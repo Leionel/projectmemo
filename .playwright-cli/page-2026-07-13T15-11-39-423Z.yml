@@ -1,0 +1,406 @@
+- generic [active] [ref=e1]:
+  - link "跳到主要内容" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "ProjectMemo PROJECT ARCHIVE" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e10]: ProjectMemo
+        - generic [ref=e11]: PROJECT ARCHIVE
+      - navigation [ref=e12]:
+        - generic [ref=e13]: Mock 模式 · 离线可演示
+        - link "项目" [ref=e15] [cursor=pointer]:
+          - /url: /projects
+  - main [ref=e18]:
+    - link "返回项目列表" [ref=e19] [cursor=pointer]:
+      - /url: /projects
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e26]: 学科竞赛
+          - generic [ref=e27]: 更新于 2026/7/13
+        - paragraph [ref=e28]: 项目工作档案
+        - heading "人工智能创意赛 ProjectMemo 作品开发" [level=1] [ref=e29]
+        - paragraph [ref=e30]: 面向大学生项目制学习场景，构建一个能够沉淀项目过程信息并主动生成比赛材料的 AI Agent。
+      - generic [ref=e31]:
+        - button "编辑项目" [ref=e32]
+        - link "生成项目成果" [ref=e36] [cursor=pointer]:
+          - /url: /projects/cmrj4qkm50000008ogptpqceu/generate
+    - region [ref=e43]:
+      - generic [ref=e44]:
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - heading "ProjectMemo 主动提醒" [level=2] [ref=e50]
+            - generic [ref=e51]: 上下文 Agent
+          - paragraph [ref=e52]: 提醒不是静态建议：每条都有触发规则、证据卡片和可确认的行动，完成后会自动沉淀复盘。
+        - button "重新评估" [ref=e53]
+      - generic [ref=e58]:
+        - generic [ref=e59]:
+          - paragraph [ref=e60]: 演示情境模拟器
+          - paragraph [ref=e61]: 一键模拟截止逼近、项目停滞或风险集中；模拟数据会明确标记并排除在效果指标之外。
+        - generic [ref=e62]:
+          - button "截止 48 小时" [ref=e63]
+          - button "停滞 72 小时" [ref=e66]
+          - button "风险集中" [ref=e69]
+          - button "清除模拟" [ref=e72]
+      - generic [ref=e75]:
+        - article [ref=e76]:
+          - generic [ref=e77]: 截止日期逼近
+          - heading "距离截止还有 14 天" [level=3] [ref=e85]
+          - paragraph [ref=e86]: Agent 根据项目截止日期和当前材料覆盖情况，建议把交付拆成今天可完成的行动。
+          - group [ref=e87]:
+            - generic "查看触发依据与判断" [ref=e88] [cursor=pointer]
+          - generic [ref=e89]:
+            - paragraph [ref=e90]: 建议行动
+            - paragraph [ref=e91]: 锁定最小可交付版本并列出提交清单
+            - paragraph [ref=e92]: 明确本轮必须保留的功能、演示路径和提交文件。
+          - generic [ref=e93]:
+            - button "接受并创建行动" [ref=e94]
+            - button "稍后" [ref=e97]
+            - button "忽略提醒" [ref=e101]
+          - paragraph [ref=e105]: 状态：待处理
+        - article [ref=e106]:
+          - generic [ref=e107]: 参赛材料存在缺口
+          - heading "参赛要求已有记录，但作品说明还未生成" [level=3] [ref=e114]
+          - paragraph [ref=e115]: Agent 已找到材料要求卡片，建议先生成一版作品说明大纲，再逐项补齐证据。
+          - group [ref=e116]:
+            - generic "查看触发依据与判断" [ref=e117] [cursor=pointer]
+          - generic [ref=e118]:
+            - paragraph [ref=e119]: 建议行动
+            - paragraph [ref=e120]: 人工智能创意赛 ProjectMemo 作品开发：先生成一版作品说明大纲
+            - paragraph [ref=e121]: 用现有知识卡片填充创意、技术路径和演示证据，再由你确认修改。
+          - generic [ref=e122]:
+            - button "接受并创建行动" [ref=e123]
+            - button "稍后" [ref=e126]
+            - button "忽略提醒" [ref=e130]
+          - paragraph [ref=e134]: 状态：待处理
+    - region "Agent 效果指标" [ref=e136]:
+      - generic [ref=e137]:
+        - generic [ref=e138]:
+          - generic [ref=e139]: 知识关联率
+          - paragraph [ref=e144]: 25%
+        - generic [ref=e145]:
+          - generic [ref=e146]: 可追溯率
+          - paragraph [ref=e153]: 0%
+        - generic [ref=e154]:
+          - generic [ref=e155]: 提醒采纳率
+          - paragraph [ref=e161]: 0%
+        - generic [ref=e162]:
+          - generic [ref=e163]: 行动完成率
+          - paragraph [ref=e168]: 0%
+        - generic [ref=e169]:
+          - generic [ref=e170]: 闭环回执
+          - paragraph [ref=e174]: "0"
+    - generic [ref=e176]:
+      - generic [ref=e177]:
+        - generic [ref=e178]:
+          - paragraph [ref=e179]: 新建项目记录
+          - heading "捕获一条项目碎片" [level=2] [ref=e180]
+          - paragraph [ref=e181]: 无需整理，Agent 会自动分类、提炼并关联历史知识。
+        - generic [ref=e182]:
+          - text: 记录来源
+          - combobox "来源类型" [ref=e183]:
+            - option "随手记录" [selected]
+            - option "论文笔记"
+            - option "代码报错"
+            - option "实验记录"
+            - option "会议纪要"
+            - option "老师建议"
+            - option "比赛材料"
+      - generic [ref=e184]:
+        - textbox "碎片内容" [ref=e185]:
+          - /placeholder: 例如：老师建议作品不要叫普通学习助手，要突出项目制学习和知识资产复用……
+        - generic [ref=e186]:
+          - generic [ref=e187]: 支持 Ctrl / ⌘ + Enter 快速提交
+          - generic [ref=e188]: 0 / 5000
+        - button "沉淀为知识资产" [disabled] [ref=e190]
+    - button "问 ProjectMemo 总结进展、解释提醒、检索历史记忆，写操作都需要确认" [ref=e196]:
+      - generic [ref=e202]:
+        - generic [ref=e203]: 问 ProjectMemo
+        - generic [ref=e204]: 总结进展、解释提醒、检索历史记忆，写操作都需要确认
+    - generic [ref=e207]:
+      - generic [ref=e208]:
+        - region [ref=e209]:
+          - generic [ref=e210]:
+            - generic [ref=e211]:
+              - paragraph [ref=e212]: 行动闭环
+              - heading "项目行动板" [level=2] [ref=e213]
+              - paragraph [ref=e216]: 提醒接受后会落到这里；完成时写下结果，Agent 自动生成可追溯的复盘卡。
+            - generic [ref=e217]: 0 / 1 已完成
+          - generic [ref=e218]:
+            - textbox "新增一个可执行行动，例如：补齐演示脚本" [ref=e219]
+            - button "新增" [disabled] [ref=e220]
+          - article [ref=e223]:
+            - generic [ref=e228]:
+              - generic [ref=e229]:
+                - heading "评估风险影响并完成最小规避验证" [level=3] [ref=e230]
+                - generic [ref=e231]: 待开始
+              - paragraph [ref=e232]: 记录影响范围、负责人、截止时间与验证结果。
+              - generic [ref=e233]:
+                - button "▶ 开始" [ref=e234]
+                - button "完成并写回执" [ref=e235]
+                - button "取消" [ref=e236]
+        - generic [ref=e237]:
+          - generic [ref=e238]:
+            - generic [ref=e239]:
+              - generic [ref=e240]:
+                - paragraph [ref=e241]: 项目记忆
+                - heading "项目知识资产流" [level=2] [ref=e242]
+              - generic [ref=e244]: 显示 8 / 8 张
+            - generic [ref=e245]:
+              - generic [ref=e246]:
+                - generic [ref=e247]: 搜索知识资产
+                - textbox "搜索知识资产" [ref=e248]:
+                  - /placeholder: 搜索标题、摘要或关键词
+              - generic [ref=e249]:
+                - generic [ref=e250]: 按卡片类型筛选
+                - combobox "按卡片类型筛选" [ref=e251]:
+                  - option "全部类型" [selected]
+                  - option "论文笔记"
+                  - option "代码问题"
+                  - option "实验记录"
+                  - option "会议纪要"
+                  - option "灵感想法"
+                  - option "待办任务"
+                  - option "项目风险"
+                  - option "材料要求"
+                  - option "阶段复盘"
+              - generic [ref=e252]:
+                - generic [ref=e253]: 知识卡片排序
+                - combobox "知识卡片排序" [ref=e254]:
+                  - option "最新优先" [selected]
+                  - option "重要性优先"
+                  - option "最早优先"
+          - generic [ref=e255]:
+            - article [ref=e256]:
+              - generic [ref=e257]:
+                - generic [ref=e258]:
+                  - generic [ref=e259]: 项目风险
+                  - generic [ref=e260]: 7月13日 19:19
+                - generic [ref=e261]: 重要性 5/5
+              - heading "风险：如果功能太多，单人开发时间不够，应该优先保证 MV…" [level=3] [ref=e264]
+              - paragraph [ref=e265]: 风险：如果功能太多，单人开发时间不够，应该优先保证 MVP 闭环。
+              - generic [ref=e266]:
+                - generic [ref=e267]: "#风险"
+                - generic [ref=e268]: "#MVP"
+              - generic [ref=e269]:
+                - paragraph [ref=e270]: 下一步建议
+                - list [ref=e271]:
+                  - listitem [ref=e272]: 评估影响范围与发生概率
+                  - listitem [ref=e276]: 制定规避方案和最小交付范围
+              - generic [ref=e281]:
+                - button "查看原文" [ref=e282]
+                - button "纠正卡片" [ref=e286]
+                - status
+            - article [ref=e290]:
+              - generic [ref=e291]:
+                - generic [ref=e292]:
+                  - generic [ref=e293]: 材料要求
+                  - generic [ref=e294]: 7月13日 19:19
+                - generic [ref=e295]: 重要性 5/5
+              - heading "要求：复赛阶段可能需要演示视频和源代码文件，因此代码结构要清晰…" [level=3] [ref=e298]
+              - paragraph [ref=e299]: 复赛阶段可能需要演示视频和源代码文件，因此代码结构要清晰。
+              - generic [ref=e300]:
+                - generic [ref=e301]: "#复赛"
+                - generic [ref=e302]: "#演示"
+              - generic [ref=e307]:
+                - strong [ref=e308]: 识别出的任务：
+                - text: 复赛阶段可能需要演示视频和源代码文件，因此代码结构要清晰。
+              - generic [ref=e309]:
+                - paragraph [ref=e310]: 下一步建议
+                - list [ref=e311]:
+                  - listitem [ref=e312]: 整理材料清单与验收标准
+                  - listitem [ref=e316]: 将要求拆解到项目里程碑
+              - generic [ref=e320]:
+                - generic [ref=e321]: 相关知识资产
+                - link "《要求：初赛需要准备创意描述、设计稿、作品介绍文档和演示材料》：都包含关键词：演示定位卡片 →" [ref=e326] [cursor=pointer]:
+                  - /url: "#card-6d9ccdba-e590-416d-9f65-0b6a43c9410f"
+                  - generic [ref=e327]: 《要求：初赛需要准备创意描述、设计稿、作品介绍文档和演示材料》
+                  - generic [ref=e328]: ：都包含关键词：演示
+                  - text: 定位卡片 →
+              - generic [ref=e330]:
+                - button "查看原文" [ref=e331]
+                - button "纠正卡片" [ref=e335]
+                - status
+            - article [ref=e339]:
+              - generic [ref=e340]:
+                - generic [ref=e341]:
+                  - generic [ref=e342]: 待办任务
+                  - generic [ref=e343]: 7月13日 19:19
+                - generic [ref=e344]: 重要性 3/5
+              - heading "任务：需要设计一个主动提醒模块，体现 Agent 不是被动问答…" [level=3] [ref=e347]
+              - paragraph [ref=e348]: 需要设计一个主动提醒模块，体现 Agent 不是被动问答工具。
+              - generic [ref=e349]:
+                - generic [ref=e350]: "#主动提醒"
+                - generic [ref=e351]: "#Agent"
+              - generic [ref=e356]:
+                - strong [ref=e357]: 识别出的任务：
+                - text: 需要设计一个主动提醒模块，体现 Agent 不是被动问答工具。
+              - generic [ref=e358]:
+                - paragraph [ref=e359]: 下一步建议
+                - list [ref=e360]:
+                  - listitem [ref=e361]: 明确负责人、产出物和截止时间
+                  - listitem [ref=e365]: 完成后记录结果并生成阶段复盘
+              - generic [ref=e369]:
+                - generic [ref=e370]: 相关知识资产
+                - link "《今天阅读了一篇关于 Agent Memory 的论文，里…》：都包含关键词：Agent定位卡片 →" [ref=e375] [cursor=pointer]:
+                  - /url: "#card-479d21d3-d813-43c7-9198-a68130cfc80c"
+                  - generic [ref=e376]: 《今天阅读了一篇关于 Agent Memory 的论文，里…》
+                  - generic [ref=e377]: ：都包含关键词：Agent
+                  - text: 定位卡片 →
+              - generic [ref=e379]:
+                - button "查看原文" [ref=e380]
+                - button "纠正卡片" [ref=e384]
+                - status
+            - article [ref=e388]:
+              - generic [ref=e389]:
+                - generic [ref=e390]:
+                  - generic [ref=e391]: 待办任务
+                  - generic [ref=e392]: 7月13日 19:19
+                - generic [ref=e393]: 重要性 3/5
+              - heading "任务：目前还没有完整 Demo，需要先完成项目创建、碎片捕获和…" [level=3] [ref=e396]
+              - paragraph [ref=e397]: 目前还没有完整 Demo，需要先完成项目创建、碎片捕获和成果生成闭环。
+              - generic [ref=e398]: "#Demo"
+              - generic [ref=e404]:
+                - strong [ref=e405]: 识别出的任务：
+                - text: 目前还没有完整 Demo，需要先完成项目创建、碎片捕获和成果生成闭环。
+              - generic [ref=e406]:
+                - paragraph [ref=e407]: 下一步建议
+                - list [ref=e408]:
+                  - listitem [ref=e409]: 明确负责人、产出物和截止时间
+                  - listitem [ref=e413]: 完成后记录结果并生成阶段复盘
+              - generic [ref=e418]:
+                - button "查看原文" [ref=e419]
+                - button "纠正卡片" [ref=e423]
+                - status
+            - article [ref=e427]:
+              - generic [ref=e428]:
+                - generic [ref=e429]:
+                  - generic [ref=e430]: 材料要求
+                  - generic [ref=e431]: 7月13日 19:19
+                - generic [ref=e432]: 重要性 5/5
+              - heading "要求：初赛需要准备创意描述、设计稿、作品介绍文档和演示材料" [level=3] [ref=e435]
+              - paragraph [ref=e436]: 初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。
+              - generic [ref=e437]:
+                - generic [ref=e438]: "#初赛"
+                - generic [ref=e439]: "#文档"
+                - generic [ref=e440]: "#演示"
+              - generic [ref=e445]:
+                - strong [ref=e446]: 识别出的任务：
+                - text: 初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。
+              - generic [ref=e447]:
+                - paragraph [ref=e448]: 下一步建议
+                - list [ref=e449]:
+                  - listitem [ref=e450]: 整理材料清单与验收标准
+                  - listitem [ref=e454]: 将要求拆解到项目里程碑
+              - generic [ref=e458]:
+                - generic [ref=e459]: 相关知识资产
+                - link "《要求：复赛阶段可能需要演示视频和源代码文件，因此代码结构要清晰…》：都包含关键词：演示定位卡片 →" [ref=e464] [cursor=pointer]:
+                  - /url: "#card-efced9a7-bb26-4b57-870b-448cbacbdc93"
+                  - generic [ref=e465]: 《要求：复赛阶段可能需要演示视频和源代码文件，因此代码结构要清晰…》
+                  - generic [ref=e466]: ：都包含关键词：演示
+                  - text: 定位卡片 →
+              - generic [ref=e468]:
+                - button "查看原文" [ref=e469]
+                - button "纠正卡片" [ref=e473]
+                - status
+            - article [ref=e477]:
+              - generic [ref=e478]:
+                - generic [ref=e479]:
+                  - generic [ref=e480]: 会议纪要
+                  - generic [ref=e481]: 7月13日 19:19
+                - generic [ref=e482]: 重要性 4/5
+              - heading "老师建议作品不要叫普通学习助手，要突出项目制学习和知识资…" [level=3] [ref=e485]
+              - paragraph [ref=e486]: 老师建议作品不要叫普通学习助手，要突出项目制学习和知识资产复用。
+              - generic [ref=e487]:
+                - generic [ref=e488]: "#知识资产"
+                - generic [ref=e489]: "#项目制学习"
+                - generic [ref=e490]: "#老师建议"
+              - generic [ref=e491]:
+                - paragraph [ref=e492]: 下一步建议
+                - list [ref=e493]:
+                  - listitem [ref=e494]: 确认建议对应的负责人和截止时间
+                  - listitem [ref=e498]: 把会议结论转为可执行任务
+              - generic [ref=e503]:
+                - button "查看原文" [ref=e504]
+                - button "纠正卡片" [ref=e508]
+                - status
+            - article [ref=e512]:
+              - generic [ref=e513]:
+                - generic [ref=e514]:
+                  - generic [ref=e515]: 项目风险
+                  - generic [ref=e516]: 7月13日 19:19
+                - generic [ref=e517]: 重要性 5/5
+              - heading "风险：RAG 检索效果不稳定，可能是知识切片粒度太粗，导致召回…" [level=3] [ref=e520]
+              - paragraph [ref=e521]: RAG 检索效果不稳定，可能是知识切片粒度太粗，导致召回内容不准确。
+              - generic [ref=e522]:
+                - generic [ref=e523]: "#RAG"
+                - generic [ref=e524]: "#检索"
+                - generic [ref=e525]: "#切片"
+                - generic [ref=e526]: "#召回"
+                - generic [ref=e527]: "#不稳定"
+              - generic [ref=e528]:
+                - paragraph [ref=e529]: 下一步建议
+                - list [ref=e530]:
+                  - listitem [ref=e531]: 评估影响范围与发生概率
+                  - listitem [ref=e535]: 制定规避方案和最小交付范围
+              - generic [ref=e540]:
+                - button "查看原文" [ref=e541]
+                - button "纠正卡片" [ref=e545]
+                - status
+            - article [ref=e549]:
+              - generic [ref=e550]:
+                - generic [ref=e551]:
+                  - generic [ref=e552]: 论文笔记
+                  - generic [ref=e553]: 7月13日 19:19
+                - generic [ref=e554]: 重要性 3/5
+              - heading "今天阅读了一篇关于 Agent Memory 的论文，里…" [level=3] [ref=e557]
+              - paragraph [ref=e558]: 今天阅读了一篇关于 Agent Memory 的论文，里面提到长期记忆需要区分 episodic memory 和 semantic memory。
+              - generic [ref=e559]:
+                - generic [ref=e560]: "#Agent Memory"
+                - generic [ref=e561]: "#episodic memory"
+                - generic [ref=e562]: "#semantic memory"
+                - generic [ref=e563]: "#论文"
+                - generic [ref=e564]: "#Agent"
+                - generic [ref=e565]: "#Memory"
+              - generic [ref=e566]:
+                - paragraph [ref=e567]: 下一步建议
+                - list [ref=e568]:
+                  - listitem [ref=e569]: 提炼 Agent Memory、episodic memory 的可复用结论
+                  - listitem [ref=e573]: 将论文观点映射到当前方案
+              - generic [ref=e577]:
+                - generic [ref=e578]: 相关知识资产
+                - link "《任务：需要设计一个主动提醒模块，体现 Agent 不是被动问答…》：都包含关键词：Agent定位卡片 →" [ref=e583] [cursor=pointer]:
+                  - /url: "#card-e43ab2a1-ab77-464f-9031-f8e4c9d8f4c8"
+                  - generic [ref=e584]: 《任务：需要设计一个主动提醒模块，体现 Agent 不是被动问答…》
+                  - generic [ref=e585]: ：都包含关键词：Agent
+                  - text: 定位卡片 →
+              - generic [ref=e587]:
+                - button "查看原文" [ref=e588]
+                - button "纠正卡片" [ref=e592]
+                - status
+      - complementary [ref=e596]:
+        - paragraph [ref=e597]: 项目概览
+        - generic [ref=e598]:
+          - generic [ref=e605]:
+            - paragraph [ref=e606]: 项目目标
+            - paragraph [ref=e607]: 完成可本地演示的 ProjectMemo MVP 与初赛材料，清晰展示知识沉淀、主动提醒和成果复用闭环。
+          - generic [ref=e612]:
+            - paragraph [ref=e613]: 截止日期
+            - paragraph [ref=e614]: 2026/7/27
+        - generic [ref=e615]:
+          - generic [ref=e616]:
+            - paragraph [ref=e617]: "8"
+            - paragraph [ref=e618]: 卡片
+          - generic [ref=e619]:
+            - paragraph [ref=e620]: "8"
+            - paragraph [ref=e621]: 碎片
+          - generic [ref=e622]:
+            - paragraph [ref=e623]: "2"
+            - paragraph [ref=e624]: 成果
+        - generic [ref=e625]:
+          - paragraph [ref=e626]: 闭环进度
+          - paragraph [ref=e627]: 已关联 2 条卡片关系，完成 0 次行动回执。
+        - link "前往生成周报" [ref=e628] [cursor=pointer]:
+          - /url: /projects/cmrj4qkm50000008ogptpqceu/generate?type=weekly_report
+  - alert [ref=e634]

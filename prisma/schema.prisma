@@ -1,0 +1,247 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../lib/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum ProjectScenario {
+  COURSE_DESIGN
+  RESEARCH
+  COMPETITION
+  INNOVATION
+  LAB_TASK
+}
+
+enum KnowledgeType {
+  paper_note
+  code_issue
+  experiment_log
+  meeting_note
+  idea
+  task
+  risk
+  requirement
+  reflection
+}
+
+enum ArtifactType {
+  weekly_report
+  competition_outline
+  defense_ppt
+  readme
+  resume_description
+  next_week_plan
+}
+
+enum InterventionTrigger {
+  DEADLINE_NEAR
+  RISK_UNHANDLED
+  PROJECT_STALE
+  EXPERIMENT_GAP
+  MATERIAL_GAP
+}
+
+enum InterventionStatus {
+  OPEN
+  ACCEPTED
+  SNOOZED
+  DISMISSED
+  RESOLVED
+}
+
+enum ActionStatus {
+  TODO
+  DOING
+  DONE
+  CANCELLED
+}
+
+enum AgentRunType {
+  CAPTURE
+  EVALUATE
+  ACTION
+  ARTIFACT
+  CHAT
+}
+
+enum AgentRunStatus {
+  SUCCESS
+  PARTIAL
+  FALLBACK
+  FAILED
+}
+
+enum AgentMessageRole {
+  USER
+  ASSISTANT
+}
+
+model Project {
+  id          String              @id @default(cuid())
+  title       String
+  description String
+  goal        String
+  scenario    ProjectScenario
+  deadline    DateTime?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  captures    Capture[]
+  cards       KnowledgeCard[]
+  artifacts   GeneratedArtifact[]
+  interventions AgentIntervention[]
+  actions     ActionItem[]
+  runs        AgentRun[]
+  messages    AgentMessage[]
+
+  @@index([updatedAt])
+}
+
+model Capture {
+  id         String        @id @default(cuid())
+  projectId  String
+  rawText    String
+  sourceType String?
+  createdAt  DateTime      @default(now())
+  project    Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  card       KnowledgeCard?
+
+  @@index([projectId, createdAt])
+}
+
+model KnowledgeCard {
+  id             String          @id @default(cuid())
+  projectId      String
+  captureId      String          @unique
+  type           KnowledgeType
+  title          String
+  summary        String
+  keywords       Json
+  relatedTasks   Json
+  nextActions    Json
+  importance     Int
+  createdAt      DateTime        @default(now())
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  capture        Capture         @relation(fields: [captureId], references: [id], onDelete: Cascade)
+  outgoingLinks  CardRelation[]  @relation("CurrentCard")
+  incomingLinks  CardRelation[]  @relation("RelatedCard")
+  interventions  AgentIntervention[] @relation("InterventionEvidence")
+  sourceActions   ActionItem[] @relation("ActionSourceCard")
+  resultingAction ActionItem? @relation("ActionResultCard")
+
+  @@index([projectId, createdAt])
+  @@index([projectId, type])
+}
+
+model CardRelation {
+  id            String        @id @default(cuid())
+  currentCardId String
+  relatedCardId String
+  reason        String
+  score         Int
+  createdAt     DateTime      @default(now())
+  currentCard   KnowledgeCard @relation("CurrentCard", fields: [currentCardId], references: [id], onDelete: Cascade)
+  relatedCard   KnowledgeCard @relation("RelatedCard", fields: [relatedCardId], references: [id], onDelete: Cascade)
+
+  @@unique([currentCardId, relatedCardId])
+  @@index([relatedCardId])
+}
+
+model GeneratedArtifact {
+  id           String       @id @default(cuid())
+  projectId    String
+  artifactType ArtifactType
+  content      String
+  createdAt    DateTime     @default(now())
+  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
+}
+
+model AgentIntervention {
+  id              String              @id @default(cuid())
+  projectId       String
+  triggerType     InterventionTrigger
+  dedupeKey       String
+  status          InterventionStatus  @default(OPEN)
+  severity        Int                 @default(3)
+  title           String
+  content         String
+  evidence        Json
+  proposedActions Json
+  isSimulated     Boolean             @default(false)
+  snoozedUntil    DateTime?
+  dismissReason   String?
+  handledAt       DateTime?
+  evidenceCardId  String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  project         Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  evidenceCard    KnowledgeCard?      @relation("InterventionEvidence", fields: [evidenceCardId], references: [id], onDelete: SetNull)
+  actions         ActionItem[]        @relation("InterventionActions")
+
+  @@unique([projectId, dedupeKey])
+  @@index([projectId, status])
+  @@index([projectId, createdAt])
+}
+
+model ActionItem {
+  id                   String               @id @default(cuid())
+  projectId            String
+  sourceInterventionId String?
+  sourceCardId         String?
+  resultCardId         String?              @unique
+  title                String
+  description          String?
+  priority             Int                  @default(3)
+  status               ActionStatus         @default(TODO)
+  dueAt                DateTime?
+  resultText           String?
+  isSimulated           Boolean              @default(false)
+  completedAt          DateTime?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  project              Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sourceIntervention   AgentIntervention?   @relation("InterventionActions", fields: [sourceInterventionId], references: [id], onDelete: SetNull)
+  sourceCard           KnowledgeCard?       @relation("ActionSourceCard", fields: [sourceCardId], references: [id], onDelete: SetNull)
+  resultCard           KnowledgeCard?       @relation("ActionResultCard", fields: [resultCardId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, status])
+  @@index([projectId, createdAt])
+  @@index([sourceInterventionId])
+}
+
+model AgentRun {
+  id             String          @id @default(cuid())
+  projectId      String
+  runType        AgentRunType
+  status         AgentRunStatus
+  provider       String
+  trace          Json
+  fallbackReason String?
+  durationMs     Int?
+  createdAt      DateTime        @default(now())
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  messages       AgentMessage[]
+
+  @@index([projectId, createdAt])
+  @@index([projectId, runType])
+}
+
+model AgentMessage {
+  id              String            @id @default(cuid())
+  projectId       String
+  role            AgentMessageRole
+  content         String
+  citations       Json
+  proposedActions Json
+  runId           String?
+  createdAt       DateTime          @default(now())
+  project         Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  run             AgentRun?         @relation(fields: [runId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, createdAt])
+}

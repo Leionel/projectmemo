@@ -1,0 +1,15 @@
+node_modules/
+.next/
+.next-e2e/
+lib/generated/
+prisma/*.db
+prisma/*.db-journal
+prisma/*.db-shm
+prisma/*.db-wal
+coverage/
+playwright-report/
+test-results/
+.env
+.env.local
+.superpowers/
+*.tsbuildinfo

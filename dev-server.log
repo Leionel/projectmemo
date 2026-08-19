@@ -1,0 +1,148 @@
+
+> projectmemo@0.1.0 dev
+> next dev --hostname 127.0.0.1 --port 3000
+
+▲ Next.js 16.2.10 (Turbopack)
+- Local:         http://127.0.0.1:3000
+- Network:       http://127.0.0.1:3000
+- Environments: .env
+✓ Ready in 577ms
+
+ GET /projects 200 in 1408ms (next.js: 939ms, application-code: 469ms)
+ GET / 200 in 608ms (next.js: 119ms, application-code: 489ms)
+ GET /projects 200 in 183ms (next.js: 41ms, application-code: 142ms)
+ GET /projects 200 in 67ms (next.js: 5ms, application-code: 63ms)
+ GET /api/settings 200 in 118ms (next.js: 102ms, application-code: 16ms)
+ POST /api/settings 200 in 13ms (next.js: 4ms, application-code: 9ms)
+ GET /projects 200 in 61ms (next.js: 4ms, application-code: 56ms)
+ GET /api/settings 200 in 9ms (next.js: 4ms, application-code: 6ms)
+ GET / 200 in 39ms (next.js: 14ms, application-code: 25ms)
+ GET /projects 200 in 26ms (next.js: 5ms, application-code: 22ms)
+ GET / 200 in 23ms (next.js: 4ms, application-code: 19ms)
+ GET /projects 200 in 27ms (next.js: 5ms, application-code: 22ms)
+ GET /projects/cmrj4qkm50000008ogptpqceu 200 in 1325ms (next.js: 710ms, application-code: 616ms)
+ GET /projects 200 in 25ms (next.js: 4ms, application-code: 20ms)
+ GET / 200 in 22ms (next.js: 4ms, application-code: 18ms)
+ GET /projects 200 in 29ms (next.js: 5ms, application-code: 25ms)
+ GET /projects/cmrj4qkm50000008ogptpqceu 200 in 235ms (next.js: 14ms, application-code: 221ms)
+LLM structure failed; using deterministic mock agent Error: LLM configuration is incomplete
+    at config (lib\agent\llmAgent.ts:11:44)
+    at chatWithLLM (lib\agent\llmAgent.ts:16:47)
+    at structureWithLLM (lib\agent\llmAgent.ts:35:25)
+    at structureCapture (lib\agent\index.ts:14:74)
+    at processCapture (lib\services\captureService.ts:14:39)
+    at async POST (app\api\projects\[id]\captures\route.ts:11:34)
+   9 |   const apiKey = process.env.LLM_API_KEY;
+  10 |   const model = process.env.LLM_MODEL_NAME;
+> 11 |   if (!baseUrl || !apiKey || !model) throw new Error("LLM configuration is incomplete");
+     |                                            ^
+  12 |   return { baseUrl, apiKey, model, timeout: Number(process.env.LLM_TIMEOUT_MS ?? 15000) };
+  13 | }
+  14 |
+ POST /api/projects/cmrj4qkm50000008ogptpqceu/captures 201 in 1454ms (next.js: 982ms, application-code: 473ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu/interventions 200 in 854ms (next.js: 844ms, application-code: 10ms)
+ POST /api/projects/cmrj4qkm50000008ogptpqceu/agent/evaluate 200 in 1112ms (next.js: 1030ms, application-code: 82ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu/interventions 200 in 39ms (next.js: 19ms, application-code: 20ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu/actions 200 in 841ms (next.js: 833ms, application-code: 8ms)
+ GET /projects/cmrj4qkm50000008ogptpqceu 200 in 2.8s (next.js: 2.4s, application-code: 474ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu 200 in 3.0s (next.js: 3.0s, application-code: 9ms)
+ PATCH /api/projects/cmrj4qkm50000008ogptpqceu/interventions/cmrsyy2v40000s08o9do6780f 200 in 912ms (next.js: 890ms, application-code: 22ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu/actions 200 in 22ms (next.js: 15ms, application-code: 7ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu/interventions 200 in 42ms (next.js: 34ms, application-code: 8ms)
+ GET /projects/cmrj4qkm50000008ogptpqceu 200 in 1587ms (next.js: 1161ms, application-code: 426ms)
+ PATCH /api/projects/cmrj4qkm50000008ogptpqceu/actions/cmrjcnoyp0001bs8otpca4s41 200 in 2.6s (next.js: 2.6s, application-code: 15ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu/actions 200 in 23ms (next.js: 17ms, application-code: 7ms)
+ GET /projects/cmrj4qkm50000008ogptpqceu 200 in 266ms (next.js: 13ms, application-code: 252ms)
+ PATCH /api/projects/cmrj4qkm50000008ogptpqceu/actions/cmrjcnoyp0001bs8otpca4s41 200 in 22ms (next.js: 11ms, application-code: 10ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu/actions 200 in 20ms (next.js: 14ms, application-code: 6ms)
+ GET /projects/cmrj4qkm50000008ogptpqceu 200 in 206ms (next.js: 13ms, application-code: 193ms)
+ PATCH /api/projects/cmrj4qkm50000008ogptpqceu/actions/cmrjcnoyp0001bs8otpca4s41 200 in 22ms (next.js: 11ms, application-code: 11ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu/actions 200 in 20ms (next.js: 13ms, application-code: 7ms)
+ GET /projects/cmrj4qkm50000008ogptpqceu 200 in 221ms (next.js: 16ms, application-code: 204ms)
+ PATCH /api/projects/cmrj4qkm50000008ogptpqceu/actions/cmrjcnoyp0001bs8otpca4s41 200 in 23ms (next.js: 13ms, application-code: 10ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu/actions 200 in 16ms (next.js: 10ms, application-code: 6ms)
+ GET /projects/cmrj4qkm50000008ogptpqceu 200 in 201ms (next.js: 15ms, application-code: 187ms)
+ PATCH /api/projects/cmrj4qkm50000008ogptpqceu/actions/cmrjcnoyp0001bs8otpca4s41 200 in 22ms (next.js: 12ms, application-code: 10ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu/actions 200 in 18ms (next.js: 12ms, application-code: 6ms)
+ GET /projects/cmrj4qkm50000008ogptpqceu 200 in 359ms (next.js: 13ms, application-code: 345ms)
+LLM structure failed; using deterministic mock agent Error: LLM configuration is incomplete
+    at config (lib\agent\llmAgent.ts:11:44)
+    at chatWithLLM (lib\agent\llmAgent.ts:16:47)
+    at structureWithLLM (lib\agent\llmAgent.ts:35:25)
+    at structureCapture (lib\agent\index.ts:14:74)
+    at completeProjectAction (lib\services\actionService.ts:26:39)
+    at async PATCH (app\api\projects\[id]\actions\[actionId]\route.ts:13:36)
+   9 |   const apiKey = process.env.LLM_API_KEY;
+  10 |   const model = process.env.LLM_MODEL_NAME;
+> 11 |   if (!baseUrl || !apiKey || !model) throw new Error("LLM configuration is incomplete");
+     |                                            ^
+  12 |   return { baseUrl, apiKey, model, timeout: Number(process.env.LLM_TIMEOUT_MS ?? 15000) };
+  13 | }
+  14 |
+ PATCH /api/projects/cmrj4qkm50000008ogptpqceu/actions/cmrjcnoyp0001bs8otpca4s41 200 in 318ms (next.js: 12ms, application-code: 306ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu/interventions 200 in 98ms (next.js: 44ms, application-code: 54ms)
+ POST /api/projects/cmrj4qkm50000008ogptpqceu/agent/evaluate 200 in 174ms (next.js: 122ms, application-code: 52ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu/actions 200 in 222ms (next.js: 200ms, application-code: 22ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu 200 in 266ms (next.js: 248ms, application-code: 19ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu/interventions 200 in 19ms (next.js: 6ms, application-code: 13ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu/actions 200 in 36ms (next.js: 23ms, application-code: 13ms)
+ GET /projects/cmrj4qkm50000008ogptpqceu 200 in 1148ms (next.js: 898ms, application-code: 250ms)
+ GET /projects/cmrj4qkm50000008ogptpqceu/generate 200 in 671ms (next.js: 562ms, application-code: 109ms)
+ GET /projects/cmrj4qkm50000008ogptpqceu 200 in 219ms (next.js: 14ms, application-code: 206ms)
+ GET / 200 in 77ms (next.js: 7ms, application-code: 70ms)
+ GET /projects/cmrj4qkm50000008ogptpqceu?openCopilot=1 200 in 690ms (next.js: 13ms, application-code: 678ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu/agent/chat 200 in 742ms (next.js: 732ms, application-code: 9ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu/agent/chat 200 in 25ms (next.js: 16ms, application-code: 10ms)
+LLM copilot failed; using deterministic mock Error: LLM configuration is incomplete
+    at config (lib\agent\llmAgent.ts:11:44)
+    at chatWithLLM (lib\agent\llmAgent.ts:16:47)
+    at chatJson (lib\agent\llmAgent.ts:48:25)
+    at answerProjectQuestion (lib\services\copilotService.ts:94:30)
+    at async POST (app\api\projects\[id]\agent\chat\route.ts:20:26)
+   9 |   const apiKey = process.env.LLM_API_KEY;
+  10 |   const model = process.env.LLM_MODEL_NAME;
+> 11 |   if (!baseUrl || !apiKey || !model) throw new Error("LLM configuration is incomplete");
+     |                                            ^
+  12 |   return { baseUrl, apiKey, model, timeout: Number(process.env.LLM_TIMEOUT_MS ?? 15000) };
+  13 | }
+  14 |
+ POST /api/projects/cmrj4qkm50000008ogptpqceu/agent/chat 200 in 252ms (next.js: 18ms, application-code: 234ms)
+LLM artifact generation failed; using mock template Error: LLM configuration is incomplete
+    at config (lib\agent\llmAgent.ts:11:44)
+    at chatWithLLM (lib\agent\llmAgent.ts:16:47)
+    at generateArtifactWithLLM (lib\agent\llmAgent.ts:44:10)
+    at generateArtifact (lib\services\artifactService.ts:22:46)
+    at async executeCopilotTool (lib\services\copilotService.ts:157:38)
+    at async POST (app\api\projects\[id]\agent\tools\route.ts:11:26)
+   9 |   const apiKey = process.env.LLM_API_KEY;
+  10 |   const model = process.env.LLM_MODEL_NAME;
+> 11 |   if (!baseUrl || !apiKey || !model) throw new Error("LLM configuration is incomplete");
+     |                                            ^
+  12 |   return { baseUrl, apiKey, model, timeout: Number(process.env.LLM_TIMEOUT_MS ?? 15000) };
+  13 | }
+  14 |
+ POST /api/projects/cmrj4qkm50000008ogptpqceu/agent/tools 200 in 1805ms (next.js: 1644ms, application-code: 161ms)
+ POST /api/projects/cmrj4qkm50000008ogptpqceu/agent/evaluate 200 in 43ms (next.js: 17ms, application-code: 26ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu/interventions 200 in 70ms (next.js: 60ms, application-code: 11ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu/actions 200 in 28ms (next.js: 16ms, application-code: 11ms)
+ GET /api/projects/cmrj4qkm50000008ogptpqceu/interventions 200 in 41ms (next.js: 31ms, application-code: 10ms)
+ GET /projects/cmrj4qkm50000008ogptpqceu 200 in 326ms (next.js: 90ms, application-code: 236ms)
+ GET /projects/cmrj4qkm50000008ogptpqceu/generate?type=competition_outline 200 in 358ms (next.js: 23ms, application-code: 335ms)
+ GET /projects/cmrj4qkm50000008ogptpqceu/generate?type=defense_ppt 200 in 88ms (next.js: 21ms, application-code: 67ms)
+LLM artifact generation failed; using mock template Error: LLM configuration is incomplete
+    at config (lib\agent\llmAgent.ts:11:44)
+    at chatWithLLM (lib\agent\llmAgent.ts:16:47)
+    at generateArtifactWithLLM (lib\agent\llmAgent.ts:44:10)
+    at generateArtifact (lib\services\artifactService.ts:22:46)
+    at async POST (app\api\projects\[id]\artifacts\route.ts:22:9)
+   9 |   const apiKey = process.env.LLM_API_KEY;
+  10 |   const model = process.env.LLM_MODEL_NAME;
+> 11 |   if (!baseUrl || !apiKey || !model) throw new Error("LLM configuration is incomplete");
+     |                                            ^
+  12 |   return { baseUrl, apiKey, model, timeout: Number(process.env.LLM_TIMEOUT_MS ?? 15000) };
+  13 | }
+  14 |
+ POST /api/projects/cmrj4qkm50000008ogptpqceu/artifacts 201 in 988ms (next.js: 770ms, application-code: 218ms)
+ GET /projects/cmrj4qkm50000008ogptpqceu/generate?type=defense_ppt 200 in 115ms (next.js: 27ms, application-code: 88ms)
+ GET / 200 in 92ms (next.js: 15ms, application-code: 77ms)
+ GET /projects 200 in 58ms (next.js: 9ms, application-code: 49ms)

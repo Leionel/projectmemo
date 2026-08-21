@@ -13,3 +13,9 @@ test-results/
 .env.local
 .superpowers/
 *.tsbuildinfo
+.trae/
+proton-recovery-phrase.pdf
+harmonyos/.hvigor/
+harmonyos/entry/build/
+harmonyos/entry/.test/
+harmonyos/oh_modules/

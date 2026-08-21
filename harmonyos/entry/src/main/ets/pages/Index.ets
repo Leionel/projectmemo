@@ -1,3 +1,4 @@
+import router from '@ohos.router';
 import { Project } from '../models/Project';
 import { ProjectService } from '../services/ProjectService';
 import { ApiError } from '../models/Project';
@@ -110,11 +111,36 @@ struct Index {
                   }
                 }
                 .margin({ top: 8 })
+                Row() {
+                  Text(`备赛进度 ${project.dashboard.readiness.percentage}%`)
+                    .fontSize(12)
+                    .fontColor('#007DFF')
+                  Text(`活跃提醒 ${project.dashboard.activeReminderCount}`)
+                    .fontSize(12)
+                    .fontColor('#999999')
+                    .margin({ left: 12 })
+                  Text(`进行中行动 ${project.dashboard.activeActionCount}`)
+                    .fontSize(12)
+                    .fontColor('#999999')
+                    .margin({ left: 12 })
+                }
+                .margin({ top: 4 })
+                if (project.dashboard.nextAction.label !== '') {
+                  Text(`下一步：${project.dashboard.nextAction.label}`)
+                    .fontSize(12)
+                    .fontColor('#666666')
+                    .maxLines(1)
+                    .textOverflow({ overflow: TextOverflow.Ellipsis })
+                    .margin({ top: 4 })
+                }
               }
               .width('100%')
               .padding(16)
               .backgroundColor('#FFFFFF')
               .borderRadius(12)
+              .onClick(() => {
+                router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: project.id } });
+              })
             }
           }, (project: Project) => project.id)
         }

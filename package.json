@@ -15,7 +15,10 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "db:demo-reset": "tsx scripts/demo-reset.ts",
-    "db:setup": "prisma generate && tsx scripts/ensure-db.ts && prisma migrate deploy && tsx prisma/seed.ts"
+    "db:setup": "prisma generate && tsx scripts/ensure-db.ts && prisma migrate deploy && tsx prisma/seed.ts",
+    "harmony:backend": "next dev",
+    "harmony:build": "tsx scripts/harmony-build.ts",
+    "harmony:test": "node scripts/harmony-test.ts"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.0.0",

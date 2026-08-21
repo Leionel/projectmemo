@@ -76,6 +76,38 @@ npm.cmd run test:e2e
 
 E2E 会使用独立数据库和 `3321` 端口，不影响开发数据库。
 
+## HarmonyOS 客户端（harmonyos/）
+
+鸿蒙客户端与 Web 共用同一套 REST API。App 的后端地址唯一来源是
+`harmonyos/entry/src/main/ets/common/Constants.ets`，当前固定为模拟器回环地址
+`http://10.0.2.2:3000`（模拟器访问宿主机本机）。
+
+```powershell
+# 1. 启动 App 要连接的 Backend（即本项目 dev 服务器）
+npm.cmd run harmony:backend
+
+# 2. 启动 DevEco 手机模拟器（冷启动约 1-3 分钟）
+& 'D:\Program Files\Huawei\DevEco Studio\tools\emulator\Emulator.exe' -start 'Pura 90'
+
+# 3. 构建 HAP（自动设置 DEVECO_SDK_HOME 与 JAVA_HOME，成功后输出 SHA-256 凭证）
+npm.cmd run harmony:build
+
+# 4. 运行 HarmonyOS 本地单元测试（Hypium，请求体/状态码/错误映射/状态枚举）
+npm.cmd run harmony:test
+```
+
+DevEco Studio 安装路径不同时用环境变量覆盖：`$env:DEVECO_HOME = 'D:\path\to\DevEco Studio'`。
+
+安装与运行（模拟器接受 unsigned debug HAP；正式签名需在 DevEco 中登录华为账号配置
+signingConfigs，仓库不保存任何证书密钥）：
+
+```powershell
+$hdc = 'D:\Program Files\Huawei\DevEco Studio\sdk\default\openharmony\toolchains\hdc.exe'
+& $hdc list targets                                  # 确认模拟器可见
+& $hdc install -r .\harmonyos\entry\build\default\outputs\default\entry-default-unsigned.hap
+& $hdc shell aa start -a EntryAbility -b com.example.projectmemo
+```
+
 ## 三分钟演示建议
 
 1. 首页：说明“碎片输入 → 可追溯记忆 → 主动介入 → 行动回写 → 成果生成”的闭环。

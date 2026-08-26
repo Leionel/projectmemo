@@ -31,6 +31,9 @@ async function main() {
   if (process.env.LLM_MODE !== "openai-compatible" || !process.env.LLM_BASE_URL || !process.env.LLM_API_KEY) {
     throw new Error("S04 semantic benchmark requires a configured OpenAI-compatible embeddings provider.");
   }
+  if (process.env.SEMANTIC_MEMORY_ENABLED !== "true") {
+    throw new Error("S04 semantic benchmark requires SEMANTIC_MEMORY_ENABLED=true.");
+  }
 
   const project = await db.project.create({
     data: {

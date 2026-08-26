@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { isFeatureEnabled } from "@/lib/config/features";
 import { cosineSimilarity, getEmbedding } from "@/lib/memory/embedding";
 import { ensureCardEmbedding } from "@/lib/repositories/embeddings";
 import type { CardSearchResult, KnowledgeTypeValue } from "@/lib/types";
@@ -55,6 +56,7 @@ function computeRecencyScore(createdAt: Date, now: Date): number {
 export async function searchProjectCards(options: HybridSearchOptions): Promise<CardSearchResult[]> {
   const { projectId, query, limit = 8, typeFilter } = options;
   const trimmedQuery = query.trim();
+  if (!trimmedQuery) return [];
 
   const whereClause: Record<string, unknown> = { projectId };
   if (typeFilter && typeFilter !== "all") {
@@ -71,8 +73,11 @@ export async function searchProjectCards(options: HybridSearchOptions): Promise<
     return [];
   }
 
-  // 1. 获取 Query 的向量
-  const queryEmbedding = await getEmbedding(trimmedQuery);
+  // 1. 获取 Query 的向量。关闭 feature flag 时严格回到旧关键词路径，
+  // 避免把离线哈希向量包装成“真实语义检索”。
+  const queryEmbedding = isFeatureEnabled("SEMANTIC_MEMORY_ENABLED", false)
+    ? await getEmbedding(trimmedQuery)
+    : null;
   const now = new Date();
   const results: CardSearchResult[] = [];
 
@@ -83,7 +88,7 @@ export async function searchProjectCards(options: HybridSearchOptions): Promise<
     // useful for repeatable tests and indexing smoke checks, but is not presented
     // to users as semantic retrieval.
     let cardVector: number[] = [];
-    const embeddingCompatible = !queryEmbedding.isMock &&
+    const embeddingCompatible = queryEmbedding !== null && !queryEmbedding.isMock &&
       card.embedding?.provider === queryEmbedding.provider &&
       card.embedding?.model === queryEmbedding.model &&
       card.embedding?.dimensions === queryEmbedding.dimensions;
@@ -95,7 +100,7 @@ export async function searchProjectCards(options: HybridSearchOptions): Promise<
       }
     }
 
-    if (!queryEmbedding.isMock && cardVector.length === 0) {
+    if (queryEmbedding !== null && !queryEmbedding.isMock && cardVector.length === 0) {
       const savedEmbedding = await ensureCardEmbedding({
         id: card.id,
         title: card.title,
@@ -111,7 +116,7 @@ export async function searchProjectCards(options: HybridSearchOptions): Promise<
 
     // 2. 计算各维度得分
     let semanticScore = 0;
-    if (cardVector.length > 0 && queryEmbedding.vector.length === cardVector.length) {
+    if (queryEmbedding !== null && cardVector.length > 0 && queryEmbedding.vector.length === cardVector.length) {
       semanticScore = cosineSimilarity(queryEmbedding.vector, cardVector);
     }
 
@@ -125,7 +130,8 @@ export async function searchProjectCards(options: HybridSearchOptions): Promise<
     const importanceScore = Math.min(1.0, (card.importance ?? 3) / 5.0);
 
     // 综合加权评分: Semantic (45%) + Keyword (35%) + Recency (10%) + Importance (10%)
-    const weightedScore = queryEmbedding.isMock
+    const hasRemoteSemantic = queryEmbedding !== null && !queryEmbedding.isMock;
+    const weightedScore = !hasRemoteSemantic
       ? 0.70 * keywordScore + 0.15 * recencyScore + 0.15 * importanceScore
       : 0.45 * semanticScore + 0.35 * keywordScore + 0.10 * recencyScore + 0.10 * importanceScore;
     const totalScore = Math.round(weightedScore * 1000) / 1000;
@@ -161,8 +167,8 @@ export async function searchProjectCards(options: HybridSearchOptions): Promise<
       recencyScore: Math.round(recencyScore * 1000) / 1000,
       importanceScore: Math.round(importanceScore * 1000) / 1000,
       reason,
-      source: queryEmbedding.isMock ? "Keyword + metadata index" : "Hybrid Memory Vector Index",
-      retrievalMode: queryEmbedding.isMock ? "keyword_fallback" : "hybrid",
+      source: hasRemoteSemantic ? "Hybrid Memory Vector Index" : "Keyword + metadata index",
+      retrievalMode: hasRemoteSemantic ? "hybrid" : "keyword_fallback",
       createdAt: card.createdAt.toISOString(),
     });
   }

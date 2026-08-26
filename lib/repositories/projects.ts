@@ -75,6 +75,7 @@ export async function getProjectDetail(projectId: string) {
         orderBy: { createdAt: "desc" },
         include: {
           capture: { select: { rawText: true, sourceType: true } },
+          attachment: { select: { id: true, fileName: true, type: true, extractionStatus: true } },
           outgoingLinks: { include: { relatedCard: true }, orderBy: { score: "desc" } },
           incomingLinks: { include: { currentCard: true }, orderBy: { score: "desc" } },
         },

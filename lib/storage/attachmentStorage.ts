@@ -16,7 +16,7 @@ export function computeFileSha256(buffer: Buffer): string {
 }
 
 export function getAttachmentStorageDir(): string {
-  const dir = process.env.ATTACHMENT_DIR || DEFAULT_STORAGE_DIR;
+  const dir = path.resolve(process.env.ATTACHMENT_DIR || DEFAULT_STORAGE_DIR);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -36,7 +36,8 @@ export async function saveFileToStorage(projectId: string, fileName: string, buf
   const absolutePath = path.join(storageDir, uniqueKey);
 
   // 防止路径穿越
-  if (!absolutePath.startsWith(storageDir)) {
+  const relativePath = path.relative(storageDir, absolutePath);
+  if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
     throw new Error("Invalid storage path");
   }
 

@@ -2,17 +2,22 @@ import { db } from "../lib/db";
 import { backfillProjectEmbeddings } from "../lib/repositories/embeddings";
 
 async function main() {
-  console.log("=== Backfilling Card Embeddings for all projects ===");
-  const projects = await db.project.findMany({ select: { id: true, title: true } });
-  let totalIndexed = 0;
-
-  for (const project of projects) {
-    const { total, indexedCount } = await backfillProjectEmbeddings(project.id);
-    console.log(`Project: [${project.title}] -> Indexed ${indexedCount} / ${total} cards`);
-    totalIndexed += indexedCount;
+  if (process.env.SEMANTIC_MEMORY_ENABLED !== "true" || process.env.LLM_MODE !== "openai-compatible" || !process.env.LLM_BASE_URL || !process.env.LLM_API_KEY) {
+    throw new Error("Embedding backfill requires SEMANTIC_MEMORY_ENABLED=true and a configured OpenAI-compatible provider.");
   }
-
-  console.log(`=== Backfill complete. Total indexed cards: ${totalIndexed} ===`);
+  const projectId = process.argv.slice(2).find((value) => value && !value.startsWith("-"));
+  if (!projectId) {
+    throw new Error("Usage: npm run db:backfill-embeddings -- <projectId>");
+  }
+  const result = await backfillProjectEmbeddings(projectId);
+  console.log(JSON.stringify({ projectId, ...result }, null, 2));
 }
 
-main().catch(console.error);
+main()
+  .catch((error) => {
+    console.error(error instanceof Error ? error.message : error);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await db.$disconnect();
+  });

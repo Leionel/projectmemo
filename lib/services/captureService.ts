@@ -2,6 +2,8 @@ import { requireProject } from "@/lib/repositories/projects";
 import { loadRecentCards, saveCaptureResult } from "@/lib/repositories/cards";
 import { structureCaptureWithMeta } from "@/lib/agent";
 import { KeywordVectorStore } from "@/lib/memory/vectorStore";
+import { ensureCardEmbedding } from "@/lib/repositories/embeddings";
+import { isFeatureEnabled } from "@/lib/config/features";
 import { AgentRunStatus, AgentRunType } from "@/lib/generated/prisma/client";
 import { saveAgentRun } from "@/lib/repositories/agent";
 
@@ -18,6 +20,20 @@ export async function processCapture(projectId: string, rawText: string, sourceT
   const links = await vectorStore.search(draft, existingCards, 3);
   const saved = await saveCaptureResult({ projectId, rawText, sourceType, draft, links });
   await vectorStore.index({ id: saved.id, title: saved.title, keywords: saved.keywords as string[] });
+  if (isFeatureEnabled("SEMANTIC_MEMORY_ENABLED", false)) {
+    try {
+      await ensureCardEmbedding({
+        id: saved.id,
+        title: saved.title,
+        summary: saved.summary,
+        keywords: saved.keywords,
+      });
+    } catch (error) {
+      // Embedding failure must not roll back a valid Capture. Search will use
+      // keyword fallback and a later backfill can retry this card.
+      console.warn("Card embedding failed; keeping captured memory searchable by keyword", error);
+    }
+  }
 
   await saveAgentRun({
     projectId,

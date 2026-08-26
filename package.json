@@ -19,6 +19,7 @@
     "harmony:backend": "next dev -H 127.0.0.1 -p 4400",
     "harmony:build": "tsx scripts/harmony-build.ts",
     "harmony:test": "node scripts/harmony-test.ts",
+    "db:backfill-embeddings": "tsx scripts/backfill-embeddings.ts",
     "verify:s03-provider": "tsx scripts/probe-llm.ts",
     "benchmark:s04": "tsx scripts/benchmark-hybrid-search.ts",
     "verify:s08-adapter": "vitest run tests/xiaoyi.adapter.test.ts"

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { AppError } from "@/lib/api";
-import { chatJson } from "@/lib/agent/llmAgent";
+import { chatJsonWithMeta } from "@/lib/agent/llmAgent";
 import { buildCopilotPrompt } from "@/lib/agent/prompts";
 import { AgentRunStatus, AgentRunType } from "@/lib/generated/prisma/client";
 import { db } from "@/lib/db";
@@ -99,9 +99,10 @@ export async function answerProjectQuestion(projectId: string, question: string)
   let answer = mockAnswer({ question, citations, cards, interventions, actions });
   let fallback = true;
   let fallbackReason: string | null = "mock_mode";
+  let provider = "mock";
   if (process.env.LLM_MODE === "openai-compatible" && process.env.LLM_API_KEY) {
     try {
-      answer = await chatJson(
+      const execution = await chatJsonWithMeta(
         buildCopilotPrompt({
           project,
           question,
@@ -111,11 +112,14 @@ export async function answerProjectQuestion(projectId: string, question: string)
         }),
         (value) => responseSchema.parse(value),
       );
+      answer = execution.data;
       fallback = false;
       fallbackReason = null;
+      provider = execution.provider;
     } catch (error) {
       console.warn("LLM copilot failed; using deterministic mock", error);
       fallbackReason = error instanceof Error ? error.message.slice(0, 180) : "llm_error";
+      provider = "mock-fallback";
     }
   }
   const knownCardIds = new Set(cards.map((card) => card.id));
@@ -130,7 +134,7 @@ export async function answerProjectQuestion(projectId: string, question: string)
     projectId,
     runType: AgentRunType.CHAT,
     status: fallback ? AgentRunStatus.FALLBACK : AgentRunStatus.SUCCESS,
-    provider: fallback ? "mock" : "openai-compatible",
+    provider,
     fallbackReason,
     trace: {
       intent: /提醒|为什么|介入/.test(question) ? "explain_intervention" : /进展|总结/.test(question) ? "summarize_progress" : "search_memory",

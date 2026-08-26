@@ -2,11 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { searchProjectCards } from "@/lib/memory/hybridSearch";
 import { requireProject } from "@/lib/repositories/projects";
 import { knowledgeTypes, type KnowledgeTypeValue } from "@/lib/types";
+import { apiError } from "@/lib/api";
+import { cardSearchInputSchema } from "@/lib/validation/schemas";
+
+export const runtime = "nodejs";
+
+async function search(projectId: string, query: string, limit: number, type: KnowledgeTypeValue | "all") {
+  await requireProject(projectId);
+  const results = await searchProjectCards({ projectId, query, limit, typeFilter: type });
+  return { query, total: results.length, results };
+}
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: projectId } = await params;
-    await requireProject(projectId);
 
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("q") ?? "";
@@ -22,24 +31,22 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       : 10;
     const type = requestedType as KnowledgeTypeValue | "all";
 
+    await requireProject(projectId);
     if (!query.trim()) {
       return NextResponse.json({ query: "", total: 0, results: [] });
     }
-
-    const results = await searchProjectCards({
-      projectId,
-      query,
-      limit,
-      typeFilter: type,
-    });
-
-    return NextResponse.json({
-      query,
-      total: results.length,
-      results,
-    });
+    return NextResponse.json(await search(projectId, query, limit, type));
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Search failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return apiError(error);
+  }
+}
+
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id: projectId } = await params;
+    const input = cardSearchInputSchema.parse(await request.json());
+    return Response.json(await search(projectId, input.query, input.topK, input.type as KnowledgeTypeValue | "all"));
+  } catch (error) {
+    return apiError(error);
   }
 }

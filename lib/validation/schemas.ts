@@ -108,6 +108,30 @@ export const agentToolConfirmSchema = z.object({
   payload: z.record(z.string(), z.unknown()).default({}),
 });
 
+export const cardSearchInputSchema = z.object({
+  query: z.string().trim().min(1, "请输入要检索的记忆问题").max(500),
+  topK: z.number().int().min(1).max(50).optional().default(8),
+  type: z.enum([...knowledgeTypes, "all"] as [string, ...string[]]).optional().default("all"),
+}).strict();
+
+export const milestoneCreateSchema = z.object({
+  title: z.string().trim().min(2).max(120),
+  targetDate: z.string().datetime().optional().nullable(),
+  deliverables: z.array(z.object({
+    title: z.string().trim().min(2).max(160),
+    expectedEvidence: z.array(z.string().trim().min(1).max(60)).min(1).max(20),
+  }).strict()).max(20).optional().default([]),
+}).strict();
+
+export const deliverableEvidenceInputSchema = z.object({
+  evidenceType: z.string().trim().min(1).max(60),
+  cardId: z.string().trim().min(1).nullable().optional(),
+  attachmentId: z.string().trim().min(1).nullable().optional(),
+  confirmed: z.boolean(),
+}).strict().refine((input) => Boolean(input.cardId) !== Boolean(input.attachmentId), {
+  message: "一次只能关联一张卡片或一个附件",
+});
+
 export type ProjectCreateInput = z.infer<typeof projectCreateSchema>;
 export type ProjectUpdateInput = z.infer<typeof projectUpdateSchema>;
 export type KnowledgeCardUpdateInput = z.infer<typeof knowledgeCardUpdateSchema>;
@@ -117,3 +141,6 @@ export type ActionUpdateInput = z.infer<typeof actionUpdateSchema>;
 export type EvaluateContextInput = z.infer<typeof evaluateContextSchema>;
 export type AgentChatInput = z.infer<typeof agentChatSchema>;
 export type AgentToolConfirmInput = z.infer<typeof agentToolConfirmSchema>;
+export type CardSearchInput = z.infer<typeof cardSearchInputSchema>;
+export type MilestoneCreateInput = z.infer<typeof milestoneCreateSchema>;
+export type DeliverableEvidenceInput = z.infer<typeof deliverableEvidenceInputSchema>;

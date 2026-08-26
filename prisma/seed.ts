@@ -1,6 +1,7 @@
 import { db } from "../lib/db";
 import { processCapture } from "../lib/services/captureService";
 import { evaluateProjectContext } from "../lib/services/agentContextService";
+import { ensureDefaultMilestones } from "../lib/services/milestoneService";
 
 const title = "人工智能创意赛 忆程 ProjectMemo 作品开发";
 const legacyTitle = "人工智能创意赛 ProjectMemo 作品开发";
@@ -32,6 +33,7 @@ async function main() {
   for (const [sourceType, rawText] of captures) {
     await processCapture(project.id, rawText, sourceType);
   }
+  await ensureDefaultMilestones(project.id);
   await evaluateProjectContext(project.id);
   console.log(`Seed complete: ${project.title} (${project.id}), ${captures.length} captures`);
 }

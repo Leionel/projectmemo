@@ -7,6 +7,8 @@ import {
 } from "@/lib/storage/attachmentStorage";
 import { processCapture } from "@/lib/services/captureService";
 import { requireProject } from "@/lib/repositories/projects";
+import { AppError } from "@/lib/api";
+import { isFeatureEnabled } from "@/lib/config/features";
 import { spawn } from "node:child_process";
 
 export interface UploadAttachmentInput {
@@ -132,6 +134,9 @@ function inferAndValidateFileType(fileName: string, mimeType: string, buffer: Bu
 
 export async function processAttachmentUpload(input: UploadAttachmentInput) {
   const { projectId, fileName, mimeType, buffer } = input;
+  if (!isFeatureEnabled("PROJECT_INBOX_ENABLED", true)) {
+    throw new AppError("PROJECT_INBOX_DISABLED", "项目附件入口当前已关闭", 503);
+  }
   await requireProject(projectId);
 
   // 1. 校验文件内容，而不是只信任客户端提供的扩展名/MIME。

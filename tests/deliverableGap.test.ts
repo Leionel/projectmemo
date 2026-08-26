@@ -105,9 +105,28 @@ describe("S06: Deliverable Gap Detection and Evidence Spine Generation", () => {
         cardId: card.id,
         confirmed: true,
       });
+      await expect(db.deliverable.findUnique({ where: { id: milestone.deliverables[0].id } })).resolves.toMatchObject({ status: "COMPLETED" });
+      await expect(db.milestone.findUnique({ where: { id: milestone.id } })).resolves.toMatchObject({ status: "COMPLETED" });
       const eval3 = await evaluateProjectContext(testProject.id);
       const gapIntervention3 = eval3.created.find((i) => i.triggerType === "DELIVERABLE_GAP");
       expect(gapIntervention3).toBeUndefined();
+    } finally {
+      await db.project.delete({ where: { id: testProject.id } });
+    }
+  });
+
+  it("does not infer a deliverable gap for a project without a milestone plan", async () => {
+    const testProject = await db.project.create({
+      data: {
+        title: "No Plan Gap Test Project",
+        description: "Testing the no-plan boundary",
+        goal: "Do not invent milestones",
+        scenario: "RESEARCH",
+      },
+    });
+    try {
+      const result = await evaluateProjectContext(testProject.id);
+      expect(result.interventions.some((item) => item.triggerType === "DELIVERABLE_GAP")).toBe(false);
     } finally {
       await db.project.delete({ where: { id: testProject.id } });
     }

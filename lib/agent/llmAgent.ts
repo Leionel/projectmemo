@@ -1,6 +1,6 @@
 import { buildArtifactPrompt, buildCapturePrompt } from "@/lib/agent/prompts";
 import { knowledgeCardDraftSchema } from "@/lib/validation/schemas";
-import type { ArtifactTypeValue, CardDraft } from "@/lib/types";
+import type { AgentExecutionResult, ArtifactTypeValue, CardDraft } from "@/lib/types";
 
 type ChatResponse = { choices?: Array<{ message?: { content?: string } }> };
 
@@ -12,7 +12,8 @@ function config() {
   return { baseUrl, apiKey, model, timeout: Number(process.env.LLM_TIMEOUT_MS ?? 15000) };
 }
 
-export async function chatWithLLM(prompt: string) {
+export async function chatWithLLMWithMeta(prompt: string): Promise<AgentExecutionResult<string>> {
+  const startedAt = Date.now();
   const { baseUrl, apiKey, model, timeout } = config();
   const response = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
@@ -24,7 +25,17 @@ export async function chatWithLLM(prompt: string) {
   const payload = (await response.json()) as ChatResponse;
   const content = payload.choices?.[0]?.message?.content;
   if (!content) throw new Error("LLM returned empty content");
-  return content.trim();
+  return {
+    data: content.trim(),
+    provider: `llm:${model}`,
+    status: "SUCCESS",
+    fallbackReason: null,
+    durationMs: Date.now() - startedAt,
+  };
+}
+
+export async function chatWithLLM(prompt: string) {
+  return (await chatWithLLMWithMeta(prompt)).data;
 }
 
 export async function structureWithLLM(input: {
@@ -44,7 +55,22 @@ export async function generateArtifactWithLLM(input: {
   return chatWithLLM(buildArtifactPrompt(input));
 }
 
+export async function generateArtifactWithLLMWithMeta(input: {
+  project: { title: string; goal: string };
+  artifactType: ArtifactTypeValue;
+  cards: CardDraft[];
+}) {
+  return chatWithLLMWithMeta(buildArtifactPrompt(input));
+}
+
 export async function chatJson<T>(prompt: string, parse: (value: unknown) => T) {
-  const content = await chatWithLLM(prompt);
-  return parse(JSON.parse(content));
+  return (await chatJsonWithMeta(prompt, parse)).data;
+}
+
+export async function chatJsonWithMeta<T>(prompt: string, parse: (value: unknown) => T) {
+  const result = await chatWithLLMWithMeta(prompt);
+  return {
+    ...result,
+    data: parse(JSON.parse(result.data)),
+  } satisfies AgentExecutionResult<T>;
 }

@@ -604,7 +604,7 @@ DeliverableEvidence
 执行项：
 
 1. 只支持当前项目的一层 Milestone 和 Deliverable，不做通用工作流 DSL。
-2. 提供最小 CRUD 与 Demo seed；HarmonyOS 在 ProjectHome 中展示当前 Milestone 和缺口。
+2. 提供最小 CRUD 与显式 Demo seed；HarmonyOS 在 ProjectHome 中展示当前 Milestone 和缺口。读取里程碑接口不隐式创建计划，保证无计划项目不产生 Gap。
 3. Gap Engine 只在 Expected Evidence 有定义时判断；缺少定义时不猜测。
 4. 增加 `DELIVERABLE_GAP` 规则，Evidence 必须列出期望项、已找到项、缺失项和对应 Card/Attachment。
 5. 复用现有 dedupe、Snooze、Dismiss、Accept 和 Action 完成闭环。

@@ -2,15 +2,15 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "module description"
+      "value": "忆程 ProjectMemo 项目记忆与决策手账"
     },
     {
       "name": "EntryAbility_desc",
-      "value": "description"
+      "value": "忆程 ProjectMemo 主入口"
     },
     {
       "name": "EntryAbility_label",
-      "value": "label"
+      "value": "忆程"
     },
     {
       "name": "internet_reason",

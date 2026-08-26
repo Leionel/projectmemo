@@ -10,6 +10,16 @@ export class InterventionService {
     return response.interventions;
   }
 
+  async get(projectId: string, interventionId: string): Promise<Intervention> {
+    const list = await this.list(projectId);
+    for (const item of list) {
+      if (item.id === interventionId) {
+        return item;
+      }
+    }
+    throw new Error('Intervention not found');
+  }
+
   async accept(projectId: string, interventionId: string, actionIndex: number): Promise<InterventionUpdateResponse> {
     return this.client.patch<InterventionUpdateResponse>(
       `/api/projects/${projectId}/interventions/${interventionId}`,

@@ -80,7 +80,7 @@ E2E 会使用独立数据库和 `3321` 端口，不影响开发数据库。
 
 鸿蒙客户端与 Web 共用同一套 REST API。App 的后端地址唯一来源是
 `harmonyos/entry/src/main/ets/common/Constants.ets`，当前固定为模拟器回环地址
-`http://10.0.2.2:3000`（模拟器访问宿主机本机）。
+当前机器验证地址为 `http://10.0.2.2:4400`（模拟器访问宿主机回环）；请用 `npm run harmony:backend` 启动对应端口。若端口再次被本机安全策略占用，需要同时更新该脚本与 `harmonyos/entry/src/main/ets/common/Constants.ets`，保持单一配置一致。
 
 ```powershell
 # 1. 启动 App 要连接的 Backend（即本项目 dev 服务器）

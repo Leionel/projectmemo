@@ -60,10 +60,32 @@ export class ProjectsResponse {
   projects: Project[] = [];
 }
 
+export class ProjectCreateInput {
+  title: string = '';
+  description: string = '';
+  goal: string = '';
+  scenario: string = 'COMPETITION';
+  deadline: string | undefined = undefined;
+}
+
+export class ProjectUpdateInput {
+  title: string | undefined = undefined;
+  description: string | undefined = undefined;
+  goal: string | undefined = undefined;
+  scenario: string | undefined = undefined;
+  deadline: string | undefined = undefined;
+}
+
+export class ProjectCreateResponse {
+  project: Project = new Project();
+}
+
 export class ApiError extends Error {
   code: string = '';
-  constructor(code: string, message: string) {
+  status: number = 0;
+  constructor(code: string, message: string, status: number = 0) {
     super(message);
     this.code = code;
+    this.status = status;
   }
 }

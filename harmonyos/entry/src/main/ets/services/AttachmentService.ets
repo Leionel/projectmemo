@@ -1,0 +1,56 @@
+import { ApiClient } from './ApiClient';
+import { Attachment } from '../models/Attachment';
+import http from '@ohos.net.http';
+import { Constants } from '../common/Constants';
+import { ApiError } from '../models/Project';
+import { isSuccessCode, parseApiError } from '../common/ApiContract';
+
+export class AttachmentUploadResult {
+  attachment: Attachment = new Attachment();
+  isDuplicate: boolean = false;
+}
+
+export class AttachmentService {
+  private client: ApiClient = new ApiClient();
+
+  async list(projectId: string): Promise<Attachment[]> {
+    return this.client.get<Attachment[]>(`/api/projects/${projectId}/attachments`);
+  }
+
+  async upload(projectId: string, fileUri: string, fileName: string, mimeType: string): Promise<AttachmentUploadResult> {
+    const request = http.createHttp();
+    try {
+      const response = await request.request(`${Constants.BASE_URL}/api/projects/${projectId}/attachments`, {
+        method: http.RequestMethod.POST,
+        multiFormDataList: [{
+          name: 'file',
+          contentType: mimeType,
+          remoteFileName: fileName,
+          filePath: fileUri
+        }],
+        expectDataType: http.HttpDataType.STRING,
+        connectTimeout: 15000,
+        readTimeout: 30000
+      });
+      const responseBody = response.result as string;
+      if (isSuccessCode('POST', response.responseCode)) {
+        return JSON.parse(responseBody) as AttachmentUploadResult;
+      }
+      throw parseApiError(responseBody, response.responseCode);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError('ATTACHMENT_UPLOAD_FAILED', '附件上传失败，请检查网络或文件格式');
+    } finally {
+      request.destroy();
+    }
+  }
+
+  async retry(projectId: string, attachmentId: string): Promise<AttachmentUploadResult> {
+    return this.client.post<AttachmentUploadResult>(
+      `/api/projects/${projectId}/attachments/${attachmentId}/retry`,
+      undefined
+    );
+  }
+}

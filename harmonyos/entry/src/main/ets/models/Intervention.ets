@@ -52,3 +52,8 @@ export class EvaluateResponse {
   interventions: Intervention[] = [];
   created: number = 0;
 }
+
+export class EvaluateProjectInput {
+  scenario: string | undefined = undefined;
+  clearSimulation: boolean | undefined = undefined;
+}

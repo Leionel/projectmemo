@@ -2,6 +2,10 @@ import router from '@ohos.router';
 import { ApiError } from '../models/Project';
 import { KnowledgeCard, CardLink, IncomingCardLink } from '../models/Memory';
 import { MemoryService } from '../services/MemoryService';
+import { PMColors, PMSpacing, PMFontSize, PMRadius } from '../common/DesignTokens';
+import { PMAppBar } from '../components/PMAppBar';
+import { MemoryTypeBadge } from '../components/MetricBadge';
+import { LoadingStateView, ErrorStateView, EmptyStateView } from '../components/AsyncStateView';
 
 @Entry
 @Component
@@ -18,12 +22,12 @@ struct MemoryTimeline {
   aboutToAppear(): void {
     const params: Record<string, string> | undefined = router.getParams() as Record<string, string>;
     if (params === undefined || params === null) {
-      this.routeError = '页面参数缺失';
+      this.routeError = '页面参数缺失，无法定位项目记忆';
       return;
     }
     this.projectId = params['projectId'] ?? '';
     if (this.projectId === '') {
-      this.routeError = '页面参数缺失';
+      this.routeError = '页面参数缺失，项目ID无效';
       return;
     }
     this.loadTimeline();
@@ -33,46 +37,19 @@ struct MemoryTimeline {
     this.isLoading = true;
     this.errorMessage = '';
     try {
-      // 后端已按 createdAt desc 返回，客户端不重排
       this.cards = await this.memoryService.getTimeline(this.projectId);
     } catch (e) {
       if (e instanceof ApiError) {
         this.errorMessage = e.message;
       } else {
-        this.errorMessage = '未知错误';
+        this.errorMessage = '无法加载记忆时序，请检查网络';
       }
     } finally {
       this.isLoading = false;
     }
   }
 
-  private typeLabel(type: string): string {
-    switch (type) {
-      case 'paper_note':
-        return '论文笔记';
-      case 'code_issue':
-        return '代码问题';
-      case 'experiment_log':
-        return '实验记录';
-      case 'meeting_note':
-        return '会议纪要';
-      case 'idea':
-        return '灵感想法';
-      case 'task':
-        return '待办任务';
-      case 'risk':
-        return '项目风险';
-      case 'requirement':
-        return '材料要求';
-      case 'reflection':
-        return '阶段复盘';
-      default:
-        return type;
-    }
-  }
-
   private formatDate(createdAt: string): string {
-    // createdAt 形如 2026-08-20T12:00:00.000Z，截取日期部分
     if (createdAt.length >= 10) {
       return createdAt.substring(0, 10);
     }
@@ -90,202 +67,192 @@ struct MemoryTimeline {
   @Builder
   private cardItem(card: KnowledgeCard) {
     Column() {
+      // 头部：类型徽标与日期
       Row() {
-        Text(this.typeLabel(card.type))
-          .fontSize(12)
-          .fontColor('#007DFF')
+        MemoryTypeBadge({ type: card.type })
         Text(this.formatDate(card.createdAt))
-          .fontSize(12)
-          .fontColor('#999999')
+          .fontSize(PMFontSize.CAPTION)
+          .fontColor(PMColors.INK_TERTIARY)
       }
       .width('100%')
       .justifyContent(FlexAlign.SpaceBetween)
+      .alignItems(VerticalAlign.Center)
 
+      // 标题
       Text(card.title)
-        .fontSize(16)
-        .fontWeight(FontWeight.Bold)
+        .fontSize(PMFontSize.SECTION_TITLE)
+        .fontWeight(FontWeight.Medium)
+        .fontColor(PMColors.INK_PRIMARY)
         .maxLines(2)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .margin({ top: 8 })
+        .margin({ top: PMSpacing.SM })
 
+      // 摘要
       if (card.summary !== '') {
         Text(card.summary)
-          .fontSize(14)
-          .fontColor('#666666')
+          .fontSize(PMFontSize.BODY)
+          .fontColor(PMColors.INK_SECONDARY)
+          .lineHeight(20)
           .maxLines(3)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .margin({ top: 4 })
+          .margin({ top: PMSpacing.XS })
       }
 
-      Button(this.expandedCardId === card.id ? '收起原始记录' : '展开原始记录')
-        .fontSize(12)
-        .margin({ top: 8 })
-        .onClick(() => {
-          this.toggleExpand(card.id);
-        })
+      // 展开/收起原始记录按钮
+      Row() {
+        Text(this.expandedCardId === card.id ? '▲ 收起原始碎片' : '▼ 查看原始采集碎片')
+          .fontSize(PMFontSize.SECONDARY)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.BRAND)
+      }
+      .padding({ top: PMSpacing.SM, bottom: PMSpacing.XS })
+      .onClick(() => {
+        this.toggleExpand(card.id);
+      })
 
+      // 原始记录展开面板
       if (this.expandedCardId === card.id) {
         Column() {
           Text('原始记录')
-            .fontSize(12)
-            .fontColor('#999999')
-          // Prisma 无关联时 capture 为 null，JSON 字段缺失时为 undefined，两者都判空
+            .fontSize(PMFontSize.CAPTION)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.INK_TERTIARY)
+
           if (card.capture !== undefined && card.capture !== null) {
             Text(card.capture.rawText)
-              .fontSize(14)
-              .fontColor('#666666')
-              .margin({ top: 4 })
-            Text(`来源：${card.capture.sourceType ?? '未知'}`)
-              .fontSize(12)
-              .fontColor('#999999')
-              .margin({ top: 4 })
+              .fontSize(PMFontSize.BODY)
+              .fontColor(PMColors.INK_PRIMARY)
+              .lineHeight(20)
+              .margin({ top: PMSpacing.XS })
+
+            Row() {
+              Text(`来源: ${card.capture.sourceType ?? '随手记录'}`)
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_TERTIARY)
+            }
+            .margin({ top: PMSpacing.SM })
           } else {
-            Text('无原始记录')
-              .fontSize(14)
-              .fontColor('#999999')
-              .margin({ top: 4 })
+            Text('该记忆卡片暂无原始采集记录')
+              .fontSize(PMFontSize.BODY)
+              .fontColor(PMColors.INK_TERTIARY)
+              .margin({ top: PMSpacing.XS })
           }
         }
         .width('100%')
+        .padding(PMSpacing.MD)
+        .backgroundColor(PMColors.SURFACE_SUBTLE)
+        .borderRadius(PMRadius.SM)
+        .border({ width: 1, color: PMColors.BORDER_SUBTLE })
         .alignItems(HorizontalAlign.Start)
-        .margin({ top: 8 })
+        .margin({ top: PMSpacing.XS })
       }
 
+      // 关联记忆网络
       if (card.outgoingLinks.length > 0 || card.incomingLinks.length > 0) {
         Column() {
-          Text('关联记忆')
-            .fontSize(12)
-            .fontColor('#999999')
+          Row() {
+            Text('关联记忆网')
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.MEMORY)
+          }
+          .margin({ top: PMSpacing.SM, bottom: PMSpacing.XS })
+
           ForEach(card.outgoingLinks, (link: CardLink, index: number) => {
-            Column() {
-              Text(`关联 → ${link.relatedCard.title}`)
-                .fontSize(14)
-                .fontColor('#666666')
-              if (link.reason !== '') {
-                Text(link.reason)
-                  .fontSize(12)
-                  .fontColor('#999999')
-                  .margin({ top: 2 })
-              }
+            Row() {
+              Text('→ ')
+                .fontSize(PMFontSize.BODY)
+                .fontColor(PMColors.MEMORY)
+              Text(link.relatedCard.title)
+                .fontSize(PMFontSize.BODY)
+                .fontColor(PMColors.INK_PRIMARY)
+                .maxLines(1)
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                .layoutWeight(1)
             }
             .width('100%')
-            .alignItems(HorizontalAlign.Start)
-            .margin({ top: 4 })
+            .padding({ top: 2, bottom: 2 })
+
+            if (link.reason !== '') {
+              Text(link.reason)
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_TERTIARY)
+                .margin({ left: PMSpacing.MD, bottom: PMSpacing.XS })
+            }
           }, (link: CardLink, index: number) => `${card.id}-out-${index}`)
 
           ForEach(card.incomingLinks, (link: IncomingCardLink, index: number) => {
-            Column() {
-              Text(`被关联 ← ${link.currentCard.title}`)
-                .fontSize(14)
-                .fontColor('#666666')
-              if (link.reason !== '') {
-                Text(link.reason)
-                  .fontSize(12)
-                  .fontColor('#999999')
-                  .margin({ top: 2 })
-              }
+            Row() {
+              Text('← ')
+                .fontSize(PMFontSize.BODY)
+                .fontColor(PMColors.EVIDENCE)
+              Text(link.currentCard.title)
+                .fontSize(PMFontSize.BODY)
+                .fontColor(PMColors.INK_PRIMARY)
+                .maxLines(1)
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                .layoutWeight(1)
             }
             .width('100%')
-            .alignItems(HorizontalAlign.Start)
-            .margin({ top: 4 })
+            .padding({ top: 2, bottom: 2 })
+
+            if (link.reason !== '') {
+              Text(link.reason)
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_TERTIARY)
+                .margin({ left: PMSpacing.MD, bottom: PMSpacing.XS })
+            }
           }, (link: IncomingCardLink, index: number) => `${card.id}-in-${index}`)
         }
         .width('100%')
         .alignItems(HorizontalAlign.Start)
-        .margin({ top: 8 })
-      } else {
-        Text('暂无关联记忆')
-          .fontSize(12)
-          .fontColor('#999999')
-          .margin({ top: 8 })
+        .padding({ top: PMSpacing.XS })
       }
     }
     .width('100%')
-    .padding(16)
-    .backgroundColor('#FFFFFF')
-    .borderRadius(12)
+    .padding(PMSpacing.LG)
+    .backgroundColor(PMColors.SURFACE)
+    .borderRadius(PMRadius.MD)
+    .border({ width: 1, color: PMColors.BORDER })
     .alignItems(HorizontalAlign.Start)
-    .onClick(() => {
-      this.toggleExpand(card.id);
-    })
   }
 
   build() {
     Column() {
-      Row() {
-        Text('返回')
-          .fontSize(16)
-          .fontColor('#007DFF')
-          .onClick(() => {
-            router.back();
-          })
-        Text('项目记忆')
-          .fontSize(20)
-          .fontWeight(FontWeight.Bold)
-          .margin({ left: 16 })
-      }
-      .width('100%')
-      .padding({ left: 16, right: 16, top: 12, bottom: 12 })
+      PMAppBar({
+        title: '记忆',
+        subtitle: '',
+        backLabel: '项目',
+        showBack: true
+      })
 
       if (this.routeError !== '') {
-        Column() {
-          Text(this.routeError)
-            .fontSize(16)
-            .fontColor('#E84026')
-            .margin({ bottom: 16 })
-          Button('返回')
-            .fontSize(14)
-            .onClick(() => {
-              router.back();
-            })
-        }
-        .width('100%')
-        .layoutWeight(1)
-        .justifyContent(FlexAlign.Center)
+        ErrorStateView({
+          message: this.routeError,
+          onRetry: () => {
+            router.back();
+          }
+        })
       } else if (this.isLoading) {
-        Column() {
-          LoadingProgress()
-            .width(48)
-            .height(48)
-            .color('#007DFF')
-          Text('加载中...')
-            .fontSize(14)
-            .fontColor('#999999')
-            .margin({ top: 12 })
-        }
-        .width('100%')
-        .layoutWeight(1)
-        .justifyContent(FlexAlign.Center)
+        LoadingStateView({ message: '加载记忆脉络...' })
       } else if (this.errorMessage !== '') {
-        Column() {
-          Text(this.errorMessage)
-            .fontSize(16)
-            .fontColor('#E84026')
-            .textAlign(TextAlign.Center)
-            .margin({ bottom: 16 })
-          Button('重试')
-            .fontSize(14)
-            .onClick(() => {
-              this.loadTimeline();
-            })
-        }
-        .width('100%')
-        .layoutWeight(1)
-        .justifyContent(FlexAlign.Center)
-        .padding({ left: 32, right: 32 })
+        ErrorStateView({
+          message: this.errorMessage,
+          onRetry: () => {
+            this.loadTimeline();
+          }
+        })
       } else if (this.cards.length === 0) {
-        Column() {
-          Text('暂无记忆，去首页记录第一条碎片')
-            .fontSize(16)
-            .fontColor('#999999')
-            .textAlign(TextAlign.Center)
-        }
-        .width('100%')
-        .layoutWeight(1)
-        .justifyContent(FlexAlign.Center)
-        .padding({ left: 32, right: 32 })
+        EmptyStateView({
+          title: '暂无记忆档案',
+          description: '项目尚未记录任何碎片，返回项目首页记录第一条知识',
+          actionText: '返回驾驶舱',
+          onAction: () => {
+            router.back();
+          }
+        })
       } else {
-        List({ space: 12 }) {
+        List({ space: PMSpacing.MD }) {
           ForEach(this.cards, (card: KnowledgeCard) => {
             ListItem() {
               this.cardItem(card)
@@ -294,11 +261,11 @@ struct MemoryTimeline {
         }
         .width('100%')
         .layoutWeight(1)
-        .padding({ left: 16, right: 16, bottom: 16 })
+        .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.LG })
       }
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#F5F5F5')
+    .backgroundColor(PMColors.BACKGROUND)
   }
 }

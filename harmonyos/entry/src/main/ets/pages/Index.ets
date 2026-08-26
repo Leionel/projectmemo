@@ -1,156 +1,1377 @@
 import router from '@ohos.router';
-import { Project } from '../models/Project';
+import promptAction from '@ohos.promptAction';
+import { Project, ApiError, ProjectCreateInput } from '../models/Project';
+import { ProjectDetail, KnowledgeCard } from '../models/Memory';
+import { Intervention } from '../models/Intervention';
+import { ActionItem } from '../models/Action';
+import { SettingsResponse, UpdateSettingsInput, ProbeInput, ProbeResponse } from '../models/Settings';
+
 import { ProjectService } from '../services/ProjectService';
-import { ApiError } from '../models/Project';
+import { InterventionService } from '../services/InterventionService';
+import { ActionService } from '../services/ActionService';
+import { MemoryService } from '../services/MemoryService';
+import { SettingsService } from '../services/SettingsService';
+
+import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily } from '../common/DesignTokens';
+import { LoadingStateView, ErrorStateView, EmptyStateView } from '../components/AsyncStateView';
+import { SeverityBadge, StatusBadge, MemoryTypeBadge } from '../components/MetricBadge';
+import { FolderIcon, TaskIcon, MemoryIcon, SettingsIcon, AlertIcon, ClockIcon } from '../components/PMIcons';
+import { TextFormatters } from '../common/TextFormatters';
+import { Constants } from '../common/Constants';
 
 @Entry
 @Component
 struct Index {
+  @State currentMainTabIndex: number = 0;
+
+  // 数据主状态
   @State projects: Project[] = [];
+  @State allInterventions: Intervention[] = [];
+  @State allActions: ActionItem[] = [];
+  @State allCards: KnowledgeCard[] = [];
+
+  // 通用状态
   @State isLoading: boolean = false;
   @State errorMessage: string = '';
 
+  // Tab 0: 项目专属
+  @State selectedScenarioFilter: string = 'ALL';
+
+  // Tab 1: 待办专属
+  @State taskTabFilter: string = 'REMINDERS'; // 'REMINDERS' | 'ACTIONS'
+
+  // Tab 2: 记忆专属
+  @State globalMemorySearchQuery: string = '';
+  @State selectedGlobalType: string = 'all';
+
+  // Tab 3: 设置专属状态
+  @State llmMode: string = 'mock'; // 'mock' | 'openai-compatible'
+  @State llmBaseUrl: string = '';
+  @State llmModelName: string = 'gpt-4o-mini';
+  @State llmApiKey: string = '';
+  @State apiKeyMasked: string = '';
+  @State hasApiKey: boolean = false;
+  @State isSavingSettings: boolean = false;
+  @State isProbing: boolean = false;
+  @State probeResult: ProbeResponse | undefined = undefined;
+  @State settingsFeedback: string = '';
+
+  // 新建项目弹窗状态
+  @State showCreateDialog: boolean = false;
+  @State newTitle: string = '';
+  @State newDescription: string = '';
+  @State newGoal: string = '';
+  @State newScenario: string = 'COMPETITION';
+  @State newDeadline: string = '';
+  @State isCreating: boolean = false;
+  @State createError: string = '';
+
   private projectService: ProjectService = new ProjectService();
+  private interventionService: InterventionService = new InterventionService();
+  private actionService: ActionService = new ActionService();
+  private memoryService: MemoryService = new MemoryService();
+  private settingsService: SettingsService = new SettingsService();
 
   aboutToAppear(): void {
-    this.loadProjects();
+    this.loadAllData();
+    this.loadLlmSettings();
+    this.openPendingNotification();
   }
 
-  private async loadProjects(): Promise<void> {
+  onPageShow(): void {
+    this.openPendingNotification();
+  }
+
+  private openPendingNotification(): void {
+    const projectId = AppStorage.get<string>('notificationProjectId') ?? '';
+    const interventionId = AppStorage.get<string>('notificationInterventionId') ?? '';
+    if (projectId === '' || interventionId === '') {
+      return;
+    }
+    AppStorage.setOrCreate<string>('notificationProjectId', '');
+    AppStorage.setOrCreate<string>('notificationInterventionId', '');
+    router.pushUrl({
+      url: 'pages/InterventionDetail',
+      params: { projectId, interventionId }
+    });
+  }
+
+  private async loadLlmSettings(): Promise<void> {
+    try {
+      const res = await this.settingsService.getSettings();
+      this.llmMode = res.llmMode;
+      this.llmBaseUrl = res.llmBaseUrl !== '' ? res.llmBaseUrl : 'https://api.openai.com/v1';
+      this.llmModelName = res.llmModelName !== '' ? res.llmModelName : 'gpt-4o-mini';
+      this.hasApiKey = res.hasApiKey;
+      this.apiKeyMasked = res.apiKeyMasked;
+    } catch (e) {
+      // 忽略
+    }
+  }
+
+  private async saveLlmSettings(): Promise<void> {
+    if (this.isSavingSettings) {
+      return;
+    }
+    this.isSavingSettings = true;
+    this.settingsFeedback = '';
+    try {
+      const input = new UpdateSettingsInput();
+      input.llmMode = this.llmMode;
+      input.llmBaseUrl = this.llmBaseUrl.trim();
+      input.llmModelName = this.llmModelName.trim();
+      input.llmApiKey = this.llmApiKey.trim();
+
+      const res = await this.settingsService.updateSettings(input);
+      this.hasApiKey = res.hasApiKey;
+      this.apiKeyMasked = res.apiKeyMasked;
+      this.llmApiKey = '';
+      this.settingsFeedback = '模型配置已保存生效';
+      promptAction.showToast({ message: '模型配置已更新' });
+    } catch (e) {
+      this.settingsFeedback = '保存失败，请检查 Base URL 或网络连接';
+    } finally {
+      this.isSavingSettings = false;
+    }
+  }
+
+  private async probeLlmConnection(): Promise<void> {
+    if (this.isProbing) {
+      return;
+    }
+    this.isProbing = true;
+    this.probeResult = undefined;
+    this.settingsFeedback = '';
+    try {
+      const input = new ProbeInput();
+      if (this.llmBaseUrl.trim() !== '') {
+        input.llmBaseUrl = this.llmBaseUrl.trim();
+      }
+      if (this.llmApiKey.trim() !== '') {
+        input.llmApiKey = this.llmApiKey.trim();
+      }
+      if (this.llmModelName.trim() !== '') {
+        input.llmModelName = this.llmModelName.trim();
+      }
+
+      const res = await this.settingsService.probeConnection(input);
+      this.probeResult = res;
+    } catch (e) {
+      const err = new ProbeResponse();
+      err.success = false;
+      err.error = '网络请求异常，无法连接探针端点';
+      this.probeResult = err;
+    } finally {
+      this.isProbing = false;
+    }
+  }
+
+  private async loadAllData(): Promise<void> {
     this.isLoading = true;
     this.errorMessage = '';
     try {
       this.projects = await this.projectService.listProjects();
+
+      // 聚合跨项目数据
+      const intervs: Intervention[] = [];
+      const acts: ActionItem[] = [];
+      const cards: KnowledgeCard[] = [];
+
+      for (const p of this.projects) {
+        try {
+          const detail = await this.projectService.getProjectDetail(p.id);
+          for (const c of detail.cards) {
+            cards.push(c);
+          }
+          const pIntervs = await this.interventionService.list(p.id);
+          for (const i of pIntervs) {
+            intervs.push(i);
+          }
+          const pActs = await this.actionService.list(p.id);
+          for (const a of pActs) {
+            acts.push(a);
+          }
+        } catch (err) {
+          // 单个项目容错
+        }
+      }
+
+      this.allInterventions = intervs;
+      this.allActions = acts;
+      this.allCards = cards;
     } catch (e) {
       if (e instanceof ApiError) {
         this.errorMessage = e.message;
       } else {
-        this.errorMessage = '未知错误';
+        this.errorMessage = '无法连接服务，请检查网络连接';
       }
     } finally {
       this.isLoading = false;
     }
   }
 
-  build() {
-    Column() {
-      Text('ProjectMemo')
-        .fontSize(24)
-        .fontWeight(FontWeight.Bold)
-        .margin({ top: 24, bottom: 16 })
+  private openCreateDialog(): void {
+    this.newTitle = '';
+    this.newDescription = '';
+    this.newGoal = '';
+    this.newScenario = 'COMPETITION';
+    this.newDeadline = '';
+    this.createError = '';
+    this.showCreateDialog = true;
+  }
 
-      if (this.isLoading) {
-        Column() {
-          LoadingProgress()
-            .width(48)
-            .height(48)
-            .color('#007DFF')
-          Text('加载中...')
-            .fontSize(14)
-            .fontColor('#999999')
-            .margin({ top: 12 })
-        }
-        .width('100%')
-        .height('60%')
-        .justifyContent(FlexAlign.Center)
-      } else if (this.errorMessage !== '') {
-        Column() {
-          Text(this.errorMessage)
-            .fontSize(16)
-            .fontColor('#E84026')
-            .textAlign(TextAlign.Center)
-            .margin({ bottom: 16 })
-          Button('重试')
-            .fontSize(14)
+  private closeCreateDialog(): void {
+    if (this.isCreating) {
+      return;
+    }
+    this.showCreateDialog = false;
+  }
+
+  private async submitCreateProject(): Promise<void> {
+    if (this.isCreating) {
+      return;
+    }
+    const title = this.newTitle.trim();
+    if (title === '') {
+      this.createError = '项目名称不能为空';
+      return;
+    }
+    this.isCreating = true;
+    this.createError = '';
+    try {
+      const input: ProjectCreateInput = new ProjectCreateInput();
+      input.title = title;
+      input.description = this.newDescription.trim();
+      input.goal = this.newGoal.trim();
+      input.scenario = this.newScenario;
+      if (this.newDeadline.trim() !== '') {
+        input.deadline = new Date(this.newDeadline.trim()).toISOString();
+      }
+      await this.projectService.createProject(input);
+      this.showCreateDialog = false;
+      promptAction.showToast({ message: '项目档案创建成功' });
+      await this.loadAllData();
+    } catch (e) {
+      if (e instanceof ApiError) {
+        this.createError = e.message;
+      } else {
+        this.createError = '创建项目失败';
+      }
+    } finally {
+      this.isCreating = false;
+    }
+  }
+
+  /**
+   * 动态生成无 0 噪音的项目统计摘要文案
+   */
+  private getProjectMetricSummary(project: Project): string {
+    const parts: string[] = [];
+    if (project._count.cards > 0) {
+      parts.push(`${project._count.cards} 条项目记忆`);
+    }
+    if (project.dashboard.activeReminderCount > 0) {
+      parts.push(`${project.dashboard.activeReminderCount} 条待处理提醒`);
+    }
+    if (project.dashboard.activeActionCount > 0) {
+      parts.push(`${project.dashboard.activeActionCount} 项进行中行动`);
+    }
+    if (project._count.artifacts > 0) {
+      parts.push(`${project._count.artifacts} 个成果草稿`);
+    }
+    if (parts.length === 0) {
+      return '暂无记忆记录';
+    }
+    return parts.join(' · ');
+  }
+
+  // ----------------------------------------------------
+  // 底部导航栏 Bar (一级 4 项：项目 / 待办 / 记忆 / 设置)
+  // ----------------------------------------------------
+  @Builder
+  private MainBottomBar() {
+    Row() {
+      // 1. 项目
+      Column() {
+        FolderIcon({ isSelected: this.currentMainTabIndex === 0, iconSize: 20 })
+        Text('项目')
+          .fontSize(PMFontSize.BOTTOM_NAV)
+          .fontFamily(PMFontFamily.SERIF)
+          .fontWeight(this.currentMainTabIndex === 0 ? FontWeight.Medium : FontWeight.Regular)
+          .fontColor(this.currentMainTabIndex === 0 ? PMColors.BRAND : PMColors.INK_TERTIARY)
+          .margin({ top: 3 })
+      }
+      .layoutWeight(1)
+      .padding({ top: PMSpacing.XS, bottom: PMSpacing.XS })
+      .onClick(() => {
+        this.currentMainTabIndex = 0;
+      })
+      .accessibilityText('项目')
+      .accessibilitySelected(this.currentMainTabIndex === 0)
+
+      // 2. 待办
+      Column() {
+        TaskIcon({ isSelected: this.currentMainTabIndex === 1, iconSize: 20 })
+        Text('待办')
+          .fontSize(PMFontSize.BOTTOM_NAV)
+          .fontFamily(PMFontFamily.SERIF)
+          .fontWeight(this.currentMainTabIndex === 1 ? FontWeight.Medium : FontWeight.Regular)
+          .fontColor(this.currentMainTabIndex === 1 ? PMColors.BRAND : PMColors.INK_TERTIARY)
+          .margin({ top: 3 })
+      }
+      .layoutWeight(1)
+      .padding({ top: PMSpacing.XS, bottom: PMSpacing.XS })
+      .onClick(() => {
+        this.currentMainTabIndex = 1;
+      })
+      .accessibilityText('待办')
+      .accessibilitySelected(this.currentMainTabIndex === 1)
+
+      // 3. 记忆
+      Column() {
+        MemoryIcon({ isSelected: this.currentMainTabIndex === 2, iconSize: 20 })
+        Text('记忆')
+          .fontSize(PMFontSize.BOTTOM_NAV)
+          .fontFamily(PMFontFamily.SERIF)
+          .fontWeight(this.currentMainTabIndex === 2 ? FontWeight.Medium : FontWeight.Regular)
+          .fontColor(this.currentMainTabIndex === 2 ? PMColors.BRAND : PMColors.INK_TERTIARY)
+          .margin({ top: 3 })
+      }
+      .layoutWeight(1)
+      .padding({ top: PMSpacing.XS, bottom: PMSpacing.XS })
+      .onClick(() => {
+        this.currentMainTabIndex = 2;
+      })
+      .accessibilityText('记忆')
+      .accessibilitySelected(this.currentMainTabIndex === 2)
+
+      // 4. 设置
+      Column() {
+        SettingsIcon({ isSelected: this.currentMainTabIndex === 3, iconSize: 20 })
+        Text('设置')
+          .fontSize(PMFontSize.BOTTOM_NAV)
+          .fontFamily(PMFontFamily.SERIF)
+          .fontWeight(this.currentMainTabIndex === 3 ? FontWeight.Medium : FontWeight.Regular)
+          .fontColor(this.currentMainTabIndex === 3 ? PMColors.BRAND : PMColors.INK_TERTIARY)
+          .margin({ top: 3 })
+      }
+      .layoutWeight(1)
+      .padding({ top: PMSpacing.XS, bottom: PMSpacing.XS })
+      .onClick(() => {
+        this.currentMainTabIndex = 3;
+        this.loadLlmSettings();
+      })
+      .accessibilityText('设置')
+      .accessibilitySelected(this.currentMainTabIndex === 3)
+    }
+    .width('100%')
+    .padding({ top: 6, bottom: 6 })
+    .backgroundColor(PMColors.SURFACE)
+    .border({ width: { top: 1 }, color: PMColors.BORDER })
+  }
+
+  // ----------------------------------------------------
+  // Tab 0: 项目档案视图
+  // ----------------------------------------------------
+  @Builder
+  private ProjectsTab() {
+    Column() {
+      // 场景分类筛选胶囊
+      Scroll() {
+        Row() {
+          Button('全部')
+            .fontSize(PMFontSize.CAPTION)
+            .fontWeight(FontWeight.Regular)
+            .fontColor(this.selectedScenarioFilter === 'ALL' ? PMColors.BRAND : PMColors.INK_SECONDARY)
+            .backgroundColor(this.selectedScenarioFilter === 'ALL' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+            .borderRadius(PMRadius.XS)
+            .margin({ right: PMSpacing.XS })
             .onClick(() => {
-              this.loadProjects();
+              this.selectedScenarioFilter = 'ALL';
+            })
+
+          Button('竞赛备赛')
+            .fontSize(PMFontSize.CAPTION)
+            .fontWeight(FontWeight.Regular)
+            .fontColor(this.selectedScenarioFilter === 'COMPETITION' ? PMColors.BRAND : PMColors.INK_SECONDARY)
+            .backgroundColor(this.selectedScenarioFilter === 'COMPETITION' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+            .borderRadius(PMRadius.XS)
+            .margin({ right: PMSpacing.XS })
+            .onClick(() => {
+              this.selectedScenarioFilter = 'COMPETITION';
+            })
+
+          Button('学术课题')
+            .fontSize(PMFontSize.CAPTION)
+            .fontWeight(FontWeight.Regular)
+            .fontColor(this.selectedScenarioFilter === 'RESEARCH' ? PMColors.BRAND : PMColors.INK_SECONDARY)
+            .backgroundColor(this.selectedScenarioFilter === 'RESEARCH' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+            .borderRadius(PMRadius.XS)
+            .margin({ right: PMSpacing.XS })
+            .onClick(() => {
+              this.selectedScenarioFilter = 'RESEARCH';
+            })
+
+          Button('课程设计')
+            .fontSize(PMFontSize.CAPTION)
+            .fontWeight(FontWeight.Regular)
+            .fontColor(this.selectedScenarioFilter === 'COURSE_DESIGN' ? PMColors.BRAND : PMColors.INK_SECONDARY)
+            .backgroundColor(this.selectedScenarioFilter === 'COURSE_DESIGN' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+            .borderRadius(PMRadius.XS)
+            .onClick(() => {
+              this.selectedScenarioFilter = 'COURSE_DESIGN';
             })
         }
-        .width('100%')
-        .height('60%')
-        .justifyContent(FlexAlign.Center)
-        .padding({ left: 32, right: 32 })
-      } else if (this.projects.length === 0) {
-        Column() {
-          Text('暂无项目')
-            .fontSize(16)
-            .fontColor('#999999')
-        }
-        .width('100%')
-        .height('60%')
-        .justifyContent(FlexAlign.Center)
+      }
+      .width('100%')
+      .scrollable(ScrollDirection.Horizontal)
+      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.SM })
+      .backgroundColor(PMColors.SURFACE)
+      .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
+
+      if (this.getFilteredProjects().length === 0) {
+        EmptyStateView({
+          title: '暂无项目档案',
+          description: '点击右上角“+ 新建项目”开始建立首个证据档案',
+          actionText: '+ 新建项目',
+          onAction: () => {
+            this.openCreateDialog();
+          }
+        })
       } else {
-        List({ space: 12 }) {
-          ForEach(this.projects, (project: Project) => {
+        List({ space: PMSpacing.SM }) {
+          ForEach(this.getFilteredProjects(), (project: Project) => {
             ListItem() {
-              Column() {
-                Text(project.title)
-                  .fontSize(18)
-                  .fontWeight(FontWeight.Medium)
-                  .maxLines(2)
-                  .textOverflow({ overflow: TextOverflow.Ellipsis })
-                Text(project.description)
-                  .fontSize(14)
-                  .fontColor('#666666')
-                  .maxLines(2)
-                  .textOverflow({ overflow: TextOverflow.Ellipsis })
-                  .margin({ top: 4 })
-                Row() {
-                  Text(`${project._count.cards} 卡片`)
-                    .fontSize(12)
-                    .fontColor('#999999')
-                  Text(`${project._count.artifacts} 成果`)
-                    .fontSize(12)
-                    .fontColor('#999999')
-                    .margin({ left: 12 })
-                  if (project.dashboard.deadline.label !== '') {
-                    Text(project.dashboard.deadline.label)
-                      .fontSize(12)
-                      .fontColor('#E84026')
-                      .margin({ left: 12 })
-                  }
-                }
-                .margin({ top: 8 })
-                Row() {
-                  Text(`备赛进度 ${project.dashboard.readiness.percentage}%`)
-                    .fontSize(12)
-                    .fontColor('#007DFF')
-                  Text(`活跃提醒 ${project.dashboard.activeReminderCount}`)
-                    .fontSize(12)
-                    .fontColor('#999999')
-                    .margin({ left: 12 })
-                  Text(`进行中行动 ${project.dashboard.activeActionCount}`)
-                    .fontSize(12)
-                    .fontColor('#999999')
-                    .margin({ left: 12 })
-                }
-                .margin({ top: 4 })
-                if (project.dashboard.nextAction.label !== '') {
-                  Text(`下一步：${project.dashboard.nextAction.label}`)
-                    .fontSize(12)
-                    .fontColor('#666666')
-                    .maxLines(1)
-                    .textOverflow({ overflow: TextOverflow.Ellipsis })
-                    .margin({ top: 4 })
-                }
-              }
-              .width('100%')
-              .padding(16)
-              .backgroundColor('#FFFFFF')
-              .borderRadius(12)
-              .onClick(() => {
-                router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: project.id } });
-              })
+              this.projectItem(project)
             }
           }, (project: Project) => project.id)
         }
         .width('100%')
         .layoutWeight(1)
-        .padding({ left: 16, right: 16 })
+        .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.LG })
+      }
+    }
+    .layoutWeight(1)
+  }
+
+  private getFilteredProjects(): Project[] {
+    if (this.selectedScenarioFilter === 'ALL') {
+      return this.projects;
+    }
+    return this.projects.filter((p) => p.scenario === this.selectedScenarioFilter);
+  }
+
+  @Builder
+  private projectItem(project: Project) {
+    Column() {
+      // 头部：场景与截止日
+      Row() {
+        Text(TextFormatters.scenarioToChinese(project.scenario))
+          .fontSize(PMFontSize.CAPTION)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.MEMORY)
+          .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 2, bottom: 2 })
+          .borderRadius(PMRadius.XS)
+          .backgroundColor(PMColors.MEMORY_LIGHT)
+
+        if (project.dashboard.deadline.label !== '') {
+          Row() {
+            ClockIcon({ iconSize: 12, color: PMColors.RISK })
+            Text(project.dashboard.deadline.label)
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.RISK)
+              .margin({ left: 4 })
+          }
+          .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 2, bottom: 2 })
+          .borderRadius(PMRadius.XS)
+          .backgroundColor(PMColors.RISK_LIGHT)
+        }
+      }
+      .width('100%')
+      .justifyContent(FlexAlign.SpaceBetween)
+
+      // 标题与简介
+      Text(project.title)
+        .fontSize(PMFontSize.PRIMARY_JUDGEMENT)
+        .fontWeight(FontWeight.Medium)
+        .fontColor(PMColors.INK_PRIMARY)
+        .maxLines(2)
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .margin({ top: PMSpacing.SM })
+
+      if (project.description !== '') {
+        Text(project.description)
+          .fontSize(PMFontSize.BODY)
+          .fontColor(PMColors.INK_SECONDARY)
+          .lineHeight(20)
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .margin({ top: PMSpacing.XS })
+      }
+
+      // 备赛准备度进度
+      Column() {
+        Row() {
+          Text('备赛准备度')
+            .fontSize(PMFontSize.SECONDARY)
+            .fontColor(PMColors.INK_TERTIARY)
+          Text(`${project.dashboard.readiness.percentage}%`)
+            .fontSize(PMFontSize.BODY)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.BRAND)
+        }
+        .width('100%')
+        .justifyContent(FlexAlign.SpaceBetween)
+
+        Stack({ alignContent: Alignment.Start }) {
+          Row()
+            .width('100%')
+            .height(3)
+            .backgroundColor(PMColors.BORDER)
+            .borderRadius(PMRadius.FULL)
+          Row()
+            .width(`${Math.min(100, Math.max(0, project.dashboard.readiness.percentage))}%`)
+            .height(3)
+            .backgroundColor(PMColors.BRAND)
+            .borderRadius(PMRadius.FULL)
+        }
+        .width('100%')
+        .margin({ top: PMSpacing.XS })
+      }
+      .width('100%')
+      .margin({ top: PMSpacing.MD })
+
+      // 动态记忆与统计摘要（无 0 KPI 噪音）
+      Row() {
+        Text(this.getProjectMetricSummary(project))
+          .fontSize(PMFontSize.SECONDARY)
+          .fontColor(PMColors.INK_SECONDARY)
+      }
+      .width('100%')
+      .padding({ top: PMSpacing.SM, bottom: PMSpacing.SM })
+      .border({ width: { top: 1 }, color: PMColors.BORDER_SUBTLE })
+      .margin({ top: PMSpacing.SM })
+
+      // 下一步行动引导
+      if (project.dashboard.nextAction.label !== '') {
+        Row() {
+          Text('下一步')
+            .fontSize(PMFontSize.SECONDARY)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.INK_TERTIARY)
+            .margin({ right: PMSpacing.SM })
+
+          Text(project.dashboard.nextAction.label)
+            .fontSize(PMFontSize.BODY)
+            .fontColor(PMColors.INK_PRIMARY)
+            .maxLines(1)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .layoutWeight(1)
+
+          Text('→')
+            .fontSize(PMFontSize.BODY)
+            .fontColor(PMColors.BRAND)
+            .margin({ left: PMSpacing.XS })
+        }
+        .width('100%')
+        .padding({ top: 2 })
+      }
+    }
+    .width('100%')
+    .padding(PMSpacing.MD)
+    .backgroundColor(PMColors.SURFACE)
+    .borderRadius(PMRadius.MD)
+    .border({ width: { left: 3 }, color: PMColors.MEMORY })
+    .alignItems(HorizontalAlign.Start)
+    .onClick(() => {
+      router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: project.id } });
+    })
+  }
+
+  // ----------------------------------------------------
+  // Tab 1: 待办提醒视图 (跨项目待办与提醒)
+  // ----------------------------------------------------
+  @Builder
+  private TasksTab() {
+    Column() {
+      // 提醒 vs 待办行动 分类切换
+      Row() {
+        Button(`主动提醒 (${this.allInterventions.filter((i) => i.status === 'OPEN').length})`)
+          .fontSize(PMFontSize.BODY)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(this.taskTabFilter === 'REMINDERS' ? PMColors.BRAND : PMColors.INK_SECONDARY)
+          .backgroundColor(this.taskTabFilter === 'REMINDERS' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+          .borderRadius(PMRadius.SM)
+          .layoutWeight(1)
+          .onClick(() => {
+            this.taskTabFilter = 'REMINDERS';
+          })
+
+        Button(`待办行动 (${this.allActions.filter((a) => a.status !== 'DONE').length})`)
+          .fontSize(PMFontSize.BODY)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(this.taskTabFilter === 'ACTIONS' ? PMColors.BRAND : PMColors.INK_SECONDARY)
+          .backgroundColor(this.taskTabFilter === 'ACTIONS' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+          .borderRadius(PMRadius.SM)
+          .layoutWeight(1)
+          .margin({ left: PMSpacing.SM })
+          .onClick(() => {
+            this.taskTabFilter = 'ACTIONS';
+          })
+      }
+      .width('100%')
+      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.SM })
+      .backgroundColor(PMColors.SURFACE)
+      .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
+
+      if (this.taskTabFilter === 'REMINDERS') {
+        List({ space: PMSpacing.MD }) {
+          ForEach(this.allInterventions.filter((i) => i.status === 'OPEN'), (interv: Intervention) => {
+            ListItem() {
+              Column() {
+                Row() {
+                  SeverityBadge({ severity: interv.severity })
+                  Text(interv.title)
+                    .fontSize(PMFontSize.SECTION_TITLE)
+                    .fontWeight(FontWeight.Medium)
+                    .fontColor(PMColors.INK_PRIMARY)
+                    .layoutWeight(1)
+                    .margin({ left: PMSpacing.SM })
+                }
+                .width('100%')
+
+                Text(interv.content)
+                  .fontSize(PMFontSize.BODY)
+                  .fontColor(PMColors.INK_SECONDARY)
+                  .margin({ top: PMSpacing.XS })
+
+                Row() {
+                  Button('查看提醒依据 →')
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontWeight(FontWeight.Medium)
+                    .fontColor(PMColors.SURFACE)
+                    .backgroundColor(PMColors.BRAND)
+                    .borderRadius(PMRadius.XS)
+                    .padding({ left: PMSpacing.MD, right: PMSpacing.MD, top: 4, bottom: 4 })
+                    .onClick(() => {
+                      router.pushUrl({
+                        url: 'pages/InterventionDetail',
+                        params: { projectId: interv.projectId, interventionId: interv.id }
+                      });
+                    })
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.End)
+                .margin({ top: PMSpacing.SM })
+              }
+              .width('100%')
+              .padding(PMSpacing.MD)
+              .backgroundColor(PMColors.SURFACE)
+              .borderRadius(PMRadius.MD)
+              .border({ width: 1, color: PMColors.BORDER })
+              .alignItems(HorizontalAlign.Start)
+            }
+          }, (interv: Intervention) => interv.id)
+        }
+        .layoutWeight(1)
+        .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.LG })
+      } else {
+        List({ space: PMSpacing.MD }) {
+          ForEach(this.allActions.filter((a) => a.status !== 'DONE'), (action: ActionItem) => {
+            ListItem() {
+              Column() {
+                Row() {
+                  StatusBadge({ status: action.status })
+                  Text(TextFormatters.priorityToChinese(action.priority))
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.INK_TERTIARY)
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.SpaceBetween)
+
+                Text(action.title)
+                  .fontSize(PMFontSize.SECTION_TITLE)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.INK_PRIMARY)
+                  .margin({ top: PMSpacing.SM })
+
+                Row() {
+                  Button('进入项目 →')
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.BRAND)
+                    .backgroundColor(PMColors.BRAND_LIGHT)
+                    .borderRadius(PMRadius.XS)
+                    .padding({ left: PMSpacing.MD, right: PMSpacing.MD, top: 4, bottom: 4 })
+                    .onClick(() => {
+                      router.pushUrl({
+                        url: 'pages/ProjectHome',
+                        params: { projectId: action.projectId }
+                      });
+                    })
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.End)
+                .margin({ top: PMSpacing.SM })
+              }
+              .width('100%')
+              .padding(PMSpacing.MD)
+              .backgroundColor(PMColors.SURFACE)
+              .borderRadius(PMRadius.MD)
+              .border({ width: 1, color: PMColors.BORDER })
+              .alignItems(HorizontalAlign.Start)
+            }
+          }, (action: ActionItem) => action.id)
+        }
+        .layoutWeight(1)
+        .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.LG })
+      }
+    }
+    .layoutWeight(1)
+  }
+
+  // ----------------------------------------------------
+  // Tab 2: 记忆视图 (跨项目知识库)
+  // ----------------------------------------------------
+  @Builder
+  private GlobalMemoryTab() {
+    Column() {
+      // 搜索框与筛选
+      Column() {
+        TextInput({ text: this.globalMemorySearchQuery, placeholder: '搜索所有项目记忆与复盘...' })
+          .onChange((v: string) => {
+            this.globalMemorySearchQuery = v;
+          })
+          .fontSize(PMFontSize.BODY)
+          .height(40)
+          .backgroundColor(PMColors.SURFACE_SUBTLE)
+          .borderRadius(PMRadius.SM)
+          .border({ width: 1, color: PMColors.BORDER })
+
+        Scroll() {
+          Row() {
+            Button('全部')
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Regular)
+              .fontColor(this.selectedGlobalType === 'all' ? PMColors.BRAND : PMColors.INK_SECONDARY)
+              .backgroundColor(this.selectedGlobalType === 'all' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.XS)
+              .margin({ right: PMSpacing.XS })
+              .onClick(() => {
+                this.selectedGlobalType = 'all';
+              })
+
+            Button('论文笔记')
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Regular)
+              .fontColor(this.selectedGlobalType === 'paper_note' ? PMColors.BRAND : PMColors.INK_SECONDARY)
+              .backgroundColor(this.selectedGlobalType === 'paper_note' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.XS)
+              .margin({ right: PMSpacing.XS })
+              .onClick(() => {
+                this.selectedGlobalType = 'paper_note';
+              })
+
+            Button('实验记录')
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Regular)
+              .fontColor(this.selectedGlobalType === 'experiment_log' ? PMColors.BRAND : PMColors.INK_SECONDARY)
+              .backgroundColor(this.selectedGlobalType === 'experiment_log' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.XS)
+              .margin({ right: PMSpacing.XS })
+              .onClick(() => {
+                this.selectedGlobalType = 'experiment_log';
+              })
+
+            Button('阶段复盘')
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Regular)
+              .fontColor(this.selectedGlobalType === 'reflection' ? PMColors.BRAND : PMColors.INK_SECONDARY)
+              .backgroundColor(this.selectedGlobalType === 'reflection' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.XS)
+              .onClick(() => {
+                this.selectedGlobalType = 'reflection';
+              })
+          }
+        }
+        .width('100%')
+        .scrollable(ScrollDirection.Horizontal)
+        .margin({ top: PMSpacing.SM })
+      }
+      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.SM })
+      .backgroundColor(PMColors.SURFACE)
+      .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
+
+      List({ space: PMSpacing.MD }) {
+        ForEach(this.getFilteredGlobalCards(), (card: KnowledgeCard) => {
+          ListItem() {
+            Column() {
+              Row() {
+                MemoryTypeBadge({ type: card.type })
+                Text(card.createdAt.length >= 10 ? card.createdAt.substring(0, 10) : card.createdAt)
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.INK_TERTIARY)
+              }
+              .width('100%')
+              .justifyContent(FlexAlign.SpaceBetween)
+
+              Text(card.title)
+                .fontSize(PMFontSize.SECTION_TITLE)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+                .margin({ top: PMSpacing.SM })
+
+              if (card.summary !== '') {
+                Text(card.summary)
+                  .fontSize(PMFontSize.BODY)
+                  .fontColor(PMColors.INK_SECONDARY)
+                  .lineHeight(20)
+                  .margin({ top: PMSpacing.XS })
+              }
+            }
+            .width('100%')
+            .padding(PMSpacing.MD)
+            .backgroundColor(PMColors.SURFACE)
+            .borderRadius(PMRadius.MD)
+            .border({ width: 1, color: PMColors.BORDER })
+            .alignItems(HorizontalAlign.Start)
+          }
+        }, (card: KnowledgeCard) => card.id)
+      }
+      .layoutWeight(1)
+      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.LG })
+    }
+    .layoutWeight(1)
+  }
+
+  private getFilteredGlobalCards(): KnowledgeCard[] {
+    const q = this.globalMemorySearchQuery.trim().toLowerCase();
+    return this.allCards.filter((c) => {
+      if (this.selectedGlobalType !== 'all' && c.type !== this.selectedGlobalType) {
+        return false;
+      }
+      if (q === '') {
+        return true;
+      }
+      return c.title.toLowerCase().includes(q) || c.summary.toLowerCase().includes(q);
+    });
+  }
+
+  // ----------------------------------------------------
+  // Tab 3: 设置视图 (大模型 API 配置与环境)
+  // ----------------------------------------------------
+  @Builder
+  private SettingsTab() {
+    Scroll() {
+      Column() {
+        // 1. 大模型接入配置卡片
+        Column() {
+          Text('大模型接入配置')
+            .fontSize(PMFontSize.SECTION_TITLE)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.INK_PRIMARY)
+
+          Text('配置 OpenAI 兼容格式接口，为问忆程与成果生成提供大模型支持。')
+            .fontSize(PMFontSize.BODY)
+            .fontColor(PMColors.INK_SECONDARY)
+            .lineHeight(18)
+            .margin({ top: PMSpacing.XS })
+
+          // 引擎模式
+          Text('引擎模式')
+            .fontSize(PMFontSize.SECONDARY)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.INK_SECONDARY)
+            .margin({ top: PMSpacing.MD })
+
+          Row() {
+            Button('OpenAI 兼容 API')
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(this.llmMode === 'openai-compatible' ? PMColors.BRAND : PMColors.INK_SECONDARY)
+              .backgroundColor(this.llmMode === 'openai-compatible' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.SM)
+              .layoutWeight(1)
+              .onClick(() => {
+                this.llmMode = 'openai-compatible';
+              })
+
+            Button('离线确定性引擎')
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(this.llmMode === 'mock' ? PMColors.BRAND : PMColors.INK_SECONDARY)
+              .backgroundColor(this.llmMode === 'mock' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.SM)
+              .layoutWeight(1)
+              .margin({ left: PMSpacing.SM })
+              .onClick(() => {
+                this.llmMode = 'mock';
+              })
+          }
+          .width('100%')
+          .margin({ top: PMSpacing.XS })
+
+          // Base URL
+          Text('API Base URL')
+            .fontSize(PMFontSize.SECONDARY)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.INK_SECONDARY)
+            .margin({ top: PMSpacing.MD })
+          TextInput({ text: this.llmBaseUrl, placeholder: 'https://api.openai.com/v1' })
+            .onChange((v: string) => {
+              this.llmBaseUrl = v;
+            })
+            .fontSize(PMFontSize.BODY)
+            .height(40)
+            .backgroundColor(PMColors.SURFACE_SUBTLE)
+            .borderRadius(PMRadius.SM)
+            .border({ width: 1, color: PMColors.BORDER })
+            .margin({ top: PMSpacing.XS })
+
+          // Model Name
+          Text('模型名称')
+            .fontSize(PMFontSize.SECONDARY)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.INK_SECONDARY)
+            .margin({ top: PMSpacing.SM })
+          TextInput({ text: this.llmModelName, placeholder: '例如：gpt-4o-mini / deepseek-chat / qwen-plus' })
+            .onChange((v: string) => {
+              this.llmModelName = v;
+            })
+            .fontSize(PMFontSize.BODY)
+            .height(40)
+            .backgroundColor(PMColors.SURFACE_SUBTLE)
+            .borderRadius(PMRadius.SM)
+            .border({ width: 1, color: PMColors.BORDER })
+            .margin({ top: PMSpacing.XS })
+
+          // API Key
+          Row() {
+            Text('API 密钥')
+              .fontSize(PMFontSize.SECONDARY)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.INK_SECONDARY)
+
+            if (this.hasApiKey) {
+              Text(`已配置 (${this.apiKeyMasked})`)
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.SUCCESS)
+            } else {
+              Text('未配置')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.RISK)
+            }
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.SpaceBetween)
+          .margin({ top: PMSpacing.SM })
+
+          TextInput({ text: this.llmApiKey, placeholder: this.hasApiKey ? '输入新 Key 覆盖，或留空保留' : '输入以 sk- 开头的密钥' })
+            .type(InputType.Password)
+            .onChange((v: string) => {
+              this.llmApiKey = v;
+            })
+            .fontSize(PMFontSize.BODY)
+            .height(40)
+            .backgroundColor(PMColors.SURFACE_SUBTLE)
+            .borderRadius(PMRadius.SM)
+            .border({ width: 1, color: PMColors.BORDER })
+            .margin({ top: PMSpacing.XS })
+
+          // 探针测试结果
+          if (this.probeResult !== undefined) {
+            Column() {
+              if (this.probeResult.success) {
+                Row() {
+                  Text('连通测试成功')
+                    .fontSize(PMFontSize.BODY)
+                    .fontWeight(FontWeight.Medium)
+                    .fontColor(PMColors.SUCCESS)
+                  Text(`耗时 ${this.probeResult.latencyMs}ms · ${this.probeResult.model}`)
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.INK_SECONDARY)
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.SpaceBetween)
+              } else {
+                Text('连通测试失败')
+                  .fontSize(PMFontSize.BODY)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.RISK)
+                Text(this.probeResult.error)
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.RISK)
+                  .margin({ top: 2 })
+              }
+            }
+            .width('100%')
+            .padding(PMSpacing.SM)
+            .backgroundColor(this.probeResult.success ? PMColors.SUCCESS_LIGHT : PMColors.RISK_LIGHT)
+            .borderRadius(PMRadius.SM)
+            .alignItems(HorizontalAlign.Start)
+            .margin({ top: PMSpacing.SM })
+          }
+
+          if (this.settingsFeedback !== '') {
+            Text(this.settingsFeedback)
+              .fontSize(PMFontSize.BODY)
+              .fontColor(PMColors.BRAND)
+              .margin({ top: PMSpacing.XS })
+          }
+
+          // 操作按钮
+          Row() {
+            Button(this.isProbing ? '正在测试...' : '测试连通性')
+              .fontSize(PMFontSize.BUTTON)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.INK_PRIMARY)
+              .backgroundColor(PMColors.SURFACE_SUBTLE)
+              .border({ width: 1, color: PMColors.BORDER })
+              .borderRadius(PMRadius.SM)
+              .enabled(!this.isProbing)
+              .layoutWeight(1)
+              .onClick(() => {
+                this.probeLlmConnection();
+              })
+
+            Button(this.isSavingSettings ? '保存中...' : '保存配置')
+              .fontSize(PMFontSize.BUTTON)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.SURFACE)
+              .backgroundColor(PMColors.BRAND)
+              .borderRadius(PMRadius.SM)
+              .enabled(!this.isSavingSettings)
+              .layoutWeight(1)
+              .margin({ left: PMSpacing.SM })
+              .onClick(() => {
+                this.saveLlmSettings();
+              })
+          }
+          .width('100%')
+          .margin({ top: PMSpacing.MD })
+        }
+        .width('100%')
+        .padding(PMSpacing.LG)
+        .backgroundColor(PMColors.SURFACE)
+        .borderRadius(PMRadius.MD)
+        .border({ width: 1, color: PMColors.BORDER })
+
+        // 2. 服务端连接状态卡片
+        Column() {
+          Text('服务端连接状态')
+            .fontSize(PMFontSize.SECTION_TITLE)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.INK_PRIMARY)
+
+          Row() {
+            Text('API 端点:')
+              .fontSize(PMFontSize.BODY)
+              .fontColor(PMColors.INK_SECONDARY)
+            Text(Constants.BASE_URL)
+              .fontSize(PMFontSize.BODY)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.BRAND)
+              .margin({ left: PMSpacing.SM })
+          }
+          .width('100%')
+          .margin({ top: PMSpacing.SM })
+
+          Row() {
+            Text('网络状态:')
+              .fontSize(PMFontSize.BODY)
+              .fontColor(PMColors.INK_SECONDARY)
+            Text('正常连通')
+              .fontSize(PMFontSize.BODY)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.SUCCESS)
+              .margin({ left: PMSpacing.SM })
+          }
+          .width('100%')
+          .margin({ top: 4 })
+
+          Button('重新同步数据')
+            .fontSize(PMFontSize.BUTTON)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.SURFACE)
+            .backgroundColor(PMColors.BRAND)
+            .borderRadius(PMRadius.SM)
+            .margin({ top: PMSpacing.MD })
+            .onClick(() => {
+              this.loadAllData();
+              promptAction.showToast({ message: '正在同步数据...' });
+            })
+        }
+        .width('100%')
+        .padding(PMSpacing.LG)
+        .backgroundColor(PMColors.SURFACE)
+        .borderRadius(PMRadius.MD)
+        .border({ width: 1, color: PMColors.BORDER })
+        .margin({ top: PMSpacing.MD })
+
+        // 3. 关于产品
+        Column() {
+          Text('关于 忆程 ProjectMemo')
+            .fontSize(PMFontSize.SECTION_TITLE)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.INK_PRIMARY)
+
+          Text('设计理念：Evidence Ledger（证据档案）')
+            .fontSize(PMFontSize.BODY)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.EVIDENCE)
+            .margin({ top: PMSpacing.SM })
+
+          Text('拒绝无事实支撑的模板化输出，以事实证据脊线支撑学术备赛与研发决策。')
+            .fontSize(PMFontSize.BODY)
+            .fontColor(PMColors.INK_SECONDARY)
+            .lineHeight(20)
+            .margin({ top: 4 })
+        }
+        .width('100%')
+        .padding(PMSpacing.LG)
+        .backgroundColor(PMColors.SURFACE)
+        .borderRadius(PMRadius.MD)
+        .border({ width: 1, color: PMColors.BORDER })
+        .margin({ top: PMSpacing.MD })
+      }
+      .padding(PMSpacing.LG)
+    }
+    .layoutWeight(1)
+  }
+
+  // ----------------------------------------------------
+  // 主构建入口
+  // ----------------------------------------------------
+  build() {
+    Stack() {
+      Column() {
+        // 头部：正式统一品牌名 "忆程 ProjectMemo"
+        Row() {
+          Image($r('app.media.app_icon'))
+            .width(36)
+            .height(36)
+            .borderRadius(PMRadius.SM)
+            .objectFit(ImageFit.Cover)
+            .margin({ right: PMSpacing.SM })
+            .accessibilityText('忆程 ProjectMemo 标志')
+
+          Column() {
+            Text('忆程 ProjectMemo')
+              .fontSize(PMFontSize.TITLE)
+              .fontWeight(FontWeight.Bold)
+              .fontFamily(PMFontFamily.SANS)
+              .fontColor(PMColors.INK_PRIMARY)
+            Text(this.currentMainTabIndex === 0 ? '证据驱动的项目过程档案与决策手账' :
+              this.currentMainTabIndex === 1 ? '主动提醒与待办事项' :
+                this.currentMainTabIndex === 2 ? '项目过程知识与复盘记忆库' : '大模型 API 配置与运行参数')
+              .fontSize(PMFontSize.SECONDARY)
+              .fontColor(PMColors.INK_TERTIARY)
+              .margin({ top: 3 })
+          }
+          .alignItems(HorizontalAlign.Start)
+          .layoutWeight(1)
+          .margin({ right: PMSpacing.SM })
+
+          if (this.currentMainTabIndex === 0) {
+            Row() {
+              Button('+ 新建项目')
+                .fontSize(PMFontSize.BUTTON)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.SURFACE)
+                .backgroundColor(PMColors.BRAND)
+                .borderRadius(PMRadius.SM)
+                .padding({ left: PMSpacing.MD, right: PMSpacing.MD, top: PMSpacing.SM, bottom: PMSpacing.SM })
+                .onClick(() => {
+                  this.openCreateDialog();
+                })
+            }
+          }
+        }
+        .width('100%')
+        .justifyContent(FlexAlign.SpaceBetween)
+        .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.SM })
+        .backgroundColor(PMColors.SURFACE)
+        .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
+
+        if (this.isLoading) {
+          LoadingStateView({ message: '正在同步项目档案...' })
+        } else if (this.errorMessage !== '') {
+          ErrorStateView({
+            message: this.errorMessage,
+            onRetry: () => {
+              this.loadAllData();
+            }
+          })
+        } else {
+          if (this.currentMainTabIndex === 0) {
+            this.ProjectsTab()
+          } else if (this.currentMainTabIndex === 1) {
+            this.TasksTab()
+          } else if (this.currentMainTabIndex === 2) {
+            this.GlobalMemoryTab()
+          } else if (this.currentMainTabIndex === 3) {
+            this.SettingsTab()
+          }
+        }
+
+        // 底部导航 Bar
+        this.MainBottomBar()
+      }
+      .width('100%')
+      .height('100%')
+
+      // 新建项目弹窗
+      if (this.showCreateDialog) {
+        Column() {
+          Column() {
+            Text('新建项目档案')
+              .fontSize(PMFontSize.PAGE_TITLE)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.INK_PRIMARY)
+
+            Text('项目名称（必填）')
+              .fontSize(PMFontSize.SECONDARY)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.INK_SECONDARY)
+              .margin({ top: PMSpacing.MD })
+            TextInput({ text: this.newTitle, placeholder: '例如：人工智能创意赛作品开发' })
+              .onChange((value: string) => {
+                this.newTitle = value;
+              })
+              .fontSize(PMFontSize.BODY)
+              .height(42)
+              .backgroundColor(PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.SM)
+              .border({ width: 1, color: PMColors.BORDER })
+              .margin({ top: PMSpacing.XS })
+
+            Text('项目目标')
+              .fontSize(PMFontSize.SECONDARY)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.INK_SECONDARY)
+              .margin({ top: PMSpacing.SM })
+            TextInput({ text: this.newGoal, placeholder: '例如：锁定核心证据链并完成答辩材料' })
+              .onChange((value: string) => {
+                this.newGoal = value;
+              })
+              .fontSize(PMFontSize.BODY)
+              .height(42)
+              .backgroundColor(PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.SM)
+              .border({ width: 1, color: PMColors.BORDER })
+              .margin({ top: PMSpacing.XS })
+
+            Text('项目简述')
+              .fontSize(PMFontSize.SECONDARY)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.INK_SECONDARY)
+              .margin({ top: PMSpacing.SM })
+            TextArea({ text: this.newDescription, placeholder: '项目背景或主要工作说明...' })
+              .onChange((value: string) => {
+                this.newDescription = value;
+              })
+              .fontSize(PMFontSize.BODY)
+              .height(60)
+              .backgroundColor(PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.SM)
+              .border({ width: 1, color: PMColors.BORDER })
+              .margin({ top: PMSpacing.XS })
+
+            Text('场景类型')
+              .fontSize(PMFontSize.SECONDARY)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.INK_SECONDARY)
+              .margin({ top: PMSpacing.SM })
+            Row() {
+              Button('学术备赛')
+                .fontSize(PMFontSize.CAPTION)
+                .fontWeight(FontWeight.Regular)
+                .fontColor(this.newScenario === 'COMPETITION' ? PMColors.BRAND : PMColors.INK_SECONDARY)
+                .backgroundColor(this.newScenario === 'COMPETITION' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+                .borderRadius(PMRadius.SM)
+                .layoutWeight(1)
+                .onClick(() => {
+                  this.newScenario = 'COMPETITION';
+                })
+
+              Button('学术课题')
+                .fontSize(PMFontSize.CAPTION)
+                .fontWeight(FontWeight.Regular)
+                .fontColor(this.newScenario === 'RESEARCH' ? PMColors.BRAND : PMColors.INK_SECONDARY)
+                .backgroundColor(this.newScenario === 'RESEARCH' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+                .borderRadius(PMRadius.SM)
+                .layoutWeight(1)
+                .margin({ left: PMSpacing.XS })
+                .onClick(() => {
+                  this.newScenario = 'RESEARCH';
+                })
+
+              Button('课程设计')
+                .fontSize(PMFontSize.CAPTION)
+                .fontWeight(FontWeight.Regular)
+                .fontColor(this.newScenario === 'COURSE_DESIGN' ? PMColors.BRAND : PMColors.INK_SECONDARY)
+                .backgroundColor(this.newScenario === 'COURSE_DESIGN' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+                .borderRadius(PMRadius.SM)
+                .layoutWeight(1)
+                .margin({ left: PMSpacing.XS })
+                .onClick(() => {
+                  this.newScenario = 'COURSE_DESIGN';
+                })
+            }
+            .width('100%')
+            .margin({ top: PMSpacing.XS })
+
+            if (this.createError !== '') {
+              Text(this.createError)
+                .fontSize(PMFontSize.BODY)
+                .fontColor(PMColors.RISK)
+                .margin({ top: PMSpacing.SM })
+            }
+
+            Row() {
+              Button('取消')
+                .fontSize(PMFontSize.BUTTON)
+                .fontColor(PMColors.INK_SECONDARY)
+                .backgroundColor(PMColors.SURFACE_SUBTLE)
+                .border({ width: 1, color: PMColors.BORDER })
+                .borderRadius(PMRadius.SM)
+                .enabled(!this.isCreating)
+                .onClick(() => {
+                  this.closeCreateDialog();
+                })
+
+              Button(this.isCreating ? '创建中...' : '确认创建')
+                .fontSize(PMFontSize.BUTTON)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.SURFACE)
+                .backgroundColor(this.newTitle.trim() !== '' && !this.isCreating ? PMColors.BRAND : PMColors.INK_MUTED)
+                .borderRadius(PMRadius.SM)
+                .margin({ left: PMSpacing.MD })
+                .enabled(this.newTitle.trim() !== '' && !this.isCreating)
+                .onClick(() => {
+                  this.submitCreateProject();
+                })
+            }
+            .margin({ top: PMSpacing.LG })
+            .width('100%')
+            .justifyContent(FlexAlign.End)
+          }
+          .width('100%')
+          .padding(PMSpacing.LG)
+          .backgroundColor(PMColors.SURFACE)
+          .borderRadius(PMRadius.LG)
+          .border({ width: 1, color: PMColors.BORDER })
+          .alignItems(HorizontalAlign.Start)
+        }
+        .width('100%')
+        .height('100%')
+        .backgroundColor('rgba(19, 36, 58, 0.45)')
+        .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
+        .justifyContent(FlexAlign.Center)
       }
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#F5F5F5')
+    .backgroundColor(PMColors.BACKGROUND)
   }
 }

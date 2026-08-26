@@ -8,7 +8,6 @@ export class InterventionAcceptBody {
   status: string = 'ACCEPTED';
   actionIndex: number = 0;
 }
-
 export class InterventionSnoozeBody {
   status: string = 'SNOOZED';
   snoozedUntil: string = '';
@@ -73,7 +72,7 @@ export function buildCaptureBody(rawText: string): CaptureRequestBody {
 export const ACTION_STATUSES: string[] = ['TODO', 'DOING', 'DONE', 'CANCELLED'];
 export const INTERVENTION_STATUSES: string[] = ['OPEN', 'ACCEPTED', 'SNOOZED', 'DISMISSED', 'RESOLVED'];
 export const INTERVENTION_TRIGGERS: string[] =
-  ['DEADLINE_NEAR', 'RISK_UNHANDLED', 'PROJECT_STALE', 'EXPERIMENT_GAP', 'MATERIAL_GAP'];
+  ['DEADLINE_NEAR', 'RISK_UNHANDLED', 'PROJECT_STALE', 'EXPERIMENT_GAP', 'MATERIAL_GAP', 'DELIVERABLE_GAP'];
 
 export function isValidActionStatus(status: string): boolean {
   return ACTION_STATUSES.includes(status);
@@ -119,5 +118,5 @@ export function parseApiError(errBody: string, statusCode: number): ApiError {
   } catch (_e) {
     // 响应体不是 JSON 时保留默认映射
   }
-  return new ApiError(code, message);
+  return new ApiError(code, message, statusCode);
 }

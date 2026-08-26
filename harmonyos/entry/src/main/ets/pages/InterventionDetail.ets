@@ -3,6 +3,13 @@ import promptAction from '@ohos.promptAction';
 import { ApiError } from '../models/Project';
 import { Intervention, ProposedAction } from '../models/Intervention';
 import { InterventionService } from '../services/InterventionService';
+import { NotificationService } from '../services/NotificationService';
+import { PMColors, PMSpacing, PMFontSize, PMRadius } from '../common/DesignTokens';
+import { PMAppBar } from '../components/PMAppBar';
+import { SeverityBadge, StatusBadge } from '../components/MetricBadge';
+import { EvidenceSpineView } from '../components/EvidenceSpineView';
+import { LoadingStateView, ErrorStateView, EmptyStateView } from '../components/AsyncStateView';
+import { TextFormatters } from '../common/TextFormatters';
 
 @Entry
 @Component
@@ -15,23 +22,24 @@ struct InterventionDetail {
   @State errorMessage: string = '';
   @State routeError: string = '';
   @State actionIndex: number = 0;
-  @State showSnoozeOptions: boolean = false;
+  @State showDismissInput: boolean = false;
   @State dismissReason: string = '';
   @State isSubmitting: boolean = false;
   @State operationError: string = '';
 
   private interventionService: InterventionService = new InterventionService();
+  private notificationService: NotificationService = new NotificationService();
 
   aboutToAppear(): void {
     const params: Record<string, string> | undefined = router.getParams() as Record<string, string>;
     if (params === undefined || params === null) {
-      this.routeError = '页面参数缺失';
+      this.routeError = '页面参数缺失，无法定位提醒记录';
       return;
     }
     this.projectId = params['projectId'] ?? '';
     this.interventionId = params['interventionId'] ?? '';
     if (this.projectId === '' || this.interventionId === '') {
-      this.routeError = '页面参数缺失';
+      this.routeError = '页面参数缺失，提醒记录ID无效';
       return;
     }
     this.loadIntervention();
@@ -42,25 +50,16 @@ struct InterventionDetail {
     this.errorMessage = '';
     this.notFound = false;
     try {
-      const list: Intervention[] = await this.interventionService.list(this.projectId);
-      let found: Intervention | undefined = undefined;
-      for (const item of list) {
-        if (item.id === this.interventionId) {
-          found = item;
-          break;
-        }
-      }
-      if (found === undefined) {
-        this.notFound = true;
-        return;
-      }
-      this.intervention = found;
-      this.actionIndex = 0;
+      this.intervention = await this.interventionService.get(this.projectId, this.interventionId);
     } catch (e) {
       if (e instanceof ApiError) {
-        this.errorMessage = e.message;
+        if (e.status === 404) {
+          this.notFound = true;
+        } else {
+          this.errorMessage = e.message;
+        }
       } else {
-        this.errorMessage = '未知错误';
+        this.errorMessage = '无法连接服务，请检查网络';
       }
     } finally {
       this.isLoading = false;
@@ -71,44 +70,6 @@ struct InterventionDetail {
     return this.intervention.status === 'OPEN';
   }
 
-  private triggerTypeLabel(triggerType: string): string {
-    if (triggerType === 'DEADLINE_NEAR') {
-      return '截止日期逼近';
-    }
-    if (triggerType === 'RISK_UNHANDLED') {
-      return '风险尚未处理';
-    }
-    if (triggerType === 'PROJECT_STALE') {
-      return '项目出现停滞';
-    }
-    if (triggerType === 'EXPERIMENT_GAP') {
-      return '论文与实验存在缺口';
-    }
-    if (triggerType === 'MATERIAL_GAP') {
-      return '参赛材料存在缺口';
-    }
-    return triggerType;
-  }
-
-  private statusLabel(status: string): string {
-    if (status === 'OPEN') {
-      return '待处理';
-    }
-    if (status === 'ACCEPTED') {
-      return '已接受';
-    }
-    if (status === 'SNOOZED') {
-      return '稍后提醒';
-    }
-    if (status === 'DISMISSED') {
-      return '已忽略';
-    }
-    if (status === 'RESOLVED') {
-      return '已解决';
-    }
-    return status;
-  }
-
   private async acceptIntervention(): Promise<void> {
     if (this.isSubmitting) {
       return;
@@ -117,13 +78,14 @@ struct InterventionDetail {
     this.operationError = '';
     try {
       await this.interventionService.accept(this.projectId, this.interventionId, this.actionIndex);
-      promptAction.showToast({ message: '已创建行动' });
+      await this.notificationService.cancelInterventionNotification(this.interventionId, this.projectId);
+      promptAction.showToast({ message: '已采纳建议并创建行动' });
       router.back();
     } catch (e) {
       if (e instanceof ApiError) {
         this.operationError = e.message;
       } else {
-        this.operationError = '未知错误';
+        this.operationError = '创建行动失败，请稍后重试';
       }
     } finally {
       this.isSubmitting = false;
@@ -139,13 +101,18 @@ struct InterventionDetail {
     try {
       const until: string = new Date(Date.now() + hours * 3600000).toISOString();
       await this.interventionService.snooze(this.projectId, this.interventionId, until);
-      promptAction.showToast({ message: '已设置稍后提醒' });
+      await this.notificationService.scheduleInterventionNotification(
+        this.intervention,
+        this.projectId,
+        new Date(until).getTime()
+      );
+      promptAction.showToast({ message: '已设置为明天提醒' });
       router.back();
     } catch (e) {
       if (e instanceof ApiError) {
         this.operationError = e.message;
       } else {
-        this.operationError = '未知错误';
+        this.operationError = '稍后提醒设置失败';
       }
     } finally {
       this.isSubmitting = false;
@@ -160,13 +127,14 @@ struct InterventionDetail {
     this.operationError = '';
     try {
       await this.interventionService.dismiss(this.projectId, this.interventionId, this.dismissReason);
-      promptAction.showToast({ message: '已忽略' });
+      await this.notificationService.cancelInterventionNotification(this.interventionId, this.projectId);
+      promptAction.showToast({ message: '已忽略该提醒' });
       router.back();
     } catch (e) {
       if (e instanceof ApiError) {
         this.operationError = e.message;
       } else {
-        this.operationError = '未知错误';
+        this.operationError = '忽略操作失败';
       }
     } finally {
       this.isSubmitting = false;
@@ -175,294 +143,302 @@ struct InterventionDetail {
 
   build() {
     Column() {
-      Row() {
-        Text('返回')
-          .fontSize(16)
-          .fontColor('#007DFF')
-          .onClick(() => {
-            router.back();
-          })
-        Text('干预详情')
-          .fontSize(20)
-          .fontWeight(FontWeight.Bold)
-          .margin({ left: 16 })
-      }
-      .width('100%')
-      .padding({ left: 16, right: 16, top: 12, bottom: 12 })
+      PMAppBar({
+        title: '为什么提醒我',
+        subtitle: '',
+        backLabel: '项目',
+        showBack: true
+      })
 
       if (this.routeError !== '') {
-        Column() {
-          Text(this.routeError)
-            .fontSize(16)
-            .fontColor('#E84026')
-            .margin({ bottom: 16 })
-          Button('返回')
-            .fontSize(14)
-            .onClick(() => {
-              router.back();
-            })
-        }
-        .width('100%')
-        .layoutWeight(1)
-        .justifyContent(FlexAlign.Center)
+        ErrorStateView({
+          message: this.routeError,
+          onRetry: () => {
+            router.back();
+          }
+        })
       } else if (this.isLoading) {
-        Column() {
-          LoadingProgress()
-            .width(48)
-            .height(48)
-            .color('#007DFF')
-          Text('加载中...')
-            .fontSize(14)
-            .fontColor('#999999')
-            .margin({ top: 12 })
-        }
-        .width('100%')
-        .layoutWeight(1)
-        .justifyContent(FlexAlign.Center)
+        LoadingStateView({ message: '正在加载提醒依据...' })
       } else if (this.notFound) {
-        Column() {
-          Text('未找到该干预')
-            .fontSize(16)
-            .fontColor('#E84026')
-            .margin({ bottom: 16 })
-          Button('返回')
-            .fontSize(14)
-            .onClick(() => {
-              router.back();
-            })
-        }
-        .width('100%')
-        .layoutWeight(1)
-        .justifyContent(FlexAlign.Center)
+        EmptyStateView({
+          title: '未找到提醒记录',
+          description: '该提醒可能已被处理或已关闭',
+          actionText: '返回上一页',
+          onAction: () => {
+            router.back();
+          }
+        })
       } else if (this.errorMessage !== '') {
-        Column() {
-          Text(this.errorMessage)
-            .fontSize(16)
-            .fontColor('#E84026')
-            .textAlign(TextAlign.Center)
-            .margin({ bottom: 16 })
-          Button('重试')
-            .fontSize(14)
-            .onClick(() => {
-              this.loadIntervention();
-            })
-        }
-        .width('100%')
-        .layoutWeight(1)
-        .justifyContent(FlexAlign.Center)
-        .padding({ left: 32, right: 32 })
+        ErrorStateView({
+          message: this.errorMessage,
+          onRetry: () => {
+            this.loadIntervention();
+          }
+        })
       } else {
         Scroll() {
           Column() {
-            Text(`当前状态：${this.statusLabel(this.intervention.status)}`)
-              .fontSize(14)
-              .fontColor(this.isOpenStatus() ? '#007DFF' : '#999999')
+            // 1. 当前判断 (Primary Judgement)
+            Column() {
+              Row() {
+                SeverityBadge({ severity: this.intervention.severity })
+                StatusBadge({ status: this.intervention.status })
+              }
               .width('100%')
+              .justifyContent(FlexAlign.SpaceBetween)
 
-            Column() {
-              Text('What · 发生了什么')
-                .fontSize(16)
-                .fontWeight(FontWeight.Medium)
               Text(this.intervention.title)
-                .fontSize(18)
+                .fontSize(PMFontSize.PRIMARY_JUDGEMENT)
                 .fontWeight(FontWeight.Medium)
-                .margin({ top: 8 })
+                .fontColor(PMColors.INK_PRIMARY)
+                .lineHeight(26)
+                .margin({ top: PMSpacing.MD })
+
               Text(this.intervention.content)
-                .fontSize(14)
-                .fontColor('#666666')
-                .margin({ top: 4 })
+                .fontSize(PMFontSize.BODY)
+                .fontColor(PMColors.INK_SECONDARY)
+                .lineHeight(22)
+                .margin({ top: PMSpacing.SM })
             }
             .width('100%')
-            .padding(16)
-            .backgroundColor('#FFFFFF')
-            .borderRadius(12)
-            .alignItems(HorizontalAlign.Start)
-            .margin({ top: 12 })
+            .padding(PMSpacing.LG)
+            .backgroundColor(PMColors.SURFACE)
+            .borderRadius(PMRadius.MD)
+            .border({ width: 1, color: PMColors.BORDER })
 
+            // 2. 提醒依据 (Evidence Spine · 时间—来源—事实—判断)
             Column() {
-              Text('Why · 为什么提醒你')
-                .fontSize(16)
-                .fontWeight(FontWeight.Medium)
-              Text(`触发类型：${this.triggerTypeLabel(this.intervention.triggerType)}`)
-                .fontSize(14)
-                .fontColor('#666666')
-                .margin({ top: 8 })
-              Text(`状态：${this.statusLabel(this.intervention.status)}`)
-                .fontSize(14)
-                .fontColor('#666666')
-                .margin({ top: 4 })
+              EvidenceSpineView({
+                evidence: this.intervention.evidence,
+                triggerType: this.intervention.triggerType,
+                judgementTitle: this.intervention.title,
+                judgementContent: this.intervention.content
+              })
             }
             .width('100%')
-            .padding(16)
-            .backgroundColor('#FFFFFF')
-            .borderRadius(12)
-            .alignItems(HorizontalAlign.Start)
-            .margin({ top: 12 })
+            .margin({ top: PMSpacing.MD })
 
+            // 3. 建议行动 (Suggested Action)
             Column() {
-              Text('Evidence · 依据')
-                .fontSize(16)
+              Text('建议行动')
+                .fontSize(PMFontSize.SECTION_TITLE)
                 .fontWeight(FontWeight.Medium)
-              Text(this.intervention.evidence.rule)
-                .fontSize(14)
-                .fontColor('#666666')
-                .margin({ top: 8 })
-              ForEach(this.intervention.evidence.facts, (fact: string) => {
-                Text(`• ${fact}`)
-                  .fontSize(14)
-                  .fontColor('#666666')
-                  .margin({ top: 4 })
-              }, (fact: string, index: number) => `${index}`)
-            }
-            .width('100%')
-            .padding(16)
-            .backgroundColor('#FFFFFF')
-            .borderRadius(12)
-            .alignItems(HorizontalAlign.Start)
-            .margin({ top: 12 })
+                .fontColor(PMColors.INK_PRIMARY)
+                .margin({ bottom: PMSpacing.SM })
 
-            Column() {
-              Text('Suggested Action · 建议行动')
-                .fontSize(16)
-                .fontWeight(FontWeight.Medium)
               if (this.intervention.proposedActions.length === 0) {
-                Text('暂无建议行动')
-                  .fontSize(14)
-                  .fontColor('#999999')
-                  .margin({ top: 8 })
+                Text('暂无预设行动建议')
+                  .fontSize(PMFontSize.BODY)
+                  .fontColor(PMColors.INK_TERTIARY)
+                  .padding(PMSpacing.LG)
               } else {
                 ForEach(this.intervention.proposedActions, (action: ProposedAction, index: number) => {
                   Column() {
                     Row() {
-                      Text(action.label)
-                        .fontSize(12)
-                        .fontColor('#007DFF')
-                      if (this.actionIndex === index) {
-                        Text('已选中')
-                          .fontSize(12)
-                          .fontColor('#007DFF')
-                          .margin({ left: 8 })
+                      Row() {
+                        Circle({ width: 14, height: 14 })
+                          .fill(this.actionIndex === index ? PMColors.BRAND : PMColors.SURFACE)
+                          .border({ width: 2, color: this.actionIndex === index ? PMColors.BRAND : PMColors.BORDER_STRONG })
+
+                        Text(action.label !== '' ? action.label : `建议方案 ${index + 1}`)
+                          .fontSize(PMFontSize.BODY)
+                          .fontWeight(FontWeight.Medium)
+                          .fontColor(this.actionIndex === index ? PMColors.BRAND : PMColors.INK_SECONDARY)
+                          .margin({ left: PMSpacing.SM })
                       }
+
+                      Text(TextFormatters.priorityToChinese(action.priority))
+                        .fontSize(PMFontSize.CAPTION)
+                        .fontColor(PMColors.INK_TERTIARY)
                     }
                     .width('100%')
+                    .justifyContent(FlexAlign.SpaceBetween)
+
                     Text(action.title)
-                      .fontSize(15)
+                      .fontSize(PMFontSize.SECTION_TITLE)
                       .fontWeight(FontWeight.Medium)
-                      .margin({ top: 4 })
+                      .fontColor(PMColors.INK_PRIMARY)
+                      .margin({ top: PMSpacing.SM })
+
                     if (action.description !== null && action.description !== undefined && action.description !== '') {
                       Text(action.description)
-                        .fontSize(13)
-                        .fontColor('#666666')
-                        .margin({ top: 4 })
+                        .fontSize(PMFontSize.BODY)
+                        .fontColor(PMColors.INK_SECONDARY)
+                        .lineHeight(20)
+                        .margin({ top: PMSpacing.XS })
                     }
                   }
                   .width('100%')
-                  .padding(12)
-                  .borderRadius(8)
+                  .padding(PMSpacing.LG)
+                  .backgroundColor(this.actionIndex === index ? PMColors.BRAND_LIGHT : PMColors.SURFACE)
+                  .borderRadius(PMRadius.MD)
                   .border({
                     width: this.actionIndex === index ? 2 : 1,
-                    color: this.actionIndex === index ? '#007DFF' : '#EEEEEE'
+                    color: this.actionIndex === index ? PMColors.BRAND : PMColors.BORDER
                   })
-                  .margin({ top: 8 })
+                  .margin({ bottom: PMSpacing.SM })
                   .alignItems(HorizontalAlign.Start)
                   .onClick(() => {
                     if (this.intervention.proposedActions.length > 1 && this.isOpenStatus()) {
                       this.actionIndex = index;
                     }
                   })
-                }, (action: ProposedAction, index: number) => `${index}-${action.title}`)
+                }, (action: ProposedAction, index: number) => `action-${index}-${action.title}`)
               }
             }
             .width('100%')
-            .padding(16)
-            .backgroundColor('#FFFFFF')
-            .borderRadius(12)
             .alignItems(HorizontalAlign.Start)
-            .margin({ top: 12 })
+            .margin({ top: PMSpacing.MD })
 
+            // 4. 你的决定 (Human Decision)
             Column() {
-              Text('Human Decision · 你的决定')
-                .fontSize(16)
-                .fontWeight(FontWeight.Medium)
-              if (!this.isOpenStatus()) {
-                Text('该干预已处理，操作已禁用')
-                  .fontSize(13)
-                  .fontColor('#999999')
-                  .margin({ top: 8 })
+              Row() {
+                Text('你的决定')
+                  .fontSize(PMFontSize.SECTION_TITLE)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.INK_PRIMARY)
+
+                Text('主动介入，但不越权')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.INK_TERTIARY)
               }
-              if (this.isOpenStatus() && this.showSnoozeOptions) {
+              .width('100%')
+              .justifyContent(FlexAlign.SpaceBetween)
+
+              if (!this.isOpenStatus()) {
                 Row() {
-                  Button('1 小时后')
-                    .fontSize(12)
-                    .enabled(!this.isSubmitting)
-                    .onClick(() => {
-                      this.snoozeIntervention(1);
+                  Text('✓ 该提醒已处理闭环，状态已锁定')
+                    .fontSize(PMFontSize.BODY)
+                    .fontColor(PMColors.SUCCESS)
+                }
+                .padding(PMSpacing.MD)
+                .backgroundColor(PMColors.SUCCESS_LIGHT)
+                .borderRadius(PMRadius.SM)
+                .margin({ top: PMSpacing.MD })
+              } else {
+                // 忽略原因输入框（点击忽略或需要记录时展开）
+                if (this.showDismissInput) {
+                  Column() {
+                    Text('忽略原因（可选）：')
+                      .fontSize(PMFontSize.SECONDARY)
+                      .fontColor(PMColors.INK_SECONDARY)
+                      .margin({ bottom: PMSpacing.XS })
+
+                    TextArea({
+                      text: this.dismissReason,
+                      placeholder: '可在此记录忽略原因（可选）...'
                     })
-                  Button('明天')
-                    .fontSize(12)
-                    .margin({ left: 8 })
-                    .enabled(!this.isSubmitting)
+                      .onChange((value: string) => {
+                        this.dismissReason = value;
+                      })
+                      .fontSize(PMFontSize.BODY)
+                      .height(60)
+                      .backgroundColor(PMColors.SURFACE_SUBTLE)
+                      .borderRadius(PMRadius.SM)
+                      .border({ width: 1, color: PMColors.BORDER })
+
+                    Row() {
+                      Button('取消')
+                        .fontSize(PMFontSize.BODY)
+                        .fontColor(PMColors.INK_SECONDARY)
+                        .backgroundColor(PMColors.SURFACE)
+                        .border({ width: 1, color: PMColors.BORDER })
+                        .borderRadius(PMRadius.SM)
+                        .onClick(() => {
+                          this.showDismissInput = false;
+                        })
+
+                      Button('确认忽略')
+                        .fontSize(PMFontSize.BODY)
+                        .fontColor(PMColors.SURFACE)
+                        .backgroundColor(PMColors.RISK)
+                        .borderRadius(PMRadius.SM)
+                        .margin({ left: PMSpacing.MD })
+                        .onClick(() => {
+                          this.dismissIntervention();
+                        })
+                    }
+                    .width('100%')
+                    .justifyContent(FlexAlign.End)
+                    .margin({ top: PMSpacing.SM })
+                  }
+                  .width('100%')
+                  .padding(PMSpacing.MD)
+                  .backgroundColor(PMColors.SURFACE_SUBTLE)
+                  .borderRadius(PMRadius.SM)
+                  .margin({ top: PMSpacing.MD })
+                }
+
+                // 核心决策三大按钮：创建行动 / 明天提醒 / 忽略
+                Row() {
+                  Button(this.isSubmitting ? '处理中...' : '创建行动')
+                    .fontSize(PMFontSize.BUTTON)
+                    .fontWeight(FontWeight.Medium)
+                    .fontColor(PMColors.SURFACE)
+                    .backgroundColor(PMColors.BRAND)
+                    .borderRadius(PMRadius.SM)
+                    .layoutWeight(2)
+                    .enabled(this.isOpenStatus() && !this.isSubmitting && this.intervention.proposedActions.length > 0)
+                    .onClick(() => {
+                      this.acceptIntervention();
+                    })
+
+                  Button('明天提醒')
+                    .fontSize(PMFontSize.BUTTON)
+                    .fontWeight(FontWeight.Medium)
+                    .fontColor(PMColors.INK_PRIMARY)
+                    .backgroundColor(PMColors.SURFACE_SUBTLE)
+                    .border({ width: 1, color: PMColors.BORDER })
+                    .borderRadius(PMRadius.SM)
+                    .layoutWeight(1.2)
+                    .margin({ left: PMSpacing.SM })
+                    .enabled(this.isOpenStatus() && !this.isSubmitting)
                     .onClick(() => {
                       this.snoozeIntervention(24);
                     })
-                  Button('三天后')
-                    .fontSize(12)
-                    .margin({ left: 8 })
-                    .enabled(!this.isSubmitting)
+
+                  Button('忽略')
+                    .fontSize(PMFontSize.BUTTON)
+                    .fontWeight(FontWeight.Medium)
+                    .fontColor(PMColors.RISK)
+                    .backgroundColor(PMColors.RISK_LIGHT)
+                    .borderRadius(PMRadius.SM)
+                    .layoutWeight(1)
+                    .margin({ left: PMSpacing.SM })
+                    .enabled(this.isOpenStatus() && !this.isSubmitting)
                     .onClick(() => {
-                      this.snoozeIntervention(72);
+                      if (!this.showDismissInput) {
+                        this.showDismissInput = true;
+                      } else {
+                        this.dismissIntervention();
+                      }
                     })
                 }
-                .margin({ top: 12 })
-              }
-              if (this.isOpenStatus()) {
-                TextArea({ text: this.dismissReason, placeholder: '忽略原因（可选，选择忽略时提交）' })
-                  .onChange((value: string) => {
-                    this.dismissReason = value;
-                  })
-                  .fontSize(14)
-                  .height(72)
-                  .margin({ top: 12 })
-              }
-              Row() {
-                Button('接受建议')
-                  .fontSize(14)
-                  .enabled(this.isOpenStatus() && !this.isSubmitting
-                    && this.intervention.proposedActions.length > 0)
-                  .onClick(() => {
-                    this.acceptIntervention();
-                  })
-                Button('稍后提醒')
-                  .fontSize(14)
-                  .margin({ left: 8 })
-                  .enabled(this.isOpenStatus() && !this.isSubmitting)
-                  .onClick(() => {
-                    this.showSnoozeOptions = !this.showSnoozeOptions;
-                  })
-                Button('忽略')
-                  .fontSize(14)
-                  .margin({ left: 8 })
-                  .enabled(this.isOpenStatus() && !this.isSubmitting)
-                  .onClick(() => {
-                    this.dismissIntervention();
-                  })
-              }
-              .margin({ top: 12 })
-              if (this.operationError !== '') {
-                Text(this.operationError)
-                  .fontSize(14)
-                  .fontColor('#E84026')
-                  .margin({ top: 8 })
+                .width('100%')
+                .margin({ top: PMSpacing.MD })
+
+                Text('只有你确认后，忆程才会创建行动。')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.INK_TERTIARY)
+                  .margin({ top: PMSpacing.SM })
+
+                if (this.operationError !== '') {
+                  Text(this.operationError)
+                    .fontSize(PMFontSize.BODY)
+                    .fontColor(PMColors.RISK)
+                    .margin({ top: PMSpacing.XS })
+                }
               }
             }
             .width('100%')
-            .padding(16)
-            .backgroundColor('#FFFFFF')
-            .borderRadius(12)
+            .padding(PMSpacing.LG)
+            .backgroundColor(PMColors.SURFACE)
+            .borderRadius(PMRadius.MD)
+            .border({ width: 1, color: PMColors.BORDER })
             .alignItems(HorizontalAlign.Start)
-            .margin({ top: 12 })
+            .margin({ top: PMSpacing.MD })
           }
-          .padding({ left: 16, right: 16, bottom: 24 })
+          .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.XXL })
         }
         .width('100%')
         .layoutWeight(1)
@@ -470,6 +446,6 @@ struct InterventionDetail {
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#F5F5F5')
+    .backgroundColor(PMColors.BACKGROUND)
   }
 }

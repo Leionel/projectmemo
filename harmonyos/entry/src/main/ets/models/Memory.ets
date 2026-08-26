@@ -64,3 +64,23 @@ export class ProjectDetailResponse {
 export class CaptureResponse {
   card: KnowledgeCard = new KnowledgeCard();
 }
+
+export class CaptureInput {
+  rawText: string = '';
+  sourceType: string | undefined = undefined;
+}
+
+export class CardSearchResultItem {
+  cardId: string = '';
+  title: string = '';
+  summary: string = '';
+  type: string = '';
+  score: number = 0;
+  reason: string = '';
+}
+
+export class CardSearchResponse {
+  query: string = '';
+  total: number = 0;
+  results: CardSearchResultItem[] = [];
+}

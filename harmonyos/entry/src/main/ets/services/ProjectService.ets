@@ -1,10 +1,13 @@
 import { ApiClient } from './ApiClient';
-import { ProjectsResponse, Project } from '../models/Project';
+import {
+  ProjectsResponse,
+  Project,
+  ProjectCreateInput,
+  ProjectUpdateInput,
+  ProjectCreateResponse
+} from '../models/Project';
 import { ProjectDetail, ProjectDetailResponse } from '../models/Memory';
-import { EvaluateResponse } from '../models/Intervention';
-
-class EvaluateProjectBody {
-}
+import { EvaluateResponse, EvaluateProjectInput } from '../models/Intervention';
 
 export class ProjectService {
   private client: ApiClient = new ApiClient();
@@ -19,7 +22,30 @@ export class ProjectService {
     return response.project;
   }
 
-  async evaluateProject(id: string): Promise<EvaluateResponse> {
-    return this.client.post<EvaluateResponse>(`/api/projects/${id}/agent/evaluate`, new EvaluateProjectBody());
+  async createProject(input: ProjectCreateInput): Promise<Project> {
+    const response: ProjectCreateResponse = await this.client.post<ProjectCreateResponse>(
+      '/api/projects',
+      input
+    );
+    return response.project;
+  }
+
+  async updateProject(id: string, input: ProjectUpdateInput): Promise<ProjectDetail> {
+    const response: ProjectDetailResponse = await this.client.patch<ProjectDetailResponse>(
+      `/api/projects/${id}`,
+      input
+    );
+    return response.project;
+  }
+
+  async evaluateProject(id: string, scenario?: string, clearSimulation: boolean = false): Promise<EvaluateResponse> {
+    const body: EvaluateProjectInput = new EvaluateProjectInput();
+    if (scenario !== undefined && scenario !== '') {
+      body.scenario = scenario;
+    }
+    if (clearSimulation) {
+      body.clearSimulation = true;
+    }
+    return this.client.post<EvaluateResponse>(`/api/projects/${id}/agent/evaluate`, body);
   }
 }

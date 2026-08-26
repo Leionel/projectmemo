@@ -3,6 +3,11 @@ import promptAction from '@ohos.promptAction';
 import { ApiError } from '../models/Project';
 import { ActionItem } from '../models/Action';
 import { ActionService } from '../services/ActionService';
+import { PMColors, PMSpacing, PMFontSize, PMRadius } from '../common/DesignTokens';
+import { PMAppBar } from '../components/PMAppBar';
+import { StatusBadge } from '../components/MetricBadge';
+import { LoadingStateView, ErrorStateView, EmptyStateView } from '../components/AsyncStateView';
+import { TextFormatters } from '../common/TextFormatters';
 
 @Entry
 @Component
@@ -25,12 +30,12 @@ struct ActionBoard {
   aboutToAppear(): void {
     const params: Record<string, string> | undefined = router.getParams() as Record<string, string>;
     if (params === undefined || params === null) {
-      this.routeError = '页面参数缺失';
+      this.routeError = '页面参数缺失，无法定位待办看板';
       return;
     }
     this.projectId = params['projectId'] ?? '';
     if (this.projectId === '') {
-      this.routeError = '页面参数缺失';
+      this.routeError = '页面参数缺失，项目ID无效';
       return;
     }
     this.loadActions();
@@ -46,7 +51,7 @@ struct ActionBoard {
       if (e instanceof ApiError) {
         this.errorMessage = e.message;
       } else {
-        this.errorMessage = '未知错误';
+        this.errorMessage = '无法加载待办列表，请检查网络';
       }
     } finally {
       this.isLoading = false;
@@ -54,7 +59,6 @@ struct ActionBoard {
   }
 
   private groupActions(actions: ActionItem[]): void {
-    // 仅展示层分组，保持后端返回顺序
     const doing: ActionItem[] = [];
     const todo: ActionItem[] = [];
     const done: ActionItem[] = [];
@@ -101,13 +105,13 @@ struct ActionBoard {
       await this.actionService.complete(this.projectId, this.completingActionId, trimmed);
       this.completingActionId = '';
       this.resultText = '';
-      promptAction.showToast({ message: '已完成并生成复盘' });
+      promptAction.showToast({ message: '已完成行动并写入项目记忆' });
       await this.loadActions();
     } catch (e) {
       if (e instanceof ApiError) {
         this.dialogError = e.message;
       } else {
-        this.dialogError = '未知错误';
+        this.dialogError = '提交失败';
       }
     } finally {
       this.isSubmitting = false;
@@ -121,12 +125,13 @@ struct ActionBoard {
     this.startingActionId = actionId;
     try {
       await this.actionService.updateStatus(this.projectId, actionId, 'DOING');
+      promptAction.showToast({ message: '已将行动标记为进行中' });
       await this.loadActions();
     } catch (e) {
       if (e instanceof ApiError) {
         promptAction.showToast({ message: e.message });
       } else {
-        promptAction.showToast({ message: '未知错误' });
+        promptAction.showToast({ message: '状态更新失败' });
       }
     } finally {
       this.startingActionId = '';
@@ -136,247 +141,306 @@ struct ActionBoard {
   @Builder
   private actionCard(action: ActionItem) {
     Column() {
+      // 顶行：状态与优先级
       Row() {
-        Text(action.title)
-          .fontSize(16)
-          .fontWeight(FontWeight.Medium)
-          .maxLines(2)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .layoutWeight(1)
-        Text(`P${action.priority}`)
-          .fontSize(12)
-          .fontColor('#999999')
+        StatusBadge({ status: action.status })
+        Text(TextFormatters.priorityToChinese(action.priority))
+          .fontSize(PMFontSize.CAPTION)
+          .fontColor(PMColors.INK_TERTIARY)
       }
       .width('100%')
-      // 后端对无来源/无复盘的关联返回 null，ArkTS 下 null !== undefined，
-      // 必须同时排除 null 和 undefined，否则渲染空行动会崩溃（jscrash）。
+      .justifyContent(FlexAlign.SpaceBetween)
+
+      // 标题
+      Text(action.title)
+        .fontSize(PMFontSize.SECTION_TITLE)
+        .fontWeight(FontWeight.Medium)
+        .fontColor(PMColors.INK_PRIMARY)
+        .maxLines(2)
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .margin({ top: PMSpacing.SM })
+
+      // 来源干预引用
       if (action.sourceIntervention !== null && action.sourceIntervention !== undefined
         && action.sourceIntervention.title !== '') {
-        Text(`来自：${action.sourceIntervention.title}`)
-          .fontSize(12)
-          .fontColor('#999999')
-          .margin({ top: 4 })
+        Row() {
+          Text('来源提醒: ')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+          Text(action.sourceIntervention.title)
+            .fontSize(PMFontSize.CAPTION)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.EVIDENCE)
+            .maxLines(1)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .layoutWeight(1)
+        }
+        .padding({ top: PMSpacing.XS })
       }
+
+      // 已完成行动的结果陈述
       if (action.status === 'DONE' && action.resultText !== undefined && action.resultText !== '') {
-        Text(action.resultText)
-          .fontSize(14)
-          .fontColor('#666666')
-          .maxLines(3)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .margin({ top: 4 })
+        Column() {
+          Text('完成记录')
+            .fontSize(PMFontSize.CAPTION)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.SUCCESS)
+          Text(action.resultText)
+            .fontSize(PMFontSize.BODY)
+            .fontColor(PMColors.INK_PRIMARY)
+            .lineHeight(20)
+            .margin({ top: 2 })
+        }
+        .width('100%')
+        .padding(PMSpacing.SM)
+        .backgroundColor(PMColors.SUCCESS_LIGHT)
+        .borderRadius(PMRadius.SM)
+        .alignItems(HorizontalAlign.Start)
+        .margin({ top: PMSpacing.SM })
       }
+
+      // 复盘记忆卡片深链
       if (action.resultCard !== null && action.resultCard !== undefined && action.resultCard.title !== '') {
-        Text(`复盘：${action.resultCard.title}`)
-          .fontSize(14)
-          .fontColor('#007DFF')
-          .margin({ top: 4 })
+        Row() {
+          Text('✓ 已写入项目记忆')
+            .fontSize(PMFontSize.SECONDARY)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.MEMORY)
+        }
+        .width('100%')
+        .padding({ top: PMSpacing.SM })
       }
+
+      // 操作按钮行
       if (action.status === 'TODO' || action.status === 'DOING') {
         Row() {
           if (action.status === 'TODO') {
-            Button(this.startingActionId === action.id ? '开始中...' : '开始')
-              .fontSize(12)
+            Button(this.startingActionId === action.id ? '启动中...' : '开始行动')
+              .fontSize(PMFontSize.BUTTON)
+              .fontColor(PMColors.INK_PRIMARY)
+              .backgroundColor(PMColors.SURFACE_SUBTLE)
+              .border({ width: 1, color: PMColors.BORDER })
+              .borderRadius(PMRadius.SM)
               .enabled(this.startingActionId === '')
               .onClick(() => {
                 this.startAction(action.id);
               })
           }
-          Button('完成')
-            .fontSize(12)
-            .margin({ left: action.status === 'TODO' ? 8 : 0 })
+
+          Button('完成并写回执')
+            .fontSize(PMFontSize.BUTTON)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.SURFACE)
+            .backgroundColor(PMColors.BRAND)
+            .borderRadius(PMRadius.SM)
+            .margin({ left: action.status === 'TODO' ? PMSpacing.SM : 0 })
             .onClick(() => {
               this.openCompleteDialog(action.id);
             })
         }
-        .margin({ top: 8 })
+        .width('100%')
+        .justifyContent(FlexAlign.End)
+        .margin({ top: PMSpacing.MD })
       }
     }
     .width('100%')
-    .padding(16)
-    .backgroundColor('#FFFFFF')
-    .borderRadius(12)
+    .padding(PMSpacing.LG)
+    .backgroundColor(PMColors.SURFACE)
+    .borderRadius(PMRadius.MD)
+    .border({ width: 1, color: PMColors.BORDER })
     .alignItems(HorizontalAlign.Start)
   }
 
   build() {
     Stack() {
       Column() {
-        Row() {
-          Text('返回')
-            .fontSize(16)
-            .fontColor('#007DFF')
-            .onClick(() => {
-              router.back();
-            })
-          Text('行动看板')
-            .fontSize(20)
-            .fontWeight(FontWeight.Bold)
-            .margin({ left: 16 })
-        }
-        .width('100%')
-        .padding({ left: 16, right: 16, top: 12, bottom: 12 })
+        PMAppBar({
+          title: '待办',
+          subtitle: '',
+          backLabel: '项目',
+          showBack: true
+        })
 
         if (this.routeError !== '') {
-          Column() {
-            Text(this.routeError)
-              .fontSize(16)
-              .fontColor('#E84026')
-              .margin({ bottom: 16 })
-            Button('返回')
-              .fontSize(14)
-              .onClick(() => {
-                router.back();
-              })
-          }
-          .width('100%')
-          .layoutWeight(1)
-          .justifyContent(FlexAlign.Center)
+          ErrorStateView({
+            message: this.routeError,
+            onRetry: () => {
+              router.back();
+            }
+          })
         } else if (this.isLoading) {
-          Column() {
-            LoadingProgress()
-              .width(48)
-              .height(48)
-              .color('#007DFF')
-            Text('加载中...')
-              .fontSize(14)
-              .fontColor('#999999')
-              .margin({ top: 12 })
-          }
-          .width('100%')
-          .layoutWeight(1)
-          .justifyContent(FlexAlign.Center)
+          LoadingStateView({ message: '加载待办行动...' })
         } else if (this.errorMessage !== '') {
-          Column() {
-            Text(this.errorMessage)
-              .fontSize(16)
-              .fontColor('#E84026')
-              .textAlign(TextAlign.Center)
-              .margin({ bottom: 16 })
-            Button('重试')
-              .fontSize(14)
-              .onClick(() => {
-                this.loadActions();
-              })
-          }
-          .width('100%')
-          .layoutWeight(1)
-          .justifyContent(FlexAlign.Center)
-          .padding({ left: 32, right: 32 })
-        } else if (this.doingActions.length === 0 && this.todoActions.length === 0
-          && this.doneActions.length === 0) {
-          Column() {
-            Text('暂无行动')
-              .fontSize(16)
-              .fontColor('#999999')
-          }
-          .width('100%')
-          .layoutWeight(1)
-          .justifyContent(FlexAlign.Center)
+          ErrorStateView({
+            message: this.errorMessage,
+            onRetry: () => {
+              this.loadActions();
+            }
+          })
+        } else if (this.doingActions.length === 0 && this.todoActions.length === 0 && this.doneActions.length === 0) {
+          EmptyStateView({
+            title: '暂无待办行动',
+            description: '当前项目没有待执行或已完成的行动，去提醒依据创建行动',
+            actionText: '返回驾驶舱',
+            onAction: () => {
+              router.back();
+            }
+          })
         } else {
-          List({ space: 12 }) {
-            ListItem() {
-              Text(`进行中（${this.doingActions.length}）`)
-                .fontSize(14)
+          // 轻量概览状态条
+          Row() {
+            Row() {
+              Text('进行中')
+                .fontSize(PMFontSize.SECONDARY)
+                .fontColor(PMColors.INK_TERTIARY)
+              Text(` ${this.doingActions.length}`)
+                .fontSize(PMFontSize.BODY)
                 .fontWeight(FontWeight.Medium)
-                .fontColor('#666666')
+                .fontColor(PMColors.BRAND)
             }
-            ForEach(this.doingActions, (action: ActionItem) => {
-              ListItem() {
-                this.actionCard(action)
-              }
-            }, (action: ActionItem) => action.id)
+            .margin({ right: PMSpacing.LG })
 
-            ListItem() {
-              Text(`待开始（${this.todoActions.length}）`)
-                .fontSize(14)
+            Row() {
+              Text('待开始')
+                .fontSize(PMFontSize.SECONDARY)
+                .fontColor(PMColors.INK_TERTIARY)
+              Text(` ${this.todoActions.length}`)
+                .fontSize(PMFontSize.BODY)
                 .fontWeight(FontWeight.Medium)
-                .fontColor('#666666')
-                .margin({ top: 12 })
+                .fontColor(PMColors.INK_PRIMARY)
             }
-            ForEach(this.todoActions, (action: ActionItem) => {
-              ListItem() {
-                this.actionCard(action)
-              }
-            }, (action: ActionItem) => action.id)
+            .margin({ right: PMSpacing.LG })
 
-            ListItem() {
-              Text(`已完成（${this.doneActions.length}）`)
-                .fontSize(14)
+            Row() {
+              Text('已完成')
+                .fontSize(PMFontSize.SECONDARY)
+                .fontColor(PMColors.INK_TERTIARY)
+              Text(` ${this.doneActions.length}`)
+                .fontSize(PMFontSize.BODY)
                 .fontWeight(FontWeight.Medium)
-                .fontColor('#666666')
-                .margin({ top: 12 })
+                .fontColor(PMColors.SUCCESS)
             }
-            ForEach(this.doneActions, (action: ActionItem) => {
-              ListItem() {
-                this.actionCard(action)
-              }
-            }, (action: ActionItem) => action.id)
+          }
+          .width('100%')
+          .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.SM })
+          .backgroundColor(PMColors.SURFACE)
+          .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
+
+          List({ space: PMSpacing.MD }) {
+            // 进行中
+            if (this.doingActions.length > 0) {
+              ForEach(this.doingActions, (action: ActionItem) => {
+                ListItem() {
+                  this.actionCard(action)
+                }
+              }, (action: ActionItem) => action.id)
+            }
+
+            // 待开始
+            if (this.todoActions.length > 0) {
+              ForEach(this.todoActions, (action: ActionItem) => {
+                ListItem() {
+                  this.actionCard(action)
+                }
+              }, (action: ActionItem) => action.id)
+            }
+
+            // 已完成
+            if (this.doneActions.length > 0) {
+              ForEach(this.doneActions, (action: ActionItem) => {
+                ListItem() {
+                  this.actionCard(action)
+                }
+              }, (action: ActionItem) => action.id)
+            }
           }
           .width('100%')
           .layoutWeight(1)
-          .padding({ left: 16, right: 16, bottom: 16 })
+          .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.LG })
         }
       }
       .width('100%')
       .height('100%')
 
+      // 完成行动弹窗
       if (this.completingActionId !== '') {
         Column() {
           Column() {
-            Text('完成行动')
-              .fontSize(16)
+            Text('完成行动并写入项目记忆')
+              .fontSize(PMFontSize.PAGE_TITLE)
               .fontWeight(FontWeight.Medium)
-            Text('请填写完成结果（至少 5 个字）')
-              .fontSize(12)
-              .fontColor('#999999')
-              .margin({ top: 4 })
-            TextArea({ text: this.resultText, placeholder: '完成结果（必填，至少 5 个字）' })
+              .fontColor(PMColors.INK_PRIMARY)
+
+            Text('请总结完成事实与交付物（系统将自动写入记忆并闭环提醒，至少 5 个字）：')
+              .fontSize(PMFontSize.BODY)
+              .fontColor(PMColors.INK_SECONDARY)
+              .lineHeight(20)
+              .margin({ top: PMSpacing.SM })
+
+            TextArea({
+              text: this.resultText,
+              placeholder: '例如：已完成最小消融对照实验并更新测试表格...'
+            })
               .onChange((value: string) => {
                 this.resultText = value;
               })
-              .fontSize(14)
-              .height(96)
-              .margin({ top: 12 })
+              .fontSize(PMFontSize.BODY)
+              .height(100)
+              .backgroundColor(PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.SM)
+              .border({ width: 1, color: PMColors.BORDER })
+              .margin({ top: PMSpacing.MD })
+
             if (this.dialogError !== '') {
               Text(this.dialogError)
-                .fontSize(14)
-                .fontColor('#E84026')
-                .margin({ top: 8 })
+                .fontSize(PMFontSize.BODY)
+                .fontColor(PMColors.RISK)
+                .margin({ top: PMSpacing.XS })
             }
+
             Row() {
               Button('取消')
-                .fontSize(14)
+                .fontSize(PMFontSize.BUTTON)
+                .fontColor(PMColors.INK_SECONDARY)
+                .backgroundColor(PMColors.SURFACE_SUBTLE)
+                .borderRadius(PMRadius.SM)
                 .enabled(!this.isSubmitting)
                 .onClick(() => {
                   this.closeCompleteDialog();
                 })
-              Button(this.isSubmitting ? '提交中...' : '提交')
-                .fontSize(14)
-                .margin({ left: 12 })
-                .enabled(this.resultText.trim() !== '' && !this.isSubmitting)
+
+              Button(this.isSubmitting ? '提交中...' : '确认完成')
+                .fontSize(PMFontSize.BUTTON)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.SURFACE)
+                .backgroundColor(this.resultText.trim().length >= 5 && !this.isSubmitting ? PMColors.BRAND : PMColors.INK_MUTED)
+                .borderRadius(PMRadius.SM)
+                .margin({ left: PMSpacing.MD })
+                .enabled(this.resultText.trim().length >= 5 && !this.isSubmitting)
                 .onClick(() => {
                   this.submitComplete();
                 })
             }
-            .margin({ top: 12 })
+            .margin({ top: PMSpacing.LG })
             .width('100%')
             .justifyContent(FlexAlign.End)
           }
           .width('100%')
-          .padding(16)
-          .backgroundColor('#FFFFFF')
-          .borderRadius(12)
+          .padding(PMSpacing.LG)
+          .backgroundColor(PMColors.SURFACE)
+          .borderRadius(PMRadius.LG)
+          .border({ width: 1, color: PMColors.BORDER })
           .alignItems(HorizontalAlign.Start)
         }
         .width('100%')
         .height('100%')
-        .backgroundColor('rgba(0, 0, 0, 0.5)')
-        .padding({ left: 24, right: 24 })
+        .backgroundColor('rgba(19, 36, 58, 0.45)')
+        .padding({ left: PMSpacing.XL, right: PMSpacing.XL })
         .justifyContent(FlexAlign.Center)
       }
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#F5F5F5')
+    .backgroundColor(PMColors.BACKGROUND)
   }
 }

@@ -5,13 +5,27 @@ import { window } from '@kit.ArkUI';
 const DOMAIN = 0x0000;
 
 export default class EntryAbility extends UIAbility {
+  private captureNotificationRoute(want: Want): void {
+    const projectId = want.parameters?.['notificationProjectId'];
+    const interventionId = want.parameters?.['notificationInterventionId'];
+    if (typeof projectId === 'string' && typeof interventionId === 'string') {
+      AppStorage.setOrCreate<string>('notificationProjectId', projectId);
+      AppStorage.setOrCreate<string>('notificationInterventionId', interventionId);
+    }
+  }
+
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+    this.captureNotificationRoute(want);
     try {
       this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
     } catch (err) {
       hilog.error(DOMAIN, 'testTag', 'Failed to set colorMode. Cause: %{public}s', JSON.stringify(err));
     }
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');
+  }
+
+  onNewWant(want: Want): void {
+    this.captureNotificationRoute(want);
   }
 
   onDestroy(): void {

@@ -1,0 +1,25 @@
+[Unit]
+Description=ProjectMemo Backend
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=projectmemo
+Group=projectmemo
+WorkingDirectory=/opt/projectmemo/app
+EnvironmentFile=/etc/projectmemo/projectmemo.env
+ExecStart=/home/projectmemo/.nvm/versions/node/v22.22.3/bin/node /opt/projectmemo/app/node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 4400
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+KillSignal=SIGINT
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=/opt/projectmemo/data /opt/projectmemo/storage -/opt/projectmemo/app/.next/cache
+
+[Install]
+WantedBy=multi-user.target

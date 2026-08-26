@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { getMissingEvidenceTypes } from "@/lib/milestones/evidenceGap";
 import { AgentRunStatus, AgentRunType, InterventionTrigger } from "@/lib/generated/prisma/client";
 import { requireProject } from "@/lib/repositories/projects";
 import {
@@ -182,6 +183,58 @@ export async function evaluateProjectContext(projectId: string, input: ContextIn
       },
       proposedActions: [materialAction(project.title)],
     });
+  }
+
+  // S06: DELIVERABLE_GAP 评估
+  const milestones = await db.milestone.findMany({
+    where: { projectId, status: "IN_PROGRESS" },
+    include: { deliverables: { include: { evidences: true } } },
+  });
+
+  for (const milestone of milestones) {
+    for (const deliverable of milestone.deliverables) {
+      if (deliverable.status === "COMPLETED") continue;
+      let expectedTypes: string[] = [];
+      try {
+        expectedTypes = JSON.parse(deliverable.expectedEvidence);
+      } catch {
+        expectedTypes = [];
+      }
+
+      if (expectedTypes.length > 0) {
+        const missingTypes = getMissingEvidenceTypes(expectedTypes, deliverable.evidences);
+
+        if (missingTypes.length > 0) {
+          matches.push({
+            triggerType: InterventionTrigger.DELIVERABLE_GAP,
+            dedupeKey: `deliverable-gap-${deliverable.id}`,
+            severity: 4,
+            title: `交付物【${deliverable.title}】存在证据缺口`,
+            content: `里程碑【${milestone.title}】中的关键交付物要求具备相应支撑证据，目前尚缺少：${missingTypes.join("、")}。建议立即补充相应记录。`,
+            evidence: {
+              rule: "deliverable_missing_expected_evidence",
+              facts: [
+                `交付目标：${deliverable.title}`,
+                `期望证据类型：${expectedTypes.join("、")}`,
+                `当前缺失证据：${missingTypes.join("、")}`,
+              ],
+              cardIds: deliverable.evidences
+                .filter((evidence) => evidence.confirmed && evidence.cardId)
+                .map((evidence) => evidence.cardId as string),
+              evaluatedAt: now.toISOString(),
+            },
+            proposedActions: [
+              action(
+                "补充交付物证据",
+                `补充【${deliverable.title}】的${missingTypes[0]}记录`,
+                `记录相关实验数据、技术设计或复盘文档，消除证据链缺口。`,
+                4
+              ),
+            ],
+          });
+        }
+      }
+    }
   }
 
   if (input.scenario === "risk_cluster" && !matches.some((item) => item.triggerType === InterventionTrigger.RISK_UNHANDLED)) {

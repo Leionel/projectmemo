@@ -16,9 +16,12 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:demo-reset": "tsx scripts/demo-reset.ts",
     "db:setup": "prisma generate && tsx scripts/ensure-db.ts && prisma migrate deploy && tsx prisma/seed.ts",
-    "harmony:backend": "next dev",
+    "harmony:backend": "next dev -H 127.0.0.1 -p 4400",
     "harmony:build": "tsx scripts/harmony-build.ts",
-    "harmony:test": "node scripts/harmony-test.ts"
+    "harmony:test": "node scripts/harmony-test.ts",
+    "verify:s03-provider": "tsx scripts/probe-llm.ts",
+    "benchmark:s04": "tsx scripts/benchmark-hybrid-search.ts",
+    "verify:s08-adapter": "vitest run tests/xiaoyi.adapter.test.ts"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.0.0",

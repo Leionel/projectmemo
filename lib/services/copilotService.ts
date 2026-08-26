@@ -23,29 +23,38 @@ const responseSchema = z.object({
   })).max(4).default([]),
 });
 
-function searchCards(cards: Array<{ id: string; title: string; summary: string; type: string; keywords: unknown }>, question: string) {
-  const tokens = question.toLowerCase().match(/[\p{L}\p{N}_-]{2,}/gu) ?? [];
-  return cards.map((card) => {
-    const haystack = `${card.title} ${card.summary} ${String(card.type)} ${Array.isArray(card.keywords) ? card.keywords.join(" ") : ""}`.toLowerCase();
-    const score = tokens.reduce((sum, token) => sum + (haystack.includes(token) ? 1 : 0), 0);
-    return { card, score };
-  }).sort((a, b) => b.score - a.score || a.card.id.localeCompare(b.card.id));
-}
+import { searchProjectCards } from "@/lib/memory/hybridSearch";
 
 function citationsFrom(cards: Array<{ id: string; title: string; summary: string }>): AgentCitation[] {
   return cards.slice(0, 5).map((card) => ({ cardId: card.id, title: card.title, excerpt: card.summary.slice(0, 180) }));
 }
 
+async function getCopilotCitations(projectId: string, question: string, fallbackCards: Array<{ id: string; title: string; summary: string }>): Promise<AgentCitation[]> {
+  try {
+    const searchResults = await searchProjectCards({ projectId, query: question, limit: 5 });
+    if (searchResults.length > 0) {
+      return searchResults.map((r) => ({
+        cardId: r.cardId,
+        title: r.title,
+        excerpt: r.summary.slice(0, 180),
+        relevance: r.score,
+      }));
+    }
+  } catch {
+    // fallback
+  }
+  return citationsFrom(fallbackCards);
+}
+
 function mockAnswer(input: {
   question: string;
+  citations: AgentCitation[];
   cards: Array<{ id: string; title: string; summary: string; type: string; keywords: unknown }>;
   interventions: Array<{ id: string; title: string; content: string; status: string; evidenceCardId: string | null }>;
   actions: Array<{ id: string; title: string; status: string }>;
 }) {
   const question = input.question.toLowerCase();
-  const ranked = searchCards(input.cards, input.question);
-  const topCards = ranked.filter((item) => item.score > 0).map((item) => item.card);
-  const citations = citationsFrom(topCards.length ? topCards : input.cards);
+  const citations = input.citations;
   const proposedActions: ProposedAction[] = [];
   if (/创建|安排|任务|下一步|做什么/.test(question)) {
     proposedActions.push({ kind: "create_action", label: "创建行动项", title: "把这个下一步拆成可执行行动", description: "确认后写入项目行动板，完成时会生成复盘卡片。", priority: 3 });
@@ -86,7 +95,8 @@ export async function answerProjectQuestion(projectId: string, question: string)
     listActions(projectId, false),
   ]);
   await saveAgentMessage({ projectId, role: "USER", content: question, citations: [], proposedActions: [] });
-  let answer = mockAnswer({ question, cards, interventions, actions });
+  const citations = await getCopilotCitations(projectId, question, cards);
+  let answer = mockAnswer({ question, citations, cards, interventions, actions });
   let fallback = true;
   let fallbackReason: string | null = "mock_mode";
   if (process.env.LLM_MODE === "openai-compatible" && process.env.LLM_API_KEY) {

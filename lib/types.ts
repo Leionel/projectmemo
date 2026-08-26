@@ -113,6 +113,7 @@ export const interventionTriggers = [
   "PROJECT_STALE",
   "EXPERIMENT_GAP",
   "MATERIAL_GAP",
+  "DELIVERABLE_GAP",
 ] as const;
 export type InterventionTriggerValue = (typeof interventionTriggers)[number];
 
@@ -128,6 +129,7 @@ export const interventionTriggerLabels: Record<InterventionTriggerValue, string>
   PROJECT_STALE: "项目出现停滞",
   EXPERIMENT_GAP: "论文与实验存在缺口",
   MATERIAL_GAP: "参赛材料存在缺口",
+  DELIVERABLE_GAP: "交付物证据存在缺口",
 };
 
 export const interventionStatusLabels: Record<InterventionStatusValue, string> = {
@@ -244,4 +246,77 @@ export interface ProjectMetrics {
   artifactCount: number;
   artifactCoverageRate: number;
   simulatedExcluded: number;
+}
+
+
+export interface AgentExecutionResult<T> {
+  data: T;
+  provider: string;
+  status: "SUCCESS" | "PARTIAL" | "FALLBACK" | "FAILED";
+  fallbackReason?: string | null;
+  durationMs: number;
+  rawResponse?: string | null;
+}
+
+export interface CardSearchResult {
+  cardId: string;
+  title: string;
+  summary: string;
+  type: KnowledgeTypeValue;
+  score: number;
+  semanticScore: number;
+  keywordScore: number;
+  recencyScore: number;
+  importanceScore: number;
+  reason: string;
+  source: string;
+  retrievalMode: "hybrid" | "semantic_only" | "keyword_fallback";
+  createdAt: string;
+}
+
+export interface MilestoneData {
+  id: string;
+  projectId: string;
+  title: string;
+  targetDate?: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  deliverables: DeliverableData[];
+}
+
+export interface DeliverableData {
+  id: string;
+  milestoneId: string;
+  title: string;
+  expectedEvidence: string[];
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  evidences?: DeliverableEvidenceData[];
+}
+
+export interface DeliverableEvidenceData {
+  id: string;
+  deliverableId: string;
+  cardId?: string | null;
+  attachmentId?: string | null;
+  evidenceType: string;
+  confirmed: boolean;
+  createdAt: string;
+}
+
+export interface AttachmentData {
+  id: string;
+  projectId: string;
+  type: string;
+  storageKey: string;
+  fileName: string;
+  mimeType: string;
+  size: number;
+  sha256: string;
+  extractedText?: string | null;
+  extractionStatus: string;
+  extractionError?: string | null;
+  createdAt: string;
 }

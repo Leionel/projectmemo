@@ -243,6 +243,8 @@ export async function saveAgentRun(input: {
   status: AgentRunStatus;
   provider: string;
   trace: Record<string, unknown>;
+  externalRequestId?: string | null;
+  resultJson?: Record<string, unknown> | null;
   fallbackReason?: string | null;
   durationMs?: number;
 }) {
@@ -252,9 +254,63 @@ export async function saveAgentRun(input: {
       runType: input.runType,
       status: input.status,
       provider: input.provider,
+      externalRequestId: input.externalRequestId ?? null,
       trace: jsonValue(input.trace),
+      resultJson: input.resultJson ? jsonValue(input.resultJson) : undefined,
       fallbackReason: input.fallbackReason ?? null,
       durationMs: input.durationMs ?? null,
+    },
+  });
+}
+
+function isUniqueConstraintError(error: unknown): error is { code: string } {
+  return typeof error === "object" && error !== null && "code" in error && error.code === "P2002";
+}
+
+export async function reserveExternalAgentRun(input: {
+  projectId: string;
+  runType: AgentRunType;
+  provider: string;
+  externalRequestId: string;
+  trace: Record<string, unknown>;
+}) {
+  try {
+    const run = await saveAgentRun({
+      ...input,
+      status: AgentRunStatus.PARTIAL,
+    });
+    return { run, created: true };
+  } catch (error) {
+    if (!isUniqueConstraintError(error)) throw error;
+    const run = await db.agentRun.findUnique({
+      where: {
+        provider_externalRequestId: {
+          provider: input.provider,
+          externalRequestId: input.externalRequestId,
+        },
+      },
+    });
+    if (!run) throw error;
+    return { run, created: false };
+  }
+}
+
+export async function finishExternalAgentRun(input: {
+  runId: string;
+  status: AgentRunStatus;
+  trace: Record<string, unknown>;
+  resultJson: Record<string, unknown>;
+  durationMs: number;
+  fallbackReason?: string | null;
+}) {
+  return db.agentRun.update({
+    where: { id: input.runId },
+    data: {
+      status: input.status,
+      trace: jsonValue(input.trace),
+      resultJson: jsonValue(input.resultJson),
+      durationMs: input.durationMs,
+      fallbackReason: input.fallbackReason ?? null,
     },
   });
 }

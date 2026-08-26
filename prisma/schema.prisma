@@ -43,6 +43,7 @@ enum InterventionTrigger {
   PROJECT_STALE
   EXPERIMENT_GAP
   MATERIAL_GAP
+  DELIVERABLE_GAP
 }
 
 enum InterventionStatus {
@@ -96,6 +97,8 @@ model Project {
   actions     ActionItem[]
   runs        AgentRun[]
   messages    AgentMessage[]
+  attachments Attachment[]
+  milestones  Milestone[]
 
   @@index([updatedAt])
 }
@@ -113,27 +116,31 @@ model Capture {
 }
 
 model KnowledgeCard {
-  id             String          @id @default(cuid())
-  projectId      String
-  captureId      String          @unique
-  type           KnowledgeType
-  title          String
-  summary        String
-  keywords       Json
-  relatedTasks   Json
-  nextActions    Json
-  importance     Int
-  createdAt      DateTime        @default(now())
-  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  capture        Capture         @relation(fields: [captureId], references: [id], onDelete: Cascade)
-  outgoingLinks  CardRelation[]  @relation("CurrentCard")
-  incomingLinks  CardRelation[]  @relation("RelatedCard")
-  interventions  AgentIntervention[] @relation("InterventionEvidence")
-  sourceActions   ActionItem[] @relation("ActionSourceCard")
-  resultingAction ActionItem? @relation("ActionResultCard")
+  id              String              @id @default(cuid())
+  projectId       String
+  captureId       String              @unique
+  attachmentId    String?
+  type            KnowledgeType
+  title           String
+  summary         String
+  keywords        Json
+  relatedTasks    Json
+  nextActions     Json
+  importance      Int
+  createdAt       DateTime            @default(now())
+  project         Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  capture         Capture             @relation(fields: [captureId], references: [id], onDelete: Cascade)
+  attachment      Attachment?         @relation(fields: [attachmentId], references: [id], onDelete: SetNull)
+  embedding       CardEmbedding?
+  outgoingLinks   CardRelation[]      @relation("CurrentCard")
+  incomingLinks   CardRelation[]      @relation("RelatedCard")
+  interventions   AgentIntervention[] @relation("InterventionEvidence")
+  sourceActions   ActionItem[]        @relation("ActionSourceCard")
+  resultingAction ActionItem?         @relation("ActionResultCard")
 
   @@index([projectId, createdAt])
   @@index([projectId, type])
+  @@index([attachmentId])
 }
 
 model CardRelation {
@@ -220,7 +227,9 @@ model AgentRun {
   runType        AgentRunType
   status         AgentRunStatus
   provider       String
+  externalRequestId String?
   trace          Json
+  resultJson     Json?
   fallbackReason String?
   durationMs     Int?
   createdAt      DateTime        @default(now())
@@ -229,6 +238,7 @@ model AgentRun {
 
   @@index([projectId, createdAt])
   @@index([projectId, runType])
+  @@unique([provider, externalRequestId])
 }
 
 model AgentMessage {
@@ -244,4 +254,80 @@ model AgentMessage {
   run             AgentRun?         @relation(fields: [runId], references: [id], onDelete: SetNull)
 
   @@index([projectId, createdAt])
+}
+
+model CardEmbedding {
+  id          String        @id @default(cuid())
+  cardId      String        @unique
+  provider    String
+  model       String
+  dimensions  Int
+  vectorJson  String
+  contentHash String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  card        KnowledgeCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId])
+}
+
+model Attachment {
+  id               String          @id @default(cuid())
+  projectId        String
+  type             String          // "IMAGE" | "PDF" | "FILE"
+  storageKey       String
+  fileName         String
+  mimeType         String
+  size             Int
+  sha256           String
+  extractedText    String?
+  extractionStatus String          @default("PENDING") // "PENDING" | "SUCCESS" | "FAILED"
+  extractionError  String?
+  createdAt        DateTime        @default(now())
+  project          Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  cards            KnowledgeCard[]
+
+  @@index([projectId, sha256])
+  @@index([projectId, createdAt])
+}
+
+model Milestone {
+  id           String        @id @default(cuid())
+  projectId    String
+  title        String
+  targetDate   DateTime?
+  status       String        @default("IN_PROGRESS") // "IN_PROGRESS" | "COMPLETED"
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  project      Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  deliverables Deliverable[]
+
+  @@index([projectId, status])
+}
+
+model Deliverable {
+  id               String                @id @default(cuid())
+  milestoneId      String
+  title            String
+  expectedEvidence String                // JSON array of expected evidence types e.g. ["experiment_log", "paper_note"]
+  status           String                @default("PENDING")
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  milestone        Milestone             @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+  evidences        DeliverableEvidence[]
+
+  @@index([milestoneId])
+}
+
+model DeliverableEvidence {
+  id            String      @id @default(cuid())
+  deliverableId String
+  cardId        String?
+  attachmentId  String?
+  evidenceType  String
+  confirmed     Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  deliverable   Deliverable @relation(fields: [deliverableId], references: [id], onDelete: Cascade)
+
+  @@index([deliverableId])
 }

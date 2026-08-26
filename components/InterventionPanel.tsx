@@ -16,6 +16,7 @@ const triggerIcon = {
   PROJECT_STALE: Clock3,
   EXPERIMENT_GAP: ShieldAlert,
   MATERIAL_GAP: Sparkles,
+  DELIVERABLE_GAP: ShieldAlert,
 } as const;
 
 export function InterventionPanel({ projectId, initialInterventions, demoEnabled = true }: { projectId: string; initialInterventions: InterventionData[]; demoEnabled?: boolean }) {

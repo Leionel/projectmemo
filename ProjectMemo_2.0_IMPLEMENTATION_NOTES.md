@@ -1,10 +1,10 @@
 # 忆程 ProjectMemo 2.0 阶段实现与交付笔记
 
-## 第一部分｜2026-08-23 现状审计与 2026-08-26 S08 更新
+## 第一部分｜2026-08-23 现状审计与 2026-08-26 S03–S08 更新
 
 ### 结论先行
 
-`HARMONYOS_PLAN.md` 所称“已经落地”只能解释为**代码骨架和部分功能已存在**，不能解释为 S00–S08 全部通过。按 `ProjectMemo_2.0_EXECUTION_PLAN.md` 的 Gate 重新核验后，当前为：S01、S02 已有可复核证据；S02A、S03–S08 均为 `PARTIAL`。只有 DevEco 模拟器，因此真机、正式签名、小艺系统入口和真机 OCR 一律保留为 `UNVERIFIED`，不阻塞模拟器路线，但也不计入完成证明。
+`HARMONYOS_PLAN.md` 所称“已经落地”只能解释为**代码骨架和部分功能已存在**，不能解释为 S00–S08 全部通过。本轮按 `ProjectMemo_2.0_EXECUTION_PLAN.md` 完成了 S03–S08 的代码切片、接口契约和本地回归；外部 provider、真机和小艺平台 Gate 仍保留为 `PARTIAL/UNVERIFIED`。S09 Benchmark、Candidate Freeze 与 Submission Freeze 按用户要求本轮不执行。
 
 | 切片 | 审计状态 | 本轮已核验/修复 | 仍缺的通过证据 |
 |---|---|---|---|
@@ -12,23 +12,23 @@
 | S01 可重复构建 | VERIFIED | 后端生产构建、ArkTS build、Hypium、HAP 安装均通过 | Signed HAP 仍 PENDING |
 | S02 Demo C | VERIFIED（模拟器） | 延续既有数据库/UI 闭环证据；Backend 已实际联网，不是静态空壳 | 真机不在本切片范围 |
 | S02A 原生 UI | PARTIAL | 实机截图审视；压缩品牌栏与卡片密度；增加 Evidence 左脊线、主导航/返回/设置无障碍语义；项目头像用于桌面图标、启动图标和首页品牌栏 | 深色 token 尚未真正接线；大字体、屏幕朗读、键鼠、慢网/乱序和横屏矩阵未完成，禁止写“G0-UI VERIFIED” |
-| S03 真实 Capture | PARTIAL | fallback 状态/provider/reason 已可追踪；新增严格 20 样例 Gate 与 JSON 回执 | 未配置真实 provider，脚本未运行；不能把 mock 计入 19/20 |
-| S04 Hybrid Search | PARTIAL | Search API、索引/backfill、解释字段存在；修复 provider/model/dimension 漂移；离线哈希不再冒充 semantic；新增 50/100/500/1000 标注 benchmark | 真实 embeddings provider 未配置，Recall/MRR/Evidence Precision/p95 尚无回执，G1 未过 |
+| S03 真实 Capture | PARTIAL | LLM provider 元数据、成功/降级回执、fallbackReason、Artifact/Copilot/AgentRun 统一记录；保留严格 20 样例 Gate | 未配置真实 provider，脚本未运行；不能把 mock 计入 19/20 |
+| S04 Hybrid Search | PARTIAL | 真实 embedding 开关、混合检索、Search API、解释字段、backfill 命令和显式 keyword fallback 已接入；离线哈希不再冒充 semantic | 真实 embeddings provider 未配置，Recall/MRR/Evidence Precision/p95 尚无回执，G1 未过 |
 | S05 Image/PDF Inbox | PARTIAL | MIME+文件魔数+20MB 校验、写盘前去重、异常清理、真实 `pdftotext`、`NEEDS_OCR`、重试 API；HarmonyOS 图片/PDF Picker 与 multipart 上传已接入 | 模拟器尚未完成图片/PDF 各 5 份；图片视觉/OCR provider 未配置；扫描 PDF 只能如实 `NEEDS_OCR` |
-| S06 Deliverable Gap | PARTIAL | Gap 改为只接受与 Deliverable 明确关联且 `confirmed=true` 的证据；新增关联 API；30 个规则 case + 集成测试 | 尚无完整模拟器 UI 选择/确认 Evidence 流；Gap Accuracy 数据集回执未形成 |
-| S07 系统通知 | PARTIAL | 改用 NotificationKit；稳定通知 ID；WantAgent 携带 project/intervention；冷/热启动路由；Snooze 使用 `deliveryTime` 重新调度 | 通知权限、去重、点击深链、Snooze 在模拟器的完整验收记录尚未完成；真机待验证 |
-| S08 小艺 | PARTIAL | `record_memory` 本地适配层、固定测试项目、Bearer 校验、幂等 request ID、`AgentRun` 回执、3/3 专项测试；香港 ECS 与 `project.luojiatutor.xyz` 已具备 | 尚未部署 HTTPS；平台鉴权字段未核对；插件真实调用、App 同卡片对照、其余三能力和 20 轮测试未完成 |
+| S06 Deliverable Gap | PARTIAL | Gap 改为只接受与 Deliverable 明确关联且 `confirmed=true` 的证据；新增关联 API、无计划不造 Gap；30 个规则 case + 集成测试；HarmonyOS 已接入选择/确认流 | 完整模拟器 UI 证据矩阵与 Gap Accuracy 数据集回执未形成 |
+| S07 系统通知 | PARTIAL | NotificationKit 权限申请、稳定通知 ID、WantAgent project/intervention 深链、冷/热启动路由和 Snooze `deliveryTime` 重新调度已接入 | 通知权限、去重、点击深链、Snooze 在模拟器的完整验收记录尚未完成；真机待验证 |
+| S08 小艺 | PARTIAL | `record_memory`、`query_memory`、`inspect_project`、两步 `create_action` 适配层已实现；固定项目授权、Bearer 校验、限流、幂等回执、AgentRun 审计；8/8 专项测试 | 尚未部署 HTTPS；平台鉴权字段未核对；插件真实调用、App 同卡片对照和 20 轮测试未完成 |
 
 ### 本轮可复核回归
 
 | 检查 | 结果 |
 |---|---|
-| Vitest | 12 files，79/79 PASS（含 S08 适配层 3/3） |
+| Vitest | 12 files，85/85 PASS（含 S08 适配层 8/8） |
 | TypeScript | `tsc --noEmit` PASS |
 | ESLint | PASS（HarmonyOS 生成目录已排除） |
 | Next.js production build | PASS；Turbopack 仍报告 1 条附件存储路径 NFT tracing 警告，不影响产物，但应在 Freeze 前清零 |
 | HarmonyOS Hypium | 23/23 PASS |
-| HarmonyOS HAP | BUILD SUCCESSFUL；unsigned HAP SHA-256 `9d4da5783bad824a60c91ad890d5f7b7861e249aeaaa856cbc0e47887b17718f` |
+| HarmonyOS HAP | BUILD SUCCESSFUL；unsigned HAP SHA-256 `04d9057394de6fffbf8042ff06ba8bea09f40e395cdc70420812e699dc178649` |
 | 模拟器联网 UI | Pura 90 API 24；Backend `127.0.0.1:4400`；首页与 ProjectHome 均读取真实数据 |
 
 ### 重要纠偏
@@ -38,6 +38,16 @@
 - S03/S04 的验证脚本会在缺少真实 provider 时拒绝计分；S04 benchmark 还要求显式 `--confirm-provider-cost`，避免无意产生 1,000 卡 embedding 调用费用。
 - S05 失败文件只保留 Attachment 和错误状态，不再用文件名/元数据拼出“成功 Memory”。
 - S06 不能再由项目中任意同类型卡片自动满足交付物；证据必须显式关联并确认。
+- S06 读取 milestones 不再隐式创建默认计划；默认 Demo 计划只由 `prisma/seed.ts` 显式写入，无计划项目不会凭空产生 Deliverable Gap。
+- S08 的 `prepare_action` / `commit_action` 概念已收敛为同一个 `POST /xiaoyi/v1/actions` 两步协议：首次只返回签名提案，确认后才写入 Action。
+
+### 2026-08-26 本轮执行回执
+
+- **范围：** 完成 S03–S08 的后端、适配层和 HarmonyOS 代码切片；S09 明确跳过。
+- **后端回归：** `npm.cmd test` 85/85、`npm.cmd exec tsc -- --noEmit` PASS、`npm.cmd run lint` PASS、`npm.cmd run build` PASS。
+- **小艺适配层：** `npm.cmd run verify:s08-adapter` 8/8 PASS；四项 Backend capability 已有本地契约，但没有把本地测试当作平台接入通过证明。
+- **HarmonyOS 回归：** `npm.cmd run harmony:build` PASS，`npm.cmd run harmony:test` 23/23 PASS；产物为 `harmonyos/entry/build/default/outputs/default/entry-default-unsigned.hap`，仍是 unsigned，仅可作为本地/模拟器验证产物。
+- **仍需外部条件：** 真实 LLM/embedding provider 探针与 S03/S04 Gate、S05 图片 OCR/扫描 PDF 样本、S07 真机通知、S08 ECS HTTPS/小艺平台真实调用和 App 对照均未虚构结果，保持未验收状态。
 
 ---
 

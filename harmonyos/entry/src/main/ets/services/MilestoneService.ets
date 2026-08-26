@@ -1,6 +1,13 @@
 import { ApiClient } from './ApiClient';
 import { Milestone } from '../models/Milestone';
 
+export class DeliverableEvidenceInput {
+  evidenceType: string = '';
+  cardId: string | null = null;
+  attachmentId: string | null = null;
+  confirmed: boolean = false;
+}
+
 export class MilestoneService {
   private client: ApiClient = new ApiClient();
 
@@ -10,11 +17,14 @@ export class MilestoneService {
 
   async confirmEvidence(projectId: string, deliverableId: string, evidenceType: string,
     cardId: string, attachmentId: string, confirmed: boolean): Promise<void> {
-    await this.client.post(`/api/projects/${projectId}/milestones/deliverables/${deliverableId}/evidence`, {
-      evidenceType,
-      cardId: cardId || null,
-      attachmentId: attachmentId || null,
-      confirmed
-    });
+    const body = new DeliverableEvidenceInput();
+    body.evidenceType = evidenceType;
+    body.cardId = cardId || null;
+    body.attachmentId = attachmentId || null;
+    body.confirmed = confirmed;
+    await this.client.post<Object>(
+      `/api/projects/${projectId}/milestones/deliverables/${deliverableId}/evidence`,
+      body
+    );
   }
 }

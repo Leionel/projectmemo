@@ -8,7 +8,7 @@ export class Attachment {
   size: number = 0;
   sha256: string = '';
   extractedText: string = '';
-  extractionStatus: string = 'SUCCESS';
+  extractionStatus: string = 'PENDING';
   extractionError: string = '';
   createdAt: string = '';
 }

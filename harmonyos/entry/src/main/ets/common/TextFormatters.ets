@@ -82,7 +82,9 @@ export class TextFormatters {
       'PENDING': '待处理',
       'ACCEPTED': '已采纳',
       'SNOOZED': '稍后提醒',
-      'DISMISSED': '已忽略'
+      'DISMISSED': '已忽略',
+      'RESOLVED': '已解决',
+      'COMPLETED': '已完成'
     };
     return map[status] ?? status;
   }
@@ -112,6 +114,9 @@ export class TextFormatters {
       'reflection': '阶段复盘',
       'meeting_note': '会议纪要',
       'code_issue': '代码问题',
+      'requirement': '参赛要求',
+      'pdf_attachment': 'PDF 附件',
+      'image_attachment': '图片附件',
       'material_requirement': '参赛要求',
       'risk_alert': '项目风险'
     };

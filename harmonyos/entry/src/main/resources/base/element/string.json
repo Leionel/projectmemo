@@ -15,6 +15,10 @@
     {
       "name": "internet_reason",
       "value": "用于访问项目数据服务"
+    },
+    {
+      "name": "notification_reason",
+      "value": "用于提醒高风险项目介入并打开对应依据"
     }
   ]
 }

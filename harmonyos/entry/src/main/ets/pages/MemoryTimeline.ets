@@ -98,6 +98,23 @@ struct MemoryTimeline {
           .margin({ top: PMSpacing.XS })
       }
 
+      if (card.attachment !== undefined && card.attachment !== null) {
+        Row() {
+          Text('附件证据')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.EVIDENCE)
+          Text(`${card.attachment.fileName} · ${card.attachment.extractionStatus}`)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+            .margin({ left: PMSpacing.XS })
+            .maxLines(1)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+        }
+        .width('100%')
+        .margin({ top: PMSpacing.SM })
+        .accessibilityText(`附件证据：${card.attachment.fileName}，提取状态${card.attachment.extractionStatus}`)
+      }
+
       // 展开/收起原始记录按钮
       Row() {
         Text(this.expandedCardId === card.id ? '▲ 收起原始碎片' : '▼ 查看原始采集碎片')

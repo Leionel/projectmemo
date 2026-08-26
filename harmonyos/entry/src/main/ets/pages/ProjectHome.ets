@@ -5,6 +5,7 @@ import { photoAccessHelper } from '@kit.MediaLibraryKit';
 import { picker } from '@kit.CoreFileKit';
 import { Project, ProjectDashboard, ApiError, ReadinessItem, ProjectUpdateInput } from '../models/Project';
 import { ProjectDetail, KnowledgeCard, CardLink, IncomingCardLink } from '../models/Memory';
+import { Milestone, Deliverable } from '../models/Milestone';
 import { Intervention, ProposedAction } from '../models/Intervention';
 import { ActionItem } from '../models/Action';
 import { ArtifactItem } from '../models/Artifact';
@@ -18,6 +19,7 @@ import { ArtifactService } from '../services/ArtifactService';
 import { CopilotService } from '../services/CopilotService';
 import { NotificationService } from '../services/NotificationService';
 import { AttachmentService } from '../services/AttachmentService';
+import { MilestoneService } from '../services/MilestoneService';
 
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily } from '../common/DesignTokens';
 import { SeverityBadge, StatusBadge, MemoryTypeBadge } from '../components/MetricBadge';
@@ -50,6 +52,7 @@ struct ProjectHome {
   @State actions: ActionItem[] = [];
   @State artifacts: ArtifactItem[] = [];
   @State chatMessages: AgentMessage[] = [];
+  @State milestones: Milestone[] = [];
 
   // 通用状态
   @State isLoading: boolean = false;
@@ -75,6 +78,9 @@ struct ProjectHome {
   @State memorySearchQuery: string = '';
   @State selectedMemoryType: string = 'all';
   @State expandedCardId: string = '';
+  @State memorySearchResults: KnowledgeCard[] = [];
+  @State isSearchingMemory: boolean = false;
+  @State memorySearchError: string = '';
 
   // Tab 2: 待办专属状态
   @State completingActionId: string = '';
@@ -94,6 +100,9 @@ struct ProjectHome {
   @State isGeneratingArtifact: boolean = false;
   @State artifactError: string = '';
   @State currentArtifact: ArtifactItem | undefined = undefined;
+  @State isConfirmingEvidence: boolean = false;
+  @State evidenceFeedback: string = '';
+  @State evidenceError: string = '';
 
   private projectService: ProjectService = new ProjectService();
   private interventionService: InterventionService = new InterventionService();
@@ -103,6 +112,8 @@ struct ProjectHome {
   private copilotService: CopilotService = new CopilotService();
   private notificationService: NotificationService = new NotificationService();
   private attachmentService: AttachmentService = new AttachmentService();
+  private milestoneService: MilestoneService = new MilestoneService();
+  private memorySearchSerial: number = 0;
 
   private sourceOptions: string[] = [
     '随手记录', '论文笔记', '代码报错', '实验记录', '会议纪要', '老师建议', '参赛材料'
@@ -184,16 +195,21 @@ struct ProjectHome {
       const actionP = this.actionService.list(this.projectId);
       const artifactP = this.artifactService.list(this.projectId);
       const chatP = this.copilotService.getChatHistory(this.projectId);
+      const milestoneP = this.milestoneService.list(this.projectId).catch(() => [] as Milestone[]);
 
-      const res = await Promise.all([detailP, listP, intervP, actionP, artifactP, chatP]);
+      const res = await Promise.all([detailP, listP, intervP, actionP, artifactP, chatP, milestoneP]);
       this.project = res[0];
       this.dashboard = this.findDashboard(res[1]);
       this.interventions = res[2];
       this.actions = res[3];
       this.artifacts = res[4];
       this.chatMessages = res[5];
+      this.milestones = res[6];
 
       this.updateCurrentArtifact();
+      if (this.memorySearchQuery.trim() !== '') {
+        await this.searchMemory();
+      }
 
       // S07: 对高风险介入派发/更新本地系统通知
       for (const interv of this.interventions) {
@@ -219,6 +235,99 @@ struct ProjectHome {
       }
     }
     return new ProjectDashboard();
+  }
+
+  private async searchMemory(): Promise<void> {
+    const query = this.memorySearchQuery.trim();
+    const type = this.selectedMemoryType;
+    if (query === '') {
+      this.memorySearchSerial += 1;
+      this.memorySearchResults = [];
+      this.memorySearchError = '';
+      this.isSearchingMemory = false;
+      return;
+    }
+
+    const serial = this.memorySearchSerial + 1;
+    this.memorySearchSerial = serial;
+    this.isSearchingMemory = true;
+    this.memorySearchError = '';
+    try {
+      const results = await this.memoryService.searchCards(this.projectId, query, type);
+      if (serial === this.memorySearchSerial) {
+        this.memorySearchResults = results;
+      }
+    } catch (error) {
+      if (serial === this.memorySearchSerial) {
+        this.memorySearchResults = [];
+        this.memorySearchError = error instanceof ApiError ? error.message : '记忆检索失败，请稍后重试';
+      }
+    } finally {
+      if (serial === this.memorySearchSerial) {
+        this.isSearchingMemory = false;
+      }
+    }
+  }
+
+  private onMemoryQueryChange(value: string): void {
+    this.memorySearchQuery = value;
+    this.searchMemory();
+  }
+
+  private selectMemoryType(type: string): void {
+    this.selectedMemoryType = type;
+    if (this.memorySearchQuery.trim() !== '') {
+      this.searchMemory();
+    }
+  }
+
+  private parseExpectedEvidence(value: string): string[] {
+    try {
+      const parsed = JSON.parse(value) as string[];
+      if (!Array.isArray(parsed)) return [];
+      const result: string[] = [];
+      for (const item of parsed) {
+        if (typeof item === 'string' && item.trim() !== '') result.push(item.trim());
+      }
+      return result;
+    } catch (_error) {
+      return [];
+    }
+  }
+
+  private isEvidenceConfirmed(deliverable: Deliverable, evidenceType: string): boolean {
+    for (const evidence of deliverable.evidences) {
+      if (evidence.evidenceType === evidenceType && evidence.confirmed) return true;
+    }
+    return false;
+  }
+
+  private getEvidenceCandidates(evidenceType: string): KnowledgeCard[] {
+    const candidates: KnowledgeCard[] = [];
+    for (const card of this.project.cards) {
+      const attachmentType = card.attachment?.type ?? '';
+      const attachmentMatch = (evidenceType === 'pdf_attachment' && attachmentType === 'PDF') ||
+        (evidenceType === 'image_attachment' && attachmentType === 'IMAGE');
+      if (card.type === evidenceType || attachmentMatch) candidates.push(card);
+      if (candidates.length >= 2) break;
+    }
+    return candidates;
+  }
+
+  private async confirmEvidence(deliverableId: string, evidenceType: string, cardId: string): Promise<void> {
+    if (this.isConfirmingEvidence) return;
+    this.isConfirmingEvidence = true;
+    this.evidenceFeedback = '';
+    this.evidenceError = '';
+    try {
+      await this.milestoneService.confirmEvidence(this.projectId, deliverableId, evidenceType, cardId, '', true);
+      this.evidenceFeedback = '证据已关联并确认';
+      await this.loadAllData();
+    } catch (error) {
+      this.evidenceError = error instanceof ApiError ? error.message : '证据确认失败，请稍后重试';
+    } finally {
+      this.isConfirmingEvidence = false;
+    }
   }
 
   private updateCurrentArtifact(): void {
@@ -758,6 +867,8 @@ struct ProjectHome {
         .borderRadius(PMRadius.MD)
         .border({ width: { left: 3 }, color: PMColors.EVIDENCE })
 
+        this.MilestoneEvidenceView()
+
         // 问题二：为什么？（主动提醒与依据）
         Column() {
           Row() {
@@ -1013,6 +1124,105 @@ struct ProjectHome {
     .layoutWeight(1)
   }
 
+  @Builder
+  private MilestoneEvidenceView() {
+    if (this.milestones.length > 0) {
+      Column() {
+        Row() {
+          Text('里程碑证据')
+            .fontSize(PMFontSize.SECTION_TITLE)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.INK_PRIMARY)
+          Text('明确关联后才算完成')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+        }
+        .width('100%')
+        .justifyContent(FlexAlign.SpaceBetween)
+
+        ForEach(this.milestones.slice(0, 1), (milestone: Milestone) => {
+          Text(milestone.title)
+            .fontSize(PMFontSize.BODY)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.INK_PRIMARY)
+            .margin({ top: PMSpacing.SM })
+
+          ForEach(milestone.deliverables.slice(0, 3), (deliverable: Deliverable) => {
+            Column() {
+              Row() {
+                Text(deliverable.title)
+                  .fontSize(PMFontSize.BODY)
+                  .fontColor(PMColors.INK_PRIMARY)
+                  .layoutWeight(1)
+                Text(deliverable.status === 'COMPLETED' ? '已完成' : '待补证据')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(deliverable.status === 'COMPLETED' ? PMColors.SUCCESS : PMColors.RISK)
+              }
+              .width('100%')
+
+              ForEach(this.parseExpectedEvidence(deliverable.expectedEvidence), (evidenceType: string) => {
+                Row() {
+                  Text(`${this.isEvidenceConfirmed(deliverable, evidenceType) ? '✓' : '○'} ${TextFormatters.memoryTypeToChinese(evidenceType)}`)
+                    .fontSize(PMFontSize.SECONDARY)
+                    .fontColor(this.isEvidenceConfirmed(deliverable, evidenceType) ? PMColors.SUCCESS : PMColors.INK_SECONDARY)
+                    .layoutWeight(1)
+                  if (!this.isEvidenceConfirmed(deliverable, evidenceType)) {
+                    ForEach(this.getEvidenceCandidates(evidenceType).slice(0, 1), (card: KnowledgeCard) => {
+                      Button(this.isConfirmingEvidence ? '确认中…' : '关联并确认')
+                        .fontSize(PMFontSize.CAPTION)
+                        .fontColor(PMColors.BRAND)
+                        .backgroundColor(PMColors.BRAND_LIGHT)
+                        .borderRadius(PMRadius.XS)
+                        .enabled(!this.isConfirmingEvidence)
+                        .onClick(() => {
+                          this.confirmEvidence(deliverable.id, evidenceType, card.id);
+                        })
+                        .accessibilityText(`关联${card.title}并确认${TextFormatters.memoryTypeToChinese(evidenceType)}证据`)
+                    }, (card: KnowledgeCard) => `${deliverable.id}-${evidenceType}-${card.id}`)
+                    if (this.getEvidenceCandidates(evidenceType).length === 0) {
+                      Text('暂无匹配记忆')
+                        .fontSize(PMFontSize.CAPTION)
+                        .fontColor(PMColors.INK_TERTIARY)
+                    }
+                  }
+                }
+                .width('100%')
+                .margin({ top: PMSpacing.XS })
+              }, (evidenceType: string) => `${deliverable.id}-${evidenceType}`)
+            }
+            .width('100%')
+            .padding(PMSpacing.MD)
+            .margin({ top: PMSpacing.XS })
+            .backgroundColor(PMColors.SURFACE_SUBTLE)
+            .borderRadius(PMRadius.SM)
+            .border({ width: 1, color: PMColors.BORDER })
+            .alignItems(HorizontalAlign.Start)
+          }, (deliverable: Deliverable) => deliverable.id)
+        }, (milestone: Milestone) => milestone.id)
+
+        if (this.evidenceFeedback !== '') {
+          Text(this.evidenceFeedback)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.SUCCESS)
+            .margin({ top: PMSpacing.SM })
+        }
+        if (this.evidenceError !== '') {
+          Text(this.evidenceError)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.RISK)
+            .margin({ top: PMSpacing.SM })
+        }
+      }
+      .width('100%')
+      .padding(PMSpacing.LG)
+      .backgroundColor(PMColors.SURFACE)
+      .borderRadius(PMRadius.MD)
+      .border({ width: 1, color: PMColors.BORDER })
+      .margin({ top: PMSpacing.MD })
+      .alignItems(HorizontalAlign.Start)
+    }
+  }
+
   // ----------------------------------------------------
   // Tab 1: 记忆脉络 (Memory) 视图
   // ----------------------------------------------------
@@ -1023,7 +1233,7 @@ struct ProjectHome {
       Column() {
         TextInput({ text: this.memorySearchQuery, placeholder: '搜索记忆标题、摘要或关键词...' })
           .onChange((value: string) => {
-            this.memorySearchQuery = value;
+            this.onMemoryQueryChange(value);
           })
           .fontSize(PMFontSize.BODY)
           .height(40)
@@ -1040,7 +1250,7 @@ struct ProjectHome {
               .borderRadius(PMRadius.XS)
               .margin({ right: PMSpacing.XS })
               .onClick(() => {
-                this.selectedMemoryType = 'all';
+                this.selectMemoryType('all');
               })
 
             Button('论文笔记')
@@ -1050,7 +1260,7 @@ struct ProjectHome {
               .borderRadius(PMRadius.XS)
               .margin({ right: PMSpacing.XS })
               .onClick(() => {
-                this.selectedMemoryType = 'paper_note';
+                this.selectMemoryType('paper_note');
               })
 
             Button('实验记录')
@@ -1060,7 +1270,7 @@ struct ProjectHome {
               .borderRadius(PMRadius.XS)
               .margin({ right: PMSpacing.XS })
               .onClick(() => {
-                this.selectedMemoryType = 'experiment_log';
+                this.selectMemoryType('experiment_log');
               })
 
             Button('阶段复盘')
@@ -1070,7 +1280,7 @@ struct ProjectHome {
               .borderRadius(PMRadius.XS)
               .margin({ right: PMSpacing.XS })
               .onClick(() => {
-                this.selectedMemoryType = 'reflection';
+                this.selectMemoryType('reflection');
               })
 
             Button('代码问题')
@@ -1080,7 +1290,7 @@ struct ProjectHome {
               .borderRadius(PMRadius.XS)
               .margin({ right: PMSpacing.XS })
               .onClick(() => {
-                this.selectedMemoryType = 'code_issue';
+                this.selectMemoryType('code_issue');
               })
           }
         }
@@ -1091,6 +1301,25 @@ struct ProjectHome {
       .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.SM })
       .backgroundColor(PMColors.SURFACE)
       .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
+
+      if (this.memorySearchQuery.trim() !== '' && this.isSearchingMemory) {
+        Text('正在检索项目记忆…')
+          .fontSize(PMFontSize.CAPTION)
+          .fontColor(PMColors.INK_TERTIARY)
+          .margin({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM })
+      }
+      if (this.memorySearchQuery.trim() !== '' && !this.isSearchingMemory && this.memorySearchError === '' && this.memorySearchResults.length === 0) {
+        Text('没有找到匹配的项目记忆')
+          .fontSize(PMFontSize.BODY)
+          .fontColor(PMColors.INK_TERTIARY)
+          .margin({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD })
+      }
+      if (this.memorySearchError !== '') {
+        Text(this.memorySearchError)
+          .fontSize(PMFontSize.BODY)
+          .fontColor(PMColors.RISK)
+          .margin({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM })
+      }
 
       // 卡片流
       List({ space: PMSpacing.MD }) {
@@ -1164,6 +1393,9 @@ struct ProjectHome {
   }
 
   private getFilteredCards(): KnowledgeCard[] {
+    if (this.memorySearchQuery.trim() !== '') {
+      return this.memorySearchResults;
+    }
     const q = this.memorySearchQuery.trim().toLowerCase();
     return this.project.cards.filter((c: KnowledgeCard) => {
       if (this.selectedMemoryType !== 'all' && c.type !== this.selectedMemoryType) {

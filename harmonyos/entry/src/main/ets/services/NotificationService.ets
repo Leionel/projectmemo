@@ -3,6 +3,37 @@ import { wantAgent } from '@kit.AbilityKit';
 import { Intervention } from '../models/Intervention';
 
 export class NotificationService {
+  private notificationPermission: boolean | undefined = undefined;
+  private permissionRequest: Promise<boolean> | undefined = undefined;
+
+  private async ensureNotificationPermission(): Promise<boolean> {
+    if (this.notificationPermission !== undefined) {
+      return this.notificationPermission;
+    }
+    if (this.permissionRequest !== undefined) {
+      return this.permissionRequest;
+    }
+
+    this.permissionRequest = (async (): Promise<boolean> => {
+      try {
+        if (await notificationManager.isNotificationEnabled()) {
+          this.notificationPermission = true;
+          return true;
+        }
+        await notificationManager.requestEnableNotification();
+        this.notificationPermission = await notificationManager.isNotificationEnabled();
+        return this.notificationPermission;
+      } catch (err) {
+        this.notificationPermission = false;
+        console.warn('Notification permission is unavailable:', JSON.stringify(err));
+        return false;
+      } finally {
+        this.permissionRequest = undefined;
+      }
+    })();
+    return this.permissionRequest;
+  }
+
   /**
    * 基于 interventionId 派生稳定的 31 位正整数 ID，用于通知去重与更新
    */
@@ -45,6 +76,10 @@ export class NotificationService {
     const text = intervention.content.slice(0, 100);
 
     try {
+      if (!await this.ensureNotificationPermission()) {
+        console.warn(`Notification permission is disabled; skipped ${intervention.id}`);
+        return;
+      }
       const routeAgent = await this.buildWantAgent(intervention.id, projectId, id);
       const notificationRequest: notificationManager.NotificationRequest = {
         id,

@@ -28,7 +28,8 @@ export class MemoryService {
       `/api/projects/${projectId}/cards/search?q=${encodeURIComponent(query)}${typeParam}`
     );
     const detail = await this.getTimeline(projectId);
-    if (!res.results || res.results.length === 0) return detail;
+    // 空结果必须保持为空，不能把“没有命中”误显示成整个项目时间线。
+    if (!res.results || res.results.length === 0) return [];
 
     // 按检索分数排序并映射
     const scoreMap = new Map<string, number>();

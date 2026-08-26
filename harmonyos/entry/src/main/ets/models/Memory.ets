@@ -26,6 +26,13 @@ export class ArtifactSummary {
   createdAt: string = '';
 }
 
+export class AttachmentSummary {
+  id: string = '';
+  fileName: string = '';
+  type: string = '';
+  extractionStatus: string = '';
+}
+
 export class KnowledgeCard {
   id: string = '';
   type: string = '';
@@ -33,6 +40,7 @@ export class KnowledgeCard {
   summary: string = '';
   createdAt: string = '';
   capture: CaptureSummary = new CaptureSummary();
+  attachment: AttachmentSummary | undefined = undefined;
   outgoingLinks: CardLink[] = [];
   incomingLinks: IncomingCardLink[] = [];
 }
@@ -77,6 +85,8 @@ export class CardSearchResultItem {
   type: string = '';
   score: number = 0;
   reason: string = '';
+  source: string = '';
+  retrievalMode: string = '';
 }
 
 export class CardSearchResponse {

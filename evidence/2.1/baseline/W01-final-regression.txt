@@ -1,0 +1,36 @@
+ProjectMemo 2.1 W01 final offline regression
+Date: 2026-08-27
+Code commit: 248257a
+
+Command: npm.cmd test
+Exit code: 0
+Result: Test Files 12 passed; Tests 85 passed.
+Note: vitest.config.ts sets fileParallelism=false because test files switch DATABASE_URL and share the Prisma singleton; the previous default parallel mode could race on SQLite.
+
+Command: npm.cmd exec tsc -- --noEmit
+Exit code: 0
+Result: no TypeScript diagnostics.
+
+Command: npm.cmd run lint
+Exit code: 0
+Result: no ESLint diagnostics.
+
+Command: npm.cmd run build
+Exit code: 0
+Result: Next.js 16.2.10 production build succeeded. The existing attachment filesystem NFT tracing warning remains; it does not fail the build.
+
+Command: npm.cmd run harmony:test
+Exit code: 0
+Result: BUILD SUCCESSFUL; Tests run 23, Failure 0, Error 0, Pass 23.
+
+Command: npm.cmd run harmony:build
+Exit code: 0
+Result: BUILD SUCCESSFUL; unsigned HAP at harmonyos/entry/build/default/outputs/default/entry-default-unsigned.hap; size 1,565,158 bytes; SHA-256 e6931284e799481ab03f913da6f570589b2d05c898191292a5ed6ff52820cee9.
+
+Command: npm.cmd run verify:s08-adapter
+Exit code: 0
+Result: Test Files 1 passed; Tests 8 passed.
+
+Command: git diff --check
+Exit code: 0
+Result: no whitespace errors.

@@ -1,0 +1,7 @@
+Command: npm.cmd run lint
+Exit code: 0
+
+> projectmemo@0.1.0 lint
+> eslint .
+
+Output: no ESLint diagnostics.

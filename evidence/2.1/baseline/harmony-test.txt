@@ -1,0 +1,6 @@
+Command: npm.cmd run harmony:test
+Exit code: 0
+
+Output:
+  BUILD SUCCESSFUL
+  [harmony-test] Tests run: 23, Failure: 0, Error: 0, Pass: 23, Ignore: 0

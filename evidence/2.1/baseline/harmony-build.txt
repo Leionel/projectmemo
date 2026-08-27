@@ -1,0 +1,12 @@
+Command: npm.cmd run harmony:build
+Exit code: 0
+
+Output:
+  DEVECO_SDK_HOME=D:\Program Files\Huawei\DevEco Studio\sdk
+  JAVA_HOME=D:\Program Files\Huawei\DevEco Studio\jbr
+  BUILD SUCCESSFUL in 26 s 948 ms
+  HAP: harmonyos\\entry\\build\\default\\outputs\\default\\entry-default-unsigned.hap
+  size: 1531234 bytes
+  sha256: 3e87eaeb0c676f4fb898f756fc21cab191af0931c111234b5a93835ef3840cd7
+
+Warnings were limited to existing ArkTS deprecations/exception-handling notices and the expected unsigned-HAP notice because no signingConfigs profile is configured.

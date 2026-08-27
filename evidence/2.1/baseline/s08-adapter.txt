@@ -1,0 +1,7 @@
+Command: npm.cmd run verify:s08-adapter
+Exit code: 0
+
+> vitest run tests/xiaoyi.adapter.test.ts
+> Test Files 1 passed (1)
+> Tests 8 passed (8)
+> Duration 2.14s

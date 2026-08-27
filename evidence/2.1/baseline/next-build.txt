@@ -1,0 +1,13 @@
+Command: npm.cmd run build
+Exit code: 0
+
+Output summary:
+  Next.js 16.2.10 production build completed.
+  Compiled successfully; TypeScript passed.
+  Routes included /health, /xiaoyi/v1/actions, /xiaoyi/v1/memories,
+  /xiaoyi/v1/memories/search, /xiaoyi/v1/projects/inspect, and
+  /api/projects/[id]/deliverables.
+
+Warning:
+  Turbopack reported one attachmentService filesystem/NFT-list warning.
+  This did not affect the exit code or generated build.

@@ -1,0 +1,10 @@
+Command: npm.cmd test
+Exit code: 0
+
+> projectmemo@0.1.0 test
+> vitest run
+
+ RUN  v4.1.10 D:/Projects/hongmen
+ Test Files  12 passed (12)
+ Tests 85 passed (85)
+ Duration 1.58s

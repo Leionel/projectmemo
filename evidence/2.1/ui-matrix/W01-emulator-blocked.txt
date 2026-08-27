@@ -1,0 +1,24 @@
+W01 UI matrix environment receipt
+Date: 2026-08-27
+
+Target environment
+- DevEco Studio 6.1.1 is installed.
+- Four AVD profiles are present in C:\Users\Administrator\AppData\Local\Huawei\Emulator\deployed\lists.json: Pura 90 (phone), Mate X7 (foldable), MatePad Pro 13 (tablet), and MateBook Pro (2in1).
+- The profiles use HarmonyOS 6.1.1 / API 24 and each declares 4096 MB guest RAM.
+
+Reproduction
+Command:
+  D:\Program Files\Huawei\DevEco Studio\tools\emulator\Emulator.exe -start "Pura 90" -instancePath "C:\Users\Administrator\AppData\Local\Huawei\Emulator\deployed\Pura 90"
+Result: exit code 1, output "Unable to start the emulator"
+Follow-up:
+  hdc list targets
+Result: [Empty]
+Process check: no Emulator.exe or qemu-system-aarch64 process remained after the failed start.
+
+Supporting host log evidence
+- Pura 90 Emulator.log records host free memory below the 3 GB threshold (reported value 2708).
+- The same boot attempt records "Guest OS Boot Completed!!" but then "hdc is not connected, hdc not init".
+- Crash server logs also record repeated low-memory observations, with free memory values below 2 GB.
+
+Classification
+This is a simulator/host limitation, not a product UI failure. Because no target is connected, W01 screenshots, uitest dumpLayout files, keyboard coverage, notification runtime coverage, and cross-device layout assertions are not claimed. The native source audit and offline test/build results are recorded separately; runtime UI coverage remains BLOCKED/UNVERIFIED until an AVD or device connects through hdc.

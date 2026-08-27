@@ -52,6 +52,7 @@ export struct ErrorStateView {
           .fontColor(PMColors.SURFACE)
           .backgroundColor(PMColors.BRAND)
           .borderRadius(PMRadius.SM)
+          .height(48)
           .padding({ left: PMSpacing.XL, right: PMSpacing.XL, top: PMSpacing.SM, bottom: PMSpacing.SM })
           .onClick(() => {
             if (this.onRetry) {
@@ -101,6 +102,7 @@ export struct EmptyStateView {
             .fontColor(PMColors.BRAND)
             .backgroundColor(PMColors.BRAND_LIGHT)
             .borderRadius(PMRadius.SM)
+            .height(48)
             .margin({ top: PMSpacing.LG })
             .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.SM })
             .onClick(() => {

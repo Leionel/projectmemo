@@ -221,6 +221,7 @@ struct ActionBoard {
               .backgroundColor(PMColors.SURFACE_SUBTLE)
               .border({ width: 1, color: PMColors.BORDER })
               .borderRadius(PMRadius.SM)
+              .height(48)
               .enabled(this.startingActionId === '')
               .onClick(() => {
                 this.startAction(action.id);
@@ -233,6 +234,7 @@ struct ActionBoard {
             .fontColor(PMColors.SURFACE)
             .backgroundColor(PMColors.BRAND)
             .borderRadius(PMRadius.SM)
+            .height(48)
             .margin({ left: action.status === 'TODO' ? PMSpacing.SM : 0 })
             .onClick(() => {
               this.openCompleteDialog(action.id);
@@ -404,6 +406,7 @@ struct ActionBoard {
                 .fontColor(PMColors.INK_SECONDARY)
                 .backgroundColor(PMColors.SURFACE_SUBTLE)
                 .borderRadius(PMRadius.SM)
+                .height(48)
                 .enabled(!this.isSubmitting)
                 .onClick(() => {
                   this.closeCompleteDialog();
@@ -415,6 +418,7 @@ struct ActionBoard {
                 .fontColor(PMColors.SURFACE)
                 .backgroundColor(this.resultText.trim().length >= 5 && !this.isSubmitting ? PMColors.BRAND : PMColors.INK_MUTED)
                 .borderRadius(PMRadius.SM)
+                .height(48)
                 .margin({ left: PMSpacing.MD })
                 .enabled(this.resultText.trim().length >= 5 && !this.isSubmitting)
                 .onClick(() => {

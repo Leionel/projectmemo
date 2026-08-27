@@ -25,6 +25,7 @@ export struct PMAppBar {
             .fontWeight(FontWeight.Medium)
         }
         .padding({ left: PMSpacing.SM, right: PMSpacing.MD, top: PMSpacing.XS, bottom: PMSpacing.XS })
+        .height(44)
         .borderRadius(PMRadius.SM)
         .backgroundColor(PMColors.SURFACE_SUBTLE)
         .border({ width: 1, color: PMColors.BORDER })
@@ -61,6 +62,8 @@ export struct PMAppBar {
           .fontSize(PMFontSize.BUTTON)
           .fontWeight(FontWeight.Medium)
           .fontColor(PMColors.BRAND)
+          .height(44)
+          .textAlign(TextAlign.Center)
           .padding({ left: PMSpacing.MD, right: PMSpacing.MD, top: PMSpacing.SM, bottom: PMSpacing.SM })
           .borderRadius(PMRadius.SM)
           .backgroundColor(PMColors.BRAND_LIGHT)

@@ -344,6 +344,7 @@ struct InterventionDetail {
                         .backgroundColor(PMColors.SURFACE)
                         .border({ width: 1, color: PMColors.BORDER })
                         .borderRadius(PMRadius.SM)
+                        .height(48)
                         .onClick(() => {
                           this.showDismissInput = false;
                         })
@@ -353,6 +354,7 @@ struct InterventionDetail {
                         .fontColor(PMColors.SURFACE)
                         .backgroundColor(PMColors.RISK)
                         .borderRadius(PMRadius.SM)
+                        .height(48)
                         .margin({ left: PMSpacing.MD })
                         .onClick(() => {
                           this.dismissIntervention();
@@ -377,6 +379,7 @@ struct InterventionDetail {
                     .fontColor(PMColors.SURFACE)
                     .backgroundColor(PMColors.BRAND)
                     .borderRadius(PMRadius.SM)
+                    .height(48)
                     .layoutWeight(2)
                     .enabled(this.isOpenStatus() && !this.isSubmitting && this.intervention.proposedActions.length > 0)
                     .onClick(() => {
@@ -390,6 +393,7 @@ struct InterventionDetail {
                     .backgroundColor(PMColors.SURFACE_SUBTLE)
                     .border({ width: 1, color: PMColors.BORDER })
                     .borderRadius(PMRadius.SM)
+                    .height(48)
                     .layoutWeight(1.2)
                     .margin({ left: PMSpacing.SM })
                     .enabled(this.isOpenStatus() && !this.isSubmitting)
@@ -403,6 +407,7 @@ struct InterventionDetail {
                     .fontColor(PMColors.RISK)
                     .backgroundColor(PMColors.RISK_LIGHT)
                     .borderRadius(PMRadius.SM)
+                    .height(48)
                     .layoutWeight(1)
                     .margin({ left: PMSpacing.SM })
                     .enabled(this.isOpenStatus() && !this.isSubmitting)

@@ -87,9 +87,9 @@ export class PMRadius {
 }
 
 export class PMFontSize {
-  static readonly CAPTION: number = 11;
-  static readonly BOTTOM_NAV: number = 11;
-  static readonly SECONDARY: number = 12;
+  static readonly CAPTION: number = 12;
+  static readonly BOTTOM_NAV: number = 12;
+  static readonly SECONDARY: number = 13;
   static readonly SM: number = 12;
   static readonly BODY: number = 14;
   static readonly BASE: number = 14;

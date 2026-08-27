@@ -66,6 +66,9 @@ struct ProjectHome {
   @State captureError: string = '';
   @State isUploadingAttachment: boolean = false;
   @State attachmentFeedback: string = '';
+  @State attachmentFeedbackTone: string = 'info';
+  @State attachmentRetryId: string = '';
+  @State isRetryingAttachment: boolean = false;
   @State isEvaluating: boolean = false;
   @State evaluateError: string = '';
   @State showSettingsDialog: boolean = false;
@@ -165,23 +168,63 @@ struct ProjectHome {
 
   private async uploadAttachment(uri: string, fileName: string, mimeType: string): Promise<void> {
     this.isUploadingAttachment = true;
+    this.attachmentRetryId = '';
+    this.attachmentFeedbackTone = 'info';
     this.attachmentFeedback = '正在上传并提取内容…';
     try {
       const result = await this.attachmentService.upload(this.projectId, uri, fileName, mimeType);
-      if (result.isDuplicate) {
+      if (result.isDuplicate && result.attachment.extractionStatus === 'SUCCESS') {
         this.attachmentFeedback = '该附件已存在，已复用原记录';
+        this.attachmentFeedbackTone = 'success';
+      } else if (result.isDuplicate) {
+        this.attachmentFeedback = '该附件已存在，已复用原记录；当前提取未完成';
+        this.attachmentFeedbackTone = result.attachment.extractionStatus === 'NEEDS_OCR' ? 'warning' : 'error';
+        this.attachmentRetryId = result.attachment.id;
       } else if (result.attachment.extractionStatus === 'SUCCESS') {
         this.attachmentFeedback = '附件已归档并沉淀为项目记忆';
+        this.attachmentFeedbackTone = 'success';
       } else if (result.attachment.extractionStatus === 'NEEDS_OCR') {
         this.attachmentFeedback = '附件已保存；当前环境需要 OCR，未生成伪造记忆';
+        this.attachmentFeedbackTone = 'warning';
+        this.attachmentRetryId = result.attachment.id;
       } else {
         this.attachmentFeedback = `附件已保存；提取失败：${result.attachment.extractionError}`;
+        this.attachmentFeedbackTone = 'error';
+        this.attachmentRetryId = result.attachment.id;
       }
       await this.loadAllData();
     } catch (error) {
       this.attachmentFeedback = error instanceof ApiError ? error.message : '附件上传失败';
+      this.attachmentFeedbackTone = 'error';
     } finally {
       this.isUploadingAttachment = false;
+    }
+  }
+
+  private async retryAttachment(): Promise<void> {
+    if (this.attachmentRetryId === '' || this.isRetryingAttachment) return;
+    this.isRetryingAttachment = true;
+    this.attachmentFeedbackTone = 'info';
+    this.attachmentFeedback = '正在重新提取附件…';
+    try {
+      const result = await this.attachmentService.retry(this.projectId, this.attachmentRetryId);
+      if (result.attachment.extractionStatus === 'SUCCESS') {
+        this.attachmentFeedback = '附件已重新提取并沉淀为项目记忆';
+        this.attachmentFeedbackTone = 'success';
+        this.attachmentRetryId = '';
+      } else if (result.attachment.extractionStatus === 'NEEDS_OCR') {
+        this.attachmentFeedback = '当前环境仍需要 OCR，已保留原始附件';
+        this.attachmentFeedbackTone = 'warning';
+      } else {
+        this.attachmentFeedback = `重新提取失败：${result.attachment.extractionError}`;
+        this.attachmentFeedbackTone = 'error';
+      }
+      await this.loadAllData();
+    } catch (error) {
+      this.attachmentFeedback = error instanceof ApiError ? error.message : '重新提取失败';
+      this.attachmentFeedbackTone = 'error';
+    } finally {
+      this.isRetryingAttachment = false;
     }
   }
 
@@ -579,6 +622,7 @@ struct ProjectHome {
           .fontColor(PMColors.INK_PRIMARY)
       }
       .padding({ left: PMSpacing.SM, right: PMSpacing.MD, top: 4, bottom: 4 })
+      .height(44)
       .borderRadius(PMRadius.SM)
       .backgroundColor(PMColors.SURFACE_SUBTLE)
       .border({ width: 1, color: PMColors.BORDER })
@@ -611,7 +655,9 @@ struct ProjectHome {
       Row() {
         SettingsIcon({ isSelected: false, iconSize: 20 })
       }
-      .padding(PMSpacing.SM)
+      .width(44)
+      .height(44)
+      .justifyContent(FlexAlign.Center)
       .onClick(() => {
         this.openSettingsDialog();
       })
@@ -640,7 +686,8 @@ struct ProjectHome {
           .margin({ top: 3 })
       }
       .layoutWeight(1)
-      .padding({ top: PMSpacing.XS, bottom: PMSpacing.XS })
+      .height(56)
+      .justifyContent(FlexAlign.Center)
       .onClick(() => {
         this.currentTabIndex = 0;
       })
@@ -658,7 +705,8 @@ struct ProjectHome {
           .margin({ top: 3 })
       }
       .layoutWeight(1)
-      .padding({ top: PMSpacing.XS, bottom: PMSpacing.XS })
+      .height(56)
+      .justifyContent(FlexAlign.Center)
       .onClick(() => {
         this.currentTabIndex = 1;
       })
@@ -676,7 +724,8 @@ struct ProjectHome {
           .margin({ top: 3 })
       }
       .layoutWeight(1)
-      .padding({ top: PMSpacing.XS, bottom: PMSpacing.XS })
+      .height(56)
+      .justifyContent(FlexAlign.Center)
       .onClick(() => {
         this.currentTabIndex = 2;
       })
@@ -694,7 +743,8 @@ struct ProjectHome {
           .margin({ top: 3 })
       }
       .layoutWeight(1)
-      .padding({ top: PMSpacing.XS, bottom: PMSpacing.XS })
+      .height(56)
+      .justifyContent(FlexAlign.Center)
       .onClick(() => {
         this.currentTabIndex = 3;
       })
@@ -712,7 +762,8 @@ struct ProjectHome {
           .margin({ top: 3 })
       }
       .layoutWeight(1)
-      .padding({ top: PMSpacing.XS, bottom: PMSpacing.XS })
+      .height(56)
+      .justifyContent(FlexAlign.Center)
       .onClick(() => {
         this.currentTabIndex = 4;
       })
@@ -720,7 +771,7 @@ struct ProjectHome {
       .accessibilitySelected(this.currentTabIndex === 4)
     }
     .width('100%')
-    .padding({ top: 6, bottom: 6 })
+    .padding({ top: 4, bottom: 4 })
     .backgroundColor(PMColors.SURFACE)
     .border({ width: { top: 1 }, color: PMColors.BORDER })
   }
@@ -1018,6 +1069,12 @@ struct ProjectHome {
           .width('100%')
           .justifyContent(FlexAlign.SpaceBetween)
 
+          Text('把实验、导师意见或材料直接归档，系统会保留来源并尝试提取为项目记忆。')
+            .fontSize(PMFontSize.SECONDARY)
+            .fontColor(PMColors.INK_SECONDARY)
+            .lineHeight(18)
+            .margin({ top: PMSpacing.XS })
+
           // 来源胶囊
           Scroll() {
             Row() {
@@ -1028,7 +1085,11 @@ struct ProjectHome {
                   .fontColor(this.sourceType === src ? PMColors.BRAND : PMColors.INK_SECONDARY)
                   .backgroundColor(this.sourceType === src ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
                   .borderRadius(PMRadius.XS)
+                  .height(44)
+                  .border({ width: this.sourceType === src ? 2 : 1, color: this.sourceType === src ? PMColors.BRAND : PMColors.BORDER })
                   .margin({ right: PMSpacing.XS })
+                  .accessibilityText(`记录来源：${src}`)
+                  .accessibilitySelected(this.sourceType === src)
                   .onClick(() => {
                     this.sourceType = src;
                   })
@@ -1045,6 +1106,7 @@ struct ProjectHome {
               .fontColor(PMColors.BRAND)
               .backgroundColor(PMColors.BRAND_LIGHT)
               .borderRadius(PMRadius.XS)
+              .height(48)
               .enabled(!this.isUploadingAttachment)
               .onClick(() => { this.pickAndUploadImage(); })
               .accessibilityText('选择图片并沉淀为项目记忆')
@@ -1054,6 +1116,7 @@ struct ProjectHome {
               .fontColor(PMColors.MEMORY)
               .backgroundColor(PMColors.MEMORY_LIGHT)
               .borderRadius(PMRadius.XS)
+              .height(48)
               .enabled(!this.isUploadingAttachment)
               .margin({ left: PMSpacing.XS })
               .onClick(() => { this.pickAndUploadPdf(); })
@@ -1065,8 +1128,27 @@ struct ProjectHome {
           if (this.attachmentFeedback !== '') {
             Text(this.attachmentFeedback)
               .fontSize(PMFontSize.CAPTION)
-              .fontColor(PMColors.INK_SECONDARY)
+              .fontColor(this.attachmentFeedbackTone === 'error' ? PMColors.RISK :
+                this.attachmentFeedbackTone === 'success' ? PMColors.SUCCESS :
+                  this.attachmentFeedbackTone === 'warning' ? PMColors.EVIDENCE : PMColors.INK_SECONDARY)
               .margin({ top: PMSpacing.XS })
+              .accessibilityText(`附件状态：${this.attachmentFeedback}`)
+          }
+
+          if (this.attachmentRetryId !== '') {
+            Button(this.isRetryingAttachment ? '重新提取中…' : '重试提取')
+              .fontSize(PMFontSize.BUTTON)
+              .fontColor(PMColors.BRAND)
+              .backgroundColor(PMColors.BRAND_LIGHT)
+              .border({ width: 1, color: PMColors.BRAND })
+              .borderRadius(PMRadius.SM)
+              .height(48)
+              .enabled(!this.isRetryingAttachment)
+              .margin({ top: PMSpacing.SM })
+              .accessibilityText('重试提取此附件')
+              .onClick(() => {
+                this.retryAttachment();
+              })
           }
 
           TextArea({
@@ -1081,6 +1163,7 @@ struct ProjectHome {
             .backgroundColor(PMColors.SURFACE_SUBTLE)
             .borderRadius(PMRadius.SM)
             .border({ width: 1, color: PMColors.BORDER })
+            .accessibilityText(`输入${this.sourceType}内容，至少 5 个字`)
             .margin({ top: PMSpacing.SM })
 
           if (this.captureError !== '') {
@@ -1101,6 +1184,7 @@ struct ProjectHome {
               .fontColor(PMColors.SURFACE)
               .backgroundColor(this.rawText.trim().length >= 5 && !this.isCapturing ? PMColors.BRAND : PMColors.INK_MUTED)
               .borderRadius(PMRadius.SM)
+              .height(48)
               .enabled(this.rawText.trim().length >= 5 && !this.isCapturing)
               .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.SM })
               .onClick(() => {
@@ -2049,6 +2133,12 @@ struct ProjectHome {
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.INK_PRIMARY)
 
+            Text('只修改项目基本信息，不会改变已有的记忆、提醒或行动。')
+              .fontSize(PMFontSize.BODY)
+              .fontColor(PMColors.INK_SECONDARY)
+              .lineHeight(20)
+              .margin({ top: PMSpacing.XS })
+
             Text('项目名称')
               .fontSize(PMFontSize.SECONDARY)
               .fontWeight(FontWeight.Medium)
@@ -2059,7 +2149,7 @@ struct ProjectHome {
                 this.editTitle = v;
               })
               .fontSize(PMFontSize.BODY)
-              .height(42)
+              .height(48)
               .backgroundColor(PMColors.SURFACE_SUBTLE)
               .borderRadius(PMRadius.SM)
               .border({ width: 1, color: PMColors.BORDER })
@@ -2074,7 +2164,7 @@ struct ProjectHome {
                 this.editGoal = v;
               })
               .fontSize(PMFontSize.BODY)
-              .height(42)
+              .height(48)
               .backgroundColor(PMColors.SURFACE_SUBTLE)
               .borderRadius(PMRadius.SM)
               .border({ width: 1, color: PMColors.BORDER })
@@ -2085,6 +2175,7 @@ struct ProjectHome {
                 .fontColor(PMColors.INK_SECONDARY)
                 .backgroundColor(PMColors.SURFACE_SUBTLE)
                 .borderRadius(PMRadius.SM)
+                .height(48)
                 .onClick(() => {
                   this.showSettingsDialog = false;
                 })
@@ -2095,6 +2186,7 @@ struct ProjectHome {
                 .fontColor(PMColors.SURFACE)
                 .backgroundColor(PMColors.BRAND)
                 .borderRadius(PMRadius.SM)
+                .height(48)
                 .margin({ left: PMSpacing.MD })
                 .onClick(() => {
                   this.saveSettings();

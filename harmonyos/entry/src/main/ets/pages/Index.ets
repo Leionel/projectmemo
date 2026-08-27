@@ -55,6 +55,7 @@ struct Index {
   @State isProbing: boolean = false;
   @State probeResult: ProbeResponse | undefined = undefined;
   @State settingsFeedback: string = '';
+  @State dataSyncState: string = '尚未同步';
 
   // 新建项目弹窗状态
   @State showCreateDialog: boolean = false;
@@ -169,6 +170,7 @@ struct Index {
   private async loadAllData(): Promise<void> {
     this.isLoading = true;
     this.errorMessage = '';
+    this.dataSyncState = '同步中...';
     try {
       this.projects = await this.projectService.listProjects();
 
@@ -199,12 +201,14 @@ struct Index {
       this.allInterventions = intervs;
       this.allActions = acts;
       this.allCards = cards;
+      this.dataSyncState = '已同步';
     } catch (e) {
       if (e instanceof ApiError) {
         this.errorMessage = e.message;
       } else {
         this.errorMessage = '无法连接服务，请检查网络连接';
       }
+      this.dataSyncState = '同步失败';
     } finally {
       this.isLoading = false;
     }
@@ -302,7 +306,8 @@ struct Index {
           .margin({ top: 3 })
       }
       .layoutWeight(1)
-      .padding({ top: PMSpacing.XS, bottom: PMSpacing.XS })
+      .height(56)
+      .justifyContent(FlexAlign.Center)
       .onClick(() => {
         this.currentMainTabIndex = 0;
       })
@@ -320,7 +325,8 @@ struct Index {
           .margin({ top: 3 })
       }
       .layoutWeight(1)
-      .padding({ top: PMSpacing.XS, bottom: PMSpacing.XS })
+      .height(56)
+      .justifyContent(FlexAlign.Center)
       .onClick(() => {
         this.currentMainTabIndex = 1;
       })
@@ -338,7 +344,8 @@ struct Index {
           .margin({ top: 3 })
       }
       .layoutWeight(1)
-      .padding({ top: PMSpacing.XS, bottom: PMSpacing.XS })
+      .height(56)
+      .justifyContent(FlexAlign.Center)
       .onClick(() => {
         this.currentMainTabIndex = 2;
       })
@@ -356,7 +363,8 @@ struct Index {
           .margin({ top: 3 })
       }
       .layoutWeight(1)
-      .padding({ top: PMSpacing.XS, bottom: PMSpacing.XS })
+      .height(56)
+      .justifyContent(FlexAlign.Center)
       .onClick(() => {
         this.currentMainTabIndex = 3;
         this.loadLlmSettings();
@@ -365,7 +373,7 @@ struct Index {
       .accessibilitySelected(this.currentMainTabIndex === 3)
     }
     .width('100%')
-    .padding({ top: 6, bottom: 6 })
+    .padding({ top: 4, bottom: 4 })
     .backgroundColor(PMColors.SURFACE)
     .border({ width: { top: 1 }, color: PMColors.BORDER })
   }
@@ -385,7 +393,11 @@ struct Index {
             .fontColor(this.selectedScenarioFilter === 'ALL' ? PMColors.BRAND : PMColors.INK_SECONDARY)
             .backgroundColor(this.selectedScenarioFilter === 'ALL' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
             .borderRadius(PMRadius.XS)
+            .height(44)
+            .border({ width: this.selectedScenarioFilter === 'ALL' ? 2 : 1, color: this.selectedScenarioFilter === 'ALL' ? PMColors.BRAND : PMColors.BORDER })
             .margin({ right: PMSpacing.XS })
+            .accessibilityText('按场景筛选：全部')
+            .accessibilitySelected(this.selectedScenarioFilter === 'ALL')
             .onClick(() => {
               this.selectedScenarioFilter = 'ALL';
             })
@@ -396,7 +408,11 @@ struct Index {
             .fontColor(this.selectedScenarioFilter === 'COMPETITION' ? PMColors.BRAND : PMColors.INK_SECONDARY)
             .backgroundColor(this.selectedScenarioFilter === 'COMPETITION' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
             .borderRadius(PMRadius.XS)
+            .height(44)
+            .border({ width: this.selectedScenarioFilter === 'COMPETITION' ? 2 : 1, color: this.selectedScenarioFilter === 'COMPETITION' ? PMColors.BRAND : PMColors.BORDER })
             .margin({ right: PMSpacing.XS })
+            .accessibilityText('按场景筛选：竞赛备赛')
+            .accessibilitySelected(this.selectedScenarioFilter === 'COMPETITION')
             .onClick(() => {
               this.selectedScenarioFilter = 'COMPETITION';
             })
@@ -407,7 +423,11 @@ struct Index {
             .fontColor(this.selectedScenarioFilter === 'RESEARCH' ? PMColors.BRAND : PMColors.INK_SECONDARY)
             .backgroundColor(this.selectedScenarioFilter === 'RESEARCH' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
             .borderRadius(PMRadius.XS)
+            .height(44)
+            .border({ width: this.selectedScenarioFilter === 'RESEARCH' ? 2 : 1, color: this.selectedScenarioFilter === 'RESEARCH' ? PMColors.BRAND : PMColors.BORDER })
             .margin({ right: PMSpacing.XS })
+            .accessibilityText('按场景筛选：学术课题')
+            .accessibilitySelected(this.selectedScenarioFilter === 'RESEARCH')
             .onClick(() => {
               this.selectedScenarioFilter = 'RESEARCH';
             })
@@ -418,6 +438,10 @@ struct Index {
             .fontColor(this.selectedScenarioFilter === 'COURSE_DESIGN' ? PMColors.BRAND : PMColors.INK_SECONDARY)
             .backgroundColor(this.selectedScenarioFilter === 'COURSE_DESIGN' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
             .borderRadius(PMRadius.XS)
+            .height(44)
+            .border({ width: this.selectedScenarioFilter === 'COURSE_DESIGN' ? 2 : 1, color: this.selectedScenarioFilter === 'COURSE_DESIGN' ? PMColors.BRAND : PMColors.BORDER })
+            .accessibilityText('按场景筛选：课程设计')
+            .accessibilitySelected(this.selectedScenarioFilter === 'COURSE_DESIGN')
             .onClick(() => {
               this.selectedScenarioFilter = 'COURSE_DESIGN';
             })
@@ -603,6 +627,9 @@ struct Index {
           .fontColor(this.taskTabFilter === 'REMINDERS' ? PMColors.BRAND : PMColors.INK_SECONDARY)
           .backgroundColor(this.taskTabFilter === 'REMINDERS' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
           .borderRadius(PMRadius.SM)
+          .height(48)
+          .accessibilityText('查看主动提醒')
+          .accessibilitySelected(this.taskTabFilter === 'REMINDERS')
           .layoutWeight(1)
           .onClick(() => {
             this.taskTabFilter = 'REMINDERS';
@@ -614,6 +641,9 @@ struct Index {
           .fontColor(this.taskTabFilter === 'ACTIONS' ? PMColors.BRAND : PMColors.INK_SECONDARY)
           .backgroundColor(this.taskTabFilter === 'ACTIONS' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
           .borderRadius(PMRadius.SM)
+          .height(48)
+          .accessibilityText('查看待办行动')
+          .accessibilitySelected(this.taskTabFilter === 'ACTIONS')
           .layoutWeight(1)
           .margin({ left: PMSpacing.SM })
           .onClick(() => {
@@ -866,16 +896,53 @@ struct Index {
       Column() {
         // 1. 大模型接入配置卡片
         Column() {
-          Text('大模型接入配置')
-            .fontSize(PMFontSize.SECTION_TITLE)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.INK_PRIMARY)
+          Row() {
+            Row() {
+              SettingsIcon({ isSelected: true, iconSize: 22 })
+            }
+            .width(48)
+            .height(48)
+            .justifyContent(FlexAlign.Center)
+            .backgroundColor(PMColors.BRAND_LIGHT)
+            .borderRadius(PMRadius.SM)
 
-          Text('配置 OpenAI 兼容格式接口，为问忆程与成果生成提供大模型支持。')
-            .fontSize(PMFontSize.BODY)
-            .fontColor(PMColors.INK_SECONDARY)
-            .lineHeight(18)
-            .margin({ top: PMSpacing.XS })
+            Column() {
+              Text('大模型接入配置')
+                .fontSize(PMFontSize.SECTION_TITLE)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text('为问忆程与成果生成提供可切换的模型支持。')
+                .fontSize(PMFontSize.BODY)
+                .fontColor(PMColors.INK_SECONDARY)
+                .lineHeight(18)
+                .maxLines(2)
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                .margin({ top: PMSpacing.XS })
+            }
+            .layoutWeight(1)
+            .alignItems(HorizontalAlign.Start)
+            .margin({ left: PMSpacing.MD })
+          }
+          .width('100%')
+          .alignItems(VerticalAlign.Center)
+
+          Row() {
+            Text('当前运行方式')
+              .fontSize(PMFontSize.SECONDARY)
+              .fontColor(PMColors.INK_TERTIARY)
+            Text(this.llmMode === 'openai-compatible' ? '在线 API' : '离线确定性引擎')
+              .fontSize(PMFontSize.SECONDARY)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(this.llmMode === 'openai-compatible' ? PMColors.BRAND : PMColors.MEMORY)
+              .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 4, bottom: 4 })
+              .backgroundColor(this.llmMode === 'openai-compatible' ? PMColors.BRAND_LIGHT : PMColors.MEMORY_LIGHT)
+              .borderRadius(PMRadius.FULL)
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.SpaceBetween)
+          .padding({ top: PMSpacing.SM, bottom: PMSpacing.SM })
+          .margin({ top: PMSpacing.SM })
+          .border({ width: { top: 1, bottom: 1 }, color: PMColors.BORDER_SUBTLE })
 
           // 引擎模式
           Text('引擎模式')
@@ -885,25 +952,39 @@ struct Index {
             .margin({ top: PMSpacing.MD })
 
           Row() {
-            Button('OpenAI 兼容 API')
+            Button(this.llmMode === 'openai-compatible' ? '✓ OpenAI 兼容 API' : 'OpenAI 兼容 API')
               .fontSize(PMFontSize.CAPTION)
               .fontWeight(FontWeight.Medium)
               .fontColor(this.llmMode === 'openai-compatible' ? PMColors.BRAND : PMColors.INK_SECONDARY)
               .backgroundColor(this.llmMode === 'openai-compatible' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+              .border({
+                width: this.llmMode === 'openai-compatible' ? 2 : 1,
+                color: this.llmMode === 'openai-compatible' ? PMColors.BRAND : PMColors.BORDER
+              })
               .borderRadius(PMRadius.SM)
+              .height(48)
               .layoutWeight(1)
+              .accessibilityText('选择 OpenAI 兼容 API')
+              .accessibilitySelected(this.llmMode === 'openai-compatible')
               .onClick(() => {
                 this.llmMode = 'openai-compatible';
               })
 
-            Button('离线确定性引擎')
+            Button(this.llmMode === 'mock' ? '✓ 离线确定性引擎' : '离线确定性引擎')
               .fontSize(PMFontSize.CAPTION)
               .fontWeight(FontWeight.Medium)
               .fontColor(this.llmMode === 'mock' ? PMColors.BRAND : PMColors.INK_SECONDARY)
               .backgroundColor(this.llmMode === 'mock' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+              .border({
+                width: this.llmMode === 'mock' ? 2 : 1,
+                color: this.llmMode === 'mock' ? PMColors.BRAND : PMColors.BORDER
+              })
               .borderRadius(PMRadius.SM)
+              .height(48)
               .layoutWeight(1)
               .margin({ left: PMSpacing.SM })
+              .accessibilityText('选择离线确定性引擎')
+              .accessibilitySelected(this.llmMode === 'mock')
               .onClick(() => {
                 this.llmMode = 'mock';
               })
@@ -911,88 +992,110 @@ struct Index {
           .width('100%')
           .margin({ top: PMSpacing.XS })
 
-          // Base URL
-          Text('API Base URL')
-            .fontSize(PMFontSize.SECONDARY)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.INK_SECONDARY)
-            .margin({ top: PMSpacing.MD })
-          TextInput({ text: this.llmBaseUrl, placeholder: 'https://api.openai.com/v1' })
-            .onChange((v: string) => {
-              this.llmBaseUrl = v;
-            })
-            .fontSize(PMFontSize.BODY)
-            .height(40)
-            .backgroundColor(PMColors.SURFACE_SUBTLE)
-            .borderRadius(PMRadius.SM)
-            .border({ width: 1, color: PMColors.BORDER })
-            .margin({ top: PMSpacing.XS })
-
-          // Model Name
-          Text('模型名称')
-            .fontSize(PMFontSize.SECONDARY)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.INK_SECONDARY)
-            .margin({ top: PMSpacing.SM })
-          TextInput({ text: this.llmModelName, placeholder: '例如：gpt-4o-mini / deepseek-chat / qwen-plus' })
-            .onChange((v: string) => {
-              this.llmModelName = v;
-            })
-            .fontSize(PMFontSize.BODY)
-            .height(40)
-            .backgroundColor(PMColors.SURFACE_SUBTLE)
-            .borderRadius(PMRadius.SM)
-            .border({ width: 1, color: PMColors.BORDER })
-            .margin({ top: PMSpacing.XS })
-
-          // API Key
-          Row() {
-            Text('API 密钥')
+          if (this.llmMode === 'openai-compatible') {
+            // Base URL
+            Text('API Base URL')
               .fontSize(PMFontSize.SECONDARY)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.INK_SECONDARY)
+              .margin({ top: PMSpacing.MD })
+            TextInput({ text: this.llmBaseUrl, placeholder: 'https://api.openai.com/v1' })
+              .onChange((v: string) => {
+                this.llmBaseUrl = v;
+              })
+              .fontSize(PMFontSize.BODY)
+              .height(48)
+              .backgroundColor(PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.SM)
+              .border({ width: 1, color: PMColors.BORDER })
+              .margin({ top: PMSpacing.XS })
 
-            if (this.hasApiKey) {
-              Text(`已配置 (${this.apiKeyMasked})`)
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.SUCCESS)
-            } else {
-              Text('未配置')
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.RISK)
+            // Model Name
+            Text('模型名称')
+              .fontSize(PMFontSize.SECONDARY)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.INK_SECONDARY)
+              .margin({ top: PMSpacing.SM })
+            TextInput({ text: this.llmModelName, placeholder: '例如：gpt-4o-mini / deepseek-chat / qwen-plus' })
+              .onChange((v: string) => {
+                this.llmModelName = v;
+              })
+              .fontSize(PMFontSize.BODY)
+              .height(48)
+              .backgroundColor(PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.SM)
+              .border({ width: 1, color: PMColors.BORDER })
+              .margin({ top: PMSpacing.XS })
+
+            // API Key
+            Row() {
+              Text('API 密钥')
+                .fontSize(PMFontSize.SECONDARY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_SECONDARY)
+
+              if (this.hasApiKey) {
+                Text(`已配置 (${this.apiKeyMasked})`)
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.SUCCESS)
+              } else {
+                Text('未配置')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.RISK)
+              }
             }
-          }
-          .width('100%')
-          .justifyContent(FlexAlign.SpaceBetween)
-          .margin({ top: PMSpacing.SM })
+            .width('100%')
+            .justifyContent(FlexAlign.SpaceBetween)
+            .margin({ top: PMSpacing.SM })
 
-          TextInput({ text: this.llmApiKey, placeholder: this.hasApiKey ? '输入新 Key 覆盖，或留空保留' : '输入以 sk- 开头的密钥' })
-            .type(InputType.Password)
-            .onChange((v: string) => {
-              this.llmApiKey = v;
-            })
-            .fontSize(PMFontSize.BODY)
-            .height(40)
-            .backgroundColor(PMColors.SURFACE_SUBTLE)
+            TextInput({ text: this.llmApiKey, placeholder: this.hasApiKey ? '输入新 Key 覆盖，或留空保留' : '输入以 sk- 开头的密钥' })
+              .type(InputType.Password)
+              .onChange((v: string) => {
+                this.llmApiKey = v;
+              })
+              .fontSize(PMFontSize.BODY)
+              .height(48)
+              .backgroundColor(PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.SM)
+              .border({ width: 1, color: PMColors.BORDER })
+              .margin({ top: PMSpacing.XS })
+            Text('密钥只用于当前本地运行，不会回显；长期配置请使用部署环境变量。')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+              .lineHeight(18)
+              .margin({ top: PMSpacing.XS })
+          } else {
+            Column() {
+              Text('离线确定性引擎已就绪')
+                .fontSize(PMFontSize.BODY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.MEMORY)
+              Text('无需配置网络、模型地址或 API 密钥；结果会按本地规则生成并可复核。')
+                .fontSize(PMFontSize.SECONDARY)
+                .fontColor(PMColors.INK_SECONDARY)
+                .lineHeight(20)
+                .margin({ top: PMSpacing.XS })
+            }
+            .width('100%')
+            .alignItems(HorizontalAlign.Start)
+            .padding(PMSpacing.MD)
+            .backgroundColor(PMColors.MEMORY_LIGHT)
             .borderRadius(PMRadius.SM)
-            .border({ width: 1, color: PMColors.BORDER })
-            .margin({ top: PMSpacing.XS })
+            .margin({ top: PMSpacing.MD })
+          }
 
           // 探针测试结果
           if (this.probeResult !== undefined) {
             Column() {
               if (this.probeResult.success) {
-                Row() {
-                  Text('连通测试成功')
+                Text('✓ 连通测试成功')
                     .fontSize(PMFontSize.BODY)
                     .fontWeight(FontWeight.Medium)
                     .fontColor(PMColors.SUCCESS)
-                  Text(`耗时 ${this.probeResult.latencyMs}ms · ${this.probeResult.model}`)
+                Text(`耗时 ${this.probeResult.latencyMs}ms · ${this.probeResult.model}`)
                     .fontSize(PMFontSize.CAPTION)
                     .fontColor(PMColors.INK_SECONDARY)
-                }
-                .width('100%')
-                .justifyContent(FlexAlign.SpaceBetween)
+                    .margin({ top: PMSpacing.XS })
               } else {
                 Text('连通测试失败')
                   .fontSize(PMFontSize.BODY)
@@ -1015,24 +1118,27 @@ struct Index {
           if (this.settingsFeedback !== '') {
             Text(this.settingsFeedback)
               .fontSize(PMFontSize.BODY)
-              .fontColor(PMColors.BRAND)
+              .fontColor(this.settingsFeedback.indexOf('失败') >= 0 ? PMColors.RISK : PMColors.SUCCESS)
               .margin({ top: PMSpacing.XS })
           }
 
           // 操作按钮
           Row() {
-            Button(this.isProbing ? '正在测试...' : '测试连通性')
-              .fontSize(PMFontSize.BUTTON)
-              .fontWeight(FontWeight.Medium)
-              .fontColor(PMColors.INK_PRIMARY)
-              .backgroundColor(PMColors.SURFACE_SUBTLE)
-              .border({ width: 1, color: PMColors.BORDER })
-              .borderRadius(PMRadius.SM)
-              .enabled(!this.isProbing)
-              .layoutWeight(1)
-              .onClick(() => {
-                this.probeLlmConnection();
-              })
+            if (this.llmMode === 'openai-compatible') {
+              Button(this.isProbing ? '正在测试...' : '测试连通性')
+                .fontSize(PMFontSize.BUTTON)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+                .backgroundColor(PMColors.SURFACE_SUBTLE)
+                .border({ width: 1, color: PMColors.BORDER })
+                .borderRadius(PMRadius.SM)
+                .height(48)
+                .enabled(!this.isProbing)
+                .layoutWeight(1)
+                .onClick(() => {
+                  this.probeLlmConnection();
+                })
+            }
 
             Button(this.isSavingSettings ? '保存中...' : '保存配置')
               .fontSize(PMFontSize.BUTTON)
@@ -1040,6 +1146,7 @@ struct Index {
               .fontColor(PMColors.SURFACE)
               .backgroundColor(PMColors.BRAND)
               .borderRadius(PMRadius.SM)
+              .height(48)
               .enabled(!this.isSavingSettings)
               .layoutWeight(1)
               .margin({ left: PMSpacing.SM })
@@ -1055,6 +1162,7 @@ struct Index {
         .backgroundColor(PMColors.SURFACE)
         .borderRadius(PMRadius.MD)
         .border({ width: 1, color: PMColors.BORDER })
+        .alignItems(HorizontalAlign.Start)
 
         // 2. 服务端连接状态卡片
         Column() {
@@ -1072,18 +1180,22 @@ struct Index {
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.BRAND)
               .margin({ left: PMSpacing.SM })
+              .layoutWeight(1)
+              .maxLines(1)
+              .textOverflow({ overflow: TextOverflow.Ellipsis })
           }
           .width('100%')
           .margin({ top: PMSpacing.SM })
 
           Row() {
-            Text('网络状态:')
+            Text('数据同步:')
               .fontSize(PMFontSize.BODY)
               .fontColor(PMColors.INK_SECONDARY)
-            Text('正常连通')
+            Text(this.dataSyncState)
               .fontSize(PMFontSize.BODY)
               .fontWeight(FontWeight.Medium)
-              .fontColor(PMColors.SUCCESS)
+              .fontColor(this.dataSyncState === '同步失败' ? PMColors.RISK :
+                this.dataSyncState === '同步中...' ? PMColors.BRAND : PMColors.SUCCESS)
               .margin({ left: PMSpacing.SM })
           }
           .width('100%')
@@ -1095,6 +1207,7 @@ struct Index {
             .fontColor(PMColors.SURFACE)
             .backgroundColor(PMColors.BRAND)
             .borderRadius(PMRadius.SM)
+            .height(48)
             .margin({ top: PMSpacing.MD })
             .onClick(() => {
               this.loadAllData();
@@ -1106,6 +1219,7 @@ struct Index {
         .backgroundColor(PMColors.SURFACE)
         .borderRadius(PMRadius.MD)
         .border({ width: 1, color: PMColors.BORDER })
+        .alignItems(HorizontalAlign.Start)
         .margin({ top: PMSpacing.MD })
 
         // 3. 关于产品
@@ -1132,8 +1246,11 @@ struct Index {
         .backgroundColor(PMColors.SURFACE)
         .borderRadius(PMRadius.MD)
         .border({ width: 1, color: PMColors.BORDER })
+        .alignItems(HorizontalAlign.Start)
         .margin({ top: PMSpacing.MD })
       }
+      .width('100%')
+      .alignItems(HorizontalAlign.Start)
       .padding(PMSpacing.LG)
     }
     .layoutWeight(1)
@@ -1180,6 +1297,8 @@ struct Index {
                 .fontColor(PMColors.SURFACE)
                 .backgroundColor(PMColors.BRAND)
                 .borderRadius(PMRadius.SM)
+                .height(48)
+                .accessibilityText('新建项目')
                 .padding({ left: PMSpacing.MD, right: PMSpacing.MD, top: PMSpacing.SM, bottom: PMSpacing.SM })
                 .onClick(() => {
                   this.openCreateDialog();
@@ -1239,7 +1358,7 @@ struct Index {
                 this.newTitle = value;
               })
               .fontSize(PMFontSize.BODY)
-              .height(42)
+              .height(48)
               .backgroundColor(PMColors.SURFACE_SUBTLE)
               .borderRadius(PMRadius.SM)
               .border({ width: 1, color: PMColors.BORDER })
@@ -1255,7 +1374,7 @@ struct Index {
                 this.newGoal = value;
               })
               .fontSize(PMFontSize.BODY)
-              .height(42)
+              .height(48)
               .backgroundColor(PMColors.SURFACE_SUBTLE)
               .borderRadius(PMRadius.SM)
               .border({ width: 1, color: PMColors.BORDER })
@@ -1335,6 +1454,7 @@ struct Index {
                 .backgroundColor(PMColors.SURFACE_SUBTLE)
                 .border({ width: 1, color: PMColors.BORDER })
                 .borderRadius(PMRadius.SM)
+                .height(48)
                 .enabled(!this.isCreating)
                 .onClick(() => {
                   this.closeCreateDialog();
@@ -1346,6 +1466,7 @@ struct Index {
                 .fontColor(PMColors.SURFACE)
                 .backgroundColor(this.newTitle.trim() !== '' && !this.isCreating ? PMColors.BRAND : PMColors.INK_MUTED)
                 .borderRadius(PMRadius.SM)
+                .height(48)
                 .margin({ left: PMSpacing.MD })
                 .enabled(this.newTitle.trim() !== '' && !this.isCreating)
                 .onClick(() => {

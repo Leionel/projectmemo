@@ -1,20 +1,23 @@
 import { PMColors, PMSpacing, PMFontSize, PMRadius } from '../common/DesignTokens';
 import { ProjectDashboard } from '../models/Project';
+import { DeadlineBadge } from './DeadlineBadge';
+import { TextFormatters } from '../common/TextFormatters';
 
 @Component
 export struct ProjectStatusCard {
   @Prop dashboard: ProjectDashboard = new ProjectDashboard();
+  @Prop scenario: string = 'COMPETITION';
 
   build() {
     Column() {
-      // 顶行：备赛进度条与就绪度
+      // 顶行：项目进度与就绪度
       Row() {
         Column() {
-          Text('备赛健康度')
+          Text(TextFormatters.projectProgressLabel(this.scenario))
             .fontSize(PMFontSize.SM)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.INK_SECONDARY)
-          Text(`${this.dashboard.readiness.percentage}%`)
+          Text(this.dashboard.readiness.percentage === 0 ? '尚未形成' : `${this.dashboard.readiness.percentage}%`)
             .fontSize(PMFontSize.DISPLAY)
             .fontWeight(FontWeight.Bold)
             .fontColor(PMColors.BRAND)
@@ -22,27 +25,8 @@ export struct ProjectStatusCard {
         }
         .alignItems(HorizontalAlign.Start)
 
-        Column() {
-          if (this.dashboard.deadline.label !== '') {
-            Row() {
-              Text('⏳ ')
-                .fontSize(PMFontSize.SM)
-              Text(this.dashboard.deadline.label)
-                .fontSize(PMFontSize.SM)
-                .fontWeight(FontWeight.Bold)
-                .fontColor(PMColors.RISK)
-            }
-            .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: PMSpacing.XS, bottom: PMSpacing.XS })
-            .backgroundColor(PMColors.RISK_LIGHT)
-            .borderRadius(PMRadius.SM)
-            .border({ width: 1, color: PMColors.RISK + '33' })
-          } else {
-            Text('未设截止日')
-              .fontSize(PMFontSize.SM)
-              .fontColor(PMColors.INK_TERTIARY)
-          }
-        }
-        .alignItems(HorizontalAlign.End)
+        DeadlineBadge({ deadline: this.dashboard.deadline })
+          .alignItems(HorizontalAlign.End)
       }
       .width('100%')
       .justifyContent(FlexAlign.SpaceBetween)

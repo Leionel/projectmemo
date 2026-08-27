@@ -5,6 +5,77 @@
 
 export class TextFormatters {
   /**
+   * 判断一段文本是否明显包含历史编码/录入损坏。
+   * 单个问号可能是正常标点，因此只拦截连续多个问号或 Unicode 替换字符。
+   */
+  static isUnreadableText(value: string): boolean {
+    if (value === '') {
+      return false;
+    }
+    if (value.includes('\uFFFD')) {
+      return true;
+    }
+    const questionMatches = value.match(/\?/g);
+    if (questionMatches === null || questionMatches.length < 3) {
+      return false;
+    }
+    const cjkMatches = value.match(/[\u3400-\u9FFF]/g);
+    return cjkMatches === null || questionMatches.length > cjkMatches.length;
+  }
+
+  /**
+   * 面向用户展示文本时，不能把损坏的原始字符串伪装成正常内容。
+   */
+  static readableText(value: string, fallback: string = '这条记录文本无法读取，请重新录入。'): string {
+    return TextFormatters.isUnreadableText(value) ? fallback : value;
+  }
+
+  /**
+   * 规范化标题和摘要，专门用于判断是否存在重复展示。
+   * 不改写原始数据，只减少移动端上的重复信息。
+   */
+  static normalizeText(value: string): string {
+    return value.trim().replace(/\s+/g, ' ').replace(/[。．.]+$/g, '');
+  }
+
+  static shouldShowSummary(title: string, summary: string): boolean {
+    const normalizedSummary = TextFormatters.normalizeText(summary);
+    if (normalizedSummary === '') {
+      return false;
+    }
+    return TextFormatters.normalizeText(title) !== normalizedSummary;
+  }
+
+  /**
+   * 标记标题、摘要或原始采集文本损坏的记忆，供列表降级展示。
+   */
+  static isDamagedMemory(title: string, summary: string, rawText: string = ''): boolean {
+    return TextFormatters.isUnreadableText(title) ||
+      TextFormatters.isUnreadableText(summary) ||
+      TextFormatters.isUnreadableText(rawText);
+  }
+
+  /**
+   * 对成果 Markdown 做逐行保护，保留列表结构并替换不可读的历史记录行。
+   */
+  static readableMarkdown(value: string): string {
+    const lines = value.split('\n');
+    const result: string[] = [];
+    let changed = false;
+    for (const line of lines) {
+      if (!TextFormatters.isUnreadableText(line)) {
+        result.push(line);
+        continue;
+      }
+      const marker = line.match(/^\s*(?:[-*•]\s+|\d+\.\s+|>\s*)/);
+      const prefix = marker === null ? '' : marker[0];
+      result.push(`${prefix}历史记录文本无法读取，请重新录入。`);
+      changed = true;
+    }
+    return changed ? result.join('\n') : value;
+  }
+
+  /**
    * 触发规则 / 干预触发类型翻译
    */
   static triggerTypeToChinese(triggerType: string): string {
@@ -120,7 +191,22 @@ export class TextFormatters {
       'material_requirement': '参赛要求',
       'risk_alert': '项目风险'
     };
-    return map[type] ?? '知识记忆';
+    return map[type] ?? '记忆';
+  }
+
+  /**
+   * 项目进度的用户可见名称：根据项目场景选择，不让课程设计误显示为备赛进度。
+   */
+  static projectProgressLabel(scenario: string): string {
+    const map: Record<string, string> = {
+      'COMPETITION': '备赛准备度',
+      'RESEARCH': '研究进展',
+      'COURSE_DESIGN': '项目进度',
+      'INNOVATION': '项目进度',
+      'LAB_TASK': '项目进度',
+      'HACKATHON': '项目进度'
+    };
+    return map[scenario] ?? '项目进度';
   }
 
   /**
@@ -131,6 +217,8 @@ export class TextFormatters {
       'COMPETITION': '学术备赛',
       'RESEARCH': '学术课题',
       'COURSE_DESIGN': '课程设计',
+      'INNOVATION': '创新项目',
+      'LAB_TASK': '实验任务',
       'HACKATHON': '创客黑客松'
     };
     return map[scenario] ?? '项目档案';

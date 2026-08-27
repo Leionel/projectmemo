@@ -25,19 +25,19 @@ import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily } from '../comm
 import { SeverityBadge, StatusBadge, MemoryTypeBadge } from '../components/MetricBadge';
 import { LoadingStateView, ErrorStateView, EmptyStateView } from '../components/AsyncStateView';
 import {
-  FolderIcon,
+  DashboardIcon,
   MemoryIcon,
   TaskIcon,
   CopilotIcon,
   ArtifactIcon,
-  SettingsIcon,
-  ClockIcon,
+  MoreIcon,
   CheckIcon,
   AlertIcon,
   SpineNodeIcon
 } from '../components/PMIcons';
 import { TextFormatters } from '../common/TextFormatters';
 import { MarkdownView } from '../components/MarkdownView';
+import { DeadlineBadge } from '../components/DeadlineBadge';
 
 @Entry
 @Component
@@ -59,7 +59,7 @@ struct ProjectHome {
   @State errorMessage: string = '';
   @State routeError: string = '';
 
-  // Tab 0: 驾驶舱专属状态
+  // Tab 0: 工作台专属状态
   @State rawText: string = '';
   @State sourceType: string = '随手记录';
   @State isCapturing: boolean = false;
@@ -71,6 +71,8 @@ struct ProjectHome {
   @State isRetryingAttachment: boolean = false;
   @State isEvaluating: boolean = false;
   @State evaluateError: string = '';
+  @State showDemoControls: boolean = false;
+  @State showCapturePanel: boolean = false;
   @State showSettingsDialog: boolean = false;
   @State editTitle: string = '';
   @State editGoal: string = '';
@@ -103,6 +105,7 @@ struct ProjectHome {
   @State isGeneratingArtifact: boolean = false;
   @State artifactError: string = '';
   @State currentArtifact: ArtifactItem | undefined = undefined;
+  @State isArtifactReader: boolean = false;
   @State isConfirmingEvidence: boolean = false;
   @State evidenceFeedback: string = '';
   @State evidenceError: string = '';
@@ -129,6 +132,9 @@ struct ProjectHome {
       return;
     }
     this.projectId = params['projectId'] ?? '';
+    if (params['tab'] === 'memory') {
+      this.currentTabIndex = 1;
+    }
     if (this.projectId === '') {
       this.routeError = '页面参数缺失，项目ID无效';
       return;
@@ -280,6 +286,52 @@ struct ProjectHome {
     return new ProjectDashboard();
   }
 
+  private getNextActionId(): string {
+    for (const action of this.actions) {
+      if (action.status === 'TODO' || action.status === 'DOING') {
+        return action.id;
+      }
+    }
+    return '';
+  }
+
+  private getNextActionStatus(): string {
+    for (const action of this.actions) {
+      if (action.status === 'TODO' || action.status === 'DOING') {
+        return action.status;
+      }
+    }
+    return '';
+  }
+
+  private getNextActionTitle(): string {
+    for (const action of this.actions) {
+      if (action.status === 'TODO' || action.status === 'DOING') {
+        return TextFormatters.readableText(action.title, '下一项行动标题无法读取');
+      }
+    }
+    return '暂无待推进的行动';
+  }
+
+  private getNextActionDescription(): string {
+    for (const action of this.actions) {
+      if (action.status === 'TODO' || action.status === 'DOING') {
+        if (action.description !== undefined && action.description !== '') {
+          return TextFormatters.readableText(action.description, '行动说明无法读取，请打开待办查看详情。');
+        }
+        return action.status === 'DOING' ? '继续推进并在完成后留下事实回执。' : '今天建议开始这项行动，并保留完成事实。';
+      }
+    }
+    return '当前没有待推进的行动，可以先记录新的项目碎片。';
+  }
+
+  private startNextAction(): void {
+    const actionId = this.getNextActionId();
+    if (actionId !== '') {
+      this.startAction(actionId);
+    }
+  }
+
   private async searchMemory(): Promise<void> {
     const query = this.memorySearchQuery.trim();
     const type = this.selectedMemoryType;
@@ -384,7 +436,7 @@ struct ProjectHome {
     this.currentArtifact = found;
   }
 
-  // --- 驾驶舱操作 ---
+  // --- 工作台操作 ---
   private async evaluate(scenario?: string, clearSim: boolean = false): Promise<void> {
     if (this.isEvaluating) {
       return;
@@ -599,7 +651,8 @@ struct ProjectHome {
       return;
     }
     const systemPasteboard = pasteboard.getSystemPasteboard();
-    const pasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, this.currentArtifact.content);
+    const readableContent = TextFormatters.readableMarkdown(this.currentArtifact.content);
+    const pasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, readableContent);
     systemPasteboard.setData(pasteData);
     promptAction.showToast({ message: '已复制正文' });
   }
@@ -632,18 +685,19 @@ struct ProjectHome {
       .accessibilityText('返回项目列表')
 
       Column() {
-        Text(this.project.title !== '' ? this.project.title : '项目档案')
+        Text(this.project.title !== '' ? TextFormatters.readableText(this.project.title, '项目名称无法读取') : '项目档案')
           .fontSize(PMFontSize.PAGE_TITLE)
           .fontWeight(FontWeight.Bold)
           .fontFamily(PMFontFamily.SANS)
           .fontColor(PMColors.INK_PRIMARY)
-          .maxLines(1)
+          .maxLines(2)
+          .lineHeight(24)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
 
-        Text(this.currentTabIndex === 0 ? '驾驶舱' :
+        Text(`项目工作区 · ${this.currentTabIndex === 0 ? '工作台' :
           this.currentTabIndex === 1 ? '记忆' :
             this.currentTabIndex === 2 ? '待办' :
-              this.currentTabIndex === 3 ? '问忆程' : '成果')
+              this.currentTabIndex === 3 ? '问忆程' : '成果'}`)
           .fontSize(PMFontSize.SECONDARY)
           .fontColor(PMColors.INK_TERTIARY)
           .margin({ top: 2 })
@@ -653,7 +707,7 @@ struct ProjectHome {
       .margin({ left: PMSpacing.MD })
 
       Row() {
-        SettingsIcon({ isSelected: false, iconSize: 20 })
+        MoreIcon({ isSelected: false, iconSize: 20 })
       }
       .width(44)
       .height(44)
@@ -661,37 +715,40 @@ struct ProjectHome {
       .onClick(() => {
         this.openSettingsDialog();
       })
-      .accessibilityText('项目设置')
+      .accessibilityText('更多项目设置')
+      .accessibilityDescription('编辑项目名称、目标和简介')
     }
     .width('100%')
+    .alignItems(VerticalAlign.Center)
     .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.SM })
     .backgroundColor(PMColors.SURFACE)
     .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
   }
 
   // ----------------------------------------------------
-  // 底部导航栏 Bar (5 项：驾驶舱 / 记忆 / 待办 / 问忆程 / 成果)
+  // 底部导航栏 Bar (5 项：工作台 / 记忆 / 待办 / 问忆程 / 成果)
   // ----------------------------------------------------
   @Builder
   private BottomTabBar() {
     Row() {
-      // 1. 驾驶舱
+      // 1. 工作台
       Column() {
-        FolderIcon({ isSelected: this.currentTabIndex === 0, iconSize: 20 })
-        Text('驾驶舱')
+        DashboardIcon({ isSelected: this.currentTabIndex === 0, iconSize: 20 })
+        Text('工作台')
           .fontSize(PMFontSize.BOTTOM_NAV)
           .fontFamily(PMFontFamily.SERIF)
           .fontWeight(this.currentTabIndex === 0 ? FontWeight.Medium : FontWeight.Regular)
           .fontColor(this.currentTabIndex === 0 ? PMColors.BRAND : PMColors.INK_TERTIARY)
           .margin({ top: 3 })
       }
-      .layoutWeight(1)
-      .height(56)
-      .justifyContent(FlexAlign.Center)
-      .onClick(() => {
-        this.currentTabIndex = 0;
+        .layoutWeight(1)
+        .height(56)
+        .justifyContent(FlexAlign.Center)
+        .onClick(() => {
+          this.isArtifactReader = false;
+          this.currentTabIndex = 0;
       })
-      .accessibilityText('驾驶舱')
+      .accessibilityText('工作台')
       .accessibilitySelected(this.currentTabIndex === 0)
 
       // 2. 记忆
@@ -705,10 +762,11 @@ struct ProjectHome {
           .margin({ top: 3 })
       }
       .layoutWeight(1)
-      .height(56)
-      .justifyContent(FlexAlign.Center)
-      .onClick(() => {
-        this.currentTabIndex = 1;
+        .height(56)
+        .justifyContent(FlexAlign.Center)
+        .onClick(() => {
+          this.isArtifactReader = false;
+          this.currentTabIndex = 1;
       })
       .accessibilityText('记忆')
       .accessibilitySelected(this.currentTabIndex === 1)
@@ -724,10 +782,11 @@ struct ProjectHome {
           .margin({ top: 3 })
       }
       .layoutWeight(1)
-      .height(56)
-      .justifyContent(FlexAlign.Center)
-      .onClick(() => {
-        this.currentTabIndex = 2;
+        .height(56)
+        .justifyContent(FlexAlign.Center)
+        .onClick(() => {
+          this.isArtifactReader = false;
+          this.currentTabIndex = 2;
       })
       .accessibilityText('待办')
       .accessibilitySelected(this.currentTabIndex === 2)
@@ -743,10 +802,11 @@ struct ProjectHome {
           .margin({ top: 3 })
       }
       .layoutWeight(1)
-      .height(56)
-      .justifyContent(FlexAlign.Center)
-      .onClick(() => {
-        this.currentTabIndex = 3;
+        .height(56)
+        .justifyContent(FlexAlign.Center)
+        .onClick(() => {
+          this.isArtifactReader = false;
+          this.currentTabIndex = 3;
       })
       .accessibilityText('问忆程')
       .accessibilitySelected(this.currentTabIndex === 3)
@@ -776,8 +836,176 @@ struct ProjectHome {
     .border({ width: { top: 1 }, color: PMColors.BORDER })
   }
 
+  @Builder
+  private NextActionView() {
+    Column() {
+      Row() {
+        Text('下一步')
+          .fontSize(PMFontSize.SECTION_TITLE)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.INK_PRIMARY)
+        Text(this.getNextActionId() === '' ? '暂无待推进事项' : '建议今天处理')
+          .fontSize(PMFontSize.CAPTION)
+          .fontColor(PMColors.INK_TERTIARY)
+      }
+      .width('100%')
+      .justifyContent(FlexAlign.SpaceBetween)
+
+      Column() {
+        Text(this.getNextActionTitle())
+          .fontSize(PMFontSize.BODY)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.INK_PRIMARY)
+          .lineHeight(22)
+
+        Text(this.getNextActionDescription())
+          .fontSize(PMFontSize.SECONDARY)
+          .fontColor(PMColors.INK_SECONDARY)
+          .lineHeight(18)
+          .margin({ top: PMSpacing.XS })
+
+        if (this.getNextActionId() !== '') {
+          Button(this.getNextActionStatus() === 'DOING' ? '查看待办' : '开始行动')
+            .fontSize(PMFontSize.BUTTON)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.SURFACE)
+            .backgroundColor(PMColors.BRAND)
+            .borderRadius(PMRadius.SM)
+            .height(48)
+            .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.SM })
+            .margin({ top: PMSpacing.MD })
+            .onClick(() => {
+              if (this.getNextActionStatus() === 'DOING') {
+                this.currentTabIndex = 2;
+              } else {
+                this.startNextAction();
+              }
+            })
+            .accessibilityText(this.getNextActionStatus() === 'DOING' ? '查看下一项待办' : '开始下一项行动')
+        }
+      }
+      .width('100%')
+      .padding(PMSpacing.MD)
+      .backgroundColor(PMColors.BRAND_LIGHT)
+      .borderRadius(PMRadius.SM)
+      .margin({ top: PMSpacing.SM })
+      .alignItems(HorizontalAlign.Start)
+    }
+    .width('100%')
+    .padding(PMSpacing.LG)
+    .backgroundColor(PMColors.SURFACE)
+    .borderRadius(PMRadius.MD)
+    .border({ width: 1, color: PMColors.BORDER })
+    .margin({ top: PMSpacing.MD })
+    .alignItems(HorizontalAlign.Start)
+  }
+
+  @Builder
+  private RecentChangesView() {
+    Column() {
+      Row() {
+        Text('近期变化')
+          .fontSize(PMFontSize.SECTION_TITLE)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.INK_PRIMARY)
+        Text(`${this.project._count.cards} 条记忆 · ${this.actions.filter((a) => a.status === 'DONE').length} 个行动完成`)
+          .fontSize(PMFontSize.CAPTION)
+          .fontColor(PMColors.INK_TERTIARY)
+      }
+      .width('100%')
+      .justifyContent(FlexAlign.SpaceBetween)
+
+      Column() {
+        if (this.project.cards.length > 0) {
+          Row() {
+            MemoryIcon({ isSelected: false, iconSize: 18 })
+            Column() {
+              Text(TextFormatters.readableText(this.project.cards[0].title, '最近新增的记忆文本无法读取'))
+                .fontSize(PMFontSize.BODY)
+                .fontColor(PMColors.INK_PRIMARY)
+                .maxLines(2)
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+              Text(`新增记忆 · ${this.project.cards[0].createdAt.length >= 10 ? this.project.cards[0].createdAt.substring(0, 10) : '近期'}`)
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.MEMORY)
+                .margin({ top: 2 })
+            }
+            .layoutWeight(1)
+            .alignItems(HorizontalAlign.Start)
+            .margin({ left: PMSpacing.SM })
+          }
+          .width('100%')
+          .alignItems(VerticalAlign.Center)
+        }
+
+        ForEach(this.actions.filter((a) => a.status === 'DONE').slice(0, 2), (action: ActionItem) => {
+          Row() {
+            CheckIcon({ iconSize: 18, color: PMColors.SUCCESS })
+            Column() {
+              Text(TextFormatters.readableText(action.title, '已完成行动标题无法读取'))
+                .fontSize(PMFontSize.BODY)
+                .fontColor(PMColors.INK_PRIMARY)
+                .maxLines(2)
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+              Text(action.resultText !== undefined && action.resultText !== '' ?
+                TextFormatters.readableText(action.resultText, '完成回执文本无法读取') : '已完成并留下回执')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.SUCCESS)
+                .maxLines(1)
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                .margin({ top: 2 })
+            }
+            .layoutWeight(1)
+            .alignItems(HorizontalAlign.Start)
+            .margin({ left: PMSpacing.SM })
+          }
+          .width('100%')
+          .alignItems(VerticalAlign.Center)
+          .margin({ top: PMSpacing.SM })
+        }, (action: ActionItem) => action.id)
+
+        if (this.artifacts.length > 0) {
+          Row() {
+            ArtifactIcon({ isSelected: false, iconSize: 18 })
+            Column() {
+              Text(`${TextFormatters.artifactTypeToChinese(this.artifacts[0].artifactType)} 已更新`)
+                .fontSize(PMFontSize.BODY)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text(`成果 · ${this.artifacts[0].createdAt.length >= 10 ? this.artifacts[0].createdAt.substring(0, 10) : '近期'}`)
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.BRAND)
+                .margin({ top: 2 })
+            }
+            .layoutWeight(1)
+            .alignItems(HorizontalAlign.Start)
+            .margin({ left: PMSpacing.SM })
+          }
+          .width('100%')
+          .alignItems(VerticalAlign.Center)
+          .margin({ top: PMSpacing.SM })
+        }
+
+        if (this.project.cards.length === 0 && this.actions.filter((a) => a.status === 'DONE').length === 0 && this.artifacts.length === 0) {
+          Text('还没有新的项目变化，先记录一条事实。')
+            .fontSize(PMFontSize.SECONDARY)
+            .fontColor(PMColors.INK_TERTIARY)
+            .margin({ top: PMSpacing.MD })
+        }
+      }
+      .width('100%')
+      .margin({ top: PMSpacing.SM })
+    }
+    .width('100%')
+    .padding(PMSpacing.LG)
+    .backgroundColor(PMColors.SURFACE)
+    .borderRadius(PMRadius.MD)
+    .border({ width: 1, color: PMColors.BORDER })
+    .margin({ top: PMSpacing.MD })
+    .alignItems(HorizontalAlign.Start)
+  }
+
   // ----------------------------------------------------
-  // Tab 0: 驾驶舱 (Cockpit) 视图 —— 围绕“三个问题”设计
+  // Tab 0: 工作台 (Workbench) 视图 —— 围绕“三个问题”设计
   // ----------------------------------------------------
   @Builder
   private CockpitView() {
@@ -790,7 +1018,9 @@ struct ProjectHome {
               Text('当前状态')
                 .fontSize(PMFontSize.SECONDARY)
                 .fontColor(PMColors.INK_TERTIARY)
-              Text(`备赛准备度 ${this.dashboard.readiness.percentage}%`)
+              Text(this.project._count.cards === 0 && this.project._count.artifacts === 0 ?
+                '尚未形成项目进度' :
+                `${TextFormatters.projectProgressLabel(this.project.scenario)} ${this.dashboard.readiness.percentage}%`)
                 .fontSize(PMFontSize.SECTION_TITLE)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
@@ -798,19 +1028,7 @@ struct ProjectHome {
             }
             .alignItems(HorizontalAlign.Start)
 
-            if (this.dashboard.deadline.label !== '') {
-              Row() {
-                ClockIcon({ iconSize: 12, color: PMColors.RISK })
-                Text(this.dashboard.deadline.label)
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontWeight(FontWeight.Medium)
-                  .fontColor(PMColors.RISK)
-                  .margin({ left: 4 })
-              }
-              .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 2, bottom: 2 })
-              .backgroundColor(PMColors.RISK_LIGHT)
-              .borderRadius(PMRadius.XS)
-            }
+            DeadlineBadge({ deadline: this.dashboard.deadline })
           }
           .width('100%')
           .justifyContent(FlexAlign.SpaceBetween)
@@ -831,7 +1049,7 @@ struct ProjectHome {
           .width('100%')
           .margin({ top: PMSpacing.SM })
 
-          // 备赛准备度清单：已具备 (弱化收起) vs 当前缺口 (重点放大)
+          // 项目进度清单：已具备 (弱化收起) vs 当前缺口 (重点放大)
           Column() {
             // 当前缺口 (重点展示)
             Text('当前缺口')
@@ -918,6 +1136,10 @@ struct ProjectHome {
         .borderRadius(PMRadius.MD)
         .border({ width: { left: 3 }, color: PMColors.EVIDENCE })
 
+        this.NextActionView()
+
+        this.RecentChangesView()
+
         this.MilestoneEvidenceView()
 
         // 问题二：为什么？（主动提醒与依据）
@@ -940,7 +1162,7 @@ struct ProjectHome {
               Column() {
                 Row() {
                   SeverityBadge({ severity: interv.severity })
-                  Text(interv.title)
+                  Text(TextFormatters.readableText(interv.title, '提醒标题无法读取，请重新评估。'))
                     .fontSize(PMFontSize.BODY)
                     .fontWeight(FontWeight.Medium)
                     .fontColor(PMColors.INK_PRIMARY)
@@ -949,7 +1171,7 @@ struct ProjectHome {
                 }
                 .width('100%')
 
-                Text(interv.content)
+                Text(TextFormatters.readableText(interv.content, '提醒依据文本无法读取，请重新评估。'))
                   .fontSize(PMFontSize.BODY)
                   .fontColor(PMColors.INK_SECONDARY)
                   .lineHeight(20)
@@ -988,64 +1210,86 @@ struct ProjectHome {
               .margin({ top: PMSpacing.MD })
           }
 
-          // 演示情境控制
-          Column() {
-            Text('比赛演示情境控制：')
+          // 演示情境控制：默认折叠，比赛时仍可快速打开。
+          Row() {
+            Text('比赛演示情境控制')
+              .fontSize(PMFontSize.SECONDARY)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.INK_SECONDARY)
+            Text(this.showDemoControls ? '收起' : '展开')
               .fontSize(PMFontSize.CAPTION)
-              .fontColor(PMColors.INK_TERTIARY)
-              .margin({ top: PMSpacing.MD, bottom: PMSpacing.XS })
-
-            Row() {
-              Button('模拟截止48h')
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.INK_PRIMARY)
-                .backgroundColor(PMColors.SURFACE_SUBTLE)
-                .border({ width: 1, color: PMColors.BORDER })
-                .borderRadius(PMRadius.XS)
-                .layoutWeight(1)
-                .onClick(() => {
-                  this.evaluate('deadline_48h');
-                })
-
-              Button('模拟停滞72h')
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.INK_PRIMARY)
-                .backgroundColor(PMColors.SURFACE_SUBTLE)
-                .border({ width: 1, color: PMColors.BORDER })
-                .borderRadius(PMRadius.XS)
-                .layoutWeight(1)
-                .margin({ left: PMSpacing.XS })
-                .onClick(() => {
-                  this.evaluate('stale_72h');
-                })
-
-              Button('风险集中')
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.INK_PRIMARY)
-                .backgroundColor(PMColors.SURFACE_SUBTLE)
-                .border({ width: 1, color: PMColors.BORDER })
-                .borderRadius(PMRadius.XS)
-                .layoutWeight(1)
-                .margin({ left: PMSpacing.XS })
-                .onClick(() => {
-                  this.evaluate('risk_cluster');
-                })
-
-              Button('清除模拟')
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.RISK)
-                .backgroundColor(PMColors.RISK_LIGHT)
-                .borderRadius(PMRadius.XS)
-                .layoutWeight(1)
-                .margin({ left: PMSpacing.XS })
-                .onClick(() => {
-                  this.evaluate(undefined, true);
-                })
-            }
-            .width('100%')
+              .fontColor(PMColors.BRAND)
           }
           .width('100%')
-          .alignItems(HorizontalAlign.Start)
+          .justifyContent(FlexAlign.SpaceBetween)
+          .padding({ top: PMSpacing.SM, bottom: PMSpacing.SM })
+          .margin({ top: PMSpacing.MD })
+          .onClick(() => {
+            this.showDemoControls = !this.showDemoControls;
+          })
+          .accessibilityText(`比赛演示情境控制，${this.showDemoControls ? '收起' : '展开'}`)
+
+          if (this.showDemoControls) {
+            Column() {
+              Row() {
+                Button('模拟截止 48h')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.INK_PRIMARY)
+                  .backgroundColor(PMColors.SURFACE_SUBTLE)
+                  .border({ width: 1, color: PMColors.BORDER })
+                  .borderRadius(PMRadius.XS)
+                  .height(48)
+                  .layoutWeight(1)
+                  .onClick(() => {
+                    this.evaluate('deadline_48h');
+                  })
+
+                Button('模拟停滞 72h')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.INK_PRIMARY)
+                  .backgroundColor(PMColors.SURFACE_SUBTLE)
+                  .border({ width: 1, color: PMColors.BORDER })
+                  .borderRadius(PMRadius.XS)
+                  .height(48)
+                  .layoutWeight(1)
+                  .margin({ left: PMSpacing.SM })
+                  .onClick(() => {
+                    this.evaluate('stale_72h');
+                  })
+              }
+              .width('100%')
+
+              Row() {
+                Button('模拟风险集中')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.INK_PRIMARY)
+                  .backgroundColor(PMColors.SURFACE_SUBTLE)
+                  .border({ width: 1, color: PMColors.BORDER })
+                  .borderRadius(PMRadius.XS)
+                  .height(48)
+                  .layoutWeight(1)
+                  .margin({ top: PMSpacing.SM })
+                  .onClick(() => {
+                    this.evaluate('risk_cluster');
+                  })
+
+                Button('清除模拟')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.RISK)
+                  .backgroundColor(PMColors.RISK_LIGHT)
+                  .borderRadius(PMRadius.XS)
+                  .height(48)
+                  .layoutWeight(1)
+                  .margin({ left: PMSpacing.SM, top: PMSpacing.SM })
+                  .onClick(() => {
+                    this.evaluate(undefined, true);
+                  })
+              }
+              .width('100%')
+            }
+            .width('100%')
+            .alignItems(HorizontalAlign.Start)
+          }
         }
         .width('100%')
         .padding(PMSpacing.LG)
@@ -1069,11 +1313,17 @@ struct ProjectHome {
           .width('100%')
           .justifyContent(FlexAlign.SpaceBetween)
 
-          Text('把实验、导师意见或材料直接归档，系统会保留来源并尝试提取为项目记忆。')
-            .fontSize(PMFontSize.SECONDARY)
-            .fontColor(PMColors.INK_SECONDARY)
-            .lineHeight(18)
-            .margin({ top: PMSpacing.XS })
+          .onClick(() => {
+            this.showCapturePanel = !this.showCapturePanel;
+          })
+          .accessibilityText(`记录项目碎片，${this.showCapturePanel ? '收起输入区' : '展开快速记录'}`)
+
+          if (this.showCapturePanel) {
+            Text('记录实验、导师意见和材料，并保留来源。')
+              .fontSize(PMFontSize.SECONDARY)
+              .fontColor(PMColors.INK_SECONDARY)
+              .lineHeight(18)
+              .margin({ top: PMSpacing.XS })
 
           // 来源胶囊
           Scroll() {
@@ -1098,6 +1348,7 @@ struct ProjectHome {
           }
           .width('100%')
           .scrollable(ScrollDirection.Horizontal)
+          .scrollBar(BarState.Off)
           .margin({ top: PMSpacing.SM })
 
           Row() {
@@ -1195,6 +1446,33 @@ struct ProjectHome {
           .justifyContent(FlexAlign.SpaceBetween)
           .alignItems(VerticalAlign.Center)
           .margin({ top: PMSpacing.MD })
+          } else {
+            Row() {
+              Text('快速记录文字、图片或 PDF，并保留来源。')
+                .fontSize(PMFontSize.SECONDARY)
+                .fontColor(PMColors.INK_SECONDARY)
+                .lineHeight(18)
+                .layoutWeight(1)
+
+              Button('开始记录')
+                .fontSize(PMFontSize.BUTTON)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.BRAND)
+                .backgroundColor(PMColors.BRAND_LIGHT)
+                .border({ width: 1, color: PMColors.BRAND })
+                .borderRadius(PMRadius.SM)
+                .height(48)
+                .padding({ left: PMSpacing.MD, right: PMSpacing.MD, top: PMSpacing.SM, bottom: PMSpacing.SM })
+                .margin({ left: PMSpacing.SM })
+                .onClick(() => {
+                  this.showCapturePanel = true;
+                })
+                .accessibilityText('开始记录项目碎片')
+            }
+            .width('100%')
+            .alignItems(VerticalAlign.Center)
+            .margin({ top: PMSpacing.MD })
+          }
         }
         .width('100%')
         .padding(PMSpacing.LG)
@@ -1332,7 +1610,10 @@ struct ProjectHome {
               .fontColor(this.selectedMemoryType === 'all' ? PMColors.BRAND : PMColors.INK_SECONDARY)
               .backgroundColor(this.selectedMemoryType === 'all' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
               .borderRadius(PMRadius.XS)
+              .height(44)
               .margin({ right: PMSpacing.XS })
+              .accessibilityText('按记忆类型筛选：全部')
+              .accessibilitySelected(this.selectedMemoryType === 'all')
               .onClick(() => {
                 this.selectMemoryType('all');
               })
@@ -1342,7 +1623,10 @@ struct ProjectHome {
               .fontColor(this.selectedMemoryType === 'paper_note' ? PMColors.BRAND : PMColors.INK_SECONDARY)
               .backgroundColor(this.selectedMemoryType === 'paper_note' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
               .borderRadius(PMRadius.XS)
+              .height(44)
               .margin({ right: PMSpacing.XS })
+              .accessibilityText('按记忆类型筛选：论文笔记')
+              .accessibilitySelected(this.selectedMemoryType === 'paper_note')
               .onClick(() => {
                 this.selectMemoryType('paper_note');
               })
@@ -1352,7 +1636,10 @@ struct ProjectHome {
               .fontColor(this.selectedMemoryType === 'experiment_log' ? PMColors.BRAND : PMColors.INK_SECONDARY)
               .backgroundColor(this.selectedMemoryType === 'experiment_log' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
               .borderRadius(PMRadius.XS)
+              .height(44)
               .margin({ right: PMSpacing.XS })
+              .accessibilityText('按记忆类型筛选：实验记录')
+              .accessibilitySelected(this.selectedMemoryType === 'experiment_log')
               .onClick(() => {
                 this.selectMemoryType('experiment_log');
               })
@@ -1362,7 +1649,10 @@ struct ProjectHome {
               .fontColor(this.selectedMemoryType === 'reflection' ? PMColors.BRAND : PMColors.INK_SECONDARY)
               .backgroundColor(this.selectedMemoryType === 'reflection' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
               .borderRadius(PMRadius.XS)
+              .height(44)
               .margin({ right: PMSpacing.XS })
+              .accessibilityText('按记忆类型筛选：阶段复盘')
+              .accessibilitySelected(this.selectedMemoryType === 'reflection')
               .onClick(() => {
                 this.selectMemoryType('reflection');
               })
@@ -1372,7 +1662,10 @@ struct ProjectHome {
               .fontColor(this.selectedMemoryType === 'code_issue' ? PMColors.BRAND : PMColors.INK_SECONDARY)
               .backgroundColor(this.selectedMemoryType === 'code_issue' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
               .borderRadius(PMRadius.XS)
+              .height(44)
               .margin({ right: PMSpacing.XS })
+              .accessibilityText('按记忆类型筛选：代码问题')
+              .accessibilitySelected(this.selectedMemoryType === 'code_issue')
               .onClick(() => {
                 this.selectMemoryType('code_issue');
               })
@@ -1380,6 +1673,7 @@ struct ProjectHome {
         }
         .width('100%')
         .scrollable(ScrollDirection.Horizontal)
+        .scrollBar(BarState.Off)
         .margin({ top: PMSpacing.SM })
       }
       .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.SM })
@@ -1410,43 +1704,77 @@ struct ProjectHome {
         ForEach(this.getFilteredCards(), (card: KnowledgeCard) => {
           ListItem() {
             Column() {
-              Row() {
-                MemoryTypeBadge({ type: card.type })
-                Text(card.createdAt.length >= 10 ? card.createdAt.substring(0, 10) : card.createdAt)
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontColor(PMColors.INK_TERTIARY)
-              }
-              .width('100%')
-              .justifyContent(FlexAlign.SpaceBetween)
+              if (this.isDamagedMemoryCard(card)) {
+                Row() {
+                  Row() {
+                    AlertIcon({ iconSize: 14, color: PMColors.RISK })
+                    Text('需要修复')
+                      .fontSize(PMFontSize.CAPTION)
+                      .fontWeight(FontWeight.Medium)
+                      .fontColor(PMColors.RISK)
+                      .margin({ left: PMSpacing.XS })
+                  }
+                  Text(card.createdAt.length >= 10 ? card.createdAt.substring(0, 10) : card.createdAt)
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.INK_TERTIARY)
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.SpaceBetween)
 
-              Text(card.title)
-                .fontSize(PMFontSize.SECTION_TITLE)
-                .fontWeight(FontWeight.Medium)
-                .fontColor(PMColors.INK_PRIMARY)
-                .margin({ top: PMSpacing.SM })
-
-              if (card.summary !== '') {
-                Text(card.summary)
+                Text('这条历史记忆无法完整读取，原内容未被替换。')
                   .fontSize(PMFontSize.BODY)
-                  .fontColor(PMColors.INK_SECONDARY)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.INK_PRIMARY)
                   .lineHeight(20)
+                  .margin({ top: PMSpacing.SM })
+
+                Text('请展开查看原始采集碎片并重新录入。')
+                  .fontSize(PMFontSize.SECONDARY)
+                  .fontColor(PMColors.INK_SECONDARY)
+                  .lineHeight(18)
                   .margin({ top: PMSpacing.XS })
+              } else {
+                Row() {
+                  MemoryTypeBadge({ type: card.type })
+                  Text(card.createdAt.length >= 10 ? card.createdAt.substring(0, 10) : card.createdAt)
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.INK_TERTIARY)
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.SpaceBetween)
+
+                Text(TextFormatters.readableText(card.title, '记忆标题无法读取，请重新录入。'))
+                  .fontSize(PMFontSize.SECTION_TITLE)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.INK_PRIMARY)
+                  .margin({ top: PMSpacing.SM })
+
+                if (TextFormatters.shouldShowSummary(card.title, card.summary)) {
+                  Text(TextFormatters.readableText(card.summary, '这条记忆摘要无法读取，请重新录入。'))
+                    .fontSize(PMFontSize.BODY)
+                    .fontColor(PMColors.INK_SECONDARY)
+                    .lineHeight(20)
+                    .margin({ top: PMSpacing.XS })
+                }
               }
 
               // 原始记录展开
               Row() {
                 Text(this.expandedCardId === card.id ? '▲ 收起原始碎片' : '▼ 查看原始采集碎片')
                   .fontSize(PMFontSize.SECONDARY)
+                  .fontWeight(FontWeight.Medium)
                   .fontColor(PMColors.BRAND)
               }
               .padding({ top: PMSpacing.SM, bottom: PMSpacing.XS })
+              .accessibilityText(this.expandedCardId === card.id ? '收起原始采集碎片' : '查看原始采集碎片')
+              .accessibilityDescription(this.isDamagedMemoryCard(card) ? '该记忆需要修复，原始采集碎片仍可查看' : '展开查看这条记忆的来源与原始内容')
               .onClick(() => {
                 this.expandedCardId = this.expandedCardId === card.id ? '' : card.id;
               })
 
               if (this.expandedCardId === card.id && card.capture !== null && card.capture !== undefined) {
                 Column() {
-                  Text(card.capture.rawText)
+                  Text(TextFormatters.readableText(card.capture.rawText, '原始记录文本无法读取，请重新录入。'))
                     .fontSize(PMFontSize.BODY)
                     .fontColor(PMColors.INK_PRIMARY)
                   Text(`来源: ${card.capture.sourceType ?? '随手记录'}`)
@@ -1490,6 +1818,11 @@ struct ProjectHome {
       }
       return c.title.toLowerCase().includes(q) || c.summary.toLowerCase().includes(q);
     });
+  }
+
+  private isDamagedMemoryCard(card: KnowledgeCard): boolean {
+    const rawText = card.capture !== undefined && card.capture !== null ? card.capture.rawText : '';
+    return TextFormatters.isDamagedMemory(card.title, card.summary, rawText);
   }
 
   // ----------------------------------------------------
@@ -1543,21 +1876,23 @@ struct ProjectHome {
             Column() {
               Row() {
                 StatusBadge({ status: action.status })
-                Text(TextFormatters.priorityToChinese(action.priority))
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontColor(PMColors.INK_TERTIARY)
+                if (action.status !== 'DONE') {
+                  Text(TextFormatters.priorityToChinese(action.priority))
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.INK_TERTIARY)
+                }
               }
               .width('100%')
               .justifyContent(FlexAlign.SpaceBetween)
 
-              Text(action.title)
+              Text(TextFormatters.readableText(action.title, '行动标题无法读取，请重新录入。'))
                 .fontSize(PMFontSize.SECTION_TITLE)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
                 .margin({ top: PMSpacing.SM })
 
               if (action.sourceIntervention !== null && action.sourceIntervention !== undefined && action.sourceIntervention.title !== '') {
-                Text(`来源：${action.sourceIntervention.title}`)
+                Text(`来源：${TextFormatters.readableText(action.sourceIntervention.title, '提醒来源无法读取')}`)
                   .fontSize(PMFontSize.CAPTION)
                   .fontColor(PMColors.EVIDENCE)
                   .margin({ top: 4 })
@@ -1569,7 +1904,7 @@ struct ProjectHome {
                     .fontSize(PMFontSize.CAPTION)
                     .fontWeight(FontWeight.Medium)
                     .fontColor(PMColors.SUCCESS)
-                  Text(action.resultText)
+                  Text(TextFormatters.readableText(action.resultText, '完成回执文本无法读取，请重新补充。'))
                     .fontSize(PMFontSize.BODY)
                     .fontColor(PMColors.INK_PRIMARY)
                     .margin({ top: 2 })
@@ -1640,6 +1975,38 @@ struct ProjectHome {
   // Tab 3: 问忆程 (Copilot) 视图 —— 结构化证据回答与项目上下文
   // ----------------------------------------------------
   @Builder
+  private CopilotEmptyState() {
+    Column() {
+      CopilotIcon({ isSelected: false, iconSize: 28 })
+        .margin({ bottom: PMSpacing.MD })
+
+      Text('暂无对话')
+        .fontSize(PMFontSize.SECTION_TITLE)
+        .fontWeight(FontWeight.Medium)
+        .fontColor(PMColors.INK_PRIMARY)
+
+      Text(`我会根据当前项目的 ${this.project._count.cards} 条记忆、${this.actions.filter((a) => a.status === 'DONE').length} 项已完成行动和已有成果回答。`)
+        .fontSize(PMFontSize.BODY)
+        .fontColor(PMColors.INK_SECONDARY)
+        .textAlign(TextAlign.Center)
+        .lineHeight(22)
+        .margin({ top: PMSpacing.SM })
+
+      Text('回答会尽量附带可追溯的记忆依据。')
+        .fontSize(PMFontSize.SECONDARY)
+        .fontColor(PMColors.MEMORY)
+        .textAlign(TextAlign.Center)
+        .margin({ top: PMSpacing.XS })
+    }
+    .width('100%')
+    .layoutWeight(1)
+    .justifyContent(FlexAlign.Center)
+    .alignItems(HorizontalAlign.Center)
+    .padding({ left: PMSpacing.XXL, right: PMSpacing.XXL })
+  }
+
+  // ----------------------------------------------------
+  @Builder
   private CopilotView() {
     Column() {
       // 问忆程项目上下文看板 (避免空白页面)
@@ -1661,15 +2028,16 @@ struct ProjectHome {
       .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
       .alignItems(HorizontalAlign.Start)
 
-      // 常用问题快捷推荐
-      Scroll() {
+      // 常用问题快捷推荐：两列完整展示，避免把关键问题截断在横向滚动条里。
+      Column({ space: PMSpacing.SM }) {
         Row() {
           Button('现在进展怎么样？')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.BRAND)
             .backgroundColor(PMColors.BRAND_LIGHT)
-            .borderRadius(PMRadius.XS)
-            .margin({ right: PMSpacing.XS })
+            .borderRadius(PMRadius.SM)
+            .height(44)
+            .layoutWeight(1)
             .onClick(() => {
               this.copilotQuestion = '总结当前项目的真实进展与已完成事实';
               this.sendCopilotMessage();
@@ -1679,19 +2047,25 @@ struct ProjectHome {
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.BRAND)
             .backgroundColor(PMColors.BRAND_LIGHT)
-            .borderRadius(PMRadius.XS)
-            .margin({ right: PMSpacing.XS })
+            .borderRadius(PMRadius.SM)
+            .height(44)
+            .layoutWeight(1)
+            .margin({ left: PMSpacing.SM })
             .onClick(() => {
               this.copilotQuestion = '检查当前项目中消融实验相关的记录和结果';
               this.sendCopilotMessage();
             })
+        }
+        .width('100%')
 
+        Row() {
           Button('为什么提醒我？')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.BRAND)
             .backgroundColor(PMColors.BRAND_LIGHT)
-            .borderRadius(PMRadius.XS)
-            .margin({ right: PMSpacing.XS })
+            .borderRadius(PMRadius.SM)
+            .height(44)
+            .layoutWeight(1)
             .onClick(() => {
               this.copilotQuestion = '为什么当前项目会触发提醒？依据是什么？';
               this.sendCopilotMessage();
@@ -1701,19 +2075,41 @@ struct ProjectHome {
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.BRAND)
             .backgroundColor(PMColors.BRAND_LIGHT)
-            .borderRadius(PMRadius.XS)
+            .borderRadius(PMRadius.SM)
+            .height(44)
+            .layoutWeight(1)
+            .margin({ left: PMSpacing.SM })
             .onClick(() => {
               this.copilotQuestion = '最近完成了哪些待办行动和回执？';
               this.sendCopilotMessage();
             })
         }
+        .width('100%')
       }
       .width('100%')
-      .scrollable(ScrollDirection.Horizontal)
       .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.SM })
 
-      // 对话消息列表
-      List({ space: PMSpacing.MD }) {
+      if (this.isAskingCopilot) {
+        Row() {
+          LoadingProgress()
+            .width(20)
+            .height(20)
+            .color(PMColors.BRAND)
+          Text('正在检索项目证据…')
+            .fontSize(PMFontSize.SECONDARY)
+            .fontColor(PMColors.INK_SECONDARY)
+            .margin({ left: PMSpacing.SM })
+        }
+        .width('100%')
+        .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.SM })
+        .justifyContent(FlexAlign.Center)
+      }
+
+      if (this.chatMessages.length === 0 && !this.isAskingCopilot) {
+        this.CopilotEmptyState()
+      } else if (this.chatMessages.length > 0) {
+        // 对话消息列表
+        List({ space: PMSpacing.MD }) {
         ForEach(this.chatMessages, (msg: AgentMessage, idx: number) => {
           ListItem() {
             Column() {
@@ -1725,7 +2121,7 @@ struct ProjectHome {
               }
               .width('100%')
 
-              Text(msg.content)
+              Text(TextFormatters.readableText(msg.content, '问忆程回复文本无法读取，请重新提问。'))
                 .fontSize(PMFontSize.BODY)
                 .fontColor(PMColors.INK_PRIMARY)
                 .lineHeight(22)
@@ -1741,7 +2137,7 @@ struct ProjectHome {
                     .margin({ top: PMSpacing.SM, bottom: 2 })
 
                   ForEach(msg.citations, (cite: AgentCitation) => {
-                    Text(`· ${cite.title}`)
+                    Text(`· ${TextFormatters.readableText(cite.title, '记忆标题无法读取')}`)
                       .fontSize(PMFontSize.CAPTION)
                       .fontColor(PMColors.MEMORY)
                   }, (cite: AgentCitation) => cite.cardId)
@@ -1797,15 +2193,17 @@ struct ProjectHome {
             .alignItems(HorizontalAlign.Start)
           }
         }, (msg: AgentMessage, idx: number) => `msg-${idx}`)
+        }
+        .layoutWeight(1)
+        .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.SM })
       }
-      .layoutWeight(1)
-      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.SM })
 
       if (this.copilotFeedback !== '') {
         Text(this.copilotFeedback)
           .fontSize(PMFontSize.CAPTION)
-          .fontColor(PMColors.INK_TERTIARY)
+          .fontColor(this.copilotFeedback.indexOf('失败') >= 0 || this.copilotFeedback.indexOf('无法') >= 0 ? PMColors.RISK : PMColors.INK_TERTIARY)
           .margin({ bottom: 4 })
+          .accessibilityText(`问忆程状态：${this.copilotFeedback}`)
       }
 
       // 输入行
@@ -1820,6 +2218,7 @@ struct ProjectHome {
           .backgroundColor(PMColors.SURFACE)
           .borderRadius(PMRadius.SM)
           .border({ width: 1, color: PMColors.BORDER })
+          .accessibilityText('输入项目问题')
 
         Button(this.isAskingCopilot ? '思考中...' : '发送')
           .fontSize(PMFontSize.BUTTON)
@@ -1829,6 +2228,7 @@ struct ProjectHome {
           .borderRadius(PMRadius.SM)
           .margin({ left: PMSpacing.SM })
           .enabled(this.copilotQuestion.trim() !== '' && !this.isAskingCopilot)
+          .accessibilityText(this.isAskingCopilot ? '正在发送问题' : '发送项目问题')
           .onClick(() => {
             this.sendCopilotMessage();
           })
@@ -1844,19 +2244,144 @@ struct ProjectHome {
   // Tab 4: 成果 (Artifacts) 视图 —— 消除重复 CTA
   // ----------------------------------------------------
   @Builder
+  private ArtifactReaderHeader() {
+    Row() {
+      Row() {
+        Text('‹')
+          .fontSize(22)
+          .fontColor(PMColors.INK_PRIMARY)
+          .margin({ right: 3, top: -2 })
+        Text('成果')
+          .fontSize(PMFontSize.BODY)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.INK_PRIMARY)
+      }
+      .height(44)
+      .padding({ left: PMSpacing.SM, right: PMSpacing.MD, top: PMSpacing.XS, bottom: PMSpacing.XS })
+      .backgroundColor(PMColors.SURFACE_SUBTLE)
+      .borderRadius(PMRadius.SM)
+      .border({ width: 1, color: PMColors.BORDER })
+      .onClick(() => {
+        this.isArtifactReader = false;
+      })
+      .accessibilityText('返回成果列表')
+
+      Column() {
+        Text(TextFormatters.artifactTypeToChinese(this.selectedArtifactType))
+          .fontSize(PMFontSize.PAGE_TITLE)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(PMColors.INK_PRIMARY)
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+        Text(this.project.title !== '' ? TextFormatters.readableText(this.project.title, '项目档案') : '项目档案')
+          .fontSize(PMFontSize.SECONDARY)
+          .fontColor(PMColors.INK_TERTIARY)
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .margin({ top: 2 })
+      }
+      .layoutWeight(1)
+      .alignItems(HorizontalAlign.Start)
+      .margin({ left: PMSpacing.MD })
+
+      Text('阅读')
+        .fontSize(PMFontSize.CAPTION)
+        .fontWeight(FontWeight.Medium)
+        .fontColor(PMColors.BRAND)
+        .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: PMSpacing.SM, bottom: PMSpacing.SM })
+        .accessibilityText('成果阅读模式')
+    }
+    .width('100%')
+    .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.SM })
+    .backgroundColor(PMColors.SURFACE)
+    .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
+  }
+
+  @Builder
+  private ArtifactReaderContent() {
+    Scroll() {
+      Column() {
+        Row() {
+          Column() {
+            Text('正文')
+              .fontSize(PMFontSize.SECTION_TITLE)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.INK_PRIMARY)
+            Text(`最后生成于 ${this.currentArtifact !== undefined && this.currentArtifact.createdAt.length >= 10 ? this.currentArtifact.createdAt.substring(0, 10) : '近期'}`)
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+              .margin({ top: 2 })
+          }
+          .alignItems(HorizontalAlign.Start)
+          .layoutWeight(1)
+
+          Button('复制正文')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.BRAND)
+            .backgroundColor(PMColors.BRAND_LIGHT)
+            .border({ width: 1, color: PMColors.BRAND })
+            .borderRadius(PMRadius.SM)
+            .height(44)
+            .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: PMSpacing.SM, bottom: PMSpacing.SM })
+            .onClick(() => {
+              this.copyArtifactContent();
+            })
+            .accessibilityText('复制成果正文')
+        }
+        .width('100%')
+        .alignItems(VerticalAlign.Center)
+
+        Text(this.project.title !== '' ? TextFormatters.readableText(this.project.title, '项目档案') : '项目档案')
+          .fontSize(PMFontSize.BODY)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.INK_SECONDARY)
+          .margin({ top: PMSpacing.LG, bottom: PMSpacing.MD })
+
+        if (this.currentArtifact !== undefined && this.currentArtifact.content !== '') {
+          MarkdownView({ content: TextFormatters.readableMarkdown(this.currentArtifact.content) })
+        } else {
+          EmptyStateView({
+            title: '成果内容暂不可用',
+            description: '返回成果列表后重新选择或生成。',
+            actionText: '返回成果列表',
+            onAction: () => {
+              this.isArtifactReader = false;
+            }
+          })
+        }
+      }
+      .width('100%')
+      .padding({ left: PMSpacing.XL, right: PMSpacing.XL, top: PMSpacing.LG, bottom: PMSpacing.SECTION })
+      .backgroundColor(PMColors.SURFACE)
+      .alignItems(HorizontalAlign.Start)
+    }
+    .layoutWeight(1)
+    .backgroundColor(PMColors.BACKGROUND)
+    .scrollBar(BarState.Off)
+  }
+
+  @Builder
   private ArtifactView() {
-    Column() {
+    if (this.isArtifactReader && this.currentArtifact !== undefined && this.currentArtifact.content !== '') {
+      this.ArtifactReaderContent()
+    } else {
+      Column() {
       // 4 大成果类型切换
       Row() {
-        Button('作品说明大纲')
+        Button('作品说明')
           .fontSize(PMFontSize.CAPTION)
           .fontColor(this.selectedArtifactType === 'competition_outline' ? PMColors.BRAND : PMColors.INK_SECONDARY)
           .backgroundColor(this.selectedArtifactType === 'competition_outline' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
           .borderRadius(PMRadius.XS)
+          .height(44)
+          .padding({ left: PMSpacing.XS, right: PMSpacing.XS, top: PMSpacing.SM, bottom: PMSpacing.SM })
           .layoutWeight(1)
+          .accessibilityText('选择作品说明成果')
+          .accessibilitySelected(this.selectedArtifactType === 'competition_outline')
           .onClick(() => {
             this.selectedArtifactType = 'competition_outline';
             this.updateCurrentArtifact();
+            this.isArtifactReader = false;
           })
 
         Button('答辩 PPT')
@@ -1864,11 +2389,16 @@ struct ProjectHome {
           .fontColor(this.selectedArtifactType === 'defense_ppt' ? PMColors.BRAND : PMColors.INK_SECONDARY)
           .backgroundColor(this.selectedArtifactType === 'defense_ppt' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
           .borderRadius(PMRadius.XS)
+          .height(44)
+          .padding({ left: PMSpacing.XS, right: PMSpacing.XS, top: PMSpacing.SM, bottom: PMSpacing.SM })
           .layoutWeight(1)
           .margin({ left: PMSpacing.XS })
+          .accessibilityText('选择答辩 PPT 成果')
+          .accessibilitySelected(this.selectedArtifactType === 'defense_ppt')
           .onClick(() => {
             this.selectedArtifactType = 'defense_ppt';
             this.updateCurrentArtifact();
+            this.isArtifactReader = false;
           })
 
         Button('项目周报')
@@ -1876,11 +2406,16 @@ struct ProjectHome {
           .fontColor(this.selectedArtifactType === 'weekly_report' ? PMColors.BRAND : PMColors.INK_SECONDARY)
           .backgroundColor(this.selectedArtifactType === 'weekly_report' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
           .borderRadius(PMRadius.XS)
+          .height(44)
+          .padding({ left: PMSpacing.XS, right: PMSpacing.XS, top: PMSpacing.SM, bottom: PMSpacing.SM })
           .layoutWeight(1)
           .margin({ left: PMSpacing.XS })
+          .accessibilityText('选择项目周报成果')
+          .accessibilitySelected(this.selectedArtifactType === 'weekly_report')
           .onClick(() => {
             this.selectedArtifactType = 'weekly_report';
             this.updateCurrentArtifact();
+            this.isArtifactReader = false;
           })
 
         Button('README')
@@ -1888,11 +2423,16 @@ struct ProjectHome {
           .fontColor(this.selectedArtifactType === 'readme' ? PMColors.BRAND : PMColors.INK_SECONDARY)
           .backgroundColor(this.selectedArtifactType === 'readme' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
           .borderRadius(PMRadius.XS)
+          .height(44)
+          .padding({ left: PMSpacing.XS, right: PMSpacing.XS, top: PMSpacing.SM, bottom: PMSpacing.SM })
           .layoutWeight(1)
           .margin({ left: PMSpacing.XS })
+          .accessibilityText('选择 README 成果')
+          .accessibilitySelected(this.selectedArtifactType === 'readme')
           .onClick(() => {
             this.selectedArtifactType = 'readme';
             this.updateCurrentArtifact();
+            this.isArtifactReader = false;
           })
       }
       .width('100%')
@@ -1952,8 +2492,23 @@ struct ProjectHome {
               .width('100%')
               .justifyContent(FlexAlign.SpaceBetween)
 
+              Button('进入阅读模式')
+                .fontSize(PMFontSize.BUTTON)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.BRAND)
+                .backgroundColor(PMColors.BRAND_LIGHT)
+                .border({ width: 1, color: PMColors.BRAND })
+                .borderRadius(PMRadius.SM)
+                .height(48)
+                .width('100%')
+                .margin({ top: PMSpacing.MD })
+                .onClick(() => {
+                  this.isArtifactReader = true;
+                })
+                .accessibilityText('进入成果阅读模式')
+
               Column() {
-                MarkdownView({ content: this.currentArtifact.content })
+                MarkdownView({ content: TextFormatters.readableMarkdown(this.currentArtifact.content) })
               }
               .width('100%')
               .margin({ top: PMSpacing.MD })
@@ -1975,7 +2530,7 @@ struct ProjectHome {
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
 
-              Text('系统会根据项目记忆、行动记录和已有成果，整理一版可继续编辑的成果结构。')
+              Text('基于项目记忆与行动生成可编辑成果。')
                 .fontSize(PMFontSize.BODY)
                 .fontColor(PMColors.INK_SECONDARY)
                 .textAlign(TextAlign.Center)
@@ -2007,6 +2562,7 @@ struct ProjectHome {
       .layoutWeight(1)
     }
     .layoutWeight(1)
+    }
   }
 
   // ----------------------------------------------------
@@ -2015,7 +2571,11 @@ struct ProjectHome {
   build() {
     Stack() {
       Column() {
-        this.TopHeader()
+        if (this.currentTabIndex === 4 && this.isArtifactReader) {
+          this.ArtifactReaderHeader()
+        } else {
+          this.TopHeader()
+        }
 
         if (this.routeError !== '') {
           ErrorStateView({
@@ -2047,8 +2607,10 @@ struct ProjectHome {
           }
         }
 
-        // 底部导航 Bar
-        this.BottomTabBar()
+        // 具体成果阅读时进入 Reader Mode，释放纵向空间；返回成果列表后恢复项目内导航。
+        if (this.currentTabIndex !== 4 || !this.isArtifactReader) {
+          this.BottomTabBar()
+        }
       }
       .width('100%')
       .height('100%')
@@ -2119,7 +2681,7 @@ struct ProjectHome {
         }
         .width('100%')
         .height('100%')
-        .backgroundColor('rgba(19, 36, 58, 0.45)')
+        .backgroundColor(PMColors.SCRIM)
         .padding({ left: PMSpacing.XL, right: PMSpacing.XL })
         .justifyContent(FlexAlign.Center)
       }
@@ -2204,7 +2766,7 @@ struct ProjectHome {
         }
         .width('100%')
         .height('100%')
-        .backgroundColor('rgba(19, 36, 58, 0.45)')
+        .backgroundColor(PMColors.SCRIM)
         .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
         .justifyContent(FlexAlign.Center)
       }

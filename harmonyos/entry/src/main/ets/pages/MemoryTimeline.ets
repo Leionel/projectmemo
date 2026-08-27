@@ -6,6 +6,8 @@ import { PMColors, PMSpacing, PMFontSize, PMRadius } from '../common/DesignToken
 import { PMAppBar } from '../components/PMAppBar';
 import { MemoryTypeBadge } from '../components/MetricBadge';
 import { LoadingStateView, ErrorStateView, EmptyStateView } from '../components/AsyncStateView';
+import { AlertIcon } from '../components/PMIcons';
+import { TextFormatters } from '../common/TextFormatters';
 
 @Entry
 @Component
@@ -64,38 +66,75 @@ struct MemoryTimeline {
     }
   }
 
+  private isDamagedMemoryCard(card: KnowledgeCard): boolean {
+    const rawText = card.capture !== undefined && card.capture !== null ? card.capture.rawText : '';
+    return TextFormatters.isDamagedMemory(card.title, card.summary, rawText);
+  }
+
   @Builder
   private cardItem(card: KnowledgeCard) {
     Column() {
-      // 头部：类型徽标与日期
-      Row() {
-        MemoryTypeBadge({ type: card.type })
-        Text(this.formatDate(card.createdAt))
-          .fontSize(PMFontSize.CAPTION)
-          .fontColor(PMColors.INK_TERTIARY)
-      }
-      .width('100%')
-      .justifyContent(FlexAlign.SpaceBetween)
-      .alignItems(VerticalAlign.Center)
+      if (this.isDamagedMemoryCard(card)) {
+        Row() {
+          Row() {
+            AlertIcon({ iconSize: 14, color: PMColors.RISK })
+            Text('需要修复')
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.RISK)
+              .margin({ left: PMSpacing.XS })
+          }
+          Text(this.formatDate(card.createdAt))
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+        }
+        .width('100%')
+        .justifyContent(FlexAlign.SpaceBetween)
+        .alignItems(VerticalAlign.Center)
 
-      // 标题
-      Text(card.title)
-        .fontSize(PMFontSize.SECTION_TITLE)
-        .fontWeight(FontWeight.Medium)
-        .fontColor(PMColors.INK_PRIMARY)
-        .maxLines(2)
-        .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .margin({ top: PMSpacing.SM })
-
-      // 摘要
-      if (card.summary !== '') {
-        Text(card.summary)
+        Text('这条历史记忆无法完整读取，原内容未被替换。')
           .fontSize(PMFontSize.BODY)
-          .fontColor(PMColors.INK_SECONDARY)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.INK_PRIMARY)
           .lineHeight(20)
-          .maxLines(3)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .margin({ top: PMSpacing.SM })
+
+        Text('请展开查看原始采集碎片并重新录入。')
+          .fontSize(PMFontSize.SECONDARY)
+          .fontColor(PMColors.INK_SECONDARY)
+          .lineHeight(18)
           .margin({ top: PMSpacing.XS })
+      } else {
+        // 头部：类型徽标与日期
+        Row() {
+          MemoryTypeBadge({ type: card.type })
+          Text(this.formatDate(card.createdAt))
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+        }
+        .width('100%')
+        .justifyContent(FlexAlign.SpaceBetween)
+        .alignItems(VerticalAlign.Center)
+
+        // 标题
+        Text(TextFormatters.readableText(card.title, '记忆标题无法读取，请重新录入。'))
+          .fontSize(PMFontSize.SECTION_TITLE)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.INK_PRIMARY)
+          .maxLines(2)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .margin({ top: PMSpacing.SM })
+
+        // 摘要：标题与摘要相同时只保留一份，避免卡片重复
+        if (TextFormatters.shouldShowSummary(card.title, card.summary)) {
+          Text(TextFormatters.readableText(card.summary, '这条记忆摘要无法读取，请重新录入。'))
+            .fontSize(PMFontSize.BODY)
+            .fontColor(PMColors.INK_SECONDARY)
+            .lineHeight(20)
+            .maxLines(3)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .margin({ top: PMSpacing.XS })
+        }
       }
 
       if (card.attachment !== undefined && card.attachment !== null) {
@@ -123,6 +162,8 @@ struct MemoryTimeline {
           .fontColor(PMColors.BRAND)
       }
       .padding({ top: PMSpacing.SM, bottom: PMSpacing.XS })
+      .accessibilityText(this.expandedCardId === card.id ? '收起原始采集碎片' : '查看原始采集碎片')
+      .accessibilityDescription(this.isDamagedMemoryCard(card) ? '该记忆需要修复，原始采集碎片仍可查看' : '展开查看这条记忆的来源与原始内容')
       .onClick(() => {
         this.toggleExpand(card.id);
       })
@@ -136,7 +177,7 @@ struct MemoryTimeline {
             .fontColor(PMColors.INK_TERTIARY)
 
           if (card.capture !== undefined && card.capture !== null) {
-            Text(card.capture.rawText)
+            Text(TextFormatters.readableText(card.capture.rawText, '原始记录文本无法读取，请重新录入。'))
               .fontSize(PMFontSize.BODY)
               .fontColor(PMColors.INK_PRIMARY)
               .lineHeight(20)
@@ -180,7 +221,7 @@ struct MemoryTimeline {
               Text('→ ')
                 .fontSize(PMFontSize.BODY)
                 .fontColor(PMColors.MEMORY)
-              Text(link.relatedCard.title)
+              Text(TextFormatters.readableText(link.relatedCard.title, '关联记忆标题无法读取'))
                 .fontSize(PMFontSize.BODY)
                 .fontColor(PMColors.INK_PRIMARY)
                 .maxLines(1)
@@ -203,7 +244,7 @@ struct MemoryTimeline {
               Text('← ')
                 .fontSize(PMFontSize.BODY)
                 .fontColor(PMColors.EVIDENCE)
-              Text(link.currentCard.title)
+              Text(TextFormatters.readableText(link.currentCard.title, '关联记忆标题无法读取'))
                 .fontSize(PMFontSize.BODY)
                 .fontColor(PMColors.INK_PRIMARY)
                 .maxLines(1)
@@ -263,7 +304,7 @@ struct MemoryTimeline {
         EmptyStateView({
           title: '暂无记忆档案',
           description: '项目尚未记录任何碎片，返回项目首页记录第一条知识',
-          actionText: '返回驾驶舱',
+          actionText: '返回工作台',
           onAction: () => {
             router.back();
           }

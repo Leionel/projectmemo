@@ -3,6 +3,114 @@
     {
       "name": "start_window_background",
       "value": "#000000"
+    },
+    {
+      "name": "pm_background",
+      "value": "#0E151E"
+    },
+    {
+      "name": "pm_surface",
+      "value": "#17212C"
+    },
+    {
+      "name": "pm_surface_subtle",
+      "value": "#121B24"
+    },
+    {
+      "name": "pm_surface_elevated",
+      "value": "#1E2A37"
+    },
+    {
+      "name": "pm_ink_primary",
+      "value": "#EAF0F4"
+    },
+    {
+      "name": "pm_ink_secondary",
+      "value": "#A6B5C3"
+    },
+    {
+      "name": "pm_ink_tertiary",
+      "value": "#8EA0B0"
+    },
+    {
+      "name": "pm_ink_muted",
+      "value": "#6B7E90"
+    },
+    {
+      "name": "pm_memory",
+      "value": "#64AAA6"
+    },
+    {
+      "name": "pm_memory_light",
+      "value": "#1D3B3A"
+    },
+    {
+      "name": "pm_evidence",
+      "value": "#D8AD63"
+    },
+    {
+      "name": "pm_evidence_light",
+      "value": "#3C3223"
+    },
+    {
+      "name": "pm_evidence_border",
+      "value": "#66D8AD63"
+    },
+    {
+      "name": "pm_evidence_tint",
+      "value": "#66D8AD63"
+    },
+    {
+      "name": "pm_risk",
+      "value": "#EF786B"
+    },
+    {
+      "name": "pm_risk_light",
+      "value": "#3D2726"
+    },
+    {
+      "name": "pm_risk_border",
+      "value": "#66EF786B"
+    },
+    {
+      "name": "pm_success",
+      "value": "#5BB794"
+    },
+    {
+      "name": "pm_success_light",
+      "value": "#1E3A32"
+    },
+    {
+      "name": "pm_brand",
+      "value": "#6FA8F7"
+    },
+    {
+      "name": "pm_brand_light",
+      "value": "#1A3558"
+    },
+    {
+      "name": "pm_brand_pressed",
+      "value": "#9BC4FF"
+    },
+    {
+      "name": "pm_border",
+      "value": "#2A3A4A"
+    },
+    {
+      "name": "pm_border_subtle",
+      "value": "#22303D"
+    },
+    {
+      "name": "pm_border_strong",
+      "value": "#415466"
+    },
+    {
+      "name": "pm_divider",
+      "value": "#263543"
+    },
+    {
+      "name": "pm_scrim",
+      "value": "#A6000000"
     }
   ]
 }

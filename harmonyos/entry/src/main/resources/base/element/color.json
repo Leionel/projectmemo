@@ -3,6 +3,114 @@
     {
       "name": "start_window_background",
       "value": "#FFFFFF"
+    },
+    {
+      "name": "pm_background",
+      "value": "#F3F6F8"
+    },
+    {
+      "name": "pm_surface",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "pm_surface_subtle",
+      "value": "#F8FAFC"
+    },
+    {
+      "name": "pm_surface_elevated",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "pm_ink_primary",
+      "value": "#13243A"
+    },
+    {
+      "name": "pm_ink_secondary",
+      "value": "#485E75"
+    },
+    {
+      "name": "pm_ink_tertiary",
+      "value": "#7C8F9F"
+    },
+    {
+      "name": "pm_ink_muted",
+      "value": "#A1B1C2"
+    },
+    {
+      "name": "pm_memory",
+      "value": "#2D6F6D"
+    },
+    {
+      "name": "pm_memory_light",
+      "value": "#EAF3F2"
+    },
+    {
+      "name": "pm_evidence",
+      "value": "#A87528"
+    },
+    {
+      "name": "pm_evidence_light",
+      "value": "#FBF5EB"
+    },
+    {
+      "name": "pm_evidence_border",
+      "value": "#33A87528"
+    },
+    {
+      "name": "pm_evidence_tint",
+      "value": "#44A87528"
+    },
+    {
+      "name": "pm_risk",
+      "value": "#C44738"
+    },
+    {
+      "name": "pm_risk_light",
+      "value": "#FDF2F0"
+    },
+    {
+      "name": "pm_risk_border",
+      "value": "#33C44738"
+    },
+    {
+      "name": "pm_success",
+      "value": "#2D6F6D"
+    },
+    {
+      "name": "pm_success_light",
+      "value": "#EDF7F3"
+    },
+    {
+      "name": "pm_brand",
+      "value": "#1E56A0"
+    },
+    {
+      "name": "pm_brand_light",
+      "value": "#EFF5FC"
+    },
+    {
+      "name": "pm_brand_pressed",
+      "value": "#163E75"
+    },
+    {
+      "name": "pm_border",
+      "value": "#E2E8F0"
+    },
+    {
+      "name": "pm_border_subtle",
+      "value": "#EDF2F7"
+    },
+    {
+      "name": "pm_border_strong",
+      "value": "#CBD5E1"
+    },
+    {
+      "name": "pm_divider",
+      "value": "#EAEEF3"
+    },
+    {
+      "name": "pm_scrim",
+      "value": "#7313243A"
     }
   ]
 }

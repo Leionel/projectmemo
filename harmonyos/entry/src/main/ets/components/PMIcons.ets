@@ -47,6 +47,51 @@ export struct FolderIcon {
 }
 
 @Component
+export struct DashboardIcon {
+  @Prop isSelected: boolean = false;
+  @Prop iconSize: number = 20;
+
+  build() {
+    // 工作台使用四格概览图形，与项目文件夹和成果文档区分开。
+    Stack() {
+      Row()
+        .width(this.iconSize * 0.38)
+        .height(this.iconSize * 0.38)
+        .backgroundColor(this.isSelected ? PMColors.BRAND_LIGHT : 'transparent')
+        .border({ width: 1.5, color: this.isSelected ? PMColors.BRAND : PMColors.INK_TERTIARY })
+        .borderRadius(2)
+        .position({ x: 0, y: 0 })
+
+      Row()
+        .width(this.iconSize * 0.38)
+        .height(this.iconSize * 0.38)
+        .backgroundColor(this.isSelected ? PMColors.BRAND_LIGHT : 'transparent')
+        .border({ width: 1.5, color: this.isSelected ? PMColors.BRAND : PMColors.INK_TERTIARY })
+        .borderRadius(2)
+        .position({ x: this.iconSize * 0.52, y: 0 })
+
+      Row()
+        .width(this.iconSize * 0.38)
+        .height(this.iconSize * 0.38)
+        .backgroundColor(this.isSelected ? PMColors.BRAND_LIGHT : 'transparent')
+        .border({ width: 1.5, color: this.isSelected ? PMColors.BRAND : PMColors.INK_TERTIARY })
+        .borderRadius(2)
+        .position({ x: 0, y: this.iconSize * 0.52 })
+
+      Row()
+        .width(this.iconSize * 0.38)
+        .height(this.iconSize * 0.38)
+        .backgroundColor(this.isSelected ? PMColors.BRAND : 'transparent')
+        .border({ width: 1.5, color: this.isSelected ? PMColors.BRAND : PMColors.INK_TERTIARY })
+        .borderRadius(2)
+        .position({ x: this.iconSize * 0.52, y: this.iconSize * 0.52 })
+    }
+    .width(this.iconSize)
+    .height(this.iconSize)
+  }
+}
+
+@Component
 export struct MemoryIcon {
   @Prop isSelected: boolean = false;
   @Prop iconSize: number = 20;
@@ -230,9 +275,40 @@ export struct SettingsIcon {
 }
 
 @Component
+export struct MoreIcon {
+  @Prop isSelected: boolean = false;
+  @Prop iconSize: number = 20;
+
+  build() {
+    Row() {
+      Row()
+        .width(4)
+        .height(4)
+        .borderRadius(2)
+        .backgroundColor(this.isSelected ? PMColors.BRAND : PMColors.INK_TERTIARY)
+      Row()
+        .width(4)
+        .height(4)
+        .borderRadius(2)
+        .backgroundColor(this.isSelected ? PMColors.BRAND : PMColors.INK_TERTIARY)
+        .margin({ left: this.iconSize * 0.18, right: this.iconSize * 0.18 })
+      Row()
+        .width(4)
+        .height(4)
+        .borderRadius(2)
+        .backgroundColor(this.isSelected ? PMColors.BRAND : PMColors.INK_TERTIARY)
+    }
+    .width(this.iconSize)
+    .height(this.iconSize)
+    .justifyContent(FlexAlign.Center)
+    .alignItems(VerticalAlign.Center)
+  }
+}
+
+@Component
 export struct AlertIcon {
   @Prop iconSize: number = 16;
-  @Prop color: string = PMColors.RISK;
+  @Prop color: ResourceColor = PMColors.RISK;
 
   build() {
     // 警示三角 / 提醒
@@ -253,7 +329,7 @@ export struct AlertIcon {
 @Component
 export struct ClockIcon {
   @Prop iconSize: number = 14;
-  @Prop color: string = PMColors.RISK;
+  @Prop color: ResourceColor = PMColors.RISK;
 
   build() {
     Stack() {
@@ -279,7 +355,7 @@ export struct ClockIcon {
 @Component
 export struct CheckIcon {
   @Prop iconSize: number = 14;
-  @Prop color: string = PMColors.SUCCESS;
+  @Prop color: ResourceColor = PMColors.SUCCESS;
 
   build() {
     Stack() {
@@ -299,7 +375,7 @@ export struct CheckIcon {
 @Component
 export struct SpineNodeIcon {
   @Prop isJudgement: boolean = false;
-  @Prop color: string = PMColors.EVIDENCE;
+  @Prop color: ResourceColor = PMColors.EVIDENCE;
 
   build() {
     if (this.isJudgement) {

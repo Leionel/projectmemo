@@ -144,15 +144,17 @@ struct ActionBoard {
       // 顶行：状态与优先级
       Row() {
         StatusBadge({ status: action.status })
-        Text(TextFormatters.priorityToChinese(action.priority))
-          .fontSize(PMFontSize.CAPTION)
-          .fontColor(PMColors.INK_TERTIARY)
+        if (action.status !== 'DONE') {
+          Text(TextFormatters.priorityToChinese(action.priority))
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+        }
       }
       .width('100%')
       .justifyContent(FlexAlign.SpaceBetween)
 
       // 标题
-      Text(action.title)
+      Text(TextFormatters.readableText(action.title, '行动标题无法读取，请重新录入。'))
         .fontSize(PMFontSize.SECTION_TITLE)
         .fontWeight(FontWeight.Medium)
         .fontColor(PMColors.INK_PRIMARY)
@@ -167,7 +169,7 @@ struct ActionBoard {
           Text('来源提醒: ')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_TERTIARY)
-          Text(action.sourceIntervention.title)
+          Text(TextFormatters.readableText(action.sourceIntervention.title, '提醒来源无法读取'))
             .fontSize(PMFontSize.CAPTION)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.EVIDENCE)
@@ -185,7 +187,7 @@ struct ActionBoard {
             .fontSize(PMFontSize.CAPTION)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.SUCCESS)
-          Text(action.resultText)
+          Text(TextFormatters.readableText(action.resultText, '完成回执文本无法读取，请重新补充。'))
             .fontSize(PMFontSize.BODY)
             .fontColor(PMColors.INK_PRIMARY)
             .lineHeight(20)
@@ -283,7 +285,7 @@ struct ActionBoard {
           EmptyStateView({
             title: '暂无待办行动',
             description: '当前项目没有待执行或已完成的行动，去提醒依据创建行动',
-            actionText: '返回驾驶舱',
+            actionText: '返回工作台',
             onAction: () => {
               router.back();
             }
@@ -438,7 +440,7 @@ struct ActionBoard {
         }
         .width('100%')
         .height('100%')
-        .backgroundColor('rgba(19, 36, 58, 0.45)')
+        .backgroundColor(PMColors.SCRIM)
         .padding({ left: PMSpacing.XL, right: PMSpacing.XL })
         .justifyContent(FlexAlign.Center)
       }

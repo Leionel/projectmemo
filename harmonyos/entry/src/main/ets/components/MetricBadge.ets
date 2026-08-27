@@ -15,7 +15,7 @@ export struct SeverityBadge {
     return '低优先级';
   }
 
-  private getBgColor(): string {
+  private getBgColor(): ResourceColor {
     if (this.severity >= 3) {
       return PMColors.RISK_LIGHT;
     }
@@ -25,7 +25,7 @@ export struct SeverityBadge {
     return PMColors.SURFACE_SUBTLE;
   }
 
-  private getTextColor(): string {
+  private getTextColor(): ResourceColor {
     if (this.severity >= 3) {
       return PMColors.RISK;
     }
@@ -59,7 +59,7 @@ export struct MemoryTypeBadge {
     return TextFormatters.memoryTypeToChinese(this.type);
   }
 
-  private getBgColor(): string {
+  private getBgColor(): ResourceColor {
     switch (this.type) {
       case 'reflection':
         return PMColors.SUCCESS_LIGHT;
@@ -77,7 +77,7 @@ export struct MemoryTypeBadge {
     }
   }
 
-  private getTextColor(): string {
+  private getTextColor(): ResourceColor {
     switch (this.type) {
       case 'reflection':
         return PMColors.SUCCESS;
@@ -114,7 +114,7 @@ export struct StatusBadge {
     return TextFormatters.statusToChinese(this.status);
   }
 
-  private getBgColor(): string {
+  private getBgColor(): ResourceColor {
     switch (this.status) {
       case 'OPEN':
       case 'DOING':
@@ -132,7 +132,7 @@ export struct StatusBadge {
     }
   }
 
-  private getTextColor(): string {
+  private getTextColor(): ResourceColor {
     switch (this.status) {
       case 'OPEN':
       case 'DOING':

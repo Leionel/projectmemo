@@ -15,7 +15,8 @@ import { SettingsService } from '../services/SettingsService';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily } from '../common/DesignTokens';
 import { LoadingStateView, ErrorStateView, EmptyStateView } from '../components/AsyncStateView';
 import { SeverityBadge, StatusBadge, MemoryTypeBadge } from '../components/MetricBadge';
-import { FolderIcon, TaskIcon, MemoryIcon, SettingsIcon, AlertIcon, ClockIcon } from '../components/PMIcons';
+import { FolderIcon, TaskIcon, MemoryIcon, SettingsIcon, AlertIcon } from '../components/PMIcons';
+import { DeadlineBadge } from '../components/DeadlineBadge';
 import { TextFormatters } from '../common/TextFormatters';
 import { Constants } from '../common/Constants';
 
@@ -37,10 +38,10 @@ struct Index {
   // Tab 0: 项目专属
   @State selectedScenarioFilter: string = 'ALL';
 
-  // Tab 1: 待办专属
+  // Tab 2: 待办专属
   @State taskTabFilter: string = 'REMINDERS'; // 'REMINDERS' | 'ACTIONS'
 
-  // Tab 2: 记忆专属
+  // Tab 1: 记忆专属
   @State globalMemorySearchQuery: string = '';
   @State selectedGlobalType: string = 'all';
 
@@ -183,6 +184,8 @@ struct Index {
         try {
           const detail = await this.projectService.getProjectDetail(p.id);
           for (const c of detail.cards) {
+            c.projectId = p.id;
+            c.projectTitle = p.title;
             cards.push(c);
           }
           const pIntervs = await this.interventionService.list(p.id);
@@ -284,13 +287,13 @@ struct Index {
       parts.push(`${project._count.artifacts} 个成果草稿`);
     }
     if (parts.length === 0) {
-      return '暂无记忆记录';
+      return '尚未形成项目进度';
     }
     return parts.join(' · ');
   }
 
   // ----------------------------------------------------
-  // 底部导航栏 Bar (一级 4 项：项目 / 待办 / 记忆 / 设置)
+  // 底部导航栏 Bar (一级 4 项：项目 / 记忆 / 待办 / 设置)
   // ----------------------------------------------------
   @Builder
   private MainBottomBar() {
@@ -314,10 +317,10 @@ struct Index {
       .accessibilityText('项目')
       .accessibilitySelected(this.currentMainTabIndex === 0)
 
-      // 2. 待办
+      // 2. 记忆
       Column() {
-        TaskIcon({ isSelected: this.currentMainTabIndex === 1, iconSize: 20 })
-        Text('待办')
+        MemoryIcon({ isSelected: this.currentMainTabIndex === 1, iconSize: 20 })
+        Text('记忆')
           .fontSize(PMFontSize.BOTTOM_NAV)
           .fontFamily(PMFontFamily.SERIF)
           .fontWeight(this.currentMainTabIndex === 1 ? FontWeight.Medium : FontWeight.Regular)
@@ -330,13 +333,13 @@ struct Index {
       .onClick(() => {
         this.currentMainTabIndex = 1;
       })
-      .accessibilityText('待办')
+      .accessibilityText('记忆')
       .accessibilitySelected(this.currentMainTabIndex === 1)
 
-      // 3. 记忆
+      // 3. 待办
       Column() {
-        MemoryIcon({ isSelected: this.currentMainTabIndex === 2, iconSize: 20 })
-        Text('记忆')
+        TaskIcon({ isSelected: this.currentMainTabIndex === 2, iconSize: 20 })
+        Text('待办')
           .fontSize(PMFontSize.BOTTOM_NAV)
           .fontFamily(PMFontFamily.SERIF)
           .fontWeight(this.currentMainTabIndex === 2 ? FontWeight.Medium : FontWeight.Regular)
@@ -349,7 +352,7 @@ struct Index {
       .onClick(() => {
         this.currentMainTabIndex = 2;
       })
-      .accessibilityText('记忆')
+      .accessibilityText('待办')
       .accessibilitySelected(this.currentMainTabIndex === 2)
 
       // 4. 设置
@@ -449,6 +452,7 @@ struct Index {
       }
       .width('100%')
       .scrollable(ScrollDirection.Horizontal)
+      .scrollBar(BarState.Off)
       .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.SM })
       .backgroundColor(PMColors.SURFACE)
       .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
@@ -498,25 +502,13 @@ struct Index {
           .borderRadius(PMRadius.XS)
           .backgroundColor(PMColors.MEMORY_LIGHT)
 
-        if (project.dashboard.deadline.label !== '') {
-          Row() {
-            ClockIcon({ iconSize: 12, color: PMColors.RISK })
-            Text(project.dashboard.deadline.label)
-              .fontSize(PMFontSize.CAPTION)
-              .fontWeight(FontWeight.Medium)
-              .fontColor(PMColors.RISK)
-              .margin({ left: 4 })
-          }
-          .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 2, bottom: 2 })
-          .borderRadius(PMRadius.XS)
-          .backgroundColor(PMColors.RISK_LIGHT)
-        }
+        DeadlineBadge({ deadline: project.dashboard.deadline })
       }
       .width('100%')
       .justifyContent(FlexAlign.SpaceBetween)
 
       // 标题与简介
-      Text(project.title)
+      Text(TextFormatters.readableText(project.title, '项目名称无法读取，请重新编辑。'))
         .fontSize(PMFontSize.PRIMARY_JUDGEMENT)
         .fontWeight(FontWeight.Medium)
         .fontColor(PMColors.INK_PRIMARY)
@@ -525,7 +517,7 @@ struct Index {
         .margin({ top: PMSpacing.SM })
 
       if (project.description !== '') {
-        Text(project.description)
+        Text(TextFormatters.readableText(project.description, '项目简介无法读取，请重新编辑。'))
           .fontSize(PMFontSize.BODY)
           .fontColor(PMColors.INK_SECONDARY)
           .lineHeight(20)
@@ -534,13 +526,14 @@ struct Index {
           .margin({ top: PMSpacing.XS })
       }
 
-      // 备赛准备度进度
+      // 进度语义随项目场景变化，避免课程设计显示备赛准备度。
       Column() {
         Row() {
-          Text('备赛准备度')
+          Text(TextFormatters.projectProgressLabel(project.scenario))
             .fontSize(PMFontSize.SECONDARY)
             .fontColor(PMColors.INK_TERTIARY)
-          Text(`${project.dashboard.readiness.percentage}%`)
+          Text(project.dashboard.readiness.percentage === 0 && project._count.cards === 0 && project._count.artifacts === 0 ?
+            '尚未形成' : `${project.dashboard.readiness.percentage}%`)
             .fontSize(PMFontSize.BODY)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.BRAND)
@@ -586,7 +579,7 @@ struct Index {
             .fontColor(PMColors.INK_TERTIARY)
             .margin({ right: PMSpacing.SM })
 
-          Text(project.dashboard.nextAction.label)
+          Text(TextFormatters.readableText(project.dashboard.nextAction.label, '下一步行动无法读取'))
             .fontSize(PMFontSize.BODY)
             .fontColor(PMColors.INK_PRIMARY)
             .maxLines(1)
@@ -761,7 +754,7 @@ struct Index {
   }
 
   // ----------------------------------------------------
-  // Tab 2: 记忆视图 (跨项目知识库)
+  // Tab 1: 记忆视图 (跨项目知识库)
   // ----------------------------------------------------
   @Builder
   private GlobalMemoryTab() {
@@ -786,7 +779,10 @@ struct Index {
               .fontColor(this.selectedGlobalType === 'all' ? PMColors.BRAND : PMColors.INK_SECONDARY)
               .backgroundColor(this.selectedGlobalType === 'all' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
               .borderRadius(PMRadius.XS)
+              .height(44)
               .margin({ right: PMSpacing.XS })
+              .accessibilityText('按记忆类型筛选：全部')
+              .accessibilitySelected(this.selectedGlobalType === 'all')
               .onClick(() => {
                 this.selectedGlobalType = 'all';
               })
@@ -797,7 +793,10 @@ struct Index {
               .fontColor(this.selectedGlobalType === 'paper_note' ? PMColors.BRAND : PMColors.INK_SECONDARY)
               .backgroundColor(this.selectedGlobalType === 'paper_note' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
               .borderRadius(PMRadius.XS)
+              .height(44)
               .margin({ right: PMSpacing.XS })
+              .accessibilityText('按记忆类型筛选：论文笔记')
+              .accessibilitySelected(this.selectedGlobalType === 'paper_note')
               .onClick(() => {
                 this.selectedGlobalType = 'paper_note';
               })
@@ -808,7 +807,10 @@ struct Index {
               .fontColor(this.selectedGlobalType === 'experiment_log' ? PMColors.BRAND : PMColors.INK_SECONDARY)
               .backgroundColor(this.selectedGlobalType === 'experiment_log' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
               .borderRadius(PMRadius.XS)
+              .height(44)
               .margin({ right: PMSpacing.XS })
+              .accessibilityText('按记忆类型筛选：实验记录')
+              .accessibilitySelected(this.selectedGlobalType === 'experiment_log')
               .onClick(() => {
                 this.selectedGlobalType = 'experiment_log';
               })
@@ -819,6 +821,9 @@ struct Index {
               .fontColor(this.selectedGlobalType === 'reflection' ? PMColors.BRAND : PMColors.INK_SECONDARY)
               .backgroundColor(this.selectedGlobalType === 'reflection' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
               .borderRadius(PMRadius.XS)
+              .height(44)
+              .accessibilityText('按记忆类型筛选：阶段复盘')
+              .accessibilitySelected(this.selectedGlobalType === 'reflection')
               .onClick(() => {
                 this.selectedGlobalType = 'reflection';
               })
@@ -826,6 +831,7 @@ struct Index {
         }
         .width('100%')
         .scrollable(ScrollDirection.Horizontal)
+        .scrollBar(BarState.Off)
         .margin({ top: PMSpacing.SM })
       }
       .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.SM })
@@ -836,28 +842,84 @@ struct Index {
         ForEach(this.getFilteredGlobalCards(), (card: KnowledgeCard) => {
           ListItem() {
             Column() {
+              if (TextFormatters.isDamagedMemory(card.title, card.summary,
+                card.capture !== undefined && card.capture !== null ? card.capture.rawText : '')) {
+                Row() {
+                  Row() {
+                    AlertIcon({ iconSize: 14, color: PMColors.RISK })
+                    Text('需要修复')
+                      .fontSize(PMFontSize.CAPTION)
+                      .fontWeight(FontWeight.Medium)
+                      .fontColor(PMColors.RISK)
+                      .margin({ left: PMSpacing.XS })
+                  }
+                  Text(card.createdAt.length >= 10 ? card.createdAt.substring(0, 10) : card.createdAt)
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.INK_TERTIARY)
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.SpaceBetween)
+
+                Text('这条历史记忆无法完整读取，原内容未被替换。')
+                  .fontSize(PMFontSize.BODY)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.INK_PRIMARY)
+                  .lineHeight(20)
+                  .margin({ top: PMSpacing.SM })
+
+                Text('可进入所属项目查看原始采集碎片并重新录入。')
+                  .fontSize(PMFontSize.SECONDARY)
+                  .fontColor(PMColors.INK_SECONDARY)
+                  .lineHeight(18)
+                  .margin({ top: PMSpacing.XS })
+              } else {
+                Row() {
+                  MemoryTypeBadge({ type: card.type })
+                  Text(card.createdAt.length >= 10 ? card.createdAt.substring(0, 10) : card.createdAt)
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.INK_TERTIARY)
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.SpaceBetween)
+
+                Text(TextFormatters.readableText(card.title, '历史记忆需要修复'))
+                  .fontSize(PMFontSize.SECTION_TITLE)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.INK_PRIMARY)
+                  .maxLines(2)
+                  .textOverflow({ overflow: TextOverflow.Ellipsis })
+                  .margin({ top: PMSpacing.SM })
+
+                if (TextFormatters.shouldShowSummary(card.title, card.summary)) {
+                  Text(card.summary)
+                    .fontSize(PMFontSize.BODY)
+                    .fontColor(PMColors.INK_SECONDARY)
+                    .lineHeight(20)
+                    .maxLines(3)
+                    .textOverflow({ overflow: TextOverflow.Ellipsis })
+                    .margin({ top: PMSpacing.XS })
+                }
+              }
+
               Row() {
-                MemoryTypeBadge({ type: card.type })
-                Text(card.createdAt.length >= 10 ? card.createdAt.substring(0, 10) : card.createdAt)
+                Text('所属项目')
                   .fontSize(PMFontSize.CAPTION)
                   .fontColor(PMColors.INK_TERTIARY)
+                Text(card.projectTitle !== '' ? TextFormatters.readableText(card.projectTitle, '项目名称无法读取') : '项目归属未同步')
+                  .fontSize(PMFontSize.SECONDARY)
+                  .fontColor(PMColors.BRAND)
+                  .maxLines(1)
+                  .textOverflow({ overflow: TextOverflow.Ellipsis })
+                  .layoutWeight(1)
+                  .margin({ left: PMSpacing.SM })
+                Text('→')
+                  .fontSize(PMFontSize.BODY)
+                  .fontColor(PMColors.BRAND)
+                  .margin({ left: PMSpacing.XS })
               }
               .width('100%')
-              .justifyContent(FlexAlign.SpaceBetween)
-
-              Text(card.title)
-                .fontSize(PMFontSize.SECTION_TITLE)
-                .fontWeight(FontWeight.Medium)
-                .fontColor(PMColors.INK_PRIMARY)
-                .margin({ top: PMSpacing.SM })
-
-              if (card.summary !== '') {
-                Text(card.summary)
-                  .fontSize(PMFontSize.BODY)
-                  .fontColor(PMColors.INK_SECONDARY)
-                  .lineHeight(20)
-                  .margin({ top: PMSpacing.XS })
-              }
+              .padding({ top: PMSpacing.SM })
+              .accessibilityText(`所属项目：${card.projectTitle !== '' ? card.projectTitle : '项目归属未同步'}`)
             }
             .width('100%')
             .padding(PMSpacing.MD)
@@ -865,6 +927,13 @@ struct Index {
             .borderRadius(PMRadius.MD)
             .border({ width: 1, color: PMColors.BORDER })
             .alignItems(HorizontalAlign.Start)
+            .onClick(() => {
+              if (card.projectId !== '') {
+                router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: card.projectId, tab: 'memory' } });
+              }
+            })
+            .accessibilityText(`记忆：${TextFormatters.readableText(card.title, '历史记忆需要修复')}，所属项目：${card.projectTitle !== '' ? card.projectTitle : '项目归属未同步'}`)
+            .accessibilityDescription(card.projectId !== '' ? '打开所属项目的记忆页面' : '项目归属未同步，暂时无法跳转')
           }
         }, (card: KnowledgeCard) => card.id)
       }
@@ -891,10 +960,95 @@ struct Index {
   // Tab 3: 设置视图 (大模型 API 配置与环境)
   // ----------------------------------------------------
   @Builder
+  private AppInfoCard() {
+    Column() {
+      Text('应用信息')
+        .fontSize(PMFontSize.CAPTION)
+        .fontWeight(FontWeight.Medium)
+        .fontColor(PMColors.INK_TERTIARY)
+
+      Row() {
+        Image($r('app.media.app_icon'))
+          .width(56)
+          .height(56)
+          .borderRadius(PMRadius.LG)
+          .objectFit(ImageFit.Cover)
+          .accessibilityText('忆程 ProjectMemo 应用图标')
+
+        Column() {
+          Text('忆程 ProjectMemo')
+            .fontSize(PMFontSize.PAGE_TITLE)
+            .fontWeight(FontWeight.Bold)
+            .fontColor(PMColors.INK_PRIMARY)
+          Text('证据驱动的项目过程档案与决策手账')
+            .fontSize(PMFontSize.BODY)
+            .fontColor(PMColors.INK_SECONDARY)
+            .lineHeight(20)
+            .margin({ top: PMSpacing.XS })
+          Text('HarmonyOS 客户端')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+            .margin({ top: PMSpacing.XS })
+        }
+        .layoutWeight(1)
+        .alignItems(HorizontalAlign.Start)
+        .margin({ left: PMSpacing.MD })
+      }
+      .width('100%')
+      .alignItems(VerticalAlign.Center)
+      .margin({ top: PMSpacing.SM })
+      .accessibilityText('忆程 ProjectMemo，证据驱动的项目过程档案与决策手账，HarmonyOS 客户端')
+
+      Divider()
+        .color(PMColors.DIVIDER)
+        .margin({ top: PMSpacing.MD, bottom: PMSpacing.SM })
+
+      Row() {
+        Column() {
+          Text('功能范围')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+          Text('记忆 · 提醒 · 待办 · 成果')
+            .fontSize(PMFontSize.SECONDARY)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.INK_SECONDARY)
+            .margin({ top: PMSpacing.XS })
+        }
+        .layoutWeight(1)
+        .alignItems(HorizontalAlign.Start)
+
+        Column() {
+          Text('数据同步')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+          Text(this.dataSyncState)
+            .fontSize(PMFontSize.SECONDARY)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(this.dataSyncState === '同步失败' ? PMColors.RISK :
+              this.dataSyncState === '同步中...' ? PMColors.BRAND : PMColors.SUCCESS)
+            .margin({ top: PMSpacing.XS })
+        }
+        .layoutWeight(1)
+        .alignItems(HorizontalAlign.End)
+      }
+      .width('100%')
+    }
+    .width('100%')
+    .padding(PMSpacing.LG)
+    .backgroundColor(PMColors.SURFACE)
+    .borderRadius(PMRadius.MD)
+    .border({ width: 1, color: PMColors.BORDER })
+    .alignItems(HorizontalAlign.Start)
+  }
+
+  @Builder
   private SettingsTab() {
     Scroll() {
       Column() {
-        // 1. 大模型接入配置卡片
+        // 一级卡片：应用身份与当前环境
+        this.AppInfoCard()
+
+        // 二级卡片：运行配置
         Column() {
           Row() {
             Row() {
@@ -907,11 +1061,11 @@ struct Index {
             .borderRadius(PMRadius.SM)
 
             Column() {
-              Text('大模型接入配置')
+              Text('运行配置')
                 .fontSize(PMFontSize.SECTION_TITLE)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
-              Text('为问忆程与成果生成提供可切换的模型支持。')
+              Text('为问忆程与成果生成选择在线模型或离线引擎。')
                 .fontSize(PMFontSize.BODY)
                 .fontColor(PMColors.INK_SECONDARY)
                 .lineHeight(18)
@@ -1163,10 +1317,11 @@ struct Index {
         .borderRadius(PMRadius.MD)
         .border({ width: 1, color: PMColors.BORDER })
         .alignItems(HorizontalAlign.Start)
+        .margin({ top: PMSpacing.MD })
 
-        // 2. 服务端连接状态卡片
+        // 三级卡片：服务连接
         Column() {
-          Text('服务端连接状态')
+          Text('服务连接')
             .fontSize(PMFontSize.SECTION_TITLE)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.INK_PRIMARY)
@@ -1222,9 +1377,9 @@ struct Index {
         .alignItems(HorizontalAlign.Start)
         .margin({ top: PMSpacing.MD })
 
-        // 3. 关于产品
+        // 四级卡片：关于与安全
         Column() {
-          Text('关于 忆程 ProjectMemo')
+          Text('关于与安全')
             .fontSize(PMFontSize.SECTION_TITLE)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.INK_PRIMARY)
@@ -1240,6 +1395,12 @@ struct Index {
             .fontColor(PMColors.INK_SECONDARY)
             .lineHeight(20)
             .margin({ top: 4 })
+
+          Text('API 密钥只用于当前本地运行，不会在界面中回显；长期配置请使用部署环境变量。')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+            .lineHeight(18)
+            .margin({ top: PMSpacing.SM })
         }
         .width('100%')
         .padding(PMSpacing.LG)
@@ -1279,8 +1440,8 @@ struct Index {
               .fontFamily(PMFontFamily.SANS)
               .fontColor(PMColors.INK_PRIMARY)
             Text(this.currentMainTabIndex === 0 ? '证据驱动的项目过程档案与决策手账' :
-              this.currentMainTabIndex === 1 ? '主动提醒与待办事项' :
-                this.currentMainTabIndex === 2 ? '项目过程知识与复盘记忆库' : '大模型 API 配置与运行参数')
+              this.currentMainTabIndex === 1 ? '项目过程记忆与复盘' :
+                this.currentMainTabIndex === 2 ? '主动提醒与待办事项' : '大模型 API 配置与运行参数')
               .fontSize(PMFontSize.SECONDARY)
               .fontColor(PMColors.INK_TERTIARY)
               .margin({ top: 3 })
@@ -1325,9 +1486,9 @@ struct Index {
           if (this.currentMainTabIndex === 0) {
             this.ProjectsTab()
           } else if (this.currentMainTabIndex === 1) {
-            this.TasksTab()
-          } else if (this.currentMainTabIndex === 2) {
             this.GlobalMemoryTab()
+          } else if (this.currentMainTabIndex === 2) {
+            this.TasksTab()
           } else if (this.currentMainTabIndex === 3) {
             this.SettingsTab()
           }
@@ -1486,7 +1647,7 @@ struct Index {
         }
         .width('100%')
         .height('100%')
-        .backgroundColor('rgba(19, 36, 58, 0.45)')
+        .backgroundColor(PMColors.SCRIM)
         .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
         .justifyContent(FlexAlign.Center)
       }

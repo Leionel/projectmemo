@@ -187,14 +187,14 @@ struct InterventionDetail {
               .width('100%')
               .justifyContent(FlexAlign.SpaceBetween)
 
-              Text(this.intervention.title)
+              Text(TextFormatters.readableText(this.intervention.title, '提醒标题无法读取，请重新评估。'))
                 .fontSize(PMFontSize.PRIMARY_JUDGEMENT)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
                 .lineHeight(26)
                 .margin({ top: PMSpacing.MD })
 
-              Text(this.intervention.content)
+              Text(TextFormatters.readableText(this.intervention.content, '提醒依据文本无法读取，请重新评估。'))
                 .fontSize(PMFontSize.BODY)
                 .fontColor(PMColors.INK_SECONDARY)
                 .lineHeight(22)
@@ -211,8 +211,8 @@ struct InterventionDetail {
               EvidenceSpineView({
                 evidence: this.intervention.evidence,
                 triggerType: this.intervention.triggerType,
-                judgementTitle: this.intervention.title,
-                judgementContent: this.intervention.content
+                judgementTitle: TextFormatters.readableText(this.intervention.title, '提醒标题无法读取，请重新评估。'),
+                judgementContent: TextFormatters.readableText(this.intervention.content, '提醒依据文本无法读取，请重新评估。')
               })
             }
             .width('100%')
@@ -240,7 +240,7 @@ struct InterventionDetail {
                           .fill(this.actionIndex === index ? PMColors.BRAND : PMColors.SURFACE)
                           .border({ width: 2, color: this.actionIndex === index ? PMColors.BRAND : PMColors.BORDER_STRONG })
 
-                        Text(action.label !== '' ? action.label : `建议方案 ${index + 1}`)
+                        Text(action.label !== '' ? TextFormatters.readableText(action.label, `建议方案 ${index + 1}`) : `建议方案 ${index + 1}`)
                           .fontSize(PMFontSize.BODY)
                           .fontWeight(FontWeight.Medium)
                           .fontColor(this.actionIndex === index ? PMColors.BRAND : PMColors.INK_SECONDARY)
@@ -254,14 +254,14 @@ struct InterventionDetail {
                     .width('100%')
                     .justifyContent(FlexAlign.SpaceBetween)
 
-                    Text(action.title)
+                    Text(TextFormatters.readableText(action.title, '行动标题无法读取，请重新评估。'))
                       .fontSize(PMFontSize.SECTION_TITLE)
                       .fontWeight(FontWeight.Medium)
                       .fontColor(PMColors.INK_PRIMARY)
                       .margin({ top: PMSpacing.SM })
 
                     if (action.description !== null && action.description !== undefined && action.description !== '') {
-                      Text(action.description)
+                      Text(TextFormatters.readableText(action.description, '行动说明无法读取，请打开待办查看详情。'))
                         .fontSize(PMFontSize.BODY)
                         .fontColor(PMColors.INK_SECONDARY)
                         .lineHeight(20)
@@ -380,7 +380,7 @@ struct InterventionDetail {
                     .backgroundColor(PMColors.BRAND)
                     .borderRadius(PMRadius.SM)
                     .height(48)
-                    .layoutWeight(2)
+                    .layoutWeight(1.6)
                     .enabled(this.isOpenStatus() && !this.isSubmitting && this.intervention.proposedActions.length > 0)
                     .onClick(() => {
                       this.acceptIntervention();
@@ -394,8 +394,10 @@ struct InterventionDetail {
                     .border({ width: 1, color: PMColors.BORDER })
                     .borderRadius(PMRadius.SM)
                     .height(48)
-                    .layoutWeight(1.2)
+                    .layoutWeight(1.5)
+                    .padding({ left: PMSpacing.XS, right: PMSpacing.XS, top: PMSpacing.SM, bottom: PMSpacing.SM })
                     .margin({ left: PMSpacing.SM })
+                    .accessibilityText('明天提醒')
                     .enabled(this.isOpenStatus() && !this.isSubmitting)
                     .onClick(() => {
                       this.snoozeIntervention(24);

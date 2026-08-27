@@ -28,7 +28,7 @@ export struct EvidenceSpineView {
         item.sourceLabel = fact.includes('要求') || fact.includes('比赛') ? '参赛要求' :
           fact.includes('实验') ? '实验记录' :
             fact.includes('行动') || fact.includes('待办') ? '行动闭环' : '项目记录';
-        item.factContent = fact;
+        item.factContent = TextFormatters.readableText(fact, '证据事实无法读取，请重新录入。');
         nodes.push(item);
       });
     } else {
@@ -88,7 +88,8 @@ export struct EvidenceSpineView {
     const judgementNode = new SpineNodeItem();
     judgementNode.timeLabel = '当前判断';
     judgementNode.sourceLabel = '结论';
-    judgementNode.factContent = this.judgementTitle !== '' ? this.judgementTitle : TextFormatters.triggerTypeToChinese(this.triggerType);
+    judgementNode.factContent = this.judgementTitle !== '' ?
+      TextFormatters.readableText(this.judgementTitle, '当前判断文本无法读取') : TextFormatters.triggerTypeToChinese(this.triggerType);
     judgementNode.isJudgement = true;
     nodes.push(judgementNode);
 
@@ -124,7 +125,7 @@ export struct EvidenceSpineView {
                 Column()
                   .width(1.5)
                   .height(34)
-                  .backgroundColor(PMColors.EVIDENCE + '44')
+                  .backgroundColor(PMColors.EVIDENCE_TINT)
                   .margin({ top: 4 })
               }
             }

@@ -1,4 +1,5 @@
 import { describe, beforeAll, beforeEach, afterEach, afterAll, it, expect } from '@ohos/hypium';
+import { TextFormatters } from '../main/ets/common/TextFormatters';
 
 export default function localUnitTest() {
   describe('localUnitTest', () => {
@@ -28,6 +29,29 @@ export default function localUnitTest() {
       // Defines a variety of assertion methods, which are used to declare expected boolean conditions.
       expect(a).assertContain(b);
       expect(a).assertEqual(a);
+    });
+
+    it('guards unreadable historical text', 0, () => {
+      expect(TextFormatters.isUnreadableText('??????,?????? A ??? 1.8%?')).assertTrue();
+      expect(TextFormatters.readableText('??????')).assertEqual('这条记录文本无法读取，请重新录入。');
+      expect(TextFormatters.readableText('完成消融实验，结果显示模块 A 提升约 1.8%。')).assertEqual('完成消融实验，结果显示模块 A 提升约 1.8%。');
+    });
+
+    it('keeps readable markdown structure', 0, () => {
+      const markdown = '- **??????**：????\n\n正常的项目事实';
+      const readable = TextFormatters.readableMarkdown(markdown);
+      expect(readable).assertContain('- 历史记录文本无法读取，请重新录入。');
+      expect(readable).assertContain('正常的项目事实');
+    });
+
+    it('deduplicates identical summaries', 0, () => {
+      expect(TextFormatters.shouldShowSummary('完成实验。', '完成实验')).assertFalse();
+      expect(TextFormatters.shouldShowSummary('项目标题', '项目摘要')).assertTrue();
+    });
+
+    it('marks damaged memories without replacing source data', 0, () => {
+      expect(TextFormatters.isDamagedMemory('????', '????')).assertTrue();
+      expect(TextFormatters.isDamagedMemory('正常标题', '正常摘要')).assertFalse();
     });
   });
 }

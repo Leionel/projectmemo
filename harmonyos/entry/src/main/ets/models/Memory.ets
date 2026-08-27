@@ -35,6 +35,9 @@ export class AttachmentSummary {
 
 export class KnowledgeCard {
   id: string = '';
+  // Global Memory 聚合时注入，项目内 Memory 不依赖这些字段。
+  projectId: string = '';
+  projectTitle: string = '';
   type: string = '';
   title: string = '';
   summary: string = '';

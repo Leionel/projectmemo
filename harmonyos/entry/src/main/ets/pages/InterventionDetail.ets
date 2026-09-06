@@ -4,7 +4,7 @@ import { ApiError } from '../models/Project';
 import { Intervention, ProposedAction } from '../models/Intervention';
 import { InterventionService } from '../services/InterventionService';
 import { NotificationService } from '../services/NotificationService';
-import { PMColors, PMSpacing, PMFontSize, PMRadius } from '../common/DesignTokens';
+import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction } from '../common/DesignTokens';
 import { PMAppBar } from '../components/PMAppBar';
 import { SeverityBadge, StatusBadge } from '../components/MetricBadge';
 import { EvidenceSpineView } from '../components/EvidenceSpineView';
@@ -278,6 +278,7 @@ struct InterventionDetail {
                   })
                   .margin({ bottom: PMSpacing.SM })
                   .alignItems(HorizontalAlign.Start)
+                  .clickEffect(PMInteraction.PRESS_EFFECT)
                   .onClick(() => {
                     if (this.intervention.proposedActions.length > 1 && this.isOpenStatus()) {
                       this.actionIndex = index;

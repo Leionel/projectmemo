@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { db } from "../lib/db";
+import { getEmbeddingProviderConfig } from "../lib/config/provider";
 import { searchProjectCards } from "../lib/memory/hybridSearch";
 import { backfillProjectEmbeddings } from "../lib/repositories/embeddings";
 
@@ -28,11 +29,12 @@ async function main() {
   if (!process.argv.includes("--confirm-provider-cost")) {
     throw new Error("Refusing a potentially billable 1,000-card benchmark. Re-run with --confirm-provider-cost.");
   }
-  if (process.env.LLM_MODE !== "openai-compatible" || !process.env.LLM_BASE_URL || !process.env.LLM_API_KEY) {
-    throw new Error("S04 semantic benchmark requires a configured OpenAI-compatible embeddings provider.");
-  }
   if (process.env.SEMANTIC_MEMORY_ENABLED !== "true") {
     throw new Error("S04 semantic benchmark requires SEMANTIC_MEMORY_ENABLED=true.");
+  }
+  const embeddingConfig = getEmbeddingProviderConfig();
+  if (!embeddingConfig) {
+    throw new Error("S04 semantic benchmark requires a configured OpenAI-compatible embeddings provider (EMBEDDING_BASE_URL and EMBEDDING_MODEL_NAME for a DeepSeek chat setup).");
   }
 
   const project = await db.project.create({
@@ -117,7 +119,8 @@ async function main() {
     const receipt = {
       gate: "S04-labelled-hybrid-search",
       generatedAt: new Date().toISOString(),
-      providerModel: process.env.EMBEDDING_MODEL_NAME ?? "text-embedding-3-small",
+      provider: embeddingConfig.provider,
+      providerModel: embeddingConfig.model,
       criteria: { recallAt8: 0.8, mrr: 0.65, evidencePrecision: 0.9, p95At1000Ms: 500 },
       reports,
       passed,

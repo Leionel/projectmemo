@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { getEmbeddingProviderConfig } from "@/lib/config/provider";
 
 export interface EmbeddingResult {
   vector: number[];
@@ -6,6 +7,7 @@ export interface EmbeddingResult {
   provider: string;
   model: string;
   isMock: boolean;
+  fallbackReason?: string | null;
 }
 
 export function cosineSimilarity(a: number[], b: number[]): number {
@@ -69,43 +71,43 @@ export function generateDeterministicEmbedding(text: string, dimensions = 128): 
  * 嵌入向量服务：优先调用 OpenAI-compatible /embeddings，失败或未配置时自动回退为确定性向量。
  */
 export async function getEmbedding(text: string): Promise<EmbeddingResult> {
-  const baseUrl = process.env.LLM_BASE_URL?.replace(/\/$/, "");
-  const apiKey = process.env.LLM_API_KEY;
-  const embeddingModel = process.env.EMBEDDING_MODEL_NAME || "text-embedding-3-small";
-  const timeout = Number(process.env.LLM_TIMEOUT_MS ?? 10000);
+  const providerConfig = getEmbeddingProviderConfig();
+  let fallbackReason: string | null = providerConfig ? "remote_embedding_unavailable" : "embedding_provider_not_configured";
 
-  const isLlmConfigured = process.env.LLM_MODE === "openai-compatible" && Boolean(apiKey) && Boolean(baseUrl);
-
-  if (isLlmConfigured) {
+  if (providerConfig) {
     try {
-      const response = await fetch(`${baseUrl}/embeddings`, {
+      const response = await fetch(`${providerConfig.baseUrl}/embeddings`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
+          Authorization: `Bearer ${providerConfig.apiKey}`,
         },
         body: JSON.stringify({
-          model: embeddingModel,
+          model: providerConfig.model,
           input: text.slice(0, 8000),
         }),
-        signal: AbortSignal.timeout(timeout),
+        signal: AbortSignal.timeout(providerConfig.timeoutMs),
       });
 
-      if (response.ok) {
-        const json = await response.json();
-        const vector = json?.data?.[0]?.embedding;
-        if (Array.isArray(vector) && vector.length > 0) {
+      if (!response.ok) {
+        fallbackReason = `Embedding request failed with HTTP ${response.status}`;
+      } else {
+        const json: unknown = await response.json();
+        const vector = (json as { data?: Array<{ embedding?: unknown }> })?.data?.[0]?.embedding;
+        if (Array.isArray(vector) && vector.length > 0 && vector.every((value) => typeof value === "number" && Number.isFinite(value))) {
           return {
             vector,
             dimensions: vector.length,
-            provider: `openai:${embeddingModel}`,
-            model: embeddingModel,
+            provider: providerConfig.provider,
+            model: providerConfig.model,
             isMock: false,
+            fallbackReason: null,
           };
         }
+        fallbackReason = "Embedding response did not contain a numeric vector";
       }
     } catch (error) {
-      console.warn("Remote embedding failed; falling back to deterministic local embedding:", error);
+      fallbackReason = error instanceof Error ? error.message.slice(0, 180) : "remote_embedding_error";
     }
   }
 
@@ -117,5 +119,6 @@ export async function getEmbedding(text: string): Promise<EmbeddingResult> {
     provider: "deterministic-mock",
     model: "hash-n-gram-128d",
     isMock: true,
+    fallbackReason,
   };
 }

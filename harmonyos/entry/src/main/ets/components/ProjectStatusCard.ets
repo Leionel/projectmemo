@@ -14,7 +14,7 @@ export struct ProjectStatusCard {
       Row() {
         Column() {
           Text(TextFormatters.projectProgressLabel(this.scenario))
-            .fontSize(PMFontSize.SM)
+            .fontSize(PMFontSize.CAPTION)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.INK_SECONDARY)
           Text(this.dashboard.readiness.percentage === 0 ? '尚未形成' : `${this.dashboard.readiness.percentage}%`)
@@ -56,7 +56,7 @@ export struct ProjectStatusCard {
             .fill(this.dashboard.activeReminderCount > 0 ? PMColors.RISK : PMColors.SUCCESS)
             .margin({ right: PMSpacing.SM })
           Text(`活跃提醒 ${this.dashboard.activeReminderCount}`)
-            .fontSize(PMFontSize.BASE)
+            .fontSize(PMFontSize.BODY)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.INK_PRIMARY)
         }
@@ -70,7 +70,7 @@ export struct ProjectStatusCard {
             .fill(this.dashboard.activeActionCount > 0 ? PMColors.BRAND : PMColors.INK_TERTIARY)
             .margin({ right: PMSpacing.SM })
           Text(`进行中行动 ${this.dashboard.activeActionCount}`)
-            .fontSize(PMFontSize.BASE)
+            .fontSize(PMFontSize.BODY)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.INK_PRIMARY)
         }

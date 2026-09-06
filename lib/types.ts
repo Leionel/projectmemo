@@ -221,6 +221,29 @@ export interface AgentCitation {
   title: string;
   excerpt: string;
   relevance?: number;
+  current?: boolean;
+  supportState?: TemporalSupportState;
+  supersededBy?: TemporalCardSummary | null;
+  temporalReason?: string | null;
+}
+
+export const evidenceSupportStates = ["SUPPORTED", "CONTESTED", "INSUFFICIENT"] as const;
+export type EvidenceSupportState = (typeof evidenceSupportStates)[number];
+
+export interface EvidenceClaim {
+  text: string;
+  support: EvidenceSupportState;
+  cardIds: string[];
+  supersededCardIds: string[];
+}
+
+export interface EvidenceTrustReceipt {
+  supportState: EvidenceSupportState;
+  abstained: boolean;
+  claims: EvidenceClaim[];
+  retrievalMode: "hybrid" | "semantic_only" | "keyword_fallback" | "none";
+  refusalReason: string | null;
+  evaluatedAt: string;
 }
 
 export interface AgentChatResponse {
@@ -229,6 +252,7 @@ export interface AgentChatResponse {
   proposedActions: ProposedAction[];
   runId: string;
   fallback: boolean;
+  trustReceipt?: EvidenceTrustReceipt;
 }
 
 export interface ProjectMetrics {
@@ -272,6 +296,72 @@ export interface CardSearchResult {
   source: string;
   retrievalMode: "hybrid" | "semantic_only" | "keyword_fallback";
   createdAt: string;
+  current: boolean;
+  supportState: TemporalSupportState;
+  supersededBy: TemporalCardSummary | null;
+  temporalReason: string | null;
+}
+
+export const cardRelationTypes = [
+  "RELATED", "SUPPORTS", "CONTRADICTS", "SUPERSEDES", "DERIVED_FROM",
+] as const;
+
+export type CardRelationTypeValue = (typeof cardRelationTypes)[number];
+
+export type TemporalSupportState =
+  | "SUPPORTED"
+  | "SUPERSEDED"
+  | "CONFLICT"
+  | "PENDING"
+  | "REVOKED"
+  | "INSUFFICIENT";
+
+export type TemporalDecisionStatus =
+  | "CURRENT"
+  | "SUPERSEDED"
+  | "CONFLICT"
+  | "PENDING"
+  | "REVOKED"
+  | "INSUFFICIENT";
+
+export interface TemporalCardSummary {
+  id: string;
+  title: string;
+  summary: string;
+  createdAt: string;
+}
+
+export interface TemporalRelationData {
+  id: string;
+  relationType: CardRelationTypeValue;
+  reason: string;
+  confidence: number | null;
+  confirmed: boolean;
+  confirmedAt: string | null;
+  revokedAt: string | null;
+  validFrom: string | null;
+  validTo: string | null;
+  createdAt: string;
+  currentCard: TemporalCardSummary;
+  relatedCard: TemporalCardSummary;
+}
+
+export interface TemporalDecisionItem {
+  card: TemporalCardSummary;
+  current: boolean;
+  status: TemporalDecisionStatus;
+  statusLabel: string;
+  supportState: TemporalSupportState;
+  supersededBy: TemporalCardSummary | null;
+  temporalReason: string | null;
+  relations: TemporalRelationData[];
+}
+
+export interface TemporalTimelineResponse {
+  projectId: string;
+  asOf: string;
+  enabled: boolean;
+  items: TemporalDecisionItem[];
 }
 
 export interface MilestoneData {

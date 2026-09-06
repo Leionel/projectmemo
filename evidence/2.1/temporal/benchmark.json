@@ -1,0 +1,2609 @@
+{
+  "benchmark": "ProjectMemo Temporal Evidence Ledger deterministic benchmark v1",
+  "generatedAt": "2026-08-30T05:18:01.718Z",
+  "datasetNote": "60 组人工定义模式化样例；跨项目写入指标由 tests/temporalLedger.test.ts 集成测试验证。后续仍需补充真实项目盲测集。",
+  "thresholds": {
+    "conflictDetectionF1": 0.85,
+    "supersessionPrecision": 0.9,
+    "currentFactAccuracy": 0.9,
+    "evidencePrecision": 0.95,
+    "unconfirmedAutoActivation": 0,
+    "crossProjectRelationWrites": 0,
+    "supersessionCyclesAccepted": 0
+  },
+  "metrics": {
+    "caseCount": 60,
+    "conflictDetectionF1": 1,
+    "supersessionPrecision": 1,
+    "currentFactAccuracy": 1,
+    "evidencePrecision": 1,
+    "unconfirmedAutoActivation": 0,
+    "supersessionCyclesAccepted": 0,
+    "crossProjectRelationWrites": 0
+  },
+  "passed": true,
+  "cases": [
+    {
+      "kind": "decision",
+      "id": "S-1",
+      "category": "明确取代",
+      "card": {
+        "id": "supersedes-1-old",
+        "title": "决策 supersedes-1-old",
+        "summary": "决策 supersedes-1-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supersedes-1",
+          "relationType": "SUPERSEDES",
+          "reason": "supersedes-1 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supersedes-1-new",
+            "title": "决策 supersedes-1-new",
+            "summary": "决策 supersedes-1-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supersedes-1-old",
+            "title": "决策 supersedes-1-old",
+            "summary": "决策 supersedes-1-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-1 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-1 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "S-2",
+      "category": "明确取代",
+      "card": {
+        "id": "supersedes-2-old",
+        "title": "决策 supersedes-2-old",
+        "summary": "决策 supersedes-2-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supersedes-2",
+          "relationType": "SUPERSEDES",
+          "reason": "supersedes-2 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supersedes-2-new",
+            "title": "决策 supersedes-2-new",
+            "summary": "决策 supersedes-2-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supersedes-2-old",
+            "title": "决策 supersedes-2-old",
+            "summary": "决策 supersedes-2-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-2 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-2 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "S-3",
+      "category": "明确取代",
+      "card": {
+        "id": "supersedes-3-old",
+        "title": "决策 supersedes-3-old",
+        "summary": "决策 supersedes-3-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supersedes-3",
+          "relationType": "SUPERSEDES",
+          "reason": "supersedes-3 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supersedes-3-new",
+            "title": "决策 supersedes-3-new",
+            "summary": "决策 supersedes-3-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supersedes-3-old",
+            "title": "决策 supersedes-3-old",
+            "summary": "决策 supersedes-3-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-3 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-3 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "S-4",
+      "category": "明确取代",
+      "card": {
+        "id": "supersedes-4-old",
+        "title": "决策 supersedes-4-old",
+        "summary": "决策 supersedes-4-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supersedes-4",
+          "relationType": "SUPERSEDES",
+          "reason": "supersedes-4 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supersedes-4-new",
+            "title": "决策 supersedes-4-new",
+            "summary": "决策 supersedes-4-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supersedes-4-old",
+            "title": "决策 supersedes-4-old",
+            "summary": "决策 supersedes-4-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-4 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-4 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "S-5",
+      "category": "明确取代",
+      "card": {
+        "id": "supersedes-5-old",
+        "title": "决策 supersedes-5-old",
+        "summary": "决策 supersedes-5-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supersedes-5",
+          "relationType": "SUPERSEDES",
+          "reason": "supersedes-5 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supersedes-5-new",
+            "title": "决策 supersedes-5-new",
+            "summary": "决策 supersedes-5-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supersedes-5-old",
+            "title": "决策 supersedes-5-old",
+            "summary": "决策 supersedes-5-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-5 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-5 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "S-6",
+      "category": "明确取代",
+      "card": {
+        "id": "supersedes-6-old",
+        "title": "决策 supersedes-6-old",
+        "summary": "决策 supersedes-6-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supersedes-6",
+          "relationType": "SUPERSEDES",
+          "reason": "supersedes-6 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supersedes-6-new",
+            "title": "决策 supersedes-6-new",
+            "summary": "决策 supersedes-6-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supersedes-6-old",
+            "title": "决策 supersedes-6-old",
+            "summary": "决策 supersedes-6-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-6 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-6 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "S-7",
+      "category": "明确取代",
+      "card": {
+        "id": "supersedes-7-old",
+        "title": "决策 supersedes-7-old",
+        "summary": "决策 supersedes-7-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supersedes-7",
+          "relationType": "SUPERSEDES",
+          "reason": "supersedes-7 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supersedes-7-new",
+            "title": "决策 supersedes-7-new",
+            "summary": "决策 supersedes-7-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supersedes-7-old",
+            "title": "决策 supersedes-7-old",
+            "summary": "决策 supersedes-7-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-7 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-7 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "S-8",
+      "category": "明确取代",
+      "card": {
+        "id": "supersedes-8-old",
+        "title": "决策 supersedes-8-old",
+        "summary": "决策 supersedes-8-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supersedes-8",
+          "relationType": "SUPERSEDES",
+          "reason": "supersedes-8 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supersedes-8-new",
+            "title": "决策 supersedes-8-new",
+            "summary": "决策 supersedes-8-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supersedes-8-old",
+            "title": "决策 supersedes-8-old",
+            "summary": "决策 supersedes-8-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-8 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-8 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "S-9",
+      "category": "明确取代",
+      "card": {
+        "id": "supersedes-9-old",
+        "title": "决策 supersedes-9-old",
+        "summary": "决策 supersedes-9-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supersedes-9",
+          "relationType": "SUPERSEDES",
+          "reason": "supersedes-9 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supersedes-9-new",
+            "title": "决策 supersedes-9-new",
+            "summary": "决策 supersedes-9-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supersedes-9-old",
+            "title": "决策 supersedes-9-old",
+            "summary": "决策 supersedes-9-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-9 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-9 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "S-10",
+      "category": "明确取代",
+      "card": {
+        "id": "supersedes-10-old",
+        "title": "决策 supersedes-10-old",
+        "summary": "决策 supersedes-10-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supersedes-10",
+          "relationType": "SUPERSEDES",
+          "reason": "supersedes-10 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supersedes-10-new",
+            "title": "决策 supersedes-10-new",
+            "summary": "决策 supersedes-10-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supersedes-10-old",
+            "title": "决策 supersedes-10-old",
+            "summary": "决策 supersedes-10-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-10 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-10 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "S-11",
+      "category": "明确取代",
+      "card": {
+        "id": "supersedes-11-old",
+        "title": "决策 supersedes-11-old",
+        "summary": "决策 supersedes-11-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supersedes-11",
+          "relationType": "SUPERSEDES",
+          "reason": "supersedes-11 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supersedes-11-new",
+            "title": "决策 supersedes-11-new",
+            "summary": "决策 supersedes-11-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supersedes-11-old",
+            "title": "决策 supersedes-11-old",
+            "summary": "决策 supersedes-11-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-11 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-11 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "S-12",
+      "category": "明确取代",
+      "card": {
+        "id": "supersedes-12-old",
+        "title": "决策 supersedes-12-old",
+        "summary": "决策 supersedes-12-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supersedes-12",
+          "relationType": "SUPERSEDES",
+          "reason": "supersedes-12 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supersedes-12-new",
+            "title": "决策 supersedes-12-new",
+            "summary": "决策 supersedes-12-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supersedes-12-old",
+            "title": "决策 supersedes-12-old",
+            "summary": "决策 supersedes-12-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-12 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "SUPERSEDED",
+        "current": false,
+        "reason": "supersedes-12 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "P-1",
+      "category": "补充支持",
+      "card": {
+        "id": "supports-1-new",
+        "title": "决策 supports-1-new",
+        "summary": "决策 supports-1-new 的可追溯内容",
+        "createdAt": "2026-08-23T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supports-1",
+          "relationType": "DERIVED_FROM",
+          "reason": "supports-1 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supports-1-new",
+            "title": "决策 supports-1-new",
+            "summary": "决策 supports-1-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supports-1-old",
+            "title": "决策 supports-1-old",
+            "summary": "决策 supports-1-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-1 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-1 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "P-2",
+      "category": "补充支持",
+      "card": {
+        "id": "supports-2-new",
+        "title": "决策 supports-2-new",
+        "summary": "决策 supports-2-new 的可追溯内容",
+        "createdAt": "2026-08-23T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supports-2",
+          "relationType": "SUPPORTS",
+          "reason": "supports-2 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supports-2-new",
+            "title": "决策 supports-2-new",
+            "summary": "决策 supports-2-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supports-2-old",
+            "title": "决策 supports-2-old",
+            "summary": "决策 supports-2-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-2 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-2 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "P-3",
+      "category": "补充支持",
+      "card": {
+        "id": "supports-3-new",
+        "title": "决策 supports-3-new",
+        "summary": "决策 supports-3-new 的可追溯内容",
+        "createdAt": "2026-08-23T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supports-3",
+          "relationType": "DERIVED_FROM",
+          "reason": "supports-3 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supports-3-new",
+            "title": "决策 supports-3-new",
+            "summary": "决策 supports-3-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supports-3-old",
+            "title": "决策 supports-3-old",
+            "summary": "决策 supports-3-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-3 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-3 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "P-4",
+      "category": "补充支持",
+      "card": {
+        "id": "supports-4-new",
+        "title": "决策 supports-4-new",
+        "summary": "决策 supports-4-new 的可追溯内容",
+        "createdAt": "2026-08-23T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supports-4",
+          "relationType": "SUPPORTS",
+          "reason": "supports-4 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supports-4-new",
+            "title": "决策 supports-4-new",
+            "summary": "决策 supports-4-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supports-4-old",
+            "title": "决策 supports-4-old",
+            "summary": "决策 supports-4-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-4 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-4 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "P-5",
+      "category": "补充支持",
+      "card": {
+        "id": "supports-5-new",
+        "title": "决策 supports-5-new",
+        "summary": "决策 supports-5-new 的可追溯内容",
+        "createdAt": "2026-08-23T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supports-5",
+          "relationType": "DERIVED_FROM",
+          "reason": "supports-5 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supports-5-new",
+            "title": "决策 supports-5-new",
+            "summary": "决策 supports-5-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supports-5-old",
+            "title": "决策 supports-5-old",
+            "summary": "决策 supports-5-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-5 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-5 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "P-6",
+      "category": "补充支持",
+      "card": {
+        "id": "supports-6-new",
+        "title": "决策 supports-6-new",
+        "summary": "决策 supports-6-new 的可追溯内容",
+        "createdAt": "2026-08-23T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supports-6",
+          "relationType": "SUPPORTS",
+          "reason": "supports-6 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supports-6-new",
+            "title": "决策 supports-6-new",
+            "summary": "决策 supports-6-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supports-6-old",
+            "title": "决策 supports-6-old",
+            "summary": "决策 supports-6-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-6 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-6 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "P-7",
+      "category": "补充支持",
+      "card": {
+        "id": "supports-7-new",
+        "title": "决策 supports-7-new",
+        "summary": "决策 supports-7-new 的可追溯内容",
+        "createdAt": "2026-08-23T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supports-7",
+          "relationType": "DERIVED_FROM",
+          "reason": "supports-7 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supports-7-new",
+            "title": "决策 supports-7-new",
+            "summary": "决策 supports-7-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supports-7-old",
+            "title": "决策 supports-7-old",
+            "summary": "决策 supports-7-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-7 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-7 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "P-8",
+      "category": "补充支持",
+      "card": {
+        "id": "supports-8-new",
+        "title": "决策 supports-8-new",
+        "summary": "决策 supports-8-new 的可追溯内容",
+        "createdAt": "2026-08-23T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supports-8",
+          "relationType": "SUPPORTS",
+          "reason": "supports-8 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supports-8-new",
+            "title": "决策 supports-8-new",
+            "summary": "决策 supports-8-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supports-8-old",
+            "title": "决策 supports-8-old",
+            "summary": "决策 supports-8-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-8 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-8 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "P-9",
+      "category": "补充支持",
+      "card": {
+        "id": "supports-9-new",
+        "title": "决策 supports-9-new",
+        "summary": "决策 supports-9-new 的可追溯内容",
+        "createdAt": "2026-08-23T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supports-9",
+          "relationType": "DERIVED_FROM",
+          "reason": "supports-9 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supports-9-new",
+            "title": "决策 supports-9-new",
+            "summary": "决策 supports-9-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supports-9-old",
+            "title": "决策 supports-9-old",
+            "summary": "决策 supports-9-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-9 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-9 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "P-10",
+      "category": "补充支持",
+      "card": {
+        "id": "supports-10-new",
+        "title": "决策 supports-10-new",
+        "summary": "决策 supports-10-new 的可追溯内容",
+        "createdAt": "2026-08-23T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "supports-10",
+          "relationType": "SUPPORTS",
+          "reason": "supports-10 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "supports-10-new",
+            "title": "决策 supports-10-new",
+            "summary": "决策 supports-10-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "supports-10-old",
+            "title": "决策 supports-10-old",
+            "summary": "决策 supports-10-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-10 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CURRENT",
+        "current": true,
+        "reason": "supports-10 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "C-1",
+      "category": "矛盾冲突",
+      "card": {
+        "id": "conflict-1-old",
+        "title": "决策 conflict-1-old",
+        "summary": "决策 conflict-1-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "conflict-1",
+          "relationType": "CONTRADICTS",
+          "reason": "conflict-1 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "conflict-1-new",
+            "title": "决策 conflict-1-new",
+            "summary": "决策 conflict-1-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "conflict-1-old",
+            "title": "决策 conflict-1-old",
+            "summary": "决策 conflict-1-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-1 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-1 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "C-2",
+      "category": "矛盾冲突",
+      "card": {
+        "id": "conflict-2-old",
+        "title": "决策 conflict-2-old",
+        "summary": "决策 conflict-2-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "conflict-2",
+          "relationType": "CONTRADICTS",
+          "reason": "conflict-2 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "conflict-2-new",
+            "title": "决策 conflict-2-new",
+            "summary": "决策 conflict-2-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "conflict-2-old",
+            "title": "决策 conflict-2-old",
+            "summary": "决策 conflict-2-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-2 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-2 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "C-3",
+      "category": "矛盾冲突",
+      "card": {
+        "id": "conflict-3-old",
+        "title": "决策 conflict-3-old",
+        "summary": "决策 conflict-3-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "conflict-3",
+          "relationType": "CONTRADICTS",
+          "reason": "conflict-3 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "conflict-3-new",
+            "title": "决策 conflict-3-new",
+            "summary": "决策 conflict-3-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "conflict-3-old",
+            "title": "决策 conflict-3-old",
+            "summary": "决策 conflict-3-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-3 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-3 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "C-4",
+      "category": "矛盾冲突",
+      "card": {
+        "id": "conflict-4-old",
+        "title": "决策 conflict-4-old",
+        "summary": "决策 conflict-4-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "conflict-4",
+          "relationType": "CONTRADICTS",
+          "reason": "conflict-4 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "conflict-4-new",
+            "title": "决策 conflict-4-new",
+            "summary": "决策 conflict-4-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "conflict-4-old",
+            "title": "决策 conflict-4-old",
+            "summary": "决策 conflict-4-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-4 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-4 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "C-5",
+      "category": "矛盾冲突",
+      "card": {
+        "id": "conflict-5-old",
+        "title": "决策 conflict-5-old",
+        "summary": "决策 conflict-5-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "conflict-5",
+          "relationType": "CONTRADICTS",
+          "reason": "conflict-5 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "conflict-5-new",
+            "title": "决策 conflict-5-new",
+            "summary": "决策 conflict-5-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "conflict-5-old",
+            "title": "决策 conflict-5-old",
+            "summary": "决策 conflict-5-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-5 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-5 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "C-6",
+      "category": "矛盾冲突",
+      "card": {
+        "id": "conflict-6-old",
+        "title": "决策 conflict-6-old",
+        "summary": "决策 conflict-6-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "conflict-6",
+          "relationType": "CONTRADICTS",
+          "reason": "conflict-6 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "conflict-6-new",
+            "title": "决策 conflict-6-new",
+            "summary": "决策 conflict-6-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "conflict-6-old",
+            "title": "决策 conflict-6-old",
+            "summary": "决策 conflict-6-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-6 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-6 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "C-7",
+      "category": "矛盾冲突",
+      "card": {
+        "id": "conflict-7-old",
+        "title": "决策 conflict-7-old",
+        "summary": "决策 conflict-7-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "conflict-7",
+          "relationType": "CONTRADICTS",
+          "reason": "conflict-7 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "conflict-7-new",
+            "title": "决策 conflict-7-new",
+            "summary": "决策 conflict-7-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "conflict-7-old",
+            "title": "决策 conflict-7-old",
+            "summary": "决策 conflict-7-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-7 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-7 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "C-8",
+      "category": "矛盾冲突",
+      "card": {
+        "id": "conflict-8-old",
+        "title": "决策 conflict-8-old",
+        "summary": "决策 conflict-8-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "conflict-8",
+          "relationType": "CONTRADICTS",
+          "reason": "conflict-8 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "conflict-8-new",
+            "title": "决策 conflict-8-new",
+            "summary": "决策 conflict-8-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "conflict-8-old",
+            "title": "决策 conflict-8-old",
+            "summary": "决策 conflict-8-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-8 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-8 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "C-9",
+      "category": "矛盾冲突",
+      "card": {
+        "id": "conflict-9-old",
+        "title": "决策 conflict-9-old",
+        "summary": "决策 conflict-9-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "conflict-9",
+          "relationType": "CONTRADICTS",
+          "reason": "conflict-9 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "conflict-9-new",
+            "title": "决策 conflict-9-new",
+            "summary": "决策 conflict-9-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "conflict-9-old",
+            "title": "决策 conflict-9-old",
+            "summary": "决策 conflict-9-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-9 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-9 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "C-10",
+      "category": "矛盾冲突",
+      "card": {
+        "id": "conflict-10-old",
+        "title": "决策 conflict-10-old",
+        "summary": "决策 conflict-10-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "conflict-10",
+          "relationType": "CONTRADICTS",
+          "reason": "conflict-10 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": null,
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "conflict-10-new",
+            "title": "决策 conflict-10-new",
+            "summary": "决策 conflict-10-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "conflict-10-old",
+            "title": "决策 conflict-10-old",
+            "summary": "决策 conflict-10-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-10 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "CONFLICT",
+        "current": true,
+        "reason": "conflict-10 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "U-1",
+      "category": "未确认提议",
+      "card": {
+        "id": "pending-1-old",
+        "title": "决策 pending-1-old",
+        "summary": "决策 pending-1-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "pending-1",
+          "relationType": "SUPERSEDES",
+          "reason": "pending-1 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": false,
+          "confirmedAt": null,
+          "revokedAt": null,
+          "validFrom": null,
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "pending-1-new",
+            "title": "决策 pending-1-new",
+            "summary": "决策 pending-1-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "pending-1-old",
+            "title": "决策 pending-1-old",
+            "summary": "决策 pending-1-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "PENDING",
+        "current": true,
+        "reason": "pending-1 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "PENDING",
+        "current": true,
+        "reason": "pending-1 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "U-2",
+      "category": "未确认提议",
+      "card": {
+        "id": "pending-2-old",
+        "title": "决策 pending-2-old",
+        "summary": "决策 pending-2-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "pending-2",
+          "relationType": "SUPERSEDES",
+          "reason": "pending-2 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": false,
+          "confirmedAt": null,
+          "revokedAt": null,
+          "validFrom": null,
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "pending-2-new",
+            "title": "决策 pending-2-new",
+            "summary": "决策 pending-2-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "pending-2-old",
+            "title": "决策 pending-2-old",
+            "summary": "决策 pending-2-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "PENDING",
+        "current": true,
+        "reason": "pending-2 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "PENDING",
+        "current": true,
+        "reason": "pending-2 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "U-3",
+      "category": "未确认提议",
+      "card": {
+        "id": "pending-3-old",
+        "title": "决策 pending-3-old",
+        "summary": "决策 pending-3-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "pending-3",
+          "relationType": "SUPERSEDES",
+          "reason": "pending-3 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": false,
+          "confirmedAt": null,
+          "revokedAt": null,
+          "validFrom": null,
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "pending-3-new",
+            "title": "决策 pending-3-new",
+            "summary": "决策 pending-3-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "pending-3-old",
+            "title": "决策 pending-3-old",
+            "summary": "决策 pending-3-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "PENDING",
+        "current": true,
+        "reason": "pending-3 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "PENDING",
+        "current": true,
+        "reason": "pending-3 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "U-4",
+      "category": "未确认提议",
+      "card": {
+        "id": "pending-4-old",
+        "title": "决策 pending-4-old",
+        "summary": "决策 pending-4-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "pending-4",
+          "relationType": "SUPERSEDES",
+          "reason": "pending-4 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": false,
+          "confirmedAt": null,
+          "revokedAt": null,
+          "validFrom": null,
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "pending-4-new",
+            "title": "决策 pending-4-new",
+            "summary": "决策 pending-4-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "pending-4-old",
+            "title": "决策 pending-4-old",
+            "summary": "决策 pending-4-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "PENDING",
+        "current": true,
+        "reason": "pending-4 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "PENDING",
+        "current": true,
+        "reason": "pending-4 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "U-5",
+      "category": "未确认提议",
+      "card": {
+        "id": "pending-5-old",
+        "title": "决策 pending-5-old",
+        "summary": "决策 pending-5-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "pending-5",
+          "relationType": "SUPERSEDES",
+          "reason": "pending-5 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": false,
+          "confirmedAt": null,
+          "revokedAt": null,
+          "validFrom": null,
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "pending-5-new",
+            "title": "决策 pending-5-new",
+            "summary": "决策 pending-5-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "pending-5-old",
+            "title": "决策 pending-5-old",
+            "summary": "决策 pending-5-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "PENDING",
+        "current": true,
+        "reason": "pending-5 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "PENDING",
+        "current": true,
+        "reason": "pending-5 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "U-6",
+      "category": "未确认提议",
+      "card": {
+        "id": "pending-6-old",
+        "title": "决策 pending-6-old",
+        "summary": "决策 pending-6-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "pending-6",
+          "relationType": "SUPERSEDES",
+          "reason": "pending-6 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": false,
+          "confirmedAt": null,
+          "revokedAt": null,
+          "validFrom": null,
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "pending-6-new",
+            "title": "决策 pending-6-new",
+            "summary": "决策 pending-6-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "pending-6-old",
+            "title": "决策 pending-6-old",
+            "summary": "决策 pending-6-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "PENDING",
+        "current": true,
+        "reason": "pending-6 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "PENDING",
+        "current": true,
+        "reason": "pending-6 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "U-7",
+      "category": "未确认提议",
+      "card": {
+        "id": "pending-7-old",
+        "title": "决策 pending-7-old",
+        "summary": "决策 pending-7-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "pending-7",
+          "relationType": "SUPERSEDES",
+          "reason": "pending-7 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": false,
+          "confirmedAt": null,
+          "revokedAt": null,
+          "validFrom": null,
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "pending-7-new",
+            "title": "决策 pending-7-new",
+            "summary": "决策 pending-7-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "pending-7-old",
+            "title": "决策 pending-7-old",
+            "summary": "决策 pending-7-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "PENDING",
+        "current": true,
+        "reason": "pending-7 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "PENDING",
+        "current": true,
+        "reason": "pending-7 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "U-8",
+      "category": "未确认提议",
+      "card": {
+        "id": "pending-8-old",
+        "title": "决策 pending-8-old",
+        "summary": "决策 pending-8-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "pending-8",
+          "relationType": "SUPERSEDES",
+          "reason": "pending-8 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": false,
+          "confirmedAt": null,
+          "revokedAt": null,
+          "validFrom": null,
+          "validTo": null,
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "pending-8-new",
+            "title": "决策 pending-8-new",
+            "summary": "决策 pending-8-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "pending-8-old",
+            "title": "决策 pending-8-old",
+            "summary": "决策 pending-8-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "PENDING",
+        "current": true,
+        "reason": "pending-8 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "PENDING",
+        "current": true,
+        "reason": "pending-8 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "R-1",
+      "category": "方案回滚",
+      "card": {
+        "id": "revoked-1-old",
+        "title": "决策 revoked-1-old",
+        "summary": "决策 revoked-1-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "revoked-1",
+          "relationType": "SUPERSEDES",
+          "reason": "revoked-1 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": "2026-08-25T00:00:00.000Z",
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": "2026-08-25T00:00:00.000Z",
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "revoked-1-new",
+            "title": "决策 revoked-1-new",
+            "summary": "决策 revoked-1-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "revoked-1-old",
+            "title": "决策 revoked-1-old",
+            "summary": "决策 revoked-1-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "REVOKED",
+        "current": true,
+        "reason": "revoked-1 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "REVOKED",
+        "current": true,
+        "reason": "revoked-1 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "R-2",
+      "category": "方案回滚",
+      "card": {
+        "id": "revoked-2-old",
+        "title": "决策 revoked-2-old",
+        "summary": "决策 revoked-2-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "revoked-2",
+          "relationType": "SUPERSEDES",
+          "reason": "revoked-2 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": "2026-08-25T00:00:00.000Z",
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": "2026-08-25T00:00:00.000Z",
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "revoked-2-new",
+            "title": "决策 revoked-2-new",
+            "summary": "决策 revoked-2-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "revoked-2-old",
+            "title": "决策 revoked-2-old",
+            "summary": "决策 revoked-2-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "REVOKED",
+        "current": true,
+        "reason": "revoked-2 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "REVOKED",
+        "current": true,
+        "reason": "revoked-2 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "R-3",
+      "category": "方案回滚",
+      "card": {
+        "id": "revoked-3-old",
+        "title": "决策 revoked-3-old",
+        "summary": "决策 revoked-3-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "revoked-3",
+          "relationType": "SUPERSEDES",
+          "reason": "revoked-3 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": "2026-08-25T00:00:00.000Z",
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": "2026-08-25T00:00:00.000Z",
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "revoked-3-new",
+            "title": "决策 revoked-3-new",
+            "summary": "决策 revoked-3-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "revoked-3-old",
+            "title": "决策 revoked-3-old",
+            "summary": "决策 revoked-3-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "REVOKED",
+        "current": true,
+        "reason": "revoked-3 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "REVOKED",
+        "current": true,
+        "reason": "revoked-3 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "R-4",
+      "category": "方案回滚",
+      "card": {
+        "id": "revoked-4-old",
+        "title": "决策 revoked-4-old",
+        "summary": "决策 revoked-4-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "revoked-4",
+          "relationType": "SUPERSEDES",
+          "reason": "revoked-4 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": "2026-08-25T00:00:00.000Z",
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": "2026-08-25T00:00:00.000Z",
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "revoked-4-new",
+            "title": "决策 revoked-4-new",
+            "summary": "决策 revoked-4-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "revoked-4-old",
+            "title": "决策 revoked-4-old",
+            "summary": "决策 revoked-4-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "REVOKED",
+        "current": true,
+        "reason": "revoked-4 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "REVOKED",
+        "current": true,
+        "reason": "revoked-4 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "R-5",
+      "category": "方案回滚",
+      "card": {
+        "id": "revoked-5-old",
+        "title": "决策 revoked-5-old",
+        "summary": "决策 revoked-5-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "revoked-5",
+          "relationType": "SUPERSEDES",
+          "reason": "revoked-5 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": "2026-08-25T00:00:00.000Z",
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": "2026-08-25T00:00:00.000Z",
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "revoked-5-new",
+            "title": "决策 revoked-5-new",
+            "summary": "决策 revoked-5-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "revoked-5-old",
+            "title": "决策 revoked-5-old",
+            "summary": "决策 revoked-5-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "REVOKED",
+        "current": true,
+        "reason": "revoked-5 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "REVOKED",
+        "current": true,
+        "reason": "revoked-5 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "R-6",
+      "category": "方案回滚",
+      "card": {
+        "id": "revoked-6-old",
+        "title": "决策 revoked-6-old",
+        "summary": "决策 revoked-6-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "revoked-6",
+          "relationType": "SUPERSEDES",
+          "reason": "revoked-6 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": "2026-08-25T00:00:00.000Z",
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": "2026-08-25T00:00:00.000Z",
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "revoked-6-new",
+            "title": "决策 revoked-6-new",
+            "summary": "决策 revoked-6-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "revoked-6-old",
+            "title": "决策 revoked-6-old",
+            "summary": "决策 revoked-6-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "REVOKED",
+        "current": true,
+        "reason": "revoked-6 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "REVOKED",
+        "current": true,
+        "reason": "revoked-6 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "R-7",
+      "category": "方案回滚",
+      "card": {
+        "id": "revoked-7-old",
+        "title": "决策 revoked-7-old",
+        "summary": "决策 revoked-7-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "revoked-7",
+          "relationType": "SUPERSEDES",
+          "reason": "revoked-7 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": "2026-08-25T00:00:00.000Z",
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": "2026-08-25T00:00:00.000Z",
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "revoked-7-new",
+            "title": "决策 revoked-7-new",
+            "summary": "决策 revoked-7-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "revoked-7-old",
+            "title": "决策 revoked-7-old",
+            "summary": "决策 revoked-7-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "REVOKED",
+        "current": true,
+        "reason": "revoked-7 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "REVOKED",
+        "current": true,
+        "reason": "revoked-7 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "R-8",
+      "category": "方案回滚",
+      "card": {
+        "id": "revoked-8-old",
+        "title": "决策 revoked-8-old",
+        "summary": "决策 revoked-8-old 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [
+        {
+          "id": "revoked-8",
+          "relationType": "SUPERSEDES",
+          "reason": "revoked-8 的人工标注关系理由",
+          "confidence": 0.9,
+          "confirmed": true,
+          "confirmedAt": "2026-08-23T00:00:00.000Z",
+          "revokedAt": "2026-08-25T00:00:00.000Z",
+          "validFrom": "2026-08-23T00:00:00.000Z",
+          "validTo": "2026-08-25T00:00:00.000Z",
+          "createdAt": "2026-08-23T00:00:00.000Z",
+          "currentCard": {
+            "id": "revoked-8-new",
+            "title": "决策 revoked-8-new",
+            "summary": "决策 revoked-8-new 的可追溯内容",
+            "createdAt": "2026-08-23T00:00:00.000Z"
+          },
+          "relatedCard": {
+            "id": "revoked-8-old",
+            "title": "决策 revoked-8-old",
+            "summary": "决策 revoked-8-old 的可追溯内容",
+            "createdAt": "2026-08-20T00:00:00.000Z"
+          }
+        }
+      ],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "REVOKED",
+        "current": true,
+        "reason": "revoked-8 的人工标注关系理由"
+      },
+      "prediction": {
+        "status": "REVOKED",
+        "current": true,
+        "reason": "revoked-8 的人工标注关系理由"
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "I-1",
+      "category": "证据不足",
+      "card": {
+        "id": "insufficient-1",
+        "title": "决策 insufficient-1",
+        "summary": "决策 insufficient-1 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "INSUFFICIENT",
+        "current": true,
+        "reason": null
+      },
+      "prediction": {
+        "status": "INSUFFICIENT",
+        "current": true,
+        "reason": null
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "I-2",
+      "category": "证据不足",
+      "card": {
+        "id": "insufficient-2",
+        "title": "决策 insufficient-2",
+        "summary": "决策 insufficient-2 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "INSUFFICIENT",
+        "current": true,
+        "reason": null
+      },
+      "prediction": {
+        "status": "INSUFFICIENT",
+        "current": true,
+        "reason": null
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "I-3",
+      "category": "证据不足",
+      "card": {
+        "id": "insufficient-3",
+        "title": "决策 insufficient-3",
+        "summary": "决策 insufficient-3 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "INSUFFICIENT",
+        "current": true,
+        "reason": null
+      },
+      "prediction": {
+        "status": "INSUFFICIENT",
+        "current": true,
+        "reason": null
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "I-4",
+      "category": "证据不足",
+      "card": {
+        "id": "insufficient-4",
+        "title": "决策 insufficient-4",
+        "summary": "决策 insufficient-4 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "INSUFFICIENT",
+        "current": true,
+        "reason": null
+      },
+      "prediction": {
+        "status": "INSUFFICIENT",
+        "current": true,
+        "reason": null
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "I-5",
+      "category": "证据不足",
+      "card": {
+        "id": "insufficient-5",
+        "title": "决策 insufficient-5",
+        "summary": "决策 insufficient-5 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "INSUFFICIENT",
+        "current": true,
+        "reason": null
+      },
+      "prediction": {
+        "status": "INSUFFICIENT",
+        "current": true,
+        "reason": null
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "I-6",
+      "category": "证据不足",
+      "card": {
+        "id": "insufficient-6",
+        "title": "决策 insufficient-6",
+        "summary": "决策 insufficient-6 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "INSUFFICIENT",
+        "current": true,
+        "reason": null
+      },
+      "prediction": {
+        "status": "INSUFFICIENT",
+        "current": true,
+        "reason": null
+      }
+    },
+    {
+      "kind": "decision",
+      "id": "I-7",
+      "category": "证据不足",
+      "card": {
+        "id": "insufficient-7",
+        "title": "决策 insufficient-7",
+        "summary": "决策 insufficient-7 的可追溯内容",
+        "createdAt": "2026-08-20T00:00:00.000Z"
+      },
+      "relations": [],
+      "asOf": "2026-08-26T00:00:00.000Z",
+      "manualLabel": {
+        "status": "INSUFFICIENT",
+        "current": true,
+        "reason": null
+      },
+      "prediction": {
+        "status": "INSUFFICIENT",
+        "current": true,
+        "reason": null
+      }
+    },
+    {
+      "kind": "cycle",
+      "id": "Y-1",
+      "category": "取代关系成环",
+      "edges": [
+        {
+          "currentCardId": "b",
+          "relatedCardId": "a"
+        },
+        {
+          "currentCardId": "c",
+          "relatedCardId": "b"
+        }
+      ],
+      "proposed": {
+        "currentCardId": "a",
+        "relatedCardId": "c"
+      },
+      "manualLabel": {
+        "cycle": true
+      },
+      "prediction": {
+        "cycle": true
+      }
+    },
+    {
+      "kind": "cycle",
+      "id": "Y-2",
+      "category": "取代关系成环",
+      "edges": [
+        {
+          "currentCardId": "b",
+          "relatedCardId": "a"
+        },
+        {
+          "currentCardId": "c",
+          "relatedCardId": "b"
+        }
+      ],
+      "proposed": {
+        "currentCardId": "a",
+        "relatedCardId": "c"
+      },
+      "manualLabel": {
+        "cycle": true
+      },
+      "prediction": {
+        "cycle": true
+      }
+    },
+    {
+      "kind": "cycle",
+      "id": "Y-3",
+      "category": "取代关系成环",
+      "edges": [
+        {
+          "currentCardId": "b",
+          "relatedCardId": "a"
+        },
+        {
+          "currentCardId": "c",
+          "relatedCardId": "b"
+        }
+      ],
+      "proposed": {
+        "currentCardId": "a",
+        "relatedCardId": "c"
+      },
+      "manualLabel": {
+        "cycle": true
+      },
+      "prediction": {
+        "cycle": true
+      }
+    },
+    {
+      "kind": "cycle",
+      "id": "N-1",
+      "category": "合法取代链",
+      "edges": [
+        {
+          "currentCardId": "b",
+          "relatedCardId": "a"
+        }
+      ],
+      "proposed": {
+        "currentCardId": "new-1",
+        "relatedCardId": "b"
+      },
+      "manualLabel": {
+        "cycle": false
+      },
+      "prediction": {
+        "cycle": false
+      }
+    },
+    {
+      "kind": "cycle",
+      "id": "N-2",
+      "category": "合法取代链",
+      "edges": [
+        {
+          "currentCardId": "b",
+          "relatedCardId": "a"
+        }
+      ],
+      "proposed": {
+        "currentCardId": "new-2",
+        "relatedCardId": "b"
+      },
+      "manualLabel": {
+        "cycle": false
+      },
+      "prediction": {
+        "cycle": false
+      }
+    }
+  ]
+}

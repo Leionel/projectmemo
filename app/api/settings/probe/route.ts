@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { getChatProviderDefaults } from "@/lib/config/provider";
 
 export const runtime = "nodejs";
 
@@ -8,6 +9,13 @@ const probeSchema = z.object({
   llmApiKey: z.string().trim().max(500).optional(),
   llmModelName: z.string().trim().max(100).optional(),
 });
+
+function sanitizeProviderError(value: string): string {
+  return value
+    .replace(/Bearer\s+[^\s"']+/gi, "Bearer [redacted]")
+    .replace(/sk-[A-Za-z0-9_-]+/g, "[redacted]")
+    .slice(0, 200);
+}
 
 export async function POST(request: Request) {
   const startedAt = Date.now();
@@ -25,9 +33,10 @@ export async function POST(request: Request) {
 
     const body = await request.json().catch(() => ({}));
     const parsed = probeSchema.safeParse(body);
-    const baseUrl = (parsed.success && parsed.data.llmBaseUrl ? parsed.data.llmBaseUrl : process.env.LLM_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
+    const defaults = getChatProviderDefaults();
+    const baseUrl = (parsed.success && parsed.data.llmBaseUrl ? parsed.data.llmBaseUrl : defaults.baseUrl).replace(/\/$/, "");
     const apiKey = (parsed.success && parsed.data.llmApiKey ? parsed.data.llmApiKey : process.env.LLM_API_KEY) || "";
-    const model = (parsed.success && parsed.data.llmModelName ? parsed.data.llmModelName : process.env.LLM_MODEL_NAME) || "gpt-4o-mini";
+    const model = (parsed.success && parsed.data.llmModelName ? parsed.data.llmModelName : process.env.LLM_MODEL_NAME) || defaults.model;
 
     if (!apiKey) {
       return NextResponse.json({
@@ -63,7 +72,7 @@ export async function POST(request: Request) {
       return NextResponse.json({
         success: false,
         status: response.status,
-        error: `HTTP ${response.status}: ${text.slice(0, 200)}`,
+        error: `HTTP ${response.status}: ${sanitizeProviderError(text)}`,
         latencyMs,
       }, { status: 200 });
     }
@@ -83,7 +92,7 @@ export async function POST(request: Request) {
     const message = error instanceof Error ? error.message : String(error);
     return NextResponse.json({
       success: false,
-      error: `连通失败: ${message.slice(0, 200)}`,
+      error: `连通失败: ${sanitizeProviderError(message)}`,
       latencyMs,
     }, { status: 200 });
   }

@@ -11,7 +11,7 @@ export struct LoadingStateView {
         .height(40)
         .color(PMColors.BRAND)
       Text(this.message)
-        .fontSize(PMFontSize.BASE)
+        .fontSize(PMFontSize.BODY)
         .fontColor(PMColors.INK_TERTIARY)
         .margin({ top: PMSpacing.MD })
     }
@@ -38,6 +38,7 @@ export struct ErrorStateView {
         .backgroundColor(PMColors.RISK_LIGHT)
         .borderRadius(PMRadius.FULL)
         .margin({ bottom: PMSpacing.MD })
+        .accessibilityLevel('no')
 
       Text(this.message)
         .fontSize(PMFontSize.MD)
@@ -48,7 +49,7 @@ export struct ErrorStateView {
 
       if (this.onRetry) {
         Button('重新加载')
-          .fontSize(PMFontSize.BASE)
+          .fontSize(PMFontSize.BODY)
           .fontColor(PMColors.SURFACE)
           .backgroundColor(PMColors.BRAND)
           .borderRadius(PMRadius.SM)
@@ -82,6 +83,7 @@ export struct EmptyStateView {
           .fontSize(32)
           .fontColor(PMColors.INK_TERTIARY)
           .margin({ bottom: PMSpacing.SM })
+          .accessibilityLevel('no')
         Text(this.title)
           .fontSize(PMFontSize.LG)
           .fontWeight(FontWeight.Bold)
@@ -90,7 +92,7 @@ export struct EmptyStateView {
 
         if (this.description !== '') {
           Text(this.description)
-            .fontSize(PMFontSize.BASE)
+            .fontSize(PMFontSize.BODY)
             .fontColor(PMColors.INK_TERTIARY)
             .textAlign(TextAlign.Center)
             .margin({ top: PMSpacing.SM })
@@ -98,7 +100,7 @@ export struct EmptyStateView {
 
         if (this.actionText !== '' && this.onAction) {
           Button(this.actionText)
-            .fontSize(PMFontSize.BASE)
+            .fontSize(PMFontSize.BODY)
             .fontColor(PMColors.BRAND)
             .backgroundColor(PMColors.BRAND_LIGHT)
             .borderRadius(PMRadius.SM)

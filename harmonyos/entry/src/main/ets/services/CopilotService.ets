@@ -35,12 +35,14 @@ export class CopilotService {
   async confirmTool(
     projectId: string,
     tool: string,
-    payload: Object
+    payload: Object,
+    sourceRunId: string | undefined
   ): Promise<ExecuteToolResponse> {
     const input: CopilotToolConfirmInput = new CopilotToolConfirmInput();
     input.tool = tool;
     input.confirmed = true;
     input.payload = payload;
+    input.sourceRunId = sourceRunId;
     const response: ExecuteToolResponse = await this.client.post<ExecuteToolResponse>(
       `/api/projects/${projectId}/agent/tools`,
       input

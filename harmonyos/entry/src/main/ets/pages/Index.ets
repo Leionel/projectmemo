@@ -12,18 +12,20 @@ import { ActionService } from '../services/ActionService';
 import { MemoryService } from '../services/MemoryService';
 import { SettingsService } from '../services/SettingsService';
 
-import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily } from '../common/DesignTokens';
+import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily, PMInteraction, PMMotion, PMMaterial, PMTransition } from '../common/DesignTokens';
 import { LoadingStateView, ErrorStateView, EmptyStateView } from '../components/AsyncStateView';
 import { SeverityBadge, StatusBadge, MemoryTypeBadge } from '../components/MetricBadge';
 import { FolderIcon, TaskIcon, MemoryIcon, SettingsIcon, AlertIcon } from '../components/PMIcons';
 import { DeadlineBadge } from '../components/DeadlineBadge';
 import { TextFormatters } from '../common/TextFormatters';
 import { Constants } from '../common/Constants';
+import { PMBreakpoint, PMStorageKey, PMWidthBp } from '../common/WindowMetrics';
 
 @Entry
 @Component
 struct Index {
   @State currentMainTabIndex: number = 0;
+  @StorageProp(PMStorageKey.WIDTH_BP) widthBp: string = PMWidthBp.SM;
 
   // 数据主状态
   @State projects: Project[] = [];
@@ -48,7 +50,7 @@ struct Index {
   // Tab 3: 设置专属状态
   @State llmMode: string = 'mock'; // 'mock' | 'openai-compatible'
   @State llmBaseUrl: string = '';
-  @State llmModelName: string = 'gpt-4o-mini';
+  @State llmModelName: string = 'deepseek-v4-flash';
   @State llmApiKey: string = '';
   @State apiKeyMasked: string = '';
   @State hasApiKey: boolean = false;
@@ -102,8 +104,8 @@ struct Index {
     try {
       const res = await this.settingsService.getSettings();
       this.llmMode = res.llmMode;
-      this.llmBaseUrl = res.llmBaseUrl !== '' ? res.llmBaseUrl : 'https://api.openai.com/v1';
-      this.llmModelName = res.llmModelName !== '' ? res.llmModelName : 'gpt-4o-mini';
+      this.llmBaseUrl = res.llmBaseUrl !== '' ? res.llmBaseUrl : 'https://api.deepseek.com/v1';
+      this.llmModelName = res.llmModelName !== '' ? res.llmModelName : 'deepseek-v4-flash';
       this.hasApiKey = res.hasApiKey;
       this.apiKeyMasked = res.apiKeyMasked;
     } catch (e) {
@@ -296,89 +298,56 @@ struct Index {
   // 底部导航栏 Bar (一级 4 项：项目 / 记忆 / 待办 / 设置)
   // ----------------------------------------------------
   @Builder
+  private MainTabItemIcon(index: number) {
+    if (index === 0) {
+      FolderIcon({ isSelected: this.currentMainTabIndex === 0, iconSize: 20 })
+    } else if (index === 1) {
+      MemoryIcon({ isSelected: this.currentMainTabIndex === 1, iconSize: 20 })
+    } else if (index === 2) {
+      TaskIcon({ isSelected: this.currentMainTabIndex === 2, iconSize: 20 })
+    } else {
+      SettingsIcon({ isSelected: this.currentMainTabIndex === 3, iconSize: 20 })
+    }
+  }
+
+  @Builder
+  private MainTabBarItem(index: number, label: string) {
+    Column() {
+      this.MainTabItemIcon(index)
+      Text(label)
+        .fontSize(PMFontSize.BOTTOM_NAV)
+        .fontFamily(PMFontFamily.SANS)
+        .fontWeight(this.currentMainTabIndex === index ? FontWeight.Medium : FontWeight.Regular)
+        .fontColor(this.currentMainTabIndex === index ? PMColors.BRAND : PMColors.INK_SECONDARY)
+        .margin({ top: 3 })
+    }
+    .layoutWeight(1)
+    .height(56)
+    .justifyContent(FlexAlign.Center)
+    .clickEffect(PMInteraction.PRESS_EFFECT)
+    .onClick(() => {
+      this.currentMainTabIndex = index;
+      if (index === 3) {
+        this.loadLlmSettings();
+      }
+    })
+    .accessibilityText(label)
+    .accessibilitySelected(this.currentMainTabIndex === index)
+  }
+
+  @Builder
   private MainBottomBar() {
     Row() {
-      // 1. 项目
-      Column() {
-        FolderIcon({ isSelected: this.currentMainTabIndex === 0, iconSize: 20 })
-        Text('项目')
-          .fontSize(PMFontSize.BOTTOM_NAV)
-          .fontFamily(PMFontFamily.SERIF)
-          .fontWeight(this.currentMainTabIndex === 0 ? FontWeight.Medium : FontWeight.Regular)
-          .fontColor(this.currentMainTabIndex === 0 ? PMColors.BRAND : PMColors.INK_TERTIARY)
-          .margin({ top: 3 })
-      }
-      .layoutWeight(1)
-      .height(56)
-      .justifyContent(FlexAlign.Center)
-      .onClick(() => {
-        this.currentMainTabIndex = 0;
-      })
-      .accessibilityText('项目')
-      .accessibilitySelected(this.currentMainTabIndex === 0)
-
-      // 2. 记忆
-      Column() {
-        MemoryIcon({ isSelected: this.currentMainTabIndex === 1, iconSize: 20 })
-        Text('记忆')
-          .fontSize(PMFontSize.BOTTOM_NAV)
-          .fontFamily(PMFontFamily.SERIF)
-          .fontWeight(this.currentMainTabIndex === 1 ? FontWeight.Medium : FontWeight.Regular)
-          .fontColor(this.currentMainTabIndex === 1 ? PMColors.BRAND : PMColors.INK_TERTIARY)
-          .margin({ top: 3 })
-      }
-      .layoutWeight(1)
-      .height(56)
-      .justifyContent(FlexAlign.Center)
-      .onClick(() => {
-        this.currentMainTabIndex = 1;
-      })
-      .accessibilityText('记忆')
-      .accessibilitySelected(this.currentMainTabIndex === 1)
-
-      // 3. 待办
-      Column() {
-        TaskIcon({ isSelected: this.currentMainTabIndex === 2, iconSize: 20 })
-        Text('待办')
-          .fontSize(PMFontSize.BOTTOM_NAV)
-          .fontFamily(PMFontFamily.SERIF)
-          .fontWeight(this.currentMainTabIndex === 2 ? FontWeight.Medium : FontWeight.Regular)
-          .fontColor(this.currentMainTabIndex === 2 ? PMColors.BRAND : PMColors.INK_TERTIARY)
-          .margin({ top: 3 })
-      }
-      .layoutWeight(1)
-      .height(56)
-      .justifyContent(FlexAlign.Center)
-      .onClick(() => {
-        this.currentMainTabIndex = 2;
-      })
-      .accessibilityText('待办')
-      .accessibilitySelected(this.currentMainTabIndex === 2)
-
-      // 4. 设置
-      Column() {
-        SettingsIcon({ isSelected: this.currentMainTabIndex === 3, iconSize: 20 })
-        Text('设置')
-          .fontSize(PMFontSize.BOTTOM_NAV)
-          .fontFamily(PMFontFamily.SERIF)
-          .fontWeight(this.currentMainTabIndex === 3 ? FontWeight.Medium : FontWeight.Regular)
-          .fontColor(this.currentMainTabIndex === 3 ? PMColors.BRAND : PMColors.INK_TERTIARY)
-          .margin({ top: 3 })
-      }
-      .layoutWeight(1)
-      .height(56)
-      .justifyContent(FlexAlign.Center)
-      .onClick(() => {
-        this.currentMainTabIndex = 3;
-        this.loadLlmSettings();
-      })
-      .accessibilityText('设置')
-      .accessibilitySelected(this.currentMainTabIndex === 3)
+      this.MainTabBarItem(0, '项目')
+      this.MainTabBarItem(1, '记忆')
+      this.MainTabBarItem(2, '待办')
+      this.MainTabBarItem(3, '设置')
     }
     .width('100%')
     .padding({ top: 4, bottom: 4 })
     .backgroundColor(PMColors.SURFACE)
     .border({ width: { top: 1 }, color: PMColors.BORDER })
+    .constraintSize({ maxWidth: PMBreakpoint.barMaxWidth(this.widthBp) })
   }
 
   // ----------------------------------------------------
@@ -480,6 +449,8 @@ struct Index {
       }
     }
     .layoutWeight(1)
+    .transition(PMTransition.CONTENT_ENTER)
+    .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
   }
 
   private getFilteredProjects(): Project[] {
@@ -601,6 +572,7 @@ struct Index {
     .borderRadius(PMRadius.MD)
     .border({ width: { left: 3 }, color: PMColors.MEMORY })
     .alignItems(HorizontalAlign.Start)
+    .clickEffect(PMInteraction.PRESS_EFFECT)
     .onClick(() => {
       router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: project.id } });
     })
@@ -751,6 +723,8 @@ struct Index {
       }
     }
     .layoutWeight(1)
+    .transition(PMTransition.CONTENT_ENTER)
+    .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
   }
 
   // ----------------------------------------------------
@@ -927,6 +901,7 @@ struct Index {
             .borderRadius(PMRadius.MD)
             .border({ width: 1, color: PMColors.BORDER })
             .alignItems(HorizontalAlign.Start)
+            .clickEffect(PMInteraction.PRESS_EFFECT)
             .onClick(() => {
               if (card.projectId !== '') {
                 router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: card.projectId, tab: 'memory' } });
@@ -941,6 +916,8 @@ struct Index {
       .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.LG })
     }
     .layoutWeight(1)
+    .transition(PMTransition.CONTENT_ENTER)
+    .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
   }
 
   private getFilteredGlobalCards(): KnowledgeCard[] {
@@ -1153,7 +1130,7 @@ struct Index {
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.INK_SECONDARY)
               .margin({ top: PMSpacing.MD })
-            TextInput({ text: this.llmBaseUrl, placeholder: 'https://api.openai.com/v1' })
+            TextInput({ text: this.llmBaseUrl, placeholder: 'https://api.deepseek.com/v1' })
               .onChange((v: string) => {
                 this.llmBaseUrl = v;
               })
@@ -1415,6 +1392,8 @@ struct Index {
       .padding(PMSpacing.LG)
     }
     .layoutWeight(1)
+    .transition(PMTransition.CONTENT_ENTER)
+    .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
   }
 
   // ----------------------------------------------------
@@ -1644,12 +1623,15 @@ struct Index {
           .borderRadius(PMRadius.LG)
           .border({ width: 1, color: PMColors.BORDER })
           .alignItems(HorizontalAlign.Start)
+          .transition(TransitionEffect.OPACITY.combine(TransitionEffect.scale({ x: 0.96, y: 0.96 })).animation({ duration: PMMotion.LOCAL, curve: PMMotion.CURVE_CONTENT }))
         }
         .width('100%')
         .height('100%')
         .backgroundColor(PMColors.SCRIM)
+        .backgroundBlurStyle(PMMaterial.SCRIM, PMMaterial.OPTIONS)
         .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
         .justifyContent(FlexAlign.Center)
+        .transition(TransitionEffect.OPACITY.animation({ duration: PMMotion.COLOR, curve: PMMotion.CURVE_CONTENT }))
       }
     }
     .width('100%')

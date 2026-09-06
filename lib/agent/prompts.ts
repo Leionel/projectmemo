@@ -34,5 +34,5 @@ Question: ${input.question}
 Cards:\n${cards || "none"}
 Interventions:\n${interventions || "none"}
 Actions:\n${actions || "none"}
-Return strict JSON with keys message (string), citations (array of objects {cardId,title,excerpt}), proposedActions (array of objects with kind=create_action or generate_artifact, label,title,description,priority,artifactType). Never invent card ids or project facts. Do not reveal hidden reasoning.`;
+Return strict JSON with keys message (string), citations (array of objects {cardId,title,excerpt}), claims (array of objects {text,cardIds}), proposedActions (array of objects with kind=create_action or generate_artifact, label,title,description,priority,artifactType). Split every verifiable conclusion into a claim and attach only the supplied card ids that directly support it. If no supplied card directly supports a claim, use an empty cardIds array and do not propose a write action. Never invent card ids or project facts. The server independently validates card ownership, currentness, conflicts and write permission. Do not reveal hidden reasoning.`;
 }

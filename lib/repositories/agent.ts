@@ -340,7 +340,18 @@ export async function saveAgentMessage(input: {
 }
 
 export async function listAgentMessages(projectId: string, limit = 20) {
-  return db.agentMessage.findMany({ where: { projectId }, orderBy: { createdAt: "asc" }, take: limit });
+  const messages = await db.agentMessage.findMany({
+    where: { projectId },
+    orderBy: { createdAt: "asc" },
+    take: limit,
+    include: { run: { select: { trace: true } } },
+  });
+  return messages.map(({ run, ...message }) => {
+    const trace = run?.trace && typeof run.trace === "object" && !Array.isArray(run.trace)
+      ? run.trace as Record<string, unknown>
+      : null;
+    return { ...message, trustReceipt: trace?.trustReceipt ?? undefined };
+  });
 }
 
 export async function getProjectMetrics(projectId: string) {

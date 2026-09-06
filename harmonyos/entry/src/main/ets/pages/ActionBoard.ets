@@ -3,7 +3,7 @@ import promptAction from '@ohos.promptAction';
 import { ApiError } from '../models/Project';
 import { ActionItem } from '../models/Action';
 import { ActionService } from '../services/ActionService';
-import { PMColors, PMSpacing, PMFontSize, PMRadius } from '../common/DesignTokens';
+import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMaterial } from '../common/DesignTokens';
 import { PMAppBar } from '../components/PMAppBar';
 import { StatusBadge } from '../components/MetricBadge';
 import { LoadingStateView, ErrorStateView, EmptyStateView } from '../components/AsyncStateView';
@@ -441,6 +441,7 @@ struct ActionBoard {
         .width('100%')
         .height('100%')
         .backgroundColor(PMColors.SCRIM)
+        .backgroundBlurStyle(PMMaterial.SCRIM, PMMaterial.OPTIONS)
         .padding({ left: PMSpacing.XL, right: PMSpacing.XL })
         .justifyContent(FlexAlign.Center)
       }

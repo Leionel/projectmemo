@@ -1,9 +1,13 @@
 import { db } from "../lib/db";
+import { getEmbeddingProviderConfig } from "../lib/config/provider";
 import { backfillProjectEmbeddings } from "../lib/repositories/embeddings";
 
 async function main() {
-  if (process.env.SEMANTIC_MEMORY_ENABLED !== "true" || process.env.LLM_MODE !== "openai-compatible" || !process.env.LLM_BASE_URL || !process.env.LLM_API_KEY) {
-    throw new Error("Embedding backfill requires SEMANTIC_MEMORY_ENABLED=true and a configured OpenAI-compatible provider.");
+  if (process.env.SEMANTIC_MEMORY_ENABLED !== "true") {
+    throw new Error("Embedding backfill requires SEMANTIC_MEMORY_ENABLED=true.");
+  }
+  if (!getEmbeddingProviderConfig()) {
+    throw new Error("Embedding backfill requires a configured OpenAI-compatible embeddings provider (EMBEDDING_BASE_URL and EMBEDDING_MODEL_NAME for a DeepSeek chat setup).");
   }
   const projectId = process.argv.slice(2).find((value) => value && !value.startsWith("-"));
   if (!projectId) {

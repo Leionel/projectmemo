@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { getChatProviderDefaults } from "@/lib/config/provider";
 
 export const runtime = "nodejs";
 
@@ -24,12 +25,14 @@ function errorResponse(code: string, message: string, status: number) {
 }
 
 function publicSettings(request: Request) {
+  const chatDefaults = getChatProviderDefaults();
   return {
     llmMode: process.env.LLM_MODE === "openai-compatible" ? "openai-compatible" : "mock",
-    llmBaseUrl: process.env.LLM_BASE_URL || "",
-    llmModelName: process.env.LLM_MODEL_NAME || "gpt-4o-mini",
+    llmProvider: chatDefaults.provider,
+    llmBaseUrl: process.env.LLM_BASE_URL || chatDefaults.baseUrl,
+    llmModelName: process.env.LLM_MODEL_NAME || chatDefaults.model,
     hasApiKey: Boolean(process.env.LLM_API_KEY),
-    apiKeyMasked: process.env.LLM_API_KEY ? `${process.env.LLM_API_KEY.slice(0, 4)}...${process.env.LLM_API_KEY.slice(-4)}` : "",
+    apiKeyMasked: process.env.LLM_API_KEY ? "••••••" : "",
     editable: canEditRuntimeSettings(request),
   };
 }

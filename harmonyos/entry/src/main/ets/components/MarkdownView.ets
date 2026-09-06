@@ -351,7 +351,7 @@ export struct MarkdownView {
             }
 
             Text(block.content)
-              .fontSize(PMFontSize.SM)
+              .fontSize(PMFontSize.CAPTION)
               .fontFamily('monospace')
               .fontColor(PMColors.INK_PRIMARY)
               .lineHeight(20)

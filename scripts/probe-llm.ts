@@ -1,4 +1,5 @@
 import { structureCaptureWithMeta } from "../lib/agent";
+import { getChatProviderConfig } from "../lib/config/provider";
 import { knowledgeCardDraftSchema } from "../lib/validation/schemas";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -27,15 +28,14 @@ export const CAPTURE_BENCHMARK_SAMPLES = [
 ];
 
 export async function runCaptureProbe() {
-  if (process.env.LLM_MODE !== "openai-compatible" || !process.env.LLM_BASE_URL || !process.env.LLM_API_KEY) {
-    throw new Error(
-      "S03 provider gate not runnable: set LLM_MODE=openai-compatible, LLM_BASE_URL and LLM_API_KEY. Mock/fallback results do not count.",
-    );
+  if (process.env.LLM_MODE !== "openai-compatible") {
+    throw new Error("S03 provider gate not runnable: set LLM_MODE=openai-compatible. Mock/fallback results do not count.");
   }
+  const providerConfig = getChatProviderConfig();
   console.log("=== ProjectMemo LLM / Capture Probe (20 Samples) ===");
-  console.log(`Current LLM_MODE: ${process.env.LLM_MODE ?? "unset (mock)"}`);
-  console.log(`Current LLM_MODEL: ${process.env.LLM_MODEL_NAME ?? "unset"}`);
-  console.log(`Current LLM_BASE_URL: ${process.env.LLM_BASE_URL ?? "unset"}`);
+  console.log(`Current LLM_PROVIDER: ${providerConfig.provider}`);
+  console.log(`Current LLM_MODEL: ${providerConfig.model}`);
+  console.log(`Current LLM_BASE_URL: ${providerConfig.baseUrl}`);
   console.log("-----------------------------------------------------");
 
   const project = {
@@ -88,7 +88,8 @@ export async function runCaptureProbe() {
   const report = {
     gate: "S03-provider-20-sample",
     generatedAt: new Date().toISOString(),
-    model: process.env.LLM_MODEL_NAME ?? "unset",
+    provider: providerConfig.provider,
+    model: providerConfig.model,
     sampleCount: CAPTURE_BENCHMARK_SAMPLES.length,
     successCount,
     fallbackCount,

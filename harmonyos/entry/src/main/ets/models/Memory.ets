@@ -97,3 +97,47 @@ export class CardSearchResponse {
   total: number = 0;
   results: CardSearchResultItem[] = [];
 }
+
+export class TemporalCardSummary {
+  id: string = '';
+  title: string = '';
+  summary: string = '';
+  createdAt: string = '';
+}
+
+export class TemporalRelation {
+  id: string = '';
+  relationType: string = 'RELATED';
+  reason: string = '';
+  confidence: number | null = null;
+  confirmed: boolean = false;
+  confirmedAt: string | null = null;
+  revokedAt: string | null = null;
+  validFrom: string | null = null;
+  validTo: string | null = null;
+  createdAt: string = '';
+  currentCard: TemporalCardSummary = new TemporalCardSummary();
+  relatedCard: TemporalCardSummary = new TemporalCardSummary();
+}
+
+export class TemporalDecisionItem {
+  card: TemporalCardSummary = new TemporalCardSummary();
+  current: boolean = true;
+  status: string = 'INSUFFICIENT';
+  statusLabel: string = '证据不足';
+  supportState: string = 'INSUFFICIENT';
+  supersededBy: TemporalCardSummary | null = null;
+  temporalReason: string | null = null;
+  relations: TemporalRelation[] = [];
+}
+
+export class TemporalTimelineResponse {
+  projectId: string = '';
+  asOf: string = '';
+  enabled: boolean = true;
+  items: TemporalDecisionItem[] = [];
+}
+
+export class TemporalRelationResponse {
+  relation: TemporalRelation = new TemporalRelation();
+}

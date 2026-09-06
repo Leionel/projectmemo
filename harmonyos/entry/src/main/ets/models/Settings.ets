@@ -1,7 +1,7 @@
 export class SettingsResponse {
   llmMode: string = 'mock'; // 'mock' | 'openai-compatible'
   llmBaseUrl: string = '';
-  llmModelName: string = 'gpt-4o-mini';
+  llmModelName: string = 'deepseek-v4-flash';
   hasApiKey: boolean = false;
   apiKeyMasked: string = '';
   editable: boolean = true;
@@ -12,7 +12,7 @@ export class UpdateSettingsInput {
   llmMode: string = 'mock';
   llmBaseUrl: string = '';
   llmApiKey: string = '';
-  llmModelName: string = 'gpt-4o-mini';
+  llmModelName: string = 'deepseek-v4-flash';
 }
 
 export class ProbeInput {

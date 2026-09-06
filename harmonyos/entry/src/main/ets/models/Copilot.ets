@@ -4,6 +4,25 @@ export class AgentCitation {
   cardId: string = '';
   title: string = '';
   excerpt: string = '';
+  current: boolean | undefined = undefined;
+  supportState: string | undefined = undefined;
+  temporalReason: string | undefined = undefined;
+}
+
+export class EvidenceClaim {
+  text: string = '';
+  support: string = 'INSUFFICIENT';
+  cardIds: string[] = [];
+  supersededCardIds: string[] = [];
+}
+
+export class EvidenceTrustReceipt {
+  supportState: string = 'INSUFFICIENT';
+  abstained: boolean = true;
+  claims: EvidenceClaim[] = [];
+  retrievalMode: string = 'none';
+  refusalReason: string | undefined = undefined;
+  evaluatedAt: string = '';
 }
 
 export class AgentMessage {
@@ -12,6 +31,8 @@ export class AgentMessage {
   content: string = '';
   citations: AgentCitation[] = [];
   proposedActions: ProposedAction[] = [];
+  runId: string | undefined = undefined;
+  trustReceipt: EvidenceTrustReceipt | undefined = undefined;
   createdAt: string = '';
 }
 
@@ -21,6 +42,7 @@ export class AgentChatResponse {
   proposedActions: ProposedAction[] = [];
   fallback: boolean = false;
   runId: string | undefined = undefined;
+  trustReceipt: EvidenceTrustReceipt | undefined = undefined;
 }
 
 export class AgentMessagesResponse {
@@ -50,4 +72,5 @@ export class CopilotToolConfirmInput {
   tool: string = '';
   confirmed: boolean = true;
   payload: Object = new Object();
+  sourceRunId: string | undefined = undefined;
 }

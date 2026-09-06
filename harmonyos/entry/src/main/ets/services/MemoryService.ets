@@ -1,5 +1,14 @@
 import { ApiClient } from './ApiClient';
-import { KnowledgeCard, ProjectDetailResponse, CaptureResponse, CaptureInput, CardSearchResponse } from '../models/Memory';
+import {
+  KnowledgeCard,
+  ProjectDetailResponse,
+  CaptureResponse,
+  CaptureInput,
+  CardSearchResponse,
+  TemporalTimelineResponse,
+  TemporalRelation,
+  TemporalRelationResponse
+} from '../models/Memory';
 
 export class MemoryService {
   private client: ApiClient = new ApiClient();
@@ -38,5 +47,25 @@ export class MemoryService {
     }
 
     return detail.filter((c) => scoreMap.has(c.id)).sort((a, b) => (scoreMap.get(b.id) ?? 0) - (scoreMap.get(a.id) ?? 0));
+  }
+
+  async getDecisionTimeline(projectId: string): Promise<TemporalTimelineResponse> {
+    return this.client.get<TemporalTimelineResponse>(`/api/projects/${projectId}/decisions/timeline`);
+  }
+
+  async confirmTemporalRelation(projectId: string, relationId: string): Promise<TemporalRelation> {
+    const response = await this.client.post<TemporalRelationResponse>(
+      `/api/projects/${projectId}/relations/${relationId}/confirm`,
+      undefined
+    );
+    return response.relation;
+  }
+
+  async revokeTemporalRelation(projectId: string, relationId: string): Promise<TemporalRelation> {
+    const response = await this.client.post<TemporalRelationResponse>(
+      `/api/projects/${projectId}/relations/${relationId}/revoke`,
+      undefined
+    );
+    return response.relation;
   }
 }

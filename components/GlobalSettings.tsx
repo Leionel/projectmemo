@@ -7,12 +7,14 @@ import { Cpu, Globe, KeyRound, LoaderCircle, Save, Settings, X } from "lucide-re
 type RuntimeSettings = {
   llmMode: "mock" | "openai-compatible";
   llmBaseUrl: string;
+  llmModelName: string;
   llmApiKey: string;
 };
 
 type SettingsResponse = {
   llmMode?: RuntimeSettings["llmMode"];
   llmBaseUrl?: string;
+  llmModelName?: string;
   hasApiKey?: boolean;
   editable?: boolean;
   error?: { message?: string };
@@ -20,7 +22,8 @@ type SettingsResponse = {
 
 const initialSettings: RuntimeSettings = {
   llmMode: "mock",
-  llmBaseUrl: "",
+  llmBaseUrl: "https://api.deepseek.com/v1",
+  llmModelName: "deepseek-v4-flash",
   llmApiKey: "",
 };
 
@@ -43,7 +46,8 @@ export function GlobalSettings({ isMenuItem = false }: { isMenuItem?: boolean })
       if (!response.ok) throw new Error(data.error?.message || "无法读取设置。");
       setSettings({
         llmMode: data.llmMode === "openai-compatible" ? "openai-compatible" : "mock",
-        llmBaseUrl: data.llmBaseUrl || "",
+        llmBaseUrl: data.llmBaseUrl || initialSettings.llmBaseUrl,
+        llmModelName: data.llmModelName || initialSettings.llmModelName,
         llmApiKey: "",
       });
       setHasApiKey(Boolean(data.hasApiKey));
@@ -132,7 +136,15 @@ export function GlobalSettings({ isMenuItem = false }: { isMenuItem?: boolean })
                             <Globe size={18} className="text-[var(--muted)]" />
                             <label htmlFor="llmBaseUrl" className="text-sm font-bold text-[var(--ink)]">API Base URL</label>
                           </div>
-                          <input id="llmBaseUrl" type="url" required value={settings.llmBaseUrl} onChange={(event) => setSettings({ ...settings, llmBaseUrl: event.target.value })} placeholder="例如：https://api.openai.com/v1" className={inputClass} />
+                          <input id="llmBaseUrl" type="url" required value={settings.llmBaseUrl} onChange={(event) => setSettings({ ...settings, llmBaseUrl: event.target.value })} placeholder="例如：https://api.deepseek.com/v1" className={inputClass} />
+                        </div>
+
+                        <div className="flex flex-col gap-3 rounded-2xl border border-[var(--rule)] bg-[var(--paper-strong)] p-5 shadow-sm transition hover:border-[var(--teal-pale)]">
+                          <div className="flex items-center gap-3">
+                            <Cpu size={18} className="text-[var(--muted)]" />
+                            <label htmlFor="llmModelName" className="text-sm font-bold text-[var(--ink)]">模型名称</label>
+                          </div>
+                          <input id="llmModelName" type="text" required value={settings.llmModelName} onChange={(event) => setSettings({ ...settings, llmModelName: event.target.value })} placeholder="例如：deepseek-v4-flash" className={inputClass} />
                         </div>
 
                         <div className="flex flex-col gap-3 rounded-2xl border border-[var(--rule)] bg-[var(--paper-strong)] p-5 shadow-sm transition hover:border-[var(--teal-pale)]">

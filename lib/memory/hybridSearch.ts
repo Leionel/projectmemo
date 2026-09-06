@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { cosineSimilarity, getEmbedding } from "@/lib/memory/embedding";
 import { ensureCardEmbedding } from "@/lib/repositories/embeddings";
+import { getTemporalSearchStates } from "@/lib/services/temporalLedgerService";
 import type { CardSearchResult, KnowledgeTypeValue } from "@/lib/types";
 
 export interface HybridSearchOptions {
@@ -79,6 +80,7 @@ export async function searchProjectCards(options: HybridSearchOptions): Promise<
     ? await getEmbedding(trimmedQuery)
     : null;
   const now = new Date();
+  const temporalStates = await getTemporalSearchStates(projectId, cards.map((card) => card.id), now);
   const results: CardSearchResult[] = [];
 
   for (const card of cards) {
@@ -88,10 +90,13 @@ export async function searchProjectCards(options: HybridSearchOptions): Promise<
     // useful for repeatable tests and indexing smoke checks, but is not presented
     // to users as semantic retrieval.
     let cardVector: number[] = [];
-    const embeddingCompatible = queryEmbedding !== null && !queryEmbedding.isMock &&
-      card.embedding?.provider === queryEmbedding.provider &&
-      card.embedding?.model === queryEmbedding.model &&
-      card.embedding?.dimensions === queryEmbedding.dimensions;
+    let cardEmbeddingProvider = card.embedding?.provider ?? null;
+    let cardEmbeddingModel = card.embedding?.model ?? null;
+    let cardEmbeddingDimensions = card.embedding?.dimensions ?? null;
+    let embeddingCompatible = queryEmbedding !== null && !queryEmbedding.isMock &&
+      cardEmbeddingProvider === queryEmbedding.provider &&
+      cardEmbeddingModel === queryEmbedding.model &&
+      cardEmbeddingDimensions === queryEmbedding.dimensions;
     if (embeddingCompatible && card.embedding?.vectorJson) {
       try {
         cardVector = JSON.parse(card.embedding.vectorJson);
@@ -107,6 +112,12 @@ export async function searchProjectCards(options: HybridSearchOptions): Promise<
         summary: card.summary,
         keywords: cardKeywords,
       }, queryEmbedding);
+      cardEmbeddingProvider = savedEmbedding.provider;
+      cardEmbeddingModel = savedEmbedding.model;
+      cardEmbeddingDimensions = savedEmbedding.dimensions;
+      embeddingCompatible = savedEmbedding.provider === queryEmbedding.provider &&
+        savedEmbedding.model === queryEmbedding.model &&
+        savedEmbedding.dimensions === queryEmbedding.dimensions;
       try {
         cardVector = JSON.parse(savedEmbedding.vectorJson);
       } catch {
@@ -116,7 +127,9 @@ export async function searchProjectCards(options: HybridSearchOptions): Promise<
 
     // 2. 计算各维度得分
     let semanticScore = 0;
-    if (queryEmbedding !== null && cardVector.length > 0 && queryEmbedding.vector.length === cardVector.length) {
+    const hasRemoteSemantic = queryEmbedding !== null && !queryEmbedding.isMock && embeddingCompatible &&
+      cardVector.length > 0 && queryEmbedding.vector.length === cardVector.length;
+    if (hasRemoteSemantic) {
       semanticScore = cosineSimilarity(queryEmbedding.vector, cardVector);
     }
 
@@ -130,7 +143,6 @@ export async function searchProjectCards(options: HybridSearchOptions): Promise<
     const importanceScore = Math.min(1.0, (card.importance ?? 3) / 5.0);
 
     // 综合加权评分: Semantic (45%) + Keyword (35%) + Recency (10%) + Importance (10%)
-    const hasRemoteSemantic = queryEmbedding !== null && !queryEmbedding.isMock;
     const weightedScore = !hasRemoteSemantic
       ? 0.70 * keywordScore + 0.15 * recencyScore + 0.15 * importanceScore
       : 0.45 * semanticScore + 0.35 * keywordScore + 0.10 * recencyScore + 0.10 * importanceScore;
@@ -155,6 +167,7 @@ export async function searchProjectCards(options: HybridSearchOptions): Promise<
     }
 
     const reason = reasonParts.length > 0 ? reasonParts.join(" · ") : "项目知识库匹配";
+    const temporal = temporalStates.get(card.id);
 
     results.push({
       cardId: card.id,
@@ -170,6 +183,10 @@ export async function searchProjectCards(options: HybridSearchOptions): Promise<
       source: hasRemoteSemantic ? "Hybrid Memory Vector Index" : "Keyword + metadata index",
       retrievalMode: hasRemoteSemantic ? "hybrid" : "keyword_fallback",
       createdAt: card.createdAt.toISOString(),
+      current: temporal?.current ?? true,
+      supportState: temporal?.supportState ?? "INSUFFICIENT",
+      supersededBy: temporal?.supersededBy ?? null,
+      temporalReason: temporal?.temporalReason ?? null,
     });
   }
 

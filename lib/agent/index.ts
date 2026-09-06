@@ -1,5 +1,6 @@
 import { createMockCard } from "@/lib/agent/mockAgent";
 import { structureWithLLM } from "@/lib/agent/llmAgent";
+import { getChatProviderDefaults } from "@/lib/config/provider";
 import { knowledgeCardDraftSchema } from "@/lib/validation/schemas";
 import type { AgentExecutionResult, CardDraft, KnowledgeTypeValue } from "@/lib/types";
 
@@ -13,7 +14,7 @@ export interface StructureCaptureInput {
 export async function structureCaptureWithMeta(input: StructureCaptureInput): Promise<AgentExecutionResult<CardDraft>> {
   const startTime = Date.now();
   const isLlmMode = process.env.LLM_MODE === "openai-compatible" && Boolean(process.env.LLM_API_KEY);
-  const modelName = process.env.LLM_MODEL_NAME || "openai-compatible";
+  const chatDefaults = getChatProviderDefaults();
 
   if (isLlmMode) {
     try {
@@ -23,7 +24,7 @@ export async function structureCaptureWithMeta(input: StructureCaptureInput): Pr
       const durationMs = Date.now() - startTime;
       return {
         data: finalDraft,
-        provider: `llm:${modelName}`,
+        provider: `llm:${chatDefaults.provider}:${chatDefaults.model}`,
         status: "SUCCESS",
         durationMs,
         fallbackReason: null,

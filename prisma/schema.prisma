@@ -81,6 +81,14 @@ enum AgentMessageRole {
   ASSISTANT
 }
 
+enum CardRelationType {
+  RELATED
+  SUPPORTS
+  CONTRADICTS
+  SUPERSEDES
+  DERIVED_FROM
+}
+
 model Project {
   id          String              @id @default(cuid())
   title       String
@@ -149,12 +157,20 @@ model CardRelation {
   relatedCardId String
   reason        String
   score         Int
+  relationType  CardRelationType @default(RELATED)
+  confidence    Float?
+  confirmed     Boolean       @default(false)
+  confirmedAt   DateTime?
+  revokedAt     DateTime?
+  validFrom     DateTime?
+  validTo       DateTime?
   createdAt     DateTime      @default(now())
   currentCard   KnowledgeCard @relation("CurrentCard", fields: [currentCardId], references: [id], onDelete: Cascade)
   relatedCard   KnowledgeCard @relation("RelatedCard", fields: [relatedCardId], references: [id], onDelete: Cascade)
 
-  @@unique([currentCardId, relatedCardId])
+  @@index([currentCardId, relatedCardId, relationType])
   @@index([relatedCardId])
+  @@index([relationType, confirmed, revokedAt])
 }
 
 model GeneratedArtifact {

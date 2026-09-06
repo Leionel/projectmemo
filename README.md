@@ -56,13 +56,28 @@ LLM_MODE="mock"
 
 ```env
 LLM_MODE="openai-compatible"
-LLM_BASE_URL="https://api.openai.com/v1"
-LLM_API_KEY="your-key"
-LLM_MODEL_NAME="gpt-4.1-mini"
+LLM_PROVIDER="deepseek"
+LLM_BASE_URL="https://api.deepseek.com/v1"
+LLM_API_KEY=""
+LLM_MODEL_NAME="deepseek-v4-flash"
 LLM_TIMEOUT_MS="15000"
 ```
 
-本机开发环境的“设置”可临时切换运行方式：API Key 不会回显、不写入文件，仅保留在当前运行进程；需要长期保存时请修改 `.env`。线上环境禁用该设置写入接口。
+DeepSeek 配置使用 OpenAI-compatible 的 `/chat/completions` 契约。API Key 只应通过本机环境变量、部署密钥或开发设置接口注入，不能写入源码、证据、日志或 Git。开发设置只保留在当前运行进程；线上环境禁用该设置写入接口。
+
+DeepSeek chat 配置不自动视为 embedding provider。要开启 `SEMANTIC_MEMORY_ENABLED`，还需单独提供兼容的 embedding 服务：
+
+```env
+EMBEDDING_BASE_URL="https://your-embedding-provider.example/v1"
+EMBEDDING_API_KEY=""
+EMBEDDING_MODEL_NAME="your-embedding-model"
+```
+
+未配置 embedding provider 时，Hybrid Search 会保持可用的关键词/元数据 fallback，并且不会把它计入真实语义检索 Gate。
+
+Temporal Evidence Ledger 默认开启。它通过提议、人工确认和可撤销关系保留决策演化；如需紧急回退到 2.0 搜索语义，可设置 `TEMPORAL_MEMORY_ENABLED=false`，关系历史不会被删除。
+
+Evidence Trust Receipt 默认开启。问忆程会把回答拆成可核验结论，显示“依据充分 / 存在冲突 / 证据不足”，并阻止后两种状态产生写操作；紧急回退可设置 `EVIDENCE_TRUST_RECEIPT_ENABLED=false`，已有 `AgentRun` 审计记录不会被删除。
 
 ## 验证命令
 
@@ -70,6 +85,7 @@ LLM_TIMEOUT_MS="15000"
 npm.cmd test
 npm.cmd run lint
 npm.cmd exec tsc -- --noEmit
+npm.cmd run benchmark:w04
 npm.cmd run build
 npm.cmd run test:e2e
 ```

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { artifactTypes, knowledgeTypes } from "@/lib/types";
+import { artifactTypes, cardRelationTypes, knowledgeTypes } from "@/lib/types";
 
 function isCalendarDate(value: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
@@ -106,6 +106,7 @@ export const agentToolConfirmSchema = z.object({
   tool: z.enum(["create_action", "generate_artifact"]),
   confirmed: z.boolean(),
   payload: z.record(z.string(), z.unknown()).default({}),
+  sourceRunId: z.string().trim().min(1).optional(),
 });
 
 export const cardSearchInputSchema = z.object({
@@ -132,6 +133,21 @@ export const deliverableEvidenceInputSchema = z.object({
   message: "一次只能关联一张卡片或一个附件",
 });
 
+export const temporalRelationProposalSchema = z.object({
+  relatedCardId: z.string().trim().min(1),
+  relationType: z.enum(cardRelationTypes),
+  reason: z.string().trim().min(2, "请说明关系理由").max(500),
+  confidence: z.number().min(0).max(1).optional().nullable(),
+  validFrom: z.string().datetime().optional().nullable(),
+  validTo: z.string().datetime().optional().nullable(),
+}).strict().refine((input) => {
+  if (!input.validFrom || !input.validTo) return true;
+  return new Date(input.validFrom).getTime() < new Date(input.validTo).getTime();
+}, {
+  message: "有效期结束时间必须晚于开始时间",
+  path: ["validTo"],
+});
+
 export type ProjectCreateInput = z.infer<typeof projectCreateSchema>;
 export type ProjectUpdateInput = z.infer<typeof projectUpdateSchema>;
 export type KnowledgeCardUpdateInput = z.infer<typeof knowledgeCardUpdateSchema>;
@@ -144,3 +160,4 @@ export type AgentToolConfirmInput = z.infer<typeof agentToolConfirmSchema>;
 export type CardSearchInput = z.infer<typeof cardSearchInputSchema>;
 export type MilestoneCreateInput = z.infer<typeof milestoneCreateSchema>;
 export type DeliverableEvidenceInput = z.infer<typeof deliverableEvidenceInputSchema>;
+export type TemporalRelationProposalInput = z.infer<typeof temporalRelationProposalSchema>;

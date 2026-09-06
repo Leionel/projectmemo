@@ -1,8 +1,8 @@
 # 在香港 ECS 部署 ProjectMemo S08 适配层
 
-这份跟做教程把 `project.luojiatutor.xyz` 部署成 ProjectMemo 的受控公网入口。完成后，小艺工作流可以调用 `record_memory`，DevEco 模拟器可以从同一云端数据库读取新卡片。
+这份跟做教程把 `project.luojiatutor.xyz` 部署成 ProjectMemo 的受控公网入口。完成后，小艺工作流可以调用 `record_memory`、`query_memory`、`inspect_project` 和 `create_action`，DevEco 模拟器可以从同一云端数据库读取结果。
 
-当前只交付 S08 的第一条纵向链路。它通过后，再复用同一鉴权和审计模块增加其他工具。
+当前本地代码已经交付四条工具路由；公网是否实际具备这些能力，以 `/health` 版本指纹和 `verify:w03-public` 的结果为准，不能只看域名能否打开。
 
 ## 完成标准
 
@@ -18,6 +18,8 @@
 ```
 
 相同 `request_id` 重试时，接口返回第一次的 `card_id`，不重复创建卡片。
+
+如果 ECS 已经能打开 `/health`，但新增工具返回 HTML 404，说明服务器仍在运行旧提交。先完成“更新已有 ECS”一节，再继续平台调试。
 
 ## 开始前检查
 
@@ -102,6 +104,79 @@ exit
 
 `REPLACE_WITH_VERIFIED_COMMIT` 必须替换为本地测试通过后的提交哈希，不能直接部署一个会继续变化的分支头。
 
+## 更新已有 ECS
+
+如果你已经完成首次部署，请用同一个已验证提交更新代码、迁移和版本指纹。以下过程不会自动丢弃服务器上的未提交修改；发现脏工作区时会停下。
+
+1. 在本地通过回归后，记录准备部署的提交：
+
+   ```powershell
+   git rev-parse HEAD
+   npm.cmd test
+   npm.cmd run build
+   npm.cmd run verify:s08-adapter
+   ```
+
+2. 在 ECS 上检查工作区：
+
+   ```bash
+   sudo -iu projectmemo
+   cd /opt/projectmemo/app
+   git status --short
+   ```
+
+   如果命令输出任何内容，停止更新并先确认这些文件的来源。不要运行 `git reset --hard`。
+
+3. 在工作区干净时，检出步骤 1 的提交：
+
+   ```bash
+   git fetch origin --prune
+   git checkout --detach REPLACE_WITH_VERIFIED_COMMIT
+   source /home/projectmemo/.nvm/nvm.sh
+   nvm use 22.22.3
+   npm ci
+   exit
+   ```
+
+4. 编辑 `/etc/projectmemo/projectmemo.env`，把版本指纹设为同一个提交，并确认 2.1 功能开关：
+
+   ```dotenv
+   PROJECTMEMO_RELEASE=REPLACE_WITH_VERIFIED_COMMIT
+   TEMPORAL_MEMORY_ENABLED=true
+   EVIDENCE_TRUST_RECEIPT_ENABLED=true
+   XIAOYI_ADAPTER_ENABLED=true
+   ```
+
+   已有 ECS 不要再次复制环境模板，否则可能覆盖真实 Token 和固定项目 ID。保留原有 `XIAOYI_ADAPTER_TOKEN`、`XIAOYI_TEST_PROJECT_ID` 和模型配置，只修改需要更新的键。
+
+5. 迁移前备份 SQLite，再执行迁移和构建。把备份文件名中的占位符也替换为相同提交号：
+
+   ```bash
+   sudo -u projectmemo sqlite3 /opt/projectmemo/data/projectmemo.db ".backup '/opt/projectmemo/data/projectmemo-pre-REPLACE_WITH_VERIFIED_COMMIT.db'"
+   sudo -iu projectmemo
+   cd /opt/projectmemo/app
+   source /home/projectmemo/.nvm/nvm.sh
+   set -a
+   source /etc/projectmemo/projectmemo.env
+   set +a
+   npx prisma generate
+   npx prisma migrate deploy
+   npm run build
+   exit
+   sudo systemctl restart projectmemo
+   sudo systemctl status projectmemo --no-pager
+   ```
+
+6. 在本地验证公网版本和四条路由：
+
+   ```powershell
+   $env:XIAOYI_BASE_URL = "https://project.luojiatutor.xyz"
+   $env:PROJECTMEMO_EXPECTED_RELEASE = "REPLACE_WITH_VERIFIED_COMMIT"
+   npm.cmd run verify:w03-public
+   ```
+
+   成功结果中，`health_ok`、`schema_current`、`release_present`、`release_matches`、`capabilities_complete` 和 `all_routes_authenticated` 必须全部为 `true`。脚本只使用无效 Token 验证 401，不会写入项目数据。
+
 ## 第 5 步：生成适配层令牌
 
 在 ECS 上生成 64 位十六进制令牌：
@@ -176,7 +251,13 @@ curl http://127.0.0.1:4400/health
 预期响应包含：
 
 ```json
-{"status":"ok","service":"projectmemo"}
+{
+  "status": "ok",
+  "service": "projectmemo",
+  "schema_version": "2.1",
+  "release": "已验证的提交号",
+  "capabilities": ["record_memory", "query_memory", "inspect_project", "create_action"]
+}
 ```
 
 ## 第 8 步：部署 HTTPS 证书
@@ -245,6 +326,16 @@ Invoke-RestMethod -Method Post -Uri "https://project.luojiatutor.xyz/xiaoyi/v1/m
 
 第二次调用的 `card_id` 和 `agent_run_id` 必须与第一次相同。
 
+四条路由全部部署后，可以运行 20 轮自动对账。该命令会真实创建 5 张测试卡片和 5 条测试行动，因此只在固定测试项目上运行：
+
+```powershell
+$env:PROJECTMEMO_XIAOYI_TOKEN = Read-Host -MaskInput "Xiaoyi adapter token"
+npm.cmd run verify:w03-live
+Remove-Item Env:\PROJECTMEMO_XIAOYI_TOKEN
+```
+
+成功时，脚本把脱敏回执写入 `evidence/2.1/xiaoyi/W03-live-*.json`。回执包含 20 轮工具结果、幂等重放结果、业务 ID、AgentRun 覆盖率和 SHA-256，不包含 Bearer Token。
+
 ## 第 11 步：让 DevEco 模拟器读取云端数据
 
 在演示构建中，把 `Constants.BASE_URL` 临时改为：
@@ -285,7 +376,8 @@ sudo systemctl restart projectmemo
 
 ## 下一步
 
-- 保存手工调用、`AgentRun` 和模拟器同卡片 ID 的三方回执，完成 T02 tracer bullet。
-- 在插件控制台完成一次真实 `record_memory` 调用，替换手工请求证据。
-- 通过第一条链路后，复用鉴权、固定项目映射和幂等回执实现 `query_memory` 与 `inspect_project`。
+- 如果 `verify:w03-public` 报 `HTML_NOT_FOUND`，按“更新已有 ECS”部署包含四条路由的新提交。
+- 公网预检通过后，在固定测试项目执行 20 轮真实对账。
+- 在插件控制台分别调用四个工具，并保存 `AgentRun`、接口响应和模拟器同一业务 ID 的回执。
+- 只有平台、服务端和 DevEco 模拟器三方 ID 对齐后，才把 W03/G3 标记为通过。
 - 最后实现 `prepare_action`/`commit_action`，完成 20 轮 S08 对照测试。

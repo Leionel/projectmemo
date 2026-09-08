@@ -120,6 +120,14 @@ S05–S07 的离线状态与代码边界见 `evidence/2.1/inbox-gap-notification
 - 上线前依赖复核将 Next.js 从 `16.2.10` 补丁升级至 `16.2.11`，并同步 `eslint-config-next`；升级后 TypeScript、111 项测试、ESLint 和 production build 复跑通过，Next 自身命中的 9 条直接公告已不再出现。
 - `npm audit --omit=dev` 仍报告 13 项间接依赖告警（9 high、4 moderate），主要沿 Next 的 PostCSS/Sharp 和 Prisma CLI 工具链进入。`npm audit fix --dry-run` 会大幅改动依赖树并尝试调整 Prisma 版本，因此本轮未执行自动修复；不能宣称依赖审计清零。
 
+#### 2026-09-07 工作流关联 ID 辅助路由
+
+- 本地新增 `POST /xiaoyi/v1/requests/begin`，作为小艺工作流的首个内部辅助节点。它要求 Bearer 鉴权、`XIAOYI_ADAPTER_ENABLED=true`、固定 `XIAOYI_TEST_PROJECT_ID` 和现有限流；不要求客户端提供 `request_id`，不接受 `project_id`，只返回 `ok`、UUID `request_id` 和 `issued_at`。
+- `begin_request` 不创建 KnowledgeCard、Action 或 `AgentRun`。当前 `AgentRunType` 没有自然的“工作流启动”枚举，因此不伪造 `agent_run_id`。健康检查仍把四项 S08 业务能力列在 `capabilities`，另列 `workflow_helpers: ["begin_request"]`，避免把辅助节点宣传成第五项业务能力。
+- 小艺平台配置方案：第一个插件节点只配置 Authorization Header；将输出的 `request_id` 映射给 `record_memory`、`query_memory`、`inspect_project` 和 `create_action`，其中 create_action 的预览/确认两阶段复用同一个 ID。单次工作流内关联成立，但整轮重试会重新生成 ID，不能据此宣称跨整轮重试幂等。
+- 本轮未部署 ECS、未操作平台、未运行 `verify:w03-live`，因此 W03/G3 仍为 `PARTIAL / DEPLOYMENT_DRIFT`，平台真实调用、20 轮对账和真机小艺入口保持 `UNVERIFIED`。完整边界见 [`evidence/2.1/xiaoyi/W03-platform-tool-config.md`](evidence/2.1/xiaoyi/W03-platform-tool-config.md)。
+- 本地回归：S08 专项 12/12、全量 Vitest 20 files / 128 tests、健康检查 2/2、TypeScript、ESLint、Next.js production build、HarmonyOS Hypium 27/27、HAP build 和 `git diff --check` 通过；production build 仅保留既有 NFT tracing warning，HAP build 仍有既有弃用 API 警告。公网预检仍需在 ECS 更新到本批提交后重跑，不能以本地通过替代平台验收。
+
 ## W04 本地实现｜2026-08-30
 
 - 状态：`IMPLEMENTED / LOCAL G4 PASS / AVD RUNTIME PENDING`。

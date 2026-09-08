@@ -36,3 +36,11 @@
 4. 在固定测试项目运行 `npm.cmd run verify:w03-live`。
 5. 用 DevEco 模拟器核对回执中的 `card_id` 和 `action_id`。
 6. 最后从小艺平台各调用一次，替换手工网络诊断证据。
+
+## 2026-09-07 本地后续修复
+
+为解决小艺工作流当前无法产生稳定关联 ID 的问题，本地仓库新增 `POST /xiaoyi/v1/requests/begin`。它沿用 Bearer 鉴权、适配层开关、固定测试项目和限流，只生成一次性 UUID，不接受请求体中的 `project_id`/`request_id`，不创建卡片、行动或 `AgentRun`。`/health` 保留四项 S08 业务能力，并另列 `workflow_helpers: ["begin_request"]`。
+
+`verify:w03-public` 现额外对该辅助路由做无效 Token JSON 401 预检；四项业务能力数量不变。`verify:w03-live --confirm-writes`（本轮未运行）会在每个循环先获取一个 `request_id`，再让 record/query/inspect/create 两阶段复用它。该 UUID 只保证单次工作流运行内的关联；整轮重试会生成新 UUID，不能替代跨整轮重试幂等键。
+
+以上是未部署的本地变更，不会改写本节 2026-09-04 对公网旧版本的历史结果。ECS、平台真实调试、20 轮对账和真机小艺入口仍为 `UNVERIFIED`；上线前需部署包含该辅助路由的提交，并重新运行公网预检。

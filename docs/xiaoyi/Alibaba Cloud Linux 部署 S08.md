@@ -1,15 +1,17 @@
 # 在香港 ECS 部署 ProjectMemo S08 适配层
 
-这份跟做教程把 `project.luojiatutor.xyz` 部署成 ProjectMemo 的受控公网入口。完成后，小艺工作流可以调用 `record_memory`、`query_memory`、`inspect_project` 和 `create_action`，DevEco 模拟器可以从同一云端数据库读取结果。
+这份跟做教程把 `project.luojiatutor.xyz` 部署成 ProjectMemo 的受控公网入口。完成后，小艺工作流可以调用 `record_memory`、`query_memory`、`inspect_project` 和 `create_action`，并先通过内部辅助路由 `begin_request` 取得一次运行内的关联 ID；DevEco 模拟器可以从同一云端数据库读取结果。
 
-当前本地代码已经交付四条工具路由；公网是否实际具备这些能力，以 `/health` 版本指纹和 `verify:w03-public` 的结果为准，不能只看域名能否打开。
+当前本地代码已经交付四条 S08 业务路由和一条不写业务数据的 `begin_request` 辅助路由；公网是否实际具备这些能力，以 `/health` 版本指纹和 `verify:w03-public` 的结果为准，不能只看域名能否打开。
 
 ## 完成标准
 
 部署结束后，你应得到以下可复核结果：
 
 ```text
-小艺/手工请求 request_id
+小艺工作流
+  → begin_request（仅 Bearer，返回 request_id）
+  → 四项业务工具复用同一 request_id
   → HTTPS 适配层
   → 固定测试项目
   → 一张 KnowledgeCard
@@ -18,6 +20,8 @@
 ```
 
 相同 `request_id` 重试时，接口返回第一次的 `card_id`，不重复创建卡片。
+
+`begin_request` 只保证一次工作流运行内的关联；整轮工作流重试会重新生成 UUID，不能替代跨整轮重试的幂等键。手工调用四项业务路由时，仍需由调用方显式提供稳定的 `request_id`。
 
 如果 ECS 已经能打开 `/health`，但新增工具返回 HTML 404，说明服务器仍在运行旧提交。先完成“更新已有 ECS”一节，再继续平台调试。
 
@@ -167,7 +171,7 @@ exit
    sudo systemctl status projectmemo --no-pager
    ```
 
-6. 在本地验证公网版本和四条路由：
+   6. 在本地验证公网版本、四条业务路由和 `begin_request` 辅助路由：
 
    ```powershell
    $env:XIAOYI_BASE_URL = "https://project.luojiatutor.xyz"
@@ -175,7 +179,7 @@ exit
    npm.cmd run verify:w03-public
    ```
 
-   成功结果中，`health_ok`、`schema_current`、`release_present`、`release_matches`、`capabilities_complete` 和 `all_routes_authenticated` 必须全部为 `true`。脚本只使用无效 Token 验证 401，不会写入项目数据。
+   成功结果中，`health_ok`、`schema_current`、`release_present`、`release_matches`、`capabilities_complete`、`workflow_helpers_complete` 和 `all_routes_authenticated` 必须全部为 `true`。脚本只使用无效 Token 验证 401，不会写入项目数据。
 
 ## 第 5 步：生成适配层令牌
 
@@ -256,7 +260,8 @@ curl http://127.0.0.1:4400/health
   "service": "projectmemo",
   "schema_version": "2.1",
   "release": "已验证的提交号",
-  "capabilities": ["record_memory", "query_memory", "inspect_project", "create_action"]
+  "capabilities": ["record_memory", "query_memory", "inspect_project", "create_action"],
+  "workflow_helpers": ["begin_request"]
 }
 ```
 
@@ -352,6 +357,14 @@ https://project.luojiatutor.xyz
 
 在小艺开放平台的云插件中配置：
 
+### 12.1 第一个节点：`begin_request`
+
+先添加 `POST /xiaoyi/v1/requests/begin` 插件节点。该节点只配置 `Authorization: Bearer <XIAOYI_ADAPTER_TOKEN>`，请求体留空或传 `{}`；不要在请求体中配置 `project_id`、`request_id`，也不要让大模型生成它们。成功返回的 `request_id` 连接到后续四项业务工具的同名字段。
+
+`begin_request` 是工作流关联辅助，不计入四项 S08 业务能力，不创建卡片、行动或 `AgentRun`。它返回的 UUID 只在本次工作流运行内复用；`create_action` 的预览和确认两个阶段使用同一个 UUID，同时仍须把预览返回的 `proposal_id` 传给确认阶段。整轮重试会生成新的 UUID，不能据此宣称跨重试幂等。
+
+### 12.2 业务工具示例
+
 | 字段 | 值 |
 |---|---|
 | 工具名 | `record_memory` |
@@ -376,8 +389,8 @@ sudo systemctl restart projectmemo
 
 ## 下一步
 
-- 如果 `verify:w03-public` 报 `HTML_NOT_FOUND`，按“更新已有 ECS”部署包含四条路由的新提交。
+- 如果 `verify:w03-public` 报 `HTML_NOT_FOUND`，按“更新已有 ECS”部署包含四条业务路由和 `begin_request` 的新提交。
 - 公网预检通过后，在固定测试项目执行 20 轮真实对账。
-- 在插件控制台分别调用四个工具，并保存 `AgentRun`、接口响应和模拟器同一业务 ID 的回执。
+- 在插件控制台先调用 `begin_request`，再分别调用四个业务工具；保存 `AgentRun`、接口响应和模拟器同一业务 ID 的回执。`begin_request` 本身不应产生 `AgentRun`。
 - 只有平台、服务端和 DevEco 模拟器三方 ID 对齐后，才把 W03/G3 标记为通过。
 - 最后实现 `prepare_action`/`commit_action`，完成 20 轮 S08 对照测试。

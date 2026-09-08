@@ -14,79 +14,77 @@ export class SpineNodeItem {
 export struct EvidenceSpineView {
   @Prop evidence: AgentEvidence = new AgentEvidence();
   @Prop triggerType: string = '';
+  @Prop isSimulated: boolean = false;
   @Prop judgementTitle: string = '';
   @Prop judgementContent: string = '';
+
+  private extractTimeLabel(fact: string, evaluatedAt?: string): string {
+    const match = fact.match(/(\d{4}[-/年]\d{1,2}[-/月]\d{1,2}[日]?)|(\d{1,2}月\d{1,2}日)/);
+    if (match && match[0]) {
+      return match[0];
+    }
+    if (evaluatedAt && evaluatedAt.length >= 10) {
+      try {
+        const d = new Date(evaluatedAt);
+        if (!isNaN(d.getTime())) {
+          const month = d.getMonth() + 1;
+          const day = d.getDate();
+          return `${month}月${day}日`;
+        }
+      } catch (_e) {
+        // ignore
+      }
+    }
+    return '时间未知';
+  }
+
+  private extractSourceLabel(fact: string): string {
+    if (fact.includes('截止') || fact.includes('倒计时')) return '截止日期';
+    if (fact.includes('要求') || fact.includes('比赛') || fact.includes('竞赛')) return '参赛要求';
+    if (fact.includes('实验')) return '实验记录';
+    if (fact.includes('行动') || fact.includes('待办')) return '行动闭环';
+    if (fact.includes('活动') || fact.includes('停滞')) return '推进节奏';
+    if (fact.includes('论文') || fact.includes('笔记')) return '论文笔记';
+    if (fact.includes('风险')) return '风险识别';
+    if (fact.includes('材料') || fact.includes('大纲')) return '交付材料';
+    return '项目记录';
+  }
 
   private getSpineNodes(): SpineNodeItem[] {
     const nodes: SpineNodeItem[] = [];
 
-    // 1. 如果有后端返回的真实 facts，结构化解析为节点
+    // 1. 如果有后端返回的真实 facts，按真实时间与来源解析，不伪造任何日期
     if (this.evidence.facts && this.evidence.facts.length > 0) {
-      this.evidence.facts.forEach((fact: string, idx: number) => {
+      this.evidence.facts.forEach((fact: string) => {
         const item = new SpineNodeItem();
-        item.timeLabel = idx === 0 ? '8 月 18 日' : idx === 1 ? '8 月 20 日' : '昨天';
-        item.sourceLabel = fact.includes('要求') || fact.includes('比赛') ? '参赛要求' :
-          fact.includes('实验') ? '实验记录' :
-            fact.includes('行动') || fact.includes('待办') ? '行动闭环' : '项目记录';
+        item.timeLabel = this.extractTimeLabel(fact, this.evidence.evaluatedAt);
+        item.sourceLabel = this.extractSourceLabel(fact);
+        if (this.isSimulated) {
+          item.sourceLabel = `[模拟] ${item.sourceLabel}`;
+        }
         item.factContent = TextFormatters.readableText(fact, '证据事实无法读取，请重新录入。');
         nodes.push(item);
       });
     } else {
-      // 2. 根据 triggerType 填充标准的业务证据事实节点（避免空白）
-      if (this.triggerType.includes('MATERIAL') || this.triggerType.includes('outline')) {
-        const n1 = new SpineNodeItem();
-        n1.timeLabel = '8 月 18 日';
-        n1.sourceLabel = '参赛要求';
-        n1.factContent = '已记录：作品申报需要提交完整作品说明大纲与佐证材料。';
-        nodes.push(n1);
-
-        const n2 = new SpineNodeItem();
-        n2.timeLabel = '8 月 20 日';
-        n2.sourceLabel = '项目成果';
-        n2.factContent = '检查当前成果库：尚未生成作品说明初稿。';
-        nodes.push(n2);
-
-        const n3 = new SpineNodeItem();
-        n3.timeLabel = '今天';
-        n3.sourceLabel = '过程检查';
-        n3.factContent = '距离评审截止日期临近，需尽快沉淀初稿。';
-        nodes.push(n3);
-      } else if (this.triggerType.includes('EXPERIMENT') || this.triggerType.includes('experiment')) {
-        const n1 = new SpineNodeItem();
-        n1.timeLabel = '8 月 15 日';
-        n1.sourceLabel = '论文笔记';
-        n1.factContent = '已记录核心方法架构设计与基线设定。';
-        nodes.push(n1);
-
-        const n2 = new SpineNodeItem();
-        n2.timeLabel = '8 月 19 日';
-        n2.sourceLabel = '实验记录';
-        n2.factContent = '主干实验已有记录，但消融对照组数据尚未补全。';
-        nodes.push(n2);
-
-        const n3 = new SpineNodeItem();
-        n3.timeLabel = '今天';
-        n3.sourceLabel = '过程检查';
-        n3.factContent = '答辩与说明文档需要消融实验证据支撑。';
-        nodes.push(n3);
+      // 2. facts 为空时如实反映“证据不足”或“演示模拟”，绝不虚构日期与事实
+      const item = new SpineNodeItem();
+      if (this.isSimulated) {
+        item.timeLabel = '模拟时点';
+        item.sourceLabel = '演示情境';
+        item.factContent = '当前为演示模拟场景，未产生真实事实记录。';
       } else {
-        const n1 = new SpineNodeItem();
-        n1.timeLabel = '近期';
-        n1.sourceLabel = '项目过程';
-        n1.factContent = TextFormatters.ruleDescriptionToChinese(this.evidence.rule);
-        nodes.push(n1);
-
-        const n2 = new SpineNodeItem();
-        n2.timeLabel = '今天';
-        n2.sourceLabel = '规则引擎';
-        n2.factContent = '系统触发状态检查，识别到需人工决策的节点。';
-        nodes.push(n2);
+        item.timeLabel = '时间未知';
+        item.sourceLabel = '证据不足';
+        item.factContent = this.evidence.rule !== ''
+          ? `依据规则：${TextFormatters.ruleDescriptionToChinese(this.evidence.rule)}（未附加具体事实）`
+          : '暂无结构化证据记录，建议核对上下文后再作决策。';
       }
+      nodes.push(item);
     }
 
     // 终点判定节点 (Judgement Node)
     const judgementNode = new SpineNodeItem();
-    judgementNode.timeLabel = '当前判断';
+    judgementNode.timeLabel = this.isSimulated ? '模拟判断' : '当前判断';
     judgementNode.sourceLabel = '结论';
     judgementNode.factContent = this.judgementTitle !== '' ?
       TextFormatters.readableText(this.judgementTitle, '当前判断文本无法读取') : TextFormatters.triggerTypeToChinese(this.triggerType);
@@ -112,6 +110,18 @@ export struct EvidenceSpineView {
       .width('100%')
       .justifyContent(FlexAlign.SpaceBetween)
       .margin({ bottom: PMSpacing.MD })
+
+      if (this.isSimulated) {
+        Row() {
+          Text('⚠ 演示模拟介入 · 事实不计入真实指标')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.RISK)
+        }
+        .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: PMSpacing.XS, bottom: PMSpacing.XS })
+        .backgroundColor(PMColors.RISK_LIGHT)
+        .borderRadius(PMRadius.SM)
+        .margin({ bottom: PMSpacing.MD })
+      }
 
       // 纵向证据脊线流 (Evidence Spine)
       Column() {

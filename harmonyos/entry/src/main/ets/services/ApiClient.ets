@@ -18,7 +18,7 @@ export class ApiClient {
           },
           expectDataType: http.HttpDataType.STRING,
           connectTimeout: 10000,
-          readTimeout: 10000,
+          readTimeout: 30000,
         }
       );
       if (isSuccessCode('GET', response.responseCode)) {
@@ -31,6 +31,10 @@ export class ApiClient {
     } catch (e) {
       if (e instanceof ApiError) {
         throw e;
+      }
+      const errMsg = e instanceof Error ? e.message : (typeof e === 'string' ? e : '');
+      if (errMsg.toLowerCase().includes('timeout') || errMsg.includes('timed out')) {
+        throw new ApiError('REQUEST_TIMEOUT', '请求处理超时，请刷新查看是否已完成或重试', 408);
       }
       throw new ApiError('NETWORK_ERROR', '网络连接失败，请检查网络设置');
     } finally {
@@ -48,7 +52,7 @@ export class ApiClient {
         },
         expectDataType: http.HttpDataType.STRING,
         connectTimeout: 10000,
-        readTimeout: 10000,
+        readTimeout: 30000,
       };
       if (body !== undefined) {
         options.extraData = JSON.stringify(body);
@@ -68,6 +72,10 @@ export class ApiClient {
       if (e instanceof ApiError) {
         throw e;
       }
+      const errMsg = e instanceof Error ? e.message : (typeof e === 'string' ? e : '');
+      if (errMsg.toLowerCase().includes('timeout') || errMsg.includes('timed out')) {
+        throw new ApiError('REQUEST_TIMEOUT', '请求处理超时，请刷新查看是否已完成或重试', 408);
+      }
       throw new ApiError('NETWORK_ERROR', '网络连接失败，请检查网络设置');
     } finally {
       httpRequest.destroy();
@@ -85,7 +93,7 @@ export class ApiClient {
         },
         expectDataType: http.HttpDataType.STRING,
         connectTimeout: 10000,
-        readTimeout: 10000,
+        readTimeout: 30000,
       };
       if (body !== undefined) {
         options.extraData = JSON.stringify(body);
@@ -107,6 +115,10 @@ export class ApiClient {
     } catch (e) {
       if (e instanceof ApiError) {
         throw e;
+      }
+      const errMsg = e instanceof Error ? e.message : (typeof e === 'string' ? e : '');
+      if (errMsg.toLowerCase().includes('timeout') || errMsg.includes('timed out')) {
+        throw new ApiError('REQUEST_TIMEOUT', '请求处理超时，请刷新查看是否已完成或重试', 408);
       }
       throw new ApiError('NETWORK_ERROR', '网络连接失败，请检查网络设置');
     } finally {

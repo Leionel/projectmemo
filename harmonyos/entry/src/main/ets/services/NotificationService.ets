@@ -2,36 +2,38 @@ import { notificationManager } from '@kit.NotificationKit';
 import { wantAgent } from '@kit.AbilityKit';
 import { Intervention } from '../models/Intervention';
 
+export interface NotificationOpResult {
+  success: boolean;
+  status: 'SCHEDULED' | 'PUBLISHED' | 'SKIPPED_LOW_SEVERITY' | 'PERMISSION_DENIED' | 'UNSUPPORTED' | 'FAILED';
+  message: string;
+}
+
 export class NotificationService {
   private notificationPermission: boolean | undefined = undefined;
-  private permissionRequest: Promise<boolean> | undefined = undefined;
+
+  async checkNotificationPermission(): Promise<boolean> {
+    try {
+      const enabled = await notificationManager.isNotificationEnabled();
+      this.notificationPermission = enabled;
+      return enabled;
+    } catch (err) {
+      this.notificationPermission = false;
+      return false;
+    }
+  }
 
   private async ensureNotificationPermission(): Promise<boolean> {
-    if (this.notificationPermission !== undefined) {
-      return this.notificationPermission;
+    const isEnabled = await this.checkNotificationPermission();
+    if (isEnabled) {
+      return true;
     }
-    if (this.permissionRequest !== undefined) {
-      return this.permissionRequest;
+    try {
+      await notificationManager.requestEnableNotification();
+      return await this.checkNotificationPermission();
+    } catch (err) {
+      console.warn('Notification permission is unavailable:', JSON.stringify(err));
+      return false;
     }
-
-    this.permissionRequest = (async (): Promise<boolean> => {
-      try {
-        if (await notificationManager.isNotificationEnabled()) {
-          this.notificationPermission = true;
-          return true;
-        }
-        await notificationManager.requestEnableNotification();
-        this.notificationPermission = await notificationManager.isNotificationEnabled();
-        return this.notificationPermission;
-      } catch (err) {
-        this.notificationPermission = false;
-        console.warn('Notification permission is unavailable:', JSON.stringify(err));
-        return false;
-      } finally {
-        this.permissionRequest = undefined;
-      }
-    })();
-    return this.permissionRequest;
   }
 
   /**
@@ -56,69 +58,78 @@ export class NotificationService {
         abilityName: 'EntryAbility',
         parameters: {
           notificationProjectId: projectId,
-          notificationInterventionId: interventionId
-        }
+          notificationInterventionId: interventionId,
+          targetTab: 0,
+        },
       }],
-      actionType: wantAgent.OperationType.START_ABILITY,
+      operationType: wantAgent.OperationType.START_ABILITY,
       requestCode,
-      actionFlags: [wantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG]
+      wantAgentFlags: [wantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG],
     };
-    return wantAgent.getWantAgent(info);
+    return await wantAgent.getWantAgent(info);
   }
 
-  private async publish(intervention: Intervention, projectId: string, deliveryTime?: number): Promise<void> {
-    if (intervention.severity < 4 || intervention.status !== 'OPEN') {
-      return;
+  async publishInterventionNotification(intervention: Intervention, projectId: string): Promise<NotificationOpResult> {
+    if (intervention.severity < 4) {
+      return { success: false, status: 'SKIPPED_LOW_SEVERITY', message: '当前严重程度无需系统级即时打扰' };
+    }
+
+    const hasPermission = await this.ensureNotificationPermission();
+    if (!hasPermission) {
+      return { success: false, status: 'PERMISSION_DENIED', message: '通知权限未开启，无法发布系统通知' };
     }
 
     const id = this.getNotificationId(intervention.id);
-    const title = `【忆程待办】${intervention.title}`;
-    const text = intervention.content.slice(0, 100);
-
     try {
-      if (!await this.ensureNotificationPermission()) {
-        console.warn(`Notification permission is disabled; skipped ${intervention.id}`);
-        return;
-      }
-      const routeAgent = await this.buildWantAgent(intervention.id, projectId, id);
+      const want = await this.buildWantAgent(intervention.id, projectId, id);
       const notificationRequest: notificationManager.NotificationRequest = {
         id,
+        badgeNumber: 1,
+        isAlertOnce: false,
         notificationSlotType: notificationManager.SlotType.OTHER_TYPES,
+        label: `pm-intervention-${projectId}`,
         content: {
           notificationContentType: notificationManager.ContentType.NOTIFICATION_CONTENT_BASIC_TEXT,
           normal: {
-            title,
-            text,
-            additionalText: `紧急程度：${intervention.severity === 5 ? '高风险' : '重要'}`
-          }
+            title: `【忆程主动介入】${intervention.title}`,
+            text: intervention.content,
+            additionalText: '需要负责人决策',
+          },
         },
-        label: `pm-intervention-${projectId}`,
-        wantAgent: routeAgent
+        wantAgent: want,
       };
-      if (deliveryTime !== undefined) {
-        notificationRequest.deliveryTime = deliveryTime;
-      }
 
       await notificationManager.publish(notificationRequest);
+      return { success: true, status: 'PUBLISHED', message: '系统通知已发送' };
     } catch (err) {
-      // 模拟器/无通知权限降级处理
       console.warn(`Failed to publish notification for ${intervention.id}:`, JSON.stringify(err));
+      return { success: false, status: 'FAILED', message: '系统通知发送失败' };
     }
   }
 
-  async publishInterventionNotification(intervention: Intervention, projectId: string): Promise<void> {
-    if (intervention.severity < 4 || intervention.status !== 'OPEN') {
-      return;
-    }
-    await this.publish(intervention, projectId);
-  }
-
-  async scheduleInterventionNotification(intervention: Intervention, projectId: string, deliveryTime: number): Promise<void> {
-    if (intervention.severity < 4 || deliveryTime <= Date.now()) {
-      return;
-    }
+  /**
+   * 计划在未来时间提醒（Snooze）。
+   * 严禁将未来 deliveryTime 直接传给 publish 伪装定时发送；返回具体调度状态供页面提示。
+   */
+  async scheduleInterventionNotification(intervention: Intervention, projectId: string, deliveryTime: number): Promise<NotificationOpResult> {
     await this.cancelInterventionNotification(intervention.id, projectId);
-    await this.publish(intervention, projectId, deliveryTime);
+
+    if (deliveryTime <= Date.now()) {
+      return this.publishInterventionNotification(intervention, projectId);
+    }
+
+    if (intervention.severity < 4) {
+      return { success: false, status: 'SKIPPED_LOW_SEVERITY', message: '当前严重程度无需系统级定时打扰，已在工作台延期' };
+    }
+
+    const hasPermission = await this.ensureNotificationPermission();
+    if (!hasPermission) {
+      return { success: false, status: 'PERMISSION_DENIED', message: '通知权限未开启，无法安排系统定时提醒' };
+    }
+
+    // 当前运行环境未接入真机后台代理提醒（reminderAgentManager 依赖系统特权与后台代理常驻）；
+    // 如实反馈调度状态，仅在工作台完成业务延期，杜绝虚报系统提醒已安排
+    return { success: false, status: 'UNSUPPORTED', message: '当前设备未接入系统代理定时提醒，已在工作台完成延期' };
   }
 
   /**

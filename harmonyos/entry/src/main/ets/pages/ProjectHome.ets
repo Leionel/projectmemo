@@ -5,11 +5,12 @@ import { photoAccessHelper } from '@kit.MediaLibraryKit';
 import { picker } from '@kit.CoreFileKit';
 import { Project, ProjectDashboard, ApiError, ReadinessItem, ProjectUpdateInput } from '../models/Project';
 import { ProjectDetail, KnowledgeCard, CardLink, IncomingCardLink } from '../models/Memory';
-import { Milestone, Deliverable } from '../models/Milestone';
+import { Milestone, Deliverable, DeliverableEvidence } from '../models/Milestone';
 import { Intervention, ProposedAction } from '../models/Intervention';
 import { ActionItem } from '../models/Action';
 import { ArtifactItem } from '../models/Artifact';
 import { AgentMessage, AgentCitation, EvidenceClaim, ActionCreatePayload, ArtifactGeneratePayload } from '../models/Copilot';
+import { Attachment } from '../models/Attachment';
 
 import { ProjectService } from '../services/ProjectService';
 import { InterventionService } from '../services/InterventionService';
@@ -39,6 +40,11 @@ import { PMAppBar } from '../components/PMAppBar';
 import { TextFormatters } from '../common/TextFormatters';
 import { MarkdownView } from '../components/MarkdownView';
 import { DeadlineBadge } from '../components/DeadlineBadge';
+import { ChangeImpactDialog } from '../components/ChangeImpactDialog';
+import { ClaimAuditorDrawer } from '../components/ClaimAuditorDrawer';
+import { JudgeRebuttalModal } from '../components/JudgeRebuttalModal';
+import { AttachmentCorrectionModal } from '../components/AttachmentCorrectionModal';
+import { ExportFormatter } from '../common/ExportFormatter';
 
 @Entry
 @Component
@@ -55,6 +61,8 @@ struct ProjectHome {
   @State artifacts: ArtifactItem[] = [];
   @State chatMessages: AgentMessage[] = [];
   @State milestones: Milestone[] = [];
+  @State attachments: Attachment[] = [];
+  @State milestoneLoadError: string = '';
 
   // 通用状态
   @State isLoading: boolean = false;
@@ -75,10 +83,16 @@ struct ProjectHome {
   @State evaluateError: string = '';
   @State showDemoControls: boolean = false;
   @State showCapturePanel: boolean = false;
+  @State showChangeImpactDialog: boolean = false;
+  @State showClaimAuditor: boolean = false;
+  @State showJudgeRebuttal: boolean = false;
+  @State showAttachmentCorrection: boolean = false;
+  @State correctingAttachment: Attachment = new Attachment();
   @State showSettingsDialog: boolean = false;
   @State editTitle: string = '';
   @State editGoal: string = '';
   @State editDescription: string = '';
+  @State editDeadline: string = '';
   @State isSavingSettings: boolean = false;
 
   // Tab 1: 记忆专属状态
@@ -143,6 +157,67 @@ struct ProjectHome {
       return;
     }
     this.loadAllData();
+  }
+
+  onPageShow(): void {
+    // NAV-02: 消费可能在热启动时通过通知写入的参数
+    this.openPendingNotification();
+    // NAV-01: 页面返回时静默刷新数据，保留用户当前 tab
+    if (this.projectId !== '' && !this.isLoading) {
+      this.loadAllData(true);
+    }
+  }
+
+  onBackPress(): boolean {
+    // NAV-03: 系统返回键优先关闭活动弹层或阅读器，避免直接退出丢失输入
+    if (this.completingActionId !== '') {
+      this.completingActionId = '';
+      this.resultText = '';
+      this.dialogError = '';
+      return true;
+    }
+    if (this.showSettingsDialog) {
+      this.showSettingsDialog = false;
+      return true;
+    }
+    if (this.showChangeImpactDialog) {
+      this.showChangeImpactDialog = false;
+      return true;
+    }
+    if (this.showClaimAuditor) {
+      this.showClaimAuditor = false;
+      return true;
+    }
+    if (this.showJudgeRebuttal) {
+      this.showJudgeRebuttal = false;
+      return true;
+    }
+    if (this.showAttachmentCorrection) {
+      this.showAttachmentCorrection = false;
+      return true;
+    }
+    if (this.showCapturePanel) {
+      this.showCapturePanel = false;
+      return true;
+    }
+    if (this.isArtifactReader) {
+      this.isArtifactReader = false;
+      return true;
+    }
+    return false;
+  }
+
+  private openPendingNotification(): void {
+    const targetProjectId = AppStorage.get<string>('notificationProjectId') ?? '';
+    const targetInterventionId = AppStorage.get<string>('notificationInterventionId') ?? '';
+    if (targetProjectId !== '' && targetInterventionId !== '') {
+      AppStorage.setOrCreate<string>('notificationProjectId', '');
+      AppStorage.setOrCreate<string>('notificationInterventionId', '');
+      router.pushUrl({
+        url: 'pages/InterventionDetail',
+        params: { projectId: targetProjectId, interventionId: targetInterventionId }
+      });
+    }
   }
 
   private async pickAndUploadImage(): Promise<void> {
@@ -237,8 +312,10 @@ struct ProjectHome {
     }
   }
 
-  private async loadAllData(): Promise<void> {
-    this.isLoading = true;
+  private async loadAllData(silent: boolean = false): Promise<void> {
+    if (!silent) {
+      this.isLoading = true;
+    }
     this.errorMessage = '';
     try {
       const detailP = this.projectService.getProjectDetail(this.projectId);
@@ -247,16 +324,31 @@ struct ProjectHome {
       const actionP = this.actionService.list(this.projectId);
       const artifactP = this.artifactService.list(this.projectId);
       const chatP = this.copilotService.getChatHistory(this.projectId);
-      const milestoneP = this.milestoneService.list(this.projectId).catch(() => [] as Milestone[]);
+      const attachmentP = this.attachmentService.list(this.projectId).catch(() => [] as Attachment[]);
+      let milestoneFailed = false;
+      const milestoneP = this.milestoneService.list(this.projectId).catch(() => {
+        milestoneFailed = true;
+        return [] as Milestone[];
+      });
 
-      const res = await Promise.all([detailP, listP, intervP, actionP, artifactP, chatP, milestoneP]);
+      const res = await Promise.all([detailP, listP, intervP, actionP, artifactP, chatP, milestoneP, attachmentP]);
       this.project = res[0];
       this.dashboard = this.findDashboard(res[1]);
       this.interventions = res[2];
       this.actions = res[3];
       this.artifacts = res[4];
       this.chatMessages = res[5];
-      this.milestones = res[6];
+      if (!milestoneFailed || this.milestones.length === 0) {
+        this.milestones = res[6];
+      }
+      this.milestoneLoadError = milestoneFailed ? '里程碑阶段数据同步异常，保留展示历史缓存' : '';
+      this.attachments = res[7];
+
+      // 提取未成功附件中的第一个作为活跃重试 ID（若尚未指定）
+      const failedAtt = this.attachments.find((att: Attachment) => att.extractionStatus === 'FAILED' || att.extractionStatus === 'NEEDS_OCR');
+      if (failedAtt && this.attachmentRetryId === '') {
+        this.attachmentRetryId = failedAtt.id;
+      }
 
       this.updateCurrentArtifact();
       if (this.memorySearchQuery.trim() !== '') {
@@ -394,10 +486,14 @@ struct ProjectHome {
   }
 
   private isEvidenceConfirmed(deliverable: Deliverable, evidenceType: string): boolean {
+    return this.getConfirmedEvidence(deliverable, evidenceType) !== undefined;
+  }
+
+  private getConfirmedEvidence(deliverable: Deliverable, evidenceType: string): DeliverableEvidence | undefined {
     for (const evidence of deliverable.evidences) {
-      if (evidence.evidenceType === evidenceType && evidence.confirmed) return true;
+      if (evidence.evidenceType === evidenceType && evidence.confirmed) return evidence;
     }
-    return false;
+    return undefined;
   }
 
   private getEvidenceCandidates(evidenceType: string): KnowledgeCard[] {
@@ -407,7 +503,7 @@ struct ProjectHome {
       const attachmentMatch = (evidenceType === 'pdf_attachment' && attachmentType === 'PDF') ||
         (evidenceType === 'image_attachment' && attachmentType === 'IMAGE');
       if (card.type === evidenceType || attachmentMatch) candidates.push(card);
-      if (candidates.length >= 2) break;
+      if (candidates.length >= 5) break;
     }
     return candidates;
   }
@@ -425,6 +521,50 @@ struct ProjectHome {
       this.evidenceError = error instanceof ApiError ? error.message : '证据确认失败，请稍后重试';
     } finally {
       this.isConfirmingEvidence = false;
+    }
+  }
+
+  private async revokeEvidence(deliverableId: string, evidenceType: string, cardId: string, attachmentId: string): Promise<void> {
+    if (this.isConfirmingEvidence) return;
+    this.isConfirmingEvidence = true;
+    this.evidenceFeedback = '';
+    this.evidenceError = '';
+    try {
+      await this.milestoneService.confirmEvidence(this.projectId, deliverableId, evidenceType, cardId, attachmentId, false);
+      this.evidenceFeedback = '已撤销证据关联';
+      await this.loadAllData();
+    } catch (error) {
+      this.evidenceError = error instanceof ApiError ? error.message : '撤销证据失败，请稍后重试';
+    } finally {
+      this.isConfirmingEvidence = false;
+    }
+  }
+
+  private async retrySpecificAttachment(attachmentId: string): Promise<void> {
+    if (attachmentId === '' || this.isRetryingAttachment) return;
+    this.attachmentRetryId = attachmentId;
+    this.isRetryingAttachment = true;
+    this.attachmentFeedbackTone = 'info';
+    this.attachmentFeedback = '正在重新提取附件…';
+    try {
+      const result = await this.attachmentService.retry(this.projectId, attachmentId);
+      if (result.attachment.extractionStatus === 'SUCCESS') {
+        this.attachmentFeedback = '附件已重新提取并沉淀为项目记忆';
+        this.attachmentFeedbackTone = 'success';
+        this.attachmentRetryId = '';
+      } else if (result.attachment.extractionStatus === 'NEEDS_OCR') {
+        this.attachmentFeedback = '当前环境仍需要 OCR，已保留原始附件';
+        this.attachmentFeedbackTone = 'warning';
+      } else {
+        this.attachmentFeedback = `重新提取失败：${result.attachment.extractionError}`;
+        this.attachmentFeedbackTone = 'error';
+      }
+      await this.loadAllData();
+    } catch (error) {
+      this.attachmentFeedback = error instanceof ApiError ? error.message : '重新提取失败';
+      this.attachmentFeedbackTone = 'error';
+    } finally {
+      this.isRetryingAttachment = false;
     }
   }
 
@@ -492,11 +632,18 @@ struct ProjectHome {
     this.editTitle = this.project.title;
     this.editGoal = this.project.goal;
     this.editDescription = this.project.description;
+    this.editDeadline = this.project.deadline !== undefined && this.project.deadline !== null && this.project.deadline.length >= 10 ?
+      this.project.deadline.substring(0, 10) : '';
     this.showSettingsDialog = true;
   }
 
   private async saveSettings(): Promise<void> {
     if (this.isSavingSettings) {
+      return;
+    }
+    const deadlineVal = this.editDeadline.trim();
+    if (deadlineVal !== '' && !/^\d{4}-\d{2}-\d{2}$/.test(deadlineVal)) {
+      promptAction.showToast({ message: '截止日期格式须为 YYYY-MM-DD' });
       return;
     }
     this.isSavingSettings = true;
@@ -505,12 +652,13 @@ struct ProjectHome {
       input.title = this.editTitle.trim();
       input.goal = this.editGoal.trim();
       input.description = this.editDescription.trim();
+      input.deadline = deadlineVal !== '' ? deadlineVal : null;
       await this.projectService.updateProject(this.projectId, input);
       this.showSettingsDialog = false;
       promptAction.showToast({ message: '项目信息已更新' });
       await this.loadAllData();
     } catch (e) {
-      promptAction.showToast({ message: '更新失败' });
+      promptAction.showToast({ message: e instanceof ApiError ? e.message : '更新失败' });
     } finally {
       this.isSavingSettings = false;
     }
@@ -662,6 +810,22 @@ struct ProjectHome {
     promptAction.showToast({ message: '已复制正文' });
   }
 
+  private copyArtifactWithProvenance(): void {
+    if (this.currentArtifact === undefined || this.currentArtifact.content === '') {
+      return;
+    }
+    const fullDoc = ExportFormatter.formatWithProvenance(
+      this.project.title !== '' ? this.project.title : '项目档案',
+      this.selectedArtifactType,
+      this.currentArtifact.content,
+      this.project.cards
+    );
+    const systemPasteboard = pasteboard.getSystemPasteboard();
+    const pasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, fullDoc);
+    systemPasteboard.setData(pasteData);
+    promptAction.showToast({ message: '已复制带完整学术证据链全文' });
+  }
+
   // ----------------------------------------------------
   // 顶部导航栏 Header (长项目名称自然两行排版，无英文副标)
   // ----------------------------------------------------
@@ -746,40 +910,74 @@ struct ProjectHome {
 
   @Builder
   private NextActionView() {
-    Column() {
+    if (this.getNextActionId() === '') {
       Row() {
-        Text('下一步')
-          .fontSize(PMFontSize.SECTION_TITLE)
-          .fontWeight(FontWeight.Medium)
-          .fontColor(PMColors.INK_PRIMARY)
-        Text(this.getNextActionId() === '' ? '暂无待推进事项' : '建议今天处理')
-          .fontSize(PMFontSize.CAPTION)
-          .fontColor(PMColors.INK_TERTIARY)
-      }
-      .width('100%')
-      .justifyContent(FlexAlign.SpaceBetween)
-
-      Column() {
-        Text(this.getNextActionTitle())
+        Text('✦')
           .fontSize(PMFontSize.BODY)
-          .fontWeight(FontWeight.Medium)
-          .fontColor(PMColors.INK_PRIMARY)
-          .lineHeight(22)
+          .fontColor(PMColors.BRAND)
+          .margin({ right: PMSpacing.SM })
 
-        Text(this.getNextActionDescription())
+        Text('暂无待推进待办 · 建议记录实验灵感或新碎片')
           .fontSize(PMFontSize.SECONDARY)
           .fontColor(PMColors.INK_SECONDARY)
-          .lineHeight(18)
-          .margin({ top: PMSpacing.XS })
+          .layoutWeight(1)
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
 
-        if (this.getNextActionId() !== '') {
+        Text('去记录 →')
+          .fontSize(PMFontSize.CAPTION)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.BRAND)
+          .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 4, bottom: 4 })
+          .backgroundColor(PMColors.BRAND_LIGHT)
+          .borderRadius(PMRadius.XS)
+      }
+      .width('100%')
+      .padding({ left: PMSpacing.MD, right: PMSpacing.MD, top: PMSpacing.SM, bottom: PMSpacing.SM })
+      .backgroundColor(PMColors.SURFACE)
+      .borderRadius(PMRadius.MD)
+      .border({ width: 1, color: PMColors.BORDER })
+      .margin({ top: PMSpacing.MD })
+      .alignItems(VerticalAlign.Center)
+      .clickEffect(PMInteraction.PRESS_EFFECT)
+      .onClick(() => {
+        this.showCapturePanel = true;
+      })
+      .accessibilityText('暂无待推进待办，点击展开快速记录面板')
+    } else {
+      Column() {
+        Row() {
+          Text('下一步')
+            .fontSize(PMFontSize.SECTION_TITLE)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.INK_PRIMARY)
+          Text('建议今天处理')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.BRAND)
+        }
+        .width('100%')
+        .justifyContent(FlexAlign.SpaceBetween)
+
+        Column() {
+          Text(this.getNextActionTitle())
+            .fontSize(PMFontSize.BODY)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.INK_PRIMARY)
+            .lineHeight(22)
+
+          Text(this.getNextActionDescription())
+            .fontSize(PMFontSize.SECONDARY)
+            .fontColor(PMColors.INK_SECONDARY)
+            .lineHeight(18)
+            .margin({ top: PMSpacing.XS })
+
           Button(this.getNextActionStatus() === 'DOING' ? '查看待办' : '开始行动')
             .fontSize(PMFontSize.BUTTON)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.SURFACE)
             .backgroundColor(PMColors.BRAND)
             .borderRadius(PMRadius.SM)
-            .height(48)
+            .height(44)
             .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.SM })
             .margin({ top: PMSpacing.MD })
             .onClick(() => {
@@ -791,21 +989,21 @@ struct ProjectHome {
             })
             .accessibilityText(this.getNextActionStatus() === 'DOING' ? '查看下一项待办' : '开始下一项行动')
         }
+        .width('100%')
+        .padding(PMSpacing.MD)
+        .backgroundColor(PMColors.BRAND_LIGHT)
+        .borderRadius(PMRadius.SM)
+        .margin({ top: PMSpacing.SM })
+        .alignItems(HorizontalAlign.Start)
       }
       .width('100%')
-      .padding(PMSpacing.MD)
-      .backgroundColor(PMColors.BRAND_LIGHT)
-      .borderRadius(PMRadius.SM)
-      .margin({ top: PMSpacing.SM })
+      .padding(PMSpacing.LG)
+      .backgroundColor(PMColors.SURFACE)
+      .borderRadius(PMRadius.MD)
+      .border({ width: 1, color: PMColors.BORDER })
+      .margin({ top: PMSpacing.MD })
       .alignItems(HorizontalAlign.Start)
     }
-    .width('100%')
-    .padding(PMSpacing.LG)
-    .backgroundColor(PMColors.SURFACE)
-    .borderRadius(PMRadius.MD)
-    .border({ width: 1, color: PMColors.BORDER })
-    .margin({ top: PMSpacing.MD })
-    .alignItems(HorizontalAlign.Start)
   }
 
   @Builder
@@ -1195,6 +1393,22 @@ struct ProjectHome {
                   })
               }
               .width('100%')
+
+              Row() {
+                Button('⚡ 模拟方案突发变更 (模块 A)')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.SURFACE)
+                  .backgroundColor(PMColors.RISK)
+                  .borderRadius(PMRadius.XS)
+                  .height(44)
+                  .width('100%')
+                  .margin({ top: PMSpacing.SM })
+                  .onClick(() => {
+                    this.showChangeImpactDialog = true;
+                  })
+              }
+              .width('100%')
             }
             .width('100%')
             .alignItems(HorizontalAlign.Start)
@@ -1299,19 +1513,104 @@ struct ProjectHome {
           }
 
           if (this.attachmentRetryId !== '') {
-            Button(this.isRetryingAttachment ? '重新提取中…' : '重试提取')
-              .fontSize(PMFontSize.BUTTON)
-              .fontColor(PMColors.BRAND)
-              .backgroundColor(PMColors.BRAND_LIGHT)
-              .border({ width: 1, color: PMColors.BRAND })
-              .borderRadius(PMRadius.SM)
-              .height(48)
-              .enabled(!this.isRetryingAttachment)
-              .margin({ top: PMSpacing.SM })
-              .accessibilityText('重试提取此附件')
-              .onClick(() => {
-                this.retryAttachment();
-              })
+            Row() {
+              Button(this.isRetryingAttachment ? '重新提取中…' : '重试提取')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.BRAND)
+                .backgroundColor(PMColors.BRAND_LIGHT)
+                .border({ width: 1, color: PMColors.BRAND })
+                .borderRadius(PMRadius.SM)
+                .height(44)
+                .enabled(!this.isRetryingAttachment)
+                .layoutWeight(1)
+                .onClick(() => {
+                  this.retryAttachment();
+                })
+
+              Button('人工校对内容 (模块 E)')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.EVIDENCE)
+                .backgroundColor(PMColors.EVIDENCE_LIGHT)
+                .border({ width: 1, color: PMColors.EVIDENCE })
+                .borderRadius(PMRadius.SM)
+                .height(44)
+                .layoutWeight(1.3)
+                .margin({ left: PMSpacing.SM })
+                .onClick(() => {
+                  const targetAttachment = new Attachment();
+                  targetAttachment.id = this.attachmentRetryId;
+                  targetAttachment.fileName = '待校对实验附件';
+                  targetAttachment.extractionStatus = 'NEEDS_OCR';
+                  this.correctingAttachment = targetAttachment;
+                  this.showAttachmentCorrection = true;
+                })
+            }
+            .width('100%')
+            .margin({ top: PMSpacing.SM })
+          }
+
+          if (this.attachments.filter((a: Attachment) => a.extractionStatus !== 'SUCCESS').length > 0) {
+            Column() {
+              Row() {
+                Text(`待处理附件 (${this.attachments.filter((a: Attachment) => a.extractionStatus !== 'SUCCESS').length})`)
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.EVIDENCE)
+                Text('退出重进仍可恢复重试')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.INK_TERTIARY)
+              }
+              .width('100%')
+              .justifyContent(FlexAlign.SpaceBetween)
+
+              ForEach(this.attachments.filter((a: Attachment) => a.extractionStatus !== 'SUCCESS'), (item: Attachment) => {
+                Row() {
+                  Column() {
+                    Text(item.fileName)
+                      .fontSize(PMFontSize.BODY)
+                      .fontColor(PMColors.INK_PRIMARY)
+                      .maxLines(1)
+                      .textOverflow({ overflow: TextOverflow.Ellipsis })
+                    Text(item.extractionStatus === 'NEEDS_OCR' ? '环境需要 OCR 提取' :
+                      item.extractionError !== '' ? item.extractionError : '提取未完成')
+                      .fontSize(PMFontSize.CAPTION)
+                      .fontColor(item.extractionStatus === 'NEEDS_OCR' ? PMColors.EVIDENCE : PMColors.RISK)
+                      .maxLines(1)
+                      .textOverflow({ overflow: TextOverflow.Ellipsis })
+                      .margin({ top: 2 })
+                  }
+                  .layoutWeight(1)
+                  .alignItems(HorizontalAlign.Start)
+
+                  Button(this.isRetryingAttachment && this.attachmentRetryId === item.id ? '重试中…' : '重试提取')
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.BRAND)
+                    .backgroundColor(PMColors.BRAND_LIGHT)
+                    .borderRadius(PMRadius.XS)
+                    .height(36)
+                    .enabled(!this.isRetryingAttachment)
+                    .margin({ left: PMSpacing.SM })
+                    .onClick(() => {
+                      this.retrySpecificAttachment(item.id);
+                    })
+                    .accessibilityText(`重试提取附件 ${item.fileName}`)
+                }
+                .width('100%')
+                .padding(PMSpacing.SM)
+                .margin({ top: PMSpacing.XS })
+                .backgroundColor(PMColors.SURFACE)
+                .borderRadius(PMRadius.XS)
+                .border({ width: 1, color: PMColors.BORDER })
+                .alignItems(VerticalAlign.Center)
+              }, (item: Attachment) => item.id)
+            }
+            .width('100%')
+            .padding(PMSpacing.SM)
+            .margin({ top: PMSpacing.SM })
+            .backgroundColor(PMColors.SURFACE_SUBTLE)
+            .borderRadius(PMRadius.SM)
+            .border({ width: 1, color: PMColors.BORDER })
+            .alignItems(HorizontalAlign.Start)
           }
 
           TextArea({
@@ -1416,14 +1715,14 @@ struct ProjectHome {
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
 
-        ForEach(this.milestones.slice(0, 1), (milestone: Milestone) => {
+        ForEach(this.milestones, (milestone: Milestone) => {
           Text(milestone.title)
             .fontSize(PMFontSize.BODY)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.INK_PRIMARY)
             .margin({ top: PMSpacing.SM })
 
-          ForEach(milestone.deliverables.slice(0, 3), (deliverable: Deliverable) => {
+          ForEach(milestone.deliverables, (deliverable: Deliverable) => {
             Column() {
               Row() {
                 Text(deliverable.title)
@@ -1437,33 +1736,89 @@ struct ProjectHome {
               .width('100%')
 
               ForEach(this.parseExpectedEvidence(deliverable.expectedEvidence), (evidenceType: string) => {
-                Row() {
-                  Text(`${this.isEvidenceConfirmed(deliverable, evidenceType) ? '✓' : '○'} ${TextFormatters.memoryTypeToChinese(evidenceType)}`)
-                    .fontSize(PMFontSize.SECONDARY)
-                    .fontColor(this.isEvidenceConfirmed(deliverable, evidenceType) ? PMColors.SUCCESS : PMColors.INK_SECONDARY)
-                    .layoutWeight(1)
-                  if (!this.isEvidenceConfirmed(deliverable, evidenceType)) {
-                    ForEach(this.getEvidenceCandidates(evidenceType).slice(0, 1), (card: KnowledgeCard) => {
-                      Button(this.isConfirmingEvidence ? '确认中…' : '关联并确认')
+                Column() {
+                  Row() {
+                    Text(`${this.isEvidenceConfirmed(deliverable, evidenceType) ? '✓' : '○'} ${TextFormatters.memoryTypeToChinese(evidenceType)}`)
+                      .fontSize(PMFontSize.SECONDARY)
+                      .fontColor(this.isEvidenceConfirmed(deliverable, evidenceType) ? PMColors.SUCCESS : PMColors.INK_SECONDARY)
+                      .layoutWeight(1)
+
+                    if (this.isEvidenceConfirmed(deliverable, evidenceType)) {
+                      Button(this.isConfirmingEvidence ? '撤销中…' : '撤销关联')
                         .fontSize(PMFontSize.CAPTION)
-                        .fontColor(PMColors.BRAND)
-                        .backgroundColor(PMColors.BRAND_LIGHT)
+                        .fontColor(PMColors.RISK)
+                        .backgroundColor(PMColors.SURFACE)
+                        .border({ width: 1, color: PMColors.BORDER })
                         .borderRadius(PMRadius.XS)
+                        .height(30)
                         .enabled(!this.isConfirmingEvidence)
                         .onClick(() => {
-                          this.confirmEvidence(deliverable.id, evidenceType, card.id);
+                          const conf: DeliverableEvidence | undefined = this.getConfirmedEvidence(deliverable, evidenceType);
+                          if (conf !== undefined) {
+                            this.revokeEvidence(deliverable.id, evidenceType, conf.cardId, conf.attachmentId);
+                          }
                         })
-                        .accessibilityText(`关联${card.title}并确认${TextFormatters.memoryTypeToChinese(evidenceType)}证据`)
-                    }, (card: KnowledgeCard) => `${deliverable.id}-${evidenceType}-${card.id}`)
+                        .accessibilityText(`撤销${deliverable.title}的${TextFormatters.memoryTypeToChinese(evidenceType)}证据`)
+                    }
+                  }
+                  .width('100%')
+                  .alignItems(VerticalAlign.Center)
+
+                  if (!this.isEvidenceConfirmed(deliverable, evidenceType)) {
                     if (this.getEvidenceCandidates(evidenceType).length === 0) {
-                      Text('暂无匹配记忆')
+                      Text('暂无匹配记忆（可上传附件或记录新事实）')
                         .fontSize(PMFontSize.CAPTION)
                         .fontColor(PMColors.INK_TERTIARY)
+                        .margin({ top: PMSpacing.XS })
+                    } else {
+                      ForEach(this.getEvidenceCandidates(evidenceType), (card: KnowledgeCard) => {
+                        Row() {
+                          Column() {
+                            Text(card.title)
+                              .fontSize(PMFontSize.CAPTION)
+                              .fontWeight(FontWeight.Medium)
+                              .fontColor(PMColors.INK_PRIMARY)
+                              .maxLines(1)
+                              .textOverflow({ overflow: TextOverflow.Ellipsis })
+                            if (card.summary !== '') {
+                              Text(card.summary.length > 50 ? `${card.summary.substring(0, 50)}…` : card.summary)
+                                .fontSize(PMFontSize.CAPTION)
+                                .fontColor(PMColors.INK_SECONDARY)
+                                .maxLines(2)
+                                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                                .margin({ top: 2 })
+                            }
+                          }
+                          .layoutWeight(1)
+                          .alignItems(HorizontalAlign.Start)
+
+                          Button(this.isConfirmingEvidence ? '确认中…' : '关联此条')
+                            .fontSize(PMFontSize.CAPTION)
+                            .fontColor(PMColors.BRAND)
+                            .backgroundColor(PMColors.BRAND_LIGHT)
+                            .borderRadius(PMRadius.XS)
+                            .height(32)
+                            .enabled(!this.isConfirmingEvidence)
+                            .margin({ left: PMSpacing.SM })
+                            .onClick(() => {
+                              this.confirmEvidence(deliverable.id, evidenceType, card.id);
+                            })
+                            .accessibilityText(`关联${card.title}并确认${TextFormatters.memoryTypeToChinese(evidenceType)}证据`)
+                        }
+                        .width('100%')
+                        .padding(PMSpacing.SM)
+                        .margin({ top: PMSpacing.XS })
+                        .backgroundColor(PMColors.SURFACE)
+                        .borderRadius(PMRadius.XS)
+                        .border({ width: 1, color: PMColors.BORDER })
+                        .alignItems(VerticalAlign.Center)
+                      }, (card: KnowledgeCard) => `${deliverable.id}-${evidenceType}-${card.id}`)
                     }
                   }
                 }
                 .width('100%')
                 .margin({ top: PMSpacing.XS })
+                .padding(PMSpacing.XS)
               }, (evidenceType: string) => `${deliverable.id}-${evidenceType}`)
             }
             .width('100%')
@@ -2339,18 +2694,45 @@ struct ProjectHome {
           .alignItems(HorizontalAlign.Start)
           .layoutWeight(1)
 
-          Button('复制正文')
-            .fontSize(PMFontSize.CAPTION)
-            .fontColor(PMColors.BRAND)
-            .backgroundColor(PMColors.BRAND_LIGHT)
-            .border({ width: 1, color: PMColors.BRAND })
-            .borderRadius(PMRadius.SM)
-            .height(44)
-            .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: PMSpacing.SM, bottom: PMSpacing.SM })
-            .onClick(() => {
-              this.copyArtifactContent();
-            })
-            .accessibilityText('复制成果正文')
+          Row() {
+            Button('证据透视')
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.BRAND)
+              .backgroundColor(PMColors.BRAND_LIGHT)
+              .borderRadius(PMRadius.XS)
+              .height(36)
+              .padding({ left: PMSpacing.SM, right: PMSpacing.SM })
+              .onClick(() => {
+                this.showClaimAuditor = true;
+              })
+
+            Button('评委质询')
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.RISK)
+              .backgroundColor(PMColors.RISK_LIGHT)
+              .borderRadius(PMRadius.XS)
+              .height(36)
+              .padding({ left: PMSpacing.SM, right: PMSpacing.SM })
+              .margin({ left: 6 })
+              .onClick(() => {
+                this.showJudgeRebuttal = true;
+              })
+
+            Button('带存证导出')
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.SURFACE)
+              .backgroundColor(PMColors.BRAND)
+              .borderRadius(PMRadius.XS)
+              .height(36)
+              .padding({ left: PMSpacing.SM, right: PMSpacing.SM })
+              .margin({ left: 6 })
+              .onClick(() => {
+                this.copyArtifactWithProvenance();
+              })
+          }
         }
         .width('100%')
         .alignItems(VerticalAlign.Center)
@@ -2593,6 +2975,26 @@ struct ProjectHome {
     }
   }
 
+  private getReferencedCardsForCurrentArtifact(): KnowledgeCard[] {
+    if (!this.project.cards || this.project.cards.length === 0) {
+      return [];
+    }
+    if (this.currentArtifact && this.currentArtifact.content) {
+      const content = this.currentArtifact.content;
+      const matched: KnowledgeCard[] = [];
+      for (let i = 0; i < this.project.cards.length; i++) {
+        const card = this.project.cards[i];
+        if (content.indexOf(card.id) >= 0) {
+          matched.push(card);
+        } else if (card.title && card.title.length >= 2 && content.indexOf(card.title) >= 0) {
+          matched.push(card);
+        }
+      }
+      return matched;
+    }
+    return [];
+  }
+
   // ----------------------------------------------------
   // 主构建入口
   // ----------------------------------------------------
@@ -2763,12 +3165,45 @@ struct ProjectHome {
               .border({ width: 1, color: PMColors.BORDER })
 
             Row() {
+              Text('截止日期 (YYYY-MM-DD)')
+                .fontSize(PMFontSize.SECONDARY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_SECONDARY)
+                .layoutWeight(1)
+              if (this.editDeadline !== '') {
+                Button('清除截止日期')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.RISK)
+                  .backgroundColor(PMColors.SURFACE_SUBTLE)
+                  .borderRadius(PMRadius.XS)
+                  .height(28)
+                  .onClick(() => {
+                    this.editDeadline = '';
+                  })
+              }
+            }
+            .width('100%')
+            .margin({ top: PMSpacing.SM })
+
+            TextInput({ text: this.editDeadline, placeholder: '例如 2026-10-01，留空表示无截止日期' })
+              .onChange((v: string) => {
+                this.editDeadline = v;
+              })
+              .fontSize(PMFontSize.BODY)
+              .height(48)
+              .backgroundColor(PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.SM)
+              .border({ width: 1, color: PMColors.BORDER })
+              .accessibilityText('输入项目截止日期，格式为 YYYY-MM-DD')
+
+            Row() {
               Button('取消')
                 .fontSize(PMFontSize.BUTTON)
                 .fontColor(PMColors.INK_SECONDARY)
                 .backgroundColor(PMColors.SURFACE_SUBTLE)
                 .borderRadius(PMRadius.SM)
                 .height(48)
+                .layoutWeight(1)
                 .onClick(() => {
                   this.showSettingsDialog = false;
                 })
@@ -2780,6 +3215,7 @@ struct ProjectHome {
                 .backgroundColor(PMColors.BRAND)
                 .borderRadius(PMRadius.SM)
                 .height(48)
+                .layoutWeight(1.8)
                 .margin({ left: PMSpacing.MD })
                 .onClick(() => {
                   this.saveSettings();
@@ -2787,13 +3223,13 @@ struct ProjectHome {
             }
             .margin({ top: PMSpacing.LG })
             .width('100%')
-            .justifyContent(FlexAlign.End)
           }
           .width('100%')
-          .padding(PMSpacing.LG)
+          .padding(PMSpacing.XL)
           .backgroundColor(PMColors.SURFACE)
           .borderRadius(PMRadius.LG)
           .border({ width: 1, color: PMColors.BORDER })
+          .shadow({ radius: 16, color: 'rgba(0, 0, 0, 0.10)', offsetX: 0, offsetY: 8 })
           .transition(TransitionEffect.OPACITY.combine(TransitionEffect.scale({ x: 0.96, y: 0.96 })).animation({ duration: PMMotion.LOCAL, curve: PMMotion.CURVE_CONTENT }))
         }
         .width('100%')
@@ -2803,6 +3239,49 @@ struct ProjectHome {
         .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
         .justifyContent(FlexAlign.Center)
         .transition(TransitionEffect.OPACITY.animation({ duration: PMMotion.COLOR, curve: PMMotion.CURVE_CONTENT }))
+      }
+
+      if (this.showChangeImpactDialog) {
+        ChangeImpactDialog({
+          projectId: this.projectId,
+          onClose: () => {
+            this.showChangeImpactDialog = false;
+          },
+          onSuccess: () => {
+            this.loadAllData();
+          }
+        })
+      }
+
+      if (this.showClaimAuditor) {
+        ClaimAuditorDrawer({
+          cards: this.getReferencedCardsForCurrentArtifact(),
+          artifactTitle: TextFormatters.artifactTypeToChinese(this.selectedArtifactType),
+          onClose: () => {
+            this.showClaimAuditor = false;
+          }
+        })
+      }
+
+      if (this.showJudgeRebuttal) {
+        JudgeRebuttalModal({
+          onClose: () => {
+            this.showJudgeRebuttal = false;
+          }
+        })
+      }
+
+      if (this.showAttachmentCorrection) {
+        AttachmentCorrectionModal({
+          projectId: this.projectId,
+          attachment: this.correctingAttachment,
+          onClose: () => {
+            this.showAttachmentCorrection = false;
+          },
+          onSuccess: () => {
+            this.loadAllData();
+          }
+        })
       }
     }
     .width('100%')

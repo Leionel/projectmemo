@@ -9,7 +9,6 @@ export class AttachmentUploadResult {
   attachment: Attachment = new Attachment();
   isDuplicate: boolean = false;
 }
-
 export class AttachmentService {
   private client: ApiClient = new ApiClient();
 
@@ -51,6 +50,16 @@ export class AttachmentService {
     return this.client.post<AttachmentUploadResult>(
       `/api/projects/${projectId}/attachments/${attachmentId}/retry`,
       undefined
+    );
+  }
+
+  async correct(projectId: string, attachmentId: string, correctedText: string): Promise<AttachmentUploadResult> {
+    const payload: Record<string, string> = {
+      'correctedText': correctedText
+    };
+    return this.client.post<AttachmentUploadResult>(
+      `/api/projects/${projectId}/attachments/${attachmentId}/correct`,
+      payload
     );
   }
 }

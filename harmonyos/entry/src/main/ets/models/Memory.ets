@@ -11,12 +11,14 @@ export class CardSummary {
 export class CardLink {
   reason: string = '';
   score: number = 0;
+  relationType: string = '';
   relatedCard: CardSummary = new CardSummary();
 }
 
 export class IncomingCardLink {
   reason: string = '';
   score: number = 0;
+  relationType: string = '';
   currentCard: CardSummary = new CardSummary();
 }
 

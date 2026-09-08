@@ -84,6 +84,17 @@ struct Index {
 
   onPageShow(): void {
     this.openPendingNotification();
+    if (!this.isLoading) {
+      this.loadAllData(true);
+    }
+  }
+
+  onBackPress(): boolean {
+    if (this.showCreateDialog) {
+      this.closeCreateDialog();
+      return true;
+    }
+    return false;
   }
 
   private openPendingNotification(): void {
@@ -170,8 +181,10 @@ struct Index {
     }
   }
 
-  private async loadAllData(): Promise<void> {
-    this.isLoading = true;
+  private async loadAllData(silent: boolean = false): Promise<void> {
+    if (!silent) {
+      this.isLoading = true;
+    }
     this.errorMessage = '';
     this.dataSyncState = '同步中...';
     try {
@@ -181,6 +194,7 @@ struct Index {
       const intervs: Intervention[] = [];
       const acts: ActionItem[] = [];
       const cards: KnowledgeCard[] = [];
+      let failedCount = 0;
 
       for (const p of this.projects) {
         try {
@@ -199,14 +213,18 @@ struct Index {
             acts.push(a);
           }
         } catch (err) {
-          // 单个项目容错
+          failedCount++;
         }
       }
 
       this.allInterventions = intervs;
       this.allActions = acts;
       this.allCards = cards;
-      this.dataSyncState = '已同步';
+      if (failedCount > 0) {
+        this.dataSyncState = `部分同步 (${this.projects.length - failedCount}/${this.projects.length})`;
+      } else {
+        this.dataSyncState = '已同步';
+      }
     } catch (e) {
       if (e instanceof ApiError) {
         this.errorMessage = e.message;
@@ -254,7 +272,7 @@ struct Index {
       input.goal = this.newGoal.trim();
       input.scenario = this.newScenario;
       if (this.newDeadline.trim() !== '') {
-        input.deadline = new Date(this.newDeadline.trim()).toISOString();
+        input.deadline = this.newDeadline.trim();
       }
       await this.projectService.createProject(input);
       this.showCreateDialog = false;
@@ -468,10 +486,10 @@ struct Index {
         Text(TextFormatters.scenarioToChinese(project.scenario))
           .fontSize(PMFontSize.CAPTION)
           .fontWeight(FontWeight.Medium)
-          .fontColor(PMColors.MEMORY)
+          .fontColor(project.dashboard.deadline.kind === 'overdue' ? PMColors.RISK : PMColors.BRAND)
           .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 2, bottom: 2 })
           .borderRadius(PMRadius.XS)
-          .backgroundColor(PMColors.MEMORY_LIGHT)
+          .backgroundColor(project.dashboard.deadline.kind === 'overdue' ? PMColors.RISK_LIGHT : PMColors.BRAND_LIGHT)
 
         DeadlineBadge({ deadline: project.dashboard.deadline })
       }
@@ -507,7 +525,7 @@ struct Index {
             '尚未形成' : `${project.dashboard.readiness.percentage}%`)
             .fontSize(PMFontSize.BODY)
             .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.BRAND)
+            .fontColor(project.dashboard.deadline.kind === 'overdue' ? PMColors.RISK : PMColors.BRAND)
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
@@ -515,13 +533,13 @@ struct Index {
         Stack({ alignContent: Alignment.Start }) {
           Row()
             .width('100%')
-            .height(3)
+            .height(4)
             .backgroundColor(PMColors.BORDER)
             .borderRadius(PMRadius.FULL)
           Row()
             .width(`${Math.min(100, Math.max(0, project.dashboard.readiness.percentage))}%`)
-            .height(3)
-            .backgroundColor(PMColors.BRAND)
+            .height(4)
+            .backgroundColor(project.dashboard.deadline.kind === 'overdue' ? PMColors.RISK : PMColors.BRAND)
             .borderRadius(PMRadius.FULL)
         }
         .width('100%')
@@ -547,7 +565,7 @@ struct Index {
           Text('下一步')
             .fontSize(PMFontSize.SECONDARY)
             .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.INK_TERTIARY)
+            .fontColor(project.dashboard.deadline.kind === 'overdue' ? PMColors.RISK : PMColors.INK_TERTIARY)
             .margin({ right: PMSpacing.SM })
 
           Text(TextFormatters.readableText(project.dashboard.nextAction.label, '下一步行动无法读取'))
@@ -559,7 +577,7 @@ struct Index {
 
           Text('→')
             .fontSize(PMFontSize.BODY)
-            .fontColor(PMColors.BRAND)
+            .fontColor(project.dashboard.deadline.kind === 'overdue' ? PMColors.RISK : PMColors.BRAND)
             .margin({ left: PMSpacing.XS })
         }
         .width('100%')
@@ -570,7 +588,23 @@ struct Index {
     .padding(PMSpacing.MD)
     .backgroundColor(PMColors.SURFACE)
     .borderRadius(PMRadius.MD)
-    .border({ width: { left: 3 }, color: PMColors.MEMORY })
+    .border({
+      width: { left: 4, top: 1, right: 1, bottom: 1 },
+      color: {
+        left: project.dashboard.deadline.kind === 'overdue' ? PMColors.RISK :
+          project.dashboard.highestReminderSeverity >= 4 ? PMColors.EVIDENCE :
+            project.dashboard.readiness.percentage > 0 ? PMColors.BRAND : PMColors.BORDER,
+        top: PMColors.BORDER,
+        right: PMColors.BORDER,
+        bottom: PMColors.BORDER
+      }
+    })
+    .shadow({
+      radius: project.dashboard.deadline.kind === 'overdue' ? 10 : 4,
+      color: project.dashboard.deadline.kind === 'overdue' ? 'rgba(197, 48, 48, 0.08)' : 'rgba(0, 0, 0, 0.03)',
+      offsetX: 0,
+      offsetY: 2
+    })
     .alignItems(HorizontalAlign.Start)
     .clickEffect(PMInteraction.PRESS_EFFECT)
     .onClick(() => {
@@ -625,20 +659,36 @@ struct Index {
           ForEach(this.allInterventions.filter((i) => i.status === 'OPEN'), (interv: Intervention) => {
             ListItem() {
               Column() {
+                // 顶部：所属项目与严重等级
                 Row() {
-                  SeverityBadge({ severity: interv.severity })
-                  Text(interv.title)
-                    .fontSize(PMFontSize.SECTION_TITLE)
-                    .fontWeight(FontWeight.Medium)
-                    .fontColor(PMColors.INK_PRIMARY)
+                  Row() {
+                    Text(interv.title.includes('截止') ? '⏱️' : interv.title.includes('72') ? '⏳' : '⚠️')
+                      .fontSize(PMFontSize.CAPTION)
+                      .margin({ right: 4 })
+                    SeverityBadge({ severity: interv.severity })
+                  }
+
+                  Text(interv.projectId !== '' ? (this.projects.find((p: Project) => p.id === interv.projectId)?.title ?? '') : '')
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.INK_TERTIARY)
+                    .maxLines(1)
+                    .textOverflow({ overflow: TextOverflow.Ellipsis })
                     .layoutWeight(1)
+                    .textAlign(TextAlign.End)
                     .margin({ left: PMSpacing.SM })
                 }
                 .width('100%')
 
+                Text(interv.title)
+                  .fontSize(PMFontSize.SECTION_TITLE)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.INK_PRIMARY)
+                  .margin({ top: PMSpacing.SM })
+
                 Text(interv.content)
                   .fontSize(PMFontSize.BODY)
                   .fontColor(PMColors.INK_SECONDARY)
+                  .lineHeight(20)
                   .margin({ top: PMSpacing.XS })
 
                 Row() {
@@ -648,7 +698,7 @@ struct Index {
                     .fontColor(PMColors.SURFACE)
                     .backgroundColor(PMColors.BRAND)
                     .borderRadius(PMRadius.XS)
-                    .padding({ left: PMSpacing.MD, right: PMSpacing.MD, top: 4, bottom: 4 })
+                    .padding({ left: PMSpacing.MD, right: PMSpacing.MD, top: 5, bottom: 5 })
                     .onClick(() => {
                       router.pushUrl({
                         url: 'pages/InterventionDetail',
@@ -664,7 +714,16 @@ struct Index {
               .padding(PMSpacing.MD)
               .backgroundColor(PMColors.SURFACE)
               .borderRadius(PMRadius.MD)
-              .border({ width: 1, color: PMColors.BORDER })
+              .border({
+                width: { left: 3, top: 1, right: 1, bottom: 1 },
+                color: {
+                  left: interv.severity >= 4 ? PMColors.RISK : PMColors.EVIDENCE,
+                  top: PMColors.BORDER,
+                  right: PMColors.BORDER,
+                  bottom: PMColors.BORDER
+                }
+              })
+              .shadow({ radius: 4, color: 'rgba(0, 0, 0, 0.03)', offsetX: 0, offsetY: 2 })
               .alignItems(HorizontalAlign.Start)
             }
           }, (interv: Intervention) => interv.id)
@@ -1576,6 +1635,40 @@ struct Index {
                 .onClick(() => {
                   this.newScenario = 'COURSE_DESIGN';
                 })
+            }
+            .width('100%')
+            .margin({ top: PMSpacing.XS })
+
+            Text('截止日期 (YYYY-MM-DD，选填)')
+              .fontSize(PMFontSize.SECONDARY)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.INK_SECONDARY)
+              .margin({ top: PMSpacing.SM })
+
+            Row() {
+              TextInput({ text: this.newDeadline, placeholder: '例如：2026-09-30' })
+                .onChange((value: string) => {
+                  this.newDeadline = value;
+                })
+                .fontSize(PMFontSize.BODY)
+                .height(48)
+                .backgroundColor(PMColors.SURFACE_SUBTLE)
+                .borderRadius(PMRadius.SM)
+                .border({ width: 1, color: PMColors.BORDER })
+                .layoutWeight(1)
+
+              if (this.newDeadline !== '') {
+                Button('清空')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.RISK)
+                  .backgroundColor(PMColors.SURFACE_SUBTLE)
+                  .borderRadius(PMRadius.SM)
+                  .height(48)
+                  .margin({ left: PMSpacing.SM })
+                  .onClick(() => {
+                    this.newDeadline = '';
+                  })
+              }
             }
             .width('100%')
             .margin({ top: PMSpacing.XS })

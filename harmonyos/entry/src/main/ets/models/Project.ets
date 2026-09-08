@@ -73,7 +73,7 @@ export class ProjectUpdateInput {
   description: string | undefined = undefined;
   goal: string | undefined = undefined;
   scenario: string | undefined = undefined;
-  deadline: string | undefined = undefined;
+  deadline: string | null | undefined = undefined;
 }
 
 export class ProjectCreateResponse {

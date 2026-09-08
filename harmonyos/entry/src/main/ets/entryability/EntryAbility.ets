@@ -7,11 +7,17 @@ const DOMAIN = 0x0000;
 
 export default class EntryAbility extends UIAbility {
   private captureNotificationRoute(want: Want): void {
-    const projectId = want.parameters?.['notificationProjectId'];
+    const projectId = want.parameters?.['notificationProjectId'] ?? want.parameters?.['projectId'];
     const interventionId = want.parameters?.['notificationInterventionId'];
-    if (typeof projectId === 'string' && typeof interventionId === 'string') {
+    const targetTab = want.parameters?.['targetTab'];
+    if (typeof projectId === 'string') {
       AppStorage.setOrCreate<string>('notificationProjectId', projectId);
-      AppStorage.setOrCreate<string>('notificationInterventionId', interventionId);
+      if (typeof interventionId === 'string') {
+        AppStorage.setOrCreate<string>('notificationInterventionId', interventionId);
+      }
+    }
+    if (typeof targetTab === 'number') {
+      AppStorage.setOrCreate<number>('targetTab', targetTab);
     }
   }
 

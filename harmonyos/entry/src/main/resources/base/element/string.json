@@ -19,6 +19,14 @@
     {
       "name": "notification_reason",
       "value": "用于提醒高风险项目介入并打开对应依据"
+    },
+    {
+      "name": "widget_display_name",
+      "value": "忆程备赛看板"
+    },
+    {
+      "name": "widget_desc",
+      "value": "在桌面常驻展示备赛倒计时与今日第一要务"
     }
   ]
 }

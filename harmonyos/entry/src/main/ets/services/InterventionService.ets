@@ -1,6 +1,7 @@
 import { ApiClient } from './ApiClient';
 import { Intervention, InterventionsResponse, InterventionUpdateResponse } from '../models/Intervention';
 import { buildAcceptBody, buildDismissBody, buildSnoozeBody } from '../common/ApiContract';
+import { ApiError } from '../models/Project';
 
 export class InterventionService {
   private client: ApiClient = new ApiClient();
@@ -17,7 +18,7 @@ export class InterventionService {
         return item;
       }
     }
-    throw new Error('Intervention not found');
+    throw new ApiError('INTERVENTION_NOT_FOUND', '提醒记录不存在或已被移除', 404);
   }
 
   async accept(projectId: string, interventionId: string, actionIndex: number): Promise<InterventionUpdateResponse> {

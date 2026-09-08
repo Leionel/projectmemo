@@ -8,7 +8,8 @@ export function linkRelatedCards(draft: CardDraft, existingCards: LinkableCard[]
   const current = new Map(draft.keywords.map((keyword) => [normalize(keyword), keyword]));
   return existingCards
     .map((card) => {
-      const sharedKeywords = card.keywords.filter((keyword) => current.has(normalize(keyword)));
+      const cardKeywords = Array.isArray(card.keywords) ? card.keywords : [];
+      const sharedKeywords = cardKeywords.filter((keyword) => current.has(normalize(keyword)));
       return {
         relatedCardId: card.id,
         relatedTitle: card.title,

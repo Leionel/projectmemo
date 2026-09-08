@@ -17,7 +17,10 @@ export async function completeProjectAction(projectId: string, actionId: string,
   if (cleanResult.length > 2000) throw new AppError("INVALID_ACTION_RESULT", "完成结果不能超过 2000 个字", 400);
   const action = await findAction(projectId, actionId);
   if (action.isSimulated) throw new AppError("SIMULATED_ACTION", "演示模拟行动不会写入真实复盘，请清除模拟后再执行", 409);
-  if (action.status === ActionStatus.DONE && action.resultCardId) return action;
+  if (action.status === ActionStatus.DONE && action.resultCardId) {
+    const card = await db.knowledgeCard.findUnique({ where: { id: action.resultCardId } });
+    return { ...action, resultCard: card };
+  }
   if (action.status === ActionStatus.CANCELLED) throw new AppError("ACTION_CANCELLED", "已取消的行动不能完成", 409);
 
   const project = await requireProject(projectId);
@@ -34,6 +37,18 @@ export async function completeProjectAction(projectId: string, actionId: string,
   const cardId = randomUUID();
   const startedAt = Date.now();
   const result = await db.$transaction(async (tx) => {
+    // 事务内原子检查：防止并发调用导致创建多张复盘卡
+    const currentAction = await tx.actionItem.findUnique({
+      where: { id: actionId },
+    });
+    if (!currentAction) throw new AppError("ACTION_NOT_FOUND", "行动不存在", 404);
+    if (currentAction.status === ActionStatus.DONE && currentAction.resultCardId) {
+      const existingCard = await tx.knowledgeCard.findUnique({
+        where: { id: currentAction.resultCardId },
+      });
+      return { card: existingCard, updatedAction: currentAction, alreadyDone: true };
+    }
+
     await tx.capture.create({
       data: { id: captureId, projectId, rawText: cleanResult, sourceType: "Agent行动回执" },
     });
@@ -77,9 +92,14 @@ export async function completeProjectAction(projectId: string, actionId: string,
       });
     }
     await tx.project.update({ where: { id: projectId }, data: { updatedAt: new Date() } });
-    return { card, updatedAction };
+    return { card, updatedAction, alreadyDone: false };
   });
-  await vectorStore.index({ id: result.card.id, title: result.card.title, keywords: result.card.keywords as string[] });
+  if (result.alreadyDone) {
+    return { ...result.updatedAction, resultCard: result.card };
+  }
+  if (result.card) {
+    await vectorStore.index({ id: result.card.id, title: result.card.title, keywords: result.card.keywords as string[] });
+  }
   const run = await saveAgentRun({
     projectId,
     runType: AgentRunType.ACTION,
@@ -87,7 +107,7 @@ export async function completeProjectAction(projectId: string, actionId: string,
     provider: process.env.LLM_MODE === "openai-compatible" && process.env.LLM_API_KEY ? "agent+rules" : "mock",
     trace: {
       actionId,
-      resultCardId: result.card.id,
+      resultCardId: result.card?.id ?? null,
       linkedCardIds: links.map((link) => link.relatedCardId),
       rule: "completed_action_creates_reflection_card",
     },

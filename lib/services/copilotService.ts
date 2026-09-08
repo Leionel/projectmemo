@@ -4,7 +4,7 @@ import { chatJsonWithMeta } from "@/lib/agent/llmAgent";
 import { buildCopilotPrompt } from "@/lib/agent/prompts";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { evaluateTrustReceipt, guardedAnswerMessage, type ClaimDraft } from "@/lib/evidence/trustReceipt";
-import { AgentRunStatus, AgentRunType } from "@/lib/generated/prisma/client";
+import { AgentRunStatus, AgentRunType, Prisma } from "@/lib/generated/prisma/client";
 import { db } from "@/lib/db";
 import { searchProjectCards } from "@/lib/memory/hybridSearch";
 import { createAction, listAgentMessages, listInterventions, listActions, saveAgentMessage, saveAgentRun } from "@/lib/repositories/agent";
@@ -259,12 +259,44 @@ export async function getProjectChat(projectId: string) {
     : message);
 }
 
+const proposalLocks = new Map<string, Promise<void>>();
+
+async function withProposalLock<T>(key: string, task: () => Promise<T>): Promise<T> {
+  while (proposalLocks.has(key)) {
+    try {
+      await proposalLocks.get(key);
+    } catch {
+      // 忽略前序异常，继续竞争执行
+    }
+  }
+
+  let resolveLock!: () => void;
+  const lockPromise = new Promise<void>((res) => {
+    resolveLock = res;
+  });
+  proposalLocks.set(key, lockPromise);
+
+  try {
+    return await task();
+  } finally {
+    if (proposalLocks.get(key) === lockPromise) {
+      proposalLocks.delete(key);
+    }
+    resolveLock();
+  }
+}
+
 export async function executeCopilotTool(projectId: string, input: { tool: "create_action" | "generate_artifact"; confirmed: boolean; payload: Record<string, unknown>; sourceRunId?: string }) {
   if (!input.confirmed) throw new AppError("CONFIRMATION_REQUIRED", "写操作需要你确认后才能执行", 400);
   await requireProject(projectId);
+
+  let matchedProposal: Record<string, unknown> | undefined;
+  let sourceRun: { id: string; trace: unknown; resultJson: unknown } | null = null;
+  let proposalKey = "";
+
   if (isFeatureEnabled("EVIDENCE_TRUST_RECEIPT_ENABLED", true)) {
     if (!input.sourceRunId) throw new AppError("TRUST_RECEIPT_REQUIRED", "缺少证据回执，不能执行写操作", 409);
-    const sourceRun = await db.agentRun.findFirst({ where: { id: input.sourceRunId, projectId, runType: AgentRunType.CHAT } });
+    sourceRun = await db.agentRun.findFirst({ where: { id: input.sourceRunId, projectId, runType: AgentRunType.CHAT } });
     if (!sourceRun) throw new AppError("TRUST_RECEIPT_NOT_FOUND", "没有找到这次回答的证据回执", 404);
     const trace = sourceRun.trace && typeof sourceRun.trace === "object" && !Array.isArray(sourceRun.trace)
       ? sourceRun.trace as Record<string, unknown>
@@ -276,17 +308,102 @@ export async function executeCopilotTool(projectId: string, input: { tool: "crea
       ? sourceRun.resultJson as Record<string, unknown>
       : {};
     const allowed = Array.isArray(result.proposedActions) ? result.proposedActions as Array<Record<string, unknown>> : [];
-    const matchesProposal = allowed.some((proposal) => proposal.kind === input.tool && (
+    matchedProposal = allowed.find((proposal) => proposal.kind === input.tool && (
       input.tool === "create_action"
         ? proposal.title === input.payload.title
         : proposal.artifactType === input.payload.artifactType
     ));
-    if (!matchesProposal) throw new AppError("UNAPPROVED_TOOL_PROPOSAL", "这个操作不属于该证据回执中的建议", 409);
+    if (!matchedProposal) throw new AppError("UNAPPROVED_TOOL_PROPOSAL", "这个操作不属于该证据回执中的建议", 409);
+
+    proposalKey = input.tool === "create_action"
+      ? `action:${matchedProposal.title}`
+      : `artifact:${matchedProposal.artifactType}`;
   }
-  if (input.tool === "create_action") {
-    const parsed = actionCreateSchema.parse(input.payload);
-    return { tool: input.tool, result: await createAction(projectId, parsed) };
-  }
-  const parsed = artifactCreateSchema.parse(input.payload);
-  return { tool: input.tool, result: await generateArtifact(projectId, parsed.artifactType) };
+
+  const lockKey = sourceRun ? `${sourceRun.id}:${proposalKey}` : `${projectId}:${input.tool}`;
+
+  return withProposalLock(lockKey, async () => {
+    // 锁内重新查询最新 executedProposals，实现严格的并发幂等阻断
+    if (sourceRun && proposalKey) {
+      const freshRun = await db.agentRun.findUnique({ where: { id: sourceRun.id } });
+      const freshResult = freshRun?.resultJson && typeof freshRun.resultJson === "object" && !Array.isArray(freshRun.resultJson)
+        ? freshRun.resultJson as Record<string, unknown>
+        : {};
+      const executedProposals = (freshResult.executedProposals && typeof freshResult.executedProposals === "object"
+        ? freshResult.executedProposals as Record<string, { tool: string; resultId: string }>
+        : {});
+
+      if (executedProposals[proposalKey]) {
+        const execRecord = executedProposals[proposalKey];
+        if (input.tool === "create_action") {
+          const existingAction = await db.actionItem.findUnique({ where: { id: execRecord.resultId } });
+          if (existingAction) {
+            return { tool: input.tool, result: existingAction, alreadyExecuted: true };
+          }
+        } else {
+          const existingArtifact = await db.generatedArtifact.findUnique({ where: { id: execRecord.resultId } });
+          if (existingArtifact) {
+            return { tool: input.tool, result: existingArtifact, alreadyExecuted: true };
+          }
+        }
+      }
+    }
+
+    if (input.tool === "create_action") {
+      // TRUST-01: 强制使用服务端存证的建议字段，防止客户端篡改 description / priority
+      const actionPayload = matchedProposal
+        ? {
+            title: matchedProposal.title,
+            description: matchedProposal.description ?? "",
+            priority: matchedProposal.priority ?? 3,
+            dueAt: matchedProposal.dueAt ?? undefined,
+          }
+        : input.payload;
+      const parsed = actionCreateSchema.parse(actionPayload);
+      const created = await createAction(projectId, parsed);
+
+      if (sourceRun && matchedProposal) {
+        await db.$transaction(async (tx) => {
+          const runToUpdate = await tx.agentRun.findUnique({ where: { id: sourceRun!.id } });
+          if (!runToUpdate) return;
+          const currentResult = (runToUpdate.resultJson && typeof runToUpdate.resultJson === "object"
+            ? runToUpdate.resultJson as Record<string, unknown>
+            : {}) as Record<string, unknown>;
+          const executed = (currentResult.executedProposals && typeof currentResult.executedProposals === "object"
+            ? { ...(currentResult.executedProposals as Record<string, unknown>) }
+            : {});
+          executed[proposalKey] = { tool: input.tool, resultId: created.id, executedAt: new Date().toISOString() };
+          await tx.agentRun.update({
+            where: { id: sourceRun!.id },
+            data: { resultJson: { ...currentResult, executedProposals: executed } as unknown as Prisma.InputJsonValue },
+          });
+        });
+      }
+
+      return { tool: input.tool, result: created };
+    }
+
+    const parsed = artifactCreateSchema.parse(input.payload);
+    const createdArtifact = await generateArtifact(projectId, parsed.artifactType);
+
+    if (sourceRun && matchedProposal) {
+      await db.$transaction(async (tx) => {
+        const runToUpdate = await tx.agentRun.findUnique({ where: { id: sourceRun!.id } });
+        if (!runToUpdate) return;
+        const currentResult = (runToUpdate.resultJson && typeof runToUpdate.resultJson === "object"
+          ? runToUpdate.resultJson as Record<string, unknown>
+          : {}) as Record<string, unknown>;
+        const executed = (currentResult.executedProposals && typeof currentResult.executedProposals === "object"
+          ? { ...(currentResult.executedProposals as Record<string, unknown>) }
+          : {});
+        executed[proposalKey] = { tool: input.tool, resultId: createdArtifact.id, executedAt: new Date().toISOString() };
+        await tx.agentRun.update({
+          where: { id: sourceRun!.id },
+          data: { resultJson: { ...currentResult, executedProposals: executed } as unknown as Prisma.InputJsonValue },
+        });
+      });
+    }
+
+    return { tool: input.tool, result: createdArtifact };
+  });
 }

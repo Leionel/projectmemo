@@ -17,7 +17,6 @@ export interface UploadAttachmentInput {
   mimeType: string;
   buffer: Buffer;
 }
-
 /**
  * 提取 PDF 文本（支持标准 ASCII 文本块与简单中文流提取）
  */
@@ -296,5 +295,64 @@ export async function retryAttachmentExtraction(projectId: string, attachmentId:
     where: { id: attachment.id },
     data: { extractedText, extractionStatus: "SUCCESS", extractionError: null },
   });
+  return { attachment: updated, card };
+}
+
+export async function correctAttachmentText(
+  projectId: string,
+  attachmentId: string,
+  correctedText: string
+) {
+  await requireProject(projectId);
+  const attachment = await db.attachment.findFirst({
+    where: { id: attachmentId, projectId },
+    include: { cards: true },
+  });
+  if (!attachment) {
+    throw new AppError("NOT_FOUND", "附件记录未找到", 404);
+  }
+
+  const sourceType = attachment.type === "IMAGE" ? "人工校对图片" : "人工校对PDF";
+  const card = await processCapture(
+    projectId,
+    `【附件校对：${attachment.fileName}】\n${correctedText.trim()}`,
+    sourceType
+  );
+
+  await db.knowledgeCard.update({
+    where: { id: card.id },
+    data: { attachmentId: attachment.id },
+  });
+
+  // 对该附件关联的历史卡片建立 SUPERSEDES 取代关系，使旧错误数值失效并建立纠错审计修订链
+  if (attachment.cards && attachment.cards.length > 0) {
+    for (const oldCard of attachment.cards) {
+      if (oldCard.id !== card.id) {
+        await db.cardRelation.create({
+          data: {
+            currentCardId: card.id,
+            relatedCardId: oldCard.id,
+            relationType: "SUPERSEDES",
+            reason: `人工校对修正附件【${attachment.fileName}】内容，新记录取代旧记录`,
+            score: 100,
+            confidence: 1.0,
+            confirmed: true,
+            confirmedAt: new Date(),
+            validFrom: new Date(),
+          },
+        });
+      }
+    }
+  }
+
+  const updated = await db.attachment.update({
+    where: { id: attachment.id },
+    data: {
+      extractedText: correctedText.trim(),
+      extractionStatus: "SUCCESS",
+      extractionError: null,
+    },
+  });
+
   return { attachment: updated, card };
 }

@@ -5,6 +5,29 @@ import type { KnowledgeType } from "@/lib/generated/prisma/client";
 import { AppError } from "@/lib/api";
 import type { KnowledgeCardUpdateInput } from "@/lib/validation/schemas";
 
+export function normalizeKeywords(keywords: unknown): string[] {
+  if (Array.isArray(keywords)) {
+    return keywords.map((k) => String(k).trim()).filter(Boolean);
+  }
+  if (typeof keywords === "string") {
+    const trimmed = keywords.trim();
+    if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed.map((k) => String(k).trim()).filter(Boolean);
+        }
+      } catch {
+        // ignore
+      }
+    }
+    if (trimmed.length > 0) {
+      return trimmed.split(/[,，、;\s]+/).map((k) => k.trim()).filter(Boolean);
+    }
+  }
+  return [];
+}
+
 export async function loadRecentCards(projectId: string, limit = 50): Promise<LinkableCard[]> {
   const cards = await db.knowledgeCard.findMany({
     where: { projectId },
@@ -12,7 +35,7 @@ export async function loadRecentCards(projectId: string, limit = 50): Promise<Li
     take: limit,
     select: { id: true, title: true, keywords: true },
   });
-  return cards.map((card) => ({ ...card, keywords: card.keywords as string[] }));
+  return cards.map((card) => ({ ...card, keywords: normalizeKeywords(card.keywords) }));
 }
 
 export async function saveCaptureResult(input: {

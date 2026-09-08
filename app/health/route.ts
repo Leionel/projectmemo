@@ -9,6 +9,7 @@ export async function GET() {
       schema_version: "2.1",
       release,
       capabilities: ["record_memory", "query_memory", "inspect_project", "create_action"],
+      workflow_helpers: ["begin_request"],
       checked_at: new Date().toISOString(),
     },
     { headers: { "cache-control": "no-store" } },

@@ -17,6 +17,7 @@ describe("release health response", () => {
       schema_version: "2.1",
       release: "28809bf-w05",
       capabilities: ["record_memory", "query_memory", "inspect_project", "create_action"],
+      workflow_helpers: ["begin_request"],
     });
   });
 

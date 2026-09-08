@@ -6,6 +6,14 @@ export interface XiaoyiRequestContext {
   requestId: string;
 }
 
+export interface XiaoyiBearerContext {
+  projectId: string;
+}
+
+interface VerifiedXiaoyiBearerContext extends XiaoyiBearerContext {
+  configuredToken: string;
+}
+
 type RateBucket = { windowStartedAt: number; count: number };
 const rateBuckets = new Map<string, RateBucket>();
 
@@ -21,33 +29,7 @@ function readBearerToken(request: Request) {
   return match?.[1]?.trim() ?? "";
 }
 
-export function authenticateXiaoyiRequest(request: Request, bodyRequestId?: string | null): XiaoyiRequestContext {
-  if (process.env.XIAOYI_ENABLED === "false") {
-    throw new AppError("XIAOYI_DISABLED", "小艺适配层已被配置关闭", 503);
-  }
-  if (process.env.XIAOYI_ADAPTER_ENABLED !== "true") {
-    throw new AppError("XIAOYI_ADAPTER_DISABLED", "小艺适配层尚未启用", 503);
-  }
-
-  const configuredToken = process.env.XIAOYI_ADAPTER_TOKEN?.trim() ?? "";
-  const projectId = process.env.XIAOYI_TEST_PROJECT_ID?.trim() ?? "";
-  if (configuredToken.length < 32 || !projectId) {
-    throw new AppError("XIAOYI_ADAPTER_NOT_CONFIGURED", "小艺适配层配置不完整", 503);
-  }
-
-  const presentedToken = readBearerToken(request);
-  if (!presentedToken || !constantTimeEqual(presentedToken, configuredToken)) {
-    throw new AppError("XIAOYI_UNAUTHENTICATED", "小艺调用身份验证失败", 401);
-  }
-
-  const requestId = request.headers.get("idempotency-key")?.trim() || bodyRequestId?.trim() || "";
-  if (!requestId) {
-    throw new AppError("XIAOYI_REQUEST_ID_REQUIRED", "调用必须提供稳定的 request_id", 400);
-  }
-  if (requestId.length > 128) {
-    throw new AppError("XIAOYI_REQUEST_ID_INVALID", "request_id 不能超过 128 个字符", 400);
-  }
-
+function enforceRateLimit(configuredToken: string) {
   const configuredLimit = Number.parseInt(process.env.XIAOYI_RATE_LIMIT_PER_MINUTE ?? "60", 10);
   const limit = Number.isFinite(configuredLimit) && configuredLimit > 0 ? configuredLimit : 60;
   const now = Date.now();
@@ -67,6 +49,49 @@ export function authenticateXiaoyiRequest(request: Request, bodyRequestId?: stri
       if (now - value.windowStartedAt >= 60_000) rateBuckets.delete(key);
     }
   }
+}
 
-  return { projectId, requestId };
+function verifyXiaoyiBearer(request: Request): VerifiedXiaoyiBearerContext {
+  if (process.env.XIAOYI_ENABLED === "false") {
+    throw new AppError("XIAOYI_DISABLED", "小艺适配层已被配置关闭", 503);
+  }
+  if (process.env.XIAOYI_ADAPTER_ENABLED !== "true") {
+    throw new AppError("XIAOYI_ADAPTER_DISABLED", "小艺适配层尚未启用", 503);
+  }
+
+  const configuredToken = process.env.XIAOYI_ADAPTER_TOKEN?.trim() ?? "";
+  const projectId = process.env.XIAOYI_TEST_PROJECT_ID?.trim() ?? "";
+  if (configuredToken.length < 32 || !projectId) {
+    throw new AppError("XIAOYI_ADAPTER_NOT_CONFIGURED", "小艺适配层配置不完整", 503);
+  }
+
+  const presentedToken = readBearerToken(request);
+  if (!presentedToken || !constantTimeEqual(presentedToken, configuredToken)) {
+    throw new AppError("XIAOYI_UNAUTHENTICATED", "小艺调用身份验证失败", 401);
+  }
+
+  return { projectId, configuredToken };
+}
+
+export function authenticateXiaoyiBearerRequest(request: Request): XiaoyiBearerContext {
+  const context = verifyXiaoyiBearer(request);
+  enforceRateLimit(context.configuredToken);
+
+  return { projectId: context.projectId };
+}
+
+export function authenticateXiaoyiRequest(request: Request, bodyRequestId?: string | null): XiaoyiRequestContext {
+  const context = verifyXiaoyiBearer(request);
+
+  const requestId = request.headers.get("idempotency-key")?.trim() || bodyRequestId?.trim() || "";
+  if (!requestId) {
+    throw new AppError("XIAOYI_REQUEST_ID_REQUIRED", "调用必须提供稳定的 request_id", 400);
+  }
+  if (requestId.length > 128) {
+    throw new AppError("XIAOYI_REQUEST_ID_INVALID", "request_id 不能超过 128 个字符", 400);
+  }
+
+  enforceRateLimit(context.configuredToken);
+
+  return { projectId: context.projectId, requestId };
 }

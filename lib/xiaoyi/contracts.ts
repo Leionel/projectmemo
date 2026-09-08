@@ -1,6 +1,14 @@
 import { z } from "zod";
 import { knowledgeTypes } from "@/lib/types";
 
+export const beginRequestInputSchema = z.object({}).strict();
+
+export const beginRequestResponseSchema = z.object({
+  ok: z.literal(true),
+  request_id: z.string().uuid(),
+  issued_at: z.string().datetime(),
+});
+
 export const recordMemoryInputSchema = z.object({
   content: z.string().trim().min(3).max(5000),
   request_id: z.string().trim().min(1).max(128).optional(),

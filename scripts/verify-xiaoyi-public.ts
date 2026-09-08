@@ -15,6 +15,7 @@ interface ProbeResult {
 }
 
 const adapterCapabilities = ["record_memory", "query_memory", "inspect_project", "create_action"];
+const workflowHelpers = ["begin_request"];
 const args = process.argv.slice(2);
 const confirmWrites = args.includes("--confirm-writes");
 const baseUrl = (process.env.XIAOYI_BASE_URL || "https://project.luojiatutor.xyz").replace(/\/$/, "");
@@ -80,9 +81,11 @@ async function runPreflight() {
     call({ name: "query_memory", method: "POST", route: "/xiaoyi/v1/memories/search", token: invalidToken, payload: { query: "public preflight", request_id: `preflight-query-${suffix}`, top_k: 1 } }),
     call({ name: "inspect_project", method: "POST", route: "/xiaoyi/v1/projects/inspect", token: invalidToken, payload: { request_id: `preflight-inspect-${suffix}`, refresh: false } }),
     call({ name: "create_action", method: "POST", route: "/xiaoyi/v1/actions", token: invalidToken, payload: { request_id: `preflight-action-${suffix}`, confirmed: false, title: "public preflight only" } }),
+    call({ name: "begin_request", method: "POST", route: "/xiaoyi/v1/requests/begin", token: invalidToken }),
   ]);
   const healthBody = asObject(health.body);
   const advertised = Array.isArray(healthBody.capabilities) ? healthBody.capabilities : [];
+  const advertisedHelpers = Array.isArray(healthBody.workflow_helpers) ? healthBody.workflow_helpers : [];
   const remote = !["localhost", "127.0.0.1"].includes(new URL(baseUrl).hostname);
   const checks = {
     health_ok: health.status === 200 && healthBody.status === "ok" && healthBody.service === "projectmemo",
@@ -90,6 +93,7 @@ async function runPreflight() {
     release_present: !remote || (typeof healthBody.release === "string" && healthBody.release !== "unversioned"),
     release_matches: !expectedRelease || healthBody.release === expectedRelease,
     capabilities_complete: adapterCapabilities.every((capability) => advertised.includes(capability)),
+    workflow_helpers_complete: workflowHelpers.every((helper) => advertisedHelpers.includes(helper)),
     all_routes_authenticated: routeProbes.every((probe) => probe.status === 401 && asObject(asObject(probe.body).error).code === "XIAOYI_UNAUTHENTICATED"),
   };
   return { passed: Object.values(checks).every(Boolean), base_url: baseUrl, checks, health, route_probes: routeProbes };
@@ -111,33 +115,49 @@ function requireStatus(result: ProbeResult, expected: number[], context: string)
   return body;
 }
 
+function requireRequestId(body: JsonObject, requestId: string, context: string) {
+  if (body.request_id !== requestId) {
+    throw new Error(`${context} did not echo the workflow request_id`);
+  }
+}
+
 async function runLiveRounds() {
   const batchId = `${new Date().toISOString().replace(/[:.]/g, "-")}-${crypto.randomUUID().slice(0, 8)}`;
-  const rounds: Array<{ cycle: number; tool: string; primary: ProbeResult; replay?: ProbeResult; commit?: ProbeResult; commit_replay?: ProbeResult }> = [];
+  const rounds: Array<{ cycle: number; tool: string; begin?: ProbeResult; primary: ProbeResult; replay?: ProbeResult; commit?: ProbeResult; commit_replay?: ProbeResult }> = [];
   const createdCardIds: string[] = [];
   const createdActionIds: string[] = [];
 
   for (let cycle = 1; cycle <= 5; cycle += 1) {
-    const recordRequestId = `w03-${batchId}-record-${cycle}`;
-    const recordPayload = { content: `W03 对账样例 ${cycle}：验证 ECS、小艺适配层与 ProjectMemo 使用同一份项目记忆。`, source_type: "w03-live-verification", request_id: recordRequestId };
+    const begin = await call({ name: `begin_request_${cycle}`, method: "POST", route: "/xiaoyi/v1/requests/begin", token: adapterToken, payload: {} });
+    const beginBody = requireStatus(begin, [200], `begin_request cycle ${cycle}`);
+    const workflowRequestId = String(beginBody.request_id ?? "");
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(workflowRequestId)) {
+      throw new Error(`begin_request cycle ${cycle} did not return a UUID request_id`);
+    }
+    if (typeof beginBody.issued_at !== "string") throw new Error(`begin_request cycle ${cycle} did not return issued_at`);
+
+    const recordPayload = { content: `W03 对账样例 ${cycle}：验证 ECS、小艺适配层与 ProjectMemo 使用同一份项目记忆。`, source_type: "w03-live-verification", request_id: workflowRequestId };
     const record = await call({ name: `record_memory_${cycle}`, method: "POST", route: "/xiaoyi/v1/memories", token: adapterToken, payload: recordPayload });
     const recordBody = requireStatus(record, [201], `record_memory cycle ${cycle}`);
+    requireRequestId(recordBody, workflowRequestId, `record_memory cycle ${cycle}`);
     const recordReplay = await call({ name: `record_memory_replay_${cycle}`, method: "POST", route: "/xiaoyi/v1/memories", token: adapterToken, payload: recordPayload });
     const replayBody = requireStatus(recordReplay, [200], `record_memory replay ${cycle}`);
+    requireRequestId(replayBody, workflowRequestId, `record_memory replay ${cycle}`);
     if (replayBody.replayed !== true || replayBody.card_id !== recordBody.card_id || replayBody.agent_run_id !== recordBody.agent_run_id) {
       throw new Error(`record_memory replay ${cycle} did not preserve card_id and agent_run_id`);
     }
     createdCardIds.push(String(recordBody.card_id));
-    rounds.push({ cycle, tool: "record_memory", primary: record, replay: recordReplay });
+    rounds.push({ cycle, tool: "record_memory", begin, primary: record, replay: recordReplay });
 
     const query = await call({
       name: `query_memory_${cycle}`,
       method: "POST",
       route: "/xiaoyi/v1/memories/search",
       token: adapterToken,
-      payload: { query: `W03 对账样例 ${cycle}`, request_id: `w03-${batchId}-query-${cycle}`, top_k: 8 },
+      payload: { query: `W03 对账样例 ${cycle}`, request_id: workflowRequestId, top_k: 8 },
     });
     const queryBody = requireStatus(query, [200], `query_memory cycle ${cycle}`);
+    requireRequestId(queryBody, workflowRequestId, `query_memory cycle ${cycle}`);
     const queryCardIds = Array.isArray(queryBody.results) ? queryBody.results.map((item) => String(asObject(item).card_id)) : [];
     if (!queryCardIds.includes(String(recordBody.card_id))) throw new Error(`query_memory cycle ${cycle} did not return the card created in the same cycle`);
     rounds.push({ cycle, tool: "query_memory", primary: query });
@@ -147,9 +167,10 @@ async function runLiveRounds() {
       method: "POST",
       route: "/xiaoyi/v1/projects/inspect",
       token: adapterToken,
-      payload: { request_id: `w03-${batchId}-inspect-${cycle}`, refresh: cycle === 1 },
+      payload: { request_id: workflowRequestId, refresh: cycle === 1 },
     });
-    requireStatus(inspect, [200], `inspect_project cycle ${cycle}`);
+    const inspectBody = requireStatus(inspect, [200], `inspect_project cycle ${cycle}`);
+    requireRequestId(inspectBody, workflowRequestId, `inspect_project cycle ${cycle}`);
     rounds.push({ cycle, tool: "inspect_project", primary: inspect });
 
     const prepare = await call({
@@ -157,21 +178,24 @@ async function runLiveRounds() {
       method: "POST",
       route: "/xiaoyi/v1/actions",
       token: adapterToken,
-      payload: { request_id: `w03-${batchId}-action-prepare-${cycle}`, confirmed: false, title: `核对 W03 第 ${cycle} 轮演示回执`, description: "确认四方 ID 一致后完成。", priority: 3 },
+      payload: { request_id: workflowRequestId, confirmed: false, title: `核对 W03 第 ${cycle} 轮演示回执`, description: "确认四方 ID 一致后完成。", priority: 3 },
     });
     const prepareBody = requireStatus(prepare, [200], `create_action prepare ${cycle}`);
+    requireRequestId(prepareBody, workflowRequestId, `create_action prepare ${cycle}`);
     if (prepareBody.confirmed !== false || typeof prepareBody.proposal_id !== "string") throw new Error(`create_action prepare ${cycle} did not return a proposal`);
-    const commitPayload = { request_id: `w03-${batchId}-action-commit-${cycle}`, confirmed: true, proposal_id: prepareBody.proposal_id };
+    const commitPayload = { request_id: workflowRequestId, confirmed: true, proposal_id: prepareBody.proposal_id };
     const commit = await call({ name: `create_action_commit_${cycle}`, method: "POST", route: "/xiaoyi/v1/actions", token: adapterToken, payload: commitPayload });
     const commitBody = requireStatus(commit, [201], `create_action commit ${cycle}`);
+    requireRequestId(commitBody, workflowRequestId, `create_action commit ${cycle}`);
     const commitReplay = await call({ name: `create_action_commit_replay_${cycle}`, method: "POST", route: "/xiaoyi/v1/actions", token: adapterToken, payload: commitPayload });
     const commitReplayBody = requireStatus(commitReplay, [200], `create_action commit replay ${cycle}`);
+    requireRequestId(commitReplayBody, workflowRequestId, `create_action commit replay ${cycle}`);
     const actionId = String(asObject(commitBody.action).id ?? "");
     if (!actionId || commitReplayBody.replayed !== true || String(asObject(commitReplayBody.action).id ?? "") !== actionId) {
       throw new Error(`create_action replay ${cycle} did not preserve action id`);
     }
     createdActionIds.push(actionId);
-    rounds.push({ cycle, tool: "create_action", primary: prepare, commit, commit_replay: commitReplay });
+    rounds.push({ cycle, tool: "create_action", begin, primary: prepare, commit, commit_replay: commitReplay });
   }
 
   const primaryBodies = rounds.flatMap((round) => [round.primary, ...(round.commit ? [round.commit] : [])]).map((result) => asObject(result.body));

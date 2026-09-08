@@ -62,6 +62,90 @@ describe.sequential("S08 Xiaoyi record_memory adapter", () => {
     await expect(response.json()).resolves.toMatchObject({ error: { code: "XIAOYI_UNAUTHENTICATED" } });
   });
 
+  it("protects begin_request with the same bearer boundary", async () => {
+    const { POST } = await import("@/app/xiaoyi/v1/requests/begin/route");
+    const missing = await POST(new Request("http://localhost/xiaoyi/v1/requests/begin", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: "{}",
+    }));
+    expect(missing.status).toBe(401);
+    await expect(missing.json()).resolves.toMatchObject({ error: { code: "XIAOYI_UNAUTHENTICATED" } });
+
+    const wrong = await POST(new Request("http://localhost/xiaoyi/v1/requests/begin", {
+      method: "POST",
+      headers: { authorization: "Bearer wrong-token-that-is-not-configured", "content-type": "application/json" },
+      body: "{}",
+    }));
+    expect(wrong.status).toBe(401);
+    await expect(wrong.json()).resolves.toMatchObject({ error: { code: "XIAOYI_UNAUTHENTICATED" } });
+  });
+
+  it("issues a fresh UUID without creating an AgentRun or accepting body identity fields", async () => {
+    const { POST } = await import("@/app/xiaoyi/v1/requests/begin/route");
+    const { db } = await import("@/lib/db");
+    const runsBefore = await db.agentRun.count();
+    const request = () => POST(new Request("http://localhost/xiaoyi/v1/requests/begin", {
+      method: "POST",
+      headers: { authorization: `Bearer ${adapterToken}`, "content-type": "application/json" },
+      body: "{}",
+    }));
+
+    const first = await request();
+    const second = await request();
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(200);
+    const firstBody = await first.json() as { ok: true; request_id: string; issued_at: string; agent_run_id?: string };
+    const secondBody = await second.json() as typeof firstBody;
+    expect(firstBody).toMatchObject({ ok: true, request_id: expect.stringMatching(/^[0-9a-f-]{36}$/i), issued_at: expect.any(String) });
+    expect(secondBody).toMatchObject({ ok: true, request_id: expect.stringMatching(/^[0-9a-f-]{36}$/i), issued_at: expect.any(String) });
+    expect(secondBody.request_id).not.toBe(firstBody.request_id);
+    expect(firstBody).not.toHaveProperty("agent_run_id");
+    expect(await db.agentRun.count()).toBe(runsBefore);
+
+    const forged = await POST(new Request("http://localhost/xiaoyi/v1/requests/begin", {
+      method: "POST",
+      headers: { authorization: `Bearer ${adapterToken}`, "content-type": "application/json" },
+      body: JSON.stringify({ project_id: "forged-project", request_id: "forged-request" }),
+    }));
+    expect(forged.status).toBe(422);
+    await expect(forged.json()).resolves.toMatchObject({ error: { code: "VALIDATION_ERROR" } });
+    expect(await db.agentRun.count()).toBe(runsBefore);
+  });
+
+  it("respects adapter disablement before issuing a workflow request", async () => {
+    const { POST } = await import("@/app/xiaoyi/v1/requests/begin/route");
+    process.env.XIAOYI_ADAPTER_ENABLED = "false";
+    const response = await POST(new Request("http://localhost/xiaoyi/v1/requests/begin", {
+      method: "POST",
+      headers: { authorization: `Bearer ${adapterToken}`, "content-type": "application/json" },
+      body: "{}",
+    }));
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({ error: { code: "XIAOYI_ADAPTER_DISABLED" } });
+    process.env.XIAOYI_ADAPTER_ENABLED = "true";
+  });
+
+  it("keeps the four business tools strict about missing request_id", async () => {
+    const routes = [
+      ["@/app/xiaoyi/v1/memories/route", "http://localhost/xiaoyi/v1/memories", { content: "缺少请求关联 ID 的记录" }],
+      ["@/app/xiaoyi/v1/memories/search/route", "http://localhost/xiaoyi/v1/memories/search", { query: "缺少请求关联 ID 的检索" }],
+      ["@/app/xiaoyi/v1/projects/inspect/route", "http://localhost/xiaoyi/v1/projects/inspect", { refresh: false }],
+      ["@/app/xiaoyi/v1/actions/route", "http://localhost/xiaoyi/v1/actions", { confirmed: false, title: "缺少请求关联 ID 的行动预览" }],
+    ] as const;
+
+    for (const [moduleName, url, payload] of routes) {
+      const { POST } = await import(moduleName);
+      const response = await POST(new Request(url, {
+        method: "POST",
+        headers: { authorization: `Bearer ${adapterToken}`, "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      }));
+      expect(response.status, moduleName).toBe(400);
+      await expect(response.json(), moduleName).resolves.toMatchObject({ error: { code: "XIAOYI_REQUEST_ID_REQUIRED" } });
+    }
+  });
+
   it("rejects a model-supplied project_id", async () => {
     const { POST } = await import("@/app/xiaoyi/v1/memories/route");
     const response = await POST(new Request("http://localhost/xiaoyi/v1/memories", {
@@ -200,16 +284,17 @@ describe.sequential("S08 Xiaoyi record_memory adapter", () => {
   });
 
   it("enforces the configured per-token rate limit", async () => {
-    const { POST } = await import("@/app/xiaoyi/v1/memories/search/route");
-    process.env.XIAOYI_ADAPTER_TOKEN = "second-test-token-that-is-also-longer-than-thirty-two-characters";
+    const { POST } = await import("@/app/xiaoyi/v1/requests/begin/route");
+    const limitedToken = "second-test-token-that-is-also-longer-than-thirty-two-characters";
+    process.env.XIAOYI_ADAPTER_TOKEN = limitedToken;
     process.env.XIAOYI_RATE_LIMIT_PER_MINUTE = "1";
-    const request = (requestId: string) => new Request("http://localhost/xiaoyi/v1/memories/search", {
+    const request = () => new Request("http://localhost/xiaoyi/v1/requests/begin", {
       method: "POST",
       headers: { authorization: `Bearer ${process.env.XIAOYI_ADAPTER_TOKEN}`, "content-type": "application/json" },
-      body: JSON.stringify({ query: "域名解析", request_id: requestId }),
+      body: "{}",
     });
-    expect((await POST(request("rate-limit-001"))).status).toBe(200);
-    const limited = await POST(request("rate-limit-002"));
+    expect((await POST(request())).status).toBe(200);
+    const limited = await POST(request());
     expect(limited.status).toBe(429);
     await expect(limited.json()).resolves.toMatchObject({ error: { code: "XIAOYI_RATE_LIMITED" } });
     process.env.XIAOYI_ADAPTER_TOKEN = adapterToken;

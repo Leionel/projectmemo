@@ -71,6 +71,7 @@ export class FeasibilityRequirementBody {
 export class FeasibilityInput {
   actionId: string = '';
   addRequirements: FeasibilityRequirementBody[] | undefined = undefined;
+  removeRequirementIds: string[] | undefined = undefined;
   estimatedMinutes: number | undefined = undefined;
 }
 

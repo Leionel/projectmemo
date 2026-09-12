@@ -180,6 +180,7 @@ export const actionFeasibilitySchema = z.object({
     hard: z.boolean().optional().default(true),
     note: z.string().trim().max(200).optional(),
   })).max(20).optional(),
+  removeRequirementIds: z.array(z.string().trim().min(1)).max(50).optional(),
   estimatedMinutes: z.number().int().min(1).max(100000).nullable().optional(),
 }).strict();
 

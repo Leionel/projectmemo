@@ -323,9 +323,31 @@ describe("Action feasibility (F1)", () => {
     expect(assessment.overdue).toBe(true);
     expect(assessment.estimateMinutes).toBe(45);
 
+    const beforeCount = await db.actionRequirement.count({ where: { actionId: action.id } });
+    const validDep = await seedAction("合法依赖行动");
     await expect(
-      updateActionFeasibilityInput(projectId, { actionId: action.id, estimatedMinutes: 0 }),
+      updateActionFeasibilityInput(projectId, {
+        actionId: action.id,
+        estimatedMinutes: 0,
+        addRequirements: [{ targetKind: "action", targetId: validDep.id }],
+      }),
     ).rejects.toThrow();
+    // 非法估时不得留下部分已添加的依赖
+    const afterCount = await db.actionRequirement.count({ where: { actionId: action.id } });
+    expect(afterCount).toBe(beforeCount);
+
+    // 删除依赖
+    await updateActionFeasibilityInput(projectId, {
+      actionId: action.id,
+      addRequirements: [{ targetKind: "action", targetId: validDep.id }],
+    });
+    const withDep = await assessActionFeasibility(projectId, action.id);
+    expect(withDep.dependencies.length).toBe(1);
+    await updateActionFeasibilityInput(projectId, {
+      actionId: action.id,
+      removeRequirementIds: [withDep.dependencies[0].requirementId],
+    });
+    expect((await assessActionFeasibility(projectId, action.id)).dependencies.length).toBe(0);
 
     const bare = await seedAction("未估算任务");
     const bareAssessment = await assessActionFeasibility(projectId, bare.id);

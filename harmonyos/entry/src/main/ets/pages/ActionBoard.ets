@@ -2,6 +2,7 @@ import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
 import { ApiError } from '../models/Project';
 import { ActionCreateInput, ActionItem, FeasibilityAssessment, FeasibilityDependency } from '../models/Action';
+import { ActionFeasibilityEditor } from '../components/ActionFeasibilityEditor';
 import { ActionService } from '../services/ActionService';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMaterial } from '../common/DesignTokens';
 import { PMAppBar } from '../components/PMAppBar';
@@ -25,9 +26,36 @@ struct ActionBoard {
   @State dialogError: string = '';
   @State startingActionId: string = '';
   @State showFeasibility: boolean = false;
+  @State showFeasibilityEditor: boolean = false;
   @State feasibilityFor: FeasibilityAssessment = new FeasibilityAssessment();
   @State isLoadingFeasibility: boolean = false;
   @State isCreatingDepTask: boolean = false;
+
+  private async openFeasibilityEditor(): Promise<void> {
+    if (this.isLoadingFeasibility) {
+      return;
+    }
+    this.isLoadingFeasibility = true;
+    try {
+      this.feasibilityFor = await this.actionService.getFeasibility(this.projectId, this.feasibilityFor.actionId);
+      this.showFeasibilityEditor = true;
+    } catch (e) {
+      promptAction.showToast({ message: e instanceof ApiError ? e.message : '编辑器加载失败' });
+    } finally {
+      this.isLoadingFeasibility = false;
+    }
+  }
+
+  // “先解决依赖”防重复：已有同名跟踪任务时不再重复创建
+  private hasDependencyTask(): boolean {
+    const all: ActionItem[] = [...this.doingActions, ...this.todoActions];
+    for (let i = 0; i < all.length; i++) {
+      if (all[i].title.startsWith('先解决依赖：')) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   private actionService: ActionService = new ActionService();
 
@@ -69,6 +97,10 @@ struct ActionBoard {
     }
     const unmet = this.firstUnmetNote();
     if (unmet === '') {
+      return;
+    }
+    if (this.hasDependencyTask()) {
+      promptAction.showToast({ message: '已存在“先解决依赖”任务，未重复创建' });
       return;
     }
     this.isCreatingDepTask = true;
@@ -439,8 +471,25 @@ struct ActionBoard {
       .width('100%')
       .height('100%')
 
+      // 可行性编辑器（E4）
+      if (this.showFeasibilityEditor) {
+        ActionFeasibilityEditor({
+          projectId: this.projectId,
+          actionId: this.feasibilityFor.actionId,
+          assessment: this.feasibilityFor,
+          onSaved: () => {
+            this.showFeasibilityEditor = false;
+            this.openFeasibilityEditor();
+          },
+          onClose: () => {
+            this.showFeasibilityEditor = false;
+            this.openFeasibilityEditor();
+          }
+        })
+      }
+
       // 可行性评估弹窗（F1）
-      if (this.showFeasibility) {
+      if (this.showFeasibility && !this.showFeasibilityEditor) {
         Column() {
           Column() {
             Row() {
@@ -514,6 +563,19 @@ struct ActionBoard {
                 .lineHeight(18)
                 .margin({ top: PMSpacing.SM })
             }
+
+            Button('编辑依赖 / 估时')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.BRAND)
+              .backgroundColor(PMColors.BRAND_LIGHT)
+              .border({ width: 1, color: PMColors.BRAND })
+              .borderRadius(PMRadius.SM)
+              .height(44)
+              .width('100%')
+              .margin({ top: PMSpacing.SM })
+              .onClick(() => {
+                this.openFeasibilityEditor();
+              })
 
             if (this.feasibilityFor.feasibility === 'BLOCKED' && this.firstUnmetNote() !== '') {
               Button(this.isCreatingDepTask ? '创建中…' : '创建“先解决依赖”任务')

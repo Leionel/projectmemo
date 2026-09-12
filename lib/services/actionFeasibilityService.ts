@@ -13,6 +13,7 @@ export interface FeasibilityRequirementInput {
 export interface FeasibilityUpdateInput {
   actionId: string;
   addRequirements?: FeasibilityRequirementInput[];
+  removeRequirementIds?: string[];
   estimatedMinutes?: number | null;
 }
 
@@ -224,6 +225,13 @@ export async function updateActionFeasibilityInput(
   const action = await db.actionItem.findFirst({ where: { id: input.actionId, projectId } });
   if (!action) throw new AppError("ACTION_NOT_FOUND", "行动不存在或不属于当前项目", 404);
 
+  // 估时先校验：非法输入不得留下部分已添加的依赖
+  if (input.estimatedMinutes !== undefined) {
+    if (input.estimatedMinutes !== null && (!Number.isInteger(input.estimatedMinutes) || input.estimatedMinutes <= 0 || input.estimatedMinutes > 100000)) {
+      throw new AppError("INVALID_ESTIMATE", "估时必须是正整数分钟，缺失时保持未估算", 422);
+    }
+  }
+
   if (input.addRequirements) {
     for (const target of input.addRequirements) {
       await assertTargetInProject(projectId, action.id, target);
@@ -247,10 +255,13 @@ export async function updateActionFeasibilityInput(
     }
   }
 
+  if (input.removeRequirementIds && input.removeRequirementIds.length > 0) {
+    await db.actionRequirement.deleteMany({
+      where: { actionId: action.id, id: { in: input.removeRequirementIds } },
+    });
+  }
+
   if (input.estimatedMinutes !== undefined) {
-    if (input.estimatedMinutes !== null && (!Number.isInteger(input.estimatedMinutes) || input.estimatedMinutes <= 0 || input.estimatedMinutes > 100000)) {
-      throw new AppError("INVALID_ESTIMATE", "估时必须是正整数分钟，缺失时保持未估算", 422);
-    }
     await db.actionItem.update({
       where: { id: action.id },
       data: { estimatedMinutes: input.estimatedMinutes },

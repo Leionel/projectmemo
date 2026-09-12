@@ -131,8 +131,12 @@ async function assessDependent(
     if (!card) {
       return { ...base, targetTitle: null, state: "MISSING", note: "依赖的记录不存在" };
     }
+    // 严格按账本状态映射：只有 SUPPORTED 才算前提满足，其余不兜底为 MET
     const state = temporalStates.get(card.id);
-    if (state && (state.supportState === "SUPERSEDED")) {
+    if (!state) {
+      return { ...base, targetTitle: card.title, state: "UNKNOWN", note: "无法确认依赖记录的当前状态" };
+    }
+    if (state.supportState === "SUPERSEDED") {
       return {
         ...base,
         targetTitle: card.title,
@@ -140,10 +144,13 @@ async function assessDependent(
         note: `依赖的记录已被「${state.supersededByTitle ?? "新记录"}」取代`,
       };
     }
-    if (state && (state.supportState === "PENDING" || state.supportState === "CONFLICT")) {
-      return { ...base, targetTitle: card.title, state: "UNKNOWN", note: "依赖的记录存在冲突或待确认，无法确认前提成立" };
+    if (state.supportState === "REVOKED") {
+      return { ...base, targetTitle: card.title, state: "UNMET", note: "依赖记录的相关关系已撤销，前提不再成立" };
     }
-    return { ...base, targetTitle: card.title, state: "MET", note: "依赖记录当前有效" };
+    if (state.supportState === "SUPPORTED") {
+      return { ...base, targetTitle: card.title, state: "MET", note: "依赖记录当前有效" };
+    }
+    return { ...base, targetTitle: card.title, state: "UNKNOWN", note: "依赖记录证据不足或待确认，无法确认前提成立" };
   }
 
   const deliverable = await db.deliverable.findUnique({

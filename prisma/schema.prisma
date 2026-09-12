@@ -390,7 +390,8 @@ model ProjectStateSnapshot {
   payload            Json
   project            Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  @@unique([projectId, sourceHash, policyVersion, evaluationKey])
+  // previousSnapshotId 参与唯一键：同一源版本在历史不同位置重现（A→B→A）必须各自成行
+  @@unique([projectId, sourceHash, policyVersion, evaluationKey, previousSnapshotId])
   @@index([projectId, evaluatedAt])
 }
 

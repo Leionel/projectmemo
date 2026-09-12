@@ -77,6 +77,36 @@ describe("Project state snapshot / diff (R2 integration)", () => {
     expect(viaGet?.id).toBe(first.snapshot.id);
   });
 
+  it("field round-trip A→B→A creates a new snapshot and latest returns to A", async () => {
+    const project = await db.project.create({
+      data: { title: "字段往返测试项目", description: "", goal: "A", scenario: "COMPETITION" },
+    });
+    try {
+      const s1 = await refreshProjectState(project.id);
+      expect(s1.snapshot.payload.goal).toBe("A");
+
+      await db.project.update({ where: { id: project.id }, data: { goal: "B" } });
+      const s2 = await refreshProjectState(project.id);
+      expect(s2.snapshot.payload.goal).toBe("B");
+
+      await db.project.update({ where: { id: project.id }, data: { goal: "A" } });
+      const s3 = await refreshProjectState(project.id);
+      // 回到旧字段值也必须产生新的状态记录，不得复用第一次 A 的历史行
+      expect(s3.reused).toBe(false);
+      expect(s3.snapshot.id).not.toBe(s1.snapshot.id);
+      expect(s3.snapshot.previousSnapshotId).toBe(s2.snapshot.id);
+
+      const latest = await getLatestProjectState(project.id);
+      expect(latest?.id).toBe(s3.snapshot.id);
+      expect(latest?.payload.goal).toBe("A");
+
+      const diff = await getProjectStateDiff(project.id, s2.snapshot.id, s3.snapshot.id);
+      expect(diff.materialChange).toBe(true);
+    } finally {
+      await db.project.delete({ where: { id: project.id } }).catch(() => {});
+    }
+  });
+
   it("detects a decision supersession as a material change with a traceable diff", async () => {
     await seedCard("选型方案A：大型密集模型");
     const baseline = await refreshProjectState(projectId);

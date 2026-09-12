@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 import { getMissingEvidenceTypes } from "@/lib/milestones/evidenceGap";
+import { evaluateTemporalCard } from "@/lib/memory/temporalLedger";
+import type { CardRelationTypeValue, TemporalCardSummary, TemporalRelationData } from "@/lib/types";
 import {
   PROJECT_STATE_POLICY_VERSION,
   PROJECT_STATE_SCHEMA_VERSION,
@@ -33,6 +35,24 @@ function evidenceHash(parts: unknown[]): string {
   return sha256Hex(stableStringify(parts));
 }
 
+/** contentHash 的业务投影：剔除观察时间（observedAt），时间不属于业务变化 */
+function stripObservationTime(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(stripObservationTime);
+  if (value !== null && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
+      if (key === "observedAt") continue;
+      out[key] = stripObservationTime(val);
+    }
+    return out;
+  }
+  return value;
+}
+
+function byEntityId(a: { id: string }, b: { id: string }): number {
+  return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+}
+
 function cardEvidence(card: { id: string; createdAt: string; title: string; summary: string }, observedAt: string): SnapshotEvidenceRef {
   return {
     entityKind: "card",
@@ -55,69 +75,83 @@ function deadlinePhase(deadline: string | null, now: Date): { evaluationKey: str
   return { evaluationKey: `deadline:${deadline}:normal`, passed: false, approaching: false };
 }
 
-function decisionTruth(item: { hasConfirmedSuperseder: boolean; isConfirmedSuperseder: boolean; hasConfirmedRelation: boolean }): SnapshotTruth {
-  if (item.hasConfirmedSuperseder) return "FALSE";
-  if (item.isConfirmedSuperseder || item.hasConfirmedRelation) return "TRUE";
-  return "UNKNOWN";
-}
-
 export function buildProjectState(input: SnapshotSourceInput): BuiltProjectState {
   const now = new Date(input.now);
   const { evaluationKey, passed, approaching } = deadlinePhase(input.deadline, now);
 
-  // ---- facts：仅纳入与非 RELATED 关系相关的卡片（决策演化域）；键排序保证顺序无关
-  const factMap = new Map<string, SnapshotFact>();
-  const involved = new Map<string, { hasConfirmedSuperseder: boolean; isConfirmedSuperseder: boolean; hasConfirmedRelation: boolean }>();
+  // ---- facts：复用时态账本统一计算（CONTRADICTS、有效期边界、撤销、待确认），
+  // 与 timeline/记忆页/证据审计保持同一套结论规则，不再各自手写判定
+  const cardById = new Map(input.cards.map((card) => [card.id, card]));
+  const ledgerRelations: TemporalRelationData[] = input.relations
+    .map((relation) => {
+      const summary = (id: string): TemporalCardSummary => {
+        const card = cardById.get(id);
+        return {
+          id,
+          title: card?.title ?? "",
+          summary: card?.summary ?? "",
+          createdAt: card?.createdAt ?? input.now,
+        };
+      };
+      return {
+        id: relation.id,
+        relationType: relation.relationType as CardRelationTypeValue,
+        reason: relation.reason,
+        confidence: null,
+        confirmed: relation.confirmed,
+        confirmedAt: relation.confirmedAt,
+        revokedAt: relation.revokedAt,
+        validFrom: relation.validFrom ?? null,
+        validTo: relation.validTo ?? null,
+        createdAt: relation.createdAt ?? relation.confirmedAt ?? input.now,
+        currentCard: summary(relation.currentCardId),
+        relatedCard: summary(relation.relatedCardId),
+      };
+    });
 
+  const involvedIds = new Set<string>();
   for (const relation of input.relations) {
     if (relation.relationType === "RELATED") continue;
-    const currentEntry = involved.get(relation.currentCardId) ?? {
-      hasConfirmedSuperseder: false,
-      isConfirmedSuperseder: false,
-      hasConfirmedRelation: false,
-    };
-    const relatedEntry = involved.get(relation.relatedCardId) ?? {
-      hasConfirmedSuperseder: false,
-      isConfirmedSuperseder: false,
-      hasConfirmedRelation: false,
-    };
-    if (relation.confirmed && relation.revokedAt === null) {
-      if (relation.relationType === "SUPERSEDES") {
-        // 取代方向固定为新卡(current) SUPERSEDES 旧卡(related)
-        currentEntry.isConfirmedSuperseder = true;
-        relatedEntry.hasConfirmedSuperseder = true;
-      } else {
-        currentEntry.hasConfirmedRelation = true;
-        relatedEntry.hasConfirmedRelation = true;
-      }
-    }
-    involved.set(relation.currentCardId, currentEntry);
-    involved.set(relation.relatedCardId, relatedEntry);
+    involvedIds.add(relation.currentCardId);
+    involvedIds.add(relation.relatedCardId);
   }
 
-  const cardById = new Map(input.cards.map((card) => [card.id, card]));
-  for (const [cardId, state] of involved) {
+  const factMap = new Map<string, SnapshotFact>();
+  for (const cardId of involvedIds) {
     const card = cardById.get(cardId);
     if (!card) continue;
-    const truth = decisionTruth(state);
-    const temporalStatus = state.hasConfirmedSuperseder ? "SUPERSEDED" : state.isConfirmedSuperseder ? "CURRENT" : "PENDING";
-    const evidenceRefs = [cardEvidence(card, input.now)];
+    const item = evaluateTemporalCard(
+      { id: card.id, title: card.title, summary: card.summary, createdAt: card.createdAt },
+      ledgerRelations,
+      now,
+    );
+    const truth: SnapshotTruth = item.status === "CURRENT" ? "TRUE" : item.status === "SUPERSEDED" ? "FALSE" : "UNKNOWN";
     let text: string;
-    if (truth === "FALSE") {
-      const superseder = input.relations.find((r) =>
-        r.relationType === "SUPERSEDES" && r.confirmed && r.revokedAt === null && r.relatedCardId === cardId);
-      text = `决策「${card.title}」已被「${superseder?.counterpartTitle ?? "新决策"}」取代`;
-    } else if (truth === "TRUE") {
-      text = `决策「${card.title}」为当前有效结论`;
-    } else {
-      text = `决策「${card.title}」存在待确认或未确认的关系`;
+    switch (item.status) {
+      case "SUPERSEDED":
+        text = `决策「${card.title}」已被「${item.supersededBy?.title ?? "新决策"}」取代`;
+        break;
+      case "CURRENT":
+        text = `决策「${card.title}」为当前有效结论`;
+        break;
+      case "CONFLICT":
+        text = `决策「${card.title}」存在冲突，无法给出确定结论`;
+        break;
+      case "REVOKED":
+        text = `决策「${card.title}」的相关关系已撤销`;
+        break;
+      case "PENDING":
+        text = `决策「${card.title}」存在待确认的关系`;
+        break;
+      default:
+        text = `决策「${card.title}」证据不足，无法确认当前有效性`;
     }
     factMap.set(`decision:${cardId}`, {
       key: `decision:${cardId}`,
       text,
       truth,
-      temporalStatus,
-      evidenceRefs,
+      temporalStatus: item.status,
+      evidenceRefs: [cardEvidence(card, input.now)],
       ruleId: "decision.supersession",
     });
   }
@@ -205,13 +239,14 @@ export function buildProjectState(input: SnapshotSourceInput): BuiltProjectState
   const sortedRisks = risks.sort((a, b) => (a.stableKey < b.stableKey ? -1 : a.stableKey > b.stableKey ? 1 : 0));
   const sortedUnknowns = unknowns.sort((a, b) => (a.predicate < b.predicate ? -1 : a.predicate > b.predicate ? 1 : 0));
 
+  // 源数组规范排序后散列：数据库返回顺序（createdAt desc 等）不参与哈希
   const sourceHash = sha256Hex(stableStringify({
     goal: input.goal,
     deadline: input.deadline,
-    cards: input.cards,
-    relations: input.relations,
-    actions: input.actions,
-    deliverables: input.deliverables,
+    cards: [...input.cards].sort(byEntityId),
+    relations: [...input.relations].sort(byEntityId),
+    actions: [...input.actions].sort(byEntityId),
+    deliverables: [...input.deliverables].sort(byEntityId),
   }));
 
   const payloadCore = {
@@ -229,8 +264,8 @@ export function buildProjectState(input: SnapshotSourceInput): BuiltProjectState
     unknowns: sortedUnknowns,
   };
 
-  // contentHash 排除生成时间：同一事实内容重复刷新不构成变化
-  const contentHash = sha256Hex(stableStringify(payloadCore));
+  // contentHash 基于剔除观察时间的业务投影：同一事实内容不因核对时刻不同而变化
+  const contentHash = sha256Hex(stableStringify(stripObservationTime(payloadCore)));
 
   return {
     ...payloadCore,

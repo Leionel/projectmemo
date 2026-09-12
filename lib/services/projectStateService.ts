@@ -67,17 +67,17 @@ function ensureEnabled() {
   }
 }
 
-/** 从数据库读取规范化源数据；纯读取，不调用 LLM 或外部服务 */
-async function loadSourceInput(projectId: string): Promise<Parameters<typeof buildProjectState>[0]> {
-  const { cards, relations } = await loadTemporalProject(projectId);
+/** 从数据库读取规范化源数据；接受事务客户端，与快照写入同事务，不拼接并发版本 */
+async function loadSourceInput(tx: Prisma.TransactionClient, projectId: string): Promise<Parameters<typeof buildProjectState>[0]> {
+  const { cards, relations } = await loadTemporalProject(projectId, tx);
   const [project, actions, deliverables] = await Promise.all([
-    db.project.findUnique({ where: { id: projectId }, select: { goal: true, deadline: true } }),
-    db.actionItem.findMany({
+    tx.project.findUnique({ where: { id: projectId }, select: { goal: true, deadline: true } }),
+    tx.actionItem.findMany({
       where: { projectId },
       select: { id: true, title: true, status: true, resultCardId: true, completedAt: true, dueAt: true },
       orderBy: { createdAt: "asc" },
     }),
-    db.deliverable.findMany({
+    tx.deliverable.findMany({
       where: { milestone: { projectId } },
       select: {
         id: true,
@@ -98,6 +98,9 @@ async function loadSourceInput(projectId: string): Promise<Parameters<typeof bui
       confirmed: relation.confirmed,
       confirmedAt: relation.confirmedAt ? relation.confirmedAt.toISOString() : null,
       revokedAt: relation.revokedAt ? relation.revokedAt.toISOString() : null,
+      validFrom: relation.validFrom ? relation.validFrom.toISOString() : null,
+      validTo: relation.validTo ? relation.validTo.toISOString() : null,
+      createdAt: relation.createdAt.toISOString(),
       currentCardId: relation.currentCardId,
       relatedCardId: relation.relatedCardId,
       counterpartTitle: relation.currentCardId === relation.relatedCardId ? "" : relation.currentCard.title,
@@ -154,36 +157,35 @@ export async function getLatestProjectState(projectId: string): Promise<ProjectS
 
 export async function refreshProjectState(projectId: string): Promise<RefreshResult> {
   ensureEnabled();
-  const input = await loadSourceInput(projectId);
-  const built = buildProjectState(input);
-  const now = new Date();
+  // 源读取与快照写入同一事务：并发业务写入不会拼出混合版本的源数据
+  return db.$transaction(async (tx) => {
+    const input = await loadSourceInput(tx, projectId);
+    const built = buildProjectState(input);
+    const now = new Date();
 
-  try {
-    return await db.$transaction(async (tx) => {
-      // 相同 (source, policy, evaluation) 区间不重复生成：并发刷新由唯一约束收敛
-      const existing = await tx.projectStateSnapshot.findFirst({
-        where: {
-          projectId,
-          sourceHash: built.sourceHash,
-          policyVersion: PROJECT_STATE_POLICY_VERSION,
-          evaluationKey: built.evaluationKey,
-        },
-      });
-      if (existing) {
-        // 该 (source, policy, evaluation) 区间已经生成过状态：本次刷新没有新信息
-        return {
-          snapshot: serializeSnapshot(existing),
-          changed: false,
-          reused: true,
-          baselineCreated: false,
-        };
-      }
+    const latest = await tx.projectStateSnapshot.findFirst({
+      where: { projectId },
+      orderBy: [{ evaluatedAt: "desc" }, { id: "desc" }],
+    });
 
-      const previous = await tx.projectStateSnapshot.findFirst({
-        where: { projectId },
-        orderBy: { evaluatedAt: "desc" },
-      });
+    // 仅当最新行对应当前源版本时复用：历史行命中同键不代表状态未变（A→B→A 必须产生新记录）
+    if (
+      latest &&
+      latest.sourceHash === built.sourceHash &&
+      latest.policyVersion === PROJECT_STATE_POLICY_VERSION &&
+      latest.evaluationKey === built.evaluationKey
+    ) {
+      return {
+        snapshot: serializeSnapshot(latest),
+        changed: false,
+        reused: true,
+        baselineCreated: false,
+      };
+    }
 
+    const previousSnapshotId = latest?.id ?? null;
+
+    try {
       const payload = {
         ...built,
         snapshotId: "",
@@ -199,13 +201,13 @@ export async function refreshProjectState(projectId: string): Promise<RefreshRes
           contentHash: built.contentHash,
           observedAt: now,
           evaluatedAt: now,
-          previousSnapshotId: previous?.id ?? null,
+          previousSnapshotId,
           payload,
         },
       });
 
       // 回填 snapshotId 进 payload，保证快照自描述
-      const payloadWithId: Prisma.InputJsonValue = {
+      const payloadWithId = {
         ...built,
         snapshotId: created.id,
       } as unknown as Prisma.InputJsonValue;
@@ -216,36 +218,38 @@ export async function refreshProjectState(projectId: string): Promise<RefreshRes
 
       return {
         snapshot: serializeSnapshot(finalized),
-        changed: previous ? previous.contentHash !== built.contentHash : true,
+        changed: latest ? latest.contentHash !== built.contentHash : true,
         reused: false,
-        baselineCreated: !previous,
+        baselineCreated: !latest,
       };
-    });
-  } catch (error) {
-    // 并发写入撞唯一约束：读取已生成的记录，不重复扣写
-    if (
-      typeof error === "object" && error !== null && "code" in error &&
-      (error as { code?: string }).code === "P2002"
-    ) {
-      const existing = await db.projectStateSnapshot.findFirst({
-        where: {
-          projectId,
-          sourceHash: built.sourceHash,
-          policyVersion: PROJECT_STATE_POLICY_VERSION,
-          evaluationKey: built.evaluationKey,
-        },
-      });
-      if (existing) {
-        return {
-          snapshot: serializeSnapshot(existing),
-          changed: false,
-          reused: true,
-          baselineCreated: false,
-        };
+    } catch (error) {
+      // 并发写入撞唯一约束（同源 + 同前驱）：读取并发方已生成的行，不重复写入
+      if (
+        typeof error === "object" && error !== null && "code" in error &&
+        (error as { code?: string }).code === "P2002"
+      ) {
+        const conflicting = await tx.projectStateSnapshot.findFirst({
+          where: {
+            projectId,
+            sourceHash: built.sourceHash,
+            policyVersion: PROJECT_STATE_POLICY_VERSION,
+            evaluationKey: built.evaluationKey,
+            previousSnapshotId,
+          },
+          orderBy: [{ evaluatedAt: "desc" }, { id: "desc" }],
+        });
+        if (conflicting) {
+          return {
+            snapshot: serializeSnapshot(conflicting),
+            changed: false,
+            reused: true,
+            baselineCreated: false,
+          };
+        }
       }
+      throw error;
     }
-    throw error;
-  }
+  });
 }
 
 export async function getProjectStateDiff(projectId: string, fromId: string, toId: string): Promise<ProjectStateDiff> {

@@ -98,6 +98,9 @@ export interface SnapshotSourceInput {
     confirmed: boolean;
     confirmedAt: string | null;
     revokedAt: string | null;
+    validFrom?: string | null;
+    validTo?: string | null;
+    createdAt?: string;
     currentCardId: string;
     relatedCardId: string;
     counterpartTitle: string;

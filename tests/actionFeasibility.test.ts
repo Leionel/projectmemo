@@ -93,6 +93,38 @@ describe("Action feasibility (F1)", () => {
       addRequirements: [{ targetKind: "card", targetId: card.id }],
     });
 
+    // 未确认的独立事实：证据不足，不得兜底为 MET
+    const unevaluated = await assessActionFeasibility(projectId, action.id);
+    expect(unevaluated.feasibility).toBe("UNKNOWN");
+    expect(unevaluated.dependencies[0].note).toContain("证据不足");
+
+    // 有确认的支持关系后才视为满足
+    const supporter = await db.knowledgeCard.create({
+      data: {
+        projectId,
+        captureId: (await db.capture.create({
+          data: { projectId, rawText: "支撑来源", sourceType: "测试" },
+        })).id,
+        type: "meeting_note",
+        title: "支撑来源记录",
+        summary: "",
+        keywords: [],
+        relatedTasks: [],
+        nextActions: [],
+        importance: 3,
+      },
+    });
+    const supportRelation = await db.cardRelation.create({
+      data: {
+        currentCardId: supporter.id,
+        relatedCardId: card.id,
+        relationType: "SUPPORTS",
+        reason: "实验支撑",
+        score: 80,
+        confirmed: true,
+        confirmedAt: new Date(),
+      },
+    });
     const ready = await assessActionFeasibility(projectId, action.id);
     expect(ready.feasibility).toBe("READY");
 
@@ -106,6 +138,63 @@ describe("Action feasibility (F1)", () => {
     const blocked = await assessActionFeasibility(projectId, action.id);
     expect(blocked.feasibility).toBe("BLOCKED");
     expect(blocked.dependencies[0].note).toContain("取代");
+  });
+
+  it("revoked support no longer satisfies a hard dependency", async () => {
+    const depCard = await db.knowledgeCard.create({
+      data: {
+        projectId,
+        captureId: (await db.capture.create({
+          data: { projectId, rawText: "被依赖记录", sourceType: "测试" },
+        })).id,
+        type: "meeting_note",
+        title: "被依赖的结论记录",
+        summary: "",
+        keywords: [],
+        relatedTasks: [],
+        nextActions: [],
+        importance: 3,
+      },
+    });
+    const other = await db.knowledgeCard.create({
+      data: {
+        projectId,
+        captureId: (await db.capture.create({
+          data: { projectId, rawText: "另一条记录", sourceType: "测试" },
+        })).id,
+        type: "meeting_note",
+        title: "另一条记录",
+        summary: "",
+        keywords: [],
+        relatedTasks: [],
+        nextActions: [],
+        importance: 3,
+      },
+    });
+    const relation = await db.cardRelation.create({
+      data: {
+        currentCardId: other.id,
+        relatedCardId: depCard.id,
+        relationType: "SUPPORTS",
+        reason: "支撑",
+        score: 80,
+        confirmed: true,
+        confirmedAt: new Date(),
+      },
+    });
+
+    const action = await seedAction("依赖可撤销记录");
+    await updateActionFeasibilityInput(projectId, {
+      actionId: action.id,
+      addRequirements: [{ targetKind: "card", targetId: depCard.id }],
+    });
+    expect((await assessActionFeasibility(projectId, action.id)).feasibility).toBe("READY");
+
+    await db.cardRelation.update({ where: { id: relation.id }, data: { revokedAt: new Date() } });
+    const after = await assessActionFeasibility(projectId, action.id);
+    expect(after.feasibility).toBe("BLOCKED");
+    expect(after.dependencies[0].state).toBe("UNMET");
+    expect(after.dependencies[0].note).toContain("撤销");
   });
 
   it("marks pending-card dependencies as UNKNOWN instead of READY", async () => {

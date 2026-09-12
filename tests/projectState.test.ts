@@ -88,6 +88,83 @@ describe("buildProjectState (pure)", () => {
     expect(after.risks.some((risk) => risk.stableKey === "risk:deadline:passed" && risk.truth === "TRUE")).toBe(true);
   });
 
+  it("confirmed CONTRADICTS surfaces as conflict instead of support", () => {
+    const built = buildProjectState(sourceInput({
+      cards: [
+        { id: "cA", title: "实测吞吐A", summary: "sa", createdAt: "2026-09-01T00:00:00.000Z" },
+        { id: "cB", title: "实测吞吐B", summary: "sb", createdAt: "2026-09-02T00:00:00.000Z" },
+      ],
+      relations: [{
+        id: "r-con",
+        relationType: "CONTRADICTS",
+        reason: "两次测试结果矛盾",
+        confirmed: true,
+        confirmedAt: "2026-09-03T00:00:00.000Z",
+        revokedAt: null,
+        validFrom: null,
+        validTo: null,
+        createdAt: "2026-09-02T00:00:00.000Z",
+        currentCardId: "cB",
+        relatedCardId: "cA",
+        counterpartTitle: "实测吞吐B",
+      }],
+    }));
+    for (const key of ["decision:cA", "decision:cB"]) {
+      const fact = built.facts.find((item) => item.key === key);
+      expect(fact?.truth).toBe("UNKNOWN");
+      expect(fact?.temporalStatus).toBe("CONFLICT");
+      expect(fact?.text).toContain("冲突");
+    }
+  });
+
+  it("a supersession with future validFrom does not take effect early", () => {
+    const built = buildProjectState(sourceInput({
+      cards: [
+        { id: "cA", title: "方案A", summary: "sa", createdAt: "2026-09-01T00:00:00.000Z" },
+        { id: "cB", title: "方案B", summary: "sb", createdAt: "2026-09-02T00:00:00.000Z" },
+      ],
+      relations: [{
+        id: "r-future",
+        relationType: "SUPERSEDES",
+        reason: "计划切换",
+        confirmed: true,
+        confirmedAt: "2026-09-03T00:00:00.000Z",
+        revokedAt: null,
+        validFrom: "2026-10-01T00:00:00.000Z",
+        validTo: null,
+        createdAt: "2026-09-02T00:00:00.000Z",
+        currentCardId: "cB",
+        relatedCardId: "cA",
+        counterpartTitle: "方案B",
+      }],
+      now: "2026-09-12T00:00:00.000Z",
+    }));
+    const a = built.facts.find((fact) => fact.key === "decision:cA");
+    const b = built.facts.find((fact) => fact.key === "decision:cB");
+    expect(a?.truth).not.toBe("FALSE");
+    expect(a?.temporalStatus).not.toBe("SUPERSEDED");
+    expect(b?.truth).not.toBe("TRUE");
+  });
+
+  it("contentHash ignores observation time on identical business content", () => {
+    const cards = [{ id: "c1", title: "方案A", summary: "s", createdAt: "2026-09-01T00:00:00.000Z" }];
+    const a = buildProjectState(sourceInput({ cards, now: "2026-09-12T00:00:00.000Z" }));
+    const b = buildProjectState(sourceInput({ cards, now: "2026-09-12T00:00:01.000Z" }));
+    expect(a.contentHash).toBe(b.contentHash);
+    // 源数组顺序不参与哈希
+    const shuffled = buildProjectState(sourceInput({
+      cards: [{ id: "c2", title: "方案B", summary: "s2", createdAt: "2026-09-02T00:00:00.000Z" }, cards[0]],
+      relations: [supersessionRelation("c1", "c2")],
+      now: "2026-09-12T00:00:00.000Z",
+    }));
+    const ordered = buildProjectState(sourceInput({
+      cards: [cards[0], { id: "c2", title: "方案B", summary: "s2", createdAt: "2026-09-02T00:00:00.000Z" }],
+      relations: [supersessionRelation("c1", "c2")],
+      now: "2026-09-12T00:00:00.000Z",
+    }));
+    expect(shuffled.sourceHash).toBe(ordered.sourceHash);
+  });
+
   it("reports missing deadline as an explicit unknown rather than assuming safety", () => {
     const built = buildProjectState(sourceInput());
     expect(built.unknowns.some((item) => item.predicate === "deadline.risk")).toBe(true);

@@ -1,0 +1,66 @@
+{
+  "databasePath": "D:\\Projects\\hongmen\\evidence\\acceptance-20260912\\probe-1789216849509.db",
+  "recurrence": {
+    "a": "cmtydilix00017s8o6fp9tgfk",
+    "b": "cmtydiljh00027s8o0qb32lad",
+    "a2": "cmtydiljs00037s8oc0v2qbo8",
+    "reused": false,
+    "latestGoal": "A"
+  },
+  "conflictFacts": [
+    {
+      "key": "decision:a",
+      "text": "决策「a」存在冲突，无法给出确定结论",
+      "truth": "UNKNOWN",
+      "temporalStatus": "CONFLICT",
+      "evidenceRefs": [
+        {
+          "entityKind": "card",
+          "entityId": "a",
+          "field": "title+summary",
+          "observedAt": "2026-09-12T00:00:00Z",
+          "contentHash": "6a82e497f58043c0c18152df7d39335462babd6c6f98b619af8d6f03f0f77ec2"
+        }
+      ],
+      "ruleId": "decision.supersession"
+    },
+    {
+      "key": "decision:b",
+      "text": "决策「b」存在冲突，无法给出确定结论",
+      "truth": "UNKNOWN",
+      "temporalStatus": "CONFLICT",
+      "evidenceRefs": [
+        {
+          "entityKind": "card",
+          "entityId": "b",
+          "field": "title+summary",
+          "observedAt": "2026-09-12T00:00:00Z",
+          "contentHash": "66c0244076e7869a68431355e9e1f6bedced76f2ae8afb3d1907b327a65a252b"
+        }
+      ],
+      "ruleId": "decision.supersession"
+    }
+  ],
+  "stableContentHash": true,
+  "unconfirmedDependency": {
+    "actionId": "cmtydilk800067s8obj82ivab",
+    "feasibility": "UNKNOWN",
+    "dependencies": [
+      {
+        "requirementId": "cmtydilkh00077s8oyh8d4y47",
+        "targetKind": "card",
+        "targetId": "cmtydilk300057s8oo1ahhsop",
+        "hard": true,
+        "targetTitle": "unconfirmed",
+        "state": "UNKNOWN",
+        "note": "依赖记录证据不足或待确认，无法确认前提成立"
+      }
+    ],
+    "overdue": false,
+    "deadline": null,
+    "estimateMinutes": null,
+    "estimateNote": "未估算（由用户补充，系统不编造估时）",
+    "assessedAt": "2026-09-12T12:40:50.625Z",
+    "summary": "没有已知阻塞，但关键依赖的状态无法确认。"
+  }
+}

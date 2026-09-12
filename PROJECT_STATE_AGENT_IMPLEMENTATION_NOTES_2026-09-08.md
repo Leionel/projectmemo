@@ -1,5 +1,7 @@
 # 实施记录：项目状态记忆与可验证主动推进
 
+> 2026-09-12 收尾入口：`IN_PROGRESS_CLOSEOUT_PLAN_2026-09-12.md`。该方案针对七项 IN_PROGRESS 和最新验收缺口，按 E1–E7 执行；方案写成不改变以下实施状态。验收发现以 `ACCEPTANCE_REVIEW_2026-09-12.md` 为准，后续修复需新回执关闭。
+
 对应计划：`PROJECT_STATE_AGENT_IMPLEMENTATION_PLAN_2026-09-08.md`。
 
 ## 2026-09-08：完成实施计划编写及现有代码入口核对
@@ -66,6 +68,21 @@
 - `PROJECT_STATE_ENABLED` 与 `INTERVENTION_BUDGET_ENABLED` 默认关闭；开启前需在测试库演练（含并发刷新、跨午夜）。
 - 真机快速连续操作、反向打断、慢放、大字号、深色主题等 UI 矩阵未执行。
 - R3 依赖平台环境；R4 依赖招募。
+
+## 2026-09-12（第二轮）：独立验收发现 5 项缺陷，全部修复并复测
+
+外部验收报告：`ACCEPTANCE_REVIEW_2026-09-12.md`；隔离探针：`evidence/acceptance-20260912/probe.ts`，修复前结果存档 `results-before-fix.json`，修复后 `results.json`。
+
+| 缺陷 | 修复 | 回执 |
+|---|---|---|
+| P1 状态回退复用历史行（A→B→A 最新停在 B） | 快照唯一键加入 previousSnapshotId（迁移 20260912210000），refresh 仅当最新行对应当前源版本时复用，回旧值必产生新行 | 探针 recurrence：a2≠a、reused=false、latestGoal=A；新增字段往返集成测试 |
+| P1 快照未复用 Ledger，CONTRADICTS 被当作支持 | buildSnapshot 改为调用 evaluateTemporalCard 统一计算（含 validFrom/validTo 边界），源输入补携带 temporal 字段 | 探针 conflictFacts：truth=UNKNOWN、CONFLICT；新增 CONTRADICTS 与未来生效期纯函数测试 |
+| P1 可行性把证据不足兜底为 MET | card 依赖严格按 supportState 映射：仅 SUPPORTED=MET，SUPERSEDED/REVOKED=UNMET，其余=UNKNOWN | 探针 unconfirmedDependency：UNKNOWN；新增 idea 卡与撤销支持关系测试 |
+| P2 contentHash 含观察时间 | contentHash 改用剔除 observedAt 的业务投影；sourceHash 对源数组按 ID 规范排序 | 探针 stableContentHash=true；新增 1 秒时差哈希稳定测试 |
+| P2 源读取不在快照事务内 | loadSourceInput 接受事务客户端，loadTemporalProject 增加可选 client 参数，全部读取移入 $transaction | 代码审阅 + 全量测试通过；未做并发故障注入（如实记录） |
+| 顺带修复：Diff 漏比 goal/deadline/health | computeProjectStateDiff 增加 project:goal、project:deadline、state:health 变化项（往返测试覆盖） | 往返集成测试断言 B→A diff materialChange=true |
+
+验证：`tsc --noEmit` 0 错误；`vitest` 28 文件 / 191 测试全部通过；验收探针五项全绿。鸿蒙代码本轮未改动（沿用 ea2fa19 的 HAP 构建）。功能缺口（T1 导入界面、F1 依赖编辑界面、B1 曝光上报、R1 逐句粒度）保持如实记录，不因后端测试通过而关闭。
 
 ### 后续入口
 

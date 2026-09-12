@@ -3,12 +3,13 @@ import { db } from "@/lib/db";
 import { wouldCreateSupersessionCycle } from "@/lib/memory/temporalLedger";
 import { recordLifecycleEventInTx } from "@/lib/services/memoryLifecycleService";
 import type { TemporalRelationProposalInput } from "@/lib/validation/schemas";
-import type { CardRelationType } from "@/lib/generated/prisma/client";
+import { Prisma, type CardRelationType } from "@/lib/generated/prisma/client";
 
 const cardSummarySelect = { id: true, title: true, summary: true, createdAt: true } as const;
 
-export async function loadTemporalProject(projectId: string) {
-  const project = await db.project.findUnique({
+/** client 允许传入事务客户端：快照刷新要求源读取与写入在同一事务内 */
+export async function loadTemporalProject(projectId: string, client: Prisma.TransactionClient = db as unknown as Prisma.TransactionClient) {
+  const project = await client.project.findUnique({
     where: { id: projectId },
     select: {
       id: true,
@@ -16,7 +17,7 @@ export async function loadTemporalProject(projectId: string) {
     },
   });
   if (!project) throw new AppError("PROJECT_NOT_FOUND", "没有找到这个项目", 404);
-  const relations = await db.cardRelation.findMany({
+  const relations = await client.cardRelation.findMany({
     where: {
       currentCard: { projectId },
       relatedCard: { projectId },

@@ -1,0 +1,66 @@
+{
+  "databasePath": "D:\\Projects\\hongmen\\evidence\\acceptance-20260912\\probe-1789215924666.db",
+  "recurrence": {
+    "a": "cmtycyrth00013s8oeww479c5",
+    "b": "cmtycyru000023s8okbl03nux",
+    "a2": "cmtycyrth00013s8oeww479c5",
+    "reused": true,
+    "latestGoal": "B"
+  },
+  "conflictFacts": [
+    {
+      "key": "decision:a",
+      "text": "决策「a」为当前有效结论",
+      "truth": "TRUE",
+      "temporalStatus": "PENDING",
+      "evidenceRefs": [
+        {
+          "entityKind": "card",
+          "entityId": "a",
+          "field": "title+summary",
+          "observedAt": "2026-09-12T00:00:00Z",
+          "contentHash": "6a82e497f58043c0c18152df7d39335462babd6c6f98b619af8d6f03f0f77ec2"
+        }
+      ],
+      "ruleId": "decision.supersession"
+    },
+    {
+      "key": "decision:b",
+      "text": "决策「b」为当前有效结论",
+      "truth": "TRUE",
+      "temporalStatus": "PENDING",
+      "evidenceRefs": [
+        {
+          "entityKind": "card",
+          "entityId": "b",
+          "field": "title+summary",
+          "observedAt": "2026-09-12T00:00:00Z",
+          "contentHash": "66c0244076e7869a68431355e9e1f6bedced76f2ae8afb3d1907b327a65a252b"
+        }
+      ],
+      "ruleId": "decision.supersession"
+    }
+  ],
+  "stableContentHash": false,
+  "unconfirmedDependency": {
+    "actionId": "cmtycyrur00053s8otou7kyiw",
+    "feasibility": "READY",
+    "dependencies": [
+      {
+        "requirementId": "cmtycyrv000063s8ohfp1huq0",
+        "targetKind": "card",
+        "targetId": "cmtycyrul00043s8osf3ik9hh",
+        "hard": true,
+        "targetTitle": "unconfirmed",
+        "state": "MET",
+        "note": "依赖记录当前有效"
+      }
+    ],
+    "overdue": false,
+    "deadline": null,
+    "estimateMinutes": null,
+    "estimateNote": "未估算（由用户补充，系统不编造估时）",
+    "assessedAt": "2026-09-12T12:25:25.659Z",
+    "summary": "已声明的硬依赖全部满足。READY 不保证现实一定能按时完成。"
+  }
+}

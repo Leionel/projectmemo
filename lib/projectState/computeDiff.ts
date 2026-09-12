@@ -265,12 +265,48 @@ function diffUnknowns(before: ProjectStatePayload, after: ProjectStatePayload): 
   return items;
 }
 
+function diffProjectFields(before: ProjectStatePayload, after: ProjectStatePayload): StateDiffItem[] {
+  const items: StateDiffItem[] = [];
+  if (before.goal !== after.goal) {
+    items.push({
+      changeKey: "project:goal",
+      kind: "CHANGED",
+      summary: `项目目标变化：${before.goal ?? "未设置"} → ${after.goal ?? "未设置"}`,
+      before: before.goal,
+      after: after.goal,
+      evidenceRefs: [],
+    });
+  }
+  if (before.deadline !== after.deadline) {
+    items.push({
+      changeKey: "project:deadline",
+      kind: "CHANGED",
+      summary: `截止时间变化：${before.deadline?.substring(0, 10) ?? "未设置"} → ${after.deadline?.substring(0, 10) ?? "未设置"}`,
+      before: before.deadline,
+      after: after.deadline,
+      evidenceRefs: [],
+    });
+  }
+  if (before.health !== after.health) {
+    items.push({
+      changeKey: "state:health",
+      kind: after.health === "AT_RISK" ? "REGRESSED" : "RESOLVED",
+      summary: `健康状态变化：${before.health} → ${after.health}`,
+      before: before.health,
+      after: after.health,
+      evidenceRefs: [],
+    });
+  }
+  return items;
+}
+
 export function computeProjectStateDiff(from: ProjectStatePayload, to: ProjectStatePayload): ProjectStateDiff {
   if (from.schemaVersion !== to.schemaVersion) {
     throw new RebuildRequiredError();
   }
 
   const items: StateDiffItem[] = [
+    ...diffProjectFields(from, to),
     ...diffFacts(from, to),
     ...diffActions(from, to),
     ...diffGaps(from, to),

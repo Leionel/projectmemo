@@ -244,6 +244,29 @@ struct ProjectHome {
     }
   }
 
+  // 上传入口统一为回形针：二级菜单分开“相册图片”与“文件（PDF 等）”两条路径
+  private async openUploadMenu(): Promise<void> {
+    if (this.isUploadingAttachment) {
+      return;
+    }
+    try {
+      const menu = await promptAction.showActionMenu({
+        title: '上传照片 / PDF',
+        buttons: [
+          { text: '从相册选图片', color: '#0A7EA4' },
+          { text: '选择文件（PDF 等）', color: '#0A7EA4' }
+        ]
+      });
+      if (menu.index === 0) {
+        await this.pickAndUploadImage();
+      } else if (menu.index === 1) {
+        await this.pickAndUploadPdf();
+      }
+    } catch (_e) {
+      // 用户取消菜单，无需提示
+    }
+  }
+
   private async pickAndUploadImage(): Promise<void> {
     if (this.isUploadingAttachment) return;
     try {
@@ -1018,6 +1041,10 @@ struct ProjectHome {
             this.currentTabIndex === 3 ? '问忆程' : '成果'}`,
       backLabel: '项目',
       backDescription: '返回项目列表',
+      rightActionText: this.currentTabIndex === 0 ? '＋ 记录' : '',
+      onRightTextAction: () => {
+        this.showCapturePanel = true;
+      },
       showRightIcon: true,
       rightIconLabel: '更多项目设置',
       rightIconDescription: '编辑项目名称、目标和简介',
@@ -1616,13 +1643,21 @@ struct ProjectHome {
         .border({ width: 1, color: PMColors.BORDER })
         .margin({ top: PMSpacing.MD })
 
-        // 问题三：记录与沉淀（捕获项目碎片）
+        // 问题三：记录与沉淀——输入区已改为底部半模态面板，此处仅保留入口
         Column() {
           Row() {
-            Text('记录项目碎片')
-              .fontSize(PMFontSize.SECTION_TITLE)
-              .fontWeight(FontWeight.Medium)
-              .fontColor(PMColors.INK_PRIMARY)
+            Column() {
+              Text('记录项目碎片')
+                .fontSize(PMFontSize.SECTION_TITLE)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text('快速记录文字、图片或 PDF，并保留来源。')
+                .fontSize(PMFontSize.SECONDARY)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: PMSpacing.XS })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
 
             Text(`已积累 ${this.project._count.cards} 条记忆`)
               .fontSize(PMFontSize.CAPTION)
@@ -1631,253 +1666,20 @@ struct ProjectHome {
           .width('100%')
           .justifyContent(FlexAlign.SpaceBetween)
 
-          .clickEffect(PMInteraction.PRESS_EFFECT)
-          .onClick(() => {
-            this.showCapturePanel = !this.showCapturePanel;
-          })
-          .accessibilityText(`记录项目碎片，${this.showCapturePanel ? '收起输入区' : '展开快速记录'}`)
-
-          if (this.showCapturePanel) {
-            Text('记录实验、导师意见和材料，并保留来源。')
-              .fontSize(PMFontSize.SECONDARY)
-              .fontColor(PMColors.INK_SECONDARY)
-              .lineHeight(18)
-              .margin({ top: PMSpacing.XS })
-              .transition(TransitionEffect.OPACITY.animation({ duration: PMMotion.LOCAL, curve: PMMotion.CURVE_CONTENT }))
-
-          // 来源胶囊
-          Scroll() {
-            Row() {
-              ForEach(this.sourceOptions, (src: string) => {
-                Button(src)
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontWeight(FontWeight.Regular)
-                  .fontColor(this.sourceType === src ? PMColors.BRAND : PMColors.INK_SECONDARY)
-                  .backgroundColor(this.sourceType === src ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
-                  .borderRadius(PMRadius.XS)
-                  .height(44)
-                  .border({ width: this.sourceType === src ? 2 : 1, color: this.sourceType === src ? PMColors.BRAND : PMColors.BORDER })
-                  .margin({ right: PMSpacing.XS })
-                  .accessibilityText(`记录来源：${src}`)
-                  .accessibilitySelected(this.sourceType === src)
-                  .onClick(() => {
-                    this.sourceType = src;
-                  })
-              }, (src: string) => src)
-            }
-          }
-          .width('100%')
-          .scrollable(ScrollDirection.Horizontal)
-          .scrollBar(BarState.Off)
-          .margin({ top: PMSpacing.SM })
-
-          Row() {
-            Button(this.isUploadingAttachment ? '处理中…' : '选择图片')
-              .fontSize(PMFontSize.CAPTION)
-              .fontColor(PMColors.BRAND)
-              .backgroundColor(PMColors.BRAND_LIGHT)
-              .borderRadius(PMRadius.XS)
-              .height(48)
-              .enabled(!this.isUploadingAttachment)
-              .onClick(() => { this.pickAndUploadImage(); })
-              .accessibilityText('选择图片并沉淀为项目记忆')
-
-            Button(this.isUploadingAttachment ? '处理中…' : '选择 PDF')
-              .fontSize(PMFontSize.CAPTION)
-              .fontColor(PMColors.MEMORY)
-              .backgroundColor(PMColors.MEMORY_LIGHT)
-              .borderRadius(PMRadius.XS)
-              .height(48)
-              .enabled(!this.isUploadingAttachment)
-              .margin({ left: PMSpacing.XS })
-              .onClick(() => { this.pickAndUploadPdf(); })
-              .accessibilityText('选择 PDF 并沉淀为项目记忆')
-          }
-          .width('100%')
-          .margin({ top: PMSpacing.SM })
-
-          if (this.attachmentFeedback !== '') {
-            Text(this.attachmentFeedback)
-              .fontSize(PMFontSize.CAPTION)
-              .fontColor(this.attachmentFeedbackTone === 'error' ? PMColors.RISK :
-                this.attachmentFeedbackTone === 'success' ? PMColors.SUCCESS :
-                  this.attachmentFeedbackTone === 'warning' ? PMColors.EVIDENCE : PMColors.INK_SECONDARY)
-              .margin({ top: PMSpacing.XS })
-              .accessibilityText(`附件状态：${this.attachmentFeedback}`)
-          }
-
-          if (this.attachmentRetryId !== '') {
-            Row() {
-              Button(this.isRetryingAttachment ? '重新提取中…' : '重试提取')
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.BRAND)
-                .backgroundColor(PMColors.BRAND_LIGHT)
-                .border({ width: 1, color: PMColors.BRAND })
-                .borderRadius(PMRadius.SM)
-                .height(44)
-                .enabled(!this.isRetryingAttachment)
-                .layoutWeight(1)
-                .onClick(() => {
-                  this.retryAttachment();
-                })
-
-              Button('人工校对内容 (模块 E)')
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.EVIDENCE)
-                .backgroundColor(PMColors.EVIDENCE_LIGHT)
-                .border({ width: 1, color: PMColors.EVIDENCE })
-                .borderRadius(PMRadius.SM)
-                .height(44)
-                .layoutWeight(1.3)
-                .margin({ left: PMSpacing.SM })
-                .onClick(() => {
-                  const targetAttachment = new Attachment();
-                  targetAttachment.id = this.attachmentRetryId;
-                  targetAttachment.fileName = '待校对实验附件';
-                  targetAttachment.extractionStatus = 'NEEDS_OCR';
-                  this.correctingAttachment = targetAttachment;
-                  this.showAttachmentCorrection = true;
-                })
-            }
-            .width('100%')
-            .margin({ top: PMSpacing.SM })
-          }
-
-          if (this.attachments.filter((a: Attachment) => a.extractionStatus !== 'SUCCESS').length > 0) {
-            Column() {
-              Row() {
-                Text(`待处理附件 (${this.attachments.filter((a: Attachment) => a.extractionStatus !== 'SUCCESS').length})`)
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontWeight(FontWeight.Medium)
-                  .fontColor(PMColors.EVIDENCE)
-                Text('退出重进仍可恢复重试')
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontColor(PMColors.INK_TERTIARY)
-              }
-              .width('100%')
-              .justifyContent(FlexAlign.SpaceBetween)
-
-              ForEach(this.attachments.filter((a: Attachment) => a.extractionStatus !== 'SUCCESS'), (item: Attachment) => {
-                Row() {
-                  Column() {
-                    Text(item.fileName)
-                      .fontSize(PMFontSize.BODY)
-                      .fontColor(PMColors.INK_PRIMARY)
-                      .maxLines(1)
-                      .textOverflow({ overflow: TextOverflow.Ellipsis })
-                    Text(item.extractionStatus === 'NEEDS_OCR' ? '环境需要 OCR 提取' :
-                      item.extractionError !== '' ? item.extractionError : '提取未完成')
-                      .fontSize(PMFontSize.CAPTION)
-                      .fontColor(item.extractionStatus === 'NEEDS_OCR' ? PMColors.EVIDENCE : PMColors.RISK)
-                      .maxLines(1)
-                      .textOverflow({ overflow: TextOverflow.Ellipsis })
-                      .margin({ top: 2 })
-                  }
-                  .layoutWeight(1)
-                  .alignItems(HorizontalAlign.Start)
-
-                  Button(this.isRetryingAttachment && this.attachmentRetryId === item.id ? '重试中…' : '重试提取')
-                    .fontSize(PMFontSize.CAPTION)
-                    .fontColor(PMColors.BRAND)
-                    .backgroundColor(PMColors.BRAND_LIGHT)
-                    .borderRadius(PMRadius.XS)
-                    .height(36)
-                    .enabled(!this.isRetryingAttachment)
-                    .margin({ left: PMSpacing.SM })
-                    .onClick(() => {
-                      this.retrySpecificAttachment(item.id);
-                    })
-                    .accessibilityText(`重试提取附件 ${item.fileName}`)
-                }
-                .width('100%')
-                .padding(PMSpacing.SM)
-                .margin({ top: PMSpacing.XS })
-                .backgroundColor(PMColors.SURFACE)
-                .borderRadius(PMRadius.XS)
-                .border({ width: 1, color: PMColors.BORDER })
-                .alignItems(VerticalAlign.Center)
-              }, (item: Attachment) => item.id)
-            }
-            .width('100%')
-            .padding(PMSpacing.SM)
-            .margin({ top: PMSpacing.SM })
-            .backgroundColor(PMColors.SURFACE_SUBTLE)
+          Button('开始记录')
+            .fontSize(PMFontSize.BUTTON)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.BRAND)
+            .backgroundColor(PMColors.BRAND_LIGHT)
+            .border({ width: 1, color: PMColors.BRAND })
             .borderRadius(PMRadius.SM)
-            .border({ width: 1, color: PMColors.BORDER })
-            .alignItems(HorizontalAlign.Start)
-          }
-
-          TextArea({
-            text: this.rawText,
-            placeholder: `记录${this.sourceType}内容（导师意见、实验结果、代码报错等，至少5个字）...`
-          })
-            .onChange((value: string) => {
-              this.rawText = value;
-            })
-            .fontSize(PMFontSize.BODY)
-            .height(80)
-            .backgroundColor(PMColors.SURFACE_SUBTLE)
-            .borderRadius(PMRadius.SM)
-            .border({ width: 1, color: PMColors.BORDER })
-            .accessibilityText(`输入${this.sourceType}内容，至少 5 个字`)
-            .margin({ top: PMSpacing.SM })
-
-          if (this.captureError !== '') {
-            Text(this.captureError)
-              .fontSize(PMFontSize.BODY)
-              .fontColor(PMColors.RISK)
-              .margin({ top: PMSpacing.XS })
-          }
-
-          Row() {
-            Text(this.rawText.trim().length > 0 ? `${this.rawText.trim().length} 字` : '至少 5 字')
-              .fontSize(PMFontSize.CAPTION)
-              .fontColor(PMColors.INK_TERTIARY)
-
-            Button(this.isCapturing ? '正在归档...' : '沉淀为项目记忆')
-              .fontSize(PMFontSize.BUTTON)
-              .fontWeight(FontWeight.Medium)
-              .fontColor(PMColors.SURFACE)
-              .backgroundColor(this.rawText.trim().length >= 5 && !this.isCapturing ? PMColors.BRAND : PMColors.INK_MUTED)
-              .borderRadius(PMRadius.SM)
-              .height(48)
-              .enabled(this.rawText.trim().length >= 5 && !this.isCapturing)
-              .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.SM })
-              .onClick(() => {
-                this.capture();
-              })
-          }
-          .width('100%')
-          .justifyContent(FlexAlign.SpaceBetween)
-          .alignItems(VerticalAlign.Center)
-          .margin({ top: PMSpacing.MD })
-          } else {
-            Row() {
-              Text('快速记录文字、图片或 PDF，并保留来源。')
-                .fontSize(PMFontSize.SECONDARY)
-                .fontColor(PMColors.INK_SECONDARY)
-                .lineHeight(18)
-                .layoutWeight(1)
-
-              Button('开始记录')
-                .fontSize(PMFontSize.BUTTON)
-                .fontWeight(FontWeight.Medium)
-                .fontColor(PMColors.BRAND)
-                .backgroundColor(PMColors.BRAND_LIGHT)
-                .border({ width: 1, color: PMColors.BRAND })
-                .borderRadius(PMRadius.SM)
-                .height(48)
-                .padding({ left: PMSpacing.MD, right: PMSpacing.MD, top: PMSpacing.SM, bottom: PMSpacing.SM })
-                .margin({ left: PMSpacing.SM })
-                .onClick(() => {
-                  this.showCapturePanel = true;
-                })
-                .accessibilityText('开始记录项目碎片')
-            }
+            .height(48)
             .width('100%')
-            .alignItems(VerticalAlign.Center)
             .margin({ top: PMSpacing.MD })
-          }
+            .onClick(() => {
+              this.showCapturePanel = true;
+            })
+            .accessibilityText('打开记录项目碎片面板')
         }
         .width('100%')
         .padding(PMSpacing.LG)
@@ -1891,6 +1693,239 @@ struct ProjectHome {
     .layoutWeight(1)
     .transition(PMTransition.CONTENT_ENTER)
     .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
+  }
+
+  // 底部半模态记录面板：来源、回形针上传与文字沉淀在同一个面板内完成
+  @Builder
+  private CaptureSheet() {
+    Column() {
+      Row() {
+        Column() {
+          Text('记录项目碎片')
+            .fontSize(PMFontSize.SECTION_TITLE)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.INK_PRIMARY)
+          Text(`记录实验、导师意见和材料，并保留来源 · 已积累 ${this.project._count.cards} 条记忆`)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+            .margin({ top: PMSpacing.XS })
+        }
+        .alignItems(HorizontalAlign.Start)
+        .layoutWeight(1)
+
+        Button('✕')
+          .fontSize(PMFontSize.BODY)
+          .fontColor(PMColors.INK_TERTIARY)
+          .backgroundColor('transparent')
+          .onClick(() => {
+            this.showCapturePanel = false;
+          })
+          .accessibilityText('关闭记录面板')
+      }
+      .width('100%')
+      .justifyContent(FlexAlign.SpaceBetween)
+      .alignItems(VerticalAlign.Top)
+
+      Scroll() {
+        Row() {
+          ForEach(this.sourceOptions, (src: string) => {
+            Button(src)
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Regular)
+              .fontColor(this.sourceType === src ? PMColors.BRAND : PMColors.INK_SECONDARY)
+              .backgroundColor(this.sourceType === src ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.XS)
+              .height(44)
+              .border({ width: this.sourceType === src ? 2 : 1, color: this.sourceType === src ? PMColors.BRAND : PMColors.BORDER })
+              .margin({ right: PMSpacing.XS })
+              .accessibilityText(`记录来源：${src}`)
+              .accessibilitySelected(this.sourceType === src)
+              .onClick(() => {
+                this.sourceType = src;
+              })
+          }, (src: string) => src)
+        }
+      }
+      .width('100%')
+      .scrollable(ScrollDirection.Horizontal)
+      .scrollBar(BarState.Off)
+      .margin({ top: PMSpacing.SM })
+
+      if (this.attachmentFeedback !== '') {
+        Text(this.attachmentFeedback)
+          .fontSize(PMFontSize.CAPTION)
+          .fontColor(this.attachmentFeedbackTone === 'error' ? PMColors.RISK :
+            this.attachmentFeedbackTone === 'success' ? PMColors.SUCCESS :
+              this.attachmentFeedbackTone === 'warning' ? PMColors.EVIDENCE : PMColors.INK_SECONDARY)
+          .margin({ top: PMSpacing.XS })
+          .accessibilityText(`附件状态：${this.attachmentFeedback}`)
+      }
+
+      if (this.attachmentRetryId !== '') {
+        Row() {
+          Button(this.isRetryingAttachment ? '重新提取中…' : '重试提取')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.BRAND)
+            .backgroundColor(PMColors.BRAND_LIGHT)
+            .border({ width: 1, color: PMColors.BRAND })
+            .borderRadius(PMRadius.SM)
+            .height(44)
+            .enabled(!this.isRetryingAttachment)
+            .layoutWeight(1)
+            .onClick(() => {
+              this.retryAttachment();
+            })
+
+          Button('人工校对内容 (模块 E)')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.EVIDENCE)
+            .backgroundColor(PMColors.EVIDENCE_LIGHT)
+            .border({ width: 1, color: PMColors.EVIDENCE })
+            .borderRadius(PMRadius.SM)
+            .height(44)
+            .layoutWeight(1.3)
+            .margin({ left: PMSpacing.SM })
+            .onClick(() => {
+              const targetAttachment = new Attachment();
+              targetAttachment.id = this.attachmentRetryId;
+              targetAttachment.fileName = '待校对实验附件';
+              targetAttachment.extractionStatus = 'NEEDS_OCR';
+              this.correctingAttachment = targetAttachment;
+              this.showAttachmentCorrection = true;
+            })
+        }
+        .width('100%')
+        .margin({ top: PMSpacing.SM })
+      }
+
+      if (this.attachments.filter((a: Attachment) => a.extractionStatus !== 'SUCCESS').length > 0) {
+        Column() {
+          Row() {
+            Text(`待处理附件 (${this.attachments.filter((a: Attachment) => a.extractionStatus !== 'SUCCESS').length})`)
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.EVIDENCE)
+            Text('退出重进仍可恢复重试')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.SpaceBetween)
+
+          ForEach(this.attachments.filter((a: Attachment) => a.extractionStatus !== 'SUCCESS'), (item: Attachment) => {
+            Row() {
+              Column() {
+                Text(item.fileName)
+                  .fontSize(PMFontSize.BODY)
+                  .fontColor(PMColors.INK_PRIMARY)
+                  .maxLines(1)
+                  .textOverflow({ overflow: TextOverflow.Ellipsis })
+                Text(item.extractionStatus === 'NEEDS_OCR' ? '环境需要 OCR 提取' :
+                  item.extractionError !== '' ? item.extractionError : '提取未完成')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(item.extractionStatus === 'NEEDS_OCR' ? PMColors.EVIDENCE : PMColors.RISK)
+                  .maxLines(1)
+                  .textOverflow({ overflow: TextOverflow.Ellipsis })
+                  .margin({ top: 2 })
+              }
+              .layoutWeight(1)
+              .alignItems(HorizontalAlign.Start)
+
+              Button(this.isRetryingAttachment && this.attachmentRetryId === item.id ? '重试中…' : '重试提取')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.BRAND)
+                .backgroundColor(PMColors.BRAND_LIGHT)
+                .borderRadius(PMRadius.XS)
+                .height(36)
+                .enabled(!this.isRetryingAttachment)
+                .margin({ left: PMSpacing.SM })
+                .onClick(() => {
+                  this.retrySpecificAttachment(item.id);
+                })
+                .accessibilityText(`重试提取附件 ${item.fileName}`)
+            }
+            .width('100%')
+            .padding(PMSpacing.SM)
+            .margin({ top: PMSpacing.XS })
+            .backgroundColor(PMColors.SURFACE)
+            .borderRadius(PMRadius.XS)
+            .border({ width: 1, color: PMColors.BORDER })
+            .alignItems(VerticalAlign.Center)
+          }, (item: Attachment) => item.id)
+        }
+        .width('100%')
+        .padding(PMSpacing.SM)
+        .margin({ top: PMSpacing.SM })
+        .backgroundColor(PMColors.SURFACE_SUBTLE)
+        .borderRadius(PMRadius.SM)
+        .border({ width: 1, color: PMColors.BORDER })
+        .alignItems(HorizontalAlign.Start)
+      }
+
+      TextArea({
+        text: this.rawText,
+        placeholder: `记录${this.sourceType}内容（导师意见、实验结果、代码报错等，至少5个字）...`
+      })
+        .onChange((value: string) => {
+          this.rawText = value;
+        })
+        .fontSize(PMFontSize.BODY)
+        .height(90)
+        .backgroundColor(PMColors.SURFACE_SUBTLE)
+        .borderRadius(PMRadius.SM)
+        .border({ width: 1, color: PMColors.BORDER })
+        .accessibilityText(`输入${this.sourceType}内容，至少 5 个字`)
+        .margin({ top: PMSpacing.SM })
+
+      if (this.captureError !== '') {
+        Text(this.captureError)
+          .fontSize(PMFontSize.BODY)
+          .fontColor(PMColors.RISK)
+          .margin({ top: PMSpacing.XS })
+      }
+
+      Row() {
+        Text(this.rawText.trim().length > 0 ? `${this.rawText.trim().length} 字` : '至少 5 字')
+          .fontSize(PMFontSize.CAPTION)
+          .fontColor(PMColors.INK_TERTIARY)
+
+        Row({ space: PMSpacing.SM }) {
+          Button('📎')
+            .fontSize(18)
+            .fontColor(PMColors.BRAND)
+            .backgroundColor(PMColors.BRAND_LIGHT)
+            .borderRadius(PMRadius.SM)
+            .height(48)
+            .width(52)
+            .enabled(!this.isUploadingAttachment)
+            .onClick(() => {
+              this.openUploadMenu();
+            })
+            .accessibilityText('上传照片或 PDF 附件')
+
+          Button(this.isCapturing ? '正在归档...' : '沉淀为项目记忆')
+            .fontSize(PMFontSize.BUTTON)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.SURFACE)
+            .backgroundColor(this.rawText.trim().length >= 5 && !this.isCapturing ? PMColors.BRAND : PMColors.INK_MUTED)
+            .borderRadius(PMRadius.SM)
+            .height(48)
+            .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.SM })
+            .enabled(this.rawText.trim().length >= 5 && !this.isCapturing)
+            .onClick(() => {
+              this.capture();
+            })
+        }
+        .alignItems(VerticalAlign.Center)
+      }
+      .width('100%')
+      .justifyContent(FlexAlign.SpaceBetween)
+      .alignItems(VerticalAlign.Center)
+      .margin({ top: PMSpacing.MD })
+    }
+    .width('100%')
+    .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.LG })
+    .alignItems(HorizontalAlign.Start)
   }
 
   @Builder
@@ -3652,5 +3687,9 @@ struct ProjectHome {
     }
     .width('100%')
     .height('100%')
+    .bindSheet($$this.showCapturePanel, this.CaptureSheet(), {
+      height: 640,
+      dragBar: true
+    })
   }
 }

@@ -17,6 +17,8 @@ export struct PMAppBar {
   @Prop rightIconLabel: string = '';
   @Prop rightIconDescription: string = '';
   public onRightAction?: () => void;
+  /** 文字型右侧动作的独立回调（未设置时回退 onRightAction） */
+  public onRightTextAction?: () => void;
 
   build() {
     Row() {
@@ -80,7 +82,9 @@ export struct PMAppBar {
           .backgroundColor(PMColors.BRAND_LIGHT)
           .clickEffect(PMInteraction.PRESS_EFFECT)
           .onClick(() => {
-            if (this.onRightAction) {
+            if (this.onRightTextAction) {
+              this.onRightTextAction();
+            } else if (this.onRightAction) {
               this.onRightAction();
             }
           })

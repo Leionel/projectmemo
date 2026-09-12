@@ -379,3 +379,138 @@ describe("Change Impact Analysis and Temporal Supersession", () => {
     expect(analysis.supersededCardTitle).toBe(targetCard.title);
   });
 });
+
+describe("Change impact matching disambiguation (R0)", () => {
+  async function createIsolatedProject(title: string) {
+    const project = await db.project.create({
+      data: {
+        title,
+        description: "R0 匹配歧义防护用例",
+        goal: "回归防护",
+        scenario: "COMPETITION",
+      },
+    });
+    return project;
+  }
+
+  async function createCard(projectId: string, title: string, keywords: string[]) {
+    const capture = await db.capture.create({
+      data: { projectId, rawText: title, sourceType: "测试" },
+    });
+    return db.knowledgeCard.create({
+      data: {
+        projectId,
+        captureId: capture.id,
+        type: "meeting_note",
+        title,
+        summary: title,
+        keywords,
+        relatedTasks: [],
+        nextActions: [],
+        importance: 3,
+      },
+    });
+  }
+
+  it("same-title cards yield ambiguity candidates instead of auto-supersession", async () => {
+    const project = await createIsolatedProject("同名卡歧义测试项目");
+    try {
+      const card1 = await createCard(project.id, "模型方案A:全参数密集模型微调", ["模型方案A"]);
+      const card2 = await createCard(project.id, "模型方案A:全参数密集模型微调", ["模型方案A"]);
+
+      // 两张同名卡得分必然并列：系统不得自动选定取代目标，只能给出候选
+      const proposal = await analyzeChangeImpact(project.id, "将模型方案A:全参数密集模型微调改为方案B");
+      expect(proposal.supersededCardId).toBeNull();
+      expect(proposal.ambiguousCandidateIds).toBeDefined();
+      expect(proposal.ambiguousCandidateIds).toHaveLength(2);
+      expect(proposal.ambiguousCandidateIds).toContain(card1.id);
+      expect(proposal.ambiguousCandidateIds).toContain(card2.id);
+
+      // 非候选卡片即使属于本项目也不允许指定为被取代对象
+      const outsider = await createCard(project.id, "完全无关的会议记录", ["会议"]);
+      await expect(
+        confirmChangeImpact(project.id, {
+          proposalId: proposal.proposalId,
+          newFactText: "将模型方案A:全参数密集模型微调改为方案B",
+          supersededCardId: outsider.id,
+        })
+      ).rejects.toThrow("指定的被取代卡片与提案预览不一致");
+
+      // 用户从候选集合中明确选择后允许确认，且另一张候选卡保持活跃
+      const result = await confirmChangeImpact(project.id, {
+        proposalId: proposal.proposalId,
+        newFactText: "将模型方案A:全参数密集模型微调改为方案B",
+        supersededCardId: card1.id,
+      });
+      expect(result.success).toBe(true);
+      expect(result.supersededCardId).toBe(card1.id);
+
+      const relation = await db.cardRelation.findFirst({
+        where: { currentCardId: result.newCardId, relatedCardId: card1.id, relationType: "SUPERSEDES" },
+      });
+      expect(relation).not.toBeNull();
+
+      const relationsForCard2 = await db.cardRelation.count({ where: { relatedCardId: card2.id } });
+      expect(relationsForCard2).toBe(0);
+    } finally {
+      await db.project.delete({ where: { id: project.id } }).catch(() => {});
+    }
+  });
+
+  it("superseded card is excluded from matching until its supersession relation is revoked", async () => {
+    const project = await createIsolatedProject("失效卡匹配测试项目");
+    try {
+      const baseCard = await createCard(project.id, "方案S:初始基线方案", ["方案S"]);
+      const newerCard = await createCard(project.id, "团队例会纪要与排期安排", ["例会"]);
+
+      await db.cardRelation.create({
+        data: {
+          currentCardId: newerCard.id,
+          relatedCardId: baseCard.id,
+          relationType: "SUPERSEDES",
+          reason: "测试：取代基线方案",
+          score: 100,
+          confidence: 1.0,
+          confirmed: true,
+          confirmedAt: new Date(),
+          validFrom: new Date(),
+        },
+      });
+
+      // 输入完整包含旧卡标题（若未过滤必得高分），但已取代的旧卡不得再作为自动取代目标
+      const analysis = await analyzeChangeImpact(
+        project.id,
+        "方案S:初始基线方案作废，直接采用方案T:量化管线"
+      );
+      expect(analysis.supersededCardId).toBeNull();
+
+      // 撤销取代关系后，旧决策恢复有效，可以重新被匹配
+      await db.cardRelation.updateMany({
+        where: { currentCardId: newerCard.id, relatedCardId: baseCard.id, relationType: "SUPERSEDES" },
+        data: { revokedAt: new Date() },
+      });
+
+      const analysisAfterRevoke = await analyzeChangeImpact(
+        project.id,
+        "方案S:初始基线方案替换为方案T:量化管线"
+      );
+      expect(analysisAfterRevoke.supersededCardId).toBe(baseCard.id);
+    } finally {
+      await db.project.delete({ where: { id: project.id } }).catch(() => {});
+    }
+  });
+
+  it("near-title distractor: the explicitly named card wins without ambiguity", async () => {
+    const project = await createIsolatedProject("相近标题测试项目");
+    try {
+      const namedCard = await createCard(project.id, "模型方案A:全参数微调", ["模型方案A"]);
+      await createCard(project.id, "模型方案A2:轻量微调", ["模型方案A2"]);
+
+      const analysis = await analyzeChangeImpact(project.id, "模型方案A:全参数微调替换为方案B");
+      expect(analysis.supersededCardId).toBe(namedCard.id);
+      expect(analysis.ambiguousCandidateIds).toBeUndefined();
+    } finally {
+      await db.project.delete({ where: { id: project.id } }).catch(() => {});
+    }
+  });
+});

@@ -10,9 +10,10 @@ const DOMAIN = 0x0000;
 
 export default class EntryFormAbility extends FormExtensionAbility {
   private buildFormData(want?: Want): Record<string, string | number> {
+    // 未接入真实数据前，默认值必须显式标识为示例，避免演示时把演示数值当成真实项目状态
     const title = typeof want?.parameters?.['projectTitle'] === 'string'
       ? (want.parameters?.['projectTitle'] as string)
-      : '忆程 ProjectMemo 备赛看板';
+      : '忆程备赛看板（示例数据）';
     const daysLeft = typeof want?.parameters?.['daysLeft'] === 'number'
       ? (want.parameters?.['daysLeft'] as number)
       : 2;
@@ -21,10 +22,10 @@ export default class EntryFormAbility extends FormExtensionAbility {
       : 80;
     const nextAction = typeof want?.parameters?.['nextAction'] === 'string'
       ? (want.parameters?.['nextAction'] as string)
-      : '完成端侧轻量方案消融测试';
+      : '示例：连接后端后显示真实待办';
     const status = typeof want?.parameters?.['status'] === 'string'
       ? (want.parameters?.['status'] as string)
-      : '备赛决胜阶段';
+      : '示例数据';
 
     return {
       'projectTitle': title,

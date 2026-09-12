@@ -17,6 +17,8 @@ export interface ChangeImpactProposal {
   newFactText: string;
   supersededCardId: string | null;
   supersededCardTitle: string | null;
+  /** 最高分并列时的候选卡片：评分只生成候选，歧义时必须由用户选择，不自动取代 */
+  ambiguousCandidateIds?: string[];
   impactedActions: ChangeImpactItem[];
   impactedArtifacts: ChangeImpactItem[];
   summary: string;

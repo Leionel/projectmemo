@@ -5,12 +5,12 @@ let storage = new LocalStorage();
 @Entry(storage)
 @Component
 struct WidgetCard {
-  /* 存储卡片数据 */
-  @LocalStorageProp('projectTitle') projectTitle: string = '忆程备赛看板';
+  /* 存储卡片数据（未收到真实推送前显示示例数据，需明确标识） */
+  @LocalStorageProp('projectTitle') projectTitle: string = '忆程备赛看板（示例数据）';
   @LocalStorageProp('daysLeft') daysLeft: number = 2;
   @LocalStorageProp('readiness') readiness: number = 80;
-  @LocalStorageProp('nextAction') nextAction: string = '完成端侧轻量方案消融测试';
-  @LocalStorageProp('status') status: string = '决胜阶段';
+  @LocalStorageProp('nextAction') nextAction: string = '示例：连接后端后显示真实待办';
+  @LocalStorageProp('status') status: string = '示例数据';
 
   build() {
     Column() {

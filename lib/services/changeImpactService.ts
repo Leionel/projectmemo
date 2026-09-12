@@ -29,6 +29,8 @@ export async function analyzeChangeImpact(projectId: string, newFactText: string
   // 2. 匹配可能被替代的原决策卡片（基于核心实体、标题语义及重合度精准匹配，绝不以卡片类型无脑兜底）
   let supersededCard: (typeof activeCards)[0] | null = null;
   let maxScore = 0;
+  let topScoreTies = 0;
+  let topScoreCandidateIds: string[] = [];
 
   // 尝试从语法结构中提取被替代的目标短语（如“将方案A改为方案B”中的“方案A”）
   const changePatternMatch = trimmed.match(/(?:将|从)?(.+?)(?:改为|替换为|调整为|转为|升级为|变更为|取代)(.+)/);
@@ -80,11 +82,24 @@ export async function analyzeChangeImpact(projectId: string, newFactText: string
     if (score > maxScore) {
       maxScore = score;
       supersededCard = card;
+      topScoreTies = 1;
+      topScoreCandidateIds = [card.id];
+    } else if (score === maxScore && score > 0) {
+      topScoreTies++;
+      topScoreCandidateIds.push(card.id);
     }
   }
 
   // 严谨置信度门槛：只有匹配得分达到明确关联要求时才确认被取代，否则为 null 供用户手动指定，绝不胡乱兜底
   if (maxScore < 30) {
+    supersededCard = null;
+  }
+
+  // 歧义保护：最高分并列（同名/相近标题）说明无法唯一确定被取代对象，评分只生成候选，
+  // 必须由用户在确认时明确选择，不得自动取代
+  let ambiguousCandidateIds: string[] | undefined;
+  if (supersededCard && topScoreTies > 1) {
+    ambiguousCandidateIds = topScoreCandidateIds;
     supersededCard = null;
   }
 
@@ -149,6 +164,7 @@ export async function analyzeChangeImpact(projectId: string, newFactText: string
       trace: {
         newFactText: trimmed,
         supersededCardId: supersededCard ? supersededCard.id : null,
+        ambiguousCandidateIds: ambiguousCandidateIds ?? [],
         allowedCancelledActionIds: impactedActions.map((a) => a.targetId),
       },
       resultJson: {
@@ -164,11 +180,14 @@ export async function analyzeChangeImpact(projectId: string, newFactText: string
     newFactText: trimmed,
     supersededCardId: supersededCard ? supersededCard.id : null,
     supersededCardTitle: supersededCard ? supersededCard.title : null,
+    ambiguousCandidateIds,
     impactedActions,
     impactedArtifacts,
     summary: supersededCard
       ? `检测到新决策将取代原事实【${supersededCard.title}】，预计影响 ${impactedActions.length} 项待办行动和 ${impactedArtifacts.length} 份成果草稿。`
-      : `已生成决策变更影响分析，涉及 ${impactedActions.length} 项待办行动。`,
+      : ambiguousCandidateIds && ambiguousCandidateIds.length > 1
+        ? `存在 ${ambiguousCandidateIds.length} 张候选卡片可能被新决策取代，请手动选择，系统不做自动取代。`
+        : `已生成决策变更影响分析，涉及 ${impactedActions.length} 项待办行动。`,
   };
 
   await db.agentRun.update({
@@ -220,6 +239,7 @@ export async function confirmChangeImpact(projectId: string, input: ConfirmChang
       : {}) as {
       newFactText?: string;
       supersededCardId?: string | null;
+      ambiguousCandidateIds?: string[];
       allowedCancelledActionIds?: string[];
     };
 
@@ -233,12 +253,17 @@ export async function confirmChangeImpact(projectId: string, input: ConfirmChang
     }
     const finalFactText = boundFactText || (input.newFactText ? input.newFactText.trim() : "");
 
-    // 强校验 2：如果调用方传了 supersededCardId，必须与持久化提案完全一致
+    // 强校验 2：如果调用方传了 supersededCardId，必须与持久化提案完全一致；
+    // 例外：提案因最高分并列未自动选定时，允许用户从持久化的歧义候选集合中明确选择
     const inputSuperseded = input.supersededCardId === undefined ? boundSupersededCardId : (input.supersededCardId ?? null);
     if (inputSuperseded !== boundSupersededCardId) {
-      throw new AppError("PROPOSAL_PAYLOAD_MISMATCH", "指定的被取代卡片与提案预览不一致", 400);
+      const ambiguityCandidates = new Set(trace.ambiguousCandidateIds || []);
+      const userSelectionAllowed = boundSupersededCardId === null && inputSuperseded !== null && ambiguityCandidates.has(inputSuperseded);
+      if (!userSelectionAllowed) {
+        throw new AppError("PROPOSAL_PAYLOAD_MISMATCH", "指定的被取代卡片与提案预览不一致", 400);
+      }
     }
-    const finalSupersededCardId = boundSupersededCardId;
+    const finalSupersededCardId = inputSuperseded;
 
     // 强校验 3：取消的行动必须是提案预览允许集合的严格子集，杜绝夹带无关任务
     if (input.cancelledActionIds && input.cancelledActionIds.length > 0) {

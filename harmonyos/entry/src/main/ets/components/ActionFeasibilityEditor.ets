@@ -147,7 +147,7 @@ export struct ActionFeasibilityEditor {
     try {
       const input = new FeasibilityInput();
       input.actionId = this.actionId;
-      input.estimatedMinutes = clear ? null : Number.parseInt(trimmed, 10);
+      input.estimatedMinutes = clear ? undefined : Number.parseInt(trimmed, 10);
       await this.apply(input);
       this.estimateText = clear ? '' : trimmed;
     } catch (e) {
@@ -251,7 +251,7 @@ export struct ActionFeasibilityEditor {
 
         // 添加依赖：来源切换 + 候选列表
         Row({ space: PMSpacing.SM }) {
-          Button('行动', this.pickerSource === 'action' ? ButtonType.Normal : ButtonType.Normal)
+          Button('行动')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(this.pickerSource === 'action' ? PMColors.BRAND : PMColors.INK_SECONDARY)
             .backgroundColor(this.pickerSource === 'action' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)

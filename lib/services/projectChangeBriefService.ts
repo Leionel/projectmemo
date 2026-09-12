@@ -106,6 +106,7 @@ export function buildChangeBrief(diff: ProjectStateDiff, options: { generatedAt?
       impact,
       suggestion,
       evidenceCount: item.evidenceRefs.length,
+      evidence: item.evidenceRefs.map((ref) => ({ entityKind: ref.entityKind, entityId: ref.entityId })),
     };
   });
 

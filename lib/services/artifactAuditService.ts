@@ -201,7 +201,7 @@ export async function getArtifactAudit(projectId: string, artifactId: string): P
   const recheck = refs.map((ref) => buildRecheckItem(ref, states.get(ref.cardId)));
 
   // 逐句核验：仅模板绑定映射参与；来源缺失显示"来源已删除"
-  let claimsStatus: ArtifactClaimsAuditStatus = storedClaims ? storedClaims.status : "LEGACY_NO_CLAIMS";
+  const claimsStatus: ArtifactClaimsAuditStatus = storedClaims ? storedClaims.status : "LEGACY_NO_CLAIMS";
   const claimItems: ArtifactClaimAuditItem[] = (storedClaims?.claims ?? []).map((claim): ArtifactClaimAuditItem => {
     const cardStates = claim.cardIds.map((cardId) => {
       const item = states.get(cardId);

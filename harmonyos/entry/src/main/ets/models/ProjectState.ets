@@ -93,6 +93,11 @@ export class StateCheckInResponse {
 
 // ---- C1 变化简报（服务端确定性模板） ----
 
+export class BriefEvidence {
+  entityKind: string = 'card';
+  entityId: string = '';
+}
+
 export class BriefSentence {
   changeKey: string = '';
   kind: string = 'CHANGED';
@@ -100,6 +105,7 @@ export class BriefSentence {
   impact: string = '';
   suggestion: string = '';
   evidenceCount: number = 0;
+  evidence: BriefEvidence[] = [];
 }
 
 export class ChangeBrief {

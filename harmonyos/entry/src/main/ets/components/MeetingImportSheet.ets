@@ -1,5 +1,5 @@
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction, PMMotion } from '../common/DesignTokens';
-import { MeetingAppliedChange, MeetingConfirmBody, MeetingConfirmResult, MeetingImpactPreview, MeetingTypedChange } from '../models/Meeting';
+import { MeetingAppliedChange, MeetingConfirmBody, MeetingConfirmResult, MeetingImpactPreview, MeetingPreviewInput, MeetingTypedChange } from '../models/Meeting';
 import { ApiError } from '../models/Project';
 import { MeetingService } from '../services/MeetingService';
 
@@ -79,10 +79,12 @@ export struct MeetingImportSheet {
     this.isLoadingPreview = true;
     this.errorMessage = '';
     try {
-      this.preview = await this.meetingService.preview(this.projectId, {
-        text: this.draftText,
-        meetingDate: date !== '' ? date : undefined
-      });
+      const input = new MeetingPreviewInput();
+      input.text = this.draftText;
+      if (date !== '') {
+        input.meetingDate = date;
+      }
+      this.preview = await this.meetingService.preview(this.projectId, input);
       this.hasPreview = true;
       this.stage = 'preview';
       this.selectedIds = [];

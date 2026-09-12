@@ -1,5 +1,5 @@
-import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMotion } from '../common/DesignTokens';
-import { ChangeBrief, BriefSentence } from '../models/ProjectState';
+import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMotion, PMInteraction } from '../common/DesignTokens';
+import { BriefEvidence, ChangeBrief, BriefSentence } from '../models/ProjectState';
 
 // C1 变化简报：变化 → 影响 → 建议，逐句可追溯（依据数量）。
 // 简报内容来自服务端确定性模板；读简报不创建行动；“已了解”复用状态面板的游标逻辑。
@@ -8,6 +8,7 @@ export struct ProjectChangeBrief {
   @Prop brief: ChangeBrief = new ChangeBrief();
   onClose: () => void = () => {};
   onGoActions: () => void = () => {};
+  onOpenEvidence: (entityKind: string) => void = (_kind: string) => {};
 
   private kindGlyph(kind: string): string {
     if (kind === 'ADDED') return '＋';
@@ -57,6 +58,30 @@ export struct ProjectChangeBrief {
         .fontColor(PMColors.BRAND)
         .lineHeight(18)
         .margin({ top: 2 })
+
+      if (sentence.evidence.length > 0) {
+        Row({ space: PMSpacing.XS }) {
+          ForEach(sentence.evidence.slice(0, 3), (ref: BriefEvidence) => {
+            Text(`📎 ${ref.entityKind === 'card' ? '记忆' : ref.entityKind === 'action' ? '行动' : ref.entityKind === 'deliverable' ? '交付物' : ref.entityKind}`)
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.BRAND)
+              .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 2, bottom: 2 })
+              .backgroundColor(PMColors.BRAND_LIGHT)
+              .borderRadius(PMRadius.XS)
+              .clickEffect(PMInteraction.PRESS_EFFECT)
+              .onClick(() => {
+                this.onOpenEvidence(ref.entityKind);
+              })
+              .accessibilityText(`打开${ref.entityKind}类证据`)
+          }, (ref: BriefEvidence) => ref.entityId)
+          if (sentence.evidence.length > 3) {
+            Text(`+${sentence.evidence.length - 3}`)
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+          }
+        }
+        .margin({ top: 4 })
+      }
     }
     .width('100%')
     .padding(PMSpacing.MD)

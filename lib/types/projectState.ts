@@ -147,6 +147,11 @@ export interface StateDiffItem {
 
 // ---- C1：变化简报（确定性模板，逐句携带 changeKey 与证据数量；读简报不创建行动） ----
 
+export interface ChangeBriefEvidence {
+  entityKind: string;
+  entityId: string;
+}
+
 export interface ChangeBriefSentence {
   changeKey: string;
   kind: StateDiffKind;
@@ -157,6 +162,8 @@ export interface ChangeBriefSentence {
   /** 建议 */
   suggestion: string;
   evidenceCount: number;
+  /** 可点开的证据引用（实体种类 + 项目内 ID） */
+  evidence: ChangeBriefEvidence[];
 }
 
 export interface ProjectChangeBrief {

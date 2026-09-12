@@ -3683,6 +3683,19 @@ struct ProjectHome {
           },
           onGoActions: () => {
             this.currentTabIndex = 2;
+          },
+          onOpenEvidence: (entityKind: string) => {
+            // 证据按实体种类跳转到对应 Tab；V1 为页签级定位
+            this.showChangeBrief = false;
+            if (entityKind === 'card') {
+              this.currentTabIndex = 1;
+            } else if (entityKind === 'action') {
+              this.currentTabIndex = 2;
+            } else if (entityKind === 'deliverable') {
+              this.currentTabIndex = 4;
+            } else {
+              this.currentTabIndex = 0;
+            }
           }
         })
       }
@@ -3735,7 +3748,7 @@ struct ProjectHome {
       dragBar: true
     })
     .bindSheet($$this.showMeetingSheet, this.MeetingSheetWrapper(), {
-      height: SheetSize.BIG,
+      height: 640,
       dragBar: true
     })
   }

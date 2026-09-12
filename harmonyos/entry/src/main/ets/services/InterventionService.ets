@@ -8,6 +8,11 @@ import { ApiError } from '../models/Project';
 const PENDING_EXPOSURE_KEY = 'pendingExposureIds';
 const PENDING_EXPOSURE_LIMIT = 100;
 
+class ExposureBody {
+  installationId: string = '';
+  interventionIds: string[] = [];
+}
+
 export class InterventionService {
   private client: ApiClient = new ApiClient();
 
@@ -44,11 +49,10 @@ export class InterventionService {
     }
     const ids = Array.from<string>(mergedSet);
     try {
-      const body: Record<string, string | string[]> = {
-        'installationId': AppStorage.get<string>('deviceConsumerKey') ?? 'unknown-installation',
-        'interventionIds': ids
-      };
-      await this.client.post<{ exposed: number; duplicates: number }>(
+      const body = new ExposureBody();
+      body.installationId = AppStorage.get<string>('deviceConsumerKey') ?? 'unknown-installation';
+      body.interventionIds = ids;
+      await this.client.post<object>(
         `/api/projects/${projectId}/interventions/exposures`,
         body
       );

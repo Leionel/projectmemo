@@ -43,6 +43,9 @@ import { MarkdownView } from '../components/MarkdownView';
 import { DeadlineBadge } from '../components/DeadlineBadge';
 import { ChangeImpactDialog } from '../components/ChangeImpactDialog';
 import { ClaimAuditorDrawer } from '../components/ClaimAuditorDrawer';
+import { ProjectStatePanel } from '../components/ProjectStatePanel';
+import { ProjectStateDiffSheet } from '../components/ProjectStateDiffSheet';
+import { StateDiff } from '../models/ProjectState';
 import { JudgeRebuttalModal } from '../components/JudgeRebuttalModal';
 import { AttachmentCorrectionModal } from '../components/AttachmentCorrectionModal';
 import { ExportFormatter } from '../common/ExportFormatter';
@@ -86,6 +89,8 @@ struct ProjectHome {
   @State showCapturePanel: boolean = false;
   @State showChangeImpactDialog: boolean = false;
   @State showClaimAuditor: boolean = false;
+  @State showStateDiffSheet: boolean = false;
+  @State stateDiffForSheet: StateDiff = new StateDiff();
   @State isExportingProvenance: boolean = false;
   @State lifecycleActionCardId: string = '';
   @State showJudgeRebuttal: boolean = false;
@@ -1165,6 +1170,18 @@ struct ProjectHome {
   private CockpitView() {
     Scroll() {
       Column() {
+        // 问题零：变了什么、依据是什么（R2/S1 状态快照与 Diff）
+        ProjectStatePanel({
+          projectId: this.projectId,
+          onOpenDiffSheet: (diff: StateDiff) => {
+            this.stateDiffForSheet = diff;
+            this.showStateDiffSheet = true;
+          },
+          onGoActions: () => {
+            this.currentTabIndex = 2;
+          }
+        })
+
         // 问题一：现在怎么样？（当前判断与准备度）
         Column() {
           Row() {
@@ -3307,6 +3324,15 @@ struct ProjectHome {
           },
           onSuccess: () => {
             this.loadAllData();
+          }
+        })
+      }
+
+      if (this.showStateDiffSheet) {
+        ProjectStateDiffSheet({
+          diff: this.stateDiffForSheet,
+          onClose: () => {
+            this.showStateDiffSheet = false;
           }
         })
       }

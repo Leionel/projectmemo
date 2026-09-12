@@ -2,6 +2,7 @@ import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.Ab
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import { PMWindowMetrics } from '../common/WindowMetrics';
+import { DeviceIdentity } from '../common/DeviceIdentity';
 
 const DOMAIN = 0x0000;
 
@@ -23,6 +24,7 @@ export default class EntryAbility extends UIAbility {
 
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     this.captureNotificationRoute(want);
+    DeviceIdentity.init(this.context);
     try {
       this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
     } catch (err) {

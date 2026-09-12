@@ -1,5 +1,5 @@
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMotion, PMMaterial } from '../common/DesignTokens';
-import { ArtifactAuditResponse, ArtifactAuditRecheckItem, ArtifactGenerationRef } from '../models/Artifact';
+import { ArtifactAuditResponse, ArtifactAuditRecheckItem, ArtifactClaimAuditItem, ArtifactGenerationRef } from '../models/Artifact';
 import { ApiError } from '../models/Project';
 import { ArtifactService } from '../services/ArtifactService';
 
@@ -243,6 +243,43 @@ export struct ClaimAuditorDrawer {
                 .backgroundColor(PMColors.SURFACE_SUBTLE)
                 .borderRadius(PMRadius.SM)
                 .width('100%')
+
+              // E3：逐句核验——每条 claim 展示文本与当前依据状态
+              if (this.audit.claims.length > 0) {
+                Text(`逐句核验（${this.audit.claims.length} 条）`)
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontWeight(FontWeight.Bold)
+                  .fontColor(PMColors.BRAND)
+                  .margin({ top: PMSpacing.MD, bottom: PMSpacing.SM })
+
+                ForEach(this.audit.claims, (claim: ArtifactClaimAuditItem) => {
+                  Column() {
+                    Text(claim.text)
+                      .fontSize(PMFontSize.CAPTION)
+                      .fontColor(PMColors.INK_PRIMARY)
+                      .lineHeight(18)
+                    Row() {
+                      Text(claim.stateLabel)
+                        .fontSize(PMFontSize.CAPTION)
+                        .fontColor(claim.state === 'CURRENT' ? PMColors.SUCCESS :
+                          claim.state === 'SUPERSEDED' ? PMColors.RISK : PMColors.EVIDENCE)
+                      Text(claim.section !== '' ? `章节：${claim.section}` : '')
+                        .fontSize(PMFontSize.CAPTION)
+                        .fontColor(PMColors.INK_TERTIARY)
+                    }
+                    .width('100%')
+                    .justifyContent(FlexAlign.SpaceBetween)
+                    .margin({ top: 2 })
+                  }
+                  .width('100%')
+                  .padding(PMSpacing.SM)
+                  .backgroundColor(PMColors.SURFACE_SUBTLE)
+                  .borderRadius(PMRadius.XS)
+                  .margin({ bottom: PMSpacing.XS })
+                  .alignItems(HorizontalAlign.Start)
+                  .accessibilityText(`逐句核验：${claim.text}，状态${claim.stateLabel}`)
+                }, (claim: ArtifactClaimAuditItem) => claim.claimId)
+              }
 
               Text(`口径二 · 当前重新检查（${this.formatDay(this.audit.recheckedAt)}）`)
                 .fontSize(PMFontSize.CAPTION)

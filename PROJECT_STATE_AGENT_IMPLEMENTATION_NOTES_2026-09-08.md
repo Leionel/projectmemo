@@ -114,6 +114,19 @@
 |---|---|---|---|
 | M1 | PASS | 尚未执行 | IN_PROGRESS |
 
+## 2026-09-12（第五轮）：执行收尾方案 E3（R1 逐句 claim 来源）
+
+1. 模板绑定 claim 生成：`generateMockArtifactWithClaims` 在渲染确定性模板时同步登记逐句映射（text 与正文逐字一致）；修复模板记录急切求值导致 claim 重复登记的缺陷（改为惰性渲染）。
+2. LLM 路径无映射时存 `UNMAPPED_MODEL`，audit 明确"相关来源，语义未核验"，不冒充 SUPPORTED；映射上线前的旧成果标 `LEGACY_NO_CLAIMS`。
+3. audit 返回 claims[]（state: CURRENT/SUPERSEDED/UNCONFIRMED/MISSING + 逐卡状态）；抽屉新增"逐句核验"区块、导出新增逐句核验表，与页面同源。
+4. 迁移 20260912230000（GeneratedArtifact.claims）；两个库均已 deploy。
+
+回执：`evidence/closeout-20260912/E3/receipt.md`。验证：tsc 0；vitest 200 通过（独立库）；harmony:test 27/27。
+
+| 项 | 代码验收 | 设备验收 | 总状态 |
+|---|---|---|---|
+| R1 | PASS | 尚未执行 | IN_PROGRESS |
+
 ### 后续入口
 
 > 从 T1 鸿蒙会议导入界面与 B1 曝光上报开始补齐，然后在一台真机上按计划第 9 节 UI 矩阵过一遍新界面；平台可用时执行 R3 对账（`verify:w03`），再开 R4。

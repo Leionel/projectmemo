@@ -3,9 +3,15 @@ import { db } from "@/lib/db";
 import { generateArtifact, saveEditedArtifactVersion } from "@/lib/services/artifactService";
 import { getArtifactAudit } from "@/lib/services/artifactAuditService";
 import { analyzeChangeImpact, confirmChangeImpact } from "@/lib/services/changeImpactService";
+import { Prisma } from "@/lib/generated/prisma/client";
 
 describe("Artifact provenance audit (R1)", () => {
   let projectId: string;
+
+  async function weeklyAuditClaims(pid: string, artifactId: string): Promise<string[]> {
+    const claimAudit = await getArtifactAudit(pid, artifactId);
+    return claimAudit.claims.map((claim) => claim.text);
+  }
 
   beforeAll(async () => {
     const project = await db.project.create({
@@ -59,8 +65,62 @@ describe("Artifact provenance audit (R1)", () => {
     // 独立事实无确认关系：时间线语义为“证据不足”，不得虚构 SUPPORTS；但未被取代
     expect(audit.recheck[0].supportState).toBe("INSUFFICIENT");
     expect(audit.recheck[0].supersededBy).toBeNull();
-    expect(audit.message).toContain("未被取代");
-    expect(audit.message).toContain("证据不足");
+
+    // E3：模板路径自带逐句映射，独立事实的引用诚实标注“尚无确认支撑”
+    expect(audit.claimsStatus).toBe("TEMPLATE_BOUND");
+    expect(audit.claims).toHaveLength(1);
+    expect(audit.claims[0].cardIds).toEqual([card.id]);
+    expect(audit.claims[0].state).toBe("UNCONFIRMED");
+    expect(audit.claims[0].stateLabel).toContain("尚无确认支撑");
+    expect(audit.message).toContain("逐句映射 1 条");
+    expect(audit.message).toContain("尚无确认支撑");
+  });
+
+  it("binds per-sentence claims only to the cards each section rendered", async () => {
+    await seedCard("实验记录：完成端侧推理时延测试");
+    await seedCard("任务：准备复赛演示环境");
+    const outline = await generateArtifact(projectId, "competition_outline");
+    const weekly = await generateArtifact(projectId, "weekly_report");
+
+    const outlineAudit = await getArtifactAudit(projectId, outline.id);
+    expect(outlineAudit.claimsStatus).toBe("TEMPLATE_BOUND");
+    expect(outlineAudit.claims.length).toBeGreaterThanOrEqual(2);
+    // claim 文本逐字出现在成果正文中（正文定位可验证）
+    for (const claim of outlineAudit.claims) {
+      expect(outline.content).toContain(claim.text);
+    }
+    // 周报与大纲的 claim 各自绑定本类型模板渲染的卡片，互不冒充
+    for (const claimText of await weeklyAuditClaims(projectId, weekly.id)) {
+      expect(weekly.content).toContain(claimText);
+    }
+  });
+
+  it("reports unmapped model artifacts as semantically unverified", async () => {
+    await seedCard("记录：完成基线实验");
+    const artifact = await generateArtifact(projectId, "weekly_report");
+    // 模拟 LLM 路径：有上下文来源但没有逐句映射
+    await db.generatedArtifact.update({
+      where: { id: artifact.id },
+      data: { claims: { status: "UNMAPPED_MODEL", claims: [] } as object },
+    });
+
+    const audit = await getArtifactAudit(projectId, artifact.id);
+    expect(audit.untraceable).toBe(false);
+    expect(audit.claimsStatus).toBe("UNMAPPED_MODEL");
+    expect(audit.claims).toHaveLength(0);
+    expect(audit.message).toContain("语义未核验");
+  });
+
+  it("marks pre-claim artifacts as legacy context-only provenance", async () => {
+    await seedCard("历史卡：早期实验记录");
+    const artifact = await generateArtifact(projectId, "weekly_report");
+    await db.generatedArtifact.update({ where: { id: artifact.id }, data: { claims: Prisma.JsonNull } });
+
+    const audit = await getArtifactAudit(projectId, artifact.id);
+    expect(audit.untraceable).toBe(false);
+    expect(audit.claimsStatus).toBe("LEGACY_NO_CLAIMS");
+    expect(audit.claims).toHaveLength(0);
+    expect(audit.message).toContain("上下文级");
   });
 
   it("reports historical artifacts without stored refs as untraceable instead of fabricating evidence", async () => {
@@ -101,6 +161,10 @@ describe("Artifact provenance audit (R1)", () => {
     expect(superseded?.supersededConfirmedAt).not.toBeNull();
     expect(superseded?.supersededReason).not.toBeNull();
     expect(audit.message).toContain("已被新决策取代");
+    // 绑定到被取代卡的逐句映射同步降级
+    const supersededClaim = audit.claims.find((claim) => claim.state === "SUPERSEDED");
+    expect(supersededClaim).toBeDefined();
+    expect(supersededClaim?.text).toContain("选型方案A");
 
     // 撤销取代关系后，重新检查应恢复旧卡的当前有效状态
     const relation = await db.cardRelation.findFirst({

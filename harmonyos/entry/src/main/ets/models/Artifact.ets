@@ -40,6 +40,16 @@ export class ArtifactAuditRecheckItem {
   supersededReason: string | null = null;
 }
 
+export class ArtifactClaimAuditItem {
+  claimId: string = '';
+  text: string = '';
+  section: string = '';
+  verification: string = 'TEMPLATE_BOUND';
+  cardIds: string[] = [];
+  state: string = 'UNVERIFIED';
+  stateLabel: string = '';
+}
+
 export class ArtifactAuditResponse {
   artifactId: string = '';
   artifactType: string = '';
@@ -48,6 +58,8 @@ export class ArtifactAuditResponse {
   message: string = '';
   generationRefs: ArtifactGenerationRef[] = [];
   recheck: ArtifactAuditRecheckItem[] = [];
+  claimsStatus: string = 'NONE';
+  claims: ArtifactClaimAuditItem[] = [];
   recheckedAt: string = '';
 }
 

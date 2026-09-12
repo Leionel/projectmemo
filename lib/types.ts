@@ -165,6 +165,34 @@ export interface ProposedAction {
   dueAt?: string;
 }
 
+/** 逐句映射（模板绑定）：claim 文本在成果正文中逐字出现，cardIds 为该句绑定证据 */
+export interface ArtifactClaimEntry {
+  claimId: string;
+  text: string;
+  section: string;
+  verification: "TEMPLATE_BOUND";
+  cardIds: string[];
+}
+
+export type ArtifactClaimsStatus = "TEMPLATE_BOUND" | "UNMAPPED_MODEL";
+
+export interface ArtifactClaims {
+  status: ArtifactClaimsStatus;
+  claims: ArtifactClaimEntry[];
+}
+
+/** audit 中的逐句核验结果 */
+export interface ArtifactClaimAuditItem {
+  claimId: string;
+  text: string;
+  section: string;
+  verification: "TEMPLATE_BOUND" | "UNVERIFIED_SEMANTICS";
+  cardIds: string[];
+  state: "CURRENT" | "SUPERSEDED" | "UNCONFIRMED" | "MISSING" | "UNVERIFIED";
+  stateLabel: string;
+  cardStates: Array<{ cardId: string; supportState: string; statusLabel: string }>;
+}
+
 /** 成果生成时固化的证据引用快照：保存当时的卡片摘要，不随后续卡片编辑变化 */
 export interface ArtifactGenerationRef {
   cardId: string;
@@ -187,6 +215,12 @@ export interface ArtifactAuditRecheckItem {
   supersededReason: string | null;
 }
 
+export type ArtifactClaimsAuditStatus =
+  | "TEMPLATE_BOUND"
+  | "UNMAPPED_MODEL"
+  | "LEGACY_NO_CLAIMS"
+  | "NONE";
+
 export interface ArtifactAuditResponse {
   artifactId: string;
   artifactType: ArtifactTypeValue;
@@ -197,6 +231,9 @@ export interface ArtifactAuditResponse {
   message: string;
   generationRefs: ArtifactGenerationRef[];
   recheck: ArtifactAuditRecheckItem[];
+  /** E3：逐句映射核验；NONE = 未保存映射 */
+  claimsStatus: ArtifactClaimsAuditStatus;
+  claims: ArtifactClaimAuditItem[];
   recheckedAt: string;
 }
 

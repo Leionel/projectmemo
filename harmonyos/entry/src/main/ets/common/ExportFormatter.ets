@@ -1,5 +1,5 @@
 import { TextFormatters } from './TextFormatters';
-import { ArtifactAuditResponse, ArtifactAuditRecheckItem } from '../models/Artifact';
+import { ArtifactAuditResponse, ArtifactClaimAuditItem } from '../models/Artifact';
 
 export class ExportFormatter {
   /**
@@ -48,6 +48,21 @@ export class ExportFormatter {
         chain = `已被「${item.supersededByTitle}」取代（确认于 ${confirmedAt}）`;
       }
       doc += `| ${index} | ${summary}… | ${stateLabel} | ${chain} |\n`;
+    }
+
+    // E3：逐句核验表（仅模板绑定映射；未映射模型成果如实标注语义未核验）
+    if (audit.claims.length > 0) {
+      doc += `\n### 逐句核验（${audit.claims.length} 条）\n\n`;
+      doc += `| 编号 | 句子（正文逐字） | 章节 | 当前状态 |\n`;
+      doc += `| :--- | :--- | :--- | :--- |\n`;
+      for (let i = 0; i < audit.claims.length; i++) {
+        const claim: ArtifactClaimAuditItem = audit.claims[i];
+        const cleanText = claim.text.replace(/\|/g, '／').replace(/\n/g, ' ');
+        const section = claim.section !== '' ? claim.section : '—';
+        doc += `| ${claim.claimId} | ${cleanText} | ${section} | ${claim.stateLabel} |\n`;
+      }
+    } else if (!audit.untraceable) {
+      doc += `\n*本成果没有逐句映射：来源为上下文级引用，语义未核验。*\n`;
     }
 
     doc += `\n### 生成时回执（${audit.generatedAt.substring(0, 10)}，共 ${audit.generationRefs.length} 项，此后不随知识库变化）\n\n`;

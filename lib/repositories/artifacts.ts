@@ -11,6 +11,7 @@ export async function saveArtifact(
   artifactType: ArtifactTypeValue,
   content: string,
   sourceRefs?: Prisma.InputJsonValue,
+  claims?: Prisma.InputJsonValue,
 ) {
   return db.$transaction(async (tx) => {
     const artifact = await tx.generatedArtifact.create({
@@ -20,6 +21,7 @@ export async function saveArtifact(
         content,
         // 仅系统生成路径携带证据引用快照；人工编辑版本不传，保持无法逐句回溯的诚实语义
         ...(sourceRefs !== undefined ? { sourceRefs } : {}),
+        ...(claims !== undefined ? { claims } : {}),
       },
     });
     await tx.project.update({ where: { id: projectId }, data: { updatedAt: new Date() } });

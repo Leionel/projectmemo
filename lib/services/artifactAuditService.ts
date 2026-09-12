@@ -4,6 +4,8 @@ import { getTemporalSearchStates } from "@/lib/services/temporalLedgerService";
 import type {
   ArtifactAuditRecheckItem,
   ArtifactAuditResponse,
+  ArtifactClaimAuditItem,
+  ArtifactClaimsAuditStatus,
   ArtifactGenerationRef,
   ArtifactTypeValue,
   TemporalDecisionItem,
@@ -14,6 +16,36 @@ interface StoredSourceRef {
   observedAt: string;
   titleSnapshot: string;
   summarySnapshot: string;
+}
+
+interface StoredClaim {
+  claimId: string;
+  text: string;
+  section: string;
+  verification: string;
+  cardIds: string[];
+}
+
+function parseStoredClaims(raw: unknown): { status: "TEMPLATE_BOUND" | "UNMAPPED_MODEL"; claims: StoredClaim[] } | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const candidate = raw as { status?: unknown; claims?: unknown };
+  if (candidate.status !== "TEMPLATE_BOUND" && candidate.status !== "UNMAPPED_MODEL") return null;
+  const claims: StoredClaim[] = [];
+  if (Array.isArray(candidate.claims)) {
+    for (const item of candidate.claims) {
+      if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+      const entry = item as Record<string, unknown>;
+      if (typeof entry.claimId !== "string" || typeof entry.text !== "string") continue;
+      claims.push({
+        claimId: entry.claimId,
+        text: entry.text,
+        section: typeof entry.section === "string" ? entry.section : "",
+        verification: entry.verification === "TEMPLATE_BOUND" ? "TEMPLATE_BOUND" : "UNVERIFIED_SEMANTICS",
+        cardIds: Array.isArray(entry.cardIds) ? entry.cardIds.filter((id): id is string => typeof id === "string") : [],
+      });
+    }
+  }
+  return { status: candidate.status, claims };
 }
 
 function parseStoredSourceRefs(raw: unknown): StoredSourceRef[] {
@@ -90,9 +122,39 @@ function buildRecheckItem(ref: StoredSourceRef, item: TemporalDecisionItem | und
   };
 }
 
-function buildAuditMessage(untraceable: boolean, recheck: ArtifactAuditRecheckItem[]): string {
+const CLAIM_STATE_LABELS: Record<ArtifactClaimAuditItem["state"], string> = {
+  CURRENT: "引用当前有效",
+  SUPERSEDED: "引用已被取代",
+  UNCONFIRMED: "引用存在但尚无确认支撑",
+  MISSING: "来源已删除",
+  UNVERIFIED: "相关来源，语义未核验",
+};
+
+function buildAuditMessage(
+  untraceable: boolean,
+  recheck: ArtifactAuditRecheckItem[],
+  claimsStatus: ArtifactClaimsAuditStatus,
+  claims: ArtifactClaimAuditItem[],
+): string {
   if (untraceable) {
     return "该成果生成时未保存逐句证据引用，无法逐句回溯；系统不会用当前知识库补造历史。";
+  }
+  if (claimsStatus === "UNMAPPED_MODEL") {
+    return "该成果由模型生成且未提供逐句引用映射：下方来源为上下文级引用，语义未核验，不视为已核验结论。";
+  }
+  if (claimsStatus === "LEGACY_NO_CLAIMS") {
+    return `该成果保存于逐句映射上线前：仅有 ${recheck.length} 项上下文级来源，无法逐句回溯。`;
+  }
+  const supersededClaims = claims.filter((claim) => claim.state === "SUPERSEDED").length;
+  const unconfirmedClaims = claims.filter((claim) => claim.state === "UNCONFIRMED").length;
+  if (supersededClaims > 0) {
+    return `逐句映射 ${claims.length} 条，其中 ${supersededClaims} 条引用已被新决策取代，以下方当前重新检查为准。`;
+  }
+  if (unconfirmedClaims > 0) {
+    return `逐句映射 ${claims.length} 条：均未被取代，其中 ${unconfirmedClaims} 条引用尚无确认支撑，系统不将其视为已核验结论。`;
+  }
+  if (claims.length > 0) {
+    return `逐句映射 ${claims.length} 条，引用经当前重新检查仍然有效。`;
   }
   const superseded = recheck.filter((item) => item.supportState === "SUPERSEDED" || item.supersededBy !== null);
   const conflicted = recheck.filter((item) => item.supportState === "CONFLICT" || item.supportState === "PENDING");
@@ -101,11 +163,6 @@ function buildAuditMessage(untraceable: boolean, recheck: ArtifactAuditRecheckIt
   }
   if (conflicted.length > 0) {
     return `生成时引用的 ${recheck.length} 项证据中存在 ${conflicted.length} 项冲突或待确认记录，请先确认哪一版代表当前事实。`;
-  }
-  // 无确认关系的独立事实按时间线语义为“证据不足”：记录未被取代，但不足以单独支撑结论
-  const insufficient = recheck.filter((item) => item.supportState === "INSUFFICIENT");
-  if (insufficient.length > 0) {
-    return `生成时引用的 ${recheck.length} 项证据均未被取代，其中 ${insufficient.length} 项尚无确认的关系支撑，状态为证据不足。`;
   }
   return `生成时引用的 ${recheck.length} 项证据经当前重新检查仍然有效。`;
 }
@@ -120,31 +177,67 @@ export async function getArtifactAudit(projectId: string, artifactId: string): P
 
   const recheckedAt = new Date();
   const refs = parseStoredSourceRefs(artifact.sourceRefs);
+  const storedClaims = parseStoredClaims(artifact.claims);
 
-  if (refs.length === 0) {
+  if (refs.length === 0 && !storedClaims) {
     return {
       artifactId: artifact.id,
       artifactType: artifact.artifactType as ArtifactTypeValue,
       generatedAt: artifact.createdAt.toISOString(),
       untraceable: true,
-      message: buildAuditMessage(true, []),
+      message: buildAuditMessage(true, [], "NONE", []),
       generationRefs: [],
       recheck: [],
+      claimsStatus: "NONE",
+      claims: [],
       recheckedAt: recheckedAt.toISOString(),
     };
   }
 
-  const states = await getTemporalSearchStates(projectId, refs.map((ref) => ref.cardId), recheckedAt);
+  const cardIdsForRecheck = [
+    ...new Set([...refs.map((ref) => ref.cardId), ...(storedClaims?.claims.flatMap((claim) => claim.cardIds) ?? [])]),
+  ];
+  const states = await getTemporalSearchStates(projectId, cardIdsForRecheck, recheckedAt);
   const recheck = refs.map((ref) => buildRecheckItem(ref, states.get(ref.cardId)));
+
+  // 逐句核验：仅模板绑定映射参与；来源缺失显示"来源已删除"
+  let claimsStatus: ArtifactClaimsAuditStatus = storedClaims ? storedClaims.status : "LEGACY_NO_CLAIMS";
+  const claimItems: ArtifactClaimAuditItem[] = (storedClaims?.claims ?? []).map((claim): ArtifactClaimAuditItem => {
+    const cardStates = claim.cardIds.map((cardId) => {
+      const item = states.get(cardId);
+      return {
+        cardId,
+        supportState: item?.supportState ?? "MISSING",
+        statusLabel: item?.statusLabel ?? "来源已删除",
+      };
+    });
+    let state: ArtifactClaimAuditItem["state"];
+    if (cardStates.some((card) => card.supportState === "MISSING")) state = "MISSING";
+    else if (cardStates.some((card) => card.supportState === "SUPERSEDED")) state = "SUPERSEDED";
+    else if (cardStates.every((card) => card.supportState === "SUPPORTED")) state = "CURRENT";
+    else state = "UNCONFIRMED";
+    return {
+      claimId: claim.claimId,
+      text: claim.text,
+      section: claim.section,
+      verification: claim.verification as ArtifactClaimAuditItem["verification"],
+      cardIds: claim.cardIds,
+      state,
+      stateLabel: CLAIM_STATE_LABELS[state],
+      cardStates,
+    };
+  });
 
   return {
     artifactId: artifact.id,
     artifactType: artifact.artifactType as ArtifactTypeValue,
     generatedAt: artifact.createdAt.toISOString(),
     untraceable: false,
-    message: buildAuditMessage(false, recheck),
+    message: buildAuditMessage(false, recheck, claimsStatus, claimItems),
     generationRefs: toGenerationRefs(refs),
     recheck,
+    claimsStatus,
+    claims: claimItems,
     recheckedAt: recheckedAt.toISOString(),
   };
 }

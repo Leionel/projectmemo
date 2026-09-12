@@ -18,6 +18,7 @@ import { MemoryService } from '../services/MemoryService';
 import { MemoryLifecycleService } from '../services/MemoryLifecycleService';
 import { InterventionPolicyService } from '../services/InterventionPolicyService';
 import { ProjectStateService } from '../services/ProjectStateService';
+import { MeetingImportSheet } from '../components/MeetingImportSheet';
 import { PolicyResponse, PolicySuggestion, PolicyUpdateBody } from '../models/Intervention';
 import { ActionService } from '../services/ActionService';
 import { ArtifactService } from '../services/ArtifactService';
@@ -97,6 +98,7 @@ struct ProjectHome {
   @State stateDiffForSheet: StateDiff = new StateDiff();
   @State showChangeBrief: boolean = false;
   @State briefForSheet: ChangeBrief = new ChangeBrief();
+  @State showMeetingSheet: boolean = false;
   @State isExportingProvenance: boolean = false;
   @State lifecycleActionCardId: string = '';
   @State showJudgeRebuttal: boolean = false;
@@ -832,6 +834,31 @@ struct ProjectHome {
     this.completingActionId = actionId;
     this.resultText = '';
     this.dialogError = '';
+  }
+
+  @Builder
+  private MeetingSheetWrapper() {
+    MeetingImportSheet({
+      projectId: this.projectId,
+      onClose: () => {
+        this.showMeetingSheet = false;
+        this.loadAllData();
+      },
+      onShowDiff: (fromId: string, toId: string) => {
+        this.showMeetingDiff(fromId, toId);
+      }
+    })
+  }
+
+  private async showMeetingDiff(fromId: string, toId: string): Promise<void> {
+    try {
+      const response = await this.stateService.diff(this.projectId, fromId, toId);
+      this.stateDiffForSheet = response.diff;
+      this.showMeetingSheet = false;
+      this.showStateDiffSheet = true;
+    } catch (e) {
+      promptAction.showToast({ message: e instanceof ApiError ? e.message : '会后对比获取失败' });
+    }
   }
 
   // --- 变化简报（C1）：以快照 Diff 为唯一事实输入，服务端确定性模板 ---
@@ -1666,20 +1693,36 @@ struct ProjectHome {
           .width('100%')
           .justifyContent(FlexAlign.SpaceBetween)
 
-          Button('开始记录')
-            .fontSize(PMFontSize.BUTTON)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.BRAND)
-            .backgroundColor(PMColors.BRAND_LIGHT)
-            .border({ width: 1, color: PMColors.BRAND })
-            .borderRadius(PMRadius.SM)
-            .height(48)
-            .width('100%')
-            .margin({ top: PMSpacing.MD })
-            .onClick(() => {
-              this.showCapturePanel = true;
-            })
-            .accessibilityText('打开记录项目碎片面板')
+          Row({ space: PMSpacing.SM }) {
+            Button('开始记录')
+              .fontSize(PMFontSize.BUTTON)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.BRAND)
+              .backgroundColor(PMColors.BRAND_LIGHT)
+              .border({ width: 1, color: PMColors.BRAND })
+              .borderRadius(PMRadius.SM)
+              .height(48)
+              .layoutWeight(1)
+              .onClick(() => {
+                this.showCapturePanel = true;
+              })
+              .accessibilityText('打开记录项目碎片面板')
+
+            Button('导入会议文本')
+              .fontSize(PMFontSize.BUTTON)
+              .fontColor(PMColors.INK_SECONDARY)
+              .backgroundColor(PMColors.SURFACE_SUBTLE)
+              .border({ width: 1, color: PMColors.BORDER })
+              .borderRadius(PMRadius.SM)
+              .height(48)
+              .layoutWeight(1)
+              .onClick(() => {
+                this.showMeetingSheet = true;
+              })
+              .accessibilityText('打开会议文本导入')
+          }
+          .width('100%')
+          .margin({ top: PMSpacing.MD })
         }
         .width('100%')
         .padding(PMSpacing.LG)
@@ -3689,6 +3732,10 @@ struct ProjectHome {
     .height('100%')
     .bindSheet($$this.showCapturePanel, this.CaptureSheet(), {
       height: SheetSize.FIT_CONTENT,
+      dragBar: true
+    })
+    .bindSheet($$this.showMeetingSheet, this.MeetingSheetWrapper(), {
+      height: SheetSize.BIG,
       dragBar: true
     })
   }

@@ -287,6 +287,35 @@ describe("Action feasibility (F1)", () => {
     }
   });
 
+  it("a lifecycle source confirmation does not upgrade an unconfirmed dependency", async () => {
+    const { confirmCardFact } = await import("@/lib/services/memoryLifecycleService");
+    const card = await db.knowledgeCard.create({
+      data: {
+        projectId,
+        captureId: (await db.capture.create({
+          data: { projectId, rawText: "仅人工确认的记录", sourceType: "测试" },
+        })).id,
+        type: "meeting_note",
+        title: "仅人工确认的记录",
+        summary: "",
+        keywords: [],
+        relatedTasks: [],
+        nextActions: [],
+        importance: 3,
+      },
+    });
+    const action = await seedAction("依赖仅人工确认的记录");
+    await updateActionFeasibilityInput(projectId, {
+      actionId: action.id,
+      addRequirements: [{ targetKind: "card", targetId: card.id }],
+    });
+
+    // 人工确认是来源声明：不虚构 SUPPORTS，可行性保持 UNKNOWN
+    await confirmCardFact(projectId, card.id, { reason: "已核对" });
+    const assessment = await assessActionFeasibility(projectId, action.id);
+    expect(assessment.feasibility).toBe("UNKNOWN");
+  });
+
   it("flags overdue deadlines and keeps user estimates honest", async () => {
     const action = await seedAction("已过期任务", { dueAt: new Date(Date.now() - 86400000) });
     await updateActionFeasibilityInput(projectId, { actionId: action.id, estimatedMinutes: 45 });

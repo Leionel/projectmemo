@@ -390,6 +390,8 @@ export interface TemporalDecisionItem {
   supersededBy: TemporalCardSummary | null;
   temporalReason: string | null;
   relations: TemporalRelationData[];
+  /** 最近一次人工确认来源的时间（来源声明，不改变时态状态） */
+  confirmedSourceAt?: string | null;
 }
 
 export interface TemporalTimelineResponse {

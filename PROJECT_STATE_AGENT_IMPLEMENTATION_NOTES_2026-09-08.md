@@ -101,6 +101,19 @@
 | S1 | PASS | 尚未执行 | IN_PROGRESS |
 | M1（E1 共享部分） | PASS | 尚未执行 | IN_PROGRESS |
 
+## 2026-09-12（第四轮）：执行收尾方案 E2（M1 修订闭环）
+
+1. 附件纠错原子化：结构化在事务外，单事务写 Capture/Card、取代关系（含生命周期事件）、修订链、附件更新；索引提交后尽力执行。
+2. 幂等重放：同附件同文本重复纠错返回既有卡（idempotentReplay），不重复建卡建链。
+3. 修订历史：`GET /attachments/[id]/revisions` + 纠错弹窗可折叠修订列表。
+4. 人工确认来源进读取端：时间线 item 附加 confirmedSourceAt，MemoryTimeline 显示声明式注记；来源声明不改变时态状态（测试锁定），F1 依赖保持 UNKNOWN。
+
+回执：`evidence/closeout-20260912/E2/receipt.md`。验证：tsc 0；vitest 197 通过（独立库）；harmony:test 27/27。
+
+| 项 | 代码验收 | 设备验收 | 总状态 |
+|---|---|---|---|
+| M1 | PASS | 尚未执行 | IN_PROGRESS |
+
 ### 后续入口
 
 > 从 T1 鸿蒙会议导入界面与 B1 曝光上报开始补齐，然后在一台真机上按计划第 9 节 UI 矩阵过一遍新界面；平台可用时执行 R3 对账（`verify:w03`），再开 R4。

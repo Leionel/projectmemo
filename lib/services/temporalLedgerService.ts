@@ -1,3 +1,4 @@
+import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { buildTemporalTimeline } from "@/lib/memory/temporalLedger";
@@ -60,11 +61,29 @@ export async function getDecisionTimeline(projectId: string, asOf = new Date()):
   const { cards, relations } = await loadTemporalProject(projectId);
   const serializedCards = cards.map(serializeCard);
   const serializedRelations = enabled ? relations.map(serializeTemporalRelation) : [];
+  const items = buildTemporalTimeline(serializedCards, serializedRelations, asOf);
+
+  // 人工确认来源是声明性注记：不改变时态状态，仅随时间线展示
+  if (items.length > 0) {
+    const events = await db.memoryLifecycleEvent.findMany({
+      where: { projectId, eventType: "CONFIRM", cardId: { in: items.map((item) => item.card.id) } },
+      orderBy: { createdAt: "desc" },
+      select: { cardId: true, createdAt: true },
+    });
+    const confirmedAt = new Map<string, string>();
+    for (const event of events) {
+      if (!confirmedAt.has(event.cardId)) confirmedAt.set(event.cardId, event.createdAt.toISOString());
+    }
+    for (const item of items) {
+      item.confirmedSourceAt = confirmedAt.get(item.card.id) ?? null;
+    }
+  }
+
   return {
     projectId,
     asOf: asOf.toISOString(),
     enabled,
-    items: buildTemporalTimeline(serializedCards, serializedRelations, asOf),
+    items,
   };
 }
 

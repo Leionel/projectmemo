@@ -1,5 +1,6 @@
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction, PMMotion, PMMaterial } from '../common/DesignTokens';
 import { Attachment } from '../models/Attachment';
+import { AttachmentRevisionItem } from '../models/Artifact';
 import { AttachmentService } from '../services/AttachmentService';
 import { ApiError } from '../models/Project';
 
@@ -12,6 +13,9 @@ export struct AttachmentCorrectionModal {
   @State errorMsg: string = '';
   @State successMsg: string = '';
 
+  @State revisions: AttachmentRevisionItem[] = [];
+  @State showRevisions: boolean = false;
+
   private attachmentService: AttachmentService = new AttachmentService();
   onClose: () => void = () => {};
   onSuccess: () => void = () => {};
@@ -22,6 +26,24 @@ export struct AttachmentCorrectionModal {
     } else {
       this.correctedText = '';
     }
+    this.loadRevisions();
+  }
+
+  // 修订链：历次机器提取与人工校对文本原样可查，旧值不被覆盖
+  private async loadRevisions(): Promise<void> {
+    try {
+      const response = await this.attachmentService.revisions(this.projectId, this.attachment.id);
+      this.revisions = response.revisions;
+    } catch (_e) {
+      // 修订历史拉取失败不打断校对主流程
+      this.revisions = [];
+    }
+  }
+
+  private revisionSourceLabel(source: string): string {
+    if (source === 'EXTRACTION') return '机器提取';
+    if (source === 'EXTRACTION_RETRY') return '重新提取';
+    return '人工校对';
   }
 
   private async submitCorrection(): Promise<void> {
@@ -163,6 +185,65 @@ export struct AttachmentCorrectionModal {
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.SUCCESS)
             .margin({ top: PMSpacing.SM })
+        }
+
+        // 修订历史
+        if (this.revisions.length > 0) {
+          Column() {
+            Row() {
+              Text(`修订历史 (${this.revisions.length})`)
+                .fontSize(PMFontSize.CAPTION)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_SECONDARY)
+              Text(this.showRevisions ? '收起' : '展开查看前后文本')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.BRAND)
+            }
+            .width('100%')
+            .justifyContent(FlexAlign.SpaceBetween)
+            .margin({ top: PMSpacing.SM })
+            .onClick(() => {
+              this.showRevisions = !this.showRevisions;
+            })
+
+            if (this.showRevisions) {
+              ForEach(this.revisions, (item: AttachmentRevisionItem) => {
+                Column() {
+                  Row() {
+                    Text(`#${item.revisionIndex} · ${this.revisionSourceLabel(item.source)}`)
+                      .fontSize(PMFontSize.CAPTION)
+                      .fontWeight(FontWeight.Medium)
+                      .fontColor(PMColors.INK_SECONDARY)
+                    Text(item.createdAt.length >= 10 ? item.createdAt.substring(0, 10) : item.createdAt)
+                      .fontSize(PMFontSize.CAPTION)
+                      .fontColor(PMColors.INK_TERTIARY)
+                  }
+                  .width('100%')
+                  .justifyContent(FlexAlign.SpaceBetween)
+
+                  Text(item.text)
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.INK_TERTIARY)
+                    .lineHeight(16)
+                    .maxLines(3)
+                    .textOverflow({ overflow: TextOverflow.Ellipsis })
+                    .margin({ top: 2 })
+                }
+                .width('100%')
+                .padding(PMSpacing.SM)
+                .backgroundColor(PMColors.SURFACE_SUBTLE)
+                .borderRadius(PMRadius.XS)
+                .margin({ top: PMSpacing.XS })
+                .alignItems(HorizontalAlign.Start)
+              }, (item: AttachmentRevisionItem) => `${item.revisionIndex}`)
+            }
+          }
+          .width('100%')
+          .padding(PMSpacing.SM)
+          .backgroundColor(PMColors.SURFACE_SUBTLE)
+          .borderRadius(PMRadius.SM)
+          .margin({ top: PMSpacing.SM })
+          .alignItems(HorizontalAlign.Start)
         }
 
         // 确认按钮

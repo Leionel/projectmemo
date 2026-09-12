@@ -8,6 +8,10 @@ import {
 import { processCapture } from "@/lib/services/captureService";
 import { requireProject } from "@/lib/repositories/projects";
 import { AppError } from "@/lib/api";
+import { structureCaptureWithMeta } from "@/lib/agent";
+import { KeywordVectorStore } from "@/lib/memory/vectorStore";
+import { ensureCardEmbedding } from "@/lib/repositories/embeddings";
+import { recordLifecycleEventInTx } from "@/lib/services/memoryLifecycleService";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { spawn } from "node:child_process";
 
@@ -325,80 +329,121 @@ export async function correctAttachmentText(
   correctedText: string
 ) {
   await requireProject(projectId);
-  // processCapture 内部自带事务，必须先于本次审计事务执行，避免 SQLite 嵌套事务互锁
-  const attachment = await db.attachment.findFirst({
+  const trimmed = correctedText.trim();
+
+  // 幂等：同一附件当前文本已经等于本次纠错文本时，返回既有结果，不重复建卡/建链
+  const existing = await db.attachment.findFirst({
     where: { id: attachmentId, projectId },
     include: { cards: true },
   });
-  if (!attachment) {
+  if (!existing) {
     throw new AppError("NOT_FOUND", "附件记录未找到", 404);
   }
+  if (existing.extractedText === trimmed && trimmed !== "") {
+    const reusedCard = await db.knowledgeCard.findFirst({
+      where: { attachmentId: existing.id },
+      orderBy: { createdAt: "desc" },
+    });
+    return { attachment: existing, card: reusedCard ?? existing.cards[0] ?? null, idempotentReplay: true };
+  }
 
-  const sourceType = attachment.type === "IMAGE" ? "人工校对图片" : "人工校对PDF";
-  const card = await processCapture(
-    projectId,
-    `【附件校对：${attachment.fileName}】\n${correctedText.trim()}`,
-    sourceType
-  );
+  // 结构化生成在事务外（与普通捕获同一结构化管线，离线时回退确定性模板）
+  const project = await requireProject(projectId);
+  const recentCards = await db.knowledgeCard.findMany({
+    where: { projectId },
+    orderBy: { createdAt: "desc" },
+    take: 30,
+    select: { keywords: true },
+  });
+  const historyKeywords = [...new Set(recentCards.flatMap((card) => (Array.isArray(card.keywords) ? (card.keywords as string[]) : [])))].slice(0, 30);
+  const structured = await structureCaptureWithMeta({ project, rawText: `【附件校对：${existing.fileName}】\n${trimmed}`, historyKeywords });
+  const draft = structured.data;
 
-  return db.$transaction(async (tx) => {
-    await tx.knowledgeCard.update({
-      where: { id: card.id },
-      data: { attachmentId: attachment.id },
+  const vectorStore = new KeywordVectorStore();
+
+  // 单事务写入：Capture/Card、取代关系、修订链、附件更新、审计事件
+  const result = await db.$transaction(async (tx) => {
+    const capture = await tx.capture.create({
+      data: {
+        projectId,
+        rawText: `【附件校对：${existing.fileName}】\n${trimmed}`,
+        sourceType: existing.type === "IMAGE" ? "人工校对图片" : "人工校对PDF",
+      },
+    });
+    const card = await tx.knowledgeCard.create({
+      data: {
+        projectId,
+        captureId: capture.id,
+        type: draft.type as never,
+        title: draft.title,
+        summary: draft.summary,
+        keywords: draft.keywords,
+        relatedTasks: draft.relatedTasks,
+        nextActions: draft.nextActions,
+        importance: draft.importance,
+        attachmentId: existing.id,
+      },
     });
 
-    // 对该附件关联的历史卡片建立 SUPERSEDES 取代关系，使旧错误数值失效并建立纠错审计修订链
-    if (attachment.cards && attachment.cards.length > 0) {
-      for (const oldCard of attachment.cards) {
-        if (oldCard.id !== card.id) {
-          await tx.cardRelation.create({
-            data: {
-              currentCardId: card.id,
-              relatedCardId: oldCard.id,
-              relationType: "SUPERSEDES",
-              reason: `人工校对修正附件【${attachment.fileName}】内容，新记录取代旧记录`,
-              score: 100,
-              confidence: 1.0,
-              confirmed: true,
-              confirmedAt: new Date(),
-              validFrom: new Date(),
-            },
-          });
-        }
+    // 对该附件关联的历史卡片建立 SUPERSEDES 取代关系（方向固定为新校对取代旧提取）
+    for (const oldCard of existing.cards) {
+      if (oldCard.id !== card.id) {
+        const relation = await tx.cardRelation.create({
+          data: {
+            currentCardId: card.id,
+            relatedCardId: oldCard.id,
+            relationType: "SUPERSEDES",
+            reason: `人工校对修正附件【${existing.fileName}】内容，新记录取代旧记录`,
+            score: 100,
+            confidence: 1.0,
+            confirmed: true,
+            confirmedAt: new Date(),
+            validFrom: new Date(),
+          },
+        });
+        await recordLifecycleEventInTx(tx, {
+          projectId,
+          cardId: card.id,
+          eventType: "RELATION_CONFIRM",
+          reason: relation.reason,
+          relationId: relation.id,
+        });
+        await recordLifecycleEventInTx(tx, {
+          projectId,
+          cardId: oldCard.id,
+          eventType: "RELATION_CONFIRM",
+          reason: relation.reason,
+          relationId: relation.id,
+        });
       }
     }
 
-    // 修订链：旧抽取/校对文本原样保留为历史修订，当前文本只作为最新版本
-    const existingRevisions = await tx.attachmentRevision.count({ where: { attachmentId: attachment.id } });
-    if (existingRevisions === 0 && attachment.extractedText !== null) {
+    // 修订链：旧抽取/校对文本原样保留，当前文本只作为最新版本
+    const revisionCount = await tx.attachmentRevision.count({ where: { attachmentId: existing.id } });
+    if (revisionCount === 0 && existing.extractedText !== null) {
       await tx.attachmentRevision.create({
-        data: {
-          attachmentId: attachment.id,
-          revisionIndex: 0,
-          text: attachment.extractedText,
-          source: "EXTRACTION",
-        },
+        data: { attachmentId: existing.id, revisionIndex: 0, text: existing.extractedText, source: "EXTRACTION" },
       });
     }
-    const nextIndex = (existingRevisions === 0 && attachment.extractedText !== null ? 1 : existingRevisions);
+    const nextIndex = revisionCount === 0 && existing.extractedText !== null ? 1 : revisionCount;
     await tx.attachmentRevision.create({
-      data: {
-        attachmentId: attachment.id,
-        revisionIndex: nextIndex,
-        text: correctedText.trim(),
-        source: "MANUAL_CORRECTION",
-      },
+      data: { attachmentId: existing.id, revisionIndex: nextIndex, text: trimmed, source: "MANUAL_CORRECTION" },
     });
 
     const updated = await tx.attachment.update({
-      where: { id: attachment.id },
-      data: {
-        extractedText: correctedText.trim(),
-        extractionStatus: "SUCCESS",
-        extractionError: null,
-      },
+      where: { id: existing.id },
+      data: { extractedText: trimmed, extractionStatus: "SUCCESS", extractionError: null },
     });
-
+    await tx.project.update({ where: { id: projectId }, data: { updatedAt: new Date() } });
     return { attachment: updated, card };
   });
+
+  // 索引在提交后进行：失败可由回填脚本补偿，不影响已提交事实
+  try {
+    await vectorStore.index({ id: result.card.id, title: result.card.title, keywords: (result.card.keywords as string[]) ?? [] });
+  } catch (error) {
+    console.warn("Correction card indexing failed; backfill can retry", error);
+  }
+
+  return { attachment: result.attachment, card: result.card, idempotentReplay: false };
 }

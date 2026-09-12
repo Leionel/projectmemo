@@ -1,5 +1,6 @@
 import { ApiClient } from './ApiClient';
 import { Attachment } from '../models/Attachment';
+import { AttachmentRevisionsResponse } from '../models/Artifact';
 import http from '@ohos.net.http';
 import { Constants } from '../common/Constants';
 import { ApiError } from '../models/Project';
@@ -62,4 +63,11 @@ export class AttachmentService {
       payload
     );
   }
+  // 修订链：按 revisionIndex 返回历次提取/人工校对文本
+  async revisions(projectId: string, attachmentId: string): Promise<AttachmentRevisionsResponse> {
+    return this.client.get<AttachmentRevisionsResponse>(
+      `/api/projects/${projectId}/attachments/${attachmentId}/revisions`
+    );
+  }
+
 }

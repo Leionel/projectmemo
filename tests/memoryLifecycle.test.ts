@@ -204,19 +204,30 @@ describe("Memory lifecycle audit and archive (M1)", () => {
 
     const first = await correctAttachmentText(projectId, attachment.id, "人工校对：温度 350 度");
     const second = await correctAttachmentText(projectId, attachment.id, "人工校对：温度 355 度");
+    const third = await correctAttachmentText(projectId, attachment.id, "人工校对：温度 360 度");
     expect(first.attachment.extractedText).toContain("350");
     expect(second.attachment.extractedText).toContain("355");
+    expect(third.attachment.extractedText).toContain("360");
 
     const revisions = await db.attachmentRevision.findMany({
       where: { attachmentId: attachment.id },
       orderBy: { revisionIndex: "asc" },
     });
-    expect(revisions).toHaveLength(3);
+    expect(revisions).toHaveLength(4);
     expect(revisions[0].source).toBe("EXTRACTION");
     expect(revisions[0].text).toContain("300 度");
     expect(revisions[1].source).toBe("MANUAL_CORRECTION");
     expect(revisions[1].text).toContain("350");
     expect(revisions[2].text).toContain("355");
+    expect(revisions[3].text).toContain("360");
+
+    // 修订链：最新校对卡取代此前所有该附件的卡（含上一版校对卡）
+    const supersedeCount = await db.cardRelation.count({
+      where: { currentCardId: third.card!.id, relationType: "SUPERSEDES" },
+    });
+    expect(supersedeCount).toBeGreaterThanOrEqual(2);
+    void first;
+    void second;
 
     // 旧提取对应的历史卡片被新校对取代，检索不再把旧值当当前值
     const timeline = await getDecisionTimeline(projectId);
@@ -224,5 +235,54 @@ describe("Memory lifecycle audit and archive (M1)", () => {
     if (supersededOld) {
       expect(supersededOld.status).toBe("SUPERSEDED");
     }
+  });
+
+  it("replays an identical correction idempotently without new revisions", async () => {
+    const attachment = await db.attachment.create({
+      data: {
+        projectId,
+        type: "PDF",
+        storageKey: "test/idempotent.pdf",
+        fileName: "幂等校对.pdf",
+        mimeType: "application/pdf",
+        size: 100,
+        sha256: "sha-idempotent-1",
+        extractedText: "原始数值：粒径 50 纳米",
+        extractionStatus: "SUCCESS",
+      },
+    });
+
+    const first = await correctAttachmentText(projectId, attachment.id, "人工校对：粒径 55 纳米");
+    expect(first.idempotentReplay).toBe(false);
+    const firstCardId = first.card!.id;
+
+    const replay = await correctAttachmentText(projectId, attachment.id, "人工校对：粒径 55 纳米");
+    expect(replay.idempotentReplay).toBe(true);
+    expect(replay.card!.id).toBe(firstCardId);
+
+    const revisions = await db.attachmentRevision.count({ where: { attachmentId: attachment.id } });
+    expect(revisions).toBe(2); // EXTRACTION + 一次 MANUAL_CORRECTION
+
+    // 不同纠错内容不合并，产生新修订与新卡
+    const different = await correctAttachmentText(projectId, attachment.id, "人工校对：粒径 60 纳米");
+    expect(different.idempotentReplay).toBe(false);
+    expect(different.card!.id).not.toBe(firstCardId);
+    const revisionsAfter = await db.attachmentRevision.count({ where: { attachmentId: attachment.id } });
+    expect(revisionsAfter).toBe(3);
+  });
+
+  it("timeline annotates manually confirmed sources without changing temporal state", async () => {
+    const card = await seedCard("待确认来源的时间线卡");
+    const before = await getDecisionTimeline(projectId);
+    const itemBefore = before.items.find((item) => item.card.id === card.id);
+    expect(itemBefore?.confirmedSourceAt ?? null).toBeNull();
+
+    await confirmCardFact(projectId, card.id, { reason: "E2：已核对" });
+
+    const after = await getDecisionTimeline(projectId);
+    const itemAfter = after.items.find((item) => item.card.id === card.id);
+    expect(itemAfter?.confirmedSourceAt).not.toBeNull();
+    // 来源声明不改变时态状态
+    expect(itemAfter?.supportState).toBe("INSUFFICIENT");
   });
 });

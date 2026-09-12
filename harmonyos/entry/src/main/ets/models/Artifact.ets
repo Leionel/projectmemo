@@ -50,3 +50,14 @@ export class ArtifactAuditResponse {
   recheck: ArtifactAuditRecheckItem[] = [];
   recheckedAt: string = '';
 }
+
+export class AttachmentRevisionItem {
+  revisionIndex: number = 0;
+  source: string = '';
+  text: string = '';
+  createdAt: string = '';
+}
+
+export class AttachmentRevisionsResponse {
+  revisions: AttachmentRevisionItem[] = [];
+}

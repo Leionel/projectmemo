@@ -131,6 +131,7 @@ export class TemporalDecisionItem {
   supersededBy: TemporalCardSummary | null = null;
   temporalReason: string | null = null;
   relations: TemporalRelation[] = [];
+  confirmedSourceAt: string | null = null;
 }
 
 export class TemporalTimelineResponse {

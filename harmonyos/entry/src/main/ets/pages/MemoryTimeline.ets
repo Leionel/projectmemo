@@ -168,6 +168,13 @@ struct MemoryTimeline {
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .margin({ top: PMSpacing.SM })
 
+      if (item.confirmedSourceAt !== null && item.confirmedSourceAt !== '') {
+        Text('✓ 已人工确认来源（来源声明，非事实证明）')
+          .fontSize(PMFontSize.CAPTION)
+          .fontColor(PMColors.SUCCESS)
+          .margin({ top: PMSpacing.XS })
+      }
+
       if (item.supersededBy !== null) {
         Text(`由「${item.supersededBy.title}」取代`)
           .fontSize(PMFontSize.BODY)

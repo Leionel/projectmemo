@@ -1,6 +1,7 @@
 process.env.PROJECT_STATE_ENABLED = "1";
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { PROJECT_STATE_SCHEMA_VERSION } from "@/lib/types/projectState";
 import { db } from "@/lib/db";
 import {
   checkInProjectState,
@@ -77,6 +78,76 @@ describe("Project state snapshot / diff (R2 integration)", () => {
     expect(viaGet?.id).toBe(first.snapshot.id);
   });
 
+  it("concurrent identical refreshes converge on a single new snapshot", async () => {
+    const project = await db.project.create({
+      data: { title: "并发刷新测试项目", description: "", goal: "并发", scenario: "COMPETITION" },
+    });
+    try {
+      const [r1, r2] = await Promise.all([
+        refreshProjectState(project.id),
+        refreshProjectState(project.id),
+      ]);
+      expect(r1.snapshot.id).toBe(r2.snapshot.id);
+      const rows = await db.projectStateSnapshot.count({ where: { projectId: project.id } });
+      expect(rows).toBe(1);
+      expect(r1.snapshot.id).toBe((await getLatestProjectState(project.id))?.id);
+      const checkIn = await checkInProjectState(project.id, {
+        displayedSnapshotId: r1.snapshot.id,
+        consumerKey: "concurrent-device",
+      });
+      expect(checkIn.status).toBe("OK");
+    } finally {
+      await db.project.delete({ where: { id: project.id } }).catch(() => {});
+    }
+  });
+
+  it("diff across policy versions demands a rebuild instead of faking consistency", async () => {
+    const project = await db.project.create({
+      data: { title: "规则版本测试项目", description: "", goal: "G", scenario: "COMPETITION" },
+    });
+    try {
+      const baseline = await refreshProjectState(project.id);
+      const legacy = await db.projectStateSnapshot.create({
+        data: {
+          projectId: project.id,
+          sequence: baseline.snapshot.sequence + 1000,
+          schemaVersion: PROJECT_STATE_SCHEMA_VERSION,
+          policyVersion: "1",
+          sourceHash: "legacy",
+          evaluationKey: "phase:steady",
+          contentHash: "legacy",
+          observedAt: new Date(),
+          evaluatedAt: new Date(),
+          payload: baseline.snapshot.payload as unknown as object,
+        },
+      });
+      await expect(
+        getProjectStateDiff(project.id, legacy.id, baseline.snapshot.id),
+      ).rejects.toThrow();
+    } finally {
+      await db.project.delete({ where: { id: project.id } }).catch(() => {});
+    }
+  });
+
+  it("confirm reports stateRefreshPending when state feature is disabled", async () => {
+    const card = await seedCard("待刷新标记测试卡");
+    void card;
+    const previous = process.env.PROJECT_STATE_ENABLED;
+    process.env.PROJECT_STATE_ENABLED = "0";
+    try {
+      const proposal = await analyzeChangeImpact(projectId, "待刷新标记测试卡改为待刷新标记方案B");
+      const confirmed = await confirmChangeImpact(projectId, {
+        proposalId: proposal.proposalId,
+        newFactText: "待刷新标记测试卡改为待刷新标记方案B",
+        supersededCardId: proposal.supersededCardId,
+      });
+      expect(confirmed.success).toBe(true);
+      expect((confirmed as { stateRefreshPending?: boolean }).stateRefreshPending).toBe(true);
+    } finally {
+      process.env.PROJECT_STATE_ENABLED = previous ?? "1";
+    }
+  });
+
   it("field round-trip A→B→A creates a new snapshot and latest returns to A", async () => {
     const project = await db.project.create({
       data: { title: "字段往返测试项目", description: "", goal: "A", scenario: "COMPETITION" },
@@ -119,10 +190,10 @@ describe("Project state snapshot / diff (R2 integration)", () => {
     });
     expect(confirmed.success).toBe(true);
 
+    // 确认变更已补偿性刷新；再刷新应命中最新行复用
     const after = await refreshProjectState(projectId);
-    expect(after.reused).toBe(false);
-    expect(after.changed).toBe(true);
     expect(after.snapshot.previousSnapshotId).toBe(baseline.snapshot.id);
+    expect(after.snapshot.payload.facts.some((fact) => fact.text.includes("取代"))).toBe(true);
 
     const diff = await getProjectStateDiff(projectId, baseline.snapshot.id, after.snapshot.id);
     expect(diff.materialChange).toBe(true);
@@ -177,12 +248,11 @@ describe("Project state snapshot / diff (R2 integration)", () => {
       supersededCardId: backToA.supersededCardId,
     });
     expect(confirmedBack.success).toBe(true);
-    const stateA2 = await refreshProjectState(projectId);
-
-    expect(stateA2.reused).toBe(false);
-    expect(stateA2.snapshot.id).not.toBe(baseline.snapshot.id);
-    // 尽管内容与最初 A 状态相似，快照行仍是新增历史，而非复用旧行
-    const diff = await getProjectStateDiff(projectId, stateB.snapshot.id, stateA2.snapshot.id);
+    // 确认已补偿刷新出"回到 A"的新快照行（不复用任何历史行）
+    const latestA = await getLatestProjectState(projectId);
+    expect(latestA).not.toBeNull();
+    expect(latestA!.previousSnapshotId).toBe(stateB.snapshot.id);
+    const diff = await getProjectStateDiff(projectId, stateB.snapshot.id, latestA!.id);
     expect(diff.materialChange).toBe(true);
   });
 

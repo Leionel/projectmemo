@@ -15,6 +15,7 @@ import type { Prisma } from "@/lib/generated/prisma/client";
 export interface ProjectStateSnapshotData {
   id: string;
   projectId: string;
+  sequence: number;
   schemaVersion: number;
   policyVersion: string;
   sourceHash: string;
@@ -36,6 +37,7 @@ export interface RefreshResult {
 function serializeSnapshot(row: {
   id: string;
   projectId: string;
+  sequence: number;
   schemaVersion: number;
   policyVersion: string;
   sourceHash: string;
@@ -49,6 +51,7 @@ function serializeSnapshot(row: {
   return {
     id: row.id,
     projectId: row.projectId,
+    sequence: row.sequence,
     schemaVersion: row.schemaVersion,
     policyVersion: row.policyVersion,
     sourceHash: row.sourceHash,
@@ -150,106 +153,102 @@ export async function getLatestProjectState(projectId: string): Promise<ProjectS
   ensureEnabled();
   const row = await db.projectStateSnapshot.findFirst({
     where: { projectId },
-    orderBy: { evaluatedAt: "desc" },
+    orderBy: { sequence: "desc" },
   });
   return row ? serializeSnapshot(row) : null;
 }
 
+const REFRESH_MAX_ATTEMPTS = 3;
+
+function isUniqueConflict(error: unknown): boolean {
+  return typeof error === "object" && error !== null && "code" in error &&
+    (error as { code?: string }).code === "P2002";
+}
+
 export async function refreshProjectState(projectId: string): Promise<RefreshResult> {
   ensureEnabled();
-  // 源读取与快照写入同一事务：并发业务写入不会拼出混合版本的源数据
-  return db.$transaction(async (tx) => {
-    const input = await loadSourceInput(tx, projectId);
-    const built = buildProjectState(input);
-    const now = new Date();
-
-    const latest = await tx.projectStateSnapshot.findFirst({
-      where: { projectId },
-      orderBy: [{ evaluatedAt: "desc" }, { id: "desc" }],
-    });
-
-    // 仅当最新行对应当前源版本时复用：历史行命中同键不代表状态未变（A→B→A 必须产生新记录）
-    if (
-      latest &&
-      latest.sourceHash === built.sourceHash &&
-      latest.policyVersion === PROJECT_STATE_POLICY_VERSION &&
-      latest.evaluationKey === built.evaluationKey
-    ) {
-      return {
-        snapshot: serializeSnapshot(latest),
-        changed: false,
-        reused: true,
-        baselineCreated: false,
-      };
-    }
-
-    const previousSnapshotId = latest?.id ?? null;
-
+  // 并发分配同一 sequence 时有界重试整个事务：重读源与最新序号，不带第一次失败前的缓存
+  let lastError: unknown = new Error("refresh not attempted");
+  for (let attempt = 1; attempt <= REFRESH_MAX_ATTEMPTS; attempt++) {
     try {
-      const payload = {
-        ...built,
-        snapshotId: "",
-      } as unknown as Prisma.InputJsonValue;
+      // 源读取与快照写入同一事务：并发业务写入不会拼出混合版本的源数据
+      return await db.$transaction(async (tx) => {
+        const input = await loadSourceInput(tx, projectId);
+        const built = buildProjectState(input);
+        const now = new Date();
 
-      const created = await tx.projectStateSnapshot.create({
-        data: {
-          projectId,
-          schemaVersion: PROJECT_STATE_SCHEMA_VERSION,
-          policyVersion: PROJECT_STATE_POLICY_VERSION,
-          sourceHash: built.sourceHash,
-          evaluationKey: built.evaluationKey,
-          contentHash: built.contentHash,
-          observedAt: now,
-          evaluatedAt: now,
-          previousSnapshotId,
-          payload,
-        },
-      });
-
-      // 回填 snapshotId 进 payload，保证快照自描述
-      const payloadWithId = {
-        ...built,
-        snapshotId: created.id,
-      } as unknown as Prisma.InputJsonValue;
-      const finalized = await tx.projectStateSnapshot.update({
-        where: { id: created.id },
-        data: { payload: payloadWithId },
-      });
-
-      return {
-        snapshot: serializeSnapshot(finalized),
-        changed: latest ? latest.contentHash !== built.contentHash : true,
-        reused: false,
-        baselineCreated: !latest,
-      };
-    } catch (error) {
-      // 并发写入撞唯一约束（同源 + 同前驱）：读取并发方已生成的行，不重复写入
-      if (
-        typeof error === "object" && error !== null && "code" in error &&
-        (error as { code?: string }).code === "P2002"
-      ) {
-        const conflicting = await tx.projectStateSnapshot.findFirst({
-          where: {
-            projectId,
-            sourceHash: built.sourceHash,
-            policyVersion: PROJECT_STATE_POLICY_VERSION,
-            evaluationKey: built.evaluationKey,
-            previousSnapshotId,
-          },
-          orderBy: [{ evaluatedAt: "desc" }, { id: "desc" }],
+        const latest = await tx.projectStateSnapshot.findFirst({
+          where: { projectId },
+          orderBy: { sequence: "desc" },
         });
-        if (conflicting) {
+
+        // 仅当最新行对应当前源版本（含规则版本）时复用：历史行命中同键不代表状态未变
+        if (
+          latest &&
+          latest.sourceHash === built.sourceHash &&
+          latest.policyVersion === PROJECT_STATE_POLICY_VERSION &&
+          latest.evaluationKey === built.evaluationKey
+        ) {
           return {
-            snapshot: serializeSnapshot(conflicting),
+            snapshot: serializeSnapshot(latest),
             changed: false,
             reused: true,
             baselineCreated: false,
           };
         }
+
+        const nextSequence = ((await tx.projectStateSnapshot.aggregate({
+          _max: { sequence: true },
+          where: { projectId },
+        }))._max.sequence ?? 0) + 1;
+
+        const payload = {
+          ...built,
+          snapshotId: "",
+        } as unknown as Prisma.InputJsonValue;
+
+        const created = await tx.projectStateSnapshot.create({
+          data: {
+            projectId,
+            sequence: nextSequence,
+            schemaVersion: PROJECT_STATE_SCHEMA_VERSION,
+            policyVersion: PROJECT_STATE_POLICY_VERSION,
+            sourceHash: built.sourceHash,
+            evaluationKey: built.evaluationKey,
+            contentHash: built.contentHash,
+            observedAt: now,
+            evaluatedAt: now,
+            previousSnapshotId: latest?.id ?? null,
+            payload,
+          },
+        });
+
+        // 回填 snapshotId 进 payload，保证快照自描述
+        const payloadWithId = {
+          ...built,
+          snapshotId: created.id,
+        } as unknown as Prisma.InputJsonValue;
+        const finalized = await tx.projectStateSnapshot.update({
+          where: { id: created.id },
+          data: { payload: payloadWithId },
+        });
+
+        return {
+          snapshot: serializeSnapshot(finalized),
+          changed: latest ? latest.contentHash !== built.contentHash : true,
+          reused: false,
+          baselineCreated: !latest,
+        };
+      });
+    } catch (error) {
+      lastError = error;
+      if (!isUniqueConflict(error) || attempt === REFRESH_MAX_ATTEMPTS) {
+        throw error;
       }
-      throw error;
+      // 唯一冲突 = 并发刷新分配了同一 sequence：重试整个事务
     }
-  });
+  }
+  throw lastError;
 }
 
 export async function getProjectStateDiff(projectId: string, fromId: string, toId: string): Promise<ProjectStateDiff> {
@@ -260,6 +259,10 @@ export async function getProjectStateDiff(projectId: string, fromId: string, toI
   ]);
   if (!fromRow || !toRow) {
     throw new AppError("SNAPSHOT_NOT_FOUND", "状态快照不存在或不属于当前项目", 404);
+  }
+  // 规则版本以行记录为准：旧行的 payload 内容可能已被新规则重算，不能据此跨版本比较
+  if (fromRow.policyVersion !== toRow.policyVersion) {
+    throw new AppError("REBUILD_REQUIRED", "状态规则版本不同，需要重建基线，历史快照已保留", 409);
   }
   const from = fromRow.payload as unknown as ProjectStatePayload;
   const to = toRow.payload as unknown as ProjectStatePayload;
@@ -297,7 +300,8 @@ export async function checkInProjectState(
     });
     if (cursor) {
       const lastSeen = await tx.projectStateSnapshot.findUnique({ where: { id: cursor.lastSeenSnapshotId } });
-      if (lastSeen && lastSeen.evaluatedAt.getTime() > displayed.evaluatedAt.getTime()) {
+      // 推进判断使用 sequence，不依赖可能相同的毫秒时间
+      if (lastSeen && lastSeen.sequence > displayed.sequence) {
         return { status: "ALREADY_SEEN" as const, lastSeenSnapshotId: cursor.lastSeenSnapshotId };
       }
       if (cursor.lastSeenSnapshotId === displayed.id) {

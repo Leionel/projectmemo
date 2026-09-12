@@ -8,6 +8,7 @@ function minimalPayload(snapshotId: string, overrides: Partial<ProjectStatePaylo
     snapshotId,
     projectId: "proj-1",
     schemaVersion: 1,
+    policyVersion: "2",
     evaluatedAt: "2026-09-12T08:00:00.000Z",
     goal: null,
     deadline: null,

@@ -379,6 +379,8 @@ model AttachmentRevision {
 model ProjectStateSnapshot {
   id                 String   @id @default(cuid())
   projectId          String
+  // 项目内单调递增序号：latest/previous/check-in 全部按它排序，不依赖毫秒时间
+  sequence           Int
   schemaVersion      Int
   policyVersion      String
   sourceHash         String
@@ -390,8 +392,9 @@ model ProjectStateSnapshot {
   payload            Json
   project            Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  // previousSnapshotId 参与唯一键：同一源版本在历史不同位置重现（A→B→A）必须各自成行
-  @@unique([projectId, sourceHash, policyVersion, evaluationKey, previousSnapshotId])
+  // 历史身份由 sequence 唯一确定；同一源版本在历史不同位置重现（A→B→A）天然各自成行
+  @@unique([projectId, sequence])
+  @@index([projectId, sourceHash])
   @@index([projectId, evaluatedAt])
 }
 

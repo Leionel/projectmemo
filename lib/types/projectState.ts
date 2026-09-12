@@ -5,7 +5,8 @@
  */
 
 export const PROJECT_STATE_SCHEMA_VERSION = 1;
-export const PROJECT_STATE_POLICY_VERSION = "1";
+// v2：E1 修复后快照事实结论由统一 Ledger 计算；v1 行保留为历史，跨版本比较要求重建基线
+export const PROJECT_STATE_POLICY_VERSION = "2";
 export const PROJECT_STATE_DIFF_ALGORITHM_VERSION = "1";
 export const PROJECT_STATE_BRIEF_TEMPLATE_VERSION = "1";
 
@@ -68,6 +69,7 @@ export interface ProjectStatePayload {
   snapshotId: string;
   projectId: string;
   schemaVersion: number;
+  policyVersion: string;
   evaluatedAt: string;
   goal: string | null;
   deadline: string | null;

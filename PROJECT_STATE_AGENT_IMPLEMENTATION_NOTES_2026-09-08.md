@@ -84,6 +84,23 @@
 
 验证：`tsc --noEmit` 0 错误；`vitest` 28 文件 / 191 测试全部通过；验收探针五项全绿。鸿蒙代码本轮未改动（沿用 ea2fa19 的 HAP 构建）。功能缺口（T1 导入界面、F1 依赖编辑界面、B1 曝光上报、R1 逐句粒度）保持如实记录，不因后端测试通过而关闭。
 
+## 2026-09-12（第三轮）：执行收尾方案 E1（S1 状态与历史正确性）
+
+依据 `IN_PROGRESS_CLOSEOUT_PLAN_2026-09-12.md`。上一轮（387e502）已完成 E1 第 1/2/4/5 步（统一 Ledger、状态映射、事务读写、稳定比较）与 §2.4 探针转断言；本轮补齐其余步骤：
+
+1. **sequence 历史身份**（迁移 20260912220000）：快照增加项目内递增 sequence，唯一键 `(projectId, sequence)`，旧行按 (evaluatedAt, id) 回填（开发库验证：存量行 seq=1、游标保留）。latest/previous/check-in 全部按 sequence 排序。
+2. **仅最新复用 + 有界重试**：refresh 仅当最新行 sourceHash+policyVersion+evaluationKey 全匹配时复用；回旧值必产生新 sequence；并发冲突整事务重试 ≤3 次并重读源。
+3. **policyVersion v2**：跨版本 diff 在行级与 payload 级双查，返回 REBUILD_REQUIRED；v1 历史行保留。
+4. **补偿刷新**：confirmChangeImpact 成功后尝试刷新，未刷新（关闭/失败）返回 `stateRefreshPending=true`；鸿蒙状态面板进入项目即显式刷新（移除手动建基线 CTA，§5.3 口径）。
+5. **独立测试库**（§2.3）：vitest 显式 `DATABASE_URL=file:./prisma/test-vitest.db`，全量测试脱离开发库。
+
+回执：`evidence/closeout-20260912/E1/receipt.md`（命令、退出码、用例对照、剩余限制）。验证：tsc 0 错误；vitest 28 文件 / 194 测试通过（独立库）；验收探针复跑全绿（`E1/probe-results.json`）。
+
+| 项 | 代码验收 | 设备验收 | 总状态 |
+|---|---|---|---|
+| S1 | PASS | 尚未执行 | IN_PROGRESS |
+| M1（E1 共享部分） | PASS | 尚未执行 | IN_PROGRESS |
+
 ### 后续入口
 
 > 从 T1 鸿蒙会议导入界面与 B1 曝光上报开始补齐，然后在一台真机上按计划第 9 节 UI 矩阵过一遍新界面；平台可用时执行 R3 对账（`verify:w03`），再开 R4。

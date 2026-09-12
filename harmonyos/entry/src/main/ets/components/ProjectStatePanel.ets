@@ -5,7 +5,6 @@ import {
   StateDiffResponse,
   StateRefreshResponse,
   StateSnapshot,
-  StateSnapshotResponse,
   StateUnknown
 } from '../models/ProjectState';
 import { ApiError } from '../models/Project';
@@ -42,12 +41,12 @@ export struct ProjectStatePanel {
     this.phase = 'loading';
     this.errorMessage = '';
     try {
-      const response: StateSnapshotResponse = await this.stateService.getLatest(this.projectId);
-      if (response.status === 'EMPTY') {
-        this.phase = 'empty';
-        return;
+      // 进入项目显式刷新再读取（§5.3）：业务写入后状态刷新失败时，这里做崩溃补偿
+      const refresh: StateRefreshResponse = await this.stateService.refresh(this.projectId);
+      this.snapshot = refresh.snapshot;
+      if (refresh.status === 'BASELINE_CREATED') {
+        this.baselineMessage = '这是第一份状态记录，后续变化都会与它对比。';
       }
-      this.snapshot = response.snapshot;
       await this.loadDiffAgainstLastSeen();
       this.phase = 'ready';
     } catch (e) {
@@ -248,33 +247,6 @@ export struct ProjectStatePanel {
             .enabled(!this.isRefreshing)
             .onClick(() => {
               this.loadState();
-            })
-        }
-        .width('100%')
-        .alignItems(HorizontalAlign.Start)
-        .margin({ top: PMSpacing.MD })
-      } else if (this.phase === 'empty') {
-        // 没有历史：明确是第一份状态记录，不展示空数组假象
-        Column() {
-          Text('? 尚未生成状态基线')
-            .fontSize(PMFontSize.BODY)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.INK_SECONDARY)
-          Text('生成后，系统会记录「当时观察到的状态」，之后每次变化都可对比与追溯。')
-            .fontSize(PMFontSize.CAPTION)
-            .fontColor(PMColors.INK_TERTIARY)
-            .lineHeight(18)
-            .margin({ top: PMSpacing.XS })
-          Button(this.isRefreshing ? '生成中…' : '生成状态基线')
-            .height(36)
-            .fontSize(PMFontSize.CAPTION)
-            .fontColor(PMColors.SURFACE)
-            .backgroundColor(PMColors.BRAND)
-            .borderRadius(PMRadius.SM)
-            .margin({ top: PMSpacing.SM })
-            .enabled(!this.isRefreshing)
-            .onClick(() => {
-              this.refreshState();
             })
         }
         .width('100%')

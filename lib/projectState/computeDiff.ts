@@ -304,6 +304,10 @@ export function computeProjectStateDiff(from: ProjectStatePayload, to: ProjectSt
   if (from.schemaVersion !== to.schemaVersion) {
     throw new RebuildRequiredError();
   }
+  // 规则版本不同说明结论计算规则已变化，跨版本比较会伪造一致性
+  if (from.policyVersion !== to.policyVersion) {
+    throw new RebuildRequiredError();
+  }
 
   const items: StateDiffItem[] = [
     ...diffProjectFields(from, to),

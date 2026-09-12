@@ -177,6 +177,7 @@ function payloadFrom(built: ReturnType<typeof buildProjectState>, snapshotId: st
     snapshotId,
     projectId: built.projectId,
     schemaVersion: built.schemaVersion,
+    policyVersion: built.policyVersion,
     evaluatedAt: built.evaluatedAt,
     goal: built.goal,
     deadline: built.deadline,

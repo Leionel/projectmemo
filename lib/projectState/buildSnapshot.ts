@@ -253,6 +253,7 @@ export function buildProjectState(input: SnapshotSourceInput): BuiltProjectState
     snapshotId: "",
     projectId: input.projectId,
     schemaVersion: PROJECT_STATE_SCHEMA_VERSION,
+    policyVersion: PROJECT_STATE_POLICY_VERSION,
     goal: input.goal,
     deadline: input.deadline,
     stage: null,

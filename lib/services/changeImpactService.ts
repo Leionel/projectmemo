@@ -3,6 +3,8 @@ import { AppError } from "@/lib/api";
 import { requireProject } from "@/lib/repositories/projects";
 import type { ChangeImpactProposal, ChangeImpactItem, ConfirmChangeInput } from "@/lib/types/decisionImpact";
 import { Prisma } from "@/lib/generated/prisma/client";
+import { isFeatureEnabled } from "@/lib/config/features";
+import { refreshProjectState } from "@/lib/services/projectStateService";
 
 // 内存暂存提案，方便快速内存比对
 const pendingProposals = new Map<string, ChangeImpactProposal>();
@@ -220,7 +222,7 @@ export async function analyzeChangeImpact(projectId: string, newFactText: string
 export async function confirmChangeImpact(projectId: string, input: ConfirmChangeInput) {
   await requireProject(projectId);
 
-  return db.$transaction(async (tx) => {
+  const result = await db.$transaction(async (tx) => {
     // 1. 校验提案受控合法性与项目归属
     const runId = input.proposalId.startsWith("cip_") ? input.proposalId.substring(4) : input.proposalId;
     const run = await tx.agentRun.findFirst({
@@ -401,4 +403,16 @@ export async function confirmChangeImpact(projectId: string, input: ConfirmChang
       ...executionResult,
     };
   });
+
+  // 业务提交已成功；状态未刷新（功能关闭或刷新失败）不得伪装成业务失败，只标记待刷新（进入项目时补偿）
+  let stateRefreshPending = true;
+  if (isFeatureEnabled("PROJECT_STATE_ENABLED", false)) {
+    try {
+      await refreshProjectState(projectId);
+      stateRefreshPending = false;
+    } catch (_e) {
+      stateRefreshPending = true;
+    }
+  }
+  return { ...result, stateRefreshPending };
 }

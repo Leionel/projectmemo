@@ -58,6 +58,7 @@ struct Index {
   @State isProbing: boolean = false;
   @State probeResult: ProbeResponse | undefined = undefined;
   @State settingsFeedback: string = '';
+  @State showSettingsSheet: boolean = false;
   @State dataSyncState: string = '尚未同步';
 
   // 新建项目弹窗状态
@@ -1084,38 +1085,126 @@ struct Index {
         // 一级卡片：应用身份与当前环境
         this.AppInfoCard()
 
-        // 二级卡片：运行配置
+        // 两大入口：功能介绍（文档） / API 与引擎
         Column() {
           Row() {
-            Row() {
-              SettingsIcon({ isSelected: true, iconSize: 22 })
-            }
-            .width(48)
-            .height(48)
-            .justifyContent(FlexAlign.Center)
-            .backgroundColor(PMColors.BRAND_LIGHT)
-            .borderRadius(PMRadius.SM)
-
+            Text('📘')
+              .fontSize(24)
             Column() {
-              Text('运行配置')
+              Text('功能介绍')
                 .fontSize(PMFontSize.SECTION_TITLE)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
-              Text('为问忆程与成果生成选择在线模型或离线引擎。')
-                .fontSize(PMFontSize.BODY)
+              Text('产品定位、功能清单与设计理念，附完整说明文档。')
+                .fontSize(PMFontSize.CAPTION)
                 .fontColor(PMColors.INK_SECONDARY)
                 .lineHeight(18)
-                .maxLines(2)
-                .textOverflow({ overflow: TextOverflow.Ellipsis })
                 .margin({ top: PMSpacing.XS })
             }
-            .layoutWeight(1)
             .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
             .margin({ left: PMSpacing.MD })
+
+            Text('›')
+              .fontSize(22)
+              .fontColor(PMColors.INK_TERTIARY)
           }
           .width('100%')
           .alignItems(VerticalAlign.Center)
+          .padding({ top: PMSpacing.SM, bottom: PMSpacing.SM })
+          .clickEffect(PMInteraction.PRESS_EFFECT)
+          .onClick(() => {
+            router.pushUrl({ url: 'pages/FeatureGuide' });
+          })
+          .accessibilityText('打开功能介绍文档')
 
+          Divider()
+            .color(PMColors.BORDER_SUBTLE)
+
+          Row() {
+            Text('🔌')
+              .fontSize(24)
+            Column() {
+              Text('API 与引擎')
+                .fontSize(PMFontSize.SECTION_TITLE)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text('选择离线确定性引擎或配置 OpenAI 兼容 API。')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .lineHeight(18)
+                .margin({ top: PMSpacing.XS })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+            .margin({ left: PMSpacing.MD })
+
+            Text(this.llmMode === 'openai-compatible' ? '在线 API' : '离线引擎')
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(this.llmMode === 'openai-compatible' ? PMColors.BRAND : PMColors.MEMORY)
+              .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 4, bottom: 4 })
+              .backgroundColor(this.llmMode === 'openai-compatible' ? PMColors.BRAND_LIGHT : PMColors.MEMORY_LIGHT)
+              .borderRadius(PMRadius.FULL)
+              .margin({ right: PMSpacing.SM })
+
+            Text('›')
+              .fontSize(22)
+              .fontColor(PMColors.INK_TERTIARY)
+          }
+          .width('100%')
+          .alignItems(VerticalAlign.Center)
+          .padding({ top: PMSpacing.SM, bottom: PMSpacing.SM })
+          .clickEffect(PMInteraction.PRESS_EFFECT)
+          .onClick(() => {
+            this.showSettingsSheet = true;
+          })
+          .accessibilityText('打开 API 与引擎配置')
+        }
+        .width('100%')
+        .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.SM })
+        .backgroundColor(PMColors.SURFACE)
+        .borderRadius(PMRadius.MD)
+        .border({ width: 1, color: PMColors.BORDER })
+        .alignItems(HorizontalAlign.Start)
+        .margin({ top: PMSpacing.MD })
+      }
+      .width('100%')
+      .alignItems(HorizontalAlign.Start)
+      .padding(PMSpacing.LG)
+    }
+    .layoutWeight(1)
+    .transition(PMTransition.CONTENT_ENTER)
+    .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
+    .bindSheet($$this.showSettingsSheet, this.ApiSheet(), {
+      height: SheetSize.FIT_CONTENT,
+      dragBar: true
+    })
+  }
+
+  // API 与引擎配置（半模态）：含引擎模式、在线 API 参数、连通测试与服务连接
+  @Builder
+  private ApiSheet() {
+    Column() {
+      Row() {
+        Text('API 与引擎')
+          .fontSize(PMFontSize.SECTION_TITLE)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.INK_PRIMARY)
+        Button('✕')
+          .fontSize(PMFontSize.BODY)
+          .fontColor(PMColors.INK_TERTIARY)
+          .backgroundColor('transparent')
+          .onClick(() => {
+            this.showSettingsSheet = false;
+          })
+          .accessibilityText('关闭 API 配置')
+      }
+      .width('100%')
+      .justifyContent(FlexAlign.SpaceBetween)
+
+      Scroll() {
+        Column() {
           Row() {
             Text('当前运行方式')
               .fontSize(PMFontSize.SECONDARY)
@@ -1131,15 +1220,11 @@ struct Index {
           .width('100%')
           .justifyContent(FlexAlign.SpaceBetween)
           .padding({ top: PMSpacing.SM, bottom: PMSpacing.SM })
-          .margin({ top: PMSpacing.SM })
-          .border({ width: { top: 1, bottom: 1 }, color: PMColors.BORDER_SUBTLE })
 
-          // 引擎模式
           Text('引擎模式')
             .fontSize(PMFontSize.SECONDARY)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.INK_SECONDARY)
-            .margin({ top: PMSpacing.MD })
 
           Row() {
             Button(this.llmMode === 'openai-compatible' ? '✓ OpenAI 兼容 API' : 'OpenAI 兼容 API')
@@ -1183,7 +1268,6 @@ struct Index {
           .margin({ top: PMSpacing.XS })
 
           if (this.llmMode === 'openai-compatible') {
-            // Base URL
             Text('API Base URL')
               .fontSize(PMFontSize.SECONDARY)
               .fontWeight(FontWeight.Medium)
@@ -1200,7 +1284,6 @@ struct Index {
               .border({ width: 1, color: PMColors.BORDER })
               .margin({ top: PMSpacing.XS })
 
-            // Model Name
             Text('模型名称')
               .fontSize(PMFontSize.SECONDARY)
               .fontWeight(FontWeight.Medium)
@@ -1217,7 +1300,6 @@ struct Index {
               .border({ width: 1, color: PMColors.BORDER })
               .margin({ top: PMSpacing.XS })
 
-            // API Key
             Row() {
               Text('API 密钥')
                 .fontSize(PMFontSize.SECONDARY)
@@ -1274,18 +1356,17 @@ struct Index {
             .margin({ top: PMSpacing.MD })
           }
 
-          // 探针测试结果
           if (this.probeResult !== undefined) {
             Column() {
               if (this.probeResult.success) {
                 Text('✓ 连通测试成功')
-                    .fontSize(PMFontSize.BODY)
-                    .fontWeight(FontWeight.Medium)
-                    .fontColor(PMColors.SUCCESS)
+                  .fontSize(PMFontSize.BODY)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.SUCCESS)
                 Text(`耗时 ${this.probeResult.latencyMs}ms · ${this.probeResult.model}`)
-                    .fontSize(PMFontSize.CAPTION)
-                    .fontColor(PMColors.INK_SECONDARY)
-                    .margin({ top: PMSpacing.XS })
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.INK_SECONDARY)
+                  .margin({ top: PMSpacing.XS })
               } else {
                 Text('连通测试失败')
                   .fontSize(PMFontSize.BODY)
@@ -1312,7 +1393,6 @@ struct Index {
               .margin({ top: PMSpacing.XS })
           }
 
-          // 操作按钮
           Row() {
             if (this.llmMode === 'openai-compatible') {
               Button(this.isProbing ? '正在测试...' : '测试连通性')
@@ -1346,113 +1426,57 @@ struct Index {
           }
           .width('100%')
           .margin({ top: PMSpacing.MD })
-        }
-        .width('100%')
-        .padding(PMSpacing.LG)
-        .backgroundColor(PMColors.SURFACE)
-        .borderRadius(PMRadius.MD)
-        .border({ width: 1, color: PMColors.BORDER })
-        .alignItems(HorizontalAlign.Start)
-        .margin({ top: PMSpacing.MD })
 
-        // 三级卡片：服务连接
-        Column() {
-          Text('服务连接')
-            .fontSize(PMFontSize.SECTION_TITLE)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.INK_PRIMARY)
+          Divider()
+            .color(PMColors.BORDER_SUBTLE)
+            .margin({ top: PMSpacing.MD, bottom: PMSpacing.SM })
 
           Row() {
-            Text('API 端点:')
-              .fontSize(PMFontSize.BODY)
-              .fontColor(PMColors.INK_SECONDARY)
-            Text(Constants.BASE_URL)
-              .fontSize(PMFontSize.BODY)
+            Text('服务连接')
+              .fontSize(PMFontSize.SECONDARY)
               .fontWeight(FontWeight.Medium)
-              .fontColor(PMColors.BRAND)
-              .margin({ left: PMSpacing.SM })
-              .layoutWeight(1)
-              .maxLines(1)
-              .textOverflow({ overflow: TextOverflow.Ellipsis })
-          }
-          .width('100%')
-          .margin({ top: PMSpacing.SM })
-
-          Row() {
-            Text('数据同步:')
-              .fontSize(PMFontSize.BODY)
               .fontColor(PMColors.INK_SECONDARY)
             Text(this.dataSyncState)
-              .fontSize(PMFontSize.BODY)
+              .fontSize(PMFontSize.CAPTION)
               .fontWeight(FontWeight.Medium)
               .fontColor(this.dataSyncState === '同步失败' ? PMColors.RISK :
                 this.dataSyncState === '同步中...' ? PMColors.BRAND : PMColors.SUCCESS)
-              .margin({ left: PMSpacing.SM })
           }
           .width('100%')
-          .margin({ top: 4 })
+          .justifyContent(FlexAlign.SpaceBetween)
+
+          Text(`API 端点：${Constants.BASE_URL}`)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+            .maxLines(1)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .margin({ top: PMSpacing.XS })
 
           Button('重新同步数据')
-            .fontSize(PMFontSize.BUTTON)
+            .fontSize(PMFontSize.CAPTION)
             .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.SURFACE)
-            .backgroundColor(PMColors.BRAND)
+            .fontColor(PMColors.INK_PRIMARY)
+            .backgroundColor(PMColors.SURFACE_SUBTLE)
+            .border({ width: 1, color: PMColors.BORDER })
             .borderRadius(PMRadius.SM)
-            .height(48)
-            .margin({ top: PMSpacing.MD })
+            .height(44)
+            .width('100%')
+            .margin({ top: PMSpacing.SM })
             .onClick(() => {
               this.loadAllData();
               promptAction.showToast({ message: '正在同步数据...' });
             })
         }
         .width('100%')
-        .padding(PMSpacing.LG)
-        .backgroundColor(PMColors.SURFACE)
-        .borderRadius(PMRadius.MD)
-        .border({ width: 1, color: PMColors.BORDER })
         .alignItems(HorizontalAlign.Start)
-        .margin({ top: PMSpacing.MD })
-
-        // 四级卡片：关于与安全
-        Column() {
-          Text('关于与安全')
-            .fontSize(PMFontSize.SECTION_TITLE)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.INK_PRIMARY)
-
-          Text('设计理念：Evidence Ledger（证据档案）')
-            .fontSize(PMFontSize.BODY)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.EVIDENCE)
-            .margin({ top: PMSpacing.SM })
-
-          Text('拒绝无事实支撑的模板化输出，以事实证据脊线支撑学术备赛与研发决策。')
-            .fontSize(PMFontSize.BODY)
-            .fontColor(PMColors.INK_SECONDARY)
-            .lineHeight(20)
-            .margin({ top: 4 })
-
-          Text('API 密钥只用于当前本地运行，不会在界面中回显；长期配置请使用部署环境变量。')
-            .fontSize(PMFontSize.CAPTION)
-            .fontColor(PMColors.INK_TERTIARY)
-            .lineHeight(18)
-            .margin({ top: PMSpacing.SM })
-        }
-        .width('100%')
-        .padding(PMSpacing.LG)
-        .backgroundColor(PMColors.SURFACE)
-        .borderRadius(PMRadius.MD)
-        .border({ width: 1, color: PMColors.BORDER })
-        .alignItems(HorizontalAlign.Start)
-        .margin({ top: PMSpacing.MD })
+        .padding({ top: PMSpacing.SM, bottom: PMSpacing.SM })
       }
-      .width('100%')
-      .alignItems(HorizontalAlign.Start)
-      .padding(PMSpacing.LG)
+      .scrollable(ScrollDirection.Vertical)
+      .scrollBar(BarState.Off)
     }
-    .layoutWeight(1)
-    .transition(PMTransition.CONTENT_ENTER)
-    .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
+    .width('100%')
+    .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.LG })
+    .alignItems(HorizontalAlign.Start)
   }
 
   // ----------------------------------------------------

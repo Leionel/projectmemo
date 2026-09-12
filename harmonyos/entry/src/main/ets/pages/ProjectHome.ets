@@ -3688,7 +3688,7 @@ struct ProjectHome {
     .width('100%')
     .height('100%')
     .bindSheet($$this.showCapturePanel, this.CaptureSheet(), {
-      height: 640,
+      height: SheetSize.FIT_CONTENT,
       dragBar: true
     })
   }

@@ -4,6 +4,7 @@
     "pages/ProjectHome",
     "pages/InterventionDetail",
     "pages/ActionBoard",
-    "pages/MemoryTimeline"
+    "pages/MemoryTimeline",
+    "pages/FeatureGuide"
   ]
 }

@@ -101,6 +101,8 @@ model Project {
   captures    Capture[]
   cards       KnowledgeCard[]
   lifecycleEvents MemoryLifecycleEvent[]
+  stateSnapshots  ProjectStateSnapshot[]
+  stateCursors    ProjectStateCursor[]
   artifacts   GeneratedArtifact[]
   interventions AgentIntervention[]
   actions     ActionItem[]
@@ -351,6 +353,38 @@ model AttachmentRevision {
   attachment   Attachment @relation(fields: [attachmentId], references: [id], onDelete: Cascade)
 
   @@index([attachmentId, revisionIndex])
+}
+
+/// R2/S1：项目状态快照。唯一约束在 (projectId, sourceHash, policyVersion, evaluationKey)：
+/// 相同输入与同一规则区间不重复生成；A→B→A 的再次发生必须保留为新的历史行。
+model ProjectStateSnapshot {
+  id                 String   @id @default(cuid())
+  projectId          String
+  schemaVersion      Int
+  policyVersion      String
+  sourceHash         String
+  evaluationKey      String
+  contentHash        String
+  observedAt         DateTime
+  evaluatedAt        DateTime
+  previousSnapshotId String?
+  payload            Json
+  project            Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, sourceHash, policyVersion, evaluationKey])
+  @@index([projectId, evaluatedAt])
+}
+
+/// 读游标：consumerKey 当前为单端安装身份；只推进不倒退，由用户显式“已了解”更新。
+model ProjectStateCursor {
+  id                 String   @id @default(cuid())
+  projectId          String
+  consumerKey        String
+  lastSeenSnapshotId String
+  updatedAt          DateTime @updatedAt
+  project            Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, consumerKey])
 }
 
 model Milestone {

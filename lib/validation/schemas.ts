@@ -166,4 +166,10 @@ export const lifecycleActionSchema = z.object({
 }).strict();
 
 export type TemporalRelationProposalInput = z.infer<typeof temporalRelationProposalSchema>;
+export const projectStateCheckInSchema = z.object({
+  displayedSnapshotId: z.string().trim().min(1),
+  consumerKey: z.string().trim().min(1).max(100),
+}).strict();
+
 export type LifecycleActionInput = z.infer<typeof lifecycleActionSchema>;
+export type ProjectStateCheckInInput = z.infer<typeof projectStateCheckInSchema>;

@@ -172,4 +172,16 @@ export const projectStateCheckInSchema = z.object({
 }).strict();
 
 export type LifecycleActionInput = z.infer<typeof lifecycleActionSchema>;
+export const actionFeasibilitySchema = z.object({
+  actionId: z.string().trim().min(1),
+  addRequirements: z.array(z.object({
+    targetKind: z.enum(["action", "card", "deliverable"]),
+    targetId: z.string().trim().min(1),
+    hard: z.boolean().optional().default(true),
+    note: z.string().trim().max(200).optional(),
+  })).max(20).optional(),
+  estimatedMinutes: z.number().int().min(1).max(100000).nullable().optional(),
+}).strict();
+
 export type ProjectStateCheckInInput = z.infer<typeof projectStateCheckInSchema>;
+export type ActionFeasibilityInput = z.infer<typeof actionFeasibilitySchema>;

@@ -179,6 +179,21 @@ model CardRelation {
   @@index([relationType, confirmed, revokedAt])
 }
 
+/// F1：行动结构化依赖。满足状态不持久化——每次按当前源数据重评，不信任客户端传入的 READY。
+model ActionRequirement {
+  id         String     @id @default(cuid())
+  actionId   String
+  projectId  String
+  targetKind String
+  targetId   String
+  hard       Boolean    @default(true)
+  note       String?
+  createdAt  DateTime   @default(now())
+  action     ActionItem @relation(fields: [actionId], references: [id], onDelete: Cascade)
+
+  @@index([actionId])
+}
+
 model GeneratedArtifact {
   id           String       @id @default(cuid())
   projectId    String
@@ -231,6 +246,8 @@ model ActionItem {
   description          String?
   priority             Int                  @default(3)
   status               ActionStatus         @default(TODO)
+  estimatedMinutes     Int?
+  requirements         ActionRequirement[]
   dueAt                DateTime?
   resultText           String?
   isSimulated           Boolean              @default(false)

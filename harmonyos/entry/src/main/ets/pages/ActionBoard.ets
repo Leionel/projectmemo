@@ -1,7 +1,7 @@
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
 import { ApiError } from '../models/Project';
-import { ActionItem } from '../models/Action';
+import { ActionCreateInput, ActionItem, FeasibilityAssessment } from '../models/Action';
 import { ActionService } from '../services/ActionService';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMaterial } from '../common/DesignTokens';
 import { PMAppBar } from '../components/PMAppBar';
@@ -24,8 +24,69 @@ struct ActionBoard {
   @State isSubmitting: boolean = false;
   @State dialogError: string = '';
   @State startingActionId: string = '';
+  @State showFeasibility: boolean = false;
+  @State feasibilityFor: FeasibilityAssessment = new FeasibilityAssessment();
+  @State isLoadingFeasibility: boolean = false;
+  @State isCreatingDepTask: boolean = false;
 
   private actionService: ActionService = new ActionService();
+
+  // --- F1 行动可行性：以当前源状态评估，不缓存旧结论 ---
+  private async openFeasibility(actionId: string): Promise<void> {
+    if (this.isLoadingFeasibility) {
+      return;
+    }
+    this.isLoadingFeasibility = true;
+    try {
+      this.feasibilityFor = await this.actionService.getFeasibility(this.projectId, actionId);
+      this.showFeasibility = true;
+    } catch (e) {
+      promptAction.showToast({ message: e instanceof ApiError ? e.message : '可行性评估失败' });
+    } finally {
+      this.isLoadingFeasibility = false;
+    }
+  }
+
+  private feasibilityColor(): ResourceColor {
+    if (this.feasibilityFor.feasibility === 'READY') return PMColors.SUCCESS;
+    if (this.feasibilityFor.feasibility === 'BLOCKED') return PMColors.RISK;
+    return PMColors.EVIDENCE;
+  }
+
+  private firstUnmetNote(): string {
+    for (let i = 0; i < this.feasibilityFor.dependencies.length; i++) {
+      const dep = this.feasibilityFor.dependencies[i];
+      if (dep.hard && (dep.state === 'UNMET' || dep.state === 'MISSING')) {
+        return dep.targetTitle !== null ? dep.targetTitle : dep.note;
+      }
+    }
+    return '';
+  }
+
+  private async createDependencyTask(): Promise<void> {
+    if (this.isCreatingDepTask) {
+      return;
+    }
+    const unmet = this.firstUnmetNote();
+    if (unmet === '') {
+      return;
+    }
+    this.isCreatingDepTask = true;
+    try {
+      const input = new ActionCreateInput();
+      input.title = `先解决依赖：${unmet}`.substring(0, 60);
+      input.description = `该任务因「${this.feasibilityFor.dependencies[0].note}」被判定为 BLOCKED，先解决此前置条件。`;
+      input.priority = 1;
+      await this.actionService.create(this.projectId, input);
+      promptAction.showToast({ message: '已创建“先解决依赖”任务' });
+      this.showFeasibility = false;
+      await this.loadActions();
+    } catch (e) {
+      promptAction.showToast({ message: e instanceof ApiError ? e.message : '创建失败' });
+    } finally {
+      this.isCreatingDepTask = false;
+    }
+  }
 
   aboutToAppear(): void {
     const params: Record<string, string> | undefined = router.getParams() as Record<string, string>;
@@ -230,6 +291,18 @@ struct ActionBoard {
               })
           }
 
+          Button(this.isLoadingFeasibility ? '评估中…' : '查可行性')
+            .fontSize(PMFontSize.BUTTON)
+            .fontColor(PMColors.INK_PRIMARY)
+            .backgroundColor(PMColors.SURFACE_SUBTLE)
+            .border({ width: 1, color: PMColors.BORDER })
+            .borderRadius(PMRadius.SM)
+            .height(48)
+            .enabled(!this.isLoadingFeasibility)
+            .onClick(() => {
+              this.openFeasibility(action.id);
+            })
+
           Button('完成并写回执')
             .fontSize(PMFontSize.BUTTON)
             .fontWeight(FontWeight.Medium)
@@ -237,7 +310,7 @@ struct ActionBoard {
             .backgroundColor(PMColors.BRAND)
             .borderRadius(PMRadius.SM)
             .height(48)
-            .margin({ left: action.status === 'TODO' ? PMSpacing.SM : 0 })
+            .margin({ left: PMSpacing.SM })
             .onClick(() => {
               this.openCompleteDialog(action.id);
             })
@@ -365,6 +438,111 @@ struct ActionBoard {
       }
       .width('100%')
       .height('100%')
+
+      // 可行性评估弹窗（F1）
+      if (this.showFeasibility) {
+        Column() {
+          Column() {
+            Row() {
+              Text('行动可行性')
+                .fontSize(PMFontSize.PAGE_TITLE)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Button('✕')
+                .fontSize(PMFontSize.BODY)
+                .fontColor(PMColors.INK_TERTIARY)
+                .backgroundColor('transparent')
+                .onClick(() => {
+                  this.showFeasibility = false;
+                })
+            }
+            .width('100%')
+            .justifyContent(FlexAlign.SpaceBetween)
+
+            Text(`${this.feasibilityFor.feasibility === 'READY' ? '✓ 可开始' : this.feasibilityFor.feasibility === 'BLOCKED' ? '! 受阻' : '? 无法确认'}`)
+              .fontSize(PMFontSize.SECTION_TITLE)
+              .fontWeight(FontWeight.Bold)
+              .fontColor(this.feasibilityColor())
+              .margin({ top: PMSpacing.SM })
+
+            Text(this.feasibilityFor.summary)
+              .fontSize(PMFontSize.BODY)
+              .fontColor(PMColors.INK_SECONDARY)
+              .lineHeight(20)
+              .margin({ top: PMSpacing.XS })
+
+            if (this.feasibilityFor.overdue) {
+              Text('! 截止时间已过')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.RISK)
+                .margin({ top: PMSpacing.XS })
+            }
+
+            Text(`估时：${this.feasibilityFor.estimateMinutes !== null ? `${this.feasibilityFor.estimateMinutes} 分钟（用户填写）` : '未估算'}`)
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+              .margin({ top: PMSpacing.XS })
+
+            ForEach(this.feasibilityFor.dependencies, (dep) => {
+              Row() {
+                Text(dep.hard ? '硬依赖' : '参考')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(dep.hard ? PMColors.RISK : PMColors.INK_TERTIARY)
+                Column() {
+                  Text(dep.targetTitle !== null ? dep.targetTitle : dep.note)
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.INK_PRIMARY)
+                  Text(`${dep.state} · ${dep.note}`)
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.INK_TERTIARY)
+                    .margin({ top: 2 })
+                }
+                .alignItems(HorizontalAlign.Start)
+                .layoutWeight(1)
+                .margin({ left: PMSpacing.SM })
+              }
+              .width('100%')
+              .alignItems(VerticalAlign.Top)
+              .padding({ top: PMSpacing.SM })
+            }, (dep) => dep.requirementId)
+
+            if (this.feasibilityFor.dependencies.length === 0) {
+              Text('尚未声明任何依赖。READY 只表示已声明的硬依赖满足，不保证现实一定按时完成。')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_TERTIARY)
+                .lineHeight(18)
+                .margin({ top: PMSpacing.SM })
+            }
+
+            if (this.feasibilityFor.feasibility === 'BLOCKED' && this.firstUnmetNote() !== '') {
+              Button(this.isCreatingDepTask ? '创建中…' : '创建“先解决依赖”任务')
+                .fontSize(PMFontSize.BUTTON)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.SURFACE)
+                .backgroundColor(PMColors.BRAND)
+                .borderRadius(PMRadius.SM)
+                .height(48)
+                .width('100%')
+                .enabled(!this.isCreatingDepTask)
+                .margin({ top: PMSpacing.MD })
+                .onClick(() => {
+                  this.createDependencyTask();
+                })
+            }
+          }
+          .width('92%')
+          .padding(PMSpacing.XL)
+          .backgroundColor(PMColors.SURFACE)
+          .borderRadius(PMRadius.LG)
+          .border({ width: 1, color: PMColors.BORDER })
+          .alignItems(HorizontalAlign.Start)
+        }
+        .width('100%')
+        .height('100%')
+        .backgroundColor(PMColors.SCRIM)
+        .justifyContent(FlexAlign.Center)
+      }
 
       // 完成行动弹窗
       if (this.completingActionId !== '') {

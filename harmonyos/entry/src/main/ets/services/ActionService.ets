@@ -1,5 +1,12 @@
 import { ApiClient } from './ApiClient';
-import { ActionItem, ActionsResponse, ActionUpdateResponse } from '../models/Action';
+import {
+  ActionCreateInput,
+  ActionItem,
+  ActionsResponse,
+  ActionUpdateResponse,
+  FeasibilityAssessment,
+  FeasibilityInput
+} from '../models/Action';
 import { buildActionCompleteBody, buildActionStatusBody } from '../common/ApiContract';
 
 export class ActionService {
@@ -8,6 +15,20 @@ export class ActionService {
   async list(projectId: string): Promise<ActionItem[]> {
     const response: ActionsResponse = await this.client.get<ActionsResponse>(`/api/projects/${projectId}/actions`);
     return response.actions;
+  }
+
+  async create(projectId: string, input: ActionCreateInput): Promise<ActionItem> {
+    return this.client.post<ActionItem>(`/api/projects/${projectId}/actions`, input);
+  }
+
+  async getFeasibility(projectId: string, actionId: string): Promise<FeasibilityAssessment> {
+    return this.client.get<FeasibilityAssessment>(
+      `/api/projects/${projectId}/actions/feasibility?actionId=${actionId}`
+    );
+  }
+
+  async updateFeasibility(projectId: string, input: FeasibilityInput): Promise<FeasibilityAssessment> {
+    return this.client.post<FeasibilityAssessment>(`/api/projects/${projectId}/actions/feasibility`, input);
   }
 
   async complete(projectId: string, actionId: string, resultText: string): Promise<ActionItem> {

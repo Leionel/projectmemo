@@ -1,5 +1,6 @@
 import { ApiClient } from './ApiClient';
 import {
+  ChangeBriefResponse,
   StateCheckInBody,
   StateCheckInResponse,
   StateDiffResponse,
@@ -27,6 +28,13 @@ export class ProjectStateService {
   async diff(projectId: string, fromSnapshotId: string, toSnapshotId: string): Promise<StateDiffResponse> {
     return this.client.get<StateDiffResponse>(
       `/api/projects/${projectId}/state/diff?from=${fromSnapshotId}&to=${toSnapshotId}`
+    );
+  }
+
+  async getBrief(projectId: string, fromSnapshotId: string, toSnapshotId: string): Promise<ChangeBriefResponse> {
+    const fromPart = fromSnapshotId === '' ? '' : `from=${fromSnapshotId}&`;
+    return this.client.get<ChangeBriefResponse>(
+      `/api/projects/${projectId}/state/brief?${fromPart}to=${toSnapshotId}`
     );
   }
 

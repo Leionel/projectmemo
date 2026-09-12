@@ -17,6 +17,7 @@ import { InterventionService } from '../services/InterventionService';
 import { MemoryService } from '../services/MemoryService';
 import { MemoryLifecycleService } from '../services/MemoryLifecycleService';
 import { InterventionPolicyService } from '../services/InterventionPolicyService';
+import { ProjectStateService } from '../services/ProjectStateService';
 import { PolicyResponse, PolicySuggestion } from '../models/Intervention';
 import { ActionService } from '../services/ActionService';
 import { ArtifactService } from '../services/ArtifactService';
@@ -47,7 +48,8 @@ import { ChangeImpactDialog } from '../components/ChangeImpactDialog';
 import { ClaimAuditorDrawer } from '../components/ClaimAuditorDrawer';
 import { ProjectStatePanel } from '../components/ProjectStatePanel';
 import { ProjectStateDiffSheet } from '../components/ProjectStateDiffSheet';
-import { StateDiff } from '../models/ProjectState';
+import { ProjectChangeBrief } from '../components/ProjectChangeBrief';
+import { ChangeBrief, StateDiff } from '../models/ProjectState';
 import { JudgeRebuttalModal } from '../components/JudgeRebuttalModal';
 import { AttachmentCorrectionModal } from '../components/AttachmentCorrectionModal';
 import { ExportFormatter } from '../common/ExportFormatter';
@@ -93,6 +95,8 @@ struct ProjectHome {
   @State showClaimAuditor: boolean = false;
   @State showStateDiffSheet: boolean = false;
   @State stateDiffForSheet: StateDiff = new StateDiff();
+  @State showChangeBrief: boolean = false;
+  @State briefForSheet: ChangeBrief = new ChangeBrief();
   @State isExportingProvenance: boolean = false;
   @State lifecycleActionCardId: string = '';
   @State showJudgeRebuttal: boolean = false;
@@ -144,6 +148,7 @@ struct ProjectHome {
   private artifactService: ArtifactService = new ArtifactService();
   private lifecycleService: MemoryLifecycleService = new MemoryLifecycleService();
   private policyService: InterventionPolicyService = new InterventionPolicyService();
+  private stateService: ProjectStateService = new ProjectStateService();
   @State policyDailyBudget: string = '3';
   @State policyQuietStart: string = '23:00';
   @State policyQuietEnd: string = '08:00';
@@ -806,6 +811,17 @@ struct ProjectHome {
     this.dialogError = '';
   }
 
+  // --- 变化简报（C1）：以快照 Diff 为唯一事实输入，服务端确定性模板 ---
+  private async openChangeBrief(fromId: string, toId: string): Promise<void> {
+    try {
+      const response = await this.stateService.getBrief(this.projectId, fromId, toId);
+      this.briefForSheet = response.brief;
+      this.showChangeBrief = true;
+    } catch (e) {
+      promptAction.showToast({ message: e instanceof ApiError ? e.message : '简报生成失败，请稍后重试' });
+    }
+  }
+
   // --- 记忆生命周期：人工确认来源 / 归档 / 恢复 ---
   private async confirmCardSource(cardId: string): Promise<void> {
     if (this.lifecycleActionCardId !== '') {
@@ -1286,6 +1302,9 @@ struct ProjectHome {
           onOpenDiffSheet: (diff: StateDiff) => {
             this.stateDiffForSheet = diff;
             this.showStateDiffSheet = true;
+          },
+          onOpenBrief: (fromId: string, toId: string) => {
+            this.openChangeBrief(fromId, toId);
           },
           onGoActions: () => {
             this.currentTabIndex = 2;
@@ -3574,6 +3593,18 @@ struct ProjectHome {
           },
           onSuccess: () => {
             this.loadAllData();
+          }
+        })
+      }
+
+      if (this.showChangeBrief) {
+        ProjectChangeBrief({
+          brief: this.briefForSheet,
+          onClose: () => {
+            this.showChangeBrief = false;
+          },
+          onGoActions: () => {
+            this.currentTabIndex = 2;
           }
         })
       }

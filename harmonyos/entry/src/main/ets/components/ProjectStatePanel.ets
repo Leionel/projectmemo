@@ -23,6 +23,7 @@ export struct ProjectStatePanel {
   @State private baselineMessage: string = '';
   private stateService: ProjectStateService = new ProjectStateService();
   onOpenDiffSheet: (diff: StateDiff) => void = (_diff: StateDiff) => {};
+  onOpenBrief: (fromId: string, toId: string) => void = (_fromId: string, _toId: string) => {};
   onGoActions: () => void = () => {};
 
   aboutToAppear(): void {
@@ -307,15 +308,28 @@ export struct ProjectStatePanel {
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.INK_TERTIARY)
           }
-          Text('查看全部变化与依据')
-            .fontSize(PMFontSize.CAPTION)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.BRAND)
-            .margin({ top: PMSpacing.XS })
-            .clickEffect(PMInteraction.PRESS_EFFECT)
-            .onClick(() => {
-              this.onOpenDiffSheet(this.diff);
-            })
+          Row({ space: PMSpacing.MD }) {
+            Text('查看全部变化与依据')
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.BRAND)
+              .clickEffect(PMInteraction.PRESS_EFFECT)
+              .onClick(() => {
+                this.onOpenDiffSheet(this.diff);
+              })
+
+            Text('查看简报（变化/影响/建议）')
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.BRAND)
+              .clickEffect(PMInteraction.PRESS_EFFECT)
+              .onClick(() => {
+                const lastSeen = AppStorage.get<string>(this.lastSeenKey());
+                this.onOpenBrief(lastSeen === undefined || lastSeen === '' ? '' : lastSeen, this.snapshot.id);
+              })
+          }
+          .width('100%')
+          .margin({ top: PMSpacing.XS })
         }
         .width('100%')
         .alignItems(HorizontalAlign.Start)

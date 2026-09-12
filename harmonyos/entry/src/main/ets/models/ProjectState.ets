@@ -90,3 +90,29 @@ export class StateCheckInResponse {
   status: string = 'OK';
   lastSeenSnapshotId: string = '';
 }
+
+// ---- C1 变化简报（服务端确定性模板） ----
+
+export class BriefSentence {
+  changeKey: string = '';
+  kind: string = 'CHANGED';
+  text: string = '';
+  impact: string = '';
+  suggestion: string = '';
+  evidenceCount: number = 0;
+}
+
+export class ChangeBrief {
+  fromSnapshotId: string = '';
+  toSnapshotId: string = '';
+  templateVersion: string = '1';
+  materialChange: boolean = false;
+  headline: string = '';
+  sentences: BriefSentence[] = [];
+  generatedAt: string = '';
+}
+
+export class ChangeBriefResponse {
+  status: string = 'OK';
+  brief: ChangeBrief = new ChangeBrief();
+}

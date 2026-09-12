@@ -7,6 +7,7 @@
 export const PROJECT_STATE_SCHEMA_VERSION = 1;
 export const PROJECT_STATE_POLICY_VERSION = "1";
 export const PROJECT_STATE_DIFF_ALGORITHM_VERSION = "1";
+export const PROJECT_STATE_BRIEF_TEMPLATE_VERSION = "1";
 
 export type ProjectHealth = "AT_RISK" | "ON_TRACK" | "UNKNOWN";
 
@@ -137,6 +138,30 @@ export interface StateDiffItem {
   before: string | null;
   after: string | null;
   evidenceRefs: SnapshotEvidenceRef[];
+}
+
+// ---- C1：变化简报（确定性模板，逐句携带 changeKey 与证据数量；读简报不创建行动） ----
+
+export interface ChangeBriefSentence {
+  changeKey: string;
+  kind: StateDiffKind;
+  /** 变化 */
+  text: string;
+  /** 影响 */
+  impact: string;
+  /** 建议 */
+  suggestion: string;
+  evidenceCount: number;
+}
+
+export interface ProjectChangeBrief {
+  fromSnapshotId: string;
+  toSnapshotId: string;
+  templateVersion: string;
+  materialChange: boolean;
+  headline: string;
+  sentences: ChangeBriefSentence[];
+  generatedAt: string;
 }
 
 export interface ProjectStateDiff {

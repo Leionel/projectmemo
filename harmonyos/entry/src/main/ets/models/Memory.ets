@@ -143,3 +143,34 @@ export class TemporalTimelineResponse {
 export class TemporalRelationResponse {
   relation: TemporalRelation = new TemporalRelation();
 }
+
+// ---- 记忆生命周期（M1：人工确认来源 / 归档 / 恢复） ----
+
+export class LifecycleActionBody {
+  action: string = 'CONFIRM';
+  reason: string | undefined = undefined;
+}
+
+export class LifecycleEvent {
+  id: string = '';
+  projectId: string = '';
+  cardId: string = '';
+  eventType: string = '';
+  reason: string | null = null;
+  actor: string = 'user';
+  relationId: string | null = null;
+  createdAt: string = '';
+}
+
+export class LifecycleEventsResponse {
+  events: LifecycleEvent[] = [];
+}
+
+export class LifecycleArchiveResponse {
+  archivedAt: string | null = null;
+}
+
+export class LifecycleConfirmResponse {
+  event: LifecycleEvent = new LifecycleEvent();
+  archivedAt: string | null = null;
+}

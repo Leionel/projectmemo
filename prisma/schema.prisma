@@ -100,6 +100,7 @@ model Project {
   updatedAt   DateTime            @updatedAt
   captures    Capture[]
   cards       KnowledgeCard[]
+  lifecycleEvents MemoryLifecycleEvent[]
   artifacts   GeneratedArtifact[]
   interventions AgentIntervention[]
   actions     ActionItem[]
@@ -135,6 +136,7 @@ model KnowledgeCard {
   relatedTasks    Json
   nextActions     Json
   importance      Int
+  archivedAt      DateTime?
   createdAt       DateTime            @default(now())
   project         Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
   capture         Capture             @relation(fields: [captureId], references: [id], onDelete: Cascade)
@@ -142,6 +144,7 @@ model KnowledgeCard {
   embedding       CardEmbedding?
   outgoingLinks   CardRelation[]      @relation("CurrentCard")
   incomingLinks   CardRelation[]      @relation("RelatedCard")
+  lifecycleEvents MemoryLifecycleEvent[]
   interventions   AgentIntervention[] @relation("InterventionEvidence")
   sourceActions   ActionItem[]        @relation("ActionSourceCard")
   resultingAction ActionItem?         @relation("ActionResultCard")
@@ -305,9 +308,49 @@ model Attachment {
   createdAt        DateTime        @default(now())
   project          Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
   cards            KnowledgeCard[]
+  revisions        AttachmentRevision[]
 
   @@index([projectId, sha256])
   @@index([projectId, createdAt])
+}
+
+/// 记忆生命周期审计：人工确认来源、关系确认/撤销、归档/恢复。
+/// 事件写入与对应业务变更同事务提交；人工确认是来源声明，不是自动证明事实真实。
+model MemoryLifecycleEvent {
+  id         String                   @id @default(cuid())
+  projectId  String
+  cardId     String
+  eventType  MemoryLifecycleEventType
+  reason     String?
+  actor      String                   @default("user")
+  relationId String?
+  createdAt  DateTime                 @default(now())
+  card       KnowledgeCard            @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  project    Project                  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([cardId, createdAt])
+  @@index([projectId, createdAt])
+}
+
+enum MemoryLifecycleEventType {
+  CONFIRM
+  RELATION_CONFIRM
+  RELATION_REVOKE
+  ARCHIVE
+  RESTORE
+}
+
+/// 附件提取/人工纠错修订链：旧抽取结果保留，不随纠错覆盖。
+model AttachmentRevision {
+  id           String     @id @default(cuid())
+  attachmentId String
+  revisionIndex Int
+  text         String
+  source       String
+  createdAt    DateTime   @default(now())
+  attachment   Attachment @relation(fields: [attachmentId], references: [id], onDelete: Cascade)
+
+  @@index([attachmentId, revisionIndex])
 }
 
 model Milestone {

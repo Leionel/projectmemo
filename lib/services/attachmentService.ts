@@ -198,6 +198,17 @@ export async function processAttachmentUpload(input: UploadAttachmentInput) {
         extractionError,
       },
     });
+    // 修订链起点：原始机器提取文本作为 revision 0 保留
+    if (extractedText) {
+      await db.attachmentRevision.create({
+        data: {
+          attachmentId: attachment.id,
+          revisionIndex: 0,
+          text: extractedText,
+          source: "EXTRACTION",
+        },
+      });
+    }
   } catch (error) {
     await deleteAttachmentFile(stored.storageKey);
     throw error;
@@ -295,6 +306,16 @@ export async function retryAttachmentExtraction(projectId: string, attachmentId:
     where: { id: attachment.id },
     data: { extractedText, extractionStatus: "SUCCESS", extractionError: null },
   });
+  // 重试提取的文本同样进入修订链，保证历史可追溯
+  const revisionCount = await db.attachmentRevision.count({ where: { attachmentId: attachment.id } });
+  await db.attachmentRevision.create({
+    data: {
+      attachmentId: attachment.id,
+      revisionIndex: revisionCount,
+      text: extractedText,
+      source: "EXTRACTION_RETRY",
+    },
+  });
   return { attachment: updated, card };
 }
 
@@ -304,6 +325,7 @@ export async function correctAttachmentText(
   correctedText: string
 ) {
   await requireProject(projectId);
+  // processCapture 内部自带事务，必须先于本次审计事务执行，避免 SQLite 嵌套事务互锁
   const attachment = await db.attachment.findFirst({
     where: { id: attachmentId, projectId },
     include: { cards: true },
@@ -319,40 +341,64 @@ export async function correctAttachmentText(
     sourceType
   );
 
-  await db.knowledgeCard.update({
-    where: { id: card.id },
-    data: { attachmentId: attachment.id },
-  });
+  return db.$transaction(async (tx) => {
+    await tx.knowledgeCard.update({
+      where: { id: card.id },
+      data: { attachmentId: attachment.id },
+    });
 
-  // 对该附件关联的历史卡片建立 SUPERSEDES 取代关系，使旧错误数值失效并建立纠错审计修订链
-  if (attachment.cards && attachment.cards.length > 0) {
-    for (const oldCard of attachment.cards) {
-      if (oldCard.id !== card.id) {
-        await db.cardRelation.create({
-          data: {
-            currentCardId: card.id,
-            relatedCardId: oldCard.id,
-            relationType: "SUPERSEDES",
-            reason: `人工校对修正附件【${attachment.fileName}】内容，新记录取代旧记录`,
-            score: 100,
-            confidence: 1.0,
-            confirmed: true,
-            confirmedAt: new Date(),
-            validFrom: new Date(),
-          },
-        });
+    // 对该附件关联的历史卡片建立 SUPERSEDES 取代关系，使旧错误数值失效并建立纠错审计修订链
+    if (attachment.cards && attachment.cards.length > 0) {
+      for (const oldCard of attachment.cards) {
+        if (oldCard.id !== card.id) {
+          await tx.cardRelation.create({
+            data: {
+              currentCardId: card.id,
+              relatedCardId: oldCard.id,
+              relationType: "SUPERSEDES",
+              reason: `人工校对修正附件【${attachment.fileName}】内容，新记录取代旧记录`,
+              score: 100,
+              confidence: 1.0,
+              confirmed: true,
+              confirmedAt: new Date(),
+              validFrom: new Date(),
+            },
+          });
+        }
       }
     }
-  }
 
-  const updated = await db.attachment.update({
-    where: { id: attachment.id },
-    data: {
-      extractedText: correctedText.trim(),
-      extractionStatus: "SUCCESS",
-      extractionError: null,
-    },
+    // 修订链：旧抽取/校对文本原样保留为历史修订，当前文本只作为最新版本
+    const existingRevisions = await tx.attachmentRevision.count({ where: { attachmentId: attachment.id } });
+    if (existingRevisions === 0 && attachment.extractedText !== null) {
+      await tx.attachmentRevision.create({
+        data: {
+          attachmentId: attachment.id,
+          revisionIndex: 0,
+          text: attachment.extractedText,
+          source: "EXTRACTION",
+        },
+      });
+    }
+    const nextIndex = (existingRevisions === 0 && attachment.extractedText !== null ? 1 : existingRevisions);
+    await tx.attachmentRevision.create({
+      data: {
+        attachmentId: attachment.id,
+        revisionIndex: nextIndex,
+        text: correctedText.trim(),
+        source: "MANUAL_CORRECTION",
+      },
+    });
+
+    const updated = await tx.attachment.update({
+      where: { id: attachment.id },
+      data: {
+        extractedText: correctedText.trim(),
+        extractionStatus: "SUCCESS",
+        extractionError: null,
+      },
+    });
+
+    return { attachment: updated, card };
   });
-
-  return { attachment: updated, card };
 }

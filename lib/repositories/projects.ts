@@ -72,6 +72,7 @@ export async function getProjectDetail(projectId: string) {
     where: { id: projectId },
     include: {
       cards: {
+        where: { archivedAt: null },
         orderBy: { createdAt: "desc" },
         include: {
           capture: { select: { rawText: true, sourceType: true } },

@@ -160,4 +160,10 @@ export type AgentToolConfirmInput = z.infer<typeof agentToolConfirmSchema>;
 export type CardSearchInput = z.infer<typeof cardSearchInputSchema>;
 export type MilestoneCreateInput = z.infer<typeof milestoneCreateSchema>;
 export type DeliverableEvidenceInput = z.infer<typeof deliverableEvidenceInputSchema>;
+export const lifecycleActionSchema = z.object({
+  action: z.enum(["CONFIRM", "ARCHIVE", "RESTORE"]),
+  reason: z.string().trim().max(200).optional(),
+}).strict();
+
 export type TemporalRelationProposalInput = z.infer<typeof temporalRelationProposalSchema>;
+export type LifecycleActionInput = z.infer<typeof lifecycleActionSchema>;

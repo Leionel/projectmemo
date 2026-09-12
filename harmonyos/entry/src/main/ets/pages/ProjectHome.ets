@@ -15,6 +15,7 @@ import { Attachment } from '../models/Attachment';
 import { ProjectService } from '../services/ProjectService';
 import { InterventionService } from '../services/InterventionService';
 import { MemoryService } from '../services/MemoryService';
+import { MemoryLifecycleService } from '../services/MemoryLifecycleService';
 import { ActionService } from '../services/ActionService';
 import { ArtifactService } from '../services/ArtifactService';
 import { CopilotService } from '../services/CopilotService';
@@ -86,6 +87,7 @@ struct ProjectHome {
   @State showChangeImpactDialog: boolean = false;
   @State showClaimAuditor: boolean = false;
   @State isExportingProvenance: boolean = false;
+  @State lifecycleActionCardId: string = '';
   @State showJudgeRebuttal: boolean = false;
   @State showAttachmentCorrection: boolean = false;
   @State correctingAttachment: Attachment = new Attachment();
@@ -133,6 +135,7 @@ struct ProjectHome {
   private memoryService: MemoryService = new MemoryService();
   private actionService: ActionService = new ActionService();
   private artifactService: ArtifactService = new ArtifactService();
+  private lifecycleService: MemoryLifecycleService = new MemoryLifecycleService();
   private copilotService: CopilotService = new CopilotService();
   private notificationService: NotificationService = new NotificationService();
   private attachmentService: AttachmentService = new AttachmentService();
@@ -686,6 +689,38 @@ struct ProjectHome {
     this.completingActionId = actionId;
     this.resultText = '';
     this.dialogError = '';
+  }
+
+  // --- 记忆生命周期：人工确认来源 / 归档 / 恢复 ---
+  private async confirmCardSource(cardId: string): Promise<void> {
+    if (this.lifecycleActionCardId !== '') {
+      return;
+    }
+    this.lifecycleActionCardId = cardId;
+    try {
+      await this.lifecycleService.confirmFact(this.projectId, cardId);
+      promptAction.showToast({ message: '已记录人工确认来源（来源声明，非事实证明）' });
+    } catch (e) {
+      promptAction.showToast({ message: e instanceof ApiError ? e.message : '确认失败，请稍后重试' });
+    } finally {
+      this.lifecycleActionCardId = '';
+    }
+  }
+
+  private async archiveMemoryCard(cardId: string): Promise<void> {
+    if (this.lifecycleActionCardId !== '') {
+      return;
+    }
+    this.lifecycleActionCardId = cardId;
+    try {
+      await this.lifecycleService.archive(this.projectId, cardId);
+      promptAction.showToast({ message: '已归档（可在检索中恢复）' });
+      await this.loadAllData();
+    } catch (e) {
+      promptAction.showToast({ message: e instanceof ApiError ? e.message : '归档失败，请稍后重试' });
+    } finally {
+      this.lifecycleActionCardId = '';
+    }
   }
 
   private async submitComplete(): Promise<void> {
@@ -2070,6 +2105,35 @@ struct ProjectHome {
                 .backgroundColor(PMColors.SURFACE_SUBTLE)
                 .borderRadius(PMRadius.SM)
                 .alignItems(HorizontalAlign.Start)
+              }
+
+              // 生命周期操作：人工确认来源 / 归档（可恢复，双击防护）
+              if (this.expandedCardId === card.id) {
+                Row({ space: PMSpacing.SM }) {
+                  Button(this.lifecycleActionCardId === card.id ? '处理中…' : '确认来源')
+                    .height(36)
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.BRAND)
+                    .backgroundColor(PMColors.BRAND_LIGHT)
+                    .borderRadius(PMRadius.SM)
+                    .enabled(this.lifecycleActionCardId === '')
+                    .onClick(() => {
+                      this.confirmCardSource(card.id);
+                    })
+
+                  Button('归档')
+                    .height(36)
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.INK_SECONDARY)
+                    .backgroundColor(PMColors.SURFACE_SUBTLE)
+                    .borderRadius(PMRadius.SM)
+                    .enabled(this.lifecycleActionCardId === '')
+                    .onClick(() => {
+                      this.archiveMemoryCard(card.id);
+                    })
+                }
+                .width('100%')
+                .margin({ top: PMSpacing.SM })
               }
             }
             .width('100%')

@@ -59,7 +59,8 @@ export async function searchProjectCards(options: HybridSearchOptions): Promise<
   const trimmedQuery = query.trim();
   if (!trimmedQuery) return [];
 
-  const whereClause: Record<string, unknown> = { projectId };
+  // 归档是可恢复的检索偏好：默认检索不包含已归档卡片，但时间有效性与历史不受影响
+  const whereClause: Record<string, unknown> = { projectId, archivedAt: null };
   if (typeFilter && typeFilter !== "all") {
     whereClause.type = typeFilter;
   }

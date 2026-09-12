@@ -1,6 +1,7 @@
 import { AppError } from "@/lib/api";
 import { db } from "@/lib/db";
 import { wouldCreateSupersessionCycle } from "@/lib/memory/temporalLedger";
+import { recordLifecycleEventInTx } from "@/lib/services/memoryLifecycleService";
 import type { TemporalRelationProposalInput } from "@/lib/validation/schemas";
 import type { CardRelationType } from "@/lib/generated/prisma/client";
 
@@ -124,7 +125,7 @@ export async function confirmTemporalRelation(projectId: string, relationId: str
       await assertNoSupersessionCycle(tx, relation.currentCardId, relation.relatedCardId, relation.id);
     }
     const now = new Date();
-    return tx.cardRelation.update({
+    const updated = await tx.cardRelation.update({
       where: { id: relation.id },
       data: { confirmed: true, confirmedAt: now, validFrom: relation.validFrom ?? now },
       include: {
@@ -132,6 +133,22 @@ export async function confirmTemporalRelation(projectId: string, relationId: str
         relatedCard: { select: cardSummarySelect },
       },
     });
+    // 事件与业务变更同事务提交：确认、撤销必须可追踪
+    await recordLifecycleEventInTx(tx, {
+      projectId,
+      cardId: relation.currentCardId,
+      eventType: "RELATION_CONFIRM",
+      reason: relation.reason,
+      relationId: relation.id,
+    });
+    await recordLifecycleEventInTx(tx, {
+      projectId,
+      cardId: relation.relatedCardId,
+      eventType: "RELATION_CONFIRM",
+      reason: relation.reason,
+      relationId: relation.id,
+    });
+    return updated;
   });
 }
 
@@ -147,7 +164,7 @@ export async function revokeTemporalRelation(projectId: string, relationId: stri
     if (!relation) throw new AppError("RELATION_NOT_FOUND", "没有找到这个项目中的关系", 404);
     if (relation.revokedAt) return relation;
     const now = new Date();
-    return tx.cardRelation.update({
+    const updated = await tx.cardRelation.update({
       where: { id: relation.id },
       data: {
         revokedAt: now,
@@ -158,5 +175,20 @@ export async function revokeTemporalRelation(projectId: string, relationId: stri
         relatedCard: { select: cardSummarySelect },
       },
     });
+    await recordLifecycleEventInTx(tx, {
+      projectId,
+      cardId: relation.currentCardId,
+      eventType: "RELATION_REVOKE",
+      reason: relation.reason,
+      relationId: relation.id,
+    });
+    await recordLifecycleEventInTx(tx, {
+      projectId,
+      cardId: relation.relatedCardId,
+      eventType: "RELATION_REVOKE",
+      reason: relation.reason,
+      relationId: relation.id,
+    });
+    return updated;
   });
 }

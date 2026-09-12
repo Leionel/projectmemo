@@ -26,10 +26,10 @@ export class InterventionPolicyService {
     const body = new PolicySuggestionBody();
     body.action = action;
     body.triggerType = triggerType;
-    await this.client.post(`/api/projects/${projectId}/interventions/policy/suggestion`, body);
+    await this.client.post<object>(`/api/projects/${projectId}/interventions/policy/suggestion`, body);
   }
 
   async restoreDefaults(projectId: string): Promise<void> {
-    await this.client.post(`/api/projects/${projectId}/interventions/policy/restore`, undefined);
+    await this.client.post<object>(`/api/projects/${projectId}/interventions/policy/restore`, undefined);
   }
 }

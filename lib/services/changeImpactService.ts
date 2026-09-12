@@ -7,6 +7,85 @@ import { Prisma } from "@/lib/generated/prisma/client";
 // 内存暂存提案，方便快速内存比对
 const pendingProposals = new Map<string, ChangeImpactProposal>();
 
+export interface SupersedeCandidateCard {
+  id: string;
+  title: string;
+}
+
+export interface SupersedePickResult {
+  /** 得分最高且唯一时才返回；歧义或低于门槛时为 null，由用户手动指定 */
+  card: SupersedeCandidateCard | null;
+  /** 最高分并列的候选（含 card 本身）；供 UI 列出候选 */
+  tieCandidateIds: string[];
+}
+
+/**
+ * 被取代卡片匹配（R0/T1 共享）：输入完整包含标题、语法提取目标、关键词重合与公共子串四类信号。
+ * 置信门槛 30 分；最高分并列说明无法唯一确定，不得自动取代。
+ */
+export function pickSupersedeCard(candidates: SupersedeCandidateCard[], text: string): SupersedePickResult {
+  const trimmed = text.trim();
+  let best: SupersedeCandidateCard | null = null;
+  let maxScore = 0;
+  let ties: string[] = [];
+
+  const changePatternMatch = trimmed.match(/(?:将|从)?(.+?)(?:改为|替换为|调整为|转为|升级为|变更为|取代)(.+)/);
+  const targetEntity = changePatternMatch ? changePatternMatch[1].trim() : "";
+  const keywords = ["方案", "模型", "架构", "算法", "组件", "系统"];
+
+  for (const card of candidates) {
+    let score = 0;
+    const title = card.title;
+    if (!title) continue;
+
+    if (trimmed.includes(title)) {
+      score += 100 + title.length * 10;
+    }
+    if (targetEntity) {
+      if (title === targetEntity) {
+        score += 120;
+      } else if (title.includes(targetEntity) || targetEntity.includes(title)) {
+        score += 80 + Math.min(title.length, targetEntity.length) * 10;
+      }
+    }
+    for (const kw of keywords) {
+      if (trimmed.includes(kw) && title.includes(kw)) {
+        score += 15;
+      }
+    }
+    let lcs = 0;
+    for (let len = Math.min(title.length, 12); len >= 2; len--) {
+      for (let i = 0; i <= title.length - len; i++) {
+        const sub = title.substring(i, i + len);
+        if (trimmed.includes(sub)) {
+          lcs = Math.max(lcs, len);
+          break;
+        }
+      }
+      if (lcs > 0) break;
+    }
+    if (lcs >= 2) {
+      score += lcs * 8;
+    }
+
+    if (score > maxScore) {
+      maxScore = score;
+      best = card;
+      ties = [card.id];
+    } else if (score === maxScore && score > 0) {
+      ties.push(card.id);
+    }
+  }
+
+  if (maxScore < 30) {
+    return { card: null, tieCandidateIds: [] };
+  }
+  if (ties.length > 1) {
+    return { card: null, tieCandidateIds: ties };
+  }
+  return { card: best, tieCandidateIds: ties };
+}
+
 export async function analyzeChangeImpact(projectId: string, newFactText: string): Promise<ChangeImpactProposal> {
   await requireProject(projectId);
   const trimmed = newFactText.trim();
@@ -26,82 +105,16 @@ export async function analyzeChangeImpact(projectId: string, newFactText: string
   // 过滤出当前仍活跃（未被取代）的卡片
   const activeCards = cards.filter((c) => c.incomingLinks.length === 0);
 
-  // 2. 匹配可能被替代的原决策卡片（基于核心实体、标题语义及重合度精准匹配，绝不以卡片类型无脑兜底）
-  let supersededCard: (typeof activeCards)[0] | null = null;
-  let maxScore = 0;
-  let topScoreTies = 0;
-  let topScoreCandidateIds: string[] = [];
+  // 2. 匹配可能被替代的原决策卡片（共享匹配函数，T1 会议文本复用同一规则）
+  const picked = pickSupersedeCard(
+    activeCards.map((card) => ({ id: card.id, title: card.title.trim() })),
+    trimmed,
+  );
+  const supersededCard = picked.card
+    ? activeCards.find((card) => card.id === picked.card?.id) ?? null
+    : null;
+  const ambiguousCandidateIds = picked.tieCandidateIds.length > 1 ? picked.tieCandidateIds : undefined;
 
-  // 尝试从语法结构中提取被替代的目标短语（如“将方案A改为方案B”中的“方案A”）
-  const changePatternMatch = trimmed.match(/(?:将|从)?(.+?)(?:改为|替换为|调整为|转为|升级为|变更为|取代)(.+)/);
-  const targetEntity = changePatternMatch ? changePatternMatch[1].trim() : "";
-
-  for (const card of activeCards) {
-    let score = 0;
-    const title = card.title.trim();
-    if (!title) continue;
-
-    // 规则 1：输入文本完整包含卡片标题（例如“模型方案A改为方案B”完整包含“模型方案A”）
-    if (trimmed.includes(title)) {
-      score += 100 + title.length * 10;
-    }
-
-    // 规则 2：卡片标题与语法提取的被替代目标相互包含
-    if (targetEntity) {
-      if (title === targetEntity) {
-        score += 120;
-      } else if (title.includes(targetEntity) || targetEntity.includes(title)) {
-        score += 80 + Math.min(title.length, targetEntity.length) * 10;
-      }
-    }
-
-    // 规则 3：核心关键词重合度（方案/模型/架构等限定词与标题共同出现）
-    const keywords = ["方案", "模型", "架构", "算法", "组件", "系统"];
-    for (const kw of keywords) {
-      if (trimmed.includes(kw) && title.includes(kw)) {
-        score += 15;
-      }
-    }
-
-    // 规则 4：计算最长公共连续子串长度
-    let lcs = 0;
-    for (let len = Math.min(title.length, 12); len >= 2; len--) {
-      for (let i = 0; i <= title.length - len; i++) {
-        const sub = title.substring(i, i + len);
-        if (trimmed.includes(sub)) {
-          lcs = Math.max(lcs, len);
-          break;
-        }
-      }
-      if (lcs > 0) break;
-    }
-    if (lcs >= 2) {
-      score += lcs * 8;
-    }
-
-    if (score > maxScore) {
-      maxScore = score;
-      supersededCard = card;
-      topScoreTies = 1;
-      topScoreCandidateIds = [card.id];
-    } else if (score === maxScore && score > 0) {
-      topScoreTies++;
-      topScoreCandidateIds.push(card.id);
-    }
-  }
-
-  // 严谨置信度门槛：只有匹配得分达到明确关联要求时才确认被取代，否则为 null 供用户手动指定，绝不胡乱兜底
-  if (maxScore < 30) {
-    supersededCard = null;
-  }
-
-  // 歧义保护：最高分并列（同名/相近标题）说明无法唯一确定被取代对象，评分只生成候选，
-  // 必须由用户在确认时明确选择，不得自动取代
-  let ambiguousCandidateIds: string[] | undefined;
-  if (supersededCard && topScoreTies > 1) {
-    ambiguousCandidateIds = topScoreCandidateIds;
-    supersededCard = null;
-  }
 
   // 3. 检索受影响的待办行动 (TODO 或 DOING)
   const actions = await db.actionItem.findMany({

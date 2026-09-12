@@ -1,7 +1,7 @@
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
 import { ApiError } from '../models/Project';
-import { ActionCreateInput, ActionItem, FeasibilityAssessment } from '../models/Action';
+import { ActionCreateInput, ActionItem, FeasibilityAssessment, FeasibilityDependency } from '../models/Action';
 import { ActionService } from '../services/ActionService';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMaterial } from '../common/DesignTokens';
 import { PMAppBar } from '../components/PMAppBar';
@@ -483,7 +483,7 @@ struct ActionBoard {
               .fontColor(PMColors.INK_TERTIARY)
               .margin({ top: PMSpacing.XS })
 
-            ForEach(this.feasibilityFor.dependencies, (dep) => {
+            ForEach(this.feasibilityFor.dependencies, (dep: FeasibilityDependency) => {
               Row() {
                 Text(dep.hard ? '硬依赖' : '参考')
                   .fontSize(PMFontSize.CAPTION)
@@ -505,7 +505,7 @@ struct ActionBoard {
               .width('100%')
               .alignItems(VerticalAlign.Top)
               .padding({ top: PMSpacing.SM })
-            }, (dep) => dep.requirementId)
+            }, (dep: FeasibilityDependency) => dep.requirementId)
 
             if (this.feasibilityFor.dependencies.length === 0) {
               Text('尚未声明任何依赖。READY 只表示已声明的硬依赖满足，不保证现实一定按时完成。')

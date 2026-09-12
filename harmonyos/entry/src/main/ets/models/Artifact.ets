@@ -32,6 +32,7 @@ export class ArtifactGenerationRef {
 export class ArtifactAuditRecheckItem {
   cardId: string = '';
   titleSnapshot: string = '';
+  summarySnapshot: string = '';
   supportState: string = 'INSUFFICIENT';
   statusLabel: string = '证据不足';
   supersededByTitle: string | null = null;

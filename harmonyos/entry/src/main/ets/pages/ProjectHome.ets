@@ -18,7 +18,7 @@ import { MemoryService } from '../services/MemoryService';
 import { MemoryLifecycleService } from '../services/MemoryLifecycleService';
 import { InterventionPolicyService } from '../services/InterventionPolicyService';
 import { ProjectStateService } from '../services/ProjectStateService';
-import { PolicyResponse, PolicySuggestion } from '../models/Intervention';
+import { PolicyResponse, PolicySuggestion, PolicyUpdateBody } from '../models/Intervention';
 import { ActionService } from '../services/ActionService';
 import { ArtifactService } from '../services/ArtifactService';
 import { CopilotService } from '../services/CopilotService';
@@ -705,11 +705,11 @@ struct ProjectHome {
     this.isSavingPolicy = true;
     this.policyFeedback = '';
     try {
-      await this.policyService.update(this.projectId, {
-        dailyBudget: budget,
-        quietStartMinute: start,
-        quietEndMinute: end,
-      });
+      const body = new PolicyUpdateBody();
+      body.dailyBudget = budget;
+      body.quietStartMinute = start;
+      body.quietEndMinute = end;
+      await this.policyService.update(this.projectId, body);
       this.policyFeedback = '提醒策略已保存';
     } catch (e) {
       this.policyFeedback = e instanceof ApiError ? e.message : '策略保存失败';
@@ -737,12 +737,12 @@ struct ProjectHome {
       return;
     }
     try {
-      await this.policyService.update(this.projectId, {
-        dailyBudget: 3,
-        quietStartMinute: 1380,
-        quietEndMinute: 480,
-        timezone: 'Asia/Shanghai',
-      });
+      const body = new PolicyUpdateBody();
+      body.dailyBudget = 3;
+      body.quietStartMinute = 1380;
+      body.quietEndMinute = 480;
+      body.timezone = 'Asia/Shanghai';
+      await this.policyService.update(this.projectId, body);
       this.policyFeedback = '已恢复默认策略（预算 3 次/天，静默 23:00–08:00）';
       await this.loadPolicy();
     } catch (e) {

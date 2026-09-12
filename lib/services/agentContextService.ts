@@ -10,6 +10,7 @@ import {
   saveAgentRun,
   upsertIntervention,
 } from "@/lib/repositories/agent";
+import { applyInterventionPolicy } from "@/lib/services/interventionPolicyService";
 import type { AgentEvidence, ProposedAction } from "@/lib/types";
 
 export type DemoScenario = "deadline_48h" | "stale_72h" | "risk_cluster";
@@ -254,11 +255,48 @@ export async function evaluateProjectContext(projectId: string, input: ContextIn
     });
   }
 
-  const saved = await Promise.all(matches.map((match) => upsertIntervention({
-    projectId,
-    ...match,
-    isSimulated: match.dedupeKey.startsWith("sim:"),
-  })));
+  // B1：真实候选先过预算/静默/去重管道，FIRE 才生成提醒；演示候选绕过管道，不计入真实指标。
+  // SUPPRESS 决策保留完整原因（DUPLICATE/SNOOZED/QUIET_HOURS/BUDGET_EXHAUSTED/...）可追溯。
+  const saved: Awaited<ReturnType<typeof upsertIntervention>>[] = [];
+  if (isFeatureEnabled("INTERVENTION_BUDGET_ENABLED", false)) {
+    const candidates = matches.map((match) => ({
+      candidateKey: `${String(match.triggerType)}:${match.dedupeKey}`,
+      triggerType: String(match.triggerType),
+      dedupeKey: match.dedupeKey,
+      severity: match.severity,
+      title: match.title,
+      content: match.content,
+      evidenceFacts: match.evidence.facts,
+      evidenceCardIds: [
+        ...(Array.isArray(match.evidence.cardIds) ? match.evidence.cardIds : []),
+        ...(match.evidenceCardId ? [match.evidenceCardId] : []),
+      ],
+      evidenceRule: String(match.evidence.rule ?? ""),
+      proposedActions: match.proposedActions as unknown as Array<Record<string, unknown>>,
+      isSimulated: match.dedupeKey.startsWith("sim:"),
+    }));
+    const outcomes = await applyInterventionPolicy(projectId, candidates, now);
+    const firedIds = outcomes
+      .filter((outcome) => outcome.decision === "FIRE" && outcome.interventionId)
+      .map((outcome) => outcome.interventionId as string);
+    const fired = firedIds.length > 0
+      ? await db.agentIntervention.findMany({ where: { id: { in: firedIds } } })
+      : [];
+    for (const intervention of fired) saved.push(intervention);
+    // 演示候选由管道直接放行但不落库，这里补齐原有 upsert 行为
+    const simulatedMatches = matches.filter((match) => match.dedupeKey.startsWith("sim:"));
+    for (const match of simulatedMatches) {
+      const intervention = await upsertIntervention({ projectId, ...match, isSimulated: true });
+      saved.push(intervention);
+    }
+  } else {
+    const legacy = await Promise.all(matches.map((match) => upsertIntervention({
+      projectId,
+      ...match,
+      isSimulated: match.dedupeKey.startsWith("sim:"),
+    })));
+    for (const item of legacy) saved.push(item);
+  }
   const run = await saveAgentRun({
     projectId,
     runType: AgentRunType.EVALUATE,

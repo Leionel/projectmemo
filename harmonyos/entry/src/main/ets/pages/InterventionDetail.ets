@@ -231,6 +231,28 @@ struct InterventionDetail {
             .width('100%')
             .margin({ top: PMSpacing.MD })
 
+            // 2.5 为什么是现在（B1：确定性解释，不要求用户读内部 ruleId）
+            Column() {
+              Text('为什么是现在')
+                .fontSize(PMFontSize.SECTION_TITLE)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text(this.intervention.evidence.whyNow !== undefined && this.intervention.evidence.whyNow !== ''
+                ? this.intervention.evidence.whyNow
+                : '由规则评估触发；本次评估未附带专门的时机解释。')
+                .fontSize(PMFontSize.BODY)
+                .fontColor(PMColors.INK_SECONDARY)
+                .lineHeight(20)
+                .margin({ top: PMSpacing.SM })
+            }
+            .width('100%')
+            .padding(PMSpacing.LG)
+            .backgroundColor(PMColors.SURFACE)
+            .borderRadius(PMRadius.MD)
+            .border({ width: 1, color: PMColors.BORDER })
+            .margin({ top: PMSpacing.MD })
+            .alignItems(HorizontalAlign.Start)
+
             // 3. 建议行动 (Suggested Action)
             Column() {
               Text('建议行动')

@@ -6,6 +6,8 @@ export class AgentEvidence {
   cardIds: string[] = [];
   artifactTypes: string[] = [];
   evaluatedAt: string | undefined = undefined;
+  // B1：预算管道生成的“为什么是现在”解释（确定性模板）
+  whyNow: string | undefined = undefined;
 }
 
 export class ProposedAction {
@@ -56,4 +58,55 @@ export class EvaluateResponse {
 export class EvaluateProjectInput {
   scenario: string | undefined = undefined;
   clearSimulation: boolean | undefined = undefined;
+}
+
+// ---- B1 提醒策略 ----
+export class InterventionPolicyData {
+  scope: string = 'GLOBAL';
+  timezone: string = 'Asia/Shanghai';
+  dailyBudget: number = 3;
+  quietStartMinute: number = 1380;
+  quietEndMinute: number = 480;
+  version: number = 1;
+  reducedTopics: ReducedTopic[] = [];
+}
+
+export class ReducedTopic {
+  triggerType: string = '';
+  since: string = '';
+}
+
+export class InterventionDecisionItem {
+  id: string = '';
+  candidateKey: string = '';
+  decision: string = '';
+  reasonCode: string = '';
+  whyNow: string = '';
+  channel: string = '';
+  policyVersion: number = 0;
+  createdAt: string = '';
+}
+
+export class PolicySuggestion {
+  triggerType: string = '';
+  ignoredCount: number = 0;
+  text: string = '';
+}
+
+export class PolicyResponse {
+  policy: InterventionPolicyData = new InterventionPolicyData();
+  recentDecisions: InterventionDecisionItem[] = [];
+  suggestions: PolicySuggestion[] = [];
+}
+
+export class PolicyUpdateBody {
+  dailyBudget: number | undefined = undefined;
+  quietStartMinute: number | undefined = undefined;
+  quietEndMinute: number | undefined = undefined;
+  timezone: string | undefined = undefined;
+}
+
+export class PolicySuggestionBody {
+  action: string = 'CONFIRM';
+  triggerType: string = '';
 }

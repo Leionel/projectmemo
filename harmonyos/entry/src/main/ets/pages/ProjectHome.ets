@@ -16,6 +16,8 @@ import { ProjectService } from '../services/ProjectService';
 import { InterventionService } from '../services/InterventionService';
 import { MemoryService } from '../services/MemoryService';
 import { MemoryLifecycleService } from '../services/MemoryLifecycleService';
+import { InterventionPolicyService } from '../services/InterventionPolicyService';
+import { PolicyResponse, PolicySuggestion } from '../models/Intervention';
 import { ActionService } from '../services/ActionService';
 import { ArtifactService } from '../services/ArtifactService';
 import { CopilotService } from '../services/CopilotService';
@@ -141,6 +143,14 @@ struct ProjectHome {
   private actionService: ActionService = new ActionService();
   private artifactService: ArtifactService = new ArtifactService();
   private lifecycleService: MemoryLifecycleService = new MemoryLifecycleService();
+  private policyService: InterventionPolicyService = new InterventionPolicyService();
+  @State policyDailyBudget: string = '3';
+  @State policyQuietStart: string = '23:00';
+  @State policyQuietEnd: string = '08:00';
+  @State policySuggestions: PolicySuggestion[] = [];
+  @State policyRecentSuppressions: string = '';
+  @State isSavingPolicy: boolean = false;
+  @State policyFeedback: string = '';
   private copilotService: CopilotService = new CopilotService();
   private notificationService: NotificationService = new NotificationService();
   private attachmentService: AttachmentService = new AttachmentService();
@@ -637,7 +647,107 @@ struct ProjectHome {
     }
   }
 
+  // --- 提醒策略（B1）：预算/静默/降频建议，全部可解释、可恢复默认 ---
+  private async loadPolicy(): Promise<void> {
+    try {
+      const res: PolicyResponse = await this.policyService.get(this.projectId);
+      this.policyDailyBudget = `${res.policy.dailyBudget}`;
+      this.policyQuietStart = this.minuteToLabel(res.policy.quietStartMinute);
+      this.policyQuietEnd = this.minuteToLabel(res.policy.quietEndMinute);
+      this.policySuggestions = res.suggestions;
+      const suppressed = res.recentDecisions.filter((d) => d.decision === 'SUPPRESS').slice(0, 3);
+      this.policyRecentSuppressions = suppressed.length === 0 ? '' :
+        `最近被抑制：${suppressed.map((d) => `${d.reasonCode}（${d.createdAt.substring(0, 10)}）`).join('、')}`;
+    } catch (_e) {
+      this.policyFeedback = '提醒策略加载失败';
+    }
+  }
+
+  private minuteToLabel(minute: number): string {
+    const hh = Math.floor(minute / 60);
+    const mm = minute % 60;
+    return `${hh < 10 ? '0' : ''}${hh}:${mm < 10 ? '0' : ''}${mm}`;
+  }
+
+  private labelToMinute(label: string): number {
+    const parts = label.split(':');
+    if (parts.length !== 2) {
+      return -1;
+    }
+    const hh = Number.parseInt(parts[0], 10);
+    const mm = Number.parseInt(parts[1], 10);
+    if (Number.isNaN(hh) || Number.isNaN(mm) || hh < 0 || hh > 24 || mm < 0 || mm > 59) {
+      return -1;
+    }
+    return hh * 60 + mm;
+  }
+
+  private async savePolicy(): Promise<void> {
+    if (this.isSavingPolicy) {
+      return;
+    }
+    const budget = Number.parseInt(this.policyDailyBudget, 10);
+    const start = this.labelToMinute(this.policyQuietStart.trim());
+    const end = this.labelToMinute(this.policyQuietEnd.trim());
+    if (Number.isNaN(budget) || budget < 0 || budget > 50) {
+      this.policyFeedback = '每日预算必须是 0–50 的整数';
+      return;
+    }
+    if (start < 0 || end < 0) {
+      this.policyFeedback = '静默时段格式须为 HH:mm';
+      return;
+    }
+    this.isSavingPolicy = true;
+    this.policyFeedback = '';
+    try {
+      await this.policyService.update(this.projectId, {
+        dailyBudget: budget,
+        quietStartMinute: start,
+        quietEndMinute: end,
+      });
+      this.policyFeedback = '提醒策略已保存';
+    } catch (e) {
+      this.policyFeedback = e instanceof ApiError ? e.message : '策略保存失败';
+    } finally {
+      this.isSavingPolicy = false;
+    }
+  }
+
+  private async decideSuggestion(action: string, triggerType: string): Promise<void> {
+    try {
+      await this.policyService.decideSuggestion(this.projectId, action, triggerType);
+      promptAction.showToast({ message: action === 'CONFIRM' ? '已降频：该类提醒每天至多 1 次' : '已忽略该建议' });
+      await this.loadPolicy();
+    } catch (e) {
+      promptAction.showToast({ message: e instanceof ApiError ? e.message : '操作失败' });
+    }
+  }
+
+  private async restorePolicyDefaults(): Promise<void> {
+    try {
+      await this.policyService.restoreDefaults(this.projectId);
+    } catch (_e) {
+      // 恢复默认失败时仍保留旧策略
+      this.policyFeedback = '恢复默认失败';
+      return;
+    }
+    try {
+      await this.policyService.update(this.projectId, {
+        dailyBudget: 3,
+        quietStartMinute: 1380,
+        quietEndMinute: 480,
+        timezone: 'Asia/Shanghai',
+      });
+      this.policyFeedback = '已恢复默认策略（预算 3 次/天，静默 23:00–08:00）';
+      await this.loadPolicy();
+    } catch (e) {
+      this.policyFeedback = e instanceof ApiError ? e.message : '恢复默认失败';
+    }
+  }
+
   private openSettingsDialog(): void {
+    this.policyFeedback = '';
+    this.loadPolicy();
     this.editTitle = this.project.title;
     this.editGoal = this.project.goal;
     this.editDescription = this.project.description;
@@ -3270,6 +3380,146 @@ struct ProjectHome {
               .borderRadius(PMRadius.SM)
               .border({ width: 1, color: PMColors.BORDER })
               .accessibilityText('输入项目截止日期，格式为 YYYY-MM-DD')
+
+            // 提醒策略（B1）：预算与静默时段；V1 为本机安装的全局共享预算
+            Column() {
+              Text('提醒策略')
+                .fontSize(PMFontSize.SECONDARY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+
+              Text('每日预算（全局共享，0–50 次）')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: PMSpacing.SM })
+              TextInput({ text: this.policyDailyBudget, placeholder: '3' })
+                .onChange((v: string) => {
+                  this.policyDailyBudget = v;
+                })
+                .fontSize(PMFontSize.BODY)
+                .height(40)
+                .backgroundColor(PMColors.SURFACE_SUBTLE)
+                .borderRadius(PMRadius.SM)
+                .border({ width: 1, color: PMColors.BORDER })
+                .margin({ top: 4 })
+                .accessibilityText('每天最多提醒次数')
+
+              Text('静默时段（跨午夜可用，格式 HH:mm）')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: PMSpacing.SM })
+              Row({ space: PMSpacing.SM }) {
+                TextInput({ text: this.policyQuietStart, placeholder: '23:00' })
+                  .onChange((v: string) => {
+                    this.policyQuietStart = v;
+                  })
+                  .fontSize(PMFontSize.BODY)
+                  .height(40)
+                  .backgroundColor(PMColors.SURFACE_SUBTLE)
+                  .borderRadius(PMRadius.SM)
+                  .border({ width: 1, color: PMColors.BORDER })
+                  .layoutWeight(1)
+                  .accessibilityText('静默开始时间')
+                TextInput({ text: this.policyQuietEnd, placeholder: '08:00' })
+                  .onChange((v: string) => {
+                    this.policyQuietEnd = v;
+                  })
+                  .fontSize(PMFontSize.BODY)
+                  .height(40)
+                  .backgroundColor(PMColors.SURFACE_SUBTLE)
+                  .borderRadius(PMRadius.SM)
+                  .border({ width: 1, color: PMColors.BORDER })
+                  .layoutWeight(1)
+                  .accessibilityText('静默结束时间')
+              }
+              .width('100%')
+              .margin({ top: 4 })
+
+              if (this.policySuggestions.length > 0) {
+                ForEach(this.policySuggestions, (suggestion: PolicySuggestion) => {
+                  Column() {
+                    Text(suggestion.text)
+                      .fontSize(PMFontSize.CAPTION)
+                      .fontColor(PMColors.INK_SECONDARY)
+                      .lineHeight(18)
+                    Row({ space: PMSpacing.SM }) {
+                      Button('降低频率')
+                        .height(32)
+                        .fontSize(PMFontSize.CAPTION)
+                        .fontColor(PMColors.SURFACE)
+                        .backgroundColor(PMColors.BRAND)
+                        .borderRadius(PMRadius.SM)
+                        .onClick(() => {
+                          this.decideSuggestion('CONFIRM', suggestion.triggerType);
+                        })
+                      Button('保持现状')
+                        .height(32)
+                        .fontSize(PMFontSize.CAPTION)
+                        .fontColor(PMColors.INK_SECONDARY)
+                        .backgroundColor(PMColors.SURFACE_SUBTLE)
+                        .borderRadius(PMRadius.SM)
+                        .onClick(() => {
+                          this.decideSuggestion('DISMISS', suggestion.triggerType);
+                        })
+                    }
+                    .margin({ top: PMSpacing.XS })
+                  }
+                  .width('100%')
+                  .padding(PMSpacing.SM)
+                  .backgroundColor(PMColors.BRAND_LIGHT)
+                  .borderRadius(PMRadius.SM)
+                  .margin({ top: PMSpacing.SM })
+                  .alignItems(HorizontalAlign.Start)
+                }, (suggestion: PolicySuggestion) => suggestion.triggerType)
+              }
+
+              if (this.policyRecentSuppressions !== '') {
+                Text(this.policyRecentSuppressions)
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.INK_TERTIARY)
+                  .lineHeight(18)
+                  .margin({ top: PMSpacing.SM })
+              }
+
+              if (this.policyFeedback !== '') {
+                Text(this.policyFeedback)
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(this.policyFeedback.indexOf('失败') >= 0 || this.policyFeedback.indexOf('必须') >= 0 || this.policyFeedback.indexOf('格式') >= 0
+                    ? PMColors.RISK : PMColors.SUCCESS)
+                  .margin({ top: PMSpacing.XS })
+              }
+
+              Row({ space: PMSpacing.SM }) {
+                Button(this.isSavingPolicy ? '保存中…' : '保存策略')
+                  .height(36)
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.SURFACE)
+                  .backgroundColor(PMColors.BRAND)
+                  .borderRadius(PMRadius.SM)
+                  .layoutWeight(1)
+                  .enabled(!this.isSavingPolicy)
+                  .onClick(() => {
+                    this.savePolicy();
+                  })
+                Button('恢复默认')
+                  .height(36)
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.INK_SECONDARY)
+                  .backgroundColor(PMColors.SURFACE_SUBTLE)
+                  .borderRadius(PMRadius.SM)
+                  .onClick(() => {
+                    this.restorePolicyDefaults();
+                  })
+              }
+              .width('100%')
+              .margin({ top: PMSpacing.SM })
+            }
+            .width('100%')
+            .padding(PMSpacing.MD)
+            .backgroundColor(PMColors.SURFACE_SUBTLE)
+            .borderRadius(PMRadius.SM)
+            .margin({ top: PMSpacing.LG })
+            .alignItems(HorizontalAlign.Start)
 
             Row() {
               Button('取消')

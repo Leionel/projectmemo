@@ -6,6 +6,7 @@ import type {
   InterventionUpdateInput,
 } from "@/lib/validation/schemas";
 import type { AgentEvidence, ProposedAction } from "@/lib/types";
+import { recordFeedback } from "@/lib/services/interventionFeedbackService";
 import {
   ActionStatus,
   AgentMessageRole,
@@ -88,12 +89,22 @@ export async function upsertIntervention(input: {
 export async function updateIntervention(projectId: string, interventionId: string, input: InterventionUpdateInput) {
   const existing = await findIntervention(projectId, interventionId);
   if (input.status === "ACCEPTED") {
+    // 状态更新与反馈事件分开记录；重复确认幂等（同键反馈只保留一条）
+    await recordFeedback(projectId, interventionId, { feedbackType: "ACCEPTED" });
     return acceptIntervention(projectId, interventionId, input.actionIndex ?? 0);
   }
   if ((existing.status === InterventionStatus.DISMISSED || existing.status === InterventionStatus.RESOLVED) && input.status !== existing.status) {
     throw new AppError("INVALID_INTERVENTION_TRANSITION", "已关闭的主动提醒不能重新打开", 409);
   }
   const status = input.status as InterventionStatus;
+  if (input.status === "SNOOZED") {
+    await recordFeedback(projectId, interventionId, { feedbackType: "SNOOZED" });
+  } else if (input.status === "DISMISSED") {
+    await recordFeedback(projectId, interventionId, {
+      feedbackType: "IGNORED",
+      reason: input.dismissReason ?? undefined,
+    });
+  }
   const updated = await db.agentIntervention.update({
     where: { id: existing.id },
     data: {

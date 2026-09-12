@@ -103,6 +103,7 @@ model Project {
   lifecycleEvents MemoryLifecycleEvent[]
   stateSnapshots  ProjectStateSnapshot[]
   stateCursors    ProjectStateCursor[]
+  interventionDecisions InterventionDecision[]
   artifacts   GeneratedArtifact[]
   interventions AgentIntervention[]
   actions     ActionItem[]
@@ -212,6 +213,7 @@ model AgentIntervention {
   updatedAt       DateTime            @updatedAt
   project         Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
   evidenceCard    KnowledgeCard?      @relation("InterventionEvidence", fields: [evidenceCardId], references: [id], onDelete: SetNull)
+  feedbacks       InterventionFeedback[]
   actions         ActionItem[]        @relation("InterventionActions")
 
   @@unique([projectId, dedupeKey])
@@ -385,6 +387,58 @@ model ProjectStateCursor {
   project            Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@unique([projectId, consumerKey])
+}
+
+/// B1：干预策略。V1 为单用户部署范围的全局共享预算（scope=GLOBAL），不是每项目独立预算。
+model InterventionPolicy {
+  id               String   @id @default(cuid())
+  scope            String   @unique @default("GLOBAL")
+  timezone         String   @default("Asia/Shanghai")
+  dailyBudget      Int      @default(3)
+  quietStartMinute Int      @default(1380)
+  quietEndMinute   Int      @default(480)
+  version          Int      @default(1)
+  isActive         Boolean  @default(true)
+  /// 已确认的降频主题 [{ triggerType, since }]；延期只影响本次，单次忽略不永久屏蔽
+  reducedTopics    Json?
+  /// 建议状态 { triggerType, suggestedAt, dismissedAt } 防止重复提出
+  suggestionState  Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+/// 干预决策日志：FIRE/SUPPRESS 及原因。生成(应用内)、曝光、送达分开记录，未验证送达不宣称收到。
+model InterventionDecision {
+  id             String   @id @default(cuid())
+  projectId      String
+  candidateKey   String
+  decision       String
+  reasonCode     String
+  whyNow         String
+  evidenceRefs   Json?
+  channel        String   @default("IN_APP")
+  policyVersion  Int
+  interventionId String?
+  createdAt      DateTime @default(now())
+  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
+  @@index([candidateKey, createdAt])
+  @@index([projectId, decision, createdAt])
+}
+
+/// 干预反馈：独立事件，曝光与反馈分开；重复反馈幂等。
+model InterventionFeedback {
+  id             String            @id @default(cuid())
+  interventionId String
+  projectId      String
+  feedbackType   String
+  reason         String?
+  createdAt      DateTime          @default(now())
+  intervention   AgentIntervention @relation(fields: [interventionId], references: [id], onDelete: Cascade)
+
+  @@unique([interventionId, feedbackType])
+  @@index([projectId, createdAt])
 }
 
 model Milestone {

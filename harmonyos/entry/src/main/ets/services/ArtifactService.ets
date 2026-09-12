@@ -3,7 +3,8 @@ import {
   ArtifactItem,
   ArtifactsResponse,
   ArtifactGenerateResponse,
-  ArtifactGenerateInput
+  ArtifactGenerateInput,
+  ArtifactAuditResponse
 } from '../models/Artifact';
 
 export class ArtifactService {
@@ -31,5 +32,12 @@ export class ArtifactService {
       input
     );
     return response.artifact;
+  }
+
+  // 每次打开审计抽屉都重新请求，不缓存：离线/失败时如实报错，不把旧结果冒充最新核验
+  async audit(projectId: string, artifactId: string): Promise<ArtifactAuditResponse> {
+    return this.client.get<ArtifactAuditResponse>(
+      `/api/projects/${projectId}/artifacts/${artifactId}/audit`
+    );
   }
 }

@@ -85,6 +85,7 @@ struct ProjectHome {
   @State showCapturePanel: boolean = false;
   @State showChangeImpactDialog: boolean = false;
   @State showClaimAuditor: boolean = false;
+  @State isExportingProvenance: boolean = false;
   @State showJudgeRebuttal: boolean = false;
   @State showAttachmentCorrection: boolean = false;
   @State correctingAttachment: Attachment = new Attachment();
@@ -810,20 +811,32 @@ struct ProjectHome {
     promptAction.showToast({ message: '已复制正文' });
   }
 
-  private copyArtifactWithProvenance(): void {
+  private async copyArtifactWithProvenance(): Promise<void> {
     if (this.currentArtifact === undefined || this.currentArtifact.content === '') {
       return;
     }
-    const fullDoc = ExportFormatter.formatWithProvenance(
-      this.project.title !== '' ? this.project.title : '项目档案',
-      this.selectedArtifactType,
-      this.currentArtifact.content,
-      this.project.cards
-    );
-    const systemPasteboard = pasteboard.getSystemPasteboard();
-    const pasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, fullDoc);
-    systemPasteboard.setData(pasteData);
-    promptAction.showToast({ message: '已复制带完整学术证据链全文' });
+    if (this.isExportingProvenance) {
+      return;
+    }
+    this.isExportingProvenance = true;
+    try {
+      // 与证据透视镜同口径：导出前实时拉取审计结果，失败即报错，不退回全项目卡片凑数
+      const audit = await this.artifactService.audit(this.projectId, this.currentArtifact.id);
+      const fullDoc = ExportFormatter.formatWithProvenance(
+        this.project.title !== '' ? this.project.title : '项目档案',
+        this.selectedArtifactType,
+        this.currentArtifact.content,
+        audit
+      );
+      const systemPasteboard = pasteboard.getSystemPasteboard();
+      const pasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, fullDoc);
+      systemPasteboard.setData(pasteData);
+      promptAction.showToast({ message: '已复制带证据审计的全文' });
+    } catch (e) {
+      promptAction.showToast({ message: e instanceof ApiError ? e.message : '证据审计获取失败，未导出' });
+    } finally {
+      this.isExportingProvenance = false;
+    }
   }
 
   // ----------------------------------------------------
@@ -2720,7 +2733,7 @@ struct ProjectHome {
                 this.showJudgeRebuttal = true;
               })
 
-            Button('带存证导出')
+            Button(this.isExportingProvenance ? '导出中…' : '带存证导出')
               .fontSize(PMFontSize.CAPTION)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.SURFACE)
@@ -2729,6 +2742,7 @@ struct ProjectHome {
               .height(36)
               .padding({ left: PMSpacing.SM, right: PMSpacing.SM })
               .margin({ left: 6 })
+              .enabled(!this.isExportingProvenance)
               .onClick(() => {
                 this.copyArtifactWithProvenance();
               })
@@ -2973,26 +2987,6 @@ struct ProjectHome {
     .transition(PMTransition.CONTENT_ENTER)
     .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
     }
-  }
-
-  private getReferencedCardsForCurrentArtifact(): KnowledgeCard[] {
-    if (!this.project.cards || this.project.cards.length === 0) {
-      return [];
-    }
-    if (this.currentArtifact && this.currentArtifact.content) {
-      const content = this.currentArtifact.content;
-      const matched: KnowledgeCard[] = [];
-      for (let i = 0; i < this.project.cards.length; i++) {
-        const card = this.project.cards[i];
-        if (content.indexOf(card.id) >= 0) {
-          matched.push(card);
-        } else if (card.title && card.title.length >= 2 && content.indexOf(card.title) >= 0) {
-          matched.push(card);
-        }
-      }
-      return matched;
-    }
-    return [];
   }
 
   // ----------------------------------------------------
@@ -3255,7 +3249,8 @@ struct ProjectHome {
 
       if (this.showClaimAuditor) {
         ClaimAuditorDrawer({
-          cards: this.getReferencedCardsForCurrentArtifact(),
+          projectId: this.projectId,
+          artifactId: this.currentArtifact !== undefined ? this.currentArtifact.id : '',
           artifactTitle: TextFormatters.artifactTypeToChinese(this.selectedArtifactType),
           onClose: () => {
             this.showClaimAuditor = false;

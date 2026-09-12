@@ -13,11 +13,21 @@ async function loadArtifactContext(projectId: string) {
   const project = await requireProject(projectId);
   const rawCards = await db.knowledgeCard.findMany({ where: { projectId }, orderBy: { createdAt: "asc" } });
   if (!rawCards.length) throw new AppError("NO_KNOWLEDGE_CARDS", "请先输入至少一条项目记录，再生成成果", 400);
-  return { project, cards: rawCards.map(cardToDraft) };
+  return {
+    project,
+    cards: rawCards.map(cardToDraft),
+    // 生成时的证据引用快照：固化 cardId、观察时间与当时摘要，供事后逐句回溯审计
+    sourceRefs: rawCards.map((card) => ({
+      cardId: card.id,
+      observedAt: new Date().toISOString(),
+      titleSnapshot: card.title,
+      summarySnapshot: card.summary,
+    })),
+  };
 }
 
 export async function generateArtifact(projectId: string, artifactType: ArtifactTypeValue) {
-  const { project, cards } = await loadArtifactContext(projectId);
+  const { project, cards, sourceRefs } = await loadArtifactContext(projectId);
   const startedAt = Date.now();
   let execution: AgentExecutionResult<string> = {
     data: generateMockArtifact(artifactType, { project, cards }),
@@ -41,7 +51,7 @@ export async function generateArtifact(projectId: string, artifactType: Artifact
       };
     }
   }
-  const artifact = await saveArtifact(projectId, artifactType, execution.data);
+  const artifact = await saveArtifact(projectId, artifactType, execution.data, sourceRefs);
   await saveAgentRun({
     projectId,
     runType: AgentRunType.ARTIFACT,

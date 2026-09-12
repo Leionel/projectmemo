@@ -178,6 +178,9 @@ model GeneratedArtifact {
   projectId    String
   artifactType ArtifactType
   content      String
+  // 生成时逐句证据引用快照：[{ cardId, observedAt, title, summary }]。
+  // 保存当时的卡片摘要，后续卡片被编辑/取代不影响历史回执；人工编辑的新版本不携带该字段（无法逐句回溯）。
+  sourceRefs   Json?
   createdAt    DateTime     @default(now())
   project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
 

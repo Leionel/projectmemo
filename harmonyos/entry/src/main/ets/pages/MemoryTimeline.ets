@@ -102,6 +102,17 @@ struct MemoryTimeline {
     return result;
   }
 
+  private confirmedSupersessions(item: TemporalDecisionItem): TemporalRelation[] {
+    const chains: TemporalRelation[] = [];
+    for (let index = 0; index < item.relations.length; index += 1) {
+      const relation = item.relations[index];
+      if (relation.relationType === 'SUPERSEDES' && relation.confirmed && relation.revokedAt === null) {
+        chains.push(relation);
+      }
+    }
+    return chains;
+  }
+
   private insufficientDecisionCount(): number {
     return this.decisions.length - this.meaningfulDecisions().length;
   }
@@ -163,6 +174,66 @@ struct MemoryTimeline {
           .fontColor(PMColors.INK_SECONDARY)
           .margin({ top: PMSpacing.XS })
       }
+
+      // 决策演化链：原决策 → 替代决策 → 确认时间 → 原因（取代方向固定为新卡取代旧卡）
+      ForEach(this.confirmedSupersessions(item), (relation: TemporalRelation) => {
+        Column() {
+          Row() {
+            Text('原决策')
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Bold)
+              .fontColor(PMColors.INK_SECONDARY)
+            Text(relation.relatedCard.title)
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_SECONDARY)
+              .layoutWeight(1)
+              .maxLines(1)
+              .textOverflow({ overflow: TextOverflow.Ellipsis })
+              .margin({ left: PMSpacing.SM })
+          }
+          .width('100%')
+
+          Row() {
+            Text('替代决策')
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Bold)
+              .fontColor(PMColors.BRAND)
+            Text(relation.currentCard.title)
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_PRIMARY)
+              .layoutWeight(1)
+              .maxLines(1)
+              .textOverflow({ overflow: TextOverflow.Ellipsis })
+              .margin({ left: PMSpacing.SM })
+          }
+          .width('100%')
+          .margin({ top: 2 })
+
+          Row() {
+            Text(`确认于 ${relation.confirmedAt !== null && relation.confirmedAt.length >= 10 ? relation.confirmedAt.substring(0, 10) : '未知时间'}`)
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+            if (relation.reason !== '') {
+              Text(relation.reason)
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_TERTIARY)
+                .layoutWeight(1)
+                .maxLines(1)
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                .margin({ left: PMSpacing.SM })
+            }
+          }
+          .width('100%')
+          .margin({ top: 2 })
+        }
+        .width('100%')
+        .padding(PMSpacing.SM)
+        .backgroundColor(PMColors.SURFACE_SUBTLE)
+        .borderRadius(PMRadius.SM)
+        .margin({ top: PMSpacing.XS })
+        .alignItems(HorizontalAlign.Start)
+        .accessibilityText(`决策演化：原决策${relation.relatedCard.title}，被${relation.currentCard.title}取代，确认时间${relation.confirmedAt !== null ? relation.confirmedAt.substring(0, 10) : '未知'}，原因${relation.reason}`)
+      }, (relation: TemporalRelation) => relation.id)
 
       if (item.temporalReason !== null && item.temporalReason !== '') {
         Text(item.temporalReason)

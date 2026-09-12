@@ -1,22 +1,123 @@
-import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction, PMMotion, PMMaterial } from '../common/DesignTokens';
-import { KnowledgeCard } from '../models/Memory';
-import { TextFormatters } from '../common/TextFormatters';
+import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMotion, PMMaterial } from '../common/DesignTokens';
+import { ArtifactAuditResponse, ArtifactAuditRecheckItem, ArtifactGenerationRef } from '../models/Artifact';
+import { ApiError } from '../models/Project';
+import { ArtifactService } from '../services/ArtifactService';
 
 @Component
 export struct ClaimAuditorDrawer {
-  @Prop cards: KnowledgeCard[] = [];
+  @Prop projectId: string = '';
+  @Prop artifactId: string = '';
   @Prop artifactTitle: string = '';
+  @State private isLoading: boolean = true;
+  @State private errorMessage: string = '';
+  @State private audit: ArtifactAuditResponse = new ArtifactAuditResponse();
+  private artifactService: ArtifactService = new ArtifactService();
   onClose: () => void = () => {};
 
-  private isCardSuperseded(card: KnowledgeCard): boolean {
-    if (card.incomingLinks && card.incomingLinks.length > 0) {
-      for (let i = 0; i < card.incomingLinks.length; i++) {
-        if (card.incomingLinks[i].relationType === 'SUPERSEDES') {
-          return true;
+  aboutToAppear(): void {
+    this.loadAudit();
+  }
+
+  private formatDay(value: string): string {
+    return value !== '' && value.length >= 10 ? value.substring(0, 10) : '未知';
+  }
+
+  private async loadAudit(): Promise<void> {
+    if (this.artifactId === '') {
+      this.errorMessage = '当前成果尚未保存，无法审计';
+      this.isLoading = false;
+      return;
+    }
+    this.isLoading = true;
+    this.errorMessage = '';
+    try {
+      // 每次打开都重新核验：离线/接口失败时显示错误，绝不把缓存结果冒充最新核验
+      const result = await this.artifactService.audit(this.projectId, this.artifactId);
+      this.audit = result;
+    } catch (e) {
+      this.errorMessage = e instanceof ApiError ? e.message : '证据核验失败，请检查网络后重试';
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  private stateColor(supportState: string): ResourceColor {
+    if (supportState === 'SUPPORTED') return PMColors.SUCCESS;
+    if (supportState === 'SUPERSEDED' || supportState === 'REVOKED') return PMColors.RISK;
+    if (supportState === 'CONFLICT' || supportState === 'PENDING') return PMColors.EVIDENCE;
+    return PMColors.INK_SECONDARY;
+  }
+
+  private stateGlyph(supportState: string): string {
+    if (supportState === 'SUPPORTED') return '✓';
+    if (supportState === 'SUPERSEDED' || supportState === 'REVOKED') return '→';
+    if (supportState === 'CONFLICT' || supportState === 'PENDING') return '？';
+    return '·';
+  }
+
+  @Builder
+  private recheckItem(item: ArtifactAuditRecheckItem) {
+    Column() {
+      Row() {
+        // 状态使用后端结构化字段（statusLabel），文字+图标表达，不依赖颜色或标题关键词
+        Text(`${this.stateGlyph(item.supportState)} ${item.statusLabel}`)
+          .fontSize(PMFontSize.CAPTION)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(this.stateColor(item.supportState))
+          .padding({ left: 6, right: 6, top: 2, bottom: 2 })
+          .backgroundColor(PMColors.SURFACE_SUBTLE)
+          .borderRadius(PMRadius.XS)
+      }
+      .width('100%')
+
+      Text(item.titleSnapshot !== '' ? item.titleSnapshot : '（当时记录无标题）')
+        .fontSize(PMFontSize.BODY)
+        .fontWeight(FontWeight.Bold)
+        .fontColor(PMColors.INK_PRIMARY)
+        .margin({ top: PMSpacing.XS })
+
+      if (item.summarySnapshot !== '') {
+        Text(item.summarySnapshot)
+          .fontSize(PMFontSize.CAPTION)
+          .fontColor(PMColors.INK_SECONDARY)
+          .lineHeight(18)
+          .margin({ top: 4 })
+      }
+
+      // 决策演化链：原决策 → 替代决策 → 确认时间 → 原因
+      if (item.supersededByTitle !== null) {
+        Column() {
+          Text(`已被「${item.supersededByTitle}」取代`)
+            .fontSize(PMFontSize.CAPTION)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.RISK)
+          Text(`确认时间：${this.formatDay(item.supersededConfirmedAt ?? '')}`)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+            .margin({ top: 2 })
+          if (item.supersededReason !== null && item.supersededReason !== '') {
+            Text(`原因：${item.supersededReason}`)
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_SECONDARY)
+              .lineHeight(18)
+              .margin({ top: 2 })
+          }
         }
+        .width('100%')
+        .alignItems(HorizontalAlign.Start)
+        .padding(PMSpacing.SM)
+        .backgroundColor(PMColors.RISK_LIGHT)
+        .borderRadius(PMRadius.SM)
+        .margin({ top: PMSpacing.SM })
       }
     }
-    return false;
+    .width('100%')
+    .padding(PMSpacing.MD)
+    .backgroundColor(PMColors.SURFACE)
+    .borderRadius(PMRadius.SM)
+    .border({ width: 1, color: PMColors.BORDER })
+    .margin({ bottom: PMSpacing.SM })
+    .alignItems(HorizontalAlign.Start)
   }
 
   build() {
@@ -58,119 +159,137 @@ export struct ClaimAuditorDrawer {
         .justifyContent(FlexAlign.SpaceBetween)
         .alignItems(VerticalAlign.Center)
 
-        // 副标题与关联成果提示
-        Row() {
+        // 副标题：核验对象与两个时间口径说明
+        Column() {
           Text(`核验成果：【${this.artifactTitle}】`)
             .fontSize(PMFontSize.CAPTION)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.BRAND)
 
-          Text(`已溯源锁定 ${this.cards.length} 项关键存证`)
+          Text('口径一：生成时回执　·　口径二：当前重新检查')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_TERTIARY)
+            .margin({ top: PMSpacing.XS })
         }
         .width('100%')
-        .justifyContent(FlexAlign.SpaceBetween)
+        .alignItems(HorizontalAlign.Start)
         .margin({ top: PMSpacing.XS, bottom: PMSpacing.MD })
 
-        // 存证可信标识
-        Row() {
-          Row() {
-            Text('🛡️')
-              .fontSize(PMFontSize.BODY)
-              .margin({ right: 6 })
-            Text('学术存证与时态账本溯源')
-              .fontSize(PMFontSize.CAPTION)
-              .fontWeight(FontWeight.Bold)
-              .fontColor(PMColors.BRAND)
-          }
-
-          Text('端到端不可篡改')
-            .fontSize(PMFontSize.CAPTION)
-            .fontColor(PMColors.INK_TERTIARY)
-        }
-        .width('100%')
-        .justifyContent(FlexAlign.SpaceBetween)
-        .padding(PMSpacing.SM)
-        .backgroundColor(PMColors.SURFACE_SUBTLE)
-        .borderRadius(PMRadius.SM)
-        .margin({ bottom: PMSpacing.MD })
-
-        // 证据卡片列表
-        Scroll() {
+        if (this.isLoading) {
           Column() {
-            if (this.cards.length === 0) {
-              Text('当前暂无关联证据卡片')
-                .fontSize(PMFontSize.BODY)
-                .fontColor(PMColors.INK_TERTIARY)
-                .margin({ top: PMSpacing.LG })
-            } else {
-              ForEach(this.cards, (card: KnowledgeCard, index: number) => {
-                Column() {
-                  // 卡片头部：类型与时态标签
-                  Row() {
-                    Text(TextFormatters.memoryTypeToChinese(card.type))
-                      .fontSize(PMFontSize.CAPTION)
-                      .fontWeight(FontWeight.Medium)
-                      .fontColor(PMColors.MEMORY)
-                      .backgroundColor(PMColors.SURFACE_SUBTLE)
-                      .padding({ left: 6, right: 6, top: 2, bottom: 2 })
-                      .borderRadius(PMRadius.XS)
-
-                    Text(this.isCardSuperseded(card) ? '🔴 已被新方案取代' : '🟢 当前有效')
-                      .fontSize(PMFontSize.CAPTION)
-                      .fontWeight(FontWeight.Medium)
-                      .fontColor(this.isCardSuperseded(card) ? PMColors.RISK : PMColors.SUCCESS)
-                      .backgroundColor(this.isCardSuperseded(card) ? PMColors.RISK_LIGHT : PMColors.BRAND_LIGHT)
-                      .padding({ left: 6, right: 6, top: 2, bottom: 2 })
-                      .borderRadius(PMRadius.XS)
-                      .margin({ left: PMSpacing.SM })
-                  }
-                  .width('100%')
-                  .justifyContent(FlexAlign.SpaceBetween)
-
-                  // 标题
-                  Text(card.title)
-                    .fontSize(PMFontSize.BODY)
-                    .fontWeight(FontWeight.Bold)
-                    .fontColor(PMColors.INK_PRIMARY)
-                    .margin({ top: PMSpacing.XS })
-
-                  // 内容摘要
-                  Text(card.summary)
-                    .fontSize(PMFontSize.CAPTION)
-                    .fontColor(PMColors.INK_SECONDARY)
-                    .lineHeight(18)
-                    .margin({ top: 4 })
-
-                  // 底部来源与时间
-                  Row() {
-                    Text(`记录于 ${card.createdAt.length >= 10 ? card.createdAt.substring(0, 10) : '近期'}`)
-                      .fontSize(PMFontSize.CAPTION)
-                      .fontColor(PMColors.INK_TERTIARY)
-
-                    Text(`存证索引 #${index + 1}`)
-                      .fontSize(PMFontSize.CAPTION)
-                      .fontColor(PMColors.INK_TERTIARY)
-                  }
-                  .width('100%')
-                  .justifyContent(FlexAlign.SpaceBetween)
-                  .margin({ top: PMSpacing.SM })
-                }
-                .width('100%')
-                .padding(PMSpacing.MD)
-                .backgroundColor(PMColors.SURFACE)
-                .borderRadius(PMRadius.SM)
-                .border({ width: 1, color: PMColors.BORDER })
-                .margin({ bottom: PMSpacing.SM })
-              }, (card: KnowledgeCard) => card.id)
-            }
+            LoadingProgress()
+              .width(28)
+              .height(28)
+              .color(PMColors.BRAND)
+            Text('正在向时态账本重新核验…')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+              .margin({ top: PMSpacing.SM })
           }
           .width('100%')
+          .padding(PMSpacing.XL)
+          .alignItems(HorizontalAlign.Center)
+        } else if (this.errorMessage !== '') {
+          // 失败状态：如实报错并允许重试，不展示缓存数据
+          Column() {
+            Text('⚠ 核验失败')
+              .fontSize(PMFontSize.BODY)
+              .fontWeight(FontWeight.Bold)
+              .fontColor(PMColors.RISK)
+            Text(this.errorMessage)
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_SECONDARY)
+              .lineHeight(18)
+              .margin({ top: PMSpacing.SM })
+            Button('重新核验')
+              .fontSize(PMFontSize.BODY)
+              .fontColor(PMColors.SURFACE)
+              .backgroundColor(PMColors.BRAND)
+              .borderRadius(PMRadius.SM)
+              .margin({ top: PMSpacing.MD })
+              .onClick(() => {
+                this.loadAudit();
+              })
+          }
+          .width('100%')
+          .padding(PMSpacing.XL)
+          .alignItems(HorizontalAlign.Center)
+        } else if (this.audit.untraceable) {
+          Column() {
+            Text('· 无法逐句回溯')
+              .fontSize(PMFontSize.BODY)
+              .fontWeight(FontWeight.Bold)
+              .fontColor(PMColors.INK_SECONDARY)
+            Text(this.audit.message)
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_SECONDARY)
+              .lineHeight(18)
+              .margin({ top: PMSpacing.SM })
+          }
+          .width('100%')
+          .padding(PMSpacing.LG)
+          .backgroundColor(PMColors.SURFACE_SUBTLE)
+          .borderRadius(PMRadius.SM)
           .alignItems(HorizontalAlign.Start)
+        } else {
+          Scroll() {
+            Column() {
+              // 确定性模板结论
+              Text(this.audit.message)
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .lineHeight(18)
+                .padding(PMSpacing.SM)
+                .backgroundColor(PMColors.SURFACE_SUBTLE)
+                .borderRadius(PMRadius.SM)
+                .width('100%')
+
+              Text(`口径二 · 当前重新检查（${this.formatDay(this.audit.recheckedAt)}）`)
+                .fontSize(PMFontSize.CAPTION)
+                .fontWeight(FontWeight.Bold)
+                .fontColor(PMColors.BRAND)
+                .margin({ top: PMSpacing.MD, bottom: PMSpacing.SM })
+
+              ForEach(this.audit.recheck, (item: ArtifactAuditRecheckItem) => {
+                this.recheckItem(item)
+              }, (item: ArtifactAuditRecheckItem) => item.cardId)
+
+              Text(`口径一 · 生成时回执（${this.formatDay(this.audit.generatedAt)}，共 ${this.audit.generationRefs.length} 项，此后不随知识库变化）`)
+                .fontSize(PMFontSize.CAPTION)
+                .fontWeight(FontWeight.Bold)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: PMSpacing.SM, bottom: PMSpacing.SM })
+
+              ForEach(this.audit.generationRefs, (ref: ArtifactGenerationRef) => {
+                Row() {
+                  Text('·')
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.INK_TERTIARY)
+                    .margin({ right: PMSpacing.SM })
+                  Column() {
+                    Text(ref.titleSnapshot !== '' ? ref.titleSnapshot : '（当时记录无标题）')
+                      .fontSize(PMFontSize.CAPTION)
+                      .fontWeight(FontWeight.Medium)
+                      .fontColor(PMColors.INK_SECONDARY)
+                    Text(`观察于 ${this.formatDay(ref.observedAt)}`)
+                      .fontSize(PMFontSize.CAPTION)
+                      .fontColor(PMColors.INK_TERTIARY)
+                      .margin({ top: 2 })
+                  }
+                  .alignItems(HorizontalAlign.Start)
+                  .layoutWeight(1)
+                }
+                .width('100%')
+                .alignItems(VerticalAlign.Top)
+                .padding({ top: 2, bottom: 2 })
+              }, (ref: ArtifactGenerationRef) => ref.cardId)
+            }
+            .width('100%')
+            .alignItems(HorizontalAlign.Start)
+          }
+          .scrollable(ScrollDirection.Vertical)
+          .constraintSize({ maxHeight: '65%' })
         }
-        .scrollable(ScrollDirection.Vertical)
-        .constraintSize({ maxHeight: '65%' })
       }
       .width('92%')
       .padding(PMSpacing.LG)

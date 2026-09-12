@@ -165,6 +165,41 @@ export interface ProposedAction {
   dueAt?: string;
 }
 
+/** 成果生成时固化的证据引用快照：保存当时的卡片摘要，不随后续卡片编辑变化 */
+export interface ArtifactGenerationRef {
+  cardId: string;
+  observedAt: string;
+  titleSnapshot: string;
+  summarySnapshot: string;
+}
+
+/** 对一条生成时引用的当前重新检查结果 */
+export interface ArtifactAuditRecheckItem {
+  cardId: string;
+  titleSnapshot: string;
+  summarySnapshot: string;
+  supportState: TemporalSupportState;
+  statusLabel: string;
+  supersededBy: TemporalCardSummary | null;
+  /** 取代关系（若有）：新卡标题、确认时间与原因，构成 原决策 → 替代决策 链 */
+  supersededByTitle: string | null;
+  supersededConfirmedAt: string | null;
+  supersededReason: string | null;
+}
+
+export interface ArtifactAuditResponse {
+  artifactId: string;
+  artifactType: ArtifactTypeValue;
+  generatedAt: string;
+  /** 成果未保存逐句引用（旧成果或人工编辑版本），无法逐句回溯 */
+  untraceable: boolean;
+  /** 确定性模板文案，解释当前口径 */
+  message: string;
+  generationRefs: ArtifactGenerationRef[];
+  recheck: ArtifactAuditRecheckItem[];
+  recheckedAt: string;
+}
+
 export interface InterventionData {
   id: string;
   projectId: string;

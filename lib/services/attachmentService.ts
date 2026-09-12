@@ -9,6 +9,7 @@ import { processCapture } from "@/lib/services/captureService";
 import { requireProject } from "@/lib/repositories/projects";
 import { AppError } from "@/lib/api";
 import { structureCaptureWithMeta } from "@/lib/agent";
+import { saveCaptureResult } from "@/lib/repositories/cards";
 import { KeywordVectorStore } from "@/lib/memory/vectorStore";
 import { ensureCardEmbedding } from "@/lib/repositories/embeddings";
 import { recordLifecycleEventInTx } from "@/lib/services/memoryLifecycleService";
@@ -361,29 +362,19 @@ export async function correctAttachmentText(
 
   const vectorStore = new KeywordVectorStore();
 
-  // 单事务写入：Capture/Card、取代关系、修订链、附件更新、审计事件
+  // 单事务写入：Capture/Card（复用统一保存逻辑）、取代关系、修订链、附件更新、审计事件
   const result = await db.$transaction(async (tx) => {
-    const capture = await tx.capture.create({
-      data: {
+    const card = await saveCaptureResult(
+      {
         projectId,
         rawText: `【附件校对：${existing.fileName}】\n${trimmed}`,
         sourceType: existing.type === "IMAGE" ? "人工校对图片" : "人工校对PDF",
-      },
-    });
-    const card = await tx.knowledgeCard.create({
-      data: {
-        projectId,
-        captureId: capture.id,
-        type: draft.type as never,
-        title: draft.title,
-        summary: draft.summary,
-        keywords: draft.keywords,
-        relatedTasks: draft.relatedTasks,
-        nextActions: draft.nextActions,
-        importance: draft.importance,
+        draft,
+        links: [],
         attachmentId: existing.id,
       },
-    });
+      tx as unknown as Parameters<typeof saveCaptureResult>[1],
+    );
 
     // 对该附件关联的历史卡片建立 SUPERSEDES 取代关系（方向固定为新校对取代旧提取）
     for (const oldCard of existing.cards) {

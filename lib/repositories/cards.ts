@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import type { CardDraft, CardLink, LinkableCard } from "@/lib/types";
-import type { KnowledgeType } from "@/lib/generated/prisma/client";
+import { Prisma, type KnowledgeType } from "@/lib/generated/prisma/client";
 import { AppError } from "@/lib/api";
 import type { KnowledgeCardUpdateInput } from "@/lib/validation/schemas";
 
@@ -38,16 +38,22 @@ export async function loadRecentCards(projectId: string, limit = 50): Promise<Li
   return cards.map((card) => ({ ...card, keywords: normalizeKeywords(card.keywords) }));
 }
 
-export async function saveCaptureResult(input: {
-  projectId: string;
-  rawText: string;
-  sourceType?: string | null;
-  draft: CardDraft;
-  links: CardLink[];
-}) {
+export async function saveCaptureResult(
+  input: {
+    projectId: string;
+    rawText: string;
+    sourceType?: string | null;
+    draft: CardDraft;
+    links: CardLink[];
+    /** 附件纠错等场景：卡与附件关联在同事务内写入 */
+    attachmentId?: string | null;
+  },
+  /** 允许调用方传入事务客户端（如附件纠错的修订事务），复用同一份保存逻辑 */
+  client: Prisma.TransactionClient = db as unknown as Prisma.TransactionClient,
+) {
   const captureId = randomUUID();
   const cardId = randomUUID();
-  return db.$transaction(async (tx) => {
+  const save = async (tx: Prisma.TransactionClient) => {
     await tx.capture.create({
       data: { id: captureId, projectId: input.projectId, rawText: input.rawText, sourceType: input.sourceType },
     });
@@ -63,6 +69,7 @@ export async function saveCaptureResult(input: {
         relatedTasks: input.draft.relatedTasks,
         nextActions: input.draft.nextActions,
         importance: input.draft.importance,
+        attachmentId: input.attachmentId ?? null,
       },
     });
     if (input.links.length) {
@@ -77,7 +84,12 @@ export async function saveCaptureResult(input: {
     }
     await tx.project.update({ where: { id: input.projectId }, data: { updatedAt: new Date() } });
     return { ...card, relations: input.links };
-  });
+  };
+  if (client === (db as unknown as Prisma.TransactionClient)) {
+    // 默认路径保持原有的独立事务语义
+    return db.$transaction(save);
+  }
+  return save(client);
 }
 
 export async function updateKnowledgeCard(projectId: string, cardId: string, input: KnowledgeCardUpdateInput) {

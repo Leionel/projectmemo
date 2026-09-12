@@ -175,6 +175,42 @@ describe("Intervention budget and quiet hours (B1)", () => {
     expect(third[0].decision).toBe("FIRE");
   });
 
+  it("records app exposures idempotently and ignores foreign project ids", async () => {
+    const { recordFeedback } = await import("@/lib/services/interventionFeedbackService");
+    const intervention = await db.agentIntervention.create({
+      data: {
+        projectId: projectIdA,
+        triggerType: "PROJECT_STALE",
+        dedupeKey: "exposure-dup-1",
+        title: "曝光测试",
+        content: "",
+        evidence: {},
+        proposedActions: [],
+      },
+    });
+
+    const first = await recordFeedback(projectIdA, intervention.id, { feedbackType: "EXPOSED" });
+    expect(first.created).toBe(true);
+    const repeat = await recordFeedback(projectIdA, intervention.id, { feedbackType: "EXPOSED" });
+    expect(repeat.created).toBe(false);
+
+    // 跨项目 id 直接忽略（批量上报不打断）
+    const other = await db.project.create({
+      data: { title: "曝光外部项目", description: "", goal: "", scenario: "COMPETITION" },
+    });
+    try {
+      await expect(
+        recordFeedback(other.id, intervention.id, { feedbackType: "EXPOSED" }),
+      ).rejects.toThrow();
+    } finally {
+      await db.project.delete({ where: { id: other.id } }).catch(() => {});
+    }
+
+    // 曝光不计入偏好建议统计（仅 IGNORED/ACCEPTED 参与）
+    const suggestions = await computeSuggestion(projectIdA);
+    expect(suggestions.find((item) => item.triggerType === "PROJECT_STALE")).toBeUndefined();
+  });
+
   it("records feedback idempotently and suggests frequency reduction after repeated ignores", async () => {
     const card = await db.knowledgeCard.create({
       data: {

@@ -9,6 +9,7 @@ export const FEEDBACK_TYPES = [
   "WORTH_IT",
   "NOT_USEFUL",
   "KEEP_UNKNOWN",
+  "EXPOSED",
 ] as const;
 
 export type FeedbackType = (typeof FEEDBACK_TYPES)[number];

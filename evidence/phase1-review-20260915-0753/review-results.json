@@ -1,0 +1,35 @@
+{
+  "date": "2026-09-15",
+  "scope": "phase1-review-before-phase2",
+  "database": "vitest isolated database",
+  "commands": [
+    {
+      "command": "npm.cmd test -- tests/memoryLifecycle.test.ts tests/temporalLedger.test.ts tests/interventionPolicy.test.ts tests/projectState.integration.test.ts tests/changeImpact.test.ts tests/artifactService.test.ts tests/actionFeasibility.test.ts tests/meetingStateDiff.test.ts tests/xiaoyi.adapter.test.ts",
+      "exitCode": 0,
+      "result": "8 files, 87 tests passed"
+    },
+    {
+      "command": "npm.cmd test -- tests/phase1Reliability.test.ts",
+      "exitCode": 1,
+      "result": "red before fix: cross-project requestId returned 409 instead of creating an independent record"
+    },
+    {
+      "command": "npm.cmd test -- tests/phase1Reliability.test.ts",
+      "exitCode": 0,
+      "result": "5 tests passed after project-scoped AgentRun receipt-key fix"
+    }
+  ],
+  "phase1": {
+    "A1": "PASS_AFTER_FIX",
+    "A2": "PASS_BASELINE",
+    "A3": "PASS_BASELINE",
+    "externalAcceptance": "BLOCKED_BY_DEVICE_SIGNING_REVIEW_URL"
+  },
+  "phase2Blockers": [
+    "B1_UNIFIED_TEMPORAL_STATE_AND_HARMONY_ARCHIVE_PATH",
+    "B2_REFRESH_FAILURE_STALE_SNAPSHOT_STATE",
+    "B3_ATOMIC_GLOBAL_BUDGET_AND_PROJECT_SCOPED_PREFERENCES",
+    "B4_EVIDENCE_NAVIGATION_AND_IDEMPOTENT_ACTION_ACCEPTANCE"
+  ],
+  "secrets": "none"
+}

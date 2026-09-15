@@ -18,6 +18,7 @@ import {
 import { AppError } from "@/lib/api";
 import { db } from "@/lib/db";
 import type { CardLink } from "@/lib/types";
+import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateService";
 
 const vectorStore = new KeywordVectorStore();
 const CAPTURE_API_PROVIDER = "capture-api";
@@ -28,6 +29,7 @@ export interface IdempotentCaptureResult {
   card: SavedCapture;
   replayed: boolean;
   postProcessingPending: boolean;
+  stateRefreshPending: boolean;
   agentRunId: string;
 }
 
@@ -93,6 +95,15 @@ async function runPostProcessing(saved: SavedCapture): Promise<boolean> {
 }
 
 /**
+ * 状态快照是保存事实后的派生读模型：刷新失败不能回滚刚保存的记录，
+ * 也不能让捕获接口诱导用户用新 requestId 重复建卡。失败由 freshness 回执
+ * 持久化，调用方只收到“状态待刷新”的附加标记。
+ */
+async function refreshStateAfterCapture(projectId: string): Promise<boolean> {
+  return refreshProjectStateAfterMutation(projectId);
+}
+
+/**
  * 兼容旧调用方的记录流程：没有 requestId 时保持原有返回类型和写入行为。
  * 需要重试/恢复语义的 API 调用请使用 processCaptureWithRequest。
  */
@@ -106,6 +117,7 @@ export async function processCapture(projectId: string, rawText: string, sourceT
   const links = await vectorStore.search(draft, existingCards, 3);
   const saved = await saveCaptureResult({ projectId, rawText, sourceType, draft, links });
   await runPostProcessing(saved);
+  await refreshStateAfterCapture(projectId);
 
   await saveAgentRun({
     projectId,
@@ -150,6 +162,7 @@ async function waitForExistingCaptureRun(projectId: string, runId: string, reque
         card,
         replayed: true,
         postProcessingPending: result.postProcessingPending === true,
+        stateRefreshPending: result.stateRefreshPending === true,
         agentRunId: run.id,
       } satisfies IdempotentCaptureResult;
     }
@@ -269,7 +282,7 @@ export async function processCaptureWithRequest(
           }
           if (existing.card) {
             const card = await loadCardById(projectId, existing.card.id);
-            return { card, replayed: true, postProcessingPending: false, agentRunId: reservation.run.id };
+            return { card, replayed: true, postProcessingPending: false, stateRefreshPending: false, agentRunId: reservation.run.id };
           }
         }
       }
@@ -277,6 +290,7 @@ export async function processCaptureWithRequest(
     }
 
     const postProcessingPending = await runPostProcessing(saved);
+    const stateRefreshPending = await refreshStateAfterCapture(projectId);
     if (postProcessingPending) {
       try {
         await db.agentRun.update({
@@ -286,6 +300,7 @@ export async function processCaptureWithRequest(
               cardId: saved.id,
               requestId: options.requestId,
               postProcessingPending: true,
+              stateRefreshPending,
             } as unknown as Prisma.InputJsonValue,
             trace: {
               source: "capture",
@@ -301,7 +316,32 @@ export async function processCaptureWithRequest(
         console.warn("Capture saved; failed to update post-processing receipt", error);
       }
     }
-    return { card: saved, replayed: false, postProcessingPending, agentRunId: reservation.run.id };
+    if (!postProcessingPending) {
+      try {
+        await db.agentRun.update({
+          where: { id: reservation.run.id },
+          data: {
+            resultJson: {
+              cardId: saved.id,
+              requestId: options.requestId,
+              postProcessingPending: false,
+              stateRefreshPending,
+            } as unknown as Prisma.InputJsonValue,
+            trace: {
+              source: "capture",
+              provider,
+              stage: stateRefreshPending ? "SAVED_STATE_REFRESH_PENDING" : "COMPLETED",
+              requestId: options.requestId,
+              requestHash: payloadHash,
+              cardId: saved.id,
+            } as unknown as Prisma.InputJsonValue,
+          },
+        });
+      } catch (error) {
+        console.warn("Capture saved; failed to update state refresh receipt", error);
+      }
+    }
+    return { card: saved, replayed: false, postProcessingPending, stateRefreshPending, agentRunId: reservation.run.id };
   } catch (error) {
     const safe = safeError(error);
     try {

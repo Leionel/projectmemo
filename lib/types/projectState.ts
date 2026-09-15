@@ -12,6 +12,18 @@ export const PROJECT_STATE_BRIEF_TEMPLATE_VERSION = "1";
 
 export type ProjectHealth = "AT_RISK" | "ON_TRACK" | "UNKNOWN";
 
+export type ProjectStateFreshnessStatus = "EMPTY" | "FRESH" | "STALE" | "FAILED";
+
+export interface ProjectStateFreshnessData {
+  projectId: string;
+  status: ProjectStateFreshnessStatus;
+  snapshotId: string | null;
+  errorCode: string | null;
+  errorMessage: string | null;
+  attemptedAt: string | null;
+  refreshedAt: string | null;
+}
+
 /** 结论支持程度：作用于具体事实句，不把 UNKNOWN 默认为 FALSE */
 export type SnapshotTruth = "TRUE" | "FALSE" | "UNKNOWN";
 
@@ -30,6 +42,9 @@ export interface SnapshotFact {
   text: string;
   truth: SnapshotTruth;
   temporalStatus: string;
+  temporalState?: "CURRENT" | "SUPERSEDED" | "CONTESTED" | "UNKNOWN";
+  reasonCode?: string;
+  displayReason?: string;
   evidenceRefs: SnapshotEvidenceRef[];
   ruleId: string;
 }
@@ -150,6 +165,9 @@ export interface StateDiffItem {
 export interface ChangeBriefEvidence {
   entityKind: string;
   entityId: string;
+  field: string;
+  observedAt: string;
+  contentHash: string;
 }
 
 export interface ChangeBriefSentence {

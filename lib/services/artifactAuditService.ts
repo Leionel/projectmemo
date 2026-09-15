@@ -82,6 +82,10 @@ function buildRecheckItem(ref: StoredSourceRef, item: TemporalDecisionItem | und
       titleSnapshot: ref.titleSnapshot,
       summarySnapshot: ref.summarySnapshot,
       supportState: "INSUFFICIENT",
+      topLevelState: "UNKNOWN",
+      reasonCode: "MISSING_TIMELINE_CARD",
+      displayReason: "时间线中找不到该来源，无法证明当前状态",
+      evidenceRefs: [],
       statusLabel: "证据不足",
       supersededBy: null,
       supersededByTitle: null,
@@ -114,6 +118,10 @@ function buildRecheckItem(ref: StoredSourceRef, item: TemporalDecisionItem | und
     titleSnapshot: ref.titleSnapshot,
     summarySnapshot: ref.summarySnapshot,
     supportState: item.supportState,
+    topLevelState: item.topLevelState,
+    reasonCode: item.reasonCode,
+    displayReason: item.displayReason,
+    evidenceRefs: item.evidenceRefs,
     statusLabel: item.statusLabel,
     supersededBy: item.supersededBy,
     supersededByTitle,
@@ -208,6 +216,10 @@ export async function getArtifactAudit(projectId: string, artifactId: string): P
       return {
         cardId,
         supportState: item?.supportState ?? "MISSING",
+        topLevelState: item?.topLevelState ?? "UNKNOWN",
+        reasonCode: item?.reasonCode,
+        displayReason: item?.displayReason,
+        evidenceRefs: item?.evidenceRefs,
         statusLabel: item?.statusLabel ?? "来源已删除",
       };
     });

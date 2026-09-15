@@ -4,6 +4,7 @@ import { z } from "zod";
 
 const correctSchema = z.object({
   correctedText: z.string().trim().min(2, "校对文本不能为空且至少2个字符"),
+  expectedCurrentText: z.string().optional().nullable(),
 });
 
 export async function POST(
@@ -13,8 +14,8 @@ export async function POST(
   try {
     const { id: projectId, attachmentId } = await params;
     const body = await request.json();
-    const { correctedText } = correctSchema.parse(body);
-    const result = await correctAttachmentText(projectId, attachmentId, correctedText);
+    const { correctedText, expectedCurrentText } = correctSchema.parse(body);
+    const result = await correctAttachmentText(projectId, attachmentId, correctedText, expectedCurrentText ?? undefined);
     return NextResponse.json(result);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Attachment correction failed";

@@ -71,6 +71,13 @@ describe("Project change brief (C1)", () => {
     expect(sentence.impact).toContain("以新决策为准");
     expect(sentence.suggestion).toContain("检查基于原决策");
     expect(sentence.evidenceCount).toBe(1);
+    expect(sentence.evidence[0]).toMatchObject({
+      entityKind: "card",
+      entityId: "cA",
+      field: "title+summary",
+      observedAt: "2026-09-12T08:00:00.000Z",
+      contentHash: "h2",
+    });
   });
 
   it("action completion maps to no-repeat guidance", () => {

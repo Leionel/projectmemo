@@ -4,6 +4,7 @@ import type { CardDraft, CardLink, LinkableCard } from "@/lib/types";
 import { Prisma, type KnowledgeType } from "@/lib/generated/prisma/client";
 import { AppError } from "@/lib/api";
 import type { KnowledgeCardUpdateInput } from "@/lib/validation/schemas";
+import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateService";
 
 export function normalizeKeywords(keywords: unknown): string[] {
   if (Array.isArray(keywords)) {
@@ -43,6 +44,10 @@ export async function saveCaptureResult(
     projectId: string;
     rawText: string;
     sourceType?: string | null;
+    /** 客户端幂等身份；NULL 保持旧调用方可写入。 */
+    requestId?: string | null;
+    /** requestId 对应的规范化 payload 摘要，用于冲突检测。 */
+    requestHash?: string | null;
     draft: CardDraft;
     links: CardLink[];
     /** 附件纠错等场景：卡与附件关联在同事务内写入 */
@@ -55,7 +60,14 @@ export async function saveCaptureResult(
   const cardId = randomUUID();
   const save = async (tx: Prisma.TransactionClient) => {
     await tx.capture.create({
-      data: { id: captureId, projectId: input.projectId, rawText: input.rawText, sourceType: input.sourceType },
+      data: {
+        id: captureId,
+        projectId: input.projectId,
+        rawText: input.rawText,
+        sourceType: input.sourceType,
+        requestId: input.requestId ?? null,
+        requestHash: input.requestHash ?? null,
+      },
     });
     const card = await tx.knowledgeCard.create({
       data: {
@@ -93,7 +105,7 @@ export async function saveCaptureResult(
 }
 
 export async function updateKnowledgeCard(projectId: string, cardId: string, input: KnowledgeCardUpdateInput) {
-  return db.$transaction(async (tx) => {
+  const updated = await db.$transaction(async (tx) => {
     const card = await tx.knowledgeCard.findFirst({ where: { id: cardId, projectId } });
     if (!card) throw new AppError("CARD_NOT_FOUND", "没有找到这个项目中的知识卡片", 404);
 
@@ -112,10 +124,12 @@ export async function updateKnowledgeCard(projectId: string, cardId: string, inp
     await tx.project.update({ where: { id: projectId }, data: { updatedAt: new Date() } });
     return updated;
   });
+  const stateRefreshPending = await refreshProjectStateAfterMutation(projectId);
+  return { ...updated, stateRefreshPending };
 }
 
 export async function deleteKnowledgeCard(projectId: string, cardId: string) {
-  return db.$transaction(async (tx) => {
+  await db.$transaction(async (tx) => {
     const card = await tx.knowledgeCard.findFirst({
       where: { id: cardId, projectId },
       select: { captureId: true },
@@ -125,4 +139,5 @@ export async function deleteKnowledgeCard(projectId: string, cardId: string) {
     await tx.capture.delete({ where: { id: card.captureId } });
     await tx.project.update({ where: { id: projectId }, data: { updatedAt: new Date() } });
   });
+  await refreshProjectStateAfterMutation(projectId);
 }

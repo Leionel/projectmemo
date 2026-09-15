@@ -1,3 +1,30 @@
+export class ArchivedCardItem {
+  id: string = '';
+  title: string = '';
+  summary: string = '';
+  type: string = '';
+  archivedAt: string | null = null;
+  createdAt: string = '';
+  temporalState: string = 'UNKNOWN';
+  reasonCode: string = 'NO_SUPPORTING_EVIDENCE';
+  displayReason: string = '';
+  historyUrl: string = '';
+}
+
+export class ArchivedCardsResponse {
+  cards: ArchivedCardItem[] = [];
+}
+
+export class CardTemporalStatus {
+  cardId: string = '';
+  supportState: string = 'INSUFFICIENT';
+  topLevelState: string = 'UNKNOWN';
+  reasonCode: string = 'NO_SUPPORTING_EVIDENCE';
+  displayReason: string = '';
+  statusLabel: string = '证据不足';
+  supersededByTitle: string = '';
+}
+
 export class CaptureSummary {
   rawText: string = '';
   sourceType: string | undefined = undefined;
@@ -48,6 +75,9 @@ export class KnowledgeCard {
   attachment: AttachmentSummary | undefined = undefined;
   outgoingLinks: CardLink[] = [];
   incomingLinks: IncomingCardLink[] = [];
+  topLevelState: string = 'UNKNOWN';
+  reasonCode: string = 'NO_SUPPORTING_EVIDENCE';
+  displayReason: string = '';
 }
 
 export class ProjectDetailCount {
@@ -76,11 +106,17 @@ export class ProjectDetailResponse {
 
 export class CaptureResponse {
   card: KnowledgeCard = new KnowledgeCard();
+  requestId: string | undefined = undefined;
+  replayed: boolean = false;
+  postProcessingPending: boolean = false;
+  stateRefreshPending: boolean = false;
+  message: string | undefined = undefined;
 }
 
 export class CaptureInput {
   rawText: string = '';
   sourceType: string | undefined = undefined;
+  requestId: string | undefined = undefined;
 }
 
 export class CardSearchResultItem {
@@ -92,6 +128,9 @@ export class CardSearchResultItem {
   reason: string = '';
   source: string = '';
   retrievalMode: string = '';
+  topLevelState: string = 'UNKNOWN';
+  reasonCode: string = 'NO_SUPPORTING_EVIDENCE';
+  displayReason: string = '';
 }
 
 export class CardSearchResponse {
@@ -128,6 +167,10 @@ export class TemporalDecisionItem {
   status: string = 'INSUFFICIENT';
   statusLabel: string = '证据不足';
   supportState: string = 'INSUFFICIENT';
+  topLevelState: string = 'UNKNOWN';
+  reasonCode: string = 'NO_SUPPORTING_EVIDENCE';
+  displayReason: string = '';
+  evidenceRefs: Object[] = [];
   supersededBy: TemporalCardSummary | null = null;
   temporalReason: string | null = null;
   relations: TemporalRelation[] = [];

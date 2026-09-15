@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-15",
+  "reviewCommit": "97db547",
+  "phase": "phase2",
+  "targeted": { "exitCode": 0, "files": 7, "tests": 62 },
+  "fullTest": { "exitCode": 0, "files": 30, "tests": 225 },
+  "typecheck": { "command": "npm.cmd exec tsc -- --noEmit", "exitCode": 0 },
+  "lint": { "exitCode": 0, "errors": 0, "warnings": 7, "warningScope": "existing" },
+  "webBuild": { "exitCode": 0, "knownWarning": "Next.js NFT whole-project trace warning from attachment service" },
+  "e2e": { "exitCode": 0, "database": "isolated projectmemo-e2e.db" },
+  "harmonyTest": { "exitCode": 0, "tests": 27, "passed": 27, "failed": 0 },
+  "harmonyBuild": {
+    "exitCode": 0,
+    "artifact": "harmonyos/entry/build/default/outputs/default/entry-default-unsigned.hap",
+    "bytes": 2697157,
+    "sha256": "148182cf6e30fb34f55321a2987cf47290052be16e1ee45d649fc78e4720c27c",
+    "signed": false
+  },
+  "migrations": {
+    "emptyReplay": { "exitCode": 0, "migrationCount": 16, "database": "independent empty SQLite" },
+    "legacyUpgrade": { "exitCode": 0, "before": 14, "after": 16, "database": "independent legacy copy" },
+    "newMigrations": ["20260915080000_phase2_consistency", "20260915084500_notification_delivery_receipt"]
+  },
+  "externalAcceptance": {
+    "device": "BLOCKED: no hdc executable/target available",
+    "signing": "BLOCKED: signingConfigs is empty",
+    "reviewBackend": "BLOCKED: REVIEW_BASE_URL is empty; development uses http://10.0.2.2:4400",
+    "deployment": "NOT_RUN: no deployment or external write authorized"
+  }
+}

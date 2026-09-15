@@ -7,6 +7,7 @@ import type {
 } from "@/lib/validation/schemas";
 import type { AgentEvidence, ProposedAction } from "@/lib/types";
 import { recordFeedback } from "@/lib/services/interventionFeedbackService";
+import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateService";
 import {
   ActionStatus,
   AgentMessageRole,
@@ -87,12 +88,13 @@ export async function upsertIntervention(input: {
 }
 
 export async function updateIntervention(projectId: string, interventionId: string, input: InterventionUpdateInput) {
-  const existing = await findIntervention(projectId, interventionId);
   if (input.status === "ACCEPTED") {
-    // 状态更新与反馈事件分开记录；重复确认幂等（同键反馈只保留一条）
+    const result = await acceptIntervention(projectId, interventionId, input.actionIndex ?? 0);
+    // 反馈是独立事件；acceptIntervention 已先以事务保证业务行动唯一。
     await recordFeedback(projectId, interventionId, { feedbackType: "ACCEPTED" });
-    return acceptIntervention(projectId, interventionId, input.actionIndex ?? 0);
+    return result;
   }
+  const existing = await findIntervention(projectId, interventionId);
   if ((existing.status === InterventionStatus.DISMISSED || existing.status === InterventionStatus.RESOLVED) && input.status !== existing.status) {
     throw new AppError("INVALID_INTERVENTION_TRANSITION", "已关闭的主动提醒不能重新打开", 409);
   }
@@ -118,38 +120,64 @@ export async function updateIntervention(projectId: string, interventionId: stri
 }
 
 export async function acceptIntervention(projectId: string, interventionId: string, actionIndex = 0) {
-  const intervention = await findIntervention(projectId, interventionId);
-  if (intervention.status === InterventionStatus.DISMISSED || intervention.status === InterventionStatus.RESOLVED) {
-    throw new AppError("INTERVENTION_CLOSED", "这条提醒已经关闭，不能再次接受", 409);
+  const maxAttempts = 3;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const result = await db.$transaction(async (tx) => {
+        // 重新在同一事务中读取提醒与行动，避免事务外“无行动”判断竞态。
+        const intervention = await tx.agentIntervention.findFirst({
+          where: { id: interventionId, projectId },
+          include: { actions: true },
+        });
+        if (!intervention) throw new AppError("INTERVENTION_NOT_FOUND", "没有找到这条主动提醒", 404);
+        if (intervention.status === InterventionStatus.DISMISSED || intervention.status === InterventionStatus.RESOLVED) {
+          throw new AppError("INTERVENTION_CLOSED", "这条提醒已经关闭，不能再次接受", 409);
+        }
+        const existingAction = intervention.actions.find((action) => action.status !== ActionStatus.CANCELLED);
+        if (existingAction) return { intervention, action: existingAction };
+
+        const proposed = Array.isArray(intervention.proposedActions)
+          ? (intervention.proposedActions as unknown as ProposedAction[])
+          : [];
+        const selectedIndex = proposed[actionIndex] ? actionIndex : 0;
+        const selected = proposed[selectedIndex];
+        if (!selected) throw new AppError("NO_ACTION_PROPOSAL", "这条提醒没有可接受的行动建议", 400);
+
+        const action = await tx.actionItem.create({
+          data: {
+            projectId,
+            dedupeKey: `intervention:${interventionId}:proposal:${selectedIndex}`,
+            sourceInterventionId: interventionId,
+            sourceCardId: intervention.evidenceCardId,
+            title: selected.title,
+            description: selected.description ?? (selected.kind === "generate_artifact" ? "确认后生成对应成果，完成时记录版本和修改结果。" : null),
+            priority: selected.priority ?? intervention.severity,
+            dueAt: selected.dueAt ? new Date(selected.dueAt) : null,
+            isSimulated: intervention.isSimulated,
+          },
+        });
+        const updated = await tx.agentIntervention.update({
+          where: { id: interventionId },
+          data: { status: InterventionStatus.ACCEPTED },
+        });
+        return { intervention: updated, action };
+      });
+      const stateRefreshPending = await refreshProjectStateAfterMutation(projectId);
+      return { ...result, stateRefreshPending };
+    } catch (error) {
+      const message = error instanceof Error ? error.message.toLowerCase() : "";
+      const retryable = isUniqueConstraintError(error) || message.includes("database is locked") || message.includes("busy");
+      if (!retryable || attempt === maxAttempts) {
+        if (isUniqueConstraintError(error)) {
+          const current = await findIntervention(projectId, interventionId);
+          const existingAction = current.actions.find((action) => action.status !== ActionStatus.CANCELLED);
+          if (existingAction) return { intervention: current, action: existingAction };
+        }
+        throw error;
+      }
+    }
   }
-  const existingAction = intervention.actions.find((action) => action.status !== ActionStatus.CANCELLED);
-  if (existingAction) {
-    return { intervention, action: existingAction };
-  }
-  const proposed = Array.isArray(intervention.proposedActions) ? (intervention.proposedActions as unknown as ProposedAction[]) : [];
-  const selected = proposed[actionIndex] ?? proposed[0];
-  if (!selected) {
-    throw new AppError("NO_ACTION_PROPOSAL", "这条提醒没有可接受的行动建议", 400);
-  }
-  return db.$transaction(async (tx) => {
-    const action = await tx.actionItem.create({
-      data: {
-        projectId,
-        sourceInterventionId: interventionId,
-        sourceCardId: intervention.evidenceCardId,
-        title: selected.title,
-        description: selected.description ?? (selected.kind === "generate_artifact" ? "确认后生成对应成果，完成时记录版本和修改结果。" : null),
-        priority: selected.priority ?? intervention.severity,
-        dueAt: selected.dueAt ? new Date(selected.dueAt) : null,
-        isSimulated: intervention.isSimulated,
-      },
-    });
-    const updated = await tx.agentIntervention.update({
-      where: { id: interventionId },
-      data: { status: InterventionStatus.ACCEPTED },
-    });
-    return { intervention: updated, action };
-  });
+  throw new AppError("ACTION_ACCEPT_FAILED", "接受提醒失败，请稍后重试", 503);
 }
 
 export async function listActions(projectId: string, includeClosed = true) {
@@ -177,7 +205,7 @@ async function assertActionSources(projectId: string, input: { sourceInterventio
 
 export async function createAction(projectId: string, input: ActionCreateInput) {
   await assertActionSources(projectId, input);
-  return db.actionItem.create({
+  const action = await db.actionItem.create({
     data: {
       projectId,
       title: input.title,
@@ -189,6 +217,8 @@ export async function createAction(projectId: string, input: ActionCreateInput) 
       isSimulated: input.isSimulated ?? false,
     },
   });
+  const stateRefreshPending = await refreshProjectStateAfterMutation(projectId);
+  return { ...action, stateRefreshPending };
 }
 
 export async function createOrReuseAction(projectId: string, input: ActionCreateInput) {
@@ -227,7 +257,7 @@ export async function updateAction(projectId: string, actionId: string, input: A
       throw new AppError("INVALID_ACTION_TRANSITION", "行动状态不能从当前状态直接跳转", 409);
     }
   }
-  return db.actionItem.update({
+  const updated = await db.actionItem.update({
     where: { id: actionId },
     data: {
       ...(input.title !== undefined ? { title: input.title } : {}),
@@ -239,6 +269,8 @@ export async function updateAction(projectId: string, actionId: string, input: A
       ...(input.status === "DONE" ? { completedAt: new Date() } : {}),
     },
   });
+  const stateRefreshPending = await refreshProjectStateAfterMutation(projectId);
+  return { ...updated, stateRefreshPending };
 }
 
 export async function deleteSimulatedAgentData(projectId: string) {

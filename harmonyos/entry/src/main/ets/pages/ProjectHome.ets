@@ -54,6 +54,7 @@ import { ChangeBrief, StateDiff } from '../models/ProjectState';
 import { JudgeRebuttalModal } from '../components/JudgeRebuttalModal';
 import { AttachmentCorrectionModal } from '../components/AttachmentCorrectionModal';
 import { ExportFormatter } from '../common/ExportFormatter';
+import { DeviceIdentity } from '../common/DeviceIdentity';
 
 @Entry
 @Component
@@ -81,6 +82,7 @@ struct ProjectHome {
   // Tab 0: 工作台专属状态
   @State rawText: string = '';
   @State sourceType: string = '随手记录';
+  @State captureRequestId: string = '';
   @State isCapturing: boolean = false;
   @State captureError: string = '';
   @State isUploadingAttachment: boolean = false;
@@ -91,14 +93,16 @@ struct ProjectHome {
   @State isEvaluating: boolean = false;
   @State evaluateError: string = '';
   @State showDemoControls: boolean = false;
-  @State showCapturePanel: boolean = false;
+  // 单一半模态入口：同一时刻只挂载一个 bindSheet，按模式渲染记录/会议
+  @State showEntrySheet: boolean = false;
+  @State entrySheetMode: string = 'capture'; // 'capture' | 'meeting'
   @State showChangeImpactDialog: boolean = false;
   @State showClaimAuditor: boolean = false;
   @State showStateDiffSheet: boolean = false;
   @State stateDiffForSheet: StateDiff = new StateDiff();
   @State showChangeBrief: boolean = false;
   @State briefForSheet: ChangeBrief = new ChangeBrief();
-  @State showMeetingSheet: boolean = false;
+
   @State isExportingProvenance: boolean = false;
   @State lifecycleActionCardId: string = '';
   @State showJudgeRebuttal: boolean = false;
@@ -182,6 +186,7 @@ struct ProjectHome {
       this.routeError = '页面参数缺失，项目ID无效';
       return;
     }
+    this.restoreCaptureDraft();
     this.loadAllData();
   }
 
@@ -222,8 +227,8 @@ struct ProjectHome {
       this.showAttachmentCorrection = false;
       return true;
     }
-    if (this.showCapturePanel) {
-      this.showCapturePanel = false;
+    if (this.showEntrySheet) {
+      this.showEntrySheet = false;
       return true;
     }
     if (this.isArtifactReader) {
@@ -628,6 +633,37 @@ struct ProjectHome {
     this.currentArtifact = found;
   }
 
+  private newCaptureRequestId(): string {
+    return `harmony-capture-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+  }
+
+  private async restoreCaptureDraft(): Promise<void> {
+    const draft = await DeviceIdentity.loadCaptureDraft(this.projectId);
+    if (draft !== undefined && this.rawText === '') {
+      this.rawText = draft.rawText;
+      this.sourceType = draft.sourceType;
+      this.captureRequestId = draft.requestId;
+    }
+  }
+
+  private async persistCaptureDraft(): Promise<void> {
+    if (this.rawText.trim() === '') return;
+    if (this.captureRequestId === '') {
+      this.captureRequestId = this.newCaptureRequestId();
+    }
+    await DeviceIdentity.saveCaptureDraft(this.projectId, this.rawText, this.sourceType, this.captureRequestId);
+  }
+
+  private openCaptureEntry(preferredSource?: string): void {
+    if (preferredSource !== undefined && preferredSource !== '' && preferredSource !== this.sourceType) {
+      this.sourceType = preferredSource;
+      this.captureRequestId = '';
+    }
+    this.captureError = '';
+    this.entrySheetMode = 'capture';
+    this.showEntrySheet = true;
+  }
+
   // --- 工作台操作 ---
   private async evaluate(scenario?: string, clearSim: boolean = false): Promise<void> {
     if (this.isEvaluating) {
@@ -661,9 +697,15 @@ struct ProjectHome {
     }
     this.isCapturing = true;
     this.captureError = '';
+    if (this.captureRequestId === '') {
+      this.captureRequestId = this.newCaptureRequestId();
+    }
+    await DeviceIdentity.saveCaptureDraft(this.projectId, trimmed, this.sourceType, this.captureRequestId);
     try {
-      await this.memoryService.capture(this.projectId, trimmed, this.sourceType);
+      await this.memoryService.capture(this.projectId, trimmed, this.sourceType, this.captureRequestId);
       this.rawText = '';
+      this.captureRequestId = '';
+      await DeviceIdentity.clearCaptureDraft(this.projectId);
       promptAction.showToast({ message: '已归档并生成记忆卡片' });
       await this.loadAllData();
     } catch (e) {
@@ -836,25 +878,11 @@ struct ProjectHome {
     this.dialogError = '';
   }
 
-  @Builder
-  private MeetingSheetWrapper() {
-    MeetingImportSheet({
-      projectId: this.projectId,
-      onClose: () => {
-        this.showMeetingSheet = false;
-        this.loadAllData();
-      },
-      onShowDiff: (fromId: string, toId: string) => {
-        this.showMeetingDiff(fromId, toId);
-      }
-    })
-  }
-
   private async showMeetingDiff(fromId: string, toId: string): Promise<void> {
     try {
       const response = await this.stateService.diff(this.projectId, fromId, toId);
       this.stateDiffForSheet = response.diff;
-      this.showMeetingSheet = false;
+      this.showEntrySheet = false;
       this.showStateDiffSheet = true;
     } catch (e) {
       promptAction.showToast({ message: e instanceof ApiError ? e.message : '会后对比获取失败' });
@@ -1070,7 +1098,7 @@ struct ProjectHome {
       backDescription: '返回项目列表',
       rightActionText: this.currentTabIndex === 0 ? '＋ 记录' : '',
       onRightTextAction: () => {
-        this.showCapturePanel = true;
+        this.openCaptureEntry();
       },
       showRightIcon: true,
       rightIconLabel: '更多项目设置',
@@ -1174,7 +1202,7 @@ struct ProjectHome {
       .alignItems(VerticalAlign.Center)
       .clickEffect(PMInteraction.PRESS_EFFECT)
       .onClick(() => {
-        this.showCapturePanel = true;
+        this.openCaptureEntry();
       })
       .accessibilityText('暂无待推进待办，点击展开快速记录面板')
     } else {
@@ -1415,14 +1443,14 @@ struct ProjectHome {
             ForEach(this.dashboard.readiness.items.filter((item: ReadinessItem) => !item.complete), (item: ReadinessItem) => {
               Row() {
                 Column() {
-                  Text(item.label)
+                  Text(item.pendingLabel !== '' ? item.pendingLabel : item.label)
                     .fontSize(PMFontSize.BODY)
                     .fontWeight(FontWeight.Medium)
                     .fontColor(PMColors.INK_PRIMARY)
 
-                  Text(item.key === 'competition_outline' ? '已有参赛要求，但尚未生成初稿' :
+                  Text(item.key === 'competition_outline' ? '尚未生成作品说明大纲初稿' :
                     item.key === 'defense_ppt' ? '尚无可复用答辩结构' :
-                      item.key === 'experiment_log' ? '尚未形成完整实验证据' : '尚未沉淀关键交付物')
+                    item.key === 'experiment' ? '尚未形成完整实验证据' : '尚未沉淀关键交付物')
                     .fontSize(PMFontSize.SECONDARY)
                     .fontColor(PMColors.INK_SECONDARY)
                     .margin({ top: 2 })
@@ -1442,6 +1470,10 @@ struct ProjectHome {
                       this.selectedArtifactType = item.key;
                       this.updateCurrentArtifact();
                       this.currentTabIndex = 4; // 跳转成果
+                    } else if (item.key === 'requirement') {
+                      this.openCaptureEntry('参赛材料');
+                    } else if (item.key === 'experiment') {
+                      this.openCaptureEntry('实验记录');
                     } else if (item.key === 'closed_loop') {
                       this.currentTabIndex = 2; // 跳转待办
                     } else {
@@ -1704,7 +1736,7 @@ struct ProjectHome {
               .height(48)
               .layoutWeight(1)
               .onClick(() => {
-                this.showCapturePanel = true;
+                this.openCaptureEntry();
               })
               .accessibilityText('打开记录项目碎片面板')
 
@@ -1717,7 +1749,7 @@ struct ProjectHome {
               .height(48)
               .layoutWeight(1)
               .onClick(() => {
-                this.showMeetingSheet = true;
+                this.entrySheetMode = 'meeting'; this.showEntrySheet = true;
               })
               .accessibilityText('打开会议文本导入')
           }
@@ -1736,6 +1768,25 @@ struct ProjectHome {
     .layoutWeight(1)
     .transition(PMTransition.CONTENT_ENTER)
     .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
+  }
+
+  // 单一 bindSheet 入口：按模式渲染记录面板或会议导入，避免同节点重复绑定
+  @Builder
+  private EntrySheet() {
+    if (this.entrySheetMode === 'meeting') {
+      MeetingImportSheet({
+        projectId: this.projectId,
+        onClose: () => {
+          this.showEntrySheet = false;
+          this.loadAllData();
+        },
+        onShowDiff: (fromId: string, toId: string) => {
+          this.showMeetingDiff(fromId, toId);
+        }
+      })
+    } else {
+      this.CaptureSheet()
+    }
   }
 
   // 底部半模态记录面板：来源、回形针上传与文字沉淀在同一个面板内完成
@@ -1761,7 +1812,7 @@ struct ProjectHome {
           .fontColor(PMColors.INK_TERTIARY)
           .backgroundColor('transparent')
           .onClick(() => {
-            this.showCapturePanel = false;
+            this.showEntrySheet = false;
           })
           .accessibilityText('关闭记录面板')
       }
@@ -1784,7 +1835,11 @@ struct ProjectHome {
               .accessibilityText(`记录来源：${src}`)
               .accessibilitySelected(this.sourceType === src)
               .onClick(() => {
+                if (this.sourceType !== src) {
+                  this.captureRequestId = '';
+                }
                 this.sourceType = src;
+                this.persistCaptureDraft();
               })
           }, (src: string) => src)
         }
@@ -1910,7 +1965,11 @@ struct ProjectHome {
         placeholder: `记录${this.sourceType}内容（导师意见、实验结果、代码报错等，至少5个字）...`
       })
         .onChange((value: string) => {
+          if (value !== this.rawText && this.captureRequestId !== '') {
+            this.captureRequestId = '';
+          }
           this.rawText = value;
+          this.persistCaptureDraft();
         })
         .fontSize(PMFontSize.BODY)
         .height(90)
@@ -2289,6 +2348,18 @@ struct ProjectHome {
                   .fontWeight(FontWeight.Medium)
                   .fontColor(PMColors.INK_PRIMARY)
                   .margin({ top: PMSpacing.SM })
+
+                Text(`时态：${card.topLevelState === 'CURRENT' ? '当前有效' : card.topLevelState === 'SUPERSEDED' ? '已被取代' : card.topLevelState === 'CONTESTED' ? '存在争议' : '暂不能确定'}`)
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(card.topLevelState === 'CONTESTED' ? PMColors.RISK : card.topLevelState === 'UNKNOWN' ? PMColors.EVIDENCE : card.topLevelState === 'SUPERSEDED' ? PMColors.INK_TERTIARY : PMColors.SUCCESS)
+                  .margin({ top: PMSpacing.XS })
+                if (card.topLevelState !== 'CURRENT' && card.displayReason !== '') {
+                  Text(card.displayReason)
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.INK_TERTIARY)
+                    .lineHeight(18)
+                    .margin({ top: 2 })
+                }
 
                 if (TextFormatters.shouldShowSummary(card.title, card.summary)) {
                   Text(TextFormatters.readableText(card.summary, '这条记忆摘要无法读取，请重新录入。'))
@@ -3684,10 +3755,15 @@ struct ProjectHome {
           onGoActions: () => {
             this.currentTabIndex = 2;
           },
-          onOpenEvidence: (entityKind: string) => {
-            // 证据按实体种类跳转到对应 Tab；V1 为页签级定位
+          onOpenEvidence: (entityKind: string, entityId: string) => {
+            // 保留实体 ID，页签打开后仍能定位到同一版本证据，而不是只跳到泛列表。
+            AppStorage.setOrCreate<string>('stateEvidenceEntityId', entityId);
             this.showChangeBrief = false;
             if (entityKind === 'card') {
+              // 记忆页默认不带搜索条件；展开同一张卡片即可保留“点击简报证据”的可达性。
+              this.memorySearchQuery = '';
+              this.memorySearchResults = [];
+              this.expandedCardId = entityId;
               this.currentTabIndex = 1;
             } else if (entityKind === 'action') {
               this.currentTabIndex = 2;
@@ -3743,12 +3819,8 @@ struct ProjectHome {
     }
     .width('100%')
     .height('100%')
-    .bindSheet($$this.showCapturePanel, this.CaptureSheet(), {
-      height: SheetSize.FIT_CONTENT,
-      dragBar: true
-    })
-    .bindSheet($$this.showMeetingSheet, this.MeetingSheetWrapper(), {
-      height: 640,
+    .bindSheet($$this.showEntrySheet, this.EntrySheet(), {
+      height: this.entrySheetMode === 'meeting' ? 640 : SheetSize.FIT_CONTENT,
       dragBar: true
     })
   }

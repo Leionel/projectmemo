@@ -190,7 +190,15 @@ export interface ArtifactClaimAuditItem {
   cardIds: string[];
   state: "CURRENT" | "SUPERSEDED" | "UNCONFIRMED" | "MISSING" | "UNVERIFIED";
   stateLabel: string;
-  cardStates: Array<{ cardId: string; supportState: string; statusLabel: string }>;
+  cardStates: Array<{
+    cardId: string;
+    supportState: TemporalSupportState | "MISSING";
+    topLevelState: TemporalTopLevelState | "UNKNOWN";
+    reasonCode?: string;
+    displayReason?: string;
+    evidenceRefs?: TemporalEvidenceRef[];
+    statusLabel: string;
+  }>;
 }
 
 /** 成果生成时固化的证据引用快照：保存当时的卡片摘要，不随后续卡片编辑变化 */
@@ -207,6 +215,10 @@ export interface ArtifactAuditRecheckItem {
   titleSnapshot: string;
   summarySnapshot: string;
   supportState: TemporalSupportState;
+  topLevelState: TemporalTopLevelState;
+  reasonCode: string;
+  displayReason: string;
+  evidenceRefs: TemporalEvidenceRef[];
   statusLabel: string;
   supersededBy: TemporalCardSummary | null;
   /** 取代关系（若有）：新卡标题、确认时间与原因，构成 原决策 → 替代决策 链 */
@@ -261,6 +273,7 @@ export interface InterventionData {
 export interface ActionItemData {
   id: string;
   projectId: string;
+  dedupeKey?: string | null;
   sourceInterventionId?: string | null;
   sourceCardId?: string | null;
   resultCardId?: string | null;
@@ -295,6 +308,10 @@ export interface AgentCitation {
   relevance?: number;
   current?: boolean;
   supportState?: TemporalSupportState;
+  topLevelState?: TemporalTopLevelState;
+  reasonCode?: string;
+  displayReason?: string;
+  evidenceRefs?: TemporalEvidenceRef[];
   supersededBy?: TemporalCardSummary | null;
   temporalReason?: string | null;
 }
@@ -370,6 +387,10 @@ export interface CardSearchResult {
   createdAt: string;
   current: boolean;
   supportState: TemporalSupportState;
+  topLevelState: TemporalTopLevelState;
+  reasonCode: string;
+  displayReason: string;
+  evidenceRefs: TemporalEvidenceRef[];
   supersededBy: TemporalCardSummary | null;
   temporalReason: string | null;
 }
@@ -395,6 +416,17 @@ export type TemporalDecisionStatus =
   | "PENDING"
   | "REVOKED"
   | "INSUFFICIENT";
+
+/** 面向跨端展示的统一顶层状态；supportState/status 保留细分兼容语义。 */
+export type TemporalTopLevelState = "CURRENT" | "SUPERSEDED" | "CONTESTED" | "UNKNOWN";
+
+export interface TemporalEvidenceRef {
+  entityKind: "card" | "relation";
+  entityId: string;
+  field: string;
+  observedAt: string;
+  relationType?: CardRelationTypeValue;
+}
 
 export interface TemporalCardSummary {
   id: string;
@@ -424,6 +456,10 @@ export interface TemporalDecisionItem {
   status: TemporalDecisionStatus;
   statusLabel: string;
   supportState: TemporalSupportState;
+  topLevelState: TemporalTopLevelState;
+  reasonCode: string;
+  displayReason: string;
+  evidenceRefs: TemporalEvidenceRef[];
   supersededBy: TemporalCardSummary | null;
   temporalReason: string | null;
   relations: TemporalRelationData[];

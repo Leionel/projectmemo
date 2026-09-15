@@ -125,7 +125,7 @@ export function buildProjectState(input: SnapshotSourceInput): BuiltProjectState
       ledgerRelations,
       now,
     );
-    const truth: SnapshotTruth = item.status === "CURRENT" ? "TRUE" : item.status === "SUPERSEDED" ? "FALSE" : "UNKNOWN";
+    const truth: SnapshotTruth = item.topLevelState === "CURRENT" ? "TRUE" : item.topLevelState === "SUPERSEDED" ? "FALSE" : "UNKNOWN";
     let text: string;
     switch (item.status) {
       case "SUPERSEDED":
@@ -151,6 +151,9 @@ export function buildProjectState(input: SnapshotSourceInput): BuiltProjectState
       text,
       truth,
       temporalStatus: item.status,
+      temporalState: item.topLevelState,
+      reasonCode: item.reasonCode,
+      displayReason: item.displayReason,
       evidenceRefs: [cardEvidence(card, input.now)],
       ruleId: "decision.supersession",
     });

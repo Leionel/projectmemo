@@ -1,7 +1,8 @@
 import router from '@ohos.router';
 import { ApiError } from '../models/Project';
-import { KnowledgeCard, CardLink, IncomingCardLink, TemporalDecisionItem, TemporalRelation } from '../models/Memory';
+import { KnowledgeCard, ArchivedCardItem, CardLink, IncomingCardLink, TemporalDecisionItem, TemporalRelation } from '../models/Memory';
 import { MemoryService } from '../services/MemoryService';
+import { MemoryLifecycleService } from '../services/MemoryLifecycleService';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction, PMMotion } from '../common/DesignTokens';
 import { PMAppBar } from '../components/PMAppBar';
 import { MemoryTypeBadge } from '../components/MetricBadge';
@@ -19,10 +20,13 @@ struct MemoryTimeline {
   @State routeError: string = '';
   @State expandedCardId: string = '';
   @State decisions: TemporalDecisionItem[] = [];
+  @State archivedCards: ArchivedCardItem[] = [];
   @State temporalEnabled: boolean = true;
   @State relationActionId: string = '';
+  @State lifecycleActionId: string = '';
 
   private memoryService: MemoryService = new MemoryService();
+  private lifecycleService: MemoryLifecycleService = new MemoryLifecycleService();
 
   aboutToAppear(): void {
     const params: Record<string, string> | undefined = router.getParams() as Record<string, string>;
@@ -44,8 +48,10 @@ struct MemoryTimeline {
     try {
       const cards = await this.memoryService.getTimeline(this.projectId);
       const timeline = await this.memoryService.getDecisionTimeline(this.projectId);
+      const archived = await this.memoryService.archivedCards(this.projectId);
       this.cards = cards;
       this.decisions = timeline.items;
+      this.archivedCards = archived.cards;
       this.temporalEnabled = timeline.enabled;
     } catch (e) {
       if (e instanceof ApiError) {
@@ -80,10 +86,22 @@ struct MemoryTimeline {
 
   private statusColor(status: string): ResourceColor {
     if (status === 'CURRENT') return PMColors.SUCCESS;
-    if (status === 'CONFLICT') return PMColors.RISK;
-    if (status === 'PENDING') return PMColors.EVIDENCE;
-    if (status === 'SUPERSEDED' || status === 'REVOKED') return PMColors.INK_TERTIARY;
+    if (status === 'CONTESTED' || status === 'CONFLICT' || status === 'PENDING') return PMColors.RISK;
+    if (status === 'SUPERSEDED' || status === 'UNKNOWN' || status === 'REVOKED') return PMColors.INK_TERTIARY;
     return PMColors.INK_SECONDARY;
+  }
+
+  private async restoreArchived(cardId: string): Promise<void> {
+    if (this.lifecycleActionId !== '') return;
+    this.lifecycleActionId = cardId;
+    try {
+      await this.lifecycleService.restore(this.projectId, cardId, '从归档列表恢复');
+      await this.loadTimeline();
+    } catch (e) {
+      this.errorMessage = e instanceof ApiError ? e.message : '恢复记忆失败，请稍后重试';
+    } finally {
+      this.lifecycleActionId = '';
+    }
   }
 
   private actionableRelation(item: TemporalDecisionItem): TemporalRelation | undefined {
@@ -167,6 +185,11 @@ struct MemoryTimeline {
         .maxLines(2)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .margin({ top: PMSpacing.SM })
+
+      Text(`统一状态：${item.topLevelState}`)
+        .fontSize(PMFontSize.CAPTION)
+        .fontColor(this.statusColor(item.topLevelState))
+        .margin({ top: PMSpacing.XS })
 
       if (item.confirmedSourceAt !== null && item.confirmedSourceAt !== '') {
         Text('✓ 已人工确认来源（来源声明，非事实证明）')
@@ -521,7 +544,7 @@ struct MemoryTimeline {
             this.loadTimeline();
           }
         })
-      } else if (this.cards.length === 0) {
+      } else if (this.cards.length === 0 && this.archivedCards.length === 0) {
         EmptyStateView({
           title: '暂无记忆档案',
           description: '项目尚未记录任何碎片，返回项目首页记录第一条知识',
@@ -595,6 +618,60 @@ struct MemoryTimeline {
               this.cardItem(card)
             }
           }, (card: KnowledgeCard) => card.id)
+
+          if (this.archivedCards.length > 0) {
+            ListItem() {
+              Column() {
+                Text('已归档记忆')
+                  .fontSize(PMFontSize.PAGE_TITLE)
+                  .fontWeight(FontWeight.Bold)
+                  .fontColor(PMColors.INK_PRIMARY)
+                Text('归档只影响列表展示，不改变事实的时态状态；恢复后不会复活已取代的旧事实。')
+                  .fontSize(PMFontSize.BODY)
+                  .fontColor(PMColors.INK_SECONDARY)
+                  .lineHeight(20)
+                  .margin({ top: PMSpacing.XS })
+                ForEach(this.archivedCards, (archived: ArchivedCardItem) => {
+                  Row() {
+                    Column() {
+                      Text(archived.title)
+                        .fontSize(PMFontSize.BODY)
+                        .fontWeight(FontWeight.Medium)
+                        .fontColor(PMColors.INK_PRIMARY)
+                        .maxLines(2)
+                        .textOverflow({ overflow: TextOverflow.Ellipsis })
+                      Text(`${archived.temporalState} · ${archived.displayReason}`)
+                        .fontSize(PMFontSize.CAPTION)
+                        .fontColor(PMColors.INK_TERTIARY)
+                        .maxLines(2)
+                        .textOverflow({ overflow: TextOverflow.Ellipsis })
+                        .margin({ top: PMSpacing.XS })
+                    }
+                    .layoutWeight(1)
+                    .alignItems(HorizontalAlign.Start)
+                    Button(this.lifecycleActionId === archived.id ? '恢复中…' : '恢复')
+                      .height(40)
+                      .fontSize(PMFontSize.CAPTION)
+                      .enabled(this.lifecycleActionId === '')
+                      .onClick(() => {
+                        this.restoreArchived(archived.id);
+                      })
+                  }
+                  .width('100%')
+                  .padding(PMSpacing.MD)
+                  .backgroundColor(PMColors.SURFACE_SUBTLE)
+                  .borderRadius(PMRadius.SM)
+                  .margin({ top: PMSpacing.SM })
+                }, (archived: ArchivedCardItem) => archived.id)
+              }
+              .width('100%')
+              .padding(PMSpacing.LG)
+              .backgroundColor(PMColors.SURFACE)
+              .borderRadius(PMRadius.MD)
+              .border({ width: 1, color: PMColors.BORDER })
+              .alignItems(HorizontalAlign.Start)
+            }
+          }
         }
         .width('100%')
         .layoutWeight(1)

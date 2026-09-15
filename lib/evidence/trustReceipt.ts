@@ -3,6 +3,7 @@ import type {
   EvidenceSupportState,
   EvidenceTrustReceipt,
   TemporalCardSummary,
+  TemporalTopLevelState,
   TemporalSupportState,
 } from "@/lib/types";
 
@@ -16,6 +17,7 @@ export interface CardEvidenceState {
   belongsToProject: boolean;
   current: boolean;
   supportState: TemporalSupportState;
+  topLevelState?: TemporalTopLevelState;
   supersededBy: TemporalCardSummary | null;
 }
 
@@ -50,13 +52,22 @@ function evaluateClaim(
       hasUnknown = true;
       continue;
     }
-    if (!evidence.current || evidence.supportState === "SUPERSEDED") {
+    const topLevelState = evidence.topLevelState ?? (
+      evidence.supportState === "SUPERSEDED" ? "SUPERSEDED" :
+        evidence.supportState === "CONFLICT" || evidence.supportState === "PENDING" ? "CONTESTED" :
+          evidence.supportState === "REVOKED" ? "UNKNOWN" :
+            evidence.current ? "CURRENT" : "UNKNOWN"
+    );
+    if (!evidence.current || topLevelState === "SUPERSEDED") {
       supersededIds.push(cardId);
       continue;
     }
-    if (evidence.supportState === "CONFLICT" || evidence.supportState === "PENDING") {
+    if (topLevelState === "CONTESTED") {
       hasConflict = true;
     }
+    // Unknown 是“系统尚不能证明时态结论”，不是“事实为假”。在证据归属
+    // 和 current 仍成立时保留旧的来源支持语义；只有缺失/跨项目引用才
+    // 让整条 claim 进入 INSUFFICIENT。
     currentIds.push(cardId);
   }
 

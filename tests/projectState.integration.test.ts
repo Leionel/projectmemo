@@ -1,16 +1,20 @@
 process.env.PROJECT_STATE_ENABLED = "1";
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { PROJECT_STATE_SCHEMA_VERSION } from "@/lib/types/projectState";
 import { db } from "@/lib/db";
 import {
   checkInProjectState,
   getLatestProjectState,
+  getProjectStateFreshness,
   getProjectStateDiff,
   refreshProjectState,
 } from "@/lib/services/projectStateService";
 import { analyzeChangeImpact, confirmChangeImpact } from "@/lib/services/changeImpactService";
 import { completeProjectAction } from "@/lib/services/actionService";
+import { updateProject } from "@/lib/repositories/projects";
+import { createProjectMilestone, confirmDeliverableEvidence } from "@/lib/services/milestoneService";
+import { proposeTemporalRelation } from "@/lib/services/temporalLedgerService";
 
 process.env.PROJECT_STATE_ENABLED = "1";
 
@@ -35,13 +39,13 @@ describe("Project state snapshot / diff (R2 integration)", () => {
     }
   });
 
-  async function seedCard(title: string) {
+  async function seedCard(title: string, targetProjectId = projectId) {
     const capture = await db.capture.create({
-      data: { projectId, rawText: title, sourceType: "测试" },
+      data: { projectId: targetProjectId, rawText: title, sourceType: "测试" },
     });
     return db.knowledgeCard.create({
       data: {
-        projectId,
+        projectId: targetProjectId,
         captureId: capture.id,
         type: "meeting_note",
         title,
@@ -76,6 +80,32 @@ describe("Project state snapshot / diff (R2 integration)", () => {
 
     const viaGet = await getLatestProjectState(projectId);
     expect(viaGet?.id).toBe(first.snapshot.id);
+    const freshness = await getProjectStateFreshness(projectId);
+    expect(freshness.status).toBe("FRESH");
+    expect(freshness.snapshotId).toBe(first.snapshot.id);
+  });
+
+  it("retains the previous snapshot and records FAILED freshness when refresh fails", async () => {
+    const project = await db.project.create({
+      data: { title: "刷新失败保留快照", description: "", goal: "", scenario: "COMPETITION" },
+    });
+    try {
+      const baseline = await refreshProjectState(project.id);
+      const prismaForTest = db as unknown as { $transaction: (...args: unknown[]) => Promise<unknown> };
+      const transaction = vi.spyOn(prismaForTest, "$transaction").mockRejectedValueOnce(new Error("simulated refresh failure"));
+      try {
+        await expect(refreshProjectState(project.id)).rejects.toMatchObject({ code: "STATE_REFRESH_FAILED" });
+      } finally {
+        transaction.mockRestore();
+      }
+      expect((await getLatestProjectState(project.id))?.id).toBe(baseline.snapshot.id);
+      const freshness = await getProjectStateFreshness(project.id);
+      expect(freshness.status).toBe("FAILED");
+      expect(freshness.snapshotId).toBe(baseline.snapshot.id);
+      expect(freshness.errorMessage).toContain("状态刷新失败");
+    } finally {
+      await db.project.delete({ where: { id: project.id } }).catch(() => {});
+    }
   });
 
   it("concurrent identical refreshes converge on a single new snapshot", async () => {
@@ -178,6 +208,51 @@ describe("Project state snapshot / diff (R2 integration)", () => {
     }
   });
 
+  it("refreshes after project settings and deliverable evidence mutations", async () => {
+    const project = await db.project.create({
+      data: { title: "业务事实刷新测试", description: "", goal: "旧目标", scenario: "COMPETITION" },
+    });
+    try {
+      const baseline = await refreshProjectState(project.id);
+      const updated = await updateProject(project.id, { goal: "新目标" });
+      expect(updated.stateRefreshPending).toBe(false);
+      const afterProject = await getLatestProjectState(project.id);
+      expect(afterProject?.payload.goal).toBe("新目标");
+      expect(afterProject?.id).not.toBe(baseline.snapshot.id);
+
+      const card = await seedCard("刷新用实验记录", project.id);
+      const milestone = await createProjectMilestone({
+        projectId: project.id,
+        title: "刷新用里程碑",
+        deliverables: [{ title: "实验记录", expectedEvidence: ["experiment_log"] }],
+      });
+      const deliverable = milestone.deliverables[0];
+      const evidence = await confirmDeliverableEvidence({
+        projectId: project.id,
+        deliverableId: deliverable.id,
+        evidenceType: "experiment_log",
+        cardId: card.id,
+        confirmed: true,
+      });
+      expect(evidence.stateRefreshPending).toBe(false);
+      const afterEvidence = await getLatestProjectState(project.id);
+      expect(afterEvidence?.payload.gaps.some((gap) => gap.deliverableId === deliverable.id)).toBe(false);
+
+      const older = await seedCard("待确认旧方案", project.id);
+      const newer = await seedCard("待确认新方案", project.id);
+      const proposed = await proposeTemporalRelation(project.id, newer.id, {
+        relatedCardId: older.id,
+        relationType: "SUPERSEDES",
+        reason: "等待用户确认的替代关系",
+      });
+      expect(proposed.stateRefreshPending).toBe(false);
+      const afterProposal = await getLatestProjectState(project.id);
+      expect(afterProposal?.payload.facts.some((fact) => fact.temporalState === "CONTESTED" && fact.truth === "UNKNOWN")).toBe(true);
+    } finally {
+      await db.project.delete({ where: { id: project.id } }).catch(() => {});
+    }
+  });
+
   it("detects a decision supersession as a material change with a traceable diff", async () => {
     await seedCard("选型方案A：大型密集模型");
     const baseline = await refreshProjectState(projectId);
@@ -218,9 +293,11 @@ describe("Project state snapshot / diff (R2 integration)", () => {
 
     const completion = await completeProjectAction(projectId, action.id, "消融实验完成，结果符合预期");
     expect(completion.status).toBe("DONE");
+    expect(completion.stateRefreshPending).toBe(false);
 
     const after = await refreshProjectState(projectId);
-    expect(after.changed).toBe(true);
+    // 行动完成已经在业务提交后触发补偿刷新；显式刷新只复用这份最新快照。
+    expect(after.reused).toBe(true);
 
     const diff = await getProjectStateDiff(projectId, baseline.snapshot.id, after.snapshot.id);
     const actionItem = diff.items.find((item) => item.changeKey === `action:${action.id}:status`);

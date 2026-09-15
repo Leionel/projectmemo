@@ -1,6 +1,7 @@
 import { notificationManager } from '@kit.NotificationKit';
 import { wantAgent } from '@kit.AbilityKit';
 import { Intervention } from '../models/Intervention';
+import { ApiClient } from './ApiClient';
 
 export interface NotificationOpResult {
   success: boolean;
@@ -8,8 +9,28 @@ export interface NotificationOpResult {
   message: string;
 }
 
+class NotificationDeliveryReceipt {
+  channel: string = 'SYSTEM_NOTIFICATION';
+  deliveryKey: string = '';
+  status: string = '';
+  message: string = '';
+}
+
 export class NotificationService {
   private notificationPermission: boolean | undefined = undefined;
+  private client: ApiClient = new ApiClient();
+
+  private reportDelivery(intervention: Intervention, projectId: string, result: NotificationOpResult): void {
+    const body: NotificationDeliveryReceipt = new NotificationDeliveryReceipt();
+    body.deliveryKey = this.getNotificationId(intervention.id).toString();
+    body.status = result.status;
+    body.message = result.message;
+    this.client.post<Object>(`/api/projects/${projectId}/interventions/${intervention.id}/deliveries`, body)
+      .catch((err: Object) => {
+        // 通知已经在本机完成/失败；回执上传失败不阻断提醒操作，下一次打开项目可重试。
+        console.warn('Notification delivery receipt upload failed:', JSON.stringify(err));
+      });
+  }
 
   async checkNotificationPermission(): Promise<boolean> {
     try {
@@ -71,12 +92,16 @@ export class NotificationService {
 
   async publishInterventionNotification(intervention: Intervention, projectId: string): Promise<NotificationOpResult> {
     if (intervention.severity < 4) {
-      return { success: false, status: 'SKIPPED_LOW_SEVERITY', message: '当前严重程度无需系统级即时打扰' };
+      const result: NotificationOpResult = { success: false, status: 'SKIPPED_LOW_SEVERITY', message: '当前严重程度无需系统级即时打扰' };
+      this.reportDelivery(intervention, projectId, result);
+      return result;
     }
 
     const hasPermission = await this.ensureNotificationPermission();
     if (!hasPermission) {
-      return { success: false, status: 'PERMISSION_DENIED', message: '通知权限未开启，无法发布系统通知' };
+      const result: NotificationOpResult = { success: false, status: 'PERMISSION_DENIED', message: '通知权限未开启，无法发布系统通知' };
+      this.reportDelivery(intervention, projectId, result);
+      return result;
     }
 
     const id = this.getNotificationId(intervention.id);
@@ -100,10 +125,14 @@ export class NotificationService {
       };
 
       await notificationManager.publish(notificationRequest);
-      return { success: true, status: 'PUBLISHED', message: '系统通知已发送' };
+      const result: NotificationOpResult = { success: true, status: 'PUBLISHED', message: '系统通知已发送' };
+      this.reportDelivery(intervention, projectId, result);
+      return result;
     } catch (err) {
       console.warn(`Failed to publish notification for ${intervention.id}:`, JSON.stringify(err));
-      return { success: false, status: 'FAILED', message: '系统通知发送失败' };
+      const result: NotificationOpResult = { success: false, status: 'FAILED', message: '系统通知发送失败' };
+      this.reportDelivery(intervention, projectId, result);
+      return result;
     }
   }
 
@@ -119,17 +148,23 @@ export class NotificationService {
     }
 
     if (intervention.severity < 4) {
-      return { success: false, status: 'SKIPPED_LOW_SEVERITY', message: '当前严重程度无需系统级定时打扰，已在工作台延期' };
+      const result: NotificationOpResult = { success: false, status: 'SKIPPED_LOW_SEVERITY', message: '当前严重程度无需系统级定时打扰，已在工作台延期' };
+      this.reportDelivery(intervention, projectId, result);
+      return result;
     }
 
     const hasPermission = await this.ensureNotificationPermission();
     if (!hasPermission) {
-      return { success: false, status: 'PERMISSION_DENIED', message: '通知权限未开启，无法安排系统定时提醒' };
+      const result: NotificationOpResult = { success: false, status: 'PERMISSION_DENIED', message: '通知权限未开启，无法安排系统定时提醒' };
+      this.reportDelivery(intervention, projectId, result);
+      return result;
     }
 
     // 当前运行环境未接入真机后台代理提醒（reminderAgentManager 依赖系统特权与后台代理常驻）；
     // 如实反馈调度状态，仅在工作台完成业务延期，杜绝虚报系统提醒已安排
-    return { success: false, status: 'UNSUPPORTED', message: '当前设备未接入系统代理定时提醒，已在工作台完成延期' };
+    const result: NotificationOpResult = { success: false, status: 'UNSUPPORTED', message: '当前设备未接入系统代理定时提醒，已在工作台完成延期' };
+    this.reportDelivery(intervention, projectId, result);
+    return result;
   }
 
   /**

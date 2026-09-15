@@ -15,6 +15,8 @@ export type DeadlineState = {
 export type ReadinessItem = {
   key: "requirement" | "experiment" | "closed_loop" | "competition_outline" | "defense_ppt" | "readme";
   label: string;
+  /** 未完成时的中性文案（如“待补参赛要求”），避免缺口区出现完成式表述 */
+  pendingLabel: string;
   complete: boolean;
   href: string;
   actionLabel: string;
@@ -88,12 +90,12 @@ export function buildCompetitionReadiness(input: {
   const realActions = input.actions.filter((action) => !action.isSimulated);
   const activeInterventions = input.interventions.filter((item) => !item.isSimulated && isInterventionActive(item, now));
   const items: ReadinessItem[] = [
-    { key: "requirement", label: "参赛要求已沉淀", complete: cardTypes.has("requirement"), href: `${projectPath}#capture-box`, actionLabel: "记录参赛要求" },
-    { key: "experiment", label: "实验记录已沉淀", complete: cardTypes.has("experiment_log"), href: `${projectPath}?cardType=experiment_log#knowledge-assets`, actionLabel: "补充实验记录" },
-    { key: "closed_loop", label: "已有行动复盘闭环", complete: realActions.some((action) => action.status === "DONE" && Boolean(action.resultCardId)), href: `${projectPath}#action-board`, actionLabel: "完成一项行动" },
-    { key: "competition_outline", label: "作品说明大纲", complete: artifactTypes.has("competition_outline"), href: `${projectPath}/generate?type=competition_outline`, actionLabel: "生成作品说明" },
-    { key: "defense_ppt", label: "答辩 PPT 大纲", complete: artifactTypes.has("defense_ppt"), href: `${projectPath}/generate?type=defense_ppt`, actionLabel: "生成 PPT 大纲" },
-    { key: "readme", label: "README 草稿", complete: artifactTypes.has("readme"), href: `${projectPath}/generate?type=readme`, actionLabel: "生成 README" },
+    { key: "requirement", label: "参赛要求已沉淀", pendingLabel: "待补参赛要求", complete: cardTypes.has("requirement"), href: `${projectPath}#capture-box`, actionLabel: "记录参赛要求" },
+    { key: "experiment", label: "实验记录已沉淀", pendingLabel: "待补实验记录", complete: cardTypes.has("experiment_log"), href: `${projectPath}?cardType=experiment_log#knowledge-assets`, actionLabel: "补充实验记录" },
+    { key: "closed_loop", label: "已有行动复盘闭环", pendingLabel: "待完成行动复盘闭环", complete: realActions.some((action) => action.status === "DONE" && Boolean(action.resultCardId)), href: `${projectPath}#action-board`, actionLabel: "完成一项行动" },
+    { key: "competition_outline", label: "作品说明大纲", pendingLabel: "待生成作品说明大纲", complete: artifactTypes.has("competition_outline"), href: `${projectPath}/generate?type=competition_outline`, actionLabel: "生成作品说明" },
+    { key: "defense_ppt", label: "答辩 PPT 大纲", pendingLabel: "待生成答辩 PPT 大纲", complete: artifactTypes.has("defense_ppt"), href: `${projectPath}/generate?type=defense_ppt`, actionLabel: "生成 PPT 大纲" },
+    { key: "readme", label: "README 草稿", pendingLabel: "待生成 README 草稿", complete: artifactTypes.has("readme"), href: `${projectPath}/generate?type=readme`, actionLabel: "生成 README" },
   ];
   const completed = items.filter((item) => item.complete).length;
   return {

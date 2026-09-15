@@ -8,6 +8,7 @@ import {
   loadTemporalProject,
   revokeTemporalRelation,
 } from "@/lib/repositories/temporalRelations";
+import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateService";
 import type {
   TemporalCardSummary,
   TemporalRelationData,
@@ -95,15 +96,21 @@ export async function getTemporalSearchStates(projectId: string, cardIds: string
 
 export async function proposeTemporalRelation(projectId: string, cardId: string, input: TemporalRelationProposalInput) {
   ensureEnabled();
-  return serializeTemporalRelation(await createTemporalRelationProposal(projectId, cardId, input));
+  const relation = serializeTemporalRelation(await createTemporalRelationProposal(projectId, cardId, input));
+  const stateRefreshPending = await refreshProjectStateAfterMutation(projectId);
+  return { ...relation, stateRefreshPending };
 }
 
 export async function confirmRelation(projectId: string, relationId: string) {
   ensureEnabled();
-  return serializeTemporalRelation(await confirmTemporalRelation(projectId, relationId));
+  const relation = serializeTemporalRelation(await confirmTemporalRelation(projectId, relationId));
+  await refreshProjectStateAfterMutation(projectId);
+  return relation;
 }
 
 export async function revokeRelation(projectId: string, relationId: string) {
   ensureEnabled();
-  return serializeTemporalRelation(await revokeTemporalRelation(projectId, relationId));
+  const relation = serializeTemporalRelation(await revokeTemporalRelation(projectId, relationId));
+  await refreshProjectStateAfterMutation(projectId);
+  return relation;
 }

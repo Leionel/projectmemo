@@ -221,20 +221,25 @@ describe("Memory lifecycle audit and archive (M1)", () => {
     expect(revisions[2].text).toContain("355");
     expect(revisions[3].text).toContain("360");
 
-    // 修订链：最新校对卡取代此前所有该附件的卡（含上一版校对卡）
+    // 线性修订链：新校对只取代当前前沿（上一版校对卡），不再对更早版本重复建边
     const supersedeCount = await db.cardRelation.count({
       where: { currentCardId: third.card!.id, relationType: "SUPERSEDES" },
     });
-    expect(supersedeCount).toBeGreaterThanOrEqual(2);
+    expect(supersedeCount).toBe(1);
     void first;
     void second;
 
-    // 旧提取对应的历史卡片被新校对取代，检索不再把旧值当当前值
+    // 连续修订后旧版本仍为 SUPERSEDED，不因多条取代边变成 CONFLICT
     const timeline = await getDecisionTimeline(projectId);
-    const supersededOld = timeline.items.find((item) => item.card.title.includes("原始机器提取") || item.card.title.includes("附件原始提取"));
-    if (supersededOld) {
-      expect(supersededOld.status).toBe("SUPERSEDED");
+    for (const item of timeline.items) {
+      if (item.card.id === first.card!.id || item.card.id === second.card!.id) {
+        expect(item.status).toBe("SUPERSEDED");
+        expect(item.supportState).toBe("SUPERSEDED");
+      }
     }
+    const chainIds = [first.card!.id, second.card!.id, third.card!.id];
+    const conflictedInChain = timeline.items.filter((item) => chainIds.includes(item.card.id) && item.status === "CONFLICT");
+    expect(conflictedInChain).toHaveLength(0);
   });
 
   it("replays an identical correction idempotently without new revisions", async () => {

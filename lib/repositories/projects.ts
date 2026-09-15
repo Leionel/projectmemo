@@ -3,6 +3,7 @@ import type { ProjectCreateInput, ProjectUpdateInput } from "@/lib/validation/sc
 import type { ProjectScenario } from "@/lib/generated/prisma/client";
 import { AppError } from "@/lib/api";
 import { buildProjectDashboard } from "@/lib/projectDashboard";
+import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateService";
 
 export async function listProjects() {
   const projects = await db.project.findMany({
@@ -42,7 +43,7 @@ export async function createProject(input: ProjectCreateInput) {
 
 export async function updateProject(projectId: string, input: ProjectUpdateInput) {
   await requireProject(projectId);
-  return db.project.update({
+  const updated = await db.project.update({
     where: { id: projectId },
     data: {
       ...(input.title !== undefined ? { title: input.title } : {}),
@@ -54,6 +55,8 @@ export async function updateProject(projectId: string, input: ProjectUpdateInput
         : {}),
     },
   });
+  const stateRefreshPending = await refreshProjectStateAfterMutation(projectId);
+  return { ...updated, stateRefreshPending };
 }
 
 export async function deleteProject(projectId: string) {

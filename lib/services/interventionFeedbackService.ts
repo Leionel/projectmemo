@@ -45,15 +45,26 @@ export async function recordFeedback(
   if (existing) {
     return { feedback: existing, created: false };
   }
-  const feedback = await db.interventionFeedback.create({
-    data: {
-      projectId,
-      interventionId,
-      feedbackType: input.feedbackType,
-      reason: normalizeReason(input.reason),
-    },
-  });
-  return { feedback, created: true };
+  try {
+    const feedback = await db.interventionFeedback.create({
+      data: {
+        projectId,
+        interventionId,
+        feedbackType: input.feedbackType,
+        reason: normalizeReason(input.reason),
+      },
+    });
+    return { feedback, created: true };
+  } catch (error) {
+    // 两个设备同时上报同一种反馈时，以数据库唯一约束为幂等闸门。
+    if (typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "P2002") {
+      const feedback = await db.interventionFeedback.findUnique({
+        where: { interventionId_feedbackType: { interventionId, feedbackType: input.feedbackType } },
+      });
+      if (feedback) return { feedback, created: false };
+    }
+    throw error;
+  }
 }
 
 export interface TopicFeedbackStats {
@@ -71,9 +82,18 @@ export async function topicFeedbackStats(projectId: string): Promise<TopicFeedba
       feedbackType: { in: ["IGNORED", "ACCEPTED"] },
     },
     include: { intervention: { select: { triggerType: true } } },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
   });
-  const stats = new Map<string, TopicFeedbackStats>();
+  // 同一提醒的相反反馈是一次修订，不是两次独立样本；只统计最近一条
+  // ACCEPTED/IGNORED，保留所有原始事件供审计。
+  const latestByIntervention = new Map<string, typeof feedbacks[number]>();
   for (const feedback of feedbacks) {
+    if (!latestByIntervention.has(feedback.interventionId)) {
+      latestByIntervention.set(feedback.interventionId, feedback);
+    }
+  }
+  const stats = new Map<string, TopicFeedbackStats>();
+  for (const feedback of latestByIntervention.values()) {
     const triggerType = String(feedback.intervention.triggerType);
     const entry = stats.get(triggerType) ?? { triggerType, ignoredCount: 0, acceptedCount: 0 };
     if (feedback.feedbackType === "IGNORED") entry.ignoredCount += 1;
@@ -88,24 +108,14 @@ export async function topicFeedbackStats(projectId: string): Promise<TopicFeedba
  * 提出一次「降低此类提醒频率」建议。阈值是产品默认，不是研究结论。
  */
 export async function computeSuggestion(projectId: string) {
-  const policy = await db.interventionPolicy.findUnique({ where: { scope: "GLOBAL" } });
-  const reduced = new Set(
-    Array.isArray(policy?.reducedTopics)
-      ? (policy?.reducedTopics as Array<{ triggerType?: string }>)
-          .map((item) => item?.triggerType)
-          .filter((item): item is string => typeof item === "string")
-      : [],
-  );
-  const suggestionState = (policy?.suggestionState && typeof policy.suggestionState === "object" && !Array.isArray(policy.suggestionState)
-    ? policy.suggestionState as Record<string, { suggestedAt?: string; dismissedAt?: string }>
-    : {}) as Record<string, { suggestedAt?: string; dismissedAt?: string }>;
+  const preferences = await db.interventionPreference.findMany({ where: { projectId } });
+  const preferenceByTopic = new Map(preferences.map((item) => [item.triggerType, item]));
 
   const stats = await topicFeedbackStats(projectId);
   const suggestions: Array<{ triggerType: string; ignoredCount: number; text: string }> = [];
   for (const stat of stats) {
-    if (reduced.has(stat.triggerType)) continue;
-    const state = suggestionState[stat.triggerType];
-    if (state?.dismissedAt) continue;
+    const preference = preferenceByTopic.get(stat.triggerType);
+    if (preference?.reducedSince || preference?.suggestionDismissedAt) continue;
     if (stat.ignoredCount >= 3 && stat.acceptedCount === 0) {
       suggestions.push({
         triggerType: stat.triggerType,
@@ -117,55 +127,73 @@ export async function computeSuggestion(projectId: string) {
   return suggestions;
 }
 
+export async function listProjectPreferences(projectId: string) {
+  const preferences = await db.interventionPreference.findMany({
+    where: { projectId, reducedSince: { not: null } },
+    orderBy: { triggerType: "asc" },
+  });
+  return preferences.map((item) => ({
+    triggerType: item.triggerType,
+    since: item.reducedSince?.toISOString() ?? null,
+  }));
+}
+
 export async function confirmSuggestion(projectId: string, triggerType: string) {
-  const policy = await db.interventionPolicy.findUnique({ where: { scope: "GLOBAL" } });
-  if (!policy) throw new AppError("POLICY_NOT_FOUND", "策略尚未初始化", 404);
-  const reduced = Array.isArray(policy.reducedTopics)
-    ? (policy.reducedTopics as Array<{ triggerType: string; since: string }>)
-    : [];
-  if (!reduced.some((item) => item.triggerType === triggerType)) {
-    reduced.push({ triggerType, since: new Date().toISOString() });
-  }
-  const state = (policy.suggestionState && typeof policy.suggestionState === "object" && !Array.isArray(policy.suggestionState)
-    ? policy.suggestionState as Record<string, unknown>
-    : {}) as Record<string, unknown>;
-  delete state[triggerType];
-  return db.interventionPolicy.update({
-    where: { id: policy.id },
-    data: {
-      reducedTopics: reduced as unknown as Prisma.InputJsonValue,
-      suggestionState: state as unknown as Prisma.InputJsonValue,
-      version: { increment: 1 },
-    },
+  const now = new Date();
+  return db.$transaction(async (tx) => {
+    const project = await tx.project.findUnique({ where: { id: projectId }, select: { id: true } });
+    if (!project) throw new AppError("PROJECT_NOT_FOUND", "没有找到这个项目", 404);
+    // 在同一事务内读取并合并旧 JSON，避免两个项目同时确认不同主题时互相覆盖。
+    const policy = await tx.interventionPolicy.findUnique({ where: { scope: "GLOBAL" } });
+    if (!policy) throw new AppError("POLICY_NOT_FOUND", "策略尚未初始化", 404);
+    const reduced = Array.isArray(policy.reducedTopics)
+      ? (policy.reducedTopics as Array<{ triggerType: string; projectId?: string; since: string }>)
+      : [];
+    if (!reduced.some((item) => item.triggerType === triggerType && item.projectId === projectId)) {
+      reduced.push({ triggerType, projectId, since: now.toISOString() });
+    }
+    await tx.interventionPreference.upsert({
+      where: { projectId_triggerType: { projectId, triggerType } },
+      create: { projectId, triggerType, reducedSince: now, suggestionDismissedAt: null },
+      update: { reducedSince: now, suggestionDismissedAt: null },
+    });
+    await tx.interventionPolicy.update({
+      where: { id: policy.id },
+      data: { reducedTopics: reduced as unknown as Prisma.InputJsonValue, version: { increment: 1 } },
+    });
+    return tx.interventionPolicy.findUniqueOrThrow({ where: { id: policy.id } });
   });
 }
 
 export async function dismissSuggestion(projectId: string, triggerType: string) {
-  const policy = await db.interventionPolicy.findUnique({ where: { scope: "GLOBAL" } });
-  if (!policy) throw new AppError("POLICY_NOT_FOUND", "策略尚未初始化", 404);
-  const state = (policy.suggestionState && typeof policy.suggestionState === "object" && !Array.isArray(policy.suggestionState)
-    ? policy.suggestionState as Record<string, unknown>
-    : {}) as Record<string, unknown>;
-  state[triggerType] = { dismissedAt: new Date().toISOString() };
-  return db.interventionPolicy.update({
-    where: { id: policy.id },
-    data: { suggestionState: state as unknown as Prisma.InputJsonValue },
+  const project = await db.project.findUnique({ where: { id: projectId }, select: { id: true } });
+  if (!project) throw new AppError("PROJECT_NOT_FOUND", "没有找到这个项目", 404);
+  return db.interventionPreference.upsert({
+    where: { projectId_triggerType: { projectId, triggerType } },
+    create: { projectId, triggerType, suggestionDismissedAt: new Date() },
+    update: { suggestionDismissedAt: new Date() },
   });
 }
 
 /** 撤销降频：延期是时间偏好，单次忽略不永久屏蔽；恢复后新证据仍会重新评估 */
 export async function revertTopicReduction(projectId: string, triggerType: string) {
-  const policy = await db.interventionPolicy.findUnique({ where: { scope: "GLOBAL" } });
-  if (!policy) throw new AppError("POLICY_NOT_FOUND", "策略尚未初始化", 404);
-  const reduced = Array.isArray(policy.reducedTopics)
-    ? (policy.reducedTopics as Array<{ triggerType: string; since: string }>)
-        .filter((item) => item.triggerType !== triggerType)
-    : [];
-  return db.interventionPolicy.update({
-    where: { id: policy.id },
-    data: {
-      reducedTopics: reduced as unknown as Prisma.InputJsonValue,
-      version: { increment: 1 },
-    },
+  return db.$transaction(async (tx) => {
+    const project = await tx.project.findUnique({ where: { id: projectId }, select: { id: true } });
+    if (!project) throw new AppError("PROJECT_NOT_FOUND", "没有找到这个项目", 404);
+    const policy = await tx.interventionPolicy.findUnique({ where: { scope: "GLOBAL" } });
+    if (!policy) throw new AppError("POLICY_NOT_FOUND", "策略尚未初始化", 404);
+    const reduced = Array.isArray(policy.reducedTopics)
+      ? (policy.reducedTopics as Array<{ triggerType: string; projectId?: string; since: string }>)
+          .filter((item) => item.triggerType !== triggerType || item.projectId !== projectId)
+      : [];
+    await tx.interventionPreference.updateMany({
+      where: { projectId, triggerType },
+      data: { reducedSince: null },
+    });
+    await tx.interventionPolicy.update({
+      where: { id: policy.id },
+      data: { reducedTopics: reduced as unknown as Prisma.InputJsonValue, version: { increment: 1 } },
+    });
+    return tx.interventionPolicy.findUniqueOrThrow({ where: { id: policy.id } });
   });
 }

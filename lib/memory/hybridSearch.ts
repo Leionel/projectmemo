@@ -186,6 +186,15 @@ export async function searchProjectCards(options: HybridSearchOptions): Promise<
       createdAt: card.createdAt.toISOString(),
       current: temporal?.current ?? true,
       supportState: temporal?.supportState ?? "INSUFFICIENT",
+      topLevelState: temporal?.topLevelState ?? "UNKNOWN",
+      reasonCode: temporal?.reasonCode ?? "NO_SUPPORTING_EVIDENCE",
+      displayReason: temporal?.displayReason ?? "尚无足够的时态关系证据，当前结论保持未知。",
+      evidenceRefs: temporal?.evidenceRefs ?? [{
+        entityKind: "card",
+        entityId: card.id,
+        field: "title+summary",
+        observedAt: card.createdAt.toISOString(),
+      }],
       supersededBy: temporal?.supersededBy ?? null,
       temporalReason: temporal?.temporalReason ?? null,
     });

@@ -46,6 +46,16 @@ export class StateSnapshot {
   payload: StatePayload = new StatePayload();
 }
 
+export class StateFreshness {
+  projectId: string = '';
+  status: string = 'EMPTY';
+  snapshotId: string | null = null;
+  errorCode: string | null = null;
+  errorMessage: string | null = null;
+  attemptedAt: string | null = null;
+  refreshedAt: string | null = null;
+}
+
 export class StateDiffItem {
   changeKey: string = '';
   kind: string = 'CHANGED';
@@ -66,14 +76,16 @@ export class StateDiff {
 
 export class StateSnapshotResponse {
   status: string = 'EMPTY';
-  snapshot: StateSnapshot = new StateSnapshot();
+  snapshot: StateSnapshot | null = null;
+  freshness: StateFreshness = new StateFreshness();
 }
 
 export class StateRefreshResponse {
   status: string = 'OK';
-  snapshot: StateSnapshot = new StateSnapshot();
+  snapshot: StateSnapshot | null = null;
   changed: boolean = false;
   reused: boolean = false;
+  freshness: StateFreshness = new StateFreshness();
 }
 
 export class StateDiffResponse {
@@ -96,6 +108,9 @@ export class StateCheckInResponse {
 export class BriefEvidence {
   entityKind: string = 'card';
   entityId: string = '';
+  field: string = '';
+  observedAt: string = '';
+  contentHash: string = '';
 }
 
 export class BriefSentence {

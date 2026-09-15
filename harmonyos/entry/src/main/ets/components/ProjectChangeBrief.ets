@@ -8,7 +8,7 @@ export struct ProjectChangeBrief {
   @Prop brief: ChangeBrief = new ChangeBrief();
   onClose: () => void = () => {};
   onGoActions: () => void = () => {};
-  onOpenEvidence: (entityKind: string) => void = (_kind: string) => {};
+  onOpenEvidence: (entityKind: string, entityId: string) => void = (_kind: string, _id: string) => {};
 
   private kindGlyph(kind: string): string {
     if (kind === 'ADDED') return '＋';
@@ -62,7 +62,7 @@ export struct ProjectChangeBrief {
       if (sentence.evidence.length > 0) {
         Row({ space: PMSpacing.XS }) {
           ForEach(sentence.evidence.slice(0, 3), (ref: BriefEvidence) => {
-            Text(`📎 ${ref.entityKind === 'card' ? '记忆' : ref.entityKind === 'action' ? '行动' : ref.entityKind === 'deliverable' ? '交付物' : ref.entityKind}`)
+            Text(`📎 ${ref.entityKind === 'card' ? '记忆' : ref.entityKind === 'action' ? '行动' : ref.entityKind === 'deliverable' ? '交付物' : ref.entityKind} · ${ref.field !== '' ? ref.field : '版本证据'}`)
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.BRAND)
               .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 2, bottom: 2 })
@@ -70,9 +70,9 @@ export struct ProjectChangeBrief {
               .borderRadius(PMRadius.XS)
               .clickEffect(PMInteraction.PRESS_EFFECT)
               .onClick(() => {
-                this.onOpenEvidence(ref.entityKind);
+                this.onOpenEvidence(ref.entityKind, ref.entityId);
               })
-              .accessibilityText(`打开${ref.entityKind}类证据`)
+              .accessibilityText(`打开${ref.entityKind}类证据，观察时间${ref.observedAt}`)
           }, (ref: BriefEvidence) => ref.entityId)
           if (sentence.evidence.length > 3) {
             Text(`+${sentence.evidence.length - 3}`)

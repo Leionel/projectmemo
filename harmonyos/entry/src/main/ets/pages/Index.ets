@@ -1,7 +1,7 @@
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
 import { Project, ApiError, ProjectCreateInput } from '../models/Project';
-import { ProjectDetail, KnowledgeCard } from '../models/Memory';
+import { ProjectDetail, KnowledgeCard, CardTemporalStatus } from '../models/Memory';
 import { Intervention } from '../models/Intervention';
 import { ActionItem } from '../models/Action';
 import { SettingsResponse, UpdateSettingsInput, ProbeInput, ProbeResponse } from '../models/Settings';
@@ -45,6 +45,7 @@ struct Index {
 
   // Tab 1: 记忆专属
   @State globalMemorySearchQuery: string = '';
+  @State globalCardStates: CardTemporalStatus[] = [];
   @State selectedGlobalType: string = 'all';
 
   // Tab 3: 设置专属状态
@@ -221,6 +222,27 @@ struct Index {
       this.allInterventions = intervs;
       this.allActions = acts;
       this.allCards = cards;
+      // 时态状态：区分 当前有效 / 已取代 / 存在冲突 / 待确认，不删除历史
+      const statuses: CardTemporalStatus[] = [];
+      for (const p of this.projects) {
+        try {
+          const timeline = await this.memoryService.getDecisionTimeline(p.id);
+          for (const item of timeline.items) {
+            const st = new CardTemporalStatus();
+            st.cardId = item.card.id;
+            st.supportState = item.supportState;
+            st.topLevelState = item.topLevelState;
+            st.reasonCode = item.reasonCode;
+            st.displayReason = item.displayReason;
+            st.statusLabel = item.statusLabel;
+            st.supersededByTitle = item.supersededBy !== null ? item.supersededBy.title : '';
+            statuses.push(st);
+          }
+        } catch (_e) {
+          // 单项目时态状态拉取失败不影响列表
+        }
+      }
+      this.globalCardStates = statuses;
       if (failedCount > 0) {
         this.dataSyncState = `部分同步 (${this.projects.length - failedCount}/${this.projects.length})`;
       } else {
@@ -469,6 +491,7 @@ struct Index {
     }
     .layoutWeight(1)
     .transition(PMTransition.CONTENT_ENTER)
+    .align(Alignment.Top)
     .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
   }
 
@@ -784,6 +807,7 @@ struct Index {
     }
     .layoutWeight(1)
     .transition(PMTransition.CONTENT_ENTER)
+    .align(Alignment.Top)
     .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
   }
 
@@ -908,7 +932,18 @@ struct Index {
                   .margin({ top: PMSpacing.XS })
               } else {
                 Row() {
-                  MemoryTypeBadge({ type: card.type })
+                  Row({ space: PMSpacing.XS }) {
+                    MemoryTypeBadge({ type: card.type })
+                    if (this.cardStatus(card.id) !== null) {
+                      Text(this.cardStatus(card.id)!.statusLabel)
+                        .fontSize(PMFontSize.CAPTION)
+                        .fontColor(this.statusColor(this.cardStatus(card.id)!.topLevelState))
+                        .padding({ left: 6, right: 6, top: 2, bottom: 2 })
+                        .backgroundColor(PMColors.SURFACE_SUBTLE)
+                        .borderRadius(PMRadius.XS)
+                        .accessibilityText(`记忆状态：${this.cardStatus(card.id)!.statusLabel}`)
+                    }
+                  }
                   Text(card.createdAt.length >= 10 ? card.createdAt.substring(0, 10) : card.createdAt)
                     .fontSize(PMFontSize.CAPTION)
                     .fontColor(PMColors.INK_TERTIARY)
@@ -977,7 +1012,24 @@ struct Index {
     }
     .layoutWeight(1)
     .transition(PMTransition.CONTENT_ENTER)
+    .align(Alignment.Top)
     .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
+  }
+
+  private cardStatus(cardId: string): CardTemporalStatus | null {
+    for (let i = 0; i < this.globalCardStates.length; i++) {
+      if (this.globalCardStates[i].cardId === cardId) {
+        return this.globalCardStates[i];
+      }
+    }
+    return null;
+  }
+
+  private statusColor(state: string): ResourceColor {
+    if (state === 'SUPERSEDED') return PMColors.INK_TERTIARY;
+    if (state === 'CONTESTED' || state === 'CONFLICT' || state === 'PENDING') return PMColors.RISK;
+    if (state === 'UNKNOWN' || state === 'INSUFFICIENT' || state === 'REVOKED') return PMColors.EVIDENCE;
+    return PMColors.SUCCESS;
   }
 
   private getFilteredGlobalCards(): KnowledgeCard[] {
@@ -1175,6 +1227,7 @@ struct Index {
     }
     .layoutWeight(1)
     .transition(PMTransition.CONTENT_ENTER)
+    .align(Alignment.Top)
     .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
     .bindSheet($$this.showSettingsSheet, this.ApiSheet(), {
       height: SheetSize.FIT_CONTENT,
@@ -1342,7 +1395,7 @@ struct Index {
                 .fontSize(PMFontSize.BODY)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.MEMORY)
-              Text('无需配置网络、模型地址或 API 密钥；结果会按本地规则生成并可复核。')
+              Text('无需配置模型 API 或密钥；仍需连接项目服务端读写数据，结果按本地规则生成并可复核。')
                 .fontSize(PMFontSize.SECONDARY)
                 .fontColor(PMColors.INK_SECONDARY)
                 .lineHeight(20)

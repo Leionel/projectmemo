@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 
 /**
  * 应用内曝光批量上报。近似口径（明确记录）：提醒列表加载即计一次曝光，
- * 按 interventionId 幂等去重；系统通知从未涉及，不存在"送达"语义。
+ * 按 interventionId 幂等去重；系统通知发布回执走独立 deliveries 路由。
  */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -26,12 +26,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     let exposed = 0;
     let duplicates = 0;
+    const confirmedIds: string[] = [];
     for (const interventionId of ids) {
       const intervention = await db.agentIntervention.findFirst({
         where: { id: interventionId, projectId: id },
       });
       if (!intervention) {
-        // 不属于当前项目的提醒直接忽略，不报错打断批量上报
+        // 不属于当前项目的提醒直接忽略（不确认为已上报，客户端保留待重试）
         continue;
       }
       const result = await recordFeedback(id, interventionId, { feedbackType: "EXPOSED" });
@@ -40,8 +41,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       } else {
         duplicates += 1;
       }
+      confirmedIds.push(interventionId);
     }
-    return Response.json({ exposed, duplicates, installationId });
+    return Response.json({ exposed, duplicates, confirmedIds, installationId });
   } catch (error) {
     return apiError(error);
   }

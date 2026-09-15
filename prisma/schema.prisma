@@ -103,7 +103,9 @@ model Project {
   lifecycleEvents MemoryLifecycleEvent[]
   stateSnapshots  ProjectStateSnapshot[]
   stateCursors    ProjectStateCursor[]
+  stateFreshness  ProjectStateFreshness?
   interventionDecisions InterventionDecision[]
+  interventionPreferences InterventionPreference[]
   artifacts   GeneratedArtifact[]
   interventions AgentIntervention[]
   actions     ActionItem[]
@@ -120,11 +122,15 @@ model Capture {
   projectId  String
   rawText    String
   sourceType String?
+  // 同一项目内的客户端提交身份；NULL 保持旧客户端兼容。
+  requestId  String?
+  requestHash String?
   createdAt  DateTime      @default(now())
   project    Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
   card       KnowledgeCard?
 
   @@index([projectId, createdAt])
+  @@unique([projectId, requestId])
 }
 
 model KnowledgeCard {
@@ -232,6 +238,7 @@ model AgentIntervention {
   project         Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
   evidenceCard    KnowledgeCard?      @relation("InterventionEvidence", fields: [evidenceCardId], references: [id], onDelete: SetNull)
   feedbacks       InterventionFeedback[]
+  deliveries      InterventionDelivery[]
   actions         ActionItem[]        @relation("InterventionActions")
 
   @@unique([projectId, dedupeKey])
@@ -244,12 +251,16 @@ model ActionItem {
   projectId            String
   sourceInterventionId String?
   sourceCardId         String?
+  // 同一主动提醒/提案的解阻操作幂等键；普通手工行动保持 NULL。
+  dedupeKey            String?              @unique
   resultCardId         String?              @unique
   title                String
   description          String?
   priority             Int                  @default(3)
   status               ActionStatus         @default(TODO)
   estimatedMinutes     Int?
+  // 依赖/估时编辑的持久化乐观版本；旧客户端不传时保持兼容。
+  dependencyVersion    Int                  @default(1)
   requirements         ActionRequirement[]
   dueAt                DateTime?
   resultText           String?
@@ -278,6 +289,8 @@ model AgentRun {
   resultJson     Json?
   fallbackReason String?
   durationMs     Int?
+  // 会议提案的唯一执行权。普通 CAPTURE 回执保持 NULL。
+  confirmedAt    DateTime?
   createdAt      DateTime        @default(now())
   project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
   messages       AgentMessage[]
@@ -413,6 +426,22 @@ model ProjectStateCursor {
   @@unique([projectId, consumerKey])
 }
 
+/// 状态刷新尝试的持久化新鲜度。刷新失败时保留上一快照并标记 STALE/FAILED，
+/// 不能让客户端把错误当成新的 0% 状态。
+model ProjectStateFreshness {
+  id            String   @id @default(cuid())
+  projectId     String   @unique
+  status        String   @default("STALE") // EMPTY | FRESH | STALE | FAILED
+  snapshotId    String?
+  errorCode     String?
+  errorMessage  String?
+  attemptedAt   DateTime?
+  refreshedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
 /// B1：干预策略。V1 为单用户部署范围的全局共享预算（scope=GLOBAL），不是每项目独立预算。
 model InterventionPolicy {
   id               String   @id @default(cuid())
@@ -429,6 +458,39 @@ model InterventionPolicy {
   suggestionState  Json?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+}
+
+/// 全局预算的原子扣减行；windowStart/windowEnd 允许时区切换时复用仍重叠的自然日窗口。
+model InterventionBudgetLedger {
+  id            String   @id @default(cuid())
+  scope         String
+  windowKey     String
+  windowStartAt DateTime
+  windowEndAt   DateTime
+  timezone      String
+  localDate     String
+  dailyBudget   Int
+  usedCount     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([scope, windowKey])
+  @@index([scope, windowStartAt, windowEndAt])
+}
+
+/// 降频/建议是项目主题偏好，不能落在全局策略 JSON 中影响其他项目。
+model InterventionPreference {
+  id                   String   @id @default(cuid())
+  projectId            String
+  triggerType          String
+  reducedSince         DateTime?
+  suggestionDismissedAt DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  project              Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, triggerType])
+  @@index([projectId, reducedSince])
 }
 
 /// 干预决策日志：FIRE/SUPPRESS 及原因。生成(应用内)、曝光、送达分开记录，未验证送达不宣称收到。
@@ -463,6 +525,25 @@ model InterventionFeedback {
 
   @@unique([interventionId, feedbackType])
   @@index([projectId, createdAt])
+}
+
+/// 系统通知通道的发布回执，与应用内曝光和用户反馈分开；PUBLISHED 只表示系统 API 接受发布，不冒充用户已看到。
+model InterventionDelivery {
+  id             String            @id @default(cuid())
+  interventionId String
+  projectId      String
+  channel        String
+  deliveryKey    String
+  status         String
+  message        String?
+  attemptedAt    DateTime          @default(now())
+  publishedAt    DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  intervention   AgentIntervention @relation(fields: [interventionId], references: [id], onDelete: Cascade)
+
+  @@unique([interventionId, channel, deliveryKey])
+  @@index([projectId, attemptedAt])
 }
 
 model Milestone {

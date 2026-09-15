@@ -5,7 +5,8 @@ import {
   StateDiffResponse,
   StateRefreshResponse,
   StateSnapshot,
-  StateUnknown
+  StateUnknown,
+  StateFreshness
 } from '../models/ProjectState';
 import { ApiError } from '../models/Project';
 import { ProjectStateService } from '../services/ProjectStateService';
@@ -16,6 +17,7 @@ export struct ProjectStatePanel {
   @State private phase: string = 'loading'; // loading | error | empty | ready
   @State private errorMessage: string = '';
   @State private snapshot: StateSnapshot = new StateSnapshot();
+  @State private freshness: StateFreshness = new StateFreshness();
   @State private diff: StateDiff = new StateDiff();
   @State private isRefreshing: boolean = false;
   @State private isMarkingRead: boolean = false;
@@ -43,7 +45,16 @@ export struct ProjectStatePanel {
     try {
       // 进入项目显式刷新再读取（§5.3）：业务写入后状态刷新失败时，这里做崩溃补偿
       const refresh: StateRefreshResponse = await this.stateService.refresh(this.projectId);
+      this.freshness = refresh.freshness;
+      if (refresh.snapshot === null) {
+        this.errorMessage = refresh.freshness.errorMessage ?? '还没有可展示的状态快照，请稍后重试';
+        this.phase = 'error';
+        return;
+      }
       this.snapshot = refresh.snapshot;
+      if (refresh.status === 'STALE' || refresh.freshness.status === 'FAILED') {
+        this.baselineMessage = refresh.freshness.errorMessage ?? '状态刷新失败，当前展示上一份快照；可稍后重试。';
+      }
       if (refresh.status === 'BASELINE_CREATED') {
         this.baselineMessage = '这是第一份状态记录，后续变化都会与它对比。';
       }
@@ -79,7 +90,16 @@ export struct ProjectStatePanel {
     this.isRefreshing = true;
     try {
       const response: StateRefreshResponse = await this.stateService.refresh(this.projectId);
+      this.freshness = response.freshness;
+      if (response.snapshot === null) {
+        this.errorMessage = response.freshness.errorMessage ?? '还没有可展示的状态快照，请稍后重试';
+        this.phase = 'error';
+        return;
+      }
       this.snapshot = response.snapshot;
+      if (response.status === 'STALE' || response.freshness.status === 'FAILED') {
+        this.baselineMessage = response.freshness.errorMessage ?? '状态刷新失败，当前展示上一份快照；可稍后重试。';
+      }
       if (response.status === 'BASELINE_CREATED') {
         this.baselineMessage = '这是第一份状态记录，后续变化都会与它对比。';
       }
@@ -254,6 +274,13 @@ export struct ProjectStatePanel {
         .margin({ top: PMSpacing.MD })
       } else {
         // ready：本次变化 → 风险/未知 → 建议下一步 → 操作
+        if (this.freshness.status === 'STALE' || this.freshness.status === 'FAILED') {
+          Text('⚠ 当前快照不是最新评估结果，系统保留了上一份状态；刷新成功后再更新。')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.RISK)
+            .lineHeight(18)
+            .margin({ top: PMSpacing.SM })
+        }
         if (this.baselineMessage !== '') {
           Text(this.baselineMessage)
             .fontSize(PMFontSize.CAPTION)

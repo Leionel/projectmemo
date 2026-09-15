@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { POST as postCapture } from "@/app/api/projects/[id]/captures/route";
+import { getLatestProjectState, getProjectStateFreshness } from "@/lib/services/projectStateService";
 
 process.env.LLM_MODE = "mock";
 
@@ -125,5 +126,22 @@ describe.sequential("ProjectMemo phase 1 capture reliability", () => {
     expect(second.status).toBe(201);
     expect(await db.capture.count({ where: { requestId } })).toBe(2);
     expect(await db.knowledgeCard.count({ where: { projectId: otherProjectId } })).toBe(1);
+  });
+
+  it("事实保存成功后触发状态快照刷新，不把派生刷新失败当成重复建卡理由", async () => {
+    const previous = process.env.PROJECT_STATE_ENABLED;
+    process.env.PROJECT_STATE_ENABLED = "1";
+    try {
+      const response = await request("phase1-capture-state-refresh-001", "保存后刷新：普通记录应进入状态快照评估。" );
+      expect(response.status).toBe(201);
+      const freshness = await getProjectStateFreshness(projectId);
+      const latest = await getLatestProjectState(projectId);
+      expect(freshness.status).toBe("FRESH");
+      expect(freshness.snapshotId).toBe(latest?.id);
+      expect(latest?.projectId).toBe(projectId);
+    } finally {
+      if (previous === undefined) delete process.env.PROJECT_STATE_ENABLED;
+      else process.env.PROJECT_STATE_ENABLED = previous;
+    }
   });
 });

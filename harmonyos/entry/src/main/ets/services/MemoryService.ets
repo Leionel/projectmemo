@@ -1,6 +1,7 @@
 import { ApiClient } from './ApiClient';
 import {
   KnowledgeCard,
+  ArchivedCardsResponse,
   ProjectDetailResponse,
   CaptureResponse,
   CaptureInput,
@@ -13,16 +14,23 @@ import {
 export class MemoryService {
   private client: ApiClient = new ApiClient();
 
+  async archivedCards(projectId: string): Promise<ArchivedCardsResponse> {
+    return this.client.get<ArchivedCardsResponse>(`/api/projects/${projectId}/cards/archived`);
+  }
+
   async getTimeline(projectId: string): Promise<KnowledgeCard[]> {
     const response: ProjectDetailResponse = await this.client.get<ProjectDetailResponse>(`/api/projects/${projectId}`);
     return response.project.cards;
   }
 
-  async capture(projectId: string, rawText: string, sourceType?: string): Promise<KnowledgeCard> {
+  async capture(projectId: string, rawText: string, sourceType?: string, requestId?: string): Promise<KnowledgeCard> {
     const input: CaptureInput = new CaptureInput();
     input.rawText = rawText;
     if (sourceType !== undefined && sourceType !== '') {
       input.sourceType = sourceType;
+    }
+    if (requestId !== undefined && requestId !== '') {
+      input.requestId = requestId;
     }
     const response: CaptureResponse = await this.client.post<CaptureResponse>(
       `/api/projects/${projectId}/captures`,
@@ -46,7 +54,15 @@ export class MemoryService {
       scoreMap.set(r.cardId, r.score);
     }
 
-    return detail.filter((c) => scoreMap.has(c.id)).sort((a, b) => (scoreMap.get(b.id) ?? 0) - (scoreMap.get(a.id) ?? 0));
+    return detail.filter((c) => scoreMap.has(c.id)).sort((a, b) => (scoreMap.get(b.id) ?? 0) - (scoreMap.get(a.id) ?? 0)).map((card: KnowledgeCard) => {
+      const result = res.results.find((item) => item.cardId === card.id);
+      if (result !== undefined) {
+        card.topLevelState = result.topLevelState;
+        card.reasonCode = result.reasonCode;
+        card.displayReason = result.displayReason;
+      }
+      return card;
+    });
   }
 
   async getDecisionTimeline(projectId: string): Promise<TemporalTimelineResponse> {

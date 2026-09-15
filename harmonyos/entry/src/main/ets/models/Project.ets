@@ -8,6 +8,7 @@ export class DeadlineState {
 export class ReadinessItem {
   key: string = '';
   label: string = '';
+  pendingLabel: string = '';
   complete: boolean = false;
   href: string = '';
   actionLabel: string = '';

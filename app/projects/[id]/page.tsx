@@ -14,6 +14,7 @@ import { AppError } from "@/lib/api";
 import { evaluateProjectContext } from "@/lib/services/agentContextService";
 import { getProjectMetrics, listActions, listInterventions } from "@/lib/repositories/agent";
 import { getProjectDetail } from "@/lib/repositories/projects";
+import { getDecisionTimeline } from "@/lib/services/temporalLedgerService";
 import { scenarioOptions, getScenarioColor, type ActionItemData, type AgentEvidence, type InterventionData, type ProposedAction, type ProjectMetrics } from "@/lib/types";
 import { buildProjectDashboard } from "@/lib/projectDashboard";
 
@@ -30,7 +31,20 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     if (error instanceof AppError && error.code === "PROJECT_NOT_FOUND") notFound();
     throw error;
   }
-  const [actions, metrics] = await Promise.all([listActions(id), getProjectMetrics(id)]);
+  const [actions, metrics, temporalTimeline] = await Promise.all([listActions(id), getProjectMetrics(id), getDecisionTimeline(id)]);
+  const temporalById = new Map(temporalTimeline.items.map((item) => [item.card.id, item]));
+  const knowledgeCards = project.cards.map((card) => {
+    const temporal = temporalById.get(card.id);
+    return {
+      ...card,
+      temporal: temporal ? {
+        topLevelState: temporal.topLevelState,
+        reasonCode: temporal.reasonCode,
+        displayReason: temporal.displayReason,
+        evidenceRefs: temporal.evidenceRefs,
+      } : undefined,
+    };
+  });
   const scenario = scenarioOptions.find((item) => item.value === project.scenario)?.label ?? project.scenario;
   const initialInterventions = await listInterventions(id, true);
   const interventionData = initialInterventions.map(toInterventionData);
@@ -88,7 +102,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     <div className="mt-9 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
       <div className="min-w-0 space-y-8">
         <ActionBoard projectId={id} initialActions={actionData} />
-        <KnowledgeFeed projectId={id} cards={project.cards} />
+        <KnowledgeFeed projectId={id} cards={knowledgeCards} />
         <CompetitionReadiness readiness={dashboard.readiness} />
         <MemoryCopilot projectId={id} />
       </div>

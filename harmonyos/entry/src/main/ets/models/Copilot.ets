@@ -6,6 +6,9 @@ export class AgentCitation {
   excerpt: string = '';
   current: boolean | undefined = undefined;
   supportState: string | undefined = undefined;
+  topLevelState: string | undefined = undefined;
+  reasonCode: string | undefined = undefined;
+  displayReason: string | undefined = undefined;
   temporalReason: string | undefined = undefined;
 }
 

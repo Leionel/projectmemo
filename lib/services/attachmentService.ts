@@ -14,6 +14,7 @@ import { KeywordVectorStore } from "@/lib/memory/vectorStore";
 import { ensureCardEmbedding } from "@/lib/repositories/embeddings";
 import { recordLifecycleEventInTx } from "@/lib/services/memoryLifecycleService";
 import { isFeatureEnabled } from "@/lib/config/features";
+import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateService";
 import { spawn } from "node:child_process";
 
 export interface UploadAttachmentInput {
@@ -327,7 +328,8 @@ export async function retryAttachmentExtraction(projectId: string, attachmentId:
 export async function correctAttachmentText(
   projectId: string,
   attachmentId: string,
-  correctedText: string
+  correctedText: string,
+  expectedCurrentText?: string
 ) {
   await requireProject(projectId);
   const trimmed = correctedText.trim();
@@ -346,6 +348,11 @@ export async function correctAttachmentText(
       orderBy: { createdAt: "desc" },
     });
     return { attachment: existing, card: reusedCard ?? existing.cards[0] ?? null, idempotentReplay: true };
+  }
+  // 原版本校验：调用方基于旧文本编辑时，若服务端文本已变化则要求重载，避免并发纠错覆盖
+  if (expectedCurrentText !== undefined && expectedCurrentText !== null &&
+      existing.extractedText !== null && existing.extractedText !== expectedCurrentText) {
+    throw new AppError("ATTACHMENT_TEXT_CHANGED", "附件文本已被其他校对修改，请重新载入后再提交", 409);
   }
 
   // 结构化生成在事务外（与普通捕获同一结构化管线，离线时回退确定性模板）
@@ -376,9 +383,21 @@ export async function correctAttachmentText(
       tx as unknown as Parameters<typeof saveCaptureResult>[1],
     );
 
-    // 对该附件关联的历史卡片建立 SUPERSEDES 取代关系（方向固定为新校对取代旧提取）
+    // 对该附件仍处于前沿的卡片建立 SUPERSEDES（跳过已被取代的旧版）：
+    // 350→355→360 形成线性链 300←355←360，避免多前置 superseder 触发伪 CONFLICT
     for (const oldCard of existing.cards) {
       if (oldCard.id !== card.id) {
+        const activeSuperseders = await tx.cardRelation.count({
+          where: {
+            relationType: "SUPERSEDES",
+            confirmed: true,
+            revokedAt: null,
+            relatedCardId: oldCard.id,
+          },
+        });
+        if (activeSuperseders > 0) {
+          continue;
+        }
         const relation = await tx.cardRelation.create({
           data: {
             currentCardId: card.id,
@@ -436,5 +455,6 @@ export async function correctAttachmentText(
     console.warn("Correction card indexing failed; backfill can retry", error);
   }
 
-  return { attachment: result.attachment, card: result.card, idempotentReplay: false };
+  const stateRefreshPending = await refreshProjectStateAfterMutation(projectId);
+  return { attachment: result.attachment, card: result.card, idempotentReplay: false, stateRefreshPending };
 }

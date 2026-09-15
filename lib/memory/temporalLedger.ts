@@ -2,7 +2,9 @@ import type {
   TemporalCardSummary,
   TemporalDecisionItem,
   TemporalDecisionStatus,
+  TemporalEvidenceRef,
   TemporalRelationData,
+  TemporalTopLevelState,
   TemporalSupportState,
 } from "@/lib/types";
 
@@ -41,6 +43,53 @@ function newest(relations: TemporalRelationData[]): TemporalRelationData | null 
     const bTime = time(b.confirmedAt) ?? time(b.createdAt) ?? 0;
     return bTime - aTime;
   })[0] ?? null;
+}
+
+function displayReasonFor(
+  status: TemporalDecisionStatus,
+  relation: TemporalRelationData | null,
+): { topLevelState: TemporalTopLevelState; reasonCode: string; displayReason: string } {
+  const supplied = relation?.reason?.trim();
+  if (status === "CURRENT") {
+    return {
+      topLevelState: "CURRENT",
+      reasonCode: "ACTIVE_SUPPORT",
+      displayReason: supplied || "存在已确认且仍在有效期内的支持关系。",
+    };
+  }
+  if (status === "SUPERSEDED") {
+    return {
+      topLevelState: "SUPERSEDED",
+      reasonCode: "SUPERSEDED_BY_CONFIRMED_RELATION",
+      displayReason: supplied || "该事实已被已确认的新事实取代。",
+    };
+  }
+  if (status === "CONFLICT") {
+    return {
+      topLevelState: "CONTESTED",
+      reasonCode: "CONTRADICTED_OR_MULTIPLE_SUPERSEDERS",
+      displayReason: supplied || "存在冲突或多个取代方向，系统不把其中一方当作已证实结论。",
+    };
+  }
+  if (status === "PENDING") {
+    return {
+      topLevelState: "CONTESTED",
+      reasonCode: "RELATION_PENDING_CONFIRMATION",
+      displayReason: supplied || "存在尚未确认的关系，当前结论不能自动升级。",
+    };
+  }
+  if (status === "REVOKED") {
+    return {
+      topLevelState: "UNKNOWN",
+      reasonCode: "RELATION_REVOKED",
+      displayReason: supplied || "相关关系已撤销，系统不再据此证明当前事实。",
+    };
+  }
+  return {
+    topLevelState: "UNKNOWN",
+    reasonCode: "NO_SUPPORTING_EVIDENCE",
+    displayReason: supplied || "尚无足够的时态关系证据，当前结论保持未知。",
+  };
 }
 
 export function evaluateTemporalCard(
@@ -95,14 +144,34 @@ export function evaluateTemporalCard(
   }
 
   const supersededByRelation = newest(superseders);
+  const normalized = displayReasonFor(status, reasonRelation);
+  const evidenceRefs: TemporalEvidenceRef[] = [
+    {
+      entityKind: "card",
+      entityId: card.id,
+      field: "title+summary",
+      observedAt: card.createdAt,
+    },
+    ...involved
+      .filter((relation) => relation.relationType !== "RELATED" && (time(relation.createdAt) ?? 0) <= asOf.getTime())
+      .map((relation) => ({
+        entityKind: "relation" as const,
+        entityId: relation.id,
+        field: "temporal-validity",
+        observedAt: relation.confirmedAt ?? relation.createdAt,
+        relationType: relation.relationType,
+      })),
+  ];
   return {
     card,
     current: status !== "SUPERSEDED",
     status,
     statusLabel: statusLabel(status),
     supportState,
+    ...normalized,
     supersededBy: supersededByRelation?.currentCard ?? null,
     temporalReason: reasonRelation?.reason ?? null,
+    evidenceRefs,
     relations: involved.sort((a, b) => (time(b.createdAt) ?? 0) - (time(a.createdAt) ?? 0)),
   };
 }

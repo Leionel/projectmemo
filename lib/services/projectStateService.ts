@@ -8,6 +8,8 @@ import {
   PROJECT_STATE_POLICY_VERSION,
   PROJECT_STATE_SCHEMA_VERSION,
   type ProjectStateDiff,
+  type ProjectStateFreshnessData,
+  type ProjectStateFreshnessStatus,
   type ProjectStatePayload,
 } from "@/lib/types/projectState";
 import type { Prisma } from "@/lib/generated/prisma/client";
@@ -32,6 +34,42 @@ export interface RefreshResult {
   changed: boolean;
   reused: boolean;
   baselineCreated: boolean;
+  freshness: ProjectStateFreshnessData;
+}
+
+function serializeFreshness(row: {
+  projectId: string;
+  status: string;
+  snapshotId: string | null;
+  errorCode: string | null;
+  errorMessage: string | null;
+  attemptedAt: Date | null;
+  refreshedAt: Date | null;
+}): ProjectStateFreshnessData {
+  const status = ["EMPTY", "FRESH", "STALE", "FAILED"].includes(row.status)
+    ? row.status as ProjectStateFreshnessStatus
+    : "STALE";
+  return {
+    projectId: row.projectId,
+    status,
+    snapshotId: row.snapshotId,
+    errorCode: row.errorCode,
+    errorMessage: row.errorMessage,
+    attemptedAt: row.attemptedAt?.toISOString() ?? null,
+    refreshedAt: row.refreshedAt?.toISOString() ?? null,
+  };
+}
+
+function emptyFreshness(projectId: string): ProjectStateFreshnessData {
+  return {
+    projectId,
+    status: "EMPTY",
+    snapshotId: null,
+    errorCode: null,
+    errorMessage: null,
+    attemptedAt: null,
+    refreshedAt: null,
+  };
 }
 
 function serializeSnapshot(row: {
@@ -158,6 +196,76 @@ export async function getLatestProjectState(projectId: string): Promise<ProjectS
   return row ? serializeSnapshot(row) : null;
 }
 
+export async function getProjectStateFreshness(projectId: string): Promise<ProjectStateFreshnessData> {
+  ensureEnabled();
+  const row = await db.projectStateFreshness.findUnique({ where: { projectId } });
+  if (row) return serializeFreshness(row);
+  const snapshot = await db.projectStateSnapshot.findFirst({
+    where: { projectId },
+    orderBy: { sequence: "desc" },
+    select: { id: true, evaluatedAt: true },
+  });
+  return snapshot
+    ? {
+      projectId,
+      status: "FRESH",
+      snapshotId: snapshot.id,
+      errorCode: null,
+      errorMessage: null,
+      attemptedAt: snapshot.evaluatedAt.toISOString(),
+      refreshedAt: snapshot.evaluatedAt.toISOString(),
+    }
+    : emptyFreshness(projectId);
+}
+
+/**
+ * 业务事实提交后的补偿刷新入口。派生快照不是业务写入的一部分：
+ * 刷新失败只留下 FAILED freshness，调用方仍应把已提交的业务结果返回给用户。
+ */
+export async function refreshProjectStateAfterMutation(projectId: string): Promise<boolean> {
+  if (!isFeatureEnabled("PROJECT_STATE_ENABLED", false)) return false;
+  try {
+    await refreshProjectState(projectId);
+    return false;
+  } catch (error) {
+    console.warn("Project state refresh is pending after mutation", error);
+    return true;
+  }
+}
+
+async function recordRefreshFailure(projectId: string, error: unknown): Promise<ProjectStateFreshnessData | null> {
+  const project = await db.project.findUnique({ where: { id: projectId }, select: { id: true } }).catch(() => null);
+  if (!project) return null;
+  const latest = await db.projectStateSnapshot.findFirst({
+    where: { projectId },
+    orderBy: { sequence: "desc" },
+    select: { id: true },
+  }).catch(() => null);
+  const code = error instanceof AppError ? error.code : "STATE_REFRESH_FAILED";
+  const message = error instanceof AppError
+    ? error.message
+    : "状态刷新失败，已保留上一份快照，可稍后重试";
+  const row = await db.projectStateFreshness.upsert({
+    where: { projectId },
+    create: {
+      projectId,
+      status: "FAILED",
+      snapshotId: latest?.id ?? null,
+      errorCode: code,
+      errorMessage: message,
+      attemptedAt: new Date(),
+    },
+    update: {
+      status: "FAILED",
+      snapshotId: latest?.id ?? null,
+      errorCode: code,
+      errorMessage: message,
+      attemptedAt: new Date(),
+    },
+  });
+  return serializeFreshness(row);
+}
+
 const REFRESH_MAX_ATTEMPTS = 3;
 
 function isUniqueConflict(error: unknown): boolean {
@@ -189,11 +297,32 @@ export async function refreshProjectState(projectId: string): Promise<RefreshRes
           latest.policyVersion === PROJECT_STATE_POLICY_VERSION &&
           latest.evaluationKey === built.evaluationKey
         ) {
+          const freshness = await tx.projectStateFreshness.upsert({
+            where: { projectId },
+            create: {
+              projectId,
+              status: "FRESH",
+              snapshotId: latest.id,
+              errorCode: null,
+              errorMessage: null,
+              attemptedAt: now,
+              refreshedAt: latest.evaluatedAt,
+            },
+            update: {
+              status: "FRESH",
+              snapshotId: latest.id,
+              errorCode: null,
+              errorMessage: null,
+              attemptedAt: now,
+              refreshedAt: latest.evaluatedAt,
+            },
+          });
           return {
             snapshot: serializeSnapshot(latest),
             changed: false,
             reused: true,
             baselineCreated: false,
+            freshness: serializeFreshness(freshness),
           };
         }
 
@@ -233,19 +362,46 @@ export async function refreshProjectState(projectId: string): Promise<RefreshRes
           data: { payload: payloadWithId },
         });
 
+        const freshness = await tx.projectStateFreshness.upsert({
+          where: { projectId },
+          create: {
+            projectId,
+            status: "FRESH",
+            snapshotId: finalized.id,
+            errorCode: null,
+            errorMessage: null,
+            attemptedAt: now,
+            refreshedAt: now,
+          },
+          update: {
+            status: "FRESH",
+            snapshotId: finalized.id,
+            errorCode: null,
+            errorMessage: null,
+            attemptedAt: now,
+            refreshedAt: now,
+          },
+        });
         return {
           snapshot: serializeSnapshot(finalized),
           changed: latest ? latest.contentHash !== built.contentHash : true,
           reused: false,
           baselineCreated: !latest,
+          freshness: serializeFreshness(freshness),
         };
       });
     } catch (error) {
       lastError = error;
-      if (!isUniqueConflict(error) || attempt === REFRESH_MAX_ATTEMPTS) {
-        throw error;
+      if (isUniqueConflict(error) && attempt < REFRESH_MAX_ATTEMPTS) {
+        continue;
       }
-      // 唯一冲突 = 并发刷新分配了同一 sequence：重试整个事务
+      // 唯一冲突 = 并发刷新分配了同一 sequence：重试整个事务；最终失败时
+      // 单独落一条 freshness 回执，绝不删除或覆盖上一份业务快照。
+      await recordRefreshFailure(projectId, error).catch((recordError) => {
+        console.warn("State refresh failed; freshness receipt could not be persisted", recordError);
+      });
+      if (error instanceof AppError) throw error;
+      throw new AppError("STATE_REFRESH_FAILED", "状态刷新失败，已保留上一份快照，可稍后重试", 503);
     }
   }
   throw lastError;

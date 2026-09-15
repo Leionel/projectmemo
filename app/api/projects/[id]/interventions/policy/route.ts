@@ -4,7 +4,7 @@ import {
   listRecentDecisions,
   updatePolicy,
 } from "@/lib/services/interventionPolicyService";
-import { computeSuggestion } from "@/lib/services/interventionFeedbackService";
+import { computeSuggestion, listProjectPreferences } from "@/lib/services/interventionFeedbackService";
 
 export const runtime = "nodejs";
 
@@ -12,9 +12,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   try {
     const { id } = await params;
     const policy = await getOrCreatePolicy();
-    const [recentDecisions, suggestions] = await Promise.all([
+    const [recentDecisions, suggestions, reducedTopics] = await Promise.all([
       listRecentDecisions(id),
       computeSuggestion(id),
+      listProjectPreferences(id),
     ]);
     return Response.json({
       policy: {
@@ -24,7 +25,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         quietStartMinute: policy.quietStartMinute,
         quietEndMinute: policy.quietEndMinute,
         version: policy.version,
-        reducedTopics: policy.reducedTopics ?? [],
+        reducedTopics,
       },
       recentDecisions,
       suggestions,
@@ -36,7 +37,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await params;
+    const { id } = await params;
     const body = (await request.json()) as {
       dailyBudget?: number;
       quietStartMinute?: number;
@@ -49,6 +50,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       quietEndMinute: body.quietEndMinute,
       timezone: body.timezone,
     });
+    const reducedTopics = await listProjectPreferences(id);
     return Response.json({
       policy: {
         scope: policy.scope,
@@ -57,7 +59,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         quietStartMinute: policy.quietStartMinute,
         quietEndMinute: policy.quietEndMinute,
         version: policy.version,
-        reducedTopics: policy.reducedTopics ?? [],
+        reducedTopics,
       },
     });
   } catch (error) {

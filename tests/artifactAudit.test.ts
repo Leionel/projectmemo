@@ -64,6 +64,9 @@ describe("Artifact provenance audit (R1)", () => {
     expect(audit.recheck).toHaveLength(1);
     // 独立事实无确认关系：时间线语义为“证据不足”，不得虚构 SUPPORTS；但未被取代
     expect(audit.recheck[0].supportState).toBe("INSUFFICIENT");
+    expect(audit.recheck[0].topLevelState).toBe("UNKNOWN");
+    expect(audit.recheck[0].reasonCode).toBe("NO_SUPPORTING_EVIDENCE");
+    expect(audit.recheck[0].evidenceRefs.some((ref) => ref.entityId === card.id)).toBe(true);
     expect(audit.recheck[0].supersededBy).toBeNull();
 
     // E3：模板路径自带逐句映射，独立事实的引用诚实标注“尚无确认支撑”
@@ -157,6 +160,8 @@ describe("Artifact provenance audit (R1)", () => {
     const audit = await getArtifactAudit(projectId, artifact.id);
     const superseded = audit.recheck.find((item) => item.supportState === "SUPERSEDED");
     expect(superseded).toBeDefined();
+    expect(superseded?.topLevelState).toBe("SUPERSEDED");
+    expect(superseded?.evidenceRefs.some((ref) => ref.entityId === superseded.cardId)).toBe(true);
     expect(superseded?.supersededByTitle).toContain("轻量量化方案B");
     expect(superseded?.supersededConfirmedAt).not.toBeNull();
     expect(superseded?.supersededReason).not.toBeNull();

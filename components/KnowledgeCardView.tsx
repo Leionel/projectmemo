@@ -4,11 +4,31 @@ import { useState } from "react";
 import { ArrowUpRight, Check, ChevronDown, Link2, ListChecks, LoaderCircle, Plus, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { CardEditor } from "@/components/CardEditor";
-import { knowledgeTypeLabels, getKnowledgeTypeColor, type KnowledgeTypeValue } from "@/lib/types";
+import { knowledgeTypeLabels, getKnowledgeTypeColor, type KnowledgeTypeValue, type TemporalEvidenceRef, type TemporalTopLevelState } from "@/lib/types";
 import { emitWorkspaceChange } from "@/lib/client/workspaceEvents";
 
 type Related = { id: string; title: string; reason: string; score: number };
-export type KnowledgeCardData = { id: string; type: string; title: string; summary: string; keywords: unknown; relatedTasks: unknown; nextActions: unknown; importance: number; createdAt: Date | string; capture: { rawText: string; sourceType: string | null }; outgoingLinks: Array<{ reason: string; score: number; relatedCard: { id: string; title: string } }>; incomingLinks: Array<{ reason: string; score: number; currentCard: { id: string; title: string } }> };
+export type KnowledgeCardTemporalData = {
+  topLevelState: TemporalTopLevelState;
+  reasonCode: string;
+  displayReason: string;
+  evidenceRefs: TemporalEvidenceRef[];
+};
+export type KnowledgeCardData = { id: string; type: string; title: string; summary: string; keywords: unknown; relatedTasks: unknown; nextActions: unknown; importance: number; createdAt: Date | string; capture: { rawText: string; sourceType: string | null }; outgoingLinks: Array<{ reason: string; score: number; relatedCard: { id: string; title: string } }>; incomingLinks: Array<{ reason: string; score: number; currentCard: { id: string; title: string } }>; temporal?: KnowledgeCardTemporalData };
+
+const temporalLabels: Record<TemporalTopLevelState, string> = {
+  CURRENT: "当前有效",
+  SUPERSEDED: "已被取代",
+  CONTESTED: "存在争议",
+  UNKNOWN: "暂不能确定",
+};
+
+const temporalStyles: Record<TemporalTopLevelState, string> = {
+  CURRENT: "bg-[var(--teal-pale)] text-[var(--teal-strong)]",
+  SUPERSEDED: "bg-[var(--paper-strong)] text-[var(--muted)]",
+  CONTESTED: "bg-[var(--brick-pale)] text-[var(--brick)]",
+  UNKNOWN: "bg-[var(--amber)]/10 text-[var(--amber)]",
+};
 
 export function KnowledgeCardView({ card, projectId, compact = false, forcedOpen = false, onReveal, onImportanceChange }: { card: KnowledgeCardData; projectId: string; compact?: boolean; forcedOpen?: boolean; onReveal: (cardId: string) => void; onImportanceChange: (cardId: string, importance: number) => void }) {
   const router = useRouter();
@@ -21,6 +41,7 @@ export function KnowledgeCardView({ card, projectId, compact = false, forcedOpen
   const keywords = Array.isArray(card.keywords) ? card.keywords as string[] : [];
   const relatedTasks = Array.isArray(card.relatedTasks) ? card.relatedTasks as string[] : [];
   const nextActions = Array.isArray(card.nextActions) ? card.nextActions as string[] : [];
+  const temporal = card.temporal;
   const related: Related[] = [...card.outgoingLinks.map((link) => ({ id: link.relatedCard.id, title: link.relatedCard.title, reason: link.reason, score: link.score })), ...card.incomingLinks.map((link) => ({ id: link.currentCard.id, title: link.currentCard.title, reason: link.reason, score: link.score }))].slice(0, 3);
   const showFull = !compact || expanded || forcedOpen;
 
@@ -71,6 +92,7 @@ export function KnowledgeCardView({ card, projectId, compact = false, forcedOpen
       <div role="group" aria-label={`调整《${card.title}》的重要性`} className="flex items-center rounded-lg border border-[var(--rule)] bg-[var(--paper-strong)] p-1">{[1,2,3,4,5].map((value) => <button key={value} type="button" aria-label={`将重要性设为 ${value}`} aria-pressed={card.importance === value} disabled={busy === "importance"} onClick={() => void setImportance(value)} className="focus-ring rounded p-1 disabled:opacity-50"><Star size={14} className={value <= card.importance ? "text-[var(--amber)]" : "text-[var(--rule-strong)]"} fill={value <= card.importance ? "currentColor" : "none"} /></button>)}</div>
     </div>
     <h3 className="mt-4 text-xl font-bold leading-7 [overflow-wrap:anywhere]">{card.title}</h3>
+    {temporal && <div className="mt-2 flex flex-wrap items-center gap-2 text-xs"><span className={`rounded-md px-2 py-1 font-bold ${temporalStyles[temporal.topLevelState]}`}>时态：{temporalLabels[temporal.topLevelState]}</span>{showFull && <span className="text-[var(--muted)]">{temporal.displayReason}</span>}</div>}
     <p className={(showFull ? "mt-2.5 leading-7 " : "mt-2 line-clamp-2 text-sm leading-6 ") + "text-[var(--ink-soft)] [overflow-wrap:anywhere]"}>{card.summary}</p>
     <div className="mt-4 flex flex-wrap gap-2">{keywords.slice(0, showFull ? keywords.length : 4).map((keyword, index) => <span key={`${keyword}-${index}`} className="paper-tab px-2.5 py-1 text-xs font-medium text-[var(--ink-soft)]">#{keyword}</span>)}{!showFull && keywords.length > 4 && <span className="px-2 py-1 text-xs font-bold text-[var(--muted)]">+{keywords.length - 4}</span>}</div>
 

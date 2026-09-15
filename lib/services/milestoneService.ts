@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { requireProject } from "@/lib/repositories/projects";
 import { AppError } from "@/lib/api";
 import { getMissingEvidenceTypes } from "@/lib/milestones/evidenceGap";
+import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateService";
 
 export interface CreateMilestoneInput {
   projectId: string;
@@ -43,7 +44,7 @@ export async function confirmDeliverableEvidence(input: ConfirmDeliverableEviden
     throw new AppError("EVIDENCE_SOURCE_REQUIRED", "一次只能关联一张卡片或一个附件", 422);
   }
 
-  return db.$transaction(async (tx) => {
+  const evidence = await db.$transaction(async (tx) => {
     const deliverable = await tx.deliverable.findFirst({
       where: { id: input.deliverableId, milestone: { projectId: input.projectId } },
       include: { milestone: { select: { id: true } }, evidences: true },
@@ -99,6 +100,8 @@ export async function confirmDeliverableEvidence(input: ConfirmDeliverableEviden
 
     return evidence;
   });
+  const stateRefreshPending = await refreshProjectStateAfterMutation(input.projectId);
+  return { ...evidence, stateRefreshPending };
 }
 
 export async function listProjectMilestones(projectId: string) {
@@ -120,7 +123,7 @@ export async function createProjectMilestone(input: CreateMilestoneInput) {
   const { projectId, title, targetDate, deliverables = [] } = input;
   await requireProject(projectId);
 
-  return db.milestone.create({
+  const milestone = await db.milestone.create({
     data: {
       projectId,
       title,
@@ -138,6 +141,8 @@ export async function createProjectMilestone(input: CreateMilestoneInput) {
       deliverables: true,
     },
   });
+  const stateRefreshPending = await refreshProjectStateAfterMutation(projectId);
+  return { ...milestone, stateRefreshPending };
 }
 
 export async function ensureDefaultMilestones(projectId: string) {

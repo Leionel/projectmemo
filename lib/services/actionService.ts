@@ -8,6 +8,7 @@ import { findAction, updateAction } from "@/lib/repositories/agent";
 import { db } from "@/lib/db";
 import { requireProject } from "@/lib/repositories/projects";
 import { saveAgentRun } from "@/lib/repositories/agent";
+import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateService";
 
 const vectorStore = new KeywordVectorStore();
 
@@ -19,7 +20,7 @@ export async function completeProjectAction(projectId: string, actionId: string,
   if (action.isSimulated) throw new AppError("SIMULATED_ACTION", "演示模拟行动不会写入真实复盘，请清除模拟后再执行", 409);
   if (action.status === ActionStatus.DONE && action.resultCardId) {
     const card = await db.knowledgeCard.findUnique({ where: { id: action.resultCardId } });
-    return { ...action, resultCard: card };
+    return { ...action, resultCard: card, stateRefreshPending: false };
   }
   if (action.status === ActionStatus.CANCELLED) throw new AppError("ACTION_CANCELLED", "已取消的行动不能完成", 409);
 
@@ -95,8 +96,9 @@ export async function completeProjectAction(projectId: string, actionId: string,
     return { card, updatedAction, alreadyDone: false };
   });
   if (result.alreadyDone) {
-    return { ...result.updatedAction, resultCard: result.card };
+    return { ...result.updatedAction, resultCard: result.card, stateRefreshPending: false };
   }
+  const stateRefreshPending = await refreshProjectStateAfterMutation(projectId);
   if (result.card) {
     await vectorStore.index({ id: result.card.id, title: result.card.title, keywords: result.card.keywords as string[] });
   }
@@ -113,7 +115,7 @@ export async function completeProjectAction(projectId: string, actionId: string,
     },
     durationMs: Date.now() - startedAt,
   });
-  return { ...result.updatedAction, resultCard: result.card, run };
+  return { ...result.updatedAction, resultCard: result.card, run, stateRefreshPending };
 }
 
 export async function updateProjectAction(projectId: string, actionId: string, input: Parameters<typeof updateAction>[2]) {

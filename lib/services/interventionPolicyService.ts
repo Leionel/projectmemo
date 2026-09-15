@@ -85,6 +85,19 @@ function zonedMidnightUtc(localDate: string, timezone: string): Date {
   return new Date(naiveUtc.getTime() - offset * 60000);
 }
 
+function nextLocalDate(localDate: string): string {
+  const date = new Date(`${localDate}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + 1);
+  return date.toISOString().substring(0, 10);
+}
+
+function localWindow(localDate: string, timezone: string): { start: Date; end: Date } {
+  return {
+    start: zonedMidnightUtc(localDate, timezone),
+    end: zonedMidnightUtc(nextLocalDate(localDate), timezone),
+  };
+}
+
 function minuteToLabel(minute: number): string {
   const hh = String(Math.floor(minute / 60)).padStart(2, "0");
   const mm = String(minute % 60).padStart(2, "0");
@@ -158,46 +171,156 @@ export async function updatePolicy(input: PolicyUpdateInput): Promise<Interventi
 
 export async function restoreDefaultPolicy(): Promise<InterventionPolicy> {
   const policy = await getOrCreatePolicy();
-  return db.interventionPolicy.update({
-    where: { id: policy.id },
-    data: {
-      dailyBudget: 3,
-      quietStartMinute: 1380,
-      quietEndMinute: 480,
-      timezone: "Asia/Shanghai",
-      reducedTopics: Prisma.JsonNull,
-      suggestionState: Prisma.JsonNull,
-      version: { increment: 1 },
-    },
-  });
+  const [, updated] = await db.$transaction([
+    db.interventionPreference.deleteMany({}),
+    db.interventionPolicy.update({
+      where: { id: policy.id },
+      data: {
+        dailyBudget: 3,
+        quietStartMinute: 1380,
+        quietEndMinute: 480,
+        timezone: "Asia/Shanghai",
+        reducedTopics: Prisma.JsonNull,
+        suggestionState: Prisma.JsonNull,
+        version: { increment: 1 },
+      },
+    }),
+  ]);
+  return updated;
 }
 
-function reducedTopics(policy: InterventionPolicy): string[] {
-  const raw = policy.reducedTopics;
-  if (!Array.isArray(raw)) return [];
-  return raw
-    .map((item) => (item && typeof item === "object" && !Array.isArray(item) && typeof (item as { triggerType?: unknown }).triggerType === "string"
-      ? (item as { triggerType: string }).triggerType
-      : null))
-    .filter((item): item is string => item !== null);
-}
-
-async function countFiresInLocalDay(
+async function reducedTopicsForProject(
   tx: Prisma.TransactionClient,
   projectId: string,
+  policy: InterventionPolicy,
+): Promise<string[]> {
+  const preferences = await tx.interventionPreference.findMany({
+    where: { projectId, reducedSince: { not: null } },
+    select: { triggerType: true },
+  });
+  const scoped = new Set(preferences.map((item) => item.triggerType));
+  // 兼容旧 JSON，但只有已经带 projectId 的迁移项才可生效；旧的全局项
+  // 不再作为新项目的隐式偏好，避免历史设置跨项目扩散。
+  const legacy = Array.isArray(policy.reducedTopics) ? policy.reducedTopics : [];
+  for (const item of legacy) {
+    if (item && typeof item === "object" && !Array.isArray(item) &&
+      (item as { projectId?: unknown }).projectId === projectId &&
+      typeof (item as { triggerType?: unknown }).triggerType === "string") {
+      scoped.add((item as { triggerType: string }).triggerType);
+    }
+  }
+  return [...scoped];
+}
+
+async function ensureBudgetLedger(
+  tx: Prisma.TransactionClient,
+  scope: string,
   localDate: string,
   timezone: string,
+  limit: number,
+  now: Date,
   topicPrefix?: string,
-): Promise<number> {
-  const start = zonedMidnightUtc(localDate, timezone);
-  const end = new Date(start.getTime() + 86400000);
-  return tx.interventionDecision.count({
+): Promise<{
+  id: string;
+  usedCount: number;
+  windowStartAt: Date;
+  windowEndAt: Date;
+}> {
+  const window = localWindow(localDate, timezone);
+  const overlapping = await tx.interventionBudgetLedger.findFirst({
+    where: {
+      scope,
+      windowStartAt: { lt: window.end },
+      windowEndAt: { gt: window.start },
+      // 测试/回放可能传入比已有历史评估更早的 now；不能把“未来创建”的
+      // 预算窗口当成当前窗口，也避免时间回拨污染预算计数。
+      createdAt: { lte: now },
+    },
+    orderBy: { windowStartAt: "desc" },
+  });
+  if (overlapping) {
+    return tx.interventionBudgetLedger.update({
+      where: { id: overlapping.id },
+      data: { dailyBudget: limit, timezone, localDate },
+      select: { id: true, usedCount: true, windowStartAt: true, windowEndAt: true },
+    });
+  }
+
+  const usedCount = await tx.interventionDecision.count({
     where: {
       decision: "FIRE",
-      createdAt: { gte: start, lt: end },
+      createdAt: { gte: window.start, lt: window.end },
       ...(topicPrefix ? { candidateKey: { startsWith: topicPrefix } } : {}),
-      // 全局共享预算：不按项目过滤
     },
+  });
+  const windowKey = window.start.toISOString();
+  try {
+    return await tx.interventionBudgetLedger.create({
+      data: {
+        scope,
+        windowKey,
+        windowStartAt: window.start,
+        windowEndAt: window.end,
+        timezone,
+        localDate,
+        dailyBudget: limit,
+        usedCount,
+        createdAt: now,
+        updatedAt: now,
+      },
+      select: { id: true, usedCount: true, windowStartAt: true, windowEndAt: true },
+    });
+  } catch (error) {
+    if (!isUniqueConstraintError(error)) throw error;
+    const existing = await tx.interventionBudgetLedger.findUnique({
+      where: { scope_windowKey: { scope, windowKey } },
+      select: { id: true, usedCount: true, windowStartAt: true, windowEndAt: true },
+    });
+    if (!existing) throw error;
+    return existing;
+  }
+}
+
+function isUniqueConstraintError(error: unknown): boolean {
+  return typeof error === "object" && error !== null && "code" in error &&
+    (error as { code?: string }).code === "P2002";
+}
+
+async function claimBudget(
+  tx: Prisma.TransactionClient,
+  input: {
+    scope: string;
+    localDate: string;
+    timezone: string;
+    limit: number;
+    now: Date;
+    topicPrefix?: string;
+  },
+) {
+  const ledger = await ensureBudgetLedger(
+    tx,
+    input.scope,
+    input.localDate,
+    input.timezone,
+    input.limit,
+    input.now,
+    input.topicPrefix,
+  );
+  const updated = await tx.interventionBudgetLedger.updateMany({
+    where: { id: ledger.id, usedCount: { lt: input.limit } },
+    data: { usedCount: { increment: 1 } },
+  });
+  return {
+    ledgerId: ledger.id,
+    granted: updated.count === 1,
+    usedCount: ledger.usedCount + updated.count,
+  };
+}
+
+async function releaseBudget(tx: Prisma.TransactionClient, ledgerId: string) {
+  await tx.interventionBudgetLedger.updateMany({
+    where: { id: ledgerId, usedCount: { gt: 0 } },
+    data: { usedCount: { decrement: 1 } },
   });
 }
 
@@ -213,11 +336,16 @@ export async function applyInterventionPolicy(
   const budgetEnabled = isFeatureEnabled("INTERVENTION_BUDGET_ENABLED", false);
   const policy = budgetEnabled ? await getOrCreatePolicy() : null;
 
-  return db.$transaction(async (tx) => {
+  const maxAttempts = 4;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      return await db.$transaction(async (tx) => {
     const outcomes: PolicyOutcome[] = [];
     const parts = policy ? localTimeParts(policy.timezone, now) : null;
     const quiet = policy && parts ? isQuietTime(policy, parts) : false;
-    const topicPrefixes = policy ? reducedTopics(policy).map((topic) => `${topic}:`) : [];
+    const topicPrefixes = policy
+      ? (await reducedTopicsForProject(tx, projectId, policy)).map((topic) => `${topic}:`)
+      : [];
 
     for (const candidate of candidates) {
       if (candidate.isSimulated) {
@@ -259,6 +387,31 @@ export async function applyInterventionPolicy(
         where: { projectId_dedupeKey: { projectId, dedupeKey: candidate.dedupeKey } },
       });
       if (existing && existing.status === "OPEN" && existing.snoozedUntil === null) {
+        // 事实已变化（如截止时间经过、剩余天数变化）时原位刷新既有提醒，不新建也不展示过期文案
+        if (existing.title !== candidate.title || existing.content !== candidate.content) {
+          await tx.agentIntervention.update({
+            where: { id: existing.id },
+            data: {
+              title: candidate.title,
+              content: candidate.content,
+              severity: candidate.severity,
+              evidence: {
+                rule: candidate.evidenceRule,
+                facts: candidate.evidenceFacts,
+                cardIds: candidate.evidenceCardIds,
+                evaluatedAt: now.toISOString(),
+              } as unknown as Prisma.InputJsonValue,
+            },
+          });
+          outcomes.push({
+            candidateKey: candidate.candidateKey,
+            decision: "SUPPRESS",
+            reasonCode: "DUPLICATE",
+            whyNow: `提醒已按最新事实更新（此前为「${existing.title}」），不重复新建。`,
+            interventionId: existing.id,
+          });
+          continue;
+        }
         outcomes.push({
           candidateKey: candidate.candidateKey,
           decision: "SUPPRESS",
@@ -291,11 +444,38 @@ export async function applyInterventionPolicy(
         continue;
       }
 
-      // 4. 降频主题：每天至多 1 次
+      // 4/5. 先原子预留全局预算；主题预算失败时释放这次全局预留。
+      const globalClaim = await claimBudget(tx, {
+        scope: "GLOBAL",
+        localDate: parts.localDate,
+        timezone: policy.timezone,
+        limit: policy.dailyBudget,
+        now,
+      });
+      if (!globalClaim.granted) {
+        outcomes.push({
+          candidateKey: candidate.candidateKey,
+          decision: "SUPPRESS",
+          reasonCode: "BUDGET_EXHAUSTED",
+          whyNow: `今日全局提醒预算（${policy.dailyBudget} 次）已用完，该候选已记录，明天优先评估。`,
+          interventionId: null,
+        });
+        continue;
+      }
+
+      // 降频主题每天最多一次，同样使用持久化原子计数，不能依赖 count→create。
       const topicPrefix = topicPrefixes.find((prefix) => candidate.candidateKey.startsWith(prefix));
       if (topicPrefix) {
-        const topicFires = await countFiresInLocalDay(tx, projectId, parts.localDate, policy.timezone, topicPrefix);
-        if (topicFires >= 1) {
+        const topicClaim = await claimBudget(tx, {
+          scope: `TOPIC:${topicPrefix}`,
+          localDate: parts.localDate,
+          timezone: policy.timezone,
+          limit: 1,
+          now,
+          topicPrefix,
+        });
+        if (!topicClaim.granted) {
+          await releaseBudget(tx, globalClaim.ledgerId);
           outcomes.push({
             candidateKey: candidate.candidateKey,
             decision: "SUPPRESS",
@@ -307,21 +487,8 @@ export async function applyInterventionPolicy(
         }
       }
 
-      // 5. 每日预算：跨项目共享（scope=GLOBAL），按配置时区自然日计数（UTC 存储）
-      const firesToday = await countFiresInLocalDay(tx, projectId, parts.localDate, policy.timezone);
-      if (firesToday >= policy.dailyBudget) {
-        outcomes.push({
-          candidateKey: candidate.candidateKey,
-          decision: "SUPPRESS",
-          reasonCode: "BUDGET_EXHAUSTED",
-          whyNow: `今日全局提醒预算（${policy.dailyBudget} 次）已用完，该候选已记录，明天优先评估。`,
-          interventionId: null,
-        });
-        continue;
-      }
-
-      // 6. FIRE：生成或恢复干预，并与决策同事务提交
-      const remaining = policy.dailyBudget - firesToday - 1;
+      // 6. FIRE：生成或恢复干预，并与预算预留、决策同事务提交。
+      const remaining = policy.dailyBudget - globalClaim.usedCount;
       const whyNow = `${candidate.evidenceFacts[0]}。当前处于允许提醒时段，今日全局预算剩余 ${Math.max(0, remaining)} 次。`;
       const intervention = await tx.agentIntervention.upsert({
         where: { projectId_dedupeKey: { projectId, dedupeKey: candidate.dedupeKey } },
@@ -397,7 +564,14 @@ export async function applyInterventionPolicy(
     }
 
     return outcomes;
-  });
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message.toLowerCase() : "";
+      const retryable = isUniqueConstraintError(error) || message.includes("database is locked") || message.includes("busy");
+      if (!retryable || attempt === maxAttempts) throw error;
+    }
+  }
+  throw new Error("intervention policy transaction exhausted");
 }
 
 export async function listRecentDecisions(projectId: string, take = 30) {

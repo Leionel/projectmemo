@@ -14,7 +14,10 @@ export async function POST(request: Request) {
       { success: true, message: "已安全退出登录" },
       {
         status: 200,
-        headers: { "cache-control": "no-store" },
+        headers: {
+          "cache-control": "no-store",
+          "set-cookie": "pm_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax",
+        },
       }
     );
   } catch (error) {

@@ -5,6 +5,7 @@ import { FolderKanban, Menu } from "lucide-react";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GlobalSettings } from "@/components/GlobalSettings";
+import { UserNav } from "@/components/UserNav";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -44,6 +45,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                   <div className="h-4 w-px bg-[var(--rule-strong)] mx-1" />
                   <GlobalSettings />
                   <ThemeToggle />
+                  <div className="h-4 w-px bg-[var(--rule-strong)] mx-1" />
+                  <UserNav />
                 </div>
 
                 {/* Mobile Menu */}
@@ -52,12 +55,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                     <summary className="focus-ring grid h-9 w-9 cursor-pointer list-none place-items-center rounded-xl bg-[var(--card-bg)] border border-[var(--rule)] text-[var(--ink)] transition hover:text-[var(--teal)] [&::-webkit-details-marker]:hidden">
                       <Menu size={16} />
                     </summary>
-                    <div className="absolute right-0 top-full mt-2 flex w-36 flex-col gap-1 rounded-2xl border border-[var(--rule)] bg-[var(--card-bg)] p-2 shadow-xl">
+                    <div className="absolute right-0 top-full mt-2 flex w-44 flex-col gap-1 rounded-2xl border border-[var(--rule)] bg-[var(--card-bg)] p-2 shadow-xl">
                       <Link href="/projects" className="focus-ring flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-[var(--ink-soft)] transition hover:bg-[var(--paper-strong)] hover:text-[var(--teal)]">
                         <FolderKanban size={16} /> 项目
                       </Link>
                       <GlobalSettings isMenuItem />
                       <ThemeToggle isMenuItem />
+                      <UserNav isMenuItem />
                     </div>
                   </details>
                 </div>

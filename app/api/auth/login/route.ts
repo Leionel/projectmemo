@@ -82,7 +82,10 @@ export async function POST(request: Request) {
       },
       {
         status: 200,
-        headers: { "cache-control": "no-store" },
+        headers: {
+          "cache-control": "no-store",
+          "set-cookie": `pm_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${7 * 24 * 3600}`,
+        },
       }
     );
   } catch (error) {

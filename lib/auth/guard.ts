@@ -13,12 +13,32 @@ export interface AuthorizedProjectContext extends AuthenticatedContext {
 }
 
 /**
- * 从请求头读取 Bearer Token
+ * 从请求头 Authorization 读取 Bearer Token，若无则从 Cookie (pm_session) 读取。
  */
 export function readBearerToken(request: Request): string {
   const authorization = request.headers.get("authorization")?.trim() ?? "";
   const match = /^Bearer\s+(.+)$/i.exec(authorization);
-  return match?.[1]?.trim() ?? "";
+  if (match?.[1]?.trim()) {
+    return match[1].trim();
+  }
+
+  // 支持从 Cookie 读取会话凭据（适配 Web 端）
+  const cookieHeader = request.headers.get("cookie");
+  if (cookieHeader) {
+    const cookies = cookieHeader.split(";").map((c) => c.trim());
+    for (const cookie of cookies) {
+      if (cookie.startsWith("pm_session=")) {
+        const val = cookie.substring("pm_session=".length).trim();
+        if (val) return decodeURIComponent(val);
+      }
+      if (cookie.startsWith("session_token=")) {
+        const val = cookie.substring("session_token=".length).trim();
+        if (val) return decodeURIComponent(val);
+      }
+    }
+  }
+
+  return "";
 }
 
 /**

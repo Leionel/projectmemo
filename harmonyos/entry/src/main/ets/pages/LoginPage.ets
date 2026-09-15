@@ -91,6 +91,41 @@ export struct LoginView {
 
         // 表单卡片
         Column() {
+          // 演示账号提示与一键填入
+          Row() {
+            Column() {
+              Text('预置复赛演示账号')
+                .fontSize(PMFontSize.SECONDARY)
+                .fontWeight(FontWeight.Bold)
+                .fontColor(PMColors.BRAND)
+              Text('contest-demo / contest-demo-2026')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: 2 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+
+            Button('一键填入')
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.BRAND)
+              .backgroundColor(PMColors.BRAND_LIGHT)
+              .borderRadius(PMRadius.XS)
+              .height(32)
+              .onClick(() => {
+                this.username = 'contest-demo';
+                this.password = 'contest-demo-2026';
+                this.errorMessage = '';
+              })
+          }
+          .width('100%')
+          .padding(PMSpacing.SM)
+          .backgroundColor(PMColors.SURFACE_SUBTLE)
+          .borderRadius(PMRadius.SM)
+          .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+          .margin({ bottom: PMSpacing.MD })
+
           if (this.errorMessage !== '') {
             Row() {
               Text('⚠ ' + this.errorMessage)

@@ -20,6 +20,12 @@ if (!fs.existsSync(hvigorw) || !fs.existsSync(path.join(javaHome, "bin", process
   process.exit(1);
 }
 
+const resultFile = path.join(harmonyDirectory, "entry", ".test", "default", "intermediates", "test", "coverage_data", "test_result.txt");
+
+// 先清掉上一轮结果：hvigor 把 test 任务判定为最新时不会重写该文件，
+// 否则下面会把旧一轮的用例数当成本轮结果打印出来。
+fs.rmSync(resultFile, { force: true });
+
 const result = spawnSync(process.execPath, [
   hvigorw,
   "test",
@@ -42,7 +48,6 @@ if (result.status !== 0) {
   process.exit(result.status ?? 1);
 }
 
-const resultFile = path.join(harmonyDirectory, "entry", ".test", "default", "intermediates", "test", "coverage_data", "test_result.txt");
 if (fs.existsSync(resultFile)) {
   const summary = fs.readFileSync(resultFile, "utf8").split("\n").find((line) => line.startsWith("Tests run:"));
   console.log(`\n[harmony-test] ${summary ?? "已运行，但未找到汇总行"}`);

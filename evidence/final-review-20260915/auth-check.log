@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/auth.test.ts tests/projectDashboard.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  2 passed (2)
+      Tests  19 passed (19)
+   Start at  22:21:18
+   Duration  2.11s (transform 354ms, setup 0ms, import 641ms, tests 1.03s, environment 0ms)
+

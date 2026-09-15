@@ -4303,7 +4303,8 @@ struct ProjectHome {
     .height('100%')
     .bindSheet($$this.showEntrySheet, this.EntrySheet(), {
       height: this.entrySheetMode === 'meeting' ? 640 : SheetSize.FIT_CONTENT,
-      dragBar: true
+      dragBar: true,
+      showClose: false
     })
   }
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getChatProviderDefaults } from "@/lib/config/provider";
+import { authenticateUser } from "@/lib/auth/guard";
 
 export const runtime = "nodejs";
 
@@ -11,20 +12,28 @@ const settingsSchema = z.object({
   llmModelName: z.string().trim().max(100).optional().default(""),
 });
 
-function canEditRuntimeSettings(request: Request) {
-  // 开发环境下允许本地、局域网及模拟器(10.0.2.2)配置运行时设置
-  if (process.env.NODE_ENV !== "production") {
+/**
+ * 运行时写入只改本进程的 process.env，既不持久也不跨实例，生产部署一律拒绝。
+ * 旧实现用 URL hostname 判断“本地请求”，而 Host 头由客户端决定，不能作为授权依据。
+ */
+function isProduction() {
+  return process.env.NODE_ENV === "production";
+}
+
+async function isSignedIn(request: Request) {
+  try {
+    await authenticateUser(request);
     return true;
+  } catch {
+    return false;
   }
-  const hostname = new URL(request.url).hostname;
-  return hostname === "127.0.0.1" || hostname === "localhost" || hostname === "[::1]";
 }
 
 function errorResponse(code: string, message: string, status: number) {
   return NextResponse.json({ error: { code, message } }, { status });
 }
 
-function publicSettings(request: Request) {
+function publicSettings(editable: boolean) {
   const chatDefaults = getChatProviderDefaults();
   return {
     llmMode: process.env.LLM_MODE === "openai-compatible" ? "openai-compatible" : "mock",
@@ -33,17 +42,23 @@ function publicSettings(request: Request) {
     llmModelName: process.env.LLM_MODEL_NAME || chatDefaults.model,
     hasApiKey: Boolean(process.env.LLM_API_KEY),
     apiKeyMasked: process.env.LLM_API_KEY ? "••••••" : "",
-    editable: canEditRuntimeSettings(request),
+    editable,
   };
 }
 
 export async function GET(request: Request) {
-  return NextResponse.json(publicSettings(request));
+  // 设置入口挂在根布局上，未登录页面也会读取，因此保持可读、只收紧可写。
+  const editable = !isProduction() && await isSignedIn(request);
+  return NextResponse.json(publicSettings(editable));
 }
 
 export async function POST(request: Request) {
-  if (!canEditRuntimeSettings(request)) {
-    return errorResponse("SETTINGS_READ_ONLY", "仅允许在开发模式下修改运行时设置。", 403);
+  if (isProduction()) {
+    return errorResponse("SETTINGS_READ_ONLY", "生产部署不支持运行时修改模型配置，请通过环境变量设置。", 403);
+  }
+
+  if (!(await isSignedIn(request))) {
+    return errorResponse("UNAUTHORIZED", "请先登录再修改模型设置。", 401);
   }
 
   try {
@@ -75,7 +90,7 @@ export async function POST(request: Request) {
     if (llmModelName) process.env.LLM_MODEL_NAME = llmModelName;
 
     return NextResponse.json({
-      ...publicSettings(request),
+      ...publicSettings(true),
       message: "大模型配置已生效并应用到运行时。",
     });
   } catch (error) {

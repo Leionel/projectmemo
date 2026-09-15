@@ -5,6 +5,7 @@ import http from '@ohos.net.http';
 import { Constants } from '../common/Constants';
 import { ApiError } from '../models/Project';
 import { isSuccessCode, parseApiError } from '../common/ApiContract';
+import { SessionStore } from './SessionStore';
 
 export class AttachmentUploadResult {
   attachment: Attachment = new Attachment();
@@ -20,8 +21,15 @@ export class AttachmentService {
   async upload(projectId: string, fileUri: string, fileName: string, mimeType: string): Promise<AttachmentUploadResult> {
     const request = http.createHttp();
     try {
+      // multipart boundary 由系统生成，只补充会话头，不能设置 JSON Content-Type。
+      const headers: Record<string, string> = {};
+      const token = SessionStore.getToken();
+      if (token !== '') {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
       const response = await request.request(`${Constants.requireBaseUrl()}/api/projects/${projectId}/attachments`, {
         method: http.RequestMethod.POST,
+        header: headers,
         multiFormDataList: [{
           name: 'file',
           contentType: mimeType,
@@ -35,6 +43,10 @@ export class AttachmentService {
       const responseBody = response.result as string;
       if (isSuccessCode('POST', response.responseCode)) {
         return JSON.parse(responseBody) as AttachmentUploadResult;
+      }
+      if (response.responseCode === 401) {
+        SessionStore.handleSessionExpired();
+        throw new ApiError('UNAUTHORIZED', '登录状态已失效，请重新登录', 401);
       }
       throw parseApiError(responseBody, response.responseCode);
     } catch (error) {

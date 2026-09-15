@@ -1,5 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
-import { E2E_BASE_URL } from "./scripts/e2e-env";
+import { E2E_AUTH_STATE_PATH, E2E_BASE_URL } from "./scripts/e2e-env";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -12,5 +12,13 @@ export default defineConfig({
     navigationTimeout: 45_000,
     trace: "retain-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    { name: "setup", testMatch: /auth\.setup\.ts/ },
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"], storageState: E2E_AUTH_STATE_PATH },
+      dependencies: ["setup"],
+      testIgnore: /auth\.setup\.ts/,
+    },
+  ],
 });

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, ArrowRight, Bot, CalendarDays, CheckSquare, FileOutput, FileText, Goal, Sparkles, Star, type LucideIcon } from "lucide-react";
 import { ActionBoard } from "@/components/ActionBoard";
 import { AgentMetrics } from "@/components/AgentMetrics";
@@ -17,12 +17,21 @@ import { getProjectDetail } from "@/lib/repositories/projects";
 import { getDecisionTimeline } from "@/lib/services/temporalLedgerService";
 import { scenarioOptions, getScenarioColor, type ActionItemData, type AgentEvidence, type InterventionData, type ProposedAction, type ProjectMetrics } from "@/lib/types";
 import { buildProjectDashboard } from "@/lib/projectDashboard";
+import { getSessionUser, hasProjectAccess } from "@/lib/auth/serverSession";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const user = await getSessionUser();
+  if (!user) {
+    redirect(`/login?from=${encodeURIComponent(`/projects/${id}`)}`);
+  }
+  // 归属校验必须先于 evaluateProjectContext：后者会写入干预与行动，越权请求不能触发它。
+  if (!(await hasProjectAccess(user.id, id))) {
+    notFound();
+  }
   let project;
   try {
     await evaluateProjectContext(id);

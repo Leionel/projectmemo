@@ -6,6 +6,7 @@ import {
   ProjectUpdateInput,
   ProjectCreateResponse
 } from '../models/Project';
+import { ApiError } from '../models/Project';
 import { ProjectDetail, ProjectDetailResponse } from '../models/Memory';
 import { EvaluateResponse, EvaluateProjectInput } from '../models/Intervention';
 
@@ -14,6 +15,15 @@ export class ProjectService {
 
   async listProjects(): Promise<Project[]> {
     const response: ProjectsResponse = await this.client.get<ProjectsResponse>('/api/projects');
+    if (!response || !Array.isArray(response.projects)) {
+      throw new ApiError('INVALID_PROJECT_RESPONSE', '项目列表格式不完整，请更新后端后重试');
+    }
+    for (const project of response.projects) {
+      if (!project || !project.dashboard || !project._count ||
+        !project.dashboard.deadline || !project.dashboard.readiness || !project.dashboard.nextAction) {
+        throw new ApiError('INVALID_PROJECT_RESPONSE', '项目概览数据不完整，请更新后端后重试');
+      }
+    }
     return response.projects;
   }
 

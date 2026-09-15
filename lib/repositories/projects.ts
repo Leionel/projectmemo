@@ -5,8 +5,9 @@ import { AppError } from "@/lib/api";
 import { buildProjectDashboard } from "@/lib/projectDashboard";
 import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateService";
 
-export async function listProjects() {
+export async function listProjects(userId?: string) {
   const projects = await db.project.findMany({
+    where: userId ? { memberships: { some: { userId } } } : undefined,
     orderBy: { updatedAt: "desc" },
     include: {
       _count: { select: { cards: true, artifacts: true } },

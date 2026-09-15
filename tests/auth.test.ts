@@ -5,6 +5,7 @@ import { createSession } from "@/lib/auth/session";
 import { POST as loginRoute } from "@/app/api/auth/login/route";
 import { GET as meRoute } from "@/app/api/auth/me/route";
 import { POST as logoutRoute } from "@/app/api/auth/logout/route";
+import { GET as projectListRoute } from "@/app/api/projects/route";
 import { GET as projectDetailRoute } from "@/app/api/projects/[id]/route";
 import { POST as captureRoute } from "@/app/api/projects/[id]/captures/route";
 import { POST as xiaoyiMemoryRoute } from "@/app/xiaoyi/v1/memories/route";
@@ -70,6 +71,22 @@ describe("Authentication & Project Authorization Suite", () => {
     }
     if (otherProjectId) {
       await db.project.delete({ where: { id: otherProjectId } }).catch(() => {});
+    }
+  });
+
+  it("authorized project list preserves dashboard and counts after session restoration", async () => {
+    const { token } = await createSession(testUserId);
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const response = await projectListRoute(new Request("http://localhost/api/projects", {
+        headers: { Authorization: `Bearer ${token}` },
+      }));
+      expect(response.status).toBe(200);
+      const { projects } = await response.json();
+      expect(projects.map((p: { id: string }) => p.id)).toEqual([ownedProjectId]);
+      expect(projects[0]._count).toEqual({ cards: 0, artifacts: 0 });
+      expect(projects[0].dashboard.deadline.kind).toBe("none");
+      expect(projects[0].dashboard.readiness.percentage).toEqual(expect.any(Number));
+      expect(projects[0].dashboard.nextAction.label).toEqual(expect.any(String));
     }
   });
 

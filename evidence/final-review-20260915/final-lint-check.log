@@ -1,0 +1,26 @@
+
+> projectmemo@0.1.0 lint
+> eslint .
+
+
+D:\Projects\hongmen\lib\projectState\computeDiff.ts
+   5:8   warning  'SnapshotFact' is defined but never used  @typescript-eslint/no-unused-vars
+  24:10  warning  'kindLabel' is defined but never used     @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen\lib\services\attachmentService.ts
+  14:10  warning  'ensureCardEmbedding' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen\lib\services\changeImpactService.ts
+  413:14  warning  '_e' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen\lib\services\meetingStateDiffService.ts
+  591:14  warning  '_e' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen\tests\actionFeasibility.test.ts
+  117:11  warning  'supportRelation' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen\tests\projectState.integration.test.ts
+  311:11  warning  'baseline' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 7 problems (0 errors, 7 warnings)
+

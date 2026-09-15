@@ -19,9 +19,6 @@ export async function POST(request: Request) {
     const json = await request.json();
     const input = loginSchema.parse(json);
 
-    // 确保演示用户已就绪
-    await ensureDemoUser();
-
     // 提取限流标识（IP + 用户名）
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
                request.headers.get("x-real-ip")?.trim() ||
@@ -29,6 +26,9 @@ export async function POST(request: Request) {
     const rateLimitKey = `${ip}:${input.username}`;
 
     enforceLoginRateLimit(rateLimitKey);
+
+    // 演示账号仅在显式开启的环境下初始化，且不再自动绑定库里最早的项目。
+    await ensureDemoUser();
 
     const user = await db.user.findUnique({
       where: { username: input.username },

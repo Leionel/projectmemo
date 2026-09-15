@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import Database from "better-sqlite3";
-import { E2E_DATABASE_PATH, E2E_ENV } from "./e2e-env";
+import { E2E_AUTH_STATE_PATH, E2E_DATABASE_PATH, E2E_ENV } from "./e2e-env";
 
 const prismaDirectory = path.resolve(process.cwd(), "prisma");
 const relativeDatabasePath = path.relative(prismaDirectory, E2E_DATABASE_PATH);
@@ -43,5 +43,8 @@ const tsxCli = path.resolve(process.cwd(), "node_modules", "tsx", "dist", "cli.m
 run("generate Prisma Client", prismaCli, ["generate"]);
 run("apply migrations to projectmemo-e2e.db", prismaCli, ["migrate", "deploy"]);
 run("seed the isolated database", tsxCli, ["prisma/seed.ts"]);
+// 库已重建，上一轮的会话 Cookie 必须一起丢掉，否则会拿着失效凭据跑测试。
+fs.rmSync(E2E_AUTH_STATE_PATH, { force: true });
+run("create the E2E auth identity", tsxCli, ["scripts/seed-e2e-auth.ts"]);
 
 console.log(`\n[e2e setup] Ready: ${E2E_DATABASE_PATH}`);

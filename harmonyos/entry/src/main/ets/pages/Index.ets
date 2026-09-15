@@ -14,7 +14,8 @@ import { MemoryService } from '../services/MemoryService';
 import { SettingsService } from '../services/SettingsService';
 import { SessionStore } from '../services/SessionStore';
 import { AuthService } from '../services/AuthService';
-import { LoginView } from './LoginPage';
+import { LoginView } from '../components/LoginView';
+import { ReminderSettingsView } from '../components/ReminderSettingsView';
 
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily, PMInteraction, PMMotion, PMMaterial, PMTransition } from '../common/DesignTokens';
 import { LoadingStateView, ErrorStateView, EmptyStateView } from '../components/AsyncStateView';
@@ -70,11 +71,8 @@ struct Index {
   @State probeResult: ProbeResponse | undefined = undefined;
   @State settingsFeedback: string = '';
   @State dataSyncState: string = '尚未同步';
-  @State riskNotificationEnabled: boolean = true;
-  @State deadlineNotificationEnabled: boolean = true;
-  @State xiaoyiReadEnabled: boolean = true;
-  @State xiaoyiRecordEnabled: boolean = true;
   @State showSettingsSheet: boolean = false;
+  @State settingsSheetMode: string = 'api';
 
   // 新建项目弹窗状态
   @State showCreateDialog: boolean = false;
@@ -93,11 +91,16 @@ struct Index {
   private settingsService: SettingsService = new SettingsService();
   private authService: AuthService = new AuthService();
 
+  private sessionExpiredListener: () => void = () => {
+    this.handleSessionExpired();
+  };
+
+  aboutToDisappear(): void {
+    SessionStore.offSessionExpired(this.sessionExpiredListener);
+  }
+
   aboutToAppear(): void {
-    // 监听 401 失效通知
-    SessionStore.onSessionExpired(() => {
-      this.handleSessionExpired();
-    });
+    SessionStore.onSessionExpired(this.sessionExpiredListener);
 
     this.checkAndRestoreAuth();
   }
@@ -1288,7 +1291,7 @@ struct Index {
                 .fontSize(PMFontSize.BODY)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
-              Text(this.llmMode === 'openai-compatible' ? 'OpenAI-compatible · 在线' : '确定性规则引擎 · 本地')
+              Text(this.llmMode === 'openai-compatible' ? 'OpenAI-compatible · 在线' : '确定性规则 · 仍需后端')
                 .fontSize(PMFontSize.CAPTION)
                 .fontColor(PMColors.INK_SECONDARY)
                 .margin({ top: 2 })
@@ -1297,7 +1300,7 @@ struct Index {
             .layoutWeight(1)
 
             Row() {
-              Text(this.llmMode === 'openai-compatible' ? '在线 API' : '离线引擎')
+              Text(this.llmMode === 'openai-compatible' ? '在线 API' : '规则模式')
                 .fontSize(PMFontSize.CAPTION)
                 .fontColor(this.llmMode === 'openai-compatible' ? PMColors.BRAND : PMColors.MEMORY)
                 .padding({ left: 8, right: 8, top: 4, bottom: 4 })
@@ -1314,6 +1317,7 @@ struct Index {
           .alignItems(VerticalAlign.Center)
           .clickEffect(PMInteraction.PRESS_EFFECT)
           .onClick(() => {
+            this.settingsSheetMode = 'api';
             this.showSettingsSheet = true;
           })
 
@@ -1352,7 +1356,7 @@ struct Index {
                 .fontSize(PMFontSize.BODY)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
-              Text('S08 标准技能适配已就绪')
+              Text('平台联调尚未验收')
                 .fontSize(PMFontSize.CAPTION)
                 .fontColor(PMColors.INK_SECONDARY)
                 .margin({ top: 2 })
@@ -1360,7 +1364,7 @@ struct Index {
             .alignItems(HorizontalAlign.Start)
             .layoutWeight(1)
 
-            Text('已连接')
+            Text('待验证')
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.SUCCESS)
               .padding({ left: 8, right: 8, top: 4, bottom: 4 })
@@ -1391,7 +1395,7 @@ struct Index {
                 .fontSize(PMFontSize.BODY)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
-              Text('缺口与关键风险触发系统级介入')
+              Text('由项目风险和提醒预算共同决定')
                 .fontSize(PMFontSize.CAPTION)
                 .fontColor(PMColors.INK_SECONDARY)
                 .margin({ top: 2 })
@@ -1399,11 +1403,7 @@ struct Index {
             .alignItems(HorizontalAlign.Start)
             .layoutWeight(1)
 
-            Toggle({ type: ToggleType.Switch, isOn: this.riskNotificationEnabled })
-              .selectedColor(PMColors.BRAND)
-              .onChange((isOn: boolean) => {
-                this.riskNotificationEnabled = isOn;
-              })
+            Text('按提醒策略').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
           }
           .width('100%')
           .height(52)
@@ -1417,7 +1417,7 @@ struct Index {
                 .fontSize(PMFontSize.BODY)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
-              Text('节点到期前 3 天触发进度自查')
+              Text('依据项目实际截止日期评估')
                 .fontSize(PMFontSize.CAPTION)
                 .fontColor(PMColors.INK_SECONDARY)
                 .margin({ top: 2 })
@@ -1425,11 +1425,7 @@ struct Index {
             .alignItems(HorizontalAlign.Start)
             .layoutWeight(1)
 
-            Toggle({ type: ToggleType.Switch, isOn: this.deadlineNotificationEnabled })
-              .selectedColor(PMColors.BRAND)
-              .onChange((isOn: boolean) => {
-                this.deadlineNotificationEnabled = isOn;
-              })
+            Text('按提醒策略').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
           }
           .width('100%')
           .height(52)
@@ -1443,7 +1439,7 @@ struct Index {
                 .fontSize(PMFontSize.BODY)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
-              Text('22:00 – 08:00 静音仅工作台红点')
+              Text('设置开始与结束时间，以服务端策略为准')
                 .fontSize(PMFontSize.CAPTION)
                 .fontColor(PMColors.INK_SECONDARY)
                 .margin({ top: 2 })
@@ -1451,13 +1447,17 @@ struct Index {
             .alignItems(HorizontalAlign.Start)
             .layoutWeight(1)
 
-            Text('22:00 – 08:00 ›')
+            Text('设置 ›')
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.INK_TERTIARY)
           }
           .width('100%')
           .height(52)
           .alignItems(VerticalAlign.Center)
+          .onClick(() => {
+            this.settingsSheetMode = 'policy';
+            this.showSettingsSheet = true;
+          })
 
           Divider().color(PMColors.BORDER_SUBTLE)
 
@@ -1467,7 +1467,7 @@ struct Index {
                 .fontSize(PMFontSize.BODY)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
-              Text('适中 · 证据明确才触发，绝不越权')
+              Text('设置每日主动提醒上限')
                 .fontSize(PMFontSize.CAPTION)
                 .fontColor(PMColors.INK_SECONDARY)
                 .margin({ top: 2 })
@@ -1475,13 +1475,17 @@ struct Index {
             .alignItems(HorizontalAlign.Start)
             .layoutWeight(1)
 
-            Text('适中 ›')
+            Text('设置 ›')
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.BRAND)
           }
           .width('100%')
           .height(52)
           .alignItems(VerticalAlign.Center)
+          .onClick(() => {
+            this.settingsSheetMode = 'policy';
+            this.showSettingsSheet = true;
+          })
         }
         .width('100%')
         .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
@@ -1511,7 +1515,7 @@ struct Index {
             .alignItems(HorizontalAlign.Start)
             .layoutWeight(1)
 
-            Text('严谨校验 ›')
+            Text('固定规则')
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.INK_TERTIARY)
           }
@@ -1535,7 +1539,7 @@ struct Index {
             .alignItems(HorizontalAlign.Start)
             .layoutWeight(1)
 
-            Text('双步确认 ›')
+            Text('固定规则')
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.INK_TERTIARY)
           }
@@ -1590,7 +1594,7 @@ struct Index {
                 .fontSize(PMFontSize.BODY)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
-              Text('用于跨终端智能问答与概览')
+              Text('需完成平台授权与实际联调')
                 .fontSize(PMFontSize.CAPTION)
                 .fontColor(PMColors.INK_SECONDARY)
                 .margin({ top: 2 })
@@ -1598,11 +1602,7 @@ struct Index {
             .alignItems(HorizontalAlign.Start)
             .layoutWeight(1)
 
-            Toggle({ type: ToggleType.Switch, isOn: this.xiaoyiReadEnabled })
-              .selectedColor(PMColors.BRAND)
-              .onChange((isOn: boolean) => {
-                this.xiaoyiReadEnabled = isOn;
-              })
+            Text('暂未接入').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
           }
           .width('100%')
           .height(52)
@@ -1616,7 +1616,7 @@ struct Index {
                 .fontSize(PMFontSize.BODY)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
-              Text('语音采集自动生成待确认草稿')
+              Text('需完成平台授权与实际联调')
                 .fontSize(PMFontSize.CAPTION)
                 .fontColor(PMColors.INK_SECONDARY)
                 .margin({ top: 2 })
@@ -1624,11 +1624,7 @@ struct Index {
             .alignItems(HorizontalAlign.Start)
             .layoutWeight(1)
 
-            Toggle({ type: ToggleType.Switch, isOn: this.xiaoyiRecordEnabled })
-              .selectedColor(PMColors.BRAND)
-              .onChange((isOn: boolean) => {
-                this.xiaoyiRecordEnabled = isOn;
-              })
+            Text('暂未接入').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
           }
           .width('100%')
           .height(52)
@@ -1638,11 +1634,11 @@ struct Index {
 
           Row() {
             Column() {
-              Text('写操作始终要求确认')
+              Text('行动创建需要确认')
                 .fontSize(PMFontSize.BODY)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
-              Text('核心安全约束，确保数据人工在环')
+              Text('行动提案确认后才提交；明确记录指令可保存')
                 .fontSize(PMFontSize.CAPTION)
                 .fontColor(PMColors.INK_SECONDARY)
                 .margin({ top: 2 })
@@ -1739,10 +1735,23 @@ struct Index {
     .transition(PMTransition.CONTENT_ENTER)
     .align(Alignment.Top)
     .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
-    .bindSheet($$this.showSettingsSheet, this.ApiSheet(), {
+    .bindSheet($$this.showSettingsSheet, this.SettingsSheet(), {
       height: SheetSize.FIT_CONTENT,
-      dragBar: true
+      dragBar: true,
+      showClose: false
     })
+  }
+
+  @Builder
+  private SettingsSheet() {
+    if (this.settingsSheetMode === 'policy') {
+      ReminderSettingsView({
+        projectId: this.projects.length > 0 ? this.projects[0].id : '',
+        onClose: () => { this.showSettingsSheet = false; }
+      })
+    } else {
+      this.ApiSheet()
+    }
   }
 
   // API 与引擎配置（半模态）：含引擎模式、在线 API 参数、连通测试与服务连接
@@ -2046,6 +2055,7 @@ struct Index {
   // 主构建入口
   // ----------------------------------------------------
   build() {
+    Stack() {
     if (this.isCheckingAuth) {
       Column() {
         LoadingStateView({ message: '正在连接演示环境...' })
@@ -2117,26 +2127,31 @@ struct Index {
         .backgroundColor(PMColors.SURFACE)
         .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
 
-        if (this.isLoading) {
-          LoadingStateView({ message: '正在同步项目档案...' })
-        } else if (this.errorMessage !== '') {
-          ErrorStateView({
-            message: this.errorMessage,
-            onRetry: () => {
-              this.loadAllData();
+        Column() {
+          if (this.isLoading) {
+            LoadingStateView({ message: '正在同步项目档案...' })
+          } else if (this.errorMessage !== '') {
+            ErrorStateView({
+              message: this.errorMessage,
+              onRetry: () => {
+                this.loadAllData();
+              }
+            })
+          } else {
+            if (this.currentMainTabIndex === 0) {
+              this.ProjectsTab()
+            } else if (this.currentMainTabIndex === 1) {
+              this.GlobalMemoryTab()
+            } else if (this.currentMainTabIndex === 2) {
+              this.TasksTab()
+            } else if (this.currentMainTabIndex === 3) {
+              this.SettingsTab()
             }
-          })
-        } else {
-          if (this.currentMainTabIndex === 0) {
-            this.ProjectsTab()
-          } else if (this.currentMainTabIndex === 1) {
-            this.GlobalMemoryTab()
-          } else if (this.currentMainTabIndex === 2) {
-            this.TasksTab()
-          } else if (this.currentMainTabIndex === 3) {
-            this.SettingsTab()
           }
         }
+        .width('100%')
+        .layoutWeight(1)
+        .clip(true)
 
         // 底部导航 Bar
         this.MainBottomBar()
@@ -2336,6 +2351,10 @@ struct Index {
     .width('100%')
     .height('100%')
     .backgroundColor(PMColors.BACKGROUND)
+    }
+    }
+    .width('100%')
+    .height('100%')
+    .backgroundColor(PMColors.BACKGROUND)
   }
-}
 }

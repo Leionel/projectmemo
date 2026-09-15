@@ -1,7 +1,7 @@
 # ProjectMemo 鸿蒙迁移代码库审计
 
 > 审计日期：2026-08-19
-> 配套文档：`HARMONYOS_PLAN.md`（迁移计划）
+> 配套文档：`../plans/HARMONYOS_PLAN.md`（迁移计划）
 > 审计原则：只分析，不修改代码。
 >
 > **目录口径说明**：仓库中不存在 `original/` 目录。**仓库根部本身就是现有 ProjectMemo 项目**（Next.js Web 应用），`harmonyos/` 是新增的 HarmonyOS 工程。下文按此口径审计。
@@ -37,7 +37,7 @@
 
 ```text
 hongmen/                        ← 仓库根 = ProjectMemo Web 项目本体
-├── HARMONYOS_PLAN.md           迁移计划（本次审计的输入）
+├── docs/plans/HARMONYOS_PLAN.md           迁移计划（本次审计的输入）
 ├── app/                        Next.js App Router
 │   ├── api/                    ★ 全部 15 个 route.ts（23 个端点），见 §3
 │   ├── page.tsx                落地页（含硬编码演示物料，见 §7）

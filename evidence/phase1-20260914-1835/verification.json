@@ -1,0 +1,63 @@
+{
+  "verifiedAt": "2026-09-14T10:51:00+08:00",
+  "scope": "ProjectMemo Phase 1 A1/A2/A3 and local SUB-01/SUB-02/SUB-07/SUB-08 checks",
+  "source": "当前工作区；未清理或覆盖既有证据；未使用真实开发库、个人登录态或外部凭据",
+  "commands": [
+    {
+      "command": "npm.cmd test -- tests/phase1Reliability.test.ts tests/meetingStateDiff.test.ts tests/actionFeasibility.test.ts tests/xiaoyi.adapter.test.ts",
+      "exitCode": 0,
+      "result": "4 files passed, 40 tests passed"
+    },
+    {
+      "command": "npm.cmd test",
+      "exitCode": 0,
+      "result": "29 files passed, 214 tests passed"
+    },
+    {
+      "command": "npm.cmd exec tsc -- --noEmit",
+      "exitCode": 0,
+      "result": "passed"
+    },
+    {
+      "command": "npm.cmd run lint",
+      "exitCode": 0,
+      "result": "0 errors, 7 existing warnings"
+    },
+    {
+      "command": "npm.cmd run build",
+      "exitCode": 0,
+      "result": "Next.js production build passed"
+    },
+    {
+      "command": "npm.cmd run test:e2e",
+      "exitCode": 0,
+      "result": "isolated E2E passed"
+    },
+    {
+      "command": "npm.cmd run harmony:test",
+      "exitCode": 0,
+      "result": "27 tests run, 0 failures, 0 errors"
+    },
+    {
+      "command": "npm.cmd run harmony:build",
+      "exitCode": 0,
+      "result": "unsigned HAP; 2665540 bytes; sha256 1f7e30c536937dd47085e2d9483fde55d1dbd97cf7ab7f295ec33c8a10847c4d"
+    }
+  ],
+  "device": {
+    "hdc": "D:\\Program Files\\Huawei\\DevEco Studio\\sdk\\default\\openharmony\\toolchains\\hdc.exe",
+    "listTargets": "empty",
+    "status": "BLOCKED"
+  },
+  "reviewBackend": {
+    "source": "harmonyos/entry/src/main/ets/common/Constants.ets",
+    "developmentUrl": "http://10.0.2.2:4400",
+    "reviewUrlConfigured": false,
+    "status": "BLOCKED"
+  },
+  "submission": {
+    "publicDeployment": false,
+    "platformUpload": false,
+    "remotePush": false
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "firstStatus": 201,
+  "secondStatus": 201,
+  "firstCard": "ca098aee-3c5a-46dd-a77d-54d4fa98f6dc",
+  "secondCard": "d11273c7-f5a1-4f14-9b15-a3175349b425",
+  "cardCount": 2,
+  "refreshStatus": 200,
+  "refreshBody": {
+    "status": "BASELINE_CREATED",
+    "snapshot": {
+      "id": "cmu0jv6by0004y88ohb02ch5x",
+      "projectId": "cmu0jv66x0000y88ok71zckav",
+      "sequence": 1,
+      "schemaVersion": 1,
+      "policyVersion": "2",
+      "sourceHash": "7021b1d4a866e780cbc8aa2f7ca8bdec4bff12aa81b8aba6a4b5b14e4bd3aaa3",
+      "evaluationKey": "phase:steady",
+      "contentHash": "14b9fbab6b40b7a7d8988d09159e0c2175d6603243ee2a4336447c8120bb27c1",
+      "observedAt": "2026-09-14T01:14:07.429Z",
+      "evaluatedAt": "2026-09-14T01:14:07.429Z",
+      "previousSnapshotId": null,
+      "payload": {
+        "snapshotId": "cmu0jv6by0004y88ohb02ch5x",
+        "projectId": "cmu0jv66x0000y88ok71zckav",
+        "schemaVersion": 1,
+        "policyVersion": "2",
+        "goal": "审查",
+        "deadline": null,
+        "stage": null,
+        "health": "UNKNOWN",
+        "facts": [],
+        "actions": [],
+        "gaps": [],
+        "risks": [],
+        "unknowns": [
+          {
+            "predicate": "deadline.risk",
+            "text": "未设置项目截止时间，无法判断截止风险",
+            "missingInputs": [
+              "project.deadline"
+            ],
+            "suggestedInputAction": "在项目设置中补充截止日期"
+          },
+          {
+            "predicate": "project.stage",
+            "text": "系统尚未记录用户确认的项目阶段",
+            "missingInputs": [
+              "project.stage"
+            ],
+            "suggestedInputAction": "在项目设置中确认当前阶段"
+          }
+        ],
+        "evaluatedAt": "2026-09-14T01:14:07.428Z",
+        "sourceHash": "7021b1d4a866e780cbc8aa2f7ca8bdec4bff12aa81b8aba6a4b5b14e4bd3aaa3",
+        "contentHash": "14b9fbab6b40b7a7d8988d09159e0c2175d6603243ee2a4336447c8120bb27c1",
+        "evaluationKey": "phase:steady"
+      }
+    },
+    "changed": true,
+    "reused": false
+  }
+}

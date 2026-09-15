@@ -5,6 +5,7 @@
     "pages/InterventionDetail",
     "pages/ActionBoard",
     "pages/MemoryTimeline",
-    "pages/FeatureGuide"
+    "pages/FeatureGuide",
+    "pages/LoginPage"
   ]
 }

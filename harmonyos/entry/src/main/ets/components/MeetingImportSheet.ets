@@ -2,6 +2,7 @@ import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction, PMMotion } fr
 import { MeetingAppliedChange, MeetingConfirmBody, MeetingConfirmResult, MeetingImpactPreview, MeetingPreviewInput, MeetingTypedChange } from '../models/Meeting';
 import { ApiError } from '../models/Project';
 import { MeetingService } from '../services/MeetingService';
+import { CheckboxIcon } from './PMIcons';
 
 // E5：会议文本导入。粘贴 → 预览（逐项勾选，待澄清项禁确认）→ 原子确认 → 会后 Diff。
 // 编辑文本/日期会使旧 proposalVersion 失效，必须重新预览。
@@ -122,10 +123,12 @@ export struct MeetingImportSheet {
       this.afterSnapshotId = result.afterSnapshotId !== null ? result.afterSnapshotId : '';
       this.stage = 'done';
     } catch (e) {
-      if (e instanceof ApiError && e.code === 'STATE_CHANGED_REPREVIEW') {
-        // 预览后源状态变化：保留输入并重新预览
-        this.errorMessage = '预览后相关决策已变化，已自动重新预览，请重新勾选确认';
-        await this.generatePreview();
+      if (e instanceof ApiError && (e.code === 'STATE_CHANGED_REPREVIEW' || e.code === 'PROPOSAL_EXECUTION_CONFLICT')) {
+        // 409 只提示重新预览：保留会议原文和日期，不自动替用户确认新版事实。
+        this.errorMessage = '预览基线已变化，原文已保留；请点击“生成预览”后重新勾选确认';
+        this.hasPreview = false;
+        this.stage = 'draft';
+        this.selectedIds = [];
       } else {
         this.errorMessage = e instanceof ApiError ? e.message : '确认失败，可重试同一次确认（不会重复写入）';
       }
@@ -144,15 +147,19 @@ export struct MeetingImportSheet {
           .fontColor(this.kindColor(change.kind))
         Blank()
         if (change.status === 'PROPOSED') {
-          Text(this.isSelected(change.changeId) ? '☑ 已勾选' : '☐ 勾选')
-            .fontSize(PMFontSize.CAPTION)
-            .fontColor(this.isSelected(change.changeId) ? PMColors.BRAND : PMColors.INK_TERTIARY)
-            .clickEffect(PMInteraction.PRESS_EFFECT)
-            .onClick(() => {
-              this.toggle(change);
-            })
-            .accessibilityText(`勾选${change.title}`)
-            .accessibilitySelected(this.isSelected(change.changeId))
+          Row() {
+            CheckboxIcon({ isChecked: this.isSelected(change.changeId), iconSize: 16 })
+            Text(this.isSelected(change.changeId) ? '已勾选' : '勾选')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(this.isSelected(change.changeId) ? PMColors.BRAND : PMColors.INK_TERTIARY)
+              .margin({ left: 4 })
+          }
+          .clickEffect(PMInteraction.PRESS_EFFECT)
+          .onClick(() => {
+            this.toggle(change);
+          })
+          .accessibilityText(`勾选${change.title}`)
+          .accessibilitySelected(this.isSelected(change.changeId))
         } else {
           Text('待澄清，不可确认')
             .fontSize(PMFontSize.CAPTION)

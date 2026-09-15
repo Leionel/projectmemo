@@ -2,6 +2,7 @@ import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMotion, PMMaterial } from 
 import { ArtifactAuditResponse, ArtifactAuditRecheckItem, ArtifactClaimAuditItem, ArtifactGenerationRef } from '../models/Artifact';
 import { ApiError } from '../models/Project';
 import { ArtifactService } from '../services/ArtifactService';
+import { AlertIcon } from './PMIcons';
 
 @Component
 export struct ClaimAuditorDrawer {
@@ -192,10 +193,13 @@ export struct ClaimAuditorDrawer {
         } else if (this.errorMessage !== '') {
           // 失败状态：如实报错并允许重试，不展示缓存数据
           Column() {
-            Text('⚠ 核验失败')
-              .fontSize(PMFontSize.BODY)
-              .fontWeight(FontWeight.Bold)
-              .fontColor(PMColors.RISK)
+            Row() {
+              AlertIcon({ iconSize: 16, color: PMColors.RISK })
+              Text(' 核验失败')
+                .fontSize(PMFontSize.BODY)
+                .fontWeight(FontWeight.Bold)
+                .fontColor(PMColors.RISK)
+            }
             Text(this.errorMessage)
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.INK_SECONDARY)
@@ -206,6 +210,7 @@ export struct ClaimAuditorDrawer {
               .fontColor(PMColors.SURFACE)
               .backgroundColor(PMColors.BRAND)
               .borderRadius(PMRadius.SM)
+              .height(44)
               .margin({ top: PMSpacing.MD })
               .onClick(() => {
                 this.loadAudit();

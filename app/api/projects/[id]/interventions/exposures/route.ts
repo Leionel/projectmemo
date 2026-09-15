@@ -1,3 +1,4 @@
+import { authorizeProjectAccess } from "@/lib/auth/guard";
 import { AppError, apiError } from "@/lib/api";
 import { db } from "@/lib/db";
 import { recordFeedback } from "@/lib/services/interventionFeedbackService";
@@ -11,6 +12,7 @@ export const runtime = "nodejs";
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    await authorizeProjectAccess(request, id);
     const body = (await request.json()) as { installationId?: string; interventionIds?: string[] };
     const installationId = body.installationId?.trim();
     if (!installationId) {

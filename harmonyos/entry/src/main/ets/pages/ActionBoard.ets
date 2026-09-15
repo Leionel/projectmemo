@@ -25,6 +25,7 @@ struct ActionBoard {
   @State isSubmitting: boolean = false;
   @State dialogError: string = '';
   @State startingActionId: string = '';
+  @State highlightActionId: string = '';
   @State showFeasibility: boolean = false;
   @State showFeasibilityEditor: boolean = false;
   @State feasibilityFor: FeasibilityAssessment = new FeasibilityAssessment();
@@ -131,6 +132,7 @@ struct ActionBoard {
       this.routeError = '页面参数缺失，项目ID无效';
       return;
     }
+    this.highlightActionId = params['actionId'] ?? '';
     this.loadActions();
   }
 
@@ -155,7 +157,11 @@ struct ActionBoard {
     const doing: ActionItem[] = [];
     const todo: ActionItem[] = [];
     const done: ActionItem[] = [];
+    let found = false;
     for (const action of actions) {
+      if (action.id === this.highlightActionId) {
+        found = true;
+      }
       if (action.status === 'DOING') {
         doing.push(action);
       } else if (action.status === 'TODO') {
@@ -167,6 +173,10 @@ struct ActionBoard {
     this.doingActions = doing;
     this.todoActions = todo;
     this.doneActions = done;
+    if (this.highlightActionId !== '' && !found) {
+      promptAction.showToast({ message: '来源行动不存在或已删除' });
+      this.highlightActionId = '';
+    }
   }
 
   private openCompleteDialog(actionId: string): void {
@@ -355,8 +365,12 @@ struct ActionBoard {
     .width('100%')
     .padding(PMSpacing.LG)
     .backgroundColor(PMColors.SURFACE)
-    .borderRadius(PMRadius.MD)
-    .border({ width: 1, color: PMColors.BORDER })
+    .borderRadius(PMRadius.LG)
+    .border({
+      width: this.highlightActionId === action.id ? 2 : 1,
+      color: this.highlightActionId === action.id ? PMColors.BRAND : PMColors.BORDER
+    })
+    .shadow({ radius: 6, color: 'rgba(0, 0, 0, 0.03)', offsetX: 0, offsetY: 1 })
     .alignItems(HorizontalAlign.Start)
   }
 

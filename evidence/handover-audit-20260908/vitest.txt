@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  19 passed (19)
+      Tests  118 passed (118)
+   Start at  07:39:07
+   Duration  12.98s (transform 1.14s, setup 0ms, import 1.88s, tests 6.21s, environment 1ms)
+

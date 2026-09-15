@@ -197,6 +197,23 @@ describe.sequential("S08 Xiaoyi record_memory adapter", () => {
     expect(receipts[0]).toMatchObject({ status: "SUCCESS", resultJson: { card_id: firstBody.card_id } });
   });
 
+  it("rejects a different payload under the same request id", async () => {
+    const { POST } = await import("@/app/xiaoyi/v1/memories/route");
+    const response = await POST(new Request("http://localhost/xiaoyi/v1/memories", {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${adapterToken}`,
+        "content-type": "application/json",
+        "idempotency-key": "record-memory-001",
+      },
+      body: JSON.stringify({ content: "这是同一请求 ID 下的另一段原文。" }),
+    }));
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toMatchObject({ error: { code: "IDEMPOTENCY_CONFLICT" } });
+    const { db } = await import("@/lib/db");
+    expect(await db.knowledgeCard.count({ where: { projectId } })).toBe(1);
+  });
+
   it("queries the shared memory API and replays its receipt", async () => {
     const { POST } = await import("@/app/xiaoyi/v1/memories/search/route");
     const request = () => new Request("http://localhost/xiaoyi/v1/memories/search", {

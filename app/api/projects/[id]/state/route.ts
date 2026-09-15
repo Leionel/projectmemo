@@ -1,11 +1,13 @@
+import { authorizeProjectAccess } from "@/lib/auth/guard";
 import { apiError } from "@/lib/api";
 import { getLatestProjectState, getProjectStateFreshness } from "@/lib/services/projectStateService";
 
 export const runtime = "nodejs";
 
-export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    await authorizeProjectAccess(request, id);
     const snapshot = await getLatestProjectState(id);
     const freshness = await getProjectStateFreshness(id);
     // 不隐式生成：没有快照就明确返回 EMPTY，由客户端显式刷新

@@ -20,7 +20,7 @@ export class AttachmentService {
   async upload(projectId: string, fileUri: string, fileName: string, mimeType: string): Promise<AttachmentUploadResult> {
     const request = http.createHttp();
     try {
-      const response = await request.request(`${Constants.BASE_URL}/api/projects/${projectId}/attachments`, {
+      const response = await request.request(`${Constants.requireBaseUrl()}/api/projects/${projectId}/attachments`, {
         method: http.RequestMethod.POST,
         multiFormDataList: [{
           name: 'file',

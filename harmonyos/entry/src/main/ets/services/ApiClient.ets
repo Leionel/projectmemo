@@ -2,9 +2,45 @@ import http from '@ohos.net.http';
 import { Constants } from '../common/Constants';
 import { ApiError } from '../models/Project';
 import { isSuccessCode, isNoContent, parseApiError } from '../common/ApiContract';
+import { SessionStore } from './SessionStore';
 
 export class ApiClient {
-  private baseUrl: string = Constants.BASE_URL;
+  private baseUrl: string = Constants.requireBaseUrl();
+
+  private buildHeaders(path: string): Record<string, string> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    // 登录接口本身不附带旧 Token
+    if (!path.startsWith('/api/auth/login')) {
+      const token = SessionStore.getToken();
+      if (token !== '' && token.length > 0) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+    return headers;
+  }
+
+  private handleResponseError(path: string, responseCode: number, resultStr: string): never {
+    if (responseCode === 401) {
+      if (!path.startsWith('/api/auth/login')) {
+        SessionStore.handleSessionExpired();
+        throw new ApiError('UNAUTHORIZED', '登录状态已失效，请重新登录', 401);
+      } else {
+        throw new ApiError('AUTH_FAILED', '账号或密码错误', 401);
+      }
+    }
+    if (responseCode === 403) {
+      throw new ApiError('FORBIDDEN', '无权访问该项目或操作受限', 403);
+    }
+    if (responseCode === 429) {
+      throw new ApiError('RATE_LIMITED', '操作过于频繁，请稍后再试', 429);
+    }
+    if (responseCode >= 500) {
+      throw new ApiError('SERVER_ERROR', '服务端异常，请稍后重试', responseCode);
+    }
+    throw parseApiError(resultStr, responseCode);
+  }
 
   async get<T>(path: string): Promise<T> {
     const httpRequest = http.createHttp();
@@ -13,9 +49,7 @@ export class ApiClient {
         `${this.baseUrl}${path}`,
         {
           method: http.RequestMethod.GET,
-          header: {
-            'Content-Type': 'application/json',
-          },
+          header: this.buildHeaders(path),
           expectDataType: http.HttpDataType.STRING,
           connectTimeout: 10000,
           readTimeout: 30000,
@@ -26,7 +60,7 @@ export class ApiClient {
         return JSON.parse(result) as T;
       } else {
         const errBody: string = response.result as string;
-        throw parseApiError(errBody, response.responseCode);
+        this.handleResponseError(path, response.responseCode, errBody);
       }
     } catch (e) {
       if (e instanceof ApiError) {
@@ -47,9 +81,7 @@ export class ApiClient {
     try {
       const options: http.HttpRequestOptions = {
         method: http.RequestMethod.POST,
-        header: {
-          'Content-Type': 'application/json',
-        },
+        header: this.buildHeaders(path),
         expectDataType: http.HttpDataType.STRING,
         connectTimeout: 10000,
         readTimeout: 30000,
@@ -66,7 +98,7 @@ export class ApiClient {
         return JSON.parse(result) as T;
       } else {
         const errBody: string = response.result as string;
-        throw parseApiError(errBody, response.responseCode);
+        this.handleResponseError(path, response.responseCode, errBody);
       }
     } catch (e) {
       if (e instanceof ApiError) {
@@ -86,11 +118,8 @@ export class ApiClient {
     const httpRequest = http.createHttp();
     try {
       const options: http.HttpRequestOptions = {
-        // RequestMethod 枚举不含 PATCH，使用 customMethod 发送 PATCH 请求
         customMethod: 'PATCH',
-        header: {
-          'Content-Type': 'application/json',
-        },
+        header: this.buildHeaders(path),
         expectDataType: http.HttpDataType.STRING,
         connectTimeout: 10000,
         readTimeout: 30000,
@@ -106,11 +135,10 @@ export class ApiClient {
         const result: string = response.result as string;
         return JSON.parse(result) as T;
       } else if (isNoContent(response.responseCode)) {
-        // 204 No Content：响应体为空，跳过 JSON.parse，直接返回 undefined
         return undefined as T;
       } else {
         const errBody: string = response.result as string;
-        throw parseApiError(errBody, response.responseCode);
+        this.handleResponseError(path, response.responseCode, errBody);
       }
     } catch (e) {
       if (e instanceof ApiError) {

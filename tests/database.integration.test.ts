@@ -53,13 +53,15 @@ describe.sequential("SQLite integration", () => {
     const { generateArtifact, saveEditedArtifactVersion } = await import("@/lib/services/artifactService");
     const { listArtifacts } = await import("@/lib/repositories/artifacts");
     const { POST } = await import("@/app/api/projects/[id]/artifacts/route");
+    const { createTestAuth } = await import("./testAuthHelper");
     const project = await createProject({ title: "成果润色项目", description: "这个项目用于验证成果的人工润色与版本留存。", goal: "保存两个独立版本", scenario: "COMPETITION", deadline: null });
+    const auth = await createTestAuth(project.id);
     await processCapture(project.id, "需要完成比赛 README，并清楚说明当前进展、风险和下一步。", "任务安排");
     const generated = await generateArtifact(project.id, "readme");
     const edited = await saveEditedArtifactVersion(project.id, "readme", "  # 人工润色 README\n\n这是最终演示版本。  ");
     const apiResponse = await POST(new Request(`http://localhost/api/projects/${project.id}/artifacts`, {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: auth.headers,
       body: JSON.stringify({ artifactType: "readme", content: "# 接口保存版本\n\n由成果编辑器提交。" }),
     }), { params: Promise.resolve({ id: project.id }) });
     expect(apiResponse.status).toBe(201);
@@ -87,16 +89,21 @@ describe.sequential("SQLite integration", () => {
   it("exposes project update and delete through the detail API", async () => {
     const { createProject, requireProject } = await import("@/lib/repositories/projects");
     const { PATCH, DELETE } = await import("@/app/api/projects/[id]/route");
+    const { createTestAuth } = await import("./testAuthHelper");
     const project = await createProject({ title: "接口编辑项目", description: "这个项目用于验证详情接口的编辑和删除。", goal: "打通接口闭环", scenario: "COMPETITION", deadline: null });
+    const auth = await createTestAuth(project.id);
     const context = { params: Promise.resolve({ id: project.id }) };
     const patchResponse = await PATCH(new Request(`http://localhost/api/projects/${project.id}`, {
       method: "PATCH",
-      headers: { "content-type": "application/json" },
+      headers: auth.headers,
       body: JSON.stringify({ title: "接口已更新项目", deadline: "2026-09-01" }),
     }), context);
     expect(patchResponse.status).toBe(200);
     await expect(patchResponse.json()).resolves.toMatchObject({ project: { title: "接口已更新项目" } });
-    const deleteResponse = await DELETE(new Request(`http://localhost/api/projects/${project.id}`, { method: "DELETE" }), context);
+    const deleteResponse = await DELETE(new Request(`http://localhost/api/projects/${project.id}`, {
+      method: "DELETE",
+      headers: auth.headers,
+    }), context);
     expect(deleteResponse.status).toBe(204);
     await expect(requireProject(project.id)).rejects.toMatchObject({ code: "PROJECT_NOT_FOUND" });
   });
@@ -140,8 +147,11 @@ describe.sequential("SQLite integration", () => {
     const { createProject, getProjectDetail } = await import("@/lib/repositories/projects");
     const { processCapture } = await import("@/lib/services/captureService");
     const { PATCH, DELETE } = await import("@/app/api/projects/[id]/cards/[cardId]/route");
+    const { createTestAuth } = await import("./testAuthHelper");
     const project = await createProject({ title: "卡片纠错项目", description: "这个项目用于验证知识卡片的追溯、纠正与撤销。", goal: "修复错误识别", scenario: "RESEARCH", deadline: null });
     const otherProject = await createProject({ title: "另一个隔离项目", description: "这个项目用于验证卡片不能被跨项目修改。", goal: "保证数据隔离", scenario: "LAB_TASK", deadline: null });
+    const auth = await createTestAuth(project.id);
+    await auth.bindProject(otherProject.id);
     await processCapture(project.id, "RAG baseline 准确率需要继续记录，并补充本周对照实验。", "实验记录");
     await processCapture(project.id, "RAG baseline 对照实验需要在周五前完成并同步结果。", "任务安排");
     const before = await getProjectDetail(project.id);
@@ -155,7 +165,7 @@ describe.sequential("SQLite integration", () => {
     const context = { params: Promise.resolve({ id: project.id, cardId: card.id }) };
     const patchResponse = await PATCH(new Request(`http://localhost/api/projects/${project.id}/cards/${card.id}`, {
       method: "PATCH",
-      headers: { "content-type": "application/json" },
+      headers: auth.headers,
       body: JSON.stringify({
         type: "risk",
         title: "修正后的检索风险",
@@ -172,7 +182,7 @@ describe.sequential("SQLite integration", () => {
 
     const crossProjectResponse = await PATCH(new Request(`http://localhost/api/projects/${otherProject.id}/cards/${card.id}`, {
       method: "PATCH",
-      headers: { "content-type": "application/json" },
+      headers: auth.headers,
       body: JSON.stringify({ title: "不应允许的跨项目修改" }),
     }), { params: Promise.resolve({ id: otherProject.id, cardId: card.id }) });
     expect(crossProjectResponse.status).toBe(404);
@@ -183,7 +193,10 @@ describe.sequential("SQLite integration", () => {
       await db.cardRelation.create({ data: { currentCardId: card.id, relatedCardId: relatedCard.id, reason: "测试级联", score: 1 } });
     }
     await db.project.update({ where: { id: project.id }, data: { updatedAt: old } });
-    const deleteResponse = await DELETE(new Request(`http://localhost/api/projects/${project.id}/cards/${card.id}`, { method: "DELETE" }), context);
+    const deleteResponse = await DELETE(new Request(`http://localhost/api/projects/${project.id}/cards/${card.id}`, {
+      method: "DELETE",
+      headers: auth.headers,
+    }), context);
     expect(deleteResponse.status).toBe(204);
     expect(await db.capture.findUnique({ where: { id: card.captureId } })).toBeNull();
     expect(await db.knowledgeCard.findUnique({ where: { id: card.id } })).toBeNull();
@@ -193,7 +206,11 @@ describe.sequential("SQLite integration", () => {
 
   it("returns 404 instead of an empty artifact list for a missing project", async () => {
     const { GET } = await import("@/app/api/projects/[id]/artifacts/route");
-    const response = await GET(new Request("http://localhost/api/projects/missing/artifacts"), { params: Promise.resolve({ id: "missing" }) });
+    const { createTestAuth } = await import("./testAuthHelper");
+    const auth = await createTestAuth();
+    const response = await GET(new Request("http://localhost/api/projects/missing/artifacts", {
+      headers: auth.headers,
+    }), { params: Promise.resolve({ id: "missing" }) });
     expect(response.status).toBe(404);
     await expect(response.json()).resolves.toMatchObject({ error: { code: "PROJECT_NOT_FOUND" } });
   });
@@ -206,18 +223,28 @@ describe.sequential("SQLite integration", () => {
     const { listInterventions, listActions } = await import("@/lib/repositories/agent");
     const { PATCH: patchIntervention } = await import("@/app/api/projects/[id]/interventions/[interventionId]/route");
     const { PATCH: patchAction } = await import("@/app/api/projects/[id]/actions/[actionId]/route");
+    const { createTestAuth } = await import("./testAuthHelper");
     const project = await createProject({ title: "主动闭环集成测试", description: "验证主动提醒、行动回执和复盘卡片的完整持久化链路。", goal: "完成 Agent 闭环", scenario: "COMPETITION", deadline: null });
+    const auth = await createTestAuth(project.id);
     await db.project.update({ where: { id: project.id }, data: { deadline: new Date(Date.now() + 2 * 86_400_000) } });
-    await processCapture(project.id, "椋庨櫓锛氭紨绀鸿剼鏈皻鏈畬鎴愶紝闇€瑕佷紭鍏堝鐞嗐€?", "风险记录");
+    await processCapture(project.id, "风险：演示脚本尚未完成，需要优先处理。", "风险记录");
     const evaluation = await evaluateProjectContext(project.id);
     expect(evaluation.interventions.length).toBeGreaterThan(0);
     const deadline = (await listInterventions(project.id, false)).find((item) => item.triggerType === "DEADLINE_NEAR");
     expect(deadline).toBeTruthy();
-    const accepted = await patchIntervention(new Request("http://localhost", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: "ACCEPTED" }) }), { params: Promise.resolve({ id: project.id, interventionId: deadline!.id }) });
+    const accepted = await patchIntervention(new Request("http://localhost", {
+      method: "PATCH",
+      headers: auth.headers,
+      body: JSON.stringify({ status: "ACCEPTED" }),
+    }), { params: Promise.resolve({ id: project.id, interventionId: deadline!.id }) });
     expect(accepted.status).toBe(200);
     const acceptedData = await accepted.json() as { action: { id: string } };
     expect(acceptedData.action.id).toBeTruthy();
-    const completed = await patchAction(new Request("http://localhost", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: "DONE", resultText: "已完成最小交付清单并录制演示路径。" }) }), { params: Promise.resolve({ id: project.id, actionId: acceptedData.action.id }) });
+    const completed = await patchAction(new Request("http://localhost", {
+      method: "PATCH",
+      headers: auth.headers,
+      body: JSON.stringify({ status: "DONE", resultText: "已完成最小交付清单并录制演示路径。" }),
+    }), { params: Promise.resolve({ id: project.id, actionId: acceptedData.action.id }) });
     expect(completed.status).toBe(200);
     await expect(completed.json()).resolves.toMatchObject({ action: { status: "DONE", resultCardId: expect.any(String) } });
     const actions = await listActions(project.id);

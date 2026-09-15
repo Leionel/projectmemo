@@ -11,7 +11,7 @@ const FEATURE_DOC: string = `# 忆程 ProjectMemo 功能说明
 
 ## 核心循环
 
-1. **记录**：在工作台随手记文字、拍照或传 PDF，来源自动保留；
+1. **记录**：在工作台随手记文字、选择图片或上传 PDF，来源自动保留；
 2. **确认**：决策变更先预览影响，你勾选确认后才生效；
 3. **对比**：系统在关键节点生成"状态基线"，之后每次变化都能对比出"变了什么、依据是什么"；
 4. **收尾**：完成行动时写下结果回执，自动写入记忆形成闭环。
@@ -26,7 +26,7 @@ const FEATURE_DOC: string = `# 忆程 ProjectMemo 功能说明
 
 - 记忆时间线展示每条记录的时态状态：当前有效 / 已被取代 / 存在冲突 / 待确认。
 - **决策演化链**：原决策 → 替代决策 → 确认时间 → 原因，逐条可追溯。
-- 长按展开可**确认来源**（来源声明，不等于事实证明）或**归档**（可恢复的展示偏好，不影响历史）。
+- 长按展开可**确认来源**（来源声明，不等于事实证明）或**归档**（可恢复的展示偏好，可在时间线页「已归档」列表恢复）。
 - 附件纠错保留旧提取文本，形成修订链；旧数值不再冒充当前值。
 
 ## 待办
@@ -50,10 +50,17 @@ const FEATURE_DOC: string = `# 忆程 ProjectMemo 功能说明
 - **时态账本**：记忆有版本与有效期；被取代的旧结论可追溯，但不再冒充当前事实。
 - **诚实的不确定性**：信息不足时保持"未知"，不猜测、不编造；演示数据一律明确标识。
 
+## 功能状态说明
+
+- **可用**：记录文字、选择图片、上传 PDF、决策变更确认、状态基线与变化对比、变化简报、行动依赖与估时、提醒预算与静默时段（部分开关需在服务端环境开启）
+- **需配置**：在线模型问答与成果生成（需配置 OpenAI 兼容 API）；语义检索（需配置 embedding 服务）
+- **示例**：桌面卡片看板（示例数据，未接实时项目）；演示情境（不计入真实指标）
+- **未完成**：关闭 App 后的定时主动提醒、拍摄照片、小艺语音入口
+
 ## 数据与安全
 
 - API 密钥只用于当前本地运行，不在界面回显；长期配置请使用部署环境变量。
-- 离线确定性引擎无需网络即可运行，结果按本地规则生成并可复核。
+- 规则引擎无需配置模型 API，结果按本地规则生成并可复核；App 仍需连接项目服务端读写数据。
 `;
 
 @Entry
@@ -64,6 +71,73 @@ struct FeatureGuide {
   aboutToAppear(): void {
     // 文档为内置常量，直接渲染；如需远程/文件加载，在此处替换 content 来源
     this.content = FEATURE_DOC;
+  }
+
+  @Builder
+  private CoreCycleBar() {
+    Column() {
+      Text('核心闭环流程 (Human-in-the-Loop)')
+        .fontSize(PMFontSize.CAPTION)
+        .fontWeight(FontWeight.Bold)
+        .fontColor(PMColors.INK_TERTIARY)
+        .margin({ bottom: PMSpacing.SM })
+
+      Scroll() {
+        Row({ space: 4 }) {
+          this.StepNode('1', '记录', '碎片与附件')
+          Text('→').fontSize(12).fontColor(PMColors.INK_TERTIARY)
+          this.StepNode('2', '确认', '影响与演化')
+          Text('→').fontSize(12).fontColor(PMColors.INK_TERTIARY)
+          this.StepNode('3', '对比', '基线与Diff')
+          Text('→').fontSize(12).fontColor(PMColors.INK_TERTIARY)
+          this.StepNode('4', '介入', '为什么是现在')
+          Text('→').fontSize(12).fontColor(PMColors.INK_TERTIARY)
+          this.StepNode('5', '行动', '依赖与执行')
+          Text('→').fontSize(12).fontColor(PMColors.INK_TERTIARY)
+          this.StepNode('6', '收尾', '回执沉淀闭环')
+        }
+      }
+      .scrollable(ScrollDirection.Horizontal)
+      .scrollBar(BarState.Off)
+      .width('100%')
+    }
+    .width('100%')
+    .padding(PMSpacing.MD)
+    .backgroundColor(PMColors.SURFACE)
+    .borderRadius(PMRadius.LG)
+    .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+    .alignItems(HorizontalAlign.Start)
+    .margin({ bottom: PMSpacing.MD })
+  }
+
+  @Builder
+  private StepNode(num: string, title: string, desc: string) {
+    Column() {
+      Row() {
+        Text(num)
+          .fontSize(10)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(PMColors.SURFACE)
+          .width(16)
+          .height(16)
+          .borderRadius(8)
+          .backgroundColor(PMColors.BRAND)
+          .textAlign(TextAlign.Center)
+        Text(title)
+          .fontSize(PMFontSize.CAPTION)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(PMColors.INK_PRIMARY)
+          .margin({ left: 4 })
+      }
+      Text(desc)
+        .fontSize(10)
+        .fontColor(PMColors.INK_TERTIARY)
+        .margin({ top: 2 })
+    }
+    .padding({ left: 8, right: 8, top: 6, bottom: 6 })
+    .backgroundColor(PMColors.SURFACE_SUBTLE)
+    .borderRadius(PMRadius.SM)
+    .alignItems(HorizontalAlign.Start)
   }
 
   build() {
@@ -81,6 +155,10 @@ struct FeatureGuide {
       } else {
         Scroll() {
           Column() {
+            // 核心循环工作流图
+            this.CoreCycleBar()
+
+            // 完整功能与设计理念 Markdown
             MarkdownView({ content: this.content })
           }
           .width('100%')
@@ -94,6 +172,6 @@ struct FeatureGuide {
     }
     .width('100%')
     .height('100%')
-    .backgroundColor(PMColors.SURFACE_SUBTLE)
+    .backgroundColor(PMColors.BACKGROUND)
   }
 }

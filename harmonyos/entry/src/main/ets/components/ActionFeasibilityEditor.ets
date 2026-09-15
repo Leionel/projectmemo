@@ -26,6 +26,7 @@ export struct ActionFeasibilityEditor {
   @State isSaving: boolean = false;
   @State editorError: string = '';
   @State pendingRequirementId: string = '';
+  @State dependencyVersion: number = 1;
 
   private actionService: ActionService = new ActionService();
   private projectService: ProjectService = new ProjectService();
@@ -35,6 +36,7 @@ export struct ActionFeasibilityEditor {
 
   aboutToAppear(): void {
     this.deps = this.assessment.dependencies;
+    this.dependencyVersion = this.assessment.dependencyVersion;
     this.estimateText = this.assessment.estimateMinutes !== null ? `${this.assessment.estimateMinutes}` : '';
     this.loadPicker('action');
   }
@@ -83,7 +85,10 @@ export struct ActionFeasibilityEditor {
   }
 
   private async apply(input: FeasibilityInput): Promise<FeasibilityAssessment> {
-    return this.actionService.updateFeasibility(this.projectId, input);
+    input.expectedVersion = this.dependencyVersion;
+    const updated = await this.actionService.updateFeasibility(this.projectId, input);
+    this.dependencyVersion = updated.dependencyVersion;
+    return updated;
   }
 
   private async addRequirement(item: PickerItem): Promise<void> {
@@ -135,19 +140,21 @@ export struct ActionFeasibilityEditor {
       return;
     }
     const trimmed = this.estimateText.trim();
-    if (!clear && trimmed !== '') {
-      const minutes = Number.parseInt(trimmed, 10);
-      if (Number.isNaN(minutes) || minutes <= 0) {
-        this.editorError = '估时必须是正整数分钟';
+    let minutes: number | null = null;
+    if (!clear) {
+      if (!/^\d+$/.test(trimmed) || Number.parseInt(trimmed, 10) <= 0) {
+        this.editorError = '估时必须是正整数分钟，不能包含其他字符';
         return;
       }
+      minutes = Number.parseInt(trimmed, 10);
     }
     this.isSaving = true;
     this.editorError = '';
     try {
       const input = new FeasibilityInput();
       input.actionId = this.actionId;
-      input.estimatedMinutes = clear ? undefined : Number.parseInt(trimmed, 10);
+      // 清空显式发 null（JSON 序列化保留），服务端将估时置空
+      input.estimatedMinutes = clear ? null : minutes;
       await this.apply(input);
       this.estimateText = clear ? '' : trimmed;
     } catch (e) {

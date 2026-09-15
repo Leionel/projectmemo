@@ -120,3 +120,60 @@ export function parseApiError(errBody: string, statusCode: number): ApiError {
   }
   return new ApiError(code, message, statusCode);
 }
+
+// --- 认证契约辅助 ---
+
+export class LoginRequestBody {
+  username: string = '';
+  password: string = '';
+  client: string = 'harmony';
+}
+
+export function buildLoginBody(username: string, password: string, client: string = 'harmony'): LoginRequestBody {
+  const body = new LoginRequestBody();
+  body.username = username.trim();
+  body.password = password;
+  body.client = client;
+  return body;
+}
+
+export function buildAuthorizationHeader(token: string): string {
+  if (!token || token.trim().length === 0) {
+    return '';
+  }
+  return `Bearer ${token.trim()}`;
+}
+
+export function isTokenExpired(expiresAt: string, nowMs?: number): boolean {
+  if (!expiresAt || expiresAt.trim().length === 0) {
+    return false;
+  }
+  const exp = Date.parse(expiresAt);
+  if (Number.isNaN(exp)) {
+    return false;
+  }
+  const current = nowMs !== undefined ? nowMs : Date.now();
+  return current >= exp;
+}
+
+export function classifyHttpError(statusCode: number): string {
+  if (statusCode === 401) {
+    return 'UNAUTHORIZED';
+  }
+  if (statusCode === 403) {
+    return 'FORBIDDEN';
+  }
+  if (statusCode === 404) {
+    return 'NOT_FOUND';
+  }
+  if (statusCode === 408) {
+    return 'REQUEST_TIMEOUT';
+  }
+  if (statusCode === 429) {
+    return 'RATE_LIMITED';
+  }
+  if (statusCode >= 500) {
+    return 'SERVER_ERROR';
+  }
+  return 'HTTP_ERROR';
+}

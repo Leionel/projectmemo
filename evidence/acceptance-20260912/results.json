@@ -1,9 +1,9 @@
 {
-  "databasePath": "D:\\Projects\\hongmen\\evidence\\acceptance-20260912\\probe-1789216849509.db",
+  "databasePath": "D:\\Projects\\hongmen\\evidence\\acceptance-20260912\\probe-1789217604166.db",
   "recurrence": {
-    "a": "cmtydilix00017s8o6fp9tgfk",
-    "b": "cmtydiljh00027s8o0qb32lad",
-    "a2": "cmtydiljs00037s8oc0v2qbo8",
+    "a": "cmtydyruq00016o8o1f4qgepk",
+    "b": "cmtydyrv800026o8om28u93nq",
+    "a2": "cmtydyrvj00036o8ouq1tun1g",
     "reused": false,
     "latestGoal": "A"
   },
@@ -43,13 +43,13 @@
   ],
   "stableContentHash": true,
   "unconfirmedDependency": {
-    "actionId": "cmtydilk800067s8obj82ivab",
+    "actionId": "cmtydyrvz00066o8o15pjukii",
     "feasibility": "UNKNOWN",
     "dependencies": [
       {
-        "requirementId": "cmtydilkh00077s8oyh8d4y47",
+        "requirementId": "cmtydyrw700076o8oh2ns6lj9",
         "targetKind": "card",
-        "targetId": "cmtydilk300057s8oo1ahhsop",
+        "targetId": "cmtydyrvu00056o8oa67edqq7",
         "hard": true,
         "targetTitle": "unconfirmed",
         "state": "UNKNOWN",
@@ -60,7 +60,7 @@
     "deadline": null,
     "estimateMinutes": null,
     "estimateNote": "未估算（由用户补充，系统不编造估时）",
-    "assessedAt": "2026-09-12T12:40:50.625Z",
+    "assessedAt": "2026-09-12T12:53:25.323Z",
     "summary": "没有已知阻塞，但关键依赖的状态无法确认。"
   }
 }

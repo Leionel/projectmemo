@@ -1,0 +1,76 @@
+{
+  "concurrentMeeting": {
+    "selected": [
+      "chg-1"
+    ],
+    "runs": [
+      {
+        "status": "fulfilled",
+        "value": {
+          "proposalId": "mip_cmu0k30va0002no8ows412rmq",
+          "applied": [
+            {
+              "changeId": "chg-1",
+              "kind": "ACTION_CREATE",
+              "newCardId": null,
+              "newActionId": "cmu0k30vk0003no8o3yml32ud",
+              "supersededCardId": null,
+              "deadlineISO": null
+            }
+          ],
+          "afterSnapshotId": "cmu0k30w30005no8oyu82z7fy",
+          "alreadyConfirmed": false
+        }
+      },
+      {
+        "status": "fulfilled",
+        "value": {
+          "proposalId": "mip_cmu0k30va0002no8ows412rmq",
+          "applied": [
+            {
+              "changeId": "chg-1",
+              "kind": "ACTION_CREATE",
+              "newCardId": null,
+              "newActionId": "cmu0k30vs0004no8ohzoe46gz",
+              "supersededCardId": null,
+              "deadlineISO": null
+            }
+          ],
+          "afterSnapshotId": "cmu0k30w30005no8oyu82z7fy",
+          "alreadyConfirmed": false
+        }
+      }
+    ],
+    "actionCount": 2
+  },
+  "staleDeadline": {
+    "newerValue": "2026-10-20",
+    "after": "2026-10-01T00:00:00.000Z",
+    "confirmed": {
+      "proposalId": "mip_cmu0k30wn0006no8o2upifqbt",
+      "applied": [
+        {
+          "changeId": "chg-1",
+          "kind": "DEADLINE_CHANGE",
+          "newCardId": null,
+          "newActionId": null,
+          "supersededCardId": null,
+          "deadlineISO": "2026-10-01"
+        }
+      ],
+      "afterSnapshotId": "cmu0k30x70007no8opp7mpy4r",
+      "alreadyConfirmed": false
+    }
+  },
+  "replaceRequirement": {
+    "actionId": "cmu0k30xj0008no8ot84me9u7",
+    "feasibility": "READY",
+    "dependencies": [],
+    "overdue": false,
+    "deadline": null,
+    "estimateMinutes": null,
+    "estimateNote": "未估算（由用户补充，系统不编造估时）",
+    "assessedAt": "2026-09-14T01:20:13.723Z",
+    "summary": "已声明的硬依赖全部满足。READY 不保证现实一定能按时完成。"
+  }
+}

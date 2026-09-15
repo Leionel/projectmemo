@@ -1,6 +1,6 @@
 process.env.INTERVENTION_BUDGET_ENABLED = "1";
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import { db } from "@/lib/db";
 import {
   applyInterventionPolicy,
@@ -50,6 +50,11 @@ describe("Intervention budget and quiet hours (B1)", () => {
     });
     projectIdA = a.id;
     projectIdB = b.id;
+  });
+
+  beforeEach(async () => {
+    await db.interventionDecision.deleteMany({});
+    await db.interventionBudgetLedger.deleteMany({});
   });
 
   afterAll(async () => {

@@ -309,6 +309,7 @@ export struct MoreIcon {
 export struct AlertIcon {
   @Prop iconSize: number = 16;
   @Prop color: ResourceColor = PMColors.RISK;
+  @Prop isHigh: boolean = false;
 
   build() {
     // 警示三角 / 提醒
@@ -376,22 +377,102 @@ export struct CheckIcon {
 export struct SpineNodeIcon {
   @Prop isJudgement: boolean = false;
   @Prop color: ResourceColor = PMColors.EVIDENCE;
+  @Prop iconSize: number = 10;
 
   build() {
     if (this.isJudgement) {
       Row()
-        .width(10)
-        .height(10)
+        .width(this.iconSize)
+        .height(this.iconSize)
         .backgroundColor(PMColors.RISK)
         .borderRadius(2)
         .rotate({ angle: 45 })
     } else {
       Row()
-        .width(10)
-        .height(10)
+        .width(this.iconSize)
+        .height(this.iconSize)
         .backgroundColor(PMColors.SURFACE)
         .border({ width: 2, color: this.color })
-        .borderRadius(5)
+        .borderRadius(this.iconSize / 2)
     }
   }
 }
+
+@Component
+export struct PaperclipIcon {
+  @Prop iconSize: number = 16;
+  @Prop color: ResourceColor = PMColors.BRAND;
+
+  build() {
+    Stack() {
+      Row()
+        .width(this.iconSize * 0.45)
+        .height(this.iconSize * 0.75)
+        .border({ width: 1.5, color: this.color })
+        .borderRadius({ topLeft: 4, topRight: 4, bottomLeft: 4, bottomRight: 4 })
+        .rotate({ angle: -30 })
+    }
+    .width(this.iconSize)
+    .height(this.iconSize)
+    .alignContent(Alignment.Center)
+  }
+}
+
+@Component
+export struct BookOpenIcon {
+  @Prop iconSize: number = 20;
+  @Prop color: ResourceColor = PMColors.BRAND;
+
+  build() {
+    Row({ space: 2 }) {
+      Row()
+        .width(this.iconSize * 0.45)
+        .height(this.iconSize * 0.65)
+        .border({ width: 1.5, color: this.color })
+        .borderRadius({ topLeft: 2, bottomLeft: 2 })
+      Row()
+        .width(this.iconSize * 0.45)
+        .height(this.iconSize * 0.65)
+        .border({ width: 1.5, color: this.color })
+        .borderRadius({ topRight: 2, bottomRight: 2 })
+    }
+    .width(this.iconSize)
+    .height(this.iconSize)
+    .justifyContent(FlexAlign.Center)
+    .alignItems(VerticalAlign.Center)
+  }
+}
+
+@Component
+export struct CheckboxIcon {
+  @Prop isChecked: boolean = false;
+  @Prop isDisabled: boolean = false;
+  @Prop iconSize: number = 18;
+
+  build() {
+    Stack() {
+      if (this.isChecked) {
+        Row()
+          .width(this.iconSize)
+          .height(this.iconSize)
+          .backgroundColor(this.isDisabled ? PMColors.INK_MUTED : PMColors.BRAND)
+          .borderRadius(3)
+        Text('✓')
+          .fontSize(12)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(PMColors.SURFACE)
+      } else {
+        Row()
+          .width(this.iconSize)
+          .height(this.iconSize)
+          .backgroundColor(PMColors.SURFACE)
+          .border({ width: 1.5, color: this.isDisabled ? PMColors.BORDER_STRONG : PMColors.INK_TERTIARY })
+          .borderRadius(3)
+      }
+    }
+    .width(this.iconSize)
+    .height(this.iconSize)
+    .alignContent(Alignment.Center)
+  }
+}
+

@@ -14,7 +14,7 @@
 ## 本轮提交
 
 - 代码批次：`248257a` — `fix: refine HarmonyOS UI states and controls`。
-- 证据批次：本文件与 `evidence/2.1/` 的 W00/W01 记录，提交号以包含本文件的 Git 历史为准。
++ 证据批次：本文件与 `../../evidence/2.1/` 的 W00/W01 记录，提交号以包含本文件的 Git 历史为准。
 - 未纳入：用户已有的 `ProjectMemo_2.1_PLAN.md` 修改、`next-env.d.ts`、浏览器运行日志、`output/`、`storage/`、`tmp/` 和其他本地运行产物。
 
 ## 网页设计优点向鸿蒙端的迁移
@@ -55,11 +55,11 @@
 
 ## W01 验收边界
 
-四个 AVD profile 均存在，但 `Emulator.exe -start "Pura 90" -instancePath ...` 返回退出码 1（`Unable to start the emulator`），随后 `hdc list targets` 为 `[Empty]`。历史 Pura 90 日志还记录主机可用内存低于 3 GB、Guest OS 启动后 hdc 未连接。完整回执见 `evidence/2.1/ui-matrix/W01-emulator-blocked.txt`。
+四个 AVD profile 均存在，但 `Emulator.exe -start "Pura 90" -instancePath ...` 返回退出码 1（`Unable to start the emulator`），随后 `hdc list targets` 为 `[Empty]`。历史 Pura 90 日志还记录主机可用内存低于 3 GB、Guest OS 启动后 hdc 未连接。完整回执见 `../../evidence/2.1/ui-matrix/W01-emulator-blocked.txt`。
 
 因此本轮不宣称以下项目通过：Phone/Foldable/Tablet/2in1 截图与 `uitest dumpLayout`、大字体、键盘遮挡、慢网/乱序、深色模式运行矩阵、S05 图片/PDF 各 5 份模拟器回执、S06 10 次 App 操作、S07 系统通知权限/点击/冷热启动/Snooze/重启矩阵。后续代码批次 `28809bf` 已将深色语义色接入 `base/dark` 资源，但尚无新的目标设备截图或 dump，因此深色运行验收仍为 `UNVERIFIED`。
 
-S05–S07 的离线状态与代码边界见 `evidence/2.1/inbox-gap-notification/W01-s05-s07-status.md`；原生 UI 审视见 `evidence/2.1/ui-matrix/native-ui-audit.md`。
+S05–S07 的离线状态与代码边界见 `../../evidence/2.1/inbox-gap-notification/W01-s05-s07-status.md`；原生 UI 审视见 `../../evidence/2.1/ui-matrix/native-ui-audit.md`。
 
 ## Deviations
 
@@ -102,14 +102,14 @@ S05–S07 的离线状态与代码边界见 `evidence/2.1/inbox-gap-notification
 - Edge 中已核对现有云插件 `ProjectMemo 记忆记录`：工具列表为 4 个，包含原有 `Memory_Recorded`，以及新增并保存的 `query_memory`、`inspect_project`、`create_action`。
 - 三个新增工具均指向 `https://project.luojiatutor.xyz`，接口路径分别为 `/xiaoyi/v1/memories/search`、`/xiaoyi/v1/projects/inspect` 和 `/xiaoyi/v1/actions`；输入参数已按本地严格 schema 配置，包含必需的 Header `Authorization` 字段，且工具开关已开启。
 - `create_action` 保留两步语义：`confirmed=false` 只预览提案，`confirmed=true` 通过 `proposal_id` 提交；未在平台输入或传输任何 API key/适配层 Token。
-- 三个新增工具当前显示“未调试”。本轮未执行平台远程调试、20 轮正常/负向调用、`proposal_id`/`action_id` 对账或 App 同 ID 验证，因此 G3 仍为 `UNVERIFIED`，不宣称真实平台闭环已通过。配置回执见 [`evidence/2.1/xiaoyi/W03-platform-tool-config.md`](evidence/2.1/xiaoyi/W03-platform-tool-config.md)。
++ 三个新增工具当前显示“未调试”。本轮未执行平台远程调试、20 轮正常/负向调用、`proposal_id`/`action_id` 对账或 App 同 ID 验证，因此 G3 仍为 `UNVERIFIED`，不宣称真实平台闭环已通过。配置回执见 [`../../evidence/2.1/xiaoyi/W03-platform-tool-config.md`](../../evidence/2.1/xiaoyi/W03-platform-tool-config.md)。
 
 #### 2026-09-03 公网复核
 
 - `GET https://project.luojiatutor.xyz/health` 返回 200，确认 HTTPS、Nginx 与 ProjectMemo 服务在线。
 - 无效鉴权探针显示 `record_memory` 路由存在并返回 JSON 401；`query_memory`、`inspect_project`、`create_action` 均返回 HTML 404，确认 ECS 仍是只含最早 tracer bullet 的旧版本。
 - 已新增公开版本指纹、四能力声明、无写入公网预检和显式确认的 20 轮对账脚本；部署教程增加安全更新流程。
-- W03 状态更新为 `PARTIAL / DEPLOYMENT_DRIFT`。部署新提交并完成 App/平台同 ID 对账前，G3 仍不通过。详见 [`evidence/2.1/xiaoyi/W03-public-audit-20260903.md`](evidence/2.1/xiaoyi/W03-public-audit-20260903.md)。
++ W03 状态更新为 `PARTIAL / DEPLOYMENT_DRIFT`。部署新提交并完成 App/平台同 ID 对账前，G3 仍不通过。详见 [`../../evidence/2.1/xiaoyi/W03-public-audit-20260903.md`](../../evidence/2.1/xiaoyi/W03-public-audit-20260903.md)。
 
 #### 2026-09-04 防部署漂移验证
 
@@ -125,7 +125,7 @@ S05–S07 的离线状态与代码边界见 `evidence/2.1/inbox-gap-notification
 - 本地新增 `POST /xiaoyi/v1/requests/begin`，作为小艺工作流的首个内部辅助节点。它要求 Bearer 鉴权、`XIAOYI_ADAPTER_ENABLED=true`、固定 `XIAOYI_TEST_PROJECT_ID` 和现有限流；不要求客户端提供 `request_id`，不接受 `project_id`，只返回 `ok`、UUID `request_id` 和 `issued_at`。
 - `begin_request` 不创建 KnowledgeCard、Action 或 `AgentRun`。当前 `AgentRunType` 没有自然的“工作流启动”枚举，因此不伪造 `agent_run_id`。健康检查仍把四项 S08 业务能力列在 `capabilities`，另列 `workflow_helpers: ["begin_request"]`，避免把辅助节点宣传成第五项业务能力。
 - 小艺平台配置方案：第一个插件节点只配置 Authorization Header；将输出的 `request_id` 映射给 `record_memory`、`query_memory`、`inspect_project` 和 `create_action`，其中 create_action 的预览/确认两阶段复用同一个 ID。单次工作流内关联成立，但整轮重试会重新生成 ID，不能据此宣称跨整轮重试幂等。
-- 本轮未部署 ECS、未操作平台、未运行 `verify:w03-live`，因此 W03/G3 仍为 `PARTIAL / DEPLOYMENT_DRIFT`，平台真实调用、20 轮对账和真机小艺入口保持 `UNVERIFIED`。完整边界见 [`evidence/2.1/xiaoyi/W03-platform-tool-config.md`](evidence/2.1/xiaoyi/W03-platform-tool-config.md)。
++ 本轮未部署 ECS、未操作平台、未运行 `verify:w03-live`，因此 W03/G3 仍为 `PARTIAL / DEPLOYMENT_DRIFT`，平台真实调用、20 轮对账和真机小艺入口保持 `UNVERIFIED`。完整边界见 [`../../evidence/2.1/xiaoyi/W03-platform-tool-config.md`](../../evidence/2.1/xiaoyi/W03-platform-tool-config.md)。
 - 本地回归：S08 专项 12/12、全量 Vitest 20 files / 128 tests、健康检查 2/2、TypeScript、ESLint、Next.js production build、HarmonyOS Hypium 27/27、HAP build 和 `git diff --check` 通过；production build 仅保留既有 NFT tracing warning，HAP build 仍有既有弃用 API 警告。公网预检仍需在 ECS 更新到本批提交后重跑，不能以本地通过替代平台验收。
 
 ## W04 本地实现｜2026-08-30
@@ -133,8 +133,8 @@ S05–S07 的离线状态与代码边界见 `evidence/2.1/inbox-gap-notification
 - 状态：`IMPLEMENTED / LOCAL G4 PASS / AVD RUNTIME PENDING`。
 - 已完成：CardRelation additive migration、时态有效性和当前事实计算、跨项目/自环/成环保护、提议/确认/撤销/时间线 API、Search 兼容字段、HarmonyOS 决策演化 UI 与确认/撤销操作。
 - 回归：Vitest 14 files / 101 tests、Temporal 专项 12/12、TypeScript、ESLint、Next.js production build、HarmonyOS Hypium 27/27、HarmonyOS HAP 均通过。
-- benchmark：60 组规则型人工定义样例通过，指标与逐例预测写入 `evidence/2.1/temporal/benchmark.json`；该结果用于确定性回归，不冒充真实项目盲测。
-- 未宣称通过：DevEco AVD 两卡片纵向运行、截图/布局 dump 和真实项目独立标注。完整边界见 [`evidence/2.1/temporal/W04-local-implementation-status.md`](evidence/2.1/temporal/W04-local-implementation-status.md)。
++ benchmark：60 组规则型人工定义样例通过，指标与逐例预测写入 `../../evidence/2.1/temporal/benchmark.json`；该结果用于确定性回归，不冒充真实项目盲测。
++ 未宣称通过：DevEco AVD 两卡片纵向运行、截图/布局 dump 和真实项目独立标注。完整边界见 [`../../evidence/2.1/temporal/W04-local-implementation-status.md`](../../evidence/2.1/temporal/W04-local-implementation-status.md)。
 
 ## W05 本地实现｜2026-09-02
 
@@ -143,4 +143,4 @@ S05–S07 的离线状态与代码边界见 `evidence/2.1/inbox-gap-notification
 - 回归：Vitest 15 files / 107 tests、W05 40/40 benchmark、TypeScript、ESLint、Next.js production build、HarmonyOS Hypium 27/27、HarmonyOS HAP 均通过；unsigned HAP SHA-256 为 `9dde65e14c4f386fbae95fd2d198d4093f3456a3be953d13140bafc01e6bc0f0`。
 - 回退：`EVIDENCE_TRUST_RECEIPT_ENABLED=false` 恢复 2.0 引用展示与旧写操作确认路径。
 - 边界：不把规则型 benchmark 当真实项目盲测；不宣称 DevEco 模拟器中的深色、大字体、键盘、读屏与渲染表现已通过。
-- 详情：[`evidence/2.1/trust/W05-local-implementation-status.md`](evidence/2.1/trust/W05-local-implementation-status.md)。
++ 详情：[`../../evidence/2.1/trust/W05-local-implementation-status.md`](../../evidence/2.1/trust/W05-local-implementation-status.md)。

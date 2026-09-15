@@ -2,12 +2,14 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { POST as postCapture } from "@/app/api/projects/[id]/captures/route";
 import { getLatestProjectState, getProjectStateFreshness } from "@/lib/services/projectStateService";
+import { createTestAuth } from "./testAuthHelper";
 
 process.env.LLM_MODE = "mock";
 
 describe.sequential("ProjectMemo phase 1 capture reliability", () => {
   let projectId = "";
   let otherProjectId = "";
+  let authHeaders: Record<string, string> = {};
 
   beforeAll(async () => {
     const project = await db.project.create({
@@ -28,6 +30,11 @@ describe.sequential("ProjectMemo phase 1 capture reliability", () => {
       },
     });
     otherProjectId = otherProject.id;
+
+    // 创建测试认证与 Membership 授权
+    const auth = await createTestAuth(projectId);
+    await auth.bindProject(otherProjectId);
+    authHeaders = auth.headers;
   });
 
   afterAll(async () => {
@@ -46,6 +53,7 @@ describe.sequential("ProjectMemo phase 1 capture reliability", () => {
         headers: {
           "content-type": "application/json",
           "idempotency-key": requestId,
+          ...authHeaders,
         },
         body: JSON.stringify({ rawText, sourceType: "实验记录", requestId }),
       }),
@@ -117,6 +125,7 @@ describe.sequential("ProjectMemo phase 1 capture reliability", () => {
         headers: {
           "content-type": "application/json",
           "idempotency-key": requestId,
+          ...authHeaders,
         },
         body: JSON.stringify({ rawText: "项目B的普通记录。", sourceType: "实验记录", requestId }),
       }),

@@ -1,0 +1,82 @@
+{
+  "generatedAt": "2026-09-14T10:37:51.823Z",
+  "source": "独立 SQLite 数据库；LLM_MODE=mock；未使用开发库、个人登录态或外部凭据",
+  "migration": {
+    "emptyDatabaseReplay": true,
+    "oldDatabaseUpgrade": true,
+    "legacyCaptureColumnsBefore": [
+      "id",
+      "projectId",
+      "rawText",
+      "sourceType",
+      "createdAt"
+    ],
+    "legacyCaptureColumnsAfter": [
+      "id",
+      "projectId",
+      "rawText",
+      "sourceType",
+      "createdAt",
+      "requestId",
+      "requestHash"
+    ],
+    "addedColumns": [
+      "requestId",
+      "requestHash"
+    ]
+  },
+  "a1": {
+    "concurrentStatusCounts": {
+      "200": 9,
+      "201": 1
+    },
+    "sameRequestCardIds": [
+      "b3d4238b-087c-443f-9424-5a73f432bab3"
+    ],
+    "sameRequestCaptureCount": 1,
+    "conflictStatus": 409,
+    "conflictCode": "IDEMPOTENCY_CONFLICT",
+    "distinctRequestStatuses": [
+      201,
+      201
+    ],
+    "distinctRequestCardIds": [
+      "ba03e3ff-25bf-488d-b00f-4f7624226eee",
+      "aadf562b-948d-4399-a099-7c988a2d44c9"
+    ]
+  },
+  "a2": {
+    "proposalId": "mip_cmu14051o000h0s8ozrfk7git",
+    "sourceCardId": "cmu14050u000f0s8omxe4dmxe",
+    "concurrentAlreadyConfirmed": [
+      false,
+      true
+    ],
+    "concurrentResultCardIds": [
+      "cmu14051z000j0s8ohvkyqpo3",
+      "cmu14051z000j0s8ohvkyqpo3"
+    ],
+    "staleDeadlineCode": "STATE_CHANGED_REPREVIEW",
+    "preservedDeadline": "2026-11-01T00:00:00.000Z"
+  },
+  "a3": {
+    "replacedRequirementCount": 1,
+    "replacedRequirement": {
+      "targetId": "cmu14054d000p0s8ojq41rtlx",
+      "hard": false,
+      "note": "软依赖"
+    },
+    "versionAfterReplace": 3,
+    "invalidBatchCode": "CROSS_PROJECT_REQUIREMENT",
+    "finalAssessment": {
+      "feasibility": "READY",
+      "dependencyCount": 1,
+      "dependencyVersion": 3
+    },
+    "cycleEdgeCount": 1,
+    "cycleOperationStatuses": [
+      "fulfilled",
+      "rejected"
+    ]
+  }
+}

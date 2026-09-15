@@ -234,6 +234,11 @@ export async function createMeetingImpactPreview(projectId: string, input: Meeti
   if (meetingDate && !/^\d{4}-\d{2}-\d{2}$/.test(meetingDate)) {
     throw new AppError("INVALID_INPUT", "会议日期格式须为 YYYY-MM-DD", 422);
   }
+  const project = await db.project.findUnique({ where: { id: projectId }, select: { id: true, deadline: true } });
+  if (!project) {
+    throw new AppError("PROJECT_NOT_FOUND", "项目不存在", 404);
+  }
+  const deadlineBaseISO = project.deadline?.toISOString() ?? null;
 
   // 会前快照：显式指定则校验归属；否则取最新；一个都没有时按用户预览动作生成基线
   let baseSnapshotId = input.baseSnapshotId?.trim() || "";
@@ -280,6 +285,7 @@ export async function createMeetingImpactPreview(projectId: string, input: Meeti
         sourceTextHash,
         proposalVersion: 1,
         meetingDate,
+        deadlineBaseISO,
         extractor: "rules",
         typedChanges: typedChanges as unknown as Prisma.InputJsonValue,
       },
@@ -308,6 +314,9 @@ export interface MeetingConfirmInput {
 }
 
 export async function confirmMeetingChanges(projectId: string, input: MeetingConfirmInput): Promise<MeetingConfirmResult> {
+  if (input.selectedChangeIds.length === 0) {
+    throw new AppError("EMPTY_SELECTION", "至少选择一项会议变化后才能确认", 422);
+  }
   const runId = input.proposalId.startsWith("mip_") ? input.proposalId.substring(4) : input.proposalId;
   const run = await db.agentRun.findFirst({
     where: { id: runId, projectId, runType: "EVALUATE", provider: "meeting_state_diff" },
@@ -328,6 +337,7 @@ export async function confirmMeetingChanges(projectId: string, input: MeetingCon
     baseSnapshotId?: string;
     sourceTextHash?: string;
     proposalVersion?: number;
+    deadlineBaseISO?: string | null;
     typedChanges?: MeetingTypedChange[];
   };
 
@@ -358,25 +368,57 @@ export async function confirmMeetingChanges(projectId: string, input: MeetingCon
     throw new AppError("INCOMPATIBLE_CHANGES", "多个取代变化指向同一张旧决策，请只保留一项", 422);
   }
 
-  // 源版本核对：预览后相关卡片若已被取代，必须重新预览（无关变化可重新校验后继续）
-  if (supersedeTargets.length > 0) {
-    const nowSuperseded = await db.cardRelation.count({
-      where: {
-        relationType: "SUPERSEDES",
-        confirmed: true,
-        revokedAt: null,
-        relatedCardId: { in: supersedeTargets },
-      },
-    });
-    if (nowSuperseded > 0) {
-      throw new AppError("STATE_CHANGED_REPREVIEW", "预览后相关决策的状态已变化，请重新预览后确认", 409);
-    }
-  }
-
   const applied: MeetingConfirmResult["applied"] = [];
   let afterSnapshotId: string | null = null;
 
-  await db.$transaction(async (tx) => {
+  const transactionResult = await db.$transaction(async (tx) => {
+    // 持久化唯一执行权：CONFIRMED 读取与写入之间不能只靠事务外的
+    // resultJson 快速路径，否则两个确认请求都可能看到 PENDING。
+    const claim = await tx.agentRun.updateMany({
+      where: { id: run.id, projectId, confirmedAt: null },
+      data: { confirmedAt: new Date() },
+    });
+    if (claim.count === 0) {
+      const latest = await tx.agentRun.findUnique({ where: { id: run.id } });
+      const latestResult = latest?.resultJson as { status?: string; executionResult?: MeetingConfirmResult } | null;
+      if (latestResult?.status === "CONFIRMED" && latestResult.executionResult) {
+        return {
+          alreadyConfirmed: true as const,
+          result: {
+            ...latestResult.executionResult,
+            proposalId: input.proposalId,
+            alreadyConfirmed: true,
+          },
+        };
+      }
+      throw new AppError("PROPOSAL_EXECUTION_CONFLICT", "该会议提案正在由另一请求确认，请稍后按原提案重试", 409);
+    }
+
+    // 截止日期基线必须在同一事务内核验；无关项目字段变化不影响本提案。
+    if (selected.some((change) => change.kind === "DEADLINE_CHANGE")) {
+      const currentProject = await tx.project.findUnique({ where: { id: projectId }, select: { deadline: true } });
+      const currentDeadlineISO = currentProject?.deadline?.toISOString() ?? null;
+      const baselineDeadlineISO = trace.deadlineBaseISO ?? null;
+      if (currentDeadlineISO !== baselineDeadlineISO) {
+        throw new AppError("STATE_CHANGED_REPREVIEW", "预览后项目截止日期已变化，请重新预览后确认", 409);
+      }
+    }
+
+    // 相关源状态核对也放入事务，避免检查完成后另一确认请求先取代旧卡。
+    if (supersedeTargets.length > 0) {
+      const nowSuperseded = await tx.cardRelation.count({
+        where: {
+          relationType: "SUPERSEDES",
+          confirmed: true,
+          revokedAt: null,
+          relatedCardId: { in: supersedeTargets },
+        },
+      });
+      if (nowSuperseded > 0) {
+        throw new AppError("STATE_CHANGED_REPREVIEW", "预览后相关决策的状态已变化，请重新预览后确认", 409);
+      }
+    }
+
     for (const change of selected) {
       if (change.kind === "DECISION_SUPERSEDE" && change.supersededCardId) {
         const capture = await tx.capture.create({
@@ -519,7 +561,12 @@ export async function confirmMeetingChanges(projectId: string, input: MeetingCon
         },
       },
     });
+    return { alreadyConfirmed: false as const };
   });
+
+  if (transactionResult.alreadyConfirmed) {
+    return transactionResult.result;
+  }
 
   // 会后状态：显式刷新一次，返回新快照供“会后 Diff”
   if (isFeatureEnabled("PROJECT_STATE_ENABLED", false)) {

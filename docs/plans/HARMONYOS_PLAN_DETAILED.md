@@ -7,7 +7,7 @@
 > 更新时间：2026-08-19  
 > 复赛提交截止：2026-09-30  
 >
-> 本文用于替代旧版 `HARMONYOS_PLAN.md` 中已经被真实代码状态推翻或过于抽象的部分，可供项目负责人、Codex、Claude Code、DevEco Code 共同执行。
+> 本文用于替代同目录旧版 `HARMONYOS_PLAN.md` 中已经被真实代码状态推翻或过于抽象的部分，可供项目负责人、Codex、Claude Code、DevEco Code 共同执行。
 
 ---
 
@@ -1309,7 +1309,7 @@ Artifact 页面
 请读取：
 
 1. HARMONYOS_PLAN_DETAILED.md
-2. HARMONYOS_AUDIT.md
+2. ../reviews/HARMONYOS_AUDIT.md
 3. harmonyos/ 当前代码
 4. lib/types.ts
 5. lib/validation/schemas.ts

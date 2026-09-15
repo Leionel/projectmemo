@@ -1,4 +1,5 @@
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction, PMMotion, PMMaterial } from '../common/DesignTokens';
+import { AlertIcon, PaperclipIcon } from './PMIcons';
 
 export class JudgeQuestionItem {
   id: string = '';
@@ -28,7 +29,7 @@ export struct JudgeRebuttalModal {
       'q1',
       '方案中途因算力超标突发改变，如何保证旧待办与成果不脱节？',
       '方案变更时态闭环',
-      'ProjectMemo 内置时态账本引擎。当突发方案变更时，系统自动识别冲突记忆并建立 SUPERSEDES 取代链，批量将波及的旧待办行动作废（CANCELLED），同时在成果中将原引用断言标记为“已被新决策取代”，确保全链路严密闭环，杜绝脏数据。',
+      'ProjectMemo 内置时态账本引擎。方案变更时系统生成变更候选：识别冲突与受影响对象，由你确认后建立取代关系并更新受影响待办；成果中受影响的引用会标注“已被新决策取代”。',
       false,
       '实现依据：时态账本引擎 (changeImpactService) 与 CardRelation 表'
     ),
@@ -36,7 +37,7 @@ export struct JudgeRebuttalModal {
       'q2',
       '你们项目宣称的性能指标提升，原始实验记录在哪里？',
       '证据可溯源性',
-      '成果正文中的核心断言均可锚定底层真实碎片。点击“证据透视镜”可穿透查看关联的原始实验数据与日志记录，时间戳、操作人员与消融对照清晰可验。',
+      '记录可关联底层原始碎片。点击“证据透视镜”可查看已关联的原始记录与时间来源；缺失的信息会标记待补，不做无法保证的宣称。',
       false,
       '实现依据：Claim Auditor 证据透视抽屉与底库原始实验卡片'
     ),
@@ -52,7 +53,7 @@ export struct JudgeRebuttalModal {
       'q4',
       '如何证明整个项目的产出不是大模型凭空胡编（AI 幻觉）？',
       '学术诚信与存证',
-      '系统实行“无证据不生成”原则（Evidence-Grounded）。每一个成果章节与行动建议均有底层知识碎片强校验，并在成果导出时自动附带完整的《过程证据与时态存证目录》，支持端到端核验。',
+      '成果生成遵循证据接地原则：模板中的事实条目提供逐句引用映射；模型生成或未核验的内容会明确标注“语义未核验”。导出附带证据审计，逐项可查。',
       false,
       '实现依据：带存证附录导出 (ExportFormatter) 与系统可信收据'
     )
@@ -134,10 +135,13 @@ export struct JudgeRebuttalModal {
             // 评委提问卡
             Column() {
               Row() {
-                Text('⚖️ 评委质询：')
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontWeight(FontWeight.Bold)
-                  .fontColor(PMColors.RISK)
+                Row() {
+                  AlertIcon({ iconSize: 14, color: PMColors.RISK })
+                  Text(' 评委质询：')
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontWeight(FontWeight.Bold)
+                    .fontColor(PMColors.RISK)
+                }
                 Text(this.questions[this.selectedIndex].tag)
                   .fontSize(PMFontSize.CAPTION)
                   .fontColor(PMColors.INK_TERTIARY)
@@ -160,7 +164,7 @@ export struct JudgeRebuttalModal {
             // Agent 答辩辞
             Column() {
               Row() {
-                Text('🤖 ProjectMemo 答辩响应：')
+                Text('ProjectMemo 答辩响应：')
                   .fontSize(PMFontSize.CAPTION)
                   .fontWeight(FontWeight.Bold)
                   .fontColor(this.questions[this.selectedIndex].isRefusal ? PMColors.RISK : PMColors.BRAND)
@@ -181,8 +185,7 @@ export struct JudgeRebuttalModal {
 
               // 证据链小注
               Row() {
-                Text('🔗')
-                  .fontSize(PMFontSize.CAPTION)
+                PaperclipIcon({ iconSize: 12, color: PMColors.INK_SECONDARY })
                   .margin({ right: 4 })
                 Text(this.questions[this.selectedIndex].evidenceRef)
                   .fontSize(PMFontSize.CAPTION)

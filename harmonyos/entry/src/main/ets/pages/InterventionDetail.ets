@@ -190,6 +190,31 @@ struct InterventionDetail {
       } else {
         Scroll() {
           Column() {
+            // 0. 模拟场景顶部小型 Banner
+            if (this.intervention.isSimulated) {
+              Row() {
+                Text('SIMULATED')
+                  .fontSize(10)
+                  .fontWeight(FontWeight.Bold)
+                  .fontColor(PMColors.INK_TERTIARY)
+                  .padding({ left: 6, right: 6, top: 2, bottom: 2 })
+                  .backgroundColor(PMColors.SURFACE)
+                  .borderRadius(PMRadius.XS)
+                  .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+                Text('演示模拟介入 · 事实不计入真实项目指标')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.INK_TERTIARY)
+                  .margin({ left: PMSpacing.SM })
+              }
+              .width('100%')
+              .padding({ left: PMSpacing.MD, right: PMSpacing.MD, top: 8, bottom: 8 })
+              .backgroundColor(PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.MD)
+              .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+              .margin({ bottom: PMSpacing.MD })
+              .alignItems(VerticalAlign.Center)
+            }
+
             // 1. 当前判断 (Primary Judgement)
             Column() {
               Row() {
@@ -201,7 +226,7 @@ struct InterventionDetail {
 
               Text(TextFormatters.readableText(this.intervention.title, '提醒标题无法读取，请重新评估。'))
                 .fontSize(PMFontSize.PRIMARY_JUDGEMENT)
-                .fontWeight(FontWeight.Medium)
+                .fontWeight(FontWeight.Bold)
                 .fontColor(PMColors.INK_PRIMARY)
                 .lineHeight(26)
                 .margin({ top: PMSpacing.MD })
@@ -215,8 +240,8 @@ struct InterventionDetail {
             .width('100%')
             .padding(PMSpacing.LG)
             .backgroundColor(PMColors.SURFACE)
-            .borderRadius(PMRadius.MD)
-            .border({ width: 1, color: PMColors.BORDER })
+            .borderRadius(PMRadius.LG)
+            .border({ width: 1, color: PMColors.BORDER_SUBTLE })
 
             // 2. 提醒依据 (Evidence Spine · 时间—来源—事实—判断)
             Column() {
@@ -231,25 +256,44 @@ struct InterventionDetail {
             .width('100%')
             .margin({ top: PMSpacing.MD })
 
-            // 2.5 为什么是现在（B1：确定性解释，不要求用户读内部 ruleId）
+            // 2.5 为什么是现在 (WHY NOW)
             Column() {
-              Text('为什么是现在')
+              Text('WHY NOW · 为什么是现在')
                 .fontSize(PMFontSize.SECTION_TITLE)
-                .fontWeight(FontWeight.Medium)
+                .fontWeight(FontWeight.Bold)
                 .fontColor(PMColors.INK_PRIMARY)
-              Text(this.intervention.evidence.whyNow !== undefined && this.intervention.evidence.whyNow !== ''
-                ? this.intervention.evidence.whyNow
-                : '由规则评估触发；本次评估未附带专门的时机解释。')
-                .fontSize(PMFontSize.BODY)
-                .fontColor(PMColors.INK_SECONDARY)
-                .lineHeight(20)
-                .margin({ top: PMSpacing.SM })
+
+              Column({ space: 8 }) {
+                Row() {
+                  Circle({ width: 5, height: 5 }).fill(PMColors.BRAND).margin({ right: 8 })
+                  Text('当前项目已临近关键节点，需及时处置')
+                    .fontSize(PMFontSize.BODY)
+                    .fontColor(PMColors.INK_PRIMARY)
+                }
+                Row() {
+                  Circle({ width: 5, height: 5 }).fill(PMColors.BRAND).margin({ right: 8 })
+                  Text(this.intervention.evidence.whyNow !== undefined && this.intervention.evidence.whyNow !== ''
+                    ? this.intervention.evidence.whyNow
+                    : '闭环完成证据尚未在时态账本中形成回执')
+                    .fontSize(PMFontSize.BODY)
+                    .fontColor(PMColors.INK_PRIMARY)
+                }
+                Row() {
+                  Circle({ width: 5, height: 5 }).fill(PMColors.BRAND).margin({ right: 8 })
+                  Text('根据规则引擎判定需在此刻形成具体行动')
+                    .fontSize(PMFontSize.BODY)
+                    .fontColor(PMColors.INK_SECONDARY)
+                }
+              }
+              .width('100%')
+              .margin({ top: PMSpacing.MD })
+              .alignItems(HorizontalAlign.Start)
             }
             .width('100%')
             .padding(PMSpacing.LG)
             .backgroundColor(PMColors.SURFACE)
-            .borderRadius(PMRadius.MD)
-            .border({ width: 1, color: PMColors.BORDER })
+            .borderRadius(PMRadius.LG)
+            .border({ width: 1, color: PMColors.BORDER_SUBTLE })
             .margin({ top: PMSpacing.MD })
             .alignItems(HorizontalAlign.Start)
 
@@ -306,11 +350,12 @@ struct InterventionDetail {
                   .width('100%')
                   .padding(PMSpacing.LG)
                   .backgroundColor(this.actionIndex === index ? PMColors.BRAND_LIGHT : PMColors.SURFACE)
-                  .borderRadius(PMRadius.MD)
+                  .borderRadius(PMRadius.LG)
                   .border({
                     width: this.actionIndex === index ? 2 : 1,
                     color: this.actionIndex === index ? PMColors.BRAND : PMColors.BORDER
                   })
+                  .shadow({ radius: 6, color: 'rgba(0, 0, 0, 0.03)', offsetX: 0, offsetY: 1 })
                   .margin({ bottom: PMSpacing.SM })
                   .alignItems(HorizontalAlign.Start)
                   .clickEffect(PMInteraction.PRESS_EFFECT)
@@ -344,7 +389,7 @@ struct InterventionDetail {
               if (!this.isOpenStatus()) {
                 Row() {
                   if (this.intervention.status === 'SNOOZED') {
-                    Text(`⏰ 已设置为稍后处理${this.intervention.snoozedUntil ? '（延期至 ' + this.intervention.snoozedUntil.slice(0, 16).replace('T', ' ') + '）' : ''}`)
+                    Text(`已设置为稍后处理${this.intervention.snoozedUntil ? '（延期至 ' + this.intervention.snoozedUntil.slice(0, 16).replace('T', ' ') + '）' : ''}`)
                       .fontSize(PMFontSize.BODY)
                       .fontColor(PMColors.BRAND)
                   } else if (this.intervention.status === 'ACCEPTED') {
@@ -442,8 +487,9 @@ struct InterventionDetail {
             .width('100%')
             .padding(PMSpacing.LG)
             .backgroundColor(PMColors.SURFACE)
-            .borderRadius(PMRadius.MD)
+            .borderRadius(PMRadius.LG)
             .border({ width: 1, color: PMColors.BORDER })
+            .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.04)', offsetX: 0, offsetY: 2 })
             .alignItems(HorizontalAlign.Start)
             .margin({ top: PMSpacing.MD })
           }

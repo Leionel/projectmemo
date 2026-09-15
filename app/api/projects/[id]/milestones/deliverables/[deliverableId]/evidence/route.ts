@@ -1,3 +1,4 @@
+import { authorizeProjectAccess } from "@/lib/auth/guard";
 import { NextRequest, NextResponse } from "next/server";
 import { confirmDeliverableEvidence } from "@/lib/services/milestoneService";
 import { apiError } from "@/lib/api";
@@ -11,6 +12,7 @@ export async function POST(
 ) {
   try {
     const { id: projectId, deliverableId } = await params;
+    await authorizeProjectAccess(request, projectId);
     const input = deliverableEvidenceInputSchema.parse(await request.json());
     const evidence = await confirmDeliverableEvidence({ projectId, deliverableId, ...input });
     return NextResponse.json(evidence, { status: 201 });

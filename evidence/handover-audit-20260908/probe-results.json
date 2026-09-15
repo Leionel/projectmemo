@@ -1,0 +1,34 @@
+{
+  "scope": "Isolated backend logic, no production DB or platform UI",
+  "database": "D:\\Projects\\hongmen\\evidence\\handover-audit-20260908\\probe-1788842550323.db",
+  "unrelatedActionMarkedForCancellation": false,
+  "bogusProposalAccepted": false,
+  "crossProjectRelationCreated": false,
+  "repeatedChangeCreatesDifferentCards": false,
+  "copilotConcurrentOutcomes": [
+    "fulfilled",
+    "fulfilled"
+  ],
+  "copilotDuplicateCount": 1,
+  "copilotSavedPriorities": [
+    2
+  ],
+  "completeOutcomes": [
+    {
+      "status": "fulfilled"
+    },
+    {
+      "status": "fulfilled"
+    }
+  ],
+  "reflectionCount": 1,
+  "cleanCompleteOutcomes": [
+    {
+      "status": "fulfilled"
+    },
+    {
+      "status": "fulfilled"
+    }
+  ],
+  "cleanReflectionCount": 1
+}

@@ -1,7 +1,7 @@
 import { PMColors, PMSpacing, PMFontSize, PMRadius } from '../common/DesignTokens';
 import { AgentEvidence } from '../models/Intervention';
 import { TextFormatters } from '../common/TextFormatters';
-import { SpineNodeIcon } from './PMIcons';
+import { SpineNodeIcon, AlertIcon } from './PMIcons';
 
 export class SpineNodeItem {
   timeLabel: string = '';
@@ -113,7 +113,8 @@ export struct EvidenceSpineView {
 
       if (this.isSimulated) {
         Row() {
-          Text('⚠ 演示模拟介入 · 事实不计入真实指标')
+          AlertIcon({ iconSize: 14, color: PMColors.RISK })
+          Text(' 演示模拟介入 · 事实不计入真实指标')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.RISK)
         }
@@ -177,8 +178,9 @@ export struct EvidenceSpineView {
     .width('100%')
     .padding(PMSpacing.LG)
     .backgroundColor(PMColors.SURFACE)
-    .borderRadius(PMRadius.MD)
+    .borderRadius(PMRadius.LG)
     .border({ width: 1, color: PMColors.BORDER })
+    .shadow({ radius: 8, color: 'rgba(0, 0, 0, 0.04)', offsetX: 0, offsetY: 2 })
     .alignItems(HorizontalAlign.Start)
   }
 }

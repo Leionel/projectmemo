@@ -1,12 +1,14 @@
+import { authorizeProjectAccess } from "@/lib/auth/guard";
 import { apiError } from "@/lib/api";
 import { db } from "@/lib/db";
 import { getDecisionTimeline } from "@/lib/services/temporalLedgerService";
 
 export const runtime = "nodejs";
 
-export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    await authorizeProjectAccess(request, id);
     const cards = await db.knowledgeCard.findMany({
       where: { projectId: id, archivedAt: { not: null } },
       orderBy: { archivedAt: "desc" },

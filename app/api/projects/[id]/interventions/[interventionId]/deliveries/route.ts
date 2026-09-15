@@ -1,3 +1,4 @@
+import { authorizeProjectAccess } from "@/lib/auth/guard";
 import { apiError } from "@/lib/api";
 import {
   DELIVERY_CHANNEL,
@@ -9,9 +10,10 @@ import {
 
 export const runtime = "nodejs";
 
-export async function GET(_request: Request, { params }: { params: Promise<{ id: string; interventionId: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string; interventionId: string }> }) {
   try {
     const { id, interventionId } = await params;
+    await authorizeProjectAccess(request, id);
     return Response.json({ deliveries: await listInterventionDeliveries(id, interventionId) });
   } catch (error) {
     return apiError(error);
@@ -21,6 +23,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 export async function POST(request: Request, { params }: { params: Promise<{ id: string; interventionId: string }> }) {
   try {
     const { id, interventionId } = await params;
+    await authorizeProjectAccess(request, id);
     const body = (await request.json()) as {
       channel?: string;
       deliveryKey?: string;

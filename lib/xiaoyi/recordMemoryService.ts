@@ -2,7 +2,7 @@ import { AppError } from "@/lib/api";
 import { AgentRunStatus, AgentRunType } from "@/lib/generated/prisma/client";
 import { finishExternalAgentRun, reserveExternalAgentRun } from "@/lib/repositories/agent";
 import { requireProject } from "@/lib/repositories/projects";
-import { processCapture } from "@/lib/services/captureService";
+import { captureRequestPayloadHash, processCapture } from "@/lib/services/captureService";
 import { recordMemoryResponseSchema, type RecordMemoryInput, type RecordMemoryResponse } from "@/lib/xiaoyi/contracts";
 
 const XIAOYI_PROVIDER = "xiaoyi-workflow";
@@ -26,6 +26,7 @@ export async function recordMemoryFromXiaoyi(input: {
 }) {
   const startedAt = Date.now();
   const project = await requireProject(input.projectId);
+  const payloadHash = captureRequestPayloadHash(input.payload.content, input.payload.source_type);
   const reservation = await reserveExternalAgentRun({
     projectId: project.id,
     runType: AgentRunType.CAPTURE,
@@ -37,12 +38,19 @@ export async function recordMemoryFromXiaoyi(input: {
         stage: "RECEIVED",
         tool: "record_memory",
         confirmed: false,
-      externalRequestId: input.requestId,
+        externalRequestId: input.requestId,
+        requestHash: payloadHash,
       contentLength: input.payload.content.length,
     },
   });
 
   if (!reservation.created) {
+    const trace = reservation.run.trace && typeof reservation.run.trace === "object" && !Array.isArray(reservation.run.trace)
+      ? reservation.run.trace as Record<string, unknown>
+      : {};
+    if (typeof trace.requestHash === "string" && trace.requestHash !== payloadHash) {
+      throw new AppError("IDEMPOTENCY_CONFLICT", "同一 request_id 已绑定其他记录内容，请保留原文或使用新的 request_id", 409);
+    }
     const response = storedResponse(reservation.run.resultJson);
     if (response) return { response: { ...response, replayed: true }, status: 200 };
     if (reservation.run.status === AgentRunStatus.FAILED) {
@@ -82,6 +90,7 @@ export async function recordMemoryFromXiaoyi(input: {
         tool: "record_memory",
         confirmed: false,
         externalRequestId: input.requestId,
+        requestHash: payloadHash,
         cardId: card.id,
         sourceType: input.payload.source_type,
         contentLength: input.payload.content.length,
@@ -104,6 +113,7 @@ export async function recordMemoryFromXiaoyi(input: {
           tool: "record_memory",
           confirmed: false,
           externalRequestId: input.requestId,
+          requestHash: payloadHash,
           errorCode: safe.code,
           contentLength: input.payload.content.length,
         },

@@ -4,8 +4,20 @@ import { TextFormatters } from '../common/TextFormatters';
 @Component
 export struct SeverityBadge {
   @Prop severity: number = 1;
+  @Prop level: string = ''; // 可选传入 'HIGH' | 'MEDIUM' | 'LOW'
 
   private getLabel(): string {
+    if (this.level !== '') {
+      switch (this.level.toUpperCase()) {
+        case 'HIGH':
+          return '高风险';
+        case 'MEDIUM':
+          return '中优先级';
+        case 'LOW':
+        default:
+          return '低优先级';
+      }
+    }
     if (this.severity >= 3) {
       return '高风险';
     }
@@ -16,21 +28,25 @@ export struct SeverityBadge {
   }
 
   private getBgColor(): ResourceColor {
-    if (this.severity >= 3) {
+    const isHigh = this.level.toUpperCase() === 'HIGH' || this.severity >= 3;
+    const isMed = this.level.toUpperCase() === 'MEDIUM' || this.severity === 2;
+    if (isHigh) {
       return PMColors.RISK_LIGHT;
     }
-    if (this.severity === 2) {
-      return PMColors.EVIDENCE_LIGHT;
+    if (isMed) {
+      return PMColors.WARNING_LIGHT;
     }
     return PMColors.SURFACE_SUBTLE;
   }
 
   private getTextColor(): ResourceColor {
-    if (this.severity >= 3) {
+    const isHigh = this.level.toUpperCase() === 'HIGH' || this.severity >= 3;
+    const isMed = this.level.toUpperCase() === 'MEDIUM' || this.severity === 2;
+    if (isHigh) {
       return PMColors.RISK;
     }
-    if (this.severity === 2) {
-      return PMColors.EVIDENCE;
+    if (isMed) {
+      return PMColors.WARNING;
     }
     return PMColors.INK_SECONDARY;
   }
@@ -44,10 +60,25 @@ export struct SeverityBadge {
         .fontSize(PMFontSize.CAPTION)
         .fontWeight(FontWeight.Medium)
         .fontColor(this.getTextColor())
+        .maxLines(1)
     }
-    .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 2, bottom: 2 })
-    .borderRadius(PMRadius.XS)
+    .height(24)
+    .padding({ left: 8, right: 8 })
+    .alignItems(VerticalAlign.Center)
+    .borderRadius(PMRadius.SM)
     .backgroundColor(this.getBgColor())
+  }
+}
+
+/**
+ * 统一 Priority / Risk Badge 别名组件
+ */
+@Component
+export struct RiskBadge {
+  @Prop level: string = 'HIGH';
+
+  build() {
+    SeverityBadge({ level: this.level })
   }
 }
 
@@ -96,13 +127,18 @@ export struct MemoryTypeBadge {
   }
 
   build() {
-    Text(this.getLabel())
-      .fontSize(PMFontSize.CAPTION)
-      .fontWeight(FontWeight.Medium)
-      .fontColor(this.getTextColor())
-      .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 2, bottom: 2 })
-      .borderRadius(PMRadius.XS)
-      .backgroundColor(this.getBgColor())
+    Row() {
+      Text(this.getLabel())
+        .fontSize(PMFontSize.CAPTION)
+        .fontWeight(FontWeight.Medium)
+        .fontColor(this.getTextColor())
+        .maxLines(1)
+    }
+    .height(24)
+    .padding({ left: 8, right: 8 })
+    .alignItems(VerticalAlign.Center)
+    .borderRadius(PMRadius.SM)
+    .backgroundColor(this.getBgColor())
   }
 }
 
@@ -151,12 +187,135 @@ export struct StatusBadge {
   }
 
   build() {
-    Text(this.getLabel())
-      .fontSize(PMFontSize.CAPTION)
-      .fontWeight(FontWeight.Medium)
-      .fontColor(this.getTextColor())
-      .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 2, bottom: 2 })
-      .borderRadius(PMRadius.XS)
-      .backgroundColor(this.getBgColor())
+    Row() {
+      Text(this.getLabel())
+        .fontSize(PMFontSize.CAPTION)
+        .fontWeight(FontWeight.Medium)
+        .fontColor(this.getTextColor())
+        .maxLines(1)
+    }
+    .height(24)
+    .padding({ left: 8, right: 8 })
+    .alignItems(VerticalAlign.Center)
+    .borderRadius(PMRadius.SM)
+    .backgroundColor(this.getBgColor())
+  }
+}
+
+/**
+ * 项目分类 Badge（中性蓝灰体系，克制沉稳）
+ */
+@Component
+export struct CategoryBadge {
+  @Prop category: string = '';
+
+  private getLabel(): string {
+    switch (this.category) {
+      case 'COMPETITION':
+        return '竞赛备赛';
+      case 'COURSE_DESIGN':
+        return '课程设计';
+      case 'RESEARCH':
+        return '学术研究';
+      case 'ACADEMIC':
+        return '学术备赛';
+      default:
+        return this.category !== '' ? this.category : '项目';
+    }
+  }
+
+  build() {
+    Row() {
+      Text(this.getLabel())
+        .fontSize(PMFontSize.CAPTION)
+        .fontWeight(FontWeight.Medium)
+        .fontColor(PMColors.BRAND)
+        .maxLines(1)
+    }
+    .height(24)
+    .padding({ left: 8, right: 8 })
+    .alignItems(VerticalAlign.Center)
+    .borderRadius(PMRadius.SM)
+    .backgroundColor(PMColors.BRAND_LIGHT)
+  }
+}
+
+/**
+ * 证据与时态生命周期 Badge (CURRENT, SUPERSEDED, CONTESTED, INSUFFICIENT, UNKNOWN 等)
+ */
+@Component
+export struct TemporalBadge {
+  @Prop status: string = 'CURRENT';
+
+  private getLabel(): string {
+    switch (this.status) {
+      case 'CURRENT':
+        return '当前有效';
+      case 'SUPERSEDED':
+        return '已被替代';
+      case 'CONTESTED':
+        return '存在争议';
+      case 'INSUFFICIENT':
+        return '证据不足';
+      case 'SUPPORTED':
+        return '充分佐证';
+      case 'UNKNOWN':
+      default:
+        return '暂未确定';
+    }
+  }
+
+  private getBgColor(): ResourceColor {
+    switch (this.status) {
+      case 'CURRENT':
+      case 'SUPPORTED':
+        return PMColors.SUCCESS_LIGHT;
+      case 'SUPERSEDED':
+        return PMColors.SURFACE_SUBTLE;
+      case 'CONTESTED':
+        return PMColors.RISK_LIGHT;
+      case 'INSUFFICIENT':
+        return PMColors.WARNING_LIGHT;
+      case 'UNKNOWN':
+      default:
+        return PMColors.SURFACE_SUBTLE;
+    }
+  }
+
+  private getTextColor(): ResourceColor {
+    switch (this.status) {
+      case 'CURRENT':
+      case 'SUPPORTED':
+        return PMColors.SUCCESS;
+      case 'SUPERSEDED':
+        return PMColors.INK_TERTIARY;
+      case 'CONTESTED':
+        return PMColors.RISK;
+      case 'INSUFFICIENT':
+        return PMColors.WARNING;
+      case 'UNKNOWN':
+      default:
+        return PMColors.INK_SECONDARY;
+    }
+  }
+
+  build() {
+    Row() {
+      if (this.status === 'CURRENT' || this.status === 'SUPPORTED') {
+        Circle({ width: 5, height: 5 })
+          .fill(this.getTextColor())
+          .margin({ right: PMSpacing.XS })
+      }
+      Text(this.getLabel())
+        .fontSize(PMFontSize.CAPTION)
+        .fontWeight(FontWeight.Medium)
+        .fontColor(this.getTextColor())
+        .maxLines(1)
+    }
+    .height(24)
+    .padding({ left: 8, right: 8 })
+    .alignItems(VerticalAlign.Center)
+    .borderRadius(PMRadius.SM)
+    .backgroundColor(this.getBgColor())
   }
 }

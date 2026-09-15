@@ -25,21 +25,25 @@ export struct PMAppBar {
       if (this.showBack) {
         Row() {
           Text('‹')
-            .fontSize(22)
-            .fontWeight(FontWeight.Regular)
+            .fontSize(24)
+            .fontWeight(FontWeight.Lighter)
             .fontColor(PMColors.INK_PRIMARY)
-            .margin({ top: -2, right: 4 })
+            .margin({ top: -2, right: this.backLabel !== '' ? 2 : 0 })
             .accessibilityLevel('no')
-          Text(this.backLabel)
-            .fontSize(PMFontSize.BODY)
-            .fontColor(PMColors.INK_PRIMARY)
-            .fontWeight(FontWeight.Medium)
+          if (this.backLabel !== '') {
+            Text(this.backLabel.length > 4 ? this.backLabel.substring(0, 4) : this.backLabel)
+              .fontSize(PMFontSize.BODY)
+              .fontColor(PMColors.INK_PRIMARY)
+              .fontWeight(FontWeight.Medium)
+              .maxLines(1)
+          }
         }
-        .padding({ left: PMSpacing.SM, right: PMSpacing.MD, top: PMSpacing.XS, bottom: PMSpacing.XS })
-        .height(44)
+        .padding({ left: 8, right: this.backLabel !== '' ? 12 : 8, top: 4, bottom: 4 })
+        .height(40)
         .borderRadius(PMRadius.SM)
         .backgroundColor(PMColors.SURFACE_SUBTLE)
-        .border({ width: 1, color: PMColors.BORDER })
+        .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+        .alignItems(VerticalAlign.Center)
         .clickEffect(PMInteraction.PRESS_EFFECT)
         .onClick(() => {
           router.back();
@@ -49,35 +53,36 @@ export struct PMAppBar {
 
       Column() {
         Text(this.title)
-          .fontSize(PMFontSize.PAGE_TITLE)
+          .fontSize(PMFontSize.SECTION_TITLE)
           .fontWeight(FontWeight.Bold)
           .fontFamily(PMFontFamily.SANS)
           .fontColor(PMColors.INK_PRIMARY)
-          .maxLines(2)
-          .lineHeight(24)
+          .maxLines(1)
+          .lineHeight(22)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
 
         if (this.subtitle !== '') {
           Text(this.subtitle)
-            .fontSize(PMFontSize.SECONDARY)
-            .fontColor(PMColors.INK_SECONDARY)
-            .maxLines(2)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+            .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
-            .margin({ top: 2 })
+            .margin({ top: 1 })
         }
       }
       .alignItems(HorizontalAlign.Start)
+      .justifyContent(FlexAlign.Center)
       .layoutWeight(1)
-      .margin({ left: this.showBack ? PMSpacing.MD : 0 })
+      .margin({ left: this.showBack ? PMSpacing.SM : 0, right: PMSpacing.SM })
 
       if (this.rightActionText !== '') {
         Text(this.rightActionText)
-          .fontSize(PMFontSize.BUTTON)
+          .fontSize(PMFontSize.CAPTION)
           .fontWeight(FontWeight.Medium)
           .fontColor(PMColors.BRAND)
-          .height(44)
+          .height(36)
           .textAlign(TextAlign.Center)
-          .padding({ left: PMSpacing.MD, right: PMSpacing.MD, top: PMSpacing.SM, bottom: PMSpacing.SM })
+          .padding({ left: PMSpacing.MD, right: PMSpacing.MD })
           .borderRadius(PMRadius.SM)
           .backgroundColor(PMColors.BRAND_LIGHT)
           .clickEffect(PMInteraction.PRESS_EFFECT)
@@ -89,14 +94,16 @@ export struct PMAppBar {
             }
           })
           .accessibilityText(this.rightActionText)
+          .margin({ right: this.showRightIcon ? PMSpacing.XS : 0 })
       }
 
       if (this.showRightIcon) {
         Row() {
           MoreIcon({ isSelected: false, iconSize: 20 })
         }
-        .width(44)
-        .height(44)
+        .width(40)
+        .height(40)
+        .borderRadius(PMRadius.SM)
         .justifyContent(FlexAlign.Center)
         .clickEffect(PMInteraction.PRESS_EFFECT)
         .onClick(() => {
@@ -104,13 +111,13 @@ export struct PMAppBar {
             this.onRightAction();
           }
         })
-        .accessibilityText(this.rightIconLabel)
+        .accessibilityText(this.rightIconLabel !== '' ? this.rightIconLabel : '更多选项')
         .accessibilityDescription(this.rightIconDescription)
       }
     }
     .width('100%')
     .alignItems(VerticalAlign.Center)
-    .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.MD })
+    .padding({ left: PMSpacing.MD, right: PMSpacing.MD, top: PMSpacing.SM, bottom: PMSpacing.SM })
     .backgroundColor(PMColors.SURFACE)
     .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
   }

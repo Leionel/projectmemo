@@ -19,3 +19,10 @@ harmonyos/.hvigor/
 harmonyos/entry/build/
 harmonyos/entry/.test/
 harmonyos/oh_modules/
+.playwright-cli/
+output/
+tmp/
+storage/
+uireference/
+evidence/**/*.db
+webbridge-*.json

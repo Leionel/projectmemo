@@ -16,6 +16,7 @@ export class ActionItem {
   status: string = '';
   description: string | undefined = undefined;
   priority: number = 3;
+  dependencyVersion: number = 1;
   dueAt: string | undefined = undefined;
   resultText: string | undefined = undefined;
   isSimulated: boolean = false;
@@ -52,6 +53,7 @@ export class FeasibilityDependency {
 
 export class FeasibilityAssessment {
   actionId: string = '';
+  dependencyVersion: number = 1;
   feasibility: string = 'UNKNOWN';
   dependencies: FeasibilityDependency[] = [];
   overdue: boolean = false;
@@ -66,13 +68,16 @@ export class FeasibilityRequirementBody {
   targetKind: string = 'action';
   targetId: string = '';
   hard: boolean = true;
+  note: string | undefined = undefined;
 }
 
 export class FeasibilityInput {
   actionId: string = '';
   addRequirements: FeasibilityRequirementBody[] | undefined = undefined;
   removeRequirementIds: string[] | undefined = undefined;
-  estimatedMinutes: number | undefined = undefined;
+  expectedVersion: number | undefined = undefined;
+  // null = 显式清空估时；undefined = 不修改
+  estimatedMinutes: number | null | undefined = undefined;
 }
 
 export class ActionCreateInput {

@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-09-15T14:40:16+08:00",
+  "command": "npm.cmd run harmony:build",
+  "status": "SUCCESS",
+  "targetHap": "harmonyos/entry/build/default/outputs/default/entry-default-unsigned.hap",
+  "fileSize": 2854844,
+  "sha256": "4bdedc0bbc0d3bcbb993ce89f6f174c047f97c6cf99236bb843e6c64445cfa5c",
+  "devecoSdk": "D:\\Program Files\\Huawei\\DevEco Studio\\sdk",
+  "java": "D:\\Program Files\\Huawei\\DevEco Studio\\jbr",
+  "duration": "33.669s"
+}

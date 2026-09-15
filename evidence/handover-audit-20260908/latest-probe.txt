@@ -1,0 +1,55 @@
+{
+  "database": "D:\\Projects\\hongmen\\evidence\\handover-audit-20260908\\latest-1788863028483.db",
+  "before": {
+    "lib/services/changeImpactService.ts": "871b916f3faabc6fc0bdd59c1f64a747f6d208cea982d65caf01a3afa6241021",
+    "lib/services/copilotService.ts": "dc9861c5a2d79c929b50dc8e93b1591485fe6e969a7c401754256b4c4a47423a",
+    "lib/services/attachmentService.ts": "b869396354aa7b9069a14917ac9f53ae208045cc25348958f584bd0a400cdbd7",
+    "lib/repositories/cards.ts": "7a42c0c9778de0065f8d34b5056cb2cec7b76b0a030d770aee402bcff5157ac8"
+  },
+  "after": {
+    "lib/services/changeImpactService.ts": "871b916f3faabc6fc0bdd59c1f64a747f6d208cea982d65caf01a3afa6241021",
+    "lib/services/copilotService.ts": "dc9861c5a2d79c929b50dc8e93b1591485fe6e969a7c401754256b4c4a47423a",
+    "lib/services/attachmentService.ts": "b869396354aa7b9069a14917ac9f53ae208045cc25348958f584bd0a400cdbd7",
+    "lib/repositories/cards.ts": "7a42c0c9778de0065f8d34b5056cb2cec7b76b0a030d770aee402bcff5157ac8"
+  },
+  "previewSelectedCard": "完全无关的会议安排",
+  "unrelatedCancellationSuggested": false,
+  "bogus": {
+    "accepted": false,
+    "error": "Error: 变更提案不存在或不属于当前项目"
+  },
+  "cross": {
+    "accepted": false,
+    "error": "Error: 被取代的卡片不存在或不属于当前项目"
+  },
+  "tamper": {
+    "accepted": true,
+    "result": {
+      "success": true,
+      "newCardId": "cmtsiv39b000br88ovroqt6r2",
+      "supersededCardId": "cmtsiv35e0003r88osliwhro8",
+      "cancelledCount": 1,
+      "createdActionsCount": 0
+    }
+  },
+  "again": {
+    "accepted": true,
+    "result": {
+      "success": true,
+      "newCardId": "cmtsiv39b000br88ovroqt6r2",
+      "supersededCardId": "cmtsiv35e0003r88osliwhro8",
+      "cancelledCount": 1,
+      "createdActionsCount": 0,
+      "alreadyConfirmed": true
+    }
+  },
+  "copilotAccepted": [
+    true,
+    true
+  ],
+  "copilotCount": 1,
+  "completionAccepted": true,
+  "failedAttachmentCanCompleteDeliverable": "COMPLETED",
+  "correctionCardCount": 2,
+  "correctionSupersession": 0
+}

@@ -1,0 +1,37 @@
+{
+  "scope": "Isolated backend logic, no production DB or platform UI",
+  "database": "D:\\Projects\\hongmen\\evidence\\handover-audit-20260908\\probe-1788824459721.db",
+  "unrelatedActionMarkedForCancellation": true,
+  "bogusProposalAccepted": true,
+  "crossProjectRelationCreated": true,
+  "repeatedChangeCreatesDifferentCards": true,
+  "copilotConcurrentOutcomes": [
+    "fulfilled",
+    "fulfilled"
+  ],
+  "copilotDuplicateCount": 2,
+  "copilotSavedPriorities": [
+    2,
+    2
+  ],
+  "completeOutcomes": [
+    {
+      "status": "rejected",
+      "reason": "TypeError: card.keywords.filter is not a function"
+    },
+    {
+      "status": "rejected",
+      "reason": "TypeError: card.keywords.filter is not a function"
+    }
+  ],
+  "reflectionCount": 0,
+  "cleanCompleteOutcomes": [
+    {
+      "status": "fulfilled"
+    },
+    {
+      "status": "fulfilled"
+    }
+  ],
+  "cleanReflectionCount": 1
+}

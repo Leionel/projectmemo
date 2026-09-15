@@ -1,3 +1,4 @@
+import { authorizeProjectAccess } from "@/lib/auth/guard";
 import { apiError, AppError } from "@/lib/api";
 import { processCapture, processCaptureWithRequest } from "@/lib/services/captureService";
 import { captureCreateSchema } from "@/lib/validation/schemas";
@@ -7,6 +8,7 @@ export const runtime = "nodejs";
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
+    await authorizeProjectAccess(request, id);
     const input = captureCreateSchema.parse(await request.json());
     const headerRequestId = request.headers.get("idempotency-key")?.trim() ?? "";
     if (headerRequestId && input.requestId && headerRequestId !== input.requestId) {

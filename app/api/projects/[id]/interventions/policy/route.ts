@@ -1,3 +1,4 @@
+import { authorizeProjectAccess } from "@/lib/auth/guard";
 import { apiError } from "@/lib/api";
 import {
   getOrCreatePolicy,
@@ -8,9 +9,10 @@ import { computeSuggestion, listProjectPreferences } from "@/lib/services/interv
 
 export const runtime = "nodejs";
 
-export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    await authorizeProjectAccess(request, id);
     const policy = await getOrCreatePolicy();
     const [recentDecisions, suggestions, reducedTopics] = await Promise.all([
       listRecentDecisions(id),
@@ -38,6 +40,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    await authorizeProjectAccess(request, id);
     const body = (await request.json()) as {
       dailyBudget?: number;
       quietStartMinute?: number;

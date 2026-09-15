@@ -1,3 +1,4 @@
+import { authorizeProjectAccess } from "@/lib/auth/guard";
 import { apiError } from "@/lib/api";
 import {
   archiveCard,
@@ -9,9 +10,10 @@ import { lifecycleActionSchema } from "@/lib/validation/schemas";
 
 export const runtime = "nodejs";
 
-export async function GET(_request: Request, { params }: { params: Promise<{ id: string; cardId: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string; cardId: string }> }) {
   try {
     const { id, cardId } = await params;
+    await authorizeProjectAccess(request, id);
     return Response.json({ events: await listLifecycleEvents(id, cardId) });
   } catch (error) {
     return apiError(error);
@@ -21,6 +23,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 export async function POST(request: Request, { params }: { params: Promise<{ id: string; cardId: string }> }) {
   try {
     const { id, cardId } = await params;
+    await authorizeProjectAccess(request, id);
     const input = lifecycleActionSchema.parse(await request.json());
     if (input.action === "CONFIRM") {
       const event = await confirmCardFact(id, cardId, { reason: input.reason });

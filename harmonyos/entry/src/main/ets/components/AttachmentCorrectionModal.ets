@@ -3,6 +3,7 @@ import { Attachment } from '../models/Attachment';
 import { AttachmentRevisionItem } from '../models/Artifact';
 import { AttachmentService } from '../services/AttachmentService';
 import { ApiError } from '../models/Project';
+import { PaperclipIcon } from './PMIcons';
 
 @Component
 export struct AttachmentCorrectionModal {
@@ -115,8 +116,7 @@ export struct AttachmentCorrectionModal {
 
         // 附件名与状态
         Row() {
-          Text(this.attachment.type === 'IMAGE' ? '📷' : '📄')
-            .fontSize(20)
+          PaperclipIcon({ iconSize: 20, color: PMColors.BRAND })
             .margin({ right: PMSpacing.SM })
 
           Column() {

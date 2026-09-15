@@ -1,0 +1,149 @@
+import { AppError } from "@/lib/api";
+import { findValidSessionByToken } from "./session";
+import { db } from "@/lib/db";
+import type { AuthSession, Project, User } from "@/lib/generated/prisma/client";
+
+export interface AuthenticatedContext {
+  user: User;
+  session: AuthSession;
+}
+
+export interface AuthorizedProjectContext extends AuthenticatedContext {
+  project: Project;
+}
+
+/**
+ * 从请求头读取 Bearer Token
+ */
+export function readBearerToken(request: Request): string {
+  const authorization = request.headers.get("authorization")?.trim() ?? "";
+  const match = /^Bearer\s+(.+)$/i.exec(authorization);
+  return match?.[1]?.trim() ?? "";
+}
+
+/**
+ * 校验请求携带的用户会话。
+ * 未登录、Token 格式错误、Token 过期或被撤销统一返回 401。
+ */
+export async function authenticateUser(request: Request): Promise<AuthenticatedContext> {
+  const token = readBearerToken(request);
+  if (!token) {
+    throw new AppError("UNAUTHORIZED", "未提供身份凭据，请先登录", 401);
+  }
+
+  const result = await findValidSessionByToken(token);
+  if (!result) {
+    throw new AppError("UNAUTHORIZED", "登录状态已失效，请重新登录", 401);
+  }
+
+  return {
+    user: result.user,
+    session: result.session,
+  };
+}
+
+/**
+ * 校验当前用户是否拥有该项目的访问权限。
+ * 1. 先验证会话（未登录 401）；
+ * 2. 再验证项目归属（项目不存在 404，无 membership 归属 403）。
+ */
+export async function authorizeProjectAccess(
+  request: Request,
+  projectId: string
+): Promise<AuthorizedProjectContext> {
+  if (!projectId || typeof projectId !== "string" || projectId.trim().length === 0) {
+    throw new AppError("INVALID_PROJECT_ID", "无效的项目 ID", 400);
+  }
+
+  const { user, session } = await authenticateUser(request);
+
+  const project = await db.project.findUnique({
+    where: { id: projectId },
+  });
+
+  if (!project) {
+    throw new AppError("PROJECT_NOT_FOUND", "项目不存在", 404);
+  }
+
+  const membership = await db.projectMembership.findUnique({
+    where: {
+      userId_projectId: {
+        userId: user.id,
+        projectId: project.id,
+      },
+    },
+  });
+
+  if (!membership) {
+    throw new AppError("FORBIDDEN", "无权访问此项目", 403);
+  }
+
+  return {
+    user,
+    session,
+    project,
+  };
+}
+
+// -------------------------------------------------------------
+// 登录失败限流器：防止暴力破解
+// -------------------------------------------------------------
+type FailureRecord = { count: number; windowStart: number; blockedUntil?: number };
+const loginFailureBuckets = new Map<string, FailureRecord>();
+
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOGIN_WINDOW_MS = 60_000;
+const LOCKOUT_DURATION_MS = 120_000;
+
+export function enforceLoginRateLimit(identifier: string): void {
+  const now = Date.now();
+  const record = loginFailureBuckets.get(identifier);
+  if (!record) return;
+
+  if (record.blockedUntil && now < record.blockedUntil) {
+    const retryAfter = Math.ceil((record.blockedUntil - now) / 1000);
+    throw new AppError(
+      "LOGIN_RATE_LIMITED",
+      `连续登录失败次数过多，请在 ${retryAfter} 秒后再试`,
+      429,
+      { retryAfter }
+    );
+  }
+
+  // 检查滑动窗口是否过期
+  if (now - record.windowStart >= LOGIN_WINDOW_MS) {
+    loginFailureBuckets.delete(identifier);
+  }
+}
+
+export function recordLoginFailure(identifier: string): void {
+  const now = Date.now();
+  const record = loginFailureBuckets.get(identifier) ?? { count: 0, windowStart: now };
+
+  if (now - record.windowStart >= LOGIN_WINDOW_MS) {
+    record.count = 1;
+    record.windowStart = now;
+    record.blockedUntil = undefined;
+  } else {
+    record.count += 1;
+  }
+
+  if (record.count >= MAX_LOGIN_ATTEMPTS) {
+    record.blockedUntil = now + LOCKOUT_DURATION_MS;
+  }
+
+  loginFailureBuckets.set(identifier, record);
+
+  // 清理过期记录防止内存泄漏
+  if (loginFailureBuckets.size > 512) {
+    for (const [key, val] of loginFailureBuckets) {
+      if (now - val.windowStart >= LOGIN_WINDOW_MS && (!val.blockedUntil || now >= val.blockedUntil)) {
+        loginFailureBuckets.delete(key);
+      }
+    }
+  }
+}
+
+export function clearLoginFailure(identifier: string): void {
+  loginFailureBuckets.delete(identifier);
+}

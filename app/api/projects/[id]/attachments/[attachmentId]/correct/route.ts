@@ -1,3 +1,4 @@
+import { authorizeProjectAccess } from "@/lib/auth/guard";
 import { NextResponse } from "next/server";
 import { correctAttachmentText } from "@/lib/services/attachmentService";
 import { z } from "zod";
@@ -13,6 +14,7 @@ export async function POST(
 ) {
   try {
     const { id: projectId, attachmentId } = await params;
+    await authorizeProjectAccess(request, projectId);
     const body = await request.json();
     const { correctedText, expectedCurrentText } = correctSchema.parse(body);
     const result = await correctAttachmentText(projectId, attachmentId, correctedText, expectedCurrentText ?? undefined);

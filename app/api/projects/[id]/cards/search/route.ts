@@ -1,3 +1,4 @@
+import { authorizeProjectAccess } from "@/lib/auth/guard";
 import { NextRequest, NextResponse } from "next/server";
 import { searchProjectCards } from "@/lib/memory/hybridSearch";
 import { requireProject } from "@/lib/repositories/projects";
@@ -16,6 +17,7 @@ async function search(projectId: string, query: string, limit: number, type: Kno
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: projectId } = await params;
+    await authorizeProjectAccess(request, projectId);
 
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("q") ?? "";
@@ -44,6 +46,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: projectId } = await params;
+    await authorizeProjectAccess(request, projectId);
     const input = cardSearchInputSchema.parse(await request.json());
     return Response.json(await search(projectId, input.query, input.topK, input.type as KnowledgeTypeValue | "all"));
   } catch (error) {

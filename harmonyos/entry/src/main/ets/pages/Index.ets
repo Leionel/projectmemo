@@ -5,17 +5,21 @@ import { ProjectDetail, KnowledgeCard, CardTemporalStatus } from '../models/Memo
 import { Intervention } from '../models/Intervention';
 import { ActionItem } from '../models/Action';
 import { SettingsResponse, UpdateSettingsInput, ProbeInput, ProbeResponse } from '../models/Settings';
+import { UserInfo } from '../models/Auth';
 
 import { ProjectService } from '../services/ProjectService';
 import { InterventionService } from '../services/InterventionService';
 import { ActionService } from '../services/ActionService';
 import { MemoryService } from '../services/MemoryService';
 import { SettingsService } from '../services/SettingsService';
+import { SessionStore } from '../services/SessionStore';
+import { AuthService } from '../services/AuthService';
+import { LoginView } from './LoginPage';
 
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily, PMInteraction, PMMotion, PMMaterial, PMTransition } from '../common/DesignTokens';
 import { LoadingStateView, ErrorStateView, EmptyStateView } from '../components/AsyncStateView';
-import { SeverityBadge, StatusBadge, MemoryTypeBadge } from '../components/MetricBadge';
-import { FolderIcon, TaskIcon, MemoryIcon, SettingsIcon, AlertIcon } from '../components/PMIcons';
+import { SeverityBadge, StatusBadge, MemoryTypeBadge, CategoryBadge, TemporalBadge } from '../components/MetricBadge';
+import { FolderIcon, TaskIcon, MemoryIcon, SettingsIcon, AlertIcon, BookOpenIcon, PaperclipIcon, ClockIcon } from '../components/PMIcons';
 import { DeadlineBadge } from '../components/DeadlineBadge';
 import { TextFormatters } from '../common/TextFormatters';
 import { Constants } from '../common/Constants';
@@ -26,6 +30,12 @@ import { PMBreakpoint, PMStorageKey, PMWidthBp } from '../common/WindowMetrics';
 struct Index {
   @State currentMainTabIndex: number = 0;
   @StorageProp(PMStorageKey.WIDTH_BP) widthBp: string = PMWidthBp.SM;
+
+  // 认证与会话状态
+  @State isAuthenticated: boolean = false;
+  @State isCheckingAuth: boolean = true;
+  @State currentUser: UserInfo = new UserInfo();
+  @State sessionExpiresAt: string = '';
 
   // 数据主状态
   @State projects: Project[] = [];
@@ -59,8 +69,12 @@ struct Index {
   @State isProbing: boolean = false;
   @State probeResult: ProbeResponse | undefined = undefined;
   @State settingsFeedback: string = '';
-  @State showSettingsSheet: boolean = false;
   @State dataSyncState: string = '尚未同步';
+  @State riskNotificationEnabled: boolean = true;
+  @State deadlineNotificationEnabled: boolean = true;
+  @State xiaoyiReadEnabled: boolean = true;
+  @State xiaoyiRecordEnabled: boolean = true;
+  @State showSettingsSheet: boolean = false;
 
   // 新建项目弹窗状态
   @State showCreateDialog: boolean = false;
@@ -77,14 +91,77 @@ struct Index {
   private actionService: ActionService = new ActionService();
   private memoryService: MemoryService = new MemoryService();
   private settingsService: SettingsService = new SettingsService();
+  private authService: AuthService = new AuthService();
 
   aboutToAppear(): void {
+    // 监听 401 失效通知
+    SessionStore.onSessionExpired(() => {
+      this.handleSessionExpired();
+    });
+
+    this.checkAndRestoreAuth();
+  }
+
+  private async checkAndRestoreAuth(): Promise<void> {
+    this.isCheckingAuth = true;
+    try {
+      const hasSession = await SessionStore.restoreSession(getContext(this));
+      if (hasSession) {
+        this.isAuthenticated = true;
+        this.currentUser = SessionStore.getUser();
+        this.sessionExpiresAt = SessionStore.getExpiresAt();
+        this.loadAllData();
+        this.loadLlmSettings();
+        this.openPendingNotification();
+      } else {
+        this.isAuthenticated = false;
+      }
+    } catch {
+      this.isAuthenticated = false;
+    } finally {
+      this.isCheckingAuth = false;
+    }
+  }
+
+  private handleSessionExpired(): void {
+    this.isAuthenticated = false;
+    this.currentUser = new UserInfo();
+    this.projects = [];
+    this.allCards = [];
+    this.allActions = [];
+    this.allInterventions = [];
+    promptAction.showToast({ message: '登录已失效，请重新登录' });
+  }
+
+  private handleLoginSuccess(): void {
+    this.isAuthenticated = true;
+    this.currentUser = SessionStore.getUser();
+    this.sessionExpiresAt = SessionStore.getExpiresAt();
     this.loadAllData();
     this.loadLlmSettings();
-    this.openPendingNotification();
+    promptAction.showToast({ message: '登录成功' });
+  }
+
+  private handleLogout(): void {
+    promptAction.showDialog({
+      title: '退出登录',
+      message: '确认退出当前复赛演示账号？退出后需重新输入凭据。',
+      buttons: [
+        { text: '取消', color: '#666666' },
+        { text: '退出登录', color: '#CF3B2B' }
+      ]
+    }).then(async (result) => {
+      if (result.index === 1) {
+        await this.authService.logout();
+        this.handleSessionExpired();
+      }
+    });
   }
 
   onPageShow(): void {
+    if (!this.isAuthenticated) {
+      return;
+    }
     this.openPendingNotification();
     if (!this.isLoading) {
       this.loadAllData(true);
@@ -505,25 +582,19 @@ struct Index {
   @Builder
   private projectItem(project: Project) {
     Column() {
-      // 头部：场景与截止日
+      // 头部：统一分类 Badge 与截止日
       Row() {
-        Text(TextFormatters.scenarioToChinese(project.scenario))
-          .fontSize(PMFontSize.CAPTION)
-          .fontWeight(FontWeight.Medium)
-          .fontColor(project.dashboard.deadline.kind === 'overdue' ? PMColors.RISK : PMColors.BRAND)
-          .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 2, bottom: 2 })
-          .borderRadius(PMRadius.XS)
-          .backgroundColor(project.dashboard.deadline.kind === 'overdue' ? PMColors.RISK_LIGHT : PMColors.BRAND_LIGHT)
-
+        CategoryBadge({ category: project.scenario })
         DeadlineBadge({ deadline: project.dashboard.deadline })
       }
       .width('100%')
       .justifyContent(FlexAlign.SpaceBetween)
+      .alignItems(VerticalAlign.Center)
 
       // 标题与简介
       Text(TextFormatters.readableText(project.title, '项目名称无法读取，请重新编辑。'))
         .fontSize(PMFontSize.PRIMARY_JUDGEMENT)
-        .fontWeight(FontWeight.Medium)
+        .fontWeight(FontWeight.Bold)
         .fontColor(PMColors.INK_PRIMARY)
         .maxLines(2)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -534,7 +605,7 @@ struct Index {
           .fontSize(PMFontSize.BODY)
           .fontColor(PMColors.INK_SECONDARY)
           .lineHeight(20)
-          .maxLines(1)
+          .maxLines(2)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .margin({ top: PMSpacing.XS })
       }
@@ -557,12 +628,12 @@ struct Index {
         Stack({ alignContent: Alignment.Start }) {
           Row()
             .width('100%')
-            .height(4)
+            .height(5)
             .backgroundColor(PMColors.BORDER)
             .borderRadius(PMRadius.FULL)
           Row()
             .width(`${Math.min(100, Math.max(0, project.dashboard.readiness.percentage))}%`)
-            .height(4)
+            .height(5)
             .backgroundColor(project.dashboard.deadline.kind === 'overdue' ? PMColors.RISK : PMColors.BRAND)
             .borderRadius(PMRadius.FULL)
         }
@@ -589,7 +660,7 @@ struct Index {
           Text('下一步')
             .fontSize(PMFontSize.SECONDARY)
             .fontWeight(FontWeight.Medium)
-            .fontColor(project.dashboard.deadline.kind === 'overdue' ? PMColors.RISK : PMColors.INK_TERTIARY)
+            .fontColor(project.dashboard.deadline.kind === 'overdue' ? PMColors.RISK : PMColors.BRAND)
             .margin({ right: PMSpacing.SM })
 
           Text(TextFormatters.readableText(project.dashboard.nextAction.label, '下一步行动无法读取'))
@@ -605,13 +676,13 @@ struct Index {
             .margin({ left: PMSpacing.XS })
         }
         .width('100%')
-        .padding({ top: 2 })
+        .padding({ top: 4, bottom: 2 })
       }
     }
     .width('100%')
-    .padding(PMSpacing.MD)
+    .padding(PMSpacing.LG)
     .backgroundColor(PMColors.SURFACE)
-    .borderRadius(PMRadius.MD)
+    .borderRadius(PMRadius.LG)
     .border({
       width: { left: 4, top: 1, right: 1, bottom: 1 },
       color: {
@@ -624,8 +695,8 @@ struct Index {
       }
     })
     .shadow({
-      radius: project.dashboard.deadline.kind === 'overdue' ? 10 : 4,
-      color: project.dashboard.deadline.kind === 'overdue' ? 'rgba(197, 48, 48, 0.08)' : 'rgba(0, 0, 0, 0.03)',
+      radius: 8,
+      color: project.dashboard.deadline.kind === 'overdue' ? 'rgba(220, 38, 38, 0.08)' : 'rgba(19, 36, 58, 0.04)',
       offsetX: 0,
       offsetY: 2
     })
@@ -683,14 +754,9 @@ struct Index {
           ForEach(this.allInterventions.filter((i) => i.status === 'OPEN'), (interv: Intervention) => {
             ListItem() {
               Column() {
-                // 顶部：所属项目与严重等级
+                // 顶部：所属项目与严重等级 (保留左侧 Accent 与 SeverityBadge，去除重复感叹号)
                 Row() {
-                  Row() {
-                    Text(interv.title.includes('截止') ? '⏱️' : interv.title.includes('72') ? '⏳' : '⚠️')
-                      .fontSize(PMFontSize.CAPTION)
-                      .margin({ right: 4 })
-                    SeverityBadge({ severity: interv.severity })
-                  }
+                  SeverityBadge({ severity: interv.severity })
 
                   Text(interv.projectId !== '' ? (this.projects.find((p: Project) => p.id === interv.projectId)?.title ?? '') : '')
                     .fontSize(PMFontSize.CAPTION)
@@ -702,6 +768,7 @@ struct Index {
                     .margin({ left: PMSpacing.SM })
                 }
                 .width('100%')
+                .alignItems(VerticalAlign.Center)
 
                 Text(interv.title)
                   .fontSize(PMFontSize.SECTION_TITLE)
@@ -721,8 +788,9 @@ struct Index {
                     .fontWeight(FontWeight.Medium)
                     .fontColor(PMColors.SURFACE)
                     .backgroundColor(PMColors.BRAND)
-                    .borderRadius(PMRadius.XS)
-                    .padding({ left: PMSpacing.MD, right: PMSpacing.MD, top: 5, bottom: 5 })
+                    .borderRadius(PMRadius.SM)
+                    .height(44)
+                    .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: 6, bottom: 6 })
                     .onClick(() => {
                       router.pushUrl({
                         url: 'pages/InterventionDetail',
@@ -735,9 +803,9 @@ struct Index {
                 .margin({ top: PMSpacing.SM })
               }
               .width('100%')
-              .padding(PMSpacing.MD)
+              .padding(PMSpacing.LG)
               .backgroundColor(PMColors.SURFACE)
-              .borderRadius(PMRadius.MD)
+              .borderRadius(PMRadius.LG)
               .border({
                 width: { left: 3, top: 1, right: 1, bottom: 1 },
                 color: {
@@ -747,7 +815,7 @@ struct Index {
                   bottom: PMColors.BORDER
                 }
               })
-              .shadow({ radius: 4, color: 'rgba(0, 0, 0, 0.03)', offsetX: 0, offsetY: 2 })
+              .shadow({ radius: 8, color: 'rgba(19, 36, 58, 0.04)', offsetX: 0, offsetY: 2 })
               .alignItems(HorizontalAlign.Start)
             }
           }, (interv: Intervention) => interv.id)
@@ -1134,92 +1202,534 @@ struct Index {
   private SettingsTab() {
     Scroll() {
       Column() {
-        // 一级卡片：应用身份与当前环境
+        // 1. 一级卡片：应用身份与当前环境 (App Summary)
         this.AppInfoCard()
 
-        // 两大入口：功能介绍（文档） / API 与引擎
+        // 2. 账号与会话 (Account & Session)
+        Text('账号与授权')
+          .fontSize(PMFontSize.CAPTION)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(PMColors.INK_TERTIARY)
+          .margin({ top: PMSpacing.LG, bottom: PMSpacing.XS, left: 4 })
+
         Column() {
           Row() {
-            Text('📘')
-              .fontSize(24)
             Column() {
-              Text('功能介绍')
-                .fontSize(PMFontSize.SECTION_TITLE)
+              Text(this.currentUser.displayName !== '' ? this.currentUser.displayName : '复赛演示账号')
+                .fontSize(PMFontSize.BODY)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
-              Text('产品定位、功能清单与设计理念，附完整说明文档。')
+              Text('账号：' + (this.currentUser.username !== '' ? this.currentUser.username : 'contest-demo'))
                 .fontSize(PMFontSize.CAPTION)
                 .fontColor(PMColors.INK_SECONDARY)
-                .lineHeight(18)
-                .margin({ top: PMSpacing.XS })
+                .margin({ top: 2 })
             }
             .alignItems(HorizontalAlign.Start)
             .layoutWeight(1)
-            .margin({ left: PMSpacing.MD })
 
-            Text('›')
-              .fontSize(22)
-              .fontColor(PMColors.INK_TERTIARY)
+            Row() {
+              Text('会话有效')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.SUCCESS)
+                .padding({ left: 8, right: 8, top: 4, bottom: 4 })
+                .backgroundColor(PMColors.SUCCESS_LIGHT)
+                .borderRadius(PMRadius.FULL)
+            }
           }
           .width('100%')
+          .height(52)
           .alignItems(VerticalAlign.Center)
-          .padding({ top: PMSpacing.SM, bottom: PMSpacing.SM })
-          .clickEffect(PMInteraction.PRESS_EFFECT)
-          .onClick(() => {
-            router.pushUrl({ url: 'pages/FeatureGuide' });
-          })
-          .accessibilityText('打开功能介绍文档')
 
-          Divider()
-            .color(PMColors.BORDER_SUBTLE)
+          Divider().color(PMColors.BORDER_SUBTLE)
 
           Row() {
-            Text('🔌')
-              .fontSize(24)
             Column() {
-              Text('API 与引擎')
-                .fontSize(PMFontSize.SECTION_TITLE)
+              Text('退出登录')
+                .fontSize(PMFontSize.BODY)
                 .fontWeight(FontWeight.Medium)
-                .fontColor(PMColors.INK_PRIMARY)
-              Text('选择离线确定性引擎或配置 OpenAI 兼容 API。')
+                .fontColor(PMColors.RISK)
+              Text('撤销会话并清除本地凭证')
                 .fontSize(PMFontSize.CAPTION)
                 .fontColor(PMColors.INK_SECONDARY)
-                .lineHeight(18)
-                .margin({ top: PMSpacing.XS })
+                .margin({ top: 2 })
             }
             .alignItems(HorizontalAlign.Start)
             .layoutWeight(1)
-            .margin({ left: PMSpacing.MD })
 
-            Text(this.llmMode === 'openai-compatible' ? '在线 API' : '离线引擎')
-              .fontSize(PMFontSize.CAPTION)
-              .fontWeight(FontWeight.Medium)
-              .fontColor(this.llmMode === 'openai-compatible' ? PMColors.BRAND : PMColors.MEMORY)
-              .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 4, bottom: 4 })
-              .backgroundColor(this.llmMode === 'openai-compatible' ? PMColors.BRAND_LIGHT : PMColors.MEMORY_LIGHT)
-              .borderRadius(PMRadius.FULL)
-              .margin({ right: PMSpacing.SM })
-
-            Text('›')
-              .fontSize(22)
-              .fontColor(PMColors.INK_TERTIARY)
+            Text('退出 ›')
+              .fontSize(PMFontSize.BODY)
+              .fontColor(PMColors.RISK)
           }
           .width('100%')
+          .height(52)
           .alignItems(VerticalAlign.Center)
-          .padding({ top: PMSpacing.SM, bottom: PMSpacing.SM })
+          .clickEffect(PMInteraction.PRESS_EFFECT)
+          .onClick(() => {
+            this.handleLogout();
+          })
+        }
+        .width('100%')
+        .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
+        .backgroundColor(PMColors.SURFACE)
+        .borderRadius(PMRadius.LG)
+        .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+
+        // 3. AI 与忆程 (AI & Engine)
+        Text('AI 与忆程')
+          .fontSize(PMFontSize.CAPTION)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(PMColors.INK_TERTIARY)
+          .margin({ top: PMSpacing.LG, bottom: PMSpacing.XS, left: 4 })
+
+        Column() {
+          Row() {
+            Column() {
+              Text('大模型与引擎')
+                .fontSize(PMFontSize.BODY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text(this.llmMode === 'openai-compatible' ? 'OpenAI-compatible · 在线' : '确定性规则引擎 · 本地')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: 2 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+
+            Row() {
+              Text(this.llmMode === 'openai-compatible' ? '在线 API' : '离线引擎')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(this.llmMode === 'openai-compatible' ? PMColors.BRAND : PMColors.MEMORY)
+                .padding({ left: 8, right: 8, top: 4, bottom: 4 })
+                .backgroundColor(this.llmMode === 'openai-compatible' ? PMColors.BRAND_LIGHT : PMColors.MEMORY_LIGHT)
+                .borderRadius(PMRadius.FULL)
+                .margin({ right: PMSpacing.XS })
+              Text('›')
+                .fontSize(20)
+                .fontColor(PMColors.INK_TERTIARY)
+            }
+          }
+          .width('100%')
+          .height(52)
+          .alignItems(VerticalAlign.Center)
           .clickEffect(PMInteraction.PRESS_EFFECT)
           .onClick(() => {
             this.showSettingsSheet = true;
           })
-          .accessibilityText('打开 API 与引擎配置')
+
+          Divider().color(PMColors.BORDER_SUBTLE)
+
+          Row() {
+            Column() {
+              Text('忆程回答偏好')
+                .fontSize(PMFontSize.BODY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text('证据优先 · 不确定时明确说明')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: 2 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+
+            Text('已启用')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.SUCCESS)
+              .padding({ left: 8, right: 8, top: 4, bottom: 4 })
+              .backgroundColor(PMColors.SUCCESS_LIGHT)
+              .borderRadius(PMRadius.FULL)
+          }
+          .width('100%')
+          .height(52)
+          .alignItems(VerticalAlign.Center)
+
+          Divider().color(PMColors.BORDER_SUBTLE)
+
+          Row() {
+            Column() {
+              Text('小艺连接状态')
+                .fontSize(PMFontSize.BODY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text('S08 标准技能适配已就绪')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: 2 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+
+            Text('已连接')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.SUCCESS)
+              .padding({ left: 8, right: 8, top: 4, bottom: 4 })
+              .backgroundColor(PMColors.SUCCESS_LIGHT)
+              .borderRadius(PMRadius.FULL)
+          }
+          .width('100%')
+          .height(52)
+          .alignItems(VerticalAlign.Center)
         }
         .width('100%')
-        .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.SM })
+        .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
         .backgroundColor(PMColors.SURFACE)
-        .borderRadius(PMRadius.MD)
-        .border({ width: 1, color: PMColors.BORDER })
-        .alignItems(HorizontalAlign.Start)
-        .margin({ top: PMSpacing.MD })
+        .borderRadius(PMRadius.LG)
+        .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+
+        // 3. 提醒与主动介入 (Intervention & Notification)
+        Text('提醒与主动介入')
+          .fontSize(PMFontSize.CAPTION)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(PMColors.INK_TERTIARY)
+          .margin({ top: PMSpacing.LG, bottom: PMSpacing.XS, left: 4 })
+
+        Column() {
+          Row() {
+            Column() {
+              Text('风险主动介入提醒')
+                .fontSize(PMFontSize.BODY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text('缺口与关键风险触发系统级介入')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: 2 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+
+            Toggle({ type: ToggleType.Switch, isOn: this.riskNotificationEnabled })
+              .selectedColor(PMColors.BRAND)
+              .onChange((isOn: boolean) => {
+                this.riskNotificationEnabled = isOn;
+              })
+          }
+          .width('100%')
+          .height(52)
+          .alignItems(VerticalAlign.Center)
+
+          Divider().color(PMColors.BORDER_SUBTLE)
+
+          Row() {
+            Column() {
+              Text('截止临近提醒')
+                .fontSize(PMFontSize.BODY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text('节点到期前 3 天触发进度自查')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: 2 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+
+            Toggle({ type: ToggleType.Switch, isOn: this.deadlineNotificationEnabled })
+              .selectedColor(PMColors.BRAND)
+              .onChange((isOn: boolean) => {
+                this.deadlineNotificationEnabled = isOn;
+              })
+          }
+          .width('100%')
+          .height(52)
+          .alignItems(VerticalAlign.Center)
+
+          Divider().color(PMColors.BORDER_SUBTLE)
+
+          Row() {
+            Column() {
+              Text('夜间免打扰')
+                .fontSize(PMFontSize.BODY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text('22:00 – 08:00 静音仅工作台红点')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: 2 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+
+            Text('22:00 – 08:00 ›')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+          }
+          .width('100%')
+          .height(52)
+          .alignItems(VerticalAlign.Center)
+
+          Divider().color(PMColors.BORDER_SUBTLE)
+
+          Row() {
+            Column() {
+              Text('提醒介入强度')
+                .fontSize(PMFontSize.BODY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text('适中 · 证据明确才触发，绝不越权')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: 2 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+
+            Text('适中 ›')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.BRAND)
+          }
+          .width('100%')
+          .height(52)
+          .alignItems(VerticalAlign.Center)
+        }
+        .width('100%')
+        .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
+        .backgroundColor(PMColors.SURFACE)
+        .borderRadius(PMRadius.LG)
+        .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+
+        // 4. 证据与记忆 (Evidence & Memory)
+        Text('证据与记忆')
+          .fontSize(PMFontSize.CAPTION)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(PMColors.INK_TERTIARY)
+          .margin({ top: PMSpacing.LG, bottom: PMSpacing.XS, left: 4 })
+
+        Column() {
+          Row() {
+            Column() {
+              Text('证据可信度规则')
+                .fontSize(PMFontSize.BODY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text('多维溯源，来源存在不等于事实成立')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: 2 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+
+            Text('严谨校验 ›')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+          }
+          .width('100%')
+          .height(52)
+          .alignItems(VerticalAlign.Center)
+
+          Divider().color(PMColors.BORDER_SUBTLE)
+
+          Row() {
+            Column() {
+              Text('记忆确认与变更策略')
+                .fontSize(PMFontSize.BODY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text('双步确认生效，禁止系统静默改写')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: 2 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+
+            Text('双步确认 ›')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+          }
+          .width('100%')
+          .height(52)
+          .alignItems(VerticalAlign.Center)
+
+          Divider().color(PMColors.BORDER_SUBTLE)
+
+          Row() {
+            Column() {
+              Text('不确定信息处理')
+                .fontSize(PMFontSize.BODY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text('Unknown 严格保留，不作为 False 处理')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: 2 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+
+            Text('保留 UNKNOWN')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.EVIDENCE)
+              .padding({ left: 8, right: 8, top: 4, bottom: 4 })
+              .backgroundColor(PMColors.EVIDENCE_LIGHT)
+              .borderRadius(PMRadius.FULL)
+          }
+          .width('100%')
+          .height(52)
+          .alignItems(VerticalAlign.Center)
+        }
+        .width('100%')
+        .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
+        .backgroundColor(PMColors.SURFACE)
+        .borderRadius(PMRadius.LG)
+        .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+
+        // 5. 小艺与设备 (XiaoYi & Human-in-the-Loop)
+        Text('小艺与设备')
+          .fontSize(PMFontSize.CAPTION)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(PMColors.INK_TERTIARY)
+          .margin({ top: PMSpacing.LG, bottom: PMSpacing.XS, left: 4 })
+
+        Column() {
+          Row() {
+            Column() {
+              Text('允许小艺读取项目状态')
+                .fontSize(PMFontSize.BODY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text('用于跨终端智能问答与概览')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: 2 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+
+            Toggle({ type: ToggleType.Switch, isOn: this.xiaoyiReadEnabled })
+              .selectedColor(PMColors.BRAND)
+              .onChange((isOn: boolean) => {
+                this.xiaoyiReadEnabled = isOn;
+              })
+          }
+          .width('100%')
+          .height(52)
+          .alignItems(VerticalAlign.Center)
+
+          Divider().color(PMColors.BORDER_SUBTLE)
+
+          Row() {
+            Column() {
+              Text('允许小艺记录项目记忆')
+                .fontSize(PMFontSize.BODY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text('语音采集自动生成待确认草稿')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: 2 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+
+            Toggle({ type: ToggleType.Switch, isOn: this.xiaoyiRecordEnabled })
+              .selectedColor(PMColors.BRAND)
+              .onChange((isOn: boolean) => {
+                this.xiaoyiRecordEnabled = isOn;
+              })
+          }
+          .width('100%')
+          .height(52)
+          .alignItems(VerticalAlign.Center)
+
+          Divider().color(PMColors.BORDER_SUBTLE)
+
+          Row() {
+            Column() {
+              Text('写操作始终要求确认')
+                .fontSize(PMFontSize.BODY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text('核心安全约束，确保数据人工在环')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: 2 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+
+            Text('安全策略 · 强制')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.BRAND)
+              .padding({ left: 8, right: 8, top: 4, bottom: 4 })
+              .backgroundColor(PMColors.BRAND_LIGHT)
+              .borderRadius(PMRadius.FULL)
+          }
+          .width('100%')
+          .height(52)
+          .alignItems(VerticalAlign.Center)
+        }
+        .width('100%')
+        .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
+        .backgroundColor(PMColors.SURFACE)
+        .borderRadius(PMRadius.LG)
+        .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+
+        // 6. 帮助与关于 (Help & About)
+        Text('帮助与关于')
+          .fontSize(PMFontSize.CAPTION)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(PMColors.INK_TERTIARY)
+          .margin({ top: PMSpacing.LG, bottom: PMSpacing.XS, left: 4 })
+
+        Column() {
+          Row() {
+            Column() {
+              Text('功能介绍与设计理念')
+                .fontSize(PMFontSize.BODY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text('项目记忆、状态对比与主动介入答辩说明')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: 2 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+
+            Text('›')
+              .fontSize(20)
+              .fontColor(PMColors.INK_TERTIARY)
+          }
+          .width('100%')
+          .height(52)
+          .alignItems(VerticalAlign.Center)
+          .clickEffect(PMInteraction.PRESS_EFFECT)
+          .onClick(() => {
+            router.pushUrl({ url: 'pages/FeatureGuide' });
+          })
+
+          Divider().color(PMColors.BORDER_SUBTLE)
+
+          Row() {
+            Column() {
+              Text('版本号')
+                .fontSize(PMFontSize.BODY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text('HarmonyOS NEXT · Release 2026')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: 2 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+
+            Text('v0.1.0')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+          }
+          .width('100%')
+          .height(52)
+          .alignItems(VerticalAlign.Center)
+        }
+        .width('100%')
+        .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
+        .backgroundColor(PMColors.SURFACE)
+        .borderRadius(PMRadius.LG)
+        .border({ width: 1, color: PMColors.BORDER_SUBTLE })
       }
       .width('100%')
       .alignItems(HorizontalAlign.Start)
@@ -1536,10 +2046,29 @@ struct Index {
   // 主构建入口
   // ----------------------------------------------------
   build() {
-    Stack() {
+    if (this.isCheckingAuth) {
       Column() {
-        // 头部：正式统一品牌名 "忆程 ProjectMemo"
-        Row() {
+        LoadingStateView({ message: '正在连接演示环境...' })
+      }
+      .width('100%')
+      .height('100%')
+      .justifyContent(FlexAlign.Center)
+      .backgroundColor(PMColors.BACKGROUND)
+    } else if (!this.isAuthenticated) {
+      Column() {
+        LoginView({
+          onLoginSuccess: () => {
+            this.handleLoginSuccess();
+          }
+        })
+      }
+      .width('100%')
+      .height('100%')
+    } else {
+      Stack() {
+        Column() {
+          // 头部：正式统一品牌名 "忆程 ProjectMemo"
+          Row() {
           Image($r('app.media.app_icon'))
             .width(36)
             .height(36)
@@ -1808,4 +2337,5 @@ struct Index {
     .height('100%')
     .backgroundColor(PMColors.BACKGROUND)
   }
+}
 }

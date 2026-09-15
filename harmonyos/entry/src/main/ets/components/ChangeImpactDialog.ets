@@ -7,6 +7,7 @@ import {
 } from '../models/DecisionImpact';
 import { DecisionService } from '../services/DecisionService';
 import { ApiError } from '../models/Project';
+import { AlertIcon } from './PMIcons';
 
 @Component
 export struct ChangeImpactDialog {
@@ -226,7 +227,8 @@ export struct ChangeImpactDialog {
               Column() {
                 // 冲突与取代状态
                 Row() {
-                  Text('⚡ 时态取代：')
+                  AlertIcon({ iconSize: 13, color: PMColors.RISK })
+                  Text(' 时态取代：')
                     .fontSize(PMFontSize.CAPTION)
                     .fontWeight(FontWeight.Bold)
                     .fontColor(PMColors.RISK)
@@ -306,8 +308,7 @@ export struct ChangeImpactDialog {
 
                   ForEach(this.proposal.impactedArtifacts, (art: ChangeImpactItem) => {
                     Row() {
-                      Text('⚠️')
-                        .fontSize(PMFontSize.CAPTION)
+                      AlertIcon({ iconSize: 14, color: PMColors.WARNING })
                         .margin({ right: PMSpacing.SM })
                       Column() {
                         Text(art.title)

@@ -1,3 +1,4 @@
+import { authorizeProjectAccess } from "@/lib/auth/guard";
 import { AppError, apiError } from "@/lib/api";
 import { getProjectStateDiff } from "@/lib/services/projectStateService";
 import { buildChangeBrief, buildFirstTimeBrief } from "@/lib/services/projectChangeBriefService";
@@ -7,6 +8,7 @@ export const runtime = "nodejs";
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    await authorizeProjectAccess(request, id);
     const searchParams = new URL(request.url).searchParams;
     const from = searchParams.get("from") ?? "";
     const to = searchParams.get("to") ?? "";

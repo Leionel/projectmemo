@@ -307,8 +307,9 @@ struct MemoryTimeline {
     .width('100%')
     .padding(PMSpacing.LG)
     .backgroundColor(PMColors.SURFACE)
-    .borderRadius(PMRadius.MD)
+    .borderRadius(PMRadius.LG)
     .border({ width: 1, color: this.statusColor(item.status) })
+    .shadow({ radius: 6, color: 'rgba(0, 0, 0, 0.03)', offsetX: 0, offsetY: 1 })
     .alignItems(HorizontalAlign.Start)
     .accessibilityText(`${item.statusLabel}，${item.card.title}${item.temporalReason !== null ? `，${item.temporalReason}` : ''}`)
   }
@@ -514,8 +515,9 @@ struct MemoryTimeline {
     .width('100%')
     .padding(PMSpacing.LG)
     .backgroundColor(PMColors.SURFACE)
-    .borderRadius(PMRadius.MD)
+    .borderRadius(PMRadius.LG)
     .border({ width: 1, color: PMColors.BORDER })
+    .shadow({ radius: 6, color: 'rgba(0, 0, 0, 0.03)', offsetX: 0, offsetY: 1 })
     .alignItems(HorizontalAlign.Start)
   }
 

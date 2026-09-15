@@ -108,7 +108,9 @@ describe.sequential("temporal ledger API integration", () => {
     const { POST: revoke } = await import("@/app/api/projects/[id]/relations/[relationId]/revoke/route");
     const { GET: timeline } = await import("@/app/api/projects/[id]/decisions/timeline/route");
 
+    const { createTestAuth } = await import("./testAuthHelper");
     const project = await createProject({ title: "时态账本项目", description: "验证新决定取代旧决定的完整纵向闭环。", goal: "保留可撤销历史", scenario: "COMPETITION", deadline: null });
+    const { headers } = await createTestAuth(project.id);
     await processCapture(project.id, "旧决定：答辩演示使用离线关键词检索方案。", "项目决定");
     await processCapture(project.id, "新决定：答辩演示改用混合检索，并保留离线降级。", "项目决定");
     const detail = await getProjectDetail(project.id);
@@ -116,7 +118,7 @@ describe.sequential("temporal ledger API integration", () => {
     const older = detail.cards[1];
 
     const proposalResponse = await propose(new Request("http://localhost/propose", {
-      method: "POST", headers: { "content-type": "application/json" },
+      method: "POST", headers: { "content-type": "application/json", ...headers },
       body: JSON.stringify({ relatedCardId: older.id, relationType: "SUPERSEDES", reason: "混合检索方案已经通过本地回归", confidence: 0.96 }),
     }), { params: Promise.resolve({ id: project.id, cardId: newer.id }) });
     expect(proposalResponse.status).toBe(201);
@@ -126,16 +128,16 @@ describe.sequential("temporal ledger API integration", () => {
     const before = await searchProjectCards({ projectId: project.id, query: "检索方案", limit: 8 });
     expect(before.find((item) => item.cardId === older.id)).toMatchObject({ current: true, supportState: "PENDING" });
 
-    expect((await confirm(new Request("http://localhost/confirm", { method: "POST" }), { params: Promise.resolve({ id: project.id, relationId: proposal.relation.id }) })).status).toBe(200);
+    expect((await confirm(new Request("http://localhost/confirm", { method: "POST", headers }), { params: Promise.resolve({ id: project.id, relationId: proposal.relation.id }) })).status).toBe(200);
     const after = await searchProjectCards({ projectId: project.id, query: "检索方案", limit: 8 });
     expect(after.find((item) => item.cardId === older.id)).toMatchObject({ current: false, supportState: "SUPERSEDED", supersededBy: { id: newer.id } });
     expect(after.find((item) => item.cardId === newer.id)).toMatchObject({ current: true, supportState: "SUPPORTED" });
 
-    const timelineResponse = await timeline(new Request(`http://localhost/api/projects/${project.id}/decisions/timeline`), { params: Promise.resolve({ id: project.id }) });
+    const timelineResponse = await timeline(new Request(`http://localhost/api/projects/${project.id}/decisions/timeline`, { headers }), { params: Promise.resolve({ id: project.id }) });
     const timelineBody = await timelineResponse.json() as { items: Array<{ card: { id: string }; status: string }> };
     expect(timelineBody.items.find((item) => item.card.id === older.id)?.status).toBe("SUPERSEDED");
 
-    expect((await revoke(new Request("http://localhost/revoke", { method: "POST" }), { params: Promise.resolve({ id: project.id, relationId: proposal.relation.id }) })).status).toBe(200);
+    expect((await revoke(new Request("http://localhost/revoke", { method: "POST", headers }), { params: Promise.resolve({ id: project.id, relationId: proposal.relation.id }) })).status).toBe(200);
     const restored = await searchProjectCards({ projectId: project.id, query: "检索方案", limit: 8 });
     expect(restored.find((item) => item.cardId === older.id)).toMatchObject({ current: true, supportState: "REVOKED" });
   });

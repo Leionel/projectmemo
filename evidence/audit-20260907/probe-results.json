@@ -1,0 +1,47 @@
+{
+  "database": "D:\\Projects\\hongmen\\evidence\\audit-20260907\\probe-1788771773255.db",
+  "scope": "Local logic and route-handler probes; not an ArkUI or notification-system run",
+  "deadlineContract": {
+    "calendarDateAccepted": true,
+    "appISODateAccepted": false,
+    "note": "newDeadline currently has no UI setter; ISO mismatch is latent, not a reachable date-entry failure"
+  },
+  "concurrentCompletion": {
+    "outcomes": [
+      {
+        "status": "fulfilled"
+      },
+      {
+        "status": "fulfilled"
+      }
+    ],
+    "reflectionCount": 1,
+    "actionResultCardId": "dd4f5113-2d0d-4bbb-80f0-a86b983ac47e"
+  },
+  "repeatedCopilotConfirmation": {
+    "firstId": "cmtr0j2730004zc8olykg02kg",
+    "secondId": "cmtr0j2730004zc8olykg02kg",
+    "count": 1
+  },
+  "proposalPayloadBinding": {
+    "changedDescription": "原始建议说明",
+    "changedPriority": 2
+  },
+  "routeAuthenticationBoundary": {
+    "anonymousListStatus": 200,
+    "anonymousDeleteStatus": 204,
+    "note": "Direct local route invocation bypasses Nginx; not evidence that a public endpoint is exposed."
+  },
+  "notificationDenied": {
+    "resolvedWithoutError": true,
+    "publishCalls": 0
+  },
+  "notificationPermissionChanged": {
+    "platformEnabledNow": true,
+    "publishCallsAfterEnable": 1
+  },
+  "notificationSchedule": {
+    "publishCalls": 1,
+    "futureDeliveryTimePassedImmediately": false
+  }
+}

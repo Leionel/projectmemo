@@ -354,4 +354,79 @@ describe("Action feasibility (F1)", () => {
     expect(bareAssessment.estimateMinutes).toBeNull();
     expect(bareAssessment.estimateNote).toContain("未估算");
   });
+
+  it("replaces a requirement in one request without dropping the target", async () => {
+    const dependency = await seedAction("替换依赖前置");
+    const action = await seedAction("替换依赖目标");
+    await updateActionFeasibilityInput(projectId, {
+      actionId: action.id,
+      addRequirements: [{ targetKind: "action", targetId: dependency.id, hard: true, note: "原备注" }],
+    });
+    const before = await db.actionRequirement.findFirstOrThrow({ where: { actionId: action.id } });
+
+    const assessment = await updateActionFeasibilityInput(projectId, {
+      actionId: action.id,
+      removeRequirementIds: [before.id],
+      addRequirements: [{ targetKind: "action", targetId: dependency.id, hard: false, note: "改为软依赖" }],
+    });
+    const after = await db.actionRequirement.findMany({ where: { actionId: action.id } });
+    expect(after).toHaveLength(1);
+    expect(after[0]).toMatchObject({ targetId: dependency.id, hard: false, note: "改为软依赖" });
+    expect(assessment.dependencies).toHaveLength(1);
+    expect(assessment.dependencies[0].hard).toBe(false);
+    expect(assessment.feasibility).toBe("READY");
+  });
+
+  it("rolls back the whole dependency batch when the final graph is invalid", async () => {
+    const dependency = await seedAction("批量校验合法前置");
+    const action = await seedAction("批量校验目标");
+    await expect(updateActionFeasibilityInput(projectId, {
+      actionId: action.id,
+      addRequirements: [
+        { targetKind: "action", targetId: dependency.id },
+        { targetKind: "action", targetId: "missing-target" },
+      ],
+    })).rejects.toThrow();
+    expect(await db.actionRequirement.count({ where: { actionId: action.id } })).toBe(0);
+  });
+
+  it("rejects an outdated dependency editor without overwriting a newer version", async () => {
+    const dependency = await seedAction("版本前置行动");
+    const action = await seedAction("版本目标行动");
+    const first = await updateActionFeasibilityInput(projectId, {
+      actionId: action.id,
+      addRequirements: [{ targetKind: "action", targetId: dependency.id }],
+    });
+    expect(first.dependencyVersion).toBeGreaterThan(1);
+
+    await expect(updateActionFeasibilityInput(projectId, {
+      actionId: action.id,
+      expectedVersion: 1,
+      estimatedMinutes: 30,
+    })).rejects.toThrow("重新打开");
+    expect((await db.actionItem.findUniqueOrThrow({ where: { id: action.id } })).estimatedMinutes).toBeNull();
+  });
+
+  it("does not commit a cycle when opposite dependencies are edited concurrently", async () => {
+    const actionA = await seedAction("并发环路 A");
+    const actionB = await seedAction("并发环路 B");
+    const results = await Promise.allSettled([
+      updateActionFeasibilityInput(projectId, {
+        actionId: actionA.id,
+        addRequirements: [{ targetKind: "action", targetId: actionB.id }],
+      }),
+      updateActionFeasibilityInput(projectId, {
+        actionId: actionB.id,
+        addRequirements: [{ targetKind: "action", targetId: actionA.id }],
+      }),
+    ]);
+    const edgeCount = await db.actionRequirement.count({
+      where: { projectId, targetKind: "action", OR: [
+        { actionId: actionA.id, targetId: actionB.id },
+        { actionId: actionB.id, targetId: actionA.id },
+      ] },
+    });
+    expect(edgeCount).toBeLessThanOrEqual(1);
+    expect(results.filter((result) => result.status === "fulfilled").length).toBeLessThanOrEqual(1);
+  });
 });

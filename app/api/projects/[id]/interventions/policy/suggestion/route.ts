@@ -1,3 +1,4 @@
+import { authorizeProjectAccess } from "@/lib/auth/guard";
 import { AppError, apiError } from "@/lib/api";
 import {
   confirmSuggestion,
@@ -10,6 +11,7 @@ export const runtime = "nodejs";
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    await authorizeProjectAccess(request, id);
     const body = (await request.json()) as { action?: string; triggerType?: string };
     const triggerType = body.triggerType?.trim();
     if (!triggerType) {

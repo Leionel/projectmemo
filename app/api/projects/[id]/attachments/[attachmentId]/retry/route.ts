@@ -1,12 +1,13 @@
+import { authorizeProjectAccess } from "@/lib/auth/guard";
 import { NextResponse } from "next/server";
 import { retryAttachmentExtraction } from "@/lib/services/attachmentService";
 
-export async function POST(
-  _request: Request,
+export async function POST(request: Request,
   { params }: { params: Promise<{ id: string; attachmentId: string }> },
 ) {
   try {
     const { id: projectId, attachmentId } = await params;
+    await authorizeProjectAccess(request, projectId);
     const result = await retryAttachmentExtraction(projectId, attachmentId);
     return NextResponse.json(result);
   } catch (error) {

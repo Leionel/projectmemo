@@ -6,7 +6,7 @@
 >
 > 当前状态：[`ProjectMemo_2.0_IMPLEMENTATION_NOTES.md`](./ProjectMemo_2.0_IMPLEMENTATION_NOTES.md) 第一部分
 >
-> S08 部署：[`docs/xiaoyi/Alibaba Cloud Linux 部署 S08.md`](./docs/xiaoyi/Alibaba%20Cloud%20Linux%20部署%20S08.md)
+> S08 部署：[`docs/xiaoyi/Alibaba Cloud Linux 部署 S08.md`](../xiaoyi/Alibaba%20Cloud%20Linux%20部署%20S08.md)
 >
 > 状态基准：2026-08-26
 >
@@ -290,7 +290,7 @@ W00 不改业务逻辑。它建立后续所有结论可复核的起点，预计 
 
 **前置条件：** 当前工作树中的用户改动已备份或提交；Node、DevEco Studio 和现有模拟器可用。
 
-**涉及文件：** `ProjectMemo_2.1_IMPLEMENTATION_NOTES.md`（新建）、`evidence/2.1/`（新建）、可选的证据采集脚本。
+**涉及文件：** `ProjectMemo_2.1_IMPLEMENTATION_NOTES.md`（新建）、`../../evidence/2.1/`（新建）、可选的证据采集脚本。
 
 ### 6.1 执行步骤
 
@@ -300,7 +300,7 @@ W00 不改业务逻辑。它建立后续所有结论可复核的起点，预计 
 2. 串行运行 Backend 测试、类型检查、lint 和生产构建。
 3. 运行 HarmonyOS Hypium 与 HAP 构建。
 4. 运行 S08 专项测试。
-5. 把每项命令、退出码和产物 SHA-256 保存到 `evidence/2.1/baseline/`。
+5. 把每项命令、退出码和产物 SHA-256 保存到 `../../evidence/2.1/baseline/`。
 
 ```powershell
 git rev-parse HEAD
@@ -356,7 +356,7 @@ W01 优先产出真实模拟器回执；只有测试暴露缺陷时才改代码�
 
 ### 7.3 验收、证据与 STOP
 
-W01 的证据写入 `evidence/2.1/ui-matrix/` 和 `evidence/2.1/inbox-gap-notification/`。每个失败必须标注“产品缺陷”“模拟器限制”或“真机待测”，不得只删除失败截图。
+W01 的证据写入 `../../evidence/2.1/ui-matrix/` 和 `../../evidence/2.1/inbox-gap-notification/`。每个失败必须标注“产品缺陷”“模拟器限制”或“真机待测”，不得只删除失败截图。
 
 以下情况触发停止对应能力：
 
@@ -413,7 +413,7 @@ W03 复用现有四项本地能力，把 `project.luojiatutor.xyz` 变成小艺�
 
 先只验证 `record_memory`，成功后再配置其余节点。
 
-1. 按 [`Alibaba Cloud Linux 部署 S08`](./docs/xiaoyi/Alibaba%20Cloud%20Linux%20部署%20S08.md) 部署 Next.js、systemd、Nginx 和证书。
+1. 按 [`Alibaba Cloud Linux 部署 S08`](../xiaoyi/Alibaba%20Cloud%20Linux%20部署%20S08.md) 部署 Next.js、systemd、Nginx 和证书。
 2. 设置 `XIAOYI_ADAPTER_ENABLED=true`、至少 32 字符的 Token 和固定 `XIAOYI_TEST_PROJECT_ID`。
 3. 从外网访问 `GET https://project.luojiatutor.xyz/health`。
 4. 用 PowerShell 或 curl 调用 `POST /xiaoyi/v1/memories`，保存 `request_id`、`agent_run_id` 和 `card_id`。
@@ -433,7 +433,7 @@ W03 复用现有四项本地能力，把 `project.luojiatutor.xyz` 变成小艺�
 
 ### 9.3 20 轮与安全对照
 
-先完成 20 轮正常调用，再执行负向测试。正常结果和失败结果都写入 `evidence/2.1/xiaoyi/`。
+先完成 20 轮正常调用，再执行负向测试。正常结果和失败结果都写入 `../../evidence/2.1/xiaoyi/`。
 
 ```text
 record_memory     5 轮
@@ -547,7 +547,7 @@ Cross-project relation writes  = 0
 Supersession cycles accepted   = 0
 ```
 
-原始样例、预测、人工标注和指标写入 `evidence/2.1/temporal/`。评测未达标时关闭 `TEMPORAL_MEMORY_ENABLED`，保留关系数据并恢复 2.0 搜索。
+原始样例、预测、人工标注和指标写入 `../../evidence/2.1/temporal/`。评测未达标时关闭 `TEMPORAL_MEMORY_ENABLED`，保留关系数据并恢复 2.0 搜索。
 
 ## 11. W05｜加入 Evidence Trust Receipt 与拒答
 

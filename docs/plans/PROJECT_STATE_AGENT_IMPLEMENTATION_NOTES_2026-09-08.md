@@ -1,6 +1,6 @@
 # 实施记录：项目状态记忆与可验证主动推进
 
-> 2026-09-12 收尾入口：`IN_PROGRESS_CLOSEOUT_PLAN_2026-09-12.md`。该方案针对七项 IN_PROGRESS 和最新验收缺口，按 E1–E7 执行；方案写成不改变以下实施状态。验收发现以 `ACCEPTANCE_REVIEW_2026-09-12.md` 为准，后续修复需新回执关闭。
+> 2026-09-12 收尾入口：`IN_PROGRESS_CLOSEOUT_PLAN_2026-09-12.md`。该方案针对七项 IN_PROGRESS 和最新验收缺口，按 E1–E7 执行；方案写成不改变以下实施状态。验收发现以 `../reviews/ACCEPTANCE_REVIEW_2026-09-12.md` 为准，后续修复需新回执关闭。
 
 对应计划：`PROJECT_STATE_AGENT_IMPLEMENTATION_PLAN_2026-09-08.md`。
 
@@ -24,7 +24,7 @@
 
 ## 2026-09-12：执行 R0 → R1/M1 → R2/S1 → B1 → C1 → F1 → T1
 
-基线：起点 commit `f150c65`（工作树无 tracked 修改），Node v24.16.0。基线与关键文件哈希存于 `evidence/project-state-r0-20260912/`。所有提交直接落在 master，每阶段一个 commit，提交前 `tsc --noEmit` 与全量 Vitest 通过。
+基线：起点 commit `f150c65`（工作树无 tracked 修改），Node v24.16.0。基线与关键文件哈希存于 `../../evidence/project-state-r0-20260912/`。所有提交直接落在 master，每阶段一个 commit，提交前 `tsc --noEmit` 与全量 Vitest 通过。
 
 | 任务 | 状态 | 回执与说明 |
 |---|---|---|
@@ -71,7 +71,7 @@
 
 ## 2026-09-12（第二轮）：独立验收发现 5 项缺陷，全部修复并复测
 
-外部验收报告：`ACCEPTANCE_REVIEW_2026-09-12.md`；隔离探针：`evidence/acceptance-20260912/probe.ts`，修复前结果存档 `results-before-fix.json`，修复后 `results.json`。
+外部验收报告：`../reviews/ACCEPTANCE_REVIEW_2026-09-12.md`；隔离探针：`../../evidence/acceptance-20260912/probe.ts`，修复前结果存档 `results-before-fix.json`，修复后 `results.json`。
 
 | 缺陷 | 修复 | 回执 |
 |---|---|---|
@@ -94,7 +94,7 @@
 4. **补偿刷新**：confirmChangeImpact 成功后尝试刷新，未刷新（关闭/失败）返回 `stateRefreshPending=true`；鸿蒙状态面板进入项目即显式刷新（移除手动建基线 CTA，§5.3 口径）。
 5. **独立测试库**（§2.3）：vitest 显式 `DATABASE_URL=file:./prisma/test-vitest.db`，全量测试脱离开发库。
 
-回执：`evidence/closeout-20260912/E1/receipt.md`（命令、退出码、用例对照、剩余限制）。验证：tsc 0 错误；vitest 28 文件 / 194 测试通过（独立库）；验收探针复跑全绿（`E1/probe-results.json`）。
+回执：`../../evidence/closeout-20260912/E1/receipt.md`（命令、退出码、用例对照、剩余限制）。验证：tsc 0 错误；vitest 28 文件 / 194 测试通过（独立库）；验收探针复跑全绿（`E1/probe-results.json`）。
 
 | 项 | 代码验收 | 设备验收 | 总状态 |
 |---|---|---|---|
@@ -108,7 +108,7 @@
 3. 修订历史：`GET /attachments/[id]/revisions` + 纠错弹窗可折叠修订列表。
 4. 人工确认来源进读取端：时间线 item 附加 confirmedSourceAt，MemoryTimeline 显示声明式注记；来源声明不改变时态状态（测试锁定），F1 依赖保持 UNKNOWN。
 
-回执：`evidence/closeout-20260912/E2/receipt.md`。验证：tsc 0；vitest 197 通过（独立库）；harmony:test 27/27。
+回执：`../../evidence/closeout-20260912/E2/receipt.md`。验证：tsc 0；vitest 197 通过（独立库）；harmony:test 27/27。
 
 | 项 | 代码验收 | 设备验收 | 总状态 |
 |---|---|---|---|
@@ -121,7 +121,7 @@
 3. audit 返回 claims[]（state: CURRENT/SUPERSEDED/UNCONFIRMED/MISSING + 逐卡状态）；抽屉新增"逐句核验"区块、导出新增逐句核验表，与页面同源。
 4. 迁移 20260912230000（GeneratedArtifact.claims）；两个库均已 deploy。
 
-回执：`evidence/closeout-20260912/E3/receipt.md`。验证：tsc 0；vitest 200 通过（独立库）；harmony:test 27/27。
+回执：`../../evidence/closeout-20260912/E3/receipt.md`。验证：tsc 0；vitest 200 通过（独立库）；harmony:test 27/27。
 
 | 项 | 代码验收 | 设备验收 | 总状态 |
 |---|---|---|---|
@@ -133,7 +133,7 @@
 2. 新增 `ActionFeasibilityEditor.ets`：依赖增删、硬/参考切换、估时设置/清空，行动/记录卡/交付物三类候选，保存后服务端重评；可行性弹窗加入口。
 3. "先解决依赖"创建防重复。
 
-回执：`evidence/closeout-20260912/E4/receipt.md`。验证：tsc 0；vitest 可行性 8 用例通过；harmony:test 27/27。
+回执：`../../evidence/closeout-20260912/E4/receipt.md`。验证：tsc 0；vitest 可行性 8 用例通过；harmony:test 27/27。
 
 | 项 | 代码验收 | 设备验收 | 总状态 |
 |---|---|---|---|
@@ -143,7 +143,7 @@
 
 新增 MeetingService/models/MeetingImportSheet（bindSheet 半模态，工作台入口）：粘贴→预览（分类展示+原文片段+逐项勾选，待澄清项禁确认）→确认（只发版本化提案选择集，409 自动重预览，幂等重试）→完成页（变更 ID+去向+会后 Diff 一键查看）。工作台记录入口拆分"开始记录/导入会议文本"。
 
-回执：`evidence/closeout-20260912/E5/receipt.md`。验证：harmony:test 27/27（后端无改动）。
+回执：`../../evidence/closeout-20260912/E5/receipt.md`。验证：harmony:test 27/27（后端无改动）。
 
 | 项 | 代码验收 | 设备验收 | 总状态 |
 |---|---|---|---|
@@ -155,7 +155,7 @@
 2. 客户端：列表加载后合并待上报队列异步上报，失败保留（上限 100）下次重试，不阻断反馈。
 3. 分母口径固定：FIRE（决策）≠ 曝光（EXPOSED）≠ 反馈；曝光不污染偏好建议统计（测试锁定）。
 
-回执：`evidence/closeout-20260912/E6/receipt.md`。验证：tsc 0；vitest 201 通过；harmony:test 27/27。
+回执：`../../evidence/closeout-20260912/E6/receipt.md`。验证：tsc 0；vitest 201 通过；harmony:test 27/27。
 
 | 项 | 代码验收 | 设备验收 | 总状态 |
 |---|---|---|---|
@@ -166,7 +166,7 @@
 1. 简报句子携带可点开证据引用（entityKind/entityId），渲染"📎 记忆/行动/交付物"芯片，点击跳转对应 Tab（V1 页签级定位，条目级定位留待后续）。
 2. 统一回归：tsc 0；vitest 201 通过（独立库）；lint 0 错误；Next build 成功；harmony:test 27/27；HAP 构建成功 sha256 `9a1bfbdf5d11c082a62a8e484193bbe60656f0e58fbdcb6e79ef1210392874f1`。
 
-回执：`evidence/closeout-20260912/E7/receipt.md`。
+回执：`../../evidence/closeout-20260912/E7/receipt.md`。
 
 | 项 | 代码验收 | 设备验收 | 总状态 |
 |---|---|---|---|

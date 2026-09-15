@@ -1,5 +1,6 @@
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMotion, PMInteraction } from '../common/DesignTokens';
 import { BriefEvidence, ChangeBrief, BriefSentence } from '../models/ProjectState';
+import { PaperclipIcon } from './PMIcons';
 
 // C1 变化简报：变化 → 影响 → 建议，逐句可追溯（依据数量）。
 // 简报内容来自服务端确定性模板；读简报不创建行动；“已了解”复用状态面板的游标逻辑。
@@ -62,17 +63,20 @@ export struct ProjectChangeBrief {
       if (sentence.evidence.length > 0) {
         Row({ space: PMSpacing.XS }) {
           ForEach(sentence.evidence.slice(0, 3), (ref: BriefEvidence) => {
-            Text(`📎 ${ref.entityKind === 'card' ? '记忆' : ref.entityKind === 'action' ? '行动' : ref.entityKind === 'deliverable' ? '交付物' : ref.entityKind} · ${ref.field !== '' ? ref.field : '版本证据'}`)
-              .fontSize(PMFontSize.CAPTION)
-              .fontColor(PMColors.BRAND)
-              .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 2, bottom: 2 })
-              .backgroundColor(PMColors.BRAND_LIGHT)
-              .borderRadius(PMRadius.XS)
-              .clickEffect(PMInteraction.PRESS_EFFECT)
-              .onClick(() => {
-                this.onOpenEvidence(ref.entityKind, ref.entityId);
-              })
-              .accessibilityText(`打开${ref.entityKind}类证据，观察时间${ref.observedAt}`)
+            Row() {
+              PaperclipIcon({ iconSize: 12, color: PMColors.BRAND })
+              Text(` ${ref.entityKind === 'card' ? '记忆' : ref.entityKind === 'action' ? '行动' : ref.entityKind === 'deliverable' ? '交付物' : ref.entityKind} · ${ref.field !== '' ? ref.field : '版本证据'}`)
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.BRAND)
+            }
+            .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 3, bottom: 3 })
+            .backgroundColor(PMColors.BRAND_LIGHT)
+            .borderRadius(PMRadius.XS)
+            .clickEffect(PMInteraction.PRESS_EFFECT)
+            .onClick(() => {
+              this.onOpenEvidence(ref.entityKind, ref.entityId);
+            })
+            .accessibilityText(`打开${ref.entityKind}类证据，观察时间${ref.observedAt}`)
           }, (ref: BriefEvidence) => ref.entityId)
           if (sentence.evidence.length > 3) {
             Text(`+${sentence.evidence.length - 3}`)

@@ -36,8 +36,15 @@ export class PMColors {
   static readonly RISK_LIGHT: ResourceColor = $r('app.color.pm_risk_light');
   static readonly RISK_BORDER: ResourceColor = $r('app.color.pm_risk_border');
 
+  static readonly WARNING: ResourceColor = $r('app.color.pm_warning');
+  static readonly WARNING_LIGHT: ResourceColor = $r('app.color.pm_warning_light');
+
   static readonly SUCCESS: ResourceColor = $r('app.color.pm_success');
   static readonly SUCCESS_LIGHT: ResourceColor = $r('app.color.pm_success_light');
+
+  // AI 辅助色彩（问忆程/智能体少量重点标记）
+  static readonly AI_ACCENT: ResourceColor = $r('app.color.pm_ai_accent');
+  static readonly AI_ACCENT_LIGHT: ResourceColor = $r('app.color.pm_ai_accent_light');
 
   // 交互行动主色、当前选中国态 (沉静深蓝)
   static readonly BRAND: ResourceColor = $r('app.color.pm_brand');
@@ -59,7 +66,7 @@ export class PMSpacing {
   static readonly LG: number = 16;
   static readonly XL: number = 20;
   static readonly XXL: number = 24;
-  static readonly SECTION: number = 32;
+  static readonly SECTION: number = 28;
 }
 
 export class PMRadius {
@@ -67,6 +74,8 @@ export class PMRadius {
   static readonly SM: number = 8;
   static readonly MD: number = 12;
   static readonly LG: number = 16;
+  static readonly XL: number = 18;
+  static readonly XXL: number = 24;
   static readonly FULL: number = 999;
 }
 
@@ -74,17 +83,33 @@ export class PMFontSize {
   static readonly CAPTION: number = 12;
   static readonly BOTTOM_NAV: number = 12;
   static readonly SECONDARY: number = 13;
-  static readonly BODY: number = 14;
-  static readonly BUTTON: number = 14;
+  static readonly BODY: number = 15;
+  static readonly BUTTON: number = 15;
   static readonly MD: number = 15;
   static readonly SECTION_TITLE: number = 16;
   static readonly LG: number = 17;
   static readonly PRIMARY_JUDGEMENT: number = 18;
   static readonly PAGE_TITLE: number = 20;
-  static readonly BRAND: number = 26;
   static readonly TITLE: number = 22;
-  static readonly DISPLAY: number = 28;
-  static readonly CRITICAL_METRIC: number = 32;
+  static readonly BRAND: number = 24;
+  static readonly DISPLAY: number = 26;
+  static readonly CRITICAL_METRIC: number = 30;
+}
+
+export class PMCardStyle {
+  static readonly BORDER_WIDTH: number = 1;
+  static readonly RADIUS: number = PMRadius.LG;
+  static readonly PADDING: number = PMSpacing.LG;
+  static readonly SHADOW_RADIUS: number = 8;
+  static readonly SHADOW_COLOR: string = 'rgba(19, 36, 58, 0.04)';
+  static readonly SHADOW_OFFSET_Y: number = 2;
+}
+
+export class PMButtonSize {
+  static readonly HEIGHT_LG: number = 48; // 主要交互按钮
+  static readonly HEIGHT_MD: number = 40; // 次级/卡片操作按钮
+  static readonly HEIGHT_SM: number = 32; // 标签/紧凑按钮
+  static readonly RADIUS: number = PMRadius.SM;
 }
 
 /**

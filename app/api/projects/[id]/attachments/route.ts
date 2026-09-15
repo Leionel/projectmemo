@@ -1,3 +1,4 @@
+import { authorizeProjectAccess } from "@/lib/auth/guard";
 import { NextRequest, NextResponse } from "next/server";
 import { listProjectAttachments, processAttachmentUpload } from "@/lib/services/attachmentService";
 import { requireProject } from "@/lib/repositories/projects";
@@ -8,6 +9,7 @@ export const runtime = "nodejs";
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: projectId } = await params;
+    await authorizeProjectAccess(request, projectId);
     await requireProject(projectId);
     const attachments = await listProjectAttachments(projectId);
     return NextResponse.json(attachments);
@@ -19,6 +21,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: projectId } = await params;
+    await authorizeProjectAccess(request, projectId);
     await requireProject(projectId);
 
     const formData = await request.formData();

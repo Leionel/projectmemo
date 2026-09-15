@@ -6,7 +6,7 @@
     },
     {
       "name": "pm_background",
-      "value": "#F3F6F8"
+      "value": "#F4F7FA"
     },
     {
       "name": "pm_surface",
@@ -22,63 +22,71 @@
     },
     {
       "name": "pm_ink_primary",
-      "value": "#13243A"
+      "value": "#142338"
     },
     {
       "name": "pm_ink_secondary",
-      "value": "#485E75"
+      "value": "#475B70"
     },
     {
       "name": "pm_ink_tertiary",
-      "value": "#7C8F9F"
+      "value": "#788C9E"
     },
     {
       "name": "pm_ink_muted",
-      "value": "#A1B1C2"
+      "value": "#9EAEBE"
     },
     {
       "name": "pm_memory",
-      "value": "#2D6F6D"
+      "value": "#0E7490"
     },
     {
       "name": "pm_memory_light",
-      "value": "#EAF3F2"
+      "value": "#EDF8F9"
     },
     {
       "name": "pm_evidence",
-      "value": "#A87528"
+      "value": "#D97706"
     },
     {
       "name": "pm_evidence_light",
-      "value": "#FBF5EB"
+      "value": "#FEF7EE"
     },
     {
       "name": "pm_evidence_border",
-      "value": "#33A87528"
+      "value": "#33D97706"
     },
     {
       "name": "pm_evidence_tint",
-      "value": "#44A87528"
+      "value": "#22D97706"
     },
     {
       "name": "pm_risk",
-      "value": "#C44738"
+      "value": "#DC2626"
     },
     {
       "name": "pm_risk_light",
-      "value": "#FDF2F0"
+      "value": "#FEF2F2"
     },
     {
       "name": "pm_risk_border",
-      "value": "#33C44738"
+      "value": "#33DC2626"
+    },
+    {
+      "name": "pm_warning",
+      "value": "#EA580C"
+    },
+    {
+      "name": "pm_warning_light",
+      "value": "#FFF7ED"
     },
     {
       "name": "pm_success",
-      "value": "#2D6F6D"
+      "value": "#0D9488"
     },
     {
       "name": "pm_success_light",
-      "value": "#EDF7F3"
+      "value": "#F0FDF4"
     },
     {
       "name": "pm_brand",
@@ -90,7 +98,7 @@
     },
     {
       "name": "pm_brand_pressed",
-      "value": "#163E75"
+      "value": "#153F78"
     },
     {
       "name": "pm_border",
@@ -111,6 +119,14 @@
     {
       "name": "pm_scrim",
       "value": "#7313243A"
+    },
+    {
+      "name": "pm_ai_accent",
+      "value": "#7C3AED"
+    },
+    {
+      "name": "pm_ai_accent_light",
+      "value": "#F5F3FF"
     }
   ]
 }

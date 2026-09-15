@@ -15,11 +15,19 @@ const sources = [
   "比赛材料",
 ];
 
+function newRequestId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `capture-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 export function CaptureBox({ projectId }: { projectId: string }) {
   const router = useRouter();
   const draftKey = `projectmemo:capture:${projectId}`;
   const [text, setText] = useState("");
   const [sourceType, setSourceType] = useState(sources[0]);
+  const [requestId, setRequestId] = useState("");
   const [draftReady, setDraftReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(
@@ -35,8 +43,10 @@ export function CaptureBox({ projectId }: { projectId: string }) {
           const draft = JSON.parse(saved) as {
             text?: string;
             sourceType?: string;
+            requestId?: string;
           };
           setText(draft.text ?? "");
+          setRequestId(draft.requestId ?? "");
           if (sources.includes(draft.sourceType ?? ""))
             setSourceType(draft.sourceType!);
         }
@@ -53,29 +63,42 @@ export function CaptureBox({ projectId }: { projectId: string }) {
     if (text)
       window.localStorage.setItem(
         draftKey,
-        JSON.stringify({ text, sourceType }),
+        JSON.stringify({ text, sourceType, requestId }),
       );
     else window.localStorage.removeItem(draftKey);
-  }, [draftKey, draftReady, sourceType, text]);
+  }, [draftKey, draftReady, requestId, sourceType, text]);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setLoading(true);
     setMessage(null);
     setNewCardId("");
+    const activeRequestId = requestId || newRequestId();
+    setRequestId(activeRequestId);
+    window.localStorage.setItem(
+      draftKey,
+      JSON.stringify({ text, sourceType, requestId: activeRequestId }),
+    );
     try {
       const response = await fetch(`/api/projects/${projectId}/captures`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rawText: text, sourceType }),
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": activeRequestId,
+        },
+        body: JSON.stringify({ rawText: text, sourceType, requestId: activeRequestId }),
       });
       const data = await response.json().catch(() => null);
       if (!response.ok)
         throw new Error(data?.error?.message ?? "沉淀失败，请稍后重试");
       setText("");
+      setRequestId("");
       window.localStorage.removeItem(draftKey);
       setNewCardId(data.card.id);
-      setMessage({ ok: true, text: `已生成《${data.card.title}》知识卡片` });
+      setMessage({
+        ok: true,
+        text: data.replayed ? `已恢复《${data.card.title}》知识卡片` : `已生成《${data.card.title}》知识卡片`,
+      });
       emitWorkspaceChange(projectId, [
         "cards",
         "interventions",
@@ -111,7 +134,11 @@ export function CaptureBox({ projectId }: { projectId: string }) {
           <select
             aria-label="来源类型"
             value={sourceType}
-            onChange={(event) => setSourceType(event.target.value)}
+            onChange={(event) => {
+              const nextSource = event.target.value;
+              setSourceType(nextSource);
+              if (nextSource !== sourceType && requestId) setRequestId(newRequestId());
+            }}
             disabled={loading}
             className="focus-ring editorial-input mt-1 block w-full px-3 py-2 text-sm font-semibold sm:w-auto"
           >
@@ -127,7 +154,9 @@ export function CaptureBox({ projectId }: { projectId: string }) {
           aria-describedby="capture-help"
           value={text}
           onChange={(event) => {
-            setText(event.target.value);
+            const nextText = event.target.value;
+            setText(nextText);
+            if (nextText !== text && requestId) setRequestId(newRequestId());
             setMessage(null);
           }}
           onKeyDown={(event) => {

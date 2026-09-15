@@ -221,4 +221,125 @@ describe("Meeting state diff (T1)", () => {
     const after = await db.knowledgeCard.count({ where: { projectId } });
     expect(after).toBe(before);
   });
+
+  it("confirms one meeting proposal once under concurrent retries", async () => {
+    const oldCard = await seedCard("并发确认旧方案A");
+    const preview = await createMeetingImpactPreview(projectId, {
+      text: "并发确认旧方案A改为并发确认新方案B。",
+      meetingDate: "2026-09-14",
+    });
+    const change = preview.typedChanges.find((item) => item.kind === "DECISION_SUPERSEDE");
+    expect(change?.supersededCardId).toBe(oldCard.id);
+
+    const results = await Promise.all(
+      [0, 1].map(() => confirmMeetingChanges(projectId, {
+        proposalId: preview.proposalId,
+        sourceTextHash: preview.sourceTextHash,
+        proposalVersion: preview.proposalVersion,
+        selectedChangeIds: [change!.changeId],
+      })),
+    );
+    expect(results.filter((result) => !result.alreadyConfirmed)).toHaveLength(1);
+    expect(results.filter((result) => result.alreadyConfirmed)).toHaveLength(1);
+    expect(new Set(results.map((result) => result.applied[0]?.newCardId)).size).toBe(1);
+    expect(await db.cardRelation.count({
+      where: { relatedCardId: oldCard.id, relationType: "SUPERSEDES", confirmed: true },
+    })).toBe(1);
+  });
+
+  it("rejects an old deadline proposal after the project deadline changes", async () => {
+    const preview = await createMeetingImpactPreview(projectId, {
+      text: "截止时间改为2026-10-01",
+      meetingDate: "2026-09-14",
+    });
+    const deadline = preview.typedChanges.find((item) => item.kind === "DEADLINE_CHANGE");
+    expect(deadline?.deadlineISO).toBe("2026-10-01");
+
+    await db.project.update({ where: { id: projectId }, data: { deadline: new Date("2026-11-01T00:00:00.000Z") } });
+    await expect(confirmMeetingChanges(projectId, {
+      proposalId: preview.proposalId,
+      sourceTextHash: preview.sourceTextHash,
+      proposalVersion: preview.proposalVersion,
+      selectedChangeIds: [deadline!.changeId],
+    })).rejects.toThrow("重新预览");
+    expect((await db.project.findUniqueOrThrow({ where: { id: projectId } })).deadline?.toISOString()).toBe("2026-11-01T00:00:00.000Z");
+  });
+
+  it("allows only one selection set to win when confirmations race", async () => {
+    const preview = await createMeetingImpactPreview(projectId, {
+      text: "并发选择需要完成端侧回归。结论：本轮以端侧指标为准",
+      meetingDate: "2026-09-14",
+    });
+    const action = preview.typedChanges.find((item) => item.kind === "ACTION_CREATE")!;
+    const fact = preview.typedChanges.find((item) => item.kind === "FACT_RECORD")!;
+    const beforeActions = await db.actionItem.count({ where: { projectId } });
+    const beforeFactCards = await db.knowledgeCard.count({ where: { projectId, summary: "本轮以端侧指标为准" } });
+
+    const results = await Promise.all([
+      confirmMeetingChanges(projectId, {
+        proposalId: preview.proposalId,
+        sourceTextHash: preview.sourceTextHash,
+        proposalVersion: preview.proposalVersion,
+        selectedChangeIds: [action.changeId],
+      }),
+      confirmMeetingChanges(projectId, {
+        proposalId: preview.proposalId,
+        sourceTextHash: preview.sourceTextHash,
+        proposalVersion: preview.proposalVersion,
+        selectedChangeIds: [fact.changeId],
+      }),
+    ]);
+    expect(results.filter((result) => !result.alreadyConfirmed)).toHaveLength(1);
+    expect(results.filter((result) => result.alreadyConfirmed)).toHaveLength(1);
+    expect(await db.actionItem.count({ where: { projectId } })).toBeGreaterThanOrEqual(beforeActions);
+    expect(await db.knowledgeCard.count({ where: { projectId, summary: "本轮以端侧指标为准" } })).toBeGreaterThanOrEqual(beforeFactCards);
+  });
+
+  it("does not partially apply a multi-change confirmation when one source conflicts", async () => {
+    const oldCard = await seedCard("组确认旧方案A");
+    const preview = await createMeetingImpactPreview(projectId, {
+      text: "组确认旧方案A改为组确认新方案B。截止时间改为2026-12-01",
+      meetingDate: "2026-09-14",
+    });
+    const supersede = preview.typedChanges.find((item) => item.kind === "DECISION_SUPERSEDE")!;
+    const deadline = preview.typedChanges.find((item) => item.kind === "DEADLINE_CHANGE")!;
+    const rivalCapture = await db.capture.create({ data: { projectId, rawText: "抢先决策", sourceType: "会议" } });
+    const rival = await db.knowledgeCard.create({
+      data: {
+        projectId,
+        captureId: rivalCapture.id,
+        type: "meeting_note",
+        title: "抢先决策",
+        summary: "抢先决策",
+        keywords: [],
+        relatedTasks: [],
+        nextActions: [],
+        importance: 4,
+      },
+    });
+    await db.cardRelation.create({
+      data: {
+        currentCardId: rival.id,
+        relatedCardId: oldCard.id,
+        relationType: "SUPERSEDES",
+        reason: "并发抢先确认",
+        score: 100,
+        confirmed: true,
+        confirmedAt: new Date(),
+      },
+    });
+    const beforeDeadline = (await db.project.findUniqueOrThrow({ where: { id: projectId } })).deadline;
+    const beforeActionCount = await db.actionItem.count({ where: { projectId } });
+
+    await expect(confirmMeetingChanges(projectId, {
+      proposalId: preview.proposalId,
+      sourceTextHash: preview.sourceTextHash,
+      proposalVersion: preview.proposalVersion,
+      selectedChangeIds: [supersede.changeId, deadline.changeId],
+    })).rejects.toThrow("重新预览");
+
+    expect(await db.actionItem.count({ where: { projectId } })).toBe(beforeActionCount);
+    expect((await db.project.findUniqueOrThrow({ where: { id: projectId } })).deadline?.toISOString() ?? null).toBe(beforeDeadline?.toISOString() ?? null);
+    expect(await db.knowledgeCard.count({ where: { projectId, title: { contains: "组确认新方案B" } } })).toBe(0);
+  });
 });

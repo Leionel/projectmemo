@@ -1,3 +1,4 @@
+import { authorizeProjectAccess } from "@/lib/auth/guard";
 import { NextRequest, NextResponse } from "next/server";
 import { analyzeChangeImpact } from "@/lib/services/changeImpactService";
 import { apiError } from "@/lib/api";
@@ -15,6 +16,7 @@ export async function POST(
 ) {
   try {
     const { id: projectId } = await params;
+    await authorizeProjectAccess(request, projectId);
     const json = await request.json();
     const { newFactText } = impactPreviewSchema.parse(json);
     const proposal = await analyzeChangeImpact(projectId, newFactText);

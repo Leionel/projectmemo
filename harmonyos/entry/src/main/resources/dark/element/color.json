@@ -73,6 +73,14 @@
       "value": "#66EF786B"
     },
     {
+      "name": "pm_warning",
+      "value": "#FB923C"
+    },
+    {
+      "name": "pm_warning_light",
+      "value": "#362114"
+    },
+    {
       "name": "pm_success",
       "value": "#5BB794"
     },
@@ -111,6 +119,14 @@
     {
       "name": "pm_scrim",
       "value": "#A6000000"
+    },
+    {
+      "name": "pm_ai_accent",
+      "value": "#A78BFA"
+    },
+    {
+      "name": "pm_ai_accent_light",
+      "value": "#2E1065"
     }
   ]
 }

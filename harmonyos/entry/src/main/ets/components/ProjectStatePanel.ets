@@ -10,6 +10,7 @@ import {
 } from '../models/ProjectState';
 import { ApiError } from '../models/Project';
 import { ProjectStateService } from '../services/ProjectStateService';
+import { AlertIcon } from './PMIcons';
 
 @Component
 export struct ProjectStatePanel {
@@ -254,11 +255,14 @@ export struct ProjectStatePanel {
         .margin({ top: PMSpacing.MD })
       } else if (this.phase === 'error') {
         Column() {
-          Text(`⚠ ${this.errorMessage}`)
-            .fontSize(PMFontSize.CAPTION)
-            .fontColor(PMColors.RISK)
+          Row() {
+            AlertIcon({ iconSize: 14, color: PMColors.RISK })
+            Text(` ${this.errorMessage}`)
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.RISK)
+          }
           Button(this.isRefreshing ? '重试中…' : '重试')
-            .height(32)
+            .height(36)
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.SURFACE)
             .backgroundColor(PMColors.BRAND)
@@ -275,11 +279,15 @@ export struct ProjectStatePanel {
       } else {
         // ready：本次变化 → 风险/未知 → 建议下一步 → 操作
         if (this.freshness.status === 'STALE' || this.freshness.status === 'FAILED') {
-          Text('⚠ 当前快照不是最新评估结果，系统保留了上一份状态；刷新成功后再更新。')
-            .fontSize(PMFontSize.CAPTION)
-            .fontColor(PMColors.RISK)
-            .lineHeight(18)
-            .margin({ top: PMSpacing.SM })
+          Row() {
+            AlertIcon({ iconSize: 14, color: PMColors.RISK })
+            Text(' 当前快照不是最新评估结果，系统保留了上一份状态；刷新成功后再更新。')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.RISK)
+              .lineHeight(18)
+              .layoutWeight(1)
+          }
+          .margin({ top: PMSpacing.SM })
         }
         if (this.baselineMessage !== '') {
           Text(this.baselineMessage)

@@ -113,6 +113,7 @@ model Project {
   messages    AgentMessage[]
   attachments Attachment[]
   milestones  Milestone[]
+  memberships ProjectMembership[]
 
   @@index([updatedAt])
 }
@@ -585,4 +586,45 @@ model DeliverableEvidence {
   deliverable   Deliverable @relation(fields: [deliverableId], references: [id], onDelete: Cascade)
 
   @@index([deliverableId])
+}
+
+model User {
+  id           String              @id @default(cuid())
+  username     String              @unique
+  displayName  String
+  passwordHash String
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  sessions     AuthSession[]
+  memberships  ProjectMembership[]
+
+  @@index([username])
+}
+
+model AuthSession {
+  id         String    @id @default(cuid())
+  userId     String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+  revokedAt  DateTime?
+  lastSeenAt DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tokenHash])
+  @@index([userId])
+}
+
+model ProjectMembership {
+  id        String   @id @default(cuid())
+  userId    String
+  projectId String
+  role      String   @default("OWNER")
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+  @@index([userId])
+  @@index([projectId])
 }

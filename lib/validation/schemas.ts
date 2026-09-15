@@ -33,6 +33,7 @@ export const projectUpdateSchema = z
 export const captureCreateSchema = z.object({
   rawText: z.string().trim().min(5, "碎片内容至少 5 个字").max(5000),
   sourceType: z.string().trim().max(40).optional().nullable(),
+  requestId: z.string().trim().min(1).max(128).optional(),
 });
 
 export const artifactContentSchema = z
@@ -182,6 +183,7 @@ export const actionFeasibilitySchema = z.object({
   })).max(20).optional(),
   removeRequirementIds: z.array(z.string().trim().min(1)).max(50).optional(),
   estimatedMinutes: z.number().int().min(1).max(100000).nullable().optional(),
+  expectedVersion: z.number().int().min(1).optional(),
 }).strict();
 
 export type ProjectStateCheckInInput = z.infer<typeof projectStateCheckInSchema>;

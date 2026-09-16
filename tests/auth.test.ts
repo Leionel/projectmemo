@@ -8,7 +8,12 @@ import { POST as logoutRoute } from "@/app/api/auth/logout/route";
 import { GET as projectListRoute } from "@/app/api/projects/route";
 import { GET as projectDetailRoute } from "@/app/api/projects/[id]/route";
 import { POST as captureRoute } from "@/app/api/projects/[id]/captures/route";
+import {
+  GET as getInterventionPolicyRoute,
+  PATCH as patchInterventionPolicyRoute,
+} from "@/app/api/projects/[id]/interventions/policy/route";
 import { POST as xiaoyiMemoryRoute } from "@/app/xiaoyi/v1/memories/route";
+import { interventionPolicyScopeForUser } from "@/lib/services/interventionPolicyService";
 
 describe("Authentication & Project Authorization Suite", () => {
   const testUsername = `user-${Date.now()}`;
@@ -229,6 +234,78 @@ describe("Authentication & Project Authorization Suite", () => {
     });
     const res3 = await meRoute(meReq);
     expect(res3.status).toBe(401);
+  });
+
+  it("登出撤销失败时清除本地 Cookie，但不谎报服务端会话已撤销", async () => {
+    const { token } = await createSession(testUserId);
+    const updateMany = vi.spyOn(db.authSession, "updateMany").mockRejectedValueOnce(new Error("database unavailable"));
+    try {
+      const response = await logoutRoute(new Request("http://localhost/api/auth/logout", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      }));
+
+      expect(response.status).toBe(503);
+      expect(response.headers.get("set-cookie")).toContain("pm_session=;");
+      await expect(response.json()).resolves.toMatchObject({
+        success: false,
+        localSessionCleared: true,
+        serverSessionRevoked: false,
+      });
+
+      const stillValid = await meRoute(new Request("http://localhost/api/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      }));
+      expect(stillValid.status).toBe(200);
+    } finally {
+      updateMany.mockRestore();
+    }
+  });
+
+  it("项目用户修改提醒策略时只更新自己的策略范围", async () => {
+    const secondUser = await db.user.create({
+      data: {
+        username: `policy-user-${Date.now()}`,
+        displayName: "策略隔离用户",
+        passwordHash: await hashPassword(testPassword),
+      },
+    });
+    const secondProject = await db.project.create({
+      data: { title: "策略隔离项目", description: "", goal: "", scenario: "COMPETITION" },
+    });
+    await db.projectMembership.create({
+      data: { userId: secondUser.id, projectId: secondProject.id, role: "OWNER" },
+    });
+    const [{ token: firstToken }, { token: secondToken }] = await Promise.all([
+      createSession(testUserId),
+      createSession(secondUser.id),
+    ]);
+    const firstScope = interventionPolicyScopeForUser(testUserId);
+    const secondScope = interventionPolicyScopeForUser(secondUser.id);
+
+    try {
+      const patched = await patchInterventionPolicyRoute(new Request(
+        `http://localhost/api/projects/${ownedProjectId}/interventions/policy`,
+        {
+          method: "PATCH",
+          headers: { Authorization: `Bearer ${firstToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ dailyBudget: 1, quietStartMinute: 0, quietEndMinute: 0, timezone: "UTC" }),
+        },
+      ), { params: Promise.resolve({ id: ownedProjectId }) });
+      expect(patched.status).toBe(200);
+      expect((await patched.json()).policy).toMatchObject({ scope: firstScope, dailyBudget: 1 });
+
+      const other = await getInterventionPolicyRoute(new Request(
+        `http://localhost/api/projects/${secondProject.id}/interventions/policy`,
+        { headers: { Authorization: `Bearer ${secondToken}` } },
+      ), { params: Promise.resolve({ id: secondProject.id }) });
+      expect(other.status).toBe(200);
+      expect((await other.json()).policy).toMatchObject({ scope: secondScope, dailyBudget: 3 });
+    } finally {
+      await db.interventionPolicy.deleteMany({ where: { scope: { in: [firstScope, secondScope] } } });
+      await db.user.delete({ where: { id: secondUser.id } }).catch(() => {});
+      await db.project.delete({ where: { id: secondProject.id } }).catch(() => {});
+    }
   });
 
   it("8. 未登录（无 Token）访问项目 API 返回 401", async () => {

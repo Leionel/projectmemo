@@ -10,7 +10,7 @@ import {
   saveAgentRun,
   upsertIntervention,
 } from "@/lib/repositories/agent";
-import { applyInterventionPolicy } from "@/lib/services/interventionPolicyService";
+import { applyInterventionPolicy, interventionPolicyScopeForUser } from "@/lib/services/interventionPolicyService";
 import type { AgentEvidence, ProposedAction } from "@/lib/types";
 
 export type DemoScenario = "deadline_48h" | "stale_72h" | "risk_cluster";
@@ -51,7 +51,7 @@ function materialAction(projectTitle: string): ProposedAction {
   };
 }
 
-export async function evaluateProjectContext(projectId: string, input: ContextInput = {}) {
+export async function evaluateProjectContext(projectId: string, input: ContextInput = {}, policyUserId?: string) {
   const startedAt = Date.now();
   const now = input.now ?? new Date();
   const project = await requireProject(projectId);
@@ -275,7 +275,13 @@ export async function evaluateProjectContext(projectId: string, input: ContextIn
       proposedActions: match.proposedActions as unknown as Array<Record<string, unknown>>,
       isSimulated: match.dedupeKey.startsWith("sim:"),
     }));
-    const outcomes = await applyInterventionPolicy(projectId, candidates, now);
+    const owner = policyUserId ? { userId: policyUserId } : await db.projectMembership.findFirst({
+      where: { projectId },
+      orderBy: [{ role: "asc" }, { createdAt: "asc" }],
+      select: { userId: true },
+    });
+    const policyScope = owner ? interventionPolicyScopeForUser(owner.userId) : "GLOBAL";
+    const outcomes = await applyInterventionPolicy(projectId, candidates, now, policyScope);
     const firedIds = outcomes
       .filter((outcome) => outcome.decision === "FIRE" && outcome.interventionId)
       .map((outcome) => outcome.interventionId as string);

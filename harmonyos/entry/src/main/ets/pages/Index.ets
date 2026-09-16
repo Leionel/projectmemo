@@ -66,6 +66,8 @@ struct Index {
   @State llmApiKey: string = '';
   @State apiKeyMasked: string = '';
   @State hasApiKey: boolean = false;
+  @State settingsEditable: boolean = false;
+  @State settingsReadOnlyMessage: string = '';
   @State isSavingSettings: boolean = false;
   @State isProbing: boolean = false;
   @State probeResult: ProbeResponse | undefined = undefined;
@@ -201,12 +203,20 @@ struct Index {
       this.llmModelName = res.llmModelName !== '' ? res.llmModelName : 'deepseek-v4-flash';
       this.hasApiKey = res.hasApiKey;
       this.apiKeyMasked = res.apiKeyMasked;
+      this.settingsEditable = res.editable;
+      this.settingsReadOnlyMessage = res.editable ? '' :
+        (res.message !== undefined ? res.message : '生产环境配置由服务端统一管理，当前仅可查看。');
     } catch (e) {
-      // 忽略
+      this.settingsEditable = false;
+      this.settingsReadOnlyMessage = '暂时无法确认配置权限，已保持只读。';
     }
   }
 
   private async saveLlmSettings(): Promise<void> {
+    if (!this.settingsEditable) {
+      this.settingsFeedback = '当前环境的模型配置只读，未发起保存请求';
+      return;
+    }
     if (this.isSavingSettings) {
       return;
     }
@@ -222,6 +232,7 @@ struct Index {
       const res = await this.settingsService.updateSettings(input);
       this.hasApiKey = res.hasApiKey;
       this.apiKeyMasked = res.apiKeyMasked;
+      this.settingsEditable = res.editable;
       this.llmApiKey = '';
       this.settingsFeedback = '模型配置已保存生效';
       promptAction.showToast({ message: '模型配置已更新' });
@@ -233,6 +244,10 @@ struct Index {
   }
 
   private async probeLlmConnection(): Promise<void> {
+    if (!this.settingsEditable) {
+      this.settingsFeedback = '当前环境的模型配置只读，未发起连通测试';
+      return;
+    }
     if (this.isProbing) {
       return;
     }
@@ -1793,6 +1808,18 @@ struct Index {
           .justifyContent(FlexAlign.SpaceBetween)
           .padding({ top: PMSpacing.SM, bottom: PMSpacing.SM })
 
+          if (!this.settingsEditable) {
+            Text(this.settingsReadOnlyMessage !== '' ? this.settingsReadOnlyMessage : '当前模型配置仅可查看。')
+              .fontSize(PMFontSize.SECONDARY)
+              .fontColor(PMColors.INK_SECONDARY)
+              .lineHeight(20)
+              .width('100%')
+              .padding(PMSpacing.SM)
+              .backgroundColor(PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.SM)
+              .margin({ bottom: PMSpacing.SM })
+          }
+
           Text('引擎模式')
             .fontSize(PMFontSize.SECONDARY)
             .fontWeight(FontWeight.Medium)
@@ -1810,6 +1837,7 @@ struct Index {
               })
               .borderRadius(PMRadius.SM)
               .height(48)
+              .enabled(this.settingsEditable)
               .layoutWeight(1)
               .accessibilityText('选择 OpenAI 兼容 API')
               .accessibilitySelected(this.llmMode === 'openai-compatible')
@@ -1828,6 +1856,7 @@ struct Index {
               })
               .borderRadius(PMRadius.SM)
               .height(48)
+              .enabled(this.settingsEditable)
               .layoutWeight(1)
               .margin({ left: PMSpacing.SM })
               .accessibilityText('选择离线确定性引擎')
@@ -1846,6 +1875,7 @@ struct Index {
               .fontColor(PMColors.INK_SECONDARY)
               .margin({ top: PMSpacing.MD })
             TextInput({ text: this.llmBaseUrl, placeholder: 'https://api.deepseek.com/v1' })
+              .enabled(this.settingsEditable)
               .onChange((v: string) => {
                 this.llmBaseUrl = v;
               })
@@ -1862,6 +1892,7 @@ struct Index {
               .fontColor(PMColors.INK_SECONDARY)
               .margin({ top: PMSpacing.SM })
             TextInput({ text: this.llmModelName, placeholder: '例如：gpt-4o-mini / deepseek-chat / qwen-plus' })
+              .enabled(this.settingsEditable)
               .onChange((v: string) => {
                 this.llmModelName = v;
               })
@@ -1894,6 +1925,7 @@ struct Index {
 
             TextInput({ text: this.llmApiKey, placeholder: this.hasApiKey ? '输入新 Key 覆盖，或留空保留' : '输入以 sk- 开头的密钥' })
               .type(InputType.Password)
+              .enabled(this.settingsEditable)
               .onChange((v: string) => {
                 this.llmApiKey = v;
               })
@@ -1975,21 +2007,21 @@ struct Index {
                 .border({ width: 1, color: PMColors.BORDER })
                 .borderRadius(PMRadius.SM)
                 .height(48)
-                .enabled(!this.isProbing)
+                .enabled(this.settingsEditable && !this.isProbing)
                 .layoutWeight(1)
                 .onClick(() => {
                   this.probeLlmConnection();
                 })
             }
 
-            Button(this.isSavingSettings ? '保存中...' : '保存配置')
+            Button(!this.settingsEditable ? '生产环境只读' : (this.isSavingSettings ? '保存中...' : '保存配置'))
               .fontSize(PMFontSize.BUTTON)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.SURFACE)
-              .backgroundColor(PMColors.BRAND)
+              .backgroundColor(this.settingsEditable ? PMColors.BRAND : PMColors.INK_TERTIARY)
               .borderRadius(PMRadius.SM)
               .height(48)
-              .enabled(!this.isSavingSettings)
+              .enabled(this.settingsEditable && !this.isSavingSettings)
               .layoutWeight(1)
               .margin({ left: PMSpacing.SM })
               .onClick(() => {

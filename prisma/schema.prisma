@@ -443,7 +443,7 @@ model ProjectStateFreshness {
   project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
-/// B1：干预策略。V1 为单用户部署范围的全局共享预算（scope=GLOBAL），不是每项目独立预算。
+/// B1：干预策略。登录用户使用 scope=USER:<userId>，同一用户的多个项目共享预算；GLOBAL 仅兼容旧数据和无归属离线任务。
 model InterventionPolicy {
   id               String   @id @default(cuid())
   scope            String   @unique @default("GLOBAL")

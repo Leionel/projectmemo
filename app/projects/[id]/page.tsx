@@ -34,7 +34,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   }
   let project;
   try {
-    await evaluateProjectContext(id);
+    await evaluateProjectContext(id, {}, user.id);
     project = await getProjectDetail(id);
   } catch (error) {
     if (error instanceof AppError && error.code === "PROJECT_NOT_FOUND") notFound();

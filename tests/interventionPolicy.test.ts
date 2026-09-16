@@ -150,6 +150,30 @@ describe("Intervention budget and quiet hours (B1)", () => {
     expect(nextDay[0].decision).toBe("FIRE");
   });
 
+  it("keeps daily budgets isolated between user policy scopes", async () => {
+    const suffix = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const scopeA = `USER:budget-a-${suffix}`;
+    const scopeB = `USER:budget-b-${suffix}`;
+    const now = new Date("2026-09-17T04:00:00Z");
+    try {
+      await updatePolicy({ dailyBudget: 1, quietStartMinute: 0, quietEndMinute: 0, timezone: "UTC" }, scopeA);
+      await updatePolicy({ dailyBudget: 2, quietStartMinute: 0, quietEndMinute: 0, timezone: "UTC" }, scopeB);
+
+      const a1 = await applyInterventionPolicy(projectIdA, [candidate({ dedupeKey: `scope-a1-${suffix}` })], now, scopeA);
+      const b1 = await applyInterventionPolicy(projectIdB, [candidate({ dedupeKey: `scope-b1-${suffix}` })], now, scopeB);
+      const b2 = await applyInterventionPolicy(projectIdB, [candidate({ dedupeKey: `scope-b2-${suffix}` })], now, scopeB);
+      const a2 = await applyInterventionPolicy(projectIdA, [candidate({ dedupeKey: `scope-a2-${suffix}` })], now, scopeA);
+
+      expect(a1[0].decision).toBe("FIRE");
+      expect(a2[0].reasonCode).toBe("BUDGET_EXHAUSTED");
+      expect(b1[0].decision).toBe("FIRE");
+      expect(b2[0].decision).toBe("FIRE");
+    } finally {
+      await db.interventionBudgetLedger.deleteMany({ where: { scope: { startsWith: `USER:budget-` } } });
+      await db.interventionPolicy.deleteMany({ where: { scope: { in: [scopeA, scopeB] } } });
+    }
+  });
+
   it("reduced topics fire at most once per day and can be reverted", async () => {
     await updatePolicy({ dailyBudget: 10, quietStartMinute: 1380, quietEndMinute: 480 });
     await revertTopicReduction(projectIdA, "PROJECT_STALE").catch(() => {});

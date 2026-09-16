@@ -114,15 +114,23 @@ function isQuietTime(policy: InterventionPolicy, parts: LocalTimeParts): boolean
   return parts.minuteOfDay >= quietStartMinute && parts.minuteOfDay < quietEndMinute;
 }
 
-export async function getOrCreatePolicy(): Promise<InterventionPolicy> {
-  const existing = await db.interventionPolicy.findUnique({ where: { scope: "GLOBAL" } });
+const LEGACY_GLOBAL_POLICY_SCOPE = "GLOBAL";
+
+export function interventionPolicyScopeForUser(userId: string): string {
+  const normalized = userId.trim();
+  if (!normalized) throw new AppError("INVALID_USER_ID", "用户 ID 不能为空", 400);
+  return `USER:${normalized}`;
+}
+
+export async function getOrCreatePolicy(scope = LEGACY_GLOBAL_POLICY_SCOPE): Promise<InterventionPolicy> {
+  const existing = await db.interventionPolicy.findUnique({ where: { scope } });
   if (existing) return existing;
   try {
-    return await db.interventionPolicy.create({ data: { scope: "GLOBAL" } });
+    return await db.interventionPolicy.create({ data: { scope } });
   } catch (error) {
     // 并发初始化：读取已创建的默认策略
     if (typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "P2002") {
-      const policy = await db.interventionPolicy.findUnique({ where: { scope: "GLOBAL" } });
+      const policy = await db.interventionPolicy.findUnique({ where: { scope } });
       if (policy) return policy;
     }
     throw error;
@@ -136,8 +144,11 @@ export interface PolicyUpdateInput {
   timezone?: string;
 }
 
-export async function updatePolicy(input: PolicyUpdateInput): Promise<InterventionPolicy> {
-  const policy = await getOrCreatePolicy();
+export async function updatePolicy(
+  input: PolicyUpdateInput,
+  scope = LEGACY_GLOBAL_POLICY_SCOPE,
+): Promise<InterventionPolicy> {
+  const policy = await getOrCreatePolicy(scope);
   const data: Prisma.InterventionPolicyUpdateInput = {};
   if (input.dailyBudget !== undefined) {
     if (!Number.isInteger(input.dailyBudget) || input.dailyBudget < 0 || input.dailyBudget > 50) {
@@ -169,10 +180,15 @@ export async function updatePolicy(input: PolicyUpdateInput): Promise<Interventi
   });
 }
 
-export async function restoreDefaultPolicy(): Promise<InterventionPolicy> {
-  const policy = await getOrCreatePolicy();
+export async function restoreDefaultPolicy(
+  scope = LEGACY_GLOBAL_POLICY_SCOPE,
+  preferenceProjectId?: string,
+): Promise<InterventionPolicy> {
+  const policy = await getOrCreatePolicy(scope);
   const [, updated] = await db.$transaction([
-    db.interventionPreference.deleteMany({}),
+    db.interventionPreference.deleteMany({
+      where: preferenceProjectId ? { projectId: preferenceProjectId } : undefined,
+    }),
     db.interventionPolicy.update({
       where: { id: policy.id },
       data: {
@@ -246,7 +262,10 @@ async function ensureBudgetLedger(
     });
   }
 
-  const usedCount = await tx.interventionDecision.count({
+  // 旧 GLOBAL 账本创建时会从决策日志恢复计数。用户账本没有在旧决策行上
+  // 持久化 owner scope，不能用全服务决策回填，否则后创建账本的用户会继承
+  // 其他用户已经消耗的预算。用户账本一旦创建，后续扣减均由原子 ledger 维护。
+  const usedCount = scope.startsWith("USER:") ? 0 : await tx.interventionDecision.count({
     where: {
       decision: "FIRE",
       createdAt: { gte: window.start, lt: window.end },
@@ -332,9 +351,10 @@ export async function applyInterventionPolicy(
   projectId: string,
   candidates: PolicyCandidate[],
   now: Date = new Date(),
+  scope = LEGACY_GLOBAL_POLICY_SCOPE,
 ): Promise<PolicyOutcome[]> {
   const budgetEnabled = isFeatureEnabled("INTERVENTION_BUDGET_ENABLED", false);
-  const policy = budgetEnabled ? await getOrCreatePolicy() : null;
+  const policy = budgetEnabled ? await getOrCreatePolicy(scope) : null;
 
   const maxAttempts = 4;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
@@ -446,7 +466,7 @@ export async function applyInterventionPolicy(
 
       // 4/5. 先原子预留全局预算；主题预算失败时释放这次全局预留。
       const globalClaim = await claimBudget(tx, {
-        scope: "GLOBAL",
+        scope: policy.scope === LEGACY_GLOBAL_POLICY_SCOPE ? "GLOBAL" : `${policy.scope}:GLOBAL`,
         localDate: parts.localDate,
         timezone: policy.timezone,
         limit: policy.dailyBudget,
@@ -467,7 +487,9 @@ export async function applyInterventionPolicy(
       const topicPrefix = topicPrefixes.find((prefix) => candidate.candidateKey.startsWith(prefix));
       if (topicPrefix) {
         const topicClaim = await claimBudget(tx, {
-          scope: `TOPIC:${topicPrefix}`,
+          scope: policy.scope === LEGACY_GLOBAL_POLICY_SCOPE
+            ? `TOPIC:${topicPrefix}`
+            : `${policy.scope}:TOPIC:${topicPrefix}`,
           localDate: parts.localDate,
           timezone: policy.timezone,
           limit: 1,

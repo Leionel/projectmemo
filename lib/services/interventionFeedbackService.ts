@@ -138,14 +138,17 @@ export async function listProjectPreferences(projectId: string) {
   }));
 }
 
-export async function confirmSuggestion(projectId: string, triggerType: string) {
+export async function confirmSuggestion(projectId: string, triggerType: string, policyScope = "GLOBAL") {
   const now = new Date();
   return db.$transaction(async (tx) => {
     const project = await tx.project.findUnique({ where: { id: projectId }, select: { id: true } });
     if (!project) throw new AppError("PROJECT_NOT_FOUND", "没有找到这个项目", 404);
     // 在同一事务内读取并合并旧 JSON，避免两个项目同时确认不同主题时互相覆盖。
-    const policy = await tx.interventionPolicy.findUnique({ where: { scope: "GLOBAL" } });
-    if (!policy) throw new AppError("POLICY_NOT_FOUND", "策略尚未初始化", 404);
+    const policy = await tx.interventionPolicy.upsert({
+      where: { scope: policyScope },
+      create: { scope: policyScope },
+      update: {},
+    });
     const reduced = Array.isArray(policy.reducedTopics)
       ? (policy.reducedTopics as Array<{ triggerType: string; projectId?: string; since: string }>)
       : [];
@@ -176,12 +179,15 @@ export async function dismissSuggestion(projectId: string, triggerType: string) 
 }
 
 /** 撤销降频：延期是时间偏好，单次忽略不永久屏蔽；恢复后新证据仍会重新评估 */
-export async function revertTopicReduction(projectId: string, triggerType: string) {
+export async function revertTopicReduction(projectId: string, triggerType: string, policyScope = "GLOBAL") {
   return db.$transaction(async (tx) => {
     const project = await tx.project.findUnique({ where: { id: projectId }, select: { id: true } });
     if (!project) throw new AppError("PROJECT_NOT_FOUND", "没有找到这个项目", 404);
-    const policy = await tx.interventionPolicy.findUnique({ where: { scope: "GLOBAL" } });
-    if (!policy) throw new AppError("POLICY_NOT_FOUND", "策略尚未初始化", 404);
+    const policy = await tx.interventionPolicy.upsert({
+      where: { scope: policyScope },
+      create: { scope: policyScope },
+      update: {},
+    });
     const reduced = Array.isArray(policy.reducedTopics)
       ? (policy.reducedTopics as Array<{ triggerType: string; projectId?: string; since: string }>)
           .filter((item) => item.triggerType !== triggerType || item.projectId !== projectId)

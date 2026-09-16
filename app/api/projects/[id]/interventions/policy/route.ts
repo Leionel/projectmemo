@@ -2,6 +2,7 @@ import { authorizeProjectAccess } from "@/lib/auth/guard";
 import { apiError } from "@/lib/api";
 import {
   getOrCreatePolicy,
+  interventionPolicyScopeForUser,
   listRecentDecisions,
   updatePolicy,
 } from "@/lib/services/interventionPolicyService";
@@ -12,8 +13,8 @@ export const runtime = "nodejs";
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    await authorizeProjectAccess(request, id);
-    const policy = await getOrCreatePolicy();
+    const { user } = await authorizeProjectAccess(request, id);
+    const policy = await getOrCreatePolicy(interventionPolicyScopeForUser(user.id));
     const [recentDecisions, suggestions, reducedTopics] = await Promise.all([
       listRecentDecisions(id),
       computeSuggestion(id),
@@ -40,19 +41,22 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    await authorizeProjectAccess(request, id);
+    const { user } = await authorizeProjectAccess(request, id);
     const body = (await request.json()) as {
       dailyBudget?: number;
       quietStartMinute?: number;
       quietEndMinute?: number;
       timezone?: string;
     };
-    const policy = await updatePolicy({
-      dailyBudget: body.dailyBudget,
-      quietStartMinute: body.quietStartMinute,
-      quietEndMinute: body.quietEndMinute,
-      timezone: body.timezone,
-    });
+    const policy = await updatePolicy(
+      {
+        dailyBudget: body.dailyBudget,
+        quietStartMinute: body.quietStartMinute,
+        quietEndMinute: body.quietEndMinute,
+        timezone: body.timezone,
+      },
+      interventionPolicyScopeForUser(user.id),
+    );
     const reducedTopics = await listProjectPreferences(id);
     return Response.json({
       policy: {

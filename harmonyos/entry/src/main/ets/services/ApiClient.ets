@@ -37,6 +37,10 @@ export class ApiClient {
       throw new ApiError('RATE_LIMITED', '操作过于频繁，请稍后再试', 429);
     }
     if (responseCode >= 500) {
+      const backendError: ApiError = parseApiError(resultStr, responseCode);
+      if (backendError.code !== 'HTTP_ERROR') {
+        throw backendError;
+      }
       throw new ApiError('SERVER_ERROR', '服务端异常，请稍后重试', responseCode);
     }
     throw parseApiError(resultStr, responseCode);

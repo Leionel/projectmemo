@@ -4,7 +4,9 @@
 
 关联：`PROJECTMEMO_IMPROVEMENT_PLAN_2026-09-14.md` 第 21 节。规程依据为仓库盖章 PDF 的鸿蒙赛道附件；官方入口：<https://developer.huawei.com/home/C4-AI>。后续平台或群通知如有调整需记录来源与日期。
 
-本轮已完成 A1/A2/A3 复审修复及 B1–B4 的本地代码、独立数据库、Web 回归和鸿蒙构建核验；没有设备目标、签名配置或真实评审后端地址，因此不写 READY_TO_SUBMIT。
+执行 ECS 后端更新、小艺平台联调、HAP 签名安装和联合验收时，使用 [ECS、后端、小艺与 HAP 执行手册](docs/competition/projectmemo-ecs-backend-xiaoyi-hap-runbook.md)。
+
+本轮已完成 A1/A2/A3 复审修复及 B1–B4 的本地代码、独立数据库、Web 回归和鸿蒙构建核验；公网 ECS、评审账号与 DevEco 模拟器主流程已经接通，但没有正式签名 HAP 或真机验收，因此不写 READY_TO_SUBMIT。
 
 ## 1. 材料与报名方向：必须先核对
 
@@ -12,7 +14,7 @@
 - [ ] 核对规程中的 2026-09-30 24:00 是否仍为最新截止，保留平台/通知证据。
 - [ ] 下载本届作品说明模板，保存来源、版本和下载日期。
 - [ ] 准备一句话创新点；设计效果图或交互流程图；作品介绍文本。
-- [ ] 核对“不超过 800 字的作品介绍”与“主体不超过 20 页的说明 PDF”的提交位置；不要自行忽略其中一项。
+- [x] 当前仓库中的鸿蒙赛道作品说明模板明确要求：创意描述不超过 100 字、介绍文档不超过 1500 字，且主体不超过 20 页；正式迁稿前仍需与报名平台最新模板核对版本与下载日期。
 - [ ] 应用方向准备可实际演示 HAP；若报名 Agent 方向，另核对完整运行工程或平台测试态 Agent 的必交要求。
 - [ ] 作品说明使用 PDF，按官方模板和命名要求；附录不能藏匿应属于主体的内容来规避页数。
 - [ ] MP4 演示视频不超过 5 分钟；建议成片留出时长余量，不按播放器四舍五入压线。
@@ -26,21 +28,21 @@
 
 ### SUB-01 地址与网络
 
-- 状态：BLOCKED（评审地址未提供；本地开发地址不能用于交付）。
+- 状态：PUBLIC_BACKEND_VERIFIED（正式签名产物与真机仍未验收）。
 - [x] 已查清唯一来源为 `harmonyos/entry/src/main/ets/common/Constants.ets`；`BUILD_FLAVOR=development` 使用模拟器 `http://10.0.2.2:4400`，评审构建填写 `REVIEW_BASE_URL`，`requireBaseUrl()` 拒绝空地址和回环地址。
-- [ ] 最终评审构建不使用 `10.0.2.2`、`localhost` 或仅开发电脑能访问的地址。
+- [x] 最终评审构建使用 `https://project.luojiatutor.xyz`，不使用 `10.0.2.2`、`localhost` 或仅开发电脑能访问的地址。
 - [x] 开发/评审配置方式和启动前校验已建立；诊断信息只显示地址，不包含密钥。
-- [ ] 评审服务优先使用有效 HTTPS 地址；验证证书、请求超时与设备网络策略。具体域名【待确认】。
+- [x] 评审服务使用有效 HTTPS 地址 `https://project.luojiatutor.xyz`；公网登录、项目列表和状态读取已返回有效 JSON。
 - [ ] 用非开发电脑所在局域网的目标设备测试创建、读取、附件上传与保存，不只请求 health。
 - [ ] 核验 `/state/refresh` 等实际 API 与 HAP 版本一致，不能只验证主页 HTTP 200。
 - [ ] 评审期间服务起止时间【待确认】，重启自动恢复，数据库与附件不位于会被发布覆盖的临时目录。
 
 ### SUB-02 安装与签名
 
-- 状态：BUILD_VERIFIED；INSTALL_BLOCKED。
-- [x] `npm.cmd run harmony:test` 退出码 0，27/27；`npm.cmd run harmony:build` 退出码 0，生成 unsigned HAP，大小 2,697,157 bytes，SHA-256 `148182cf6e30fb34f55321a2987cf47290052be16e1ee45d649fc78e4720c27c`。
+- 状态：EMULATOR_VERIFIED；SIGNED_INSTALL_BLOCKED。
+- [x] `npm.cmd run harmony:test` 退出码 0，39/39；`npm.cmd run harmony:build` 退出码 0，生成 unsigned HAP，大小 3,791,660 bytes，SHA-256 `246f694ac1690a7b1b853c7a69d9eae36e4f3881309ebeec62f348879eb86bcb`。
 - [ ] `harmonyos/build-profile.json5` 当前 `signingConfigs=[]`；没有符合授权范围的签名配置，不能宣称最终签名包。
-- [ ] 当前 `hdc` 不可用，没有设备/模拟器目标，安装、打开、杀进程/重启复测 BLOCKED。
+- [x] DevEco 模拟器已完成评审账号登录与公网主流程；该证据不替代真机或最终签名 HAP 的干净安装。
 - [ ] 核对主办方允许的签名和安装方式；若调试签名绑定设备，确认是否覆盖评审设备，不能只在自己的设备成功就关闭。
 - [x] 本地 debug HAP 的构建参数、SDK/API、大小和 SHA256 已记录；最终签名 HAP 仍未生成。
 - [ ] 在干净测试设备安装最终 ZIP 中取出的 HAP，打开成功；杀进程/重启后再次启动成功。
@@ -160,7 +162,7 @@ rematch-release/<版本>/
 | 项目 | 结果 | 证据路径/说明 |
 |---|---|---|
 | 报名方向与官方材料 | NOT_RUN | 待填写 |
-| 最终 HAP 安装/启动 | BLOCKED | unsigned HAP 构建通过；无签名配置、无 `hdc` 设备目标 |
+| 最终 HAP 安装/启动 | PARTIAL | DevEco 模拟器主流程通过；unsigned HAP 构建通过，正式签名产物与真机未验收 |
 | 非开发网络业务请求 | BLOCKED | `Constants.ets` 已区分 development/review；真实评审地址未提供 |
 | 干净环境与持久化 | PARTIAL | 独立 SQLite 迁移重放、旧库升级、全量测试和隔离 E2E 通过；空设备安装未运行 |
 | 三项数据一致性缺陷 | CODE_VERIFIED | `evidence/phase1-review-20260915-0753/`、`evidence/phase2-20260915-085607/`；针对性回归 62/62、全量 30 files/225 tests |
@@ -168,7 +170,7 @@ rematch-release/<版本>/
 | B2 Snapshot/Diff 新鲜度 | CODE_VERIFIED | `evidence/phase2-20260915-085607/`；刷新失败、并发、规则版本、游标和业务入口回归通过；设备未验收 |
 | B3 预算/反馈/偏好 | CODE_VERIFIED | `evidence/phase2-20260915-085607/`；跨项目、并发预算/反馈/通知回执回归通过；设备未验收 |
 | B4 简报/会议/行动 | CODE_VERIFIED | `evidence/phase2-20260915-085607/`；证据导航、会议冲突、依赖重评和行动去重通过；设备未验收 |
-| 鸿蒙完整主线 | BLOCKED | ArkTS 单测 27/27、unsigned HAP 构建通过；无 `hdc` 目标，设备业务主线未验收 |
+| 鸿蒙完整主线 | PARTIAL | ArkTS 39/39、DevEco 模拟器公网主流程通过、unsigned HAP 构建通过；最终签名产物与真机未验收 |
 | 模型/规则边界 | PARTIAL | 本轮使用 mock 进行确定性回归；未宣称真实模型或评审平台通过 |
 | PDF/MP4/ZIP 检查 | NOT_RUN | 待填写 |
 | 平台上传及回执 | NOT_RUN | 未授权上传 |

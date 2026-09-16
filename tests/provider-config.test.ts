@@ -63,6 +63,7 @@ describe("W02 provider configuration", () => {
 
     expect(requestUrl).toBe(`${DEEPSEEK_BASE_URL}/chat/completions`);
     expect(requestBody?.model).toBe(DEEPSEEK_CHAT_MODEL);
+    expect(requestBody?.thinking).toEqual({ type: "disabled" });
     expect(result.provider).toBe(`llm:deepseek:${DEEPSEEK_CHAT_MODEL}`);
     expect(result.status).toBe("SUCCESS");
   });

@@ -12,10 +12,20 @@ function config() {
 export async function chatWithLLMWithMeta(prompt: string): Promise<AgentExecutionResult<string>> {
   const startedAt = Date.now();
   const { provider, baseUrl, apiKey, model, timeoutMs } = config();
+  const requestBody: Record<string, unknown> = {
+    model,
+    temperature: 0.2,
+    messages: [{ role: "user", content: prompt }],
+  };
+  // DeepSeek 当前默认启用思考模式。ProjectMemo 需要低延迟、可解析的
+  // 结构化 content，因此显式使用非思考模式；其他兼容服务不接收该字段。
+  if (provider === "deepseek") {
+    requestBody.thinking = { type: "disabled" };
+  }
   const response = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({ model, temperature: 0.2, messages: [{ role: "user", content: prompt }] }),
+    body: JSON.stringify(requestBody),
     signal: AbortSignal.timeout(timeoutMs),
   });
   if (!response.ok) throw new Error(`LLM request failed with HTTP ${response.status}`);

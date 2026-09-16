@@ -74,6 +74,11 @@ describe.sequential("ProjectMemo phase 1 capture reliability", () => {
     expect(responses.filter((response) => response.status === 200)).toHaveLength(9);
     expect(await db.capture.count({ where: { projectId, requestId } })).toBe(1);
     expect(await db.knowledgeCard.count({ where: { projectId } })).toBe(1);
+    const run = await db.agentRun.findFirst({
+      where: { projectId, externalRequestId: `${projectId}:${requestId}` },
+    });
+    expect(run?.provider).toBe("capture-api");
+    expect(run?.trace).toMatchObject({ provider: "capture-api", modelProvider: "mock" });
   });
 
   it("同一 requestId 的不同 payload 返回 409，不创建第二张卡", async () => {

@@ -3,9 +3,9 @@
 // 生成评审包前，必须将 BUILD_FLAVOR 改为 review 并填入真实 HTTPS 地址。
 // 空的 REVIEW_BASE_URL 或开发机回环地址会被 requireBaseUrl() 拒绝。
 export class Constants {
-  static readonly BUILD_FLAVOR: string = 'development';
+  static readonly BUILD_FLAVOR: string = 'review';
   static readonly DEVELOPMENT_BASE_URL: string = 'http://10.0.2.2:4400';
-  static readonly REVIEW_BASE_URL: string = '';
+  static readonly REVIEW_BASE_URL: string = 'https://project.luojiatutor.xyz';
   static readonly BASE_URL: string = Constants.BUILD_FLAVOR === 'review'
     ? Constants.REVIEW_BASE_URL
     : Constants.DEVELOPMENT_BASE_URL;

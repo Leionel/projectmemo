@@ -116,6 +116,13 @@ export default function apiContractTest() {
       expect(err.code).assertEqual('INVALID_ACTION_RESULT');
     });
 
+    it('parse_api_error_preserves_structured_service_error', 0, () => {
+      const body = '{"error":{"code":"PROJECT_STATE_DISABLED","message":"项目状态功能当前已关闭"}}';
+      const err = parseApiError(body, 503);
+      expect(err.code).assertEqual('PROJECT_STATE_DISABLED');
+      expect(err.message).assertEqual('项目状态功能当前已关闭');
+    });
+
     it('parse_api_error_fallback_on_non_json', 0, () => {
       const err = parseApiError('<html>502</html>', 502);
       expect(err.code).assertEqual('HTTP_ERROR');

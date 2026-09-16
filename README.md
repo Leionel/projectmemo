@@ -57,13 +57,13 @@ LLM_MODE="mock"
 ```env
 LLM_MODE="openai-compatible"
 LLM_PROVIDER="deepseek"
-LLM_BASE_URL="https://api.deepseek.com/v1"
+LLM_BASE_URL="https://api.deepseek.com"
 LLM_API_KEY=""
-LLM_MODEL_NAME="deepseek-v4-flash"
-LLM_TIMEOUT_MS="15000"
+LLM_MODEL_NAME="deepseek-flash"
+LLM_TIMEOUT_MS="30000"
 ```
 
-DeepSeek 配置使用 OpenAI-compatible 的 `/chat/completions` 契约。API Key 只应通过本机环境变量、部署密钥或开发设置接口注入，不能写入源码、证据、日志或 Git。开发设置只保留在当前运行进程；线上环境禁用该设置写入接口。
+DeepSeek 配置使用 OpenAI-compatible 的 `/chat/completions` 契约；结构化任务显式关闭思考模式，以取得可解析的最终 `content`。API Key 只应通过本机环境变量、部署密钥或开发设置接口注入，不能写入源码、证据、日志或 Git。开发设置只保留在当前运行进程；线上环境禁用该设置写入接口。
 
 DeepSeek chat 配置不自动视为 embedding provider。要开启 `SEMANTIC_MEMORY_ENABLED`，还需单独提供兼容的 embedding 服务：
 

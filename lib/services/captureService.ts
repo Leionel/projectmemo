@@ -251,6 +251,7 @@ export async function processCaptureWithRequest(
             trace: {
               source: "capture",
               provider,
+              modelProvider: execResult.provider,
               stage: "COMPLETED",
               requestId: options.requestId,
               requestHash: payloadHash,
@@ -305,6 +306,7 @@ export async function processCaptureWithRequest(
             trace: {
               source: "capture",
               provider,
+              modelProvider: execResult.provider,
               stage: "SAVED_POSTPROCESS_PENDING",
               requestId: options.requestId,
               requestHash: payloadHash,
@@ -330,6 +332,7 @@ export async function processCaptureWithRequest(
             trace: {
               source: "capture",
               provider,
+              modelProvider: execResult.provider,
               stage: stateRefreshPending ? "SAVED_STATE_REFRESH_PENDING" : "COMPLETED",
               requestId: options.requestId,
               requestHash: payloadHash,

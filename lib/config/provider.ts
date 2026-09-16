@@ -1,5 +1,5 @@
-export const DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1";
-export const DEEPSEEK_CHAT_MODEL = "deepseek-v4-flash";
+export const DEEPSEEK_BASE_URL = "https://api.deepseek.com";
+export const DEEPSEEK_CHAT_MODEL = "deepseek-flash";
 export const OPENAI_COMPATIBLE_BASE_URL = "https://api.openai.com/v1";
 export const OPENAI_COMPATIBLE_CHAT_MODEL = "gpt-4o-mini";
 export const DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small";

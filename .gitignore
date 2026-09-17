@@ -26,3 +26,19 @@ storage/
 uireference/
 evidence/**/*.db
 webbridge-*.json
+
+# ---------------------------------------------------------------
+# 生成物：可从受版本管理的输入重新生成，不入库
+# 只忽略导出/渲染结果，保留 .docx-work 下的脚本、模板与样式证据，
+# 以及 evidence/ 下的验收日志（那些是回执，不是生成物）。
+# ---------------------------------------------------------------
+.docx-work/*/pages/
+.docx-work/*/submission*.pdf
+.docx-work/*/submission*.docx
+.docx-work/*/reference-word.pdf
+.docx-work/*/~$*
+
+# 本地 dev server 与调试日志（根目录历史遗留）
+.dev-server*.log
+/dev-server.log
+/debug.log

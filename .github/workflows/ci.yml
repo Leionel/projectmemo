@@ -1,0 +1,59 @@
+name: CI
+
+# 最小 Web / 后端回归：lint、类型、独立测试库单测、生产构建。
+#
+# HarmonyOS 不在本工作流内：DevEco SDK 无法在 GitHub 托管 runner 上直接取得，
+# 鸿蒙侧仍在本地用 `npm run harmony:test` / `npm run harmony:build` 验证。
+# 这里只守住"改前端顺手弄坏后端"这类回归。
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+# 同一分支的新推送取消尚未完成的旧运行，避免排队浪费。
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      # 独立测试库：与 vitest.config.ts 的 env 保持一致，不触碰任何真实数据。
+      DATABASE_URL: file:./prisma/test-vitest.db
+      # 单测与构建都不得依赖真实模型凭据。
+      LLM_MODE: mock
+      # 不在这里设 NODE_ENV：vitest 自己用 test，next build 自己用 production，
+      # 从外部强行统一反而会让生产构建看到非标准值。
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 生成 Prisma Client
+        run: npx prisma generate
+
+      - name: 初始化测试库（从空库重放全部迁移）
+        run: npx prisma migrate deploy
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: 类型检查
+        run: npx tsc --noEmit
+
+      - name: 单元 / 集成测试
+        run: npm test
+
+      - name: 生产构建
+        run: npm run build

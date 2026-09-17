@@ -40,6 +40,7 @@ f37523ab940674a66a3a7dcdf7a75d6e75b5e5a4
 | 数据库 | `/opt/projectmemo/data/projectmemo.db` | 备份后再迁移 |
 | 附件目录 | `/opt/projectmemo/storage` | 与数据库一起备份 |
 | 服务环境文件 | `/etc/projectmemo/projectmemo.env` | 权限应为 `600` |
+| 部署样例与运维手册 | `deploy/alibaba-cloud-linux/` | 含备份、恢复演练与故障速查，见该目录 `README.md` |
 | 小艺适配层 Token | `【已配置/未配置】` | 只放 ECS 环境文件和平台密钥区 |
 | 小艺固定测试项目 ID | `【待确认】` | 必须是专用演示项目 |
 | 评审用户名 | `【待确认】` | 使用独立演示账号 |

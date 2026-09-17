@@ -33,10 +33,18 @@ function errorResponse(code: string, message: string, status: number) {
   return NextResponse.json({ error: { code, message } }, { status });
 }
 
-function publicSettings(editable: boolean) {
+function publicSettings(editable: boolean, includeProviderDetails: boolean) {
+  const llmMode = process.env.LLM_MODE === "openai-compatible" ? "openai-compatible" : "mock";
+
+  // 匿名访客只拿得到「跑在什么模式」，拿不到 provider / baseUrl / model / 有没有 Key。
+  // 这些是部署内部信息，生产环境没有理由公开给未登录的访问者。
+  if (!includeProviderDetails) {
+    return { llmMode, editable };
+  }
+
   const chatDefaults = getChatProviderDefaults();
   return {
-    llmMode: process.env.LLM_MODE === "openai-compatible" ? "openai-compatible" : "mock",
+    llmMode,
     llmProvider: chatDefaults.provider,
     llmBaseUrl: process.env.LLM_BASE_URL || chatDefaults.baseUrl,
     llmModelName: process.env.LLM_MODEL_NAME || chatDefaults.model,
@@ -48,8 +56,10 @@ function publicSettings(editable: boolean) {
 
 export async function GET(request: Request) {
   // 设置入口挂在根布局上，未登录页面也会读取，因此保持可读、只收紧可写。
-  const editable = !isProduction() && await isSignedIn(request);
-  return NextResponse.json(publicSettings(editable));
+  const signedIn = await isSignedIn(request);
+  const includeProviderDetails = signedIn || !isProduction();
+
+  return NextResponse.json(publicSettings(!isProduction() && signedIn, includeProviderDetails));
 }
 
 export async function POST(request: Request) {
@@ -90,7 +100,8 @@ export async function POST(request: Request) {
     if (llmModelName) process.env.LLM_MODEL_NAME = llmModelName;
 
     return NextResponse.json({
-      ...publicSettings(true),
+      // 写入成功即已通过登录校验，且该分支在生产环境不可达，因此回带完整 provider 细节。
+      ...publicSettings(true, true),
       message: "大模型配置已生效并应用到运行时。",
     });
   } catch (error) {

@@ -14,6 +14,7 @@ import { KeywordVectorStore } from "@/lib/memory/vectorStore";
 import { ensureCardEmbedding } from "@/lib/repositories/embeddings";
 import { recordLifecycleEventInTx } from "@/lib/services/memoryLifecycleService";
 import { isFeatureEnabled } from "@/lib/config/features";
+import { getVisionProviderConfig } from "@/lib/config/provider";
 import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateService";
 import { spawn } from "node:child_process";
 
@@ -55,51 +56,64 @@ async function extractPdfText(buffer: Buffer): Promise<string | null> {
   });
 }
 
+/** 视觉提取的体积上限：base64 后约为原始的 1.33 倍，需留在请求体限制之内。 */
+const VISION_MAX_BYTES = 5 * 1024 * 1024;
+
 /**
- * 提取图片文本 / 描述
+ * 提取图片文本 / 描述。
+ * 未配置视觉 provider 时返回 null（调用方记为 NEEDS_OCR）；
+ * 已配置但调用失败时抛出，调用方记为 FAILED 并保留真实原因。
  */
 async function extractImageText(mimeType: string, buffer: Buffer): Promise<string | null> {
-  const isLlmVisionConfigured = process.env.LLM_MODE === "openai-compatible" && Boolean(process.env.LLM_API_KEY) && Boolean(process.env.LLM_BASE_URL);
-  const baseUrl = process.env.LLM_BASE_URL?.replace(/\/$/, "");
-  const apiKey = process.env.LLM_API_KEY;
-  const model = process.env.LLM_VISION_MODEL_NAME || process.env.LLM_MODEL_NAME || "gpt-4o-mini";
-
-  if (isLlmVisionConfigured && buffer.length < 5 * 1024 * 1024) {
-    try {
-      const base64 = buffer.toString("base64");
-      const dataUri = `data:${mimeType};base64,${base64}`;
-
-      const response = await fetch(`${baseUrl}/chat/completions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-        body: JSON.stringify({
-          model,
-          messages: [
-            {
-              role: "user",
-              content: [
-                { type: "text", text: "请简明提取或总结这张图片中的关键文字与项目核心信息（100字以内）：" },
-                { type: "image_url", image_url: { url: dataUri } },
-              ],
-            },
-          ],
-        }),
-        signal: AbortSignal.timeout(15000),
-      });
-
-      if (response.ok) {
-        const json = await response.json();
-        const text = json?.choices?.[0]?.message?.content?.trim();
-        if (text) {
-          return `【图片提取】：${text}`;
-        }
-      }
-    } catch (e) {
-      console.warn("Vision OCR failed; falling back to metadata:", e);
-    }
+  const config = getVisionProviderConfig();
+  if (!config) {
+    return null;
   }
 
-  return null;
+  if (buffer.length >= VISION_MAX_BYTES) {
+    throw new Error(`图片超过视觉提取上限 ${Math.round(VISION_MAX_BYTES / 1024 / 1024)}MB`);
+  }
+
+  const { baseUrl, apiKey, model } = config;
+
+  try {
+    const base64 = buffer.toString("base64");
+    const dataUri = `data:${mimeType};base64,${base64}`;
+
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model,
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: "请简明提取或总结这张图片中的关键文字与项目核心信息（100字以内）：" },
+              { type: "image_url", image_url: { url: dataUri } },
+            ],
+          },
+        ],
+      }),
+      signal: AbortSignal.timeout(15000),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const json = await response.json();
+    const text = json?.choices?.[0]?.message?.content?.trim();
+    if (!text) {
+      throw new Error("视觉模型返回了空结果");
+    }
+    return `【图片提取】：${text}`;
+  } catch (error) {
+    // 已经配置了 provider 却失败，说明是模型名/额度/网络问题，不是"这个文件不支持"。
+    // 旧实现把它 console.warn 掉再返回 null，附件就被记成 NEEDS_OCR，真实原因丢失。
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(`视觉提取失败（模型 ${model}）：${detail}`);
+  }
 }
 
 function inferAndValidateFileType(fileName: string, mimeType: string, buffer: Buffer): "IMAGE" | "PDF" {

@@ -65,7 +65,11 @@ export async function authenticateUser(request: Request): Promise<AuthenticatedC
 /**
  * 校验当前用户是否拥有该项目的访问权限。
  * 1. 先验证会话（未登录 401）；
- * 2. 再验证项目归属（项目不存在 404，无 membership 归属 403）。
+ * 2. 再验证项目归属（项目不存在或无 membership 统一 404）。
+ *
+ * 越权沿用「统一 404」而不是 403：403 与 404 的差异会让已登录用户逐个
+ * 试探 projectId 是否存在。Server Component 页面端
+ * （lib/auth/serverSession.ts）已经这么做，API 必须与之一致。
  */
 export async function authorizeProjectAccess(
   request: Request,
@@ -95,7 +99,7 @@ export async function authorizeProjectAccess(
   });
 
   if (!membership) {
-    throw new AppError("FORBIDDEN", "无权访问此项目", 403);
+    throw new AppError("PROJECT_NOT_FOUND", "项目不存在", 404);
   }
 
   return {
@@ -114,6 +118,29 @@ const loginFailureBuckets = new Map<string, FailureRecord>();
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOGIN_WINDOW_MS = 60_000;
 const LOCKOUT_DURATION_MS = 120_000;
+
+/**
+ * 解析登录限流用的客户端标识。
+ *
+ * 反向代理必须「覆盖」而不是「追加」这两个头。旧实现取 X-Forwarded-For 最左值，
+ * 而 nginx 的 `$proxy_add_x_forwarded_for` 会把客户端自带的 XFF 前置拼接，
+ * 于是外部只要轮换这个头就能让每次请求落在不同桶里，限流形同不存在。
+ *
+ * 这里优先用 `X-Real-IP`（nginx 固定重写为 `$remote_addr`，客户端无法伪造），
+ * 退路才取 XFF 最右侧一跳——无论代理是覆盖还是追加，最右侧都是代理自己写的那一跳。
+ * 两个头都缺失（无代理直连）时返回 "local"，此时本来就拿不到真实来源地址。
+ */
+export function resolveClientIp(request: Request): string {
+  const realIp = request.headers.get("x-real-ip")?.trim();
+  if (realIp) return realIp;
+
+  const hops = (request.headers.get("x-forwarded-for") ?? "")
+    .split(",")
+    .map((hop) => hop.trim())
+    .filter(Boolean);
+
+  return hops[hops.length - 1] ?? "local";
+}
 
 export function enforceLoginRateLimit(identifier: string): void {
   const now = Date.now();

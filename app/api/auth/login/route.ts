@@ -3,7 +3,8 @@ import { apiError, AppError } from "@/lib/api";
 import { db } from "@/lib/db";
 import { verifyPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
-import { enforceLoginRateLimit, recordLoginFailure, clearLoginFailure } from "@/lib/auth/guard";
+import { enforceLoginRateLimit, recordLoginFailure, clearLoginFailure, resolveClientIp } from "@/lib/auth/guard";
+import { sessionCookieHeader } from "@/lib/auth/sessionCookie";
 import { ensureDemoUser } from "@/lib/auth/ensureDemoUser";
 
 export const runtime = "nodejs";
@@ -19,11 +20,8 @@ export async function POST(request: Request) {
     const json = await request.json();
     const input = loginSchema.parse(json);
 
-    // 提取限流标识（IP + 用户名）
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-               request.headers.get("x-real-ip")?.trim() ||
-               "local";
-    const rateLimitKey = `${ip}:${input.username}`;
+    // 提取限流标识（客户端 IP + 用户名）；IP 解析见 resolveClientIp 的伪造防护说明。
+    const rateLimitKey = `${resolveClientIp(request)}:${input.username}`;
 
     enforceLoginRateLimit(rateLimitKey);
 
@@ -84,7 +82,7 @@ export async function POST(request: Request) {
         status: 200,
         headers: {
           "cache-control": "no-store",
-          "set-cookie": `pm_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${7 * 24 * 3600}`,
+          "set-cookie": sessionCookieHeader(token),
         },
       }
     );

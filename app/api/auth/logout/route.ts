@@ -1,12 +1,15 @@
 import { apiError } from "@/lib/api";
 import { readBearerToken } from "@/lib/auth/guard";
 import { revokeSession } from "@/lib/auth/session";
+import { clearedSessionCookieHeader } from "@/lib/auth/sessionCookie";
 
 export const runtime = "nodejs";
 
+// 清除用的 Cookie 必须带上与写入时相同的属性（含生产环境 Secure），
+// 否则浏览器可能保留旧的那一份而不是真正覆盖。
 const logoutHeaders = {
   "cache-control": "no-store",
-  "set-cookie": "pm_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax",
+  "set-cookie": clearedSessionCookieHeader(),
 };
 
 export async function POST(request: Request) {

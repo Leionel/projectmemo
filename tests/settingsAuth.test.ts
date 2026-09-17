@@ -115,6 +115,34 @@ describe("模型设置与探针鉴权", () => {
     expect((await response.json()).editable).toBe(true);
   });
 
+  it("生产环境匿名读取设置不下发 provider 细节", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("LLM_BASE_URL", "https://api.deepseek.com");
+    vi.stubEnv("LLM_MODEL_NAME", "deepseek-flash");
+    vi.stubEnv("LLM_API_KEY", "sk-should-not-be-disclosed");
+
+    const response = await settingsGet(new Request("http://localhost/api/settings"));
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body).toEqual({ llmMode: "mock", editable: false });
+    expect(body.llmBaseUrl).toBeUndefined();
+    expect(body.llmModelName).toBeUndefined();
+    expect(body.hasApiKey).toBeUndefined();
+  });
+
+  it("生产环境登录用户仍可读到 provider 细节，但仍不可编辑", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("LLM_MODEL_NAME", "deepseek-flash");
+
+    const response = await settingsGet(authed("http://localhost/api/settings"));
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.editable).toBe(false);
+    expect(body.llmModelName).toBe("deepseek-flash");
+  });
+
   it("未登录不能调用连通性探针", async () => {
     vi.stubEnv("NODE_ENV", "development");
 

@@ -5,6 +5,7 @@ import {
   DEEPSEEK_CHAT_MODEL,
   getChatProviderDefaults,
   getEmbeddingProviderConfig,
+  getVisionProviderConfig,
 } from "@/lib/config/provider";
 import { getEmbedding } from "@/lib/memory/embedding";
 
@@ -88,5 +89,45 @@ describe("W02 provider configuration", () => {
     expect(fetchMock).not.toHaveBeenCalled();
     expect(result.isMock).toBe(true);
     expect(result.fallbackReason).toBe("embedding_provider_not_configured");
+  });
+});
+
+describe("W11 视觉 provider 解析（图片提取）", () => {
+  it("mock 模式下不解析视觉 provider，图片记为 NEEDS_OCR 而不是报错", () => {
+    expect(getVisionProviderConfig({ LLM_MODE: "mock", LLM_API_KEY: "test-key" })).toBeNull();
+  });
+
+  it("缺少 API Key 时不解析视觉 provider", () => {
+    expect(getVisionProviderConfig({ LLM_MODE: "openai-compatible", LLM_API_KEY: "" })).toBeNull();
+  });
+
+  it("未单独配置视觉模型时复用当前 chat 模型，而不是兜底到别家模型名", () => {
+    const config = getVisionProviderConfig({
+      LLM_MODE: "openai-compatible",
+      LLM_PROVIDER: "deepseek",
+      LLM_BASE_URL: "https://api.deepseek.com",
+      LLM_MODEL_NAME: "deepseek-flash",
+      LLM_VISION_MODEL_NAME: "",
+      LLM_API_KEY: "test-key",
+    });
+
+    expect(config).not.toBeNull();
+    expect(config?.model).toBe(DEEPSEEK_CHAT_MODEL);
+    expect(config?.model).not.toBe("gpt-4o-mini");
+    expect(config?.baseUrl).toBe("https://api.deepseek.com");
+  });
+
+  it("显式配置视觉模型时优先使用该模型", () => {
+    const config = getVisionProviderConfig({
+      LLM_MODE: "openai-compatible",
+      LLM_PROVIDER: "openai-compatible",
+      LLM_BASE_URL: "https://example.test/v1",
+      LLM_MODEL_NAME: "example-chat",
+      LLM_VISION_MODEL_NAME: "example-vision",
+      LLM_API_KEY: "test-key",
+    });
+
+    expect(config?.model).toBe("example-vision");
+    expect(config?.baseUrl).toBe("https://example.test/v1");
   });
 });

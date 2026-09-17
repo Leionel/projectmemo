@@ -320,7 +320,7 @@ describe("Authentication & Project Authorization Suite", () => {
     expect(response.status).toBe(401);
   });
 
-  it("9. 已登录但无项目权限访问返回 403", async () => {
+  it("9. 已登录但无项目权限访问返回 404，与页面端一致且不暴露项目是否存在", async () => {
     const { token } = await createSession(testUserId);
 
     const request = new Request(`http://localhost/api/projects/${otherProjectId}`, {
@@ -334,7 +334,31 @@ describe("Authentication & Project Authorization Suite", () => {
       params: Promise.resolve({ id: otherProjectId }),
     });
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(404);
+    expect(await response.json()).toMatchObject({ error: { code: "PROJECT_NOT_FOUND" } });
+  });
+
+  it("9b. 不存在的项目与无权访问的项目返回相同的 404，无法据此枚举", async () => {
+    const { token } = await createSession(testUserId);
+
+    const missing = await projectDetailRoute(
+      new Request("http://localhost/api/projects/no-such-project", {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      { params: Promise.resolve({ id: "no-such-project" }) },
+    );
+    const forbidden = await projectDetailRoute(
+      new Request(`http://localhost/api/projects/${otherProjectId}`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      { params: Promise.resolve({ id: otherProjectId }) },
+    );
+
+    expect(missing.status).toBe(404);
+    expect(forbidden.status).toBe(404);
+    expect(await missing.json()).toEqual(await forbidden.json());
   });
 
   it("10. 已登录且拥有权限可以成功访问项目及其子路由", async () => {
@@ -374,7 +398,29 @@ describe("Authentication & Project Authorization Suite", () => {
       params: Promise.resolve({ id: otherProjectId }),
     });
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(404);
+  });
+
+  it("11b. 轮换 X-Forwarded-For 不能绕过登录限流（伪造头防护）", async () => {
+    const attackerUsername = `spoof-${Date.now()}`;
+    let lastStatus = 0;
+
+    // 真实来源始终是 X-Real-IP（nginx 固定重写）；攻击者每次换一个 XFF 试图落进新桶。
+    for (let i = 0; i < 7; i++) {
+      const req = new Request("http://localhost/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Real-IP": "203.0.113.7",
+          "X-Forwarded-For": `10.0.0.${i}, 203.0.113.7`,
+        },
+        body: JSON.stringify({ username: attackerUsername, password: "bad-password" }),
+      });
+      const res = await loginRoute(req);
+      lastStatus = res.status;
+    }
+
+    expect(lastStatus).toBe(429);
   });
 
   it("12. 登录失败限流器正常生效", async () => {

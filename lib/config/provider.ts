@@ -28,6 +28,12 @@ export interface EmbeddingProviderConfig {
   timeoutMs: number;
 }
 
+export interface VisionProviderConfig {
+  baseUrl: string;
+  model: string;
+  apiKey: string;
+}
+
 function readValue(environment: Environment, name: string): string {
   return environment[name]?.trim() ?? "";
 }
@@ -125,5 +131,37 @@ export function getEmbeddingProviderConfig(environment: Environment = process.en
     model,
     apiKey,
     timeoutMs: timeoutFrom(environment, "EMBEDDING_TIMEOUT_MS", chat.timeoutMs),
+  };
+}
+
+/**
+ * 图片提取走对话模型自带的视觉能力，不是独立的 OCR 服务，所以模型名必须与
+ * chat provider 共用同一套解析规则。旧实现把 `LLM_VISION_MODEL_NAME` 兜底成
+ * `gpt-4o-mini`，而默认 provider 是 DeepSeek：一个 DeepSeek 不认识的模型名只会
+ * 换来一个错误响应，再被上层 catch 吞掉，最终静默降级成 NEEDS_OCR——看起来像
+ * "图片不支持"，实际是配置写错了。
+ *
+ * 因此这里默认复用 `LLM_MODEL_NAME`。DeepSeek 的 `deepseek-flash` 原生接受
+ * `image_url` + base64 data URI，默认无需单独配置视觉模型名。
+ */
+export function getVisionProviderConfig(environment: Environment = process.env): VisionProviderConfig | null {
+  if (readValue(environment, "LLM_MODE") !== "openai-compatible") {
+    return null;
+  }
+
+  const apiKey = readValue(environment, "LLM_API_KEY");
+  if (!apiKey) {
+    return null;
+  }
+
+  const chat = getChatProviderDefaults(environment);
+  if (!chat.baseUrl) {
+    return null;
+  }
+
+  return {
+    baseUrl: chat.baseUrl,
+    model: readValue(environment, "LLM_VISION_MODEL_NAME") || chat.model,
+    apiKey,
   };
 }

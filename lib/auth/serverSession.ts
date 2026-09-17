@@ -1,7 +1,10 @@
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { findValidSessionByToken } from "./session";
+import { SESSION_COOKIE } from "./sessionCookie";
 import type { User } from "@/lib/generated/prisma/client";
+
+export { SESSION_COOKIE };
 
 /**
  * 服务端页面（RSC）侧的会话恢复。
@@ -10,7 +13,6 @@ import type { User } from "@/lib/generated/prisma/client";
  * 服务端组件没有 Request，必须经 `next/headers` 读 Cookie。
  * 保护 `/api` 不等于保护服务端渲染出来的数据，两者要各自校验。
  */
-export const SESSION_COOKIE = "pm_session";
 
 export async function getSessionUser(): Promise<User | null> {
   const store = await cookies();

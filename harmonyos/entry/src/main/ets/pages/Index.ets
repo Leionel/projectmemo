@@ -40,6 +40,12 @@ struct Index {
 
   // 数据主状态
   @State projects: Project[] = [];
+  // 已归档项目单独一份：主列表与跨项目聚合都不含它们，但必须仍能在这里恢复
+  @State archivedProjects: Project[] = [];
+  @State showArchivedProjects: boolean = false;
+  // 生命周期操作进行中的项目 id：兼作双击防护，非空时禁用所有项目操作入口
+  @State projectLifecycleBusyId: string = '';
+  @State projectDeleteConfirmId: string = '';
   @State allInterventions: Intervention[] = [];
   @State allActions: ActionItem[] = [];
   @State allCards: KnowledgeCard[] = [];
@@ -132,6 +138,10 @@ struct Index {
     this.isAuthenticated = false;
     this.currentUser = new UserInfo();
     this.projects = [];
+    this.archivedProjects = [];
+    this.showArchivedProjects = false;
+    this.projectLifecycleBusyId = '';
+    this.projectDeleteConfirmId = '';
     this.allCards = [];
     this.allActions = [];
     this.allInterventions = [];
@@ -287,6 +297,15 @@ struct Index {
     try {
       this.projects = await this.projectService.listProjects();
 
+      // 归档项目单独取。主列表与跨项目聚合都不该包含它们，
+      // 但归档必须可恢复，所以归档列表本身要拉回来放在管理入口里。
+      try {
+        this.archivedProjects = await this.projectService.listArchivedProjects();
+      } catch (_e) {
+        // 归档列表拉取失败不影响主流程呈现
+        this.archivedProjects = [];
+      }
+
       // 聚合跨项目数据
       const intervs: Intervention[] = [];
       const acts: ActionItem[] = [];
@@ -404,6 +423,56 @@ struct Index {
       }
     } finally {
       this.isCreating = false;
+    }
+  }
+
+  /**
+   * 归档 / 恢复项目。
+   *
+   * 归档是可恢复的展示偏好，不是删除：记忆时态、行动与成果都不变，
+   * 因此不弹二次确认——把它做成和删除一样重的动作反而会误导用户。
+   * busy id 同时承担双击防护，请求未返回前所有项目入口保持禁用。
+   */
+  private async toggleProjectArchive(project: Project): Promise<void> {
+    if (this.projectLifecycleBusyId !== '') {
+      return;
+    }
+    const isArchived: boolean = project.archivedAt !== undefined && project.archivedAt !== '';
+    this.projectLifecycleBusyId = project.id;
+    try {
+      if (isArchived) {
+        await this.projectService.restoreProject(project.id);
+      } else {
+        await this.projectService.archiveProject(project.id);
+      }
+      promptAction.showToast({ message: isArchived ? '已恢复，项目回到项目列表' : '已归档，保留全部记忆与成果，可随时恢复' });
+      this.projectDeleteConfirmId = '';
+      await this.loadAllData(true);
+    } catch (e) {
+      promptAction.showToast({ message: e instanceof ApiError ? e.message : '操作失败，请稍后重试' });
+    } finally {
+      this.projectLifecycleBusyId = '';
+    }
+  }
+
+  /**
+   * 删除项目：服务端级联清空该项目的记忆、行动与成果，不可恢复。
+   * 与归档性质完全不同，必须先经过 projectDeleteConfirmId 的二次确认。
+   */
+  private async deleteProjectItem(project: Project): Promise<void> {
+    if (this.projectLifecycleBusyId !== '') {
+      return;
+    }
+    this.projectLifecycleBusyId = project.id;
+    try {
+      await this.projectService.deleteProject(project.id);
+      promptAction.showToast({ message: '项目及其记忆、行动与成果已删除' });
+      this.projectDeleteConfirmId = '';
+      await this.loadAllData(true);
+    } catch (e) {
+      promptAction.showToast({ message: e instanceof ApiError ? e.message : '删除失败，请稍后重试' });
+    } finally {
+      this.projectLifecycleBusyId = '';
     }
   }
 
@@ -562,6 +631,34 @@ struct Index {
       .backgroundColor(PMColors.SURFACE)
       .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
 
+      // 归档管理入口放在分支之外：即使项目全部归档、主列表为空，
+      // 也必须能进到归档列表把它们恢复回来。
+      if (this.archivedProjects.length > 0) {
+        Row() {
+          Text(`已归档项目（${this.archivedProjects.length}）`)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_SECONDARY)
+            .layoutWeight(1)
+
+          Button('管理与恢复')
+            .height(40)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.BRAND)
+            .backgroundColor(PMColors.BRAND_LIGHT)
+            .borderRadius(PMRadius.XS)
+            .accessibilityText(`查看 ${this.archivedProjects.length} 个已归档项目并恢复`)
+            .onClick(() => {
+              this.projectDeleteConfirmId = '';
+              this.showArchivedProjects = true;
+            })
+        }
+        .width('100%')
+        .alignItems(VerticalAlign.Center)
+        .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.SM })
+        .backgroundColor(PMColors.SURFACE_SUBTLE)
+        .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
+      }
+
       if (this.getFilteredProjects().length === 0) {
         EmptyStateView({
           title: '暂无项目档案',
@@ -575,7 +672,7 @@ struct Index {
         List({ space: PMSpacing.SM }) {
           ForEach(this.getFilteredProjects(), (project: Project) => {
             ListItem() {
-              this.projectItem(project)
+              this.projectListItem(project)
             }
           }, (project: Project) => project.id)
         }
@@ -588,6 +685,71 @@ struct Index {
     .transition(PMTransition.CONTENT_ENTER)
     .align(Alignment.Top)
     .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
+    .bindSheet($$this.showArchivedProjects, this.ArchivedProjectsSheet(), {
+      height: SheetSize.FIT_CONTENT,
+      dragBar: true,
+      showClose: false
+    })
+  }
+
+  /**
+   * 已归档项目管理。
+   *
+   * 用 sheet 而不是在主列表里再嵌一段：归档项目本来就不属于主列表，
+   * 混排会让人以为它们仍然占用"需要关注"的位置；sheet 也不影响主列表的布局。
+   */
+  @Builder
+  private ArchivedProjectsSheet() {
+    Column() {
+      Text('已归档项目')
+        .fontSize(PMFontSize.SECTION_TITLE)
+        .fontWeight(FontWeight.Bold)
+        .fontColor(PMColors.INK_PRIMARY)
+        .width('100%')
+
+      Text('归档只让项目离开主列表，它的记忆、行动与成果都保持有效；恢复后不会改变任何历史。')
+        .fontSize(PMFontSize.CAPTION)
+        .fontColor(PMColors.INK_TERTIARY)
+        .width('100%')
+        .margin({ top: PMSpacing.XS })
+
+      if (this.archivedProjects.length === 0) {
+        Text('当前没有已归档项目。')
+          .fontSize(PMFontSize.BODY)
+          .fontColor(PMColors.INK_SECONDARY)
+          .margin({ top: PMSpacing.LG })
+      } else {
+        List({ space: PMSpacing.SM }) {
+          ForEach(this.archivedProjects, (project: Project) => {
+            ListItem() {
+              Column() {
+                Text(TextFormatters.readableText(project.title, '项目名称无法读取'))
+                  .fontSize(PMFontSize.BODY)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.INK_PRIMARY)
+                  .maxLines(1)
+                  .textOverflow({ overflow: TextOverflow.Ellipsis })
+                  .width('100%')
+
+                this.projectLifecycleActions(project)
+              }
+              .width('100%')
+              .padding(PMSpacing.MD)
+              .backgroundColor(PMColors.SURFACE)
+              .borderRadius(PMRadius.MD)
+              .border({ width: 1, color: PMColors.BORDER })
+              .alignItems(HorizontalAlign.Start)
+            }
+          }, (project: Project) => project.id)
+        }
+        .width('100%')
+        .constraintSize({ maxHeight: 360 })
+        .margin({ top: PMSpacing.MD })
+      }
+    }
+    .width('100%')
+    .alignItems(HorizontalAlign.Start)
+    .padding(PMSpacing.LG)
   }
 
   private getFilteredProjects(): Project[] {
@@ -723,6 +885,112 @@ struct Index {
     .onClick(() => {
       router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: project.id } });
     })
+  }
+
+  /**
+   * 项目列表项 = 可点击的档案主体 + 明确可见的生命周期操作入口。
+   *
+   * 操作入口刻意放在档案主体之外：主体整块负责跳转项目页，若把按钮嵌进可点击区域，
+   * 点击命中的归属会变得可疑（"想归档却进了项目页"）。长按也不作为唯一入口——
+   * 发现性太差，归档与删除需要有看得见的入口。
+   */
+  @Builder
+  private projectListItem(project: Project) {
+    Column({ space: PMSpacing.XS }) {
+      this.projectItem(project)
+      this.projectLifecycleActions(project)
+    }
+    .width('100%')
+  }
+
+  @Builder
+  private projectLifecycleActions(project: Project) {
+    Column() {
+      if (this.projectDeleteConfirmId === project.id) {
+        // 删除不可恢复，必须写清会失去什么再确认；归档不需要走到这里。
+        Column() {
+          Text(`删除「${TextFormatters.readableText(project.title, '该项目')}」会同时删除它的全部记忆、行动与成果，且无法恢复。`)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.RISK)
+            .width('100%')
+
+          Row({ space: PMSpacing.SM }) {
+            Button(this.projectLifecycleBusyId === project.id ? '正在删除…' : '确认删除')
+              .height(40)
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.RISK)
+              .backgroundColor(PMColors.RISK_LIGHT)
+              .border({ width: 1, color: PMColors.RISK_BORDER })
+              .borderRadius(PMRadius.SM)
+              .enabled(this.projectLifecycleBusyId === '')
+              .accessibilityText(`确认删除项目 ${project.title}，会同时删除全部记忆、行动与成果`)
+              .onClick(() => {
+                this.deleteProjectItem(project);
+              })
+
+            Button('取消')
+              .height(40)
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_SECONDARY)
+              .backgroundColor(PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.SM)
+              .enabled(this.projectLifecycleBusyId === '')
+              .accessibilityText('取消删除')
+              .onClick(() => {
+                this.projectDeleteConfirmId = '';
+              })
+          }
+          .width('100%')
+          .margin({ top: PMSpacing.SM })
+        }
+        .width('100%')
+        .padding(PMSpacing.MD)
+        .backgroundColor(PMColors.RISK_LIGHT)
+        .borderRadius(PMRadius.SM)
+        .alignItems(HorizontalAlign.Start)
+      } else {
+        Row({ space: PMSpacing.SM }) {
+          Button(project.archivedAt !== undefined && project.archivedAt !== '' ? '恢复' : '归档')
+            .height(40)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_SECONDARY)
+            .backgroundColor(PMColors.SURFACE_SUBTLE)
+            .borderRadius(PMRadius.SM)
+            .enabled(this.projectLifecycleBusyId === '')
+            .accessibilityText(project.archivedAt !== undefined && project.archivedAt !== ''
+              ? `恢复项目 ${project.title}，恢复到项目列表`
+              : `归档项目 ${project.title}，保留全部记忆与成果，可随时恢复`)
+            .onClick(() => {
+              this.toggleProjectArchive(project);
+            })
+
+          Button('删除')
+            .height(40)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.RISK)
+            .backgroundColor(PMColors.RISK_LIGHT)
+            .borderRadius(PMRadius.SM)
+            .enabled(this.projectLifecycleBusyId === '')
+            .accessibilityText(`删除项目 ${project.title}`)
+            .onClick(() => {
+              this.projectDeleteConfirmId = project.id;
+            })
+
+          Text(project.archivedAt !== undefined && project.archivedAt !== ''
+            ? '已归档：不占主列表，记忆与成果都保持有效'
+            : '归档只是移出主列表，不删除任何记忆')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+            .layoutWeight(1)
+            .maxLines(2)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+        }
+        .width('100%')
+        .padding({ left: PMSpacing.SM, right: PMSpacing.SM })
+      }
+    }
+    .width('100%')
   }
 
   // ----------------------------------------------------

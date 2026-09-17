@@ -51,6 +51,8 @@ export class Project {
   goal: string = '';
   scenario: string = 'COMPETITION';
   deadline: string | undefined = undefined;
+  // 非空表示已归档：项目离开主列表，但记忆、行动与成果仍然有效且可恢复。
+  archivedAt: string | undefined = undefined;
   createdAt: string = '';
   updatedAt: string = '';
   _count: ProjectCount = new ProjectCount();
@@ -79,6 +81,16 @@ export class ProjectUpdateInput {
 
 export class ProjectCreateResponse {
   project: Project = new Project();
+}
+
+// 归档 / 恢复接口只回带生命周期字段，不需要整份项目详情。
+export class ProjectLifecyclePayload {
+  id: string = '';
+  archivedAt: string | undefined = undefined;
+}
+
+export class ProjectLifecycleResponse {
+  project: ProjectLifecyclePayload = new ProjectLifecyclePayload();
 }
 
 export class ApiError extends Error {

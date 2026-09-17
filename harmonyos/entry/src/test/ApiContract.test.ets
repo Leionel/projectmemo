@@ -8,6 +8,7 @@ import {
   buildCaptureBody,
   isSuccessCode,
   isNoContent,
+  classifyHttpError,
   parseApiError,
   isValidActionStatus,
   isValidInterventionStatus,
@@ -94,6 +95,19 @@ export default function apiContractTest() {
       expect(isSuccessCode('GET', 404)).assertFalse();
       expect(isSuccessCode('POST', 422)).assertFalse();
       expect(isSuccessCode('PATCH', 500)).assertFalse();
+    });
+
+    // 删除项目成功返回 204 无正文：不能按 JSON 成功解析，必须走 isNoContent。
+    it('delete_success_is_no_content', 0, () => {
+      expect(isSuccessCode('DELETE', 200)).assertTrue();
+      expect(isSuccessCode('DELETE', 204)).assertFalse();
+      expect(isNoContent(204)).assertTrue();
+    });
+
+    it('delete_404_is_project_not_found', 0, () => {
+      // 越权与项目不存在统一 404，客户端不应把它当成"操作成功"或"服务端故障"。
+      expect(classifyHttpError(404)).assertEqual('NOT_FOUND');
+      expect(isSuccessCode('DELETE', 404)).assertFalse();
     });
 
     it('no_content_204', 0, () => {

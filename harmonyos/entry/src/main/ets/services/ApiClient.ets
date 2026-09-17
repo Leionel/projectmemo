@@ -157,4 +157,42 @@ export class ApiClient {
       httpRequest.destroy();
     }
   }
+
+  // @ohos.net.http 的 RequestMethod 没有 DELETE，与 PATCH 一样用 customMethod；
+  // 删除成功返回 204 无正文，不能按 JSON 解析，由 isNoContent 单独判定。
+  async delete<T>(path: string): Promise<T> {
+    const httpRequest = http.createHttp();
+    try {
+      const response: http.HttpResponse = await httpRequest.request(
+        `${this.baseUrl}${path}`,
+        {
+          customMethod: 'DELETE',
+          header: this.buildHeaders(path),
+          expectDataType: http.HttpDataType.STRING,
+          connectTimeout: 10000,
+          readTimeout: 30000,
+        }
+      );
+      if (isSuccessCode('DELETE', response.responseCode)) {
+        const result: string = response.result as string;
+        return JSON.parse(result) as T;
+      } else if (isNoContent(response.responseCode)) {
+        return undefined as T;
+      } else {
+        const errBody: string = response.result as string;
+        this.handleResponseError(path, response.responseCode, errBody);
+      }
+    } catch (e) {
+      if (e instanceof ApiError) {
+        throw e;
+      }
+      const errMsg = e instanceof Error ? e.message : (typeof e === 'string' ? e : '');
+      if (errMsg.toLowerCase().includes('timeout') || errMsg.includes('timed out')) {
+        throw new ApiError('REQUEST_TIMEOUT', '请求处理超时，请刷新查看是否已完成或重试', 408);
+      }
+      throw new ApiError('NETWORK_ERROR', '网络连接失败，请检查网络设置');
+    } finally {
+      httpRequest.destroy();
+    }
+  }
 }

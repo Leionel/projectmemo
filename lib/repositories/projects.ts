@@ -5,9 +5,24 @@ import { AppError } from "@/lib/api";
 import { buildProjectDashboard } from "@/lib/projectDashboard";
 import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateService";
 
-export async function listProjects(userId?: string) {
+export interface ListProjectsOptions {
+  /**
+   * 归档项目默认不出现在主列表：它们不该继续占用"需要关注"的排序位置，
+   * 也不该参与跨项目聚合（提醒 / 待办 / 卡片统计）。要看它们必须显式声明。
+   */
+  archived?: "exclude" | "include" | "only";
+}
+
+export async function listProjects(userId?: string, options: ListProjectsOptions = {}) {
+  const archived = options.archived ?? "exclude";
+  const archivedFilter =
+    archived === "only" ? { archivedAt: { not: null } } : archived === "include" ? {} : { archivedAt: null };
+
   const projects = await db.project.findMany({
-    where: userId ? { memberships: { some: { userId } } } : undefined,
+    where: {
+      ...archivedFilter,
+      ...(userId ? { memberships: { some: { userId } } } : {}),
+    },
     orderBy: { updatedAt: "desc" },
     include: {
       _count: { select: { cards: true, artifacts: true } },
@@ -63,6 +78,26 @@ export async function updateProject(projectId: string, input: ProjectUpdateInput
 export async function deleteProject(projectId: string) {
   await requireProject(projectId);
   return db.project.delete({ where: { id: projectId } });
+}
+
+/**
+ * 归档项目：可恢复的展示偏好，不改变任何业务事实。
+ *
+ * 幂等：已归档的项目再次归档保持原 archivedAt，不刷新时间戳——否则"归档时间"
+ * 会随重复点击漂移，无法作为"它是什么时候退出的"依据。
+ * 不触发状态重评：归档是生命周期动作，不是业务数据变更。
+ */
+export async function archiveProject(projectId: string) {
+  const project = await requireProject(projectId);
+  if (project.archivedAt) return project;
+  return db.project.update({ where: { id: projectId }, data: { archivedAt: new Date() } });
+}
+
+/** 恢复项目：清空 archivedAt，归档期间被隐藏的数据本身从未改变。 */
+export async function restoreProject(projectId: string) {
+  const project = await requireProject(projectId);
+  if (!project.archivedAt) return project;
+  return db.project.update({ where: { id: projectId }, data: { archivedAt: null } });
 }
 
 export async function requireProject(projectId: string) {

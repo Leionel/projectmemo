@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, ArrowRight, Bot, CalendarDays, CheckSquare, FileOutput, FileText, Goal, Sparkles, Star, type LucideIcon } from "lucide-react";
+import { Archive, ArrowLeft, ArrowRight, Bot, CalendarDays, CheckSquare, FileOutput, FileText, Goal, Sparkles, Star, type LucideIcon } from "lucide-react";
 import { ActionBoard } from "@/components/ActionBoard";
 import { AgentMetrics } from "@/components/AgentMetrics";
 import { CaptureBox } from "@/components/CaptureBox";
@@ -79,12 +79,12 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     <header className="mt-7 border-y archive-rule py-7">
       <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2"><span className={`paper-tab px-3 py-1.5 text-xs font-bold ${getScenarioColor(project.scenario)}`}>{scenario}</span><span className="text-xs text-[var(--muted)]">更新于 {project.updatedAt.toLocaleDateString("zh-CN")}</span></div>
+          <div className="flex flex-wrap items-center gap-2"><span className={`paper-tab px-3 py-1.5 text-xs font-bold ${getScenarioColor(project.scenario)}`}>{scenario}</span>{project.archivedAt && <span className="rounded-full bg-[var(--paper-strong)] px-2.5 py-1 text-xs font-bold text-[var(--ink-soft)]"><Archive aria-hidden="true" size={12} className="mr-1 inline" />已归档</span>}<span className="text-xs text-[var(--muted)]">更新于 {project.updatedAt.toLocaleDateString("zh-CN")}</span></div>
           <p className="archive-label mt-5">项目工作档案</p>
           <h1 className="mt-3 max-w-4xl text-3xl font-black tracking-tight [overflow-wrap:anywhere] sm:text-4xl">{project.title}</h1>
           <p className="mt-3 max-w-3xl leading-7 text-[var(--ink-soft)] [overflow-wrap:anywhere]">{project.description}</p>
         </div>
-        <div className="flex flex-wrap gap-3"><ProjectSettings project={{ id, title: project.title, description: project.description, goal: project.goal, scenario: project.scenario, deadline: project.deadline ? project.deadline.toISOString().slice(0, 10) : "" }} /><Link href={"/projects/" + id + "/generate"} className="focus-ring editorial-button shrink-0"><FileOutput size={18} /> 生成项目成果</Link></div>
+        <div className="flex flex-wrap gap-3"><ProjectSettings project={{ id, title: project.title, description: project.description, goal: project.goal, scenario: project.scenario, deadline: project.deadline ? project.deadline.toISOString().slice(0, 10) : "", archivedAt: project.archivedAt ? project.archivedAt.toISOString() : null }} /><Link href={"/projects/" + id + "/generate"} className="focus-ring editorial-button shrink-0"><FileOutput size={18} /> 生成项目成果</Link></div>
       </div>
     </header>
 

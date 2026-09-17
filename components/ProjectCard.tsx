@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, CalendarDays, CheckSquare, FileText, Gauge, Layers3, Sparkles } from "lucide-react";
 import { scenarioOptions, getScenarioColor } from "@/lib/types";
+import { ProjectCardActions } from "@/components/ProjectCardActions";
 import type { ProjectDashboard } from "@/lib/projectDashboard";
 
 export type ProjectCardData = {
@@ -9,6 +10,8 @@ export type ProjectCardData = {
   description: string;
   scenario: string;
   deadline: Date | string | null;
+  /** 非空表示该项目已归档：仍然可打开、可恢复，只是不再占用主列表。 */
+  archivedAt: Date | string | null;
   updatedAt: Date | string;
   _count: { cards: number; artifacts: number };
   dashboard: ProjectDashboard;
@@ -27,5 +30,6 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
     <div className="relative mt-4 rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3"><div className="flex items-center justify-between gap-2 text-xs font-bold"><span className="inline-flex items-center gap-1 text-[var(--ink-soft)]"><Gauge size={14} className="text-[var(--teal-strong)]" />参赛准备度</span><span className="text-[var(--navy)]">{dashboard.readiness.percentage}%</span></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--rule)]"><div className="h-full rounded-full bg-[var(--teal)]" style={{ width: `${dashboard.readiness.percentage}%` }} /></div>{dashboard.readiness.blockingRiskCount > 0 && <p className="mt-2 text-[11px] font-bold text-[var(--brick)]">存在 {dashboard.readiness.blockingRiskCount} 条高风险提醒待处理</p>}</div>
     <div className="relative mt-5 flex flex-wrap gap-4 border-t archive-rule pt-4 text-xs font-semibold text-[var(--ink-soft)]"><span className="flex items-center gap-1.5"><Layers3 aria-hidden="true" size={14} className="text-[var(--teal)]" /> {project._count.cards} 张卡片</span><span className="flex items-center gap-1.5"><FileText aria-hidden="true" size={14} className="text-[var(--teal)]" /> {project._count.artifacts} 份成果</span></div>
     <div className="relative mt-auto flex flex-wrap items-center justify-between gap-2 pt-5"><Link href={`/projects/${project.id}`} className="focus-ring rounded-lg px-2 py-1.5 text-xs font-black text-[var(--navy)] hover:bg-[var(--paper)]">打开项目 <ArrowRight size={14} className="ml-1 inline" /></Link><Link href={dashboard.nextAction.href} className={"focus-ring rounded-lg px-3 py-2 text-xs font-black " + (dashboard.nextAction.tone === "critical" ? "bg-[var(--brick)] text-white" : "bg-[var(--teal-pale)] text-[var(--teal-strong)]")}>{dashboard.nextAction.label} →</Link></div>
+    <ProjectCardActions projectId={project.id} projectTitle={project.title} archived={project.archivedAt !== null} />
   </article>;
 }

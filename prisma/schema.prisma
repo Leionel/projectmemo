@@ -96,6 +96,9 @@ model Project {
   goal        String
   scenario    ProjectScenario
   deadline    DateTime?
+  /// 归档是「不占主列表」的可恢复展示偏好，与事实有效性正交：
+  /// 归档不改变记忆的时态状态、不删除快照与行动历史，也不能当作删除使用。
+  archivedAt  DateTime?
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
   captures    Capture[]
@@ -116,6 +119,7 @@ model Project {
   memberships ProjectMembership[]
 
   @@index([updatedAt])
+  @@index([archivedAt])
 }
 
 model Capture {

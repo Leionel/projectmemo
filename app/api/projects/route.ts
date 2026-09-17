@@ -10,7 +10,14 @@ export async function GET(request?: Request) {
   try {
     const req = request ?? new Request("http://localhost/api/projects");
     const { user } = await authenticateUser(req);
-    const projects = await listProjects(user.id);
+
+    // 默认只返回在册项目；`?archived=true` 只返回已归档项目。
+    // 不做「一次返回全部、由客户端过滤」：跨项目聚合（提醒 / 待办 / 记忆检索）
+    // 直接消费这个列表，多传一份归档数据等于让归档项目继续打扰用户。
+    const archivedParam = new URL(req.url).searchParams.get("archived");
+    const archived = archivedParam === "true" ? "only" : archivedParam === "include" ? "include" : "exclude";
+
+    const projects = await listProjects(user.id, { archived });
     return Response.json({ projects });
   } catch (error) {
     return apiError(error);

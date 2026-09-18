@@ -43,8 +43,20 @@ export default class EntryFormAbility extends FormExtensionAbility {
 
   onAddForm(want: Want): formBindingData.FormBindingData {
     hilog.info(DOMAIN, TAG, 'onAddForm called');
-    const formData = this.buildFormData(want);
-    return formBindingData.createFormBindingData(formData);
+    try {
+      const formData = this.buildFormData(want);
+      return formBindingData.createFormBindingData(formData);
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'onAddForm error fallback');
+      return formBindingData.createFormBindingData({
+        'formDimension': 2,
+        'projectTitle': '忆程备赛看板',
+        'daysLeft': 2,
+        'readiness': 80,
+        'nextAction': '连接后端后显示真实待办',
+        'status': '备赛中'
+      });
+    }
   }
 
   onCastToNormalForm(formId: string): void {

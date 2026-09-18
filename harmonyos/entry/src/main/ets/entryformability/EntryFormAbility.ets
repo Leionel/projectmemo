@@ -4,6 +4,7 @@ import formProvider from '@ohos.app.form.formProvider';
 import FormExtensionAbility from '@ohos.app.form.FormExtensionAbility';
 import Want from '@ohos.app.ability.Want';
 import { hilog } from '@kit.PerformanceAnalysisKit';
+import { WidgetDataService } from '../services/WidgetDataService';
 
 const TAG = 'EntryFormAbility';
 const DOMAIN = 0x0000;
@@ -14,22 +15,28 @@ export default class EntryFormAbility extends FormExtensionAbility {
       ? (want.parameters?.[formInfo.FormParam.DIMENSION_KEY] as number)
       : 3; // 2=2*2, 3=2*4
 
-    // 未接入真实数据前，默认值必须显式标识为示例，避免演示时把演示数值当成真实项目状态
+    // 优先从真实本地持久化数据中加载已同步的项目看板
+    const cachedData = WidgetDataService.getCachedWidgetDataSync(this.context);
+
     const title = typeof want?.parameters?.['projectTitle'] === 'string' && (want.parameters?.['projectTitle'] as string).trim() !== ''
       ? (want.parameters?.['projectTitle'] as string)
-      : '忆程备赛看板（示例数据）';
+      : (cachedData['projectTitle'] as string);
+
     const daysLeft = typeof want?.parameters?.['daysLeft'] === 'number'
       ? (want.parameters?.['daysLeft'] as number)
-      : 2;
+      : (cachedData['daysLeft'] as number);
+
     const readiness = typeof want?.parameters?.['readiness'] === 'number'
       ? (want.parameters?.['readiness'] as number)
-      : 80;
+      : (cachedData['readiness'] as number);
+
     const nextAction = typeof want?.parameters?.['nextAction'] === 'string' && (want.parameters?.['nextAction'] as string).trim() !== ''
       ? (want.parameters?.['nextAction'] as string)
-      : '示例：连接后端后显示真实待办';
+      : (cachedData['nextAction'] as string);
+
     const status = typeof want?.parameters?.['status'] === 'string' && (want.parameters?.['status'] as string).trim() !== ''
       ? (want.parameters?.['status'] as string)
-      : '示例数据';
+      : (cachedData['status'] as string);
 
     return {
       'formDimension': dimension,
@@ -44,17 +51,24 @@ export default class EntryFormAbility extends FormExtensionAbility {
   onAddForm(want: Want): formBindingData.FormBindingData {
     hilog.info(DOMAIN, TAG, 'onAddForm called');
     try {
+      const formId = want?.parameters?.[formInfo.FormParam.IDENTITY_KEY] as string;
+      if (formId) {
+        WidgetDataService.registerFormId(this.context, formId).catch((err: Error) => {
+          hilog.error(DOMAIN, TAG, 'Failed to register formId in onAddForm: %{public}s', err.message);
+        });
+      }
+
       const formData = this.buildFormData(want);
       return formBindingData.createFormBindingData(formData);
     } catch (err) {
-      hilog.error(DOMAIN, TAG, 'onAddForm error fallback');
+      hilog.error(DOMAIN, TAG, 'onAddForm error fallback: %{public}s', JSON.stringify(err));
       return formBindingData.createFormBindingData({
-        'formDimension': 2,
-        'projectTitle': '忆程备赛看板',
-        'daysLeft': 2,
-        'readiness': 80,
-        'nextAction': '连接后端后显示真实待办',
-        'status': '备赛中'
+        'formDimension': 3,
+        'projectTitle': '忆程项目看板',
+        'daysLeft': 0,
+        'readiness': 0,
+        'nextAction': '打开应用同步项目待办',
+        'status': '待同步'
       });
     }
   }
@@ -66,6 +80,11 @@ export default class EntryFormAbility extends FormExtensionAbility {
   onUpdateForm(formId: string): void {
     hilog.info(DOMAIN, TAG, 'onUpdateForm formId: %{public}s', formId);
     try {
+      if (formId) {
+        WidgetDataService.registerFormId(this.context, formId).catch((err: Error) => {
+          hilog.error(DOMAIN, TAG, 'Failed to register formId in onUpdateForm: %{public}s', err.message);
+        });
+      }
       const updatedData = this.buildFormData();
       const bindingData = formBindingData.createFormBindingData(updatedData);
       formProvider.updateForm(formId, bindingData).catch((err: Error) => {
@@ -84,9 +103,15 @@ export default class EntryFormAbility extends FormExtensionAbility {
 
   onRemoveForm(formId: string): void {
     hilog.info(DOMAIN, TAG, 'onRemoveForm formId: %{public}s', formId);
+    if (formId) {
+      WidgetDataService.unregisterFormId(this.context, formId).catch((err: Error) => {
+        hilog.error(DOMAIN, TAG, 'Failed to unregister formId in onRemoveForm: %{public}s', err.message);
+      });
+    }
   }
 
   onAcquireFormState(want: Want): formInfo.FormState {
     return formInfo.FormState.READY;
   }
 }
+

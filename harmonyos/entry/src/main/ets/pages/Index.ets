@@ -14,6 +14,7 @@ import { MemoryService } from '../services/MemoryService';
 import { SettingsService } from '../services/SettingsService';
 import { SessionStore } from '../services/SessionStore';
 import { AuthService } from '../services/AuthService';
+import { WidgetDataService } from '../services/WidgetDataService';
 import { LoginView } from '../components/LoginView';
 import { ReminderSettingsView } from '../components/ReminderSettingsView';
 
@@ -296,6 +297,9 @@ struct Index {
     this.dataSyncState = '同步中...';
     try {
       this.projects = await this.projectService.listProjects();
+      if (this.projects.length > 0) {
+        WidgetDataService.updateWidgetWithProject(getContext(this), this.projects[0]).catch(() => {});
+      }
 
       // 归档项目单独取。主列表与跨项目聚合都不该包含它们，
       // 但归档必须可恢复，所以归档列表本身要拉回来放在管理入口里。

@@ -5,13 +5,13 @@ let storage = new LocalStorage();
 @Entry(storage)
 @Component
 struct WidgetCard {
-  /* 存储卡片数据（未收到真实推送前显示示例数据，需明确标识） */
+  /* 存储卡片数据（通过 WidgetDataService 实时同步真实项目看板数据） */
   @LocalStorageProp('formDimension') formDimension: number = 3; // 2=2*2, 3=2*4
-  @LocalStorageProp('projectTitle') projectTitle: string = '忆程备赛看板（示例数据）';
-  @LocalStorageProp('daysLeft') daysLeft: number = 2;
-  @LocalStorageProp('readiness') readiness: number = 80;
-  @LocalStorageProp('nextAction') nextAction: string = '示例：连接后端后显示真实待办';
-  @LocalStorageProp('status') status: string = '示例数据';
+  @LocalStorageProp('projectTitle') projectTitle: string = '忆程项目看板';
+  @LocalStorageProp('daysLeft') daysLeft: number = 0;
+  @LocalStorageProp('readiness') readiness: number = 0;
+  @LocalStorageProp('nextAction') nextAction: string = '打开应用同步待办';
+  @LocalStorageProp('status') status: string = '进行中';
 
   build() {
     Column() {
@@ -24,7 +24,7 @@ struct WidgetCard {
             .width(8)
             .height(8)
             .borderRadius(4)
-            .backgroundColor('#E5484D')
+            .backgroundColor(this.daysLeft > 0 ? '#E5484D' : '#0284C7')
             .margin({ right: 6 })
 
           Text(this.projectTitle)
@@ -39,19 +39,19 @@ struct WidgetCard {
         .alignItems(VerticalAlign.Center)
 
         Row() {
-          Text('仅剩 ')
+          Text(this.daysLeft > 0 ? '仅剩 ' : '')
             .fontSize(10)
-            .fontColor('#E5484D')
-          Text(`${this.daysLeft}`)
-            .fontSize(13)
+            .fontColor(this.daysLeft > 0 ? '#E5484D' : '#64748B')
+          Text(this.daysLeft > 0 ? `${this.daysLeft}` : '无截止日')
+            .fontSize(this.daysLeft > 0 ? 13 : 10)
             .fontWeight(FontWeight.Bold)
-            .fontColor('#E5484D')
-          Text(' 天')
+            .fontColor(this.daysLeft > 0 ? '#E5484D' : '#64748B')
+          Text(this.daysLeft > 0 ? ' 天' : '')
             .fontSize(10)
             .fontColor('#E5484D')
         }
         .padding({ left: 6, right: 6, top: 2, bottom: 2 })
-        .backgroundColor('#FFEBEB')
+        .backgroundColor(this.daysLeft > 0 ? '#FFEBEB' : '#F1F5F9')
         .borderRadius(10)
         .margin({ left: 6 })
       }

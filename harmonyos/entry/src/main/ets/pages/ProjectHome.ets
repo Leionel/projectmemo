@@ -26,6 +26,7 @@ import { CopilotService } from '../services/CopilotService';
 import { NotificationService } from '../services/NotificationService';
 import { AttachmentService } from '../services/AttachmentService';
 import { MilestoneService } from '../services/MilestoneService';
+import { WidgetDataService } from '../services/WidgetDataService';
 
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily, PMInteraction, PMMotion, PMMaterial, PMTransition } from '../common/DesignTokens';
 import { PMBreakpoint, PMStorageKey, PMWidthBp } from '../common/WindowMetrics';
@@ -390,6 +391,9 @@ struct ProjectHome {
       const res = await Promise.all([detailP, listP, intervP, actionP, artifactP, chatP, milestoneP, attachmentP]);
       this.project = res[0];
       this.dashboard = this.findDashboard(res[1]);
+      if (this.project) {
+        WidgetDataService.updateWidgetWithProjectDetail(getContext(this), this.project, this.dashboard).catch(() => {});
+      }
       this.interventions = res[2];
       this.actions = res[3];
       this.artifacts = res[4];

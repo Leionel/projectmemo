@@ -38,6 +38,21 @@ webbridge-*.json
 .docx-work/*/reference-word.pdf
 .docx-work/*/~$*
 
+# ---------------------------------------------------------------
+# 文档、比赛说明材料、评审验收与模板（防泄密，不入库）
+# ---------------------------------------------------------------
+docs/
+*.docx
+~$*.docx
+01-作品说明文档+*.pdf
+2026*.pdf
+rematch_template_dump.txt
+PHASE1_ACCEPTANCE_*.md
+PHASE2_ACCEPTANCE_*.md
+PROJECTMEMO_IMPROVEMENT_*.md
+REMATCH_SUBMISSION_GATE_*.md
+FINAL_CANDIDATE_REVIEW_*.md
+
 # 本地 dev server 与调试日志（根目录历史遗留）
 .dev-server*.log
 /dev-server.log

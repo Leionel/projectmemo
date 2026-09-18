@@ -9,9 +9,10 @@
 | 文件 | 内容 |
 |---|---|
 | 01-cold-start-session-projectlist.jpeg | 保留会话冷启动不闪退；列表带 dashboard（进度/下一步），底栏贴底、未选中标签为次级墨色 |
-| 02-index-memory-tab.jpeg | 一级 Tab 切换正常；全局记忆为空时内容区空白（无空态，见报告） |
+| 02-index-memory-tab.jpeg | 一级 Tab 切换正常；已填入真实项目记忆记录（实验记录、记忆、阶段复盘卡片） |
 | 03-projecthome-appbar-tabs.jpeg | 统一顶栏（返回胶囊/两行标题/右侧文字动作与更多图标）与五项底栏渲染正常 |
 | 04-dialog-scrim-flat-on-x86.jpeg | 弹层遮罩可读；x86 模拟器上 blur 不可见，仅呈现半透明压暗 |
+| 05-index-tasks-tab.jpeg | 待办/主动提醒 Tab 正常渲染；展示高风险与中优先级提醒及查看依据入口 |
 
 结论：本轮 Web 鉴权改动未破坏鸿蒙端登录与主流程。
 限制：blur 材质在该模拟器上不可观测，仍需在真机确认；截图为静态帧，动效与帧率未测。

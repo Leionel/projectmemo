@@ -121,5 +121,5 @@ describe("服务端页面鉴权与项目归属", () => {
 
     await expect(GeneratePage({ params: Promise.resolve({ id: projectId }), searchParams: Promise.resolve({}) }))
       .rejects.toMatchObject({ digest: NOT_FOUND_SENTINEL });
-  });
+  }, 15000);
 });

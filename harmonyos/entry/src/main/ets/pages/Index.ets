@@ -456,6 +456,33 @@ struct Index {
   }
 
   /**
+   * 长按项目卡片触发管理菜单：
+   * 交互支持长按显示“恢复/归档”与“删除”，避免在卡片下方常驻按钮影响主界面整洁。
+   */
+  private async openProjectActionMenu(project: Project): Promise<void> {
+    if (this.projectLifecycleBusyId !== '') {
+      return;
+    }
+    const isArchived: boolean = project.archivedAt !== undefined && project.archivedAt !== '';
+    try {
+      const menu = await promptAction.showActionMenu({
+        title: TextFormatters.readableText(project.title, '项目管理'),
+        buttons: [
+          { text: isArchived ? '恢复项目' : '归档项目', color: '#0A7EA4' },
+          { text: '删除项目', color: '#FA5151' }
+        ]
+      });
+      if (menu.index === 0) {
+        await this.toggleProjectArchive(project);
+      } else if (menu.index === 1) {
+        this.projectDeleteConfirmId = project.id;
+      }
+    } catch (_e) {
+      // 用户取消菜单，无需提示
+    }
+  }
+
+  /**
    * 删除项目：服务端级联清空该项目的记忆、行动与成果，不可恢复。
    * 与归档性质完全不同，必须先经过 projectDeleteConfirmId 的二次确认。
    */
@@ -885,20 +912,25 @@ struct Index {
     .onClick(() => {
       router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: project.id } });
     })
+    .gesture(
+      LongPressGesture({ repeat: false })
+        .onAction(() => {
+          this.openProjectActionMenu(project);
+        })
+    )
   }
 
   /**
-   * 项目列表项 = 可点击的档案主体 + 明确可见的生命周期操作入口。
-   *
-   * 操作入口刻意放在档案主体之外：主体整块负责跳转项目页，若把按钮嵌进可点击区域，
-   * 点击命中的归属会变得可疑（"想归档却进了项目页"）。长按也不作为唯一入口——
-   * 发现性太差，归档与删除需要有看得见的入口。
+   * 项目列表项 = 可点击且支持长按管理的卡片主体。
+   * 长按后唤起删除/恢复（归档）操作菜单；仅在确认删除态时就地展开风险确认框。
    */
   @Builder
   private projectListItem(project: Project) {
     Column({ space: PMSpacing.XS }) {
       this.projectItem(project)
-      this.projectLifecycleActions(project)
+      if (this.projectDeleteConfirmId === project.id) {
+        this.projectLifecycleActions(project)
+      }
     }
     .width('100%')
   }
@@ -907,7 +939,7 @@ struct Index {
   private projectLifecycleActions(project: Project) {
     Column() {
       if (this.projectDeleteConfirmId === project.id) {
-        // 删除不可恢复，必须写清会失去什么再确认；归档不需要走到这里。
+        // 删除不可恢复，必须写清会失去什么再确认；平时不常驻展示
         Column() {
           Text(`删除「${TextFormatters.readableText(project.title, '该项目')}」会同时删除它的全部记忆、行动与成果，且无法恢复。`)
             .fontSize(PMFontSize.CAPTION)
@@ -949,45 +981,6 @@ struct Index {
         .backgroundColor(PMColors.RISK_LIGHT)
         .borderRadius(PMRadius.SM)
         .alignItems(HorizontalAlign.Start)
-      } else {
-        Row({ space: PMSpacing.SM }) {
-          Button(project.archivedAt !== undefined && project.archivedAt !== '' ? '恢复' : '归档')
-            .height(40)
-            .fontSize(PMFontSize.CAPTION)
-            .fontColor(PMColors.INK_SECONDARY)
-            .backgroundColor(PMColors.SURFACE_SUBTLE)
-            .borderRadius(PMRadius.SM)
-            .enabled(this.projectLifecycleBusyId === '')
-            .accessibilityText(project.archivedAt !== undefined && project.archivedAt !== ''
-              ? `恢复项目 ${project.title}，恢复到项目列表`
-              : `归档项目 ${project.title}，保留全部记忆与成果，可随时恢复`)
-            .onClick(() => {
-              this.toggleProjectArchive(project);
-            })
-
-          Button('删除')
-            .height(40)
-            .fontSize(PMFontSize.CAPTION)
-            .fontColor(PMColors.RISK)
-            .backgroundColor(PMColors.RISK_LIGHT)
-            .borderRadius(PMRadius.SM)
-            .enabled(this.projectLifecycleBusyId === '')
-            .accessibilityText(`删除项目 ${project.title}`)
-            .onClick(() => {
-              this.projectDeleteConfirmId = project.id;
-            })
-
-          Text(project.archivedAt !== undefined && project.archivedAt !== ''
-            ? '已归档：不占主列表，记忆与成果都保持有效'
-            : '归档只是移出主列表，不删除任何记忆')
-            .fontSize(PMFontSize.CAPTION)
-            .fontColor(PMColors.INK_TERTIARY)
-            .layoutWeight(1)
-            .maxLines(2)
-            .textOverflow({ overflow: TextOverflow.Ellipsis })
-        }
-        .width('100%')
-        .padding({ left: PMSpacing.SM, right: PMSpacing.SM })
       }
     }
     .width('100%')

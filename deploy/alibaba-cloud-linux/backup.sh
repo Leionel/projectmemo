@@ -39,7 +39,17 @@ command -v node >/dev/null 2>&1 || fail "找不到 node，无法执行在线备�
 [ -f "$DB_FILE" ] || fail "数据库不存在：$DB_FILE"
 [ -d "$APP_DIR" ] || fail "应用目录不存在：$APP_DIR"
 
-mkdir -p "$DEST"
+# 备份根目录必须由当前账号可写。没有这一步时，非 root 身份运行会直接抛出
+# 原始的 "mkdir: cannot create directory ...: Permission denied"，
+# 看起来像脚本坏了，实际是目录归属不对（通常是被 root 创建过）。
+if [ ! -d "$BACKUP_ROOT" ]; then
+  mkdir -p "$BACKUP_ROOT" 2>/dev/null \
+    || fail "无法创建备份根目录 $BACKUP_ROOT。修复：sudo mkdir -p $BACKUP_ROOT && sudo chown -R $(id -un) $BACKUP_ROOT"
+fi
+[ -w "$BACKUP_ROOT" ] \
+  || fail "备份根目录不可写：$BACKUP_ROOT（当前账号 $(id -un)，属主 $(stat -c '%U:%G' "$BACKUP_ROOT")）。修复：sudo chown -R $(id -un) $BACKUP_ROOT"
+
+mkdir -p "$DEST" || fail "无法在 $BACKUP_ROOT 下创建快照目录 $DEST"
 
 # ---- 1. 数据库在线备份 ----
 log "备份数据库 $DB_FILE → $DEST/projectmemo.db"

@@ -92,6 +92,15 @@ journalctl -u projectmemo --since "1 hour ago" --no-pager | tail -50
 只读源数据，只写 `BACKUP_ROOT`。数据库用 SQLite Online Backup API 取一致快照——
 库处于 WAL 模式，直接 `cp projectmemo.db` 会漏掉还留在 `-wal` 里的事务。
 
+备份根目录必须由运行账号可写。它常被 root 手动创建过，于是以服务账号运行时
+`mkdir` 直接报 `Permission denied`。先确认归属并交给服务账号：
+
+```bash
+ls -ld /opt/projectmemo /opt/projectmemo/backups
+sudo mkdir -p /opt/projectmemo/backups
+sudo chown -R projectmemo:projectmemo /opt/projectmemo/backups
+```
+
 ```bash
 sudo -u projectmemo APP_DIR=/opt/projectmemo/app \
   DB_FILE=/opt/projectmemo/data/projectmemo.db \

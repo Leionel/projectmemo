@@ -10,8 +10,12 @@ const DOMAIN = 0x0000;
 
 export default class EntryFormAbility extends FormExtensionAbility {
   private buildFormData(want?: Want): Record<string, string | number> {
+    const dimension = typeof want?.parameters?.[formInfo.FormParam.DIMENSION_KEY] === 'number'
+      ? (want.parameters?.[formInfo.FormParam.DIMENSION_KEY] as number)
+      : 3; // 2=2*2, 3=2*4
+
     // 未接入真实数据前，默认值必须显式标识为示例，避免演示时把演示数值当成真实项目状态
-    const title = typeof want?.parameters?.['projectTitle'] === 'string'
+    const title = typeof want?.parameters?.['projectTitle'] === 'string' && (want.parameters?.['projectTitle'] as string).trim() !== ''
       ? (want.parameters?.['projectTitle'] as string)
       : '忆程备赛看板（示例数据）';
     const daysLeft = typeof want?.parameters?.['daysLeft'] === 'number'
@@ -20,14 +24,15 @@ export default class EntryFormAbility extends FormExtensionAbility {
     const readiness = typeof want?.parameters?.['readiness'] === 'number'
       ? (want.parameters?.['readiness'] as number)
       : 80;
-    const nextAction = typeof want?.parameters?.['nextAction'] === 'string'
+    const nextAction = typeof want?.parameters?.['nextAction'] === 'string' && (want.parameters?.['nextAction'] as string).trim() !== ''
       ? (want.parameters?.['nextAction'] as string)
       : '示例：连接后端后显示真实待办';
-    const status = typeof want?.parameters?.['status'] === 'string'
+    const status = typeof want?.parameters?.['status'] === 'string' && (want.parameters?.['status'] as string).trim() !== ''
       ? (want.parameters?.['status'] as string)
       : '示例数据';
 
     return {
+      'formDimension': dimension,
       'projectTitle': title,
       'daysLeft': daysLeft,
       'readiness': readiness,

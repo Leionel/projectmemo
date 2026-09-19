@@ -1116,10 +1116,6 @@ struct ProjectHome {
             this.currentTabIndex === 3 ? '问忆程' : '成果'}`,
       backLabel: '项目',
       backDescription: '返回项目列表',
-      rightActionText: this.currentTabIndex === 0 ? '＋ 记录' : '',
-      onRightTextAction: () => {
-        this.openCaptureEntry();
-      },
       showRightIcon: true,
       rightIconLabel: '更多项目设置',
       rightIconDescription: '编辑项目名称、目标和简介',

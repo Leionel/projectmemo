@@ -1,13 +1,11 @@
 import { AuthService } from '../services/AuthService';
 import { ApiError } from '../models/Project';
-import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily, PMInteraction } from '../common/DesignTokens';
-import { BookOpenIcon } from './PMIcons';
+import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily } from '../common/DesignTokens';
 
 @Component
 export struct LoginView {
   @State username: string = '';
   @State password: string = '';
-  @State showPassword: boolean = false;
   @State isSubmitting: boolean = false;
   @State errorMessage: string = '';
 
@@ -62,15 +60,13 @@ export struct LoginView {
       Column() {
         // 顶部品牌区
         Column() {
-          Row() {
-            BookOpenIcon({ iconSize: 32, color: PMColors.BRAND })
-          }
-          .width(64)
-          .height(64)
-          .borderRadius(PMRadius.MD)
-          .backgroundColor(PMColors.BRAND_LIGHT)
-          .justifyContent(FlexAlign.Center)
-          .margin({ bottom: PMSpacing.MD })
+          Image($r('app.media.app_icon'))
+            .width(72)
+            .height(72)
+            .borderRadius(PMRadius.LG)
+            .objectFit(ImageFit.Cover)
+            .accessibilityText('忆程 ProjectMemo 应用图标')
+            .margin({ bottom: PMSpacing.LG })
 
           Text('忆程 ProjectMemo')
             .fontSize(PMFontSize.DISPLAY)
@@ -78,14 +74,20 @@ export struct LoginView {
             .fontColor(PMColors.INK_PRIMARY)
             .fontFamily(PMFontFamily.SANS)
 
-          Text('登录复赛演示环境')
-            .fontSize(PMFontSize.BODY)
+          Text('证据驱动的项目过程档案与决策手账')
+            .fontSize(PMFontSize.SECONDARY)
             .fontColor(PMColors.INK_SECONDARY)
+            .textAlign(TextAlign.Center)
+            .margin({ top: PMSpacing.SM })
+
+          Text('登录复赛演示环境')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
             .margin({ top: PMSpacing.XS })
         }
         .width('100%')
         .alignItems(HorizontalAlign.Center)
-        .margin({ top: 40, bottom: 32 })
+        .margin({ top: PMSpacing.XXL, bottom: PMSpacing.SECTION })
 
         // 表单卡片
         Column() {
@@ -170,34 +172,21 @@ export struct LoginView {
               .fontColor(PMColors.INK_PRIMARY)
               .margin({ bottom: PMSpacing.XS })
 
-            Stack({ alignContent: Alignment.End }) {
-              TextInput({
-                placeholder: '请输入演示环境密码',
-                text: this.password,
+            TextInput({
+              placeholder: '请输入演示环境密码',
+              text: this.password,
+            })
+              .type(InputType.Password)
+              .fontSize(PMFontSize.BODY)
+              .height(48)
+              .width('100%')
+              .borderRadius(PMRadius.SM)
+              .backgroundColor(PMColors.SURFACE_SUBTLE)
+              .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+              .onChange((val: string) => {
+                this.password = val;
+                this.errorMessage = '';
               })
-                .type(this.showPassword ? InputType.Normal : InputType.Password)
-                .fontSize(PMFontSize.BODY)
-                .height(48)
-                .width('100%')
-                .borderRadius(PMRadius.SM)
-                .backgroundColor(PMColors.SURFACE_SUBTLE)
-                .border({ width: 1, color: PMColors.BORDER_SUBTLE })
-                .onChange((val: string) => {
-                  this.password = val;
-                  this.errorMessage = '';
-                })
-
-              Button(this.showPassword ? '隐藏' : '显示')
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.INK_SECONDARY)
-                .backgroundColor(Color.Transparent)
-                .height(36)
-                .margin({ right: 6 })
-                .onClick(() => {
-                  this.showPassword = !this.showPassword;
-                })
-            }
-            .width('100%')
           }
           .width('100%')
           .alignItems(HorizontalAlign.Start)

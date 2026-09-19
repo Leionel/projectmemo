@@ -10,3 +10,9 @@
 /.clang-tidy
 **/.test
 /.appanalyzer
+# 签名材料不入库：证书、密钥库、CSR 与本机签名目录
+*.p12
+*.p7b
+*.cer
+*.csr
+/signing

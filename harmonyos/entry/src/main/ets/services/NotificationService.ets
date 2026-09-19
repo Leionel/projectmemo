@@ -1,5 +1,5 @@
 import { notificationManager } from '@kit.NotificationKit';
-import { wantAgent } from '@kit.AbilityKit';
+import { wantAgent, bundleManager } from '@kit.AbilityKit';
 import { Intervention } from '../models/Intervention';
 import { ApiClient } from './ApiClient';
 
@@ -73,9 +73,12 @@ export class NotificationService {
    * 发布/更新高风险介入系统通知 (Severity >= 4)
    */
   private async buildWantAgent(interventionId: string, projectId: string, requestCode: number) {
+    // 从系统取包名，避免与 AppScope/app.json5 的 bundleName 硬编码漂移导致通知点击无法回跳。
+    const bundleInfo: bundleManager.BundleInfo =
+      await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_DEFAULT);
     const info: wantAgent.WantAgentInfo = {
       wants: [{
-        bundleName: 'com.example.projectmemo',
+        bundleName: bundleInfo.name,
         abilityName: 'EntryAbility',
         parameters: {
           notificationProjectId: projectId,

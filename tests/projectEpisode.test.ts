@@ -168,6 +168,117 @@ describe("ProjectEpisode preview / confirm (R2-1)", () => {
     expect(refreshed.revisions[1].revision).toBe(2);
   });
 
+  it("rejects confirm when a cited card summary changed after preview", async () => {
+    const project = await db.project.create({
+      data: { title: "确认期来源重校验", description: "", goal: "", scenario: "RESEARCH" },
+    });
+    try {
+      const capture = await db.capture.create({ data: { projectId: project.id, rawText: "原始结论", sourceType: "测试" } });
+      const card = await db.knowledgeCard.create({
+        data: {
+          projectId: project.id,
+          captureId: capture.id,
+          type: "experiment_log",
+          title: "召回率结论",
+          summary: "召回率 78%",
+          keywords: [],
+          relatedTasks: [],
+          nextActions: [],
+          importance: 4,
+        },
+      });
+
+      const preview = await previewProjectEpisode(project.id, {
+        windowStart: new Date(Date.now() - 60_000).toISOString(),
+        windowEnd: new Date().toISOString(),
+      });
+      const revision = preview.episode.revisions[0];
+
+      // 预览之后来源内容被改写：即使客户端仍提交旧哈希，服务端重算也必须拒绝
+      await db.knowledgeCard.update({ where: { id: card.id }, data: { summary: "召回率 91%（复测修正）" } });
+
+      await expect(
+        confirmEpisodeRevision(project.id, preview.episode.id, {
+          revision: revision.revision,
+          requestId: "stale-source-confirm",
+          expectedSourceHash: revision.sourceHash,
+        }),
+      ).rejects.toMatchObject({ code: "EPISODE_SOURCE_CHANGED", status: 409 });
+
+      // 不带客户端哈希同样被拒：校验不依赖客户端自觉
+      await expect(
+        confirmEpisodeRevision(project.id, preview.episode.id, {
+          revision: revision.revision,
+          requestId: "stale-source-confirm-2",
+        }),
+      ).rejects.toMatchObject({ code: "EPISODE_SOURCE_CHANGED", status: 409 });
+
+      const stored = await db.projectEpisode.findUniqueOrThrow({
+        where: { id: preview.episode.id },
+        include: { revisions: true },
+      });
+      expect(stored.status).toBe("DRAFT");
+      expect(stored.revisions.every((item) => item.status === "DRAFT")).toBe(true);
+    } finally {
+      await db.project.delete({ where: { id: project.id } }).catch(() => {});
+    }
+  });
+
+  it("reentry reads the newest published revision while older ones stay readable", async () => {
+    const project = await db.project.create({
+      data: { title: "多版本检查点", description: "", goal: "", scenario: "RESEARCH" },
+    });
+    try {
+      const capture = await db.capture.create({ data: { projectId: project.id, rawText: "V1 来源", sourceType: "测试" } });
+      await db.knowledgeCard.create({
+        data: {
+          projectId: project.id,
+          captureId: capture.id,
+          type: "meeting_note",
+          title: "V1 结论",
+          summary: "第一版结论",
+          keywords: [],
+          relatedTasks: [],
+          nextActions: [],
+          importance: 3,
+        },
+      });
+
+      const v1Preview = await previewProjectEpisode(project.id, {
+        windowStart: new Date(Date.now() - 60_000).toISOString(),
+        windowEnd: new Date().toISOString(),
+      });
+      const v1 = await confirmEpisodeRevision(project.id, v1Preview.episode.id, {
+        revision: 1,
+        requestId: "v1-confirm",
+      });
+      expect(v1.status).toBe("PUBLISHED");
+      expect(v1.revisions[0].confirmedAt).not.toBeNull();
+
+      const refreshed = await refreshProjectEpisode(project.id, v1Preview.episode.id);
+      expect(refreshed.revisions).toHaveLength(2);
+      const v2 = await confirmEpisodeRevision(project.id, v1Preview.episode.id, {
+        revision: 2,
+        requestId: "v2-confirm",
+        expectedSourceHash: refreshed.revisions[1].sourceHash,
+      });
+      expect(v2.status).toBe("PUBLISHED");
+
+      const { getLatestPublishedEpisode } = await import("@/lib/services/projectEpisodeService");
+      const current = await getLatestPublishedEpisode(project.id);
+      expect(current?.revisions).toHaveLength(1);
+      expect(current?.revisions[0].revision).toBe(2);
+
+      const detail = await getProjectEpisode(project.id, v1Preview.episode.id);
+      expect(detail.revisions).toHaveLength(2);
+      expect(detail.revisions[0].revision).toBe(1);
+      expect(detail.revisions[0].status).toBe("PUBLISHED");
+      expect(detail.revisions[1].revision).toBe(2);
+    } finally {
+      await db.project.delete({ where: { id: project.id } }).catch(() => {});
+    }
+  });
+
   it("list does not create new revisions and cross-project episodes are not visible", async () => {
     const before = await db.episodeRevision.count({ where: { episode: { projectId } } });
     await listProjectEpisodes(projectId);

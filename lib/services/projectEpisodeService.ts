@@ -44,6 +44,11 @@ function sha256(text: string): string {
   return createHash("sha256").update(text).digest("hex");
 }
 
+/** 来源集合哈希：预览、刷新与确认重算共用同一规范，任何一项来源变化都会改变结果 */
+function sourceHashOf(refs: EpisodeSourceRef[]): string {
+  return sha256(JSON.stringify(refs.map((ref) => [ref.kind, ref.entityId, ref.revisionIndex, ref.observedAt, ref.contentHash])));
+}
+
 function iso(value: Date): string {
   return value.toISOString();
 }
@@ -59,9 +64,9 @@ function toDate(value: string, field: string): Date {
 interface CollectedSources {
   refs: EpisodeSourceRef[];
   cards: Array<{ id: string; title: string; summary: string; createdAt: Date; importance: number }>;
-  relations: Array<{ id: string; relationType: string; currentTitle: string; relatedTitle: string; relatedCardId: string; confirmedAt: Date | null }>;
+  relations: Array<{ id: string; relationType: string; currentTitle: string; relatedTitle: string; relatedCardId: string; relatedSummary: string; confirmedAt: Date | null }>;
   actionResults: Array<{ actionId: string; actionTitle: string; resultCardId: string; resultTitle: string; resultSummary: string; completedAt: Date | null }>;
-  attachmentRevisions: Array<{ revisionId: string; attachmentId: string; revisionIndex: number; fileName: string; createdAt: Date }>;
+  attachmentRevisions: Array<{ revisionId: string; attachmentId: string; revisionIndex: number; fileName: string; text: string; createdAt: Date }>;
   baseSnapshotId: string | null;
   endSnapshotId: string | null;
   endSnapshotPolicyVersion: string | null;
@@ -76,10 +81,17 @@ interface CollectedSources {
  * 按固定顺序收集窗口内候选来源并冻结观察版本。
  * 摘要不递归当来源：只取原始卡片、附件修订、行动结果卡、状态快照与已确认关系。
  */
-async function collectSources(projectId: string, windowStart: Date, windowEnd: Date, baseSnapshotId?: string | null, endSnapshotId?: string | null): Promise<CollectedSources> {
+async function collectSources(
+  projectId: string,
+  windowStart: Date,
+  windowEnd: Date,
+  baseSnapshotId?: string | null,
+  endSnapshotId?: string | null,
+  client: Prisma.TransactionClient = db as unknown as Prisma.TransactionClient,
+): Promise<CollectedSources> {
   const excluded: string[] = [];
 
-  const allCards = await db.knowledgeCard.findMany({
+  const allCards = await client.knowledgeCard.findMany({
     where: { projectId, createdAt: { gte: windowStart, lte: windowEnd } },
     select: { id: true, title: true, summary: true, createdAt: true, importance: true, archivedAt: true },
     orderBy: [{ importance: "desc" }, { createdAt: "asc" }],
@@ -91,7 +103,7 @@ async function collectSources(projectId: string, windowStart: Date, windowEnd: D
   }
 
   const cardIdsInWindow = new Set(allCards.map((card) => card.id));
-  const allRelations = await db.cardRelation.findMany({
+  const allRelations = await client.cardRelation.findMany({
     where: {
       confirmed: true,
       revokedAt: null,
@@ -102,7 +114,7 @@ async function collectSources(projectId: string, windowStart: Date, windowEnd: D
       relationType: true,
       confirmedAt: true,
       currentCard: { select: { id: true, title: true } },
-      relatedCard: { select: { id: true, title: true } },
+      relatedCard: { select: { id: true, title: true, summary: true } },
     },
     orderBy: { createdAt: "asc" },
   }).then((rows) => rows.filter((row) => cardIdsInWindow.has(row.currentCard.id) && cardIdsInWindow.has(row.relatedCard.id)));
@@ -113,6 +125,7 @@ async function collectSources(projectId: string, windowStart: Date, windowEnd: D
       currentTitle: row.currentCard.title,
       relatedTitle: row.relatedCard.title,
       relatedCardId: row.relatedCard.id,
+      relatedSummary: row.relatedCard.summary,
       confirmedAt: row.confirmedAt,
     }))
     .slice(0, MAX_RELATIONS);
@@ -120,7 +133,7 @@ async function collectSources(projectId: string, windowStart: Date, windowEnd: D
     excluded.push(`已确认关系超出上限（${allRelations.length} 条，仅纳入前 ${relations.length} 条）`);
   }
 
-  const completedActions = await db.actionItem.findMany({
+  const completedActions = await client.actionItem.findMany({
     where: { projectId, completedAt: { gte: windowStart, lte: windowEnd }, resultCardId: { not: null } },
     select: {
       id: true,
@@ -142,9 +155,9 @@ async function collectSources(projectId: string, windowStart: Date, windowEnd: D
       completedAt: action.completedAt,
     }));
 
-  const allRevisions = await db.attachmentRevision.findMany({
+  const allRevisions = await client.attachmentRevision.findMany({
     where: { attachment: { projectId }, createdAt: { gte: windowStart, lte: windowEnd } },
-    select: { id: true, attachmentId: true, revisionIndex: true, createdAt: true, attachment: { select: { fileName: true } } },
+    select: { id: true, attachmentId: true, revisionIndex: true, text: true, createdAt: true, attachment: { select: { fileName: true } } },
     orderBy: { createdAt: "asc" },
   });
   const attachmentRevisions = allRevisions.slice(0, MAX_ATTACHMENT_REVISIONS).map((row) => ({
@@ -152,6 +165,7 @@ async function collectSources(projectId: string, windowStart: Date, windowEnd: D
     attachmentId: row.attachmentId,
     revisionIndex: row.revisionIndex,
     fileName: row.attachment.fileName,
+    text: row.text.slice(0, 300),
     createdAt: row.createdAt,
   }));
   if (allRevisions.length > attachmentRevisions.length) {
@@ -160,7 +174,7 @@ async function collectSources(projectId: string, windowStart: Date, windowEnd: D
 
   let resolvedBase = baseSnapshotId ?? null;
   let resolvedEnd = endSnapshotId ?? null;
-  const snapshots = await db.projectStateSnapshot.findMany({
+  const snapshots = await client.projectStateSnapshot.findMany({
     where: { projectId, evaluatedAt: { lte: windowEnd } },
     select: { id: true, evaluatedAt: true, policyVersion: true },
     orderBy: { sequence: "asc" },
@@ -194,6 +208,7 @@ async function collectSources(projectId: string, windowStart: Date, windowEnd: D
       observedAt: iso(card.createdAt),
       contentHash: sha256(`${card.title}\n${card.summary}`),
       title: card.title,
+      summary: card.summary,
     });
   }
   for (const relation of relations) {
@@ -205,6 +220,7 @@ async function collectSources(projectId: string, windowStart: Date, windowEnd: D
       observedAt: iso(relation.confirmedAt ?? new Date(0)),
       contentHash: sha256(`${relation.relationType}:${relation.id}`),
       title: relation.relatedTitle,
+      summary: relation.relatedSummary,
     });
   }
   for (const result of actionResults) {
@@ -216,6 +232,7 @@ async function collectSources(projectId: string, windowStart: Date, windowEnd: D
       observedAt: iso(result.completedAt ?? new Date(0)),
       contentHash: sha256(`${result.resultTitle}\n${result.resultSummary}`),
       title: result.resultTitle,
+      summary: result.resultSummary,
     });
   }
   for (const revision of attachmentRevisions) {
@@ -227,6 +244,7 @@ async function collectSources(projectId: string, windowStart: Date, windowEnd: D
       observedAt: iso(revision.createdAt),
       contentHash: sha256(`${revision.attachmentId}:${revision.revisionIndex}:${revision.fileName}`),
       title: revision.fileName,
+      summary: revision.text,
     });
   }
   if (resolvedBase) {
@@ -238,6 +256,7 @@ async function collectSources(projectId: string, windowStart: Date, windowEnd: D
       observedAt: windowStart.toISOString(),
       contentHash: sha256(`snapshot:${resolvedBase}`),
       title: "阶段起点快照",
+      summary: "项目状态快照（结构化评估结果，不含自由文本）",
     });
   }
   if (resolvedEnd && resolvedEnd !== resolvedBase) {
@@ -249,6 +268,7 @@ async function collectSources(projectId: string, windowStart: Date, windowEnd: D
       observedAt: windowEnd.toISOString(),
       contentHash: sha256(`snapshot:${resolvedEnd}`),
       title: "阶段终点快照",
+      summary: "项目状态快照（结构化评估结果，不含自由文本）",
     });
   }
 
@@ -519,6 +539,24 @@ async function collectNextStepCandidates(projectId: string, limit = 3): Promise<
   return candidates;
 }
 
+interface RevisionRow {
+  id: string;
+  revision: number;
+  status: string;
+}
+
+/**
+ * 读取「当前版本」的唯一规则：已发布修订中 revision 最大者。
+ * refresh 会保留旧的 PUBLISHED 修订，直接取数组末位会把草稿当成当前版本，
+ * 或在多次发布后读到过期版本。
+ */
+function pickCurrentRevision<T extends RevisionRow>(revisions: T[]): T | null {
+  if (revisions.length === 0) return null;
+  const published = revisions.filter((item) => item.status === "PUBLISHED");
+  const pool = published.length > 0 ? published : revisions;
+  return pool.reduce((best, item) => (item.revision > best.revision ? item : best));
+}
+
 function serializeRevision(row: {
   id: string;
   episodeId: string;
@@ -533,6 +571,7 @@ function serializeRevision(row: {
   provider: string | null;
   fallbackReason: string | null;
   status: string;
+  confirmedAt: Date | null;
   createdAt: Date;
 }): EpisodeRevisionData {
   return {
@@ -549,6 +588,7 @@ function serializeRevision(row: {
     provider: row.provider,
     fallbackReason: row.fallbackReason,
     status: row.status as EpisodeRevisionData["status"],
+    confirmedAt: row.confirmedAt ? iso(row.confirmedAt) : null,
     createdAt: iso(row.createdAt),
   };
 }
@@ -611,7 +651,7 @@ export async function previewProjectEpisode(projectId: string, input: EpisodePre
   const { claims, summary } = buildTemplateClaims(sources, windowStart, windowEnd);
   appendNextStepClaims(claims, summary, await collectNextStepCandidates(projectId));
   const compressed = await compressEpisodeSummary(summary);
-  const sourceHash = sha256(JSON.stringify(sources.refs.map((ref) => [ref.kind, ref.entityId, ref.revisionIndex, ref.observedAt, ref.contentHash])));
+  const sourceHash = sourceHashOf(sources.refs);
 
   const title = `阶段检查点 · ${iso(windowStart).slice(0, 10)} ~ ${iso(windowEnd).slice(0, 10)}`;
   const episode = await db.projectEpisode.create({
@@ -681,9 +721,24 @@ export async function confirmEpisodeRevision(projectId: string, episodeId: strin
       throw new AppError("EPISODE_SOURCE_CHANGED", "检查点的来源在预览后发生了变化，请重新生成预览", 409);
     }
 
+    // 客户端哈希只防呆：确认时必须在同一事务内按预览规范重读当前来源重算，
+    // 卡片摘要/关系状态/附件修订/结果卡变化都会改变哈希并拒绝发布过期结论。
+    const current = await collectSources(
+      projectId,
+      episode.windowStart,
+      episode.windowEnd,
+      revision.baseSnapshotId,
+      revision.endSnapshotId,
+      tx,
+    );
+    if (sourceHashOf(current.refs) !== revision.sourceHash) {
+      throw new AppError("EPISODE_SOURCE_CHANGED", "来源在预览后已变化，请重新生成预览再确认", 409);
+    }
+
+    const now = new Date();
     const published = await tx.episodeRevision.updateMany({
       where: { id: revision.id, status: "DRAFT" },
-      data: { status: "PUBLISHED", requestId: input.requestId },
+      data: { status: "PUBLISHED", requestId: input.requestId, confirmedAt: now },
     });
     if (published.count === 0) {
       // 并发下另一请求已完成确认：重新读取并按幂等语义返回
@@ -712,7 +767,7 @@ export async function listProjectEpisodes(projectId: string): Promise<EpisodeDat
   });
   const result: EpisodeData[] = [];
   for (const row of rows) {
-    const latest = row.revisions[row.revisions.length - 1];
+    const latest = pickCurrentRevision(row.revisions);
     if (row.status === "PUBLISHED" && latest) {
       const report = await evaluateEpisodeFreshness(projectId, latest);
       await persistStaleness(row.id, report);
@@ -740,7 +795,7 @@ async function persistStaleness(episodeId: string, report: EpisodeFreshnessRepor
 export async function getProjectEpisode(projectId: string, episodeId: string): Promise<EpisodeData> {
   ensureEpisodeEnabled();
   const row = await loadEpisode(projectId, episodeId);
-  const latest = row.revisions[row.revisions.length - 1];
+  const latest = pickCurrentRevision(row.revisions);
   if (row.status === "PUBLISHED" || row.status === "PARTIALLY_STALE" || row.status === "STALE") {
     if (latest) {
       const report = await evaluateEpisodeFreshness(projectId, latest);
@@ -853,11 +908,11 @@ export async function refreshProjectEpisode(projectId: string, episodeId: string
     throw new AppError("EPISODE_ARCHIVED", "已归档的检查点不能刷新", 409);
   }
 
-  const sources = await collectSources(projectId, episode.windowStart, new Date(Math.min(episode.windowEnd.getTime(), Date.now())));
+  const sources = await collectSources(projectId, episode.windowStart, episode.windowEnd);
   const { claims, summary } = buildTemplateClaims(sources, episode.windowStart, episode.windowEnd);
   appendNextStepClaims(claims, summary, await collectNextStepCandidates(projectId));
   const compressed = await compressEpisodeSummary(summary);
-  const sourceHash = sha256(JSON.stringify(sources.refs.map((ref) => [ref.kind, ref.entityId, ref.revisionIndex, ref.observedAt, ref.contentHash])));
+  const sourceHash = sourceHashOf(sources.refs);
   const nextRevision = episode.revisions[episode.revisions.length - 1].revision + 1;
 
   const updated = await db.projectEpisode.update({
@@ -892,10 +947,12 @@ export async function getLatestPublishedEpisode(projectId: string): Promise<Epis
     orderBy: { updatedAt: "desc" },
   });
   if (!row) return null;
-  const latest = row.revisions.find((item) => item.status === "PUBLISHED") ?? row.revisions[row.revisions.length - 1];
+  const latest = pickCurrentRevision(row.revisions);
   if (!latest) return null;
   const report = await evaluateEpisodeFreshness(projectId, latest);
-  const data = serializeEpisode(row, report);
+  // 与列表/详情同一规则：漂移状态既要回写展示状态，也要如实反映在再入场聚合里
+  await persistStaleness(row.id, report);
+  const data = serializeEpisode({ ...row, status: mapFreshnessStatus(report.status, row.status) }, report);
   data.revisions = [serializeRevision(latest)];
   return data;
 }

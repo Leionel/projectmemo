@@ -7,8 +7,8 @@ export const runtime = "nodejs";
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    await authorizeProjectAccess(request, id);
-    const plan = await getCurrentSchedulePlan(id);
+    const { user } = await authorizeProjectAccess(request, id);
+    const plan = await getCurrentSchedulePlan(id, user.id);
     if (!plan) {
       return Response.json({ status: "EMPTY", plan: null });
     }

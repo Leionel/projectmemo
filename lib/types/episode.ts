@@ -26,6 +26,8 @@ export interface EpisodeSourceRef {
   contentHash: string;
   /** 展示用摘要，冻结生成时的观察版本 */
   title: string;
+  /** 冻结的正文摘要：来源后续被改写或删除时，仍能展示当时看到的内容 */
+  summary: string;
 }
 
 export interface EpisodeClaim {
@@ -109,6 +111,8 @@ export interface EpisodeRevisionData {
   provider: string | null;
   fallbackReason: string | null;
   status: EpisodeRevisionStatus;
+  /** 用户确认时间；草稿为 null */
+  confirmedAt: string | null;
   createdAt: string;
 }
 

@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { getProjectReentry } from "@/lib/services/projectReentryService";
 import { previewProjectEpisode, confirmEpisodeRevision } from "@/lib/services/projectEpisodeService";
 import { previewSchedule, confirmSchedulePlan } from "@/lib/services/scheduleService";
+import { proposeTemporalRelation, confirmRelation } from "@/lib/services/temporalLedgerService";
 import { refreshProjectState } from "@/lib/services/projectStateService";
 
 const createdProjectIds: string[] = [];
@@ -68,6 +69,9 @@ describe("ProjectReentry aggregation (R2-4)", () => {
     expect(reentry.risk.text).toBeNull();
     expect(reentry.schedule.meta.status).toBe("EMPTY");
     expect(reentry.primaryMessage).toContain("阶段进展");
+    // 顶层新鲜度不写死：全空时是 EMPTY
+    expect(reentry.freshness).toBe("EMPTY");
+    expect(reentry.primaryAction).toBe("ADD_EVIDENCE");
   });
 
   it("aggregates confirmed episode, risk, and confirmed schedule into one result", async () => {
@@ -104,7 +108,43 @@ describe("ProjectReentry aggregation (R2-4)", () => {
     expect(reentry.schedule.actionId).toBe(action.id);
     expect(reentry.primaryAction).toBe("START_ACTION");
     expect(reentry.primaryMessage).toContain("实现原型");
+    // 子状态全部可用时才是 FRESH；版本号与来源数随聚合返回
+    expect(reentry.freshness).toBe("FRESH");
+    expect(reentry.episode.revision).toBe(1);
+    expect(reentry.episode.sourceCount).toBeGreaterThan(0);
+    expect(reentry.schedule.calendarStatus).toBe("NONE");
     void plan;
+  });
+
+  it("reports STALE when a cited source is superseded but keeps other sections usable", async () => {
+    const project = await newProject("局部失效再入场");
+    const user = await seedUser(project.id);
+    const older = await seedCard(project.id, "会被取代的阶段结论");
+    await refreshProjectState(project.id).catch(() => {});
+    const preview = await previewProjectEpisode(project.id, {
+      windowStart: new Date(Date.now() - 60_000).toISOString(),
+      windowEnd: new Date().toISOString(),
+    });
+    await confirmEpisodeRevision(project.id, preview.episode.id, {
+      revision: preview.episode.revisions[0].revision,
+      requestId: `stale-${preview.episode.id}`,
+    });
+
+    const newer = await seedCard(project.id, "取代旧结论的新证据");
+    const relation = await proposeTemporalRelation(project.id, newer.id, {
+      relatedCardId: older.id,
+      relationType: "SUPERSEDES",
+      reason: "复测结果更新",
+    });
+    await confirmRelation(project.id, relation.id);
+
+    const reentry = await getProjectReentry(project.id, user.id);
+    expect(reentry.freshness).toBe("STALE");
+    expect(reentry.episode.status).toBe("PARTIALLY_STALE");
+    expect(reentry.primaryAction).toBe("VIEW_CHANGES");
+    // 局部失效不影响其余子服务：风险与安排仍可用，不伪造空态
+    expect(reentry.risk.meta.status).toBe("OK");
+    expect(reentry.schedule.meta.status).toBe("EMPTY");
   });
 
   it("keeps other sections available when the schedule part is disabled", async () => {

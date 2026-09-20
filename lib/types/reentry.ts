@@ -8,6 +8,9 @@ export type ReentryPrimaryAction = "VIEW_CHANGES" | "ADD_EVIDENCE" | "RESOLVE_BL
 
 export type ReentrySectionStatus = "OK" | "EMPTY" | "STALE" | "FAILED";
 
+/** 顶层新鲜度由子状态推导，不写死为 FRESH */
+export type ReentryFreshness = "FRESH" | "STALE" | "EMPTY" | "FAILED";
+
 export interface ReentrySectionMeta {
   status: ReentrySectionStatus;
   observedAt: string | null;
@@ -18,10 +21,14 @@ export interface ReentrySectionMeta {
 export interface ReentryEpisodePart {
   episodeId: string | null;
   revisionId: string | null;
+  /** 当前版本号 Vn */
+  revision: number | null;
   title: string | null;
-  /** 已确认检查点的生成时间 */
+  /** 已确认检查点的确认时间 */
   confirmedAt: string | null;
   status: string | null;
+  /** 冻结来源数量 */
+  sourceCount: number;
   /** 已确认检查点之后的简述；无变化时为空数组，不编造进展 */
   changesSince: string[];
   meta: ReentrySectionMeta;
@@ -42,14 +49,16 @@ export interface ReentrySchedulePart {
   actionTitle: string | null;
   start: string | null;
   end: string | null;
+  status: string | null;
+  /** 该时段的系统日历同步状态；未开启同步时为 NONE */
+  calendarStatus: string | null;
   meta: ReentrySectionMeta;
 }
 
 export interface ReentryData {
   projectId: string;
   projectName: string;
-  /** 状态快照新鲜度提示；沿用 ProjectStateFreshness 语义 */
-  freshness: "FRESH" | "STALE" | "EMPTY" | "FAILED";
+  freshness: ReentryFreshness;
   episode: ReentryEpisodePart;
   risk: ReentryRiskPart;
   schedule: ReentrySchedulePart;

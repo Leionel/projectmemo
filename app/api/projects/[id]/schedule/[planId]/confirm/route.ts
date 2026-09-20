@@ -10,7 +10,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const { user } = await authorizeProjectAccess(request, id);
     const body = (await request.json()) as { requestId?: string; expectedVersion?: number; action?: string };
     if (body.action === "cancel") {
-      const plan = await cancelSchedulePlan(id, planId);
+      const plan = await cancelSchedulePlan(id, planId, user.id);
       return Response.json({ plan });
     }
     if (!body.requestId) {

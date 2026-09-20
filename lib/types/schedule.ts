@@ -11,6 +11,7 @@ export type ScheduleSkipReasonCode =
   | "BLOCKED"
   | "UNKNOWN"
   | "NO_CAPACITY"
+  | "CROSS_PROJECT_CONFLICT"
   | "VERSION_CHANGED"
   | "ALREADY_SCHEDULED"
   | "DONE_OR_CANCELLED";
@@ -58,11 +59,25 @@ export interface ScheduleBlockData {
   start: string;
   end: string;
   locked: boolean;
+  /** 系统日历同步回执；只记录 ProjectMemo 自己写入的事件 */
+  calendar: ScheduleCalendarState;
+}
+
+export type CalendarSyncStatus = "NONE" | "PENDING" | "SYNCED" | "FAILED" | "REVOKED";
+
+export interface ScheduleCalendarState {
+  status: CalendarSyncStatus;
+  calendarId: string | null;
+  eventId: string | null;
+  syncedAt: string | null;
+  error: string | null;
 }
 
 export interface SchedulePlanData {
   id: string;
   projectId: string;
+  /** 个人时间的所有者；来自鉴权结果，不接受客户端传入 */
+  userId: string | null;
   episodeRevisionId: string | null;
   requestId: string;
   timezone: string;

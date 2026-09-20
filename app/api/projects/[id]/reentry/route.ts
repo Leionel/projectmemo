@@ -8,8 +8,8 @@ export const runtime = "nodejs";
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    await authorizeProjectAccess(request, id);
-    const reentry = await getProjectReentry(id);
+    const { user } = await authorizeProjectAccess(request, id);
+    const reentry = await getProjectReentry(id, user.id);
     return Response.json(reentry);
   } catch (error) {
     return apiError(error);

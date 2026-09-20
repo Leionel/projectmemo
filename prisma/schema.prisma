@@ -119,6 +119,7 @@ model Project {
   memberships ProjectMembership[]
   episodes    ProjectEpisode[]
   schedulePlans SchedulePlan[]
+  mergeReceipts MemoryMergeReceipt[]
 
   @@index([updatedAt])
   @@index([archivedAt])
@@ -582,7 +583,7 @@ model EpisodeRevision {
   revision       Int
   baseSnapshotId String?
   endSnapshotId  String?
-  // 生成时冻结的来源集合哈希；确认时用于校验来源未变
+  // 生成时冻结的来源集合哈希；确认时按同一规范重算比对，不一致返回 409
   sourceHash     String
   sourceRefs     Json
   claims         Json
@@ -594,6 +595,7 @@ model EpisodeRevision {
   // DRAFT | PUBLISHED
   status         String         @default("DRAFT")
   requestId      String?
+  confirmedAt    DateTime?
   createdAt      DateTime       @default(now())
   episode        ProjectEpisode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
 
@@ -603,9 +605,11 @@ model EpisodeRevision {
 
 /// R2：确定性排程计划。DRAFT 只是预览，CONFIRMED 才占用应用内时段；
 /// 排程不改变行动 TODO/DONE 状态，也不能当作完成回执。
+/// userId 是个人时间的所有者：同一项目两名成员的安排互不占用。
 model SchedulePlan {
   id                String   @id @default(cuid())
   projectId         String
+  userId            String?
   episodeRevisionId String?
   requestId         String
   timezone          String   @default("Asia/Shanghai")
@@ -617,6 +621,8 @@ model SchedulePlan {
   version           Int      @default(1)
   // DRAFT | CONFIRMED | STALE | SUPERSEDED | CANCELLED
   status            String   @default("DRAFT")
+  // 未安排原因随计划持久化：同 requestId 重放必须返回首次结果，不能变成空数组
+  unscheduled       Json?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   project           Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -624,22 +630,52 @@ model SchedulePlan {
 
   @@unique([projectId, requestId])
   @@index([projectId, status])
+  @@index([userId, status])
   @@index([projectId, rangeStart, rangeEnd])
 }
 
+/// 时段块。calendar* 字段只记录 ProjectMemo 自己写入系统日历的回执：
+/// 更新/取消只作用于带 eventId 的块，绝不触碰用户原有日程。
 model ScheduleBlock {
-  id            String       @id @default(cuid())
-  planId        String
-  actionId      String
-  actionVersion Int
-  startAt       DateTime
-  endAt         DateTime
-  locked        Boolean      @default(false)
-  reasonCode    String?
-  plan          SchedulePlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  id                 String       @id @default(cuid())
+  planId             String
+  actionId           String
+  actionVersion      Int
+  startAt            DateTime
+  endAt              DateTime
+  locked             Boolean      @default(false)
+  reasonCode         String?
+  calendarId         String?
+  calendarEventId    String?
+  // NONE | PENDING | SYNCED | FAILED | REVOKED
+  calendarSyncStatus String?
+  calendarSyncedAt   DateTime?
+  calendarError      String?
+  plan               SchedulePlan @relation(fields: [planId], references: [id], onDelete: Cascade)
 
   @@index([planId])
   @@index([actionId])
+  @@index([calendarEventId])
+}
+
+/// 记忆归并回执：归并不删除原始 Capture、附件修订、关系与历史快照，
+/// 原卡只标记归档；撤销按回执恢复，不重建数据。
+model MemoryMergeReceipt {
+  id              String   @id @default(cuid())
+  projectId       String
+  masterCardId    String
+  mergedCardIds   Json
+  reason          String
+  similarityScore Float    @default(0)
+  // ACTIVE | REVOKED
+  status          String   @default("ACTIVE")
+  requestId       String?
+  createdAt       DateTime @default(now())
+  revokedAt       DateTime?
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, status])
+  @@index([masterCardId])
 }
 
 model Milestone {

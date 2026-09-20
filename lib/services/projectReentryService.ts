@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import type {
   ReentryData,
   ReentryEpisodePart,
+  ReentryFreshness,
   ReentryPrimaryAction,
   ReentryRiskPart,
   ReentrySchedulePart,
@@ -37,10 +38,35 @@ function failedMeta(error: unknown): ReentrySectionMeta {
 }
 
 /**
- * 60 秒再入场：只读聚合，不另存项目事实。
- * 局部子服务失败不伪造空项目：对应部分返回 FAILED 并保留错误码。
+ * 小艺等外部入口没有登录用户身份：回落到项目负责人，保证读到的是某个真实成员的安排，
+ * 而不是把别人的个人时段当作当前用户的下一步。
  */
-export async function getProjectReentry(projectId: string): Promise<ReentryData> {
+async function resolveScheduleOwner(projectId: string): Promise<string | null> {
+  const owner = await db.projectMembership.findFirst({
+    where: { projectId, role: "OWNER" },
+    orderBy: { createdAt: "asc" },
+    select: { userId: true },
+  });
+  return owner?.userId ?? null;
+}
+
+/**
+ * 顶层新鲜度由子状态推导，不写死：
+ * 任一子服务失败 → FAILED；检查点或安排过期 → STALE；全部为空 → EMPTY；否则 FRESH。
+ */
+function deriveFreshness(episode: ReentryEpisodePart, schedule: ReentrySchedulePart, risk: ReentryRiskPart): ReentryFreshness {
+  const metas = [episode.meta, schedule.meta, risk.meta];
+  if (metas.some((meta) => meta.status === "FAILED")) return "FAILED";
+  if (episode.status === "STALE" || episode.status === "PARTIALLY_STALE" || schedule.status === "STALE") return "STALE";
+  if (metas.every((meta) => meta.status === "EMPTY")) return "EMPTY";
+  return "FRESH";
+}
+
+/**
+ * 60 秒再入场：只读聚合，不另存项目事实。
+ * 局部子服务失败不伪造空项目：对应部分返回 FAILED，其余可用数据照常返回。
+ */
+export async function getProjectReentry(projectId: string, userId?: string | null): Promise<ReentryData> {
   ensureReentryEnabled();
   const project = await db.project.findUnique({ where: { id: projectId }, select: { id: true, title: true } });
   if (!project) throw new AppError("PROJECT_NOT_FOUND", "项目不存在", 404);
@@ -49,13 +75,14 @@ export async function getProjectReentry(projectId: string): Promise<ReentryData>
   let episode: ReentryEpisodePart = {
     episodeId: null,
     revisionId: null,
+    revision: null,
     title: null,
     confirmedAt: null,
     status: null,
+    sourceCount: 0,
     changesSince: [],
     meta: emptyMeta(),
   };
-  let episodeFreshness: string = "FRESH";
   try {
     const latest = await getLatestPublishedEpisode(projectId);
     if (!latest) {
@@ -65,25 +92,24 @@ export async function getProjectReentry(projectId: string): Promise<ReentryData>
       episode = {
         episodeId: latest.id,
         revisionId: revision?.id ?? null,
+        revision: revision?.revision ?? null,
         title: latest.title,
-        confirmedAt: revision?.createdAt ?? null,
+        confirmedAt: revision?.confirmedAt ?? revision?.createdAt ?? null,
         status: latest.status,
+        sourceCount: revision?.sourceRefs.length ?? 0,
         changesSince: [],
         meta: okMeta(latest.updatedAt),
       };
-      episodeFreshness = latest.status ?? "PUBLISHED";
       if (revision?.endSnapshotId) {
         const endSnapshot = await getLatestProjectState(projectId).catch(() => null);
         if (endSnapshot && endSnapshot.id !== revision.endSnapshotId) {
           const diff = await getProjectStateDiff(projectId, revision.endSnapshotId, endSnapshot.id);
-          episode.changesSince = diff.items
-            .slice(0, 3)
-            .map((item) => item.summary);
+          episode.changesSince = diff.items.slice(0, 3).map((item) => item.summary);
         }
       }
     }
   } catch (error) {
-    episode.meta = failedMeta(error);
+    episode = { ...episode, meta: failedMeta(error) };
   }
 
   // ---- 最大风险或未知 ----
@@ -106,10 +132,10 @@ export async function getProjectReentry(projectId: string): Promise<ReentryData>
       }
     }
   } catch (error) {
-    risk.meta = failedMeta(error);
+    risk = { ...risk, meta: failedMeta(error) };
   }
 
-  // ---- 最近一个已确认且尚未完成的安排 ----
+  // ---- 最近一个已确认且尚未完成的安排（按用户隔离）----
   let schedule: ReentrySchedulePart = {
     planId: null,
     blockId: null,
@@ -117,10 +143,13 @@ export async function getProjectReentry(projectId: string): Promise<ReentryData>
     actionTitle: null,
     start: null,
     end: null,
+    status: null,
+    calendarStatus: null,
     meta: emptyMeta(),
   };
   try {
-    const plan = await getCurrentSchedulePlan(projectId).catch(() => null);
+    const scheduleOwner = userId ?? await resolveScheduleOwner(projectId);
+    const plan = scheduleOwner ? await getCurrentSchedulePlan(projectId, scheduleOwner).catch(() => null) : null;
     const now = new Date();
     const upcoming = plan?.blocks
       .filter((block) => new Date(block.end).getTime() >= now.getTime())
@@ -133,14 +162,18 @@ export async function getProjectReentry(projectId: string): Promise<ReentryData>
         actionTitle: upcoming.actionTitle,
         start: upcoming.start,
         end: upcoming.end,
+        status: plan.status,
+        calendarStatus: upcoming.calendar.status,
         meta: okMeta(plan.updatedAt),
       };
     } else {
       schedule.meta = emptyMeta();
     }
   } catch (error) {
-    schedule.meta = failedMeta(error);
+    schedule = { ...schedule, meta: failedMeta(error) };
   }
+
+  const freshness = deriveFreshness(episode, schedule, risk);
 
   // ---- 主操作：先看变化，再解阻塞，再开始行动 ----
   let primaryAction: ReentryPrimaryAction = "START_ACTION";
@@ -148,11 +181,14 @@ export async function getProjectReentry(projectId: string): Promise<ReentryData>
   if (episode.meta.status === "FAILED") {
     primaryAction = "VIEW_CHANGES";
     primaryMessage = "检查点数据暂时不可用，请稍后重试";
-  } else if (episodeFreshness === "STALE" || episodeFreshness === "PARTIALLY_STALE") {
+  } else if (episode.status === "STALE" || episode.status === "PARTIALLY_STALE") {
     primaryAction = "VIEW_CHANGES";
     primaryMessage = "部分结论的来源已变化，请先查看受影响的内容";
-  } else if (schedule.meta.status === "EMPTY" || !schedule.blockId) {
-    primaryAction = "START_ACTION";
+  } else if (risk.meta.status === "FAILED") {
+    primaryAction = "VIEW_CHANGES";
+    primaryMessage = "风险数据暂时不可用，其余信息仍可查看";
+  } else if (!schedule.blockId) {
+    primaryAction = episode.episodeId ? "START_ACTION" : "ADD_EVIDENCE";
     primaryMessage = episode.episodeId ? "从检查点选择下一步，并安排到未来时间" : "先整理一次阶段进展，再选择下一步";
   } else {
     primaryAction = "START_ACTION";
@@ -162,7 +198,7 @@ export async function getProjectReentry(projectId: string): Promise<ReentryData>
   return {
     projectId: project.id,
     projectName: project.title,
-    freshness: "FRESH",
+    freshness,
     episode,
     risk,
     schedule,

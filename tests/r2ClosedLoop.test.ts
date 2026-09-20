@@ -124,8 +124,12 @@ describe("R2 closed loop on a non-seed project", () => {
     const reentry = await getProjectReentry(project.id);
     expect(reentry.episode.episodeId).toBe(preview.episode.id);
     expect(reentry.episode.meta.status).toBe("OK");
+    expect(reentry.episode.revision).toBe(2);
     expect(reentry.schedule.actionId).toBe(action.id);
-    expect(reentry.primaryAction).toBe("START_ACTION");
+    // 第 3 步取代过来源：再入场必须先引导查看变化，不能直接说「开始行动」
+    expect(reentry.episode.status).toBe("PARTIALLY_STALE");
+    expect(reentry.freshness).toBe("STALE");
+    expect(reentry.primaryAction).toBe("VIEW_CHANGES");
 
     // ---- 8. 成果联动：以检查点为范围生成，sourceRefs 只含检查点冻结来源 ----
     const artifact = await generateArtifact(project.id, "weekly_report", { episodeId: preview.episode.id });

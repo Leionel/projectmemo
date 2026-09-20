@@ -1,15 +1,17 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { Archive, ArrowLeft, ArrowRight, Bot, CalendarDays, CheckSquare, FileOutput, FileText, Goal, Sparkles, Star, type LucideIcon } from "lucide-react";
+import { Archive, ArrowLeft, ArrowRight, Bot, BookmarkCheck, CalendarDays, CheckSquare, FileOutput, FileText, Goal, Sparkles, Star, type LucideIcon } from "lucide-react";
 import { ActionBoard } from "@/components/ActionBoard";
 import { AgentMetrics } from "@/components/AgentMetrics";
 import { CaptureBox } from "@/components/CaptureBox";
 import { CompetitionReadiness } from "@/components/CompetitionReadiness";
+import { EpisodeCheckpointCard } from "@/components/EpisodeCheckpointCard";
 import { InterventionPanel } from "@/components/InterventionPanel";
 import { KnowledgeFeed } from "@/components/KnowledgeFeed";
 import { MemoryCopilot } from "@/components/MemoryCopilot";
 import { ProjectSettings } from "@/components/ProjectSettings";
 import { ProjectPulse } from "@/components/ProjectPulse";
+import { SchedulePlanner } from "@/components/SchedulePlanner";
 import { AppError } from "@/lib/api";
 import { evaluateProjectContext } from "@/lib/services/agentContextService";
 import { getProjectMetrics, listActions, listInterventions } from "@/lib/repositories/agent";
@@ -18,6 +20,7 @@ import { getDecisionTimeline } from "@/lib/services/temporalLedgerService";
 import { scenarioOptions, getScenarioColor, type ActionItemData, type AgentEvidence, type InterventionData, type ProposedAction, type ProjectMetrics } from "@/lib/types";
 import { buildProjectDashboard } from "@/lib/projectDashboard";
 import { getSessionUser, hasProjectAccess } from "@/lib/auth/serverSession";
+import { isFeatureEnabled } from "@/lib/config/features";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -70,6 +73,8 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   });
   const openReminderCount = dashboard.activeReminderCount;
   const openActionCount = dashboard.activeActionCount;
+  const episodesEnabled = isFeatureEnabled("PROJECT_EPISODES_ENABLED", false);
+  const schedulingEnabled = isFeatureEnabled("PROJECT_SCHEDULING_ENABLED", false);
   const importantCardCount = project.cards.filter((card) => card.importance >= 4).length;
   const outline = project.artifacts.find((artifact) => String(artifact.artifactType) === "competition_outline");
   const latestArtifact = project.artifacts[0];
@@ -94,6 +99,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       <div className="flex items-center gap-2 overflow-x-auto px-1 pb-0.5 [scrollbar-width:thin]">
         <span className="shrink-0 px-2 text-xs font-black text-[var(--muted)]">项目大纲</span>
         <WorkspaceNavLink href="#capture-box" label="记录进展" icon={FileText} />
+        {episodesEnabled && <WorkspaceNavLink href="#episode-checkpoint" label="阶段进展" icon={BookmarkCheck} />}
         <WorkspaceNavLink href="#interventions" label="主动提醒" count={openReminderCount} icon={Sparkles} />
         <WorkspaceNavLink href="#action-board" label="待办" count={openActionCount} icon={CheckSquare} />
         <WorkspaceNavLink href="#knowledge-assets" label="知识资产" count={project.cards.length} icon={Star} />
@@ -107,10 +113,12 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]"><Link href={dashboard.nextAction.href} className={"focus-ring group flex min-w-0 items-center justify-between gap-4 rounded-2xl p-4 text-white shadow-[var(--shadow-sm)] transition hover:-translate-y-0.5 " + (dashboard.nextAction.tone === "critical" ? "bg-[var(--brick)]" : "bg-[var(--navy)]")}><span><span className="text-[11px] font-black uppercase tracking-[.14em] text-white/70">忆程建议下一步</span><span className="mt-1 block text-base font-black">{dashboard.nextAction.label}</span><span className="mt-1 block text-xs leading-5 text-white/75">{dashboard.nextAction.detail}</span></span><ArrowRight size={20} className="shrink-0 transition group-hover:translate-x-1" /></Link><div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3"><QuickJump href={`${projectPath}?cardSort=importance#knowledge-assets`} icon={Star} label="重点记录" detail={`${importantCardCount} 张`} /><QuickJump href={`${projectPath}/generate?type=competition_outline`} icon={FileOutput} label={outline ? "作品说明" : "生成大纲"} detail={outline ? "已有版本" : "尚未生成"} /><QuickJump href={`${projectPath}?openCopilot=1#memory-copilot`} icon={Bot} label="问忆程" detail="检索记忆" /></div></div>
     </section>
 
+    <div className="mt-4"><EpisodeCheckpointCard projectId={id} enabled={episodesEnabled} /></div>
     <div className="mt-8"><InterventionPanel projectId={id} initialInterventions={interventionData} demoEnabled={process.env.DEMO_SCENARIOS !== "false"} /></div>
     <div className="mt-9 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
       <div className="min-w-0 space-y-8">
         <ActionBoard projectId={id} initialActions={actionData} />
+        <SchedulePlanner projectId={id} enabled={schedulingEnabled} />
         <KnowledgeFeed projectId={id} cards={knowledgeCards} />
         <CompetitionReadiness readiness={dashboard.readiness} />
         <MemoryCopilot projectId={id} />

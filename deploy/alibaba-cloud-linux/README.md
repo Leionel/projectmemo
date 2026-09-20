@@ -58,6 +58,63 @@ sudo install -m 644 projectmemo.nginx.conf /etc/nginx/conf.d/projectmemo.conf
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
+## 更新发布（已部署机器）
+
+固定顺序：`checkout → prisma generate → build → migrate deploy → restart`。两个必须注意的点：
+
+1. `lib/generated/prisma` 在 `.gitignore` 里，**每次切换 commit 后都要重新 `prisma generate`**，
+   否则 `next build` 会因为客户端缺少新模型而类型检查失败。
+2. `prisma.config.ts` 在没有 `DATABASE_URL` 时回落到 `file:./prisma/dev.db`。systemd 的
+   `EnvironmentFile` 只对服务进程生效，手动执行 `migrate deploy` 必须显式带上生产库地址，
+   否则迁移会打到应用目录里的 stray 开发库，生产库毫无变化。
+
+```bash
+cd /opt/projectmemo/app
+
+# 0. 备份（见下节），发布前必做
+# 1. 代码：next-env.d.ts 是构建生成物，服务器上的本地改动可直接丢弃
+sudo -u projectmemo git restore next-env.d.ts
+sudo -u projectmemo git fetch --all
+sudo -u projectmemo git checkout <verified-commit>
+
+# 2. 生成客户端 + 构建
+sudo -u projectmemo npx prisma generate
+sudo -u projectmemo npm run build
+
+# 3. 迁移：显式指向生产库，先停服务避免写锁竞争
+sudo systemctl stop projectmemo
+sudo -u projectmemo sh -c 'cd /opt/projectmemo/app && DATABASE_URL="file:/opt/projectmemo/data/projectmemo.db" npx prisma migrate deploy'
+
+# 4. 环境变量（R2 开关与 PROJECTMEMO_RELEASE）
+sudo -e /etc/projectmemo/projectmemo.env
+
+# 5. 起服务并核对版本指纹
+sudo systemctl start projectmemo
+curl -s http://127.0.0.1:4400/health ; echo
+```
+
+R2 相关开关见 `projectmemo.env.example`：`PROJECT_EPISODES_ENABLED`、`PROJECT_SCHEDULING_ENABLED`、
+`PROJECT_REENTRY_ENABLED` 随发布启用；`PROJECT_CALENDAR_SYNC_ENABLED` 与
+`PROJECT_MEMORY_CONSOLIDATION_ENABLED` 在完成真机/交互验收前保持 `false`。回退只需把开关改回
+`false` 并重启，不需要回滚代码或删除新增表。
+
+冒烟验收（接口需要登录态）：
+
+```bash
+TOKEN=$(curl -s -X POST http://127.0.0.1:4400/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"<账号>","password":"<密码>"}' \
+  | sed -n 's/.*"accessToken":"\([^"]*\)".*/\1/p')
+curl -s -H "Authorization: Bearer $TOKEN" http://127.0.0.1:4400/api/projects ; echo
+PROJECT_ID=<上一步返回的项目 id>
+curl -s -H "Authorization: Bearer $TOKEN" http://127.0.0.1:4400/api/projects/$PROJECT_ID/reentry ; echo
+curl -s -H "Authorization: Bearer $TOKEN" http://127.0.0.1:4400/api/projects/$PROJECT_ID/episodes ; echo
+curl -s -H "Authorization: Bearer $TOKEN" http://127.0.0.1:4400/api/projects/$PROJECT_ID/schedule/current ; echo
+```
+
+没有数据时这三个接口应返回结构化空态（`{"episodes":[]}`、`{"status":"EMPTY","plan":null}`），
+而不是 500。
+
 ## 重启自动恢复
 
 `enable` 决定开机自启，必须显式执行并验证，不能只看 `start` 成功：

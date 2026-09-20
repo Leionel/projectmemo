@@ -9,6 +9,7 @@ import { EpisodeCheckpointCard } from "@/components/EpisodeCheckpointCard";
 import { InterventionPanel } from "@/components/InterventionPanel";
 import { KnowledgeFeed } from "@/components/KnowledgeFeed";
 import { MemoryCopilot } from "@/components/MemoryCopilot";
+import { MemoryConsolidationCard } from "@/components/MemoryConsolidationCard";
 import { ProjectSettings } from "@/components/ProjectSettings";
 import { ProjectPulse } from "@/components/ProjectPulse";
 import { SchedulePlanner } from "@/components/SchedulePlanner";
@@ -75,6 +76,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const openActionCount = dashboard.activeActionCount;
   const episodesEnabled = isFeatureEnabled("PROJECT_EPISODES_ENABLED", false);
   const schedulingEnabled = isFeatureEnabled("PROJECT_SCHEDULING_ENABLED", false);
+  const consolidationEnabled = isFeatureEnabled("PROJECT_MEMORY_CONSOLIDATION_ENABLED", false);
   const importantCardCount = project.cards.filter((card) => card.importance >= 4).length;
   const outline = project.artifacts.find((artifact) => String(artifact.artifactType) === "competition_outline");
   const latestArtifact = project.artifacts[0];
@@ -120,6 +122,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         <ActionBoard projectId={id} initialActions={actionData} />
         <SchedulePlanner projectId={id} enabled={schedulingEnabled} />
         <KnowledgeFeed projectId={id} cards={knowledgeCards} />
+        <MemoryConsolidationCard projectId={id} enabled={consolidationEnabled} />
         <CompetitionReadiness readiness={dashboard.readiness} />
         <MemoryCopilot projectId={id} />
       </div>

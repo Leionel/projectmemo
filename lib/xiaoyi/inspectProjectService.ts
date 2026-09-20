@@ -52,6 +52,16 @@ export async function inspectProjectFromXiaoyi(input: {
       listActions(project.id, false),
       listProjectMilestones(project.id),
     ]);
+    // 只读聚合：播报顺序为变化 → 风险/未知 → 下一行动 → 已安排时间；失败不阻断 inspect 主体
+    let reentrySection: unknown = null;
+    if (isFeatureEnabled("PROJECT_REENTRY_ENABLED", false)) {
+      try {
+        const { getProjectReentry } = await import("@/lib/services/projectReentryService");
+        reentrySection = await getProjectReentry(project.id);
+      } catch (reentryError) {
+        reentrySection = { status: "FAILED", errorCode: reentryError instanceof AppError ? reentryError.code : "REENTRY_SECTION_FAILED" };
+      }
+    }
     const response = {
       ok: true as const,
       request_id: input.requestId,
@@ -115,6 +125,7 @@ export async function inspectProjectFromXiaoyi(input: {
         }),
       })),
       replayed: false,
+      reentry: reentrySection,
     };
     await finishExternalAgentRun({
       runId: reservation.run.id,

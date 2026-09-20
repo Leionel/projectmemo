@@ -22,7 +22,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     await authorizeProjectAccess(request, id);
     const input = artifactCreateSchema.parse(await request.json());
     const artifact = input.content === undefined
-      ? await generateArtifact(id, input.artifactType)
+      ? await generateArtifact(id, input.artifactType, { episodeId: input.episodeId })
       : await saveEditedArtifactVersion(id, input.artifactType, input.content);
     return Response.json({ artifact }, { status: 201 });
   } catch (error) { return apiError(error); }

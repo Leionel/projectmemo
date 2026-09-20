@@ -45,6 +45,8 @@ export const artifactContentSchema = z
 export const artifactCreateSchema = z.object({
   artifactType: z.enum(artifactTypes),
   content: artifactContentSchema.optional(),
+  // R2-5：可选已确认检查点作为生成范围；只读取该检查点冻结的来源
+  episodeId: z.string().trim().min(1).optional(),
 });
 
 export const knowledgeCardDraftSchema = z.object({

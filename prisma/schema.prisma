@@ -117,6 +117,8 @@ model Project {
   attachments Attachment[]
   milestones  Milestone[]
   memberships ProjectMembership[]
+  episodes    ProjectEpisode[]
+  schedulePlans SchedulePlan[]
 
   @@index([updatedAt])
   @@index([archivedAt])
@@ -549,6 +551,95 @@ model InterventionDelivery {
 
   @@unique([interventionId, channel, deliveryKey])
   @@index([projectId, attemptedAt])
+}
+
+/// R2：阶段检查点。Episode 是"一个阶段的再入场判断"，DRAFT 可取消，
+/// PUBLISHED 后不可原地覆盖；来源变化只把状态标为 PARTIALLY_STALE/STALE，不删除历史。
+model ProjectEpisode {
+  id          String   @id @default(cuid())
+  projectId   String
+  // MANUAL | MILESTONE | SNAPSHOT_RANGE；范围来源标识，不承载业务规则
+  kind        String   @default("MANUAL")
+  title       String   @default("")
+  windowStart DateTime
+  windowEnd   DateTime
+  // DRAFT | PUBLISHED | PARTIALLY_STALE | STALE | ARCHIVED
+  status      String   @default("DRAFT")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  revisions   EpisodeRevision[]
+
+  @@index([projectId, status])
+  @@index([projectId, createdAt])
+}
+
+/// 检查点修订：确认后只增不改。claims/sourceRefs 使用带 schemaVersion 的 JSON，
+/// 只有出现跨检查点查询需求时才拆分为独立表。
+model EpisodeRevision {
+  id             String         @id @default(cuid())
+  episodeId      String
+  revision       Int
+  baseSnapshotId String?
+  endSnapshotId  String?
+  // 生成时冻结的来源集合哈希；确认时用于校验来源未变
+  sourceHash     String
+  sourceRefs     Json
+  claims         Json
+  summary        Json
+  // TEMPLATE | MODEL | MODEL_FALLBACK_TEMPLATE；模型失败回退模板时保留原因
+  generationMode String         @default("TEMPLATE")
+  provider       String?
+  fallbackReason String?
+  // DRAFT | PUBLISHED
+  status         String         @default("DRAFT")
+  requestId      String?
+  createdAt      DateTime       @default(now())
+  episode        ProjectEpisode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@unique([episodeId, revision])
+  @@index([episodeId, status])
+}
+
+/// R2：确定性排程计划。DRAFT 只是预览，CONFIRMED 才占用应用内时段；
+/// 排程不改变行动 TODO/DONE 状态，也不能当作完成回执。
+model SchedulePlan {
+  id                String   @id @default(cuid())
+  projectId         String
+  episodeRevisionId String?
+  requestId         String
+  timezone          String   @default("Asia/Shanghai")
+  rangeStart        DateTime
+  rangeEnd          DateTime
+  inputHash         String
+  sourceSnapshotId  String?
+  // 乐观版本：确认前行动/依赖变化时递增，客户端用 expectedVersion 提交
+  version           Int      @default(1)
+  // DRAFT | CONFIRMED | STALE | SUPERSEDED | CANCELLED
+  status            String   @default("DRAFT")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  project           Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  blocks            ScheduleBlock[]
+
+  @@unique([projectId, requestId])
+  @@index([projectId, status])
+  @@index([projectId, rangeStart, rangeEnd])
+}
+
+model ScheduleBlock {
+  id            String       @id @default(cuid())
+  planId        String
+  actionId      String
+  actionVersion Int
+  startAt       DateTime
+  endAt         DateTime
+  locked        Boolean      @default(false)
+  reasonCode    String?
+  plan          SchedulePlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId])
+  @@index([actionId])
 }
 
 model Milestone {

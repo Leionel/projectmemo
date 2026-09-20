@@ -7,17 +7,51 @@ import { requireProject } from "@/lib/repositories/projects";
 import { AgentRunStatus, AgentRunType } from "@/lib/generated/prisma/client";
 import { saveAgentRun } from "@/lib/repositories/agent";
 import type { AgentExecutionResult, ArtifactTypeValue } from "@/lib/types";
+import type { EpisodeSourceRef } from "@/lib/types/episode";
 import { artifactContentSchema } from "@/lib/validation/schemas";
 
-async function loadArtifactContext(projectId: string) {
+async function loadArtifactContext(projectId: string, episodeId?: string) {
   const project = await requireProject(projectId);
-  const rawCards = await db.knowledgeCard.findMany({ where: { projectId }, orderBy: { createdAt: "asc" } });
+  // R2-5：指定已确认检查点时，范围与证据快照只来自该检查点冻结的来源
+  let scopedCardIds: string[] | null = null;
+  let scopedSourceRefs: Array<{ cardId: string; observedAt: string; titleSnapshot: string; summarySnapshot: string }> | null = null;
+  let episodeTag: { episodeId: string; revisionId: string } | null = null;
+  if (episodeId) {
+    const episode = await db.projectEpisode.findFirst({
+      where: { id: episodeId, projectId },
+      include: { revisions: { orderBy: { revision: "asc" } } },
+    });
+    if (!episode) throw new AppError("EPISODE_NOT_FOUND", "阶段检查点不存在或不属于当前项目", 404);
+    const published = [...episode.revisions].reverse().find((revision) => revision.status === "PUBLISHED");
+    if (!published) throw new AppError("EPISODE_NOT_PUBLISHED", "该检查点还没有已确认版本，不能作为成果范围", 409);
+    const refs = published.sourceRefs as unknown as EpisodeSourceRef[];
+    const usable = refs.filter((ref) => ref.kind === "CARD" || ref.kind === "ACTION_RESULT");
+    scopedCardIds = [...new Set(usable.map((ref) => ref.entityId))];
+    if (scopedCardIds.length === 0) throw new AppError("EPISODE_SCOPE_EMPTY", "该检查点没有可用的记录来源，请先重新整理", 400);
+    scopedSourceRefs = usable.map((ref) => ({
+      cardId: ref.entityId,
+      observedAt: ref.observedAt,
+      titleSnapshot: ref.title,
+      summarySnapshot: "",
+    }));
+    episodeTag = { episodeId: episode.id, revisionId: published.id };
+  }
+
+  const rawCards = await db.knowledgeCard.findMany({
+    where: { projectId, ...(scopedCardIds ? { id: { in: scopedCardIds } } : {}) },
+    orderBy: { createdAt: "asc" },
+  });
   if (!rawCards.length) throw new AppError("NO_KNOWLEDGE_CARDS", "请先输入至少一条项目记录，再生成成果", 400);
+  if (scopedSourceRefs) {
+    const summaryById = new Map(rawCards.map((card) => [card.id, card.summary]));
+    for (const ref of scopedSourceRefs) ref.summarySnapshot = summaryById.get(ref.cardId) ?? "";
+  }
   return {
     project,
+    episodeTag,
     cards: rawCards.map((card) => ({ ...cardToDraft(card), id: card.id })),
     // 生成时的证据引用快照：固化 cardId、观察时间与当时摘要，供事后逐句回溯审计
-    sourceRefs: rawCards.map((card) => ({
+    sourceRefs: scopedSourceRefs ?? rawCards.map((card) => ({
       cardId: card.id,
       observedAt: new Date().toISOString(),
       titleSnapshot: card.title,
@@ -26,8 +60,8 @@ async function loadArtifactContext(projectId: string) {
   };
 }
 
-export async function generateArtifact(projectId: string, artifactType: ArtifactTypeValue) {
-  const { project, cards, sourceRefs } = await loadArtifactContext(projectId);
+export async function generateArtifact(projectId: string, artifactType: ArtifactTypeValue, options?: { episodeId?: string }) {
+  const { project, cards, sourceRefs, episodeTag } = await loadArtifactContext(projectId, options?.episodeId);
   const startedAt = Date.now();
   const mock = generateMockArtifactWithClaims(artifactType, { project, cards });
   // 模板绑定的逐句映射：模板路径自带，模型路径暂无映射（语义未核验，audit 明确标注）
@@ -77,6 +111,7 @@ export async function generateArtifact(projectId: string, artifactType: Artifact
       artifactType,
       artifactId: artifact.id,
       cardCount: cards.length,
+      ...(episodeTag ? { episodeId: episodeTag.episodeId, episodeRevisionId: episodeTag.revisionId, scope: "EPISODE_CHECKPOINT" } : {}),
     },
     resultJson: { artifactId: artifact.id, artifactType },
   });

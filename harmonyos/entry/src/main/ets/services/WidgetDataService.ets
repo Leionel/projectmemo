@@ -5,6 +5,7 @@ import { common } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { Project, ProjectDashboard } from '../models/Project';
 import { ProjectDetail } from '../models/Memory';
+import { ReentryData } from '../models/Reentry';
 
 const TAG = 'WidgetDataService';
 const DOMAIN = 0x0000;
@@ -15,6 +16,7 @@ const KEY_DAYS_LEFT = 'daysLeft';
 const KEY_READINESS = 'readiness';
 const KEY_NEXT_ACTION = 'nextAction';
 const KEY_STATUS = 'status';
+const KEY_CHECKPOINT_INFO = 'checkpointInfo';
 const KEY_FORM_IDS = 'widget_form_ids';
 
 export interface WidgetPayload {
@@ -23,6 +25,42 @@ export interface WidgetPayload {
   readiness: number;
   nextAction: string;
   status: string;
+  checkpointInfo: string;
+}
+
+/** 检查点状态 → 卡片展示标签；与 EpisodeCheckpointCard 的语义保持一致 */
+export function episodeStatusLabel(status: string | null): string {
+  if (status === 'PUBLISHED') {
+    return '结论有效';
+  } else if (status === 'PARTIALLY_STALE') {
+    return '部分过期';
+  } else if (status === 'STALE') {
+    return '需要重整';
+  }
+  return '待整理';
+}
+
+/** reentry 聚合 → 卡片字段；daysLeft/readiness 沿用 dashboard 缓存，保持向后兼容 */
+export function mapReentryToWidget(reentry: ReentryData, daysLeft: number, readiness: number): WidgetPayload {
+  const statusLabel = episodeStatusLabel(reentry.episode ? reentry.episode.status : null);
+  const changes = reentry.episode && reentry.episode.changesSince ? reentry.episode.changesSince.length : 0;
+  const nextAction = (reentry.schedule && reentry.schedule.actionTitle)
+    ? reentry.schedule.actionTitle
+    : (reentry.primaryMessage || '打开应用同步待办');
+  let checkpointInfo = statusLabel;
+  if (changes > 0) {
+    checkpointInfo += ` · ${changes} 条新变化`;
+  } else if (reentry.episode && reentry.episode.meta && reentry.episode.meta.status === 'OK') {
+    checkpointInfo += ' · 暂无新变化';
+  }
+  return {
+    projectTitle: reentry.projectName || '忆程项目看板',
+    daysLeft: daysLeft,
+    readiness: readiness,
+    nextAction: nextAction,
+    status: statusLabel,
+    checkpointInfo: checkpointInfo
+  };
 }
 
 export class WidgetDataService {
@@ -109,6 +147,7 @@ export class WidgetDataService {
       const readiness = store.getSync(KEY_READINESS, 0) as number;
       const nextAction = (store.getSync(KEY_NEXT_ACTION, '') as string).trim();
       const status = (store.getSync(KEY_STATUS, '') as string).trim();
+      const checkpointInfo = (store.getSync(KEY_CHECKPOINT_INFO, '') as string).trim();
 
       if (title.length > 0) {
         return {
@@ -116,7 +155,8 @@ export class WidgetDataService {
           'daysLeft': daysLeft,
           'readiness': readiness,
           'nextAction': nextAction || '暂无进行中待办',
-          'status': status || '进行中'
+          'status': status || '进行中',
+          'checkpointInfo': checkpointInfo
         };
       }
     } catch (err) {
@@ -129,7 +169,8 @@ export class WidgetDataService {
       'daysLeft': 0,
       'readiness': 0,
       'nextAction': '打开应用同步项目待办',
-      'status': '待同步'
+      'status': '待同步',
+      'checkpointInfo': ''
     };
   }
 
@@ -157,7 +198,8 @@ export class WidgetDataService {
       daysLeft: daysLeft,
       readiness: readiness,
       nextAction: nextAction,
-      status: status
+      status: status,
+      checkpointInfo: ''
     };
 
     await WidgetDataService.persistAndPushToForms(context, payload);
@@ -191,10 +233,31 @@ export class WidgetDataService {
       daysLeft: daysLeft,
       readiness: readiness,
       nextAction: nextAction,
-      status: status
+      status: status,
+      checkpointInfo: ''
     };
 
     await WidgetDataService.persistAndPushToForms(context, payload);
+  }
+
+  /**
+   * 使用 reentry 聚合结果同步卡片：下一行动与检查点状态与 App 同源。
+   * 拉取失败由调用方保留上次缓存（getCachedWidgetDataSync），不显示假空态。
+   */
+  static async updateWidgetWithReentry(context: common.Context, reentry: ReentryData): Promise<void> {
+    if (!reentry) {
+      return;
+    }
+    let daysLeft = 0;
+    let readiness = 0;
+    try {
+      const store = preferences.getPreferencesSync(context, { name: PREFS_NAME });
+      daysLeft = store.getSync(KEY_DAYS_LEFT, 0) as number;
+      readiness = store.getSync(KEY_READINESS, 0) as number;
+    } catch (err) {
+      hilog.warn(DOMAIN, TAG, 'Failed to read cached widget metrics: %{public}s', JSON.stringify(err));
+    }
+    await WidgetDataService.persistAndPushToForms(context, mapReentryToWidget(reentry, daysLeft, readiness));
   }
 
   /**
@@ -208,6 +271,7 @@ export class WidgetDataService {
       await store.put(KEY_READINESS, payload.readiness);
       await store.put(KEY_NEXT_ACTION, payload.nextAction);
       await store.put(KEY_STATUS, payload.status);
+      await store.put(KEY_CHECKPOINT_INFO, payload.checkpointInfo);
       await store.flush();
 
       // 获取当前已在桌面展示的所有卡片实例
@@ -229,7 +293,8 @@ export class WidgetDataService {
         'daysLeft': payload.daysLeft,
         'readiness': payload.readiness,
         'nextAction': payload.nextAction,
-        'status': payload.status
+        'status': payload.status,
+        'checkpointInfo': payload.checkpointInfo
       };
 
       const bindingData = formBindingData.createFormBindingData(updateMap);

@@ -27,6 +27,8 @@ import { NotificationService } from '../services/NotificationService';
 import { AttachmentService } from '../services/AttachmentService';
 import { MilestoneService } from '../services/MilestoneService';
 import { WidgetDataService } from '../services/WidgetDataService';
+import { ReentryService, EpisodePreviewBody, EpisodeConfirmBody } from '../services/ReentryService';
+import { ReentryData, Episode, EpisodeRevision, EpisodeSummarySection } from '../models/Reentry';
 
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily, PMInteraction, PMMotion, PMMaterial, PMTransition } from '../common/DesignTokens';
 import { PMBreakpoint, PMStorageKey, PMWidthBp } from '../common/WindowMetrics';
@@ -169,6 +171,12 @@ struct ProjectHome {
   private notificationService: NotificationService = new NotificationService();
   private attachmentService: AttachmentService = new AttachmentService();
   private milestoneService: MilestoneService = new MilestoneService();
+  private reentryService: ReentryService = new ReentryService();
+  @State reentry: ReentryData | null = null;
+  @State checkpointPreview: Episode | null = null;
+  @State checkpointBusy: string = '';
+  @State checkpointMessage: string = '';
+  @State checkpointError: string = '';
   private memorySearchSerial: number = 0;
 
   private sourceOptions: string[] = [
@@ -391,7 +399,13 @@ struct ProjectHome {
       const res = await Promise.all([detailP, listP, intervP, actionP, artifactP, chatP, milestoneP, attachmentP]);
       this.project = res[0];
       this.dashboard = this.findDashboard(res[1]);
-      if (this.project) {
+      // R2 再入场：检查点/风险/下一安排聚合；失败保留上次缓存，不推送假空态
+      const reentryP = this.reentryService.getReentry(this.projectId).catch(() => null);
+      const reentryData = await reentryP;
+      if (reentryData !== null) {
+        this.reentry = reentryData;
+        WidgetDataService.updateWidgetWithReentry(getContext(this), reentryData).catch(() => {});
+      } else if (this.project) {
         WidgetDataService.updateWidgetWithProjectDetail(getContext(this), this.project, this.dashboard).catch(() => {});
       }
       this.interventions = res[2];
@@ -439,6 +453,258 @@ struct ProjectHome {
       }
     }
     return new ProjectDashboard();
+  }
+
+  // ---- R2 阶段检查点（60 秒再入口） ----
+
+  private genRequestId(): string {
+    return `pm-${Date.now()}-${Math.floor(Math.random() * 100000000)}`;
+  }
+
+  private async previewCheckpoint(): Promise<void> {
+    if (this.checkpointBusy !== '') {
+      return;
+    }
+    this.checkpointBusy = 'preview';
+    this.checkpointError = '';
+    this.checkpointMessage = '';
+    try {
+      const body = new EpisodePreviewBody();
+      const lastWindowEnd = (this.reentry !== null && this.reentry.episode !== null && this.reentry.episode.confirmedAt !== null)
+        ? this.reentry.episode.confirmedAt
+        : new Date(Date.now() - 7 * 86400000).toISOString();
+      body.windowStart = lastWindowEnd;
+      body.windowEnd = new Date().toISOString();
+      const result = await this.reentryService.previewEpisode(this.projectId, body);
+      this.checkpointPreview = result.episode;
+    } catch (e) {
+      this.checkpointError = e instanceof ApiError ? e.message : '生成检查点预览失败';
+    } finally {
+      this.checkpointBusy = '';
+    }
+  }
+
+  private async refreshCheckpoint(): Promise<void> {
+    if (this.checkpointBusy !== '' || this.reentry === null || this.reentry.episode.episodeId === null) {
+      return;
+    }
+    this.checkpointBusy = 'refresh';
+    this.checkpointError = '';
+    this.checkpointMessage = '';
+    try {
+      const result = await this.reentryService.refreshEpisode(this.projectId, this.reentry.episode.episodeId!);
+      this.checkpointPreview = result.episode;
+    } catch (e) {
+      this.checkpointError = e instanceof ApiError ? e.message : '刷新检查点失败';
+    } finally {
+      this.checkpointBusy = '';
+    }
+  }
+
+  private async confirmCheckpoint(): Promise<void> {
+    const preview = this.checkpointPreview;
+    if (this.checkpointBusy !== '' || preview === null || preview.revisions.length === 0) {
+      return;
+    }
+    this.checkpointBusy = 'confirm';
+    this.checkpointError = '';
+    try {
+      const revision: EpisodeRevision = preview.revisions[preview.revisions.length - 1];
+      const body = new EpisodeConfirmBody();
+      body.revision = revision.revision;
+      body.requestId = this.genRequestId();
+      body.expectedSourceHash = revision.sourceHash;
+      await this.reentryService.confirmEpisode(this.projectId, preview.id, body);
+      this.checkpointPreview = null;
+      this.checkpointMessage = '阶段检查点已确认';
+      const reentryData = await this.reentryService.getReentry(this.projectId);
+      this.reentry = reentryData;
+      WidgetDataService.updateWidgetWithReentry(getContext(this), reentryData).catch(() => {});
+    } catch (e) {
+      this.checkpointError = e instanceof ApiError ? e.message : '确认检查点失败';
+    } finally {
+      this.checkpointBusy = '';
+    }
+  }
+
+  private previewSections(): EpisodeSummarySection[] {
+    const preview = this.checkpointPreview;
+    if (preview === null || preview.revisions.length === 0) {
+      return [];
+    }
+    const revision: EpisodeRevision = preview.revisions[preview.revisions.length - 1];
+    return revision.summary !== undefined ? revision.summary.sections : [];
+  }
+
+  private cancelCheckpointPreview(): void {
+    this.checkpointPreview = null;
+    this.checkpointMessage = '';
+    this.checkpointError = '';
+  }
+
+  @Builder
+  EpisodeCheckpointCardView() {
+    Column() {
+      Row() {
+        Column() {
+          Text('阶段检查点')
+            .fontSize(PMFontSize.SECONDARY)
+            .fontColor(PMColors.INK_TERTIARY)
+          Text('整理阶段进展')
+            .fontSize(PMFontSize.SECTION_TITLE)
+            .fontWeight(FontWeight.Bold)
+            .fontColor(PMColors.INK_PRIMARY)
+            .margin({ top: 2 })
+        }
+        .alignItems(HorizontalAlign.Start)
+        .layoutWeight(1)
+
+        if (this.checkpointBusy !== '') {
+          LoadingProgress()
+            .width(18)
+            .height(18)
+            .color(PMColors.BRAND)
+        } else if (this.checkpointPreview === null) {
+          Text(this.reentry !== null && this.reentry.episode.episodeId !== null ? '重新整理' : '整理最近 7 天')
+            .fontSize(PMFontSize.SECONDARY)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.BRAND)
+            .padding({ left: 10, right: 10, top: 6, bottom: 6 })
+            .backgroundColor(PMColors.BRAND_LIGHT)
+            .borderRadius(PMRadius.MD)
+            .onClick(() => {
+              this.previewCheckpoint();
+            })
+        }
+      }
+      .width('100%')
+      .alignItems(VerticalAlign.Center)
+
+      if (this.checkpointMessage !== '') {
+        Text(this.checkpointMessage)
+          .fontSize(PMFontSize.SECONDARY)
+          .fontColor(PMColors.SUCCESS)
+          .margin({ top: 6 })
+      }
+      if (this.checkpointError !== '') {
+        Text(this.checkpointError)
+          .fontSize(PMFontSize.SECONDARY)
+          .fontColor(PMColors.RISK)
+          .margin({ top: 6 })
+      }
+
+      if (this.checkpointPreview !== null) {
+        this.CheckpointPreviewBody()
+      } else if (this.reentry !== null && this.reentry.episode !== null && this.reentry.episode.episodeId !== null) {
+        this.CheckpointPublishedBody()
+      } else {
+        Text('隔几天回到项目时，先用 60 秒看清上次做到哪、哪些结论仍有效。')
+          .fontSize(PMFontSize.SECONDARY)
+          .fontColor(PMColors.INK_TERTIARY)
+          .margin({ top: 8 })
+      }
+    }
+    .width('100%')
+    .padding(PMSpacing.LG)
+    .backgroundColor(PMColors.SURFACE)
+    .borderRadius(PMRadius.LG)
+    .border({ width: 1, color: PMColors.BORDER })
+    .margin({ top: PMSpacing.MD })
+  }
+
+  @Builder
+  CheckpointPreviewBody() {
+    Text('预览未生效：确认后才成为当前阶段判断；每条事实都能打开来源。')
+      .fontSize(PMFontSize.SECONDARY)
+      .fontColor(PMColors.INK_TERTIARY)
+      .margin({ top: 8 })
+    ForEach(this.previewSections(), (section: EpisodeSummarySection) => {
+      Text(`${section.section}: ${section.text}`)
+        .fontSize(PMFontSize.SECONDARY)
+        .fontColor(PMColors.INK_PRIMARY)
+        .margin({ top: 6 })
+    }, (section: EpisodeSummarySection) => section.section)
+    Row({ space: 8 }) {
+      Button('取消')
+        .buttonStyle(ButtonStyleMode.NORMAL)
+        .fontSize(PMFontSize.SECONDARY)
+        .onClick(() => {
+          this.cancelCheckpointPreview();
+        })
+      Button(this.checkpointBusy === 'confirm' ? '确认中…' : '确认这一版')
+        .buttonStyle(ButtonStyleMode.EMPHASIZED)
+        .fontSize(PMFontSize.SECONDARY)
+        .enabled(this.checkpointBusy === '')
+        .onClick(() => {
+          this.confirmCheckpoint();
+        })
+    }
+    .width('100%')
+    .justifyContent(FlexAlign.End)
+    .margin({ top: 10 })
+  }
+
+  @Builder
+  CheckpointPublishedBody() {
+    Row() {
+      Text(this.reentry!.episode.title ?? '阶段检查点')
+        .fontSize(PMFontSize.SECONDARY)
+        .fontWeight(FontWeight.Bold)
+        .fontColor(PMColors.INK_PRIMARY)
+        .layoutWeight(1)
+        .maxLines(1)
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+      Text(this.reentry!.episode.status === 'PUBLISHED' ? '结论有效'
+        : (this.reentry!.episode.status === 'PARTIALLY_STALE' ? '部分结论来源已变化' : '基线已失效'))
+        .fontSize(PMFontSize.CAPTION)
+        .fontColor(this.reentry!.episode.status === 'PUBLISHED' ? PMColors.SUCCESS : PMColors.WARNING)
+        .padding({ left: 8, right: 8, top: 2, bottom: 2 })
+        .backgroundColor(PMColors.SURFACE_SUBTLE)
+        .borderRadius(PMRadius.SM)
+    }
+    .width('100%')
+    .margin({ top: 8 })
+    .alignItems(VerticalAlign.Center)
+
+    if (this.reentry!.episode.changesSince.length > 0) {
+      ForEach(this.reentry!.episode.changesSince, (change: string, index: number) => {
+        Text(`· ${change}`)
+          .fontSize(PMFontSize.SECONDARY)
+          .fontColor(PMColors.INK_SECONDARY)
+          .margin({ top: index === 0 ? 6 : 2 })
+      }, (change: string, index: number) => `change-${index}`)
+    } else {
+      Text('检查点之后暂无已确认变化')
+        .fontSize(PMFontSize.SECONDARY)
+        .fontColor(PMColors.INK_TERTIARY)
+        .margin({ top: 6 })
+    }
+
+    if (this.reentry!.primaryMessage !== '') {
+      Text(this.reentry!.primaryMessage)
+        .fontSize(PMFontSize.SECONDARY)
+        .fontColor(PMColors.BRAND)
+        .margin({ top: 8 })
+    }
+
+    Row({ space: 8 }) {
+      Button('继续推进')
+        .buttonStyle(ButtonStyleMode.EMPHASIZED)
+        .fontSize(PMFontSize.SECONDARY)
+        .onClick(() => {
+          this.currentTabIndex = 2;
+        })
+      Button(this.checkpointBusy === 'refresh' ? '整理中…' : '根据最新来源重新整理')
+        .buttonStyle(ButtonStyleMode.NORMAL)
+        .fontSize(PMFontSize.SECONDARY)
+        .enabled(this.checkpointBusy === '')
+        .onClick(() => {
+          this.refreshCheckpoint();
+        })
+    }
+    .width('100%')
+    .justifyContent(FlexAlign.End)
+    .margin({ top: 10 })
   }
 
   private getTopOpenIntervention(): Intervention | undefined {
@@ -1701,6 +1967,9 @@ struct ProjectHome {
             this.currentTabIndex = 2;
           }
         })
+
+        // R2 阶段检查点：把散乱记忆收束为可确认版本，60 秒再入口
+        this.EpisodeCheckpointCardView()
 
         // 问题一：现在怎么样？（当前判断与准备度）
         Column() {

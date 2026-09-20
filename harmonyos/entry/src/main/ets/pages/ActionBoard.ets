@@ -4,6 +4,8 @@ import { ApiError } from '../models/Project';
 import { ActionCreateInput, ActionItem, FeasibilityAssessment, FeasibilityDependency } from '../models/Action';
 import { ActionFeasibilityEditor } from '../components/ActionFeasibilityEditor';
 import { ActionService } from '../services/ActionService';
+import { ReentryService, SchedulePreviewBody, ScheduleConfirmBody, ScheduleSlotBody } from '../services/ReentryService';
+import { ScheduleBlock, SchedulePlan, ScheduleSkipReason } from '../models/Reentry';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMaterial } from '../common/DesignTokens';
 import { PMAppBar } from '../components/PMAppBar';
 import { StatusBadge } from '../components/MetricBadge';
@@ -31,6 +33,262 @@ struct ActionBoard {
   @State feasibilityFor: FeasibilityAssessment = new FeasibilityAssessment();
   @State isLoadingFeasibility: boolean = false;
   @State isCreatingDepTask: boolean = false;
+
+  // ---- R2 可执行安排：只安排当前 READY 的行动 ----
+  private reentryService: ReentryService = new ReentryService();
+  @State showSchedulePlanner: boolean = false;
+  @State schedulePlan: SchedulePlan | null = null;
+  @State schedulePreview: SchedulePlan | null = null;
+  @State scheduleStartTime: string = '19:00';
+  @State scheduleEndTime: string = '22:00';
+  @State scheduleDays: string = '7';
+  @State scheduleBusy: string = '';
+  @State scheduleMessage: string = '';
+  @State scheduleError: string = '';
+
+  private scheduleSlotInstant(dayOffset: number, time: string): string {
+    const date = new Date();
+    date.setDate(date.getDate() + dayOffset);
+    const parts = time.split(':');
+    if (parts.length >= 2) {
+      const hours = Number(parts[0]);
+      const minutes = Number(parts[1]);
+      if (!Number.isNaN(hours) && !Number.isNaN(minutes)) {
+        date.setHours(hours, minutes, 0, 0);
+      }
+    }
+    return date.toISOString();
+  }
+
+  private async loadCurrentSchedule(): Promise<void> {
+    try {
+      const response = await this.reentryService.getCurrentSchedule(this.projectId);
+      this.schedulePlan = response.plan;
+    } catch (e) {
+      this.schedulePlan = null;
+    }
+  }
+
+  private async generateSchedulePreview(): Promise<void> {
+    if (this.scheduleBusy !== '') {
+      return;
+    }
+    this.scheduleBusy = 'preview';
+    this.scheduleError = '';
+    this.scheduleMessage = '';
+    try {
+      const days = Number(this.scheduleDays);
+      const total = Number.isNaN(days) ? 7 : Math.min(7, Math.max(1, Math.round(days)));
+      const slots: ScheduleSlotBody[] = [];
+      for (let i = 1; i <= total; i++) {
+        const slot = new ScheduleSlotBody();
+        slot.start = this.scheduleSlotInstant(i, this.scheduleStartTime);
+        slot.end = this.scheduleSlotInstant(i, this.scheduleEndTime);
+        if (new Date(slot.end).getTime() > new Date(slot.start).getTime()) {
+          slots.push(slot);
+        }
+      }
+      if (slots.length === 0) {
+        this.scheduleError = '可用时间区间无效：结束时间必须晚于开始时间。';
+        return;
+      }
+      const body = new SchedulePreviewBody();
+      body.requestId = `sched-${Date.now()}-${Math.floor(Math.random() * 100000000)}`;
+      body.rangeStart = slots[0].start;
+      body.rangeEnd = slots[slots.length - 1].end;
+      body.slots = slots;
+      const plan = await this.reentryService.previewSchedule(this.projectId, body);
+      this.schedulePreview = plan;
+    } catch (e) {
+      this.scheduleError = e instanceof ApiError ? e.message : '生成排程预览失败';
+    } finally {
+      this.scheduleBusy = '';
+    }
+  }
+
+  private async confirmSchedule(): Promise<void> {
+    const preview = this.schedulePreview;
+    if (this.scheduleBusy !== '' || preview === null) {
+      return;
+    }
+    this.scheduleBusy = 'confirm';
+    this.scheduleError = '';
+    try {
+      const body = new ScheduleConfirmBody();
+      body.requestId = `sched-${Date.now()}-${Math.floor(Math.random() * 100000000)}`;
+      body.expectedVersion = preview.version;
+      await this.reentryService.confirmSchedule(this.projectId, preview.id, body);
+      this.schedulePreview = null;
+      this.showSchedulePlanner = false;
+      this.scheduleMessage = '未来安排已确认';
+      await this.loadCurrentSchedule();
+    } catch (e) {
+      this.scheduleError = e instanceof ApiError ? e.message : '确认安排失败';
+    } finally {
+      this.scheduleBusy = '';
+    }
+  }
+
+  private scheduleTimeLabel(iso: string): string {
+    const date = new Date(iso);
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${date.getMonth() + 1}/${date.getDate()} ${hours}:${minutes}`;
+  }
+
+  private scheduleReasonLabel(code: string): string {
+    if (code === 'MISSING_ESTIMATE') return '待补估时';
+    if (code === 'BLOCKED') return '受阻';
+    if (code === 'UNKNOWN') return '待确认';
+    if (code === 'NO_CAPACITY') return '容量不足';
+    return '未安排';
+  }
+
+  @Builder
+  ScheduleSection() {
+    Column() {
+      Row() {
+        Column() {
+          Text('可执行安排')
+            .fontSize(PMFontSize.SECONDARY)
+            .fontColor(PMColors.INK_TERTIARY)
+          Text('安排未来 7 天')
+            .fontSize(PMFontSize.SECTION_TITLE)
+            .fontWeight(FontWeight.Bold)
+            .fontColor(PMColors.INK_PRIMARY)
+            .margin({ top: 2 })
+        }
+        .alignItems(HorizontalAlign.Start)
+        .layoutWeight(1)
+
+        Text(this.showSchedulePlanner ? '收起' : '预览安排')
+          .fontSize(PMFontSize.SECONDARY)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.BRAND)
+          .padding({ left: 10, right: 10, top: 6, bottom: 6 })
+          .backgroundColor(PMColors.BRAND_LIGHT)
+          .borderRadius(PMRadius.MD)
+          .onClick(() => {
+            this.showSchedulePlanner = !this.showSchedulePlanner;
+            this.schedulePreview = null;
+          })
+      }
+      .width('100%')
+      .alignItems(VerticalAlign.Center)
+
+      if (this.scheduleMessage !== '') {
+        Text(this.scheduleMessage)
+          .fontSize(PMFontSize.SECONDARY)
+          .fontColor(PMColors.SUCCESS)
+          .margin({ top: 6 })
+      }
+      if (this.scheduleError !== '') {
+        Text(this.scheduleError)
+          .fontSize(PMFontSize.SECONDARY)
+          .fontColor(PMColors.RISK)
+          .margin({ top: 6 })
+      }
+
+      if (this.schedulePlan !== null && this.schedulePlan!.blocks.length > 0) {
+        Text('当前已确认安排')
+          .fontSize(PMFontSize.SECONDARY)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(PMColors.INK_PRIMARY)
+          .margin({ top: 8 })
+        ForEach(this.schedulePlan!.blocks, (block: ScheduleBlock) => {
+          Text(`${block.actionTitle !== '' ? block.actionTitle : '行动'} · ${this.scheduleTimeLabel(block.start)}`)
+            .fontSize(PMFontSize.SECONDARY)
+            .fontColor(PMColors.INK_SECONDARY)
+            .margin({ top: 4 })
+        }, (block: ScheduleBlock) => block.id ?? '')
+      }
+
+      if (this.showSchedulePlanner && this.schedulePreview === null) {
+        Row() {
+          TextInput({ text: this.scheduleStartTime })
+            .onChange((value: string) => {
+              this.scheduleStartTime = value;
+            })
+            .width(84)
+            .height(36)
+          Text('至').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_TERTIARY)
+          TextInput({ text: this.scheduleEndTime })
+            .onChange((value: string) => {
+              this.scheduleEndTime = value;
+            })
+            .width(84)
+            .height(36)
+          TextInput({ text: this.scheduleDays })
+            .onChange((value: string) => {
+              this.scheduleDays = value;
+            })
+            .width(52)
+            .height(36)
+          Text('天').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_TERTIARY)
+          Blank()
+          Button(this.scheduleBusy === 'preview' ? '生成中…' : '生成预览')
+            .buttonStyle(ButtonStyleMode.EMPHASIZED)
+            .fontSize(PMFontSize.SECONDARY)
+            .enabled(this.scheduleBusy === '')
+            .onClick(() => {
+              this.generateSchedulePreview();
+            })
+        }
+        .width('100%')
+        .margin({ top: 10 })
+        .alignItems(VerticalAlign.Center)
+
+        Text('每天可用时段（如 19:00）；只安排当前可开始（READY）的行动。')
+          .fontSize(PMFontSize.CAPTION)
+          .fontColor(PMColors.INK_TERTIARY)
+          .margin({ top: 4 })
+      }
+
+      if (this.schedulePreview !== null) {
+        Text(`已安排（${this.schedulePreview!.blocks.length}）`)
+          .fontSize(PMFontSize.SECONDARY)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(PMColors.SUCCESS)
+          .margin({ top: 8 })
+        ForEach(this.schedulePreview!.blocks, (block: ScheduleBlock) => {
+          Text(`· ${block.actionTitle !== '' ? block.actionTitle : '行动'} · ${this.scheduleTimeLabel(block.start)}`)
+            .fontSize(PMFontSize.SECONDARY)
+            .fontColor(PMColors.INK_SECONDARY)
+            .margin({ top: 4 })
+        }, (block: ScheduleBlock) => block.id ?? '')
+        ForEach(this.schedulePreview!.unscheduled, (item: ScheduleSkipReason) => {
+          Text(`· ${this.scheduleReasonLabel(item.reasonCode)}：${item.actionTitle !== '' ? item.actionTitle : '行动'} — ${item.message}`)
+            .fontSize(PMFontSize.SECONDARY)
+            .fontColor(PMColors.INK_TERTIARY)
+            .margin({ top: 4 })
+        }, (item: ScheduleSkipReason) => `${item.actionId}-${item.reasonCode}`)
+        Row({ space: 8 }) {
+          Button('重新填写时间')
+            .buttonStyle(ButtonStyleMode.NORMAL)
+            .fontSize(PMFontSize.SECONDARY)
+            .onClick(() => {
+              this.schedulePreview = null;
+            })
+          Button(this.scheduleBusy === 'confirm' ? '确认中…' : '确认安排')
+            .buttonStyle(ButtonStyleMode.EMPHASIZED)
+            .fontSize(PMFontSize.SECONDARY)
+            .enabled(this.scheduleBusy === '' && this.schedulePreview !== null && this.schedulePreview!.blocks.length > 0)
+            .onClick(() => {
+              this.confirmSchedule();
+            })
+        }
+        .width('100%')
+        .justifyContent(FlexAlign.End)
+        .margin({ top: 10 })
+      }
+    }
+    .width('100%')
+    .padding(PMSpacing.LG)
+    .backgroundColor(PMColors.SURFACE)
+    .borderRadius(PMRadius.LG)
+    .border({ width: 1, color: PMColors.BORDER })
+    .margin({ top: PMSpacing.MD })
+  }
 
   private async openFeasibilityEditor(): Promise<void> {
     if (this.isLoadingFeasibility) {
@@ -134,6 +392,7 @@ struct ActionBoard {
     }
     this.highlightActionId = params['actionId'] ?? '';
     this.loadActions();
+    this.loadCurrentSchedule();
   }
 
   private async loadActions(): Promise<void> {
@@ -448,6 +707,9 @@ struct ActionBoard {
           .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.SM })
           .backgroundColor(PMColors.SURFACE)
           .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
+
+          // R2 可执行安排：预览并确认未来 7 天的应用内时段
+          this.ScheduleSection()
 
           List({ space: PMSpacing.MD }) {
             // 进行中

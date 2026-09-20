@@ -12,6 +12,7 @@ struct WidgetCard {
   @LocalStorageProp('readiness') readiness: number = 0;
   @LocalStorageProp('nextAction') nextAction: string = '打开应用同步待办';
   @LocalStorageProp('status') status: string = '进行中';
+  @LocalStorageProp('checkpointInfo') checkpointInfo: string = '';
 
   build() {
     Column() {
@@ -104,6 +105,17 @@ struct WidgetCard {
       }
       .width('100%')
       .margin({ top: 4, bottom: 4 })
+
+      // 检查点状态行（仅 2*4 展示：检查点新鲜度与新变化数量）
+      if (this.formDimension === 3 && this.checkpointInfo.length > 0) {
+        Text(this.checkpointInfo)
+          .fontSize(9)
+          .fontColor('#64748B')
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .width('100%')
+          .margin({ bottom: 2 })
+      }
 
       // ------------------------------------
       // 底栏：今日第一要务卡片（点击直达待办）

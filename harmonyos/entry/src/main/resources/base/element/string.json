@@ -21,6 +21,14 @@
       "value": "用于提醒高风险项目介入并打开对应依据"
     },
     {
+      "name": "calendar_read_reason",
+      "value": "用于读取你的日历，在写入安排前检查是否与既有日程冲突"
+    },
+    {
+      "name": "calendar_write_reason",
+      "value": "用于把你确认的项目安排写入系统日历，取消时会同步撤销"
+    },
+    {
       "name": "widget_display_name",
       "value": "忆程备赛看板"
     },

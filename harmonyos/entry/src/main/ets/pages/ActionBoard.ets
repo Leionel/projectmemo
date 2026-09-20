@@ -4,8 +4,10 @@ import { ApiError } from '../models/Project';
 import { ActionCreateInput, ActionItem, FeasibilityAssessment, FeasibilityDependency } from '../models/Action';
 import { ActionFeasibilityEditor } from '../components/ActionFeasibilityEditor';
 import { ActionService } from '../services/ActionService';
-import { ReentryService, SchedulePreviewBody, ScheduleConfirmBody, ScheduleSlotBody } from '../services/ReentryService';
-import { ScheduleBlock, SchedulePlan, ScheduleSkipReason } from '../models/Reentry';
+import { ReentryService, SchedulePreviewBody, ScheduleConfirmBody, ScheduleSlotBody, CalendarSyncBody, CalendarRevokeBody } from '../services/ReentryService';
+import { ScheduleBlock, ScheduleCalendarEntry, SchedulePlan, ScheduleSkipReason } from '../models/Reentry';
+import { CalendarSyncService, CalendarOption, CalendarConflict } from '../services/CalendarSyncService';
+import { common } from '@kit.AbilityKit';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMaterial } from '../common/DesignTokens';
 import { PMAppBar } from '../components/PMAppBar';
 import { StatusBadge } from '../components/MetricBadge';
@@ -45,6 +47,15 @@ struct ActionBoard {
   @State scheduleBusy: string = '';
   @State scheduleMessage: string = '';
   @State scheduleError: string = '';
+
+  // ---- R2 系统日历同步：授权 → 选择日历 → 冲突预览 → 用户确认写入 → 可撤销 ----
+  @State calendarStage: string = '';
+  @State calendarOptions: CalendarOption[] = [];
+  @State calendarChoice: string = '';
+  @State calendarConflicts: CalendarConflict[] = [];
+  @State calendarBusy: string = '';
+  @State calendarMessage: string = '';
+  @State calendarError: string = '';
 
   private scheduleSlotInstant(dayOffset: number, time: string): string {
     const date = new Date();
@@ -137,11 +148,155 @@ struct ActionBoard {
   }
 
   private scheduleReasonLabel(code: string): string {
-    if (code === 'MISSING_ESTIMATE') return '待补估时';
-    if (code === 'BLOCKED') return '受阻';
-    if (code === 'UNKNOWN') return '待确认';
-    if (code === 'NO_CAPACITY') return '容量不足';
+    if (code === 'MISSING_ESTIMATE') return '缺少估时';
+    if (code === 'BLOCKED') return '依赖阻塞';
+    if (code === 'UNKNOWN') return '证据不足';
+    if (code === 'DONE_OR_CANCELLED') return '行动已取消或完成';
+    if (code === 'NO_CAPACITY') return '时间容量不足';
+    if (code === 'CROSS_PROJECT_CONFLICT') return '跨项目冲突';
+    if (code === 'VERSION_CHANGED') return '预览后版本变化';
+    if (code === 'ALREADY_SCHEDULED') return '已在当前安排中';
     return '未安排';
+  }
+
+  /** 未安排原因按固定顺序分组，保证每个行动都能看懂为什么没被排入 */
+  private reasonOrder(): string[] {
+    return ['MISSING_ESTIMATE', 'BLOCKED', 'UNKNOWN', 'DONE_OR_CANCELLED', 'NO_CAPACITY', 'CROSS_PROJECT_CONFLICT', 'VERSION_CHANGED', 'ALREADY_SCHEDULED'];
+  }
+
+  private unscheduledByCode(code: string): ScheduleSkipReason[] {
+    const preview = this.schedulePreview;
+    if (preview === null) {
+      return [];
+    }
+    return preview.unscheduled.filter((item: ScheduleSkipReason) => item.reasonCode === code);
+  }
+
+  private calendarStatusLabel(status: string): string {
+    if (status === 'SYNCED') return '已写入系统日历';
+    if (status === 'FAILED') return '系统日历写入失败，仅应用内有效';
+    if (status === 'REVOKED') return '已从系统日历撤销';
+    if (status === 'PENDING') return '日历写入中';
+    return '';
+  }
+
+  private async openCalendarFlow(): Promise<void> {
+    const plan = this.schedulePlan;
+    if (plan === null || this.calendarBusy !== '') {
+      return;
+    }
+    this.calendarBusy = 'inspect';
+    this.calendarError = '';
+    this.calendarMessage = '';
+    try {
+      const context = getContext(this) as common.UIAbilityContext;
+      const capability = await CalendarSyncService.inspect(context);
+      if (!capability.supported) {
+        // 设备不支持：如实说明并回退应用内排程
+        this.calendarError = `${capability.reason}，已保留应用内安排`;
+        return;
+      }
+      if (!capability.granted) {
+        const permission = await CalendarSyncService.requestPermission(context);
+        if (!permission.granted) {
+          this.calendarError = permission.reason !== '' ? permission.reason : '未获得日历权限，已保留应用内安排';
+          return;
+        }
+      }
+      this.calendarOptions = await CalendarSyncService.listCalendars(context);
+      this.calendarChoice = this.calendarOptions.length > 0 ? this.calendarOptions[0].id : '';
+      this.calendarStage = 'calendars';
+    } catch (e) {
+      this.calendarError = e instanceof ApiError ? e.message : '日历能力不可用，已保留应用内安排';
+    } finally {
+      this.calendarBusy = '';
+    }
+  }
+
+  private async previewCalendarWrite(): Promise<void> {
+    const plan = this.schedulePlan;
+    if (plan === null || this.calendarBusy !== '') {
+      return;
+    }
+    this.calendarBusy = 'preview';
+    this.calendarError = '';
+    try {
+      const context = getContext(this) as common.UIAbilityContext;
+      const pending = plan.blocks.filter((block: ScheduleBlock) => block.calendar.status !== 'SYNCED');
+      this.calendarConflicts = await CalendarSyncService.findConflicts(context, this.calendarChoice, pending);
+      this.calendarStage = 'confirm';
+    } catch (e) {
+      this.calendarError = e instanceof ApiError ? e.message : '冲突检查失败，未写入任何日程';
+    } finally {
+      this.calendarBusy = '';
+    }
+  }
+
+  private async writeCalendar(): Promise<void> {
+    const plan = this.schedulePlan;
+    if (plan === null || this.calendarBusy !== '') {
+      return;
+    }
+    this.calendarBusy = 'write';
+    this.calendarError = '';
+    try {
+      const context = getContext(this) as common.UIAbilityContext;
+      const pending = plan.blocks.filter((block: ScheduleBlock) => block.calendar.status !== 'SYNCED');
+      const entries = await CalendarSyncService.writeBlocks(context, this.calendarChoice, pending);
+      const body = new CalendarSyncBody();
+      body.entries = entries;
+      const updated = await this.reentryService.reportCalendarSync(this.projectId, plan.id, body);
+      this.schedulePlan = updated;
+      this.calendarStage = '';
+      const failed = entries.filter((entry: ScheduleCalendarEntry) => entry.status === 'FAILED').length;
+      this.calendarMessage = failed === 0
+        ? `已写入 ${entries.length} 条系统日历日程`
+        : `${entries.length - failed} 条写入成功，${failed} 条失败；应用内安排仍然有效`;
+    } catch (e) {
+      this.calendarError = e instanceof ApiError ? e.message : '日历写入失败，应用内安排不受影响';
+    } finally {
+      this.calendarBusy = '';
+    }
+  }
+
+  private async revokeCalendar(): Promise<void> {
+    const plan = this.schedulePlan;
+    if (plan === null || this.calendarBusy !== '') {
+      return;
+    }
+    this.calendarBusy = 'revoke';
+    this.calendarError = '';
+    try {
+      const context = getContext(this) as common.UIAbilityContext;
+      const synced = plan.blocks.filter((block: ScheduleBlock) => block.calendar.status === 'SYNCED');
+      const calendarId = synced.length > 0 && synced[0].calendar.calendarId !== null ? synced[0].calendar.calendarId! : this.calendarChoice;
+      const revokedIds = await CalendarSyncService.revokeBlocks(context, calendarId, synced);
+      const body = new CalendarRevokeBody();
+      body.blockIds = revokedIds;
+      const updated = await this.reentryService.revokeCalendarSync(this.projectId, plan.id, body);
+      this.schedulePlan = updated;
+      this.calendarMessage = revokedIds.length > 0 ? `已从系统日历撤销 ${revokedIds.length} 条日程` : '没有需要撤销的日程';
+    } catch (e) {
+      this.calendarError = e instanceof ApiError ? e.message : '撤销失败，请稍后重试';
+    } finally {
+      this.calendarBusy = '';
+    }
+  }
+
+  private hasSyncedBlocks(): boolean {
+    const plan = this.schedulePlan;
+    if (plan === null) {
+      return false;
+    }
+    return plan.blocks.some((block: ScheduleBlock) => block.calendar.status === 'SYNCED');
+  }
+
+  private hasUnsyncedBlocks(): boolean {
+    const plan = this.schedulePlan;
+    if (plan === null) {
+      return false;
+    }
+    return plan.blocks.some((block: ScheduleBlock) => block.calendar.status !== 'SYNCED');
   }
 
   @Builder
@@ -196,11 +351,137 @@ struct ActionBoard {
           .fontColor(PMColors.INK_PRIMARY)
           .margin({ top: 8 })
         ForEach(this.schedulePlan!.blocks, (block: ScheduleBlock) => {
-          Text(`${block.actionTitle !== '' ? block.actionTitle : '行动'} · ${this.scheduleTimeLabel(block.start)}`)
-            .fontSize(PMFontSize.SECONDARY)
-            .fontColor(PMColors.INK_SECONDARY)
-            .margin({ top: 4 })
+          Column() {
+            Text(`${block.actionTitle !== '' ? block.actionTitle : '行动'} · ${this.scheduleTimeLabel(block.start)}`)
+              .fontSize(PMFontSize.SECONDARY)
+              .fontColor(PMColors.INK_SECONDARY)
+              .margin({ top: 4 })
+            if (this.calendarStatusLabel(block.calendar.status) !== '') {
+              Text(this.calendarStatusLabel(block.calendar.status))
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(block.calendar.status === 'FAILED' ? PMColors.WARNING : PMColors.SUCCESS)
+                .margin({ top: 2 })
+            }
+            if (block.calendar.status === 'FAILED' && block.calendar.error !== null) {
+              Text(block.calendar.error!)
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_TERTIARY)
+            }
+          }
+          .width('100%')
+          .alignItems(HorizontalAlign.Start)
         }, (block: ScheduleBlock) => block.id ?? '')
+
+        // 系统日历同步：只在用户确认后写入，且只管理自己创建的事件
+        if (this.calendarMessage !== '') {
+          Text(this.calendarMessage)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.SUCCESS)
+            .margin({ top: 6 })
+        }
+        if (this.calendarError !== '') {
+          Text(this.calendarError)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.WARNING)
+            .margin({ top: 6 })
+        }
+        Row({ space: 8 }) {
+          if (this.hasUnsyncedBlocks()) {
+            Button(this.calendarBusy !== '' ? '处理中…' : '同步到系统日历')
+              .buttonStyle(ButtonStyleMode.NORMAL)
+              .fontSize(PMFontSize.CAPTION)
+              .enabled(this.calendarBusy === '')
+              .onClick(() => {
+                this.openCalendarFlow();
+              })
+          }
+          if (this.hasSyncedBlocks()) {
+            Button('从系统日历撤销')
+              .buttonStyle(ButtonStyleMode.NORMAL)
+              .fontSize(PMFontSize.CAPTION)
+              .enabled(this.calendarBusy === '')
+              .onClick(() => {
+                this.revokeCalendar();
+              })
+          }
+        }
+        .width('100%')
+        .justifyContent(FlexAlign.Start)
+        .margin({ top: 8 })
+
+        if (this.calendarStage === 'calendars') {
+          Column() {
+            Text('选择要写入的日历（不会修改或删除你已有的日程）')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+            ForEach(this.calendarOptions, (option: CalendarOption) => {
+              Row() {
+                Radio({ value: option.id, group: 'calendarChoice' })
+                  .checked(this.calendarChoice === option.id)
+                  .onChange((checked: boolean) => {
+                    if (checked) {
+                      this.calendarChoice = option.id;
+                    }
+                  })
+                Text(option.label)
+                  .fontSize(PMFontSize.SECONDARY)
+                  .fontColor(PMColors.INK_PRIMARY)
+                  .margin({ left: 6 })
+              }
+              .width('100%')
+              .margin({ top: 4 })
+            }, (option: CalendarOption) => option.id)
+            Button('下一步：检查冲突')
+              .buttonStyle(ButtonStyleMode.EMPHASIZED)
+              .fontSize(PMFontSize.CAPTION)
+              .margin({ top: 8 })
+              .onClick(() => {
+                this.previewCalendarWrite();
+              })
+          }
+          .width('100%')
+          .alignItems(HorizontalAlign.Start)
+          .margin({ top: 8 })
+        }
+
+        if (this.calendarStage === 'confirm') {
+          Column() {
+            if (this.calendarConflicts.length > 0) {
+              Text('以下时段与你已有日程重叠，请自行决定；系统不会覆盖或删除既有日程：')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.WARNING)
+              ForEach(this.calendarConflicts, (conflict: CalendarConflict) => {
+                Text(`· ${conflict.actionTitle} 与「${conflict.existingTitle}」重叠（${this.scheduleTimeLabel(conflict.start)}）`)
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.INK_SECONDARY)
+                  .margin({ top: 2 })
+              }, (conflict: CalendarConflict) => `${conflict.blockId}-${conflict.existingTitle}`)
+            } else {
+              Text('未发现与既有日程重叠，可写入系统日历。')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_TERTIARY)
+            }
+            Row({ space: 8 }) {
+              Button('先不写')
+                .buttonStyle(ButtonStyleMode.NORMAL)
+                .fontSize(PMFontSize.CAPTION)
+                .onClick(() => {
+                  this.calendarStage = '';
+                })
+              Button(this.calendarBusy === 'write' ? '写入中…' : '确认写入日历')
+                .buttonStyle(ButtonStyleMode.EMPHASIZED)
+                .fontSize(PMFontSize.CAPTION)
+                .enabled(this.calendarBusy === '')
+                .onClick(() => {
+                  this.writeCalendar();
+                })
+            }
+            .margin({ top: 8 })
+          }
+          .width('100%')
+          .alignItems(HorizontalAlign.Start)
+          .margin({ top: 8 })
+        }
       }
 
       if (this.showSchedulePlanner && this.schedulePreview === null) {
@@ -256,12 +537,25 @@ struct ActionBoard {
             .fontColor(PMColors.INK_SECONDARY)
             .margin({ top: 4 })
         }, (block: ScheduleBlock) => block.id ?? '')
-        ForEach(this.schedulePreview!.unscheduled, (item: ScheduleSkipReason) => {
-          Text(`· ${this.scheduleReasonLabel(item.reasonCode)}：${item.actionTitle !== '' ? item.actionTitle : '行动'} — ${item.message}`)
-            .fontSize(PMFontSize.SECONDARY)
-            .fontColor(PMColors.INK_TERTIARY)
-            .margin({ top: 4 })
-        }, (item: ScheduleSkipReason) => `${item.actionId}-${item.reasonCode}`)
+        ForEach(this.reasonOrder(), (code: string) => {
+          if (this.unscheduledByCode(code).length > 0) {
+            Column() {
+              Text(`${this.scheduleReasonLabel(code)}（${this.unscheduledByCode(code).length}）`)
+                .fontSize(PMFontSize.CAPTION)
+                .fontWeight(FontWeight.Bold)
+                .fontColor(PMColors.INK_PRIMARY)
+              ForEach(this.unscheduledByCode(code), (item: ScheduleSkipReason) => {
+                Text(`· ${item.actionTitle !== '' ? item.actionTitle : '行动'}：${item.message}`)
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.INK_TERTIARY)
+                  .margin({ top: 2 })
+              }, (item: ScheduleSkipReason) => `${item.actionId}-${item.reasonCode}`)
+            }
+            .width('100%')
+            .alignItems(HorizontalAlign.Start)
+            .margin({ top: 8 })
+          }
+        }, (code: string) => code)
         Row({ space: 8 }) {
           Button('重新填写时间')
             .buttonStyle(ButtonStyleMode.NORMAL)

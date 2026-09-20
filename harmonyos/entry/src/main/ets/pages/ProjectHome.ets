@@ -28,7 +28,7 @@ import { AttachmentService } from '../services/AttachmentService';
 import { MilestoneService } from '../services/MilestoneService';
 import { WidgetDataService } from '../services/WidgetDataService';
 import { ReentryService, EpisodePreviewBody, EpisodeConfirmBody } from '../services/ReentryService';
-import { ReentryData, Episode, EpisodeRevision, EpisodeSummarySection } from '../models/Reentry';
+import { ReentryData, Episode, EpisodeRevision, EpisodeSummarySection, EpisodeClaim, EpisodeSourceRef } from '../models/Reentry';
 
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily, PMInteraction, PMMotion, PMMaterial, PMTransition } from '../common/DesignTokens';
 import { PMBreakpoint, PMStorageKey, PMWidthBp } from '../common/WindowMetrics';
@@ -177,6 +177,11 @@ struct ProjectHome {
   @State checkpointBusy: string = '';
   @State checkpointMessage: string = '';
   @State checkpointError: string = '';
+  // 已确认检查点的完整详情（含全部版本与来源状态），来源弹层与历史版本都读它
+  @State episodeDetail: Episode | null = null;
+  @State sourceSheetClaim: EpisodeClaim | null = null;
+  @State showSourceSheet: boolean = false;
+  @State viewingRevision: number = 0;
   private memorySearchSerial: number = 0;
 
   private sourceOptions: string[] = [
@@ -405,6 +410,14 @@ struct ProjectHome {
       if (reentryData !== null) {
         this.reentry = reentryData;
         WidgetDataService.updateWidgetWithReentry(getContext(this), reentryData).catch(() => {});
+        const episodeId = reentryData.episode !== null ? reentryData.episode.episodeId : null;
+        if (episodeId !== null) {
+          this.episodeDetail = await this.reentryService.getEpisode(this.projectId, episodeId)
+            .then((result) => result.episode)
+            .catch(() => null);
+        } else {
+          this.episodeDetail = null;
+        }
       } else if (this.project) {
         WidgetDataService.updateWidgetWithProjectDetail(getContext(this), this.project, this.dashboard).catch(() => {});
       }
@@ -520,11 +533,121 @@ struct ProjectHome {
       const reentryData = await this.reentryService.getReentry(this.projectId);
       this.reentry = reentryData;
       WidgetDataService.updateWidgetWithReentry(getContext(this), reentryData).catch(() => {});
+      this.viewingRevision = 0;
+      if (reentryData.episode.episodeId !== null) {
+        this.episodeDetail = await this.reentryService.getEpisode(this.projectId, reentryData.episode.episodeId!)
+          .then((result) => result.episode)
+          .catch(() => null);
+      }
     } catch (e) {
       this.checkpointError = e instanceof ApiError ? e.message : '确认检查点失败';
     } finally {
       this.checkpointBusy = '';
     }
+  }
+
+  private publishedRevisions(): EpisodeRevision[] {
+    const detail = this.episodeDetail;
+    if (detail === null) {
+      return [];
+    }
+    return detail.revisions.filter((item: EpisodeRevision) => item.status === 'PUBLISHED');
+  }
+
+  /** 当前版本 = 已发布修订中版本号最大者；历史版本只读 */
+  private currentRevision(): EpisodeRevision | null {
+    const published = this.publishedRevisions();
+    if (published.length === 0) {
+      return null;
+    }
+    let best = published[0];
+    for (let i = 1; i < published.length; i++) {
+      if (published[i].revision > best.revision) {
+        best = published[i];
+      }
+    }
+    return best;
+  }
+
+  private viewingRevisionData(): EpisodeRevision | null {
+    const detail = this.episodeDetail;
+    if (detail === null) {
+      return null;
+    }
+    if (this.viewingRevision > 0) {
+      const found = detail.revisions.filter((item: EpisodeRevision) => item.revision === this.viewingRevision);
+      if (found.length > 0) {
+        return found[0];
+      }
+    }
+    return this.currentRevision();
+  }
+
+  private claimSourceRefs(claim: EpisodeClaim, revision: EpisodeRevision): EpisodeSourceRef[] {
+    return revision.sourceRefs.filter((ref: EpisodeSourceRef) => claim.sourceRefIds.indexOf(ref.refId) >= 0);
+  }
+
+  private sourceStateLabel(refId: string): string {
+    const detail = this.episodeDetail;
+    if (detail === null || detail.freshness === undefined) {
+      return '冻结版本';
+    }
+    const states = detail.freshness.sources.filter((item) => item.refId === refId);
+    if (states.length === 0) {
+      return '冻结版本';
+    }
+    return states[0].displayReason;
+  }
+
+  private isClaimAffected(claimId: string): boolean {
+    const detail = this.episodeDetail;
+    if (detail === null || detail.freshness === undefined) {
+      return false;
+    }
+    return detail.freshness.affectedClaims.some((item) => item.claimId === claimId);
+  }
+
+  private viewingClaims(): EpisodeClaim[] {
+    const revision = this.viewingRevisionData();
+    if (revision === null) {
+      return [];
+    }
+    return revision.claims;
+  }
+
+  private claimKindLabel(kind: string): string {
+    if (kind === 'FACT') return '事实';
+    if (kind === 'RULE') return '系统判断';
+    return '建议';
+  }
+
+  private sourceKindLabel(kind: string): string {
+    if (kind === 'CARD') return '记录';
+    if (kind === 'ATTACHMENT_REVISION') return '附件修订';
+    if (kind === 'ACTION_RESULT') return '行动结果';
+    return '状态快照';
+  }
+
+  private formatObservedAt(value: string): string {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return '—';
+    }
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+  }
+
+  private openOriginalRecord(ref: EpisodeSourceRef): void {
+    // 原始记录在「记忆」页：切页并提示定位，不伪造已打开
+    this.showSourceSheet = false;
+    this.currentTabIndex = 1;
+    promptAction.showToast({ message: `已切到记忆列表，请查找《${ref.title}》` });
+  }
+
+  private episodeStatusText(status: string | null): string {
+    if (status === 'PUBLISHED') return '结论有效';
+    if (status === 'PARTIALLY_STALE') return '部分失效';
+    if (status === 'STALE') return '已失效';
+    return '草稿';
   }
 
   private previewSections(): EpisodeSummarySection[] {
@@ -610,11 +733,18 @@ struct ProjectHome {
     .borderRadius(PMRadius.LG)
     .border({ width: 1, color: PMColors.BORDER })
     .margin({ top: PMSpacing.MD })
+    .bindSheet(this.showSourceSheet, this.SourceSheetBody(), {
+      height: 560,
+      showClose: true,
+      onDisappear: () => {
+        this.showSourceSheet = false;
+      }
+    })
   }
 
   @Builder
   CheckpointPreviewBody() {
-    Text('预览未生效：确认后才成为当前阶段判断；每条事实都能打开来源。')
+    Text('预览未生效：确认后才成为当前阶段判断。每条事实句都可以打开当时的来源。')
       .fontSize(PMFontSize.SECONDARY)
       .fontColor(PMColors.INK_TERTIARY)
       .margin({ top: 8 })
@@ -624,6 +754,42 @@ struct ProjectHome {
         .fontColor(PMColors.INK_PRIMARY)
         .margin({ top: 6 })
     }, (section: EpisodeSummarySection) => section.section)
+    ForEach(this.previewClaims(), (claim: EpisodeClaim) => {
+      Column() {
+        Row() {
+          Text(this.claimKindLabel(claim.kind))
+            .fontSize(10)
+            .fontColor(PMColors.BRAND)
+            .padding({ left: 6, right: 6, top: 1, bottom: 1 })
+            .backgroundColor(PMColors.BRAND_LIGHT)
+            .borderRadius(PMRadius.XS)
+          Text(claim.text)
+            .fontSize(PMFontSize.SECONDARY)
+            .fontColor(PMColors.INK_SECONDARY)
+            .layoutWeight(1)
+            .margin({ left: 6 })
+        }
+        .width('100%')
+        .alignItems(VerticalAlign.Top)
+
+        if (claim.kind === 'FACT' && claim.sourceRefIds.length > 0) {
+          Text(`查看 ${claim.sourceRefIds.length} 个来源`)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.BRAND)
+            .margin({ top: 4 })
+            .onClick(() => {
+              this.sourceSheetClaim = claim;
+              this.showSourceSheet = true;
+            })
+        }
+      }
+      .width('100%')
+      .alignItems(HorizontalAlign.Start)
+      .padding(PMSpacing.SM)
+      .backgroundColor(PMColors.SURFACE_SUBTLE)
+      .borderRadius(PMRadius.SM)
+      .margin({ top: 6 })
+    }, (claim: EpisodeClaim) => claim.claimId)
     Row({ space: 8 }) {
       Button('取消')
         .buttonStyle(ButtonStyleMode.NORMAL)
@@ -647,15 +813,14 @@ struct ProjectHome {
   @Builder
   CheckpointPublishedBody() {
     Row() {
-      Text(this.reentry!.episode.title ?? '阶段检查点')
+      Text(`V${this.reentry!.episode.revision ?? 1} · ${this.reentry!.episode.title ?? '阶段检查点'}`)
         .fontSize(PMFontSize.SECONDARY)
         .fontWeight(FontWeight.Bold)
         .fontColor(PMColors.INK_PRIMARY)
         .layoutWeight(1)
         .maxLines(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
-      Text(this.reentry!.episode.status === 'PUBLISHED' ? '结论有效'
-        : (this.reentry!.episode.status === 'PARTIALLY_STALE' ? '部分结论来源已变化' : '基线已失效'))
+      Text(this.episodeStatusText(this.reentry!.episode.status))
         .fontSize(PMFontSize.CAPTION)
         .fontColor(this.reentry!.episode.status === 'PUBLISHED' ? PMColors.SUCCESS : PMColors.WARNING)
         .padding({ left: 8, right: 8, top: 2, bottom: 2 })
@@ -665,6 +830,11 @@ struct ProjectHome {
     .width('100%')
     .margin({ top: 8 })
     .alignItems(VerticalAlign.Center)
+
+    Text(`确认于 ${this.formatObservedAt(this.reentry!.episode.confirmedAt ?? '')} · 来源 ${this.reentry!.episode.sourceCount} 个`)
+      .fontSize(PMFontSize.CAPTION)
+      .fontColor(PMColors.INK_TERTIARY)
+      .margin({ top: 4 })
 
     if (this.reentry!.episode.changesSince.length > 0) {
       ForEach(this.reentry!.episode.changesSince, (change: string, index: number) => {
@@ -687,6 +857,78 @@ struct ProjectHome {
         .margin({ top: 8 })
     }
 
+    ForEach(this.viewingClaims(), (claim: EpisodeClaim) => {
+      Column() {
+        Row() {
+          Text(this.claimKindLabel(claim.kind))
+            .fontSize(10)
+            .fontColor(PMColors.BRAND)
+            .padding({ left: 6, right: 6, top: 1, bottom: 1 })
+            .backgroundColor(PMColors.BRAND_LIGHT)
+            .borderRadius(PMRadius.XS)
+          Text(claim.text)
+            .fontSize(PMFontSize.SECONDARY)
+            .fontColor(this.isClaimAffected(claim.claimId) ? PMColors.WARNING : PMColors.INK_SECONDARY)
+            .layoutWeight(1)
+            .margin({ left: 6 })
+        }
+        .width('100%')
+        .alignItems(VerticalAlign.Top)
+
+        if (claim.kind === 'FACT' && claim.sourceRefIds.length > 0) {
+          Text(`查看 ${claim.sourceRefIds.length} 个来源`)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.BRAND)
+            .margin({ top: 4 })
+            .onClick(() => {
+              this.sourceSheetClaim = claim;
+              this.showSourceSheet = true;
+            })
+        }
+        if (this.isClaimAffected(claim.claimId)) {
+          Text('该结论的来源已变化，可生成新版本；旧版本仍可查看')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.WARNING)
+            .margin({ top: 2 })
+        }
+      }
+      .width('100%')
+      .alignItems(HorizontalAlign.Start)
+      .padding(PMSpacing.SM)
+      .backgroundColor(PMColors.SURFACE_SUBTLE)
+      .borderRadius(PMRadius.SM)
+      .margin({ top: 6 })
+    }, (claim: EpisodeClaim) => claim.claimId)
+
+    if (this.publishedRevisions().length > 1) {
+      Text(`历史版本（${this.publishedRevisions().length}，只读）`)
+        .fontSize(PMFontSize.CAPTION)
+        .fontColor(PMColors.INK_TERTIARY)
+        .margin({ top: 10 })
+      ForEach(this.publishedRevisions(), (revision: EpisodeRevision) => {
+        Row() {
+          Text(`V${revision.revision}`)
+            .fontSize(PMFontSize.SECONDARY)
+            .fontWeight(FontWeight.Bold)
+            .fontColor(PMColors.INK_PRIMARY)
+          Text(revision.confirmedAt !== null ? `确认于 ${this.formatObservedAt(revision.confirmedAt!)}` : '未记录确认时间')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+            .layoutWeight(1)
+            .margin({ left: 8 })
+          Text(this.viewingRevision === revision.revision ? '正在查看' : '查看')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.BRAND)
+            .onClick(() => {
+              this.viewingRevision = this.viewingRevision === revision.revision ? 0 : revision.revision;
+            })
+        }
+        .width('100%')
+        .alignItems(VerticalAlign.Center)
+        .padding({ top: 4, bottom: 4 })
+      }, (revision: EpisodeRevision) => `rev-${revision.revision}`)
+    }
+
     Row({ space: 8 }) {
       Button('继续推进')
         .buttonStyle(ButtonStyleMode.EMPHASIZED)
@@ -705,6 +947,103 @@ struct ProjectHome {
     .width('100%')
     .justifyContent(FlexAlign.End)
     .margin({ top: 10 })
+  }
+
+  private sheetRevision(): EpisodeRevision | null {
+    const preview = this.checkpointPreview;
+    if (preview !== null && preview.revisions.length > 0) {
+      return preview.revisions[preview.revisions.length - 1];
+    }
+    return this.viewingRevisionData();
+  }
+
+  private sheetSourceRefs(): EpisodeSourceRef[] {
+    const claim = this.sourceSheetClaim;
+    const revision = this.sheetRevision();
+    if (claim === null || revision === null) {
+      return [];
+    }
+    return this.claimSourceRefs(claim, revision);
+  }
+
+  private previewClaims(): EpisodeClaim[] {
+    const preview = this.checkpointPreview;
+    if (preview === null || preview.revisions.length === 0) {
+      return [];
+    }
+    return preview.revisions[preview.revisions.length - 1].claims;
+  }
+
+  private isSourceDeleted(ref: EpisodeSourceRef): boolean {
+    return this.sourceStateLabel(ref.refId) === '来源记录已被删除';
+  }
+
+  @Builder
+  SourceSheetBody() {
+    Column() {
+      Text('来源详情')
+        .fontSize(PMFontSize.SECTION_TITLE)
+        .fontWeight(FontWeight.Bold)
+        .fontColor(PMColors.INK_PRIMARY)
+      if (this.sourceSheetClaim !== null) {
+        Text(this.sourceSheetClaim!.text)
+          .fontSize(PMFontSize.SECONDARY)
+          .fontColor(PMColors.INK_SECONDARY)
+          .margin({ top: 6 })
+      }
+      ForEach(this.sheetSourceRefs(), (ref: EpisodeSourceRef) => {
+        Column() {
+          Row() {
+            Text(`${this.sourceKindLabel(ref.kind)}${ref.revisionIndex !== null ? ` #${ref.revisionIndex}` : ''}`)
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+            Text(this.sourceStateLabel(ref.refId))
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.BRAND)
+              .layoutWeight(1)
+              .textAlign(TextAlign.End)
+          }
+          .width('100%')
+
+          Text(ref.title !== '' ? ref.title : ref.entityId)
+            .fontSize(PMFontSize.SECONDARY)
+            .fontWeight(FontWeight.Bold)
+            .fontColor(PMColors.INK_PRIMARY)
+            .margin({ top: 4 })
+          Text(`观察于 ${this.formatObservedAt(ref.observedAt)}`)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+            .margin({ top: 2 })
+          Text(`冻结摘要：${ref.summary !== '' ? ref.summary : '（该来源没有文本摘要）'}`)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_SECONDARY)
+            .margin({ top: 4 })
+          if (this.isSourceDeleted(ref)) {
+            Text('原来源已删除，以上为生成时冻结的信息')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.WARNING)
+              .margin({ top: 4 })
+          } else if (ref.kind === 'CARD' || ref.kind === 'ACTION_RESULT') {
+            Text('打开原记录')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.BRAND)
+              .margin({ top: 6 })
+              .onClick(() => {
+                this.openOriginalRecord(ref);
+              })
+          }
+        }
+        .width('100%')
+        .alignItems(HorizontalAlign.Start)
+        .padding(PMSpacing.SM)
+        .backgroundColor(PMColors.SURFACE_SUBTLE)
+        .borderRadius(PMRadius.SM)
+        .margin({ top: 8 })
+      }, (ref: EpisodeSourceRef) => ref.refId)
+    }
+    .width('100%')
+    .alignItems(HorizontalAlign.Start)
+    .padding(PMSpacing.LG)
   }
 
   private getTopOpenIntervention(): Intervention | undefined {

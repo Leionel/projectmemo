@@ -1,10 +1,14 @@
 import { ApiClient } from './ApiClient';
 import {
+  ConsolidationProposalResponse,
+  ConsolidationReceipt,
+  ConsolidationReceiptResponse,
   Episode,
   EpisodeDetailResponse,
   EpisodeListResponse,
   EpisodePreviewResult,
   ReentryData,
+  ScheduleCalendarEntry,
   SchedulePlan,
   SchedulePlanResponse
 } from '../models/Reentry';
@@ -39,6 +43,27 @@ export class SchedulePreviewBody {
 export class ScheduleConfirmBody {
   requestId: string = '';
   expectedVersion?: number;
+}
+
+export class CalendarSyncBody {
+  entries: ScheduleCalendarEntry[] = [];
+}
+
+export class CalendarRevokeBody {
+  action: string = 'revoke';
+  blockIds: string[] = [];
+}
+
+export class ConsolidationConfirmBody {
+  masterCardId: string = '';
+  mergedCardIds: string[] = [];
+  reason: string = '';
+  requestId: string = '';
+  similarityScore: number = 0;
+}
+
+export class ConsolidationReceiptResult {
+  receipt: ConsolidationReceipt = new ConsolidationReceipt();
 }
 
 // R2 阶段检查点、可执行安排与 60 秒再入场。
@@ -84,5 +109,30 @@ export class ReentryService {
 
   async getReentry(projectId: string): Promise<ReentryData> {
     return this.client.get<ReentryData>(`/api/projects/${projectId}/reentry`);
+  }
+
+  /** 上报系统日历写入回执；服务端只登记 ProjectMemo 自己创建的事件 */
+  async reportCalendarSync(projectId: string, planId: string, body: CalendarSyncBody): Promise<SchedulePlan> {
+    return this.client.post<SchedulePlan>(`/api/projects/${projectId}/schedule/${planId}/calendar`, body);
+  }
+
+  async revokeCalendarSync(projectId: string, planId: string, body: CalendarRevokeBody): Promise<SchedulePlan> {
+    return this.client.post<SchedulePlan>(`/api/projects/${projectId}/schedule/${planId}/calendar`, body);
+  }
+
+  async listConsolidationProposals(projectId: string): Promise<ConsolidationProposalResponse> {
+    return this.client.get<ConsolidationProposalResponse>(`/api/projects/${projectId}/consolidation`);
+  }
+
+  async confirmConsolidation(projectId: string, body: ConsolidationConfirmBody): Promise<ConsolidationReceiptResult> {
+    return this.client.post<ConsolidationReceiptResult>(`/api/projects/${projectId}/consolidation`, body);
+  }
+
+  async listConsolidationReceipts(projectId: string): Promise<ConsolidationReceiptResponse> {
+    return this.client.get<ConsolidationReceiptResponse>(`/api/projects/${projectId}/consolidation/receipts`);
+  }
+
+  async revokeConsolidation(projectId: string, receiptId: string): Promise<ConsolidationReceiptResult> {
+    return this.client.post<ConsolidationReceiptResult>(`/api/projects/${projectId}/consolidation/${receiptId}/revoke`, undefined);
   }
 }

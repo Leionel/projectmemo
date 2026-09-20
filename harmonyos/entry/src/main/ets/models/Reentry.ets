@@ -8,6 +8,8 @@ export class EpisodeSourceRef {
   observedAt: string = '';
   contentHash: string = '';
   title: string = '';
+  /** 冻结摘要：来源被改写或删除后仍能展示当时看到的内容 */
+  summary: string = '';
 }
 
 export class EpisodeClaim {
@@ -67,6 +69,8 @@ export class EpisodeRevision {
   provider: string | null = null;
   fallbackReason: string | null = null;
   status: string = 'DRAFT';
+  /** 用户确认时间；草稿为 null */
+  confirmedAt: string | null = null;
   createdAt: string = '';
 }
 
@@ -99,6 +103,14 @@ export class EpisodeDetailResponse {
 
 // ---- 排程 ----
 
+export class ScheduleCalendarState {
+  status: string = 'NONE';
+  calendarId: string | null = null;
+  eventId: string | null = null;
+  syncedAt: string | null = null;
+  error: string | null = null;
+}
+
 export class ScheduleBlock {
   id: string | null = null;
   actionId: string = '';
@@ -107,6 +119,16 @@ export class ScheduleBlock {
   start: string = '';
   end: string = '';
   locked: boolean = false;
+  calendar: ScheduleCalendarState = new ScheduleCalendarState();
+}
+
+/** 上报服务端的日历写入回执条目 */
+export class ScheduleCalendarEntry {
+  blockId: string = '';
+  calendarId: string | null = null;
+  eventId: string | null = null;
+  status: string = 'FAILED';
+  error: string | null = null;
 }
 
 export class ScheduleSkipReason {
@@ -138,6 +160,48 @@ export class SchedulePlanResponse {
   plan: SchedulePlan | null = null;
 }
 
+// ---- 可撤销记忆归并 ----
+
+export class ConsolidationCard {
+  id: string = '';
+  title: string = '';
+  summary: string = '';
+  importance: number = 0;
+  createdAt: string = '';
+  topLevelState: string = 'CURRENT';
+}
+
+export class ConsolidationProposal {
+  proposalId: string = '';
+  reason: string = '';
+  similarityScore: number = 0;
+  masterCardId: string = '';
+  cards: ConsolidationCard[] = [];
+  mergedPreview: string = '';
+  preservedSources: string[] = [];
+}
+
+export class ConsolidationReceipt {
+  id: string = '';
+  projectId: string = '';
+  masterCardId: string = '';
+  masterCardTitle: string = '';
+  mergedCardIds: string[] = [];
+  reason: string = '';
+  similarityScore: number = 0;
+  status: string = 'ACTIVE';
+  createdAt: string = '';
+  revokedAt: string | null = null;
+}
+
+export class ConsolidationProposalResponse {
+  proposals: ConsolidationProposal[] = [];
+}
+
+export class ConsolidationReceiptResponse {
+  receipts: ConsolidationReceipt[] = [];
+}
+
 // ---- 再入场聚合 ----
 
 export class ReentrySectionMeta {
@@ -150,9 +214,13 @@ export class ReentrySectionMeta {
 export class ReentryEpisodePart {
   episodeId: string | null = null;
   revisionId: string | null = null;
+  /** 当前版本号 */
+  revision: number | null = null;
   title: string | null = null;
   confirmedAt: string | null = null;
   status: string | null = null;
+  /** 冻结来源数量 */
+  sourceCount: number = 0;
   changesSince: string[] = [];
   meta: ReentrySectionMeta = new ReentrySectionMeta();
 }

@@ -10,6 +10,7 @@ import {
   type SchedulePreviewInput,
   type ScheduleSkipReason,
 } from "@/lib/types/schedule";
+import { assertDeviceCalendarReceipt } from "@/lib/services/calendarReceiptRules";
 
 const DEFAULT_TIMEZONE = "Asia/Shanghai";
 const MAX_CANDIDATE_ACTIONS = 50;
@@ -558,12 +559,9 @@ export async function recordCalendarSync(projectId: string, planId: string, entr
       if (entry.status !== "SYNCED" && entry.status !== "FAILED") {
         throw new AppError("INVALID_CALENDAR_RECEIPT", "日历写入回执只能是 SYNCED 或 FAILED", 422);
       }
-      if (entry.status === "SYNCED" && (!entry.calendarId?.trim() || !entry.eventId?.trim())) {
-        throw new AppError("INVALID_CALENDAR_RECEIPT", "成功回执必须包含 calendarId 与 eventId", 422);
-      }
-      if (entry.status === "FAILED" && entry.eventId !== null) {
-        throw new AppError("INVALID_CALENDAR_RECEIPT", "失败回执不能登记 eventId", 422);
-      }
+      // 与单待办提醒共用同一套回执校验：成功必须有真实事件编号，失败不能带编号。
+      // 两条入口的状态词表与判定标准一致，避免出现互相冲突的「已同步」。
+      assertDeviceCalendarReceipt({ status: entry.status, calendarId: entry.calendarId, eventId: entry.eventId });
       if (block.calendarSyncStatus === "SYNCED") {
         if (entry.status === "SYNCED" && block.calendarId === entry.calendarId && block.calendarEventId === entry.eventId) {
           continue;

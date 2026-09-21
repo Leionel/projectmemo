@@ -2,6 +2,7 @@ import { ApiClient } from './ApiClient';
 import {
   ActionCreateInput,
   ActionCreateResponse,
+  ActionDueAtInput,
   ActionItem,
   ActionsResponse,
   ActionUpdateResponse,
@@ -45,6 +46,16 @@ export class ActionService {
     const response: ActionUpdateResponse = await this.client.patch<ActionUpdateResponse>(
       `/api/projects/${projectId}/actions/${actionId}`,
       buildActionStatusBody(status)
+    );
+    return response.action;
+  }
+
+  async updateDueAt(projectId: string, actionId: string, dueAt: string): Promise<ActionItem> {
+    const body = new ActionDueAtInput();
+    body.dueAt = dueAt;
+    const response: ActionUpdateResponse = await this.client.patch<ActionUpdateResponse>(
+      `/api/projects/${projectId}/actions/${actionId}`,
+      body
     );
     return response.action;
   }

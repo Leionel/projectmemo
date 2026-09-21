@@ -191,6 +191,9 @@ export class CalendarSyncService {
             startTime: new Date(block.start).getTime(),
             endTime: new Date(block.end).getTime(),
             description: EVENT_DESCRIPTION_MARKER,
+            // 0 表示在日程开始时提醒。只创建日历事件并不会自动产生提醒，
+            // 因此必须随事件明确写入 reminderTime。
+            reminderTime: [0],
           });
           const entry = new ScheduleCalendarEntry();
           entry.blockId = block.id ?? '';
@@ -241,6 +244,40 @@ export class CalendarSyncService {
     const calendarId = successful[0].calendarId ?? '';
     const revoked = await CalendarSyncService.revokeBlocks(context, calendarId, rollbackBlocks);
     return revoked.length;
+  }
+
+  /**
+   * 重新安排单条提醒后，清理同一待办旧时间上的应用自有事件。
+   * 必须同时匹配标题、描述标记和起止时间；不会按标题模糊删除用户日程。
+   */
+  static async removeMatchingReminder(context: common.Context, actionTitle: string, start: string,
+    end: string, excludeEventId: string): Promise<number> {
+    try {
+      const manager = calendarManager.getCalendarManager(context);
+      const calendar = await manager.getCalendar();
+      const startTime = new Date(start).getTime();
+      const endTime = new Date(end).getTime();
+      const events = await calendar.getEvents(
+        calendarManager.EventFilter.filterByTime(startTime, endTime),
+        ['id', 'title', 'description', 'startTime', 'endTime'],
+      );
+      let removed = 0;
+      for (const event of events) {
+        if (event.id === undefined || `${event.id}` === excludeEventId) {
+          continue;
+        }
+        const owned = event.title === `${EVENT_TITLE_PREFIX}${actionTitle !== '' ? actionTitle : '项目行动'}` &&
+          event.description === EVENT_DESCRIPTION_MARKER && event.startTime === startTime && event.endTime === endTime;
+        if (owned) {
+          await calendar.deleteEvent(event.id);
+          removed += 1;
+        }
+      }
+      return removed;
+    } catch (error) {
+      hilog.warn(DOMAIN, TAG, 'old reminder cleanup failed: %{public}s', JSON.stringify(error));
+      return 0;
+    }
   }
 
   /** 撤销：只删除 ProjectMemo 写入过、且带 eventId 的事件 */

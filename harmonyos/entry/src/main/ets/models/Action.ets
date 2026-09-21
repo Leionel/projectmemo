@@ -90,3 +90,7 @@ export class ActionCreateInput {
   description: string | undefined = undefined;
   priority: number = 3;
 }
+
+export class ActionDueAtInput {
+  dueAt: string | null = null;
+}

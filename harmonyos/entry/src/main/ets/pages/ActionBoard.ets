@@ -7,6 +7,10 @@ import { ActionService } from '../services/ActionService';
 import { ReentryService, SchedulePreviewBody, ScheduleConfirmBody, ScheduleSlotBody, CalendarSyncBody, CalendarRevokeBody } from '../services/ReentryService';
 import { ScheduleBlock, ScheduleCalendarEntry, SchedulePlan, ScheduleSkipReason } from '../models/Reentry';
 import { CalendarSyncService, CalendarOption, CalendarConflict } from '../services/CalendarSyncService';
+import { ReminderService } from '../services/ReminderService';
+import { ReminderCompletionOption } from '../models/Reminder';
+import { ActionReminderBlock } from '../components/ActionReminderBlock';
+import { DeviceIdentity } from '../common/DeviceIdentity';
 import { common } from '@kit.AbilityKit';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMaterial } from '../common/DesignTokens';
 import { PMAppBar } from '../components/PMAppBar';
@@ -56,6 +60,13 @@ struct ActionBoard {
   @State calendarBusy: string = '';
   @State calendarMessage: string = '';
   @State calendarError: string = '';
+  // 单条待办的日历提醒（与批量排程的日历同步共用同一套状态语义）
+  @State reminderAvailable: boolean = false;
+  @State reminderForActionId: string = '';
+  @State completionQuestion: string = '';
+  @State completionOptions: ReminderCompletionOption[] = [];
+  @State completionDisposition: string = 'KEEP';
+  @State reminderNotice: string = '';
 
   private scheduleSlotInstant(dayOffset: number, time: string): string {
     const date = new Date();
@@ -641,6 +652,7 @@ struct ActionBoard {
   }
 
   private actionService: ActionService = new ActionService();
+  private reminderService: ReminderService = new ReminderService();
 
   // --- F1 行动可行性：以当前源状态评估，不缓存旧结论 ---
   private async openFeasibility(actionId: string): Promise<void> {
@@ -738,6 +750,7 @@ struct ActionBoard {
     this.highlightActionId = params['actionId'] ?? '';
     this.loadActions();
     this.loadCurrentSchedule();
+    this.probeReminder();
   }
 
   private async loadActions(): Promise<void> {
@@ -783,10 +796,40 @@ struct ActionBoard {
     }
   }
 
-  private openCompleteDialog(actionId: string): void {
+  /** 开关关闭时不显示提醒入口：不让用户点下去才看到模糊错误 */
+  private async probeReminder(): Promise<void> {
+    try {
+      this.reminderAvailable = await this.reminderService.isAvailable(this.projectId);
+    } catch {
+      this.reminderAvailable = false;
+    }
+  }
+
+  /**
+   * 打开完成回执。若这条待办在设备日历里还有未来的日程，
+   * 在同一个弹层里先问「保留还是移除」，不叠加第二个弹窗。
+   */
+  private async openCompleteDialog(actionId: string): Promise<void> {
     this.completingActionId = actionId;
     this.resultText = '';
     this.dialogError = '';
+    this.completionQuestion = '';
+    this.completionOptions = [];
+    this.completionDisposition = 'KEEP';
+    this.reminderNotice = '';
+    if (!this.reminderAvailable) {
+      return;
+    }
+    try {
+      const state = await this.reminderService.load(this.projectId, actionId);
+      const prompt = state.completionPrompt;
+      if (prompt !== null && prompt.required) {
+        this.completionQuestion = prompt.question;
+        this.completionOptions = prompt.options;
+      }
+    } catch {
+      // 读取提醒状态失败不阻塞完成流程：仍可正常填写回执
+    }
   }
 
   private closeCompleteDialog(): void {
@@ -796,6 +839,9 @@ struct ActionBoard {
     this.completingActionId = '';
     this.resultText = '';
     this.dialogError = '';
+    this.completionQuestion = '';
+    this.completionOptions = [];
+    this.reminderNotice = '';
   }
 
   private async submitComplete(): Promise<void> {
@@ -808,11 +854,30 @@ struct ActionBoard {
     }
     this.isSubmitting = true;
     this.dialogError = '';
+    const actionId = this.completingActionId;
     try {
-      await this.actionService.complete(this.projectId, this.completingActionId, trimmed);
+      if (this.completionOptions.length > 0) {
+        // 用户已经选择如何处理未来提醒：完成回执先落库，设备删除随后补偿执行
+        const response = await this.actionService.completeWithReminder(this.projectId, actionId, trimmed,
+          this.completionDisposition, DeviceIdentity.getConsumerKey());
+        const outcome = response.reminderOutcome;
+        if (outcome !== null && outcome.devicePlan.length > 0) {
+          const context = getContext(this) as common.UIAbilityContext;
+          this.reminderNotice = await this.reminderService.applyDevicePlan(context, outcome.devicePlan);
+        } else if (outcome !== null && outcome.compensation.needed) {
+          this.reminderNotice = outcome.compensation.message;
+        }
+      } else {
+        await this.actionService.complete(this.projectId, actionId, trimmed);
+      }
       this.completingActionId = '';
       this.resultText = '';
-      promptAction.showToast({ message: '已完成行动并写入项目记忆' });
+      this.completionQuestion = '';
+      this.completionOptions = [];
+      promptAction.showToast({ message: this.reminderNotice !== ''
+        ? `已完成行动并写入项目记忆。${this.reminderNotice}`
+        : '已完成行动并写入项目记忆' });
+      this.reminderNotice = '';
       await this.loadActions();
     } catch (e) {
       if (e instanceof ApiError) {
@@ -964,6 +1029,36 @@ struct ActionBoard {
         .width('100%')
         .justifyContent(FlexAlign.End)
         .margin({ top: PMSpacing.MD })
+      }
+
+      // 日历提醒：入口只在功能开启时出现，状态区分「计划时间」与「设备日历事件」
+      if (this.reminderAvailable && (action.status === 'TODO' || action.status === 'DOING')) {
+        Button(this.reminderForActionId === action.id ? '收起提醒设置' : '日历提醒')
+          .fontSize(PMFontSize.BUTTON)
+          .fontColor(PMColors.INK_PRIMARY)
+          .backgroundColor(PMColors.SURFACE_SUBTLE)
+          .border({ width: 1, color: PMColors.BORDER })
+          .borderRadius(PMRadius.SM)
+          .height(48)
+          .margin({ top: PMSpacing.SM })
+          .onClick(() => {
+            this.reminderForActionId = this.reminderForActionId === action.id ? '' : action.id;
+          })
+      }
+
+      if (this.reminderAvailable && this.reminderForActionId === action.id) {
+        ActionReminderBlock({
+          projectId: this.projectId,
+          actionId: action.id,
+          actionTitle: action.title,
+          reminderEnabled: this.reminderAvailable,
+          onClose: () => {
+            this.reminderForActionId = '';
+          },
+          onChanged: () => {
+            this.loadActions();
+          }
+        })
       }
     }
     .width('100%')
@@ -1258,6 +1353,43 @@ struct ActionBoard {
               .borderRadius(PMRadius.SM)
               .border({ width: 1, color: PMColors.BORDER })
               .margin({ top: PMSpacing.MD })
+
+            if (this.completionOptions.length > 0) {
+              Column() {
+                Text('设备日历提醒')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.WARNING)
+                Text(this.completionQuestion)
+                  .fontSize(PMFontSize.SECONDARY)
+                  .fontColor(PMColors.INK_PRIMARY)
+                  .lineHeight(18)
+                  .margin({ top: 2 })
+                ForEach(this.completionOptions, (option: ReminderCompletionOption) => {
+                  Row() {
+                    Radio({ value: option.value, group: 'reminder-disposition' })
+                      .checked(this.completionDisposition === option.value)
+                      .onChange((isChecked: boolean) => {
+                        if (isChecked) {
+                          this.completionDisposition = option.value;
+                        }
+                      })
+                    Text(option.label)
+                      .fontSize(PMFontSize.SECONDARY)
+                      .fontColor(PMColors.INK_SECONDARY)
+                      .margin({ left: PMSpacing.SM })
+                  }
+                  .width('100%')
+                  .margin({ top: PMSpacing.XS })
+                }, (option: ReminderCompletionOption) => option.value)
+              }
+              .width('100%')
+              .padding(PMSpacing.SM)
+              .backgroundColor(PMColors.WARNING_LIGHT)
+              .borderRadius(PMRadius.SM)
+              .alignItems(HorizontalAlign.Start)
+              .margin({ top: PMSpacing.MD })
+            }
 
             if (this.dialogError !== '') {
               Text(this.dialogError)

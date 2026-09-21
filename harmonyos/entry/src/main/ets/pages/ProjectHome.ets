@@ -32,7 +32,7 @@ import { ReentryService, EpisodePreviewBody, EpisodeConfirmBody } from '../servi
 import { ReentryData, Episode, EpisodeRevision, EpisodeSummarySection, EpisodeClaim, EpisodeSourceRef, ScheduleBlock, ScheduleCalendarEntry } from '../models/Reentry';
 import { CalendarSyncService } from '../services/CalendarSyncService';
 
-import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily, PMInteraction, PMMotion, PMMaterial, PMTransition } from '../common/DesignTokens';
+import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily, PMInteraction, PMMotion, PMMaterial, PMTransition, PMButtonSize } from '../common/DesignTokens';
 import { PMBreakpoint, PMStorageKey, PMWidthBp } from '../common/WindowMetrics';
 import { SeverityBadge, StatusBadge, MemoryTypeBadge, CategoryBadge, TemporalBadge } from '../components/MetricBadge';
 import { EvidenceItemView } from '../components/EvidenceItemView';
@@ -55,6 +55,11 @@ import { DeadlineBadge } from '../components/DeadlineBadge';
 import { ChangeImpactDialog } from '../components/ChangeImpactDialog';
 import { ClaimAuditorDrawer } from '../components/ClaimAuditorDrawer';
 import { ProjectStatePanel } from '../components/ProjectStatePanel';
+import { HealthEntryCard } from '../components/HealthEntryCard';
+import { ActionReminderBlock } from '../components/ActionReminderBlock';
+import { EpisodeActionOutcome, SuggestionEntry } from '../models/EpisodeAction';
+import { EpisodeActionService } from '../services/EpisodeActionService';
+import { HealthSeverityCopy } from '../models/Health';
 import { ProjectStateDiffSheet } from '../components/ProjectStateDiffSheet';
 import { ProjectChangeBrief } from '../components/ProjectChangeBrief';
 import { ChangeBrief, StateDiff } from '../models/ProjectState';
@@ -198,6 +203,19 @@ struct ProjectHome {
   @State sourceSheetClaim: EpisodeClaim | null = null;
   @State showSourceSheet: boolean = false;
   @State viewingRevision: number = 0;
+  // F3：检查点建议 → 待办 → 日历提醒。同一条链在同一区域推进，不嵌套弹窗。
+  private episodeActionService: EpisodeActionService = new EpisodeActionService();
+  @State suggestionClaimId: string = '';
+  @State suggestionActionId: string = '';
+  // 设备日历事件标题要用真实待办标题，不能用提示文案
+  @State suggestionActionTitle: string = '';
+  @State suggestionCanArrange: boolean = false;
+  @State suggestionBlockedReason: string = '';
+  @State suggestionEntries: SuggestionEntry[] = [];
+  @State suggestionBusy: string = '';
+  @State suggestionNotice: string = '';
+  @State suggestionError: string = '';
+  @State reminderBlockForActionId: string = '';
   private memorySearchSerial: number = 0;
 
   private sourceOptions: string[] = [
@@ -682,6 +700,184 @@ struct ProjectHome {
     this.checkpointError = '';
   }
 
+  /**
+   * 从检查点建议创建待办。
+   * 检查点只提供建议：用户点这个按钮才算确认；幂等键由服务端用 revisionId + claimId 生成，
+   * 重复点击只会得到同一条待办，已存在时直接复用并在这里继续下一步。
+   */
+  private async createSuggestionTodo(claim: EpisodeClaim, mode: string, targetActionId: string): Promise<void> {
+    const episodeId = this.reentry !== null && this.reentry.episode.episodeId !== null ? this.reentry.episode.episodeId : '';
+    if (episodeId === '' || this.suggestionBusy !== '') {
+      return;
+    }
+    this.suggestionBusy = claim.claimId;
+    this.suggestionError = '';
+    this.suggestionNotice = '';
+    try {
+      const outcome: EpisodeActionOutcome = await this.episodeActionService.createFromSuggestion(
+        this.projectId, episodeId, claim.claimId, mode, targetActionId);
+      this.suggestionClaimId = claim.claimId;
+      this.suggestionActionId = outcome.actionId;
+      this.suggestionActionTitle = outcome.title;
+      this.suggestionCanArrange = outcome.availability.canArrangeReminder;
+      this.suggestionBlockedReason = outcome.availability.blockedReason !== null ? outcome.availability.blockedReason : '';
+      this.suggestionEntries = outcome.availability.entries;
+      if (mode === 'UNBLOCK') {
+        this.suggestionNotice = `已创建解阻待办「${outcome.title}」。先完成它，原来的待办才有开始条件。`;
+      } else if (outcome.reused) {
+        this.suggestionNotice = `已存在对应待办「${outcome.title}」，直接使用它，没有重复创建。`;
+      } else {
+        this.suggestionNotice = `已加入待办「${outcome.title}」。${outcome.availability.canArrangeReminder ? '可以在下面直接安排提醒。' : '这条待办当前还有前置事项。'}`;
+      }
+      this.reminderBlockForActionId = outcome.availability.canArrangeReminder ? outcome.actionId : '';
+    } catch (e) {
+      this.suggestionError = e instanceof ApiError ? e.message : '加入待办失败';
+    } finally {
+      this.suggestionBusy = '';
+    }
+  }
+
+  /** 检查点建议的下一步操作；受阻时给出解阻入口，不让用户停在死路 */
+  @Builder
+  SuggestionActions(claim: EpisodeClaim) {
+    Column() {
+      Row() {
+        Button(this.suggestionBusy === claim.claimId ? '处理中…' : '加入待办')
+          .fontSize(PMFontSize.CAPTION)
+          .fontColor(PMColors.SURFACE)
+          .backgroundColor(PMColors.BRAND)
+          .height(PMButtonSize.HEIGHT_MD)
+          .borderRadius(PMRadius.SM)
+          .enabled(this.suggestionBusy === '')
+          .onClick(() => {
+            this.createSuggestionTodo(claim, 'SUGGESTION', '');
+          })
+        Button('查看建议依据')
+          .fontSize(PMFontSize.CAPTION)
+          .fontColor(PMColors.BRAND)
+          .backgroundColor(PMColors.SURFACE_SUBTLE)
+          .border({ width: 1, color: PMColors.BORDER })
+          .height(PMButtonSize.HEIGHT_MD)
+          .borderRadius(PMRadius.SM)
+          .margin({ left: PMSpacing.SM })
+          .onClick(() => {
+            this.sourceSheetClaim = claim;
+            this.showSourceSheet = true;
+          })
+        if (this.suggestionClaimId === claim.claimId && this.suggestionCanArrange) {
+          Button(this.reminderBlockForActionId === this.suggestionActionId ? '收起提醒设置' : '安排日历提醒')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.BRAND)
+            .backgroundColor(PMColors.EVIDENCE_LIGHT)
+            .height(PMButtonSize.HEIGHT_MD)
+            .borderRadius(PMRadius.SM)
+            .margin({ left: PMSpacing.SM })
+            .onClick(() => {
+              this.reminderBlockForActionId = this.reminderBlockForActionId === this.suggestionActionId ? '' : this.suggestionActionId;
+            })
+        }
+        if (this.suggestionClaimId === claim.claimId && !this.suggestionCanArrange && this.suggestionBlockedReason !== '') {
+          Button('先处理阻塞')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.WARNING)
+            .backgroundColor(PMColors.WARNING_LIGHT)
+            .height(PMButtonSize.HEIGHT_MD)
+            .borderRadius(PMRadius.SM)
+            .margin({ left: PMSpacing.SM })
+            .onClick(() => {
+              this.suggestionNotice = this.suggestionBlockedReason;
+            })
+        }
+      }
+      .width('100%')
+      .margin({ top: 6 })
+
+      if (this.suggestionClaimId === claim.claimId && !this.suggestionCanArrange && this.suggestionBlockedReason !== '') {
+        Column() {
+          Text(this.suggestionBlockedReason)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.WARNING)
+            .lineHeight(18)
+          ForEach(this.suggestionEntries, (entry: SuggestionEntry) => {
+            Text(`· ${entry.label}`)
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.BRAND)
+              .margin({ top: 2 })
+              .onClick(() => {
+                if (entry.kind === 'CREATE_UNBLOCK_ACTION') {
+                  this.createSuggestionTodo(claim, 'UNBLOCK', entry.targetActionId);
+                } else {
+                  this.currentTabIndex = 2;
+                  promptAction.showToast({ message: `请到「待办」里${entry.label}` });
+                }
+              })
+          }, (entry: SuggestionEntry) => `${entry.kind}-${entry.targetActionId}`)
+          Text('受阻的待办不会进入时间安排，也不会被写入设备日历。')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+            .margin({ top: 2 })
+        }
+        .width('100%')
+        .alignItems(HorizontalAlign.Start)
+        .padding(PMSpacing.SM)
+        .backgroundColor(PMColors.WARNING_LIGHT)
+        .borderRadius(PMRadius.SM)
+        .margin({ top: PMSpacing.SM })
+      }
+
+      if (this.suggestionClaimId === claim.claimId && this.suggestionActionId !== '') {
+        Text(this.suggestionNotice)
+          .fontSize(PMFontSize.CAPTION)
+          .fontColor(PMColors.SUCCESS)
+          .lineHeight(18)
+          .margin({ top: 4 })
+      }
+      if (this.suggestionClaimId === claim.claimId && this.suggestionError !== '') {
+        Text(this.suggestionError)
+          .fontSize(PMFontSize.CAPTION)
+          .fontColor(PMColors.RISK)
+          .lineHeight(18)
+          .margin({ top: 4 })
+      }
+      if (this.reminderBlockForActionId !== '' && this.reminderBlockForActionId === this.suggestionActionId
+        && this.suggestionClaimId === claim.claimId) {
+        ActionReminderBlock({
+          projectId: this.projectId,
+          actionId: this.suggestionActionId,
+          actionTitle: this.suggestionActionTitle,
+          reminderEnabled: true,
+          onClose: () => {
+            this.reminderBlockForActionId = '';
+          },
+          onChanged: () => {
+            this.loadAllData(true);
+          }
+        })
+      }
+    }
+    .width('100%')
+    .alignItems(HorizontalAlign.Start)
+  }
+
+  /** 项目体检：只读入口卡，放在「状态与变化」下方 */
+  @Builder
+  ProjectHealthCardView() {
+    HealthEntryCard({
+      projectId: this.projectId,
+      active: true,
+      onGoTarget: (kind: string, objectId: string, suggestedAction: string) => {
+        if (kind === 'action' || kind === 'reminder') {
+          this.currentTabIndex = 2;
+        } else if (kind === 'card' || kind === 'memory' || kind === 'attachment') {
+          this.currentTabIndex = 1;
+        } else {
+          this.currentTabIndex = 0;
+        }
+        promptAction.showToast({ message: `去「${HealthSeverityCopy.targetLabel(kind)}」：${suggestedAction}` });
+      }
+    })
+  }
+
   @Builder
   EpisodeCheckpointCardView() {
     Column() {
@@ -907,6 +1103,10 @@ struct ProjectHome {
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.WARNING)
             .margin({ top: 2 })
+        }
+        // 建议不是已执行的事实：只有用户点确认才会创建待办
+        if (claim.kind === 'SUGGESTION') {
+          this.SuggestionActions(claim)
         }
       }
       .width('100%')
@@ -2493,6 +2693,9 @@ struct ProjectHome {
 
         // R2 阶段检查点：把散乱记忆收束为可确认版本，60 秒再入口
         this.EpisodeCheckpointCardView()
+
+        // 项目体检：只读、确定性地列出当前问题与修复入口
+        this.ProjectHealthCardView()
 
         // 问题一：现在怎么样？（当前判断与准备度）
         Column() {

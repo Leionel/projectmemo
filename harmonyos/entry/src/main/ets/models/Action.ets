@@ -1,3 +1,5 @@
+import { ReminderCompletionOutcome } from './Reminder';
+
 export class ActionSourceIntervention {
   id: string = '';
   title: string = '';
@@ -42,6 +44,12 @@ export class ActionUpdateResponse {
 export class ActionCreateResponse {
   action: ActionItem = new ActionItem();
   reused: boolean = false;
+}
+
+/** 完成行动 + 提醒处置的完整响应（服务端 reminderOutcome 为 null 表示没有询问过） */
+export class ActionCompleteResponse {
+  action: ActionItem = new ActionItem();
+  reminderOutcome: ReminderCompletionOutcome | null = null;
 }
 
 // ---- F1 行动可行性 ----

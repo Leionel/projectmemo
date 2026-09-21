@@ -1,4 +1,5 @@
 import router from '@ohos.router';
+import promptAction from '@ohos.promptAction';
 import { ApiError } from '../models/Project';
 import { KnowledgeCard, ArchivedCardItem, CardLink, IncomingCardLink, TemporalDecisionItem, TemporalRelation } from '../models/Memory';
 import { MemoryService } from '../services/MemoryService';
@@ -9,7 +10,7 @@ import { MemoryTypeBadge } from '../components/MetricBadge';
 import { LoadingStateView, ErrorStateView, EmptyStateView } from '../components/AsyncStateView';
 import { AlertIcon } from '../components/PMIcons';
 import { TextFormatters } from '../common/TextFormatters';
-import { ConsolidationProposal, ConsolidationReceipt } from '../models/Reentry';
+import { ConsolidationProposal, ConsolidationCard, ConsolidationReceipt } from '../models/Reentry';
 import { ConsolidationConfirmBody, ReentryService } from '../services/ReentryService';
 
 @Entry
@@ -30,6 +31,7 @@ struct MemoryTimeline {
   @State consolidationProposals: ConsolidationProposal[] = [];
   @State consolidationReceipts: ConsolidationReceipt[] = [];
   @State consolidationError: string = '';
+  @State consolidationReceiptsError: string = '';
   @State consolidationActionId: string = '';
   @State consolidationRequestId: string = '';
   @State consolidationRequestProposalId: string = '';
@@ -75,24 +77,30 @@ struct MemoryTimeline {
     }
   }
 
-  /** 功能开关关闭时不展示入口；单项读取失败不拖垮整页记忆。 */
+  /** 功能开关关闭时不展示入口；建议列表与已归并回执各自独立加载，一个失败不拖垮另一个。 */
   private async loadConsolidation(): Promise<void> {
     this.consolidationError = '';
+    this.consolidationReceiptsError = '';
     try {
       const proposals = await this.reentryService.listConsolidationProposals(this.projectId);
-      const receipts = await this.reentryService.listConsolidationReceipts(this.projectId);
       this.consolidationProposals = proposals.proposals;
-      this.consolidationReceipts = receipts.receipts;
       this.consolidationVisible = true;
     } catch (e) {
       if (e instanceof ApiError && e.code === 'MEMORY_CONSOLIDATION_DISABLED') {
         this.consolidationVisible = false;
         this.consolidationProposals = [];
-        this.consolidationReceipts = [];
         return;
       }
-      this.consolidationVisible = true;
+      this.consolidationProposals = [];
       this.consolidationError = e instanceof ApiError ? e.message : '重复记录建议暂时无法加载';
+      this.consolidationVisible = true;
+    }
+    try {
+      const receipts = await this.reentryService.listConsolidationReceipts(this.projectId);
+      this.consolidationReceipts = receipts.receipts;
+    } catch (e) {
+      this.consolidationReceipts = [];
+      this.consolidationReceiptsError = e instanceof ApiError ? e.message : '已归并记录暂时无法加载';
     }
   }
 
@@ -112,6 +120,44 @@ struct MemoryTimeline {
       .join('、');
   }
 
+  private consolidationMasterState(proposal: ConsolidationProposal): string {
+    const master = proposal.cards.find((card) => card.id === proposal.masterCardId);
+    return master !== undefined ? master.topLevelState : 'CURRENT';
+  }
+
+  /** topLevelState 英文枚举映射为自然简体中文，不向用户暴露原始枚举值。 */
+  private consolidationStateLabel(state: string): string {
+    if (state === 'CURRENT') return '当前有效';
+    if (state === 'SUPERSEDED') return '已被取代';
+    if (state === 'CONTESTED') return '存在争议';
+    if (state === 'UNKNOWN') return '证据不足';
+    if (state === 'REVOKED') return '已撤销';
+    if (state === 'PENDING') return '确认中';
+    return state;
+  }
+
+  private consolidationSimilarityLabel(score: number): string {
+    if (score <= 0) return '未知';
+    return `${Math.round(score * 100)}%`;
+  }
+
+  /** 依据各卡片当前状态说明为何可/不可归并，避免直接展示英文枚举。 */
+  private consolidationReason(proposal: ConsolidationProposal): string {
+    const states: string[] = proposal.cards.map((card) => card.topLevelState);
+    if (states.includes('CONTESTED')) {
+      return '存在争议，不能归并，请先处理争议';
+    }
+    const unknownCount: number = states.filter((state) => state === 'UNKNOWN').length;
+    if (unknownCount > 0) {
+      return `其中 ${unknownCount} 条证据不足，请人工确认后再归并`;
+    }
+    const supersededCount: number = states.filter((state) => state === 'SUPERSEDED').length;
+    if (supersededCount > 0) {
+      return `其中 ${supersededCount} 条已被取代，归并将保留当前有效记录`;
+    }
+    return '两条均在当前有效状态，可以归并';
+  }
+
   private async confirmConsolidation(proposal: ConsolidationProposal): Promise<void> {
     if (this.consolidationActionId !== '') return;
     this.consolidationActionId = proposal.proposalId;
@@ -123,17 +169,28 @@ struct MemoryTimeline {
     try {
       const body = new ConsolidationConfirmBody();
       body.masterCardId = proposal.masterCardId;
-      body.mergedCardIds = proposal.cards.filter((card) => card.id !== proposal.masterCardId).map((card) => card.id);
+      const mergedIds: string[] = proposal.cards.filter((card) => card.id !== proposal.masterCardId).map((card) => card.id);
+      body.mergedCardIds = mergedIds;
       body.reason = proposal.reason;
       body.similarityScore = proposal.similarityScore;
       body.requestId = this.consolidationRequestId;
       await this.reentryService.confirmConsolidation(this.projectId, body);
       this.consolidationRequestId = '';
       this.consolidationRequestProposalId = '';
+      const masterTitle: string = proposal.cards.find((card) => card.id === proposal.masterCardId)?.title ?? proposal.masterCardId;
+      promptAction.showToast({
+        message: `已归并 ${mergedIds.length} 条重复记录，主记录《${masterTitle}》保持不变；原始采集、关系与历史仍然保留`
+      });
       await this.loadTimeline();
     } catch (e) {
       // 请求结果不明确时保留原 requestId，用户重试会得到同一业务结果。
-      this.consolidationError = e instanceof ApiError ? e.message : '归并失败，请使用原请求重试';
+      const message = e instanceof ApiError ? e.message : '归并失败，请使用原请求重试';
+      this.consolidationError = message;
+      if (e instanceof ApiError && e.code === 'CONSOLIDATION_PARTIAL') {
+        promptAction.showToast({ message: '部分重复记录归并失败，请重试剩余项' });
+      } else {
+        promptAction.showToast({ message });
+      }
     } finally {
       this.consolidationActionId = '';
     }
@@ -143,11 +200,18 @@ struct MemoryTimeline {
     if (this.consolidationActionId !== '') return;
     this.consolidationActionId = receiptId;
     this.consolidationError = '';
+    const target: ConsolidationReceipt | undefined = this.consolidationReceipts.find((receipt) => receipt.id === receiptId);
+    const mergedCount: number = target !== undefined ? target.mergedCardIds.length : 0;
     try {
       await this.reentryService.revokeConsolidation(this.projectId, receiptId);
+      promptAction.showToast({
+        message: `已恢复到归并前的状态，被归并的 ${mergedCount} 条记录重新可见`
+      });
       await this.loadTimeline();
     } catch (e) {
-      this.consolidationError = e instanceof ApiError ? e.message : '撤销归并失败，请稍后重试';
+      const message = e instanceof ApiError ? e.message : '撤销归并失败，请稍后重试';
+      this.consolidationError = message;
+      promptAction.showToast({ message });
     } finally {
       this.consolidationActionId = '';
     }
@@ -659,6 +723,14 @@ struct MemoryTimeline {
                   .lineHeight(20)
                   .margin({ top: PMSpacing.XS })
 
+                if (this.consolidationProposals.length > 0) {
+                  Text(`发现 ${this.consolidationProposals.length} 组可能重复`)
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontWeight(FontWeight.Medium)
+                    .fontColor(PMColors.INK_TERTIARY)
+                    .margin({ top: PMSpacing.XS })
+                }
+
                 if (this.consolidationError !== '') {
                   Column() {
                     Text(this.consolidationError)
@@ -697,22 +769,50 @@ struct MemoryTimeline {
                       .fontSize(PMFontSize.SECTION_TITLE)
                       .fontWeight(FontWeight.Medium)
                       .fontColor(PMColors.INK_PRIMARY)
+                    Text(`当前状态：${this.consolidationStateLabel(this.consolidationMasterState(proposal))}`)
+                      .fontSize(PMFontSize.CAPTION)
+                      .fontColor(this.statusColor(this.consolidationMasterState(proposal)))
+                      .margin({ top: PMSpacing.XS })
+
                     Text(`候选重复：${this.consolidationDuplicateTitles(proposal)}`)
                       .fontSize(PMFontSize.BODY)
                       .fontColor(PMColors.INK_SECONDARY)
                       .maxLines(2)
                       .textOverflow({ overflow: TextOverflow.Ellipsis })
+                      .margin({ top: PMSpacing.SM })
+
+                    ForEach(proposal.cards.filter((card) => card.id !== proposal.masterCardId), (card: ConsolidationCard) => {
+                      Row() {
+                        Text(`· ${card.title}`)
+                          .fontSize(PMFontSize.CAPTION)
+                          .fontColor(PMColors.INK_SECONDARY)
+                          .layoutWeight(1)
+                          .maxLines(1)
+                          .textOverflow({ overflow: TextOverflow.Ellipsis })
+                        Text(this.consolidationStateLabel(card.topLevelState))
+                          .fontSize(PMFontSize.CAPTION)
+                          .fontColor(this.statusColor(card.topLevelState))
+                      }
+                      .width('100%')
+                      .margin({ top: 2 })
+                    }, (card: ConsolidationCard) => `dup-${card.id}`)
+
+                    Text(`相似度 ${this.consolidationSimilarityLabel(proposal.similarityScore)}`)
+                      .fontSize(PMFontSize.CAPTION)
+                      .fontColor(PMColors.INK_TERTIARY)
                       .margin({ top: PMSpacing.XS })
-                    Text(proposal.reason)
+                    Text(this.consolidationReason(proposal))
                       .fontSize(PMFontSize.CAPTION)
                       .fontColor(PMColors.INK_TERTIARY)
                       .lineHeight(18)
                       .margin({ top: PMSpacing.XS })
-                    Text(`仍保留：${proposal.preservedSources.join('、')}`)
-                      .fontSize(PMFontSize.CAPTION)
-                      .fontColor(PMColors.EVIDENCE)
-                      .lineHeight(18)
-                      .margin({ top: PMSpacing.XS })
+                    if (proposal.preservedSources.length > 0) {
+                      Text(`保留来源：${proposal.preservedSources.join('、')}`)
+                        .fontSize(PMFontSize.CAPTION)
+                        .fontColor(PMColors.EVIDENCE)
+                        .lineHeight(18)
+                        .margin({ top: PMSpacing.XS })
+                    }
                     Button(this.consolidationActionId === proposal.proposalId ? '归并中…' : '确认归并')
                       .height(44)
                       .fontSize(PMFontSize.BUTTON)
@@ -728,8 +828,24 @@ struct MemoryTimeline {
                   .backgroundColor(PMColors.SURFACE_SUBTLE)
                   .borderRadius(PMRadius.SM)
                   .margin({ top: PMSpacing.MD })
-                  .accessibilityText(`重复记录归并建议，保留${this.consolidationMasterTitle(proposal)}，候选重复${this.consolidationDuplicateTitles(proposal)}，需要用户确认`)
+                  .accessibilityText(`重复记录归并建议，保留${this.consolidationMasterTitle(proposal)}，候选重复${this.consolidationDuplicateTitles(proposal)}，相似度${this.consolidationSimilarityLabel(proposal.similarityScore)}，需要用户确认`)
                 }, (proposal: ConsolidationProposal) => proposal.proposalId)
+
+                if (this.consolidationReceiptsError !== '') {
+                  Row() {
+                    AlertIcon({ iconSize: 14, color: PMColors.RISK })
+                    Text(this.consolidationReceiptsError)
+                      .fontSize(PMFontSize.CAPTION)
+                      .fontColor(PMColors.RISK)
+                      .margin({ left: PMSpacing.XS })
+                  }
+                  .width('100%')
+                  .alignItems(VerticalAlign.Center)
+                  .padding(PMSpacing.MD)
+                  .backgroundColor(PMColors.SURFACE_SUBTLE)
+                  .borderRadius(PMRadius.SM)
+                  .margin({ top: PMSpacing.MD })
+                }
 
                 if (this.activeConsolidationReceipts().length > 0) {
                   Text('已归并（可撤销）')

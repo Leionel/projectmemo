@@ -21,6 +21,10 @@ export class InterventionDismissBody {
 export class ActionCompleteBody {
   status: string = 'DONE';
   resultText: string = '';
+  /** 完成时如何处理已存在的未来设备日历提醒：KEEP | REMOVE；不传表示不问 */
+  reminderDisposition?: string;
+  /** 设备标识：提醒回执按设备归属，缺少时服务端不会处理提醒 */
+  deviceKey?: string;
 }
 
 export class ActionUpdateStatusBody {
@@ -50,9 +54,15 @@ export function buildDismissBody(dismissReason: string): InterventionDismissBody
   return body;
 }
 
-export function buildActionCompleteBody(resultText: string): ActionCompleteBody {
+export function buildActionCompleteBody(resultText: string, disposition?: string, deviceKey?: string): ActionCompleteBody {
   const body: ActionCompleteBody = new ActionCompleteBody();
   body.resultText = resultText;
+  if (disposition !== undefined && disposition !== '') {
+    body.reminderDisposition = disposition;
+  }
+  if (deviceKey !== undefined && deviceKey !== '') {
+    body.deviceKey = deviceKey;
+  }
   return body;
 }
 

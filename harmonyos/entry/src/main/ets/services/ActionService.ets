@@ -1,5 +1,6 @@
 import { ApiClient } from './ApiClient';
 import {
+  ActionCompleteResponse,
   ActionCreateInput,
   ActionCreateResponse,
   ActionDueAtInput,
@@ -40,6 +41,19 @@ export class ActionService {
       buildActionCompleteBody(resultText)
     );
     return response.action;
+  }
+
+  /**
+   * 完成行动并同时处理未来提醒。
+   * 返回完整响应：完成回执先落库（它已经发生），提醒处置结果单独返回，
+   * 设备上的日程由调用方按 devicePlan 执行删除。
+   */
+  async completeWithReminder(projectId: string, actionId: string, resultText: string,
+    disposition: string, deviceKey: string): Promise<ActionCompleteResponse> {
+    return await this.client.patch<ActionCompleteResponse>(
+      `/api/projects/${projectId}/actions/${actionId}`,
+      buildActionCompleteBody(resultText, disposition, deviceKey)
+    );
   }
 
   async updateStatus(projectId: string, actionId: string, status: string): Promise<ActionItem> {

@@ -12,6 +12,7 @@ import { MemoryCopilot } from "@/components/MemoryCopilot";
 import { MemoryConsolidationCard } from "@/components/MemoryConsolidationCard";
 import { ProjectSettings } from "@/components/ProjectSettings";
 import { ProjectPulse } from "@/components/ProjectPulse";
+import { ProjectHealthCard } from "@/components/ProjectHealthCard";
 import { SchedulePlanner } from "@/components/SchedulePlanner";
 import { AppError } from "@/lib/api";
 import { evaluateProjectContext } from "@/lib/services/agentContextService";
@@ -77,6 +78,8 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const episodesEnabled = isFeatureEnabled("PROJECT_EPISODES_ENABLED", false);
   const schedulingEnabled = isFeatureEnabled("PROJECT_SCHEDULING_ENABLED", false);
   const consolidationEnabled = isFeatureEnabled("PROJECT_MEMORY_CONSOLIDATION_ENABLED", false);
+  const reminderEnabled = isFeatureEnabled("PROJECT_CALENDAR_REMINDER_ENABLED", false);
+  const healthEnabled = isFeatureEnabled("PROJECT_HEALTH_ENABLED", true);
   const importantCardCount = project.cards.filter((card) => card.importance >= 4).length;
   const outline = project.artifacts.find((artifact) => String(artifact.artifactType) === "competition_outline");
   const latestArtifact = project.artifacts[0];
@@ -115,11 +118,12 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]"><Link href={dashboard.nextAction.href} className={"focus-ring group flex min-w-0 items-center justify-between gap-4 rounded-2xl p-4 text-white shadow-[var(--shadow-sm)] transition hover:-translate-y-0.5 " + (dashboard.nextAction.tone === "critical" ? "bg-[var(--brick)]" : "bg-[var(--navy)]")}><span><span className="text-[11px] font-black uppercase tracking-[.14em] text-white/70">忆程建议下一步</span><span className="mt-1 block text-base font-black">{dashboard.nextAction.label}</span><span className="mt-1 block text-xs leading-5 text-white/75">{dashboard.nextAction.detail}</span></span><ArrowRight size={20} className="shrink-0 transition group-hover:translate-x-1" /></Link><div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3"><QuickJump href={`${projectPath}?cardSort=importance#knowledge-assets`} icon={Star} label="重点记录" detail={`${importantCardCount} 张`} /><QuickJump href={`${projectPath}/generate?type=competition_outline`} icon={FileOutput} label={outline ? "作品说明" : "生成大纲"} detail={outline ? "已有版本" : "尚未生成"} /><QuickJump href={`${projectPath}?openCopilot=1#memory-copilot`} icon={Bot} label="问忆程" detail="检索记忆" /></div></div>
     </section>
 
-    <div className="mt-4"><EpisodeCheckpointCard projectId={id} enabled={episodesEnabled} /></div>
+    <div className="mt-4"><EpisodeCheckpointCard projectId={id} enabled={episodesEnabled} reminderEnabled={reminderEnabled} /></div>
+    <div className="mt-4"><ProjectHealthCard projectId={id} enabled={healthEnabled} /></div>
     <div className="mt-8"><InterventionPanel projectId={id} initialInterventions={interventionData} demoEnabled={process.env.DEMO_SCENARIOS !== "false"} /></div>
     <div className="mt-9 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
       <div className="min-w-0 space-y-8">
-        <ActionBoard projectId={id} initialActions={actionData} />
+        <ActionBoard projectId={id} initialActions={actionData} reminderEnabled={reminderEnabled} />
         <SchedulePlanner projectId={id} enabled={schedulingEnabled} />
         <KnowledgeFeed projectId={id} cards={knowledgeCards} />
         <MemoryConsolidationCard projectId={id} enabled={consolidationEnabled} />

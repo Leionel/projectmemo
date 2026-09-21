@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type { ActionItemData } from "@/lib/types";
 import { actionStatusLabels } from "@/lib/types";
 import { emitWorkspaceChange, subscribeWorkspaceChange } from "@/lib/client/workspaceEvents";
+import { getDeviceKey } from "@/lib/client/deviceKey";
 import { sortActions, type ActionSortMode } from "@/lib/projectDashboard";
 
 type ActionView = "active" | "completed" | "all";
@@ -29,7 +30,7 @@ function dateInputValue(value?: string | null) {
   return local.toISOString().slice(0, 10);
 }
 
-export function ActionBoard({ projectId, initialActions }: { projectId: string; initialActions: ActionItemData[] }) {
+export function ActionBoard({ projectId, initialActions, reminderEnabled = false }: { projectId: string; initialActions: ActionItemData[]; reminderEnabled?: boolean }) {
   const router = useRouter();
   const [actions, setActions] = useState(initialActions);
   const [view, setView] = useState<ActionView>("active");
@@ -46,6 +47,8 @@ export function ActionBoard({ projectId, initialActions }: { projectId: string; 
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [now] = useState(() => new Date());
+  /** 完成前的提醒处置询问：有未来设备日历日程时才会出现 */
+  const [completionPrompt, setCompletionPrompt] = useState<{ actionId: string; question: string; options: Array<{ value: string; label: string }>; disposition: "KEEP" | "REMOVE" } | null>(null);
 
   useEffect(() => subscribeWorkspaceChange(projectId, ["actions"], () => {
     void fetch(`/api/projects/${projectId}/actions`).then(async (response) => {
@@ -102,12 +105,46 @@ export function ActionBoard({ projectId, initialActions }: { projectId: string; 
       if (!response.ok) throw new Error(data?.error?.message ?? "更新行动失败");
       setActions((old) => old.map((item) => item.id === action.id ? { ...item, ...data.action } : item));
       setMessage(success);
-      setEditFor(null); setEditDraft(null); setCancelFor(null);
+      setEditFor(null); setEditDraft(null); setCancelFor(null); setCompletionPrompt(null);
       notify(["actions", "metrics"]);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "更新行动失败");
     } finally {
       setBusy(null);
+    }
+  }
+
+  /**
+   * 打开完成回执表单。如果这条待办在设备日历里还有未来的日程，
+   * 在同一区域先询问「保留还是移除」，不另开弹窗。
+   */
+  async function openResult(action: ActionItemData) {
+    if (resultFor === action.id) {
+      setResultFor(null);
+      setResultText("");
+      setCompletionPrompt(null);
+      return;
+    }
+    setResultFor(action.id);
+    setResultText("");
+    setCancelFor(null);
+    setCompletionPrompt(null);
+    if (!reminderEnabled) return;
+    try {
+      const response = await fetch(`/api/projects/${projectId}/actions/${action.id}/reminder?deviceKey=${encodeURIComponent(getDeviceKey())}`);
+      if (!response.ok) return;
+      const data = await response.json().catch(() => null);
+      const prompt = data?.state?.completionPrompt;
+      if (prompt?.required) {
+        setCompletionPrompt({
+          actionId: action.id,
+          question: prompt.question,
+          options: prompt.options,
+          disposition: "KEEP",
+        });
+      }
+    } catch {
+      // 读取提醒状态失败不阻塞完成流程：仍可正常填写回执
     }
   }
 
@@ -119,12 +156,26 @@ export function ActionBoard({ projectId, initialActions }: { projectId: string; 
     setBusy(action.id);
     setMessage("");
     try {
-      const response = await fetch(`/api/projects/${projectId}/actions/${action.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "DONE", resultText: resultText.trim() }) });
+      const payload: Record<string, unknown> = { status: "DONE", resultText: resultText.trim() };
+      if (completionPrompt && completionPrompt.actionId === action.id) {
+        payload.reminderDisposition = completionPrompt.disposition;
+        payload.deviceKey = getDeviceKey();
+      }
+      const response = await fetch(`/api/projects/${projectId}/actions/${action.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       const data = await response.json().catch(() => null);
       if (!response.ok) throw new Error(data?.error?.message ?? "完成行动失败");
       setActions((old) => old.map((item) => item.id === action.id ? { ...item, ...data.action, status: "DONE" } : item));
-      setResultFor(null); setResultText("");
-      setMessage("行动已完成并移入历史，结果已沉淀为阶段复盘卡片。");
+      setResultFor(null); setResultText(""); setCompletionPrompt(null);
+      const outcome = data.reminderOutcome;
+      if (outcome?.compensation?.needed) {
+        setMessage(`行动已完成并移入历史，结果已沉淀为阶段复盘卡片。提醒方面：${outcome.compensation.message}`);
+      } else if (outcome?.disposition === "REMOVE" && Array.isArray(outcome.devicePlan) && outcome.devicePlan.length > 0) {
+        setMessage("行动已完成并移入历史，结果已沉淀为阶段复盘卡片。设备日历里的那条未来日程已标记为移除，请在鸿蒙客户端确认删除。");
+      } else if (outcome?.disposition === "KEEP") {
+        setMessage("行动已完成并移入历史，结果已沉淀为阶段复盘卡片。设备日历里的日程按你的选择保留。");
+      } else {
+        setMessage("行动已完成并移入历史，结果已沉淀为阶段复盘卡片。");
+      }
       notify(["actions", "cards", "interventions", "metrics"]);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "完成行动失败");
@@ -163,7 +214,7 @@ export function ActionBoard({ projectId, initialActions }: { projectId: string; 
     </div>
 
     {message && <p role="status" className="mt-3 rounded-lg bg-[var(--teal-pale)] px-3 py-2 text-xs font-semibold text-[var(--teal-strong)]">{message}</p>}
-    <div className="mt-4 space-y-3">{visibleActions.length ? visibleActions.map((action) => <ActionCard key={action.id} action={action} now={now} busy={busy} resultFor={resultFor} resultText={resultText} editFor={editFor} editDraft={editDraft} cancelFor={cancelFor} onSetResultFor={setResultFor} onSetResultText={setResultText} onBeginEdit={beginEdit} onSetEditDraft={setEditDraft} onCloseEdit={() => { setEditFor(null); setEditDraft(null); }} onSetCancelFor={setCancelFor} onPatch={patchAction} onComplete={complete} />) : <EmptyState view={view} hasActions={projectActions.length > 0} onShowActive={() => setView("active")} />}</div>
+    <div className="mt-4 space-y-3">{visibleActions.length ? visibleActions.map((action) => <ActionCard key={action.id} action={action} now={now} busy={busy} resultFor={resultFor} resultText={resultText} editFor={editFor} editDraft={editDraft} cancelFor={cancelFor} onSetResultFor={setResultFor} onSetResultText={setResultText} onBeginEdit={beginEdit} onSetEditDraft={setEditDraft} onCloseEdit={() => { setEditFor(null); setEditDraft(null); }} onSetCancelFor={setCancelFor} onPatch={patchAction} onComplete={complete} onOpenResult={openResult} completionPrompt={completionPrompt} onSetCompletionDisposition={(value) => setCompletionPrompt((previous) => previous ? { ...previous, disposition: value } : previous)} />) : <EmptyState view={view} hasActions={projectActions.length > 0} onShowActive={() => setView("active")} />}</div>
     {simulatedActions.length > 0 && <details className="mt-4 rounded-xl border border-dashed border-[var(--amber)] bg-[var(--amber)]/10 p-3 text-xs"><summary className="focus-ring cursor-pointer rounded font-bold text-[var(--amber)]">查看 {simulatedActions.length} 条演示行动（不计入真实完成率）</summary><ul className="mt-2 space-y-1.5 text-[var(--ink-soft)]">{simulatedActions.map((action) => <li key={action.id}>· {action.title}</li>)}</ul></details>}
   </section>;
 }
@@ -185,20 +236,40 @@ type ActionCardProps = {
   onSetCancelFor: (id: string | null) => void;
   onPatch: (action: ActionItemData, payload: Record<string, unknown>, success: string) => Promise<void>;
   onComplete: (action: ActionItemData) => Promise<void>;
+  onOpenResult: (action: ActionItemData) => void;
+  onSetCompletionDisposition: (value: "KEEP" | "REMOVE") => void;
+  completionPrompt: { actionId: string; question: string; options: Array<{ value: string; label: string }>; disposition: "KEEP" | "REMOVE" } | null;
 };
 
 function ActionCard(props: ActionCardProps) {
-  const { action, now, busy, resultFor, resultText, editFor, editDraft, cancelFor } = props;
+  const { action, now, busy, resultFor, resultText, editFor, editDraft, cancelFor, completionPrompt } = props;
   const completed = action.status === "DONE";
   const cancelled = action.status === "CANCELLED";
   const due = action.dueAt ? new Date(action.dueAt) : null;
   const overdue = Boolean(due && due.getTime() < now.getTime() && !completed && !cancelled);
   return <article className={"rounded-xl border p-3.5 " + (completed ? "border-[var(--teal)]/30 bg-[var(--teal-pale)]" : cancelled ? "border-[var(--rule)] bg-[var(--paper-strong)] opacity-75" : overdue ? "border-[var(--brick)]/35 bg-[var(--brick-pale)]/35" : "border-[var(--rule)] bg-[var(--card-bg)]")}>
     <div className="flex items-start gap-3"><span className="mt-0.5 text-[var(--teal-strong)]">{completed ? <Check size={17} /> : <Circle size={17} />}</span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center justify-between gap-2"><h3 className={"text-sm font-bold " + (completed ? "line-through opacity-70" : "")}>{action.title}</h3><span className="text-[11px] font-bold text-[var(--muted)]">{actionStatusLabels[action.status]}</span></div>{action.description && <p className="mt-1 text-xs leading-5 text-[var(--ink-soft)]">{action.description}</p>}<div className="mt-2 flex flex-wrap gap-2 text-[11px] font-bold text-[var(--muted)]"><span className="inline-flex items-center gap-1 rounded-md bg-[var(--card-bg)] px-2 py-1"><Star size={12} className="text-[var(--amber)]" />优先级 {action.priority}/5</span>{due && <span className={"inline-flex items-center gap-1 rounded-md bg-[var(--card-bg)] px-2 py-1 " + (overdue ? "text-[var(--brick)]" : "")}><CalendarDays size={12} />{due.toLocaleDateString("zh-CN")} {overdue ? "已逾期" : "截止"}</span>}</div>{action.resultText && <p className="mt-2 rounded-lg bg-[var(--card-bg)] p-2 text-xs leading-5 text-[var(--ink-soft)]"><span className="font-bold">回执：</span>{action.resultText}</p>}
-      {!completed && !cancelled && editFor !== action.id && <div className="mt-3 flex flex-wrap gap-2">{action.status === "TODO" ? <button type="button" onClick={() => void props.onPatch(action, { status: "DOING" }, "行动已开始。") } disabled={Boolean(busy)} className="focus-ring rounded-lg bg-[var(--paper)] px-2.5 py-1.5 text-xs font-bold text-[var(--navy)]">▶ 开始</button> : <button type="button" onClick={() => void props.onPatch(action, { status: "TODO" }, "行动已退回待处理。") } disabled={Boolean(busy)} className="focus-ring rounded-lg bg-[var(--paper)] px-2.5 py-1.5 text-xs font-bold text-[var(--navy)]">暂停</button>}<button type="button" onClick={() => { props.onSetResultFor(resultFor === action.id ? null : action.id); props.onSetResultText(""); props.onSetCancelFor(null); }} disabled={Boolean(busy)} className="focus-ring rounded-lg bg-[var(--teal-pale)] px-2.5 py-1.5 text-xs font-bold text-[var(--teal-strong)]">完成并写回执</button><button type="button" onClick={() => props.onBeginEdit(action)} disabled={Boolean(busy)} className="focus-ring rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--ink-soft)] hover:bg-[var(--paper-strong)]"><Pencil size={13} className="mr-1 inline" />编辑</button><button type="button" onClick={() => props.onSetCancelFor(cancelFor === action.id ? null : action.id)} disabled={Boolean(busy)} className="focus-ring rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--muted)]">取消行动</button></div>}
+      {!completed && !cancelled && editFor !== action.id && <div className="mt-3 flex flex-wrap gap-2">{action.status === "TODO" ? <button type="button" onClick={() => void props.onPatch(action, { status: "DOING" }, "行动已开始。") } disabled={Boolean(busy)} className="focus-ring rounded-lg bg-[var(--paper)] px-2.5 py-1.5 text-xs font-bold text-[var(--navy)]">▶ 开始</button> : <button type="button" onClick={() => void props.onPatch(action, { status: "TODO" }, "行动已退回待处理。") } disabled={Boolean(busy)} className="focus-ring rounded-lg bg-[var(--paper)] px-2.5 py-1.5 text-xs font-bold text-[var(--navy)]">暂停</button>}<button type="button" onClick={() => props.onOpenResult(action)} disabled={Boolean(busy)} className="focus-ring rounded-lg bg-[var(--teal-pale)] px-2.5 py-1.5 text-xs font-bold text-[var(--teal-strong)]">完成并写回执</button><button type="button" onClick={() => props.onBeginEdit(action)} disabled={Boolean(busy)} className="focus-ring rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--ink-soft)] hover:bg-[var(--paper-strong)]"><Pencil size={13} className="mr-1 inline" />编辑</button><button type="button" onClick={() => props.onSetCancelFor(cancelFor === action.id ? null : action.id)} disabled={Boolean(busy)} className="focus-ring rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--muted)]">取消行动</button></div>}
       {cancelFor === action.id && <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg bg-[var(--brick-pale)] px-3 py-2 text-xs"><span className="font-bold text-[var(--brick)]">确定取消这项行动？</span><button type="button" onClick={() => void props.onPatch(action, { status: "CANCELLED" }, "行动已取消，可在“全部”中查看。") } disabled={busy === action.id} className="focus-ring rounded-md bg-[var(--brick)] px-2 py-1 font-bold text-white">确认取消</button><button type="button" onClick={() => props.onSetCancelFor(null)} className="focus-ring rounded-md px-2 py-1 font-bold">返回</button></div>}
       {editFor === action.id && editDraft && <div className="mt-3 rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3"><div className="grid gap-3 sm:grid-cols-2"><label className="text-xs font-bold text-[var(--ink-soft)] sm:col-span-2">标题<input value={editDraft.title} onChange={(event) => props.onSetEditDraft({ ...editDraft, title: event.target.value })} maxLength={160} className="focus-ring editorial-input mt-1 w-full px-3 py-2 text-sm" /></label><label className="text-xs font-bold text-[var(--ink-soft)]">优先级<select value={editDraft.priority} onChange={(event) => props.onSetEditDraft({ ...editDraft, priority: Number(event.target.value) })} className="focus-ring editorial-input mt-1 w-full px-3 py-2 text-sm">{[1,2,3,4,5].map((value) => <option key={value} value={value}>{value} / 5</option>)}</select></label><label className="text-xs font-bold text-[var(--ink-soft)]">截止日期<input type="date" value={editDraft.dueDate} onChange={(event) => props.onSetEditDraft({ ...editDraft, dueDate: event.target.value })} className="focus-ring editorial-input mt-1 w-full px-3 py-2 text-sm" /></label><label className="text-xs font-bold text-[var(--ink-soft)] sm:col-span-2">说明<textarea value={editDraft.description} onChange={(event) => props.onSetEditDraft({ ...editDraft, description: event.target.value })} maxLength={500} rows={2} className="focus-ring editorial-input mt-1 w-full resize-y px-3 py-2 text-sm" /></label></div><div className="mt-3 flex justify-end gap-2"><button type="button" onClick={props.onCloseEdit} className="focus-ring editorial-button-secondary text-xs"><X size={14} />取消</button><button type="button" onClick={() => void props.onPatch(action, { title: editDraft.title.trim(), description: editDraft.description.trim() || null, priority: editDraft.priority, dueAt: dueDateToIso(editDraft.dueDate) }, "行动信息已更新。") } disabled={busy === action.id || editDraft.title.trim().length < 2} className="focus-ring editorial-button text-xs">{busy === action.id ? <LoaderCircle size={14} className="animate-spin" /> : <Check size={14} />}保存</button></div></div>}
-      {resultFor === action.id && <div className="mt-3 rounded-xl border border-[var(--teal)]/30 bg-[var(--card-bg)] p-3"><label htmlFor={`result-${action.id}`} className="text-xs font-black text-[var(--navy)]">完成结果（会生成复盘卡）</label><textarea id={`result-${action.id}`} value={resultText} onChange={(event) => props.onSetResultText(event.target.value)} rows={3} maxLength={2000} className="focus-ring editorial-input mt-2 w-full p-2.5 text-sm" placeholder="写下完成了什么、验证结果和仍需跟进的地方" /><div className="mt-2 flex justify-end gap-2"><button type="button" onClick={() => props.onSetResultFor(null)} className="focus-ring rounded-lg px-2.5 py-1.5 text-xs font-bold">取消</button><button type="button" onClick={() => void props.onComplete(action)} disabled={busy === action.id} className="focus-ring editorial-button text-xs">{busy === action.id ? <LoaderCircle size={14} className="animate-spin" /> : <Check size={14} />}确认完成</button></div></div>}
+      {resultFor === action.id && <div className="mt-3 rounded-xl border border-[var(--teal)]/30 bg-[var(--card-bg)] p-3"><label htmlFor={`result-${action.id}`} className="text-xs font-black text-[var(--navy)]">完成结果（会生成复盘卡）</label><textarea id={`result-${action.id}`} value={resultText} onChange={(event) => props.onSetResultText(event.target.value)} rows={3} maxLength={2000} className="focus-ring editorial-input mt-2 w-full p-2.5 text-sm" placeholder="写下完成了什么、验证结果和仍需跟进的地方" />
+        {completionPrompt?.actionId === action.id && <fieldset className="mt-2 rounded-lg bg-[var(--amber)]/10 p-2.5">
+          <legend className="px-1 text-xs font-bold text-[var(--amber)]">设备日历提醒</legend>
+          <p className="text-xs font-semibold text-[var(--ink-soft)]">{completionPrompt.question}</p>
+          <div className="mt-1.5 space-y-1">
+            {completionPrompt.options.map((option) => <label key={option.value} className="flex items-center gap-2 text-xs font-semibold text-[var(--ink-soft)]">
+              <input
+                type="radio"
+                name={`reminder-disposition-${action.id}`}
+                checked={completionPrompt.disposition === option.value}
+                onChange={() => props.onSetCompletionDisposition(option.value === "REMOVE" ? "REMOVE" : "KEEP")}
+                className="focus-ring"
+              />
+              {option.label}
+            </label>)}
+          </div>
+        </fieldset>}
+        <div className="mt-2 flex justify-end gap-2"><button type="button" onClick={() => props.onSetResultFor(null)} className="focus-ring rounded-lg px-2.5 py-1.5 text-xs font-bold">取消</button><button type="button" onClick={() => void props.onComplete(action)} disabled={busy === action.id} className="focus-ring editorial-button text-xs">{busy === action.id ? <LoaderCircle size={14} className="animate-spin" /> : <Check size={14} />}确认完成</button></div></div>}
     </div></div>
   </article>;
 }

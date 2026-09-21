@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { BookmarkCheck, Check, ExternalLink, FileQuestion, History, LoaderCircle, RefreshCw, X } from "lucide-react";
+import { BookmarkCheck, CalendarClock, Check, ExternalLink, FileQuestion, History, ListPlus, LoaderCircle, RefreshCw, ShieldAlert, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ActionReminderPanel } from "@/components/ActionReminderPanel";
 
 type EpisodeSourceRef = {
   refId: string;
@@ -39,6 +40,21 @@ type EpisodeData = {
   freshness?: { status: string; affectedClaims: Array<{ claimId: string; reason: string }>; sources: SourceState[] };
 };
 type ScopeReport = { includedCount: number; excludedReasons: string[]; contestedCount: number; unknownCount: number };
+
+/** 从检查点建议创建待办后的结果：既说明复用了哪一条，也说明能不能直接安排提醒 */
+type SuggestionOutcome = {
+  actionId: string;
+  reused: boolean;
+  title: string;
+  status: string;
+  availability: {
+    status: string;
+    summary: string;
+    canArrangeReminder: boolean;
+    blockedReason: string | null;
+    entries: Array<{ kind: string; label: string; targetActionId: string }>;
+  };
+};
 
 const kindLabels: Record<string, string> = {
   CARD: "记录",
@@ -85,7 +101,7 @@ function sourceHref(ref: EpisodeSourceRef, state?: SourceState) {
   return null;
 }
 
-export function EpisodeCheckpointCard({ projectId, enabled }: { projectId: string; enabled: boolean }) {
+export function EpisodeCheckpointCard({ projectId, enabled, reminderEnabled = false }: { projectId: string; enabled: boolean; reminderEnabled?: boolean }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [episodes, setEpisodes] = useState<EpisodeData[]>([]);
@@ -95,6 +111,9 @@ export function EpisodeCheckpointCard({ projectId, enabled }: { projectId: strin
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [outcomes, setOutcomes] = useState<Record<string, SuggestionOutcome>>({});
+  const [reminderFor, setReminderFor] = useState<string | null>(null);
+  const [blockedFor, setBlockedFor] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -205,6 +224,49 @@ export function EpisodeCheckpointCard({ projectId, enabled }: { projectId: strin
     setSourceDrawer({ claim, refs, states: sourceStates });
   }
 
+  /**
+   * 从检查点建议创建待办。
+   *
+   * 幂等由服务端保证：幂等键来自 revisionId + claimId，重复点击只会得到同一条待办；
+   * 已存在时服务端返回 reused=true，这里直接把用户带到那条待办，不新建重复记录。
+   * 检查点只给建议，用户点这个按钮才代表确认。
+   */
+  async function addToTodo(claim: EpisodeClaim, episodeId: string, mode: "SUGGESTION" | "UNBLOCK", targetActionId?: string) {
+    if (busy !== null) return;
+    setBusy(`claim-${claim.claimId}`);
+    setMessage("");
+    setError("");
+    try {
+      const response = await fetch(`/api/projects/${projectId}/episodes/${episodeId}/actions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          claimId: claim.claimId,
+          confirm: true,
+          mode,
+          ...(targetActionId ? { unblockTargetActionId: targetActionId } : {}),
+        }),
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error?.message ?? "加入待办失败");
+      const outcome = data.outcome as SuggestionOutcome;
+      setOutcomes((previous) => ({ ...previous, [claim.claimId]: outcome }));
+      setBlockedFor(null);
+      const canArrangeHere = outcome.availability.canArrangeReminder && reminderEnabled;
+      setMessage(outcome.reused
+        ? `已存在对应待办「${outcome.title}」，直接使用它，没有重复创建。`
+        : mode === "UNBLOCK"
+          ? `已创建解阻待办「${outcome.title}」。先完成它，原来的待办才有开始条件。`
+          : `已加入待办「${outcome.title}」。${canArrangeHere ? "可以在下面直接安排提醒。" : "安排提醒请在鸿蒙客户端完成。"}`);
+      if (canArrangeHere) setReminderFor(claim.claimId);
+      router.refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "加入待办失败");
+    } finally {
+      setBusy(null);
+    }
+  }
+
   const activeRevision = preview ? preview.episode.revisions[preview.episode.revisions.length - 1] : viewingRevision;
 
   return <section id="episode-checkpoint" aria-labelledby="episode-title" className="card-surface scroll-mt-24 rounded-[1.5rem] p-5 sm:p-6">
@@ -272,6 +334,36 @@ export function EpisodeCheckpointCard({ projectId, enabled }: { projectId: strin
                 {claim.kind === "FACT" && claim.sourceRefIds.length > 0 && <button type="button" onClick={() => openSources(claim, activeRevision)} className="focus-ring mt-1.5 rounded-md bg-[var(--paper-strong)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)]">
                   查看 {claim.sourceRefIds.length} 个来源
                 </button>}
+                {claim.kind === "SUGGESTION" && !isHistoryView && current && <div>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    <button type="button" onClick={() => void addToTodo(claim, current.id, "SUGGESTION")} disabled={busy !== null} className="focus-ring inline-flex items-center gap-1.5 rounded-md bg-[var(--navy)] px-2 py-1 text-[11px] font-bold text-white disabled:opacity-50">
+                      {busy === `claim-${claim.claimId}` ? <LoaderCircle size={13} className="animate-spin" /> : <ListPlus size={13} />}
+                      {outcomes[claim.claimId] ? "已加入待办" : "加入待办"}
+                    </button>
+                    <button type="button" onClick={() => openSources(claim, activeRevision)} className="focus-ring inline-flex items-center gap-1.5 rounded-md bg-[var(--paper-strong)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)]">
+                      查看建议依据
+                    </button>
+                    {outcomes[claim.claimId] && outcomes[claim.claimId].availability.canArrangeReminder && reminderEnabled && <button type="button" onClick={() => setReminderFor(reminderFor === claim.claimId ? null : claim.claimId)} className="focus-ring inline-flex items-center gap-1.5 rounded-md bg-[var(--teal-pale)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)]">
+                      <CalendarClock size={13} />{reminderFor === claim.claimId ? "收起提醒设置" : "安排日历提醒"}
+                    </button>}
+                    {outcomes[claim.claimId] && !outcomes[claim.claimId].availability.canArrangeReminder && <button type="button" onClick={() => setBlockedFor(blockedFor === claim.claimId ? null : claim.claimId)} className="focus-ring inline-flex items-center gap-1.5 rounded-md bg-[var(--amber)]/15 px-2 py-1 text-[11px] font-bold text-[var(--amber)]">
+                      <ShieldAlert size={13} />先处理阻塞
+                    </button>}
+                  </div>
+                  {outcomes[claim.claimId] && <p className="mt-1.5 text-[11px] font-semibold text-[var(--ink-soft)]">
+                    {outcomes[claim.claimId].reused ? "已复用现有待办" : "已新建待办"}「{outcomes[claim.claimId].title}」：{outcomes[claim.claimId].availability.summary}
+                  </p>}
+                  {blockedFor === claim.claimId && outcomes[claim.claimId] && <div className="mt-1.5 rounded-lg bg-[var(--amber)]/10 p-2.5">
+                    <p className="text-[11px] font-semibold text-[var(--amber)]">{outcomes[claim.claimId].availability.blockedReason}</p>
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      <a href="#action-board" className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-[11px] font-bold text-[var(--ink-soft)]">补充前置依赖</a>
+                      <a href="#capture-box" className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-[11px] font-bold text-[var(--ink-soft)]">补充缺失的信息</a>
+                      <button type="button" onClick={() => void addToTodo(claim, current.id, "UNBLOCK", outcomes[claim.claimId].actionId)} disabled={busy !== null} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)] disabled:opacity-50">创建一个解阻待办</button>
+                    </div>
+                    <p className="mt-1.5 text-[11px] text-[var(--muted)]">受阻的待办不会进入时间安排，也不会被写入设备日历。</p>
+                  </div>}
+                  {reminderFor === claim.claimId && outcomes[claim.claimId] && <ActionReminderPanel projectId={projectId} actionId={outcomes[claim.claimId].actionId} onClose={() => setReminderFor(null)} />}
+                </div>}
               </li>)}
             </ul>
           </div>;
@@ -340,6 +432,9 @@ export function EpisodeCheckpointCard({ projectId, enabled }: { projectId: strin
           </div>
           <button type="button" onClick={() => setSourceDrawer(null)} aria-label="关闭来源详情" className="focus-ring shrink-0 rounded-lg p-1.5 text-[var(--muted)] hover:bg-[var(--paper-strong)]"><X size={16} /></button>
         </div>
+        {sourceDrawer.refs.length === 0 && <p className="mt-4 rounded-xl bg-[var(--paper-strong)] p-3 text-xs leading-5 text-[var(--ink-soft)]">
+          这条建议来自系统规则，没有绑定某一条原始来源：它的依据是当前仍可开始的行动与尚未完成的交付缺口。执行它之前，忆程会先检查这段时间里来源有没有变化，来源变了会拒绝执行并要求重新生成检查点。
+        </p>}
         <ul className="mt-4 space-y-3">
           {sourceDrawer.refs.map((ref) => {
             const state = sourceDrawer.states.find((item) => item.refId === ref.refId);

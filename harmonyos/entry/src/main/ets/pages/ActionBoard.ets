@@ -148,15 +148,15 @@ struct ActionBoard {
   }
 
   private scheduleReasonLabel(code: string): string {
-    if (code === 'MISSING_ESTIMATE') return '缺少估时';
-    if (code === 'BLOCKED') return '依赖阻塞';
-    if (code === 'UNKNOWN') return '证据不足';
-    if (code === 'DONE_OR_CANCELLED') return '行动已取消或完成';
-    if (code === 'NO_CAPACITY') return '时间容量不足';
-    if (code === 'CROSS_PROJECT_CONFLICT') return '跨项目冲突';
-    if (code === 'VERSION_CHANGED') return '预览后版本变化';
-    if (code === 'ALREADY_SCHEDULED') return '已在当前安排中';
-    return '未安排';
+    if (code === 'MISSING_ESTIMATE') return '先填写预计用时';
+    if (code === 'BLOCKED') return '还有事情需要先完成';
+    if (code === 'UNKNOWN') return '暂时无法确认能否开始';
+    if (code === 'DONE_OR_CANCELLED') return '已经结束，不再安排';
+    if (code === 'NO_CAPACITY') return '空闲时间放不下';
+    if (code === 'CROSS_PROJECT_CONFLICT') return '和其他项目的安排冲突';
+    if (code === 'VERSION_CHANGED') return '待办刚刚发生了变化';
+    if (code === 'ALREADY_SCHEDULED') return '已经安排过了';
+    return '这次暂未安排';
   }
 
   /** 未安排原因按固定顺序分组，保证每个行动都能看懂为什么没被排入 */
@@ -314,10 +314,10 @@ struct ActionBoard {
     Column() {
       Row() {
         Column() {
-          Text('可执行安排')
+          Text('把待办放进日程')
             .fontSize(PMFontSize.SECONDARY)
             .fontColor(PMColors.INK_TERTIARY)
-          Text('安排未来 7 天')
+          Text('安排接下来几天')
             .fontSize(PMFontSize.SECTION_TITLE)
             .fontWeight(FontWeight.Bold)
             .fontColor(PMColors.INK_PRIMARY)
@@ -326,7 +326,7 @@ struct ActionBoard {
         .alignItems(HorizontalAlign.Start)
         .layoutWeight(1)
 
-        Text(this.showSchedulePlanner ? '收起' : '预览安排')
+        Text(this.showSchedulePlanner ? '收起设置' : '设置时间')
           .fontSize(PMFontSize.SECONDARY)
           .fontWeight(FontWeight.Medium)
           .fontColor(PMColors.BRAND)
@@ -355,7 +355,7 @@ struct ActionBoard {
       }
 
       if (this.schedulePlan !== null && this.schedulePlan!.blocks.length > 0) {
-        Text('当前已确认安排')
+        Text('已经安排好的时间')
           .fontSize(PMFontSize.SECONDARY)
           .fontWeight(FontWeight.Bold)
           .fontColor(PMColors.INK_PRIMARY)
@@ -397,7 +397,7 @@ struct ActionBoard {
         }
         Row({ space: 8 }) {
           if (this.hasUnsyncedBlocks()) {
-            Button(this.calendarBusy !== '' ? '处理中…' : '同步到系统日历')
+            Button(this.calendarBusy !== '' ? '处理中…' : '添加到手机日历')
               .buttonStyle(ButtonStyleMode.NORMAL)
               .fontSize(PMFontSize.CAPTION)
               .enabled(this.calendarBusy === '')
@@ -406,7 +406,7 @@ struct ActionBoard {
               })
           }
           if (this.hasSyncedBlocks()) {
-            Button('从系统日历撤销')
+            Button('从手机日历移除')
               .buttonStyle(ButtonStyleMode.NORMAL)
               .fontSize(PMFontSize.CAPTION)
               .enabled(this.calendarBusy === '')
@@ -421,7 +421,7 @@ struct ActionBoard {
 
         if (this.calendarStage === 'calendars') {
           Column() {
-            Text('选择要写入的日历（不会修改或删除你已有的日程）')
+            Text('选择保存位置。忆程不会修改你原有的日程。')
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.INK_TERTIARY)
             ForEach(this.calendarOptions, (option: CalendarOption) => {
@@ -441,7 +441,7 @@ struct ActionBoard {
               .width('100%')
               .margin({ top: 4 })
             }, (option: CalendarOption) => option.id)
-            Button('下一步：检查冲突')
+            Button('看看是否撞时间')
               .buttonStyle(ButtonStyleMode.EMPHASIZED)
               .fontSize(PMFontSize.CAPTION)
               .margin({ top: 8 })
@@ -457,7 +457,7 @@ struct ActionBoard {
         if (this.calendarStage === 'confirm') {
           Column() {
             if (this.calendarConflicts.length > 0) {
-              Text('以下时段与你已有日程重叠，请自行决定；系统不会覆盖或删除既有日程：')
+              Text('这些时间和已有日程重叠。忆程不会覆盖原来的日程，请确认后再继续：')
                 .fontSize(PMFontSize.CAPTION)
                 .fontColor(PMColors.WARNING)
               ForEach(this.calendarConflicts, (conflict: CalendarConflict) => {
@@ -467,7 +467,7 @@ struct ActionBoard {
                   .margin({ top: 2 })
               }, (conflict: CalendarConflict) => `${conflict.blockId}-${conflict.existingTitle}`)
             } else {
-              Text('未发现与既有日程重叠，可写入系统日历。')
+              Text('没有发现时间冲突，可以放心添加。')
                 .fontSize(PMFontSize.CAPTION)
                 .fontColor(PMColors.INK_TERTIARY)
             }
@@ -478,7 +478,7 @@ struct ActionBoard {
                 .onClick(() => {
                   this.calendarStage = '';
                 })
-              Button(this.calendarBusy === 'write' ? '写入中…' : '确认写入日历')
+              Button(this.calendarBusy === 'write' ? '添加中…' : '确认添加')
                 .buttonStyle(ButtonStyleMode.EMPHASIZED)
                 .fontSize(PMFontSize.CAPTION)
                 .enabled(this.calendarBusy === '')
@@ -495,48 +495,68 @@ struct ActionBoard {
       }
 
       if (this.showSchedulePlanner && this.schedulePreview === null) {
-        Row() {
-          TextInput({ text: this.scheduleStartTime })
-            .onChange((value: string) => {
-              this.scheduleStartTime = value;
-            })
-            .width(84)
-            .height(36)
-          Text('至').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_TERTIARY)
-          TextInput({ text: this.scheduleEndTime })
-            .onChange((value: string) => {
-              this.scheduleEndTime = value;
-            })
-            .width(84)
-            .height(36)
-          TextInput({ text: this.scheduleDays })
-            .onChange((value: string) => {
-              this.scheduleDays = value;
-            })
-            .width(52)
-            .height(36)
-          Text('天').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_TERTIARY)
-          Blank()
-          Button(this.scheduleBusy === 'preview' ? '生成中…' : '生成预览')
+        Column() {
+          Text('我每天有空的时间')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+          Row({ space: 8 }) {
+            Text('从').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY)
+            TextInput({ text: this.scheduleStartTime })
+              .onChange((value: string) => {
+                this.scheduleStartTime = value;
+              })
+              .width(92)
+              .height(40)
+              .accessibilityText('每天空闲时间的开始时刻')
+            Text('到').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY)
+            TextInput({ text: this.scheduleEndTime })
+              .onChange((value: string) => {
+                this.scheduleEndTime = value;
+              })
+              .width(92)
+              .height(40)
+              .accessibilityText('每天空闲时间的结束时刻')
+          }
+          .width('100%')
+          .margin({ top: 4 })
+
+          Row({ space: 8 }) {
+            Text('连续安排').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY)
+            TextInput({ text: this.scheduleDays })
+              .onChange((value: string) => {
+                this.scheduleDays = value;
+              })
+              .width(64)
+              .height(40)
+              .accessibilityText('要安排的天数')
+            Text('天').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY)
+          }
+          .width('100%')
+          .margin({ top: 6 })
+
+          Button(this.scheduleBusy === 'preview' ? '正在安排…' : '看看怎么安排')
             .buttonStyle(ButtonStyleMode.EMPHASIZED)
-            .fontSize(PMFontSize.SECONDARY)
+            .fontSize(PMFontSize.BUTTON)
+            .height(44)
+            .width('100%')
             .enabled(this.scheduleBusy === '')
+            .margin({ top: 10 })
             .onClick(() => {
               this.generateSchedulePreview();
             })
         }
         .width('100%')
         .margin({ top: 10 })
-        .alignItems(VerticalAlign.Center)
+        .alignItems(HorizontalAlign.Start)
 
-        Text('每天可用时段（如 19:00）；只安排当前可开始（READY）的行动。')
+        Text('只会安排能够开始、并且已经填写预计用时的待办。你确认前不会保存，也不会写入手机日历。')
           .fontSize(PMFontSize.CAPTION)
           .fontColor(PMColors.INK_TERTIARY)
           .margin({ top: 4 })
       }
 
       if (this.schedulePreview !== null) {
-        Text(`已安排（${this.schedulePreview!.blocks.length}）`)
+        Text(`安排建议（${this.schedulePreview!.blocks.length} 项）`)
           .fontSize(PMFontSize.SECONDARY)
           .fontWeight(FontWeight.Bold)
           .fontColor(PMColors.SUCCESS)
@@ -567,13 +587,13 @@ struct ActionBoard {
           }
         }, (code: string) => code)
         Row({ space: 8 }) {
-          Button('重新填写时间')
+          Button('修改空闲时间')
             .buttonStyle(ButtonStyleMode.NORMAL)
             .fontSize(PMFontSize.SECONDARY)
             .onClick(() => {
               this.schedulePreview = null;
             })
-          Button(this.scheduleBusy === 'confirm' ? '确认中…' : '确认安排')
+          Button(this.scheduleBusy === 'confirm' ? '保存中…' : '保存这个安排')
             .buttonStyle(ButtonStyleMode.EMPHASIZED)
             .fontSize(PMFontSize.SECONDARY)
             .enabled(this.scheduleBusy === '' && this.schedulePreview !== null && this.schedulePreview!.blocks.length > 0)
@@ -642,6 +662,27 @@ struct ActionBoard {
     if (this.feasibilityFor.feasibility === 'READY') return PMColors.SUCCESS;
     if (this.feasibilityFor.feasibility === 'BLOCKED') return PMColors.RISK;
     return PMColors.EVIDENCE;
+  }
+
+  private feasibilityTitle(): string {
+    if (this.feasibilityFor.feasibility === 'BLOCKED') return '还有事情需要先完成';
+    if (this.feasibilityFor.feasibility === 'UNKNOWN') return '暂时无法确认能否开始';
+    if (this.feasibilityFor.estimateMinutes === null) return '可以开始，还缺预计用时';
+    return '可以开始，也可以安排时间';
+  }
+
+  private feasibilitySummary(): string {
+    if (this.feasibilityFor.feasibility === 'BLOCKED') return '先完成下面标出的前置事项，再回来安排这个待办。';
+    if (this.feasibilityFor.feasibility === 'UNKNOWN') return '有些前置事项的状态还不明确，确认后再安排会更稳妥。';
+    if (this.feasibilityFor.estimateMinutes === null) return '没有发现必须先完成的事项。填写大约需要多少分钟后，就能把它放进日程。';
+    return `没有发现必须先完成的事项，预计需要 ${this.feasibilityFor.estimateMinutes} 分钟。`;
+  }
+
+  private dependencyStateLabel(state: string): string {
+    if (state === 'MET') return '已满足';
+    if (state === 'UNMET') return '未完成';
+    if (state === 'MISSING') return '已找不到';
+    return '待确认';
   }
 
   private firstUnmetNote(): string {
@@ -896,7 +937,7 @@ struct ActionBoard {
               })
           }
 
-          Button(this.isLoadingFeasibility ? '评估中…' : '查可行性')
+          Button(this.isLoadingFeasibility ? '检查中…' : '看看能否安排')
             .fontSize(PMFontSize.BUTTON)
             .fontColor(PMColors.INK_PRIMARY)
             .backgroundColor(PMColors.SURFACE_SUBTLE)
@@ -1059,12 +1100,14 @@ struct ActionBoard {
           actionId: this.feasibilityFor.actionId,
           assessment: this.feasibilityFor,
           onSaved: () => {
+            const actionId = this.feasibilityFor.actionId;
             this.showFeasibilityEditor = false;
-            this.openFeasibilityEditor();
+            this.openFeasibility(actionId);
           },
           onClose: () => {
+            const actionId = this.feasibilityFor.actionId;
             this.showFeasibilityEditor = false;
-            this.openFeasibilityEditor();
+            this.openFeasibility(actionId);
           }
         })
       }
@@ -1074,7 +1117,7 @@ struct ActionBoard {
         Column() {
           Column() {
             Row() {
-              Text('行动可行性')
+              Text('这个待办能安排吗？')
                 .fontSize(PMFontSize.PAGE_TITLE)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
@@ -1089,13 +1132,13 @@ struct ActionBoard {
             .width('100%')
             .justifyContent(FlexAlign.SpaceBetween)
 
-            Text(`${this.feasibilityFor.feasibility === 'READY' ? '✓ 可开始' : this.feasibilityFor.feasibility === 'BLOCKED' ? '! 受阻' : '? 无法确认'}`)
+            Text(this.feasibilityTitle())
               .fontSize(PMFontSize.SECTION_TITLE)
               .fontWeight(FontWeight.Bold)
               .fontColor(this.feasibilityColor())
               .margin({ top: PMSpacing.SM })
 
-            Text(this.feasibilityFor.summary)
+            Text(this.feasibilitySummary())
               .fontSize(PMFontSize.BODY)
               .fontColor(PMColors.INK_SECONDARY)
               .lineHeight(20)
@@ -1108,14 +1151,14 @@ struct ActionBoard {
                 .margin({ top: PMSpacing.XS })
             }
 
-            Text(`估时：${this.feasibilityFor.estimateMinutes !== null ? `${this.feasibilityFor.estimateMinutes} 分钟（用户填写）` : '未估算'}`)
+            Text(this.feasibilityFor.estimateMinutes !== null ? `预计用时：${this.feasibilityFor.estimateMinutes} 分钟` : '还没有填写预计用时')
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.INK_TERTIARY)
               .margin({ top: PMSpacing.XS })
 
             ForEach(this.feasibilityFor.dependencies, (dep: FeasibilityDependency) => {
               Row() {
-                Text(dep.hard ? '硬依赖' : '参考')
+                Text(dep.hard ? '必须先完成' : '参考事项')
                   .fontSize(PMFontSize.CAPTION)
                   .fontWeight(FontWeight.Medium)
                   .fontColor(dep.hard ? PMColors.RISK : PMColors.INK_TERTIARY)
@@ -1123,7 +1166,7 @@ struct ActionBoard {
                   Text(dep.targetTitle !== null ? dep.targetTitle : dep.note)
                     .fontSize(PMFontSize.CAPTION)
                     .fontColor(PMColors.INK_PRIMARY)
-                  Text(`${dep.state} · ${dep.note}`)
+                  Text(`${this.dependencyStateLabel(dep.state)} · ${dep.note}`)
                     .fontSize(PMFontSize.CAPTION)
                     .fontColor(PMColors.INK_TERTIARY)
                     .margin({ top: 2 })
@@ -1138,14 +1181,14 @@ struct ActionBoard {
             }, (dep: FeasibilityDependency) => dep.requirementId)
 
             if (this.feasibilityFor.dependencies.length === 0) {
-              Text('尚未声明任何依赖。READY 只表示已声明的硬依赖满足，不保证现实一定按时完成。')
+              Text('没有需要先完成的事项。实际完成时间仍可能受临时情况影响。')
                 .fontSize(PMFontSize.CAPTION)
                 .fontColor(PMColors.INK_TERTIARY)
                 .lineHeight(18)
                 .margin({ top: PMSpacing.SM })
             }
 
-            Button('编辑依赖 / 估时')
+            Button(this.feasibilityFor.estimateMinutes === null ? '填写预计用时' : '修改前置事项或用时')
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.BRAND)
               .backgroundColor(PMColors.BRAND_LIGHT)

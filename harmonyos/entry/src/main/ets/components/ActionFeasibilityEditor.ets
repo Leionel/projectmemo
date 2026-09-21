@@ -143,7 +143,7 @@ export struct ActionFeasibilityEditor {
     let minutes: number | null = null;
     if (!clear) {
       if (!/^\d+$/.test(trimmed) || Number.parseInt(trimmed, 10) <= 0) {
-        this.editorError = '估时必须是正整数分钟，不能包含其他字符';
+        this.editorError = '预计用时请填写整数分钟，例如 60';
         return;
       }
       minutes = Number.parseInt(trimmed, 10);
@@ -158,7 +158,7 @@ export struct ActionFeasibilityEditor {
       await this.apply(input);
       this.estimateText = clear ? '' : trimmed;
     } catch (e) {
-      this.editorError = e instanceof ApiError ? e.message : '估时保存失败';
+      this.editorError = e instanceof ApiError ? e.message : '预计用时保存失败，请稍后重试';
     } finally {
       this.isSaving = false;
     }
@@ -178,7 +178,7 @@ export struct ActionFeasibilityEditor {
 
       Column() {
         Row() {
-          Text('编辑依赖与估时')
+          Text('准备这个待办')
             .fontSize(PMFontSize.SECTION_TITLE)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.INK_PRIMARY)
@@ -195,7 +195,7 @@ export struct ActionFeasibilityEditor {
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
 
-        Text('说明：记录卡依赖表示“依赖该结论成立”，仅存在记录并不代表前提满足；服务端每次按当前状态重评。')
+        Text('填写预计用时；如果必须先完成其他事情，也可以在下面添加。')
           .fontSize(PMFontSize.CAPTION)
           .fontColor(PMColors.INK_TERTIARY)
           .lineHeight(16)
@@ -203,14 +203,14 @@ export struct ActionFeasibilityEditor {
 
         // 当前依赖列表
         Column() {
-          Text(`依赖 (${this.deps.length})`)
+          Text(`需要先完成的事项（${this.deps.length}）`)
             .fontSize(PMFontSize.CAPTION)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.INK_SECONDARY)
           ForEach(this.deps, (dep: FeasibilityDependency) => {
             Row() {
               Column() {
-                Text(`${dep.hard ? '硬依赖' : '参考'} · ${dep.targetTitle !== null ? dep.targetTitle : dep.note}`)
+                Text(`${dep.hard ? '必须完成' : '仅供参考'} · ${dep.targetTitle !== null ? dep.targetTitle : dep.note}`)
                   .fontSize(PMFontSize.CAPTION)
                   .fontColor(PMColors.INK_PRIMARY)
                   .maxLines(1)
@@ -244,7 +244,7 @@ export struct ActionFeasibilityEditor {
           }, (dep: FeasibilityDependency) => dep.requirementId)
 
           if (this.deps.length === 0) {
-            Text('尚未声明依赖')
+            Text('没有需要先完成的事项')
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.INK_TERTIARY)
           }
@@ -288,7 +288,7 @@ export struct ActionFeasibilityEditor {
 
           Blank()
 
-          Button(this.hardRequirement ? '硬依赖' : '参考')
+          Button(this.hardRequirement ? '必须先完成' : '仅供参考')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(this.hardRequirement ? PMColors.RISK : PMColors.INK_SECONDARY)
             .backgroundColor(PMColors.SURFACE)
@@ -298,7 +298,7 @@ export struct ActionFeasibilityEditor {
             .onClick(() => {
               this.hardRequirement = !this.hardRequirement;
             })
-            .accessibilityText('切换硬依赖或参考')
+            .accessibilityText('切换为必须先完成或仅供参考')
         }
         .width('100%')
         .margin({ top: PMSpacing.SM })
@@ -338,9 +338,15 @@ export struct ActionFeasibilityEditor {
         .layoutWeight(1)
         .margin({ top: PMSpacing.SM })
 
-        // 估时
+        Text('预计需要多久？')
+          .fontSize(PMFontSize.CAPTION)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.INK_SECONDARY)
+          .width('100%')
+          .margin({ top: PMSpacing.SM })
+
         Row({ space: PMSpacing.SM }) {
-          TextInput({ text: this.estimateText, placeholder: '估时（分钟，留空为未估算）' })
+          TextInput({ text: this.estimateText, placeholder: '例如 60' })
             .onChange((v: string) => {
               this.estimateText = v;
             })
@@ -352,7 +358,19 @@ export struct ActionFeasibilityEditor {
             .layoutWeight(1)
             .accessibilityText('预估完成分钟数')
 
-          Button('清空')
+          Button(this.isSaving ? '保存中…' : '保存用时')
+            .fontSize(PMFontSize.CAPTION)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.SURFACE)
+            .backgroundColor(PMColors.BRAND)
+            .borderRadius(PMRadius.XS)
+            .height(40)
+            .enabled(!this.isSaving)
+            .onClick(() => {
+              this.saveEstimate(false);
+            })
+
+          Button('清除')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_SECONDARY)
             .backgroundColor(PMColors.SURFACE_SUBTLE)

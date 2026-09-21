@@ -7,7 +7,7 @@ import { Project, ProjectDashboard, ApiError, ReadinessItem, ProjectUpdateInput 
 import { ProjectDetail, KnowledgeCard, CardLink, IncomingCardLink } from '../models/Memory';
 import { Milestone, Deliverable, DeliverableEvidence } from '../models/Milestone';
 import { Intervention, ProposedAction } from '../models/Intervention';
-import { ActionItem } from '../models/Action';
+import { ActionCreateInput, ActionItem } from '../models/Action';
 import { ArtifactItem } from '../models/Artifact';
 import { AgentMessage, AgentCitation, EvidenceClaim, ActionCreatePayload, ArtifactGeneratePayload } from '../models/Copilot';
 import { Attachment } from '../models/Attachment';
@@ -134,6 +134,12 @@ struct ProjectHome {
   @State isSubmittingAction: boolean = false;
   @State dialogError: string = '';
   @State startingActionId: string = '';
+  @State showCreateAction: boolean = false;
+  @State newActionTitle: string = '';
+  @State newActionDescription: string = '';
+  @State newActionPriority: number = 3;
+  @State newActionError: string = '';
+  @State isCreatingAction: boolean = false;
 
   // Tab 3: 问忆程专属状态
   @State copilotQuestion: string = '';
@@ -1482,6 +1488,44 @@ struct ProjectHome {
   }
 
   // --- 待办操作 ---
+  private openCreateAction(): void {
+    this.newActionTitle = '';
+    this.newActionDescription = '';
+    this.newActionPriority = 3;
+    this.newActionError = '';
+    this.showCreateAction = true;
+  }
+
+  private async createActionManually(): Promise<void> {
+    if (this.isCreatingAction) {
+      return;
+    }
+    const title = this.newActionTitle.trim();
+    if (title.length < 2) {
+      this.newActionError = '请用至少 2 个字写清要做什么';
+      return;
+    }
+    this.isCreatingAction = true;
+    this.newActionError = '';
+    try {
+      const input = new ActionCreateInput();
+      input.title = title;
+      const description = this.newActionDescription.trim();
+      if (description !== '') {
+        input.description = description;
+      }
+      input.priority = this.newActionPriority;
+      await this.actionService.create(this.projectId, input);
+      this.showCreateAction = false;
+      promptAction.showToast({ message: '已加入待办' });
+      await this.loadAllData();
+    } catch (e) {
+      this.newActionError = e instanceof ApiError ? e.message : '暂时无法添加，请稍后重试';
+    } finally {
+      this.isCreatingAction = false;
+    }
+  }
+
   private async startAction(actionId: string): Promise<void> {
     if (this.startingActionId !== '') {
       return;
@@ -2659,7 +2703,7 @@ struct ProjectHome {
               })
               .accessibilityText('打开记录项目碎片面板')
 
-            Button('导入会议文本')
+            Button('整理会议内容')
               .fontSize(PMFontSize.BUTTON)
               .fontColor(PMColors.INK_SECONDARY)
               .backgroundColor(PMColors.SURFACE_SUBTLE)
@@ -2670,7 +2714,7 @@ struct ProjectHome {
               .onClick(() => {
                 this.entrySheetMode = 'meeting'; this.showEntrySheet = true;
               })
-              .accessibilityText('打开会议文本导入')
+              .accessibilityText('打开会议内容整理')
           }
           .width('100%')
           .margin({ top: PMSpacing.MD })
@@ -3437,44 +3481,50 @@ struct ProjectHome {
       .backgroundColor(PMColors.SURFACE)
       .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
 
-      Row() {
-        Column() {
-          Text('行动安排')
-            .fontSize(PMFontSize.BODY)
+      Column() {
+        Row({ space: PMSpacing.SM }) {
+          Button('＋ 新增待办')
+            .fontSize(PMFontSize.BUTTON)
             .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.INK_PRIMARY)
-          Text('预览未来 7 天安排，并可选择同步到系统日历')
-            .fontSize(PMFontSize.CAPTION)
-            .fontColor(PMColors.INK_TERTIARY)
-            .margin({ top: 2 })
-            .maxLines(2)
-        }
-        .alignItems(HorizontalAlign.Start)
-        .layoutWeight(1)
+            .fontColor(PMColors.SURFACE)
+            .backgroundColor(PMColors.BRAND)
+            .borderRadius(PMRadius.SM)
+            .height(44)
+            .layoutWeight(1)
+            .onClick(() => {
+              this.openCreateAction();
+            })
+            .accessibilityText('手动新增待办')
 
-        Button('打开')
-          .fontSize(PMFontSize.BUTTON)
-          .fontWeight(FontWeight.Medium)
-          .fontColor(PMColors.BRAND)
-          .backgroundColor(PMColors.BRAND_LIGHT)
-          .borderRadius(PMRadius.SM)
-          .height(40)
-          .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
-          .margin({ left: PMSpacing.MD })
-          .onClick(() => {
-            router.pushUrl({
-              url: 'pages/ActionBoard',
-              params: { projectId: this.projectId }
-            });
-          })
-          .accessibilityText('打开行动安排与系统日历同步')
-          .accessibilityDescription('预览并确认项目行动的未来安排，可选同步到设备系统日历')
+          Button('安排时间')
+            .fontSize(PMFontSize.BUTTON)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.BRAND)
+            .backgroundColor(PMColors.BRAND_LIGHT)
+            .borderRadius(PMRadius.SM)
+            .height(44)
+            .layoutWeight(1)
+            .onClick(() => {
+              router.pushUrl({
+                url: 'pages/ActionBoard',
+                params: { projectId: this.projectId }
+              });
+            })
+            .accessibilityText('安排待办时间')
+            .accessibilityDescription('把待办安排到未来几天，并可选择添加到手机日历')
+        }
+        .width('100%')
+
+        Text('先添加要做的事；需要时再把它们安排到具体时间。')
+          .fontSize(PMFontSize.CAPTION)
+          .fontColor(PMColors.INK_TERTIARY)
+          .margin({ top: PMSpacing.XS })
       }
       .width('100%')
       .padding(PMSpacing.LG)
       .backgroundColor(PMColors.SURFACE)
       .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
-      .alignItems(VerticalAlign.Center)
+      .alignItems(HorizontalAlign.Start)
 
       List({ space: PMSpacing.MD }) {
         ForEach(this.actions, (action: ActionItem) => {
@@ -4528,6 +4578,121 @@ struct ProjectHome {
       .width('100%')
       .height('100%')
       .backgroundColor(PMColors.BACKGROUND)
+
+      if (this.showCreateAction) {
+        Column() {
+          Column() {
+            Row() {
+              Text('新增待办')
+                .fontSize(PMFontSize.PAGE_TITLE)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Button('✕')
+                .fontSize(PMFontSize.BODY)
+                .fontColor(PMColors.INK_TERTIARY)
+                .backgroundColor('transparent')
+                .enabled(!this.isCreatingAction)
+                .onClick(() => {
+                  this.showCreateAction = false;
+                })
+                .accessibilityText('关闭新增待办')
+            }
+            .width('100%')
+            .justifyContent(FlexAlign.SpaceBetween)
+
+            Text('要做什么？')
+              .fontSize(PMFontSize.BODY)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.INK_PRIMARY)
+              .margin({ top: PMSpacing.MD })
+            TextInput({ text: this.newActionTitle, placeholder: '例如：整理复赛演示数据' })
+              .onChange((value: string) => {
+                this.newActionTitle = value;
+                this.newActionError = '';
+              })
+              .fontSize(PMFontSize.BODY)
+              .height(44)
+              .backgroundColor(PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.SM)
+              .border({ width: 1, color: PMColors.BORDER })
+              .margin({ top: PMSpacing.XS })
+              .accessibilityText('待办标题')
+
+            Text('补充说明（可不填）')
+              .fontSize(PMFontSize.BODY)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.INK_PRIMARY)
+              .margin({ top: PMSpacing.MD })
+            TextArea({ text: this.newActionDescription, placeholder: '写下完成标准、材料位置或注意事项' })
+              .onChange((value: string) => {
+                this.newActionDescription = value;
+              })
+              .fontSize(PMFontSize.BODY)
+              .height(88)
+              .backgroundColor(PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.SM)
+              .border({ width: 1, color: PMColors.BORDER })
+              .margin({ top: PMSpacing.XS })
+              .accessibilityText('待办补充说明')
+
+            Text('什么时候优先做？')
+              .fontSize(PMFontSize.BODY)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.INK_PRIMARY)
+              .margin({ top: PMSpacing.MD })
+            Row({ space: PMSpacing.SM }) {
+              ForEach([1, 3, 5], (priority: number) => {
+                Button(priority === 1 ? '优先' : priority === 3 ? '普通' : '稍后')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(this.newActionPriority === priority ? PMColors.SURFACE : PMColors.INK_SECONDARY)
+                  .backgroundColor(this.newActionPriority === priority ? PMColors.BRAND : PMColors.SURFACE_SUBTLE)
+                  .borderRadius(PMRadius.SM)
+                  .height(40)
+                  .layoutWeight(1)
+                  .onClick(() => {
+                    this.newActionPriority = priority;
+                  })
+                  .accessibilitySelected(this.newActionPriority === priority)
+              }, (priority: number) => `${priority}`)
+            }
+            .width('100%')
+            .margin({ top: PMSpacing.XS })
+
+            if (this.newActionError !== '') {
+              Text(this.newActionError)
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.RISK)
+                .margin({ top: PMSpacing.SM })
+            }
+
+            Button(this.isCreatingAction ? '正在添加…' : '加入待办')
+              .fontSize(PMFontSize.BUTTON)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.SURFACE)
+              .backgroundColor(this.newActionTitle.trim().length >= 2 && !this.isCreatingAction ? PMColors.BRAND : PMColors.INK_MUTED)
+              .borderRadius(PMRadius.SM)
+              .height(48)
+              .width('100%')
+              .enabled(this.newActionTitle.trim().length >= 2 && !this.isCreatingAction)
+              .margin({ top: PMSpacing.LG })
+              .onClick(() => {
+                this.createActionManually();
+              })
+          }
+          .width('92%')
+          .padding(PMSpacing.LG)
+          .backgroundColor(PMColors.SURFACE)
+          .borderRadius(PMRadius.LG)
+          .border({ width: 1, color: PMColors.BORDER })
+          .alignItems(HorizontalAlign.Start)
+          .transition(TransitionEffect.OPACITY.combine(TransitionEffect.scale({ x: 0.96, y: 0.96 })).animation({ duration: PMMotion.LOCAL, curve: PMMotion.CURVE_CONTENT }))
+        }
+        .width('100%')
+        .height('100%')
+        .backgroundColor(PMColors.SCRIM)
+        .backgroundBlurStyle(PMMaterial.SCRIM, PMMaterial.OPTIONS)
+        .justifyContent(FlexAlign.Center)
+      }
 
       // 完成行动写回执弹窗
       if (this.completingActionId !== '') {

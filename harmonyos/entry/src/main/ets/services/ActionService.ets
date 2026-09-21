@@ -1,6 +1,7 @@
 import { ApiClient } from './ApiClient';
 import {
   ActionCreateInput,
+  ActionCreateResponse,
   ActionItem,
   ActionsResponse,
   ActionUpdateResponse,
@@ -18,7 +19,8 @@ export class ActionService {
   }
 
   async create(projectId: string, input: ActionCreateInput): Promise<ActionItem> {
-    return this.client.post<ActionItem>(`/api/projects/${projectId}/actions`, input);
+    const response = await this.client.post<ActionCreateResponse>(`/api/projects/${projectId}/actions`, input);
+    return response.action;
   }
 
   async getFeasibility(projectId: string, actionId: string): Promise<FeasibilityAssessment> {

@@ -39,6 +39,11 @@ export class ActionUpdateResponse {
   action: ActionItem = new ActionItem();
 }
 
+export class ActionCreateResponse {
+  action: ActionItem = new ActionItem();
+  reused: boolean = false;
+}
+
 // ---- F1 行动可行性 ----
 
 export class FeasibilityDependency {

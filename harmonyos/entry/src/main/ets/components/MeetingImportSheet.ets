@@ -26,10 +26,10 @@ export struct MeetingImportSheet {
   onShowDiff: (fromId: string, toId: string) => void = (_fromId: string, _toId: string) => {};
 
   private kindLabel(kind: string): string {
-    if (kind === 'DECISION_SUPERSEDE') return '决策取代';
-    if (kind === 'ACTION_CREATE') return '新增行动';
-    if (kind === 'DEADLINE_CHANGE') return '截止变化';
-    return '结论记录';
+    if (kind === 'DECISION_SUPERSEDE') return '决定有变化';
+    if (kind === 'ACTION_CREATE') return '新增待办';
+    if (kind === 'DEADLINE_CHANGE') return '日期有变化';
+    return '会议结论';
   }
 
   private kindColor(kind: string): ResourceColor {
@@ -125,7 +125,7 @@ export struct MeetingImportSheet {
     } catch (e) {
       if (e instanceof ApiError && (e.code === 'STATE_CHANGED_REPREVIEW' || e.code === 'PROPOSAL_EXECUTION_CONFLICT')) {
         // 409 只提示重新预览：保留会议原文和日期，不自动替用户确认新版事实。
-        this.errorMessage = '预览基线已变化，原文已保留；请点击“生成预览”后重新勾选确认';
+        this.errorMessage = '项目内容刚刚发生了变化，会议原文仍在；请重新点击“看看识别到了什么”后再选择保存';
         this.hasPreview = false;
         this.stage = 'draft';
         this.selectedIds = [];
@@ -161,7 +161,7 @@ export struct MeetingImportSheet {
           .accessibilityText(`勾选${change.title}`)
           .accessibilitySelected(this.isSelected(change.changeId))
         } else {
-          Text('待澄清，不可确认')
+          Text('信息不完整')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.RISK)
         }
@@ -175,20 +175,20 @@ export struct MeetingImportSheet {
         .lineHeight(20)
         .margin({ top: 4 })
 
-      Text(`原文：${change.evidenceSpan}`)
+      Text(`会议原文：${change.evidenceSpan}`)
         .fontSize(PMFontSize.CAPTION)
         .fontColor(PMColors.INK_TERTIARY)
         .lineHeight(16)
         .margin({ top: 2 })
 
       if (change.kind === 'DECISION_SUPERSEDE' && change.supersededCardTitle !== null) {
-        Text(`拟取代：${change.supersededCardTitle}`)
+        Text(`将替换：${change.supersededCardTitle}`)
           .fontSize(PMFontSize.CAPTION)
           .fontColor(PMColors.RISK)
           .margin({ top: 2 })
       }
       if (change.kind === 'DEADLINE_CHANGE' && change.deadlineISO !== null) {
-        Text(`新截止：${change.deadlineISO}`)
+        Text(`新的截止日期：${change.deadlineISO}`)
           .fontSize(PMFontSize.CAPTION)
           .fontColor(PMColors.EVIDENCE)
           .margin({ top: 2 })
@@ -224,7 +224,7 @@ export struct MeetingImportSheet {
 
       Column() {
         Row() {
-          Text('导入会议文本')
+          Text('记录这次会议')
             .fontSize(PMFontSize.SECTION_TITLE)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.INK_PRIMARY)
@@ -243,11 +243,11 @@ export struct MeetingImportSheet {
 
         if (this.stage === 'done') {
           Column() {
-            Text('✓ 会议变更已确认写入')
+            Text('✓ 会议内容已保存')
               .fontSize(PMFontSize.SECTION_TITLE)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.SUCCESS)
-            Text(`共 ${this.applied.length} 项变更；规则抽取，未使用模型语义理解。`)
+            Text(`已按你的选择保存 ${this.applied.length} 项，未勾选的内容没有写入。`)
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.INK_TERTIARY)
               .margin({ top: PMSpacing.XS })
@@ -257,7 +257,7 @@ export struct MeetingImportSheet {
                 Text(this.kindLabel(item.kind))
                   .fontSize(PMFontSize.CAPTION)
                   .fontColor(this.kindColor(item.kind))
-                Text(`${item.changeId}${item.newCardId !== null ? ' · 新记忆' : ''}${item.newActionId !== null ? ' · 新待办' : ''}${item.deadlineISO !== null ? ` · 截止 ${item.deadlineISO}` : ''}`)
+                Text(`${item.newCardId !== null ? '已保存到记忆' : ''}${item.newActionId !== null ? '已加入待办' : ''}${item.deadlineISO !== null ? `截止日期改为 ${item.deadlineISO}` : ''}`)
                   .fontSize(PMFontSize.CAPTION)
                   .fontColor(PMColors.INK_SECONDARY)
                   .layoutWeight(1)
@@ -296,6 +296,11 @@ export struct MeetingImportSheet {
           .width('100%')
           .alignItems(HorizontalAlign.Start)
         } else if (this.stage === 'preview') {
+          Text('请检查识别结果')
+            .fontSize(PMFontSize.BODY)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.INK_PRIMARY)
+            .margin({ top: PMSpacing.XS })
           Text(this.preview.summary)
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_SECONDARY)
@@ -321,7 +326,7 @@ export struct MeetingImportSheet {
               .margin({ top: PMSpacing.XS })
           }
 
-          Text(`已勾选 ${this.selectedIds.length}/${this.proposedCount()} 项可确认变化`)
+          Text(`已选择 ${this.selectedIds.length}/${this.proposedCount()} 项`)
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_TERTIARY)
             .margin({ top: PMSpacing.XS })
@@ -338,7 +343,7 @@ export struct MeetingImportSheet {
               .onClick(() => {
                 this.backToDraft();
               })
-            Button(this.isConfirming ? '确认中…' : `确认选中 ${this.selectedIds.length} 项`)
+            Button(this.isConfirming ? '保存中…' : `保存选中的 ${this.selectedIds.length} 项`)
               .fontSize(PMFontSize.BUTTON)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.SURFACE)
@@ -354,7 +359,7 @@ export struct MeetingImportSheet {
           .width('100%')
           .margin({ top: PMSpacing.MD })
         } else {
-          Text('粘贴会议记录，系统按规则抽取候选变化（决策取代 / 新行动 / 截止变化 / 结论），逐项勾选后确认写入。')
+          Text('粘贴会议内容。忆程会找出“改了什么、要做什么、日期有没有变化”，先给你检查，只有勾选确认后才会保存。')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_TERTIARY)
             .lineHeight(16)
@@ -372,11 +377,11 @@ export struct MeetingImportSheet {
             .margin({ top: PMSpacing.SM })
             .accessibilityText('输入会议文本')
 
-          Text('会议日期（YYYY-MM-DD，用于解析“下周五”等相对日期）')
+          Text('会议是哪一天？（可不填）')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_TERTIARY)
             .margin({ top: PMSpacing.SM })
-          TextInput({ text: this.meetingDate, placeholder: '例如 2026-09-14，留空则相对日期标记待澄清' })
+          TextInput({ text: this.meetingDate, placeholder: '例如 2026-09-14；内容里有“下周五”时建议填写' })
             .onChange((v: string) => {
               this.meetingDate = v;
             })
@@ -394,7 +399,7 @@ export struct MeetingImportSheet {
               .margin({ top: PMSpacing.XS })
           }
 
-          Button(this.isLoadingPreview ? '解析中…' : '生成预览')
+          Button(this.isLoadingPreview ? '正在识别…' : '看看识别到了什么')
             .fontSize(PMFontSize.BUTTON)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.SURFACE)

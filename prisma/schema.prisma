@@ -120,6 +120,7 @@ model Project {
   episodes    ProjectEpisode[]
   schedulePlans SchedulePlan[]
   mergeReceipts MemoryMergeReceipt[]
+  actionReminders ActionReminder[]
 
   @@index([updatedAt])
   @@index([archivedAt])
@@ -280,6 +281,7 @@ model ActionItem {
   sourceIntervention   AgentIntervention?   @relation("InterventionActions", fields: [sourceInterventionId], references: [id], onDelete: SetNull)
   sourceCard           KnowledgeCard?       @relation("ActionSourceCard", fields: [sourceCardId], references: [id], onDelete: SetNull)
   resultCard           KnowledgeCard?       @relation("ActionResultCard", fields: [resultCardId], references: [id], onDelete: SetNull)
+  reminders            ActionReminder[]
 
   @@index([projectId, status])
   @@index([projectId, createdAt])
@@ -656,6 +658,49 @@ model ScheduleBlock {
   @@index([planId])
   @@index([actionId])
   @@index([calendarEventId])
+}
+
+/// 待办提醒回执：ProjectMemo 为「某条待办」写入设备系统日历的最小可管理回执。
+/// reminderAt 只是项目内计划时间；只有带 calendarEventId 的 SYNCED 才证明设备上真实存在事件。
+/// 归属维度是 (projectId, actionId, userId, deviceKey)：同一项目的其他成员、
+/// 同一成员的另一台设备都不能读取或撤销不属于自己的日历事件。
+/// 每行只代表一次提醒意图的当前状态，修改时间原地更新并递增 revision，不新增重复行。
+model ActionReminder {
+  id               String   @id @default(cuid())
+  projectId        String
+  actionId         String
+  /// 设备日历事件的所有者；来自鉴权结果，不接受客户端传入
+  userId           String
+  /// 客户端/设备身份（复用 DeviceIdentity），用于区分同一用户的多个设备
+  deviceKey        String
+  /// 最近一次「安排/修改」意图的请求标识；用于幂等重放
+  requestId        String
+  reminderAt       DateTime
+  /// 事件时长；首版固定 30 分钟并在界面明确说明
+  durationMinutes  Int      @default(30)
+  timezone         String   @default("Asia/Shanghai")
+  calendarId       String?
+  calendarEventId  String?
+  /// PLANNED | PENDING | SYNCED | FAILED | PERMISSION_DENIED | MISSING | UNSUPPORTED | REVOKED
+  syncStatus       String   @default("PLANNED")
+  error            String?
+  /// 同一 requestId 的载荷规范哈希；用于识别 requestId 被不同载荷复用
+  inputHash        String?
+  /// 待办完成时用户的选择：KEEP | REMOVE | null（未询问）
+  completionChoice String?
+  /// 乐观版本：修改提醒时客户端用 expectedRevision 提交，避免覆盖并发修改
+  revision         Int      @default(1)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  revokedAt        DateTime?
+  project          Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  action           ActionItem @relation(fields: [actionId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, actionId, userId, deviceKey])
+  @@index([userId, syncStatus])
+  @@index([projectId, syncStatus])
+  @@index([calendarEventId])
+  @@index([projectId, updatedAt])
 }
 
 /// 记忆归并回执：归并不删除原始 Capture、附件修订、关系与历史快照，

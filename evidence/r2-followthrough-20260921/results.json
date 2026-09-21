@@ -1,0 +1,132 @@
+{
+  "batch": "r2-followthrough-20260921",
+  "date": "2026-09-21",
+  "scope": "日历提醒生命周期 / 项目体检 / 检查点→待办→提醒 / 鸿蒙整理重复记忆",
+  "dataSources": {
+    "unitAndIntegration": "独立测试库 prisma/test-vitest.db（vitest.config.ts 显式指定），未使用开发库与真实凭据",
+    "e2e": "prisma/projectmemo-e2e.db（scripts/setup-e2e.ts 生成），种子项目 + e2e-reviewer 身份",
+    "migrationEmptyReplay": "tmp/migration-verify/empty.db（零字节新建的空库，验证后已清理）",
+    "migrationOldCopy": "prisma/dev.db 的副本 tmp/migration-verify/old-copy.db（只读复制，验证后已清理）",
+    "modelMode": "rules/mock：LLM_MODE 未配置真实 Key，日历与提醒链路不调用模型"
+  },
+  "commands": [
+    {
+      "command": "vitest run",
+      "result": "passed",
+      "detail": "50 files / 376 tests passed"
+    },
+    {
+      "command": "vitest run tests/actionReminder.test.ts tests/projectHealth.test.ts tests/episodeAction.test.ts tests/calendarSync.test.ts tests/schedule.test.ts",
+      "result": "passed",
+      "detail": "5 files / 52 tests passed"
+    },
+    {
+      "command": "tsc --noEmit",
+      "result": "passed",
+      "detail": "无输出"
+    },
+    {
+      "command": "eslint .",
+      "result": "passed",
+      "detail": "0 error，7 个既有 warning"
+    },
+    {
+      "command": "next build",
+      "result": "passed",
+      "detail": "生产构建成功，路由表包含 /api/projects/[id]/health 与 /api/projects/[id]/reminders"
+    },
+    {
+      "command": "tsx scripts/setup-e2e.ts && tsx scripts/run-e2e.ts",
+      "result": "passed",
+      "detail": "[e2e] completed with passing result."
+    },
+    {
+      "command": "scripts/harmony-test.ts",
+      "result": "passed",
+      "detail": "Tests run: 55, Failure: 0, Error: 0, Pass: 55"
+    },
+    {
+      "command": "scripts/harmony-build.ts",
+      "result": "passed",
+      "detail": "BUILD SUCCESSFUL；unsigned HAP 4,734,706 bytes；SHA-256 61e0faed99c870614b5ef4c8d938d9ee241e4336c35473182d2cb3238f45106f"
+    },
+    {
+      "command": "prisma migrate deploy (空库)",
+      "result": "passed",
+      "detail": "All migrations have been successfully applied（23 个迁移）"
+    },
+    {
+      "command": "prisma migrate deploy (旧库副本)",
+      "result": "passed",
+      "detail": "仅应用 20260921110000_memory_merge_idempotency 与 20260921160000_action_reminder_receipts；升级前后逐表行数一致：Project 4 / Capture 20 / KnowledgeCard 19 / ActionItem 3 / ActionRequirement 0 / Attachment 1 / AttachmentRevision 0 / ProjectStateSnapshot 9 / ProjectEpisode 0 / EpisodeRevision 0 / SchedulePlan 0 / ScheduleBlock 0 / MemoryMergeReceipt 0 / User 1 / ProjectMembership 2 / AgentRun 24；ActionReminder 表在升级后存在"
+    }
+  ],
+  "notVerified": [
+    "真机或模拟器日历链路：授权弹窗、真实 addEvent/deleteEvent、801 不支持机型回退、真实通知触发、重启后状态恢复（hdc list targets 无可用设备目标）",
+    "鸿蒙端新增界面的设备点击验收（仅有 harmony:build 编译级证据与纯逻辑单测）",
+    "Web 新增卡片的浏览器点击验收（本机无可见浏览器视口）",
+    "小艺真实平台往返（独立 Gate）"
+  ],
+  "notes": [
+    "本批未运行 db:setup、db:seed 或 db:demo-reset；迁移验证全部在空库与旧库副本上进行。",
+    "日历提醒开关 PROJECT_CALENDAR_REMINDER_ENABLED 默认 false；项目体检 PROJECT_HEALTH_ENABLED 默认 true（只读）。"
+  ],
+  "selfCheckFindings": [
+    {
+      "issue": "PENDING（正在写入）回执被要求携带 eventId，导致该状态无法登记",
+      "fix": "只有 SYNCED 要求 calendarId + eventId；其余状态携带编号一律 422",
+      "foundBy": "回顾实现时发现"
+    },
+    {
+      "issue": "PENDING 的设备删除指令缺少起止时间，设备端无法做四重核对",
+      "fix": "deleteOperation 随回执带出 reminderAt 与结束时间",
+      "foundBy": "回顾实现时发现"
+    },
+    {
+      "issue": "完成待办时若设备事件来自「安排未来 7 天」，单待办路径查不到回执会静默什么都不做",
+      "fix": "显式返回指路信息，并新增测试固定该行为",
+      "foundBy": "自查：状态来源交叉"
+    },
+    {
+      "issue": "listActionReminders 的 now 参数未使用（死参数）",
+      "fix": "删除参数并同步测试调用",
+      "foundBy": "eslint warning"
+    },
+    {
+      "issue": "编辑过程导致三处换行被吞（page.tsx / Action.ets / actionReminderService.ts）",
+      "fix": "逐处修复并全量扫描同类问题；git diff --check 通过",
+      "foundBy": "git diff 逐文件复查"
+    },
+    {
+      "issue": "鸿蒙 HealthEntryCard 的 enabled 属性与 ArkUI 通用属性 enabled 冲突",
+      "fix": "改名为 active",
+      "foundBy": "harmony:build 编译报错"
+    },
+    {
+      "issue": "鸿蒙 Radio() 缺必填参数、ProjectHome 引用不存在的 loadReentry、ActionService 漏导入 ActionCompleteResponse",
+      "fix": "分别改为 Radio({value,group})、loadAllData(true)、补导入",
+      "foundBy": "harmony:build 编译报错"
+    },
+    {
+      "issue": "ReminderDeviceOp.reminderMinutesBeforeStart 默认值为空数组，与「事件开始时提醒」规则不一致",
+      "fix": "改为 [0]",
+      "foundBy": "ArkTS 单测"
+    },
+    {
+      "issue": "ProjectHome 把提示文案当作日历事件标题传给提醒组件",
+      "fix": "改为传递真实待办标题",
+      "foundBy": "自查：跨组件契约"
+    }
+  ],
+  "deepLinkVerification": {
+    "conclusion": "当前 SDK 不支持「点击日历事件打开应用」的正式能力，因此不实现、不承诺",
+    "evidence": "sdk/default/openharmony/ets/api/@ohos.calendarManager.d.ts 中 Event 只提供 EventService.type（MEETING/WATCHING/REPAYMENT/LIVE/SHOPPING/TRIP/CLASS/SPORTS_EVENTS/SPORTS_EXERCISE）与通用 uri 字段，没有 Want 或应用深链参数；亦无 reminder 回跳接口",
+    "action": "界面只保留应用内入口；实施记录中明确记录该限制"
+  },
+  "notesFile": {
+    "path": "PROJECTMEMO_IMPROVEMENT_NOTES_2026-09-14.md",
+    "tracked": false,
+    "reason": "仓库 .gitignore 第 52 行以 PROJECTMEMO_IMPROVEMENT_*.md 忽略该类文档，因此本批更新只存在于工作区，未作为提交内容",
+    "content": "已按需求补充：实际修改、测试结果、自查发现的问题与修复、未验证项"
+  }
+}

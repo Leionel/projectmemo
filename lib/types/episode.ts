@@ -13,12 +13,12 @@ export type EpisodeGenerationMode = "TEMPLATE" | "MODEL" | "MODEL_FALLBACK_TEMPL
 /** 内容类型：事实句必须可回溯，规则解释标注系统判断，建议不冒充已执行 */
 export type EpisodeClaimKind = "FACT" | "RULE" | "SUGGESTION";
 
-export type EpisodeSourceKind = "CARD" | "ATTACHMENT_REVISION" | "ACTION_RESULT" | "SNAPSHOT";
+export type EpisodeSourceKind = "CARD" | "RELATION" | "ATTACHMENT_REVISION" | "ACTION_RESULT" | "SNAPSHOT";
 
 export interface EpisodeSourceRef {
   refId: string;
   kind: EpisodeSourceKind;
-  /** CARD/KnowledgeCard；ATTACHMENT_REVISION/AttachmentRevision；ACTION_RESULT/行动完成结果卡；SNAPSHOT/ProjectStateSnapshot */
+  /** CARD/KnowledgeCard；RELATION/CardRelation；ATTACHMENT_REVISION/AttachmentRevision；ACTION_RESULT/行动完成结果卡；SNAPSHOT/ProjectStateSnapshot */
   entityId: string;
   /** 附件修订号或快照序号；卡片来源为 null */
   revisionIndex: number | null;
@@ -79,7 +79,7 @@ export interface EpisodeSourceState {
   refId: string;
   kind: EpisodeSourceKind;
   entityId: string;
-  /** AVAILABLE | ARCHIVED | SUPERSEDED | REVOKED | CONTESTED | DELETED | POLICY_CHANGED */
+  /** AVAILABLE | CHANGED | ARCHIVED | SUPERSEDED | REVOKED | CONTESTED | DELETED | POLICY_CHANGED */
   state: string;
   displayReason: string;
 }

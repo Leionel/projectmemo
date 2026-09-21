@@ -42,13 +42,16 @@ type ScopeReport = { includedCount: number; excludedReasons: string[]; contested
 
 const kindLabels: Record<string, string> = {
   CARD: "记录",
+  RELATION: "关系",
   ATTACHMENT_REVISION: "附件修订",
   ACTION_RESULT: "行动结果",
   SNAPSHOT: "状态快照",
 };
 const stateLabels: Record<string, string> = {
   AVAILABLE: "当前有效",
+  CHANGED: "内容已变化",
   SUPERSEDED: "已被取代",
+  REVOKED: "已撤销",
   CONTESTED: "存在争议",
   DELETED: "原来源已删除",
   POLICY_CHANGED: "评估规则已更新",

@@ -11,6 +11,7 @@ const READ_CALENDAR = 'ohos.permission.READ_CALENDAR';
 const WRITE_CALENDAR = 'ohos.permission.WRITE_CALENDAR';
 /** 事件标题前缀：撤销时只认自己写入的事件，绝不动用户原有日程 */
 const EVENT_TITLE_PREFIX = '忆程·';
+const EVENT_DESCRIPTION_MARKER = 'ProjectMemo 应用内安排同步；在应用内取消会同步撤销';
 
 export class CalendarCapability {
   supported: boolean = false;
@@ -45,8 +46,10 @@ export class CalendarSyncService {
     const result = new CalendarCapability();
     try {
       const atManager = abilityAccessCtrl.createAtManager();
-      const readState = await atManager.checkAccessToken(0, READ_CALENDAR).catch(() => -1);
-      result.granted = readState === 0;
+      const tokenId = context.applicationInfo.accessTokenId;
+      const readState = await atManager.checkAccessToken(tokenId, READ_CALENDAR).catch(() => -1);
+      const writeState = await atManager.checkAccessToken(tokenId, WRITE_CALENDAR).catch(() => -1);
+      result.granted = readState === 0 && writeState === 0;
       const manager = calendarManager.getCalendarManager(context);
       result.supported = manager !== null && manager !== undefined;
       if (!result.supported) {
@@ -123,17 +126,23 @@ export class CalendarSyncService {
       const calendar = calendarId === '' ? await manager.getCalendar() : (await manager.getAllCalendars())
         .find((item) => `${item.id}` === calendarId);
       if (!calendar) {
-        return conflicts;
+        throw new Error('目标日历不存在');
       }
       const begin = Math.min(...blocks.map((block) => new Date(block.start).getTime()));
       const end = Math.max(...blocks.map((block) => new Date(block.end).getTime()));
-      const existing = await calendar.getEvents(calendarManager.EventFilter.filterByTime(begin, end), ['title', 'startTime', 'endTime']);
+      const ownedEventIds = new Set<string>();
+      for (const block of blocks) {
+        if (block.calendar !== undefined && block.calendar.eventId !== null && block.calendar.eventId !== '') {
+          ownedEventIds.add(block.calendar.eventId);
+        }
+      }
+      const existing = await calendar.getEvents(calendarManager.EventFilter.filterByTime(begin, end), ['id', 'title', 'startTime', 'endTime']);
       for (const block of blocks) {
         const blockStart = new Date(block.start).getTime();
         const blockEnd = new Date(block.end).getTime();
         for (const event of existing) {
-          // 自己此前写入的事件不算冲突
-          if ((event.title ?? '').startsWith(EVENT_TITLE_PREFIX) && event.id !== undefined) {
+          // 只跳过当前这些块已登记的同一事件；其他项目或用户手工创建的“忆程·”日程仍是冲突。
+          if (event.id !== undefined && ownedEventIds.has(`${event.id}`)) {
             continue;
           }
           const eventStart = event.startTime ?? 0;
@@ -153,6 +162,7 @@ export class CalendarSyncService {
     } catch (error) {
       const err = error as BusinessError;
       hilog.warn(DOMAIN, TAG, 'conflict check failed: %{public}s', JSON.stringify(err));
+      throw new Error(`无法读取系统日历，未执行写入：${CalendarSyncService.describe(err)}`);
     }
     return conflicts;
   }
@@ -180,7 +190,7 @@ export class CalendarSyncService {
             title: `${EVENT_TITLE_PREFIX}${block.actionTitle !== '' ? block.actionTitle : '项目行动'}`,
             startTime: new Date(block.start).getTime(),
             endTime: new Date(block.end).getTime(),
-            description: 'ProjectMemo 应用内安排同步；在应用内取消会同步撤销',
+            description: EVENT_DESCRIPTION_MARKER,
           });
           const entry = new ScheduleCalendarEntry();
           entry.blockId = block.id ?? '';
@@ -221,6 +231,18 @@ export class CalendarSyncService {
           continue;
         }
         try {
+          // eventId 来自设备回执，但删除前仍重新核对标题与描述标记；
+          // 即使服务端记录被污染，也不能误删用户原有日程。
+          const candidates = await calendar.getEvents(
+            calendarManager.EventFilter.filterByTime(new Date(block.start).getTime(), new Date(block.end).getTime()),
+            ['id', 'title', 'description'],
+          );
+          const owned = candidates.find((event) => event.id !== undefined && `${event.id}` === `${eventId}` &&
+            (event.title ?? '').startsWith(EVENT_TITLE_PREFIX) && event.description === EVENT_DESCRIPTION_MARKER);
+          if (!owned) {
+            hilog.warn(DOMAIN, TAG, 'skip unverified event id: %{public}s', `${eventId}`);
+            continue;
+          }
           await calendar.deleteEvent(eventId);
           if (block.id !== null) {
             revoked.push(block.id);

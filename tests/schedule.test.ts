@@ -145,7 +145,7 @@ describe("Schedule preview / confirm (R2-3)", () => {
 
     // 确认前行动依赖版本变化
     await db.actionItem.update({ where: { id: action.id }, data: { dependencyVersion: { increment: 1 } } });
-    await expect(confirmSchedulePlan(project.id, plan.id, { requestId: `conflict-${project.id}` }, { userId: user.id }))
+    await expect(confirmSchedulePlan(project.id, plan.id, { requestId: plan.requestId }, { userId: user.id }))
       .rejects.toMatchObject({ code: "SCHEDULE_ACTION_CHANGED", status: 409 });
     const after = await db.schedulePlan.findUniqueOrThrow({ where: { id: plan.id } });
     expect(after.status).toBe("DRAFT");
@@ -234,6 +234,29 @@ describe("Schedule preview / confirm (R2-3)", () => {
     const current = await getCurrentSchedulePlan(project.id, user.id);
     expect(current?.id).toBe(confirmed.id);
     expect(current?.blocks[0].actionId).toBe(action.id);
+  });
+
+  it("requires confirmation to reuse the preview requestId", async () => {
+    const project = await newProject("确认沿用预览请求标识");
+    const user = await newMembershipOwner(project.id);
+    const action = await seedAction(project.id, { estimatedMinutes: 30 });
+    const base = Date.now() + 60 * HOUR;
+    const plan = await previewSchedule(project.id, {
+      requestId: `preview-confirm-${project.id}`,
+      rangeStart: new Date(base).toISOString(),
+      rangeEnd: new Date(base + 2 * HOUR).toISOString(),
+      slots: [{ start: new Date(base).toISOString(), end: new Date(base + 2 * HOUR).toISOString() }],
+      actionIds: [action.id],
+    }, { userId: user.id });
+
+    await expect(confirmSchedulePlan(project.id, plan.id, { requestId: "new-confirm-id" }, { userId: user.id }))
+      .rejects.toMatchObject({ code: "SCHEDULE_REQUEST_ID_MISMATCH", status: 409 });
+    expect((await db.schedulePlan.findUniqueOrThrow({ where: { id: plan.id } })).status).toBe("DRAFT");
+
+    const confirmed = await confirmSchedulePlan(project.id, plan.id, { requestId: plan.requestId }, { userId: user.id });
+    const replay = await confirmSchedulePlan(project.id, plan.id, { requestId: plan.requestId }, { userId: user.id });
+    expect(confirmed.status).toBe("CONFIRMED");
+    expect(replay.id).toBe(confirmed.id);
   });
 
   it("refuses to confirm a plan whose action was cancelled after preview", async () => {

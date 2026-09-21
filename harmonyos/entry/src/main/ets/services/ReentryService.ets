@@ -10,7 +10,8 @@ import {
   ReentryData,
   ScheduleCalendarEntry,
   SchedulePlan,
-  SchedulePlanResponse
+  SchedulePlanResponse,
+  SchedulePlanResult
 } from '../models/Reentry';
 
 export class EpisodePreviewBody {
@@ -96,11 +97,13 @@ export class ReentryService {
   }
 
   async previewSchedule(projectId: string, body: SchedulePreviewBody): Promise<SchedulePlan> {
-    return this.client.post<SchedulePlan>(`/api/projects/${projectId}/schedule/preview`, body);
+    const result = await this.client.post<SchedulePlanResult>(`/api/projects/${projectId}/schedule/preview`, body);
+    return result.plan;
   }
 
   async confirmSchedule(projectId: string, planId: string, body: ScheduleConfirmBody): Promise<SchedulePlan> {
-    return this.client.post<SchedulePlan>(`/api/projects/${projectId}/schedule/${planId}/confirm`, body);
+    const result = await this.client.post<SchedulePlanResult>(`/api/projects/${projectId}/schedule/${planId}/confirm`, body);
+    return result.plan;
   }
 
   async getCurrentSchedule(projectId: string): Promise<SchedulePlanResponse> {
@@ -113,11 +116,13 @@ export class ReentryService {
 
   /** 上报系统日历写入回执；服务端只登记 ProjectMemo 自己创建的事件 */
   async reportCalendarSync(projectId: string, planId: string, body: CalendarSyncBody): Promise<SchedulePlan> {
-    return this.client.post<SchedulePlan>(`/api/projects/${projectId}/schedule/${planId}/calendar`, body);
+    const result = await this.client.post<SchedulePlanResult>(`/api/projects/${projectId}/schedule/${planId}/calendar`, body);
+    return result.plan;
   }
 
   async revokeCalendarSync(projectId: string, planId: string, body: CalendarRevokeBody): Promise<SchedulePlan> {
-    return this.client.post<SchedulePlan>(`/api/projects/${projectId}/schedule/${planId}/calendar`, body);
+    const result = await this.client.post<SchedulePlanResult>(`/api/projects/${projectId}/schedule/${planId}/calendar`, body);
+    return result.plan;
   }
 
   async listConsolidationProposals(projectId: string): Promise<ConsolidationProposalResponse> {

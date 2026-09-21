@@ -4,6 +4,7 @@ process.env.PROJECT_CALENDAR_SYNC_ENABLED = "1";
 import { describe, it, expect, afterAll } from "vitest";
 import { db } from "@/lib/db";
 import {
+  cancelSchedulePlan,
   confirmSchedulePlan,
   markCalendarRevoked,
   previewSchedule,
@@ -116,6 +117,41 @@ describe("calendar sync receipts (R2 日历同步)", () => {
     expect(revoked.blocks[0].calendar.status).toBe("REVOKED");
     // 撤销保留 eventId 以便审计，不假装从未写入
     expect(revoked.blocks[0].calendar.eventId).toBe("evt-2002");
+  });
+
+  it("validates calendar receipts and refuses to replace an existing event silently", async () => {
+    const project = await newProject("日历回执校验项目");
+    const user = await newOwner(project.id);
+    const plan = await confirmedPlanWithOneBlock(project.id, user.id, 84);
+    const blockId = plan.blocks[0].id!;
+
+    await expect(recordCalendarSync(project.id, plan.id, [{
+      blockId, calendarId: "c1", eventId: null, status: "SYNCED",
+    }], user.id)).rejects.toMatchObject({ code: "INVALID_CALENDAR_RECEIPT", status: 422 });
+    await expect(recordCalendarSync(project.id, plan.id, [
+      { blockId, calendarId: "c1", eventId: "evt-a", status: "SYNCED" },
+      { blockId, calendarId: "c1", eventId: "evt-b", status: "SYNCED" },
+    ], user.id)).rejects.toMatchObject({ code: "INVALID_CALENDAR_RECEIPT", status: 422 });
+
+    await recordCalendarSync(project.id, plan.id, [{ blockId, calendarId: "c1", eventId: "evt-stable", status: "SYNCED" }], user.id);
+    const replay = await recordCalendarSync(project.id, plan.id, [{ blockId, calendarId: "c1", eventId: "evt-stable", status: "SYNCED" }], user.id);
+    expect(replay.blocks[0].calendar.eventId).toBe("evt-stable");
+    await expect(recordCalendarSync(project.id, plan.id, [{
+      blockId, calendarId: "c1", eventId: "evt-replacement", status: "SYNCED",
+    }], user.id)).rejects.toMatchObject({ code: "CALENDAR_EVENT_ALREADY_RECORDED", status: 409 });
+  });
+
+  it("requires device calendar revocation before cancelling an in-app plan", async () => {
+    const project = await newProject("取消前撤销系统日历");
+    const user = await newOwner(project.id);
+    const plan = await confirmedPlanWithOneBlock(project.id, user.id, 90);
+    const blockId = plan.blocks[0].id!;
+    await recordCalendarSync(project.id, plan.id, [{ blockId, calendarId: "c1", eventId: "evt-cancel", status: "SYNCED" }], user.id);
+
+    await expect(cancelSchedulePlan(project.id, plan.id, user.id))
+      .rejects.toMatchObject({ code: "CALENDAR_REVOKE_REQUIRED", status: 409 });
+    await markCalendarRevoked(project.id, plan.id, [blockId], user.id);
+    expect((await cancelSchedulePlan(project.id, plan.id, user.id)).status).toBe("CANCELLED");
   });
 
   it("rejects cross-user and cross-project sync writes", async () => {

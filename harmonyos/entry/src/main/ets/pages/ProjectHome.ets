@@ -623,6 +623,7 @@ struct ProjectHome {
 
   private sourceKindLabel(kind: string): string {
     if (kind === 'CARD') return '记录';
+    if (kind === 'RELATION') return '关系';
     if (kind === 'ATTACHMENT_REVISION') return '附件修订';
     if (kind === 'ACTION_RESULT') return '行动结果';
     return '状态快照';

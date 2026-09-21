@@ -82,7 +82,7 @@ describe("memory consolidation (可撤销归并)", () => {
     const captureStillThere = await db.capture.findUniqueOrThrow({ where: { id: archived.captureId } });
     expect(captureStillThere.rawText).toContain("召回率");
     const lifecycle = await db.memoryLifecycleEvent.findMany({ where: { cardId: duplicate.id, eventType: "ARCHIVE" } });
-    expect(lifecycle.some((event) => event.reason === `merged_into:${master.id}`)).toBe(true);
+    expect(lifecycle.some((event) => event.reason === `merge_receipt:${receipt.id}`)).toBe(true);
 
     // 搜索默认突出归并后的当前记录
     const results = await searchProjectCards({ projectId: project.id, query: "召回率 切片粒度" });
@@ -98,6 +98,13 @@ describe("memory consolidation (可撤销归并)", () => {
     expect(replay.id).toBe(receipt.id);
     expect(await db.memoryMergeReceipt.count({ where: { projectId: project.id } })).toBe(1);
 
+    const different = await seedCard(project.id, "另一条重复候选", "不应复用同一个请求标识");
+    await expect(confirmConsolidation(project.id, {
+      masterCardId: master.id,
+      mergedCardIds: [different.id],
+      requestId: `merge-${project.id}`,
+    })).rejects.toMatchObject({ code: "REQUEST_ID_REUSED", status: 409 });
+
     // 撤销：恢复归档，回执标记 REVOKED
     const revoked = await revokeConsolidation(project.id, receipt.id);
     expect(revoked.status).toBe("REVOKED");
@@ -109,6 +116,44 @@ describe("memory consolidation (可撤销归并)", () => {
     const receipts = await listConsolidationReceipts(project.id);
     expect(receipts).toHaveLength(1);
     expect(receipts[0].status).toBe("REVOKED");
+  });
+
+  it("does not merge an already archived card", async () => {
+    const project = await newProject("已归档记录不归并");
+    const master = await seedCard(project.id, "主记录", "相同内容");
+    const archived = await seedCard(project.id, "重复记录", "相同内容");
+    await db.knowledgeCard.update({ where: { id: archived.id }, data: { archivedAt: new Date() } });
+
+    await expect(confirmConsolidation(project.id, {
+      masterCardId: master.id,
+      mergedCardIds: [archived.id],
+      requestId: `archived-${project.id}`,
+    })).rejects.toMatchObject({ code: "MERGED_CARD_ARCHIVED", status: 409 });
+    expect(await db.memoryMergeReceipt.count({ where: { projectId: project.id } })).toBe(0);
+  });
+
+  it("does not undo a later explicit archive when revoking a merge", async () => {
+    const project = await newProject("撤销不覆盖后续操作");
+    const master = await seedCard(project.id, "归并主记录", "重复内容");
+    const duplicate = await seedCard(project.id, "归并重复记录", "重复内容");
+    const receipt = await confirmConsolidation(project.id, {
+      masterCardId: master.id,
+      mergedCardIds: [duplicate.id],
+      requestId: `later-archive-${project.id}`,
+    });
+    await db.memoryLifecycleEvent.create({
+      data: {
+        projectId: project.id,
+        cardId: duplicate.id,
+        eventType: "ARCHIVE",
+        reason: "用户随后明确保留归档",
+        actor: "user",
+        createdAt: new Date(Date.now() + 1_000),
+      },
+    });
+
+    await revokeConsolidation(project.id, receipt.id);
+    expect((await db.knowledgeCard.findUniqueOrThrow({ where: { id: duplicate.id } })).archivedAt).not.toBeNull();
   });
 
   it("never proposes or merges cards linked by supersede relations", async () => {

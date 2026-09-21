@@ -141,6 +141,7 @@ export class ScheduleSkipReason {
 export class SchedulePlan {
   id: string = '';
   projectId: string = '';
+  userId: string | null = null;
   episodeRevisionId: string | null = null;
   requestId: string = '';
   timezone: string = 'Asia/Shanghai';
@@ -153,6 +154,11 @@ export class SchedulePlan {
   unscheduled: ScheduleSkipReason[] = [];
   createdAt: string = '';
   updatedAt: string = '';
+}
+
+/** preview/confirm/calendar 写接口统一返回 { plan }，避免把包装对象误当作计划。 */
+export class SchedulePlanResult {
+  plan: SchedulePlan = new SchedulePlan();
 }
 
 export class SchedulePlanResponse {
@@ -239,6 +245,8 @@ export class ReentrySchedulePart {
   actionTitle: string | null = null;
   start: string | null = null;
   end: string | null = null;
+  status: string | null = null;
+  calendarStatus: string | null = null;
   meta: ReentrySectionMeta = new ReentrySectionMeta();
 }
 

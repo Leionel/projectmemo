@@ -14,7 +14,7 @@ type ScheduleBlock = {
   calendar?: { status: string; eventId: string | null; syncedAt: string | null; error: string | null };
 };
 type SkipReason = { actionId: string; actionTitle: string; reasonCode: string; message: string };
-type SchedulePlanData = { id: string; version: number; status: string; blocks: ScheduleBlock[]; unscheduled: SkipReason[] };
+type SchedulePlanData = { id: string; requestId: string; version: number; status: string; blocks: ScheduleBlock[]; unscheduled: SkipReason[] };
 
 /** 未排入原因分组：每个行动都必须能看懂为什么没被安排 */
 const reasonGroups: Array<{ key: string; label: string; codes: string[] }> = [
@@ -137,7 +137,7 @@ export function SchedulePlanner({ projectId, enabled }: { projectId: string; ena
       const response = await fetch(`/api/projects/${projectId}/schedule/${preview.id}/confirm`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requestId: crypto.randomUUID(), expectedVersion: preview.version }),
+        body: JSON.stringify({ requestId: preview.requestId, expectedVersion: preview.version }),
       });
       const data = await response.json().catch(() => null);
       if (!response.ok) throw new Error(data?.error?.message ?? "确认安排失败");

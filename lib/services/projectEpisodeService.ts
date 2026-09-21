@@ -12,7 +12,6 @@ import {
   type EpisodeRevisionData,
   type EpisodeScopeReport,
   type EpisodeSection,
-  type EpisodeSourceKind,
   type EpisodeSourceRef,
   type EpisodeSourceState,
   type EpisodeSummary,
@@ -64,7 +63,18 @@ function toDate(value: string, field: string): Date {
 interface CollectedSources {
   refs: EpisodeSourceRef[];
   cards: Array<{ id: string; title: string; summary: string; createdAt: Date; importance: number }>;
-  relations: Array<{ id: string; relationType: string; currentTitle: string; relatedTitle: string; relatedCardId: string; relatedSummary: string; confirmedAt: Date | null }>;
+  relations: Array<{
+    id: string;
+    relationType: string;
+    reason: string;
+    currentCardId: string;
+    currentTitle: string;
+    currentSummary: string;
+    relatedCardId: string;
+    relatedTitle: string;
+    relatedSummary: string;
+    confirmedAt: Date | null;
+  }>;
   actionResults: Array<{ actionId: string; actionTitle: string; resultCardId: string; resultTitle: string; resultSummary: string; completedAt: Date | null }>;
   attachmentRevisions: Array<{ revisionId: string; attachmentId: string; revisionIndex: number; fileName: string; text: string; createdAt: Date }>;
   baseSnapshotId: string | null;
@@ -112,8 +122,9 @@ async function collectSources(
     select: {
       id: true,
       relationType: true,
+      reason: true,
       confirmedAt: true,
-      currentCard: { select: { id: true, title: true } },
+      currentCard: { select: { id: true, title: true, summary: true } },
       relatedCard: { select: { id: true, title: true, summary: true } },
     },
     orderBy: { createdAt: "asc" },
@@ -122,7 +133,10 @@ async function collectSources(
     .map((row) => ({
       id: row.id,
       relationType: row.relationType as string,
+      reason: row.reason,
+      currentCardId: row.currentCard.id,
       currentTitle: row.currentCard.title,
+      currentSummary: row.currentCard.summary,
       relatedTitle: row.relatedCard.title,
       relatedCardId: row.relatedCard.id,
       relatedSummary: row.relatedCard.summary,
@@ -214,13 +228,22 @@ async function collectSources(
   for (const relation of relations) {
     refs.push({
       refId: `s${refs.length + 1}`,
-      kind: "CARD",
-      entityId: relation.relatedCardId,
+      kind: "RELATION",
+      entityId: relation.id,
       revisionIndex: null,
       observedAt: iso(relation.confirmedAt ?? new Date(0)),
-      contentHash: sha256(`${relation.relationType}:${relation.id}`),
-      title: relation.relatedTitle,
-      summary: relation.relatedSummary,
+      contentHash: sha256(JSON.stringify([
+        relation.relationType,
+        relation.reason,
+        relation.currentCardId,
+        relation.currentTitle,
+        relation.currentSummary,
+        relation.relatedCardId,
+        relation.relatedTitle,
+        relation.relatedSummary,
+      ])),
+      title: `${relation.currentTitle} → ${relation.relatedTitle}`,
+      summary: `${relation.relationType}：${relation.reason}`,
     });
   }
   for (const result of actionResults) {
@@ -307,6 +330,7 @@ function buildTemplateClaims(sources: CollectedSources, windowStart: Date, windo
   const cardRefByEntity = new Map(sources.refs.filter((ref) => ref.kind === "CARD").map((ref) => [ref.entityId, ref.refId]));
   const resultRefByEntity = new Map(sources.refs.filter((ref) => ref.kind === "ACTION_RESULT").map((ref) => [ref.entityId, ref.refId]));
   const attachmentRefByEntity = new Map(sources.refs.filter((ref) => ref.kind === "ATTACHMENT_REVISION").map((ref) => [ref.entityId, ref.refId]));
+  const relationRefByEntity = new Map(sources.refs.filter((ref) => ref.kind === "RELATION").map((ref) => [ref.entityId, ref.refId]));
 
   for (const revision of sources.attachmentRevisions) {
     const refId = attachmentRefByEntity.get(revision.revisionId);
@@ -320,12 +344,14 @@ function buildTemplateClaims(sources: CollectedSources, windowStart: Date, windo
     });
   }
 
+  const scopeRefIds = sources.refs.filter((ref) => ref.kind === "SNAPSHOT").map((ref) => ref.refId);
   claims.push({
     claimId: `c${claims.length + 1}`,
-    kind: "FACT",
+    kind: scopeRefIds.length > 0 ? "FACT" : "RULE",
     section: "GOALS",
     text: `阶段范围为 ${iso(windowStart).slice(0, 10)} 至 ${iso(windowEnd).slice(0, 10)}，共纳入 ${sources.refs.length} 个可追溯来源。`,
-    sourceRefIds: sources.refs.filter((ref) => ref.kind === "SNAPSHOT").map((ref) => ref.refId),
+    sourceRefIds: scopeRefIds,
+    ...(scopeRefIds.length === 0 ? { ruleCode: "episode.window_scope_v1" } : {}),
   });
 
   const changeTexts: string[] = [];
@@ -351,7 +377,7 @@ function buildTemplateClaims(sources: CollectedSources, windowStart: Date, windo
   const trailTexts: string[] = [];
   const relationLabels: Record<string, string> = { SUPERSEDES: "取代", SUPPORTS: "支持", CONTRADICTS: "反驳", DERIVED_FROM: "派生自" };
   for (const relation of sources.relations) {
-    const refId = cardRefByEntity.get(relation.relatedCardId);
+    const refId = relationRefByEntity.get(relation.id);
     const label = relationLabels[relation.relationType] ?? relation.relationType;
     claims.push({
       claimId: `c${claims.length + 1}`,
@@ -747,7 +773,11 @@ export async function confirmEpisodeRevision(projectId: string, episodeId: strin
         include: { revisions: { orderBy: { revision: "asc" } } },
       });
       if (!refreshed) throw new AppError("EPISODE_NOT_FOUND", "阶段检查点不存在或不属于当前项目", 404);
-      return serializeEpisode(refreshed);
+      const refreshedRevision = refreshed.revisions.find((item) => item.id === revision.id);
+      if (refreshedRevision?.status === "PUBLISHED" && refreshedRevision.requestId === input.requestId) {
+        return serializeEpisode(refreshed);
+      }
+      throw new AppError("EPISODE_REVISION_ALREADY_PUBLISHED", "该检查点版本已用其他请求确认过", 409);
     }
     const updated = await tx.projectEpisode.update({
       where: { id: episode.id },
@@ -836,10 +866,48 @@ export async function evaluateEpisodeFreshness(
         states.set(ref.refId, { refId: ref.refId, kind: ref.kind, entityId: ref.entityId, state: "SUPERSEDED", displayReason: `来源已被《${state?.supersededBy?.title ?? "新记录"}》取代` });
       } else if (topLevel === "CONTESTED") {
         states.set(ref.refId, { refId: ref.refId, kind: ref.kind, entityId: ref.entityId, state: "CONTESTED", displayReason: "来源记录当前处于争议状态" });
+      } else if (typeof ref.summary === "string" && ref.contentHash === sha256(`${ref.title}\n${ref.summary}`) &&
+        sha256(`${card.title}\n${card.summary}`) !== ref.contentHash) {
+        states.set(ref.refId, { refId: ref.refId, kind: ref.kind, entityId: ref.entityId, state: "CHANGED", displayReason: "来源记录内容已在检查点发布后修改" });
       } else {
         // UNKNOWN（证据不足）是记录的初始正常态，不构成来源漂移；只有取代/争议/删除才触发失效
         states.set(ref.refId, { refId: ref.refId, kind: ref.kind, entityId: ref.entityId, state: "AVAILABLE", displayReason: "来源当前有效" });
       }
+      continue;
+    }
+    if (ref.kind === "RELATION") {
+      const relation = await db.cardRelation.findFirst({
+        where: { id: ref.entityId, currentCard: { projectId } },
+        select: {
+          relationType: true,
+          reason: true,
+          confirmed: true,
+          revokedAt: true,
+          currentCard: { select: { id: true, title: true, summary: true } },
+          relatedCard: { select: { id: true, title: true, summary: true } },
+        },
+      });
+      if (!relation) {
+        states.set(ref.refId, { refId: ref.refId, kind: ref.kind, entityId: ref.entityId, state: "DELETED", displayReason: "来源关系已被删除" });
+        continue;
+      }
+      if (!relation.confirmed || relation.revokedAt !== null) {
+        states.set(ref.refId, { refId: ref.refId, kind: ref.kind, entityId: ref.entityId, state: "REVOKED", displayReason: "来源关系已撤销" });
+        continue;
+      }
+      const currentHash = sha256(JSON.stringify([
+        relation.relationType,
+        relation.reason,
+        relation.currentCard.id,
+        relation.currentCard.title,
+        relation.currentCard.summary,
+        relation.relatedCard.id,
+        relation.relatedCard.title,
+        relation.relatedCard.summary,
+      ]));
+      states.set(ref.refId, currentHash === ref.contentHash
+        ? { refId: ref.refId, kind: ref.kind, entityId: ref.entityId, state: "AVAILABLE", displayReason: "来源当前有效" }
+        : { refId: ref.refId, kind: ref.kind, entityId: ref.entityId, state: "CHANGED", displayReason: "关系或关联记录内容已在检查点发布后修改" });
       continue;
     }
     if (ref.kind === "ATTACHMENT_REVISION") {

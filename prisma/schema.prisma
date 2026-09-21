@@ -670,12 +670,15 @@ model MemoryMergeReceipt {
   // ACTIVE | REVOKED
   status          String   @default("ACTIVE")
   requestId       String?
+  /// 主卡与被归并卡集合的规范哈希；用于识别 requestId 是否被不同载荷复用
+  inputHash       String?
   createdAt       DateTime @default(now())
   revokedAt       DateTime?
   project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId, status])
   @@index([masterCardId])
+  @@unique([projectId, requestId])
 }
 
 model Milestone {

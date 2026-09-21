@@ -167,6 +167,27 @@ export interface ConsolidationConfirmInput {
   similarityScore?: number;
 }
 
+function consolidationInputHash(masterCardId: string, mergedCardIds: string[]): string {
+  return createHash("sha256").update(JSON.stringify({
+    masterCardId,
+    mergedCardIds: [...mergedCardIds].sort(),
+  })).digest("hex");
+}
+
+function assertReceiptReplay(
+  row: { masterCardId: string; mergedCardIds: unknown; inputHash: string | null },
+  masterCardId: string,
+  mergedCardIds: string[],
+  inputHash: string,
+) {
+  const storedIds = Array.isArray(row.mergedCardIds) ? [...(row.mergedCardIds as string[])].sort() : [];
+  const sameLegacyInput = row.masterCardId === masterCardId &&
+    JSON.stringify(storedIds) === JSON.stringify([...mergedCardIds].sort());
+  if ((row.inputHash !== null && row.inputHash !== inputHash) || (row.inputHash === null && !sameLegacyInput)) {
+    throw new AppError("REQUEST_ID_REUSED", "该 requestId 已用于不同的归并请求，请换一个新的请求标识", 409);
+  }
+}
+
 async function serializeReceipt(row: {
   id: string;
   projectId: string;
@@ -206,6 +227,14 @@ export async function confirmConsolidation(projectId: string, input: Consolidati
   if (mergedCardIds.length === 0) {
     throw new AppError("VALIDATION_ERROR", "至少选择一条要归并的记录", 422);
   }
+  const inputHash = consolidationInputHash(input.masterCardId, mergedCardIds);
+
+  // 先重放已提交结果：即使随后卡片状态又发生变化，同一请求仍返回原回执。
+  const replay = await db.memoryMergeReceipt.findFirst({ where: { projectId, requestId: input.requestId } });
+  if (replay) {
+    assertReceiptReplay(replay, input.masterCardId, mergedCardIds, inputHash);
+    return serializeReceipt(replay);
+  }
 
   // 争议中的记录不合并：先解决争议，否则归并会把分歧藏进主记录。
   // 时态判定走独立读取，放在事务外，避免与写事务共用连接。
@@ -216,102 +245,135 @@ export async function confirmConsolidation(projectId: string, input: Consolidati
     }
   }
 
-  return db.$transaction(async (tx) => {
-    const existing = await tx.memoryMergeReceipt.findFirst({ where: { projectId, requestId: input.requestId } });
-    if (existing) return serializeReceipt(existing);
-
-    const cards = await tx.knowledgeCard.findMany({
-      where: { projectId, id: { in: [input.masterCardId, ...mergedCardIds] } },
-      select: { id: true, archivedAt: true },
-    });
-    const found = new Set(cards.map((card) => card.id));
-    for (const id of [input.masterCardId, ...mergedCardIds]) {
-      if (!found.has(id)) {
-        throw new AppError("CARD_NOT_FOUND", "要归并的记录不存在或不属于当前项目", 404);
+  let receipt: Parameters<typeof serializeReceipt>[0];
+  try {
+    receipt = await db.$transaction(async (tx) => {
+      const existing = await tx.memoryMergeReceipt.findFirst({ where: { projectId, requestId: input.requestId } });
+      if (existing) {
+        assertReceiptReplay(existing, input.masterCardId, mergedCardIds, inputHash);
+        return existing;
       }
-    }
-    const master = cards.find((card) => card.id === input.masterCardId)!;
-    if (master.archivedAt !== null) {
-      throw new AppError("MASTER_CARD_ARCHIVED", "主记录已归档，请先恢复后再归并", 409);
-    }
 
-    // 冲突/取代关系不允许静默合并：必须由用户在关系视图里显式处理
-    const conflicting = await tx.cardRelation.findFirst({
-      where: {
-        relationType: { in: ["SUPERSEDES", "CONTRADICTS"] },
-        revokedAt: null,
-        OR: [
-          { currentCardId: input.masterCardId, relatedCardId: { in: mergedCardIds } },
-          { currentCardId: { in: mergedCardIds }, relatedCardId: input.masterCardId },
-          { currentCardId: { in: mergedCardIds }, relatedCardId: { in: mergedCardIds } },
-        ],
-      },
-      select: { id: true },
-    });
-    if (conflicting) {
-      throw new AppError("CONSOLIDATION_CONFLICT", "这些记录之间存在取代或反驳关系，不能静默合并，请先在关系视图处理", 409);
-    }
-
-    const now = new Date();
-    for (const cardId of mergedCardIds) {
-      await tx.knowledgeCard.updateMany({
-        where: { id: cardId, archivedAt: null },
-        data: { archivedAt: now },
+      const cards = await tx.knowledgeCard.findMany({
+        where: { projectId, id: { in: [input.masterCardId, ...mergedCardIds] } },
+        select: { id: true, archivedAt: true },
       });
-      await tx.memoryLifecycleEvent.create({
+      const found = new Set(cards.map((card) => card.id));
+      for (const id of [input.masterCardId, ...mergedCardIds]) {
+        if (!found.has(id)) {
+          throw new AppError("CARD_NOT_FOUND", "要归并的记录不存在或不属于当前项目", 404);
+        }
+      }
+      const master = cards.find((card) => card.id === input.masterCardId)!;
+      if (master.archivedAt !== null) {
+        throw new AppError("MASTER_CARD_ARCHIVED", "主记录已归档，请先恢复后再归并", 409);
+      }
+      if (cards.some((card) => card.id !== input.masterCardId && card.archivedAt !== null)) {
+        throw new AppError("MERGED_CARD_ARCHIVED", "被归并记录中有已归档项，请先恢复或重新选择", 409);
+      }
+
+      // 冲突/取代关系不允许静默合并：必须由用户在关系视图里显式处理
+      const conflicting = await tx.cardRelation.findFirst({
+        where: {
+          relationType: { in: ["SUPERSEDES", "CONTRADICTS"] },
+          revokedAt: null,
+          OR: [
+            { currentCardId: input.masterCardId, relatedCardId: { in: mergedCardIds } },
+            { currentCardId: { in: mergedCardIds }, relatedCardId: input.masterCardId },
+            { currentCardId: { in: mergedCardIds }, relatedCardId: { in: mergedCardIds } },
+          ],
+        },
+        select: { id: true },
+      });
+      if (conflicting) {
+        throw new AppError("CONSOLIDATION_CONFLICT", "这些记录之间存在取代或反驳关系，不能静默合并，请先在关系视图处理", 409);
+      }
+
+      // 先创建回执，再把回执 ID 写进生命周期原因；撤销只匹配本次归并。
+      const created = await tx.memoryMergeReceipt.create({
         data: {
           projectId,
-          cardId,
-          eventType: "ARCHIVE",
-          reason: `merged_into:${input.masterCardId}`,
-          actor: "user",
+          masterCardId: input.masterCardId,
+          mergedCardIds: mergedCardIds as unknown as Prisma.InputJsonValue,
+          reason: input.reason?.trim() ? input.reason.trim() : "用户确认归并重复记录",
+          similarityScore: input.similarityScore ?? 0,
+          status: "ACTIVE",
+          requestId: input.requestId,
+          inputHash,
         },
       });
-    }
 
-    const receipt = await tx.memoryMergeReceipt.create({
-      data: {
-        projectId,
-        masterCardId: input.masterCardId,
-        mergedCardIds: mergedCardIds as unknown as Prisma.InputJsonValue,
-        reason: input.reason?.trim() ? input.reason.trim() : "用户确认归并重复记录",
-        similarityScore: input.similarityScore ?? 0,
-        status: "ACTIVE",
-        requestId: input.requestId,
-      },
+      const now = new Date();
+      for (const cardId of mergedCardIds) {
+        const archived = await tx.knowledgeCard.updateMany({
+          where: { id: cardId, projectId, archivedAt: null },
+          data: { archivedAt: now },
+        });
+        if (archived.count !== 1) {
+          throw new AppError("MERGED_CARD_ARCHIVED", "被归并记录的状态已变化，请重新选择", 409);
+        }
+        await tx.memoryLifecycleEvent.create({
+          data: {
+            projectId,
+            cardId,
+            eventType: "ARCHIVE",
+            reason: `merge_receipt:${created.id}`,
+            actor: "user",
+          },
+        });
+      }
+      return created;
     });
-    return serializeReceipt(receipt);
-  });
+  } catch (error) {
+    const code = typeof error === "object" && error !== null && "code" in error ? String(error.code) : "";
+    if (code !== "P2002") throw error;
+    const raced = await db.memoryMergeReceipt.findFirst({ where: { projectId, requestId: input.requestId } });
+    if (!raced) throw error;
+    assertReceiptReplay(raced, input.masterCardId, mergedCardIds, inputHash);
+    receipt = raced;
+  }
+  return serializeReceipt(receipt);
 }
 
 /** 撤销归并：恢复被归档的卡，回执标记 REVOKED；原始数据从未被删除 */
 export async function revokeConsolidation(projectId: string, receiptId: string): Promise<ConsolidationReceipt> {
   ensureConsolidationEnabled();
-  return db.$transaction(async (tx) => {
+  const result = await db.$transaction(async (tx) => {
     const receipt = await tx.memoryMergeReceipt.findFirst({ where: { id: receiptId, projectId } });
     if (!receipt) throw new AppError("MERGE_RECEIPT_NOT_FOUND", "归并回执不存在或不属于当前项目", 404);
-    if (receipt.status === "REVOKED") return serializeReceipt(receipt);
+    if (receipt.status === "REVOKED") return receipt;
 
     const mergedCardIds = Array.isArray(receipt.mergedCardIds) ? (receipt.mergedCardIds as unknown as string[]) : [];
-    // 只恢复本次归并归档的卡；用户在此之前自行归档的记录保持原状
-    const archivedByMerge = await tx.memoryLifecycleEvent.findMany({
-      where: {
-        projectId,
-        cardId: { in: mergedCardIds },
-        eventType: "ARCHIVE",
-        reason: `merged_into:${receipt.masterCardId}`,
-      },
-      select: { cardId: true },
-    });
-    for (const event of archivedByMerge) {
-      await tx.knowledgeCard.updateMany({ where: { id: event.cardId }, data: { archivedAt: null } });
+    // 只有“最近一次生命周期事件仍是本回执归档”的卡才恢复；
+    // 归并后若用户又手工归档/恢复，撤销不能覆盖后来的明确操作。
+    for (const cardId of mergedCardIds) {
+      const latest = await tx.memoryLifecycleEvent.findFirst({
+        where: { projectId, cardId },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      });
+      if (latest?.eventType !== "ARCHIVE" || latest.reason !== `merge_receipt:${receipt.id}`) continue;
+      const restored = await tx.knowledgeCard.updateMany({
+        where: { id: cardId, projectId, archivedAt: { not: null } },
+        data: { archivedAt: null },
+      });
+      if (restored.count === 1) {
+        await tx.memoryLifecycleEvent.create({
+          data: {
+            projectId,
+            cardId,
+            eventType: "RESTORE",
+            reason: `merge_revoke:${receipt.id}`,
+            actor: "user",
+          },
+        });
+      }
     }
-    const revoked = await tx.memoryMergeReceipt.update({
+    return tx.memoryMergeReceipt.update({
       where: { id: receipt.id },
       data: { status: "REVOKED", revokedAt: new Date() },
     });
-    return serializeReceipt(revoked);
   });
+  return serializeReceipt(result);
 }
 
 export async function listConsolidationReceipts(projectId: string): Promise<ConsolidationReceipt[]> {

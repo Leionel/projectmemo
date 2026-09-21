@@ -8,7 +8,7 @@ import {
   getProjectEpisode,
   previewProjectEpisode,
 } from "@/lib/services/projectEpisodeService";
-import { proposeTemporalRelation, confirmRelation } from "@/lib/services/temporalLedgerService";
+import { proposeTemporalRelation, confirmRelation, revokeRelation } from "@/lib/services/temporalLedgerService";
 import { refreshProjectState } from "@/lib/services/projectStateService";
 
 const createdProjectIds: string[] = [];
@@ -115,6 +115,54 @@ describe("ProjectEpisode staleness (R2-2)", () => {
     const staleClaim = rev.claims.find((claim) => claim.text.includes("被取代的结论A"));
     expect(staleClaim).toBeTruthy();
     expect(detail.freshness!.affectedClaims.some((item) => item.claimId === staleClaim!.claimId)).toBe(true);
+  });
+
+  it("marks only the cited claim stale when a frozen card is edited", async () => {
+    const project = await newProject("来源内容修改局部失效");
+    const episode = await createPublishedEpisode(project.id, ["将修改的结论", "保持不变的结论"]);
+    const changed = await db.knowledgeCard.findFirstOrThrow({ where: { projectId: project.id, title: "将修改的结论" } });
+    await db.knowledgeCard.update({ where: { id: changed.id }, data: { summary: "发布检查点后修改的新摘要" } });
+
+    const detail = await getProjectEpisode(project.id, episode.id);
+    expect(detail.status).toBe("PARTIALLY_STALE");
+    const source = detail.freshness!.sources.find((item) => item.entityId === changed.id && item.kind === "CARD");
+    expect(source?.state).toBe("CHANGED");
+    const changedClaim = detail.revisions[0].claims.find((claim) => claim.text.includes("将修改的结论"));
+    const unchangedClaim = detail.revisions[0].claims.find((claim) => claim.text.includes("保持不变的结论"));
+    expect(detail.freshness!.affectedClaims.some((item) => item.claimId === changedClaim!.claimId)).toBe(true);
+    expect(detail.freshness!.affectedClaims.some((item) => item.claimId === unchangedClaim!.claimId)).toBe(false);
+  });
+
+  it("tracks a relation as its own source and expires its claim after revocation", async () => {
+    const project = await newProject("关系撤销局部失效");
+    const current = await seedCard(project.id, "当前方案");
+    const related = await seedCard(project.id, "支撑记录");
+    const relation = await proposeTemporalRelation(project.id, current.id, {
+      relatedCardId: related.id,
+      relationType: "SUPPORTS",
+      reason: "实验结果支持当前方案",
+    });
+    await confirmRelation(project.id, relation.id);
+    await refreshProjectState(project.id).catch(() => {});
+    const preview = await previewProjectEpisode(project.id, {
+      windowStart: new Date(Date.now() - 60_000).toISOString(),
+      windowEnd: new Date().toISOString(),
+    });
+    await confirmEpisodeRevision(project.id, preview.episode.id, {
+      revision: 1,
+      requestId: `relation-${preview.episode.id}`,
+    });
+    const frozen = preview.episode.revisions[0];
+    const relationRef = frozen.sourceRefs.find((ref) => ref.kind === "RELATION" && ref.entityId === relation.id);
+    expect(relationRef).toBeTruthy();
+    const relationClaim = frozen.claims.find((claim) => claim.sourceRefIds.includes(relationRef!.refId));
+    expect(relationClaim).toBeTruthy();
+
+    await revokeRelation(project.id, relation.id);
+    const detail = await getProjectEpisode(project.id, preview.episode.id);
+    expect(detail.status).toBe("PARTIALLY_STALE");
+    expect(detail.freshness!.sources.find((item) => item.refId === relationRef!.refId)?.state).toBe("REVOKED");
+    expect(detail.freshness!.affectedClaims.some((item) => item.claimId === relationClaim!.claimId)).toBe(true);
   });
 
   it("deleted source keeps the checkpoint openable and reports the source unavailable", async () => {

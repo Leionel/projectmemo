@@ -126,7 +126,7 @@ struct ActionBoard {
     this.scheduleError = '';
     try {
       const body = new ScheduleConfirmBody();
-      body.requestId = `sched-${Date.now()}-${Math.floor(Math.random() * 100000000)}`;
+      body.requestId = preview.requestId;
       body.expectedVersion = preview.version;
       await this.reentryService.confirmSchedule(this.projectId, preview.id, body);
       this.schedulePreview = null;

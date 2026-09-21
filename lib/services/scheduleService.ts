@@ -363,33 +363,48 @@ export async function previewSchedule(projectId: string, input: SchedulePreviewI
     free = subtractIntervals(free, [{ start: target.start, end: target.start + durationMs }]);
   }
 
-  const plan = await db.schedulePlan.create({
-    data: {
-      projectId,
-      userId: actor.userId,
-      episodeRevisionId: input.episodeRevisionId ?? null,
-      requestId: input.requestId,
-      timezone: input.timezone && input.timezone.trim().length > 0 ? input.timezone : DEFAULT_TIMEZONE,
-      rangeStart,
-      rangeEnd,
-      inputHash,
-      version: 1,
-      status: "DRAFT",
-      unscheduled: unscheduled as unknown as Prisma.InputJsonValue,
-      blocks: {
-        create: placedBlocks.map((block) => ({
-          actionId: block.actionId,
-          actionVersion: block.actionVersion,
-          startAt: block.startAt,
-          endAt: block.endAt,
-          locked: block.locked,
-          calendarSyncStatus: "NONE",
-        })),
+  try {
+    const plan = await db.schedulePlan.create({
+      data: {
+        projectId,
+        userId: actor.userId,
+        episodeRevisionId: input.episodeRevisionId ?? null,
+        requestId: input.requestId,
+        timezone: input.timezone && input.timezone.trim().length > 0 ? input.timezone : DEFAULT_TIMEZONE,
+        rangeStart,
+        rangeEnd,
+        inputHash,
+        version: 1,
+        status: "DRAFT",
+        unscheduled: unscheduled as unknown as Prisma.InputJsonValue,
+        blocks: {
+          create: placedBlocks.map((block) => ({
+            actionId: block.actionId,
+            actionVersion: block.actionVersion,
+            startAt: block.startAt,
+            endAt: block.endAt,
+            locked: block.locked,
+            calendarSyncStatus: "NONE",
+          })),
+        },
       },
-    },
-    include: { blocks: true },
-  });
-  return await serializePlan(plan);
+      include: { blocks: true },
+    });
+    return await serializePlan(plan);
+  } catch (error) {
+    // 两个相同 requestId 的预览可能同时越过首次查询；唯一约束负责收口，
+    // 后到请求按同样的幂等规则重放，而不是把 P2002 暴露给客户端。
+    const code = typeof error === "object" && error !== null && "code" in error ? String(error.code) : "";
+    if (code !== "P2002") throw error;
+    const raced = await db.schedulePlan.findUnique({
+      where: { projectId_requestId: { projectId, requestId: input.requestId } },
+      include: { blocks: true },
+    });
+    if (raced && raced.inputHash === inputHash && raced.userId === actor.userId) {
+      return await serializePlan(raced);
+    }
+    throw new AppError("REQUEST_ID_REUSED", "该 requestId 已用于不同的安排请求，请换一个新的请求标识", 409);
+  }
 }
 
 export interface ScheduleConfirmInput {
@@ -410,9 +425,14 @@ export async function confirmSchedulePlan(projectId: string, planId: string, inp
   });
   if (!plan) throw new AppError("SCHEDULE_PLAN_NOT_FOUND", "排程计划不存在或不属于当前项目", 404);
 
+  // 确认沿用预览 requestId：它同时标识一次稳定的「预览→确认」意图。
+  // 若另起 ID，首次请求丢失响应后就无法安全重放确认结果。
+  if (plan.requestId !== input.requestId) {
+    throw new AppError("SCHEDULE_REQUEST_ID_MISMATCH", "确认必须使用排程预览返回的 requestId，请重新打开最新预览", 409);
+  }
+
   if (plan.status === "CONFIRMED") {
-    if (plan.requestId === input.requestId) return await serializePlan(plan);
-    throw new AppError("SCHEDULE_PLAN_ALREADY_CONFIRMED", "该计划已用其他请求确认过", 409);
+    return await serializePlan(plan);
   }
   if (plan.status !== "DRAFT") {
     throw new AppError("SCHEDULE_PLAN_STATE_CONFLICT", `计划当前状态为 ${plan.status}，不能确认`, 409);
@@ -492,6 +512,9 @@ export async function cancelSchedulePlan(projectId: string, planId: string, user
   });
   if (!plan) throw new AppError("SCHEDULE_PLAN_NOT_FOUND", "排程计划不存在或不属于当前项目", 404);
   if (plan.status === "CANCELLED") return await serializePlan(plan);
+  if (plan.blocks.some((block) => block.calendarSyncStatus === "SYNCED" && block.calendarEventId !== null)) {
+    throw new AppError("CALENDAR_REVOKE_REQUIRED", "请先在鸿蒙端撤销已同步的系统日历日程，再取消应用内安排", 409);
+  }
   const updated = await db.schedulePlan.update({
     where: { id: plan.id },
     data: { status: "CANCELLED" },
@@ -519,19 +542,55 @@ export async function recordCalendarSync(projectId: string, planId: string, entr
   }
   const plan = await db.schedulePlan.findFirst({ where: { id: planId, projectId, userId }, include: { blocks: true } });
   if (!plan) throw new AppError("SCHEDULE_PLAN_NOT_FOUND", "排程计划不存在或不属于当前项目", 404);
+  if (plan.status !== "CONFIRMED") {
+    throw new AppError("SCHEDULE_PLAN_STATE_CONFLICT", "只有已确认的安排才能同步系统日历", 409);
+  }
+  const entryBlockIds = entries.map((entry) => entry.blockId);
+  if (new Set(entryBlockIds).size !== entryBlockIds.length) {
+    throw new AppError("INVALID_CALENDAR_RECEIPT", "同一个时段不能在一次回执中重复出现", 422);
+  }
 
   const now = new Date();
   await db.$transaction(async (tx) => {
     for (const entry of entries) {
       const block = plan.blocks.find((item) => item.id === entry.blockId);
       if (!block) throw new AppError("SCHEDULE_BLOCK_NOT_FOUND", "要同步的时段不存在或不属于当前计划", 404);
+      if (entry.status !== "SYNCED" && entry.status !== "FAILED") {
+        throw new AppError("INVALID_CALENDAR_RECEIPT", "日历写入回执只能是 SYNCED 或 FAILED", 422);
+      }
+      if (entry.status === "SYNCED" && (!entry.calendarId?.trim() || !entry.eventId?.trim())) {
+        throw new AppError("INVALID_CALENDAR_RECEIPT", "成功回执必须包含 calendarId 与 eventId", 422);
+      }
+      if (entry.status === "FAILED" && entry.eventId !== null) {
+        throw new AppError("INVALID_CALENDAR_RECEIPT", "失败回执不能登记 eventId", 422);
+      }
+      if (block.calendarSyncStatus === "SYNCED") {
+        if (entry.status === "SYNCED" && block.calendarId === entry.calendarId && block.calendarEventId === entry.eventId) {
+          continue;
+        }
+        throw new AppError("CALENDAR_EVENT_ALREADY_RECORDED", "该时段已写入系统日历，请先撤销原日程再重新同步", 409);
+      }
+      if (entry.status === "SYNCED") {
+        const duplicate = await tx.scheduleBlock.findFirst({
+          where: {
+            id: { not: block.id },
+            calendarId: entry.calendarId,
+            calendarEventId: entry.eventId,
+            calendarSyncStatus: "SYNCED",
+          },
+          select: { id: true },
+        });
+        if (duplicate) {
+          throw new AppError("CALENDAR_EVENT_ALREADY_RECORDED", "该系统日历事件已登记到其他时段，不能重复绑定", 409);
+        }
+      }
       await tx.scheduleBlock.update({
         where: { id: block.id },
         data: {
           calendarId: entry.calendarId,
           calendarEventId: entry.eventId,
           calendarSyncStatus: entry.status,
-          calendarSyncedAt: entry.status === "SYNCED" || entry.status === "REVOKED" ? now : block.calendarSyncedAt,
+          calendarSyncedAt: entry.status === "SYNCED" ? now : block.calendarSyncedAt,
           calendarError: entry.error ?? null,
         },
       });
@@ -547,7 +606,9 @@ export async function markCalendarRevoked(projectId: string, planId: string, blo
   ensureScheduleEnabled();
   const plan = await db.schedulePlan.findFirst({ where: { id: planId, projectId, userId }, include: { blocks: true } });
   if (!plan) throw new AppError("SCHEDULE_PLAN_NOT_FOUND", "排程计划不存在或不属于当前项目", 404);
-  const targets = plan.blocks.filter((block) => blockIds.includes(block.id) && block.calendarEventId !== null);
+  const targets = plan.blocks.filter((block) =>
+    blockIds.includes(block.id) && block.calendarSyncStatus === "SYNCED" && block.calendarEventId !== null,
+  );
   if (targets.length > 0) {
     await db.$transaction(async (tx) => {
       for (const block of targets) {

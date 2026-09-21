@@ -36,6 +36,36 @@ function businessCode(error: BusinessError): number {
   return typeof error.code === 'number' ? error.code : -1;
 }
 
+/** 权限类错误码：读/写日历被拒 */
+const PERMISSION_DENIED_CODES = [201, 12100001];
+
+function isPermissionCode(code: number): boolean {
+  return PERMISSION_DENIED_CODES.indexOf(code) >= 0;
+}
+
+/**
+ * 设备删除结果状态：只有 DELETED 与经过查询确认的 ALREADY_MISSING 才算清理成功。
+ * 其余状态都表示「这条自有日程还没有被确认从设备上移除」，不得当作成功。
+ */
+export class DeviceDeleteResult {
+  /** 传入的标识（提醒场景里是 reminderId） */
+  blockId: string = '';
+  eventId: string = '';
+  calendarId: string = '';
+  /** DELETED | ALREADY_MISSING | UNVERIFIED | PERMISSION_DENIED | CALENDAR_NOT_FOUND | FAILED */
+  state: string = 'FAILED';
+  message: string = '';
+}
+
+/** 查询结果：用于区分「确认不存在」与「查不到」 */
+export class DeviceEventLookup {
+  calendarId: string = '';
+  /** OK | PERMISSION_DENIED | CALENDAR_NOT_FOUND | FAILED */
+  status: string = 'OK';
+  message: string = '';
+  eventIds: string[] = [];
+}
+
 /**
  * 系统日历同步（用户授权 → 选择日历 → 预览 → 确认，可撤销）。
  * 权限被拒或设备不支持时如实返回原因，调用方回退为应用内排程。
@@ -62,7 +92,7 @@ export class CalendarSyncService {
       result.supported = false;
       result.granted = false;
       result.reason = businessCode(err) === 801 ? '当前设备不支持系统日历' : `日历能力不可用（${err.message ?? '未知错误'}）`;
-      hilog.warn(DOMAIN, TAG, 'calendar inspect failed: %{public}s', JSON.stringify(err));
+      hilog.warn(DOMAIN, TAG, 'calendar inspect failed: %{public}s', CalendarSyncService.safeLogText(JSON.stringify(err)));
     }
     return result;
   }
@@ -107,7 +137,7 @@ export class CalendarSyncService {
       }
     } catch (error) {
       const err = error as BusinessError;
-      hilog.warn(DOMAIN, TAG, 'list calendars failed: %{public}s', JSON.stringify(err));
+      hilog.warn(DOMAIN, TAG, 'list calendars failed: %{public}s', CalendarSyncService.safeLogText(JSON.stringify(err)));
     }
     return options;
   }
@@ -161,7 +191,7 @@ export class CalendarSyncService {
       }
     } catch (error) {
       const err = error as BusinessError;
-      hilog.warn(DOMAIN, TAG, 'conflict check failed: %{public}s', JSON.stringify(err));
+      hilog.warn(DOMAIN, TAG, 'conflict check failed: %{public}s', CalendarSyncService.safeLogText(JSON.stringify(err)));
       throw new Error(`无法读取系统日历，未执行写入：${CalendarSyncService.describe(err)}`);
     }
     return conflicts;
@@ -242,8 +272,14 @@ export class CalendarSyncService {
       rollbackBlocks.push(rollback);
     }
     const calendarId = successful[0].calendarId ?? '';
-    const revoked = await CalendarSyncService.revokeBlocks(context, calendarId, rollbackBlocks);
-    return revoked.length;
+    const results = await CalendarSyncService.deleteOwnedEvents(context, calendarId, rollbackBlocks);
+    let confirmed = 0;
+    for (const result of results) {
+      if (result.state === 'DELETED' || result.state === 'ALREADY_MISSING') {
+        confirmed += 1;
+      }
+    }
+    return confirmed;
   }
 
   /**
@@ -275,53 +311,199 @@ export class CalendarSyncService {
       }
       return removed;
     } catch (error) {
-      hilog.warn(DOMAIN, TAG, 'old reminder cleanup failed: %{public}s', JSON.stringify(error));
+      hilog.warn(DOMAIN, TAG, 'old reminder cleanup failed: %{public}s', CalendarSyncService.safeLogText(JSON.stringify(error)));
       return 0;
     }
   }
 
-  /** 撤销：只删除 ProjectMemo 写入过、且带 eventId 的事件 */
-  static async revokeBlocks(context: common.Context, calendarId: string, blocks: ScheduleBlock[]): Promise<string[]> {
-    const revoked: string[] = [];
-    const targets = blocks.filter((block) => block.calendar !== undefined && block.calendar.eventId !== null && block.calendar.eventId !== '');
-    if (targets.length === 0) {
-      return revoked;
-    }
+  /** 只读核查：在给定时间窗内查询目标日历，返回查询是否成功以及命中的事件编号 */
+  static async lookupOwnedEvents(context: common.Context, calendarId: string, start: string, end: string): Promise<DeviceEventLookup> {
+    const lookup = new DeviceEventLookup();
+    lookup.calendarId = calendarId;
+    let calendar: calendarManager.Calendar | undefined = undefined;
     try {
       const manager = calendarManager.getCalendarManager(context);
-      const calendar = calendarId === '' ? await manager.getCalendar() : (await manager.getAllCalendars())
+      calendar = calendarId === '' ? await manager.getCalendar() : (await manager.getAllCalendars())
         .find((item) => `${item.id}` === calendarId);
-      if (!calendar) {
-        return revoked;
-      }
-      for (const block of targets) {
-        const eventId = Number(block.calendar!.eventId);
-        if (Number.isNaN(eventId)) {
-          continue;
-        }
-        try {
-          // eventId 来自设备回执，但删除前仍重新核对标题与描述标记；
-          // 即使服务端记录被污染，也不能误删用户原有日程。
-          const candidates = await calendar.getEvents(
-            calendarManager.EventFilter.filterByTime(new Date(block.start).getTime(), new Date(block.end).getTime()),
-            ['id', 'title', 'description'],
-          );
-          const owned = candidates.find((event) => event.id !== undefined && `${event.id}` === `${eventId}` &&
-            (event.title ?? '').startsWith(EVENT_TITLE_PREFIX) && event.description === EVENT_DESCRIPTION_MARKER);
-          if (!owned) {
-            hilog.warn(DOMAIN, TAG, 'skip unverified event id: %{public}s', `${eventId}`);
-            continue;
-          }
-          await calendar.deleteEvent(eventId);
-          if (block.id !== null) {
-            revoked.push(block.id);
-          }
-        } catch (error) {
-          hilog.warn(DOMAIN, TAG, 'delete event failed: %{public}s', JSON.stringify(error));
-        }
-      }
     } catch (error) {
-      hilog.warn(DOMAIN, TAG, 'revoke failed: %{public}s', JSON.stringify(error));
+      const code = businessCode(error as BusinessError);
+      if (isPermissionCode(code)) {
+        lookup.status = 'PERMISSION_DENIED';
+        lookup.message = '日历权限被拒绝，无法查询设备日历';
+      } else {
+        lookup.status = 'FAILED';
+        lookup.message = CalendarSyncService.describe(error as BusinessError);
+      }
+      return lookup;
+    }
+    if (calendar === undefined) {
+      lookup.status = 'CALENDAR_NOT_FOUND';
+      lookup.message = '目标日历不存在';
+      return lookup;
+    }
+    const granted = await CalendarSyncService.hasCalendarPermission(context);
+    if (!granted) {
+      lookup.status = 'PERMISSION_DENIED';
+      lookup.message = '日历权限被拒绝，无法查询设备日历';
+      return lookup;
+    }
+    try {
+      const events = await calendar.getEvents(
+        calendarManager.EventFilter.filterByTime(new Date(start).getTime(), new Date(end).getTime()),
+        ['id', 'title', 'description'],
+      );
+      for (const event of events) {
+        if (event.id !== undefined) {
+          lookup.eventIds.push(`${event.id}`);
+        }
+      }
+      lookup.status = 'OK';
+    } catch (error) {
+      const code = businessCode(error as BusinessError);
+      if (isPermissionCode(code)) {
+        lookup.status = 'PERMISSION_DENIED';
+        lookup.message = '日历权限被拒绝，无法查询设备日历';
+      } else {
+        lookup.status = 'FAILED';
+        lookup.message = CalendarSyncService.describe(error as BusinessError);
+      }
+    }
+    return lookup;
+  }
+
+  /**
+   * 删除忆程自己创建的事件，返回逐条结构化结果（不抛异常，全部落到 state 里）。
+   * 精确区分：日历找不到 / 权限被拒 / 查询后确认不存在 / 命中但核验未通过 / 删除报错 / 成功。
+   */
+  static async deleteOwnedEvents(context: common.Context, calendarId: string, targets: ScheduleBlock[]): Promise<DeviceDeleteResult[]> {
+    const results: DeviceDeleteResult[] = [];
+    const valid = targets.filter((block) => block.calendar !== undefined && block.calendar.eventId !== null && block.calendar.eventId !== '');
+    if (valid.length === 0) {
+      return results;
+    }
+    // 先判定能力：日历找不到或权限被拒，整体落到对应状态，不再逐条误判。
+    let calendar: calendarManager.Calendar | undefined = undefined;
+    try {
+      const manager = calendarManager.getCalendarManager(context);
+      calendar = calendarId === '' ? await manager.getCalendar() : (await manager.getAllCalendars())
+        .find((item) => `${item.id}` === calendarId);
+    } catch (error) {
+      const denied = isPermissionCode(businessCode(error as BusinessError));
+      for (const block of valid) {
+        results.push(CalendarSyncService.blockResult(block, denied ? 'PERMISSION_DENIED' : 'CALENDAR_NOT_FOUND',
+          denied ? '日历权限被拒绝，无法读取设备日历' : '目标日历不存在'));
+      }
+      return results;
+    }
+    if (calendar === undefined) {
+      for (const block of valid) {
+        results.push(CalendarSyncService.blockResult(block, 'CALENDAR_NOT_FOUND', '目标日历不存在'));
+      }
+      return results;
+    }
+    const granted = await CalendarSyncService.hasCalendarPermission(context);
+    if (!granted) {
+      for (const block of valid) {
+        results.push(CalendarSyncService.blockResult(block, 'PERMISSION_DENIED', '日历权限被拒绝，无法删除设备日程'));
+      }
+      return results;
+    }
+    for (const block of valid) {
+      results.push(await CalendarSyncService.deleteOneOwned(calendar, calendarId, block));
+    }
+    return results;
+  }
+
+  /** 在已确认存在的日历上删除单条自有事件；查询成功才允许判 ALREADY_MISSING */
+  private static async deleteOneOwned(calendar: calendarManager.Calendar, calendarId: string, block: ScheduleBlock): Promise<DeviceDeleteResult> {
+    const result = new DeviceDeleteResult();
+    result.blockId = block.id ?? '';
+    result.calendarId = calendarId;
+    const eventId = block.calendar !== undefined ? block.calendar.eventId : null;
+    if (eventId === null || eventId === '') {
+      result.state = 'FAILED';
+      result.message = '没有事件编号，无法定位设备日程';
+      return result;
+    }
+    result.eventId = eventId;
+    const numericId = Number(eventId);
+    if (Number.isNaN(numericId)) {
+      result.state = 'FAILED';
+      result.message = '事件编号格式不正确，无法删除设备日程';
+      return result;
+    }
+    try {
+      const events = await calendar.getEvents(
+        calendarManager.EventFilter.filterByTime(new Date(block.start).getTime(), new Date(block.end).getTime()),
+        ['id', 'title', 'description'],
+      );
+      const match = events.find((event) => event.id !== undefined && `${event.id}` === `${numericId}`);
+      if (match === undefined) {
+        // 只有查询成功（走到了这里）才能判定为「确认不存在」
+        result.state = 'ALREADY_MISSING';
+        result.message = '设备日历里没有找到这条忆程的日程';
+        return result;
+      }
+      const owned = (match.title ?? '').startsWith(EVENT_TITLE_PREFIX) && match.description === EVENT_DESCRIPTION_MARKER;
+      if (!owned) {
+        // 编号命中但归属核验未通过：绝不擅自删除用户原有日程
+        result.state = 'UNVERIFIED';
+        result.message = '这条日程不属于忆程，未删除';
+        return result;
+      }
+      await calendar.deleteEvent(numericId);
+      result.state = 'DELETED';
+      result.message = '已删除设备日历里忆程创建的日程';
+      return result;
+    } catch (error) {
+      const err = error as BusinessError;
+      if (isPermissionCode(businessCode(err))) {
+        result.state = 'PERMISSION_DENIED';
+        result.message = '日历权限被拒绝，无法删除设备日程';
+      } else {
+        result.state = 'FAILED';
+        result.message = CalendarSyncService.describe(err);
+      }
+      return result;
+    }
+  }
+
+  private static blockResult(block: ScheduleBlock, state: string, message: string): DeviceDeleteResult {
+    const result = new DeviceDeleteResult();
+    result.blockId = block.id ?? '';
+    if (block.calendar !== undefined) {
+      result.calendarId = block.calendar.calendarId ?? '';
+      result.eventId = block.calendar.eventId !== null ? block.calendar.eventId : '';
+    }
+    result.state = state;
+    result.message = message;
+    return result;
+  }
+
+  private static async hasCalendarPermission(context: common.Context): Promise<boolean> {
+    try {
+      const atManager = abilityAccessCtrl.createAtManager();
+      const tokenId = context.applicationInfo.accessTokenId;
+      const readState = await atManager.checkAccessToken(tokenId, READ_CALENDAR).catch(() => -1);
+      const writeState = await atManager.checkAccessToken(tokenId, WRITE_CALENDAR).catch(() => -1);
+      return readState === 0 && writeState === 0;
+    } catch {
+      return false;
+    }
+  }
+
+  /** 撤销：只删除 ProjectMemo 写入过、且带 eventId 的事件；返回已确认清理（删除或确认不存在）的 blockId */
+  static async revokeBlocks(context: common.Context, calendarId: string, blocks: ScheduleBlock[]): Promise<string[]> {
+    const targets = blocks.filter((block) => block.calendar !== undefined && block.calendar.eventId !== null && block.calendar.eventId !== '');
+    if (targets.length === 0) {
+      return [];
+    }
+    const results = await CalendarSyncService.deleteOwnedEvents(context, calendarId, targets);
+    const revoked: string[] = [];
+    for (const result of results) {
+      if (result.state === 'DELETED' || result.state === 'ALREADY_MISSING') {
+        revoked.push(result.blockId);
+      }
     }
     return revoked;
   }
@@ -345,5 +527,22 @@ export class CalendarSyncService {
       return '当前设备不支持系统日历，已保留应用内安排';
     }
     return error.message ?? '系统日历写入失败';
+  }
+
+  /**
+   * 日志脱敏：把形如 Bearer <token>、token=xxx、"token":"xxx"、apiKey 的值替换成 [redacted]，
+   * 并截断到 200 字符，避免把会话凭证写入日志。所有 hilog 调用都应经过它。
+   */
+  private static safeLogText(value: string): string {
+    let text = value;
+    text = text.replace(/Bearer\s+[^\s,"}]+/g, 'Bearer [redacted]');
+    text = text.replace(/token=[^\s,&"]+/gi, 'token=[redacted]');
+    text = text.replace(/"token"\s*:\s*"[^"]*"/gi, '"token":"[redacted]"');
+    text = text.replace(/apikey\s*[:=]\s*[^\s,&"}]+/gi, 'apiKey=[redacted]');
+    text = text.replace(/"apikey"\s*:\s*"[^"]*"/gi, '"apiKey":"[redacted]"');
+    if (text.length > 200) {
+      text = text.substring(0, 200);
+    }
+    return text;
   }
 }

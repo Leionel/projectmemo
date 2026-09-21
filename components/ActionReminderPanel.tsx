@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { AlertTriangle, CalendarPlus, Check, LoaderCircle, RefreshCw, Trash2, X } from "lucide-react";
 import { getDeviceKey } from "@/lib/client/deviceKey";
+import { resolveReminderPanel } from "@/lib/client/reminderPanelState";
 
 type ReminderSyncStatus =
   | "NOT_SCHEDULED"
@@ -27,7 +28,7 @@ type ReminderState = {
   blockedReason: string | null;
   requiresRevokeBeforeChange: boolean;
   outstandingDeviceEvent: { reminderId: string | null; eventId: string; source: string } | null;
-  reminder: { id: string; reminderAt: string; durationMinutes: number; calendarEventId: string | null; error: string | null } | null;
+  reminder: { id: string; reminderAt: string; durationMinutes: number; calendarEventId: string | null; calendarId: string | null; revision: number; error: string | null } | null;
   planBlock: { blockId: string; start: string; end: string; calendarEventId: string | null } | null;
   durationMinutes: number;
   permissionPurpose: string;
@@ -68,6 +69,13 @@ export function ActionReminderPanel({
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [reminderAt, setReminderAt] = useState(defaultReminderValue);
+  /**
+   * 一次用户意图一个 requestId：超时或失败后的重试沿用同一个；
+   * 只有成功保存（用户开始下一次安排意图）才换新的。
+   */
+  const [pendingRequestId, setPendingRequestId] = useState(() => crypto.randomUUID());
+  /** 撤销同样是一次用户意图一个 ID，重试沿用同一个 */
+  const [revokeRequestId, setRevokeRequestId] = useState(() => crypto.randomUUID());
   const [durationMinutes, setDurationMinutes] = useState(30);
 
   const load = useCallback(async () => {
@@ -96,25 +104,57 @@ export function ActionReminderPanel({
   }, [load]);
 
   async function savePlanTime() {
+    // 设备上已有自有日程时不允许直接提交：服务端必然 409，界面不给死按钮
+    if (!decision.canSubmitTime) {
+      setError(decision.reason ?? "当前还不能修改时间。");
+      return;
+    }
     setBusy("arrange");
     setMessage("");
     setError("");
     try {
+      const payload: Record<string, unknown> = {
+        requestId: pendingRequestId,
+        reminderAt: new Date(reminderAt).toISOString(),
+        durationMinutes,
+      };
+      // 修改已有提醒必须带上读到的版本号，服务端据此做原子 CAS
+      if (decision.requiresExpectedRevision && state?.reminder) {
+        payload.expectedRevision = state.reminder.revision;
+      }
       const response = await fetch(`/api/projects/${projectId}/actions/${actionId}/reminder`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-pm-device-key": getDeviceKey() },
-        body: JSON.stringify({
-          requestId: crypto.randomUUID(),
-          reminderAt: new Date(reminderAt).toISOString(),
-          durationMinutes,
-        }),
+        body: JSON.stringify(payload),
       });
       const data = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(data?.error?.message ?? "保存计划时间失败");
-      setMessage(
-        data?.message
-          ?? "计划时间已保存到忆程。这台浏览器不能写系统日历，需要在鸿蒙客户端的这条待办里写入才会收到设备提醒。",
-      );
+      if (!response.ok) {
+        const code = data?.error?.code as string | undefined;
+        // 版本过期 / 缺版本号：刷新最新状态，保留用户填的时间，让用户再点一次即可成功
+        if (code === "REMINDER_REVISION_CHANGED" || code === "REMINDER_EXPECTED_REVISION_REQUIRED") {
+          await load();
+          setError(`${data?.error?.message ?? "提醒已被其他操作修改"}。你填的时间已保留，请再点一次保存。`);
+          return;
+        }
+        if (code === "REQUEST_ID_REUSED") {
+          // 上一次同 ID 请求其实已经成功落库：换成新的意图 ID 并刷新真实状态
+          setPendingRequestId(crypto.randomUUID());
+          await load();
+          setError(`${data?.error?.message ?? "这次请求此前已经处理过"}。已刷新为最新状态，请再确认一次。`);
+          return;
+        }
+        throw new Error(data?.error?.message ?? "保存计划时间失败");
+      }
+      if (data?.historical) {
+        setMessage(data?.message ?? "这次请求此前已经处理过，当前显示的是最新状态，没有覆盖它。");
+      } else {
+        setMessage(
+          data?.message
+            ?? "计划时间已保存到忆程。这台浏览器不能写系统日历，需要在鸿蒙客户端的这条待办里写入才会收到设备提醒。",
+        );
+      }
+      // 这次意图已经完成，下一次修改用新的 requestId
+      setPendingRequestId(crypto.randomUUID());
       await load();
     } catch (caught) {
       // 失败保留用户填写的日期时间
@@ -137,16 +177,18 @@ export function ActionReminderPanel({
       const response = await fetch(`/api/projects/${projectId}/reminders/${reminderId}/revoke`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-pm-device-key": getDeviceKey() },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ requestId: revokeRequestId }),
       });
       const data = await response.json().catch(() => null);
       if (!response.ok) throw new Error(data?.error?.message ?? "撤销提醒失败");
       const devicePlan = Array.isArray(data?.devicePlan) ? data.devicePlan : [];
       setMessage(
         devicePlan.length > 0
-          ? "提醒已撤销。设备日历里的那条演示日程需要在鸿蒙客户端删除，忆程只会在你确认后操作自己创建的事件。"
+          ? "服务端提醒已撤销；设备日历里仍可能留有这条自有日程，需要在鸿蒙客户端删除后才能确认清理完成。"
           : (data?.message ?? "提醒已撤销，设备上没有需要删除的自有日程。"),
       );
+      // 这次撤销意图已经完成，下一次撤销用新的 requestId
+      setRevokeRequestId(crypto.randomUUID());
       await load();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "撤销提醒失败，可以重试");
@@ -194,6 +236,16 @@ export function ActionReminderPanel({
   const status = state.status;
   const needsPermissionHelp = status === "PERMISSION_DENIED";
   const unsupported = status === "UNSUPPORTED";
+  const decision = resolveReminderPanel({
+    status,
+    canArrange: state.canArrange,
+    requiresRevokeBeforeChange: state.requiresRevokeBeforeChange,
+    blockedReason: state.blockedReason,
+    revision: state.reminder?.revision ?? null,
+    hasReminderRecord: state.reminder !== null,
+    calendarEventId: state.reminder?.calendarEventId ?? state.planBlock?.calendarEventId ?? null,
+    calendarId: state.reminder?.calendarId ?? null,
+  });
 
   return <div className="mt-2 rounded-xl border border-[var(--rule)] bg-[var(--paper-strong)] p-3">
     <div className="flex flex-wrap items-start justify-between gap-2">
@@ -215,8 +267,27 @@ export function ActionReminderPanel({
     {message && <p role="status" className="mt-2 rounded-lg bg-[var(--teal-pale)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--teal-strong)]">{message}</p>}
     {error && <p role="alert" className="mt-2 rounded-lg bg-[var(--brick-pale)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--brick)]">{error}</p>}
 
-    {!state.canArrange && <p className="mt-2 flex items-start gap-1.5 rounded-lg bg-[var(--amber)]/10 px-2.5 py-1.5 text-[11px] font-semibold text-[var(--amber)]">
-      <AlertTriangle size={13} className="mt-0.5 shrink-0" />{state.blockedReason ?? "这条待办当前不能安排提醒。"}
+    <dl className="mt-2 grid gap-1 text-[11px] leading-5">
+      <div className="flex flex-wrap gap-x-1.5">
+        <dt className="font-bold text-[var(--ink-soft)]">计划时间：</dt>
+        <dd className="text-[var(--muted)]">{decision.planStateLabel}</dd>
+      </div>
+      <div className="flex flex-wrap gap-x-1.5">
+        <dt className="font-bold text-[var(--ink-soft)]">设备日历：</dt>
+        <dd className="text-[var(--muted)]">{decision.deviceStateLabel}</dd>
+      </div>
+      <div className="flex flex-wrap gap-x-1.5">
+        <dt className="font-bold text-[var(--ink-soft)]">下一步：</dt>
+        <dd className="text-[var(--muted)]">{decision.nextStep}</dd>
+      </div>
+    </dl>
+
+    {decision.reason && <p className="mt-2 flex items-start gap-1.5 rounded-lg bg-[var(--amber)]/10 px-2.5 py-1.5 text-[11px] font-semibold text-[var(--amber)]">
+      <AlertTriangle size={13} className="mt-0.5 shrink-0" />{decision.reason}
+    </p>}
+
+    {decision.requiresHarmonyDevice && <p className="mt-2 rounded-lg bg-[var(--paper-strong)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--ink-soft)]">
+      浏览器不能读写系统日历，因此设备上的日程只能在鸿蒙客户端处理；忆程只会清理自己创建、「忆程·」开头的日程。
     </p>}
 
     {needsPermissionHelp && <p className="mt-2 rounded-lg bg-[var(--amber)]/10 px-2.5 py-1.5 text-[11px] font-semibold text-[var(--amber)]">
@@ -227,7 +298,7 @@ export function ActionReminderPanel({
       这台设备不支持系统日历，忆程只保存项目内的计划时间，不会有设备级提醒。
     </p>}
 
-    {state.canArrange && <div className="mt-2 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
+    {decision.canSubmitTime && <div className="mt-2 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
       <label className="min-w-0">
         <span className="sr-only">提醒时间</span>
         <input
@@ -251,7 +322,7 @@ export function ActionReminderPanel({
       </label>
       <button type="button" onClick={() => void savePlanTime()} disabled={busy !== null} className="focus-ring editorial-button-secondary text-xs disabled:opacity-50">
         {busy === "arrange" ? <LoaderCircle size={14} className="animate-spin" /> : <CalendarPlus size={14} />}
-        {state.requiresRevokeBeforeChange ? "改到这个时间" : "保存计划时间"}
+        {decision.requiresExpectedRevision ? "改到这个时间" : "保存计划时间"}
       </button>
     </div>}
 

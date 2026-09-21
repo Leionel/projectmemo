@@ -863,7 +863,11 @@ struct ActionBoard {
         const outcome = response.reminderOutcome;
         if (outcome !== null && outcome.devicePlan.length > 0) {
           const context = getContext(this) as common.UIAbilityContext;
-          this.reminderNotice = await this.reminderService.applyDevicePlan(context, outcome.devicePlan);
+          // 用结构化清理结果：只有 DELETED / 已查询确认不存在才会说「设备日程已删除」
+          const cleanup = await this.reminderService.applyDevicePlanDetailed(context, outcome.devicePlan);
+          this.reminderNotice = cleanup.confirmed
+            ? `设备日历里的自有日程已确认清理（${cleanup.deleted + cleanup.alreadyMissing} 条）。`
+            : `${cleanup.message}如果反复失败，请到系统日历检查「忆程·」事件。`;
         } else if (outcome !== null && outcome.compensation.needed) {
           this.reminderNotice = outcome.compensation.message;
         }

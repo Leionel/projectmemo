@@ -72,6 +72,12 @@ function terminateProcessTree(child: ChildProcess) {
   child.unref();
 }
 
+const ANSI_PATTERN = /\x1B\[[0-?]*[ -/]*[@-~]/g;
+
+function stripAnsi(value: string): string {
+  return value.replace(ANSI_PATTERN, "");
+}
+
 function runPlaywright() {
   return new Promise<number>((resolve, reject) => {
     const reportPath = path.resolve(process.cwd(), "test-results", "e2e-results.json");
@@ -93,12 +99,18 @@ function runPlaywright() {
       if (timers.reportPoll) clearInterval(timers.reportPoll);
       if (timers.hardTimeout) clearTimeout(timers.hardTimeout);
       console.log(`[e2e] completed with ${status === 0 ? "passing" : "failing"} result.`);
-      if (status !== 0) console.error("[e2e] failure details: test-results/e2e-results.json");
+      if (status !== 0) {
+        // 之前只收集不打印：一旦 Playwright 在打印最终汇总前卡住（Windows 上偶尔会），
+        // 失败用例名与断言就完全看不到，只能靠人工复现。这里把收集到的输出回放出来。
+        console.error("[e2e] runner output tail:");
+        console.error(stripAnsi(output).split("\n").slice(-40).join("\n"));
+        console.error("[e2e] failure details: test-results/e2e-results.json");
+      }
       resolve(status);
     };
 
     const scheduleWatchdog = () => {
-      const plainOutput = output.replace(/\x1B\[[0-?]*[ -/]*[@-~]/g, "");
+      const plainOutput = stripAnsi(output);
       const failed = /\n\s*\d+ failed\s*\r?\n/.test(plainOutput);
       const completed = plainOutput.includes(" passed (") || failed;
       if (watchdog || !completed) return;
@@ -137,6 +149,9 @@ function runPlaywright() {
 
     timers.hardTimeout = setTimeout(() => {
       console.error("[e2e] test runner exceeded its 210-second safety limit.");
+      // 卡住时同样回放输出：失败用例通常已经打印在列表里，但汇总行还没出现
+      console.error("[e2e] runner output tail:");
+      console.error(stripAnsi(output).split("\n").slice(-40).join("\n"));
       terminateProcessTree(runner);
       finish(1);
     }, 210_000);

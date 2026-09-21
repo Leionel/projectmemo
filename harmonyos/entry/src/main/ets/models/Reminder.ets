@@ -103,6 +103,10 @@ export class ReminderMutationResponse {
   /** 客户端按顺序执行的设备日历操作：先删后建，避免留下两条应用自有事件 */
   devicePlan: ReminderDeviceOp[] = [];
   message: string = '';
+  /** 幂等重放：同 requestId 重复提交返回同一回执 */
+  replayed: boolean = false;
+  /** 操作针对历史已撤销/已存在的提醒 */
+  historical: boolean = false;
 }
 
 // ---- 请求体 ----
@@ -112,6 +116,8 @@ export class ReminderArrangeBody {
   reminderAt: string = '';
   durationMinutes: number = 30;
   deviceKey: string = '';
+  /** 修改已有提醒时的乐观版本号；首次创建传 0（或不传） */
+  expectedRevision: number = 0;
 }
 
 export class ReminderSyncBody {
@@ -124,12 +130,40 @@ export class ReminderSyncBody {
 
 export class ReminderRevokeBody {
   deviceKey: string = '';
+  /** 幂等请求编号：一次用户撤销意图一个，重试沿用 */
+  requestId: string = '';
 }
 
 // ---- 服务端返回之外的本地结果 ----
 
+/**
+ * 设备侧清理结果汇总：只有每条都 DELETED 或 ALREADY_MISSING 时 confirmed 才为真。
+ * 用于区分「服务端已撤销」与「设备日程已确认删除」，避免虚假成功。
+ */
+export class DeviceCleanupSummary {
+  requested: number = 0;
+  deleted: number = 0;
+  alreadyMissing: number = 0;
+  unverified: number = 0;
+  permissionDenied: number = 0;
+  calendarNotFound: number = 0;
+  failed: number = 0;
+  /** 仍需重试清理的自有事件编号，界面据此提供「重试删除设备日程」 */
+  pendingEventIds: string[] = [];
+  pendingCalendarIds: string[] = [];
+  /** 只有每条都 DELETED 或 ALREADY_MISSING 时才为 true */
+  confirmed: boolean = false;
+  /** 面向用户的自然中文结果 */
+  message: string = '';
+}
+
 export class ReminderOutcome {
+  /** 服务端是否完成了请求（撤销 / 写入） */
   ok: boolean = false;
+  /** 设备侧是否确认清理干净 */
+  deviceConfirmed: boolean = false;
+  /** 设备清理结构化结果；未确认时据此提供重试 */
+  cleanup: DeviceCleanupSummary = new DeviceCleanupSummary();
   /** 面向用户的自然中文结果；成功时必须说明实际完成了什么 */
   message: string = '';
   /** 需要用户确认的系统日历冲突（不静默覆盖） */

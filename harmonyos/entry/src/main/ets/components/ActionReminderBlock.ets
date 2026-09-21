@@ -1,6 +1,6 @@
 import { common } from '@kit.AbilityKit';
 import { ApiError } from '../models/Project';
-import { ActionReminderState, ReminderOutcome } from '../models/Reminder';
+import { ActionReminderState, DeviceCleanupSummary, ReminderDeviceOp, ReminderOutcome } from '../models/Reminder';
 import { ReminderService } from '../services/ReminderService';
 import { CalendarSyncService, CalendarCapability } from '../services/CalendarSyncService';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMButtonSize } from '../common/DesignTokens';
@@ -40,6 +40,12 @@ export struct ActionReminderBlock {
   @State conflictTitles: string[] = [];
   @State needsConflictConfirm: boolean = false;
   @State capabilityNote: string = '';
+  /** 一次保存意图一个 requestId：失败/超时重试沿用，成功或重新开编辑器才清空 */
+  @State pendingRequestId: string = '';
+  /** 一次撤销意图一个 requestId */
+  @State pendingRevokeRequestId: string = '';
+  /** 最近一次撤销后的设备清理结果；未确认时据此展示原因与重试按钮 */
+  @State lastCleanup: DeviceCleanupSummary | null = null;
 
   private service: ReminderService = new ReminderService();
 
@@ -60,6 +66,7 @@ export struct ActionReminderBlock {
   private async load(): Promise<void> {
     this.isLoading = true;
     this.errorMessage = '';
+    this.lastCleanup = null;
     try {
       const state = await this.service.load(this.projectId, this.actionId);
       this.state = state;
@@ -112,7 +119,7 @@ export struct ActionReminderBlock {
     });
   }
 
-  /** 保存计划时间；失败时保留用户选择的日期时间，不显示假成功 */
+  /** 保存计划时间；一次意图一个 requestId，失败重试沿用，不显示假成功 */
   private async savePlanTime(): Promise<void> {
     if (this.busy !== '') {
       return;
@@ -123,11 +130,19 @@ export struct ActionReminderBlock {
       this.errorMessage = '提醒时间需要晚于当前时间至少 1 分钟。';
       return;
     }
+    // 一次用户意图一个 requestId：仅在尚未生成时新建，失败/超时重试沿用同一个
+    if (this.pendingRequestId === '') {
+      this.pendingRequestId = `reminder-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+    }
+    // 修改已有提醒时必须带上最新版本号，否则服务端返回 409/422
+    const reminder = this.state !== null ? this.state.reminder : null;
+    const expectedRevision = (reminder !== null && reminder.id !== '') ? reminder.revision : 0;
     this.busy = 'arrange';
     this.errorMessage = '';
     this.message = '';
     try {
-      const mutation = await this.service.arrange(this.projectId, this.actionId, iso, this.durationMinutes);
+      const mutation = await this.service.arrange(this.projectId, this.actionId, this.pendingRequestId, iso, this.durationMinutes, expectedRevision);
+      this.pendingRequestId = '';
       this.message = `计划时间已保存：${preview}。这是忆程里的时间，还没有写进设备日历。`;
       this.showEditor = false;
       this.needsConflictConfirm = false;
@@ -139,7 +154,14 @@ export struct ActionReminderBlock {
         this.message = `${this.message} 接下来可以写入设备日历。`;
       }
     } catch (e) {
-      this.errorMessage = e instanceof ApiError ? e.message : '保存计划时间失败，请重试';
+      if (e instanceof ApiError && (e.code === 'REMINDER_REVISION_CHANGED' || e.code === 'REMINDER_EXPECTED_REVISION_REQUIRED')) {
+        // 版本冲突：保留用户已填时间，重新拉取最新版本号，让用户再确认一次（不自动重试提交）
+        await this.load();
+        this.errorMessage = '提醒已被其他操作修改，已刷新，请再确认一次';
+      } else {
+        // 其它失败：保留 pendingRequestId 以便用户重试时用同一个意图编号
+        this.errorMessage = e instanceof ApiError ? e.message : '保存计划时间失败，请重试';
+      }
     } finally {
       this.busy = '';
     }
@@ -181,18 +203,61 @@ export struct ActionReminderBlock {
     if (reminder === null || this.busy !== '') {
       return;
     }
+    if (this.pendingRevokeRequestId === '') {
+      this.pendingRevokeRequestId = `revoke-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+    }
     this.busy = 'revoke';
     this.errorMessage = '';
     try {
       const context = getContext(this) as common.UIAbilityContext;
-      const outcome = await this.service.revokeAndRemove(context, this.projectId, reminder.id);
+      const outcome = await this.service.revokeAndRemove(context, this.projectId, reminder.id, this.pendingRevokeRequestId);
+      this.pendingRevokeRequestId = '';
       this.message = outcome.message;
       this.needsConflictConfirm = false;
       this.conflictTitles = [];
       await this.load();
+      // load 会刷新状态，因此在 load 之后再记录设备清理结果，避免被清空
+      this.lastCleanup = outcome.cleanup;
       this.onChanged();
     } catch (e) {
+      // 保留 pendingRevokeRequestId 以便重试时沿用同一意图编号
       this.errorMessage = e instanceof ApiError ? e.message : '撤销提醒失败，可以重试；重试只会删除忆程记录过的那条日程';
+    } finally {
+      this.busy = '';
+    }
+  }
+
+  /** 设备清理未确认时，按服务端记录的日历事件编号重试删除设备日程 */
+  private async retryDeviceCleanup(): Promise<void> {
+    const reminder = this.state !== null ? this.state.reminder : null;
+    if (reminder === null || this.busy !== '' || reminder.calendarEventId === null || reminder.calendarEventId === '') {
+      return;
+    }
+    this.busy = 'retryCleanup';
+    this.errorMessage = '';
+    try {
+      const context = getContext(this) as common.UIAbilityContext;
+      const op = new ReminderDeviceOp();
+      op.kind = 'DELETE';
+      op.reminderId = reminder.id;
+      op.calendarId = reminder.calendarId;
+      op.eventId = reminder.calendarEventId;
+      op.title = `忆程·${this.actionTitle}`;
+      op.prefix = '忆程·';
+      op.start = reminder.reminderAt;
+      op.end = new Date(new Date(reminder.reminderAt).getTime() + reminder.durationMinutes * 60000).toISOString();
+      const summary = await this.service.applyDevicePlanDetailed(context, [op]);
+      if (summary.confirmed) {
+        this.message = `设备日历里的自有日程已删除（共 ${summary.deleted + summary.alreadyMissing} 条）。`;
+      } else {
+        this.message = summary.message !== '' ? summary.message : '设备日程仍未确认删除，请到系统日历检查「忆程·」事件。';
+      }
+      await this.load();
+      // load 会刷新状态，因此在 load 之后再记录设备清理结果，避免被清空
+      this.lastCleanup = summary;
+      this.onChanged();
+    } catch (e) {
+      this.errorMessage = e instanceof ApiError ? e.message : '重试删除设备日程失败';
     } finally {
       this.busy = '';
     }
@@ -428,6 +493,7 @@ export struct ActionReminderBlock {
               .margin({ top: PMSpacing.SM })
               .onClick(() => {
                 this.showEditor = true;
+                this.pendingRequestId = '';
                 this.checkCapability();
               })
           }
@@ -497,9 +563,26 @@ export struct ActionReminderBlock {
       if (this.message !== '') {
         Text(this.message)
           .fontSize(PMFontSize.CAPTION)
-          .fontColor(PMColors.SUCCESS)
+          .fontColor(this.lastCleanup !== null && !this.lastCleanup.confirmed ? PMColors.WARNING : PMColors.SUCCESS)
           .lineHeight(18)
           .margin({ top: PMSpacing.SM })
+      }
+      // 设备清理未确认：区分「服务端已撤销」与「设备日程已确认删除」，提供重试
+      if (this.lastCleanup !== null && !this.lastCleanup.confirmed && this.lastCleanup.pendingEventIds.length > 0
+        && this.state !== null && this.state.reminder !== null) {
+        Button(this.busy === 'retryCleanup' ? '重试中…' : '重试删除设备日程')
+          .fontSize(PMFontSize.BUTTON)
+          .fontColor(PMColors.RISK)
+          .backgroundColor(PMColors.SURFACE_SUBTLE)
+          .border({ width: 1, color: PMColors.RISK_BORDER })
+          .borderRadius(PMRadius.SM)
+          .height(48)
+          .width('100%')
+          .margin({ top: PMSpacing.SM })
+          .enabled(this.busy === '')
+          .onClick(() => {
+            this.retryDeviceCleanup();
+          })
       }
       if (this.errorMessage !== '' && this.state !== null) {
         Text(this.errorMessage)

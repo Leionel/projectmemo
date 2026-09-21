@@ -29,8 +29,8 @@ import { AttachmentService } from '../services/AttachmentService';
 import { MilestoneService } from '../services/MilestoneService';
 import { WidgetDataService } from '../services/WidgetDataService';
 import { ReentryService, EpisodePreviewBody, EpisodeConfirmBody } from '../services/ReentryService';
-import { ReentryData, Episode, EpisodeRevision, EpisodeSummarySection, EpisodeClaim, EpisodeSourceRef, ScheduleBlock, ScheduleCalendarEntry } from '../models/Reentry';
-import { CalendarSyncService } from '../services/CalendarSyncService';
+import { ReentryData, Episode, EpisodeRevision, EpisodeSummarySection, EpisodeClaim, EpisodeSourceRef } from '../models/Reentry';
+import { ReminderService } from '../services/ReminderService';
 
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily, PMInteraction, PMMotion, PMMaterial, PMTransition, PMButtonSize } from '../common/DesignTokens';
 import { PMBreakpoint, PMStorageKey, PMWidthBp } from '../common/WindowMetrics';
@@ -147,14 +147,9 @@ struct ProjectHome {
   @State newActionPriority: number = 3;
   @State newActionError: string = '';
   @State isCreatingAction: boolean = false;
-  @State showActionReminder: boolean = false;
-  @State reminderActionId: string = '';
-  @State reminderActionTitle: string = '';
-  @State reminderPreviousAt: string = '';
-  @State reminderDate: string = '';
-  @State reminderTime: string = '';
-  @State reminderError: string = '';
-  @State isSavingReminder: boolean = false;
+  // 单待办日历提醒：功能开关探测结果 + 当前展开提醒设置的待办 ID（与行动安排页共用 ActionReminderBlock）
+  @State reminderAvailable: boolean = false;
+  @State actionReminderCardId: string = '';
 
   // Tab 3: 问忆程专属状态
   @State copilotQuestion: string = '';
@@ -177,6 +172,7 @@ struct ProjectHome {
   private interventionService: InterventionService = new InterventionService();
   private memoryService: MemoryService = new MemoryService();
   private actionService: ActionService = new ActionService();
+  private reminderService: ReminderService = new ReminderService();
   private artifactService: ArtifactService = new ArtifactService();
   private lifecycleService: MemoryLifecycleService = new MemoryLifecycleService();
   private policyService: InterventionPolicyService = new InterventionPolicyService();
@@ -238,6 +234,7 @@ struct ProjectHome {
     }
     this.restoreCaptureDraft();
     this.loadAllData();
+    this.probeReminderAvailability();
   }
 
   onPageShow(): void {
@@ -764,7 +761,7 @@ struct ProjectHome {
             this.sourceSheetClaim = claim;
             this.showSourceSheet = true;
           })
-        if (this.suggestionClaimId === claim.claimId && this.suggestionCanArrange) {
+        if (this.suggestionClaimId === claim.claimId && this.suggestionCanArrange && this.reminderAvailable) {
           Button(this.reminderBlockForActionId === this.suggestionActionId ? '收起提醒设置' : '安排日历提醒')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.BRAND)
@@ -845,7 +842,7 @@ struct ProjectHome {
           projectId: this.projectId,
           actionId: this.suggestionActionId,
           actionTitle: this.suggestionActionTitle,
-          reminderEnabled: true,
+          reminderEnabled: this.reminderAvailable,
           onClose: () => {
             this.reminderBlockForActionId = '';
           },
@@ -1752,132 +1749,11 @@ struct ProjectHome {
     }
   }
 
-  private twoDigits(value: number): string {
-    return value < 10 ? `0${value}` : `${value}`;
-  }
-
-  private openActionReminder(action: ActionItem): void {
-    let suggested = action.dueAt !== undefined && action.dueAt !== null ? new Date(action.dueAt) : new Date();
-    if (Number.isNaN(suggested.getTime()) || suggested.getTime() <= Date.now()) {
-      suggested = new Date();
-      suggested.setMinutes(0, 0, 0);
-      suggested.setHours(suggested.getHours() + 1);
-    }
-    this.reminderActionId = action.id;
-    this.reminderActionTitle = action.title;
-    this.reminderPreviousAt = action.dueAt ?? '';
-    this.reminderDate = `${suggested.getFullYear()}-${this.twoDigits(suggested.getMonth() + 1)}-${this.twoDigits(suggested.getDate())}`;
-    this.reminderTime = `${this.twoDigits(suggested.getHours())}:${this.twoDigits(suggested.getMinutes())}`;
-    this.reminderError = '';
-    this.showActionReminder = true;
-  }
-
-  private reminderStart(): Date | null {
-    const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(this.reminderDate.trim());
-    const timeMatch = /^(\d{2}):(\d{2})$/.exec(this.reminderTime.trim());
-    if (dateMatch === null || timeMatch === null) {
-      return null;
-    }
-    const year = Number(dateMatch[1]);
-    const month = Number(dateMatch[2]);
-    const day = Number(dateMatch[3]);
-    const hour = Number(timeMatch[1]);
-    const minute = Number(timeMatch[2]);
-    const value = new Date(year, month - 1, day, hour, minute, 0, 0);
-    if (value.getFullYear() !== year || value.getMonth() !== month - 1 || value.getDate() !== day ||
-      value.getHours() !== hour || value.getMinutes() !== minute) {
-      return null;
-    }
-    return value;
-  }
-
-  private actionTimeLabel(value: string): string {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-      return '';
-    }
-    return `${this.twoDigits(date.getMonth() + 1)}月${this.twoDigits(date.getDate())}日 ${this.twoDigits(date.getHours())}:${this.twoDigits(date.getMinutes())}`;
-  }
-
-  private async saveActionReminder(): Promise<void> {
-    if (this.isSavingReminder) {
-      return;
-    }
-    const start = this.reminderStart();
-    if (start === null) {
-      this.reminderError = '请按“YYYY-MM-DD”和“HH:mm”填写日期与时间';
-      return;
-    }
-    if (start.getTime() <= Date.now()) {
-      this.reminderError = '提醒时间需要晚于现在';
-      return;
-    }
-
-    this.isSavingReminder = true;
-    this.reminderError = '';
-    const block = new ScheduleBlock();
-    block.id = this.reminderActionId;
-    block.actionId = this.reminderActionId;
-    block.actionTitle = this.reminderActionTitle;
-    block.start = start.toISOString();
-    block.end = new Date(start.getTime() + 30 * 60 * 1000).toISOString();
-    const context = getContext(this) as common.UIAbilityContext;
-    let entries: ScheduleCalendarEntry[] = [];
+  private async probeReminderAvailability(): Promise<void> {
     try {
-      const capability = await CalendarSyncService.inspect(context);
-      if (!capability.supported) {
-        this.reminderError = capability.reason !== '' ? capability.reason : '当前设备不支持系统日历';
-        return;
-      }
-      if (!capability.granted) {
-        const permission = await CalendarSyncService.requestPermission(context);
-        if (!permission.granted) {
-          this.reminderError = permission.reason !== '' ? permission.reason : '需要日历权限才能创建提醒';
-          return;
-        }
-      }
-
-      const conflicts = await CalendarSyncService.findConflicts(context, '', [block]);
-      if (conflicts.length > 0) {
-        this.reminderError = `这个时间已有“${conflicts[0].existingTitle}”，请换一个时间`;
-        return;
-      }
-
-      entries = await CalendarSyncService.writeBlocks(context, '', [block]);
-      const receipt = entries.length > 0 ? entries[0] : null;
-      if (receipt === null || receipt.status !== 'SYNCED' || receipt.eventId === null || receipt.eventId === '') {
-        this.reminderError = receipt !== null && receipt.error !== null && receipt.error !== '' ? receipt.error : '系统日历没有返回有效日程，请稍后重试';
-        return;
-      }
-
-      // 设备日历写入成功后再保存项目内时间；服务端失败则补偿删除刚创建的日程，避免假成功。
-      await this.actionService.updateDueAt(this.projectId, this.reminderActionId, block.start);
-      if (this.reminderPreviousAt !== '') {
-        const previousStart = new Date(this.reminderPreviousAt);
-        if (!Number.isNaN(previousStart.getTime())) {
-          const previousEnd = new Date(previousStart.getTime() + 30 * 60 * 1000).toISOString();
-          await CalendarSyncService.removeMatchingReminder(
-            context,
-            this.reminderActionTitle,
-            previousStart.toISOString(),
-            previousEnd,
-            receipt.eventId,
-          );
-        }
-      }
-      this.showActionReminder = false;
-      promptAction.showToast({ message: `已加入系统日历，将在 ${this.actionTimeLabel(block.start)} 提醒` });
-      await this.loadAllData();
-    } catch (e) {
-      const written = entries.filter((entry: ScheduleCalendarEntry) => entry.status === 'SYNCED').length;
-      if (written > 0) {
-        const rolledBack = await CalendarSyncService.rollbackWrites(context, [block], entries);
-        this.reminderError = rolledBack === written ? '项目时间保存失败，已撤销刚创建的日历事件' : '保存失败，请到系统日历检查“忆程·”事件';
-      } else {
-        this.reminderError = e instanceof ApiError ? e.message : '暂时无法写入系统日历，请稍后重试';
-      }
-    } finally {
-      this.isSavingReminder = false;
+      this.reminderAvailable = await this.reminderService.isAvailable(this.projectId);
+    } catch {
+      this.reminderAvailable = false;
     }
   }
 
@@ -3915,14 +3791,10 @@ struct ProjectHome {
                 .margin({ top: PMSpacing.SM })
               }
 
-              if (action.status === 'TODO' || action.status === 'DOING') {
-                if (action.dueAt !== undefined && action.dueAt !== null && this.actionTimeLabel(action.dueAt) !== '') {
-                  Text(`计划时间：${this.actionTimeLabel(action.dueAt)}`)
-                    .fontSize(PMFontSize.CAPTION)
-                    .fontColor(PMColors.BRAND)
-                    .margin({ top: PMSpacing.SM })
-                }
-                Button(action.dueAt !== undefined && action.dueAt !== null ? '修改日历提醒' : '安排日历提醒')
+              // 单待办日历提醒只有一套实现（ActionReminderBlock + ReminderService），
+              // 项目页与行动安排页共用同一服务契约与状态文案；ActionItem.dueAt 是截止时间，不作为设备日历写入回执。
+              if (this.reminderAvailable && (action.status === 'TODO' || action.status === 'DOING')) {
+                Button(this.actionReminderCardId === action.id ? '收起提醒设置' : '日历提醒')
                   .fontSize(PMFontSize.BUTTON)
                   .fontColor(PMColors.BRAND)
                   .backgroundColor(PMColors.BRAND_LIGHT)
@@ -3930,10 +3802,27 @@ struct ProjectHome {
                   .height(36)
                   .width('100%')
                   .margin({ top: PMSpacing.MD })
+                  .accessibilityDescription('打开这条待办的日历提醒设置')
                   .onClick(() => {
-                    this.openActionReminder(action);
+                    this.actionReminderCardId = this.actionReminderCardId === action.id ? '' : action.id;
                   })
-                  .accessibilityDescription('选择日期和时间，加入系统日历并到点提醒')
+              }
+
+              if (this.reminderAvailable && this.actionReminderCardId === action.id) {
+                ActionReminderBlock({
+                  projectId: this.projectId,
+                  actionId: action.id,
+                  actionTitle: action.title,
+                  reminderEnabled: this.reminderAvailable,
+                  onClose: () => {
+                    this.actionReminderCardId = '';
+                  },
+                  onChanged: () => {
+                    this.loadAllData(true);
+                  }
+                })
+              }
+              if (action.status === 'TODO' || action.status === 'DOING') {
                 Row() {
                   if (action.status === 'TODO') {
                     Button(this.startingActionId === action.id ? '启动中...' : '开始行动')
@@ -5030,109 +4919,6 @@ struct ProjectHome {
           .border({ width: 1, color: PMColors.BORDER })
           .alignItems(HorizontalAlign.Start)
           .transition(TransitionEffect.OPACITY.combine(TransitionEffect.scale({ x: 0.96, y: 0.96 })).animation({ duration: PMMotion.LOCAL, curve: PMMotion.CURVE_CONTENT }))
-        }
-        .width('100%')
-        .height('100%')
-        .backgroundColor(PMColors.SCRIM)
-        .backgroundBlurStyle(PMMaterial.SCRIM, PMMaterial.OPTIONS)
-        .justifyContent(FlexAlign.Center)
-      }
-
-      if (this.showActionReminder) {
-        Column() {
-          Column() {
-            Row() {
-              Text('安排提醒')
-                .fontSize(PMFontSize.PAGE_TITLE)
-                .fontWeight(FontWeight.Medium)
-                .fontColor(PMColors.INK_PRIMARY)
-              Button('✕')
-                .fontSize(PMFontSize.BODY)
-                .fontColor(PMColors.INK_TERTIARY)
-                .backgroundColor('transparent')
-                .enabled(!this.isSavingReminder)
-                .onClick(() => {
-                  this.showActionReminder = false;
-                })
-                .accessibilityText('关闭安排提醒')
-            }
-            .width('100%')
-            .justifyContent(FlexAlign.SpaceBetween)
-
-            Text(this.reminderActionTitle)
-              .fontSize(PMFontSize.BODY)
-              .fontWeight(FontWeight.Medium)
-              .fontColor(PMColors.INK_PRIMARY)
-              .maxLines(2)
-              .textOverflow({ overflow: TextOverflow.Ellipsis })
-              .margin({ top: PMSpacing.MD })
-
-            Text('哪天提醒？')
-              .fontSize(PMFontSize.BODY)
-              .fontColor(PMColors.INK_SECONDARY)
-              .margin({ top: PMSpacing.LG })
-            TextInput({ text: this.reminderDate, placeholder: '例如 2026-09-22' })
-              .onChange((value: string) => {
-                this.reminderDate = value;
-                this.reminderError = '';
-              })
-              .height(44)
-              .backgroundColor(PMColors.SURFACE_SUBTLE)
-              .borderRadius(PMRadius.SM)
-              .border({ width: 1, color: PMColors.BORDER })
-              .margin({ top: PMSpacing.XS })
-              .accessibilityText('提醒日期，格式为年月日')
-
-            Text('几点提醒？')
-              .fontSize(PMFontSize.BODY)
-              .fontColor(PMColors.INK_SECONDARY)
-              .margin({ top: PMSpacing.MD })
-            TextInput({ text: this.reminderTime, placeholder: '例如 19:30' })
-              .onChange((value: string) => {
-                this.reminderTime = value;
-                this.reminderError = '';
-              })
-              .height(44)
-              .backgroundColor(PMColors.SURFACE_SUBTLE)
-              .borderRadius(PMRadius.SM)
-              .border({ width: 1, color: PMColors.BORDER })
-              .margin({ top: PMSpacing.XS })
-              .accessibilityText('提醒时间，格式为小时和分钟')
-
-            Text('确认后会创建一条 30 分钟的系统日历事件，并在开始时提醒。')
-              .fontSize(PMFontSize.CAPTION)
-              .fontColor(PMColors.INK_TERTIARY)
-              .lineHeight(18)
-              .margin({ top: PMSpacing.MD })
-
-            if (this.reminderError !== '') {
-              Text(this.reminderError)
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.RISK)
-                .lineHeight(18)
-                .margin({ top: PMSpacing.SM })
-            }
-
-            Button(this.isSavingReminder ? '正在加入日历…' : '加入日历并提醒我')
-              .fontSize(PMFontSize.BUTTON)
-              .fontWeight(FontWeight.Medium)
-              .fontColor(PMColors.SURFACE)
-              .backgroundColor(this.isSavingReminder ? PMColors.INK_MUTED : PMColors.BRAND)
-              .borderRadius(PMRadius.SM)
-              .height(48)
-              .width('100%')
-              .enabled(!this.isSavingReminder)
-              .margin({ top: PMSpacing.LG })
-              .onClick(() => {
-                this.saveActionReminder();
-              })
-          }
-          .width('92%')
-          .padding(PMSpacing.LG)
-          .backgroundColor(PMColors.SURFACE)
-          .borderRadius(PMRadius.LG)
-          .border({ width: 1, color: PMColors.BORDER })
-          .alignItems(HorizontalAlign.Start)
         }
         .width('100%')
         .height('100%')

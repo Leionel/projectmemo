@@ -9,6 +9,7 @@
  * 5. 读取不产生任何业务写入、行动或检查点。
  */
 import { db } from "@/lib/db";
+import { AppError } from "@/lib/api";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { getProjectStateFreshness } from "@/lib/services/projectStateService";
 import { evaluateEpisodeFreshness } from "@/lib/services/projectEpisodeService";
@@ -82,22 +83,47 @@ export function sortFindings(findings: HealthFinding[]): HealthFinding[] {
 interface DetectorContext {
   projectId: string;
   now: Date;
+  /** 当前登录用户；个人提醒与个人排程只按它过滤，null 表示没有可用身份 */
+  viewerUserId: string | null;
   findings: HealthFinding[];
   unavailable: HealthUnavailableSection[];
 }
 
 type Detector = (context: DetectorContext) => Promise<void>;
 
+/** 分组中文名：不可用时只告诉用户「哪一部分没读到」，不复述底层错误 */
+const SECTION_LABELS: Record<string, string> = {
+  episodes: "阶段检查点",
+  state: "项目状态",
+  actions: "待办检查",
+  meetings: "会议变化",
+  attachments: "附件解析",
+  deliverables: "成果证据",
+  memory: "重复记忆",
+  personal_schedule: "与你个人相关的提醒和排程",
+};
+
+/**
+ * 子检查失败的处理：
+ * - 详细原因（可能含数据库错误）只写服务端日志；
+ * - 返回给客户端的是稳定的中文分类说明与错误码，不含任何底层异常文本。
+ */
 async function runDetector(name: string, detector: Detector, context: DetectorContext) {
   try {
     await detector(context);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    context.unavailable.push({
-      section: name,
-      errorCode: typeof error === "object" && error !== null && "code" in error ? String(error.code) : "SECTION_FAILED",
-      message: `这一部分暂时无法读取：${message}`,
-    });
+    const rawCode = typeof error === "object" && error !== null && "code" in error ? String((error as { code: unknown }).code) : "";
+    // 只认我们自己定义的错误码形状（大写+下划线）；Prisma 的 P2002 / SQLITE_BUSY 这类
+    // 内部码一律折叠成 SECTION_UNAVAILABLE，不把底层实现暴露给客户端。
+    const looksLikeOurs = /^[A-Z][A-Z0-9_]{3,}$/.test(rawCode) && !/^P[0-9]+$/.test(rawCode);
+    const knownCode = looksLikeOurs ? rawCode : "SECTION_UNAVAILABLE";
+    console.error(`[project-health] section "${name}" failed`, { code: rawCode || knownCode, error });
+    const label = SECTION_LABELS[name] ?? "这一部分";
+    // 已知的开关关闭类错误可以如实说明；其它一律用统一分类，不泄露内部信息
+    const message = knownCode.endsWith("DISABLED")
+      ? `${label}功能当前已关闭，本次体检不包含这一部分。`
+      : `${label}暂时无法读取，本次体检不包含这一部分。`;
+    context.unavailable.push({ section: name, errorCode: knownCode, message });
   }
 }
 
@@ -109,7 +135,7 @@ function finding(input: Omit<HealthFinding, "observedAt"> & { observedAt?: strin
 
 const episodeDetector: Detector = async ({ projectId, now, findings }) => {
   if (!isFeatureEnabled("PROJECT_EPISODES_ENABLED", false)) {
-    throw Object.assign(new Error("阶段检查点功能当前已关闭"), { code: "EPISODES_DISABLED" });
+    throw new AppError("EPISODES_DISABLED", "阶段检查点功能当前已关闭", 503);
   }
   const episode = await db.projectEpisode.findFirst({
     where: { projectId, status: { not: "ARCHIVED" } },
@@ -210,7 +236,7 @@ const episodeDetector: Detector = async ({ projectId, now, findings }) => {
 
 const stateDetector: Detector = async ({ projectId, now, findings }) => {
   if (!isFeatureEnabled("PROJECT_STATE_ENABLED", false)) {
-    throw Object.assign(new Error("项目状态功能当前已关闭"), { code: "PROJECT_STATE_DISABLED" });
+    throw new AppError("PROJECT_STATE_DISABLED", "项目状态功能当前已关闭", 503);
   }
   const freshness = await getProjectStateFreshness(projectId);
   if (freshness.status === "FAILED") {
@@ -220,9 +246,8 @@ const stateDetector: Detector = async ({ projectId, now, findings }) => {
       objectType: "project_state",
       objectId: projectId,
       title: "项目状态上次刷新失败",
-      explanation: freshness.errorMessage
-        ? `失败原因：${freshness.errorMessage}`
-        : "刷新没有成功，界面上的状态可能停留在上一次成功的结果。",
+      // 只说明「刷新没有成功」，不复述可能含数据库细节的原始错误文本
+      explanation: "刷新没有成功，界面上的状态可能停留在上一次成功的结果。可以重新刷新一次。",
       suggestedAction: "重新刷新项目状态",
       suggestedTarget: { kind: "state", id: null, fallback: null },
     }, now));
@@ -276,18 +301,10 @@ const actionDetector: Detector = async ({ projectId, now, findings }) => {
   });
   if (actions.length === 0) return;
 
-  const actionIds = actions.map((action) => action.id);
-
-  // 依赖判定复用行动可行性服务：体检不自己发明一套规则
+  // 这里只检查「项目共享的行动事实」（受阻、无法确认、缺估时、逾期）。
+  // 个人提醒与个人排程状态全部移到 personalScheduleDetector，并按当前登录用户过滤，
+  // 避免成员之间互相看到对方的日历权限、失败原因或私人安排。
   const { assessActionFeasibility } = await import("@/lib/services/actionFeasibilityService");
-  const blocks = await db.scheduleBlock.findMany({
-    where: { actionId: { in: actionIds }, plan: { status: "CONFIRMED", projectId } },
-    select: { actionId: true, startAt: true, endAt: true, calendarSyncStatus: true, calendarError: true, calendarEventId: true },
-  });
-  const reminders = await db.actionReminder.findMany({
-    where: { actionId: { in: actionIds }, projectId },
-    select: { id: true, actionId: true, syncStatus: true, error: true, reminderAt: true },
-  });
 
   for (const action of actions) {
     const assessment = await assessActionFeasibility(projectId, action.id);
@@ -345,6 +362,83 @@ const actionDetector: Detector = async ({ projectId, now, findings }) => {
       }, now));
     }
 
+  }
+};
+
+// ---------------------------------------------------------------- 个人提醒与个人排程（按登录用户隔离）
+
+/**
+ * 只检查「当前查看者自己的」提醒与排程状态。
+ *
+ * 与 actionDetector 的分工：行动是否受阻、是否逾期属于项目共享事实，所有成员看到同一份；
+ * 而设备日历权限、写入失败原因、私人时段属于个人数据，只能按 viewerUserId 过滤，
+ * 绝不能把别的成员的状态混进同一条发现。
+ */
+const personalScheduleDetector: Detector = async ({ projectId, now, findings, viewerUserId, unavailable }) => {
+  if (viewerUserId === null) {
+    // 没有登录身份时宁可不检查，也不能用「全部成员」代替「当前用户」
+    unavailable.push({
+      section: "personal_schedule",
+      errorCode: "NO_VIEWER_IDENTITY",
+      message: "没有可用登录身份，本次不检查个人提醒与个人排程状态。",
+    });
+    return;
+  }
+
+  const actions = await db.actionItem.findMany({
+    where: { projectId, status: { in: ["TODO", "DOING"] } },
+    orderBy: { createdAt: "asc" },
+    take: MAX_ACTIONS_SCANNED,
+    select: { id: true, title: true, status: true },
+  });
+  if (actions.length === 0) return;
+  const actionIds = actions.map((action) => action.id);
+
+  const reminders = await db.actionReminder.findMany({
+    where: { projectId, userId: viewerUserId, actionId: { in: actionIds } },
+    select: { id: true, actionId: true, syncStatus: true, reminderAt: true },
+  });
+  const blocks = await db.scheduleBlock.findMany({
+    where: { actionId: { in: actionIds }, plan: { status: "CONFIRMED", projectId, userId: viewerUserId } },
+    select: { actionId: true, startAt: true, calendarSyncStatus: true, calendarError: true },
+  });
+
+  for (const action of actions) {
+    const mine = reminders.filter((item) => item.actionId === action.id);
+    const failed = mine.filter((item) => item.syncStatus === "FAILED");
+    const denied = mine.filter((item) => item.syncStatus === "PERMISSION_DENIED");
+    const missing = mine.filter((item) => item.syncStatus === "MISSING");
+    if (failed.length > 0 || denied.length > 0) {
+      const target = denied[0] ?? failed[0];
+      findings.push(finding({
+        findingCode: "ACTION_CALENDAR_SYNC_FAILED",
+        severity: "ATTENTION",
+        objectType: "reminder",
+        objectId: target.id,
+        title: denied.length > 0
+          ? `你为「${action.title}」设置的日历提醒没有拿到权限`
+          : `你为「${action.title}」设置的日历提醒没有写进设备`,
+        explanation: denied.length > 0
+          ? "计划时间已经保存在忆程里，但设备日历权限被拒，到点不会有提醒。这条状态只有你自己能看到。"
+          : "计划时间仍然保留；这条失败原因只属于你的设备，其他成员看不到。",
+        observedAt: target.reminderAt.toISOString(),
+        suggestedAction: denied.length > 0 ? "到系统设置里允许忆程使用日历，然后重试" : "重试写入设备日历",
+        suggestedTarget: { kind: "reminder", id: target.id, fallback: "action_board" },
+      }, now));
+    }
+    if (missing.length > 0) {
+      findings.push(finding({
+        findingCode: "REMINDER_NEEDS_ATTENTION",
+        severity: "ATTENTION",
+        objectType: "reminder",
+        objectId: missing[0].id,
+        title: `你为「${action.title}」设置的日历日程已不存在`,
+        explanation: "忆程记录过一条你设备上的日历日程，但当前在设备上找不到它，可能被手动删除了。",
+        observedAt: missing[0].reminderAt.toISOString(),
+        suggestedAction: "重新写入设备日历，或撤销这条提醒",
+        suggestedTarget: { kind: "reminder", id: missing[0].id, fallback: "action_board" },
+      }, now));
+    }
     const block = blocks.find((item) => item.actionId === action.id);
     if (block && action.status === "TODO" && block.startAt.getTime() - now.getTime() < UPCOMING_WINDOW_MS) {
       findings.push(finding({
@@ -352,46 +446,11 @@ const actionDetector: Detector = async ({ projectId, now, findings }) => {
         severity: "INFO",
         objectType: "action",
         objectId: action.id,
-        title: `待办「${action.title}」已安排时间但还没开始`,
-        explanation: `安排的时间是 ${block.startAt.toISOString().slice(0, 16).replace("T", " ")}，现在状态仍是未开始。`,
+        title: `你已安排的「${action.title}」还没开始`,
+        explanation: `你把它安排在 ${block.startAt.toISOString().slice(0, 16).replace("T", " ")}，现在状态仍是未开始。`,
         observedAt: block.startAt.toISOString(),
         suggestedAction: "打开待办开始执行",
         suggestedTarget: { kind: "action", id: action.id, fallback: "action_board" },
-      }, now));
-    }
-
-    const failedReminders = reminders.filter((item) => item.actionId === action.id && item.syncStatus === "FAILED");
-    const permissionReminders = reminders.filter((item) => item.actionId === action.id && item.syncStatus === "PERMISSION_DENIED");
-    const missingReminders = reminders.filter((item) => item.actionId === action.id && item.syncStatus === "MISSING");
-    if (failedReminders.length > 0 || permissionReminders.length > 0) {
-      const target = permissionReminders[0] ?? failedReminders[0];
-      findings.push(finding({
-        findingCode: "ACTION_CALENDAR_SYNC_FAILED",
-        severity: "ATTENTION",
-        objectType: "reminder",
-        objectId: target.id,
-        title: permissionReminders.length > 0
-          ? `待办「${action.title}」的日历提醒没有拿到权限`
-          : `待办「${action.title}」的日历提醒写入失败`,
-        explanation: permissionReminders.length > 0
-          ? "计划时间已经保存，但设备日历权限被拒，到点不会有提醒。"
-          : target.error?.trim() || "写入设备日历时出错了，计划时间仍然保留。",
-        observedAt: target.reminderAt.toISOString(),
-        suggestedAction: permissionReminders.length > 0 ? "到系统设置里允许忆程使用日历，然后重试" : "重试写入设备日历",
-        suggestedTarget: { kind: "reminder", id: target.id, fallback: "action_board" },
-      }, now));
-    }
-    if (missingReminders.length > 0) {
-      findings.push(finding({
-        findingCode: "REMINDER_NEEDS_ATTENTION",
-        severity: "ATTENTION",
-        objectType: "reminder",
-        objectId: missingReminders[0].id,
-        title: `待办「${action.title}」的日历日程已不存在`,
-        explanation: "忆程记录过一条设备日历日程，但当前在设备上找不到它，可能被手动删除了。",
-        observedAt: missingReminders[0].reminderAt.toISOString(),
-        suggestedAction: "重新写入设备日历，或撤销这条提醒",
-        suggestedTarget: { kind: "reminder", id: missingReminders[0].id, fallback: "action_board" },
       }, now));
     }
     if (block?.calendarSyncStatus === "FAILED") {
@@ -400,8 +459,8 @@ const actionDetector: Detector = async ({ projectId, now, findings }) => {
         severity: "ATTENTION",
         objectType: "action",
         objectId: action.id,
-        title: `待办「${action.title}」的已排时段没有写进设备日历`,
-        explanation: block.calendarError?.trim() || "已确认的时段仍然有效，只是设备日历里还没有对应日程。",
+        title: `你已安排的「${action.title}」时段没有写进设备日历`,
+        explanation: block.calendarError?.trim() || "已确认的时段仍然有效，只是你设备上的日历还没有对应日程。",
         observedAt: block.startAt.toISOString(),
         suggestedAction: "重试写入设备日历",
         suggestedTarget: { kind: "action", id: action.id, fallback: "action_board" },
@@ -440,7 +499,7 @@ const meetingDetector: Detector = async ({ projectId, now, findings }) => {
 
 const attachmentDetector: Detector = async ({ projectId, now, findings }) => {
   if (!isFeatureEnabled("PROJECT_INBOX_ENABLED", false)) {
-    throw Object.assign(new Error("附件入口当前已关闭"), { code: "PROJECT_INBOX_DISABLED" });
+    throw new AppError("PROJECT_INBOX_DISABLED", "附件入口当前已关闭", 503);
   }
   const failed = await db.attachment.findMany({
     where: { projectId, extractionStatus: "FAILED" },
@@ -504,7 +563,7 @@ const deliverableDetector: Detector = async ({ projectId, now, findings }) => {
 
 const memoryDetector: Detector = async ({ projectId, now, findings }) => {
   if (!isFeatureEnabled("PROJECT_MEMORY_CONSOLIDATION_ENABLED", false)) {
-    throw Object.assign(new Error("记忆整理功能当前已关闭"), { code: "MEMORY_CONSOLIDATION_DISABLED" });
+    throw new AppError("MEMORY_CONSOLIDATION_DISABLED", "记忆整理功能当前已关闭", 503);
   }
   const { listConsolidationProposals } = await import("@/lib/services/memoryConsolidationService");
   const proposals = await listConsolidationProposals(projectId);
@@ -530,6 +589,8 @@ const DETECTORS: Array<[string, Detector]> = [
   ["attachments", attachmentDetector],
   ["deliverables", deliverableDetector],
   ["memory", memoryDetector],
+  // 个人数据单独一组：按登录用户过滤，不与项目共享事实混为一条发现
+  ["personal_schedule", personalScheduleDetector],
 ];
 
 function buildGroups(findings: HealthFinding[]): HealthGroup[] {
@@ -550,14 +611,27 @@ function buildGroups(findings: HealthFinding[]): HealthGroup[] {
 /**
  * 生成只读体检报告。任何检测失败都只影响对应分组，不影响其余结果。
  */
+export interface HealthViewer {
+  /** 当前登录用户；个人提醒与个人排程只按它过滤，禁止用「全部成员」代替 */
+  userId: string | null;
+  now?: Date;
+}
+
 export async function buildProjectHealthReport(
   projectId: string,
-  now: Date = new Date(),
+  viewer: HealthViewer,
 ): Promise<ProjectHealthReport> {
   if (!isFeatureEnabled("PROJECT_HEALTH_ENABLED", true)) {
     throw Object.assign(new Error("项目体检功能当前已关闭"), { code: "PROJECT_HEALTH_DISABLED" });
   }
-  const context: DetectorContext = { projectId, now, findings: [], unavailable: [] };
+  const now = viewer.now ?? new Date();
+  const context: DetectorContext = {
+    projectId,
+    now,
+    viewerUserId: viewer.userId,
+    findings: [],
+    unavailable: [],
+  };
   for (const [name, detector] of DETECTORS) {
     await runDetector(name, detector, context);
   }

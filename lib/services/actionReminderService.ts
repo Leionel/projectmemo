@@ -13,6 +13,7 @@ import { createHash } from "node:crypto";
 import { AppError } from "@/lib/api";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { db } from "@/lib/db";
+import type { Prisma } from "@/lib/generated/prisma/client";
 import {
   CALENDAR_EVENT_PREFIX,
   CALENDAR_PERMISSION_PURPOSE,
@@ -142,6 +143,10 @@ export interface ReminderMutationResult {
   /** 客户端按顺序执行的设备日历操作；先删后建，避免重复事件 */
   devicePlan: DeviceCalendarOperation[];
   message: string;
+  /** 这次请求是已完成请求的重放：没有产生任何新的业务变更 */
+  replayed?: boolean;
+  /** 重放且提醒在此之后又被改过：界面据此说明「当前显示的是最新状态」 */
+  historical?: boolean;
 }
 
 export interface ReminderCompletionOutcome {
@@ -475,7 +480,13 @@ export async function getActionReminderState(
   };
 }
 
+/**
+ * 载荷规范哈希：包含项目与待办两个维度。
+ * 这样「同一个 requestId 换到别的项目或别的待办」连哈希都对不上，
+ * 一定会走 409 而不是被当成一次新写入。
+ */
 function reminderInputHash(input: {
+  projectId: string;
   actionId: string;
   reminderAt: Date;
   durationMinutes: number;
@@ -483,6 +494,7 @@ function reminderInputHash(input: {
   deviceKey: string;
 }): string {
   return createHash("sha256").update(JSON.stringify({
+    projectId: input.projectId,
     actionId: input.actionId,
     reminderAt: iso(input.reminderAt),
     durationMinutes: input.durationMinutes,
@@ -491,11 +503,145 @@ function reminderInputHash(input: {
   })).digest("hex");
 }
 
+// ----------------------------------------------------------------
+// 幂等：不可变的请求回执
+//
+// ActionReminder 承载「这条待办当前的提醒状态」，请求回执承载「这次请求当初做了什么」。
+// 两者分开之后，旧请求的延迟重放只会读到它自己的历史结果，不可能覆盖较新的安排。
+// ----------------------------------------------------------------
+
+type TxClient = Prisma.TransactionClient;
+
+/** 请求回执的唯一范围：同一设备的一次用户意图只对应一个 requestId。 */
+function requestKey(actor: ReminderActor, requestId: string) {
+  return {
+    userId: actor.userId,
+    deviceKey: actor.deviceKey,
+    requestId: requestId.trim(),
+  };
+}
+
 /**
- * 安排或修改提醒。幂等语义：
- * - 同 requestId 同载荷 → 重放当前状态，不重复建事件；
- * - 同 requestId 异载荷 → 409；
- * - 设备上已有自有事件 → 409 并要求先撤销，避免一次意图留下两个事件。
+ * 回执必须与本次请求完全一致。
+ * ID 相同但载荷、项目、待办或操作类型不同，一律 409——这样「同 ID 不同项目/不同待办」
+ * 不会被当成一次新写入静默执行。
+ */
+function assertReceiptMatchesRequest(
+  receipt: { projectId: string; actionId: string; kind: string; inputHash: string },
+  expected: { projectId: string; actionId: string; kind: string; inputHash: string },
+) {
+  const sameRequest = receipt.inputHash === expected.inputHash
+    && receipt.projectId === expected.projectId
+    && receipt.actionId === expected.actionId
+    && receipt.kind === expected.kind;
+  if (sameRequest) return;
+  throw new AppError(
+    "REQUEST_ID_REUSED",
+    "这个 requestId 已经用在另一条待办、另一个项目或另一类操作上，请换一个新的请求标识",
+    409,
+  );
+}
+
+function describeRequestedMoment(value: Date | null): string {
+  if (value === null) return "原来的时间";
+  const text = value.toISOString();
+  return `${text.slice(0, 10)} ${text.slice(11, 16)}`;
+}
+
+async function readRequestReceipt(client: TxClient, actor: ReminderActor, requestId: string) {
+  return client.actionReminderRequest.findUnique({
+    where: { userId_deviceKey_requestId: requestKey(actor, requestId) },
+  });
+}
+
+async function createRequestReceipt(
+  client: TxClient,
+  params: {
+    projectId: string;
+    actionId: string;
+    actor: ReminderActor;
+    requestId: string;
+    kind: "ARRANGE" | "REVOKE";
+    inputHash: string;
+    reminderId: string;
+    reminderStatus: string;
+    reminderRevision: number;
+    requestedReminderAt: Date | null;
+    durationMinutes: number | null;
+  },
+) {
+  return client.actionReminderRequest.create({
+    data: {
+      projectId: params.projectId,
+      actionId: params.actionId,
+      userId: params.actor.userId,
+      deviceKey: params.actor.deviceKey,
+      requestId: params.requestId.trim(),
+      kind: params.kind,
+      inputHash: params.inputHash,
+      reminderId: params.reminderId,
+      reminderStatus: params.reminderStatus,
+      reminderRevision: params.reminderRevision,
+      requestedReminderAt: params.requestedReminderAt,
+      durationMinutes: params.durationMinutes,
+    },
+  });
+}
+
+function isUniqueViolation(error: unknown): boolean {
+  return typeof error === "object" && error !== null && "code" in error && String(error.code) === "P2002";
+}
+
+/** 撤销请求的载荷固定为「撤销这条提醒」，因此哈希只由项目与待办决定。 */
+function revokeInputHash(projectId: string, actionId: string): string {
+  return createHash("sha256").update(JSON.stringify({ op: "REVOKE", projectId, actionId })).digest("hex");
+}
+/**
+ * 历史重放：只返回「当初这次请求的结果」与当前最新状态，不写任何业务数据。
+ *
+ * 如果提醒在此之后被改过（revision 与回执记录不同），明确标注为历史重放，
+ * 让 UI 能说清「当前显示的是最新状态，本次没有覆盖它」，而不是假装又改了一次。
+ */
+async function buildArrangeReplay(
+  projectId: string,
+  actionId: string,
+  actor: ReminderActor,
+  requestId: string,
+  inputHash: string,
+): Promise<ReminderMutationResult> {
+  const receipt = await readRequestReceipt(db as unknown as TxClient, actor, requestId);
+  if (!receipt) {
+    throw new AppError("REQUEST_ID_REUSED", "这个 requestId 正在被并发处理，请刷新后重试", 409);
+  }
+  assertReceiptMatchesRequest(receipt, { projectId, actionId, kind: "ARRANGE", inputHash });
+  const action = await loadAction(projectId, actionId);
+  const row = receipt.reminderId !== null
+    ? await db.actionReminder.findUnique({ where: { id: receipt.reminderId } })
+    : null;
+  if (!row) {
+    throw new AppError("REMINDER_NOT_FOUND", "这次请求对应的提醒已不存在，请重新安排", 409);
+  }
+  const historical = receipt.reminderRevision === null || row.revision !== receipt.reminderRevision;
+  return {
+    reminder: serializeReminder(row, action.title),
+    devicePlan: [],
+    replayed: true,
+    historical,
+    message: historical
+      ? `这次请求此前已经处理过（当初想安排在 ${describeRequestedMoment(receipt.requestedReminderAt)}）。当前显示的是最新状态，本次没有覆盖它。`
+      : "这次安排之前已经保存过，直接沿用原来的结果。",
+  };
+}
+
+/**
+ * 安排或修改提醒。
+ *
+ * 幂等与并发语义（不再只比较 ActionReminder 当前行）：
+ * 1. 请求回执不可变：任何已完成过的 requestId 一律重放其历史结果，绝不覆盖后来的修改；
+ * 2. 同 ID 同载荷稳定重放，同 ID 异载荷（含换项目、换待办）一律 409；
+ * 3. 修改必须带 expectedRevision，并用带 revision 条件的原子 CAS 落库，
+ *    并发修改只有一个能成功，另一个返回 REMINDER_REVISION_CHANGED；
+ * 4. 首次创建也处理唯一键冲突并返回确定结果。
  */
 export async function arrangeActionReminder(
   projectId: string,
@@ -519,7 +665,7 @@ export async function arrangeActionReminder(
       409,
     );
   }
-  if (action.dedupeKey === null && action.title.trim().length === 0) {
+  if (action.title.trim().length === 0) {
     throw new AppError("VALIDATION_ERROR", "待办标题为空，无法生成日历事件", 422);
   }
 
@@ -540,82 +686,168 @@ export async function arrangeActionReminder(
   }
   const durationMinutes = normalizeDuration(input.durationMinutes);
   const timezone = input.timezone?.trim() || DEFAULT_TIMEZONE;
-  const inputHash = reminderInputHash({ actionId, reminderAt, durationMinutes, timezone, deviceKey: actor.deviceKey });
+  const inputHash = reminderInputHash({ projectId, actionId, reminderAt, durationMinutes, timezone, deviceKey: actor.deviceKey });
 
-  const existing = await findReminderRow(projectId, actionId, actor);
-  if (existing) {
-    if (existing.requestId === input.requestId) {
-      if (existing.inputHash === inputHash) {
-        return {
-          reminder: serializeReminder(existing, action.title),
-          devicePlan: [],
-          message: "这次安排之前已经保存过，直接沿用原来的结果。",
-        };
+  // 1) 已完成过的请求先重放，不进入写入路径
+  const settled = await readRequestReceipt(db as unknown as TxClient, actor, input.requestId);
+  if (settled) {
+    return await buildArrangeReplay(projectId, actionId, actor, input.requestId, inputHash);
+  }
+
+  interface ArrangeOutcome { row: ReminderRow; previous: ReminderRow | null }
+  let outcome: ArrangeOutcome | null = null;
+  try {
+    outcome = await db.$transaction(async (tx) => {
+      // 并发同 ID：唯一键只允许一条回执落库，后到者转历史重放
+      const raced = await readRequestReceipt(tx, actor, input.requestId);
+      if (raced) return null;
+
+      const existing = await tx.actionReminder.findUnique({
+        where: {
+          projectId_actionId_userId_deviceKey: {
+            projectId,
+            actionId,
+            userId: actor.userId,
+            deviceKey: actor.deviceKey,
+          },
+        },
+      });
+
+      if (!existing) {
+        if (input.expectedRevision !== undefined && input.expectedRevision !== 0) {
+          throw new AppError("REMINDER_REVISION_CHANGED", "这条待办还没有提醒，请刷新后重新安排", 409, {
+            currentRevision: 0,
+          });
+        }
+        const created = await tx.actionReminder.create({
+          data: {
+            projectId,
+            actionId,
+            userId: actor.userId,
+            deviceKey: actor.deviceKey,
+            requestId: input.requestId.trim(),
+            reminderAt,
+            durationMinutes,
+            timezone,
+            syncStatus: "PLANNED",
+            inputHash,
+            revision: 1,
+          },
+        });
+        await createRequestReceipt(tx, {
+          projectId,
+          actionId,
+          actor,
+          requestId: input.requestId,
+          kind: "ARRANGE",
+          inputHash,
+          reminderId: created.id,
+          reminderStatus: created.syncStatus,
+          reminderRevision: created.revision,
+          requestedReminderAt: reminderAt,
+          durationMinutes,
+        });
+        return { row: created, previous: null };
       }
-      throw new AppError("REQUEST_ID_REUSED", "该 requestId 已用于不同的提醒安排，请换一个新的请求标识", 409);
+
+      // 设备上已有自有事件：这是用户必须先解决的领域状态冲突，优先于版本号要求报出来
+      if (isOutstandingDeviceStatus(existing.syncStatus)) {
+        throw new AppError(
+          "REMINDER_DEVICE_EVENT_EXISTS",
+          "这条待办在设备日历里已经有日程，请先撤销原提醒并确认设备上的日程已删除，再改时间",
+          409,
+          { reminderId: existing.id, calendarId: existing.calendarId, calendarEventId: existing.calendarEventId, currentRevision: existing.revision },
+        );
+      }
+      // 修改：必须声明版本号，否则无法区分「基于哪一版」的修改
+      if (input.expectedRevision === undefined) {
+        throw new AppError(
+          "REMINDER_EXPECTED_REVISION_REQUIRED",
+          "修改提醒需要带上当前版本号；已刷新最新状态，请再确认一次",
+          422,
+          { currentRevision: existing.revision },
+        );
+      }
+      // 原子 CAS：只有 revision 仍然等于客户端读到的版本才更新
+      const cas = await tx.actionReminder.updateMany({
+        where: { id: existing.id, revision: input.expectedRevision },
+        data: {
+          requestId: input.requestId.trim(),
+          reminderAt,
+          durationMinutes,
+          timezone,
+          syncStatus: "PLANNED",
+          inputHash,
+          calendarId: null,
+          calendarEventId: null,
+          error: null,
+          revokedAt: null,
+          completionChoice: null,
+          revision: { increment: 1 },
+        },
+      });
+      if (cas.count === 0) {
+        throw new AppError("REMINDER_REVISION_CHANGED", "提醒已被其他操作修改，已刷新最新状态，请再确认一次", 409, {
+          currentRevision: existing.revision,
+        });
+      }
+      const fresh = await tx.actionReminder.findUniqueOrThrow({ where: { id: existing.id } });
+      await createRequestReceipt(tx, {
+        projectId,
+        actionId,
+        actor,
+        requestId: input.requestId,
+        kind: "ARRANGE",
+        inputHash,
+        reminderId: fresh.id,
+        reminderStatus: fresh.syncStatus,
+        reminderRevision: fresh.revision,
+        requestedReminderAt: reminderAt,
+        durationMinutes,
+      });
+      return { row: fresh, previous: existing };
+    });
+  } catch (error) {
+    if (!isUniqueViolation(error)) throw error;
+    // 首次创建撞上并发唯一键：回读并给出确定结果
+    const racedReceipt = await readRequestReceipt(db as unknown as TxClient, actor, input.requestId);
+    if (racedReceipt) {
+      return await buildArrangeReplay(projectId, actionId, actor, input.requestId, inputHash);
     }
-    if (isOutstandingDeviceStatus(existing.syncStatus)) {
-      throw new AppError(
-        "REMINDER_DEVICE_EVENT_EXISTS",
-        "这条待办在设备日历里已经有日程，请先删除原日程再改时间，避免留下两条提醒",
-        409,
-        { reminderId: existing.id, calendarId: existing.calendarId, calendarEventId: existing.calendarEventId },
-      );
-    }
-    if (input.expectedRevision !== undefined && input.expectedRevision !== existing.revision) {
-      throw new AppError("REMINDER_REVISION_CHANGED", "提醒已被其他操作修改，请刷新后重试", 409);
-    }
+    const racedRow = await db.actionReminder.findUnique({
+      where: {
+        projectId_actionId_userId_deviceKey: {
+          projectId,
+          actionId,
+          userId: actor.userId,
+          deviceKey: actor.deviceKey,
+        },
+      },
+    });
+    throw new AppError("REMINDER_REVISION_CHANGED", "这条待办的提醒刚刚被另一个请求创建，请刷新后重试", 409, {
+      currentRevision: racedRow?.revision ?? 0,
+    });
+  }
+
+  if (outcome === null) {
+    return await buildArrangeReplay(projectId, actionId, actor, input.requestId, inputHash);
   }
 
   // 之前撤销过但可能尚未在设备上删除：先删后建，保证不会出现两条应用自有事件
-  const staleDelete = existing && existing.calendarEventId !== null && existing.syncStatus !== "SYNCED" && existing.syncStatus !== "PENDING"
-    ? deleteOperation(existing, action.title)
+  const previous = outcome.previous;
+  const staleDelete = previous !== null && previous.calendarEventId !== null
+    && !isOutstandingDeviceStatus(previous.syncStatus)
+    ? deleteOperation(previous, action.title)
     : null;
 
-  const saved = await db.actionReminder.upsert({
-    where: {
-      projectId_actionId_userId_deviceKey: {
-        projectId,
-        actionId,
-        userId: actor.userId,
-        deviceKey: actor.deviceKey,
-      },
-    },
-    create: {
-      projectId,
-      actionId,
-      userId: actor.userId,
-      deviceKey: actor.deviceKey,
-      requestId: input.requestId.trim(),
-      reminderAt,
-      durationMinutes,
-      timezone,
-      syncStatus: "PLANNED",
-      inputHash,
-      revision: 1,
-    },
-    update: {
-      requestId: input.requestId.trim(),
-      reminderAt,
-      durationMinutes,
-      timezone,
-      syncStatus: "PLANNED",
-      inputHash,
-      calendarId: null,
-      calendarEventId: null,
-      error: null,
-      revokedAt: null,
-      completionChoice: null,
-      revision: (existing?.revision ?? 1) + 1,
-    },
-  });
-
   return {
-    reminder: serializeReminder(saved, action.title),
+    reminder: serializeReminder(outcome.row, action.title),
     devicePlan: [
       ...(staleDelete ? [staleDelete] : []),
-      createOperation(saved.id, action.title, reminderAt, durationMinutes),
+      createOperation(outcome.row.id, action.title, reminderAt, durationMinutes),
     ],
+    replayed: false,
+    historical: false,
     message: staleDelete
       ? "已更新计划时间。请先在设备上删除原日程，再创建新的日程。"
       : "计划时间已保存。还需要写入设备日历，才会在到点时收到提醒。",
@@ -710,42 +942,101 @@ export async function recordActionReminderSync(
   return serializeReminder(updated, action.title);
 }
 
+/** 撤销后是否还需要向设备下发删除指令：只可能是忆程自己记录过的事件编号 */
+function revokeDevicePlan(row: ReminderRow, title: string): DeviceCalendarOperation[] {
+  const hasOwnEvent = row.calendarEventId !== null
+    && (isOutstandingDeviceStatus(row.syncStatus) || row.syncStatus === "REVOKED");
+  return hasOwnEvent ? [deleteOperation(row, title)] : [];
+}
+
 /**
  * 撤销提醒。只针对回执里记录过的 eventId 生成删除指令，
  * 可安全重试：重复调用不会改变状态，也不会指向其他事件。
+ *
+ * 带 requestId 时走不可变请求回执：已完成过的撤销请求稳定重放，
+ * 同 ID 换项目/换待办一律 409，不再依赖「当前行状态」推断幂等。
  */
 export async function revokeActionReminder(
   projectId: string,
   reminderId: string,
   actor: ReminderActor,
+  options: { requestId?: string } = {},
 ): Promise<ReminderMutationResult> {
   ensureReminderEnabled();
+  const requestId = (options.requestId ?? "").trim();
   const row = await findReminderById(projectId, reminderId, actor);
   const action = await loadAction(projectId, row.actionId);
+  const inputHash = revokeInputHash(projectId, row.actionId);
 
-  if (row.syncStatus === "REVOKED") {
-    return {
-      reminder: serializeReminder(row, action.title),
-      devicePlan: row.calendarEventId !== null ? [deleteOperation(row, action.title)] : [],
-      message: "这条提醒此前已经撤销过，可以直接重试设备上的删除操作。",
-    };
+  if (requestId !== "") {
+    const settled = await readRequestReceipt(db as unknown as TxClient, actor, requestId);
+    if (settled) {
+      assertReceiptMatchesRequest(settled, { projectId, actionId: row.actionId, kind: "REVOKE", inputHash });
+      return {
+        reminder: serializeReminder(row, action.title),
+        devicePlan: revokeDevicePlan(row, action.title),
+        replayed: true,
+        historical: false,
+        message: "这次撤销此前已经处理过，直接沿用原来的结果；如需删除设备上的日程可以重试。",
+      };
+    }
   }
 
-  const shouldDelete = isOutstandingDeviceStatus(row.syncStatus) && row.calendarEventId !== null;
-  const updated = await db.actionReminder.update({
-    where: { id: row.id },
-    data: {
-      syncStatus: "REVOKED",
-      revokedAt: new Date(),
-      error: null,
-      revision: row.revision + 1,
-    },
-  });
+  let current = row;
+  if (row.syncStatus !== "REVOKED") {
+    current = await db.$transaction(async (tx) => {
+      // 撤销是幂等的：即使并发请求已把它改成 REVOKED，这里也只是读到最终状态
+      await tx.actionReminder.updateMany({
+        where: { id: row.id, revision: row.revision },
+        data: { syncStatus: "REVOKED", revokedAt: new Date(), error: null, revision: { increment: 1 } },
+      });
+      const fresh = await tx.actionReminder.findUniqueOrThrow({ where: { id: row.id } });
+      if (requestId !== "") {
+        await createRequestReceipt(tx, {
+          projectId,
+          actionId: row.actionId,
+          actor,
+          requestId,
+          kind: "REVOKE",
+          inputHash,
+          reminderId: fresh.id,
+          reminderStatus: fresh.syncStatus,
+          reminderRevision: fresh.revision,
+          requestedReminderAt: fresh.reminderAt,
+          durationMinutes: fresh.durationMinutes,
+        });
+      }
+      return fresh;
+    });
+  } else if (requestId !== "") {
+    // 已经是 REVOKED：仍把这次请求登记成回执，后续重试才有稳定重放
+    try {
+      await createRequestReceipt(db as unknown as TxClient, {
+        projectId,
+        actionId: row.actionId,
+        actor,
+        requestId,
+        kind: "REVOKE",
+        inputHash,
+        reminderId: current.id,
+        reminderStatus: current.syncStatus,
+        reminderRevision: current.revision,
+        requestedReminderAt: current.reminderAt,
+        durationMinutes: current.durationMinutes,
+      });
+    } catch (error) {
+      if (!isUniqueViolation(error)) throw error;
+    }
+  }
+
+  const devicePlan = revokeDevicePlan(current, action.title);
   return {
-    reminder: serializeReminder(updated, action.title),
-    devicePlan: shouldDelete ? [deleteOperation(updated, action.title)] : [],
-    message: shouldDelete
-      ? "提醒已撤销。请按返回的事件编号删除设备日历里的那一条自有日程。"
+    reminder: serializeReminder(current, action.title),
+    devicePlan,
+    replayed: false,
+    historical: false,
+    message: devicePlan.length > 0
+      ? "服务端提醒已撤销。请删除设备日历里这条自有日程，并在设备确认后才会显示清理完成。"
       : "提醒已撤销，设备上没有需要删除的自有日程。",
   };
 }

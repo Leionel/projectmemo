@@ -1,0 +1,14 @@
+
+Running 9 tests using 1 worker
+
+  ok 1 [setup] › e2e\auth.setup.ts:8:1 › authenticate as the E2E reviewer (1.3s)
+  ok 2 [chromium] › e2e\demo.spec.ts:12:1 › accepts a proactive reminder and asks the memory copilot (8.6s)
+  ok 3 [chromium] › e2e\demo.spec.ts:32:1 › seed project completes the core demo loop (14.1s)
+  ok 4 [chromium] › e2e\demo.spec.ts:71:1 › creates a project and captures a fragment (15.0s)
+  ok 5 [chromium] › e2e\demo.spec.ts:88:1 › project workspace provides direct navigation and priority shortcuts (9.5s)
+  x  6 [chromium] › e2e\demo.spec.ts:101:1 › project dashboard surfaces attention state and snoozed reminder history (18.4s)
+  ok 7 [chromium] › e2e\demo.spec.ts:124:1 › creates, edits, sorts and safely cancels a detailed action (11.9s)
+  ok 8 [chromium] › e2e\demo.spec.ts:147:1 › updates card importance and reuses a card-sourced action (12.9s)
+  ok 9 [chromium] › e2e\demo.spec.ts:175:1 › mobile workspace keeps project status and overview near the top (6.9s)
+Error: worker-2 process did not exit within 300000ms after stop, force-killed it
+Error: worker-2 process did not exit within 300000ms after stop, force-killed it

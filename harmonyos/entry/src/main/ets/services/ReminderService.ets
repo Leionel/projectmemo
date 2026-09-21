@@ -1,4 +1,5 @@
 import { common } from '@kit.AbilityKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
 import { ApiError } from '../models/Project';
 import { DeviceIdentity } from '../common/DeviceIdentity';
 import { ScheduleBlock } from '../models/Reentry';
@@ -7,6 +8,7 @@ import { ApiClient } from './ApiClient';
 import {
   ActionReminderState,
   ActionReminderStateResponse,
+  DeviceCleanupSummary,
   ReminderArrangeBody,
   ReminderDeviceOp,
   ReminderMutationResponse,
@@ -14,6 +16,9 @@ import {
   ReminderRevokeBody,
   ReminderSyncBody,
 } from '../models/Reminder';
+
+const TAG = 'ReminderService';
+const DOMAIN = 0x0000;
 
 /** 授权被拒后如何恢复的说明；与界面文案共用同一份，避免各处说法不一致 */
 const PERMISSION_RECOVERY_HINT = '到系统设置 → 应用 → 忆程 → 权限里允许「日历」的读取与写入，再回来重试。';
@@ -58,14 +63,17 @@ export class ReminderService {
 
   /**
    * 保存或修改计划时间（不写设备日历）。
-   * requestId 每次新建：服务端按 requestId 判定幂等，同载荷重放返回同一个回执。
+   * requestId 由调用方保证「一次用户意图一个」以实现幂等；expectedRevision 修改已有提醒时必带，
+   * 首次创建传 0（或不传）。服务端按 requestId 判定幂等，同载荷重放返回同一个回执。
    */
-  async arrange(projectId: string, actionId: string, reminderAtIso: string, durationMinutes: number): Promise<ReminderMutationResponse> {
+  async arrange(projectId: string, actionId: string, requestId: string, reminderAtIso: string, durationMinutes: number,
+    expectedRevision: number = 0): Promise<ReminderMutationResponse> {
     const body = new ReminderArrangeBody();
-    body.requestId = `reminder-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+    body.requestId = requestId;
     body.reminderAt = reminderAtIso;
     body.durationMinutes = durationMinutes;
     body.deviceKey = DeviceIdentity.getConsumerKey();
+    body.expectedRevision = expectedRevision;
     return await this.api.post<ReminderMutationResponse>(
       `/api/projects/${projectId}/actions/${actionId}/reminder`,
       body,
@@ -85,9 +93,10 @@ export class ReminderService {
   }
 
   /** 撤销提醒回执；服务端返回需要删除的自有事件编号 */
-  async revoke(projectId: string, reminderId: string): Promise<ReminderMutationResponse> {
+  async revoke(projectId: string, reminderId: string, requestId: string): Promise<ReminderMutationResponse> {
     const body = new ReminderRevokeBody();
     body.deviceKey = DeviceIdentity.getConsumerKey();
+    body.requestId = requestId;
     return await this.api.post<ReminderMutationResponse>(
       `/api/projects/${projectId}/reminders/${reminderId}/revoke`,
       body,
@@ -165,9 +174,16 @@ export class ReminderService {
       rollbackBlock.calendar.status = 'SYNCED';
       rollbackBlock.calendar.calendarId = entry.calendarId;
       rollbackBlock.calendar.eventId = entry.eventId;
-      await CalendarSyncService.revokeBlocks(context, calendarId, [rollbackBlock]);
+      const results = await CalendarSyncService.deleteOwnedEvents(context, calendarId, [rollbackBlock]);
+      const cleaned = results.length > 0 && results.every((result) => result.state === 'DELETED' || result.state === 'ALREADY_MISSING');
       const detail = error instanceof ApiError ? error.message : '服务端暂时无法登记这次写入';
-      outcome.message = `${detail}。设备上刚创建的日程已删除，避免留下无法管理的提醒；计划时间仍然保留。`;
+      if (cleaned) {
+        outcome.message = `${detail}。设备上刚创建的日程已删除，避免留下无法管理的提醒；计划时间仍然保留。`;
+      } else {
+        // 没有确认删除就不能报「已删除」：如实告诉用户去系统日历检查
+        outcome.deviceConfirmed = false;
+        outcome.message = `${detail}。刚写入的日程没有确认删除，请到系统日历检查「忆程·」事件；计划时间仍然保留。`;
+      }
       return outcome;
     }
 
@@ -177,14 +193,13 @@ export class ReminderService {
   }
 
   /**
-   * 执行服务端给出的设备操作计划（先删后建）。
-   * 删除只针对回执记录过的事件编号，并在删除前核对标题前缀与时间窗。
+   * 执行服务端给出的设备操作计划（先删后建），返回结构化清理结果。
+   * 只有每条都 DELETED 或 ALREADY_MISSING 时 summary.confirmed 才为真；
+   * 权限被拒 / 日历不存在 / 核验未通过 / 删除报错都不算清理成功，必须如实上报。
    */
-  async applyDevicePlan(context: common.Context, devicePlan: ReminderDeviceOp[]): Promise<string> {
-    if (devicePlan.length === 0) {
-      return '';
-    }
-    let removed = 0;
+  async applyDevicePlanDetailed(context: common.Context, devicePlan: ReminderDeviceOp[]): Promise<DeviceCleanupSummary> {
+    const summary = new DeviceCleanupSummary();
+    const targets: ScheduleBlock[] = [];
     for (const op of devicePlan) {
       if (op.kind !== 'DELETE' || op.eventId === null || op.eventId === '') {
         continue;
@@ -197,27 +212,92 @@ export class ReminderService {
       block.calendar.status = 'SYNCED';
       block.calendar.calendarId = op.calendarId;
       block.calendar.eventId = op.eventId;
-      const calendarId = op.calendarId !== null ? op.calendarId : '';
-      const revoked = await CalendarSyncService.revokeBlocks(context, calendarId, [block]);
-      removed += revoked.length;
+      targets.push(block);
     }
-    if (removed === 0) {
-      // 设备上可能已经不存在这条日程：重试撤销仍然是安全的，如实说明即可
-      return '设备日历里已经没有对应的自有日程。';
+    if (targets.length === 0) {
+      summary.requested = 0;
+      summary.confirmed = true;
+      summary.message = '没有需要清理的设备日程。';
+      return summary;
     }
-    return `已删除设备日历里忆程创建的 ${removed} 条日程；你自己创建的日程没有受到影响。`;
+    const calendarId = targets[0].calendar.calendarId !== null ? targets[0].calendar.calendarId : '';
+    const results = await CalendarSyncService.deleteOwnedEvents(context, calendarId, targets);
+    for (const result of results) {
+      summary.requested += 1;
+      if (result.state === 'DELETED') {
+        summary.deleted += 1;
+      } else if (result.state === 'ALREADY_MISSING') {
+        summary.alreadyMissing += 1;
+      } else if (result.state === 'UNVERIFIED') {
+        summary.unverified += 1;
+        summary.pendingEventIds.push(result.eventId);
+        summary.pendingCalendarIds.push(result.calendarId);
+      } else if (result.state === 'PERMISSION_DENIED') {
+        summary.permissionDenied += 1;
+        summary.pendingEventIds.push(result.eventId);
+        summary.pendingCalendarIds.push(result.calendarId);
+      } else if (result.state === 'CALENDAR_NOT_FOUND') {
+        summary.calendarNotFound += 1;
+        summary.pendingEventIds.push(result.eventId);
+        summary.pendingCalendarIds.push(result.calendarId);
+      } else {
+        summary.failed += 1;
+        summary.pendingEventIds.push(result.eventId);
+        summary.pendingCalendarIds.push(result.calendarId);
+      }
+    }
+    summary.confirmed = summary.requested > 0 && (summary.deleted + summary.alreadyMissing) === summary.requested;
+    if (summary.confirmed) {
+      summary.message = summary.requested === 0
+        ? '没有需要清理的设备日程。'
+        : `设备日历里的自有日程已确认清理（共 ${summary.deleted + summary.alreadyMissing} 条）。`;
+    } else {
+      summary.message = `设备日历里的自有日程还没有全部确认删除（待处理 ${summary.pendingEventIds.length} 条）。`;
+    }
+    hilog.info(DOMAIN, TAG, 'device cleanup summary: %{public}s', ReminderService.safeLogText(JSON.stringify(summary)));
+    return summary;
+  }
+
+  /**
+   * 兼容旧调用方（ActionBoard 的提醒处置提示）：返回面向用户的自然中文结果字符串。
+   * 新代码请改用 applyDevicePlanDetailed 拿到结构化结果。
+   */
+  async applyDevicePlan(context: common.Context, devicePlan: ReminderDeviceOp[]): Promise<string> {
+    const summary = await this.applyDevicePlanDetailed(context, devicePlan);
+    return summary.message;
   }
 
   /** 撤销提醒并清理设备上的自有日程 */
-  async revokeAndRemove(context: common.Context, projectId: string, reminderId: string): Promise<ReminderOutcome> {
+  async revokeAndRemove(context: common.Context, projectId: string, reminderId: string, requestId: string): Promise<ReminderOutcome> {
     const outcome = new ReminderOutcome();
-    const mutation = await this.revoke(projectId, reminderId);
-    const detail = await this.applyDevicePlan(context, mutation.devicePlan);
+    const mutation = await this.revoke(projectId, reminderId, requestId);
+    const cleanup = await this.applyDevicePlanDetailed(context, mutation.devicePlan);
     outcome.ok = true;
     outcome.state = null;
-    outcome.message = detail !== ''
-      ? `提醒已撤销。${detail}`
-      : '提醒已撤销，设备上没有需要删除的自有日程。';
+    outcome.cleanup = cleanup;
+    outcome.deviceConfirmed = cleanup.confirmed;
+    if (!cleanup.confirmed) {
+      // 未确认清理：权限被拒 / 日历不存在 / 核验未通过 / 删除报错，不得报「已删除」
+      const reasons: string[] = [];
+      if (cleanup.permissionDenied > 0) {
+        reasons.push('日历权限被拒绝');
+      }
+      if (cleanup.calendarNotFound > 0) {
+        reasons.push('目标日历不存在');
+      }
+      if (cleanup.unverified > 0) {
+        reasons.push('部分日程核验未通过，不是忆程创建的');
+      }
+      if (cleanup.failed > 0) {
+        reasons.push('删除设备日程时报错');
+      }
+      const reason = reasons.length > 0 ? reasons.join('、') : '原因未知';
+      outcome.message = `服务端提醒已撤销，但设备日历里的日程还没有确认删除（${reason}）。请重试删除；如果仍然失败，请到系统日历检查「忆程·」事件。`;
+    } else if (cleanup.deleted > 0) {
+      outcome.message = `提醒已撤销，设备日历里的自有日程已删除（共 ${cleanup.deleted + cleanup.alreadyMissing} 条）。`;
+    } else {
+      outcome.message = '提醒已撤销；设备日历里没有找到忆程的这条日程，无需删除。';
+    }
     return outcome;
   }
 
@@ -252,5 +332,22 @@ export class ReminderService {
       return iso;
     }
     return `${iso.substring(0, 10)} ${iso.substring(11, 16)}`;
+  }
+
+  /**
+   * 日志脱敏：把形如 Bearer <token>、token=xxx、"token":"xxx"、apiKey 的值替换成 [redacted]，
+   * 并截断到 200 字符，避免把会话凭证写入日志。所有 hilog 调用都应经过它。
+   */
+  private static safeLogText(value: string): string {
+    let text = value;
+    text = text.replace(/Bearer\s+[^\s,"}]+/g, 'Bearer [redacted]');
+    text = text.replace(/token=[^\s,&"]+/gi, 'token=[redacted]');
+    text = text.replace(/"token"\s*:\s*"[^"]*"/gi, '"token":"[redacted]"');
+    text = text.replace(/apikey\s*[:=]\s*[^\s,&"}]+/gi, 'apiKey=[redacted]');
+    text = text.replace(/"apikey"\s*:\s*"[^"]*"/gi, '"apiKey":"[redacted]"');
+    if (text.length > 200) {
+      text = text.substring(0, 200);
+    }
+    return text;
   }
 }

@@ -1,0 +1,110 @@
+{
+  "batch": "r2-audit-fixes-20260921",
+  "date": "2026-09-21",
+  "scope": "交接审计修复：单一提醒实现 / 设备删除结果模型 / 持久幂等与 CAS / 体检用户隔离 / Web 无效入口",
+  "dataSources": {
+    "unitAndIntegration": "独立测试库 prisma/test-vitest.db（vitest.config.ts 显式指定），未使用开发库与真实凭据",
+    "e2e": "prisma/projectmemo-e2e.db（scripts/setup-e2e.ts 每次重建），seed 项目 + e2e-reviewer 身份",
+    "migrationEmptyReplay": "tmp/migrate-check/empty.db（零字节新建空库，验证后清理）",
+    "migrationOldCopy": "prisma/dev.db 只读副本 tmp/migrate-check/old-copy.db（验证后清理）",
+    "modelMode": "LLM_MODE=mock；日历与提醒链路不调用模型"
+  },
+  "commands": [
+    {
+      "command": "vitest run",
+      "result": "passed",
+      "detail": "51 files / 394 tests passed"
+    },
+    {
+      "command": "vitest run tests/actionReminder.test.ts tests/projectHealth.test.ts tests/episodeAction.test.ts tests/calendarSync.test.ts tests/schedule.test.ts tests/reminderClientContract.test.ts",
+      "result": "passed",
+      "detail": "6 files / 70 tests passed"
+    },
+    {
+      "command": "tsc --noEmit",
+      "result": "passed",
+      "detail": "无输出"
+    },
+    {
+      "command": "eslint .",
+      "result": "passed",
+      "detail": "0 error，7 个既有 warning"
+    },
+    {
+      "command": "next build",
+      "result": "passed",
+      "detail": "✓ Compiled successfully；路由表包含 /api/projects/[id]/health 与 /api/projects/[id]/reminders*"
+    },
+    {
+      "command": "scripts/setup-e2e.ts && scripts/run-e2e.ts",
+      "result": "passed (flaky)",
+      "detail": "本次共尝试 4 次：前 3 次在 210 秒安全上限被判失败，第 4 次（加入诊断输出后）「[e2e] completed with passing result.」通过。失败均为同一处：e2e/demo.spec.ts:115 的 expect(simulated).toBeVisible() 超时；失败后 Playwright worker 在 Windows 上约 300 秒才退出且不打印最终汇总，运行器的汇总看门狗无法收口，于是由硬上限终止。产品行为经独立探针验证正确：演示评估接口 ~0.3s 返回，模拟卡片独立运行时确实渲染（simulated visible: 1）。该用例断言目标代码不在本批改动范围内，判定为既有不稳定用例（未修复，保留复现证据）。"
+    },
+    {
+      "command": "scripts/harmony-test.ts",
+      "result": "passed",
+      "detail": "Tests run: 55, Failure: 0, Error: 0, Pass: 55"
+    },
+    {
+      "command": "scripts/harmony-build.ts",
+      "result": "passed",
+      "detail": "BUILD SUCCESSFUL；unsigned HAP 4,744,178 bytes；SHA-256 affcb8c915b54ea185115725e65c5a48a0fae335db41e80fb82e16844c45477f"
+    },
+    {
+      "command": "prisma migrate deploy（空库）",
+      "result": "passed",
+      "detail": "All migrations have been successfully applied（23 个迁移目录）"
+    },
+    {
+      "command": "prisma migrate deploy（旧库副本）",
+      "result": "passed",
+      "detail": "仅应用 20260921110000_memory_merge_idempotency、20260921160000_action_reminder_receipts、20260921220000_action_reminder_request_receipts；升级前后逐表行数一致：Project 4 / Capture 20 / KnowledgeCard 19 / ActionItem 3 / ActionRequirement 0 / Attachment 1 / AttachmentRevision 0 / ProjectStateSnapshot 9 / ProjectEpisode 0 / EpisodeRevision 0 / SchedulePlan 0 / ScheduleBlock 0 / MemoryMergeReceipt 0 / User 1 / ProjectMembership 2 / AgentRun 24；新表 ActionReminder 与 ActionReminderRequest 升级后存在且为 0 行；未运行 db:setup / db:seed / db:demo-reset"
+    },
+    {
+      "command": "反橡皮章：临时移除修复后重跑对应用例",
+      "result": "passed",
+      "detail": "三处断点共让 5 个新用例转红（requests 回执检查移除 → 3 个幂等用例；个人检测器去掉 userId 过滤 → 跨成员隔离；ProjectHome 重新加入 updateDueAt( → 旧流程清除源码扫描），恢复后重新全绿"
+    }
+  ],
+  "selfCheckFindings": [
+    {
+      "issue": "新增迁移把 4 个集成测试的迁移重放推过 10 秒默认 hook 预算（实测 9,940ms → 11,519ms），导致 beforeAll 超时",
+      "fix": "vitest.config.ts 显式设置 hookTimeout: 30_000 并注明这是真实重放成本",
+      "foundBy": "全量测试失败并定位到 Hook timed out"
+    },
+    {
+      "issue": "体检检测器自身的开关守卫抛的是普通 Error（带 code），被判成未知错误而无法给出「功能已关闭」分类",
+      "fix": "守卫统一改为 AppError；清洗逻辑只接受我们形状的错误码，Prisma 内部码折叠为 SECTION_UNAVAILABLE",
+      "foundBy": "新增的分类测试转红"
+    },
+    {
+      "issue": "lib/services/projectHealthService.ts 被批量替换脚本截断，尾部检测器与导出丢失",
+      "fix": "从 git 恢复后按逐项断言重做全部改动，并用 grep + tsc 验证导出完整",
+      "foundBy": "脚本断言失败后的文件检查"
+    },
+    {
+      "issue": "Web 面板撤销成功后未轮换 requestId，下一次撤销会复用已完成 ID；setRevokeRequestId 成为未使用变量",
+      "fix": "撤销成功后轮换 revokeRequestId",
+      "foundBy": "eslint warning"
+    },
+    {
+      "issue": "提醒面板决策只信服务端 requiresRevokeBeforeChange 单个字段，状态为 SYNCED 且带事件编号时仍会放行一个必然 409 的提交",
+      "fix": "改为「状态为已写入/正在写入」+「存在事件编号」共同判定",
+      "foundBy": "新增的 Web 状态测试转红"
+    },
+    {
+      "issue": "run-e2e.ts 收集 Playwright 输出但从不打印，失败时无法看到用例名与断言",
+      "fix": "失败与超时分支回放输出 tail（ANSI 清洗后 40 行）",
+      "foundBy": "排查 E2E 失败时亲历"
+    }
+  ],
+  "notVerified": [
+    "E2E 的 e2e/demo.spec.ts:115 用例不稳定：4 次运行 3 次失败 1 次通过，本批未修复，保留复现命令与证据",
+    "真机或模拟器日历链路：授权弹窗、真实 addEvent/deleteEvent、801 不支持机型回退、真实通知触发、重启后状态恢复",
+    "鸿蒙本轮改动的设备点击验收（仅有 harmony:build 编译证据与纯逻辑单测）"
+  ],
+  "notes": [
+    "本批未公开部署、未操作 ECS、未覆盖 .env、未清理任何真实数据库。",
+    "日历提醒开关 PROJECT_CALENDAR_REMINDER_ENABLED 仍默认 false；项目体检 PROJECT_HEALTH_ENABLED 默认 true（只读）。"
+  ]
+}

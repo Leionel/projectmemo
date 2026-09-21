@@ -121,6 +121,7 @@ model Project {
   schedulePlans SchedulePlan[]
   mergeReceipts MemoryMergeReceipt[]
   actionReminders ActionReminder[]
+  reminderRequests ActionReminderRequest[]
 
   @@index([updatedAt])
   @@index([archivedAt])
@@ -703,8 +704,42 @@ model ActionReminder {
   @@index([projectId, updatedAt])
 }
 
-/// 记忆归并回执：归并不删除原始 Capture、附件修订、关系与历史快照，
-/// 原卡只标记归档；撤销按回执恢复，不重建数据。
+/// 提醒请求回执：requestId 是不可变的幂等事实，不随提醒后来被修改而失效。
+///
+/// 与 ActionReminder 的分工：ActionReminder 承载「这条待办当前的提醒状态」，
+/// 而本表承载「这次请求当初做了什么」——即使提醒随后被改成别的时间，
+/// 延迟重放的旧请求仍然只会读到它自己的历史结果，不会覆盖较新的安排。
+///
+/// 唯一范围是 (userId, deviceKey, requestId) 而不是按项目/待办：
+/// 一次用户意图只生成一个 ID，同一 ID 换个项目或换个待办复用一律视为冲突（409），
+/// 避免把「同 ID 不同载荷」当成新请求静默执行。
+model ActionReminderRequest {
+  id                  String   @id @default(cuid())
+  projectId           String
+  actionId            String
+  userId              String
+  deviceKey           String
+  requestId           String
+  /// ARRANGE | REVOKE
+  kind                String   @default("ARRANGE")
+  /// 载荷规范哈希：同 ID 异载荷必须在写入前就被拒绝
+  inputHash           String
+  reminderId          String?
+  /// 该请求处理完成时提醒的状态与版本；与当前行不同即说明这是历史重放
+  reminderStatus      String?
+  reminderRevision    Int?
+  /// 该请求当初的目标时间与时长：重放时如实说明「这次请求想安排到什么时候」
+  requestedReminderAt DateTime?
+  durationMinutes     Int?
+  createdAt           DateTime @default(now())
+  project             Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, deviceKey, requestId])
+  @@index([projectId, actionId])
+  @@index([reminderId])
+}
+
+/// 记忆归并回执：归并不删除原始 Capture、附件修订、关系与历史快照，/// 原卡只标记归档；撤销按回执恢复，不重建数据。
 model MemoryMergeReceipt {
   id              String   @id @default(cuid())
   projectId       String

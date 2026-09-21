@@ -204,10 +204,11 @@ describe("action reminder lifecycle (待办日历提醒生命周期)", () => {
       reminderAt: new Date(now.getTime() + 5 * HOUR).toISOString(),
     }, actor, now)).rejects.toMatchObject({ code: "REQUEST_ID_REUSED", status: 409 });
 
-    // 换一个 requestId 才是「修改提醒」
+    // 换一个 requestId 才是「修改提醒」；修改必须带上读到的 expectedRevision
     const changed = await arrangeActionReminder(project.id, action.id, {
       requestId: "arr-idem-2",
       reminderAt: new Date(now.getTime() + 5 * HOUR).toISOString(),
+      expectedRevision: a.reminder.revision,
     }, actor, now);
     expect(changed.reminder.id).toBe(a.reminder.id);
     expect(changed.reminder.revision).toBeGreaterThan(a.reminder.revision);
@@ -236,6 +237,7 @@ describe("action reminder lifecycle (待办日历提醒生命周期)", () => {
     const replaced = await arrangeActionReminder(project.id, action.id, {
       requestId: "arr-change-3",
       reminderAt: new Date(now.getTime() + 8 * HOUR).toISOString(),
+      expectedRevision: revoked.reminder.revision,
     }, actor, now);
     // 先删旧、再建新：顺序由服务端决定，客户端照做就不会留下两个事件
     expect(replaced.devicePlan.map((operation) => operation.kind)).toEqual(["DELETE", "CREATE"]);
@@ -531,5 +533,214 @@ describe("action reminder lifecycle (待办日历提醒生命周期)", () => {
     expect(await db.actionReminder.count({ where: { projectId: project.id } })).toBe(0);
     const block = await db.scheduleBlock.findFirstOrThrow({ where: { actionId: action.id } });
     expect(block.calendarSyncStatus).toBe("SYNCED");
+  });
+});
+
+describe("reminder request receipts (持久幂等与并发控制)", () => {
+  it("does not let a delayed replay of an older request overwrite a newer reminder", async () => {
+    const project = await newProject("延迟重放不覆盖新安排");
+    const user = await newMember(project.id);
+    const actor = actorFor(user.id);
+    const now = new Date();
+    const action = await newAction(project.id, "会被改时间的待办");
+    const timeA = new Date(now.getTime() + 3 * HOUR).toISOString();
+    const timeB = new Date(now.getTime() + 6 * HOUR).toISOString();
+
+    // 请求 A：首次安排
+    const a = await arrangeActionReminder(project.id, action.id, { requestId: "req-A", reminderAt: timeA }, actor, now);
+    expect(a.replayed).toBeFalsy();
+    expect(a.reminder.reminderAt).toBe(timeA);
+
+    // 请求 B：改成更晚的时间，成功
+    const b = await arrangeActionReminder(project.id, action.id, {
+      requestId: "req-B",
+      reminderAt: timeB,
+      expectedRevision: a.reminder.revision,
+    }, actor, now);
+    expect(b.reminder.reminderAt).toBe(timeB);
+    expect(b.reminder.revision).toBeGreaterThan(a.reminder.revision);
+
+    // 延迟重放 A：必须只读回历史结果，绝不能把 B 改回 timeA
+    const replay = await arrangeActionReminder(project.id, action.id, { requestId: "req-A", reminderAt: timeA }, actor, now);
+    expect(replay.replayed).toBe(true);
+    expect(replay.historical).toBe(true);
+    expect(replay.devicePlan).toHaveLength(0);
+    expect(replay.message).toContain("没有覆盖");
+
+    const state = await getActionReminderState(project.id, action.id, actor, now);
+    expect(state.reminder?.reminderAt).toBe(timeB);
+    expect(state.reminder?.revision).toBe(b.reminder.revision);
+    // 两条请求各自留痕：旧请求的幂等保护不因提醒被修改而失效
+    expect(await db.actionReminderRequest.count({ where: { projectId: project.id } })).toBe(2);
+    expect(await db.actionReminder.count({ where: { projectId: project.id } })).toBe(1);
+  });
+
+  it("rejects the same requestId reused with another payload, another action or another project", async () => {
+    const project = await newProject("requestId 冲突范围");
+    const otherProject = await newProject("requestId 冲突的另一个项目");
+    const user = await newMember(project.id);
+    await db.projectMembership.create({ data: { userId: user.id, projectId: otherProject.id, role: "OWNER" } });
+    const actor = actorFor(user.id);
+    const now = new Date();
+    const action = await newAction(project.id, "第一条待办");
+    const otherAction = await newAction(project.id, "第二条待办");
+    const otherProjectAction = await newAction(otherProject.id, "别的项目的待办");
+    const first = new Date(now.getTime() + 3 * HOUR).toISOString();
+
+    await arrangeActionReminder(project.id, action.id, { requestId: "req-shared", reminderAt: first }, actor, now);
+
+    // 同 ID 不同载荷
+    await expect(arrangeActionReminder(project.id, action.id, {
+      requestId: "req-shared",
+      reminderAt: new Date(now.getTime() + 4 * HOUR).toISOString(),
+    }, actor, now)).rejects.toMatchObject({ code: "REQUEST_ID_REUSED", status: 409 });
+
+    // 同 ID 不同待办
+    await expect(arrangeActionReminder(project.id, otherAction.id, {
+      requestId: "req-shared",
+      reminderAt: first,
+    }, actor, now)).rejects.toMatchObject({ code: "REQUEST_ID_REUSED", status: 409 });
+
+    // 同 ID 不同项目
+    await expect(arrangeActionReminder(otherProject.id, otherProjectAction.id, {
+      requestId: "req-shared",
+      reminderAt: first,
+    }, actor, now)).rejects.toMatchObject({ code: "REQUEST_ID_REUSED", status: 409 });
+
+    // 冲突请求没有在别处偷偷建出提醒
+    expect(await db.actionReminder.count({ where: { projectId: project.id } })).toBe(1);
+    expect(await db.actionReminder.count({ where: { projectId: otherProject.id } })).toBe(0);
+  });
+
+  it("requires expectedRevision for modifications and rejects a stale version", async () => {
+    const project = await newProject("修改必须带版本号");
+    const user = await newMember(project.id);
+    const actor = actorFor(user.id);
+    const now = new Date();
+    const action = await newAction(project.id);
+    const created = await arrangeActionReminder(project.id, action.id, {
+      requestId: "req-rev-1",
+      reminderAt: new Date(now.getTime() + 3 * HOUR).toISOString(),
+    }, actor, now);
+
+    // 不带版本号：明确要求，而不是猜
+    await expect(arrangeActionReminder(project.id, action.id, {
+      requestId: "req-rev-2",
+      reminderAt: new Date(now.getTime() + 4 * HOUR).toISOString(),
+    }, actor, now)).rejects.toMatchObject({ code: "REMINDER_EXPECTED_REVISION_REQUIRED", status: 422 });
+
+    // 带过期版本号：CAS 拒绝
+    await expect(arrangeActionReminder(project.id, action.id, {
+      requestId: "req-rev-3",
+      reminderAt: new Date(now.getTime() + 4 * HOUR).toISOString(),
+      expectedRevision: created.reminder.revision + 5,
+    }, actor, now)).rejects.toMatchObject({ code: "REMINDER_REVISION_CHANGED", status: 409 });
+
+    // 带正确版本号：成功并把版本号推进
+    const updated = await arrangeActionReminder(project.id, action.id, {
+      requestId: "req-rev-4",
+      reminderAt: new Date(now.getTime() + 4 * HOUR).toISOString(),
+      expectedRevision: created.reminder.revision,
+    }, actor, now);
+    expect(updated.reminder.revision).toBe(created.reminder.revision + 1);
+  });
+
+  it("lets only one of two concurrent modifications with the same expectedRevision win", async () => {
+    const project = await newProject("并发修改只有一个成功");
+    const user = await newMember(project.id);
+    const actor = actorFor(user.id);
+    const now = new Date();
+    const action = await newAction(project.id);
+    const created = await arrangeActionReminder(project.id, action.id, {
+      requestId: "req-cas-0",
+      reminderAt: new Date(now.getTime() + 3 * HOUR).toISOString(),
+    }, actor, now);
+    const version = created.reminder.revision;
+
+    const results = await Promise.allSettled([
+      arrangeActionReminder(project.id, action.id, {
+        requestId: "req-cas-A",
+        reminderAt: new Date(now.getTime() + 5 * HOUR).toISOString(),
+        expectedRevision: version,
+      }, actor, now),
+      arrangeActionReminder(project.id, action.id, {
+        requestId: "req-cas-B",
+        reminderAt: new Date(now.getTime() + 7 * HOUR).toISOString(),
+        expectedRevision: version,
+      }, actor, now),
+    ]);
+
+    const fulfilled = results.filter((item) => item.status === "fulfilled");
+    const rejected = results.filter((item) => item.status === "rejected");
+    expect(fulfilled).toHaveLength(1);
+    expect(rejected).toHaveLength(1);
+    expect((rejected[0] as PromiseRejectedResult).reason).toMatchObject({
+      code: "REMINDER_REVISION_CHANGED",
+      status: 409,
+    });
+    // 只推进一次版本，且只留一条提醒
+    const state = await getActionReminderState(project.id, action.id, actor, now);
+    expect(state.reminder?.revision).toBe(version + 1);
+    expect(await db.actionReminder.count({ where: { projectId: project.id } })).toBe(1);
+  });
+
+  it("returns a deterministic result when two first-arranges race on the same todo", async () => {
+    const project = await newProject("并发首建确定结果");
+    const user = await newMember(project.id);
+    const actor = actorFor(user.id);
+    const now = new Date();
+    const action = await newAction(project.id);
+
+    const results = await Promise.allSettled([
+      arrangeActionReminder(project.id, action.id, {
+        requestId: "req-first-A",
+        reminderAt: new Date(now.getTime() + 3 * HOUR).toISOString(),
+      }, actor, now),
+      arrangeActionReminder(project.id, action.id, {
+        requestId: "req-first-B",
+        reminderAt: new Date(now.getTime() + 3 * HOUR).toISOString(),
+      }, actor, now),
+    ]);
+
+    const fulfilled = results.filter((item) => item.status === "fulfilled");
+    const rejected = results.filter((item) => item.status === "rejected");
+    expect(fulfilled).toHaveLength(1);
+    expect(rejected).toHaveLength(1);
+    // 后到者必须得到确定结果，三种都属于明确拒绝，绝不会静默建出第二条提醒：
+    // - 读到时已被抢先创建、自己却没带版本号 → REMINDER_EXPECTED_REVISION_REQUIRED
+    // - 带了版本号但版本已过期 → REMINDER_REVISION_CHANGED
+    // - 同一个 requestId 并发 → REQUEST_ID_REUSED
+    const reason = (rejected[0] as PromiseRejectedResult).reason as { code?: string; status?: number };
+    expect(["REMINDER_EXPECTED_REVISION_REQUIRED", "REMINDER_REVISION_CHANGED", "REQUEST_ID_REUSED"])
+      .toContain(reason.code);
+    expect(await db.actionReminder.count({ where: { projectId: project.id, actionId: action.id } })).toBe(1);
+  });
+
+  it("keeps revoke idempotent through the request receipt and rejects cross-target reuse", async () => {
+    const project = await newProject("撤销请求回执");
+    const user = await newMember(project.id);
+    const actor = actorFor(user.id);
+    const now = new Date();
+    const action = await newAction(project.id, "待撤销的待办");
+    const otherAction = await newAction(project.id, "另一条待办");
+    const first = await arrangeAndSync(project.id, action.id, actor, 4, "revoke-receipt", now);
+    const second = await arrangeAndSync(project.id, otherAction.id, actor, 5, "revoke-other", now);
+
+    const revoked = await revokeActionReminder(project.id, first.reminderId, actor, { requestId: "req-revoke-1" });
+    expect(revoked.reminder.syncStatus).toBe("REVOKED");
+    expect(revoked.replayed).toBeFalsy();
+    expect(revoked.devicePlan[0].eventId).toBe(first.eventId);
+
+    // 同 ID 重放：稳定返回，不再次改变状态
+    const replay = await revokeActionReminder(project.id, first.reminderId, actor, { requestId: "req-revoke-1" });
+    expect(replay.replayed).toBe(true);
+    expect(replay.reminder.revision).toBe(revoked.reminder.revision);
+    expect(replay.devicePlan[0].eventId).toBe(first.eventId);
+
+    // 同 ID 用在另一条提醒上：409，而不是把它也撤销掉
+    await expect(revokeActionReminder(project.id, second.reminderId, actor, { requestId: "req-revoke-1" }))
+      .rejects.toMatchObject({ code: "REQUEST_ID_REUSED", status: 409 });
+    const untouched = await db.actionReminder.findUniqueOrThrow({ where: { id: second.reminderId } });
+    expect(untouched.syncStatus).toBe("SYNCED");
   });
 });

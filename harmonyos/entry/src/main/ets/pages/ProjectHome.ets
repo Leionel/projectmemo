@@ -3437,6 +3437,45 @@ struct ProjectHome {
       .backgroundColor(PMColors.SURFACE)
       .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
 
+      Row() {
+        Column() {
+          Text('行动安排')
+            .fontSize(PMFontSize.BODY)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.INK_PRIMARY)
+          Text('预览未来 7 天安排，并可选择同步到系统日历')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+            .margin({ top: 2 })
+            .maxLines(2)
+        }
+        .alignItems(HorizontalAlign.Start)
+        .layoutWeight(1)
+
+        Button('打开')
+          .fontSize(PMFontSize.BUTTON)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.BRAND)
+          .backgroundColor(PMColors.BRAND_LIGHT)
+          .borderRadius(PMRadius.SM)
+          .height(40)
+          .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
+          .margin({ left: PMSpacing.MD })
+          .onClick(() => {
+            router.pushUrl({
+              url: 'pages/ActionBoard',
+              params: { projectId: this.projectId }
+            });
+          })
+          .accessibilityText('打开行动安排与系统日历同步')
+          .accessibilityDescription('预览并确认项目行动的未来安排，可选同步到设备系统日历')
+      }
+      .width('100%')
+      .padding(PMSpacing.LG)
+      .backgroundColor(PMColors.SURFACE)
+      .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
+      .alignItems(VerticalAlign.Center)
+
       List({ space: PMSpacing.MD }) {
         ForEach(this.actions, (action: ActionItem) => {
           ListItem() {

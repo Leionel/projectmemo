@@ -239,10 +239,11 @@ struct ActionBoard {
     }
     this.calendarBusy = 'write';
     this.calendarError = '';
+    const context = getContext(this) as common.UIAbilityContext;
+    const pending = plan.blocks.filter((block: ScheduleBlock) => block.calendar.status !== 'SYNCED');
+    let entries: ScheduleCalendarEntry[] = [];
     try {
-      const context = getContext(this) as common.UIAbilityContext;
-      const pending = plan.blocks.filter((block: ScheduleBlock) => block.calendar.status !== 'SYNCED');
-      const entries = await CalendarSyncService.writeBlocks(context, this.calendarChoice, pending);
+      entries = await CalendarSyncService.writeBlocks(context, this.calendarChoice, pending);
       const body = new CalendarSyncBody();
       body.entries = entries;
       const updated = await this.reentryService.reportCalendarSync(this.projectId, plan.id, body);
@@ -253,7 +254,16 @@ struct ActionBoard {
         ? `已写入 ${entries.length} 条系统日历日程`
         : `${entries.length - failed} 条写入成功，${failed} 条失败；应用内安排仍然有效`;
     } catch (e) {
-      this.calendarError = e instanceof ApiError ? e.message : '日历写入失败，应用内安排不受影响';
+      const written = entries.filter((entry: ScheduleCalendarEntry) => entry.status === 'SYNCED').length;
+      let rollbackMessage = '';
+      if (written > 0) {
+        const rolledBack = await CalendarSyncService.rollbackWrites(context, pending, entries);
+        rollbackMessage = rolledBack === written
+          ? '；已撤销本次新建的系统日程'
+          : '；部分日程未能自动撤销，请在系统日历中检查“忆程·”事件';
+      }
+      const reason = e instanceof ApiError ? e.message : '日历写入失败，应用内安排不受影响';
+      this.calendarError = `${reason}${rollbackMessage}`;
     } finally {
       this.calendarBusy = '';
     }
@@ -931,9 +941,10 @@ struct ActionBoard {
     Stack() {
       Column() {
         PMAppBar({
-          title: '待办',
-          subtitle: '',
+          title: '行动安排',
+          subtitle: '排程与系统日历',
           backLabel: '项目',
+          backDescription: '返回项目待办',
           showBack: true
         })
 

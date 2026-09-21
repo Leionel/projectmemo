@@ -211,6 +211,38 @@ export class CalendarSyncService {
     return entries;
   }
 
+  /**
+   * 设备写入成功、服务端回执登记失败时的补偿删除。
+   * 仍复用 revokeBlocks 的标题、描述与 eventId 三重校验，避免误删用户原有日程。
+   */
+  static async rollbackWrites(context: common.Context, blocks: ScheduleBlock[], entries: ScheduleCalendarEntry[]): Promise<number> {
+    const successful = entries.filter((entry: ScheduleCalendarEntry) =>
+      entry.status === 'SYNCED' && entry.eventId !== null && entry.eventId !== '');
+    if (successful.length === 0) {
+      return 0;
+    }
+    const rollbackBlocks: ScheduleBlock[] = [];
+    for (const block of blocks) {
+      const entry = successful.find((item: ScheduleCalendarEntry) => item.blockId === (block.id ?? ''));
+      if (entry === undefined) {
+        continue;
+      }
+      const rollback = new ScheduleBlock();
+      rollback.id = block.id;
+      rollback.actionId = block.actionId;
+      rollback.actionTitle = block.actionTitle;
+      rollback.start = block.start;
+      rollback.end = block.end;
+      rollback.calendar.status = 'SYNCED';
+      rollback.calendar.calendarId = entry.calendarId;
+      rollback.calendar.eventId = entry.eventId;
+      rollbackBlocks.push(rollback);
+    }
+    const calendarId = successful[0].calendarId ?? '';
+    const revoked = await CalendarSyncService.revokeBlocks(context, calendarId, rollbackBlocks);
+    return revoked.length;
+  }
+
   /** 撤销：只删除 ProjectMemo 写入过、且带 eventId 的事件 */
   static async revokeBlocks(context: common.Context, calendarId: string, blocks: ScheduleBlock[]): Promise<string[]> {
     const revoked: string[] = [];

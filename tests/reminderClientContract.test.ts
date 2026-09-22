@@ -10,6 +10,7 @@ import { resolveReminderPanel } from "@/lib/client/reminderPanelState";
  * 删除对应修复代码（旧的直接写日历流程、requiresRevokeBeforeChange 的拦截）时它们必须转红。
  */
 const HARMONY_PAGES = path.resolve(import.meta.dirname, "..", "harmonyos", "entry", "src", "main", "ets", "pages");
+const HARMONY_COMPONENTS = path.resolve(import.meta.dirname, "..", "harmonyos", "entry", "src", "main", "ets", "components");
 
 function readPage(name: string): string {
   return readFileSync(path.join(HARMONY_PAGES, `${name}.ets`), "utf8");
@@ -57,6 +58,13 @@ describe("single reminder entry (旧流程清除)", () => {
     expect(source.includes("reminderEnabled: true")).toBe(false);
     expect(source.includes("reminderEnabled: this.reminderAvailable")).toBe(true);
   });
+
+  it("does not show a harmony time editor while an old device event is still awaiting cleanup", () => {
+    const source = readFileSync(path.join(HARMONY_COMPONENTS, "ActionReminderBlock.ets"), "utf8");
+    expect(source).toContain("this.state.canArrange && !this.state.requiresRevokeBeforeChange");
+    expect(source).not.toContain("this.state.requiresRevokeBeforeChange ? '改到别的时间'");
+    expect(source).toContain("请先撤销并确认设备日程已清理，再修改时间");
+  });
 });
 
 describe("web reminder panel states (界面不给死按钮)", () => {
@@ -94,10 +102,10 @@ describe("web reminder panel states (界面不给死按钮)", () => {
     const revoked = resolveReminderPanel({ ...base, status: "REVOKED", calendarEventId: "evt-1" });
     expect(revoked.deviceStateLabel).toContain("服务端已撤销");
     expect(revoked.deviceStateLabel).toContain("待清理");
-    // 服务端已经撤销、设备仅待清理：允许保存新的计划时间，但要如实说明清理位置
-    expect(revoked.canSubmitTime).toBe(true);
+    // 服务端已撤销不等于设备已删除；清理回执落库前仍禁止修改时间。
+    expect(revoked.canSubmitTime).toBe(false);
     expect(revoked.requiresHarmonyDevice).toBe(true);
-    expect(revoked.nextStep).toContain("鸿蒙客户端");
+    expect(revoked.nextStep).toBe("先撤销原提醒");
   });
 
   it("requires expectedRevision only when a reminder record already exists", () => {

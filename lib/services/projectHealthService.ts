@@ -103,6 +103,14 @@ const SECTION_LABELS: Record<string, string> = {
   personal_schedule: "与你个人相关的提醒和排程",
 };
 
+/** 只有这些业务开关码允许返回给客户端；数据库/运行时错误码一律折叠。 */
+const CLIENT_SAFE_SECTION_CODES = new Set([
+  "EPISODES_DISABLED",
+  "PROJECT_STATE_DISABLED",
+  "PROJECT_INBOX_DISABLED",
+  "MEMORY_CONSOLIDATION_DISABLED",
+]);
+
 /**
  * 子检查失败的处理：
  * - 详细原因（可能含数据库错误）只写服务端日志；
@@ -113,10 +121,8 @@ async function runDetector(name: string, detector: Detector, context: DetectorCo
     await detector(context);
   } catch (error) {
     const rawCode = typeof error === "object" && error !== null && "code" in error ? String((error as { code: unknown }).code) : "";
-    // 只认我们自己定义的错误码形状（大写+下划线）；Prisma 的 P2002 / SQLITE_BUSY 这类
-    // 内部码一律折叠成 SECTION_UNAVAILABLE，不把底层实现暴露给客户端。
-    const looksLikeOurs = /^[A-Z][A-Z0-9_]{3,}$/.test(rawCode) && !/^P[0-9]+$/.test(rawCode);
-    const knownCode = looksLikeOurs ? rawCode : "SECTION_UNAVAILABLE";
+    // 形状校验不足以区分业务码与 SQLITE_BUSY 等内部码，必须使用明确允许列表。
+    const knownCode = CLIENT_SAFE_SECTION_CODES.has(rawCode) ? rawCode : "SECTION_UNAVAILABLE";
     console.error(`[project-health] section "${name}" failed`, { code: rawCode || knownCode, error });
     const label = SECTION_LABELS[name] ?? "这一部分";
     // 已知的开关关闭类错误可以如实说明；其它一律用统一分类，不泄露内部信息
@@ -460,7 +466,8 @@ const personalScheduleDetector: Detector = async ({ projectId, now, findings, vi
         objectType: "action",
         objectId: action.id,
         title: `你已安排的「${action.title}」时段没有写进设备日历`,
-        explanation: block.calendarError?.trim() || "已确认的时段仍然有效，只是你设备上的日历还没有对应日程。",
+        // calendarError 来自设备/系统异常，可能含内部实现细节；体检只返回稳定的用户说明。
+        explanation: "已确认的时段仍然有效，只是你设备上的日历还没有对应日程。",
         observedAt: block.startAt.toISOString(),
         suggestedAction: "重试写入设备日历",
         suggestedTarget: { kind: "action", id: action.id, fallback: "action_board" },

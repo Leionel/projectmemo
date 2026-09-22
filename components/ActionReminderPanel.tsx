@@ -332,7 +332,7 @@ export function ActionReminderPanel({
     </p>
 
     <div className="mt-2 flex flex-wrap gap-2">
-      {state.outstandingDeviceEvent && <button type="button" onClick={() => void revoke()} disabled={busy !== null} className="focus-ring editorial-button-secondary text-xs disabled:opacity-50">
+      {state.outstandingDeviceEvent && status !== "REVOKED" && <button type="button" onClick={() => void revoke()} disabled={busy !== null} className="focus-ring editorial-button-secondary text-xs disabled:opacity-50">
         {busy === "revoke" ? <LoaderCircle size={14} className="animate-spin" /> : <Trash2 size={14} />}撤销提醒并移除日程
       </button>}
       {(status === "FAILED" || status === "MISSING") && <button type="button" onClick={() => void retryDeviceWrite()} disabled={busy !== null} className="focus-ring editorial-button-secondary text-xs disabled:opacity-50">

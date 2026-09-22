@@ -4,7 +4,7 @@ process.env.PROJECT_STATE_ENABLED = "1";
 process.env.PROJECT_INBOX_ENABLED = "1";
 process.env.PROJECT_MEMORY_CONSOLIDATION_ENABLED = "1";
 
-import { describe, it, expect, afterAll } from "vitest";
+import { describe, it, expect, afterAll, vi } from "vitest";
 import { db } from "@/lib/db";
 import { buildProjectHealthReport, sortFindings } from "@/lib/services/projectHealthService";
 import type { HealthFinding } from "@/lib/types/health";
@@ -502,6 +502,28 @@ describe("project health isolation (体检的用户隔离与错误清洗)", () =
         calendarError: "OTHER-PRIVATE-PLAN-ERROR",
       },
     });
+    const viewerPlan = await db.schedulePlan.create({
+      data: {
+        projectId: project.id,
+        userId: viewer.id,
+        requestId: "plan-viewer",
+        rangeStart: new Date(now.getTime() + 2 * HOUR),
+        rangeEnd: new Date(now.getTime() + 4 * HOUR),
+        inputHash: "hash-viewer",
+        status: "CONFIRMED",
+      },
+    });
+    await db.scheduleBlock.create({
+      data: {
+        planId: viewerPlan.id,
+        actionId: viewerAction.id,
+        actionVersion: 1,
+        startAt: new Date(now.getTime() + 2 * HOUR),
+        endAt: new Date(now.getTime() + 3 * HOUR),
+        calendarSyncStatus: "FAILED",
+        calendarError: "VIEWER-SQLITE-SECRET",
+      },
+    });
 
     const report = await buildProjectHealthReport(project.id, { userId: viewer.id, now });
     const serialized = JSON.stringify(report);
@@ -513,6 +535,7 @@ describe("project health isolation (体检的用户隔离与错误清洗)", () =
     expect(serialized).not.toContain(otherReminder.id);
     expect(serialized).not.toContain("OTHER-MEMBER-SECRET-ERROR");
     expect(serialized).not.toContain("OTHER-PRIVATE-PLAN-ERROR");
+    expect(serialized).not.toContain("VIEWER-SQLITE-SECRET");
     expect(serialized).not.toContain(otherBlock.id);
     expect(serialized).not.toContain(otherPlan.id);
     expect(report.findings.some((finding) => finding.objectId === otherReminder.id)).toBe(false);
@@ -606,6 +629,26 @@ describe("project health isolation (体检的用户隔离与错误清洗)", () =
       expect(entry!.message).not.toContain("Prisma");
     } finally {
       process.env.PROJECT_STATE_ENABLED = previous;
+    }
+  });
+
+  it("folds SQLITE-style error codes into the stable unavailable classification", async () => {
+    const project = await newProject("体检内部错误码清洗");
+    const now = new Date();
+    const failure = Object.assign(new Error("SQLITE raw detail should stay server-side"), { code: "SQLITE_BUSY" });
+    const spy = vi.spyOn(db.projectEpisode, "findFirst").mockRejectedValueOnce(failure);
+    try {
+      const report = await buildProjectHealthReport(project.id, { userId: VIEWER_ID, now });
+      const entry = report.unavailable.find((item) => item.section === "episodes");
+      expect(entry).toEqual({
+        section: "episodes",
+        errorCode: "SECTION_UNAVAILABLE",
+        message: "阶段检查点暂时无法读取，本次体检不包含这一部分。",
+      });
+      expect(JSON.stringify(report)).not.toContain("SQLITE_BUSY");
+      expect(JSON.stringify(report)).not.toContain("raw detail");
+    } finally {
+      spy.mockRestore();
     }
   });
 });

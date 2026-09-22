@@ -138,6 +138,11 @@ export interface RecordReminderSyncInput {
   error?: string | null;
 }
 
+export interface ConfirmReminderCleanupInput {
+  /** 设备实际删除或确认不存在的事件编号；必须与服务端回执一致 */
+  eventId: string;
+}
+
 export interface ReminderMutationResult {
   reminder: ActionReminderData;
   /** 客户端按顺序执行的设备日历操作；先删后建，避免重复事件 */
@@ -436,7 +441,9 @@ export async function getActionReminderState(
     blockedReason = `${assessment.summary} 请先补充缺失的信息，再安排提醒。`;
   }
 
-  const outstandingFromReminder = row && isOutstandingDeviceStatus(row.syncStatus) && row.calendarEventId !== null;
+  // REVOKED 只表示服务端不再触发这条提醒，不代表设备事件已经删除。
+  // 只要回执里仍保留 eventId，就必须继续暴露清理入口并禁止直接改时间。
+  const outstandingFromReminder = row && row.calendarEventId !== null;
   const outstandingDeviceEvent = outstandingFromReminder
     ? { reminderId: row!.id, calendarId: row!.calendarId, eventId: row!.calendarEventId!, source: "ACTION_REMINDER" as const }
     : block && isOutstandingDeviceStatus(block.calendarSyncStatus) && block.calendarEventId !== null
@@ -750,11 +757,13 @@ export async function arrangeActionReminder(
         return { row: created, previous: null };
       }
 
-      // 设备上已有自有事件：这是用户必须先解决的领域状态冲突，优先于版本号要求报出来
-      if (isOutstandingDeviceStatus(existing.syncStatus)) {
+      // 只要服务端仍记录着设备事件编号，就说明设备清理尚未得到确认。
+      // 即使服务端状态已经 REVOKED，也不能先清掉编号再返回一个客户端可能忽略的 DELETE 计划，
+      // 否则旧事件会变成无法重试清理的孤儿日程。
+      if (existing.calendarEventId !== null) {
         throw new AppError(
           "REMINDER_DEVICE_EVENT_EXISTS",
-          "这条待办在设备日历里已经有日程，请先撤销原提醒并确认设备上的日程已删除，再改时间",
+          "这条待办仍有一条设备日程等待确认清理，请先撤销并删除原日程，再改时间",
           409,
           { reminderId: existing.id, calendarId: existing.calendarId, calendarEventId: existing.calendarEventId, currentRevision: existing.revision },
         );
@@ -833,25 +842,76 @@ export async function arrangeActionReminder(
     return await buildArrangeReplay(projectId, actionId, actor, input.requestId, inputHash);
   }
 
-  // 之前撤销过但可能尚未在设备上删除：先删后建，保证不会出现两条应用自有事件
-  const previous = outcome.previous;
-  const staleDelete = previous !== null && previous.calendarEventId !== null
-    && !isOutstandingDeviceStatus(previous.syncStatus)
-    ? deleteOperation(previous, action.title)
-    : null;
-
   return {
     reminder: serializeReminder(outcome.row, action.title),
-    devicePlan: [
-      ...(staleDelete ? [staleDelete] : []),
-      createOperation(outcome.row.id, action.title, reminderAt, durationMinutes),
-    ],
+    devicePlan: [createOperation(outcome.row.id, action.title, reminderAt, durationMinutes)],
     replayed: false,
     historical: false,
-    message: staleDelete
-      ? "已更新计划时间。请先在设备上删除原日程，再创建新的日程。"
-      : "计划时间已保存。还需要写入设备日历，才会在到点时收到提醒。",
+    message: "计划时间已保存。还需要写入设备日历，才会在到点时收到提醒。",
   };
+}
+
+/**
+ * 设备确认删除（或查询确认不存在）后，清除服务端保存的设备事件编号。
+ *
+ * 该确认必须发生在设备操作之后：服务端不能仅因“已经发出删除指令”就假定设备事件消失。
+ * eventId 比对也保护后续新事件——延迟到达的旧确认不能清除新绑定的事件编号。
+ */
+export async function confirmActionReminderCleanup(
+  projectId: string,
+  reminderId: string,
+  input: ConfirmReminderCleanupInput,
+  actor: ReminderActor,
+): Promise<ActionReminderData> {
+  ensureReminderEnabled();
+  const eventId = input.eventId.trim();
+  if (eventId.length === 0) {
+    throw new AppError("VALIDATION_ERROR", "缺少已清理的设备日程编号", 422);
+  }
+
+  const row = await findReminderById(projectId, reminderId, actor);
+  const action = await loadAction(projectId, row.actionId);
+
+  // 已清理后的重复确认是安全重放；此时没有编号可再比对，也不会修改任何新状态。
+  if (row.calendarEventId === null) {
+    return serializeReminder(row, action.title);
+  }
+  if (row.syncStatus !== "REVOKED") {
+    throw new AppError("REMINDER_NOT_REVOKED", "请先撤销提醒，再确认设备日程已删除", 409);
+  }
+  if (row.calendarEventId !== eventId) {
+    throw new AppError("REMINDER_EVENT_CHANGED", "设备日程编号已经变化，未清除当前回执", 409, {
+      currentEventId: row.calendarEventId,
+    });
+  }
+
+  const cleared = await db.actionReminder.updateMany({
+    where: {
+      id: row.id,
+      userId: actor.userId,
+      deviceKey: actor.deviceKey,
+      syncStatus: "REVOKED",
+      calendarEventId: eventId,
+      revision: row.revision,
+    },
+    data: {
+      calendarId: null,
+      calendarEventId: null,
+      error: null,
+      revision: { increment: 1 },
+    },
+  });
+  if (cleared.count === 0) {
+    const latest = await findReminderById(projectId, reminderId, actor);
+    if (latest.calendarEventId === null) {
+      return serializeReminder(latest, action.title);
+    }
+    throw new AppError("REMINDER_REVISION_CHANGED", "提醒状态已变化，请刷新后重试清理确认", 409, {
+      currentRevision: latest.revision,
+    });
+  }
+  const updated = await findReminderById(projectId, reminderId, actor);
+  return serializeReminder(updated, action.title);
 }
 
 /** 设备侧需要执行的一次日历操作；顺序由服务端决定（先删后建，避免留下重复事件） */
@@ -985,12 +1045,18 @@ export async function revokeActionReminder(
   let current = row;
   if (row.syncStatus !== "REVOKED") {
     current = await db.$transaction(async (tx) => {
-      // 撤销是幂等的：即使并发请求已把它改成 REVOKED，这里也只是读到最终状态
-      await tx.actionReminder.updateMany({
+      const revoked = await tx.actionReminder.updateMany({
         where: { id: row.id, revision: row.revision },
         data: { syncStatus: "REVOKED", revokedAt: new Date(), error: null, revision: { increment: 1 } },
       });
       const fresh = await tx.actionReminder.findUniqueOrThrow({ where: { id: row.id } });
+      // 另一个并发修改可能已经把提醒改到了新版本，但未必撤销。
+      // 这种情况下绝不能登记一张“撤销成功”回执或向用户返回假成功。
+      if (revoked.count === 0 && fresh.syncStatus !== "REVOKED") {
+        throw new AppError("REMINDER_REVISION_CHANGED", "提醒已被其他操作修改，请刷新后重新撤销", 409, {
+          currentRevision: fresh.revision,
+        });
+      }
       if (requestId !== "") {
         await createRequestReceipt(tx, {
           projectId,

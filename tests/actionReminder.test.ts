@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import {
   applyReminderDispositionOnCompletion,
   arrangeActionReminder,
+  confirmActionReminderCleanup,
   getActionReminderState,
   listActionReminders,
   recordActionReminderSync,
@@ -234,15 +235,65 @@ describe("action reminder lifecycle (待办日历提醒生命周期)", () => {
     expect(revoked.devicePlan).toHaveLength(1);
     expect(revoked.devicePlan[0]).toMatchObject({ kind: "DELETE", eventId });
 
+    // 服务端撤销不等于设备已删除：编号仍在时必须继续阻止修改，并暴露清理入口。
+    let state = await getActionReminderState(project.id, action.id, actor, now);
+    expect(state.status).toBe("REVOKED");
+    expect(state.requiresRevokeBeforeChange).toBe(true);
+    expect(state.outstandingDeviceEvent?.eventId).toBe(eventId);
+    await expect(arrangeActionReminder(project.id, action.id, {
+      requestId: "arr-change-before-cleanup",
+      reminderAt: new Date(now.getTime() + 8 * HOUR).toISOString(),
+      expectedRevision: revoked.reminder.revision,
+    }, actor, now)).rejects.toMatchObject({ code: "REMINDER_DEVICE_EVENT_EXISTS", status: 409 });
+
+    const cleaned = await confirmActionReminderCleanup(project.id, reminderId, { eventId }, actor);
+    expect(cleaned.syncStatus).toBe("REVOKED");
+    expect(cleaned.calendarEventId).toBeNull();
+    state = await getActionReminderState(project.id, action.id, actor, now);
+    expect(state.requiresRevokeBeforeChange).toBe(false);
+    expect(state.outstandingDeviceEvent).toBeNull();
+
     const replaced = await arrangeActionReminder(project.id, action.id, {
       requestId: "arr-change-3",
       reminderAt: new Date(now.getTime() + 8 * HOUR).toISOString(),
-      expectedRevision: revoked.reminder.revision,
+      expectedRevision: cleaned.revision,
     }, actor, now);
-    // 先删旧、再建新：顺序由服务端决定，客户端照做就不会留下两个事件
-    expect(replaced.devicePlan.map((operation) => operation.kind)).toEqual(["DELETE", "CREATE"]);
-    expect(replaced.devicePlan[0].eventId).toBe(eventId);
+    // 只有设备清理回执落库后才允许创建新事件；此时计划里不再携带已经执行过的 DELETE。
+    expect(replaced.devicePlan.map((operation) => operation.kind)).toEqual(["CREATE"]);
     expect(await db.actionReminder.count({ where: { projectId: project.id } })).toBe(1);
+  });
+
+  it("keeps cleanup acknowledgement scoped and prevents a delayed old acknowledgement from clearing a new event", async () => {
+    const project = await newProject("设备清理确认隔离");
+    const user = await newMember(project.id);
+    const actor = actorFor(user.id);
+    const now = new Date();
+    const action = await newAction(project.id);
+    const first = await arrangeAndSync(project.id, action.id, actor, 4, "cleanup-old", now);
+
+    const revoked = await revokeActionReminder(project.id, first.reminderId, actor);
+    await expect(confirmActionReminderCleanup(project.id, first.reminderId, { eventId: "another-event" }, actor))
+      .rejects.toMatchObject({ code: "REMINDER_EVENT_CHANGED", status: 409 });
+    const cleaned = await confirmActionReminderCleanup(project.id, first.reminderId, { eventId: first.eventId }, actor);
+
+    const replacement = await arrangeActionReminder(project.id, action.id, {
+      requestId: "cleanup-replacement",
+      reminderAt: new Date(now.getTime() + 8 * HOUR).toISOString(),
+      expectedRevision: cleaned.revision,
+    }, actor, now);
+    await recordActionReminderSync(project.id, replacement.reminder.id, {
+      status: "SYNCED",
+      calendarId: "cal-local",
+      eventId: "evt-cleanup-new",
+    }, actor);
+
+    // 旧删除确认延迟到达时，不能清掉后来登记的新事件。
+    await expect(confirmActionReminderCleanup(project.id, first.reminderId, { eventId: first.eventId }, actor))
+      .rejects.toMatchObject({ code: "REMINDER_NOT_REVOKED", status: 409 });
+    const latest = await db.actionReminder.findUniqueOrThrow({ where: { id: first.reminderId } });
+    expect(latest.calendarEventId).toBe("evt-cleanup-new");
+    expect(latest.syncStatus).toBe("SYNCED");
+    expect(revoked.reminder.calendarEventId).toBe(first.eventId);
   });
 
   it("keeps revocation retry-safe and scoped to its own recorded event", async () => {

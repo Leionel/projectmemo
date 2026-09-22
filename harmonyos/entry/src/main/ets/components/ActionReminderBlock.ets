@@ -143,7 +143,9 @@ export struct ActionReminderBlock {
     try {
       const mutation = await this.service.arrange(this.projectId, this.actionId, this.pendingRequestId, iso, this.durationMinutes, expectedRevision);
       this.pendingRequestId = '';
-      this.message = `计划时间已保存：${preview}。这是忆程里的时间，还没有写进设备日历。`;
+      this.message = mutation.replayed
+        ? mutation.message
+        : `计划时间已保存：${preview}。这是忆程里的时间，还没有写进设备日历。`;
       this.showEditor = false;
       this.needsConflictConfirm = false;
       this.conflictTitles = [];
@@ -248,7 +250,8 @@ export struct ActionReminderBlock {
       op.end = new Date(new Date(reminder.reminderAt).getTime() + reminder.durationMinutes * 60000).toISOString();
       const summary = await this.service.applyDevicePlanDetailed(context, [op]);
       if (summary.confirmed) {
-        this.message = `设备日历里的自有日程已删除（共 ${summary.deleted + summary.alreadyMissing} 条）。`;
+        await this.service.confirmCleanup(this.projectId, reminder.id, reminder.calendarEventId);
+        this.message = `设备日历里的自有日程已确认清理（共 ${summary.deleted + summary.alreadyMissing} 条）。`;
       } else {
         this.message = summary.message !== '' ? summary.message : '设备日程仍未确认删除，请到系统日历检查「忆程·」事件。';
       }
@@ -386,8 +389,16 @@ export struct ActionReminderBlock {
             .margin({ top: PMSpacing.SM })
         }
 
-        // 计划时间编辑区（内联展开）
-        if (this.state.canArrange) {
+        if (this.state.canArrange && this.state.requiresRevokeBeforeChange) {
+          Text('设备日历里仍有这条待办的日程。请先撤销并确认设备日程已清理，再修改时间。')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.WARNING)
+            .lineHeight(18)
+            .margin({ top: PMSpacing.SM })
+        }
+
+        // 计划时间编辑区（内联展开）。设备事件未确认清理时不展示必然 409 的修改入口。
+        if (this.state.canArrange && !this.state.requiresRevokeBeforeChange) {
           if (this.showEditor) {
             Column() {
               Row() {
@@ -483,7 +494,7 @@ export struct ActionReminderBlock {
             .width('100%')
             .alignItems(HorizontalAlign.Start)
           } else {
-            Button(this.state.requiresRevokeBeforeChange ? '改到别的时间' : (this.state.reminder !== null ? '修改提醒时间' : '设定提醒时间'))
+            Button(this.state.reminder !== null ? '修改提醒时间' : '设定提醒时间')
               .fontSize(PMFontSize.BUTTON)
               .fontColor(PMColors.INK_PRIMARY)
               .backgroundColor(PMColors.SURFACE_SUBTLE)
@@ -533,7 +544,9 @@ export struct ActionReminderBlock {
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.INK_SECONDARY)
               .layoutWeight(1)
-            Button(this.busy === 'revoke' ? '撤销中…' : '撤销提醒')
+            Button(this.busy === 'revoke' || this.busy === 'retryCleanup'
+              ? '处理中…'
+              : (this.state.status === 'REVOKED' ? '重试删除设备日程' : '撤销提醒'))
               .fontSize(PMFontSize.BUTTON)
               .fontColor(PMColors.RISK)
               .backgroundColor(PMColors.SURFACE_SUBTLE)
@@ -542,7 +555,11 @@ export struct ActionReminderBlock {
               .height(48)
               .enabled(this.busy === '')
               .onClick(() => {
-                this.revokeReminder();
+                if (this.state !== null && this.state.status === 'REVOKED') {
+                  this.retryDeviceCleanup();
+                } else {
+                  this.revokeReminder();
+                }
               })
           }
           .width('100%')
@@ -566,23 +583,6 @@ export struct ActionReminderBlock {
           .fontColor(this.lastCleanup !== null && !this.lastCleanup.confirmed ? PMColors.WARNING : PMColors.SUCCESS)
           .lineHeight(18)
           .margin({ top: PMSpacing.SM })
-      }
-      // 设备清理未确认：区分「服务端已撤销」与「设备日程已确认删除」，提供重试
-      if (this.lastCleanup !== null && !this.lastCleanup.confirmed && this.lastCleanup.pendingEventIds.length > 0
-        && this.state !== null && this.state.reminder !== null) {
-        Button(this.busy === 'retryCleanup' ? '重试中…' : '重试删除设备日程')
-          .fontSize(PMFontSize.BUTTON)
-          .fontColor(PMColors.RISK)
-          .backgroundColor(PMColors.SURFACE_SUBTLE)
-          .border({ width: 1, color: PMColors.RISK_BORDER })
-          .borderRadius(PMRadius.SM)
-          .height(48)
-          .width('100%')
-          .margin({ top: PMSpacing.SM })
-          .enabled(this.busy === '')
-          .onClick(() => {
-            this.retryDeviceCleanup();
-          })
       }
       if (this.errorMessage !== '' && this.state !== null) {
         Text(this.errorMessage)

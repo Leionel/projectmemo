@@ -62,8 +62,9 @@ export function resolveReminderPanel(input: ReminderPanelInput): ReminderPanelDe
    * 不只看服务端的 requiresRevokeBeforeChange 一个字段：只要状态是「已写入/正在写入」
    * 且回执里记着事件编号，就必须先撤销，避免客户端因字段缺失而放出一个必然 409 的提交。
    */
-  const deviceEventExists = input.requiresRevokeBeforeChange
-    || ((status === "SYNCED" || status === "PENDING") && input.calendarEventId !== null);
+  // eventId 是服务端仍未收到设备清理确认的事实。即使状态已经 REVOKED，
+  // 也必须先在鸿蒙端完成删除并回报清理结果，不能先保存新时间让旧事件失去管理入口。
+  const deviceEventExists = input.requiresRevokeBeforeChange || input.calendarEventId !== null;
 
   let planStateLabel = "还没有安排计划时间";
   if (input.hasReminderRecord) {
@@ -103,16 +104,13 @@ export function resolveReminderPanel(input: ReminderPanelInput): ReminderPanelDe
     };
   }
 
-  const needsCleanupRetry = status === "REVOKED" && input.calendarEventId !== null;
   return {
     canSubmitTime: true,
     reason: null,
-    requiresHarmonyDevice: needsCleanupRetry,
+    requiresHarmonyDevice: false,
     planStateLabel,
     deviceStateLabel,
-    nextStep: needsCleanupRetry
-      ? "可以保存新的计划时间；设备上的旧日程请在鸿蒙客户端删除"
-      : (requiresExpectedRevision ? "改到新的时间" : "保存计划时间"),
+    nextStep: requiresExpectedRevision ? "改到新的时间" : "保存计划时间",
     requiresExpectedRevision,
   };
 }

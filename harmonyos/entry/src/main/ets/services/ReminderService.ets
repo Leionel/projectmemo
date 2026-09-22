@@ -10,6 +10,7 @@ import {
   ActionReminderStateResponse,
   DeviceCleanupSummary,
   ReminderArrangeBody,
+  ReminderCleanupBody,
   ReminderDeviceOp,
   ReminderMutationResponse,
   ReminderOutcome,
@@ -101,6 +102,17 @@ export class ReminderService {
       `/api/projects/${projectId}/reminders/${reminderId}/revoke`,
       body,
     );
+  }
+
+  /**
+   * 设备真实删除（或查询确认不存在）后登记清理结果。
+   * 服务端收到回执后才清除 eventId；未登记前不允许重新安排，避免旧日程变成孤儿事件。
+   */
+  async confirmCleanup(projectId: string, reminderId: string, eventId: string): Promise<void> {
+    const body = new ReminderCleanupBody();
+    body.deviceKey = DeviceIdentity.getConsumerKey();
+    body.eventId = eventId;
+    await this.api.post<Object>(`/api/projects/${projectId}/reminders/${reminderId}/cleanup`, body);
   }
 
   /**
@@ -276,6 +288,19 @@ export class ReminderService {
     outcome.state = null;
     outcome.cleanup = cleanup;
     outcome.deviceConfirmed = cleanup.confirmed;
+    const eventId = mutation.reminder.calendarEventId;
+    if (cleanup.confirmed && eventId !== null && eventId !== '') {
+      try {
+        await this.confirmCleanup(projectId, reminderId, eventId);
+      } catch {
+        // 设备已经清理，但服务端没有确认：保留 eventId 才能安全重试，不能报完整成功。
+        outcome.deviceConfirmed = false;
+        cleanup.confirmed = false;
+        cleanup.pendingEventIds.push(eventId);
+        outcome.message = '设备日程已经清理，但服务端暂时没有登记成功。请保持网络连接后重试确认。';
+        return outcome;
+      }
+    }
     if (!cleanup.confirmed) {
       // 未确认清理：权限被拒 / 日历不存在 / 核验未通过 / 删除报错，不得报「已删除」
       const reasons: string[] = [];

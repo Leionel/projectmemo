@@ -134,6 +134,12 @@ export class ReminderRevokeBody {
   requestId: string = '';
 }
 
+export class ReminderCleanupBody {
+  deviceKey: string = '';
+  /** 设备已经删除或查询确认不存在的事件编号 */
+  eventId: string = '';
+}
+
 // ---- 服务端返回之外的本地结果 ----
 
 /**

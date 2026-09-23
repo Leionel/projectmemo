@@ -116,8 +116,8 @@ export class ReminderArrangeBody {
   reminderAt: string = '';
   durationMinutes: number = 30;
   deviceKey: string = '';
-  /** 修改已有提醒时的乐观版本号；首次创建传 0（或不传） */
-  expectedRevision: number = 0;
+  /** 修改已有提醒时的乐观版本号；首次创建不传 */
+  expectedRevision: number | undefined = undefined;
 }
 
 export class ReminderSyncBody {

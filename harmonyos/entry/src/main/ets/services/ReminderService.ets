@@ -74,7 +74,10 @@ export class ReminderService {
     body.reminderAt = reminderAtIso;
     body.durationMinutes = durationMinutes;
     body.deviceKey = DeviceIdentity.getConsumerKey();
-    body.expectedRevision = expectedRevision;
+    // 首次创建没有旧版本；服务端只接受正整数 expectedRevision。
+    if (expectedRevision > 0) {
+      body.expectedRevision = expectedRevision;
+    }
     return await this.api.post<ReminderMutationResponse>(
       `/api/projects/${projectId}/actions/${actionId}/reminder`,
       body,

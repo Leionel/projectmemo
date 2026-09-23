@@ -11,6 +11,8 @@ import { resolveReminderPanel } from "@/lib/client/reminderPanelState";
  */
 const HARMONY_PAGES = path.resolve(import.meta.dirname, "..", "harmonyos", "entry", "src", "main", "ets", "pages");
 const HARMONY_COMPONENTS = path.resolve(import.meta.dirname, "..", "harmonyos", "entry", "src", "main", "ets", "components");
+const HARMONY_SERVICES = path.resolve(import.meta.dirname, "..", "harmonyos", "entry", "src", "main", "ets", "services");
+const HARMONY_MODELS = path.resolve(import.meta.dirname, "..", "harmonyos", "entry", "src", "main", "ets", "models");
 
 function readPage(name: string): string {
   return readFileSync(path.join(HARMONY_PAGES, `${name}.ets`), "utf8");
@@ -64,6 +66,13 @@ describe("single reminder entry (旧流程清除)", () => {
     expect(source).toContain("this.state.canArrange && !this.state.requiresRevokeBeforeChange");
     expect(source).not.toContain("this.state.requiresRevokeBeforeChange ? '改到别的时间'");
     expect(source).toContain("请先撤销并确认设备日程已清理，再修改时间");
+  });
+
+  it("omits expectedRevision for the first reminder creation", () => {
+    const source = readFileSync(path.join(HARMONY_SERVICES, "ReminderService.ets"), "utf8");
+    const model = readFileSync(path.join(HARMONY_MODELS, "Reminder.ets"), "utf8");
+    expect(source).toMatch(/if \(expectedRevision > 0\)\s*\{\s*body\.expectedRevision = expectedRevision;/);
+    expect(model).toMatch(/expectedRevision: number \| undefined = undefined;/);
   });
 });
 

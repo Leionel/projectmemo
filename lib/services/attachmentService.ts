@@ -11,7 +11,6 @@ import { AppError } from "@/lib/api";
 import { structureCaptureWithMeta } from "@/lib/agent";
 import { saveCaptureResult } from "@/lib/repositories/cards";
 import { KeywordVectorStore } from "@/lib/memory/vectorStore";
-import { ensureCardEmbedding } from "@/lib/repositories/embeddings";
 import { recordLifecycleEventInTx } from "@/lib/services/memoryLifecycleService";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { getVisionProviderConfig } from "@/lib/config/provider";

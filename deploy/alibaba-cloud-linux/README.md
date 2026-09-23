@@ -94,9 +94,12 @@ curl -s http://127.0.0.1:4400/health ; echo
 ```
 
 R2 相关开关见 `projectmemo.env.example`：`PROJECT_EPISODES_ENABLED`、`PROJECT_SCHEDULING_ENABLED`、
-`PROJECT_REENTRY_ENABLED` 随发布启用；`PROJECT_CALENDAR_SYNC_ENABLED` 与
-`PROJECT_MEMORY_CONSOLIDATION_ENABLED` 在完成真机/交互验收前保持 `false`。回退只需把开关改回
-`false` 并重启，不需要回滚代码或删除新增表。
+`PROJECT_REENTRY_ENABLED` 随发布启用。待办卡片的“日历提醒”依赖
+`PROJECT_CALENDAR_REMINDER_ENABLED=true`；“安排时间”中的“添加到手机日历”还依赖
+`PROJECT_CALENDAR_SYNC_ENABLED=true`。二者在完成目标设备的授权、冲突预览、写入、撤销和重启后状态核对前保持 `false`；开启时修改
+`/etc/projectmemo/projectmemo.env` 并重启 `projectmemo`，仅修改开发机 `.env` 不影响评审 HAP 连接的 ECS。
+`PROJECT_MEMORY_CONSOLIDATION_ENABLED` 同样在交互验收前保持 `false`。日历能力需要回退时，将对应开关改回
+`false` 并重启，不删除已有计划与审计记录；先确认设备上的自有日程如何处置。
 
 冒烟验收（接口需要登录态）：
 

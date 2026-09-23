@@ -3700,7 +3700,7 @@ struct ProjectHome {
       .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
 
       Column() {
-        Row() {
+        Row({ space: PMSpacing.SM }) {
           Button('＋ 新增待办')
             .fontSize(PMFontSize.BUTTON)
             .fontWeight(FontWeight.Medium)
@@ -3708,16 +3708,32 @@ struct ProjectHome {
             .backgroundColor(PMColors.BRAND)
             .borderRadius(PMRadius.SM)
             .height(44)
-            .width('100%')
+            .layoutWeight(1)
             .onClick(() => {
               this.openCreateAction();
             })
             .accessibilityText('手动新增待办')
 
+          Button('安排时间')
+            .fontSize(PMFontSize.BUTTON)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.BRAND)
+            .backgroundColor(PMColors.BRAND_LIGHT)
+            .borderRadius(PMRadius.SM)
+            .height(44)
+            .layoutWeight(1)
+            .onClick(() => {
+              router.pushUrl({
+                url: 'pages/ActionBoard',
+                params: { projectId: this.projectId }
+              });
+            })
+            .accessibilityText('安排待办时间')
+            .accessibilityDescription('预览并确认未来几天的行动安排，可选择同步到手机日历')
         }
         .width('100%')
 
-        Text('在每条待办中选择日期和时间，即可加入系统日历并在到点时提醒。')
+        Text('可为单条待办设置日历提醒，或安排未来几天的时间；写入手机日历前会再次确认。')
           .fontSize(PMFontSize.CAPTION)
           .fontColor(PMColors.INK_TERTIARY)
           .margin({ top: PMSpacing.XS })

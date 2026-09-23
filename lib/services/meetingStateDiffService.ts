@@ -588,7 +588,7 @@ export async function confirmMeetingChanges(projectId: string, input: MeetingCon
           },
         },
       });
-    } catch (_e) {
+    } catch {
       // 状态刷新失败不吞掉业务写入：afterSnapshotId 为空，界面提示可稍后重试
       afterSnapshotId = null;
     }

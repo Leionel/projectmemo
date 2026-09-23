@@ -114,7 +114,7 @@ describe("Action feasibility (F1)", () => {
         importance: 3,
       },
     });
-    const supportRelation = await db.cardRelation.create({
+    await db.cardRelation.create({
       data: {
         currentCardId: supporter.id,
         relatedCardId: card.id,

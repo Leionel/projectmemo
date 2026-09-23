@@ -95,6 +95,15 @@ export struct ActionReminderBlock {
     return `${this.selectedDate.getFullYear()}-${pad(this.selectedDate.getMonth() + 1)}-${pad(this.selectedDate.getDate())} ${pad(this.selectedHour)}:${pad(this.selectedMinute)}`;
   }
 
+  private localTimeLabel(iso: string): string {
+    const value = new Date(iso);
+    if (Number.isNaN(value.getTime())) {
+      return '时间无法读取';
+    }
+    const pad = (part: number): string => part < 10 ? `0${part}` : `${part}`;
+    return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())} ${pad(value.getHours())}:${pad(value.getMinutes())}`;
+  }
+
   private pickDate(): void {
     DatePickerDialog.show({
       start: new Date(),
@@ -102,6 +111,7 @@ export struct ActionReminderBlock {
       selected: this.selectedDate,
       onDateAccept: (value: Date) => {
         this.selectedDate = value;
+        this.pendingRequestId = '';
       },
     });
   }
@@ -115,6 +125,7 @@ export struct ActionReminderBlock {
       onAccept: (value: TimePickerResult) => {
         this.selectedHour = value.hour;
         this.selectedMinute = value.minute;
+        this.pendingRequestId = '';
       },
     });
   }
@@ -159,6 +170,7 @@ export struct ActionReminderBlock {
       if (e instanceof ApiError && (e.code === 'REMINDER_REVISION_CHANGED' || e.code === 'REMINDER_EXPECTED_REVISION_REQUIRED')) {
         // 版本冲突：保留用户已填时间，重新拉取最新版本号，让用户再确认一次（不自动重试提交）
         await this.load();
+        this.pendingRequestId = '';
         this.errorMessage = '提醒已被其他操作修改，已刷新，请再确认一次';
       } else {
         // 其它失败：保留 pendingRequestId 以便用户重试时用同一个意图编号
@@ -303,13 +315,13 @@ export struct ActionReminderBlock {
           .margin({ top: 2 })
       }
       if (this.state !== null && this.state.reminder !== null && this.state.reminder.reminderAt !== '') {
-        Text(`忆程里的计划时间：${this.state.reminder.reminderAt.substring(0, 10)} ${this.state.reminder.reminderAt.substring(11, 16)} · 持续 ${this.state.reminder.durationMinutes} 分钟`)
+        Text(`忆程里的计划时间：${this.localTimeLabel(this.state.reminder.reminderAt)} · 持续 ${this.state.reminder.durationMinutes} 分钟`)
           .fontSize(PMFontSize.CAPTION)
           .fontColor(PMColors.INK_TERTIARY)
           .margin({ top: 2 })
       }
       if (this.state !== null && this.state.planBlock !== null) {
-        Text(`已确认的排程时段：${this.state.planBlock.start.substring(0, 10)} ${this.state.planBlock.start.substring(11, 16)}（来自「安排未来 7 天」）`)
+        Text(`已确认的排程时段：${this.localTimeLabel(this.state.planBlock.start)}（来自「安排未来 7 天」）`)
           .fontSize(PMFontSize.CAPTION)
           .fontColor(PMColors.INK_TERTIARY)
           .margin({ top: 2 })
@@ -409,6 +421,7 @@ export struct ActionReminderBlock {
                   .borderRadius(PMRadius.SM)
                   .height(44)
                   .layoutWeight(1)
+                  .enabled(this.busy === '')
                   .onClick(() => {
                     this.pickDate();
                   })
@@ -419,6 +432,7 @@ export struct ActionReminderBlock {
                   .borderRadius(PMRadius.SM)
                   .height(44)
                   .margin({ left: PMSpacing.SM })
+                  .enabled(this.busy === '')
                   .onClick(() => {
                     this.pickTime();
                   })
@@ -435,10 +449,11 @@ export struct ActionReminderBlock {
                   .height(PMButtonSize.HEIGHT_SM)
                   .backgroundColor(PMColors.SURFACE_SUBTLE)
                   .fontColor(PMColors.INK_PRIMARY)
-                  .enabled(this.durationMinutes > 15)
+                  .enabled(this.busy === '' && this.durationMinutes > 15)
                   .onClick(() => {
                     if (this.durationMinutes > 15) {
                       this.durationMinutes = this.durationMinutes - 15;
+                      this.pendingRequestId = '';
                     }
                   })
                 Text(`${this.durationMinutes} 分钟`)
@@ -450,10 +465,11 @@ export struct ActionReminderBlock {
                   .height(PMButtonSize.HEIGHT_SM)
                   .backgroundColor(PMColors.SURFACE_SUBTLE)
                   .fontColor(PMColors.INK_PRIMARY)
-                  .enabled(this.durationMinutes < 240)
+                  .enabled(this.busy === '' && this.durationMinutes < 240)
                   .onClick(() => {
                     if (this.durationMinutes < 240) {
                       this.durationMinutes = this.durationMinutes + 15;
+                      this.pendingRequestId = '';
                     }
                   })
               }
@@ -484,6 +500,7 @@ export struct ActionReminderBlock {
                   .backgroundColor(PMColors.SURFACE_SUBTLE)
                   .height(48)
                   .margin({ left: PMSpacing.SM })
+                  .enabled(this.busy === '')
                   .onClick(() => {
                     this.showEditor = false;
                   })

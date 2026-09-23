@@ -2,7 +2,6 @@ import {
   PROJECT_STATE_DIFF_ALGORITHM_VERSION,
   type ProjectStateDiff,
   type ProjectStatePayload,
-  type SnapshotFact,
   type StateDiffItem,
 } from "@/lib/types/projectState";
 
@@ -19,16 +18,6 @@ class RebuildRequiredError extends Error {
 
 export function isRebuildRequiredError(error: unknown): boolean {
   return error instanceof RebuildRequiredError;
-}
-
-function kindLabel(kind: StateDiffItem["kind"]): string {
-  switch (kind) {
-    case "ADDED": return "新增";
-    case "RESOLVED": return "已解决";
-    case "REGRESSED": return "回退";
-    case "UNCERTAIN": return "变得不确定";
-    default: return "变化";
-  }
 }
 
 function diffFacts(before: ProjectStatePayload, after: ProjectStatePayload): StateDiffItem[] {

@@ -308,7 +308,7 @@ describe("Project state snapshot / diff (R2 integration)", () => {
   it("preserves A→B→A recurrence as separate snapshot rows", async () => {
     const cardA = await seedCard("往返方案A：基础版本");
     void cardA;
-    const baseline = await refreshProjectState(projectId);
+    await refreshProjectState(projectId);
 
     const toB = await analyzeChangeImpact(projectId, "往返方案A：基础版本改为往返方案B");
     await confirmChangeImpact(projectId, {

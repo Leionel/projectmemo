@@ -72,14 +72,12 @@ struct ActionBoard {
     const date = new Date();
     date.setDate(date.getDate() + dayOffset);
     const parts = time.split(':');
-    if (parts.length >= 2) {
-      const hours = Number(parts[0]);
-      const minutes = Number(parts[1]);
-      if (!Number.isNaN(hours) && !Number.isNaN(minutes)) {
-        date.setHours(hours, minutes, 0, 0);
-      }
-    }
+    date.setHours(Number(parts[0]), Number(parts[1]), 0, 0);
     return date.toISOString();
+  }
+
+  private validScheduleTime(value: string): boolean {
+    return /^(?:[01][0-9]|2[0-3]):[0-5][0-9]$/.test(value);
   }
 
   private async loadCurrentSchedule(): Promise<void> {
@@ -88,6 +86,9 @@ struct ActionBoard {
       this.schedulePlan = response.plan;
     } catch (e) {
       this.schedulePlan = null;
+      if (e instanceof ApiError && e.code === 'PROJECT_SCHEDULING_DISABLED') {
+        this.scheduleError = '当前后端未开启行动安排，暂时不能保存排程。';
+      }
     }
   }
 
@@ -100,9 +101,19 @@ struct ActionBoard {
     this.scheduleMessage = '';
     try {
       const days = Number(this.scheduleDays);
-      const total = Number.isNaN(days) ? 7 : Math.min(7, Math.max(1, Math.round(days)));
+      if (!Number.isInteger(days) || days < 1 || days > 7 || !this.validScheduleTime(this.scheduleStartTime) ||
+        !this.validScheduleTime(this.scheduleEndTime)) {
+        this.scheduleError = '请填写 1～7 天，以及 00:00～23:59 格式的开始和结束时间。';
+        return;
+      }
+      const startParts = this.scheduleStartTime.split(':');
+      const endParts = this.scheduleEndTime.split(':');
+      if (Number(endParts[0]) * 60 + Number(endParts[1]) <= Number(startParts[0]) * 60 + Number(startParts[1])) {
+        this.scheduleError = '结束时间必须晚于开始时间。';
+        return;
+      }
       const slots: ScheduleSlotBody[] = [];
-      for (let i = 1; i <= total; i++) {
+      for (let i = 1; i <= days; i++) {
         const slot = new ScheduleSlotBody();
         slot.start = this.scheduleSlotInstant(i, this.scheduleStartTime);
         slot.end = this.scheduleSlotInstant(i, this.scheduleEndTime);

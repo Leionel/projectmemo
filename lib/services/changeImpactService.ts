@@ -410,7 +410,7 @@ export async function confirmChangeImpact(projectId: string, input: ConfirmChang
     try {
       await refreshProjectState(projectId);
       stateRefreshPending = false;
-    } catch (_e) {
+    } catch {
       stateRefreshPending = true;
     }
   }

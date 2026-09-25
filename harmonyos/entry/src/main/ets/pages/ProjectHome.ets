@@ -20,6 +20,7 @@ import { MemoryLifecycleService } from '../services/MemoryLifecycleService';
 import { InterventionPolicyService } from '../services/InterventionPolicyService';
 import { ProjectStateService } from '../services/ProjectStateService';
 import { MeetingImportSheet } from '../components/MeetingImportSheet';
+import { DateOnly } from '../common/DateOnly';
 import { PolicyResponse, PolicySuggestion, PolicyUpdateBody } from '../models/Intervention';
 import { ActionService } from '../services/ActionService';
 import { ArtifactService } from '../services/ArtifactService';
@@ -1665,6 +1666,17 @@ struct ProjectHome {
     this.editDeadline = this.project.deadline !== undefined && this.project.deadline !== null && this.project.deadline.length >= 10 ?
       this.project.deadline.substring(0, 10) : '';
     this.showSettingsDialog = true;
+  }
+
+  private pickEditDeadline(): void {
+    DatePickerDialog.show({
+      start: new Date(2000, 0, 1),
+      end: new Date(2100, 11, 31),
+      selected: DateOnly.selected(this.editDeadline),
+      onDateAccept: (value: Date) => {
+        this.editDeadline = DateOnly.format(value);
+      },
+    });
   }
 
   private async saveSettings(): Promise<void> {
@@ -5019,6 +5031,7 @@ struct ProjectHome {
       // 项目设置弹窗
       if (this.showSettingsDialog) {
         Column() {
+          Scroll() {
           Column() {
             Text('项目设置')
               .fontSize(PMFontSize.PAGE_TITLE)
@@ -5062,7 +5075,7 @@ struct ProjectHome {
               .border({ width: 1, color: PMColors.BORDER })
 
             Row() {
-              Text('截止日期 (YYYY-MM-DD)')
+              Text('截止日期')
                 .fontSize(PMFontSize.SECONDARY)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_SECONDARY)
@@ -5082,16 +5095,18 @@ struct ProjectHome {
             .width('100%')
             .margin({ top: PMSpacing.SM })
 
-            TextInput({ text: this.editDeadline, placeholder: '例如 2026-10-01，留空表示无截止日期' })
-              .onChange((v: string) => {
-                this.editDeadline = v;
-              })
+            Button(this.editDeadline === '' ? '选择截止日期' : this.editDeadline)
               .fontSize(PMFontSize.BODY)
+              .fontColor(PMColors.INK_PRIMARY)
               .height(48)
               .backgroundColor(PMColors.SURFACE_SUBTLE)
               .borderRadius(PMRadius.SM)
               .border({ width: 1, color: PMColors.BORDER })
-              .accessibilityText('输入项目截止日期，格式为 YYYY-MM-DD')
+              .width('100%')
+              .accessibilityText(this.editDeadline === '' ? '选择项目截止日期' : `项目截止日期：${this.editDeadline}，点击修改`)
+              .onClick(() => {
+                this.pickEditDeadline();
+              })
 
             // 提醒策略（B1）：预算与静默时段；V1 为本机安装的全局共享预算
             Column() {
@@ -5263,6 +5278,10 @@ struct ProjectHome {
           }
           .width('100%')
           .padding(PMSpacing.XL)
+          }
+          .width('100%')
+          .constraintSize({ maxHeight: '90%' })
+          .scrollable(ScrollDirection.Vertical)
           .backgroundColor(PMColors.SURFACE)
           .borderRadius(PMRadius.LG)
           .border({ width: 1, color: PMColors.BORDER })
@@ -5366,7 +5385,13 @@ struct ProjectHome {
     .bindSheet($$this.showEntrySheet, this.EntrySheet(), {
       height: this.entrySheetMode === 'meeting' ? 640 : SheetSize.FIT_CONTENT,
       dragBar: true,
-      showClose: false
+      showClose: false,
+      onDisappear: () => {
+        // 手势收起会议面板也要刷新；确认后的变更不能只依赖页内关闭按钮触发。
+        if (this.entrySheetMode === 'meeting') {
+          this.loadAllData();
+        }
+      }
     })
   }
 }

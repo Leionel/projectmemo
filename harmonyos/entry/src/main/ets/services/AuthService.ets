@@ -17,17 +17,10 @@ export class AuthService {
     return response;
   }
 
-  /**
-   * 退出登录：通知服务端撤销当前会话，并清除本地持久化凭证。
-   */
+  /** 服务端确认撤销后才清除本地凭证；失败时保留 Token 供用户重试。 */
   async logout(): Promise<void> {
-    try {
-      await this.client.post<Object>('/api/auth/logout', undefined);
-    } catch {
-      // 忽略网络错误，确保本地凭证无论如何都被清理
-    } finally {
-      await SessionStore.clearSession();
-    }
+    await this.client.post<Object>('/api/auth/logout', undefined);
+    await SessionStore.clearSession();
   }
 
   /**

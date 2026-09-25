@@ -1,5 +1,6 @@
 import { describe, beforeAll, beforeEach, afterEach, afterAll, it, expect } from '@ohos/hypium';
 import { TextFormatters } from '../main/ets/common/TextFormatters';
+import { DateOnly } from '../main/ets/common/DateOnly';
 
 export default function localUnitTest() {
   describe('localUnitTest', () => {
@@ -52,6 +53,12 @@ export default function localUnitTest() {
     it('marks damaged memories without replacing source data', 0, () => {
       expect(TextFormatters.isDamagedMemory('????', '????')).assertTrue();
       expect(TextFormatters.isDamagedMemory('正常标题', '正常摘要')).assertFalse();
+    });
+
+    it('keeps picked calendar days in local time, including leap day', 0, () => {
+      const picked = DateOnly.selected('2028-02-29');
+      expect(DateOnly.format(picked)).assertEqual('2028-02-29');
+      expect(DateOnly.format(DateOnly.selected('2028-02-30')) === '2028-02-30').assertFalse();
     });
   });
 }

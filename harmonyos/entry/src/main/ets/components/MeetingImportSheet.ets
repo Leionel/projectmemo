@@ -1,8 +1,9 @@
-import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction, PMMotion } from '../common/DesignTokens';
+import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction } from '../common/DesignTokens';
 import { MeetingAppliedChange, MeetingConfirmBody, MeetingConfirmResult, MeetingImpactPreview, MeetingPreviewInput, MeetingTypedChange } from '../models/Meeting';
 import { ApiError } from '../models/Project';
 import { MeetingService } from '../services/MeetingService';
 import { CheckboxIcon } from './PMIcons';
+import { DateOnly } from '../common/DateOnly';
 
 // E5：会议文本导入。粘贴 → 预览（逐项勾选，待澄清项禁确认）→ 原子确认 → 会后 Diff。
 // 编辑文本/日期会使旧 proposalVersion 失效，必须重新预览。
@@ -62,6 +63,18 @@ export struct MeetingImportSheet {
       if (this.preview.typedChanges[i].status === 'PROPOSED') count += 1;
     }
     return count;
+  }
+
+  private pickMeetingDate(): void {
+    DatePickerDialog.show({
+      start: new Date(2000, 0, 1),
+      end: new Date(2100, 11, 31),
+      selected: DateOnly.selected(this.meetingDate),
+      onDateAccept: (value: Date) => {
+        this.meetingDate = DateOnly.format(value);
+        this.errorMessage = '';
+      },
+    });
   }
 
   private async generatePreview(): Promise<void> {
@@ -211,18 +224,7 @@ export struct MeetingImportSheet {
   }
 
   build() {
-    Stack() {
-      Column()
-        .width('100%')
-        .height('100%')
-        .backgroundColor(PMColors.SCRIM)
-        .onClick(() => {
-          if (!this.isConfirming) {
-            this.onClose();
-          }
-        })
-
-      Column() {
+    Column() {
         Row() {
           Text('记录这次会议')
             .fontSize(PMFontSize.SECTION_TITLE)
@@ -359,6 +361,8 @@ export struct MeetingImportSheet {
           .width('100%')
           .margin({ top: PMSpacing.MD })
         } else {
+          Scroll() {
+            Column() {
           Text('粘贴会议内容。忆程会找出“改了什么、要做什么、日期有没有变化”，先给你检查，只有勾选确认后才会保存。')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_TERTIARY)
@@ -381,15 +385,35 @@ export struct MeetingImportSheet {
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_TERTIARY)
             .margin({ top: PMSpacing.SM })
-          TextInput({ text: this.meetingDate, placeholder: '例如 2026-09-14；内容里有“下周五”时建议填写' })
-            .onChange((v: string) => {
-              this.meetingDate = v;
-            })
-            .fontSize(PMFontSize.BODY)
-            .height(44)
-            .backgroundColor(PMColors.SURFACE_SUBTLE)
-            .borderRadius(PMRadius.SM)
-            .border({ width: 1, color: PMColors.BORDER })
+          Row({ space: PMSpacing.SM }) {
+            Button(this.meetingDate === '' ? '选择会议日期' : this.meetingDate)
+              .fontSize(PMFontSize.BODY)
+              .fontColor(PMColors.INK_PRIMARY)
+              .height(44)
+              .backgroundColor(PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.SM)
+              .border({ width: 1, color: PMColors.BORDER })
+              .layoutWeight(1)
+              .accessibilityText(this.meetingDate === '' ? '选择会议日期' : `会议日期：${this.meetingDate}，点击修改`)
+              .onClick(() => {
+                this.pickMeetingDate();
+              })
+            if (this.meetingDate !== '') {
+              Button('清空')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.RISK)
+                .backgroundColor(PMColors.SURFACE_SUBTLE)
+                .height(44)
+                .onClick(() => {
+                  this.meetingDate = '';
+                })
+            }
+          }
+          .width('100%')
+          .margin({ top: PMSpacing.XS })
+          Text('内容中有“下周五”等相对日期时，请选择会议日期。')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
             .margin({ top: PMSpacing.XS })
 
           if (this.errorMessage !== '') {
@@ -412,18 +436,17 @@ export struct MeetingImportSheet {
             .onClick(() => {
               this.generatePreview();
             })
+            }
+            .width('100%')
+            .alignItems(HorizontalAlign.Start)
+          }
+          .scrollable(ScrollDirection.Vertical)
+          .layoutWeight(1)
         }
-      }
-      .width('92%')
-      .height('85%')
-      .padding(PMSpacing.LG)
-      .backgroundColor(PMColors.SURFACE)
-      .borderRadius(PMRadius.LG)
-      .border({ width: 1, color: PMColors.BORDER })
-      .transition(TransitionEffect.OPACITY.combine(TransitionEffect.scale({ x: 0.96, y: 0.96 })).animation({ duration: PMMotion.LOCAL, curve: PMMotion.CURVE_CONTENT }))
     }
     .width('100%')
     .height('100%')
-    .alignContent(Alignment.Center)
+    .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.XL })
+    .backgroundColor(PMColors.SURFACE)
   }
 }

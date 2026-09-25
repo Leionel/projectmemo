@@ -16,6 +16,7 @@ import { SessionStore } from '../services/SessionStore';
 import { AuthService } from '../services/AuthService';
 import { WidgetDataService } from '../services/WidgetDataService';
 import { LoginView } from '../components/LoginView';
+import { DateOnly } from '../common/DateOnly';
 import { ReminderSettingsView } from '../components/ReminderSettingsView';
 
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily, PMInteraction, PMMotion, PMMaterial, PMTransition } from '../common/DesignTokens';
@@ -135,7 +136,7 @@ struct Index {
     }
   }
 
-  private handleSessionExpired(): void {
+  private handleSessionExpired(message: string = '登录已失效，请重新登录'): void {
     this.isAuthenticated = false;
     this.currentUser = new UserInfo();
     this.projects = [];
@@ -146,7 +147,7 @@ struct Index {
     this.allCards = [];
     this.allActions = [];
     this.allInterventions = [];
-    promptAction.showToast({ message: '登录已失效，请重新登录' });
+    promptAction.showToast({ message });
   }
 
   private handleLoginSuccess(): void {
@@ -168,8 +169,14 @@ struct Index {
       ]
     }).then(async (result) => {
       if (result.index === 1) {
-        await this.authService.logout();
-        this.handleSessionExpired();
+        try {
+          await this.authService.logout();
+          this.handleSessionExpired('已退出登录');
+        } catch (e) {
+          if (!(e instanceof ApiError && e.code === 'UNAUTHORIZED')) {
+            promptAction.showToast({ message: '退出未完成，当前登录仍保留，请稍后重试' });
+          }
+        }
       }
     });
   }
@@ -388,6 +395,18 @@ struct Index {
     this.showCreateDialog = true;
   }
 
+  private pickNewDeadline(): void {
+    DatePickerDialog.show({
+      start: new Date(2000, 0, 1),
+      end: new Date(2100, 11, 31),
+      selected: DateOnly.selected(this.newDeadline),
+      onDateAccept: (value: Date) => {
+        this.newDeadline = DateOnly.format(value);
+        this.createError = '';
+      },
+    });
+  }
+
   private closeCreateDialog(): void {
     if (this.isCreating) {
       return;
@@ -395,13 +414,26 @@ struct Index {
     this.showCreateDialog = false;
   }
 
+  private canCreateProject(): boolean {
+    return this.newTitle.trim().length >= 2 && this.newGoal.trim().length >= 2 &&
+      this.newDescription.trim().length >= 10 && !this.isCreating;
+  }
+
   private async submitCreateProject(): Promise<void> {
     if (this.isCreating) {
       return;
     }
     const title = this.newTitle.trim();
-    if (title === '') {
-      this.createError = '项目名称不能为空';
+    if (title.length < 2) {
+      this.createError = '项目名称至少 2 个字';
+      return;
+    }
+    if (this.newGoal.trim().length < 2) {
+      this.createError = '项目目标至少 2 个字';
+      return;
+    }
+    if (this.newDescription.trim().length < 10) {
+      this.createError = '项目简述至少 10 个字';
       return;
     }
     this.isCreating = true;
@@ -1502,7 +1534,7 @@ struct Index {
                 .fontSize(PMFontSize.BODY)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
-              Text('账号：' + (this.currentUser.username !== '' ? this.currentUser.username : 'contest-demo'))
+              Text('账号：' + (this.currentUser.username !== '' ? this.currentUser.username : '未读取'))
                 .fontSize(PMFontSize.CAPTION)
                 .fontColor(PMColors.INK_SECONDARY)
                 .margin({ top: 2 })
@@ -2459,13 +2491,14 @@ struct Index {
       // 新建项目弹窗
       if (this.showCreateDialog) {
         Column() {
+          Scroll() {
           Column() {
             Text('新建项目档案')
               .fontSize(PMFontSize.PAGE_TITLE)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.INK_PRIMARY)
 
-            Text('项目名称（必填）')
+            Text('项目名称（至少 2 字）')
               .fontSize(PMFontSize.SECONDARY)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.INK_SECONDARY)
@@ -2481,7 +2514,7 @@ struct Index {
               .border({ width: 1, color: PMColors.BORDER })
               .margin({ top: PMSpacing.XS })
 
-            Text('项目目标')
+            Text('项目目标（至少 2 字）')
               .fontSize(PMFontSize.SECONDARY)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.INK_SECONDARY)
@@ -2497,7 +2530,7 @@ struct Index {
               .border({ width: 1, color: PMColors.BORDER })
               .margin({ top: PMSpacing.XS })
 
-            Text('项目简述')
+            Text('项目简述（至少 10 字）')
               .fontSize(PMFontSize.SECONDARY)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.INK_SECONDARY)
@@ -2557,23 +2590,25 @@ struct Index {
             .width('100%')
             .margin({ top: PMSpacing.XS })
 
-            Text('截止日期 (YYYY-MM-DD，选填)')
+            Text('截止日期（选填）')
               .fontSize(PMFontSize.SECONDARY)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.INK_SECONDARY)
               .margin({ top: PMSpacing.SM })
 
             Row() {
-              TextInput({ text: this.newDeadline, placeholder: '例如：2026-09-30' })
-                .onChange((value: string) => {
-                  this.newDeadline = value;
-                })
+              Button(this.newDeadline === '' ? '选择截止日期' : this.newDeadline)
                 .fontSize(PMFontSize.BODY)
+                .fontColor(PMColors.INK_PRIMARY)
                 .height(48)
                 .backgroundColor(PMColors.SURFACE_SUBTLE)
                 .borderRadius(PMRadius.SM)
                 .border({ width: 1, color: PMColors.BORDER })
                 .layoutWeight(1)
+                .accessibilityText(this.newDeadline === '' ? '选择项目截止日期' : `项目截止日期：${this.newDeadline}，点击修改`)
+                .onClick(() => {
+                  this.pickNewDeadline();
+                })
 
               if (this.newDeadline !== '') {
                 Button('清空')
@@ -2596,6 +2631,11 @@ struct Index {
                 .fontSize(PMFontSize.BODY)
                 .fontColor(PMColors.RISK)
                 .margin({ top: PMSpacing.SM })
+            } else if (!this.canCreateProject() && !this.isCreating) {
+              Text('请填写至少 2 字的名称和目标、至少 10 字的项目简述。')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_TERTIARY)
+                .margin({ top: PMSpacing.SM })
             }
 
             Row() {
@@ -2615,11 +2655,11 @@ struct Index {
                 .fontSize(PMFontSize.BUTTON)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.SURFACE)
-                .backgroundColor(this.newTitle.trim() !== '' && !this.isCreating ? PMColors.BRAND : PMColors.INK_MUTED)
+                .backgroundColor(this.canCreateProject() ? PMColors.BRAND : PMColors.INK_MUTED)
                 .borderRadius(PMRadius.SM)
                 .height(48)
                 .margin({ left: PMSpacing.MD })
-                .enabled(this.newTitle.trim() !== '' && !this.isCreating)
+                .enabled(this.canCreateProject())
                 .onClick(() => {
                   this.submitCreateProject();
                 })
@@ -2630,10 +2670,14 @@ struct Index {
           }
           .width('100%')
           .padding(PMSpacing.LG)
+          .alignItems(HorizontalAlign.Start)
+          }
+          .width('100%')
+          .constraintSize({ maxHeight: '90%' })
+          .scrollable(ScrollDirection.Vertical)
           .backgroundColor(PMColors.SURFACE)
           .borderRadius(PMRadius.LG)
           .border({ width: 1, color: PMColors.BORDER })
-          .alignItems(HorizontalAlign.Start)
           .transition(TransitionEffect.OPACITY.combine(TransitionEffect.scale({ x: 0.96, y: 0.96 })).animation({ duration: PMMotion.LOCAL, curve: PMMotion.CURVE_CONTENT }))
         }
         .width('100%')

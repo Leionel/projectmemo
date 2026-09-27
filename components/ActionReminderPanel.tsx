@@ -78,7 +78,7 @@ export function ActionReminderPanel({
   const [revokeRequestId, setRevokeRequestId] = useState(() => crypto.randomUUID());
   const [durationMinutes, setDurationMinutes] = useState(30);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (options?: { preserveDraft?: boolean }) => {
     setLoading(true);
     try {
       const response = await fetch(
@@ -87,11 +87,15 @@ export function ActionReminderPanel({
       const data = await response.json().catch(() => null);
       if (!response.ok) throw new Error(data?.error?.message ?? "读取提醒状态失败");
       setState(data.state as ReminderState);
-      if (data.state?.reminder?.reminderAt) setReminderAt(toLocalInputValue(new Date(data.state.reminder.reminderAt)));
-      if (data.state?.durationMinutes) setDurationMinutes(data.state.durationMinutes);
+      if (!options?.preserveDraft) {
+        if (data.state?.reminder?.reminderAt) setReminderAt(toLocalInputValue(new Date(data.state.reminder.reminderAt)));
+        if (data.state?.durationMinutes) setDurationMinutes(data.state.durationMinutes);
+      }
       setError("");
+      return true;
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "读取提醒状态失败");
+      return false;
     } finally {
       setLoading(false);
     }
@@ -132,8 +136,10 @@ export function ActionReminderPanel({
         const code = data?.error?.code as string | undefined;
         // 版本过期 / 缺版本号：刷新最新状态，保留用户填的时间，让用户再点一次即可成功
         if (code === "REMINDER_REVISION_CHANGED" || code === "REMINDER_EXPECTED_REVISION_REQUIRED") {
-          await load();
-          setError(`${data?.error?.message ?? "提醒已被其他操作修改"}。你填的时间已保留，请再点一次保存。`);
+          const refreshed = await load({ preserveDraft: true });
+          setError(refreshed
+            ? `${data?.error?.message ?? "提醒已被其他操作修改"}。你填的时间已保留，请再点一次保存。`
+            : "提醒版本已变化，最新状态暂时读不到；你填的时间仍在，请刷新状态后再保存。");
           return;
         }
         if (code === "REQUEST_ID_REUSED") {

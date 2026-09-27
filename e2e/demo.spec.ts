@@ -94,7 +94,7 @@ test("project workspace provides direct navigation and priority shortcuts", asyn
   await page.getByRole("link", { name: /重点记录/ }).click();
   await expect(page.getByRole("button", { name: "重要", exact: true })).toHaveAttribute("aria-pressed", "true");
 
-  await page.getByRole("link", { name: /问忆程/ }).click();
+  await page.getByRole("navigation", { name: "项目页目录" }).getByRole("link", { name: "问忆程", exact: true }).click();
   await expect(page.getByLabel("问项目进展、提醒依据或下一步")).toBeVisible();
 });
 

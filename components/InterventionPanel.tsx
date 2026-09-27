@@ -88,19 +88,36 @@ export function InterventionPanel({ projectId, initialInterventions, demoEnabled
   /** 只依赖稳定的 ID 串，避免每次渲染都重跑上报 */
   const exposedIds = openItems.filter((item) => !item.isSimulated).map((item) => item.id).join(",");
 
-  // 曝光回执：提醒确实展示给用户才计一次；服务端按 interventionId 幂等去重，
-  // 提醒预算与抑制统计因此与鸿蒙端同一口径。上报失败不阻塞展示。
+  // 曝光回执：只把服务端确认的 ID 记为已上报；失败短暂重试，不阻塞提醒展示。
   useEffect(() => {
-    const pending = exposedIds.split(",").filter((id) => id !== "" && !reportedRef.current.has(id)).slice(0, 100);
-    if (pending.length === 0) return;
-    for (const id of pending) reportedRef.current.add(id);
-    fetch(`/api/projects/${projectId}/interventions/exposures`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ installationId: getDeviceKey(), interventionIds: pending }),
-    }).catch(() => {
-      for (const id of pending) reportedRef.current.delete(id);
-    });
+    const ids = exposedIds.split(",").filter((id) => id !== "" && !reportedRef.current.has(id));
+    if (ids.length === 0) return;
+    let cancelled = false;
+    void (async () => {
+      for (let offset = 0; offset < ids.length && !cancelled; offset += 100) {
+        let pending = ids.slice(offset, offset + 100).filter((id) => !reportedRef.current.has(id));
+        for (let attempt = 0; attempt < 3 && pending.length > 0 && !cancelled; attempt++) {
+          try {
+            const response = await fetch(`/api/projects/${projectId}/interventions/exposures`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ installationId: getDeviceKey(), interventionIds: pending }),
+            });
+            if (!response.ok) throw new Error("曝光回执未被服务端接受");
+            const data = await response.json();
+            const confirmed = new Set<string>(Array.isArray(data.confirmedIds) ? data.confirmedIds : []);
+            for (const id of confirmed) reportedRef.current.add(id);
+            pending = pending.filter((id) => !confirmed.has(id));
+          } catch {
+            // 网络错误和 HTTP 错误都不能被记成成功。
+          }
+          if (pending.length > 0 && attempt < 2 && !cancelled) {
+            await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+          }
+        }
+      }
+    })();
+    return () => { cancelled = true; };
   }, [exposedIds, projectId]);
 
   return <section id="interventions" aria-labelledby="interventions-title" className="scroll-mt-24 space-y-4">

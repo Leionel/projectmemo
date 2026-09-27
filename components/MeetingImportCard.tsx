@@ -25,7 +25,7 @@ const kindTone: Record<MeetingTypedChange["kind"], string> = {
 };
 
 /** 确认阶段遇到这些错误码说明预览已经过期：只能回到原文重新预览，不能就地重试写入 */
-const REPREVIEW_CODES = new Set(["STATE_CHANGED_REPREVIEW", "PROPOSAL_VERSION_MISMATCH", "PROPOSAL_EXECUTION_CONFLICT", "INVALID_SELECTION"]);
+const REPREVIEW_CODES = new Set(["STATE_CHANGED_REPREVIEW", "PROPOSAL_VERSION_MISMATCH", "INVALID_SELECTION"]);
 
 const sampleText = "例如：会上决定将方案A改为方案B。张三需要跟进测试报告。截止提前到 2026-10-01。";
 
@@ -113,7 +113,7 @@ export function MeetingImportCard({ projectId, stateEnabled }: { projectId: stri
         const code = String(data?.error?.code ?? "");
         // 预览已过期：保留会议原文，要求重新识别，绝不自动确认新版本
         if (REPREVIEW_CODES.has(code)) {
-          backToDraft("项目内容刚刚发生了变化，会议原文仍在；请重新点「看看识别到了什么」后再选择保存。");
+          backToDraft("这次预览已不能确认，会议原文仍在；请重新点「看看识别到了什么」后再选择保存。");
           setError(data?.error?.message ?? "");
           return;
         }

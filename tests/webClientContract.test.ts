@@ -46,7 +46,7 @@ describe("会议导入：预览 → 逐项勾选 → 确认", () => {
   it("预览过期时回到原文重新识别，不就地重试写入", () => {
     expect(source).toContain("STATE_CHANGED_REPREVIEW");
     expect(source).toContain("PROPOSAL_VERSION_MISMATCH");
-    expect(source).toContain("PROPOSAL_EXECUTION_CONFLICT");
+    expect(source).not.toMatch(/REPREVIEW_CODES = new Set\([^)]*PROPOSAL_EXECUTION_CONFLICT/);
     expect(source).toContain("backToDraft(");
   });
 
@@ -226,7 +226,7 @@ describe("项目页信息架构：核心路径有目录入口", () => {
   });
 
   it("工作台首屏给出 ProjectMemo Insight 与 60 秒再入场", () => {
-    expect(source).toContain("<ProjectInsightCard intervention={topIntervention} />");
+    expect(source).toContain("<ProjectInsightCard key={id} projectId={id} intervention={topIntervention} />");
     expect(source).toContain("<ReentryBrief");
     expect(source).toContain("isInterventionActive");
   });

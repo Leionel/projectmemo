@@ -29,6 +29,7 @@ export struct ActionReminderBlock {
 
   @State isLoading: boolean = true;
   @State state: ActionReminderState | null = null;
+  @State stateRefreshFailed: boolean = false;
   @State errorMessage: string = '';
   @State message: string = '';
   @State busy: string = '';
@@ -63,22 +64,28 @@ export struct ActionReminderBlock {
     }
   }
 
-  private async load(): Promise<void> {
+  private async load(preserveDraft: boolean = false): Promise<boolean> {
     this.isLoading = true;
     this.errorMessage = '';
     this.lastCleanup = null;
     try {
       const state = await this.service.load(this.projectId, this.actionId);
       this.state = state;
-      this.durationMinutes = state.durationMinutes > 0 ? state.durationMinutes : 30;
-      if (state.reminder !== null && state.reminder.reminderAt !== '') {
-        const existing = new Date(state.reminder.reminderAt);
-        this.selectedDate = existing;
-        this.selectedHour = existing.getHours();
-        this.selectedMinute = existing.getMinutes();
+      this.stateRefreshFailed = false;
+      if (!preserveDraft) {
+        this.durationMinutes = state.durationMinutes > 0 ? state.durationMinutes : 30;
+        if (state.reminder !== null && state.reminder.reminderAt !== '') {
+          const existing = new Date(state.reminder.reminderAt);
+          this.selectedDate = existing;
+          this.selectedHour = existing.getHours();
+          this.selectedMinute = existing.getMinutes();
+        }
       }
+      return true;
     } catch (e) {
+      this.stateRefreshFailed = true;
       this.errorMessage = e instanceof ApiError ? e.message : '提醒状态暂时读不到，请检查网络';
+      return false;
     } finally {
       this.isLoading = false;
     }
@@ -169,9 +176,11 @@ export struct ActionReminderBlock {
     } catch (e) {
       if (e instanceof ApiError && (e.code === 'REMINDER_REVISION_CHANGED' || e.code === 'REMINDER_EXPECTED_REVISION_REQUIRED')) {
         // 版本冲突：保留用户已填时间，重新拉取最新版本号，让用户再确认一次（不自动重试提交）
-        await this.load();
+        const refreshed = await this.load(true);
         this.pendingRequestId = '';
-        this.errorMessage = '提醒已被其他操作修改，已刷新，请再确认一次';
+        this.errorMessage = refreshed
+          ? '提醒已被其他操作修改；你选的时间已保留，请再确认一次'
+          : '提醒版本已变化，最新状态暂时读不到；你选的时间仍在，请刷新状态后再保存';
       } else {
         // 其它失败：保留 pendingRequestId 以便用户重试时用同一个意图编号
         this.errorMessage = e instanceof ApiError ? e.message : '保存计划时间失败，请重试';
@@ -490,7 +499,7 @@ export struct ActionReminderBlock {
                   .backgroundColor(PMColors.BRAND)
                   .height(48)
                   .layoutWeight(1)
-                  .enabled(this.busy === '')
+                  .enabled(this.busy === '' && !this.stateRefreshFailed)
                   .onClick(() => {
                     this.savePlanTime();
                   })
@@ -607,6 +616,16 @@ export struct ActionReminderBlock {
           .fontColor(PMColors.RISK)
           .lineHeight(18)
           .margin({ top: PMSpacing.SM })
+      }
+      if (this.stateRefreshFailed && this.state !== null) {
+        Button('刷新提醒状态')
+          .fontSize(PMFontSize.CAPTION)
+          .height(PMButtonSize.HEIGHT_SM)
+          .margin({ top: PMSpacing.SM })
+          .enabled(this.busy === '' && !this.isLoading)
+          .onClick(() => {
+            this.load(true);
+          })
       }
       if (this.state !== null && this.state.permissionPurpose !== '') {
         Text(this.state.permissionPurpose)

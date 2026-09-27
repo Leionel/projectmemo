@@ -70,17 +70,19 @@ export function ActionFeasibilityPanel({ projectId, action, otherActions, onActi
   const [candidates, setCandidates] = useState<Candidate[] | null>(null);
   const [draft, setDraft] = useState<{ kind: TargetKind; targetId: string; hard: boolean; note: string }>({ kind: "action", targetId: "", hard: true, note: "" });
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (options?: { preserveDraft?: boolean }) => {
     setLoading(true);
     try {
       const response = await fetch(`/api/projects/${projectId}/actions/feasibility?actionId=${encodeURIComponent(action.id)}`);
       const data = await response.json().catch(() => null);
       if (!response.ok) throw new Error(data?.error?.message ?? "读取可执行前提失败");
       setAssessment(data as Assessment);
-      setEstimate(data?.estimateMinutes != null ? String(data.estimateMinutes) : "");
+      if (!options?.preserveDraft) setEstimate(data?.estimateMinutes != null ? String(data.estimateMinutes) : "");
       setError("");
+      return true;
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "读取可执行前提失败");
+      return false;
     } finally {
       setLoading(false);
     }
@@ -107,8 +109,10 @@ export function ActionFeasibilityPanel({ projectId, action, otherActions, onActi
       if (!response.ok) {
         // 版本冲突：刷新到最新版本，保留用户填写的内容，让用户再点一次保存
         if (data?.error?.code === "FEASIBILITY_VERSION_CONFLICT") {
-          await load();
-          setError(`${data?.error?.message ?? "依赖已被其他编辑更新"}。你填写的内容已保留，请再保存一次。`);
+          const refreshed = await load({ preserveDraft: true });
+          setError(refreshed
+            ? `${data?.error?.message ?? "依赖已被其他编辑更新"}。你填写的内容已保留，请再保存一次。`
+            : "依赖版本已变化，最新状态暂时读不到；输入仍在，请重新评估后再保存。");
           return;
         }
         throw new Error(data?.error?.message ?? "保存失败，请稍后重试");

@@ -97,7 +97,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const corePath: Array<{ href: string; label: string; detail: string; icon: LucideIcon }> = [
     { href: "#capture-box", label: "记录", detail: "碎片与附件", icon: FileText },
     { href: "#meeting-import", label: "会议", detail: "预览后确认", icon: FileOutput },
-    { href: "#project-state", label: "对比", detail: "基线与变化", icon: Activity },
+    ...(stateEnabled ? [{ href: "#project-state", label: "对比", detail: "基线与变化", icon: Activity }] : []),
     { href: "#interventions", label: "介入", detail: "为什么是现在", icon: Sparkles },
     { href: "#action-board", label: "行动", detail: "依赖与安排", icon: CheckSquare },
     { href: `${projectPath}/generate`, label: "成果", detail: "逐句可追溯", icon: ClipboardCheck },
@@ -119,8 +119,8 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
     <ProjectPulse dashboard={dashboard} goal={project.goal} deadlineLabel={project.deadline ? project.deadline.toLocaleDateString("zh-CN") : "暂未设置"} />
 
-    <div className="mt-4"><ReentryBrief projectId={id} enabled={reentryEnabled} episodesEnabled={episodesEnabled} /></div>
-    <div className="mt-4"><ProjectInsightCard intervention={topIntervention} /></div>
+    <div className="mt-4"><ReentryBrief projectId={id} enabled={reentryEnabled} episodesEnabled={episodesEnabled} stateEnabled={stateEnabled} schedulingEnabled={schedulingEnabled} /></div>
+    <div className="mt-4"><ProjectInsightCard key={id} projectId={id} intervention={topIntervention} /></div>
 
     <nav aria-label="项目页目录" className="sticky top-3 z-20 mt-5 rounded-2xl border border-[var(--rule)] bg-[rgba(255,253,248,.94)] p-2 shadow-[var(--shadow-sm)] backdrop-blur">
       <div className="flex items-center gap-2 overflow-x-auto px-1 pb-0.5 [scrollbar-width:thin]">
@@ -161,7 +161,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     <div className="mt-4"><MeetingImportCard projectId={id} stateEnabled={stateEnabled} /></div>
     <div className="mt-4"><ProjectStateCard projectId={id} enabled={stateEnabled} /></div>
     <div className="mt-4"><EpisodeCheckpointCard projectId={id} enabled={episodesEnabled} reminderEnabled={reminderEnabled} /></div>
-    <div className="mt-4"><ProjectHealthCard projectId={id} enabled={healthEnabled} /></div>
+    <div className="mt-4"><ProjectHealthCard projectId={id} enabled={healthEnabled} stateEnabled={stateEnabled} /></div>
     <div className="mt-8"><InterventionPanel projectId={id} initialInterventions={interventionData} demoEnabled={process.env.DEMO_SCENARIOS !== "false"} /></div>
     <div className="mt-9 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
       <div className="min-w-0 space-y-8">

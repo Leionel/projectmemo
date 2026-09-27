@@ -40,7 +40,7 @@ function formatTime(value: string | null) {
  * 这里只做汇总，不另存一份项目事实；每个分区都带自己的状态，
  * 局部失败时如实标注并保留其余部分，不伪造一个空项目。
  */
-export function ReentryBrief({ projectId, enabled, episodesEnabled }: { projectId: string; enabled: boolean; episodesEnabled: boolean }) {
+export function ReentryBrief({ projectId, enabled, episodesEnabled, stateEnabled, schedulingEnabled }: { projectId: string; enabled: boolean; episodesEnabled: boolean; stateEnabled: boolean; schedulingEnabled: boolean }) {
   const [data, setData] = useState<ReentryData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -92,7 +92,9 @@ export function ReentryBrief({ projectId, enabled, episodesEnabled }: { projectI
     </section>;
   }
 
-  const target = primaryActionTarget[data.primaryAction] ?? primaryActionTarget.START_ACTION;
+  const target = data.primaryAction === "VIEW_CHANGES" && !stateEnabled
+    ? { href: "#capture-box", label: "补充项目进展" }
+    : primaryActionTarget[data.primaryAction] ?? primaryActionTarget.START_ACTION;
   const freshness = freshnessLabels[data.freshness] ?? freshnessLabels.EMPTY;
 
   return <section id="reentry-brief" aria-labelledby="reentry-title" className="card-surface scroll-mt-24 rounded-[1.5rem] p-5 sm:p-6">
@@ -146,7 +148,7 @@ export function ReentryBrief({ projectId, enabled, episodesEnabled }: { projectI
           </>
           : <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">还没有已确认的时间安排。</p>}
         {data.schedule.meta.status !== "OK" && data.schedule.meta.message && <p className="mt-1.5 text-[11px] font-semibold text-[var(--amber)]">{data.schedule.meta.message}</p>}
-        <a href="#schedule-planner" className="focus-ring mt-2 inline-block text-[11px] font-black text-[var(--teal-strong)] underline underline-offset-2">安排未来几天 →</a>
+        {schedulingEnabled && <a href="#schedule-planner" className="focus-ring mt-2 inline-block text-[11px] font-black text-[var(--teal-strong)] underline underline-offset-2">安排未来几天 →</a>}
       </div>
     </div>
 

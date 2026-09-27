@@ -136,13 +136,14 @@ export struct MeetingImportSheet {
       this.afterSnapshotId = result.afterSnapshotId !== null ? result.afterSnapshotId : '';
       this.stage = 'done';
     } catch (e) {
-      if (e instanceof ApiError && (e.code === 'STATE_CHANGED_REPREVIEW' || e.code === 'PROPOSAL_EXECUTION_CONFLICT')) {
-        // 409 只提示重新预览：保留会议原文和日期，不自动替用户确认新版事实。
-        this.errorMessage = '项目内容刚刚发生了变化，会议原文仍在；请重新点击“看看识别到了什么”后再选择保存';
+      if (e instanceof ApiError && (e.code === 'STATE_CHANGED_REPREVIEW' || e.code === 'PROPOSAL_VERSION_MISMATCH' || e.code === 'INVALID_SELECTION')) {
+        // 预览或选择已失效：保留会议原文和日期，不自动替用户确认新版事实。
+        this.errorMessage = '这次预览已不能确认，会议原文仍在；请重新点击“看看识别到了什么”后再选择保存';
         this.hasPreview = false;
         this.stage = 'draft';
         this.selectedIds = [];
       } else {
+        // PROPOSAL_EXECUTION_CONFLICT 表示同一提案正在确认；保留预览与选择，稍后可用原提案重试。
         this.errorMessage = e instanceof ApiError ? e.message : '确认失败，可重试同一次确认（不会重复写入）';
       }
     } finally {

@@ -50,12 +50,17 @@ const targetHref: Record<string, string> = {
   memory: "#knowledge-assets",
 };
 
-function hrefFor(finding: HealthFinding): string {
+function hrefFor(finding: HealthFinding, stateEnabled: boolean): string {
+  if (finding.suggestedTarget.kind === "state" && !stateEnabled) return "#capture-box";
   return targetHref[finding.suggestedTarget.kind] ?? "#main-content";
 }
 
+function actionLabelFor(finding: HealthFinding, stateEnabled: boolean): string {
+  return finding.suggestedTarget.kind === "state" && !stateEnabled ? "补充项目进展" : finding.suggestedAction;
+}
+
 /** 项目体检：只读聚合的当前问题清单，不展示「健康度 87 分」这类综合评分 */
-export function ProjectHealthCard({ projectId, enabled }: { projectId: string; enabled: boolean }) {
+export function ProjectHealthCard({ projectId, enabled, stateEnabled }: { projectId: string; enabled: boolean; stateEnabled: boolean }) {
   const [report, setReport] = useState<HealthReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -123,7 +128,7 @@ export function ProjectHealthCard({ projectId, enabled }: { projectId: string; e
       <p className="mt-2 text-sm font-black text-[var(--navy)]">{primary.title}</p>
       <p className="mt-1 text-xs leading-5 text-[var(--ink-soft)]">{primary.explanation}</p>
       <div className="mt-3 flex flex-wrap gap-2">
-        <a href={hrefFor(primary)} className="focus-ring editorial-button text-xs">处理最重要的问题</a>
+        <a href={hrefFor(primary, stateEnabled)} className="focus-ring editorial-button text-xs">{actionLabelFor(primary, stateEnabled)}</a>
         <button type="button" onClick={() => setShowAll((previous) => !previous)} className="focus-ring editorial-button-secondary text-xs">
           {showAll ? "收起检查结果" : "查看全部检查结果"}
         </button>
@@ -142,7 +147,7 @@ export function ProjectHealthCard({ projectId, enabled }: { projectId: string; e
             </div>
             <p className="mt-1 text-xs leading-5 text-[var(--ink-soft)]">{finding.explanation}</p>
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
-              <a href={hrefFor(finding)} className="focus-ring rounded-md bg-[var(--paper-strong)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)]">{finding.suggestedAction}</a>
+              <a href={hrefFor(finding, stateEnabled)} className="focus-ring rounded-md bg-[var(--paper-strong)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)]">{actionLabelFor(finding, stateEnabled)}</a>
               <span className="text-[11px] text-[var(--muted)]">发现于 {new Date(finding.observedAt).toLocaleString("zh-CN", { hour12: false })}</span>
             </div>
           </li>;

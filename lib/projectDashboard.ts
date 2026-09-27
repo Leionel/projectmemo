@@ -1,4 +1,4 @@
-export type WorkspaceArea = "actions" | "cards" | "interventions" | "artifacts" | "metrics" | "projects";
+export type WorkspaceArea = "actions" | "cards" | "interventions" | "artifacts" | "metrics" | "projects" | "episodes" | "schedule" | "state";
 
 export type WorkspaceChangeDetail = {
   projectId: string;

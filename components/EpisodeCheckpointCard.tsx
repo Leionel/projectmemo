@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { BookmarkCheck, CalendarClock, Check, ExternalLink, FileQuestion, History, ListPlus, LoaderCircle, RefreshCw, ShieldAlert, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ActionReminderPanel } from "@/components/ActionReminderPanel";
+import { emitWorkspaceChange } from "@/lib/client/workspaceEvents";
 
 type EpisodeSourceRef = {
   refId: string;
@@ -185,6 +186,7 @@ export function EpisodeCheckpointCard({ projectId, enabled, reminderEnabled = fa
       if (!response.ok) throw new Error(data?.error?.message ?? "生成新版本失败");
       setPreview({ episode: data.episode, scope: { includedCount: data.episode.revisions.at(-1)?.sourceRefs.length ?? 0, excludedReasons: [], contestedCount: 0, unknownCount: 0 } });
       setHistoryRevision(null);
+      emitWorkspaceChange(projectId, ["episodes"]);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "生成新版本失败");
     } finally {
@@ -209,6 +211,8 @@ export function EpisodeCheckpointCard({ projectId, enabled, reminderEnabled = fa
       setPreview(null);
       setMessage(`已确认 V${revision.revision}，成为当前阶段判断。`);
       await load();
+      // 检查点确认后，60 秒再入场与状态卡都读的是旧聚合：广播一次让它们重新拉取
+      emitWorkspaceChange(projectId, ["episodes", "cards", "metrics", "projects"]);
       router.refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "确认失败");

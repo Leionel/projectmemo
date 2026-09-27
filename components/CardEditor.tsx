@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { AlertTriangle, Eye, LoaderCircle, Pencil, Save, Trash2, X } from "lucide-react";
+import { AlertTriangle, Archive, Eye, LoaderCircle, Pencil, Save, ShieldCheck, Trash2, X } from "lucide-react";
 import { knowledgeTypeLabels, knowledgeTypes, getKnowledgeTypeColor, type KnowledgeTypeValue } from "@/lib/types";
 import { knowledgeCardDraftSchema } from "@/lib/validation/schemas";
 import { emitWorkspaceChange } from "@/lib/client/workspaceEvents";
@@ -33,7 +33,7 @@ function keywords(value: string) {
   return value.split(/[,，\n]/).map((item) => item.trim().replace(/^#/, "")).filter(Boolean);
 }
 
-export function CardEditor({ card }: { card: EditableCard }) {
+export function CardEditor({ card, onArchived }: { card: EditableCard; onArchived?: (title: string) => void }) {
   const router = useRouter();
   const { id: projectId } = useParams<{ id: string }>();
   const [panel, setPanel] = useState<Panel>(null);
@@ -44,8 +44,9 @@ export function CardEditor({ card }: { card: EditableCard }) {
   const [keywordText, setKeywordText] = useState(stringList(card.keywords).join("，"));
   const [taskText, setTaskText] = useState(stringList(card.relatedTasks).join("\n"));
   const [actionText, setActionText] = useState(stringList(card.nextActions).join("\n"));
-  const [busy, setBusy] = useState<"save" | "delete" | null>(null);
+  const [busy, setBusy] = useState<"save" | "delete" | "lifecycle" | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmArchive, setConfirmArchive] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
@@ -114,10 +115,42 @@ export function CardEditor({ card }: { card: EditableCard }) {
     }
   }
 
+  /**
+   * 记忆生命周期：确认来源是「来源声明」，不是事实证明；
+   * 归档只是展示偏好，不改变这条记录的时态状态，也不会复活已被取代的旧事实。
+   */
+  async function lifecycle(action: "CONFIRM" | "ARCHIVE") {
+    setBusy("lifecycle");
+    setError("");
+    setNotice("");
+    try {
+      const response = await fetch(`/api/projects/${projectId}/cards/${card.id}/lifecycle`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(action === "ARCHIVE" ? { action, reason: "在 Web 项目记忆中归档" } : { action }),
+      });
+      const data = response.headers.get("content-type")?.includes("application/json") ? await response.json() : null;
+      if (!response.ok) throw new Error(data?.error?.message ?? "操作失败，请稍后重试");
+      setConfirmArchive(false);
+      if (action === "CONFIRM") setNotice("已记录人工确认来源（来源声明，非事实证明）");
+      emitWorkspaceChange(projectId, ["cards", "metrics", "projects"]);
+      // 归档后这条记录会离开当前列表：结果交给列表层提示，用户才知道去哪里恢复
+      if (action === "ARCHIVE") onArchived?.(card.title);
+      router.refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "操作失败，请稍后重试");
+      setBusy(null);
+    }
+  }
+
   return <div className="mt-5 border-t archive-rule pt-4">
     <div className="flex flex-wrap items-center gap-2">
       <button type="button" onClick={() => open("source")} aria-expanded={panel === "source"} className="focus-ring inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-bold text-[var(--ink-soft)] transition hover:bg-[var(--paper-strong)] hover:text-[var(--navy)]"><Eye size={15} /> 查看原文</button>
       <button type="button" onClick={() => open("edit")} aria-expanded={panel === "edit"} className="focus-ring inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-bold text-[var(--ink-soft)] transition hover:bg-[var(--paper-strong)] hover:text-[var(--navy)]"><Pencil size={15} /> 纠正卡片</button>
+      <button type="button" onClick={() => void lifecycle("CONFIRM")} disabled={busy !== null} className="focus-ring inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-bold text-[var(--teal-strong)] transition hover:bg-[var(--teal-pale)] disabled:opacity-50">{busy === "lifecycle" ? <LoaderCircle size={15} className="animate-spin" /> : <ShieldCheck size={15} />} 确认来源</button>
+      {!confirmArchive
+        ? <button type="button" onClick={() => { setConfirmArchive(true); setConfirmDelete(false); }} disabled={busy !== null} className="focus-ring inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-bold text-[var(--ink-soft)] transition hover:bg-[var(--paper-strong)] hover:text-[var(--navy)] disabled:opacity-50"><Archive size={15} /> 归档</button>
+        : <span className="flex flex-wrap items-center gap-2 rounded-lg bg-[var(--paper-strong)] px-2.5 py-1.5 text-xs font-bold text-[var(--ink-soft)]">归档后离开列表，可在「已归档记忆」恢复<button type="button" onClick={() => void lifecycle("ARCHIVE")} disabled={busy !== null} className="focus-ring rounded-md bg-[var(--navy)] px-2 py-1 text-[11px] font-bold text-white disabled:opacity-50">{busy === "lifecycle" ? "归档中…" : "确认归档"}</button><button type="button" onClick={() => setConfirmArchive(false)} disabled={busy !== null} className="focus-ring rounded-md px-2 py-1 text-[11px] font-bold text-[var(--muted)]">取消</button></span>}
       <span role="status" aria-live="polite" className="ml-auto text-xs font-bold text-[var(--teal-strong)]">{notice}</span>
     </div>
 

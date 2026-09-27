@@ -1,18 +1,23 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { Archive, ArrowLeft, ArrowRight, Bot, BookmarkCheck, CalendarDays, CheckSquare, FileOutput, FileText, Goal, Sparkles, Star, type LucideIcon } from "lucide-react";
+import { Activity, Archive, ArrowLeft, ArrowRight, Bot, BookmarkCheck, CalendarDays, CheckSquare, ClipboardCheck, FileOutput, FileText, Goal, Sparkles, Star, type LucideIcon } from "lucide-react";
 import { ActionBoard } from "@/components/ActionBoard";
 import { AgentMetrics } from "@/components/AgentMetrics";
+import { ArchivedMemoryList } from "@/components/ArchivedMemoryList";
 import { CaptureBox } from "@/components/CaptureBox";
 import { CompetitionReadiness } from "@/components/CompetitionReadiness";
 import { EpisodeCheckpointCard } from "@/components/EpisodeCheckpointCard";
 import { InterventionPanel } from "@/components/InterventionPanel";
 import { KnowledgeFeed } from "@/components/KnowledgeFeed";
+import { MeetingImportCard } from "@/components/MeetingImportCard";
 import { MemoryCopilot } from "@/components/MemoryCopilot";
 import { MemoryConsolidationCard } from "@/components/MemoryConsolidationCard";
+import { ProjectInsightCard } from "@/components/ProjectInsightCard";
 import { ProjectSettings } from "@/components/ProjectSettings";
 import { ProjectPulse } from "@/components/ProjectPulse";
 import { ProjectHealthCard } from "@/components/ProjectHealthCard";
+import { ProjectStateCard } from "@/components/ProjectStateCard";
+import { ReentryBrief } from "@/components/ReentryBrief";
 import { SchedulePlanner } from "@/components/SchedulePlanner";
 import { AppError } from "@/lib/api";
 import { evaluateProjectContext } from "@/lib/services/agentContextService";
@@ -20,7 +25,7 @@ import { getProjectMetrics, listActions, listInterventions } from "@/lib/reposit
 import { getProjectDetail } from "@/lib/repositories/projects";
 import { getDecisionTimeline } from "@/lib/services/temporalLedgerService";
 import { scenarioOptions, getScenarioColor, type ActionItemData, type AgentEvidence, type InterventionData, type ProposedAction, type ProjectMetrics } from "@/lib/types";
-import { buildProjectDashboard } from "@/lib/projectDashboard";
+import { buildProjectDashboard, isInterventionActive } from "@/lib/projectDashboard";
 import { getSessionUser, hasProjectAccess } from "@/lib/auth/serverSession";
 import { isFeatureEnabled } from "@/lib/config/features";
 
@@ -80,9 +85,23 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const consolidationEnabled = isFeatureEnabled("PROJECT_MEMORY_CONSOLIDATION_ENABLED", false);
   const reminderEnabled = isFeatureEnabled("PROJECT_CALENDAR_REMINDER_ENABLED", false);
   const healthEnabled = isFeatureEnabled("PROJECT_HEALTH_ENABLED", true);
+  const stateEnabled = isFeatureEnabled("PROJECT_STATE_ENABLED", false);
+  const reentryEnabled = isFeatureEnabled("PROJECT_REENTRY_ENABLED", false);
+  const inboxEnabled = isFeatureEnabled("PROJECT_INBOX_ENABLED", true);
   const importantCardCount = project.cards.filter((card) => card.importance >= 4).length;
   const outline = project.artifacts.find((artifact) => String(artifact.artifactType) === "competition_outline");
   const latestArtifact = project.artifacts[0];
+  // 工作台首屏判断：当前最该看的一条主动提醒（与鸿蒙 ProjectMemo Insight 同一口径）
+  const topIntervention = interventionData.find((item) => isInterventionActive(item)) ?? null;
+  // 核心闭环路径：评委按这条顺序就能走完「记录 → 判断 → 行动 → 成果」
+  const corePath: Array<{ href: string; label: string; detail: string; icon: LucideIcon }> = [
+    { href: "#capture-box", label: "记录", detail: "碎片与附件", icon: FileText },
+    { href: "#meeting-import", label: "会议", detail: "预览后确认", icon: FileOutput },
+    { href: "#project-state", label: "对比", detail: "基线与变化", icon: Activity },
+    { href: "#interventions", label: "介入", detail: "为什么是现在", icon: Sparkles },
+    { href: "#action-board", label: "行动", detail: "依赖与安排", icon: CheckSquare },
+    { href: `${projectPath}/generate`, label: "成果", detail: "逐句可追溯", icon: ClipboardCheck },
+  ];
 
   return <main id="main-content" className="shell py-10 sm:py-12">
     <Link href="/projects" className="focus-ring inline-flex items-center gap-2 rounded-lg text-sm font-semibold text-[var(--ink-soft)] transition hover:text-[var(--navy)]"><ArrowLeft size={16} /> 返回项目列表</Link>
@@ -94,30 +113,53 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           <h1 className="mt-3 max-w-4xl text-3xl font-black tracking-tight [overflow-wrap:anywhere] sm:text-4xl">{project.title}</h1>
           <p className="mt-3 max-w-3xl leading-7 text-[var(--ink-soft)] [overflow-wrap:anywhere]">{project.description}</p>
         </div>
-        <div className="flex flex-wrap gap-3"><ProjectSettings project={{ id, title: project.title, description: project.description, goal: project.goal, scenario: project.scenario, deadline: project.deadline ? project.deadline.toISOString().slice(0, 10) : "", archivedAt: project.archivedAt ? project.archivedAt.toISOString() : null }} /><Link href={"/projects/" + id + "/generate"} className="focus-ring editorial-button shrink-0"><FileOutput size={18} /> 生成项目成果</Link></div>
+        <div className="flex flex-wrap gap-3"><a href="#meeting-import" className="focus-ring editorial-button-secondary shrink-0"><FileText size={18} /> 会议更新</a><ProjectSettings project={{ id, title: project.title, description: project.description, goal: project.goal, scenario: project.scenario, deadline: project.deadline ? project.deadline.toISOString().slice(0, 10) : "", archivedAt: project.archivedAt ? project.archivedAt.toISOString() : null }} /><Link href={"/projects/" + id + "/generate"} className="focus-ring editorial-button shrink-0"><FileOutput size={18} /> 生成项目成果</Link></div>
       </div>
     </header>
 
     <ProjectPulse dashboard={dashboard} goal={project.goal} deadlineLabel={project.deadline ? project.deadline.toLocaleDateString("zh-CN") : "暂未设置"} />
 
+    <div className="mt-4"><ReentryBrief projectId={id} enabled={reentryEnabled} episodesEnabled={episodesEnabled} /></div>
+    <div className="mt-4"><ProjectInsightCard intervention={topIntervention} /></div>
+
     <nav aria-label="项目页目录" className="sticky top-3 z-20 mt-5 rounded-2xl border border-[var(--rule)] bg-[rgba(255,253,248,.94)] p-2 shadow-[var(--shadow-sm)] backdrop-blur">
       <div className="flex items-center gap-2 overflow-x-auto px-1 pb-0.5 [scrollbar-width:thin]">
         <span className="shrink-0 px-2 text-xs font-black text-[var(--muted)]">项目大纲</span>
+        {reentryEnabled && <WorkspaceNavLink href="#reentry-brief" label="回到项目" icon={Goal} />}
         <WorkspaceNavLink href="#capture-box" label="记录进展" icon={FileText} />
+        <WorkspaceNavLink href="#meeting-import" label="会议更新" icon={FileOutput} />
+        {stateEnabled && <WorkspaceNavLink href="#project-state" label="状态变化" icon={Activity} />}
         {episodesEnabled && <WorkspaceNavLink href="#episode-checkpoint" label="阶段进展" icon={BookmarkCheck} />}
+        {healthEnabled && <WorkspaceNavLink href="#project-health" label="项目体检" icon={ClipboardCheck} />}
         <WorkspaceNavLink href="#interventions" label="主动提醒" count={openReminderCount} icon={Sparkles} />
         <WorkspaceNavLink href="#action-board" label="待办" count={openActionCount} icon={CheckSquare} />
+        {schedulingEnabled && <WorkspaceNavLink href="#schedule-planner" label="安排时间" icon={CalendarDays} />}
         <WorkspaceNavLink href="#knowledge-assets" label="知识资产" count={project.cards.length} icon={Star} />
         <WorkspaceNavLink href="#competition-readiness" label="参赛准备" count={dashboard.readiness.completed} icon={Goal} />
+        <WorkspaceNavLink href="#memory-copilot" label="问忆程" icon={Bot} />
         <WorkspaceNavLink href={`${projectPath}/generate`} label="成果" count={project._count.artifacts} icon={FileOutput} />
       </div>
     </nav>
 
-    <div className="mt-6"><CaptureBox projectId={id} /></div>
-    <section aria-label="常用项目入口" className="mt-4 rounded-[1.35rem] border border-[var(--rule)] bg-[var(--card-bg)] p-4 sm:p-5">
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]"><Link href={dashboard.nextAction.href} className={"focus-ring group flex min-w-0 items-center justify-between gap-4 rounded-2xl p-4 text-white shadow-[var(--shadow-sm)] transition hover:-translate-y-0.5 " + (dashboard.nextAction.tone === "critical" ? "bg-[var(--brick)]" : "bg-[var(--navy)]")}><span><span className="text-[11px] font-black uppercase tracking-[.14em] text-white/70">忆程建议下一步</span><span className="mt-1 block text-base font-black">{dashboard.nextAction.label}</span><span className="mt-1 block text-xs leading-5 text-white/75">{dashboard.nextAction.detail}</span></span><ArrowRight size={20} className="shrink-0 transition group-hover:translate-x-1" /></Link><div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3"><QuickJump href={`${projectPath}?cardSort=importance#knowledge-assets`} icon={Star} label="重点记录" detail={`${importantCardCount} 张`} /><QuickJump href={`${projectPath}/generate?type=competition_outline`} icon={FileOutput} label={outline ? "作品说明" : "生成大纲"} detail={outline ? "已有版本" : "尚未生成"} /><QuickJump href={`${projectPath}?openCopilot=1#memory-copilot`} icon={Bot} label="问忆程" detail="检索记忆" /></div></div>
+    <section aria-label="核心闭环路径" className="mt-4 rounded-[1.35rem] border border-[var(--rule)] bg-[var(--card-bg)] p-4 sm:p-5">
+      <p className="archive-label">核心闭环 · 人确认后才会写入</p>
+      <ol className="mt-3 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
+        {corePath.map((step, index) => <li key={step.label}>
+          <a href={step.href} className="focus-ring group flex h-full min-w-0 items-start gap-2.5 rounded-xl border border-[var(--glass-border)] bg-[var(--paper-strong)] px-3 py-2.5 transition hover:-translate-y-0.5 hover:border-[var(--teal)] hover:shadow-[var(--shadow-sm)]">
+            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[var(--teal-pale)] text-[11px] font-black text-[var(--teal-strong)] transition group-hover:bg-[var(--teal)] group-hover:text-white">{index + 1}</span>
+            <span className="min-w-0"><span className="flex items-center gap-1 text-xs font-black text-[var(--navy)]"><step.icon size={13} className="text-[var(--teal-strong)]" />{step.label}</span><span className="mt-0.5 block truncate text-[11px] text-[var(--ink-soft)]">{step.detail}</span></span>
+          </a>
+        </li>)}
+      </ol>
     </section>
 
+    <div className="mt-6"><CaptureBox projectId={id} inboxEnabled={inboxEnabled} /></div>
+    <section aria-label="常用项目入口" className="mt-4 rounded-[1.35rem] border border-[var(--rule)] bg-[var(--card-bg)] p-4 sm:p-5">
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]"><Link href={dashboard.nextAction.href} className={"focus-ring group flex min-w-0 items-center justify-between gap-4 rounded-2xl p-4 text-white shadow-[var(--shadow-sm)] transition hover:-translate-y-0.5 " + (dashboard.nextAction.tone === "critical" ? "bg-[var(--brick)]" : "bg-[var(--navy)]")}><span><span className="text-[11px] font-black uppercase tracking-[.14em] text-white/70">忆程建议下一步</span><span className="mt-1 block text-base font-black">{dashboard.nextAction.label}</span><span className="mt-1 block text-xs leading-5 text-white/75">{dashboard.nextAction.detail}</span></span><ArrowRight size={20} className="shrink-0 transition group-hover:translate-x-1" /></Link><div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2"><QuickJump href="#meeting-import" icon={FileText} label="整理会议内容" detail="预览后逐项确认" /><QuickJump href={`${projectPath}?cardSort=importance#knowledge-assets`} icon={Star} label="重点记录" detail={`${importantCardCount} 张`} /><QuickJump href={`${projectPath}/generate?type=competition_outline`} icon={FileOutput} label={outline ? "作品说明" : "生成大纲"} detail={outline ? "已有版本" : "尚未生成"} /><QuickJump href={`${projectPath}?openCopilot=1#memory-copilot`} icon={Bot} label="问忆程" detail="检索记忆" /></div></div>
+    </section>
+
+    <div className="mt-4"><MeetingImportCard projectId={id} stateEnabled={stateEnabled} /></div>
+    <div className="mt-4"><ProjectStateCard projectId={id} enabled={stateEnabled} /></div>
     <div className="mt-4"><EpisodeCheckpointCard projectId={id} enabled={episodesEnabled} reminderEnabled={reminderEnabled} /></div>
     <div className="mt-4"><ProjectHealthCard projectId={id} enabled={healthEnabled} /></div>
     <div className="mt-8"><InterventionPanel projectId={id} initialInterventions={interventionData} demoEnabled={process.env.DEMO_SCENARIOS !== "false"} /></div>
@@ -126,6 +168,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         <ActionBoard projectId={id} initialActions={actionData} reminderEnabled={reminderEnabled} />
         <SchedulePlanner projectId={id} enabled={schedulingEnabled} />
         <KnowledgeFeed projectId={id} cards={knowledgeCards} />
+        <ArchivedMemoryList projectId={id} />
         <MemoryConsolidationCard projectId={id} enabled={consolidationEnabled} />
         <CompetitionReadiness readiness={dashboard.readiness} />
         <MemoryCopilot projectId={id} />

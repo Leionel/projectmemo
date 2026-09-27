@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { CalendarClock, CalendarCheck2, Check, ChevronDown, LoaderCircle, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { subscribeWorkspaceChange, emitWorkspaceChange } from "@/lib/client/workspaceEvents";
 
 type ScheduleBlock = {
   id: string | null;
@@ -29,7 +30,7 @@ const reasonGroups: Array<{ key: string; label: string; codes: string[] }> = [
 
 const calendarLabels: Record<string, string> = {
   NONE: "",
-  PENDING: "日历写入中",
+  PENDING: "应用内已安排；等待鸿蒙客户端写入系统日历",
   SYNCED: "已写入系统日历",
   FAILED: "系统日历写入失败，仅应用内有效",
   REVOKED: "已从系统日历撤销",
@@ -84,6 +85,12 @@ export function SchedulePlanner({ projectId, enabled }: { projectId: string; ena
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (enabled) void load();
   }, [enabled, load]);
+
+  // 补齐预计用时或解阻待办后，可安排的行动会变：重新读取已确认安排，不要求用户刷新页面
+  useEffect(() => {
+    if (!enabled) return;
+    return subscribeWorkspaceChange(projectId, ["actions"], () => void load());
+  }, [enabled, load, projectId]);
 
   if (!enabled) return null;
 
@@ -145,6 +152,7 @@ export function SchedulePlanner({ projectId, enabled }: { projectId: string; ena
       setOpen(false);
       setMessage("未来安排已确认。");
       await load();
+      emitWorkspaceChange(projectId, ["schedule", "actions"]);
       router.refresh();
     } catch (caught) {
       // 确认失败保留预览与已填时间，用户改完可直接重新预览
@@ -168,6 +176,7 @@ export function SchedulePlanner({ projectId, enabled }: { projectId: string; ena
       if (!response.ok) throw new Error(data?.error?.message ?? "取消安排失败");
       setMessage("已取消当前安排，历史保留。");
       await load();
+      emitWorkspaceChange(projectId, ["schedule", "actions"]);
       router.refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "取消安排失败");

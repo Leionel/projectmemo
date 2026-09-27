@@ -42,11 +42,11 @@ const targetHref: Record<string, string> = {
   episode: "#episode-checkpoint",
   action: "#action-board",
   reminder: "#action-board",
-  state: "#capture-box",
-  meeting: "#interventions",
+  state: "#project-state",
+  meeting: "#meeting-import",
   deliverable: "#competition-readiness",
   card: "#knowledge-assets",
-  attachment: "#knowledge-assets",
+  attachment: "#capture-box",
   memory: "#knowledge-assets",
 };
 

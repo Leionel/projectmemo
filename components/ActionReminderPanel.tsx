@@ -236,6 +236,8 @@ export function ActionReminderPanel({
   const status = state.status;
   const needsPermissionHelp = status === "PERMISSION_DENIED";
   const unsupported = status === "UNSUPPORTED";
+  /** 计划时间已存在、但设备上还没有忆程创建的日程：这台浏览器写不了系统日历 */
+  const planAwaitingDeviceWrite = state.reminder !== null && state.reminder.calendarEventId === null && status !== "REVOKED";
   const decision = resolveReminderPanel({
     status,
     canArrange: state.canArrange,
@@ -288,6 +290,10 @@ export function ActionReminderPanel({
 
     {decision.requiresHarmonyDevice && <p className="mt-2 rounded-lg bg-[var(--paper-strong)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--ink-soft)]">
       浏览器不能读写系统日历，因此设备上的日程只能在鸿蒙客户端处理；忆程只会清理自己创建、「忆程·」开头的日程。
+    </p>}
+
+    {!decision.requiresHarmonyDevice && planAwaitingDeviceWrite && <p className="mt-2 rounded-lg bg-[var(--paper-strong)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--ink-soft)]">
+      计划时间只保存在忆程里。浏览器不能写系统日历，要收到设备提醒，请在鸿蒙客户端打开这条待办完成日历写入；在那之前设备日历一栏会一直显示「还没有写进设备日历」。
     </p>}
 
     {needsPermissionHelp && <p className="mt-2 rounded-lg bg-[var(--amber)]/10 px-2.5 py-1.5 text-[11px] font-semibold text-[var(--amber)]">

@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, CalendarClock, Check, Clock3, LoaderCircle, Play, RotateCcw, ShieldAlert, Sparkles, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { InterventionData, ProposedAction } from "@/lib/types";
 import { interventionStatusLabels, interventionTriggerLabels } from "@/lib/types";
 import { emitWorkspaceChange, subscribeWorkspaceChange } from "@/lib/client/workspaceEvents";
+import { getDeviceKey } from "@/lib/client/deviceKey";
 import { isInterventionActive } from "@/lib/projectDashboard";
 
 type Scenario = "deadline_48h" | "stale_72h" | "risk_cluster";
@@ -24,6 +25,8 @@ export function InterventionPanel({ projectId, initialInterventions, demoEnabled
   const [items, setItems] = useState(initialInterventions);
   const [busy, setBusy] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ text: string; href?: string; linkLabel?: string } | null>(null);
+  /** 已上报曝光的提醒 ID：避免同一条在每次列表刷新时重复上报 */
+  const reportedRef = useRef<Set<string>>(new Set());
 
   async function evaluate(scenario?: Scenario, clearSimulation = false) {
     setBusy(clearSimulation ? "clear" : scenario ?? "evaluate");
@@ -82,6 +85,24 @@ export function InterventionPanel({ projectId, initialInterventions, demoEnabled
 
   const openItems = items.filter((item) => isInterventionActive(item));
   const historyItems = items.filter((item) => !isInterventionActive(item)).slice(0, 8);
+  /** 只依赖稳定的 ID 串，避免每次渲染都重跑上报 */
+  const exposedIds = openItems.filter((item) => !item.isSimulated).map((item) => item.id).join(",");
+
+  // 曝光回执：提醒确实展示给用户才计一次；服务端按 interventionId 幂等去重，
+  // 提醒预算与抑制统计因此与鸿蒙端同一口径。上报失败不阻塞展示。
+  useEffect(() => {
+    const pending = exposedIds.split(",").filter((id) => id !== "" && !reportedRef.current.has(id)).slice(0, 100);
+    if (pending.length === 0) return;
+    for (const id of pending) reportedRef.current.add(id);
+    fetch(`/api/projects/${projectId}/interventions/exposures`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ installationId: getDeviceKey(), interventionIds: pending }),
+    }).catch(() => {
+      for (const id of pending) reportedRef.current.delete(id);
+    });
+  }, [exposedIds, projectId]);
+
   return <section id="interventions" aria-labelledby="interventions-title" className="scroll-mt-24 space-y-4">
     <div className="flex flex-wrap items-end justify-between gap-3">
       <div><div className="mb-2 flex flex-wrap items-center gap-2"><Sparkles size={18} className="text-[var(--teal-strong)]" /><h2 id="interventions-title" className="text-lg font-black">忆程主动提醒</h2><span className="paper-tab px-2 py-1 text-xs font-bold text-[var(--teal-strong)]">上下文 Agent</span></div><p className="max-w-2xl text-sm leading-6 text-[var(--ink-soft)]">提醒不是静态建议：每条都有触发规则、证据卡片和可确认的行动，完成后会自动沉淀复盘。</p></div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { emitWorkspaceChange } from "@/lib/client/workspaceEvents";
+import { AttachmentInbox } from "@/components/AttachmentInbox";
 import { CheckCircle2, LoaderCircle, Save, Sparkles } from "lucide-react";
 
 const sources = [
@@ -22,7 +23,7 @@ function newRequestId() {
   return `capture-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-export function CaptureBox({ projectId }: { projectId: string }) {
+export function CaptureBox({ projectId, inboxEnabled = true }: { projectId: string; inboxEnabled?: boolean }) {
   const router = useRouter();
   const draftKey = `projectmemo:capture:${projectId}`;
   const [text, setText] = useState("");
@@ -207,22 +208,6 @@ export function CaptureBox({ projectId }: { projectId: string }) {
             )}
           </div>
           <div className="flex items-center gap-3">
-            <label className="focus-ring flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-[var(--rule-strong)] bg-[var(--card-bg)] px-4 py-2.5 text-sm font-bold text-[var(--ink)] shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--teal)] hover:bg-[var(--paper-strong)]">
-              <input
-                type="file"
-                accept=".txt,.md,.pdf,.csv,.json,.docx"
-                className="hidden"
-                onChange={(e) => {
-                  if (e.target.files?.[0]) {
-                    setMessage({
-                      ok: true,
-                      text: `已选中文件：${e.target.files[0].name} (即将支持解析)`,
-                    });
-                  }
-                }}
-              />
-              <span>上传文档资料</span>
-            </label>
             <button
               disabled={loading || text.trim().length < 5}
               className="focus-ring editorial-button disabled:cursor-not-allowed disabled:opacity-50"
@@ -237,6 +222,7 @@ export function CaptureBox({ projectId }: { projectId: string }) {
           </div>
         </div>
       </form>
+      <AttachmentInbox projectId={projectId} enabled={inboxEnabled} />
     </section>
   );
 }

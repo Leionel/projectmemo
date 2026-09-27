@@ -2,9 +2,10 @@
 
 import { useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Check, Clipboard, Code2, Download, Eye, FileOutput, LoaderCircle, Save, X } from "lucide-react";
+import { Check, Clipboard, Code2, Download, Eye, FileOutput, LoaderCircle, Save, ScanSearch, X } from "lucide-react";
 import { artifactTypeLabels, artifactTypes, type ArtifactTypeValue } from "@/lib/types";
 import { emitWorkspaceChange } from "@/lib/client/workspaceEvents";
+import { ArtifactAuditPanel } from "@/components/ArtifactAuditPanel";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 
 type Artifact = { id: string; artifactType: string; content: string; createdAt: Date | string };
@@ -23,6 +24,7 @@ export function ArtifactGenerator({ projectId, initialArtifacts }: { projectId: 
   const [editing, setEditing] = useState(false);
   const [viewMode, setViewMode] = useState<"preview" | "source">("preview");
   const [editContent, setEditContent] = useState("");
+  const [auditOpen, setAuditOpen] = useState(false);
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState("");
   const resultRef = useRef<HTMLElement>(null);
@@ -31,7 +33,7 @@ export function ArtifactGenerator({ projectId, initialArtifacts }: { projectId: 
 
   function selectType(nextType: ArtifactTypeValue) {
     if (busy || editing) return;
-    setType(nextType); setCurrent(artifacts.find((artifact) => artifact.artifactType === nextType) ?? null); setError(""); setFeedback("");
+    setType(nextType); setCurrent(artifacts.find((artifact) => artifact.artifactType === nextType) ?? null); setError(""); setFeedback(""); setAuditOpen(false);
     router.replace(`${pathname}?type=${nextType}`, { scroll: false });
   }
 
@@ -130,10 +132,12 @@ export function ArtifactGenerator({ projectId, initialArtifacts }: { projectId: 
               <button type="button" aria-pressed={viewMode === "preview"} onClick={() => setViewMode("preview")} className={`focus-ring inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-black transition ${viewMode === "preview" ? "bg-[var(--card-bg)] text-[var(--teal-strong)] shadow-[var(--shadow-sm)]" : "text-[var(--muted)] hover:text-[var(--navy)]"}`}><Eye size={15} />渲染预览</button>
               <button type="button" aria-pressed={viewMode === "source"} disabled={busy} onClick={() => editing ? setViewMode("source") : startEditing()} className={`focus-ring inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-60 ${viewMode === "source" ? "bg-[var(--navy)] text-white shadow-[var(--shadow-sm)]" : "text-[var(--muted)] hover:text-[var(--navy)]"}`}><Code2 size={15} />Markdown 编辑</button>
             </div>
+            <button type="button" onClick={() => setAuditOpen((value) => !value)} disabled={busy || editing} aria-pressed={auditOpen} className="focus-ring editorial-button-secondary disabled:cursor-not-allowed disabled:opacity-60"><ScanSearch size={16} />证据透视</button>
             <button onClick={copy} disabled={busy || editing} className="focus-ring editorial-button-secondary disabled:cursor-not-allowed disabled:opacity-60"><Clipboard size={16} />复制文本</button>
             <button onClick={download} disabled={busy || editing} className="focus-ring editorial-button-secondary disabled:cursor-not-allowed disabled:opacity-60"><Download size={16} />导出 .md</button>
           </div>
         </div>
+        {auditOpen && !editing && <ArtifactAuditPanel key={current.id} projectId={projectId} artifactId={current.id} onClose={() => setAuditOpen(false)} />}
         {feedback && <p className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[var(--teal-pale)] px-3 py-2 text-sm font-bold text-[var(--teal-strong)]"><Check size={16} />{feedback}</p>}
         <div className="mt-6">
           {editing && <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[var(--teal)] bg-[var(--teal-pale)] px-4 py-3"><span className="text-sm font-black text-[var(--teal-strong)]">正在编辑未保存的 Markdown 草稿</span><span className="text-xs text-[var(--ink-soft)]">可切换预览检查排版；保存后新增版本，原版本不变</span></div>}

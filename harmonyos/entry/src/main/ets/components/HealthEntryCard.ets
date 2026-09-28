@@ -165,10 +165,16 @@ export struct HealthEntryCard {
         }
 
         if (this.report !== null) {
+          if (!this.isLoading && this.errorMessage !== '') {
+            Text('本次体检未完成，下方为上次结果；状态可能已变化。')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.WARNING)
+              .margin({ top: PMSpacing.SM })
+          }
           if (this.total() === 0) {
-            Text('当前没有需要立即处理的问题')
+            Text(this.isLoading || this.errorMessage !== '' ? '上次体检未发现需立即处理的问题' : '当前没有需要立即处理的问题')
               .fontSize(PMFontSize.BODY)
-              .fontColor(PMColors.SUCCESS)
+              .fontColor(this.isLoading || this.errorMessage !== '' ? PMColors.INK_SECONDARY : PMColors.SUCCESS)
               .margin({ top: PMSpacing.SM })
           } else {
             Row() {

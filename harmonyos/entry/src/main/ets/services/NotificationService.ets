@@ -5,7 +5,7 @@ import { ApiClient } from './ApiClient';
 
 export interface NotificationOpResult {
   success: boolean;
-  status: 'SCHEDULED' | 'PUBLISHED' | 'SKIPPED_LOW_SEVERITY' | 'PERMISSION_DENIED' | 'UNSUPPORTED' | 'FAILED';
+  status: 'SCHEDULED' | 'PUBLISHED' | 'SKIPPED_SIMULATED' | 'SKIPPED_LOW_SEVERITY' | 'PERMISSION_DENIED' | 'UNSUPPORTED' | 'FAILED';
   message: string;
 }
 
@@ -94,6 +94,9 @@ export class NotificationService {
   }
 
   async publishInterventionNotification(intervention: Intervention, projectId: string): Promise<NotificationOpResult> {
+    if (intervention.isSimulated) {
+      return { success: false, status: 'SKIPPED_SIMULATED', message: '演示情境不发送系统通知' };
+    }
     if (intervention.severity < 4) {
       const result: NotificationOpResult = { success: false, status: 'SKIPPED_LOW_SEVERITY', message: '当前严重程度无需系统级即时打扰' };
       this.reportDelivery(intervention, projectId, result);
@@ -144,6 +147,9 @@ export class NotificationService {
    * 严禁将未来 deliveryTime 直接传给 publish 伪装定时发送；返回具体调度状态供页面提示。
    */
   async scheduleInterventionNotification(intervention: Intervention, projectId: string, deliveryTime: number): Promise<NotificationOpResult> {
+    if (intervention.isSimulated) {
+      return { success: false, status: 'SKIPPED_SIMULATED', message: '演示情境不安排系统通知' };
+    }
     await this.cancelInterventionNotification(intervention.id, projectId);
 
     if (deliveryTime <= Date.now()) {

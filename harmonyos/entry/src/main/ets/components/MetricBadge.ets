@@ -18,18 +18,20 @@ export struct SeverityBadge {
           return '低优先级';
       }
     }
-    if (this.severity >= 3) {
-      return '高风险';
-    }
-    if (this.severity === 2) {
-      return '中优先级';
-    }
-    return '低优先级';
+    return TextFormatters.severityToChinese(this.severity);
+  }
+
+  private isHigh(): boolean {
+    return this.level !== '' ? this.level.toUpperCase() === 'HIGH' : this.severity >= 4;
+  }
+
+  private isMedium(): boolean {
+    return this.level !== '' ? this.level.toUpperCase() === 'MEDIUM' : this.severity >= 2;
   }
 
   private getBgColor(): ResourceColor {
-    const isHigh = this.level.toUpperCase() === 'HIGH' || this.severity >= 3;
-    const isMed = this.level.toUpperCase() === 'MEDIUM' || this.severity === 2;
+    const isHigh = this.isHigh();
+    const isMed = this.isMedium();
     if (isHigh) {
       return PMColors.RISK_LIGHT;
     }
@@ -40,8 +42,8 @@ export struct SeverityBadge {
   }
 
   private getTextColor(): ResourceColor {
-    const isHigh = this.level.toUpperCase() === 'HIGH' || this.severity >= 3;
-    const isMed = this.level.toUpperCase() === 'MEDIUM' || this.severity === 2;
+    const isHigh = this.isHigh();
+    const isMed = this.isMedium();
     if (isHigh) {
       return PMColors.RISK;
     }

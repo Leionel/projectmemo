@@ -1042,7 +1042,7 @@ struct Index {
   private visibleOpenInterventions(): Intervention[] {
     const q = this.globalSearchQuery.trim().toLowerCase();
     return this.allInterventions.filter((i) => {
-      if (i.status !== 'OPEN') {
+      if (i.status !== 'OPEN' || i.isSimulated) {
         return false;
       }
       return q === '' || i.title.toLowerCase().includes(q) || i.content.toLowerCase().includes(q);
@@ -1052,7 +1052,7 @@ struct Index {
   private visibleOpenActions(): ActionItem[] {
     const q = this.globalSearchQuery.trim().toLowerCase();
     return this.allActions.filter((a) => {
-      if (a.status === 'DONE') {
+      if (a.status === 'DONE' || a.isSimulated) {
         return false;
       }
       return q === '' || a.title.toLowerCase().includes(q);
@@ -1303,7 +1303,7 @@ struct Index {
     Column() {
       // 提醒 vs 待办行动 分类切换
       Row() {
-        Button(`主动提醒 (${this.allInterventions.filter((i) => i.status === 'OPEN').length})`)
+        Button(`主动提醒 (${this.allInterventions.filter((i) => i.status === 'OPEN' && !i.isSimulated).length})`)
           .fontSize(PMFontSize.BODY)
           .fontWeight(FontWeight.Medium)
           .fontColor(this.taskTabFilter === 'REMINDERS' ? PMColors.BRAND : PMColors.INK_SECONDARY)
@@ -1317,7 +1317,7 @@ struct Index {
             this.taskTabFilter = 'REMINDERS';
           })
 
-        Button(`待办行动 (${this.allActions.filter((a) => a.status !== 'DONE').length})`)
+        Button(`待办行动 (${this.allActions.filter((a) => a.status !== 'DONE' && !a.isSimulated).length})`)
           .fontSize(PMFontSize.BODY)
           .fontWeight(FontWeight.Medium)
           .fontColor(this.taskTabFilter === 'ACTIONS' ? PMColors.BRAND : PMColors.INK_SECONDARY)

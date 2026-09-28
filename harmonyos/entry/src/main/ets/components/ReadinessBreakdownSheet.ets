@@ -145,7 +145,8 @@ export struct ReadinessBreakdownSheet {
                 .fontSize(PMFontSize.SECONDARY)
                 .fontColor(PMColors.INK_SECONDARY)
                 .layoutWeight(1)
-              Text(`${this.completedCount()} ÷ ${this.readiness.items.length} ≈ ${this.readiness.percentage}%`)
+              Text(this.readiness.items.length === 0 ? '暂无可计算清单' :
+                `${this.completedCount()} ÷ ${this.readiness.items.length} ≈ ${this.readiness.percentage}%`)
                 .fontSize(PMFontSize.SECONDARY)
                 .fontWeight(FontWeight.Bold)
                 .fontColor(PMColors.INK_PRIMARY)

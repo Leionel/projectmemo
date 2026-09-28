@@ -60,6 +60,10 @@ sudo nginx -t && sudo systemctl reload nginx
 
 ## 更新发布（已部署机器）
 
+网页版与鸿蒙端共用此 Next.js 服务和数据库。启用网页版时，先部署包含网页登录页更新的固定提交，再安装该提交的 `projectmemo.nginx.conf` 并运行 `nginx -t`；配置会把 `/`、`/login`、`/projects` 和 Next.js 静态资源转发至本机 4400，保留 `/api/settings*` 的公网 404、登录限流及原有业务 API 规则。不要只改 Nginx 而继续使用展示默认演示密码的旧网页构建。
+
+上线后从公网检查：`/` 与 `/login` 应返回网页，未登录访问 `/projects` 应跳转到登录页，`/api/projects` 应返回 401，`/api/settings` 应返回 404，`/health` 应保持原有版本号。用专用评审账号验证登录与项目列表；不要用真实个人项目作共享演示。
+
 固定顺序：`checkout → prisma generate → build → migrate deploy → restart`。两个必须注意的点：
 
 1. `lib/generated/prisma` 在 `.gitignore` 里，**每次切换 commit 后都要重新 `prisma generate`**，

@@ -2,7 +2,7 @@ import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction } from '../com
 import { MeetingAppliedChange, MeetingConfirmBody, MeetingConfirmResult, MeetingImpactPreview, MeetingPreviewInput, MeetingTypedChange } from '../models/Meeting';
 import { ApiError } from '../models/Project';
 import { MeetingService } from '../services/MeetingService';
-import { CheckboxIcon } from './PMIcons';
+import { CheckboxIcon, PaperclipIcon } from './PMIcons';
 import { DateOnly } from '../common/DateOnly';
 
 // E5：会议文本导入。粘贴 → 预览（逐项勾选，待澄清项禁确认）→ 原子确认 → 会后 Diff。
@@ -10,6 +10,10 @@ import { DateOnly } from '../common/DateOnly';
 @Component
 export struct MeetingImportSheet {
   @Prop projectId: string = '';
+  @Prop @Watch('onInjectedTextChange') injectedText: string = '';
+  @Prop isUploadingAttachment: boolean = false;
+  @Prop uploadFeedback: string = '';
+  onRequestUpload: () => void = () => {};
   @State draftText: string = '';
   @State meetingDate: string = '';
   @State preview: MeetingImpactPreview = new MeetingImpactPreview();
@@ -224,6 +228,13 @@ export struct MeetingImportSheet {
     .opacity(change.status === 'NEEDS_CLARIFICATION' ? 0.9 : 1)
   }
 
+  onInjectedTextChange(): void {
+    if (this.injectedText === '') {
+      return;
+    }
+    this.draftText = this.draftText === '' ? this.injectedText : `${this.draftText}\n${this.injectedText}`;
+  }
+
   build() {
     Column() {
         Row() {
@@ -368,6 +379,33 @@ export struct MeetingImportSheet {
             .fontColor(PMColors.INK_TERTIARY)
             .lineHeight(16)
             .margin({ top: PMSpacing.XS })
+
+          Row() {
+            Row() {
+              PaperclipIcon({ iconSize: 18, color: PMColors.BRAND })
+            }
+            .width(48)
+            .height(44)
+            .justifyContent(FlexAlign.Center)
+            .backgroundColor(PMColors.BRAND_LIGHT)
+            .borderRadius(PMRadius.SM)
+            .clickEffect(PMInteraction.PRESS_EFFECT)
+            .enabled(!this.isUploadingAttachment)
+            .onClick(() => {
+              this.onRequestUpload();
+            })
+            .accessibilityText('上传会议照片或 PDF 附件')
+
+            Text(this.isUploadingAttachment ? '正在上传并识别…' :
+              (this.uploadFeedback !== '' ? this.uploadFeedback : '可上传会议照片或 PDF，识别内容自动填入'))
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+              .layoutWeight(1)
+              .margin({ left: PMSpacing.SM })
+          }
+          .width('100%')
+          .alignItems(VerticalAlign.Center)
+          .margin({ top: PMSpacing.SM })
 
           TextArea({ text: this.draftText, placeholder: '例如：会上决定将方案A改为方案B。张三需要完成测试报告。截止提前到 2026-10-01。' })
             .onChange((v: string) => {

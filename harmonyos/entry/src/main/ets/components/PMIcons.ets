@@ -361,9 +361,13 @@ export struct CheckIcon {
   build() {
     Stack() {
       Text('✓')
-        .fontSize(11)
+        .fontSize(this.iconSize * 0.72)
+        .lineHeight(this.iconSize)
+        .textAlign(TextAlign.Center)
         .fontWeight(FontWeight.Bold)
         .fontColor(this.color)
+        .width('100%')
+        .height('100%')
     }
     .width(this.iconSize)
     .height(this.iconSize)

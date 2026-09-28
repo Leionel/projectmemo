@@ -111,6 +111,7 @@ struct ProjectHome {
   @State showDemoControls: boolean = false;
   // 单一半模态入口：同一时刻只挂载一个 bindSheet，按模式渲染记录/会议
   @State showEntrySheet: boolean = false;
+  @State meetingInjectedText: string = '';
   @State entrySheetMode: string = 'capture'; // 'capture' | 'meeting'
   @State showChangeImpactDialog: boolean = false;
   @State showClaimAuditor: boolean = false;
@@ -395,6 +396,7 @@ struct ProjectHome {
       if (result.isDuplicate && result.attachment.extractionStatus === 'SUCCESS') {
         this.attachmentFeedback = '该附件已存在，已复用原记录';
         this.attachmentFeedbackTone = 'success';
+        this.injectExtractedIntoMeeting(result.attachment.extractedText);
       } else if (result.isDuplicate) {
         this.attachmentFeedback = '该附件已存在，已复用原记录；当前提取未完成';
         this.attachmentFeedbackTone = result.attachment.extractionStatus === 'NEEDS_OCR' ? 'warning' : 'error';
@@ -402,6 +404,7 @@ struct ProjectHome {
       } else if (result.attachment.extractionStatus === 'SUCCESS') {
         this.attachmentFeedback = '附件已归档并沉淀为项目记忆';
         this.attachmentFeedbackTone = 'success';
+        this.injectExtractedIntoMeeting(result.attachment.extractedText);
       } else if (result.attachment.extractionStatus === 'NEEDS_OCR') {
         this.attachmentFeedback = '附件已保存；当前环境需要 OCR，未生成伪造记忆';
         this.attachmentFeedbackTone = 'warning';
@@ -417,6 +420,13 @@ struct ProjectHome {
       this.attachmentFeedbackTone = 'error';
     } finally {
       this.isUploadingAttachment = false;
+    }
+  }
+
+  /** 会议面板打开时，把附件识别文本填入会议草稿；同一文本重复注入不触发 @Watch，属可接受边界 */
+  private injectExtractedIntoMeeting(text: string): void {
+    if (this.entrySheetMode === 'meeting' && this.showEntrySheet && text !== '') {
+      this.meetingInjectedText = text;
     }
   }
 
@@ -3391,6 +3401,12 @@ struct ProjectHome {
     if (this.entrySheetMode === 'meeting') {
       MeetingImportSheet({
         projectId: this.projectId,
+        injectedText: this.meetingInjectedText,
+        isUploadingAttachment: this.isUploadingAttachment,
+        uploadFeedback: this.attachmentFeedback,
+        onRequestUpload: () => {
+          void this.openUploadMenu();
+        },
         onClose: () => {
           this.showEntrySheet = false;
           this.loadAllData();
@@ -3414,10 +3430,14 @@ struct ProjectHome {
             .fontSize(PMFontSize.SECTION_TITLE)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.INK_PRIMARY)
-          Text(`记录实验、导师意见和材料，并保留来源 · 已积累 ${this.project._count.cards} 条记忆`)
+          Text('记录实验、导师意见和材料，并保留来源')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_TERTIARY)
             .margin({ top: PMSpacing.XS })
+          Text(`已积累 ${this.project._count.cards} 条记忆`)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+            .margin({ top: 2 })
         }
         .alignItems(HorizontalAlign.Start)
         .layoutWeight(1)
@@ -3426,6 +3446,10 @@ struct ProjectHome {
           .fontSize(PMFontSize.BODY)
           .fontColor(PMColors.INK_TERTIARY)
           .backgroundColor('transparent')
+          .width(32)
+          .height(32)
+          .padding(0)
+          .margin({ right: -PMSpacing.XS })
           .onClick(() => {
             this.showEntrySheet = false;
           })
@@ -4304,21 +4328,6 @@ struct ProjectHome {
 
               // 单待办日历提醒只有一套实现（ActionReminderBlock + ReminderService），
               // 项目页与行动安排页共用同一服务契约与状态文案；ActionItem.dueAt 是截止时间，不作为设备日历写入回执。
-              if (this.reminderAvailable && (action.status === 'TODO' || action.status === 'DOING')) {
-                Button(this.actionReminderCardId === action.id ? '收起提醒设置' : '日历提醒')
-                  .fontSize(PMFontSize.BUTTON)
-                  .fontColor(PMColors.BRAND)
-                  .backgroundColor(PMColors.BRAND_LIGHT)
-                  .borderRadius(PMRadius.SM)
-                  .height(36)
-                  .width('100%')
-                  .margin({ top: PMSpacing.MD })
-                  .accessibilityDescription('打开这条待办的日历提醒设置')
-                  .onClick(() => {
-                    this.actionReminderCardId = this.actionReminderCardId === action.id ? '' : action.id;
-                  })
-              }
-
               if (this.reminderAvailable && this.actionReminderCardId === action.id) {
                 ActionReminderBlock({
                   projectId: this.projectId,
@@ -4334,7 +4343,20 @@ struct ProjectHome {
                 })
               }
               if (action.status === 'TODO' || action.status === 'DOING') {
-                Row() {
+                Row({ space: PMSpacing.SM }) {
+                  if (this.reminderAvailable) {
+                    Button(this.actionReminderCardId === action.id ? '收起提醒设置' : '日历提醒')
+                      .fontSize(PMFontSize.BUTTON)
+                      .fontColor(PMColors.BRAND)
+                      .backgroundColor(PMColors.BRAND_LIGHT)
+                      .borderRadius(PMRadius.SM)
+                      .height(36)
+                      .layoutWeight(1)
+                      .accessibilityDescription('打开这条待办的日历提醒设置')
+                      .onClick(() => {
+                        this.actionReminderCardId = this.actionReminderCardId === action.id ? '' : action.id;
+                      })
+                  }
                   if (action.status === 'TODO') {
                     Button(this.startingActionId === action.id ? '启动中...' : '开始行动')
                       .fontSize(PMFontSize.BUTTON)
@@ -4343,6 +4365,7 @@ struct ProjectHome {
                       .border({ width: 1, color: PMColors.BORDER })
                       .borderRadius(PMRadius.SM)
                       .height(36)
+                      .layoutWeight(1)
                       .enabled(this.startingActionId === '')
                       .onClick(() => {
                         this.startAction(action.id);
@@ -4356,14 +4379,12 @@ struct ProjectHome {
                     .backgroundColor(PMColors.BRAND)
                     .borderRadius(PMRadius.SM)
                     .height(36)
-                    .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
-                    .margin({ left: action.status === 'TODO' ? PMSpacing.SM : 0 })
+                    .layoutWeight(1.2)
                     .onClick(() => {
                       this.openCompleteDialog(action.id);
                     })
                 }
                 .width('100%')
-                .justifyContent(FlexAlign.End)
                 .margin({ top: PMSpacing.MD })
               }
             }

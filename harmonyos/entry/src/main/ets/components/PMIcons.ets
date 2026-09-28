@@ -406,11 +406,18 @@ export struct PaperclipIcon {
   build() {
     Stack() {
       Row()
-        .width(this.iconSize * 0.45)
-        .height(this.iconSize * 0.75)
+        .width(this.iconSize * 0.5)
+        .height(this.iconSize * 0.85)
         .border({ width: 1.5, color: this.color })
-        .borderRadius({ topLeft: 4, topRight: 4, bottomLeft: 4, bottomRight: 4 })
+        .borderRadius(this.iconSize * 0.25)
         .rotate({ angle: -30 })
+      Row()
+        .width(this.iconSize * 0.26)
+        .height(this.iconSize * 0.5)
+        .border({ width: 1.5, color: this.color })
+        .borderRadius(this.iconSize * 0.13)
+        .rotate({ angle: -30 })
+        .translate({ x: this.iconSize * 0.06, y: -this.iconSize * 0.06 })
     }
     .width(this.iconSize)
     .height(this.iconSize)

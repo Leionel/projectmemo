@@ -91,6 +91,7 @@ struct ProjectHome {
 
   // 通用状态
   @State isLoading: boolean = false;
+  @State hasLoadedProjectSnapshot: boolean = false;
   @State errorMessage: string = '';
   @State routeError: string = '';
 
@@ -508,10 +509,11 @@ struct ProjectHome {
 
       // S07: 对高风险介入派发/更新本地系统通知
       for (const interv of this.interventions) {
-        if (interv.severity >= 4 && interv.status === 'OPEN') {
+        if (!interv.isSimulated && interv.severity >= 4 && interv.status === 'OPEN') {
           this.notificationService.publishInterventionNotification(interv, this.projectId);
         }
       }
+      this.hasLoadedProjectSnapshot = true;
     } catch (e) {
       if (e instanceof ApiError) {
         this.errorMessage = e.message;
@@ -1295,6 +1297,11 @@ struct ProjectHome {
 
   private getTopOpenIntervention(): Intervention | undefined {
     for (const item of this.interventions) {
+      if (item.status === 'OPEN' && !item.isSimulated) {
+        return item;
+      }
+    }
+    for (const item of this.interventions) {
       if (item.status === 'OPEN') {
         return item;
       }
@@ -1375,7 +1382,7 @@ struct ProjectHome {
 
   private getNextActionId(): string {
     for (const action of this.actions) {
-      if (action.status === 'TODO' || action.status === 'DOING') {
+      if (!action.isSimulated && (action.status === 'TODO' || action.status === 'DOING')) {
         return action.id;
       }
     }
@@ -1384,7 +1391,7 @@ struct ProjectHome {
 
   private getNextActionStatus(): string {
     for (const action of this.actions) {
-      if (action.status === 'TODO' || action.status === 'DOING') {
+      if (!action.isSimulated && (action.status === 'TODO' || action.status === 'DOING')) {
         return action.status;
       }
     }
@@ -1393,7 +1400,7 @@ struct ProjectHome {
 
   private getNextActionTitle(): string {
     for (const action of this.actions) {
-      if (action.status === 'TODO' || action.status === 'DOING') {
+      if (!action.isSimulated && (action.status === 'TODO' || action.status === 'DOING')) {
         return TextFormatters.readableText(action.title, '下一项行动标题无法读取');
       }
     }
@@ -1402,7 +1409,7 @@ struct ProjectHome {
 
   private getNextActionDescription(): string {
     for (const action of this.actions) {
-      if (action.status === 'TODO' || action.status === 'DOING') {
+      if (!action.isSimulated && (action.status === 'TODO' || action.status === 'DOING')) {
         if (action.description !== undefined && action.description !== null && action.description !== '') {
           return TextFormatters.readableText(action.description, '行动说明无法读取，请打开待办查看详情。');
         }
@@ -2249,14 +2256,16 @@ struct ProjectHome {
             .fontColor(PMColors.INK_TERTIARY)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
-          Text(`${this.dashboard.readiness.items.filter((i) => i.complete).length} / ${this.dashboard.readiness.items.length} 项已形成`)
+          Text(this.dashboard.readiness.items.length === 0 ? '准备项清单未返回' :
+            `${this.dashboard.readiness.items.filter((i) => i.complete).length} / ${this.dashboard.readiness.items.length} 项已形成`)
             .fontSize(PMFontSize.SECTION_TITLE)
             .fontWeight(FontWeight.Bold)
             .fontColor(PMColors.BRAND)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .margin({ top: 4, bottom: 2 })
-          Text(`${this.dashboard.readiness.percentage}% · 查看计算口径`)
+          Text(this.dashboard.readiness.items.length === 0 ? '暂无可计算口径' :
+            `${this.dashboard.readiness.percentage}% · 查看计算口径`)
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_MUTED)
             .maxLines(1)
@@ -2273,7 +2282,8 @@ struct ProjectHome {
         .onClick(() => {
           this.showReadinessSheet = true;
         })
-        .accessibilityText(`项目内准备项 ${this.dashboard.readiness.items.filter((i) => i.complete).length} / ${this.dashboard.readiness.items.length} 项已形成，点击查看计算口径`)
+        .accessibilityText(this.dashboard.readiness.items.length === 0 ? '项目内准备项清单未返回，点击查看说明' :
+          `项目内准备项 ${this.dashboard.readiness.items.filter((i) => i.complete).length} / ${this.dashboard.readiness.items.length} 项已形成，点击查看计算口径`)
       }
       .width('100%')
 
@@ -2284,14 +2294,15 @@ struct ProjectHome {
           Text('风险提醒')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_TERTIARY)
-          Text(`${this.interventions.filter((i) => i.status === 'OPEN').length} 项`)
+          Text(`${this.interventions.filter((i) => i.status === 'OPEN' && !i.isSimulated).length} 项`)
             .fontSize(PMFontSize.SECTION_TITLE)
             .fontWeight(FontWeight.Bold)
-            .fontColor(this.interventions.some((i) => i.status === 'OPEN' && i.severity >= 4) ? PMColors.RISK :
-              this.interventions.filter((i) => i.status === 'OPEN').length > 0 ? PMColors.EVIDENCE : PMColors.SUCCESS)
+            .fontColor(this.interventions.some((i) => i.status === 'OPEN' && !i.isSimulated && i.severity >= 4) ? PMColors.RISK :
+              this.interventions.filter((i) => i.status === 'OPEN' && !i.isSimulated).length > 0 ? PMColors.EVIDENCE : PMColors.SUCCESS)
             .margin({ top: 4, bottom: 2 })
-          Text(this.interventions.filter((i) => i.status === 'OPEN').length > 0 ?
-            `${this.interventions.filter((i) => i.status === 'OPEN' && i.severity >= 4).length} 项高风险待处理` : '目前无阻断风险')
+          Text(this.interventions.some((i) => i.status === 'OPEN' && !i.isSimulated && i.severity >= 4) ?
+            `${this.interventions.filter((i) => i.status === 'OPEN' && !i.isSimulated && i.severity >= 4).length} 项高风险待处理` :
+            this.interventions.some((i) => i.status === 'OPEN' && !i.isSimulated) ? '暂无高风险提醒' : '当前无待处理提醒')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_MUTED)
             .maxLines(1)
@@ -2313,12 +2324,12 @@ struct ProjectHome {
           Text('待办行动')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_TERTIARY)
-          Text(`${this.actions.filter((a) => a.status === 'TODO' || a.status === 'DOING').length} 项`)
+          Text(`${this.actions.filter((a) => !a.isSimulated && (a.status === 'TODO' || a.status === 'DOING')).length} 项`)
             .fontSize(PMFontSize.SECTION_TITLE)
             .fontWeight(FontWeight.Bold)
             .fontColor(PMColors.INK_PRIMARY)
             .margin({ top: 4, bottom: 2 })
-          Text(`${this.actions.filter((a) => a.status === 'DOING').length} 项进行中 · ${this.actions.filter((a) => a.status === 'DONE').length} 项完成`)
+          Text(`${this.actions.filter((a) => !a.isSimulated && a.status === 'DOING').length} 项进行中 · ${this.actions.filter((a) => !a.isSimulated && a.status === 'DONE').length} 项完成`)
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_MUTED)
             .maxLines(1)
@@ -2565,7 +2576,7 @@ struct ProjectHome {
           .fontSize(PMFontSize.SECTION_TITLE)
           .fontWeight(FontWeight.Bold)
           .fontColor(PMColors.INK_PRIMARY)
-        Text(`${this.project._count.cards} 条记忆 · ${this.actions.filter((a) => a.status === 'DONE').length} 个行动完成`)
+        Text(`${this.project._count.cards} 条记忆 · ${this.actions.filter((a) => !a.isSimulated && a.status === 'DONE').length} 个行动完成`)
           .fontSize(PMFontSize.CAPTION)
           .fontColor(PMColors.INK_TERTIARY)
       }
@@ -2601,7 +2612,7 @@ struct ProjectHome {
           .alignItems(VerticalAlign.Center)
         }
 
-        ForEach(this.actions.filter((a) => a.status === 'DONE').slice(0, 2), (action: ActionItem) => {
+        ForEach(this.actions.filter((a) => !a.isSimulated && a.status === 'DONE').slice(0, 2), (action: ActionItem) => {
           Row() {
             CheckIcon({ iconSize: 18, color: PMColors.SUCCESS })
             Column() {
@@ -2656,7 +2667,7 @@ struct ProjectHome {
           .alignItems(VerticalAlign.Center)
         }
 
-        if (this.project.cards.length === 0 && this.actions.filter((a) => a.status === 'DONE').length === 0 && this.artifacts.length === 0) {
+        if (this.project.cards.length === 0 && this.actions.filter((a) => !a.isSimulated && a.status === 'DONE').length === 0 && this.artifacts.length === 0) {
           Text('还没有新的项目变化，先记录一条事实。')
             .fontSize(PMFontSize.SECONDARY)
             .fontColor(PMColors.INK_TERTIARY)
@@ -2697,6 +2708,11 @@ struct ProjectHome {
    */
   private closedLoopStateChange(action: ActionItem): StateDiffItem | null {
     for (const item of this.stateDiff.items) {
+      if (item.changeKey.startsWith('risk:') && !item.evidenceRefs.some((ref) =>
+        !((ref.entityKind === 'action' && ref.entityId === action.id) ||
+          (ref.entityKind === 'card' && ref.entityId === action.resultCardId)))) {
+        continue;
+      }
       for (const ref of item.evidenceRefs) {
         if (ref.entityKind === 'action' && ref.entityId === action.id) {
           return item;
@@ -2958,9 +2974,10 @@ struct ProjectHome {
               Text('当前状态')
                 .fontSize(PMFontSize.SECONDARY)
                 .fontColor(PMColors.INK_TERTIARY)
-              Text(this.project._count.cards === 0 && this.project._count.artifacts === 0 ?
-                '尚未形成项目进度' :
-                `项目内准备项 ${this.dashboard.readiness.items.filter((item: ReadinessItem) => item.complete).length}/${this.dashboard.readiness.items.length} 已形成 · ${this.dashboard.readiness.percentage}%`)
+              Text(this.dashboard.readiness.items.length === 0 ? '准备项清单未返回' :
+                this.project._count.cards === 0 && this.project._count.artifacts === 0 ?
+                  '尚未形成项目进度' :
+                  `项目内准备项 ${this.dashboard.readiness.items.filter((item: ReadinessItem) => item.complete).length}/${this.dashboard.readiness.items.length} 已形成 · ${this.dashboard.readiness.percentage}%`)
                 .fontSize(PMFontSize.SECTION_TITLE)
                 .fontWeight(FontWeight.Bold)
                 .fontColor(PMColors.INK_PRIMARY)
@@ -3118,15 +3135,15 @@ struct ProjectHome {
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.INK_PRIMARY)
 
-            Text(`${this.interventions.filter((i) => i.status === 'OPEN').length} 项待处理`)
+            Text(`${this.interventions.filter((i) => i.status === 'OPEN' && !i.isSimulated).length} 项待处理`)
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.INK_TERTIARY)
           }
           .width('100%')
           .justifyContent(FlexAlign.SpaceBetween)
 
-          if (this.interventions.filter((i) => i.status === 'OPEN').length > 0) {
-            ForEach(this.interventions.filter((i) => i.status === 'OPEN').slice(0, 1), (interv: Intervention) => {
+          if (this.interventions.filter((i) => i.status === 'OPEN' && !i.isSimulated).length > 0) {
+            ForEach(this.interventions.filter((i) => i.status === 'OPEN' && !i.isSimulated).slice(0, 1), (interv: Intervention) => {
               Column() {
                 Row() {
                   SeverityBadge({ severity: interv.severity })
@@ -3586,45 +3603,44 @@ struct ProjectHome {
       }
 
       Row() {
-        Text(this.rawText.trim().length > 0 ? `${this.rawText.trim().length} 字` : '至少 5 字')
+        Row() {
+          PaperclipIcon({ iconSize: 18, color: PMColors.BRAND })
+        }
+        .width(48)
+        .height(44)
+        .justifyContent(FlexAlign.Center)
+        .backgroundColor(PMColors.BRAND_LIGHT)
+        .borderRadius(PMRadius.SM)
+        .clickEffect(PMInteraction.PRESS_EFFECT)
+        .enabled(!this.isUploadingAttachment)
+        .onClick(() => {
+          this.openUploadMenu();
+        })
+        .accessibilityText('上传照片或 PDF 附件')
+
+        Text(this.rawText.trim().length > 0 ? `已输入 ${this.rawText.trim().length} 字 · 至少 5 字可归档` : '至少 5 字可归档；附件会保留原始来源')
           .fontSize(PMFontSize.CAPTION)
           .fontColor(PMColors.INK_TERTIARY)
-
-        Row({ space: PMSpacing.SM }) {
-          Row() {
-            PaperclipIcon({ iconSize: 18, color: PMColors.BRAND })
-          }
-          .width(48)
-          .height(44)
-          .justifyContent(FlexAlign.Center)
-          .backgroundColor(PMColors.BRAND_LIGHT)
-          .borderRadius(PMRadius.SM)
-          .clickEffect(PMInteraction.PRESS_EFFECT)
-          .enabled(!this.isUploadingAttachment)
-          .onClick(() => {
-            this.openUploadMenu();
-          })
-          .accessibilityText('上传照片或 PDF 附件')
-
-          Button(this.isCapturing ? '正在归档...' : '沉淀为项目记忆')
-            .fontSize(PMFontSize.BUTTON)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.SURFACE)
-            .backgroundColor(this.rawText.trim().length >= 5 && !this.isCapturing ? PMColors.BRAND : PMColors.INK_MUTED)
-            .borderRadius(PMRadius.SM)
-            .height(44)
-            .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
-            .enabled(this.rawText.trim().length >= 5 && !this.isCapturing)
-            .onClick(() => {
-              this.capture();
-            })
-        }
-        .alignItems(VerticalAlign.Center)
+          .layoutWeight(1)
+          .margin({ left: PMSpacing.SM })
       }
       .width('100%')
-      .justifyContent(FlexAlign.SpaceBetween)
       .alignItems(VerticalAlign.Center)
       .margin({ top: PMSpacing.MD })
+
+      Button(this.isCapturing ? '正在归档...' : '沉淀为项目记忆')
+        .fontSize(PMFontSize.BUTTON)
+        .fontWeight(FontWeight.Medium)
+        .fontColor(PMColors.SURFACE)
+        .backgroundColor(this.rawText.trim().length >= 5 && !this.isCapturing ? PMColors.BRAND : PMColors.INK_MUTED)
+        .borderRadius(PMRadius.SM)
+        .height(48)
+        .width('100%')
+        .margin({ top: PMSpacing.SM })
+        .enabled(this.rawText.trim().length >= 5 && !this.isCapturing)
+        .onClick(() => {
+          this.capture();
+        })
     }
     .width('100%')
     .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.LG })
@@ -4139,7 +4155,7 @@ struct ProjectHome {
           Text('进行中')
             .fontSize(PMFontSize.SECONDARY)
             .fontColor(PMColors.INK_TERTIARY)
-          Text(` ${this.actions.filter((a) => a.status === 'DOING').length}`)
+          Text(` ${this.actions.filter((a) => !a.isSimulated && a.status === 'DOING').length}`)
             .fontSize(PMFontSize.BODY)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.BRAND)
@@ -4150,7 +4166,7 @@ struct ProjectHome {
           Text('待开始')
             .fontSize(PMFontSize.SECONDARY)
             .fontColor(PMColors.INK_TERTIARY)
-          Text(` ${this.actions.filter((a) => a.status === 'TODO').length}`)
+          Text(` ${this.actions.filter((a) => !a.isSimulated && a.status === 'TODO').length}`)
             .fontSize(PMFontSize.BODY)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.INK_PRIMARY)
@@ -4161,7 +4177,7 @@ struct ProjectHome {
           Text('已完成')
             .fontSize(PMFontSize.SECONDARY)
             .fontColor(PMColors.INK_TERTIARY)
-          Text(` ${this.actions.filter((a) => a.status === 'DONE').length}`)
+          Text(` ${this.actions.filter((a) => !a.isSimulated && a.status === 'DONE').length}`)
             .fontSize(PMFontSize.BODY)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.SUCCESS)
@@ -4223,6 +4239,12 @@ struct ProjectHome {
             Column() {
               Row() {
                 StatusBadge({ status: action.status })
+                if (action.isSimulated) {
+                  Text('演示情境')
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.RISK)
+                    .margin({ left: PMSpacing.SM })
+                }
                 if (action.status !== 'DONE') {
                   Text(TextFormatters.priorityToChinese(action.priority))
                     .fontSize(PMFontSize.CAPTION)
@@ -4377,7 +4399,7 @@ struct ProjectHome {
         .fontWeight(FontWeight.Medium)
         .fontColor(PMColors.INK_PRIMARY)
 
-      Text(`我会根据当前项目的 ${this.project._count.cards} 条记忆、${this.actions.filter((a) => a.status === 'DONE').length} 项已完成行动和已有成果回答。`)
+      Text(`我会根据当前项目的 ${this.project._count.cards} 条记忆、${this.actions.filter((a) => !a.isSimulated && a.status === 'DONE').length} 项已完成行动和已有成果回答。`)
         .fontSize(PMFontSize.BODY)
         .fontColor(PMColors.INK_SECONDARY)
         .textAlign(TextAlign.Center)
@@ -4408,7 +4430,7 @@ struct ProjectHome {
           .fontWeight(FontWeight.Medium)
           .fontColor(PMColors.INK_PRIMARY)
 
-        Text(`基于当前项目的 ${this.project._count.cards} 条记忆、${this.actions.filter((a) => a.status === 'DONE').length} 项完成行动与 ${this.interventions.filter((i) => i.status === 'OPEN').length} 条提醒，回答状态事实、历史依据与下一步建议。`)
+        Text(`基于当前项目的 ${this.project._count.cards} 条记忆、${this.actions.filter((a) => !a.isSimulated && a.status === 'DONE').length} 项完成行动与 ${this.interventions.filter((i) => !i.isSimulated && i.status === 'OPEN').length} 条提醒，回答状态事实、历史依据与下一步建议。`)
           .fontSize(PMFontSize.SECONDARY)
           .fontColor(PMColors.INK_SECONDARY)
           .lineHeight(18)
@@ -5108,22 +5130,13 @@ struct ProjectHome {
 
               // 生成依据与支撑维度
               Column({ space: PMSpacing.MD }) {
-                Row() {
-                  Text('将基于当前项目事实：')
-                    .fontSize(PMFontSize.CAPTION)
-                    .fontWeight(FontWeight.Bold)
-                    .fontColor(PMColors.INK_SECONDARY)
-
-                  // 数量只能说明有多少可整理的材料，不能证明某份成果的结论已得到支持
-                  Text(this.project._count.cards > 0 ? `已有 ${this.project._count.cards} 条项目记忆` : '还没有项目记忆')
-                    .fontSize(PMFontSize.CAPTION)
-                    .fontColor(this.project._count.cards > 0 ? PMColors.INK_SECONDARY : PMColors.EVIDENCE)
-                    .backgroundColor(this.project._count.cards > 0 ? PMColors.SURFACE_SUBTLE : PMColors.EVIDENCE_LIGHT)
-                    .padding({ left: 6, right: 6, top: 2, bottom: 2 })
-                    .borderRadius(PMRadius.XS)
-                }
-                .width('100%')
-                .justifyContent(FlexAlign.SpaceBetween)
+                // 数量只能说明有多少可整理的材料，不能证明某份成果的结论已得到支持；
+                // 计数只在下方的事实卡出现一次，避免同屏重复
+                Text('将基于当前项目事实：')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontWeight(FontWeight.Bold)
+                  .fontColor(PMColors.INK_SECONDARY)
+                  .width('100%')
 
                 // 2x2 事实支撑小卡片
                 Row({ space: PMSpacing.SM }) {
@@ -5142,7 +5155,7 @@ struct ProjectHome {
 
                   Row() {
                     CheckIcon({ iconSize: 14, color: PMColors.SUCCESS })
-                    Text(`${this.actions.filter((a) => a.status === 'DONE').length} 个完成行动`)
+                    Text(`${this.actions.filter((a) => !a.isSimulated && a.status === 'DONE').length} 个完成行动`)
                       .fontSize(PMFontSize.CAPTION)
                       .fontColor(PMColors.INK_PRIMARY)
                       .margin({ left: 4 })
@@ -5158,7 +5171,7 @@ struct ProjectHome {
                 Row({ space: PMSpacing.SM }) {
                   Row() {
                     AlertIcon({ iconSize: 14, color: PMColors.RISK })
-                    Text(`${this.interventions.filter((i) => i.status === 'OPEN').length} 项当前提醒`)
+                    Text(`${this.interventions.filter((i) => i.status === 'OPEN' && !i.isSimulated).length} 项当前提醒`)
                       .fontSize(PMFontSize.CAPTION)
                       .fontColor(PMColors.INK_PRIMARY)
                       .margin({ left: 4 })
@@ -5170,10 +5183,10 @@ struct ProjectHome {
                   .border({ width: 1, color: PMColors.BORDER_SUBTLE })
 
                   Row() {
-                    Text('准备度')
+                    Text('项目内准备项')
                       .fontSize(PMFontSize.CAPTION)
                       .fontColor(PMColors.INK_TERTIARY)
-                    Text(`${this.dashboard.readiness.percentage}%`)
+                    Text(this.dashboard.readiness.items.length === 0 ? '暂无口径' : `${this.dashboard.readiness.percentage}%`)
                       .fontSize(PMFontSize.CAPTION)
                       .fontWeight(FontWeight.Bold)
                       .fontColor(PMColors.BRAND)
@@ -5192,19 +5205,23 @@ struct ProjectHome {
                   Text('将提取并生成四个核心结构：')
                     .fontSize(PMFontSize.CAPTION)
                     .fontColor(PMColors.INK_TERTIARY)
-                  Row({ space: PMSpacing.SM }) {
+                  Flex({ wrap: FlexWrap.Wrap }) {
                     Text('● 阶段进展')
                       .fontSize(PMFontSize.CAPTION)
                       .fontColor(PMColors.BRAND)
+                      .margin({ right: PMSpacing.SM, bottom: 2 })
                     Text('● 关键决策')
                       .fontSize(PMFontSize.CAPTION)
                       .fontColor(PMColors.BRAND)
+                      .margin({ right: PMSpacing.SM, bottom: 2 })
                     Text('● 风险与缺口')
                       .fontSize(PMFontSize.CAPTION)
                       .fontColor(PMColors.BRAND)
+                      .margin({ right: PMSpacing.SM, bottom: 2 })
                     Text('● 下一步建议')
                       .fontSize(PMFontSize.CAPTION)
                       .fontColor(PMColors.BRAND)
+                      .margin({ right: PMSpacing.SM, bottom: 2 })
                   }
                   .width('100%')
                 }
@@ -5242,8 +5259,10 @@ struct ProjectHome {
           }
         }
         .padding({ left: PMSpacing.LG, right: PMSpacing.LG, bottom: PMSpacing.LG })
+        .justifyContent(FlexAlign.Start)
       }
       .layoutWeight(1)
+      .align(Alignment.Top)
     }
     .layoutWeight(1)
     .transition(PMTransition.CONTENT_ENTER)
@@ -5270,9 +5289,9 @@ struct ProjectHome {
               router.back();
             }
           })
-        } else if (this.isLoading) {
+        } else if (this.isLoading && !this.hasLoadedProjectSnapshot) {
           LoadingStateView({ message: '正在同步项目档案...' })
-        } else if (this.errorMessage !== '') {
+        } else if (this.errorMessage !== '' && !this.hasLoadedProjectSnapshot) {
           ErrorStateView({
             message: this.errorMessage,
             onRetry: () => {
@@ -5280,6 +5299,29 @@ struct ProjectHome {
             }
           })
         } else {
+          if (this.hasLoadedProjectSnapshot && (this.isLoading || this.errorMessage !== '')) {
+            Row({ space: PMSpacing.SM }) {
+              Text(this.isLoading ? '正在核对最新项目状态…' : '同步未完成，当前显示已有快照；请重试核对最新状态。')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .layoutWeight(1)
+                .maxLines(2)
+              if (!this.isLoading) {
+                Button('重试同步')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.BRAND)
+                  .backgroundColor(PMColors.SURFACE)
+                  .height(40)
+                  .onClick(() => {
+                    this.loadAllData();
+                  })
+              }
+            }
+            .width('100%')
+            .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.SM })
+            .backgroundColor(PMColors.WARNING_LIGHT)
+            .alignItems(VerticalAlign.Center)
+          }
           if (this.currentTabIndex === 0) {
             this.CockpitView()
           } else if (this.currentTabIndex === 1) {
@@ -5876,7 +5918,7 @@ struct ProjectHome {
     .width('100%')
     .height('100%')
     .bindSheet($$this.showEntrySheet, this.EntrySheet(), {
-      height: this.entrySheetMode === 'meeting' ? 640 : SheetSize.FIT_CONTENT,
+      height: SheetSize.FIT_CONTENT,
       dragBar: true,
       showClose: false,
       onDisappear: () => {

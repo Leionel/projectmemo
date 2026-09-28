@@ -319,7 +319,7 @@ export struct MeetingImportSheet {
             .alignItems(HorizontalAlign.Start)
           }
           .scrollable(ScrollDirection.Vertical)
-          .layoutWeight(1)
+          .constraintSize({ maxHeight: 380 })
           .margin({ top: PMSpacing.SM })
 
           if (this.errorMessage !== '') {
@@ -362,8 +362,7 @@ export struct MeetingImportSheet {
           .width('100%')
           .margin({ top: PMSpacing.MD })
         } else {
-          Scroll() {
-            Column() {
+          Column() {
           Text('粘贴会议内容。忆程会找出“改了什么、要做什么、日期有没有变化”，先给你检查，只有勾选确认后才会保存。')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_TERTIARY)
@@ -437,16 +436,12 @@ export struct MeetingImportSheet {
             .onClick(() => {
               this.generatePreview();
             })
-            }
-            .width('100%')
-            .alignItems(HorizontalAlign.Start)
           }
-          .scrollable(ScrollDirection.Vertical)
-          .layoutWeight(1)
+          .width('100%')
+          .alignItems(HorizontalAlign.Start)
         }
     }
     .width('100%')
-    .height('100%')
     .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.XL })
     .backgroundColor(PMColors.SURFACE)
   }

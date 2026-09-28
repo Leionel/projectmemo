@@ -476,3 +476,48 @@ export struct CheckboxIcon {
   }
 }
 
+
+@Component
+export struct SearchIcon {
+  @Prop iconSize: number = 20;
+
+  build() {
+    Stack() {
+      Row()
+        .width(this.iconSize * 0.72)
+        .height(this.iconSize * 0.72)
+        .border({ width: 1.8, color: PMColors.INK_SECONDARY })
+        .borderRadius(this.iconSize * 0.36)
+        .position({ x: 0, y: 0 })
+      Row()
+        .width(this.iconSize * 0.36)
+        .height(1.8)
+        .backgroundColor(PMColors.INK_SECONDARY)
+        .rotate({ angle: 45 })
+        .position({ x: this.iconSize * 0.62, y: this.iconSize * 0.78 })
+    }
+    .width(this.iconSize)
+    .height(this.iconSize)
+  }
+}
+
+@Component
+export struct PlusIcon {
+  @Prop iconSize: number = 20;
+  @Prop iconColor: ResourceColor = PMColors.INK_SECONDARY;
+
+  build() {
+    Stack() {
+      Row()
+        .width(this.iconSize * 0.8)
+        .height(1.8)
+        .backgroundColor(this.iconColor)
+      Row()
+        .width(1.8)
+        .height(this.iconSize * 0.8)
+        .backgroundColor(this.iconColor)
+    }
+    .width(this.iconSize)
+    .height(this.iconSize)
+  }
+}

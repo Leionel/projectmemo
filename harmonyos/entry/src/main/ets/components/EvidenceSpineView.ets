@@ -8,6 +8,8 @@ export class SpineNodeItem {
   sourceLabel: string = '';
   factContent: string = '';
   isJudgement: boolean = false;
+  /** 来源短编号（01 / 02 …）：只是引用索引，不代表结论已证实；判断节点不编号 */
+  indexLabel: string = '';
 }
 
 @Component
@@ -50,12 +52,16 @@ export struct EvidenceSpineView {
     return '项目记录';
   }
 
+  private indexLabelOf(position: number): string {
+    return position < 9 ? `0${position + 1}` : `${position + 1}`;
+  }
+
   private getSpineNodes(): SpineNodeItem[] {
     const nodes: SpineNodeItem[] = [];
 
     // 1. 如果有后端返回的真实 facts，按真实时间与来源解析，不伪造任何日期
     if (this.evidence.facts && this.evidence.facts.length > 0) {
-      this.evidence.facts.forEach((fact: string) => {
+      this.evidence.facts.forEach((fact: string, position: number) => {
         const item = new SpineNodeItem();
         item.timeLabel = this.extractTimeLabel(fact, this.evidence.evaluatedAt);
         item.sourceLabel = this.extractSourceLabel(fact);
@@ -63,11 +69,13 @@ export struct EvidenceSpineView {
           item.sourceLabel = `[模拟] ${item.sourceLabel}`;
         }
         item.factContent = TextFormatters.readableText(fact, '证据事实无法读取，请重新录入。');
+        item.indexLabel = this.indexLabelOf(position);
         nodes.push(item);
       });
     } else {
       // 2. facts 为空时如实反映“证据不足”或“演示模拟”，绝不虚构日期与事实
       const item = new SpineNodeItem();
+      item.indexLabel = this.indexLabelOf(0);
       if (this.isSimulated) {
         item.timeLabel = '模拟时点';
         item.sourceLabel = '演示情境';
@@ -147,7 +155,7 @@ export struct EvidenceSpineView {
             // 右侧：节点事实卡片
             Column() {
               Row() {
-                Text(node.timeLabel)
+                Text(node.indexLabel !== '' ? `${node.indexLabel} · ${node.timeLabel}` : node.timeLabel)
                   .fontSize(PMFontSize.SECONDARY)
                   .fontWeight(node.isJudgement ? FontWeight.Bold : FontWeight.Medium)
                   .fontColor(node.isJudgement ? PMColors.RISK : PMColors.INK_SECONDARY)
@@ -174,6 +182,12 @@ export struct EvidenceSpineView {
       }
       .width('100%')
       .padding({ top: PMSpacing.SM })
+
+      Text('编号只是来源引用索引，方便与原始记录对照；来源存在不等于结论已证实。')
+        .fontSize(PMFontSize.CAPTION)
+        .fontColor(PMColors.INK_TERTIARY)
+        .lineHeight(18)
+        .margin({ top: PMSpacing.SM })
     }
     .width('100%')
     .padding(PMSpacing.LG)

@@ -9,7 +9,8 @@ export class TextFormatters {
    * 单个问号可能是正常标点，因此只拦截连续多个问号或 Unicode 替换字符。
    */
   static isUnreadableText(value: string): boolean {
-    if (value === '') {
+    // 服务端可选字段可能是 null（模型声明为 string | undefined），这里兜底避免崩溃。
+    if (!value) {
       return false;
     }
     if (value.includes('\uFFFD')) {
@@ -27,6 +28,9 @@ export class TextFormatters {
    * 面向用户展示文本时，不能把损坏的原始字符串伪装成正常内容。
    */
   static readableText(value: string, fallback: string = '这条记录文本无法读取，请重新录入。'): string {
+    if (!value) {
+      return '';
+    }
     return TextFormatters.isUnreadableText(value) ? fallback : value;
   }
 
@@ -141,6 +145,16 @@ export class TextFormatters {
     return '低优先级';
   }
 
+  /** 状态快照里的风险严重度：HIGH/MEDIUM/LOW 只留在数据与调试层 */
+  static riskSeverityToChinese(severity: string): string {
+    const map: Record<string, string> = {
+      'HIGH': '高',
+      'MEDIUM': '中',
+      'LOW': '低'
+    };
+    return map[severity] ?? '待确认';
+  }
+
   /**
    * 状态映射为中文
    */
@@ -195,18 +209,102 @@ export class TextFormatters {
   }
 
   /**
-   * 项目进度的用户可见名称：根据项目场景选择，不让课程设计误显示为备赛进度。
+   * 准备项的用户可见名称。
+   *
+   * 不再随场景改写：`dashboard.readiness.items` 对所有场景都是同样六项应用内信号，
+   * 写成「研究进展 67%」或「备赛准备度」都会让人以为这是对项目本身的评分。
+   * 参数保留是为了让调用方继续显式传入场景，便于将来服务端按场景区分口径。
    */
-  static projectProgressLabel(scenario: string): string {
+  static projectProgressLabel(_scenario: string): string {
+    return '项目内准备项';
+  }
+
+  /**
+   * 项目内准备项的计算口径。
+   *
+   * 六项全部来自服务端 `dashboard.readiness.items`，这里只解释「怎样才算已形成」，
+   * 不参与计数。这六项是应用内信号（记忆、行动回执、成果草稿是否存在），
+   * 不核验可安装 HAP、作品说明 PDF 或演示 MP4，因此不能读作复赛提交已通过验收。
+   */
+  static readinessCriterion(key: string): string {
     const map: Record<string, string> = {
-      'COMPETITION': '备赛准备度',
-      'RESEARCH': '研究进展',
-      'COURSE_DESIGN': '项目进度',
-      'INNOVATION': '项目进度',
-      'LAB_TASK': '项目进度',
-      'HACKATHON': '项目进度'
+      'requirement': '存在「参赛要求」类型的项目记忆',
+      'experiment': '存在「实验记录」类型的项目记忆',
+      'closed_loop': '有已完成行动，且完成回执已回写为结果记忆',
+      'competition_outline': '存在作品说明大纲成果（可能仍是草稿）',
+      'defense_ppt': '存在答辩 PPT 提纲成果（可能仍是草稿）',
+      'readme': '存在 README 草稿成果'
     };
-    return map[scenario] ?? '项目进度';
+    return map[key] ?? '服务端未提供这一项的计算口径';
+  }
+
+  /** 成果类三项即使存在也可能只是草稿，措辞必须区分 */
+  static readinessStateLabel(key: string, complete: boolean): string {
+    if (!complete) {
+      return '待形成';
+    }
+    if (key === 'competition_outline' || key === 'defense_ppt' || key === 'readme') {
+      return '草稿已形成';
+    }
+    return '已形成';
+  }
+
+  /**
+   * 状态未知项的前台文案。
+   *
+   * 服务端 `project.stage` 未知项原文是「系统尚未记录用户确认的项目阶段」，但项目场景
+   * 在创建时就由用户选定，继续写「项目阶段待确认」会与已标注的场景自相矛盾；真正尚未
+   * 确认的是本阶段检查点版本。App 内也没有「确认项目阶段」的设置项，因此把建议动作
+   * 指向确实存在的阶段检查点，而不是指向一个点不到的入口。
+   */
+  static stateUnknownText(predicate: string, fallback: string): string {
+    if (predicate === 'project.stage') {
+      return '本阶段检查点尚未确认';
+    }
+    return fallback;
+  }
+
+  static stateUnknownAction(predicate: string, fallback: string): string {
+    if (predicate === 'project.stage') {
+      return '整理并确认这一阶段的检查点';
+    }
+    return fallback;
+  }
+
+  /** 状态变化类型的中文读法：英文枚举只留在数据与调试层 */
+  static stateDiffKindToChinese(kind: string): string {
+    const map: Record<string, string> = {
+      'ADDED': '新增',
+      'CHANGED': '变化',
+      'RESOLVED': '已解决',
+      'REGRESSED': '回退',
+      'UNCERTAIN': '待确认'
+    };
+    return map[kind] ?? '其他变化';
+  }
+
+  /** 证据实体类型的中文读法 */
+  static evidenceKindToChinese(kind: string): string {
+    const map: Record<string, string> = {
+      'card': '记忆',
+      'action': '行动',
+      'deliverable': '交付物',
+      'attachment': '附件'
+    };
+    return map[kind] ?? '项目记录';
+  }
+
+  /**
+   * 依据行：只有确实存在来源时才说「来源可查看」。
+   * 没有来源计数时写「依据待查看」，绝不默认「来源已校对」——来源存在也只说明可追溯，
+   * 不等于结论已被证实。
+   */
+  static evidenceCountLine(factCount: number, cardCount: number): string {
+    const total = factCount + cardCount;
+    if (total <= 0) {
+      return '依据待查看';
+    }
+    return `依据 ${total} 条 · 来源可查看`;
   }
 
   /**

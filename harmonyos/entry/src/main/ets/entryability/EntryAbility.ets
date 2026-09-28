@@ -1,6 +1,6 @@
 import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
-import { window } from '@kit.ArkUI';
+import { font, window } from '@kit.ArkUI';
 import { PMWindowMetrics } from '../common/WindowMetrics';
 import { DeviceIdentity } from '../common/DeviceIdentity';
 
@@ -25,6 +25,12 @@ export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     this.captureNotificationRoute(want);
     DeviceIdentity.init(this.context);
+    // 品牌名用思源宋体子集（Noto Serif SC，SIL OFL 1.1）；系统无 CJK 衬线时保证衬线生效
+    try {
+      font.registerFont({ familyName: 'PMSerifBrand', familySrc: $rawfile('fonts/pm-serif-brand.ttf') });
+    } catch (err) {
+      hilog.error(DOMAIN, 'testTag', 'Failed to register brand font. Cause: %{public}s', JSON.stringify(err));
+    }
     try {
       this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
     } catch (err) {

@@ -979,7 +979,7 @@ struct ActionBoard {
       }
 
       // 已完成行动的结果陈述
-      if (action.status === 'DONE' && action.resultText !== undefined && action.resultText !== '') {
+      if (action.status === 'DONE' && action.resultText !== undefined && action.resultText !== null && action.resultText !== '') {
         Column() {
           Text('完成记录')
             .fontSize(PMFontSize.CAPTION)

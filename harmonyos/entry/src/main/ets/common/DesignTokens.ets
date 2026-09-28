@@ -6,8 +6,10 @@
 
 export class PMFontFamily {
   static readonly SANS: string = 'HarmonyOS Sans, Source Han Sans CN, sans-serif';
-  static readonly SERIF: string = 'Noto Serif SC, Source Han Serif SC, serif';
-  static readonly SERIF_BLACK: string = 'Noto Serif SC Black, Noto Serif SC, Source Han Serif SC, serif';
+  // ArkUI 的 fontFamily 不解析逗号回退列表，自定义注册字体必须单独精确引用
+  static readonly BRAND_SERIF: string = 'PMSerifBrand';
+  static readonly SERIF: string = 'PMSerifBrand, Noto Serif SC, Source Han Serif SC, serif';
+  static readonly SERIF_BLACK: string = 'PMSerifBrand, Noto Serif SC Black, Noto Serif SC, Source Han Serif SC, serif';
 }
 
 export class PMColors {

@@ -8,6 +8,7 @@ import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction } from '../com
 import { PMAppBar } from '../components/PMAppBar';
 import { SeverityBadge, StatusBadge } from '../components/MetricBadge';
 import { EvidenceSpineView } from '../components/EvidenceSpineView';
+import { AlertIcon } from '../components/PMIcons';
 import { LoadingStateView, ErrorStateView, EmptyStateView } from '../components/AsyncStateView';
 import { TextFormatters } from '../common/TextFormatters';
 
@@ -68,6 +69,26 @@ struct InterventionDetail {
 
   private isOpenStatus(): boolean {
     return this.intervention.status === 'OPEN';
+  }
+
+  /**
+   * 「为什么是现在」只接受有真实来源的理由：命中的规则、服务端给出的时机解释、
+   * 以及本次判断实际引用的事实条数。三者都没有时返回空数组，由界面如实说明
+   * 尚不能确认时机，而不是补几条看起来确定的模板理由。
+   */
+  private whyNowReasons(): string[] {
+    const reasons: string[] = [];
+    const evidence = this.intervention.evidence;
+    if (evidence.rule !== '') {
+      reasons.push(`规则发现：${TextFormatters.ruleDescriptionToChinese(evidence.rule)}`);
+    }
+    if (evidence.whyNow !== undefined && evidence.whyNow !== null && evidence.whyNow !== '') {
+      reasons.push(evidence.whyNow);
+    }
+    if (evidence.facts !== undefined && evidence.facts !== null && evidence.facts.length > 0) {
+      reasons.push(`本次判断引用了 ${evidence.facts.length} 条项目事实，可在上方「提醒依据」按编号逐条对照。`);
+    }
+    return reasons;
   }
 
   private async acceptIntervention(): Promise<void> {
@@ -256,33 +277,50 @@ struct InterventionDetail {
             .width('100%')
             .margin({ top: PMSpacing.MD })
 
-            // 2.5 为什么是现在 (WHY NOW)
+            // 2.5 为什么是现在：只列有真实来源的理由，不用模板句凑数
             Column() {
-              Text('WHY NOW · 为什么是现在')
-                .fontSize(PMFontSize.SECTION_TITLE)
-                .fontWeight(FontWeight.Bold)
-                .fontColor(PMColors.INK_PRIMARY)
+              Row() {
+                Text('为什么是现在')
+                  .fontSize(PMFontSize.SECTION_TITLE)
+                  .fontWeight(FontWeight.Bold)
+                  .fontColor(PMColors.INK_PRIMARY)
+                Text('WHY NOW')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.INK_MUTED)
+                  .margin({ left: PMSpacing.SM })
+              }
+              .width('100%')
+              .alignItems(VerticalAlign.Bottom)
+
+              if (this.intervention.isSimulated) {
+                Row() {
+                  AlertIcon({ iconSize: 14, color: PMColors.RISK })
+                  Text(' 演示情境生成的模拟提醒，不计入真实风险统计')
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.RISK)
+                }
+                .margin({ top: PMSpacing.SM })
+              }
 
               Column({ space: 8 }) {
-                Row() {
-                  Circle({ width: 5, height: 5 }).fill(PMColors.BRAND).margin({ right: 8 })
-                  Text('当前项目已临近关键节点，需及时处置')
-                    .fontSize(PMFontSize.BODY)
-                    .fontColor(PMColors.INK_PRIMARY)
-                }
-                Row() {
-                  Circle({ width: 5, height: 5 }).fill(PMColors.BRAND).margin({ right: 8 })
-                  Text(this.intervention.evidence.whyNow !== undefined && this.intervention.evidence.whyNow !== ''
-                    ? this.intervention.evidence.whyNow
-                    : '闭环完成证据尚未在时态账本中形成回执')
-                    .fontSize(PMFontSize.BODY)
-                    .fontColor(PMColors.INK_PRIMARY)
-                }
-                Row() {
-                  Circle({ width: 5, height: 5 }).fill(PMColors.BRAND).margin({ right: 8 })
-                  Text('根据规则引擎判定需在此刻形成具体行动')
+                ForEach(this.whyNowReasons(), (reason: string) => {
+                  Row() {
+                    Circle({ width: 5, height: 5 }).fill(PMColors.BRAND).margin({ right: 8 })
+                    Text(reason)
+                      .fontSize(PMFontSize.BODY)
+                      .fontColor(PMColors.INK_PRIMARY)
+                      .lineHeight(22)
+                      .layoutWeight(1)
+                  }
+                  .width('100%')
+                  .alignItems(VerticalAlign.Top)
+                }, (reason: string) => reason)
+
+                if (this.whyNowReasons().length === 0) {
+                  Text('目前只检测到关联事实，尚不能确认提醒时机。')
                     .fontSize(PMFontSize.BODY)
                     .fontColor(PMColors.INK_SECONDARY)
+                    .lineHeight(22)
                 }
               }
               .width('100%')
@@ -339,7 +377,7 @@ struct InterventionDetail {
                       .fontColor(PMColors.INK_PRIMARY)
                       .margin({ top: PMSpacing.SM })
 
-                    if (action.description !== null && action.description !== undefined && action.description !== '') {
+                    if (action.description !== null && action.description !== undefined && action.description !== null && action.description !== '') {
                       Text(TextFormatters.readableText(action.description, '行动说明无法读取，请打开待办查看详情。'))
                         .fontSize(PMFontSize.BODY)
                         .fontColor(PMColors.INK_SECONDARY)
@@ -501,6 +539,17 @@ struct InterventionDetail {
         // 常驻吸底决策操作栏 (Floating Action Bar)
         if (this.isOpenStatus()) {
           Column() {
+            // 写入前先说清要创建的是哪一条：候选、标题与优先级都在正文里选过，这里再确认一次
+            if (this.intervention.proposedActions.length > 0) {
+              Text(`将创建：${TextFormatters.readableText(this.intervention.proposedActions[this.actionIndex].title, '行动标题无法读取')} · ${TextFormatters.priorityToChinese(this.intervention.proposedActions[this.actionIndex].priority)}`)
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .lineHeight(18)
+                .maxLines(2)
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                .width('100%')
+                .margin({ bottom: PMSpacing.SM })
+            }
             Row() {
               Button(this.isSubmitting ? '处理中...' : '创建行动')
                 .fontSize(PMFontSize.BUTTON)

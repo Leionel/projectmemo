@@ -10,6 +10,7 @@ import {
 } from '../models/ProjectState';
 import { ApiError } from '../models/Project';
 import { ProjectStateService } from '../services/ProjectStateService';
+import { TextFormatters } from '../common/TextFormatters';
 import { AlertIcon } from './PMIcons';
 
 @Component
@@ -27,6 +28,11 @@ export struct ProjectStatePanel {
   onOpenDiffSheet: (diff: StateDiff) => void = (_diff: StateDiff) => {};
   onOpenBrief: (fromId: string, toId: string) => void = (_fromId: string, _toId: string) => {};
   onGoActions: () => void = () => {};
+  /**
+   * 把当前变化同步给页面：工作台的「最近闭环」只能引用有独立依据的状态变化，
+   * 因此需要拿到 diff 本身，而不是自己再算一份。
+   */
+  onDiffUpdated: (diff: StateDiff) => void = (_diff: StateDiff) => {};
 
   aboutToAppear(): void {
     this.loadState();
@@ -69,6 +75,7 @@ export struct ProjectStatePanel {
 
   private async loadDiffAgainstLastSeen(): Promise<void> {
     this.diff = new StateDiff();
+    this.onDiffUpdated(this.diff);
     const lastSeen = AppStorage.get<string>(this.lastSeenKey());
     if (lastSeen === undefined || lastSeen === '' || lastSeen === this.snapshot.id) {
       return;
@@ -77,9 +84,11 @@ export struct ProjectStatePanel {
       const diffResponse: StateDiffResponse =
         await this.stateService.diff(this.projectId, lastSeen, this.snapshot.id);
       this.diff = diffResponse.diff;
+      this.onDiffUpdated(this.diff);
     } catch (_e) {
       // Diff 拉取失败不冒充“没有变化”：保留未读提示，由用户重试或直接查看快照
       this.diff = new StateDiff();
+      this.onDiffUpdated(this.diff);
       this.baselineMessage = '变化详情暂时无法获取，可点击刷新重试。';
     }
   }
@@ -131,6 +140,7 @@ export struct ProjectStatePanel {
       await this.stateService.checkIn(this.projectId, this.snapshot.id, consumerKey);
       AppStorage.setOrCreate<string>(this.lastSeenKey(), this.snapshot.id);
       this.diff = new StateDiff();
+      this.onDiffUpdated(this.diff);
     } catch (e) {
       // 已了解失败不吞掉：保留未读状态，用户可重试
       const message = e instanceof ApiError ? e.message : '标记已读失败，请重试';
@@ -162,7 +172,8 @@ export struct ProjectStatePanel {
     for (let i = 0; i < this.snapshot.payload.risks.length; i++) {
       const risk = this.snapshot.payload.risks[i];
       if (risk.truth === 'TRUE') {
-        return `[${risk.severity}] ${risk.text}`;
+        // 严重度用中文：HIGH/MEDIUM/LOW 只留在数据层
+        return `[${TextFormatters.riskSeverityToChinese(risk.severity)}] ${risk.text}`;
       }
     }
     return '';
@@ -177,7 +188,10 @@ export struct ProjectStatePanel {
 
   private topUnknownText(): string {
     const unknown = this.topUnknown();
-    return unknown !== null ? unknown.text : '';
+    if (unknown === null) {
+      return '';
+    }
+    return TextFormatters.stateUnknownText(unknown.predicate, unknown.text);
   }
 
   private nextStepText(): string {
@@ -186,7 +200,7 @@ export struct ProjectStatePanel {
       return '先处理上方风险对应的任务。';
     }
     if (unknown !== null) {
-      return unknown.suggestedInputAction;
+      return TextFormatters.stateUnknownAction(unknown.predicate, unknown.suggestedInputAction);
     }
     return '继续推进当前待办。';
   }

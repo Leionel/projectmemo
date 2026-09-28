@@ -63,7 +63,9 @@ import { EpisodeActionService } from '../services/EpisodeActionService';
 import { HealthSeverityCopy } from '../models/Health';
 import { ProjectStateDiffSheet } from '../components/ProjectStateDiffSheet';
 import { ProjectChangeBrief } from '../components/ProjectChangeBrief';
-import { ChangeBrief, StateDiff } from '../models/ProjectState';
+import { ReadinessBreakdownSheet } from '../components/ReadinessBreakdownSheet';
+import { ActionCreateConfirmSheet } from '../components/ActionCreateConfirmSheet';
+import { ChangeBrief, StateDiff, StateDiffItem } from '../models/ProjectState';
 import { JudgeRebuttalModal } from '../components/JudgeRebuttalModal';
 import { AttachmentCorrectionModal } from '../components/AttachmentCorrectionModal';
 import { ExportFormatter } from '../common/ExportFormatter';
@@ -115,6 +117,16 @@ struct ProjectHome {
   @State stateDiffForSheet: StateDiff = new StateDiff();
   @State showChangeBrief: boolean = false;
   @State briefForSheet: ChangeBrief = new ChangeBrief();
+  // 项目内准备项：逐项说明与计算口径，计数仍完全来自服务端 readiness.items
+  @State showReadinessSheet: boolean = false;
+  // 候选行动确认：预览与提交分开，点「创建行动」不直接写入
+  @State showActionConfirmSheet: boolean = false;
+  @State actionConfirmIntervention: Intervention = new Intervention();
+  @State actionConfirmIndex: number = 0;
+  @State isCreatingFocusAction: boolean = false;
+  @State actionConfirmError: string = '';
+  // 状态面板回传的当前变化：「最近闭环」只能引用有独立依据的状态变化
+  @State stateDiff: StateDiff = new StateDiff();
 
   @State isExportingProvenance: boolean = false;
   @State lifecycleActionCardId: string = '';
@@ -273,6 +285,26 @@ struct ProjectHome {
     }
     if (this.showAttachmentCorrection) {
       this.showAttachmentCorrection = false;
+      return true;
+    }
+    // 提交中不允许用返回键关掉确认面板：否则用户以为没创建，实际已经写入
+    if (this.showActionConfirmSheet) {
+      if (!this.isCreatingFocusAction) {
+        this.showActionConfirmSheet = false;
+        this.actionConfirmError = '';
+      }
+      return true;
+    }
+    if (this.showReadinessSheet) {
+      this.showReadinessSheet = false;
+      return true;
+    }
+    if (this.showChangeBrief) {
+      this.showChangeBrief = false;
+      return true;
+    }
+    if (this.showStateDiffSheet) {
+      this.showStateDiffSheet = false;
       return true;
     }
     if (this.showEntrySheet) {
@@ -1270,6 +1302,77 @@ struct ProjectHome {
     return undefined;
   }
 
+  /** 准备项逐项入口：与「当前状态」卡里的缺口按钮同一套跳转规则 */
+  private openReadinessItem(key: string): void {
+    this.showReadinessSheet = false;
+    if (key === 'competition_outline' || key === 'defense_ppt' || key === 'readme') {
+      this.selectedArtifactType = key;
+      this.updateCurrentArtifact();
+      this.currentTabIndex = 4;
+    } else if (key === 'requirement') {
+      this.openCaptureEntry('参赛材料');
+    } else if (key === 'experiment') {
+      this.openCaptureEntry('实验记录');
+    } else if (key === 'closed_loop') {
+      this.currentTabIndex = 2;
+    } else {
+      this.currentTabIndex = 1;
+    }
+  }
+
+  /**
+   * 本阶段重点的依据行：只报可核对的条数，不下「来源已校对」这类结论。
+   * 来源存在只说明可追溯，不等于支持结论；没有来源时如实写「依据待查看」。
+   */
+  private focusEvidenceLine(intervention: Intervention): string {
+    const evidence = intervention.evidence;
+    const factCount = evidence.facts !== undefined && evidence.facts !== null ? evidence.facts.length : 0;
+    const cardCount = evidence.cardIds !== undefined && evidence.cardIds !== null ? evidence.cardIds.length : 0;
+    const line = TextFormatters.evidenceCountLine(factCount, cardCount);
+    if (factCount + cardCount === 0 && evidence.rule !== '') {
+      return '依据待查看 · 由规则发现，未附具体事实';
+    }
+    return line;
+  }
+
+  /**
+   * 打开候选行动确认面板。
+   * 没有候选行动时不弹确认框，而是去提醒详情看依据，避免一个必然失败的确认按钮。
+   */
+  private openActionConfirm(intervention: Intervention): void {
+    if (intervention.proposedActions.length === 0) {
+      router.pushUrl({
+        url: 'pages/InterventionDetail',
+        params: { projectId: this.projectId, interventionId: intervention.id }
+      });
+      return;
+    }
+    this.actionConfirmIntervention = intervention;
+    this.actionConfirmIndex = 0;
+    this.actionConfirmError = '';
+    this.showActionConfirmSheet = true;
+  }
+
+  /** 用户在确认面板里点「确认创建」之后才写入；写入结果以服务端返回为准 */
+  private async confirmCreateFocusAction(): Promise<void> {
+    if (this.isCreatingFocusAction) {
+      return;
+    }
+    this.isCreatingFocusAction = true;
+    this.actionConfirmError = '';
+    try {
+      await this.interventionService.accept(this.projectId, this.actionConfirmIntervention.id, this.actionConfirmIndex);
+      await this.notificationService.cancelInterventionNotification(this.actionConfirmIntervention.id, this.projectId);
+      this.showActionConfirmSheet = false;
+      promptAction.showToast({ message: '已加入待办；创建不等于已排程或已完成' });
+      await this.loadAllData(true);
+    } catch (e) {
+      this.actionConfirmError = e instanceof ApiError ? e.message : '创建行动失败，请稍后重试';
+    } finally {
+      this.isCreatingFocusAction = false;
+    }
+  }
+
   private getNextActionId(): string {
     for (const action of this.actions) {
       if (action.status === 'TODO' || action.status === 'DOING') {
@@ -1300,7 +1403,7 @@ struct ProjectHome {
   private getNextActionDescription(): string {
     for (const action of this.actions) {
       if (action.status === 'TODO' || action.status === 'DOING') {
-        if (action.description !== undefined && action.description !== '') {
+        if (action.description !== undefined && action.description !== null && action.description !== '') {
           return TextFormatters.readableText(action.description, '行动说明无法读取，请打开待办查看详情。');
         }
         return action.status === 'DOING' ? '继续推进并在完成后留下事实回执。' : '今天建议开始这项行动，并保留完成事实。';
@@ -2139,20 +2242,25 @@ struct ProjectHome {
         .shadow({ radius: 4, color: 'rgba(19, 36, 58, 0.03)', offsetX: 0, offsetY: 1 })
         .alignItems(HorizontalAlign.Start)
 
-        // 指标 2: 阶段准备度
+        // 指标 2: 项目内准备项（计数与口径都来自服务端 readiness.items，可点开逐项查看）
         Column() {
-          Text(TextFormatters.projectProgressLabel(this.project.scenario))
+          Text(`${TextFormatters.projectProgressLabel(this.project.scenario)} ↗`)
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_TERTIARY)
-          Text(`${this.dashboard.readiness.percentage}%`)
+            .maxLines(1)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+          Text(`${this.dashboard.readiness.items.filter((i) => i.complete).length} / ${this.dashboard.readiness.items.length} 项已形成`)
             .fontSize(PMFontSize.SECTION_TITLE)
             .fontWeight(FontWeight.Bold)
             .fontColor(PMColors.BRAND)
+            .maxLines(1)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
             .margin({ top: 4, bottom: 2 })
-          Text(`已具备 ${this.dashboard.readiness.items.filter((i) => i.complete).length}/${this.dashboard.readiness.items.length} 项交付物`)
+          Text(`${this.dashboard.readiness.percentage}% · 查看计算口径`)
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_MUTED)
             .maxLines(1)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
         }
         .layoutWeight(1)
         .padding(PMSpacing.MD)
@@ -2161,6 +2269,11 @@ struct ProjectHome {
         .border({ width: 1, color: PMColors.BORDER })
         .shadow({ radius: 4, color: 'rgba(19, 36, 58, 0.03)', offsetX: 0, offsetY: 1 })
         .alignItems(HorizontalAlign.Start)
+        .clickEffect(PMInteraction.PRESS_EFFECT)
+        .onClick(() => {
+          this.showReadinessSheet = true;
+        })
+        .accessibilityText(`项目内准备项 ${this.dashboard.readiness.items.filter((i) => i.complete).length} / ${this.dashboard.readiness.items.length} 项已形成，点击查看计算口径`)
       }
       .width('100%')
 
@@ -2230,33 +2343,34 @@ struct ProjectHome {
   }
 
   @Builder
-  private ProjectMemoInsightCard(topIntervention: Intervention) {
+  private StageFocusCard(topIntervention: Intervention) {
     Column() {
       Row() {
-        Row() {
-          Row() {
-            SpineNodeIcon({ iconSize: 14, color: PMColors.AI_ACCENT })
-          }
-          .width(24)
-          .height(24)
-          .borderRadius(PMRadius.FULL)
-          .backgroundColor(PMColors.AI_ACCENT_LIGHT)
-          .justifyContent(FlexAlign.Center)
-          .margin({ right: PMSpacing.SM })
+        Text('当前最值得处理')
+          .fontSize(PMFontSize.CAPTION)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.INK_TERTIARY)
+          .layoutWeight(1)
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
 
-          Text('ProjectMemo Insight')
-            .fontSize(PMFontSize.BODY)
-            .fontWeight(FontWeight.Bold)
-            .fontColor(PMColors.BRAND)
+        if (topIntervention.isSimulated) {
+          Text('演示情境')
+            .fontSize(PMFontSize.CAPTION)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.RISK)
+            .padding({ left: 6, right: 6, top: 2, bottom: 2 })
+            .backgroundColor(PMColors.RISK_LIGHT)
+            .borderRadius(PMRadius.XS)
+            .margin({ right: PMSpacing.SM })
         }
-        .alignItems(VerticalAlign.Center)
 
         SeverityBadge({ severity: topIntervention.severity })
       }
       .width('100%')
-      .justifyContent(FlexAlign.SpaceBetween)
       .alignItems(VerticalAlign.Center)
 
+      // 结论：一条最值得处理的事实性问题，不用生成式段落
       Text(TextFormatters.readableText(topIntervention.title, '关键风险提醒'))
         .fontSize(PMFontSize.PRIMARY_JUDGEMENT)
         .fontWeight(FontWeight.Bold)
@@ -2264,28 +2378,36 @@ struct ProjectHome {
         .lineHeight(24)
         .margin({ top: PMSpacing.MD })
 
-      Text(TextFormatters.readableText(topIntervention.content, '尚未形成完整闭环依据。'))
-        .fontSize(PMFontSize.BODY)
-        .fontColor(PMColors.INK_SECONDARY)
-        .lineHeight(20)
-        .margin({ top: PMSpacing.XS })
-
-      Row({ space: PMSpacing.SM }) {
-        Text('来源已校对')
+      // 说明行：标签与正文分行，避免系统字体放大时标签被挤掉
+      Column() {
+        Text('说明')
           .fontSize(PMFontSize.CAPTION)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.INK_TERTIARY)
+        Text(TextFormatters.readableText(topIntervention.content, '尚未形成完整闭环依据。'))
+          .fontSize(PMFontSize.BODY)
           .fontColor(PMColors.INK_SECONDARY)
-          .padding({ left: 8, right: 8, top: 3, bottom: 3 })
-          .backgroundColor(PMColors.SURFACE_SUBTLE)
-          .borderRadius(PMRadius.SM)
-        Text('规则引擎判定')
-          .fontSize(PMFontSize.CAPTION)
-          .fontColor(PMColors.BRAND)
-          .padding({ left: 8, right: 8, top: 3, bottom: 3 })
-          .backgroundColor(PMColors.BRAND_LIGHT)
-          .borderRadius(PMRadius.SM)
+          .lineHeight(20)
+          .margin({ top: 2 })
       }
       .width('100%')
+      .alignItems(HorizontalAlign.Start)
+      .margin({ top: PMSpacing.SM })
+
+      // 依据浅色行只承载信息：不再重复一个「查看依据」链接，也不写「来源已校对」
+      Row() {
+        Text(this.focusEvidenceLine(topIntervention))
+          .fontSize(PMFontSize.CAPTION)
+          .fontColor(PMColors.INK_SECONDARY)
+          .lineHeight(18)
+          .layoutWeight(1)
+      }
+      .width('100%')
+      .padding({ left: PMSpacing.MD, right: PMSpacing.MD, top: PMSpacing.SM, bottom: PMSpacing.SM })
+      .backgroundColor(PMColors.EVIDENCE_TINT)
+      .borderRadius(PMRadius.SM)
       .margin({ top: PMSpacing.MD })
+      .accessibilityText(this.focusEvidenceLine(topIntervention))
 
       Row({ space: PMSpacing.MD }) {
         Button('查看依据')
@@ -2312,12 +2434,12 @@ struct ProjectHome {
           .fontColor(PMColors.SURFACE)
           .backgroundColor(PMColors.BRAND)
           .borderRadius(PMRadius.SM)
+          .clickEffect(PMInteraction.PRESS_EFFECT)
           .onClick(() => {
-            router.pushUrl({
-              url: 'pages/InterventionDetail',
-              params: { projectId: this.projectId, interventionId: topIntervention.id }
-            });
+            // 先预览候选行动，由用户确认后才写入；点击瞬间不创建、也不提示已创建
+            this.openActionConfirm(topIntervention);
           })
+          .accessibilityText('预览并确认创建候选行动')
       }
       .width('100%')
       .margin({ top: PMSpacing.LG })
@@ -2326,7 +2448,10 @@ struct ProjectHome {
     .padding(PMSpacing.LG)
     .backgroundColor(PMColors.SURFACE)
     .borderRadius(PMRadius.LG)
-    .border({ width: 1, color: topIntervention.severity >= 4 ? PMColors.RISK_BORDER : PMColors.BORDER_SUBTLE })
+    .border({
+      width: { left: 3, top: 1, right: 1, bottom: 1 },
+      color: topIntervention.severity >= 4 ? PMColors.RISK : PMColors.BORDER_SUBTLE
+    })
     .shadow({ radius: 10, color: 'rgba(19, 36, 58, 0.05)', offsetX: 0, offsetY: 2 })
     .margin({ top: PMSpacing.MD })
     .alignItems(HorizontalAlign.Start)
@@ -2486,7 +2611,7 @@ struct ProjectHome {
                 .fontColor(PMColors.INK_PRIMARY)
                 .maxLines(2)
                 .textOverflow({ overflow: TextOverflow.Ellipsis })
-              Text(action.resultText !== undefined && action.resultText !== '' ?
+              Text(action.resultText !== undefined && action.resultText !== null && action.resultText !== '' ?
                 TextFormatters.readableText(action.resultText, '完成回执文本无法读取') : '已完成并留下回执')
                 .fontSize(PMFontSize.CAPTION)
                 .fontColor(PMColors.SUCCESS)
@@ -2546,6 +2671,229 @@ struct ProjectHome {
     .alignItems(HorizontalAlign.Start)
   }
 
+  /** 最近一条真实完成的行动：模拟数据不进闭环展示 */
+  private latestClosedLoopAction(): ActionItem | null {
+    let best: ActionItem | null = null;
+    for (const action of this.actions) {
+      if (action.status !== 'DONE' || action.isSimulated) {
+        continue;
+      }
+      if (best === null) {
+        best = action;
+        continue;
+      }
+      const current: string = action.completedAt !== undefined && action.completedAt !== null ? action.completedAt : '';
+      const bestSoFar: string = best.completedAt !== undefined && best.completedAt !== null ? best.completedAt : '';
+      if (current > bestSoFar) {
+        best = action;
+      }
+    }
+    return best;
+  }
+
+  /**
+   * 只有当状态变化本身带着指向这条行动或其结果记忆的依据时才返回；
+   * 没有独立依据就不写「风险已处理」这类结论。
+   */
+  private closedLoopStateChange(action: ActionItem): StateDiffItem | null {
+    for (const item of this.stateDiff.items) {
+      for (const ref of item.evidenceRefs) {
+        if (ref.entityKind === 'action' && ref.entityId === action.id) {
+          return item;
+        }
+        if (ref.entityKind === 'card' && action.resultCardId !== undefined && action.resultCardId !== null &&
+          action.resultCardId !== '' && ref.entityId === action.resultCardId) {
+          return item;
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * 最近闭环：已完成行动 → 完成回执 → 结果记忆 → 可证实的状态变化。
+   * 缺任一环就只显示已有的环节，不写「结果已回写」或「风险已处理」。
+   */
+  @Builder
+  private ClosedLoopView() {
+    Column() {
+      Row() {
+        Text('最近闭环')
+          .fontSize(PMFontSize.SECTION_TITLE)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(PMColors.INK_PRIMARY)
+        Text('行动 → 回执 → 事实')
+          .fontSize(PMFontSize.CAPTION)
+          .fontColor(PMColors.INK_TERTIARY)
+      }
+      .width('100%')
+      .justifyContent(FlexAlign.SpaceBetween)
+      .padding({ left: 2, right: 2, bottom: PMSpacing.XS })
+
+      if (this.latestClosedLoopAction() === null) {
+        Column() {
+          Text('还没有已完成并留下回执的行动。')
+            .fontSize(PMFontSize.BODY)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.INK_PRIMARY)
+            .lineHeight(20)
+          Text('完成一项行动并写下结果后，这里会按「行动 → 回执 → 结果记忆 → 状态变化」展示真实链路；缺少的环节不会补写。')
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+            .lineHeight(18)
+            .margin({ top: PMSpacing.XS })
+        }
+        .width('100%')
+        .padding(PMSpacing.LG)
+        .backgroundColor(PMColors.SURFACE)
+        .borderRadius(PMRadius.MD)
+        .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+        .alignItems(HorizontalAlign.Start)
+      } else {
+        Column() {
+          Row() {
+            Text(`已完成 · ${this.latestClosedLoopAction()!.completedAt !== undefined && this.latestClosedLoopAction()!.completedAt !== null && this.latestClosedLoopAction()!.completedAt!.length >= 10 ?
+              this.latestClosedLoopAction()!.completedAt!.substring(0, 10) : '近期'}`)
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.SUCCESS)
+              .padding({ left: 8, right: 8, top: 3, bottom: 3 })
+              .backgroundColor(PMColors.SUCCESS_LIGHT)
+              .borderRadius(PMRadius.XS)
+          }
+          .width('100%')
+
+          Text(TextFormatters.readableText(this.latestClosedLoopAction()!.title, '已完成行动标题无法读取'))
+            .fontSize(PMFontSize.BODY)
+            .fontWeight(FontWeight.Bold)
+            .fontColor(PMColors.INK_PRIMARY)
+            .lineHeight(22)
+            .margin({ top: PMSpacing.SM })
+
+          if (this.latestClosedLoopAction()!.sourceIntervention !== undefined) {
+            Text(`来自提醒「${TextFormatters.readableText(this.latestClosedLoopAction()!.sourceIntervention!.title, '来源提醒标题无法读取')}」`)
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+              .lineHeight(18)
+              .maxLines(2)
+              .textOverflow({ overflow: TextOverflow.Ellipsis })
+              .margin({ top: 2 })
+          }
+
+          // 完成回执：有文本就原文展示，没有就如实说明缺这一环
+          Column() {
+            if (this.latestClosedLoopAction()!.resultText !== undefined && this.latestClosedLoopAction()!.resultText !== null && this.latestClosedLoopAction()!.resultText !== '') {
+              Text('完成回执')
+                .fontSize(PMFontSize.CAPTION)
+                .fontWeight(FontWeight.Bold)
+                .fontColor(PMColors.INK_SECONDARY)
+              Text(TextFormatters.readableText(this.latestClosedLoopAction()!.resultText!, '完成回执文本无法读取'))
+                .fontSize(PMFontSize.SECONDARY)
+                .fontColor(PMColors.INK_SECONDARY)
+                .lineHeight(19)
+                .maxLines(3)
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                .margin({ top: 2 })
+            } else {
+              Text('这条行动已完成，但没有留下回执文本。')
+                .fontSize(PMFontSize.SECONDARY)
+                .fontColor(PMColors.INK_TERTIARY)
+                .lineHeight(19)
+            }
+          }
+          .width('100%')
+          .padding({ left: PMSpacing.MD })
+          .border({ width: { left: 2 }, color: PMColors.EVIDENCE })
+          .alignItems(HorizontalAlign.Start)
+          .margin({ top: PMSpacing.MD })
+
+          // 结果记忆：只有真的关联了 resultCardId 才说已回写
+          if (this.latestClosedLoopAction()!.resultCardId !== undefined && this.latestClosedLoopAction()!.resultCardId !== null && this.latestClosedLoopAction()!.resultCardId !== '') {
+            Row() {
+              CheckIcon({ iconSize: 14, color: PMColors.SUCCESS })
+              Text(this.latestClosedLoopAction()!.resultCard !== undefined && this.latestClosedLoopAction()!.resultCard!.title !== '' ?
+                `完成回执已写入项目记忆《${TextFormatters.readableText(this.latestClosedLoopAction()!.resultCard!.title, '结果记忆标题无法读取')}》` :
+                '完成回执已写入项目记忆')
+                .fontSize(PMFontSize.CAPTION)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.SUCCESS)
+                .lineHeight(18)
+                .layoutWeight(1)
+                .margin({ left: PMSpacing.SM })
+            }
+            .width('100%')
+            .padding(PMSpacing.SM)
+            .backgroundColor(PMColors.SUCCESS_LIGHT)
+            .borderRadius(PMRadius.SM)
+            .alignItems(VerticalAlign.Top)
+            .margin({ top: PMSpacing.MD })
+          } else {
+            Text('尚未回写为项目记忆：这条行动没有关联结果记忆，闭环还差最后一环。')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+              .lineHeight(18)
+              .width('100%')
+              .margin({ top: PMSpacing.MD })
+          }
+
+          // 状态变化：必须有指向这条行动或结果记忆的独立依据才展示
+          if (this.closedLoopStateChange(this.latestClosedLoopAction()!) !== null) {
+            Row() {
+              Text(`状态变化：${this.closedLoopStateChange(this.latestClosedLoopAction()!)!.summary}`)
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .lineHeight(18)
+                .layoutWeight(1)
+              Text(`依据 ${this.closedLoopStateChange(this.latestClosedLoopAction()!)!.evidenceRefs.length} 项`)
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_TERTIARY)
+                .margin({ left: PMSpacing.SM })
+            }
+            .width('100%')
+            .alignItems(VerticalAlign.Top)
+            .padding(PMSpacing.SM)
+            .backgroundColor(PMColors.SURFACE_SUBTLE)
+            .borderRadius(PMRadius.SM)
+            .margin({ top: PMSpacing.SM })
+          }
+
+          Button(this.latestClosedLoopAction()!.resultCardId !== undefined && this.latestClosedLoopAction()!.resultCardId !== null && this.latestClosedLoopAction()!.resultCardId !== '' ?
+            '查看回执与来源 →' : '去待办查看这条行动 →')
+            .fontSize(PMFontSize.CAPTION)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.BRAND)
+            .backgroundColor('transparent')
+            .height(36)
+            .padding({ left: 0, right: 0 })
+            .margin({ top: PMSpacing.SM })
+            .clickEffect(PMInteraction.PRESS_EFFECT)
+            .onClick(() => {
+              const action = this.latestClosedLoopAction();
+              if (action !== null && action.resultCardId !== undefined && action.resultCardId !== null && action.resultCardId !== '') {
+                // 定位到那条结果记忆，而不是只跳到泛列表
+                this.memorySearchQuery = '';
+                this.memorySearchResults = [];
+                this.expandedCardId = action.resultCardId;
+                this.currentTabIndex = 1;
+              } else {
+                this.currentTabIndex = 2;
+              }
+            })
+            .accessibilityText('查看这条行动的完成回执与来源')
+        }
+        .width('100%')
+        .padding(PMSpacing.LG)
+        .backgroundColor(PMColors.SURFACE)
+        .borderRadius(PMRadius.MD)
+        .border({ width: 1, color: PMColors.EVIDENCE_BORDER })
+        .alignItems(HorizontalAlign.Start)
+      }
+    }
+    .width('100%')
+    .margin({ top: PMSpacing.MD })
+    .alignItems(HorizontalAlign.Start)
+  }
+
   // ----------------------------------------------------
   // Tab 0: 工作台 (Workbench) 视图 —— 围绕“三个问题”设计
   // ----------------------------------------------------
@@ -2559,9 +2907,24 @@ struct ProjectHome {
         // 核心四项指标概览 (2x2)
         this.MetricsOverviewGrid()
 
-        // 核心焦点：ProjectMemo Insight (优先回答“现在最值得我关注什么”)
+        // 核心焦点：本阶段重点（优先回答“现在最值得我关注什么”）
         if (this.getTopOpenIntervention() !== undefined) {
-          this.ProjectMemoInsightCard(this.getTopOpenIntervention()!)
+          Row() {
+            Text('本阶段重点')
+              .fontSize(PMFontSize.SECTION_TITLE)
+              .fontWeight(FontWeight.Bold)
+              .fontColor(PMColors.INK_PRIMARY)
+            Text('基于现有记录')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.SpaceBetween)
+          .alignItems(VerticalAlign.Bottom)
+          .padding({ left: 2, right: 2 })
+          .margin({ top: PMSpacing.LG })
+
+          this.StageFocusCard(this.getTopOpenIntervention()!)
         }
 
         // 问题零：变了什么、依据是什么（R2/S1 状态快照与 Diff）
@@ -2576,6 +2939,9 @@ struct ProjectHome {
           },
           onGoActions: () => {
             this.currentTabIndex = 2;
+          },
+          onDiffUpdated: (diff: StateDiff) => {
+            this.stateDiff = diff;
           }
         })
 
@@ -2594,7 +2960,7 @@ struct ProjectHome {
                 .fontColor(PMColors.INK_TERTIARY)
               Text(this.project._count.cards === 0 && this.project._count.artifacts === 0 ?
                 '尚未形成项目进度' :
-                `${TextFormatters.projectProgressLabel(this.project.scenario)} ${this.dashboard.readiness.percentage}%`)
+                `项目内准备项 ${this.dashboard.readiness.items.filter((item: ReadinessItem) => item.complete).length}/${this.dashboard.readiness.items.length} 已形成 · ${this.dashboard.readiness.percentage}%`)
                 .fontSize(PMFontSize.SECTION_TITLE)
                 .fontWeight(FontWeight.Bold)
                 .fontColor(PMColors.INK_PRIMARY)
@@ -2622,6 +2988,27 @@ struct ProjectHome {
           }
           .width('100%')
           .margin({ top: PMSpacing.SM })
+
+          Row() {
+            Text('按项目记录、行动回执与成果草稿是否形成计数，不是模型评分')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+              .lineHeight(18)
+              .layoutWeight(1)
+            Text('计算口径 →')
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.BRAND)
+              .margin({ left: PMSpacing.SM })
+          }
+          .width('100%')
+          .alignItems(VerticalAlign.Top)
+          .padding({ top: PMSpacing.SM, bottom: PMSpacing.SM })
+          .clickEffect(PMInteraction.PRESS_EFFECT)
+          .onClick(() => {
+            this.showReadinessSheet = true;
+          })
+          .accessibilityText('查看项目内准备项的逐项计算口径')
 
           // 项目进度清单：已具备 (弱化收起) vs 当前缺口 (重点放大)
           Column() {
@@ -2717,6 +3104,8 @@ struct ProjectHome {
 
         this.NextActionView()
 
+        this.ClosedLoopView()
+
         this.RecentChangesView()
 
         this.MilestoneEvidenceView()
@@ -2782,10 +3171,26 @@ struct ProjectHome {
               .border({ width: 1, color: PMColors.BORDER })
               .margin({ top: PMSpacing.SM })
             }, (interv: Intervention) => interv.id)
+          } else if (this.evaluateError !== '') {
+            // 评估失败不能伪装成「没有风险」：如实说明展示的是上次结果
+            Column() {
+              Text('暂未获取最新提醒，下面显示的是上次结果。')
+                .fontSize(PMFontSize.BODY)
+                .fontColor(PMColors.RISK)
+                .lineHeight(20)
+              Text(this.evaluateError)
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_TERTIARY)
+                .lineHeight(18)
+                .margin({ top: 2 })
+            }
+            .width('100%')
+            .alignItems(HorizontalAlign.Start)
+            .margin({ top: PMSpacing.MD })
           } else {
-            Text('当前无阻断性风险，规则引擎评估正常')
+            Text('当前没有待处理的提醒')
               .fontSize(PMFontSize.BODY)
-              .fontColor(PMColors.SUCCESS)
+              .fontColor(PMColors.INK_SECONDARY)
               .margin({ top: PMSpacing.MD })
           }
 
@@ -3476,6 +3881,18 @@ struct ProjectHome {
       .backgroundColor(PMColors.SURFACE)
       .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
 
+      // 项目内记忆与全局记忆的分工要说清：这里只有当前项目的时态关系与原始来源
+      Text('仅当前项目的记忆：这里展示时态状态、演化关系与原始采集碎片。跨项目检索请用底部「记忆」。')
+        .fontSize(PMFontSize.CAPTION)
+        .fontColor(PMColors.INK_SECONDARY)
+        .lineHeight(18)
+        .width('100%')
+        .padding(PMSpacing.MD)
+        .backgroundColor(PMColors.EVIDENCE_TINT)
+        .borderRadius(PMRadius.SM)
+        .margin({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD })
+        .accessibilityText('范围说明：仅当前项目的记忆，跨项目检索请使用底部的记忆页签')
+
       if (this.memorySearchQuery.trim() !== '' && this.isSearchingMemory) {
         Text('正在检索项目记忆…')
           .fontSize(PMFontSize.CAPTION)
@@ -3497,6 +3914,50 @@ struct ProjectHome {
 
       // 卡片流
       List({ space: PMSpacing.MD }) {
+        // 空态不能用空白代替：区分「还没有记忆」和「当前筛选下没有记忆」
+        if (this.getFilteredCards().length === 0 && this.memorySearchQuery.trim() === '') {
+          ListItem() {
+            Column() {
+              Text(this.project.cards.length === 0 ? '这个项目还没有记忆' : '当前类型下没有记忆')
+                .fontSize(PMFontSize.BODY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+                .lineHeight(22)
+              Text(this.project.cards.length === 0 ?
+                '记录第一条项目事实后，这里会生成带来源与时态状态的记忆卡。' :
+                '换一个类型看看；这里不会用全部记忆替代你的筛选结果。')
+                .fontSize(PMFontSize.SECONDARY)
+                .fontColor(PMColors.INK_TERTIARY)
+                .lineHeight(19)
+                .margin({ top: PMSpacing.XS })
+              Button(this.project.cards.length === 0 ? '＋ 记录第一条事实' : '清空类型筛选')
+                .fontSize(PMFontSize.CAPTION)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.SURFACE)
+                .backgroundColor(PMColors.BRAND)
+                .borderRadius(PMRadius.SM)
+                .height(40)
+                .margin({ top: PMSpacing.LG })
+                .clickEffect(PMInteraction.PRESS_EFFECT)
+                .onClick(() => {
+                  if (this.project.cards.length === 0) {
+                    this.openCaptureEntry();
+                  } else {
+                    this.selectMemoryType('all');
+                  }
+                })
+            }
+            .width('100%')
+            .padding({
+              top: PMSpacing.XXL,
+              bottom: PMSpacing.XXL,
+              left: PMSpacing.LG,
+              right: PMSpacing.LG
+            })
+            .alignItems(HorizontalAlign.Start)
+          }
+        }
+
         ForEach(this.getFilteredCards(), (card: KnowledgeCard) => {
           ListItem() {
             Column() {
@@ -3784,7 +4245,7 @@ struct ProjectHome {
                   .margin({ top: 4 })
               }
 
-              if (action.status === 'DONE' && action.resultText !== undefined && action.resultText !== '') {
+              if (action.status === 'DONE' && action.resultText !== undefined && action.resultText !== null && action.resultText !== '') {
                 Column() {
                   Text('完成回执')
                     .fontSize(PMFontSize.CAPTION)
@@ -4068,7 +4529,7 @@ struct ProjectHome {
                 .margin({ top: 4 })
 
               // W05 Evidence Trust Receipt：状态用文字 + 颜色双重表达，拒答时不伪装成成功答案。
-              if (msg.role === 'ASSISTANT' && msg.trustReceipt !== undefined) {
+              if (msg.role === 'ASSISTANT' && msg.trustReceipt !== undefined && msg.trustReceipt !== null) {
                 Column() {
                   Row() {
                     Text(msg.trustReceipt.supportState === 'SUPPORTED' ? '依据充分' :
@@ -4150,7 +4611,7 @@ struct ProjectHome {
                         }, (cite: AgentCitation) => cite.cardId)
                       }
 
-                      if (msg.trustReceipt.refusalReason !== undefined && msg.trustReceipt.refusalReason !== '') {
+                      if (msg.trustReceipt.refusalReason !== undefined && msg.trustReceipt.refusalReason !== null && msg.trustReceipt.refusalReason !== '') {
                         Text(`拒答原因：${msg.trustReceipt.refusalReason}`)
                           .fontSize(PMFontSize.CAPTION)
                           .fontColor(PMColors.RISK)
@@ -4653,10 +5114,11 @@ struct ProjectHome {
                     .fontWeight(FontWeight.Bold)
                     .fontColor(PMColors.INK_SECONDARY)
 
-                  Text(this.project._count.cards >= 3 ? '✓ 证据充分' : '建议补齐')
+                  // 数量只能说明有多少可整理的材料，不能证明某份成果的结论已得到支持
+                  Text(this.project._count.cards > 0 ? `已有 ${this.project._count.cards} 条项目记忆` : '还没有项目记忆')
                     .fontSize(PMFontSize.CAPTION)
-                    .fontColor(this.project._count.cards >= 3 ? PMColors.SUCCESS : PMColors.EVIDENCE)
-                    .backgroundColor(this.project._count.cards >= 3 ? PMColors.SUCCESS_LIGHT : PMColors.EVIDENCE_LIGHT)
+                    .fontColor(this.project._count.cards > 0 ? PMColors.INK_SECONDARY : PMColors.EVIDENCE)
+                    .backgroundColor(this.project._count.cards > 0 ? PMColors.SURFACE_SUBTLE : PMColors.EVIDENCE_LIGHT)
                     .padding({ left: 6, right: 6, top: 2, bottom: 2 })
                     .borderRadius(PMRadius.XS)
                 }
@@ -5344,6 +5806,37 @@ struct ProjectHome {
           diff: this.stateDiffForSheet,
           onClose: () => {
             this.showStateDiffSheet = false;
+          }
+        })
+      }
+
+      if (this.showReadinessSheet) {
+        ReadinessBreakdownSheet({
+          readiness: this.dashboard.readiness,
+          showItemEntry: true,
+          onClose: () => {
+            this.showReadinessSheet = false;
+          },
+          onOpenItem: (key: string) => {
+            this.openReadinessItem(key);
+          }
+        })
+      }
+
+      if (this.showActionConfirmSheet) {
+        ActionCreateConfirmSheet({
+          intervention: this.actionConfirmIntervention,
+          actionIndex: this.actionConfirmIndex,
+          isSubmitting: this.isCreatingFocusAction,
+          operationError: this.actionConfirmError,
+          onClose: () => {
+            // 提交中不允许关面板：避免用户以为没创建，实际已经写入
+            if (!this.isCreatingFocusAction) {
+              this.showActionConfirmSheet = false;
+            }
+          },
+          onConfirm: () => {
+            this.confirmCreateFocusAction();
           }
         })
       }

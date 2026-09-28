@@ -1,5 +1,6 @@
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMotion } from '../common/DesignTokens';
 import { StateDiff, StateDiffItem } from '../models/ProjectState';
+import { TextFormatters } from '../common/TextFormatters';
 
 @Component
 export struct ProjectStateDiffSheet {
@@ -63,18 +64,28 @@ export struct ProjectStateDiffSheet {
             }
             ForEach(this.diff.items, (item: StateDiffItem) => {
               Row() {
-                Text(`${this.kindGlyph(item.kind)} ${item.kind}`)
+                Text(`${this.kindGlyph(item.kind)} ${TextFormatters.stateDiffKindToChinese(item.kind)}`)
                   .fontSize(PMFontSize.CAPTION)
                   .fontWeight(FontWeight.Bold)
                   .fontColor(this.kindColor(item.kind))
-                  .width(64)
+                  // 不写死宽度：中文标签在系统字体放大时需要更多空间
+                  .constraintSize({ minWidth: 52 })
+                  .margin({ right: PMSpacing.SM })
 
                 Column() {
                   Text(item.summary)
                     .fontSize(PMFontSize.BODY)
                     .fontColor(PMColors.INK_PRIMARY)
                     .lineHeight(20)
-                  Text(`依据：${item.evidenceRefs.length} 项记录（${item.evidenceRefs.length > 0 ? item.evidenceRefs[0].entityKind : '-'}）`)
+                  if (item.before !== null || item.after !== null) {
+                    Text(`${item.before !== null ? item.before : ''}${item.before !== null && item.after !== null ? ' → ' : ''}${item.after !== null ? item.after : ''}`)
+                      .fontSize(PMFontSize.CAPTION)
+                      .fontColor(PMColors.INK_SECONDARY)
+                      .lineHeight(18)
+                      .margin({ top: 2 })
+                  }
+                  Text(`依据 ${item.evidenceRefs.length} 项${item.evidenceRefs.length > 0 ?
+                    `（${TextFormatters.evidenceKindToChinese(item.evidenceRefs[0].entityKind)}）` : ''}`)
                     .fontSize(PMFontSize.CAPTION)
                     .fontColor(PMColors.INK_TERTIARY)
                     .margin({ top: 2 })

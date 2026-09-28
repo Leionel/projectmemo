@@ -1,0 +1,11 @@
+### Error
+SyntaxError: Unexpected token ')'
+    at eval (eval at evaluate (:367:30), <anonymous>:2:38)
+    at UtilityScript.evaluate (<anonymous>:369:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+### Page
+- Page URL: http://127.0.0.1:33321/projects/cmucaw8yy0000ck8og8jrom2s/generate?type=competition_outline
+- Page Title: 忆程 ProjectMemo｜知识资产沉淀与主动推进 Agent
+- Console: 1 errors, 0 warnings
+### Events
+- New console entries: .playwright-cli\console-2026-09-22T07-05-33-598Z.log#L10-L11

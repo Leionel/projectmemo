@@ -13,7 +13,22 @@ export interface HybridSearchOptions {
 }
 
 function computeKeywordScore(query: string, card: { title: string; summary: string; keywords: string[] }): { score: number; matchedKeywords: string[] } {
-  const queryTokens = query.toLowerCase().split(/[\s,，、。！？!?]+/).filter((t) => t.length > 0);
+  // 中文问句没有空格，整句匹配会让「消融实验完成了吗」错过「消融实验已完成」。
+  // 只去掉提问套话；较长的中文主题再拆成相邻短语，仍要求有实词命中。
+  const topics = query.toLowerCase()
+    .replace(/依据是什么|这个项目|为什么|怎么样|有没有|是什么|已完成了吗|完成了吗|请问|帮我|当前|现在|目前|是否|了吗|什么|如何/g, " ")
+    .match(/[\p{Script=Han}]+|[a-z0-9_]+/gu) ?? [];
+  const hasLongChineseTopic = topics.some((topic) => /^[\p{Script=Han}]+$/u.test(topic) && topic.length >= 4);
+  const queryTokens = [...new Set(topics.flatMap((topic) => {
+    if (!/^[\p{Script=Han}]+$/u.test(topic) || topic.length < 4) return topic.length >= 2 ? [topic] : [];
+    const terms = [topic];
+    for (const length of [4, 3, 2]) {
+      for (let index = 0; index + length <= topic.length; index++) {
+        terms.push(topic.slice(index, index + length));
+      }
+    }
+    return terms;
+  }))];
   if (queryTokens.length === 0) return { score: 0, matchedKeywords: [] };
 
   const titleLower = card.title.toLowerCase();
@@ -22,6 +37,7 @@ function computeKeywordScore(query: string, card: { title: string; summary: stri
 
   let matchCount = 0;
   const matchedKeywords: string[] = [];
+  const matchedTerms: string[] = [];
 
   for (const token of queryTokens) {
     let tokenMatched = false;
@@ -34,17 +50,19 @@ function computeKeywordScore(query: string, card: { title: string; summary: stri
       tokenMatched = true;
     }
     for (let i = 0; i < keywordsLower.length; i++) {
-      if (keywordsLower[i].includes(token) || token.includes(keywordsLower[i])) {
+      if (keywordsLower[i].includes(token) || (/^[a-z0-9_]+$/.test(token) && token.includes(keywordsLower[i]))) {
         matchCount += 2;
         matchedKeywords.push(card.keywords[i]);
         tokenMatched = true;
       }
     }
-    if (tokenMatched && !matchedKeywords.includes(token)) {
-      // 记录匹配的 token
-    }
+    if (tokenMatched) matchedTerms.push(token);
   }
 
+  // 长主题只碰到一个两字词时，不把这张卡当作可引用依据。
+  if (hasLongChineseTopic && !matchedTerms.some((term) => term.length >= 3) && matchedTerms.length < 2) {
+    return { score: 0, matchedKeywords: [] };
+  }
   const normalizedScore = Math.min(1.0, matchCount / (queryTokens.length * 3));
   return { score: normalizedScore, matchedKeywords: [...new Set(matchedKeywords)] };
 }

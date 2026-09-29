@@ -93,4 +93,29 @@ describe("S04: Hybrid Search and Card Embeddings", () => {
       await db.project.delete({ where: { id: testProject.id } });
     }
   });
+
+  it("does not treat a generic two-character overlap as evidence for a longer Chinese topic", async () => {
+    const project = await db.project.create({ data: {
+      title: "中文检索校验", description: "核对长主题与通用词的区别", goal: "避免误引", scenario: "COMPETITION",
+    } });
+    try {
+      const genericCapture = await db.capture.create({ data: { projectId: project.id, rawText: "实验材料待整理" } });
+      const generic = await db.knowledgeCard.create({ data: {
+        projectId: project.id, captureId: genericCapture.id, type: "meeting_note",
+        title: "实验材料", summary: "实验材料待整理", keywords: ["实验"],
+        relatedTasks: [], nextActions: [], importance: 3,
+      } });
+      const specificCapture = await db.capture.create({ data: { projectId: project.id, rawText: "消融实验已完成" } });
+      const specific = await db.knowledgeCard.create({ data: {
+        projectId: project.id, captureId: specificCapture.id, type: "meeting_note",
+        title: "消融实验记录", summary: "消融实验已完成", keywords: ["消融实验"],
+        relatedTasks: [], nextActions: [], importance: 3,
+      } });
+      const results = await searchProjectCards({ projectId: project.id, query: "消融实验完成了吗？" });
+      expect(results.find((item) => item.cardId === specific.id)?.keywordScore).toBeGreaterThan(0);
+      expect(results.find((item) => item.cardId === generic.id)?.keywordScore).toBe(0);
+    } finally {
+      await db.project.delete({ where: { id: project.id } });
+    }
+  });
 });

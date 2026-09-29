@@ -12,7 +12,7 @@ import { requireProject } from "@/lib/repositories/projects";
 import { generateArtifact } from "@/lib/services/artifactService";
 import { getDecisionTimeline } from "@/lib/services/temporalLedgerService";
 import { actionCreateSchema, artifactCreateSchema } from "@/lib/validation/schemas";
-import type { AgentChatResponse, AgentCitation, CardSearchResult, EvidenceTrustReceipt, ProposedAction } from "@/lib/types";
+import type { AgentChatResponse, AgentCitation, CardSearchResult, EvidenceTrustReceipt, ProjectEvidenceRef, ProposedAction } from "@/lib/types";
 
 const responseSchema = z.object({
   message: z.string().trim().min(1).max(4000),
@@ -124,6 +124,54 @@ export async function answerProjectQuestion(projectId: string, question: string)
     listActions(projectId, false),
   ]);
   await saveAgentMessage({ projectId, role: "USER", content: question, citations: [], proposedActions: [] });
+  // 当前提醒数和提醒原文是本项目的持久化事实，可以直接核对；不必强迫它们
+  // 再匹配到一张知识卡片。这里只回答已有状态，不推断未记录的触发原因。
+  const asksCurrentReminders = /(提醒|主动介入)/.test(question)
+    && /(当前|现在|目前|正在|会触发|有哪些|有.*提醒|提醒.*吗)/.test(question)
+    && !/(曾经|之前|过去|历史|上次|那次|当时|创建|新增|设置|安排|发送|关闭|取消)/.test(question);
+  if (asksCurrentReminders) {
+    const observedAt = new Date().toISOString();
+    const openReminders = interventions.filter((item) => item.status === "OPEN" && !item.isSimulated);
+    const simulatedCount = interventions.filter((item) => item.status === "OPEN" && item.isSimulated).length;
+    const topReminder = openReminders[0];
+    const projectRef: ProjectEvidenceRef = {
+      kind: "project_status", entityId: projectId, label: "当前开放提醒",
+      detail: `真实 ${openReminders.length} 条，演示 ${simulatedCount} 条`, observedAt,
+    };
+    const projectRefs: ProjectEvidenceRef[] = [projectRef];
+    if (topReminder) {
+      projectRefs.push({
+        kind: "intervention", entityId: topReminder.id, label: "提醒记录",
+        detail: `${topReminder.title}：${topReminder.content}`, observedAt,
+      });
+    }
+    const message = topReminder
+      ? `当前项目有 ${openReminders.length} 条开放中的真实主动提醒。最优先的是「${topReminder.title}」。提醒记录写明：${topReminder.content}。具体来源请在这条提醒的详情中核对。`
+      : `当前项目没有开放中的真实主动提醒${simulatedCount > 0 ? `，另有 ${simulatedCount} 条演示情境提醒` : ""}。现在没有正在触发的真实提醒可供解释；如果你指过去的提醒，请到主动提醒列表查看那条记录。`;
+    const trustReceipt: EvidenceTrustReceipt = {
+      supportState: "SUPPORTED", abstained: false,
+      claims: [{
+        text: topReminder
+          ? `当前项目有 ${openReminders.length} 条开放中的真实主动提醒，首条记录为「${topReminder.title}」：${topReminder.content}`
+          : `当前项目有 0 条开放中的真实主动提醒。`,
+        support: "SUPPORTED", cardIds: [], supersededCardIds: [], projectRefs,
+      }],
+      retrievalMode: "project_state", refusalReason: null, evaluatedAt: observedAt,
+    };
+    const run = await saveAgentRun({
+      projectId, runType: AgentRunType.CHAT, status: AgentRunStatus.SUCCESS,
+      provider: "project_state", fallbackReason: null,
+      trace: {
+        intent: "inspect_current_reminders", retrievalMode: "project_state",
+        supportState: "SUPPORTED", abstained: false, trustReceipt,
+      },
+      resultJson: { proposedActions: [], trustReceipt }, durationMs: Date.now() - startedAt,
+    });
+    await saveAgentMessage({
+      projectId, role: "ASSISTANT", content: message, citations: [], proposedActions: [], runId: run.id,
+    });
+    return { message, citations: [], proposedActions: [], runId: run.id, fallback: false, trustReceipt };
+  }
   const evidenceSearch = await getCopilotEvidence(projectId, question, cards);
   let answer = mockAnswer({ question, citations: evidenceSearch.citations, cards, interventions, actions });
   let fallback = true;

@@ -38,14 +38,15 @@ function Receipt({ receipt, citations }: { receipt: EvidenceTrustReceipt; citati
     <details className="mt-2 rounded-lg border border-[var(--rule)] bg-[var(--card-bg)] px-3 py-2">
       <summary className="focus-ring cursor-pointer rounded text-xs font-black text-[var(--navy)]">查看证据回执与原始卡片</summary>
       <div className="mt-2 space-y-2 text-xs leading-5 text-[var(--ink-soft)]">
-        <p>检索方式：{receipt.retrievalMode === "hybrid" ? "混合检索" : receipt.retrievalMode === "keyword_fallback" ? "关键词降级" : receipt.retrievalMode === "semantic_only" ? "语义检索" : "未检索到证据"}</p>
+        <p>检索方式：{receipt.retrievalMode === "hybrid" ? "混合检索" : receipt.retrievalMode === "keyword_fallback" ? "关键词降级" : receipt.retrievalMode === "semantic_only" ? "语义检索" : receipt.retrievalMode === "project_state" ? "项目当前状态" : "未检索到证据"}</p>
         {receipt.claims.map((claim, index) => <div key={`${claim.text}-${index}`} className="rounded-md bg-[var(--paper)] p-2.5">
           <p className="font-bold text-[var(--navy)]">结论 {index + 1} · {receiptMeta[claim.support].label}</p>
           <p className="mt-1">{claim.text}</p>
           <div className="mt-1.5 flex flex-wrap gap-1.5">
             {claim.cardIds.map((cardId) => <a key={cardId} href={`#card-${cardId}`} className="focus-ring rounded bg-[var(--paper-strong)] px-2 py-0.5 font-bold text-[var(--teal-strong)]">当前卡片：{citationById.get(cardId)?.title ?? cardId}</a>)}
             {claim.supersededCardIds.map((cardId) => <a key={cardId} href={`#card-${cardId}`} className="focus-ring rounded bg-amber-100 px-2 py-0.5 font-bold text-amber-900 dark:bg-amber-950/60 dark:text-amber-200">历史卡片：{citationById.get(cardId)?.title ?? cardId}</a>)}
-            {claim.cardIds.length === 0 && claim.supersededCardIds.length === 0 && <span className="font-semibold text-[var(--brick)]">没有可核验卡片</span>}
+            {claim.projectRefs?.map((ref) => <span key={`${ref.kind}-${ref.entityId}`} className="rounded bg-[var(--paper-strong)] px-2 py-0.5 font-bold text-[var(--teal-strong)]">{ref.label}：{ref.detail}</span>)}
+            {claim.cardIds.length === 0 && claim.supersededCardIds.length === 0 && !claim.projectRefs?.length && <span className="font-semibold text-[var(--brick)]">没有可核验依据</span>}
           </div>
         </div>)}
         {receipt.refusalReason && <p className="font-semibold text-[var(--brick)]">拒答原因：{receipt.refusalReason}</p>}

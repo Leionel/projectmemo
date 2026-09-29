@@ -10,7 +10,7 @@ import { Milestone, Deliverable, DeliverableEvidence } from '../models/Milestone
 import { Intervention, ProposedAction } from '../models/Intervention';
 import { ActionCreateInput, ActionItem } from '../models/Action';
 import { ArtifactItem } from '../models/Artifact';
-import { AgentMessage, AgentCitation, EvidenceClaim, ActionCreatePayload, ArtifactGeneratePayload } from '../models/Copilot';
+import { AgentMessage, AgentCitation, EvidenceClaim, ProjectEvidenceRef, ActionCreatePayload, ArtifactGeneratePayload } from '../models/Copilot';
 import { Attachment } from '../models/Attachment';
 
 import { ProjectService } from '../services/ProjectService';
@@ -4606,7 +4606,8 @@ struct ProjectHome {
                     Column({ space: PMSpacing.SM }) {
                       Text(`检索方式：${msg.trustReceipt.retrievalMode === 'hybrid' ? '混合检索' :
                         msg.trustReceipt.retrievalMode === 'keyword_fallback' ? '关键词降级' :
-                          msg.trustReceipt.retrievalMode === 'semantic_only' ? '语义检索' : '未检索到证据'}`)
+                          msg.trustReceipt.retrievalMode === 'semantic_only' ? '语义检索' :
+                            msg.trustReceipt.retrievalMode === 'project_state' ? '项目当前状态' : '未检索到证据'}`)
                         .fontSize(PMFontSize.CAPTION)
                         .fontColor(PMColors.INK_SECONDARY)
 
@@ -4621,6 +4622,14 @@ struct ProjectHome {
                             .fontColor(PMColors.INK_SECONDARY)
                             .lineHeight(18)
                             .margin({ top: 2 })
+                          if (claim.projectRefs !== undefined && claim.projectRefs !== null) {
+                            ForEach(claim.projectRefs, (ref: ProjectEvidenceRef) => {
+                              Text(`${ref.label}：${ref.detail}`)
+                                .fontSize(PMFontSize.CAPTION)
+                                .fontColor(PMColors.MEMORY)
+                                .margin({ top: 2 })
+                            }, (ref: ProjectEvidenceRef) => `${ref.kind}-${ref.entityId}`)
+                          }
                         }
                         .width('100%')
                         .padding(PMSpacing.SM)

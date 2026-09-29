@@ -17,6 +17,15 @@ export class EvidenceClaim {
   support: string = 'INSUFFICIENT';
   cardIds: string[] = [];
   supersededCardIds: string[] = [];
+  projectRefs: ProjectEvidenceRef[] | undefined = undefined;
+}
+
+export class ProjectEvidenceRef {
+  kind: string = 'project_status';
+  entityId: string = '';
+  label: string = '';
+  detail: string = '';
+  observedAt: string = '';
 }
 
 export class EvidenceTrustReceipt {

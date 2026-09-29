@@ -319,18 +319,27 @@ export interface AgentCitation {
 export const evidenceSupportStates = ["SUPPORTED", "CONTESTED", "INSUFFICIENT"] as const;
 export type EvidenceSupportState = (typeof evidenceSupportStates)[number];
 
+export interface ProjectEvidenceRef {
+  kind: "project_status" | "intervention";
+  entityId: string;
+  label: string;
+  detail: string;
+  observedAt: string;
+}
+
 export interface EvidenceClaim {
   text: string;
   support: EvidenceSupportState;
   cardIds: string[];
   supersededCardIds: string[];
+  projectRefs?: ProjectEvidenceRef[];
 }
 
 export interface EvidenceTrustReceipt {
   supportState: EvidenceSupportState;
   abstained: boolean;
   claims: EvidenceClaim[];
-  retrievalMode: "hybrid" | "semantic_only" | "keyword_fallback" | "none";
+  retrievalMode: "hybrid" | "semantic_only" | "keyword_fallback" | "project_state" | "none";
   refusalReason: string | null;
   evaluatedAt: string;
 }

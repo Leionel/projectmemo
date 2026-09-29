@@ -40,6 +40,21 @@ describe.sequential("W05 trust receipt integration", () => {
     const answer = await answerProjectQuestion(project.id, "消融实验已经完成了吗？");
     expect(answer.trustReceipt).toMatchObject({ supportState: "INSUFFICIENT", abstained: true });
     expect(answer.proposedActions).toEqual([]);
+    const reminderStatus = await answerProjectQuestion(project.id, "为什么当前项目会触发提醒？依据是什么？");
+    expect(reminderStatus.message).toContain("没有开放中的真实主动提醒");
+    expect(reminderStatus.trustReceipt).toMatchObject({
+      supportState: "SUPPORTED",
+      abstained: false,
+      retrievalMode: "project_state",
+      claims: [{ projectRefs: [{ kind: "project_status", entityId: project.id }] }],
+    });
+    expect(reminderStatus.proposedActions).toEqual([]);
+    await expect(executeCopilotTool(project.id, {
+      tool: "create_action",
+      confirmed: true,
+      sourceRunId: reminderStatus.runId,
+      payload: { title: "从状态回答伪造行动" },
+    })).rejects.toMatchObject({ code: "UNAPPROVED_TOOL_PROPOSAL" });
     await expect(executeCopilotTool(project.id, {
       tool: "create_action",
       confirmed: true,
@@ -60,6 +75,9 @@ describe.sequential("W05 trust receipt integration", () => {
       deadline: null,
     });
     await processCapture(project.id, "消融实验已完成，结果显示移除时间化账本后拒答召回率下降。", "实验记录");
+    const naturalQuestion = await answerProjectQuestion(project.id, "消融实验完成了吗？");
+    expect(naturalQuestion.trustReceipt).toMatchObject({ supportState: "SUPPORTED", abstained: false });
+    expect(naturalQuestion.citations.length).toBeGreaterThan(0);
     const answer = await answerProjectQuestion(project.id, "消融实验 下一步 做什么？");
     expect(answer.trustReceipt).toMatchObject({ supportState: "SUPPORTED", abstained: false });
     expect(answer.proposedActions[0]?.kind).toBe("create_action");
@@ -81,5 +99,32 @@ describe.sequential("W05 trust receipt integration", () => {
 
     const history = await getProjectChat(project.id);
     expect(history.at(-1)?.trustReceipt).toMatchObject({ supportState: "SUPPORTED" });
+  });
+
+  it("answers from current reminder records without treating a demo reminder as real", async () => {
+    const { createProject } = await import("@/lib/repositories/projects");
+    const { db } = await import("@/lib/db");
+    const { answerProjectQuestion, getProjectChat } = await import("@/lib/services/copilotService");
+    const project = await createProject({
+      title: "提醒状态测试项目", description: "验证当前提醒的结构化依据", goal: "核对提醒",
+      scenario: "COMPETITION", deadline: null,
+    });
+    await db.agentIntervention.create({ data: {
+      projectId: project.id, triggerType: "RISK_UNHANDLED", dedupeKey: "real-risk",
+      status: "OPEN", severity: 4, title: "实验材料缺口", content: "缺少可核对的实验材料。",
+      evidence: { facts: [] }, proposedActions: [], isSimulated: false,
+    } });
+    await db.agentIntervention.create({ data: {
+      projectId: project.id, triggerType: "RISK_UNHANDLED", dedupeKey: "demo-risk",
+      status: "OPEN", severity: 5, title: "演示提醒", content: "仅用于演示。",
+      evidence: { facts: [] }, proposedActions: [], isSimulated: true,
+    } });
+    const answer = await answerProjectQuestion(project.id, "当前有哪些提醒？依据是什么？");
+    expect(answer.message).toContain("1 条开放中的真实主动提醒");
+    expect(answer.message).toContain("实验材料缺口");
+    expect(answer.message).not.toContain("演示提醒");
+    expect(answer.trustReceipt?.claims[0].projectRefs).toHaveLength(2);
+    const history = await getProjectChat(project.id);
+    expect(history.at(-1)?.trustReceipt?.claims[0].projectRefs).toHaveLength(2);
   });
 });

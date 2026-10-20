@@ -9,10 +9,12 @@ export async function claimMission(owner:string,id?:string){
  requireMissions();return db.$transaction(async tx=>{
   const now=new Date();await tx.agentMission.updateMany({where:{status:"RUNNING",leaseUntil:{lte:now}},data:{status:"READY",executionSlot:null,leaseOwner:null,leaseUntil:null}});
   if(await tx.agentMission.count({where:{executionSlot:1}}))return null;
-  const m=await tx.agentMission.findFirst({where:{status:"READY",...(id?{id}:{})},orderBy:{createdAt:"asc"}});if(!m)return null;
-  await lock(tx,m.id);await assertOwner(m.ownerUserId,m.projectId,tx);
-  const claimed=await tx.agentMission.update({where:{id:m.id},data:{status:"RUNNING",executionSlot:1,leaseOwner:owner,leaseUntil:new Date(Date.now()+60000),leaseEpoch:{increment:1},version:{increment:1}}});
+  for(let scan=0;scan<20;scan++){
+  const m=await tx.agentMission.findFirst({where:{status:"READY",OR:[{nextAttemptAt:null},{nextAttemptAt:{lte:now}}],...(id?{id}:{})},orderBy:{createdAt:"asc"}});if(!m)return null;
+  await lock(tx,m.id);try{await assertOwner(m.ownerUserId,m.projectId,tx);}catch(error){if(!(error instanceof AppError))throw error;await tx.agentMission.update({where:{id:m.id},data:{status:"PAUSED",pauseReason:"REVIEW_REQUIRED",version:{increment:1},lastErrorJson:{code:"AUTHORIZATION_REVOKED",message:"项目权限已撤销，委托已暂停"}}});await event(tx,m.id,"AUTHORIZATION_REVOKED",{});continue;}
+  const claimed=await tx.agentMission.update({where:{id:m.id},data:{status:"RUNNING",nextAttemptAt:null,executionSlot:1,leaseOwner:owner,leaseUntil:new Date(Date.now()+60000),leaseEpoch:{increment:1},version:{increment:1}}});
   await event(tx,m.id,"CLAIMED",{epoch:claimed.leaseEpoch});return claimed;
+  }return null;
  });
 }
 export async function fenced(tx:Tx,lease:Lease,checkContext=true){
@@ -35,4 +37,4 @@ export async function settleUsage(lease:Lease,kind:"models"|"tools",durationMs:n
  if(kind==="models"&&tokens&&tokens.inputTokens!==null&&tokens.outputTokens!==null){used.inputTokens+=tokens.inputTokens;used.outputTokens+=tokens.outputTokens;used.unknownCalls=Math.max(0,used.unknownCalls-1);}
  await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json(used)}});
  });}
-export async function release(tx:Tx,m:AgentMission,status:string,reason?:string){return tx.agentMission.update({where:{id:m.id},data:{status,pauseReason:reason??null,executionSlot:null,leaseOwner:null,leaseUntil:null,version:{increment:1},...(status==="SUCCEEDED"||status==="CANCELLED"?{finishedAt:new Date()}:{})}});}
+export async function release(tx:Tx,m:AgentMission,status:string,reason?:string){return tx.agentMission.update({where:{id:m.id},data:{status,pauseReason:reason??null,...(status==="PAUSED"&&reason!=="USER"?{planJson:json({...m.planJson as object,resumeStatus:"READY"})}:{}),executionSlot:null,leaseOwner:null,leaseUntil:null,version:{increment:1},...(status==="SUCCEEDED"||status==="CANCELLED"?{finishedAt:new Date()}:{})}});}

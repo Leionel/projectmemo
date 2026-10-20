@@ -9,7 +9,7 @@ export type Tool = { description:string; schema:z.ZodType; effects:{businessWrit
 export type ToolSet=Record<string,Tool>;
 const readEffects={businessWrite:false,cacheWrite:false,externalDisclosure:false};
 export const actionProposalSchema=z.object({title:z.string().trim().min(2).max(160),description:z.string().max(500).default(""),priority:z.number().int().min(1).max(5).default(3),dueAt:z.string().datetime().nullable().optional()}).strict();
-export const outputSchema=z.object({schemaVersion:z.literal(1).default(1),kind:z.enum(["NOTE","RESEARCH"]).default("NOTE"),blocks:z.array(z.object({blockId:z.string().min(1).max(80),text:z.string().min(1).max(1500),kind:z.enum(["PROJECT_OBSERVATION","EXTERNAL_REFERENCE","INFERENCE"]),sourceIds:z.array(z.string().max(160)).max(8)}).strict()).min(1).max(12),missingInformation:z.array(z.string().max(300)).max(12).default([])}).strict();
+export const outputSchema=z.object({schemaVersion:z.literal(1).default(1),kind:z.enum(["NOTE","RESEARCH"]).default("NOTE"),blocks:z.array(z.object({blockId:z.string().min(1).max(80),text:z.string().min(1).max(1500),kind:z.enum(["PROJECT_OBSERVATION","EXTERNAL_REFERENCE","INFERENCE"]),sourceIds:z.array(z.string().max(160)).max(8),citations:z.array(z.object({sourceId:z.string(),start:z.number().int().nonnegative(),end:z.number().int().positive(),excerptHash:z.string().regex(/^[a-f0-9]{64}$/)}).strict()).max(8).default([])}).strict()).min(1).max(12),missingInformation:z.array(z.string().max(300)).max(12).default([])}).strict();
 export const projectTools:ToolSet={
  inspect_project:{description:"读取当前项目目标与真实行动。来源是项目观察，不证明实验结论。",schema:z.object({}).strict(),effects:readEffects,run:async actor=>{
    const before=await sourceHash(actor.projectId,`project:${actor.projectId}`);
@@ -31,5 +31,5 @@ export const projectTools:ToolSet={
  propose_action:{description:"提出待办并等待用户批准，不创建行动。",schema:actionProposalSchema,effects:readEffects,run:async(_actor,input)=>({data:input,sources:[]})},
  inspect_action:{description:"读回本项目真实行动；TODO 不代表现实完成。",schema:z.object({actionId:z.string().min(1)}).strict(),effects:readEffects,run:async(actor,raw)=>{const action=await db.actionItem.findFirst({where:{id:(raw as {actionId:string}).actionId,projectId:actor.projectId,isSimulated:false}});if(!action)throw new AppError("ACTION_NOT_FOUND","没有找到可访问的行动",404);return{data:action,sources:[]};}},
 };
-export function sourcesFrom(results:unknown[]):Source[]{const all=results.flatMap(v=>Array.isArray((v as ToolResult|null)?.sources)?(v as ToolResult).sources:[]);return [...new Map(all.map(s=>[s.id,s])).values()];}
+export function sourcesFrom(results:unknown[]):Source[]{const all=results.flatMap(v=>Array.isArray((v as ToolResult|null)?.sources)?(v as ToolResult).sources:[]);return [...new Map(all.map(s=>[s.kind==="EXTERNAL"?s.identityKey??s.id:s.id,s])).values()];}
 export function toolInputHash(tool:string,args:unknown,sources:Source[]){return jsonHash({tool,args,sources:sources.map(s=>({id:s.id,hash:s.hash}))});}

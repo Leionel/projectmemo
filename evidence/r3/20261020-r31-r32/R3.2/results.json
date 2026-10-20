@@ -1,0 +1,101 @@
+{
+  "phase": "R3.2",
+  "date": "2026-10-20",
+  "scope": "LOCAL_IMPLEMENTATION",
+  "branch": "codex/r3-runtime-research",
+  "r31Commit": "7a7e500",
+  "providerMode": "SCRIPTED_FIXTURE_AND_MOCK_HTTP",
+  "checks": [
+    {
+      "command": "npm.cmd test",
+      "exitCode": 0,
+      "files": 57,
+      "tests": 511,
+      "log": "unit-delivery.log"
+    },
+    {
+      "command": "npm.cmd run lint",
+      "exitCode": 0,
+      "log": "lint-delivery.log"
+    },
+    {
+      "command": "npm.cmd run test:e2e",
+      "exitCode": 0,
+      "tests": 9,
+      "unexpected": 0,
+      "log": "e2e-delivery.log",
+      "includesProductionBuildAndTypes": true
+    },
+    {
+      "command": "npm.cmd run harmony:test",
+      "exitCode": 0,
+      "tests": 56,
+      "failures": 0,
+      "log": "harmony-test.log"
+    },
+    {
+      "command": "M1 checkpoint copy to M2 migration",
+      "exitCode": 0,
+      "preservedMission": true,
+      "foreignKeyErrors": 0
+    },
+    {
+      "command": "npm.cmd exec tsc -- --noEmit",
+      "exitCode": 0,
+      "log": "types-delivery-final.log"
+    },
+    {
+      "command": "npm.cmd test -- tests/missionPanel.test.ts",
+      "exitCode": 0,
+      "tests": 2,
+      "reason": "Rechecked after correcting test-only DOM matcher option types"
+    }
+  ],
+  "independentReview": {
+    "agent": "independent_review",
+    "findingsClosed": 10,
+    "openFindings": 0,
+    "lastResearchRunTests": 34,
+    "exitCode": 0,
+    "record": "review.md",
+    "scope": "Runtime, sources, query policy, output, API and UI source; independent temporary SQLite and mock calls"
+  },
+  "browser": {
+    "tool": "Playwright CLI",
+    "mode": "isolated E2E database and scripted provider",
+    "receipt": "ui-smoke.json",
+    "verified": [
+      "create Mission",
+      "multi-line resource and time constraint edit",
+      "Research Scope edit",
+      "reload and reselect same Mission",
+      "answer original question",
+      "approve full frozen Action parameters",
+      "read back exactly one TODO Action"
+    ],
+    "laterFrontendRegressionTests": 2,
+    "screenshot": "output/playwright/r3-mission-smoke.png"
+  },
+  "migration": {
+    "emptyReplay": true,
+    "oldSchemaCopyUpgrade": true,
+    "developmentDatabaseTouched": false
+  },
+  "paidApiCalls": 0,
+  "dependenciesAdded": [],
+  "preservedUnrelatedUserFiles": true,
+  "knownBuildWarning": "Existing attachmentStorage -> next.config broad file tracing warning",
+  "pendingGates": [
+    "MODEL: real autonomous model trajectories and protocol compatibility",
+    "SEARCH: real account Search/Fetch behavior and limits",
+    "R3.3: material event continuation and Artifact adoption",
+    "R3.4: native Mission panel and device/platform acceptance"
+  ],
+  "deviations": [
+    "Public-query generation uses the same Adapter with only approved public scope and public sources; main private-context model passes a typed research focus, not raw query text",
+    "M2 adds nextAttemptAt for durable bounded retry/backoff",
+    "Server amount-based cost conversion is not configured; an explicit monetary ceiling pauses real paid execution instead of inventing a conversion rate"
+  ],
+  "testedWorkspace": "Current working tree with pre-existing unrelated changes preserved; not an isolated clean-HEAD verification",
+  "logFormatting": "Committed final logs normalize trailing horizontal whitespace and final blank lines only; intermediate raw runs remain local."
+}

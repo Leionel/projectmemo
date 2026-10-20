@@ -40,15 +40,21 @@ export async function commandMission(userId:string,id:string,action:string,raw:u
     }else if(action==="approval"){
       const a=await tx.agentMissionApproval.findFirst({where:{id:approvalId,missionId:id,status:"PENDING"}});
       if(m.status!=="WAITING_APPROVAL"||!a||!body.decision||a.proposalHash!==body.proposalHash||a.expiresAt<=new Date()||a.expectedPlanRevision!==m.planRevision)throw new AppError("APPROVAL_CHANGED","批准预览已失效，请重新预览",409);
-      if(body.decision==="APPROVED")await validateSources(m.projectId,a.readSetJson as unknown as Source[],tx);
+      if(body.decision==="APPROVED")await validateSources(m.projectId,a.readSetJson as unknown as Source[],tx,m.id);
       await tx.agentMissionApproval.update({where:{id:a.id},data:{status:body.decision,approverUserId:userId,decidedAt:new Date()}});
       await tx.agentMissionStep.update({where:{id:a.stepId},data:{status:body.decision==="APPROVED"?"READY":"SKIPPED"}});status="READY";
+      if(body.decision==="REJECTED"){const c=m.constraintsJson as Record<string,unknown>;const title=(a.proposalJson as {args:{title:string}}).args.title;await tx.agentMission.update({where:{id},data:{constraintsJson:json({...c,rejectedActions:[...new Set([...(c.rejectedActions as string[]??[]),title])].slice(-12)}),constraintsVersion:{increment:1},contextVersion:{increment:1},planRevision:{increment:1}}});await event(tx,id,"CONSTRAINTS_CHANGED",{rejectedAction:title,source:"USER_REJECTED_APPROVAL"});}
+    }else if(action==="replan"){
+      if(m.status!=="WAITING_APPROVAL")throw new AppError("INVALID_TRANSITION","当前没有待重新预览的提案",409);
+      await tx.agentMissionApproval.updateMany({where:{missionId:id,status:{in:["PENDING","APPROVED"]}},data:{status:"EXPIRED"}});
+      await tx.agentMissionStep.updateMany({where:{missionId:id,status:{in:["WAITING_APPROVAL","READY"]}},data:{status:"OBSOLETE"}});
+      await tx.agentMission.update({where:{id},data:{planRevision:{increment:1}}});status="READY";
     }else if(action==="resume"){
-      if(m.status!=="PAUSED")throw new AppError("MISSION_NOT_PAUSED","仅暂停的委托可以继续；失败任务需先修复原因",409);status="READY";
+      if(m.status!=="PAUSED")throw new AppError("MISSION_NOT_PAUSED","仅暂停的委托可以继续；失败任务需先修复原因",409);const previous=(m.planJson as {resumeStatus?:string}).resumeStatus;status=previous&&["WAITING_INPUT","WAITING_APPROVAL"].includes(previous)?previous:"READY";
     }else if(action==="pause"){if(!["READY","RUNNING","WAITING_INPUT","WAITING_APPROVAL"].includes(m.status))throw new AppError("INVALID_TRANSITION","当前状态无法暂停",409);status=m.status==="RUNNING"?"RUNNING":"PAUSED";}
     else if(action==="cancel")status=m.status==="RUNNING"?"RUNNING":"CANCELLED";
     else throw new AppError("INVALID_COMMAND","不支持此操作",422);
-    const updated=await tx.agentMission.update({where:{id},data:{status,version:{increment:1},...(action==="input"?{contextVersion:{increment:1}}:{}),pauseRequestedAt:action==="pause"?new Date():null,cancelRequestedAt:action==="cancel"?new Date():m.cancelRequestedAt,pauseReason:action==="pause"?"USER":null}});
+    const updated=await tx.agentMission.update({where:{id},data:{status,...(action==="pause"?{planJson:json({...m.planJson as object,resumeStatus:m.status==="RUNNING"?"READY":m.status})}:{}),...( ["resume","input","approval","replan"].includes(action)?{planJson:json({...m.planJson as object,resumeStatus:null})}:{}),version:{increment:1},...(action==="input"?{contextVersion:{increment:1}}:{}),pauseRequestedAt:action==="pause"?new Date():null,cancelRequestedAt:action==="cancel"?new Date():m.cancelRequestedAt,pauseReason:action==="pause"?"USER":null}});
     await event(tx,id,action.toUpperCase(),json(body),{id:`cmd:${body.requestId}`,hash});return updated;
   });
 }
@@ -62,7 +68,7 @@ export async function editMission(userId:string,id:string,kind:"constraints"|"re
     await tx.agentMissionApproval.updateMany({where:{missionId:id,status:{in:["PENDING","APPROVED"]}},data:{status:"EXPIRED"}});
     await tx.agentMissionStep.updateMany({where:{missionId:id,status:{in:["READY","WAITING_APPROVAL"]}},data:{status:"OBSOLETE"}});
     const old=m.constraintsJson as Record<string,unknown>;
-    const updated=await tx.agentMission.update({where:{id},data:{...(kind==="constraints"?{constraintsJson:json({...body.constraints,llmContextApproved:body.llmContextApproved??old.llmContextApproved}),constraintsVersion:{increment:1}}:{researchScopeJson:json(body.scope),researchScopeVersion:{increment:1}}),contextVersion:{increment:1},version:{increment:1},planRevision:{increment:1},status:m.status==="WAITING_APPROVAL"?"READY":m.status}});
+    const updated=await tx.agentMission.update({where:{id},data:{...(kind==="constraints"?{constraintsJson:json({...body.constraints,llmContextApproved:body.llmContextApproved??old.llmContextApproved}),constraintsVersion:{increment:1}}:{researchScopeJson:json(body.scope),researchScopeVersion:{increment:1}}),contextVersion:{increment:1},version:{increment:1},planRevision:{increment:1},planJson:json({...m.planJson as object,resumeStatus:"READY"}),status:m.status==="WAITING_APPROVAL"?"READY":m.status}});
     await event(tx,id,kind==="constraints"?"CONSTRAINTS_CHANGED":"RESEARCH_SCOPE_CHANGED",json(body),{id:`cmd:${body.requestId}`,hash});return updated;
   });
 }

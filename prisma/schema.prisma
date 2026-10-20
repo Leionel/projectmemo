@@ -871,6 +871,7 @@ model AgentMission {
  budgetUsedJson Json @default("{}")
  nextEventSeq Int @default(0)
  leaseOwner String?
+ nextAttemptAt DateTime?
  leaseUntil DateTime?
  leaseEpoch Int @default(0)
  executionSlot Int? @unique
@@ -886,9 +887,11 @@ model AgentMission {
  events AgentMissionEvent[]
  approvals AgentMissionApproval[]
  outputs AgentMissionOutput[]
+ externalSources ExternalSource[]
  @@unique([ownerUserId,createRequestId])
  @@index([ownerUserId,status])
  @@index([status,leaseUntil])
+ @@index([status,nextAttemptAt])
 }
 model AgentMissionStep {
  id String @id @default(cuid())
@@ -958,4 +961,23 @@ model AgentMissionOutput {
  createdAt DateTime @default(now())
  mission AgentMission @relation(fields:[missionId], references:[id], onDelete:Cascade)
  @@unique([missionId,revision])
+}
+
+model ExternalSource {
+ id String @id
+ missionId String
+ requestedUrl String
+ resolvedUrl String?
+ retrievalMode String
+ title String
+ publisher String?
+ publishedAt DateTime?
+ fetchedAt DateTime @default(now())
+ normalizedContentHash String
+ excerptJson Json
+ availability String @default("AVAILABLE")
+ trustLabel String @default("EXTERNAL_UNVERIFIED")
+ mission AgentMission @relation(fields:[missionId], references:[id], onDelete:Cascade)
+ @@unique([missionId,requestedUrl,retrievalMode,normalizedContentHash])
+ @@index([missionId,fetchedAt])
 }

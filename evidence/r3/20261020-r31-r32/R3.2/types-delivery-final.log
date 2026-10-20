@@ -1,0 +1,3 @@
+Command: npm.cmd exec tsc -- --noEmit
+ExitCode: 0
+Console output: empty (successful type check)

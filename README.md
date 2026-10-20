@@ -215,3 +215,7 @@ evidence/               验收回执（按批次分目录，注明数据来源�
 启用 `MISSION_ENABLED=true` 后，项目页显示长期委托面板。Web 只接收命令，另开进程运行 `npm.cmd run mission:worker`；单片段排查可加 `-- --once`。行动实际创建另需 `MISSION_WRITES_ENABLED=true`。
 
 使用 Node 24、相同代码和同一个数据库；先备份并在独立副本验证新增迁移，不运行 seed/reset 修复旧库。云模型调用需用户在委托中明确许可上下文范围，环境沿用 LLM 配置；未配置真实模型时任务暂停，测试夹具不作为自主执行验收。约束、问题、批准、草稿与事件保存在服务端，退出页面不清除。关闭入口/Worker 不删除已创建行动和历史。
+
+公开研究另需 `MISSION_WEB_ENABLED=true` 和服务端 `MISSION_SEARCH_API_KEY`（或已授权的 LLM 凭据）。项目面板单独确认研究主题、公开概念、信息类别和站点范围。Agent 选择研究方向，查询由同模型在只含已批准主题及公开资料的视图生成；查询不会携带项目原文。托管 DeepSeek Search/Fetch 的地址固定，按官方接口实现；返回正文标为 PROVIDER_EXTRACT，最终 URL 不可见，不冒称已独立验证目标域名。官方契约：[Search](https://api-docs.deepseek.com/api/search/)、[Fetch](https://api-docs.deepseek.com/api/fetch/)。
+
+来源摘要与获取正文分开；研究稿保持待审核，精确摘录与哈希由服务端提供。来源更新保留旧观察。旧批准到期或依据变化可点“更新依据并重新预览”，不复用过期批准。R3.3 的材料事件接续/成果归入和 R3.4 的鸿蒙 Mission 面板尚未包含在 R3.1/R3.2 本地实现中。

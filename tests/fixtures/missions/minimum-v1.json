@@ -48,7 +48,7 @@
       "allowedToolClasses": [
         "web_search",
         "web_fetch",
-        "save_research_draft"
+        "save_mission_output"
       ],
       "criterion": "两条独立来源，限制条件不能省略"
     },
@@ -97,7 +97,7 @@
       "goal": "缺少我的实验指标时准备比较草稿",
       "category": "CONTEXT",
       "allowedToolClasses": [
-        "save_research_draft"
+        "save_mission_output"
       ],
       "criterion": "需要私有指标应追问，保留未知"
     },

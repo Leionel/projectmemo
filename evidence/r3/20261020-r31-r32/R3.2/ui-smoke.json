@@ -1,0 +1,25 @@
+{
+  "mode": "ISOLATED_SQLITE_AND_SCRIPTED_PROVIDER",
+  "tool": "Playwright CLI",
+  "missionId": "cmvh8bd7l0006ks8olcvrh5un",
+  "createdThroughUI": true,
+  "constraints": {
+    "availableMinutes": 45,
+    "multiLineResourcesPersisted": true
+  },
+  "researchScopePersisted": true,
+  "reloadedSameMission": true,
+  "answeredSameQuestion": true,
+  "approvalFieldsVisible": [
+    "priority",
+    "dueAt",
+    "expiresAt"
+  ],
+  "approvedThroughUI": true,
+  "actionId": "cmvh8ihun0001po8oxjju92nw",
+  "actionStatus": "TODO",
+  "actionPriority": 4,
+  "sourceModel": "TEST_FIXTURE",
+  "paidApiCalls": 0,
+  "status": "READY"
+}

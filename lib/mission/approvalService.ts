@@ -15,7 +15,7 @@ export async function commitApprovedAction(lease:Lease,stepId:string){
   if(!step||!approval||approval.missionId!==m.id)throw new AppError("APPROVAL_CHANGED","批准不存在",409);
   if(step.status==="SUCCEEDED"&&approval.status==="CONSUMED")return step.resultJson;
   if(approval.status!=="APPROVED"||approval.expectedPlanRevision!==m.planRevision||approval.expiresAt<=new Date()||approval.proposalHash!==jsonHash(approval.proposalJson))throw new AppError("APPROVAL_CHANGED","批准已失效，请重新预览",409);
-  await validateSources(m.projectId,approval.readSetJson as unknown as Source[],tx);
+  await validateSources(m.projectId,approval.readSetJson as unknown as Source[],tx,m.id);
   const proposal=approval.proposalJson as {args:unknown};const args=actionProposalSchema.parse(proposal.args);assertToolConstraints(m.constraintsJson,"propose_action",args);
   const key=step.effectKey!;const old=await tx.actionItem.findUnique({where:{dedupeKey:key}});
   const action=old??await createActionInTx(tx,m.projectId,{...args,dueAt:args.dueAt??undefined},key);

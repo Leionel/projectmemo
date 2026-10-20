@@ -1,0 +1,12 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  57 passed (57)
+      Tests  511 passed (511)
+   Start at  15:11:25
+   Duration  88.58s (transform 5.03s, setup 0ms, import 18.72s, tests 53.72s, environment 997ms)

@@ -48,7 +48,7 @@ type ResultKind = 'DRAFT_DELIVERED' | 'TOOL_EXECUTED' | 'USER_REPORTED' | 'CRITE
 
 | 表 | 必需字段 | 约束及生命周期 |
 |---|---|---|
-| AgentMission | id、ownerUserId、projectId、goal、successCriteriaJson、constraintsJson、constraintsVersion、researchScopeJson、researchScopeVersion、continuationPolicyJson、status、pauseReason、version、planRevision、planJson、contextSchemaVersion、contextVersion、waitStateJson、budgetJson、budgetUsedJson、nextEventSeq、leaseOwner、leaseUntil、leaseEpoch、executionSlot、pauseRequestedAt、cancelRequestedAt、lastErrorJson、createdAt、updatedAt、finishedAt | FK 到 User/Project；unique(ownerUserId,createRequestId)，同时存 createPayloadHash；executionSlot 可空且唯一，非空仅允许 1；首版全局一个执行槽；索引 owner/status、status/leaseUntil |
+| AgentMission | id、ownerUserId、projectId、goal、successCriteriaJson、constraintsJson、constraintsVersion、researchScopeJson、researchScopeVersion、continuationPolicyJson、status、pauseReason、version、planRevision、planJson、contextSchemaVersion、contextVersion、waitStateJson、budgetJson、budgetUsedJson、nextEventSeq、leaseOwner、leaseUntil、nextAttemptAt、leaseEpoch、executionSlot、pauseRequestedAt、cancelRequestedAt、lastErrorJson、createdAt、updatedAt、finishedAt | FK 到 User/Project；unique(ownerUserId,createRequestId)，同时存 createPayloadHash；executionSlot 可空且唯一，非空仅允许 1；首版全局一个执行槽；索引 owner/status、status/leaseUntil |
 | AgentMissionStep | id、missionId、ordinal、planRevision、toolName、toolVersion、status、canonicalInputJson、inputHash、readSetJson、effectKey、attempts、resultJson、agentRunId、providerCallId、usageJson、verificationJson、startedAt、finishedAt | unique(missionId,ordinal)、unique(effectKey)；effectKey 对写步骤稳定；输出严格限长；已成功步骤不能被重新执行覆盖 |
 | AgentMissionEvent | id、missionId、seq、type、payloadJson、commandRequestId、commandPayloadHash、createdAt | unique(missionId,seq)、unique(missionId,commandRequestId)；用户命令键加 cmd: 前缀，来源信号用服务端 source:<kind>:<id>:<revision/hash> 键；普通事件为空；序号在 Mission 事务内递增；仅存允许展示的摘要与引用 |
 | AgentMissionApproval | id、missionId、stepId、proposalHash、proposalJson、expectedPlanRevision、readSetJson、approverUserId、status、expiresAt、decidedAt、consumedAt | unique(stepId)；使用复合关系或事务约束确保 Step 属于同一 Mission；提案冻结，不接受批准请求覆盖字段 |
@@ -97,7 +97,7 @@ interface SourcePointer { kind: 'PROJECT' | 'EXTERNAL'; entityType: 'CARD' | 'CA
 |---|---|---|---|
 | inspect_project | 当前 Mission 范围，禁止任意 projectId | 最新状态/新鲜度、关键约束、Health findings；复用 projectState、buildProjectHealthReport | 领域只读；可能存在状态缓存维护，须明确标注；不调用会生成提醒的 evaluateProjectContext |
 | search_memory | query≤256 字，limit≤8，historyPurpose 可选 | searchProjectCards + 时态状态；返回具体来源与截断说明 | 不在查询路径无界调用 ensureCardEmbedding；缺向量用关键词并报告 |
-| web_search | query、scopeRevision、可选 siteFilter/dateRange；模型不得修改授权范围 | SearchProvider 结果 ID、URL、摘要、时间及 Query Policy 回执 | 网络外传；允许范围内自主生成查询，服务端核对公开主题、允许外传类别及敏感信息；超范围需用户确认，Provider 长度上限另校验 |
+| web_search | focus（METHODS/PAPERS/EVALUATION/COMPARISON）、scopeRevision；隔离的公开研究视图生成 query，模型不得修改授权范围 | SearchProvider 结果 ID、URL、摘要、时间及 Query Policy 回执 | 网络外传；允许范围内自主生成查询，服务端核对公开主题、允许外传类别及敏感信息；超范围需用户确认，Provider 长度上限另校验 |
 | web_fetch | 本 Mission 搜索结果 ID 或用户显式允许的 URL ID | 受限获取、规范化片段、Source ID、获取时间和失败类型 | 公开 HTTPS、SSRF/大小/重定向限制；不允许模型提交任意 URL |
 | save_mission_output | kind、schemaVersion、content、sourcePointers；R3.2 扩展研究块、claim 与待补项 | 同一 Output Service 创建新 MissionOutput revision | 任务私有持久写，不改变项目当前事实；无引用的判断标推断或待审核 |
 | propose_action | title、description、priority、可选dueAt、依据引用 | 冻结批准预览与 proposalHash | 仅保存提案，不创建 Action；描述不能把公开结果写成项目已完成 |
@@ -116,7 +116,7 @@ interface SourcePointer { kind: 'PROJECT' | 'EXTERNAL'; entityType: 'CARD' | 'CA
 | GET /api/missions/:id | 无 | version/contextVersion、约束及范围版本、状态、计划、步骤、预算、Output/成果回执、待输入/批准与资料评估 |
 | GET /api/missions/:id/outputs/:outputId | 当前 Mission 范围及固定 Output ID | kind/schemaVersion、revision、内容、固定来源与核验状态、归入回执；其他 Mission 的 Output 拒绝 |
 | GET /api/missions/:id/events?afterSeq= | cursor | events、nextAfterSeq；重复拉取可去重，重连不丢事件 |
-| PATCH /api/missions/:id/constraints | requestId、expectedVersion、expectedConstraintsVersion、set/unset/revoke | 用户会话命令；版本化约束变更事件，影响计划/批准时原子失效；历史保留 |
+| PATCH /api/missions/:id/constraints | requestId、expectedVersion、expectedConstraintsVersion、完整 constraints、llmContextApproved（可撤销） | 用户会话命令；版本化约束变更事件，影响计划/批准时原子失效；历史保留 |
 | PATCH /api/missions/:id/research-scope | requestId、expectedVersion、expectedScopeVersion、scope、continuationPolicy | 用户明确确认，模型不可调用；撤销/缩小立即约束后续调用，扩范围不追认旧外传 |
 | POST /api/missions/:id/continuations/preview | 当前 questionId、候选 sourcePointers（可手动选择） | 只读返回关联、缺口充分性/冲突、仍缺项、建议状态及 assessmentHash；不会恢复 |
 | POST /api/missions/:id/continuations/confirm | requestId、expectedVersion/contextVersion、questionId、sourcePointers、assessmentHash、用户确认的缺口答复 | 202；重查来源/权限/缺口/预算/约束，过期 409；不足仍等待；满足时原子绑定并入 READY |
@@ -124,6 +124,7 @@ interface SourcePointer { kind: 'PROJECT' | 'EXTERNAL'; entityType: 'CARD' | 'CA
 | POST /api/missions/:id/outputs/:outputId/artifact-confirm | requestId、previewHash、expectedOutputRevision、expectedContextVersion | 用户会话显式确认；原子创建 Artifact 历史版本和 Receipt，返回两者 ID；同意图读回，异载荷/旧源 409 |
 | POST /api/missions/:id/input | requestId、expectedVersion、questionId、answer；公开搜索范围扩充需用户显式确认 | 202；引用当前问题；保留原输入历史 |
 | POST /api/missions/:id/approvals/:approvalId | requestId、decision、proposalHash、expectedVersion | 202；只决定批准/拒绝，不能附新工具参数；工作进程负责提交 |
+| POST /api/missions/:id/replan | requestId、expectedVersion；仅 WAITING_APPROVAL | 202；过期/来源变化后的旧批准及未执行提案失效，保留历史，重新规划并预览 |
 | POST /api/missions/:id/pause | requestId、expectedVersion | 202；运行中显示暂停请求已接收，安全点后转 PAUSED |
 | POST /api/missions/:id/resume | requestId、expectedVersion | 202；不重置累计预算，不重放已成功步骤 |
 | POST /api/missions/:id/cancel | requestId、expectedVersion | 202；保留已发生的副作用和回执 |
@@ -373,5 +374,5 @@ Target 放行且实际用户需求成立后才领取，3–5 日预算中择一�
 |---|---|---|---|---|
 | 初次规划基线 | 两份规划文档；当时未实施业务代码 | 初次源码和官方文档核对 | 不能据此宣布实施 Gate 通过 | 以路线图范围取舍为准 |
 | 第二轮规划修订 | 仅修订两份文档，保留 dfa42ea 及已有未完成工作树 | 规划契约、依赖、估时与修改范围核对 | 本轮未新增模型/设备/平台验收 | 接续人审属 Minimum、自动恢复属 Target；Output 单生命周期；成果复用 Artifact，新增持久关联 |
-
 | WP-10/11/12 本地实现 | 持久 Runtime/独立 Worker、通用 Output、显式约束、原子 Action 批准及 Web 面板 | 3 文件 44 测试（Mission 19）、tsc、受影响 ESLint、Web build；隔离空库重放和旧库副本升级；evidence/r3/20261020-r31-r32/R3.1/results.json | 真实模型/设备/平台未验收 | 保持严格 JSON 为默认协议，原生工具模式可配置；后续 R3.2 扩同一 Output/Context/Registry |
+| WP-20/21 本地实现与独立审查修复 | 托管 Search/Fetch、隔离公开查询、来源观察/精确摘录、同一 Research Output、范围与来源 Web 入口；修复审批/恢复/队列问题 | 独立审查及复核见 evidence/r3/20261020-r31-r32/R3.2/review.md；最终 57 文件 511 测试、E2E 9、鸿蒙 56、全库 lint/类型与构建通过，浏览器隔离闭环见 ui-smoke.json；最终命令回执见同目录 | MODEL/SEARCH 实际账号未调用；R3.3 材料事件接续与成果归入、R3.4 原生面板另行实施 | web_search 不接受私有上下文模型给出的完整query，改由同Adapter在公开视图生成；Registry仍七个业务工具。M2增nextAttemptAt作持久退避，Worker不忙循环；费用金额无法换算时暂停、不重置硬调用预算 |

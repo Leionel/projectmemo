@@ -32,7 +32,8 @@ export async function sourceHash(projectId: string, id: string, tx: Tx = db): Pr
   }
   return null;
 }
-export async function validateSources(projectId: string, sources: Source[], tx: Tx = db) {
+export async function validateSources(projectId: string, sources: Source[], tx: Tx = db, missionId?: string) {
+  for(const s of sources.filter(s=>s.kind==="EXTERNAL")){const row=missionId?await tx.externalSource.findFirst({where:{id:s.id,missionId,retrievalMode:"PROVIDER_EXTRACT",availability:"AVAILABLE",normalizedContentHash:s.hash}}):null;if(!row)throw new AppError("SOURCE_CHANGED","外部来源不存在、失效或不属于当前委托",409);}
   for (const source of sources.filter(s=>s.kind==="PROJECT")) if (await sourceHash(projectId,source.id,tx)!==source.hash) throw new AppError("SOURCE_CHANGED","来源已变化，请重新读取并预览",409);
 }
 export async function commandReplay(tx: Tx, id: string, requestId: string, hash: string) {

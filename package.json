@@ -26,7 +26,8 @@
     "benchmark:w05": "tsx scripts/benchmark-trust-receipt.ts",
     "verify:s08-adapter": "vitest run tests/xiaoyi.adapter.test.ts",
     "verify:w03-public": "tsx scripts/verify-xiaoyi-public.ts",
-    "verify:w03-live": "tsx scripts/verify-xiaoyi-public.ts --confirm-writes"
+    "verify:w03-live": "tsx scripts/verify-xiaoyi-public.ts --confirm-writes",
+    "mission:worker": "tsx scripts/mission-worker.ts"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.0.0",

@@ -90,6 +90,7 @@ enum CardRelationType {
 }
 
 model Project {
+  missions AgentMission[]
   id          String              @id @default(cuid())
   title       String
   description String
@@ -305,6 +306,7 @@ model AgentRun {
   createdAt      DateTime        @default(now())
   project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
   messages       AgentMessage[]
+  missionSteps   AgentMissionStep[]
 
   @@index([projectId, createdAt])
   @@index([projectId, runType])
@@ -803,6 +805,7 @@ model DeliverableEvidence {
 }
 
 model User {
+  missions AgentMission[]
   id           String              @id @default(cuid())
   username     String              @unique
   displayName  String
@@ -841,4 +844,118 @@ model ProjectMembership {
   @@unique([userId, projectId])
   @@index([userId])
   @@index([projectId])
+}
+
+model AgentMission {
+ id String @id @default(cuid())
+ ownerUserId String
+ projectId String
+ createRequestId String
+ createPayloadHash String
+ goal String
+ successCriteriaJson Json
+ constraintsJson Json
+ constraintsVersion Int @default(1)
+ researchScopeJson Json @default("{}")
+ researchScopeVersion Int @default(1)
+ continuationPolicyJson Json @default("{\"mode\":\"MANUAL\"}")
+ contextVersion Int @default(1)
+ waitStateJson Json?
+ status String @default("READY")
+ pauseReason String?
+ version Int @default(1)
+ planRevision Int @default(1)
+ planJson Json @default("{}")
+ contextSchemaVersion Int @default(1)
+ budgetJson Json
+ budgetUsedJson Json @default("{}")
+ nextEventSeq Int @default(0)
+ leaseOwner String?
+ leaseUntil DateTime?
+ leaseEpoch Int @default(0)
+ executionSlot Int? @unique
+ pauseRequestedAt DateTime?
+ cancelRequestedAt DateTime?
+ lastErrorJson Json?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ finishedAt DateTime?
+ owner User @relation(fields:[ownerUserId], references:[id], onDelete:Cascade)
+ project Project @relation(fields:[projectId], references:[id], onDelete:Cascade)
+ steps AgentMissionStep[]
+ events AgentMissionEvent[]
+ approvals AgentMissionApproval[]
+ outputs AgentMissionOutput[]
+ @@unique([ownerUserId,createRequestId])
+ @@index([ownerUserId,status])
+ @@index([status,leaseUntil])
+}
+model AgentMissionStep {
+ id String @id @default(cuid())
+ missionId String
+ ordinal Int
+ planRevision Int
+ toolName String
+ toolVersion String @default("1")
+ status String @default("RUNNING")
+ canonicalInputJson Json
+ inputHash String
+ readSetJson Json
+ effectKey String? @unique
+ attempts Int @default(1)
+ resultJson Json?
+ providerCallId String?
+ protocolJson Json?
+ agentRunId String?
+ agentRun AgentRun? @relation(fields:[agentRunId], references:[id], onDelete:SetNull)
+ usageJson Json?
+ verificationJson Json?
+ startedAt DateTime @default(now())
+ finishedAt DateTime?
+ mission AgentMission @relation(fields:[missionId], references:[id], onDelete:Cascade)
+ approval AgentMissionApproval?
+ @@unique([missionId,ordinal])
+}
+model AgentMissionEvent {
+ id String @id @default(cuid())
+ missionId String
+ seq Int
+ type String
+ payloadJson Json
+ commandRequestId String?
+ commandPayloadHash String?
+ createdAt DateTime @default(now())
+ mission AgentMission @relation(fields:[missionId], references:[id], onDelete:Cascade)
+ @@unique([missionId,seq])
+ @@unique([missionId,commandRequestId])
+}
+model AgentMissionApproval {
+ id String @id @default(cuid())
+ missionId String
+ stepId String @unique
+ proposalHash String
+ proposalJson Json
+ expectedPlanRevision Int
+ readSetJson Json
+ approverUserId String?
+ status String @default("PENDING")
+ expiresAt DateTime
+ decidedAt DateTime?
+ consumedAt DateTime?
+ mission AgentMission @relation(fields:[missionId], references:[id], onDelete:Cascade)
+ step AgentMissionStep @relation(fields:[stepId], references:[id], onDelete:Cascade)
+}
+model AgentMissionOutput {
+ id String @id @default(cuid())
+ missionId String
+ stepId String? @unique
+ revision Int
+ kind String
+ contentJson Json
+ sourceRefsJson Json
+ claimChecksJson Json
+ verificationStatus String @default("NEEDS_REVIEW")
+ createdAt DateTime @default(now())
+ mission AgentMission @relation(fields:[missionId], references:[id], onDelete:Cascade)
+ @@unique([missionId,revision])
 }

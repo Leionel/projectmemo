@@ -192,33 +192,25 @@ export async function listActions(projectId: string, includeClosed = true) {
   });
 }
 
-async function assertActionSources(projectId: string, input: { sourceInterventionId?: string | null; sourceCardId?: string | null }) {
+async function assertActionSources(projectId: string, input: { sourceInterventionId?: string | null; sourceCardId?: string | null }, client: Prisma.TransactionClient = db) {
   if (input.sourceInterventionId) {
-    const found = await db.agentIntervention.findFirst({ where: { id: input.sourceInterventionId, projectId } });
+    const found = await client.agentIntervention.findFirst({ where: { id: input.sourceInterventionId, projectId } });
     if (!found) throw new AppError("INTERVENTION_NOT_FOUND", "行动引用的提醒不属于当前项目", 404);
   }
   if (input.sourceCardId) {
-    const found = await db.knowledgeCard.findFirst({ where: { id: input.sourceCardId, projectId } });
+    const found = await client.knowledgeCard.findFirst({ where: { id: input.sourceCardId, projectId } });
     if (!found) throw new AppError("CARD_NOT_FOUND", "行动引用的知识卡片不属于当前项目", 404);
   }
 }
 
+export async function createActionInTx(tx: Prisma.TransactionClient, projectId: string, input: ActionCreateInput, dedupeKey?: string) {
+  await assertActionSources(projectId, input, tx);
+  return tx.actionItem.create({data:{projectId,title:input.title,description:input.description ?? null,priority:input.priority ?? 3,dueAt:input.dueAt ? new Date(input.dueAt) : null,sourceInterventionId:input.sourceInterventionId ?? null,sourceCardId:input.sourceCardId ?? null,isSimulated:input.isSimulated ?? false,dedupeKey}});
+}
 export async function createAction(projectId: string, input: ActionCreateInput) {
-  await assertActionSources(projectId, input);
-  const action = await db.actionItem.create({
-    data: {
-      projectId,
-      title: input.title,
-      description: input.description ?? null,
-      priority: input.priority ?? 3,
-      dueAt: input.dueAt ? new Date(input.dueAt) : null,
-      sourceInterventionId: input.sourceInterventionId ?? null,
-      sourceCardId: input.sourceCardId ?? null,
-      isSimulated: input.isSimulated ?? false,
-    },
-  });
-  const stateRefreshPending = await refreshProjectStateAfterMutation(projectId);
-  return { ...action, stateRefreshPending };
+  const action=await db.$transaction(tx=>createActionInTx(tx,projectId,input));
+  const stateRefreshPending=await refreshProjectStateAfterMutation(projectId);
+  return {...action,stateRefreshPending};
 }
 
 export async function createOrReuseAction(projectId: string, input: ActionCreateInput) {

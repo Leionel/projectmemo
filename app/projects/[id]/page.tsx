@@ -1,3 +1,4 @@
+import { MissionPanel } from "@/components/MissionPanel";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Activity, Archive, ArrowLeft, ArrowRight, Bot, BookmarkCheck, CalendarDays, CheckSquare, ClipboardCheck, FileOutput, FileText, Goal, Sparkles, Star, type LucideIcon } from "lucide-react";
@@ -116,6 +117,8 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         <div className="flex flex-wrap gap-3"><a href="#meeting-import" className="focus-ring editorial-button-secondary shrink-0"><FileText size={18} /> 会议更新</a><ProjectSettings project={{ id, title: project.title, description: project.description, goal: project.goal, scenario: project.scenario, deadline: project.deadline ? project.deadline.toISOString().slice(0, 10) : "", archivedAt: project.archivedAt ? project.archivedAt.toISOString() : null }} /><Link href={"/projects/" + id + "/generate"} className="focus-ring editorial-button shrink-0"><FileOutput size={18} /> 生成项目成果</Link></div>
       </div>
     </header>
+
+    {isFeatureEnabled("MISSION_ENABLED", false) && <MissionPanel projectId={id} />}
 
     <ProjectPulse dashboard={dashboard} goal={project.goal} deadlineLabel={project.deadline ? project.deadline.toLocaleDateString("zh-CN") : "暂未设置"} />
 

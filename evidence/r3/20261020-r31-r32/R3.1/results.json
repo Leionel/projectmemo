@@ -1,0 +1,44 @@
+{
+  "phase": "R3.1",
+  "mode": "SCRIPTED_PROVIDER_AND_INDEPENDENT_SQLITE",
+  "checks": [
+    {
+      "command": "npm.cmd test -- tests/missionRuntime.test.ts tests/database.integration.test.ts tests/actionFeasibility.test.ts",
+      "exitCode": 0,
+      "files": 3,
+      "tests": 44,
+      "missionTests": 19
+    },
+    {
+      "command": "npm.cmd exec tsc -- --noEmit",
+      "exitCode": 0
+    },
+    {
+      "command": "npm.cmd exec eslint -- [changed Mission files]",
+      "exitCode": 0
+    },
+    {
+      "command": "npm.cmd run build",
+      "exitCode": 0,
+      "warning": "Existing attachmentStorage import traces next.config.ts broadly"
+    },
+    {
+      "command": "isolated old-schema copy + M1 migration",
+      "exitCode": 0,
+      "preservedExistingProject": true,
+      "foreignKeyErrors": 0
+    }
+  ],
+  "faults": {
+    "transactionAbortRepetitions": 10,
+    "approvalConcurrency": 20,
+    "subprocessExitAfterCommit": 17,
+    "duplicateActions": 0
+  },
+  "pending": [
+    "真实模型自主轨迹",
+    "真实云模型和搜索外传额度确认",
+    "设备与平台验收（R3.4后续）"
+  ],
+  "developmentDatabaseMigrated": false
+}

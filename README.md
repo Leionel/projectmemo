@@ -210,3 +210,8 @@ evidence/               验收回执（按批次分目录，注明数据来源�
 - [竞赛增强与迭代蓝图](docs/competition/ProjectMemo_竞赛增强与迭代蓝图.md)
 - [宣传海报生成提示词](docs/competition/忆程ProjectMemo_宣传海报生成提示词.md)
 - [复赛配图生成提示词](docs/competition/复赛配图生成提示词.md)
+### R3 Mission 本地运行
+
+启用 `MISSION_ENABLED=true` 后，项目页显示长期委托面板。Web 只接收命令，另开进程运行 `npm.cmd run mission:worker`；单片段排查可加 `-- --once`。行动实际创建另需 `MISSION_WRITES_ENABLED=true`。
+
+使用 Node 24、相同代码和同一个数据库；先备份并在独立副本验证新增迁移，不运行 seed/reset 修复旧库。云模型调用需用户在委托中明确许可上下文范围，环境沿用 LLM 配置；未配置真实模型时任务暂停，测试夹具不作为自主执行验收。约束、问题、批准、草稿与事件保存在服务端，退出页面不清除。关闭入口/Worker 不删除已创建行动和历史。

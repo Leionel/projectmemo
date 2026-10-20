@@ -53,4 +53,48 @@ describe("R3.1 持久执行与原子审批",()=>{
 
  it("原生协议错误只修复一次，仍失败则暂停且预算累计",async()=>{const {m}=await fixture();const bad=vi.fn(async()=>{throw new AppError('MODEL_PROTOCOL_ERROR','并行调用需修复',409);});await runMissionSlice({id:m.id,provider:bad});expect((await missionDetail(userId,m.id)).status).toBe('READY');await runMissionSlice({id:m.id,provider:bad});expect((await missionDetail(userId,m.id)).status).toBe('PAUSED');expect(bad).toHaveBeenCalledTimes(2);expect(usageOf((await db.agentMission.findUniqueOrThrow({where:{id:m.id}})).budgetUsedJson).models).toBe(2);});
 
+ it.each(["批准前", "提交前"])("行动读回后来源在%s取消，不得按旧依据创建后续行动",async(changeAt)=>{
+  const {p,m}=await fixture();
+  const action=await db.actionItem.create({data:{projectId:p.id,title:"尚未完成实验",description:"原实验安排",priority:1}});
+  const observed=await slice(m.id,tool("inspect_action",{actionId:action.id}));
+  expect(observed.steps[0].result).toMatchObject({sources:[{id:`action:${action.id}`,kind:"PROJECT",entityType:"ACTION"}]});
+  const proposal=await slice(m.id,tool("propose_action",{title:"按原实验安排开展后续验证"}));
+  const approval=proposal.approvals[0];
+  const frozen=await db.agentMissionApproval.findUniqueOrThrow({where:{id:approval.id}});
+  expect(frozen.readSetJson).toEqual(expect.arrayContaining([expect.objectContaining({id:`action:${action.id}`})]));
+  if(changeAt==="提交前")await approve(m.id);
+  await db.actionItem.update({where:{id:action.id},data:{status:"CANCELLED",description:"实验已取消，不应继续后续验证"}});
+  if(changeAt==="批准前"){
+   await expect(approve(m.id)).rejects.toMatchObject({code:"SOURCE_CHANGED"});
+   expect((await db.agentMissionApproval.findUniqueOrThrow({where:{id:approval.id}})).status).toBe("PENDING");
+  }else{
+   await runMissionSlice({id:m.id,provider:provider(draft())});
+   expect((await missionDetail(userId,m.id)).status).toBe("PAUSED");
+  }
+  expect(await db.actionItem.count({where:{projectId:p.id}})).toBe(1);
+  expect(await db.agentMissionApproval.count({where:{missionId:m.id,status:"CONSUMED"}})).toBe(0);
+ });
+
+ it.each(["constraints", "research-scope"] as const)("等待输入暂停后编辑%s，恢复仍须回答原问题才可执行",async(kind)=>{
+  const {m}=await fixture();
+  let d=await slice(m.id,{kind:"ask",question:"请补充必须由本人提供的实验指标",missing:"PRIVATE"});
+  const questionId=d.question!.id;
+  await commandMission(userId,m.id,"pause",{requestId:"pause-before-edit",expectedVersion:d.version});
+  d=await missionDetail(userId,m.id);
+  await editMission(userId,m.id,kind,{requestId:"edit-while-waiting",expectedVersion:d.version,...(kind==="constraints"?{expectedConstraintsVersion:d.constraintsVersion,constraints:{availableMinutes:30}}:{expectedScopeVersion:d.researchScopeVersion,scope:{enabled:false}})});
+  d=await missionDetail(userId,m.id);
+  await commandMission(userId,m.id,"resume",{requestId:"resume-after-edit",expectedVersion:d.version});
+  d=await missionDetail(userId,m.id);
+  expect(d.status).toBe("WAITING_INPUT");
+  expect(d.question!.id).toBe(questionId);
+  const mocked=vi.fn(provider(draft()));
+  expect(await runMissionSlice({id:m.id,provider:mocked})).toBe(false);
+  expect(mocked).not.toHaveBeenCalled();
+  expect(await db.agentMissionEvent.count({where:{missionId:m.id,type:"INPUT"}})).toBe(0);
+  await commandMission(userId,m.id,"input",{requestId:"answer-after-edit",expectedVersion:d.version,questionId,answer:"本地实验指标为0.71"});
+  await runMissionSlice({id:m.id,provider:mocked});
+  expect(mocked).toHaveBeenCalledOnce();
+  expect((await missionDetail(userId,m.id)).outputs).toHaveLength(1);
+ });
+
 });

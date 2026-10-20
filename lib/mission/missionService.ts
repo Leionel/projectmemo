@@ -68,7 +68,7 @@ export async function editMission(userId:string,id:string,kind:"constraints"|"re
     await tx.agentMissionApproval.updateMany({where:{missionId:id,status:{in:["PENDING","APPROVED"]}},data:{status:"EXPIRED"}});
     await tx.agentMissionStep.updateMany({where:{missionId:id,status:{in:["READY","WAITING_APPROVAL"]}},data:{status:"OBSOLETE"}});
     const old=m.constraintsJson as Record<string,unknown>;
-    const updated=await tx.agentMission.update({where:{id},data:{...(kind==="constraints"?{constraintsJson:json({...body.constraints,llmContextApproved:body.llmContextApproved??old.llmContextApproved}),constraintsVersion:{increment:1}}:{researchScopeJson:json(body.scope),researchScopeVersion:{increment:1}}),contextVersion:{increment:1},version:{increment:1},planRevision:{increment:1},planJson:json({...m.planJson as object,resumeStatus:"READY"}),status:m.status==="WAITING_APPROVAL"?"READY":m.status}});
+    const updated=await tx.agentMission.update({where:{id},data:{...(kind==="constraints"?{constraintsJson:json({...body.constraints,llmContextApproved:body.llmContextApproved??old.llmContextApproved}),constraintsVersion:{increment:1}}:{researchScopeJson:json(body.scope),researchScopeVersion:{increment:1}}),contextVersion:{increment:1},version:{increment:1},planRevision:{increment:1},planJson:json({...m.planJson as object,resumeStatus:(m.planJson as {resumeStatus?:string}).resumeStatus==="WAITING_INPUT"?"WAITING_INPUT":"READY"}),status:m.status==="WAITING_APPROVAL"?"READY":m.status}});
     await event(tx,id,kind==="constraints"?"CONSTRAINTS_CHANGED":"RESEARCH_SCOPE_CHANGED",json(body),{id:`cmd:${body.requestId}`,hash});return updated;
   });
 }

@@ -18,6 +18,10 @@ export async function event(tx: Tx, id: string, type: string, payload: unknown, 
 }
 export async function lock(tx: Tx, id: string) { await tx.agentMission.updateMany({ where: { id }, data: { version: { increment: 0 } } }); }
 export async function sourceHash(projectId: string, id: string, tx: Tx = db): Promise<string | null> {
+  if (id.startsWith("action:")) {
+    const action = await tx.actionItem.findFirst({where:{id:id.slice(7),projectId,isSimulated:false}});
+    return action ? jsonHash(action) : null;
+  }
   if (id === `project:${projectId}`) {
     const project = await tx.project.findUnique({where:{id:projectId},select:{title:true,goal:true,deadline:true}});
     const actions = await tx.actionItem.findMany({where:{projectId,isSimulated:false},orderBy:{id:"asc"},select:{id:true,title:true,status:true,dependencyVersion:true,dueAt:true}});

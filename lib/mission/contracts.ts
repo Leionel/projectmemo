@@ -26,7 +26,7 @@ export const choiceSchema = z.discriminatedUnion("kind", [
 ]);
 export type Choice = z.infer<typeof choiceSchema>;
 export type Decision = { choice: Choice; provider: string; model: string; usage: { inputTokens: number | null; outputTokens: number | null }; protocol: string; callId?: string };
-export type Source = { id: string; kind: "PROJECT" | "EXTERNAL"; entityType: "PROJECT" | "CARD" | "EXTERNAL_SOURCE"; revision: string; hash: string; identityKey?: string; text: string; observedAt: string };
+export type Source = { id: string; kind: "PROJECT" | "EXTERNAL"; entityType: "PROJECT" | "CARD" | "ACTION" | "EXTERNAL_SOURCE"; revision: string; hash: string; identityKey?: string; text: string; observedAt: string };
 export type ToolResult = { data: unknown; sources: Source[]; status?: "SUCCESS" | "PARTIAL" };
 export type Actor = { userId: string; projectId: string; missionId: string };
 export const defaultBudget = { models: 12, tools: 16, searches: 3, fetches: 4, activeMs: 180000, reservedOutputTokens: 12000 };

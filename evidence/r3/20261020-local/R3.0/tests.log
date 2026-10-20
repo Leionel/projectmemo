@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/r3Baseline.test.ts tests/projectReentry.test.ts tests/attachmentCorrection.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  3 passed (3)
+      Tests  12 passed (12)
+   Start at  07:29:06
+   Duration  3.64s (transform 516ms, setup 0ms, import 1.54s, tests 1.21s, environment 0ms)
+

@@ -342,7 +342,7 @@ export async function correctAttachmentText(
   projectId: string,
   attachmentId: string,
   correctedText: string,
-  expectedCurrentText?: string
+  expectedCurrentText?: string | null
 ) {
   await requireProject(projectId);
   const trimmed = correctedText.trim();
@@ -363,8 +363,7 @@ export async function correctAttachmentText(
     return { attachment: existing, card: reusedCard ?? existing.cards[0] ?? null, idempotentReplay: true };
   }
   // 原版本校验：调用方基于旧文本编辑时，若服务端文本已变化则要求重载，避免并发纠错覆盖
-  if (expectedCurrentText !== undefined && expectedCurrentText !== null &&
-      existing.extractedText !== null && existing.extractedText !== expectedCurrentText) {
+  if (expectedCurrentText !== undefined && existing.extractedText !== expectedCurrentText) {
     throw new AppError("ATTACHMENT_TEXT_CHANGED", "附件文本已被其他校对修改，请重新载入后再提交", 409);
   }
 
@@ -384,6 +383,14 @@ export async function correctAttachmentText(
 
   // 单事务写入：Capture/Card（复用统一保存逻辑）、取代关系、修订链、附件更新、审计事件
   const result = await db.$transaction(async (tx) => {
+    // 条件写先取得执行权，结构化生成期间发生的更新也必须拒绝。
+    const claimed = await tx.attachment.updateMany({
+      where: { id: existing.id, projectId, extractedText: existing.extractedText },
+      data: { extractedText: trimmed, extractionStatus: "SUCCESS", extractionError: null },
+    });
+    if (claimed.count !== 1) {
+      throw new AppError("ATTACHMENT_TEXT_CHANGED", "附件文本已被其他校对修改，请重新载入后再提交", 409);
+    }
     const card = await saveCaptureResult(
       {
         projectId,

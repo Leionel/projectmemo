@@ -17,7 +17,7 @@ export async function POST(
     await authorizeProjectAccess(request, projectId);
     const body = await request.json();
     const { correctedText, expectedCurrentText } = correctSchema.parse(body);
-    const result = await correctAttachmentText(projectId, attachmentId, correctedText, expectedCurrentText ?? undefined);
+    const result = await correctAttachmentText(projectId, attachmentId, correctedText, expectedCurrentText);
     return NextResponse.json(result);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Attachment correction failed";

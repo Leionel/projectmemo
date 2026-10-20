@@ -24,6 +24,10 @@ export interface ReentryEpisodePart {
   /** 当前版本号 Vn */
   revision: number | null;
   title: string | null;
+  /** 当前有效结论/重点摘要；无检查点时为 null */
+  keyConclusion: string | null;
+  /** 是否为历史版本（非最新已发布，或已失效被新进展替代） */
+  isHistorical: boolean;
   /** 已确认检查点的确认时间 */
   confirmedAt: string | null;
   status: string | null;
@@ -39,6 +43,10 @@ export interface ReentryRiskPart {
   text: string | null;
   severity: "HIGH" | "MEDIUM" | "LOW" | null;
   entityId: string | null;
+  /** 明确区分风险类型：受阻（待办前置阻塞）、信息不足（未知/证据缺失）、评估风险（风险项） */
+  kind: "BLOCKED" | "UNKNOWN" | "RISK" | null;
+  /** 若属于受阻待办，记录对应行动 ID */
+  actionId: string | null;
   meta: ReentrySectionMeta;
 }
 
@@ -64,5 +72,7 @@ export interface ReentryData {
   schedule: ReentrySchedulePart;
   primaryAction: ReentryPrimaryAction;
   primaryMessage: string;
+  /** 主操作直达的目标实体 ID（如 actionId、episodeId、cardId 等），便于前端精确定位 */
+  primaryTargetId: string | null;
   generatedAt: string;
 }

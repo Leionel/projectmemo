@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/r3Baseline.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  07:30:33
+   Duration  1.50s (transform 479ms, setup 0ms, import 821ms, tests 444ms, environment 0ms)
+

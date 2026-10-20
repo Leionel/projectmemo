@@ -92,9 +92,22 @@ export function ReentryBrief({ projectId, enabled, episodesEnabled, stateEnabled
     </section>;
   }
 
-  const target = data.primaryAction === "VIEW_CHANGES" && !stateEnabled
-    ? { href: "#capture-box", label: "补充项目进展" }
-    : primaryActionTarget[data.primaryAction] ?? primaryActionTarget.START_ACTION;
+  let target = primaryActionTarget[data.primaryAction] ?? primaryActionTarget.START_ACTION;
+  if (data.primaryAction === "VIEW_CHANGES") {
+    if (stateEnabled) {
+      target = { href: "#project-state", label: "查看这次有什么变化" };
+    } else if (episodesEnabled) {
+      target = { href: "#episode-checkpoint", label: "查看受影响的结论" };
+    } else {
+      target = { href: "#capture-box", label: "补充项目进展" };
+    }
+  } else if (data.primaryAction === "RESOLVE_BLOCKED") {
+    target = { href: "#action-board", label: "处理受阻待办" };
+  }
+  if (data.primaryTargetId) {
+    if (data.primaryAction === "RESOLVE_BLOCKED" || (data.primaryAction === "START_ACTION" && data.schedule.actionId === data.primaryTargetId)) target = { ...target, href: `#action-${data.primaryTargetId}` };
+    else if (episodesEnabled && data.primaryTargetId === data.episode.episodeId) target = { ...target, href: "#episode-checkpoint" };
+  }
   const freshness = freshnessLabels[data.freshness] ?? freshnessLabels.EMPTY;
 
   return <section id="reentry-brief" aria-labelledby="reentry-title" className="card-surface scroll-mt-24 rounded-[1.5rem] p-5 sm:p-6">
@@ -112,14 +125,21 @@ export function ReentryBrief({ projectId, enabled, episodesEnabled, stateEnabled
 
     <div className="mt-4 grid gap-3 lg:grid-cols-3">
       <div className="rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">
-        <p className="flex items-center gap-1.5 text-[11px] font-black text-[var(--navy)]"><BookmarkCheck size={13} className="text-[var(--teal-strong)]" />阶段检查点</p>
+        <div className="flex items-center justify-between gap-1.5">
+          <p className="flex items-center gap-1.5 text-[11px] font-black text-[var(--navy)]"><BookmarkCheck size={13} className="text-[var(--teal-strong)]" />阶段检查点与结论</p>
+          {data.episode.isHistorical && <span className="rounded px-1.5 py-0.2 text-[10px] font-bold bg-[var(--amber)]/15 text-[var(--amber)]">历史参考</span>}
+        </div>
         {data.episode.revision === null
           ? <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">{episodesEnabled ? "还没有已确认的检查点。整理一版后，这里会显示结论与之后的变化。" : "当前部署未开启阶段检查点。"}</p>
           : <>
             <p className="mt-1.5 text-xs font-bold text-[var(--navy)]">V{data.episode.revision} · {data.episode.title}</p>
+            {data.episode.keyConclusion && <p className="mt-1 rounded-md bg-[var(--paper-strong)] p-1.5 text-[11px] font-semibold leading-5 text-[var(--ink-soft)]"><span className="text-[var(--navy)] font-bold">{data.episode.isHistorical ? "历史结论：" : "当前结论："}</span>{data.episode.keyConclusion}</p>}
             <p className="mt-0.5 text-[11px] text-[var(--muted)]">确认于 {formatTime(data.episode.confirmedAt)} · 冻结来源 {data.episode.sourceCount} 个</p>
             {data.episode.changesSince.length > 0
-              ? <ul className="mt-1.5 space-y-1">{data.episode.changesSince.map((change) => <li key={change} className="text-[11px] leading-5 text-[var(--ink-soft)]">· {change}</li>)}</ul>
+              ? <div className="mt-1.5">
+                  <p className="text-[10px] font-bold text-[var(--muted)]">检查点之后的变化：</p>
+                  <ul className="mt-0.5 space-y-1">{data.episode.changesSince.map((change) => <li key={change} className="text-[11px] leading-5 text-[var(--ink-soft)]">· {change}</li>)}</ul>
+                </div>
               : <p className="mt-1.5 text-[11px] leading-5 text-[var(--muted)]">检查点之后暂无已确认变化。</p>}
           </>}
         {data.episode.meta.status !== "OK" && data.episode.meta.message && <p className="mt-1.5 text-[11px] font-semibold text-[var(--amber)]">{data.episode.meta.message}</p>}
@@ -127,15 +147,20 @@ export function ReentryBrief({ projectId, enabled, episodesEnabled, stateEnabled
       </div>
 
       <div className="rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">
-        <p className="flex items-center gap-1.5 text-[11px] font-black text-[var(--navy)]"><TriangleAlert size={13} className="text-[var(--brick)]" />最大风险或未知</p>
+        <p className="flex items-center gap-1.5 text-[11px] font-black text-[var(--navy)]"><TriangleAlert size={13} className="text-[var(--brick)]" />最急需处理项</p>
         {data.risk.text
-          ? <p className="mt-1.5 text-xs leading-5 text-[var(--ink-soft)]">
-            {data.risk.severity && <span className={"mr-1.5 rounded px-1.5 py-0.5 text-[10px] font-bold " + (data.risk.severity === "HIGH" ? "bg-[var(--brick-pale)] text-[var(--brick)]" : data.risk.severity === "MEDIUM" ? "bg-[var(--amber)]/15 text-[var(--amber)]" : "bg-[var(--paper-strong)] text-[var(--muted)]")}>{data.risk.severity === "HIGH" ? "高" : data.risk.severity === "MEDIUM" ? "中" : "低"}</span>}
-            {data.risk.text}
-          </p>
-          : <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">当前没有已确认的风险；信息不足的部分会保留为未知，不会被当成「没有风险」。</p>}
+          ? <div className="mt-1.5">
+            <div className="flex items-center gap-1.5">
+              {data.risk.kind === "BLOCKED" && <span className="rounded bg-[var(--brick-pale)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--brick)]">待办受阻</span>}
+              {data.risk.kind === "UNKNOWN" && <span className="rounded bg-[var(--paper-strong)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--ink-soft)]">信息不足</span>}
+              {data.risk.kind === "RISK" && data.risk.severity && <span className={"rounded px-1.5 py-0.5 text-[10px] font-bold " + (data.risk.severity === "HIGH" ? "bg-[var(--brick-pale)] text-[var(--brick)]" : data.risk.severity === "MEDIUM" ? "bg-[var(--amber)]/15 text-[var(--amber)]" : "bg-[var(--paper-strong)] text-[var(--muted)]")}>{data.risk.severity === "HIGH" ? "高风险" : data.risk.severity === "MEDIUM" ? "中风险" : "低风险"}</span>}
+            </div>
+            <p className="mt-1 text-xs leading-5 text-[var(--ink-soft)]">{data.risk.text}</p>
+            {data.risk.kind === "BLOCKED" && <p className="mt-1 text-[10px] text-[var(--brick)] font-semibold">前置依赖尚未满足，需先补全依赖或创建解阻行动</p>}
+          </div>
+          : <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">当前没有受阻项或已确认风险；信息不足的部分会保留为未知，不会被当成「没有风险」。</p>}
         {data.risk.meta.status !== "OK" && data.risk.meta.message && <p className="mt-1.5 text-[11px] font-semibold text-[var(--amber)]">{data.risk.meta.message}</p>}
-        <a href="#interventions" className="focus-ring mt-2 inline-block text-[11px] font-black text-[var(--teal-strong)] underline underline-offset-2">查看提醒与依据 →</a>
+        <a href={data.risk.kind === "BLOCKED" ? "#action-board" : "#interventions"} className="focus-ring mt-2 inline-block text-[11px] font-black text-[var(--teal-strong)] underline underline-offset-2">{data.risk.kind === "BLOCKED" ? "前往处理受阻待办 →" : "查看提醒与依据 →"}</a>
       </div>
 
       <div className="rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">
@@ -151,6 +176,7 @@ export function ReentryBrief({ projectId, enabled, episodesEnabled, stateEnabled
         {schedulingEnabled && <a href="#schedule-planner" className="focus-ring mt-2 inline-block text-[11px] font-black text-[var(--teal-strong)] underline underline-offset-2">安排未来几天 →</a>}
       </div>
     </div>
+
 
     <p className="mt-3 text-[11px] leading-5 text-[var(--muted)]">
       浏览器不能写系统日历：这里显示的是忆程里的应用内安排与设备同步状态。要收到设备提醒，请在鸿蒙客户端的这条待办里完成日历写入。

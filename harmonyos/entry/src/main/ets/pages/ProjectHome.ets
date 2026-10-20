@@ -205,6 +205,7 @@ struct ProjectHome {
   private milestoneService: MilestoneService = new MilestoneService();
   private reentryService: ReentryService = new ReentryService();
   @State reentry: ReentryData | null = null;
+  @State focusedActionId: string = '';
   @State checkpointPreview: Episode | null = null;
   @State checkpointBusy: string = '';
   @State checkpointMessage: string = '';
@@ -1091,12 +1092,36 @@ struct ProjectHome {
       .fontColor(PMColors.INK_TERTIARY)
       .margin({ top: 4 })
 
+    if (this.reentry!.episode.keyConclusion !== null && this.reentry!.episode.keyConclusion !== '') {
+      Column() {
+        Text(this.reentry!.episode.isHistorical ? '历史结论（来源已变化，供参考）：' : '当前有效结论：')
+          .fontSize(PMFontSize.CAPTION)
+          .fontColor(this.reentry!.episode.isHistorical ? PMColors.WARNING : PMColors.BRAND)
+          .fontWeight(FontWeight.Bold)
+        Text(this.reentry!.episode.keyConclusion)
+          .fontSize(PMFontSize.SECONDARY)
+          .fontColor(PMColors.INK_PRIMARY)
+          .fontWeight(FontWeight.Medium)
+          .margin({ top: 2 })
+      }
+      .width('100%')
+      .alignItems(HorizontalAlign.Start)
+      .padding(PMSpacing.SM)
+      .backgroundColor(PMColors.SURFACE_SUBTLE)
+      .borderRadius(PMRadius.SM)
+      .margin({ top: 6 })
+    }
+
     if (this.reentry!.episode.changesSince.length > 0) {
+      Text('检查点之后的变化：')
+        .fontSize(PMFontSize.CAPTION)
+        .fontColor(PMColors.INK_TERTIARY)
+        .margin({ top: 6 })
       ForEach(this.reentry!.episode.changesSince, (change: string, index: number) => {
         Text(`· ${change}`)
           .fontSize(PMFontSize.SECONDARY)
           .fontColor(PMColors.INK_SECONDARY)
-          .margin({ top: index === 0 ? 6 : 2 })
+          .margin({ top: 2 })
       }, (change: string, index: number) => `change-${index}`)
     } else {
       Text('检查点之后暂无已确认变化')
@@ -1105,10 +1130,39 @@ struct ProjectHome {
         .margin({ top: 6 })
     }
 
+    if (this.reentry!.risk.text !== null && this.reentry!.risk.text !== '') {
+      Row() {
+        Text(this.reentry!.risk.kind === 'BLOCKED' ? '待办受阻' : this.reentry!.risk.kind === 'UNKNOWN' ? '信息不足' : '需关注风险')
+          .fontSize(10)
+          .fontColor(this.reentry!.risk.kind === 'BLOCKED' ? PMColors.RISK : PMColors.WARNING)
+          .padding({ left: 6, right: 6, top: 1, bottom: 1 })
+          .backgroundColor(this.reentry!.risk.kind === 'BLOCKED' ? PMColors.SURFACE_SUBTLE : PMColors.BRAND_LIGHT)
+          .borderRadius(PMRadius.XS)
+        Text(this.reentry!.risk.text)
+          .fontSize(PMFontSize.SECONDARY)
+          .fontColor(PMColors.INK_SECONDARY)
+          .layoutWeight(1)
+          .margin({ left: 6 })
+      }
+      .width('100%')
+      .alignItems(VerticalAlign.Center)
+      .padding(PMSpacing.SM)
+      .backgroundColor(PMColors.SURFACE_SUBTLE)
+      .borderRadius(PMRadius.SM)
+      .margin({ top: 6 })
+      .onClick(() => {
+        if (this.reentry!.risk.kind === 'BLOCKED') {
+          this.focusedActionId = this.reentry!.risk.actionId ?? '';
+          this.currentTabIndex = 2;
+        }
+      })
+    }
+
     if (this.reentry!.primaryMessage !== '') {
       Text(this.reentry!.primaryMessage)
         .fontSize(PMFontSize.SECONDARY)
         .fontColor(PMColors.BRAND)
+        .fontWeight(FontWeight.Medium)
         .margin({ top: 8 })
     }
 
@@ -4258,7 +4312,12 @@ struct ProjectHome {
       .alignItems(HorizontalAlign.Start)
 
       List({ space: PMSpacing.MD }) {
-        ForEach(this.actions, (action: ActionItem) => {
+        if (this.focusedActionId !== '') {
+          ListItem() {
+            Button('查看全部待办').onClick(() => { this.focusedActionId = ''; })
+          }
+        }
+        ForEach(this.focusedActionId === '' ? this.actions : this.actions.filter((item: ActionItem) => item.id === this.focusedActionId), (action: ActionItem) => {
           ListItem() {
             Column() {
               Row() {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowUpRight, Check, ChevronDown, Link2, ListChecks, LoaderCircle, Plus, Star } from "lucide-react";
+import { ArrowUpRight, Check, ChevronDown, Link2, ListChecks, LoaderCircle, Paperclip, Plus, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { CardEditor } from "@/components/CardEditor";
 import { knowledgeTypeLabels, getKnowledgeTypeColor, type KnowledgeTypeValue, type TemporalEvidenceRef, type TemporalTopLevelState } from "@/lib/types";
@@ -14,7 +14,8 @@ export type KnowledgeCardTemporalData = {
   displayReason: string;
   evidenceRefs: TemporalEvidenceRef[];
 };
-export type KnowledgeCardData = { id: string; type: string; title: string; summary: string; keywords: unknown; relatedTasks: unknown; nextActions: unknown; importance: number; createdAt: Date | string; capture: { rawText: string; sourceType: string | null }; outgoingLinks: Array<{ reason: string; score: number; relatedCard: { id: string; title: string } }>; incomingLinks: Array<{ reason: string; score: number; currentCard: { id: string; title: string } }>; temporal?: KnowledgeCardTemporalData };
+export type KnowledgeCardData = { id: string; type: string; title: string; summary: string; keywords: unknown; relatedTasks: unknown; nextActions: unknown; importance: number; createdAt: Date | string; attachmentId?: string | null; capture: { rawText: string; sourceType: string | null }; outgoingLinks: Array<{ reason: string; score: number; relatedCard: { id: string; title: string } }>; incomingLinks: Array<{ reason: string; score: number; currentCard: { id: string; title: string } }>; temporal?: KnowledgeCardTemporalData };
+
 
 const temporalLabels: Record<TemporalTopLevelState, string> = {
   CURRENT: "当前有效",
@@ -93,6 +94,11 @@ export function KnowledgeCardView({ card, projectId, compact = false, forcedOpen
     </div>
     <h3 className="mt-4 text-xl font-bold leading-7 [overflow-wrap:anywhere]">{card.title}</h3>
     {temporal && <div className="mt-2 flex flex-wrap items-center gap-2 text-xs"><span className={`rounded-md px-2 py-1 font-bold ${temporalStyles[temporal.topLevelState]}`}>时态：{temporalLabels[temporal.topLevelState]}</span>{showFull && <span className="text-[var(--muted)]">{temporal.displayReason}</span>}</div>}
+    {card.attachmentId && <div className="mt-2 flex items-center gap-1.5 text-xs text-[var(--teal-strong)]">
+      <Paperclip size={13} />
+      <a href={`/api/projects/${projectId}/attachments/${card.attachmentId}/file`} target="_blank" rel="noopener noreferrer" className="font-semibold hover:underline">查看关联材料原件</a>
+    </div>}
+
     <p className={(showFull ? "mt-2.5 leading-7 " : "mt-2 line-clamp-2 text-sm leading-6 ") + "text-[var(--ink-soft)] [overflow-wrap:anywhere]"}>{card.summary}</p>
     <div className="mt-4 flex flex-wrap gap-2">{keywords.slice(0, showFull ? keywords.length : 4).map((keyword, index) => <span key={`${keyword}-${index}`} className="paper-tab px-2.5 py-1 text-xs font-medium text-[var(--ink-soft)]">#{keyword}</span>)}{!showFull && keywords.length > 4 && <span className="px-2 py-1 text-xs font-bold text-[var(--muted)]">+{keywords.length - 4}</span>}</div>
 

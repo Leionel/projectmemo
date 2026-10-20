@@ -10,6 +10,7 @@ import type {
   ReentrySchedulePart,
   ReentrySectionMeta,
 } from "@/lib/types/reentry";
+import { assessActionFeasibility } from "@/lib/services/actionFeasibilityService";
 import { getLatestPublishedEpisode } from "@/lib/services/projectEpisodeService";
 import { getCurrentSchedulePlan } from "@/lib/services/scheduleService";
 import { getLatestProjectState, getProjectStateDiff } from "@/lib/services/projectStateService";
@@ -77,6 +78,8 @@ export async function getProjectReentry(projectId: string, userId?: string | nul
     revisionId: null,
     revision: null,
     title: null,
+    keyConclusion: null,
+    isHistorical: false,
     confirmedAt: null,
     status: null,
     sourceCount: 0,
@@ -89,11 +92,19 @@ export async function getProjectReentry(projectId: string, userId?: string | nul
       episode.meta = emptyMeta();
     } else {
       const revision = latest.revisions[latest.revisions.length - 1];
+      const affected = new Set(latest.freshness?.affectedClaims.map((claim) => claim.claimId) ?? []);
+      const facts = revision?.claims.filter((c) => c.kind === "FACT" && c.section !== "GOALS") ?? [];
+      const keyClaim = facts.find((c) => !affected.has(c.claimId)) ?? facts[0];
+      const keyConclusion = keyClaim?.text ?? null;
+      const isHistorical = latest.status === "STALE" || Boolean(keyClaim && affected.has(keyClaim.claimId));
+
       episode = {
         episodeId: latest.id,
         revisionId: revision?.id ?? null,
         revision: revision?.revision ?? null,
         title: latest.title,
+        keyConclusion: keyConclusion ?? null,
+        isHistorical,
         confirmedAt: revision?.confirmedAt ?? revision?.createdAt ?? null,
         status: latest.status,
         sourceCount: revision?.sourceRefs.length ?? 0,
@@ -112,23 +123,66 @@ export async function getProjectReentry(projectId: string, userId?: string | nul
     episode = { ...episode, meta: failedMeta(error) };
   }
 
-  // ---- 最大风险或未知 ----
-  let risk: ReentryRiskPart = { text: null, severity: null, entityId: null, meta: emptyMeta() };
+  // ---- 最大风险、受阻或未知（明确区分 BLOCKED / UNKNOWN / RISK） ----
+  let risk: ReentryRiskPart = { text: null, severity: null, entityId: null, kind: null, actionId: null, meta: emptyMeta() };
   try {
-    const snapshot = await getLatestProjectState(projectId).catch(() => null);
-    if (!snapshot) {
-      risk.meta = emptyMeta();
+    // 优先检查是否有因依赖未就绪而受阻的待办项（用户最急需处理）
+    const candidateActions = await db.actionItem.findMany({
+      where: { projectId, isSimulated: false, status: { in: ["TODO", "DOING"] } },
+      include: { requirements: true },
+      orderBy: { priority: "asc" },
+      take: 10,
+    });
+    let blockedAction: { id: string; title: string } | null = null;
+    for (const cand of candidateActions) {
+      if (cand.requirements.length > 0) {
+        const assessment = await assessActionFeasibility(projectId, cand.id).catch(() => null);
+        if (assessment && assessment.feasibility === "BLOCKED") {
+          blockedAction = { id: cand.id, title: cand.title };
+          break;
+        }
+      }
+    }
+
+    if (blockedAction) {
+      risk = {
+        text: blockedAction.title,
+        severity: "HIGH",
+        entityId: blockedAction.id,
+        kind: "BLOCKED",
+        actionId: blockedAction.id,
+        meta: okMeta(new Date().toISOString()),
+      };
     } else {
-      const payload = snapshot.payload;
-      const severityOrder = { HIGH: 0, MEDIUM: 1, LOW: 2 } as const;
-      const topRisk = [...payload.risks].sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity])[0];
-      const unknown = payload.unknowns[0];
-      if (topRisk) {
-        risk = { text: topRisk.text, severity: topRisk.severity, entityId: topRisk.stableKey, meta: okMeta(snapshot.evaluatedAt) };
-      } else if (unknown) {
-        risk = { text: unknown.text, severity: null, entityId: null, meta: okMeta(snapshot.evaluatedAt) };
-      } else {
+      const snapshot = await getLatestProjectState(projectId).catch(() => null);
+      if (!snapshot) {
         risk.meta = emptyMeta();
+      } else {
+        const payload = snapshot.payload;
+        const severityOrder = { HIGH: 0, MEDIUM: 1, LOW: 2 } as const;
+        const topRisk = [...payload.risks].sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity])[0];
+        const unknown = payload.unknowns[0];
+        if (topRisk) {
+          risk = {
+            text: topRisk.text,
+            severity: topRisk.severity,
+            entityId: topRisk.stableKey,
+            kind: "RISK",
+            actionId: null,
+            meta: okMeta(snapshot.evaluatedAt),
+          };
+        } else if (unknown) {
+          risk = {
+            text: unknown.text,
+            severity: null,
+            entityId: null,
+            kind: "UNKNOWN",
+            actionId: null,
+            meta: okMeta(snapshot.evaluatedAt),
+          };
+        } else {
+          risk.meta = emptyMeta();
+        }
       }
     }
   } catch (error) {
@@ -178,21 +232,32 @@ export async function getProjectReentry(projectId: string, userId?: string | nul
   // ---- 主操作：先看变化，再解阻塞，再开始行动 ----
   let primaryAction: ReentryPrimaryAction = "START_ACTION";
   let primaryMessage = "从检查点选择下一步行动";
+  let primaryTargetId: string | null = null;
+
   if (episode.meta.status === "FAILED") {
     primaryAction = "VIEW_CHANGES";
     primaryMessage = "检查点数据暂时不可用，请稍后重试";
+    primaryTargetId = episode.episodeId;
   } else if (episode.status === "STALE" || episode.status === "PARTIALLY_STALE") {
     primaryAction = "VIEW_CHANGES";
     primaryMessage = "部分结论的来源已变化，请先查看受影响的内容";
+    primaryTargetId = episode.episodeId;
+  } else if (risk.kind === "BLOCKED" && risk.actionId) {
+    primaryAction = "RESOLVE_BLOCKED";
+    primaryMessage = `待办受阻，请先处理阻塞：${risk.text}`;
+    primaryTargetId = risk.actionId;
   } else if (risk.meta.status === "FAILED") {
     primaryAction = "VIEW_CHANGES";
     primaryMessage = "风险数据暂时不可用，其余信息仍可查看";
+    primaryTargetId = null;
   } else if (!schedule.blockId) {
     primaryAction = episode.episodeId ? "START_ACTION" : "ADD_EVIDENCE";
     primaryMessage = episode.episodeId ? "从检查点选择下一步，并安排到未来时间" : "先整理一次阶段进展，再选择下一步";
+    primaryTargetId = episode.episodeId;
   } else {
     primaryAction = "START_ACTION";
     primaryMessage = schedule.actionTitle ? `继续推进：${schedule.actionTitle}` : "继续推进已安排的行动";
+    primaryTargetId = schedule.actionId;
   }
 
   return {
@@ -204,6 +269,8 @@ export async function getProjectReentry(projectId: string, userId?: string | nul
     schedule,
     primaryAction,
     primaryMessage,
+    primaryTargetId,
     generatedAt: new Date().toISOString(),
   };
+
 }

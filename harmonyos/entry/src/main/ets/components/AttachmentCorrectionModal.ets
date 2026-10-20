@@ -57,8 +57,9 @@ export struct AttachmentCorrectionModal {
     this.errorMsg = '';
     this.successMsg = '';
     try {
-      await this.attachmentService.correct(this.projectId, this.attachment.id, text);
+      await this.attachmentService.correct(this.projectId, this.attachment.id, text, this.attachment.extractedText);
       this.successMsg = '校对成功！已保存校对内容并生成项目记忆。';
+
       setTimeout(() => {
         this.onSuccess();
         this.onClose();

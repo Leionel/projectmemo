@@ -164,4 +164,61 @@ describe("ProjectReentry aggregation (R2-4)", () => {
     expect(reentry.episode.episodeId).toBe(preview.episode.id);
     expect(reentry.schedule.meta.status).toBe("EMPTY");
   });
+
+  it("prioritizes RESOLVE_BLOCKED when a blocked action exists and targets the blocked item directly", async () => {
+    const project = await newProject("受阻行动再入场");
+    const user = await seedUser(project.id);
+    await seedCard(project.id, "方案基础记录");
+    await refreshProjectState(project.id).catch(() => {});
+
+    const preview = await previewProjectEpisode(project.id, {
+      windowStart: new Date(Date.now() - 60_000).toISOString(),
+      windowEnd: new Date().toISOString(),
+    });
+    await confirmEpisodeRevision(project.id, preview.episode.id, {
+      revision: preview.episode.revisions[0].revision,
+      requestId: `blocked-test-${preview.episode.id}`,
+    });
+
+    // 创建一个前置行动和依赖它的待办（前置未完成 -> 该待办评估为 BLOCKED）
+    const prerequisite = await db.actionItem.create({
+      data: {
+        projectId: project.id,
+        title: "前置任务：提交初审材料",
+        status: "TODO",
+        priority: 1,
+      },
+    });
+    const blockedAction = await db.actionItem.create({
+      data: {
+        projectId: project.id,
+        title: "受阻待办：参加现场答辩",
+        status: "TODO",
+        priority: 1,
+        requirements: {
+          create: [
+            {
+              projectId: project.id,
+              targetKind: "action",
+              targetId: prerequisite.id,
+              hard: true,
+              note: "必须先通过初审",
+            },
+          ],
+        },
+      },
+    });
+
+    const reentry = await getProjectReentry(project.id, user.id);
+    // 验证结论已提炼
+    expect(reentry.episode.keyConclusion).toBeTruthy();
+    expect(reentry.episode.isHistorical).toBe(false);
+    // 验证区分出 BLOCKED
+    expect(reentry.risk.kind).toBe("BLOCKED");
+    expect(reentry.risk.actionId).toBe(blockedAction.id);
+    // 验证主操作优先推荐解阻，且直达目标 ID
+    expect(reentry.primaryAction).toBe("RESOLVE_BLOCKED");
+    expect(reentry.primaryTargetId).toBe(blockedAction.id);
+    expect(reentry.primaryMessage).toContain("待办受阻");
+  });
 });

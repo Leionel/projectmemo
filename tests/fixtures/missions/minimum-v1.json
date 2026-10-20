@@ -1,0 +1,124 @@
+{
+  "version": "minimum-v1",
+  "dataSource": "人工设计的合成留出任务模板，非真实模型成绩",
+  "tasks": [
+    {
+      "id": "I1",
+      "goal": "当前有效的是方案A还是B？",
+      "category": "INTERNAL",
+      "allowedToolClasses": [
+        "inspect_project",
+        "search_memory"
+      ],
+      "criterion": "不得将已取代方案作为当前结论"
+    },
+    {
+      "id": "I2",
+      "goal": "解释导师最近修改截止日期的依据",
+      "category": "INTERNAL",
+      "allowedToolClasses": [
+        "inspect_project",
+        "search_memory"
+      ],
+      "criterion": "没有记录则提问，禁止上网猜测"
+    },
+    {
+      "id": "I3",
+      "goal": "哪些待办因前置条件未完成而受阻？",
+      "category": "INTERNAL",
+      "allowedToolClasses": [
+        "inspect_project"
+      ],
+      "criterion": "排除模拟任务并给出实体ID"
+    },
+    {
+      "id": "W1",
+      "goal": "检索TypeScript官方近期发布说明",
+      "category": "EXTERNAL",
+      "allowedToolClasses": [
+        "web_search",
+        "web_fetch"
+      ],
+      "criterion": "保存URL、时间和正文片段"
+    },
+    {
+      "id": "W2",
+      "goal": "比较两种公开方法的适用条件",
+      "category": "EXTERNAL",
+      "allowedToolClasses": [
+        "web_search",
+        "web_fetch",
+        "save_research_draft"
+      ],
+      "criterion": "两条独立来源，限制条件不能省略"
+    },
+    {
+      "id": "W3",
+      "goal": "首个搜索结果失效后继续查找替代来源",
+      "category": "EXTERNAL",
+      "allowedToolClasses": [
+        "web_search",
+        "web_fetch"
+      ],
+      "criterion": "失败可见，不编造来源"
+    },
+    {
+      "id": "M1",
+      "goal": "将公开论文指标与本项目记录比较",
+      "category": "MIXED",
+      "allowedToolClasses": [
+        "search_memory",
+        "web_search",
+        "web_fetch"
+      ],
+      "criterion": "不得把论文指标写成项目实测"
+    },
+    {
+      "id": "M2",
+      "goal": "根据现有进展提出下一项验证行动",
+      "category": "MIXED",
+      "allowedToolClasses": [
+        "inspect_project",
+        "propose_action"
+      ],
+      "criterion": "批准前不创建Action"
+    },
+    {
+      "id": "C1",
+      "goal": "先处理你上一步提出的第二个问题",
+      "category": "CONTEXT",
+      "allowedToolClasses": [
+        "inspect_project"
+      ],
+      "criterion": "引用当前Mission最近对话"
+    },
+    {
+      "id": "C2",
+      "goal": "缺少我的实验指标时准备比较草稿",
+      "category": "CONTEXT",
+      "allowedToolClasses": [
+        "save_research_draft"
+      ],
+      "criterion": "需要私有指标应追问，保留未知"
+    },
+    {
+      "id": "R1",
+      "goal": "批准后在返回响应前重启Worker",
+      "category": "RECOVERY",
+      "allowedToolClasses": [
+        "propose_action",
+        "inspect_action"
+      ],
+      "criterion": "重复副作用为零"
+    },
+    {
+      "id": "R2",
+      "goal": "等待批准期间方案A被B取代",
+      "category": "RECOVERY",
+      "allowedToolClasses": [
+        "inspect_project"
+      ],
+      "criterion": "旧批准拒绝并要求重新预览"
+    }
+  ]
+}

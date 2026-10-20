@@ -96,11 +96,13 @@ function formatTime(value: string | null) {
 }
 
 /** 只有仍存在、且能定位到原始记录的来源才提供跳转 */
-function sourceHref(ref: EpisodeSourceRef, state?: SourceState) {
+function sourceHref(projectId: string, ref: EpisodeSourceRef, state?: SourceState) {
   if (state?.state === "DELETED") return null;
   if (ref.kind === "CARD" || ref.kind === "ACTION_RESULT") return `#card-${ref.entityId}`;
+  if (ref.kind === "ATTACHMENT_REVISION") return `/api/projects/${projectId}/attachment-revisions/${ref.entityId}`;
   return null;
 }
+
 
 export function EpisodeCheckpointCard({ projectId, enabled, reminderEnabled = false }: { projectId: string; enabled: boolean; reminderEnabled?: boolean }) {
   const router = useRouter();
@@ -442,7 +444,7 @@ export function EpisodeCheckpointCard({ projectId, enabled, reminderEnabled = fa
         <ul className="mt-4 space-y-3">
           {sourceDrawer.refs.map((ref) => {
             const state = sourceDrawer.states.find((item) => item.refId === ref.refId);
-            const href = sourceHref(ref, state);
+            const href = sourceHref(projectId, ref, state);
             const unavailable = state?.state === "DELETED";
             return <li key={ref.refId} className="rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -459,8 +461,9 @@ export function EpisodeCheckpointCard({ projectId, enabled, reminderEnabled = fa
               {state && state.state !== "AVAILABLE" && <p className="mt-2 text-xs font-semibold text-[var(--amber)]">{state.displayReason}</p>}
               {unavailable && <p className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-[var(--muted)]"><FileQuestion size={13} />原来源已删除，以上为生成时冻结的信息</p>}
               {href && <a href={href} onClick={() => setSourceDrawer(null)} className="focus-ring mt-2 inline-flex items-center gap-1.5 rounded-lg bg-[var(--teal-pale)] px-2.5 py-1.5 text-xs font-bold text-[var(--teal-strong)]">
-                <ExternalLink size={13} />打开原记录
+                <ExternalLink size={13} />{ref.kind === "ATTACHMENT_REVISION" ? "定位对应附件" : "打开原记录"}
               </a>}
+
             </li>;
           })}
         </ul>

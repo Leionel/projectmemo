@@ -223,6 +223,10 @@ export class ReentryEpisodePart {
   /** 当前版本号 */
   revision: number | null = null;
   title: string | null = null;
+  /** 当前有效结论/核心摘要 */
+  keyConclusion: string | null = null;
+  /** 是否为历史版本或已失效 */
+  isHistorical: boolean = false;
   confirmedAt: string | null = null;
   status: string | null = null;
   /** 冻结来源数量 */
@@ -235,6 +239,9 @@ export class ReentryRiskPart {
   text: string | null = null;
   severity: string | null = null;
   entityId: string | null = null;
+  /** 明确区分类型：BLOCKED | UNKNOWN | RISK */
+  kind: string | null = null;
+  actionId: string | null = null;
   meta: ReentrySectionMeta = new ReentrySectionMeta();
 }
 
@@ -259,5 +266,6 @@ export class ReentryData {
   schedule: ReentrySchedulePart = new ReentrySchedulePart();
   primaryAction: string = 'START_ACTION';
   primaryMessage: string = '';
+  primaryTargetId: string | null = null;
   generatedAt: string = '';
 }

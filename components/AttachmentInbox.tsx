@@ -83,6 +83,13 @@ export function AttachmentInbox({ projectId, enabled }: { projectId: string; ena
     if (enabled) void load();
   }, [enabled, load]);
 
+  const [sourceExpanded, setSourceExpanded] = useState(false);
+  useEffect(() => {
+    const locate = () => { if (window.location.hash.startsWith('#attachment-')) { setSourceExpanded(true); setTimeout(() => document.getElementById(window.location.hash.slice(1))?.scrollIntoView({block:'center'}), 50); } };
+    locate(); window.addEventListener('hashchange', locate);
+    return () => window.removeEventListener('hashchange', locate);
+  }, [attachments]);
+
   if (!enabled) return null;
 
   function replaceAttachment(next: Attachment) {
@@ -231,7 +238,7 @@ export function AttachmentInbox({ projectId, enabled }: { projectId: string; ena
       <ul className="mt-1.5 space-y-1.5">
         {pending.map((attachment) => {
           const status = statusCopy[attachment.extractionStatus] ?? statusCopy.PENDING;
-          return <li key={attachment.id} className="rounded-lg bg-[var(--paper-strong)] p-2.5">
+          return <li id={`attachment-${attachment.id}`} key={attachment.id} className="rounded-lg bg-[var(--paper-strong)] p-2.5">
             <div className="flex flex-wrap items-center gap-2">
               <span className="min-w-0 truncate text-[11px] font-bold text-[var(--navy)]">{attachment.fileName}</span>
               <span className="text-[10px] text-[var(--muted)]">{formatSize(attachment.size)}</span>
@@ -271,11 +278,12 @@ export function AttachmentInbox({ projectId, enabled }: { projectId: string; ena
       </ul>
     </div>}
 
-    {!loading && attachments.length > pending.length && <details className="mt-2.5 rounded-lg bg-[var(--paper-strong)] p-2">
+    {!loading && attachments.length > pending.length && <details open={sourceExpanded} onToggle={(e) => setSourceExpanded(e.currentTarget.open)} className="mt-2.5 rounded-lg bg-[var(--paper-strong)] p-2">
       <summary className="focus-ring cursor-pointer text-[11px] font-bold text-[var(--ink-soft)]">已归档附件（{attachments.length - pending.length}）</summary>
       <ul className="mt-1.5 space-y-1">
-        {attachments.filter((item) => item.extractionStatus === "SUCCESS").map((attachment) => <li key={attachment.id} className="flex flex-wrap items-center gap-2 text-[11px] text-[var(--ink-soft)]">
+        {attachments.filter((item) => item.extractionStatus === "SUCCESS").map((attachment) => <li id={`attachment-${attachment.id}`} key={attachment.id} className="flex flex-wrap items-center gap-2 text-[11px] text-[var(--ink-soft)]">
           <span className="min-w-0 truncate font-bold text-[var(--navy)]">{attachment.fileName}</span>
+          <a href={`/api/projects/${projectId}/attachments/${attachment.id}/file`} className="underline">查看原件</a>
           <span className="text-[10px] text-[var(--muted)]">{formatSize(attachment.size)} · {new Date(attachment.createdAt).toLocaleDateString("zh-CN")}</span>
           <span className="rounded bg-[var(--teal-pale)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--teal-strong)]">已沉淀为记忆</span>
         </li>)}

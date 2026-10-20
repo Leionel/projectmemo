@@ -66,15 +66,19 @@ export class AttachmentService {
     );
   }
 
-  async correct(projectId: string, attachmentId: string, correctedText: string): Promise<AttachmentUploadResult> {
-    const payload: Record<string, string> = {
+  async correct(projectId: string, attachmentId: string, correctedText: string, expectedCurrentText?: string | null): Promise<AttachmentUploadResult> {
+    const payload: Record<string, string | null> = {
       'correctedText': correctedText
     };
+    if (expectedCurrentText !== undefined) {
+      payload['expectedCurrentText'] = expectedCurrentText;
+    }
     return this.client.post<AttachmentUploadResult>(
       `/api/projects/${projectId}/attachments/${attachmentId}/correct`,
       payload
     );
   }
+
   // 修订链：按 revisionIndex 返回历次提取/人工校对文本
   async revisions(projectId: string, attachmentId: string): Promise<AttachmentRevisionsResponse> {
     return this.client.get<AttachmentRevisionsResponse>(

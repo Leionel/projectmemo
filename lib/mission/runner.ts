@@ -1,5 +1,7 @@
 import { researchTools,type ResearchDependencies } from "./tools/researchTools";
 import { persistObservations } from "@/lib/research/sourceRepository";
+import { verifyMissionResult } from "./resultVerifier";
+import { gapRequirementsSchema } from "./gaps";
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
@@ -33,16 +35,14 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
     const current=await fenced(tx,lease);
     const run=await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"SUCCESS",provider:decision.provider,trace:json({missionId:m.id,model:decision.model,protocol:decision.protocol,usage:decision.usage}),resultJson:json({kind:choice.kind}),durationMs:Date.now()-started}});
     if(choice.kind==="ask"){
-     const q=await event(tx,m.id,"QUESTION",{question:choice.question,missing:choice.missing});
-     await tx.agentMission.update({where:{id:m.id},data:{waitStateJson:{questionId:q.id,question:choice.question,missing:choice.missing}}});await release(tx,current,"WAITING_INPUT");return null;
+     const requirements=gapRequirementsSchema.parse(choice.requirements??{});const gapId=randomUUID();
+     const q=await event(tx,m.id,"QUESTION",{question:choice.question,missing:choice.missing,gapId,requirements});
+     const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,status:"SUCCEEDED"},orderBy:{ordinal:"asc"}});
+     await tx.agentMission.update({where:{id:m.id},data:{waitStateJson:json({questionId:q.id,gapId,question:choice.question,missing:choice.missing,requirements,startedAt:new Date().toISOString(),readSet:sourcesFrom(history.map(s=>s.resultJson))})}});await release(tx,current,"WAITING_INPUT");return null;
     }
     if(choice.kind==="finish"){
-     const output=await tx.agentMissionOutput.findFirst({where:{id:choice.outputId,missionId:m.id}});
-     if(!output)throw new AppError("OUTPUT_REQUIRED","请先保存本委托的成果草稿",409);
-     await validateSources(m.projectId,output.sourceRefsJson as unknown as Source[],tx,m.id);
-     const criteria=m.successCriteriaJson as string[];
-     if(criteria.includes("ACTION_CREATED")&&!await tx.agentMissionApproval.count({where:{missionId:m.id,status:"CONSUMED"}}))throw new AppError("CRITERIA_NOT_MET","尚未完成批准后的行动创建",409);
-     await event(tx,m.id,"CRITERIA_CHECKED",{outputId:output.id,draftDelivered:true,actionCreated:criteria.includes("ACTION_CREATED"),contentVerification:"NEEDS_REVIEW"});await release(tx,current,"SUCCEEDED");return null;
+     const verification=await verifyMissionResult(tx,current,choice.outputId);
+     await event(tx,m.id,"CRITERIA_CHECKED",verification);await release(tx,current,"SUCCEEDED");return null;
     }
     const tool=tools[choice.tool];if(!tool)throw new AppError("UNKNOWN_TOOL","模型选择了未开放的工具",422);const args=tool.schema.parse(choice.args);assertToolConstraints(current.constraintsJson,choice.tool,args);
     const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,status:"SUCCEEDED"},orderBy:{ordinal:"asc"}});const sources=sourcesFrom(history.map(s=>s.resultJson));const inputHash=toolInputHash(choice.tool,args,sources);

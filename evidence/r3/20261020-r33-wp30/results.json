@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-20",
+  "scope": "R3.1/R3.2 follow-up fixes + R3.3 WP-30 local increment",
+  "baseCommit": "9429ec3",
+  "dataMode": "independent temporary SQLite, TEST_FIXTURE model only",
+  "checks": [
+    {
+      "command": "npm.cmd test",
+      "exitCode": 0,
+      "testFiles": 58,
+      "tests": 525,
+      "note": "Full run before addition of UI and independent-review test files; production WP-30 code included."
+    },
+    {
+      "command": "npm.cmd test -- tests/missionContinuation.test.ts tests/missionContinuationPanel.test.ts tests/missionRuntime.test.ts tests/missionResearch.test.ts tests/missionPanel.test.ts",
+      "exitCode": 0,
+      "testFiles": 5,
+      "tests": 76
+    },
+    {
+      "command": "npm.cmd test -- tests/missionContinuation.review.test.ts",
+      "exitCode": 0,
+      "tests": 1,
+      "note": "Reviewer added test; strengthened with cloud permission enabled and explicit CONFLICT assertion, rerun passed."
+    },
+    {
+      "command": "npm.cmd exec tsc -- --noEmit",
+      "exitCode": 0
+    },
+    {
+      "command": "npm.cmd run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm.cmd run build",
+      "exitCode": 0,
+      "warning": "Existing attachmentStorage/next.config broad NFT tracing warning."
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm.cmd exec eslint -- (15 affected implementation/test files)",
+      "exitCode": 0
+    }
+  ],
+  "implemented": [
+    "Action source versions and retained WAITING_INPUT after paused edits (commit 9429ec3)",
+    "Typed result checks for draft, actual Action, consumed approval, source count, current question answer",
+    "New material signals and durable bounded cyclic scan with deduplication",
+    "Human preview/confirmation, context and plan revisions, history retention",
+    "Ledger SUPERSEDED/CONTESTED material rejection",
+    "Web candidate review, answer and confirmation"
+  ],
+  "notImplemented": [
+    "WP-31 Artifact adoption, MissionArtifactReceipt M3",
+    "Target automatic continuation and semantic Judge",
+    "R3.4 native Mission UI"
+  ],
+  "notValidated": [
+    "Live model/search paid-account continuation",
+    "Browser E2E for new continuation flow",
+    "HarmonyOS/device/platform acceptance"
+  ],
+  "deviations": [
+    "No in-save notification hook; authoritative Worker scan every 15 seconds, up to 8 waiting missions and 20 sources per kind per batch; delay increases with backlog.",
+    "Source cursor and gap stored in existing waitStateJson; no migration for WP-30.",
+    "Legacy WAITING_INPUT without structured gap metadata retains original manual-input fallback."
+  ],
+  "flags": {
+    "MISSION_EVENT_CONTINUATION_ENABLED": "false by default; disabling retains history and original input API"
+  },
+  "workspace": "Tests/build run with preserved pre-existing user WIP; not a clean-HEAD acceptance claim. Scoped diff check used because pre-existing trustReceipt.integration.test.ts has trailing blank line. Build regenerated next-env.d.ts then restored original WIP bytes (verified SHA256).",
+  "externalSideEffects": "No deployment, push, dev DB migration, live model/search API or credits/reset use.",
+  "quota": {
+    "windowMinutes": 300,
+    "initialRemainingPercent": 37,
+    "lastObservedRemainingPercent": 16,
+    "stopPolicy": "Finish current WP-30 increment and stop before exhaustion, reserve approximately 15%."
+  },
+  "next": "Implement WP-31 controlled weekly_report adoption + M3 receipt, then complete R3.3 Minimum integration gates."
+}

@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
+import { gapRequirementsSchema } from "./gaps";
+export const successCriterionSchema=z.union([z.enum(["DRAFT_EXISTS","ACTION_CREATED","APPROVAL_CONSUMED","REQUIRED_INPUT_PRESENT"]),z.object({type:z.literal("SOURCE_COUNT"),minimum:z.number().int().min(1).max(40)}).strict()]);
 function canonical(value: unknown): unknown {
   if (value instanceof Date) return value.toISOString();
   if (Array.isArray(value)) return value.map(canonical);
@@ -12,7 +14,7 @@ export { constraintsSchema,researchScopeSchema } from "@/lib/types/mission";
 import { constraintsSchema,researchScopeSchema } from "@/lib/types/mission";
 export const createMissionSchema = z.object({
   projectId: z.string().min(1), requestId: z.string().min(1).max(128), goal: z.string().trim().min(3).max(2000),
-  successCriteria: z.array(z.enum(["DRAFT_EXISTS", "ACTION_CREATED"])).min(1).max(2).default(["DRAFT_EXISTS"]),
+  successCriteria: z.array(successCriterionSchema).min(1).max(8).default(["DRAFT_EXISTS"]),
   missionConstraints: constraintsSchema.default(() => constraintsSchema.parse({})),
   researchScope: researchScopeSchema.default(() => researchScopeSchema.parse({})),
   llmContextApproved: z.boolean().default(false),
@@ -21,12 +23,12 @@ export const createMissionSchema = z.object({
 export const commandSchema = z.object({ requestId: z.string().min(1).max(128), expectedVersion: z.number().int().positive(), questionId: z.string().optional(), answer: z.string().trim().min(1).max(3000).optional(), decision: z.enum(["APPROVED", "REJECTED"]).optional(), proposalHash: z.string().optional() }).strict();
 export const choiceSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("tool"), tool: z.string(), args: z.unknown(), summary: z.string().max(240).default("") }).strict(),
-  z.object({ kind: z.literal("ask"), question: z.string().min(1).max(500), missing: z.enum(["PRIVATE", "CRITICAL", "CONFLICT"]) }).strict(),
+  z.object({ kind: z.literal("ask"), question: z.string().min(1).max(500), missing: z.enum(["PRIVATE", "CRITICAL", "CONFLICT"]), requirements: gapRequirementsSchema.optional() }).strict(),
   z.object({ kind: z.literal("finish"), outputId: z.string().min(1) }).strict(),
 ]);
 export type Choice = z.infer<typeof choiceSchema>;
 export type Decision = { choice: Choice; provider: string; model: string; usage: { inputTokens: number | null; outputTokens: number | null }; protocol: string; callId?: string };
-export type Source = { id: string; kind: "PROJECT" | "EXTERNAL"; entityType: "PROJECT" | "CARD" | "ACTION" | "EXTERNAL_SOURCE"; revision: string; hash: string; identityKey?: string; text: string; observedAt: string };
+export type Source = { id: string; kind: "PROJECT" | "EXTERNAL"; entityType: "PROJECT" | "CARD" | "ACTION" | "CAPTURE" | "ATTACHMENT" | "EXTERNAL_SOURCE"; revision: string; hash: string; identityKey?: string; text: string; observedAt: string };
 export type ToolResult = { data: unknown; sources: Source[]; status?: "SUCCESS" | "PARTIAL" };
 export type Actor = { userId: string; projectId: string; missionId: string };
 export const defaultBudget = { models: 12, tools: 16, searches: 3, fetches: 4, activeMs: 180000, reservedOutputTokens: 12000 };

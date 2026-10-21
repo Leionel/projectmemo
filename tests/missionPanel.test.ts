@@ -14,6 +14,16 @@ function fixture(action=false){
  return{requests,mission};
 }
 describe("Mission 面板调用方",()=>{
+ it("过期批准保留内容但不允许再次提交，提示重新预览",async()=>{
+  const f=fixture(true);f.mission.approvals[0].expiresAt="2020-01-01T00:00:00Z";
+  render(createElement(MissionPanel,{projectId:"p"}));fireEvent.click(await screen.findByRole("button",{name:"整理阶段汇报 · 等待你的批准"}));
+  expect(await screen.findByText("提案已过期，请更新依据并重新预览。")).toBeTruthy();expect((screen.getByRole("button",{name:"批准创建行动"}) as HTMLButtonElement).disabled).toBe(true);expect(f.requests).toHaveLength(0);
+ });
+ it("401时清除已显示的私有委托、来源和输入，不留下旧账号内容",async()=>{
+  fixture();render(createElement(MissionPanel,{projectId:"p"}));const row=await screen.findByRole("button",{name:"整理阶段汇报 · 等待执行"});fireEvent.click(row);await screen.findByRole("heading",{name:"整理阶段汇报"});
+  vi.stubGlobal("fetch",vi.fn(async()=>({ok:false,status:401,json:async()=>({error:{message:"登录已过期"}})})));
+  fireEvent.click(row);await screen.findByRole("alert");await waitFor(()=>expect(screen.queryByRole("heading",{name:"整理阶段汇报"})).toBeNull());expect(screen.queryByRole("button",{name:"整理阶段汇报 · 等待执行"})).toBeNull();
+ });
  it("暂停时展示具体协议原因和继续入口，旧通用错误也能读懂",async()=>{
   const f=fixture();Object.assign(f.mission,{status:"PAUSED",error:{code:"MODEL_PROTOCOL_ERROR",message:"委托执行失败，请检查服务配置后继续"}});
   render(createElement(MissionPanel,{projectId:"p"}));

@@ -1,3 +1,4 @@
+import {openProjectDirectory} from "./projectMenu";
 import { test, expect } from "@playwright/test";
 
 async function openSeedProject(page: import("@playwright/test").Page, section = "actions") {
@@ -22,7 +23,7 @@ test("accepts a proactive reminder and asks the memory copilot", async ({ page }
   await firstAction.locator("textarea").fill("已完成演示闭环并记录验证结果。");
   await firstAction.locator("button").last().click();
   await expect(actions.locator('[role="status"]')).toBeVisible();
-  await page.getByRole("navigation", {name:"项目功能导航"}).getByRole("link",{name:"知识与问答"}).click();
+  await openProjectDirectory(page);await page.getByRole("navigation", {name:"项目功能导航"}).getByRole("link",{name:"知识与问答"}).click();
   const copilot = page.locator("#memory-copilot");
   await copilot.getByRole("button", { name: /问忆程/ }).click();
   await copilot.locator("input").fill("当前进展如何？");
@@ -40,13 +41,13 @@ test("seed project completes the core demo loop", async ({ page }) => {
   const seedHref = await seedLink.getAttribute("href");
   expect(seedHref).toMatch(/^\/projects\/[^/?#]+$/);
   await page.goto(seedHref!);
-  await expect(page.getByRole("heading", { name: "项目首页", exact:true })).toBeVisible();
-  await page.getByRole("navigation", {name:"项目功能导航"}).getByRole("link",{name:"知识与问答"}).click();
+  await expect(page.getByRole("heading", { name: "项目概览", exact:true })).toBeVisible();
+  await openProjectDirectory(page);await page.getByRole("navigation", {name:"项目功能导航"}).getByRole("link",{name:"知识与问答"}).click();
   await page.locator("#knowledge-assets").getByRole("button", { name: "完整" }).click();
   await expect(page.getByText("相关知识资产", { exact: true }).first()).toBeVisible();
   await page.getByRole("button", { name: "查看原文" }).first().click();
   await expect(page.getByRole("region", { name: "碎片原文" })).toBeVisible();
-  await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link", { name: "成果文档" }).click();
+  await openProjectDirectory(page);await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link", { name: "成果文档" }).click();
   await page.getByRole("button", { name: "生成新版本" }).click();
   await expect(page.getByRole("heading", { name: "人工智能创意赛 忆程 ProjectMemo 作品开发｜项目周报", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "答辩 PPT 大纲" }).click();
@@ -76,7 +77,7 @@ test("creates a project and captures a fragment", async ({ page }) => {
   await page.getByLabel("项目描述").fill("这是一个验证项目创建和碎片沉淀流程的自动化测试项目。");
   await page.getByLabel("项目目标").fill("完成项目创建和知识卡片生成");
   await page.getByRole("button", { name: "创建项目并开始沉淀" }).click();
-  await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link", {name:"记录与资料"}).click();
+  await openProjectDirectory(page);await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link", {name:"记录与资料"}).click();
   await page.getByLabel("碎片内容").fill("老师建议先完成 Demo 闭环，再准备比赛演示文档。");
   await page.getByRole("button", { name: "沉淀为知识资产" }).click();
   await expect(page.getByText(/已生成/)).toBeVisible();
@@ -91,7 +92,7 @@ test("creates a project and captures a fragment", async ({ page }) => {
 
 test("project home separates features and preserves old bookmarks", async ({page})=>{
   await openSeedProject(page, "");
-  const nav=page.getByRole("navigation",{name:"项目功能导航"});
+  await openProjectDirectory(page);const nav=page.getByRole("navigation",{name:"项目功能导航"});
   await expect(nav.getByRole("link",{name:"项目首页",exact:true})).toHaveAttribute("aria-current","page");
   await expect(page.locator("#capture-box")).toHaveCount(0);await expect(page.locator("#mission-agent")).toHaveCount(0);await expect(page.locator("#action-board")).toHaveCount(0);
   await nav.getByRole("link",{name:"记录与资料"}).click();await expect(page).toHaveURL(/\/records$/);await expect(page.getByLabel("碎片内容")).toBeVisible();
@@ -101,6 +102,19 @@ test("project home separates features and preserves old bookmarks", async ({page
   await expect(page).toHaveURL(/\/knowledge\?cardSort=importance#knowledge-assets$/);
   await expect(page.getByRole("button",{name:"重要",exact:true})).toHaveAttribute("aria-pressed","true");
   await page.goto(`${base}?openCopilot=1#memory-copilot`);await expect(page.getByLabel("问项目进展、提醒依据或下一步")).toBeVisible();
+  await page.goto(base);await page.setViewportSize({width:1280,height:800});
+  await page.screenshot({path:"test-results/pre-r4-home-desktop.png",fullPage:true,animations:"disabled"});
+  await page.getByRole("button",{name:"切换深浅色主题"}).click();
+  await expect(page.locator("html")).toHaveClass(/dark/);
+  await page.screenshot({path:"test-results/pre-r4-home-dark.png",fullPage:true,animations:"disabled"});
+  await page.getByRole("button",{name:"切换深浅色主题"}).click();
+  await page.setViewportSize({width:390,height:844});
+  await expect(page.getByRole("region",{name:"当前最重要的事项"}).getByRole("link").first()).toBeInViewport();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+  await page.screenshot({path:"test-results/pre-r4-home-mobile.png",fullPage:true,animations:"disabled"});
+  await page.setViewportSize({width:320,height:844});await page.addStyleTag({content:"html { font-size:125%; }"});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+  await page.screenshot({path:"test-results/pre-r4-home-large-text.png",fullPage:true,animations:"disabled"});
 });
 
 test("project feature pages reload independently and enforce sign-in",async({page,browser})=>{
@@ -109,7 +123,7 @@ test("project feature pages reload independently and enforce sign-in",async({pag
   const sections=[["missions","长期委托"],["records","记录与资料"],["meetings","会议更新"],["actions","行动与提醒"],["knowledge","知识与问答"],["health","项目体检"],["generate","成果文档"]];
   for(const [path,label] of sections){
     await page.goto(`${base}/${path}`);
-    await expect(page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link",{name:label,exact:true})).toHaveAttribute("aria-current","page");
+    await openProjectDirectory(page);await expect(page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link",{name:label,exact:true})).toHaveAttribute("aria-current","page");
     await expect(page.getByRole("heading",{name:label,exact:true})).toBeVisible();await expect(page.locator("main")).toHaveCount(1);
   }
   const anonymous=await browser.newContext({storageState:{cookies:[],origins:[]}});
@@ -128,8 +142,9 @@ test("project dashboard surfaces attention state and snoozed reminder history", 
   expect(projectHref).toMatch(/^\/projects\/[^/?#]+$/);
   await page.goto(projectHref!);
 
+  await page.getByText("更多项目状态与目标",{exact:true}).click();
   await expect(page.getByRole("region", { name: "项目关键状态" })).toBeVisible();
-  await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link",{name:"行动与提醒"}).click();
+  await openProjectDirectory(page);await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link",{name:"行动与提醒"}).click();
   const interventions = page.locator('section[aria-labelledby="interventions-title"]');
   await interventions.getByText("演示控制", { exact: true }).click();
   await interventions.getByRole("button", { name: "截止 48 小时" }).click();
@@ -180,10 +195,10 @@ test("updates card importance and reuses a card-sourced action", async ({ page }
     card.getByRole("button", { name: "加入待办" }).first().click(),
   ]);
   expect(created.status()).toBe(201);
-  await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link",{name:"行动与提醒"}).click();
+  await openProjectDirectory(page);await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link",{name:"行动与提醒"}).click();
   await expect(page.locator("#action-board article")).toHaveCount(1);
 
-  await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link",{name:"知识与问答"}).click();
+  await openProjectDirectory(page);await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link",{name:"知识与问答"}).click();
   await page.locator("#knowledge-assets").getByRole("button", { name: "完整" }).click();
   card = page.locator("#knowledge-assets article").filter({ hasText: "下一步建议" }).first();
   const [reused] = await Promise.all([
@@ -192,17 +207,18 @@ test("updates card importance and reuses a card-sourced action", async ({ page }
   ]);
   expect(reused.status()).toBe(200);
   expect((await reused.json() as { reused: boolean }).reused).toBe(true);
-  await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link",{name:"行动与提醒"}).click();
+  await openProjectDirectory(page);await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link",{name:"行动与提醒"}).click();
   await expect(page.locator("#action-board article")).toHaveCount(1);
 });
 
 test("mobile workspace keeps project status and overview near the top", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openSeedProject(page, "");
+  await page.getByText("更多项目状态与目标",{exact:true}).click();
   await expect(page.getByRole("region", { name: "项目关键状态" })).toBeVisible();
   await page.getByText("查看项目目标与时间").click();
   await expect(page.getByText("项目目标：")).toBeVisible();
   await expect(page.locator("#capture-box")).toHaveCount(0);
-  await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link",{name:"记录与资料"}).click();
+  await openProjectDirectory(page);await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link",{name:"记录与资料"}).click();
   await expect(page.locator("#capture-box")).toBeVisible();
 });

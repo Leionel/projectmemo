@@ -254,9 +254,9 @@ struct MissionDetail {
   @Builder private WaitingInput() {
     Column({ space: 10 }) {
       Text(this.mission.question?.payloadJson.question ?? '请补充资料').fontSize(18)
-      Button('返回项目补充记录或附件').onClick(() => { router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: this.projectId } }); })
+      Button('返回项目补充记录或附件').backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).onClick(() => { router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: this.projectId } }); })
       TextArea({ placeholder: '回答当前问题，或说明所选资料如何满足缺口', text: this.answer }).height(100).maxLength(3000).onChange((v: string) => { this.answer = v; })
-      Button('提交答复').enabled(!this.busy && this.answer.trim() !== '').onClick(() => { this.command('input'); })
+      Button('提交答复').backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy && this.answer.trim() !== '').onClick(() => { this.command('input'); })
       Text('新资料候选：到达不代表相关，也不代表足以继续').fontSize(14)
       ForEach(this.candidates, (candidate: MissionCandidate) => {
         Column({ space: 4 }) {
@@ -268,12 +268,12 @@ struct MissionDetail {
           })
         }.width('100%').alignItems(HorizontalAlign.Start)
       }, (candidate: MissionCandidate) => candidate.sourcePointer.id)
-      Button('评估所选资料').enabled(!this.busy && this.selectedSources.length > 0 && this.selectedSources.length <= 8).onClick(() => { this.previewMaterials(); })
+      Button('评估所选资料').backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy && this.selectedSources.length > 0 && this.selectedSources.length <= 8).onClick(() => { this.previewMaterials(); })
       if (this.preview !== null) {
         Text(`关联：${this.preview.relevance === 'RELATED' ? '可能相关' : '尚不明确'}；${this.holdReason(this.preview.assessment)}`)
         Text(`剩余缺口：${this.preview.remaining.join('、') || '字段检查未发现缺项；资料含义仍待核验'}`)
         Text('确认表示你已核对资料与当前问题，任务是否继续由服务端检查授权和预算。').fontSize(13)
-        Button('确认资料并接续').enabled(!this.busy && this.answer.trim() !== '').onClick(() => { this.continueMaterials(); })
+        Button('确认资料并接续').backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy && this.answer.trim() !== '').onClick(() => { this.continueMaterials(); })
       }
     }.width('100%').alignItems(HorizontalAlign.Start)
   }
@@ -283,13 +283,13 @@ struct MissionDetail {
       Text(`${missionStatusLabel(this.mission.status)} · 上次同步 ${this.updatedAt}`)
       if (this.mission.status === 'RUNNING' && (this.mission.cancelRequestedAt || this.mission.pauseRequestedAt)) { Text(this.mission.cancelRequestedAt ? '取消请求已受理，等待当前步骤停止' : '暂停请求已受理，等待当前步骤停止').fontColor(PMColors.WARNING) }
       if (this.mission.pauseReason) { Text(`暂停原因：${this.mission.error?.message ?? this.mission.pauseReason}`) }
+      if (this.mission.status === 'PAUSED' && this.missionUiEnabled) { Button('继续原委托').backgroundColor(PMColors.BRAND).fontColor(PMColors.SURFACE).enabled(!this.busy).onClick(() => { this.command('resume'); }) }
       Button(this.showSettings ? '收起委托设置与控制' : '委托设置与控制').onClick(() => { this.showSettings = !this.showSettings; })
       if (this.showSettings && !missionTerminal(this.mission.status) && this.missionUiEnabled) {
-        if (this.mission.status === 'PAUSED') { Button('继续委托').enabled(!this.busy).onClick(() => { this.command('resume'); }) }
-        else if (['READY', 'RUNNING', 'WAITING_INPUT', 'WAITING_APPROVAL'].includes(this.mission.status)) { Button('暂停委托').enabled(!this.busy).onClick(() => { this.command('pause'); }) }
-        Button('取消委托').enabled(!this.busy).onClick(() => { this.cancel(); })
-        Button('查看与修改个人约束').enabled(!this.busy).onClick(() => { this.openForm('constraints'); })
-        Button('查看与修改公开研究范围').enabled(!this.busy).onClick(() => { this.openForm('scope'); })
+        if (['READY', 'RUNNING', 'WAITING_INPUT', 'WAITING_APPROVAL'].includes(this.mission.status)) { Button('暂停委托').backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy).onClick(() => { this.command('pause'); }) }
+        Button('取消委托').backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy).onClick(() => { this.cancel(); })
+        Button('查看与修改个人约束').backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy).onClick(() => { this.openForm('constraints'); })
+        Button('查看与修改公开研究范围').backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy).onClick(() => { this.openForm('scope'); })
         if (this.mission.autoContinuationEnabled || this.mission.continuationPolicy.mode !== 'MANUAL') {
           Text(`接续许可：${this.mission.continuationPolicy.mode === 'MANUAL' ? '每次确认' : '满足条件后自动读取与分析'}`)
           Button(this.mission.continuationPolicy.mode === 'MANUAL' ? '允许低风险自动接续' : '撤销自动接续许可').enabled(!this.busy).onClick(() => { this.policy(); })
@@ -301,7 +301,7 @@ struct MissionDetail {
           this.approval = approval; this.reviewedVersion = this.mission.version;
         })
       }, (approval: MissionApproval) => approval.id)
-      if (this.mission.status === 'WAITING_APPROVAL') { Button('提案已失效？重新评估').enabled(!this.busy && this.missionUiEnabled).onClick(() => { this.command('replan'); }) }
+      if (this.mission.status === 'WAITING_APPROVAL') { Button('提案已失效？重新评估').backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy && this.missionUiEnabled).onClick(() => { this.command('replan'); }) }
       Text('最近进展').fontSize(18).fontWeight(FontWeight.Medium)
       ForEach(this.mission.steps.filter((step: MissionStep) => step.status === 'SUCCEEDED').slice(-2), (step: MissionStep) => {
         Text(`${missionToolLabel(step.toolName)}已执行`).fontSize(14).fontColor(PMColors.INK_SECONDARY)
@@ -331,7 +331,7 @@ struct MissionDetail {
           ForEach(output.claimChecksJson ?? [], (claim: MissionClaim) => {
             Text(`${this.claimStatus(claim.status)}：${claim.text ?? '该段内容尚未逐句核验'}`).fontSize(13)
           }, (claim: MissionClaim, index: number) => claim.claimId ?? `${claim.blockId}-${index}`)
-          if (this.mission.artifactAdoptionEnabled) { Button('预览归入项目周报').enabled(!this.busy).onClick(() => { this.previewOutput(output); }) }
+          if (this.mission.artifactAdoptionEnabled) { Button('预览归入项目周报').backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy).onClick(() => { this.previewOutput(output); }) }
         }.width('100%').alignItems(HorizontalAlign.Start)
       }, (output: MissionOutput) => output.id)
       if (this.showExecution) { MissionEventList({ events: this.events }) }
@@ -363,18 +363,18 @@ struct MissionDetail {
               Text(`${this.knowledge(source.knowledgeClass ?? source.kind)} · ${source.id}\n${(source.excerpts ?? []).join('\n')}`).fontSize(13)
             }, (source: MissionSource) => source.id)
             Text('归入后可由后续任务检索。确认归入不表示所有结论已证实，项目事实仍按原确认流程管理。')
-            Button('确认归入项目成果').enabled(!this.busy).onClick(() => { this.adopt(); })
-            Button('返回任务').enabled(!this.busy).onClick(() => { this.adoption = null; })
+            Button('确认归入项目成果').backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy).onClick(() => { this.adopt(); })
+            Button('返回任务').backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy).onClick(() => { this.adoption = null; })
           } else if (this.mission.id !== '') {
             this.MissionBody()
-            Button('返回委托列表').enabled(!this.busy).onClick(() => { this.openMission(''); })
+            Button('返回委托列表').backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy).onClick(() => { this.openMission(''); })
           } else {
-            if (this.missionUiEnabled) { Button('委托新目标').enabled(!this.busy).onClick(() => { this.editSnapshot = new Mission(); this.form = 'create'; }) }
+            if (this.missionUiEnabled) { Button('委托新目标').backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy).onClick(() => { this.editSnapshot = new Mission(); this.form = 'create'; }) }
             if (this.loaded && this.missions.length === 0) { Text('还没有长期委托') }
             ForEach(this.missions, (mission: MissionSummary) => {
               Button(`${missionStatusLabel(mission.status)} · ${mission.goal}`).height('auto').padding(12).onClick(() => { this.openMission(mission.id); })
             }, (mission: MissionSummary) => mission.id)
-            if (this.nextCursor !== '') { Button('加载更多委托').enabled(!this.busy).onClick(() => { this.more(); }) }
+            if (this.nextCursor !== '') { Button('加载更多委托').backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy).onClick(() => { this.more(); }) }
           }
         }.width('100%').padding(PMSpacing.LG).alignItems(HorizontalAlign.Start)
       }.layoutWeight(1).width('100%')

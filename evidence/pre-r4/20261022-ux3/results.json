@@ -1,0 +1,33 @@
+{
+  "stage": "UX-3",
+  "date": "2026-10-22",
+  "baseline": "4b8f7064731fc5e1c8a75032b103b4a2f42c0f29",
+  "unitFiles": 72,
+  "unitTests": 615,
+  "unit": "PASS",
+  "e2e": {
+    "result": "PASS",
+    "expected": 12,
+    "unexpected": 0,
+    "flaky": 0,
+    "includesAuthSetup": true
+  },
+  "productionBuild": "PASS (included in E2E)",
+  "typescript": "PASS",
+  "lint": "PASS",
+  "harmonyTests": {
+    "passed": 60,
+    "failed": 0,
+    "initialFailure": "missing local Hypium dependencies; ohpm install restored declared packages"
+  },
+  "harmonyBuild": "PASS_UNSIGNED",
+  "hapSha256": "0d64a68907f140975f270a4a439fda5c6d65a4322272ec6548f6e9b286627a24",
+  "screenshots": 7,
+  "screenshotData": "isolated mock/TEST_FIXTURE",
+  "nativeDevice": "OPEN: hdc list targets returned Empty",
+  "ecs": "NOT_DEPLOYED",
+  "liveModelSearch": "NOT_RUN",
+  "r4Backend": "NOT_IMPLEMENTED",
+  "independentAgentReview": "NOT_RUN",
+  "preservation": "PASS: 6 main-worktree WIP files and 3 formal R4 docs unchanged"
+}

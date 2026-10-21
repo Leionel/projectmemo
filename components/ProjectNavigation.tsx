@@ -11,6 +11,7 @@ export function ProjectNavigation({projectId,missionsEnabled}:{projectId:string;
  const path=usePathname(),base=`/projects/${projectId}`;
  const section=path.slice(base.length).split("/")[1]??"";
  return <div className={styles.navigationShell}><nav className={styles.navigation} aria-label="项目主要导航">{groups.filter(g=>g.key!=="missions"||missionsEnabled).map(g=>{const Icon=g.icon;return <Link key={g.key} href={base+(g.key?`/${g.key}`:"")} prefetch={false} aria-current={g.sections.includes(section)?"page":undefined}><Icon size={17} aria-hidden="true"/><span>{g.label}</span></Link>;})}</nav>
+ {groups[2].sections.includes(section)&&<nav className={styles.contextNavigation} aria-label="资料功能"><Link href={`${base}/records`} aria-current={section==="records"?"page":undefined}>记录与附件</Link><Link href={`${base}/knowledge`} aria-current={section==="knowledge"?"page":undefined}>项目记忆与问答</Link><Link href={`${base}/meetings`} aria-current={section==="meetings"?"page":undefined}>会议更新</Link></nav>}
  <details className={styles.directory}><summary>项目功能</summary><nav aria-label="项目功能导航">{projectSections.map((item,index)=>{
   if(item.key==="missions"&&!missionsEnabled)return null;
   const href=base+(item.key?`/${item.key}`:"");const Icon=icons[index];

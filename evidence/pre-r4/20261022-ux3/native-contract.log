@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/missionNativeContract.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-r3-release-merge
+
+
+ Test Files  1 passed (1)
+      Tests  10 passed (10)
+   Start at  04:01:34
+   Duration  4.03s (transform 954ms, setup 0ms, import 2.46s, tests 1.21s, environment 0ms)
+

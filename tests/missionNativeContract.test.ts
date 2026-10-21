@@ -21,6 +21,7 @@ import type { Choice } from "@/lib/mission/contracts";
 import { POST as webCreate } from "@/app/api/missions/route";
 import { GET as webDetail } from "@/app/api/missions/[id]/route";
 import { GET as webEvents } from "@/app/api/missions/[id]/events/route";
+import { GET as workspaceSummary } from "@/app/api/missions/summary/route";
 import { GET as capabilities } from "@/app/api/missions/capabilities/route";
 import { POST as approval } from "@/app/api/missions/[id]/approvals/[approvalId]/route";
 import { POST as previewMaterial } from "@/app/api/missions/[id]/continuations/preview/route";
@@ -49,6 +50,7 @@ function nativeModule(relative: string): Record<string, unknown> {
   return exports;
 }
 interface NativeService {
+  summary(projectId:string):Promise<{enabled:boolean;totalActive:number;items:Array<{id:string;status:string;attention:string|null}>}>;
   create(body: object): Promise<{ mission: { id: string } }>;
   detail(id: string): ReturnType<typeof missionDetail>;
   events(id: string, seq: number): ReturnType<typeof missionEvents>;
@@ -65,6 +67,7 @@ async function dispatch(method: string, url: string, body?: object) {
   const parts = new URL(request.url).pathname.split("/"); const id = parts[3], key = parts[4];
   let response: Response;
   if (url === "/api/missions") response = await webCreate(request);
+  else if (id === "summary") response = await workspaceSummary(request);
   else if (key === "events") response = await webEvents(request, { params: Promise.resolve({ id }) });
   else if (key === "approvals") response = await approval(request, { params: Promise.resolve({ id, approvalId: parts[5] }) });
   else if (key === "continuations") response = await (parts[5] === "preview" ? previewMaterial : confirmMaterial)(request, { params: Promise.resolve({ id }) });
@@ -89,6 +92,12 @@ beforeAll(async () => {
 });
 afterAll(async () => { await db.$disconnect(); fs.rmSync(isolated.dir, { recursive: true, force: true }); });
 describe("R3.4 实际 ArkTS 服务 ↔ Next 路由", () => {
+  it("原生项目摘要与Web读取同一等待问题，且不改变Mission状态",async()=>{
+    const m=await fixture();await slice(m.id,{kind:"ask",question:"请补充同条件实验指标",missing:"PRIVATE"});
+    const summary=await native.summary(projectId);expect(summary.enabled).toBe(true);
+    expect(summary.items.find(item=>item.id===m.id)).toMatchObject({status:"WAITING_INPUT",attention:"请补充同条件实验指标"});
+    expect((await native.detail(m.id)).status).toBe("WAITING_INPUT");
+  });
   it("Web 创建、原生读取同ID，202只受理，超过100事件按实际路由游标接续", async () => {
     const created = await native.create({ projectId, requestId: crypto.randomUUID(), goal: "继续整理实验汇报" });
     expect((await native.detail(created.mission.id)).status).toBe("READY");

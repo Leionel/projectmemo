@@ -121,8 +121,8 @@ export struct MissionSettingsForm {
         Text('搜索授权与模型上下文授权分别保存。内部实验、身份和私有文档不能因此传给搜索服务。').fontSize(13).fontColor(PMColors.INK_SECONDARY)
       }
       if (this.error !== '') { Text(this.error).fontColor(PMColors.RISK) }
-      Button(this.busy ? '正在提交…' : '确认保存').enabled(!this.busy).onClick(() => { this.submit(); })
-      Button('收起').enabled(!this.busy).onClick(() => { this.onClose(); })
+      Button('确认保存').backgroundColor(PMColors.BRAND).fontColor(PMColors.SURFACE).enabled(!this.busy).onClick(() => { this.submit(); })
+      Button('收起').backgroundColor(PMColors.SURFACE_SUBTLE).fontColor(PMColors.INK_SECONDARY).enabled(!this.busy).onClick(() => { this.onClose(); })
     }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.MD)
   }
 }

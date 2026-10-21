@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-r3-release-merge
+
+
+ Test Files  72 passed (72)
+      Tests  612 passed (612)
+   Start at  03:57:06
+   Duration  117.87s (transform 3.48s, setup 0ms, import 27.83s, tests 67.91s, environment 4.87s)
+

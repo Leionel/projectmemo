@@ -2,11 +2,11 @@
   "color": [
     {
       "name": "start_window_background",
-      "value": "#FFFFFF"
+      "value": "#F7F6F2"
     },
     {
       "name": "pm_background",
-      "value": "#F4F7FA"
+      "value": "#F7F6F2"
     },
     {
       "name": "pm_surface",
@@ -14,7 +14,7 @@
     },
     {
       "name": "pm_surface_subtle",
-      "value": "#F8FAFC"
+      "value": "#F2F4EF"
     },
     {
       "name": "pm_surface_elevated",
@@ -22,35 +22,35 @@
     },
     {
       "name": "pm_ink_primary",
-      "value": "#142338"
+      "value": "#1C2E2C"
     },
     {
       "name": "pm_ink_secondary",
-      "value": "#475B70"
+      "value": "#53645E"
     },
     {
       "name": "pm_ink_tertiary",
-      "value": "#788C9E"
+      "value": "#617268"
     },
     {
       "name": "pm_ink_muted",
-      "value": "#9EAEBE"
+      "value": "#617268"
     },
     {
       "name": "pm_memory",
-      "value": "#0E7490"
+      "value": "#355F84"
     },
     {
       "name": "pm_memory_light",
-      "value": "#EDF8F9"
+      "value": "#EAF1F7"
     },
     {
       "name": "pm_evidence",
-      "value": "#D97706"
+      "value": "#8A5700"
     },
     {
       "name": "pm_evidence_light",
-      "value": "#FEF7EE"
+      "value": "#FFF4DC"
     },
     {
       "name": "pm_evidence_border",
@@ -62,11 +62,11 @@
     },
     {
       "name": "pm_risk",
-      "value": "#DC2626"
+      "value": "#A9343C"
     },
     {
       "name": "pm_risk_light",
-      "value": "#FEF2F2"
+      "value": "#FCEDF0"
     },
     {
       "name": "pm_risk_border",
@@ -74,47 +74,47 @@
     },
     {
       "name": "pm_warning",
-      "value": "#EA580C"
+      "value": "#8A5700"
     },
     {
       "name": "pm_warning_light",
-      "value": "#FFF7ED"
+      "value": "#FFF4DC"
     },
     {
       "name": "pm_success",
-      "value": "#0D9488"
+      "value": "#236447"
     },
     {
       "name": "pm_success_light",
-      "value": "#F0FDF4"
+      "value": "#E7F1EB"
     },
     {
       "name": "pm_brand",
-      "value": "#1E56A0"
+      "value": "#27685D"
     },
     {
       "name": "pm_brand_light",
-      "value": "#EFF5FC"
+      "value": "#E7F0EB"
     },
     {
       "name": "pm_brand_pressed",
-      "value": "#153F78"
+      "value": "#1B4C44"
     },
     {
       "name": "pm_border",
-      "value": "#E2E8F0"
+      "value": "#D9E1DB"
     },
     {
       "name": "pm_border_subtle",
-      "value": "#EDF2F7"
+      "value": "#E6EBE5"
     },
     {
       "name": "pm_border_strong",
-      "value": "#CBD5E1"
+      "value": "#718278"
     },
     {
       "name": "pm_divider",
-      "value": "#EAEEF3"
+      "value": "#D9E1DB"
     },
     {
       "name": "pm_scrim",
@@ -122,11 +122,11 @@
     },
     {
       "name": "pm_ai_accent",
-      "value": "#7C3AED"
+      "value": "#27685D"
     },
     {
       "name": "pm_ai_accent_light",
-      "value": "#F5F3FF"
+      "value": "#E7F0EB"
     }
   ]
 }

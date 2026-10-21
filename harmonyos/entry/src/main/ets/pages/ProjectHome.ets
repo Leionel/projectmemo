@@ -77,6 +77,7 @@ import { MissionPanel } from '../components/MissionPanel';
 struct ProjectHome {
   @State projectId: string = '';
   @State currentTabIndex: number = 0;
+  @State missionRefreshKey: number = 0;
   @State showProjectStatus: boolean = false;
   @State showQuickCopilot: boolean = false;
   @StorageProp(PMStorageKey.WIDTH_BP) widthBp: string = PMWidthBp.SM;
@@ -258,6 +259,7 @@ struct ProjectHome {
   }
 
   onPageShow(): void {
+    this.missionRefreshKey++;
     // NAV-02: 消费可能在热启动时通过通知写入的参数
     this.openPendingNotification();
     // NAV-01: 页面返回时静默刷新数据，保留用户当前 tab
@@ -2234,9 +2236,9 @@ struct ProjectHome {
   private BottomTabBar() {
     Row() {
       this.TabBarItem(0, '概览')
+      this.TabBarItem(3, '委托')
       this.TabBarItem(1, '资料')
       this.TabBarItem(2, '行动')
-      this.TabBarItem(3, '委托')
       this.TabBarItem(4, '成果')
     }
     .width('100%')
@@ -2994,7 +2996,7 @@ struct ProjectHome {
         // 项目头部场景与快捷操作入口
         this.ProjectBanner()
 
-        MissionPanel({ projectId: this.projectId, compact: true })
+        MissionPanel({ projectId: this.projectId, compact: true, refreshKey: this.missionRefreshKey })
         Button('问忆程').backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND)
           .onClick(() => { this.showQuickCopilot = true; this.currentTabIndex = 3; })
 
@@ -4527,7 +4529,7 @@ struct ProjectHome {
     } else {
       Scroll() {
         Column({ space: PMSpacing.MD }) {
-          MissionPanel({ projectId: this.projectId })
+          MissionPanel({ projectId: this.projectId, refreshKey: this.missionRefreshKey })
           Button('快速提问：问忆程').onClick(() => { this.showQuickCopilot = true; })
         }.padding(PMSpacing.MD).width('100%')
       }.layoutWeight(1).width('100%')

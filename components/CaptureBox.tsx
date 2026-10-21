@@ -1,4 +1,5 @@
 "use client";
+import {projectHref} from "@/lib/projectNavigation";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -198,7 +199,7 @@ export function CaptureBox({ projectId, inboxEnabled = true }: { projectId: stri
                 {message.text}
                 {message.ok && newCardId && (
                   <a
-                    href={`#card-${newCardId}`}
+                    href={projectHref(projectId,`#card-${newCardId}`)}
                     className="focus-ring rounded-md underline underline-offset-4"
                   >
                     查看新卡片

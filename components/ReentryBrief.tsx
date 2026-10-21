@@ -1,4 +1,5 @@
 "use client";
+import {projectHref} from "@/lib/projectNavigation";
 
 import { useCallback, useEffect, useState } from "react";
 import { ArrowRight, BookmarkCheck, CalendarClock, LoaderCircle, TriangleAlert } from "lucide-react";
@@ -119,7 +120,7 @@ export function ReentryBrief({ projectId, enabled, episodesEnabled, stateEnabled
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <span className={"rounded-full px-2.5 py-1 text-[11px] font-bold " + freshness.className}>{freshness.label}</span>
-        <a href={target.href} className="focus-ring editorial-button text-xs">{target.label}<ArrowRight size={14} /></a>
+        <a href={projectHref(projectId,target.href)} className="focus-ring editorial-button text-xs">{target.label}<ArrowRight size={14} /></a>
       </div>
     </div>
 
@@ -143,7 +144,7 @@ export function ReentryBrief({ projectId, enabled, episodesEnabled, stateEnabled
               : <p className="mt-1.5 text-[11px] leading-5 text-[var(--muted)]">检查点之后暂无已确认变化。</p>}
           </>}
         {data.episode.meta.status !== "OK" && data.episode.meta.message && <p className="mt-1.5 text-[11px] font-semibold text-[var(--amber)]">{data.episode.meta.message}</p>}
-        {episodesEnabled && <a href="#episode-checkpoint" className="focus-ring mt-2 inline-block text-[11px] font-black text-[var(--teal-strong)] underline underline-offset-2">打开阶段检查点 →</a>}
+        {episodesEnabled && <a href={projectHref(projectId,"#episode-checkpoint")} className="focus-ring mt-2 inline-block text-[11px] font-black text-[var(--teal-strong)] underline underline-offset-2">打开阶段检查点 →</a>}
       </div>
 
       <div className="rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">
@@ -160,7 +161,7 @@ export function ReentryBrief({ projectId, enabled, episodesEnabled, stateEnabled
           </div>
           : <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">当前没有受阻项或已确认风险；信息不足的部分会保留为未知，不会被当成「没有风险」。</p>}
         {data.risk.meta.status !== "OK" && data.risk.meta.message && <p className="mt-1.5 text-[11px] font-semibold text-[var(--amber)]">{data.risk.meta.message}</p>}
-        <a href={data.risk.kind === "BLOCKED" ? "#action-board" : "#interventions"} className="focus-ring mt-2 inline-block text-[11px] font-black text-[var(--teal-strong)] underline underline-offset-2">{data.risk.kind === "BLOCKED" ? "前往处理受阻待办 →" : "查看提醒与依据 →"}</a>
+        <a href={projectHref(projectId,data.risk.kind === "BLOCKED" ? "#action-board" : "#interventions")} className="focus-ring mt-2 inline-block text-[11px] font-black text-[var(--teal-strong)] underline underline-offset-2">{data.risk.kind === "BLOCKED" ? "前往处理受阻待办 →" : "查看提醒与依据 →"}</a>
       </div>
 
       <div className="rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">
@@ -173,7 +174,7 @@ export function ReentryBrief({ projectId, enabled, episodesEnabled, stateEnabled
           </>
           : <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">还没有已确认的时间安排。</p>}
         {data.schedule.meta.status !== "OK" && data.schedule.meta.message && <p className="mt-1.5 text-[11px] font-semibold text-[var(--amber)]">{data.schedule.meta.message}</p>}
-        {schedulingEnabled && <a href="#schedule-planner" className="focus-ring mt-2 inline-block text-[11px] font-black text-[var(--teal-strong)] underline underline-offset-2">安排未来几天 →</a>}
+        {schedulingEnabled && <a href={projectHref(projectId,"#schedule-planner")} className="focus-ring mt-2 inline-block text-[11px] font-black text-[var(--teal-strong)] underline underline-offset-2">安排未来几天 →</a>}
       </div>
     </div>
 

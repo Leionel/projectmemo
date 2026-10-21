@@ -1,4 +1,5 @@
 "use client";
+import {projectHref} from "@/lib/projectNavigation";
 
 import { useCallback, useEffect, useState } from "react";
 import { BookmarkCheck, CalendarClock, Check, ExternalLink, FileQuestion, History, ListPlus, LoaderCircle, RefreshCw, ShieldAlert, X } from "lucide-react";
@@ -98,7 +99,7 @@ function formatTime(value: string | null) {
 /** 只有仍存在、且能定位到原始记录的来源才提供跳转 */
 function sourceHref(projectId: string, ref: EpisodeSourceRef, state?: SourceState) {
   if (state?.state === "DELETED") return null;
-  if (ref.kind === "CARD" || ref.kind === "ACTION_RESULT") return `#card-${ref.entityId}`;
+  if (ref.kind === "CARD" || ref.kind === "ACTION_RESULT") return projectHref(projectId,`#card-${ref.entityId}`);
   if (ref.kind === "ATTACHMENT_REVISION") return `/api/projects/${projectId}/attachment-revisions/${ref.entityId}`;
   return null;
 }
@@ -362,8 +363,8 @@ export function EpisodeCheckpointCard({ projectId, enabled, reminderEnabled = fa
                   {blockedFor === claim.claimId && outcomes[claim.claimId] && <div className="mt-1.5 rounded-lg bg-[var(--amber)]/10 p-2.5">
                     <p className="text-[11px] font-semibold text-[var(--amber)]">{outcomes[claim.claimId].availability.blockedReason}</p>
                     <div className="mt-1.5 flex flex-wrap gap-1.5">
-                      <a href="#action-board" className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-[11px] font-bold text-[var(--ink-soft)]">补充前置依赖</a>
-                      <a href="#capture-box" className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-[11px] font-bold text-[var(--ink-soft)]">补充缺失的信息</a>
+                      <a href={projectHref(projectId,"#action-board")} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-[11px] font-bold text-[var(--ink-soft)]">补充前置依赖</a>
+                      <a href={projectHref(projectId,"#capture-box")} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-[11px] font-bold text-[var(--ink-soft)]">补充缺失的信息</a>
                       <button type="button" onClick={() => void addToTodo(claim, current.id, "UNBLOCK", outcomes[claim.claimId].actionId)} disabled={busy !== null} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)] disabled:opacity-50">创建一个解阻待办</button>
                     </div>
                     <p className="mt-1.5 text-[11px] text-[var(--muted)]">受阻的待办不会进入时间安排，也不会被写入设备日历。</p>
@@ -391,7 +392,7 @@ export function EpisodeCheckpointCard({ projectId, enabled, reminderEnabled = fa
       </details>}
 
       {!isHistoryView && <div className="mt-4 flex flex-wrap gap-2">
-        <a href="#action-board" className="focus-ring editorial-button text-xs">继续推进<Check size={14} /></a>
+        <a href={projectHref(projectId,"#action-board")} className="focus-ring editorial-button text-xs">继续推进<Check size={14} /></a>
       </div>}
     </div>}
 

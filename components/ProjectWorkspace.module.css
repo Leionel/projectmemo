@@ -1,0 +1,44 @@
+.shell { width: min(1360px, calc(100% - 40px)); margin: 0 auto; padding-block: 1.5rem 3rem; }
+.back { display: inline-flex; gap: .5rem; align-items: center; color: var(--ink-soft); font-size: .8125rem; min-height: 2.75rem; }
+.heading { display: flex; justify-content: space-between; gap: 1.5rem; align-items: center; margin: .75rem 0 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--rule); }
+.heading h1 { font-size: 1.5rem; line-height: 1.5; overflow-wrap: anywhere; }
+.heading p { margin-top: .375rem; max-width: 50rem; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; color: var(--ink-soft); font-size: .8125rem; line-height: 1.7; }
+.headingMeta { display: flex; gap: .75rem; align-items: center; color: var(--muted); font-size: .75rem; margin-bottom: .5rem; }
+.headingActions { display: flex; flex-shrink: 0; gap: .5rem; }
+.workspace { display: grid; grid-template-columns: 172px minmax(0,1fr); gap: 1.75rem; align-items: start; }
+.navigation { display: grid; gap: .25rem; position: sticky; top: 6rem; }
+.navigation a { display: flex; align-items: center; gap: .625rem; min-height: 2.75rem; border-radius: .5rem; padding: .625rem .75rem; font-size: .8125rem; font-weight: 600; color: var(--ink-soft); }
+.navigation a:hover { background: var(--paper-strong); color: var(--ink); }
+.navigation a[aria-current=page] { color: var(--teal-strong); background: var(--teal-pale); }
+.navigation a:focus-visible,.back:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+.content { min-width: 0; }
+.pageTitle { margin-bottom: 1.25rem; }
+.pageTitle h2 { font-family: inherit; font-size: 1.125rem; font-weight: 700; }
+.pageTitle p { margin-top: .375rem; color: var(--ink-soft); font-size: .8125rem; line-height: 1.7; }
+.sectionStack { display: grid; gap: 1.25rem; }
+.overviewColumns { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 1.25rem; margin-top: 1.25rem; align-items: start; }
+.summary { min-width: 0; padding: 1.25rem; border: 1px solid var(--rule); border-radius: .875rem; background: var(--paper-strong); }
+.summaryHeading { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .75rem; }
+.summaryHeading h3 { font-family: inherit; font-size: .875rem; font-weight: 700; line-height: 1.6; }
+.summaryHeading a { font-size: .75rem; color: var(--teal-strong); }
+.summary ul { margin: 0; padding: 0; list-style: none; }
+.summary li + li { border-top: 1px solid var(--rule); }
+.summary li > a { display: block; padding: .875rem 0; min-height: 2.75rem; }
+.summary li strong { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: .8125rem; font-weight: 600; line-height: 1.65; overflow-wrap: anywhere; }
+.summary li p { font-size: .75rem; color: var(--ink-soft); line-height: 1.65; margin-top: .25rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.empty { color: var(--ink-soft); font-size: .8125rem; line-height: 1.8; padding-block: .75rem; }
+.next { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1.25rem; padding: 1.125rem 1.25rem; border-radius: .875rem; background: var(--teal-pale); border: 1px solid var(--rule); color: var(--ink); }
+.next small { font-size: .6875rem; color: var(--teal-strong); }
+.next strong { display: block; font-size: .9375rem; margin-top: .25rem; }
+.next p { color: var(--ink-soft); font-size: .75rem; margin-top: .375rem; line-height: 1.65; }
+.secondary { margin-top: 1.25rem; border-top: 1px solid var(--rule); padding-top: 1rem; }
+.secondary summary { cursor: pointer; padding-block: .5rem; min-height: 2.75rem; font-size: .8125rem; }
+@media(max-width: 900px) {
+ .shell { width: calc(100% - 32px); }
+ .heading { align-items: flex-start; flex-direction: column; gap: .875rem; }
+ .heading h1 { font-size: 1.25rem; }
+ .workspace { grid-template-columns: minmax(0,1fr); gap: 1.25rem; }
+ .navigation { grid-template-columns: repeat(4,minmax(0,1fr)); position: static; gap: .25rem; padding-bottom: .875rem; border-bottom: 1px solid var(--rule); }
+ .navigation a { justify-content: center; gap: .25rem; flex-direction: column; padding: .5rem .125rem; font-size: .6875rem; }
+ .overviewColumns { grid-template-columns: minmax(0,1fr); }
+}

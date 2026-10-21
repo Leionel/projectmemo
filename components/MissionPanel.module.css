@@ -1,4 +1,4 @@
-.panel { margin-top: 1.25rem; border: 1px solid var(--rule); border-radius: 1rem; background: var(--paper-strong); color: var(--ink); overflow: hidden; font-size: .875rem; line-height: 1.65; }
+.panel { container-type: inline-size; margin-top: 1.25rem; border: 1px solid var(--rule); border-radius: 1rem; background: var(--paper-strong); color: var(--ink); overflow: hidden; font-size: .875rem; line-height: 1.65; }
 .panel :is(h2,h3,h4,h5) { margin: 0; font-family: inherit; letter-spacing: normal; }
 .panel h2 { font-size: 1.125rem; font-weight: 700; }
 .panel :is(h3,h4,h5) { font-size: .875rem; font-weight: 650; }
@@ -77,7 +77,7 @@
 .emptyMark { color: var(--teal); font-size: 1.75rem; }
 .empty h3 { font-size: 1.125rem; }
 .empty p { color: var(--ink-soft); }
-@media (max-width: 800px) {
+@container (max-width: 760px) {
  .workspace { grid-template-columns: minmax(0,1fr); }
  .header,.detail { padding: 1rem; }
  .sidebar { padding: 1rem; border-right: 0; border-bottom: 1px solid var(--rule); }

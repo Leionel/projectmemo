@@ -11,6 +11,7 @@ async function scan(id:string){return fixture("scan",id);}
 test("same Mission survives reload, receives metric, auto continues, waits for approval and adopts a reusable draft",async({page})=>{
  test.setTimeout(120000);
  await page.goto("/projects/new");await page.getByLabel("项目名称").fill(`E2E Mission ${Date.now()}`);await page.getByLabel("项目描述").fill("独立的Mission接续测试项目");await page.getByLabel("项目目标").fill("验证接续、批准和成果归入");await page.getByRole("button",{name:"创建项目并开始沉淀"}).click();await expect(page).toHaveURL(/\/projects\/(?!new)[^/?#]+$/);
+ await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link",{name:"长期委托"}).click();
  const panel=page.locator("#mission-agent"),goal="跨时间准备10月实验汇报";await panel.getByRole("textbox",{name:"委托目标"}).fill(goal);await panel.getByRole("checkbox",{name:/允许配置的云模型/}).check();
  const created=page.waitForResponse(r=>r.url().endsWith("/api/missions")&&r.request().method()==="POST");await panel.getByRole("button",{name:"创建委托",exact:true}).click();const{id}=((await(await created).json()) as {mission:{id:string}}).mission;
  await slice(id,{kind:"ask",question:"请补充本项目2026-10的Dice百分比",missing:"PRIVATE",requirements:{terms:[],unit:"",period:"",sourceType:"EITHER",metric:{name:"Dice",unit:"%",period:"2026-10"}}});
@@ -26,4 +27,7 @@ test("same Mission survives reload, receives metric, auto continues, waits for a
  await page.screenshot({path:"test-results/r33-mission-continuation-adoption.png",fullPage:true});
  await panel.getByRole("textbox",{name:"委托目标"}).fill("引用已归入成果准备后续汇报");const nextCreated=page.waitForResponse(r=>r.url().endsWith("/api/missions")&&r.request().method()==="POST");await panel.getByRole("button",{name:"创建委托",exact:true}).click();const nextResponse=await nextCreated;expect(nextResponse.status()).toBe(202);const next=(await nextResponse.json()).mission;
  await slice(next.id,{kind:"tool",tool:"search_memory",args:{query:"10月汇报",limit:8},summary:"复用项目成果"});const step=fixture("state",next.id).steps.find(s=>s.toolName==="search_memory")!;expect(step.resultJson?.sources?.some(s=>s.id===`artifact:${receipt.artifactId}`)).toBe(true);
+ await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link",{name:"项目首页",exact:true}).click();
+ await page.getByRole("region",{name:"当前委托"}).getByRole("link",{name:/引用已归入成果准备后续汇报/}).click();
+ await expect(page).toHaveURL(new RegExp(`/missions\\?mission=${next.id}`));await expect(page.getByText(`任务编号：${next.id}`,{exact:true})).toBeVisible();
 });

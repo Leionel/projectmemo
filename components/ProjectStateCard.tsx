@@ -1,4 +1,5 @@
 "use client";
+import {projectHref} from "@/lib/projectNavigation";
 
 import { useCallback, useEffect, useState } from "react";
 import { Activity, ChevronDown, Check, LoaderCircle, ListChecks, RefreshCw, TriangleAlert } from "lucide-react";
@@ -270,7 +271,7 @@ export function ProjectStateCard({ projectId, enabled }: { projectId: string; en
           <p className="mt-1 text-[11px] leading-5 text-[var(--ink-soft)]">影响：{sentence.impact}</p>
           <p className="mt-0.5 text-[11px] leading-5 text-[var(--teal-strong)]">建议：{sentence.suggestion}</p>
           {sentence.evidence.length > 0 && <p className="mt-1.5 flex flex-wrap gap-1.5">
-            {sentence.evidence.slice(0, 3).map((ref, index) => <a key={`${ref.entityId}-${index}`} href={ref.entityKind === "card" ? `#card-${ref.entityId}` : evidenceHref[ref.entityKind] ?? "#project-state"} className="focus-ring rounded bg-[var(--teal-pale)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--teal-strong)]">
+            {sentence.evidence.slice(0, 3).map((ref, index) => <a key={`${ref.entityId}-${index}`} href={projectHref(projectId,ref.entityKind === "card" ? `#card-${ref.entityId}` : evidenceHref[ref.entityKind] ?? "#project-state")} className="focus-ring rounded bg-[var(--teal-pale)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--teal-strong)]">
               {ref.entityKind === "card" ? "记忆" : ref.entityKind === "action" ? "行动" : ref.entityKind === "deliverable" ? "交付物" : ref.entityKind} · {ref.field || "版本证据"}
             </a>)}
             {sentence.evidence.length > 3 && <span className="px-1 py-0.5 text-[10px] text-[var(--muted)]">+{sentence.evidence.length - 3}</span>}
@@ -305,7 +306,7 @@ export function ProjectStateCard({ projectId, enabled }: { projectId: string; en
       <button type="button" onClick={() => void markRead()} disabled={busy !== null || !unread} className="focus-ring editorial-button text-xs disabled:opacity-50">
         {busy === "read" ? <LoaderCircle size={14} className="animate-spin" /> : <Check size={14} />}{unread ? "已了解" : "已读至最新"}
       </button>
-      <a href="#action-board" className="focus-ring editorial-button-secondary inline-flex text-xs"><ListChecks size={14} />去处理待办</a>
+      <a href={projectHref(projectId,"#action-board")} className="focus-ring editorial-button-secondary inline-flex text-xs"><ListChecks size={14} />去处理待办</a>
     </div>
   </section>;
 }

@@ -5,11 +5,11 @@ import type { Suggestion } from "@/lib/types";
 const styles = { risk: [AlertTriangle, "border-l-[var(--brick)] bg-[var(--brick-pale)] text-[var(--brick)]"], deadline: [CalendarClock, "border-l-[#ad862e] bg-[var(--amber)]/10 text-[var(--amber)]"], action: [Lightbulb, "border-l-[var(--navy)] bg-[var(--paper)] text-[var(--navy)]"], insight: [Sparkles, "border-l-[var(--teal)] bg-[var(--teal-pale)] text-[var(--teal)]"] } as const;
 
 function actionFor(projectId: string, id: string) {
-  if (id === "risks") return { href: `/projects/${projectId}?cardType=risk#knowledge-assets`, label: "查看风险卡片" };
+  if (id === "risks") return { href: `/projects/${projectId}/knowledge?cardType=risk#knowledge-assets`, label: "查看风险卡片" };
   if (id === "deadline") return { href: `/projects/${projectId}/generate?type=competition_outline`, label: "生成材料大纲" };
   if (id === "reflect") return { href: `/projects/${projectId}/generate?type=weekly_report`, label: "生成阶段周报" };
   if (id === "artifact") return { href: `/projects/${projectId}/generate?type=weekly_report`, label: "检验沉淀质量" };
-  return { href: "#capture-box", label: id === "experiment" ? "记录最小实验" : "继续补充记录" };
+  return { href: `/projects/${projectId}/records#capture-box`, label: id === "experiment" ? "记录最小实验" : "继续补充记录" };
 }
 
 export function ProactiveSuggestions({ projectId, suggestions }: { projectId: string; suggestions: Suggestion[] }) {

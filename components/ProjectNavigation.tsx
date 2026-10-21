@@ -11,7 +11,7 @@ export function ProjectNavigation({projectId,missionsEnabled}:{projectId:string;
  return <nav className={styles.navigation} aria-label="项目功能导航">{projectSections.map((item,index)=>{
   if(item.key==="missions"&&!missionsEnabled)return null;
   const href=base+(item.key?`/${item.key}`:"");const Icon=icons[index];
-  return <Link key={item.key} href={href} aria-current={path===href?"page":undefined}><Icon size={17} aria-hidden="true"/><span>{item.label}</span></Link>;
+  return <Link key={item.key} href={href} prefetch={false} aria-current={path===href?"page":undefined}><Icon size={17} aria-hidden="true"/><span>{item.label}</span></Link>;
  })}</nav>;
 }
 /** Old bookmarked root anchors still reach the canonical feature page. */

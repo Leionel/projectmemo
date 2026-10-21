@@ -1,4 +1,5 @@
 import {cache} from "react";
+import {after} from "next/server";
 import {notFound,redirect} from "next/navigation";
 import {db} from "@/lib/db";
 import {getSessionUser,hasProjectAccess} from "@/lib/auth/serverSession";
@@ -20,7 +21,13 @@ export async function requireWorkspaceProject(id:string,section=""){
 }
 export const loadWorkspaceOverview=cache(async(id:string)=>{
  const {user}=await requireWorkspaceProject(id);
- await evaluateProjectContext(id,{},user.id);
+ after(async()=>{
+  try{
+   await evaluateProjectContext(id,{},user.id);
+  }catch(error){
+   console.error("[project-workspace] 项目提醒评估失败",{projectId:id,error});
+  }
+ });
  const [project,actions,interventions,metrics]=await Promise.all([
   db.project.findUniqueOrThrow({where:{id},include:{cards:{where:{archivedAt:null},orderBy:{createdAt:"desc"},select:{id:true,title:true,summary:true,type:true,importance:true,createdAt:true}},artifacts:{orderBy:{createdAt:"desc"},select:{id:true,artifactType:true,createdAt:true}},_count:{select:{captures:true,cards:true,artifacts:true}}}}),
   listActions(id),listInterventions(id,true),getProjectMetrics(id)

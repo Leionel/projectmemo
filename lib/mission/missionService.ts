@@ -5,6 +5,7 @@ import { commandSchema, constraintsSchema, createMissionSchema, defaultBudget, j
 import { assertOwner, commandReplay, event, lock, ownedMission, validateSources } from "./repository";
 import type { Source } from "./contracts";
 import { z } from "zod";
+import { continuationPolicySchema } from "@/lib/types/mission";
 export function requireMissions() { if (!isFeatureEnabled("MISSION_ENABLED", false)) throw new AppError("MISSION_DISABLED", "委托功能尚未启用", 503); }
 export async function createMission(userId: string, input: unknown) {
   requireMissions(); const body=createMissionSchema.parse(input); await assertOwner(userId,body.projectId); const hash=jsonHash(body);
@@ -24,7 +25,7 @@ export async function missionDetail(userId:string,id:string){
   const m=await ownedMission(userId,id);const [steps,approvals,outputs,questions]=await Promise.all([
     db.agentMissionStep.findMany({where:{missionId:id},orderBy:{ordinal:"asc"}}),db.agentMissionApproval.findMany({where:{missionId:id,status:"PENDING"}}),db.agentMissionOutput.findMany({where:{missionId:id},orderBy:{revision:"desc"},take:5}),db.agentMissionEvent.findMany({where:{missionId:id,type:"QUESTION"},orderBy:{seq:"desc"},take:1}),
   ]);
-  return {artifactAdoptionEnabled:isFeatureEnabled("MISSION_ARTIFACT_ADOPTION_ENABLED",false),id:m.id,projectId:m.projectId,goal:m.goal,status:m.status,version:m.version,contextVersion:m.contextVersion,planRevision:m.planRevision,successCriteria:m.successCriteriaJson,constraints:m.constraintsJson,constraintsVersion:m.constraintsVersion,researchScope:m.researchScopeJson,researchScopeVersion:m.researchScopeVersion,pauseReason:m.pauseReason,error:m.lastErrorJson,budget:m.budgetJson,used:m.budgetUsedJson,question:m.status==="WAITING_INPUT"?questions[0]??null:null,steps:steps.map(s=>({id:s.id,ordinal:s.ordinal,toolName:s.toolName,status:s.status,result:s.resultJson})),approvals:approvals.map(a=>({id:a.id,proposal:a.proposalJson,proposalHash:a.proposalHash,expiresAt:a.expiresAt})),outputs};
+  return {semanticCheckEnabled:isFeatureEnabled("MISSION_SEMANTIC_CHECK_ENABLED",false),artifactAdoptionEnabled:isFeatureEnabled("MISSION_ARTIFACT_ADOPTION_ENABLED",false),id:m.id,projectId:m.projectId,goal:m.goal,status:m.status,version:m.version,contextVersion:m.contextVersion,planRevision:m.planRevision,continuationPolicy:m.continuationPolicyJson,autoContinuationEnabled:isFeatureEnabled("MISSION_AUTO_CONTINUATION_ENABLED",false),successCriteria:m.successCriteriaJson,constraints:m.constraintsJson,constraintsVersion:m.constraintsVersion,researchScope:m.researchScopeJson,researchScopeVersion:m.researchScopeVersion,pauseReason:m.pauseReason,error:m.lastErrorJson,budget:m.budgetJson,used:m.budgetUsedJson,question:m.status==="WAITING_INPUT"?questions[0]??null:null,steps:steps.map(s=>({id:s.id,ordinal:s.ordinal,toolName:s.toolName,status:s.status,result:s.resultJson})),approvals:approvals.map(a=>({id:a.id,proposal:a.proposalJson,proposalHash:a.proposalHash,expiresAt:a.expiresAt})),outputs};
 }
 export async function readOutput(userId:string,id:string,outputId:string){await ownedMission(userId,id);const output=await db.agentMissionOutput.findFirst({where:{id:outputId,missionId:id}});if(!output)throw new AppError("OUTPUT_NOT_FOUND","没有找到成果草稿",404);return output;}
 export async function missionEvents(userId:string,id:string,after=0){await ownedMission(userId,id);const events=await db.agentMissionEvent.findMany({where:{missionId:id,seq:{gt:after}},orderBy:{seq:"asc"},take:100});return{events,nextAfterSeq:events.at(-1)?.seq??after};}
@@ -54,7 +55,7 @@ export async function commandMission(userId:string,id:string,action:string,raw:u
     }else if(action==="pause"){if(!["READY","RUNNING","WAITING_INPUT","WAITING_APPROVAL"].includes(m.status))throw new AppError("INVALID_TRANSITION","当前状态无法暂停",409);status=m.status==="RUNNING"?"RUNNING":"PAUSED";}
     else if(action==="cancel")status=m.status==="RUNNING"?"RUNNING":"CANCELLED";
     else throw new AppError("INVALID_COMMAND","不支持此操作",422);
-    const updated=await tx.agentMission.update({where:{id},data:{status,...(action==="pause"?{planJson:json({...m.planJson as object,resumeStatus:m.status==="RUNNING"?"READY":m.status})}:{}),...( ["resume","input","approval","replan"].includes(action)?{planJson:json({...m.planJson as object,resumeStatus:null})}:{}),version:{increment:1},...(action==="input"?{contextVersion:{increment:1}}:{}),pauseRequestedAt:action==="pause"?new Date():null,cancelRequestedAt:action==="cancel"?new Date():m.cancelRequestedAt,pauseReason:action==="pause"?"USER":null}});
+    const updated=await tx.agentMission.update({where:{id},data:{status,...(action==="pause"?{planJson:json({...m.planJson as object,resumeStatus:m.status==="RUNNING"?"READY":m.status})}:{}),...( ["resume","input","approval","replan"].includes(action)?{planJson:json({...m.planJson as object,resumeStatus:null,automaticContinuation:null})}:{}),version:{increment:1},...(action==="input"?{contextVersion:{increment:1}}:{}),pauseRequestedAt:action==="pause"?new Date():null,cancelRequestedAt:action==="cancel"?new Date():m.cancelRequestedAt,pauseReason:action==="pause"?"USER":null}});
     await event(tx,id,action.toUpperCase(),json(body),{id:`cmd:${body.requestId}`,hash});return updated;
   });
 }
@@ -71,4 +72,18 @@ export async function editMission(userId:string,id:string,kind:"constraints"|"re
     const updated=await tx.agentMission.update({where:{id},data:{...(kind==="constraints"?{constraintsJson:json({...body.constraints,llmContextApproved:body.llmContextApproved??old.llmContextApproved}),constraintsVersion:{increment:1}}:{researchScopeJson:json(body.scope),researchScopeVersion:{increment:1}}),contextVersion:{increment:1},version:{increment:1},planRevision:{increment:1},planJson:json({...m.planJson as object,resumeStatus:(m.planJson as {resumeStatus?:string}).resumeStatus==="WAITING_INPUT"?"WAITING_INPUT":"READY"}),status:m.status==="WAITING_APPROVAL"?"READY":m.status}});
     await event(tx,id,kind==="constraints"?"CONSTRAINTS_CHANGED":"RESEARCH_SCOPE_CHANGED",json(body),{id:`cmd:${body.requestId}`,hash});return updated;
   });
+}
+const policyEditSchema=z.object({requestId:z.string().min(1).max(128),expectedVersion:z.number().int().positive(),policy:continuationPolicySchema}).strict();
+export async function editContinuationPolicy(userId:string,id:string,raw:unknown){
+ requireMissions();const body=policyEditSchema.parse(raw),hash=jsonHash(body);
+ return db.$transaction(async tx=>{
+  await lock(tx,id);const m=await ownedMission(userId,id,tx);if(await commandReplay(tx,id,body.requestId,hash))return m;
+  if(m.version!==body.expectedVersion||terminal.includes(m.status))throw new AppError("MISSION_CHANGED","委托已变化，请刷新",409);
+  const active=!!(m.planJson as {automaticContinuation?:unknown}).automaticContinuation;
+  await tx.agentMissionApproval.updateMany({where:{missionId:id,status:{in:["PENDING","APPROVED"]}},data:{status:"EXPIRED"}});
+  await tx.agentMissionStep.updateMany({where:{missionId:id,status:{in:["READY","WAITING_APPROVAL"]}},data:{status:"OBSOLETE"}});
+  const status=active&&m.status==="READY"?"PAUSED":m.status==="WAITING_APPROVAL"?"READY":m.status;
+  const updated=await tx.agentMission.update({where:{id},data:{continuationPolicyJson:json(body.policy),contextVersion:{increment:1},planRevision:{increment:1},version:{increment:1},status,pauseRequestedAt:active&&m.status==="RUNNING"?new Date():m.pauseRequestedAt,planJson:json({...m.planJson as object,automaticContinuation:null,...(status==="PAUSED"?{resumeStatus:"READY"}:{})})}});
+  await event(tx,id,"CONTINUATION_POLICY_CHANGED",{policy:body.policy,source:"USER_CONFIRMED"},{id:`cmd:${body.requestId}`,hash});return updated;
+ });
 }

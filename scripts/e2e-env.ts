@@ -19,5 +19,13 @@ export const E2E_AUTH_STATE_PATH = path.resolve(process.cwd(), "test-results", "
 export const E2E_ENV = {
   DATABASE_URL: E2E_DATABASE_URL,
   LLM_MODE: "mock",
+  MISSION_ENABLED: "true",
+  MISSION_WRITES_ENABLED: "true",
+  MISSION_WEB_ENABLED: "false",
+  MISSION_EVENT_CONTINUATION_ENABLED: "true",
+  MISSION_AUTO_CONTINUATION_ENABLED: "true",
+  MISSION_ARTIFACT_ADOPTION_ENABLED: "true",
+  MISSION_SEMANTIC_CHECK_ENABLED: "true",
+  MISSION_CLAIM_JUDGE_ENABLED: "false",
   NEXT_DIST_DIR: ".next-e2e",
 } as const;

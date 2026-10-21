@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "mode": "OFFLINE_RULES",
+  "fixtureSource": "synthetic_agent_authored_not_human_labels",
+  "calls": 0,
+  "cap": 0,
+  "knownInputTokens": 0,
+  "knownOutputTokens": 0,
+  "unknownCalls": 0,
+  "independentLabels": 0,
+  "disagreements": 0,
+  "metrics": {
+    "supportPrecision": null,
+    "falseSupport": null,
+    "overRefusal": null
+  },
+  "acceptance": "双人标注与真实Judge质量需另行验收；合成规则回归不等于语义支持率",
+  "results": [
+    {
+      "id": "support-paraphrase",
+      "split": "development",
+      "status": "NOT_CHECKED",
+      "mode": "RULE",
+      "fixtureExpectation": "ENTAILS",
+      "independentlyLabeled": false,
+      "agreement": null,
+      "consensus": null
+    },
+    {
+      "id": "numeric",
+      "split": "development",
+      "status": "CONTRADICTS",
+      "mode": "RULE",
+      "fixtureExpectation": "CONTRADICTS",
+      "independentlyLabeled": false,
+      "agreement": null,
+      "consensus": null
+    },
+    {
+      "id": "unit",
+      "split": "development",
+      "status": "NOT_ENOUGH_INFORMATION",
+      "mode": "RULE",
+      "fixtureExpectation": "NOT_ENOUGH_INFORMATION",
+      "independentlyLabeled": false,
+      "agreement": null,
+      "consensus": null
+    },
+    {
+      "id": "condition",
+      "split": "development",
+      "status": "NOT_CHECKED",
+      "mode": "RULE",
+      "fixtureExpectation": "NOT_ENOUGH_INFORMATION",
+      "independentlyLabeled": false,
+      "agreement": null,
+      "consensus": null
+    },
+    {
+      "id": "negation",
+      "split": "development",
+      "status": "CONTRADICTS",
+      "mode": "RULE",
+      "fixtureExpectation": "CONTRADICTS",
+      "independentlyLabeled": false,
+      "agreement": null,
+      "consensus": null
+    },
+    {
+      "id": "origin",
+      "split": "holdout",
+      "status": "CONTRADICTS",
+      "mode": "RULE",
+      "fixtureExpectation": "CONTRADICTS",
+      "independentlyLabeled": false,
+      "agreement": null,
+      "consensus": null
+    },
+    {
+      "id": "exact",
+      "split": "holdout",
+      "status": "NOT_CHECKED",
+      "mode": "RULE",
+      "fixtureExpectation": "ENTAILS",
+      "independentlyLabeled": false,
+      "agreement": null,
+      "consensus": null
+    },
+    {
+      "id": "unsupported",
+      "split": "holdout",
+      "status": "NOT_ENOUGH_INFORMATION",
+      "mode": "RULE",
+      "fixtureExpectation": "NOT_ENOUGH_INFORMATION",
+      "independentlyLabeled": false,
+      "agreement": null,
+      "consensus": null
+    },
+    {
+      "id": "insufficient",
+      "split": "holdout",
+      "status": "NOT_CHECKED",
+      "mode": "RULE",
+      "fixtureExpectation": "NOT_ENOUGH_INFORMATION",
+      "independentlyLabeled": false,
+      "agreement": null,
+      "consensus": null
+    },
+    {
+      "id": "scope",
+      "split": "holdout",
+      "status": "NOT_CHECKED",
+      "mode": "RULE",
+      "fixtureExpectation": "NOT_ENOUGH_INFORMATION",
+      "independentlyLabeled": false,
+      "agreement": null,
+      "consensus": null
+    }
+  ]
+}

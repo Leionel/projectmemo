@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import { gapRequirementsSchema } from "./gaps";
+import { continuationPolicySchema } from "@/lib/types/mission";
 export const successCriterionSchema=z.union([z.enum(["DRAFT_EXISTS","ACTION_CREATED","APPROVAL_CONSUMED","REQUIRED_INPUT_PRESENT"]),z.object({type:z.literal("SOURCE_COUNT"),minimum:z.number().int().min(1).max(40)}).strict()]);
 function canonical(value: unknown): unknown {
   if (value instanceof Date) return value.toISOString();
@@ -18,7 +19,7 @@ export const createMissionSchema = z.object({
   missionConstraints: constraintsSchema.default(() => constraintsSchema.parse({})),
   researchScope: researchScopeSchema.default(() => researchScopeSchema.parse({})),
   llmContextApproved: z.boolean().default(false),
-  continuationPolicy: z.object({ mode: z.literal("MANUAL") }).default({mode:"MANUAL"}),
+  continuationPolicy: continuationPolicySchema.default({mode:"MANUAL"}),
 }).strict();
 export const commandSchema = z.object({ requestId: z.string().min(1).max(128), expectedVersion: z.number().int().positive(), questionId: z.string().optional(), answer: z.string().trim().min(1).max(3000).optional(), decision: z.enum(["APPROVED", "REJECTED"]).optional(), proposalHash: z.string().optional() }).strict();
 export const choiceSchema = z.discriminatedUnion("kind", [

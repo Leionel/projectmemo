@@ -1,0 +1,6 @@
+"use client";
+import {useState} from "react";
+export function MissionMetricInput({projectId,name,unit,period}:{projectId:string;name:string;unit:string;period:string}){
+ const [value,setValue]=useState(""),[busy,setBusy]=useState(false),[message,setMessage]=useState("");
+ return <form className="mt-2 rounded border p-3" onSubmit={e=>{e.preventDefault();setBusy(true);setMessage("");void fetch(`/api/projects/${projectId}/captures`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({requestId:crypto.randomUUID(),sourceType:"结构化实验记录",rawText:JSON.stringify({schemaVersion:1,kind:"PROJECT_METRIC",projectId,subject:"LOCAL_EXPERIMENT",name,unit,period,value:Number(value)})})}).then(async r=>{const data=await r.json();if(!r.ok)throw new Error(data.error?.message??"记录保存失败");setMessage("已保存实验记录。Worker 会检查是否满足当前缺口，确认结果尚不代表项目事实已核验。");}).catch(e=>setMessage(e.message)).finally(()=>setBusy(false));}}><p>补充实验记录：{name} · {period}</p><label>实验指标数值（{unit}）<input className="ml-2 border p-1" type="number" step="any" required value={value} onChange={e=>setValue(e.target.value)}/></label><button disabled={busy||!value.trim()||!Number.isFinite(Number(value))}>保存本项目实验记录</button>{message&&<p role="status">{message}</p>}</form>;
+}

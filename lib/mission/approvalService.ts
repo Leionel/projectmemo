@@ -7,10 +7,11 @@ import { event, validateSources, type Tx } from "./repository";
 import { assertToolConstraints } from "./constraintsService";
 import { actionProposalSchema } from "./tools";
 import { fenced, release, type Lease } from "./runtimeStore";
+import { assertAutomaticTool } from "./automaticPolicy";
 export async function commitApprovedAction(lease:Lease,stepId:string){
  if(!isFeatureEnabled("MISSION_WRITES_ENABLED",false))throw new AppError("WRITES_DISABLED","行动写入已关闭，提案已保留",503);
  return db.$transaction(async tx=>{
-  const m=await fenced(tx,lease);const step=await tx.agentMissionStep.findFirst({where:{id:stepId,missionId:m.id}});
+  const m=await fenced(tx,lease);assertAutomaticTool(m,"create_action",true);const step=await tx.agentMissionStep.findFirst({where:{id:stepId,missionId:m.id}});
   const approval=await tx.agentMissionApproval.findUnique({where:{stepId}});
   if(!step||!approval||approval.missionId!==m.id)throw new AppError("APPROVAL_CHANGED","批准不存在",409);
   if(step.status==="SUCCEEDED"&&approval.status==="CONSUMED")return step.resultJson;

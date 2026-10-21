@@ -1,3 +1,4 @@
+import { assertAutomaticPermission,validateAutomaticEvidence } from "./automaticPolicy";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import type { AgentMission } from "@/lib/generated/prisma/client";
@@ -20,9 +21,10 @@ export async function claimMission(owner:string,id?:string){
 export async function fenced(tx:Tx,lease:Lease,checkContext=true){
  requireMissions();await lock(tx,lease.id);const m=await tx.agentMission.findUniqueOrThrow({where:{id:lease.id}});
  if(m.status!=="RUNNING"||m.leaseOwner!==lease.owner||m.leaseEpoch!==lease.epoch||!m.leaseUntil||m.leaseUntil<=new Date())throw new AppError("LEASE_LOST","执行租约已失效",409);
- await assertOwner(m.ownerUserId,m.projectId,tx);
+ await assertOwner(m.ownerUserId,m.projectId,tx);assertAutomaticPermission(m);
  if(m.cancelRequestedAt||m.pauseRequestedAt)throw new AppError("STOP_REQUESTED","用户请求停止执行",409);
  if(checkContext&&(m.contextVersion!==lease.contextVersion||m.planRevision!==lease.planRevision))throw new AppError("CONTEXT_CHANGED","委托上下文已变化",409);
+ await validateAutomaticEvidence(tx,m);
  return m;
 }
 export async function renew(lease:Lease){requireMissions();const result=await db.agentMission.updateMany({where:{id:lease.id,status:"RUNNING",leaseOwner:lease.owner,leaseEpoch:lease.epoch,leaseUntil:{gt:new Date()}},data:{leaseUntil:new Date(Date.now()+60000)}});return result.count===1;}

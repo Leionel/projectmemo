@@ -25,8 +25,8 @@ export async function readProjectMaterial(projectId: string, id: string, tx: Tx 
 }
 
 /** Durable, bounded cyclic scan. Re-scans overlap rather than trusting callback delivery or commit order. */
-export async function scanWaitingMaterials(limit=8) {
-  if(!isFeatureEnabled("MISSION_ENABLED",false)||!isFeatureEnabled("MISSION_EVENT_CONTINUATION_ENABLED",false))return 0;
+export async function scanWaitingMaterialBatch(limit=8) {
+  if(!isFeatureEnabled("MISSION_ENABLED",false)||!isFeatureEnabled("MISSION_EVENT_CONTINUATION_ENABLED",false))return {signals:0,missionIds:[] as string[]};
   const missions=await db.agentMission.findMany({where:{status:"WAITING_INPUT",cancelRequestedAt:null,pauseRequestedAt:null},orderBy:{updatedAt:"asc"},take:limit});
   let signals=0;
   for(const candidate of missions)await db.$transaction(async tx=>{
@@ -46,5 +46,7 @@ export async function scanWaitingMaterials(limit=8) {
     }
     await tx.agentMission.update({where:{id:m.id},data:{waitStateJson:json({...wait,sourceCursor:{capture:captures.length===20?captures.at(-1)!.id:"",attachment:attachments.length===20?attachments.at(-1)!.id:""}})}});
   });
-  return signals;
+  return {signals,missionIds:missions.map(m=>m.id)};
 }
+
+export async function scanWaitingMaterials(limit=8){return(await scanWaitingMaterialBatch(limit)).signals;}

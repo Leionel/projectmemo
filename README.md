@@ -227,3 +227,10 @@ evidence/               验收回执（按批次分目录，注明数据来源�
 
 
 成果归入需新增 M3 迁移及 `MISSION_ARTIFACT_ADOPTION_ENABLED=true`（默认关闭）。在副本验证迁移后，草稿可预览并确认保存为现有项目周报；来源、块类型与未核验状态随回执保留，后续 Mission 沿同一个 search_memory 检索。确认归入不确认项目事实。关闭开关只停新归入，已有成果审计继续可读；人工另存的版本不继承原映射。已归入 Mission/Output 的单独物理删除受外键保护，项目整体授权删除沿原入口。此轮未迁移开发数据库。
+
+
+R3.3 Target：`MISSION_AUTO_CONTINUATION_ENABLED=true` 允许已明确授权 `LOW_RISK_READ_ANALYZE` 的委托在结构化指标缺口满足后接续。用户可在委托面板授权/撤销，并通过友好的数值表单使用已有 Capture 保存实验记录。仅指标名、单位、时间和项目完全匹配，且额外要求均满足、没有不同值/时态冲突、权限与预算有效时进入 READY；普通文字与复杂语义问题保留人审。自动片段只读取/分析/保存私有草稿；新问题或 Action 提案会停止，Action 创建和成果归入仍需用户确认。关闭开关也会拦截已入队的自动片段。扫描与接续共享一批 ID，避免任务被两次调度互相挤出。
+
+`MISSION_SEMANTIC_CHECK_ENABLED=true` 启用逐句结构/数值/单位/否定检查；额外的 `MISSION_CLAIM_JUDGE_ENABLED=true` 才允许配置的云模型做来源支持判断，仍需该 Mission 的上下文许可。Judge 每个 Output 最多 3 次、复用 Mission 模型预算与 AgentRun 回执。来源失效、引用不足、调用失败或预算不足均保留未核验/证据不足；引文逐字相符不自动标为语义支持。关闭语义开关后新 Output 不显示支持，历史快照仍保存。核验不确认项目事实或现实效果。
+
+离线准备：`npm.cmd exec tsx -- scripts/eval-claim-checks.ts` 只运行合成规则集，不调用付费模型。双人标签留空时不计算支持精确率；`--live --max-calls=N` 是后续在真实调用获授权后使用的显式上限入口，本次未执行。Target 工程接入与真实 Judge/双人标注质量验收分别记录。

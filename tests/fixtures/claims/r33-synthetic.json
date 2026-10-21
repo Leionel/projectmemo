@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "source": "synthetic_agent_authored_not_human_labels",
+  "items": [
+    {
+      "id": "support-paraphrase",
+      "split": "development",
+      "claim": "公开模型在数据集A上的Dice为0.85。",
+      "evidence": "在公开数据集A上，该模型报告Dice为0.85。",
+      "kind": "EXTERNAL_REFERENCE",
+      "expectedByFixtureAuthor": "ENTAILS",
+      "labelA": null,
+      "labelB": null,
+      "reviewerA": null,
+      "reviewerB": null
+    },
+    {
+      "id": "numeric",
+      "split": "development",
+      "claim": "公开模型Dice为0.95。",
+      "evidence": "公开模型Dice为0.85。",
+      "kind": "EXTERNAL_REFERENCE",
+      "expectedByFixtureAuthor": "CONTRADICTS",
+      "labelA": null,
+      "labelB": null,
+      "reviewerA": null,
+      "reviewerB": null
+    },
+    {
+      "id": "unit",
+      "split": "development",
+      "claim": "延迟为10ms。",
+      "evidence": "延迟为10秒。",
+      "kind": "EXTERNAL_REFERENCE",
+      "expectedByFixtureAuthor": "NOT_ENOUGH_INFORMATION",
+      "labelA": null,
+      "labelB": null,
+      "reviewerA": null,
+      "reviewerB": null
+    },
+    {
+      "id": "condition",
+      "split": "development",
+      "claim": "公开模型在任何数据集Dice都为0.85。",
+      "evidence": "仅在公开数据集A，模型报告Dice为0.85。",
+      "kind": "EXTERNAL_REFERENCE",
+      "expectedByFixtureAuthor": "NOT_ENOUGH_INFORMATION",
+      "labelA": null,
+      "labelB": null,
+      "reviewerA": null,
+      "reviewerB": null
+    },
+    {
+      "id": "negation",
+      "split": "development",
+      "claim": "实验显著改善。",
+      "evidence": "实验未显著改善。",
+      "kind": "EXTERNAL_REFERENCE",
+      "expectedByFixtureAuthor": "CONTRADICTS",
+      "labelA": null,
+      "labelB": null,
+      "reviewerA": null,
+      "reviewerB": null
+    },
+    {
+      "id": "origin",
+      "split": "holdout",
+      "claim": "本项目实测达到0.85。",
+      "evidence": "公开模型Dice为0.85。",
+      "kind": "PROJECT_OBSERVATION",
+      "expectedByFixtureAuthor": "CONTRADICTS",
+      "labelA": null,
+      "labelB": null,
+      "reviewerA": null,
+      "reviewerB": null
+    },
+    {
+      "id": "exact",
+      "split": "holdout",
+      "claim": "公开模型Dice为0.85。",
+      "evidence": "公开模型Dice为0.85。",
+      "kind": "EXTERNAL_REFERENCE",
+      "expectedByFixtureAuthor": "ENTAILS",
+      "labelA": null,
+      "labelB": null,
+      "reviewerA": null,
+      "reviewerB": null
+    },
+    {
+      "id": "unsupported",
+      "split": "holdout",
+      "claim": "模型准确率为0.99。",
+      "evidence": "仅提供模型训练方法，未报告准确率。",
+      "kind": "EXTERNAL_REFERENCE",
+      "expectedByFixtureAuthor": "NOT_ENOUGH_INFORMATION",
+      "labelA": null,
+      "labelB": null,
+      "reviewerA": null,
+      "reviewerB": null
+    },
+    {
+      "id": "insufficient",
+      "split": "holdout",
+      "claim": "该模型适用于所有任务。",
+      "evidence": "该模型在公开任务A上完成测试。",
+      "kind": "INFERENCE",
+      "expectedByFixtureAuthor": "NOT_ENOUGH_INFORMATION",
+      "labelA": null,
+      "labelB": null,
+      "reviewerA": null,
+      "reviewerB": null
+    },
+    {
+      "id": "scope",
+      "split": "holdout",
+      "claim": "模型在数据集B上取得0.85。",
+      "evidence": "模型在数据集A上取得0.85。",
+      "kind": "EXTERNAL_REFERENCE",
+      "expectedByFixtureAuthor": "NOT_ENOUGH_INFORMATION",
+      "labelA": null,
+      "labelB": null,
+      "reviewerA": null,
+      "reviewerB": null
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import { z } from "zod";
+export const continuationPolicySchema=z.object({mode:z.enum(["MANUAL","LOW_RISK_READ_ANALYZE"])}).strict();
 export const constraintsSchema = z.object({
   availableMinutes: z.number().int().positive().max(100000).nullable().default(null),
   resourceLimits: z.array(z.string().min(1).max(160)).max(12).default([]),

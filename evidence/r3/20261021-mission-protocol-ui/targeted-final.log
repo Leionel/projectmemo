@@ -1,0 +1,12 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/missionModelProtocol.test.ts tests/missionRuntime.test.ts tests/missionResearch.test.ts tests/missionPanel.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-r3-release-merge
+
+
+ Test Files  4 passed (4)
+      Tests  81 passed (81)
+   Start at  16:38:24
+   Duration  17.65s (transform 834ms, setup 0ms, import 3.65s, tests 11.93s, environment 902ms)

@@ -6,6 +6,8 @@ const isolated=await vi.hoisted(async()=>{
 import {db} from "@/lib/db";
 import {createMission,commandMission,missionDetail,editMission,missionEvents} from "@/lib/mission/missionService";
 import { AppError } from "@/lib/api";
+import { ModelProtocolError, protocolDiagnostic } from "@/lib/mission/modelProtocol";
+import { buildContext } from "@/lib/mission/contextBuilder";
 import {runMissionSlice} from "@/lib/mission/runner";
 import {claimMission,fenced} from "@/lib/mission/runtimeStore";
 import {json,usageOf,type Choice} from "@/lib/mission/contracts";
@@ -52,6 +54,52 @@ describe("R3.1 持久执行与原子审批",()=>{
  it("撤权的最早任务暂停，后续合法任务仍可领取",async()=>{await db.agentMission.updateMany({where:{status:'READY'},data:{status:'PAUSED'}});const a=await fixture(),b=await fixture();await db.projectMembership.delete({where:{userId_projectId:{userId,projectId:a.p.id}}});const next=await claimMission('queue-recovery');expect(next!.id).toBe(b.m.id);expect((await db.agentMission.findUniqueOrThrow({where:{id:a.m.id}})).status).toBe('PAUSED');await db.agentMission.update({where:{id:b.m.id},data:{status:'CANCELLED',executionSlot:null}});});
 
  it("原生协议错误只修复一次，仍失败则暂停且预算累计",async()=>{const {m}=await fixture();const bad=vi.fn(async()=>{throw new AppError('MODEL_PROTOCOL_ERROR','并行调用需修复',409);});await runMissionSlice({id:m.id,provider:bad});expect((await missionDetail(userId,m.id)).status).toBe('READY');await runMissionSlice({id:m.id,provider:bad});expect((await missionDetail(userId,m.id)).status).toBe('PAUSED');expect(bad).toHaveBeenCalledTimes(2);expect(usageOf((await db.agentMission.findUniqueOrThrow({where:{id:m.id}})).budgetUsedJson).models).toBe(2);});
+
+ it("失败响应结算用量并给出纠错；截断加长仍受总预算约束",async()=>{
+  const {m}=await fixture();
+  const bad=async()=>{throw new ModelProtocolError(protocolDiagnostic("TRUNCATED","length",25),{provider:"deepseek",model:"fixture",protocol:"JSON_CHOICE",usage:{inputTokens:123,outputTokens:1000}});};
+  await runMissionSlice({id:m.id,provider:bad});
+  let row=await db.agentMission.findUniqueOrThrow({where:{id:m.id}});
+  expect(usageOf(row.budgetUsedJson)).toMatchObject({models:1,inputTokens:123,outputTokens:1000,unknownCalls:0,reservedOutputTokens:1000});
+  const context=JSON.parse(await buildContext(row));
+  expect(context.outputTokenLimit).toBe(2000);
+  expect(context.recentInputs.at(-1).payload).toMatchObject({reason:"TRUNCATED",repairHint:expect.stringContaining("压缩草稿")});
+  await db.agentMission.update({where:{id:m.id},data:{budgetJson:json({...row.budgetJson as object,reservedOutputTokens:2500})}});
+  const spy=vi.fn(bad);await runMissionSlice({id:m.id,provider:spy});expect(spy).not.toHaveBeenCalled();
+  row=await db.agentMission.findUniqueOrThrow({where:{id:m.id}});expect(row.pauseReason).toBe("BUDGET");
+  expect(usageOf(row.budgetUsedJson).models).toBe(1);
+ });
+ it("成功进展和人工继续后各允许一次纠错，不重做已有步骤",async()=>{
+  const {m}=await fixture();const bad=async()=>{throw new ModelProtocolError(protocolDiagnostic("INVALID_JSON","stop",10),{provider:"fixture",model:"fixture",protocol:"JSON_CHOICE",usage:{inputTokens:11,outputTokens:4}});};
+  await runMissionSlice({id:m.id,provider:bad});await slice(m.id,tool("inspect_project",{}));
+  expect((await missionDetail(userId,m.id)).error).toBeNull();
+  await runMissionSlice({id:m.id,provider:bad});expect((await missionDetail(userId,m.id)).status).toBe("READY");
+  await runMissionSlice({id:m.id,provider:bad});let d=await missionDetail(userId,m.id);expect(d.status).toBe("PAUSED");
+  await commandMission(userId,m.id,"resume",{requestId:"resume-fixed-protocol",expectedVersion:d.version});
+  await runMissionSlice({id:m.id,provider:bad});d=await missionDetail(userId,m.id);expect(d.status).toBe("READY");
+  await slice(m.id,draft());d=await missionDetail(userId,m.id);expect(d.outputs).toHaveLength(1);
+  expect(d.steps.map(s=>s.toolName)).toEqual(["inspect_project","save_mission_output"]);
+  expect((await missionEvents(userId,m.id)).events.filter(e=>e.type==="MODEL_PROTOCOL_ERROR")).toHaveLength(4);
+ });
+ it("模拟 HTTP 的截断→纠错→保存→完成，记录来源模型与失败用量，不落原始回复",async()=>{
+  const {m}=await fixture();await db.agentMission.update({where:{id:m.id},data:{constraintsJson:json({...m.constraintsJson as object,llmContextApproved:true})}});
+  vi.stubEnv("LLM_MODE","openai-compatible");vi.stubEnv("LLM_PROVIDER","deepseek");vi.stubEnv("LLM_API_KEY","test-key");vi.stubEnv("MISSION_MODEL_PROTOCOL","json");
+  let ordinal=0;const calls:Array<Record<string,unknown>>=[];
+  vi.stubGlobal("fetch",vi.fn(async(_url,init)=>{
+   const body=JSON.parse(init.body);calls.push(body);ordinal++;
+   const value=ordinal===1?'private-raw-response-secret':ordinal===2?JSON.stringify(draft()):JSON.stringify({kind:"finish",outputId:(await missionDetail(userId,m.id)).outputs[0].id});
+   return new Response(JSON.stringify({choices:[{finish_reason:ordinal===1?"length":"stop",message:{content:value}}],usage:{prompt_tokens:100,completion_tokens:ordinal===1?1000:50}}));
+  }));
+  try{
+   await runMissionSlice({id:m.id});await runMissionSlice({id:m.id});await runMissionSlice({id:m.id});
+   const d=await missionDetail(userId,m.id);expect(d.status).toBe("SUCCEEDED");expect(d.outputs).toHaveLength(1);expect(d.steps).toHaveLength(1);
+   expect(d.used).toMatchObject({models:3,inputTokens:300,outputTokens:1100,unknownCalls:0,reservedOutputTokens:4000});
+   expect(calls.map(c=>c.max_tokens)).toEqual([1000,2000,1000]);
+   const runs=await db.agentRun.findMany({where:{projectId:m.projectId}});expect(runs.find(r=>r.status==="FAILED")?.provider).toBe("deepseek");
+   expect(JSON.stringify(runs)).not.toContain("private-raw-response-secret");
+   expect(JSON.stringify((await missionEvents(userId,m.id)).events)).not.toContain("private-raw-response-secret");
+  }finally{vi.unstubAllGlobals();vi.unstubAllEnvs();}
+ });
 
  it.each(["批准前", "提交前"])("行动读回后来源在%s取消，不得按旧依据创建后续行动",async(changeAt)=>{
   const {p,m}=await fixture();

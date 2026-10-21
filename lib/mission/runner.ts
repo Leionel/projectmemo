@@ -18,6 +18,8 @@ import { projectTools, sourcesFrom, toolInputHash, type ToolSet } from "./tools"
 import { assertToolConstraints } from "./constraintsService";
 import { saveOutput } from "./outputService";
 import { commitApprovedAction, obsoleteApprovals } from "./approvalService";
+import { decisionTokenLimit, ModelProtocolError } from "./modelProtocol";
+import { Prisma } from "@/lib/generated/prisma/client";
 export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;judge?:ClaimJudge}={}){
  const m=await claimMission(options.workerId??randomUUID(),options.id);if(!m)return false;
  const lease:Lease={id:m.id,owner:m.leaseOwner!,epoch:m.leaseEpoch,contextVersion:m.contextVersion,planRevision:m.planRevision};
@@ -33,10 +35,15 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    const constraints=m.constraintsJson as {llmContextApproved?:boolean;costCeiling?:{amount:number}|null};
    if(!options.provider&&!constraints.llmContextApproved)throw new AppError("LLM_CONTEXT_NOT_APPROVED","请先确认云模型使用本委托上下文的范围",409);
    if(!options.provider&&constraints.costCeiling)throw new AppError("COST_POLICY_REQUIRED","金额上限尚无法自动换算，需确认调用额度或使用不计费模式",409);
-   await reserve(lease,"models");const started=Date.now();const decision=await (options.provider??chooseNext)(await buildContext(m),tools);
+   const context=await buildContext(m);await reserve(lease,"models",undefined,decisionTokenLimit(m.lastErrorJson));const started=Date.now();
+   const decision=await (async()=>{try{return await (options.provider??chooseNext)(context,tools);}catch(error){
+    if(error instanceof ModelProtocolError)await settleUsage(lease,"models",Date.now()-started,error.metadata.usage);
+    throw error;
+   }})();
    await settleUsage(lease,"models",Date.now()-started,decision.usage);const choice=choiceSchema.parse(decision.choice);
    step=await db.$transaction(async tx=>{
     const current=await fenced(tx,lease);
+    await tx.agentMission.update({where:{id:m.id},data:{lastErrorJson:Prisma.DbNull}});
     const run=await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"SUCCESS",provider:decision.provider,trace:json({missionId:m.id,model:decision.model,protocol:decision.protocol,usage:decision.usage}),resultJson:json({kind:choice.kind}),durationMs:Date.now()-started}});
     if(choice.kind==="ask"){
      const requirements=gapRequirementsSchema.parse(choice.requirements??{});const gapId=randomUUID();
@@ -106,10 +113,13 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    if(retry){await tx.agentMissionStep.update({where:{id:active!.id},data:{attempts:{increment:1}}});const requested=(error as AppError).details as {retryAfterMs?:number}|undefined;const delay=Math.min(30000,Math.max(1000*2**(active!.attempts-1),requested?.retryAfterMs??0));await tx.agentMission.update({where:{id:m.id},data:{nextAttemptAt:new Date(Date.now()+delay)}});}
    if(activeStepId&&!stop&&!retry)await tx.agentMissionStep.updateMany({where:{id:activeStepId,status:"RUNNING"},data:{status:code==="CONTEXT_CHANGED"?"OBSOLETE":"FAILED"}});
    if(code==="SOURCE_CHANGED"||code==="APPROVAL_CHANGED"||code==="CONTEXT_CHANGED"){await obsoleteApprovals(tx,m.id);await tx.agentMission.update({where:{id:m.id},data:{planRevision:{increment:1}}});}
-   await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"FAILED",provider:options.provider?"TEST_FIXTURE":"mission-adapter",trace:{missionId:m.id,code},fallbackReason:code}});
-   const failures=code==="MODEL_PROTOCOL_ERROR"?await tx.agentMissionEvent.count({where:{missionId:m.id,type:"MODEL_PROTOCOL_ERROR"}}):0;
-   await tx.agentMission.update({where:{id:m.id},data:{lastErrorJson:{code,message:error instanceof AppError?error.message:"委托执行失败，请检查服务配置后继续"}}});
-   await event(tx,m.id,code==="MODEL_PROTOCOL_ERROR"?code:"EXECUTION_STOPPED",{code});
+   const diagnostic=error instanceof ModelProtocolError?error.diagnostic:undefined;
+   const metadata=error instanceof ModelProtocolError?error.metadata:undefined;
+   await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"FAILED",provider:options.provider?"TEST_FIXTURE":metadata?.provider??"mission-adapter",trace:json({missionId:m.id,code,...metadata,diagnostic}),fallbackReason:code}});
+   const boundary=code==="MODEL_PROTOCOL_ERROR"?await tx.agentMissionEvent.findFirst({where:{missionId:m.id,type:{in:["TOOL_FINISHED","QUESTION","CRITERIA_CHECKED","RESUME","INPUT"]}},orderBy:{seq:"desc"}}):null;
+   const failures=code==="MODEL_PROTOCOL_ERROR"?await tx.agentMissionEvent.count({where:{missionId:m.id,type:"MODEL_PROTOCOL_ERROR",seq:{gt:boundary?.seq??0}}}):0;
+   await tx.agentMission.update({where:{id:m.id},data:{lastErrorJson:json({code,message:error instanceof AppError?error.message:code==="MODEL_PROTOCOL_ERROR"?"模型回复格式不符合要求，未执行新步骤":"委托执行失败，请检查服务配置后继续",diagnostic})}});
+   await event(tx,m.id,code==="MODEL_PROTOCOL_ERROR"?code:"EXECUTION_STOPPED",{code,...diagnostic});
    await release(tx,current,current.cancelRequestedAt?"CANCELLED":retry?"READY":code==="MODEL_PROTOCOL_ERROR"&&failures<1?"READY":"PAUSED",stop?"USER":code==="BUDGET_EXHAUSTED"?"BUDGET":"REVIEW_REQUIRED");
   });return true;
  }finally{clearInterval(heartbeat);}

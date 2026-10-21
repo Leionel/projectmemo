@@ -1,0 +1,20 @@
+{
+  "base": "ff7c7af",
+  "data": "isolated mock/HTTP fixtures",
+  "tests": {
+    "files": 67,
+    "passed": 592
+  },
+  "targeted": 81,
+  "e2e": 11,
+  "independent_review_regressions": 4,
+  "tsc": true,
+  "lint": true,
+  "production_build": true,
+  "live_model_tested": false,
+  "ecs_deployed": false,
+  "screenshots": [
+    "desktop.png",
+    "mobile.png"
+  ]
+}

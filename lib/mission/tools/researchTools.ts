@@ -6,6 +6,7 @@ import {jsonHash,json,type Source} from "../contracts";
 import {event} from "../repository";
 import {fenced,reserve,settleUsage,type Lease} from "../runtimeStore";
 import {chooseNext,type DecisionProvider} from "../modelAdapter";
+import {ModelProtocolError} from "../modelProtocol";
 import type {ToolSet} from "../tools";
 import {researchScopeSchema} from "@/lib/types/mission";
 import {deepSeekResearch} from "@/lib/research/searchProvider";
@@ -27,7 +28,7 @@ export function researchTools(lease:Lease,deps:ResearchDependencies={}):ToolSet{
   if(input.scopeRevision!==m.researchScopeVersion)throw new AppError("SCOPE_CHANGED","公开研究授权已变化",409);
   const publicSources=scope.allowedCategories.includes("PUBLIC_SOURCE")?await db.externalSource.findMany({where:{missionId:actor.missionId},take:8,orderBy:{fetchedAt:"desc"},select:{title:true,excerptJson:true}}):[];
   // This decision receives no goal, private messages, project cards, constraints or internal measurements.
-  await reserve(lease,"models");const start=Date.now();const decision=await (deps.queryProvider??chooseNext)(JSON.stringify({goal:"仅为以下已批准公开主题形成检索查询；从公开资料自主选择关键词，保留至少一个公开概念。",scope,focus:input.focus,publicSources:publicSources.map(s=>({title:s.title,text:(s.excerptJson as {text?:string}).text?.slice(0,800)}))}),queryTool);
+  await reserve(lease,"models");const start=Date.now();const decision=await (async()=>{try{return await (deps.queryProvider??chooseNext)(JSON.stringify({goal:"仅为以下已批准公开主题形成检索查询；从公开资料自主选择关键词，保留至少一个公开概念。必须调用 submit_public_query 工具。",scope,focus:input.focus,publicSources:publicSources.map(s=>({title:s.title,text:(s.excerptJson as {text?:string}).text?.slice(0,800)}))}),queryTool);}catch(error){if(error instanceof ModelProtocolError)await settleUsage(lease,"models",Date.now()-start,error.metadata.usage);throw error;}})();
   await settleUsage(lease,"models",Date.now()-start,decision.usage);
   if(decision.choice.kind!=="tool"||decision.choice.tool!=="submit_public_query")throw new AppError("QUERY_NOT_GENERATED","未生成有效的公开研究查询",409);
   const suggested=(queryTool.submit_public_query.schema.parse(decision.choice.args) as {query:string}).query;

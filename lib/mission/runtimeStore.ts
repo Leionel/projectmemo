@@ -28,15 +28,15 @@ export async function fenced(tx:Tx,lease:Lease,checkContext=true){
  return m;
 }
 export async function renew(lease:Lease){requireMissions();const result=await db.agentMission.updateMany({where:{id:lease.id,status:"RUNNING",leaseOwner:lease.owner,leaseEpoch:lease.epoch,leaseUntil:{gt:new Date()}},data:{leaseUntil:new Date(Date.now()+60000)}});return result.count===1;}
-export async function reserve(lease:Lease,kind:"models"|"tools",tool?:string){return db.$transaction(async tx=>{
+export async function reserve(lease:Lease,kind:"models"|"tools",tool?:string,outputTokens=1000){return db.$transaction(async tx=>{
  const m=await fenced(tx,lease);const used=usageOf(m.budgetUsedJson),limits={...defaultBudget,...m.budgetJson as object};
- used[kind]++;if(tool==="web_search")used.searches++;if(tool==="web_fetch")used.fetches++;used.activeMs+=20000;if(kind==="models"){used.reservedOutputTokens+=1000;used.unknownCalls++;}
+ used[kind]++;if(tool==="web_search")used.searches++;if(tool==="web_fetch")used.fetches++;used.activeMs+=20000;if(kind==="models"){used.reservedOutputTokens+=outputTokens;used.unknownCalls++;}
  if(Object.entries(limits).some(([key,value])=>used[key as keyof typeof used]>value))throw new AppError("BUDGET_EXHAUSTED","委托预算已用完，请检查后处理",409);
  await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json(used)}});return used;
  });}
 export async function settleUsage(lease:Lease,kind:"models"|"tools",durationMs:number,tokens?:{inputTokens:number|null;outputTokens:number|null}){return db.$transaction(async tx=>{
  const m=await fenced(tx,lease,false);const used=usageOf(m.budgetUsedJson);used.activeMs=Math.max(0,used.activeMs-20000)+durationMs;
- if(kind==="models"&&tokens&&tokens.inputTokens!==null&&tokens.outputTokens!==null){used.inputTokens+=tokens.inputTokens;used.outputTokens+=tokens.outputTokens;used.unknownCalls=Math.max(0,used.unknownCalls-1);}
+ if(kind==="models"&&tokens){if(tokens.inputTokens!==null)used.inputTokens+=tokens.inputTokens;if(tokens.outputTokens!==null)used.outputTokens+=tokens.outputTokens;if(tokens.inputTokens!==null&&tokens.outputTokens!==null)used.unknownCalls=Math.max(0,used.unknownCalls-1);}
  await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json(used)}});
  });}
 export async function release(tx:Tx,m:AgentMission,status:string,reason?:string){return tx.agentMission.update({where:{id:m.id},data:{status,pauseReason:reason??null,...(status==="PAUSED"&&reason!=="USER"?{planJson:json({...m.planJson as object,resumeStatus:"READY"})}:{}),executionSlot:null,leaseOwner:null,leaseUntil:null,version:{increment:1},...(status==="SUCCEEDED"||status==="CANCELLED"?{finishedAt:new Date()}:{})}});}

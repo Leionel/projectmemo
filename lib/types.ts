@@ -234,6 +234,7 @@ export type ArtifactClaimsAuditStatus =
   | "NONE";
 
 export interface ArtifactAuditResponse {
+  missionProvenance?: import("./types/missionArtifacts").MissionArtifactAudit;
   artifactId: string;
   artifactType: ArtifactTypeValue;
   generatedAt: string;

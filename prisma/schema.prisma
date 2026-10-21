@@ -90,6 +90,7 @@ enum CardRelationType {
 }
 
 model Project {
+  missionArtifactReceipts MissionArtifactReceipt[]
   missions AgentMission[]
   id          String              @id @default(cuid())
   title       String
@@ -212,6 +213,7 @@ model ActionRequirement {
 }
 
 model GeneratedArtifact {
+  missionReceipt MissionArtifactReceipt?
   id           String       @id @default(cuid())
   projectId    String
   artifactType ArtifactType
@@ -847,6 +849,7 @@ model ProjectMembership {
 }
 
 model AgentMission {
+ artifactReceipts MissionArtifactReceipt[]
  id String @id @default(cuid())
  ownerUserId String
  projectId String
@@ -949,6 +952,7 @@ model AgentMissionApproval {
  step AgentMissionStep @relation(fields:[stepId], references:[id], onDelete:Cascade)
 }
 model AgentMissionOutput {
+ artifactReceipts MissionArtifactReceipt[]
  id String @id @default(cuid())
  missionId String
  stepId String? @unique
@@ -980,4 +984,29 @@ model ExternalSource {
  mission AgentMission @relation(fields:[missionId], references:[id], onDelete:Cascade)
  @@unique([missionId,requestedUrl,retrievalMode,normalizedContentHash])
  @@index([missionId,fetchedAt])
+}
+
+model MissionArtifactReceipt {
+ id String @id @default(cuid())
+ projectId String
+ missionId String
+ outputId String
+ outputRevision Int
+ outputHash String
+ artifactId String @unique
+ artifactType String
+ sourceManifestJson Json
+ blockMapJson Json
+ verificationSnapshotJson Json
+ createdByUserId String
+ requestId String
+ payloadHash String
+ createdAt DateTime @default(now())
+ project Project @relation(fields:[projectId], references:[id], onDelete:Cascade)
+ mission AgentMission @relation(fields:[missionId], references:[id], onDelete:NoAction)
+ output AgentMissionOutput @relation(fields:[outputId], references:[id], onDelete:NoAction)
+ artifact GeneratedArtifact @relation(fields:[artifactId], references:[id], onDelete:NoAction)
+ @@unique([outputId,artifactType])
+ @@unique([createdByUserId,requestId])
+ @@index([projectId,createdAt])
 }

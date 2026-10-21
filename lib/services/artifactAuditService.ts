@@ -1,3 +1,4 @@
+import { missionArtifactAudit } from "@/lib/mission/artifactProvenanceService";
 import { AppError } from "@/lib/api";
 import { db } from "@/lib/db";
 import { getTemporalSearchStates } from "@/lib/services/temporalLedgerService";
@@ -184,6 +185,8 @@ export async function getArtifactAudit(projectId: string, artifactId: string): P
   }
 
   const recheckedAt = new Date();
+  const missionProvenance=await missionArtifactAudit(projectId,artifactId);
+  if(missionProvenance)return {artifactId:artifact.id,artifactType:artifact.artifactType as ArtifactTypeValue,generatedAt:artifact.createdAt.toISOString(),untraceable:false,message:"本成果经用户确认归入项目，来源按块保存；确认归入不等于结论已证实。",generationRefs:[],recheck:[],claimsStatus:"NONE",claims:[],recheckedAt:recheckedAt.toISOString(),missionProvenance};
   const refs = parseStoredSourceRefs(artifact.sourceRefs);
   const storedClaims = parseStoredClaims(artifact.claims);
 

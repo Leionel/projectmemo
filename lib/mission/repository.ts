@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import { json, jsonHash, type Source } from "./contracts";
+import { artifactSourceHash } from "./artifactProvenanceService";
 import { readProjectMaterial } from "./sourceSignals";
 export type Tx = Prisma.TransactionClient;
 export async function assertOwner(userId: string, projectId: string, tx: Tx = db) {
@@ -19,6 +20,7 @@ export async function event(tx: Tx, id: string, type: string, payload: unknown, 
 }
 export async function lock(tx: Tx, id: string) { await tx.agentMission.updateMany({ where: { id }, data: { version: { increment: 0 } } }); }
 export async function sourceHash(projectId: string, id: string, tx: Tx = db): Promise<string | null> {
+  if(id.startsWith("artifact:"))return artifactSourceHash(projectId,id.slice(9),tx);
   if(id.startsWith("capture:")||id.startsWith("attachment:"))return (await readProjectMaterial(projectId,id,tx))?.hash??null;
   if (id.startsWith("action:")) {
     const action = await tx.actionItem.findFirst({where:{id:id.slice(7),projectId,isSimulated:false}});

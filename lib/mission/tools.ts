@@ -1,3 +1,4 @@
+import { searchAdoptedArtifacts } from "./artifactProvenanceService";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
@@ -25,11 +26,13 @@ export const projectTools:ToolSet={
    const states=await getTemporalSearchStates(actor.projectId,results.map(c=>c.cardId));
    const sources:Source[]=[];
    for(const c of results){const card=await db.knowledgeCard.findFirst({where:{id:c.cardId,projectId:actor.projectId}});if(!card||card.title!==c.title||card.summary!==c.summary)throw new AppError("SOURCE_CHANGED","记忆刚发生变化，请重新检索",409);const hash=await sourceHash(actor.projectId,`card:${c.cardId}`);sources.push({id:`card:${c.cardId}`,kind:"PROJECT",entityType:"CARD",revision:hash!,hash:hash!,text:`${c.title}\n${c.summary}`,observedAt:new Date().toISOString()});}
-   return{data:results.map(c=>({...c,temporal:states.get(c.cardId)?.topLevelState??"UNKNOWN"})),sources};
+   const artifacts=await searchAdoptedArtifacts(actor.projectId,(raw as {query:string}).query,Math.min(3,(raw as {limit:number}).limit));
+   const remaining=Math.max(0,(raw as {limit:number}).limit-artifacts.results.length);
+   return{data:[...results.slice(0,remaining).map(c=>({...c,temporal:states.get(c.cardId)?.topLevelState??"UNKNOWN"})),...artifacts.results],sources:[...sources.slice(0,remaining),...artifacts.sources]};
  }},
  save_mission_output:{description:"保存委托私有 Output 新版本。观察须引用来源，推断标明；不发布项目事实。",schema:outputSchema,effects:readEffects,run:async(_actor,input)=>({data:input,sources:[]})},
  propose_action:{description:"提出待办并等待用户批准，不创建行动。",schema:actionProposalSchema,effects:readEffects,run:async(_actor,input)=>({data:input,sources:[]})},
- inspect_action:{description:"读回本项目真实行动；TODO 不代表现实完成。",schema:z.object({actionId:z.string().min(1)}).strict(),effects:readEffects,run:async(actor,raw)=>{const action=await db.actionItem.findFirst({where:{id:(raw as {actionId:string}).actionId,projectId:actor.projectId,isSimulated:false}});if(!action)throw new AppError("ACTION_NOT_FOUND","没有找到可访问的行动",404);const hash=await sourceHash(actor.projectId,`action:${action.id}`);if(hash!==jsonHash(action))throw new AppError("SOURCE_CHANGED","行动刚发生变化，请重新读取",409);return{data:action,sources:[{id:`action:${action.id}`,kind:"PROJECT",entityType:"ACTION",revision:hash!,hash:hash!,text:JSON.stringify(action),observedAt:new Date().toISOString()}]};}},
+ inspect_action:{description:"读回本项目真实行动；TODO 不代表现实完成。",schema:z.object({actionId:z.string().min(1)}).strict(),effects:readEffects,run:async(actor,raw)=>{const action=await db.actionItem.findFirst({where:{id:(raw as {actionId:string}).actionId,projectId:actor.projectId,isSimulated:false}});if(!action)throw new AppError("ACTION_NOT_FOUND","没有找到可访问的行动",404);const hash=await sourceHash(actor.projectId,`action:${action.id}`);if(hash!==jsonHash(action))throw new AppError("SOURCE_CHANGED","行动刚发生变化，请重新读取",409);return{data:{...action,actionId:action.id},sources:[{id:`action:${action.id}`,kind:"PROJECT",entityType:"ACTION",revision:hash!,hash:hash!,text:JSON.stringify(action),observedAt:new Date().toISOString()}]};}},
 };
 export function sourcesFrom(results:unknown[]):Source[]{const all=results.flatMap(v=>Array.isArray((v as ToolResult|null)?.sources)?(v as ToolResult).sources:[]);return [...new Map(all.map(s=>[s.kind==="EXTERNAL"?s.identityKey??s.id:s.id,s])).values()];}
 export function toolInputHash(tool:string,args:unknown,sources:Source[]){return jsonHash({tool,args,sources:sources.map(s=>({id:s.id,hash:s.hash}))});}

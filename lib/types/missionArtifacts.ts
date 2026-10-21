@@ -1,0 +1,1 @@
+export type MissionArtifactAudit={receiptId:string;missionId:string;outputId:string;outputRevision:number;verification:string;blocks:Array<{blockId:string;kind:string;sourceIds:string[];state:"STALE"|"CONFLICT"|"UNKNOWN"|"NOT_CHECKED"}>;sources:Array<{id:string;kind:string;entityType:string;revision:string;hash:string;observedAt:string;url?:string;excerpts?:string[]}>};

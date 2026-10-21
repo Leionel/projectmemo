@@ -13,18 +13,9 @@ export async function saveArtifact(
   sourceRefs?: Prisma.InputJsonValue,
   claims?: Prisma.InputJsonValue,
 ) {
-  return db.$transaction(async (tx) => {
-    const artifact = await tx.generatedArtifact.create({
-      data: {
-        projectId,
-        artifactType: artifactType as ArtifactType,
-        content,
-        // 仅系统生成路径携带证据引用快照；人工编辑版本不传，保持无法逐句回溯的诚实语义
-        ...(sourceRefs !== undefined ? { sourceRefs } : {}),
-        ...(claims !== undefined ? { claims } : {}),
-      },
-    });
-    await tx.project.update({ where: { id: projectId }, data: { updatedAt: new Date() } });
-    return artifact;
-  });
+  return db.$transaction(tx=>saveArtifactInTx(tx,projectId,artifactType,content,sourceRefs,claims));
+}
+export async function saveArtifactInTx(tx:Prisma.TransactionClient,projectId:string,artifactType:ArtifactTypeValue,content:string,sourceRefs?:Prisma.InputJsonValue,claims?:Prisma.InputJsonValue){
+ const artifact=await tx.generatedArtifact.create({data:{projectId,artifactType:artifactType as ArtifactType,content,...(sourceRefs!==undefined?{sourceRefs}:{}),...(claims!==undefined?{claims}:{})}});
+ await tx.project.update({where:{id:projectId},data:{updatedAt:new Date()}});return artifact;
 }

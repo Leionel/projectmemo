@@ -76,9 +76,10 @@ export function ArtifactAuditPanel({ projectId, artifactId, onClose }: { project
     {audit && <>
       <p className="mt-3 rounded-lg bg-[var(--paper-strong)] px-3 py-2 text-[11px] leading-5 text-[var(--ink-soft)]">{audit.message}</p>
       <p className={"mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-bold " + (audit.untraceable ? "bg-[var(--amber)]/15 text-[var(--amber)]" : "bg-[var(--teal-pale)] text-[var(--teal-strong)]")}>
-        {audit.untraceable ? <TriangleAlert size={12} /> : <ShieldCheck size={12} />}{claimsStatusCopy[audit.claimsStatus] ?? audit.claimsStatus}
+        {audit.untraceable ? <TriangleAlert size={12} /> : <ShieldCheck size={12} />}{audit.missionProvenance?"委托成果来源映射 · 语义未核验":claimsStatusCopy[audit.claimsStatus] ?? audit.claimsStatus}
       </p>
 
+      {audit.missionProvenance&&<div className="mt-3 text-xs"><p>来自委托草稿版本 {audit.missionProvenance.outputRevision}</p>{audit.missionProvenance.blocks.map(b=><p key={b.blockId}>{b.blockId} · {b.state==="STALE"?"来源已变化":b.state==="CONFLICT"?"来源存在争议":b.state==="UNKNOWN"?"来源状态未知":"来源版本相符，内容未核验"}</p>)}</div>}
       {audit.claims.length > 0 && <div className="mt-3">
         <p className="text-[11px] font-black text-[var(--navy)]">逐句核验（{audit.claims.length}）</p>
         <ul className="mt-1.5 space-y-1.5">

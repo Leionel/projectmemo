@@ -71,6 +71,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
     await tx.agentMissionStep.update({where:{id:step!.id},data:{status:"WAITING_APPROVAL",effectKey:`mission:${m.id}:step:${step!.id}`}});
     await event(tx,m.id,"APPROVAL_REQUESTED",{stepId:step!.id,proposal});await release(tx,current,"WAITING_APPROVAL");return;
    }
+   if(step!.toolName==="inspect_action"){const action=data.data as {actionId?:string;status?:string;resultCardId?:string};if(action.status==="DONE"&&action.resultCardId)await event(tx,m.id,"USER_REPORTED",{stepId:step!.id,actionId:action.actionId,resultCardId:action.resultCardId});}
    await tx.agentMissionStep.update({where:{id:step!.id},data:{status:"SUCCEEDED",resultJson:json(data),finishedAt:new Date()}});
    await event(tx,m.id,"TOOL_FINISHED",{stepId:step!.id,result:data});await release(tx,current,"READY");
   });return true;

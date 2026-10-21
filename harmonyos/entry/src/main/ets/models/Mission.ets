@@ -58,6 +58,7 @@ export class Mission {
   researchScope: MissionScope = new MissionScope();
   continuationPolicy: MissionPolicy = new MissionPolicy();
   autoContinuationEnabled: boolean = false; artifactAdoptionEnabled: boolean = false;
+  pauseRequestedAt: string | null = null; cancelRequestedAt: string | null = null;
   pauseReason: string | null = null; error: MissionError | null = null;
   question: MissionQuestion | null = null;
   steps: MissionStep[] = []; approvals: MissionApproval[] = []; outputs: MissionOutput[] = [];

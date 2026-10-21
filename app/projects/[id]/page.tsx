@@ -8,6 +8,7 @@ import {missionWorkspaceSummary} from "@/lib/mission/workspaceSummary";
 import {missionStatusLabels,type MissionWorkspaceSummary} from "@/lib/mission/presentation";
 import {ProjectPulse} from "@/components/ProjectPulse";
 import {ProjectLegacyRedirect} from "@/components/ProjectNavigation";
+import {ProjectEvolutionSummary} from "@/components/ProjectEvolutionSummary";
 import {ReentryBrief} from "@/components/ReentryBrief";
 import styles from "@/components/ProjectWorkspace.module.css";
 export const dynamic="force-dynamic";
@@ -30,6 +31,7 @@ export default async function ProjectHome({params}:{params:Promise<{id:string}>}
   <header className={styles.pageTitle}><h2>项目概览</h2><div className={styles.quickActions}><Link href={`${base}/records`}>记录进展</Link><Link href={`${base}/knowledge?openCopilot=1#memory-copilot`}>问忆程</Link></div></header>
   <section className={styles.focus} aria-label="当前最重要的事项"><small>{focus.eyebrow}</small><h3>{focus.title}</h3><p>{focus.detail}</p><Link className="focus-ring editorial-button" prefetch={false} href={focus.href}>{focus.action}<ArrowRight size={17} aria-hidden="true"/></Link>{summary.totalActive>1&&<Link className={styles.otherTasks} href={`${base}/missions`}>查看全部 {summary.totalActive} 项未结束委托</Link>}</section>
   {missionError&&<p className={styles.empty} role="status">委托摘要暂时未能加载。<Link href={`${base}/missions`}>进入委托重试</Link></p>}
+  {isFeatureEnabled("PROJECT_STATE_ENABLED",false)&&<ProjectEvolutionSummary key={id} projectId={id}/>}
   <div className={styles.overviewColumns}>
    {important.length>0&&<section className={styles.summary} aria-label="重要提醒"><div className={styles.summaryHeading}><h3>需要关注</h3><Link href={`${base}/actions#interventions`}>查看全部</Link></div><ul>{important.map(i=><li key={i.id}><Link href={`${base}/actions#intervention-${i.id}`}><strong>{i.title}</strong><p>{i.content}</p></Link></li>)}</ul></section>}
    {summary.enabled&&<section className={styles.summary} aria-label="当前委托"><div className={styles.summaryHeading}><h3>当前委托</h3><Link href={`${base}/missions`}>查看全部</Link></div>{summary.items.length?<ul>{summary.items.map(m=><li key={m.id}><Link href={`${base}/missions?mission=${encodeURIComponent(m.id)}`}><strong>{m.goal}</strong><p>{missionStatusLabels[m.status]??"状态待确认"}{m.attention&&m.id!==first?.id?` · ${m.attention}`:""}</p>{m.activity&&<p>{m.activity}{m.activityAt?` · ${new Date(m.activityAt).toLocaleString("zh-CN")}`:""}</p>}</Link></li>)}</ul>:<p className={styles.empty}>已有资料可以作为委托的起点。<Link href={`${base}/missions`}>委托第一个目标</Link></p>}</section>}

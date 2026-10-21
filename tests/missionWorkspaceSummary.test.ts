@@ -9,6 +9,7 @@ const isolated=await vi.hoisted(async()=>{
   sql.close();return{directory};
 });
 import fs from "node:fs";
+import {missionDetail,commandMission} from "@/lib/mission/missionService";
 import {db} from "@/lib/db";
 import {missionWorkspaceSummary} from "@/lib/mission/workspaceSummary";
 let user="",project="",waiting="";
@@ -33,6 +34,11 @@ describe("双端委托只读摘要",()=>{
     const member=await db.user.create({data:{username:"ux-summary-member",displayName:"成员",passwordHash:"unused"}});
     await db.projectMembership.create({data:{projectId:project,userId:member.id,role:"MEMBER"}});
     await expect(missionWorkspaceSummary(member.id,project)).rejects.toMatchObject({status:404});
+  });
+  it("运行中的暂停只是请求，详情保留RUNNING并暴露持久请求时间",async()=>{
+    const running=await db.agentMission.findFirstOrThrow({where:{projectId:project,status:"RUNNING"}});
+    await commandMission(user,running.id,"pause",{requestId:"pause-request",expectedVersion:running.version});
+    const detail=await missionDetail(user,running.id);expect(detail.status).toBe("RUNNING");expect(detail.pauseRequestedAt).toBeTruthy();expect(detail.cancelRequestedAt).toBeNull();
   });
   it("关闭UI与网络失败不同：关闭返回明确enabled=false，历史不删除",async()=>{
     process.env.MISSION_UI_ENABLED="false";

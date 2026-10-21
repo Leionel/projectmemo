@@ -88,3 +88,9 @@
  .panel input:not([type=checkbox]) { margin-left: 0; }
  .panel :is(input:not([type=checkbox]),textarea,select) { font-size: 1rem; }
 }
+
+.notice { margin:1rem 1.5rem; padding:.75rem; background:var(--teal-pale); color:var(--teal-strong); border-radius:.5rem; }
+.newMission summary,.progress > summary,.detailHeader details > summary { cursor:pointer; min-height:2.75rem; padding:.6rem 0; font-weight:600; }
+.newMission form { margin-top:.75rem; }
+.activity { margin-top:1.5rem; padding-block:1rem; border-top:1px solid var(--rule); }
+.activity p { margin-top:.5rem; color:var(--ink-soft); }

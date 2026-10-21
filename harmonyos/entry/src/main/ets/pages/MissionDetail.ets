@@ -38,6 +38,8 @@ struct MissionDetail {
   @State missionUiEnabled: boolean = false;
   @State nextCursor: string = '';
   @State loaded: boolean = false;
+  @State showExecution: boolean = false;
+  @State showSettings: boolean = false;
   @StorageProp('missionAppActive') @Watch('appActivityChanged') appActive: boolean = true;
   private service: MissionService = new MissionService();
   private missionId: string = '';
@@ -277,13 +279,14 @@ struct MissionDetail {
   }
   @Builder private MissionBody() {
     Column({ space: 12 }) {
-      Text(this.mission.goal).fontSize(22)
+      Text(this.mission.goal).fontSize(20).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
       Text(`${missionStatusLabel(this.mission.status)} · 上次同步 ${this.updatedAt}`)
-      Text(`上下文 ${this.mission.contextVersion} · 计划 ${this.mission.planRevision}`).fontSize(13)
+      if (this.mission.status === 'RUNNING' && (this.mission.cancelRequestedAt || this.mission.pauseRequestedAt)) { Text(this.mission.cancelRequestedAt ? '取消请求已受理，等待当前步骤停止' : '暂停请求已受理，等待当前步骤停止').fontColor(PMColors.WARNING) }
       if (this.mission.pauseReason) { Text(`暂停原因：${this.mission.error?.message ?? this.mission.pauseReason}`) }
-      if (!missionTerminal(this.mission.status) && this.missionUiEnabled) {
+      Button(this.showSettings ? '收起委托设置与控制' : '委托设置与控制').onClick(() => { this.showSettings = !this.showSettings; })
+      if (this.showSettings && !missionTerminal(this.mission.status) && this.missionUiEnabled) {
         if (this.mission.status === 'PAUSED') { Button('继续委托').enabled(!this.busy).onClick(() => { this.command('resume'); }) }
-        else { Button('暂停委托').enabled(!this.busy).onClick(() => { this.command('pause'); }) }
+        else if (['READY', 'RUNNING', 'WAITING_INPUT', 'WAITING_APPROVAL'].includes(this.mission.status)) { Button('暂停委托').enabled(!this.busy).onClick(() => { this.command('pause'); }) }
         Button('取消委托').enabled(!this.busy).onClick(() => { this.cancel(); })
         Button('查看与修改个人约束').enabled(!this.busy).onClick(() => { this.openForm('constraints'); })
         Button('查看与修改公开研究范围').enabled(!this.busy).onClick(() => { this.openForm('scope'); })
@@ -299,16 +302,25 @@ struct MissionDetail {
         })
       }, (approval: MissionApproval) => approval.id)
       if (this.mission.status === 'WAITING_APPROVAL') { Button('提案已失效？重新评估').enabled(!this.busy && this.missionUiEnabled).onClick(() => { this.command('replan'); }) }
+      Text('最近进展').fontSize(18).fontWeight(FontWeight.Medium)
+      ForEach(this.mission.steps.filter((step: MissionStep) => step.status === 'SUCCEEDED').slice(-2), (step: MissionStep) => {
+        Text(`${missionToolLabel(step.toolName)}已执行`).fontSize(14).fontColor(PMColors.INK_SECONDARY)
+      }, (step: MissionStep) => step.id)
+      if (this.mission.outputs.length > 0) { Text(`草稿修订 ${this.mission.outputs[0].revision} 已保存，内容待审阅`).fontSize(14).fontColor(PMColors.INK_SECONDARY) }
+      Button(this.showExecution ? '收起执行详情与回执' : '查看执行详情与回执').onClick(() => { this.showExecution = !this.showExecution; })
+      if (this.showExecution) {
+      Text(`上下文 ${this.mission.contextVersion} · 计划 ${this.mission.planRevision}`).fontSize(13)
       Text('执行步骤与回执').fontSize(18)
       ForEach(this.mission.steps, (step: MissionStep) => {
         Column({ space: 6 }) {
-          Text(`${step.ordinal} · ${missionToolLabel(step.toolName)} · ${step.status === 'SUCCEEDED' ? '已完成' : missionStatusLabel(step.status)}`)
+          Text(`${step.ordinal} · ${missionToolLabel(step.toolName)} · ${step.status === 'SUCCEEDED' ? '工具已执行' : missionStatusLabel(step.status)}`)
           if (this.actionReceipt(step) !== '') { Text(this.actionReceipt(step)) }
           ForEach(step.result?.sources ?? [], (source: MissionSource) => {
             Text(`${this.knowledge(source.knowledgeClass ?? source.kind)} · ${source.id}\n${source.text ?? ''}`).fontSize(13)
           }, (source: MissionSource) => source.id)
         }.width('100%').alignItems(HorizontalAlign.Start)
       }, (step: MissionStep) => step.id)
+      }
       Text('草稿与来源').fontSize(18)
       ForEach(this.mission.outputs, (output: MissionOutput) => {
         Column({ space: 8 }) {
@@ -322,7 +334,7 @@ struct MissionDetail {
           if (this.mission.artifactAdoptionEnabled) { Button('预览归入项目周报').enabled(!this.busy).onClick(() => { this.previewOutput(output); }) }
         }.width('100%').alignItems(HorizontalAlign.Start)
       }, (output: MissionOutput) => output.id)
-      MissionEventList({ events: this.events })
+      if (this.showExecution) { MissionEventList({ events: this.events }) }
     }.width('100%').alignItems(HorizontalAlign.Start)
   }
   build() {

@@ -22,7 +22,7 @@ export function StateDiffView({ diff, limit, emptyText = "没有需要处理的�
   if (items.length === 0) {
     return <p className="rounded-lg bg-[var(--paper-strong)] px-3 py-2.5 text-xs leading-5 text-[var(--muted)]">{emptyText}</p>;
   }
-  return <ul className="space-y-2">
+  return <div><p className="mb-2 break-all text-xs text-[var(--ink-soft)]">比较基线：{diff.fromSnapshotId} → {diff.toSnapshotId}</p><ul className="space-y-2">
     {items.map((item) => {
       const meta = diffMeta(item.kind);
       return <li key={item.changeKey} className="rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">
@@ -46,5 +46,5 @@ export function StateDiffView({ diff, limit, emptyText = "没有需要处理的�
       </li>;
     })}
     {limit && diff.items.length > limit && <li className="px-1 text-[11px] font-semibold text-[var(--muted)]">还有 {diff.items.length - limit} 项变化</li>}
-  </ul>;
+  </ul></div>;
 }

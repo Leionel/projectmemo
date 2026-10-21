@@ -261,6 +261,12 @@ struct Index {
   }
 
   private openPendingNotification(): void {
+    const missionId = AppStorage.get<string>('pendingMissionId') ?? '';
+    const missionProjectId = AppStorage.get<string>('pendingMissionProjectId') ?? '';
+    if (missionId !== '' && missionProjectId !== '') {
+      AppStorage.setOrCreate<string>('pendingMissionId', ''); AppStorage.setOrCreate<string>('pendingMissionProjectId', '');
+      router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: missionProjectId, missionId } }); return;
+    }
     const projectId = AppStorage.get<string>('notificationProjectId') ?? '';
     const interventionId = AppStorage.get<string>('notificationInterventionId') ?? '';
     if (projectId === '' || interventionId === '') {

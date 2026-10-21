@@ -38,7 +38,10 @@ export default class EntryFormAbility extends FormExtensionAbility {
       ? (want.parameters?.['status'] as string)
       : (cachedData['status'] as string);
 
+    const mission = WidgetDataService.missionData(this.context);
     return {
+      'missionId': mission['missionId'], 'missionProjectId': mission['missionProjectId'],
+      'missionSummary': mission['missionSummary'], 'missionUpdatedAt': mission['missionUpdatedAt'],
       'formDimension': dimension,
       'projectTitle': title,
       'daysLeft': daysLeft,

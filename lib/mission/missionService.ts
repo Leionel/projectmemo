@@ -29,10 +29,10 @@ export async function missionDetail(userId:string,id:string){
 }
 export async function readOutput(userId:string,id:string,outputId:string){await ownedMission(userId,id);const output=await db.agentMissionOutput.findFirst({where:{id:outputId,missionId:id}});if(!output)throw new AppError("OUTPUT_NOT_FOUND","没有找到成果草稿",404);return output;}
 export async function missionEvents(userId:string,id:string,after=0){await ownedMission(userId,id);const events=await db.agentMissionEvent.findMany({where:{missionId:id,seq:{gt:after}},orderBy:{seq:"asc"},take:100});return{events,nextAfterSeq:events.at(-1)?.seq??after};}
-export async function commandMission(userId:string,id:string,action:string,raw:unknown,approvalId?:string){
+export async function commandMission(userId:string,id:string,action:string,raw:unknown,approvalId?:string,guard?:(mission:Awaited<ReturnType<typeof ownedMission>>)=>void){
   requireMissions();const body=commandSchema.parse(raw),hash=jsonHash({action,approvalId,body});
   return db.$transaction(async tx=>{
-    await lock(tx,id);const m=await ownedMission(userId,id,tx);if(await commandReplay(tx,id,body.requestId,hash))return m;
+    await lock(tx,id);const m=await ownedMission(userId,id,tx);guard?.(m);if(await commandReplay(tx,id,body.requestId,hash))return m;
     if(m.version!==body.expectedVersion||terminal.includes(m.status))throw new AppError("MISSION_CHANGED","委托状态已变化，请刷新",409);
     let status=m.status;
     if(action==="input"){

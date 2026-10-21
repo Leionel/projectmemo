@@ -1,6 +1,13 @@
 import { z } from "zod";
 import { knowledgeTypes } from "@/lib/types";
 
+export const inspectMissionInputSchema = z.object({
+  mission_id: z.string().min(1).max(128), request_id: z.string().min(1).max(100).optional(),
+}).strict();
+export const resumeMissionInputSchema = inspectMissionInputSchema.extend({ expected_version: z.number().int().positive() }).strict();
+export type InspectMissionInput = z.infer<typeof inspectMissionInputSchema>;
+export type ResumeMissionInput = z.infer<typeof resumeMissionInputSchema>;
+
 export const beginRequestInputSchema = z.object({}).strict();
 
 export const beginRequestResponseSchema = z.object({

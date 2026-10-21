@@ -70,6 +70,7 @@ import { JudgeRebuttalModal } from '../components/JudgeRebuttalModal';
 import { AttachmentCorrectionModal } from '../components/AttachmentCorrectionModal';
 import { ExportFormatter } from '../common/ExportFormatter';
 import { DeviceIdentity } from '../common/DeviceIdentity';
+import { MissionPanel } from '../components/MissionPanel';
 
 @Entry
 @Component
@@ -241,6 +242,7 @@ struct ProjectHome {
       return;
     }
     this.projectId = params['projectId'] ?? '';
+    if (this.projectId !== '') WidgetDataService.selectProject(getContext(this), this.projectId).catch(() => {});
     if (params['tab'] === 'memory') {
       this.currentTabIndex = 1;
     }
@@ -322,6 +324,12 @@ struct ProjectHome {
   }
 
   private openPendingNotification(): void {
+    const missionId = AppStorage.get<string>('pendingMissionId') ?? '';
+    const missionProjectId = AppStorage.get<string>('pendingMissionProjectId') ?? '';
+    if (missionId !== '' && missionProjectId !== '') {
+      AppStorage.setOrCreate<string>('pendingMissionId', ''); AppStorage.setOrCreate<string>('pendingMissionProjectId', '');
+      router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: missionProjectId, missionId } }); return;
+    }
     const targetProjectId = AppStorage.get<string>('notificationProjectId') ?? '';
     const targetInterventionId = AppStorage.get<string>('notificationInterventionId') ?? '';
     if (targetProjectId !== '' && targetInterventionId !== '') {
@@ -4503,6 +4511,7 @@ struct ProjectHome {
   @Builder
   private CopilotView() {
     Column() {
+      MissionPanel({ projectId: this.projectId })
       // 问忆程项目上下文看板 (避免空白页面)
       Column() {
         Text('问忆程')

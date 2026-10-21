@@ -3,6 +3,7 @@ import apiContractTest from './ApiContract.test';
 import authContractTest from './AuthContract.test';
 import reentryMappingTest from './ReentryMapping.test';
 import reminderRulesTest from './ReminderRules.test';
+import missionContractTest from './MissionContract.test';
 
 export default function testsuite() {
   localUnitTest();
@@ -10,4 +11,5 @@ export default function testsuite() {
   authContractTest();
   reentryMappingTest();
   reminderRulesTest();
+  missionContractTest();
 }

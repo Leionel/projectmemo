@@ -6,6 +6,7 @@
     "pages/ActionBoard",
     "pages/MemoryTimeline",
     "pages/FeatureGuide",
-    "pages/LoginPage"
+    "pages/LoginPage",
+    "pages/MissionDetail"
   ]
 }

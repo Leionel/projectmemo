@@ -1,0 +1,12 @@
+{
+  "source": "test-results/e2e-results.json",
+  "environment": "独立 E2E 库 / mock；包含当前候选 Next 生产构建",
+  "stats": {
+    "startTime": "2026-10-21T05:25:17.468Z",
+    "duration": 77021.782,
+    "expected": 10,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

@@ -13,6 +13,10 @@ struct WidgetCard {
   @LocalStorageProp('nextAction') nextAction: string = '打开应用同步待办';
   @LocalStorageProp('status') status: string = '进行中';
   @LocalStorageProp('checkpointInfo') checkpointInfo: string = '';
+  @LocalStorageProp('missionId') missionId: string = '';
+  @LocalStorageProp('missionProjectId') missionProjectId: string = '';
+  @LocalStorageProp('missionSummary') missionSummary: string = '';
+  @LocalStorageProp('missionUpdatedAt') missionUpdatedAt: string = '';
 
   build() {
     Column() {
@@ -122,7 +126,7 @@ struct WidgetCard {
       // ------------------------------------
       Column() {
         Row() {
-          Text('今日第一要务')
+          Text(this.missionId !== '' ? '长期委托' : '今日第一要务')
             .fontSize(10)
             .fontWeight(FontWeight.Bold)
             .fontColor('#0F172A')
@@ -135,7 +139,7 @@ struct WidgetCard {
         .justifyContent(FlexAlign.SpaceBetween)
         .alignItems(VerticalAlign.Center)
 
-        Text(this.nextAction)
+        Text(this.missionId !== '' ? this.missionSummary : this.nextAction)
           .fontSize(11)
           .fontColor('#0284C7')
           .fontWeight(FontWeight.Medium)
@@ -143,6 +147,9 @@ struct WidgetCard {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
           .margin({ top: 2 })
+        if (this.missionId !== '' && this.formDimension === 3) {
+          Text(`同步 ${this.missionUpdatedAt}`).fontSize(9).fontColor('#64748B').maxLines(1)
+        }
       }
       .width('100%')
       .padding({ left: 8, right: 8, top: 6, bottom: 6 })
@@ -162,7 +169,9 @@ struct WidgetCard {
         action: ACTION_ROUTER,
         abilityName: ABILITY_NAME,
         params: {
-          targetTab: 2
+          targetTab: 2,
+          missionId: this.missionId,
+          projectId: this.missionProjectId
         }
       });
     })

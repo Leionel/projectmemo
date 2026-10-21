@@ -11,6 +11,11 @@ export default class EntryAbility extends UIAbility {
     const projectId = want.parameters?.['notificationProjectId'] ?? want.parameters?.['projectId'];
     const interventionId = want.parameters?.['notificationInterventionId'];
     const targetTab = want.parameters?.['targetTab'];
+    const missionId = want.parameters?.['missionId'];
+    if (typeof missionId === 'string' && missionId !== '' && typeof projectId === 'string' && projectId !== '') {
+      AppStorage.setOrCreate<string>('pendingMissionId', missionId);
+      AppStorage.setOrCreate<string>('pendingMissionProjectId', projectId);
+    }
     if (typeof projectId === 'string') {
       AppStorage.setOrCreate<string>('notificationProjectId', projectId);
       if (typeof interventionId === 'string') {
@@ -67,11 +72,13 @@ export default class EntryAbility extends UIAbility {
   }
 
   onForeground(): void {
+    AppStorage.setOrCreate<boolean>('missionAppActive', true);
     // Ability has brought to foreground
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onForeground');
   }
 
   onBackground(): void {
+    AppStorage.setOrCreate<boolean>('missionAppActive', false);
     // Ability has back to background
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onBackground');
   }

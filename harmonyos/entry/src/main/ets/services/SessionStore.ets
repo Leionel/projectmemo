@@ -2,6 +2,7 @@ import preferences from '@ohos.data.preferences';
 import { common } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { UserInfo } from '../models/Auth';
+import { WidgetDataService } from './WidgetDataService';
 
 const TAG = 'SessionStore';
 const DOMAIN = 0x0000;
@@ -123,6 +124,8 @@ export class SessionStore {
       await store.flush();
     } catch (err) {
       hilog.error(DOMAIN, TAG, 'Failed to clear session from preferences: %{public}s', JSON.stringify(err));
+    } finally {
+      try { await WidgetDataService.clearMission(ctx); } catch { /* 卡片异常不阻止凭证清除 */ }
     }
   }
 

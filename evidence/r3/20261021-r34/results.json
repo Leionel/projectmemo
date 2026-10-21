@@ -1,0 +1,73 @@
+{
+  "stage": "R3.4",
+  "date": "2026-10-21",
+  "scope": "WP-40 Minimum + WP-41/WP-42 Target local engineering",
+  "baseCommit": "e2be8be",
+  "provider": "mock / TEST_FIXTURE; no paid or platform API calls",
+  "checks": [
+    {
+      "command": "npm.cmd test",
+      "exitCode": 0,
+      "files": 66,
+      "tests": 574,
+      "note": "Full suite before adding one final regression test; business implementation guard already included."
+    },
+    {
+      "command": "npm.cmd test -- tests/missionNativeContract.test.ts",
+      "exitCode": 0,
+      "tests": 9,
+      "note": "Latest targeted run includes snapshot/revoke future-version concurrency regression."
+    },
+    {
+      "command": "npm.cmd run test:e2e",
+      "exitCode": 0,
+      "tests": 10,
+      "database": "prisma/projectmemo-e2e.db",
+      "productionBuildIncluded": true
+    },
+    {
+      "command": "npm.cmd exec tsc -- --noEmit",
+      "exitCode": 0
+    },
+    {
+      "command": "npm.cmd run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm.cmd run harmony:test",
+      "exitCode": 0,
+      "tests": 60
+    },
+    {
+      "command": "npm.cmd run harmony:build",
+      "exitCode": 0,
+      "artifact": "harmonyos/entry/build/default/outputs/default/entry-default-unsigned.hap",
+      "size": 4463597,
+      "sha256": "29cd319d20f19ff959a825ab330885b4ed58cb9b4c48f3e2fb9ac36c7dd4efc7",
+      "deviceAcceptance": false
+    }
+  ],
+  "review": "review.md; independent agent reproduced and closed both P1 concurrency cases",
+  "fallbacks": {
+    "MISSION_UI_ENABLED": "false hides native entry; history retained",
+    "XIAOYI_MISSION_ENABLED": "false by default",
+    "MISSION_WIDGET_ENABLED": "false by default"
+  },
+  "openGates": [
+    "Harmony physical-device clean-install and foreground/background/cold-start/accessibility/offline scenarios",
+    "Actual Xiaoyi platform identity/request/entry",
+    "Actual widget system refresh and click routing",
+    "Live model/search/Judge and previous R3.1/R3.2 audit gaps"
+  ],
+  "boundaries": {
+    "developmentDatabaseMigrated": false,
+    "newMigrations": false,
+    "pushed": false,
+    "deployed": false,
+    "newThirdPartyDependencies": false,
+    "quotaRemainingPercentAtLastRead": 10,
+    "nextStageStarted": false
+  },
+  "unrelatedWipPreserved": true,
+  "e2ePort33321ListenersAfterCleanup": 0
+}

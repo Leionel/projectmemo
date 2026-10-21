@@ -96,13 +96,13 @@ export function isValidInterventionTrigger(trigger: string): boolean {
   return INTERVENTION_TRIGGERS.includes(trigger);
 }
 
-// GET 只接受 200；POST/PATCH 接受 200/201。
+// POST/PATCH 的 202 仅表示已受理；执行结果由服务端读取接口确认。
 // 204 No Content（PATCH 空响应）不算 JSON 成功，由 isNoContent 单独判定。
 export function isSuccessCode(method: string, code: number): boolean {
   if (code === 200) {
     return true;
   }
-  if (code === 201 && (method === 'POST' || method === 'PATCH')) {
+  if ((code === 201 || code === 202) && (method === 'POST' || method === 'PATCH')) {
     return true;
   }
   return false;

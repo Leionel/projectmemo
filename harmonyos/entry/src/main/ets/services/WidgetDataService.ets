@@ -6,6 +6,9 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 import { Project, ProjectDashboard } from '../models/Project';
 import { ProjectDetail } from '../models/Memory';
 import { ReentryData } from '../models/Reentry';
+import { Mission } from '../models/Mission';
+import { MissionWidgetSnapshot, visibleMissionWidget } from '../common/MissionWidgetContract';
+import { missionStatusLabel } from '../common/MissionContract';
 
 const TAG = 'WidgetDataService';
 const DOMAIN = 0x0000;
@@ -64,6 +67,77 @@ export function mapReentryToWidget(reentry: ReentryData, daysLeft: number, readi
 }
 
 export class WidgetDataService {
+  private static missionGeneration: number = 0;
+  private static missionWrites: Promise<void> = Promise.resolve();
+  private static serializeMission(write: () => Promise<void>): Promise<void> {
+    const next = WidgetDataService.missionWrites.catch(() => {}).then(write);
+    WidgetDataService.missionWrites = next.catch(() => {}); return next;
+  }
+  // 只缓存状态，不缓存目标、私有问题、审批载荷或来源正文。
+  static missionData(context: common.Context): Record<string, string | number> {
+    const empty: Record<string, string | number> = { 'missionId': '', 'missionProjectId': '', 'missionSummary': '', 'missionUpdatedAt': '' };
+    try {
+      const store = preferences.getPreferencesSync(context, { name: PREFS_NAME });
+      const auth = preferences.getPreferencesSync(context, { name: 'projectmemo_auth_store' });
+      const expiresAt = Date.parse(auth.getSync('expires_at', '') as string);
+      const user = JSON.parse(auth.getSync('user_info', '{}') as string) as Record<string, string>;
+      const snapshot = JSON.parse(store.getSync('mission_snapshot', '{}') as string) as MissionWidgetSnapshot;
+      const projectId = store.getSync('active_project_id', '') as string;
+      if (!Number.isFinite(expiresAt) || expiresAt <= Date.now() || !visibleMissionWidget(snapshot, user['id'] ?? '', projectId, Date.now())) return empty;
+      return { 'missionId': snapshot.missionId, 'missionProjectId': snapshot.projectId,
+        'missionSummary': `${missionStatusLabel(snapshot.status)} · ${snapshot.pendingCount} 项待确认`, 'missionUpdatedAt': snapshot.updatedAt };
+    } catch { return empty; }
+  }
+  static clearMission(context: common.Context): Promise<void> {
+    WidgetDataService.missionGeneration++;
+    return WidgetDataService.serializeMission(async () => {
+    const store = await preferences.getPreferences(context, PREFS_NAME);
+    await store.put('mission_snapshot', '{}');
+    // 退出时同样清除旧项目摘要；卡片保留已注册formId，等待下一次认证同步。
+    const auth = preferences.getPreferencesSync(context, { name: 'projectmemo_auth_store' });
+    if ((auth.getSync('access_token', '') as string) === '') {
+      await store.put(KEY_TITLE, '忆程项目看板'); await store.put(KEY_NEXT_ACTION, '请登录后同步项目');
+      await store.put(KEY_STATUS, '待登录'); await store.put(KEY_CHECKPOINT_INFO, '');
+      await store.put(KEY_DAYS_LEFT, 0); await store.put(KEY_READINESS, 0);
+    }
+    await store.flush(); await WidgetDataService.pushMission(context);
+    });
+  }
+  static selectProject(context: common.Context, projectId: string): Promise<void> {
+    WidgetDataService.missionGeneration++;
+    return WidgetDataService.serializeMission(async () => {
+    const store = await preferences.getPreferences(context, PREFS_NAME);
+    if ((await store.get('active_project_id', '')) !== projectId) {
+      await store.put('active_project_id', projectId); await store.put('mission_snapshot', '{}'); await store.flush();
+      await WidgetDataService.pushMission(context);
+    }
+    });
+  }
+  static updateMission(context: common.Context, mission: Mission, ownerId: string, expiresAt: string): Promise<void> {
+    const generation = WidgetDataService.missionGeneration;
+    return WidgetDataService.serializeMission(async () => {
+    const store = await preferences.getPreferences(context, PREFS_NAME);
+    if (ownerId === '' || (await store.get('active_project_id', '')) !== mission.projectId) return;
+    const auth = preferences.getPreferencesSync(context, { name: 'projectmemo_auth_store' });
+    const user = JSON.parse(auth.getSync('user_info', '{}') as string) as Record<string, string>;
+    if (generation !== WidgetDataService.missionGeneration || user['id'] !== ownerId ||
+      auth.getSync('expires_at', '') !== expiresAt || (auth.getSync('access_token', '') as string) === '') return;
+    const snapshot = new MissionWidgetSnapshot(); snapshot.ownerId = ownerId; snapshot.projectId = mission.projectId;
+    snapshot.missionId = mission.id; snapshot.status = mission.status;
+    snapshot.pendingCount = mission.approvals.length + (mission.question ? 1 : 0); snapshot.updatedAt = new Date().toLocaleString();
+    snapshot.expiresAt = Math.min(Date.now() + 300000, Date.parse(expiresAt));
+    await store.put('mission_snapshot', JSON.stringify(snapshot)); await store.flush(); await WidgetDataService.pushMission(context);
+    });
+  }
+  private static async pushMission(context: common.Context): Promise<void> {
+    const store = await preferences.getPreferences(context, PREFS_NAME);
+    const ids = JSON.parse(await store.get(KEY_FORM_IDS, '[]') as string) as string[];
+    const values = WidgetDataService.getCachedWidgetDataSync(context);
+    const mission = WidgetDataService.missionData(context);
+    Object.keys(mission).forEach((key: string) => { values[key] = mission[key]; });
+    const data = formBindingData.createFormBindingData(values);
+    for (const id of ids) { try { await formProvider.updateForm(id, data); } catch { /* 下次系统刷新读取同一缓存 */ } }
+  }
   /**
    * 将场景代码转为友好中文场景标签
    */

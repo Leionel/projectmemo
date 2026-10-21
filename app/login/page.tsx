@@ -4,12 +4,15 @@ import { Suspense, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, Eye, EyeOff, LoaderCircle, ShieldAlert, Sparkles } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, LoaderCircle, ShieldAlert } from "lucide-react";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const from = searchParams.get("from") || "/projects";
+  const requestedPath = searchParams.get("from");
+  const from = requestedPath?.startsWith("/projects") && !requestedPath.startsWith("//")
+    ? requestedPath
+    : "/projects";
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -17,20 +20,11 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const DEMO_USER = "contest-demo";
-  const DEMO_PASS = "contest-demo-2026";
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const fillDemoAccount = () => {
-    setUsername(DEMO_USER);
-    setPassword(DEMO_PASS);
-    setError("");
-  };
-
-  const handleLogin = async (e?: React.FormEvent, customUser?: string, customPass?: string) => {
-    if (e) e.preventDefault();
-
-    const u = (customUser ?? username).trim();
-    const p = customPass ?? password;
+    const u = username.trim();
+    const p = password;
 
     if (!u || !p) {
       setError("请输入账号与密码");
@@ -69,11 +63,6 @@ function LoginForm() {
     }
   };
 
-  const handleQuickDemoLogin = async () => {
-    fillDemoAccount();
-    await handleLogin(undefined, DEMO_USER, DEMO_PASS);
-  };
-
   return (
     <div className="mx-auto w-full max-w-md animate-fade-in">
       {/* 顶部品牌区 */}
@@ -93,33 +82,6 @@ function LoginForm() {
             </span>
           </div>
         </Link>
-      </div>
-
-      {/* 演示账号快捷提示条 */}
-      <div className="mb-6 rounded-2xl border border-[var(--rule)] border-l-4 border-l-[var(--teal)] bg-[var(--card-bg)] p-4 shadow-sm">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--teal-strong)]">
-              <Sparkles size={15} /> 预置复赛演示账号
-            </p>
-            <div className="mt-1.5 space-y-0.5 text-xs text-[var(--ink-soft)]">
-              <p>
-                账号：<code className="rounded bg-[var(--paper-strong)] px-1.5 py-0.5 font-mono text-[var(--ink)]">contest-demo</code>
-              </p>
-              <p>
-                密码：<code className="rounded bg-[var(--paper-strong)] px-1.5 py-0.5 font-mono text-[var(--ink)]">contest-demo-2026</code>
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={handleQuickDemoLogin}
-            disabled={loading}
-            className="focus-ring shrink-0 rounded-xl bg-[var(--teal-pale)] px-3 py-1.5 text-xs font-bold text-[var(--teal-strong)] transition hover:bg-[var(--teal)] hover:text-white"
-          >
-            一键登录
-          </button>
-        </div>
       </div>
 
       {/* 登录卡片 */}
@@ -157,7 +119,7 @@ function LoginForm() {
                 onChange={(e) => setUsername(e.target.value)}
                 required
                 disabled={loading}
-                placeholder="请输入演示账号，如 contest-demo"
+                placeholder="请输入评审账号"
                 className="focus-ring editorial-input w-full px-4 py-3 placeholder:text-[var(--placeholder)]"
               />
             </div>
@@ -185,7 +147,7 @@ function LoginForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={loading}
-                placeholder="请输入密码，如 contest-demo-2026"
+                placeholder="请输入密码"
                 className="focus-ring editorial-input w-full px-4 py-3 placeholder:text-[var(--placeholder)]"
               />
             </div>
@@ -211,15 +173,6 @@ function LoginForm() {
           </div>
         </form>
 
-        <div className="mt-5 border-t archive-rule pt-4 text-center">
-          <button
-            type="button"
-            onClick={fillDemoAccount}
-            className="text-xs text-[var(--ink-soft)] hover:text-[var(--teal)] hover:underline"
-          >
-            填入默认账号密码
-          </button>
-        </div>
       </div>
     </div>
   );

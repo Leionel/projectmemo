@@ -309,3 +309,8 @@ WP-30自动接续与WP-32规则/Judge/逐句记录已接入同一Runtime/Output�
 ### Stretch 升级复核（2026-10-21，R3.4提交后）
 
 R3.4本地工程已提交fa21231。5h额度本次读取余8%，完成升级评估后停止，不领取WP-X1/X2。Stretch仍按6.3节/第10节要求，在Target真实模型任务、零容忍用例和设备Gate通过后领取；当前缺口及方案对比见 `evidence/r3/20261021-r34/stretch-assessment.md`。优先顺序是补齐R3.1/R3.2已接受契约与专项回归、WP-50评测和设备放行，再择WP-X1显式跨Mission偏好；WP-X2周期检查后置。保留二选一及3–5日估算，不将当前单Mission约束或材料扫描计为Stretch完成。
+
+
+### ECS Web 发布分支合流（2026-10-21）
+
+将R3 master父版本21cc5fd与服务器现行Web发布父版本a7e3676合流，保留公开登录、Nginx站点和Mission能力；在独立worktree修复干净构建类型问题并验证，不覆盖原工作区未提交修改。回执见 `evidence/r3/20261021-ecs-release-merge/`。服务器仍需核对持久数据路径、备份、更新代码/Node运行时、显式迁移、配置并启动独立Worker后另行验收；本次合并不关闭这些Gate，不调整阶段估时。

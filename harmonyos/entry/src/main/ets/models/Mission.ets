@@ -105,3 +105,9 @@ export class MissionScopeEdit {
 export class MissionPolicyEdit {
   requestId: string = ''; expectedVersion: number = 1; policy: MissionPolicy = new MissionPolicy();
 }
+
+export interface MissionWorkspaceItem {
+  id: string; goal: string; status: string; version: number; attention: string | null;
+  activity: string | null; activityAt: string | null; outputRevision: number | null;
+}
+export interface MissionWorkspaceSummary { enabled: boolean; totalActive: number; items: MissionWorkspaceItem[]; }

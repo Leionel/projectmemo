@@ -1,6 +1,6 @@
-.shell { width: min(1360px, calc(100% - 40px)); margin: 0 auto; padding-block: 1.5rem 3rem; }
+.shell { width: min(1360px, calc(100% - 40px)); margin: 0 auto; padding-block: .75rem 3rem; }
 .back { display: inline-flex; gap: .5rem; align-items: center; color: var(--ink-soft); font-size: .8125rem; min-height: 2.75rem; }
-.heading { display: flex; justify-content: space-between; gap: 1.5rem; align-items: center; margin: .75rem 0 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--rule); }
+.heading { display: flex; justify-content: space-between; gap: 1.5rem; align-items: center; margin: .25rem 0 1rem; padding-bottom: .75rem; border-bottom: 1px solid var(--rule); }
 .heading h1 { font-size: 1.5rem; line-height: 1.5; overflow-wrap: anywhere; }
 .heading p { margin-top: .375rem; max-width: 50rem; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; color: var(--ink-soft); font-size: .8125rem; line-height: 1.7; }
 .headingMeta { display: flex; gap: .75rem; align-items: center; color: var(--muted); font-size: .75rem; margin-bottom: .5rem; }
@@ -17,7 +17,7 @@
 .pageTitle p { margin-top: .375rem; color: var(--ink-soft); font-size: .8125rem; line-height: 1.7; }
 .sectionStack { display: grid; gap: 1.25rem; }
 .overviewColumns { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 1.25rem; margin-top: 1.25rem; align-items: start; }
-.summary { min-width: 0; padding: 1.25rem; border: 1px solid var(--rule); border-radius: .875rem; background: var(--paper-strong); }
+.summary { min-width: 0; padding: 1rem 0; border-top: 1px solid var(--rule); background: transparent; }
 .summaryHeading { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .75rem; }
 .summaryHeading h3 { font-family: inherit; font-size: .875rem; font-weight: 700; line-height: 1.6; }
 .summaryHeading a { font-size: .75rem; color: var(--teal-strong); }
@@ -38,7 +38,27 @@
  .heading { align-items: flex-start; flex-direction: column; gap: .875rem; }
  .heading h1 { font-size: 1.25rem; }
  .workspace { grid-template-columns: minmax(0,1fr); gap: 1.25rem; }
- .navigation { grid-template-columns: repeat(4,minmax(0,1fr)); position: static; gap: .25rem; padding-bottom: .875rem; border-bottom: 1px solid var(--rule); }
+ .navigation { grid-template-columns: repeat(5,minmax(0,1fr)); position: static; gap: .25rem; padding-bottom: .875rem; border-bottom: 1px solid var(--rule); }
  .navigation a { justify-content: center; gap: .25rem; flex-direction: column; padding: .5rem .125rem; font-size: .6875rem; }
  .overviewColumns { grid-template-columns: minmax(0,1fr); }
 }
+
+.navigationShell { position: sticky; top: 5.5rem; min-width: 0; }
+.navigation { position: static; }
+.directory { margin-top: 1rem; font-size: .8125rem; }
+.directory summary { cursor: pointer; min-height: 2.75rem; padding: .75rem; color: var(--ink-soft); }
+.directory nav { display: grid; }
+.directory a { display: flex; gap: .5rem; align-items: center; padding: .7rem; min-height: 2.75rem; color: var(--ink-soft); }
+.directory a[aria-current=page] { color: var(--teal-strong); }
+.directory a:focus-visible,.quickActions a:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.pageTitle { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:.5rem; }
+.quickActions { display:flex; gap:1rem; font-size:.8125rem; color:var(--teal-strong); }
+.quickActions a { display:inline-flex; align-items:center; min-height:2.75rem; }
+.focus { padding:1.5rem; background:var(--paper-strong); border:1px solid var(--rule); border-left:4px solid var(--teal); border-radius:.75rem; }
+.focus small { color:var(--teal-strong); font-size:.8125rem; font-weight:600; }
+.focus h3 { font-family:inherit; font-size:1.25rem; line-height:1.6; margin:.5rem 0; overflow-wrap:anywhere; }
+.focus p { max-width:60ch; color:var(--ink-soft); line-height:1.7; font-size:.875rem; margin-bottom:1.25rem; overflow-wrap:anywhere; }
+.otherTasks { display:block; color:var(--teal-strong); font-size:.8125rem; margin-top:1rem; }
+.projectContext { font-size:.8125rem; color:var(--ink-soft); }
+.projectContext summary { cursor:pointer; padding:.4rem 0; }
+@media(max-width:900px) { .navigationShell { position:static; } .directory { margin:0; } .directory summary { padding:.25rem 0; } .directory nav { grid-template-columns:repeat(2,minmax(0,1fr)); } .navigation { border-bottom:0; padding-bottom:0; } .navigation a { min-height:2.75rem; flex-direction:row; gap:.3rem; font-size:.75rem; } .navigation a svg { display:none; } .heading { flex-direction:row; gap:.5rem; } .headingMeta { font-size:.6875rem; flex-wrap:wrap; } .headingActions button { font-size:.75rem; padding:.5rem .65rem; } .focus { padding:1.1rem; } .focus h3 { font-size:1.1rem; } .workspace { gap:.75rem; } }

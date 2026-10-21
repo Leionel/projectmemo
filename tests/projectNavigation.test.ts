@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import {createElement} from "react";
-import {render,screen,cleanup} from "@testing-library/react";
+import {render,screen,cleanup,within} from "@testing-library/react";
 import {afterEach,describe,expect,it,vi} from "vitest";
 import {projectHref} from "@/lib/projectNavigation";
 import {ProjectNavigation,ProjectLegacyRedirect} from "@/components/ProjectNavigation";
@@ -10,6 +10,9 @@ afterEach(()=>{cleanup();state.replace.mockReset();window.history.replaceState(n
 describe("单项目功能导航",()=>{
  it("真实链接带项目范围，当前页标明，功能页可直接访问",()=>{
   render(createElement(ProjectNavigation,{projectId:"p",missionsEnabled:true}));
+  document.querySelector("details")!.open=true;
+  expect(within(screen.getByRole("navigation",{name:"项目主要导航"})).getAllByRole("link")).toHaveLength(5);
+  expect(screen.getByRole("link",{name:"资料"}).getAttribute("aria-current")).toBe("page");
   const nav=screen.getByRole("navigation",{name:"项目功能导航"});expect(nav.querySelectorAll("a")).toHaveLength(8);
   expect(screen.getByRole("link",{name:"记录与资料"}).getAttribute("href")).toBe("/projects/p/records");
   expect(screen.getByRole("link",{name:"记录与资料"}).getAttribute("aria-current")).toBe("page");
@@ -17,6 +20,7 @@ describe("单项目功能导航",()=>{
  });
  it("委托关闭时隐藏入口，其他功能仍可达",()=>{
   render(createElement(ProjectNavigation,{projectId:"q",missionsEnabled:false}));
+  document.querySelector("details")!.open=true;
   expect(screen.queryByRole("link",{name:"长期委托"})).toBeNull();
   expect(screen.getByRole("link",{name:"知识与问答"}).getAttribute("href")).toBe("/projects/q/knowledge");
  });

@@ -77,6 +77,8 @@ import { MissionPanel } from '../components/MissionPanel';
 struct ProjectHome {
   @State projectId: string = '';
   @State currentTabIndex: number = 0;
+  @State showProjectStatus: boolean = false;
+  @State showQuickCopilot: boolean = false;
   @StorageProp(PMStorageKey.WIDTH_BP) widthBp: string = PMWidthBp.SM;
 
   // 数据主状态
@@ -2169,10 +2171,10 @@ struct ProjectHome {
   private TopHeader() {
     PMAppBar({
       title: this.project.title !== '' ? TextFormatters.readableText(this.project.title, '项目名称无法读取') : '项目档案',
-      subtitle: `项目工作区 · ${this.currentTabIndex === 0 ? '工作台' :
-        this.currentTabIndex === 1 ? '记忆' :
-          this.currentTabIndex === 2 ? '待办' :
-            this.currentTabIndex === 3 ? '问忆程' : '成果'}`,
+      subtitle: `项目工作区 · ${this.currentTabIndex === 0 ? '概览' :
+        this.currentTabIndex === 1 ? '资料' :
+          this.currentTabIndex === 2 ? '行动' :
+            this.currentTabIndex === 3 ? '委托' : '成果'}`,
       backLabel: '项目',
       backDescription: '返回项目列表',
       showRightIcon: true,
@@ -2231,10 +2233,10 @@ struct ProjectHome {
   @Builder
   private BottomTabBar() {
     Row() {
-      this.TabBarItem(0, '工作台')
-      this.TabBarItem(1, '记忆')
-      this.TabBarItem(2, '待办')
-      this.TabBarItem(3, '问忆程')
+      this.TabBarItem(0, '概览')
+      this.TabBarItem(1, '资料')
+      this.TabBarItem(2, '行动')
+      this.TabBarItem(3, '委托')
       this.TabBarItem(4, '成果')
     }
     .width('100%')
@@ -2992,8 +2994,9 @@ struct ProjectHome {
         // 项目头部场景与快捷操作入口
         this.ProjectBanner()
 
-        // 核心四项指标概览 (2x2)
-        this.MetricsOverviewGrid()
+        MissionPanel({ projectId: this.projectId, compact: true })
+        Button('问忆程').backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND)
+          .onClick(() => { this.showQuickCopilot = true; this.currentTabIndex = 3; })
 
         // 核心焦点：本阶段重点（优先回答“现在最值得我关注什么”）
         if (this.getTopOpenIntervention() !== undefined) {
@@ -3033,7 +3036,13 @@ struct ProjectHome {
           }
         })
 
-        // R2 阶段检查点：把散乱记忆收束为可确认版本，60 秒再入口
+        this.RecentChangesView()
+        Button(this.showProjectStatus ? '收起更多项目状态' : '更多项目状态、体检与阶段检查')
+          .backgroundColor(PMColors.SURFACE).fontColor(PMColors.BRAND)
+          .onClick(() => { this.showProjectStatus = !this.showProjectStatus; })
+        if (this.showProjectStatus) {
+        this.MetricsOverviewGrid()
+        // 阶段记忆和完整检查按需展开，原入口保留。
         this.EpisodeCheckpointCardView()
 
         // 项目体检：只读、确定性地列出当前问题与修复入口
@@ -3194,8 +3203,6 @@ struct ProjectHome {
         this.NextActionView()
 
         this.ClosedLoopView()
-
-        this.RecentChangesView()
 
         this.MilestoneEvidenceView()
 
@@ -3389,6 +3396,7 @@ struct ProjectHome {
         .border({ width: 1, color: PMColors.BORDER })
         .margin({ top: PMSpacing.MD })
 
+        }
         // 问题三：记录与沉淀——输入区已改为底部半模态面板，此处仅保留入口
         Column() {
           Row() {
@@ -4509,9 +4517,26 @@ struct ProjectHome {
 
   // ----------------------------------------------------
   @Builder
+  private MissionView() {
+    if (this.showQuickCopilot) {
+      Column() {
+        Button('返回委托').backgroundColor(PMColors.SURFACE).fontColor(PMColors.BRAND)
+          .onClick(() => { this.showQuickCopilot = false; })
+        this.CopilotView()
+      }.layoutWeight(1).width('100%')
+    } else {
+      Scroll() {
+        Column({ space: PMSpacing.MD }) {
+          MissionPanel({ projectId: this.projectId })
+          Button('快速提问：问忆程').onClick(() => { this.showQuickCopilot = true; })
+        }.padding(PMSpacing.MD).width('100%')
+      }.layoutWeight(1).width('100%')
+    }
+  }
+
+  @Builder
   private CopilotView() {
     Column() {
-      MissionPanel({ projectId: this.projectId })
       // 问忆程项目上下文看板 (避免空白页面)
       Column() {
         Text('问忆程')
@@ -5427,7 +5452,7 @@ struct ProjectHome {
           } else if (this.currentTabIndex === 2) {
             this.ActionView()
           } else if (this.currentTabIndex === 3) {
-            this.CopilotView()
+            this.MissionView()
           } else if (this.currentTabIndex === 4) {
             this.ArtifactView()
           }

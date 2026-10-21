@@ -1,0 +1,124 @@
+{
+  "stats": {
+    "startTime": "2026-10-21T04:39:01.038Z",
+    "duration": 74716.636,
+    "expected": 10,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "tests": [
+    {
+      "title": "authenticate as the E2E reviewer",
+      "project": "setup",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 741
+        }
+      ]
+    },
+    {
+      "title": "accepts a proactive reminder and asks the memory copilot",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 10107
+        }
+      ]
+    },
+    {
+      "title": "seed project completes the core demo loop",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 11050
+        }
+      ]
+    },
+    {
+      "title": "creates a project and captures a fragment",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 9111
+        }
+      ]
+    },
+    {
+      "title": "project workspace provides direct navigation and priority shortcuts",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 6948
+        }
+      ]
+    },
+    {
+      "title": "project dashboard surfaces attention state and snoozed reminder history",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 7302
+        }
+      ]
+    },
+    {
+      "title": "creates, edits, sorts and safely cancels a detailed action",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 11352
+        }
+      ]
+    },
+    {
+      "title": "updates card importance and reuses a card-sourced action",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 7505
+        }
+      ]
+    },
+    {
+      "title": "mobile workspace keeps project status and overview near the top",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 6392
+        }
+      ]
+    },
+    {
+      "title": "same Mission survives reload, receives metric, auto continues, waits for approval and adopts a reusable draft",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 36377
+        }
+      ]
+    }
+  ],
+  "providerMode": "E2E_TEST_FIXTURE, LLM_MODE=mock, no live search/Judge",
+  "database": "prisma/projectmemo-e2e.db only"
+}

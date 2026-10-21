@@ -1,0 +1,22 @@
+{
+  "sourceCandidate": "bb0b6da",
+  "result": "PASS",
+  "errors": [],
+  "documents": [
+    {
+      "name": "ProjectMemo_双端功能曝光与UI优化方案_2026-10-21.md",
+      "sha256": "63e5b6e3f430285fe2836e6b9693eb7175da1089b6edf7c7914fbe895e55c308"
+    },
+    {
+      "name": "PRE_R4_UX_PROTOTYPES.md",
+      "sha256": "33afe538f9e08905873dcca91863cf96c4663c59160a8390eedcfe2bb9715b4e"
+    },
+    {
+      "name": "R4_UX_INTEGRATION_CONTRACT.md",
+      "sha256": "43eaf7512c945a40f82d3c66b9a1d6eca1c2ab5a0c1aebb749808d1dd8304bed"
+    }
+  ],
+  "newR4Backend": false,
+  "deviceGate": "OPEN",
+  "productionGate": "NOT_DEPLOYED"
+}

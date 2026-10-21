@@ -33,9 +33,9 @@ N只复用现有业务与必要只读DTO，不新增事实状态；S不在生产
 | 输出/采纳 | Output revision/sourceRefs/claimChecks；MissionArtifactReceipt | 草稿、核验、成果采纳分别呈现 | 缺块映射只显示上下文可能影响 |
 | 权限/开关 | capabilities、原owner/session校验 | enabled/关闭/无权/探测错误分别处理 | 401登录，其他错误重试，不全部假设关闭 |
 
-**拟Pre-R4只读扩展**：在统一服务层增加有界项目摘要（内部函数优先，跨端确有需要再设计endpoint），返回每项Mission的id、原版本、短显原目标、status、当前question/approval的引用及短文、最近关键活动与真实时间/seq、最新Output引用、分页/截断说明。首页不为每项调完整详情、全部事件或运行模型；OWNER过滤先于读取，不泄漏其他人的任务数量/标题。不得持久第二套状态或客户端自造truth。
+**Pre-R4只读扩展（已实施，见实施记录）**：已通过统一 `missionWorkspaceSummary` 服务及 `GET /api/missions/summary?projectId=…` 提供有界项目摘要，返回每项Mission的id、原版本、短显原目标、status、当前question/approval的引用及短文、最近关键活动与真实时间/seq、最新Output引用、分页/截断说明。首页不为每项调完整详情、全部事件或运行模型；OWNER过滤先于读取，不泄漏其他人的任务数量/标题。不得持久第二套状态或客户端自造truth。
 
-暂停/取消已请求但状态仍RUNNING的跨端显示，需要将已有pauseRequestedAt/cancelRequestedAt作为**新增可选只读字段**暴露，并适配Web+ArkTS；缺字段的旧客户端仍可运行。优先明确这项适配，不迁移新表。能力探测的网络失败与enabled=false在客户端状态分开即可，不必扩充服务器业务状态。
+暂停/取消已请求但状态仍RUNNING的跨端显示，已将已有pauseRequestedAt/cancelRequestedAt作为**新增可选只读字段**暴露，并适配Web+ArkTS；缺字段的旧客户端仍可运行。优先明确这项适配，不迁移新表。能力探测的网络失败与enabled=false在客户端状态分开即可，不必扩充服务器业务状态。
 
 ### 2.2 共享状态语义
 

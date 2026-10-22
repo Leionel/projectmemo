@@ -1,7 +1,7 @@
 "use client";
 import {missionStatusLabels,missionToolLabels} from "@/lib/mission/presentation";
 import {projectHref} from "@/lib/projectNavigation";
-import { useCallback,useEffect,useRef,useState } from "react";
+import { useCallback,useEffect,useRef,useState,useSyncExternalStore } from "react";
 import { emitWorkspaceChange } from "@/lib/client/workspaceEvents";
 import { MissionClaimChecks } from "./MissionClaimChecks";
 import { MissionMetricInput } from "./MissionMetricInput";
@@ -24,7 +24,11 @@ type WebSource={id:string;requestedUrl:string;title:string;retrievalMode:string;
 export function MissionPanel({projectId,initialMissionId}:{projectId:string;initialMissionId?:string}){
  return <MissionWorkspace key={projectId} projectId={projectId} initialMissionId={initialMissionId}/>;
 }
+const subscribeClientReady=()=>()=>{};
+const clientSnapshot=()=>true;
+const serverSnapshot=()=>false;
 function MissionWorkspace({projectId,initialMissionId}:{projectId:string;initialMissionId?:string}){
+ const clientReady=useSyncExternalStore(subscribeClientReady,clientSnapshot,serverSnapshot);
  const [list,setList]=useState<Array<{id:string;goal:string;status:string}>>([]),[mission,setMission]=useState<Mission|null>(null),[goal,setGoal]=useState(""),[answer,setAnswer]=useState(""),[error,setError]=useState(""),[busy,setBusy]=useState(false),[sources,setSources]=useState<WebSource[]>([]),[cloud,setCloud]=useState(false);
  const [showList,setShowList]=useState(false),[checkedAt,setCheckedAt]=useState(0),[readOnly,setReadOnly]=useState(false);
  const [notice,setNotice]=useState(""),[nextCursor,setNextCursor]=useState<string|null>(null);
@@ -59,12 +63,12 @@ function MissionWorkspace({projectId,initialMissionId}:{projectId:string;initial
    <aside className={`${styles.sidebar} ${mission&&!showList?styles.collapsedSidebar:""}`} aria-label="委托列表与创建">
     <details className={styles.newMission} open={!initialMissionId&&!list.length&&!mission}><summary>委托新目标</summary><form className={styles.composer} onSubmit={e=>{e.preventDefault();void perform(async()=>{const v=await api("/api/missions","POST",{projectId,requestId:requestId({projectId,goal,llmContextApproved:cloud,readOnly}),goal,llmContextApproved:cloud,...(readOnly?{missionConstraints:{executionBoundary:"READ_ANALYZE"}}:{})});await refresh(v.mission.id);requestKeys.current.delete(JSON.stringify({projectId,goal,llmContextApproved:cloud,readOnly}));setGoal("");});}}>
      <h3>新建委托</h3>
-     <button type="button" disabled={busy} onClick={()=>{setGoal("根据本项目已有材料，形成带来源的阶段汇报草稿，包括已完成事项、当前风险和下一步建议。缺少依据的内容列为信息缺口，不编造实验指标。本次只读取、分析和保存草稿，不搜索网络，不创建或修改行动。");setReadOnly(true);}}>使用阶段汇报模板</button>
+     <button type="button" disabled={busy||!clientReady} onClick={()=>{setGoal("根据本项目已有材料，形成带来源的阶段汇报草稿，包括已完成事项、当前风险和下一步建议。缺少依据的内容列为信息缺口，不编造实验指标。本次只读取、分析和保存草稿，不搜索网络，不创建或修改行动。");setReadOnly(true);}}>使用阶段汇报模板</button>
      <label htmlFor="mission-goal">委托目标</label>
-     <textarea id="mission-goal" rows={4} placeholder="例如：根据已有材料准备阶段汇报，列出风险和缺失信息。" value={goal} onChange={e=>setGoal(e.target.value)} required minLength={3} maxLength={2000}/>
-     <label className={styles.consent}><input type="checkbox" checked={cloud} onChange={e=>setCloud(e.target.checked)}/><span>允许配置的云模型使用本委托目标、选入的项目资料和任务历史</span></label>
-     <label className={styles.consent}><input type="checkbox" checked={readOnly} onChange={e=>setReadOnly(e.target.checked)}/><span>仅允许读取、分析和保存草稿</span></label>
-     <button className={styles.primary} disabled={busy}>创建委托</button>
+     <textarea id="mission-goal" disabled={!clientReady||busy} rows={4} placeholder="例如：根据已有材料准备阶段汇报，列出风险和缺失信息。" value={goal} onChange={e=>setGoal(e.target.value)} required minLength={3} maxLength={2000}/>
+     <label className={styles.consent}><input type="checkbox" disabled={!clientReady||busy} checked={cloud} onChange={e=>setCloud(e.target.checked)}/><span>允许配置的云模型使用本委托目标、选入的项目资料和任务历史</span></label>
+     <label className={styles.consent}><input type="checkbox" disabled={!clientReady||busy} checked={readOnly} onChange={e=>setReadOnly(e.target.checked)}/><span>仅允许读取、分析和保存草稿</span></label>
+     <button className={styles.primary} disabled={!clientReady||busy||goal.trim().length<3}>创建委托</button>
     </form></details>
     <nav className={styles.missionList} aria-label="已有委托">
      <h3>已有委托</h3>

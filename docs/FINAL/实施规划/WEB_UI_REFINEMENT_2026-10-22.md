@@ -18,17 +18,17 @@
 
 | 路由/宿主 | 卡片/容器 | 核查重点 | 当前状态 |
 | --- | --- | --- | --- |
-| 首页、登录、新建项目 | 营销段落、LoginForm、NewProjectForm | 不把营销卡片样式带入工作区；输入/错误/确认语义 | 待核查 |
-| 项目列表 | ProjectList/ProjectCard | 多层边框、圆角、全卡可点误导；科研项目参赛文案 | 待核查 |
-| 概览 | focus/summary/ProjectStartGuide/ProjectEvolutionSummary/ProjectPulse | 松散、全宽绿块、弱CTA、日期/数值、无基线不冒充变化 | 改造中 |
-| 委托 | MissionPanel/Continuation/Approval/Output/Adoption | 工单/轨迹/设置不同层级；批准与完成区分 | 待核查 |
-| 资料 | CaptureBox/AttachmentInbox | 捕获表单不是报告卡片；原文/处理进度分离 | 待核查 |
-| 会议 | MeetingImportCard | 预览、勾选确认与已应用结果分离，不能把空预览当成功 | 待核查 |
-| 行动 | ActionBoard/InterventionPanel/SchedulePlanner | 提醒≠行动；当前/历史/演示；完成写结果回执 | 待核查 |
-| 记忆与问答 | KnowledgeFeed/CardView/ArchivedMemory/Consolidation/MemoryCopilot | 记忆、来源、建议不同角色；弱空卡片和重复说明 | 待核查 |
-| 体检与演进 | State/DecisionTimeline/Episode/Health/Readiness | 来源/关系/基线、已发布修订、指标与状态真实性 | 待核查 |
-| 成果 | ArtifactGenerator/AuditPanel | 固定版本、编辑、来源审计、未验证Claim，不做第二文档系统 | 待核查 |
-| 全局设置/项目设置 | GlobalSettings/ProjectSettings | 模态边界、焦点、错误和破坏性操作 | 待核查 |
+| 首页、登录、新建项目 | 营销段落、LoginForm、NewProjectForm | 不把营销卡片样式带入工作区；输入/错误/确认语义 | 源码核查与相应容器修正；浏览器覆盖见N3 |
+| 项目列表 | ProjectList/ProjectCard | 多层边框、圆角、全卡可点误导；科研项目参赛文案 | 源码核查与相应容器修正；浏览器覆盖见N3 |
+| 概览 | focus/summary/ProjectStartGuide/ProjectEvolutionSummary/ProjectPulse | 松散、全宽绿块、弱CTA、日期/数值、无基线不冒充变化 | 布局/按钮已改，桌面与窄屏截图已核对 |
+| 委托 | MissionPanel/Continuation/Approval/Output/Adoption | 工单/轨迹/设置不同层级；批准与完成区分 | 源码核查与相应容器修正；浏览器覆盖见N3 |
+| 资料 | CaptureBox/AttachmentInbox | 捕获表单不是报告卡片；原文/处理进度分离 | 源码核查与相应容器修正；浏览器覆盖见N3 |
+| 会议 | MeetingImportCard | 预览、勾选确认与已应用结果分离，不能把空预览当成功 | 源码核查与相应容器修正；浏览器覆盖见N3 |
+| 行动 | ActionBoard/InterventionPanel/SchedulePlanner | 提醒≠行动；当前/历史/演示；完成写结果回执 | 源码核查与相应容器修正；浏览器覆盖见N3 |
+| 记忆与问答 | KnowledgeFeed/CardView/ArchivedMemory/Consolidation/MemoryCopilot | 记忆、来源、建议不同角色；弱空卡片和重复说明 | 源码核查与相应容器修正；浏览器覆盖见N3 |
+| 体检与演进 | State/DecisionTimeline/Episode/Health/Readiness | 来源/关系/基线、已发布修订、指标与状态真实性 | 源码核查与相应容器修正；浏览器覆盖见N3 |
+| 成果 | ArtifactGenerator/AuditPanel | 固定版本、编辑、来源审计、未验证Claim，不做第二文档系统 | 源码核查与相应容器修正；浏览器覆盖见N3 |
+| 全局设置/项目设置 | GlobalSettings/ProjectSettings | 模态边界、焦点、错误和破坏性操作 | 源码核查与相应容器修正；浏览器覆盖见N3 |
 
 本表以当前源码和浏览器为证据，不把mock数据解释为真实科研结论。不引入R4服务、隐藏思考或虚构进度。实际改动与验收随阶段更新。
 
@@ -74,3 +74,8 @@ README独立改为产品介绍，开发信息迁至DEVELOPMENT.md，旧原文留
 串行全量81文件651项通过；最终受影响4文件11项通过（包含结构化资料可读展示、新输入等待草稿就绪和双端六种Mission状态语义）。TypeScript/lint最终通过。浏览器上一版14/14通过后，又收紧焦点每组默认3项和折叠近期资料，补输入就绪限制；最终生产构建/E2E正在重跑。
 
 发现既有后台提醒评估在并发访问时曾产生Prisma P1008（InterventionBudgetLedger）日志；直接前台交互测试虽通过，仍单列为后台可靠性开放Gate，不视为全链路无异常。E2E现在保留隔离服务器stderr，避免500仅显示通用错误而无原因。未放宽服务端审批、幂等或数据库校验。
+
+
+### N2 放行记录
+
+最终ArkTS编译与unsigned HAP通过，SHA256：b6cd73379ca5ee7bb5e10905faf485f56ad9f12630f852d7a6b51596f7240132。六种Mission状态和四类操作去向有跨端语义回归；原生系统交互仍为开放Gate。焦点时间字段区分行动dueAt与资料recordedAt，避免跨端混用。设置返回先关闭浮层，再回焦点，不丢失原新建入口。

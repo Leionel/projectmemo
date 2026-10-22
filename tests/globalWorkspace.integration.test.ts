@@ -86,6 +86,7 @@ it("焦点分别投影真实状态，Mission双重归属、关闭开关和API身
   const running = await db.agentMission.findFirstOrThrow({ where: { ownerUserId: user.id, projectId: owned.id, status: "RUNNING" } });
   await db.agentMissionOutput.create({ data: { missionId: running.id, revision: 1, kind: "RESEARCH", contentJson: { blocks: [] }, sourceRefsJson: [], claimChecksJson: [] } });
   process.env.MISSION_ENABLED = "true"; process.env.MISSION_UI_ENABLED = "true";
+  await db.actionItem.updateMany({ where: { projectId: owned.id, status: "TODO", isSimulated: false }, data: { dueAt: new Date("2026-12-01T12:00:00Z") } });
   const events = await db.agentMissionEvent.count();
   const focus = await loadGlobalFocus(user.id);
   expect(focus.waiting.map(m => m.status).sort()).toEqual(["FAILED", "PAUSED", "WAITING_APPROVAL", "WAITING_INPUT"]);
@@ -93,6 +94,7 @@ it("焦点分别投影真实状态，Mission双重归属、关闭开关和API身
   expect(focus.running.find(m => m.id === running.id)?.activity).toBe("草稿修订 1 已保存");
   expect(focus.running.map(m => m.status).sort()).toEqual(["READY", "RUNNING"]);
   expect(focus.actions.map(m => m.title)).toEqual(["P95 为 118ms"]);
+  expect(focus.actions[0]).toMatchObject({ dueAt: "2026-12-01T12:00:00.000Z", recordedAt: "" });
   expect(focus.reminders.map(m => m.title).sort()).toEqual(["P95 为 118ms", "静默到期"].sort());
   expect((await loadGlobalFocus(user.id, true)).waiting).toHaveLength(5);
   const empty = await loadGlobalFocus("unknown-user");

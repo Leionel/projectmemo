@@ -16,6 +16,7 @@ import { SettingsService } from '../services/SettingsService';
 import { SessionStore } from '../services/SessionStore';
 import { AuthService } from '../services/AuthService';
 import { WidgetDataService } from '../services/WidgetDataService';
+import { GlobalFocusPanel } from '../components/GlobalFocusPanel';
 import { LoginView } from '../components/LoginView';
 import { DateOnly } from '../common/DateOnly';
 import { ReminderSettingsView } from '../components/ReminderSettingsView';
@@ -24,7 +25,7 @@ import { ReadinessBreakdownSheet } from '../components/ReadinessBreakdownSheet';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily, PMInteraction, PMMotion, PMMaterial, PMTransition } from '../common/DesignTokens';
 import { LoadingStateView, ErrorStateView, EmptyStateView } from '../components/AsyncStateView';
 import { SeverityBadge, StatusBadge, MemoryTypeBadge, CategoryBadge, TemporalBadge } from '../components/MetricBadge';
-import { FolderIcon, TaskIcon, MemoryIcon, SettingsIcon, AlertIcon, BookOpenIcon, PaperclipIcon, ClockIcon, SearchIcon, PlusIcon } from '../components/PMIcons';
+import { DashboardIcon, FolderIcon, TaskIcon, MemoryIcon, SettingsIcon, AlertIcon, BookOpenIcon, PaperclipIcon, ClockIcon, SearchIcon, PlusIcon } from '../components/PMIcons';
 import { DeadlineBadge } from '../components/DeadlineBadge';
 import { TextFormatters } from '../common/TextFormatters';
 import { Constants } from '../common/Constants';
@@ -47,7 +48,8 @@ class MemoryTypeFilter {
 @Entry
 @Component
 struct Index {
-  @State currentMainTabIndex: number = 0;
+  @State currentMainTabIndex: number = 4;
+  @State focusRefreshKey: number = 0;
   @StorageProp(PMStorageKey.WIDTH_BP) widthBp: string = PMWidthBp.SM;
 
   // 认证与会话状态
@@ -195,6 +197,7 @@ struct Index {
 
   private handleSessionExpired(message: string = '登录已失效，请重新登录'): void {
     this.isAuthenticated = false;
+    this.currentMainTabIndex = 4;
     this.currentUser = new UserInfo();
     this.projects = [];
     this.archivedProjects = [];
@@ -208,6 +211,7 @@ struct Index {
   }
 
   private handleLoginSuccess(): void {
+    this.currentMainTabIndex = 4;
     this.isAuthenticated = true;
     this.currentUser = SessionStore.getUser();
     this.sessionExpiresAt = SessionStore.getExpiresAt();
@@ -242,6 +246,7 @@ struct Index {
     if (!this.isAuthenticated) {
       return;
     }
+    this.focusRefreshKey++;
     this.openPendingNotification();
     if (!this.isLoading) {
       this.loadAllData(true);
@@ -257,6 +262,10 @@ struct Index {
       this.closeCreateDialog();
       return true;
     }
+    if (this.showSettingsSheet) { this.showSettingsSheet = false; return true; }
+    if (this.showGlobalCapture) { if (!this.gcSubmitting) this.showGlobalCapture = false; return true; }
+    if (this.showGlobalTodo) { if (!this.gtSubmitting) this.showGlobalTodo = false; return true; }
+    if (this.currentMainTabIndex === 3) { this.currentMainTabIndex = 4; return true; }
     return false;
   }
 
@@ -630,11 +639,13 @@ struct Index {
   }
 
   // ----------------------------------------------------
-  // 底部导航栏 Bar (一级 4 项：项目 / 记忆 / 待办 / 设置)
+  // 底部导航栏 Bar (一级 4 项：焦点 / 项目 / 记忆 / 行动；设置位于右上角)
   // ----------------------------------------------------
   @Builder
   private MainTabItemIcon(index: number) {
-    if (index === 0) {
+    if (index === 4) {
+      DashboardIcon({ isSelected: this.currentMainTabIndex === 4, iconSize: 20 })
+    } else if (index === 0) {
       FolderIcon({ isSelected: this.currentMainTabIndex === 0, iconSize: 20 })
     } else if (index === 1) {
       MemoryIcon({ isSelected: this.currentMainTabIndex === 1, iconSize: 20 })
@@ -673,10 +684,10 @@ struct Index {
   @Builder
   private MainBottomBar() {
     Row() {
+      this.MainTabBarItem(4, '焦点')
       this.MainTabBarItem(0, '项目')
       this.MainTabBarItem(1, '记忆')
-      this.MainTabBarItem(2, '待办')
-      this.MainTabBarItem(3, '设置')
+      this.MainTabBarItem(2, '行动')
     }
     .width('100%')
     .padding({ top: 4, bottom: 4 })
@@ -935,7 +946,7 @@ struct Index {
       return '记忆';
     }
     if (this.currentMainTabIndex === 2) {
-      return '待办';
+      return '行动';
     }
     return '设置';
   }
@@ -1458,7 +1469,7 @@ struct Index {
                     .onClick(() => {
                       router.pushUrl({
                         url: 'pages/ProjectHome',
-                        params: { projectId: action.projectId }
+                        params: { projectId: action.projectId, tab: 'actions', actionId: action.id }
                       });
                     })
                 }
@@ -2777,14 +2788,16 @@ struct Index {
           Column() {
             Row() {
               Row() {
-                SearchIcon({ iconSize: 20 })
+                if (this.currentMainTabIndex < 3) { SearchIcon({ iconSize: 20 }) }
+                else { DashboardIcon({ iconSize: 20, isSelected: this.currentMainTabIndex === 4 }) }
               }
               .width(44)
               .height(44)
               .justifyContent(FlexAlign.Center)
-              .accessibilityText(this.searchOpen ? '关闭搜索' : `搜索${this.searchTargetName()}`)
+              .accessibilityText(this.currentMainTabIndex < 3 ? (this.searchOpen ? '关闭搜索' : `搜索${this.searchTargetName()}`) : '返回焦点')
               .onClick(() => {
-                this.toggleSearch();
+                if (this.currentMainTabIndex < 3) this.toggleSearch();
+                else this.currentMainTabIndex = 4;
               })
 
               Row() {
@@ -2798,30 +2811,30 @@ struct Index {
                   .fontSize(PMFontSize.PRIMARY_JUDGEMENT)
                   .fontFamily(PMFontFamily.BRAND_SERIF)
                   .fontColor(PMColors.INK_PRIMARY)
+                  .maxLines(1)
+                  .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
               .layoutWeight(1)
               .justifyContent(FlexAlign.Center)
-              .accessibilityText('忆程 ProjectMemo，点击打开设置')
+              .accessibilityText('忆程 ProjectMemo，返回焦点')
               .onClick(() => {
-                this.currentMainTabIndex = 3;
+                this.currentMainTabIndex = 4;
               })
 
-              Row() {
-                if (this.currentMainTabIndex !== 3) {
-                  PlusIcon({ iconSize: 20, iconColor: PMColors.BRAND })
-                }
+              if (this.currentMainTabIndex < 3) {
+                Row() { PlusIcon({ iconSize: 20, iconColor: PMColors.BRAND }) }
+                  .width(44).height(44).justifyContent(FlexAlign.Center)
+                  .accessibilityText(this.createActionName())
+                  .onClick(() => { this.openContextualCreate(); })
               }
-              .width(44)
-              .height(44)
-              .justifyContent(FlexAlign.Center)
-              .accessibilityText(this.createActionName())
-              .onClick(() => {
-                this.openContextualCreate();
-              })
+              Row() { SettingsIcon({ iconSize: 20, isSelected: this.currentMainTabIndex === 3 }) }
+                .width(44).height(44).justifyContent(FlexAlign.Center)
+                .accessibilityText('打开设置')
+                .onClick(() => { this.currentMainTabIndex = 3; this.loadLlmSettings(); })
             }
             .width('100%')
 
-            if (this.searchOpen && this.currentMainTabIndex !== 3) {
+            if (this.searchOpen && this.currentMainTabIndex < 3) {
               Row() {
                 TextInput({ text: this.globalSearchQuery, placeholder: this.searchPlaceholder() })
                   .onChange((v: string) => {
@@ -2853,7 +2866,11 @@ struct Index {
           .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
 
         Column() {
-          if (this.isLoading) {
+          if (this.currentMainTabIndex === 4) {
+            GlobalFocusPanel({ refreshKey: this.focusRefreshKey })
+          } else if (this.currentMainTabIndex === 3) {
+            this.SettingsTab()
+          } else if (this.isLoading) {
             LoadingStateView({ message: '正在同步项目档案...' })
           } else if (this.errorMessage !== '') {
             ErrorStateView({

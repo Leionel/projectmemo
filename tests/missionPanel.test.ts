@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import {createElement} from "react";
+import {renderToStaticMarkup} from "react-dom/server";
 import {render,screen,fireEvent,waitFor,cleanup} from "@testing-library/react";
 import {describe,it,expect,vi,afterEach} from "vitest";
 import {MissionPanel} from "@/components/MissionPanel";
@@ -14,6 +15,16 @@ function fixture(action=false){
  return{requests,mission};
 }
 describe("Mission 面板调用方",()=>{
+ it("表单在服务端输出中不可提前编辑，客户端就绪后才接收委托目标",()=>{
+  fixture();const markup=renderToStaticMarkup(createElement(MissionPanel,{projectId:"p"}));
+  const holder=document.createElement("div");holder.innerHTML=markup;
+  expect(holder.querySelector<HTMLTextAreaElement>("#mission-goal")!.disabled).toBe(true);
+  render(createElement(MissionPanel,{projectId:"p"}));
+  const field=screen.getByRole("textbox",{name:"委托目标"}) as HTMLTextAreaElement;
+  expect(field.disabled).toBe(false);fireEvent.change(field,{target:{value:"准备有来源的阶段汇报"}});
+  expect(field.value).toBe("准备有来源的阶段汇报");
+ });
+
  it("模板写入真实只读约束但不代勾云模型许可；丢失响应先读回并保留请求编号",async()=>{
   fixture();const original=globalThis.fetch;const requests:Array<{requestId:string;missionConstraints:unknown;llmContextApproved:boolean}>=[];
   vi.stubGlobal("fetch",vi.fn(async(input,init)=>{if(input==="/api/missions"&&init?.method==="POST"){requests.push(JSON.parse(init.body as string));throw new Error("response lost");}return original(input,init);}));

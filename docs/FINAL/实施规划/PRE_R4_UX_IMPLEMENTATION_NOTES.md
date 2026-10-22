@@ -1,5 +1,9 @@
 # Pre-R4 UX 交付与实施记录
 
+## 当前交付位置（2026-10-22 后续）
+
+代码已通过15eb02f合并回D:/Projects/hongmen，当前分支codex/r3-runtime-research。发布工作树的历史记录不覆盖此处后续改动。5f98a2e修正登录显示，3c3d577收紧Web工作台，609e097加入全局焦点/记忆/行动。新导航及README收尾详见[本轮核查](WEB_UI_REFINEMENT_2026-10-22.md)；原计划逐项对账见[F5](PRE_R4_UX_FOLLOWUP.md)。未push、未部署，用户本机签名配置不提交。
+
 ## 两部分顺序
 
 北京时间2026-10-22 03:30后启动。第一部分先交付设计文档，第二部分再按UX阶段实施；不以代码替代文档交付。UI工作使用最新Web基线的发布工作树 `D:/Projects/hongmen-r3-release-merge`，独立分支 `codex/pre-r4-ux`；主工作树 `D:/Projects/hongmen` 的用户修改不动。R4后端、付费调用和部署不在本次实施范围。

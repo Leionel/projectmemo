@@ -254,6 +254,10 @@ struct ProjectHome {
     if (this.projectId !== '') WidgetDataService.selectProject(getContext(this), this.projectId).catch(() => {});
     if (params['tab'] === 'memory') {
       this.currentTabIndex = 1;
+      this.expandedCardId = params['cardId'] ?? '';
+    } else if (params['tab'] === 'actions') {
+      this.currentTabIndex = 2;
+      this.focusedActionId = params['actionId'] ?? '';
     }
     if (this.projectId === '') {
       this.routeError = '页面参数缺失，项目ID无效';
@@ -4382,6 +4386,11 @@ struct ProjectHome {
         if (this.focusedActionId !== '') {
           ListItem() {
             Button('查看全部待办').onClick(() => { this.focusedActionId = ''; })
+          }
+        }
+        if (this.focusedActionId !== '' && !this.actions.some((item: ActionItem) => item.id === this.focusedActionId)) {
+          ListItem() {
+            Text('这项行动已移除或当前不可访问，可查看全部行动。').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY)
           }
         }
         ForEach(this.focusedActionId === '' ? this.actions : this.actions.filter((item: ActionItem) => item.id === this.focusedActionId), (action: ActionItem) => {

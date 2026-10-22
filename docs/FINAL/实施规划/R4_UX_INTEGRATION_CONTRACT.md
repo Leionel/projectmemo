@@ -166,3 +166,15 @@ R4建议开关TWIN_READ/DECISION_PREVIEW/DECISION_CONFIRM/PROACTIVE_IMPACT/SENSI
 | 主动/感知/经验 | 宿主/权限/生命周期/停用原型 | W5/TP、TE、TB各自真实服务与效果证据 |
 
 Pre-R4验收只要求N能力真实可用、S有明确规格、R未冒充上线。R4接入再跑新增路径；不能用Pre-R4原型通过替代R4工程、真实模型、设备或发布Gate。UX-4冻结本文时记录仍待W0/W1/W2确定的具体schema/读回方式，不为了“冻结”编造已存在字段。
+
+
+## Pre-R4 全局焦点接口（2026-10-22 增量）
+
+已实现GET /api/workspace/focus，Web /focus和鸿蒙焦点共用只读投影。现有项目内summary保持原契约，不扩展成第二套Runtime。
+
+- 顶层schemaVersion=1、missionEnabled、archived、hasMore，以及waiting/running/actions/reminders/records分组。Mission同时要求ownerUserId=当前用户和项目OWNER成员资格；其他对象先按当前用户项目成员关系过滤。无权项目不返回数量、标题或ID。
+- 每项id、projectId、projectTitle、title、detail、status、activity、activityAt、recordedAt、dueAt。waiting/running/actions/reminders各最多6条，records最多3条；Web/原生先展示每组3条，剩余可展开。hasMore仅说明摘要被截断，不是完整清单或完成比例。
+- activity仅来自已有成功Step或保存Output，activityAt使用其持久时间；recordedAt仅用于KnowledgeCard.createdAt，dueAt仅用于ActionItem.dueAt。两者与访问时间、事实有效期、原实验发生时间互不替代。
+- archived=1明确包含归档项目，默认排除。Mission能力关闭返回missionEnabled=false及空Mission组，行动/提醒仍可查看；401/加载失败显示错误，不当作没有事项。
+- 该DTO没有审批实体ID、提案哈希、源修订确认参数或写入命令。用户进入原MissionDetail/项目行动/InterventionDetail/知识卡后才能核对来源和提交原业务操作。
+- 全局记忆/memory和行动/actions另有成员范围内的只读聚合，按项目、关键词、记忆类型筛选；每类30条稳定分页。它们不进行跨项目Mission、经验学习、Twin推理或多跳影响分析。

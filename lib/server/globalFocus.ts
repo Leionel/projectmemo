@@ -20,14 +20,14 @@ export async function loadGlobalFocus(userId: string, archived = false): Promise
     db.agentIntervention.findMany({ where: { project: projectScope, isSimulated: false, OR: [{ status: "OPEN" }, { status: "SNOOZED", snoozedUntil: { lte: now } }] }, select: { id: true, title: true, content: true, status: true, createdAt: true, project }, orderBy: [{ severity: "desc" }, { createdAt: "desc" }, { id: "desc" }], take: LIMIT + 1 }),
     db.knowledgeCard.findMany({ where: { project: projectScope, archivedAt: null }, select: { id: true, title: true, summary: true, createdAt: true, project }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 4 }),
   ]);
-  const common = (row: { id: string; title: string; project: { id: string; title: string; archivedAt: Date | null } }): FocusEntry => ({ id: row.id, projectId: row.project.id, projectTitle: `${row.project.title}${row.project.archivedAt ? " · 已归档" : ""}`, title: row.title, detail: "", status: "", activity: "", activityAt: "", recordedAt: "" });
+  const common = (row: { id: string; title: string; project: { id: string; title: string; archivedAt: Date | null } }): FocusEntry => ({ id: row.id, projectId: row.project.id, projectTitle: `${row.project.title}${row.project.archivedAt ? " · 已归档" : ""}`, title: row.title, detail: "", status: "", activity: "", activityAt: "", recordedAt: "", dueAt: "" });
   const missions = (rows: typeof waiting) => rows.slice(0, LIMIT).map(row => {
     const summary = presentMissionSummary(row);
     return { ...common({ ...row, title: row.goal }), detail: summary.attention ?? "", status: row.status, activity: summary.activity ?? "", activityAt: summary.activityAt ?? "" };
   });
   return { schemaVersion: 1, missionEnabled, archived, hasMore: [waiting, running, actions, reminders].some(rows => rows.length > LIMIT),
     waiting: missions(waiting), running: missions(running),
-    actions: actions.slice(0, LIMIT).map(row => ({ ...common(row), status: row.status, detail: row.description ?? "", recordedAt: row.dueAt?.toISOString() ?? "" })),
+    actions: actions.slice(0, LIMIT).map(row => ({ ...common(row), status: row.status, detail: row.description ?? "", dueAt: row.dueAt?.toISOString() ?? "" })),
     reminders: reminders.slice(0, LIMIT).map(row => ({ ...common(row), status: row.status, detail: row.content })),
     records: records.slice(0, 3).map(row => { const text = readableRecord(row.title, row.summary); return { ...common({ ...row, title: text.title }), detail: text.summary, recordedAt: row.createdAt.toISOString() }; }),
   };

@@ -114,7 +114,7 @@ export struct LoginView {
               .fontColor(PMColors.INK_PRIMARY)
               .margin({ bottom: PMSpacing.XS })
 
-            TextInput({ placeholder: '请输入复赛演示账号', text: this.username })
+            TextInput({ placeholder: '请输入账号', text: this.username })
               .fontSize(PMFontSize.BODY)
               .height(48)
               .borderRadius(PMRadius.SM)

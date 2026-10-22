@@ -430,6 +430,14 @@ export type TemporalDecisionStatus =
 /** 面向跨端展示的统一顶层状态；supportState/status 保留细分兼容语义。 */
 export type TemporalTopLevelState = "CURRENT" | "SUPERSEDED" | "CONTESTED" | "UNKNOWN";
 
+/** 时态只描述记录与当前结论的关系，不代表事实经过独立核验。 */
+export const temporalStateLabels: Record<TemporalTopLevelState, string> = {
+  CURRENT: "当前有效",
+  SUPERSEDED: "已被取代",
+  CONTESTED: "存在争议",
+  UNKNOWN: "暂不能确定",
+};
+
 export interface TemporalEvidenceRef {
   entityKind: "card" | "relation";
   entityId: string;

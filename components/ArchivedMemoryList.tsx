@@ -86,7 +86,7 @@ export function ArchivedMemoryList({ projectId }: { projectId: string }) {
     <details>
       <summary className="focus-ring cursor-pointer list-none">
         <p className="archive-label">已归档记忆</p>
-        <h2 id="archived-memory-title" className="mt-2 flex items-center gap-2 text-base font-black text-[var(--navy)]"><ArchiveRestore size={17} className="text-[var(--teal-strong)]" />已归档记忆{cards.length > 0 && <span className="ml-1 rounded-md bg-[var(--paper-strong)] px-1.5 py-0.5 text-[11px] font-bold text-[var(--muted)]">{cards.length}</span>}</h2>
+        <h2 id="archived-memory-title" className="mt-2 flex items-center gap-2 text-base font-black text-[var(--navy)]"><ArchiveRestore size={17} className="text-[var(--teal-strong)]" />已归档记忆{cards.length > 0 && <span className="ml-1 rounded-md bg-[var(--paper-strong)] px-1.5 py-0.5 text-xs font-bold text-[var(--muted)]">{cards.length}</span>}</h2>
         <p className="mt-1 text-xs leading-5 text-[var(--ink-soft)]">归档只影响列表展示，不改变事实的时态状态；恢复后不会复活已被取代的旧事实。</p>
       </summary>
 
@@ -100,12 +100,12 @@ export function ArchivedMemoryList({ projectId }: { projectId: string }) {
       {!loading && cards.length > 0 && <ul className="mt-3 space-y-2">
         {cards.map((card) => <li key={card.id} className="rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-md bg-[var(--paper-strong)] px-2 py-0.5 text-[11px] font-bold text-[var(--ink-soft)]">{knowledgeTypeLabels[card.type as KnowledgeTypeValue] ?? card.type}</span>
+            <span className="rounded-md bg-[var(--paper-strong)] px-2 py-0.5 text-xs font-bold text-[var(--ink-soft)]">{knowledgeTypeLabels[card.type as KnowledgeTypeValue] ?? card.type}</span>
             <span className="text-sm font-bold text-[var(--navy)]">{card.title}</span>
-            <span className="text-[11px] text-[var(--muted)]">{card.archivedAt ? `归档于 ${new Date(card.archivedAt).toLocaleString("zh-CN", { hour12: false })}` : ""}</span>
+            <span className="text-xs text-[var(--muted)]">{card.archivedAt ? `归档于 ${new Date(card.archivedAt).toLocaleString("zh-CN", { hour12: false })}` : ""}</span>
           </div>
-          <p className="mt-1 text-[11px] leading-5 text-[var(--ink-soft)]">时态：{temporalLabels[card.temporalState] ?? card.temporalState} · {card.displayReason}</p>
-          <button type="button" onClick={() => void restore(card)} disabled={busy !== null} className="focus-ring mt-2 rounded-md bg-[var(--teal-pale)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)] disabled:opacity-50">
+          <p className="mt-1 text-xs leading-5 text-[var(--ink-soft)]">时态：{temporalLabels[card.temporalState] ?? card.temporalState} · {card.displayReason}</p>
+          <button type="button" onClick={() => void restore(card)} disabled={busy !== null} className="focus-ring mt-2 rounded-md bg-[var(--teal-pale)] px-2 py-1 text-xs font-bold text-[var(--teal-strong)] disabled:opacity-50">
             {busy === card.id ? <LoaderCircle size={12} className="mr-1 inline animate-spin" /> : <ArchiveRestore size={12} className="mr-1 inline" />}恢复
           </button>
         </li>)}

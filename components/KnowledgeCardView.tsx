@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ArrowUpRight, Check, ChevronDown, Link2, ListChecks, LoaderCircle, Paperclip, Plus, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { CardEditor } from "@/components/CardEditor";
-import { knowledgeTypeLabels, getKnowledgeTypeColor, type KnowledgeTypeValue, type TemporalEvidenceRef, type TemporalTopLevelState } from "@/lib/types";
+import { knowledgeTypeLabels, getKnowledgeTypeColor, temporalStateLabels, type KnowledgeTypeValue, type TemporalEvidenceRef, type TemporalTopLevelState } from "@/lib/types";
 import { emitWorkspaceChange } from "@/lib/client/workspaceEvents";
 
 type Related = { id: string; title: string; reason: string; score: number };
@@ -17,13 +17,6 @@ export type KnowledgeCardTemporalData = {
 };
 export type KnowledgeCardData = { id: string; type: string; title: string; summary: string; keywords: unknown; relatedTasks: unknown; nextActions: unknown; importance: number; createdAt: Date | string; attachmentId?: string | null; capture: { rawText: string; sourceType: string | null }; outgoingLinks: Array<{ reason: string; score: number; relatedCard: { id: string; title: string } }>; incomingLinks: Array<{ reason: string; score: number; currentCard: { id: string; title: string } }>; temporal?: KnowledgeCardTemporalData };
 
-
-const temporalLabels: Record<TemporalTopLevelState, string> = {
-  CURRENT: "当前有效",
-  SUPERSEDED: "已被取代",
-  CONTESTED: "存在争议",
-  UNKNOWN: "暂不能确定",
-};
 
 const temporalStyles: Record<TemporalTopLevelState, string> = {
   CURRENT: "bg-[var(--teal-pale)] text-[var(--teal-strong)]",
@@ -94,7 +87,7 @@ export function KnowledgeCardView({ card, projectId, compact = false, forcedOpen
       <div role="group" aria-label={`调整《${card.title}》的重要性`} className="flex items-center rounded-lg border border-[var(--rule)] bg-[var(--paper-strong)] p-1">{[1,2,3,4,5].map((value) => <button key={value} type="button" aria-label={`将重要性设为 ${value}`} aria-pressed={card.importance === value} disabled={busy === "importance"} onClick={() => void setImportance(value)} className="focus-ring rounded p-1 disabled:opacity-50"><Star size={14} className={value <= card.importance ? "text-[var(--amber)]" : "text-[var(--rule-strong)]"} fill={value <= card.importance ? "currentColor" : "none"} /></button>)}</div>
     </div>
     <h3 className="mt-4 text-xl font-bold leading-7 [overflow-wrap:anywhere]">{card.title}</h3>
-    {temporal && <div className="mt-2 flex flex-wrap items-center gap-2 text-xs"><span className={`rounded-md px-2 py-1 font-bold ${temporalStyles[temporal.topLevelState]}`}>时态：{temporalLabels[temporal.topLevelState]}</span>{showFull && <span className="text-[var(--muted)]">{temporal.displayReason}</span>}</div>}
+    {temporal && <div className="mt-2 flex flex-wrap items-center gap-2 text-xs"><span className={`rounded-md px-2 py-1 font-bold ${temporalStyles[temporal.topLevelState]}`}>时态：{temporalStateLabels[temporal.topLevelState]}</span>{showFull && <span className="text-[var(--muted)]">{temporal.displayReason}</span>}</div>}
     {card.attachmentId && <div className="mt-2 flex items-center gap-1.5 text-xs text-[var(--teal-strong)]">
       <Paperclip size={13} />
       <a href={`/api/projects/${projectId}/attachments/${card.attachmentId}/file`} target="_blank" rel="noopener noreferrer" className="font-semibold hover:underline">查看关联材料原件</a>
@@ -107,7 +100,7 @@ export function KnowledgeCardView({ card, projectId, compact = false, forcedOpen
 
     {showFull && <>
       {relatedTasks.length > 0 && <div className="mt-4 flex items-start gap-2 text-sm leading-6 text-[var(--ink-soft)]"><ListChecks size={16} className="mt-1 shrink-0 text-[var(--navy)]" /><span><strong className="text-[var(--ink)]">识别出的任务：</strong>{relatedTasks.join("；")}</span></div>}
-      <div className="mt-5 rounded-md border-l-2 border-[var(--teal)] bg-[var(--teal-pale)] p-4"><p className="text-xs font-black uppercase tracking-wider text-[var(--teal-strong)]">下一步建议</p><ul className="mt-2 space-y-2 text-sm leading-6 text-[var(--ink-soft)]">{nextActions.map((action, index) => <li key={`${action}-${index}`} className="flex flex-wrap items-start justify-between gap-2 rounded-lg bg-[var(--paper-strong)] px-2.5 py-2 shadow-sm border border-[var(--rule)]"><span className="flex min-w-0 flex-1 gap-2"><ArrowUpRight size={15} className="mt-1 shrink-0 text-[var(--teal)]" />{action}</span><button type="button" onClick={() => void addAction(action)} disabled={Boolean(busy) || addedActions.has(action)} className="focus-ring shrink-0 rounded-md bg-[var(--card-bg)] px-2 py-1 text-[11px] font-black text-[var(--teal-strong)] border border-[var(--rule)] disabled:opacity-60">{busy === `action:${action}` ? <LoaderCircle size={12} className="mr-1 inline animate-spin" /> : addedActions.has(action) ? <Check size={12} className="mr-1 inline" /> : <Plus size={12} className="mr-1 inline" />}{addedActions.has(action) ? "已在待办" : "加入待办"}</button></li>)}</ul></div>
+      <div className="mt-5 rounded-md border-l-2 border-[var(--teal)] bg-[var(--teal-pale)] p-4"><p className="text-xs font-black uppercase tracking-wider text-[var(--teal-strong)]">下一步建议</p><ul className="mt-2 space-y-2 text-sm leading-6 text-[var(--ink-soft)]">{nextActions.map((action, index) => <li key={`${action}-${index}`} className="flex flex-wrap items-start justify-between gap-2 rounded-lg bg-[var(--paper-strong)] px-2.5 py-2 shadow-sm border border-[var(--rule)]"><span className="flex min-w-0 flex-1 gap-2"><ArrowUpRight size={15} className="mt-1 shrink-0 text-[var(--teal)]" />{action}</span><button type="button" onClick={() => void addAction(action)} disabled={Boolean(busy) || addedActions.has(action)} className="focus-ring shrink-0 rounded-md bg-[var(--card-bg)] px-2 py-1 text-xs font-black text-[var(--teal-strong)] border border-[var(--rule)] disabled:opacity-60">{busy === `action:${action}` ? <LoaderCircle size={12} className="mr-1 inline animate-spin" /> : addedActions.has(action) ? <Check size={12} className="mr-1 inline" /> : <Plus size={12} className="mr-1 inline" />}{addedActions.has(action) ? "已在待办" : "加入待办"}</button></li>)}</ul></div>
       {related.length > 0 && <div className="mt-5 border-t archive-rule pt-4"><div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-[var(--muted)]"><Link2 size={14} /> 相关知识资产</div><div className="mt-3 space-y-2">{related.map((item) => <a href={`#card-${item.id}`} onClick={(event) => { event.preventDefault(); onReveal(item.id); }} key={item.id} className="focus-ring block border-l border-[var(--rule-strong)] bg-[var(--paper-strong)] px-3.5 py-3 text-sm transition hover:border-l-[var(--teal)] hover:bg-[var(--teal-pale)]"><span className="font-bold text-[var(--navy)]">《{item.title}》</span><span className="text-[var(--ink-soft)]">：{item.reason}</span><span className="ml-2 text-xs font-bold text-[var(--teal)]">定位卡片 →</span></a>)}</div></div>}
       {compact && !forcedOpen && <button type="button" onClick={() => setExpanded(false)} className="focus-ring mt-4 inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--muted)] hover:bg-[var(--paper-strong)]"><ChevronDown size={14} className="rotate-180" />收起卡片</button>}
       <CardEditor card={card} onArchived={onArchived ? () => onArchived(card.id, card.title) : undefined} />

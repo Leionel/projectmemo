@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArchiveRestore, Archive, LoaderCircle, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, LoaderCircle, MoreHorizontal, Trash2 } from "lucide-react";
 import { runProjectLifecycleAction } from "@/lib/client/projectLifecycle";
 
 type ProjectCardActionsProps = {
@@ -14,11 +14,12 @@ type ProjectCardActionsProps = {
 };
 
 /**
- * 项目卡片上的归档 / 恢复 / 删除入口。
+ * 项目卡上的归档 / 恢复 / 删除入口，收纳进「更多」菜单，不与「打开项目」竞争视觉权重。
  *
  * 归档是可恢复动作，按下即执行，不弹确认——给它加二次确认反而会让人以为
- * 它和删除一样危险。删除不可恢复，必须二次确认，且确认文案明确写出会失去什么。
- * 删除确认区用 role="alert" 而不是模态框：卡片里再套一层模态框会打断列表浏览。
+ * 它和删除一样危险。删除不可恢复，必须在菜单原位展开二次确认，且确认文案
+ * 明确写出会失去什么。确认区用 role="alert" 而不是模态框：卡片里再套一层模态框
+ * 会打断列表浏览。
  */
 export function ProjectCardActions({ projectId, projectTitle, archived, onDone }: ProjectCardActionsProps) {
   const router = useRouter();
@@ -26,6 +27,7 @@ export function ProjectCardActions({ projectId, projectTitle, archived, onDone }
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState("");
   const busyRef = useRef(false);
+  const menuRef = useRef<HTMLDetailsElement>(null);
 
   async function run(action: "archive" | "restore" | "delete") {
     if (busyRef.current) return;
@@ -49,12 +51,10 @@ export function ProjectCardActions({ projectId, projectTitle, archived, onDone }
     router.refresh();
   }
 
-  const quietButton = "focus-ring inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold transition disabled:opacity-60";
-
   return (
-    <div className="mt-4 border-t archive-rule pt-4">
+    <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
       {confirming ? (
-        <div role="alert" className="rounded-md bg-[var(--brick-pale)] p-3">
+        <div role="alert" className="w-full rounded-md bg-[var(--brick-pale)] p-3">
           <p className="text-xs font-bold text-[var(--brick)]">
             删除「{projectTitle}」会同时删除它的全部卡片、行动与成果，且无法恢复。确认删除？
           </p>
@@ -79,35 +79,38 @@ export function ProjectCardActions({ projectId, projectTitle, archived, onDone }
           </div>
         </div>
       ) : (
-        <div className="flex flex-wrap items-center justify-end gap-1.5">
-          <button
-            type="button"
-            onClick={() => void run(archived ? "restore" : "archive")}
-            disabled={busy}
-            aria-label={archived ? `恢复项目 ${projectTitle}` : `归档项目 ${projectTitle}`}
-            className={`${quietButton} text-[var(--ink-soft)] hover:bg-[var(--paper-strong)] hover:text-[var(--teal-strong)]`}
-          >
-            {busy
-              ? <LoaderCircle className="animate-spin" size={13} aria-hidden="true" />
-              : archived
-                ? <ArchiveRestore size={13} aria-hidden="true" />
-                : <Archive size={13} aria-hidden="true" />}
-            {archived ? "恢复" : "归档"}
-          </button>
-          <button
-            type="button"
-            onClick={() => { setConfirming(true); setError(""); }}
-            disabled={busy}
-            aria-label={`删除项目 ${projectTitle}`}
-            className={`${quietButton} text-[var(--brick)] hover:bg-[var(--brick-pale)]`}
-          >
-            <Trash2 size={13} aria-hidden="true" />
-            删除
-          </button>
-        </div>
+        <details className="relative" ref={menuRef}>
+          <summary className="focus-ring flex cursor-pointer list-none items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--muted)] hover:bg-[var(--paper)] hover:text-[var(--ink)]">
+            <MoreHorizontal size={14} aria-hidden="true" />项目操作
+          </summary>
+          <div className="absolute right-0 z-20 mt-1 w-44 rounded-lg border border-[var(--rule)] bg-[var(--card-bg)] p-1 shadow-[var(--shadow-md)]">
+            <button
+              type="button"
+              onClick={() => { menuRef.current?.removeAttribute("open"); void run(archived ? "restore" : "archive"); }}
+              disabled={busy}
+              className="focus-ring flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-xs font-bold text-[var(--ink-soft)] transition hover:bg-[var(--paper)] hover:text-[var(--ink)] disabled:opacity-60"
+            >
+              {busy
+                ? <LoaderCircle className="animate-spin" size={13} aria-hidden="true" />
+                : archived
+                  ? <ArchiveRestore size={13} aria-hidden="true" />
+                  : <Archive size={13} aria-hidden="true" />}
+              {archived ? "恢复项目" : "归档项目"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { menuRef.current?.removeAttribute("open"); setConfirming(true); setError(""); }}
+              disabled={busy}
+              className="focus-ring flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-xs font-bold text-[var(--brick)] transition hover:bg-[var(--brick-pale)] disabled:opacity-60"
+            >
+              <Trash2 size={13} aria-hidden="true" />
+              删除项目
+            </button>
+          </div>
+        </details>
       )}
 
-      {error && <p role="alert" aria-live="polite" className="mt-2 text-right text-xs font-bold text-[var(--brick)]">{error}</p>}
+      {error && <p role="alert" aria-live="polite" className="w-full text-right text-xs font-bold text-[var(--brick)]">{error}</p>}
     </div>
   );
 }

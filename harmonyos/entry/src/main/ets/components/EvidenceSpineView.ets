@@ -20,36 +20,12 @@ export struct EvidenceSpineView {
   @Prop judgementTitle: string = '';
   @Prop judgementContent: string = '';
 
-  private extractTimeLabel(fact: string, evaluatedAt?: string): string {
+  private extractTimeLabel(fact: string): string {
     const match = fact.match(/(\d{4}[-/年]\d{1,2}[-/月]\d{1,2}[日]?)|(\d{1,2}月\d{1,2}日)/);
     if (match && match[0]) {
       return match[0];
     }
-    if (evaluatedAt && evaluatedAt.length >= 10) {
-      try {
-        const d = new Date(evaluatedAt);
-        if (!isNaN(d.getTime())) {
-          const month = d.getMonth() + 1;
-          const day = d.getDate();
-          return `${month}月${day}日`;
-        }
-      } catch (_e) {
-        // ignore
-      }
-    }
-    return '时间未知';
-  }
-
-  private extractSourceLabel(fact: string): string {
-    if (fact.includes('截止') || fact.includes('倒计时')) return '截止日期';
-    if (fact.includes('要求') || fact.includes('比赛') || fact.includes('竞赛')) return '参赛要求';
-    if (fact.includes('实验')) return '实验记录';
-    if (fact.includes('行动') || fact.includes('待办')) return '行动闭环';
-    if (fact.includes('活动') || fact.includes('停滞')) return '推进节奏';
-    if (fact.includes('论文') || fact.includes('笔记')) return '论文笔记';
-    if (fact.includes('风险')) return '风险识别';
-    if (fact.includes('材料') || fact.includes('大纲')) return '交付材料';
-    return '项目记录';
+    return '事实时间未注明';
   }
 
   private indexLabelOf(position: number): string {
@@ -59,12 +35,12 @@ export struct EvidenceSpineView {
   private getSpineNodes(): SpineNodeItem[] {
     const nodes: SpineNodeItem[] = [];
 
-    // 1. 如果有后端返回的真实 facts，按真实时间与来源解析，不伪造任何日期
+    // Facts have no per-fact source pointer. Preserve the supplied text without inventing provenance.
     if (this.evidence.facts && this.evidence.facts.length > 0) {
       this.evidence.facts.forEach((fact: string, position: number) => {
         const item = new SpineNodeItem();
-        item.timeLabel = this.extractTimeLabel(fact, this.evidence.evaluatedAt);
-        item.sourceLabel = this.extractSourceLabel(fact);
+        item.timeLabel = this.extractTimeLabel(fact);
+        item.sourceLabel = '来源待核对';
         if (this.isSimulated) {
           item.sourceLabel = `[模拟] ${item.sourceLabel}`;
         }
@@ -87,6 +63,7 @@ export struct EvidenceSpineView {
           ? `依据规则：${TextFormatters.ruleDescriptionToChinese(this.evidence.rule)}（未附加具体事实）`
           : '暂无结构化证据记录，建议核对上下文后再作决策。';
       }
+
       nodes.push(item);
     }
 
@@ -132,6 +109,13 @@ export struct EvidenceSpineView {
         .margin({ bottom: PMSpacing.MD })
       }
 
+      if (this.evidence.evaluatedAt !== undefined && this.evidence.evaluatedAt !== null && this.evidence.evaluatedAt !== '') {
+        Text(`判断记录于 ${this.evidence.evaluatedAt.substring(0, 10)}；事实日期以各条原文为准。`)
+          .fontSize(PMFontSize.CAPTION)
+          .fontColor(PMColors.INK_SECONDARY)
+          .margin({ bottom: PMSpacing.SM })
+      }
+
       // 纵向证据脊线流 (Evidence Spine)
       Column() {
         ForEach(this.getSpineNodes(), (node: SpineNodeItem, index: number) => {
@@ -154,14 +138,14 @@ export struct EvidenceSpineView {
 
             // 右侧：节点事实卡片
             Column() {
-              Row() {
+              Flex({ wrap: FlexWrap.Wrap }) {
                 Text(node.indexLabel !== '' ? `${node.indexLabel} · ${node.timeLabel}` : node.timeLabel)
-                  .fontSize(PMFontSize.SECONDARY)
+                  .fontSize(12)
                   .fontWeight(node.isJudgement ? FontWeight.Bold : FontWeight.Medium)
                   .fontColor(node.isJudgement ? PMColors.RISK : PMColors.INK_SECONDARY)
 
                 Text(` · ${node.sourceLabel}`)
-                  .fontSize(PMFontSize.SECONDARY)
+                  .fontSize(12)
                   .fontColor(PMColors.INK_TERTIARY)
               }
 
@@ -183,7 +167,7 @@ export struct EvidenceSpineView {
       .width('100%')
       .padding({ top: PMSpacing.SM })
 
-      Text('编号只是来源引用索引，方便与原始记录对照；来源存在不等于结论已证实。')
+      Text('事实中的日期可能来自历史记录；请核对原始来源与当前项目状态。')
         .fontSize(PMFontSize.CAPTION)
         .fontColor(PMColors.INK_TERTIARY)
         .lineHeight(18)

@@ -17,6 +17,6 @@ export function ProjectOverviewToolbar({projectId}:{projectId:string}) {
  },[ask,router]);
  return <div className="flex flex-wrap items-center gap-2" aria-label="项目快捷操作">
   <Link href={`/projects/${projectId}/records#capture-box`} className="workspace-tool"><Plus size={14} aria-hidden="true"/>记录进展</Link>
-  <Link href={ask} className="workspace-tool workspace-tool-tinted" aria-keyshortcuts="Control+j Meta+j"><MessageSquare size={14} aria-hidden="true"/>问忆程<kbd className="ml-1 hidden font-mono text-[10px] opacity-65 sm:inline">⌘/Ctrl J</kbd></Link>
+  <Link href={ask} className="workspace-tool workspace-tool-tinted" aria-keyshortcuts="Control+j Meta+j"><MessageSquare size={14} aria-hidden="true"/>问忆程<kbd className="ml-1 hidden font-mono text-[11px] opacity-65 sm:inline">⌘/Ctrl J</kbd></Link>
  </div>;
 }

@@ -1,0 +1,310 @@
+
+> projectmemo@0.1.0 test:e2e
+> tsx scripts/setup-e2e.ts && tsx scripts/run-e2e.ts
+
+
+[e2e setup] generate Prisma Client
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+
+✔ Generated Prisma Client (7.8.0) to .\lib\generated\prisma in 383ms
+
+
+[e2e setup] apply migrations to projectmemo-e2e.db
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+Datasource "db": SQLite database "projectmemo-e2e.db" at "file:D:/Projects/hongmen/prisma/projectmemo-e2e.db"
+
+26 migrations found in prisma/migrations
+
+Applying migration `20260711000000_init`
+Applying migration `20260713000000_agent_loop`
+Applying migration `20260715000000_projectmemo_v2`
+Applying migration `20260826000000_xiaoyi_adapter_receipts`
+Applying migration `20260830000000_temporal_evidence_ledger`
+Applying migration `20260912000000_artifact_source_refs`
+Applying migration `20260912010000_memory_lifecycle`
+Applying migration `20260912020000_project_state_snapshots`
+Applying migration `20260912030000_intervention_policy`
+Applying migration `20260912040000_action_feasibility`
+Applying migration `20260912210000_project_state_recurrence_key`
+Applying migration `20260912220000_project_state_sequence`
+Applying migration `20260912230000_artifact_claims`
+Applying migration `20260914080000_phase1_reliability`
+Applying migration `20260915080000_phase2_consistency`
+Applying migration `20260915084500_notification_delivery_receipt`
+Applying migration `20260915120000_auth_and_project_membership`
+Applying migration `20260917120000_project_archive`
+Applying migration `20260920100000_project_episode_schedule`
+Applying migration `20260920140000_r2_correctness_and_sync`
+Applying migration `20260921110000_memory_merge_idempotency`
+Applying migration `20260921160000_action_reminder_receipts`
+Applying migration `20260921220000_action_reminder_request_receipts`
+Applying migration `20261020080000_mission_runtime`
+Applying migration `20261020120000_mission_external_sources`
+Applying migration `20261021080000_mission_artifact_receipts`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260711000000_init/
+    └─ migration.sql
+  └─ 20260713000000_agent_loop/
+    └─ migration.sql
+  └─ 20260715000000_projectmemo_v2/
+    └─ migration.sql
+  └─ 20260826000000_xiaoyi_adapter_receipts/
+    └─ migration.sql
+  └─ 20260830000000_temporal_evidence_ledger/
+    └─ migration.sql
+  └─ 20260912000000_artifact_source_refs/
+    └─ migration.sql
+  └─ 20260912010000_memory_lifecycle/
+    └─ migration.sql
+  └─ 20260912020000_project_state_snapshots/
+    └─ migration.sql
+  └─ 20260912030000_intervention_policy/
+    └─ migration.sql
+  └─ 20260912040000_action_feasibility/
+    └─ migration.sql
+  └─ 20260912210000_project_state_recurrence_key/
+    └─ migration.sql
+  └─ 20260912220000_project_state_sequence/
+    └─ migration.sql
+  └─ 20260912230000_artifact_claims/
+    └─ migration.sql
+  └─ 20260914080000_phase1_reliability/
+    └─ migration.sql
+  └─ 20260915080000_phase2_consistency/
+    └─ migration.sql
+  └─ 20260915084500_notification_delivery_receipt/
+    └─ migration.sql
+  └─ 20260915120000_auth_and_project_membership/
+    └─ migration.sql
+  └─ 20260917120000_project_archive/
+    └─ migration.sql
+  └─ 20260920100000_project_episode_schedule/
+    └─ migration.sql
+  └─ 20260920140000_r2_correctness_and_sync/
+    └─ migration.sql
+  └─ 20260921110000_memory_merge_idempotency/
+    └─ migration.sql
+  └─ 20260921160000_action_reminder_receipts/
+    └─ migration.sql
+  └─ 20260921220000_action_reminder_request_receipts/
+    └─ migration.sql
+  └─ 20261020080000_mission_runtime/
+    └─ migration.sql
+  └─ 20261020120000_mission_external_sources/
+    └─ migration.sql
+  └─ 20261021080000_mission_artifact_receipts/
+    └─ migration.sql
+
+All migrations have been successfully applied.
+
+[e2e setup] seed the isolated database
+Seed complete: 人工智能创意赛 忆程 ProjectMemo 作品开发 (cmvjpqqem0000288oroh4qtv0), 8 captures
+
+[e2e setup] create the E2E auth identity
+[e2e setup] auth identity ready: e2e-reviewer -> 人工智能创意赛 忆程 ProjectMemo 作品开发 (cmvjpqqem0000288oroh4qtv0)
+
+[e2e setup] Ready: D:\Projects\hongmen\prisma\projectmemo-e2e.db
+
+[e2e] build isolated production server
+▲ Next.js 16.2.11 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+Turbopack build encountered 1 warnings:
+./next.config.ts
+Encountered unexpected file in NFT list
+A file was traced that indicates that the whole project was traced unintentionally. Somewhere in the import trace below, there are:
+- filesystem operations (like path.join, path.resolve or fs.readFile), or
+- very dynamic requires (like require('./' + foo)).
+To resolve this, you can
+- remove them if possible, or
+- only use them in development, or
+- make sure they are statically scoped to some subfolder: path.join(process.cwd(), 'data', bar), or
+- add ignore comments: path.join(/*turbopackIgnore: true*/ process.cwd(), bar)
+
+Import trace:
+  App Route:
+    ./next.config.ts
+    ./lib/storage/attachmentStorage.ts
+    ./app/api/projects/[id]/attachments/[attachmentId]/file/route.ts
+
+
+✓ Compiled successfully in 6.6s
+  Running TypeScript ...
+  Finished TypeScript in 16.2s ...
+  Collecting page data using 27 workers ...
+  Generating static pages using 27 workers (0/22) ...
+  Generating static pages using 27 workers (5/22) 
+  Generating static pages using 27 workers (10/22) 
+  Generating static pages using 27 workers (16/22) 
+✓ Generating static pages using 27 workers (22/22) in 536ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /actions
+├ ƒ /api/auth/login
+├ ƒ /api/auth/logout
+├ ƒ /api/auth/me
+├ ƒ /api/missions
+├ ƒ /api/missions/[id]
+├ ƒ /api/missions/[id]/approvals/[approvalId]
+├ ƒ /api/missions/[id]/cancel
+├ ƒ /api/missions/[id]/constraints
+├ ƒ /api/missions/[id]/continuation-policy
+├ ƒ /api/missions/[id]/continuations
+├ ƒ /api/missions/[id]/continuations/confirm
+├ ƒ /api/missions/[id]/continuations/preview
+├ ƒ /api/missions/[id]/events
+├ ƒ /api/missions/[id]/input
+├ ƒ /api/missions/[id]/outputs/[outputId]
+├ ƒ /api/missions/[id]/outputs/[outputId]/artifact-confirm
+├ ƒ /api/missions/[id]/outputs/[outputId]/artifact-preview
+├ ƒ /api/missions/[id]/pause
+├ ƒ /api/missions/[id]/replan
+├ ƒ /api/missions/[id]/research-scope
+├ ƒ /api/missions/[id]/resume
+├ ƒ /api/missions/[id]/sources
+├ ƒ /api/missions/[id]/sources/[sourceId]
+├ ƒ /api/missions/capabilities
+├ ƒ /api/missions/summary
+├ ƒ /api/projects
+├ ƒ /api/projects/[id]
+├ ƒ /api/projects/[id]/actions
+├ ƒ /api/projects/[id]/actions/[actionId]
+├ ƒ /api/projects/[id]/actions/[actionId]/reminder
+├ ƒ /api/projects/[id]/actions/feasibility
+├ ƒ /api/projects/[id]/agent/chat
+├ ƒ /api/projects/[id]/agent/evaluate
+├ ƒ /api/projects/[id]/agent/runs
+├ ƒ /api/projects/[id]/agent/tools
+├ ƒ /api/projects/[id]/archive
+├ ƒ /api/projects/[id]/artifacts
+├ ƒ /api/projects/[id]/artifacts/[artifactId]/audit
+├ ƒ /api/projects/[id]/attachment-revisions/[revisionId]
+├ ƒ /api/projects/[id]/attachments
+├ ƒ /api/projects/[id]/attachments/[attachmentId]/correct
+├ ƒ /api/projects/[id]/attachments/[attachmentId]/file
+├ ƒ /api/projects/[id]/attachments/[attachmentId]/retry
+├ ƒ /api/projects/[id]/attachments/[attachmentId]/revisions
+├ ƒ /api/projects/[id]/captures
+├ ƒ /api/projects/[id]/cards/[cardId]
+├ ƒ /api/projects/[id]/cards/[cardId]/lifecycle
+├ ƒ /api/projects/[id]/cards/[cardId]/relations/propose
+├ ƒ /api/projects/[id]/cards/archived
+├ ƒ /api/projects/[id]/cards/search
+├ ƒ /api/projects/[id]/consolidation
+├ ƒ /api/projects/[id]/consolidation/[receiptId]/revoke
+├ ƒ /api/projects/[id]/consolidation/receipts
+├ ƒ /api/projects/[id]/decisions/confirm-change
+├ ƒ /api/projects/[id]/decisions/impact-preview
+├ ƒ /api/projects/[id]/decisions/timeline
+├ ƒ /api/projects/[id]/deliverables
+├ ƒ /api/projects/[id]/episodes
+├ ƒ /api/projects/[id]/episodes/[episodeId]
+├ ƒ /api/projects/[id]/episodes/[episodeId]/actions
+├ ƒ /api/projects/[id]/episodes/[episodeId]/confirm
+├ ƒ /api/projects/[id]/episodes/[episodeId]/refresh
+├ ƒ /api/projects/[id]/episodes/preview
+├ ƒ /api/projects/[id]/health
+├ ƒ /api/projects/[id]/interventions
+├ ƒ /api/projects/[id]/interventions/[interventionId]
+├ ƒ /api/projects/[id]/interventions/[interventionId]/deliveries
+├ ƒ /api/projects/[id]/interventions/[interventionId]/feedback
+├ ƒ /api/projects/[id]/interventions/exposures
+├ ƒ /api/projects/[id]/interventions/policy
+├ ƒ /api/projects/[id]/interventions/policy/restore
+├ ƒ /api/projects/[id]/interventions/policy/suggestion
+├ ƒ /api/projects/[id]/meetings/confirm
+├ ƒ /api/projects/[id]/meetings/impact-preview
+├ ƒ /api/projects/[id]/metrics
+├ ƒ /api/projects/[id]/milestones
+├ ƒ /api/projects/[id]/milestones/deliverables/[deliverableId]/evidence
+├ ƒ /api/projects/[id]/reentry
+├ ƒ /api/projects/[id]/relations/[relationId]/confirm
+├ ƒ /api/projects/[id]/relations/[relationId]/revoke
+├ ƒ /api/projects/[id]/reminders
+├ ƒ /api/projects/[id]/reminders/[reminderId]/cleanup
+├ ƒ /api/projects/[id]/reminders/[reminderId]/revoke
+├ ƒ /api/projects/[id]/reminders/[reminderId]/sync
+├ ƒ /api/projects/[id]/restore
+├ ƒ /api/projects/[id]/schedule/[planId]/calendar
+├ ƒ /api/projects/[id]/schedule/[planId]/confirm
+├ ƒ /api/projects/[id]/schedule/current
+├ ƒ /api/projects/[id]/schedule/preview
+├ ƒ /api/projects/[id]/state
+├ ƒ /api/projects/[id]/state/brief
+├ ƒ /api/projects/[id]/state/check-in
+├ ƒ /api/projects/[id]/state/diff
+├ ƒ /api/projects/[id]/state/refresh
+├ ƒ /api/settings
+├ ƒ /api/settings/probe
+├ ƒ /api/workspace/focus
+├ ƒ /focus
+├ ƒ /health
+├ ○ /icon.svg
+├ ○ /login
+├ ƒ /memory
+├ ƒ /projects
+├ ƒ /projects/[id]
+├ ƒ /projects/[id]/[section]
+├ ƒ /projects/[id]/generate
+├ ƒ /projects/new
+├ ƒ /xiaoyi/v1/actions
+├ ƒ /xiaoyi/v1/memories
+├ ƒ /xiaoyi/v1/memories/search
+├ ƒ /xiaoyi/v1/missions/inspect
+├ ƒ /xiaoyi/v1/missions/resume
+├ ƒ /xiaoyi/v1/projects/inspect
+└ ƒ /xiaoyi/v1/requests/begin
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+[project-health] section "attachments" failed {
+  code: 'PROJECT_INBOX_DISABLED',
+  error: Error: 附件入口当前已关闭
+      at ignore-listed frames {
+    code: 'PROJECT_INBOX_DISABLED',
+    status: 503,
+    details: undefined
+  }
+}
+[project-health] section "memory" failed {
+  code: 'MEMORY_CONSOLIDATION_DISABLED',
+  error: Error: 记忆整理功能当前已关闭
+      at ignore-listed frames {
+    code: 'MEMORY_CONSOLIDATION_DISABLED',
+    status: 503,
+    details: undefined
+  }
+}
+[project-health] section "attachments" failed {
+  code: 'PROJECT_INBOX_DISABLED',
+  error: Error: 附件入口当前已关闭
+      at ignore-listed frames {
+    code: 'PROJECT_INBOX_DISABLED',
+    status: 503,
+    details: undefined
+  }
+}
+[project-health] section "memory" failed {
+  code: 'MEMORY_CONSOLIDATION_DISABLED',
+  error: Error: 记忆整理功能当前已关闭
+      at ignore-listed frames {
+    code: 'MEMORY_CONSOLIDATION_DISABLED',
+    status: 503,
+    details: undefined
+  }
+}
+[e2e] structured result written; closing lingering test process.
+[e2e] completed with passing result.

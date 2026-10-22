@@ -8,7 +8,7 @@ export struct MissionEventList {
     Column({ space: 8 }) {
       Text('执行历史').fontSize(18)
       ForEach(this.events, (event: MissionEvent) => {
-        Text(`${event.seq} · ${missionEventLabel(event.type)} · ${new Date(event.createdAt).toLocaleString()}`)
+        Text(`${event.seq} · ${missionEventLabel(event.type)} · ${new Date(event.createdAt).toLocaleString('zh-CN')}`)
           .fontSize(13).fontColor(PMColors.INK_SECONDARY).width('100%')
       }, (event: MissionEvent) => event.id)
     }.width('100%').alignItems(HorizontalAlign.Start)

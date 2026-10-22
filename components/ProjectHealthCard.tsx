@@ -120,9 +120,9 @@ export function ProjectHealthCard({ projectId, enabled, stateEnabled }: { projec
 
     {!loading && !error && report && total > 0 && primary && <div className="mt-4">
       <div className="flex flex-wrap items-center gap-2">
-        <span className={"rounded px-2.5 py-1 text-[11px] font-bold " + severityCopy[primary.severity].className}>{severityCopy[primary.severity].label}</span>
-        <span className="text-[11px] font-bold text-[var(--muted)]">共 {total} 个待处理问题</span>
-        {report.groups.map((group) => <span key={group.severity} className="rounded bg-[var(--paper-strong)] px-2 py-0.5 text-[11px] font-semibold text-[var(--ink-soft)]">
+        <span className={"rounded px-2.5 py-1 text-xs font-bold " + severityCopy[primary.severity].className}>{severityCopy[primary.severity].label}</span>
+        <span className="text-xs font-bold text-[var(--muted)]">共 {total} 个待处理问题</span>
+        {report.groups.map((group) => <span key={group.severity} className="rounded bg-[var(--paper-strong)] px-2 py-0.5 text-xs font-semibold text-[var(--ink-soft)]">
           {severityCopy[group.severity].label} {group.count}
         </span>)}
       </div>
@@ -141,15 +141,15 @@ export function ProjectHealthCard({ projectId, enabled, stateEnabled }: { projec
           const Icon = copy.icon;
           return <li key={`${finding.findingCode}-${finding.objectId}`} className="rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3">
             <div className="flex flex-wrap items-center gap-2">
-              <span className={"inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-bold " + copy.className}>
+              <span className={"inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-bold " + copy.className}>
                 <Icon size={11} />{copy.label}
               </span>
               <span className="text-xs font-black text-[var(--navy)]">{finding.title}</span>
             </div>
             <p className="mt-1 text-xs leading-5 text-[var(--ink-soft)]">{finding.explanation}</p>
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
-              <a href={projectHref(projectId,hrefFor(finding, stateEnabled))} className="focus-ring rounded-md bg-[var(--paper-strong)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)]">{actionLabelFor(finding, stateEnabled)}</a>
-              <span className="text-[11px] text-[var(--muted)]">发现于 {new Date(finding.observedAt).toLocaleString("zh-CN", { hour12: false })}</span>
+              <a href={projectHref(projectId,hrefFor(finding, stateEnabled))} className="focus-ring rounded-md bg-[var(--paper-strong)] px-2 py-1 text-xs font-bold text-[var(--teal-strong)]">{actionLabelFor(finding, stateEnabled)}</a>
+              <span className="text-xs text-[var(--muted)]">发现于 {new Date(finding.observedAt).toLocaleString("zh-CN", { hour12: false })}</span>
             </div>
           </li>;
         })}
@@ -157,8 +157,8 @@ export function ProjectHealthCard({ projectId, enabled, stateEnabled }: { projec
     </div>}
 
     {!loading && report && report.unavailable.length > 0 && <div className="mt-3 rounded-lg bg-[var(--amber)]/10 px-3 py-2">
-      {report.unavailable.map((item) => <p key={item.section} className="text-[11px] font-semibold text-[var(--amber)]">{item.message}</p>)}
-      <p className="mt-1 text-[11px] text-[var(--muted)]">其余检查结果仍然有效，以上部分暂不可用。</p>
+      {report.unavailable.map((item) => <p key={item.section} className="text-xs font-semibold text-[var(--amber)]">{item.message}</p>)}
+      <p className="mt-1 text-xs text-[var(--muted)]">其余检查结果仍然有效，以上部分暂不可用。</p>
     </div>}
   </section>;
 }

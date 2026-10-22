@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
-import { knowledgeTypes, type KnowledgeTypeValue } from "@/lib/types";
+import { knowledgeTypes, type KnowledgeTypeValue, type TemporalTopLevelState } from "@/lib/types";
 import { readableRecord } from "@/lib/recordPresentation";
+import { getTemporalSearchStates } from "@/lib/services/temporalLedgerService";
 
 export type WorkspaceFilters = {
   q?: string | string[]; project?: string | string[]; type?: string | string[]; page?: string | string[]; archived?: string | string[];
@@ -28,7 +29,16 @@ export async function loadGlobalWorkspace(userId: string, mode: "memory" | "acti
       select: { id: true, title: true, summary: true, type: true, createdAt: true, project: projectSelect },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }], ...pagination,
     });
-    return { projects, filters, cards: cards.slice(0, PAGE_SIZE).map(card => ({ ...card, ...readableRecord(card.title, card.summary) })), actions: [], reminders: [], hasMore: cards.length > PAGE_SIZE };
+    const listed = cards.slice(0, PAGE_SIZE);
+    // 时态来自既有 temporalLedger 投影，按项目分组读取；不新建状态，也不据此判定事实真伪。
+    const temporalByCard = new Map<string, { topLevelState: TemporalTopLevelState; displayReason: string }>();
+    const cardIdsByProject = new Map<string, string[]>();
+    for (const card of listed) cardIdsByProject.set(card.project.id, [...(cardIdsByProject.get(card.project.id) ?? []), card.id]);
+    await Promise.all([...cardIdsByProject.entries()].map(async ([projectId, cardIds]) => {
+      const states = await getTemporalSearchStates(projectId, cardIds);
+      for (const [cardId, item] of states) temporalByCard.set(cardId, { topLevelState: item.topLevelState, displayReason: item.displayReason });
+    }));
+    return { projects, filters, cards: listed.map(card => ({ ...card, ...readableRecord(card.title, card.summary), temporal: temporalByCard.get(card.id) })), actions: [], reminders: [], hasMore: cards.length > PAGE_SIZE };
   }
   const now = new Date();
   const [actions, reminders] = await Promise.all([

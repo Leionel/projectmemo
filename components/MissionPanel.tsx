@@ -63,11 +63,21 @@ function MissionWorkspace({projectId,initialMissionId}:{projectId:string;initial
    <aside className={`${styles.sidebar} ${mission&&!showList?styles.collapsedSidebar:""}`} aria-label="委托列表与创建">
     <details className={styles.newMission} open={!initialMissionId&&!list.length&&!mission}><summary>委托新目标</summary><form className={styles.composer} onSubmit={e=>{e.preventDefault();void perform(async()=>{const v=await api("/api/missions","POST",{projectId,requestId:requestId({projectId,goal,llmContextApproved:cloud,readOnly}),goal,llmContextApproved:cloud,...(readOnly?{missionConstraints:{executionBoundary:"READ_ANALYZE"}}:{})});await refresh(v.mission.id);requestKeys.current.delete(JSON.stringify({projectId,goal,llmContextApproved:cloud,readOnly}));setGoal("");});}}>
      <h3>新建委托</h3>
-     <button type="button" disabled={busy||!clientReady} onClick={()=>{setGoal("根据本项目已有材料，形成带来源的阶段汇报草稿，包括已完成事项、当前风险和下一步建议。缺少依据的内容列为信息缺口，不编造实验指标。本次只读取、分析和保存草稿，不搜索网络，不创建或修改行动。");setReadOnly(true);}}>使用阶段汇报模板</button>
-     <label htmlFor="mission-goal">委托目标</label>
-     <textarea id="mission-goal" disabled={!clientReady||busy} rows={4} placeholder="例如：根据已有材料准备阶段汇报，列出风险和缺失信息。" value={goal} onChange={e=>setGoal(e.target.value)} required minLength={3} maxLength={2000}/>
-     <label className={styles.consent}><input type="checkbox" disabled={!clientReady||busy} checked={cloud} onChange={e=>setCloud(e.target.checked)}/><span>允许配置的云模型使用本委托目标、选入的项目资料和任务历史</span></label>
-     <label className={styles.consent}><input type="checkbox" disabled={!clientReady||busy} checked={readOnly} onChange={e=>setReadOnly(e.target.checked)}/><span>仅允许读取、分析和保存草稿</span></label>
+     <fieldset className={styles.step}>
+      <legend>01 · 委托目标</legend>
+      <button type="button" disabled={busy||!clientReady} onClick={()=>{setGoal("根据本项目已有材料，形成带来源的阶段汇报草稿，包括已完成事项、当前风险和下一步建议。缺少依据的内容列为信息缺口，不编造实验指标。本次只读取、分析和保存草稿，不搜索网络，不创建或修改行动。");setReadOnly(true);}}>使用阶段汇报模板</button>
+      <label htmlFor="mission-goal">想推进什么</label>
+      <textarea id="mission-goal" disabled={!clientReady||busy} rows={4} placeholder="例如：根据已有材料准备阶段汇报，列出风险和缺失信息。" value={goal} onChange={e=>setGoal(e.target.value)} required minLength={3} maxLength={2000}/>
+     </fieldset>
+     <fieldset className={styles.step}>
+      <legend>02 · 执行边界</legend>
+      <label className={styles.consent}><input type="checkbox" disabled={!clientReady||busy} checked={readOnly} onChange={e=>setReadOnly(e.target.checked)}/><span>仅允许读取、分析和保存草稿（创建或修改行动需要另行批准）</span></label>
+     </fieldset>
+     <fieldset className={styles.step}>
+      <legend>03 · 用户授权</legend>
+      <label className={styles.consent}><input type="checkbox" disabled={!clientReady||busy} checked={cloud} onChange={e=>setCloud(e.target.checked)}/><span>允许配置的云模型使用本委托目标、选入的项目资料和任务历史</span></label>
+      <p className={styles.stepHint}>高级约束（费用、研究范围、接续许可）在创建后于「委托设置」中调整。</p>
+     </fieldset>
      <button className={styles.primary} disabled={!clientReady||busy||goal.trim().length<3}>创建委托</button>
     </form></details>
     <nav className={styles.missionList} aria-label="已有委托">
@@ -87,20 +97,35 @@ function MissionWorkspace({projectId,initialMissionId}:{projectId:string;initial
 
      <div role="status" className={styles.statusText}>{labels[mission.status]}{mission.status==="RUNNING"?"，最近已完成的步骤见下方":mission.status==="READY"?"，进度已保存，等待开始":mission.status==="WAITING_INPUT"?"，补充后可继续同一委托":mission.status==="WAITING_APPROVAL"?"，确认预览后才会创建行动":""}</div>
      {mission.status==="RUNNING"&&(mission.cancelRequestedAt||mission.pauseRequestedAt)&&<p role="status">{mission.cancelRequestedAt?"取消":"暂停"}请求已受理，等待当前执行安全停止。</p>}
-     {mission.status==="PAUSED"&&<button className={styles.primary} disabled={busy} onClick={()=>void command("resume")}>继续</button>}
-     <details><summary>暂停、取消与恢复操作</summary><div className={styles.actions}>
+     <details><summary>暂停与取消</summary><div className={styles.actions}>
       {mission.status==="WAITING_APPROVAL"&&<button disabled={busy} onClick={()=>void command("replan")}>更新依据并重新预览</button>}
       {["READY","RUNNING","WAITING_INPUT","WAITING_APPROVAL"].includes(mission.status)&&<button disabled={busy} onClick={()=>void command("pause")}>暂停</button>}
       {!terminal&&<button className={styles.cancel} disabled={busy} onClick={()=>void command("cancel")}>取消委托</button>}
      </div></details>
     </header>
-    {mission.status==="PAUSED"&&mission.error&&<div className={styles.error} role="alert"><div><strong>执行已暂停，已有进度已保留</strong><p>{mission.error.code==="MODEL_PROTOCOL_ERROR"&&mission.error.message==="委托执行失败，请检查服务配置后继续"?"模型回复格式不符合要求，尚未执行新步骤。修复后可继续此委托。":mission.error.message}</p>{mission.error.code&&<small>{mission.error.code}{mission.error.diagnostic?.reason?` · ${mission.error.diagnostic.reason}`:""}</small>}</div></div>}
+    {(mission.status==="PAUSED"||mission.status==="FAILED")&&mission.error&&<section className={styles.stoppedBlock} role="alert" aria-label="暂停原因与恢复条件">
+      <strong>{mission.status==="PAUSED"?"执行已暂停，已有进度已保留":"执行失败，已执行的结果保留"}</strong>
+      <p>{mission.error.code==="MODEL_PROTOCOL_ERROR"&&mission.error.message==="委托执行失败，请检查服务配置后继续"?"模型回复格式不符合要求，尚未执行新步骤。修复后可继续此委托。":mission.error.message}</p>
+      <div className={styles.recovery}>
+        <p>继续前请核对：</p>
+        <ul>
+          <li>模型服务可用且协议校验通过——「已配置」不代表本次能执行成功；</li>
+          <li>重复重试不会创建重复草稿或行动（同一请求会保留原请求编号）；</li>
+          <li>你对该项目的所有权和授权范围仍然有效。</li>
+        </ul>
+      </div>
+      <div className={styles.actions}>
+        {mission.status==="PAUSED"&&<button className={styles.primary} disabled={busy} onClick={()=>void command("resume")}>确认后继续执行</button>}
+        <button disabled={busy} onClick={()=>{document.getElementById("mission-progress-summary")?.scrollIntoView({behavior:"smooth",block:"start"});(document.getElementById("mission-progress-summary")?.closest("details") as HTMLDetailsElement|null)?.setAttribute("open","");}}>查看执行轨迹</button>
+      </div>
+      <details className={styles.diagnostic}><summary>技术诊断（错误码与协议详情）</summary><div><p className={styles.muted}>错误类型：{mission.error.code}{mission.error.diagnostic?.reason?` · ${mission.error.diagnostic.reason}`:""}</p>{mission.error.diagnostic&&"repairHint" in mission.error.diagnostic&&<p className={styles.muted}>修复提示：{(mission.error.diagnostic as {repairHint?:string}).repairHint}</p>}<p className={styles.muted}>请结合后端配置、协议版本与请求轨迹排查；不要用重复点击「继续」掩盖模型不可用。</p></div></details>
+    </section>}
     {mission.question&&<section className={styles.attention} aria-label="待补充信息"><h4>需要你补充</h4><p>{mission.question.payloadJson.question}</p>{mission.question.payloadJson.requirements?.metric&&<MissionMetricInput projectId={projectId} {...mission.question.payloadJson.requirements.metric}/>}<label>补充信息<textarea rows={3} maxLength={3000} value={answer} onChange={e=>setAnswer(e.target.value)}/></label><button className={styles.primary} disabled={busy||!answer.trim()} onClick={()=>void command("input",{questionId:mission.question!.id,answer})}>补充并继续</button><MissionContinuation key={mission.question.id} id={mission.id} questionId={mission.question.id} version={mission.version} contextVersion={mission.contextVersion} onContinued={()=>refresh(mission.id)}/></section>}
     {mission.approvals.map(a=><section className={styles.attention} key={a.id}><h4>等待你的批准</h4><p>将创建本项目 1 项待办：{a.proposal.args.title}</p><p className={styles.muted}>批准记录与实际执行分开；创建待办不表示现实行动完成。</p><p>{a.proposal.args.description}</p><p className={styles.muted}>优先级：{a.proposal.args.priority??3} · 截止时间：{a.proposal.args.dueAt?new Date(a.proposal.args.dueAt).toLocaleString("zh-CN"):"未设定"}</p><p className={styles.muted}>批准有效至：{new Date(a.expiresAt).toLocaleString("zh-CN")}</p>{checkedAt>0&&Date.parse(a.expiresAt)<=checkedAt&&<p role="status">提案已过期，请更新依据并重新预览。</p>}<div className={styles.actions}><button className={styles.primary} disabled={busy||checkedAt===0||Date.parse(a.expiresAt)<=checkedAt} onClick={()=>void command(`approvals/${a.id}`,{decision:"APPROVED",proposalHash:a.proposalHash})}>批准创建行动</button><button disabled={busy} onClick={()=>void command(`approvals/${a.id}`,{decision:"REJECTED",proposalHash:a.proposalHash})}>拒绝</button></div></section>)}
     <section className={styles.activity} aria-label="最近进展"><h4>最近进展</h4>{mission.steps.filter(s=>s.status==="SUCCEEDED").slice(-2).map(s=><p key={s.id}>{toolLabels[s.toolName]??"工具步骤"}已执行</p>)}{mission.outputs[0]&&<p>草稿修订 {mission.outputs[0].revision} 已保存，内容待审阅。</p>}{done===0&&!mission.outputs.length&&<p>尚无已完成步骤；当前状态：{labels[mission.status]??"待核对"}。</p>}</section>
     {mission.outputs.length>0&&<section className={styles.results} aria-label="委托成果"><h4>成果草稿</h4>{mission.outputs.map((o,index)=><details className={styles.output} key={o.id} open={index===0}><summary><h5>草稿版本 {o.revision} · 内容待审核</h5></summary>{o.contentJson.blocks.map(b=><div className={styles.outputBlock} key={b.blockId}><p>{b.text}</p><small>{b.kind==="EXTERNAL_REFERENCE"?"外部参考":b.kind==="INFERENCE"?"推断或建议":"项目观察"}{b.sourceIds.length?` · ${b.sourceIds.join("、")}`:""}</small></div>)}<MissionClaimChecks checks={o.claimChecksJson} enabled={mission.semanticCheckEnabled===true}/>{mission.artifactAdoptionEnabled&&mission.status!=="CANCELLED"&&<MissionArtifactAdoption projectId={projectId} missionId={mission.id} outputId={o.id} revision={o.revision}/>}</details>)}</section>}
 
-    <details className={styles.progress}><summary>执行详情与回执（{done} 个步骤已执行）</summary><section aria-label="执行记录"><div className={styles.sectionTitle}><h4>执行记录</h4><span>{done} 个步骤已执行</span></div>
+    <details className={styles.progress} id="mission-progress"><summary id="mission-progress-summary">执行详情与回执（{done} 个步骤已执行）</summary><section aria-label="执行记录"><div className={styles.sectionTitle}><h4>执行记录</h4><span>{done} 个步骤已执行</span></div>
      {!mission.steps.length&&<p className={styles.muted}>{mission.status==="READY"?"委托已保存，等待开始执行。":"尚无执行步骤。"}</p>}
      <p className={styles.taskId}>任务编号：{mission.id}</p><ol>{mission.steps.map((s,index)=><li key={s.id}><span className={styles.stepNumber} data-status={s.status}>{s.status==="SUCCEEDED"?"✓":index+1}</span><div className={styles.stepBody}><div className={styles.stepHeading}><span>{toolLabels[s.toolName]??"执行步骤"}</span><small>{stepLabels[s.status]??"状态待确认"}</small></div>{s.result?.data?.actionId&&<p><a href={projectHref(projectId,`#action-${s.result.data.actionId}`)}>{s.toolName==="inspect_action"?"行动结果":"已创建行动"}：{s.result.data.title??"查看行动"}</a>（{s.result.data.status==="DONE"?"已报告完成":s.result.data.status==="CANCELLED"?"已取消":["IN_PROGRESS","DOING"].includes(s.result.data.status??"")?"进行中":"创建回执：待办"}）{s.result.data.resultCardId&&<a href={projectHref(projectId,`#card-${s.result.data.resultCardId}`)}>查看结果复盘</a>}</p>}</div></li>)}</ol>
     </section></details>

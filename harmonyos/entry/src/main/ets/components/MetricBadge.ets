@@ -252,7 +252,7 @@ export struct TemporalBadge {
   private getLabel(): string {
     switch (this.status) {
       case 'CURRENT':
-        return '当前有效';
+        return '当前时态';
       case 'SUPERSEDED':
         return '已被替代';
       case 'CONTESTED':
@@ -270,6 +270,7 @@ export struct TemporalBadge {
   private getBgColor(): ResourceColor {
     switch (this.status) {
       case 'CURRENT':
+        return PMColors.EVIDENCE_TINT;
       case 'SUPPORTED':
         return PMColors.SUCCESS_LIGHT;
       case 'SUPERSEDED':
@@ -287,6 +288,7 @@ export struct TemporalBadge {
   private getTextColor(): ResourceColor {
     switch (this.status) {
       case 'CURRENT':
+        return PMColors.EVIDENCE;
       case 'SUPPORTED':
         return PMColors.SUCCESS;
       case 'SUPERSEDED':

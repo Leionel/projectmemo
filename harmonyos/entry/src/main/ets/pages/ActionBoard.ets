@@ -419,7 +419,7 @@ struct ActionBoard {
         }
         Row({ space: 8 }) {
           if (this.hasUnsyncedBlocks()) {
-            Button(this.calendarBusy !== '' ? '处理中…' : '添加到手机日历')
+            Button(this.calendarBusy !== '' ? '处理中…' : '添加到手机日历').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
               .buttonStyle(ButtonStyleMode.NORMAL)
               .fontSize(PMFontSize.CAPTION)
               .enabled(this.calendarBusy === '')
@@ -428,7 +428,7 @@ struct ActionBoard {
               })
           }
           if (this.hasSyncedBlocks()) {
-            Button('从手机日历移除')
+            Button('从手机日历移除').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
               .buttonStyle(ButtonStyleMode.NORMAL)
               .fontSize(PMFontSize.CAPTION)
               .enabled(this.calendarBusy === '')
@@ -463,7 +463,7 @@ struct ActionBoard {
               .width('100%')
               .margin({ top: 4 })
             }, (option: CalendarOption) => option.id)
-            Button('看看是否撞时间')
+            Button('看看是否撞时间').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
               .buttonStyle(ButtonStyleMode.EMPHASIZED)
               .fontSize(PMFontSize.CAPTION)
               .margin({ top: 8 })
@@ -494,13 +494,13 @@ struct ActionBoard {
                 .fontColor(PMColors.INK_TERTIARY)
             }
             Row({ space: 8 }) {
-              Button('先不写')
+              Button('先不写').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                 .buttonStyle(ButtonStyleMode.NORMAL)
                 .fontSize(PMFontSize.CAPTION)
                 .onClick(() => {
                   this.calendarStage = '';
                 })
-              Button(this.calendarBusy === 'write' ? '添加中…' : '确认添加')
+              Button(this.calendarBusy === 'write' ? '添加中…' : '确认添加').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                 .buttonStyle(ButtonStyleMode.EMPHASIZED)
                 .fontSize(PMFontSize.CAPTION)
                 .enabled(this.calendarBusy === '')
@@ -556,7 +556,7 @@ struct ActionBoard {
           .width('100%')
           .margin({ top: 6 })
 
-          Button(this.scheduleBusy === 'preview' ? '正在安排…' : '看看怎么安排')
+          Button(this.scheduleBusy === 'preview' ? '正在安排…' : '看看怎么安排').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
             .buttonStyle(ButtonStyleMode.EMPHASIZED)
             .fontSize(PMFontSize.BUTTON)
             .height(44)
@@ -609,13 +609,13 @@ struct ActionBoard {
           }
         }, (code: string) => code)
         Row({ space: 8 }) {
-          Button('修改空闲时间')
+          Button('修改空闲时间').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
             .buttonStyle(ButtonStyleMode.NORMAL)
             .fontSize(PMFontSize.SECONDARY)
             .onClick(() => {
               this.schedulePreview = null;
             })
-          Button(this.scheduleBusy === 'confirm' ? '保存中…' : '保存这个安排')
+          Button(this.scheduleBusy === 'confirm' ? '保存中…' : '保存这个安排').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
             .buttonStyle(ButtonStyleMode.EMPHASIZED)
             .fontSize(PMFontSize.SECONDARY)
             .enabled(this.scheduleBusy === '' && this.schedulePreview !== null && this.schedulePreview!.blocks.length > 0)
@@ -867,10 +867,12 @@ struct ActionBoard {
     this.dialogError = '';
     const actionId = this.completingActionId;
     try {
+      let completed: ActionItem = new ActionItem();
       if (this.completionOptions.length > 0) {
         // 用户已经选择如何处理未来提醒：完成回执先落库，设备删除随后补偿执行
         const response = await this.actionService.completeWithReminder(this.projectId, actionId, trimmed,
           this.completionDisposition, DeviceIdentity.getConsumerKey());
+        completed = response.action;
         const outcome = response.reminderOutcome;
         if (outcome !== null && outcome.devicePlan.length > 0) {
           const context = getContext(this) as common.UIAbilityContext;
@@ -894,15 +896,15 @@ struct ActionBoard {
           this.reminderNotice = outcome.compensation.message;
         }
       } else {
-        await this.actionService.complete(this.projectId, actionId, trimmed);
+        completed = await this.actionService.complete(this.projectId, actionId, trimmed);
       }
       this.completingActionId = '';
       this.resultText = '';
       this.completionQuestion = '';
       this.completionOptions = [];
-      promptAction.showToast({ message: this.reminderNotice !== ''
-        ? `已完成行动并写入项目记忆。${this.reminderNotice}`
-        : '已完成行动并写入项目记忆' });
+      const receiptReady = completed.status === 'DONE' && !completed.isSimulated &&
+        completed.resultCardId !== undefined && completed.resultCardId !== null && completed.resultCardId !== '';
+      promptAction.showToast({ message: `${receiptReady ? '已完成行动并写入项目记忆' : '行动已提交，结果记忆关联待核对'}${this.reminderNotice !== '' ? '。' + this.reminderNotice : ''}` });
       this.reminderNotice = '';
       await this.loadActions();
     } catch (e) {
@@ -961,6 +963,15 @@ struct ActionBoard {
         .margin({ top: PMSpacing.SM })
 
       // 来源干预引用
+      if ((action.description ?? '').trim() !== '') {
+        Column({ space: 4 }) {
+          Text('预期结果').fontSize(12).fontColor(PMColors.INK_TERTIARY)
+          Text(action.description ?? '').fontSize(14).lineHeight(21).fontColor(PMColors.INK_SECONDARY)
+        }.width('100%').alignItems(HorizontalAlign.Start).padding(12).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(12).margin({ top: 10 })
+      }
+      if ((action.dueAt ?? '') !== '') {
+        Text(`截止：${(action.dueAt ?? '').substring(0, 10)}`).fontSize(12).fontColor(PMColors.INK_TERTIARY).margin({ top: 8 })
+      }
       if (action.sourceIntervention !== null && action.sourceIntervention !== undefined
         && action.sourceIntervention.title !== '') {
         Row() {
@@ -1000,7 +1011,8 @@ struct ActionBoard {
       }
 
       // 复盘记忆卡片深链
-      if (action.resultCard !== null && action.resultCard !== undefined && action.resultCard.title !== '') {
+      if (action.status === 'DONE' && !action.isSimulated && action.resultCardId !== undefined && action.resultCardId !== null && action.resultCardId !== '' &&
+        action.resultCard !== null && action.resultCard !== undefined && action.resultCard.title !== '') {
         Row() {
           Text('✓ 已写入项目记忆')
             .fontSize(PMFontSize.SECONDARY)
@@ -1011,55 +1023,55 @@ struct ActionBoard {
         .padding({ top: PMSpacing.SM })
       }
 
-      // 操作按钮行
+      // 主操作独占一行，避免窄屏上回执入口被压缩。
       if (action.status === 'TODO' || action.status === 'DOING') {
-        Row() {
+        Column({ space: PMSpacing.SM }) {
+          Button('填写完成回执').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
+            .fontSize(PMFontSize.BUTTON)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.SURFACE)
+            .backgroundColor(PMColors.BRAND)
+            .borderRadius(PMRadius.MD)
+            .height(48)
+            .width('100%')
+            .onClick(() => { this.openCompleteDialog(action.id); })
+          Row({ space: PMSpacing.SM }) {
           if (action.status === 'TODO') {
-            Button(this.startingActionId === action.id ? '启动中...' : '开始行动')
+            Button(this.startingActionId === action.id ? '启动中...' : '开始行动').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
               .fontSize(PMFontSize.BUTTON)
               .fontColor(PMColors.INK_PRIMARY)
               .backgroundColor(PMColors.SURFACE_SUBTLE)
               .border({ width: 1, color: PMColors.BORDER })
               .borderRadius(PMRadius.SM)
-              .height(48)
+              .height(44)
+              .layoutWeight(1)
               .enabled(this.startingActionId === '')
               .onClick(() => {
                 this.startAction(action.id);
               })
           }
 
-          Button(this.isLoadingFeasibility ? '检查中…' : '看看能否安排')
+          Button(this.isLoadingFeasibility ? '检查中…' : '看看能否安排').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
             .fontSize(PMFontSize.BUTTON)
             .fontColor(PMColors.INK_PRIMARY)
             .backgroundColor(PMColors.SURFACE_SUBTLE)
             .border({ width: 1, color: PMColors.BORDER })
             .borderRadius(PMRadius.SM)
-            .height(48)
+            .height(44)
+            .layoutWeight(1)
             .enabled(!this.isLoadingFeasibility)
             .onClick(() => {
               this.openFeasibility(action.id);
             })
 
-          Button('完成并写回执')
-            .fontSize(PMFontSize.BUTTON)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.SURFACE)
-            .backgroundColor(PMColors.BRAND)
-            .borderRadius(PMRadius.SM)
-            .height(48)
-            .margin({ left: PMSpacing.SM })
-            .onClick(() => {
-              this.openCompleteDialog(action.id);
-            })
-        }
-        .width('100%')
-        .justifyContent(FlexAlign.End)
+          }.width('100%')
+        }.width('100%')
         .margin({ top: PMSpacing.MD })
       }
 
       // 日历提醒：入口只在功能开启时出现，状态区分「计划时间」与「设备日历事件」
       if (this.reminderAvailable && (action.status === 'TODO' || action.status === 'DOING')) {
-        Button(this.reminderForActionId === action.id ? '收起提醒设置' : '日历提醒')
+        Button(this.reminderForActionId === action.id ? '收起提醒设置' : '日历提醒').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
           .fontSize(PMFontSize.BUTTON)
           .fontColor(PMColors.INK_PRIMARY)
           .backgroundColor(PMColors.SURFACE_SUBTLE)
@@ -1242,7 +1254,7 @@ struct ActionBoard {
                 .fontSize(PMFontSize.PAGE_TITLE)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
-              Button('✕')
+              Button('✕').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                 .fontSize(PMFontSize.BODY)
                 .fontColor(PMColors.INK_TERTIARY)
                 .backgroundColor('transparent')
@@ -1309,7 +1321,7 @@ struct ActionBoard {
                 .margin({ top: PMSpacing.SM })
             }
 
-            Button(this.feasibilityFor.estimateMinutes === null ? '填写预计用时' : '修改前置事项或用时')
+            Button(this.feasibilityFor.estimateMinutes === null ? '填写预计用时' : '修改前置事项或用时').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.BRAND)
               .backgroundColor(PMColors.BRAND_LIGHT)
@@ -1323,7 +1335,7 @@ struct ActionBoard {
               })
 
             if (this.feasibilityFor.feasibility === 'BLOCKED' && this.firstUnmetNote() !== '') {
-              Button(this.isCreatingDepTask ? '创建中…' : '创建“先解决依赖”任务')
+              Button(this.isCreatingDepTask ? '创建中…' : '创建“先解决依赖”任务').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                 .fontSize(PMFontSize.BUTTON)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.SURFACE)
@@ -1425,7 +1437,7 @@ struct ActionBoard {
             }
 
             Row() {
-              Button('取消')
+              Button('取消').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                 .fontSize(PMFontSize.BUTTON)
                 .fontColor(PMColors.INK_SECONDARY)
                 .backgroundColor(PMColors.SURFACE_SUBTLE)
@@ -1436,7 +1448,7 @@ struct ActionBoard {
                   this.closeCompleteDialog();
                 })
 
-              Button(this.isSubmitting ? '提交中...' : '确认完成')
+              Button(this.isSubmitting ? '提交中...' : '确认完成').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                 .fontSize(PMFontSize.BUTTON)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.SURFACE)

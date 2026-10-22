@@ -25,24 +25,14 @@ export struct PMAppBar {
       if (this.showBack) {
         Row() {
           Text('‹')
-            .fontSize(24)
+            .fontSize(30)
             .fontWeight(FontWeight.Lighter)
             .fontColor(PMColors.INK_PRIMARY)
             .margin({ top: -2, right: this.backLabel !== '' ? 2 : 0 })
             .accessibilityLevel('no')
-          if (this.backLabel !== '') {
-            Text(this.backLabel.length > 4 ? this.backLabel.substring(0, 4) : this.backLabel)
-              .fontSize(PMFontSize.BODY)
-              .fontColor(PMColors.INK_PRIMARY)
-              .fontWeight(FontWeight.Medium)
-              .maxLines(1)
-          }
         }
-        .padding({ left: 8, right: this.backLabel !== '' ? 12 : 8, top: 4, bottom: 4 })
-        .height(40)
-        .borderRadius(PMRadius.SM)
-        .backgroundColor(PMColors.SURFACE_SUBTLE)
-        .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+        .width(44).height(44)
+        .justifyContent(FlexAlign.Center)
         .alignItems(VerticalAlign.Center)
         .clickEffect(PMInteraction.PRESS_EFFECT)
         .onClick(() => {
@@ -53,7 +43,7 @@ export struct PMAppBar {
 
       Column() {
         Text(this.title)
-          .fontSize(PMFontSize.SECTION_TITLE)
+          .fontSize(17)
           .fontWeight(FontWeight.Bold)
           .fontFamily(PMFontFamily.SANS)
           .fontColor(PMColors.INK_PRIMARY)
@@ -63,7 +53,7 @@ export struct PMAppBar {
 
         if (this.subtitle !== '') {
           Text(this.subtitle)
-            .fontSize(PMFontSize.CAPTION)
+            .fontSize(11)
             .fontColor(PMColors.INK_TERTIARY)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -80,11 +70,11 @@ export struct PMAppBar {
           .fontSize(PMFontSize.CAPTION)
           .fontWeight(FontWeight.Medium)
           .fontColor(PMColors.BRAND)
-          .height(36)
+          .height(44)
           .textAlign(TextAlign.Center)
           .padding({ left: PMSpacing.MD, right: PMSpacing.MD })
           .borderRadius(PMRadius.SM)
-          .backgroundColor(PMColors.BRAND_LIGHT)
+          .backgroundColor(Color.Transparent)
           .clickEffect(PMInteraction.PRESS_EFFECT)
           .onClick(() => {
             if (this.onRightTextAction) {
@@ -101,8 +91,8 @@ export struct PMAppBar {
         Row() {
           MoreIcon({ isSelected: false, iconSize: 20 })
         }
-        .width(40)
-        .height(40)
+        .width(44)
+        .height(44)
         .borderRadius(PMRadius.SM)
         .justifyContent(FlexAlign.Center)
         .clickEffect(PMInteraction.PRESS_EFFECT)
@@ -117,7 +107,8 @@ export struct PMAppBar {
     }
     .width('100%')
     .alignItems(VerticalAlign.Center)
-    .padding({ left: PMSpacing.MD, right: PMSpacing.MD, top: PMSpacing.SM, bottom: PMSpacing.SM })
+    .constraintSize({ minHeight: 58 })
+    .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 7, bottom: 7 })
     .backgroundColor(PMColors.SURFACE)
     .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
   }

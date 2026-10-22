@@ -149,7 +149,7 @@ export struct AttachmentCorrectionModal {
             .fontColor(PMColors.INK_TERTIARY)
 
           if (this.attachment.extractedText && this.attachment.extractedText !== '') {
-            Button('还原识别文本')
+            Button('还原识别文本').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.BRAND)
               .backgroundColor(PMColors.BRAND_LIGHT)
@@ -248,7 +248,7 @@ export struct AttachmentCorrectionModal {
         }
 
         // 确认按钮
-        Button(this.isSubmitting ? '正在提交校对并入库…' : '保存校对并沉淀为记忆 →')
+        Button(this.isSubmitting ? '正在提交校对并入库…' : '保存校对并沉淀为记忆 →').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
           .fontSize(PMFontSize.BUTTON)
           .fontWeight(FontWeight.Bold)
           .fontColor(PMColors.SURFACE)

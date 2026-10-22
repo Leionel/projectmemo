@@ -7,11 +7,12 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { GlobalSettings } from "@/components/GlobalSettings";
 import { GlobalNavigation } from "@/components/GlobalNavigation";
 import { UserNav } from "@/components/UserNav";
+import { SiteHeader } from "@/components/SiteHeader";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "忆程 ProjectMemo｜知识资产沉淀与主动推进 Agent",
-  description: "忆程 ProjectMemo：面向大学生项目制学习的知识资产沉淀与主动推进 Agent",
+  title: "忆程 ProjectMemo｜你的个人项目 Agent",
+  description: "忆程 ProjectMemo：面向大学生的个人项目 Agent，留住过程、找回依据、看清变化、接续行动。",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -26,7 +27,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           disableTransitionOnChange
         >
           <a href="#main-content" className="skip-link">跳到主要内容</a>
-          <header className="sticky top-0 z-40 border-b border-[var(--rule)] bg-[var(--header-bg)] backdrop-blur-xl transition-colors duration-400">
+          <SiteHeader><header className="sticky top-0 z-40 border-b border-[var(--rule)] bg-[var(--header-bg)] backdrop-blur-xl transition-colors duration-400">
             <div className="shell flex h-14 items-center justify-between">
               <Link href="/" className="focus-ring flex items-center gap-2.5 rounded-xl font-bold tracking-tight text-[var(--ink)]">
                 <Image src="/logo.png" alt="忆程 ProjectMemo 标志" width={36} height={36} className="h-7 w-7 shrink-0 rounded-md object-cover shadow-[var(--shadow-sm)]" />
@@ -64,7 +65,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 </div>
               </nav>
             </div>
-          </header>
+          </header></SiteHeader>
           {children}
         </ThemeProvider>
       </body>

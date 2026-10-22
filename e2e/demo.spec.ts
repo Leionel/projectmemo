@@ -19,9 +19,11 @@ test("accepts a proactive reminder and asks the memory copilot", async ({ page }
   const actions = page.locator('section[aria-labelledby="action-board-title"]');
   await expect(actions).toBeVisible();
   const firstAction = actions.locator("article").first();
-  await firstAction.locator("button").nth(1).click();
+  // 新交互：待开始行动先「开始」，再走「完成并写回执」表单
+  await firstAction.getByRole("button", { name: "开始行动" }).click();
+  await firstAction.getByRole("button", { name: "完成并写回执" }).click();
   await firstAction.locator("textarea").fill("已完成演示闭环并记录验证结果。");
-  await firstAction.locator("button").last().click();
+  await firstAction.getByRole("button", { name: "确认完成" }).click();
   await expect(actions.locator('[role="status"]')).toBeVisible();
   await openProjectDirectory(page);await page.getByRole("navigation", {name:"项目功能导航"}).getByRole("link",{name:"知识与问答"}).click();
   const copilot = page.locator("#memory-copilot");
@@ -33,6 +35,8 @@ test("accepts a proactive reminder and asks the memory copilot", async ({ page }
 
 test("seed project completes the core demo loop", async ({ page }) => {
   await page.goto("/");
+  await expect(page.getByText("忆程，你的个人项目 Agent", { exact: true })).toBeVisible();
+  await page.getByRole("link", { name: "回到我的工作台", exact: true }).first().click();
   await expect(page).toHaveURL(/\/focus$/);
   await page.getByRole("link", { name: "查看项目", exact: true }).click();
   await page.getByLabel("搜索项目").fill("ProjectMemo");
@@ -79,7 +83,7 @@ test("creates a project and captures a fragment", async ({ page }) => {
   await page.getByRole("button", { name: "创建项目并开始沉淀" }).click();
   await openProjectDirectory(page);await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link", {name:"记录与资料"}).click();
   await page.getByLabel("碎片内容").fill("老师建议先完成 Demo 闭环，再准备比赛演示文档。");
-  await page.getByRole("button", { name: "沉淀为知识资产" }).click();
+  await page.getByRole("button", { name: "保存记录并生成知识卡" }).click();
   await expect(page.getByText(/已生成/)).toBeVisible();
   await page.getByRole("link",{name:"查看新卡片",exact:true}).click();
   await expect(page.locator("article span").filter({ hasText: /^会议纪要$/ })).toBeVisible();
@@ -137,7 +141,7 @@ test("project dashboard surfaces attention state and snoozed reminder history", 
   await page.goto("/projects");
   await expect(page.getByLabel("排列方式")).toHaveValue("attention");
   const projectCard = page.locator("article").filter({ hasText: /人工智能创意赛 忆程 ProjectMemo 作品开发/ }).first();
-  await expect(projectCard.getByText("参赛准备度", { exact: true })).toBeVisible();
+  await expect(projectCard.getByText("参赛准备项已形成", { exact: true })).toBeVisible();
   const projectHref = await projectCard.getByRole("link", { name: /打开项目/ }).getAttribute("href");
   expect(projectHref).toMatch(/^\/projects\/[^/?#]+$/);
   await page.goto(projectHref!);
@@ -147,7 +151,10 @@ test("project dashboard surfaces attention state and snoozed reminder history", 
   await openProjectDirectory(page);await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link",{name:"行动与提醒"}).click();
   const interventions = page.locator('section[aria-labelledby="interventions-title"]');
   await interventions.getByText("演示控制", { exact: true }).click();
-  await interventions.getByRole("button", { name: "截止 48 小时" }).click();
+  await Promise.all([
+    page.waitForResponse((res) => res.url().includes("/agent/evaluate") && res.status() === 200),
+    interventions.getByRole("button", { name: "截止 48 小时" }).click(),
+  ]);
   const simulatedCards = interventions.locator("article").filter({ hasText: "模拟数据" });
   const simulated = simulatedCards.first();
   await expect(simulated).toBeVisible();
@@ -170,10 +177,13 @@ test("creates, edits, sorts and safely cancels a detailed action", async ({ page
   await board.getByRole("button", { name: "新增行动", exact: true }).click();
   const action = board.locator("article").filter({ hasText: title });
   await expect(action.getByText("优先级 5/5")).toBeVisible();
-  await action.getByRole("button", { name: "编辑" }).click();
+  // 编辑与取消收纳在「更多」菜单中
+  await action.getByText("更多", { exact: true }).click();
+  await action.getByRole("button", { name: "编辑行动" }).click();
   await action.getByLabel("标题").fill(`${title} 已更新`);
   await action.getByRole("button", { name: "保存" }).click();
   const updated = board.locator("article").filter({ hasText: `${title} 已更新` });
+  await updated.getByText("更多", { exact: true }).click();
   await updated.getByRole("button", { name: "取消行动" }).click();
   await updated.getByRole("button", { name: "确认取消行动" }).click();
   await expect(updated).toBeHidden();

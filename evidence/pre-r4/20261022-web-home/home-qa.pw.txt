@@ -1,0 +1,46 @@
+async (page) => {
+  await page.goto('http://127.0.0.1:33322/');
+  await page.getByRole('heading', { level: 1 }).waitFor();
+  await page.evaluate(() => document.fonts.ready);
+  const results = { widths: [], interaction: {}, motion: {} };
+  for (const width of [1440, 768, 390, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    const metrics = await page.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
+    if (metrics.scrollWidth > width) throw new Error(`Horizontal overflow at ${width}`);
+    results.widths.push(metrics);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('tab', { name: '查看记录阶段' }).click();
+  await page.getByRole('heading', { name: '评审设备只有 8 GB 显存', exact: true }).waitFor();
+  if (!(await page.getByRole('tabpanel').innerText()).includes('评审设备只有 8 GB 显存')) throw new Error('Record tab failed');
+  await page.getByRole('tab', { name: '查看记录阶段' }).press('End');
+  await page.getByRole('heading', { name: '完成一次最小部署验证', exact: true }).waitFor();
+  if (!(await page.getByRole('tabpanel').innerText()).includes('完成一次最小部署验证')) throw new Error('End key failed');
+  await page.getByRole('tab', { name: '查看行动阶段' }).press('ArrowLeft');
+  await page.getByRole('heading', { name: '部署验证还缺一条结果', exact: true }).waitFor();
+  if (!(await page.getByRole('tabpanel').innerText()).includes('部署验证还缺一条结果')) throw new Error('Arrow navigation failed');
+  results.interaction = { click: 'pass', endKey: 'pass', arrowKey: 'pass', selectedTabs: await page.getByRole('tab', { selected: true }).count() };
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const reduced = await page.locator('[role=tabpanel] > div').first().evaluate(el => ({ animation: getComputedStyle(el).animationName, transition: getComputedStyle(el).transitionDuration }));
+  if (reduced.animation !== 'none' || reduced.transition !== '0s') throw new Error('Reduced motion failed');
+  results.motion.reduced = reduced;
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: 'evidence/pre-r4/20261022-web-home/mobile-release.png', animations: 'disabled' });
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.getByRole('tab', { name: '查看行动阶段' }).click();
+  results.motion.cardAnimation = await page.locator('[role=tabpanel] > div').first().evaluate(el => getComputedStyle(el).animationName);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  for (const section of await page.locator('[data-reveal]').all()) {
+    await section.scrollIntoViewIfNeeded();
+    await section.waitFor({ state: 'visible' });
+  }
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: 'evidence/pre-r4/20261022-web-home/desktop-full-release.png', fullPage: true, animations: 'disabled' });
+  await page.screenshot({ path: 'evidence/pre-r4/20261022-web-home/desktop-release.png', animations: 'disabled' });
+  const cta = page.getByRole('link', { name: '开始我的项目', exact: true }).first();
+  await cta.click();
+  if (!new URL(page.url()).pathname.startsWith('/login')) throw new Error('Entry link failed');
+  results.interaction.anonymousEntry = 'login';
+  return results;
+}

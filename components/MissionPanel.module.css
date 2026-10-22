@@ -92,6 +92,20 @@
 .notice { margin:1rem 1.5rem; padding:.75rem; background:var(--teal-pale); color:var(--teal-strong); border-radius:.5rem; }
 .newMission summary,.progress > summary,.detailHeader details > summary { cursor:pointer; min-height:2.75rem; padding:.6rem 0; font-weight:600; }
 .newMission form { margin-top:.75rem; }
+.composer .step { display:grid; gap:.5rem; margin:0; padding:.875rem .875rem 1rem; border:1px solid var(--rule); border-radius:.5rem; background:var(--paper); }
+.composer .step legend { font-size:.75rem; font-weight:700; letter-spacing:.08em; color:var(--teal-strong); padding-inline:.375rem; }
+.composer .step > button { justify-self:start; }
+.stepHint { color:var(--muted); font-size:.75rem; line-height:1.6; }
+.stoppedBlock { display:grid; gap:.75rem; margin-top:1.25rem; border:1px solid color-mix(in srgb,var(--brick) 55%,var(--rule)); border-left:3px solid var(--brick); border-radius:.5rem; padding:1rem; background:var(--brick-pale); color:var(--brick); }
+.stoppedBlock > strong { font-size:.875rem; }
+.stoppedBlock > p { color:var(--ink-soft); font-size:.8125rem; line-height:1.7; overflow-wrap:anywhere; }
+.recovery { border-top:1px dashed color-mix(in srgb,var(--brick) 35%,var(--rule)); padding-top:.625rem; }
+.recovery p { font-weight:650; font-size:.75rem; }
+.recovery ul { margin:.375rem 0 0; padding-left:1.125rem; color:var(--ink-soft); font-size:.75rem; line-height:1.8; }
+.stoppedBlock .actions { align-items:center; }
+.diagnostic { border-top:1px dashed color-mix(in srgb,var(--brick) 35%,var(--rule)); }
+.diagnostic summary { cursor:pointer; min-height:2rem; padding:.375rem 0; font-size:.75rem; color:var(--ink-soft); }
+.diagnostic div { display:grid; gap:.375rem; padding-bottom:.375rem; }
 .activity { margin-top:1.5rem; padding-block:1rem; border-top:1px solid var(--rule); }
 .activity p { margin-top:.5rem; color:var(--ink-soft); }
 .output > summary { min-height:2.75rem; cursor:pointer; padding:.5rem 0; font-weight:600; }

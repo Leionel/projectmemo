@@ -216,7 +216,7 @@ export function SchedulePlanner({ projectId, enabled }: { projectId: string; ena
             <span className="font-bold text-[var(--navy)]">{block.actionTitle || "行动"}</span>
             <span className="text-[var(--ink-soft)]">{formatSlot(block.start, block.end)}</span>
           </div>
-          {block.calendar && block.calendar.status !== "NONE" && <p className={"mt-1 flex items-center gap-1.5 text-[11px] font-semibold " + (block.calendar.status === "FAILED" ? "text-[var(--amber)]" : "text-[var(--teal-strong)]")}>
+          {block.calendar && block.calendar.status !== "NONE" && <p className={"mt-1 flex items-center gap-1.5 text-xs font-semibold " + (block.calendar.status === "FAILED" ? "text-[var(--amber)]" : "text-[var(--teal-strong)]")}>
             <CalendarCheck2 size={12} />{calendarLabels[block.calendar.status] ?? block.calendar.status}
             {block.calendar.status === "FAILED" && block.calendar.error ? `：${block.calendar.error}` : ""}
           </p>}

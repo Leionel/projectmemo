@@ -173,13 +173,13 @@ export function MeetingImportCard({ projectId, stateEnabled }: { projectId: stri
         <label className="text-xs font-bold text-[var(--ink-soft)]">会议是哪一天？（可不填）
           <input type="date" value={meetingDate} onChange={(event) => setMeetingDate(event.target.value)} disabled={busy !== null} className="focus-ring editorial-input mt-1.5 px-3 py-2 text-sm" />
         </label>
-        <p className="text-[11px] leading-5 text-[var(--muted)]">内容里有「下周五」「三天内」这类相对日期时，请选择会议日期，否则这些日期无法解析，会被标为待澄清。</p>
+        <p className="text-xs leading-5 text-[var(--muted)]">内容里有「下周五」「三天内」这类相对日期时，请选择会议日期，否则这些日期无法解析，会被标为待澄清。</p>
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <button type="button" onClick={() => void recognize()} disabled={busy !== null || text.trim().length < 5} className="focus-ring editorial-button text-xs disabled:opacity-50">
           {busy === "preview" ? <LoaderCircle size={14} className="animate-spin" /> : <FileText size={14} />}{busy === "preview" ? "正在识别…" : "看看识别到了什么"}
         </button>
-        <span className="text-[11px] text-[var(--muted)]">{text.trim().length} 字 · 至少 5 字</span>
+        <span className="text-xs text-[var(--muted)]">{text.trim().length} 字 · 至少 5 字</span>
       </div>
     </div>}
 
@@ -190,8 +190,8 @@ export function MeetingImportCard({ projectId, stateEnabled }: { projectId: stri
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs font-black text-[var(--navy)]">请检查识别结果</p>
         <div className="flex flex-wrap items-center gap-2">
-          <span aria-live="polite" className="text-[11px] font-bold text-[var(--muted)]">已选择 {selected.length}/{proposed.length} 项</span>
-          {proposed.length > 0 && <button type="button" onClick={() => setSelected(selected.length === proposed.length ? [] : proposed.map((change) => change.changeId))} disabled={busy !== null} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)]">
+          <span aria-live="polite" className="text-xs font-bold text-[var(--muted)]">已选择 {selected.length}/{proposed.length} 项</span>
+          {proposed.length > 0 && <button type="button" onClick={() => setSelected(selected.length === proposed.length ? [] : proposed.map((change) => change.changeId))} disabled={busy !== null} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-xs font-bold text-[var(--teal-strong)]">
             {selected.length === proposed.length ? "全不选" : "全选可保存项"}
           </button>}
         </div>
@@ -209,25 +209,25 @@ export function MeetingImportCard({ projectId, stateEnabled }: { projectId: stri
             <div className="flex items-start gap-2.5">
               {selectable
                 ? <input type="checkbox" id={`meeting-${change.changeId}`} checked={checked} onChange={() => toggle(change.changeId)} disabled={busy !== null} aria-label={`勾选「${change.title}」`} className="focus-ring mt-1 size-4 shrink-0" />
-                : <span className="mt-0.5 shrink-0 rounded bg-[var(--amber)]/20 px-1.5 py-0.5 text-[10px] font-black text-[var(--amber)]">信息不完整</span>}
+                : <span className="mt-0.5 shrink-0 rounded bg-[var(--amber)]/20 px-1.5 py-0.5 text-[11px] font-black text-[var(--amber)]">信息不完整</span>}
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className={"rounded-md px-1.5 py-0.5 text-[10px] font-bold " + kindTone[change.kind]}>{kindLabels[change.kind] ?? change.kind}</span>
+                  <span className={"rounded-md px-1.5 py-0.5 text-[11px] font-bold " + kindTone[change.kind]}>{kindLabels[change.kind] ?? change.kind}</span>
                   <label htmlFor={selectable ? `meeting-${change.changeId}` : undefined} className="text-xs font-bold leading-5 text-[var(--navy)]">{change.title}</label>
                 </div>
-                <p className="mt-1 rounded-lg bg-[var(--paper-strong)] px-2.5 py-1.5 text-[11px] leading-5 text-[var(--ink-soft)]">会议原文：{change.evidenceSpan}</p>
-                {change.supersededCardTitle && <p className="mt-1 text-[11px] font-semibold text-[var(--brick)]">将替换：{change.supersededCardTitle}（旧记录会保留为历史，不会被删除）</p>}
-                {change.deadlineISO && <p className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--amber)]"><CalendarDays size={12} />新的截止日期：{change.deadlineISO}</p>}
-                {change.actionTitle && <p className="mt-1 text-[11px] font-semibold text-[var(--teal-strong)]">将创建待办：{change.actionTitle}</p>}
-                {change.clarification && <p className={"mt-1 text-[11px] leading-5 font-semibold " + (selectable ? "text-[var(--ink-soft)]" : "text-[var(--amber)]")}>{change.clarification}</p>}
-                {change.candidateCardIds.length > 0 && <p className="mt-1 text-[11px] text-[var(--muted)]">存在 {change.candidateCardIds.length} 张相近的候选记录，需要在文本里写清楚被取代的是哪一条。</p>}
+                <p className="mt-1 rounded-lg bg-[var(--paper-strong)] px-2.5 py-1.5 text-xs leading-5 text-[var(--ink-soft)]">会议原文：{change.evidenceSpan}</p>
+                {change.supersededCardTitle && <p className="mt-1 text-xs font-semibold text-[var(--brick)]">将替换：{change.supersededCardTitle}（旧记录会保留为历史，不会被删除）</p>}
+                {change.deadlineISO && <p className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-[var(--amber)]"><CalendarDays size={12} />新的截止日期：{change.deadlineISO}</p>}
+                {change.actionTitle && <p className="mt-1 text-xs font-semibold text-[var(--teal-strong)]">将创建待办：{change.actionTitle}</p>}
+                {change.clarification && <p className={"mt-1 text-xs leading-5 font-semibold " + (selectable ? "text-[var(--ink-soft)]" : "text-[var(--amber)]")}>{change.clarification}</p>}
+                {change.candidateCardIds.length > 0 && <p className="mt-1 text-xs text-[var(--muted)]">存在 {change.candidateCardIds.length} 张相近的候选记录，需要在文本里写清楚被取代的是哪一条。</p>}
               </div>
             </div>
           </li>;
         })}
       </ul>
 
-      {unclear.length > 0 && <p className="mt-2 text-[11px] leading-5 text-[var(--amber)]">其中 {unclear.length} 项信息不完整，不能勾选；补齐会议日期或把文本写明确后重新识别。</p>}
+      {unclear.length > 0 && <p className="mt-2 text-xs leading-5 text-[var(--amber)]">其中 {unclear.length} 项信息不完整，不能勾选；补齐会议日期或把文本写明确后重新识别。</p>}
 
       <div className="mt-4 flex flex-wrap justify-end gap-2">
         <button type="button" onClick={() => backToDraft("")} disabled={busy !== null} className="focus-ring editorial-button-secondary text-xs"><X size={14} />放弃这次识别</button>
@@ -241,8 +241,8 @@ export function MeetingImportCard({ projectId, stateEnabled }: { projectId: stri
       <p className="flex items-center gap-2 rounded-lg bg-[var(--teal-pale)] px-3 py-2 text-xs font-black text-[var(--teal-strong)]"><Check size={15} />会议内容已保存</p>
       <p className="mt-2 text-xs leading-5 text-[var(--ink-soft)]">已按你的选择保存 {result.applied.length} 项，未勾选的内容没有写入。</p>
       <ul className="mt-2 space-y-1.5">
-        {result.applied.map((item) => <li key={item.changeId} className="rounded-lg border border-[var(--rule)] bg-[var(--card-bg)] px-3 py-2 text-[11px] leading-5 text-[var(--ink-soft)]">
-          <span className="mr-1.5 rounded bg-[var(--paper-strong)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--navy)]">{kindLabels[item.kind as MeetingTypedChange["kind"]] ?? item.kind}</span>
+        {result.applied.map((item) => <li key={item.changeId} className="rounded-lg border border-[var(--rule)] bg-[var(--card-bg)] px-3 py-2 text-xs leading-5 text-[var(--ink-soft)]">
+          <span className="mr-1.5 rounded bg-[var(--paper-strong)] px-1.5 py-0.5 text-[11px] font-bold text-[var(--navy)]">{kindLabels[item.kind as MeetingTypedChange["kind"]] ?? item.kind}</span>
           {item.newCardId && <span>已保存到记忆{item.supersededCardId ? "，旧记录转为历史版本" : ""}</span>}
           {item.newActionId && <a href={projectHref(projectId,"#action-board")} className="focus-ring font-bold text-[var(--teal-strong)] underline underline-offset-2">已加入待办</a>}
           {item.deadlineISO && <span>截止日期改为 {item.deadlineISO}</span>}
@@ -258,7 +258,7 @@ export function MeetingImportCard({ projectId, stateEnabled }: { projectId: stri
       </div>
       {showDiff && afterDiff && <div className="mt-3 rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3">
         <p className="text-xs font-black text-[var(--navy)]">会前 → 会后（{afterDiff.items.length} 项变化）</p>
-        <p className="mt-1 text-[11px] text-[var(--muted)]">{afterDiff.summary}</p>
+        <p className="mt-1 text-xs text-[var(--muted)]">{afterDiff.summary}</p>
         <div className="mt-2"><StateDiffView diff={afterDiff} emptyText="这次确认没有改变状态快照里的事实。" /></div>
       </div>}
     </div>}

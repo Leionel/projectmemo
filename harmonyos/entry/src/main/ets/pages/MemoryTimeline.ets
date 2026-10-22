@@ -122,18 +122,18 @@ struct MemoryTimeline {
 
   private consolidationMasterState(proposal: ConsolidationProposal): string {
     const master = proposal.cards.find((card) => card.id === proposal.masterCardId);
-    return master !== undefined ? master.topLevelState : 'CURRENT';
+    return master !== undefined ? master.topLevelState : 'UNKNOWN';
   }
 
   /** topLevelState 英文枚举映射为自然简体中文，不向用户暴露原始枚举值。 */
   private consolidationStateLabel(state: string): string {
-    if (state === 'CURRENT') return '当前有效';
+    if (state === 'CURRENT') return '当前时态';
     if (state === 'SUPERSEDED') return '已被取代';
     if (state === 'CONTESTED') return '存在争议';
-    if (state === 'UNKNOWN') return '证据不足';
+    if (state === 'UNKNOWN') return '状态或证据待核对';
     if (state === 'REVOKED') return '已撤销';
     if (state === 'PENDING') return '确认中';
-    return state;
+    return '状态待核对';
   }
 
   private consolidationSimilarityLabel(score: number): string {
@@ -153,9 +153,12 @@ struct MemoryTimeline {
     }
     const supersededCount: number = states.filter((state) => state === 'SUPERSEDED').length;
     if (supersededCount > 0) {
-      return `其中 ${supersededCount} 条已被取代，归并将保留当前有效记录`;
+      return `其中 ${supersededCount} 条已被取代，请核对主记录及来源后再确认归并`;
     }
-    return '两条均在当前有效状态，可以归并';
+    if (states.length === 0 || states.some((state) => state !== 'CURRENT')) {
+      return '状态待核对，请先检查每条记忆及其来源';
+    }
+    return '这些记忆均处于当前时态；仍需核对内容与来源后确认归并';
   }
 
   private async confirmConsolidation(proposal: ConsolidationProposal): Promise<void> {
@@ -339,7 +342,7 @@ struct MemoryTimeline {
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .margin({ top: PMSpacing.SM })
 
-      Text(`统一状态：${item.topLevelState}`)
+      Text(`统一状态：${this.consolidationStateLabel(item.topLevelState)}`)
         .fontSize(PMFontSize.CAPTION)
         .fontColor(this.statusColor(item.topLevelState))
         .margin({ top: PMSpacing.XS })
@@ -434,7 +437,7 @@ struct MemoryTimeline {
       if (this.actionableRelation(item) !== undefined) {
         Row({ space: PMSpacing.SM }) {
           if (!this.actionableRelation(item)!.confirmed && this.actionableRelation(item)!.revokedAt === null) {
-            Button(this.relationActionId === this.actionableRelation(item)!.id ? '确认中…' : '确认关系')
+            Button(this.relationActionId === this.actionableRelation(item)!.id ? '确认中…' : '确认关系').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
               .height(44)
               .fontSize(PMFontSize.BUTTON)
               .enabled(this.relationActionId === '')
@@ -443,7 +446,7 @@ struct MemoryTimeline {
               })
           }
           if (this.actionableRelation(item)!.confirmed && this.actionableRelation(item)!.revokedAt === null) {
-            Button(this.relationActionId === this.actionableRelation(item)!.id ? '撤销中…' : '撤销关系')
+            Button(this.relationActionId === this.actionableRelation(item)!.id ? '撤销中…' : '撤销关系').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
               .height(44)
               .fontSize(PMFontSize.BUTTON)
               .type(ButtonType.Normal)
@@ -736,7 +739,7 @@ struct MemoryTimeline {
                     Text(this.consolidationError)
                       .fontSize(PMFontSize.BODY)
                       .fontColor(PMColors.RISK)
-                    Button('重新加载')
+                    Button('重新加载').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                       .height(44)
                       .fontSize(PMFontSize.BUTTON)
                       .margin({ top: PMSpacing.SM })
@@ -813,7 +816,7 @@ struct MemoryTimeline {
                         .lineHeight(18)
                         .margin({ top: PMSpacing.XS })
                     }
-                    Button(this.consolidationActionId === proposal.proposalId ? '归并中…' : '确认归并')
+                    Button(this.consolidationActionId === proposal.proposalId ? '归并中…' : '确认归并').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                       .height(44)
                       .fontSize(PMFontSize.BUTTON)
                       .enabled(this.consolidationActionId === '')
@@ -867,7 +870,7 @@ struct MemoryTimeline {
                       }
                       .layoutWeight(1)
                       .alignItems(HorizontalAlign.Start)
-                      Button(this.consolidationActionId === receipt.id ? '撤销中…' : '撤销')
+                      Button(this.consolidationActionId === receipt.id ? '撤销中…' : '撤销').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                         .height(40)
                         .fontSize(PMFontSize.CAPTION)
                         .type(ButtonType.Normal)
@@ -987,7 +990,7 @@ struct MemoryTimeline {
                     }
                     .layoutWeight(1)
                     .alignItems(HorizontalAlign.Start)
-                    Button(this.lifecycleActionId === archived.id ? '恢复中…' : '恢复')
+                    Button(this.lifecycleActionId === archived.id ? '恢复中…' : '恢复').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                       .height(40)
                       .fontSize(PMFontSize.CAPTION)
                       .enabled(this.lifecycleActionId === '')

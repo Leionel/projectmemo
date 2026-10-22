@@ -312,8 +312,8 @@ export function EpisodeCheckpointCard({ projectId, enabled, reminderEnabled = fa
     {!loading && !preview && current && activeRevision && <div className="mt-4">
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="text-sm font-black text-[var(--navy)]">V{activeRevision.revision} · {current.title}</h3>
-        {badge && <span className={"rounded px-2.5 py-1 text-[11px] font-bold " + (badge.tone === "ok" ? "bg-[var(--teal-pale)] text-[var(--teal-strong)]" : badge.tone === "warn" ? "bg-[var(--amber)]/15 text-[var(--amber)]" : badge.tone === "bad" ? "bg-[var(--brick-pale)] text-[var(--brick)]" : "bg-[var(--paper-strong)] text-[var(--muted)]")}>{badge.text}</span>}
-        {isHistoryView && <span className="rounded bg-[var(--paper-strong)] px-2.5 py-1 text-[11px] font-bold text-[var(--muted)]">历史版本 · 只读</span>}
+        {badge && <span className={"rounded px-2.5 py-1 text-xs font-bold " + (badge.tone === "ok" ? "bg-[var(--teal-pale)] text-[var(--teal-strong)]" : badge.tone === "warn" ? "bg-[var(--amber)]/15 text-[var(--amber)]" : badge.tone === "bad" ? "bg-[var(--brick-pale)] text-[var(--brick)]" : "bg-[var(--paper-strong)] text-[var(--muted)]")}>{badge.text}</span>}
+        {isHistoryView && <span className="rounded bg-[var(--paper-strong)] px-2.5 py-1 text-xs font-bold text-[var(--muted)]">历史版本 · 只读</span>}
       </div>
       <p className="mt-1.5 text-xs text-[var(--muted)]">
         确认于 {formatTime(activeRevision.confirmedAt)} · 来源 {activeRevision.sourceRefs.length} 个 · 依据截至 {new Date(current.windowEnd).toLocaleDateString("zh-CN")}
@@ -333,41 +333,41 @@ export function EpisodeCheckpointCard({ projectId, enabled, reminderEnabled = fa
             <p className="text-xs font-black text-[var(--navy)]">{sectionLabels[section]}</p>
             <ul className="mt-1.5 space-y-1.5">
               {claims.map((claim) => <li key={claim.claimId} className={"rounded-lg border p-2.5 text-xs leading-5 " + (affectedIds.has(claim.claimId) && !isHistoryView ? "border-[var(--amber)]/50 bg-[var(--amber)]/10" : "border-[var(--rule)] bg-[var(--card-bg)]")}>
-                <span className={"mr-1.5 rounded px-1.5 py-0.5 text-[10px] font-bold " + (claim.kind === "FACT" ? "bg-[var(--teal-pale)] text-[var(--teal-strong)]" : claim.kind === "RULE" ? "bg-[var(--paper-strong)] text-[var(--ink-soft)]" : "bg-[var(--navy)]/10 text-[var(--navy)]")}>
+                <span className={"mr-1.5 rounded px-1.5 py-0.5 text-[11px] font-bold " + (claim.kind === "FACT" ? "bg-[var(--teal-pale)] text-[var(--teal-strong)]" : claim.kind === "RULE" ? "bg-[var(--paper-strong)] text-[var(--ink-soft)]" : "bg-[var(--navy)]/10 text-[var(--navy)]")}>
                   {claim.kind === "FACT" ? "事实" : claim.kind === "RULE" ? "系统判断" : "建议"}
                 </span>
                 <span className={affectedIds.has(claim.claimId) && !isHistoryView ? "text-[var(--amber)]" : ""}>{claim.text}</span>
                 {affectedIds.has(claim.claimId) && !isHistoryView && <span className="mt-1 block font-bold text-[var(--amber)]">{current.freshness?.affectedClaims.find((item) => item.claimId === claim.claimId)?.reason}</span>}
-                {claim.kind === "FACT" && claim.sourceRefIds.length > 0 && <button type="button" onClick={() => openSources(claim, activeRevision)} className="focus-ring mt-1.5 rounded-md bg-[var(--paper-strong)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)]">
+                {claim.kind === "FACT" && claim.sourceRefIds.length > 0 && <button type="button" onClick={() => openSources(claim, activeRevision)} className="focus-ring mt-1.5 rounded-md bg-[var(--paper-strong)] px-2 py-1 text-xs font-bold text-[var(--teal-strong)]">
                   查看 {claim.sourceRefIds.length} 个来源
                 </button>}
                 {claim.kind === "SUGGESTION" && !isHistoryView && current && <div>
                   <div className="mt-1.5 flex flex-wrap gap-1.5">
-                    <button type="button" onClick={() => void addToTodo(claim, current.id, "SUGGESTION")} disabled={busy !== null} className="focus-ring inline-flex items-center gap-1.5 rounded-md bg-[var(--navy)] px-2 py-1 text-[11px] font-bold text-white disabled:opacity-50">
+                    <button type="button" onClick={() => void addToTodo(claim, current.id, "SUGGESTION")} disabled={busy !== null} className="focus-ring inline-flex items-center gap-1.5 rounded-md bg-[var(--navy)] px-2 py-1 text-xs font-bold text-white disabled:opacity-50">
                       {busy === `claim-${claim.claimId}` ? <LoaderCircle size={13} className="animate-spin" /> : <ListPlus size={13} />}
                       {outcomes[claim.claimId] ? "已加入待办" : "加入待办"}
                     </button>
-                    <button type="button" onClick={() => openSources(claim, activeRevision)} className="focus-ring inline-flex items-center gap-1.5 rounded-md bg-[var(--paper-strong)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)]">
+                    <button type="button" onClick={() => openSources(claim, activeRevision)} className="focus-ring inline-flex items-center gap-1.5 rounded-md bg-[var(--paper-strong)] px-2 py-1 text-xs font-bold text-[var(--teal-strong)]">
                       查看建议依据
                     </button>
-                    {outcomes[claim.claimId] && outcomes[claim.claimId].availability.canArrangeReminder && reminderEnabled && <button type="button" onClick={() => setReminderFor(reminderFor === claim.claimId ? null : claim.claimId)} className="focus-ring inline-flex items-center gap-1.5 rounded-md bg-[var(--teal-pale)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)]">
+                    {outcomes[claim.claimId] && outcomes[claim.claimId].availability.canArrangeReminder && reminderEnabled && <button type="button" onClick={() => setReminderFor(reminderFor === claim.claimId ? null : claim.claimId)} className="focus-ring inline-flex items-center gap-1.5 rounded-md bg-[var(--teal-pale)] px-2 py-1 text-xs font-bold text-[var(--teal-strong)]">
                       <CalendarClock size={13} />{reminderFor === claim.claimId ? "收起提醒设置" : "安排日历提醒"}
                     </button>}
-                    {outcomes[claim.claimId] && !outcomes[claim.claimId].availability.canArrangeReminder && <button type="button" onClick={() => setBlockedFor(blockedFor === claim.claimId ? null : claim.claimId)} className="focus-ring inline-flex items-center gap-1.5 rounded-md bg-[var(--amber)]/15 px-2 py-1 text-[11px] font-bold text-[var(--amber)]">
+                    {outcomes[claim.claimId] && !outcomes[claim.claimId].availability.canArrangeReminder && <button type="button" onClick={() => setBlockedFor(blockedFor === claim.claimId ? null : claim.claimId)} className="focus-ring inline-flex items-center gap-1.5 rounded-md bg-[var(--amber)]/15 px-2 py-1 text-xs font-bold text-[var(--amber)]">
                       <ShieldAlert size={13} />先处理阻塞
                     </button>}
                   </div>
-                  {outcomes[claim.claimId] && <p className="mt-1.5 text-[11px] font-semibold text-[var(--ink-soft)]">
+                  {outcomes[claim.claimId] && <p className="mt-1.5 text-xs font-semibold text-[var(--ink-soft)]">
                     {outcomes[claim.claimId].reused ? "已复用现有待办" : "已新建待办"}「{outcomes[claim.claimId].title}」：{outcomes[claim.claimId].availability.summary}
                   </p>}
                   {blockedFor === claim.claimId && outcomes[claim.claimId] && <div className="mt-1.5 rounded-lg bg-[var(--amber)]/10 p-2.5">
-                    <p className="text-[11px] font-semibold text-[var(--amber)]">{outcomes[claim.claimId].availability.blockedReason}</p>
+                    <p className="text-xs font-semibold text-[var(--amber)]">{outcomes[claim.claimId].availability.blockedReason}</p>
                     <div className="mt-1.5 flex flex-wrap gap-1.5">
-                      <a href={projectHref(projectId,"#action-board")} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-[11px] font-bold text-[var(--ink-soft)]">补充前置依赖</a>
-                      <a href={projectHref(projectId,"#capture-box")} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-[11px] font-bold text-[var(--ink-soft)]">补充缺失的信息</a>
-                      <button type="button" onClick={() => void addToTodo(claim, current.id, "UNBLOCK", outcomes[claim.claimId].actionId)} disabled={busy !== null} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)] disabled:opacity-50">创建一个解阻待办</button>
+                      <a href={projectHref(projectId,"#action-board")} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-xs font-bold text-[var(--ink-soft)]">补充前置依赖</a>
+                      <a href={projectHref(projectId,"#capture-box")} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-xs font-bold text-[var(--ink-soft)]">补充缺失的信息</a>
+                      <button type="button" onClick={() => void addToTodo(claim, current.id, "UNBLOCK", outcomes[claim.claimId].actionId)} disabled={busy !== null} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-xs font-bold text-[var(--teal-strong)] disabled:opacity-50">创建一个解阻待办</button>
                     </div>
-                    <p className="mt-1.5 text-[11px] text-[var(--muted)]">受阻的待办不会进入时间安排，也不会被写入设备日历。</p>
+                    <p className="mt-1.5 text-xs text-[var(--muted)]">受阻的待办不会进入时间安排，也不会被写入设备日历。</p>
                   </div>}
                   {reminderFor === claim.claimId && outcomes[claim.claimId] && <ActionReminderPanel projectId={projectId} actionId={outcomes[claim.claimId].actionId} onClose={() => setReminderFor(null)} />}
                 </div>}
@@ -410,11 +410,11 @@ export function EpisodeCheckpointCard({ projectId, enabled, reminderEnabled = fa
             <p className="text-xs font-black text-[var(--navy)]">{sectionLabels[section]}</p>
             <ul className="mt-1.5 space-y-1.5">
               {claims.map((claim) => <li key={claim.claimId} className="rounded-lg border border-[var(--rule)] bg-[var(--card-bg)] p-2.5 text-xs leading-5">
-                <span className={"mr-1.5 rounded px-1.5 py-0.5 text-[10px] font-bold " + (claim.kind === "FACT" ? "bg-[var(--teal-pale)] text-[var(--teal-strong)]" : claim.kind === "RULE" ? "bg-[var(--paper-strong)] text-[var(--ink-soft)]" : "bg-[var(--navy)]/10 text-[var(--navy)]")}>
+                <span className={"mr-1.5 rounded px-1.5 py-0.5 text-[11px] font-bold " + (claim.kind === "FACT" ? "bg-[var(--teal-pale)] text-[var(--teal-strong)]" : claim.kind === "RULE" ? "bg-[var(--paper-strong)] text-[var(--ink-soft)]" : "bg-[var(--navy)]/10 text-[var(--navy)]")}>
                   {claim.kind === "FACT" ? "事实" : claim.kind === "RULE" ? "系统判断" : "建议"}
                 </span>
                 {claim.text}
-                {claim.kind === "FACT" && claim.sourceRefIds.length > 0 && <button type="button" onClick={() => openSources(claim, activeRevision)} className="focus-ring mt-1.5 rounded-md bg-[var(--paper-strong)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)]">
+                {claim.kind === "FACT" && claim.sourceRefIds.length > 0 && <button type="button" onClick={() => openSources(claim, activeRevision)} className="focus-ring mt-1.5 rounded-md bg-[var(--paper-strong)] px-2 py-1 text-xs font-bold text-[var(--teal-strong)]">
                   查看 {claim.sourceRefIds.length} 个来源
                 </button>}
               </li>)}
@@ -449,8 +449,8 @@ export function EpisodeCheckpointCard({ projectId, enabled, reminderEnabled = fa
             const unavailable = state?.state === "DELETED";
             return <li key={ref.refId} className="rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="rounded-md bg-[var(--paper-strong)] px-2 py-0.5 text-[11px] font-bold text-[var(--ink-soft)]">{kindLabels[ref.kind] ?? ref.kind}{ref.revisionIndex !== null ? ` #${ref.revisionIndex}` : ""}</span>
-                <span className={"text-[11px] font-bold " + (!state || state.state === "AVAILABLE" ? "text-[var(--teal-strong)]" : "text-[var(--amber)]")}>
+                <span className="rounded-md bg-[var(--paper-strong)] px-2 py-0.5 text-xs font-bold text-[var(--ink-soft)]">{kindLabels[ref.kind] ?? ref.kind}{ref.revisionIndex !== null ? ` #${ref.revisionIndex}` : ""}</span>
+                <span className={"text-xs font-bold " + (!state || state.state === "AVAILABLE" ? "text-[var(--teal-strong)]" : "text-[var(--amber)]")}>
                   {state ? stateLabels[state.state] ?? state.displayReason : "冻结版本"}
                 </span>
               </div>

@@ -122,7 +122,7 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
         onClick={() => setMenuOpen(!menuOpen)}
         className="focus-ring flex items-center gap-1.5 rounded-md border border-[var(--rule)] bg-[var(--paper-strong)] px-2.5 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:border-[var(--teal)]"
       >
-        <span className="grid h-5 w-5 place-items-center rounded-full bg-[var(--teal-pale)] text-[10px] text-[var(--teal-strong)]">
+        <span className="grid h-5 w-5 place-items-center rounded-full bg-[var(--teal-pale)] text-[11px] text-[var(--teal-strong)]">
           <User size={12} />
         </span>
         <span className="max-w-[100px] truncate">{user.displayName || user.username}</span>
@@ -134,7 +134,7 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
           <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-lg border border-[var(--rule)] bg-[var(--card-bg)] p-2 shadow-xl animate-scale-in">
             <div className="border-b border-[var(--rule)] px-3 py-2">
               <p className="text-xs font-bold text-[var(--ink)]">{user.displayName}</p>
-              <p className="font-mono text-[11px] text-[var(--ink-soft)]">@{user.username}</p>
+              <p className="font-mono text-xs text-[var(--ink-soft)]">@{user.username}</p>
             </div>
             <button
               onClick={handleLogout}

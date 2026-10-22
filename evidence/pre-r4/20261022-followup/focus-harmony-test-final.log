@@ -1,0 +1,40 @@
+
+> projectmemo@0.1.0 harmony:test
+> node scripts/harmony-test.ts
+
+> hvigor [32mUP-TO-DATE :entry:default@PreBuild...  [39m
+> hvigor [32mFinished :entry:default@CreateModuleInfo... after 2 ms [39m
+> hvigor [32mFinished :entry:default@CreateBuildProfile... after 5 ms [39m
+> hvigor [32mFinished :entry:default@PreCheckSyscap... after 1 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@GenerateUnitTestTemplate...  [39m
+> hvigor [32mFinished :entry:default@GeneratePkgContextInfo... after 14 ms [39m
+> hvigor [32mFinished :entry:default@MergeProfile... after 29 ms [39m
+> hvigor [32mFinished :entry:default@ProcessRouterMap... after 7 ms [39m
+> hvigor [32mFinished :entry:default@ProcessShareConfig... after 5 ms [39m
+> hvigor [32mFinished :entry:default@ProcessStartupConfig... after 4 ms [39m
+> hvigor [32mFinished :entry:default@ProcessProfile... after 214 ms [39m
+> hvigor [32mFinished :entry:default@GenerateLoaderJson... after 31 ms [39m
+> hvigor [32mFinished :entry:default@UnitTestProcessProfile... after 5 ms [39m
+> hvigor [32mFinished :entry:default@ProcessResource... after 10 ms [39m
+> hvigor [32mFinished :entry:default@CompileResource... after 590 ms [39m
+> hvigor [32mFinished :entry:default@ReplaceUnitTestIndexFile... after 9 ms [39m
+> hvigor [32mFinished :entry:default@BuildUnitTestHook... after 1 ms [39m
+> hvigor WARN: WARN: ArkTS:WARN File: D:/Projects/hongmen/harmonyos/entry/src/main/ets/entryability/EntryAbility.ets:35:12
+ 'registerFont' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:133:25
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:134:34
+ Function may throw exceptions. Special handling is required.
+
+
+> hvigor [32mFinished :entry:default@UnitTestArkTS... after 6 s 441 ms [39m
+> hvigor [32mWindows_NT[39m
+[32m[2026-10-22T11:48:59.273] [INFO] default - [39mFinished write html report
+> hvigor [32mFinished :entry:default@GenerateUnitTestResult... after 2 s 894 ms [39m
+> hvigor [32mFinished :entry:test... after 1 ms [39m
+> hvigor [32mBUILD SUCCESSFUL in 18 s 570 ms [39m
+[32m[2026-10-22T11:48:59.370] [INFO] default - [39mFinished file written successfully
+
+[harmony-test] Tests run: 60, Failure: 0, Error: 0, Pass: 60, Ignore: 0

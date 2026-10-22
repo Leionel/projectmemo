@@ -1,0 +1,32 @@
+{
+  "worktree": "D:/Projects/hongmen",
+  "sourceCommit": "c9bb118",
+  "data": "isolated E2E mock; no real model or production data",
+  "e2e": {
+    "startTime": "2026-10-22T04:04:56.961Z",
+    "duration": 59853.608,
+    "expected": 14,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "unitSuite": {
+    "files": 81,
+    "passed": 651,
+    "note": "before final display changes; affected checks rerun"
+  },
+  "affected": {
+    "files": 5,
+    "passed": 20
+  },
+  "harmonyTests": 60,
+  "unsignedHapSha256": "5715e67caa951a10c8a7100ac235550568298a1019fc9bc9863e2ef22c590d38",
+  "deviceTargets": [],
+  "openGates": [
+    "native device interaction, large text, screen reader, notifications, cold start",
+    "live model and research quality",
+    "sustained concurrency; earlier background P1008 did not recur in final E2E"
+  ],
+  "pushed": false,
+  "deployed": false
+}

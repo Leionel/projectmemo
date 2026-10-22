@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/globalWorkspace.integration.test.ts tests/missionPanel.test.ts tests/recordPresentation.test.ts tests/captureDraftReady.test.ts tests/globalFocusPresentation.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  5 passed (5)
+      Tests  20 passed (20)
+   Start at  11:59:35
+   Duration  15.53s (transform 2.74s, setup 0ms, import 2.99s, tests 8.21s, environment 2.55s)
+

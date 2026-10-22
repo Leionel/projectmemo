@@ -29,7 +29,8 @@ function startServer() {
   server = spawn(process.execPath, [nextCli, "start", "--hostname", "127.0.0.1", "--port", String(E2E_PORT)], {
     cwd: process.cwd(),
     env: environment,
-    stdio: "ignore",
+    // Keep isolated-server errors visible so a 500 has a diagnosable cause.
+    stdio: ["ignore", "ignore", "inherit"],
   });
   server.once("exit", () => { serverExited = true; });
 }

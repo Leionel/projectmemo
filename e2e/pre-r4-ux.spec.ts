@@ -47,4 +47,19 @@ test("first material leads to an explicitly authorized Mission; multiple waiting
  await page.goto(`${base}/health#project-evolution`);await page.getByRole("button",{name:"查看结论与关系记录"}).click();
  await expect(page.getByRole("region",{name:"项目结论演进"}).getByText("实验记录",{exact:false}).first()).toBeVisible();
  await page.setViewportSize({width:1440,height:980});await page.screenshot({path:"test-results/pre-r4-followup-evolution.png",fullPage:true,animations:"disabled"});
+ await page.goto("/focus");
+ const waitingFocus=page.getByRole("region",{name:"需要回应的委托"});
+ await expect(waitingFocus.getByText("等待补充信息",{exact:true}).first()).toBeVisible();
+ await expect(waitingFocus.getByRole("link",{name:"补充委托资料"}).first()).toHaveAttribute("href",/\/missions\?mission=/);
+ await page.screenshot({path:"test-results/projectmemo-focus-desktop.png",fullPage:true,animations:"disabled"});
+ await page.getByRole("button",{name:"切换深浅色主题"}).click();
+ await page.screenshot({path:"test-results/projectmemo-focus-dark.png",fullPage:true,animations:"disabled"});
+ await page.setViewportSize({width:390,height:844});
+ await page.getByLabel("打开全局导航").click();
+ const globalMenu=page.locator("header").first();
+ await expect(globalMenu.getByRole("link",{name:"焦点",exact:true})).toHaveAttribute("aria-current","page");
+ await globalMenu.getByRole("link",{name:"焦点",exact:true}).click();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+ await page.screenshot({path:"test-results/projectmemo-focus-mobile.png",fullPage:true,animations:"disabled"});
+
 });

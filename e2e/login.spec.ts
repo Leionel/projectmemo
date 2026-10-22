@@ -12,6 +12,6 @@ test("公开登录页不展示预置凭据，登录后拒绝外域回跳", async
   await page.getByPlaceholder("请输入评审账号").fill(E2E_USERNAME);
   await page.getByPlaceholder("请输入密码", { exact: true }).fill(E2E_PASSWORD);
   await page.getByRole("button", { name: "进入演示空间" }).click();
-  await expect(page).toHaveURL(/\/projects$/);
+  await expect(page).toHaveURL(/\/focus$/);
   await expect(page.getByRole("button", {name:"E2E 评审身份",exact:true})).toBeVisible();
 });

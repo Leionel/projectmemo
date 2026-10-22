@@ -1,0 +1,29 @@
+import { test, expect } from "@playwright/test";
+
+test("global memory and inbox retain project context, filtering and mobile access", async ({ page }) => {
+  await page.goto("/projects");
+  await page.getByRole("link", { name: "记忆", exact: true }).click();
+  await expect(page).toHaveURL(/\/memory$/);
+  const memory = page.getByRole("region", { name: "跨项目记忆" });
+  const first = memory.getByRole("link", { name: "查看记忆与来源" }).first();
+  await expect(first).toHaveAttribute("href", /\/projects\/.+\/knowledge#card-/);
+  await first.click();
+  await expect(page.locator("#knowledge-assets")).toBeVisible();
+  const hash = new URL(page.url()).hash;
+  await expect(page.locator(hash)).toBeVisible();
+  await page.goto("/memory?q=definitely-no-match-UX");
+  await expect(page.getByText("没有符合当前筛选的内容")).toBeVisible();
+  await expect(memory.getByRole("link", { name: "查看记忆与来源" })).toHaveCount(0);
+  await page.getByRole("link", { name: "清除筛选" }).click();
+  await expect(memory.getByRole("link", { name: "查看记忆与来源" }).first()).toBeVisible();
+  await page.screenshot({ path: "test-results/global-memory-desktop.png", fullPage: true });
+  await page.getByRole("link", { name: "行动", exact: true }).click();
+  await expect(page.getByRole("region", { name: "主动提醒" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "待办行动" })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByLabel("打开全局导航").click();
+  await page.getByRole("link", { name: "记忆", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "项目记忆", exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  await page.screenshot({ path: "test-results/global-memory-mobile.png", fullPage: true });
+});

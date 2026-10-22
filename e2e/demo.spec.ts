@@ -33,8 +33,8 @@ test("accepts a proactive reminder and asks the memory copilot", async ({ page }
 
 test("seed project completes the core demo loop", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /沉淀每一步/ })).toBeVisible();
-  await page.getByRole("link", { name: "进入 Demo", exact: true }).click();
+  await expect(page).toHaveURL(/\/focus$/);
+  await page.getByRole("link", { name: "查看项目", exact: true }).click();
   await page.getByLabel("搜索项目").fill("ProjectMemo");
   await expect(page.getByText(/找到 1 个项目/)).toBeVisible();
   const seedLink = page.getByRole("link", { name: /人工智能创意赛 忆程 ProjectMemo 作品开发/ }).first();

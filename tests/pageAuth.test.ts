@@ -97,6 +97,11 @@ describe("服务端页面鉴权与项目归属", () => {
     await expect(ProjectsPage()).rejects.toMatchObject({ digest: REDIRECT_SENTINEL });
   });
 
+  it.each(["focus", "memory", "actions"])("匿名访问全局%s需登录，不能返回聚合内容", async (route) => {
+    const { default: Page } = route === "focus" ? await import("@/app/focus/page") : route === "memory" ? await import("@/app/memory/page") : await import("@/app/actions/page");
+    await expect(Page({ searchParams: Promise.resolve({}) })).rejects.toMatchObject({ digest: REDIRECT_SENTINEL });
+  });
+
   it("登录后项目列表页正常渲染", async () => {
     const { token } = await createSession(owner);
     setSessionCookie(token);

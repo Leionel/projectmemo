@@ -1,3 +1,5 @@
+import {redirect} from "next/navigation";
+import {getSessionUser} from "@/lib/auth/serverSession";
 import Link from "next/link";
 import { ArrowRight, BrainCircuit, FileOutput, GitMerge, Layers3, Zap } from "lucide-react";
 
@@ -7,7 +9,8 @@ const values = [
   { icon: FileOutput, title: "成果一键生成", text: "从真实项目过程生成周报、PPT、README、简历和下一步计划。" },
 ];
 
-export default function Home() {
+export default async function Home() {
+  if(await getSessionUser()) redirect("/focus");
   return (
     <main id="main-content">
       <section className="shell grid min-h-[calc(100vh-64px)] items-center gap-12 py-14 lg:grid-cols-[1.02fr_.98fr] lg:py-20">

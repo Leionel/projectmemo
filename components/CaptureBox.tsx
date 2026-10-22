@@ -141,7 +141,7 @@ export function CaptureBox({ projectId, inboxEnabled = true }: { projectId: stri
               setSourceType(nextSource);
               if (nextSource !== sourceType && requestId) setRequestId(newRequestId());
             }}
-            disabled={loading}
+            disabled={!draftReady || loading}
             className="focus-ring editorial-input mt-1 block w-full px-3 py-2 text-sm font-semibold sm:w-auto"
           >
             {sources.map((source) => (
@@ -165,7 +165,7 @@ export function CaptureBox({ projectId, inboxEnabled = true }: { projectId: stri
             if ((event.ctrlKey || event.metaKey) && event.key === "Enter")
               event.currentTarget.form?.requestSubmit();
           }}
-          disabled={loading}
+          disabled={!draftReady || loading}
           minLength={5}
           maxLength={5000}
           required
@@ -178,7 +178,7 @@ export function CaptureBox({ projectId, inboxEnabled = true }: { projectId: stri
           className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--muted)]"
         >
           <span>
-            {text && draftReady ? (
+            {!draftReady ? "正在恢复本机草稿…" : text ? (
               <span className="inline-flex items-center gap-1">
                 <Save size={13} /> 草稿已自动保存在本机
               </span>
@@ -210,7 +210,7 @@ export function CaptureBox({ projectId, inboxEnabled = true }: { projectId: stri
           </div>
           <div className="flex items-center gap-3">
             <button
-              disabled={loading || text.trim().length < 5}
+              disabled={!draftReady || loading || text.trim().length < 5}
               className="focus-ring editorial-button disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? (

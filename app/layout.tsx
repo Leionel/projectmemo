@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { FolderKanban, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GlobalSettings } from "@/components/GlobalSettings";
+import { GlobalNavigation } from "@/components/GlobalNavigation";
 import { UserNav } from "@/components/UserNav";
 import "./globals.css";
 
@@ -33,15 +34,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 <span className="hidden border-l border-[var(--rule-strong)] pl-2 text-[10px] font-black tracking-[.16em] text-[var(--ink-soft)] xl:inline">MEMORY AGENT</span>
               </Link>
               <nav className="flex items-center gap-2 text-sm font-medium">
-                <span className="hidden items-center gap-1.5 paper-tab px-3 py-1.5 text-[var(--ink-soft)] sm:flex">
+                <span className="hidden items-center gap-1.5 paper-tab px-3 py-1.5 text-[var(--ink-soft)] lg:flex">
                   <span className="h-1.5 w-1.5 rounded-full bg-[var(--teal)] shadow-[0_0_8px_var(--teal)]" /> {liveLlm ? "云模型已配置" : "演示模式"}
                 </span>
                 
                 {/* Desktop Nav */}
-                <div className="hidden items-center gap-2 sm:flex">
-                  <Link href="/projects" className="focus-ring flex items-center gap-2 rounded-xl px-3 py-2 text-[var(--ink-soft)] transition hover:bg-[var(--paper-strong)] hover:text-[var(--teal)] dark:hover:bg-[rgba(255,255,255,0.05)]">
-                    <FolderKanban size={17} /> 项目
-                  </Link>
+                <div className="hidden items-center gap-2 lg:flex">
+                  <GlobalNavigation />
                   <div className="h-4 w-px bg-[var(--rule-strong)] mx-1" />
                   <GlobalSettings />
                   <ThemeToggle />
@@ -50,15 +49,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 </div>
 
                 {/* Mobile Menu */}
-                <div className="sm:hidden flex items-center">
+                <div className="lg:hidden flex items-center">
                   <details className="group relative">
                     <summary aria-label="打开全局导航" className="focus-ring grid h-11 w-11 cursor-pointer list-none place-items-center rounded-xl bg-[var(--card-bg)] border border-[var(--rule)] text-[var(--ink)] transition hover:text-[var(--teal)] [&::-webkit-details-marker]:hidden">
                       <Menu size={16} />
                     </summary>
                     <div className="absolute right-0 top-full mt-2 flex w-44 flex-col gap-1 rounded-2xl border border-[var(--rule)] bg-[var(--card-bg)] p-2 shadow-xl">
-                      <Link href="/projects" className="focus-ring flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-[var(--ink-soft)] transition hover:bg-[var(--paper-strong)] hover:text-[var(--teal)]">
-                        <FolderKanban size={16} /> 项目
-                      </Link>
+                      <GlobalNavigation mobile />
                       <GlobalSettings isMenuItem />
                       <ThemeToggle isMenuItem />
                       <UserNav isMenuItem />

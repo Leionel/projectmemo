@@ -67,7 +67,7 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: "Inter", "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: "Inter", "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans SC", "Source Han Sans SC", sans-serif;
   font-feature-settings: "cv11", "ss01";
   transition: background-color 0.4s ease, color 0.4s ease;
 }
@@ -285,3 +285,8 @@ button:active:enabled,.editorial-button:active { filter:brightness(.94); }
 .focus-page-grid { display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:1rem; align-items:start; }
 .focus-page-grid .workspace-row { flex-wrap:wrap; gap:.5rem 1rem; }
 @media(max-width:900px) { .focus-page-grid { grid-template-columns:minmax(0,1fr); } }
+
+.workspace-row h3,.workspace-row p { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
+
+.focus-more summary,.focus-records > summary { padding:.75rem 1rem; min-height:2.75rem; cursor:pointer; font-size:.75rem; color:var(--teal-strong); }
+.focus-records > .workspace-list-panel { border:0; border-top:1px solid var(--rule); border-radius:0 0 8px 8px; }

@@ -10,9 +10,9 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const requestedPath = searchParams.get("from");
-  const from = requestedPath?.startsWith("/projects") && !requestedPath.startsWith("//")
+  const from = requestedPath && /^\/(?:projects(?:\/|[?#]|$)|(?:focus|memory|actions)(?:[?#]|$))/.test(requestedPath) && !requestedPath.includes("\\")
     ? requestedPath
-    : "/projects";
+    : "/focus";
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");

@@ -11,7 +11,7 @@ export const projectSections = [
 export function projectSectionForHash(hash:string):string|null {
  if(/^#intervention-/.test(hash)||/^#action-/.test(hash)||["#action-board","#interventions","#schedule-planner"].includes(hash))return "actions";
  if(/^#card-/.test(hash)||["#knowledge-assets","#archived-memory","#memory-consolidation","#memory-copilot"].includes(hash))return "knowledge";
- if(["#project-health","#project-state","#episode-checkpoint","#competition-readiness"].includes(hash))return "health";
+ if(["#project-health","#project-state","#project-evolution","#episode-checkpoint","#competition-readiness"].includes(hash))return "health";
  if(/^#attachment-/.test(hash)||["#capture-box","#attachment-inbox"].includes(hash))return "records";
  if(hash==="#meeting-import")return "meetings";
  if(hash==="#mission-agent")return "missions";

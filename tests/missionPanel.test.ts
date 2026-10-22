@@ -14,6 +14,17 @@ function fixture(action=false){
  return{requests,mission};
 }
 describe("Mission 面板调用方",()=>{
+ it("模板写入真实只读约束但不代勾云模型许可；丢失响应先读回并保留请求编号",async()=>{
+  fixture();const original=globalThis.fetch;const requests:Array<{requestId:string;missionConstraints:unknown;llmContextApproved:boolean}>=[];
+  vi.stubGlobal("fetch",vi.fn(async(input,init)=>{if(input==="/api/missions"&&init?.method==="POST"){requests.push(JSON.parse(init.body as string));throw new Error("response lost");}return original(input,init);}));
+  render(createElement(MissionPanel,{projectId:"p"}));fireEvent.click(screen.getByRole("button",{name:"使用阶段汇报模板"}));
+  expect((screen.getByRole("checkbox",{name:/允许配置的云模型/}) as HTMLInputElement).checked).toBe(false);
+  expect((screen.getByRole("checkbox",{name:"仅允许读取、分析和保存草稿"}) as HTMLInputElement).checked).toBe(true);
+  fireEvent.click(screen.getByRole("button",{name:"创建委托"}));expect(await screen.findByText(/已读取最新状态/)).toBeTruthy();
+  expect((screen.getByRole("textbox",{name:"委托目标"}) as HTMLTextAreaElement).value).toContain("本次只读取");
+  fireEvent.click(screen.getByRole("button",{name:"创建委托"}));await waitFor(()=>expect(requests).toHaveLength(2));
+  expect(requests[0].requestId).toBe(requests[1].requestId);expect(requests[0].missionConstraints).toEqual({executionBoundary:"READ_ANALYZE"});expect(requests[0].llmContextApproved).toBe(false);
+ });
  it("过期批准保留内容但不允许再次提交，提示重新预览",async()=>{
   const f=fixture(true);f.mission.approvals[0].expiresAt="2020-01-01T00:00:00Z";
   render(createElement(MissionPanel,{projectId:"p"}));fireEvent.click(await screen.findByRole("button",{name:"整理阶段汇报 · 等待你的批准"}));

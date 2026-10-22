@@ -29,7 +29,7 @@ test("same Mission survives reload, receives metric, auto continues, waits for a
  await panel.getByText("委托新目标",{exact:true}).click();await panel.getByRole("textbox",{name:"委托目标"}).fill("引用已归入成果准备后续汇报");const nextCreated=page.waitForResponse(r=>r.url().endsWith("/api/missions")&&r.request().method()==="POST");await panel.getByRole("button",{name:"创建委托",exact:true}).click();const nextResponse=await nextCreated;expect(nextResponse.status()).toBe(202);const next=(await nextResponse.json()).mission;
  await slice(next.id,{kind:"tool",tool:"search_memory",args:{query:"10月汇报",limit:8},summary:"复用项目成果"});const step=fixture("state",next.id).steps.find(s=>s.toolName==="search_memory")!;expect(step.resultJson?.sources?.some(s=>s.id===`artifact:${receipt.artifactId}`)).toBe(true);
  await openProjectDirectory(page);await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link",{name:"项目首页",exact:true}).click();
- await page.getByRole("region",{name:"当前委托"}).getByRole("link",{name:/引用已归入成果准备后续汇报/}).click();
+ await page.locator(`a[href$="mission=${next.id}"]`).first().click();
  await expect(page).toHaveURL(new RegExp(`/missions\\?mission=${next.id}`));await panel.getByText(/执行详情与回执（/).click();await expect(page.getByText(`任务编号：${next.id}`,{exact:true})).toBeVisible();
  await page.getByText("项目功能",{exact:true}).click();
  await page.evaluate(()=>{(document.activeElement as HTMLElement)?.blur();window.scrollTo({top:0,behavior:"instant"});});

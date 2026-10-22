@@ -71,6 +71,10 @@ import { AttachmentCorrectionModal } from '../components/AttachmentCorrectionMod
 import { ExportFormatter } from '../common/ExportFormatter';
 import { DeviceIdentity } from '../common/DeviceIdentity';
 import { MissionPanel } from '../components/MissionPanel';
+import { MissionWorkspaceItem, MissionWorkspaceSummary } from '../models/Mission';
+import { missionStatusLabel } from '../common/MissionContract';
+import { selectProjectFocus } from '../common/ProjectAttention';
+import { ProjectEvolutionPanel } from '../components/ProjectEvolutionPanel';
 
 @Entry
 @Component
@@ -80,6 +84,8 @@ struct ProjectHome {
   @State missionRefreshKey: number = 0;
   @State showProjectStatus: boolean = false;
   @State showQuickCopilot: boolean = false;
+  @State homeMission: MissionWorkspaceItem | null = null;
+  @State showEvolution: boolean = false;
   @StorageProp(PMStorageKey.WIDTH_BP) widthBp: string = PMWidthBp.SM;
 
   // 数据主状态
@@ -1372,17 +1378,59 @@ struct ProjectHome {
   }
 
   private getTopOpenIntervention(): Intervention | undefined {
-    for (const item of this.interventions) {
-      if (item.status === 'OPEN' && !item.isSimulated) {
-        return item;
-      }
-    }
-    for (const item of this.interventions) {
-      if (item.status === 'OPEN') {
-        return item;
-      }
-    }
-    return undefined;
+    return this.interventions.filter((item: Intervention) => !item.isSimulated &&
+      (item.status === 'OPEN' || (item.status === 'SNOOZED' && item.snoozedUntil !== null &&
+        item.snoozedUntil !== undefined && Date.parse(item.snoozedUntil) <= Date.now())))
+      .sort((a: Intervention, b: Intervention) => b.severity - a.severity)[0];
+  }
+
+  private homeFocusKind(): string {
+    return selectProjectFocus(this.homeMission?.status ?? '', this.getTopOpenIntervention()?.severity ?? 0,
+      this.dashboard.deadline.rank, this.getNextActionId() !== '');
+  }
+  private homeFocusTitle(): string {
+    const kind = this.homeFocusKind();
+    if (kind === 'reminder') return this.getTopOpenIntervention()?.title ?? '查看提醒';
+    if (kind === 'mission') return this.homeMission?.attention ?? this.homeMission?.goal ?? '查看委托';
+    if (kind === 'deadline') return this.dashboard.deadline.label;
+    if (kind === 'action') return this.getNextActionTitle();
+    return this.project.cards.length === 0 ? '先留下一条真实的项目资料' : '记录新进展，或继续一个长期目标';
+  }
+  private homeFocusDetail(): string {
+    const kind = this.homeFocusKind();
+    if (kind === 'reminder') return this.getTopOpenIntervention()?.content ?? '';
+    if (kind === 'mission') return this.homeMission?.attention !== null ? this.homeMission?.goal ?? '' : this.homeMission?.activity ?? '已有步骤与草稿会保留。';
+    if (kind === 'deadline') return '核对剩余行动和项目目标，决定本次先推进什么。';
+    if (kind === 'action') return this.getNextActionDescription();
+    return '记录进展、实验结果或会议要求，让后续判断有据可查。';
+  }
+  private homeFocusAction(): string {
+    const kind = this.homeFocusKind();
+    if (kind === 'reminder') return '查看提醒依据';
+    if (kind === 'mission') return this.homeMission?.status === 'WAITING_INPUT' ? '补充信息' : this.homeMission?.status === 'WAITING_APPROVAL' ? '审阅行动提案' : '查看原委托';
+    if (kind === 'deadline' || kind === 'action') return '查看行动';
+    return this.project.cards.length === 0 ? '记录第一条资料' : '记录项目进展';
+  }
+  private openHomeFocus(): void {
+    const kind = this.homeFocusKind();
+    if (kind === 'reminder') router.pushUrl({ url: 'pages/InterventionDetail', params: { projectId: this.projectId, interventionId: this.getTopOpenIntervention()!.id } });
+    else if (kind === 'mission' && this.homeMission !== null) router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.projectId, missionId: this.homeMission.id } });
+    else if (kind === 'deadline' || kind === 'action') this.currentTabIndex = 2;
+    else this.openCaptureEntry();
+  }
+
+  @Builder
+  private HomeFocusView() {
+    Column({ space: PMSpacing.SM }) {
+      Text(this.homeFocusKind() === 'mission' ? missionStatusLabel(this.homeMission?.status ?? '') : '当前最重要的事项')
+        .fontSize(14).fontColor(PMColors.BRAND)
+      Text(this.homeFocusTitle()).fontSize(21).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
+        .maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis })
+      Text(this.homeFocusDetail()).fontSize(PMFontSize.BODY).fontColor(PMColors.INK_SECONDARY).maxLines(3)
+      Button(this.homeFocusAction()).constraintSize({ minHeight: 48 }).backgroundColor(PMColors.BRAND)
+        .fontColor(PMColors.SURFACE).onClick(() => { this.openHomeFocus(); })
+    }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.LG)
+      .backgroundColor(PMColors.BRAND_LIGHT).borderRadius(PMRadius.LG)
   }
 
   /** 准备项逐项入口：与「当前状态」卡里的缺口按钮同一套跳转规则 */
@@ -2266,7 +2314,7 @@ struct ProjectHome {
 
         Row({ space: PMSpacing.SM }) {
           Button('＋ 记录')
-            .height(36)
+            .constraintSize({ minHeight: 48 })
             .fontSize(PMFontSize.CAPTION)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.SURFACE)
@@ -2277,7 +2325,7 @@ struct ProjectHome {
             })
 
           Button('会议更新')
-            .height(36)
+            .constraintSize({ minHeight: 48 })
             .fontSize(PMFontSize.CAPTION)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.BRAND)
@@ -2996,29 +3044,22 @@ struct ProjectHome {
         // 项目头部场景与快捷操作入口
         this.ProjectBanner()
 
-        MissionPanel({ projectId: this.projectId, compact: true, refreshKey: this.missionRefreshKey })
-        Button('问忆程').backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND)
-          .onClick(() => { this.showQuickCopilot = true; this.currentTabIndex = 3; })
-
-        // 核心焦点：本阶段重点（优先回答“现在最值得我关注什么”）
-        if (this.getTopOpenIntervention() !== undefined) {
-          Row() {
-            Text('本阶段重点')
-              .fontSize(PMFontSize.SECTION_TITLE)
-              .fontWeight(FontWeight.Bold)
-              .fontColor(PMColors.INK_PRIMARY)
-            Text('基于现有记录')
-              .fontSize(PMFontSize.CAPTION)
-              .fontColor(PMColors.INK_TERTIARY)
-          }
-          .width('100%')
-          .justifyContent(FlexAlign.SpaceBetween)
-          .alignItems(VerticalAlign.Bottom)
-          .padding({ left: 2, right: 2 })
-          .margin({ top: PMSpacing.LG })
-
-          this.StageFocusCard(this.getTopOpenIntervention()!)
+        this.HomeFocusView()
+        if (this.homeMission === null) {
+          Column({ space: PMSpacing.XS }) {
+            Text(this.project.cards.length === 0 ?
+              (this.project._count.captures > 0 ? '资料已记录：到资料页核对处理结果，再查看记忆与来源。' : '从真实记录开始：留下资料 → 核对记忆与来源 → 委托下一个目标。') :
+              '资料已沉淀：可到资料页核对记忆与来源，再到委托页填写下一个目标。')
+              .fontSize(PMFontSize.BODY).fontColor(PMColors.INK_SECONDARY)
+            Button('查看资料与记忆').constraintSize({ minHeight: 48 }).backgroundColor(PMColors.BRAND_LIGHT)
+              .fontColor(PMColors.BRAND).onClick(() => { this.currentTabIndex = 1; })
+          }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.SM)
         }
+        MissionPanel({ projectId: this.projectId, compact: true, refreshKey: this.missionRefreshKey,
+          excludedMissionId: this.homeFocusKind() === 'mission' ? this.homeMission?.id ?? '' : '',
+          onSummary: (summary: MissionWorkspaceSummary): void => { this.homeMission = summary.enabled ? summary.items[0] ?? null : null; }
+        })
+        if (this.getNextActionId() !== '' && this.homeFocusKind() !== 'action') { this.NextActionView() }
 
         // 问题零：变了什么、依据是什么（R2/S1 状态快照与 Diff）
         ProjectStatePanel({
@@ -3039,13 +3080,23 @@ struct ProjectHome {
         })
 
         this.RecentChangesView()
+        Button(this.showEvolution ? '收起项目演进与阶段检查点' : '查看项目演进与阶段检查点')
+          .constraintSize({ minHeight: 48 }).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND)
+          .onClick(() => { this.showEvolution = !this.showEvolution; })
+        if (this.showEvolution) {
+          ProjectEvolutionPanel({ projectId: this.projectId, onOpenSources: (cardId: string): void => {
+            this.memorySearchQuery = ''; this.memorySearchResults = []; this.selectedMemoryType = 'all';
+            this.expandedCardId = cardId; this.currentTabIndex = 1;
+            if (cardId !== '') AppStorage.setOrCreate<string>('stateEvidenceEntityId', cardId);
+          } })
+          this.EpisodeCheckpointCardView()
+        }
         Button(this.showProjectStatus ? '收起更多项目状态' : '更多项目状态、体检与阶段检查')
           .backgroundColor(PMColors.SURFACE).fontColor(PMColors.BRAND)
           .onClick(() => { this.showProjectStatus = !this.showProjectStatus; })
         if (this.showProjectStatus) {
         this.MetricsOverviewGrid()
         // 阶段记忆和完整检查按需展开，原入口保留。
-        this.EpisodeCheckpointCardView()
 
         // 项目体检：只读、确定性地列出当前问题与修复入口
         this.ProjectHealthCardView()
@@ -3201,8 +3252,6 @@ struct ProjectHome {
         .backgroundColor(PMColors.SURFACE)
         .borderRadius(PMRadius.LG)
         .border({ width: 1, color: PMColors.BORDER_SUBTLE })
-
-        this.NextActionView()
 
         this.ClosedLoopView()
 

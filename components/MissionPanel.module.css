@@ -94,6 +94,7 @@
 .newMission form { margin-top:.75rem; }
 .activity { margin-top:1.5rem; padding-block:1rem; border-top:1px solid var(--rule); }
 .activity p { margin-top:.5rem; color:var(--ink-soft); }
+.output > summary { min-height:2.75rem; cursor:pointer; padding:.5rem 0; font-weight:600; }
 
 .listToggle { display:none; }
 @container(max-width:800px) { .panel .listToggle { display:block; margin:.75rem 1rem; } .collapsedSidebar { display:none; } }

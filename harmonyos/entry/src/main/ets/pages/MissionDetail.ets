@@ -40,6 +40,7 @@ struct MissionDetail {
   @State loaded: boolean = false;
   @State showExecution: boolean = false;
   @State showSettings: boolean = false;
+  @State showOlderOutputs: boolean = false;
   @StorageProp('missionAppActive') @Watch('appActivityChanged') appActive: boolean = true;
   private service: MissionService = new MissionService();
   private missionId: string = '';
@@ -322,7 +323,8 @@ struct MissionDetail {
       }, (step: MissionStep) => step.id)
       }
       Text('草稿与来源').fontSize(18)
-      ForEach(this.mission.outputs, (output: MissionOutput) => {
+      if (this.mission.outputs.length > 1) { Button(this.showOlderOutputs ? '收起历史草稿' : `查看其余 ${this.mission.outputs.length - 1} 份草稿`).constraintSize({ minHeight: 48 }).onClick(() => { this.showOlderOutputs = !this.showOlderOutputs; }) }
+      ForEach(this.showOlderOutputs ? this.mission.outputs : this.mission.outputs.slice(0, 1), (output: MissionOutput) => {
         Column({ space: 8 }) {
           Text(`草稿修订 ${output.revision} · 待审阅`)
           ForEach(output.contentJson.blocks, (block: MissionBlock) => {

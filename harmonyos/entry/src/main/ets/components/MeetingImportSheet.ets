@@ -320,6 +320,18 @@ export struct MeetingImportSheet {
             .fontColor(PMColors.INK_SECONDARY)
             .margin({ top: PMSpacing.XS })
 
+          if (this.preview.typedChanges.length === 0) {
+            Text('没有从这段文本里识别出可确认的变化。请写清会议决定、负责人或截止日期；若只是保存原文，请使用“记录”入口。')
+              .fontSize(PMFontSize.BODY)
+              .fontColor(PMColors.INK_SECONDARY)
+              .lineHeight(20)
+              .width('100%')
+              .padding(PMSpacing.MD)
+              .backgroundColor(PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.SM)
+              .margin({ top: PMSpacing.MD })
+          }
+
           Scroll() {
             Column() {
               ForEach(this.preview.typedChanges, (change: MeetingTypedChange) => {

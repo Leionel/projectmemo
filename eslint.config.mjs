@@ -14,5 +14,6 @@ export default defineConfig([
     // ArkTS is compiled and linted by DevEco/Hvigor. ESLint otherwise scans
     // generated preview/build output and third-party oh_modules as TypeScript.
     "harmonyos/**",
+    "tmp/**",
   ]),
 ]);

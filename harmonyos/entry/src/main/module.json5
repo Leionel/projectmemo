@@ -46,16 +46,6 @@
         }
       },
       {
-        "name": "ohos.permission.NOTIFICATION_CONTROLLER",
-        "reason": "$string:notification_reason",
-        "usedScene": {
-          "abilities": [
-            "EntryAbility"
-          ],
-          "when": "always"
-        }
-      },
-      {
         "name": "ohos.permission.READ_CALENDAR",
         "reason": "$string:calendar_read_reason",
         "usedScene": {

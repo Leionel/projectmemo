@@ -154,12 +154,12 @@ export function CardEditor({ card, onArchived }: { card: EditableCard; onArchive
       <span role="status" aria-live="polite" className="ml-auto text-xs font-bold text-[var(--teal-strong)]">{notice}</span>
     </div>
 
-    {panel === "source" && <section aria-label="碎片原文" className="mt-3 rounded-xl border border-[var(--rule)] bg-[var(--paper-strong)] p-4">
+    {panel === "source" && <section aria-label="碎片原文" className="mt-3 rounded-md border border-[var(--rule)] bg-[var(--paper-strong)] p-4">
       <div className="flex items-center justify-between gap-3"><p className="text-xs font-black uppercase tracking-wider text-[var(--muted)]">Agent 处理前的原始记录</p>{card.capture.sourceType && <span className="paper-tab px-2 py-1 text-xs text-[var(--ink-soft)]">{card.capture.sourceType}</span>}</div>
       <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-[var(--ink-soft)]">{card.capture.rawText}</p>
     </section>}
 
-    {panel === "edit" && <section aria-label="纠正知识卡片" className="mt-3 rounded-xl border border-[var(--rule)] bg-[var(--paper-strong)] p-4 sm:p-5">
+    {panel === "edit" && <section aria-label="纠正知识卡片" className="mt-3 rounded-md border border-[var(--rule)] bg-[var(--paper-strong)] p-4 sm:p-5">
       <div className="flex items-start justify-between gap-3"><div><p className="text-sm font-black text-[var(--ink)]">纠正 Agent 识别结果</p><p className="mt-1 text-xs leading-5 text-[var(--muted)]">每行填写一项任务或建议；关键词用逗号分隔。</p></div><button type="button" onClick={() => setPanel(null)} aria-label="关闭卡片编辑" className="focus-ring rounded-lg p-1.5 text-[var(--muted)] hover:bg-[var(--paper-strong)]"><X size={16} /></button></div>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <label className="sm:col-span-2"><span className="text-xs font-bold text-[var(--ink-soft)]">标题</span><input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={60} className="focus-ring editorial-input mt-1.5 w-full px-3 py-2.5 text-sm" /><span className="mt-1 block text-right text-[11px] text-[var(--muted)]">{title.length}/60</span></label>

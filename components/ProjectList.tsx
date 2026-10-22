@@ -49,10 +49,10 @@ export function ProjectList({ projects }: { projects: ProjectCardData[] }) {
   }
 
   return (
-    <section className="mt-10" aria-labelledby="project-list-heading">
+    <section className="mt-5" aria-labelledby="project-list-heading">
       <h2 id="project-list-heading" className="sr-only">项目列表</h2>
 
-      <div className="card-surface rounded-[1.35rem] p-4 sm:p-5">
+      <div className="border-b border-[var(--rule)] pb-4">
         <div className="grid gap-3 lg:grid-cols-[minmax(16rem,1fr)_minmax(10rem,0.34fr)_minmax(10rem,0.34fr)]">
           <label className="block">
             <span className="mb-2 block text-xs font-bold text-[var(--ink-soft)]">搜索项目</span>
@@ -126,9 +126,9 @@ export function ProjectList({ projects }: { projects: ProjectCardData[] }) {
           {visibleProjects.map((project) => <ProjectCard key={project.id} project={project} />)}
         </div>
       ) : (
-        <div className="card-surface mt-5 grid min-h-64 place-items-center rounded-[1.35rem] p-8 text-center" role="status">
+        <div className="card-surface mt-5 grid min-h-64 place-items-center rounded-lg p-8 text-center" role="status">
           <div>
-            <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-[var(--teal-pale)] text-[var(--teal-strong)]">
+            <span className="mx-auto grid h-12 w-12 place-items-center rounded-lg bg-[var(--teal-pale)] text-[var(--teal-strong)]">
               <Search aria-hidden="true" size={22} />
             </span>
             <h3 className="mt-4 text-lg font-bold">没有匹配的项目</h3>

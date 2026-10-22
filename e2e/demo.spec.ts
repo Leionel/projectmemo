@@ -167,7 +167,7 @@ test("creates, edits, sorts and safely cancels a detailed action", async ({ page
   await board.getByLabel("新行动优先级").selectOption("5");
   await board.getByLabel("新行动截止日期").fill("2026-07-25");
   await board.getByLabel("新行动说明").fill("验证编辑、排序与取消确认。 ");
-  await board.getByRole("button", { name: "新增", exact: true }).click();
+  await board.getByRole("button", { name: "新增行动", exact: true }).click();
   const action = board.locator("article").filter({ hasText: title });
   await expect(action.getByText("优先级 5/5")).toBeVisible();
   await action.getByRole("button", { name: "编辑" }).click();
@@ -175,7 +175,7 @@ test("creates, edits, sorts and safely cancels a detailed action", async ({ page
   await action.getByRole("button", { name: "保存" }).click();
   const updated = board.locator("article").filter({ hasText: `${title} 已更新` });
   await updated.getByRole("button", { name: "取消行动" }).click();
-  await updated.getByRole("button", { name: "确认取消" }).click();
+  await updated.getByRole("button", { name: "确认取消行动" }).click();
   await expect(updated).toBeHidden();
   await board.getByRole("button", { name: /全部/ }).click();
   await expect(board.locator("article").filter({ hasText: `${title} 已更新` }).getByText("已取消")).toBeVisible();

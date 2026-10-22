@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import {ArrowRight} from "lucide-react";
 import {useEffect,useState} from "react";
 import {getDeviceKey} from "@/lib/client/deviceKey";
 import type {ProjectStateDiff} from "@/lib/types/projectState";
@@ -25,12 +26,12 @@ export function ProjectEvolutionSummary({projectId}:{projectId:string}) {
     }
     void read();return()=>{live=false;};
   },[projectId,attempt]);
-  return <section className={styles.summary} aria-label="最近重要变化"><div className={styles.summaryHeading}><h3>最近重要变化</h3><Link href={`/projects/${projectId}/health#project-state`}>查看状态与依据</Link></div>
+  return <section className={styles.summary} aria-label="最近重要变化"><div className={styles.summaryHeading}><h3>最近重要变化</h3><Link href={`/projects/${projectId}/health#project-state`}>查看状态与依据<ArrowRight size={13} aria-hidden="true"/></Link></div>
     {view.loading?<p className={styles.empty}>正在读取已有项目观察…</p>:view.error?<p className={styles.empty} role="status">{view.error}。</p>:<>
       {view.at&&<p className={styles.empty}>观察于 {new Date(view.at).toLocaleString("zh-CN")}；当前有效性以来源核对为准。</p>}
       {view.warning?<p className={styles.empty} role="status">{view.warning}</p>:view.diff?<><p className={styles.empty}>相较已了解快照 → 当前保存快照</p><ul>{view.diff.items.slice(0,3).map(item=><li key={item.changeKey}><Link href={`/projects/${projectId}/health#project-state`}><strong>{item.summary}</strong><p>{item.before??"未记录"} → {item.after??"未记录"}</p></Link></li>)}</ul>{!view.diff.items.length&&<p className={styles.empty}>这两份快照未记录到状态差异。</p>}</>:<p className={styles.empty}>{!view.to?"尚无状态观察，可到状态详情建立基线。":!view.from?"尚无已了解的比较基线；先查看当前记录。":"当前已了解这份快照；新资料仍需重新评估。"}</p>}
     </>}
     {(view.warning||view.error)&&<button className="focus-ring editorial-button-secondary" onClick={()=>{setView(v=>({...v,loading:true,error:"",warning:""}));setAttempt(n=>n+1);}}>重新读取项目观察</button>}
-    <Link className={styles.historyLink} href={`/projects/${projectId}/health#project-evolution`}>查看结论演进与阶段检查点</Link>
+    <Link className={styles.historyLink} href={`/projects/${projectId}/health#project-evolution`}>查看结论演进与阶段检查点<ArrowRight size={13} aria-hidden="true"/></Link>
   </section>;
 }

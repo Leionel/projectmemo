@@ -79,7 +79,7 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
       return (
         <Link
           href="/login"
-          className="focus-ring flex w-full items-center gap-2 rounded-xl bg-[var(--teal-pale)] px-3 py-2 text-sm font-bold text-[var(--teal-strong)] transition hover:bg-[var(--teal)] hover:text-white"
+          className="focus-ring flex w-full items-center gap-2 rounded-md bg-[var(--teal-pale)] px-3 py-2 text-sm font-bold text-[var(--teal-strong)] transition hover:bg-[var(--teal)] hover:text-white"
         >
           <LogIn size={16} /> 登录演示空间
         </Link>
@@ -95,7 +95,7 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
         <button
           onClick={handleLogout}
           disabled={loggingOut}
-          className="focus-ring flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-[var(--brick)] transition hover:bg-[var(--brick-pale)]"
+          className="focus-ring flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-[var(--brick)] transition hover:bg-[var(--brick-pale)]"
         >
           <LogOut size={16} /> {loggingOut ? "退出中..." : "退出登录"}
         </button>
@@ -109,7 +109,7 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
     return (
       <Link
         href="/login"
-        className="focus-ring flex items-center gap-1.5 rounded-xl bg-[var(--teal-pale)] px-3 py-1.5 text-xs font-bold text-[var(--teal-strong)] transition hover:bg-[var(--teal)] hover:text-white shadow-sm"
+        className="focus-ring flex items-center gap-1.5 rounded-md bg-[var(--teal-pale)] px-3 py-1.5 text-xs font-bold text-[var(--teal-strong)] transition hover:bg-[var(--teal)] hover:text-white shadow-sm"
       >
         <LogIn size={14} /> 登录
       </Link>
@@ -120,7 +120,7 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
     <div className="relative">
       <button
         onClick={() => setMenuOpen(!menuOpen)}
-        className="focus-ring flex items-center gap-1.5 rounded-xl border border-[var(--rule)] bg-[var(--paper-strong)] px-2.5 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:border-[var(--teal)]"
+        className="focus-ring flex items-center gap-1.5 rounded-md border border-[var(--rule)] bg-[var(--paper-strong)] px-2.5 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:border-[var(--teal)]"
       >
         <span className="grid h-5 w-5 place-items-center rounded-full bg-[var(--teal-pale)] text-[10px] text-[var(--teal-strong)]">
           <User size={12} />
@@ -131,7 +131,7 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
       {menuOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-          <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-2xl border border-[var(--rule)] bg-[var(--card-bg)] p-2 shadow-xl animate-scale-in">
+          <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-lg border border-[var(--rule)] bg-[var(--card-bg)] p-2 shadow-xl animate-scale-in">
             <div className="border-b border-[var(--rule)] px-3 py-2">
               <p className="text-xs font-bold text-[var(--ink)]">{user.displayName}</p>
               <p className="font-mono text-[11px] text-[var(--ink-soft)]">@{user.username}</p>
@@ -139,7 +139,7 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
             <button
               onClick={handleLogout}
               disabled={loggingOut}
-              className="focus-ring mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-[var(--brick)] transition hover:bg-[var(--brick-pale)]"
+              className="focus-ring mt-1 flex w-full items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-[var(--brick)] transition hover:bg-[var(--brick-pale)]"
             >
               <LogOut size={14} /> {loggingOut ? "退出中..." : "退出登录"}
             </button>

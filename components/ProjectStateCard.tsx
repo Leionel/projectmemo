@@ -190,26 +190,26 @@ export function ProjectStateCard({ projectId, enabled }: { projectId: string; en
   }
 
   if (phase === "loading") {
-    return <section id="project-state" aria-label="状态与变化" className="card-surface scroll-mt-24 rounded-[1.5rem] p-5 sm:p-6">
+    return <section id="project-state" aria-label="状态与变化" className="card-surface scroll-mt-24 rounded-lg p-5 sm:p-6">
       <p className="flex items-center gap-2 text-sm text-[var(--ink-soft)]"><LoaderCircle size={15} className="animate-spin" />正在读取项目状态…</p>
     </section>;
   }
 
   if (phase === "error") {
-    return <section id="project-state" aria-label="状态与变化" className="card-surface scroll-mt-24 rounded-[1.5rem] p-5 sm:p-6">
+    return <section id="project-state" aria-label="状态与变化" className="card-surface scroll-mt-24 rounded-lg p-5 sm:p-6">
       <p className="archive-label">状态与变化</p>
       <div role="alert" className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[var(--brick-pale)] px-3 py-2">
         <p className="text-xs font-semibold text-[var(--brick)]">{error}</p>
-        <button type="button" onClick={() => void refresh()} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-xs font-bold text-[var(--brick)]">重试</button>
+        <button type="button" onClick={() => void refresh()} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-xs font-bold text-[var(--brick)]">重新读取状态</button>
       </div>
     </section>;
   }
 
   if (phase === "empty" || !snapshot) {
-    return <section id="project-state" aria-label="状态与变化" className="card-surface scroll-mt-24 rounded-[1.5rem] p-5 sm:p-6">
+    return <section id="project-state" aria-label="状态与变化" className="card-surface scroll-mt-24 rounded-lg p-5 sm:p-6">
       <p className="archive-label">状态与变化</p>
       <h2 className="mt-2 flex items-center gap-2 text-lg font-black"><Activity size={18} className="text-[var(--teal-strong)]" />还没有状态记录</h2>
-      <p className="mt-1 text-sm leading-6 text-[var(--ink-soft)]">生成第一份状态快照后，忆程会把每次回到项目时的变化与它对比，并逐句给出依据。</p>
+      <p className="mt-1 text-sm leading-6 text-[var(--ink-soft)]">生成第一份状态快照后，可在明确标记“已了解”后，将后续状态与这份基线比较，并查看变化依据。</p>
       {error && <p role="alert" className="mt-2 text-xs font-semibold text-[var(--brick)]">{error}</p>}
       <button type="button" onClick={() => void refresh()} disabled={busy !== null} className="focus-ring editorial-button mt-4 text-xs disabled:opacity-50">
         {busy === "refresh" ? <LoaderCircle size={14} className="animate-spin" /> : <RefreshCw size={14} />}生成第一份状态记录
@@ -224,7 +224,7 @@ export function ProjectStateCard({ projectId, enabled }: { projectId: string; en
   const unread = hasUnreadChange(lastSeenSnapshotId, snapshot.id);
   const stale = freshness?.status === "STALE" || freshness?.status === "FAILED";
 
-  return <section id="project-state" aria-labelledby="project-state-title" className="card-surface scroll-mt-24 rounded-[1.5rem] p-5 sm:p-6">
+  return <section id="project-state" aria-labelledby="project-state-title" className="card-surface scroll-mt-24 rounded-lg p-5 sm:p-6">
     <div className="flex flex-wrap items-end justify-between gap-3 border-b archive-rule pb-4">
       <div className="min-w-0">
         <p className="archive-label">状态与变化</p>
@@ -258,7 +258,7 @@ export function ProjectStateCard({ projectId, enabled }: { projectId: string; en
       </div>
     </div>
 
-    {showBrief && brief && <div className="mt-3 rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">
+    {showBrief && brief && <div className="mt-3 rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3">
       <p className="text-xs font-black text-[var(--navy)]">{brief.headline}</p>
       {!brief.materialChange && <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">没有需要处理的变化。你可以继续推进当前待办，或刷新状态查看最新评估。</p>}
       <ul className="mt-2 space-y-2">

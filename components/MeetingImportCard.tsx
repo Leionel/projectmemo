@@ -153,7 +153,7 @@ export function MeetingImportCard({ projectId, stateEnabled }: { projectId: stri
     }
   }
 
-  return <section id="meeting-import" aria-labelledby="meeting-import-title" className="card-surface scroll-mt-24 rounded-[1.5rem] p-5 sm:p-6">
+  return <section id="meeting-import" aria-labelledby="meeting-import-title" className="card-surface scroll-mt-24 rounded-lg p-5 sm:p-6">
     <div className="flex flex-wrap items-end justify-between gap-3 border-b archive-rule pb-4">
       <div className="min-w-0">
         <p className="archive-label">会议更新</p>
@@ -197,7 +197,7 @@ export function MeetingImportCard({ projectId, stateEnabled }: { projectId: stri
         </div>
       </div>
 
-      {preview.typedChanges.length === 0 && <p className="mt-3 rounded-xl bg-[var(--paper-strong)] p-4 text-center text-xs leading-5 text-[var(--ink-soft)]">
+      {preview.typedChanges.length === 0 && <p className="mt-3 rounded-md bg-[var(--paper-strong)] p-4 text-center text-xs leading-5 text-[var(--ink-soft)]">
         没有从这段文本里识别出可确认的变化。可以把决定、负责人和日期写得更明确，或改用「记录进展」直接沉淀为项目记忆。
       </p>}
 
@@ -205,7 +205,7 @@ export function MeetingImportCard({ projectId, stateEnabled }: { projectId: stri
         {preview.typedChanges.map((change) => {
           const selectable = change.status === "PROPOSED";
           const checked = selected.includes(change.changeId);
-          return <li key={change.changeId} className={"rounded-xl border p-3 " + (selectable ? checked ? "border-[var(--teal)]/40 bg-[var(--teal-pale)]" : "border-[var(--rule)] bg-[var(--card-bg)]" : "border-dashed border-[var(--amber)] bg-[var(--amber)]/10")}>
+          return <li key={change.changeId} className={"rounded-md border p-3 " + (selectable ? checked ? "border-[var(--teal)]/40 bg-[var(--teal-pale)]" : "border-[var(--rule)] bg-[var(--card-bg)]" : "border-dashed border-[var(--amber)] bg-[var(--amber)]/10")}>
             <div className="flex items-start gap-2.5">
               {selectable
                 ? <input type="checkbox" id={`meeting-${change.changeId}`} checked={checked} onChange={() => toggle(change.changeId)} disabled={busy !== null} aria-label={`勾选「${change.title}」`} className="focus-ring mt-1 size-4 shrink-0" />
@@ -256,7 +256,7 @@ export function MeetingImportCard({ projectId, stateEnabled }: { projectId: stri
         <a href={projectHref(projectId,"#knowledge-assets")} className="focus-ring editorial-button-secondary text-xs">查看新记忆</a>
         <button type="button" onClick={() => { backToDraft(""); setText(""); setMeetingDate(""); }} disabled={busy !== null} className="focus-ring editorial-button text-xs">完成</button>
       </div>
-      {showDiff && afterDiff && <div className="mt-3 rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">
+      {showDiff && afterDiff && <div className="mt-3 rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3">
         <p className="text-xs font-black text-[var(--navy)]">会前 → 会后（{afterDiff.items.length} 项变化）</p>
         <p className="mt-1 text-[11px] text-[var(--muted)]">{afterDiff.summary}</p>
         <div className="mt-2"><StateDiffView diff={afterDiff} emptyText="这次确认没有改变状态快照里的事实。" /></div>

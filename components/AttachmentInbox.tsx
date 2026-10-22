@@ -218,7 +218,7 @@ export function AttachmentInbox({ projectId, enabled }: { projectId: string; ena
 
   const pending = attachments.filter((item) => item.extractionStatus !== "SUCCESS");
 
-  return <div className="mt-4 rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">
+  return <div className="mt-4 rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3">
     <div className="flex flex-wrap items-center justify-between gap-2">
       <p className="flex items-center gap-1.5 text-xs font-black text-[var(--navy)]"><Paperclip size={14} className="text-[var(--teal-strong)]" />附件资料（PDF / 图片）</p>
       <label className="focus-ring inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--rule-strong)] bg-[var(--paper-strong)] px-2.5 py-1.5 text-xs font-bold text-[var(--ink-soft)] transition hover:border-[var(--teal)] hover:text-[var(--teal-strong)]">

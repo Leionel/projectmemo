@@ -255,7 +255,7 @@ export function ActionReminderPanel({
     calendarId: state.reminder?.calendarId ?? null,
   });
 
-  return <div className="mt-2 rounded-xl border border-[var(--rule)] bg-[var(--paper-strong)] p-3">
+  return <div className="mt-2 rounded-md border border-[var(--rule)] bg-[var(--paper-strong)] p-3">
     <div className="flex flex-wrap items-start justify-between gap-2">
       <div className="min-w-0">
         <p className="text-[11px] font-black text-[var(--navy)]">日历提醒</p>

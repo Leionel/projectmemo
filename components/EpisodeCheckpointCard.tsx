@@ -276,7 +276,7 @@ export function EpisodeCheckpointCard({ projectId, enabled, reminderEnabled = fa
 
   const activeRevision = preview ? preview.episode.revisions[preview.episode.revisions.length - 1] : viewingRevision;
 
-  return <section id="episode-checkpoint" aria-labelledby="episode-title" className="card-surface scroll-mt-24 rounded-[1.5rem] p-5 sm:p-6">
+  return <section id="episode-checkpoint" aria-labelledby="episode-title" className="card-surface scroll-mt-24 rounded-lg p-5 sm:p-6">
     <div className="flex flex-wrap items-end justify-between gap-3 border-b archive-rule pb-4">
       <div className="min-w-0">
         <p className="archive-label">阶段检查点</p>
@@ -304,7 +304,7 @@ export function EpisodeCheckpointCard({ projectId, enabled, reminderEnabled = fa
 
     {loading && <p className="mt-4 text-sm text-[var(--ink-soft)]">正在读取检查点…</p>}
 
-    {!loading && !preview && !current && <div className="mt-4 rounded-xl bg-[var(--paper-strong)] p-5 text-center">
+    {!loading && !preview && !current && <div className="mt-4 rounded-md bg-[var(--paper-strong)] p-5 text-center">
       <p className="text-sm font-bold text-[var(--ink-soft)]">还没有阶段检查点。</p>
       <p className="mt-1 text-xs text-[var(--muted)]">隔几天回到项目时，先用 60 秒看清上次做到哪、哪些结论仍有效。</p>
     </div>}
@@ -312,8 +312,8 @@ export function EpisodeCheckpointCard({ projectId, enabled, reminderEnabled = fa
     {!loading && !preview && current && activeRevision && <div className="mt-4">
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="text-sm font-black text-[var(--navy)]">V{activeRevision.revision} · {current.title}</h3>
-        {badge && <span className={"rounded-full px-2.5 py-1 text-[11px] font-bold " + (badge.tone === "ok" ? "bg-[var(--teal-pale)] text-[var(--teal-strong)]" : badge.tone === "warn" ? "bg-[var(--amber)]/15 text-[var(--amber)]" : badge.tone === "bad" ? "bg-[var(--brick-pale)] text-[var(--brick)]" : "bg-[var(--paper-strong)] text-[var(--muted)]")}>{badge.text}</span>}
-        {isHistoryView && <span className="rounded-full bg-[var(--paper-strong)] px-2.5 py-1 text-[11px] font-bold text-[var(--muted)]">历史版本 · 只读</span>}
+        {badge && <span className={"rounded px-2.5 py-1 text-[11px] font-bold " + (badge.tone === "ok" ? "bg-[var(--teal-pale)] text-[var(--teal-strong)]" : badge.tone === "warn" ? "bg-[var(--amber)]/15 text-[var(--amber)]" : badge.tone === "bad" ? "bg-[var(--brick-pale)] text-[var(--brick)]" : "bg-[var(--paper-strong)] text-[var(--muted)]")}>{badge.text}</span>}
+        {isHistoryView && <span className="rounded bg-[var(--paper-strong)] px-2.5 py-1 text-[11px] font-bold text-[var(--muted)]">历史版本 · 只读</span>}
       </div>
       <p className="mt-1.5 text-xs text-[var(--muted)]">
         确认于 {formatTime(activeRevision.confirmedAt)} · 来源 {activeRevision.sourceRefs.length} 个 · 依据截至 {new Date(current.windowEnd).toLocaleDateString("zh-CN")}
@@ -377,7 +377,7 @@ export function EpisodeCheckpointCard({ projectId, enabled, reminderEnabled = fa
         })}
       </div>
 
-      {publishedRevisions.length > 1 && <details className="mt-3 rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">
+      {publishedRevisions.length > 1 && <details className="mt-3 rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3">
         <summary className="focus-ring flex cursor-pointer list-none items-center gap-1.5 text-xs font-bold text-[var(--ink-soft)]">
           <History size={13} />查看历史版本（{publishedRevisions.length}）
         </summary>
@@ -439,7 +439,7 @@ export function EpisodeCheckpointCard({ projectId, enabled, reminderEnabled = fa
           </div>
           <button type="button" onClick={() => setSourceDrawer(null)} aria-label="关闭来源详情" className="focus-ring shrink-0 rounded-lg p-1.5 text-[var(--muted)] hover:bg-[var(--paper-strong)]"><X size={16} /></button>
         </div>
-        {sourceDrawer.refs.length === 0 && <p className="mt-4 rounded-xl bg-[var(--paper-strong)] p-3 text-xs leading-5 text-[var(--ink-soft)]">
+        {sourceDrawer.refs.length === 0 && <p className="mt-4 rounded-md bg-[var(--paper-strong)] p-3 text-xs leading-5 text-[var(--ink-soft)]">
           这条建议来自系统规则，没有绑定某一条原始来源：它的依据是当前仍可开始的行动与尚未完成的交付缺口。执行它之前，忆程会先检查这段时间里来源有没有变化，来源变了会拒绝执行并要求重新生成检查点。
         </p>}
         <ul className="mt-4 space-y-3">
@@ -447,7 +447,7 @@ export function EpisodeCheckpointCard({ projectId, enabled, reminderEnabled = fa
             const state = sourceDrawer.states.find((item) => item.refId === ref.refId);
             const href = sourceHref(projectId, ref, state);
             const unavailable = state?.state === "DELETED";
-            return <li key={ref.refId} className="rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">
+            return <li key={ref.refId} className="rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="rounded-md bg-[var(--paper-strong)] px-2 py-0.5 text-[11px] font-bold text-[var(--ink-soft)]">{kindLabels[ref.kind] ?? ref.kind}{ref.revisionIndex !== null ? ` #${ref.revisionIndex}` : ""}</span>
                 <span className={"text-[11px] font-bold " + (!state || state.state === "AVAILABLE" ? "text-[var(--teal-strong)]" : "text-[var(--amber)]")}>

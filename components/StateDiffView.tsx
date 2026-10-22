@@ -25,7 +25,7 @@ export function StateDiffView({ diff, limit, emptyText = "没有需要处理的�
   return <div><p className="mb-2 break-all text-xs text-[var(--ink-soft)]">比较基线：{diff.fromSnapshotId} → {diff.toSnapshotId}</p><ul className="space-y-2">
     {items.map((item) => {
       const meta = diffMeta(item.kind);
-      return <li key={item.changeKey} className="rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">
+      return <li key={item.changeKey} className="rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3">
         <div className="flex flex-wrap items-center gap-2">
           <span aria-hidden="true" className={"text-sm font-black " + toneClass[meta.tone]}>{meta.glyph}</span>
           <span className="rounded-md bg-[var(--paper-strong)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--ink-soft)]">{meta.label}</span>

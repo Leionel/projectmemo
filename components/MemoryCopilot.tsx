@@ -33,7 +33,7 @@ function Receipt({ receipt, citations }: { receipt: EvidenceTrustReceipt; citati
   const meta = receiptMeta[receipt.supportState];
   const citationById = new Map(citations.map((citation) => [citation.cardId, citation]));
   return <div className="mt-3">
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-black ${meta.className}`} aria-label={`证据支持状态：${meta.label}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded border px-2.5 py-1 text-[11px] font-black ${meta.className}`} aria-label={`证据支持状态：${meta.label}`}>
       {receipt.supportState !== "SUPPORTED" && <CircleAlert size={12} aria-hidden="true" />}{meta.label}
     </span>
     <details className="mt-2 rounded-lg border border-[var(--rule)] bg-[var(--card-bg)] px-3 py-2">
@@ -155,23 +155,23 @@ export function MemoryCopilot({ projectId }: { projectId: string }) {
     }
   }
 
-  return <section id="memory-copilot" className="card-surface scroll-mt-24 overflow-hidden rounded-[1.5rem]">
+  return <section id="memory-copilot" className="card-surface scroll-mt-24 overflow-hidden rounded-lg">
     <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} className="focus-ring flex w-full items-center justify-between gap-3 p-5 text-left sm:p-6">
-      <span className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--navy)] text-white"><Bot size={20} /></span><span><span className="block text-sm font-black text-[var(--navy)]">问忆程</span><span className="mt-0.5 block text-xs text-[var(--ink-soft)]">逐条核验依据；证据不足或冲突时不会执行写操作</span></span></span>
+      <span className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-md bg-[var(--navy)] text-white"><Bot size={20} /></span><span><span className="block text-sm font-black text-[var(--navy)]">问忆程</span><span className="mt-0.5 block text-xs text-[var(--ink-soft)]">逐条核验依据；证据不足或冲突时不会执行写操作</span></span></span>
       <ChevronDown size={18} className={`transition ${open ? "rotate-180" : ""}`} />
     </button>
     {open && <div className="border-t archive-rule p-5 sm:p-6">
       <div className="max-h-96 space-y-3 overflow-y-auto pr-1">
-        {messages.length ? messages.map((item, index) => <div key={item.id ?? index} className={`rounded-xl p-3 text-sm leading-6 ${item.role === "USER" ? "ml-8 bg-[var(--paper)] text-[var(--navy)]" : "mr-4 bg-[var(--paper-strong)] text-[var(--ink-soft)]"}`}>
+        {messages.length ? messages.map((item, index) => <div key={item.id ?? index} className={`rounded-md p-3 text-sm leading-6 ${item.role === "USER" ? "ml-8 bg-[var(--paper)] text-[var(--navy)]" : "mr-4 bg-[var(--paper-strong)] text-[var(--ink-soft)]"}`}>
           <p className="whitespace-pre-wrap">{item.content}</p>
           {item.role === "ASSISTANT" && item.trustReceipt && <Receipt receipt={item.trustReceipt} citations={item.citations} />}
           {!item.trustReceipt && item.citations.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{item.citations.map((citation) => <a key={citation.cardId} href={`#card-${citation.cardId}`} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)]">引用：{citation.title}</a>)}</div>}
           {item.proposedActions.length > 0 && <div className="mt-3 space-y-2">{item.proposedActions.map((action) => <div key={action.title} className="rounded-lg border border-[var(--teal)]/30 bg-[var(--teal-pale)] p-2.5"><p className="text-xs font-bold text-[var(--navy)]">{action.title}</p><button type="button" onClick={() => void confirmTool(action, item.runId)} disabled={Boolean(toolBusy)} className="focus-ring mt-2 inline-flex items-center gap-1 rounded-md bg-[var(--paper-strong)] px-2 py-1 text-[11px] font-black text-[var(--teal-strong)] disabled:opacity-60">{toolBusy === action.title ? <LoaderCircle size={12} className="animate-spin" /> : <Check size={12} />}确认执行</button></div>)}</div>}
-        </div>) : <p className="rounded-xl bg-[var(--paper-strong)] p-5 text-center text-sm text-[var(--ink-soft)]">试试问“当前进展如何？”或“消融实验完成了吗？”</p>}
-        {loading && <div className="mr-4 rounded-xl bg-[var(--paper-strong)] p-3 text-sm text-[var(--muted)]"><LoaderCircle size={15} className="mr-2 inline animate-spin" />正在检索并核验证据…</div>}
+        </div>) : <p className="rounded-md bg-[var(--paper-strong)] p-5 text-center text-sm text-[var(--ink-soft)]">试试问“当前进展如何？”或“消融实验完成了吗？”</p>}
+        {loading && <div className="mr-4 rounded-md bg-[var(--paper-strong)] p-3 text-sm text-[var(--muted)]"><LoaderCircle size={15} className="mr-2 inline animate-spin" />正在检索并核验证据…</div>}
       </div>
       {feedback && <p role="status" className="mt-3 rounded-lg bg-[var(--teal-pale)] px-3 py-2 text-xs font-semibold text-[var(--teal-strong)]">{feedback}{feedbackHref && <a href={projectHref(projectId,feedbackHref)} className="ml-2 underline underline-offset-3">立即查看 →</a>}</p>}
-      <form onSubmit={ask} className="mt-4 flex gap-2"><input aria-label="问项目进展、提醒依据或下一步" value={question} onChange={(event) => setQuestion(event.target.value)} disabled={loading} className="focus-ring editorial-input min-w-0 flex-1 px-3 py-2.5 text-sm" placeholder="问项目进展、提醒依据或下一步" /><button type="submit" disabled={loading || !question.trim()} className="focus-ring editorial-button disabled:opacity-50"><Send size={16} />发送</button></form>
+      <form onSubmit={ask} className="mt-4 flex gap-2"><input aria-label="问项目进展、提醒依据或下一步" value={question} onChange={(event) => setQuestion(event.target.value)} disabled={loading} className="focus-ring editorial-input min-w-0 flex-1 px-3 py-2.5 text-sm" placeholder="问项目进展、提醒依据或下一步" /><button type="submit" disabled={loading || !question.trim()} className="focus-ring editorial-button disabled:opacity-50"><Send size={16} />发送问题</button></form>
     </div>}
   </section>;
 }

@@ -59,7 +59,7 @@ export function ArtifactAuditPanel({ projectId, artifactId, onClose }: { project
     void reload();
   }, [reload]);
 
-  return <div className="mt-4 rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-4">
+  return <div className="mt-4 rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-4">
     <div className="flex flex-wrap items-start justify-between gap-2">
       <div>
         <p className="flex items-center gap-1.5 text-xs font-black text-[var(--navy)]"><ScanSearch size={15} className="text-[var(--teal-strong)]" />证据透视</p>

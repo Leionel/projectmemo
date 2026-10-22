@@ -79,13 +79,13 @@ export function ReentryBrief({ projectId, enabled, episodesEnabled, stateEnabled
   if (!enabled) return null;
 
   if (loading) {
-    return <section id="reentry-brief" aria-label="回到项目" className="card-surface scroll-mt-24 rounded-[1.5rem] p-5 sm:p-6">
+    return <section id="reentry-brief" aria-label="回到项目" className="card-surface scroll-mt-24 rounded-lg p-5 sm:p-6">
       <p className="flex items-center gap-2 text-sm text-[var(--ink-soft)]"><LoaderCircle size={15} className="animate-spin" />正在汇总上次做到哪…</p>
     </section>;
   }
 
   if (error || !data) {
-    return <section id="reentry-brief" aria-label="回到项目" className="card-surface scroll-mt-24 rounded-[1.5rem] p-5 sm:p-6">
+    return <section id="reentry-brief" aria-label="回到项目" className="card-surface scroll-mt-24 rounded-lg p-5 sm:p-6">
       <div role="alert" className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[var(--brick-pale)] px-3 py-2">
         <p className="text-xs font-semibold text-[var(--brick)]">{error || "再入场摘要暂时读不到。"}</p>
         <button type="button" onClick={() => void load()} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-xs font-bold text-[var(--brick)]">重试</button>
@@ -111,7 +111,7 @@ export function ReentryBrief({ projectId, enabled, episodesEnabled, stateEnabled
   }
   const freshness = freshnessLabels[data.freshness] ?? freshnessLabels.EMPTY;
 
-  return <section id="reentry-brief" aria-labelledby="reentry-title" className="card-surface scroll-mt-24 rounded-[1.5rem] p-5 sm:p-6">
+  return <section id="reentry-brief" aria-labelledby="reentry-title" className="card-surface scroll-mt-24 rounded-lg p-5 sm:p-6">
     <div className="flex flex-wrap items-end justify-between gap-3 border-b archive-rule pb-4">
       <div className="min-w-0">
         <p className="archive-label">60 秒回到项目</p>
@@ -119,13 +119,13 @@ export function ReentryBrief({ projectId, enabled, episodesEnabled, stateEnabled
         <p className="mt-1 text-xs text-[var(--muted)]">汇总于 {formatTime(data.generatedAt)} · 与鸿蒙客户端、桌面卡片读取同一份结果</p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <span className={"rounded-full px-2.5 py-1 text-[11px] font-bold " + freshness.className}>{freshness.label}</span>
+        <span className={"rounded px-2.5 py-1 text-[11px] font-bold " + freshness.className}>{freshness.label}</span>
         <a href={projectHref(projectId,target.href)} className="focus-ring editorial-button text-xs">{target.label}<ArrowRight size={14} /></a>
       </div>
     </div>
 
     <div className="mt-4 grid gap-3 lg:grid-cols-3">
-      <div className="rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">
+      <div className="rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3">
         <div className="flex items-center justify-between gap-1.5">
           <p className="flex items-center gap-1.5 text-[11px] font-black text-[var(--navy)]"><BookmarkCheck size={13} className="text-[var(--teal-strong)]" />阶段检查点与结论</p>
           {data.episode.isHistorical && <span className="rounded px-1.5 py-0.2 text-[10px] font-bold bg-[var(--amber)]/15 text-[var(--amber)]">历史参考</span>}
@@ -147,7 +147,7 @@ export function ReentryBrief({ projectId, enabled, episodesEnabled, stateEnabled
         {episodesEnabled && <a href={projectHref(projectId,"#episode-checkpoint")} className="focus-ring mt-2 inline-block text-[11px] font-black text-[var(--teal-strong)] underline underline-offset-2">打开阶段检查点 →</a>}
       </div>
 
-      <div className="rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">
+      <div className="rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3">
         <p className="flex items-center gap-1.5 text-[11px] font-black text-[var(--navy)]"><TriangleAlert size={13} className="text-[var(--brick)]" />最急需处理项</p>
         {data.risk.text
           ? <div className="mt-1.5">
@@ -164,7 +164,7 @@ export function ReentryBrief({ projectId, enabled, episodesEnabled, stateEnabled
         <a href={projectHref(projectId,data.risk.kind === "BLOCKED" ? "#action-board" : "#interventions")} className="focus-ring mt-2 inline-block text-[11px] font-black text-[var(--teal-strong)] underline underline-offset-2">{data.risk.kind === "BLOCKED" ? "前往处理受阻待办 →" : "查看提醒与依据 →"}</a>
       </div>
 
-      <div className="rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">
+      <div className="rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3">
         <p className="flex items-center gap-1.5 text-[11px] font-black text-[var(--navy)]"><CalendarClock size={13} className="text-[var(--teal-strong)]" />下一个安排</p>
         {data.schedule.start
           ? <>

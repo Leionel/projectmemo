@@ -185,7 +185,7 @@ export function SchedulePlanner({ projectId, enabled }: { projectId: string; ena
     }
   }
 
-  return <section id="schedule-planner" aria-labelledby="schedule-title" className="card-surface scroll-mt-24 rounded-[1.5rem] p-5 sm:p-6">
+  return <section id="schedule-planner" aria-labelledby="schedule-title" className="card-surface scroll-mt-24 rounded-lg p-5 sm:p-6">
     <div className="flex flex-wrap items-end justify-between gap-3 border-b archive-rule pb-4">
       <div>
         <p className="archive-label">可执行安排</p>
@@ -211,7 +211,7 @@ export function SchedulePlanner({ projectId, enabled }: { projectId: string; ena
     {!loading && plan && plan.blocks.length > 0 && <div className="mt-4">
       <p className="text-xs font-black text-[var(--navy)]">当前已确认安排</p>
       <ul className="mt-2 space-y-1.5">
-        {plan.blocks.map((block) => <li key={block.id} className="rounded-xl border border-[var(--teal)]/30 bg-[var(--teal-pale)] px-3 py-2">
+        {plan.blocks.map((block) => <li key={block.id} className="rounded-md border border-[var(--teal)]/30 bg-[var(--teal-pale)] px-3 py-2">
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
             <span className="font-bold text-[var(--navy)]">{block.actionTitle || "行动"}</span>
             <span className="text-[var(--ink-soft)]">{formatSlot(block.start, block.end)}</span>
@@ -225,7 +225,7 @@ export function SchedulePlanner({ projectId, enabled }: { projectId: string; ena
       <button type="button" onClick={() => void cancelPlan()} disabled={busy === "cancel"} className="focus-ring mt-3 rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--muted)] hover:bg-[var(--paper-strong)]">取消这份安排</button>
     </div>}
 
-    {!loading && open && !preview && <div className="mt-4 rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">
+    {!loading && open && !preview && <div className="mt-4 rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3">
       <div className="grid gap-3 sm:grid-cols-3">
         <label className="text-xs font-bold text-[var(--ink-soft)]">每天开始时间<input aria-label="每天开始时间" type="time" value={startTime} onChange={(event) => setStartTime(event.target.value)} className="focus-ring editorial-input mt-1.5 w-full px-3 py-2 text-sm" /></label>
         <label className="text-xs font-bold text-[var(--ink-soft)]">每天结束时间<input aria-label="每天结束时间" type="time" value={endTime} onChange={(event) => setEndTime(event.target.value)} className="focus-ring editorial-input mt-1.5 w-full px-3 py-2 text-sm" /></label>
@@ -237,7 +237,7 @@ export function SchedulePlanner({ projectId, enabled }: { projectId: string; ena
     </div>}
 
     {preview && <div className="mt-4">
-      <div className="rounded-xl border border-[var(--teal)]/30 bg-[var(--teal-pale)] p-3">
+      <div className="rounded-md border border-[var(--teal)]/30 bg-[var(--teal-pale)] p-3">
         <p className="text-xs font-black text-[var(--teal-strong)]">已安排（{preview.blocks.length}）</p>
         {preview.blocks.length === 0 && <p className="mt-1.5 text-xs text-[var(--ink-soft)]">没有可安排的 READY 行动，原因见下方分组。</p>}
         <ul className="mt-2 space-y-1.5">
@@ -251,7 +251,7 @@ export function SchedulePlanner({ projectId, enabled }: { projectId: string; ena
       {reasonGroups.map((group) => {
         const items = preview.unscheduled.filter((item) => group.codes.includes(item.reasonCode));
         if (items.length === 0) return null;
-        return <div key={group.key} className="mt-2 rounded-xl border border-[var(--rule)] bg-[var(--paper-strong)] p-3">
+        return <div key={group.key} className="mt-2 rounded-md border border-[var(--rule)] bg-[var(--paper-strong)] p-3">
           <p className="text-xs font-black text-[var(--navy)]">{group.label}（{items.length}）</p>
           <ul className="mt-1.5 space-y-1 text-xs leading-5 text-[var(--ink-soft)]">
             {items.map((item) => <li key={`${item.actionId}-${item.reasonCode}`}>· <span className="font-bold">{item.actionTitle || "行动"}</span>：{item.message}</li>)}

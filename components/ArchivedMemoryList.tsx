@@ -82,7 +82,7 @@ export function ArchivedMemoryList({ projectId }: { projectId: string }) {
   // 没有已归档记忆时不占位；归档动作会通过工作区事件把新条目带回来
   if (cards.length === 0 && !error && !notice) return null;
 
-  return <section id="archived-memory" aria-labelledby="archived-memory-title" className="card-surface scroll-mt-24 rounded-[1.45rem] p-5 sm:p-6">
+  return <section id="archived-memory" aria-labelledby="archived-memory-title" className="card-surface scroll-mt-24 rounded-lg p-5 sm:p-6">
     <details>
       <summary className="focus-ring cursor-pointer list-none">
         <p className="archive-label">已归档记忆</p>
@@ -98,7 +98,7 @@ export function ArchivedMemoryList({ projectId }: { projectId: string }) {
       </div>}
 
       {!loading && cards.length > 0 && <ul className="mt-3 space-y-2">
-        {cards.map((card) => <li key={card.id} className="rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">
+        {cards.map((card) => <li key={card.id} className="rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-md bg-[var(--paper-strong)] px-2 py-0.5 text-[11px] font-bold text-[var(--ink-soft)]">{knowledgeTypeLabels[card.type as KnowledgeTypeValue] ?? card.type}</span>
             <span className="text-sm font-bold text-[var(--navy)]">{card.title}</span>

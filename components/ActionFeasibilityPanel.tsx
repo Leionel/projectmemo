@@ -196,7 +196,7 @@ export function ActionFeasibilityPanel({ projectId, action, otherActions, onActi
     ? otherActions.filter((item) => item.id !== action.id && item.status !== "DONE" && item.status !== "CANCELLED").map((item) => ({ kind: "action" as const, id: item.id, title: item.title }))
     : (candidates ?? []).filter((candidate) => candidate.kind === draft.kind);
 
-  return <div className="mt-2 rounded-xl border border-[var(--rule)] bg-[var(--paper-strong)] p-3">
+  return <div className="mt-2 rounded-md border border-[var(--rule)] bg-[var(--paper-strong)] p-3">
     <div className="flex flex-wrap items-center gap-2">
       <span className={"inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-black " + verdict.className}><VerdictIcon size={13} />{verdict.label}</span>
       {assessment.estimateMinutes === null

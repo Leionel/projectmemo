@@ -113,7 +113,7 @@ export function MemoryConsolidationCard({ projectId, enabled }: { projectId: str
 
   const activeReceipts = receipts.filter((receipt) => receipt.status === "ACTIVE");
 
-  return <section id="memory-consolidation" aria-labelledby="consolidation-title" className="card-surface scroll-mt-24 rounded-[1.5rem] p-5 sm:p-6">
+  return <section id="memory-consolidation" aria-labelledby="consolidation-title" className="card-surface scroll-mt-24 rounded-lg p-5 sm:p-6">
     <div className="flex flex-wrap items-end justify-between gap-3 border-b archive-rule pb-4">
       <div>
         <p className="archive-label">记忆整理</p>
@@ -131,13 +131,13 @@ export function MemoryConsolidationCard({ projectId, enabled }: { projectId: str
 
     {loading && <p className="mt-4 text-sm text-[var(--ink-soft)]">正在比对记录…</p>}
 
-    {!loading && proposals.length === 0 && <p className="mt-4 rounded-xl bg-[var(--paper-strong)] p-4 text-center text-sm text-[var(--ink-soft)]">没有发现需要归并的重复记录。存在争议或取代关系的记录不会被建议合并。</p>}
+    {!loading && proposals.length === 0 && <p className="mt-4 rounded-md bg-[var(--paper-strong)] p-4 text-center text-sm text-[var(--ink-soft)]">没有发现需要归并的重复记录。存在争议或取代关系的记录不会被建议合并。</p>}
 
     <ul className="mt-4 space-y-3">
       {proposals.map((proposal) => {
         const master = proposal.cards.find((card) => card.id === proposal.masterCardId);
         const others = proposal.cards.filter((card) => card.id !== proposal.masterCardId);
-        return <li key={proposal.proposalId} className="rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3.5">
+        return <li key={proposal.proposalId} className="rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3.5">
           <p className="flex items-start gap-1.5 text-xs font-semibold text-[var(--amber)]"><TriangleAlert size={13} className="mt-0.5 shrink-0" />{proposal.reason}</p>
           <div className="mt-2.5 grid gap-2 sm:grid-cols-2">
             <div className="rounded-lg border border-[var(--teal)]/40 bg-[var(--teal-pale)] p-2.5">

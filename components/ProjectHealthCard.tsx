@@ -93,7 +93,7 @@ export function ProjectHealthCard({ projectId, enabled, stateEnabled }: { projec
   const total = report?.findings.length ?? 0;
   const primary = report?.primaryAction ?? null;
 
-  return <section id="project-health" aria-labelledby="project-health-title" className="card-surface scroll-mt-24 rounded-[1.5rem] p-5 sm:p-6">
+  return <section id="project-health" aria-labelledby="project-health-title" className="card-surface scroll-mt-24 rounded-lg p-5 sm:p-6">
     <div className="flex flex-wrap items-end justify-between gap-3 border-b archive-rule pb-4">
       <div className="min-w-0">
         <p className="archive-label">项目体检</p>
@@ -114,15 +114,15 @@ export function ProjectHealthCard({ projectId, enabled, stateEnabled }: { projec
       <button type="button" onClick={() => void load()} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-xs font-bold text-[var(--brick)]">重试</button>
     </div>}
 
-    {!loading && !error && report && total === 0 && <p className="mt-4 rounded-xl bg-[var(--paper-strong)] p-5 text-center text-sm font-bold text-[var(--ink-soft)]">
+    {!loading && !error && report && total === 0 && <p className="mt-4 rounded-md bg-[var(--paper-strong)] p-5 text-center text-sm font-bold text-[var(--ink-soft)]">
       当前没有需要立即处理的问题
     </p>}
 
     {!loading && !error && report && total > 0 && primary && <div className="mt-4">
       <div className="flex flex-wrap items-center gap-2">
-        <span className={"rounded-full px-2.5 py-1 text-[11px] font-bold " + severityCopy[primary.severity].className}>{severityCopy[primary.severity].label}</span>
+        <span className={"rounded px-2.5 py-1 text-[11px] font-bold " + severityCopy[primary.severity].className}>{severityCopy[primary.severity].label}</span>
         <span className="text-[11px] font-bold text-[var(--muted)]">共 {total} 个待处理问题</span>
-        {report.groups.map((group) => <span key={group.severity} className="rounded-full bg-[var(--paper-strong)] px-2 py-0.5 text-[11px] font-semibold text-[var(--ink-soft)]">
+        {report.groups.map((group) => <span key={group.severity} className="rounded bg-[var(--paper-strong)] px-2 py-0.5 text-[11px] font-semibold text-[var(--ink-soft)]">
           {severityCopy[group.severity].label} {group.count}
         </span>)}
       </div>
@@ -139,7 +139,7 @@ export function ProjectHealthCard({ projectId, enabled, stateEnabled }: { projec
         {report.findings.map((finding) => {
           const copy = severityCopy[finding.severity];
           const Icon = copy.icon;
-          return <li key={`${finding.findingCode}-${finding.objectId}`} className="rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">
+          return <li key={`${finding.findingCode}-${finding.objectId}`} className="rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3">
             <div className="flex flex-wrap items-center gap-2">
               <span className={"inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-bold " + copy.className}>
                 <Icon size={11} />{copy.label}

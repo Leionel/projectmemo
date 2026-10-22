@@ -41,7 +41,8 @@ test("first material leads to an explicitly authorized Mission; multiple waiting
  await page.setViewportSize({width:390,height:844});await expect(focus.getByRole("link").first()).toBeInViewport();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
  await page.screenshot({path:"test-results/pre-r4-followup-home-mobile.png",fullPage:true,animations:"disabled"});
- await focus.getByRole("link").first().click();await expect(page.getByRole("region",{name:"待补充信息"})).toBeVisible();
+ await focus.getByRole("link").first().focus();await expect(focus.getByRole("link").first()).toBeFocused();
+ await focus.getByRole("link").first().press("Enter");await expect(page.getByRole("region",{name:"待补充信息"})).toBeVisible();
  await page.screenshot({path:"test-results/pre-r4-followup-mission-mobile.png",fullPage:true,animations:"disabled"});
  await page.goto(`${base}/health#project-evolution`);await page.getByRole("button",{name:"查看结论与关系记录"}).click();
  await expect(page.getByRole("region",{name:"项目结论演进"}).getByText("实验记录",{exact:false}).first()).toBeVisible();

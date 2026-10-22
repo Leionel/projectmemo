@@ -121,7 +121,7 @@ export function CaptureBox({ projectId, inboxEnabled = true }: { projectId: stri
   return (
     <section
       id="capture-box"
-      className="card-surface scroll-mt-24 rounded-[1.5rem] p-5 sm:p-6"
+      className="card-surface scroll-mt-24 rounded-lg p-5 sm:p-6"
     >
       <div className="flex flex-col justify-between gap-4 border-b archive-rule pb-5 sm:flex-row sm:items-end">
         <div>

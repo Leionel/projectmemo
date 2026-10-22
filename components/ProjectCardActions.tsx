@@ -54,7 +54,7 @@ export function ProjectCardActions({ projectId, projectTitle, archived, onDone }
   return (
     <div className="mt-4 border-t archive-rule pt-4">
       {confirming ? (
-        <div role="alert" className="rounded-xl bg-[var(--brick-pale)] p-3">
+        <div role="alert" className="rounded-md bg-[var(--brick-pale)] p-3">
           <p className="text-xs font-bold text-[var(--brick)]">
             删除「{projectTitle}」会同时删除它的全部卡片、行动与成果，且无法恢复。确认删除？
           </p>

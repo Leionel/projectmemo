@@ -11,6 +11,19 @@ function fixture(fail=false){
 }
 async function confirm(){fireEvent.click((await screen.findAllByRole("checkbox"))[0]);fireEvent.click(screen.getByRole("button",{name:"评估选中材料"}));await screen.findByText("材料字段齐备，仍需您核对含义");const button=screen.getByRole("button",{name:"确认材料并继续委托"}) as HTMLButtonElement;expect(button.disabled).toBe(true);fireEvent.change(screen.getByRole("textbox",{name:"材料说明与当前问题答复"}),{target:{value:"确认来自本地实验，请继续修订"}});fireEvent.click(screen.getByRole("checkbox",{name:"我已核对材料与该问题的关系，确认以上答复"}));fireEvent.click(button);}
 describe("材料接续面板",()=>{
+ it("同问题版本更新保留答复但不能使用旧预览",async()=>{
+  fixture();
+  const value="确认来自本地实验，请继续修订";
+  // 更改同一组件的服务端版本，模拟父面板轮询；不重新创建问题。
+  cleanup();
+  const resumed=vi.fn(async()=>undefined),props={id:"m",questionId:"q",version:7,contextVersion:3,onContinued:resumed};
+  const {rerender}=render(createElement(MissionContinuation,props));
+  fireEvent.click((await screen.findAllByRole("checkbox"))[0]);fireEvent.click(screen.getByRole("button",{name:"评估选中材料"}));await screen.findByText("材料字段齐备，仍需您核对含义");
+  fireEvent.change(screen.getByRole("textbox",{name:"材料说明与当前问题答复"}),{target:{value}});
+  rerender(createElement(MissionContinuation,{...props,version:8,contextVersion:4}));
+  expect((screen.getByRole("textbox",{name:"材料说明与当前问题答复"}) as HTMLTextAreaElement).value).toBe(value);
+  expect(screen.queryByRole("button",{name:"确认材料并继续委托"})).toBeNull();expect(screen.getByText(/委托版本已变化/)).toBeTruthy();
+ });
  it("先展示评估再人工确认，提交冻结的版本与资料指针",async()=>{const f=fixture();await confirm();await waitFor(()=>expect(f.resumed).toHaveBeenCalledTimes(1));expect(f.calls.find(c=>c.url.endsWith("/confirm"))?.body).toMatchObject({questionId:"q",expectedVersion:7,expectedContextVersion:3,assessmentHash:"frozen",sourcePointers:[f.pointer],confirmedGap:true});});
  it("旧预览409留在当前问题并提示重新预览",async()=>{const f=fixture(true);await confirm();await screen.findByRole("alert");expect(screen.getByText("材料已变化，请重新预览")).toBeTruthy();expect(f.resumed).not.toHaveBeenCalled();expect(screen.queryByRole("button",{name:"确认材料并继续委托"})).toBeNull();});
 });

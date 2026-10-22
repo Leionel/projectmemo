@@ -15,17 +15,19 @@ export function ArtifactGenerator({ projectId, initialArtifacts }: { projectId: 
   const pathname = usePathname();
   const router = useRouter();
   const queryType = search.get("type") as ArtifactTypeValue | null;
-  const initialType = queryType && artifactTypes.includes(queryType) ? queryType : "weekly_report";
+  const artifactId = search.get("artifact");
+  const requested = artifactId ? initialArtifacts.find(item => item.id === artifactId) : null;
+  const initialType = requested && artifactTypes.includes(requested.artifactType as ArtifactTypeValue) ? requested.artifactType as ArtifactTypeValue : queryType && artifactTypes.includes(queryType) ? queryType : "weekly_report";
   const [type, setType] = useState<ArtifactTypeValue>(initialType);
   const [artifacts, setArtifacts] = useState(initialArtifacts);
-  const [current, setCurrent] = useState<Artifact | null>(initialArtifacts.find((item) => item.artifactType === initialType) ?? null);
+  const [current, setCurrent] = useState<Artifact | null>(artifactId ? requested ?? null : initialArtifacts.find((item) => item.artifactType === initialType) ?? null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
   const [viewMode, setViewMode] = useState<"preview" | "source">("preview");
   const [editContent, setEditContent] = useState("");
   const [auditOpen, setAuditOpen] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(artifactId && !requested ? "该成果版本当前不可访问，请从历史版本中选择。" : "");
   const [feedback, setFeedback] = useState("");
   const resultRef = useRef<HTMLElement>(null);
   const history = useMemo(() => artifacts.filter((item) => item.artifactType === type), [artifacts, type]);
@@ -117,7 +119,7 @@ export function ArtifactGenerator({ projectId, initialArtifacts }: { projectId: 
   return <div className="mt-9 grid min-w-0 items-start gap-6 lg:grid-cols-[268px_minmax(0,1fr)]">
     <aside className="card-surface min-w-0 rounded-[1.4rem] p-4 lg:sticky lg:top-24">
       <p className="archive-label px-2 pb-3">成果目录</p>
-      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 lg:block lg:space-y-1 lg:overflow-visible">{artifactTypes.map((item) => <button key={item} type="button" aria-pressed={type === item} disabled={busy || editing} onClick={() => selectType(item)} className={`focus-ring flex shrink-0 items-center justify-between gap-3 rounded-lg border-l-2 px-3 py-3 text-left text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 lg:w-full ${type === item ? "border-l-[var(--teal-strong)] bg-[#edf3ef] text-[var(--navy)]" : "border-l-transparent bg-[var(--card-bg)] text-[var(--ink-soft)] hover:bg-[#f3f1ea]"}`}><span>{artifactTypeLabels[item]}</span><FileOutput size={15} /></button>)}</div>
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 lg:block lg:space-y-1 lg:overflow-visible">{artifactTypes.map((item) => <button key={item} type="button" aria-pressed={type === item} disabled={busy || editing} onClick={() => selectType(item)} className={`focus-ring flex shrink-0 items-center justify-between gap-3 rounded-lg border-l-2 px-3 py-3 text-left text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 lg:w-full ${type === item ? "border-l-[var(--teal-strong)] bg-[var(--teal-pale)] text-[var(--navy)]" : "border-l-transparent bg-[var(--card-bg)] text-[var(--ink-soft)] hover:bg-[var(--paper-strong)]"}`}><span>{artifactTypeLabels[item]}</span><FileOutput size={15} /></button>)}</div>
       <button onClick={generate} disabled={busy || editing} className="focus-ring editorial-button mt-4 w-full disabled:cursor-not-allowed disabled:opacity-60">{loading ? <LoaderCircle className="animate-spin" size={17} /> : <FileOutput size={17} />}{loading ? `正在生成${artifactTypeLabels[type]}…` : "生成新版本"}</button>
       {error && <p role="alert" className="mt-3 rounded-xl bg-[var(--brick-pale)] p-3 text-sm text-[var(--brick)]">{error}</p>}
       <details className="mt-5 border-t archive-rule pt-4 lg:open" open><summary className="focus-ring cursor-pointer rounded-md px-2 text-xs font-black uppercase tracking-[.14em] text-[var(--teal-strong)]">历史版本 · {history.length}</summary><div className="mt-3 max-h-56 space-y-1 overflow-y-auto pr-1">{history.length ? history.map((item, index) => <button key={item.id} type="button" aria-pressed={current?.id === item.id} disabled={busy || editing} onClick={() => { setCurrent(item); setFeedback(""); setError(""); }} className={`focus-ring w-full rounded-lg border px-3 py-2.5 text-left text-xs transition disabled:cursor-not-allowed disabled:opacity-60 ${current?.id === item.id ? "border-[var(--teal)] bg-[var(--teal-pale)] text-[var(--ink)]" : "border-transparent text-[var(--ink-soft)] hover:bg-[var(--paper-strong)]"}`}><span className="font-bold">版本 {history.length - index}</span><br />{new Date(item.createdAt).toLocaleString("zh-CN")}</button>) : <p className="px-2 py-3 text-xs leading-5 text-[var(--muted)]">该类型还没有历史成果。</p>}</div></details>

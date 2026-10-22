@@ -1,0 +1,18 @@
+{
+  "stage": "F4 caller resilience and exact artifact navigation",
+  "targetedTests": 20,
+  "panelRecheck": 4,
+  "typescript": "PASS",
+  "lint": "PASS",
+  "e2e": {
+    "startTime": "2026-10-22T02:35:03.909Z",
+    "duration": 34868.076,
+    "expected": 13,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "build": "PASS",
+  "backendContractChanges": false,
+  "independentAgentReview": "NOT_RUN"
+}

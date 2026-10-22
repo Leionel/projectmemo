@@ -7,7 +7,7 @@ import { getSessionUser, hasProjectAccess } from "@/lib/auth/serverSession";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-export default async function GeneratePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ type?: string }> }) {
+export default async function GeneratePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ type?: string; artifact?: string }> }) {
   const { id } = await params;
   const query = await searchParams;
   const user = await getSessionUser();
@@ -19,5 +19,5 @@ export default async function GeneratePage({ params, searchParams }: { params: P
   }
   let project;
   try { project = await getProjectDetail(id); } catch (error) { if (error instanceof AppError && error.code === "PROJECT_NOT_FOUND") notFound(); throw error; }
-  return <><header className="mb-5"><h2 className="text-lg font-bold">成果文档</h2><p className="mt-2 text-sm text-[var(--ink-soft)]">基于《{project.title}》的 {project.cards.length} 张知识卡片，生成和审阅项目材料。</p></header><ArtifactGenerator key={query.type ?? "weekly_report"} projectId={id} initialArtifacts={project.artifacts} /></>;
+  return <><header className="mb-5"><h2 className="text-lg font-bold">成果文档</h2><p className="mt-2 text-sm text-[var(--ink-soft)]">基于《{project.title}》的 {project.cards.length} 张知识卡片，生成和审阅项目材料。</p></header><ArtifactGenerator key={`${query.type ?? "weekly_report"}:${query.artifact ?? ""}`} projectId={id} initialArtifacts={project.artifacts} /></>;
 }

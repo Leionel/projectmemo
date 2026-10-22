@@ -15,40 +15,47 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let active = true;
+    let generation = 0;
     async function checkAuth() {
+      const read = ++generation;
       try {
-        const res = await fetch("/api/auth/me");
+        const res = await fetch("/api/auth/me", { cache: "no-store" });
         if (res.ok) {
           const data = await res.json();
-          if (active && data.user) {
-            setUser(data.user);
+          if (active && read === generation) {
+            setUser(data.user ?? null);
           }
         } else {
-          if (active) setUser(null);
+          if (active && read === generation) setUser(null);
         }
       } catch {
-        if (active) setUser(null);
+        if (active && read === generation) setUser(null);
       } finally {
-        if (active) setLoading(false);
+        if (active && read === generation) setLoading(false);
       }
     }
     checkAuth();
+    window.addEventListener("projectmemo:session-changed", checkAuth);
     return () => {
       active = false;
+      window.removeEventListener("projectmemo:session-changed", checkAuth);
     };
   }, []);
 
   const handleLogout = async () => {
     setLoggingOut(true);
+    setError("");
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+      if (!response.ok) throw new Error("logout failed");
       setUser(null);
       window.location.assign("/login");
     } catch {
-      window.location.assign("/login");
+      setError("退出未完成，当前登录仍保留，请重试。");
     } finally {
       setLoggingOut(false);
     }
@@ -92,6 +99,7 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
         >
           <LogOut size={16} /> {loggingOut ? "退出中..." : "退出登录"}
         </button>
+        {error && <p role="alert" className="px-3 text-xs text-[var(--brick)]">{error}</p>}
       </div>
     );
   }
@@ -135,6 +143,7 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
             >
               <LogOut size={14} /> {loggingOut ? "退出中..." : "退出登录"}
             </button>
+            {error && <p role="alert" className="px-3 text-xs text-[var(--brick)]">{error}</p>}
           </div>
         </>
       )}

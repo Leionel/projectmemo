@@ -54,6 +54,7 @@ function LoginForm() {
       }
 
       // 登录成功，跳转至目标页面
+      window.dispatchEvent(new Event("projectmemo:session-changed"));
       router.push(from);
       router.refresh();
     } catch (err) {

@@ -1,0 +1,92 @@
+{
+  "checkedAt": "2026-10-22T11:38:09.077529+08:00",
+  "auditBaseline": "3c3d5774da74f264c157b27418a31426720061cc",
+  "testSource": {
+    "worktree": "D:/Projects/hongmen-r3-release-merge",
+    "commit": "21d8bf178fec2e570aba18064cd0fc7f0595c6ba",
+    "filesPassed": 11,
+    "testsPassed": 57,
+    "exitCode": 0,
+    "data": "isolated temporary databases / component mocks / actual Next route native adapters",
+    "liveExternalCalls": false
+  },
+  "stages": {
+    "UX-0": {
+      "commit": "bd4215eb4ea5f3d2fe9d34af9c210318c8ca4d09",
+      "includedInAuditBaseline": true
+    },
+    "UX-1": {
+      "commit": "33bb4168b04b1b936d3133ce46332382965c63c1",
+      "includedInAuditBaseline": true
+    },
+    "UX-2": {
+      "commit": "393c8f3d8bc8f3873c11a2a247ec973577fc18f0",
+      "includedInAuditBaseline": true
+    },
+    "UX-3": {
+      "commit": "bb0b6dae899e37c4730cb28adbadea49780de029",
+      "includedInAuditBaseline": true
+    },
+    "UX-4": {
+      "commit": "4da0183f4633d5397d384ef6cfdc389833e3a75a",
+      "includedInAuditBaseline": true
+    },
+    "F1-F3": {
+      "commit": "3a7f327fed1b375cc431e4473f14ed53becb3b20",
+      "includedInAuditBaseline": true
+    },
+    "F4": {
+      "commit": "21d8bf178fec2e570aba18064cd0fc7f0595c6ba",
+      "includedInAuditBaseline": true
+    },
+    "integrated": {
+      "commit": "15eb02fb715cc456bbc5aba6e82b31c1f2924eef",
+      "includedInAuditBaseline": true
+    }
+  },
+  "packages": [
+    "P00",
+    "P01",
+    "P10",
+    "P11",
+    "P20",
+    "P21",
+    "P22",
+    "P30",
+    "P31",
+    "P40"
+  ],
+  "formalDocuments": [
+    {
+      "path": "docs/FINAL/R4_FINAL_ARCHITECTURE.md",
+      "sha256": "744a18292f1e9e1a902dbbb9e33890f9bdae15a62cc6cb80707a38ba7a8c02ae",
+      "unchanged": true
+    },
+    {
+      "path": "docs/FINAL/R4_FINAL_ROADMAP.md",
+      "sha256": "44ea2c2d84e111667cba00b888a521f06ce2fd95ce6b5e68640f090b6630108a",
+      "unchanged": true
+    },
+    {
+      "path": "docs/FINAL/R4_RESEARCH_REVIEW_AND_DECISIONS.md",
+      "sha256": "950415b6caff866ca42bdd99a9f690147800e2eae9ec2d33b11459dbeeb8087e",
+      "unchanged": true
+    }
+  ],
+  "documentLinksChecked": 22,
+  "errors": [],
+  "result": "PASS",
+  "scope": "F5 documentation reconciliation; no application edits",
+  "openGates": [
+    "P01/P22 formative user walkthrough",
+    "P31 physical device, accessibility, touch, lifecycle and frame timing",
+    "post-baseline global-navigation WIP acceptance"
+  ],
+  "usage": {
+    "fiveHourUsedPercentAtQuery": 49,
+    "weeklyUsedPercentAtQuery": 8,
+    "resetCardsAvailable": 2,
+    "resetCardsUsedThisRun": 0,
+    "currentModelIdentifier": "NOT_RETURNED"
+  }
+}

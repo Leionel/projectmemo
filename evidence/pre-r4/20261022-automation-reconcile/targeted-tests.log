@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/projectNavigation.test.ts tests/projectWorkspaceOverview.test.ts tests/projectAttention.test.ts tests/missionWorkspaceSummary.test.ts tests/missionNativeContract.test.ts tests/projectEvolutionSummary.test.ts tests/projectDecisionTimeline.test.ts tests/projectStartGuide.test.ts tests/missionPanel.test.ts tests/missionContinuationPanel.test.ts tests/missionArtifactAdoptionPanel.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-r3-release-merge
+
+
+ Test Files  11 passed (11)
+      Tests  57 passed (57)
+   Start at  11:34:45
+   Duration  60.37s (transform 4.59s, setup 0ms, import 21.89s, tests 5.14s, environment 27.79s)
+

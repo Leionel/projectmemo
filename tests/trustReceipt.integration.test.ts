@@ -125,6 +125,11 @@ describe.sequential("W05 trust receipt integration", () => {
     expect(answer.message).not.toContain("演示提醒");
     expect(answer.trustReceipt?.claims[0].projectRefs).toHaveLength(2);
     const history = await getProjectChat(project.id);
-    expect((history.at(-1)?.trustReceipt as { claims: Array<{ projectRefs: unknown[] }> } | undefined)?.claims[0].projectRefs).toHaveLength(2);
+    expect(history.at(-1)?.trustReceipt).toMatchObject({
+      claims: [{ projectRefs: [
+        expect.objectContaining({ kind: "project_status", entityId: project.id }),
+        expect.objectContaining({ kind: "intervention" }),
+      ] }],
+    });
   });
 });

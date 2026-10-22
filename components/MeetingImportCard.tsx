@@ -1,4 +1,5 @@
 "use client";
+import {projectHref} from "@/lib/projectNavigation";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -243,7 +244,7 @@ export function MeetingImportCard({ projectId, stateEnabled }: { projectId: stri
         {result.applied.map((item) => <li key={item.changeId} className="rounded-lg border border-[var(--rule)] bg-[var(--card-bg)] px-3 py-2 text-[11px] leading-5 text-[var(--ink-soft)]">
           <span className="mr-1.5 rounded bg-[var(--paper-strong)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--navy)]">{kindLabels[item.kind as MeetingTypedChange["kind"]] ?? item.kind}</span>
           {item.newCardId && <span>已保存到记忆{item.supersededCardId ? "，旧记录转为历史版本" : ""}</span>}
-          {item.newActionId && <a href="#action-board" className="focus-ring font-bold text-[var(--teal-strong)] underline underline-offset-2">已加入待办</a>}
+          {item.newActionId && <a href={projectHref(projectId,"#action-board")} className="focus-ring font-bold text-[var(--teal-strong)] underline underline-offset-2">已加入待办</a>}
           {item.deadlineISO && <span>截止日期改为 {item.deadlineISO}</span>}
         </li>)}
       </ul>
@@ -252,7 +253,7 @@ export function MeetingImportCard({ projectId, stateEnabled }: { projectId: stri
           {busy === "diff" ? <LoaderCircle size={14} className="animate-spin" /> : <CalendarDays size={14} />}查看会后变化对比
         </button>}
         {showDiff && <button type="button" onClick={() => setShowDiff(false)} className="focus-ring editorial-button-secondary text-xs">收起对比</button>}
-        <a href="#knowledge-assets" className="focus-ring editorial-button-secondary text-xs">查看新记忆</a>
+        <a href={projectHref(projectId,"#knowledge-assets")} className="focus-ring editorial-button-secondary text-xs">查看新记忆</a>
         <button type="button" onClick={() => { backToDraft(""); setText(""); setMeetingDate(""); }} disabled={busy !== null} className="focus-ring editorial-button text-xs">完成</button>
       </div>
       {showDiff && afterDiff && <div className="mt-3 rounded-xl border border-[var(--rule)] bg-[var(--card-bg)] p-3">

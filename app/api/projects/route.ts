@@ -6,6 +6,9 @@ import { projectCreateSchema } from "@/lib/validation/schemas";
 
 export const runtime = "nodejs";
 
+// Next 路由类型使用显式 Request；保留已有匿名探针的无参调用。
+export function GET(): Promise<Response>;
+export function GET(request: Request): Promise<Response>;
 export async function GET(request?: Request) {
   try {
     const req = request ?? new Request("http://localhost/api/projects");

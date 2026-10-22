@@ -1,0 +1,134 @@
+{
+  "stage": "UX-0 documentation",
+  "date": "2026-10-22",
+  "files": [
+    {
+      "file": "ProjectMemo_双端功能曝光与UI优化方案_2026-10-21.md",
+      "lines": 300,
+      "fences": 4,
+      "sha256": "de5387e09176d32d1f61f71738cf93a61d196d5a6a84d257c0ed2e31ff50bb25"
+    },
+    {
+      "file": "PRE_R4_UX_PROTOTYPES.md",
+      "lines": 301,
+      "fences": 20,
+      "sha256": "33afe538f9e08905873dcca91863cf96c4663c59160a8390eedcfe2bb9715b4e"
+    },
+    {
+      "file": "R4_UX_INTEGRATION_CONTRACT.md",
+      "lines": 168,
+      "fences": 0,
+      "sha256": "56c01ff596b27d0b3685288a8e09c3df80720f485ae03032fb0a8722e1d8cb2e"
+    }
+  ],
+  "errors": [],
+  "contrast": [
+    {
+      "role": "light body",
+      "fg": "#1C2E2C",
+      "bg": "#F7F6F2",
+      "ratio": 13.15,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "role": "light secondary",
+      "fg": "#53645E",
+      "bg": "#FFFFFF",
+      "ratio": 6.26,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "role": "light primary",
+      "fg": "#FFFFFF",
+      "bg": "#27685D",
+      "ratio": 6.51,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "role": "dark body",
+      "fg": "#E8EEE9",
+      "bg": "#1D2926",
+      "ratio": 12.76,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "role": "dark secondary",
+      "fg": "#B3C4BB",
+      "bg": "#1D2926",
+      "ratio": 8.25,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "role": "dark primary",
+      "fg": "#151E1C",
+      "bg": "#91C6B5",
+      "ratio": 8.87,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "role": "danger",
+      "fg": "#A9343C",
+      "bg": "#FFFFFF",
+      "ratio": 6.47,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "role": "warning",
+      "fg": "#8A5700",
+      "bg": "#FFFFFF",
+      "ratio": 6.1,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "role": "info",
+      "fg": "#355F84",
+      "bg": "#FFFFFF",
+      "ratio": 6.73,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "role": "success",
+      "fg": "#236447",
+      "bg": "#FFFFFF",
+      "ratio": 7.03,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "role": "control border",
+      "fg": "#718278",
+      "bg": "#FFFFFF",
+      "ratio": 4.06,
+      "minimum": 3,
+      "pass": true
+    },
+    {
+      "role": "dark control border",
+      "fg": "#859B8D",
+      "bg": "#1D2926",
+      "ratio": 5.06,
+      "minimum": 3,
+      "pass": true
+    }
+  ],
+  "uiImplemented": false,
+  "renderingVerified": false,
+  "deviceVerified": false,
+  "result": "PASS",
+  "checks": [
+    "local links",
+    "balanced fences",
+    "original V1-V8 preserved",
+    "registered product rule IDs",
+    "12 candidate color contrast pairs"
+  ]
+}

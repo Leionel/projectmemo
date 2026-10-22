@@ -1,0 +1,13 @@
+{
+  "stage": "UX-1",
+  "data": "isolated test databases and existing code",
+  "navigationWorkspaceTests": 18,
+  "summaryNativeTests": 12,
+  "typescript": "PASS",
+  "harmonyBuild": "PASS_UNSIGNED",
+  "hapSha256": "3717a5d7b5a0362a168d4c3edd95c6cb06a18c39a25e54791be38bd13c5ac1af",
+  "device": "NOT_RUN",
+  "ecs": "NOT_RUN",
+  "lint": "PASS",
+  "lintInitialFailure": "existing generated build under .workbuddy; excluded scratch directory and reran"
+}

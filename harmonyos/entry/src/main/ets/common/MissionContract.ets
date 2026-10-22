@@ -2,8 +2,8 @@ import { MissionEvent, MissionConstraints } from '../models/Mission';
 
 export function missionStatusLabel(status: string): string {
   const labels: Record<string, string> = { 'READY': '等待执行', 'RUNNING': '执行中', 'WAITING_INPUT': '等待补充资料',
-    'WAITING_APPROVAL': '等待批准', 'PAUSED': '已暂停', 'SUCCEEDED': '委托已完成', 'CANCELLED': '已取消',
-    'FAILED': '执行失败', 'OBSOLETE': '已被新计划替代', 'SKIPPED': '已跳过' };
+    'WAITING_APPROVAL': '等待批准', 'PAUSED': '已暂停', 'SUCCEEDED': '委托条件已验收', 'CANCELLED': '已取消',
+    'FAILED': '执行失败', 'OBSOLETE': '依据已变化，未执行', 'SKIPPED': '已跳过' };
   return labels[status] ?? status;
 }
 export function missionEventLabel(type: string): string {

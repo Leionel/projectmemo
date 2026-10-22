@@ -22,6 +22,11 @@ describe("Authentication & Project Authorization Suite", () => {
   let ownedProjectId = "";
   let otherProjectId = "";
 
+  it("legacy anonymous project-list probes remain unauthenticated", async () => {
+    const response = await projectListRoute();
+    expect(response.status).toBe(401);
+  });
+
   beforeEach(async () => {
     // 创建测试用户
     const passwordHash = await hashPassword(testPassword);

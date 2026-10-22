@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/missionPanel.test.ts tests/projectNavigation.test.ts tests/projectEvolutionSummary.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-r3-release-merge
+
+
+ Test Files  3 passed (3)
+      Tests  20 passed (20)
+   Start at  04:04:21
+   Duration  8.16s (transform 376ms, setup 0ms, import 1.93s, tests 1.55s, environment 3.61s)
+

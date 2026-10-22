@@ -11,6 +11,7 @@ import {checkPublicQuery,publicUrl} from "@/lib/research/queryPolicy";
 import {readLimitedJson,deepSeekResearch} from "@/lib/research/searchProvider";
 import {textHash,readSource} from "@/lib/research/sourceRepository";
 import {AppError} from "@/lib/api";
+import {ModelProtocolError,protocolDiagnostic} from "@/lib/mission/modelProtocol";
 import fs from "node:fs";
 const scope={enabled:true,topic:"公开图像分割方法及评测",publicTerms:["分割","segmentation"],allowedCategories:["PUBLIC_TOPIC","PUBLIC_SOURCE"],allowedHosts:["arxiv.org"],excludedTerms:["个人身份"]};
 const decision=(choice:Choice)=>({choice,provider:"TEST_FIXTURE",model:"fixture",protocol:"JSON_CHOICE",usage:{inputTokens:10,outputTokens:5}});
@@ -25,6 +26,12 @@ async function slice(id:string,choice:Choice,extra:object={}){await runMissionSl
 async function search(id:string,extra:object={}){return slice(id,tool("web_search",{focus:"METHODS",scopeRevision:1}),extra);}
 async function fetched(id:string){await search(id);const source=await db.externalSource.findFirstOrThrow({where:{missionId:id,retrievalMode:"SEARCH_SNIPPET"}});await slice(id,tool("web_fetch",{sourceId:source.id,scopeRevision:1}));return db.externalSource.findFirstOrThrow({where:{missionId:id,retrievalMode:"PROVIDER_EXTRACT"}});}
 describe("R3.2 公开研究、隔离与精确引用",()=>{
+ it("公开查询生成失败仍结算服务端用量，不发送搜索请求",async()=>{
+  const {m}=await fixture();researchProvider.search.mockClear();
+  const queryProvider=async()=>{throw new ModelProtocolError(protocolDiagnostic("INVALID_JSON","stop",30),{provider:"deepseek",model:"fixture",protocol:"JSON_CHOICE",usage:{inputTokens:700,outputTokens:90}});};
+  const d=await search(m.id,{queryProvider});expect(d.used).toMatchObject({models:2,inputTokens:710,outputTokens:95,unknownCalls:0});
+  expect(d.error).toMatchObject({code:"MODEL_PROTOCOL_ERROR",diagnostic:{reason:"INVALID_JSON"}});expect(researchProvider.search).not.toHaveBeenCalled();
+ });
  it("公开查询视图没有私有目标、消息或项目字段，范围内自主增加方法词",async()=>{const {m}=await fixture();const planner=vi.fn(async(context:string)=>{expect(context).not.toContain("private-score");expect(context).not.toContain("私有实验");return decision(tool("submit_public_query",{query:"segmentation transformer public evaluation methods"}));});const d=await search(m.id,{queryProvider:planner});expect(d.status).toBe("READY");expect(planner).toHaveBeenCalledOnce();const audit=await db.agentMissionEvent.findFirstOrThrow({where:{missionId:m.id,type:"QUERY_SENT"}});expect(audit.payloadJson).toMatchObject({query:"segmentation transformer public evaluation methods",scopeRevision:1});});
  it("主Agent不能把任意完整查询作为工具参数发送",async()=>{const {m}=await fixture();researchProvider.search.mockClear();await slice(m.id,tool("web_search",{query:"private-score-0.4319",scopeRevision:1}));expect(researchProvider.search).not.toHaveBeenCalled();});
  it("检索→读取→研究Output→完成，外部来源不产生项目事实",async()=>{const {p,m}=await fixture();const source=await fetched(m.id);const text=(source.excerptJson as {text:string}).text;const d=await slice(m.id,tool("save_mission_output",{kind:"RESEARCH",blocks:[{blockId:"comparison",kind:"EXTERNAL_REFERENCE",text:"公开研究报告Dice为0.85，尚未进行项目实测。",sourceIds:[source.id],citations:[{sourceId:source.id,start:0,end:text.length,excerptHash:textHash(text)}]}],missingInformation:["本地验证指标"]}));expect(d.outputs).toHaveLength(1);expect(d.outputs[0].verificationStatus).toBe("NEEDS_REVIEW");expect(await db.knowledgeCard.count({where:{projectId:p.id}})).toBe(0);const finished=await slice(m.id,{kind:"finish",outputId:d.outputs[0].id});expect(finished.status).toBe("SUCCEEDED");});

@@ -78,6 +78,11 @@ export struct MissionSettingsForm {
   build() {
     Column({ space: 10 }) {
       if (this.mode === 'create') {
+        Button('使用阶段汇报模板').enabled(!this.busy).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND)
+          .constraintSize({ minHeight: 48 }).onClick(() => {
+            this.goal = '根据本项目已有材料，形成带来源的阶段汇报草稿，包括已完成事项、当前风险和下一步建议。缺少依据的内容列为信息缺口，不编造实验指标。本次只读取、分析和保存草稿，不搜索网络，不创建或修改行动。';
+            this.readOnly = true;
+          })
         Text('委托一个长期目标').fontSize(20).fontColor(PMColors.INK_PRIMARY)
         TextArea({ placeholder: '例如：根据后续实验结果，准备科研项目阶段汇报', text: this.goal })
           .height(100).maxLength(2000).onChange((v: string) => { this.goal = v; })
@@ -121,8 +126,8 @@ export struct MissionSettingsForm {
         Text('搜索授权与模型上下文授权分别保存。内部实验、身份和私有文档不能因此传给搜索服务。').fontSize(13).fontColor(PMColors.INK_SECONDARY)
       }
       if (this.error !== '') { Text(this.error).fontColor(PMColors.RISK) }
-      Button(this.busy ? '正在提交…' : '确认保存').enabled(!this.busy).onClick(() => { this.submit(); })
-      Button('收起').enabled(!this.busy).onClick(() => { this.onClose(); })
+      Button('确认保存').backgroundColor(PMColors.BRAND).fontColor(PMColors.SURFACE).enabled(!this.busy).onClick(() => { this.submit(); })
+      Button('收起').backgroundColor(PMColors.SURFACE_SUBTLE).fontColor(PMColors.INK_SECONDARY).enabled(!this.busy).onClick(() => { this.onClose(); })
     }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.MD)
   }
 }

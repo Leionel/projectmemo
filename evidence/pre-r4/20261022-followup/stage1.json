@@ -1,0 +1,24 @@
+{
+  "stage": "F1-F3 and parent Mission flow",
+  "unit": {
+    "files": 75,
+    "passed": 632
+  },
+  "e2e": {
+    "startTime": "2026-10-22T02:25:10.730Z",
+    "duration": 47262.117,
+    "expected": 13,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "harmonyTests": 60,
+  "hapSha256": "82b2e7b55b5ae70996eeb001e9c4459a7f674f18282e98cc7a64597429d2ada6",
+  "productionBuild": "PASS",
+  "typescript": "PASS",
+  "lint": "PASS",
+  "source": "isolated mock and scripted E2E_TEST_FIXTURE",
+  "device": "NOT_VERIFIED",
+  "online": "NOT_DEPLOYED",
+  "r4Backend": "NOT_IMPLEMENTED"
+}

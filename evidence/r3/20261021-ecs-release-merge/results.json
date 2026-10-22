@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-21",
+  "parents": [
+    "21cc5fd",
+    "a7e3676"
+  ],
+  "environment": "Independent worktree; own npm ci --offline dependencies and generated Prisma; Node 24.16.0; SQLite fixture/mock only",
+  "checks": [
+    {
+      "command": "npm.cmd test",
+      "exitCode": 0,
+      "files": 66,
+      "tests": 576
+    },
+    {
+      "command": "npm.cmd test -- tests/auth.test.ts tests/trustReceipt.integration.test.ts tests/projectLifecycle.test.ts",
+      "exitCode": 0,
+      "files": 3,
+      "tests": 34
+    },
+    {
+      "command": "npm.cmd run build",
+      "exitCode": 0
+    },
+    {
+      "command": "npm.cmd run test:e2e",
+      "exitCode": 0,
+      "stats": {
+        "startTime": "2026-10-21T07:43:21.194Z",
+        "duration": 80580.239,
+        "expected": 11,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "productionBuildIncluded": true
+    },
+    {
+      "command": "npm.cmd exec tsc -- --noEmit",
+      "exitCode": 0
+    },
+    {
+      "command": "npm.cmd run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm.cmd exec prisma -- migrate deploy",
+      "exitCode": 0,
+      "target": "file:D:/Projects/hongmen-r3-release-merge/prisma/test-vitest.db",
+      "seed": false
+    }
+  ],
+  "sourceHashes": {
+    "app/api/projects/route.ts": "14a79b4d826816547f70f4dd40b1d2d4b49ee58dfe0ec4631270bd8aab1dd7aa",
+    "app/login/page.tsx": "965a273e9cbeb60d1ff5e655cb9917cfe4a6df1a4e4793e647918b2db2651082",
+    "deploy/alibaba-cloud-linux/projectmemo.nginx.conf": "5ce3b21f05afa6b8d905017e834a402ba854897c7dc309ad5ffaa3e9a3a768f2",
+    "tests/auth.test.ts": "77cfc7170ffcbc174f3726a52fce820cc09a72ed73430643e736f78b20ec2fe5",
+    "tests/trustReceipt.integration.test.ts": "a0019838d450ebca7b98d85460fd76062443cbce85d59fd363883a173d46048f",
+    "e2e/login.spec.ts": "92e271a178bad856ebd806395a339e9a3a266aa3d829442e9da128ec77d1a43a",
+    "package-lock.json": "0a2a66ed07ce9726df62eb4fae58f5fca01789226e6f29e253ab36d5702655e1"
+  },
+  "originalWorktreeWipPreserved": true,
+  "e2ePort33321ListenersAfterCleanup": 0,
+  "serverChanged": false,
+  "realModelCalls": false,
+  "newMigrations": false,
+  "deviceAcceptance": false,
+  "knownWarning": "Existing attachmentStorage NFT broad trace warning remains; Nginx effective configuration requires ECS nginx -t separately."
+}

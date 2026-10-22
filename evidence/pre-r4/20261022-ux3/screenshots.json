@@ -1,0 +1,47 @@
+{
+  "provenance": "isolated E2E database / mock / TEST_FIXTURE; not ECS",
+  "images": [
+    {
+      "file": "evidence/pre-r4/20261022-ux3/screenshots/pre-r4-home-dark.png",
+      "width": 1280,
+      "height": 1095,
+      "sha256": "e951188adbe45e7a703d1902541ae189c13fb94c1db80bcc468520ab35fcf3e4"
+    },
+    {
+      "file": "evidence/pre-r4/20261022-ux3/screenshots/pre-r4-home-desktop.png",
+      "width": 1280,
+      "height": 1095,
+      "sha256": "e6e99a92c9774eebb51aa51050ddd323d0b30155501274721f025ac3ee824dee"
+    },
+    {
+      "file": "evidence/pre-r4/20261022-ux3/screenshots/pre-r4-home-large-text.png",
+      "width": 320,
+      "height": 2238,
+      "sha256": "2c70dc12d4de8df9733eca45dab330ee70e1c72bda345adff0d23a81f6335952"
+    },
+    {
+      "file": "evidence/pre-r4/20261022-ux3/screenshots/pre-r4-home-mobile.png",
+      "width": 390,
+      "height": 1648,
+      "sha256": "a0c2c5e46cccf8215793fd8bb12cc161ca3dc3a473eaa020f52ce9678a1a5fa5"
+    },
+    {
+      "file": "evidence/pre-r4/20261022-ux3/screenshots/pre-r4-mission-continuation-adoption.png",
+      "width": 1280,
+      "height": 1868,
+      "sha256": "89a5e13717c3de0309840ce1cdbcfbcfb59ed0d0c91324fe3843ab5d22dbcfdf"
+    },
+    {
+      "file": "evidence/pre-r4/20261022-ux3/screenshots/pre-r4-mission-desktop.png",
+      "width": 1280,
+      "height": 1236,
+      "sha256": "320b5316d0614f740324e3d4bc5d7458fff4de9124758b61a51a29df5a873ab7"
+    },
+    {
+      "file": "evidence/pre-r4/20261022-ux3/screenshots/pre-r4-mission-mobile.png",
+      "width": 390,
+      "height": 1416,
+      "sha256": "5547989ec0f7081c88275cceafa0c3017378fd828db0d61f67efdbf86e856d4c"
+    }
+  ]
+}

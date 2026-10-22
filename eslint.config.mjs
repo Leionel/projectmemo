@@ -7,6 +7,7 @@ export default defineConfig([
   ...nextTs,
   globalIgnores([
     ".next/**",
+    ".workbuddy/**", // Local build output and agent scratch files, not application source.
     ".next-e2e/**",
     "lib/generated/**",
     "coverage/**",

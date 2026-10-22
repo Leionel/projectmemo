@@ -4,7 +4,7 @@ import { ApiError } from '../models/Project';
 import { Mission, MissionCreate, MissionReply, MissionDetailReply, MissionList, MissionEvents, MissionCommand,
   MissionCandidates, MissionMaterialInput, MissionMaterialPreview, MissionMaterialConfirm, MissionContinued,
   MissionArtifactInput, MissionArtifactPreviewReply, MissionArtifactConfirm, MissionArtifactReply,
-  MissionConstraintsEdit, MissionScopeEdit, MissionPolicyEdit, MissionCapabilities } from '../models/Mission';
+  MissionConstraintsEdit, MissionScopeEdit, MissionPolicyEdit, MissionCapabilities, MissionWorkspaceSummary } from '../models/Mission';
 
 export class MissionService {
   private client: ApiClient;
@@ -18,6 +18,9 @@ export class MissionService {
   private path(id: string): string { return `/api/missions/${encodeURIComponent(id)}`; }
   async capabilities(projectId: string): Promise<MissionCapabilities> {
     this.authorize(); return this.client.get<MissionCapabilities>(`/api/missions/capabilities?projectId=${encodeURIComponent(projectId)}`);
+  }
+  async summary(projectId: string): Promise<MissionWorkspaceSummary> {
+    this.authorize(); return this.client.get<MissionWorkspaceSummary>(`/api/missions/summary?projectId=${encodeURIComponent(projectId)}`);
   }
   async list(projectId: string, cursor: string = ''): Promise<MissionList> {
     this.authorize(); return this.client.get<MissionList>(`/api/missions?projectId=${encodeURIComponent(projectId)}&cursor=${encodeURIComponent(cursor)}`);

@@ -1,4 +1,5 @@
 "use client";
+import {projectHref} from "@/lib/projectNavigation";
 
 import { useCallback, useEffect, useState } from "react";
 import { Activity, ChevronDown, Check, LoaderCircle, ListChecks, RefreshCw, TriangleAlert } from "lucide-react";
@@ -227,7 +228,7 @@ export function ProjectStateCard({ projectId, enabled }: { projectId: string; en
     <div className="flex flex-wrap items-end justify-between gap-3 border-b archive-rule pb-4">
       <div className="min-w-0">
         <p className="archive-label">状态与变化</p>
-        <h2 id="project-state-title" className="mt-2 flex items-center gap-2 text-lg font-black"><Activity size={18} className="text-[var(--teal-strong)]" />自上次查看以来</h2>
+        <h2 id="project-state-title" className="mt-2 flex items-center gap-2 text-lg font-black"><Activity size={18} className="text-[var(--teal-strong)]" />{lastSeenSnapshotId ? "相较已了解的状态" : "当前项目观察"}</h2>
         <p className="mt-1 text-sm text-[var(--ink-soft)]">评估于 {formatDay(snapshot.evaluatedAt)} · 事实句逐条带来源；信息不足会保留为未知，不当作「没有发生」。</p>
       </div>
       <button type="button" onClick={() => void refresh()} disabled={busy !== null} className="focus-ring editorial-button-secondary text-xs disabled:opacity-50">
@@ -244,7 +245,7 @@ export function ProjectStateCard({ projectId, enabled }: { projectId: string; en
     <div className="mt-4">
       <p className="text-xs font-black text-[var(--navy)]">本次变化</p>
       {!unread && <p className="mt-1.5 text-xs text-[var(--muted)]">· 没有未读的重要变化</p>}
-      {unread && !lastSeenSnapshotId && <p className="mt-1.5 text-xs leading-5 text-[var(--ink-soft)]">这是你在这台浏览器上第一次查看状态：下面的内容是当前事实全貌，点「已了解」后，下次只显示变化。</p>}
+      {unread && !lastSeenSnapshotId && <p className="mt-1.5 text-xs leading-5 text-[var(--ink-soft)]">这是你在这台浏览器上第一次查看状态：下面展示本次观察覆盖的记录，点「已了解」后可与后续快照比较。</p>}
       {unread && lastSeenSnapshotId && diff && <div className="mt-2"><StateDiffView diff={diff} limit={showAll ? undefined : 3} /></div>}
       {unread && lastSeenSnapshotId && !diff && <p className="mt-1.5 text-xs text-[var(--muted)]">变化详情尚未取到，可点「刷新状态」重试。</p>}
       <div className="mt-2.5 flex flex-wrap gap-2">
@@ -270,7 +271,7 @@ export function ProjectStateCard({ projectId, enabled }: { projectId: string; en
           <p className="mt-1 text-[11px] leading-5 text-[var(--ink-soft)]">影响：{sentence.impact}</p>
           <p className="mt-0.5 text-[11px] leading-5 text-[var(--teal-strong)]">建议：{sentence.suggestion}</p>
           {sentence.evidence.length > 0 && <p className="mt-1.5 flex flex-wrap gap-1.5">
-            {sentence.evidence.slice(0, 3).map((ref, index) => <a key={`${ref.entityId}-${index}`} href={ref.entityKind === "card" ? `#card-${ref.entityId}` : evidenceHref[ref.entityKind] ?? "#project-state"} className="focus-ring rounded bg-[var(--teal-pale)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--teal-strong)]">
+            {sentence.evidence.slice(0, 3).map((ref, index) => <a key={`${ref.entityId}-${index}`} href={projectHref(projectId,ref.entityKind === "card" ? `#card-${ref.entityId}` : evidenceHref[ref.entityKind] ?? "#project-state")} className="focus-ring rounded bg-[var(--teal-pale)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--teal-strong)]">
               {ref.entityKind === "card" ? "记忆" : ref.entityKind === "action" ? "行动" : ref.entityKind === "deliverable" ? "交付物" : ref.entityKind} · {ref.field || "版本证据"}
             </a>)}
             {sentence.evidence.length > 3 && <span className="px-1 py-0.5 text-[10px] text-[var(--muted)]">+{sentence.evidence.length - 3}</span>}
@@ -305,7 +306,7 @@ export function ProjectStateCard({ projectId, enabled }: { projectId: string; en
       <button type="button" onClick={() => void markRead()} disabled={busy !== null || !unread} className="focus-ring editorial-button text-xs disabled:opacity-50">
         {busy === "read" ? <LoaderCircle size={14} className="animate-spin" /> : <Check size={14} />}{unread ? "已了解" : "已读至最新"}
       </button>
-      <a href="#action-board" className="focus-ring editorial-button-secondary inline-flex text-xs"><ListChecks size={14} />去处理待办</a>
+      <a href={projectHref(projectId,"#action-board")} className="focus-ring editorial-button-secondary inline-flex text-xs"><ListChecks size={14} />去处理待办</a>
     </div>
   </section>;
 }

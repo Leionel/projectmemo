@@ -30,11 +30,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <Link href="/" className="focus-ring flex items-center gap-2.5 rounded-xl font-bold tracking-tight text-[var(--ink)]">
                 <Image src="/logo.png" alt="忆程 ProjectMemo 标志" width={36} height={36} className="h-9 w-9 shrink-0 rounded-md object-cover shadow-[var(--shadow-sm)]" />
                 <span className="majestic-heading text-lg">忆程<span className="hidden sm:inline"> ProjectMemo</span></span>
-                <span className="hidden border-l border-[var(--rule-strong)] pl-2 text-[10px] font-black tracking-[.16em] text-[var(--ink-soft)] sm:inline">MEMORY AGENT</span>
+                <span className="hidden border-l border-[var(--rule-strong)] pl-2 text-[10px] font-black tracking-[.16em] text-[var(--ink-soft)] xl:inline">MEMORY AGENT</span>
               </Link>
               <nav className="flex items-center gap-2 text-sm font-medium">
                 <span className="hidden items-center gap-1.5 paper-tab px-3 py-1.5 text-[var(--ink-soft)] sm:flex">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--teal)] shadow-[0_0_8px_var(--teal)]" /> {liveLlm ? "真实模型 · 自动回退" : "Mock 模式 · 离线可演示"}
+                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--teal)] shadow-[0_0_8px_var(--teal)]" /> {liveLlm ? "云模型已配置" : "演示模式"}
                 </span>
                 
                 {/* Desktop Nav */}
@@ -52,7 +52,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 {/* Mobile Menu */}
                 <div className="sm:hidden flex items-center">
                   <details className="group relative">
-                    <summary className="focus-ring grid h-9 w-9 cursor-pointer list-none place-items-center rounded-xl bg-[var(--card-bg)] border border-[var(--rule)] text-[var(--ink)] transition hover:text-[var(--teal)] [&::-webkit-details-marker]:hidden">
+                    <summary aria-label="打开全局导航" className="focus-ring grid h-11 w-11 cursor-pointer list-none place-items-center rounded-xl bg-[var(--card-bg)] border border-[var(--rule)] text-[var(--ink)] transition hover:text-[var(--teal)] [&::-webkit-details-marker]:hidden">
                       <Menu size={16} />
                     </summary>
                     <div className="absolute right-0 top-full mt-2 flex w-44 flex-col gap-1 rounded-2xl border border-[var(--rule)] bg-[var(--card-bg)] p-2 shadow-xl">

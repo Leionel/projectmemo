@@ -10,15 +10,11 @@ import { describe, it, expect } from "vitest";
  * 已读基线必须来自服务端游标。删掉对应实现时它们必须转红。
  */
 const COMPONENTS = path.resolve(import.meta.dirname, "..", "components");
-const PAGES = path.resolve(import.meta.dirname, "..", "app", "projects", "[id]");
 
 function readComponent(name: string): string {
   return readFileSync(path.join(COMPONENTS, `${name}.tsx`), "utf8");
 }
 
-function readProjectPage(): string {
-  return readFileSync(path.join(PAGES, "page.tsx"), "utf8");
-}
 
 describe("会议导入：预览 → 逐项勾选 → 确认", () => {
   const source = readComponent("MeetingImportCard");
@@ -210,34 +206,6 @@ describe("提醒与设备边界：Web 不假装能写系统日历", () => {
   });
 });
 
-describe("项目页信息架构：核心路径有目录入口", () => {
-  const source = readProjectPage();
-
-  it("新增能力都挂在项目大纲与核心闭环路径上", () => {
-    for (const anchor of ["#reentry-brief", "#meeting-import", "#project-state", "#episode-checkpoint", "#project-health", "#interventions", "#action-board", "#schedule-planner", "#knowledge-assets", "#memory-copilot"]) {
-      expect(source, `项目页应提供 ${anchor} 入口`).toContain(anchor);
-    }
-  });
-
-  it("能力开关关闭时不渲染对应入口", () => {
-    expect(source).toContain('reentryEnabled && <WorkspaceNavLink href="#reentry-brief"');
-    expect(source).toContain('stateEnabled && <WorkspaceNavLink href="#project-state"');
-    expect(source).toContain('schedulingEnabled && <WorkspaceNavLink href="#schedule-planner"');
-  });
-
-  it("工作台首屏给出 ProjectMemo Insight 与 60 秒再入场", () => {
-    expect(source).toContain("<ProjectInsightCard key={id} projectId={id} intervention={topIntervention} />");
-    expect(source).toContain("<ReentryBrief");
-    expect(source).toContain("isInterventionActive");
-  });
-
-  it("会议导入与状态卡按开关接入，附件入口受收件箱开关控制", () => {
-    expect(source).toContain('<MeetingImportCard projectId={id} stateEnabled={stateEnabled} />');
-    expect(source).toContain('<ProjectStateCard projectId={id} enabled={stateEnabled} />');
-    expect(source).toContain('<CaptureBox projectId={id} inboxEnabled={inboxEnabled} />');
-    expect(source).toContain('<ArchivedMemoryList projectId={id} />');
-  });
-});
 
 describe("记忆生命周期：归档不改变事实有效性", () => {
   const editor = readComponent("CardEditor");

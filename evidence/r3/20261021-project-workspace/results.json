@@ -1,0 +1,35 @@
+{
+  "base": "c66725f",
+  "unit": {
+    "files": 69,
+    "passed": 605
+  },
+  "e2e": {
+    "passed": 12,
+    "failed": 0,
+    "flaky": 0
+  },
+  "tsc": true,
+  "lint": true,
+  "build": "test:e2e production build passed",
+  "independent_review": {
+    "regressions": 17,
+    "findings_closed": [
+      "attachment entity anchor",
+      "artifact card references",
+      "owner-only mission overview"
+    ]
+  },
+  "browser": {
+    "data": "isolated test DB and mock, no paid calls",
+    "desktop_width": 1280,
+    "mobile_width": 390,
+    "horizontal_overflow": false,
+    "screenshots": [
+      "home-desktop.png",
+      "home-mobile.png"
+    ]
+  },
+  "deployed_to_ecs": false,
+  "migration_required": false
+}

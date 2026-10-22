@@ -1,4 +1,5 @@
 "use client";
+import {projectHref} from "@/lib/projectNavigation";
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -169,7 +170,7 @@ export function MemoryCopilot({ projectId }: { projectId: string }) {
         </div>) : <p className="rounded-xl bg-[var(--paper-strong)] p-5 text-center text-sm text-[var(--ink-soft)]">试试问“当前进展如何？”或“消融实验完成了吗？”</p>}
         {loading && <div className="mr-4 rounded-xl bg-[var(--paper-strong)] p-3 text-sm text-[var(--muted)]"><LoaderCircle size={15} className="mr-2 inline animate-spin" />正在检索并核验证据…</div>}
       </div>
-      {feedback && <p role="status" className="mt-3 rounded-lg bg-[var(--teal-pale)] px-3 py-2 text-xs font-semibold text-[var(--teal-strong)]">{feedback}{feedbackHref && <a href={feedbackHref} className="ml-2 underline underline-offset-3">立即查看 →</a>}</p>}
+      {feedback && <p role="status" className="mt-3 rounded-lg bg-[var(--teal-pale)] px-3 py-2 text-xs font-semibold text-[var(--teal-strong)]">{feedback}{feedbackHref && <a href={projectHref(projectId,feedbackHref)} className="ml-2 underline underline-offset-3">立即查看 →</a>}</p>}
       <form onSubmit={ask} className="mt-4 flex gap-2"><input aria-label="问项目进展、提醒依据或下一步" value={question} onChange={(event) => setQuestion(event.target.value)} disabled={loading} className="focus-ring editorial-input min-w-0 flex-1 px-3 py-2.5 text-sm" placeholder="问项目进展、提醒依据或下一步" /><button type="submit" disabled={loading || !question.trim()} className="focus-ring editorial-button disabled:opacity-50"><Send size={16} />发送</button></form>
     </div>}
   </section>;

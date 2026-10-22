@@ -1,4 +1,5 @@
 "use client";
+import {projectHref} from "@/lib/projectNavigation";
 
 import { useCallback, useEffect, useState } from "react";
 import { LoaderCircle, ScanSearch, ShieldCheck, TriangleAlert, X } from "lucide-react";
@@ -92,7 +93,7 @@ export function ArtifactAuditPanel({ projectId, artifactId, onClose }: { project
             <p className="mt-1 text-[11px] leading-5 text-[var(--ink)]">{claim.text}</p>
             {claim.cardStates.length > 0 && <ul className="mt-1.5 space-y-1">
               {claim.cardStates.map((state) => <li key={state.cardId} className="rounded bg-[var(--card-bg)] px-2 py-1 text-[10px] leading-4 text-[var(--ink-soft)]">
-                <a href={`#card-${state.cardId}`} className="focus-ring font-bold text-[var(--teal-strong)] underline underline-offset-2">{state.statusLabel}</a>
+                <a href={projectHref(projectId,`#card-${state.cardId}`)} className="focus-ring font-bold text-[var(--teal-strong)] underline underline-offset-2">{state.statusLabel}</a>
                 {state.displayReason ? ` · ${state.displayReason}` : ""}
               </li>)}
             </ul>}
@@ -107,7 +108,7 @@ export function ArtifactAuditPanel({ projectId, artifactId, onClose }: { project
           {audit.recheck.map((item) => <li key={item.cardId} className="rounded-lg bg-[var(--paper-strong)] p-2.5">
             <div className="flex flex-wrap items-center gap-1.5">
               <span className={"rounded px-1.5 py-0.5 text-[10px] font-bold " + (stateTone[item.topLevelState] ?? "bg-[var(--paper-strong)] text-[var(--muted)]")}>{item.statusLabel}</span>
-              <a href={`#card-${item.cardId}`} className="focus-ring text-[11px] font-bold text-[var(--navy)] underline underline-offset-2">{item.titleSnapshot}</a>
+              <a href={projectHref(projectId,`#card-${item.cardId}`)} className="focus-ring text-[11px] font-bold text-[var(--navy)] underline underline-offset-2">{item.titleSnapshot}</a>
             </div>
             <p className="mt-1 line-clamp-2 text-[10px] leading-4 text-[var(--ink-soft)]">冻结摘要：{item.summarySnapshot}</p>
             {item.displayReason && <p className="mt-1 text-[10px] font-semibold text-[var(--amber)]">{item.displayReason}</p>}

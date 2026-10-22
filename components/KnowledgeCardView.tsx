@@ -1,4 +1,5 @@
 "use client";
+import {projectHref} from "@/lib/projectNavigation";
 
 import { useState } from "react";
 import { ArrowUpRight, Check, ChevronDown, Link2, ListChecks, LoaderCircle, Paperclip, Plus, Star } from "lucide-react";
@@ -111,6 +112,6 @@ export function KnowledgeCardView({ card, projectId, compact = false, forcedOpen
       {compact && !forcedOpen && <button type="button" onClick={() => setExpanded(false)} className="focus-ring mt-4 inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--muted)] hover:bg-[var(--paper-strong)]"><ChevronDown size={14} className="rotate-180" />收起卡片</button>}
       <CardEditor card={card} onArchived={onArchived ? () => onArchived(card.id, card.title) : undefined} />
     </>}
-    {(message || error) && <p role={error ? "alert" : "status"} className={"mt-3 rounded-lg px-3 py-2 text-xs font-semibold " + (error ? "bg-[var(--brick-pale)] text-[var(--brick)]" : "bg-[var(--teal-pale)] text-[var(--teal-strong)]")}>{error || message}{message.includes("行动板") && <a href="#action-board" className="ml-2 underline underline-offset-3">前往行动板 →</a>}</p>}
+    {(message || error) && <p role={error ? "alert" : "status"} className={"mt-3 rounded-lg px-3 py-2 text-xs font-semibold " + (error ? "bg-[var(--brick-pale)] text-[var(--brick)]" : "bg-[var(--teal-pale)] text-[var(--teal-strong)]")}>{error || message}{message.includes("行动板") && <a href={projectHref(projectId,"#action-board")} className="ml-2 underline underline-offset-3">前往行动板 →</a>}</p>}
   </article>;
 }

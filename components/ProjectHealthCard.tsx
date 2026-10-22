@@ -1,4 +1,5 @@
 "use client";
+import {projectHref} from "@/lib/projectNavigation";
 
 import { useCallback, useEffect, useState } from "react";
 import { AlertTriangle, ClipboardCheck, Info, LoaderCircle, RefreshCw, ShieldAlert } from "lucide-react";
@@ -128,7 +129,7 @@ export function ProjectHealthCard({ projectId, enabled, stateEnabled }: { projec
       <p className="mt-2 text-sm font-black text-[var(--navy)]">{primary.title}</p>
       <p className="mt-1 text-xs leading-5 text-[var(--ink-soft)]">{primary.explanation}</p>
       <div className="mt-3 flex flex-wrap gap-2">
-        <a href={hrefFor(primary, stateEnabled)} className="focus-ring editorial-button text-xs">{actionLabelFor(primary, stateEnabled)}</a>
+        <a href={projectHref(projectId,hrefFor(primary, stateEnabled))} className="focus-ring editorial-button text-xs">{actionLabelFor(primary, stateEnabled)}</a>
         <button type="button" onClick={() => setShowAll((previous) => !previous)} className="focus-ring editorial-button-secondary text-xs">
           {showAll ? "收起检查结果" : "查看全部检查结果"}
         </button>
@@ -147,7 +148,7 @@ export function ProjectHealthCard({ projectId, enabled, stateEnabled }: { projec
             </div>
             <p className="mt-1 text-xs leading-5 text-[var(--ink-soft)]">{finding.explanation}</p>
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
-              <a href={hrefFor(finding, stateEnabled)} className="focus-ring rounded-md bg-[var(--paper-strong)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)]">{actionLabelFor(finding, stateEnabled)}</a>
+              <a href={projectHref(projectId,hrefFor(finding, stateEnabled))} className="focus-ring rounded-md bg-[var(--paper-strong)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)]">{actionLabelFor(finding, stateEnabled)}</a>
               <span className="text-[11px] text-[var(--muted)]">发现于 {new Date(finding.observedAt).toLocaleString("zh-CN", { hour12: false })}</span>
             </div>
           </li>;

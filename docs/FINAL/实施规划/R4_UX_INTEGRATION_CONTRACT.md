@@ -178,3 +178,10 @@ Pre-R4验收只要求N能力真实可用、S有明确规格、R未冒充上线�
 - archived=1明确包含归档项目，默认排除。Mission能力关闭返回missionEnabled=false及空Mission组，行动/提醒仍可查看；401/加载失败显示错误，不当作没有事项。
 - 该DTO没有审批实体ID、提案哈希、源修订确认参数或写入命令。用户进入原MissionDetail/项目行动/InterventionDetail/知识卡后才能核对来源和提交原业务操作。
 - 全局记忆/memory和行动/actions另有成员范围内的只读聚合，按项目、关键词、记忆类型筛选；每类30条稳定分页。它们不进行跨项目Mission、经验学习、Twin推理或多跳影响分析。
+
+
+### 焦点参考稿深化的可兼容展示字段
+
+schemaVersion=1增补counts（waiting/running/actions/reminders，各自相同授权范围内独立COUNT）、nextDeadline（同范围最近未到期Project.deadline，可能为null）、每项projectDeadline与recordFields。counts不会从截断行数推断；零项指标不用于填充，数据没有截止时不造倒计时。旧客户端可忽略这些字段，鸿蒙模型声明可选，不改变原命令接口。
+
+recordFields只从原Capture.rawText经已有metricRecordSchema解析，并要求payload.projectId等于数据库projectId后输出指标/原记录值/统计范围；原文、源项目、保存时间仍保留。解析符合Schema不代表事实已核验，UI标“结构化记录 · 待核对”。不展示内部schemaVersion、subject或项目ID，也不依据记录文字生成“已验证”徽章。未来R4事实或影响状态仍必须来自正式契约。

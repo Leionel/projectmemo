@@ -27,10 +27,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         >
           <a href="#main-content" className="skip-link">跳到主要内容</a>
           <header className="sticky top-0 z-40 border-b border-[var(--rule)] bg-[var(--header-bg)] backdrop-blur-xl transition-colors duration-400">
-            <div className="shell flex h-16 items-center justify-between">
+            <div className="shell flex h-14 items-center justify-between">
               <Link href="/" className="focus-ring flex items-center gap-2.5 rounded-xl font-bold tracking-tight text-[var(--ink)]">
-                <Image src="/logo.png" alt="忆程 ProjectMemo 标志" width={36} height={36} className="h-9 w-9 shrink-0 rounded-md object-cover shadow-[var(--shadow-sm)]" />
-                <span className="majestic-heading text-lg">忆程<span className="hidden sm:inline"> ProjectMemo</span></span>
+                <Image src="/logo.png" alt="忆程 ProjectMemo 标志" width={36} height={36} className="h-7 w-7 shrink-0 rounded-md object-cover shadow-[var(--shadow-sm)]" />
+                <span className="majestic-heading text-base">忆程<span className="hidden sm:inline"> ProjectMemo</span></span>
                 <span className="hidden border-l border-[var(--rule-strong)] pl-2 text-[10px] font-black tracking-[.16em] text-[var(--ink-soft)] xl:inline">MEMORY AGENT</span>
               </Link>
               <nav className="flex items-center gap-2 text-sm font-medium">

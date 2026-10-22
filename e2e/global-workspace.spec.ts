@@ -8,6 +8,7 @@ test("global memory and inbox retain project context, filtering and mobile acces
   const first = memory.getByRole("link", { name: "查看记忆与来源" }).first();
   await expect(first).toHaveAttribute("href", /\/projects\/.+\/knowledge#card-/);
   await first.click();
+  await expect(page).toHaveURL(/\/knowledge#card-/);
   await expect(page.locator("#knowledge-assets")).toBeVisible();
   const hash = new URL(page.url()).hash;
   await expect(page.locator(hash)).toBeVisible();

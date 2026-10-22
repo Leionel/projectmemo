@@ -51,6 +51,9 @@ test("first material leads to an explicitly authorized Mission; multiple waiting
  const waitingFocus=page.getByRole("region",{name:"需要回应的委托"});
  await expect(waitingFocus.getByText("等待补充信息",{exact:true}).first()).toBeVisible();
  await expect(waitingFocus.getByRole("link",{name:"补充委托资料"}).first()).toHaveAttribute("href",/\/missions\?mission=/);
+ await expect(page.getByRole("region",{name:"当前范围概览"})).toBeVisible();
+ await expect(page.getByRole("region",{name:"最近保存的资料"})).toBeVisible();
+ await expect(page.getByRole("complementary",{name:"有效提醒"})).toBeVisible();
  await page.screenshot({path:"test-results/projectmemo-focus-desktop.png",fullPage:true,animations:"disabled"});
  await page.getByRole("button",{name:"切换深浅色主题"}).click();
  await page.screenshot({path:"test-results/projectmemo-focus-dark.png",fullPage:true,animations:"disabled"});

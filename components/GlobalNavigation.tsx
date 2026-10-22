@@ -13,7 +13,7 @@ const destinations = [
 
 export function GlobalNavigation({ mobile = false }: { mobile?: boolean }) {
   const pathname = usePathname();
-  return <div className={mobile ? "grid gap-1" : "flex items-center gap-1"}>
+  return <div className={mobile ? "grid gap-1" : "global-navigation flex items-center gap-1"}>
     {destinations.map(({ href, label, icon: Icon }) => <Link prefetch={false} key={href} href={href}
       aria-current={pathname === href || pathname.startsWith(`${href}/`) ? "page" : undefined}
       onClick={event => event.currentTarget.closest("details")?.removeAttribute("open")}

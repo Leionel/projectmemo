@@ -107,5 +107,20 @@ it("焦点分别投影真实状态，Mission双重归属、关闭开关和API身
   expect(disabled.actions).toHaveLength(1);
   expect(await db.agentMissionEvent.count()).toBe(events);
   expect(await db.agentMission.count()).toBe(12);
+  process.env.MISSION_ENABLED = "true";
+  await db.project.update({where:{id:owned.id},data:{deadline:new Date("2100-01-01T00:00:00Z")}});
+  await db.project.update({where:{id:foreign.id},data:{deadline:new Date("2099-01-01T00:00:00Z")}});
+  await db.project.update({where:{id:archived.id},data:{deadline:new Date("2090-01-01T00:00:00Z")}});
+  const macro = await loadGlobalFocus(user.id);
+  expect(macro.counts).toEqual({waiting:4,running:2,actions:1,reminders:2});
+  expect(macro.nextDeadline?.projectId).toBe(owned.id);
+  expect((await loadGlobalFocus(user.id,true)).nextDeadline?.projectId).toBe(archived.id);
+  const raw=JSON.stringify({schemaVersion:1,kind:"PROJECT_METRIC",projectId:owned.id,subject:"LOCAL_EXPERIMENT",name:"Dice",unit:"%",period:"2026-10",value:82});
+  await db.capture.create({data:{projectId:owned.id,rawText:raw,card:{create:{projectId:owned.id,title:raw,summary:raw,type:"experiment_log",keywords:[],relatedTasks:[],nextActions:[],importance:3}}}});
+  const record=(await loadGlobalFocus(user.id)).records[0];
+  expect(record.title).toBe("Dice 实验记录");expect(record.recordFields).toContainEqual({label:"记录值",value:"82 %"});
+  for(let i=0;i<6;i++)await make(owned.id,user.id,"RUNNING");
+  const bounded=await loadGlobalFocus(user.id);expect(bounded.running).toHaveLength(6);expect(bounded.counts.running).toBe(8);expect(bounded.hasMore).toBe(true);
+
   delete process.env.MISSION_ENABLED; delete process.env.MISSION_UI_ENABLED;
 });

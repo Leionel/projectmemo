@@ -290,3 +290,8 @@ button:active:enabled,.editorial-button:active { filter:brightness(.94); }
 
 .focus-more summary,.focus-records > summary { padding:.75rem 1rem; min-height:2.75rem; cursor:pointer; font-size:.75rem; color:var(--teal-strong); }
 .focus-records > .workspace-list-panel { border:0; border-top:1px solid var(--rule); border-radius:0 0 8px 8px; }
+
+.global-navigation { border:1px solid var(--rule); border-radius:6px; padding:2px; background:var(--paper); }
+.global-navigation .global-nav-link { padding:.375rem .625rem; min-height:1.875rem; font-size:.75rem; }
+.global-navigation .global-nav-link[aria-current=page] { background:var(--card-bg); box-shadow:0 1px 2px rgb(28 46 44 / 5%); }
+@media(pointer:coarse) { .global-navigation .global-nav-link { min-height:2.75rem; } }

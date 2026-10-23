@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { isFeatureEnabled } from "@/lib/config/features";
-import { buildTemporalTimeline } from "@/lib/memory/temporalLedger";
+import { buildTemporalTimeline, evaluateTemporalCard } from "@/lib/memory/temporalLedger";
 import {
   confirmTemporalRelation,
   createTemporalRelationProposal,
@@ -90,8 +90,15 @@ export async function getDecisionTimeline(projectId: string, asOf = new Date()):
 
 export async function getTemporalSearchStates(projectId: string, cardIds: string[], asOf = new Date()) {
   if (!isFeatureEnabled("TEMPORAL_MEMORY_ENABLED", true) || cardIds.length === 0) return new Map();
-  const timeline = await getDecisionTimeline(projectId, asOf);
-  return new Map(timeline.items.filter((item) => cardIds.includes(item.card.id)).map((item) => [item.card.id, item]));
+  const select = { id: true, title: true, summary: true, createdAt: true } as const;
+  const [cards, relations] = await Promise.all([
+    db.knowledgeCard.findMany({ where: { projectId, id: { in: cardIds } }, select }),
+    db.cardRelation.findMany({ where: { currentCard: { projectId }, relatedCard: { projectId },
+      OR: [{ currentCardId: { in: cardIds } }, { relatedCardId: { in: cardIds } }] },
+      include: { currentCard: { select }, relatedCard: { select } } }),
+  ]);
+  const serialized = relations.map(serializeTemporalRelation);
+  return new Map(cards.map(card => [card.id, evaluateTemporalCard(serializeCard(card), serialized, asOf)]));
 }
 
 export async function proposeTemporalRelation(projectId: string, cardId: string, input: TemporalRelationProposalInput) {

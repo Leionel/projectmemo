@@ -29,7 +29,9 @@
     "verify:w03-live": "tsx scripts/verify-xiaoyi-public.ts --confirm-writes",
     "mission:worker": "tsx scripts/mission-worker.ts",
     "auth:mail:test": "node --env-file-if-exists=.env --import tsx scripts/test-account-mail.ts",
-    "auth:cloud-quota": "node --env-file-if-exists=.env --import tsx scripts/account-cloud-quota.ts"
+    "auth:cloud-quota": "node --env-file-if-exists=.env --import tsx scripts/account-cloud-quota.ts",
+    "mission:probe": "node --env-file-if-exists=.env --import tsx scripts/probe-mission-provider.ts",
+    "mission:verify": "node --env-file-if-exists=.env --import tsx scripts/eval-missions.ts"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.0.0",

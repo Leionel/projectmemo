@@ -2,9 +2,25 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { db } from "@/lib/db";
 import { executeCopilotTool } from "@/lib/services/copilotService";
 import { AgentRunType, AgentRunStatus } from "@/lib/generated/prisma/client";
+import { freezeCopilotProposals, readCopilotContext } from "@/lib/copilot/confirmation";
+import type { ProposedAction } from "@/lib/types";
+import { json } from "@/lib/mission/contracts";
 
 describe("Copilot Tool Execution Concurrency & Idempotency", () => {
   let projectId: string;
+
+  async function supportedRun(proposals: ProposedAction[]) {
+    return db.$transaction(async tx => {
+      const { sourceManifest } = await readCopilotContext(tx, projectId);
+      const run = await tx.agentRun.create({ data: {
+        projectId, runType: AgentRunType.CHAT, status: AgentRunStatus.SUCCESS, provider: "TEST_FIXTURE",
+        trace: { supportState: "SUPPORTED", copilotSources: sourceManifest },
+        resultJson: json({ proposedActions: proposals }),
+      } });
+      await freezeCopilotProposals(tx, run.id, proposals, sourceManifest);
+      return run;
+    });
+  }
 
   beforeAll(async () => {
     const project = await db.project.create({
@@ -32,20 +48,7 @@ describe("Copilot Tool Execution Concurrency & Idempotency", () => {
       priority: 2,
     };
 
-    const run = await db.agentRun.create({
-      data: {
-        projectId,
-        runType: AgentRunType.CHAT,
-        status: AgentRunStatus.SUCCESS,
-        provider: "vitest",
-        trace: {
-          supportState: "SUPPORTED",
-        },
-        resultJson: {
-          proposedActions: [proposal],
-        },
-      },
-    });
+    const run = await supportedRun([proposal as ProposedAction]);
 
     const input = {
       tool: "create_action" as const,
@@ -95,20 +98,7 @@ describe("Copilot Tool Execution Concurrency & Idempotency", () => {
       priority: 3,
     };
 
-    const run = await db.agentRun.create({
-      data: {
-        projectId,
-        runType: AgentRunType.CHAT,
-        status: AgentRunStatus.SUCCESS,
-        provider: "vitest",
-        trace: {
-          supportState: "SUPPORTED",
-        },
-        resultJson: {
-          proposedActions: [proposalA, proposalB],
-        },
-      },
-    });
+    const run = await supportedRun([proposalA as ProposedAction, proposalB as ProposedAction]);
 
     const inputA = {
       tool: "create_action" as const,

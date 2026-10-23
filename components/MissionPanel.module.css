@@ -40,6 +40,10 @@
 .panel h3.goal { font-size: 1rem; line-height: 1.8; font-weight: 600; overflow-wrap: anywhere; }
 .taskId { color: var(--muted); font-size: .6875rem; overflow-wrap: anywhere; }
 .statusText { font-size: .8125rem; color: var(--ink-soft); }
+.completionFacts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.625rem 1rem; padding-block:.75rem; border-block:1px solid var(--rule); }
+.completionFacts div { min-width:0; }
+.completionFacts dt { font-size:.6875rem; color:var(--muted); }
+.completionFacts dd { margin:.2rem 0 0; font-size:.75rem; line-height:1.65; color:var(--ink-soft); overflow-wrap:anywhere; }
 .actions { display: flex; flex-wrap: wrap; gap: .5rem; }
 .error { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; margin-top: 1.25rem; border: 1px solid var(--brick); background: var(--brick-pale); border-radius: .5rem; padding: .875rem 1rem; color: var(--brick); }
 .panel > .error { margin: 1rem 1.5rem; }
@@ -114,3 +118,4 @@
 @container(max-width:800px) { .panel .listToggle { display:block; margin:.75rem 1rem; } .collapsedSidebar { display:none; } }
 
 @media(pointer:coarse) { .panel button { min-height:2.75rem; } }
+@container(max-width:420px) { .completionFacts { grid-template-columns:minmax(0,1fr); } }

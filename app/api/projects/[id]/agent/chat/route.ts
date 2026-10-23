@@ -18,9 +18,9 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
-    await authorizeProjectAccess(request, id);
+    const { user, session } = await authorizeProjectAccess(request, id);
     const input = agentChatSchema.parse(await request.json());
-    return Response.json(await answerProjectQuestion(id, input.message));
+    return Response.json(await answerProjectQuestion(id, input.message, { userId: user.id, sessionId: session.id }));
   } catch (error) {
     return apiError(error);
   }

@@ -303,6 +303,7 @@ export interface AgentRunData {
 }
 
 export interface AgentCitation {
+  assessment?: import("./evidence/assessment").EvidenceAssessment;
   cardId: string;
   title: string;
   excerpt: string;
@@ -329,6 +330,7 @@ export interface ProjectEvidenceRef {
 }
 
 export interface EvidenceClaim {
+  assessments?: import("./evidence/assessment").EvidenceAssessment[];
   text: string;
   support: EvidenceSupportState;
   cardIds: string[];
@@ -337,6 +339,7 @@ export interface EvidenceClaim {
 }
 
 export interface EvidenceTrustReceipt {
+  schemaVersion?: 2;
   supportState: EvidenceSupportState;
   abstained: boolean;
   claims: EvidenceClaim[];

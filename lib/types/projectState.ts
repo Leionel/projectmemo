@@ -4,9 +4,9 @@
  * 本文件只描述数据形状；构建与比较逻辑在 lib/projectState/*。
  */
 
-export const PROJECT_STATE_SCHEMA_VERSION = 1;
+export const PROJECT_STATE_SCHEMA_VERSION = 2;
 // v2：E1 修复后快照事实结论由统一 Ledger 计算；v1 行保留为历史，跨版本比较要求重建基线
-export const PROJECT_STATE_POLICY_VERSION = "2";
+export const PROJECT_STATE_POLICY_VERSION = "3";
 export const PROJECT_STATE_DIFF_ALGORITHM_VERSION = "1";
 export const PROJECT_STATE_BRIEF_TEMPLATE_VERSION = "1";
 
@@ -38,6 +38,7 @@ export interface SnapshotEvidenceRef {
 
 /** facts 稳定键：decision:<cardId>；一条记录一个键 */
 export interface SnapshotFact {
+  assessment?: import("../evidence/assessment").EvidenceAssessment;
   key: string;
   text: string;
   truth: SnapshotTruth;
@@ -86,6 +87,7 @@ export interface ProjectStatePayload {
   schemaVersion: number;
   policyVersion: string;
   evaluatedAt: string;
+  nextInvalidationAt?: string | null;
   goal: string | null;
   deadline: string | null;
   stage: string | null;

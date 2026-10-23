@@ -1,4 +1,4 @@
-import { MissionEvent, MissionConstraints } from '../models/Mission';
+import { MissionEvent, MissionConstraints, MissionCompletionSummary, MissionCompletionFact } from '../models/Mission';
 
 export function missionStatusLabel(status: string): string {
   const labels: Record<string, string> = { 'READY': '等待执行', 'RUNNING': '执行中', 'WAITING_INPUT': '等待补充资料',
@@ -31,6 +31,20 @@ export function editableMissionConstraints(value: MissionConstraints): MissionCo
   return result;
 }
 export function missionTerminal(status: string): boolean { return status === 'SUCCEEDED' || status === 'CANCELLED'; }
+export function missionErrorPhaseLabel(phase?: string): string {
+  const labels: Record<string, string> = { 'CONTEXT': '准备上下文', 'DECISION': '模型决策', 'TOOL': '工具执行',
+    'VERIFY': '结果核验', 'COMMIT': '保存执行结果', 'APPROVAL': '批准与行动提交' };
+  return phase ? labels[phase] ?? '执行阶段待确认' : '执行阶段未记录';
+}
+export function missionCompletionFacts(status: string, completion?: MissionCompletionSummary, draftVerification?: string): MissionCompletionFact[] {
+  const verification = completion?.draftVerification ?? draftVerification;
+  return [
+    { label: '执行条件', value: completion?.criteriaPassed === true ? '已通过本委托设定的条件' : completion?.criteriaPassed === false ? '条件未通过，请核对执行记录' : status === 'SUCCEEDED' ? '已验收，明细待读取' : '尚未完成条件验收' },
+    { label: '草稿核验', value: verification ? verification === 'NEEDS_REVIEW' ? '待审阅，尚未整体核验' : `核验状态待核对（${verification}）` : '尚无已保存草稿' },
+    { label: '用户采纳', value: completion ? completion.adoptionCount > 0 ? `已确认归入 ${completion.adoptionCount} 份项目成果` : '尚未归入项目成果' : '采纳回执待读取' },
+    { label: '现实完成', value: '未从委托状态推断，以实际行动回执为准' }
+  ];
+}
 export function missionToolLabel(tool: string): string {
   const labels: Record<string, string> = { 'inspect_project': '读取项目状态', 'search_memory': '检索项目记忆',
     'web_search': '搜索公开资料', 'web_fetch': '读取公开来源', 'save_mission_output': '保存草稿',

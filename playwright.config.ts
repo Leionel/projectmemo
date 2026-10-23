@@ -4,6 +4,9 @@ import { E2E_AUTH_STATE_PATH, E2E_BASE_URL } from "./scripts/e2e-env";
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
+  // Test files share one isolated SQLite database and Mission's unique execution slot.
+  // fullyParallel=false only serializes tests inside a file, not separate files.
+  workers: 1,
   retries: 0,
   reporter: [["list"], ["json", { outputFile: "test-results/e2e-results.json" }]],
   timeout: 45_000,

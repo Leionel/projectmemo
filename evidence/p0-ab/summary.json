@@ -1,0 +1,9 @@
+{
+  "baseline": "c93da467fe32277ebc404d686943da4c4cfa0b1a",
+  "realModelCalls": 0,
+  "fixtureHttpCalls": 17,
+  "realModelAcceptance": "PENDING_ECS",
+  "deployment": "NOT_EXECUTED",
+  "judgeHoldout": "NOT_EXECUTED",
+  "p0bSubagents": 0
+}

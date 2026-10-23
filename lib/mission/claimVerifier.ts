@@ -1,3 +1,4 @@
+import { ruleVerdict } from "@/lib/evidence/semanticRules";
 import {z} from "zod";
 import {jsonHash,type Source} from "./contracts";
 import {outputSchema} from "./tools";
@@ -11,15 +12,6 @@ export type ClaimCheck={schemaVersion:1;verifierVersion:"r33-v1";claimId:string;
 const normalize=(s:string)=>s.normalize("NFKC").trim().replace(/\s+/g," ");
 const numberPattern=/[-+]?\d+(?:\.\d+)?/g;
 const numbers=(s:string)=>s.match(numberPattern)??[];
-function ruleVerdict(claim:string,evidence:string):{status:ClaimVerdict;reasonCode:string}|null{
- const c=normalize(claim),e=normalize(evidence);
- if(c===e)return{status:"ENTAILS",reasonCode:"EXACT_QUOTATION"};
- const cn=numbers(c),en=numbers(e);
- if(cn.length&&cn.length===en.length&&c.replace(numberPattern,"#")===e.replace(numberPattern,"#")&&cn.some((v,i)=>Number(v)!==Number(en[i])))return{status:"CONTRADICTS",reasonCode:"NUMERIC_MISMATCH"};
- const polarity=/(?:没有|未)(?=(?:显著)?(?:改善|提升|通过|完成))|不(?=(?:支持|通过))/g;
- if(c.replace(polarity,"")===e.replace(polarity,"")&&(c.match(polarity)?.length??0)!==(e.match(polarity)?.length??0))return{status:"CONTRADICTS",reasonCode:"NEGATION_MISMATCH"};
- return null;
-}
 /** Structural validity and textual entailment are separate; inferred claims never inherit an exact-quote pass. */
 export async function verifyResearchClaims(input:unknown,sources:Source[],options:{enabled:boolean;judge?:ClaimJudge;maxJudgeCalls?:number}):Promise<ClaimCheck[]>{
  const body=outputSchema.parse(input),checks:ClaimCheck[]=[];let calls=0;

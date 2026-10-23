@@ -56,6 +56,19 @@ describe("Mission 面板调用方",()=>{
   fireEvent.click(screen.getByText(/执行详情与回执（/));
   expect(screen.getByRole("region",{name:"执行记录"})).toBeTruthy();
  });
+ it("完成条件、草稿核验、采纳和现实结果并列，不把SUCCEEDED包装为事实完成",async()=>{
+  const f=fixture();Object.assign(f.mission,{status:"SUCCEEDED",completion:{criteriaPassed:true,criteriaCheckedAt:"2026-10-23T00:00:00Z",draftVerification:"NEEDS_REVIEW",adoptionCount:0,latestArtifactId:null,realityOutcome:"NOT_INFERRED"}});
+  render(createElement(MissionPanel,{projectId:"p"}));fireEvent.click(await screen.findByRole("button",{name:"整理阶段汇报 · 委托条件已验收"}));
+  expect(await screen.findByText("已通过本委托设定的条件")).toBeTruthy();
+  expect(screen.getByText("待审阅，尚未整体核验")).toBeTruthy();expect(screen.getByText("尚未归入项目成果")).toBeTruthy();
+  expect(screen.getByText("未从委托状态推断，以实际行动回执为准")).toBeTruthy();
+ });
+ it("自动协议纠错展示后端阶段与恢复原因，READY不提供手动继续",async()=>{
+  const f=fixture();Object.assign(f.mission,{status:"READY",error:{code:"MODEL_PROTOCOL_ERROR",phase:"DECISION",message:"模型回复格式不符合要求",recovery:{kind:"MODEL_FORMAT_RETRY",automatic:true,message:"将按限次策略重试原委托"}}});
+  render(createElement(MissionPanel,{projectId:"p"}));fireEvent.click(await screen.findByRole("button",{name:"整理阶段汇报 · 等待执行"}));
+  expect(await screen.findByText(/发生阶段：模型决策 · 错误类别：MODEL_PROTOCOL_ERROR/)).toBeTruthy();
+  expect(screen.getByText(/将按限次策略重试原委托/)).toBeTruthy();expect(screen.queryByRole("button",{name:"确认后继续执行"})).toBeNull();
+ });
  it("创建失败保留用户目标和云模型选择，给出可重试提示",async()=>{
   fixture();const original=globalThis.fetch;
   vi.stubGlobal("fetch",vi.fn(async(input,init)=>init?.method==="POST"?{ok:false,json:async()=>({error:{message:"服务暂时不可用"}})}:original(input,init)));

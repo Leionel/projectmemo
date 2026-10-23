@@ -6,6 +6,8 @@ import type {
   TemporalTopLevelState,
   TemporalSupportState,
 } from "@/lib/types";
+import { evidenceAssessment, type EvidenceAssessment } from "./assessment";
+import { ruleVerdict } from "./semanticRules";
 
 export interface ClaimDraft {
   text: string;
@@ -19,6 +21,10 @@ export interface CardEvidenceState {
   supportState: TemporalSupportState;
   topLevelState?: TemporalTopLevelState;
   supersededBy: TemporalCardSummary | null;
+  text?: string;
+  revision?: string;
+  sourceTime?: string;
+  semanticChecks?: Record<string, EvidenceAssessment["semanticVerdict"]>;
 }
 
 export interface TrustReceiptEvaluation {
@@ -42,12 +48,26 @@ function evaluateClaim(
 ): EvidenceClaim {
   const requestedIds = unique(draft.cardIds);
   const currentIds: string[] = [];
+  const assessments: EvidenceAssessment[] = [];
   const supersededIds: string[] = [];
   let hasUnknown = requestedIds.length === 0;
   let hasConflict = false;
 
   for (const cardId of requestedIds) {
     const evidence = evidenceById.get(cardId);
+    const sentences = evidence?.text ? [evidence.text, ...Array.from(new Intl.Segmenter("zh", { granularity: "sentence" }).segment(evidence.text), s => s.segment.trim())] : [];
+    const rules = sentences.map(text => ruleVerdict(draft.text, text));
+    const rule = rules.find(result => result?.status === "CONTRADICTS") ?? rules.find(result => result?.status === "ENTAILS");
+    const admissible = !!evidence?.belongsToProject;
+    // Like Mission, a verbatim match is structural evidence; only a configured Judge
+    // can grant ENTAILS. A deterministic numeric/negative contradiction still fails closed.
+    const semanticVerdict = admissible ? rule?.status === "CONTRADICTS" ? "CONTRADICTS" : evidence?.semanticChecks?.[draft.text] ?? "NOT_CHECKED" : "NOT_CHECKED";
+    assessments.push(evidenceAssessment({ sourceId: `card:${cardId}`, observedAt: new Date().toISOString(),
+      sourceRevision: evidence?.revision ?? "", sourceTime: evidence?.sourceTime ?? null,
+      textRange: evidence?.text ? { start: 0, end: evidence.text.length } : null,
+      citationAdmissibility: admissible ? "ADMITTED" : "REJECTED", temporalState: evidence?.topLevelState ?? "UNKNOWN",
+      semanticVerdict, method: rule?.status === "CONTRADICTS" ? "RULE" : evidence?.semanticChecks?.[draft.text] ? "JUDGE" : rule ? "RULE" : "NONE",
+      reasonCode: !admissible ? "SOURCE_NOT_ADMITTED" : rule?.status === "CONTRADICTS" ? rule.reasonCode : evidence?.semanticChecks?.[draft.text] ? "MODEL_JUDGMENT" : rule?.reasonCode ?? "SEMANTIC_NOT_CHECKED" }));
     if (!evidence || !evidence.belongsToProject) {
       hasUnknown = true;
       continue;
@@ -65,6 +85,7 @@ function evaluateClaim(
     if (topLevelState === "CONTESTED") {
       hasConflict = true;
     }
+    if (semanticVerdict === "CONTRADICTS") hasConflict = true;
     // Unknown 是“系统尚不能证明时态结论”，不是“事实为假”。在证据归属
     // 和 current 仍成立时保留旧的来源支持语义；只有缺失/跨项目引用才
     // 让整条 claim 进入 INSUFFICIENT。
@@ -80,6 +101,7 @@ function evaluateClaim(
     support,
     cardIds: currentIds,
     supersededCardIds: supersededIds,
+    assessments,
   };
 }
 
@@ -110,6 +132,7 @@ export function evaluateTrustReceipt(input: {
 
   return {
     receipt: {
+      schemaVersion: 2,
       supportState,
       abstained: supportState !== "SUPPORTED",
       claims,

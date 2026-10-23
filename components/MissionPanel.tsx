@@ -1,5 +1,5 @@
 "use client";
-import {missionStatusLabels,missionToolLabels} from "@/lib/mission/presentation";
+import {missionStatusLabels,missionToolLabels,missionCompletionFacts,missionErrorPhaseLabel,type MissionCompletionSummary,type MissionRecovery} from "@/lib/mission/presentation";
 import {projectHref} from "@/lib/projectNavigation";
 import { useCallback,useEffect,useRef,useState,useSyncExternalStore } from "react";
 import { emitWorkspaceChange } from "@/lib/client/workspaceEvents";
@@ -10,7 +10,7 @@ import { MissionContinuation } from "./MissionContinuation";
 import { MissionResearchScopeEditor } from "./MissionResearchScopeEditor";
 import { MissionConstraintsEditor } from "./MissionConstraintsEditor";
 import styles from "./MissionPanel.module.css";
-type Mission={semanticCheckEnabled?:boolean;continuationPolicy?:{mode:string};autoContinuationEnabled?:boolean;artifactAdoptionEnabled?:boolean;id:string;goal:string;status:string;version:number;contextVersion:number;constraintsVersion:number;researchScopeVersion:number;constraints:Record<string,unknown>;researchScope:Record<string,unknown>;pauseRequestedAt?:string|null;cancelRequestedAt?:string|null;pauseReason:string|null;error:{code?:string;message?:string;diagnostic?:{reason?:string}}|null;question:{id:string;payloadJson:{question:string;requirements?:{metric?:{name:string;unit:string;period:string}}}}|null;steps:Array<{id:string;toolName:string;status:string;result?:{data?:{actionId?:string;title?:string;status?:string;resultCardId?:string|null}}|null}>;approvals:Array<{id:string;proposalHash:string;proposal:{args:{title:string;description:string;priority?:number;dueAt?:string|null}};expiresAt:string}>;outputs:Array<{id:string;revision:number;verificationStatus:string;claimChecksJson?:Array<{blockId:string;status:string;mode?:string;checkedAt?:string}>;contentJson:{blocks:Array<{blockId:string;text:string;kind:string;sourceIds:string[]}>}}>};
+type Mission={completion?:MissionCompletionSummary;semanticCheckEnabled?:boolean;continuationPolicy?:{mode:string};autoContinuationEnabled?:boolean;artifactAdoptionEnabled?:boolean;id:string;goal:string;status:string;version:number;contextVersion:number;constraintsVersion:number;researchScopeVersion:number;constraints:Record<string,unknown>;researchScope:Record<string,unknown>;pauseRequestedAt?:string|null;cancelRequestedAt?:string|null;pauseReason:string|null;error:{code?:string;message?:string;phase?:string;recovery?:MissionRecovery;diagnostic?:{reason?:string}}|null;question:{id:string;payloadJson:{question:string;requirements?:{metric?:{name:string;unit:string;period:string}}}}|null;steps:Array<{id:string;toolName:string;status:string;result?:{data?:{actionId?:string;title?:string;status?:string;resultCardId?:string|null}}|null}>;approvals:Array<{id:string;proposalHash:string;proposal:{args:{title:string;description:string;priority?:number;dueAt?:string|null}};expiresAt:string}>;outputs:Array<{id:string;revision:number;verificationStatus:string;claimChecksJson?:Array<{blockId:string;status:string;mode?:string;checkedAt?:string}>;contentJson:{blocks:Array<{blockId:string;text:string;kind:string;sourceIds:string[]}>}}>};
 const toolLabels=missionToolLabels;
 const stepLabels:Record<string,string>={READY:"准备执行",RUNNING:"正在执行",WAITING_APPROVAL:"待批准",SUCCEEDED:"已执行",FAILED:"执行失败",OBSOLETE:"依据已变化",SKIPPED:"已跳过"};
 const labels=missionStatusLabels;
@@ -96,6 +96,7 @@ function MissionWorkspace({projectId,initialMissionId}:{projectId:string;initial
      <h3 className={styles.goal}>{mission.goal.length>90?`${[...mission.goal].slice(0,90).join("")}…`:mission.goal}</h3>{mission.goal.length>90&&<details><summary>查看完整委托目标</summary><p>{mission.goal}</p></details>}
 
      <div role="status" className={styles.statusText}>{labels[mission.status]}{mission.status==="RUNNING"?"，最近已完成的步骤见下方":mission.status==="READY"?"，进度已保存，等待开始":mission.status==="WAITING_INPUT"?"，补充后可继续同一委托":mission.status==="WAITING_APPROVAL"?"，确认预览后才会创建行动":""}</div>
+     <dl className={styles.completionFacts} aria-label="完成与核验">{missionCompletionFacts(mission.status,mission.completion,mission.outputs[0]?.verificationStatus).map(fact=><div key={fact.label}><dt>{fact.label}</dt><dd>{fact.value}</dd></div>)}</dl>
      {mission.status==="RUNNING"&&(mission.cancelRequestedAt||mission.pauseRequestedAt)&&<p role="status">{mission.cancelRequestedAt?"取消":"暂停"}请求已受理，等待当前执行安全停止。</p>}
      <details><summary>暂停与取消</summary><div className={styles.actions}>
       {mission.status==="WAITING_APPROVAL"&&<button disabled={busy} onClick={()=>void command("replan")}>更新依据并重新预览</button>}
@@ -103,9 +104,11 @@ function MissionWorkspace({projectId,initialMissionId}:{projectId:string;initial
       {!terminal&&<button className={styles.cancel} disabled={busy} onClick={()=>void command("cancel")}>取消委托</button>}
      </div></details>
     </header>
-    {(mission.status==="PAUSED"||mission.status==="FAILED")&&mission.error&&<section className={styles.stoppedBlock} role="alert" aria-label="暂停原因与恢复条件">
-      <strong>{mission.status==="PAUSED"?"执行已暂停，已有进度已保留":"执行失败，已执行的结果保留"}</strong>
+    {mission.error&&<section className={styles.stoppedBlock} role={mission.status==="PAUSED"||mission.status==="FAILED"?"alert":"status"} aria-label="暂停原因与恢复条件">
+      <strong>{mission.status==="PAUSED"?"执行已暂停，已有进度已保留":mission.status==="FAILED"?"执行失败，已执行的结果保留":"本次执行需要恢复，已有进度已保留"}</strong>
       <p>{mission.error.code==="MODEL_PROTOCOL_ERROR"&&mission.error.message==="委托执行失败，请检查服务配置后继续"?"模型回复格式不符合要求，尚未执行新步骤。修复后可继续此委托。":mission.error.message}</p>
+      {mission.error.phase&&<p>发生阶段：{missionErrorPhaseLabel(mission.error.phase)} · 错误类别：{mission.error.code??"未记录"}</p>}
+      {mission.error.recovery?.message&&<p>{mission.error.recovery.message}{mission.error.recovery.automatic?"（由服务端按限次策略处理）":""}</p>}
       <div className={styles.recovery}>
         <p>继续前请核对：</p>
         <ul>

@@ -2,10 +2,9 @@ import { AppError } from "@/lib/api";
 import { db } from "@/lib/db";
 import { generateArtifactWithLLMWithMeta } from "@/lib/agent/llmAgent";
 import { cardToDraft, generateMockArtifactWithClaims } from "@/lib/generators/templates";
-import { saveArtifact } from "@/lib/repositories/artifacts";
+import { saveArtifact, saveArtifactInTx } from "@/lib/repositories/artifacts";
 import { requireProject } from "@/lib/repositories/projects";
-import { AgentRunStatus, AgentRunType } from "@/lib/generated/prisma/client";
-import { saveAgentRun } from "@/lib/repositories/agent";
+import { AgentRunStatus, AgentRunType, type Prisma } from "@/lib/generated/prisma/client";
 import type { AgentExecutionResult, ArtifactTypeValue } from "@/lib/types";
 import type { EpisodeSourceRef } from "@/lib/types/episode";
 import { artifactContentSchema } from "@/lib/validation/schemas";
@@ -60,7 +59,8 @@ async function loadArtifactContext(projectId: string, episodeId?: string) {
   };
 }
 
-export async function generateArtifact(projectId: string, artifactType: ArtifactTypeValue, options?: { episodeId?: string }) {
+/** Preparation can call the model; it must stay outside the final business transaction. */
+export async function prepareArtifactGeneration(projectId: string, artifactType: ArtifactTypeValue, options?: { episodeId?: string }) {
   const { project, cards, sourceRefs, episodeTag } = await loadArtifactContext(projectId, options?.episodeId);
   const startedAt = Date.now();
   const mock = generateMockArtifactWithClaims(artifactType, { project, cards });
@@ -92,30 +92,43 @@ export async function generateArtifact(projectId: string, artifactType: Artifact
       };
     }
   }
-  const artifact = await saveArtifact(
+  return {
     projectId,
     artifactType,
-    execution.data,
+    content: execution.data,
     sourceRefs,
-    claims as unknown as Parameters<typeof saveArtifact>[4],
-  );
-  await saveAgentRun({
-    projectId,
-    runType: AgentRunType.ARTIFACT,
-    status: execution.status === "SUCCESS" ? AgentRunStatus.SUCCESS : AgentRunStatus.FALLBACK,
-    provider: execution.provider,
-    fallbackReason: execution.fallbackReason,
-    durationMs: Date.now() - startedAt,
-    trace: {
+    claims,
+    audit: {
+      status: execution.status === "SUCCESS" ? AgentRunStatus.SUCCESS : AgentRunStatus.FALLBACK,
+      provider: execution.provider,
+      fallbackReason: execution.fallbackReason,
+      durationMs: Date.now() - startedAt,
+      trace: {
       pipeline: ["load_project", "load_memory", "generate_artifact", "save_version"],
       artifactType,
-      artifactId: artifact.id,
       cardCount: cards.length,
       ...(episodeTag ? { episodeId: episodeTag.episodeId, episodeRevisionId: episodeTag.revisionId, scope: "EPISODE_CHECKPOINT" } : {}),
+      },
     },
-    resultJson: { artifactId: artifact.id, artifactType },
-  });
+  };
+}
+
+export async function savePreparedArtifactInTx(tx: Prisma.TransactionClient, prepared: Awaited<ReturnType<typeof prepareArtifactGeneration>>) {
+  const artifact = await saveArtifactInTx(tx, prepared.projectId, prepared.artifactType, prepared.content,
+    prepared.sourceRefs, prepared.claims as unknown as Prisma.InputJsonValue);
+  await tx.agentRun.create({ data: {
+    projectId: prepared.projectId,
+    runType: AgentRunType.ARTIFACT,
+    ...prepared.audit,
+    trace: { ...prepared.audit.trace, artifactId: artifact.id },
+    resultJson: { artifactId: artifact.id, artifactType: prepared.artifactType },
+  } });
   return artifact;
+}
+
+export async function generateArtifact(projectId: string, artifactType: ArtifactTypeValue, options?: { episodeId?: string }) {
+  const prepared = await prepareArtifactGeneration(projectId, artifactType, options);
+  return db.$transaction(tx => savePreparedArtifactInTx(tx, prepared));
 }
 
 export async function saveEditedArtifactVersion(projectId: string, artifactType: ArtifactTypeValue, content: string) {

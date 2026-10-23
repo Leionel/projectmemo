@@ -16,5 +16,6 @@ export default defineConfig([
     // generated preview/build output and third-party oh_modules as TypeScript.
     "harmonyos/**",
     "tmp/**",
+    "evidence/**", // Archived probes and receipts are validated separately from application source.
   ]),
 ]);

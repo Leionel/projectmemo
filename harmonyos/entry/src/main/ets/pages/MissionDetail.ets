@@ -3,12 +3,12 @@ import promptAction from '@ohos.promptAction';
 import { Mission, MissionSummary, MissionCreate, MissionEvent, MissionApproval, MissionCommand,
   MissionCandidate, MissionPointer, MissionMaterialInput, MissionMaterialPreview, MissionMaterialConfirm,
   MissionOutput, MissionBlock, MissionSource, MissionArtifactPreview, MissionArtifactInput, MissionArtifactConfirm,
-  MissionConstraintsEdit, MissionScopeEdit, MissionPolicyEdit, MissionStep, MissionClaim } from '../models/Mission';
+  MissionConstraintsEdit, MissionScopeEdit, MissionPolicyEdit, MissionStep, MissionClaim, MissionCompletionFact } from '../models/Mission';
 import { ApiError } from '../models/Project';
 import { MissionService } from '../services/MissionService';
 import { SessionStore } from '../services/SessionStore';
 import { WidgetDataService } from '../services/WidgetDataService';
-import { missionStatusLabel, mergeMissionEvents, missionTerminal, missionToolLabel } from '../common/MissionContract';
+import { missionStatusLabel, mergeMissionEvents, missionTerminal, missionToolLabel, missionCompletionFacts, missionErrorPhaseLabel } from '../common/MissionContract';
 import { PMColors, PMSpacing, PMRadius, PMFontSize } from '../common/DesignTokens';
 import { PMAppBar } from '../components/PMAppBar';
 import { PMStatusPill, PMButton } from '../components/PMReferencePrimitives';
@@ -307,10 +307,19 @@ struct MissionDetail {
           .fontSize(12).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent)
           .height(44).onClick(() => { this.showGoal = !this.showGoal; })
       }
-      if (this.mission.status === 'PAUSED' || this.mission.status === 'FAILED') {
+      Column({ space: 8 }) {
+        ForEach(missionCompletionFacts(this.mission.status, this.mission.completion, this.mission.outputs[0]?.verificationStatus), (fact: MissionCompletionFact) => {
+          Row({ space: 12 }) {
+            Text(fact.label).fontSize(12).fontColor(PMColors.INK_TERTIARY).width(64)
+            Text(fact.value).fontSize(13).fontColor(PMColors.INK_SECONDARY).lineHeight(20).layoutWeight(1)
+          }.width('100%').alignItems(VerticalAlign.Top)
+        }, (fact: MissionCompletionFact) => fact.label)
+      }.width('100%').alignItems(HorizontalAlign.Start).padding({ top: 10, bottom: 10 })
+        .border({ width: { top: 1, bottom: 1 }, color: PMColors.BORDER_SUBTLE })
+      if (this.mission.error !== null || this.mission.status === 'PAUSED' || this.mission.status === 'FAILED') {
         Column({ space: PMSpacing.SM }) {
           Text('当前状态').fontSize(12).fontColor(PMColors.INK_TERTIARY)
-          Text(this.mission.status === 'PAUSED' ? '委托已暂停' : '委托执行失败')
+          Text(this.mission.status === 'PAUSED' ? '委托已暂停' : this.mission.status === 'FAILED' ? '委托执行失败' : '本次执行需要恢复')
             .fontSize(PMFontSize.SECTION_TITLE).fontWeight(FontWeight.Medium).fontColor(PMColors.RISK)
           Text(this.mission.error?.message ?? this.mission.pauseReason ?? '服务端未提供具体原因，请查看执行回执。')
             .fontSize(PMFontSize.BODY).fontColor(PMColors.INK_PRIMARY)
@@ -318,10 +327,15 @@ struct MissionDetail {
             Text(`错误类别：${this.mission.error!.code}`)
               .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
           }
+          if (this.mission.error?.phase) {
+            Text(`发生阶段：${missionErrorPhaseLabel(this.mission.error!.phase)}`)
+              .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+          }
           Column({ space: 5 }) {
             Text('建议的恢复步骤').fontSize(11).fontColor(PMColors.INK_TERTIARY)
-            Text(this.mission.status === 'PAUSED' ? '检查服务配置及执行回执，再继续原委托。' : '核对执行回执后，返回列表重新委托。')
+            Text(this.mission.error?.recovery?.message ?? (this.mission.status === 'PAUSED' ? '检查服务配置及执行回执，再继续原委托。' : this.mission.status === 'FAILED' ? '核对执行回执后，返回列表重新委托。' : '请读取最新状态，服务端会保留此前进度。'))
               .fontSize(13).fontColor(PMColors.INK_PRIMARY).lineHeight(20)
+            if (this.mission.error?.recovery?.automatic) { Text('由服务端按限次策略处理').fontSize(12).fontColor(PMColors.INK_SECONDARY) }
           }.width('100%').alignItems(HorizontalAlign.Start).padding(12).backgroundColor(PMColors.WARNING_LIGHT).borderRadius(12)
         }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.LG)
           .backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.LG).border({ width: 1, color: PMColors.BORDER_SUBTLE })

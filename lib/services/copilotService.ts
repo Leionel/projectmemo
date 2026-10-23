@@ -1,17 +1,20 @@
+import { reserveCloudCall } from "@/lib/auth/cloudQuota";
+import { configuredClaimJudge } from "@/lib/mission/claimJudgeAdapter";
+import { assessCopilotSemantics } from "@/lib/evidence/copilotSemantic";
+import { evidenceAssessment } from "@/lib/evidence/assessment";
+import { jsonHash } from "@/lib/mission/contracts";
 import { z } from "zod";
-import { AppError } from "@/lib/api";
 import { chatJsonWithMeta } from "@/lib/agent/llmAgent";
 import { buildCopilotPrompt } from "@/lib/agent/prompts";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { evaluateTrustReceipt, guardedAnswerMessage, type ClaimDraft } from "@/lib/evidence/trustReceipt";
-import { AgentRunStatus, AgentRunType, Prisma } from "@/lib/generated/prisma/client";
+import { AgentRunStatus, AgentRunType } from "@/lib/generated/prisma/client";
 import { db } from "@/lib/db";
 import { searchProjectCards } from "@/lib/memory/hybridSearch";
-import { createAction, listAgentMessages, listInterventions, listActions, saveAgentMessage, saveAgentRun } from "@/lib/repositories/agent";
+import { listAgentMessages, saveAgentMessage, saveAgentRun } from "@/lib/repositories/agent";
 import { requireProject } from "@/lib/repositories/projects";
-import { generateArtifact } from "@/lib/services/artifactService";
 import { getDecisionTimeline } from "@/lib/services/temporalLedgerService";
-import { actionCreateSchema, artifactCreateSchema } from "@/lib/validation/schemas";
+import { assertCopilotSources, confirmCopilotTool, freezeCopilotProposals, readCopilotContext, type CopilotActor } from "@/lib/copilot/confirmation";
 import type { AgentChatResponse, AgentCitation, CardSearchResult, EvidenceTrustReceipt, ProjectEvidenceRef, ProposedAction } from "@/lib/types";
 
 const responseSchema = z.object({
@@ -101,7 +104,7 @@ function mockAnswer(input: {
   if (/进展|总结|现在|完成/.test(question)) {
     const primary = citations[0];
     return {
-      message: primary ? `当前能从项目记忆直接核验的进展是：${primary.excerpt}` : "当前没有检索到能直接支持进展结论的项目记忆。",
+      message: primary ? `目前找到的项目记录写道：${primary.excerpt}` : "当前没有检索到能直接支持进展结论的项目记忆。",
       citations,
       claims: primary ? [{ text: primary.excerpt, cardIds: [primary.cardId] }] : [],
       proposedActions,
@@ -115,14 +118,9 @@ function mockAnswer(input: {
   };
 }
 
-export async function answerProjectQuestion(projectId: string, question: string): Promise<AgentChatResponse> {
+export async function answerProjectQuestion(projectId: string, question: string, actor?: CopilotActor): Promise<AgentChatResponse> {
   const startedAt = Date.now();
-  const project = await requireProject(projectId);
-  const [cards, interventions, actions] = await Promise.all([
-    db.knowledgeCard.findMany({ where: { projectId }, orderBy: { createdAt: "desc" }, select: { id: true, title: true, summary: true, type: true, keywords: true } }),
-    listInterventions(projectId, false),
-    listActions(projectId, false),
-  ]);
+  const { project, cards, interventions, actions, sourceManifest } = await db.$transaction(tx => readCopilotContext(tx, projectId, actor));
   await saveAgentMessage({ projectId, role: "USER", content: question, citations: [], proposedActions: [] });
   // 当前提醒数和提醒原文是本项目的持久化事实，可以直接核对；不必强迫它们
   // 再匹配到一张知识卡片。这里只回答已有状态，不推断未记录的触发原因。
@@ -172,6 +170,8 @@ export async function answerProjectQuestion(projectId: string, question: string)
     });
     return { message, citations: [], proposedActions: [], runId: run.id, fallback: false, trustReceipt };
   }
+  const timeline = await getDecisionTimeline(projectId);
+  const temporalById = new Map(timeline.items.map(item => [item.card.id, item]));
   const evidenceSearch = await getCopilotEvidence(projectId, question, cards);
   let answer = mockAnswer({ question, citations: evidenceSearch.citations, cards, interventions, actions });
   let fallback = true;
@@ -183,7 +183,7 @@ export async function answerProjectQuestion(projectId: string, question: string)
         buildCopilotPrompt({
           project,
           question,
-          cards: cards.filter((card) => evidenceSearch.citations.some((citation) => citation.cardId === card.id)).map((card) => ({ id: card.id, title: card.title, summary: card.summary, type: String(card.type) })),
+          cards: cards.filter((card) => evidenceSearch.citations.some((citation) => citation.cardId === card.id)).map((card) => ({ id: card.id, title: card.title, summary: card.summary, type: String(card.type), temporalState: temporalById.get(card.id)?.topLevelState ?? "UNKNOWN", sourceRevision: sourceManifest.cardHashes.find(item => item.id === card.id)?.hash ?? "", observedAt: sourceManifest.observedAt })),
           interventions: interventions.map((item) => ({ id: item.id, title: item.title, content: item.content, status: String(item.status) })),
           actions: actions.map((item) => ({ id: item.id, title: item.title, status: String(item.status) })),
         }),
@@ -203,8 +203,6 @@ export async function answerProjectQuestion(projectId: string, question: string)
   const knownCardIds = new Set(cards.map((card) => card.id));
   const retrievedCardIds = new Set(evidenceSearch.citations.map((citation) => citation.cardId));
   const cardById = new Map(cards.map((card) => [card.id, card]));
-  const timeline = await getDecisionTimeline(projectId);
-  const temporalById = new Map(timeline.items.map((item) => [item.card.id, item]));
   const answerCitationById = new Map(answer.citations.map((citation) => [citation.cardId, citation]));
   const retrievedCitationById = new Map(evidenceSearch.citations.map((citation) => [citation.cardId, citation]));
   const requestedCitationIds = [...new Set([
@@ -219,6 +217,9 @@ export async function answerProjectQuestion(projectId: string, question: string)
       const card = cardById.get(cardId);
       return {
         ...citation,
+        assessment: evidenceAssessment({ sourceId: `card:${cardId}`, sourceRevision: sourceManifest.cardHashes.find(item => item.id === cardId)?.hash ?? "",
+          observedAt: timeline.asOf, sourceTime: temporal?.card.createdAt ?? null, citationAdmissibility: "ADMITTED",
+          temporalState: temporal?.topLevelState ?? "UNKNOWN", textRange: { start: 0, end: card?.summary.length ?? 0 } }),
         title: card?.title ?? citation.title,
         excerpt: (card?.summary ?? citation.excerpt).slice(0, 180),
         current: temporal?.current ?? true,
@@ -239,6 +240,20 @@ export async function answerProjectQuestion(projectId: string, question: string)
   let trustReceipt: EvidenceTrustReceipt | undefined;
   let rejectedCardIds: string[] = [];
   if (trustEnabled) {
+    const judge = isFeatureEnabled("COPILOT_CLAIM_JUDGE_ENABLED", false) && process.env.LLM_MODE === "openai-compatible" ? async (request: Parameters<typeof configuredClaimJudge>[0]) => {
+      await reserveCloudCall(projectId);
+      try {
+        const result = await configuredClaimJudge(request);
+        await saveAgentRun({ projectId, runType: AgentRunType.CHAT, status: AgentRunStatus.SUCCESS, provider: result.provider,
+          trace: { purpose: "COPILOT_CLAIM_JUDGE", claimHash: jsonHash(request.text), model: result.model, usage: result.usage }, resultJson: { verdict: result.verdict } });
+        return result;
+      } catch (error) {
+        await saveAgentRun({ projectId, runType: AgentRunType.CHAT, status: AgentRunStatus.FAILED, provider: "copilot-claim-judge",
+          fallbackReason: "JUDGE_UNAVAILABLE", trace: { purpose: "COPILOT_CLAIM_JUDGE", claimHash: jsonHash(request.text), usageUnknown: true } });
+        throw error;
+      }
+    } : undefined;
+    const semanticChecks = await assessCopilotSemantics(answer.claims, cards.filter(card => retrievedCardIds.has(card.id)), judge);
     const evaluated = evaluateTrustReceipt({
       claims: answer.claims as ClaimDraft[],
       fallbackClaimText: answer.message,
@@ -249,6 +264,8 @@ export async function answerProjectQuestion(projectId: string, question: string)
           return {
             cardId: card.id,
             belongsToProject: true,
+            text: card.summary, revision: sourceManifest.cardHashes.find(item => item.id === card.id)?.hash,
+            sourceTime: temporal?.card.createdAt, semanticChecks: semanticChecks.get(card.id),
             current: temporal?.current ?? true,
             supportState: temporal?.supportState ?? "INSUFFICIENT" as const,
             topLevelState: temporal?.topLevelState ?? "UNKNOWN" as const,
@@ -267,19 +284,30 @@ export async function answerProjectQuestion(projectId: string, question: string)
     });
     trustReceipt = evaluated.receipt;
     rejectedCardIds = evaluated.rejectedCardIds;
+    const unverified = trustReceipt.claims.some(claim => !claim.assessments?.length || claim.assessments.some(a => a.semanticVerdict !== "ENTAILS"));
+    const boundedMessage = unverified && trustReceipt.supportState === "SUPPORTED"
+      ? `找到以下项目记录，回答中的推断尚未完成语义核对：\n${answer.citations.slice(0, 3).map(c => `「${c.title}」记录：${c.excerpt}`).join("\n")}` : answer.message;
     answer = {
       ...answer,
-      message: guardedAnswerMessage(trustReceipt, answer.message),
+      message: guardedAnswerMessage(trustReceipt, boundedMessage),
       proposedActions: trustReceipt.supportState === "SUPPORTED" ? answer.proposedActions : [],
     };
   }
-  const run = await saveAgentRun({
+  const run = await db.$transaction(async tx => {
+    await tx.$executeRaw`UPDATE "Project" SET "id" = "id" WHERE "id" = ${projectId}`;
+    await assertCopilotSources(tx, projectId, sourceManifest, actor);
+    const saved = await saveAgentRun({
     projectId,
     runType: AgentRunType.CHAT,
     status: fallback ? AgentRunStatus.FALLBACK : trustReceipt?.abstained ? AgentRunStatus.PARTIAL : AgentRunStatus.SUCCESS,
     provider,
     fallbackReason,
     trace: {
+      ...(actor ? { actorUserId: actor.userId } : {}),
+      copilotSources: sourceManifest,
+      evidenceManifest: { schemaVersion: 1, promptVersion: "copilot-evidence-v1", questionHash: jsonHash(question),
+        includedCardIds: answer.citations.map(c => c.cardId), sourceHashes: sourceManifest.cardHashes.filter(item => retrievedCardIds.has(item.id)),
+        temporalAsOf: timeline.asOf, semanticJudgeEnabled: isFeatureEnabled("COPILOT_CLAIM_JUDGE_ENABLED", false) },
       intent: /提醒|为什么|介入/.test(question) ? "explain_intervention" : /进展|总结/.test(question) ? "summarize_progress" : "search_memory",
       citedCardIds: answer.citations.map((citation) => citation.cardId),
       rejectedCardIds,
@@ -296,6 +324,9 @@ export async function answerProjectQuestion(projectId: string, question: string)
     },
     resultJson: { proposedActions: answer.proposedActions, trustReceipt: trustReceipt ?? null },
     durationMs: Date.now() - startedAt,
+    }, tx);
+    await freezeCopilotProposals(tx, saved.id, answer.proposedActions, sourceManifest);
+    return saved;
   });
   await saveAgentMessage({
     projectId,
@@ -317,151 +348,6 @@ export async function getProjectChat(projectId: string) {
     : message);
 }
 
-const proposalLocks = new Map<string, Promise<void>>();
-
-async function withProposalLock<T>(key: string, task: () => Promise<T>): Promise<T> {
-  while (proposalLocks.has(key)) {
-    try {
-      await proposalLocks.get(key);
-    } catch {
-      // 忽略前序异常，继续竞争执行
-    }
-  }
-
-  let resolveLock!: () => void;
-  const lockPromise = new Promise<void>((res) => {
-    resolveLock = res;
-  });
-  proposalLocks.set(key, lockPromise);
-
-  try {
-    return await task();
-  } finally {
-    if (proposalLocks.get(key) === lockPromise) {
-      proposalLocks.delete(key);
-    }
-    resolveLock();
-  }
-}
-
-export async function executeCopilotTool(projectId: string, input: { tool: "create_action" | "generate_artifact"; confirmed: boolean; payload: Record<string, unknown>; sourceRunId?: string }) {
-  if (!input.confirmed) throw new AppError("CONFIRMATION_REQUIRED", "写操作需要你确认后才能执行", 400);
-  await requireProject(projectId);
-
-  let matchedProposal: Record<string, unknown> | undefined;
-  let sourceRun: { id: string; trace: unknown; resultJson: unknown } | null = null;
-  let proposalKey = "";
-
-  if (isFeatureEnabled("EVIDENCE_TRUST_RECEIPT_ENABLED", true)) {
-    if (!input.sourceRunId) throw new AppError("TRUST_RECEIPT_REQUIRED", "缺少证据回执，不能执行写操作", 409);
-    sourceRun = await db.agentRun.findFirst({ where: { id: input.sourceRunId, projectId, runType: AgentRunType.CHAT } });
-    if (!sourceRun) throw new AppError("TRUST_RECEIPT_NOT_FOUND", "没有找到这次回答的证据回执", 404);
-    const trace = sourceRun.trace && typeof sourceRun.trace === "object" && !Array.isArray(sourceRun.trace)
-      ? sourceRun.trace as Record<string, unknown>
-      : {};
-    if (trace.supportState !== "SUPPORTED") {
-      throw new AppError("EVIDENCE_NOT_SUPPORTED", "证据存在冲突或不足，已阻止写操作", 409);
-    }
-    const result = sourceRun.resultJson && typeof sourceRun.resultJson === "object" && !Array.isArray(sourceRun.resultJson)
-      ? sourceRun.resultJson as Record<string, unknown>
-      : {};
-    const allowed = Array.isArray(result.proposedActions) ? result.proposedActions as Array<Record<string, unknown>> : [];
-    matchedProposal = allowed.find((proposal) => proposal.kind === input.tool && (
-      input.tool === "create_action"
-        ? proposal.title === input.payload.title
-        : proposal.artifactType === input.payload.artifactType
-    ));
-    if (!matchedProposal) throw new AppError("UNAPPROVED_TOOL_PROPOSAL", "这个操作不属于该证据回执中的建议", 409);
-
-    proposalKey = input.tool === "create_action"
-      ? `action:${matchedProposal.title}`
-      : `artifact:${matchedProposal.artifactType}`;
-  }
-
-  const lockKey = sourceRun ? `${sourceRun.id}:${proposalKey}` : `${projectId}:${input.tool}`;
-
-  return withProposalLock(lockKey, async () => {
-    // 锁内重新查询最新 executedProposals，实现严格的并发幂等阻断
-    if (sourceRun && proposalKey) {
-      const freshRun = await db.agentRun.findUnique({ where: { id: sourceRun.id } });
-      const freshResult = freshRun?.resultJson && typeof freshRun.resultJson === "object" && !Array.isArray(freshRun.resultJson)
-        ? freshRun.resultJson as Record<string, unknown>
-        : {};
-      const executedProposals = (freshResult.executedProposals && typeof freshResult.executedProposals === "object"
-        ? freshResult.executedProposals as Record<string, { tool: string; resultId: string }>
-        : {});
-
-      if (executedProposals[proposalKey]) {
-        const execRecord = executedProposals[proposalKey];
-        if (input.tool === "create_action") {
-          const existingAction = await db.actionItem.findUnique({ where: { id: execRecord.resultId } });
-          if (existingAction) {
-            return { tool: input.tool, result: existingAction, alreadyExecuted: true };
-          }
-        } else {
-          const existingArtifact = await db.generatedArtifact.findUnique({ where: { id: execRecord.resultId } });
-          if (existingArtifact) {
-            return { tool: input.tool, result: existingArtifact, alreadyExecuted: true };
-          }
-        }
-      }
-    }
-
-    if (input.tool === "create_action") {
-      // TRUST-01: 强制使用服务端存证的建议字段，防止客户端篡改 description / priority
-      const actionPayload = matchedProposal
-        ? {
-            title: matchedProposal.title,
-            description: matchedProposal.description ?? "",
-            priority: matchedProposal.priority ?? 3,
-            dueAt: matchedProposal.dueAt ?? undefined,
-          }
-        : input.payload;
-      const parsed = actionCreateSchema.parse(actionPayload);
-      const created = await createAction(projectId, parsed);
-
-      if (sourceRun && matchedProposal) {
-        await db.$transaction(async (tx) => {
-          const runToUpdate = await tx.agentRun.findUnique({ where: { id: sourceRun!.id } });
-          if (!runToUpdate) return;
-          const currentResult = (runToUpdate.resultJson && typeof runToUpdate.resultJson === "object"
-            ? runToUpdate.resultJson as Record<string, unknown>
-            : {}) as Record<string, unknown>;
-          const executed = (currentResult.executedProposals && typeof currentResult.executedProposals === "object"
-            ? { ...(currentResult.executedProposals as Record<string, unknown>) }
-            : {});
-          executed[proposalKey] = { tool: input.tool, resultId: created.id, executedAt: new Date().toISOString() };
-          await tx.agentRun.update({
-            where: { id: sourceRun!.id },
-            data: { resultJson: { ...currentResult, executedProposals: executed } as unknown as Prisma.InputJsonValue },
-          });
-        });
-      }
-
-      return { tool: input.tool, result: created };
-    }
-
-    const parsed = artifactCreateSchema.parse(input.payload);
-    const createdArtifact = await generateArtifact(projectId, parsed.artifactType);
-
-    if (sourceRun && matchedProposal) {
-      await db.$transaction(async (tx) => {
-        const runToUpdate = await tx.agentRun.findUnique({ where: { id: sourceRun!.id } });
-        if (!runToUpdate) return;
-        const currentResult = (runToUpdate.resultJson && typeof runToUpdate.resultJson === "object"
-          ? runToUpdate.resultJson as Record<string, unknown>
-          : {}) as Record<string, unknown>;
-        const executed = (currentResult.executedProposals && typeof currentResult.executedProposals === "object"
-          ? { ...(currentResult.executedProposals as Record<string, unknown>) }
-          : {});
-        executed[proposalKey] = { tool: input.tool, resultId: createdArtifact.id, executedAt: new Date().toISOString() };
-        await tx.agentRun.update({
-          where: { id: sourceRun!.id },
-          data: { resultJson: { ...currentResult, executedProposals: executed } as unknown as Prisma.InputJsonValue },
-        });
-      });
-    }
-
-    return { tool: input.tool, result: createdArtifact };
-  });
+export async function executeCopilotTool(projectId: string, input: { tool: "create_action" | "generate_artifact"; confirmed: boolean; payload: Record<string, unknown>; sourceRunId?: string }, actor?: CopilotActor) {
+  return confirmCopilotTool(projectId, input, actor);
 }

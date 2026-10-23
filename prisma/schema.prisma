@@ -309,10 +309,34 @@ model AgentRun {
   project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
   messages       AgentMessage[]
   missionSteps   AgentMissionStep[]
+  copilotExecutions CopilotToolExecution[]
 
   @@index([projectId, createdAt])
   @@index([projectId, runType])
   @@unique([provider, externalRequestId])
+}
+
+/// A fixed Copilot proposal's preparation/consumption receipt, not another Agent runtime.
+model CopilotToolExecution {
+  id                String   @id @default(cuid())
+  sourceRunId       String
+  proposalKey       String
+  tool              String
+  proposalJson      Json
+  proposalHash      String
+  sourceManifestHash String
+  confirmationHash  String?
+  status            String   @default("PENDING")
+  leaseToken        String?
+  leaseUntil        DateTime?
+  resultId          String?
+  committedAt       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  sourceRun         AgentRun @relation(fields: [sourceRunId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceRunId, proposalKey])
+  @@index([status, leaseUntil])
 }
 
 model AgentMessage {

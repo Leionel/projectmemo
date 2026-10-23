@@ -1,3 +1,4 @@
+import { EvidenceAssessment, evidenceAssessmentText } from '../models/Copilot';
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
 import pasteboard from '@ohos.pasteboard';
@@ -4214,7 +4215,7 @@ struct ProjectHome {
               if (msg.role === 'ASSISTANT' && msg.trustReceipt !== undefined && msg.trustReceipt !== null) {
                 Column() {
                   Row() {
-                    Text(msg.trustReceipt.supportState === 'SUPPORTED' ? '依据充分' :
+                    Text(msg.trustReceipt.supportState === 'SUPPORTED' ? '引用可用 · 语义另行核验' :
                       msg.trustReceipt.supportState === 'CONTESTED' ? '存在冲突' : '证据不足')
                       .fontSize(PMFontSize.CAPTION)
                       .fontWeight(FontWeight.Medium)
@@ -4224,7 +4225,7 @@ struct ProjectHome {
                       .backgroundColor(msg.trustReceipt.supportState === 'SUPPORTED' ? PMColors.SUCCESS_LIGHT :
                         msg.trustReceipt.supportState === 'CONTESTED' ? PMColors.EVIDENCE_LIGHT : PMColors.RISK_LIGHT)
                       .borderRadius(PMRadius.FULL)
-                      .accessibilityText(`证据支持状态：${msg.trustReceipt.supportState === 'SUPPORTED' ? '依据充分' :
+                      .accessibilityText(`证据支持状态：${msg.trustReceipt.supportState === 'SUPPORTED' ? '引用可用 · 语义另行核验' :
                         msg.trustReceipt.supportState === 'CONTESTED' ? '存在冲突' : '证据不足'}`)
 
                     Blank()
@@ -4266,10 +4267,23 @@ struct ProjectHome {
 
                       ForEach(msg.trustReceipt.claims, (claim: EvidenceClaim, claimIndex: number) => {
                         Column() {
-                          Text(`结论 ${claimIndex + 1} · ${claim.support === 'SUPPORTED' ? '依据充分' : claim.support === 'CONTESTED' ? '存在冲突' : '证据不足'}`)
+                          Text(`结论 ${claimIndex + 1} · ${claim.support === 'SUPPORTED' ? '引用可用 · 语义另行核验' : claim.support === 'CONTESTED' ? '存在冲突' : '证据不足'}`)
                             .fontSize(PMFontSize.CAPTION)
                             .fontWeight(FontWeight.Medium)
                             .fontColor(PMColors.INK_PRIMARY)
+                          if (claim.assessments !== undefined && claim.assessments !== null && claim.assessments.length > 0) {
+                            ForEach(claim.assessments, (assessment: EvidenceAssessment) => {
+                              Text(evidenceAssessmentText(assessment))
+                                .fontSize(PMFontSize.CAPTION)
+                                .fontColor(PMColors.INK_SECONDARY)
+                                .lineHeight(18)
+                              Text(`来源版本：${assessment.sourceRevision || '未提供'}`)
+                                .fontSize(PMFontSize.CAPTION)
+                                .fontColor(PMColors.INK_SECONDARY)
+                            }, (assessment: EvidenceAssessment) => assessment.sourceId)
+                          } else {
+                            Text('语义尚未核验').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
+                          }
                           Text(claim.text)
                             .fontSize(PMFontSize.CAPTION)
                             .fontColor(PMColors.INK_SECONDARY)

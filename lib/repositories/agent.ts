@@ -282,8 +282,8 @@ export async function saveAgentRun(input: {
   resultJson?: Record<string, unknown> | null;
   fallbackReason?: string | null;
   durationMs?: number;
-}) {
-  return db.agentRun.create({
+}, client: Prisma.TransactionClient = db) {
+  return client.agentRun.create({
     data: {
       projectId: input.projectId,
       runType: input.runType,

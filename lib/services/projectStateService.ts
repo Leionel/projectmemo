@@ -199,7 +199,11 @@ export async function getLatestProjectState(projectId: string): Promise<ProjectS
 export async function getProjectStateFreshness(projectId: string): Promise<ProjectStateFreshnessData> {
   ensureEnabled();
   const row = await db.projectStateFreshness.findUnique({ where: { projectId } });
-  if (row) return serializeFreshness(row);
+  const latest = await db.projectStateSnapshot.findFirst({ where: { projectId }, orderBy: { sequence: "desc" }, select: { payload: true, policyVersion: true } });
+  const payload = latest?.payload as unknown as ProjectStatePayload | undefined;
+  const expired = latest && (latest.policyVersion !== PROJECT_STATE_POLICY_VERSION ||
+    (payload?.nextInvalidationAt && new Date(payload.nextInvalidationAt).getTime() <= Date.now()));
+  if (row) return { ...serializeFreshness(row), ...(expired && row.status === "FRESH" ? { status: "STALE" as const } : {}) };
   const snapshot = await db.projectStateSnapshot.findFirst({
     where: { projectId },
     orderBy: { sequence: "desc" },
@@ -208,7 +212,7 @@ export async function getProjectStateFreshness(projectId: string): Promise<Proje
   return snapshot
     ? {
       projectId,
-      status: "FRESH",
+      status: expired ? "STALE" : "FRESH",
       snapshotId: snapshot.id,
       errorCode: null,
       errorMessage: null,
@@ -294,6 +298,7 @@ export async function refreshProjectState(projectId: string): Promise<RefreshRes
         if (
           latest &&
           latest.sourceHash === built.sourceHash &&
+          latest.contentHash === built.contentHash &&
           latest.policyVersion === PROJECT_STATE_POLICY_VERSION &&
           latest.evaluationKey === built.evaluationKey
         ) {

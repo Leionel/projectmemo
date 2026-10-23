@@ -11,6 +11,7 @@ import type {
   EvidenceTrustReceipt,
   ProposedAction,
 } from "@/lib/types";
+import { semanticLabel, temporalLabel } from "@/lib/evidence/assessment";
 import { emitWorkspaceChange } from "@/lib/client/workspaceEvents";
 
 type Message = {
@@ -24,7 +25,7 @@ type Message = {
 };
 
 const receiptMeta: Record<EvidenceSupportState, { label: string; className: string }> = {
-  SUPPORTED: { label: "依据充分", className: "border-emerald-300/60 bg-emerald-50 text-emerald-800 dark:border-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300" },
+  SUPPORTED: { label: "引用可用 · 语义另行核验", className: "border-emerald-300/60 bg-emerald-50 text-emerald-800 dark:border-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300" },
   CONTESTED: { label: "存在冲突", className: "border-amber-300/70 bg-amber-50 text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200" },
   INSUFFICIENT: { label: "证据不足", className: "border-rose-300/60 bg-rose-50 text-rose-800 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-300" },
 };
@@ -43,8 +44,13 @@ function Receipt({ receipt, citations }: { receipt: EvidenceTrustReceipt; citati
         {receipt.claims.map((claim, index) => <div key={`${claim.text}-${index}`} className="rounded-md bg-[var(--paper)] p-2.5">
           <p className="font-bold text-[var(--navy)]">结论 {index + 1} · {receiptMeta[claim.support].label}</p>
           <p className="mt-1">{claim.text}</p>
+          {!claim.assessments?.length && <p>语义尚未核验</p>}
+          {claim.assessments?.map((assessment, i) => <p key={`${assessment.sourceId}-${i}`}>
+            {assessment.citationAdmissibility === "ADMITTED" ? "引用可用" : "引用不可用"} · {temporalLabel(assessment.temporalState)} · {semanticLabel(assessment.semanticVerdict)} · {assessment.knowledgeClass === "PROJECT_OBSERVATION" ? "项目记录" : "参考资料"}
+            <span className="block break-all text-[var(--muted)]">来源版本：{assessment.sourceRevision || "未提供"} · {assessment.method === "JUDGE" ? "模型核验" : assessment.method === "RULE" ? "文本规则" : "尚未核验"}</span>
+          </p>)}
           <div className="mt-1.5 flex flex-wrap gap-1.5">
-            {claim.cardIds.map((cardId) => <a key={cardId} href={`#card-${cardId}`} className="focus-ring rounded bg-[var(--paper-strong)] px-2 py-0.5 font-bold text-[var(--teal-strong)]">当前卡片：{citationById.get(cardId)?.title ?? cardId}</a>)}
+            {claim.cardIds.map((cardId) => <a key={cardId} href={`#card-${cardId}`} className="focus-ring rounded bg-[var(--paper-strong)] px-2 py-0.5 font-bold text-[var(--teal-strong)]">引用记录：{citationById.get(cardId)?.title ?? cardId}</a>)}
             {claim.supersededCardIds.map((cardId) => <a key={cardId} href={`#card-${cardId}`} className="focus-ring rounded bg-amber-100 px-2 py-0.5 font-bold text-amber-900 dark:bg-amber-950/60 dark:text-amber-200">历史卡片：{citationById.get(cardId)?.title ?? cardId}</a>)}
             {claim.projectRefs?.map((ref) => <span key={`${ref.kind}-${ref.entityId}`} className="rounded bg-[var(--paper-strong)] px-2 py-0.5 font-bold text-[var(--teal-strong)]">{ref.label}：{ref.detail}</span>)}
             {claim.cardIds.length === 0 && claim.supersededCardIds.length === 0 && !claim.projectRefs?.length && <span className="font-semibold text-[var(--brick)]">没有可核验依据</span>}

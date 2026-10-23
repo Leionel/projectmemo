@@ -49,7 +49,17 @@ export interface MissionBlock { blockId: string; text: string; kind: string; sou
 export interface MissionContent { blocks: MissionBlock[]; }
 export interface MissionClaim { claimId?: string; blockId?: string; text?: string; status: string; mode?: string; }
 export interface MissionOutput { id: string; revision: number; contentJson: MissionContent; verificationStatus: string; claimChecksJson: MissionClaim[]; }
-export interface MissionError { code?: string; message?: string; }
+export interface MissionRecovery {
+  kind: string; automatic: boolean; message: string;
+  attempt?: number; maxAttempts?: number; nextAttemptAt?: string;
+}
+export interface MissionError { code?: string; message?: string; phase?: string; recovery?: MissionRecovery; }
+export interface MissionCompletionSummary {
+  criteriaPassed: boolean | null; criteriaCheckedAt: string | null;
+  draftVerification: string | null; adoptionCount: number; latestArtifactId: string | null;
+  realityOutcome: string;
+}
+export interface MissionCompletionFact { label: string; value: string; }
 export class Mission {
   id: string = ''; projectId: string = ''; goal: string = ''; status: string = '';
   version: number = 1; contextVersion: number = 1; planRevision: number = 1;
@@ -60,6 +70,7 @@ export class Mission {
   autoContinuationEnabled: boolean = false; artifactAdoptionEnabled: boolean = false;
   pauseRequestedAt: string | null = null; cancelRequestedAt: string | null = null;
   pauseReason: string | null = null; error: MissionError | null = null;
+  completion?: MissionCompletionSummary;
   question: MissionQuestion | null = null;
   steps: MissionStep[] = []; approvals: MissionApproval[] = []; outputs: MissionOutput[] = [];
 }

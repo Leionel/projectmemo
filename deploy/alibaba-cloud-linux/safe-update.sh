@@ -82,7 +82,7 @@ as_app git -C "$APP" diff --quiet -- . ':(exclude)next-env.d.ts'
 as_app git -C "$APP" diff --cached --quiet
 as_app git -C "$APP" fetch origin codex/r3-runtime-research
 as_app git -C "$APP" cat-file -e "$TARGET^{commit}"
-as_app git -C "$APP" merge-base --is-ancestor "$TARGET" origin/codex/r3-runtime-research
+as_app git -C "$APP" merge-base --is-ancestor "$TARGET" FETCH_HEAD
 PREVIOUS=$(as_app git -C "$APP" rev-parse HEAD)
 as_app git -C "$APP" merge-base --is-ancestor "$PREVIOUS" "$TARGET"
 if [[ "$PREVIOUS" == "$TARGET" ]]; then health "$TARGET"; echo '已经是目标版本'; exit 0; fi

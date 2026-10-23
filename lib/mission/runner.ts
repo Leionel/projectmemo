@@ -61,7 +61,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    step=await db.$transaction(async tx=>{
     const current=await fenced(tx,lease);
     await tx.agentMission.update({where:{id:m.id},data:{lastErrorJson:Prisma.DbNull}});
-    const run=await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"SUCCESS",provider:decision.provider,trace:json({missionId:m.id,phase:"DECISION",model:decision.model,protocol:decision.protocol,usage:decision.usage,contextManifest}),resultJson:json({kind:choice.kind}),durationMs:Date.now()-started}});
+    const run=await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"SUCCESS",provider:decision.provider,trace:json({missionId:m.id,phase:"DECISION",model:decision.model,protocol:decision.protocol,usage:decision.usage,serialization:decision.serialization,contextManifest}),resultJson:json({kind:choice.kind}),durationMs:Date.now()-started}});
     if(choice.kind==="ask"){
      phase="DECISION";const requirements=gapRequirementsSchema.parse(choice.requirements??{});const gapId=randomUUID();phase="COMMIT";
      const q=await event(tx,m.id,"QUESTION",{question:choice.question,missing:choice.missing,gapId,requirements,phase:"DECISION"});

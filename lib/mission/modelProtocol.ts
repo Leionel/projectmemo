@@ -98,7 +98,7 @@ export function decisionTokenLimit(lastError: unknown): 1000 | 2000 {
 const hints: Record<ProtocolReason, string> = {
   INVALID_RESPONSE: "返回一个包含单次决策的 JSON 对象。",
   EMPTY_CONTENT: "回复不能为空；返回一个完整 JSON 决策。",
-  INVALID_JSON: "只返回一个完整 JSON 对象，不附解释或 Markdown。",
+  INVALID_JSON: "只返回一个完整 JSON 对象；字符串中的换行和引号须JSON转义；不要附解释、Markdown或补写残缺片段。可用select_mission_step时通过它提交完整决策。",
   TRUNCATED: "上次回复超出长度限制。压缩草稿和摘要，减少内容块，返回完整 JSON；不要续写残缺回复。",
   INVALID_CHOICE: "严格按 responseSchema 返回一个决策，不增加字段。",
   INVALID_TOOL_ARGUMENTS: "按所选工具的 parameters 修正参数名称、类型和长度。",
@@ -116,6 +116,7 @@ const messages: Record<ProtocolReason, string> = {
   UNKNOWN_TOOL: "模型选择了未开放的工具，未执行新步骤",
 };
 export type ProtocolDiagnostic = {
+  json?: import("./decisionJson").JsonFailure;
   reason: ProtocolReason;
   repairHint: string;
   finishReason: "stop" | "length" | "tool_calls" | "content_filter" | "other" | null;

@@ -4,17 +4,18 @@ import { createHash, randomUUID } from "node:crypto";
 import { getChatProviderConfig, getChatProviderDefaults } from "../../lib/config/provider";
 import { EvaluationBudget, PRICE_SOURCE, PRICE_VERIFIED_AT } from "./budget";
 import { fixtureFetch, prepareEvaluationEnvironment } from "./environment";
+import { retryCandidate, archiveEvaluationReport, needsProtocolProbe } from "./retry";
 
-type Options = { live: boolean; fixture: boolean; confirmCost: boolean; maxRequests: number; maxCostCny: number; repeats: number; phase: "protocol" | "all" };
+type Options = { live: boolean; fixture: boolean; confirmCost: boolean; retryFailed: boolean; maxRequests: number; maxCostCny: number; repeats: number; phase: "protocol" | "all" };
 export function parseEvaluationOptions(argv: string[], phase: "protocol" | "all"): Options {
-  const flags = new Set(["--live", "--fixture", "--confirm-cost"]), values = new Set(["--max-requests", "--max-cost-cny", "--repeats"]);
+  const flags = new Set(["--live", "--fixture", "--confirm-cost", "--retry-failed"]), values = new Set(["--max-requests", "--max-cost-cny", "--repeats"]);
   for (let i = 0; i < argv.length; i++) {
     if (flags.has(argv[i])) continue;
     if (values.has(argv[i]) && argv[i + 1]) { i++; continue; }
     throw new Error("UNKNOWN_EVALUATION_ARGUMENT");
   }
   const value = (key: string, fallback: number) => argv.includes(key) ? Number(argv[argv.indexOf(key) + 1]) : fallback;
-  const options = { live: argv.includes("--live"), fixture: argv.includes("--fixture"), confirmCost: argv.includes("--confirm-cost"),
+  const options = { live: argv.includes("--live"), fixture: argv.includes("--fixture"), confirmCost: argv.includes("--confirm-cost"), retryFailed: argv.includes("--retry-failed"),
     maxRequests: value("--max-requests", 60), maxCostCny: value("--max-cost-cny", 10), repeats: value("--repeats", 3), phase };
   if (options.live && options.fixture || options.live && !options.confirmCost || !Number.isInteger(options.repeats) || options.repeats < 1 || options.repeats > 3)
     throw new Error("INVALID_EVALUATION_AUTHORIZATION");
@@ -44,13 +45,18 @@ export async function runEvaluation(options: Options) {
   const report = { schemaVersion: 1, mode: options.live ? "REAL_MODEL_SYNTHETIC_DATA" : "FIXTURE_HTTP_SYNTHETIC_DATA",
     sourceVersions: {} as Record<string, string>,
     taskSet: "p0-a-internal-continuation-v1", runId: budget.summary().runId,
-    protocol: process.env.MISSION_MODEL_PROTOCOL === "native" ? "native" : "json", attempts: [] as Array<Record<string, unknown>>, budget: {} };
+    protocol: process.env.MISSION_MODEL_PROTOCOL === "native" ? "native" : "json", revision: "", archives: [] as Array<{archive:string;sha256:string;runId?:string}>, attempts: [] as Array<Record<string, unknown>>, budget: {} };
   let disconnect: (() => Promise<void>) | undefined;
   try {
-  report.sourceVersions = Object.fromEntries(await Promise.all(["lib/mission/runner.ts", "lib/mission/modelAdapter.ts", "lib/mission/contextBuilder.ts", "lib/mission/tools.ts", "lib/mission/memorySearch.ts", "lib/mission/modelProtocol.ts", "lib/mission/continuationService.ts", "prisma/schema.prisma"].map(async file => [file, createHash("sha256").update(await readFile(path.join(process.cwd(), file))).digest("hex")])));
+  report.sourceVersions = Object.fromEntries(await Promise.all(["lib/mission/runner.ts", "lib/mission/modelAdapter.ts", "lib/mission/decisionJson.ts", "lib/mission/claimVerifier.ts", "lib/mission/claimSegments.ts", "lib/mission/contextBuilder.ts", "lib/mission/tools.ts", "lib/mission/memorySearch.ts", "lib/mission/modelProtocol.ts", "lib/mission/continuationService.ts", "scripts/mission-evaluation/run.ts", "scripts/mission-evaluation/retry.ts", "scripts/mission-evaluation/budget.ts", "prisma/schema.prisma"].map(async file => [file, createHash("sha256").update(await readFile(path.join(process.cwd(), file))).digest("hex")])));
+  report.revision = createHash("sha256").update(JSON.stringify(report.sourceVersions)).digest("hex");
   try {
     const prior = JSON.parse(await readFile(reportPath, "utf8"));
-    if (prior.runId === report.runId && Array.isArray(prior.attempts)) report.attempts = prior.attempts.map((attempt: Record<string, unknown>) => attempt.status === "STARTED" ? { ...attempt, status: "ABORTED_UNKNOWN", code: "PRIOR_PROCESS_INTERRUPTED" } : attempt);
+    if (prior.runId !== report.runId || !Array.isArray(prior.attempts)) throw new Error("EVALUATION_REPORT_LEDGER_MISMATCH");
+    report.archives = [...(prior.archives ?? []), await archiveEvaluationReport(reportPath, prior)];
+    const previousRevision = prior.revision ?? createHash("sha256").update(JSON.stringify(prior.sourceVersions ?? {})).digest("hex");
+    report.attempts = prior.attempts.map((attempt: Record<string, unknown>) => ({ ...attempt, revision: attempt.revision ?? previousRevision,
+      ...(attempt.status === "STARTED" ? { status: "ABORTED_UNKNOWN", code: "PRIOR_PROCESS_INTERRUPTED" } : {}) }));
   } catch (error) { if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error; }
   const { db } = await import("../../lib/db");
   disconnect = () => db.$disconnect();
@@ -72,21 +78,22 @@ export async function runEvaluation(options: Options) {
       return { owner, project };
     };
     const runSlice = async (id: string, tools = projectTools) => { if (!await runMissionSlice({ id, tools })) throw new Error("MISSION_NOT_CLAIMED"); };
-    if (!report.attempts.some(attempt => attempt.kind === "protocol")) {
-      budget.setScope("protocol");
+    if (needsProtocolProbe(report.attempts, report.revision, options.retryFailed)) {
+      const protocolScope = "protocol-" + report.revision.slice(0, 12);
+      budget.setScope(protocolScope);
       const data = await fixture("协议往返探针：先读取项目，再根据实际观察检索本项目记录；只读取，不写业务、不研究外网。");
       const mission = await createMission(data.owner.id, { projectId: data.project.id, requestId: randomUUID(), goal: data.project.goal, llmContextApproved: true });
-      const attempt: Record<string, unknown> = { kind: "protocol", missionId: mission.id, status: "STARTED", datasetOrigin: "SYNTHETIC" };
+      const attempt: Record<string, unknown> = { kind: "protocol", missionId: mission.id, status: "STARTED", revision: report.revision, datasetOrigin: "SYNTHETIC" };
       report.attempts.push(attempt); await save();
       try {
         const reads = { inspect_project: projectTools.inspect_project, search_memory: projectTools.search_memory };
         for (let slice = 0; slice < 3; slice++) {
           await runSlice(mission.id, reads);
           const state = await missionDetail(data.owner.id, mission.id);
-          if (budget.entries().some(entry => entry.scope === "protocol" && entry.hasObservation)) break;
+          if (budget.entries().some(entry => entry.scope === protocolScope && entry.hasObservation)) break;
           if (state.status !== "READY") throw new Error("PROTOCOL_STOPPED_" + state.status);
         }
-        const entries = budget.entries().filter(entry => entry.scope === "protocol"), state = await missionDetail(data.owner.id, mission.id);
+        const entries = budget.entries().filter(entry => entry.scope === protocolScope), state = await missionDetail(data.owner.id, mission.id);
         const runs = await db.agentRun.count({ where: { projectId: data.project.id, status: "SUCCESS" } });
         if (!state.steps.some(step => step.status === "SUCCEEDED") || runs < 2 || !entries.some(entry => entry.hasObservation)) throw new Error("ROUND_TRIP_NOT_VERIFIED");
         Object.assign(attempt, { status: "PASSED", actualReadTool: state.steps[0]?.toolName, modelRequests: entries.length, observationReturned: true, taskSuccessInferred: false });
@@ -94,18 +101,31 @@ export async function runEvaluation(options: Options) {
       } catch (error) { Object.assign(attempt, { status: "FAILED", code: safeCode(error) }); }
       await save();
     }
-    if (options.phase === "all" && report.attempts.some(attempt => attempt.kind === "protocol" && attempt.status === "PASSED")) {
+    if (options.phase === "all" && report.attempts.filter(attempt => attempt.kind === "protocol").at(-1)?.status === "PASSED") {
       for (let repeat = 1; repeat <= options.repeats; repeat++) {
-        if (report.attempts.some(attempt => attempt.repeat === repeat)) continue;
-        budget.setScope("continuation-" + repeat);
-        const data = await fixture("根据本项目材料准备阶段汇报草稿，包含已完成事项、风险和下一步。先核对已有记录；缺少复赛验证准确率时向用户询问，不能猜测。补充记录后继续本委托，保存带准确来源引用的简明草稿，最后满足验收条件。不要外部研究，不创建行动。");
-        const mission = await createMission(data.owner.id, { projectId: data.project.id, requestId: randomUUID(), goal: data.project.goal,
+        const candidate = retryCandidate(report.attempts, repeat, report.revision, options.retryFailed);
+        if (!candidate.run) continue;
+        const previous = candidate.previous;
+        budget.setScope("continuation-" + repeat + (previous ? "-retry-" + report.revision.slice(0, 12) : ""));
+        const data = previous ? await (async () => {
+          const row = await db.agentMission.findUniqueOrThrow({ where: { id: String(previous.missionId) }, include: { owner: true, project: true } });
+          if (row.projectId !== previous.projectId || !row.owner.username.startsWith("p0a-") || row.project.description !== "SYNTHETIC；不是真实用户实验") throw new Error("RETRY_NOT_SYNTHETIC_EVALUATION");
+          return { owner: row.owner, project: row.project };
+        })() : await fixture("根据本项目材料准备阶段汇报草稿，包含已完成事项、风险和下一步。先核对已有记录；缺少复赛验证准确率时向用户询问，不能猜测。补充记录后继续本委托，保存带准确来源引用的简明草稿，最后满足验收条件。不要外部研究，不创建行动。");
+        const mission = previous ? await db.agentMission.findUniqueOrThrow({ where: { id: String(previous.missionId) } }) : await createMission(data.owner.id, { projectId: data.project.id, requestId: randomUUID(), goal: data.project.goal,
           successCriteria: ["DRAFT_EXISTS", "REQUIRED_INPUT_PRESENT", { type: "SOURCE_COUNT", minimum: 1 }], llmContextApproved: true });
         const attempt: Record<string, unknown> = { kind: "continuation", repeat, missionId: mission.id, projectId: data.project.id,
-          status: "STARTED", datasetOrigin: "SYNTHETIC", humanInputMode: "PREDECLARED_EVALUATION_RESPONSE" };
+          status: "STARTED", revision: report.revision, retryOf: previous ? { missionId: previous.missionId, revision: previous.revision ?? "BASELINE", status: previous.status } : null,
+          ...(previous?.inputSourceId ? { inputSourceId: previous.inputSourceId, questionId: previous.questionId } : {}),
+          datasetOrigin: "SYNTHETIC", humanInputMode: "PREDECLARED_EVALUATION_RESPONSE" };
         report.attempts.push(attempt); await save();
         try {
-          let supplied = false;
+          let supplied = !!previous?.inputSourceId;
+          if (previous) {
+            const state = await missionDetail(data.owner.id, mission.id);
+            if (state.status !== "PAUSED" || (state.error as {code?:string})?.code !== "MODEL_PROTOCOL_ERROR") throw new Error("RETRY_REQUIRES_PAUSED_PROTOCOL_FAILURE");
+            await commandMission(data.owner.id, mission.id, "resume", { requestId: randomUUID(), expectedVersion: state.version });
+          }
           for (let slice = 0; slice < 18; slice++) {
             let state = await missionDetail(data.owner.id, mission.id);
             if (state.status === "WAITING_INPUT") {
@@ -144,10 +164,22 @@ export async function runEvaluation(options: Options) {
           const state = await missionDetail(data.owner.id, mission.id);
           Object.assign(attempt, { status: "FAILED", code: safeCode(error), missionStatus: state.status, error: state.error, outputCount: state.outputs.length });
         }
+        const decisions = await db.agentRun.findMany({ where: { projectId: data.project.id, runType: "CHAT" }, orderBy: { createdAt: "asc" }, take: 40 });
+        attempt.modelDecisions = decisions.map(run => {
+          const trace = run.trace as Record<string, unknown> | null;
+          return { id: run.id, status: run.status, provider: run.provider, model: trace?.model, protocol: trace?.protocol,
+            diagnostic: trace?.diagnostic, serialization: trace?.serialization, usage: trace?.usage };
+        });
         await save();
         if (budget.summary().requestsStarted >= options.maxRequests) break;
       }
     }
-    await save(); return { ...report, evidenceDirectory: environment.directory, humanReviewRequired: true, realProjectOutcomeVerified: false };
+    const latest = Array.from({length: options.repeats}, (_, index) => report.attempts.filter(attempt => attempt.kind === "continuation" && attempt.repeat === index + 1).at(-1));
+    const failedLatest = latest.some(attempt => !attempt || ["FAILED", "STARTED", "ABORTED_UNKNOWN"].includes(String(attempt.status)));
+    await save(); return { ...report, latestTrials: latest.filter(Boolean).map(a => ({ repeat: a!.repeat, missionId: a!.missionId, status: a!.status,
+      revision: a!.revision, retainedFromEarlierRevision: a!.revision !== report.revision })),
+      historicalFailureCount: report.attempts.filter(a => a.status === "FAILED").length,
+      failedLatest: (options.phase === "all" && failedLatest) || report.attempts.filter(a => a.kind === "protocol").at(-1)?.status !== "PASSED",
+      evidenceDirectory: environment.directory, humanReviewRequired: true, realProjectOutcomeVerified: false };
   } finally { globalThis.fetch = originalFetch; try { await disconnect?.(); } finally { await budget.close(); } }
 }

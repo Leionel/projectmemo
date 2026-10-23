@@ -1,3 +1,4 @@
+import { segmentClaims, claimNumbers as numbers } from "./claimSegments";
 import { ruleVerdict } from "@/lib/evidence/semanticRules";
 import {z} from "zod";
 import {jsonHash,type Source} from "./contracts";
@@ -8,22 +9,19 @@ export type ClaimVerdict=z.infer<typeof verdictSchema>|"NOT_CHECKED";
 export type JudgeRequest={claimId:string;text:string;kind:string;evidence:Array<{sourceId:string;kind:string;knowledgeClass?:string;text:string;context:string;hash:string;fullSource:boolean}>};
 export type JudgeResult={verdict:z.infer<typeof verdictSchema>;provider:string;model:string;usage:{inputTokens:number|null;outputTokens:number|null}};
 export type ClaimJudge=(request:JudgeRequest)=>Promise<JudgeResult>;
-export type ClaimCheck={schemaVersion:1;verifierVersion:"r33-v1";claimId:string;blockId:string;text:string;claimStart:number;claimEnd:number;claimHash:string;status:ClaimVerdict;mode:"OFF"|"RULE"|"JUDGE";structuralCheck:"VALID"|"MISSING_EVIDENCE";reasonCode:string;sourceRefs:Array<{id:string;hash:string;start:number;end:number;excerptHash:string}>;provider?:string;model?:string;checkedAt:string};
+export type ClaimCheck={schemaVersion:1;verifierVersion:"r33-v2";claimId:string;blockId:string;text:string;claimStart:number;claimEnd:number;claimHash:string;status:ClaimVerdict;mode:"OFF"|"RULE"|"JUDGE";structuralCheck:"VALID"|"MISSING_EVIDENCE";reasonCode:string;sourceRefs:Array<{id:string;hash:string;start:number;end:number;excerptHash:string}>;provider?:string;model?:string;checkedAt:string};
 const normalize=(s:string)=>s.normalize("NFKC").trim().replace(/\s+/g," ");
-const numberPattern=/[-+]?\d+(?:\.\d+)?/g;
-const numbers=(s:string)=>s.match(numberPattern)??[];
 /** Structural validity and textual entailment are separate; inferred claims never inherit an exact-quote pass. */
 export async function verifyResearchClaims(input:unknown,sources:Source[],options:{enabled:boolean;judge?:ClaimJudge;maxJudgeCalls?:number}):Promise<ClaimCheck[]>{
  const body=outputSchema.parse(input),checks:ClaimCheck[]=[];let calls=0;
- const segmenter=new Intl.Segmenter("zh",{granularity:"sentence"});
  const claims=body.blocks.flatMap(block=>{
-  const segments=[...segmenter.segment(block.text)];
-  return segments.slice(0,9).map((segment,index)=>{const start=segment.index,end=index===8?block.text.length:segment.index+segment.segment.length;return{...block,text:block.text.slice(start,end),claimId:`${block.blockId}:${start}`,claimStart:start,claimEnd:end,merged:index===8};});
+  const segments=segmentClaims(block.text);
+  return segments.slice(0,9).map((segment,index)=>{const start=segment.start,end=index===8&&segments.length>9?block.text.length:segment.end;return{...block,text:block.text.slice(start,end),claimId:`${block.blockId}:${start}`,claimStart:start,claimEnd:end,merged:index===8&&segments.length>9};});
  });
  for(const block of claims){
   const refs=block.citations.map(c=>({id:c.sourceId,hash:sources.find(s=>s.id===c.sourceId)?.hash??"",start:c.start,end:c.end,excerptHash:c.excerptHash}));
   const evidence=block.citations.flatMap(c=>{const s=sources.find(s=>s.id===c.sourceId);if(!s||!block.sourceIds.includes(s.id)||c.start<0||c.end>s.text.length||c.start>=c.end||textHash(s.text.slice(c.start,c.end))!==c.excerptHash)return[];return[{sourceId:s.id,kind:s.kind,knowledgeClass:s.knowledgeClass,text:s.text.slice(c.start,c.end),context:s.text.slice(Math.max(0,c.start-200),Math.min(s.text.length,c.end+200)),hash:s.hash,fullSource:c.start===0&&c.end===s.text.length}];});
-  const check:ClaimCheck={schemaVersion:1,verifierVersion:"r33-v1",claimId:block.claimId,blockId:block.blockId,text:block.text,claimStart:block.claimStart,claimEnd:block.claimEnd,claimHash:jsonHash(block.text),status:"NOT_CHECKED",mode:options.enabled?"RULE":"OFF",structuralCheck:evidence.length&&evidence.length===block.citations.length?"VALID":"MISSING_EVIDENCE",reasonCode:options.enabled?"NO_SEMANTIC_CHECK":"FEATURE_DISABLED",sourceRefs:refs,checkedAt:new Date().toISOString()};
+  const check:ClaimCheck={schemaVersion:1,verifierVersion:"r33-v2",claimId:block.claimId,blockId:block.blockId,text:block.text,claimStart:block.claimStart,claimEnd:block.claimEnd,claimHash:jsonHash(block.text),status:"NOT_CHECKED",mode:options.enabled?"RULE":"OFF",structuralCheck:evidence.length&&evidence.length===block.citations.length?"VALID":"MISSING_EVIDENCE",reasonCode:options.enabled?"NO_SEMANTIC_CHECK":"FEATURE_DISABLED",sourceRefs:refs,checkedAt:new Date().toISOString()};
   if(!options.enabled){checks.push(check);continue;}
   if(block.merged){checks.push({...check,reasonCode:"CLAIM_LIMIT"});continue;}
   if(block.kind==="PROJECT_OBSERVATION"&&evidence.some(e=>e.kind==="EXTERNAL"||e.knowledgeClass&&e.knowledgeClass!=="PROJECT_OBSERVATION")){checks.push({...check,status:"CONTRADICTS",reasonCode:"ORIGIN_MISMATCH"});continue;}

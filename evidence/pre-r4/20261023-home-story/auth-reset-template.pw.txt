@@ -1,0 +1,35 @@
+async (page) => {
+ const checks=[];const ok=(v,n)=>{if(!v)throw new Error(n);checks.push(n);};
+ await page.goto('http://127.0.0.1:33324/reset-password?token=RESET_TOKEN');
+ await page.getByLabel('新密码',{exact:true}).fill('browser-new-password-2026');
+ await page.getByLabel('确认密码',{exact:true}).fill('browser-new-password-2026');
+ await page.getByRole('button',{name:'保存新密码',exact:true}).click();
+ await page.getByRole('heading',{name:'操作已完成',exact:true}).waitFor();
+ ok(true,'password reset completed via real backend with local TLS mail token');
+ await page.goto('http://127.0.0.1:33324/reset-password?token=RESET_TOKEN');
+ await page.getByLabel('新密码',{exact:true}).fill('browser-new-password-2026');
+ await page.getByLabel('确认密码',{exact:true}).fill('browser-new-password-2026');
+ await page.getByRole('button',{name:'保存新密码',exact:true}).click();
+ await page.locator('#auth-error').waitFor();
+ ok((await page.locator('#auth-error').innerText()).includes('已使用'),'reset token replay denied');
+ await page.goto('http://127.0.0.1:33324/login');
+ await page.getByLabel('账号',{exact:true}).fill('browser-acceptance-20261023');
+ await page.getByLabel('密码',{exact:true}).fill('browser-new-password-2026');
+ await page.getByRole('button',{name:'登录工作台',exact:true}).click();
+ await page.waitForURL('**/focus');
+ ok(true,'new password logs in through existing session system');
+ await page.request.post('http://127.0.0.1:33324/api/auth/logout');
+ await page.goto('http://127.0.0.1:33324/login');
+ await page.getByRole('heading',{name:'登录忆程',exact:true}).waitFor();
+ await page.evaluate(()=>document.fonts.ready);
+ await page.setViewportSize({width:390,height:844});
+ await page.screenshot({path:'evidence/pre-r4/20261023-home-story/after-login-mobile.png',fullPage:true});
+ for(const path of ['login','register','forgot-password','resend-verification']) {
+  await page.goto('http://127.0.0.1:33324/'+path);await page.getByRole('heading',{level:1}).waitFor();
+  await page.setViewportSize({width:320,height:844});
+  await page.evaluate(()=>document.documentElement.style.fontSize='125%');
+  ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'320px large font auth layout: '+path);
+  await page.evaluate(()=>document.documentElement.style.fontSize='');
+ }
+ return {checks,source:'isolated E2E database; no real credentials or users'};
+}

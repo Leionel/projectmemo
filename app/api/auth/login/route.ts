@@ -43,6 +43,12 @@ export async function POST(request: Request) {
       throw new AppError("AUTH_FAILED", "账号或密码错误", 401);
     }
 
+    const security = await db.accountSecurity.findUnique({ where: { userId: user.id } });
+    if (security && !security.emailVerifiedAt) {
+      recordLoginFailure(rateLimitKey);
+      throw new AppError("EMAIL_NOT_VERIFIED", "请先验证注册邮箱；未收到邮件可以重新发送", 403);
+    }
+
     clearLoginFailure(rateLimitKey);
 
     // 创建会话

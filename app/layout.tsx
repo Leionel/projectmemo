@@ -8,6 +8,7 @@ import { GlobalSettings } from "@/components/GlobalSettings";
 import { GlobalNavigation } from "@/components/GlobalNavigation";
 import { UserNav } from "@/components/UserNav";
 import { SiteHeader } from "@/components/SiteHeader";
+import { accountMailConfiguration } from "@/lib/auth/mail";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -27,7 +28,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           disableTransitionOnChange
         >
           <a href="#main-content" className="skip-link">跳到主要内容</a>
-          <SiteHeader><header className="sticky top-0 z-40 border-b border-[var(--rule)] bg-[var(--header-bg)] backdrop-blur-xl transition-colors duration-400">
+          <SiteHeader registrationEnabled={Boolean(accountMailConfiguration())}><header className="sticky top-0 z-40 border-b border-[var(--rule)] bg-[var(--header-bg)] backdrop-blur-xl transition-colors duration-400">
             <div className="shell flex h-14 items-center justify-between">
               <Link href="/" className="focus-ring flex items-center gap-2.5 rounded-xl font-bold tracking-tight text-[var(--ink)]">
                 <Image src="/logo.png" alt="忆程 ProjectMemo 标志" width={36} height={36} className="h-7 w-7 shrink-0 rounded-md object-cover shadow-[var(--shadow-sm)]" />

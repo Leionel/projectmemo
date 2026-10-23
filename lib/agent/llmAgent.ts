@@ -1,3 +1,4 @@
+import { reserveCloudCall } from "@/lib/auth/cloudQuota";
 import { buildArtifactPrompt, buildCapturePrompt } from "@/lib/agent/prompts";
 import { getChatProviderConfig } from "@/lib/config/provider";
 import { knowledgeCardDraftSchema } from "@/lib/validation/schemas";
@@ -9,10 +10,12 @@ function config() {
   return getChatProviderConfig();
 }
 
-export async function chatWithLLMWithMeta(prompt: string): Promise<AgentExecutionResult<string>> {
+export async function chatWithLLMWithMeta(prompt: string, projectId?: string): Promise<AgentExecutionResult<string>> {
   const startedAt = Date.now();
   const { provider, baseUrl, apiKey, model, timeoutMs } = config();
+  await reserveCloudCall(projectId);
   const requestBody: Record<string, unknown> = {
+    max_tokens: 2048,
     model,
     temperature: 0.2,
     messages: [{ role: "user", content: prompt }],
@@ -43,41 +46,41 @@ export async function chatWithLLMWithMeta(prompt: string): Promise<AgentExecutio
   };
 }
 
-export async function chatWithLLM(prompt: string) {
-  return (await chatWithLLMWithMeta(prompt)).data;
+export async function chatWithLLM(prompt: string, projectId?: string) {
+  return (await chatWithLLMWithMeta(prompt, projectId)).data;
 }
 
 export async function structureWithLLM(input: {
-  project: { title: string; description: string; goal: string };
+  project: { id?: string; title: string; description: string; goal: string };
   rawText: string;
   historyKeywords: string[];
 }) {
-  const content = await chatWithLLM(buildCapturePrompt(input));
+  const content = await chatWithLLM(buildCapturePrompt(input), input.project.id);
   return knowledgeCardDraftSchema.parse(JSON.parse(content));
 }
 
 export async function generateArtifactWithLLM(input: {
-  project: { title: string; goal: string };
+  project: { id?: string; title: string; goal: string };
   artifactType: ArtifactTypeValue;
   cards: CardDraft[];
 }) {
-  return chatWithLLM(buildArtifactPrompt(input));
+  return chatWithLLM(buildArtifactPrompt(input), input.project.id);
 }
 
 export async function generateArtifactWithLLMWithMeta(input: {
-  project: { title: string; goal: string };
+  project: { id?: string; title: string; goal: string };
   artifactType: ArtifactTypeValue;
   cards: CardDraft[];
 }) {
-  return chatWithLLMWithMeta(buildArtifactPrompt(input));
+  return chatWithLLMWithMeta(buildArtifactPrompt(input), input.project.id);
 }
 
-export async function chatJson<T>(prompt: string, parse: (value: unknown) => T) {
-  return (await chatJsonWithMeta(prompt, parse)).data;
+export async function chatJson<T>(prompt: string, parse: (value: unknown) => T, projectId?: string) {
+  return (await chatJsonWithMeta(prompt, parse, projectId)).data;
 }
 
-export async function chatJsonWithMeta<T>(prompt: string, parse: (value: unknown) => T) {
-  const result = await chatWithLLMWithMeta(prompt);
+export async function chatJsonWithMeta<T>(prompt: string, parse: (value: unknown) => T, projectId?: string) {
+  const result = await chatWithLLMWithMeta(prompt, projectId);
   return {
     ...result,
     data: parse(JSON.parse(result.data)),

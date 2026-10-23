@@ -1,3 +1,4 @@
+import { reserveCloudCall } from "@/lib/auth/cloudQuota";
 import { db } from "@/lib/db";
 import {
   computeFileSha256,
@@ -63,7 +64,7 @@ const VISION_MAX_BYTES = 5 * 1024 * 1024;
  * 未配置视觉 provider 时返回 null（调用方记为 NEEDS_OCR）；
  * 已配置但调用失败时抛出，调用方记为 FAILED 并保留真实原因。
  */
-async function extractImageText(mimeType: string, buffer: Buffer): Promise<string | null> {
+async function extractImageText(mimeType: string, buffer: Buffer, projectId: string): Promise<string | null> {
   const config = getVisionProviderConfig();
   if (!config) {
     return null;
@@ -79,11 +80,13 @@ async function extractImageText(mimeType: string, buffer: Buffer): Promise<strin
     const base64 = buffer.toString("base64");
     const dataUri = `data:${mimeType};base64,${base64}`;
 
+    await reserveCloudCall(projectId);
     const response = await fetch(`${baseUrl}/chat/completions`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
         model,
+        max_tokens: 1000,
         messages: [
           {
             role: "user",
@@ -186,7 +189,7 @@ export async function processAttachmentUpload(input: UploadAttachmentInput) {
     if (fileType === "PDF") {
       extractedText = await extractPdfText(buffer) ?? "";
     } else {
-      extractedText = await extractImageText(mimeType, buffer) ?? "";
+      extractedText = await extractImageText(mimeType, buffer, projectId) ?? "";
     }
     if (!extractedText) {
       extractionStatus = "NEEDS_OCR";
@@ -285,7 +288,7 @@ export async function retryAttachmentExtraction(projectId: string, attachmentId:
   try {
     extractedText = fileType === "PDF"
       ? await extractPdfText(buffer)
-      : await extractImageText(attachment.mimeType, buffer);
+      : await extractImageText(attachment.mimeType, buffer, projectId);
   } catch (error) {
     const failed = await db.attachment.update({
       where: { id: attachment.id },

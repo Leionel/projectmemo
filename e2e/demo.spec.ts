@@ -35,7 +35,7 @@ test("accepts a proactive reminder and asks the memory copilot", async ({ page }
 
 test("seed project completes the core demo loop", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByText("忆程，你的个人项目 Agent", { exact: true })).toBeVisible();
+  await expect(page.getByText("面向大学生的个人项目 Agent", { exact: true })).toBeVisible();
   await page.getByRole("link", { name: "回到我的工作台", exact: true }).first().click();
   await expect(page).toHaveURL(/\/focus$/);
   await page.getByRole("link", { name: "查看项目", exact: true }).click();

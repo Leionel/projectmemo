@@ -23,3 +23,28 @@ export class MeResponse {
   user: UserInfo = new UserInfo();
   projects: Project[] = [];
 }
+
+export class AccountCapabilities {
+  registrationEnabled: boolean = false;
+  passwordResetEnabled: boolean = false;
+}
+
+export class RegisterInput {
+  username: string = '';
+  email: string = '';
+  password: string = '';
+  confirmPassword: string = '';
+}
+
+export class AccountEmailInput {
+  email: string = '';
+}
+
+export class AccountMessage {
+  message: string = '';
+}
+
+export class RegisterResponse {
+  verificationRequired: boolean = true;
+  message: string = '';
+}

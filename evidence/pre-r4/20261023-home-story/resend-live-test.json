@@ -1,0 +1,11 @@
+{
+  "provider": "Resend HTTPS API",
+  "sender": "no-reply@mail.luojiatutor.xyz",
+  "recipient": "84***@qq.com",
+  "purpose": "one neutral integration test email; no account mutation",
+  "providerAccepted": true,
+  "recipientConfirmedReceived": true,
+  "confirmationSource": "user response in this conversation on 2026-10-23",
+  "secretHandling": "child-process environment only; not saved to workspace or evidence",
+  "productionDeployment": "not performed"
+}

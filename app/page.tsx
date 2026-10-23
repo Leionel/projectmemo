@@ -1,110 +1,271 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowDown, ArrowRight, BookOpen, Check, ChevronRight, FileText, Fingerprint, Laptop, Smartphone, GitBranch, Waypoints } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowRight,
+  ChevronRight,
+  FileText,
+  Laptop,
+  Smartphone,
+} from "lucide-react";
 import { getSessionUser } from "@/lib/auth/serverSession";
 import { HomeJourney } from "@/components/HomeJourney";
-import { HomeMotion } from "@/components/HomeMotion";
 import styles from "./home.module.css";
 
 export const metadata: Metadata = {
-  title: "忆程 ProjectMemo｜你的个人项目 Agent",
-  description: "为大学生的竞赛、科研与课程项目，留住过程、找回依据、看清变化、接续行动。忆程是你的个人项目 Agent。",
+  title: "忆程 ProjectMemo｜个人项目 Agent",
+  description:
+    "把竞赛、科研与课程项目的记录、来源和行动放在一起。查看已有进展与判断依据，确认下一步，并留下完成回执。",
 };
-
-const moments = [
-  { scene: "竞赛备赛", title: "从灵感到答辩，每一步都有来路。", text: "把讨论、材料要求和实验结果留在项目里。准备汇报时，沿着来源找回做过的工作。", detail: "参赛要求 → 项目进展 → 汇报草稿" },
-  { scene: "科研训练", title: "实验做过很多轮，经验还能接着用。", text: "保留实验记录与方案变化。再看一个结论时，知道它来自哪里，哪些依据还需要补齐。", detail: "论文笔记 → 实验记录 → 阶段复盘" },
-  { scene: "课程设计", title: "交付作品，也留下自己的成长。", text: "串起需求、问题与解决过程，把行动结果沉淀为项目记忆，整理出属于你的项目总结。", detail: "任务拆解 → 行动回执 → 项目总结" },
-];
 
 export default async function Home() {
   const user = await getSessionUser();
-  const startHref = user ? "/focus" : "/login?from=%2Ffocus";
+  const workspaceHref = user ? "/focus" : "/login?from=%2Ffocus";
+  const workspaceLabel = user ? "回到我的工作台" : "进入工作台";
   return (
     <main id="main-content" className={styles.home}>
-      <HomeMotion>
       <section className={styles.hero} aria-labelledby="home-heading">
         <div className={styles.heroCopy}>
-          <p className={styles.eyebrow}><span /> 忆程，你的个人项目 Agent</p>
-          <h1 id="home-heading"><span className={styles.headlineChinese}>你的个人项目</span><span className={styles.agentWord}>Agent<span>。</span></span></h1>
-          <p className={styles.lead}>记得来路，接得上下一步。</p>
-          <p className={styles.intro}>离开项目一阵子，再回来，也知道自己做到了哪、接下来该做什么。从一条笔记、一次实验到一份成果，让自己的积累持续向前。</p>
+          <p className={styles.positioning}>面向大学生的个人项目 Agent</p>
+          <h1 id="home-heading">
+            项目隔了几天，
+            <br />
+            <span>再打开也接得上。</span>
+          </h1>
+          <p className={styles.heroDescription}>
+            会议记录、实验结果、方案调整，都留在项目里。先看上次的进展与判断依据，再决定下一步。
+          </p>
           <div className={styles.heroActions}>
-            <Link href={startHref} className={styles.primary}>{user ? "回到我的工作台" : "开始我的项目"}<ArrowRight size={18} /></Link>
-            <a href="#experience" className={styles.textLink}>看看忆程怎么帮你<ArrowDown size={16} /></a>
+            <a className={styles.primary} href="#experience">
+              体验项目接续
+              <ArrowDown size={16} aria-hidden="true" />
+            </a>
+            <Link className={styles.secondary} href={workspaceHref}>
+              {workspaceLabel}
+              <ArrowRight size={16} aria-hidden="true" />
+            </Link>
           </div>
-          <div className={styles.audience}><span>为大学生的长期项目而做</span><span>竞赛 · 科研 · 课程设计</span></div>
+          <p className={styles.heroNote}>
+            下方示例无需登录。个人项目在工作台中管理。
+          </p>
         </div>
+        <figure className={styles.heroProduct}>
+          <div className={styles.imageToolbar}>
+            <span>忆程工作区</span>
+            <span>内置示例项目</span>
+          </div>
+          <picture>
+            <source
+              media="(max-width: 700px)"
+              srcSet="/home/workspace-mobile.jpg"
+            />
+            <Image
+              src="/home/workspace-desktop.jpg"
+              alt="忆程实际工作区：项目风险状态、记录依据与下一步入口"
+              width={1280}
+              height={760}
+              sizes="(max-width: 700px) 100vw, 1040px"
+              priority
+              unoptimized
+            />
+          </picture>
+          <figcaption>实际工作区界面，使用内置示例数据。</figcaption>
+        </figure>
+      </section>
+
+      <section
+        id="experience"
+        className={styles.storySection}
+        aria-labelledby="story-heading"
+      >
+        <header className={styles.sectionHeading}>
+          <div>
+            <p className={styles.sectionLabel}>先用一段项目经历试试看</p>
+            <h2 id="story-heading">
+              准备参赛作品，
+              <br className={styles.mobileBreak} />
+              上次做到哪里了？
+            </h2>
+          </div>
+          <p>
+            示例取自项目自带的参赛素材。
+            <br />
+            从原始记录开始，看看依据、建议和完成结果如何关联。
+          </p>
+        </header>
         <HomeJourney />
       </section>
 
-      <section id="experience" data-reveal className={styles.experience} aria-labelledby="experience-heading">
-        <div className={styles.sectionHeading}>
-          <p className={styles.kicker}>从“我记过”到“我能继续”</p>
-          <h2 id="experience-heading">陪你推进的，<br />是同一个项目。</h2>
-          <p>记录散落在不同时间，行动却需要接在一起。<br />让个人 Agent 带着项目的来路，帮你理清现在。</p>
+      <section
+        id="missions"
+        className={styles.missionSection}
+        aria-labelledby="mission-heading"
+      >
+        <div className={styles.missionCopy}>
+          <p className={styles.sectionLabel}>有些目标，需要分几次完成</p>
+          <h2 id="mission-heading">
+            长期委托会保留进度，
+            <br />
+            需要你时停下来。
+          </h2>
+          <p>
+            比如“用已有材料整理阶段汇报”。你可以回看执行步骤和草稿；缺材料时补充来源，需要批准时先核对提案。
+          </p>
+          <p>
+            暂停后不会从头另建一个任务。继续前，服务端会重新检查授权、预算和材料是否仍然适用。
+          </p>
+          <details className={styles.conditions}>
+            <summary>哪些条件会影响执行？</summary>
+            <p>
+              实际执行需要启用委托功能、配置模型并授权使用相关资料。默认由你确认继续；后台自动接续还需要运行
+              Worker、单独授权，并满足结构化材料等条件。这里的自动接续仅限读取与分析，创建行动仍需用户确认。
+            </p>
+          </details>
         </div>
-        <div className={styles.workflow}>
-          {[
-            ["留下过程", "笔记、会议、图片与 PDF，都能成为项目的原始材料。", "记录"],
-            ["找回依据", "把材料整理为项目记忆，回看结论时能找到原始来源。", "记忆"],
-            ["看清变化", "关注期限、风险与停滞；提醒附带原因，供你判断。", "提醒"],
-            ["接续行动", "确认下一步，记录完成结果，再沉淀回自己的项目。", "复盘"],
-          ].map(([title, text, label], index) => <div key={title} className={styles.workflowItem}>
-            <div className={styles.workflowTop}><span>{label}</span>{index < 3 && <ChevronRight size={18} aria-hidden="true" />}</div>
-            <h3>{title}</h3><p>{text}</p>
-          </div>)}
+        <div
+          className={styles.missionPreview}
+          aria-label="长期委托等待补充材料的界面示例"
+        >
+          <div className={styles.previewLabel}>
+            <span>界面示例</span>
+            <span className={styles.waitingBadge}>等待补充材料</span>
+          </div>
+          <h3>整理参赛项目的阶段汇报</h3>
+          <p className={styles.previewDescription}>
+            已有步骤和草稿保留在同一份委托里。
+          </p>
+          <ol className={styles.executionList}>
+            <li>
+              <span className={styles.completedNode}>✓</span>
+              <div>
+                <strong>读取项目记忆</strong>
+                <span>已找到参赛要求与任务安排</span>
+              </div>
+            </li>
+            <li>
+              <span className={styles.currentNode}>?</span>
+              <div>
+                <strong>需要补充：演示流程的实际结果</strong>
+                <span>目前没有完成回执，不能确认流程已跑通</span>
+              </div>
+            </li>
+            <li>
+              <span className={styles.pendingNode} />
+              <div>
+                <strong>继续整理汇报草稿</strong>
+                <span>补充材料并确认后，再检查是否能够继续</span>
+              </div>
+            </li>
+          </ol>
+          <p className={styles.previewFootnote}>
+            这是界面说明，未启动委托或执行模型任务。
+          </p>
         </div>
       </section>
 
-      <section data-reveal className={styles.capabilities} aria-labelledby="capabilities-heading">
-        <div className={styles.sectionTop}><div><p className={styles.kicker}>记忆在积累，项目在推进</p><h2 id="capabilities-heading">个人 Agent，<br />多走一步的能力。</h2></div><p>记住项目，也关注变化。<br />把一个目标，接到可以继续做的事上。</p></div>
-        <div className={styles.capabilityGrid}>
-          <article className={styles.missionFeature}>
-            <span className={styles.featureIcon}><Waypoints size={23} aria-hidden="true" /></span><p className={styles.featureEyebrow}>LONG-TERM MISSION · 长期委托</p>
-            <h3>交代一次目标，<br />带着已有进展继续。</h3><p>让 Agent 围绕你的目标整理材料、形成草稿。缺少依据时提出问题，等待你补充后接续原委托。</p>
-            <div className={styles.missionExample}><span>委托示例</span><p>用本项目已有材料，整理一份带来源的阶段汇报。</p><div><span><Check size={12} />读取项目记忆</span><span><Check size={12} />整理已有进展</span><span className={styles.waitingStep}>待补充实验结果</span></div></div>
-            <span className={styles.featureFootnote}>重要操作，仍由你确认。</span>
-          </article>
-          <article className={styles.sourceFeature}>
-            <span className={styles.featureIcon}><GitBranch size={23} aria-hidden="true" /></span><p className={styles.featureEyebrow}>TRACEABLE MEMORY · 来源追溯</p>
-            <h3>一份成果，<br />找得到它的来路。</h3><p>保留原始记录与附件，把成果里的已知事实和缺失依据分别说清楚。</p>
-            <div className={styles.sourceDiagram} aria-label="成果可追溯到实验记录、会议纪要和论文笔记"><div><FileText size={17} />阶段汇报草稿</div><span className={styles.branchLine} /><ul><li>实验记录</li><li>会议纪要</li><li>论文笔记</li></ul></div>
-          </article>
+      <section
+        id="moments"
+        className={styles.scenarios}
+        aria-labelledby="scenarios-heading"
+      >
+        <div>
+          <p className={styles.sectionLabel}>项目里的具体用处</p>
+          <h2 id="scenarios-heading">
+            竞赛、科研和课程项目，
+            <br />
+            都有值得保留的过程。
+          </h2>
         </div>
-        <div className={styles.changeFeature}><div><p className={styles.featureEyebrow}>PROJECT EVOLUTION · 状态变化</p><h3>项目变了什么，回头就看得清。</h3><p>把新增事实、方案调整与待确认变化放在一起，保留项目走过的轨迹。</p></div><div className={styles.changeExample}><span>原方案</span><span>设备限制有变化</span><ArrowRight size={18} aria-hidden="true" /><strong>待你确认调整</strong></div></div>
+        <dl>
+          <div>
+            <dt>竞赛备赛</dt>
+            <dd>
+              把实验记录、报名要求和答辩材料放回同一个项目，整理汇报时能回看来源。
+            </dd>
+          </div>
+          <div>
+            <dt>科研训练</dt>
+            <dd>
+              查清方案为什么改过、结论用了哪些实验记录，以及哪些问题还没有依据。
+            </dd>
+          </div>
+          <div>
+            <dt>课程设计</dt>
+            <dd>
+              保留需求、问题和修改过程，完成一项行动后，把结果接回项目历史。
+            </dd>
+          </div>
+        </dl>
       </section>
 
-      <section id="moments" data-reveal className={styles.moments} aria-labelledby="moments-heading">
-        <div className={styles.sectionTop}><div><p className={styles.kicker}>你的目标，有自己的节奏</p><h2 id="moments-heading">把每一程，留给下一程。</h2></div><p>一个人也会经历很多阶段。<br />让过去的积累，成为下一次出发的依据。</p></div>
-        <div className={styles.momentGrid}>{moments.map(moment => <article key={moment.scene}>
-          <p className={styles.sceneLabel}>{moment.scene}</p><h3>{moment.title}</h3><p>{moment.text}</p><div className={styles.momentDetail}>{moment.detail}</div>
-        </article>)}</div>
-      </section>
-
-      <section id="principles" data-reveal className={styles.principles} aria-labelledby="principles-heading">
-        <div><Fingerprint size={28} aria-hidden="true" /><p className={styles.kicker}>个人 Agent，决定权在你</p><h2 id="principles-heading">帮你理清，<br />由你决定。</h2><p>忆程围绕你的项目提供建议，<br />也把依据、缺口和需要确认的事讲清楚。</p></div>
-        <ul>
-          <li><BookOpen size={20} aria-hidden="true" /><div><h3>结论有来源</h3><p>回到原始记录与附件，核对信息的来路。</p></div></li>
-          <li><FileText size={20} aria-hidden="true" /><div><h3>缺口有说明</h3><p>已知事实、缺失依据和成果草稿分别展示。</p></div></li>
-          <li><Check size={20} aria-hidden="true" /><div><h3>重要变更由你确认</h3><p>Agent 提议行动，你确认后才应用到项目中。</p></div></li>
-        </ul>
-      </section>
-
-      <section data-reveal className={styles.platforms} aria-labelledby="platforms-heading">
-        <div><p className={styles.kicker}>同一个项目，随时接续</p><h2 id="platforms-heading">电脑上梳理，<br />手机上接着做。</h2><p>Web 与鸿蒙客户端连接同一项目后端。<br />资料、提醒与行动围绕同一份项目记录展开。</p></div>
-        <div className={styles.platformList}>
-          <div><Laptop size={28} aria-hidden="true" /><div><h3>Web 工作台</h3><p>梳理材料、查看来源、整理成果。</p></div></div>
-          <div><Smartphone size={28} aria-hidden="true" /><div><h3>HarmonyOS 客户端</h3><p>记录进展、查看提醒、接续行动。</p></div></div>
+      <section
+        className={styles.platformSection}
+        aria-labelledby="platform-heading"
+      >
+        <div>
+          <p className={styles.sectionLabel}>电脑和手机上的同一个项目</p>
+          <h2 id="platform-heading">
+            资料在电脑上整理，
+            <br />
+            进展也能在手机上查看。
+          </h2>
+          <p>
+            Web
+            与鸿蒙客户端使用同一项目后端。客户端连到同一服务并登录相应账号后，可以接着查看项目资料与行动。
+          </p>
+        </div>
+        <div className={styles.platformPaths}>
+          <div>
+            <Laptop size={20} aria-hidden="true" />
+            <h3>Web 工作台</h3>
+            <p>
+              项目
+              <ChevronRight size={13} />
+              记录与资料
+              <ChevronRight size={13} />
+              查看原件
+            </p>
+          </div>
+          <div>
+            <Smartphone size={20} aria-hidden="true" />
+            <h3>鸿蒙客户端</h3>
+            <p>
+              项目
+              <ChevronRight size={13} />
+              资料
+              <ChevronRight size={13} />
+              附件原件
+            </p>
+          </div>
         </div>
       </section>
 
-      <section data-reveal className={styles.closing}>
-        <p>忆程 ProjectMemo · 你的个人项目 Agent</p><h2>下一步，从你的项目开始。</h2>
-        <Link href={startHref} className={styles.primary}>{user ? "回到我的工作台" : "开始我的项目"}<ArrowRight size={18} /></Link>
+      <aside
+        id="principles"
+        className={styles.boundaryNote}
+        aria-label="使用边界"
+      >
+        <FileText size={18} aria-hidden="true" />
+        <p>
+          来源可以回看；没有依据的内容会标明缺口。建议需要你判断，重要操作在确认后才应用。模型分析和委托执行取决于实际配置。
+        </p>
+      </aside>
+      <section className={styles.closing}>
+        <div>
+          <h2>从自己的项目开始。</h2>
+          <p>已有账号可以直接进入工作台。</p>
+        </div>
+        <Link href={workspaceHref} className={styles.primary}>
+          {workspaceLabel}
+          <ArrowRight size={16} aria-hidden="true" />
+        </Link>
       </section>
-      <footer className={styles.footer}><Link href="/">忆程 ProjectMemo</Link><span>沉淀每一步，推进下一程。</span><a href="#home-heading">回到顶部 ↑</a></footer>
-      </HomeMotion>
+      <footer className={styles.footer}>
+        <Link href="/">忆程 ProjectMemo</Link>
+        <span>竞赛 · 科研 · 课程项目</span>
+        <a href="#home-heading">回到顶部 ↑</a>
+      </footer>
     </main>
   );
 }

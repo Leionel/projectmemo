@@ -1,3 +1,4 @@
+import { reserveCloudCall } from "@/lib/auth/cloudQuota";
 import {verifyResearchClaims,type ClaimJudge,type ClaimCheck} from "./claimVerifier";
 import {configuredClaimJudge} from "./claimJudgeAdapter";
 import {isFeatureEnabled} from "@/lib/config/features";
@@ -35,6 +36,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    const constraints=m.constraintsJson as {llmContextApproved?:boolean;costCeiling?:{amount:number}|null};
    if(!options.provider&&!constraints.llmContextApproved)throw new AppError("LLM_CONTEXT_NOT_APPROVED","请先确认云模型使用本委托上下文的范围",409);
    if(!options.provider&&constraints.costCeiling)throw new AppError("COST_POLICY_REQUIRED","金额上限尚无法自动换算，需确认调用额度或使用不计费模式",409);
+   if(!options.provider)await reserveCloudCall(m.projectId);
    const context=await buildContext(m);await reserve(lease,"models",undefined,decisionTokenLimit(m.lastErrorJson));const started=Date.now();
    const decision=await (async()=>{try{return await (options.provider??chooseNext)(context,tools);}catch(error){
     if(error instanceof ModelProtocolError)await settleUsage(lease,"models",Date.now()-started,error.metadata.usage);
@@ -77,7 +79,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    const judge:ClaimJudge|undefined=delegate?async request=>{
     if(!isFeatureEnabled("MISSION_SEMANTIC_CHECK_ENABLED",false)||!options.judge&&!isFeatureEnabled("MISSION_CLAIM_JUDGE_ENABLED",false))throw new AppError("JUDGE_DISABLED","语义核验已关闭",409);
     await reserve(lease,"models");const begin=Date.now();
-    try{const response=await delegate(request);await settleUsage(lease,"models",Date.now()-begin,response.usage);
+    try{if(!options.judge)await reserveCloudCall(m.projectId);const response=await delegate(request);await settleUsage(lease,"models",Date.now()-begin,response.usage);
      await db.$transaction(async tx=>{await fenced(tx,lease);await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"SUCCESS",provider:response.provider,trace:json({missionId:m.id,purpose:"CLAIM_JUDGE",model:response.model,claimId:request.claimId,usage:response.usage}),resultJson:{verdict:response.verdict}}});});return response;
     }catch(error){await db.$transaction(async tx=>{await fenced(tx,lease);await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"FAILED",provider:options.judge?"TEST_FIXTURE":"mission-claim-judge",fallbackReason:"JUDGE_UNAVAILABLE",trace:{missionId:m.id,purpose:"CLAIM_JUDGE",claimId:request.claimId}}});});throw error;}
    }:undefined;

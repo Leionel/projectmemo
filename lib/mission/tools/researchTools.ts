@@ -1,3 +1,4 @@
+import { reserveCloudCall } from "@/lib/auth/cloudQuota";
 import {z} from "zod";
 import {db} from "@/lib/db";
 import {AppError} from "@/lib/api";
@@ -28,12 +29,14 @@ export function researchTools(lease:Lease,deps:ResearchDependencies={}):ToolSet{
   if(input.scopeRevision!==m.researchScopeVersion)throw new AppError("SCOPE_CHANGED","公开研究授权已变化",409);
   const publicSources=scope.allowedCategories.includes("PUBLIC_SOURCE")?await db.externalSource.findMany({where:{missionId:actor.missionId},take:8,orderBy:{fetchedAt:"desc"},select:{title:true,excerptJson:true}}):[];
   // This decision receives no goal, private messages, project cards, constraints or internal measurements.
+  if(!deps.queryProvider)await reserveCloudCall(m.projectId);
   await reserve(lease,"models");const start=Date.now();const decision=await (async()=>{try{return await (deps.queryProvider??chooseNext)(JSON.stringify({goal:"仅为以下已批准公开主题形成检索查询；从公开资料自主选择关键词，保留至少一个公开概念。必须调用 submit_public_query 工具。",scope,focus:input.focus,publicSources:publicSources.map(s=>({title:s.title,text:(s.excerptJson as {text?:string}).text?.slice(0,800)}))}),queryTool);}catch(error){if(error instanceof ModelProtocolError)await settleUsage(lease,"models",Date.now()-start,error.metadata.usage);throw error;}})();
   await settleUsage(lease,"models",Date.now()-start,decision.usage);
   if(decision.choice.kind!=="tool"||decision.choice.tool!=="submit_public_query")throw new AppError("QUERY_NOT_GENERATED","未生成有效的公开研究查询",409);
   const suggested=(queryTool.submit_public_query.schema.parse(decision.choice.args) as {query:string}).query;
   let query:string;try{query=checkPublicQuery(suggested,scope);}catch(error){await db.$transaction(async tx=>{await fenced(tx,lease);await event(tx,m.id,"QUERY_REJECTED",{queryHash:jsonHash(suggested),scopeRevision:m.researchScopeVersion,reason:error instanceof AppError?error.code:"QUERY_INVALID"});});throw error;}
   await db.$transaction(async tx=>{await fenced(tx,lease);await event(tx,m.id,"QUERY_SENT",{query,scopeRevision:m.researchScopeVersion,categories:scope.allowedCategories,provider:provider.name});await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"SUCCESS",provider:decision.provider,trace:json({missionId:m.id,purpose:"PUBLIC_QUERY",model:decision.model,usage:decision.usage}),resultJson:{queryHash:jsonHash(query)}}});});
+  if(!deps.provider)await reserveCloudCall(m.projectId);
   const hits=await provider.search(query);const observations=[];
   for(const hit of hits.slice(0,5)){let url:string;try{url=publicUrl(hit.url,scope.allowedHosts);}catch{continue;}observations.push(observation(m.id,url,"SEARCH_SNIPPET",hit.title,hit.snippet.slice(0,1200),hit.date));}
   return{data:{query,results:observations.map(s=>({sourceId:s.id,url:s.requestedUrl,title:s.title,snippet:s.excerpt.text,publishedAt:s.publishedAt})),observations},sources:[]};
@@ -41,7 +44,7 @@ export function researchTools(lease:Lease,deps:ResearchDependencies={}):ToolSet{
  web_fetch:{description:"读取本委托已检索的公开来源正文。参数只能是来源ID，不接受任意URL。返回托管提取文本，最终域名未独立验证。",schema:z.object({sourceId:z.string().min(1),scopeRevision:z.number().int().positive()}).strict(),effects,run:async(actor,raw)=>{
   const input=raw as {sourceId:string;scopeRevision:number};const {m,scope}=await researchMission(lease);if(input.scopeRevision!==m.researchScopeVersion)throw new AppError("SCOPE_CHANGED","研究范围已变化",409);
   const found=await db.externalSource.findFirst({where:{id:input.sourceId,missionId:m.id}});if(!found)throw new AppError("SOURCE_NOT_FOUND","资料不属于当前委托",404);
-  const url=publicUrl(found.requestedUrl,scope.allowedHosts);const page=await provider.fetchPage(url);if(!page.content.trim())throw new AppError("EMPTY_SOURCE","该网页没有可读取正文，请换一个来源",422);
+  const url=publicUrl(found.requestedUrl,scope.allowedHosts);if(!deps.provider)await reserveCloudCall(m.projectId);const page=await provider.fetchPage(url);if(!page.content.trim())throw new AppError("EMPTY_SOURCE","该网页没有可读取正文，请换一个来源",422);
   const record=observation(m.id,url,"PROVIDER_EXTRACT",page.title,page.content,found.publishedAt?.toISOString());
   const source:Source={id:record.id,kind:"EXTERNAL",entityType:"EXTERNAL_SOURCE",revision:record.normalizedContentHash,hash:record.normalizedContentHash,identityKey:url,text:record.excerpt.text,observedAt:new Date().toISOString()};
   return{data:{sourceId:record.id,title:record.title,url,content:record.excerpt.text,retrievalMode:"PROVIDER_EXTRACT",resolvedUrl:null,truncated:record.excerpt.truncated,observations:[record]},sources:[source]};

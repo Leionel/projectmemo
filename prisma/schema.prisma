@@ -816,8 +816,46 @@ model User {
   updatedAt    DateTime            @updatedAt
   sessions     AuthSession[]
   memberships  ProjectMembership[]
+  security     AccountSecurity?
+  accountTokens AccountToken[]
+  cloudUsage   AccountCloudUsage[]
 
   @@index([username])
+}
+
+model AccountSecurity {
+  userId String @id
+  email String @unique
+  emailVerifiedAt DateTime?
+  dailyCloudLimit Int @default(0)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuthRequestLimit {
+  key String @id
+  count Int
+  expiresAt DateTime
+  @@index([expiresAt])
+}
+
+model AccountToken {
+  id String @id @default(cuid())
+  userId String
+  tokenHash String @unique
+  purpose String
+  expiresAt DateTime
+  usedAt DateTime?
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, purpose])
+}
+
+model AccountCloudUsage {
+  userId String
+  day String
+  used Int @default(0)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@id([userId, day])
 }
 
 model AuthSession {

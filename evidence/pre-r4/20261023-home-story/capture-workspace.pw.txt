@@ -1,0 +1,14 @@
+async (page) => {
+  const r = await page.request.post('http://127.0.0.1:33324/api/auth/login', {data:{username:'e2e-reviewer',password:'e2e-reviewer-password',client:'web'}});
+  if (r.status() !== 200) throw new Error('Isolated fixture login failed');
+  await page.goto('http://127.0.0.1:33324/projects');
+  const href = await page.getByRole('link',{name:/人工智能创意赛 忆程 ProjectMemo 作品开发/}).first().getAttribute('href');
+  if (!href) throw new Error('Missing seed project');
+  await page.setViewportSize({width:1280,height:900});
+  await page.goto('http://127.0.0.1:33324'+href);
+  await page.getByRole('heading',{level:1}).waitFor();
+  await page.screenshot({path:'public/home/workspace-desktop.jpg',type:'jpeg',quality:85,clip:{x:0,y:56,width:1280,height:760}});
+  await page.setViewportSize({width:390,height:844});
+  await page.screenshot({path:'public/home/workspace-mobile.jpg',type:'jpeg',quality:85,clip:{x:0,y:56,width:390,height:680}});
+  return {source:'isolated E2E database, existing seed project, mock model',writes:'test-account login only; no project mutation',screenshots:2};
+}

@@ -30,7 +30,8 @@ export async function ensureCardEmbedding(
     return existing;
   }
 
-  const embeddingResult = await getEmbedding(fullText);
+  const source = await db.knowledgeCard.findUnique({where:{id:card.id},select:{projectId:true}});
+  const embeddingResult = await getEmbedding(fullText, source?.projectId);
 
   // A transient provider outage must not replace a valid remote index with the
   // deterministic offline representation. Keep it so the next request retries.

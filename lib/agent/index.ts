@@ -5,7 +5,7 @@ import { knowledgeCardDraftSchema } from "@/lib/validation/schemas";
 import type { AgentExecutionResult, CardDraft, KnowledgeTypeValue } from "@/lib/types";
 
 export interface StructureCaptureInput {
-  project: { title: string; description: string; goal: string };
+  project: { id?: string; title: string; description: string; goal: string };
   rawText: string;
   historyKeywords: string[];
   preferredType?: KnowledgeTypeValue;

@@ -188,6 +188,7 @@ export async function answerProjectQuestion(projectId: string, question: string)
           actions: actions.map((item) => ({ id: item.id, title: item.title, status: String(item.status) })),
         }),
         (value) => responseSchema.parse(value),
+        projectId,
       );
       answer = execution.data;
       fallback = false;

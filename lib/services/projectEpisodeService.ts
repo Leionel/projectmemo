@@ -474,7 +474,7 @@ interface SummaryCompressionResult {
  * 模型只压缩段落语言，不接触 claim 与来源结构；输出必须与输入节一一对应，
  * 任何缺节、改节名或疑似新增事实都会回退模板，绝不把模型输出存为 PUBLISHED 事实。
  */
-async function compressEpisodeSummary(summary: EpisodeSummary): Promise<SummaryCompressionResult> {
+async function compressEpisodeSummary(summary: EpisodeSummary, projectId: string): Promise<SummaryCompressionResult> {
   const base: SummaryCompressionResult = { summary, generationMode: "TEMPLATE", provider: null, fallbackReason: null };
   if (!isLlmConfigured()) return base;
   try {
@@ -506,7 +506,7 @@ async function compressEpisodeSummary(summary: EpisodeSummary): Promise<SummaryC
         return { section: key as EpisodeSection, text };
       });
       return compressed;
-    });
+    }, projectId);
     if (result.status !== "SUCCESS") return base;
     return {
       summary: { schemaVersion: summary.schemaVersion, goals: summary.goals, sections: result.data },
@@ -676,7 +676,7 @@ export async function previewProjectEpisode(projectId: string, input: EpisodePre
   const sources = await collectSources(projectId, windowStart, windowEnd, input.baseSnapshotId ?? null, input.endSnapshotId ?? null);
   const { claims, summary } = buildTemplateClaims(sources, windowStart, windowEnd);
   appendNextStepClaims(claims, summary, await collectNextStepCandidates(projectId));
-  const compressed = await compressEpisodeSummary(summary);
+  const compressed = await compressEpisodeSummary(summary, projectId);
   const sourceHash = sourceHashOf(sources.refs);
 
   const title = `阶段检查点 · ${iso(windowStart).slice(0, 10)} ~ ${iso(windowEnd).slice(0, 10)}`;
@@ -979,7 +979,7 @@ export async function refreshProjectEpisode(projectId: string, episodeId: string
   const sources = await collectSources(projectId, episode.windowStart, episode.windowEnd);
   const { claims, summary } = buildTemplateClaims(sources, episode.windowStart, episode.windowEnd);
   appendNextStepClaims(claims, summary, await collectNextStepCandidates(projectId));
-  const compressed = await compressEpisodeSummary(summary);
+  const compressed = await compressEpisodeSummary(summary, projectId);
   const sourceHash = sourceHashOf(sources.refs);
   const nextRevision = episode.revisions[episode.revisions.length - 1].revision + 1;
 

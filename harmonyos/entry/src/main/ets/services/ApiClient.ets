@@ -11,8 +11,8 @@ export class ApiClient {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
-    // 登录接口本身不附带旧 Token
-    if (!path.startsWith('/api/auth/login')) {
+    // 公开账号接口不附带旧 Token；会话查询与退出仍需认证。
+    if (!path.startsWith('/api/auth/') || path === '/api/auth/me' || path === '/api/auth/logout') {
       const token = SessionStore.getToken();
       if (token !== '' && token.length > 0) {
         headers['Authorization'] = `Bearer ${token}`;
@@ -31,9 +31,13 @@ export class ApiClient {
       }
     }
     if (responseCode === 403) {
+      const backendError: ApiError = parseApiError(resultStr, responseCode);
+      if (backendError.code !== 'HTTP_ERROR') throw backendError;
       throw new ApiError('FORBIDDEN', '无权访问该项目或操作受限', 403);
     }
     if (responseCode === 429) {
+      const backendError: ApiError = parseApiError(resultStr, responseCode);
+      if (backendError.code !== 'HTTP_ERROR') throw backendError;
       throw new ApiError('RATE_LIMITED', '操作过于频繁，请稍后再试', 429);
     }
     if (responseCode >= 500) {

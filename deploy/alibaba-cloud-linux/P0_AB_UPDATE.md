@@ -12,6 +12,12 @@
 
 固定假设沿用现有部署：`/opt/projectmemo/app`、`/opt/projectmemo/data/projectmemo.db`、`/opt/projectmemo/storage`、Node `/home/projectmemo/.nvm/versions/node/v24.22.0/bin`、EnvironmentFile `/etc/projectmemo/projectmemo.env`、监听 `127.0.0.1:4400`。不符合时脚本停止，先核对实际 unit，不盲目改路径。
 
+### 构建内存
+
+用户提供的第二次更新输出显示：`652dd5b` 编译成功，但 TypeScript 检查触及旧脚本的1024 MiB V8堆上限，发生 `JavaScript heap out of memory`。脚本已恢复 `bda4da9` 的代码、依赖、构建与环境，Web及Worker重新运行；真实模型续验未执行。
+
+当前脚本默认堆上限2048 MiB，可用 `PROJECTMEMO_BUILD_HEAP_MB=3072 bash safe-update.sh COMMIT` 调整（允许1536至16384 MiB）。停服前要求 `/proc/meminfo` 中 `MemAvailable + SwapFree` 至少为堆上限加1024 MiB；不足则停止，不修改服务器swap。该检查预留原生内存与子进程空间，但不能保证构建期间系统资源不会变化。不要跳过TypeScript检查，也不要自动执行 `npm audit fix --force` 来处理这次内存失败。
+
 ## 真实模型验收（独立于部署）
 
 执行 `verify-p0a.sh COMMIT` 只准备独立工作树并 dry run；增加 `--live --confirm-cost` 才使用服务器现有模型凭据。不读取个人项目，不对线上数据库执行迁移，不向外网研究，不运行线上 Worker。

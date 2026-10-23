@@ -17,6 +17,24 @@ describe("ECS update script controlled rollback (no ECS, sudo, git, database or 
     }
     expect(script.indexOf('npm run build -- --webpack')).toBeLessThan(script.indexOf('npm exec prisma -- migrate deploy'));
     expect(script.lastIndexOf('health "$TARGET"')).toBeLessThan(script.lastIndexOf('systemctl start projectmemo-mission-worker'));
+    expect(script.indexOf('check_build_memory /proc/meminfo')).toBeLessThan(script.indexOf('STOPPED=1'));
+    expect(script).toContain('NODE_OPTIONS="--max-old-space-size=$BUILD_HEAP_MB"');
+  });
+  it.each([
+    { heap: "", ram: 4 * 1024, swap: 0, status: 0 },
+    { heap: "2048", ram: 1536, swap: 2048, status: 0 },
+    { heap: "2048", ram: 2048, swap: 0, status: 1 },
+    { heap: "1024", ram: 4096, swap: 0, status: 1 },
+    { heap: "2048;echo unsafe", ram: 4096, swap: 0, status: 1 },
+  ])("checks heap and memory headroom before stopping services: $heap / $ram / $swap", ({ heap, ram, swap, status }) => {
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), "pm-deploy-memory-")); temporary.push(directory);
+    const info = path.join(directory, "meminfo");
+    fs.writeFileSync(info, `MemAvailable: ${ram * 1024} kB\nSwapFree: ${swap * 1024} kB\n`);
+    const run = spawnSync(bash, ["--noprofile", "--norc", "-c", `${functions}\ncheck_build_memory "$MEMORY_INFO"`], {
+      encoding: "utf8", env: { ...process.env, PROJECTMEMO_BUILD_HEAP_MB: heap, MEMORY_INFO: info.replaceAll("\\", "/") },
+    });
+    expect(run.status, run.stderr).toBe(status);
+    expect(run.stdout).not.toContain("\nunsafe");
   });
   it.each([0, 1])("failure trap restores only after services were stopped: STOPPED=%d", stopped => {
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), "pm-deploy-fault-")); temporary.push(directory);

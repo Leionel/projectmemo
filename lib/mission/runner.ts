@@ -65,7 +65,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
     if(choice.kind==="ask"){
      phase="DECISION";const requirements=gapRequirementsSchema.parse(choice.requirements??{});const gapId=randomUUID();phase="COMMIT";
      const q=await event(tx,m.id,"QUESTION",{question:choice.question,missing:choice.missing,gapId,requirements,phase:"DECISION"});
-     const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,status:"SUCCEEDED"},orderBy:{ordinal:"asc"}});
+     const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,status:"SUCCEEDED",...((current.planJson as {impactGuard?:string}).impactGuard?{planRevision:current.planRevision}:{})},orderBy:{ordinal:"asc"}});
      await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...current.planJson as object,automaticContinuation:null}),waitStateJson:json({questionId:q.id,gapId,question:choice.question,missing:choice.missing,requirements,startedAt:new Date().toISOString(),readSet:sourcesFrom(history.map(s=>s.resultJson))})}});await release(tx,current,"WAITING_INPUT");return null;
     }
     if(choice.kind==="finish"){
@@ -73,7 +73,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
      await event(tx,m.id,"CRITERIA_CHECKED",{...verification,phase:"VERIFY"});await release(tx,current,"SUCCEEDED");return null;
     }
     phase="TOOL";const tool=tools[choice.tool],args=toolArgs;assertAutomaticTool(current,choice.tool,tool.effects.businessWrite);assertToolConstraints(current.constraintsJson,choice.tool,args);
-    const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,status:"SUCCEEDED"},orderBy:{ordinal:"asc"}});const sources=sourcesFrom(history.map(s=>s.resultJson));const inputHash=toolInputHash(choice.tool,args,sources);
+    const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,status:"SUCCEEDED",...((current.planJson as {impactGuard?:string}).impactGuard?{planRevision:current.planRevision}:{})},orderBy:{ordinal:"asc"}});const sources=sourcesFrom(history.map(s=>s.resultJson));const inputHash=toolInputHash(choice.tool,args,sources);
     if(history.slice(-2).length===2&&history.slice(-2).every(s=>s.inputHash===inputHash))throw new AppError("NO_PROGRESS","连续调用没有新信息，请调整目标或补充资料",409);
     phase="COMMIT";const last=await tx.agentMissionStep.aggregate({where:{missionId:m.id},_max:{ordinal:true}});
     const created=await tx.agentMissionStep.create({data:{missionId:m.id,ordinal:(last._max.ordinal??0)+1,planRevision:m.planRevision,toolName:choice.tool,canonicalInputJson:json(args),inputHash,readSetJson:json(sources),agentRunId:run.id,providerCallId:decision.callId,protocolJson:{protocol:decision.protocol,schemaVersion:1}}});

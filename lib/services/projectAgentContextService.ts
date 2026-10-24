@@ -27,7 +27,7 @@ export async function getProjectAgentContext(userId: string, projectId: string) 
     }
   }
   await Promise.all([
-    db.agentIntervention.findFirst({where:{projectId,isSimulated:false,OR:[{status:"OPEN"},{status:"SNOOZED",snoozedUntil:{lte:new Date()}}]},orderBy:[{severity:"desc"},{createdAt:"desc"},{id:"asc"}]}).then(row=>{if(row){
+    db.agentIntervention.findFirst({where:{NOT:{dedupeKey:{startsWith:"goal:"}},projectId,isSimulated:false,OR:[{status:"OPEN"},{status:"SNOOZED",snoozedUntil:{lte:new Date()}}]},orderBy:[{severity:"desc"},{createdAt:"desc"},{id:"asc"}]}).then(row=>{if(row){
       const deadlineConflict=project.deadline && project.deadline.getTime()>Date.now() && (row.title==="截止日期已经过去"||row.content.includes("项目已经超过截止日期"));
       candidates.push({kind:"INTERVENTION",id:row.id,status:row.status,title:deadlineConflict?"核对提醒与当前截止日":row.title,
         reason:deadlineConflict?`历史提醒为「${row.title}」，当前项目截止日为 ${project.deadline!.toISOString().slice(0,10)}。请核对原始通知及适用阶段。`:row.content,severity:row.severity,updatedAt:row.updatedAt.toISOString()});

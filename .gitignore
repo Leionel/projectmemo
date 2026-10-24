@@ -1,6 +1,7 @@
 node_modules/
 .next/
 .next-e2e/
+.next-*/
 lib/generated/
 prisma/*.db
 prisma/*.db-journal

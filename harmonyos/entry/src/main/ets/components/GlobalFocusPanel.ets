@@ -1,3 +1,4 @@
+import { GoalQuestionPanel } from './GoalQuestionPanel';
 import { SessionStore } from '../services/SessionStore';
 import router from '@ohos.router';
 import { focusStatusLabel, focusActionLabel, focusPrimary, focusEntryKind, focusDeadlineConflict } from '../common/GlobalFocusPresentation';
@@ -108,6 +109,7 @@ export struct GlobalFocusPanel {
         .maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis }).lineHeight(29)
       if (this.primaryDetail(item) !== '') { Text(this.primaryDetail(item)).fontSize(14).lineHeight(22).fontColor(PMColors.INK_SECONDARY).maxLines(4).textOverflow({ overflow: TextOverflow.Ellipsis }) }
       PMStatusPill({ label: this.kind(item) === 'mission' ? '执行记录可追溯' : this.kind(item) === 'reminder' ? '待核对提醒依据' : '查看原始记录' })
+      if (this.kind(item) === 'mission') { GoalQuestionPanel({ projectId: item.projectId, missionId: item.id, compact: true }) }
       PMButton({ label: this.view.primaryContext?.nextStep.actionLabel ?? focusActionLabel(item.status, this.kind(item)), onAction: (): void => { this.open(item, this.kind(item)); } })
     }.width('100%').alignItems(HorizontalAlign.Start).padding(16).backgroundColor(PMColors.SURFACE)
       .borderRadius(PMRadius.LG).border({ width: 1, color: PMColors.BORDER }).margin({ bottom: 12 })

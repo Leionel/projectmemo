@@ -1,0 +1,120 @@
+{
+  "baseline": "7b093aca67a967e65269d5347f7909baf21c3e88",
+  "environment": "isolated local SQLite, rule/mock or TEST_FIXTURE only",
+  "unit": {
+    "files": 103,
+    "passed": 835
+  },
+  "latest_affected": {
+    "decisionEvolution": 26,
+    "decisionEvolutionUi": 4
+  },
+  "e2e": {
+    "startTime": "2026-10-24T07:27:59.033Z",
+    "duration": 68698.347,
+    "expected": 14,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "hypium": {
+    "passed": 77,
+    "failed": 0
+  },
+  "hap": {
+    "path": "harmonyos/entry/build/default/outputs/default/entry-default-unsigned.hap",
+    "sha256": "d8707fe507c609cae592fc5463af9e45502b1d94603d473c38ae69625800a0fe"
+  },
+  "paid_model_calls_this_phase": 0,
+  "open_gates": [
+    "real models / real outcomes",
+    "Harmony simulator and physical device",
+    "public network and platform",
+    "production deployment"
+  ],
+  "browser": {
+    "widths": [
+      1440,
+      1280,
+      768,
+      390
+    ],
+    "horizontal_overflow": false,
+    "brand_shared_component": "components/BrandLink.tsx",
+    "header_inner_px": 56,
+    "brand_px": 16,
+    "logo_px": 28,
+    "scenario_preview_adoption_and_cold_readback": true,
+    "unknown_and_recover": true,
+    "impact_paths": true,
+    "story_tabs": true,
+    "notes": [
+      "Before screenshots are local preview captures.",
+      "One combined script reached receipt/question/impact successfully but used button instead of tab for story; corrected story script passed.",
+      "E2E reset initially hit EPERM with preview open; own preview processes stopped before successful retry.",
+      "First preview cache was accidentally scanned as source; isolated Next output is now ignored by Git and ESLint."
+    ]
+  },
+  "logs": {
+    "unit_all": {
+      "path": "tmp/p2-unit-release.log",
+      "sha256": "62bc10a348236716f456990a1154655df94ea42186846da753e9e17a098950b2",
+      "bytes": 273
+    },
+    "p2_boundaries_latest": {
+      "path": "tmp/p2-bound-version-final.log",
+      "sha256": "82a4087e0fe6b6ea8bb05f4835d9f82336b3c20f8cbf847e7c5b3d6fea0d4a59",
+      "bytes": 293
+    },
+    "ui_latest": {
+      "path": "tmp/p2-ui-release.log",
+      "sha256": "068569d579e293d6e9c9defbde656bd893667ca669e686539524044146fd4cee",
+      "bytes": 292
+    },
+    "e2e_final": {
+      "path": "tmp/p2-e2e-release.log",
+      "sha256": "754ad0ea010959311af88cbfdc11ed6641dc8f2689f96943dc8643c232d1adc8",
+      "bytes": 13306
+    },
+    "types": {
+      "path": "tmp/p2-types-delivery.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "lint": {
+      "path": "tmp/p2-lint-delivery.log",
+      "sha256": "539dfcd0fd1a8a7591e87b682790281238cc45a52fe814e2e526b140ac613535",
+      "bytes": 42
+    },
+    "hypium": {
+      "path": "tmp/p2-hypium.log",
+      "sha256": "3f214655b4befd3cf763aee87498b7a21969195844e498baebab7c84b1ab58a5",
+      "bytes": 2443
+    },
+    "hap": {
+      "path": "tmp/p2-harmony-delivery.log",
+      "sha256": "58b4d84def7849fbad83bd619c45aa7805245b5774d623c8c4b8d999f2306b6b",
+      "bytes": 32637
+    },
+    "browser_scenarios": {
+      "path": "tmp/p2-scenario-qa.log",
+      "sha256": "dcf5a0a88d032bf687dfeb125bb702b33ce055078c15b72acb97b3e93d2b90b8",
+      "bytes": 1664
+    },
+    "browser_recovery": {
+      "path": "tmp/p2-final-browser-retry.log",
+      "sha256": "6c35816cb595df8abedab83806e56237ccc53d9e8aa9e6c97c432840da41f40d",
+      "bytes": 152
+    },
+    "browser_home": {
+      "path": "tmp/p2-story-final.log",
+      "sha256": "5d3ddf560d3c5428bd2170acd31572d40d3e4eb86af1cbc710a15c734857e881",
+      "bytes": 1531
+    },
+    "types_after_version_binding": {
+      "path": "tmp/p2-types-bound-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  }
+}

@@ -19,7 +19,7 @@ export async function loadGlobalFocus(userId: string, archived = false): Promise
     missionEnabled ? db.agentMission.findMany({ where: { ...missionWhere, status: { in: waitingStates } }, select: { ...missionSummarySelect, project }, orderBy: [{ updatedAt: "desc" }, { id: "desc" }], take: LIMIT + 1 }) : [],
     missionEnabled ? db.agentMission.findMany({ where: { ...missionWhere, status: { in: ["READY", "RUNNING"] } }, select: { ...missionSummarySelect, project }, orderBy: [{ updatedAt: "desc" }, { id: "desc" }], take: LIMIT + 1 }) : [],
     db.actionItem.findMany({ where: { project: projectScope, isSimulated: false, status: { in: ["TODO", "DOING"] } }, select: { id: true, title: true, description: true, status: true, dueAt: true, createdAt: true, project }, orderBy: [{ priority: "desc" }, { createdAt: "desc" }, { id: "desc" }], take: LIMIT + 1 }),
-    db.agentIntervention.findMany({ where: { project: projectScope, isSimulated: false, OR: [{ status: "OPEN" }, { status: "SNOOZED", snoozedUntil: { lte: now } }] }, select: { id: true, title: true, content: true, status: true, createdAt: true, project }, orderBy: [{ severity: "desc" }, { createdAt: "desc" }, { id: "desc" }], take: LIMIT + 1 }),
+    db.agentIntervention.findMany({ where: { NOT:{dedupeKey:{startsWith:"goal:"}}, project: projectScope, isSimulated: false, OR: [{ status: "OPEN" }, { status: "SNOOZED", snoozedUntil: { lte: now } }] }, select: { id: true, title: true, content: true, status: true, createdAt: true, project }, orderBy: [{ severity: "desc" }, { createdAt: "desc" }, { id: "desc" }], take: LIMIT + 1 }),
     db.knowledgeCard.findMany({ where: { project: projectScope, archivedAt: null }, select: { id: true, title: true, summary: true, createdAt: true, capture: {select: {rawText: true}}, project }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 4 }),
   ]);
   const common = (row: { id: string; title: string; project: { id: string; title: string; archivedAt: Date | null; deadline: Date | null } }): FocusEntry => ({ id: row.id, projectId: row.project.id, projectTitle: `${row.project.title}${row.project.archivedAt ? " · 已归档" : ""}`, title: row.title, detail: "", status: "", activity: "", activityAt: "", recordedAt: "", dueAt: "", projectDeadline: row.project.deadline?.toISOString() ?? "", recordFields: [] });
@@ -31,7 +31,7 @@ export async function loadGlobalFocus(userId: string, archived = false): Promise
     missionEnabled ? db.agentMission.count({where: {...missionWhere, status: {in: waitingStates}}}) : 0,
     missionEnabled ? db.agentMission.count({where: {...missionWhere, status: {in: ["READY", "RUNNING"]}}}) : 0,
     db.actionItem.count({where: {project: projectScope, isSimulated: false, status: {in: ["TODO", "DOING"]}}}),
-    db.agentIntervention.count({where: {project: projectScope, isSimulated: false, OR: [{status: "OPEN"}, {status: "SNOOZED", snoozedUntil: {lte: now}}]}}),
+    db.agentIntervention.count({where: {NOT:{dedupeKey:{startsWith:"goal:"}},project: projectScope, isSimulated: false, OR: [{status: "OPEN"}, {status: "SNOOZED", snoozedUntil: {lte: now}}]}}),
     db.project.findFirst({where: {...projectScope, deadline: {gte: now}}, select: {id: true, title: true, deadline: true}, orderBy: [{deadline: "asc"}, {id: "asc"}]}),
   ]);
   const contextIds = [...new Set([...waiting, ...running, ...reminders, ...actions].map(row=>row.project.id))].slice(0,LIMIT);

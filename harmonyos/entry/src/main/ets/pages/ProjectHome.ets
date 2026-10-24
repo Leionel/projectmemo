@@ -1,3 +1,4 @@
+import { ProjectImpactPanel } from '../components/ProjectImpactPanel';
 import { CopilotContinuationCard } from '../components/CopilotContinuationCard';
 import { SessionStore } from '../services/SessionStore';
 import { ProjectAgentContext } from '../models/ProjectAgentContext';
@@ -3086,6 +3087,7 @@ struct ProjectHome {
             onDiffUpdated: (diff: StateDiff): void => { this.stateDiff = diff; }
           })
           this.ProjectHealthCardView()
+          ProjectImpactPanel({ projectId: this.projectId })
           this.ClosedLoopView()
           this.MilestoneEvidenceView()
           PMButton({ label: this.showEvolution ? '收起演进与检查点' : '查看演进与检查点', secondary: true,

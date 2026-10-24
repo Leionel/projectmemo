@@ -1,10 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
+import { BrandLink } from "./BrandLink";
 import styles from "@/app/home.module.css";
 
 export function SiteHeader({
@@ -29,16 +29,7 @@ export function SiteHeader({
       className={`${styles.siteHeader} ${pathname === "/" ? styles.homeHeader : ""}`}
     >
       <div className={styles.siteHeaderInner}>
-        <Link
-          href="/"
-          className={styles.homeBrand}
-          aria-label="忆程 ProjectMemo 首页"
-        >
-          <Image src="/logo.png" alt="" width={34} height={34} />
-          <span>
-            忆程 <span>ProjectMemo</span>
-          </span>
-        </Link>
+        <BrandLink />
         <nav aria-label="首页导航" className={styles.homeNav}>
           {accountPage ? (
             <Link href="/" className={styles.headerCta}>

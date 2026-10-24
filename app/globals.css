@@ -297,3 +297,12 @@ button:active:enabled,.editorial-button:active { filter:brightness(.94); }
 .global-navigation .global-nav-link { padding:.5rem .875rem; min-height:2.375rem; font-size:.875rem; }
 .global-navigation .global-nav-link[aria-current=page] { background:var(--card-bg); box-shadow:0 1px 2px rgb(28 46 44 / 5%); }
 @media(pointer:coarse) { .global-navigation .global-nav-link { min-height:2.75rem; } }
+
+/* One wordmark system across the public site, account pages and workspace. */
+.app-brand { display:inline-flex; align-items:center; gap:10px; min-width:0; color:var(--ink); border-radius:6px; white-space:nowrap; }
+.app-brand > img { width:28px; height:28px; flex-shrink:0; object-fit:cover; border-radius:6px; }
+.app-brand-name { font-family:"PM Brand","Noto Serif SC","Songti SC","SimSun",serif; font-size:16px; font-weight:600; letter-spacing:-.02em; line-height:1.5; }
+.app-brand-english { display:none; }
+.app-brand-descriptor { display:none; border-left:1px solid var(--rule-strong); padding-left:8px; font-size:10px; font-weight:800; letter-spacing:.16em; color:var(--ink-soft); }
+@media(min-width:640px) { .app-brand-english { display:inline; } }
+@media(min-width:1280px) { .app-brand-descriptor { display:inline; } }

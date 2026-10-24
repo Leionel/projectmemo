@@ -1,3 +1,4 @@
+import {ProjectImpact} from "@/components/ProjectImpact";
 import Link from "next/link";
 import {notFound} from "next/navigation";
 import {requireWorkspaceProject,loadWorkspaceOverview} from "@/lib/server/projectWorkspace";
@@ -45,7 +46,7 @@ export default async function ProjectFeaturePage({params,searchParams}:{params:P
  }else if(section==="health"){
   const {dashboard,metrics}=await loadWorkspaceOverview(id);
   const readiness={...dashboard.readiness,items:dashboard.readiness.items.map(i=>({...i,href:projectHref(id,i.href)}))};
-  content=<><ProjectStateCard projectId={id} enabled={state}/><ProjectDecisionTimeline key={id} projectId={id}/><EpisodeCheckpointCard projectId={id} enabled={enabled("PROJECT_EPISODES_ENABLED")} reminderEnabled={reminders}/><details className={styles.secondary}><summary>项目体检与统计</summary><ProjectHealthCard projectId={id} enabled={enabled("PROJECT_HEALTH_ENABLED",true)} stateEnabled={state}/>{workspace.project.scenario==="COMPETITION"&&<CompetitionReadiness readiness={readiness}/>}<AgentMetrics metrics={metrics}/></details></>;
+  content=<><ProjectImpact key={workspace.user.id} projectId={id}/><ProjectStateCard projectId={id} enabled={state}/><ProjectDecisionTimeline key={id} projectId={id}/><EpisodeCheckpointCard projectId={id} enabled={enabled("PROJECT_EPISODES_ENABLED")} reminderEnabled={reminders}/><details className={styles.secondary}><summary>项目体检与统计</summary><ProjectHealthCard projectId={id} enabled={enabled("PROJECT_HEALTH_ENABLED",true)} stateEnabled={state}/>{workspace.project.scenario==="COMPETITION"&&<CompetitionReadiness readiness={readiness}/>}<AgentMetrics metrics={metrics}/></details></>;
  }
  return <><header className={styles.pageTitle}><h2>{item.label}</h2><p>{item.description}</p></header><div className={styles.sectionStack}>{content}</div></>;
 }

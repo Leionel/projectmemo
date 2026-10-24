@@ -9,6 +9,7 @@ export default defineConfig([
     ".next/**",
     ".workbuddy/**", // Local build output and agent scratch files, not application source.
     ".next-e2e/**",
+    ".next-*/**", // Isolated previews and guarded release builds are generated output.
     "lib/generated/**",
     "coverage/**",
     "playwright-report/**",

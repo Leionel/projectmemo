@@ -42,7 +42,7 @@ export async function readCopilotContext(tx: Tx, projectId: string, actor?: Copi
   const [cards, interventions, allActions] = await Promise.all([
     tx.knowledgeCard.findMany({ where: { projectId }, orderBy: { createdAt: "desc" },
       select: { id: true, title: true, summary: true, type: true, keywords: true } }),
-    tx.agentIntervention.findMany({ where: { projectId, OR: [
+    tx.agentIntervention.findMany({ where: { projectId, NOT:{dedupeKey:{startsWith:"goal:"}}, OR: [
       { status: "OPEN" }, { status: "SNOOZED", snoozedUntil: { lte: now } },
     ] }, orderBy: [{ status: "asc" }, { severity: "desc" }, { createdAt: "desc" }] }),
     tx.actionItem.findMany({ where: { projectId, status: { notIn: ["DONE", "CANCELLED"] } },

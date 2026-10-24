@@ -90,6 +90,8 @@ enum CardRelationType {
 }
 
 model Project {
+  impactJobs ProjectImpactJob[]
+  decisionProposals DecisionScenarioProposal[]
   missionArtifactReceipts MissionArtifactReceipt[]
   missions AgentMission[]
   id          String              @id @default(cuid())
@@ -835,6 +837,8 @@ model DeliverableEvidence {
 }
 
 model User {
+  decisionProposals DecisionScenarioProposal[]
+  goalQuestionPreferences GoalQuestionPreference[]
   missions AgentMission[]
   id           String              @id @default(cuid())
   username     String              @unique
@@ -916,6 +920,9 @@ model ProjectMembership {
 }
 
 model AgentMission {
+ decisionProposals DecisionScenarioProposal[]
+ impactEffects ProjectImpactEffect[]
+ goalQuestionPreferences GoalQuestionPreference[]
  artifactReceipts MissionArtifactReceipt[]
  id String @id @default(cuid())
  ownerUserId String
@@ -1076,4 +1083,73 @@ model MissionArtifactReceipt {
  @@unique([outputId,artifactType])
  @@unique([createdByUserId,requestId])
  @@index([projectId,createdAt])
+}
+
+model ProjectImpactJob {
+ id String @id @default(cuid())
+ projectId String
+ mutationReceiptId String
+ ruleVersion String @default("impact-v1")
+ rootsJson Json
+ status String @default("PENDING")
+ attempts Int @default(0)
+ nextAttemptAt DateTime @default(now())
+ resultJson Json?
+ lastError String?
+ createdAt DateTime @default(now())
+ project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
+ effects ProjectImpactEffect[]
+ @@unique([projectId,mutationReceiptId])
+ @@index([status,nextAttemptAt])
+}
+model ProjectImpactEffect {
+ id String @id @default(cuid())
+ jobId String
+ missionId String
+ oldPlanRevision Int
+ newPlanRevision Int
+ createdAt DateTime @default(now())
+ job ProjectImpactJob @relation(fields:[jobId],references:[id],onDelete:Cascade)
+ mission AgentMission @relation(fields:[missionId],references:[id],onDelete:Cascade)
+ @@unique([jobId,missionId])
+}
+model DecisionScenarioProposal {
+ id String @id @default(cuid())
+ projectId String
+ missionId String
+ ownerUserId String
+ createRequestId String
+ inputHash String
+ inputJson Json
+ baseManifest Json
+ scenariosJson Json
+ proposalHash String
+ status String @default("READY")
+ expiresAt DateTime
+ revision Int @default(1)
+ parentId String?
+ confirmRequestId String?
+ confirmHash String?
+ selectedKey String?
+ receiptJson Json?
+ createdAt DateTime @default(now())
+ project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
+ mission AgentMission @relation(fields:[missionId],references:[id],onDelete:Cascade)
+ owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
+ @@unique([ownerUserId,createRequestId])
+ @@unique([ownerUserId,confirmRequestId])
+ @@index([missionId,createdAt])
+}
+model GoalQuestionPreference {
+ id String @id @default(cuid())
+ userId String
+ missionId String
+ questionId String
+ mode String
+ contextHash String
+ snoozedUntil DateTime?
+ updatedAt DateTime @updatedAt
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ mission AgentMission @relation(fields:[missionId],references:[id],onDelete:Cascade)
+ @@unique([userId,missionId,questionId])
 }

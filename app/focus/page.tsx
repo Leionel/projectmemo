@@ -1,3 +1,4 @@
+import {GoalQuestion} from "@/components/GoalQuestion";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, ArrowUpRight, Bot, CalendarDays, CircleHelp, Clock3, Inbox, Layers3 } from "lucide-react";
@@ -37,7 +38,7 @@ export default async function FocusPage({ searchParams }: { searchParams: Promis
       <div className={styles.toolbar}><form action="/focus" className={styles.scope} aria-label="焦点范围"><label><input type="checkbox" name="archived" value="1" defaultChecked={focus.archived}/><span className={styles.switch} aria-hidden="true"/><span>包含归档项目</span></label><button className="workspace-tool focus-ring">应用范围</button></form><Link prefetch={false} href="/projects" className="workspace-tool focus-ring">查看项目<ArrowUpRight size={14} aria-hidden="true"/></Link></div>
     </header>
     {!focus.missionEnabled && <p role="status" className={styles.notice}>长期委托当前未开启，已有委托数据仍保留。</p>}
-    {hero && <HeroCard hero={hero}/>}
+    {hero && <><HeroCard hero={hero}/>{hero.kind==="mission"&&<GoalQuestion key={`${user.id}:${hero.item.id}`} projectId={hero.item.projectId} missionId={hero.item.id} compact/>}</>}
     <Pulse focus={focus} hero={hero}/>
     {empty ? <section className={styles.empty}><Inbox size={24} aria-hidden="true"/><h2>从一个真实项目开始</h2><p>当前范围内没有待回应或推进中的事项。进入项目记录资料，或委托一个长期目标。</p><Link prefetch={false} className="editorial-button focus-ring" href="/projects">选择或创建项目<ArrowRight size={14} aria-hidden="true"/></Link></section> : <>
       <div className={styles.stage}><div className={styles.missions}>

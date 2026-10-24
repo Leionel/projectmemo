@@ -1,3 +1,4 @@
+import {readDecisionSnapshot} from "@/lib/decision/snapshot";
 import { assertAutomaticPermission,validateAutomaticEvidence } from "./automaticPolicy";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
@@ -24,6 +25,8 @@ export async function fenced(tx:Tx,lease:Lease,checkContext=true){
  await assertOwner(m.ownerUserId,m.projectId,tx);assertAutomaticPermission(m);
  if(m.cancelRequestedAt||m.pauseRequestedAt)throw new AppError("STOP_REQUESTED","用户请求停止执行",409);
  if(checkContext&&(m.contextVersion!==lease.contextVersion||m.planRevision!==lease.planRevision))throw new AppError("CONTEXT_CHANGED","委托上下文已变化",409);
+ const impactGuard=(m.planJson as {impactGuard?:string}).impactGuard;
+ if(checkContext&&impactGuard){const current=await readDecisionSnapshot(tx,m.projectId);if(current.coverage.state!=="COMPLETE"||current.sharedHash!==impactGuard)throw new AppError("SOURCE_CHANGED","依赖或来源已变化，旧方案不得继续提交，请重新对比并确认",409);}
  await validateAutomaticEvidence(tx,m);
  return m;
 }

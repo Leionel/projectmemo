@@ -352,6 +352,7 @@ export async function applyInterventionPolicy(
   candidates: PolicyCandidate[],
   now: Date = new Date(),
   scope = LEGACY_GLOBAL_POLICY_SCOPE,
+  validate?: (tx: Prisma.TransactionClient) => Promise<void>,
 ): Promise<PolicyOutcome[]> {
   const budgetEnabled = isFeatureEnabled("INTERVENTION_BUDGET_ENABLED", false);
   const policy = budgetEnabled ? await getOrCreatePolicy(scope) : null;
@@ -360,6 +361,7 @@ export async function applyInterventionPolicy(
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
       return await db.$transaction(async (tx) => {
+    await validate?.(tx);
     const outcomes: PolicyOutcome[] = [];
     const parts = policy ? localTimeParts(policy.timezone, now) : null;
     const quiet = policy && parts ? isQuietTime(policy, parts) : false;

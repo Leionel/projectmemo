@@ -24,7 +24,7 @@ export async function listInterventions(projectId: string, includeClosed = true)
   const now = new Date();
   return db.agentIntervention.findMany({
     where: {
-      projectId,
+      projectId, NOT:{dedupeKey:{startsWith:"goal:"}},
       ...(includeClosed ? {} : {
         OR: [
           { status: InterventionStatus.OPEN },

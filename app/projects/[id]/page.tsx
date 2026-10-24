@@ -1,3 +1,4 @@
+import {ProjectImpact} from "@/components/ProjectImpact";
 import Link from "next/link";
 import {ArrowRight} from "lucide-react";
 import {isFeatureEnabled} from "@/lib/config/features";
@@ -57,6 +58,7 @@ export default async function ProjectHome({params}:{params:Promise<{id:string}>}
   </div><aside className={styles.overviewAside} aria-label="项目近期记录">
   {isFeatureEnabled("PROJECT_STATE_ENABLED",false)&&(project._count.captures>0||project.cards.length>0||actions.length>0||project._count.artifacts>0)&&<ProjectEvolutionSummary key={id} projectId={id}/>}
    {project.cards.length>0&&<section className={styles.summary} aria-label="最近记录"><div className={styles.summaryHeading}><h3>最近记录</h3><Link href={`${base}/records`}>全部资料<ArrowRight size={13} aria-hidden="true"/></Link></div><ul>{project.cards.slice(0,3).map(c=><li key={c.id}><Link href={`${base}/knowledge#card-${c.id}`}><time className="font-mono text-xs text-[var(--muted)]" dateTime={c.createdAt.toISOString()}>{c.createdAt.toLocaleDateString("zh-CN")}</time><strong>{c.title}</strong><p><EvidenceText text={c.summary}/></p></Link></li>)}</ul></section>}
+  <ProjectImpact key={user.id} projectId={id}/>
   </aside></div>
   <details className={styles.secondary}><summary>更多项目状态与目标</summary><p className={styles.empty}>{project.goal}</p><ProjectPulse dashboard={dashboard} competition={project.scenario==="COMPETITION"} goal={project.goal} deadlineLabel={project.deadline?.toLocaleDateString("zh-CN")??"暂未设置"}/><Link href={`${base}/health`}>项目体检、变化与阶段检查</Link></details>
  </>;

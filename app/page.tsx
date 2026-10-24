@@ -27,28 +27,33 @@ export default async function Home() {
     <main id="main-content" className={styles.home}>
       <section className={styles.hero} aria-labelledby="home-heading">
         <div className={styles.heroCopy}>
-          <p className={styles.positioning}>面向大学生的个人项目 Agent</p>
+          <p className={styles.positioning}>
+            <span>面向大学生的</span>
+            <strong>个人项目 Agent</strong>
+          </p>
           <h1 id="home-heading">
             项目隔了几天，
             <br />
             <span>再打开也接得上。</span>
           </h1>
-          <p className={styles.heroDescription}>
-            会议记录、实验结果、方案调整，都留在项目里。先看上次的进展与判断依据，再决定下一步。
-          </p>
-          <div className={styles.heroActions}>
-            <a className={styles.primary} href="#experience">
-              体验项目接续
-              <ArrowDown size={16} aria-hidden="true" />
-            </a>
-            <Link className={styles.secondary} href={workspaceHref}>
-              {workspaceLabel}
-              <ArrowRight size={16} aria-hidden="true" />
-            </Link>
+          <div className={styles.heroSupporting}>
+            <p className={styles.heroDescription}>
+              会议记录、实验结果、方案调整，都留在项目里。先看上次的进展与判断依据，再决定下一步。
+            </p>
+            <div className={styles.heroActions}>
+              <a className={styles.primary} href="#experience">
+                体验项目接续
+                <ArrowDown size={16} aria-hidden="true" />
+              </a>
+              <Link className={styles.secondary} href={workspaceHref}>
+                {workspaceLabel}
+                <ArrowRight size={16} aria-hidden="true" />
+              </Link>
+            </div>
+            <p className={styles.heroNote}>
+              下方示例无需登录。个人项目在工作台中管理。
+            </p>
           </div>
-          <p className={styles.heroNote}>
-            下方示例无需登录。个人项目在工作台中管理。
-          </p>
         </div>
         <figure className={styles.heroProduct}>
           <div className={styles.imageToolbar}>

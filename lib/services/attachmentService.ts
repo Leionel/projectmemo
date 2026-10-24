@@ -1,3 +1,4 @@
+import {enqueueImpact} from "@/lib/decision/impactJobs";
 import { reserveCloudCall } from "@/lib/auth/cloudQuota";
 import { db } from "@/lib/db";
 import {
@@ -468,6 +469,7 @@ export async function correctAttachmentText(
       data: { extractedText: trimmed, extractionStatus: "SUCCESS", extractionError: null },
     });
     await tx.project.update({ where: { id: projectId }, data: { updatedAt: new Date() } });
+    await enqueueImpact(tx,projectId,`attachment-revision:${existing.id}:${nextIndex}`,[`attachment:${existing.id}`,`card:${card.id}`]);
     return { attachment: updated, card };
   });
 

@@ -29,7 +29,7 @@ export async function listProjects(userId?: string, options: ListProjectsOptions
       cards: { select: { type: true } },
       artifacts: { select: { artifactType: true } },
       actions: { select: { status: true, priority: true, dueAt: true, createdAt: true, completedAt: true, resultCardId: true, isSimulated: true } },
-      interventions: { select: { status: true, severity: true, snoozedUntil: true, isSimulated: true, triggerType: true } },
+      interventions: { where: { NOT: { dedupeKey: { startsWith: "goal:" } } }, select: { status: true, severity: true, snoozedUntil: true, isSimulated: true, triggerType: true } },
     },
   });
   return projects.map(({ cards, artifacts, actions, interventions, ...project }) => ({

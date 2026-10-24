@@ -1,0 +1,32 @@
+# P1-B / P1-C 更新
+
+继续使用 `safe-update.sh <已推送的完整 commit>`，共用 Web / 鸿蒙后端；本地 HAP 需另行安装。
+
+服务器上以 root 执行（把 TARGET 换为本次完整提交号）：
+
+```bash
+APP=/opt/projectmemo/app
+TARGET=<本次完整提交号>
+sudo -H -u projectmemo git -C "$APP" fetch origin codex/r3-runtime-research
+sudo -H -u projectmemo git -C "$APP" show "$TARGET:deploy/alibaba-cloud-linux/safe-update.sh" > /tmp/projectmemo-safe-update.sh
+bash /tmp/projectmemo-safe-update.sh "$TARGET"
+```
+
+脚本核对目录、数据路径、已推送版本和干净工作区，备份数据库/附件/配置，增量迁移并独立构建，健康失败恢复旧代码与构建。`20261024010000_copilot_turn_identity` 为添加可空列的兼容迁移，不使用 seed，不清理旧聊天。
+
+环境变量：
+
+- 已有 `MISSION_ENABLED=true`、`MISSION_UI_ENABLED=true` 保持原配置。
+- 新增 `COPILOT_CONTINUATION_ENABLED=true`（默认值）。设为 false 后不产生新建议，未消费的旧建议不能确认；已创建委托及回执保留。无需新密钥。
+- 云模型使用原配置、账户配额和委托独立许可，不给新注册用户额外额度。
+
+更新后核对：
+
+1. `/health` 的 release 等于本次提交，Web 与 worker 均 active。
+2. 登录原账户：普通进度查询不创建委托；显式任务进入预览，取消后委托数量不变。
+3. 确认一个目标后打开同一 Mission，刷新/重试不新建；已有任务先链接原任务。
+4. 旧草稿按原 ID/修订读取，归入成果按固定 artifact ID 打开；批准不代表行动完成。
+5. 在测试账号下断网：保留标时历史，写操作不可提交；恢复网络重新读取后再操作。退出/换账号不显示前一人的聊天或私有委托。
+6. 安装本轮 HAP 后在设备上完成同 ID 的补料/批准/成果读回，并回 Web 核对。此项尚未由本地服务测试替代。
+
+执行更新不包含任何付费模型评估。如需 ECS 真实验收，继续沿用原有独立验收库和同一预算账本。

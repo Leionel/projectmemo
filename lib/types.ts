@@ -349,6 +349,7 @@ export interface EvidenceTrustReceipt {
 }
 
 export interface AgentChatResponse {
+  continuationSuggestion?: import("./types/copilotContinuation").CopilotContinuationSuggestion;
   message: string;
   citations: AgentCitation[];
   proposedActions: ProposedAction[];

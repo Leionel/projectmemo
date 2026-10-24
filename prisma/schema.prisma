@@ -347,11 +347,15 @@ model AgentMessage {
   citations       Json
   proposedActions Json
   runId           String?
+  ownerUserId     String?
+  requestId       String?
+  requestState    String?
   createdAt       DateTime          @default(now())
   project         Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
   run             AgentRun?         @relation(fields: [runId], references: [id], onDelete: SetNull)
 
   @@index([projectId, createdAt])
+  @@unique([projectId, ownerUserId, requestId, role])
 }
 
 model CardEmbedding {

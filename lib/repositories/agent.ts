@@ -361,8 +361,9 @@ export async function saveAgentMessage(input: {
   citations: unknown[];
   proposedActions: unknown[];
   runId?: string | null;
-}) {
-  return db.agentMessage.create({
+  ownerUserId?: string; requestId?: string; requestState?: string;
+}, tx: Prisma.TransactionClient = db) {
+  return tx.agentMessage.create({
     data: {
       projectId: input.projectId,
       role: input.role === "USER" ? AgentMessageRole.USER : AgentMessageRole.ASSISTANT,
@@ -370,22 +371,35 @@ export async function saveAgentMessage(input: {
       citations: jsonValue(input.citations),
       proposedActions: jsonValue(input.proposedActions),
       runId: input.runId ?? null,
+      ownerUserId:input.ownerUserId,requestId:input.requestId,requestState:input.requestState,
     },
   });
 }
 
-export async function listAgentMessages(projectId: string, limit = 20) {
+export async function listAgentMessages(projectId: string, limit = 20, ownerUserId?: string, sourceRunId?:string) {
+  const source=sourceRunId&&ownerUserId?await db.agentMessage.findFirst({where:{projectId,ownerUserId,runId:sourceRunId,role:"ASSISTANT"},select:{requestId:true}}):null;
+  if(sourceRunId&&!source)throw new AppError("COPILOT_SOURCE_NOT_FOUND","来源对话已不可用",404);
   const messages = await db.agentMessage.findMany({
-    where: { projectId },
-    orderBy: { createdAt: "asc" },
+    where: { projectId,...(ownerUserId?{ownerUserId}:{}),...(sourceRunId?{OR:[{runId:sourceRunId},...(source?.requestId?[{requestId:source.requestId}]:[])]}:{}) },
+    orderBy: [{ createdAt: "desc" },{id:"desc"}],
     take: limit,
-    include: { run: { select: { trace: true } } },
+    include: { run: { select: { trace: true, resultJson:true,copilotExecutions:{where:{proposalKey:"mission-continuation",status:"COMMITTED"},take:1,select:{resultId:true}} } } },
   });
-  return messages.map(({ run, ...message }) => {
+  const missionIds=messages.flatMap(m=>m.run?.copilotExecutions.map(e=>e.resultId).filter((id):id is string=>!!id)??[]);
+  const received=ownerUserId&&missionIds.length?await db.agentMission.findMany({where:{id:{in:missionIds},projectId,ownerUserId,project:{memberships:{some:{userId:ownerUserId,role:"OWNER"}}}},select:{id:true,version:true,planRevision:true}}):[];
+  const receivedById=new Map(received.map(m=>[m.id,m]));
+  return messages.reverse().map(({ run, ...message }) => {
     const trace = run?.trace && typeof run.trace === "object" && !Array.isArray(run.trace)
       ? run.trace as Record<string, unknown>
       : null;
-    return { ...message, trustReceipt: trace?.trustReceipt ?? undefined };
+    const result=run?.resultJson as Record<string,unknown>|null;
+    let suggestion=result?.continuationSuggestion;
+    const consumed=run?.copilotExecutions[0];
+    if(consumed&&suggestion&&typeof suggestion==="object"&&!Array.isArray(suggestion)){
+      const mission=receivedById.get(consumed.resultId??"");
+      suggestion={...suggestion,kind:mission?"OPEN_MISSION":"ANSWER_ONLY",reason:mission?"这条建议已经受理，请回到同一个原委托查看进度。":"原委托当前不可访问，请重新核对权限；不会再次创建。",mission:mission?{...mission,questionId:null,approvalId:null,outputId:null,outputRevision:null}:null};
+    }
+    return { ...message, trustReceipt: trace?.trustReceipt ?? undefined,continuationSuggestion:suggestion ?? undefined };
   });
 }
 

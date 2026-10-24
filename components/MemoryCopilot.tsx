@@ -1,7 +1,7 @@
 "use client";
 import {projectHref} from "@/lib/projectNavigation";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Bot, Check, ChevronDown, CircleAlert, LoaderCircle, Send } from "lucide-react";
 import type {
@@ -14,7 +14,11 @@ import type {
 import { semanticLabel, temporalLabel } from "@/lib/evidence/assessment";
 import { emitWorkspaceChange } from "@/lib/client/workspaceEvents";
 
+import {CopilotContinuation} from "./CopilotContinuation";
+import type {CopilotContinuationSuggestion} from "@/lib/types/copilotContinuation";
+
 type Message = {
+  continuationSuggestion?: CopilotContinuationSuggestion;
   id?: string;
   runId?: string | null;
   role: "USER" | "ASSISTANT";
@@ -63,6 +67,9 @@ function Receipt({ receipt, citations }: { receipt: EvidenceTrustReceipt; citati
 }
 
 export function MemoryCopilot({ projectId }: { projectId: string }) {
+  return <ProjectCopilot key={projectId} projectId={projectId}/>;
+}
+function ProjectCopilot({projectId}:{projectId:string}) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [open, setOpen] = useState(() => searchParams.get("openCopilot") === "1");
@@ -73,8 +80,11 @@ export function MemoryCopilot({ projectId }: { projectId: string }) {
   const [feedback, setFeedback] = useState("");
   const [feedbackHref, setFeedbackHref] = useState("");
 
+  const generation=useRef(0), turn=useRef<{text:string;id:string}|null>(null);
+  const [historyLoaded,setHistoryLoaded]=useState(false);
+  useEffect(()=>()=>{generation.current++;},[]);
   useEffect(() => {
-    const openFromHash = () => { if (window.location.hash === "#memory-copilot") setOpen(true); };
+    const openFromHash = () => { if ((window.location.hash === "#memory-copilot" || window.location.hash.startsWith("#copilot-run-"))) setOpen(true); };
     const openFromShortcut = () => setOpen(true);
     openFromHash();
     window.addEventListener("hashchange", openFromHash);
@@ -86,35 +96,43 @@ export function MemoryCopilot({ projectId }: { projectId: string }) {
   }, []);
 
   useEffect(() => {
-    if (!open || messages.length) return;
-    fetch(`/api/projects/${projectId}/agent/chat`).then((response) => response.json()).then((data) => {
-      setMessages((data.messages ?? []).map((item: Message) => ({
-        ...item,
-        citations: item.citations ?? [],
-        proposedActions: item.proposedActions ?? [],
-      })));
-    }).catch(() => undefined);
-  }, [messages.length, open, projectId]);
+    if (!open || historyLoaded) return;
+    const current=++generation.current;let cancelled=false;
+    fetch(`/api/projects/${projectId}/agent/chat${window.location.hash.startsWith("#copilot-run-")?`?sourceRunId=${encodeURIComponent(window.location.hash.slice(13))}`:""}`,{cache:"no-store"}).then(async response => {
+      const data=await response.json();
+      if(cancelled||current!==generation.current)return;
+      if(!response.ok)throw Object.assign(new Error(data.error?.message??"历史对话暂不可用"),{status:response.status});
+      setMessages((data.messages??[]).map((item:Message)=>({...item,citations:item.citations??[],proposedActions:item.proposedActions??[]})));
+      setHistoryLoaded(true);
+      requestAnimationFrame(()=>document.getElementById(window.location.hash.slice(1))?.scrollIntoView({block:"nearest"}));
+    }).catch(error=>{if(!cancelled&&current===generation.current){if([401,403,404].includes(error.status)){setMessages([]);setQuestion("");turn.current=null;}setFeedback(error.message);setHistoryLoaded(true);}});
+    return ()=>{cancelled=true;};
+  },[open,historyLoaded,projectId]);
 
   async function ask(event: React.FormEvent) {
     event.preventDefault();
     if (!question.trim() || loading) return;
     const text = question.trim();
-    setQuestion("");
+    if(!historyLoaded)return;
+    if(turn.current?.text!==text)turn.current={text,id:crypto.randomUUID()};
+    const current=++generation.current;
     setLoading(true);
     setFeedback("");
-    setMessages((old) => [...old, { role: "USER", content: text, citations: [], proposedActions: [] }]);
+
     try {
       const response = await fetch(`/api/projects/${projectId}/agent/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({ message: text, requestId:turn.current.id }),
       });
       const data = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(data?.error?.message ?? "问答失败，请稍后重试");
+      if(current!==generation.current)return;
+      if (!response.ok) {if(data?.error?.code==="COPILOT_TURN_FAILED")turn.current=null;if([401,403,404].includes(response.status)){setMessages([]);setQuestion("");turn.current=null;}throw new Error(data?.error?.message ?? "问答失败，请稍后重试");}
       const answer = data as AgentChatResponse;
-      setMessages((old) => [...old, {
+      setQuestion("");turn.current=null;
+      setMessages((old) => [...old, {role:"USER",content:text,citations:[],proposedActions:[]}, {
         role: "ASSISTANT",
+        continuationSuggestion:answer.continuationSuggestion,
         runId: answer.runId,
         content: answer.message,
         citations: answer.citations ?? [],
@@ -123,9 +141,9 @@ export function MemoryCopilot({ projectId }: { projectId: string }) {
       }]);
       if (answer.fallback) setFeedback("当前使用本地确定性回答，证据仍由服务器逐条校验。");
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : "问答失败，请稍后重试");
+      if(current===generation.current)setFeedback(error instanceof Error ? error.message : "问答失败，请稍后重试");
     } finally {
-      setLoading(false);
+      if(current===generation.current)setLoading(false);
     }
   }
 
@@ -163,21 +181,23 @@ export function MemoryCopilot({ projectId }: { projectId: string }) {
 
   return <section id="memory-copilot" className="card-surface scroll-mt-24 overflow-hidden rounded-lg">
     <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} className="focus-ring flex w-full items-center justify-between gap-3 p-5 text-left sm:p-6">
-      <span className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-md bg-[var(--navy)] text-white"><Bot size={20} /></span><span><span className="block text-sm font-black text-[var(--navy)]">问忆程</span><span className="mt-0.5 block text-xs text-[var(--ink-soft)]">逐条核验依据；证据不足或冲突时不会执行写操作</span></span></span>
+      <span className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-md bg-[var(--navy)] text-white"><Bot size={20} /></span><span><span className="block text-sm font-black text-[var(--navy)]">问忆程</span><span className="mt-0.5 block text-xs text-[var(--ink-soft)]">逐条核验依据；写入行动或成果前由你确认</span></span></span>
       <ChevronDown size={18} className={`transition ${open ? "rotate-180" : ""}`} />
     </button>
     {open && <div className="border-t archive-rule p-5 sm:p-6">
       <div className="max-h-96 space-y-3 overflow-y-auto pr-1">
-        {messages.length ? messages.map((item, index) => <div key={item.id ?? index} className={`rounded-md p-3 text-sm leading-6 ${item.role === "USER" ? "ml-8 bg-[var(--paper)] text-[var(--navy)]" : "mr-4 bg-[var(--paper-strong)] text-[var(--ink-soft)]"}`}>
+        {messages.length ? messages.map((item, index) => <div id={item.runId?`copilot-run-${item.runId}`:undefined} key={item.id ?? index} className={`rounded-md p-3 text-sm leading-6 ${item.role === "USER" ? "ml-8 bg-[var(--paper)] text-[var(--navy)]" : "mr-4 bg-[var(--paper-strong)] text-[var(--ink-soft)]"}`}>
           <p className="whitespace-pre-wrap">{item.content}</p>
           {item.role === "ASSISTANT" && item.trustReceipt && <Receipt receipt={item.trustReceipt} citations={item.citations} />}
           {!item.trustReceipt && item.citations.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{item.citations.map((citation) => <a key={citation.cardId} href={`#card-${citation.cardId}`} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-xs font-bold text-[var(--teal-strong)]">引用：{citation.title}</a>)}</div>}
+          {item.continuationSuggestion && <CopilotContinuation key={item.runId} suggestion={item.continuationSuggestion}/>}
           {item.proposedActions.length > 0 && <div className="mt-3 space-y-2">{item.proposedActions.map((action) => <div key={action.title} className="rounded-lg border border-[var(--teal)]/30 bg-[var(--teal-pale)] p-2.5"><p className="text-xs font-bold text-[var(--navy)]">{action.title}</p><button type="button" onClick={() => void confirmTool(action, item.runId)} disabled={Boolean(toolBusy)} className="focus-ring mt-2 inline-flex items-center gap-1 rounded-md bg-[var(--paper-strong)] px-2 py-1 text-xs font-black text-[var(--teal-strong)] disabled:opacity-60">{toolBusy === action.title ? <LoaderCircle size={12} className="animate-spin" /> : <Check size={12} />}确认执行</button></div>)}</div>}
         </div>) : <p className="rounded-md bg-[var(--paper-strong)] p-5 text-center text-sm text-[var(--ink-soft)]">试试问“当前进展如何？”或“消融实验完成了吗？”</p>}
         {loading && <div className="mr-4 rounded-md bg-[var(--paper-strong)] p-3 text-sm text-[var(--muted)]"><LoaderCircle size={15} className="mr-2 inline animate-spin" />正在检索并核验证据…</div>}
       </div>
       {feedback && <p role="status" className="mt-3 rounded-lg bg-[var(--teal-pale)] px-3 py-2 text-xs font-semibold text-[var(--teal-strong)]">{feedback}{feedbackHref && <a href={projectHref(projectId,feedbackHref)} className="ml-2 underline underline-offset-3">立即查看 →</a>}</p>}
-      <form onSubmit={ask} className="mt-4 flex gap-2"><input aria-label="问项目进展、提醒依据或下一步" value={question} onChange={(event) => setQuestion(event.target.value)} disabled={loading} className="focus-ring editorial-input min-w-0 flex-1 px-3 py-2.5 text-sm" placeholder="问项目进展、提醒依据或下一步" /><button type="submit" disabled={loading || !question.trim()} className="focus-ring editorial-button disabled:opacity-50"><Send size={16} />发送问题</button></form>
+      {feedback&&<button type="button" className="workspace-tool focus-ring mt-2" disabled={loading} onClick={()=>setHistoryLoaded(false)}>重新读取对话</button>}
+      <form onSubmit={ask} className="mt-4 flex gap-2"><input aria-label="问项目进展、提醒依据或下一步" value={question} onChange={(event) => setQuestion(event.target.value)} disabled={loading} className="focus-ring editorial-input min-w-0 flex-1 px-3 py-2.5 text-sm" placeholder="问项目进展、提醒依据或下一步" /><button type="submit" disabled={loading || !historyLoaded || !question.trim()} className="focus-ring editorial-button disabled:opacity-50"><Send size={16} />发送问题</button></form>
     </div>}
   </section>;
 }

@@ -24,14 +24,15 @@ import {ProjectDecisionTimeline} from "@/components/ProjectDecisionTimeline";
 import styles from "@/components/ProjectWorkspace.module.css";
 export const dynamic="force-dynamic";
 export const runtime="nodejs";
-export default async function ProjectFeaturePage({params,searchParams}:{params:Promise<{id:string;section:string}>;searchParams:Promise<{mission?:string}>}){
+export default async function ProjectFeaturePage({params,searchParams}:{params:Promise<{id:string;section:string}>;searchParams:Promise<{mission?:string;questionId?:string;approvalId?:string;outputId?:string;revision?:string;receiptId?:string}>}){
  const {id,section}=await params;
+ const query=await searchParams;
  const item=projectSections.find(p=>p.key===section&&p.key!=="generate");if(!item)notFound();
  const workspace=await requireWorkspaceProject(id,section);
  if(section==="missions"&&!workspace.missionOwner)notFound();
  const enabled=(name:string,fallback=false)=>isFeatureEnabled(name,fallback),state=enabled("PROJECT_STATE_ENABLED"),reminders=enabled("PROJECT_CALENDAR_REMINDER_ENABLED");
  let content;
- if(section==="missions")content=enabled("MISSION_ENABLED")?<MissionPanel projectId={id} initialMissionId={(await searchParams).mission}/>:<p className={styles.empty}>长期委托当前未开启。已有委托数据仍保留。</p>;
+ if(section==="missions")content=enabled("MISSION_ENABLED")?<MissionPanel key={workspace.user.id} projectId={id} initialMissionId={query.mission} readTarget={{questionId:query.questionId,approvalId:query.approvalId,outputId:query.outputId,revision:query.revision?Number(query.revision):undefined,receiptId:query.receiptId}}/>:<p className={styles.empty}>长期委托当前未开启。已有委托数据仍保留。</p>;
  else if(section==="records")content=<><CaptureBox projectId={id} inboxEnabled={enabled("PROJECT_INBOX_ENABLED",true)}/><Link className="focus-ring editorial-button-secondary justify-self-start" href={`/projects/${id}/knowledge`}>查看已生成的知识资产</Link></>;
  else if(section==="meetings")content=<MeetingImportCard projectId={id} stateEnabled={state}/>;
  else if(section==="actions"){
@@ -40,7 +41,7 @@ export default async function ProjectFeaturePage({params,searchParams}:{params:P
  }else if(section==="knowledge"){
   const [project,timeline]=await Promise.all([getProjectDetail(id),getDecisionTimeline(id)]);const byId=new Map(timeline.items.map(i=>[i.card.id,i]));
   const cards=project.cards.map(card=>{const temporal=byId.get(card.id);return {...card,temporal:temporal?{topLevelState:temporal.topLevelState,reasonCode:temporal.reasonCode,displayReason:temporal.displayReason,evidenceRefs:temporal.evidenceRefs}:undefined};});
-  content=<><MemoryCopilot projectId={id}/><KnowledgeFeed projectId={id} cards={cards}/><ArchivedMemoryList projectId={id}/><MemoryConsolidationCard projectId={id} enabled={enabled("PROJECT_MEMORY_CONSOLIDATION_ENABLED")}/></>;
+  content=<><MemoryCopilot key={workspace.user.id} projectId={id}/><KnowledgeFeed projectId={id} cards={cards}/><ArchivedMemoryList projectId={id}/><MemoryConsolidationCard projectId={id} enabled={enabled("PROJECT_MEMORY_CONSOLIDATION_ENABLED")}/></>;
  }else if(section==="health"){
   const {dashboard,metrics}=await loadWorkspaceOverview(id);
   const readiness={...dashboard.readiness,items:dashboard.readiness.items.map(i=>({...i,href:projectHref(id,i.href)}))};

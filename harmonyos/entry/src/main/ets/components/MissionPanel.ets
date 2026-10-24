@@ -1,3 +1,4 @@
+import { failedReadState } from '../common/ReadState';
 import { ProjectAgentContextService } from '../services/ProjectAgentContextService';
 import router from '@ohos.router';
 import { MissionService } from '../services/MissionService';
@@ -17,12 +18,14 @@ export struct MissionPanel {
   @State available: boolean = false;
   @State loading: boolean = true;
   @State error: string = '';
+  @State readState: string = 'unavailable';
+  @State observedAt: string = '';
   @State total: number = 0;
   @State items: MissionWorkspaceItem[] = [];
   private generation: number = 0;
   private disposed: boolean = false;
   private expired: () => void = () => {
-    this.generation++; this.items = []; this.total = 0; this.available = false; this.loading = false; this.error = '请重新登录后查看委托';
+    this.generation++; this.readState = 'unavailable'; this.observedAt = ''; this.items = []; this.total = 0; this.available = false; this.loading = false; this.error = '请重新登录后查看委托';
     this.onSummary({ enabled: false, totalActive: 0, items: [] });
   };
   aboutToAppear(): void { this.disposed = false; SessionStore.onSessionExpired(this.expired); this.probe(); }
@@ -33,12 +36,12 @@ export struct MissionPanel {
     try {
       const summary = await new MissionService().summary(project);
       if (this.disposed || generation !== this.generation || token !== SessionStore.getToken() || project !== this.projectId) return;
-      this.available = summary.enabled; this.total = summary.totalActive; this.items = summary.items;
+      this.readState = 'fresh'; this.observedAt = new Date().toLocaleString('zh-CN'); this.available = summary.enabled; this.total = summary.totalActive; this.items = summary.items;
       this.onSummary(summary);
     } catch (e) {
       if (this.disposed || generation !== this.generation || token !== SessionStore.getToken()) return;
-      this.items = []; this.total = 0;
-      this.onSummary({ enabled: false, totalActive: 0, items: [] });
+      this.readState = failedReadState(this.observedAt !== '', e instanceof ApiError ? e.status : 0);
+      if (this.readState === 'unavailable') { this.items = []; this.total = 0; this.available = false; this.observedAt = ''; this.onSummary({ enabled: false, totalActive: 0, items: [] }); }
       this.error = e instanceof ApiError && e.status === 404 ? '当前账号无权查看本项目的私有委托' : e instanceof ApiError ? e.message : '委托摘要暂未加载，请检查网络后重试';
     } finally { if (generation === this.generation && !this.disposed) this.loading = false; }
   }
@@ -78,7 +81,9 @@ export struct MissionPanel {
             .onClick(() => { this.probe(); })
         } else if (!this.available) {
           Text('委托入口当前未开启；项目资料和原有记录仍保留。').fontSize(14).fontColor(PMColors.INK_SECONDARY)
-        } else {
+        }
+        if (!this.loading && this.available) {
+          if (this.readState === 'lastKnown') { Text(`上次读取于 ${this.observedAt}；以下为历史摘要`).fontSize(12).fontColor(PMColors.RISK) }
           if (this.items.length === 0) {
             Text('交给忆程一个目标，步骤、草稿和审阅记录会保留。').fontSize(14).fontColor(PMColors.INK_SECONDARY)
           }
@@ -97,7 +102,7 @@ export struct MissionPanel {
                   Text(item.activity).fontSize(13).maxLines(2).fontColor(PMColors.INK_PRIMARY)
                 }.width('100%').padding(12).alignItems(HorizontalAlign.Start).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(12)
               }
-              Button('设为当前关注').height(44).fontSize(12).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT)
+              Button('设为当前关注').enabled(this.readState === 'fresh').height(44).fontSize(12).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT)
                 .onClick(async () => {
                   try { await new ProjectAgentContextService().focus(this.projectId, item.id); this.error = ''; this.probe(); }
                   catch (e) { this.error = e instanceof ApiError ? e.message : '未能设置关注委托'; }

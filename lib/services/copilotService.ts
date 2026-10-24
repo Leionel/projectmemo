@@ -1,4 +1,10 @@
 import { reserveCloudCall } from "@/lib/auth/cloudQuota";
+import {AppError} from "@/lib/api";
+import type {Prisma} from "@/lib/generated/prisma/client";
+import {continuationSuggestion,freezeContinuation} from "@/lib/copilot/continuation";
+import {assertActor,type SourceManifest} from "@/lib/copilot/confirmation";
+import {getProjectAgentContext} from "./projectAgentContextService";
+import type {CopilotContinuationSuggestion} from "@/lib/types/copilotContinuation";
 import { configuredClaimJudge } from "@/lib/mission/claimJudgeAdapter";
 import { assessCopilotSemantics } from "@/lib/evidence/copilotSemantic";
 import { evidenceAssessment } from "@/lib/evidence/assessment";
@@ -118,10 +124,49 @@ function mockAnswer(input: {
   };
 }
 
-export async function answerProjectQuestion(projectId: string, question: string, actor?: CopilotActor): Promise<AgentChatResponse> {
+type ChatTurn={requestId:string;userMessageId:string};
+async function persistAnswer(tx:Prisma.TransactionClient,runId:string,projectId:string,answer:{message:string;citations:AgentCitation[];proposedActions:ProposedAction[]},suggestion:CopilotContinuationSuggestion|undefined,manifest:SourceManifest,actor?:CopilotActor,turn?:ChatTurn){
+  const continuation=suggestion?{...suggestion,sourceRunId:runId}:undefined;
+  if(continuation){
+    const run=await tx.agentRun.findUniqueOrThrow({where:{id:runId}});
+    await tx.agentRun.update({where:{id:runId},data:{resultJson:{...run.resultJson as object,continuationSuggestion:continuation}}});
+    await freezeContinuation(tx,runId,continuation,manifest);
+  }
+  await saveAgentMessage({projectId,role:"ASSISTANT",content:answer.message,citations:answer.citations,proposedActions:answer.proposedActions,runId,ownerUserId:actor?.userId,requestId:turn?.requestId,requestState:"ANSWERED"},tx);
+  if(turn)await tx.agentMessage.update({where:{id:turn.userMessageId},data:{requestState:"ANSWERED"}});
+  return continuation;
+}
+export async function answerProjectQuestion(projectId:string,question:string,actor?:CopilotActor,requestId?:string):Promise<AgentChatResponse>{
+  if(!actor||!requestId)return answerQuestion(projectId,question,actor);
+  await db.$transaction(tx=>assertActor(tx,projectId,actor));
+  async function replay(){
+    const user=await db.agentMessage.findFirst({where:{projectId,ownerUserId:actor!.userId,requestId,role:"USER"}});
+    if(!user)return null;if(user.content!==question)throw new AppError("REQUEST_ID_REUSED","请求编号已用于另一条问题",409);
+    const message=await db.agentMessage.findFirst({where:{projectId,ownerUserId:actor!.userId,requestId,role:"ASSISTANT"},include:{run:true}});
+    if(!message?.run&&user.requestState==="PENDING"&&user.createdAt.getTime()<Date.now()-10*60*1000){
+      await db.agentMessage.updateMany({where:{id:user.id,requestState:"PENDING"},data:{requestState:"FAILED"}});
+      user.requestState="FAILED";
+    }
+    if(!message?.run)throw new AppError(user.requestState==="FAILED"?"COPILOT_TURN_FAILED":"COPILOT_TURN_PENDING",user.requestState==="FAILED"?"原问题未完成，请重新提问；没有自动创建业务任务":"原问题仍在处理中，请稍后重试读取同一回答",409);
+    const result=message.run.resultJson as {continuationSuggestion?:CopilotContinuationSuggestion;trustReceipt?:EvidenceTrustReceipt};
+    return {message:message.content,citations:message.citations as unknown as AgentCitation[],proposedActions:message.proposedActions as unknown as ProposedAction[],runId:message.run.id,fallback:message.run.status==="FALLBACK",trustReceipt:result?.trustReceipt??undefined,continuationSuggestion:result?.continuationSuggestion};
+  }
+  const old=await replay();if(old)return old;
+  let user;
+  try{user=await saveAgentMessage({projectId,role:"USER",content:question,citations:[],proposedActions:[],ownerUserId:actor.userId,requestId,requestState:"PENDING"});}
+  catch(error){if((error as {code?:string}).code==="P2002"){const existing=await replay();if(existing)return existing;}throw error;}
+  try{return await answerQuestion(projectId,question,actor,{requestId,userMessageId:user.id});}
+  catch(error){await db.agentMessage.updateMany({where:{id:user.id,requestState:"PENDING"},data:{requestState:"FAILED"}});throw error;}
+}
+async function answerQuestion(projectId: string, question: string, actor?: CopilotActor,turn?:ChatTurn): Promise<AgentChatResponse> {
   const startedAt = Date.now();
   const { project, cards, interventions, actions, sourceManifest } = await db.$transaction(tx => readCopilotContext(tx, projectId, actor));
-  await saveAgentMessage({ projectId, role: "USER", content: question, citations: [], proposedActions: [] });
+  const history=actor?await db.agentMessage.findMany({where:{projectId,ownerUserId:actor.userId,requestState:"ANSWERED"},orderBy:[{createdAt:"desc"},{id:"desc"}],take:12,select:{id:true,role:true,content:true}}):[];
+  const dialogue=history.slice(0,6).reverse().map(m=>({role:m.role,text:m.content.slice(0,1000)}));
+  const explicitConstraints=history.filter(m=>m.role==="USER"&&/不要|禁止|不允许|只读|不得|不创建|不使用/.test(m.content)).slice(0,6).map(m=>m.content.slice(0,1000));
+  const missionContext=actor?await getProjectAgentContext(actor.userId,projectId):null;
+  if(!turn)await saveAgentMessage({ projectId, role: "USER", content: question, citations: [], proposedActions: [],ownerUserId:actor?.userId,requestState:"ANSWERED" });
+  const suggested=await continuationSuggestion(projectId,question,actor);
   // 当前提醒数和提醒原文是本项目的持久化事实，可以直接核对；不必强迫它们
   // 再匹配到一张知识卡片。这里只回答已有状态，不推断未记录的触发原因。
   const asksCurrentReminders = /(提醒|主动介入)/.test(question)
@@ -156,20 +201,24 @@ export async function answerProjectQuestion(projectId: string, question: string,
       }],
       retrievalMode: "project_state", refusalReason: null, evaluatedAt: observedAt,
     };
-    const run = await saveAgentRun({
+    const run = await db.$transaction(async tx=>{
+      await assertCopilotSources(tx,projectId,sourceManifest,actor);
+      const saved = await saveAgentRun({
       projectId, runType: AgentRunType.CHAT, status: AgentRunStatus.SUCCESS,
       provider: "project_state", fallbackReason: null,
       trace: {
+        actorUserId:actor?.userId,copilotSources:sourceManifest,
         intent: "inspect_current_reminders", retrievalMode: "project_state",
         supportState: "SUPPORTED", abstained: false, trustReceipt,
       },
       resultJson: { proposedActions: [], trustReceipt }, durationMs: Date.now() - startedAt,
+    },tx);
+      const continuation=await persistAnswer(tx,saved.id,projectId,{message,citations:[],proposedActions:[]},suggested,sourceManifest,actor,turn);
+      return {...saved,continuationSuggestion:continuation};
     });
-    await saveAgentMessage({
-      projectId, role: "ASSISTANT", content: message, citations: [], proposedActions: [], runId: run.id,
-    });
-    return { message, citations: [], proposedActions: [], runId: run.id, fallback: false, trustReceipt };
+    return {message,citations:[],proposedActions:[],runId:run.id,fallback:false,trustReceipt,continuationSuggestion:run.continuationSuggestion};
   }
+
   const timeline = await getDecisionTimeline(projectId);
   const temporalById = new Map(timeline.items.map(item => [item.card.id, item]));
   const evidenceSearch = await getCopilotEvidence(projectId, question, cards);
@@ -183,6 +232,7 @@ export async function answerProjectQuestion(projectId: string, question: string,
         buildCopilotPrompt({
           project,
           question,
+          dialogue:{messages:dialogue,explicitConstraints},missionContext,
           cards: cards.filter((card) => evidenceSearch.citations.some((citation) => citation.cardId === card.id)).map((card) => ({ id: card.id, title: card.title, summary: card.summary, type: String(card.type), temporalState: temporalById.get(card.id)?.topLevelState ?? "UNKNOWN", sourceRevision: sourceManifest.cardHashes.find(item => item.id === card.id)?.hash ?? "", observedAt: sourceManifest.observedAt })),
           interventions: interventions.map((item) => ({ id: item.id, title: item.title, content: item.content, status: String(item.status) })),
           actions: actions.map((item) => ({ id: item.id, title: item.title, status: String(item.status) })),
@@ -305,6 +355,7 @@ export async function answerProjectQuestion(projectId: string, question: string,
     trace: {
       ...(actor ? { actorUserId: actor.userId } : {}),
       copilotSources: sourceManifest,
+      dialogueManifest:{schemaVersion:1,messageIds:history.map(m=>m.id),hash:jsonHash({dialogue,explicitConstraints}),missionObservationHash:missionContext?.observationHash??null},
       evidenceManifest: { schemaVersion: 1, promptVersion: "copilot-evidence-v1", questionHash: jsonHash(question),
         includedCardIds: answer.citations.map(c => c.cardId), sourceHashes: sourceManifest.cardHashes.filter(item => retrievedCardIds.has(item.id)),
         temporalAsOf: timeline.asOf, semanticJudgeEnabled: isFeatureEnabled("COPILOT_CLAIM_JUDGE_ENABLED", false) },
@@ -326,22 +377,15 @@ export async function answerProjectQuestion(projectId: string, question: string,
     durationMs: Date.now() - startedAt,
     }, tx);
     await freezeCopilotProposals(tx, saved.id, answer.proposedActions, sourceManifest);
-    return saved;
+    const continuation=await persistAnswer(tx,saved.id,projectId,answer,suggested,sourceManifest,actor,turn);
+    return {...saved,continuationSuggestion:continuation};
   });
-  await saveAgentMessage({
-    projectId,
-    role: "ASSISTANT",
-    content: answer.message,
-    citations: answer.citations,
-    proposedActions: answer.proposedActions,
-    runId: run.id,
-  });
-  return { message: answer.message, citations: answer.citations, proposedActions: answer.proposedActions, runId: run.id, fallback, ...(trustReceipt ? { trustReceipt } : {}) };
+  return { message: answer.message, citations: answer.citations, proposedActions: answer.proposedActions, runId: run.id, fallback,continuationSuggestion:run.continuationSuggestion, ...(trustReceipt ? { trustReceipt } : {}) };
 }
 
-export async function getProjectChat(projectId: string) {
+export async function getProjectChat(projectId: string,ownerUserId?:string,sourceRunId?:string) {
   await requireProject(projectId);
-  const messages = await listAgentMessages(projectId);
+  const messages = await listAgentMessages(projectId,20,ownerUserId,sourceRunId);
   if (!isFeatureEnabled("EVIDENCE_TRUST_RECEIPT_ENABLED", true)) return messages;
   return messages.map((message) => message.role === "ASSISTANT" && !message.trustReceipt
     ? { ...message, proposedActions: [] }

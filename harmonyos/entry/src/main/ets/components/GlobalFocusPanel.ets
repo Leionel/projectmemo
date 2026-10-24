@@ -15,24 +15,28 @@ export struct GlobalFocusPanel {
   @State private view: GlobalFocusReply = new GlobalFocusReply();
   @State private busy: boolean = true;
   @State private errorText: string = '';
+  @State private observedAt: string = '';
+  @State private lastKnown: boolean = false;
   @State private includeArchived: boolean = false;
   @State private expandedGroups: string[] = [];
   private generation: number = 0;
   private service: GlobalFocusService = new GlobalFocusService();
-  private expired: () => void = () => { this.generation++; this.view = new GlobalFocusReply(); this.errorText = '请重新登录后查看焦点'; this.busy = false; };
+  private expired: () => void = () => { this.generation++; this.view = new GlobalFocusReply(); this.lastKnown = false; this.observedAt = ''; this.errorText = '请重新登录后查看焦点'; this.busy = false; };
   aboutToAppear(): void { SessionStore.onSessionExpired(this.expired); this.refresh(); }
   aboutToDisappear(): void { this.generation++; SessionStore.offSessionExpired(this.expired); }
   private async refresh(): Promise<void> {
     const generation = ++this.generation; const token = SessionStore.getToken();
-    this.busy = true; this.errorText = ''; this.view = new GlobalFocusReply();
+    this.busy = true; this.errorText = '';
     try {
       const reply = await this.service.read(this.includeArchived);
       if (generation !== this.generation || token !== SessionStore.getToken()) return;
       if (reply.schemaVersion !== 1) throw new Error('当前客户端尚不支持这份焦点摘要，请更新应用');
-      this.view = reply;
+      this.view = reply; this.observedAt = new Date().toLocaleString('zh-CN'); this.lastKnown = false;
     } catch (error) {
       if (generation !== this.generation || token !== SessionStore.getToken()) return;
-      this.errorText = error instanceof ApiError ? error.message : '焦点暂未加载，请检查网络后重试';
+      if (error instanceof ApiError && [401, 403, 404].includes(error.status)) { this.view = new GlobalFocusReply(); this.observedAt = ''; }
+      this.lastKnown = this.observedAt !== '';
+      this.errorText = (error instanceof ApiError ? error.message : '焦点暂未加载，请检查网络后重试') + (this.lastKnown ? `；保留上次读取 ${this.observedAt} 的历史摘要` : '');
     } finally { if (generation === this.generation) this.busy = false; }
   }
   private dateLabel(): string {
@@ -127,10 +131,11 @@ export struct GlobalFocusPanel {
   }
   build() {
     if (this.busy) { LoadingStateView({ message: '正在读取当前焦点…' }) }
-    else if (this.errorText !== '') { ErrorStateView({ message: this.errorText, onRetry: () => { this.refresh(); } }) }
+    else if (this.errorText !== '' && !this.lastKnown) { ErrorStateView({ message: this.errorText, onRetry: () => { this.refresh(); } }) }
     else {
       Scroll() {
         Column() {
+          if (this.errorText !== '') { Text(this.errorText).fontSize(12).fontColor(PMColors.RISK) }
           PMPageIntro({ eyebrow: this.dateLabel(), title: '今天，先处理重要的事', description: '优先回应与你有关的判断，再继续推进项目。' })
           if (this.primary() !== null) { this.Primary(this.primary()!) }
           else { Text('当前范围内没有待回应的事项，进入项目记录新进展。').fontSize(14).fontColor(PMColors.INK_SECONDARY).margin({ bottom: 16 }) }

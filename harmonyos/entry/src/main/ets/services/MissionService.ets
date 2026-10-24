@@ -1,3 +1,4 @@
+import { MissionReadTarget, MissionReadbackReply, missionReadbackQuery } from '../models/MissionReadback';
 import { ApiClient } from './ApiClient';
 import { SessionStore } from './SessionStore';
 import { ApiError } from '../models/Project';
@@ -44,6 +45,9 @@ export class MissionService {
   }
   async confirmMaterial(id: string, body: MissionMaterialConfirm): Promise<MissionContinued> {
     this.authorize(); return this.client.post<MissionContinued>(`${this.path(id)}/continuations/confirm`, body);
+  }
+  async readback(id: string, target: MissionReadTarget): Promise<MissionReadbackReply> {
+    this.authorize(); return this.client.get<MissionReadbackReply>(`${this.path(id)}/readback?${missionReadbackQuery(target)}`);
   }
   async previewArtifact(id: string, outputId: string, body: MissionArtifactInput): Promise<MissionArtifactPreviewReply> {
     this.authorize(); return this.client.post<MissionArtifactPreviewReply>(`${this.path(id)}/outputs/${encodeURIComponent(outputId)}/artifact-preview`, body);

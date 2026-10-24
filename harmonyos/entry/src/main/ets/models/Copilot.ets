@@ -72,6 +72,7 @@ export class AgentMessage {
   citations: AgentCitation[] = [];
   proposedActions: ProposedAction[] = [];
   runId: string | undefined = undefined;
+  continuationSuggestion: CopilotContinuationSuggestion | undefined = undefined;
   trustReceipt: EvidenceTrustReceipt | undefined = undefined;
   createdAt: string = '';
 }
@@ -82,6 +83,7 @@ export class AgentChatResponse {
   proposedActions: ProposedAction[] = [];
   fallback: boolean = false;
   runId: string | undefined = undefined;
+  continuationSuggestion: CopilotContinuationSuggestion | undefined = undefined;
   trustReceipt: EvidenceTrustReceipt | undefined = undefined;
 }
 
@@ -95,6 +97,7 @@ export class ExecuteToolResponse {
 }
 
 export class CopilotChatInput {
+  requestId: string | undefined = undefined;
   message: string = '';
 }
 
@@ -114,3 +117,12 @@ export class CopilotToolConfirmInput {
   payload: Object = new Object();
   sourceRunId: string | undefined = undefined;
 }
+
+export class CopilotMissionRef { id: string = ''; version: number = 0; planRevision: number = 0; questionId: string | null = null; approvalId: string | null = null; outputId: string | null = null; outputRevision: number | null = null; }
+export class CopilotContinuationSuggestion { schemaVersion: number = 1; kind: string = 'ANSWER_ONLY'; projectId: string = ''; sourceRunId: string = ''; reason: string = ''; goal: string = ''; mission: CopilotMissionRef | null = null; }
+export class CopilotMissionPreviewInput { sourceRunId: string = ''; goal: string = ''; llmContextApproved: boolean = false; }
+export class CopilotMissionConfirmInput { sourceRunId: string = ''; requestId: string = ''; previewHash: string = ''; confirmed: boolean = true; }
+export class CopilotMissionPreview { previewHash: string = ''; goal: string = ''; readOnly: boolean = true; llmContextApproved: boolean = false; successCriteria: string[] = []; }
+export class CopilotMissionPreviewReply { preview: CopilotMissionPreview = new CopilotMissionPreview(); }
+export class CopilotMissionReceipt { missionId: string = ''; projectId: string = ''; sourceRunId: string = ''; receiptId: string = ''; alreadyCreated: boolean = false; }
+export class CopilotMissionReceiptReply { receipt: CopilotMissionReceipt = new CopilotMissionReceipt(); }

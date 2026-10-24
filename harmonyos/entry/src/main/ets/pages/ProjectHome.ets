@@ -1,3 +1,4 @@
+import { CopilotContinuationCard } from '../components/CopilotContinuationCard';
 import { SessionStore } from '../services/SessionStore';
 import { ProjectAgentContext } from '../models/ProjectAgentContext';
 import { ProjectAgentContextService } from '../services/ProjectAgentContextService';
@@ -95,7 +96,7 @@ struct ProjectHome {
   @State private agentContext: ProjectAgentContext | null = null;
   @State private agentContextError: string = '';
   private agentContextGeneration: number = 0;
-  private agentContextExpired: () => void = () => { this.agentContextGeneration++; this.agentContext = null; this.homeMission = null; this.agentContextError = '登录已失效，请重新登录。'; };
+  private agentContextExpired: () => void = () => { this.agentContextGeneration++; this.agentContext = null; this.homeMission = null; this.chatMessages = []; this.copilotTurnId = ''; this.copilotTurnText = ''; this.copilotQuestion = ''; this.agentContextError = '登录已失效，请重新登录。'; };
   @State homeMission: MissionWorkspaceItem | null = null;
   @State showEvolution: boolean = false;
   @StorageProp(PMStorageKey.WIDTH_BP) widthBp: string = PMWidthBp.SM;
@@ -271,6 +272,11 @@ struct ProjectHome {
       return;
     }
     this.projectId = params['projectId'] ?? '';
+    this.showQuickCopilot = params['openCopilot'] === '1';
+    this.sourceConversationRun = params['sourceRunId'] ?? '';
+    this.requestedArtifactId = params['artifactId'] ?? '';
+    if (this.requestedArtifactId !== '') this.currentTabIndex = 4;
+
     if (this.projectId !== '') WidgetDataService.selectProject(getContext(this), this.projectId).catch(() => {});
     if (params['tab'] === 'memory') {
       this.currentTabIndex = 1;
@@ -509,16 +515,17 @@ struct ProjectHome {
     const contextGeneration = ++this.agentContextGeneration;
     const contextToken = SessionStore.getToken();
     const contextProject = this.projectId;
-    this.agentContext = null; this.agentContextError = '';
-    const contextP = new ProjectAgentContextService().read(contextProject).catch(() => null);
+    this.agentContextError = '';
+    let contextDenied = false; let missionDenied = false;
+    const contextP = new ProjectAgentContextService().read(contextProject).catch((e: ApiError) => { contextDenied = e instanceof ApiError && [401, 403, 404].includes(e.status); return null; });
     try {
       const detailP = this.projectService.getProjectDetail(this.projectId);
       const listP = this.projectService.listProjects();
       const intervP = this.interventionService.list(this.projectId);
       const actionP = this.actionService.list(this.projectId);
       const artifactP = this.artifactService.list(this.projectId);
-      const chatP = this.copilotService.getChatHistory(this.projectId);
-      const missionP = new MissionService().summary(this.projectId).catch(() => null);
+      const chatP = this.copilotService.getChatHistory(this.projectId, this.sourceConversationRun);
+      const missionP = new MissionService().summary(this.projectId).catch((e: ApiError) => { missionDenied = e instanceof ApiError && [401, 403, 404].includes(e.status); return null; });
       let attachmentError = '';
       const attachmentP = this.attachmentService.list(this.projectId).catch((error: ApiError) => {
         attachmentError = error instanceof ApiError ? error.message : '附件列表加载失败，请重试';
@@ -534,9 +541,11 @@ struct ProjectHome {
       const missionSummary = await missionP;
       const contextReply = await contextP;
       if (contextGeneration !== this.agentContextGeneration || contextToken !== SessionStore.getToken() || contextProject !== this.projectId) return;
-      this.agentContext = contextReply?.context ?? null;
-      this.agentContextError = contextReply === null ? '当前下一步暂时无法读取，请刷新重试。' : '';
-      this.homeMission = missionSummary !== null && missionSummary.enabled ? missionSummary.items[0] ?? null : null;
+      if (contextReply !== null) this.agentContext = contextReply.context;
+      else if (contextDenied) this.agentContext = null;
+      this.agentContextError = contextReply === null ? (this.agentContext !== null ? `当前显示上次读取 ${this.agentContext.observedAt} 的历史摘要，请刷新。` : '当前下一步暂时无法读取，请刷新重试。') : '';
+      if (missionSummary !== null) this.homeMission = missionSummary.enabled ? missionSummary.items[0] ?? null : null;
+      else if (missionDenied) this.homeMission = null;
       this.project = res[0];
       this.dashboard = this.findDashboard(res[1]);
       // R2 再入场：检查点/风险/下一安排聚合；失败保留上次缓存，不推送假空态
@@ -574,6 +583,13 @@ struct ProjectHome {
       }
 
       this.updateCurrentArtifact();
+      if (this.requestedArtifactId !== '') {
+        const fixed = this.artifacts.find((item: ArtifactItem) => item.id === this.requestedArtifactId);
+        this.currentArtifact = fixed;
+        if (fixed !== undefined) { this.selectedArtifactType = fixed.artifactType; this.isArtifactReader = true; this.currentTabIndex = 4; }
+        else { this.isArtifactReader = false; this.artifactError = '原成果版本当前不可访问，请核对后重新选择；不会自动替换为最新成果。'; }
+        this.requestedArtifactId = '';
+      }
       if (this.memorySearchQuery.trim() !== '') {
         await this.searchMemory();
       }
@@ -2156,6 +2172,10 @@ struct ProjectHome {
   }
 
   // --- 问忆程操作 ---
+  private requestedArtifactId: string = '';
+  private sourceConversationRun: string = '';
+  private copilotTurnId: string = '';
+  private copilotTurnText: string = '';
   private async sendCopilotMessage(): Promise<void> {
     if (this.isAskingCopilot) {
       return;
@@ -2164,17 +2184,21 @@ struct ProjectHome {
     if (text === '') {
       return;
     }
-    this.copilotQuestion = '';
+    const token = SessionStore.getToken(); const project = this.projectId;
+    if (this.copilotTurnText !== text || this.copilotTurnId === '') { this.copilotTurnText = text; this.copilotTurnId = `chat-${Date.now()}-${Math.random().toString(36).slice(2)}`; }
     this.isAskingCopilot = true;
     this.copilotFeedback = '';
 
     const userMsg = new AgentMessage();
     userMsg.role = 'USER';
     userMsg.content = text;
-    this.chatMessages.push(userMsg);
+
 
     try {
-      const res = await this.copilotService.askQuestion(this.projectId, text);
+      const res = await this.copilotService.askQuestion(project, text, this.copilotTurnId);
+      if (token !== SessionStore.getToken() || project !== this.projectId) return;
+      this.copilotQuestion = ''; this.copilotTurnId = ''; this.copilotTurnText = '';
+      this.chatMessages.push(userMsg);
       const assistantMsg = new AgentMessage();
       assistantMsg.role = 'ASSISTANT';
       assistantMsg.content = res.message;
@@ -2182,12 +2206,16 @@ struct ProjectHome {
       assistantMsg.proposedActions = res.proposedActions;
       assistantMsg.runId = res.runId;
       assistantMsg.trustReceipt = res.trustReceipt;
+      assistantMsg.continuationSuggestion = res.continuationSuggestion;
       this.chatMessages.push(assistantMsg);
       if (res.fallback) {
         this.copilotFeedback = '（已从项目记忆检索并整理回复）';
       }
     } catch (e) {
-      this.copilotFeedback = '问答服务异常，请稍后重试';
+      if (token !== SessionStore.getToken() || project !== this.projectId) return;
+      this.copilotFeedback = e instanceof ApiError ? e.message : '问答结果尚未确认，保留问题后可重试';
+      if (e instanceof ApiError && e.code === 'COPILOT_TURN_FAILED') this.copilotTurnId = '';
+      if (e instanceof ApiError && [401, 403, 404].includes(e.status)) { this.chatMessages = []; this.copilotQuestion = ''; this.copilotTurnId = ''; this.copilotTurnText = ''; }
     } finally {
       this.isAskingCopilot = false;
     }
@@ -4462,6 +4490,8 @@ struct ProjectHome {
                 .width('100%')
                 .alignItems(HorizontalAlign.Start)
               }
+              if (msg.runId === this.sourceConversationRun) { Text('原委托的来源对话').fontSize(12).fontColor(PMColors.BRAND) }
+              if (msg.continuationSuggestion !== undefined) { CopilotContinuationCard({ suggestion: msg.continuationSuggestion }) }
             }
             .width('100%')
             .padding(PMSpacing.LG)

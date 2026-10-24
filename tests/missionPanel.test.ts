@@ -28,7 +28,7 @@ describe("Mission 面板调用方",()=>{
  it("模板写入真实只读约束但不代勾云模型许可；丢失响应先读回并保留请求编号",async()=>{
   fixture();const original=globalThis.fetch;const requests:Array<{requestId:string;missionConstraints:unknown;llmContextApproved:boolean}>=[];
   vi.stubGlobal("fetch",vi.fn(async(input,init)=>{if(input==="/api/missions"&&init?.method==="POST"){requests.push(JSON.parse(init.body as string));throw new Error("response lost");}return original(input,init);}));
-  render(createElement(MissionPanel,{projectId:"p"}));fireEvent.click(screen.getByRole("button",{name:"使用阶段汇报模板"}));
+  render(createElement(MissionPanel,{projectId:"p"}));await screen.findByRole("button",{name:"整理阶段汇报 · 等待执行"});fireEvent.click(screen.getByRole("button",{name:"使用阶段汇报模板"}));
   expect((screen.getByRole("checkbox",{name:/允许配置的云模型/}) as HTMLInputElement).checked).toBe(false);
  expect((screen.getByRole("checkbox",{name:/仅允许读取、分析和保存草稿/}) as HTMLInputElement).checked).toBe(true);
  fireEvent.click(screen.getByRole("button",{name:"创建委托"}));expect(await screen.findByText(/已读取最新状态/)).toBeTruthy();
@@ -40,6 +40,13 @@ describe("Mission 面板调用方",()=>{
   const f=fixture(true);f.mission.approvals[0].expiresAt="2020-01-01T00:00:00Z";
   render(createElement(MissionPanel,{projectId:"p"}));fireEvent.click(await screen.findByRole("button",{name:"整理阶段汇报 · 等待你的批准"}));
   expect(await screen.findByText("提案已过期，请更新依据并重新预览。")).toBeTruthy();expect((screen.getByRole("button",{name:"批准创建行动"}) as HTMLButtonElement).disabled).toBe(true);expect(f.requests).toHaveLength(0);
+ });
+ it("临时读取失败保留标时历史并阻止写入，重新读取后恢复",async()=>{
+  const f=fixture();render(createElement(MissionPanel,{projectId:"p"}));const row=await screen.findByRole("button",{name:"整理阶段汇报 · 等待执行"});fireEvent.click(row);await screen.findByRole("heading",{name:"整理阶段汇报"});
+  const original=globalThis.fetch;vi.stubGlobal("fetch",vi.fn(async()=>({ok:false,status:503,json:async()=>({error:{message:"服务暂不可用"}})})));
+  fireEvent.click(row);await screen.findByText(/当前显示上次读取的历史状态/);expect(screen.getByRole("heading",{name:"整理阶段汇报"})).toBeTruthy();
+  fireEvent.click(screen.getByText("暂停与取消"));expect((screen.getByRole("button",{name:"暂停"}) as HTMLButtonElement).closest("fieldset")?.disabled).toBe(true);expect(f.requests).toHaveLength(0);
+  vi.stubGlobal("fetch",original);fireEvent.click(screen.getByRole("button",{name:"刷新重试"}));await waitFor(()=>expect(screen.queryByText(/当前显示上次读取的历史状态/)).toBeNull());
  });
  it("401时清除已显示的私有委托、来源和输入，不留下旧账号内容",async()=>{
   fixture();render(createElement(MissionPanel,{projectId:"p"}));const row=await screen.findByRole("button",{name:"整理阶段汇报 · 等待执行"});fireEvent.click(row);await screen.findByRole("heading",{name:"整理阶段汇报"});

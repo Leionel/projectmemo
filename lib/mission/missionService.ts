@@ -7,15 +7,19 @@ import type { Source } from "./contracts";
 import { z } from "zod";
 import { continuationPolicySchema } from "@/lib/types/mission";
 import { readMissionCompletion } from "./completionSummary";
+import type {Prisma} from "@/lib/generated/prisma/client";
 export function requireMissions() { if (!isFeatureEnabled("MISSION_ENABLED", false)) throw new AppError("MISSION_DISABLED", "委托功能尚未启用", 503); }
 export async function createMission(userId: string, input: unknown) {
   requireMissions(); const body=createMissionSchema.parse(input); await assertOwner(userId,body.projectId); const hash=jsonHash(body);
   const find=()=>db.agentMission.findUnique({where:{ownerUserId_createRequestId:{ownerUserId:userId,createRequestId:body.requestId}}});
   const existing=await find(); if(existing){if(existing.createPayloadHash!==hash)throw new AppError("REQUEST_ID_REUSED","请求编号已用于其他委托",409);return existing;}
-  try{return await db.$transaction(async tx=>{
+  try{return await db.$transaction(tx=>createMissionInTx(tx,userId,body));}catch(error){const raced=await find();if(raced?.createPayloadHash===hash)return raced;throw error;}
+}
+/** Shared creation path for confirmed Copilot handoff; caller owns the atomic receipt transaction. */
+export async function createMissionInTx(tx:Prisma.TransactionClient,userId:string,input:unknown){
+    requireMissions();const body=createMissionSchema.parse(input);await assertOwner(userId,body.projectId,tx);const hash=jsonHash(body);
     const m=await tx.agentMission.create({data:{ownerUserId:userId,projectId:body.projectId,createRequestId:body.requestId,createPayloadHash:hash,goal:body.goal,successCriteriaJson:body.successCriteria,constraintsJson:json({...body.missionConstraints,llmContextApproved:body.llmContextApproved}),researchScopeJson:json(body.researchScope),continuationPolicyJson:body.continuationPolicy,budgetJson:defaultBudget}});
     await event(tx,m.id,"CREATED",{goal:m.goal,constraints:body.missionConstraints,researchScope:body.researchScope,llmContextApproved:body.llmContextApproved});return m;
-  });}catch(error){const raced=await find();if(raced?.createPayloadHash===hash)return raced;throw error;}
 }
 export async function listMissions(userId:string,projectId:string,cursor?:string){
   await assertOwner(userId,projectId);

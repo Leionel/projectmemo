@@ -14,16 +14,16 @@ import type { ProposedAction } from "@/lib/types";
 
 type Tx = Prisma.TransactionClient;
 export type CopilotActor = { userId: string; sessionId: string };
-const manifestSchema = z.object({
+export const manifestSchema = z.object({
   schemaVersion: z.literal(1),
   contextHash: z.string().regex(/^[a-f0-9]{64}$/),
   cardHashes: z.array(z.object({ id: z.string(), hash: z.string().regex(/^[a-f0-9]{64}$/) }).strict()),
   observedAt: z.string().datetime(),
 }).strict();
-type SourceManifest = z.infer<typeof manifestSchema>;
+export type SourceManifest = z.infer<typeof manifestSchema>;
 const object = (value: unknown): Record<string, unknown> => value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
 
-async function assertActor(tx: Tx, projectId: string, actor?: CopilotActor) {
+export async function assertActor(tx: Tx, projectId: string, actor?: CopilotActor) {
   if (!actor) return; // Trusted in-process callers; HTTP routes always supply authenticated context.
   const session = await tx.authSession.findFirst({ where: {
     id: actor.sessionId, userId: actor.userId, revokedAt: null, expiresAt: { gt: new Date() },
@@ -108,7 +108,7 @@ export async function freezeCopilotProposals(tx: Tx, sourceRunId: string, propos
   }
 }
 
-async function writeTransaction<T>(sourceRunId: string, callback: (tx: Tx) => Promise<T>): Promise<T> {
+export async function writeTransaction<T>(sourceRunId: string, callback: (tx: Tx) => Promise<T>): Promise<T> {
   for (let attempt = 0; ; attempt++) {
     try {
       return await db.$transaction(async tx => {

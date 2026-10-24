@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-24T11:02:46.434Z",
+  "request": {
+    "method": "POST",
+    "path": "/api/projects/cmvmabwy10003svrawzrfth86/repo-signals/connections/cmvmahppf001dsvraei37ew7w",
+    "body": {
+      "action": "REFRESH",
+      "requestId": "28d80f75-5e35-44f8-813e-75d4cf772ef1"
+    },
+    "authorized": true
+  },
+  "status": 409,
+  "body": {
+    "error": {
+      "code": "CONNECTION_REVOKED",
+      "message": "连接已撤销，不再发起任何新请求；历史信号保留"
+    }
+  }
+}

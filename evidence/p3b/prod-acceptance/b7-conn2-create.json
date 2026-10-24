@@ -1,0 +1,56 @@
+{
+  "at": "2026-10-24T11:02:21.631Z",
+  "request": {
+    "method": "POST",
+    "path": "/api/projects/cmvmabwy10003svrawzrfth86/repo-signals",
+    "body": {
+      "repo": "Leionel/projectmemo",
+      "ref": "master",
+      "requestId": "52479cad-c25d-4d2a-80d4-497994356558"
+    },
+    "authorized": true
+  },
+  "status": 200,
+  "body": {
+    "connection": {
+      "id": "cmvmahppf001dsvraei37ew7w",
+      "projectId": "cmvmabwy10003svrawzrfth86",
+      "ownerUserId": "cmu3sjpnj0000zlrasghegg46",
+      "repo": "Leionel/projectmemo",
+      "ref": "master",
+      "signalKind": "COMMITS",
+      "status": "ACTIVE",
+      "revokedAt": null,
+      "revokedReason": null,
+      "etag": "W/\"021daa93e8c3210faf84a7b3b8a10a734d18dff1267649b5425c70adbf2275b2\"",
+      "cursorSha": "b91c0b76581517a6fc2f7b8740c568ec54cd09c7",
+      "lastFetchedAt": "2026-10-24T11:02:21.761Z",
+      "lastStatus": "OK",
+      "lastError": null,
+      "createdAt": "2026-10-24T11:02:21.028Z",
+      "updatedAt": "2026-10-24T11:02:21.761Z"
+    },
+    "summary": {
+      "connection": {
+        "id": "cmvmahppf001dsvraei37ew7w",
+        "projectId": "cmvmabwy10003svrawzrfth86",
+        "ownerUserId": "cmu3sjpnj0000zlrasghegg46",
+        "repo": "Leionel/projectmemo",
+        "ref": "master",
+        "signalKind": "COMMITS",
+        "status": "ACTIVE",
+        "revokedAt": null,
+        "revokedReason": null,
+        "etag": "W/\"021daa93e8c3210faf84a7b3b8a10a734d18dff1267649b5425c70adbf2275b2\"",
+        "cursorSha": "b91c0b76581517a6fc2f7b8740c568ec54cd09c7",
+        "lastFetchedAt": "2026-10-24T11:02:21.761Z",
+        "lastStatus": "OK",
+        "lastError": null,
+        "createdAt": "2026-10-24T11:02:21.028Z",
+        "updatedAt": "2026-10-24T11:02:21.761Z"
+      },
+      "status": "OK",
+      "created": 30
+    }
+  }
+}

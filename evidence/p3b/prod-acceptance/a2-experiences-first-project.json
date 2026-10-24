@@ -1,0 +1,23 @@
+{
+  "at": "2026-10-24T10:57:31.434Z",
+  "request": {
+    "method": "GET",
+    "path": "/api/projects/cmt9uzmx10000xlratkg2nsil/experiences",
+    "body": null,
+    "authorized": true
+  },
+  "status": 200,
+  "body": {
+    "enabled": true,
+    "trajectory": {
+      "missionCount": 2,
+      "truncated": false,
+      "engineeringSucceeded": 0,
+      "adopted": 0,
+      "actionsCompleted": 0,
+      "realOutcomeAttested": 0,
+      "note": "工程执行成功、用户采用、行动完成（带复盘回执）与用户自述效果分别计数，不混作成功样本。"
+    },
+    "experiences": []
+  }
+}

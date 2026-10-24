@@ -1,0 +1,30 @@
+{
+  "at": "2026-10-24T10:58:26.366Z",
+  "request": {
+    "method": "GET",
+    "path": "/api/projects/cmvmabwy10003svrawzrfth86",
+    "body": null,
+    "authorized": true
+  },
+  "status": 200,
+  "body": {
+    "project": {
+      "id": "cmvmabwy10003svrawzrfth86",
+      "title": "洛加数学技能仓库跟踪",
+      "description": "跟踪洛加数学技能仓库的提交动态，用于验收仓库信号感知与采纳链路。",
+      "goal": "验证仓库信号感知、采纳与撤销链路在生产可用",
+      "scenario": "COMPETITION",
+      "deadline": null,
+      "archivedAt": null,
+      "createdAt": "2026-10-24T10:57:50.473Z",
+      "updatedAt": "2026-10-24T10:57:50.473Z",
+      "cards": [],
+      "artifacts": [],
+      "_count": {
+        "captures": 1,
+        "cards": 0,
+        "artifacts": 0
+      }
+    }
+  }
+}

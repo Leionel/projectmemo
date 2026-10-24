@@ -1,0 +1,192 @@
+{
+  "at": "2026-10-24T10:57:31.340Z",
+  "request": {
+    "method": "GET",
+    "path": "/api/projects",
+    "body": null,
+    "authorized": true
+  },
+  "status": 200,
+  "body": {
+    "projects": [
+      {
+        "id": "cmt9uzmx10000xlratkg2nsil",
+        "title": "人工智能创意赛 忆程 ProjectMemo 作品开发",
+        "description": "忆程 ProjectMemo 是面向大学生项目制学习的知识资产沉淀与主动推进 Agent。",
+        "goal": "完成可本地演示的忆程 MVP 与决赛材料，清晰展示知识沉淀、主动提醒、行动闭环和成果复用。",
+        "scenario": "COMPETITION",
+        "deadline": "2026-11-15T15:59:59.000Z",
+        "archivedAt": null,
+        "createdAt": "2026-08-26T08:55:44.582Z",
+        "updatedAt": "2026-10-21T08:17:17.465Z",
+        "_count": {
+          "cards": 16,
+          "artifacts": 5
+        },
+        "dashboard": {
+          "activeReminderCount": 3,
+          "highestReminderSeverity": 5,
+          "activeActionCount": 4,
+          "deadline": {
+            "kind": "steady",
+            "label": "23 天后截止",
+            "daysRemaining": 23,
+            "rank": 0
+          },
+          "readiness": {
+            "completed": 4,
+            "total": 6,
+            "percentage": 67,
+            "blockingRiskCount": 0,
+            "items": [
+              {
+                "key": "requirement",
+                "label": "参赛要求已沉淀",
+                "pendingLabel": "待补参赛要求",
+                "complete": true,
+                "href": "/projects/cmt9uzmx10000xlratkg2nsil#capture-box",
+                "actionLabel": "记录参赛要求"
+              },
+              {
+                "key": "experiment",
+                "label": "实验记录已沉淀",
+                "pendingLabel": "待补实验记录",
+                "complete": true,
+                "href": "/projects/cmt9uzmx10000xlratkg2nsil?cardType=experiment_log#knowledge-assets",
+                "actionLabel": "补充实验记录"
+              },
+              {
+                "key": "closed_loop",
+                "label": "已有行动复盘闭环",
+                "pendingLabel": "待完成行动复盘闭环",
+                "complete": false,
+                "href": "/projects/cmt9uzmx10000xlratkg2nsil#action-board",
+                "actionLabel": "完成一项行动"
+              },
+              {
+                "key": "competition_outline",
+                "label": "作品说明大纲",
+                "pendingLabel": "待生成作品说明大纲",
+                "complete": true,
+                "href": "/projects/cmt9uzmx10000xlratkg2nsil/generate?type=competition_outline",
+                "actionLabel": "生成作品说明"
+              },
+              {
+                "key": "defense_ppt",
+                "label": "答辩 PPT 大纲",
+                "pendingLabel": "待生成答辩 PPT 大纲",
+                "complete": true,
+                "href": "/projects/cmt9uzmx10000xlratkg2nsil/generate?type=defense_ppt",
+                "actionLabel": "生成 PPT 大纲"
+              },
+              {
+                "key": "readme",
+                "label": "README 草稿",
+                "pendingLabel": "待生成 README 草稿",
+                "complete": false,
+                "href": "/projects/cmt9uzmx10000xlratkg2nsil/generate?type=readme",
+                "actionLabel": "生成 README"
+              }
+            ]
+          },
+          "nextAction": {
+            "label": "处理高优先提醒",
+            "detail": "3 条提醒等待确认",
+            "href": "/projects/cmt9uzmx10000xlratkg2nsil#interventions",
+            "tone": "critical"
+          },
+          "attentionScore": 573
+        }
+      },
+      {
+        "id": "cmudqprjk000gzfras28jdmzg",
+        "title": "轻量视觉模型复赛项目",
+        "description": "团队正在准备轻量视觉模型复赛演示，需要核对评审设备的显存预算，完成可复现实验，并记录方案变化、风险依据与最终交付材料。",
+        "goal": "在评审设备约束下完成稳定、可复现的视觉模型演示，并形成方案对比与答辩材料",
+        "scenario": "COMPETITION",
+        "deadline": "2026-09-30T00:00:00.000Z",
+        "archivedAt": null,
+        "createdAt": "2026-09-23T06:46:52.593Z",
+        "updatedAt": "2026-09-23T09:43:13.205Z",
+        "_count": {
+          "cards": 6,
+          "artifacts": 2
+        },
+        "dashboard": {
+          "activeReminderCount": 2,
+          "highestReminderSeverity": 5,
+          "activeActionCount": 2,
+          "deadline": {
+            "kind": "overdue",
+            "label": "已逾期 25 天",
+            "daysRemaining": -25,
+            "rank": 4
+          },
+          "readiness": {
+            "completed": 3,
+            "total": 6,
+            "percentage": 50,
+            "blockingRiskCount": 0,
+            "items": [
+              {
+                "key": "requirement",
+                "label": "参赛要求已沉淀",
+                "pendingLabel": "待补参赛要求",
+                "complete": true,
+                "href": "/projects/cmudqprjk000gzfras28jdmzg#capture-box",
+                "actionLabel": "记录参赛要求"
+              },
+              {
+                "key": "experiment",
+                "label": "实验记录已沉淀",
+                "pendingLabel": "待补实验记录",
+                "complete": false,
+                "href": "/projects/cmudqprjk000gzfras28jdmzg?cardType=experiment_log#knowledge-assets",
+                "actionLabel": "补充实验记录"
+              },
+              {
+                "key": "closed_loop",
+                "label": "已有行动复盘闭环",
+                "pendingLabel": "待完成行动复盘闭环",
+                "complete": true,
+                "href": "/projects/cmudqprjk000gzfras28jdmzg#action-board",
+                "actionLabel": "完成一项行动"
+              },
+              {
+                "key": "competition_outline",
+                "label": "作品说明大纲",
+                "pendingLabel": "待生成作品说明大纲",
+                "complete": true,
+                "href": "/projects/cmudqprjk000gzfras28jdmzg/generate?type=competition_outline",
+                "actionLabel": "生成作品说明"
+              },
+              {
+                "key": "defense_ppt",
+                "label": "答辩 PPT 大纲",
+                "pendingLabel": "待生成答辩 PPT 大纲",
+                "complete": false,
+                "href": "/projects/cmudqprjk000gzfras28jdmzg/generate?type=defense_ppt",
+                "actionLabel": "生成 PPT 大纲"
+              },
+              {
+                "key": "readme",
+                "label": "README 草稿",
+                "pendingLabel": "待生成 README 草稿",
+                "complete": false,
+                "href": "/projects/cmudqprjk000gzfras28jdmzg/generate?type=readme",
+                "actionLabel": "生成 README"
+              }
+            ]
+          },
+          "nextAction": {
+            "label": "先处理截止风险",
+            "detail": "已逾期 25 天",
+            "href": "/projects/cmudqprjk000gzfras28jdmzg#interventions",
+            "tone": "critical"
+          },
+          "attentionScore": 4570
+        }
+      }
+    ]
+  }
+}

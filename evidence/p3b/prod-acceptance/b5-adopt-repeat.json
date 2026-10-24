@@ -1,0 +1,30 @@
+{
+  "at": "2026-10-24T11:00:24.550Z",
+  "request": {
+    "method": "POST",
+    "path": "/api/projects/cmvmabwy10003svrawzrfth86/repo-signals/signals/cmvmaceg90010svrae2wvq7sk",
+    "body": {
+      "action": "ADOPT",
+      "actionId": "cmvmacocy0012svra17vkkl97",
+      "requestId": "d63cab7e-9dbe-4f5f-be34-c8337b1b44a3"
+    },
+    "authorized": true
+  },
+  "status": 200,
+  "body": {
+    "signal": {
+      "id": "cmvmaceg90010svrae2wvq7sk",
+      "connectionId": "cmvmacdtb0006svran5dce3b2",
+      "kind": "COMMITS",
+      "sha": "c6d7a6a90a43a390cb2c0eea3208b93ee21d53c1",
+      "title": "Merge pull request #2 from Leionel/feature/course-graph-2.0",
+      "authorName": "Shengxin Xiao",
+      "committedAt": "2026-10-16T02:14:03.000Z",
+      "url": "https://github.com/Leionel/luojia-math-tutor-skill/commit/c6d7a6a90a43a390cb2c0eea3208b93ee21d53c1",
+      "status": "ADOPTED",
+      "adoptedAt": "2026-10-24T10:58:26.338Z",
+      "adoptedCaptureId": "cmvmacom20015svrap2ecghwx",
+      "linkedActionId": null
+    }
+  }
+}

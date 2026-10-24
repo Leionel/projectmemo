@@ -1,0 +1,150 @@
+{
+  "user": {
+    "id": "cmu3sjpnj0000zlrasghegg46",
+    "username": "contest-demo",
+    "displayName": "复赛演示账号"
+  },
+  "demoProjects": [
+    {
+      "id": "cmt9uzmx10000xlratkg2nsil",
+      "title": "人工智能创意赛 忆程 ProjectMemo 作品开发"
+    },
+    {
+      "id": "cmudqprjk000gzfras28jdmzg",
+      "title": "轻量视觉模型复赛项目"
+    }
+  ],
+  "firstProjectId": "cmt9uzmx10000xlratkg2nsil",
+  "missionProjectId": "cmt9uzmx10000xlratkg2nsil",
+  "missionId": "cmvhu32ww0007w9racxjesok8",
+  "pid": "cmvmabwy10003svrawzrfth86",
+  "cid": "cmvmacdtb0006svran5dce3b2",
+  "sid": "cmvmaceg90010svrae2wvq7sk",
+  "candidateSignals": [
+    {
+      "id": "cmvmaceg90010svrae2wvq7sk",
+      "sha": "c6d7a6a90a43a390cb2c0eea3208b93ee21d53c1"
+    },
+    {
+      "id": "cmvmaceg0000zsvra9x7f6lsk",
+      "sha": "accd40d3401a9775bf8653c744af15bc003fc0c7"
+    },
+    {
+      "id": "cmvmacefq000ysvranel549qx",
+      "sha": "a08f1003f7cf9a8b7446fc3064fef167de60d9ce"
+    },
+    {
+      "id": "cmvmaceff000xsvrac3mlfj4g",
+      "sha": "6825c9d0ef64cdc9b68dcd96aa3e3167ff9d7fd9"
+    },
+    {
+      "id": "cmvmacef6000wsvra9cbfpnzz",
+      "sha": "3968afe793a9b6e0790ba2d3f134709ae8187305"
+    },
+    {
+      "id": "cmvmaceew000vsvra5kni8klg",
+      "sha": "1120fdc630770fe7518786c009e805ab94f4989c"
+    },
+    {
+      "id": "cmvmaceen000usvra9n5i6cic",
+      "sha": "4e71579fd6694eb902a71c1734dc005a207ba84b"
+    },
+    {
+      "id": "cmvmaceee000tsvraputmuo61",
+      "sha": "5b7f2c8887bc48b744eda4455df3d9b4410d8726"
+    },
+    {
+      "id": "cmvmacee5000ssvra1jhufmot",
+      "sha": "dcf1f7a409c21cf14c962505109ec20d3bda167f"
+    },
+    {
+      "id": "cmvmacedw000rsvraiwauonif",
+      "sha": "85c8ec039515110becb2264b9f1d82238ea9947a"
+    },
+    {
+      "id": "cmvmacedn000qsvrasxgin8mp",
+      "sha": "f8aca2c395464e449e27b3e708967f4f51ad055a"
+    },
+    {
+      "id": "cmvmacedd000psvrakxejr2cv",
+      "sha": "400011faa6bdaccc8c76c3ffc7f0c454b5bfc28c"
+    },
+    {
+      "id": "cmvmaced2000osvrauh4vvavz",
+      "sha": "93aa00d717de9444072b21662c589ae63976d1a8"
+    },
+    {
+      "id": "cmvmacect000nsvrav702zjwy",
+      "sha": "881ae36be572e6706cc95803511402b5e9641845"
+    },
+    {
+      "id": "cmvmaceck000msvraainvp9g7",
+      "sha": "8392e359bc29222f0ebbbe3a1b632827fd368eb9"
+    },
+    {
+      "id": "cmvmacecb000lsvrarqsl957i",
+      "sha": "4f0564499c4eb79d2aafdc0e3cb5244e34ec95d8"
+    },
+    {
+      "id": "cmvmacec1000ksvrawou5t1vm",
+      "sha": "654d8ce8ada80b3250ac7edbe85db927e95d1518"
+    },
+    {
+      "id": "cmvmacebs000jsvra5g35cav0",
+      "sha": "d7ba8acbd31f7670b96137f4412917adaed135c9"
+    },
+    {
+      "id": "cmvmacebk000isvran6b2brv3",
+      "sha": "0b49cbdd1df37919e904c1c6bedf7b1d3cdcf92e"
+    },
+    {
+      "id": "cmvmacebc000hsvraxitznocn",
+      "sha": "48ef116e5efc21ed2f5a759be17e3e53b5658f55"
+    },
+    {
+      "id": "cmvmaceb4000gsvramyknwp4u",
+      "sha": "8edd92e0eedecfb5fa2697c9cb626ffdabd3ad30"
+    },
+    {
+      "id": "cmvmaceaw000fsvrai1mn7g4s",
+      "sha": "89a68c977034e3db122377f64a3e85e9469b5620"
+    },
+    {
+      "id": "cmvmaceam000esvradtd78p5m",
+      "sha": "accfec7ce93d733e1bab640dd385b0a6f8f67397"
+    },
+    {
+      "id": "cmvmaceaf000dsvrao9fzxpru",
+      "sha": "e57406c7719dbeb74183306fd8514c8d9492f0a6"
+    },
+    {
+      "id": "cmvmacea6000csvrae8r01sgs",
+      "sha": "6c45680faad32277001288f8be89c606d1ea20fe"
+    },
+    {
+      "id": "cmvmace9y000bsvraor7ofw35",
+      "sha": "0dfa3b59b04fd97ef21119bc3c0e8b26a9b4c0e0"
+    },
+    {
+      "id": "cmvmace9q000asvranp0d64zk",
+      "sha": "67537af94de0490f166206935b52cd74e3b7615f"
+    },
+    {
+      "id": "cmvmace9i0009svraodtln2g5",
+      "sha": "b497bb2cddb63cb71956bebd805039cdc2761cc1"
+    },
+    {
+      "id": "cmvmace990008svrae9zd0cu0",
+      "sha": "029072c99ce22b8a8e696eff3d54b7ca4abcca55"
+    },
+    {
+      "id": "cmvmace8s0007svraftm3a16w",
+      "sha": "813ea2e08fb860a61ff0f7b98f1bcd7e679832a8"
+    }
+  ],
+  "actionId": "cmvmacocy0012svra17vkkl97",
+  "sidLinked": "cmvmaceg0000zsvra9x7f6lsk",
+  "sid2": "cmvmaceg0000zsvra9x7f6lsk",
+  "sidErr": "cmvmacefq000ysvranel549qx",
+  "cid2": "cmvmahppf001dsvraei37ew7w"
+}

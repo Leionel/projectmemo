@@ -1,0 +1,35 @@
+{
+  "at": "2026-10-24T10:58:13.444Z",
+  "request": {
+    "method": "POST",
+    "path": "/api/projects/cmvmabwy10003svrawzrfth86/repo-signals/connections/cmvmacdtb0006svran5dce3b2",
+    "body": {
+      "action": "REFRESH",
+      "requestId": "06ab1acd-991b-48bf-a2b9-4c412d4c9dbd"
+    },
+    "authorized": true
+  },
+  "status": 200,
+  "body": {
+    "connection": {
+      "id": "cmvmacdtb0006svran5dce3b2",
+      "projectId": "cmvmabwy10003svrawzrfth86",
+      "ownerUserId": "cmu3sjpnj0000zlrasghegg46",
+      "repo": "Leionel/luojia-math-tutor-skill",
+      "ref": "main",
+      "signalKind": "COMMITS",
+      "status": "ACTIVE",
+      "revokedAt": null,
+      "revokedReason": null,
+      "etag": "W/\"1878fe40308723df0cfb164111d92e4639926b975476cf50e9e089cae5c5bf71\"",
+      "cursorSha": "c6d7a6a90a43a390cb2c0eea3208b93ee21d53c1",
+      "lastFetchedAt": "2026-10-24T10:58:13.476Z",
+      "lastStatus": "NOT_MODIFIED",
+      "lastError": null,
+      "createdAt": "2026-10-24T10:58:12.335Z",
+      "updatedAt": "2026-10-24T10:58:13.476Z"
+    },
+    "status": "NOT_MODIFIED",
+    "created": 0
+  }
+}

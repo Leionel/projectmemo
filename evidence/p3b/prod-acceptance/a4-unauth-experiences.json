@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-24T10:57:31.688Z",
+  "request": {
+    "method": "GET",
+    "path": "/api/projects/cmt9uzmx10000xlratkg2nsil/experiences",
+    "body": null,
+    "authorized": false
+  },
+  "status": 401,
+  "body": {
+    "error": {
+      "code": "UNAUTHORIZED",
+      "message": "未提供身份凭据，请先登录"
+    }
+  }
+}

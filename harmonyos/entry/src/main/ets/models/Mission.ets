@@ -1,3 +1,5 @@
+import { MissionExperience } from './Experience';
+
 export class MissionConstraints {
   availableMinutes: number | null = null;
   resourceLimits: string[] = [];
@@ -71,6 +73,7 @@ export class Mission {
   pauseRequestedAt: string | null = null; cancelRequestedAt: string | null = null;
   pauseReason: string | null = null; error: MissionError | null = null;
   completion?: MissionCompletionSummary;
+  experience?: MissionExperience;
   question: MissionQuestion | null = null;
   steps: MissionStep[] = []; approvals: MissionApproval[] = []; outputs: MissionOutput[] = [];
 }

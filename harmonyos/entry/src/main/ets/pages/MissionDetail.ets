@@ -1,4 +1,5 @@
 import { DecisionScenarioPanel } from '../components/DecisionScenarioPanel';
+import { ExperiencePanel } from '../components/ExperiencePanel';
 import { GoalQuestionPanel } from '../components/GoalQuestionPanel';
 import { ProjectImpactPanel } from '../components/ProjectImpactPanel';
 import { MissionReadTarget } from '../models/MissionReadback';
@@ -355,6 +356,9 @@ struct MissionDetail {
       if (this.mission.status === 'RUNNING' && (this.mission.cancelRequestedAt || this.mission.pauseRequestedAt)) { Text(this.mission.cancelRequestedAt ? '取消请求已受理，等待当前步骤停止' : '暂停请求已受理，等待当前步骤停止').fontColor(PMColors.WARNING) }
       if (this.readState === 'lastKnown') { Text(`上次读取于 ${this.updatedAt}；当前为历史状态，刷新成功后可操作。`).fontSize(12).fontColor(PMColors.RISK) }
       DecisionScenarioPanel({ missionId: this.missionId, disabled: this.readState !== 'fresh' || this.busy || missionTerminal(this.mission.status), onAdopted: (): void => { this.refresh(); } })
+      if (this.mission.experience !== undefined && this.mission.experience.enabled && this.mission.experience.suggestions.length > 0) {
+        ExperiencePanel({ projectId: this.projectId, suggestions: this.mission.experience.suggestions, onChanged: (): void => { this.refresh(); } })
+      }
       GoalQuestionPanel({ projectId: this.projectId, missionId: this.missionId, compact: true })
       ProjectImpactPanel({ projectId: this.projectId })
       MissionReadbackView({ missionId: this.missionId, target: this.readTarget })

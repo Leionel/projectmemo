@@ -93,6 +93,7 @@ model Project {
   impactJobs ProjectImpactJob[]
   decisionProposals DecisionScenarioProposal[]
   missionArtifactReceipts MissionArtifactReceipt[]
+  experiences AgentExperience[]
   missions AgentMission[]
   id          String              @id @default(cuid())
   title       String
@@ -839,6 +840,7 @@ model DeliverableEvidence {
 model User {
   decisionProposals DecisionScenarioProposal[]
   goalQuestionPreferences GoalQuestionPreference[]
+  experiences AgentExperience[]
   missions AgentMission[]
   id           String              @id @default(cuid())
   username     String              @unique
@@ -924,6 +926,7 @@ model AgentMission {
  impactEffects ProjectImpactEffect[]
  goalQuestionPreferences GoalQuestionPreference[]
  artifactReceipts MissionArtifactReceipt[]
+ experienceUses AgentExperienceUse[]
  id String @id @default(cuid())
  ownerUserId String
  projectId String
@@ -1152,4 +1155,49 @@ model GoalQuestionPreference {
  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
  mission AgentMission @relation(fields:[missionId],references:[id],onDelete:Cascade)
  @@unique([userId,missionId,questionId])
+}
+
+// P3-A 项目内经验：一类成功工作方法（WORKFLOW）、一类失败防护（GUARDRAIL）。
+// 只以建议形式注入，不授予写入权限；样本不足时保持 CANDIDATE/SHADOW，激活必须由用户发起。
+model AgentExperience {
+ id String @id @default(cuid())
+ projectId String
+ ownerUserId String
+ kind String
+ patternHash String
+ title String
+ statement String
+ applicabilityJson Json
+ toolVersionsJson Json @default("{}")
+ protocolVersionsJson Json @default("[]")
+ counterExamplesJson Json @default("[]")
+ status String @default("CANDIDATE")
+ sampleMissionIdsJson Json @default("[]")
+ supportCount Int @default(0)
+ counterCount Int @default(0)
+ activatedAt DateTime?
+ revokedAt DateTime?
+ revokedReason String?
+ schemaVersion Int @default(1)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
+ owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
+ uses AgentExperienceUse[]
+ @@unique([projectId,kind,patternHash])
+ @@index([projectId,status])
+}
+
+// 经验使用记录：撤销/失效/版本不兼容后停止新注入，但历史使用记录保留。
+model AgentExperienceUse {
+ id String @id @default(cuid())
+ experienceId String
+ missionId String
+ stage String
+ contextHash String?
+ injectedAt DateTime @default(now())
+ experience AgentExperience @relation(fields:[experienceId],references:[id],onDelete:Cascade)
+ mission AgentMission @relation(fields:[missionId],references:[id],onDelete:Cascade)
+ @@unique([experienceId,missionId,stage])
+ @@index([experienceId,injectedAt])
 }

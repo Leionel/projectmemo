@@ -3,6 +3,8 @@ import type { AgentMission } from "@/lib/generated/prisma/client";
 import { jsonHash, type ToolResult, type Source } from "./contracts";
 import { textHash } from "@/lib/research/sourceRepository";
 import { decisionTokenLimit } from "./modelProtocol";
+import { isFeatureEnabled } from "@/lib/config/features";
+import { injectionDecisions, recordUses, type ExperienceAdvisory } from "@/lib/experience/injection";
 
 export function sourceContext(source: Source) {
   const text = source.text, ranges = text.length > 800 ? [[0, 400], [text.length - 400, text.length]] : [[0, text.length]];
@@ -59,6 +61,16 @@ export async function buildContext(m: AgentMission) {
     excluded.push(observations.splice(index, 1)[0].stepId);
   }
   if (JSON.stringify(context).length > 30000) throw new Error("CONTEXT_LIMIT");
-  return JSON.stringify({ ...context, manifest: { excludedStepIds: excluded, unlistedStepCount: Math.max(0, stepCount - stepIndex.length), historyStepCount: stepCount, notLoadedStepCount: stepCount - steps.length,
-    historyEventCount: eventCount, includedEventSeqs: inputs.map(e => e.seq), promptVersion: context.promptVersion, source: "MISSION_EVENTS_AND_STEPS", hash: jsonHash(context) } });
+  // P3-A 项目内经验：仅 ACTIVE 经验以建议形式注入；版本不兼容、撤销或反例追平时停止注入，历史使用记录保留。
+  let experienceAdvisories: ExperienceAdvisory[] = [];
+  if (isFeatureEnabled("PROJECT_EXPERIENCE_ENABLED", true)) {
+    const usedTools = steps.map(s => ({ name: s.toolName, version: s.toolVersion }));
+    const protocolSchemaVersion = (steps.at(-1)?.protocolJson as { schemaVersion?: number } | null | undefined)?.schemaVersion ?? null;
+    const decisions = await injectionDecisions(m, usedTools, protocolSchemaVersion);
+    experienceAdvisories = decisions.flatMap(d => ("advisory" in d ? [d.advisory] : [])).slice(0, 3);
+  }
+  const hash = jsonHash(context);
+  if (experienceAdvisories.length) await recordUses(m.id, experienceAdvisories.map(advisory => ({ advisory, experienceId: advisory.id })), hash);
+  return JSON.stringify({ ...context, experienceAdvisories, manifest: { excludedStepIds: excluded, unlistedStepCount: Math.max(0, stepCount - stepIndex.length), historyStepCount: stepCount, notLoadedStepCount: stepCount - steps.length,
+    historyEventCount: eventCount, includedEventSeqs: inputs.map(e => e.seq), promptVersion: context.promptVersion, source: "MISSION_EVENTS_AND_STEPS", hash } });
 }

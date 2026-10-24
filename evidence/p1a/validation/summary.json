@@ -9,7 +9,8 @@
     "followUpTargetedPassed": [
       29,
       18,
-      4
+      4,
+      25
     ],
     "followUpSetsOverlap": true
   },
@@ -33,5 +34,10 @@
   "browserProof": "browser-proof.json",
   "mobileProof": "mobile-proof.json",
   "deepLinkProof": "deep-link-proof.json",
-  "postE2eReadOnlyBoundaryTestsPassed": 4
+  "postE2eReadOnlyBoundaryTestsPassed": 4,
+  "compatibilityReview": {
+    "pastReminderVsFutureDeadline": "PASSED",
+    "missionOnlyReentryNotEmpty": "PASSED",
+    "targetedPassed": 25
+  }
 }

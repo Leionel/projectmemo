@@ -50,7 +50,7 @@ describe("shared next step",()=>{
     const [context,focus,reentry]=await Promise.all([getProjectAgentContext(user,project),loadGlobalFocus(user),getProjectReentry(project,user)]);
     expect(context?.nextStep).toMatchObject({attentionKind:"WAITING_INPUT",entityRef:{id:waiting}});
     expect(context?.nextStep.entityRef.questionId).toBeTruthy();
-    expect(focus.primaryContext?.observationHash).toBe(context?.observationHash);expect(reentry.agentContext?.observationHash).toBe(context?.observationHash);
+    expect(focus.primaryContext?.observationHash).toBe(context?.observationHash);expect(reentry.agentContext?.observationHash).toBe(context?.observationHash);expect(reentry.freshness).toBe("FRESH");
     expect(await db.agentMissionEvent.count()).toBe(before);expect(await db.agentRun.count()).toBe(0);
   });
   it("关注偏好持久化且不能盖过待补料，不改变执行状态",async()=>{
@@ -83,5 +83,11 @@ describe("shared next step",()=>{
     expect(result.status).toBe(200);expect((await result.json()).context.focusMissionId).toBe(running);
     await db.authSession.update({where:{id:session.session.id},data:{revokedAt:new Date()}});
     expect((await contextGet(new Request("http://localhost/context",{headers}),route)).status).toBe(401);
+  });
+  it("旧逾期提醒与当前未来截止日冲突时，两端拿到核对提示而非过期结论",async()=>{
+    const p=await db.project.create({data:{title:"日期核对",goal:"核对材料",description:"合成",scenario:"RESEARCH",deadline:new Date(Date.now()+7*86400000),memberships:{create:{userId:user,role:"OWNER"}}}});
+    const reminder=await db.agentIntervention.create({data:{projectId:p.id,triggerType:"DEADLINE_NEAR",dedupeKey:"past",severity:5,title:"截止日期已经过去",content:"项目已经超过截止日期",evidence:{},proposedActions:[]}});
+    const c=await getProjectAgentContext(user,p.id);expect(c?.nextStep).toMatchObject({title:"核对提醒与当前截止日",entityRef:{id:reminder.id}});expect(c?.nextStep.reason).toContain("适用阶段");
+    expect((await db.agentIntervention.findUniqueOrThrow({where:{id:reminder.id}})).title).toBe("截止日期已经过去");
   });
 });

@@ -233,7 +233,10 @@ export async function getProjectReentry(projectId: string, userId?: string | nul
     schedule = { ...schedule, meta: failedMeta(error) };
   }
 
-  const freshness = deriveFreshness(episode, schedule, risk);
+  const agentContext = userId ? await getProjectAgentContext(userId,projectId) : null;
+  let freshness = deriveFreshness(episode, schedule, risk);
+  if(agentContext?.freshness==="UNAVAILABLE"||agentContext?.freshness==="PARTIAL")freshness="FAILED";
+  else if(freshness==="EMPTY"&&agentContext&&agentContext.nextStep.attentionKind!=="CAPTURE")freshness="FRESH";
 
   // ---- 主操作：先看变化，再解阻塞，再开始行动 ----
   let primaryAction: ReentryPrimaryAction = "START_ACTION";
@@ -271,7 +274,7 @@ export async function getProjectReentry(projectId: string, userId?: string | nul
   }
 
   return {
-    ...(userId ? {agentContext: await getProjectAgentContext(userId,projectId)} : {}),
+    ...(userId ? {agentContext} : {}),
     projectId: project.id,
     projectName: project.title,
     freshness,

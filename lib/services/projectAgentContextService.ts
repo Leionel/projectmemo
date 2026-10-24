@@ -5,7 +5,7 @@ import { selectProjectAgentContext, type AgentCandidate } from "@/lib/projectAge
 import { missionSummarySelect, presentMissionSummary } from "@/lib/mission/workspaceSummary";
 
 export async function getProjectAgentContext(userId: string, projectId: string) {
-  const project = await db.project.findFirst({where:{id:projectId,memberships:{some:{userId}}},select:{id:true,title:true,goal:true,updatedAt:true,_count:{select:{captures:true}},memberships:{where:{userId},select:{role:true,focusMissionId:true}}}});
+  const project = await db.project.findFirst({where:{id:projectId,memberships:{some:{userId}}},select:{id:true,title:true,goal:true,deadline:true,updatedAt:true,_count:{select:{captures:true}},memberships:{where:{userId},select:{role:true,focusMissionId:true}}}});
   if (!project) throw new AppError("PROJECT_NOT_FOUND","项目不存在或无法访问",404);
   if (!isFeatureEnabled("PROJECT_AGENT_CONTEXT_ENABLED",true)) return null;
   const failures: string[] = [], candidates: AgentCandidate[] = [];
@@ -27,7 +27,11 @@ export async function getProjectAgentContext(userId: string, projectId: string) 
     }
   }
   await Promise.all([
-    db.agentIntervention.findFirst({where:{projectId,isSimulated:false,OR:[{status:"OPEN"},{status:"SNOOZED",snoozedUntil:{lte:new Date()}}]},orderBy:[{severity:"desc"},{createdAt:"desc"},{id:"asc"}]}).then(row=>{if(row)candidates.push({kind:"INTERVENTION",id:row.id,status:row.status,title:row.title,reason:row.content,severity:row.severity,updatedAt:row.updatedAt.toISOString()});}).catch(()=>{failures.push("REMINDER_SUMMARY_UNAVAILABLE");}),
+    db.agentIntervention.findFirst({where:{projectId,isSimulated:false,OR:[{status:"OPEN"},{status:"SNOOZED",snoozedUntil:{lte:new Date()}}]},orderBy:[{severity:"desc"},{createdAt:"desc"},{id:"asc"}]}).then(row=>{if(row){
+      const deadlineConflict=project.deadline && project.deadline.getTime()>Date.now() && (row.title==="截止日期已经过去"||row.content.includes("项目已经超过截止日期"));
+      candidates.push({kind:"INTERVENTION",id:row.id,status:row.status,title:deadlineConflict?"核对提醒与当前截止日":row.title,
+        reason:deadlineConflict?`历史提醒为「${row.title}」，当前项目截止日为 ${project.deadline!.toISOString().slice(0,10)}。请核对原始通知及适用阶段。`:row.content,severity:row.severity,updatedAt:row.updatedAt.toISOString()});
+    }}).catch(()=>{failures.push("REMINDER_SUMMARY_UNAVAILABLE");}),
     db.actionItem.findFirst({where:{projectId,isSimulated:false,status:{in:["TODO","DOING"]}},orderBy:[{priority:"desc"},{createdAt:"desc"},{id:"asc"}]}).then(row=>{if(row)candidates.push({kind:"ACTION",id:row.id,status:row.status,title:row.title,reason:row.description ?? "查看行动要求，完成后记录实际结果。",updatedAt:row.updatedAt.toISOString()});}).catch(()=>{failures.push("ACTION_SUMMARY_UNAVAILABLE");}),
   ]);
   const focusMissionId = candidates.some(c=>c.kind==="MISSION"&&c.id===member.focusMissionId) ? member.focusMissionId : null;

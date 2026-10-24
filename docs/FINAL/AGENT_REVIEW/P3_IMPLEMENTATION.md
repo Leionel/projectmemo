@@ -1,4 +1,4 @@
-# P3-A 实施与本地验收
+# P3-A / P3-B 实施与本地验收
 
 基线：`d618f8c37a91ab11e3bc073a4da3964aa46d4655`（P2 已上线版本）。日期：2026-10-24。所有新增数据均来自隔离测试库；本轮真实模型调用 0 次，提炼与注入全部为规则实现。不宣称"越用越好"：真实任务效果对照未执行，保持未验收。
 
@@ -31,4 +31,34 @@
 
 ## 部署
 
-沿用 safe-update.sh（先 typegen+tsc 再构建的 2026-10-24 修复版）。迁移 `20261024090000_experience` 增量执行；不运行 seed/reset。见 deploy/alibaba-cloud-linux/P3_UPDATE.md。
+沿用 safe-update.sh（先 typegen+tsc 再构建的 2026-10-24 修复版）。迁移增量执行；不运行 seed/reset。见 deploy/alibaba-cloud-linux/P3_UPDATE.md 与 P3B_UPDATE.md。
+
+---
+
+# P3-B 单仓库只读感知（最小版）
+
+实施状态（2026-10-24）：单类公开仓库 commits 信号已实现；ECS 到 api.github.com 连通性、匿名配额（60/h 满额）与真实仓库 JSON 可读性已由用户在服务器实测确认。真实仓库→候选→采纳链路的线上验收在部署后执行。本轮零模型调用、零凭据。
+
+## 已实施
+
+- **连接与信号分层**（迁移 `20261024100000_repo_sensing`，两张新表）：`SourceConnection`（repo/ref/ETag/游标/状态，每项目最多 3 个活跃连接）+ `ExternalSignal`（CANDIDATE/ADOPTED/DISMISSED）。按项目与用户严格隔离。
+- **按需刷新**（`lib/sensing/repoSource.ts`）：仅用户显式触发时匿名请求 `api.github.com`（无轮询守护、无凭据）；带 If-None-Match 的 304 不计限额；403/429/404 只记录状态不产生信号；重叠扫描在游标 sha 处停止，同 sha 重复到达靠唯一约束去重；单页 30 条上限。
+- **不可信文本处理**：commit 标题只保留首行、去控制字符、限长 200；内容只作资料存储与展示，绝不执行其中指令（prompt 注入无执行面）。
+- **采纳语义**：采纳须用户确认，只写入一条 `Capture`（sourceType=仓库信号）并可关联一个本项目未完成、非模拟的行动作为资料指引——不改变行动状态、不生成完成回执；commit/CI 不构成现实完成证明，行动完成仍由用户回执决定。未采纳/忽略零事实写入。跨项目行动、模拟行动、已完成行动一律拒绝。
+- **撤销**：立即停止一切新请求（测试断言零请求），游标与历史信号保留；同 repo+ref 撤销后不可重建。开关 `REPO_SENSING_ENABLED` 关闭时全接口拒绝。
+- **双端展示**：Web 资料页折叠卡片"仓库信号（外部候选）"（连接状态/刷新/撤销/新建、候选采纳/忽略、可选关联行动下拉、提交外链）；鸿蒙记忆列表页 `RepoSignalPanel` 同步。无新一级导航。
+
+## 验证（本地）
+
+- `tests/repoSensing.test.ts` 12 项：游标推进与重叠停止、304/403/429/404、重复 sha 去重、恶意标题清洗、非法 repo（含 `../` 前导点路径穿越防护）/ref、连接数上限、幂等建连、采纳幂等与行动状态不变、错/跨项目/模拟/已完成 actionId 拒绝、忽略零写入、跨用户 404、撤销后零请求且历史保留、开关关闭拒绝。
+- `tests/repoSignalNativeContract.test.ts`：真实 ArkTS `RepoSignalService` 经真实 Next 路由（全局 fetch 以 Response fixture 替换）完成创建→列表→采纳→读回，Capture 恰好 1 条。
+- 鸿蒙 `RepoSignalContract` 3 项（候选非事实、撤销保留历史、请求体契约）。
+- 全量回归、tsc、ESLint、Hypium、HAP 构建与部署预检结果见 evidence/p3b/validation.json。
+
+## 范围与开放 Gate
+
+- 只支持 GitHub 公开仓库 commits 一类信号；PR/CI/Issue、多连接器、私有凭据、周期订阅全部未做（路线图后置项）。
+- 服务器向 GitHub 发请求依赖 ECS 出口网络与匿名配额；被限流时只记录状态，不会自动重试或加压。
+- 焦点页按价值展示信号、与 P2-A 影响链的深度联动未做：采纳产生的 Capture 是普通资料记录，卡片化（涉及模型）不在本轮。
+- 真实仓库变更→候选→采纳的线上链路验收在部署后执行并记录；在此之前按"fixture 已过、真实接入未验收"陈述。
+

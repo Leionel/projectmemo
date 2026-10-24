@@ -8,6 +8,7 @@ import {isFeatureEnabled} from "@/lib/config/features";
 import {projectSections,projectHref} from "@/lib/projectNavigation";
 import {MissionPanel} from "@/components/MissionPanel";
 import {ExperienceHistory} from "@/components/ExperienceHistory";
+import {RepoSignalsCard} from "@/components/RepoSignalsCard";
 import {CaptureBox} from "@/components/CaptureBox";
 import {MeetingImportCard} from "@/components/MeetingImportCard";
 import {ActionBoard} from "@/components/ActionBoard";
@@ -35,7 +36,7 @@ export default async function ProjectFeaturePage({params,searchParams}:{params:P
  const enabled=(name:string,fallback=false)=>isFeatureEnabled(name,fallback),state=enabled("PROJECT_STATE_ENABLED"),reminders=enabled("PROJECT_CALENDAR_REMINDER_ENABLED");
  let content;
  if(section==="missions")content=enabled("MISSION_ENABLED")?<><MissionPanel key={workspace.user.id} projectId={id} initialMissionId={query.mission} readTarget={{questionId:query.questionId,approvalId:query.approvalId,outputId:query.outputId,revision:query.revision?Number(query.revision):undefined,receiptId:query.receiptId}}/><ExperienceHistory projectId={id}/></>:<p className={styles.empty}>长期委托当前未开启。已有委托数据仍保留。</p>;
- else if(section==="records")content=<><CaptureBox projectId={id} inboxEnabled={enabled("PROJECT_INBOX_ENABLED",true)}/><Link className="focus-ring editorial-button-secondary justify-self-start" href={`/projects/${id}/knowledge`}>查看已生成的知识资产</Link></>;
+ else if(section==="records")content=<><CaptureBox projectId={id} inboxEnabled={enabled("PROJECT_INBOX_ENABLED",true)}/><RepoSignalsCard projectId={id}/><Link className="focus-ring editorial-button-secondary justify-self-start" href={`/projects/${id}/knowledge`}>查看已生成的知识资产</Link></>;
  else if(section==="meetings")content=<MeetingImportCard projectId={id} stateEnabled={state}/>;
  else if(section==="actions"){
   const data=await loadWorkspaceOverview(id);

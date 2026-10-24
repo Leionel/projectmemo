@@ -12,6 +12,7 @@ import { AlertIcon } from '../components/PMIcons';
 import { TextFormatters } from '../common/TextFormatters';
 import { ConsolidationProposal, ConsolidationCard, ConsolidationReceipt } from '../models/Reentry';
 import { ConsolidationConfirmBody, ReentryService } from '../services/ReentryService';
+import { RepoSignalPanel } from '../components/RepoSignalPanel';
 
 @Entry
 @Component
@@ -713,6 +714,7 @@ struct MemoryTimeline {
         })
       } else {
         List({ space: PMSpacing.MD }) {
+          ListItem() { RepoSignalPanel({ projectId: this.projectId }) }
           if (this.consolidationVisible) {
             ListItem() {
               Column() {

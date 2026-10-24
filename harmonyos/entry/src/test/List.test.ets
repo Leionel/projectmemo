@@ -7,6 +7,7 @@ import reminderRulesTest from './ReminderRules.test';
 import missionContractTest from './MissionContract.test';
 import globalFocusPresentationTest from './GlobalFocusPresentation.test';
 import experienceContractTest from './ExperienceContract.test';
+import repoSignalContractTest from './RepoSignalContract.test';
 
 export default function testsuite() {
   localUnitTest();
@@ -18,4 +19,5 @@ export default function testsuite() {
   globalFocusPresentationTest();
   attachmentPresentationTest();
   experienceContractTest();
+  repoSignalContractTest();
 }

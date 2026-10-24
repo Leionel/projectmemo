@@ -94,6 +94,8 @@ model Project {
   decisionProposals DecisionScenarioProposal[]
   missionArtifactReceipts MissionArtifactReceipt[]
   experiences AgentExperience[]
+  sourceConnections SourceConnection[]
+  externalSignals ExternalSignal[]
   missions AgentMission[]
   id          String              @id @default(cuid())
   title       String
@@ -841,6 +843,8 @@ model User {
   decisionProposals DecisionScenarioProposal[]
   goalQuestionPreferences GoalQuestionPreference[]
   experiences AgentExperience[]
+  sourceConnections SourceConnection[]
+  externalSignals ExternalSignal[]
   missions AgentMission[]
   id           String              @id @default(cuid())
   username     String              @unique
@@ -1200,4 +1204,54 @@ model AgentExperienceUse {
  mission AgentMission @relation(fields:[missionId],references:[id],onDelete:Cascade)
  @@unique([experienceId,missionId,stage])
  @@index([experienceId,injectedAt])
+}
+
+// P3-B 单仓库只读感知：连接与信号分层。信号只是候选资料（未采纳零事实写入），
+// 采纳须用户确认且只产生 Capture 记录与可选行动关联；CI/commit 不构成现实完成证明。
+model SourceConnection {
+ id String @id @default(cuid())
+ projectId String
+ ownerUserId String
+ repo String
+ ref String
+ signalKind String @default("COMMITS")
+ status String @default("ACTIVE")
+ revokedAt DateTime?
+ revokedReason String?
+ etag String?
+ cursorSha String?
+ lastFetchedAt DateTime?
+ lastStatus String?
+ lastError String?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
+ owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
+ signals ExternalSignal[]
+ @@unique([projectId,repo,ref])
+ @@index([projectId,status])
+}
+
+model ExternalSignal {
+ id String @id @default(cuid())
+ connectionId String
+ projectId String
+ ownerUserId String
+ sha String
+ kind String @default("COMMITS")
+ title String
+ authorName String
+ committedAt DateTime?
+ url String
+ status String @default("CANDIDATE")
+ adoptedByUserId String?
+ adoptedAt DateTime?
+ adoptedCaptureId String?
+ linkedActionId String?
+ fetchedAt DateTime @default(now())
+ connection SourceConnection @relation(fields:[connectionId],references:[id],onDelete:Cascade)
+ project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
+ owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
+ @@unique([connectionId,sha])
+ @@index([projectId,status,committedAt])
 }

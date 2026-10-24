@@ -65,7 +65,7 @@ describe("ECS update script controlled rollback (no ECS, sudo, git, database or 
   it.each([
     { ram: 3072, swap: 0, heap: "1536" },
     { ram: 1800, swap: 0, heap: "1416" },
-    { ram: 1300, swap: 4096, heap: "1024" },
+    { ram: 1300, swap: 4096, heap: "1280" },
     { ram: 1300, swap: 1024, heap: "" },
   ])("sizes the heap from post-stop memory before building: avail=$ram swapfree=$swap -> $heap", ({ ram, swap, heap }) => {
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), "pm-deploy-size-")); temporary.push(directory);

@@ -35,7 +35,8 @@ check_build_memory() {
 }
 size_build_memory() {
   # 该检查只把堆上限压到停服后可用内存可容纳的范围（384 MiB 预留 swc 等原生内存与内核占用），
-  # 构建期间不再并行 TypeScript 子进程，因此不需要为第二个 Node 进程预留堆。
+  # 构建期间不再并行 TypeScript 子进程。2026-10-24 P3-A 代码量增长后独立 tsc 实测需要约
+  # 1280 MiB 堆上限（1024 会 Ineffective mark-compacts），低于 1280 时依赖空闲swap兜底。
   local available_kb swapfree_kb available_mb swapfree_mb derived_mb
   available_kb=$(awk '/^MemAvailable:/{print $2; exit}' "$1")
   swapfree_kb=$(awk '/^SwapFree:/{print $2; exit}' "$1")
@@ -43,12 +44,12 @@ size_build_memory() {
   available_mb=$(( available_kb / 1024 ))
   swapfree_mb=$(( swapfree_kb / 1024 ))
   derived_mb=$(( available_mb - 384 ))
-  if (( derived_mb < 1024 )); then
+  if (( derived_mb < 1280 )); then
     if (( swapfree_mb >= 3072 )); then
-      derived_mb=1024
+      derived_mb=1280
       printf '停服后可用内存仅 %s MiB，依赖 %s MiB 空闲swap兜底。\n' "$available_mb" "$swapfree_mb"
     else
-      echo "停服后可用内存 ${available_mb} MiB 不足以支撑 1024 MiB 构建堆且空闲swap不足；更新停止，旧版本即将恢复。"; return 1
+      echo "停服后可用内存 ${available_mb} MiB 不足以支撑 1280 MiB 构建堆（独立类型检查实测下限）且空闲swap不足；更新停止，旧版本即将恢复。"; return 1
     fi
   fi
   if (( derived_mb < BUILD_HEAP_MB )); then

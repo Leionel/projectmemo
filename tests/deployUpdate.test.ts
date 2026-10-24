@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -8,7 +8,10 @@ const bash = process.platform === "win32" ? path.join(process.env.ProgramFiles ?
 const script = fs.readFileSync("deploy/alibaba-cloud-linux/safe-update.sh", "utf8");
 const functions = script.slice(script.indexOf("as_app()"), script.indexOf("trap 'on_error"));
 const temporary: string[] = [];
-afterEach(() => { for (const directory of temporary.splice(0)) fs.rmSync(directory, { recursive: true, force: true }); });
+afterEach(() => {
+  for (const directory of temporary.splice(0)) fs.rmSync(directory, { recursive: true, force: true });
+  delete process.env.PROJECTMEMO_BUILD_SKIP_TYPECHECK;
+});
 
 describe("ECS update script controlled rollback (no ECS, sudo, git, database or service operations)", () => {
   it("both scripts pass bash syntax and build precedes migration, health precedes Worker", () => {
@@ -20,11 +23,34 @@ describe("ECS update script controlled rollback (no ECS, sudo, git, database or 
     expect(script.indexOf('check_build_memory /proc/meminfo')).toBeLessThan(script.indexOf('STOPPED=1'));
     expect(script).toContain('NODE_OPTIONS="--max-old-space-size=$BUILD_HEAP_MB"');
   });
+  it("type check runs standalone before the build and only the build skips in-build checking", () => {
+    const typegen = script.indexOf('npm exec next -- typegen');
+    const tsc = script.indexOf('npm exec tsc -- --noEmit');
+    const build = script.indexOf('npm run build -- --webpack');
+    expect(typegen).toBeGreaterThan(script.indexOf('npm exec prisma -- generate'));
+    expect(tsc).toBeGreaterThan(typegen);
+    expect(tsc).toBeLessThan(build);
+    expect(script).toContain('NODE_OPTIONS="--max-old-space-size=$BUILD_HEAP_MB" npm exec tsc -- --noEmit');
+    expect(script.indexOf('PROJECTMEMO_BUILD_SKIP_TYPECHECK=1')).toBeGreaterThan(tsc);
+    expect(script).toContain('CIRCLE_NODE_TOTAL=1');
+    expect(script).not.toContain('CIRCLE_NODE_TOTAL=2');
+    expect(script).toContain('size_build_memory /proc/meminfo');
+    expect(script.indexOf('size_build_memory /proc/meminfo')).toBeGreaterThan(script.indexOf('STOPPED=1'));
+  });
+  it("next build keeps type checking unless the deploy opt-in is set", async () => {
+    delete process.env.PROJECTMEMO_BUILD_SKIP_TYPECHECK;
+    vi.resetModules();
+    expect((await import("../next.config")).default.typescript).toBeUndefined();
+    process.env.PROJECTMEMO_BUILD_SKIP_TYPECHECK = "1";
+    vi.resetModules();
+    expect((await import("../next.config")).default.typescript).toEqual({ ignoreBuildErrors: true });
+    delete process.env.PROJECTMEMO_BUILD_SKIP_TYPECHECK;
+  });
   it.each([
     { heap: "", ram: 4 * 1024, swap: 0, status: 0 },
     { heap: "2048", ram: 1536, swap: 2048, status: 0 },
     { heap: "2048", ram: 2048, swap: 0, status: 1 },
-    { heap: "1024", ram: 4096, swap: 0, status: 1 },
+    { heap: "1023", ram: 4096, swap: 0, status: 1 },
     { heap: "2048;echo unsafe", ram: 4096, swap: 0, status: 1 },
   ])("checks heap and memory headroom before stopping services: $heap / $ram / $swap", ({ heap, ram, swap, status }) => {
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), "pm-deploy-memory-")); temporary.push(directory);
@@ -35,6 +61,27 @@ describe("ECS update script controlled rollback (no ECS, sudo, git, database or 
     });
     expect(run.status, run.stderr).toBe(status);
     expect(run.stdout).not.toContain("\nunsafe");
+  });
+  it.each([
+    { ram: 3072, swap: 0, heap: "1536" },
+    { ram: 1800, swap: 0, heap: "1416" },
+    { ram: 1300, swap: 4096, heap: "1024" },
+    { ram: 1300, swap: 1024, heap: "" },
+  ])("sizes the heap from post-stop memory before building: avail=$ram swapfree=$swap -> $heap", ({ ram, swap, heap }) => {
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), "pm-deploy-size-")); temporary.push(directory);
+    const info = path.join(directory, "meminfo");
+    fs.writeFileSync(info, `MemAvailable: ${ram * 1024} kB\nSwapFree: ${swap * 1024} kB\n`);
+    const run = spawnSync(bash, ["--noprofile", "--norc", "-c", `${functions}
+BUILD_HEAP_MB=1536
+size_build_memory "$MEMORY_INFO" && printf 'heap=%s\\n' "$BUILD_HEAP_MB"`], {
+      encoding: "utf8", env: { ...process.env, MEMORY_INFO: info.replaceAll("\\", "/") },
+    });
+    if (heap === "") {
+      expect(run.status, run.stderr).toBe(1);
+      return;
+    }
+    expect(run.status, run.stderr).toBe(0);
+    expect(run.stdout.trimEnd().endsWith(`heap=${heap}`)).toBe(true);
   });
   it.each([0, 1])("failure trap restores only after services were stopped: STOPPED=%d", stopped => {
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), "pm-deploy-fault-")); temporary.push(directory);

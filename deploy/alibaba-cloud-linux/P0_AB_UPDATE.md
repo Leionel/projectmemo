@@ -16,7 +16,9 @@
 
 用户提供的第二次更新输出显示：`652dd5b` 编译成功，但 TypeScript 检查触及旧脚本的1024 MiB V8堆上限，发生 `JavaScript heap out of memory`。脚本已恢复 `bda4da9` 的代码、依赖、构建与环境，Web及Worker重新运行；真实模型续验未执行。
 
-当前脚本默认堆上限2048 MiB，可用 `PROJECTMEMO_BUILD_HEAP_MB=3072 bash safe-update.sh COMMIT` 调整（允许1536至16384 MiB）。停服前要求 `/proc/meminfo` 中 `MemAvailable + SwapFree` 至少为堆上限加1024 MiB；不足则停止，不修改服务器swap。该检查预留原生内存与子进程空间，但不能保证构建期间系统资源不会变化。不要跳过TypeScript检查，也不要自动执行 `npm audit fix --force` 来处理这次内存失败。
+当前脚本默认堆上限1536 MiB，可用 `PROJECTMEMO_BUILD_HEAP_MB=3072 bash safe-update.sh COMMIT` 覆盖（允许1024至16384 MiB，只是上限）。停服前要求 `/proc/meminfo` 中 `MemAvailable + SwapFree` 至少为该值加1024 MiB，不足则停止，不修改服务器swap。停服备份后会按 `MemAvailable - 384 MiB` 再次收紧实际堆，下限1024 MiB；空闲swap不足3 GiB且可用内存不足以支撑下限时失败并自动恢复旧版本。
+
+2026-10-24 起，构建拆为 `next typegen`（生成新鲜路由类型）→ 独立 `tsc --noEmit`（失败即回滚）→ 跳过构建内类型检查的 `next build --webpack`（`CIRCLE_NODE_TOTAL=1`）。类型检查仍是发布硬门禁，只是不再与编译主进程并行驻留内存——Next.js 16 的构建内检查会额外启动一个 TypeScript 子进程，两进程合计内存是低内存机器 OOM 的直接原因。仍不要用 `typescript.ignoreBuildErrors` 等手段绕过独立类型检查，也不要自动执行 `npm audit fix --force` 来处理内存失败。
 
 ## 真实模型验收（独立于部署）
 

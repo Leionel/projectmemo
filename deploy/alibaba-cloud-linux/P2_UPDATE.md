@@ -1,6 +1,6 @@
 # P2 更新
 
-沿用 `safe-update.sh <本次已推送完整commit>`，不运行模型验收。脚本会备份库/附件/配置、安装原依赖、生成 Prisma、独立构建、增量迁移，健康失败恢复旧代码与构建，保留已迁移数据库。
+沿用 `safe-update.sh <本次已推送完整commit>`，不运行模型验收。脚本会备份库/附件/配置、停服后按实际可用内存收紧构建堆上限、安装原依赖、生成 Prisma、`next typegen` 后独立运行 `tsc --noEmit`（失败即回滚），再以单 worker、跳过构建内并行类型检查的方式执行 `next build --webpack`，然后增量迁移；健康失败恢复旧代码与构建，保留已迁移数据库。
 
 ```bash
 APP=/opt/projectmemo/app

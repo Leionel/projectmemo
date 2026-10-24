@@ -20,17 +20,42 @@ GENERATED_MOVED=0
 BUILD_SWITCHED=0
 as_app() { sudo -H -u projectmemo env PATH="$NODE_BIN:/usr/local/bin:/usr/bin:/bin" "$@"; }
 check_build_memory() {
-  BUILD_HEAP_MB=${PROJECTMEMO_BUILD_HEAP_MB:-2048}
-  if [[ ! "$BUILD_HEAP_MB" =~ ^[1-9][0-9]{3,4}$ ]] || (( BUILD_HEAP_MB < 1536 || BUILD_HEAP_MB > 16384 )); then
-    echo 'PROJECTMEMO_BUILD_HEAP_MB 必须为1536至16384的整数（MiB）'; return 1
+  BUILD_HEAP_MB=${PROJECTMEMO_BUILD_HEAP_MB:-1536}
+  if [[ ! "$BUILD_HEAP_MB" =~ ^[1-9][0-9]{3,4}$ ]] || (( BUILD_HEAP_MB < 1024 || BUILD_HEAP_MB > 16384 )); then
+    echo 'PROJECTMEMO_BUILD_HEAP_MB 必须为1024至16384的整数（MiB）'; return 1
   fi
   local available_kb available_mb required_mb
   available_kb=$(awk '/^MemAvailable:/{m=$2} /^SwapFree:/{s=$2} END {if (m=="") exit 1; printf "%.0f", m+s}' "$1") || { echo '无法读取可用内存，更新停止'; return 1; }
   available_mb=$(( available_kb / 1024 ))
   required_mb=$(( BUILD_HEAP_MB + 1024 ))
-  printf '构建堆上限：%s MiB；当前可用内存与空闲swap：%s MiB；要求至少：%s MiB。\n' "$BUILD_HEAP_MB" "$available_mb" "$required_mb"
+  printf '构建堆上限：%s MiB；当前可用内存与空闲swap：%s MiB；要求至少：%s MiB；停服后会按实际可用内存收紧上限。\n' "$BUILD_HEAP_MB" "$available_mb" "$required_mb"
   if (( available_mb < required_mb )); then
     echo '构建内存余量不足；尚未停服。请核对free -h、增加内存或swap后再更新。'; return 1
+  fi
+}
+size_build_memory() {
+  # 该检查只把堆上限压到停服后可用内存可容纳的范围（384 MiB 预留 swc 等原生内存与内核占用），
+  # 构建期间不再并行 TypeScript 子进程，因此不需要为第二个 Node 进程预留堆。
+  local available_kb swapfree_kb available_mb swapfree_mb derived_mb
+  available_kb=$(awk '/^MemAvailable:/{print $2; exit}' "$1")
+  swapfree_kb=$(awk '/^SwapFree:/{print $2; exit}' "$1")
+  if [[ -z "$available_kb" || -z "$swapfree_kb" ]]; then echo '无法读取停服后可用内存，更新停止'; return 1; fi
+  available_mb=$(( available_kb / 1024 ))
+  swapfree_mb=$(( swapfree_kb / 1024 ))
+  derived_mb=$(( available_mb - 384 ))
+  if (( derived_mb < 1024 )); then
+    if (( swapfree_mb >= 3072 )); then
+      derived_mb=1024
+      printf '停服后可用内存仅 %s MiB，依赖 %s MiB 空闲swap兜底。\n' "$available_mb" "$swapfree_mb"
+    else
+      echo "停服后可用内存 ${available_mb} MiB 不足以支撑 1024 MiB 构建堆且空闲swap不足；更新停止，旧版本即将恢复。"; return 1
+    fi
+  fi
+  if (( derived_mb < BUILD_HEAP_MB )); then
+    printf '停服后可用内存 %s MiB；构建堆上限由 %s 调整为 %s MiB。\n' "$available_mb" "$BUILD_HEAP_MB" "$derived_mb"
+    BUILD_HEAP_MB=$derived_mb
+  else
+    printf '停服后可用内存 %s MiB；构建堆上限保持 %s MiB。\n' "$available_mb" "$BUILD_HEAP_MB"
   fi
 }
 health() {
@@ -113,6 +138,8 @@ systemctl stop projectmemo-mission-worker projectmemo
 as_app env DB_FILE=/opt/projectmemo/data/projectmemo.db ATTACHMENT_DIR=/opt/projectmemo/storage BACKUP_ROOT="$BACKUP/data" KEEP=0 \
   bash "$APP/deploy/alibaba-cloud-linux/backup.sh"
 
+size_build_memory /proc/meminfo
+
 mv "$APP/node_modules" "$BACKUP/previous-node_modules"; DEPS_MOVED=1
 mv "$APP/lib/generated/prisma" "$BACKUP/previous-prisma-client"; GENERATED_MOVED=1
 as_app git -C "$APP" checkout --detach "$TARGET"
@@ -120,9 +147,14 @@ as_app npm ci --include=dev
 as_app npm rebuild better-sqlite3
 as_app node -e 'const D=require("better-sqlite3");const d=new D(":memory:");d.prepare("select 1").get();d.close()'
 as_app env DATABASE_URL=file:/opt/projectmemo/data/projectmemo.db npm exec prisma -- generate
-as_app env NODE_OPTIONS="--max-old-space-size=$BUILD_HEAP_MB" CIRCLE_NODE_TOTAL=2 \
+# 类型检查独立于构建：先生成新鲜路由类型（写入旧 .next/types，运行时不读取），
+# 再用完整堆跑 tsc，失败即回滚；构建阶段据此跳过并行类型检查子进程。
+as_app npm exec next -- typegen
+as_app env NODE_OPTIONS="--max-old-space-size=$BUILD_HEAP_MB" npm exec tsc -- --noEmit
+as_app env NODE_OPTIONS="--max-old-space-size=$BUILD_HEAP_MB" CIRCLE_NODE_TOTAL=1 \
   DATABASE_URL=file:/opt/projectmemo/data/projectmemo.db ATTACHMENT_DIR=/opt/projectmemo/storage \
-  PROJECTMEMO_RELEASE="$TARGET" NEXT_DIST_DIR="$BUILD_NAME" npm run build -- --webpack
+  PROJECTMEMO_RELEASE="$TARGET" NEXT_DIST_DIR="$BUILD_NAME" PROJECTMEMO_BUILD_SKIP_TYPECHECK=1 \
+  npm run build -- --webpack
 test -f "$APP/$BUILD_NAME/BUILD_ID"
 as_app git -C "$APP" restore -- next-env.d.ts tsconfig.json
 # 不运行db:setup或seed。只有构建成功才迁移已经备份的生产库。

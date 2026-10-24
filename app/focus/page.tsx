@@ -8,14 +8,16 @@ import { missionStatusLabels } from "@/lib/mission/presentation";
 import { EvidenceText } from "@/components/EvidenceText";
 import { knowledgeTypeLabels, type KnowledgeTypeValue } from "@/lib/types";
 import type { FocusEntry, GlobalFocus } from "@/lib/types/globalFocus";
+import type {ProjectAgentContext} from "@/lib/types/projectAgentContext";
 import styles from "@/components/FocusDashboard.module.css";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 /** Hero 候选按“需要用户判断”优先：待补充/待批准 > 提醒 > 行动。 */
-type Hero = { kind: "mission" | "reminder" | "action"; item: FocusEntry };
+type Hero = { kind: "mission" | "reminder" | "action"; item: FocusEntry; context?: ProjectAgentContext };
 
 function pickHero(focus: GlobalFocus): Hero | null {
+  if(focus.primaryContext){const c=focus.primaryContext,n=c.nextStep;return {kind:n.entityRef.kind==="MISSION"?"mission":n.entityRef.kind==="INTERVENTION"?"reminder":"action",context:c,item:{id:n.entityRef.id,projectId:c.projectId,projectTitle:c.projectTitle,title:n.title,detail:n.reason,status:n.status,activity:"",activityAt:c.observedAt,recordedAt:"",dueAt:"",projectDeadline:"",recordFields:[]}};}
   const judgment = focus.waiting.find(item => item.status === "WAITING_INPUT" || item.status === "WAITING_APPROVAL");
   if (judgment) return { kind: "mission", item: judgment };
   if (focus.reminders.length) return { kind: "reminder", item: focus.reminders[0] };
@@ -52,6 +54,7 @@ export default async function FocusPage({ searchParams }: { searchParams: Promis
 
 function heroCopy(hero: Hero): { pill: string; pillAmber: boolean; why: string; action: string; href: string } {
   const item = hero.item;
+  if(hero.context){const n=hero.context.nextStep;return {pill:hero.context.freshness!=="FRESH"?"部分摘要暂不可用":missionStatusLabels[item.status]??"当前下一步",pillAmber:n.priority<60,why:n.reason,action:n.actionLabel,href:n.href};}
   if (hero.kind === "mission") {
     const question = item.status === "WAITING_INPUT", approval = item.status === "WAITING_APPROVAL";
     return {
@@ -72,6 +75,7 @@ function HeroCard({ hero }: { hero: Hero }) {
     <div className={styles.heroBody}>
       <div className={styles.heroMeta}><span className={copy.pillAmber ? "workspace-status" : "workspace-status workspace-status-neutral"}>{copy.pill}</span><Link prefetch={false} className={`focus-ring ${styles.heroProject}`} href={`/projects/${hero.item.projectId}`}>{hero.item.projectTitle}</Link></div>
       <h2>{hero.item.title}</h2>
+      {hero.context&&hero.context.goal!==hero.item.title&&<p className={styles.activity}>当前目标：{hero.context.goal}</p>}
       <p><EvidenceText text={copy.why}/></p>
     </div>
     <div className={styles.heroActions}><Link prefetch={false} className="editorial-button focus-ring" href={copy.href}>{copy.action}<ArrowRight size={14} aria-hidden="true"/></Link><Link prefetch={false} className="workspace-link focus-ring" href={`/projects/${hero.item.projectId}`}>回到项目</Link></div>
@@ -100,8 +104,10 @@ function MissionGroup({title,items,waiting=false}:{title:string;items:FocusEntry
   // 暂停/失败是运行状态而非用户判断：归并为一条摘要，逐条运行记录保留在展开区。
   const pending=items.filter(item=>item.status==="WAITING_INPUT"||item.status==="WAITING_APPROVAL");
   const stopped=items.filter(item=>item.status==="PAUSED"||item.status==="FAILED");
+  const active=items.filter(item=>item.status==="READY"||item.status==="RUNNING");
   return <section id={waiting?"focus-waiting":"focus-running"} className={`${styles.panel} ${waiting?styles.handover:""}`} aria-label={title}><PanelHeading title={title} items={items}/>
     {pending.slice(0,3).map(item=><MissionRow key={item.id} item={item} waiting={waiting}/>)}
+    {active.map(item=><MissionRow key={item.id} item={item} waiting={false}/>)}
     {pending.length>3&&<details className={styles.more}><summary className="focus-ring">展开其余 {pending.length-3} 项待回应委托</summary>{pending.slice(3).map(item=><MissionRow key={item.id} item={item} waiting={waiting}/>)}</details>}
     {stopped.length>0&&<details className={styles.stopped}><summary className="focus-ring">{stopped.length} 项委托执行已暂停或失败<span className={styles.stoppedHint}>运行记录与原因保留，逐条查看</span></summary>{stopped.map(item=><MissionRow key={item.id} item={item} waiting={waiting}/>)}</details>}
   </section>;

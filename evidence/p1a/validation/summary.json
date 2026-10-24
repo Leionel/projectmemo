@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "codeBaseline": "d7fb1c10e52bc6d5725f7ca2ca0fd6545be752fc",
+  "dataOrigin": "ISOLATED_SYNTHETIC_DATABASES",
+  "realModelCallsThisChange": 0,
+  "fullVitest": {
+    "files": 98,
+    "passed": 780,
+    "followUpTargetedPassed": [
+      29,
+      18,
+      4
+    ],
+    "followUpSetsOverlap": true
+  },
+  "e2e": {
+    "passed": 14,
+    "failed": 0,
+    "flaky": 0
+  },
+  "typescript": "PASSED",
+  "eslint": "PASSED",
+  "harmonyUnitTests": {
+    "passed": 77,
+    "failed": 0
+  },
+  "hap": {
+    "kind": "UNSIGNED",
+    "sha256": "e4a968be9af1fab3b43a774bfc4ef61eab39e14246ebc651ab919b4e302ef85a"
+  },
+  "deviceAcceptance": "NOT_RUN",
+  "productionDeployment": "NOT_RUN",
+  "browserProof": "browser-proof.json",
+  "mobileProof": "mobile-proof.json",
+  "deepLinkProof": "deep-link-proof.json",
+  "postE2eReadOnlyBoundaryTestsPassed": 4
+}

@@ -47,7 +47,7 @@ export function episodeStatusLabel(status: string | null): string {
 export function mapReentryToWidget(reentry: ReentryData, daysLeft: number, readiness: number): WidgetPayload {
   const statusLabel = episodeStatusLabel(reentry.episode ? reentry.episode.status : null);
   const changes = reentry.episode && reentry.episode.changesSince ? reentry.episode.changesSince.length : 0;
-  const nextAction = (reentry.schedule && reentry.schedule.actionTitle)
+  const nextAction = reentry.agentContext !== undefined && reentry.agentContext !== null ? reentry.agentContext.nextStep.reason : (reentry.schedule && reentry.schedule.actionTitle)
     ? reentry.schedule.actionTitle
     : (reentry.primaryMessage || '打开应用同步待办');
   let checkpointInfo = statusLabel;

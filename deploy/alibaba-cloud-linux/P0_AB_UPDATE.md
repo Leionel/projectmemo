@@ -49,7 +49,15 @@ bash verify-p0a.sh 修复版完整COMMIT --live --confirm-cost \
 
 结果 `results.json` 保存每次尝试、草稿、来源版本、步骤和形式核验；`budget.json` 保存请求哈希、usage 与费用上界，不保存密钥和原始提示词。请回传两份 JSON 的脱敏内容及退出码，用于判定真实协议与内容质量。`FIXTURE_HTTP` 是模拟测试，实际费用为零，里面的费用上界只用于测试预算算法。
 
-## P0-B 核验开关
+## P0-C 收口与 P1-A 统一下一步
+
+P0-C原始真实结果、累计账本与哈希已归档到 `evidence/p0-c/`。原账本累计23次调用、记录费用上界0.188372元；此次实现没有新增付费调用。无需为发布P1-A重新运行真实模型验收。
+
+P1-A新增迁移 `20261023160000_project_agent_focus`，仅给ProjectMembership加可空的个人关注指针。继续使用 `safe-update.sh` 先备份、构建后增量迁移；不执行seed或db:setup。旧代码可忽略新列，回滚保留数据。
+
+`PROJECT_AGENT_CONTEXT_ENABLED` 默认开启；设置false可回退旧页面选择方式。新 `/api/projects/:id/agent-context` 以当前会话读取，只返回授权项目；PATCH只允许OWNER选择本人、同项目、尚未结束的Mission或清除关注，不创建、启动或批准委托。Web概览、Reentry、焦点与ArkTS使用同一投影。新版鸿蒙APK/HAP仍需单独安装验收；更新ECS不等于设备已更新。
+
+## P0-B 核验开关（默认保持关闭）
 
 新增 `COPILOT_CLAIM_JUDGE_ENABLED=false`，默认只做本地规则，不新增付费调用。显式开启后每次回答最多三次共享 Judge，继续受现有账户云调用配额限制。失败保留未核验，不能变成通过。它与 `MISSION_CLAIM_JUDGE_ENABLED` 分别控制；本轮不自动打开任一个。
 

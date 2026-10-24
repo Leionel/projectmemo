@@ -1,3 +1,4 @@
+import { ProjectAgentContextService } from '../services/ProjectAgentContextService';
 import router from '@ohos.router';
 import { MissionService } from '../services/MissionService';
 import { SessionStore } from '../services/SessionStore';
@@ -96,6 +97,11 @@ export struct MissionPanel {
                   Text(item.activity).fontSize(13).maxLines(2).fontColor(PMColors.INK_PRIMARY)
                 }.width('100%').padding(12).alignItems(HorizontalAlign.Start).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(12)
               }
+              Button('设为当前关注').height(44).fontSize(12).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT)
+                .onClick(async () => {
+                  try { await new ProjectAgentContextService().focus(this.projectId, item.id); this.error = ''; this.probe(); }
+                  catch (e) { this.error = e instanceof ApiError ? e.message : '未能设置关注委托'; }
+                })
               PMButton({ label: item.status === 'WAITING_INPUT' ? '补充信息 →' : item.status === 'WAITING_APPROVAL' ? '审阅行动提案 →' : '查看委托详情 →',
                 secondary: true, onAction: (): void => { this.open(item.id); } })
             }.width('100%').alignItems(HorizontalAlign.Start).padding(16).backgroundColor(PMColors.SURFACE)

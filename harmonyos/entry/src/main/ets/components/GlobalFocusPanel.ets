@@ -1,3 +1,4 @@
+import { SessionStore } from '../services/SessionStore';
 import router from '@ohos.router';
 import { focusStatusLabel, focusActionLabel, focusPrimary, focusEntryKind, focusDeadlineConflict } from '../common/GlobalFocusPresentation';
 import { FocusEntry, GlobalFocusReply } from '../models/GlobalFocus';
@@ -18,18 +19,19 @@ export struct GlobalFocusPanel {
   @State private expandedGroups: string[] = [];
   private generation: number = 0;
   private service: GlobalFocusService = new GlobalFocusService();
-  aboutToAppear(): void { this.refresh(); }
-  aboutToDisappear(): void { this.generation++; }
+  private expired: () => void = () => { this.generation++; this.view = new GlobalFocusReply(); this.errorText = '请重新登录后查看焦点'; this.busy = false; };
+  aboutToAppear(): void { SessionStore.onSessionExpired(this.expired); this.refresh(); }
+  aboutToDisappear(): void { this.generation++; SessionStore.offSessionExpired(this.expired); }
   private async refresh(): Promise<void> {
-    const generation = ++this.generation;
+    const generation = ++this.generation; const token = SessionStore.getToken();
     this.busy = true; this.errorText = ''; this.view = new GlobalFocusReply();
     try {
       const reply = await this.service.read(this.includeArchived);
-      if (generation !== this.generation) return;
+      if (generation !== this.generation || token !== SessionStore.getToken()) return;
       if (reply.schemaVersion !== 1) throw new Error('当前客户端尚不支持这份焦点摘要，请更新应用');
       this.view = reply;
     } catch (error) {
-      if (generation !== this.generation) return;
+      if (generation !== this.generation || token !== SessionStore.getToken()) return;
       this.errorText = error instanceof ApiError ? error.message : '焦点暂未加载，请检查网络后重试';
     } finally { if (generation === this.generation) this.busy = false; }
   }
@@ -84,6 +86,7 @@ export struct GlobalFocusPanel {
     return item.detail;
   }
   private open(item: FocusEntry, kind: string): void {
+    if (kind === 'project') { router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: item.projectId } }); return; }
     if (kind === 'mission') router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: item.projectId, missionId: item.id } });
     else if (kind === 'reminder') router.pushUrl({ url: 'pages/InterventionDetail', params: { projectId: item.projectId, interventionId: item.id } });
     else router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: item.projectId,
@@ -92,7 +95,7 @@ export struct GlobalFocusPanel {
   @Builder private Primary(item: FocusEntry) {
     Column({ space: 12 }) {
       Row({ space: 8 }) {
-        PMStatusPill({ label: this.kind(item) === 'reminder' ? '待你核对' : this.kind(item) === 'record' ? '最近记录' : focusStatusLabel(item.status),
+        PMStatusPill({ label: this.view.primaryContext !== undefined && this.view.primaryContext !== null && this.view.primaryContext.freshness !== 'FRESH' ? '部分摘要暂不可用' : this.kind(item) === 'reminder' ? '待你核对' : this.kind(item) === 'record' ? '最近记录' : focusStatusLabel(item.status),
           tone: item.status === 'PAUSED' || item.status === 'FAILED' ? 'risk' : 'warning' })
         Text(item.projectTitle).fontSize(12).fontColor(PMColors.INK_TERTIARY).layoutWeight(1)
           .textAlign(TextAlign.End).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -101,7 +104,7 @@ export struct GlobalFocusPanel {
         .maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis }).lineHeight(29)
       if (this.primaryDetail(item) !== '') { Text(this.primaryDetail(item)).fontSize(14).lineHeight(22).fontColor(PMColors.INK_SECONDARY).maxLines(4).textOverflow({ overflow: TextOverflow.Ellipsis }) }
       PMStatusPill({ label: this.kind(item) === 'mission' ? '执行记录可追溯' : this.kind(item) === 'reminder' ? '待核对提醒依据' : '查看原始记录' })
-      PMButton({ label: focusActionLabel(item.status, this.kind(item)), onAction: (): void => { this.open(item, this.kind(item)); } })
+      PMButton({ label: this.view.primaryContext?.nextStep.actionLabel ?? focusActionLabel(item.status, this.kind(item)), onAction: (): void => { this.open(item, this.kind(item)); } })
     }.width('100%').alignItems(HorizontalAlign.Start).padding(16).backgroundColor(PMColors.SURFACE)
       .borderRadius(PMRadius.LG).border({ width: 1, color: PMColors.BORDER }).margin({ bottom: 12 })
   }

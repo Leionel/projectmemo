@@ -1,6 +1,7 @@
 import { AppError } from "@/lib/api";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { db } from "@/lib/db";
+import { getProjectAgentContext } from "./projectAgentContextService";
 import type {
   ReentryData,
   ReentryEpisodePart,
@@ -270,6 +271,7 @@ export async function getProjectReentry(projectId: string, userId?: string | nul
   }
 
   return {
+    ...(userId ? {agentContext: await getProjectAgentContext(userId,projectId)} : {}),
     projectId: project.id,
     projectName: project.title,
     freshness,

@@ -1,8 +1,10 @@
+import { ProjectAgentContext } from './ProjectAgentContext';
 export interface FocusEntry {
   id: string; projectId: string; projectTitle: string; title: string; detail: string;
   status: string; activity: string; activityAt: string; recordedAt: string; dueAt: string; projectDeadline?: string; recordFields?: FocusRecordField[];
 }
 export class GlobalFocusReply {
+  primaryContext?: ProjectAgentContext | null;
   // Additive Web presentation fields are optional for older clients.
   counts?: FocusCounts;
   nextDeadline?: FocusDeadline | null;

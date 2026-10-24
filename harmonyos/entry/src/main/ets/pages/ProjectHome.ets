@@ -1,3 +1,6 @@
+import { SessionStore } from '../services/SessionStore';
+import { ProjectAgentContext } from '../models/ProjectAgentContext';
+import { ProjectAgentContextService } from '../services/ProjectAgentContextService';
 import { EvidenceAssessment, evidenceAssessmentText } from '../models/Copilot';
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
@@ -89,6 +92,10 @@ struct ProjectHome {
   @State missionRefreshKey: number = 0;
   @State showProjectStatus: boolean = false;
   @State showQuickCopilot: boolean = false;
+  @State private agentContext: ProjectAgentContext | null = null;
+  @State private agentContextError: string = '';
+  private agentContextGeneration: number = 0;
+  private agentContextExpired: () => void = () => { this.agentContextGeneration++; this.agentContext = null; this.homeMission = null; this.agentContextError = '登录已失效，请重新登录。'; };
   @State homeMission: MissionWorkspaceItem | null = null;
   @State showEvolution: boolean = false;
   @StorageProp(PMStorageKey.WIDTH_BP) widthBp: string = PMWidthBp.SM;
@@ -254,7 +261,10 @@ struct ProjectHome {
     '随手记录', '论文笔记', '代码报错', '实验记录', '会议纪要', '老师建议', '参赛材料'
   ];
 
+  aboutToDisappear(): void { this.agentContextGeneration++; SessionStore.offSessionExpired(this.agentContextExpired); }
+
   aboutToAppear(): void {
+    SessionStore.onSessionExpired(this.agentContextExpired);
     const params: Record<string, string> | undefined = router.getParams() as Record<string, string>;
     if (params === undefined || params === null) {
       this.routeError = '页面参数缺失，无法定位项目';
@@ -496,6 +506,11 @@ struct ProjectHome {
       this.isLoading = true;
     }
     this.errorMessage = '';
+    const contextGeneration = ++this.agentContextGeneration;
+    const contextToken = SessionStore.getToken();
+    const contextProject = this.projectId;
+    this.agentContext = null; this.agentContextError = '';
+    const contextP = new ProjectAgentContextService().read(contextProject).catch(() => null);
     try {
       const detailP = this.projectService.getProjectDetail(this.projectId);
       const listP = this.projectService.listProjects();
@@ -517,6 +532,10 @@ struct ProjectHome {
 
       const res = await Promise.all([detailP, listP, intervP, actionP, artifactP, chatP, milestoneP, attachmentP]);
       const missionSummary = await missionP;
+      const contextReply = await contextP;
+      if (contextGeneration !== this.agentContextGeneration || contextToken !== SessionStore.getToken() || contextProject !== this.projectId) return;
+      this.agentContext = contextReply?.context ?? null;
+      this.agentContextError = contextReply === null ? '当前下一步暂时无法读取，请刷新重试。' : '';
       this.homeMission = missionSummary !== null && missionSummary.enabled ? missionSummary.items[0] ?? null : null;
       this.project = res[0];
       this.dashboard = this.findDashboard(res[1]);
@@ -1417,6 +1436,8 @@ struct ProjectHome {
     return deadlineReminderConflict(reminder.title, reminder.content, this.project.deadline ?? '', Date.now());
   }
   private homeFocusTitle(): string {
+    if (this.agentContext !== null) return this.agentContext.nextStep.title;
+    if (this.agentContextError !== '') return '项目摘要暂不可用';
     const kind = this.homeFocusKind();
     if (kind === 'reminder') return this.homeDeadlineConflict() ? '核对提醒与当前截止日' : this.getTopOpenIntervention()?.title ?? '查看提醒';
     if (kind === 'mission') return this.homeMission?.attention ?? '查看长期委托进展';
@@ -1425,6 +1446,8 @@ struct ProjectHome {
     return this.project.cards.length === 0 ? '先留下一条真实的项目资料' : '记录新进展，或继续一个长期目标';
   }
   private homeFocusDetail(): string {
+    if (this.agentContext !== null) return this.agentContext.nextStep.reason;
+    if (this.agentContextError !== '') return this.agentContextError;
     const kind = this.homeFocusKind();
     if (kind === 'reminder') return this.homeDeadlineConflict() ? `历史提醒为「${this.getTopOpenIntervention()?.title ?? ''}」，当前截止日为 ${(this.project.deadline ?? '').substring(0, 10)}。请查看原提醒依据。` : this.getTopOpenIntervention()?.content ?? '';
     if (kind === 'mission') return this.homeMission?.activity ?? this.homeMission?.goal ?? '已有步骤与草稿会保留。';
@@ -1433,6 +1456,8 @@ struct ProjectHome {
     return '记录进展、实验结果或会议要求，让后续判断有据可查。';
   }
   private homeFocusAction(): string {
+    if (this.agentContext !== null) return this.agentContext.nextStep.actionLabel;
+    if (this.agentContextError !== '') return '重新读取项目';
     const kind = this.homeFocusKind();
     if (kind === 'reminder') return '查看提醒依据';
     if (kind === 'mission') return this.homeMission?.status === 'WAITING_INPUT' ? '补充信息' : this.homeMission?.status === 'WAITING_APPROVAL' ? '审阅行动提案' : '查看原委托';
@@ -1440,6 +1465,16 @@ struct ProjectHome {
     return this.project.cards.length === 0 ? '记录第一条资料' : '记录项目进展';
   }
   private openHomeFocus(): void {
+    if (this.agentContextError !== '') { this.loadAllData(true); return; }
+    if (this.agentContext !== null) {
+      const target = this.agentContext.nextStep.entityRef;
+      if (target.kind === 'MISSION') router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.projectId, missionId: target.id } });
+      else if (target.kind === 'INTERVENTION') router.pushUrl({ url: 'pages/InterventionDetail', params: { projectId: this.projectId, interventionId: target.id } });
+      else if (target.kind === 'ACTION') { this.currentTabIndex = 2; this.focusedActionId = target.id; }
+      else if (this.agentContext.freshness === 'UNAVAILABLE') this.loadAllData(true);
+      else this.openCaptureEntry();
+      return;
+    }
     const kind = this.homeFocusKind();
     if (kind === 'reminder') router.pushUrl({ url: 'pages/InterventionDetail', params: { projectId: this.projectId, interventionId: this.getTopOpenIntervention()!.id } });
     else if (kind === 'mission' && this.homeMission !== null) router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.projectId, missionId: this.homeMission.id } });
@@ -1450,7 +1485,8 @@ struct ProjectHome {
   @Builder
   private HomeFocusView() {
     Column({ space: 12 }) {
-      Text(this.homeFocusKind() === 'mission' ? missionStatusLabel(this.homeMission?.status ?? '') : '当前先处理')
+      if (this.agentContext !== null) { Text(`当前目标：${this.agentContext.goal}`).fontSize(12).fontColor(PMColors.INK_SECONDARY).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }) }
+      Text(this.agentContext !== null ? '当前下一步' : this.homeFocusKind() === 'mission' ? missionStatusLabel(this.homeMission?.status ?? '') : '当前先处理')
         .fontSize(12).fontWeight(FontWeight.Medium).fontColor(PMColors.BRAND)
       Text(this.homeFocusTitle()).fontSize(20).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
         .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })

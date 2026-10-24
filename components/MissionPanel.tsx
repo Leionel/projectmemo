@@ -3,6 +3,7 @@ import {missionStatusLabels,missionToolLabels,missionCompletionFacts,missionErro
 import {projectHref} from "@/lib/projectNavigation";
 import { useCallback,useEffect,useRef,useState,useSyncExternalStore } from "react";
 import { emitWorkspaceChange } from "@/lib/client/workspaceEvents";
+import {ProjectAgentFocusButton} from "./ProjectAgentFocus";
 import { MissionClaimChecks } from "./MissionClaimChecks";
 import { MissionMetricInput } from "./MissionMetricInput";
 import { MissionArtifactAdoption } from "./MissionArtifactAdoption";
@@ -91,6 +92,7 @@ function MissionWorkspace({projectId,initialMissionId}:{projectId:string;initial
    </aside>
    <div className={styles.detail} aria-busy={busy}>
    {!mission?<div className={styles.empty}><span className={styles.emptyMark} aria-hidden="true">↗</span><h3>让目标持续向前</h3><p>新建一个委托，或选择已有委托查看执行进度。</p><p className={styles.muted}>步骤与草稿会保留；需要你的材料或批准时，Agent 会停下来等待。</p></div>:<>
+    {!["SUCCEEDED","CANCELLED"].includes(mission.status)&&<ProjectAgentFocusButton projectId={projectId} missionId={mission.id}/>}
     <header className={styles.detailHeader}>
      <div className={styles.detailMeta}><span className={styles.badge} data-status={mission.status}>{labels[mission.status]??"状态待确认"}</span><span>{done} 个步骤已执行 · {mission.outputs.length} 份草稿</span></div>
      <h3 className={styles.goal}>{mission.goal.length>90?`${[...mission.goal].slice(0,90).join("")}…`:mission.goal}</h3>{mission.goal.length>90&&<details><summary>查看完整委托目标</summary><p>{mission.goal}</p></details>}

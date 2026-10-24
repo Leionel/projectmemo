@@ -23,8 +23,8 @@ export async function missionWorkspaceSummary(userId: string, projectId: string)
 
 export const missionSummarySelect = {
     id: true, goal: true, status: true, version: true, lastErrorJson: true,
-    events: {where: {type: "QUESTION"}, orderBy: {seq: "desc" as const}, take: 1, select: {payloadJson: true}},
-    approvals: {where: {status: "PENDING"}, orderBy: {expiresAt: "asc" as const}, take: 1, select: {proposalJson: true}},
+    events: {where: {type: "QUESTION"}, orderBy: {seq: "desc" as const}, take: 1, select: {id: true, payloadJson: true}},
+    approvals: {where: {status: "PENDING"}, orderBy: {expiresAt: "asc" as const}, take: 1, select: {id: true, proposalJson: true}},
     steps: {where: {status: "SUCCEEDED"}, orderBy: {ordinal: "desc" as const}, take: 1, select: {toolName: true, finishedAt: true}},
     outputs: {orderBy: {revision: "desc" as const}, take: 1, select: {revision: true, createdAt: true}},
   } as const;

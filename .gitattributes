@@ -1,0 +1,3 @@
+# Preserve uploaded evaluation bytes and their recorded SHA-256 across platforms.
+evidence/p0-c/20261023-live-recovery/results.json -text
+evidence/p0-c/20261023-live-recovery/budget.json -text

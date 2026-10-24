@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "id": "p0-c-minimum-v1",
+  "frozenAt": "2026-10-23",
+  "purpose": "任务口径冻结；测试文件是入口映射，不自动等同真实模型或设备通过",
+  "baselineEvidence": "20261023-live-recovery/assessment.json",
+  "cases": [
+    {
+      "id": "normal",
+      "name": "正常内部整理",
+      "deterministicEntry": "tests/missionRuntime.test.ts",
+      "realModelStatus": "NOT_EVALUATED",
+      "humanLabel": null,
+      "deviceStatus": "NOT_EVALUATED"
+    },
+    {
+      "id": "missing",
+      "name": "缺私有材料与同委托补料",
+      "deterministicEntry": "tests/missionContinuation.test.ts",
+      "realModelStatus": "COVERED_BY_RECOVERY_TRACE",
+      "humanLabel": null,
+      "deviceStatus": "NOT_EVALUATED"
+    },
+    {
+      "id": "conflict",
+      "name": "冲突证据保留未知或争议",
+      "deterministicEntry": "tests/missionClaimVerifier.test.ts",
+      "realModelStatus": "NOT_EVALUATED",
+      "humanLabel": null,
+      "deviceStatus": "NOT_EVALUATED"
+    },
+    {
+      "id": "superseded",
+      "name": "被取代事实不作当前依据",
+      "deterministicEntry": "tests/temporalLedger.test.ts",
+      "realModelStatus": "NOT_EVALUATED",
+      "humanLabel": null,
+      "deviceStatus": "NOT_EVALUATED"
+    },
+    {
+      "id": "protocol",
+      "name": "协议失败和一次格式修复",
+      "deterministicEntry": "tests/missionProtocolRepair.test.ts",
+      "realModelStatus": "COVERED_BY_RECOVERY_TRACE",
+      "humanLabel": null,
+      "deviceStatus": "NOT_EVALUATED"
+    },
+    {
+      "id": "tool",
+      "name": "工具失败保留步骤与原因",
+      "deterministicEntry": "tests/missionRuntimeDiagnostics.test.ts",
+      "realModelStatus": "NOT_EVALUATED",
+      "humanLabel": null,
+      "deviceStatus": "NOT_EVALUATED"
+    },
+    {
+      "id": "interruption",
+      "name": "进程中断后租约恢复",
+      "deterministicEntry": "tests/missionRuntime.test.ts",
+      "realModelStatus": "NOT_EVALUATED",
+      "humanLabel": null,
+      "deviceStatus": "NOT_EVALUATED"
+    },
+    {
+      "id": "retry",
+      "name": "重复请求与恢复幂等",
+      "deterministicEntry": "tests/missionEvaluationRetry.test.ts",
+      "realModelStatus": "COVERED_BY_RECOVERY_TRACE",
+      "humanLabel": null,
+      "deviceStatus": "NOT_EVALUATED"
+    },
+    {
+      "id": "refusal",
+      "name": "拒绝权限或拒绝批准不写业务",
+      "deterministicEntry": "tests/missionRuntime.test.ts",
+      "realModelStatus": "NOT_EVALUATED",
+      "humanLabel": null,
+      "deviceStatus": "NOT_EVALUATED"
+    },
+    {
+      "id": "invalidation",
+      "name": "新证据使旧提案失效",
+      "deterministicEntry": "tests/copilotPersistence.test.ts",
+      "realModelStatus": "NOT_EVALUATED",
+      "humanLabel": null,
+      "deviceStatus": "NOT_EVALUATED"
+    }
+  ],
+  "rules": [
+    "失败留在分母；恢复尝试不计独立成功样本",
+    "规则、真实模型、人工语义、用户测试、设备、生产启用分别记录",
+    "未知人工标签保持null，不用模型自评代填",
+    "付费调用继续沿原账本，不能新建授权预算"
+  ]
+}

@@ -64,6 +64,7 @@ export interface ReentrySchedulePart {
 }
 
 export interface ReentryData {
+  agentContext?: import("./projectAgentContext").ProjectAgentContext | null;
   projectId: string;
   projectName: string;
   freshness: ReentryFreshness;

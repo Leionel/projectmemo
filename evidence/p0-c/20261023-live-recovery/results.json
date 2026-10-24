@@ -1,0 +1,1219 @@
+{
+  "schemaVersion": 1,
+  "mode": "REAL_MODEL_SYNTHETIC_DATA",
+  "sourceVersions": {
+    "lib/mission/runner.ts": "8b43d79e0fceff51b642bf9380ef82e2d74798ec5da3b22ca834996f27ebd790",
+    "lib/mission/modelAdapter.ts": "1cce4667696030e8c151f182e95bc88c4c43532ea30c80df3d0bb3fb36558836",
+    "lib/mission/decisionJson.ts": "47356822df55df49eff614064f7e214879e89bb69b23d81294e76e33d54431c6",
+    "lib/mission/claimVerifier.ts": "d934e8f6d7b47ced20bf759f75598d666a83f4effcec31bb1d5b609a28447eaa",
+    "lib/mission/claimSegments.ts": "145af2d01f6ac36506649b6cb62b14ed5fa154741fcdf82e25158f02f71397e2",
+    "lib/mission/contextBuilder.ts": "f1e95b34098608f0825d6993d36270000aa0eb1b736029d29dd2b1d99586a949",
+    "lib/mission/tools.ts": "5c2214fe310cd70c2f540d45fc5cf8e98f8f365ccc2dc7e1421d8d4922db5c33",
+    "lib/mission/memorySearch.ts": "060ddddfa5c0e8d0d8e9d630dbdfd9971c240040406979096fa01937ebdc5510",
+    "lib/mission/modelProtocol.ts": "8a51591342da900d53babbae6d1aa8999e8535a5d7ac46d09671a6ececad7d7f",
+    "lib/mission/continuationService.ts": "70a81c4f9fcc53357a187c14efe271b040cd301dc321276c8c31e29dccff917e",
+    "scripts/mission-evaluation/run.ts": "ecc52a9d93575eecb7c1f9446caa8fdc34ff566bd52137822cb21739152ed439",
+    "scripts/mission-evaluation/retry.ts": "28ef8f19cf1205dbe57e28bc7179e7770cbcf1d19ed0306f2622ca91a3fb0931",
+    "scripts/mission-evaluation/budget.ts": "68b19c2898a637a1119b9ba98cc514b60d850517655fbe4ac281147f16f0b82a",
+    "prisma/schema.prisma": "318a781e304547fed3657bd9e5a59abe6532ef0419605e373bd1e5f399b9666d"
+  },
+  "taskSet": "p0-a-internal-continuation-v1",
+  "runId": "8c893117-6de1-414c-9d3e-788fc7217860",
+  "protocol": "json",
+  "revision": "05c849aa974fb1a14cbe79763553721e4f37fd22c0e9417995506773134f96bd",
+  "archives": [
+    {
+      "archive": "results-archive-d48df0af5e9709431992f6b7f2b5913bbf86ae0d0d00b22be26de485979435e6.json",
+      "sha256": "d48df0af5e9709431992f6b7f2b5913bbf86ae0d0d00b22be26de485979435e6",
+      "runId": "8c893117-6de1-414c-9d3e-788fc7217860"
+    }
+  ],
+  "attempts": [
+    {
+      "kind": "protocol",
+      "missionId": "cmvl1ssou0005enraxd8yquim",
+      "status": "PASSED",
+      "datasetOrigin": "SYNTHETIC",
+      "actualReadTool": "inspect_project",
+      "modelRequests": 2,
+      "observationReturned": true,
+      "taskSuccessInferred": false,
+      "revision": "474aceceef53a11cd7d5243a853cf4104921b3b2bb45a37dfb94043d2fbd7a83"
+    },
+    {
+      "kind": "continuation",
+      "repeat": 1,
+      "missionId": "cmvl1sume000nenra1b4on61l",
+      "projectId": "cmvl1sull000jenragfony2mi",
+      "status": "ENGINEERING_COMPLETED_PENDING_HUMAN_CONTENT_REVIEW",
+      "datasetOrigin": "SYNTHETIC",
+      "humanInputMode": "PREDECLARED_EVALUATION_RESPONSE",
+      "questionId": "cmvl1sxzf000zenramqjfrweb",
+      "inputSourceId": "capture:cmvl1sxzw0010enramsz2yinu",
+      "outputId": "cmvl1szxr001cenra3apz5b6z",
+      "outputVerification": "NEEDS_REVIEW",
+      "artifactId": "cmvl1t0us001ienra7qdn5goh",
+      "receiptId": "cmvl1t0uv001jenrajgbeeig2",
+      "sameMissionRestored": true,
+      "draftForHumanReview": {
+        "id": "cmvl1szxr001cenra3apz5b6z",
+        "missionId": "cmvl1sume000nenra1b4on61l",
+        "stepId": "cmvl1szwh001aenra5mlalw30",
+        "revision": 1,
+        "kind": "NOTE",
+        "contentJson": {
+          "schemaVersion": 1,
+          "kind": "NOTE",
+          "blocks": [
+            {
+              "blockId": "draft",
+              "text": "阶段汇报草稿（P0-A 隔离合成项目）\n\n一、已完成事项\n1. 基线训练与参数核对已完成。\n2. 复赛验证准确率：91%（复赛验证阶段）。注意：该数字来自隔离评测合成材料，不代表真实实验。\n\n二、风险\n1. 复赛验证准确率 91% 为合成材料数据，不能作为真实实验结论对外引用。\n2. 验证数据划分尚未核对，可能影响指标可比性。\n\n三、下一步\n1. 核对验证数据划分。\n2. 审阅本阶段汇报草稿。",
+              "kind": "PROJECT_OBSERVATION",
+              "sourceIds": [
+                "capture:cmvl1sxzw0010enramsz2yinu",
+                "project:cmvl1sull000jenragfony2mi"
+              ],
+              "citations": [
+                {
+                  "sourceId": "capture:cmvl1sxzw0010enramsz2yinu",
+                  "start": 0,
+                  "end": 67,
+                  "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+                }
+              ]
+            }
+          ],
+          "missingInformation": [
+            "复赛验证准确率对应的时间段未明确（仅知为复赛验证阶段）"
+          ]
+        },
+        "sourceRefsJson": [
+          {
+            "id": "capture:cmvl1sxzw0010enramsz2yinu",
+            "kind": "PROJECT",
+            "entityType": "CAPTURE",
+            "revision": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+            "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+            "text": "复赛验证准确率：91%。本项目基线训练与参数核对已完成；数字是隔离评测合成材料，不代表真实实验。下一步核对验证数据划分并审阅阶段汇报。",
+            "observedAt": "2026-10-23T14:11:22.268Z"
+          },
+          {
+            "id": "project:cmvl1sull000jenragfony2mi",
+            "kind": "PROJECT",
+            "entityType": "PROJECT",
+            "revision": "7ec9e040074bcaedfbfa0b22c6ae0c5819308909a644d4bca9ca9d18f6bc7af9",
+            "hash": "7ec9e040074bcaedfbfa0b22c6ae0c5819308909a644d4bca9ca9d18f6bc7af9",
+            "text": "{\"project\":{\"title\":\"P0-A 隔离合成项目\",\"goal\":\"根据本项目材料准备阶段汇报草稿，包含已完成事项、风险和下一步。先核对已有记录；缺少复赛验证准确率时向用户询问，不能猜测。补充记录后继续本委托，保存带准确来源引用的简明草稿，最后满足验收条件。不要外部研究，不创建行动。\",\"deadline\":null},\"actions\":[],\"coverage\":{\"totalActions\":0,\"returnedActions\":0,\"nextCursor\":null,\"complete\":true},\"truncated\":false}",
+            "observedAt": "2026-10-23T14:11:19.818Z"
+          }
+        ],
+        "claimChecksJson": [
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v1",
+            "claimId": "draft:0",
+            "blockId": "draft",
+            "text": "阶段汇报草稿（P0-A 隔离合成项目）\n",
+            "claimStart": 0,
+            "claimEnd": 20,
+            "claimHash": "3bf3f3457390f20dce44fa5d363ba7f508c39600ee9a40be46bedb3f52d406ff",
+            "status": "NOT_ENOUGH_INFORMATION",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "UNSUPPORTED_NUMBER",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1sxzw0010enramsz2yinu",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              }
+            ],
+            "checkedAt": "2026-10-23T14:11:24.773Z"
+          },
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v1",
+            "claimId": "draft:20",
+            "blockId": "draft",
+            "text": "\n",
+            "claimStart": 20,
+            "claimEnd": 21,
+            "claimHash": "d7a5e915306d21dc1937ad5616f1dc9682e759e75ef51dd05fd9ddc98a078ea1",
+            "status": "NOT_CHECKED",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "JUDGE_NOT_CONFIGURED",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1sxzw0010enramsz2yinu",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              }
+            ],
+            "checkedAt": "2026-10-23T14:11:24.774Z"
+          },
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v1",
+            "claimId": "draft:21",
+            "blockId": "draft",
+            "text": "一、已完成事项\n",
+            "claimStart": 21,
+            "claimEnd": 29,
+            "claimHash": "219428adfa662713be52e85e98f62ea946d14e33ce51f925350e05d30d94af11",
+            "status": "NOT_CHECKED",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "JUDGE_NOT_CONFIGURED",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1sxzw0010enramsz2yinu",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              }
+            ],
+            "checkedAt": "2026-10-23T14:11:24.774Z"
+          },
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v1",
+            "claimId": "draft:29",
+            "blockId": "draft",
+            "text": "1. ",
+            "claimStart": 29,
+            "claimEnd": 32,
+            "claimHash": "56c8764bd1b99cae06f278276c770b2eba32055bb0963ecafa5f7ddb9fb15579",
+            "status": "NOT_ENOUGH_INFORMATION",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "UNSUPPORTED_NUMBER",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1sxzw0010enramsz2yinu",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              }
+            ],
+            "checkedAt": "2026-10-23T14:11:24.775Z"
+          },
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v1",
+            "claimId": "draft:32",
+            "blockId": "draft",
+            "text": "基线训练与参数核对已完成。\n",
+            "claimStart": 32,
+            "claimEnd": 46,
+            "claimHash": "fa41898eedcfb476639762f592877dad12b868a4227754efc840d1443f1bd6db",
+            "status": "NOT_CHECKED",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "JUDGE_NOT_CONFIGURED",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1sxzw0010enramsz2yinu",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              }
+            ],
+            "checkedAt": "2026-10-23T14:11:24.775Z"
+          },
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v1",
+            "claimId": "draft:46",
+            "blockId": "draft",
+            "text": "2. ",
+            "claimStart": 46,
+            "claimEnd": 49,
+            "claimHash": "a31ac8d0c74621e152b0a826595b05294469dca12ff4d82cd20f211db3db3ac9",
+            "status": "NOT_ENOUGH_INFORMATION",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "UNSUPPORTED_NUMBER",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1sxzw0010enramsz2yinu",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              }
+            ],
+            "checkedAt": "2026-10-23T14:11:24.775Z"
+          },
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v1",
+            "claimId": "draft:49",
+            "blockId": "draft",
+            "text": "复赛验证准确率：91%（复赛验证阶段）。",
+            "claimStart": 49,
+            "claimEnd": 69,
+            "claimHash": "1674265c48b8f6dae16544defdfad15dac3bda74a1a383952dc8382b39fbbd37",
+            "status": "NOT_CHECKED",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "JUDGE_NOT_CONFIGURED",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1sxzw0010enramsz2yinu",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              }
+            ],
+            "checkedAt": "2026-10-23T14:11:24.775Z"
+          },
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v1",
+            "claimId": "draft:69",
+            "blockId": "draft",
+            "text": "注意：该数字来自隔离评测合成材料，不代表真实实验。\n",
+            "claimStart": 69,
+            "claimEnd": 95,
+            "claimHash": "ce4c75a15be6d9fef00ac0a1a9f1a60827c94cbe752b8d8b5394f7a346897440",
+            "status": "NOT_CHECKED",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "JUDGE_NOT_CONFIGURED",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1sxzw0010enramsz2yinu",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              }
+            ],
+            "checkedAt": "2026-10-23T14:11:24.775Z"
+          },
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v1",
+            "claimId": "draft:95",
+            "blockId": "draft",
+            "text": "\n二、风险\n1. 复赛验证准确率 91% 为合成材料数据，不能作为真实实验结论对外引用。\n2. 验证数据划分尚未核对，可能影响指标可比性。\n\n三、下一步\n1. 核对验证数据划分。\n2. 审阅本阶段汇报草稿。",
+            "claimStart": 95,
+            "claimEnd": 198,
+            "claimHash": "91b4b5cd722e6fb47d0430d02cdbb8f39000cbebc049897f68659ffb8e08343b",
+            "status": "NOT_CHECKED",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "CLAIM_LIMIT",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1sxzw0010enramsz2yinu",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              }
+            ],
+            "checkedAt": "2026-10-23T14:11:24.775Z"
+          }
+        ],
+        "verificationStatus": "NEEDS_REVIEW",
+        "createdAt": "2026-10-23T14:11:24.783Z"
+      },
+      "businessActionCount": 0,
+      "steps": [
+        {
+          "tool": "inspect_project",
+          "status": "SUCCEEDED"
+        },
+        {
+          "tool": "bind_project_sources",
+          "status": "SUCCEEDED"
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED"
+        }
+      ],
+      "goalSemanticSuccess": "NOT_INFERRED",
+      "realityOutcome": "NOT_INFERRED",
+      "revision": "474aceceef53a11cd7d5243a853cf4104921b3b2bb45a37dfb94043d2fbd7a83"
+    },
+    {
+      "kind": "continuation",
+      "repeat": 2,
+      "missionId": "cmvl1t0wi001qenrahpk1j0jy",
+      "projectId": "cmvl1t0vl001menraallrslhs",
+      "status": "FAILED",
+      "datasetOrigin": "SYNTHETIC",
+      "humanInputMode": "PREDECLARED_EVALUATION_RESPONSE",
+      "questionId": "cmvl1t3fp0022enraa1zzhyu2",
+      "inputSourceId": "capture:cmvl1t3g60023enran72gtxnk",
+      "code": "MISSION_STOPPED_PAUSED",
+      "missionStatus": "PAUSED",
+      "error": {
+        "code": "MODEL_PROTOCOL_ERROR",
+        "message": "模型回复不是完整的 JSON，未执行新步骤",
+        "diagnostic": {
+          "reason": "INVALID_JSON",
+          "repairHint": "只返回一个完整 JSON 对象，不附解释或 Markdown。",
+          "finishReason": "stop",
+          "responseChars": 1164
+        },
+        "phase": "DECISION",
+        "category": "MODEL_PROTOCOL",
+        "recovery": {
+          "kind": "REVIEW_REQUIRED",
+          "automatic": false,
+          "message": "模型格式纠错仍未通过，请检查模型配置后人工继续。",
+          "attempt": 2,
+          "maxAttempts": 2
+        }
+      },
+      "outputCount": 0,
+      "revision": "474aceceef53a11cd7d5243a853cf4104921b3b2bb45a37dfb94043d2fbd7a83"
+    },
+    {
+      "kind": "continuation",
+      "repeat": 3,
+      "missionId": "cmvl1t7p0002menradxh3bqgm",
+      "projectId": "cmvl1t7o4002ienrap3p9ggx6",
+      "status": "FAILED",
+      "datasetOrigin": "SYNTHETIC",
+      "humanInputMode": "PREDECLARED_EVALUATION_RESPONSE",
+      "questionId": "cmvl1tahk002yenraz06cqzjc",
+      "inputSourceId": "capture:cmvl1tahx002zenrapwx1cnqn",
+      "code": "MISSION_STOPPED_PAUSED",
+      "missionStatus": "PAUSED",
+      "error": {
+        "code": "MODEL_PROTOCOL_ERROR",
+        "message": "模型回复不是完整的 JSON，未执行新步骤",
+        "diagnostic": {
+          "reason": "INVALID_JSON",
+          "repairHint": "只返回一个完整 JSON 对象，不附解释或 Markdown。",
+          "finishReason": "stop",
+          "responseChars": 758
+        },
+        "phase": "DECISION",
+        "category": "MODEL_PROTOCOL",
+        "recovery": {
+          "kind": "REVIEW_REQUIRED",
+          "automatic": false,
+          "message": "模型格式纠错仍未通过，请检查模型配置后人工继续。",
+          "attempt": 2,
+          "maxAttempts": 2
+        }
+      },
+      "outputCount": 0,
+      "revision": "474aceceef53a11cd7d5243a853cf4104921b3b2bb45a37dfb94043d2fbd7a83"
+    },
+    {
+      "kind": "protocol",
+      "missionId": "cmvl40u4b0005n8raqb3fiv3v",
+      "status": "PASSED",
+      "revision": "05c849aa974fb1a14cbe79763553721e4f37fd22c0e9417995506773134f96bd",
+      "datasetOrigin": "SYNTHETIC",
+      "actualReadTool": "inspect_project",
+      "modelRequests": 2,
+      "observationReturned": true,
+      "taskSuccessInferred": false
+    },
+    {
+      "kind": "continuation",
+      "repeat": 2,
+      "missionId": "cmvl1t0wi001qenrahpk1j0jy",
+      "projectId": "cmvl1t0vl001menraallrslhs",
+      "status": "ENGINEERING_COMPLETED_PENDING_HUMAN_CONTENT_REVIEW",
+      "revision": "05c849aa974fb1a14cbe79763553721e4f37fd22c0e9417995506773134f96bd",
+      "retryOf": {
+        "missionId": "cmvl1t0wi001qenrahpk1j0jy",
+        "revision": "474aceceef53a11cd7d5243a853cf4104921b3b2bb45a37dfb94043d2fbd7a83",
+        "status": "FAILED"
+      },
+      "inputSourceId": "capture:cmvl1t3g60023enran72gtxnk",
+      "questionId": "cmvl1t3fp0022enraa1zzhyu2",
+      "datasetOrigin": "SYNTHETIC",
+      "humanInputMode": "PREDECLARED_EVALUATION_RESPONSE",
+      "outputId": "cmvl40znz000nn8ra151b6hfm",
+      "outputVerification": "NEEDS_REVIEW",
+      "artifactId": "cmvl410zt000tn8rau4vw3t9d",
+      "receiptId": "cmvl410zv000un8rag868c61w",
+      "sameMissionRestored": true,
+      "draftForHumanReview": {
+        "id": "cmvl40znz000nn8ra151b6hfm",
+        "missionId": "cmvl1t0wi001qenrahpk1j0jy",
+        "stepId": "cmvl40zmm000ln8raosg1z6xi",
+        "revision": 1,
+        "kind": "NOTE",
+        "contentJson": {
+          "schemaVersion": 1,
+          "kind": "NOTE",
+          "blocks": [
+            {
+              "blockId": "facts",
+              "text": "已完成事项：基线训练与参数核对已完成。复赛验证准确率：91%（用户补充记录，单位为%，对应复赛验证阶段）。用户说明该数字来自隔离评测合成材料，不代表真实实验。",
+              "kind": "PROJECT_OBSERVATION",
+              "sourceIds": [
+                "capture:cmvl1t3g60023enran72gtxnk"
+              ],
+              "citations": [
+                {
+                  "sourceId": "capture:cmvl1t3g60023enran72gtxnk",
+                  "start": 0,
+                  "end": 67,
+                  "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+                }
+              ]
+            },
+            {
+              "blockId": "risks",
+              "text": "风险推断：91% 准确率来自隔离评测合成材料，不能作为真实实验结论对外引用；验证数据划分尚未核对，指标口径与可比性存在不确定性。",
+              "kind": "INFERENCE",
+              "sourceIds": [
+                "capture:cmvl1t3g60023enran72gtxnk"
+              ],
+              "citations": [
+                {
+                  "sourceId": "capture:cmvl1t3g60023enran72gtxnk",
+                  "start": 0,
+                  "end": 67,
+                  "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+                }
+              ]
+            },
+            {
+              "blockId": "next",
+              "text": "下一步：核对验证数据划分，并审阅阶段汇报。",
+              "kind": "PROJECT_OBSERVATION",
+              "sourceIds": [
+                "capture:cmvl1t3g60023enran72gtxnk"
+              ],
+              "citations": [
+                {
+                  "sourceId": "capture:cmvl1t3g60023enran72gtxnk",
+                  "start": 0,
+                  "end": 67,
+                  "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+                }
+              ]
+            }
+          ],
+          "missingInformation": [
+            "复赛验证准确率对应的时间段未明确",
+            "验证数据划分核对结果尚未记录"
+          ]
+        },
+        "sourceRefsJson": [
+          {
+            "id": "capture:cmvl1t3g60023enran72gtxnk",
+            "kind": "PROJECT",
+            "entityType": "CAPTURE",
+            "revision": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+            "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+            "text": "复赛验证准确率：91%。本项目基线训练与参数核对已完成；数字是隔离评测合成材料，不代表真实实验。下一步核对验证数据划分并审阅阶段汇报。",
+            "observedAt": "2026-10-23T14:11:29.334Z"
+          },
+          {
+            "id": "capture:cmvl1t3g60023enran72gtxnk",
+            "kind": "PROJECT",
+            "entityType": "CAPTURE",
+            "revision": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+            "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+            "text": "复赛验证准确率：91%。本项目基线训练与参数核对已完成；数字是隔离评测合成材料，不代表真实实验。下一步核对验证数据划分并审阅阶段汇报。",
+            "observedAt": "2026-10-23T14:11:29.334Z"
+          },
+          {
+            "id": "capture:cmvl1t3g60023enran72gtxnk",
+            "kind": "PROJECT",
+            "entityType": "CAPTURE",
+            "revision": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+            "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+            "text": "复赛验证准确率：91%。本项目基线训练与参数核对已完成；数字是隔离评测合成材料，不代表真实实验。下一步核对验证数据划分并审阅阶段汇报。",
+            "observedAt": "2026-10-23T14:11:29.334Z"
+          }
+        ],
+        "claimChecksJson": [
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v2",
+            "claimId": "facts:0",
+            "blockId": "facts",
+            "text": "已完成事项：基线训练与参数核对已完成。",
+            "claimStart": 0,
+            "claimEnd": 19,
+            "claimHash": "d3534542e82c07d8472472017bce836deca50f668c8d377b77c215a9c4b64135",
+            "status": "NOT_CHECKED",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "JUDGE_NOT_CONFIGURED",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1t3g60023enran72gtxnk",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              }
+            ],
+            "checkedAt": "2026-10-23T15:13:36.899Z"
+          },
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v2",
+            "claimId": "facts:19",
+            "blockId": "facts",
+            "text": "复赛验证准确率：91%（用户补充记录，单位为%，对应复赛验证阶段）。",
+            "claimStart": 19,
+            "claimEnd": 53,
+            "claimHash": "8f36b9c6b8850da00f82eb4998a238d0e3425f4ebd2bdf6bc1ba5cf632db5d0e",
+            "status": "NOT_CHECKED",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "JUDGE_NOT_CONFIGURED",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1t3g60023enran72gtxnk",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              }
+            ],
+            "checkedAt": "2026-10-23T15:13:36.901Z"
+          },
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v2",
+            "claimId": "facts:53",
+            "blockId": "facts",
+            "text": "用户说明该数字来自隔离评测合成材料，不代表真实实验。",
+            "claimStart": 53,
+            "claimEnd": 79,
+            "claimHash": "75011b0d9c358f5e87ab0fbfe9a8203bc617a56aaf33623ba1a8a997ae7203ef",
+            "status": "NOT_CHECKED",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "JUDGE_NOT_CONFIGURED",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1t3g60023enran72gtxnk",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              }
+            ],
+            "checkedAt": "2026-10-23T15:13:36.901Z"
+          },
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v2",
+            "claimId": "risks:0",
+            "blockId": "risks",
+            "text": "风险推断：91% 准确率来自隔离评测合成材料，不能作为真实实验结论对外引用；验证数据划分尚未核对，指标口径与可比性存在不确定性。",
+            "claimStart": 0,
+            "claimEnd": 64,
+            "claimHash": "0b41dd7eade41fa5298fae42ac4a73c724d204d534cb00714e59c25476213335",
+            "status": "NOT_CHECKED",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "JUDGE_NOT_CONFIGURED",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1t3g60023enran72gtxnk",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              }
+            ],
+            "checkedAt": "2026-10-23T15:13:36.901Z"
+          },
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v2",
+            "claimId": "next:0",
+            "blockId": "next",
+            "text": "下一步：核对验证数据划分，并审阅阶段汇报。",
+            "claimStart": 0,
+            "claimEnd": 21,
+            "claimHash": "e16725ae38d224ae95ac3da9b15802ebed7ca17383782bfa996674911673e08b",
+            "status": "NOT_CHECKED",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "JUDGE_NOT_CONFIGURED",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1t3g60023enran72gtxnk",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              }
+            ],
+            "checkedAt": "2026-10-23T15:13:36.901Z"
+          }
+        ],
+        "verificationStatus": "NEEDS_REVIEW",
+        "createdAt": "2026-10-23T15:13:36.911Z"
+      },
+      "businessActionCount": 0,
+      "steps": [
+        {
+          "tool": "inspect_project",
+          "status": "SUCCEEDED"
+        },
+        {
+          "tool": "bind_project_sources",
+          "status": "SUCCEEDED"
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED"
+        }
+      ],
+      "goalSemanticSuccess": "NOT_INFERRED",
+      "realityOutcome": "NOT_INFERRED",
+      "modelDecisions": [
+        {
+          "id": "cmvl1t1iq001tenrainy9dv4w",
+          "status": "FAILED",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "protocol": "JSON_CHOICE",
+          "diagnostic": {
+            "reason": "INVALID_JSON",
+            "repairHint": "只返回一个完整 JSON 对象，不附解释或 Markdown。",
+            "finishReason": "stop",
+            "responseChars": 86
+          },
+          "usage": {
+            "inputTokens": 2156,
+            "outputTokens": 27
+          }
+        },
+        {
+          "id": "cmvl1t2e3001wenra2ki4w7ro",
+          "status": "SUCCESS",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "protocol": "JSON_CHOICE",
+          "usage": {
+            "inputTokens": 2316,
+            "outputTokens": 24
+          }
+        },
+        {
+          "id": "cmvl1t3fo0021enraw5gdvs00",
+          "status": "SUCCESS",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "protocol": "JSON_CHOICE",
+          "usage": {
+            "inputTokens": 3057,
+            "outputTokens": 99
+          }
+        },
+        {
+          "id": "cmvl1t5gs002cenraixc7jg1u",
+          "status": "FAILED",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "protocol": "JSON_CHOICE",
+          "diagnostic": {
+            "reason": "INVALID_JSON",
+            "repairHint": "只返回一个完整 JSON 对象，不附解释或 Markdown。",
+            "finishReason": "stop",
+            "responseChars": 872
+          },
+          "usage": {
+            "inputTokens": 4138,
+            "outputTokens": 387
+          }
+        },
+        {
+          "id": "cmvl1t7n3002fenrayf5yg3vr",
+          "status": "FAILED",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "protocol": "JSON_CHOICE",
+          "diagnostic": {
+            "reason": "INVALID_JSON",
+            "repairHint": "只返回一个完整 JSON 对象，不附解释或 Markdown。",
+            "finishReason": "stop",
+            "responseChars": 1164
+          },
+          "usage": {
+            "inputTokens": 4257,
+            "outputTokens": 515
+          }
+        },
+        {
+          "id": "cmvl40zmk000kn8rabjlwqds3",
+          "status": "SUCCESS",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "protocol": "FUNCTION_CHOICE",
+          "usage": {
+            "inputTokens": 5204,
+            "outputTokens": 622
+          }
+        },
+        {
+          "id": "cmvl410yk000rn8rard0v4re9",
+          "status": "SUCCESS",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "protocol": "JSON_CHOICE",
+          "usage": {
+            "inputTokens": 5863,
+            "outputTokens": 24
+          }
+        }
+      ]
+    },
+    {
+      "kind": "continuation",
+      "repeat": 3,
+      "missionId": "cmvl1t7p0002menradxh3bqgm",
+      "projectId": "cmvl1t7o4002ienrap3p9ggx6",
+      "status": "ENGINEERING_COMPLETED_PENDING_HUMAN_CONTENT_REVIEW",
+      "revision": "05c849aa974fb1a14cbe79763553721e4f37fd22c0e9417995506773134f96bd",
+      "retryOf": {
+        "missionId": "cmvl1t7p0002menradxh3bqgm",
+        "revision": "474aceceef53a11cd7d5243a853cf4104921b3b2bb45a37dfb94043d2fbd7a83",
+        "status": "FAILED"
+      },
+      "inputSourceId": "capture:cmvl1tahx002zenrapwx1cnqn",
+      "questionId": "cmvl1tahk002yenraz06cqzjc",
+      "datasetOrigin": "SYNTHETIC",
+      "humanInputMode": "PREDECLARED_EVALUATION_RESPONSE",
+      "outputId": "cmvl413qe0011n8rafsrmc3wd",
+      "outputVerification": "NEEDS_REVIEW",
+      "artifactId": "cmvl414s40017n8ra3u2pdr7d",
+      "receiptId": "cmvl414s60018n8raob630sr6",
+      "sameMissionRestored": true,
+      "draftForHumanReview": {
+        "id": "cmvl413qe0011n8rafsrmc3wd",
+        "missionId": "cmvl1t7p0002menradxh3bqgm",
+        "stepId": "cmvl413pc000zn8ra4j0hs3td",
+        "revision": 1,
+        "kind": "NOTE",
+        "contentJson": {
+          "schemaVersion": 1,
+          "kind": "NOTE",
+          "blocks": [
+            {
+              "blockId": "facts",
+              "text": "已完成事项：本项目基线训练与参数核对已完成。复赛验证准确率为 91%（复赛验证阶段）。用户说明该数字来自隔离评测合成材料，不代表真实实验。项目当前无已登记行动（actions 为空）。",
+              "kind": "PROJECT_OBSERVATION",
+              "sourceIds": [
+                "capture:cmvl1tahx002zenrapwx1cnqn",
+                "project:cmvl1t7o4002ienrap3p9ggx6"
+              ],
+              "citations": [
+                {
+                  "sourceId": "capture:cmvl1tahx002zenrapwx1cnqn",
+                  "start": 0,
+                  "end": 67,
+                  "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+                },
+                {
+                  "sourceId": "project:cmvl1t7o4002ienrap3p9ggx6",
+                  "start": 0,
+                  "end": 284,
+                  "excerptHash": "d23f4c1a61d3ab5863aea45b58e59b11e2592a675be146f4e6c9672665c4e3cb"
+                }
+              ]
+            },
+            {
+              "blockId": "risks",
+              "text": "风险推断：91% 准确率来自隔离评测合成材料，不能作为真实实验结论对外汇报；验证数据划分尚未核对，指标口径与可比性存在不确定性。",
+              "kind": "INFERENCE",
+              "sourceIds": [
+                "capture:cmvl1tahx002zenrapwx1cnqn"
+              ],
+              "citations": [
+                {
+                  "sourceId": "capture:cmvl1tahx002zenrapwx1cnqn",
+                  "start": 0,
+                  "end": 67,
+                  "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+                }
+              ]
+            },
+            {
+              "blockId": "next",
+              "text": "下一步建议：核对验证数据划分，确认准确率口径；审阅本阶段汇报草稿后再定稿。",
+              "kind": "INFERENCE",
+              "sourceIds": [
+                "capture:cmvl1tahx002zenrapwx1cnqn"
+              ],
+              "citations": [
+                {
+                  "sourceId": "capture:cmvl1tahx002zenrapwx1cnqn",
+                  "start": 0,
+                  "end": 67,
+                  "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+                }
+              ]
+            }
+          ],
+          "missingInformation": [
+            "真实实验的复赛验证准确率（现有 91% 为隔离评测合成材料）",
+            "验证数据划分的核对结果"
+          ]
+        },
+        "sourceRefsJson": [
+          {
+            "id": "capture:cmvl1tahx002zenrapwx1cnqn",
+            "kind": "PROJECT",
+            "entityType": "CAPTURE",
+            "revision": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+            "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+            "text": "复赛验证准确率：91%。本项目基线训练与参数核对已完成；数字是隔离评测合成材料，不代表真实实验。下一步核对验证数据划分并审阅阶段汇报。",
+            "observedAt": "2026-10-23T14:11:38.469Z"
+          },
+          {
+            "id": "project:cmvl1t7o4002ienrap3p9ggx6",
+            "kind": "PROJECT",
+            "entityType": "PROJECT",
+            "revision": "7ec9e040074bcaedfbfa0b22c6ae0c5819308909a644d4bca9ca9d18f6bc7af9",
+            "hash": "7ec9e040074bcaedfbfa0b22c6ae0c5819308909a644d4bca9ca9d18f6bc7af9",
+            "text": "{\"project\":{\"title\":\"P0-A 隔离合成项目\",\"goal\":\"根据本项目材料准备阶段汇报草稿，包含已完成事项、风险和下一步。先核对已有记录；缺少复赛验证准确率时向用户询问，不能猜测。补充记录后继续本委托，保存带准确来源引用的简明草稿，最后满足验收条件。不要外部研究，不创建行动。\",\"deadline\":null},\"actions\":[],\"coverage\":{\"totalActions\":0,\"returnedActions\":0,\"nextCursor\":null,\"complete\":true},\"truncated\":false}",
+            "observedAt": "2026-10-23T14:11:37.066Z"
+          },
+          {
+            "id": "capture:cmvl1tahx002zenrapwx1cnqn",
+            "kind": "PROJECT",
+            "entityType": "CAPTURE",
+            "revision": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+            "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+            "text": "复赛验证准确率：91%。本项目基线训练与参数核对已完成；数字是隔离评测合成材料，不代表真实实验。下一步核对验证数据划分并审阅阶段汇报。",
+            "observedAt": "2026-10-23T14:11:38.469Z"
+          },
+          {
+            "id": "capture:cmvl1tahx002zenrapwx1cnqn",
+            "kind": "PROJECT",
+            "entityType": "CAPTURE",
+            "revision": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+            "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+            "text": "复赛验证准确率：91%。本项目基线训练与参数核对已完成；数字是隔离评测合成材料，不代表真实实验。下一步核对验证数据划分并审阅阶段汇报。",
+            "observedAt": "2026-10-23T14:11:38.469Z"
+          }
+        ],
+        "claimChecksJson": [
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v2",
+            "claimId": "facts:0",
+            "blockId": "facts",
+            "text": "已完成事项：本项目基线训练与参数核对已完成。",
+            "claimStart": 0,
+            "claimEnd": 22,
+            "claimHash": "0b88dd2bcb1a6ca9ff22645b298a1012759d57394bd638bca87c98e8d8f76599",
+            "status": "NOT_CHECKED",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "JUDGE_NOT_CONFIGURED",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1tahx002zenrapwx1cnqn",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              },
+              {
+                "id": "project:cmvl1t7o4002ienrap3p9ggx6",
+                "hash": "7ec9e040074bcaedfbfa0b22c6ae0c5819308909a644d4bca9ca9d18f6bc7af9",
+                "start": 0,
+                "end": 284,
+                "excerptHash": "d23f4c1a61d3ab5863aea45b58e59b11e2592a675be146f4e6c9672665c4e3cb"
+              }
+            ],
+            "checkedAt": "2026-10-23T15:13:42.175Z"
+          },
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v2",
+            "claimId": "facts:22",
+            "blockId": "facts",
+            "text": "复赛验证准确率为 91%（复赛验证阶段）。",
+            "claimStart": 22,
+            "claimEnd": 43,
+            "claimHash": "83dec0714540281cee29561f2655abd08ce084591ef9d86c66c4c516c6f81a67",
+            "status": "NOT_CHECKED",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "JUDGE_NOT_CONFIGURED",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1tahx002zenrapwx1cnqn",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              },
+              {
+                "id": "project:cmvl1t7o4002ienrap3p9ggx6",
+                "hash": "7ec9e040074bcaedfbfa0b22c6ae0c5819308909a644d4bca9ca9d18f6bc7af9",
+                "start": 0,
+                "end": 284,
+                "excerptHash": "d23f4c1a61d3ab5863aea45b58e59b11e2592a675be146f4e6c9672665c4e3cb"
+              }
+            ],
+            "checkedAt": "2026-10-23T15:13:42.175Z"
+          },
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v2",
+            "claimId": "facts:43",
+            "blockId": "facts",
+            "text": "用户说明该数字来自隔离评测合成材料，不代表真实实验。",
+            "claimStart": 43,
+            "claimEnd": 69,
+            "claimHash": "75011b0d9c358f5e87ab0fbfe9a8203bc617a56aaf33623ba1a8a997ae7203ef",
+            "status": "NOT_CHECKED",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "JUDGE_NOT_CONFIGURED",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1tahx002zenrapwx1cnqn",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              },
+              {
+                "id": "project:cmvl1t7o4002ienrap3p9ggx6",
+                "hash": "7ec9e040074bcaedfbfa0b22c6ae0c5819308909a644d4bca9ca9d18f6bc7af9",
+                "start": 0,
+                "end": 284,
+                "excerptHash": "d23f4c1a61d3ab5863aea45b58e59b11e2592a675be146f4e6c9672665c4e3cb"
+              }
+            ],
+            "checkedAt": "2026-10-23T15:13:42.175Z"
+          },
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v2",
+            "claimId": "facts:69",
+            "blockId": "facts",
+            "text": "项目当前无已登记行动（actions 为空）。",
+            "claimStart": 69,
+            "claimEnd": 92,
+            "claimHash": "77fd76f7de0aa81b162e79ba5f66202e4e9759739e222f0d852b4bba344ac38a",
+            "status": "NOT_CHECKED",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "JUDGE_NOT_CONFIGURED",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1tahx002zenrapwx1cnqn",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              },
+              {
+                "id": "project:cmvl1t7o4002ienrap3p9ggx6",
+                "hash": "7ec9e040074bcaedfbfa0b22c6ae0c5819308909a644d4bca9ca9d18f6bc7af9",
+                "start": 0,
+                "end": 284,
+                "excerptHash": "d23f4c1a61d3ab5863aea45b58e59b11e2592a675be146f4e6c9672665c4e3cb"
+              }
+            ],
+            "checkedAt": "2026-10-23T15:13:42.176Z"
+          },
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v2",
+            "claimId": "risks:0",
+            "blockId": "risks",
+            "text": "风险推断：91% 准确率来自隔离评测合成材料，不能作为真实实验结论对外汇报；验证数据划分尚未核对，指标口径与可比性存在不确定性。",
+            "claimStart": 0,
+            "claimEnd": 64,
+            "claimHash": "279b1c6852044ef1c19be55b77d3e045ca9f4fa73ac40b3fc56179a9fa4f3f34",
+            "status": "NOT_CHECKED",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "JUDGE_NOT_CONFIGURED",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1tahx002zenrapwx1cnqn",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              }
+            ],
+            "checkedAt": "2026-10-23T15:13:42.176Z"
+          },
+          {
+            "schemaVersion": 1,
+            "verifierVersion": "r33-v2",
+            "claimId": "next:0",
+            "blockId": "next",
+            "text": "下一步建议：核对验证数据划分，确认准确率口径；审阅本阶段汇报草稿后再定稿。",
+            "claimStart": 0,
+            "claimEnd": 37,
+            "claimHash": "0bdf3ad028bffc92b6dc2c67394d8e975e2fcd0a287616eac8ae2b42fcaae0f7",
+            "status": "NOT_CHECKED",
+            "mode": "RULE",
+            "structuralCheck": "VALID",
+            "reasonCode": "JUDGE_NOT_CONFIGURED",
+            "sourceRefs": [
+              {
+                "id": "capture:cmvl1tahx002zenrapwx1cnqn",
+                "hash": "d00a964e70e0b112bad4fd09af87c8d61cd5c296406ecccf6804eb004d73c3b8",
+                "start": 0,
+                "end": 67,
+                "excerptHash": "ae429d5c6a206eb42cafaec90738fdf5eb72a57c0ef5d3f3721784fb05aac951"
+              }
+            ],
+            "checkedAt": "2026-10-23T15:13:42.176Z"
+          }
+        ],
+        "verificationStatus": "NEEDS_REVIEW",
+        "createdAt": "2026-10-23T15:13:42.183Z"
+      },
+      "businessActionCount": 0,
+      "steps": [
+        {
+          "tool": "inspect_project",
+          "status": "SUCCEEDED"
+        },
+        {
+          "tool": "bind_project_sources",
+          "status": "SUCCEEDED"
+        },
+        {
+          "tool": "save_mission_output",
+          "status": "SUCCEEDED"
+        }
+      ],
+      "goalSemanticSuccess": "NOT_INFERRED",
+      "realityOutcome": "NOT_INFERRED",
+      "modelDecisions": [
+        {
+          "id": "cmvl1t8m2002penraiobek9b9",
+          "status": "FAILED",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "protocol": "JSON_CHOICE",
+          "diagnostic": {
+            "reason": "INVALID_JSON",
+            "repairHint": "只返回一个完整 JSON 对象，不附解释或 Markdown。",
+            "finishReason": "stop",
+            "responseChars": 75
+          },
+          "usage": {
+            "inputTokens": 2156,
+            "outputTokens": 25
+          }
+        },
+        {
+          "id": "cmvl1t9ea002senrade0o4s45",
+          "status": "SUCCESS",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "protocol": "JSON_CHOICE",
+          "usage": {
+            "inputTokens": 2316,
+            "outputTokens": 24
+          }
+        },
+        {
+          "id": "cmvl1tahj002xenra9pr68la0",
+          "status": "SUCCESS",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "protocol": "JSON_CHOICE",
+          "usage": {
+            "inputTokens": 3069,
+            "outputTokens": 88
+          }
+        },
+        {
+          "id": "cmvl1tcvb0038enra33363kfh",
+          "status": "FAILED",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "protocol": "JSON_CHOICE",
+          "diagnostic": {
+            "reason": "INVALID_JSON",
+            "repairHint": "只返回一个完整 JSON 对象，不附解释或 Markdown。",
+            "finishReason": "stop",
+            "responseChars": 1158
+          },
+          "usage": {
+            "inputTokens": 4100,
+            "outputTokens": 509
+          }
+        },
+        {
+          "id": "cmvl1terw003benrahpsac2co",
+          "status": "FAILED",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "protocol": "JSON_CHOICE",
+          "diagnostic": {
+            "reason": "INVALID_JSON",
+            "repairHint": "只返回一个完整 JSON 对象，不附解释或 Markdown。",
+            "finishReason": "stop",
+            "responseChars": 758
+          },
+          "usage": {
+            "inputTokens": 4222,
+            "outputTokens": 348
+          }
+        },
+        {
+          "id": "cmvl413pa000yn8raa60i5by9",
+          "status": "SUCCESS",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "protocol": "FUNCTION_CHOICE",
+          "usage": {
+            "inputTokens": 5157,
+            "outputTokens": 743
+          }
+        },
+        {
+          "id": "cmvl414rb0015n8rabwi893sj",
+          "status": "SUCCESS",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "protocol": "JSON_CHOICE",
+          "usage": {
+            "inputTokens": 6319,
+            "outputTokens": 24
+          }
+        }
+      ]
+    }
+  ],
+  "budget": {
+    "runId": "8c893117-6de1-414c-9d3e-788fc7217860",
+    "mode": "REAL_MODEL",
+    "model": "deepseek-flash",
+    "requestsStarted": 23,
+    "maxRequests": 60,
+    "costUpperCny": 0.188372,
+    "maxCostCny": 10,
+    "unknownUsageRequests": 0,
+    "realModelRequests": 23,
+    "priceSource": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "priceVerifiedAt": "2026-10-23"
+  }
+}

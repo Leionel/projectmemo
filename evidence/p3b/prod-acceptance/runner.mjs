@@ -11,8 +11,13 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const BASE = process.env.PM_BASE ?? "https://project.luojiatutor.xyz";
 const STATE_PATH = join(HERE, "state.json");
 
-const state = existsSync(STATE_PATH) ? JSON.parse(readFileSync(STATE_PATH, "utf8")) : {};
-function saveState() { writeFileSync(STATE_PATH, JSON.stringify(state, null, 2)); }
+const stateKeys = ["actionId", "actionStatusAfterCreate", "candidateSignals", "captureCountBefore", "cid", "cid2", "demoProjects", "firstProjectId", "missionId", "missionProjectId", "pid", "sid", "sid2", "sidErr", "sidLinked"];
+const saved = existsSync(STATE_PATH) ? JSON.parse(readFileSync(STATE_PATH, "utf8")) : {};
+const state = Object.fromEntries(stateKeys.filter(key => Object.hasOwn(saved, key)).map(key => [key, saved[key]]));
+let accessToken;
+function saveState() {
+  writeFileSync(STATE_PATH, JSON.stringify(Object.fromEntries(stateKeys.filter(key => Object.hasOwn(state, key)).map(key => [key, state[key]])), null, 2), { mode: 0o600 });
+}
 
 function save(name, entry) {
   writeFileSync(join(HERE, name), JSON.stringify(entry, null, 2));
@@ -37,7 +42,7 @@ async function fetchWithRetry(url, options, attempts = 4) {
 
 async function api(name, method, path, body, { auth = true } = {}) {
   const headers = { "content-type": "application/json" };
-  if (auth && state.token) headers.authorization = `Bearer ${state.token}`;
+  if (auth && accessToken) headers.authorization = `Bearer ${accessToken}`;
   const response = await fetchWithRetry(`${BASE}${path}`, {
     method,
     headers,
@@ -48,7 +53,7 @@ async function api(name, method, path, body, { auth = true } = {}) {
   try { parsed = text ? JSON.parse(text) : null; } catch { parsed = text.slice(0, 2000); }
   const entry = {
     at: new Date().toISOString(),
-    request: { method, path, body: body ?? null, authorized: auth && Boolean(state.token) },
+    request: { method, path, body: body ?? null, authorized: auth && Boolean(accessToken) },
     status: response.status,
     body: parsed,
   };
@@ -64,8 +69,7 @@ async function login() {
   });
   if (response.status !== 200) throw new Error(`login failed: ${response.status}`);
   const data = await response.json();
-  state.token = data.accessToken; // 仅进程内存
-  state.user = data.user;
+  accessToken = data.accessToken;
   saveState();
   return data;
 }
@@ -255,7 +259,7 @@ if (!phases[phase]) {
 try {
   await phases[phase]();
 } finally {
-  delete state.token; // 结束即清
+  accessToken = undefined;
   saveState();
 }
 console.log(`phase ${phase} done`);

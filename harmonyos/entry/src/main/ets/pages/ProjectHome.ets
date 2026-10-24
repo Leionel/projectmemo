@@ -3046,6 +3046,10 @@ struct ProjectHome {
   private CockpitView() {
     Scroll() {
       Column({ space: 18 }) {
+        Button('GitHub 仓库 · 连接与提交记录', { type: ButtonType.Normal })
+          .fontSize(14).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT)
+          .constraintSize({ minHeight: 44 }).borderRadius(PMRadius.SM)
+          .onClick(() => { router.pushUrl({ url: 'pages/MemoryTimeline', params: { projectId: this.projectId, openRepo: '1' } }); })
         Column({ space: 10 }) {
           Row() {
             CategoryBadge({ category: this.project.scenario })
@@ -3607,6 +3611,10 @@ struct ProjectHome {
   @Builder
   private MemoryView() {
     Column() {
+      Button('GitHub 仓库 · 查看提交与连接', { type: ButtonType.Normal })
+        .fontSize(13).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent)
+        .constraintSize({ minHeight: 44 }).width('100%')
+        .onClick(() => { router.pushUrl({ url: 'pages/MemoryTimeline', params: { projectId: this.projectId, openRepo: '1' } }); })
       Column() {
         Row({ space: 6 }) {
           Button(`项目记忆 ${this.project.cards.length}`, { type: ButtonType.Normal }).layoutWeight(1).constraintSize({ minHeight: 44 }).fontSize(13)

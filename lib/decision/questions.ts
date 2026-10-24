@@ -104,7 +104,7 @@ async function selectGoalQuestion(
     const paths = impact.items.filter((i) => i.target === `mission:${m.id}`);
     const relevant = s.cards.filter(
       (c) =>
-        roots.includes(`card:${c.id}`) ||
+        paths.some((item) => item.path.some((edge) => edge.from === `card:${c.id}`)) ||
         terms.some((t) =>
           (c.summary + " " + (c.capture?.rawText ?? ""))
             .toLowerCase()

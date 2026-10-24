@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { z } from "zod";
 import { gapRequirementsSchema } from "./gaps";
 import { continuationPolicySchema } from "@/lib/types/mission";
+export const MISSION_PROTOCOL_SCHEMA_VERSION = 1;
 export const successCriterionSchema=z.union([z.enum(["DRAFT_EXISTS","ACTION_CREATED","APPROVAL_CONSUMED","REQUIRED_INPUT_PRESENT"]),z.object({type:z.literal("SOURCE_COUNT"),minimum:z.number().int().min(1).max(40)}).strict()]);
 function canonical(value: unknown): unknown {
   if (value instanceof Date) return value.toISOString();

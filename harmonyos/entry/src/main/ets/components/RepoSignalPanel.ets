@@ -8,6 +8,7 @@ import { PMColors, PMSpacing } from '../common/DesignTokens';
 @Component
 export struct RepoSignalPanel {
   @Prop projectId: string = '';
+  @Prop initialOpen: boolean = false;
   @State open: boolean = false;
   @State loaded: boolean = false;
   @State busy: boolean = false;
@@ -19,6 +20,10 @@ export struct RepoSignalPanel {
   @State newRef: string = 'main';
   private service: RepoSignalService = new RepoSignalService();
 
+  aboutToAppear(): void {
+    if (this.initialOpen) { this.open = true; this.load(); }
+  }
+
   private statusLabel(status: string): string {
     if (status === 'CANDIDATE') { return '候选'; }
     if (status === 'ADOPTED') { return '已采纳'; }
@@ -27,10 +32,14 @@ export struct RepoSignalPanel {
   }
   private fetchLabel(status: string | null): string {
     if (status === null) { return '未刷新'; }
-    const labels: Record<string, string> = {
-      OK: '已刷新', NOT_MODIFIED: '无新提交', RATE_LIMITED: '被限流', FORBIDDEN: '被拒绝', NOT_FOUND: '仓库或分支不存在', ERROR: '出错',
-    };
-    return labels[status] ?? status;
+    if (status === 'OK') { return '已刷新'; }
+    if (status === 'PARTIAL') { return '尚有提交待同步'; }
+    if (status === 'NOT_MODIFIED') { return '无新提交'; }
+    if (status === 'RATE_LIMITED') { return '被限流'; }
+    if (status === 'FORBIDDEN') { return '被拒绝'; }
+    if (status === 'NOT_FOUND') { return '仓库或分支不存在'; }
+    if (status === 'ERROR') { return '出错'; }
+    return status;
   }
 
   private async load(): Promise<void> {
@@ -123,8 +132,8 @@ export struct RepoSignalPanel {
 
   build() {
     Column({ space: 8 }) {
-      Button(this.open ? '收起仓库信号' : `仓库信号（外部候选）${this.loaded ? `：${this.connections.filter((c: ConnectionView) => c.status === 'ACTIVE').length} 个连接` : ''}`)
-        .fontSize(13).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND)
+      Button(this.open ? '收起 GitHub 仓库' : `GitHub 仓库 · ${this.loaded ? `${this.connections.filter((c: ConnectionView) => c.status === 'ACTIVE').length} 个连接` : '连接与提交记录'}`)
+        .fontSize(14).constraintSize({ minHeight: 44 }).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND)
         .onClick(() => { this.toggle(); })
       if (this.open) {
         Text(this.note).fontSize(11).fontColor(PMColors.INK_TERTIARY)

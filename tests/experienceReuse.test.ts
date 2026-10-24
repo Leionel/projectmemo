@@ -25,6 +25,8 @@ import { extractCandidates } from "@/lib/experience/extract";
 import { injectionDecisions, recordUses, suggestionsForMission } from "@/lib/experience/injection";
 import { syncExperiences } from "@/lib/experience/extract";
 import { listExperiences, actOnExperience } from "@/lib/experience/service";
+import { projectTools } from "@/lib/mission/tools";
+const fixtureTools = Object.fromEntries(["alpha_1", "alpha_2", "shadow_1", "shadow_2"].map(name => [name, projectTools.inspect_project]));
 
 let userId: string, otherUserId: string, projectId: string, otherProjectId: string;
 beforeAll(async () => {
@@ -185,14 +187,14 @@ describe("P3-A 注入：建议性质、失效停注入、历史保留", () => {
     await actOnExperience(userId, projectId, target.id, { action: "ACTIVATE", requestId: crypto.randomUUID() });
     const m = await createMission(userId, { projectId, requestId: crypto.randomUUID(), goal: "使用经验的新委托" });
     await db.agentMissionStep.create({ data: { missionId: m.id, ordinal: 1, planRevision: 1, toolName: "alpha_1", toolVersion: "1", status: "SUCCEEDED", canonicalInputJson: {}, inputHash: "x", readSetJson: [], protocolJson: { protocol: "JSON_CHOICE", schemaVersion: 1 } } });
-    const decisions = await injectionDecisions(m, [{ name: "alpha_1", version: "1" }], 1);
+    const decisions = await injectionDecisions(m, [{ name: "alpha_1", version: "1" }, { name: "alpha_2", version: "1" }], 1);
     const injected = decisions.filter(d => "advisory" in d);
     expect(injected).toHaveLength(1);
     expect(injected[0]).toMatchObject({ advisory: { note: "项目内经验建议，不改变权限" } });
     await recordUses(m.id, decisions, "hash-a");
     await recordUses(m.id, decisions, "hash-b");
     expect(await db.agentExperienceUse.count({ where: { missionId: m.id } })).toBe(1);
-    const context = JSON.parse(await buildContext(m));
+    const context = JSON.parse(await buildContext(m, fixtureTools));
     expect(context.experienceAdvisories).toHaveLength(1);
     expect(context.experienceAdvisories[0].statement).toContain("建议");
   });
@@ -227,7 +229,7 @@ describe("P3-A 注入：建议性质、失效停注入、历史保留", () => {
     expect(await injectionDecisions(m, [], 1)).toEqual([]);
     const shadowRow = await experienceByTools(["shadow_1", "shadow_2"]);
     await db.agentExperience.update({ where: { id: shadowRow.id }, data: { status: "ACTIVE", counterCount: shadowRow.supportCount } });
-    const decisions = await injectionDecisions(m, [], 1);
+    const decisions = await injectionDecisions(m, [{ name: "shadow_1", version: "1" }, { name: "shadow_2", version: "1" }], 1);
     expect(decisions).toEqual([{ suppressed: { experienceId: shadowRow.id, reason: "EVIDENCE_TURNED_AGAINST" } }]);
   });
 });
@@ -268,8 +270,8 @@ describe("P3-A 冻结任务对照探针（规则/mock，不宣称真实效果）
     const frozen = await createMission(userId, { projectId, requestId: crypto.randomUUID(), goal: "冻结对照任务：整理资料并形成带来源草稿" });
     process.env.PROJECT_EXPERIENCE_ENABLED = "0";
     let without: string;
-    try { without = await buildContext(frozen); } finally { process.env.PROJECT_EXPERIENCE_ENABLED = "1"; }
-    const withExperience = await buildContext(frozen);
+    try { without = await buildContext(frozen, fixtureTools); } finally { process.env.PROJECT_EXPERIENCE_ENABLED = "1"; }
+    const withExperience = await buildContext(frozen, fixtureTools);
     const a = JSON.parse(without), b = JSON.parse(withExperience);
     // 正确性：建议内容来自真实样本（含适用条件与建议声明），非编造。
     expect(b.experienceAdvisories.length).toBeGreaterThan(0);

@@ -1,7 +1,7 @@
 import { ApiClient } from './ApiClient';
 import { SessionStore } from './SessionStore';
 import { ApiError } from '../models/Project';
-import { ConnectionActionBody, ConnectionCreateBody, RepoSignalListReply, SignalActionBody, SignalView } from '../models/RepoSignal';
+import { ConnectionActionBody, ConnectionCreateBody, ConnectionMutationReply, RepoSignalListReply, SignalActionBody, SignalActionReply } from '../models/RepoSignal';
 
 /** P3-B 仓库感知：列表 / 建连接 / 刷新 / 撤销 / 采纳 / 忽略；服务端执行外部请求，客户端不直连 GitHub。 */
 export class RepoSignalService {
@@ -17,20 +17,20 @@ export class RepoSignalService {
     this.authorize();
     return this.client.get<RepoSignalListReply>(`/api/projects/${encodeURIComponent(projectId)}/repo-signals`);
   }
-  async create(projectId: string, body: ConnectionCreateBody): Promise<RepoSignalListReply> {
+  async create(projectId: string, body: ConnectionCreateBody): Promise<ConnectionMutationReply> {
     this.authorize();
-    return this.client.post<RepoSignalListReply>(`/api/projects/${encodeURIComponent(projectId)}/repo-signals`, body);
+    return this.client.post<ConnectionMutationReply>(`/api/projects/${encodeURIComponent(projectId)}/repo-signals`, body);
   }
-  async refresh(projectId: string, connectionId: string, body: ConnectionActionBody): Promise<RepoSignalListReply> {
+  async refresh(projectId: string, connectionId: string, body: ConnectionActionBody): Promise<ConnectionMutationReply> {
     this.authorize();
-    return this.client.post<RepoSignalListReply>(`/api/projects/${encodeURIComponent(projectId)}/repo-signals/connections/${encodeURIComponent(connectionId)}`, body);
+    return this.client.post<ConnectionMutationReply>(`/api/projects/${encodeURIComponent(projectId)}/repo-signals/connections/${encodeURIComponent(connectionId)}`, body);
   }
-  async revoke(projectId: string, connectionId: string, body: ConnectionActionBody): Promise<RepoSignalListReply> {
+  async revoke(projectId: string, connectionId: string, body: ConnectionActionBody): Promise<ConnectionMutationReply> {
     this.authorize();
-    return this.client.post<RepoSignalListReply>(`/api/projects/${encodeURIComponent(projectId)}/repo-signals/connections/${encodeURIComponent(connectionId)}`, body);
+    return this.client.post<ConnectionMutationReply>(`/api/projects/${encodeURIComponent(projectId)}/repo-signals/connections/${encodeURIComponent(connectionId)}`, body);
   }
-  async act(projectId: string, signalId: string, body: SignalActionBody): Promise<{ signal: SignalView }> {
+  async act(projectId: string, signalId: string, body: SignalActionBody): Promise<SignalActionReply> {
     this.authorize();
-    return this.client.post<{ signal: SignalView }>(`/api/projects/${encodeURIComponent(projectId)}/repo-signals/signals/${encodeURIComponent(signalId)}`, body);
+    return this.client.post<SignalActionReply>(`/api/projects/${encodeURIComponent(projectId)}/repo-signals/signals/${encodeURIComponent(signalId)}`, body);
   }
 }

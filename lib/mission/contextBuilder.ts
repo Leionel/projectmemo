@@ -5,6 +5,8 @@ import { textHash } from "@/lib/research/sourceRepository";
 import { decisionTokenLimit } from "./modelProtocol";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { injectionDecisions, recordUses, type ExperienceAdvisory } from "@/lib/experience/injection";
+import { projectTools, type ToolSet } from "./tools";
+import { MISSION_PROTOCOL_SCHEMA_VERSION } from "./contracts";
 
 export function sourceContext(source: Source) {
   const text = source.text, ranges = text.length > 800 ? [[0, 400], [text.length - 400, text.length]] : [[0, text.length]];
@@ -18,7 +20,7 @@ function compactData(value: unknown) {
   return serialized.length <= 1600 ? { value, truncated: false } : { preview: serialized.slice(0, 1000), truncated: true, originalCharacters: serialized.length,
     note: "数据正文已裁剪；来源状态完整保留在sources和sourceIndex" };
 }
-export async function buildContext(m: AgentMission) {
+export async function buildContext(m: AgentMission, tools: ToolSet = projectTools) {
   const where = { missionId: m.id };
   const adopted=!!(m.planJson as {impactGuard?:string}).impactGuard;
   const currentWhere={...where,...(adopted?{planRevision:m.planRevision}:{})};
@@ -64,9 +66,8 @@ export async function buildContext(m: AgentMission) {
   // P3-A 项目内经验：仅 ACTIVE 经验以建议形式注入；版本不兼容、撤销或反例追平时停止注入，历史使用记录保留。
   let experienceAdvisories: ExperienceAdvisory[] = [];
   if (isFeatureEnabled("PROJECT_EXPERIENCE_ENABLED", true)) {
-    const usedTools = steps.map(s => ({ name: s.toolName, version: s.toolVersion }));
-    const protocolSchemaVersion = (steps.at(-1)?.protocolJson as { schemaVersion?: number } | null | undefined)?.schemaVersion ?? null;
-    const decisions = await injectionDecisions(m, usedTools, protocolSchemaVersion);
+    const currentTools = Object.entries(tools).map(([name, tool]) => ({ name, version: tool.version ?? "1" }));
+    const decisions = await injectionDecisions(m, currentTools, MISSION_PROTOCOL_SCHEMA_VERSION);
     experienceAdvisories = decisions.flatMap(d => ("advisory" in d ? [d.advisory] : [])).slice(0, 3);
   }
   const hash = jsonHash(context);

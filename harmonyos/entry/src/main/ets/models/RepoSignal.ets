@@ -37,6 +37,24 @@ export interface RepoSignalListReply {
   signals: SignalView[];
 }
 
+export interface ConnectionMutationReply {
+  connection: ConnectionIdentity;
+  status?: string;
+  created?: number;
+}
+
+export interface ConnectionIdentity {
+  id: string;
+  repo: string;
+  ref: string;
+  status: string;
+}
+
+export interface SignalActionReply {
+  signal: SignalView;
+  captureId?: string;
+}
+
 export class ConnectionCreateBody {
   repo: string = '';
   ref: string = 'main';

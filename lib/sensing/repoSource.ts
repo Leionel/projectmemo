@@ -2,10 +2,13 @@ import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { z } from "zod";
+import { writeTransaction } from "@/lib/copilot/confirmation";
+import { json, jsonHash } from "@/lib/mission/contracts";
+import type { Prisma } from "@/lib/generated/prisma/client";
 
 /**
  * P3-B 单仓库只读感知（最小版）：GitHub 公开仓库 commits 信号。
- * - 只在用户显式刷新时发请求（无轮询守护）；匿名 + ETag 条件请求（304 不计限额）。
+ * - 只在用户显式刷新时发请求（无轮询守护）；匿名 + ETag 条件请求。
  * - 信号只是候选资料：未采纳零事实写入；采纳须用户确认，只产生 Capture 记录与可选行动关联。
  * - commit/标题内容一律当作不可信文本存储与展示，绝不执行其中指令；
  *   信号存在不等于现实完成，行动完成仍由用户回执（resultCardId）决定。
@@ -17,6 +20,7 @@ const REF_PATTERN = /^[A-Za-z0-9_./-]{1,120}$/;
 const SHA_PATTERN = /^[0-9a-f]{40}$/;
 const MAX_CONNECTIONS_PER_PROJECT = 3;
 const PAGE_SIZE = 30;
+const MAX_PAGES_PER_REFRESH = 4;
 const TITLE_LIMIT = 200;
 const FETCH_TIMEOUT_MS = 15_000;
 
@@ -51,8 +55,8 @@ export const signalActionSchema = z
   .object({ action: z.enum(["ADOPT", "DISMISS"]), requestId: z.string().min(1).max(128), actionId: z.string().min(1).optional() })
   .strict();
 
-async function ownedProject(userId: string, projectId: string) {
-  const membership = await db.projectMembership.findFirst({ where: { userId, projectId, role: "OWNER" } });
+async function ownedProject(userId: string, projectId: string, client: Prisma.TransactionClient = db) {
+  const membership = await client.projectMembership.findFirst({ where: { userId, projectId, role: "OWNER" } });
   if (!membership) throw new AppError("PROJECT_NOT_FOUND", "项目不存在或不可访问", 404);
 }
 
@@ -84,64 +88,78 @@ type GithubCommit = { sha: string; html_url?: string; commit?: { message?: strin
 
 export async function refreshConnection(userId: string, projectId: string, connectionId: string, fetcher: FetchLike = defaultFetch) {
   requireEnabled();
+  await ownedProject(userId, projectId);
   const connection = await ownedConnection(userId, projectId, connectionId);
   if (connection.status === "REVOKED")
     throw new AppError("CONNECTION_REVOKED", "连接已撤销，不再发起任何新请求；历史信号保留", 409);
-  let result: { status: string; error?: string; created: number };
+  const commitResult = async (work: (tx: Prisma.TransactionClient) => Promise<{ status: string; error?: string; created: number }>) =>
+    writeTransaction(`repo-refresh:${connectionId}`, async tx => {
+      requireEnabled();
+      await ownedProject(userId, projectId, tx);
+      const current = await tx.sourceConnection.findFirst({ where: { id: connectionId, projectId, ownerUserId: userId } });
+      if (!current) throw new AppError("CONNECTION_NOT_FOUND", "仓库连接不存在或不可访问", 404);
+      if (current.status !== "ACTIVE") throw new AppError("CONNECTION_REVOKED", "连接已撤销；本次迟到响应未写入", 409);
+      if (current.revision !== connection.revision) throw new AppError("CONNECTION_CHANGED", "连接已发生变化，本次响应未写入；请重新刷新", 409);
+      const result = await work(tx);
+      await tx.sourceConnection.update({ where: { id: connectionId }, data: { revision: { increment: 1 }, lastFetchedAt: new Date(), lastStatus: result.status, lastError: result.error ?? null } });
+      return { connection: await tx.sourceConnection.findUniqueOrThrow({ where: { id: connectionId } }), ...result };
+    });
   try {
-    const headers: Record<string, string> = { Accept: "application/vnd.github+json", "User-Agent": "projectmemo-sensing" };
-    if (connection.etag) headers["If-None-Match"] = connection.etag;
-    const response = await fetcher(
-      `https://api.github.com/repos/${connection.repo}/commits?sha=${encodeURIComponent(connection.ref)}&per_page=${PAGE_SIZE}`,
-      { headers, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) },
-    );
-    if (response.status === 304) {
-      result = { status: "NOT_MODIFIED", created: 0 };
-    } else if (response.status === 403 || response.status === 429) {
-      result = { status: response.status === 403 ? "FORBIDDEN" : "RATE_LIMITED", created: 0, error: "GitHub 拒绝或限流；稍后再刷新" };
-    } else if (response.status === 404) {
-      result = { status: "NOT_FOUND", created: 0, error: "仓库或分支不存在（或为私有仓库）" };
-    } else if (response.status !== 200) {
-      result = { status: "ERROR", created: 0, error: `GitHub 返回 ${response.status}` };
-    } else {
-      const commits = Array.isArray(response.body) ? (response.body as GithubCommit[]) : [];
-      // 重叠扫描：按新到旧读取，遇到已见过的游标即停；同 sha 重复到达靠唯一约束去重。
-      const fresh: GithubCommit[] = [];
+    const fresh: GithubCommit[] = [];
+    let page = connection.scanNextPage ?? 1, head = connection.scanHeadSha, etag = connection.scanEtag, complete = false;
+    // 按冻结 head 翻页，避免刷新期间仓库新提交令页边界漂移；每次最多四页，缺口持久续取。
+    const timeout = AbortSignal.timeout(FETCH_TIMEOUT_MS);
+    for (let fetched = 0; fetched < MAX_PAGES_PER_REFRESH; fetched++, page++) {
+      const headers: Record<string, string> = { Accept: "application/vnd.github+json", "User-Agent": "projectmemo-sensing" };
+      if (page === 1 && !head && connection.etag) headers["If-None-Match"] = connection.etag;
+      const response = await fetcher(`https://api.github.com/repos/${connection.repo}/commits?sha=${encodeURIComponent(head ?? connection.ref)}&per_page=${PAGE_SIZE}&page=${page}`, { headers, signal: timeout });
+      if (response.status !== 200) {
+        if (response.status === 304 && page === 1 && !head) return await commitResult(async tx => {
+          await tx.sourceConnection.update({ where: { id: connectionId }, data: { etag: response.etag ?? connection.etag } });
+          return { status: "NOT_MODIFIED", created: 0 };
+        });
+        const status = response.status === 403 ? "FORBIDDEN" : response.status === 429 ? "RATE_LIMITED" : response.status === 404 ? "NOT_FOUND" : "ERROR";
+        return await commitResult(async () => ({ status, created: 0, error: status === "NOT_FOUND" ? "仓库或分支不存在（或为私有仓库）" : `GitHub 返回 ${response.status}；未推进同步游标，请稍后重试` }));
+      }
+      if (!Array.isArray(response.body)) throw new Error("GitHub 提交列表格式不正确");
+      const commits = response.body as GithubCommit[];
+      if (!head) { head = commits[0]?.sha ?? null; etag = response.etag; }
       for (const commit of commits) {
-        if (connection.cursorSha && commit.sha === connection.cursorSha) break;
+        if (!SHA_PATTERN.test(commit.sha ?? "")) throw new Error("GitHub 提交标识不正确");
+        if (connection.cursorSha && commit.sha === connection.cursorSha) { complete = true; break; }
         fresh.push(commit);
       }
+      // 初次仅建立最近 30 条基线；已有游标必须找到旧边界或读到末页。
+      if (complete || !connection.cursorSha || commits.length < PAGE_SIZE) { complete = true; break; }
+    }
+    return await commitResult(async tx => {
       let created = 0;
       for (const commit of fresh.reverse()) {
-        if (!SHA_PATTERN.test(commit.sha ?? "")) continue;
-        try {
-          await db.externalSignal.create({
+        const existing = await tx.externalSignal.findUnique({ where: { connectionId_sha: { connectionId, sha: commit.sha } } });
+        if (!existing) {
+          await tx.externalSignal.create({
             data: {
               connectionId: connection.id, projectId, ownerUserId: userId, sha: commit.sha,
               kind: "COMMITS", title: sanitizeTitle(commit.commit?.message ?? ""),
               authorName: (commit.commit?.author?.name ?? "未知").slice(0, 80),
               committedAt: commit.commit?.author?.date ? new Date(commit.commit.author.date) : null,
-              url: (commit.html_url ?? `https://github.com/${connection.repo}/commit/${commit.sha}`).slice(0, 300),
+               url: `https://github.com/${connection.repo}/commit/${commit.sha}`,
             },
           });
           created += 1;
-        } catch { /* 唯一约束冲突：该 sha 已存在（重试/重复推送），不重复计信号 */ }
+        }
       }
-      const top = commits[0]?.sha;
-      result = { status: "OK", created };
-      await db.sourceConnection.update({ where: { id: connection.id }, data: { cursorSha: SHA_PATTERN.test(top ?? "") ? top : connection.cursorSha } });
-    }
-    if (response.status === 200 || response.status === 304) {
-      await db.sourceConnection.update({ where: { id: connection.id }, data: { etag: response.etag ?? connection.etag, lastFetchedAt: new Date(), lastStatus: result.status, lastError: result.error ?? null } });
-    } else {
-      await db.sourceConnection.update({ where: { id: connection.id }, data: { lastFetchedAt: new Date(), lastStatus: result.status, lastError: result.error ?? null } });
-    }
+      await tx.sourceConnection.update({ where: { id: connectionId }, data: complete
+        ? { cursorSha: head ?? connection.cursorSha, etag, scanHeadSha: null, scanNextPage: null, scanEtag: null }
+        : { scanHeadSha: head, scanNextPage: page, scanEtag: etag } });
+      return { status: complete ? "OK" : "PARTIAL", created, ...(complete ? {} : { error: "还有较早的新提交未读取；再次刷新将继续，不会跳过这段记录" }) };
+    });
   } catch (error) {
+    if (error instanceof AppError) throw error;
     const message = error instanceof Error ? error.message : "网络请求失败";
-    await db.sourceConnection.update({ where: { id: connection.id }, data: { lastFetchedAt: new Date(), lastStatus: "ERROR", lastError: `刷新失败：${message.slice(0, 160)}` } });
-    result = { status: "ERROR", created: 0, error: message };
+    // 失败事务回滚全部信号；只记录错误，不确认 cursor / ETag，仍须重验撤销与授权。
+    return commitResult(async () => ({ status: "ERROR", created: 0, error: `刷新失败：${message.slice(0, 160)}` }));
   }
-  return { connection: await db.sourceConnection.findUniqueOrThrow({ where: { id: connection.id } }), ...result };
 }
 
 async function refreshSummary(connection: { id: string }) {
@@ -191,42 +209,62 @@ export async function actOnConnection(userId: string, projectId: string, connect
   requireEnabled();
   const input = connectionActionSchema.parse(raw);
   if (input.action === "REFRESH") return refreshConnection(userId, projectId, connectionId, fetcher);
-  const connection = await ownedConnection(userId, projectId, connectionId);
-  if (connection.status === "REVOKED") return { connection, status: "REVOKED", created: 0 };
-  const updated = await db.sourceConnection.update({
-    where: { id: connection.id },
-    data: { status: "REVOKED", revokedAt: new Date(), revokedReason: input.reason ?? "USER_REVOKED" },
+  return writeTransaction(`repo-revoke:${connectionId}`, async tx => {
+    await ownedProject(userId, projectId, tx);
+    const connection = await tx.sourceConnection.findFirst({ where: { id: connectionId, projectId, ownerUserId: userId } });
+    if (!connection) throw new AppError("CONNECTION_NOT_FOUND", "仓库连接不存在或不可访问", 404);
+    if (connection.status === "REVOKED") return { connection, status: "REVOKED", created: 0 };
+    const updated = await tx.sourceConnection.update({
+      where: { id: connection.id },
+      data: { status: "REVOKED", revision: { increment: 1 }, revokedAt: new Date(), revokedReason: input.reason ?? "USER_REVOKED" },
+    });
+    return { connection: updated, status: "REVOKED", created: 0 };
   });
-  return { connection: updated, status: "REVOKED", created: 0 };
 }
 
 export async function actOnSignal(userId: string, projectId: string, signalId: string, raw: unknown) {
   requireEnabled();
   const input = signalActionSchema.parse(raw);
-  const signal = await db.externalSignal.findFirst({ where: { id: signalId, projectId } });
+  const payloadHash = jsonHash({ projectId, signalId, action: input.action, actionId: input.actionId ?? null });
+  return writeTransaction(`repo-signal:${signalId}`, async tx => {
+  await ownedProject(userId, projectId, tx);
+  const signal = await tx.externalSignal.findFirst({ where: { id: signalId, projectId } });
   if (!signal || signal.ownerUserId !== userId) throw new AppError("SIGNAL_NOT_FOUND", "信号不存在或不可访问", 404);
+  const previous = await tx.repoSignalCommand.findUnique({ where: { ownerUserId_requestId: { ownerUserId: userId, requestId: input.requestId } } });
+  if (previous) {
+    if (previous.payloadHash !== payloadHash) throw new AppError("REQUEST_CONFLICT", "该请求编号已用于其他操作，请刷新后重试", 409);
+    return previous.resultJson as unknown as { signal: ReturnType<typeof viewOfSignal>; captureId?: string };
+  }
+  const finish = async (result: { signal: ReturnType<typeof viewOfSignal>; captureId?: string }) => {
+    await tx.repoSignalCommand.create({ data: { signalId, ownerUserId: userId, requestId: input.requestId, payloadHash, resultJson: json(result) } });
+    return result;
+  };
   if (input.action === "DISMISS") {
     if (signal.status === "ADOPTED") throw new AppError("SIGNAL_ADOPTED", "已采纳的信号不再变更；项目事实请从资料侧修改", 409);
-    const updated = await db.externalSignal.update({ where: { id: signal.id }, data: { status: "DISMISSED" } });
-    return { signal: viewOfSignal(updated) };
+    const updated = await tx.externalSignal.update({ where: { id: signal.id }, data: { status: "DISMISSED" } });
+    return finish({ signal: viewOfSignal(updated) });
   }
-  if (signal.status === "ADOPTED") return { signal: viewOfSignal(signal) };
+  if (signal.status === "ADOPTED") {
+    if (input.actionId && input.actionId !== signal.linkedActionId) throw new AppError("SIGNAL_CHANGED", "已采纳信号的关联行动不能通过重试更换", 409);
+    return finish({ signal: viewOfSignal(signal), ...(signal.adoptedCaptureId ? { captureId: signal.adoptedCaptureId } : {}) });
+  }
   if (signal.status !== "CANDIDATE") throw new AppError("SIGNAL_CHANGED", "该信号已处理，请刷新列表", 409);
   let linkedActionId: string | null = null;
   if (input.actionId) {
     // 关联行动只作资料指引：不改变行动状态，不产生完成回执；跨项目/模拟/已完成行动一律拒绝。
-    const action = await db.actionItem.findFirst({ where: { id: input.actionId, projectId } });
+    const action = await tx.actionItem.findFirst({ where: { id: input.actionId, projectId } });
     if (!action) throw new AppError("ACTION_NOT_FOUND", "关联的行动不存在或不属于当前项目", 404);
     if (action.isSimulated) throw new AppError("SIMULATED_ACTION", "演示模拟行动不能作为信号关联对象", 409);
-    if (action.status === "DONE") throw new AppError("ACTION_DONE", "行动已完成；信号可作为资料但不改变完成事实", 409);
+    if (["DONE", "CANCELLED"].includes(action.status)) throw new AppError("ACTION_DONE", "行动已结束；信号可作为资料但不改变完成事实", 409);
     linkedActionId = action.id;
   }
-  const capture = await db.capture.create({
+  const capture = await tx.capture.create({
     data: { projectId, rawText: `仓库提交 ${signal.sha.slice(0, 10)}：${signal.title}（${signal.url}）`, sourceType: "仓库信号" },
   });
-  const updated = await db.externalSignal.update({
+  const updated = await tx.externalSignal.update({
     where: { id: signal.id },
     data: { status: "ADOPTED", adoptedByUserId: userId, adoptedAt: new Date(), adoptedCaptureId: capture.id, linkedActionId },
   });
-  return { signal: viewOfSignal(updated), captureId: capture.id };
+  return finish({ signal: viewOfSignal(updated), captureId: capture.id });
+  });
 }

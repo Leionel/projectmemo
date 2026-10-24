@@ -115,7 +115,7 @@ export async function syncExperiences(ownerUserId: string, projectId: string): P
   const index = await buildTrajectoryIndex(ownerUserId, projectId);
   const candidates = extractCandidates(index);
   for (const candidate of candidates) {
-    const existing = await db.agentExperience.findUnique({ where: { projectId_kind_patternHash: { projectId, kind: candidate.kind, patternHash: candidate.patternHash } } });
+    const existing = await db.agentExperience.findUnique({ where: { projectId_ownerUserId_kind_patternHash: { projectId, ownerUserId, kind: candidate.kind, patternHash: candidate.patternHash } } });
     if (!existing) {
       await db.agentExperience.create({
         data: {

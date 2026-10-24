@@ -1,0 +1,19 @@
+.panel { margin-top: 0; scroll-margin-top: 6rem; }
+.panel > summary { min-height: 3rem; padding: .875rem 1rem; cursor: pointer; color: var(--ink); font-weight: 600; }
+.panel > summary::marker { color: var(--teal); }
+.panel > summary svg { display: inline-block; margin: 0 .5rem; vertical-align: middle; }
+.panel[open] > summary { border-bottom: 1px solid var(--rule); }
+.body { display: grid; gap: 1rem; padding: 1rem; overflow-wrap: anywhere; }
+.form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(8rem, 12rem) auto; gap: .75rem; align-items: end; }
+.form label { display: grid; gap: .375rem; min-width: 0; font-size: .8125rem; color: var(--ink-soft); }
+.form input { width: 100%; }
+.form button { min-height: 2.75rem; color: var(--paper-strong); background: var(--teal); border-color: var(--teal); }
+.form button:hover:enabled { background: var(--teal-strong); color: var(--paper-strong); }
+.item { display: grid; gap: .5rem; padding-top: 1rem; border-top: 1px solid var(--rule); min-width: 0; }
+.panel select { min-width: 0; max-width: 100%; }
+@media (max-width: 640px) {
+  .panel > summary { line-height: 1.7; }
+  .form { grid-template-columns: minmax(0, 1fr); }
+  .form button { justify-self: start; }
+  .panel button { min-height: 2.75rem; }
+}

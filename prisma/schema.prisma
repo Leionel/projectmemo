@@ -1188,7 +1188,7 @@ model AgentExperience {
  project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
  owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
  uses AgentExperienceUse[]
- @@unique([projectId,kind,patternHash])
+ @@unique([projectId,ownerUserId,kind,patternHash])
  @@index([projectId,status])
 }
 
@@ -1220,6 +1220,10 @@ model SourceConnection {
  revokedReason String?
  etag String?
  cursorSha String?
+ revision Int @default(0)
+ scanHeadSha String?
+ scanNextPage Int?
+ scanEtag String?
  lastFetchedAt DateTime?
  lastStatus String?
  lastError String?
@@ -1252,6 +1256,20 @@ model ExternalSignal {
  connection SourceConnection @relation(fields:[connectionId],references:[id],onDelete:Cascade)
  project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
  owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
+ commands RepoSignalCommand[]
  @@unique([connectionId,sha])
  @@index([projectId,status,committedAt])
+}
+
+// 同一用户 requestId 绑定固定信号/载荷，业务与回执同事务提交。
+model RepoSignalCommand {
+ id String @id @default(cuid())
+ signalId String
+ ownerUserId String
+ requestId String
+ payloadHash String
+ resultJson Json
+ createdAt DateTime @default(now())
+ signal ExternalSignal @relation(fields:[signalId],references:[id],onDelete:Cascade)
+ @@unique([ownerUserId,requestId])
 }

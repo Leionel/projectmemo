@@ -43,7 +43,7 @@ export default async function ProjectHome({params}:{params:Promise<{id:string}>}
  const remainingActions=nextActions.filter(a=>!(kind==="action"&&a.id===(primaryId??nextActions[0]?.id)));
  return <>
   <ProjectLegacyRedirect projectId={id}/>
-  <header className={styles.pageTitle}><h2>项目概览</h2><ProjectOverviewToolbar projectId={id}/></header>
+  <header className={styles.pageTitle}><h2>项目概览</h2><ProjectOverviewToolbar projectId={id} repoEnabled={missionOwner&&isFeatureEnabled("REPO_SENSING_ENABLED",true)}/></header>
   <div className={styles.overviewLayout}><div className={styles.overviewMain}>
   {/* 60 秒接续置顶：与鸿蒙、桌面卡片读取同一份只读聚合；未开启时组件自身不渲染。 */}
   {isFeatureEnabled("PROJECT_REENTRY_ENABLED",false)&&<details className={styles.secondary}><summary>阶段记录与时间安排</summary><ReentryBrief projectId={id} enabled episodesEnabled={isFeatureEnabled("PROJECT_EPISODES_ENABLED",false)} stateEnabled={isFeatureEnabled("PROJECT_STATE_ENABLED",false)} schedulingEnabled={isFeatureEnabled("PROJECT_SCHEDULING_ENABLED",false)} showPrimary={false}/></details>}

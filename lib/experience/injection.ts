@@ -20,7 +20,7 @@ export type InjectionDecision = { advisory: ExperienceAdvisory; experienceId: st
 
 export async function injectionDecisions(m: AgentMission, usedTools: Array<{ name: string; version: string }>, protocolSchemaVersion: number | null): Promise<InjectionDecision[]> {
   const rows = await db.agentExperience.findMany({
-    where: { projectId: m.projectId, status: "ACTIVE" },
+    where: { projectId: m.projectId, ownerUserId: m.ownerUserId, status: "ACTIVE" },
     orderBy: { supportCount: "desc" },
     take: 8,
   });
@@ -28,12 +28,13 @@ export async function injectionDecisions(m: AgentMission, usedTools: Array<{ nam
   for (const row of rows) {
     if (row.revokedAt) { decisions.push({ suppressed: { experienceId: row.id, reason: "REVOKED" } }); continue; }
     const toolVersions = row.toolVersionsJson as Record<string, string>;
-    const mismatched = usedTools.find(t => toolVersions[t.name] !== undefined && toolVersions[t.name] !== t.version);
-    if (mismatched) { decisions.push({ suppressed: { experienceId: row.id, reason: `TOOL_VERSION_MISMATCH:${mismatched.name}` } }); continue; }
     const protocolVersions = row.protocolVersionsJson as number[];
-    if (protocolSchemaVersion !== null && protocolVersions.length > 0 && !protocolVersions.includes(protocolSchemaVersion)) {
+    if (protocolSchemaVersion === null || (protocolVersions.length > 0 && !protocolVersions.includes(protocolSchemaVersion))) {
       decisions.push({ suppressed: { experienceId: row.id, reason: `PROTOCOL_VERSION_MISMATCH:${protocolSchemaVersion}` } }); continue;
     }
+    const registry = new Map(usedTools.map(t => [t.name, t.version]));
+    const mismatched = Object.entries(toolVersions).find(([name, version]) => registry.get(name) !== version);
+    if (mismatched) { decisions.push({ suppressed: { experienceId: row.id, reason: `TOOL_VERSION_MISMATCH:${mismatched[0]}` } }); continue; }
     if (row.supportCount > 0 && row.counterCount >= row.supportCount) { decisions.push({ suppressed: { experienceId: row.id, reason: "EVIDENCE_TURNED_AGAINST" } }); continue; }
     const applicability = row.applicabilityJson as { conditions?: string[] };
     decisions.push({
@@ -65,7 +66,7 @@ export async function recordUses(missionId: string, decisions: InjectionDecision
 /** UI 就近展示：ACTIVE（注入中）+ SHADOW（影子观察，不注入）；供委托详情使用。 */
 export async function suggestionsForMission(m: AgentMission) {
   const rows = await db.agentExperience.findMany({
-    where: { projectId: m.projectId, status: { in: ["ACTIVE", "SHADOW"] } },
+    where: { projectId: m.projectId, ownerUserId: m.ownerUserId, status: { in: ["ACTIVE", "SHADOW"] } },
     orderBy: [{ status: "asc" }, { supportCount: "desc" }],
     take: 10,
   });

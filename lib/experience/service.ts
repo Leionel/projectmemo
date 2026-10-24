@@ -26,17 +26,24 @@ function requireEnabled() {
 }
 
 async function ownedExperience(userId: string, projectId: string, experienceId: string) {
+  await requirePrivateAccess(userId, projectId);
   const row = await db.agentExperience.findFirst({ where: { id: experienceId, projectId } });
   if (!row || row.ownerUserId !== userId) throw new AppError("EXPERIENCE_NOT_FOUND", "经验不存在或不可访问", 404);
   return row;
 }
 
+async function requirePrivateAccess(userId: string, projectId: string) {
+  if (!await db.projectMembership.findFirst({ where: { userId, projectId, role: "OWNER" } }))
+    throw new AppError("PROJECT_NOT_FOUND", "项目不存在或不可访问", 404);
+}
+
 export async function listExperiences(userId: string, projectId: string) {
   const enabled = isFeatureEnabled("PROJECT_EXPERIENCE_ENABLED", true);
   if (!enabled) return { enabled: false as const, experiences: [], trajectory: null };
+  await requirePrivateAccess(userId, projectId);
   await syncExperiences(userId, projectId);
   const [rows, index] = await Promise.all([
-    db.agentExperience.findMany({ where: { projectId }, orderBy: { supportCount: "desc" }, take: 50 }),
+    db.agentExperience.findMany({ where: { projectId, ownerUserId: userId }, orderBy: { supportCount: "desc" }, take: 50 }),
     buildTrajectoryIndex(userId, projectId),
   ]);
   const statusOrder: Record<string, number> = { SHADOW: 0, ACTIVE: 1, CANDIDATE: 2, REVOKED: 3 };

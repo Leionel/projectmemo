@@ -1,0 +1,30 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/missionEvaluationBudget.test.ts (9 tests | 1 failed) 185ms
+     × locks concurrent evaluators and reopening preserves consumed request limits 26ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/missionEvaluationBudget.test.ts > P0-A isolated evaluation authorization and cumulative budget > locks concurrent evaluators and reopening preserves consumed request limits
+Error: EPERM: operation not permitted, rename 'C:\Users\ADMINI~1\AppData\Local\Temp\pm-budget-7QK51U\ledger.json.next' -> 'C:\Users\ADMINI~1\AppData\Local\Temp\pm-budget-7QK51U\ledger.json'
+ ❯ scripts/mission-evaluation/budget.ts:82:7
+     80|     const pending = this.writes.then(async () => {
+     81|       await writeFile(this.file + ".next", JSON.stringify(this.ledger,…
+     82|       await rename(this.file + ".next", this.file);
+       |       ^
+     83|     });
+     84|     this.writes = pending.catch(() => {});
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 107 passed (108)
+      Tests  1 failed | 881 passed (882)
+   Start at  19:47:25
+   Duration  378.02s (transform 13.67s, setup 0ms, import 95.92s, tests 211.29s, environment 36.46s)
+

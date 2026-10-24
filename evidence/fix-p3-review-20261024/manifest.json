@@ -1,0 +1,112 @@
+{
+  "baseline": "c92d52096eea222611240dc2c1896c044e57e224",
+  "committed": false,
+  "productionDeployed": false,
+  "dataSource": "isolated fixtures and E2E DB; browser mutation route fixtures",
+  "files": [
+    {
+      "sha256": "a89d91895b47f1d29b5fc0b0244fb01fc38788c8d7e6499f82b7914da62b97da",
+      "path": "app/projects/[id]/[section]/page.tsx"
+    },
+    {
+      "sha256": "2b90d7b2b72bf1e4c4d2115af97bbaaccd5bc268120eb45f4367372963d407a2",
+      "path": "app/projects/[id]/page.tsx"
+    },
+    {
+      "sha256": "52a021edfb52705722ec54d7a7b662ccc2b866ce9317e751d6c0171380154def",
+      "path": "components/ProjectOverviewToolbar.tsx"
+    },
+    {
+      "sha256": "89c6bacf36f0e9527814cf1eda507d51c3154254eee0a5062dcc5a6469cd47fc",
+      "path": "components/RepoSignalsCard.tsx"
+    },
+    {
+      "sha256": "496835ab40e4473c3990b760825f89cf083a51648487a030fffc8249a0075412",
+      "path": "docs/FINAL/AGENT_REVIEW/P3_IMPLEMENTATION.md"
+    },
+    {
+      "sha256": "df219939aeb4c2d877b23d5eaa4a7772c6c7181472abf3c4ee035461f0d71d6d",
+      "path": "evidence/p3b/prod-acceptance/README.md"
+    },
+    {
+      "sha256": "03324932d21b0190b2b98082b6df635a65f55c26a6a4bf09d04cf1b8ba67dcd7",
+      "path": "evidence/p3b/prod-acceptance/runner.mjs"
+    },
+    {
+      "sha256": "77132c21ea6bc9f743818e39e01f083b14876bff09eee26006169f661522b98d",
+      "path": "harmonyos/entry/src/main/ets/components/RepoSignalPanel.ets"
+    },
+    {
+      "sha256": "99a5de0d8f10027f314ee7363fa09f61bb39a7bb241e33cb875010666d2488c2",
+      "path": "harmonyos/entry/src/main/ets/models/RepoSignal.ets"
+    },
+    {
+      "sha256": "55a57366389ade7cb006a371cbc3a8f2555853c5963873ca98ae5dce559a307f",
+      "path": "harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets"
+    },
+    {
+      "sha256": "d1846e2b17c9232670c4f48825be59bbf0da48df2e280f203873f3d9a68d8dd2",
+      "path": "harmonyos/entry/src/main/ets/pages/ProjectHome.ets"
+    },
+    {
+      "sha256": "614d1ba938202dfd2125b75daa31c8a6a40567c789ad25d6cc44324d07de003d",
+      "path": "harmonyos/entry/src/main/ets/services/RepoSignalService.ets"
+    },
+    {
+      "sha256": "12934d19102e587abeea187b020ebd1f6b5a6d352923e2575d1b16d4430999fc",
+      "path": "lib/decision/questions.ts"
+    },
+    {
+      "sha256": "581c113a3d6fe18d91479aca62560c30804c923fbb9b4392af9e6787d17e64a5",
+      "path": "lib/experience/extract.ts"
+    },
+    {
+      "sha256": "0f3d4b6b835c59470573e5105a8206f8f1c5a66e34457a2020c05c415acb5fca",
+      "path": "lib/experience/injection.ts"
+    },
+    {
+      "sha256": "0f4f14b8974610590ffce14d2b5e2f7042df5127159bf9545f799bc74f9f9fdb",
+      "path": "lib/experience/service.ts"
+    },
+    {
+      "sha256": "44e2f1c2f7a701b1d7c1f22d8d5677a7f3b710185c16d4fa47f77d7acd9fc832",
+      "path": "lib/mission/contextBuilder.ts"
+    },
+    {
+      "sha256": "58c1db10053cb97a47081de47307bea0f79581b8723244590ac83e7ecd7f9486",
+      "path": "lib/mission/contracts.ts"
+    },
+    {
+      "sha256": "682fb38251e59d8c06fd8771df65b67de6292b15cac0510106fe88fcb9bdee6d",
+      "path": "lib/mission/runner.ts"
+    },
+    {
+      "sha256": "c2c7bc075291258c48446cf6c6c558827f7402a41c73416173dd122cb5b9cc64",
+      "path": "lib/mission/tools.ts"
+    },
+    {
+      "sha256": "2b7bb7354e0dc74298d0648ed9905a533c841154a7b08cb61efe27843449a268",
+      "path": "lib/sensing/repoSource.ts"
+    },
+    {
+      "sha256": "45bec761cee7ff45f108b578c2127e52b4f2569fdd74e4e3629704b80c86361d",
+      "path": "prisma/schema.prisma"
+    },
+    {
+      "sha256": "2846f5e1169b543cfe7159b141d791a7326560f71d60083317872911e0f43d89",
+      "path": "tests/experienceReuse.test.ts"
+    },
+    {
+      "sha256": "69867e71f304f549d0d545e05b732d084d46a50e27cc89bf4b0649562092b17b",
+      "path": "components/RepoSignalsCard.module.css"
+    },
+    {
+      "sha256": "6ff77ba7dbfbbc67a0fb509a6576d2356aaed0aa6ba5dc1ade40978759840c85",
+      "path": "tests/p3ReviewBoundaries.test.ts"
+    },
+    {
+      "sha256": "c1d85ee0e0e43d64b7d6598315b60c59858d596ad9c5b5338f956567c2582a61",
+      "path": "prisma/migrations/20261024120000_p3_review_boundaries/migration.sql"
+    }
+  ]
+}

@@ -18,6 +18,7 @@ import { RepoSignalPanel } from '../components/RepoSignalPanel';
 @Component
 struct MemoryTimeline {
   @State projectId: string = '';
+  @State repoMode: boolean = false;
   @State cards: KnowledgeCard[] = [];
   @State isLoading: boolean = false;
   @State errorMessage: string = '';
@@ -48,11 +49,12 @@ struct MemoryTimeline {
       return;
     }
     this.projectId = params['projectId'] ?? '';
+    this.repoMode = params['openRepo'] === '1';
     if (this.projectId === '') {
       this.routeError = '页面参数缺失，项目ID无效';
       return;
     }
-    this.loadTimeline();
+    if (!this.repoMode) { this.loadTimeline(); }
   }
 
   private async loadTimeline(): Promise<void> {
@@ -681,7 +683,7 @@ struct MemoryTimeline {
   build() {
     Column() {
       PMAppBar({
-        title: '记忆',
+        title: this.repoMode ? 'GitHub 仓库' : '记忆',
         subtitle: '',
         backLabel: '项目',
         showBack: true
@@ -694,6 +696,13 @@ struct MemoryTimeline {
             router.back();
           }
         })
+      } else if (this.repoMode) {
+        Scroll() {
+          Column({ space: 12 }) {
+            Text('连接公开仓库，查看提交，再选择哪些记录加入项目资料。').fontSize(14).fontColor(PMColors.INK_SECONDARY)
+            RepoSignalPanel({ projectId: this.projectId, initialOpen: true })
+          }.width('100%').padding(16).alignItems(HorizontalAlign.Start)
+        }.layoutWeight(1).width('100%')
       } else if (this.isLoading) {
         LoadingStateView({ message: '加载记忆脉络...' })
       } else if (this.errorMessage !== '') {

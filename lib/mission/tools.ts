@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { jsonHash, type Actor, type ToolResult, type Source } from "./contracts";
 import { sourceHash } from "./repository";
-export type Tool = { description:string; schema:z.ZodType; effects:{businessWrite:boolean;cacheWrite:boolean;externalDisclosure:boolean}; run:(actor:Actor,input:unknown)=>Promise<ToolResult> };
+export type Tool = { version?:string; description:string; schema:z.ZodType; effects:{businessWrite:boolean;cacheWrite:boolean;externalDisclosure:boolean}; run:(actor:Actor,input:unknown)=>Promise<ToolResult> };
 export type ToolSet=Record<string,Tool>;
 const readEffects={businessWrite:false,cacheWrite:false,externalDisclosure:false};
 export const actionProposalSchema=z.object({title:z.string().trim().min(2).max(160),description:z.string().max(500).default(""),priority:z.number().int().min(1).max(5).default(3),dueAt:z.string().datetime().nullable().optional()}).strict();

@@ -709,64 +709,22 @@ struct Index {
       // 场景分类筛选胶囊
       Scroll() {
         Row() {
-          Button('全部').type(ButtonType.Capsule).borderRadius(PMRadius.FULL)
-            .fontSize(PMFontSize.CAPTION)
-            .fontWeight(FontWeight.Regular)
-            .fontColor(this.selectedScenarioFilter === 'ALL' ? PMColors.BRAND : PMColors.INK_SECONDARY)
-            .backgroundColor(this.selectedScenarioFilter === 'ALL' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
-            .borderRadius(PMRadius.FULL)
-            .height(36)
-            .border({ width: this.selectedScenarioFilter === 'ALL' ? 2 : 1, color: this.selectedScenarioFilter === 'ALL' ? PMColors.BRAND : PMColors.BORDER })
-            .margin({ right: PMSpacing.XS })
-            .accessibilityText('按场景筛选：全部')
-            .accessibilitySelected(this.selectedScenarioFilter === 'ALL')
-            .onClick(() => {
-              this.selectedScenarioFilter = 'ALL';
-            })
-
-          Button('竞赛备赛').type(ButtonType.Capsule).borderRadius(PMRadius.FULL)
-            .fontSize(PMFontSize.CAPTION)
-            .fontWeight(FontWeight.Regular)
-            .fontColor(this.selectedScenarioFilter === 'COMPETITION' ? PMColors.BRAND : PMColors.INK_SECONDARY)
-            .backgroundColor(this.selectedScenarioFilter === 'COMPETITION' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
-            .borderRadius(PMRadius.FULL)
-            .height(36)
-            .border({ width: this.selectedScenarioFilter === 'COMPETITION' ? 2 : 1, color: this.selectedScenarioFilter === 'COMPETITION' ? PMColors.BRAND : PMColors.BORDER })
-            .margin({ right: PMSpacing.XS })
-            .accessibilityText('按场景筛选：竞赛备赛')
-            .accessibilitySelected(this.selectedScenarioFilter === 'COMPETITION')
-            .onClick(() => {
-              this.selectedScenarioFilter = 'COMPETITION';
-            })
-
-          Button('学术课题').type(ButtonType.Capsule).borderRadius(PMRadius.FULL)
-            .fontSize(PMFontSize.CAPTION)
-            .fontWeight(FontWeight.Regular)
-            .fontColor(this.selectedScenarioFilter === 'RESEARCH' ? PMColors.BRAND : PMColors.INK_SECONDARY)
-            .backgroundColor(this.selectedScenarioFilter === 'RESEARCH' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
-            .borderRadius(PMRadius.FULL)
-            .height(36)
-            .border({ width: this.selectedScenarioFilter === 'RESEARCH' ? 2 : 1, color: this.selectedScenarioFilter === 'RESEARCH' ? PMColors.BRAND : PMColors.BORDER })
-            .margin({ right: PMSpacing.XS })
-            .accessibilityText('按场景筛选：学术课题')
-            .accessibilitySelected(this.selectedScenarioFilter === 'RESEARCH')
-            .onClick(() => {
-              this.selectedScenarioFilter = 'RESEARCH';
-            })
-
-          Button('课程设计').type(ButtonType.Capsule).borderRadius(PMRadius.FULL)
-            .fontSize(PMFontSize.CAPTION)
-            .fontWeight(FontWeight.Regular)
-            .fontColor(this.selectedScenarioFilter === 'COURSE_DESIGN' ? PMColors.BRAND : PMColors.INK_SECONDARY)
-            .backgroundColor(this.selectedScenarioFilter === 'COURSE_DESIGN' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
-            .borderRadius(PMRadius.FULL)
-            .height(36)
-            .border({ width: this.selectedScenarioFilter === 'COURSE_DESIGN' ? 2 : 1, color: this.selectedScenarioFilter === 'COURSE_DESIGN' ? PMColors.BRAND : PMColors.BORDER })
-            .accessibilityText('按场景筛选：课程设计')
-            .accessibilitySelected(this.selectedScenarioFilter === 'COURSE_DESIGN')
-            .onClick(() => {
-              this.selectedScenarioFilter = 'COURSE_DESIGN';
-            })
+          ForEach(['ALL', 'COURSE_DESIGN', 'RESEARCH', 'COMPETITION', 'INNOVATION', 'LAB_TASK'], (scenario: string) => {
+            Button(scenario === 'ALL' ? '全部' : TextFormatters.scenarioToChinese(scenario))
+              .type(ButtonType.Capsule)
+              .fontSize(PMFontSize.CAPTION)
+              .fontWeight(this.selectedScenarioFilter === scenario ? FontWeight.Medium : FontWeight.Regular)
+              .fontColor(this.selectedScenarioFilter === scenario ? PMColors.BRAND : PMColors.INK_SECONDARY)
+              .backgroundColor(this.selectedScenarioFilter === scenario ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+              .borderRadius(PMRadius.FULL)
+              .height(36)
+              .border({ width: this.selectedScenarioFilter === scenario ? 2 : 1,
+                color: this.selectedScenarioFilter === scenario ? PMColors.BRAND : PMColors.BORDER })
+              .margin({ right: PMSpacing.XS })
+              .accessibilityText(`按场景筛选：${scenario === 'ALL' ? '全部' : TextFormatters.scenarioToChinese(scenario)}`)
+              .accessibilitySelected(this.selectedScenarioFilter === scenario)
+              .onClick(() => { this.selectedScenarioFilter = scenario; })
+          }, (scenario: string) => scenario)
         }
       }
       .width('100%')
@@ -2809,7 +2767,7 @@ struct Index {
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_SECONDARY)
                 .margin({ top: PMSpacing.MD })
-              Select(this.globalProjectOptions())
+              Select(this.globalProjectOptions()).fontColor(PMColors.INK_PRIMARY).selectedOptionFontColor(PMColors.BRAND).selectedOptionBgColor(PMColors.BRAND_LIGHT).optionFontColor(PMColors.INK_PRIMARY)
                 .selected(this.gcProjectIndex)
                 .value(this.globalProjectTitle(this.gcProjectIndex))
                 .onSelect((index: number) => {
@@ -2932,7 +2890,7 @@ struct Index {
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_SECONDARY)
                 .margin({ top: PMSpacing.MD })
-              Select(this.globalProjectOptions())
+              Select(this.globalProjectOptions()).fontColor(PMColors.INK_PRIMARY).selectedOptionFontColor(PMColors.BRAND).selectedOptionBgColor(PMColors.BRAND_LIGHT).optionFontColor(PMColors.INK_PRIMARY)
                 .selected(this.gtProjectIndex)
                 .value(this.globalProjectTitle(this.gtProjectIndex))
                 .onSelect((index: number) => {
@@ -3116,41 +3074,19 @@ struct Index {
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.INK_SECONDARY)
               .margin({ top: PMSpacing.SM })
-            Row() {
-              Button('学术备赛').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-                .fontSize(PMFontSize.CAPTION)
-                .fontWeight(FontWeight.Regular)
-                .fontColor(this.newScenario === 'COMPETITION' ? PMColors.BRAND : PMColors.INK_SECONDARY)
-                .backgroundColor(this.newScenario === 'COMPETITION' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
-                .borderRadius(PMRadius.SM)
-                .layoutWeight(1)
-                .onClick(() => {
-                  this.newScenario = 'COMPETITION';
-                })
-
-              Button('学术课题').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-                .fontSize(PMFontSize.CAPTION)
-                .fontWeight(FontWeight.Regular)
-                .fontColor(this.newScenario === 'RESEARCH' ? PMColors.BRAND : PMColors.INK_SECONDARY)
-                .backgroundColor(this.newScenario === 'RESEARCH' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
-                .borderRadius(PMRadius.SM)
-                .layoutWeight(1)
-                .margin({ left: PMSpacing.XS })
-                .onClick(() => {
-                  this.newScenario = 'RESEARCH';
-                })
-
-              Button('课程设计').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-                .fontSize(PMFontSize.CAPTION)
-                .fontWeight(FontWeight.Regular)
-                .fontColor(this.newScenario === 'COURSE_DESIGN' ? PMColors.BRAND : PMColors.INK_SECONDARY)
-                .backgroundColor(this.newScenario === 'COURSE_DESIGN' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
-                .borderRadius(PMRadius.SM)
-                .layoutWeight(1)
-                .margin({ left: PMSpacing.XS })
-                .onClick(() => {
-                  this.newScenario = 'COURSE_DESIGN';
-                })
+            Flex({ wrap: FlexWrap.Wrap }) {
+              ForEach(['COURSE_DESIGN', 'RESEARCH', 'COMPETITION', 'INNOVATION', 'LAB_TASK'], (scenario: string) => {
+                Button(TextFormatters.scenarioToChinese(scenario), { type: ButtonType.Normal })
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontWeight(this.newScenario === scenario ? FontWeight.Medium : FontWeight.Regular)
+                  .fontColor(this.newScenario === scenario ? PMColors.BRAND : PMColors.INK_SECONDARY)
+                  .backgroundColor(this.newScenario === scenario ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+                  .borderRadius(PMRadius.SM)
+                  .width('31%').height(44)
+                  .margin({ right: '2%', bottom: PMSpacing.XS })
+                  .accessibilitySelected(this.newScenario === scenario)
+                  .onClick(() => { this.newScenario = scenario; })
+              }, (scenario: string) => scenario)
             }
             .width('100%')
             .margin({ top: PMSpacing.XS })

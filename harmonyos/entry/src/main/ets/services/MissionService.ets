@@ -37,8 +37,13 @@ export class MissionService {
     this.authorize(); const suffix = approvalId === '' ? action : `approvals/${encodeURIComponent(approvalId)}`;
     return this.client.post<MissionReply>(`${this.path(id)}/${suffix}`, body);
   }
-  async candidates(id: string): Promise<MissionCandidates> {
-    this.authorize(); return this.client.get<MissionCandidates>(`${this.path(id)}/continuations`);
+  async candidates(id: string, questionId: string = '', sourceId: string = '', includeExisting: boolean = false): Promise<MissionCandidates> {
+    this.authorize();
+    const query: string[] = [];
+    if (questionId !== '') query.push(`questionId=${encodeURIComponent(questionId)}`);
+    if (sourceId !== '') query.push(`sourceId=${encodeURIComponent(sourceId)}`);
+    if (includeExisting) query.push('includeExisting=1');
+    return this.client.get<MissionCandidates>(`${this.path(id)}/continuations${query.length > 0 ? '?' + query.join('&') : ''}`);
   }
   async previewMaterial(id: string, body: MissionMaterialInput): Promise<MissionMaterialPreview> {
     this.authorize(); return this.client.post<MissionMaterialPreview>(`${this.path(id)}/continuations/preview`, body);

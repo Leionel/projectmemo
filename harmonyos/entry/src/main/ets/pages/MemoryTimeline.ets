@@ -446,7 +446,7 @@ struct MemoryTimeline {
               .enabled(this.relationActionId === '')
               .onClick(() => {
                 this.confirmRelation(this.actionableRelation(item)!.id);
-              })
+              }).fontColor(PMColors.SURFACE).backgroundColor(PMColors.BRAND).constraintSize({ minHeight: 44 })
           }
           if (this.actionableRelation(item)!.confirmed && this.actionableRelation(item)!.revokedAt === null) {
             Button(this.relationActionId === this.actionableRelation(item)!.id ? '撤销中…' : '撤销关系').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
@@ -456,7 +456,7 @@ struct MemoryTimeline {
               .enabled(this.relationActionId === '')
               .onClick(() => {
                 this.revokeRelation(this.actionableRelation(item)!.id);
-              })
+              }).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
           }
         }
         .width('100%')
@@ -756,7 +756,7 @@ struct MemoryTimeline {
                       .margin({ top: PMSpacing.SM })
                       .onClick(() => {
                         this.loadConsolidation();
-                      })
+                      }).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
                   }
                   .width('100%')
                   .alignItems(HorizontalAlign.Start)
@@ -834,7 +834,7 @@ struct MemoryTimeline {
                       .margin({ top: PMSpacing.SM })
                       .onClick(() => {
                         this.confirmConsolidation(proposal);
-                      })
+                      }).fontColor(PMColors.SURFACE).backgroundColor(PMColors.BRAND).constraintSize({ minHeight: 44 })
                   }
                   .width('100%')
                   .alignItems(HorizontalAlign.Start)
@@ -888,7 +888,7 @@ struct MemoryTimeline {
                         .enabled(this.consolidationActionId === '')
                         .onClick(() => {
                           this.revokeConsolidation(receipt.id);
-                        })
+                        }).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
                     }
                     .width('100%')
                     .padding(PMSpacing.MD)
@@ -1007,7 +1007,7 @@ struct MemoryTimeline {
                       .enabled(this.lifecycleActionId === '')
                       .onClick(() => {
                         this.restoreArchived(archived.id);
-                      })
+                      }).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
                   }
                   .width('100%')
                   .padding(PMSpacing.MD)

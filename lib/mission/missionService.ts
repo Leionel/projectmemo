@@ -9,6 +9,8 @@ import { continuationPolicySchema } from "@/lib/types/mission";
 import { readMissionCompletion } from "./completionSummary";
 import { suggestionsForMission } from "@/lib/experience/injection";
 import type {Prisma} from "@/lib/generated/prisma/client";
+import { premiseFor, assessEvidenceFit, requireFitReview, recordFitReview } from "./evidenceFitService";
+import type { WaitState } from "./gaps";
 export function requireMissions() { if (!isFeatureEnabled("MISSION_ENABLED", false)) throw new AppError("MISSION_DISABLED", "委托功能尚未启用", 503); }
 export async function createMission(userId: string, input: unknown) {
   requireMissions(); const body=createMissionSchema.parse(input); await assertOwner(userId,body.projectId); const hash=jsonHash(body);
@@ -32,8 +34,9 @@ export async function missionDetail(userId:string,id:string){
     db.agentMissionStep.findMany({where:{missionId:id},orderBy:{ordinal:"asc"}}),db.agentMissionApproval.findMany({where:{missionId:id,status:"PENDING"}}),db.agentMissionOutput.findMany({where:{missionId:id},orderBy:{revision:"desc"},take:5}),db.agentMissionEvent.findMany({where:{missionId:id,type:"QUESTION"},orderBy:{seq:"desc"},take:1}),
   ]);
   const completion=await readMissionCompletion(id,outputs[0]?.verificationStatus??null);
+  const fitPremise=m.waitStateJson&&m.status==="WAITING_INPUT"?premiseFor(m,m.waitStateJson as unknown as WaitState):null;
   const experience=isFeatureEnabled("PROJECT_EXPERIENCE_ENABLED",true)?{enabled:true as const,suggestions:await suggestionsForMission(m),note:"建议不改变权限；影子观察不注入模型上下文。"}:{enabled:false as const,suggestions:[],note:"项目经验复用当前未开启。"};
-  return {completion,experience,semanticCheckEnabled:isFeatureEnabled("MISSION_SEMANTIC_CHECK_ENABLED",false),artifactAdoptionEnabled:isFeatureEnabled("MISSION_ARTIFACT_ADOPTION_ENABLED",false),id:m.id,projectId:m.projectId,goal:m.goal,status:m.status,version:m.version,contextVersion:m.contextVersion,planRevision:m.planRevision,continuationPolicy:m.continuationPolicyJson,autoContinuationEnabled:isFeatureEnabled("MISSION_AUTO_CONTINUATION_ENABLED",false),successCriteria:m.successCriteriaJson,constraints:m.constraintsJson,constraintsVersion:m.constraintsVersion,researchScope:m.researchScopeJson,researchScopeVersion:m.researchScopeVersion,pauseReason:m.pauseReason,pauseRequestedAt:m.pauseRequestedAt?.toISOString()??null,cancelRequestedAt:m.cancelRequestedAt?.toISOString()??null,error:m.lastErrorJson,budget:m.budgetJson,used:m.budgetUsedJson,question:m.status==="WAITING_INPUT"?questions[0]??null:null,steps:steps.map(s=>({id:s.id,ordinal:s.ordinal,toolName:s.toolName,status:s.status,result:s.resultJson})),approvals:approvals.map(a=>({id:a.id,proposal:a.proposalJson,proposalHash:a.proposalHash,expiresAt:a.expiresAt})),outputs};
+  return {evidencePremise:fitPremise,completion,experience,semanticCheckEnabled:isFeatureEnabled("MISSION_SEMANTIC_CHECK_ENABLED",false),artifactAdoptionEnabled:isFeatureEnabled("MISSION_ARTIFACT_ADOPTION_ENABLED",false),id:m.id,projectId:m.projectId,goal:m.goal,status:m.status,version:m.version,contextVersion:m.contextVersion,planRevision:m.planRevision,continuationPolicy:m.continuationPolicyJson,autoContinuationEnabled:isFeatureEnabled("MISSION_AUTO_CONTINUATION_ENABLED",false),successCriteria:m.successCriteriaJson,constraints:m.constraintsJson,constraintsVersion:m.constraintsVersion,researchScope:m.researchScopeJson,researchScopeVersion:m.researchScopeVersion,pauseReason:m.pauseReason,pauseRequestedAt:m.pauseRequestedAt?.toISOString()??null,cancelRequestedAt:m.cancelRequestedAt?.toISOString()??null,error:m.lastErrorJson,budget:m.budgetJson,used:m.budgetUsedJson,question:m.status==="WAITING_INPUT"?questions[0]??null:null,steps:steps.map(s=>({id:s.id,ordinal:s.ordinal,toolName:s.toolName,status:s.status,result:s.resultJson})),approvals:approvals.map(a=>({id:a.id,proposal:a.proposalJson,proposalHash:a.proposalHash,expiresAt:a.expiresAt})),outputs};
 }
 export async function readOutput(userId:string,id:string,outputId:string){await ownedMission(userId,id);const output=await db.agentMissionOutput.findFirst({where:{id:outputId,missionId:id}});if(!output)throw new AppError("OUTPUT_NOT_FOUND","没有找到成果草稿",404);return output;}
 export async function missionEvents(userId:string,id:string,after=0){await ownedMission(userId,id);const events=await db.agentMissionEvent.findMany({where:{missionId:id,seq:{gt:after}},orderBy:{seq:"asc"},take:100});return{events,nextAfterSeq:events.at(-1)?.seq??after};}
@@ -46,6 +49,15 @@ export async function commandMission(userId:string,id:string,action:string,raw:u
     if(action==="input"){
       const q=await tx.agentMissionEvent.findFirst({where:{missionId:id,type:"QUESTION"},orderBy:{seq:"desc"}});
       if(m.status!=="WAITING_INPUT"||!body.answer||q?.id!==body.questionId)throw new AppError("INPUT_CHANGED","问题已变化，请刷新后补充",409);status="READY";
+      const wait=m.waitStateJson as unknown as WaitState;
+      const fit=await assessEvidenceFit(tx,m,wait,[],body.evidenceReview);
+      if(fit){
+        requireFitReview(fit,body.evidenceReview);
+        if(body.evidenceReview!.mode!=="CONDITIONAL_ANALYSIS")throw new AppError("FIT_MATERIAL_REQUIRED","文字答复只用于保留未知的条件分析；直接作答请选取原资料",409);
+        const reviewed=await recordFitReview(tx,m,fit,body.evidenceReview!);
+        await tx.agentMission.update({where:{id},data:{waitStateJson:json({...wait,resolved:true,evidenceFitReview:fit,evidenceFitEventId:reviewed.id})}});
+      }else if(body.evidenceReview)throw new AppError("FIT_NOT_AVAILABLE","此问题没有新版核对条件",409);
+
     }else if(action==="approval"){
       const a=await tx.agentMissionApproval.findFirst({where:{id:approvalId,missionId:id,status:"PENDING"}});
       if(m.status!=="WAITING_APPROVAL"||!a||!body.decision||a.proposalHash!==body.proposalHash||a.expiresAt<=new Date()||a.expectedPlanRevision!==m.planRevision)throw new AppError("APPROVAL_CHANGED","批准预览已失效，请重新预览",409);

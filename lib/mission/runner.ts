@@ -63,10 +63,11 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
     await tx.agentMission.update({where:{id:m.id},data:{lastErrorJson:Prisma.DbNull}});
     const run=await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"SUCCESS",provider:decision.provider,trace:json({missionId:m.id,phase:"DECISION",model:decision.model,protocol:decision.protocol,usage:decision.usage,serialization:decision.serialization,contextManifest}),resultJson:json({kind:choice.kind}),durationMs:Date.now()-started}});
     if(choice.kind==="ask"){
-     phase="DECISION";const requirements=gapRequirementsSchema.parse(choice.requirements??{});const gapId=randomUUID();phase="COMMIT";
-     const q=await event(tx,m.id,"QUESTION",{question:choice.question,missing:choice.missing,gapId,requirements,phase:"DECISION"});
+     phase="DECISION";const requirements=gapRequirementsSchema.parse(choice.requirements??{});if(!isFeatureEnabled("MISSION_EVIDENCE_FIT_ENABLED",false))delete requirements.evidenceFitV1;const gapId=randomUUID();phase="COMMIT";
+     const evidencePremiseContext=requirements.evidenceFitV1?{constraintsVersion:current.constraintsVersion,scopeVersion:current.researchScopeVersion,goalHash:jsonHash(current.goal)}:undefined;
+     const q=await event(tx,m.id,"QUESTION",{question:choice.question,missing:choice.missing,gapId,requirements,evidencePremiseContext,phase:"DECISION"});
      const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,status:"SUCCEEDED",...((current.planJson as {impactGuard?:string}).impactGuard?{planRevision:current.planRevision}:{})},orderBy:{ordinal:"asc"}});
-     await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...current.planJson as object,automaticContinuation:null}),waitStateJson:json({questionId:q.id,gapId,question:choice.question,missing:choice.missing,requirements,startedAt:new Date().toISOString(),readSet:sourcesFrom(history.map(s=>s.resultJson))})}});await release(tx,current,"WAITING_INPUT");return null;
+     await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...current.planJson as object,automaticContinuation:null}),waitStateJson:json({questionId:q.id,gapId,question:choice.question,missing:choice.missing,requirements,evidencePremiseContext,startedAt:new Date().toISOString(),readSet:sourcesFrom(history.map(s=>s.resultJson))})}});await release(tx,current,"WAITING_INPUT");return null;
     }
     if(choice.kind==="finish"){
      phase="VERIFY";const verification=await verifyMissionResult(tx,current,choice.outputId);phase="COMMIT";

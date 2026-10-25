@@ -3,7 +3,8 @@ import { GoalQuestion, GoalQuestionInput } from '../models/DecisionEvolution';
 import { DecisionEvolutionService } from '../services/DecisionEvolutionService';
 import { SessionStore } from '../services/SessionStore';
 import { ApiError } from '../models/Project';
-import { PMColors } from '../common/DesignTokens';
+import { PMButton } from './PMReferencePrimitives';
+import { PMColors, PMFontSize, PMSpacing, PMRadius } from '../common/DesignTokens';
 @Component
 export struct GoalQuestionPanel {
  @Prop projectId: string = '';
@@ -14,6 +15,8 @@ export struct GoalQuestionPanel {
  @State error: string = '';
  @State busy: boolean = false;
  @State fresh: boolean = false;
+ @State showOptions: boolean = false;
+ @State feedback: string = '';
  private generation: number = 0;
  private keys: Record<string, string> = {};
  private exposed: string = '';
@@ -33,24 +36,50 @@ export struct GoalQuestionPanel {
  private async respond(action: string): Promise<void> {
   const q = this.question; if (q === null || !this.fresh || this.busy) return; const g = this.generation; const token = SessionStore.getToken(); if (action !== 'EXPOSED') this.busy = true;
   try { await new DecisionEvolutionService().respond(this.projectId, this.input(q, action)); if (!this.current(g, token)) return;
+   if (action === 'WORTH_IT') this.feedback = '反馈已保存';
    if (['UNKNOWN', 'LATER', 'STOP', 'NOT_USEFUL'].includes(action)) { this.mutedMissionId = q.missionId; this.question = null; }
   } catch (e) { if (!this.current(g, token)) return; this.error = e instanceof ApiError ? e.message : '反馈未保存，请重试'; if (action === 'EXPOSED') this.exposed = ''; }
   finally { if (g === this.generation) this.busy = false; }
  }
  private async reset(): Promise<void> { if (this.mutedMissionId === '' || this.busy) return; const g = this.generation; const token = SessionStore.getToken(); this.busy = true; try { await new DecisionEvolutionService().resetQuestion(this.mutedMissionId); if (!this.current(g, token)) return; this.mutedMissionId = ''; this.load(); } catch (e) { if (this.current(g, token)) this.error = e instanceof ApiError ? e.message : '恢复提示失败，请重试'; } finally { if (this.current(g, token)) this.busy = false; } }
  build() {
-  Column({ space: 8 }) {
+  Column({ space: PMSpacing.SM }) {
    if (this.question !== null) {
-    if (!this.compact) { Text(this.question.text).fontSize(15).fontWeight(FontWeight.Medium) }
-    Text(this.question.whyNow).fontSize(13).fontColor(PMColors.INK_SECONDARY)
-    Text(`${this.question.answerability} ${this.question.unansweredConsequence}`).fontSize(12).fontColor(PMColors.INK_TERTIARY)
-    Button(this.question.kind === 'WAITING_INPUT' ? '补充到原问题 →' : '核对并接续原委托 →').height(44).enabled(this.fresh).onClick(() => { router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.projectId, missionId: this.question!.missionId, questionId: this.question!.kind === 'WAITING_INPUT' ? this.question!.questionId : '' } }); })
-    Row({ space: 8 }) { Button('我还不知道').height(44).enabled(!this.busy && this.fresh).onClick(() => { this.respond('UNKNOWN'); }); Button('明天再看').height(44).enabled(!this.busy && this.fresh).onClick(() => { this.respond('LATER'); }) }
-    Button('停止此委托的主动追问').height(44).enabled(!this.busy && this.fresh).onClick(() => { this.respond('STOP'); })
-    Row({ space: 8 }) { Button('这项问题有用').height(44).enabled(!this.busy && this.fresh).onClick(() => { this.respond('WORTH_IT'); }); Button('这次没有帮助').height(44).enabled(!this.busy && this.fresh).onClick(() => { this.respond('NOT_USEFUL'); }) }
+    if (!this.compact) {
+     Text(this.question.text).fontSize(PMFontSize.BODY).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
+     Text(this.question.whyNow).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY)
+     PMButton({ label: this.question.kind === 'WAITING_INPUT' ? '补充到原问题' : '核对并接续原委托', disabled: this.busy || !this.fresh, onAction: (): void => {
+      router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.projectId, missionId: this.question!.missionId, questionId: this.question!.kind === 'WAITING_INPUT' ? this.question!.questionId : '' } });
+     } })
+    }
+    Row({ space: PMSpacing.SM }) {
+     Button('还不知道').type(ButtonType.Normal).height(44).layoutWeight(1).fontSize(PMFontSize.SECONDARY)
+      .fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).borderRadius(PMRadius.BUTTON)
+      .enabled(!this.busy && this.fresh).onClick(() => { this.respond('UNKNOWN'); })
+     Button('明天再看').type(ButtonType.Normal).height(44).layoutWeight(1).fontSize(PMFontSize.SECONDARY)
+      .fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).borderRadius(PMRadius.BUTTON)
+      .enabled(!this.busy && this.fresh).onClick(() => { this.respond('LATER'); })
+    }.width('100%')
+    Button(this.showOptions ? '收起问题选项' : '问题选项与反馈').type(ButtonType.Normal).height(44)
+     .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).borderRadius(PMRadius.BUTTON)
+     .onClick(() => { this.showOptions = !this.showOptions; })
+    if (this.showOptions) {
+     Row({ space: PMSpacing.SM }) {
+      Button('有帮助').type(ButtonType.Normal).height(44).layoutWeight(1).fontSize(PMFontSize.SECONDARY)
+       .fontColor(PMColors.BRAND).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(PMRadius.BUTTON)
+       .enabled(!this.busy && this.fresh).onClick(() => { this.respond('WORTH_IT'); })
+      Button('没帮助').type(ButtonType.Normal).height(44).layoutWeight(1).fontSize(PMFontSize.SECONDARY)
+       .fontColor(PMColors.INK_SECONDARY).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(PMRadius.BUTTON)
+       .enabled(!this.busy && this.fresh).onClick(() => { this.respond('NOT_USEFUL'); })
+     }.width('100%')
+     Button('停止此委托的主动追问').type(ButtonType.Normal).constraintSize({ minHeight: 44 }).fontSize(PMFontSize.SECONDARY)
+      .fontColor(PMColors.RISK).backgroundColor(Color.Transparent).borderRadius(PMRadius.BUTTON)
+      .enabled(!this.busy && this.fresh).onClick(() => { this.respond('STOP'); })
+    }
+    if (this.feedback !== '') { Text(this.feedback).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY) }
    }
-   if (this.mutedMissionId !== '') { Button('恢复该委托的问题提示').height(44).onClick(() => { this.reset(); }) }
-   if (this.error !== '') { Text(this.error).fontSize(12).fontColor(PMColors.RISK); Button('重新读取问题').height(44).enabled(!this.busy).onClick(() => { this.load(); }) }
+   if (this.mutedMissionId !== '') { PMButton({ label: '恢复问题提示', secondary: true, disabled: this.busy, onAction: (): void => { this.reset(); } }) }
+   if (this.error !== '') { Text(this.error).fontSize(PMFontSize.CAPTION).fontColor(PMColors.RISK); PMButton({ label: '重新读取问题', secondary: true, disabled: this.busy, onAction: (): void => { this.load(); } }) }
   }.width('100%').alignItems(HorizontalAlign.Start).onVisibleAreaChange([0.5], (visible: boolean, ratio: number) => { if (visible && ratio >= 0.5 && this.question !== null && this.exposed !== this.question.contextHash) { this.exposed = this.question.contextHash; this.respond('EXPOSED'); } })
  }
 }

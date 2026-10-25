@@ -119,3 +119,13 @@
 
 @media(pointer:coarse) { .panel button { min-height:2.75rem; } }
 @container(max-width:420px) { .completionFacts { grid-template-columns:minmax(0,1fr); } }
+
+.questionInput { display:grid; gap:.875rem; min-width:0; }
+.materialCandidates { display:grid; gap:.5rem; max-height:24rem; overflow:auto; }
+.materialCandidate { display:flex; align-items:flex-start; gap:.625rem; padding:.75rem; border:1px solid var(--rule); border-radius:.5rem; background:var(--paper-strong); overflow-wrap:anywhere; }
+.materialCandidate > span { min-width:0; flex:1; }
+.materialCandidate small { color:var(--muted); font-size:.75rem; }
+.materialExcerpt { display:block; white-space:pre-wrap; overflow-wrap:anywhere; max-height:12rem; overflow:auto; margin:.375rem 0; font:inherit; color:var(--ink-soft); }
+.materialReview { display:grid; gap:.75rem; padding-top:.75rem; border-top:1px solid var(--rule); }
+.questionInput summary { cursor:pointer; color:var(--teal-strong); }
+@media(max-width:640px) { .questionInput textarea { font-size:1rem; } .questionInput :is(button,a) { min-height:2.75rem; } }

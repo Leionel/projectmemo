@@ -31,7 +31,7 @@ export struct LoginView {
       const result: AccountCapabilities = await this.authService.capabilities();
       if (!this.active) return;
       this.capabilities = result;
-      this.mailStatus = result.registrationEnabled ? '' : '邮件服务尚未配置，注册和找回密码暂不可用。已有账号仍可登录。';
+      this.mailStatus = result.registrationEnabled ? '' : '邮件服务未配置，暂不提供注册与找回密码。已有账号可登录。';
     } catch (_e) {
       if (!this.active) return;
       this.mailStatus = '暂时无法确认账号服务状态。你仍可尝试登录，或重新检查服务。';
@@ -47,7 +47,7 @@ export struct LoginView {
     if (this.mode === 'register') return '创建你的账号';
     if (this.mode === 'forgot') return '找回密码';
     if (this.mode === 'resend') return '重发验证邮件';
-    return '登录忆程';
+    return '继续你的项目';
   }
 
   private canSubmit(): boolean {
@@ -94,29 +94,33 @@ export struct LoginView {
 
   @Builder
   FieldLabel(label: string) {
-    Text(label).fontSize(PMFontSize.BODY).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY).margin({ bottom: 8 })
+    Text(label).fontSize(14).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY).margin({ bottom: PMSpacing.SM })
   }
 
   build() {
     Scroll() {
-      Column({ space: 24 }) {
-        Column({ space: 10 }) {
-          Image($r('app.media.app_icon')).width(48).height(48).borderRadius(12).accessibilityText('忆程 ProjectMemo')
-          Text('忆程 ProjectMemo').fontSize(24).fontFamily(PMFontFamily.BRAND_SERIF).fontColor(PMColors.INK_PRIMARY)
-          Text('你的个人项目空间').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY)
-        }.width('100%').margin({ top: 32, bottom: 8 })
+      Column({ space: PMSpacing.XXL }) {
+        Row({ space: PMSpacing.MD }) {
+          Image($r('app.media.app_icon')).width(46).height(46).borderRadius(PMRadius.MD).accessibilityText('忆程')
+          Column({ space: 3 }) {
+            Text('忆程 ProjectMemo').fontSize(22).fontWeight(FontWeight.Medium).fontFamily(PMFontFamily.BRAND_SERIF).fontColor(PMColors.INK_PRIMARY)
+            Text('个人项目工作台').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
+          }.alignItems(HorizontalAlign.Start)
+        }.width('100%').margin({ top: PMSpacing.XXL, bottom: PMSpacing.MD })
+
+        Column({ space: PMSpacing.SM }) {
+          Text(this.title()).fontSize(PMFontSize.DISPLAY).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY).lineHeight(36)
+          Text(this.mode === 'login' ? '登录后，接着推进上次的项目。' : this.mode === 'register' ? '用一个账号，保存项目里的积累。' : '我们会将安全链接发送到你的邮箱。')
+            .fontSize(PMFontSize.BODY).fontColor(PMColors.INK_SECONDARY).lineHeight(24)
+        }.width('100%').alignItems(HorizontalAlign.Start)
 
         Column() {
-          Text(this.title()).fontSize(25).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY).margin({ bottom: 8 })
-          Text(this.mode === 'login' ? '继续查看你的项目、记录和行动。' : '验证和重置通过邮件中的安全链接完成。')
-            .fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY).lineHeight(22).margin({ bottom: 24 })
-
           if (this.successMessage !== '') {
             Text(this.successMessage).fontSize(PMFontSize.BODY).fontColor(PMColors.BRAND).lineHeight(24)
             Text('在邮件中打开链接完成操作，然后返回应用登录。注册成功不代表邮箱已验证。')
               .fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY).lineHeight(22).margin({ top: 16, bottom: 20 })
-            Button('返回登录').width('100%').height(48).backgroundColor(PMColors.BRAND).fontColor(Color.White).onClick(() => this.changeMode('login'))
-            Button('重新发送验证邮件', { type: ButtonType.Normal }).height(44).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).margin({ top: 12 }).onClick(() => this.changeMode('resend'))
+            Button('返回登录', { type: ButtonType.Normal }).width('100%').height(48).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).backgroundColor(PMColors.BRAND).fontColor(PMColors.SURFACE).onClick(() => this.changeMode('login'))
+            if (this.capabilities.registrationEnabled) { Button('重新发送验证邮件', { type: ButtonType.Normal }).height(44).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).margin({ top: 12 }).onClick(() => this.changeMode('resend')) }
           } else {
             if (this.errorMessage !== '') {
               Text(this.errorMessage).width('100%').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.RISK).lineHeight(22)
@@ -126,67 +130,73 @@ export struct LoginView {
               Column() {
                 this.FieldLabel('账号')
                 TextInput({ placeholder: '输入你的账号', text: this.username }).height(48).fontSize(PMFontSize.BODY)
-                  .backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(10).border({ width: 1, color: PMColors.BORDER_SUBTLE }).enabled(!this.isSubmitting)
+                  .fontColor(PMColors.INK_PRIMARY).placeholderColor(PMColors.INK_TERTIARY).caretColor(PMColors.BRAND)
+                  .backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(PMRadius.MD).border({ width: 1, color: PMColors.BORDER_SUBTLE }).enabled(!this.isSubmitting)
                   .accessibilityText('账号').onChange((value: string) => { this.username = this.mode === 'register' ? value.toLowerCase() : value; })
                 if (this.mode === 'register') {
                   Text('3–32 位字母、数字、下划线或短横线，以字母或数字开头。').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY).lineHeight(18).margin({ top: 6 })
                 }
-              }.width('100%').alignItems(HorizontalAlign.Start).margin({ bottom: 18 })
+              }.width('100%').alignItems(HorizontalAlign.Start).margin({ bottom: PMSpacing.LG })
             }
             if (this.mode !== 'login') {
               Column() {
                 this.FieldLabel('邮箱')
                 TextInput({ placeholder: 'you@example.com', text: this.email }).type(InputType.Email).height(48).fontSize(PMFontSize.BODY)
-                  .backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(10).border({ width: 1, color: PMColors.BORDER_SUBTLE }).enabled(!this.isSubmitting)
+                  .fontColor(PMColors.INK_PRIMARY).placeholderColor(PMColors.INK_TERTIARY).caretColor(PMColors.BRAND)
+                  .backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(PMRadius.MD).border({ width: 1, color: PMColors.BORDER_SUBTLE }).enabled(!this.isSubmitting)
                   .accessibilityText('邮箱').onChange((value: string) => { this.email = value; })
-              }.width('100%').alignItems(HorizontalAlign.Start).margin({ bottom: 18 })
+              }.width('100%').alignItems(HorizontalAlign.Start).margin({ bottom: PMSpacing.LG })
             }
             if (this.mode === 'login' || this.mode === 'register') {
               Column() {
                 this.FieldLabel('密码')
                 TextInput({ placeholder: this.mode === 'login' ? '输入你的密码' : '至少 10 个字符', text: this.password }).type(InputType.Password).height(48).fontSize(PMFontSize.BODY)
-                  .backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(10).border({ width: 1, color: PMColors.BORDER_SUBTLE }).enabled(!this.isSubmitting)
+                  .fontColor(PMColors.INK_PRIMARY).placeholderColor(PMColors.INK_TERTIARY).caretColor(PMColors.BRAND)
+                  .backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(PMRadius.MD).border({ width: 1, color: PMColors.BORDER_SUBTLE }).enabled(!this.isSubmitting)
                   .accessibilityText('密码').onChange((value: string) => { this.password = value; })
-              }.width('100%').alignItems(HorizontalAlign.Start).margin({ bottom: 18 })
+              }.width('100%').alignItems(HorizontalAlign.Start).margin({ bottom: PMSpacing.LG })
             }
             if (this.mode === 'register') {
               Column() {
                 this.FieldLabel('确认密码')
                 TextInput({ placeholder: '再次输入密码', text: this.confirmPassword }).type(InputType.Password).height(48).fontSize(PMFontSize.BODY)
-                  .backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(10).border({ width: 1, color: PMColors.BORDER_SUBTLE }).enabled(!this.isSubmitting)
+                  .fontColor(PMColors.INK_PRIMARY).placeholderColor(PMColors.INK_TERTIARY).caretColor(PMColors.BRAND)
+                  .backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(PMRadius.MD).border({ width: 1, color: PMColors.BORDER_SUBTLE }).enabled(!this.isSubmitting)
                   .accessibilityText('确认密码').onChange((value: string) => { this.confirmPassword = value; })
-              }.width('100%').alignItems(HorizontalAlign.Start).margin({ bottom: 18 })
+              }.width('100%').alignItems(HorizontalAlign.Start).margin({ bottom: PMSpacing.LG })
             }
             Button(this.isSubmitting ? '正在提交…' : this.mode === 'login' ? '登录工作台' : this.mode === 'register' ? '注册并发送验证邮件' : this.mode === 'forgot' ? '发送重置邮件' : '发送验证邮件')
-              .width('100%').height(48).fontSize(PMFontSize.BODY).fontColor(Color.White).backgroundColor(PMColors.BRAND).borderRadius(10)
+              .width('100%').height(48).fontSize(PMFontSize.BUTTON).fontWeight(FontWeight.Medium).fontColor(PMColors.SURFACE).backgroundColor(PMColors.BRAND).borderRadius(PMRadius.BUTTON)
               .enabled(this.canSubmit()).onClick(() => this.submit())
             if (this.mode === 'register') {
               Text('验证邮箱后才能登录。新账号不自带云模型调用额度。').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY).lineHeight(20).margin({ top: 14 })
             }
-            if (this.mode === 'login') {
+            if (this.mode === 'login' && (this.capabilities.registrationEnabled || this.capabilities.passwordResetEnabled)) {
               Row() {
                 if (this.capabilities.registrationEnabled) {
                   Button('创建账号', { type: ButtonType.Normal }).height(44).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).enabled(!this.isSubmitting).onClick(() => this.changeMode('register'))
                 }
                 Blank()
-                Button('忘记密码？', { type: ButtonType.Normal }).height(44).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).enabled(!this.isSubmitting && this.capabilities.passwordResetEnabled).onClick(() => this.changeMode('forgot'))
+                if (this.capabilities.passwordResetEnabled) { Button('找回密码', { type: ButtonType.Normal }).height(44).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).enabled(!this.isSubmitting && this.capabilities.passwordResetEnabled).onClick(() => this.changeMode('forgot')) }
               }.width('100%').margin({ top: 16 })
               if (this.capabilities.registrationEnabled) {
                 Button('重发邮箱验证', { type: ButtonType.Normal }).height(44).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).enabled(!this.isSubmitting).onClick(() => this.changeMode('resend'))
               }
-            } else {
+            } else if (this.mode !== 'login') {
               Button('已有账号？返回登录', { type: ButtonType.Normal }).height(48).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).enabled(!this.isSubmitting).margin({ top: 16 }).onClick(() => this.changeMode('login'))
             }
           }
-        }.width('100%').padding(24).alignItems(HorizontalAlign.Start).backgroundColor(PMColors.SURFACE).border({ width: 1, color: PMColors.BORDER_SUBTLE }).borderRadius(20)
+        }.width('100%').padding(PMSpacing.XL).alignItems(HorizontalAlign.Start).backgroundColor(PMColors.SURFACE).border({ width: 1, color: PMColors.BORDER_SUBTLE }).borderRadius(PMRadius.LG)
 
         if (this.mailStatus !== '') {
-          Text(this.mailStatus).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY).lineHeight(22)
-          Button(this.isChecking ? '正在检查…' : '重新检查账号服务', { type: ButtonType.Normal }).height(44).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).enabled(!this.isChecking && !this.isSubmitting).onClick(() => this.loadCapabilities())
+          Column({ space: PMSpacing.XS }) {
+            Text(this.mailStatus).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY).lineHeight(20)
+            Button(this.isChecking ? '正在检查服务…' : '重新检查服务', { type: ButtonType.Normal }).height(44)
+              .fontSize(PMFontSize.CAPTION).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).borderRadius(PMRadius.BUTTON)
+              .enabled(!this.isChecking && !this.isSubmitting).onClick(() => this.loadCapabilities())
+          }.width('100%').alignItems(HorizontalAlign.Start)
         }
-        Text('项目资料由服务端保存。原有账号和演示账号继续使用原密码登录。')
-          .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY).lineHeight(20).margin({ bottom: 28 })
-      }.width('100%').constraintSize({ maxWidth: 480 }).padding({ left: 20, right: 20 })
+      }.width('100%').constraintSize({ maxWidth: 480 }).padding({ left: PMSpacing.XXL, right: PMSpacing.XXL, bottom: PMSpacing.XXL })
     }.width('100%').height('100%').backgroundColor(PMColors.BACKGROUND)
   }
 }

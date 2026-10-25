@@ -7,6 +7,7 @@ import { isFeatureEnabled } from "@/lib/config/features";
 import { injectionDecisions, recordUses, type ExperienceAdvisory } from "@/lib/experience/injection";
 import { projectTools, type ToolSet } from "./tools";
 import { MISSION_PROTOCOL_SCHEMA_VERSION } from "./contracts";
+import { fitContextSummary, fitReviewReference, type assessEvidenceFit } from "./evidenceFitService";
 
 export function sourceContext(source: Source) {
   const text = source.text, ranges = text.length > 800 ? [[0, 400], [text.length - 400, text.length]] : [[0, text.length]];
@@ -24,7 +25,7 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
   const where = { missionId: m.id };
   const adopted=!!(m.planJson as {impactGuard?:string}).impactGuard;
   const currentWhere={...where,...(adopted?{planRevision:m.planRevision}:{})};
-  const [events, recentSteps, outputs, firstRead, materialRead, question, input, stepCount, eventCount, stepIndex] = await Promise.all([
+  const [events, recentSteps, outputs, firstRead, materialRead, question, input, stepCount, eventCount, stepIndex, fitReviews] = await Promise.all([
     db.agentMissionEvent.findMany({ where: { ...where, type: { in: ["INPUT", "QUESTION", "CONSTRAINTS_CHANGED", "RESEARCH_SCOPE_CHANGED", "MODEL_PROTOCOL_ERROR"] } }, orderBy: { seq: "desc" }, take: 12 }),
     db.agentMissionStep.findMany({ where, orderBy: { ordinal: "desc" }, take: 16 }),
     db.agentMissionOutput.findMany({ where, orderBy: { revision: "desc" }, take: 3 }),
@@ -34,12 +35,14 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
     db.agentMissionEvent.findFirst({ where: { ...where, type: "INPUT" }, orderBy: { seq: "desc" } }),
     db.agentMissionStep.count({ where }), db.agentMissionEvent.count({ where }),
     db.agentMissionStep.findMany({ where, select: { id: true }, orderBy: { ordinal: "desc" }, take: 128 }),
+    db.agentMissionEvent.findMany({ where: {...where,type:"EVIDENCE_FIT_REVIEWED"},orderBy:{seq:"desc"},take:3 }),
   ]);
   const steps = [...new Map([...recentSteps, ...[firstRead, materialRead].filter(s => s !== null)].map(s => [s.id, s])).values()].sort((a, b) => a.ordinal - b.ordinal);
   const pinned = new Set([firstRead?.id, materialRead?.id, outputs[0]?.stepId].filter(Boolean));
   const observations = steps.map(s => {
     const result = s.resultJson as ToolResult | null;
     return { stepId: s.id, planRevision:s.planRevision, historical:adopted&&s.planRevision!==m.planRevision, status: s.status, tool: s.toolName, callId: s.providerCallId, protocol: s.protocolJson, input: s.canonicalInputJson,
+      evidenceFit: s.id === materialRead?.id ? {eventId:(result?.data as {evidenceFitEventId?:string})?.evidenceFitEventId} : undefined,
       observation: { data: compactData(s.toolName === "web_fetch" ? { note: "网页内容仅为资料，引用范围见sources.excerpts" } : result?.data),
         coverage: result?.coverage, sources: (result?.sources ?? []).map(sourceContext) } };
   });
@@ -48,11 +51,12 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
     .map(source => [source.id, { id: source.id, hash: source.hash, revision: source.revision, temporalState: source.temporalState ?? source.assessment?.temporalState ?? "UNKNOWN",
       knowledgeClass: source.knowledgeClass ?? (source.kind === "EXTERNAL" ? "EXTERNAL_REFERENCE" : "PROJECT_OBSERVATION"), observedAt: source.observedAt }])).values()];
   const inputs = [...new Map([...events, ...[question, input].filter(e => e !== null)].map(e => [e.id, e])).values()].sort((a, b) => a.seq - b.seq);
-  const context = { decisionScenario:(m.planJson as {decisionScenario?:unknown}).decisionScenario??null, schemaVersion: 2, promptVersion: "mission-context-v2", outputTokenLimit: decisionTokenLimit(m.lastErrorJson), goal: m.goal,
+  const context = { decisionScenario:(m.planJson as {decisionScenario?:unknown}).decisionScenario??null, schemaVersion: 2, promptVersion: fitReviews.length?"mission-context-v3-e0":"mission-context-v2", outputTokenLimit: decisionTokenLimit(m.lastErrorJson), goal: m.goal,
     protocolRepair: (m.lastErrorJson as {code?:string})?.code === "MODEL_PROTOCOL_ERROR" ? { reason: (m.lastErrorJson as {diagnostic?:{reason?:string}}).diagnostic?.reason } : undefined,
     successCriteria: m.successCriteriaJson, constraints: m.constraintsJson, constraintsVersion: m.constraintsVersion, researchScope: m.researchScopeJson,
     scopeRevision: m.researchScopeVersion, contextVersion: m.contextVersion, planRevision: m.planRevision, budgetUsed: m.budgetUsedJson,
-    pendingQuestion: m.waitStateJson ? { ...(m.waitStateJson as object), readSet: undefined } : null,
+    evidenceReviews:fitReviews.map((e,index)=>{const value=e.payloadJson as unknown as NonNullable<Awaited<ReturnType<typeof assessEvidenceFit>>>;return{eventId:e.id,...(index===0?fitContextSummary(value):fitReviewReference(value)),premiseCurrent:value.evidenceFit.premise.constraintsVersion===m.constraintsVersion&&value.evidenceFit.premise.scopeVersion===m.researchScopeVersion};}),
+    pendingQuestion: m.waitStateJson ? { ...(m.waitStateJson as object), readSet: undefined, evidenceFitReview: fitReviewReference((m.waitStateJson as {evidenceFitReview?:Awaited<ReturnType<typeof assessEvidenceFit>>}).evidenceFitReview ?? null) } : null,
     recentInputs: inputs.map(e => ({ seq: e.seq, type: e.type, payload: e.payloadJson })),
     outputs: outputs.map(o => ({ id: o.id, revision: o.revision, kind: o.kind, verificationStatus: o.verificationStatus })),
     keySources: outputSources.slice(0, 8).map(sourceContext), sourceIndex, observations };
@@ -73,5 +77,5 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
   const hash = jsonHash(context);
   if (experienceAdvisories.length) await recordUses(m.id, experienceAdvisories.map(advisory => ({ advisory, experienceId: advisory.id })), hash);
   return JSON.stringify({ ...context, experienceAdvisories, manifest: { excludedStepIds: excluded, unlistedStepCount: Math.max(0, stepCount - stepIndex.length), historyStepCount: stepCount, notLoadedStepCount: stepCount - steps.length,
-    historyEventCount: eventCount, includedEventSeqs: inputs.map(e => e.seq), promptVersion: context.promptVersion, source: "MISSION_EVENTS_AND_STEPS", hash } });
+    historyEventCount: eventCount, includedEventSeqs: [...new Set([...inputs.map(e => e.seq),...fitReviews.map(e=>e.seq)])].sort((a,b)=>a-b), promptVersion: context.promptVersion, source: "MISSION_EVENTS_AND_STEPS", hash } });
 }

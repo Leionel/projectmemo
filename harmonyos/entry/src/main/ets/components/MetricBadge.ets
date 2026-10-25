@@ -214,11 +214,15 @@ export struct CategoryBadge {
   private getLabel(): string {
     switch (this.category) {
       case 'COMPETITION':
-        return '竞赛备赛';
+        return '学科竞赛';
       case 'COURSE_DESIGN':
         return '课程设计';
+      case 'LAB_TASK':
+        return '实验室任务';
+      case 'INNOVATION':
+        return '创新创业';
       case 'RESEARCH':
-        return '学术研究';
+        return '科研训练';
       case 'ACADEMIC':
         return '学术备赛';
       default:

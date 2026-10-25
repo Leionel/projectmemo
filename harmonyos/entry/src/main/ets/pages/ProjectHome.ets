@@ -128,6 +128,11 @@ struct ProjectHome {
   @State rawText: string = '';
   @State sourceType: string = '随手记录';
   @State captureRequestId: string = '';
+  @State materialMissionId: string = '';
+  @State materialQuestionId: string = '';
+  @State materialQuestion: string = '';
+  @State materialSourceId: string = '';
+  private materialOwnerId: string = '';
   @State isCapturing: boolean = false;
   @State captureError: string = '';
   @State isUploadingAttachment: boolean = false;
@@ -274,6 +279,13 @@ struct ProjectHome {
     }
     this.projectId = params['projectId'] ?? '';
     this.showQuickCopilot = params['openCopilot'] === '1';
+    this.materialMissionId = params['materialMissionId'] ?? '';
+    this.materialQuestionId = params['materialQuestionId'] ?? '';
+    this.materialOwnerId = SessionStore.getUser().id;
+    if (this.materialMissionId !== '' && this.materialQuestionId !== '') {
+      this.currentTabIndex = 1; this.entrySheetMode = 'capture'; this.showEntrySheet = true;
+      this.loadMaterialQuestion();
+    }
     this.sourceConversationRun = params['sourceRunId'] ?? '';
     this.requestedArtifactId = params['artifactId'] ?? '';
     if (this.requestedArtifactId !== '') this.currentTabIndex = 4;
@@ -361,6 +373,7 @@ struct ProjectHome {
       this.isArtifactReader = false;
       return true;
     }
+    if (this.materialMissionId !== '') { this.returnToMaterialQuestion(); return true; }
     return false;
   }
 
@@ -437,13 +450,16 @@ struct ProjectHome {
   }
 
   private async uploadAttachment(uri: string, fileName: string, mimeType: string): Promise<void> {
+    const uploadToken = SessionStore.getToken();
     this.isUploadingAttachment = true;
     this.attachmentRetryId = '';
     this.attachmentFeedbackTone = 'info';
     this.attachmentFeedback = '正在上传并提取内容…';
     try {
       const result = await this.attachmentService.upload(this.projectId, uri, fileName, mimeType);
+      if (uploadToken !== SessionStore.getToken()) return;
       this.lastUploadedAttachmentId = result.attachment.id;
+      if (this.materialOwnerId === SessionStore.getUser().id) this.materialSourceId = `attachment:${result.attachment.id}`;
       if (result.isDuplicate && result.attachment.extractionStatus === 'SUCCESS') {
         this.attachmentFeedback = '该附件已存在，已复用原记录';
         this.attachmentFeedbackTone = 'success';
@@ -1129,14 +1145,14 @@ struct ProjectHome {
         .fontSize(PMFontSize.SECONDARY)
         .onClick(() => {
           this.cancelCheckpointPreview();
-        })
+        }).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
       Button(this.checkpointBusy === 'confirm' ? '确认中…' : '确认这一版').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
         .buttonStyle(ButtonStyleMode.EMPHASIZED)
         .fontSize(PMFontSize.SECONDARY)
         .enabled(this.checkpointBusy === '')
         .onClick(() => {
           this.confirmCheckpoint();
-        })
+        }).fontColor(PMColors.SURFACE).backgroundColor(PMColors.BRAND).constraintSize({ minHeight: 44 })
     }
     .width('100%')
     .justifyContent(FlexAlign.End)
@@ -1325,14 +1341,14 @@ struct ProjectHome {
         .fontSize(PMFontSize.SECONDARY)
         .onClick(() => {
           this.currentTabIndex = 2;
-        })
+        }).fontColor(PMColors.SURFACE).backgroundColor(PMColors.BRAND).constraintSize({ minHeight: 44 })
       Button(this.checkpointBusy === 'refresh' ? '整理中…' : '根据最新来源重新整理').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
         .buttonStyle(ButtonStyleMode.NORMAL)
         .fontSize(PMFontSize.SECONDARY)
         .enabled(this.checkpointBusy === '')
         .onClick(() => {
           this.refreshCheckpoint();
-        })
+        }).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
     }
     .width('100%')
     .justifyContent(FlexAlign.End)
@@ -1786,8 +1802,33 @@ struct ProjectHome {
     return `harmony-capture-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
   }
 
+  private async loadMaterialQuestion(): Promise<void> {
+    const token = SessionStore.getToken();
+    try {
+      const m = await new MissionService().detail(this.materialMissionId);
+      if (token !== SessionStore.getToken() || m.projectId !== this.projectId) return;
+      this.materialQuestion = m.question?.id === this.materialQuestionId ? m.question.payloadJson.question : '原问题已变化，返回原委托核对后再继续';
+    } catch (_e) { if (token === SessionStore.getToken()) this.materialQuestion = '暂时无法读取原问题；资料仍可保存，返回后核对'; }
+  }
+  private captureDraftScope(): string {
+    return this.materialMissionId === '' ? this.projectId : `${this.projectId}:${this.materialOwnerId}:${this.materialMissionId}:${this.materialQuestionId}`;
+  }
+  private returnToMaterialQuestion(): void {
+    if (this.materialOwnerId !== SessionStore.getUser().id || !SessionStore.isTokenValid()) return;
+    this.showEntrySheet = false;
+    router.back({ url: 'pages/MissionDetail', params: { projectId: this.projectId, missionId: this.materialMissionId, questionId: this.materialQuestionId, sourceId: this.materialSourceId } });
+  }
+  @Builder private MaterialReturn() {
+    if (this.materialMissionId !== '') {
+      Column({ space: PMSpacing.XS }) {
+        Text(this.materialQuestion || '为原问题补充资料').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY)
+        PMButton({ label: this.materialSourceId === '' ? '返回原问题' : '回到原问题，核对这份资料 →', secondary: true, onAction: (): void => { this.returnToMaterialQuestion(); } })
+      }.width('100%').alignItems(HorizontalAlign.Start).padding({ top: PMSpacing.SM, bottom: PMSpacing.SM })
+    }
+  }
+
   private async restoreCaptureDraft(): Promise<void> {
-    const draft = await DeviceIdentity.loadCaptureDraft(this.projectId);
+    const draft = await DeviceIdentity.loadCaptureDraft(this.captureDraftScope());
     if (draft !== undefined && this.rawText === '') {
       this.rawText = draft.rawText;
       this.sourceType = draft.sourceType;
@@ -1800,7 +1841,7 @@ struct ProjectHome {
     if (this.captureRequestId === '') {
       this.captureRequestId = this.newCaptureRequestId();
     }
-    await DeviceIdentity.saveCaptureDraft(this.projectId, this.rawText, this.sourceType, this.captureRequestId);
+    await DeviceIdentity.saveCaptureDraft(this.captureDraftScope(), this.rawText, this.sourceType, this.captureRequestId);
   }
 
   private openCaptureEntry(preferredSource?: string): void {
@@ -1854,12 +1895,15 @@ struct ProjectHome {
     if (this.captureRequestId === '') {
       this.captureRequestId = this.newCaptureRequestId();
     }
-    await DeviceIdentity.saveCaptureDraft(this.projectId, trimmed, this.sourceType, this.captureRequestId);
+    await DeviceIdentity.saveCaptureDraft(this.captureDraftScope(), trimmed, this.sourceType, this.captureRequestId);
+    const captureToken = SessionStore.getToken();
     try {
-      await this.memoryService.capture(this.projectId, trimmed, this.sourceType, this.captureRequestId);
+      const saved = await this.memoryService.capture(this.projectId, trimmed, this.sourceType, this.captureRequestId);
+      if (captureToken !== SessionStore.getToken()) return;
+      if (this.materialOwnerId === SessionStore.getUser().id && saved.captureId !== '') this.materialSourceId = `capture:${saved.captureId}`;
       this.rawText = '';
       this.captureRequestId = '';
-      await DeviceIdentity.clearCaptureDraft(this.projectId);
+      await DeviceIdentity.clearCaptureDraft(this.captureDraftScope());
       promptAction.showToast({ message: '已归档并生成记忆卡片' });
       await this.loadAllData();
     } catch (e) {
@@ -2320,6 +2364,10 @@ struct ProjectHome {
             this.currentTabIndex === 3 ? '委托' : '成果'}`,
       backLabel: '项目',
       backDescription: '返回项目列表',
+      showRepository: true,
+      onRepositoryAction: () => {
+        router.pushUrl({ url: 'pages/MemoryTimeline', params: { projectId: this.projectId, openRepo: '1' } });
+      },
       showRightIcon: true,
       rightIconLabel: '更多项目设置',
       rightIconDescription: '编辑项目名称、目标和简介',
@@ -3046,10 +3094,6 @@ struct ProjectHome {
   private CockpitView() {
     Scroll() {
       Column({ space: 18 }) {
-        Button('GitHub 仓库 · 连接与提交记录', { type: ButtonType.Normal })
-          .fontSize(14).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT)
-          .constraintSize({ minHeight: 44 }).borderRadius(PMRadius.SM)
-          .onClick(() => { router.pushUrl({ url: 'pages/MemoryTimeline', params: { projectId: this.projectId, openRepo: '1' } }); })
         Column({ space: 10 }) {
           Row() {
             CategoryBadge({ category: this.project.scenario })
@@ -3186,6 +3230,8 @@ struct ProjectHome {
       .width('100%')
       .justifyContent(FlexAlign.SpaceBetween)
       .alignItems(VerticalAlign.Top)
+
+      this.MaterialReturn()
 
       Scroll() {
         Row() {
@@ -3611,44 +3657,47 @@ struct ProjectHome {
   @Builder
   private MemoryView() {
     Column() {
-      Button('GitHub 仓库 · 查看提交与连接', { type: ButtonType.Normal })
-        .fontSize(13).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent)
-        .constraintSize({ minHeight: 44 }).width('100%')
-        .onClick(() => { router.pushUrl({ url: 'pages/MemoryTimeline', params: { projectId: this.projectId, openRepo: '1' } }); })
       Column() {
-        Row({ space: 6 }) {
-          Button(`项目记忆 ${this.project.cards.length}`, { type: ButtonType.Normal }).layoutWeight(1).constraintSize({ minHeight: 44 }).fontSize(13)
+        Row({ space: 10 }) {
+          Row({ space: 2 }) {
+          Button(`项目记忆 ${this.project.cards.length}`, { type: ButtonType.Normal }).layoutWeight(1).constraintSize({ minHeight: 44 }).fontSize(14)
             .fontColor(this.materialsMode === 'memory' ? PMColors.BRAND : PMColors.INK_SECONDARY)
-            .backgroundColor(this.materialsMode === 'memory' ? PMColors.BRAND_LIGHT : Color.Transparent).borderRadius(11)
+            .fontWeight(this.materialsMode === 'memory' ? FontWeight.Medium : FontWeight.Regular)
+            .backgroundColor(this.materialsMode === 'memory' ? PMColors.SURFACE : Color.Transparent).borderRadius(9)
             .accessibilitySelected(this.materialsMode === 'memory').onClick(() => { this.materialsMode = 'memory'; })
-          Button(this.attachmentLoadError === '' ? `附件原件 ${this.attachments.length}` : '附件 · 未同步', { type: ButtonType.Normal }).layoutWeight(1).constraintSize({ minHeight: 44 }).fontSize(13)
+          Button(this.attachmentLoadError === '' ? `附件原件 ${this.attachments.length}` : '附件 · 未同步', { type: ButtonType.Normal }).layoutWeight(1).constraintSize({ minHeight: 44 }).fontSize(14)
             .fontColor(this.materialsMode === 'attachments' ? PMColors.BRAND : PMColors.INK_SECONDARY)
-            .backgroundColor(this.materialsMode === 'attachments' ? PMColors.BRAND_LIGHT : Color.Transparent).borderRadius(11)
+            .fontWeight(this.materialsMode === 'attachments' ? FontWeight.Medium : FontWeight.Regular)
+            .backgroundColor(this.materialsMode === 'attachments' ? PMColors.SURFACE : Color.Transparent).borderRadius(9)
             .accessibilitySelected(this.materialsMode === 'attachments').onClick(() => { this.materialsMode = 'attachments'; })
+          }.layoutWeight(1).padding(3).borderRadius(12).backgroundColor(PMColors.SURFACE_SUBTLE)
           Button('＋ 新增', { type: ButtonType.Normal }).constraintSize({ minHeight: 44 }).padding({ left: 12, right: 12 }).fontSize(13)
-            .fontColor(PMColors.BRAND).backgroundColor(PMColors.SURFACE).borderRadius(11)
+            .fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).borderRadius(11)
             .accessibilityText('记录或上传附件').onClick(() => { this.openCaptureEntry(); })
         }.width('100%')
-      }.padding({ left: 16, right: 16, top: 10, bottom: 6 }).width('100%')
+      }.padding({ left: 16, right: 16, top: 12, bottom: 10 }).width('100%')
       if (this.materialsMode === 'attachments') {
         this.AttachmentLibrary()
       } else {
       Column({ space: 6 }) {
         TextInput({ text: this.memorySearchQuery, placeholder: '搜索标题、摘要或关键词' })
           .onChange((value: string) => { this.onMemoryQueryChange(value); })
-          .fontSize(14).height(40).backgroundColor(PMColors.SURFACE).borderRadius(11)
+          .fontSize(14).height(44).backgroundColor(PMColors.SURFACE).borderRadius(11)
+          .border({ width: 1, color: PMColors.BORDER_SUBTLE })
         Scroll() {
-          Row({ space: 6 }) {
+          Row({ space: 8 }) {
             ForEach(['all', 'paper_note', 'experiment_log', 'reflection', 'code_issue'], (type: string) => {
               Button(type === 'all' ? '全部' : type === 'paper_note' ? '论文笔记' : type === 'experiment_log' ? '实验记录' : type === 'reflection' ? '阶段复盘' : '代码问题', { type: ButtonType.Normal })
                 .fontSize(13).fontColor(this.selectedMemoryType === type ? PMColors.BRAND : PMColors.INK_SECONDARY)
-                .backgroundColor(this.selectedMemoryType === type ? PMColors.BRAND_LIGHT : Color.Transparent)
-                .borderRadius(10).constraintSize({ minHeight: 44 }).padding({ left: 12, right: 12 })
+                .fontWeight(this.selectedMemoryType === type ? FontWeight.Medium : FontWeight.Regular)
+                .backgroundColor(Color.Transparent)
+                .borderRadius(0).constraintSize({ minHeight: 44 }).padding({ left: 10, right: 10 })
+                .border({ width: { bottom: this.selectedMemoryType === type ? 2 : 0 }, color: PMColors.BRAND })
                 .accessibilitySelected(this.selectedMemoryType === type).onClick(() => { this.selectMemoryType(type); })
             })
           }
         }.width('100%').scrollable(ScrollDirection.Horizontal).align(Alignment.TopStart).scrollBar(BarState.Off)
-      }.width('100%').padding({ left: 16, right: 16, bottom: 4 })
+      }.width('100%').padding({ left: 16, right: 16, bottom: 10 })
 
       if (this.memorySearchQuery.trim() !== '' && this.isSearchingMemory) {
         Text('正在检索项目记忆…')
@@ -3925,7 +3974,7 @@ struct ProjectHome {
       List({ space: PMSpacing.MD }) {
         if (this.focusedActionId !== '') {
           ListItem() {
-            Button('查看全部待办').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).onClick(() => { this.focusedActionId = ''; })
+            Button('查看全部待办').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).onClick(() => { this.focusedActionId = ''; }).fontSize(PMFontSize.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
           }
         }
         if (this.focusedActionId !== '' && !this.actions.some((item: ActionItem) => item.id === this.focusedActionId)) {

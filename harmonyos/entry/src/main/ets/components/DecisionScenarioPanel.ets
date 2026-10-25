@@ -2,7 +2,7 @@ import { DecisionProposal, DecisionChoice, DecisionInput, DecisionConfirm, Decis
 import { DecisionEvolutionService } from '../services/DecisionEvolutionService';
 import { SessionStore } from '../services/SessionStore';
 import { ApiError } from '../models/Project';
-import { PMColors } from '../common/DesignTokens';
+import { PMColors, PMFontSize, PMRadius } from '../common/DesignTokens';
 @Component
 export struct DecisionScenarioPanel {
  @Prop missionId: string = '';
@@ -51,9 +51,9 @@ export struct DecisionScenarioPanel {
     TextInput({ text: this.available, placeholder: '请输入分钟数' }).type(InputType.Number).enabled(!this.busy && !this.disabled).onChange((v: string) => { this.available = v; })
     Text('你估计最小草稿需要几分钟').fontSize(13)
     TextInput({ text: this.estimate, placeholder: '请输入你的估计' }).type(InputType.Number).enabled(!this.busy && !this.disabled).onChange((v: string) => { this.estimate = v; })
-    Row({ space: 8 }) { Toggle({ type: ToggleType.Switch, isOn: this.allowActions }).onChange((v: boolean) => { this.allowActions = v; }); Text('允许草稿方案提议行动；创建仍需逐项批准').fontSize(12).layoutWeight(1) }
-    Row({ space: 8 }) { Toggle({ type: ToggleType.Switch, isOn: this.cloud }).onChange((v: boolean) => { this.cloud = v; }); Text('另请已授权云模型补充一轮定性权衡，占用原额度').fontSize(12).layoutWeight(1) }
-    Button(this.proposal === null ? '生成对比预览' : '更新对比预览').enabled(!this.busy && !this.disabled && Number(this.available) > 0 && Number(this.estimate) > 0).onClick(() => { this.perform('create'); })
+    Row({ space: 8 }) { Toggle({ type: ToggleType.Switch, isOn: this.allowActions }).selectedColor(PMColors.BRAND).onChange((v: boolean) => { this.allowActions = v; }); Text('允许草稿方案提议行动；创建仍需逐项批准').fontSize(12).layoutWeight(1) }
+    Row({ space: 8 }) { Toggle({ type: ToggleType.Switch, isOn: this.cloud }).selectedColor(PMColors.BRAND).onChange((v: boolean) => { this.cloud = v; }); Text('另请已授权云模型补充一轮定性权衡，占用原额度').fontSize(12).layoutWeight(1) }
+    Button(this.proposal === null ? '生成对比预览' : '更新对比预览').enabled(!this.busy && !this.disabled && Number(this.available) > 0 && Number(this.estimate) > 0).onClick(() => { this.perform('create'); }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
     if (this.proposal !== null) {
      Text(`原目标：${this.proposal.base.goal}`).fontSize(13)
      Text(`原成功条件保持不变 · 本轮上限 ${this.proposal.base.availableMinutes} 分钟 · 修订 ${this.proposal.revision}/3`).fontSize(12)
@@ -69,9 +69,9 @@ export struct DecisionScenarioPanel {
        Text(s.modelTradeoff === undefined ? '规则对比，未使用模型权衡' : `模型补充：${s.modelTradeoff}`).fontSize(12).fontColor(PMColors.INK_SECONDARY)
       }.width('100%').alignItems(HorizontalAlign.Start).padding(12).backgroundColor(this.selected === s.key ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE).borderRadius(12)
      }, (s: DecisionChoice) => s.key)
-     Button('重新读取原方案').enabled(!this.busy).onClick(() => { this.perform('read'); })
-     Button('采用到原委托').enabled(!this.busy && !this.disabled && this.selected !== '' && this.proposal.status === 'READY' && !this.proposal.stale && new Date(this.proposal.expiresAt).getTime() > Date.now()).onClick(() => { this.perform('adopt'); })
-     Button('保留原计划，不采用').enabled(!this.busy && !this.disabled && this.proposal.status === 'READY').onClick(() => { this.perform('reject'); })
+     Button('重新读取原方案').enabled(!this.busy).onClick(() => { this.perform('read'); }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
+     Button('采用到原委托').enabled(!this.busy && !this.disabled && this.selected !== '' && this.proposal.status === 'READY' && !this.proposal.stale && new Date(this.proposal.expiresAt).getTime() > Date.now()).onClick(() => { this.perform('adopt'); }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).fontColor(PMColors.SURFACE).backgroundColor(PMColors.BRAND).constraintSize({ minHeight: 44 })
+     Button('保留原计划，不采用').enabled(!this.busy && !this.disabled && this.proposal.status === 'READY').onClick(() => { this.perform('reject'); }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
     }
     if (this.receipt !== null) { Text(`已采用到同一委托，计划修订为 ${this.receipt.planRevision}；原步骤、草稿和回执保留。`).fontSize(13).fontColor(PMColors.BRAND) }
     if (this.error !== '') { Text(this.error).fontSize(12).fontColor(PMColors.RISK) }

@@ -108,9 +108,9 @@ export struct GlobalFocusPanel {
       Text(this.rowTitle(item, this.kind(item))).fontSize(21).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
         .maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis }).lineHeight(29)
       if (this.primaryDetail(item) !== '') { Text(this.primaryDetail(item)).fontSize(14).lineHeight(22).fontColor(PMColors.INK_SECONDARY).maxLines(4).textOverflow({ overflow: TextOverflow.Ellipsis }) }
-      PMStatusPill({ label: this.kind(item) === 'mission' ? '执行记录可追溯' : this.kind(item) === 'reminder' ? '待核对提醒依据' : '查看原始记录' })
-      if (this.kind(item) === 'mission') { GoalQuestionPanel({ projectId: item.projectId, missionId: item.id, compact: true }) }
+      if (this.kind(item) !== 'mission') { PMStatusPill({ label: this.kind(item) === 'reminder' ? '待核对提醒依据' : '查看原始记录' }) }
       PMButton({ label: this.view.primaryContext?.nextStep.actionLabel ?? focusActionLabel(item.status, this.kind(item)), onAction: (): void => { this.open(item, this.kind(item)); } })
+      if (this.kind(item) === 'mission') { GoalQuestionPanel({ projectId: item.projectId, missionId: item.id, compact: true }) }
     }.width('100%').alignItems(HorizontalAlign.Start).padding(16).backgroundColor(PMColors.SURFACE)
       .borderRadius(PMRadius.LG).border({ width: 1, color: PMColors.BORDER }).margin({ bottom: 12 })
   }
@@ -151,7 +151,7 @@ export struct GlobalFocusPanel {
           this.Group('其他提醒', this.view.reminders, 'reminder')
           this.Group('最近保存的资料', this.view.records, 'record')
           Row() {
-            Checkbox({ name: '包含归档项目' }).width(20).height(20).select(this.includeArchived)
+            Checkbox({ name: '包含归档项目' }).selectedColor(PMColors.BRAND).width(20).height(20).select(this.includeArchived)
               .onChange((value: boolean) => { this.includeArchived = value; this.refresh(); }).accessibilityText('包含归档项目')
             Text('包含归档项目').fontSize(12).fontColor(PMColors.INK_TERTIARY)
             Blank()

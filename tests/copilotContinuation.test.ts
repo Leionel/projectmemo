@@ -644,13 +644,14 @@ it("Web dialogue → actual ArkTS preview/confirm/readback → Web preserves sou
       claimChecksJson: [],
     },
   });
-  const native = await new Mission(client).readback(m, {
-    questionId: "",
-    approvalId: "",
-    outputId: output.id,
-    revision: "1",
-    receiptId: "",
-  });
+  // 经真实 ArkTS 模型构造读取目标：字段初始化与 App 内一致（新字段不会再被漏掉）。
+  const ReadbackModel = nativeModule("models/MissionReadback.ets");
+  const readTarget = new (ReadbackModel.MissionReadTarget as new () => {
+    questionId: string; approvalId: string; outputId: string; revision: string; receiptId: string; sourceId: string;
+  })();
+  readTarget.outputId = output.id;
+  readTarget.revision = "1";
+  const native = await new Mission(client).readback(m, readTarget);
   expect(native.readback).toMatchObject({
     missionId: m,
     sourceConversation: { sourceRunId: a.runId },

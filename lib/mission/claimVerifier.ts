@@ -4,6 +4,7 @@ import {z} from "zod";
 import {jsonHash,type Source} from "./contracts";
 import {outputSchema} from "./tools";
 import {textHash} from "@/lib/research/sourceRepository";
+import { quoteKnowledgeClass } from "./sourceObservation";
 export const verdictSchema=z.enum(["ENTAILS","CONTRADICTS","NOT_ENOUGH_INFORMATION"]);
 export type ClaimVerdict=z.infer<typeof verdictSchema>|"NOT_CHECKED";
 export type JudgeRequest={claimId:string;text:string;kind:string;evidence:Array<{sourceId:string;kind:string;knowledgeClass?:string;text:string;context:string;hash:string;fullSource:boolean}>};
@@ -20,10 +21,11 @@ export async function verifyResearchClaims(input:unknown,sources:Source[],option
  });
  for(const block of claims){
   const refs=block.citations.map(c=>({id:c.sourceId,hash:sources.find(s=>s.id===c.sourceId)?.hash??"",start:c.start,end:c.end,excerptHash:c.excerptHash}));
-  const evidence=block.citations.flatMap(c=>{const s=sources.find(s=>s.id===c.sourceId);if(!s||!block.sourceIds.includes(s.id)||c.start<0||c.end>s.text.length||c.start>=c.end||textHash(s.text.slice(c.start,c.end))!==c.excerptHash)return[];return[{sourceId:s.id,kind:s.kind,knowledgeClass:s.knowledgeClass,text:s.text.slice(c.start,c.end),context:s.text.slice(Math.max(0,c.start-200),Math.min(s.text.length,c.end+200)),hash:s.hash,fullSource:c.start===0&&c.end===s.text.length}];});
+  const evidence=block.citations.flatMap(c=>{const s=sources.find(s=>s.id===c.sourceId);if(!s||!block.sourceIds.includes(s.id)||c.start<0||c.end>s.text.length||c.start>=c.end||textHash(s.text.slice(c.start,c.end))!==c.excerptHash)return[];return[{sourceId:s.id,kind:s.kind,knowledgeClass:quoteKnowledgeClass(s,c.start,c.end),text:s.text.slice(c.start,c.end),context:s.text.slice(Math.max(0,c.start-200),Math.min(s.text.length,c.end+200)),hash:s.hash,fullSource:c.start===0&&c.end===s.text.length}];});
   const check:ClaimCheck={schemaVersion:1,verifierVersion:"r33-v2",claimId:block.claimId,blockId:block.blockId,text:block.text,claimStart:block.claimStart,claimEnd:block.claimEnd,claimHash:jsonHash(block.text),status:"NOT_CHECKED",mode:options.enabled?"RULE":"OFF",structuralCheck:evidence.length&&evidence.length===block.citations.length?"VALID":"MISSING_EVIDENCE",reasonCode:options.enabled?"NO_SEMANTIC_CHECK":"FEATURE_DISABLED",sourceRefs:refs,checkedAt:new Date().toISOString()};
   if(!options.enabled){checks.push(check);continue;}
   if(block.merged){checks.push({...check,reasonCode:"CLAIM_LIMIT"});continue;}
+  if(block.kind==="PROJECT_OBSERVATION"&&evidence.some(e=>e.knowledgeClass==="UNKNOWN")){checks.push({...check,status:"NOT_ENOUGH_INFORMATION",reasonCode:"ORIGIN_UNKNOWN"});continue;}
   if(block.kind==="PROJECT_OBSERVATION"&&evidence.some(e=>e.kind==="EXTERNAL"||e.knowledgeClass&&e.knowledgeClass!=="PROJECT_OBSERVATION")){checks.push({...check,status:"CONTRADICTS",reasonCode:"ORIGIN_MISMATCH"});continue;}
   if(!evidence.length||evidence.length!==block.citations.length){checks.push({...check,status:"NOT_ENOUGH_INFORMATION",reasonCode:"MISSING_EVIDENCE"});continue;}
   const rules=evidence.map(e=>e.fullSource?ruleVerdict(block.text,e.text):null);

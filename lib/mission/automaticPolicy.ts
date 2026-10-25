@@ -5,8 +5,10 @@ import {jsonHash} from "./contracts";
 import {parseMetricRecord,type GapRequirements} from "./gaps";
 import {readProjectMaterial} from "./sourceSignals";
 import type {Tx} from "./repository";
+import type { WaitState } from "./gaps";
 export function assertAutomaticPermission(m:AgentMission){
  const marker=(m.planJson as {automaticContinuation?:{policyHash:string}|null}).automaticContinuation;if(!marker)return;
+ if((m.waitStateJson as unknown as WaitState|null)?.requirements?.evidenceFitV1)throw new AppError("EVIDENCE_REVIEW_REQUIRED","此问题需要人工核对条件，不能自动接续",409);
  if(!isFeatureEnabled("MISSION_AUTO_CONTINUATION_ENABLED",false)||(m.continuationPolicyJson as {mode?:string}).mode!=="LOW_RISK_READ_ANALYZE"||marker.policyHash!==jsonHash(m.continuationPolicyJson))throw new AppError("AUTOMATION_REVOKED","自动接续已撤销，请人工检查后继续",409);
 }
 export function assertAutomaticTool(m:AgentMission,name:string,businessWrite:boolean){

@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { z } from "zod";
 import { gapRequirementsSchema } from "./gaps";
 import { continuationPolicySchema } from "@/lib/types/mission";
+import { evidenceReviewSchema } from "@/lib/types/missionEvidenceFit";
 export const MISSION_PROTOCOL_SCHEMA_VERSION = 1;
 export const successCriterionSchema=z.union([z.enum(["DRAFT_EXISTS","ACTION_CREATED","APPROVAL_CONSUMED","REQUIRED_INPUT_PRESENT"]),z.object({type:z.literal("SOURCE_COUNT"),minimum:z.number().int().min(1).max(40)}).strict()]);
 function canonical(value: unknown): unknown {
@@ -22,7 +23,7 @@ export const createMissionSchema = z.object({
   llmContextApproved: z.boolean().default(false),
   continuationPolicy: continuationPolicySchema.default({mode:"MANUAL"}),
 }).strict();
-export const commandSchema = z.object({ requestId: z.string().min(1).max(128), expectedVersion: z.number().int().positive(), questionId: z.string().optional(), answer: z.string().trim().min(1).max(3000).optional(), decision: z.enum(["APPROVED", "REJECTED"]).optional(), proposalHash: z.string().optional() }).strict();
+export const commandSchema = z.object({ requestId: z.string().min(1).max(128), expectedVersion: z.number().int().positive(), questionId: z.string().optional(), answer: z.string().trim().min(1).max(3000).optional(), decision: z.enum(["APPROVED", "REJECTED"]).optional(), proposalHash: z.string().optional(), evidenceReview: evidenceReviewSchema.optional() }).strict();
 export const choiceSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("tool"), tool: z.string(), args: z.unknown(), summary: z.string().max(240).default("") }).strict(),
   z.object({ kind: z.literal("ask"), question: z.string().min(1).max(500), missing: z.enum(["PRIVATE", "CRITICAL", "CONFLICT"]), requirements: gapRequirementsSchema.optional() }).strict(),
@@ -30,7 +31,7 @@ export const choiceSchema = z.discriminatedUnion("kind", [
 ]);
 export type Choice = z.infer<typeof choiceSchema>;
 export type Decision = { choice: Choice; provider: string; model: string; usage: { inputTokens: number | null; outputTokens: number | null }; protocol: string; callId?: string; serialization?: { escapedControls: number; responseHash: string } };
-export type Source = { id: string; kind: "PROJECT" | "EXTERNAL"; entityType: "PROJECT" | "CARD" | "ACTION" | "ARTIFACT" | "CAPTURE" | "ATTACHMENT" | "EXTERNAL_SOURCE"; revision: string; hash: string; identityKey?: string; knowledgeClass?: "PROJECT_OBSERVATION" | "EXTERNAL_REFERENCE" | "MIXED" | "INFERENCE"; text: string; observedAt: string; temporalState?: "CURRENT" | "SUPERSEDED" | "CONTESTED" | "UNKNOWN"; assessment?: import("../evidence/assessment").EvidenceAssessment };
+export type Source = { id: string; kind: "PROJECT" | "EXTERNAL"; entityType: "PROJECT" | "CARD" | "ACTION" | "ARTIFACT" | "CAPTURE" | "ATTACHMENT" | "EXTERNAL_SOURCE"; revision: string; hash: string; identityKey?: string; knowledgeClass?: "PROJECT_OBSERVATION" | "EXTERNAL_REFERENCE" | "MIXED" | "INFERENCE"; observationScopes?:Array<{start:number;end:number;knowledgeClass:"PROJECT_OBSERVATION"|"EXTERNAL_REFERENCE"|"INFERENCE"}>; text: string; observedAt: string; temporalState?: "CURRENT" | "SUPERSEDED" | "CONTESTED" | "UNKNOWN"; assessment?: import("../evidence/assessment").EvidenceAssessment };
 export type ToolResult = { data: unknown; sources: Source[]; status?: "SUCCESS" | "PARTIAL"; coverage?: Record<string, unknown> };
 export type Actor = { userId: string; projectId: string; missionId: string };
 export const defaultBudget = { models: 12, tools: 16, searches: 3, fetches: 4, activeMs: 180000, reservedOutputTokens: 12000 };

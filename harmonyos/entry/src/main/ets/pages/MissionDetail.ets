@@ -1,3 +1,5 @@
+import { EvidenceReview, FitGroup, FitExcerpt } from '../models/EvidenceFit';
+import { MissionEvidenceReview } from '../components/MissionEvidenceReview';
 import { DecisionScenarioPanel } from '../components/DecisionScenarioPanel';
 import { ExperiencePanel } from '../components/ExperiencePanel';
 import { GoalQuestionPanel } from '../components/GoalQuestionPanel';
@@ -33,6 +35,16 @@ struct MissionDetail {
   @State missions: MissionSummary[] = [];
   @State events: MissionEvent[] = [];
   @State candidates: MissionCandidate[] = [];
+  @State showMaterials: boolean = false;
+  @State materialsReviewed: boolean = false;
+  @State premiseReviewed: boolean = false;
+  @State evidenceMode: string = 'CONDITIONAL_ANALYSIS';
+  @State showCompletion: boolean = false;
+  @State showFitDetails: boolean = false;
+  @State readbackRefreshKey: number = 0;
+  private returnedSourceId: string = '';
+  private returnedQuestionId: string = '';
+  private handledReturn: string = '';
   @State selectedSources: string[] = [];
   @State preview: MissionMaterialPreview | null = null;
   @State adoption: MissionArtifactPreview | null = null;
@@ -80,11 +92,20 @@ struct MissionDetail {
     this.projectId = params?.['projectId'] ?? '';
     this.missionId = params?.['missionId'] ?? '';
     this.readTarget.questionId = params?.['questionId'] ?? ''; this.readTarget.approvalId = params?.['approvalId'] ?? '';
-    this.readTarget.outputId = params?.['outputId'] ?? ''; this.readTarget.revision = params?.['revision'] ?? ''; this.readTarget.receiptId = params?.['receiptId'] ?? '';
+    this.readTarget.outputId = params?.['outputId'] ?? ''; this.readTarget.revision = params?.['revision'] ?? ''; this.readTarget.receiptId = params?.['receiptId'] ?? ''; this.readTarget.sourceId = params?.['sourceId'] ?? '';
     this.createRequested = params?.['mode'] === 'create';
     this.directCreate = this.createRequested;
   }
-  onPageShow(): void { this.visible = true; this.refresh(); }
+  onPageShow(): void {
+    this.visible = true;
+    const params = router.getParams() as Record<string, string>;
+    if (params?.['missionId'] === this.missionId && params?.['projectId'] === this.projectId && params?.['sourceId']) {
+      this.returnedSourceId = params['sourceId']; this.returnedQuestionId = params['questionId'] ?? '';
+      const target = new MissionReadTarget(); target.questionId = this.returnedQuestionId; target.sourceId = this.returnedSourceId;
+      this.readTarget = target;
+    }
+    this.readbackRefreshKey++; this.refresh();
+  }
   onPageHide(): void { this.visible = false; this.stop(); }
   aboutToDisappear(): void { this.visible = false; this.stop(); SessionStore.offSessionExpired(this.sessionExpired); }
   private appActivityChanged(): void { if (this.appActive && this.visible) this.refresh(); else this.stop(); }
@@ -136,16 +157,30 @@ struct MissionDetail {
         const batch = await this.service.events(id, this.afterSeq);
         if (!this.current(generation, token)) return;
         this.stablePolls = detail.version === this.mission.version ? this.stablePolls + 1 : 0;
+        if (this.mission.evidencePremise?.premiseHash !== detail.evidencePremise?.premiseHash) { this.premiseReviewed = false; this.preview = null; }
         if (this.mission.question?.id !== detail.question?.id) { this.answer = ''; this.selectedSources = []; this.preview = null; }
         if (this.mission.version !== detail.version) { this.preview = null; this.approval = null; this.adoption = null; }
         this.mission = detail; this.events = mergeMissionEvents(this.events, batch.events); this.afterSeq = batch.nextAfterSeq;
         if (capability.widgetEnabled) await WidgetDataService.updateMission(getContext(this), detail, SessionStore.getUser().id, SessionStore.getExpiresAt());
         else await WidgetDataService.clearMission(getContext(this));
         if (detail.status === 'WAITING_INPUT') {
-          const material = await this.service.candidates(id);
+          const matchingReturn = this.returnedQuestionId === detail.question?.id ? this.returnedSourceId : '';
+          const material = await this.service.candidates(id, this.showMaterials || matchingReturn !== '' ? detail.question?.id ?? '' : '', matchingReturn, this.showMaterials);
           if (!this.current(generation, token)) return;
+          if (this.preview !== null && !this.preview.sourcePointers.every((p: MissionPointer) => material.candidates.some((c: MissionCandidate) => c.readable && c.sourcePointer.id === p.id && c.sourcePointer.hash === p.hash))) {
+            this.preview = null; this.materialsReviewed = false; this.notice = '所选资料已变化，请重新评估；答复仍保留';
+          }
           this.candidates = material.candidates;
+          const returned = material.candidates.find((c: MissionCandidate) => c.sourcePointer.id === matchingReturn);
+          if (returned !== undefined) this.showMaterials = true;
+          const returnKey = `${this.returnedQuestionId}:${this.returnedSourceId}`;
+          if (returned?.readable && this.handledReturn !== returnKey) {
+            this.handledReturn = returnKey; this.showMaterials = true;
+            this.selectedSources = [returned.sourcePointer.id];
+            if (this.answer === '') this.answer = `请根据这份原记录重新判断，保留未核对的内容：${returned.excerpt}`;
+          }
         } else this.candidates = [];
+        if (this.returnedSourceId !== '' && this.returnedQuestionId !== detail.question?.id) this.notice = '返回链接中的原问题已变化。资料仍保留；下方可读历史问题，不会自动提交给新问题。';
       }
       this.updatedAt = new Date().toLocaleString('zh-CN'); this.loaded = true; this.readState = 'fresh'; this.error = ''; this.errorCount = 0;
     } catch (e) {
@@ -193,11 +228,17 @@ struct MissionDetail {
     } catch (e) { this.fail(e); }
     finally { this.busy = false; this.refresh(); }
   }
+  private evidenceReview(): EvidenceReview | undefined {
+    const premise = this.mission.evidencePremise;
+    if (!premise || !this.premiseReviewed || this.answer.trim() === '') return undefined;
+    const review = new EvidenceReview(); review.mode = this.evidenceMode; review.note = this.answer.trim().substring(0, 1000); review.premiseHash = premise.premiseHash;
+    return review;
+  }
   private async command(action: string, decision: string = ''): Promise<void> {
     if (this.busy || this.readState !== 'fresh') return;
     const body = new MissionCommand(); body.expectedVersion = this.mission.version;
     const approval = this.approval;
-    if (action === 'input') { body.questionId = this.mission.question?.id; body.answer = this.answer.trim(); if (!body.answer) return; }
+    if (action === 'input') { body.questionId = this.mission.question?.id; body.answer = this.answer.trim(); if (!body.answer) return; body.evidenceReview = this.evidenceReview(); if (this.mission.evidencePremise && (!body.evidenceReview || this.evidenceMode !== 'CONDITIONAL_ANALYSIS')) return; }
     if (action === 'approval') {
       if (approval === null) return; body.expectedVersion = this.reviewedVersion;
       body.proposalHash = approval.proposalHash; body.decision = decision;
@@ -206,6 +247,8 @@ struct MissionDetail {
     try {
       await this.service.command(this.missionId, action, body, action === 'approval' ? approval?.id ?? '' : '');
       this.approval = null; this.notice = '请求已受理，请查看服务端状态与执行回执';
+      // 补料/答复等结果未必推进 missionVersion（如关联被保留），回执区需主动重读。
+      this.readbackRefreshKey++;
     } catch (e) { this.fail(e); this.approval = null; }
     finally { this.busy = false; this.refresh(); }
   }
@@ -229,26 +272,31 @@ struct MissionDetail {
     if (this.busy || !this.mission.question) return;
     const body = new MissionMaterialInput(); body.questionId = this.mission.question.id;
     body.sourcePointers = this.candidates.filter((c: MissionCandidate) => this.selectedSources.includes(c.sourcePointer.id)).map((c: MissionCandidate) => c.sourcePointer);
-    if (!body.sourcePointers.length) return; this.busy = true;
+    body.evidenceReview = this.evidenceReview();
+    if (!body.sourcePointers.length || this.mission.evidencePremise && !body.evidenceReview) return; this.busy = true;
     const generation = this.generation; const token = SessionStore.getToken();
     try { const preview = await this.service.previewMaterial(this.missionId, body); if (this.current(generation, token)) this.preview = preview; }
     catch (e) { this.fail(e); } finally { this.busy = false; }
   }
   private async continueMaterials(): Promise<void> {
     const preview = this.preview;
-    if (this.busy || preview === null || this.answer.trim() === '') return;
+    if (this.busy || this.readState !== 'fresh' || !this.materialsReviewed || preview === null || this.answer.trim() === '') return;
     const body = new MissionMaterialConfirm(); body.questionId = preview.questionId; body.sourcePointers = preview.sourcePointers;
     body.expectedVersion = preview.version; body.expectedContextVersion = preview.contextVersion;
-    body.assessmentHash = preview.assessmentHash; body.answer = this.answer.trim(); body.requestId = this.requestKey(body); this.busy = true;
+    body.assessmentHash = preview.assessmentHash; body.answer = this.answer.trim(); body.evidenceReview = this.evidenceReview(); body.fitHash = preview.fitHash; body.requestId = this.requestKey(body); this.busy = true;
+    const generation = this.generation; const token = SessionStore.getToken();
     try {
       const result = await this.service.confirmMaterial(this.missionId, body);
+      if (!this.current(generation, token)) return;
       this.notice = result.continued ? '资料已绑定，同一委托可以继续；后续执行仍待服务端处理' : `仍需等待：${this.holdReason(result.reason ?? '')}`;
       this.preview = null;
-    } catch (e) { this.fail(e); this.preview = null; } finally { this.busy = false; this.refresh(); }
+      // HELD 关联等结果不推进 missionVersion，回执区据此重读材料使用事实。
+      this.readbackRefreshKey++;
+    } catch (e) { if (this.current(generation, token)) { this.fail(e); this.preview = null; } } finally { this.busy = false; this.refresh(); }
   }
   private holdReason(reason: string): string {
-    const labels: Record<string, string> = { 'SUFFICIENT': '信息缺口已满足', 'INSUFFICIENT': '资料尚不足', 'CONFLICT': '资料存在冲突', 'UNKNOWN': '充分性需要人工核对',
-      'LLM_CONTEXT_NOT_APPROVED': '尚未批准模型使用任务上下文', 'BUDGET_EXHAUSTED': '执行预算已耗尽' };
+    const labels: Record<string, string> = { 'SUFFICIENT': '材料字段齐备，仍需核对含义', 'INSUFFICIENT': '资料尚不足', 'CONFLICT': '资料存在冲突', 'UNKNOWN': '充分性需要人工核对',
+      'LLM_CONTEXT_NOT_APPROVED': '尚未批准模型使用任务上下文', 'BUDGET_EXHAUSTED': '执行预算已耗尽', 'BACKGROUND_ONLY': '资料仅作背景，原问题继续等待' };
     return labels[reason] ?? '请核对资料与授权';
   }
   private async previewOutput(output: MissionOutput): Promise<void> {
@@ -278,33 +326,82 @@ struct MissionDetail {
     const labels: Record<string, string> = { 'ENTAILS': '来源支持', 'CONTRADICTS': '来源冲突', 'NOT_ENOUGH_INFORMATION': '证据不足', 'NOT_CHECKED': '尚未核验' };
     return labels[status] ?? '尚未核验';
   }
+  private async chooseExistingMaterials(): Promise<void> {
+    if (this.busy || this.readState !== 'fresh' || this.mission.question === null) return;
+    this.showMaterials = !this.showMaterials;
+    if (!this.showMaterials) return;
+    const generation = this.generation; const token = SessionStore.getToken(); const questionId = this.mission.question.id;
+    try {
+      const page = await this.service.candidates(this.missionId, questionId, '', true);
+      if (this.current(generation, token) && this.mission.question?.id === questionId) this.candidates = page.candidates;
+    } catch (e) { if (this.current(generation, token)) this.fail(e); }
+  }
   @Builder private WaitingInput() {
     Column({ space: 10 }) {
-      Text(this.mission.question?.payloadJson.question ?? '请补充资料').fontSize(18)
-      Button('返回项目补充记录或附件').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).onClick(() => { router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: this.projectId } }); })
-      TextArea({ placeholder: '回答当前问题，或说明所选资料如何满足缺口', text: this.answer }).height(100).maxLength(3000).onChange((v: string) => { this.answer = v; })
-      Button('提交答复').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(this.readState === 'fresh' && !this.busy && this.answer.trim() !== '').onClick(() => { this.command('input'); })
-      Text('新资料候选：到达不代表相关，也不代表足以继续').fontSize(14)
-      ForEach(this.candidates, (candidate: MissionCandidate) => {
-        Column({ space: 4 }) {
-          Text(candidate.excerpt)
-          Text(`资料时间：${candidate.observedAt}`).fontSize(12)
-          Button(this.selectedSources.includes(candidate.sourcePointer.id) ? '取消选择' : '选择此资料').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-            .fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).borderRadius(PMRadius.MD)
-            .enabled(this.readState === 'fresh' && !this.busy).onClick(() => {
-            this.selectedSources = this.selectedSources.includes(candidate.sourcePointer.id) ? this.selectedSources.filter((id: string) => id !== candidate.sourcePointer.id) : this.selectedSources.concat([candidate.sourcePointer.id]);
-            this.preview = null;
-          })
-        }.width('100%').alignItems(HorizontalAlign.Start)
-      }, (candidate: MissionCandidate) => candidate.sourcePointer.id)
-      Button('评估所选资料').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(this.readState === 'fresh' && !this.busy && this.selectedSources.length > 0 && this.selectedSources.length <= 8).onClick(() => { this.previewMaterials(); })
-      if (this.preview !== null) {
-        Text(`关联：${this.preview.relevance === 'RELATED' ? '可能相关' : '尚不明确'}；${this.holdReason(this.preview.assessment)}`)
-        Text(`剩余缺口：${this.preview.remaining.join('、') || '字段检查未发现缺项；资料含义仍待核验'}`)
-        Text('确认表示你已核对资料与当前问题，任务是否继续由服务端检查授权和预算。').fontSize(13)
-        Button('确认资料并接续').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(this.readState === 'fresh' && !this.busy && this.answer.trim() !== '').onClick(() => { this.continueMaterials(); })
+      Text('需要你补充').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.BRAND).fontWeight(FontWeight.Medium)
+      Text(this.mission.question?.payloadJson.question ?? '请补充资料').fontSize(PMFontSize.PRIMARY_JUDGEMENT).fontColor(PMColors.INK_PRIMARY)
+      Row({ space: PMSpacing.SM }) {
+        Button('保存新记录或附件').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
+          .fontSize(PMFontSize.BUTTON).fontWeight(FontWeight.Medium).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT)
+          .constraintSize({ minHeight: 44 }).layoutWeight(1)
+          .enabled(this.readState === 'fresh' && !this.busy).onClick(() => { router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: this.projectId, materialMissionId: this.missionId, materialQuestionId: this.mission.question?.id ?? '' } }); })
+        Button('从项目资料选取').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
+          .fontSize(PMFontSize.BUTTON).fontWeight(FontWeight.Medium).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT)
+          .constraintSize({ minHeight: 44 }).layoutWeight(1)
+          .enabled(this.readState === 'fresh' && !this.busy).onClick(() => { this.chooseExistingMaterials(); })
+      }.width('100%')
+      TextArea({ placeholder: this.selectedSources.length > 0 ? '核对所选资料，并补充当前问题答复' : '回答这个问题，也可以选择记录或附件', text: this.answer }).height(104).fontSize(PMFontSize.BODY).fontColor(PMColors.INK_PRIMARY).backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.MD).padding(PMSpacing.MD).border({ width: 1, color: PMColors.BORDER_SUBTLE }).maxLength(3000).onChange((v: string) => { this.answer = v; this.materialsReviewed = false; if (this.mission.evidencePremise) this.preview = null; })
+      if (this.showMaterials) {
+        if (this.candidates.length === 0) { Text('当前范围没有资料，可先保存记录或附件再返回。').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY) }
+        ForEach(this.candidates, (candidate: MissionCandidate) => {
+          Column({ space: 4 }) {
+            Text(candidate.title ?? '项目资料').fontSize(PMFontSize.SECONDARY).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
+            Text(candidate.excerpt || '正文尚不可读，原件仍保留').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY).maxLines(4).textOverflow({ overflow: TextOverflow.Ellipsis })
+            Button(this.selectedSources.includes(candidate.sourcePointer.id) ? '取消选择' : candidate.readable ? '选择此资料' : '等待解析或解析失败').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
+              .fontSize(PMFontSize.CAPTION).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 36 })
+              .enabled(this.readState === 'fresh' && !this.busy && candidate.readable && (this.selectedSources.includes(candidate.sourcePointer.id) || this.selectedSources.length < 8)).onClick(() => {
+                const already = this.selectedSources.includes(candidate.sourcePointer.id);
+                this.selectedSources = already ? this.selectedSources.filter((id: string) => id !== candidate.sourcePointer.id) : this.selectedSources.concat([candidate.sourcePointer.id]);
+                if (!already && this.answer === '') this.answer = `请根据所选资料重新判断：${candidate.excerpt}`;
+                this.preview = null; this.materialsReviewed = false;
+              })
+          }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.MD).backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.MD).border({ width: 1, color: PMColors.BORDER_SUBTLE })
+        }, (candidate: MissionCandidate) => `${candidate.sourcePointer.id}:${candidate.sourcePointer.hash}`)
       }
-    }.width('100%').alignItems(HorizontalAlign.Start)
+      if (this.mission.evidencePremise) {
+        MissionEvidenceReview({ premise: this.mission.evidencePremise!, mode: this.evidenceMode, confirmed: this.premiseReviewed, disabled: this.busy || this.readState !== 'fresh',
+          onMode: (value: string): void => { this.evidenceMode = value; this.preview = null; this.materialsReviewed = false; },
+          onConfirm: (value: boolean): void => { this.premiseReviewed = value; this.preview = null; this.materialsReviewed = false; } })
+      }
+      if (this.selectedSources.length === 0) {
+        PMButton({ label: '补充并继续', disabled: this.readState !== 'fresh' || this.busy || this.answer.trim() === '' || !!this.mission.evidencePremise && (!this.premiseReviewed || this.evidenceMode !== 'CONDITIONAL_ANALYSIS'), onAction: (): void => { this.command('input'); } })
+      } else if (this.preview === null) {
+        PMButton({ label: '评估所选资料', disabled: this.readState !== 'fresh' || this.busy || this.selectedSources.length === 0 || this.selectedSources.length > 8 || !!this.mission.evidencePremise && (!this.premiseReviewed || this.answer.trim() === ''), onAction: (): void => { this.materialsReviewed = false; this.previewMaterials(); } })
+      } else {
+        if (this.preview.evidenceFit) {
+          Text(this.preview.evidenceFit!.fitStatus === 'FIT' ? '条件对应，可用于回答本次测量' : this.preview.evidenceFit!.fitStatus === 'NOT_FIT' ? '观察条件不符，可保留为背景' : '仍有未决项，请保留未知')
+            .fontSize(PMFontSize.BODY).fontColor(PMColors.INK_PRIMARY)
+          Button(this.showFitDetails ? '收起核对原文' : '查看核对原文').type(ButtonType.Normal).height(44).fontSize(PMFontSize.SECONDARY)
+            .fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).borderRadius(PMRadius.BUTTON).onClick(() => { this.showFitDetails = !this.showFitDetails; })
+          if (this.showFitDetails) {
+            ForEach(this.preview.observationExcerpts ?? [], (excerpt: FitExcerpt) => {
+              Text(excerpt.text || '这份资料中尚无明确观察').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY).copyOption(CopyOptions.LocalDevice)
+              if (excerpt.truncated) { Text('此段只展示部分内容，其余保持未知').fontSize(PMFontSize.CAPTION).fontColor(PMColors.WARNING) }
+            }, (excerpt: FitExcerpt) => excerpt.observationGroup)
+          }
+          ForEach(this.preview.evidenceFit!.groups, (group: FitGroup) => {
+            if (group.measurementResult === 'EXCEEDS_LIMIT') { Text('测量超出约定预算，负结果保留').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.WARNING) }
+          }, (group: FitGroup) => group.observationGroup)
+        }
+        Text(this.holdReason(this.preview.assessment)).fontSize(PMFontSize.BODY).fontColor(PMColors.BRAND).fontWeight(FontWeight.Medium)
+        if (this.preview.remaining.length > 0) { Text(`待补：${this.preview.remaining.join('、')}`).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY) }
+        Row({ space: PMSpacing.SM }) {
+          Checkbox({ name: 'material-reviewed' }).selectedColor(PMColors.BRAND).select(this.materialsReviewed).onChange((v: boolean) => { this.materialsReviewed = v; })
+          Text('已核对资料与原问题的关系，确认以上答复').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY).layoutWeight(1)
+        }.width('100%')
+        PMButton({ label: '确认资料并接续', disabled: this.readState !== 'fresh' || this.busy || !this.materialsReviewed || this.answer.trim() === '', onAction: (): void => { this.continueMaterials(); } })
+      }
+    }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.LG).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(PMRadius.LG)
   }
   @Builder private MissionBody() {
     Column({ space: 12 }) {
@@ -320,6 +417,8 @@ struct MissionDetail {
           .fontSize(12).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent)
           .height(44).onClick(() => { this.showGoal = !this.showGoal; })
       }
+      Button(this.showCompletion ? '收起执行与成果状态' : '执行与成果状态').type(ButtonType.Normal).height(44).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).borderRadius(PMRadius.BUTTON).onClick(() => { this.showCompletion = !this.showCompletion; })
+      if (this.showCompletion) {
       Column({ space: 8 }) {
         ForEach(missionCompletionFacts(this.mission.status, this.mission.completion, this.mission.outputs[0]?.verificationStatus), (fact: MissionCompletionFact) => {
           Row({ space: 12 }) {
@@ -329,6 +428,7 @@ struct MissionDetail {
         }, (fact: MissionCompletionFact) => fact.label)
       }.width('100%').alignItems(HorizontalAlign.Start).padding({ top: 10, bottom: 10 })
         .border({ width: { top: 1, bottom: 1 }, color: PMColors.BORDER_SUBTLE })
+      }
       if (this.mission.error !== null || this.mission.status === 'PAUSED' || this.mission.status === 'FAILED') {
         Column({ space: PMSpacing.SM }) {
           Text('当前状态').fontSize(12).fontColor(PMColors.INK_TERTIARY)
@@ -355,13 +455,14 @@ struct MissionDetail {
       }
       if (this.mission.status === 'RUNNING' && (this.mission.cancelRequestedAt || this.mission.pauseRequestedAt)) { Text(this.mission.cancelRequestedAt ? '取消请求已受理，等待当前步骤停止' : '暂停请求已受理，等待当前步骤停止').fontColor(PMColors.WARNING) }
       if (this.readState === 'lastKnown') { Text(`上次读取于 ${this.updatedAt}；当前为历史状态，刷新成功后可操作。`).fontSize(12).fontColor(PMColors.RISK) }
+      if (this.mission.status === 'WAITING_INPUT' && this.mission.question !== null) { this.WaitingInput() }
       DecisionScenarioPanel({ missionId: this.missionId, disabled: this.readState !== 'fresh' || this.busy || missionTerminal(this.mission.status), onAdopted: (): void => { this.refresh(); } })
       if (this.mission.experience !== undefined && this.mission.experience.enabled && this.mission.experience.suggestions.length > 0) {
         ExperiencePanel({ projectId: this.projectId, suggestions: this.mission.experience.suggestions, onChanged: (): void => { this.refresh(); } })
       }
       GoalQuestionPanel({ projectId: this.projectId, missionId: this.missionId, compact: true })
       ProjectImpactPanel({ projectId: this.projectId })
-      MissionReadbackView({ missionId: this.missionId, target: this.readTarget })
+      MissionReadbackView({ missionId: this.missionId, target: this.readTarget, missionVersion: this.mission.version, refreshKey: this.readbackRefreshKey, targetKey: JSON.stringify(this.readTarget) })
       if (this.mission.status === 'PAUSED' && this.missionUiEnabled) { Button('继续原委托').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).backgroundColor(PMColors.BRAND).fontColor(PMColors.SURFACE).enabled(this.readState === 'fresh' && !this.busy).onClick(() => { this.command('resume'); }) }
       Button(this.showSettings ? '收起委托设置与控制' : '委托设置与控制').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
         .fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).borderRadius(PMRadius.MD)
@@ -378,7 +479,6 @@ struct MissionDetail {
             .enabled(this.readState === 'fresh' && !this.busy).onClick(() => { this.policy(); })
         }
       }
-      if (this.mission.status === 'WAITING_INPUT' && this.missionUiEnabled) { this.WaitingInput() }
       ForEach(this.mission.approvals, (approval: MissionApproval) => {
         Button(`审阅提案：${approval.proposal.args.title}`).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
           .fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).borderRadius(PMRadius.MD)

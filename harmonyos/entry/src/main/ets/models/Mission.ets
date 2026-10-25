@@ -1,4 +1,5 @@
 import { MissionExperience } from './Experience';
+import { FitPremise, EvidenceReview, EvidenceFit, FitExcerpt } from './EvidenceFit';
 
 export class MissionConstraints {
   availableMinutes: number | null = null;
@@ -63,6 +64,7 @@ export interface MissionCompletionSummary {
 }
 export interface MissionCompletionFact { label: string; value: string; }
 export class Mission {
+  evidencePremise?: FitPremise | null;
   id: string = ''; projectId: string = ''; goal: string = ''; status: string = '';
   version: number = 1; contextVersion: number = 1; planRevision: number = 1;
   constraintsVersion: number = 1; researchScopeVersion: number = 1;
@@ -80,18 +82,22 @@ export class Mission {
 export interface MissionEvent { id: string; seq: number; type: string; createdAt: string; payloadJson: Object; }
 export interface MissionEvents { events: MissionEvent[]; nextAfterSeq: number; }
 export class MissionCommand {
+  evidenceReview?: EvidenceReview;
   requestId: string = ''; expectedVersion: number = 1;
   questionId?: string; answer?: string; decision?: string; proposalHash?: string;
 }
 export interface MissionPointer { id: string; hash: string; }
-export interface MissionCandidate { sourcePointer: MissionPointer; readable: boolean; excerpt: string; observedAt: string; }
+export interface MissionCandidate { title?: string; sourcePointer: MissionPointer; readable: boolean; excerpt: string; observedAt: string; }
 export interface MissionCandidates { candidates: MissionCandidate[]; }
-export class MissionMaterialInput { questionId: string = ''; sourcePointers: MissionPointer[] = []; }
+export class MissionMaterialInput { questionId: string = ''; sourcePointers: MissionPointer[] = []; evidenceReview?: EvidenceReview; }
 export interface MissionMaterialPreview {
+  evidenceFit?: EvidenceFit; fitHash?: string;
+  observationExcerpts?: FitExcerpt[];
   questionId: string; version: number; contextVersion: number; assessment: string; relevance: string;
   sourcePointers: MissionPointer[]; assessmentHash: string; remaining: string[]; readable: boolean;
 }
 export class MissionMaterialConfirm extends MissionMaterialInput {
+  fitHash?: string;
   requestId: string = ''; expectedVersion: number = 1; expectedContextVersion: number = 1;
   assessmentHash: string = ''; answer: string = ''; confirmedGap: boolean = true;
 }

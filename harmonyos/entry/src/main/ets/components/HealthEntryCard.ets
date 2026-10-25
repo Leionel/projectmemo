@@ -157,7 +157,7 @@ export struct HealthEntryCard {
               .margin({ top: PMSpacing.SM })
               .onClick(() => {
                 this.load();
-              })
+              }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
           }
           .width('100%')
           .alignItems(HorizontalAlign.Start)

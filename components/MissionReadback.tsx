@@ -1,14 +1,21 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import type { MissionReadTarget } from "@/lib/mission/navigation";
+import { missionNavigationHref, type MissionReadTarget } from "@/lib/mission/navigation";
+import { materialUseSummary } from "@/lib/client/materialUseLabels";
+import { fitReasonLabel } from "@/lib/client/evidenceFitLabels";
+import { fitStatusLabel } from "./MissionEvidenceReview";
 import type { MissionReadback as Data } from "@/lib/mission/readback";
 import { failedReadState, type ReadState } from "@/lib/client/readState";
 export function MissionReadback({
   missionId,
   target = {},
+  missionVersion,
+  refreshKey = 0,
 }: {
   missionId: string;
   target?: MissionReadTarget;
+  missionVersion?: number;
+  refreshKey?: number;
 }) {
   const [data, setData] = useState<Data | null>(null),
     [state, setState] = useState<ReadState>("unavailable"),
@@ -56,13 +63,20 @@ export function MissionReadback({
     return () => {
       cancelled = true;
     };
-  }, [missionId, query, reload]);
+  }, [missionId, query, reload, missionVersion, refreshKey]);
+  useEffect(() => {
+    const refresh = () => { if (!document.hidden) setReload(v => v + 1); };
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { window.removeEventListener("focus", refresh); document.removeEventListener("visibilitychange", refresh); };
+  }, []);
   return (
     <section
       aria-label="原任务与完成回执"
       className="mt-3 rounded-lg border border-[var(--rule)] p-3 text-xs"
     >
       <button type="button" className="workspace-tool focus-ring" onClick={()=>setReload(v=>v+1)}>重新读取回执</button>
+      {data && missionVersion !== undefined && data.missionVersion < missionVersion && <p role="status">委托版本已变化，正在重新读取回执；以下为上次结果。</p>}
       {error && (
         <p role="status">
           {error}
@@ -148,6 +162,25 @@ export function MissionReadback({
               )}
             </p>
           ))}
+          {data.materialUses && data.materialUses.items.length > 0 && <details className="mt-3 border-t border-[var(--rule)] pt-3">
+            <summary className="cursor-pointer font-semibold">这份资料用在哪里 · {data.materialUses.items.length}</summary>
+            <ul className="mt-3 space-y-3">
+              {data.materialUses.items.map(item => <li key={`${item.sourcePointer.id}:${item.sourcePointer.hash}`} className="space-y-1 break-words">
+                <strong>{item.title}</strong><p>{item.availability === "CHANGED" ? "历史版本 · " : ""}{materialUseSummary(item.facts)}</p>
+                {item.availability === "UNAVAILABLE" && <p>原资料暂不可访问，历史关联仍保留。</p>}
+                {item.excerpt && <details><summary className="cursor-pointer">查看原记录摘录</summary><p className="whitespace-pre-wrap">{item.excerpt}</p></details>}
+                {item.sourcePointer.id.startsWith("attachment:") && item.availability === "CURRENT" && <a className="workspace-link focus-ring" target="_blank" rel="noopener noreferrer" href={`/api/projects/${encodeURIComponent(data.projectId)}/attachments/${encodeURIComponent(item.sourcePointer.id.slice(11))}/file`}>查看附件原件 →</a>}
+                {item.facts.filter(f => f.kind === "OUTPUT_REFERENCE").map(f => <a key={f.refId} className="workspace-link focus-ring mr-3" href={missionNavigationHref(data.projectId, data.missionId, { outputId: f.refId, revision: f.revision, questionId: data.materialUses?.questionId ?? undefined })}>查看草稿版本 {f.revision} →</a>)}
+              </li>)}
+            </ul>
+            <p className="mt-2 text-[var(--muted)]">仅展示直接来源与有限历史；引用不表示结论已核验。</p>
+          </details>}
+          {data.evidenceReviews?.items.length>0&&<details className="mt-3 border-t border-[var(--rule)] pt-3"><summary>这次资料核对</summary>
+            {data.evidenceReviews.items.map(r=><div className="mt-3 space-y-2" key={r.eventId}><strong>{fitStatusLabel[r.fitStatus]}</strong>
+              <p>{r.review?.mode==="ANSWERING_EVIDENCE"?"用于回答这次测量":r.review?.mode==="BACKGROUND_ONLY"?"仅作背景，继续等待":"保留未知作条件分析"}</p>
+              <p>{r.review?.note}</p><ul>{[...new Set(r.unresolvedChecks.map(fitReasonLabel))].map(c=><li key={c}>{c}</li>)}</ul>
+              <p>用户核对 · 结果真实性仍待验证</p></div>)}
+          </details>}
         </>
       )}
     </section>

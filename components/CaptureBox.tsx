@@ -24,9 +24,9 @@ function newRequestId() {
   return `capture-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-export function CaptureBox({ projectId, inboxEnabled = true }: { projectId: string; inboxEnabled?: boolean }) {
+export function CaptureBox({ projectId, inboxEnabled = true, onMaterialSaved, draftScope }: { projectId: string; inboxEnabled?: boolean; onMaterialSaved?: (sourceId: string) => void; draftScope?: string }) {
   const router = useRouter();
-  const draftKey = `projectmemo:capture:${projectId}`;
+  const draftKey = `projectmemo:capture:${projectId}${draftScope ? `:${draftScope}` : ""}`;
   const [text, setText] = useState("");
   const [sourceType, setSourceType] = useState(sources[0]);
   const [requestId, setRequestId] = useState("");
@@ -97,6 +97,7 @@ export function CaptureBox({ projectId, inboxEnabled = true }: { projectId: stri
       setRequestId("");
       window.localStorage.removeItem(draftKey);
       setNewCardId(data.card.id);
+      if (data.card.captureId) onMaterialSaved?.(`capture:${data.card.captureId}`);
       setMessage({
         ok: true,
         text: data.replayed ? `已恢复《${data.card.title}》知识卡片` : `已生成《${data.card.title}》知识卡片`,
@@ -226,7 +227,7 @@ export function CaptureBox({ projectId, inboxEnabled = true }: { projectId: stri
           </div>
         </div>
       </form>
-      <AttachmentInbox projectId={projectId} enabled={inboxEnabled} />
+      <AttachmentInbox projectId={projectId} enabled={inboxEnabled} onMaterialSaved={onMaterialSaved} />
     </section>
   );
 }

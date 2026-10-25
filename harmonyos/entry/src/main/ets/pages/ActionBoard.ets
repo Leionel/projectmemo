@@ -425,7 +425,7 @@ struct ActionBoard {
               .enabled(this.calendarBusy === '')
               .onClick(() => {
                 this.openCalendarFlow();
-              })
+              }).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
           }
           if (this.hasSyncedBlocks()) {
             Button('从手机日历移除').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
@@ -434,7 +434,7 @@ struct ActionBoard {
               .enabled(this.calendarBusy === '')
               .onClick(() => {
                 this.revokeCalendar();
-              })
+              }).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
           }
         }
         .width('100%')
@@ -469,7 +469,7 @@ struct ActionBoard {
               .margin({ top: 8 })
               .onClick(() => {
                 this.previewCalendarWrite();
-              })
+              }).fontColor(PMColors.SURFACE).backgroundColor(PMColors.BRAND).constraintSize({ minHeight: 44 })
           }
           .width('100%')
           .alignItems(HorizontalAlign.Start)
@@ -499,14 +499,14 @@ struct ActionBoard {
                 .fontSize(PMFontSize.CAPTION)
                 .onClick(() => {
                   this.calendarStage = '';
-                })
+                }).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
               Button(this.calendarBusy === 'write' ? '添加中…' : '确认添加').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                 .buttonStyle(ButtonStyleMode.EMPHASIZED)
                 .fontSize(PMFontSize.CAPTION)
                 .enabled(this.calendarBusy === '')
                 .onClick(() => {
                   this.writeCalendar();
-                })
+                }).fontColor(PMColors.SURFACE).backgroundColor(PMColors.BRAND).constraintSize({ minHeight: 44 })
             }
             .margin({ top: 8 })
           }
@@ -565,7 +565,7 @@ struct ActionBoard {
             .margin({ top: 10 })
             .onClick(() => {
               this.generateSchedulePreview();
-            })
+            }).fontColor(PMColors.SURFACE).backgroundColor(PMColors.BRAND).constraintSize({ minHeight: 44 })
         }
         .width('100%')
         .margin({ top: 10 })
@@ -614,14 +614,14 @@ struct ActionBoard {
             .fontSize(PMFontSize.SECONDARY)
             .onClick(() => {
               this.schedulePreview = null;
-            })
+            }).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
           Button(this.scheduleBusy === 'confirm' ? '保存中…' : '保存这个安排').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
             .buttonStyle(ButtonStyleMode.EMPHASIZED)
             .fontSize(PMFontSize.SECONDARY)
             .enabled(this.scheduleBusy === '' && this.schedulePreview !== null && this.schedulePreview!.blocks.length > 0)
             .onClick(() => {
               this.confirmSchedule();
-            })
+            }).fontColor(PMColors.SURFACE).backgroundColor(PMColors.BRAND).constraintSize({ minHeight: 44 })
         }
         .width('100%')
         .justifyContent(FlexAlign.End)

@@ -18,5 +18,6 @@ export default defineConfig([
     "harmonyos/**",
     "tmp/**",
     "evidence/**", // Archived probes and receipts are validated separately from application source.
+    "docs/**", // Research notes and archived probe scripts (e.g. working/*.cjs), not application source.
   ]),
 ]);

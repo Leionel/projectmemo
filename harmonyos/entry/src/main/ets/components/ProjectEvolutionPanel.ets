@@ -1,7 +1,7 @@
 import { MemoryService } from '../services/MemoryService';
 import { SessionStore } from '../services/SessionStore';
 import { TemporalDecisionItem, TemporalRelation } from '../models/Memory';
-import { PMColors, PMSpacing, PMRadius } from '../common/DesignTokens';
+import { PMColors, PMSpacing, PMRadius, PMFontSize } from '../common/DesignTokens';
 
 @Component
 export struct ProjectEvolutionPanel {
@@ -45,7 +45,7 @@ export struct ProjectEvolutionPanel {
       if (this.loading) { Text('正在读取已记录的结论与关系…').fontSize(14) }
       else if (this.error !== '') {
         Text(this.error).fontSize(14).fontColor(PMColors.RISK)
-        Button('重新读取项目演进').constraintSize({ minHeight: 48 }).onClick(() => { this.read(); })
+        Button('重新读取项目演进').constraintSize({ minHeight: 48 }).onClick(() => { this.read(); }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT)
       } else {
         if (!this.relationsEnabled) { Text('时态关系评估当前关闭；下方仅供查看原始记录。').fontSize(14).fontColor(PMColors.INK_SECONDARY) }
         if (this.evaluatedAt !== '') { Text(`本次核验：${this.evaluatedAt}`).fontSize(13).fontColor(PMColors.INK_SECONDARY) }
@@ -74,7 +74,7 @@ export struct ProjectEvolutionPanel {
           }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.MD)
             .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
         }, (item: TemporalDecisionItem) => item.card.id)
-        if (this.items.length > this.limit) { Button('继续查看结论记录').constraintSize({ minHeight: 48 }).onClick(() => { this.limit += 5; }) }
+        if (this.items.length > this.limit) { Button('继续查看结论记录').constraintSize({ minHeight: 48 }).onClick(() => { this.limit += 5; }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT) }
       }
       Button('到资料页查看全部来源').constraintSize({ minHeight: 48 }).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).onClick(() => { this.onOpenSources(''); })
     }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.LG).backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.MD)

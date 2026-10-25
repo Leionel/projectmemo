@@ -335,11 +335,11 @@ export class TextFormatters {
    */
   static scenarioToChinese(scenario: string): string {
     const map: Record<string, string> = {
-      'COMPETITION': '学术备赛',
-      'RESEARCH': '学术课题',
+      'COMPETITION': '学科竞赛',
+      'RESEARCH': '科研训练',
       'COURSE_DESIGN': '课程设计',
-      'INNOVATION': '创新项目',
-      'LAB_TASK': '实验任务',
+      'INNOVATION': '创新创业',
+      'LAB_TASK': '实验室任务',
       'HACKATHON': '创客黑客松'
     };
     return map[scenario] ?? '项目档案';

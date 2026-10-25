@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { artifactTypeLabels } from "@/lib/types";
 import { ownedMission } from "./repository";
+import { materialUseProjection } from "./materialUseProjection";
+import { fitContextSummary, type assessEvidenceFit } from "./evidenceFitService";
 export const readTargetSchema = z
   .object({
     questionId: z.string().min(1).optional(),
@@ -10,6 +12,7 @@ export const readTargetSchema = z
     outputId: z.string().min(1).optional(),
     revision: z.coerce.number().int().positive().optional(),
     receiptId: z.string().min(1).optional(),
+    sourceId: z.string().max(180).regex(/^(capture|attachment):.+/).optional(),
   })
   .strict();
 export async function readMissionBack(
@@ -91,6 +94,9 @@ export async function readMissionBack(
         "回执与指定草稿版本不一致，请从原成果重新进入",
         409,
       );
+    const fitRows=await tx.agentMissionEvent.findMany({where:{missionId:id,type:"EVIDENCE_FIT_REVIEWED"},orderBy:{seq:"desc"},take:21});
+    const selectedQuestionId=input.questionId??(m.waitStateJson as {questionId?:string}|null)?.questionId;
+    const evidenceReviews={items:fitRows.slice(0,20).filter(e=>(e.payloadJson as {evidenceFit?:{premise?:{questionId?:string}}}).evidenceFit?.premise?.questionId===selectedQuestionId).slice(0,3).map(e=>({eventId:e.id,observedAt:e.createdAt.toISOString(),...fitContextSummary(e.payloadJson as unknown as NonNullable<Awaited<ReturnType<typeof assessEvidenceFit>>>)!})),truncated:fitRows.length>20};
     const actionIds = steps
       .map(
         (s) =>
@@ -114,6 +120,11 @@ export async function readMissionBack(
       : [];
     const sourceRunId = (origin?.payloadJson as { sourceRunId?: string } | null)
       ?.sourceRunId;
+    const wait = m.waitStateJson as { questionId?: string } | null;
+    const materialUses = await materialUseProjection(tx, {
+      missionId: id, projectId: m.projectId,
+      questionId: input.questionId ?? wait?.questionId ?? null, sourceId: input.sourceId,
+    });
     return {
       schemaVersion: 1 as const,
       missionId: id,
@@ -122,6 +133,8 @@ export async function readMissionBack(
       missionStatus: m.status,
       observedAt: new Date().toISOString(),
       missionUpdatedAt: m.updatedAt.toISOString(),
+      materialUses,
+      evidenceReviews,
       sourceConversation: sourceRunId
         ? {
             sourceRunId,

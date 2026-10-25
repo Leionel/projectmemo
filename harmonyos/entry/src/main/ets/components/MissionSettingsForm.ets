@@ -176,6 +176,7 @@ export struct MissionSettingsForm {
             }.width('100%')
             this.Label('优先级', '1 最高，5 最低；不指定则交由任务判断。')
             Select([{ value: '不指定' }, { value: '1 · 最高' }, { value: '2 · 较高' }, { value: '3 · 普通' }, { value: '4 · 较低' }, { value: '5 · 最低' }])
+              .fontColor(PMColors.INK_PRIMARY).selectedOptionFontColor(PMColors.BRAND).selectedOptionBgColor(PMColors.BRAND_LIGHT).optionFontColor(PMColors.INK_PRIMARY)
               .selected(this.priority === '' ? 0 : Number(this.priority)).value(this.priority === '' ? '不指定' : `${this.priority} 级`)
               .width('100%').height(44).font({ size: 14 }).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(11).enabled(!this.busy)
               .onSelect((index: number) => { this.priority = index === 0 ? '' : `${index}`; })

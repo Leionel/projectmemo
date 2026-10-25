@@ -2,7 +2,7 @@ import { ImpactReply, ImpactItem, ImpactEdge } from '../models/DecisionEvolution
 import { DecisionEvolutionService } from '../services/DecisionEvolutionService';
 import { SessionStore } from '../services/SessionStore';
 import { ApiError } from '../models/Project';
-import { PMColors } from '../common/DesignTokens';
+import { PMColors, PMFontSize, PMRadius } from '../common/DesignTokens';
 @Component
 export struct ProjectImpactPanel {
  @Prop projectId: string = '';
@@ -26,7 +26,7 @@ export struct ProjectImpactPanel {
    Button(this.open ? '收起资料影响路径' : '新资料影响了哪些计划与成果').height(44).fontSize(13).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).onClick(() => { this.open = !this.open; if (this.open && this.data === null) this.load(); })
    if (this.open) {
     if (this.error !== '') { Text(`${this.error}${this.data !== null ? '；以下为上次读取的历史结果' : ''}`).fontSize(12).fontColor(PMColors.RISK) }
-    Button(this.busy ? '正在读取影响路径…' : '重新读取影响').height(44).enabled(!this.busy).onClick(() => { this.load(); })
+    Button(this.busy ? '正在读取影响路径…' : '重新读取影响').height(44).enabled(!this.busy).onClick(() => { this.load(); }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
     if (this.data !== null && this.data.enabled) {
      Text(`读取于 ${this.data.assessment.observedAt} · ${this.data.assessment.coverage.state === 'COMPLETE' ? '当前窄范围已覆盖' : '范围不完整，部分影响未知'} · ${this.data.pendingJobs} 项影响处理待完成`).fontSize(12)
      Text(this.data.assessment.note).fontSize(12).fontColor(PMColors.INK_SECONDARY)

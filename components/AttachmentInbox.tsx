@@ -51,7 +51,7 @@ function formatSize(size: number) {
  * 当前环境没有可用的 OCR 或视觉 provider 时，附件保存为「待处理」并说明原因，
  * 不会伪造一条提取成功的记忆；用户可以随时在线预览原件、重试提取，或直接对照原件人工校对文本进入记忆。
  */
-export function AttachmentInbox({ projectId, enabled }: { projectId: string; enabled: boolean }) {
+export function AttachmentInbox({ projectId, enabled, onMaterialSaved }: { projectId: string; enabled: boolean; onMaterialSaved?: (sourceId: string) => void }) {
   const router = useRouter();
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -141,6 +141,7 @@ export function AttachmentInbox({ projectId, enabled }: { projectId: string; ena
           : reason);
       }
       const attachment = data.attachment as Attachment;
+      onMaterialSaved?.(`attachment:${attachment.id}`);
       replaceAttachment(attachment);
       await load();
       if (data.isDuplicate) {

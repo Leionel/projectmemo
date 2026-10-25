@@ -4,6 +4,7 @@ export type MissionReadTarget = {
   outputId?: string;
   revision?: number;
   receiptId?: string;
+  sourceId?: string;
 };
 export function missionNavigationHref(
   projectId: string,

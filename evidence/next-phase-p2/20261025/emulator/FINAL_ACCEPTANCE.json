@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-25",
+  "baseImplementationCommit": "7f7582ad6cb92b328f18b72b3d26759a824f72f9",
+  "device": "DevEco emulator 127.0.0.1:5555",
+  "bundle": "xyz.luojiatutor.projectmemo",
+  "authorization": "User approved uninstall of emulator ProjectMemo only to unify signing",
+  "resetScope": "Emulator app local drafts, cache and login state only; server projects unchanged",
+  "signedInstall": true,
+  "signedCoverInstallRetriesPassed": 2,
+  "appIdentifier": "6918743533450958047",
+  "hap": {
+    "flavor": "development",
+    "sha256": "bb143464a8b492c1cef9466b7df7b4d7ef3f80a0422328991ea536a97a5a4a7e",
+    "buildExitCode": 0
+  },
+  "verifiedUi": [
+    "isolated QA account login",
+    "session preserved after final signed cover update",
+    "focus primary and secondary actions",
+    "mission details and collapsed execution status",
+    "material-use select initial label and option change"
+  ],
+  "additionalUiFix": "Select now binds visible value and full width; selecting answering evidence updates displayed label",
+  "screenshots": [
+    "signed-focus-after.jpeg",
+    "signed-mission-loaded.jpeg",
+    "signed-mission-final.jpeg"
+  ],
+  "testData": "SYNTHETIC_MOCK, isolated local acceptance database",
+  "fullRegressionAtBaseCommit": {
+    "unit": 929,
+    "harmony": 83,
+    "e2e": 14,
+    "typecheck": true,
+    "lint": true,
+    "webBuild": true
+  },
+  "afterSelectFix": [
+    "HarmonyOS HAP build passed",
+    "signed cover install passed",
+    "native selector initial value and option change passed"
+  ],
+  "sourceBuildFlavorRestored": "review",
+  "limitations": {
+    "productionDeployed": false,
+    "realModelQualityVerified": false,
+    "physicalDeviceVerified": false,
+    "entireP2Complete": false,
+    "featureEnabledByDefault": false
+  }
+}

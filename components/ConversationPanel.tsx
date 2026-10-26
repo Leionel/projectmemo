@@ -35,13 +35,13 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
   const [view, setView] = useState<ConversationView | null>(null);
   const [list, setList] = useState<Array<{ id: string; title: string }>>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
-  const [text, setText] = useState(""), [busy, setBusyState] = useState(false), [error, setError] = useState("");
+  const [text, setText] = useState(selection ? "请先调查“" + selection.title + "”的依据和下一步。" : ""), [busy, setBusyState] = useState(false), [error, setError] = useState("");
   const busyRef = useRef(false);
   const setBusy = useCallback((value: boolean) => { busyRef.current = value; setBusyState(value); }, []);
   const [cloud, setCloud] = useState(false), [reply, setReply] = useState<ConversationMessage | null>(null);
   const [showCloudHelp, setShowCloudHelp] = useState(false);
   const [cloudAvailable, setCloudAvailable] = useState(false), [analysisReady, setAnalysisReady] = useState(false);
-  const [target, setTarget] = useState(projectId ?? ""), [showPreference, setShowPreference] = useState(false);
+  const [target, setTarget] = useState(selection?.projectId ?? projectId ?? ""), [showPreference, setShowPreference] = useState(false);
   const [workRef, setWorkRef] = useState<ConversationWorkRef | null>(null);
   const generation = useRef(0), pending = useRef<{ text: string; id: string; body: unknown } | null>(null);
   const messageRegion = useRef<HTMLDivElement>(null);
@@ -72,7 +72,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
   useEffect(() => {
     const epoch = ++generation.current;
     void (async () => {
-      const rows = await api<{ conversations: Array<{ id: string; title: string }> }>("/api/conversations" + (projectId ? "?projectId=" + encodeURIComponent(projectId) : ""));
+      const rows = await api<{ conversations: Array<{ id: string; title: string; scope: "WORKSPACE" | "PROJECT" }> }>("/api/conversations" + (projectId ? "?projectId=" + encodeURIComponent(projectId) : ""));
       if (epoch !== generation.current) return;
       setList(rows.conversations);
       if (entry) {
@@ -80,7 +80,10 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
           requestId: createKey.current + ":" + entry.id, scope: "WORKSPACE", entry,
         });
         await load(c.id, epoch); setText("为什么提醒我这个？");
-      } else if (initial || rows.conversations[0]) await load(initial || rows.conversations[0].id, epoch);
+      } else {
+        const recent = projectId ? rows.conversations[0] : rows.conversations.find(c => c.scope === "WORKSPACE");
+        if (initial || recent) await load(initial || recent!.id, epoch);
+      }
     })().catch(e => { if (epoch === generation.current) { setError(e.message); if ([401, 403, 404].includes(e.status)) { setView(null); setList([]); } } })
       .finally(() => { if (epoch === generation.current) setLoadingHistory(false); });
     const activeGeneration = generation;
@@ -106,6 +109,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
         requestId: crypto.randomUUID(), scope: projectId ? "PROJECT" : "WORKSPACE", ...(projectId ? { projectId } : {}),
       });
       await load(c.id, epoch); setReply(null); setWorkRef(null); pending.current = null;
+      if (selection && epoch === generation.current) setTarget(selection.projectId);
       const rows = await api<{ conversations: Array<{ id: string; title: string }> }>("/api/conversations" + (projectId ? "?projectId=" + encodeURIComponent(projectId) : ""));
       if (epoch === generation.current) setList(rows.conversations);
     } catch (e) { if (epoch === generation.current) setError(e instanceof Error ? e.message : "创建失败"); }

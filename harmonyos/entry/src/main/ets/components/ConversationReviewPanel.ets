@@ -73,11 +73,11 @@ export struct ConversationReviewPanel {
           PMButton({ label: '云端复核所选资料', secondary: true, disabled: this.busy || this.selected.length === 0 || !['READY', 'PAUSED'].includes(this.work.status), onAction: (): void => { this.submit('CHANGE_REVIEW'); } })
           if (this.data.change) {
             Text(this.data.change.stale ? '复核依据已变化' : this.data.change.result?.summary ?? '正在读取复核状态；不会自动重发模型').fontSize(14).lineHeight(23).fontColor(PMColors.INK_PRIMARY)
-            if (this.data.change.result) { ForEach(this.data.change.result.candidates, (c: ReviewCandidate) => { Text(c.question ?? '').fontSize(13).lineHeight(21).fontColor(PMColors.INK_SECONDARY) }, (c: ReviewCandidate) => c.candidateId) }
+            if (this.data.change.result && this.data.change.result.decision !== 'KEEP_PLAN') { ForEach(this.data.change.result.candidates, (c: ReviewCandidate) => { Text(c.question ?? '').fontSize(13).lineHeight(21).fontColor(PMColors.INK_SECONDARY) }, (c: ReviewCandidate) => c.candidateId) }
             if (this.data.change.status === 'READY' && !this.data.change.stale && this.data.change.result?.decision !== 'KEEP_PLAN' && !this.data.dynamic) { PMButton({ label: '比较本轮推进方案', secondary: true, disabled: this.busy, onAction: (): void => { this.submit('DYNAMIC_PLAN'); } }) }
           }
           if (this.data.dynamic) {
-            Text(this.data.dynamic.stale ? '方案依据已变化' : this.data.dynamic.result?.summary ?? '方案状态：' + this.data.dynamic.status).fontSize(14).lineHeight(23).fontColor(PMColors.INK_PRIMARY)
+            Text(this.data.dynamic.stale ? '方案依据已变化' : this.data.dynamic.result?.summary ?? (this.data.dynamic.status === 'FAILED' ? '方案未生成完整，原计划已保留。' : this.data.dynamic.status === 'UNKNOWN' ? '调用结果尚不确定，请先读取状态。' : '正在比较本轮方案…')).fontSize(14).lineHeight(23).fontColor(PMColors.INK_PRIMARY)
             if (this.data.dynamic.result) {
               ForEach(this.data.dynamic.result.candidates, (c: ReviewCandidate) => {
                 Column({ space: 8 }) {
@@ -91,7 +91,7 @@ export struct ConversationReviewPanel {
             }
             if (this.data.dynamic.base.attempt < 2 && this.data.dynamic.status !== 'BUILDING' && !this.data.dynamic.stale) {
               TextArea({ text: this.feedback, placeholder: '补充新观察，或说明方案哪里不合适…' }).height(80).maxLength(500).backgroundColor(PMColors.SURFACE_SUBTLE).enabled(!this.busy).onChange((v: string) => { this.feedback = v; })
-              PMButton({ label: '带新反馈再分析一次', secondary: true, disabled: this.busy || this.feedback.trim() === '' && this.rejected.length === 0 && (this.data.change?.toolAttempts ?? 0) === 0, onAction: (): void => { this.submit('DYNAMIC_PLAN', true); } })
+              PMButton({ label: this.data.dynamic.status === 'FAILED' ? '重新生成方案' : '带新反馈再分析一次', secondary: true, disabled: this.busy || this.data.dynamic.status !== 'FAILED' && this.feedback.trim() === '' && this.rejected.length === 0 && (this.data.change?.toolAttempts ?? 0) === 0, onAction: (): void => { this.submit('DYNAMIC_PLAN', true); } })
             }
           }
           PMButton({ label: '读取复核状态', secondary: true, disabled: this.busy, onAction: (): void => { this.load(); } })

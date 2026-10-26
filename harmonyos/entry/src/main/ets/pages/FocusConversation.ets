@@ -74,7 +74,10 @@ struct FocusConversation {
         input.entry = { kind: params['originKind'], projectId: projectId, id: params['originId'] };
         id = (await this.service.entry(input)).id;
         this.text = '为什么提醒我这个？';
-      } else if (id === '') id = list.conversations[0]?.id ?? '';
+      } else if (id === '') {
+        const recent = projectId !== '' ? list.conversations[0] : list.conversations.find((item: ConversationListItem) => item.scope === 'WORKSPACE');
+        id = recent?.id ?? '';
+      }
       if (id !== '') { const loaded = await this.service.read(id); if (epoch !== this.generation) return; this.view = loaded; }
       this.target = projectId || this.view.focusProjectId || '';
       if (params?.['entityId']) {

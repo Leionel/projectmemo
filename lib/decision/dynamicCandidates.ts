@@ -98,6 +98,9 @@ export async function createDynamicReview(actor: CopilotActor, missionId: string
 优先读取已存在且能回答问题的日志，再考虑追问或最小验证；必须包含KEEP_PLAN。不得编造时长、费用、成功概率或声称已执行。
 READ_EXISTING只能绑定给定currentSourceIds中的一至两份资料；ASK_USER只问一个会改变选择的未知，不重问资料已明确的事实。
 PROPOSE_VERIFICATION须列出有区分力的结果分支、条件及停止规则；未知条件不能称可执行。服务端会保留其待人工核对状态。
+每项必须包含全部schema字段，不适用时question为null、sourceIds/evidence/branches为空数组、expectedObservation为空字符串；不得省略。KEEP_PLAN也必须完整。
+summary尽量80字内，title尽量25字内，reason/expectedObservation/stopCondition各60字内，逐字quote尽量80字内；只列能区分的必要候选，整个JSON须在2048输出token内完成。
+完整保持计划示例：{"summary":"保留原计划。","candidates":[{"kind":"KEEP_PLAN","title":"保留当前计划","reason":"当前没有新的相关依据。","question":null,"sourceIds":[],"expectedObservation":"","stopCondition":"出现相关新观察后再复核","branches":[],"evidence":[]}]}。
 不扩大原权限，不修改成功条件，不自行批准。引用必须使用evidence内ref和逐字quote。无新信息或重复提问时保持原计划并停止。
 只输出JSON。schema=${JSON.stringify(dynamicAnswerSchema.toJSONSchema())}
 context=${JSON.stringify({ goal: base.goal, successCriteria: base.successCriteria, constraints: base.constraints,

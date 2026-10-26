@@ -47,12 +47,12 @@ export function ConversationReviewPanel({ conversation, work, busy, run, onChang
       {change && <section className={styles.reason}>
         <strong>{change.stale ? "复核依据已变化" : ({ READY: "变化复核", UNKNOWN: "调用结果未知", BUILDING: "正在复核", STALE: "复核依据已变化", FAILED: "本轮未完成" } as Record<string, string>)[change.status] ?? "本轮已结束"}</strong>
         <p>{changeResult?.summary ?? "读取状态不会自动重发模型。"}</p>
-        {changeResult?.candidates.map(candidate => <p key={candidate.candidateId}>{candidate.question}</p>)}
+        {changeResult?.decision !== "KEEP_PLAN" && changeResult?.candidates.map(candidate => <p key={candidate.candidateId}>{candidate.question}</p>)}
         {change.status === "READY" && !change.stale && changeResult?.decision !== "KEEP_PLAN" && !dynamic && <button type="button" className="workspace-link focus-ring" disabled={busy} onClick={() => void submit("DYNAMIC_PLAN")}>比较本轮推进方案 →</button>}
       </section>}
       {dynamic && <>
         {dynamic.stale && <p>方案依据已变化，请重新复核。</p>}
-        <p>{dynamicResult?.summary ?? "方案状态：" + dynamic.status}</p>
+        <p>{dynamicResult?.summary ?? ({ FAILED: "方案未生成完整，原计划已保留。", UNKNOWN: "调用结果尚不确定，请先读取状态。", BUILDING: "正在比较本轮方案…", STALE: "方案依据已变化，请重新复核。" } as Record<string, string>)[dynamic.status] ?? "本轮方案已结束。"}</p>
         {dynamicResult?.candidates.map((candidate, index) => <section className={styles.scenario} key={candidate.candidateId}>
           <span>{String(index + 1).padStart(2, "0")}</span><div>
             <strong>{candidate.title}</strong><p>{candidate.reason}</p><p>{candidate.expectedObservation}</p>
@@ -65,7 +65,7 @@ export function ConversationReviewPanel({ conversation, work, busy, run, onChang
         </section>)}
         {dynamic.base.attempt < 2 && dynamic.status !== "BUILDING" && !dynamic.stale && <>
           <textarea aria-label="本轮复核反馈" value={feedback} maxLength={500} placeholder="补充新观察，或说明哪些方案不合适…" disabled={busy} onChange={event => setFeedback(event.target.value)}/>
-          <button type="button" className="workspace-tool focus-ring" disabled={busy || !feedback.trim() && !rejected.length && (change?.toolAttempts ?? 0) === 0} onClick={() => void submit("DYNAMIC_PLAN", true)}>带新反馈再分析一次</button>
+          <button type="button" className="workspace-tool focus-ring" disabled={busy || dynamic.status !== "FAILED" && !feedback.trim() && !rejected.length && (change?.toolAttempts ?? 0) === 0} onClick={() => void submit("DYNAMIC_PLAN", true)}>{dynamic.status === "FAILED" ? "重新生成方案" : "带新反馈再分析一次"}</button>
         </>}
       </>}
       <button type="button" className="workspace-link focus-ring" disabled={busy} onClick={() => void run(load)}>读取复核状态</button>

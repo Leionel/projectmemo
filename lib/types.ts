@@ -377,6 +377,7 @@ export interface ProjectMetrics {
 
 
 export interface AgentExecutionResult<T> {
+  finishReason?: string | null;
   requestIdentity?: string | null;
   usage?: { inputTokens: number | null; outputTokens: number | null };
   usageUnknown?: boolean;

@@ -4,6 +4,7 @@ import { ConversationWorkRef } from './ConversationWork';
 export interface ReviewMaterial { sourcePointer: MissionPointer; title: string; excerpt: string; readable: boolean; }
 export interface ReviewCandidate {
   candidateId: string; kind?: string; title?: string; reason: string; question: string | null;
+  goalLink?: string;
   expectedObservation?: string; stopCondition?: string; feasibility?: string; feasibilityReasons?: string[];
 }
 export interface ReviewResult { summary: string; decision?: string; candidates: ReviewCandidate[]; }

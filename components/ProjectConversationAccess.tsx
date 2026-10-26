@@ -8,7 +8,11 @@ import { conversationHref } from "@/lib/conversation/navigation";
 import styles from "./ConversationPanel.module.css";
 export function ProjectConversationAccess({ projectId }: { projectId: string }) {
   const search = useSearchParams(), id = search.get("conversation");
-  const [open, setOpen] = useState(!!id);
+  const requested = !!id || search.get("openCopilot") === "1";
+  const identity = projectId + ":" + (id ?? "") + ":" + (search.get("openCopilot") ?? "");
+  const [override, setOverride] = useState<{ identity: string; open: boolean } | null>(null);
+  const open = override?.identity === identity ? override.open : requested;
+  const setOpen = (value: boolean) => setOverride({ identity, open: value });
   return <section aria-label="项目关联讨论">
     {!open && <FocusAgentLauncher onOpen={() => setOpen(true)}/>}
     {open && <div className={styles.projectDrawer}><div className={styles.return}>

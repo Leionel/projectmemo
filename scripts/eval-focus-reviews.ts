@@ -3,6 +3,30 @@ import os from "node:os";
 import path from "node:path";
 import Database from "better-sqlite3";
 const episodes = JSON.parse(fs.readFileSync("scripts/focus-review-episodes.json", "utf8")) as { callCeiling: number; episodes: Array<{ id: string; group: string; goal: string; material: string; expected: string; feedback: string }> };
+const replayDirectory = process.argv.find(arg => arg.startsWith("--replay-dir="))?.slice("--replay-dir=".length);
+if (replayDirectory) {
+  const { parseReviewJSON } = await import("../lib/decision/reviewProtocol");
+  const { changeAnswerSchema } = await import("../lib/types/changeReview");
+  const { normalizeChangeAnswer } = await import("../lib/decision/changeCandidateRules");
+  const source = JSON.parse(fs.readFileSync(path.join(replayDirectory, "results.json"), "utf8")) as {
+    evaluationScope: string; results: Array<{ id: string; result: { change: { status: string; base: import("../lib/types/changeReview").ReviewBase } } }>;
+  };
+  if (source.evaluationScope !== "D1_ONLY") throw new Error("只回放逐条对应原响应的D1_ONLY批次");
+  const results = source.results.map((entry, index) => {
+    try {
+      const response = JSON.parse(fs.readFileSync(path.join(replayDirectory, `response-${index + 1}.json`), "utf8"));
+      if (response.httpStatus !== 200 || response.choices?.[0]?.finish_reason !== "stop") throw new Error("原响应未完整结束");
+      const parsed = parseReviewJSON(response.choices[0].message.content, changeAnswerSchema);
+      const normalized = normalizeChangeAnswer(parsed.data, entry.result.change.base, "RECORDED_REAL_RESPONSE_REPLAY", false);
+      return { id: entry.id, originalStatus: entry.result.change.status, parseStatus: "PASS", decision: normalized.decision, ignoredNullFields: parsed.ignoredNullFields };
+    } catch (error) { return { id: entry.id, originalStatus: entry.result.change.status, parseStatus: "FAILED", error: error instanceof Error ? error.message : "回放失败" }; }
+  });
+  const output = path.resolve("output", "focus-review-replay-" + new Date().toISOString().replaceAll(/[:.]/g, "-"));
+  fs.mkdirSync(output, { recursive: true });
+  fs.writeFileSync(path.join(output, "replay.json"), JSON.stringify({ kind: "OFFLINE_RECORDED_MODEL_RESPONSE_REPLAY", originalDirectory: path.resolve(replayDirectory), calls: 0, originalFailuresPreserved: true, independentQualityReview: "PENDING", results }, null, 2));
+  console.log(JSON.stringify({ output, calls: 0, pass: results.filter(r => r.parseStatus === "PASS").length, failures: results.filter(r => r.parseStatus !== "PASS").length }));
+  process.exit(results.some(r => r.parseStatus !== "PASS") ? 1 : 0);
+}
 if (!process.argv.includes("--real") || !process.argv.includes("--confirm-paid-calls")) {
   process.stdout.write(JSON.stringify({ mode: "PREPARED_ONLY", episodes: episodes.episodes.length, callCeiling: episodes.callCeiling, dataset: "scripts/focus-review-episodes.json", calls: 0 }, null, 2));
   process.exit(0);
@@ -25,13 +49,14 @@ let calls = 0;
 const budgetPath = path.resolve(process.env.FOCUS_REVIEW_BUDGET_FILE ?? "output/focus-review-call-budget.json");
 fs.mkdirSync(path.dirname(budgetPath), { recursive: true });
 const budget = fs.existsSync(budgetPath) ? JSON.parse(fs.readFileSync(budgetPath, "utf8")) as { limit: number; used: number } : { limit: 48, used: 0 };
+const callLimit = Math.min(48, budget.limit);
 const fetchProvider = globalThis.fetch;
 globalThis.fetch = async (...args) => {
-  if (calls >= episodes.callCeiling || budget.used >= Math.min(48, budget.limit)) throw new Error("达到48次调用上限，停止验收");
+  if (calls >= episodes.callCeiling || budget.used >= callLimit) throw new Error(`达到本轮${callLimit}次调用上限，停止验收`);
   calls++; budget.used++; fs.writeFileSync(budgetPath, JSON.stringify(budget));
   const response = await fetchProvider(...args);
   const payload = await response.clone().json().catch(() => null) as { choices?: unknown; usage?: unknown } | null;
-  fs.writeFileSync(path.join(output, `response-${calls}.json`), JSON.stringify({ choices: payload?.choices, usage: payload?.usage }, null, 2));
+  fs.writeFileSync(path.join(output, `response-${calls}.json`), JSON.stringify({ httpStatus: response.status, choices: payload?.choices, usage: payload?.usage }, null, 2));
   return response;
 };
 const output = path.resolve("output", "focus-f3-real-" + new Date().toISOString().replaceAll(/[:.]/g, "-"));
@@ -63,12 +88,12 @@ try {
     let result: unknown;
     try {
       const change = await createChangeReview(actor, mission.id, { requestId: episode.id + "-d1", expectedVersion: mission.version, sources: [{ id, hash: await sourceHash(project.id, id) }], llmContextApproved: true });
-      const dynamic = change.status === "READY" && change.result && "decision" in change.result && change.result.decision !== "KEEP_PLAN" ? await createDynamicReview(actor, mission.id, { requestId: episode.id + "-d2", reviewId: change.id, llmContextApproved: true }) : null;
+      const dynamic = !process.argv.includes("--d1-only") && change.status === "READY" && change.result && "decision" in change.result && change.result.decision !== "KEEP_PLAN" ? await createDynamicReview(actor, mission.id, { requestId: episode.id + "-d2", reviewId: change.id, llmContextApproved: true }) : null;
       const feedback = dynamic?.status === "READY" ? await createDynamicReview(actor, mission.id, { requestId: episode.id + "-feedback", reviewId: change.id, llmContextApproved: true, retry: true, feedback: episode.feedback }) : null;
       result = { change, dynamic, feedback };
     } catch (error) { result = { error: error instanceof Error ? error.message : "验收未完成" }; }
     results.push({ ...episode, calls: calls - startCalls, result, reviewerPass: null, reviewerNote: "", executionAcceptance: "NOT_RUN" });
-    fs.writeFileSync(path.join(output, "results.json"), JSON.stringify({ kind: "REAL_MODEL_SEMANTIC_REVIEW", calls, maxCalls: 48, results }, null, 2));
+    fs.writeFileSync(path.join(output, "results.json"), JSON.stringify({ kind: "REAL_MODEL_SEMANTIC_REVIEW", evaluationScope: process.argv.includes("--d1-only") ? "D1_ONLY" : "D1_D2_FEEDBACK", calls, maxCalls: callLimit, results }, null, 2));
     console.log(JSON.stringify({ episode: episode.id, completed: results.length, calls }));
   }
   console.log(JSON.stringify({ output, calls, episodes: results.length, independentReview: "PENDING", originalRunnerAcceptance: "use isolated integration and browser evidence separately", targetUserStudy: "PENDING" }));

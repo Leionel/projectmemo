@@ -27,10 +27,22 @@ test("accepts a proactive reminder and asks the memory copilot", async ({ page }
   await expect(actions.locator('[role="status"]')).toBeVisible();
   await openProjectDirectory(page);await page.getByRole("navigation", {name:"项目功能导航"}).getByRole("link",{name:"知识与问答"}).click();
   const copilot = page.locator("#memory-copilot");
-  await copilot.getByRole("button", { name: /问忆程/ }).click();
-  await copilot.locator("input").fill("当前进展如何？");
-  await copilot.locator("form button").click();
-  await expect(copilot.locator("form")).toBeVisible();
+  if (process.env.FOCUS_AGENT_ENABLED === "true") {
+    await page.getByRole("button", { name: "问忆程，打开项目协作对话", exact: true }).click();
+    const discussion = page.getByRole("region", { name: "问忆程", exact: true });
+    await expect(discussion.getByText("正在读取讨论…")).toHaveCount(0);
+    if (await discussion.getByRole("button", { name: "开始讨论", exact: true }).isVisible()) await discussion.getByRole("button", { name: "开始讨论", exact: true }).click();
+    const input = discussion.getByRole("textbox", { name: "与忆程讨论项目" });
+    await input.fill("当前进展如何？");
+    await discussion.getByRole("button", { name: "发送", exact: true }).click();
+    await expect(input).toHaveValue("");
+    await expect(discussion.getByText("当前进展如何？", { exact: true })).toBeVisible();
+  } else {
+    await copilot.getByRole("button", { name: /问忆程/ }).click();
+    await copilot.locator("input").fill("当前进展如何？");
+    await copilot.locator("form button").click();
+    await expect(copilot.locator("form")).toBeVisible();
+  }
 });
 
 test("seed project completes the core demo loop", async ({ page }) => {
@@ -38,7 +50,7 @@ test("seed project completes the core demo loop", async ({ page }) => {
   await expect(page.getByText("面向大学生的个人项目 Agent", { exact: true })).toBeVisible();
   await page.getByRole("link", { name: "回到我的工作台", exact: true }).first().click();
   await expect(page).toHaveURL(/\/focus$/);
-  await page.getByRole("link", { name: "查看项目", exact: true }).click();
+  await page.getByRole("link", { name: process.env.FOCUS_AGENT_ENABLED === "true" ? "全部项目" : "查看项目", exact: true }).click();
   await page.getByLabel("搜索项目").fill("ProjectMemo");
   await expect(page.getByText(/找到 1 个项目/)).toBeVisible();
   const seedLink = page.getByRole("link", { name: /人工智能创意赛 忆程 ProjectMemo 作品开发/ }).first();
@@ -105,7 +117,14 @@ test("project home separates features and preserves old bookmarks", async ({page
   await page.goto(`${base}?cardSort=importance#knowledge-assets`);
   await expect(page).toHaveURL(/\/knowledge\?cardSort=importance#knowledge-assets$/);
   await expect(page.getByRole("button",{name:"重要",exact:true})).toHaveAttribute("aria-pressed","true");
-  await page.goto(`${base}?openCopilot=1#memory-copilot`);await expect(page.getByLabel("问项目进展、提醒依据或下一步")).toBeVisible();
+  await page.goto(`${base}?openCopilot=1#memory-copilot`);
+  if(process.env.FOCUS_AGENT_ENABLED==="true"){
+    const discussion=page.getByRole("region",{name:"问忆程",exact:true});
+    await expect(discussion).toBeVisible();
+    await expect(discussion.getByText("正在读取讨论…")).toHaveCount(0);
+    if(await discussion.getByRole("button",{name:"开始讨论",exact:true}).isVisible())await discussion.getByRole("button",{name:"开始讨论",exact:true}).click();
+  }
+  await expect(page.getByLabel(process.env.FOCUS_AGENT_ENABLED === "true" ? "与忆程讨论项目" : "问项目进展、提醒依据或下一步")).toBeVisible();
   await page.goto(base);await page.setViewportSize({width:1280,height:800});
   await page.screenshot({path:"test-results/pre-r4-home-desktop.png",fullPage:true,animations:"disabled"});
   await page.getByRole("button",{name:"切换深浅色主题"}).click();

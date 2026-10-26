@@ -48,12 +48,29 @@ test("first material leads to an explicitly authorized Mission; multiple waiting
  await expect(page.getByRole("region",{name:"项目结论演进"}).getByText("实验记录",{exact:false}).first()).toBeVisible();
  await page.setViewportSize({width:1440,height:980});await page.screenshot({path:"test-results/pre-r4-followup-evolution.png",fullPage:true,animations:"disabled"});
  await page.goto("/focus");
- const waitingFocus=page.getByRole("region",{name:"需要回应的委托"});
- await expect(waitingFocus.getByText("等待补充信息",{exact:true}).first()).toBeVisible();
- await expect(waitingFocus.getByRole("link",{name:"补充委托资料"}).first()).toHaveAttribute("href",/\/missions\?mission=/);
- await expect(page.getByRole("region",{name:"当前范围概览"})).toBeVisible();
- await expect(page.getByRole("region",{name:"最近保存的资料"})).toBeVisible();
- await expect(page.getByRole("complementary",{name:"有效提醒"})).toBeVisible();
+ if(process.env.FOCUS_AGENT_ENABLED==="true"){
+   const waitingFocus=page.getByRole("complementary",{name:"项目焦点",exact:true});
+   const item=waitingFocus.locator("article").filter({has:page.getByRole("heading",{name:"核对阶段汇报的资料范围",exact:true})});
+   await expect(item.getByText("需要你判断",{exact:true})).toBeVisible();
+   await item.getByRole("button",{name:"与忆程讨论",exact:true}).click();
+   const discussion=page.getByRole("region",{name:"问忆程",exact:true});
+   await expect(discussion.getByText("正在读取讨论…")).toHaveCount(0);
+   if(await discussion.getByRole("button",{name:"开始讨论",exact:true}).isVisible())await discussion.getByRole("button",{name:"开始讨论",exact:true}).click();
+   const input=discussion.getByRole("textbox",{name:"与忆程讨论项目"});
+   await expect(input).toHaveValue(/核对阶段汇报的资料范围/);
+   const send=discussion.getByRole("button",{name:"发送",exact:true});await expect(send).toBeEnabled();await send.click();
+   await expect(input).toHaveValue("");
+   const source=discussion.getByRole("button",{name:"核对阶段汇报的资料范围",exact:true}).last();await expect(source).toBeVisible();
+   await source.locator("..").getByRole("button",{name:"在此协作",exact:true}).click();
+   await expect(discussion.getByRole("region",{name:"原任务协作",exact:true})).toContainText("核对阶段汇报的资料范围");
+ }else{
+   const waitingFocus=page.getByRole("region",{name:"需要回应的委托"});
+   await expect(waitingFocus.getByText("等待补充信息",{exact:true}).first()).toBeVisible();
+   await expect(waitingFocus.getByRole("link",{name:"补充委托资料"}).first()).toHaveAttribute("href",/\/missions\?mission=/);
+   await expect(page.getByRole("region",{name:"当前范围概览"})).toBeVisible();
+   await expect(page.getByRole("region",{name:"最近保存的资料"})).toBeVisible();
+   await expect(page.getByRole("complementary",{name:"有效提醒"})).toBeVisible();
+ }
  await page.screenshot({path:"test-results/projectmemo-focus-desktop.png",fullPage:true,animations:"disabled"});
  await page.getByRole("button",{name:"切换深浅色主题"}).click();
  await page.screenshot({path:"test-results/projectmemo-focus-dark.png",fullPage:true,animations:"disabled"});

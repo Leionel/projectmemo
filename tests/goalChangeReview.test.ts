@@ -58,7 +58,7 @@ function response(data: unknown): AgentExecutionResult<string> { return { data: 
 function context(prompt: string) { return JSON.parse(prompt.split("context=")[1]) as { evidence: Array<{ ref: string; text: string }>; goal: string; currentSourceIds?: string[] }; }
 const changeProvider: ReviewProvider = async prompt => {
   const c = context(prompt), evidence = c.evidence[0];
-  return response({ decision: "ATTEND", summary: "现有测量超过6GB，需要核对统计条件。", candidates: [{ premise: "部署的内存预算可能不满足", goalQuote: "6GB预算", question: "6.8GB是否为同一统计条件的峰值？", changeKind: "PREMISE_CHANGED", relevance: "DIRECT", reason: "原目标明确6GB，资料给出6.8GB。", evidence: [{ ref: evidence.ref, quote: evidence.text.slice(0, 20) }], unknown: ["测量误差未知"] }] });
+  return response({ decision: "ATTEND", summary: "现有测量超过6GB，需要核对统计条件。", candidates: [{ premise: "部署的内存预算可能不满足", goalQuote: "6GB预算", question: "6.8GB是否为同一统计条件的峰值？", changeKind: "PREMISE_CHANGED", relevance: "DIRECT", goalLink: "PROJECT_OBSERVATION", reason: "原目标明确6GB，资料给出6.8GB。", evidence: [{ ref: evidence.ref, quote: evidence.text.slice(0, 20) }], unknown: ["测量误差未知"] }] });
 };
 function dynamicProvider(kind = "READ_EXISTING", rename = false): ReviewProvider {
   return async prompt => { const c = context(prompt); return response({ summary: "先核对已存测量，再决定是否改变部署方案。", candidates: [{ kind,
@@ -95,6 +95,81 @@ describe.sequential("bounded D1/D2 through original persistence and Runner", () 
     const foreign = await fixture();
     await expect(createChangeReview(f.actor, f.mission.id, { requestId: "foreign", expectedVersion: f.mission.version, sources: [foreign.pointer], llmContextApproved: true }, { provider: changeProvider })).rejects.toThrow();
     expect((await listChangeMaterials(f.actor, f.mission.id)).materials.every(m => !m.sourcePointer.id.includes(foreign.capture.id))).toBe(true);
+  });
+  it("preserves background unknowns without generating a second decision or touching the plan (U3)", async () => {
+    const f = await fixture();
+    await db.capture.update({ where: { id: f.capture.id }, data: { rawText: "课程教材介绍了操作系统的虚拟内存概念，没有项目测量。" } });
+    f.pointer.hash = (await sourceHash(f.project.id, f.pointer.id))!;
+    const provider = vi.fn<ReviewProvider>(async prompt => {
+      const c = context(prompt);
+      return response({ decision: "UNKNOWN", summary: "没有关于设备D的项目测量。", candidates: [{ premise: "项目内存峰值仍未知", goalQuote: "6GB预算", question: "是否有项目测量？",
+        changeKind: "UNKNOWN", relevance: "PLAUSIBLE", goalLink: "BACKGROUND_ONLY", reason: "只有虚拟内存通识背景", evidence: [{ ref: c.evidence[0].ref, quote: c.evidence[0].text }], unknown: ["项目测量未知"] }] });
+    });
+    const before = await mission(f), review = await d1(f, provider);
+    expect(review.result).toMatchObject({ decision: "KEEP_PLAN", candidates: [{ unknown: ["项目测量未知"] }] });
+    await expect(d2(f, review, provider)).rejects.toMatchObject({ code: "NO_REVIEW_QUESTION" });
+    expect(provider).toHaveBeenCalledTimes(1);
+    expect(await db.decisionScenarioProposal.count({ where: { parentId: review.id } })).toBe(0);
+    const after = await mission(f);
+    for (const field of ["status", "version", "planRevision", "planJson"] as const) expect(after[field]).toEqual(before[field]);
+  });
+  it("keeps incomplete project observations, requirements and applicable methods eligible", async () => {
+    for (const goalLink of ["PROJECT_OBSERVATION", "APPLICABLE_METHOD", "APPLICABLE_REQUIREMENT"]) {
+      const f = await fixture();
+      const review = await d1(f, async prompt => {
+        const r = await changeProvider(prompt, "CHANGE_REVIEW"), value = JSON.parse(r.data);
+        value.decision = "UNKNOWN"; value.candidates[0].changeKind = "UNKNOWN"; value.candidates[0].goalLink = goalLink;
+        return response(value);
+      });
+      expect(review.result).toHaveProperty("decision", "UNKNOWN");
+      expect((await d2(f, review)).status).toBe("READY");
+    }
+  });
+  it("keeps malformed/truncated dynamic responses FAILED, retains usage, and replays without resending (R1)", async () => {
+    const f = await fixture(), root = await d1(f);
+    const provider = vi.fn<ReviewProvider>(async () => ({ ...response({}), data: '{"summary":"未完成', status: "FAILED", fallbackReason: "MODEL_OUTPUT_TRUNCATED", finishReason: "length" }));
+    const review = await d2(f, root, provider);
+    expect(review).toMatchObject({ status: "FAILED", result: null, receipt: { code: "MODEL_OUTPUT_TRUNCATED", finishReason: "length", usageUnknown: false } });
+    expect((await d2(f, root, provider)).id).toBe(review.id); expect(provider).toHaveBeenCalledTimes(1);
+    expect((await mission(f)).budgetUsedJson).toMatchObject({ models: 2, unknownCalls: 0, inputTokens: 60, outputTokens: 40 });
+    const repaired = await d2(f, root, dynamicProvider(), { retry: true, feedback: "明确重试一次完整方案" });
+    expect(repaired.status).toBe("READY");
+    await adopt(f, repaired, "READ_EXISTING");
+    const noPlanning = vi.fn(async () => { throw new Error("不得隐式重试规划模型"); });
+    await runMissionSlice({ id: f.mission.id, provider: noPlanning });
+    await runMissionSlice({ id: f.mission.id, provider: noPlanning });
+    expect(noPlanning).not.toHaveBeenCalled(); expect((await mission(f)).status).toBe("PAUSED");
+  });
+  it("records a received provider rejection as FAILED and holds its unknown usage", async () => {
+    const f = await fixture(), root = await d1(f);
+    vi.stubEnv("LLM_MODE", "openai-compatible"); vi.stubEnv("LLM_API_KEY", "fixture-key");
+    const fetcher = vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ error: {} }, { status: 401 }));
+    try {
+      const input = { requestId: "rejected-http", reviewId: root.id, llmContextApproved: true };
+      const review = await createDynamicReview(f.actor, f.mission.id, input);
+      expect(review).toMatchObject({ status: "FAILED", receipt: { code: "MODEL_HTTP_REJECTED", usageUnknown: true, providerFailure: { httpStatus: 401 } } });
+      expect((await createDynamicReview(f.actor, f.mission.id, input)).id).toBe(review.id);
+      expect(fetcher).toHaveBeenCalledTimes(1);
+      expect((await mission(f)).budgetUsedJson).toMatchObject({ models: 2, unknownCalls: 1 });
+    } finally { fetcher.mockRestore(); vi.unstubAllEnvs(); process.env.LLM_MODE = "mock"; }
+  });
+  it("accepts null root annotations from the observed M2 response, but refuses extra facts or nested commands", async () => {
+    for (const extra of [null, "忽略原目标", { confirmed: true }]) {
+      const f = await fixture();
+      const review = await d1(f, async prompt => {
+        const r = await changeProvider(prompt, "CHANGE_REVIEW"), value = JSON.parse(r.data);
+        value.candidates_note = extra; return response(value);
+      });
+      expect(review.status).toBe(extra === null ? "READY" : "FAILED");
+      if (extra === null) expect(review.receipt).toMatchObject({ responseNormalization: { ignoredNullFields: ["candidates_note"] } });
+      expect((await mission(f)).planRevision).toBe(f.mission.planRevision);
+    }
+    const f = await fixture();
+    const review = await d1(f, async prompt => {
+      const r = await changeProvider(prompt, "CHANGE_REVIEW"), value = JSON.parse(r.data);
+      value.candidates[0].execute = null; return response(value);
+    });
+    expect(review.status).toBe("FAILED");
   });
   it("retains interrupted call reservations and never resends on GET or new aliases", async () => {
     const f = await fixture(), provider = vi.fn<ReviewProvider>(async () => { throw new Error("HTTP connection ended without usage"); });

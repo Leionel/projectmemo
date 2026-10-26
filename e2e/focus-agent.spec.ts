@@ -25,9 +25,13 @@ test("Focus keeps file guidance inside its answer and names discussions from the
   await guides.locator("summary").first().click();
   await expect(guides.getByRole("link", { name: "查看项目资料", exact: true }).first()).toHaveAttribute("href", new RegExp(project.id + "/knowledge.*conversation="));
   await expect(panel.getByRole("combobox", { name: "选择讨论" }).locator("option:checked")).toContainText("实验部署记录还需要核对什么");
-  await page.setViewportSize({ width: 390, height: 844 });
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
-  await page.screenshot({ path: focusEvidenceDir + "/answer-file-guide-mobile.png", fullPage: true });
+  for (const width of [360, 390, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+    await expect(panel.getByRole("textbox", { name: "与忆程讨论项目" })).toBeVisible();
+    await expect(panel.getByRole("button", { name: "发送", exact: true })).toBeVisible();
+    await page.screenshot({ path: focusEvidenceDir + `/answer-file-guide-${width}.png`, fullPage: true });
+  }
 });
 
 test("Focus reads a D1/D2 proposal, confirms a directed read and returns its original result", async ({ page }) => {

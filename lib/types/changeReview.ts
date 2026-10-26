@@ -20,6 +20,7 @@ export const changeAnswerSchema = z.object({
     premise: z.string().min(1).max(300), goalQuote: z.string().min(1).max(300), question: z.string().min(1).max(500),
     changeKind: z.enum(["PREMISE_CHANGED", "CONFLICT", "UNKNOWN", "UPDATE", "UNRELATED"]),
     relevance: z.enum(["DIRECT", "PLAUSIBLE", "UNCLASSIFIED", "UNRELATED"]),
+    goalLink: z.enum(["PROJECT_OBSERVATION", "APPLICABLE_REQUIREMENT", "APPLICABLE_METHOD", "BACKGROUND_ONLY", "UNESTABLISHED"]),
     reason: z.string().min(1).max(500), evidence: z.array(quoteRef).min(1).max(8),
     unknown: z.array(z.string().max(200)).max(8),
   }).strict()).max(3),

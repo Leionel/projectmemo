@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { chatWithLLMWithMeta } from "@/lib/agent/llmAgent";
+import { getChatProviderDefaults } from "@/lib/config/provider";
+import { parseReviewJSON } from "./reviewProtocol";
 import { assertActor, type CopilotActor } from "@/lib/copilot/confirmation";
 import { defaultBudget, json, jsonHash, usageOf } from "@/lib/mission/contracts";
 import { event, lock, ownedMission, sourceHash, type Tx } from "@/lib/mission/repository";
@@ -109,14 +111,17 @@ export async function runPreparedReview<T>(actor: CopilotActor, p: DecisionScena
   normalize: (answer: T, base: ReviewBase, provider: string, usageUnknown: boolean) => ChangeReviewResult | DynamicReviewResult, provider?: ReviewProvider) {
   const base = p.baseManifest as unknown as ReviewBase;
   let reply: AgentExecutionResult<string> | undefined, answer: ChangeReviewResult | DynamicReviewResult | null = null, error: unknown;
+  let ignoredNullFields: string[] = [];
   const started = Date.now();
   try {
     if (prompt.length > 22000) throw new AppError("REVIEW_CONTEXT_LIMIT", "复核资料超出本轮范围", 409);
     // The original provider wrapper consumes account quota once; preparation reserves only Mission budget.
     await db.decisionScenarioProposal.update({ where: { id: p.id }, data: { baseManifest: json({ ...base, reservation: { ...base.reservation!, sent: true } }) } });
     reply = await (provider ? provider(prompt, p.purpose as ReviewPurpose) : chatWithLLMWithMeta(prompt, p.projectId, undefined, { userId: actor.userId, sessionId: actor.sessionId, reviewProposalId: p.id }));
-    if (!["SUCCESS", "PARTIAL"].includes(reply.status)) throw new AppError("REVIEW_MODEL_FAILED", "模型未提供有效复核，保留原计划", 409);
-    answer = normalize(schema.parse(JSON.parse(reply.data)), base, reply.provider, !!reply.usageUnknown);
+    if (!["SUCCESS", "PARTIAL"].includes(reply.status)) throw new AppError(reply.fallbackReason ?? "REVIEW_MODEL_FAILED", "模型未提供完整复核，保留原计划", 409);
+    const parsed = parseReviewJSON(reply.data, schema);
+    ignoredNullFields = parsed.ignoredNullFields;
+    answer = normalize(parsed.data, base, reply.provider, !!reply.usageUnknown);
   } catch (caught) { error = caught; }
   await db.$transaction(async tx => {
     await lock(tx, p.missionId);
@@ -134,16 +139,20 @@ export async function runPreparedReview<T>(actor: CopilotActor, p: DecisionScena
     }
     let fresh = false;
     try { await reviewMission(actor, p.missionId, tx); fresh = await reviewFresh(base, m, tx); } catch { /* Settle usage even if authorization was revoked while HTTP was in flight. */ }
-    const status = error ? reply || notSent ? "FAILED" : "UNKNOWN" : fresh ? "READY" : "STALE";
+    const receivedFailure = error instanceof AppError && ["MODEL_HTTP_REJECTED", "MODEL_RESPONSE_INVALID"].includes(error.code);
+    const status = error ? reply || notSent || receivedFailure ? "FAILED" : "UNKNOWN" : fresh ? "READY" : "STALE";
     const finalBase = { ...base, reservation: { ...base.reservation!, sent: !notSent, settled: true } };
     await tx.agentMission.update({ where: { id: m.id }, data: { budgetUsedJson: json(used) } });
     await tx.decisionScenarioProposal.update({ where: { id: p.id }, data: { status, baseManifest: json(finalBase), scenariosJson: answer ? json(answer) : { schemaVersion: 2, pending: false },
       proposalHash: jsonHash({ base: finalBase, purpose: p.purpose, answer }), receiptJson: error ? json({ code: error instanceof AppError ? error.code : reply ? "INVALID_REVIEW_RESULT" : "REVIEW_INTERRUPTED",
+        finishReason: reply?.finishReason ?? null, responseLength: reply?.data.length ?? null, responseHash: reply ? jsonHash(reply.data) : null,
+        providerFailure: receivedFailure ? (error as AppError).details : null,
         diagnostic: error instanceof z.ZodError ? error.issues.slice(0, 8).map(issue => ({ code: issue.code, path: issue.path.join("."), message: issue.message.slice(0, 160) })) : null,
-        usageUnknown: !reply?.usage || !!reply.usageUnknown }) : undefined } });
-    await tx.agentRun.create({ data: { projectId: p.projectId, runType: "CHAT", provider: reply?.provider ?? (provider ? "TEST_FIXTURE" : "change-review-model"),
-      status: status === "READY" ? "SUCCESS" : "FAILED", fallbackReason: status === "READY" ? null : status,
-      trace: json({ purpose: p.purpose, reviewProposalId: p.id, actorUserId: actor.userId, usage: reply?.usage ?? null, usageUnknown: !reply?.usage || !!reply.usageUnknown, requestIdentity: reply?.requestIdentity ?? null, durationMs: Date.now() - started }) } });
+        usageUnknown: !reply?.usage || !!reply.usageUnknown }) : ignoredNullFields.length ? json({ responseNormalization: { ignoredNullFields } }) : undefined } });
+    const config = getChatProviderDefaults();
+    await tx.agentRun.create({ data: { projectId: p.projectId, runType: "CHAT", provider: reply?.provider ?? (provider ? "TEST_FIXTURE" : `llm:${config.provider}:${config.model}`),
+      status: status === "READY" ? "SUCCESS" : "FAILED", fallbackReason: status === "READY" ? null : error instanceof AppError ? error.code : status,
+      trace: json({ purpose: p.purpose, reviewProposalId: p.id, actorUserId: actor.userId, usage: reply?.usage ?? null, usageUnknown: !reply?.usage || !!reply.usageUnknown, requestIdentity: reply?.requestIdentity ?? null, responseNormalization: { ignoredNullFields }, responseHash: reply ? jsonHash(reply.data) : null, durationMs: Date.now() - started }) } });
     if (status === "READY") await event(tx, m.id, p.purpose === "CHANGE_REVIEW" ? "CHANGE_REVIEW_READY" : "DYNAMIC_PLAN_READY", { proposalId: p.id });
   }, { timeout: 20000 });
   return readReview(actor, p.id);

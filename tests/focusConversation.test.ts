@@ -31,7 +31,8 @@ import { createConversation, readConversation, saveFocusPreference, listConversa
 import { submitConversationTurn } from "@/lib/conversation/turnService";
 import { confirmConversationAction, declineConversationAction } from "@/lib/conversation/commands";
 import { workspaceDirectory } from "@/lib/services/workspaceContextService";
-import { reserveWorkspaceCloudCall } from "@/lib/auth/cloudQuota";
+import { reserveWorkspaceCloudCall, settleWorkspaceCloudCall } from "@/lib/auth/cloudQuota";
+import { inputTokenBound } from "@/lib/conversation/tokenBudget";
 import { explainPriority } from "@/lib/conversation/priority";
 import { getProjectChat } from "@/lib/services/copilotService";
 import { conversationHref } from "@/lib/conversation/navigation";
@@ -202,6 +203,58 @@ describe.sequential("Focus conversations: real services and isolated persistence
     const t = await db.conversationTurn.create({ data: { conversationId: f.id, requestId: "bill", inputHash: "hash", inputJson: {}, baseVersion: 1, status: "OBSERVING" } });
     await expect(reserveWorkspaceCloudCall({ userId: f.user.id, turnId: t.id, purpose: "ROUTE" })).rejects.toMatchObject({ code: "CLOUD_ACCESS_DISABLED" });
     expect((await db.conversationTurn.findUniqueOrThrow({ where: { id: t.id } })).callCount).toBe(0);
+  });
+  it("settles token reservations once, keeps partial usage held, and blocks cumulative over-budget before billing", async () => {
+    const f = await fixture();
+    await db.accountSecurity.create({ data: { userId: f.user.id, email: f.user.id + "@example.test", emailVerifiedAt: new Date(), dailyCloudLimit: 10 } });
+    const turn = await db.conversationTurn.create({ data: { conversationId: f.id, requestId: "tokens", inputHash: "tokens", inputJson: {}, baseVersion: 1, status: "OBSERVING" } });
+    const route = { userId: f.user.id, sessionId: f.actor.sessionId, turnId: turn.id, purpose: "ROUTE" as const, inputTokens: 9000, outputTokens: 768 };
+    await reserveWorkspaceCloudCall(route);
+    await expect(reserveWorkspaceCloudCall(route)).rejects.toMatchObject({ code: "CALL_ALREADY_RESERVED" });
+    const answer = { ...route, purpose: "ANSWER" as const, inputTokens: 4000, outputTokens: 2048 };
+    await expect(reserveWorkspaceCloudCall(answer)).rejects.toMatchObject({ code: "CONVERSATION_TOKEN_BUDGET_EXHAUSTED" });
+    const result = { data: "{}", provider: "fixture", status: "SUCCESS" as const, durationMs: 1, usage: { inputTokens: 100, outputTokens: null } };
+    await settleWorkspaceCloudCall(route, result); await settleWorkspaceCloudCall(route, result);
+    await reserveWorkspaceCloudCall(answer);
+    const stored = await db.conversationTurn.findUniqueOrThrow({ where: { id: turn.id } });
+    expect(stored.callCount).toBe(2); expect(stored.usageJson).toHaveLength(1);
+    expect(stored.reservationJson).toMatchObject([{ state: "SETTLED", usage: { inputTokens: 100, outputTokens: null } }, { state: "RESERVED" }]);
+    expect((await db.accountCloudUsage.findFirstOrThrow({ where: { userId: f.user.id } })).used).toBe(2);
+    expect(inputTokenBound("中文😀")).toBeGreaterThan(inputTokenBound("abcd"));
+  });
+  it("settles truncated/empty received responses as FAILED with real usage and never auto-replays HTTP", async () => {
+    for (const content of ['{"intent":', ""]) {
+      const f = await fixture();
+      vi.stubEnv("LLM_MODE", "openai-compatible"); vi.stubEnv("LLM_PROVIDER", "deepseek"); vi.stubEnv("LLM_API_KEY", "fixture-key");
+      const fetcher = vi.spyOn(globalThis, "fetch").mockImplementation(async (_url, init) => {
+        const body = JSON.parse(init!.body as string);
+        expect(body.response_format).toEqual({ type: "json_object" }); expect(body.max_tokens).toBe(768);
+        return Response.json({ choices: [{ finish_reason: content ? "length" : "stop", message: { content } }], usage: { prompt_tokens: 23, completion_tokens: 19 } });
+      });
+      try {
+        const input = { requestId: "received-invalid", expectedVersion: 1, message: "先处理什么？", llmContextApproved: true };
+        await expect(submitConversationTurn(f.actor, f.id, input)).rejects.toMatchObject({ code: content ? "MODEL_OUTPUT_TRUNCATED" : "MODEL_EMPTY_RESPONSE" });
+        expect((await submitConversationTurn(f.actor, f.id, input)).status).toBe("FAILED");
+        const turn = await db.conversationTurn.findFirstOrThrow({ where: { conversationId: f.id } });
+        expect(turn.usageJson).toMatchObject([{ usage: { inputTokens: 23, outputTokens: 19 }, usageUnknown: false }]);
+        expect(fetcher).toHaveBeenCalledTimes(1);
+      } finally { fetcher.mockRestore(); vi.unstubAllEnvs(); process.env.LLM_MODE = "mock"; }
+    }
+  });
+  it("records HTTP rejection as a known failure while retaining unknown token cost", async () => {
+    const f = await fixture();
+    vi.stubEnv("LLM_MODE", "openai-compatible"); vi.stubEnv("LLM_API_KEY", "fixture-key");
+    const fetcher = vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ error: { code: "unauthorized" } }, { status: 401 }));
+    try {
+      const input = { requestId: "http-rejected", expectedVersion: 1, message: "哪个项目优先？", llmContextApproved: true };
+      await expect(submitConversationTurn(f.actor, f.id, input)).rejects.toMatchObject({ code: "MODEL_HTTP_REJECTED" });
+      expect((await submitConversationTurn(f.actor, f.id, input)).status).toBe("FAILED");
+      const stored = await db.conversationTurn.findFirstOrThrow({ where: { conversationId: f.id } });
+      expect(stored.reservationJson).toMatchObject([{ state: "SETTLED", usage: { inputTokens: null, outputTokens: null } }]);
+      expect(stored.usageJson).toMatchObject([{ usageUnknown: true }]); expect(fetcher).toHaveBeenCalledTimes(1);
+      const audit = await db.agentRun.findFirstOrThrow({ where: { conversationId: f.id } });
+      expect(audit.provider).toMatch(/^llm:/); expect(audit.trace).toMatchObject({ usageUnknown: true });
+    } finally { fetcher.mockRestore(); vi.unstubAllEnvs(); process.env.LLM_MODE = "mock"; }
   });
   it("uses structured model routing, keeps private audit outside project runs, and bills the current user once per request stage", async () => {
     const f = await fixture(8), p = f.projects[7];

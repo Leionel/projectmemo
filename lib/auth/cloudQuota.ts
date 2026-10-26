@@ -1,8 +1,10 @@
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { json } from "@/lib/mission/contracts";
+import { reserveTurnTokens, stageOutputLimit, tokenReservations } from "@/lib/conversation/tokenBudget";
+import type { AgentExecutionResult } from "@/lib/types";
 
-export type WorkspaceBilling = { userId: string; turnId: string; purpose: "ROUTE" | "ANSWER" };
+export type WorkspaceBilling = { userId: string; turnId: string; purpose: "ROUTE" | "ANSWER"; sessionId?: string; inputTokens?: number; outputTokens?: number; provider?: string };
 export type ReviewBilling = { userId: string; sessionId: string; reviewProposalId: string };
 /** One actor and one durable proposal reservation; never charges every project owner. */
 export async function reserveReviewCloudCall(billing: ReviewBilling): Promise<void> {
@@ -35,9 +37,12 @@ export async function reserveWorkspaceCloudCall(billing: WorkspaceBilling): Prom
     });
     if (!turn || !["OBSERVING", "GENERATING"].includes(turn.status))
       throw new AppError("TURN_CHANGED", "本次请求已结束或不可访问", 409);
-    const reserved = Array.isArray(turn.reservationJson) ? turn.reservationJson as string[] : [];
-    if (reserved.includes(billing.purpose) || turn.callCount >= 2)
+    if (billing.sessionId && !await tx.authSession.findFirst({ where: { id: billing.sessionId, userId: billing.userId, revokedAt: null, expiresAt: { gt: new Date() } } }))
+      throw new AppError("UNAUTHORIZED", "登录状态已变化，请重新登录", 401);
+    if (turn.callCount >= 2)
       throw new AppError("CALL_ALREADY_RESERVED", "本次模型请求已经发出，请读取原回执", 409);
+    const reserved = reserveTurnTokens(turn.reservationJson, billing.purpose, billing.inputTokens ?? 12000, billing.outputTokens ?? stageOutputLimit(billing.purpose));
+    reserved[reserved.length - 1].provider = billing.provider;
     const account = await tx.accountSecurity.findUnique({ where: { userId: billing.userId } });
     if (account) {
       if (!account.emailVerifiedAt || account.dailyCloudLimit <= 0)
@@ -52,8 +57,26 @@ export async function reserveWorkspaceCloudCall(billing: WorkspaceBilling): Prom
       if (!consumed.count) throw new AppError("CLOUD_QUOTA_EXHAUSTED", "今日云模型调用额度已用完", 429);
     }
     await tx.conversationTurn.update({ where: { id: turn.id }, data: {
-      callCount: { increment: 1 }, reservationJson: json([...reserved, billing.purpose]),
+      callCount: { increment: 1 }, reservationJson: json(reserved),
     } });
+  });
+}
+
+/** Settle once even if the client disconnected or lost authorization after HTTP; this writes usage only. */
+export async function settleWorkspaceCloudCall(billing: WorkspaceBilling, result: AgentExecutionResult<string>) {
+  await db.$transaction(async tx => {
+    await tx.conversationTurn.updateMany({ where: { id: billing.turnId }, data: { callCount: { increment: 0 } } });
+    const turn = await tx.conversationTurn.findFirstOrThrow({ where: { id: billing.turnId, conversation: { ownerUserId: billing.userId } } });
+    const entries = tokenReservations(turn.reservationJson), entry = entries.find(e => e.purpose === billing.purpose);
+    if (!entry || entry.state === "SETTLED") return;
+    const valid = (n: number | null | undefined) => typeof n === "number" && Number.isSafeInteger(n) && n >= 0 ? n : null;
+    const usage = { inputTokens: valid(result.usage?.inputTokens), outputTokens: valid(result.usage?.outputTokens) };
+    entry.state = "SETTLED"; entry.usage = usage;
+    await tx.conversationTurn.update({ where: { id: turn.id }, data: { reservationJson: json(entries), usageJson: json([
+      ...(Array.isArray(turn.usageJson) ? turn.usageJson : []), { purpose: billing.purpose, provider: result.provider,
+        requestIdentity: result.requestIdentity, usage, usageUnknown: usage.inputTokens === null || usage.outputTokens === null,
+        durationMs: result.durationMs, finishReason: result.finishReason ?? null },
+    ]) } });
   });
 }
 

@@ -255,7 +255,10 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     return { ...result, conversation: await readConversation(actor, id) };
   } catch (error) {
     const old = await db.conversationTurn.findUnique({ where: { id: turn.id } });
-    const completedCalls = Array.isArray(old?.usageJson) ? old.usageJson.length : 0;
+    const usages = Array.isArray(old?.usageJson) ? old.usageJson.map(record) : [];
+    const reservations = Array.isArray(old?.reservationJson) ? old.reservationJson.map(record) : [];
+    const completedCalls = usages.length;
+    const observedProvider = [...usages, ...reservations].findLast(e => typeof e.provider === "string")?.provider;
     const status = (old?.callCount ?? 0) > completedCalls ? "UNKNOWN" : "FAILED";
     await db.$transaction(async tx => {
       await lockConversation(tx, id);
@@ -263,10 +266,10 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
         errorJson: { code: error instanceof AppError ? error.code : "MODEL_OR_PROTOCOL_ERROR", message: "请求未完成，未创建业务操作；不会自动重发模型" } } });
       await tx.conversation.updateMany({ where: { id, activeTurnId: turn.id }, data: { activeTurnId: null } });
       await tx.agentRun.create({ data: { projectId: null, conversationId: id, turnId: turn.id, runType: "CHAT",
-        status: "FAILED", provider: old?.callCount ? "configured-model" : "project_state",
+        status: "FAILED", provider: typeof observedProvider === "string" ? observedProvider : old?.callCount ? "configured-model" : "project_state",
         fallbackReason: error instanceof AppError ? error.code : "MODEL_OR_PROTOCOL_ERROR",
         trace: json({ purpose: "FOCUS_FAILED_TURN", actorUserId: actor.userId, usage: old?.usageJson,
-          reservation: old?.reservationJson, usageUnknown: status === "UNKNOWN" }) } });
+          reservation: old?.reservationJson, usageUnknown: status === "UNKNOWN" || usages.some(e => e.usageUnknown !== false) }) } });
     });
     throw error;
   }

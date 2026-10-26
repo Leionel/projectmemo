@@ -19,7 +19,7 @@ try{
   const sourceId = "capture:" + capture.id;
   const root = await createChangeReview(actor, id, { requestId: "e2e-review:" + id, expectedVersion: mission.version, sources: [{ id: sourceId, hash: await sourceHash(mission.projectId, sourceId) }], llmContextApproved: true }, { provider: async prompt => {
     const context = JSON.parse(prompt.split("context=")[1]);
-    return { provider: "E2E_TEST_FIXTURE", status: "SUCCESS", durationMs: 1, usage: { inputTokens: 1, outputTokens: 1 }, data: JSON.stringify({ decision: "ATTEND", summary: "设备D部署测量超过原预算，需要核对。", candidates: [{ premise: "部署预算可能不满足", goalQuote: mission.goal, question: "原日志是否包含缓存？", changeKind: "UNKNOWN", relevance: "DIRECT", reason: "需核对原日志条件", unknown: ["缓存口径"], evidence: [{ ref: context.evidence[0].ref, quote: "模型A内存峰值6.8GB" }] }] }) };
+    return { provider: "E2E_TEST_FIXTURE", status: "SUCCESS", durationMs: 1, usage: { inputTokens: 1, outputTokens: 1 }, data: JSON.stringify({ decision: "ATTEND", summary: "设备D部署测量超过原预算，需要核对。", candidates: [{ premise: "部署预算可能不满足", goalQuote: mission.goal, question: "原日志是否包含缓存？", changeKind: "UNKNOWN", relevance: "DIRECT", goalLink: "PROJECT_OBSERVATION", reason: "需核对原日志条件", unknown: ["缓存口径"], evidence: [{ ref: context.evidence[0].ref, quote: "模型A内存峰值6.8GB" }] }] }) };
   } });
   await createDynamicReview(actor, id, { requestId: "e2e-dynamic:" + id, reviewId: root.id, llmContextApproved: true }, { provider: async prompt => {
     const context = JSON.parse(prompt.split("context=")[1]);

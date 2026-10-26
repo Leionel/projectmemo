@@ -22,8 +22,9 @@ export function normalizeChangeAnswer(answer: z.infer<typeof changeAnswerSchema>
     const rank = { DIRECT: 0, PLAUSIBLE: 1, UNCLASSIFIED: 2, UNRELATED: 3 };
     return rank[a.relevance] - rank[b.relevance] || a.candidateId.localeCompare(b.candidateId);
   });
-  const useful = candidates.filter(c => c.relevance !== "UNRELATED" && c.changeKind !== "UNRELATED");
-  return { schemaVersion: 2, summary: answer.summary, candidates,
-    decision: answer.decision === "ATTEND" && !useful.length ? "KEEP_PLAN" : answer.decision,
+  const useful = candidates.filter(c => ["DIRECT", "PLAUSIBLE"].includes(c.relevance) && c.changeKind !== "UNRELATED" &&
+    ["PROJECT_OBSERVATION", "APPLICABLE_REQUIREMENT", "APPLICABLE_METHOD"].includes(c.goalLink));
+  return { schemaVersion: 2, candidates, summary: useful.length ? answer.summary : "本轮资料尚未形成影响原目标的依据，保留当前计划。" + answer.summary,
+    decision: !useful.length ? "KEEP_PLAN" : answer.decision,
     provider, usageUnknown };
 }

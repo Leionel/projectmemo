@@ -5,6 +5,7 @@ import { ConversationService } from '../services/ConversationService';
 import { SessionStore } from '../services/SessionStore';
 import { ConversationView, ConversationListItem, ConversationCreateInput, ConversationTurnInput, ConversationConfirmInput,
   ConversationMessage, ConversationRef, ConversationProposal, ConversationEntityInput, ConversationSource, ConversationProject, PriorityReason, FocusPreferenceInput } from '../models/Conversation';
+import { missionStatusLabel } from '../common/MissionContract';
 import { PMAppBar } from '../components/PMAppBar';
 import { PMButton } from '../components/PMReferencePrimitives';
 import { PMColors, PMSpacing, PMRadius } from '../common/DesignTokens';
@@ -22,8 +23,11 @@ struct FocusConversation {
   @State private pageVisible: boolean = true;
   @State private error: string = '';
   @State private cloud: boolean = false;
+  @State private cloudAvailable: boolean = false;
+  @State private analysisReady: boolean = false;
   @State private target: string = '';
   @State private expanded: string = '';
+  @State private expandedRefs: string = '';
   @State private historyOpen: boolean = false;
   @State private showPreference: boolean = false;
   @State private scopeOpen: boolean = false;
@@ -40,7 +44,7 @@ struct FocusConversation {
   private service: ConversationService = new ConversationService();
   private pending: ConversationTurnInput | null = null;
   private confirmationKeys: Map<string, string> = new Map<string, string>();
-  private expired: () => void = (): void => { this.generation++; this.view = new ConversationView(); this.workRef = null; this.text = ''; this.pending = null; this.sessions = []; this.error = '登录已失效，请重新登录'; this.busy = false; };
+  private expired: () => void = (): void => { this.generation++; this.view = new ConversationView(); this.workRef = null; this.text = ''; this.pending = null; this.sessions = []; this.error = '登录已失效，请重新登录'; this.busy = false; this.cloud = false; this.analysisReady = false; };
   aboutToAppear(): void { SessionStore.onSessionExpired(this.expired); this.initialize(); }
   aboutToDisappear(): void { this.generation++; SessionStore.offSessionExpired(this.expired); }
   onPageShow(): void { this.pageVisible = true; if (this.view.id !== '' && !this.busy) this.refresh(); }
@@ -50,6 +54,8 @@ struct FocusConversation {
     try {
       const caps = await this.service.capabilities();
       if (epoch !== this.generation) return;
+      this.cloudAvailable = caps.cloudAvailable;
+      this.cloud = caps.cloudAvailable; this.analysisReady = true;
       if (!caps.enabled) { this.error = '全局协作尚未开启'; return; }
       await this.service.syncWorkspace();
       if (epoch !== this.generation) return;
@@ -108,11 +114,11 @@ struct FocusConversation {
     finally { if (epoch === this.generation) this.busy = false; }
   }
   private async ask(): Promise<void> {
-    if (this.busy || this.text.trim() === '' || this.view.id === '') return;
+    if (this.busy || !this.analysisReady || this.text.trim() === '' || this.view.id === '') return;
     const epoch = this.generation; this.busy = true; this.error = '';
     if (this.pending === null || this.pending.message !== this.text.trim()) {
       const input = new ConversationTurnInput(); input.requestId = util.generateRandomUUID(); input.expectedVersion = this.view.version;
-      input.message = this.text.trim(); input.llmContextApproved = this.cloud;
+      input.message = this.text.trim(); input.llmContextApproved = this.cloud && this.cloudAvailable;
       input.projectId = this.target === '' ? null : this.target;
       if (this.replyId !== '') input.replyToMessageId = this.replyId;
       if (this.entity !== undefined && this.entity.projectId === this.target) input.entityRef = this.entity;
@@ -159,19 +165,51 @@ struct FocusConversation {
   }
   @Builder private Message(m: ConversationMessage) {
     Column({ space: 10 }) {
+      if (m.role === 'ASSISTANT') {
+        Row({ space: 8 }) {
+          Text('忆').fontSize(13).fontWeight(FontWeight.Medium).fontColor(PMColors.BRAND).width(26).height(26).textAlign(TextAlign.Center).backgroundColor(PMColors.BRAND_LIGHT).borderRadius(8)
+          Text('忆程').fontSize(13).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
+          Blank()
+          Text(m.provider === 'rules' ? '本地整理' : m.provider === 'project_state' ? '项目记录' : '云端分析').fontSize(11).fontColor(PMColors.INK_TERTIARY)
+        }.width('100%')
+      }
       Text(m.content).fontSize(15).lineHeight(24).fontColor(PMColors.INK_PRIMARY).width('100%')
       if (m.priorities.length > 0 || m.sources.length > 0) {
-        PMButton({ label: this.expanded === m.id ? '收起依据' : '优先级与来源', secondary: true, onAction: (): void => { this.expanded = this.expanded === m.id ? '' : m.id; } })
+        Button(this.expanded === m.id ? '收起依据  ⌃' : '优先级与来源  ⌄', { type: ButtonType.Normal }).height(44).fontSize(12).fontColor(PMColors.BRAND)
+          .backgroundColor(Color.Transparent).padding({ left: 0, right: 8 }).onClick(() => { this.expanded = this.expanded === m.id ? '' : m.id; })
       }
       if (this.expanded === m.id) {
         ForEach(m.priorities, (p: PriorityReason) => { Text(p.importance + '；' + p.urgency + '；' + p.blocking + '；' + p.effort + '\n' + p.preference + '\n' + p.tradeoff).fontSize(13).lineHeight(21).fontColor(PMColors.INK_SECONDARY) }, (p: PriorityReason) => p.projectId)
         ForEach(m.sources, (s: ConversationSource) => { Text(s.title + '\n' + s.excerpt).fontSize(13).lineHeight(21).fontColor(PMColors.INK_SECONDARY) }, (s: ConversationSource) => s.id)
       }
-      ForEach(m.refs.filter((r: ConversationRef) => ['PROJECT', 'MISSION', 'ACTION'].includes(r.kind)).slice(0, 3), (r: ConversationRef) => {
-        Text(r.title + '  ↗').fontSize(13).fontColor(PMColors.BRAND).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).padding({ top: 8, bottom: 8 }).onClick(() => { this.open(r, m.id); })
-        if (r.kind === 'MISSION' || r.kind === 'ACTION') { PMButton({ label: '在此协作', secondary: true, disabled: this.busy, onAction: (): void => { this.workRef = { kind: r.kind, id: r.id, projectId: r.projectId }; this.messageScroller.scrollEdge(Edge.Bottom); } }) }
-        if (r.kind === 'MISSION' && r.status === 'PAUSED') { PMButton({ label: '预览接续原委托', disabled: this.busy, secondary: true, onAction: (): void => { if (this.busy) return; const epoch = this.generation; this.busy = true; this.service.previewResume(this.view.id, r.id).then(v => { if (epoch === this.generation) this.view = v.conversation; }).catch((e: Error) => { if (epoch === this.generation) this.fail(e); }).finally(() => { if (epoch === this.generation) this.busy = false; }); } }) }
+      ForEach(m.refs.filter((r: ConversationRef) => ['PROJECT', 'MISSION', 'ACTION'].includes(r.kind)).slice(0, this.expandedRefs === m.id ? m.refs.length : 2), (r: ConversationRef) => {
+        if (r.kind === 'PROJECT') {
+          Button(r.title + '  ↗', { type: ButtonType.Normal }).height(44).fontSize(12).fontColor(PMColors.INK_SECONDARY)
+            .backgroundColor(Color.Transparent).padding({ left: 0, right: 4 })
+            .onClick(() => { this.open(r, m.id); })
+        } else {
+          Column({ space: 6 }) {
+            Text((r.kind === 'MISSION' ? '长期委托' : '行动') + (r.status ? ' · ' + (r.kind === 'MISSION' ? missionStatusLabel(r.status) : r.status === 'DONE' ? '已完成' : r.status === 'DOING' ? '进行中' : r.status === 'TODO' ? '待办' : '状态待核对') : ''))
+              .fontSize(11).fontColor(PMColors.INK_TERTIARY)
+            Text(r.title).fontSize(14).lineHeight(21).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
+              .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
+            Row({ space: 12 }) {
+              Button('打开原任务 ↗', { type: ButtonType.Normal }).height(44).fontSize(12).fontColor(PMColors.INK_SECONDARY)
+                .backgroundColor(Color.Transparent).padding({ left: 0, right: 4 }).onClick(() => { this.open(r, m.id); })
+              Blank()
+              Button('在此协作 →', { type: ButtonType.Normal }).height(44).fontSize(13).fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).padding({ left: 8, right: 0 }).enabled(!this.busy)
+                .onClick(() => { this.workRef = { kind: r.kind, id: r.id, projectId: r.projectId }; this.messageScroller.scrollEdge(Edge.Bottom); })
+            }.width('100%')
+          }.width('100%').alignItems(HorizontalAlign.Start).padding({ left: 14, right: 14, top: 12, bottom: 0 })
+            .backgroundColor(PMColors.SURFACE).borderRadius(12).border({ width: 1, color: PMColors.BORDER_SUBTLE })
+        }
       }, (r: ConversationRef) => r.bindingId ?? r.id)
+      if (m.refs.filter((r: ConversationRef) => ['PROJECT', 'MISSION', 'ACTION'].includes(r.kind)).length > 2) {
+        Button(this.expandedRefs === m.id ? '收起其他关联任务 ⌃' : '其他关联任务 ⌄', { type: ButtonType.Normal }).height(44)
+          .fontSize(12).fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).padding({ left: 0, right: 8 })
+          .onClick(() => { this.expandedRefs = this.expandedRefs === m.id ? '' : m.id; })
+      }
       if (m.proposal !== null) {
         Text(m.proposal.title).fontSize(15).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
         Text(m.proposal.description).fontSize(14).fontColor(PMColors.INK_SECONDARY)
@@ -188,8 +226,13 @@ struct FocusConversation {
           PMButton({ label: '不采用', secondary: true, disabled: this.busy, onAction: (): void => { if (this.busy) return; const epoch = this.generation; this.busy = true; this.service.decline(this.view.id, m.proposal!.executionId).then(r => { if (epoch === this.generation) this.view = r.conversation; }).catch((e: Error) => { if (epoch === this.generation) this.fail(e); }).finally(() => { if (epoch === this.generation) this.busy = false; }); } })
         }
       }
-      if (m.role === 'ASSISTANT' && !m.restricted) { PMButton({ label: '追问这条', secondary: true, onAction: (): void => { this.replyId = m.id; this.text = '为什么这样建议？'; } }) }
-    }.width('100%').alignItems(HorizontalAlign.Start).padding(16).backgroundColor(m.role === 'USER' ? PMColors.SURFACE_SUBTLE : PMColors.SURFACE).borderRadius(PMRadius.LG)
+      if (m.role === 'ASSISTANT' && !m.restricted) {
+        Button('追问这条 ↗', { type: ButtonType.Normal }).height(44).fontSize(12).fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).padding({ left: 0, right: 8 })
+          .onClick(() => { this.replyId = m.id; this.text = '为什么这样建议？'; })
+      }
+    }.width(m.role === 'USER' ? '92%' : '100%').alignSelf(m.role === 'USER' ? ItemAlign.End : ItemAlign.Start)
+      .alignItems(HorizontalAlign.Start).padding(m.role === 'USER' ? 14 : 0)
+      .backgroundColor(m.role === 'USER' ? PMColors.BRAND_LIGHT : Color.Transparent).borderRadius(16)
   }
   build() {
     Column() {
@@ -225,7 +268,7 @@ struct FocusConversation {
         Text(this.error).fontSize(12).lineHeight(20).fontColor(PMColors.RISK).padding({ left: 20, right: 20, top: 8, bottom: 8 }).width('100%')
       }
       Scroll(this.messageScroller) {
-        Column({ space: 16 }) {
+        Column({ space: 24 }) {
           if (this.view.id !== '') {
             ForEach([this.view.id], (id: string) => {
               ConversationAnchorPanel({ conversationId: id, revision: this.view.version, busy: $busy, visible: this.pageVisible, suspended: this.workRef !== null,
@@ -264,20 +307,23 @@ struct FocusConversation {
             }.width('100%').padding(16).backgroundColor(PMColors.SURFACE).borderRadius(16)
           }
         }.padding(16).width('100%').alignItems(HorizontalAlign.Start)
-      }.layoutWeight(1).width('100%')
+      }.layoutWeight(1).width('100%').scrollBar(BarState.Off)
       if (this.view.id !== '') {
         Column({ space: 8 }) {
-          TextArea({ text: this.text, placeholder: '和忆程聊聊下一步…' }).height(80).fontSize(15).backgroundColor(PMColors.SURFACE_SUBTLE)
+          TextArea({ text: this.text, placeholder: '和忆程聊聊下一步…' }).height(64).fontSize(15).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(14)
             .enabled(!this.busy).onChange((v: string) => { this.text = v; })
           Row({ space: 8 }) {
-            Checkbox().width(18).height(18).selectedColor(PMColors.BRAND).select(this.cloud).onChange((v: boolean) => { this.cloud = v; this.pending = null; })
-            Text('云端分析').fontSize(12).fontColor(PMColors.INK_TERTIARY).accessibilityText('允许云模型使用本次授权项目资料')
+            Checkbox().width(18).height(18).selectedColor(PMColors.BRAND).select(this.cloud).enabled(this.analysisReady && this.cloudAvailable && !this.busy).onChange((v: boolean) => { this.cloud = v; this.pending = null; })
+            Text(this.cloudAvailable ? '云端分析' : '本地整理').fontSize(12).fontColor(PMColors.INK_TERTIARY).accessibilityText('允许云模型使用本次授权项目资料')
             Blank()
             Button('发送 ↑', { type: ButtonType.Normal }).height(40).padding({ left: 20, right: 20 }).fontSize(14)
               .backgroundColor(PMColors.BRAND).fontColor(Color.White).borderRadius(12)
-              .enabled(!this.busy && this.text.trim() !== '').onClick(() => { this.ask(); })
+              .enabled(!this.busy && this.analysisReady && this.text.trim() !== '').onClick(() => { this.ask(); })
           }.width('100%')
-        }.width('100%').padding({ left: 16, right: 16, top: 12, bottom: 16 }).backgroundColor(PMColors.SURFACE)
+          Text(!this.analysisReady ? '正在确认分析方式…' : !this.cloudAvailable ? '未配置云模型，当前仅整理项目记录' : this.cloud ? '发送即允许云模型分析本次授权项目资料，可关闭' : '仅整理项目记录，不调用云模型')
+            .fontSize(11).lineHeight(16).fontColor(PMColors.INK_TERTIARY).width('100%')
+        }.width('100%').padding({ left: 16, right: 16, top: 10, bottom: 12 }).backgroundColor(PMColors.SURFACE)
+          .border({ width: { top: 1 }, color: PMColors.BORDER_SUBTLE })
       }
     }.width('100%').height('100%').backgroundColor(PMColors.BACKGROUND)
   }

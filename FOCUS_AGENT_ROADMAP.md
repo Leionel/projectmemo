@@ -69,7 +69,7 @@
 
 新增 Conversation、ConversationProject、ConversationTurn、ConversationBinding；AgentMessage/AgentRun 增可空 conversation/turn 关联及 workspace 所需 nullable projectId。字段、不变量与迁移次序见架构 §4。
 
-首包实现 create/list/read、turn submit/status、context update。明确要求 requestId、expectedVersion、replyToMessageId/bindingIds、contextSelection；模型上下文授权单列，不能用进入焦点替代云端发送许可。响应含 scope、read manifest、sources、bindings、status 和 failure/fallback 元数据。
+首包实现 create/list/read、turn submit/status、context update。明确要求 requestId、expectedVersion、replyToMessageId/bindingIds、contextSelection；模型上下文授权单列。已配置云模型时，发送区默认选中云端分析，并说明发送会使用本次授权项目资料，用户可关闭；只有主动发送才随请求提交 llmContextApproved，进入页面和刷新不触发模型调用。未配置模型时明确显示本地整理。响应含 scope、read manifest、sources、bindings、status 和 failure/fallback 元数据。
 
 纯 GET 不跑模型、不写 Mission event、不改变 nextStep。POST turn 使用固定路由/读取/回答阶段，首版正常请求同步返回最终提交结果；相同 in-flight 请求返回 202 + turnId，客户端读 status。进程中断不靠浏览器连接维持任务，启动恢复将已发模型且无回执的 turn 标 UNKNOWN，未发出的可明确重试；不把“返回 202”当作已存在可恢复后台执行能力。
 

@@ -38,12 +38,20 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
   const busyRef = useRef(false);
   const setBusy = useCallback((value: boolean) => { busyRef.current = value; setBusyState(value); }, []);
   const [cloud, setCloud] = useState(false), [reply, setReply] = useState<ConversationMessage | null>(null);
+  const [cloudAvailable, setCloudAvailable] = useState(false), [analysisReady, setAnalysisReady] = useState(false);
   const [target, setTarget] = useState(projectId ?? ""), [showPreference, setShowPreference] = useState(false);
   const [workRef, setWorkRef] = useState<ConversationWorkRef | null>(null);
   const generation = useRef(0), pending = useRef<{ text: string; id: string; body: unknown } | null>(null);
   const messageRegion = useRef<HTMLDivElement>(null);
   const createKey = useRef(crypto.randomUUID()), confirmKeys = useRef(new Map<string, string>());
   const loadedId = useRef("");
+  useEffect(() => {
+    let live = true;
+    void api<{ cloudAvailable: boolean }>("/api/conversations/capabilities").then(caps => {
+      if (live) { setCloudAvailable(caps.cloudAvailable); setCloud(caps.cloudAvailable); setAnalysisReady(true); }
+    }).catch(e => { if (live) setError(e.message); });
+    return () => { live = false; };
+  }, []);
   const [previousSelection, setPreviousSelection] = useState(selection);
   if (selection && selection !== previousSelection) {
     setPreviousSelection(selection);
@@ -102,14 +110,14 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
     finally { if (epoch === generation.current) setBusy(false); }
   }
   async function ask(e: React.FormEvent) {
-    e.preventDefault(); if (!view || !text.trim() || busyRef.current) return;
+    e.preventDefault(); if (!view || !analysisReady || !text.trim() || busyRef.current) return;
     const epoch = generation.current, currentText = text.trim();
     const intentKey = JSON.stringify({ text: currentText, target, replyId: reply?.id, entityId: selection?.id, cloud });
     if (!pending.current || pending.current.text !== intentKey) pending.current = { text: intentKey, id: crypto.randomUUID(),
       body: { requestId: crypto.randomUUID(), expectedVersion: view.version, message: currentText,
         projectId: target || null, ...(reply ? { replyToMessageId: reply.id } : {}),
         ...(selection && selection.projectId === target ? { entityRef: { kind: selection.kind, id: selection.id, projectId: selection.projectId } } : {}),
-        llmContextApproved: cloud } };
+        llmContextApproved: cloud && cloudAvailable } };
     setBusy(true); setError("");
     try {
       const result = await api<{ conversation: ConversationView; status: string }>("/api/conversations/" + view.id + "/turns", "POST", pending.current.body);
@@ -222,8 +230,9 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
     {view && <form className={styles.composer} onSubmit={ask}>
       {reply && <div className={styles.reply}>围绕：{reply.content.slice(0, 55)}<button type="button" className="workspace-link focus-ring" onClick={() => { setReply(null); pending.current = null; }}>取消追问</button></div>}
       <label className={styles.inputLabel}><textarea aria-label="与忆程讨论项目" value={text} onChange={e => setText(e.target.value)} maxLength={3000} placeholder="问忆程：先做什么？或请帮我继续…" disabled={busy} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); e.currentTarget.form?.requestSubmit(); } }}/></label>
-      <div className={styles.composerFooter}><label className={styles.cloud} title="开启后，允许配置的云模型读取本次授权项目资料"><input type="checkbox" aria-label="允许云模型使用本次授权项目资料" checked={cloud} onChange={e => { setCloud(e.target.checked); pending.current = null; }}/>云端分析</label>
-      <button type="submit" className={styles.send + " focus-ring"} disabled={busy || !text.trim()} aria-label="发送"><ArrowUp size={17}/></button></div>
+      <div className={styles.composerFooter}><label className={styles.cloud} title="发送即允许云模型分析本次授权项目资料，可关闭"><input type="checkbox" aria-label="允许云模型使用本次授权项目资料" checked={cloud} disabled={!analysisReady || !cloudAvailable || busy} onChange={e => { setCloud(e.target.checked); pending.current = null; }}/>{cloudAvailable ? "云端分析" : "本地整理"}</label>
+      <button type="submit" className={styles.send + " focus-ring"} disabled={busy || !analysisReady || !text.trim()} aria-label="发送"><ArrowUp size={17}/></button></div>
+      <p className={styles.analysisHint}>{!analysisReady ? "正在确认分析方式…" : !cloudAvailable ? "未配置云模型，当前仅整理项目记录" : cloud ? "发送即允许云模型分析本次授权项目资料，可关闭" : "仅整理项目记录，不调用云模型"}</p>
     </form>}
   </section>;
 }

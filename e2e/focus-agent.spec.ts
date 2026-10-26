@@ -7,6 +7,57 @@ function focusFixture(operation: string, id: string, choice?: import("../lib/mis
   execFileSync(process.execPath, [path.resolve("node_modules/tsx/dist/cli.mjs"), "scripts/e2e-mission-fixture.ts", operation, id, ...(choice ? [JSON.stringify(choice)] : [])],
     { env: { ...process.env, ...E2E_ENV }, timeout: 30000, maxBuffer: 2 * 1024 * 1024 });
 }
+
+test("Focus defaults to available cloud analysis, explains scope and preserves manual opt-out", async ({ page }) => {
+  const session = (await page.context().cookies()).find(c => c.name === "pm_session")!;
+  const caps = await page.request.get("/api/conversations/capabilities", { headers: { Authorization: "Bearer " + session.value } });
+  expect(caps.ok()).toBe(true);
+  const capabilities = await caps.json();
+  test.skip(!capabilities.enabled, "Focus is off in legacy regression");
+  // Only the capability display is simulated; the isolated backend keeps LLM_MODE=mock.
+  await page.route("**/api/conversations/capabilities", route => route.fulfill({ json: { ...capabilities, cloudAvailable: true } }));
+  const approvals: boolean[] = [];
+  await page.route("**/api/conversations/*/turns", async route => {
+    approvals.push(route.request().postDataJSON().llmContextApproved);
+    await route.continue();
+  });
+  await page.goto("/focus");
+  const panel = page.getByRole("region", { name: "问忆程", exact: true });
+  const cloud = panel.getByRole("checkbox", { name: "允许云模型使用本次授权项目资料" });
+  await panel.getByRole("button", { name: "新讨论", exact: true }).click();
+  await expect(cloud).toBeChecked();
+  await expect(panel.getByText("发送即允许云模型分析本次授权项目资料，可关闭")).toBeVisible();
+  await page.screenshot({ path: focusEvidenceDir + "/cloud-default.png", fullPage: true });
+  const input = panel.getByRole("textbox", { name: "与忆程讨论项目" });
+  await input.fill("当前有哪些待办？");
+  await panel.getByRole("button", { name: "发送", exact: true }).click();
+  await expect(input).toHaveValue("");
+  expect(approvals).toEqual([true]);
+  await cloud.uncheck();
+  await expect(panel.getByText("仅整理项目记录，不调用云模型")).toBeVisible();
+  await input.fill("当前有哪些待回应的事？");
+  await panel.getByRole("button", { name: "发送", exact: true }).click();
+  await expect(input).toHaveValue("");
+  expect(approvals).toEqual([true, false]);
+  await panel.getByRole("button", { name: "新讨论", exact: true }).click();
+  await expect(cloud).not.toBeChecked();
+});
+
+test("Focus explains local mode when the backend has no cloud model", async ({ page }) => {
+  const session = (await page.context().cookies()).find(c => c.name === "pm_session")!;
+  const caps = await page.request.get("/api/conversations/capabilities", { headers: { Authorization: "Bearer " + session.value } });
+  expect(caps.ok()).toBe(true);
+  const capabilities = await caps.json();
+  test.skip(!capabilities.enabled, "Focus is off in legacy regression");
+  await page.route("**/api/conversations/capabilities", route => route.fulfill({ json: { ...capabilities, cloudAvailable: false } }));
+  await page.goto("/focus");
+  const panel = page.getByRole("region", { name: "问忆程", exact: true });
+  await panel.getByRole("button", { name: "新讨论", exact: true }).click();
+  const cloud = panel.getByRole("checkbox", { name: "允许云模型使用本次授权项目资料" });
+  await expect(cloud).not.toBeChecked();
+  await expect(cloud).toBeDisabled();
+  await expect(panel.getByText("未配置云模型，当前仅整理项目记录")).toBeVisible();
+});
 test("Focus discussion creates a real Action, reads it back, and survives project navigation", async ({ page }) => {
   const session = (await page.context().cookies()).find(c => c.name === "pm_session");
   expect(session).toBeTruthy();

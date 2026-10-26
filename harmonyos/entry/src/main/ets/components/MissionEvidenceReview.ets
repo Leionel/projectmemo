@@ -2,6 +2,7 @@ import { FitPremise, FitCheck } from '../models/EvidenceFit';
 import { PMColors, PMFontSize, PMSpacing, PMRadius } from '../common/DesignTokens';
 @Component
 export struct MissionEvidenceReview {
+ @State private expanded: boolean = false;
  @Prop premise: FitPremise = new FitPremise();
  @Prop mode: string = 'CONDITIONAL_ANALYSIS';
  @Prop confirmed: boolean = false;
@@ -10,9 +11,15 @@ export struct MissionEvidenceReview {
  onConfirm: (value: boolean) => void = (): void => {};
  build() {
   Column({ space: PMSpacing.SM }) {
-   Text('核对这次测量的条件').fontSize(PMFontSize.BODY).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
+   Row({ space: 8 }) {
+    Text('测量条件与用途').fontSize(14).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY).layoutWeight(1)
+    Button(this.expanded ? '收起 ⌃' : this.confirmed ? '已核对 ⌄' : '待核对 ⌄', { type: ButtonType.Normal })
+     .height(44).fontSize(12).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).padding({ left: 8, right: 0 })
+     .onClick(() => { this.expanded = !this.expanded; })
+   }.width('100%')
    Text(`GPU 内存 · ${this.premise.measurement.period ?? '期间待核对'} · ${this.premise.measurement.upperLimit === undefined ? this.premise.measurement.unit : '预算上限 ' + this.premise.measurement.upperLimit + ' ' + this.premise.measurement.unit}`)
     .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
+   if (this.expanded) {
    ForEach(this.premise.checks, (check: FitCheck) => {
     Text(`${check.id === 'SUBJECT' ? '主体' : check.id === 'STAGE' ? '阶段' : '条件'} · ${check.expected}`)
      .fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY)
@@ -28,6 +35,8 @@ export struct MissionEvidenceReview {
     Checkbox({ name: 'evidence-premise-reviewed' }).select(this.confirmed).selectedColor(PMColors.BRAND).enabled(!this.disabled).onChange((value: boolean) => { this.onConfirm(value); })
     Text('我已核对以上条件与原问题的关系').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY).layoutWeight(1)
    }.width('100%')
-  }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.MD).backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.MD)
+   }
+  }.width('100%').alignItems(HorizontalAlign.Start).padding({ top: 4, bottom: 8 })
+    .border({ width: { top: 1 }, color: PMColors.BORDER_SUBTLE })
  }
 }

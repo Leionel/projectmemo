@@ -339,35 +339,43 @@ struct MissionDetail {
     } catch (e) { if (this.current(generation, token)) this.fail(e); }
   }
   @Builder private WaitingInput() {
-    Column({ space: 10 }) {
-      Text('需要你补充').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.BRAND).fontWeight(FontWeight.Medium)
-      Text(this.mission.question?.payloadJson.question ?? '请补充资料').fontSize(PMFontSize.PRIMARY_JUDGEMENT).fontColor(PMColors.INK_PRIMARY)
-      Row({ space: PMSpacing.SM }) {
-        Button('保存新记录或附件').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-          .fontSize(PMFontSize.BUTTON).fontWeight(FontWeight.Medium).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT)
-          .constraintSize({ minHeight: 44 }).layoutWeight(1)
+    Column({ space: 14 }) {
+      Text('补充资料').fontSize(13).fontColor(PMColors.BRAND).fontWeight(FontWeight.Medium)
+      Text(this.mission.question?.payloadJson.question ?? '请补充资料').fontSize(17).lineHeight(26).fontColor(PMColors.INK_PRIMARY)
+      TextArea({ placeholder: this.selectedSources.length > 0 ? '补充你对这份资料的答复…' : '写下你的答复，或从下方选择资料…', text: this.answer })
+        .height(92).fontSize(15).fontColor(PMColors.INK_PRIMARY).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(12)
+        .padding(12).maxLength(3000).onChange((v: string) => { this.answer = v; this.materialsReviewed = false; if (this.mission.evidencePremise) this.preview = null; })
+      Row({ space: 8 }) {
+        Button('＋ 新记录或附件', { type: ButtonType.Normal }).height(44).fontSize(13).fontColor(PMColors.BRAND)
+          .backgroundColor(Color.Transparent).padding({ left: 0, right: 8 }).layoutWeight(1)
           .enabled(this.readState === 'fresh' && !this.busy).onClick(() => { router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: this.projectId, materialMissionId: this.missionId, materialQuestionId: this.mission.question?.id ?? '' } }); })
-        Button('从项目资料选取').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-          .fontSize(PMFontSize.BUTTON).fontWeight(FontWeight.Medium).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT)
-          .constraintSize({ minHeight: 44 }).layoutWeight(1)
+        Button(this.showMaterials ? '收起项目资料 ⌃' : '选择项目资料 ⌄', { type: ButtonType.Normal }).height(44).fontSize(13).fontColor(PMColors.BRAND)
+          .backgroundColor(Color.Transparent).padding({ left: 8, right: 0 }).layoutWeight(1)
           .enabled(this.readState === 'fresh' && !this.busy).onClick(() => { this.chooseExistingMaterials(); })
       }.width('100%')
-      TextArea({ placeholder: this.selectedSources.length > 0 ? '核对所选资料，并补充当前问题答复' : '回答这个问题，也可以选择记录或附件', text: this.answer }).height(104).fontSize(PMFontSize.BODY).fontColor(PMColors.INK_PRIMARY).backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.MD).padding(PMSpacing.MD).border({ width: 1, color: PMColors.BORDER_SUBTLE }).maxLength(3000).onChange((v: string) => { this.answer = v; this.materialsReviewed = false; if (this.mission.evidencePremise) this.preview = null; })
       if (this.showMaterials) {
-        if (this.candidates.length === 0) { Text('当前范围没有资料，可先保存记录或附件再返回。').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY) }
+        if (this.candidates.length === 0) { Text('还没有可选资料，先添加一条记录或附件。').fontSize(13).fontColor(PMColors.INK_SECONDARY) }
         ForEach(this.candidates, (candidate: MissionCandidate) => {
-          Column({ space: 4 }) {
-            Text(candidate.title ?? '项目资料').fontSize(PMFontSize.SECONDARY).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
-            Text(candidate.excerpt || '正文尚不可读，原件仍保留').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY).maxLines(4).textOverflow({ overflow: TextOverflow.Ellipsis })
-            Button(this.selectedSources.includes(candidate.sourcePointer.id) ? '取消选择' : candidate.readable ? '选择此资料' : '等待解析或解析失败').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-              .fontSize(PMFontSize.CAPTION).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 36 })
+          Row({ space: 12 }) {
+            Column({ space: 5 }) {
+              if (candidate.title && !candidate.excerpt.trim().startsWith(candidate.title.trim())) {
+                Text(candidate.title).fontSize(13).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
+              }
+              Text(candidate.excerpt || candidate.title || '正文尚不可读，原件仍保留').fontSize(13).lineHeight(20).fontColor(PMColors.INK_SECONDARY)
+                .maxLines(this.selectedSources.includes(candidate.sourcePointer.id) ? 6 : 3).textOverflow({ overflow: TextOverflow.Ellipsis })
+              if (!candidate.readable) { Text('等待解析').fontSize(11).fontColor(PMColors.INK_TERTIARY) }
+            }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+            Button(this.selectedSources.includes(candidate.sourcePointer.id) ? '✓' : '＋', { type: ButtonType.Normal })
+              .width(44).height(44).fontSize(18).fontColor(PMColors.BRAND).backgroundColor(this.selectedSources.includes(candidate.sourcePointer.id) ? PMColors.BRAND_LIGHT : Color.Transparent).borderRadius(12)
+              .accessibilityText((this.selectedSources.includes(candidate.sourcePointer.id) ? '取消选择：' : '选择资料：') + (candidate.title ?? candidate.excerpt))
               .enabled(this.readState === 'fresh' && !this.busy && candidate.readable && (this.selectedSources.includes(candidate.sourcePointer.id) || this.selectedSources.length < 8)).onClick(() => {
                 const already = this.selectedSources.includes(candidate.sourcePointer.id);
                 this.selectedSources = already ? this.selectedSources.filter((id: string) => id !== candidate.sourcePointer.id) : this.selectedSources.concat([candidate.sourcePointer.id]);
                 if (!already && this.answer === '') this.answer = `请根据所选资料重新判断：${candidate.excerpt}`;
                 this.preview = null; this.materialsReviewed = false;
               })
-          }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.MD).backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.MD).border({ width: 1, color: PMColors.BORDER_SUBTLE })
+          }.width('100%').alignItems(VerticalAlign.Top).padding({ top: 10, bottom: 10 })
+            .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
         }, (candidate: MissionCandidate) => `${candidate.sourcePointer.id}:${candidate.sourcePointer.hash}`)
       }
       if (this.mission.evidencePremise) {
@@ -403,23 +411,24 @@ struct MissionDetail {
         }.width('100%')
         PMButton({ label: '确认资料并接续', disabled: this.readState !== 'fresh' || this.busy || !this.materialsReviewed || this.answer.trim() === '', onAction: (): void => { this.continueMaterials(); } })
       }
-    }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.LG).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(PMRadius.LG)
+    }.width('100%').alignItems(HorizontalAlign.Start).padding(18).backgroundColor(PMColors.SURFACE).borderRadius(16)
+      .border({ width: 1, color: PMColors.BORDER_SUBTLE })
   }
   @Builder private MissionBody() {
     Column({ space: 12 }) {
       Row() {
         PMStatusPill({ label: missionStatusLabel(this.mission.status), tone: this.mission.status === 'PAUSED' || this.mission.status === 'FAILED' ? 'risk' : 'brand' })
         Blank()
-        Text('执行记录').fontSize(12).fontColor(PMColors.INK_TERTIARY)
+        Button(this.showCompletion ? '收起状态 ⌃' : '状态详情 ⌄', { type: ButtonType.Normal }).height(44).fontSize(12)
+          .fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).padding({ left: 8, right: 0 }).onClick(() => { this.showCompletion = !this.showCompletion; })
       }.width('100%')
-      Text(this.mission.goal).fontSize(21).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
+      Text(this.mission.goal).fontSize(20).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
         .maxLines(this.showGoal ? 100 : 2).textOverflow({ overflow: TextOverflow.Ellipsis }).lineHeight(29)
       if (this.mission.goal.length > 40) {
         Button(this.showGoal ? '收起目标原文' : '展开目标原文').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
           .fontSize(12).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent)
           .height(44).onClick(() => { this.showGoal = !this.showGoal; })
       }
-      Button(this.showCompletion ? '收起执行与成果状态' : '执行与成果状态').type(ButtonType.Normal).height(44).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).borderRadius(PMRadius.BUTTON).onClick(() => { this.showCompletion = !this.showCompletion; })
       if (this.showCompletion) {
       Column({ space: 8 }) {
         ForEach(missionCompletionFacts(this.mission.status, this.mission.completion, this.mission.outputs[0]?.verificationStatus), (fact: MissionCompletionFact) => {

@@ -9,6 +9,9 @@ import type { WaitState } from "@/lib/mission/gaps";
 import { listContinuationCandidates, previewContinuation, confirmContinuation } from "@/lib/mission/continuationService";
 import { previewArtifactAdoption, confirmArtifactAdoption } from "@/lib/mission/artifactAdoptionService";
 import { latestScenario, createScenarios, adoptScenario } from "@/lib/decision/scenarios";
+import { readReview } from "@/lib/decision/reviewPersistence";
+import { adoptDynamicPlan } from "@/lib/decision/boundedReview";
+import type { DynamicReviewResult } from "@/lib/types/changeReview";
 import { prepareActionResult, commitActionResult, actionResultVersion, type PreparedActionResult } from "@/lib/services/actionService";
 import type { ConversationActor, ConversationProposal } from "@/lib/types/conversation";
 import { conversationConfirmSchema } from "@/lib/types/conversation";
@@ -38,9 +41,11 @@ function assertWorkPolicy(pinned: unknown, operation: string, command: Record<st
   const rules: Record<string, RegExp> = { complete_action: /(?:不要|禁止|不得|不允许).*(?:完成|复盘|结果写入)/,
     adopt_artifact: /(?:不要|禁止|不得|不允许).*(?:归入|分享|成果写入)/,
     adopt_scenario: /(?:不要|禁止|不得|不允许).*改.*计划/,
+    adopt_dynamic: /(?:不要|禁止|不得|不允许).*(?:改.*计划|执行|新增.*问题|调查|读取)/,
     approval: /(?:不要|禁止|不得|不允许).*(?:批准|执行)/ };
-  const choiceVeto = (v: string) => operation === "adopt_scenario" && /不要|禁止|不选|不接受|拒绝/.test(v) &&
-    (command.scenarioKey === "VERIFY_FIRST" ? /先核对|第一[种项个]/.test(v) : /先整理|先交付|草稿|第二[种项个]/.test(v));
+  const choiceVeto = (v: string) => /不要|禁止|不选|不接受|拒绝/.test(v) && (operation === "adopt_scenario" &&
+    (command.scenarioKey === "VERIFY_FIRST" ? /先核对|第一[种项个]/.test(v) : /先整理|先交付|草稿|第二[种项个]/.test(v)) ||
+    operation === "adopt_dynamic" && typeof command.candidateTitle === "string" && v.includes(command.candidateTitle));
   if (Array.isArray(pinned) && pinned.some(v => typeof v === "string" && (/只读|禁止.*(?:操作|写入)/.test(v) || rules[operation]?.test(v) || choiceVeto(v))))
     throw new AppError("READ_ONLY_CONSTRAINT", "这项操作与会话中保留的限制冲突，请另开协作主题", 409);
 }
@@ -99,7 +104,7 @@ export async function assessConversationMaterials(actor: ConversationActor, id: 
   if (work.versionToken !== input.versionToken || !work.question) throw new AppError("INPUT_CHANGED", "原问题已变化", 409);
   return previewContinuation(actor.userId, input.ref.id, { questionId: work.question.id, sourcePointers: input.sourcePointers, ...(input.evidenceReview ? { evidenceReview: input.evidenceReview } : {}) });
 }
-const labels: Record<string, string> = { input: "提交原问题答复", approval: "处理原待批准操作", resume: "恢复原委托", continuation: "用所选材料接续原问题", adopt_scenario: "采用原方案", adopt_artifact: "将此版成果归入项目", complete_action: "完成行动并保存复盘" };
+const labels: Record<string, string> = { input: "提交原问题答复", approval: "处理原待批准操作", resume: "恢复原委托", continuation: "用所选材料接续原问题", adopt_scenario: "采用原方案", adopt_dynamic: "采用本轮方案", adopt_artifact: "将此版成果归入项目", complete_action: "完成行动并保存复盘" };
 export async function previewConversationWork(actor: ConversationActor, id: string, raw: unknown, turnId?: string) {
   const input = workPreviewSchema.parse(raw), inputHash = jsonHash(input);
   await requireWork(actor, id, input.ref);
@@ -135,6 +140,15 @@ export async function previewConversationWork(actor: ConversationActor, id: stri
     } else if (op === "adopt_scenario") {
       if (!work.scenario || work.scenario.id !== input.scenarioProposalId || !input.scenarioKey || work.scenario.stale || work.scenario.status !== "READY") throw new AppError("PROPOSAL_CHANGED", "原方案已变化，请重新对比", 409);
       command = { ...command, proposalId: work.scenario.id, proposalHash: work.scenario.proposalHash, scenarioKey: input.scenarioKey, confirmed: true };
+    } else if (op === "adopt_dynamic") {
+      if (!input.dynamicProposalId || !input.candidateId) throw new AppError("PROPOSAL_CHANGED", "请选择明确的本轮方案", 409);
+      const review = await readReview(actor, input.dynamicProposalId);
+      const candidate = (review.result as DynamicReviewResult | null)?.candidates.find(c => c.candidateId === input.candidateId);
+      if (review.purpose !== "DYNAMIC_PLAN" || review.missionId !== input.ref.id || review.projectId !== input.ref.projectId ||
+        review.status !== "READY" || review.stale || review.base.expectedVersion !== work.version || !candidate || candidate.feasibility !== "READY")
+        throw new AppError("PROPOSAL_CHANGED", "本轮方案或任务依据已变化，请重新读取", 409);
+      command = { ...command, proposalId: review.id, proposalHash: review.proposalHash, candidateId: candidate.candidateId,
+        candidateTitle: candidate.title, candidateKind: candidate.kind, confirmed: true };
     } else if (op === "adopt_artifact") {
       if (!input.outputId || !input.outputRevision) throw new AppError("OUTPUT_CHANGED", "请选择明确的成果版本", 409);
       const p = await previewArtifactAdoption(actor.userId, input.ref.id, input.outputId, { expectedOutputRevision: input.outputRevision });
@@ -154,7 +168,7 @@ export async function previewConversationWork(actor: ConversationActor, id: stri
     const run = await tx.agentRun.create({ data: { projectId: null, conversationId: id, runType: "CHAT", provider: "project_state", status: "SUCCESS",
       trace: { purpose: "FOCUS_WORK_PREVIEW", actorUserId: actor.userId, copilotTargetProjectId: input.ref.projectId } } });
     const e = await tx.copilotToolExecution.create({ data: { sourceRunId: run.id, proposalKey: key, tool: op, proposalJson: json(payload), proposalHash: jsonHash(payload), sourceManifestHash: jsonHash(command) } });
-    const description = [input.answer, input.decision === "REJECTED" ? "拒绝原操作" : input.decision === "APPROVED" ? "批准原操作，实际执行仍由原委托运行器完成" : "", op === "adopt_scenario" ? input.scenarioKey : "", op === "adopt_artifact" ? "所选成果将对项目成员可见；保留原来源与验证状态。" : ""].filter(Boolean).join("\n") || "保留原任务的范围、预算与成功条件。";
+    const description = [input.answer, input.decision === "REJECTED" ? "拒绝原操作" : input.decision === "APPROVED" ? "批准原操作，实际执行仍由原委托运行器完成" : "", op === "adopt_scenario" ? input.scenarioKey : "", op === "adopt_dynamic" ? command.candidateTitle + (command.candidateKind === "KEEP_PLAN" ? "。保留原计划，不新增执行。" : "。由原委托执行，读取结束后等待核对；本轮最多两次读取。") : "", op === "adopt_artifact" ? "所选成果将对项目成员可见；保留原来源与验证状态。" : ""].filter(Boolean).join("\n") || "保留原任务的范围、预算与成功条件。";
     const proposal: ConversationProposal = { tool: op, executionId: e.id, projectId: input.ref.projectId, title: labels[op] + "：" + work.title, description, proposalHash: e.proposalHash, status: e.status, resultId: null };
     const refs = await bindRefs(tx, id, [{ ...input.ref, title: work.title, version: work.version, status: work.status,
       href: "/projects/" + input.ref.projectId + (input.ref.kind === "MISSION" ? "/missions?mission=" + input.ref.id : "/actions#action-" + input.ref.id) }]);
@@ -194,6 +208,10 @@ export async function confirmConversationWork(actor: ConversationActor, id: stri
       const { proposalId, ...body } = cmd;
       await adoptScenario(actor, String(proposalId), { ...body, requestId }, tx);
       receiptText = "已采用原方案；原委托保留，执行前请核对当前状态。";
+    } else if (op === "adopt_dynamic") {
+      await adoptDynamicPlan(actor, String(cmd.proposalId), { requestId, proposalHash: cmd.proposalHash, candidateId: cmd.candidateId,
+        expectedVersion: cmd.expectedVersion, confirmed: true }, tx);
+      receiptText = cmd.candidateKind === "KEEP_PLAN" ? "已保留原计划，本轮未新增执行。" : "已采用：" + cmd.candidateTitle + "。已交给原委托，等待执行结果。";
     } else if (op === "adopt_artifact") {
       const { outputId, ...body } = cmd;
       const r = await confirmArtifactAdoption(actor.userId, ref.id, String(outputId), { ...body, requestId }, tx);

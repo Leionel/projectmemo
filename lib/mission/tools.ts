@@ -4,12 +4,19 @@ import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { jsonHash, type Actor, type ToolResult, type Source } from "./contracts";
 import { sourceHash } from "./repository";
+import { readReviewMaterial } from "./projectMaterialReader";
 export type Tool = { version?:string; description:string; schema:z.ZodType; effects:{businessWrite:boolean;cacheWrite:boolean;externalDisclosure:boolean}; run:(actor:Actor,input:unknown)=>Promise<ToolResult> };
 export type ToolSet=Record<string,Tool>;
 const readEffects={businessWrite:false,cacheWrite:false,externalDisclosure:false};
 export const actionProposalSchema=z.object({title:z.string().trim().min(2).max(160),description:z.string().max(500).default(""),priority:z.number().int().min(1).max(5).default(3),dueAt:z.string().datetime().nullable().optional()}).strict();
 export const outputSchema=z.object({schemaVersion:z.literal(1).default(1),kind:z.enum(["NOTE","RESEARCH"]).default("NOTE"),blocks:z.array(z.object({blockId:z.string().min(1).max(80),text:z.string().min(1).max(1500),kind:z.enum(["PROJECT_OBSERVATION","EXTERNAL_REFERENCE","INFERENCE"]),sourceIds:z.array(z.string().max(160)).max(8),citations:z.array(z.object({sourceId:z.string(),start:z.number().int().nonnegative(),end:z.number().int().positive(),excerptHash:z.string().regex(/^[a-f0-9]{64}$/)}).strict()).max(8).default([])}).strict()).min(1).max(12),missingInformation:z.array(z.string().max(300)).max(12).default([])}).strict();
 export const projectTools:ToolSet={
+ read_project_material:{version:"1",description:"定向读取已确认的本项目记录或附件片段；只接受原来源ID与版本，不接路径或URL。",schema:z.object({sourceId:z.string().min(1).max(160),sourceHash:z.string().regex(/^[a-f0-9]{64}$/)}).strict(),effects:readEffects,run:async(actor,raw)=>{
+   const input=raw as {sourceId:string;sourceHash:string};const material=await readReviewMaterial(actor.projectId,input.sourceId);
+   if(!material||material.source.hash!==input.sourceHash)throw new AppError("SOURCE_CHANGED","指定资料已变化或不可访问",409);
+   if(!material.source.text.trim())throw new AppError("SOURCE_NOT_READABLE","资料正文尚不可读",409);
+   return{data:{title:material.title,readScope:material.readScope,content:material.source.text,coverage:material.coverage},sources:[material.source],coverage:material.coverage};
+ }},
  inspect_project:{description:"读取当前项目目标与真实行动。来源是项目观察，不证明实验结论。",schema:z.object({afterId:z.string().min(1).max(160).optional()}).strict(),effects:readEffects,run:async (actor,raw)=>{
    const before=await sourceHash(actor.projectId,`project:${actor.projectId}`);
    const project=await db.project.findUniqueOrThrow({where:{id:actor.projectId},select:{title:true,goal:true,deadline:true}});

@@ -9,6 +9,7 @@ import { Sparkles, ArrowUp, Plus, CornerDownRight } from "lucide-react";
 import type { ConversationWorkRef } from "@/lib/types/conversationWork";
 import { ConversationWorkCard } from "./ConversationWorkCard";
 import { ConversationAnchorPanel } from "./ConversationAnchorPanel";
+import { ConversationFileGuides, ConversationAnswer } from "./ConversationFileGuides";
 import { missionStatusLabels } from "@/lib/mission/presentation";
 import styles from "./ConversationPanel.module.css";
 
@@ -38,6 +39,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
   const busyRef = useRef(false);
   const setBusy = useCallback((value: boolean) => { busyRef.current = value; setBusyState(value); }, []);
   const [cloud, setCloud] = useState(false), [reply, setReply] = useState<ConversationMessage | null>(null);
+  const [showCloudHelp, setShowCloudHelp] = useState(false);
   const [cloudAvailable, setCloudAvailable] = useState(false), [analysisReady, setAnalysisReady] = useState(false);
   const [target, setTarget] = useState(projectId ?? ""), [showPreference, setShowPreference] = useState(false);
   const [workRef, setWorkRef] = useState<ConversationWorkRef | null>(null);
@@ -123,17 +125,20 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
       const result = await api<{ conversation: ConversationView; status: string }>("/api/conversations/" + view.id + "/turns", "POST", pending.current.body);
       if (epoch !== generation.current) return;
       setView(result.conversation);
+      setList(rows => rows.map(row => row.id === result.conversation.id ? { ...row, title: result.conversation.title } : row));
       setTarget(result.conversation.focusProjectId ?? "");
       requestAnimationFrame(() => { if (epoch === generation.current && messageRegion.current) messageRegion.current.scrollTop = messageRegion.current.scrollHeight; });
       if (["ANSWERED", "NEEDS_CLARIFICATION"].includes(result.status)) { setText(""); setReply(null); pending.current = null; }
-      else setError("原请求状态：" + result.status + "。刷新读取，不会自动重发模型。");
+      else { setError(""); if (["UNKNOWN", "FAILED"].includes(result.status)) pending.current = null; }
     } catch (e) {
       if (epoch !== generation.current) return;
       const err = e as Error & { code?: string; status?: number };
       setError(err.message);
       if (["CONVERSATION_CHANGED", "SOURCE_CHANGED", "MISSION_CHANGED"].includes(err.code ?? "")) pending.current = null;
       if ([401, 403, 404].includes(err.status ?? 0)) { setView(null); setList([]); pending.current = null; setText(""); }
-      else await load(view.id, epoch).catch(() => {});
+      else {
+        try { const next = await api<ConversationView>("/api/conversations/" + view.id); if (epoch === generation.current) { setView(next); if (next.latestTurn?.canRetry) { pending.current = null; setError(""); } } } catch { /* Keep the original transport error. */ }
+      }
     } finally { if (epoch === generation.current) setBusy(false); }
   }
   async function confirm(m: ConversationMessage, decline = false) {
@@ -171,14 +176,6 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
         {list.map(c => <option value={c.id} key={c.id}>{c.title}</option>)}</select>
       <button type="button" aria-label="新讨论" title="新讨论" className={styles.newDiscussion + " focus-ring"} disabled={busy} onClick={() => void create()}><Plus size={17}/></button>
     </div></header>
-    {view && <div className={styles.scope}>
-      <label><select aria-label="讨论项目范围" value={target} disabled={busy || view.scope === "PROJECT"} onChange={e => { setTarget(e.target.value); pending.current = null; }}>
-        <option value="">跨项目</option>{view.linkedProjects.map(p => <option value={p.id} key={p.id}>{p.title}</option>)}
-        {projectId && !view.linkedProjects.some(p => p.id === projectId) && <option value={projectId}>当前项目</option>}
-      </select></label>
-      {target && <button type="button" className={styles.quietLink + " focus-ring"} onClick={() => setShowPreference(v => !v)}>项目偏好</button>}
-      {projectId && <Link className="workspace-link focus-ring" href={conversationHref("/focus", view.id)}>回到原焦点讨论</Link>}
-    </div>}
     {view && showPreference && target && <FocusPreference key={target} projectId={target} onError={setError}/>}
     <div ref={messageRegion} className={styles.messages} aria-live="polite" aria-busy={busy}>
       {view && <ConversationAnchorPanel key={view.id} conversationId={view.id} revision={view.version} busy={busy || workRef !== null}
@@ -187,12 +184,15 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
         onReadResults={() => { if (loadedId.current === view.id && messageRegion.current) messageRegion.current.scrollTop = messageRegion.current.scrollHeight; }}
         onUpdated={v => { if (loadedId.current === v.id) { setView(v); onUpdated?.(); } }}/>}
       {view?.hasMore && <button type="button" className="workspace-link focus-ring" onClick={() => void older()}>读取更早讨论</button>}
+      {view?.latestTurn?.canRetry && <div className={styles.reason} role="status"><strong>这次分析未完成</strong><p>{view.latestTurn.message}</p><button type="button" className="workspace-link focus-ring" disabled={busy} onClick={() => { pending.current = null; setText(view.messages.filter(m => m.role === "USER").at(-1)?.content ?? ""); }}>重新提问 →</button></div>}
       {loadingHistory && <p role="status">正在读取讨论…</p>}
       {!view && !loadingHistory && <div className={styles.empty}><span className={styles.emptyMark} aria-hidden="true">忆</span><h3>从今天最重要的事开始</h3><p>忆程会带上项目记忆，和你一起往下走。</p><button className="editorial-button focus-ring" onClick={() => void create()} disabled={busy}>开始讨论</button></div>}
       {view && !view.messages.length && <div className={styles.empty}><span className={styles.emptyMark} aria-hidden="true">忆</span><h3>今天，先推进哪件事？</h3><div className={styles.starters}>{["最近哪个项目最值得先处理？", "这周有哪些待回应的事？"].map(q => <button key={q} type="button" className={styles.starter + " focus-ring"} onClick={() => setText(q)}>{q}<span aria-hidden="true">↗</span></button>)}</div></div>}
       {view?.messages.map(m => <article key={m.id} className={m.role === "USER" ? styles.user : styles.assistant}>
+        {m.role === "USER" && <div className={styles.userHead}><strong>你</strong><span aria-hidden="true">我</span></div>}
         {m.role === "ASSISTANT" && <div className={styles.answerHead}><span aria-hidden="true">忆</span><strong>忆程</strong><small>{m.provider === "rules" ? "规则观察" : m.provider === "project_state" ? "项目记录" : "基于本次授权资料"}</small></div>}
-        <p className={styles.body}>{m.content}</p>
+        <p className={styles.body}><ConversationAnswer message={m} conversationId={view.id}/></p>
+        <ConversationFileGuides message={m} conversationId={view.id}/>
         {!!m.priorities.length && <details><summary>优先级依据与取舍</summary>{m.priorities.map(p => <div key={p.projectId} className={styles.reason}>
           <strong>{view.linkedProjects.find(v => v.id === p.projectId)?.title ?? "项目"}</strong>
           <p>{p.importance}；{p.urgency}；{p.blocking}；{p.effort}</p><p>{p.preference}</p><p>{p.tradeoff}</p>
@@ -230,9 +230,17 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
     {view && <form className={styles.composer} onSubmit={ask}>
       {reply && <div className={styles.reply}>围绕：{reply.content.slice(0, 55)}<button type="button" className="workspace-link focus-ring" onClick={() => { setReply(null); pending.current = null; }}>取消追问</button></div>}
       <label className={styles.inputLabel}><textarea aria-label="与忆程讨论项目" value={text} onChange={e => setText(e.target.value)} maxLength={3000} placeholder="问忆程：先做什么？或请帮我继续…" disabled={busy} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); e.currentTarget.form?.requestSubmit(); } }}/></label>
-      <div className={styles.composerFooter}><label className={styles.cloud} title="发送即允许云模型分析本次授权项目资料，可关闭"><input type="checkbox" aria-label="允许云模型使用本次授权项目资料" checked={cloud} disabled={!analysisReady || !cloudAvailable || busy} onChange={e => { setCloud(e.target.checked); pending.current = null; }}/>{cloudAvailable ? "云端分析" : "本地整理"}</label>
+      <div className={styles.composerFooter}><label className={styles.cloud} onMouseEnter={() => setShowCloudHelp(true)} onMouseLeave={() => setShowCloudHelp(false)} onFocus={() => setShowCloudHelp(true)} onBlur={() => setShowCloudHelp(false)} onContextMenu={event => { event.preventDefault(); setShowCloudHelp(v => !v); }} title="长按查看资料使用说明"><input type="checkbox" aria-label="允许云模型使用本次授权项目资料" checked={cloud} disabled={!analysisReady || !cloudAvailable || busy} onChange={e => { setCloud(e.target.checked); pending.current = null; }}/>{cloudAvailable ? "云端分析" : "本地整理"}</label>
+      {view && <div className={styles.composerScope}>
+      <label><select aria-label="讨论项目范围" value={target} disabled={busy || view.scope === "PROJECT"} onChange={e => { setTarget(e.target.value); pending.current = null; }}>
+        <option value="">跨项目</option>{view.linkedProjects.map(p => <option value={p.id} key={p.id}>{p.title}</option>)}
+        {projectId && !view.linkedProjects.some(p => p.id === projectId) && <option value={projectId}>当前项目</option>}
+      </select></label>
+      {target && <button type="button" className={styles.quietLink + " focus-ring"} onClick={() => setShowPreference(v => !v)}>项目偏好</button>}
+      {projectId && <Link className="workspace-link focus-ring" href={conversationHref("/focus", view.id)}>回到原焦点讨论</Link>}
+    </div>}
       <button type="submit" className={styles.send + " focus-ring"} disabled={busy || !analysisReady || !text.trim()} aria-label="发送"><ArrowUp size={17}/></button></div>
-      <p className={styles.analysisHint}>{!analysisReady ? "正在确认分析方式…" : !cloudAvailable ? "未配置云模型，当前仅整理项目记录" : cloud ? "发送即允许云模型分析本次授权项目资料，可关闭" : "仅整理项目记录，不调用云模型"}</p>
+      <p data-visible={showCloudHelp} className={styles.analysisHint}>{!analysisReady ? "正在确认分析方式…" : !cloudAvailable ? "未配置云模型，当前仅整理项目记录" : cloud ? "发送即允许云模型分析本次授权项目资料，可关闭" : "仅整理项目记录，不调用云模型"}</p>
     </form>}
   </section>;
 }

@@ -12,6 +12,8 @@ import { PMColors, PMSpacing, PMRadius } from '../common/DesignTokens';
 import { ConversationWorkRef } from '../models/ConversationWork';
 import { ConversationWorkPanel } from '../components/ConversationWorkPanel';
 import { ConversationAnchorPanel } from '../components/ConversationAnchorPanel';
+import { ConversationFileGuides, ConversationAnswer } from '../components/ConversationFileGuides';
+interface CloudHelpState { isVisible: boolean; }
 
 @Entry
 @Component
@@ -25,6 +27,7 @@ struct FocusConversation {
   @State private cloud: boolean = false;
   @State private cloudAvailable: boolean = false;
   @State private analysisReady: boolean = false;
+  @State private showCloudHelp: boolean = false;
   @State private target: string = '';
   @State private expanded: string = '';
   @State private expandedRefs: string = '';
@@ -102,13 +105,13 @@ struct FocusConversation {
   }
   private async refresh(): Promise<void> {
     const epoch = this.generation, owned = !this.busy; if (owned) this.busy = true;
-    try { const v = await this.service.read(this.view.id); if (epoch === this.generation) this.view = v; }
+    try { const v = await this.service.read(this.view.id); if (epoch === this.generation) { this.view = v; if (v.latestTurn?.canRetry) { this.pending = null; this.error = ''; } } }
     catch (e) { if (epoch === this.generation) this.fail(e); }
     finally { if (owned && epoch === this.generation) this.busy = false; }
   }
   private async selectDiscussion(id: string): Promise<void> {
     if (this.busy) return;
-    const epoch = ++this.generation; this.busy = true; this.pending = null; this.replyId = ''; this.workRef = null; this.historyOpen = false;
+    const epoch = ++this.generation; this.busy = true; this.pending = null; this.replyId = ''; this.workRef = null; this.historyOpen = false; this.error = '';
     try { const view = await this.service.read(id); if (epoch === this.generation) { this.view = view; this.target = view.focusProjectId ?? ''; } }
     catch (e) { if (epoch === this.generation) this.fail(e); }
     finally { if (epoch === this.generation) this.busy = false; }
@@ -128,9 +131,10 @@ struct FocusConversation {
       const reply = await this.service.ask(this.view.id, this.pending!);
       if (epoch !== this.generation) return;
       this.view = reply.conversation; this.target = this.view.focusProjectId ?? '';
+      this.sessions = this.sessions.map((item: ConversationListItem): ConversationListItem => item.id === this.view.id ? { id: item.id, title: this.view.title, scope: item.scope, homeProjectId: item.homeProjectId } : item);
       setTimeout(() => { if (epoch === this.generation) this.messageScroller.scrollEdge(Edge.Bottom); }, 50);
       if (reply.status === 'ANSWERED' || reply.status === 'NEEDS_CLARIFICATION') { this.text = ''; this.pending = null; this.replyId = ''; }
-      else this.error = '原请求状态：' + reply.status + '，请读取原状态。';
+      else { this.error = ''; if (['FAILED', 'UNKNOWN'].includes(reply.status)) this.pending = null; }
     } catch (e) { if (epoch === this.generation) { this.fail(e); await this.refresh(); } }
     finally { if (epoch === this.generation) this.busy = false; }
   }
@@ -163,8 +167,18 @@ struct FocusConversation {
     try { const p = (await this.service.savePreference(this.target, input)).preference; this.preferenceVersion = p?.version ?? 0; this.showPreference = false; }
     catch (e) { this.fail(e); }
   }
+  private cloudExplanation(): string {
+    return !this.analysisReady ? '正在确认分析方式…' : !this.cloudAvailable ? '未配置云模型，当前仅整理项目记录' : this.cloud ? '发送即允许云模型分析本次授权项目资料，可关闭' : '仅整理项目记录，不调用云模型';
+  }
   @Builder private Message(m: ConversationMessage) {
     Column({ space: 10 }) {
+      if (m.role === 'USER') {
+        Row({ space: 8 }) {
+          Blank()
+          Text('你').fontSize(13).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_SECONDARY)
+          Text('我').fontSize(12).fontColor(PMColors.INK_SECONDARY).width(27).height(27).textAlign(TextAlign.Center).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(10)
+        }.width('100%')
+      }
       if (m.role === 'ASSISTANT') {
         Row({ space: 8 }) {
           Text('忆').fontSize(13).fontWeight(FontWeight.Medium).fontColor(PMColors.BRAND).width(26).height(26).textAlign(TextAlign.Center).backgroundColor(PMColors.BRAND_LIGHT).borderRadius(8)
@@ -173,7 +187,8 @@ struct FocusConversation {
           Text(m.provider === 'rules' ? '本地整理' : m.provider === 'project_state' ? '项目记录' : '云端分析').fontSize(11).fontColor(PMColors.INK_TERTIARY)
         }.width('100%')
       }
-      Text(m.content).fontSize(15).lineHeight(24).fontColor(PMColors.INK_PRIMARY).width('100%')
+      ConversationAnswer({ content: m.content, files: m.fileGuides ?? [], conversationId: this.view.id, rightAligned: m.role === 'USER' })
+      if (m.fileGuides && m.fileGuides.length > 0) { ConversationFileGuides({ files: m.fileGuides, conversationId: this.view.id }) }
       if (m.priorities.length > 0 || m.sources.length > 0) {
         Button(this.expanded === m.id ? '收起依据  ⌃' : '优先级与来源  ⌄', { type: ButtonType.Normal }).height(44).fontSize(12).fontColor(PMColors.BRAND)
           .backgroundColor(Color.Transparent).padding({ left: 0, right: 8 }).onClick(() => { this.expanded = this.expanded === m.id ? '' : m.id; })
@@ -230,31 +245,11 @@ struct FocusConversation {
         Button('追问这条 ↗', { type: ButtonType.Normal }).height(44).fontSize(12).fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).padding({ left: 0, right: 8 })
           .onClick(() => { this.replyId = m.id; this.text = '为什么这样建议？'; })
       }
-    }.width(m.role === 'USER' ? '92%' : '100%').alignSelf(m.role === 'USER' ? ItemAlign.End : ItemAlign.Start)
-      .alignItems(HorizontalAlign.Start).padding(m.role === 'USER' ? 14 : 0)
-      .backgroundColor(m.role === 'USER' ? PMColors.BRAND_LIGHT : Color.Transparent).borderRadius(16)
+    }.width('100%').alignItems(HorizontalAlign.Start).padding({ top: m.role === 'USER' ? 2 : 0, bottom: m.role === 'USER' ? 8 : 0 })
   }
   build() {
     Column() {
-      PMAppBar({ title: '与忆程协作', showBack: true })
-      Row({ space: 8 }) {
-        Button(this.target === '' ? '跨项目讨论  ⌄' : '当前项目  ⌄', { type: ButtonType.Normal })
-          .fontSize(13).fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).height(40)
-          .onClick(() => { this.scopeOpen = !this.scopeOpen; })
-        Blank()
-        Button('历史', { type: ButtonType.Normal }).height(40).fontSize(13).fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent)
-          .onClick(() => { this.historyOpen = !this.historyOpen; })
-        Button('＋ 新讨论', { type: ButtonType.Normal }).height(40).fontSize(13).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent)
-          .enabled(!this.busy).onClick(() => { this.create(); })
-      }.width('100%').padding({ left: 16, right: 16 }).backgroundColor(PMColors.SURFACE)
-      if (this.scopeOpen) {
-        Column({ space: 4 }) {
-          if (this.view.scope !== 'PROJECT') { PMButton({ label: '全部授权项目', secondary: true, onAction: (): void => { this.target = ''; this.scopeOpen = false; this.pending = null; } }) }
-          ForEach(this.view.linkedProjects, (p: ConversationProject) => {
-            PMButton({ label: p.title, secondary: true, onAction: (): void => { this.target = p.id; this.scopeOpen = false; this.pending = null; } })
-          }, (p: ConversationProject) => p.id)
-        }.padding(12).width('100%').backgroundColor(PMColors.SURFACE)
-      }
+      PMAppBar({ title: '与忆程协作', subtitle: this.view.messages.length > 0 ? this.view.title : '', showBack: true, rightActionText: '新讨论', showRightIcon: true, rightIconLabel: '历史讨论', onRightAction: (): void => { if (!this.busy) this.historyOpen = !this.historyOpen; }, onRightTextAction: (): void => { if (!this.busy) this.create(); } })
       if (this.historyOpen) {
         Scroll() {
           Column({ space: 4 }) {
@@ -264,11 +259,8 @@ struct FocusConversation {
           }.width('100%').padding(12)
         }.constraintSize({ maxHeight: 220 }).backgroundColor(PMColors.SURFACE)
       }
-      if (this.error !== '') {
-        Text(this.error).fontSize(12).lineHeight(20).fontColor(PMColors.RISK).padding({ left: 20, right: 20, top: 8, bottom: 8 }).width('100%')
-      }
       Scroll(this.messageScroller) {
-        Column({ space: 24 }) {
+        Column({ space: 20 }) {
           if (this.view.id !== '') {
             ForEach([this.view.id], (id: string) => {
               ConversationAnchorPanel({ conversationId: id, revision: this.view.version, busy: $busy, visible: this.pageVisible, suspended: this.workRef !== null,
@@ -289,8 +281,18 @@ struct FocusConversation {
             }.width('100%').padding({ top: 64, bottom: 48 })
           }
           ForEach(this.view.messages, (m: ConversationMessage) => { this.Message(m) }, (m: ConversationMessage) => m.id)
+          if (!this.busy && (this.view.latestTurn?.message || this.error !== '')) {
+            Column({ space: 8 }) {
+              Row({ space: 8 }) { Text('忆').fontSize(12).fontColor(PMColors.BRAND).width(24).height(24).textAlign(TextAlign.Center).backgroundColor(PMColors.BRAND_LIGHT).borderRadius(8); Text(this.view.latestTurn?.canRetry ? '这次分析未完成' : '讨论状态').fontSize(14).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY) }.width('100%')
+              Text(this.view.latestTurn?.message || this.error).fontSize(13).lineHeight(21).fontColor(PMColors.INK_SECONDARY)
+              Row({ space: 16 }) {
+                Button('读取状态', { type: ButtonType.Normal }).height(44).fontSize(12).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).onClick(() => { this.refresh(); })
+                if (this.view.latestTurn?.canRetry) { Button('重新提问', { type: ButtonType.Normal }).height(44).fontSize(12).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).onClick(() => { this.pending = null; if (this.text.trim() === '') this.text = this.view.messages.filter((m: ConversationMessage) => m.role === 'USER').slice(-1)[0]?.content ?? ''; this.ask(); }) }
+              }
+            }.width('100%').alignItems(HorizontalAlign.Start).padding(14).backgroundColor(PMColors.SURFACE).borderRadius(14).border({ width: 1, color: PMColors.BORDER_SUBTLE })
+          }
           if (this.workRef) { ForEach([this.workRef], (ref: ConversationWorkRef) => { ConversationWorkPanel({ conversation: this.view, workRef: ref, onUpdated: (v: ConversationView): void => { this.view = v; }, onClose: (): void => { this.workRef = null; } }) }, (ref: ConversationWorkRef) => this.view.id + ref.id) }
-          if (this.busy) { Text('正在核对项目资料…').fontSize(13).fontColor(PMColors.INK_SECONDARY) }
+          if (this.busy) { Row({ space: 10 }) { LoadingProgress().width(18).height(18).color(PMColors.BRAND); Text('正在核对项目资料…').fontSize(13).fontColor(PMColors.INK_SECONDARY) }.width('100%').padding({ top: 4, bottom: 8 }) }
           if (this.view.id !== '') {
             Row({ space: 16 }) {
               if (this.target !== '') { Button('项目偏好', { type: ButtonType.Normal }).fontSize(12).fontColor(PMColors.INK_TERTIARY).backgroundColor(Color.Transparent).height(40).onClick(() => { this.loadPreference(); }) }
@@ -306,25 +308,50 @@ struct FocusConversation {
               PMButton({ label: '保存偏好', onAction: (): void => { this.savePreference(); } })
             }.width('100%').padding(16).backgroundColor(PMColors.SURFACE).borderRadius(16)
           }
-        }.padding(16).width('100%').alignItems(HorizontalAlign.Start)
-      }.layoutWeight(1).width('100%').scrollBar(BarState.Off)
+        }.padding({ left: 20, right: 20, top: 18, bottom: 24 }).width('100%').alignItems(HorizontalAlign.Start).justifyContent(FlexAlign.Start)
+      }.layoutWeight(1).width('100%').scrollBar(BarState.Off).align(Alignment.TopStart)
       if (this.view.id !== '') {
-        Column({ space: 8 }) {
-          TextArea({ text: this.text, placeholder: '和忆程聊聊下一步…' }).height(64).fontSize(15).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(14)
+        Column() {
+        if (this.scopeOpen) {
+          Scroll() {
+            Column({ space: 4 }) {
+              if (this.view.scope !== 'PROJECT') { PMButton({ label: '全部授权项目', secondary: true, onAction: (): void => { this.target = ''; this.scopeOpen = false; this.pending = null; } }) }
+              ForEach(this.view.linkedProjects, (p: ConversationProject) => {
+                PMButton({ label: p.title, secondary: true, onAction: (): void => { this.target = p.id; this.scopeOpen = false; this.pending = null; } })
+              }, (p: ConversationProject) => p.id)
+            }.padding(10).width('100%')
+          }.width('100%').constraintSize({ maxHeight: 200 }).align(Alignment.TopStart)
+        }
+        Column({ space: 0 }) {
+          TextArea({ text: this.text, placeholder: '聊聊下一步…' }).height(84).fontSize(15).fontColor(PMColors.INK_PRIMARY).backgroundColor(Color.Transparent).padding({ left: 15, right: 15, top: 14, bottom: 4 })
             .enabled(!this.busy).onChange((v: string) => { this.text = v; })
           Row({ space: 8 }) {
+            Row({ space: 6 }) {
             Checkbox().width(18).height(18).selectedColor(PMColors.BRAND).select(this.cloud).enabled(this.analysisReady && this.cloudAvailable && !this.busy).onChange((v: boolean) => { this.cloud = v; this.pending = null; })
-            Text(this.cloudAvailable ? '云端分析' : '本地整理').fontSize(12).fontColor(PMColors.INK_TERTIARY).accessibilityText('允许云模型使用本次授权项目资料')
+            Text(this.cloudAvailable ? '云端分析' : '本地整理').fontSize(12).fontColor(PMColors.INK_SECONDARY)
+            }.height(44).accessibilityText('云端分析').accessibilityDescription(this.cloudExplanation())
+              .gesture(LongPressGesture({ repeat: false, duration: 500 }).onAction(() => { this.showCloudHelp = true; }))
+              .onHover((hover: boolean) => { this.showCloudHelp = hover; })
+              .bindPopup(this.showCloudHelp, { message: this.cloudExplanation(), placement: Placement.Top, onStateChange: (event: CloudHelpState) => { if (!event.isVisible) this.showCloudHelp = false; } })
+            Text('·').fontSize(12).fontColor(PMColors.INK_MUTED)
+            Button(this.target === '' ? '跨项目 ⌄' : '当前项目 ⌄', { type: ButtonType.Normal }).height(44).fontSize(12).fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).padding({ left: 4, right: 6 }).enabled(!this.busy)
+              .accessibilityText('选择讨论项目范围').onClick(() => { this.scopeOpen = !this.scopeOpen; })
             Blank()
-            Button('发送 ↑', { type: ButtonType.Normal }).height(40).padding({ left: 20, right: 20 }).fontSize(14)
-              .backgroundColor(PMColors.BRAND).fontColor(Color.White).borderRadius(12)
+            Button({ type: ButtonType.Circle }) {
+              if (this.busy) { LoadingProgress().width(18).height(18).color(Color.White) }
+              else {
+                Stack() {
+                  Row().width(2).height(16).backgroundColor(Color.White).borderRadius(1).translate({ y: 2 })
+                  Row().width(11).height(2).backgroundColor(Color.White).borderRadius(1).rotate({ angle: -45 }).translate({ x: -3.5, y: -3.5 })
+                  Row().width(11).height(2).backgroundColor(Color.White).borderRadius(1).rotate({ angle: 45 }).translate({ x: 3.5, y: -3.5 })
+                }.width(22).height(22)
+              }
+            }.height(38).width(38).accessibilityText('发送').backgroundColor(PMColors.BRAND)
               .enabled(!this.busy && this.analysisReady && this.text.trim() !== '').onClick(() => { this.ask(); })
-          }.width('100%')
-          Text(!this.analysisReady ? '正在确认分析方式…' : !this.cloudAvailable ? '未配置云模型，当前仅整理项目记录' : this.cloud ? '发送即允许云模型分析本次授权项目资料，可关闭' : '仅整理项目记录，不调用云模型')
-            .fontSize(11).lineHeight(16).fontColor(PMColors.INK_TERTIARY).width('100%')
-        }.width('100%').padding({ left: 16, right: 16, top: 10, bottom: 12 }).backgroundColor(PMColors.SURFACE)
-          .border({ width: { top: 1 }, color: PMColors.BORDER_SUBTLE })
+          }.width('100%').padding({ left: 12, right: 10, bottom: 8 })
+        }.width('100%').backgroundColor(PMColors.SURFACE_SUBTLE).border({ width: 1, color: PMColors.BORDER_SUBTLE }).borderRadius(22).clip(true)
+        }.width('100%').padding({ left: 10, right: 10, top: 8, bottom: 10 }).backgroundColor(PMColors.SURFACE)
       }
-    }.width('100%').height('100%').backgroundColor(PMColors.BACKGROUND)
+    }.width('100%').height('100%').backgroundColor(PMColors.SURFACE)
   }
 }

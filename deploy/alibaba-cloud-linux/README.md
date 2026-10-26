@@ -98,6 +98,7 @@ curl -fsS --max-time 10 http://127.0.0.1:4400/health
 |---|---|
 | `FOCUS_AGENT_ENABLED=true` | 启用 `/focus` 全局对话和项目内关联会话入口 |
 | `FOCUS_AGENT_FOLLOW_ENABLED=true` | 启用 F3 显式关注、延后、停止和原会话结果回流；需同时开启上一项 |
+| `GOAL_CHANGE_REVIEW_ENABLED=true` | 启用原委托内D1资料变化复核与D2有界方案；先执行本轮迁移，再启用 |
 | `MISSION_ENABLED=true`、`MISSION_UI_ENABLED=true` | 原长期委托及其页面入口；沿用服务器原配置，协作验收时核对 |
 
 两个 Focus 开关默认均为 `false`，部署新代码后仍可能看到旧焦点页。按 [Focus 更新说明](FOCUS_UPDATE.md) 执行带备份的环境修改、重启和检查；已部署到目标版本时只执行该配置步骤即可。

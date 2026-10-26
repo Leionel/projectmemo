@@ -20,6 +20,7 @@ import { assertToolConstraints } from "./constraintsService";
 import { saveOutput } from "./outputService";
 import { commitApprovedAction, obsoleteApprovals } from "./approvalService";
 import { decisionTokenLimit, ModelProtocolError, protocolDiagnostic, missionFailure, missionContextManifest, type MissionPhase, type MissionRecovery, type MissionContextManifest } from "./modelProtocol";
+import { dynamicGuard, assertDynamicTool } from "./dynamicGuard";
 import { Prisma } from "@/lib/generated/prisma/client";
 export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;judge?:ClaimJudge}={}){
  const m=await claimMission(options.workerId??randomUUID(),options.id);if(!m)return false;
@@ -31,6 +32,27 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
  const settleFailed=async(kind:"models"|"tools",started:number,usage?:Decision["usage"])=>{try{await settleUsage(lease,kind,Date.now()-started,usage);}catch{failedSettlements.add(kind);}};
  const heartbeat=setInterval(()=>{void renew(lease).catch(()=>false);},10000);heartbeat.unref();
  try{
+  const directed = dynamicGuard(m);
+  if (directed) {
+   const ready = await db.agentMissionStep.findFirst({where:{missionId:m.id,planRevision:m.planRevision,status:"READY",toolName:"read_project_material"},orderBy:{ordinal:"asc"}});
+   const running = await db.agentMissionStep.findFirst({where:{missionId:m.id,planRevision:m.planRevision,status:"RUNNING",toolName:"read_project_material"},orderBy:{ordinal:"asc"}});
+   if (directed.kind === "ASK_USER" || !ready && !running) {
+    phase="COMMIT";
+    await db.$transaction(async tx=>{
+     const current=await fenced(tx,lease);const guard=dynamicGuard(current)!;
+     if(guard.kind==="ASK_USER"&&!guard.completed){
+      const question=await event(tx,m.id,"QUESTION",{question:guard.question,missing:"PRIVATE",requirements:{},reviewProposalId:guard.proposalId,phase:"DYNAMIC_REVIEW"});
+      await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...current.planJson as object,dynamicReview:{...guard,completed:true}}),waitStateJson:json({questionId:question.id,gapId:question.id,question:guard.question,missing:"PRIVATE",requirements:{},startedAt:new Date().toISOString(),readSet:[],reviewProposalId:guard.proposalId})}});
+      await release(tx,current,"WAITING_INPUT");
+     }else{
+      const completed=await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...current.planJson as object,dynamicReview:{...guard,completed:true}})}});
+      await event(tx,m.id,"REVIEW_OBSERVATIONS_READY",{rootReviewId:guard.rootReviewId,proposalId:guard.proposalId});
+      await release(tx,completed,"PAUSED","REVIEW_REQUIRED");
+     }
+    });return true;
+   }
+   if(ready&&!running)await db.$transaction(async tx=>{const current=await fenced(tx,lease);assertDynamicTool(current,ready.toolName,ready.canonicalInputJson);await tx.agentMissionStep.update({where:{id:ready.id},data:{status:"RUNNING",startedAt:new Date()}});});
+  }
   const pending=await db.agentMissionStep.findFirst({where:{missionId:m.id,status:"READY",approval:{status:"APPROVED"}},orderBy:{ordinal:"asc"}});
   if(pending){phase="APPROVAL";activeStepId=pending.id;sourceDecisionRunId=pending.agentRunId;await commitApprovedAction(lease,pending.id);return true;}
   const unfinished=await db.agentMissionStep.findFirst({where:{missionId:m.id,status:"RUNNING",planRevision:m.planRevision},orderBy:{ordinal:"asc"}});
@@ -84,7 +106,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
   phase="TOOL";activeStepId=step.id;sourceDecisionRunId=step.agentRunId;const tool=tools[step.toolName];if(!tool)throw new AppError("UNKNOWN_TOOL","该工具版本不可恢复",409);
   const currentMission=await db.agentMission.findUniqueOrThrow({where:{id:m.id}});assertAutomaticTool(currentMission,step.toolName,tool.effects.businessWrite);
   assertToolConstraints(currentMission.constraintsJson,step.toolName,step.canonicalInputJson);
-  const args=tool.schema.parse(step.canonicalInputJson);await reserve(lease,"tools",step.toolName);const started=Date.now();
+  const args=tool.schema.parse(step.canonicalInputJson);assertDynamicTool(currentMission,step.toolName,args);await reserve(lease,"tools",step.toolName);const started=Date.now();
   const result=await(async()=>{try{const value=await tool.run({userId:m.ownerUserId,projectId:m.projectId,missionId:m.id},args);if(JSON.stringify(value).length>40000)throw new AppError("TOOL_OUTPUT_LIMIT","工具结果超出任务读取范围",409);return value;}catch(error){await settleFailed("tools",started);throw error;}})();
   await settleUsage(lease,"tools",Date.now()-started);
   let claimChecks:ClaimCheck[]|undefined;
@@ -107,7 +129,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
   }
 
   phase="COMMIT";await db.$transaction(async tx=>{
-   const current=await fenced(tx,lease);let data=result;
+   const current=await fenced(tx,lease);assertDynamicTool(current,step!.toolName,step!.canonicalInputJson);let data=result;
    if(step!.toolName==="web_search"||step!.toolName==="web_fetch")await persistObservations(tx,m.id,result.data);
    if(step!.toolName==="save_mission_output"){
     phase="VERIFY";const output=await saveOutput(tx,m.id,step!.id,step!.canonicalInputJson,step!.readSetJson as unknown as Source[],claimChecks);phase="COMMIT";data={data:{outputId:output.id,revision:output.revision},sources:[]};

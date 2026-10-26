@@ -1,6 +1,7 @@
 import { apiError } from "@/lib/api";
 import { authenticateUser } from "@/lib/auth/guard";
 import { createScenarios, latestScenario } from "@/lib/decision/scenarios";
+import { createDynamicReview } from "@/lib/decision/dynamicCandidates";
 export const runtime = "nodejs";
 export async function GET(
   request: Request,
@@ -28,12 +29,18 @@ export async function POST(
   try {
     const { user, session } = await authenticateUser(request);
     const { id } = await params;
+    const raw = await request.json();
+    if (raw && raw.purpose === "DYNAMIC_PLAN") {
+      const { purpose: _purpose, ...input } = raw;
+      void _purpose;
+      return Response.json({ proposal: await createDynamicReview({ userId: user.id, sessionId: session.id }, id, input) }, { headers: { "cache-control": "private, no-store" } });
+    }
     return Response.json(
       {
         proposal: await createScenarios(
           { userId: user.id, sessionId: session.id },
           id,
-          await request.json(),
+          raw,
         ),
       },
       { headers: { "cache-control": "no-store" } },

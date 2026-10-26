@@ -43,3 +43,5 @@
 @media(max-width:1000px) { .columns { grid-template-columns:minmax(0,1fr) minmax(22rem,1fr); gap:1rem; } .hero { padding:1.25rem; } .hero h2 { font-size:1.125rem; } .metrics > div { padding:.85rem; } }
 @media(max-width:850px) { .root { padding-top:1.2rem; } .columns { display:block; } .right { position:static; } .mobileSwitch { display:flex; margin-bottom:1rem; } .mobileSwitch button { flex:1; padding:.65rem; font-size:.75rem; border-radius:6px; } .columns[data-mobile="chat"] .left,.columns[data-mobile="focus"] .right { display:none; } .pageHead { margin-bottom:1rem; } .pageHead h1 { font-size:1.5rem; } .pageHead > a { font-size:.6875rem; padding:.4rem .6rem; } .eyebrow { font-size:.6rem; margin-bottom:.5rem; } }
 @media(pointer:coarse) { .filters button,.discuss { min-height:44px; } }
+.mobileLauncher.mobileLauncher { display: none; }
+@media(max-width:850px) { .mobileLauncher.mobileLauncher { display:flex; } }

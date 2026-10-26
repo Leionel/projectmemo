@@ -18,6 +18,7 @@ export class ConversationWorkInput {
   requestId: string = ''; expectedConversationVersion: number = 1; ref: ConversationWorkRef = new ConversationWorkRef(); versionToken: string = '';
   operation: string = ''; answer?: string; decision?: string; sourcePointers?: MissionPointer[]; evidenceReview?: EvidenceReview;
   scenarioProposalId?: string; scenarioKey?: string; outputId?: string; outputRevision?: number;
+  dynamicProposalId?: string; candidateId?: string;
 }
 export class ConversationScenarioInput {
   requestId: string = ''; ref: ConversationWorkRef = new ConversationWorkRef(); versionToken: string = '';

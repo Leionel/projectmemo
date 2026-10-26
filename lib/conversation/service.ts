@@ -6,10 +6,20 @@ import { conversationCreateSchema, focusPreferenceSchema } from "@/lib/types/con
 import type { ConversationActor, ConversationBlocks, ConversationView, ConversationRef } from "@/lib/types/conversation";
 import { assertProject, assertSession, emptyBlocks, lockConversation, ownedConversation, record, type Tx } from "./repository";
 import { openConversationEntry } from "./anchorService";
+import { discussionTitle, hasDefaultDiscussionTitle } from "./presentation";
+import { resolveFileGuides } from "./fileGuides";
 
 export async function appendConversationMessage(tx: Tx, conversationId: string, ownerUserId: string,
   role: "USER" | "ASSISTANT", content: string, blocks: ConversationBlocks, turnId?: string, runId?: string) {
   const c = await tx.conversation.update({ where: { id: conversationId }, data: { nextSeq: { increment: 1 } } });
+  if (role === "USER" && hasDefaultDiscussionTitle(c.title)) {
+    const first = await tx.agentMessage.findFirst({ where: { conversationId, role: "USER", ownerUserId }, orderBy: { seq: "asc" }, select: { content: true, blocksJson: true } });
+    const firstProjects = first ? record(first.blocksJson).observedProjectIds : blocks.observedProjectIds;
+    const projectId = c.homeProjectId ?? (Array.isArray(firstProjects) && typeof firstProjects[0] === "string" ? firstProjects[0] : null)
+      ?? (typeof record(c.focusJson).projectId === "string" ? record(c.focusJson).projectId as string : null);
+    const project = projectId ? await tx.project.findFirst({ where: { id: projectId, memberships: { some: { userId: ownerUserId } } }, select: { title: true } }) : null;
+    await tx.conversation.update({ where: { id: conversationId }, data: { title: discussionTitle(first?.content ?? content, project?.title) } });
+  }
   return tx.agentMessage.create({ data: { projectId: null, conversationId, turnId, seq: c.nextSeq,
     ownerUserId, role, content, blocksJson: json(blocks), citations: [], proposedActions: [], runId } });
 }
@@ -73,15 +83,37 @@ export async function listConversations(actor: ConversationActor, projectId?: st
     ...(projectId ? { projects: { some: { projectId } } } : {}), ...(cursor ? { id: { lt: cursor } } : {}) },
     orderBy: { id: "desc" }, take: 21, select: { id: true, title: true, scope: true, homeProjectId: true,
       projects: { select: { projectId: true } } } });
-  const memberships = await db.projectMembership.findMany({ where: { userId: actor.userId }, select: { projectId: true } });
+  const memberships = await db.projectMembership.findMany({ where: { userId: actor.userId }, select: { projectId: true, role: true } });
   const allowed = new Set(memberships.map(m => m.projectId));
-  return { conversations: rows.slice(0, 20).map(({ projects, ...row }) => ({
-    ...row, title: projects.some(p => !allowed.has(p.projectId)) ? "部分历史不可用的讨论" : row.title,
-  })), nextCursor: rows.length > 20 ? rows[19].id : null };
+  const privateBindings = await db.conversationBinding.findMany({ where: { conversationId: { in: rows.map(c => c.id) },
+    kind: { in: ["MISSION", "GOAL_QUESTION", "IMPACT"] }, projectId: { notIn: memberships.filter(m => m.role === "OWNER").map(m => m.projectId) } }, select: { conversationId: true } });
+  const restricted = new Set(privateBindings.map(b => b.conversationId));
+  const titleScopes = new Map(rows.map(row => [row.id, row.projects.map(p => p.projectId)]));
+  const conversations = await Promise.all(rows.slice(0, 20).map(async ({ projects, ...row }) => {
+    if (restricted.has(row.id) || projects.some(p => !allowed.has(p.projectId))) return { ...row, title: "部分历史不可用的讨论" };
+    if (!hasDefaultDiscussionTitle(row.title)) return row;
+    const first = await db.agentMessage.findFirst({ where: { conversationId: row.id, role: "USER", ownerUserId: actor.userId }, orderBy: { seq: "asc" }, select: { content: true, blocksJson: true } });
+    const scopes = first && Array.isArray(record(first.blocksJson).observedProjectIds) ? record(first.blocksJson).observedProjectIds as string[] : [];
+    titleScopes.set(row.id, [...titleScopes.get(row.id)!, ...scopes]);
+    if (scopes.some(p => !allowed.has(p))) return { ...row, title: "部分历史不可用的讨论" };
+    const projectId = row.homeProjectId ?? scopes[0];
+    const project = projectId ? await db.project.findFirst({ where: { id: projectId, memberships: { some: { userId: actor.userId } } }, select: { title: true } }) : null;
+    return { ...row, title: first ? discussionTitle(first.content, project?.title) : project ? project.title.slice(0, 20) + " · 新讨论" : "新讨论" };
+  }));
+  // Recheck after reading titles: a mixed-project title must not survive scope revocation.
+  await assertSession(actor);
+  const latest = await db.projectMembership.findMany({ where: { userId: actor.userId }, select: { projectId: true, role: true } });
+  const latestAllowed = new Set(latest.map(m => m.projectId));
+  const latestOwners = new Set(latest.filter(m => m.role === "OWNER").map(m => m.projectId));
+  for (const row of conversations) {
+    if (titleScopes.get(row.id)!.some(p => !latestAllowed.has(p)) ||
+      await db.conversationBinding.findFirst({ where: { conversationId: row.id, kind: { in: ["MISSION", "GOAL_QUESTION", "IMPACT"] }, projectId: { notIn: [...latestOwners] } } })) row.title = "部分历史不可用的讨论";
+  }
+  return { conversations, nextCursor: rows.length > 20 ? rows[19].id : null };
 }
 export async function readConversation(actor: ConversationActor, id: string, beforeSeq?: number): Promise<ConversationView> {
   const c = await ownedConversation(actor, id);
-  const [memberships, rows, linked, active] = await Promise.all([
+  const [memberships, rows, linked, active, latest] = await Promise.all([
     db.projectMembership.findMany({ where: { userId: actor.userId }, select: { projectId: true, role: true } }),
     db.agentMessage.findMany({ where: { conversationId: id, ownerUserId: actor.userId, ...(beforeSeq ? { seq: { lt: beforeSeq } } : {}) },
       orderBy: { seq: "desc" }, take: 51 }),
@@ -89,6 +121,7 @@ export async function readConversation(actor: ConversationActor, id: string, bef
       id: { in: (await db.conversationProject.findMany({ where: { conversationId: id } })).map(p => p.projectId) } },
       select: { id: true, title: true } }),
     c.activeTurnId ? db.conversationTurn.findUnique({ where: { id: c.activeTurnId } }) : null,
+    db.conversationTurn.findFirst({ where: { conversationId: id }, orderBy: { createdAt: "desc" } }),
   ]);
   const allowed = new Set(memberships.map(m => m.projectId)), owners = new Set(memberships.filter(m => m.role === "OWNER").map(m => m.projectId));
   const messages: ConversationView["messages"] = [];
@@ -114,6 +147,7 @@ export async function readConversation(actor: ConversationActor, id: string, bef
           resultCardId: action && "resultCardId" in action ? action.resultCardId : null };
       }
     }
+    blocks.fileGuides = await resolveFileGuides(blocks.sources, blocks.citations, blocks.fileGuides);
     messages.push({ ...blocks, id: row.id, seq: row.seq!, role: row.role, content: row.content, restricted: false });
   }
   await assertSession(actor);
@@ -129,10 +163,22 @@ export async function readConversation(actor: ConversationActor, id: string, bef
   }
   if (c.homeProjectId && !latestAllowed.has(c.homeProjectId)) throw new AppError("PROJECT_NOT_FOUND", "项目权限已变化", 404);
   const focus = record(c.focusJson), focusProjectId = typeof focus.projectId === "string" && latestAllowed.has(focus.projectId) ? focus.projectId : null;
-  return { schemaVersion: 1, id, title: messages.some(m => m.restricted) ? "项目协作" : c.title,
+  let title = c.title;
+  if (hasDefaultDiscussionTitle(title)) {
+    const first = await db.agentMessage.findFirst({ where: { conversationId: id, ownerUserId: actor.userId, role: "USER" }, orderBy: { seq: "asc" }, select: { content: true, blocksJson: true } });
+    const scopes = first && Array.isArray(record(first.blocksJson).observedProjectIds) ? record(first.blocksJson).observedProjectIds as string[] : [];
+    const projectId = c.homeProjectId ?? scopes[0];
+    title = first ? scopes.some(p => !latestAllowed.has(p)) ? "项目协作" : discussionTitle(first.content, linked.find(p => p.id === projectId)?.title) : "新讨论";
+  }
+  return { schemaVersion: 1, id, title: messages.some(m => m.restricted) ? "项目协作" : title,
     scope: c.scope, homeProjectId: c.homeProjectId, version: c.version, focusProjectId,
     messages, linkedProjects: linked.filter(p => latestAllowed.has(p.id)), hasMore: rows.length > 50, beforeSeq: rows.length ? rows[Math.min(49, rows.length - 1)].seq : null,
-    activeTurn: active ? { id: active.id, requestId: active.requestId, status: active.status } : null };
+    activeTurn: active ? { id: active.id, requestId: active.requestId, status: active.status } : null,
+    latestTurn: latest && !messages.some(m => m.restricted) ? { id: latest.id, status: latest.status,
+      canRetry: ["FAILED", "UNKNOWN"].includes(latest.status),
+      message: latest.status === "UNKNOWN" ? "上次分析中断，暂未取得可用回答。你可以读取状态，或重新提问。"
+        : latest.status === "FAILED" ? "这次分析未完成，你可以重新提问。"
+        : ["OBSERVING", "GENERATING", "ACCEPTED"].includes(latest.status) ? "正在核对项目资料…" : "" } : null };
 }
 export async function saveFocusPreference(actor: ConversationActor, projectId: string, raw: unknown) {
   const input = focusPreferenceSchema.parse(raw);

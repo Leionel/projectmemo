@@ -40,6 +40,13 @@ export type ConversationSource = {
   title: string; excerpt: string; observedAt: string; temporalState: string;
   knowledgeClass: string; start: number; end: number; excerptHash: string;
 };
+export type ConversationCitation = { sourceId: string; quote: string };
+export type ConversationFileGuide = {
+  number: number; sourceId: string; projectId: string; entityId: string;
+  kind: "ATTACHMENT" | "RECORD" | "ARTIFACT"; title: string; revision: string;
+  stale: boolean; missing: boolean; archived: boolean; temporalState: string;
+  excerpt: string; quote: string | null; readScope: "SUMMARY" | "EXCERPT"; href: string;
+};
 export type PriorityReason = {
   projectId: string; importance: string; urgency: string; blocking: string;
   effort: string; preference: string; tradeoff: string; unknown: string[];
@@ -56,7 +63,10 @@ export type ConversationBlocks = {
   schemaVersion: 1; refs: ConversationRef[]; sources: ConversationSource[];
   priorities: PriorityReason[]; proposal: ConversationProposal | null;
   provider: string; limitations: string[]; observedProjectIds: string[];
-  options?: Array<{ key: string; label: string; projectId: string; missionId: string; proposalId: string; proposalHash: string; expectedVersion: number }>;
+  citations?: ConversationCitation[];
+  fileGuides?: ConversationFileGuide[];
+  reviewRef?: { id: string; purpose: string; missionId: string; projectId: string; status: string; proposalHash: string };
+  options?: Array<{ key: string; label: string; projectId: string; missionId: string; proposalId: string; proposalHash: string; expectedVersion: number; purpose?: "DYNAMIC_PLAN"; candidateId?: string }>;
 };
 export type ConversationMessage = ConversationBlocks & {
   id: string; seq: number; role: string; content: string; restricted: boolean;
@@ -66,5 +76,6 @@ export type ConversationView = {
   homeProjectId: string | null; focusProjectId: string | null;
   messages: ConversationMessage[]; hasMore: boolean; beforeSeq: number | null;
   activeTurn: { id: string; requestId: string; status: string } | null;
+  latestTurn?: { id: string; status: string; message: string; canRetry: boolean } | null;
   linkedProjects: Array<{ id: string; title: string }>;
 };

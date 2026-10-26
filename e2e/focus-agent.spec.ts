@@ -8,6 +8,54 @@ function focusFixture(operation: string, id: string, choice?: import("../lib/mis
     { env: { ...process.env, ...E2E_ENV }, timeout: 30000, maxBuffer: 2 * 1024 * 1024 });
 }
 
+test("Focus keeps file guidance inside its answer and names discussions from the question", async ({ page }) => {
+  const token = (await page.context().cookies()).find(c => c.name === "pm_session")!.value; const headers = { Authorization: "Bearer " + token };
+  const caps = await page.request.get("/api/conversations/capabilities", { headers }); test.skip(!(await caps.json()).enabled, "Focus flag is off");
+  const created = await page.request.post("/api/projects", { headers, data: { title: "文件指引测试 " + Date.now(), description: "独立隔离数据库的文件指引验证", goal: "核对部署日志", scenario: "RESEARCH" } });
+  expect(created.ok()).toBe(true); const project = (await created.json()).project;
+  const captured = await page.request.post(`/api/projects/${project.id}/captures`, { headers, data: { requestId: crypto.randomUUID(), rawText: "实验部署记录：设备D模型A内存峰值6.8GB。", sourceType: "实验记录" } });
+  expect(captured.ok(), await captured.text()).toBe(true);
+  const opened = await page.request.post("/api/conversations", { headers, data: { requestId: crypto.randomUUID(), scope: "PROJECT", projectId: project.id } });
+  const id = (await opened.json()).id;
+  await page.goto("/focus?conversation=" + id);
+  const panel = page.getByRole("region", { name: "问忆程", exact: true });
+  await panel.getByRole("textbox", { name: "与忆程讨论项目" }).fill("实验部署记录还需要核对什么？");
+  await panel.getByRole("button", { name: "发送", exact: true }).click();
+  const guides = panel.getByLabel("本条回答的资料指引"); await expect(guides).toBeVisible();
+  await guides.locator("summary").first().click();
+  await expect(guides.getByRole("link", { name: "查看项目资料", exact: true }).first()).toHaveAttribute("href", new RegExp(project.id + "/knowledge.*conversation="));
+  await expect(panel.getByRole("combobox", { name: "选择讨论" }).locator("option:checked")).toContainText("实验部署记录还需要核对什么");
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  await page.screenshot({ path: focusEvidenceDir + "/answer-file-guide-mobile.png", fullPage: true });
+});
+
+test("Focus reads a D1/D2 proposal, confirms a directed read and returns its original result", async ({ page }) => {
+  const token = (await page.context().cookies()).find(c => c.name === "pm_session")!.value; const headers = { Authorization: "Bearer " + token };
+  const caps = await page.request.get("/api/conversations/capabilities", { headers }); test.skip(!(await caps.json()).enabled || !process.env.GOAL_CHANGE_REVIEW_ENABLED, "Review flag is off");
+  const created = await page.request.post("/api/projects", { headers, data: { title: "D1D2部署复核 " + Date.now(), description: "独立隔离数据库的部署复核验证", goal: "部署预算6GB", scenario: "RESEARCH" } });
+  expect(created.ok(), await created.text()).toBe(true);
+  const project = (await created.json()).project;
+  const mr = await page.request.post("/api/missions", { headers, data: { projectId: project.id, requestId: crypto.randomUUID(), goal: "核对部署证据", llmContextApproved: true } });
+  expect(mr.ok(), await mr.text()).toBe(true); const mission = (await mr.json()).mission;
+  focusFixture("review", mission.id);
+  const opened = await page.request.post("/api/conversations", { headers, data: { requestId: crypto.randomUUID(), scope: "WORKSPACE" } }); const id = (await opened.json()).id;
+  const turn = await page.request.post(`/api/conversations/${id}/turns`, { headers, data: { requestId: crypto.randomUUID(), expectedVersion: 1, message: "读取原委托", projectId: project.id, entityRef: { kind: "MISSION", id: mission.id, projectId: project.id } } });
+  expect(turn.ok(), await turn.text()).toBe(true);
+  await page.goto("/focus?conversation=" + id);
+  const panel = page.getByRole("region", { name: "问忆程", exact: true });
+  await panel.getByRole("button", { name: "在此协作", exact: true }).first().click();
+  const work = panel.getByRole("region", { name: "原任务协作", exact: true });
+  await work.getByText("复核资料变化", { exact: true }).click();
+  await expect(work.getByText("设备D部署测量超过原预算，需要核对。", { exact: true })).toBeVisible();
+  await work.getByRole("button", { name: "预览采用 →", exact: true }).first().click();
+  await panel.getByRole("button", { name: "确认此操作", exact: true }).click();
+  focusFixture("review-slice", mission.id);
+  const state = await page.request.get(`/api/missions/${mission.id}`, { headers }); expect((await state.json()).mission.status).toBe("PAUSED");
+  await page.reload(); await expect(panel.getByText(/已采用：读取设备D部署日志/)).toBeVisible();
+  const detail = await page.request.get(`/api/missions/${mission.id}`, { headers }); expect(JSON.stringify(await detail.json())).toContain("6.8GB");
+});
+
 test("Focus defaults to available cloud analysis, explains scope and preserves manual opt-out", async ({ page }) => {
   const session = (await page.context().cookies()).find(c => c.name === "pm_session")!;
   const caps = await page.request.get("/api/conversations/capabilities", { headers: { Authorization: "Bearer " + session.value } });
@@ -26,6 +74,7 @@ test("Focus defaults to available cloud analysis, explains scope and preserves m
   const cloud = panel.getByRole("checkbox", { name: "允许云模型使用本次授权项目资料" });
   await panel.getByRole("button", { name: "新讨论", exact: true }).click();
   await expect(cloud).toBeChecked();
+  await cloud.hover();
   await expect(panel.getByText("发送即允许云模型分析本次授权项目资料，可关闭")).toBeVisible();
   await page.screenshot({ path: focusEvidenceDir + "/cloud-default.png", fullPage: true });
   const input = panel.getByRole("textbox", { name: "与忆程讨论项目" });
@@ -34,6 +83,7 @@ test("Focus defaults to available cloud analysis, explains scope and preserves m
   await expect(input).toHaveValue("");
   expect(approvals).toEqual([true]);
   await cloud.uncheck();
+  await cloud.hover();
   await expect(panel.getByText("仅整理项目记录，不调用云模型")).toBeVisible();
   await input.fill("当前有哪些待回应的事？");
   await panel.getByRole("button", { name: "发送", exact: true }).click();
@@ -56,6 +106,7 @@ test("Focus explains local mode when the backend has no cloud model", async ({ p
   const cloud = panel.getByRole("checkbox", { name: "允许云模型使用本次授权项目资料" });
   await expect(cloud).not.toBeChecked();
   await expect(cloud).toBeDisabled();
+  await cloud.hover();
   await expect(panel.getByText("未配置云模型，当前仅整理项目记录")).toBeVisible();
 });
 test("Focus discussion creates a real Action, reads it back, and survives project navigation", async ({ page }) => {

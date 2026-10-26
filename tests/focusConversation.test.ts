@@ -40,6 +40,10 @@ import { listAgentRuns } from "@/lib/repositories/agent";
 import { previewConversationResume, confirmConversationProposal } from "@/lib/conversation/missionCommands";
 import { GET as getView } from "@/app/api/conversations/[id]/route";
 import { POST as confirmRoute } from "@/app/api/conversations/[id]/proposals/[executionId]/confirm/route";
+import { appendConversationMessage } from "@/lib/conversation/service";
+import { emptyBlocks } from "@/lib/conversation/repository";
+import { sourceHash } from "@/lib/mission/repository";
+import { jsonHash } from "@/lib/mission/contracts";
 afterAll(async () => { vi.restoreAllMocks(); await db.$disconnect(); fs.rmSync(isolated.dir, { recursive: true, force: true }); });
 async function fixture(count = 2) {
   const user = await db.user.create({ data: { username: crypto.randomUUID(), displayName: "焦点测试", passwordHash: "unused" } });
@@ -61,6 +65,45 @@ async function ask(f: Awaited<ReturnType<typeof fixture>>, message: string, proj
   return submitConversationTurn(f.actor, f.id, { requestId, expectedVersion: c.version, message, ...(projectId ? { projectId } : {}) });
 }
 describe.sequential("Focus conversations: real services and isolated persistence", () => {
+  it("names a discussion from its first question, keeps it across follow-ups and preserves explicit titles", async () => {
+    const f = await fixture(), p = f.projects[0];
+    await ask(f, "请核对部署资料是否齐全", p.id);
+    const original = await readConversation(f.actor, f.id);
+    expect(original.title).toContain("核对部署资料是否齐全");
+    expect(original.title).toContain(p.title.slice(0, 10));
+    await ask(f, "那另一个项目呢？", f.projects[1].id);
+    expect((await readConversation(f.actor, f.id)).title).toBe(original.title);
+    const custom = await createConversation(f.actor, { requestId: "custom-title", scope: "PROJECT", projectId: p.id, title: "我自己的部署讨论" });
+    const c = await readConversation(f.actor, custom.id);
+    await submitConversationTurn(f.actor, custom.id, { requestId: "custom-question", expectedVersion: c.version, message: "目前还缺什么？" });
+    expect((await readConversation(f.actor, custom.id)).title).toBe("我自己的部署讨论");
+    await db.conversation.update({ where: { id: f.id }, data: { title: "项目协作" } });
+    const list = await listConversations(f.actor);
+    expect(list.conversations.find(c => c.id === f.id)!.title).toContain("核对部署资料是否齐全");
+    expect((await db.conversation.findUniqueOrThrow({ where: { id: f.id } })).title).toBe("项目协作");
+  });
+  it("guides an answer to the exact original file, preserves quoted revisions and hides revoked history", async () => {
+    const f = await fixture(), p = f.projects[0];
+    const file = await db.attachment.create({ data: { projectId: p.id, type: "PDF", fileName: "实验报告.pdf", mimeType: "application/pdf", size: 100, sha256: "a".repeat(64), storageKey: "isolated-fixture", extractionStatus: "SUCCESS", extractedText: "尚未读取的整篇原文件" } });
+    const card = await db.knowledgeCard.findFirstOrThrow({ where: { projectId: p.id } });
+    await db.knowledgeCard.update({ where: { id: card.id }, data: { attachmentId: file.id } });
+    const qualified = p.id + "/card:" + card.id, excerpt = "实验记录：已完成资料核对。";
+    const blocks = { ...emptyBlocks(), observedProjectIds: [p.id], citations: [{ sourceId: qualified, quote: "已完成资料核对" }],
+      sources: [{ id: qualified, sourceId: "card:" + card.id, projectId: p.id, revision: (await sourceHash(p.id, "card:" + card.id))!, title: "card:" + card.id, excerpt, excerptHash: jsonHash(excerpt), start: 0, end: excerpt.length, temporalState: "CURRENT", knowledgeClass: "PROJECT_OBSERVATION", observedAt: new Date().toISOString() }] };
+    await db.$transaction(tx => appendConversationMessage(tx, f.id, f.user.id, "ASSISTANT", "请查看实验资料【1】。", blocks));
+    const reply = (await readConversation(f.actor, f.id)).messages.at(-1)!;
+    expect(reply.fileGuides).toHaveLength(1);
+    expect(reply.fileGuides![0]).toMatchObject({ number: 1, entityId: file.id, kind: "ATTACHMENT", title: "实验报告.pdf", readScope: "SUMMARY", stale: false, missing: false, quote: "已完成资料核对", href: `/api/projects/${p.id}/attachments/${file.id}/file` });
+    expect(JSON.stringify(reply)).not.toContain("尚未读取的整篇原文件");
+    expect(JSON.stringify(reply)).not.toContain("isolated-fixture");
+    await db.knowledgeCard.update({ where: { id: card.id }, data: { summary: "资料已更正", archivedAt: new Date() } });
+    const changed = (await readConversation(f.actor, f.id)).messages.at(-1)!.fileGuides![0];
+    expect(changed).toMatchObject({ stale: true, archived: true, excerpt, temporalState: "CURRENT" });
+    await db.projectMembership.delete({ where: { userId_projectId: { userId: f.user.id, projectId: p.id } } });
+    const revoked = (await readConversation(f.actor, f.id)).messages.at(-1)!;
+    expect(revoked.restricted).toBe(true);
+    expect(revoked.fileGuides).toBeUndefined();
+  });
   it("replays all migrations and preserves legacy message/run identity without assigning an unknown owner", () => {
     expect(isolated.legacy).toMatchObject({ id: "legacy-m", projectId: "legacy-p", runId: "legacy-r", content: "保留原历史", ownerUserId: null });
     expect(isolated.foreignErrors).toEqual([]);
@@ -209,6 +252,41 @@ describe.sequential("Focus conversations: real services and isolated persistence
       expect(fetcher).toHaveBeenCalledTimes(1);
       expect((await db.agentRun.findFirstOrThrow({ where: { conversationId: f.id } })).status).toBe("FAILED");
       expect(await db.actionItem.count({ where: { projectId: { in: f.projects.map(p => p.id) } } })).toBe(0);
+    } finally { fetcher.mockRestore(); vi.unstubAllEnvs(); process.env.LLM_MODE = "mock"; }
+  });
+  it("discards an unsupported cloud answer and its action, then returns verified state without another call", async () => {
+    const f = await fixture(), p = f.projects[0];
+    vi.stubEnv("LLM_MODE", "openai-compatible"); vi.stubEnv("LLM_API_KEY", "fixture-key");
+    let calls = 0;
+    const fetcher = vi.spyOn(globalThis, "fetch").mockImplementation(async () => {
+      const data = ++calls === 1 ? { intent: "PROPOSE_ACTION", projectIds: [p.id], query: "实验" } : {
+        advice: "模型A已全部完成并达标【1】", recommendedProjectId: p.id,
+        observations: [{ sourceId: p.id + "/project:" + p.id, quote: "伪造的全完成证明" }], priorities: [],
+        action: { projectId: p.id, title: "不应出现的行动", description: "未通过核对", priority: 5 },
+      };
+      return Response.json({ choices: [{ message: { content: JSON.stringify(data) } }], usage: { prompt_tokens: 10, completion_tokens: 10 } });
+    });
+    try {
+      const result = await submitConversationTurn(f.actor, f.id, { requestId: "bad-quote", expectedVersion: 1, projectId: p.id, message: "帮我处理下一步", llmContextApproved: true });
+      expect(result.status).toBe("ANSWERED"); expect(calls).toBe(2);
+      const message = result.conversation.messages.at(-1)!;
+      expect(message.content).toContain("已核实的项目状态"); expect(message.content).not.toContain("全部完成并达标"); expect(message.proposal).toBeNull();
+      expect(message.provider).toBe("project_state");
+      expect(await db.copilotToolExecution.count({ where: { sourceRun: { conversationId: f.id } } })).toBe(0);
+      expect(await db.agentRun.findFirst({ where: { conversationId: f.id } })).toMatchObject({ status: "FALLBACK", fallbackReason: "UNSUPPORTED_QUOTE" });
+    } finally { fetcher.mockRestore(); vi.unstubAllEnvs(); process.env.LLM_MODE = "mock"; }
+  });
+  it("marks a received invalid model response FAILED and lets a deliberate new question recover", async () => {
+    const f = await fixture();
+    vi.stubEnv("LLM_MODE", "openai-compatible"); vi.stubEnv("LLM_API_KEY", "fixture-key");
+    const fetcher = vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ choices: [{ message: { content: "这不是约定的JSON" } }], usage: { prompt_tokens: 10, completion_tokens: 10 } }));
+    try {
+      await expect(submitConversationTurn(f.actor, f.id, { requestId: "invalid-json", expectedVersion: 1, message: "哪些项目重要？", llmContextApproved: true })).rejects.toThrow();
+      const read = await readConversation(f.actor, f.id); expect(read.latestTurn).toMatchObject({ status: "FAILED", canRetry: true }); expect(read.activeTurn).toBeNull();
+      expect(fetcher).toHaveBeenCalledTimes(1);
+      process.env.LLM_MODE = "mock";
+      const recovered = await submitConversationTurn(f.actor, f.id, { requestId: "explicit-new-question", expectedVersion: read.version, message: "哪些项目重要？" });
+      expect(recovered.status).toBe("ANSWERED"); expect(recovered.conversation.latestTurn?.canRetry).toBe(false);
     } finally { fetcher.mockRestore(); vi.unstubAllEnvs(); process.env.LLM_MODE = "mock"; }
   });
   it("resumes the bound paused Mission through the original service, once, without creating another task", async () => {

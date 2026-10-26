@@ -1,10 +1,13 @@
 import { ApiClient } from './ApiClient';
+import { ConversationReviews, ConversationReviewInput, ConversationReviewReply } from '../models/ChangeReview';
 import { ConversationAnchorListReply, ConversationAnchorReply, ConversationAnchorInput, ConversationWorkspaceSyncReply } from '../models/ConversationAnchor';
 import { ConversationWork, ConversationWorkRef, ConversationWorkInput, ConversationScenarioInput, ConversationWorkReply, ConversationMaterialAssessment } from '../models/ConversationWork';
 import { ConversationCapabilities, ConversationListReply, ConversationCreated, ConversationCreateInput,
   ConversationView, ConversationTurnInput, ConversationTurnReply, ConversationConfirmInput, ConversationConfirmReply,
   FocusPreferenceInput, FocusPreferenceReply } from '../models/Conversation';
 export class ConversationService {
+  async reviews(id: string, ref: ConversationWorkRef): Promise<ConversationReviews> { return this.client.get<ConversationReviews>(`/api/conversations/${id}/work/review?kind=${ref.kind}&id=${encodeURIComponent(ref.id)}&projectId=${encodeURIComponent(ref.projectId)}`); }
+  async submitReview(id: string, input: ConversationReviewInput): Promise<ConversationReviewReply> { return this.client.post<ConversationReviewReply>(`/api/conversations/${id}/work/review`, input, 60000); }
   private client: ApiClient = new ApiClient();
   async capabilities(): Promise<ConversationCapabilities> { return this.client.get<ConversationCapabilities>('/api/conversations/capabilities'); }
   async list(projectId: string = ''): Promise<ConversationListReply> {
@@ -17,7 +20,7 @@ export class ConversationService {
   async syncAnchors(id: string): Promise<ConversationAnchorReply> { return this.client.post<ConversationAnchorReply>(`/api/conversations/${id}/anchors/sync`, undefined); }
   async updateAnchor(id: string, anchorId: string, input: ConversationAnchorInput): Promise<ConversationAnchorReply> { return this.client.post<ConversationAnchorReply>(`/api/conversations/${id}/anchors/${anchorId}`, input); }
   async read(id: string, beforeSeq: number = 0): Promise<ConversationView> { return this.client.get<ConversationView>(`/api/conversations/${id}${beforeSeq > 0 ? '?beforeSeq=' + beforeSeq : ''}`); }
-  async ask(id: string, input: ConversationTurnInput): Promise<ConversationTurnReply> { return this.client.post<ConversationTurnReply>(`/api/conversations/${id}/turns`, input); }
+  async ask(id: string, input: ConversationTurnInput): Promise<ConversationTurnReply> { return this.client.post<ConversationTurnReply>(`/api/conversations/${id}/turns`, input, 60000); }
   async confirm(id: string, executionId: string, input: ConversationConfirmInput): Promise<ConversationConfirmReply> {
     return this.client.post<ConversationConfirmReply>(`/api/conversations/${id}/proposals/${executionId}/confirm`, input);
   }

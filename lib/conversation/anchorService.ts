@@ -124,8 +124,29 @@ async function missionSnapshots(tx: Tx, actor: ConversationActor, a: Conversatio
       : m.status === "CANCELLED" ? "原委托已取消，已有记录仍保留。"
       : m.status === "PAUSED" ? "原委托已暂停，原计划与依据需要重新核对。" : "原委托状态已更新：" + m.status + "。", refs: [ref] }];
   const ownCommands = await tx.copilotToolExecution.findMany({ where: { resultId: m.id, status: "COMMITTED", sourceRun: { conversationId: a.conversationId },
-    tool: { in: ["input", "approval", "resume", "resume_mission", "continuation", "adopt_scenario"] } }, orderBy: { updatedAt: "desc" }, take: 5 });
+    tool: { in: ["input", "approval", "resume", "resume_mission", "continuation", "adopt_scenario", "adopt_dynamic"] } }, orderBy: { updatedAt: "desc" }, take: 5 });
   snapshots[0].silent = ownCommands.some(e => Number(record(record(e.proposalJson).command).expectedVersion ?? record(e.proposalJson).expectedVersion) === m.version - 1);
+  const reviewIds = batch?.filter(e => ["CHANGE_REVIEW_READY", "DYNAMIC_PLAN_READY"].includes(e.type)).map(e => record(e.payloadJson).proposalId).filter((id): id is string => typeof id === "string");
+  const reviews = await tx.decisionScenarioProposal.findMany({ where: { missionId: m.id, ownerUserId: actor.userId,
+    purpose: { in: ["CHANGE_REVIEW", "DYNAMIC_PLAN"] }, status: "READY", ...(batch ? { id: { in: reviewIds ?? [] } } : {}) }, orderBy: { createdAt: "desc" }, take: 4 });
+  for (const review of reviews) {
+    const result = record(review.scenariosJson);
+    if (typeof result.summary !== "string" || result.decision === "KEEP_PLAN") continue;
+    const { reviewFresh } = await import("@/lib/decision/reviewPersistence");
+    if (!await reviewFresh(review.baseManifest as unknown as import("@/lib/types/changeReview").ReviewBase, m, tx)) continue;
+    const alreadyProjected = await tx.agentMessage.findFirst({ where: { conversationId: a.conversationId,
+      blocksJson: { path: "$.reviewRef.id", equals: review.id } }, select: { id: true } });
+    snapshots.push({ key: "review:" + review.id + ":" + review.proposalHash, refs: [ref], silent: !!alreadyProjected,
+      content: (review.purpose === "CHANGE_REVIEW" ? "原资料变化复核已返回：\n" : "本轮推进方案已返回：\n") + result.summary + "\n可在原任务协作中读取，尚未采用或执行。" });
+  }
+  const reads = await tx.agentMissionStep.findMany({ where: { missionId: m.id, status: "SUCCEEDED", toolName: "read_project_material" }, orderBy: { ordinal: "desc" }, take: 4 });
+  for (const read of reads) {
+    if (record(read.protocolJson).purpose !== "DYNAMIC_READ") continue;
+    const result = read.resultJson as unknown as import("@/lib/mission/contracts").ToolResult;
+    try { await validateSources(m.projectId, result.sources, tx, m.id); } catch (e) { if (e instanceof AppError) continue; throw e; }
+    snapshots.push({ key: "review-read:" + read.id, refs: [ref], content: "原委托已读回所选资料，等待你核对：\n" + result.sources.map(s => s.text.slice(0, 600)).join("\n"),
+      sources: result.sources.map(s => ({ id: m.projectId + "/" + s.id, projectId: m.projectId, sourceId: s.id, revision: s.hash, title: "本轮读取资料", excerpt: s.text.slice(0, 600), start: 0, end: Math.min(600, s.text.length), excerptHash: jsonHash(s.text.slice(0, 600)), observedAt: s.observedAt, temporalState: s.temporalState ?? "UNKNOWN", knowledgeClass: s.knowledgeClass ?? "PROJECT_OBSERVATION" })) });
+  }
   const outputIds = batch?.filter(e => e.type === "TOOL_FINISHED").map(e => record(record(record(e.payloadJson).result).data).outputId).filter((id): id is string => typeof id === "string") ?? [];
   const outputs = await tx.agentMissionOutput.findMany({ where: { missionId: m.id, ...(batch ? { id: { in: outputIds } } : {}) }, orderBy: { revision: "desc" }, take: batch ? 40 : 3 });
   for (const output of outputs.reverse()) {

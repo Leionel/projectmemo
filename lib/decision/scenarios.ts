@@ -90,7 +90,7 @@ function present(
 export async function readScenario(actor: CopilotActor, id: string) {
   return db.$transaction(async (tx) => {
     const p = await tx.decisionScenarioProposal.findFirst({
-      where: { id, ownerUserId: actor.userId },
+      where: { id, ownerUserId: actor.userId, purpose: "FIXED_SCENARIOS" },
     });
     if (!p)
       throw new AppError("PROPOSAL_NOT_FOUND", "方案不存在或不可访问", 404);
@@ -110,7 +110,7 @@ export async function latestScenario(actor: CopilotActor, missionId: string) {
   const latest = await db.$transaction(async (tx) => {
     await scope(tx, actor, missionId);
     return tx.decisionScenarioProposal.findFirst({
-      where: { missionId, ownerUserId: actor.userId },
+      where: { missionId, ownerUserId: actor.userId, purpose: "FIXED_SCENARIOS" },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       select: { id: true },
     });
@@ -128,6 +128,8 @@ export async function createScenarios(
   const prepared = await db.$transaction(async (tx) => {
     const m = await scope(tx, actor, missionId);
     await lock(tx, missionId);
+    if (await tx.decisionReviewRequest.findUnique({ where: { ownerUserId_requestId: { ownerUserId: actor.userId, requestId: input.requestId } } }))
+      throw new AppError("REQUEST_ID_REUSED", "请求编号已用于变化复核", 409);
     const existing = await tx.decisionScenarioProposal.findUnique({
       where: {
         ownerUserId_createRequestId: {
@@ -137,7 +139,7 @@ export async function createScenarios(
       },
     });
     if (existing) {
-      if (existing.inputHash !== inputHash)
+      if (existing.purpose !== "FIXED_SCENARIOS" || existing.inputHash !== inputHash)
         throw new AppError(
           "REQUEST_ID_REUSED",
           "请求编号已用于另一份方案",
@@ -168,7 +170,7 @@ export async function createScenarios(
     if (input.parentId) {
       const parent = await tx.decisionScenarioProposal.findFirst({
         where: {
-          id: input.parentId,
+          id: input.parentId, purpose: "FIXED_SCENARIOS",
           ownerUserId: actor.userId,
           missionId,
           OR: [
@@ -459,7 +461,7 @@ export async function adoptScenario(
   const apply = async (tx: Tx) => {
     await tx.$executeRaw`UPDATE "DecisionScenarioProposal" SET "id"="id" WHERE "id"=${id}`;
     const p = await tx.decisionScenarioProposal.findFirst({
-      where: { id, ownerUserId: actor.userId },
+      where: { id, ownerUserId: actor.userId, purpose: "FIXED_SCENARIOS" },
     });
     if (!p)
       throw new AppError("PROPOSAL_NOT_FOUND", "方案不存在或不可访问", 404);
@@ -605,7 +607,7 @@ export async function adoptScenario(
       },
     });
     await tx.decisionScenarioProposal.updateMany({
-      where: { missionId: m.id, id: { not: p.id }, status: "READY" },
+      where: { missionId: m.id, purpose: "FIXED_SCENARIOS", id: { not: p.id }, status: "READY" },
       data: { status: "SUPERSEDED" },
     });
     await enqueueImpact(tx, p.projectId, `decision:${p.id}`, [
@@ -619,7 +621,7 @@ export async function adoptScenario(
 export async function rejectScenario(actor: CopilotActor, id: string) {
   return db.$transaction(async (tx) => {
     const p = await tx.decisionScenarioProposal.findFirst({
-      where: { id, ownerUserId: actor.userId },
+      where: { id, ownerUserId: actor.userId, purpose: "FIXED_SCENARIOS" },
     });
     if (!p) throw new AppError("PROPOSAL_NOT_FOUND", "方案不可访问", 404);
     await scope(tx, actor, p.missionId);

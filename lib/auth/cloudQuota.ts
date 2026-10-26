@@ -3,6 +3,29 @@ import { AppError } from "@/lib/api";
 import { json } from "@/lib/mission/contracts";
 
 export type WorkspaceBilling = { userId: string; turnId: string; purpose: "ROUTE" | "ANSWER" };
+export type ReviewBilling = { userId: string; sessionId: string; reviewProposalId: string };
+/** One actor and one durable proposal reservation; never charges every project owner. */
+export async function reserveReviewCloudCall(billing: ReviewBilling): Promise<void> {
+  await db.$transaction(async tx => {
+    await tx.$executeRaw`UPDATE "DecisionScenarioProposal" SET "id"="id" WHERE "id"=${billing.reviewProposalId}`;
+    const proposal = await tx.decisionScenarioProposal.findFirst({ where: { id: billing.reviewProposalId, ownerUserId: billing.userId, purpose: { in: ["CHANGE_REVIEW", "DYNAMIC_PLAN"] }, status: "BUILDING" } });
+    if (!proposal || !await tx.authSession.findFirst({ where: { id: billing.sessionId, userId: billing.userId, revokedAt: null, expiresAt: { gt: new Date() } } }))
+      throw new AppError("UNAUTHORIZED", "复核已结束或登录状态已变化", 401);
+    if (!await tx.projectMembership.findFirst({ where: { projectId: proposal.projectId, userId: billing.userId, role: "OWNER" } })) throw new AppError("PROJECT_NOT_FOUND", "项目权限已变化", 404);
+    if (await tx.goalQuestionPreference.findFirst({ where: { missionId: proposal.missionId, userId: billing.userId, questionId: "*", mode: "STOP" } })) throw new AppError("REVIEW_STOPPED", "该主题已停止", 409);
+    const state = (proposal.reviewStateJson ?? {}) as { accountReserved?: boolean };
+    if (state.accountReserved) throw new AppError("CALL_ALREADY_RESERVED", "原复核请求已发出，请读取原状态", 409);
+    const account = await tx.accountSecurity.findUnique({ where: { userId: billing.userId } });
+    if (account) {
+      if (!account.emailVerifiedAt || account.dailyCloudLimit <= 0) throw new AppError("CLOUD_ACCESS_DISABLED", "当前账号未开通云模型额度", 403);
+      const day = new Date().toISOString().slice(0, 10);
+      await tx.accountCloudUsage.upsert({ where: { userId_day: { userId: billing.userId, day } }, create: { userId: billing.userId, day, used: 0 }, update: {} });
+      const consumed = await tx.accountCloudUsage.updateMany({ where: { userId: billing.userId, day, used: { lt: account.dailyCloudLimit } }, data: { used: { increment: 1 } } });
+      if (!consumed.count) throw new AppError("CLOUD_QUOTA_EXHAUSTED", "今日云模型调用额度已用完", 429);
+    }
+    await tx.decisionScenarioProposal.update({ where: { id: proposal.id }, data: { reviewStateJson: json({ ...state, accountReserved: true }) } });
+  });
+}
 /** Reservation and quota consumption are one durable transaction, before HTTP. */
 export async function reserveWorkspaceCloudCall(billing: WorkspaceBilling): Promise<void> {
   await db.$transaction(async tx => {

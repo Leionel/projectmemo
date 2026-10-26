@@ -6,6 +6,7 @@ import { EvidenceReview } from '../models/EvidenceFit';
 import { ApiError } from '../models/Project';
 import { ConversationService } from '../services/ConversationService';
 import { MissionEvidenceReview } from './MissionEvidenceReview';
+import { ConversationReviewPanel } from './ConversationReviewPanel';
 import { PMButton } from './PMReferencePrimitives';
 import { PMColors } from '../common/DesignTokens';
 @Component
@@ -93,6 +94,7 @@ export struct ConversationWorkPanel {
       }
       if (this.work.question?.premise) { MissionEvidenceReview({ premise: this.work.question.premise, mode: this.mode, confirmed: this.reviewed(), disabled: this.busy, onMode: (v: string): void => { this.mode = v; this.assessed = false; }, onConfirm: (v: boolean): void => { this.premiseHash = v ? this.work.question!.premise!.premiseHash : ''; } }) }
       if (this.assessmentText !== '') { Text(this.assessmentText).fontSize(12).lineHeight(20).fontColor(PMColors.INK_SECONDARY) }
+      if (this.workRef.kind === 'MISSION' && this.work.version > 0) { ConversationReviewPanel({ conversation: this.conversation, work: this.work, busy: $busy, onUpdated: (view: ConversationView): void => { this.onUpdated(view); } }) }
       if (this.work.question) {
         if (this.selected.length > 0) {
           PMButton({ label: '核对所选资料', secondary: true, disabled: this.busy || !this.reviewed() || this.answer.trim() === '', onAction: (): void => { this.assess(); } })

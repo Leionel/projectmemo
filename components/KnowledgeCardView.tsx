@@ -36,7 +36,7 @@ export function KnowledgeCardView({ card, projectId, compact = false, forcedOpen
   const keywords = Array.isArray(card.keywords) ? card.keywords as string[] : [];
   const relatedTasks = Array.isArray(card.relatedTasks) ? card.relatedTasks as string[] : [];
   const nextActions = Array.isArray(card.nextActions) ? card.nextActions as string[] : [];
-  const temporal = card.temporal;
+  const temporal = card.temporal?.reasonCode === "NO_SUPPORTING_EVIDENCE" ? undefined : card.temporal;
   const related: Related[] = [...card.outgoingLinks.map((link) => ({ id: link.relatedCard.id, title: link.relatedCard.title, reason: link.reason, score: link.score })), ...card.incomingLinks.map((link) => ({ id: link.currentCard.id, title: link.currentCard.title, reason: link.reason, score: link.score }))].slice(0, 3);
   const showFull = !compact || expanded || forcedOpen;
 
@@ -83,7 +83,7 @@ export function KnowledgeCardView({ card, projectId, compact = false, forcedOpen
 
   return <article id={`card-${card.id}`} tabIndex={-1} className="timeline-entry card-surface min-w-0 scroll-mt-24 rounded-lg p-5 break-words focus:outline-none focus:ring-4 focus:ring-[rgba(45,139,116,.18)] sm:p-6">
     <div className="flex flex-wrap items-start justify-between gap-3">
-      <div className="flex flex-wrap items-center gap-2"><span className={`rounded-md px-2.5 py-1.5 text-xs font-bold ${getKnowledgeTypeColor(type)}`}>{knowledgeTypeLabels[type]}</span><span className="text-xs text-[var(--muted)]">{new Date(card.createdAt).toLocaleString("zh-CN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span></div>
+      <div className="flex flex-wrap items-center gap-2"><span className={`rounded-md px-2.5 py-1.5 text-xs font-bold ${getKnowledgeTypeColor(type)}`}>{knowledgeTypeLabels[type]}</span>{card.capture.sourceType && <span className="paper-tab px-2 py-1 text-xs text-[var(--ink-soft)]">{card.capture.sourceType}</span>}<span className="text-xs text-[var(--muted)]">{new Date(card.createdAt).toLocaleString("zh-CN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span></div>
       <div role="group" aria-label={`调整《${card.title}》的重要性`} className="flex items-center rounded-lg border border-[var(--rule)] bg-[var(--paper-strong)] p-1">{[1,2,3,4,5].map((value) => <button key={value} type="button" aria-label={`将重要性设为 ${value}`} aria-pressed={card.importance === value} disabled={busy === "importance"} onClick={() => void setImportance(value)} className="focus-ring rounded p-1 disabled:opacity-50"><Star size={14} className={value <= card.importance ? "text-[var(--amber)]" : "text-[var(--rule-strong)]"} fill={value <= card.importance ? "currentColor" : "none"} /></button>)}</div>
     </div>
     <h3 className="mt-4 text-xl font-bold leading-7 [overflow-wrap:anywhere]">{card.title}</h3>

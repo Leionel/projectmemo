@@ -84,7 +84,7 @@ export class ApiClient {
     }
   }
 
-  async post<T>(path: string, body: Object | undefined): Promise<T> {
+  async post<T>(path: string, body: Object | undefined, readTimeoutMs: number = 30000): Promise<T> {
     const httpRequest = http.createHttp();
     try {
       const options: http.HttpRequestOptions = {
@@ -92,7 +92,7 @@ export class ApiClient {
         header: this.buildHeaders(path),
         expectDataType: http.HttpDataType.STRING,
         connectTimeout: 10000,
-        readTimeout: 30000,
+        readTimeout: readTimeoutMs,
       };
       if (body !== undefined) {
         options.extraData = JSON.stringify(body);

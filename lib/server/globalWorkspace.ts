@@ -26,17 +26,17 @@ export async function loadGlobalWorkspace(userId: string, mode: "memory" | "acti
   if (mode === "memory") {
     const cards = await db.knowledgeCard.findMany({
       where: { project: projectWhere, archivedAt: null, ...(type ? { type } : {}), ...text },
-      select: { id: true, title: true, summary: true, type: true, createdAt: true, project: projectSelect },
+      select: { id: true, title: true, summary: true, type: true, createdAt: true, capture: { select: { sourceType: true } }, project: projectSelect },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }], ...pagination,
     });
     const listed = cards.slice(0, PAGE_SIZE);
     // 时态来自既有 temporalLedger 投影，按项目分组读取；不新建状态，也不据此判定事实真伪。
-    const temporalByCard = new Map<string, { topLevelState: TemporalTopLevelState; displayReason: string }>();
+    const temporalByCard = new Map<string, { topLevelState: TemporalTopLevelState; displayReason: string; reasonCode: string }>();
     const cardIdsByProject = new Map<string, string[]>();
     for (const card of listed) cardIdsByProject.set(card.project.id, [...(cardIdsByProject.get(card.project.id) ?? []), card.id]);
     await Promise.all([...cardIdsByProject.entries()].map(async ([projectId, cardIds]) => {
       const states = await getTemporalSearchStates(projectId, cardIds);
-      for (const [cardId, item] of states) temporalByCard.set(cardId, { topLevelState: item.topLevelState, displayReason: item.displayReason });
+      for (const [cardId, item] of states) temporalByCard.set(cardId, { topLevelState: item.topLevelState, displayReason: item.displayReason, reasonCode: item.reasonCode });
     }));
     return { projects, filters, cards: listed.map(card => ({ ...card, ...readableRecord(card.title, card.summary), temporal: temporalByCard.get(card.id) })), actions: [], reminders: [], hasMore: cards.length > PAGE_SIZE };
   }

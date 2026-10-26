@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, MessageCircle, CircleAlert, Layers3, Clock3, CheckSquare2 } from "lucide-react";
 import { ConversationPanel } from "./ConversationPanel";
+import { FocusAgentLauncher } from "./FocusAgentLauncher";
 import type { GlobalFocus, FocusEntry } from "@/lib/types/globalFocus";
 import type { ConversationEntry } from "@/lib/types/conversation";
 import { missionStatusLabels } from "@/lib/mission/presentation";
@@ -51,7 +52,8 @@ export function FocusAgentWorkspace({ focus }: { focus: GlobalFocus }) {
   }
   function href(item: FocusEntry, kind: string) { return "/projects/" + item.projectId + (kind === "MISSION" ? "/missions?mission=" + item.id : "/actions#" + (kind === "ACTION" ? "action-" : "intervention-") + item.id); }
   return <div className={styles.root}>
-    <header className={styles.pageHead}><div><p className={styles.eyebrow}>我的工作台 / 焦点</p><h1>今天，先处理重要的事</h1></div><Link className="workspace-tool focus-ring" href="/projects">全部项目<ArrowRight size={14}/></Link></header>
+    {mobileView === "focus" && <FocusAgentLauncher className={styles.mobileLauncher} onOpen={() => { setMobileView("chat"); requestAnimationFrame(() => document.getElementById("focus-conversation")?.scrollIntoView({ block: "nearest" })); }}/>}
+    <header className={styles.pageHead}><div><p className={styles.eyebrow}>我的工作台 / 焦点</p><h1>今日项目焦点</h1></div><Link className="workspace-tool focus-ring" href="/projects">全部项目<ArrowRight size={14}/></Link></header>
     <div className={styles.mobileSwitch} aria-label="焦点视图">{[["focus", "项目焦点"], ["chat", "与忆程协作"]].map(([key, title]) => <button type="button" key={key} aria-pressed={mobileView === key} className={mobileView === key ? styles.active : ""} onClick={() => setMobileView(key)}>{title}</button>)}</div>
     <div className={styles.columns} data-mobile={mobileView}>
       <aside className={styles.left} aria-label="项目焦点">

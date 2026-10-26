@@ -5,6 +5,7 @@ import { ProjectAgentContext } from '../models/ProjectAgentContext';
 import { ProjectAgentContextService } from '../services/ProjectAgentContextService';
 import { EvidenceAssessment, evidenceAssessmentText } from '../models/Copilot';
 import router from '@ohos.router';
+import { FocusAgentLauncher } from '../components/FocusAgentLauncher';
 import promptAction from '@ohos.promptAction';
 import pasteboard from '@ohos.pasteboard';
 import { photoAccessHelper } from '@kit.MediaLibraryKit';
@@ -5059,7 +5060,7 @@ struct ProjectHome {
   // 主构建入口
   // ----------------------------------------------------
   build() {
-    Stack() {
+    Stack({ alignContent: Alignment.BottomEnd }) {
       Column() {
         if (this.currentTabIndex === 4 && this.isArtifactReader) {
           this.ArtifactReaderHeader()
@@ -5067,7 +5068,6 @@ struct ProjectHome {
           this.TopHeader()
         }
 
-        if (this.focusConversationId !== '' || this.focusAgentEnabled) { PMButton({ label: this.focusConversationId !== '' ? '继续原焦点讨论' : '问忆程 · 项目讨论', secondary: true, onAction: (): void => { router.pushUrl({ url: 'pages/FocusConversation', params: { conversationId: this.focusConversationId, projectId: this.projectId } }); } }) }
         if (this.routeError !== '') {
           ErrorStateView({
             message: this.routeError,
@@ -5130,6 +5130,10 @@ struct ProjectHome {
       .height('100%')
       .backgroundColor(PMColors.BACKGROUND)
 
+      if ((this.focusConversationId !== '' || this.focusAgentEnabled) && this.hasLoadedProjectSnapshot && this.routeError === '' && !this.isArtifactReader && !this.showQuickCopilot) {
+        FocusAgentLauncher({ onOpen: (): void => { router.pushUrl({ url: 'pages/FocusConversation', params: { conversationId: this.focusConversationId, projectId: this.projectId } }); } })
+          .align(Alignment.BottomEnd).margin({ right: 18, bottom: 90 })
+      }
       if (this.showCreateAction) {
         Column() {
           Column() {

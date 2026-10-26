@@ -1,4 +1,4 @@
-import { reserveCloudCall, reserveWorkspaceCloudCall, type WorkspaceBilling } from "@/lib/auth/cloudQuota";
+import { reserveCloudCall, reserveWorkspaceCloudCall, reserveReviewCloudCall, type WorkspaceBilling, type ReviewBilling } from "@/lib/auth/cloudQuota";
 import { buildArtifactPrompt, buildCapturePrompt } from "@/lib/agent/prompts";
 import { getChatProviderConfig } from "@/lib/config/provider";
 import { knowledgeCardDraftSchema } from "@/lib/validation/schemas";
@@ -10,10 +10,11 @@ function config() {
   return getChatProviderConfig();
 }
 
-export async function chatWithLLMWithMeta(prompt: string, projectId?: string, workspace?: WorkspaceBilling): Promise<AgentExecutionResult<string>> {
+export async function chatWithLLMWithMeta(prompt: string, projectId?: string, workspace?: WorkspaceBilling, review?: ReviewBilling): Promise<AgentExecutionResult<string>> {
   const startedAt = Date.now();
   const { provider, baseUrl, apiKey, model, timeoutMs } = config();
-  if (workspace) await reserveWorkspaceCloudCall(workspace);
+  if (review) await reserveReviewCloudCall(review);
+  else if (workspace) await reserveWorkspaceCloudCall(workspace);
   else await reserveCloudCall(projectId);
   const requestBody: Record<string, unknown> = {
     max_tokens: 2048,

@@ -1276,11 +1276,15 @@ model ProjectImpactEffect {
  @@unique([jobId,missionId])
 }
 model DecisionScenarioProposal {
+ reviewRequests DecisionReviewRequest[]
  id String @id @default(cuid())
  projectId String
  missionId String
  ownerUserId String
  createRequestId String
+ purpose String @default("FIXED_SCENARIOS")
+ reviewKey String?
+ reviewStateJson Json?
  inputHash String
  inputJson Json
  baseManifest Json
@@ -1300,7 +1304,18 @@ model DecisionScenarioProposal {
  owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
  @@unique([ownerUserId,createRequestId])
  @@unique([ownerUserId,confirmRequestId])
+ @@unique([ownerUserId,purpose,reviewKey])
+ @@index([missionId,purpose,createdAt])
+ @@index([parentId,purpose])
  @@index([missionId,createdAt])
+}
+model DecisionReviewRequest {
+ ownerUserId String
+ requestId String
+ inputHash String
+ proposalId String
+ proposal DecisionScenarioProposal @relation(fields:[proposalId], references:[id], onDelete:Cascade)
+ @@id([ownerUserId,requestId])
 }
 model GoalQuestionPreference {
  id String @id @default(cuid())

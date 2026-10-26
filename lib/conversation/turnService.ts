@@ -10,6 +10,8 @@ import { answerSchema, conversationModel, focusSystemPrompt, routeSchema } from 
 import { freezeCopilotProposals, readCopilotContext } from "@/lib/copilot/confirmation";
 import { previewConversationWork, readConversationWork } from "./workService";
 import { workRefSchema, type ConversationWorkRef } from "@/lib/types/conversationWork";
+import { resolveFileGuides } from "./fileGuides";
+import { bindAnswerEvidence } from "./answerEvidence";
 
 export async function submitConversationTurn(actor: ConversationActor, id: string, raw: unknown) {
   const input = conversationTurnSchema.parse(raw), hash = jsonHash(input);
@@ -52,6 +54,8 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
       throw new AppError("BINDING_NOT_FOUND", "讨论对象已不可访问", 404);
     const turn = await tx.conversationTurn.create({ data: { conversationId: id, requestId: input.requestId,
       inputHash: hash, inputJson: json(input), baseVersion: c.version, status: "OBSERVING" } });
+    if (target) await tx.conversationProject.upsert({ where: { conversationId_projectId: { conversationId: id, projectId: target } },
+      create: { conversationId: id, projectId: target }, update: {} });
     await appendConversationMessage(tx, id, actor.userId, "USER", input.message,
       { ...emptyBlocks(), observedProjectIds: target ? [target] : [] }, turn.id);
     await tx.conversation.update({ where: { id }, data: { activeTurnId: turn.id, version: { increment: 1 } } });
@@ -79,10 +83,10 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     const conflictingName = !!(input.projectId || input.entityRef || input.bindingId) && !!focused && named.some(p => p.id !== focused);
     if (!input.projectId && !explicitBinding && named.length === 1) focused = named[0].id;
     // Resolve exact frozen choices before the project ordinal router; a choice never executes directly.
-    const choiceMatch = input.message.match(/(?:选|采用)(?:择)?第?([一二12])(?:个|项|种)?/);
+    const choiceMatch = input.message.match(/(?:选|采用)(?:择)?第?([一二三123])(?:个|项|种)?/);
     const optionMessage = input.replyToMessageId ? frozenMessage : [...history.messages].reverse().find(m =>
       !m.restricted && m.options?.length && (!input.projectId || m.options.every(o => o.projectId === input.projectId)));
-    const option = choiceMatch ? optionMessage?.options?.[({ 一: 0, 二: 1, "1": 0, "2": 1 } as Record<string, number>)[choiceMatch[1]]] : undefined;
+    const option = choiceMatch ? optionMessage?.options?.[({ 一: 0, 二: 1, 三: 2, "1": 0, "2": 1, "3": 2 } as Record<string, number>)[choiceMatch[1]]] : undefined;
     const savedRef = workRefSchema.safeParse(record(c.focusJson).entityRef);
     const replyCandidates = [...new Map(frozenRefs.filter(r => ["MISSION", "ACTION"].includes(r.kind)).map(r => [r.kind + ":" + r.id, r])).values()];
     const replyProposal = frozenMessage?.proposal;
@@ -97,18 +101,18 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     if (option && (input.projectId && input.projectId !== option.projectId || input.entityRef && input.entityRef.id !== option.missionId))
       throw new AppError("CONTEXT_SCOPE_CHANGED", "原选项与本次指定对象不同，请明确要采用哪份方案", 409);
     const operation = !conflictingName && !/不要|不选|不采用|禁止|只读/.test(input.message)
-      ? option ? "adopt_scenario" : exactRef?.kind === "ACTION" && resultText ? "complete_action"
+      ? option ? option.purpose === "DYNAMIC_PLAN" ? "adopt_dynamic" : "adopt_scenario" : exactRef?.kind === "ACTION" && resultText ? "complete_action"
         : exactRef?.kind === "MISSION" && /^(?:请|帮我)?(?:继续|恢复|接续)(?:原|这|该)?.*(?:委托|任务)/.test(input.message) ? "resume" : null : null;
     const boundWork = exactRef ? await db.conversationBinding.findFirst({ where: { conversationId: id, kind: exactRef.kind, entityId: exactRef.id, projectId: exactRef.projectId } }) : null;
     if (operation && (option || boundWork)) {
       const ref: ConversationWorkRef = option ? { kind: "MISSION", id: option.missionId, projectId: option.projectId } : exactRef!;
       const work = await readConversationWork(actor, id, ref);
-      if (option && (work.scenario?.id !== option.proposalId || work.scenario.proposalHash !== option.proposalHash || work.version !== option.expectedVersion))
+      if (option && option.purpose !== "DYNAMIC_PLAN" && (work.scenario?.id !== option.proposalId || work.scenario.proposalHash !== option.proposalHash || work.version !== option.expectedVersion))
         throw new AppError("PROPOSAL_CHANGED", "原选项或原任务已变化，请重新对比", 409);
       if (operation !== "resume" || work.status === "PAUSED") {
         const preview = await previewConversationWork(actor, id, { requestId: "turn:" + turn.id, expectedConversationVersion: c.version,
           ref, operation, versionToken: work.versionToken, ...(resultText ? { answer: resultText } : {}),
-          ...(option ? { scenarioProposalId: option.proposalId, scenarioKey: option.key } : {}) }, turn.id);
+          ...(option ? option.purpose === "DYNAMIC_PLAN" ? { dynamicProposalId: option.proposalId, candidateId: option.candidateId } : { scenarioProposalId: option.proposalId, scenarioKey: option.key } : {}) }, turn.id);
         return { turnId: turn.id, status: "ANSWERED", ...preview };
       }
     }
@@ -128,6 +132,7 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     let route = { intent: "ANSWER" as "ANSWER" | "CLARIFY" | "PROPOSE_ACTION" | "OPEN_MISSION",
       projectIds: focused ? [focused] : directory.summaries.slice(0, 3).map(p => p.id), query: input.message.slice(0, 256) };
     let provider = "rules", advice = "", modelAnswer: ReturnType<typeof answerSchema.parse> | null = null;
+    let fallbackReason: string | null = null;
     if (ambiguous) route.intent = "CLARIFY";
     else if (modelEnabled) {
       const permitted = await db.projectMembership.count({ where: { userId: actor.userId, projectId: { in: directory.summaries.map(p => p.id) } } });
@@ -147,6 +152,7 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     } else if (/创建.*行动|变成.*行动|帮我.*处理|整理.*待办/.test(input.message) && !/不创建|不要.*行动/.test(input.message)) route.intent = "PROPOSE_ACTION";
     const observations = route.intent === "CLARIFY" ? { refs: frozenRefs, sources: [], coverage: { complete: false } }
       : await observeProjects(actor, directory, route.projectIds, route.query || input.message, exactRef);
+    const fileGuides = await resolveFileGuides(observations.sources);
     await db.conversationTurn.update({ where: { id: turn.id }, data: { status: "GENERATING", readManifestJson: json({
       schemaVersion: 1, observedAt: new Date().toISOString(), directory: directory.coverage,
       observedProjectIds: directory.summaries.map(p => p.id), route, observation: observations.coverage,
@@ -164,13 +170,26 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
           projects: directory.summaries.filter(p => route.projectIds.includes(p.id)).map(p => ({
             id: p.id, title: p.title, goal: p.goal.slice(0, 300), priority: p.priority,
             missions: p.missions, actions: p.actions, actionCount: p.actionCount, coverage: p.coverage })),
-          sources: observations.sources,
+          sources: observations.sources.map((source, index) => {
+            const file = fileGuides.find(file => file.sourceId === source.id);
+            return { ...source, citationNumber: index + 1, file: file ? { title: file.title, kind: file.kind, readScope: file.readScope } : null };
+          }),
           coverage: directory.coverage }), answerSchema);
       modelAnswer = r.data; provider = r.provider; advice = r.data.advice;
       if (r.data.recommendedProjectId && route.projectIds.includes(r.data.recommendedProjectId)) focused = r.data.recommendedProjectId;
-      for (const o of r.data.observations) {
-        const source = observations.sources.find(s => s.id === o.sourceId);
-        if (!source || !source.excerpt.includes(o.quote)) throw new AppError("UNSUPPORTED_QUOTE", "回答引用与已读取原文不一致，请重新核对", 409);
+      const citations = bindAnswerEvidence(r.data.observations, observations.sources);
+      if (!citations) fallbackReason = "UNSUPPORTED_QUOTE";
+      else modelAnswer.observations = citations;
+      for (const match of advice.matchAll(/【(\d+)】/g)) {
+        const source = observations.sources[Number(match[1]) - 1];
+        if (!source || !citations?.some(o => o.sourceId === source.id))
+          fallbackReason ??= "UNSUPPORTED_CITATION";
+      }
+      if (fallbackReason) {
+        // Discard the entire ungrounded draft and its action; do not auto-retry a paid call.
+        modelAnswer = null;
+        advice = "这次云端回答的引用未通过核对，先为你列出已核实的项目状态：\n" + directory.summaries.filter(p => route.projectIds.includes(p.id))
+          .map(p => p.title + "：" + p.actionCount + " 项未完成行动，" + p.waiting + " 项待回应委托。").join("\n") + "\n可打开下方原任务继续核对。";
       }
     } else {
       advice = directory.summaries.filter(p => route.projectIds.includes(p.id))
@@ -205,12 +224,14 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
         kind: "PROJECT", id: p.id, projectId: p.id, title: p.title, href: "/projects/" + p.id + "/knowledge",
       }));
       refs = await bindRefs(tx, id, refs);
-      const blocks: ConversationBlocks = { ...emptyBlocks(), refs, sources: observations.sources, priorities, provider,
+      const blocks: ConversationBlocks = { ...emptyBlocks(), refs, sources: observations.sources, priorities, provider: fallbackReason ? "project_state" : provider,
+        citations: modelAnswer?.observations ?? [],
+        fileGuides,
         observedProjectIds: directory.summaries.map(p => p.id),
-        limitations: [...directory.coverage.limitations, ...("limitations" in observations.coverage ? observations.coverage.limitations as string[] : [])] };
+        limitations: [...(fallbackReason ? ["云端回答未通过引用核对，已改为项目状态读回，未生成操作提案"] : []), ...directory.coverage.limitations, ...("limitations" in observations.coverage ? observations.coverage.limitations as string[] : [])] };
       const run = await tx.agentRun.create({ data: { projectId: null, conversationId: id, turnId: turn.id,
-        runType: "CHAT", status: modelEnabled ? "SUCCESS" : "FALLBACK", provider,
-        fallbackReason: modelEnabled ? null : "MODEL_NOT_REQUESTED_OR_RULE_MODE",
+        runType: "CHAT", status: modelEnabled && !fallbackReason ? "SUCCESS" : "FALLBACK", provider,
+        fallbackReason: fallbackReason ?? (modelEnabled ? null : "MODEL_NOT_REQUESTED_OR_RULE_MODE"),
         trace: json({ purpose: "FOCUS_TURN", actorUserId: actor.userId, sourceIds: blocks.sources.map(s => s.id),
           supportState: action ? "SUPPORTED" : "INSUFFICIENT", supportBasis: "ACTION_PROPOSAL_NOT_FACT_CLAIM" }),
         resultJson: json({}) } });
@@ -234,7 +255,8 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     return { ...result, conversation: await readConversation(actor, id) };
   } catch (error) {
     const old = await db.conversationTurn.findUnique({ where: { id: turn.id } });
-    const status = old?.callCount ? "UNKNOWN" : "FAILED";
+    const completedCalls = Array.isArray(old?.usageJson) ? old.usageJson.length : 0;
+    const status = (old?.callCount ?? 0) > completedCalls ? "UNKNOWN" : "FAILED";
     await db.$transaction(async tx => {
       await lockConversation(tx, id);
       await tx.conversationTurn.update({ where: { id: turn.id }, data: { status, finishedAt: new Date(),

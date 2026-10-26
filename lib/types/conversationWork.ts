@@ -5,11 +5,12 @@ export const workRefSchema = z.object({ kind: z.enum(["MISSION", "ACTION"]), id:
 export const workPreviewSchema = z.object({
   requestId: z.string().min(1).max(128), expectedConversationVersion: z.number().int().positive(),
   ref: workRefSchema, versionToken: z.string(),
-  operation: z.enum(["input", "approval", "resume", "continuation", "adopt_scenario", "adopt_artifact", "complete_action"]),
+  operation: z.enum(["input", "approval", "resume", "continuation", "adopt_scenario", "adopt_dynamic", "adopt_artifact", "complete_action"]),
   answer: z.string().trim().min(1).max(3000).optional(), decision: z.enum(["APPROVED", "REJECTED"]).optional(),
   sourcePointers: z.array(z.object({ id: z.string(), hash: z.string() }).strict()).min(1).max(8).optional(),
   evidenceReview: evidenceReviewSchema.optional(),
   scenarioProposalId: z.string().optional(), scenarioKey: z.enum(["VERIFY_FIRST", "DELIVER_FIRST"]).optional(),
+  dynamicProposalId: z.string().optional(), candidateId: z.string().optional(),
   outputId: z.string().optional(), outputRevision: z.number().int().positive().optional(),
 }).strict();
 export type ConversationWorkRef = z.infer<typeof workRefSchema>;

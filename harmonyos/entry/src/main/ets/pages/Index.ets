@@ -1271,7 +1271,6 @@ struct Index {
   private TasksTab() {
     Column() {
       Column() {
-        PMPageIntro({ compact: true, title: '行动与提醒' })
         Row({ space: 8 }) {
           Button(`主动提醒 ${this.allInterventions.filter((i: Intervention) => i.status === 'OPEN' && !i.isSimulated).length}`, { type: ButtonType.Normal })
             .layoutWeight(1).constraintSize({ minHeight: 44 }).borderRadius(11).fontSize(14)
@@ -1334,8 +1333,6 @@ struct Index {
   @Builder
   private GlobalMemoryTab() {
     Column() {
-      Column() { PMPageIntro({ compact: true, title: '项目记忆' }) }
-        .width('100%').padding({ left: 16, right: 16, top: 16 })
       // 搜索框与筛选
       Column() {
         TextInput({ text: this.globalSearchQuery, placeholder: '搜索记忆、摘要或项目名称' })
@@ -1474,7 +1471,10 @@ struct Index {
                 Row() {
                   Row({ space: PMSpacing.XS }) {
                     MemoryTypeBadge({ type: card.type })
-                    if (this.cardStatus(card.id) !== null) {
+                    if (card.capture?.sourceType) {
+                      Text(card.capture?.sourceType ?? '').fontSize(10).fontColor(PMColors.INK_SECONDARY).padding({ left: 6, right: 6, top: 3, bottom: 3 }).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(5).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).constraintSize({ maxWidth: 80 })
+                    }
+                    if (this.cardStatus(card.id) !== null && this.evidenceStateLabel(this.cardStatus(card.id)!) !== '') {
                       Text(this.evidenceStateLabel(this.cardStatus(card.id)!))
                         .fontSize(PMFontSize.CAPTION)
                         .fontColor(this.statusColor(this.cardStatus(card.id)!.topLevelState))
@@ -1514,12 +1514,7 @@ struct Index {
                 }
               }
 
-              Text(`采集来源：${card.capture !== null && card.capture !== undefined && card.capture.sourceType !== undefined && card.capture.sourceType !== null && card.capture.sourceType !== '' ? card.capture.sourceType : '未注明'} · 来源声明待核对`)
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.INK_TERTIARY)
-                .margin({ top: PMSpacing.XS })
-
-              if (this.expandedEvidenceCardId === card.id && this.cardStatus(card.id) !== null) {
+              if (this.expandedEvidenceCardId === card.id && this.cardStatus(card.id) !== null && this.evidenceStateLabel(this.cardStatus(card.id)!) !== '') {
                 Text(this.cardStatus(card.id)!.displayReason !== '' ?
                   this.cardStatus(card.id)!.displayReason :
                   '进入所属项目可查看这条结论与来源、证据之间的关系。')
@@ -1619,7 +1614,7 @@ struct Index {
       case 'RELATION_REVOKED':
         return '关系已撤销';
       case 'NO_SUPPORTING_EVIDENCE':
-        return '时态依据不足';
+        return '';
       default:
         return status.statusLabel;
     }
@@ -2637,10 +2632,10 @@ struct Index {
                   .objectFit(ImageFit.Cover)
                   .margin({ right: PMSpacing.SM })
                 Column({ space: 2 }) {
-                  Text('忆程 ProjectMemo').fontSize(17).fontWeight(FontWeight.Bold)
+                  Text(this.currentMainTabIndex === 4 ? '今日项目焦点' : this.currentMainTabIndex === 0 ? '我的项目空间' : this.currentMainTabIndex === 1 ? '项目记忆档案' : this.currentMainTabIndex === 2 ? '行动与提醒' : '个人设置').fontSize(20).fontWeight(FontWeight.Bold).letterSpacing(0.3)
                     .fontFamily(PMFontFamily.SANS).fontColor(PMColors.INK_PRIMARY)
                     .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
-                  Text(this.currentMainTabIndex === 3 ? '个人设置' : '你的项目工作台')
+                  Text('忆程 ProjectMemo')
                     .fontSize(11).fontColor(PMColors.INK_TERTIARY)
                 }.alignItems(HorizontalAlign.Start).layoutWeight(1)
               }
@@ -2651,10 +2646,12 @@ struct Index {
               })
 
               if (this.currentMainTabIndex < 3) {
+                if (this.currentMainTabIndex !== 1) {
                 Row() { SearchIcon({ iconSize: 19 }) }
                   .width(44).height(44).justifyContent(FlexAlign.Center)
                   .accessibilityText(this.searchOpen ? '关闭搜索' : `搜索${this.searchTargetName()}`)
                   .onClick(() => { this.toggleSearch(); })
+                }
                 Row() { PlusIcon({ iconSize: 20, iconColor: PMColors.BRAND }) }
                   .width(44).height(44).justifyContent(FlexAlign.Center)
                   .accessibilityText(this.createActionName())

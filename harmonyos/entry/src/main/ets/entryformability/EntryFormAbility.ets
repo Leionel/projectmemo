@@ -47,7 +47,8 @@ export default class EntryFormAbility extends FormExtensionAbility {
       'daysLeft': daysLeft,
       'readiness': readiness,
       'nextAction': nextAction,
-      'status': status
+      'status': status,
+      'checkpointInfo': cachedData['checkpointInfo']
     };
   }
 

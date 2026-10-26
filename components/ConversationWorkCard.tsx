@@ -5,6 +5,7 @@ import type { ConversationView } from "@/lib/types/conversation";
 import type { ConversationWork, ConversationWorkRef, ConversationWorkPreview } from "@/lib/types/conversationWork";
 import type { EvidenceFit, EvidenceReview, FitExcerpt } from "@/lib/types/missionEvidenceFit";
 import { MissionEvidenceReview, MissionEvidenceResult } from "./MissionEvidenceReview";
+import { ConversationReviewPanel } from "./ConversationReviewPanel";
 import { missionStatusLabels } from "@/lib/mission/presentation";
 import styles from "./ConversationPanel.module.css";
 async function request<T>(url: string, body?: unknown): Promise<T> {
@@ -49,6 +50,7 @@ export function ConversationWorkCard({ conversation, workRef, onChange, onClose 
       {(work.question || workRef.kind === "ACTION" && !["DONE", "CANCELLED"].includes(work.status)) && <label className={styles.workInput}>{workRef.kind === "ACTION" ? "实际完成结果" : "你的答复与核对结论"}<textarea aria-label={workRef.kind === "ACTION" ? "实际完成结果" : "原问题答复"} value={answer} maxLength={workRef.kind === "ACTION" ? 2000 : 3000} onChange={e => { setAnswer(e.target.value); setAssessment(null); }} disabled={busy} placeholder={workRef.kind === "ACTION" ? "做了什么，结果如何，还有什么未完成…" : "围绕上面的原问题补充…"}/></label>}
       {work.question?.premise && <MissionEvidenceReview premise={work.question.premise} mode={mode} confirmed={reviewed} disabled={busy} onMode={v => { setMode(v); setAssessment(null); }} onConfirm={v => setPremiseHash(v ? work.question!.premise!.premiseHash : "")}/>}
       {assessment && <div className={styles.reason}>{assessment.evidenceFit ? <MissionEvidenceResult fit={assessment.evidenceFit} excerpts={assessment.observationExcerpts}/> : <><p>{({ SUFFICIENT: "字段齐备，请核对含义", INSUFFICIENT: "资料仍有缺口", CONFLICT: "存在冲突", UNKNOWN: "含义仍需核对" } as Record<string, string>)[assessment.assessment]}</p><p>{assessment.remaining.join("、")}</p></>}</div>}
+      {workRef.kind === "MISSION" && <ConversationReviewPanel key={conversation.id + workRef.id} conversation={conversation} work={work} busy={busy} run={run} onChange={onChange} preview={preview}/>}
       <div className={styles.actions}>
         {work.question && (pointers.length ? <><button type="button" className="workspace-tool focus-ring" disabled={busy || !reviewed || !answer.trim()} onClick={() => void run(async () => { const a = await request<NonNullable<typeof assessment>>(base + "/materials", body("continuation", { sourcePointers: pointers })); if (live.current) setAssessment(a); })}>核对所选资料</button><button type="button" className="editorial-button focus-ring" disabled={busy || !assessment || !reviewed || !answer.trim()} onClick={() => void preview("continuation", { sourcePointers: pointers })}>预览材料接续</button></> : <button type="button" className="editorial-button focus-ring" disabled={busy || !answer.trim() || !reviewed || needsReview && mode !== "CONDITIONAL_ANALYSIS"} onClick={() => void preview("input")}>预览提交答复</button>)}
         {work.status === "PAUSED" && <button type="button" className="editorial-button focus-ring" disabled={busy} onClick={() => void preview("resume")}>预览接续原委托</button>}

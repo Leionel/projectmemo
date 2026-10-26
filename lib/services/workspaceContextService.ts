@@ -87,7 +87,8 @@ export async function observeProjects(actor: ConversationActor, directory: Works
         href: "/projects/" + p.id + "/actions#action-" + action.id });
     }
     const hash = await sourceHash(p.id, "project:" + p.id);
-    const excerpt = JSON.stringify({ title: p.title, goal: p.goal, deadline: p.deadline, actionCount: p.actionCount, waiting: p.waiting, blocked: p.blocked });
+    const excerpt = [p.title, "项目目标：" + p.goal, "截止日期：" + (p.deadline ?? "未知"), "未完成行动：" + p.actionCount + " 项", "待回应委托：" + p.waiting + " 项", "阻塞项：" + p.blocked + " 项",
+      ...p.missions.map(m => "委托：" + m.goal + "；状态：" + m.status), ...p.actions.map(a => "行动：" + a.title + "；状态：" + a.status)].join("\n").slice(0, 1800);
     sources.push({ id: p.id + "/project:" + p.id, projectId: p.id, sourceId: "project:" + p.id,
       revision: hash!, title: p.title + " 当前状态", excerpt, observedAt,
       temporalState: "CURRENT", knowledgeClass: "PROJECT_OBSERVATION", start: 0, end: excerpt.length, excerptHash: jsonHash(excerpt) });

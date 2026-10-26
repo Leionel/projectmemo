@@ -8,6 +8,7 @@ import { ConversationService } from '../services/ConversationService';
 import { ApiError } from '../models/Project';
 import { LoadingStateView, ErrorStateView } from './AsyncStateView';
 import { PMColors, PMRadius } from '../common/DesignTokens';
+import { FocusAgentLauncher } from './FocusAgentLauncher';
 import { PMButton, PMStatusPill, PMPageIntro, PMMetricTile, PMListRow } from './PMReferencePrimitives';
 
 @Component
@@ -139,11 +140,11 @@ export struct GlobalFocusPanel {
     if (this.busy) { LoadingStateView({ message: '正在读取当前焦点…' }) }
     else if (this.errorText !== '' && !this.lastKnown) { ErrorStateView({ message: this.errorText, onRetry: () => { this.refresh(); } }) }
     else {
+      Stack({ alignContent: Alignment.BottomEnd }) {
       Scroll() {
         Column() {
           if (this.errorText !== '') { Text(this.errorText).fontSize(12).fontColor(PMColors.RISK) }
           PMPageIntro({ eyebrow: this.dateLabel(), title: '今天，先处理重要的事', description: '优先回应与你有关的判断，再继续推进项目。' })
-          if (this.agentEnabled) { PMButton({ label: '问忆程', onAction: (): void => { router.pushUrl({ url: 'pages/FocusConversation' }); } }) }
           if (this.primary() !== null) { this.Primary(this.primary()!) }
           else { Text('当前范围内没有待回应的事项，进入项目记录新进展。').fontSize(14).fontColor(PMColors.INK_SECONDARY).margin({ bottom: 16 }) }
           Row({ space: 10 }) {
@@ -165,8 +166,12 @@ export struct GlobalFocusPanel {
           }.width('100%').margin({ top: 16 })
           if (!this.view.missionEnabled) { Text('长期委托当前未开启，已有记录仍保留。').fontSize(12).fontColor(PMColors.INK_TERTIARY) }
           if (this.view.hasMore) { Text('当前显示部分摘要，进入所属项目可查看全部。').fontSize(12).fontColor(PMColors.INK_TERTIARY) }
-        }.width('100%').alignItems(HorizontalAlign.Start).padding({ left: 16, right: 16, top: 22, bottom: 20 })
+        }.width('100%').alignItems(HorizontalAlign.Start).padding({ left: 16, right: 16, top: 22, bottom: this.agentEnabled ? 88 : 20 })
       }.width('100%').height('100%').align(Alignment.TopStart).scrollBar(BarState.Off)
+      if (this.agentEnabled) {
+        FocusAgentLauncher({ onOpen: (): void => { router.pushUrl({ url: 'pages/FocusConversation' }); } }).margin({ right: 18, bottom: 16 })
+      }
+      }.width('100%').height('100%')
     }
   }
 }

@@ -127,9 +127,13 @@ export async function writeTransaction<T>(sourceRunId: string, callback: (tx: Tx
 
 async function inspectConfirmation(tx: Tx, projectId: string, input: AgentToolConfirmInput, actor?: CopilotActor) {
   await assertActor(tx, projectId, actor);
-  const run = await tx.agentRun.findFirst({ where: { id: input.sourceRunId, projectId, runType: "CHAT" } });
+  const run = await tx.agentRun.findFirst({ where: { id: input.sourceRunId, runType: "CHAT", OR: [
+    { projectId }, ...(actor ? [{ projectId: null, conversation: { ownerUserId: actor.userId } }] : []),
+  ] } });
   if (!run) throw new AppError("TRUST_RECEIPT_NOT_FOUND", "没有找到这次回答的证据回执", 404);
   const trace = object(run.trace), result = object(run.resultJson);
+  if (run.projectId === null && trace.copilotTargetProjectId !== projectId)
+    throw new AppError("TRUST_RECEIPT_NOT_FOUND", "没有本项目的提案回执", 404);
   if (trace.actorUserId && actor && trace.actorUserId !== actor.userId) throw new AppError("TRUST_RECEIPT_NOT_FOUND", "没有可确认的建议", 404);
   if (trace.supportState !== "SUPPORTED") throw new AppError("EVIDENCE_NOT_SUPPORTED", "证据存在冲突或不足，已阻止写操作", 409);
   const allowed = Array.isArray(result.proposedActions) ? result.proposedActions.map(object) : [];
@@ -138,6 +142,7 @@ async function inspectConfirmation(tx: Tx, projectId: string, input: AgentToolCo
   if (!proposed) throw new AppError("UNAPPROVED_TOOL_PROPOSAL", "这个操作不属于该证据回执中的建议", 409);
   const key = keyOf(input.tool, proposed), confirmationHash = jsonHash({ tool: input.tool, payload: input.payload });
   const execution = await tx.copilotToolExecution.findUnique({ where: { sourceRunId_proposalKey: { sourceRunId: run.id, proposalKey: key } } });
+  if (execution?.status === "DECLINED") throw new AppError("PROPOSAL_DECLINED", "这项提案已被拒绝，请重新讨论", 409);
   if (execution?.confirmationHash && execution.confirmationHash !== confirmationHash) {
     throw new AppError("CONFIRMATION_PAYLOAD_CHANGED", "该建议已使用不同内容确认，请勿更改重试载荷", 409);
   }
@@ -175,14 +180,7 @@ export async function confirmCopilotTool(projectId: string, input: AgentToolConf
   if (!input.sourceRunId) throw new AppError("TRUST_RECEIPT_REQUIRED", "缺少证据回执，请重新提问后确认", 409);
   const sourceRunId = input.sourceRunId;
   if (input.tool === "create_action") {
-    const outcome = await writeTransaction(sourceRunId, async tx => {
-      const state = await inspectConfirmation(tx, projectId, input, actor);
-      if (state.replay) return state.replay;
-      const payload = actionCreateSchema.parse(state.execution!.proposalJson);
-      const action = await createActionInTx(tx, projectId, payload, `copilot:${sourceRunId}:${state.execution!.id}`);
-      await recordConsumption(tx, state, input.tool, action.id);
-      return { tool: input.tool, result: action, alreadyExecuted: false };
-    });
+    const outcome = await writeTransaction(sourceRunId, tx => confirmCopilotActionInTx(tx, projectId, input, actor));
     const stateRefreshPending = await refreshProjectStateAfterMutation(projectId);
     return { ...outcome, result: { ...outcome.result, stateRefreshPending } };
   }
@@ -217,4 +215,16 @@ export async function confirmCopilotTool(projectId: string, input: AgentToolConf
       data: { status: "PENDING", leaseToken: null, leaseUntil: null } }).catch(() => {});
     throw error;
   }
+}
+
+/** Shared atomic action path for project Copilot and the private conversation. */
+export async function confirmCopilotActionInTx(tx: Tx, projectId: string, input: AgentToolConfirmInput, actor?: CopilotActor) {
+  if (input.tool !== "create_action" || !input.confirmed || !input.sourceRunId)
+    throw new AppError("CONFIRMATION_REQUIRED", "创建行动需要明确确认", 400);
+  const state = await inspectConfirmation(tx, projectId, input, actor);
+  if (state.replay) return state.replay;
+  const payload = actionCreateSchema.parse(state.execution!.proposalJson);
+  const action = await createActionInTx(tx, projectId, payload, `copilot:${input.sourceRunId}:${state.execution!.id}`);
+  await recordConsumption(tx, state, input.tool, action.id);
+  return { tool: input.tool, result: action, alreadyExecuted: false };
 }

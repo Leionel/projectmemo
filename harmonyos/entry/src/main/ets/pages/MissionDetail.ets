@@ -31,6 +31,7 @@ interface MissionActionReceipt { actionId?: string; id?: string; title?: string;
 @Component
 struct MissionDetail {
   @State projectId: string = '';
+  @State private focusConversationId: string = '';
   @State mission: Mission = new Mission();
   @State missions: MissionSummary[] = [];
   @State events: MissionEvent[] = [];
@@ -90,6 +91,7 @@ struct MissionDetail {
     SessionStore.onSessionExpired(this.sessionExpired);
     const params = router.getParams() as Record<string, string>;
     this.projectId = params?.['projectId'] ?? '';
+    this.focusConversationId = params?.['conversationId'] ?? '';
     this.missionId = params?.['missionId'] ?? '';
     this.readTarget.questionId = params?.['questionId'] ?? ''; this.readTarget.approvalId = params?.['approvalId'] ?? '';
     this.readTarget.outputId = params?.['outputId'] ?? ''; this.readTarget.revision = params?.['revision'] ?? ''; this.readTarget.receiptId = params?.['receiptId'] ?? ''; this.readTarget.sourceId = params?.['sourceId'] ?? '';
@@ -531,6 +533,7 @@ struct MissionDetail {
   build() {
     Column() {
       PMAppBar({ title: this.form === 'create' ? '新建长期委托' : '长期委托', backLabel: '项目', rightActionText: '刷新', onRightTextAction: () => { this.error = ''; this.errorCount = 0; this.refresh(); } })
+      if (this.focusConversationId !== '') { PMButton({ label: '继续原焦点讨论', secondary: true, onAction: (): void => { router.pushUrl({ url: 'pages/FocusConversation', params: { conversationId: this.focusConversationId, projectId: this.projectId } }); } }) }
       Scroll() {
         Column({ space: 14 }) {
           if (this.projectId === '') { Text('缺少项目参数，请返回项目后重新进入') }

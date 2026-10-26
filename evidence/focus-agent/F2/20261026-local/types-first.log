@@ -1,0 +1,3 @@
+lib/conversation/workService.ts(50,133): error TS2353: Object literal may only specify known properties, and 'createdAt' does not exist in type 'AgentMissionApprovalOrderByWithRelationInput | AgentMissionApprovalOrderByWithRelationInput[]'.
+lib/services/actionService.ts(37,42): error TS2345: Argument of type 'CardDraft | { title: string; summary: string; keywords: string[]; relatedTasks: string[]; nextActions: string[]; importance: number; }' is not assignable to parameter of type 'CardDraft'.
+  Property 'type' is missing in type '{ title: string; summary: string; keywords: string[]; relatedTasks: string[]; nextActions: string[]; importance: number; }' but required in type 'CardDraft'.

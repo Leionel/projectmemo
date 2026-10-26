@@ -1,0 +1,108 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/focusCollaboration.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/focusCollaboration.test.ts (19 tests | 5 failed) 3114ms
+     × binds an answer to the exact original question, and never substitutes a second Mission 169ms
+     × uses real materials, preserves unmet gaps and refuses changed sources 118ms
+     × commits selected materials to the same Mission once and reads a READY receipt 129ms
+     × adopts one exact Output revision and reads the original artifact receipt 329ms
+     × refuses a resume shortcut for WAITING_INPUT 69ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/focusCollaboration.test.ts > F2 original-object collaboration > binds an answer to the exact original question, and never substitutes a second Mission
+Error: 原问题已变化或缺少答复
+ ❯ Module.previewConversationWork lib/conversation/workService.ts:120:50
+    118|     if (input.ref.kind !== "MISSION") throw new AppError("INVALID_OPER…
+    119|     if (op === "input") {
+    120|       if (!work.question || !input.answer) throw new AppError("INPUT_C…
+       |                                                  ^
+    121|       command = { ...command, questionId: work.question.id, answer: in…
+    122|     } else if (op === "approval") {
+ ❯ preview tests/focusCollaboration.test.ts:45:13
+ ❯ tests/focusCollaboration.test.ts:101:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/focusCollaboration.test.ts > F2 original-object collaboration > uses real materials, preserves unmet gaps and refuses changed sources
+TypeError: Cannot read properties of undefined (reading 'sourcePointer')
+ ❯ tests/focusCollaboration.test.ts:110:151
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/focusCollaboration.test.ts > F2 original-object collaboration > commits selected materials to the same Mission once and reads a READY receipt
+ZodError: [
+  {
+    "origin": "array",
+    "code": "too_small",
+    "minimum": 1,
+    "inclusive": true,
+    "path": [
+      "sourcePointers"
+    ],
+    "message": "Too small: expected array to have >=1 items"
+  }
+]
+ ❯ Module.previewConversationWork lib/conversation/workService.ts:102:35
+
+ ❯ preview tests/focusCollaboration.test.ts:45:19
+ ❯ tests/focusCollaboration.test.ts:123:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/focusCollaboration.test.ts > F2 original-object collaboration > adopts one exact Output revision and reads the original artifact receipt
+TypeError: Cannot read properties of undefined (reading 'count')
+ ❯ tests/focusCollaboration.test.ts:158:30
+    156|     const receipts = await db.missionArtifactReceipt.findMany({ where:…
+    157|     expect(receipts).toHaveLength(1); expect(receipts[0]).toMatchObjec…
+    158|     expect(await db.artifact.count({ where: { projectId: f.project.id …
+       |                              ^
+    159|   });
+    160|   it.each(["READY", "RUNNING", "WAITING_INPUT", "WAITING_APPROVAL", "S…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/focusCollaboration.test.ts > F2 original-object collaboration > refuses a resume shortcut for WAITING_INPUT
+AssertionError: expected ZodError: [
+  {
+    "code": "custom",
+   … { …(8) } to match object { code: 'MISSION_NOT_PAUSED' }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+- {
+-   "code": "MISSION_NOT_PAUSED",
++ ZodError {
++   "message": "[
++   {
++     \"code\": \"custom\",
++     \"path\": [],
++     \"message\": \"定向选择资料需要原问题编号\"
++   }
++ ]",
++   "name": "ZodError",
+  }
+
+ ❯ tests/focusCollaboration.test.ts:162:46
+    160|   it.each(["READY", "RUNNING", "WAITING_INPUT", "WAITING_APPROVAL", "S…
+    161|     const f = await fixture(); await db.agentMission.update({ where: {…
+    162|     await expect(preview(f, f.ref, "resume")).rejects.toMatchObject({ …
+       |                                              ^
+    163|   });
+    164|   it("resumes a PAUSED Mission, rejects tampering, expiry, changed con…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 14 passed (19)
+   Start at  09:34:41
+   Duration  5.53s (transform 897ms, setup 0ms, import 2.23s, tests 3.11s, environment 0ms)
+

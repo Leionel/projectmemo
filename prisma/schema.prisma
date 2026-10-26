@@ -299,7 +299,10 @@ model ActionItem {
 
 model AgentRun {
   id             String          @id @default(cuid())
-  projectId      String
+  projectId      String?
+  conversationId String?
+  turnId         String?
+  conversation   Conversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   runType        AgentRunType
   status         AgentRunStatus
   provider       String
@@ -311,7 +314,7 @@ model AgentRun {
   // 会议提案的唯一执行权。普通 CAPTURE 回执保持 NULL。
   confirmedAt    DateTime?
   createdAt      DateTime        @default(now())
-  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project        Project?        @relation(fields: [projectId], references: [id], onDelete: Cascade)
   messages       AgentMessage[]
   missionSteps   AgentMissionStep[]
   copilotExecutions CopilotToolExecution[]
@@ -346,7 +349,12 @@ model CopilotToolExecution {
 
 model AgentMessage {
   id              String            @id @default(cuid())
-  projectId       String
+  projectId       String?
+  conversationId  String?
+  turnId          String?
+  seq             Int?
+  blocksJson      Json?
+  conversation    Conversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   role            AgentMessageRole
   content         String
   citations       Json
@@ -356,11 +364,107 @@ model AgentMessage {
   requestId       String?
   requestState    String?
   createdAt       DateTime          @default(now())
-  project         Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project         Project?          @relation(fields: [projectId], references: [id], onDelete: Cascade)
   run             AgentRun?         @relation(fields: [runId], references: [id], onDelete: SetNull)
 
   @@index([projectId, createdAt])
   @@unique([projectId, ownerUserId, requestId, role])
+  @@unique([conversationId, seq])
+  @@unique([turnId, role])
+}
+
+/// 私有讨论；任务生命周期仍属于 AgentMission。
+model Conversation {
+  id String @id @default(cuid())
+  ownerUserId String
+  createRequestId String
+  createInputHash String
+  scope String
+  homeProjectId String?
+  title String @default("新讨论")
+  status String @default("ACTIVE")
+  version Int @default(1)
+  nextSeq Int @default(0)
+  activeTurnId String?
+  focusJson Json @default("{}")
+  pinnedStateJson Json @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  owner User @relation(fields:[ownerUserId], references:[id], onDelete:Cascade)
+  messages AgentMessage[]
+  runs AgentRun[]
+  turns ConversationTurn[]
+  bindings ConversationBinding[]
+  projects ConversationProject[]
+  anchors ConversationAnchor[]
+  @@unique([ownerUserId,createRequestId])
+  @@index([ownerUserId,updatedAt])
+}
+
+model ConversationTurn {
+  id String @id @default(cuid())
+  conversationId String
+  requestId String
+  inputHash String
+  inputJson Json
+  baseVersion Int
+  status String @default("ACCEPTED")
+  callCount Int @default(0)
+  reservationJson Json @default("[]")
+  readManifestJson Json @default("{}")
+  usageJson Json @default("[]")
+  errorJson Json?
+  createdAt DateTime @default(now())
+  finishedAt DateTime?
+  conversation Conversation @relation(fields:[conversationId],references:[id],onDelete:Cascade)
+  @@unique([conversationId,requestId])
+}
+
+model ConversationBinding {
+  id String @id @default(cuid())
+  conversationId String
+  projectId String
+  kind String
+  entityId String
+  revisionKey String
+  valueJson Json
+  conversation Conversation @relation(fields:[conversationId],references:[id],onDelete:Cascade)
+  @@unique([conversationId,kind,entityId,revisionKey])
+  @@index([conversationId,projectId])
+}
+
+model ConversationProject {
+  conversationId String
+  projectId String
+  conversation Conversation @relation(fields:[conversationId],references:[id],onDelete:Cascade)
+  @@id([conversationId,projectId])
+}
+
+/// 首版只在用户显式追问时锚定；不发送新通知。
+model ConversationAnchor {
+  id String @id @default(cuid())
+  ownerUserId String
+  conversationId String
+  projectId String
+  originKind String
+  originId String
+  topicKey String @default("DISCUSS")
+  originRevision String
+  conversation Conversation @relation(fields:[conversationId],references:[id],onDelete:Cascade)
+  @@unique([ownerUserId,originKind,originId,topicKey])
+}
+
+model FocusProjectPreference {
+  id String @id @default(cuid())
+  userId String
+  projectId String
+  importance Int?
+  longTermGoal String @default("")
+  estimatedMinutes Int?
+  notes String @default("")
+  version Int @default(1)
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  @@unique([userId,projectId])
 }
 
 model CardEmbedding {
@@ -840,6 +944,8 @@ model DeliverableEvidence {
 }
 
 model User {
+  conversations Conversation[]
+  focusPreferences FocusProjectPreference[]
   decisionProposals DecisionScenarioProposal[]
   goalQuestionPreferences GoalQuestionPreference[]
   experiences AgentExperience[]

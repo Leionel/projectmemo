@@ -1,0 +1,91 @@
+{
+  "baselineHead": "4d7b4796b83df7bb8e45e532883c0542948440aa",
+  "scope": "F1 plus Action and paused-Mission continuation slice; UI revised",
+  "liveModelTested": false,
+  "deviceJourneyTested": false,
+  "productionDeployed": false,
+  "realDevelopmentDatabaseMigrated": false,
+  "featureDefault": "off",
+  "protectedFiles": [
+    {
+      "path": "AGENTS.md",
+      "unchanged": true
+    },
+    {
+      "path": "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md",
+      "unchanged": true
+    },
+    {
+      "path": "harmonyos/build-profile.json5",
+      "unchanged": true
+    },
+    {
+      "path": "next-env.d.ts",
+      "unchanged": true
+    },
+    {
+      "path": "tsconfig.json",
+      "unchanged": true
+    }
+  ],
+  "checks": {
+    "unit": {
+      "files": 113,
+      "passed": 945,
+      "log": "unit-all-final.log"
+    },
+    "affected": {
+      "files": 5,
+      "passed": 50,
+      "log": "final-affected.log"
+    },
+    "legacyE2E": {
+      "passed": 14,
+      "focusDisabledSkip": 1,
+      "log": "e2e-all-final.log"
+    },
+    "focusE2E": {
+      "passed": 2,
+      "skipped": 0,
+      "includesAuthSetup": true,
+      "log": "focus-e2e-delivery.log"
+    },
+    "harmonyUnit": {
+      "passed": 83,
+      "log": "harmony-test.log"
+    },
+    "webBuild": {
+      "log": "build-delivery.log",
+      "passed": true
+    },
+    "harmonyBuild": {
+      "log": "harmony-build-delivery.log",
+      "passed": true
+    },
+    "lint": {
+      "fullLog": "lint-delivery.log",
+      "affectedLog": "lint-affected-final.log",
+      "passed": true
+    },
+    "types": {
+      "passed": true,
+      "log": "types-final.log"
+    }
+  },
+  "files": {
+    "focus-desktop.png": {
+      "sha256": "a238a5176b15cfd94b5cbcae54b214083f2b559c71626c995d868bf30e01fe73",
+      "bytes": 92238
+    },
+    "focus-mobile.png": {
+      "sha256": "77f7acda5c9030f4db85055fd15bf80345c84a7cd7a348a97b7582485c66bce0",
+      "bytes": 153251
+    }
+  },
+  "hap": {
+    "path": "harmonyos\\entry\\build\\default\\outputs\\default\\entry-default-unsigned.hap",
+    "sha256": "40d146f77247104bd8a583e030a56485fa58461fa45b2a9fea82883a875e56b9",
+    "bytes": 5722604,
+    "deviceAcceptance": false
+  }
+}

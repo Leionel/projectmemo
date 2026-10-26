@@ -4,6 +4,7 @@ import router from '@ohos.router';
 import { focusStatusLabel, focusActionLabel, focusPrimary, focusEntryKind, focusDeadlineConflict } from '../common/GlobalFocusPresentation';
 import { FocusEntry, GlobalFocusReply } from '../models/GlobalFocus';
 import { GlobalFocusService } from '../services/GlobalFocusService';
+import { ConversationService } from '../services/ConversationService';
 import { ApiError } from '../models/Project';
 import { LoadingStateView, ErrorStateView } from './AsyncStateView';
 import { PMColors, PMRadius } from '../common/DesignTokens';
@@ -11,6 +12,7 @@ import { PMButton, PMStatusPill, PMPageIntro, PMMetricTile, PMListRow } from './
 
 @Component
 export struct GlobalFocusPanel {
+  @State private agentEnabled: boolean = false;
   @Prop @Watch('refresh') refreshKey: number = 0;
   onOpenActions: (reminders: boolean) => void = (_reminders: boolean): void => {};
   @State private view: GlobalFocusReply = new GlobalFocusReply();
@@ -23,7 +25,7 @@ export struct GlobalFocusPanel {
   private generation: number = 0;
   private service: GlobalFocusService = new GlobalFocusService();
   private expired: () => void = () => { this.generation++; this.view = new GlobalFocusReply(); this.lastKnown = false; this.observedAt = ''; this.errorText = '请重新登录后查看焦点'; this.busy = false; };
-  aboutToAppear(): void { SessionStore.onSessionExpired(this.expired); this.refresh(); }
+  aboutToAppear(): void { SessionStore.onSessionExpired(this.expired); this.refresh(); const epoch = this.generation; new ConversationService().capabilities().then(c => { if (epoch === this.generation) this.agentEnabled = c.enabled; }).catch(() => {}); }
   aboutToDisappear(): void { this.generation++; SessionStore.offSessionExpired(this.expired); }
   private async refresh(): Promise<void> {
     const generation = ++this.generation; const token = SessionStore.getToken();
@@ -110,6 +112,7 @@ export struct GlobalFocusPanel {
       if (this.primaryDetail(item) !== '') { Text(this.primaryDetail(item)).fontSize(14).lineHeight(22).fontColor(PMColors.INK_SECONDARY).maxLines(4).textOverflow({ overflow: TextOverflow.Ellipsis }) }
       if (this.kind(item) !== 'mission') { PMStatusPill({ label: this.kind(item) === 'reminder' ? '待核对提醒依据' : '查看原始记录' }) }
       PMButton({ label: this.view.primaryContext?.nextStep.actionLabel ?? focusActionLabel(item.status, this.kind(item)), onAction: (): void => { this.open(item, this.kind(item)); } })
+      if (this.agentEnabled && this.kind(item) === 'reminder') { PMButton({ label: '问问提醒原因', secondary: true, onAction: (): void => { router.pushUrl({ url: 'pages/FocusConversation', params: { projectId: item.projectId, originKind: 'INTERVENTION', originId: item.id } }); } }) }
       if (this.kind(item) === 'mission') { GoalQuestionPanel({ projectId: item.projectId, missionId: item.id, compact: true }) }
     }.width('100%').alignItems(HorizontalAlign.Start).padding(16).backgroundColor(PMColors.SURFACE)
       .borderRadius(PMRadius.LG).border({ width: 1, color: PMColors.BORDER }).margin({ bottom: 12 })
@@ -122,6 +125,7 @@ export struct GlobalFocusPanel {
           PMListRow({ title: this.rowTitle(item, kind), subtitle: this.rowSubtitle(item, items), meta: item.projectTitle,
             kind: kind, status: kind === 'mission' && (item.status === 'PAUSED' || item.status === 'FAILED') ? '需处理' : '',
             risk: item.status === 'PAUSED' || item.status === 'FAILED', onOpen: (): void => { this.open(item, kind); } })
+          if (this.agentEnabled && kind === 'reminder') { PMButton({ label: '为什么提醒我？', secondary: true, onAction: (): void => { router.pushUrl({ url: 'pages/FocusConversation', params: { projectId: item.projectId, originKind: 'INTERVENTION', originId: item.id } }); } }) }
         }, (item: FocusEntry) => item.id)
         if (this.remaining(items).length > this.visible(title, items, kind).length && !this.expandedGroups.includes(title)) {
           Button('展开本组全部原记录', { type: ButtonType.Normal }).height(44).width('100%').fontSize(12)
@@ -139,6 +143,7 @@ export struct GlobalFocusPanel {
         Column() {
           if (this.errorText !== '') { Text(this.errorText).fontSize(12).fontColor(PMColors.RISK) }
           PMPageIntro({ eyebrow: this.dateLabel(), title: '今天，先处理重要的事', description: '优先回应与你有关的判断，再继续推进项目。' })
+          if (this.agentEnabled) { PMButton({ label: '问忆程', onAction: (): void => { router.pushUrl({ url: 'pages/FocusConversation' }); } }) }
           if (this.primary() !== null) { this.Primary(this.primary()!) }
           else { Text('当前范围内没有待回应的事项，进入项目记录新进展。').fontSize(14).fontColor(PMColors.INK_SECONDARY).margin({ bottom: 16 }) }
           Row({ space: 10 }) {

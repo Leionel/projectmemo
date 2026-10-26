@@ -74,9 +74,9 @@ export async function listContinuationCandidates(userId:string,id:string,raw:unk
   return{candidates,coverage:{limit,truncated:pointers.size>limit,existingLimit:query.includeExisting?12:0}};
  });
 }
-export async function confirmContinuation(userId:string,id:string,raw:unknown):Promise<ContinuationResult>{
+export async function confirmContinuation(userId:string,id:string,raw:unknown,transaction?:Tx):Promise<ContinuationResult>{
   enabled();const body=confirmSchema.parse(raw);if(body.evidenceReview)body.sourcePointers.sort((a,b)=>a.id.localeCompare(b.id));const hash=jsonHash(body);
-  return db.$transaction(async tx=>{
+  const apply=async (tx:Tx)=>{
     await lock(tx,id);await ownedMission(userId,id,tx);
     const replay=await commandReplay(tx,id,body.requestId,hash);if(replay)return replay.payloadJson as unknown as ContinuationResult;
     const a=await assess(userId,id,body,tx),{m,wait}=a;
@@ -91,7 +91,8 @@ export async function confirmContinuation(userId:string,id:string,raw:unknown):P
     const authorized=(m.constraintsJson as {llmContextApproved?:boolean}).llmContextApproved===true;
     if(!sufficient||!canRun||!authorized){const result={continued:false,reason:!authorized?"LLM_CONTEXT_NOT_APPROVED":!canRun?"BUDGET_EXHAUSTED":a.fit&&body.evidenceReview?.mode==="BACKGROUND_ONLY"?"BACKGROUND_ONLY":a.value.assessment,questionId:wait.questionId};await event(tx,id,"CONTINUATION_HELD",result,{id:`cmd:${body.requestId}`,hash});return result;}
     return resumeWithMaterials(tx,a,body,hash,"MANUAL",fitEvent?.id);
-  });
+  };
+  return transaction?apply(transaction):db.$transaction(apply);
 }
 
 async function resumeWithMaterials(tx:Tx,a:Awaited<ReturnType<typeof assess>>,body:{sourcePointers:Array<{id:string;hash:string}>;answer:string;requestId:string},hash:string,mode:"MANUAL"|"AUTO",fitEventId?:string){

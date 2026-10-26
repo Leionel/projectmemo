@@ -8,6 +8,7 @@
     "pages/FeatureGuide",
     "pages/LoginPage",
     "pages/MissionDetail",
-    "pages/AttachmentViewer"
+    "pages/AttachmentViewer",
+    "pages/FocusConversation"
   ]
 }

@@ -1,4 +1,6 @@
 import {GoalQuestion} from "@/components/GoalQuestion";
+import { FocusAgentWorkspace } from "@/components/FocusAgentWorkspace";
+import { isFeatureEnabled } from "@/lib/config/features";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, ArrowUpRight, Bot, CalendarDays, CircleHelp, Clock3, Inbox, Layers3 } from "lucide-react";
@@ -30,6 +32,9 @@ export default async function FocusPage({ searchParams }: { searchParams: Promis
   const user = await getSessionUser();
   if (!user) redirect("/login?from=%2Ffocus");
   const focus = await loadGlobalFocus(user.id, (await searchParams).archived === "1");
+  if (isFeatureEnabled("FOCUS_AGENT_ENABLED", false)) return <main id="main-content" className={`shell ${styles.page}`}>
+    <FocusAgentWorkspace focus={focus}/>
+  </main>;
   const empty = ![focus.waiting, focus.running, focus.actions, focus.reminders, focus.records].some(rows => rows.length);
   const hero = empty ? null : pickHero(focus);
   const waitingRows = hero?.kind === "mission" ? focus.waiting.filter(item => item.id !== hero.item.id) : focus.waiting;

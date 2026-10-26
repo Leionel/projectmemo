@@ -20,9 +20,9 @@ async function prepare(userId:string,id:string,outputId:string,body:z.infer<type
  return{m,value,previewHash:jsonHash(value)};
 }
 export async function previewArtifactAdoption(userId:string,id:string,outputId:string,raw:unknown){enabled();return db.$transaction(async tx=>{const a=await prepare(userId,id,outputId,previewSchema.parse(raw),tx);return{...a.value,previewHash:a.previewHash};});}
-export async function confirmArtifactAdoption(userId:string,id:string,outputId:string,raw:unknown){
+export async function confirmArtifactAdoption(userId:string,id:string,outputId:string,raw:unknown,transaction?:Tx){
  enabled();const body=confirmSchema.parse(raw),hash=jsonHash({id,outputId,body});
- return db.$transaction(async tx=>{
+ const apply=async (tx:Tx)=>{
   await lock(tx,id);const m=await ownedMission(userId,id,tx);
   const commandKey=`artifact:${userId}:${body.requestId}`;
   const prior=await tx.agentMissionEvent.findFirst({where:{commandRequestId:commandKey}});
@@ -35,5 +35,6 @@ export async function confirmArtifactAdoption(userId:string,id:string,outputId:s
   const artifact=await saveArtifactInTx(tx,m.projectId,body.artifactType,a.value.content);
   const receipt=await tx.missionArtifactReceipt.create({data:{projectId:m.projectId,missionId:id,outputId,outputRevision:a.value.outputRevision,outputHash:a.value.outputHash,artifactId:artifact.id,artifactType:body.artifactType,sourceManifestJson:json(a.value.sourceManifest),blockMapJson:json(a.value.blockMap),verificationSnapshotJson:json(a.value.verification),createdByUserId:userId,requestId:body.requestId,payloadHash:hash}});
   await event(tx,id,"OUTPUT_ADOPTED",{receiptId:receipt.id,artifactId:artifact.id,outputId,outputRevision:a.value.outputRevision});return receipt;
- });
+ };
+ return transaction?apply(transaction):db.$transaction(apply);
 }

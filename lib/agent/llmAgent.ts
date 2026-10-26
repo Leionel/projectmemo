@@ -1,19 +1,20 @@
-import { reserveCloudCall } from "@/lib/auth/cloudQuota";
+import { reserveCloudCall, reserveWorkspaceCloudCall, type WorkspaceBilling } from "@/lib/auth/cloudQuota";
 import { buildArtifactPrompt, buildCapturePrompt } from "@/lib/agent/prompts";
 import { getChatProviderConfig } from "@/lib/config/provider";
 import { knowledgeCardDraftSchema } from "@/lib/validation/schemas";
 import type { AgentExecutionResult, ArtifactTypeValue, CardDraft } from "@/lib/types";
 
-type ChatResponse = { choices?: Array<{ message?: { content?: string } }> };
+type ChatResponse = { id?: string; usage?: { prompt_tokens?: number; completion_tokens?: number }; choices?: Array<{ message?: { content?: string } }> };
 
 function config() {
   return getChatProviderConfig();
 }
 
-export async function chatWithLLMWithMeta(prompt: string, projectId?: string): Promise<AgentExecutionResult<string>> {
+export async function chatWithLLMWithMeta(prompt: string, projectId?: string, workspace?: WorkspaceBilling): Promise<AgentExecutionResult<string>> {
   const startedAt = Date.now();
   const { provider, baseUrl, apiKey, model, timeoutMs } = config();
-  await reserveCloudCall(projectId);
+  if (workspace) await reserveWorkspaceCloudCall(workspace);
+  else await reserveCloudCall(projectId);
   const requestBody: Record<string, unknown> = {
     max_tokens: 2048,
     model,
@@ -29,7 +30,7 @@ export async function chatWithLLMWithMeta(prompt: string, projectId?: string): P
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify(requestBody),
-    signal: AbortSignal.timeout(timeoutMs),
+    signal: AbortSignal.timeout(workspace ? Math.min(timeoutMs, 20000) : timeoutMs),
   });
   if (!response.ok) throw new Error(`LLM request failed with HTTP ${response.status}`);
   const payload = await response.json().catch(() => {
@@ -43,6 +44,9 @@ export async function chatWithLLMWithMeta(prompt: string, projectId?: string): P
     status: "SUCCESS",
     fallbackReason: null,
     durationMs: Date.now() - startedAt,
+    requestIdentity: payload.id ?? null,
+    usage: { inputTokens: payload.usage?.prompt_tokens ?? null, outputTokens: payload.usage?.completion_tokens ?? null },
+    usageUnknown: !payload.usage,
   };
 }
 

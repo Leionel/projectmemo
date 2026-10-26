@@ -58,6 +58,7 @@ import {
   PaperclipIcon
 } from '../components/PMIcons';
 import { PMAppBar } from '../components/PMAppBar';
+import { ConversationService } from '../services/ConversationService';
 import { PMButton, PMPageIntro, PMStatusPill, PMListRow } from '../components/PMReferencePrimitives';
 import { TextFormatters } from '../common/TextFormatters';
 import { MarkdownView } from '../components/MarkdownView';
@@ -90,6 +91,8 @@ import { ProjectEvolutionPanel } from '../components/ProjectEvolutionPanel';
 @Component
 struct ProjectHome {
   @State projectId: string = '';
+  @State private focusConversationId: string = '';
+  @State private focusAgentEnabled: boolean = false;
   @State currentTabIndex: number = 0;
   @State missionRefreshKey: number = 0;
   @State showProjectStatus: boolean = false;
@@ -278,6 +281,9 @@ struct ProjectHome {
       return;
     }
     this.projectId = params['projectId'] ?? '';
+    this.focusConversationId = params['conversationId'] ?? '';
+    const focusToken = SessionStore.getToken();
+    new ConversationService().capabilities().then(v => { if (focusToken === SessionStore.getToken()) this.focusAgentEnabled = v.enabled; }).catch(() => {});
     this.showQuickCopilot = params['openCopilot'] === '1';
     this.materialMissionId = params['materialMissionId'] ?? '';
     this.materialQuestionId = params['materialQuestionId'] ?? '';
@@ -4196,7 +4202,7 @@ struct ProjectHome {
               Text(`基于 ${this.project._count.cards} 条记忆解释项目情况`).fontSize(12).fontColor(PMColors.INK_SECONDARY)
             }.layoutWeight(1).alignItems(HorizontalAlign.Start)
             Button('提问 →', { type: ButtonType.Normal }).constraintSize({ minHeight: 44 }).fontSize(14).borderRadius(11)
-              .fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).onClick(() => { this.showQuickCopilot = true; })
+              .fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).onClick(() => { if (this.focusAgentEnabled) router.pushUrl({ url: 'pages/FocusConversation', params: { conversationId: this.focusConversationId, projectId: this.projectId } }); else this.showQuickCopilot = true; })
           }.width('100%').padding(14).backgroundColor(PMColors.SURFACE).borderRadius(18).border({ width: 1, color: PMColors.BORDER_SUBTLE })
           MissionPanel({ projectId: this.projectId, refreshKey: this.missionRefreshKey })
         }.padding(PMSpacing.MD).width('100%').justifyContent(FlexAlign.Start)
@@ -5061,6 +5067,7 @@ struct ProjectHome {
           this.TopHeader()
         }
 
+        if (this.focusConversationId !== '' || this.focusAgentEnabled) { PMButton({ label: this.focusConversationId !== '' ? '继续原焦点讨论' : '问忆程 · 项目讨论', secondary: true, onAction: (): void => { router.pushUrl({ url: 'pages/FocusConversation', params: { conversationId: this.focusConversationId, projectId: this.projectId } }); } }) }
         if (this.routeError !== '') {
           ErrorStateView({
             message: this.routeError,

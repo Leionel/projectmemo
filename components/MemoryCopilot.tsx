@@ -66,13 +66,13 @@ function Receipt({ receipt, citations }: { receipt: EvidenceTrustReceipt; citati
   </div>;
 }
 
-export function MemoryCopilot({ projectId }: { projectId: string }) {
-  return <ProjectCopilot key={projectId} projectId={projectId}/>;
+export function MemoryCopilot({ projectId, historyOnly = false }: { projectId: string; historyOnly?: boolean }) {
+  return <ProjectCopilot key={projectId} projectId={projectId} historyOnly={historyOnly}/>;
 }
-function ProjectCopilot({projectId}:{projectId:string}) {
+function ProjectCopilot({projectId,historyOnly}:{projectId:string;historyOnly:boolean}) {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [open, setOpen] = useState(() => searchParams.get("openCopilot") === "1");
+  const [open, setOpen] = useState(() => historyOnly || searchParams.get("openCopilot") === "1");
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
@@ -190,14 +190,14 @@ function ProjectCopilot({projectId}:{projectId:string}) {
           <p className="whitespace-pre-wrap">{item.content}</p>
           {item.role === "ASSISTANT" && item.trustReceipt && <Receipt receipt={item.trustReceipt} citations={item.citations} />}
           {!item.trustReceipt && item.citations.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{item.citations.map((citation) => <a key={citation.cardId} href={`#card-${citation.cardId}`} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-xs font-bold text-[var(--teal-strong)]">引用：{citation.title}</a>)}</div>}
-          {item.continuationSuggestion && <CopilotContinuation key={item.runId} suggestion={item.continuationSuggestion}/>}
-          {item.proposedActions.length > 0 && <div className="mt-3 space-y-2">{item.proposedActions.map((action) => <div key={action.title} className="rounded-lg border border-[var(--teal)]/30 bg-[var(--teal-pale)] p-2.5"><p className="text-xs font-bold text-[var(--navy)]">{action.title}</p><button type="button" onClick={() => void confirmTool(action, item.runId)} disabled={Boolean(toolBusy)} className="focus-ring mt-2 inline-flex items-center gap-1 rounded-md bg-[var(--paper-strong)] px-2 py-1 text-xs font-black text-[var(--teal-strong)] disabled:opacity-60">{toolBusy === action.title ? <LoaderCircle size={12} className="animate-spin" /> : <Check size={12} />}确认执行</button></div>)}</div>}
+          {!historyOnly && item.continuationSuggestion && <CopilotContinuation key={item.runId} suggestion={item.continuationSuggestion}/>}
+          {!historyOnly && item.proposedActions.length > 0 && <div className="mt-3 space-y-2">{item.proposedActions.map((action) => <div key={action.title} className="rounded-lg border border-[var(--teal)]/30 bg-[var(--teal-pale)] p-2.5"><p className="text-xs font-bold text-[var(--navy)]">{action.title}</p><button type="button" onClick={() => void confirmTool(action, item.runId)} disabled={Boolean(toolBusy)} className="focus-ring mt-2 inline-flex items-center gap-1 rounded-md bg-[var(--paper-strong)] px-2 py-1 text-xs font-black text-[var(--teal-strong)] disabled:opacity-60">{toolBusy === action.title ? <LoaderCircle size={12} className="animate-spin" /> : <Check size={12} />}确认执行</button></div>)}</div>}
         </div>) : <p className="rounded-md bg-[var(--paper-strong)] p-5 text-center text-sm text-[var(--ink-soft)]">试试问“当前进展如何？”或“消融实验完成了吗？”</p>}
         {loading && <div className="mr-4 rounded-md bg-[var(--paper-strong)] p-3 text-sm text-[var(--muted)]"><LoaderCircle size={15} className="mr-2 inline animate-spin" />正在检索并核验证据…</div>}
       </div>
       {feedback && <p role="status" className="mt-3 rounded-lg bg-[var(--teal-pale)] px-3 py-2 text-xs font-semibold text-[var(--teal-strong)]">{feedback}{feedbackHref && <a href={projectHref(projectId,feedbackHref)} className="ml-2 underline underline-offset-3">立即查看 →</a>}</p>}
       {feedback&&<button type="button" className="workspace-tool focus-ring mt-2" disabled={loading} onClick={()=>setHistoryLoaded(false)}>重新读取对话</button>}
-      <form onSubmit={ask} className="mt-4 flex gap-2"><input aria-label="问项目进展、提醒依据或下一步" value={question} onChange={(event) => setQuestion(event.target.value)} disabled={loading} className="focus-ring editorial-input min-w-0 flex-1 px-3 py-2.5 text-sm" placeholder="问项目进展、提醒依据或下一步" /><button type="submit" disabled={loading || !historyLoaded || !question.trim()} className="focus-ring editorial-button disabled:opacity-50"><Send size={16} />发送问题</button></form>
+      {!historyOnly && <form onSubmit={ask} className="mt-4 flex gap-2"><input aria-label="问项目进展、提醒依据或下一步" value={question} onChange={(event) => setQuestion(event.target.value)} disabled={loading} className="focus-ring editorial-input min-w-0 flex-1 px-3 py-2.5 text-sm" placeholder="问项目进展、提醒依据或下一步" /><button type="submit" disabled={loading || !historyLoaded || !question.trim()} className="focus-ring editorial-button disabled:opacity-50"><Send size={16} />发送问题</button></form>}
     </div>}
   </section>;
 }

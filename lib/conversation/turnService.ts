@@ -1,0 +1,258 @@
+import { db } from "@/lib/db";
+import { AppError } from "@/lib/api";
+import { json, jsonHash } from "@/lib/mission/contracts";
+import { conversationTurnSchema } from "@/lib/types/conversation";
+import type { ConversationActor, ConversationBlocks } from "@/lib/types/conversation";
+import { workspaceDirectory, observeProjects } from "@/lib/services/workspaceContextService";
+import { assertProject, emptyBlocks, lockConversation, ownedConversation, record } from "./repository";
+import { appendConversationMessage, bindRefs, readConversation, validateReadSources } from "./service";
+import { answerSchema, conversationModel, focusSystemPrompt, routeSchema } from "./model";
+import { freezeCopilotProposals, readCopilotContext } from "@/lib/copilot/confirmation";
+import { previewConversationWork, readConversationWork } from "./workService";
+import { workRefSchema, type ConversationWorkRef } from "@/lib/types/conversationWork";
+
+export async function submitConversationTurn(actor: ConversationActor, id: string, raw: unknown) {
+  const input = conversationTurnSchema.parse(raw), hash = jsonHash(input);
+  const reserved = await db.$transaction(async tx => {
+    await lockConversation(tx, id);
+    const c = await ownedConversation(actor, id, tx);
+    const prior = await tx.conversationTurn.findUnique({ where: { conversationId_requestId: { conversationId: id, requestId: input.requestId } } });
+    if (prior) {
+      if (prior.inputHash !== hash) throw new AppError("REQUEST_ID_REUSED", "请求编号已用于另一条输入", 409);
+      if (["ACCEPTED", "OBSERVING", "GENERATING"].includes(prior.status) && Date.now() - prior.createdAt.getTime() >= 120000) {
+        const stopped = await tx.conversationTurn.update({ where: { id: prior.id }, data: {
+          status: prior.callCount ? "UNKNOWN" : "FAILED", finishedAt: new Date(),
+          errorJson: { code: "INTERRUPTED", message: "原请求中断，不会自动重发模型" },
+        } });
+        await tx.conversation.updateMany({ where: { id, activeTurnId: prior.id }, data: { activeTurnId: null } });
+        return { turn: stopped, replay: true };
+      }
+      return { turn: prior, replay: true };
+    }
+    if (c.activeTurnId) {
+      const active = await tx.conversationTurn.findUnique({ where: { id: c.activeTurnId } });
+      if (active && Date.now() - active.createdAt.getTime() < 120000)
+        throw new AppError("CONVERSATION_BUSY", "另一条输入正在处理，请读取原请求状态", 409);
+      if (active) await tx.conversationTurn.update({ where: { id: active.id }, data: {
+        status: active.callCount ? "UNKNOWN" : "FAILED", finishedAt: new Date(),
+        errorJson: { code: "INTERRUPTED", message: "原请求中断，不会自动重发模型" },
+      } });
+    }
+    if (c.version !== input.expectedVersion) throw new AppError("CONVERSATION_CHANGED", "讨论上下文已变化，请刷新后重试原输入", 409);
+    const target = input.entityRef?.projectId ?? input.projectId;
+    if (target) {
+      await assertProject(actor, target, tx);
+      if (input.entityRef && input.projectId && input.entityRef.projectId !== input.projectId)
+        throw new AppError("CONTEXT_SCOPE_CHANGED", "原对象与所选项目不一致", 409);
+      if (c.scope === "PROJECT" && c.homeProjectId !== target) throw new AppError("CONTEXT_SCOPE_CHANGED", "请另开跨项目讨论", 409);
+    }
+    if (input.replyToMessageId && !await tx.agentMessage.findFirst({ where: { id: input.replyToMessageId, conversationId: id, ownerUserId: actor.userId } }))
+      throw new AppError("MESSAGE_NOT_FOUND", "原消息已不可访问", 404);
+    if (input.bindingId && !await tx.conversationBinding.findFirst({ where: { id: input.bindingId, conversationId: id } }))
+      throw new AppError("BINDING_NOT_FOUND", "讨论对象已不可访问", 404);
+    const turn = await tx.conversationTurn.create({ data: { conversationId: id, requestId: input.requestId,
+      inputHash: hash, inputJson: json(input), baseVersion: c.version, status: "OBSERVING" } });
+    await appendConversationMessage(tx, id, actor.userId, "USER", input.message,
+      { ...emptyBlocks(), observedProjectIds: target ? [target] : [] }, turn.id);
+    await tx.conversation.update({ where: { id }, data: { activeTurnId: turn.id, version: { increment: 1 } } });
+    return { turn, replay: false };
+  });
+  if (reserved.replay) return { turnId: reserved.turn.id, status: reserved.turn.status, conversation: await readConversation(actor, id) };
+  const turn = reserved.turn;
+  try {
+    const c = await ownedConversation(actor, id);
+    const history = await readConversation(actor, id);
+    const explicitBinding = input.bindingId ? await db.conversationBinding.findFirst({ where: { id: input.bindingId, conversationId: id } }) : null;
+    let frozenMessage = input.replyToMessageId ? history.messages.find(m => m.id === input.replyToMessageId && !m.restricted)
+      : [...history.messages].reverse().find(m => m.role === "ASSISTANT" && !m.restricted);
+    if (input.replyToMessageId && !frozenMessage) {
+      const old = await db.agentMessage.findFirst({ where: { id: input.replyToMessageId, conversationId: id, ownerUserId: actor.userId } });
+      if (!old) throw new AppError("MESSAGE_NOT_FOUND", "原消息不可访问", 404);
+      const blocks = { ...emptyBlocks(), ...record(old.blocksJson) } as ConversationBlocks;
+      for (const p of blocks.observedProjectIds) await assertProject(actor, p);
+      frozenMessage = { ...blocks, id: old.id, seq: old.seq!, role: old.role, content: old.content, restricted: false };
+    }
+    const frozenRefs = frozenMessage?.refs ?? [];
+    let focused = input.entityRef?.projectId ?? (input.projectId === null ? undefined : input.projectId ?? explicitBinding?.projectId ?? history.focusProjectId ?? undefined);
+    const directory = await workspaceDirectory(actor, c.scope, c.homeProjectId, focused);
+    const named = directory.summaries.filter(p => input.message.includes(p.title));
+    const conflictingName = !!(input.projectId || input.entityRef || input.bindingId) && !!focused && named.some(p => p.id !== focused);
+    if (!input.projectId && !explicitBinding && named.length === 1) focused = named[0].id;
+    // Resolve exact frozen choices before the project ordinal router; a choice never executes directly.
+    const choiceMatch = input.message.match(/(?:选|采用)(?:择)?第?([一二12])(?:个|项|种)?/);
+    const optionMessage = input.replyToMessageId ? frozenMessage : [...history.messages].reverse().find(m =>
+      !m.restricted && m.options?.length && (!input.projectId || m.options.every(o => o.projectId === input.projectId)));
+    const option = choiceMatch ? optionMessage?.options?.[({ 一: 0, 二: 1, "1": 0, "2": 1 } as Record<string, number>)[choiceMatch[1]]] : undefined;
+    const savedRef = workRefSchema.safeParse(record(c.focusJson).entityRef);
+    const replyCandidates = [...new Map(frozenRefs.filter(r => ["MISSION", "ACTION"].includes(r.kind)).map(r => [r.kind + ":" + r.id, r])).values()];
+    const replyProposal = frozenMessage?.proposal;
+    const replyTarget: ConversationWorkRef | undefined = input.replyToMessageId && replyProposal?.resultId && (!replyProposal.tool || ["create_action", "complete_action"].includes(replyProposal.tool))
+      ? { kind: "ACTION", id: replyProposal.resultId, projectId: replyProposal.projectId }
+      : input.replyToMessageId && replyCandidates.length === 1 ? { kind: replyCandidates[0].kind as "MISSION" | "ACTION", id: replyCandidates[0].id, projectId: replyCandidates[0].projectId } : undefined;
+    const exactRef: ConversationWorkRef | undefined = input.entityRef ?? (explicitBinding && ["MISSION", "ACTION"].includes(explicitBinding.kind)
+      ? { kind: explicitBinding.kind as "MISSION" | "ACTION", id: explicitBinding.entityId, projectId: explicitBinding.projectId }
+      : input.replyToMessageId ? replyTarget : savedRef.success && input.projectId !== null && (!input.projectId || input.projectId === savedRef.data.projectId) && named.every(p => p.id === savedRef.data.projectId) ? savedRef.data : undefined);
+    if (exactRef && input.projectId && exactRef.projectId !== input.projectId) throw new AppError("CONTEXT_SCOPE_CHANGED", "原消息对象与所选项目不同，请核对讨论范围", 409);
+    const resultText = input.message.match(/(?:验证|完成|执行)?结果(?:是|为|[：:])\s*([\s\S]+)/)?.[1]?.trim();
+    if (option && (input.projectId && input.projectId !== option.projectId || input.entityRef && input.entityRef.id !== option.missionId))
+      throw new AppError("CONTEXT_SCOPE_CHANGED", "原选项与本次指定对象不同，请明确要采用哪份方案", 409);
+    const operation = !conflictingName && !/不要|不选|不采用|禁止|只读/.test(input.message)
+      ? option ? "adopt_scenario" : exactRef?.kind === "ACTION" && resultText ? "complete_action"
+        : exactRef?.kind === "MISSION" && /^(?:请|帮我)?(?:继续|恢复|接续)(?:原|这|该)?.*(?:委托|任务)/.test(input.message) ? "resume" : null : null;
+    const boundWork = exactRef ? await db.conversationBinding.findFirst({ where: { conversationId: id, kind: exactRef.kind, entityId: exactRef.id, projectId: exactRef.projectId } }) : null;
+    if (operation && (option || boundWork)) {
+      const ref: ConversationWorkRef = option ? { kind: "MISSION", id: option.missionId, projectId: option.projectId } : exactRef!;
+      const work = await readConversationWork(actor, id, ref);
+      if (option && (work.scenario?.id !== option.proposalId || work.scenario.proposalHash !== option.proposalHash || work.version !== option.expectedVersion))
+        throw new AppError("PROPOSAL_CHANGED", "原选项或原任务已变化，请重新对比", 409);
+      if (operation !== "resume" || work.status === "PAUSED") {
+        const preview = await previewConversationWork(actor, id, { requestId: "turn:" + turn.id, expectedConversationVersion: c.version,
+          ref, operation, versionToken: work.versionToken, ...(resultText ? { answer: resultText } : {}),
+          ...(option ? { scenarioProposalId: option.proposalId, scenarioKey: option.key } : {}) }, turn.id);
+        return { turnId: turn.id, status: "ANSWERED", ...preview };
+      }
+    }
+    const ordinal = input.message.match(/第([一二三123])(?:个|项|种)/);
+    const selectable = frozenRefs.filter(r => r.kind === "PROJECT");
+    if (ordinal && !choiceMatch) {
+      const index = ({ 一: 0, 二: 1, 三: 2, "1": 0, "2": 1, "3": 2 } as Record<string, number>)[ordinal[1]];
+      if (selectable[index]) focused = selectable[index].projectId;
+    }
+    const ambiguous = conflictingName || !input.projectId && !explicitBinding && !focused &&
+      (named.length > 1 || (/这个|那个|原来|继续/.test(input.message) && selectable.length > 1));
+    const constraints = Array.isArray(c.pinnedStateJson) ? c.pinnedStateJson as string[] : [];
+    const newConstraint = /不要|禁止|不得|不允许|只读|不联网|不创建|不接受|不选/.test(input.message) ? input.message : null;
+    if (newConstraint && constraints.length >= 24) throw new AppError("CONSTRAINT_LIMIT", "已保留24项限制，请另开主题或整理限制后继续", 409);
+    const pinned = newConstraint ? [...constraints, newConstraint] : constraints;
+    const modelEnabled = input.llmContextApproved && process.env.LLM_MODE === "openai-compatible";
+    let route = { intent: "ANSWER" as "ANSWER" | "CLARIFY" | "PROPOSE_ACTION" | "OPEN_MISSION",
+      projectIds: focused ? [focused] : directory.summaries.slice(0, 3).map(p => p.id), query: input.message.slice(0, 256) };
+    let provider = "rules", advice = "", modelAnswer: ReturnType<typeof answerSchema.parse> | null = null;
+    if (ambiguous) route.intent = "CLARIFY";
+    else if (modelEnabled) {
+      const permitted = await db.projectMembership.count({ where: { userId: actor.userId, projectId: { in: directory.summaries.map(p => p.id) } } });
+      if (permitted !== directory.summaries.length) throw new AppError("PROJECT_NOT_FOUND", "项目权限已变化，请重新选择范围", 404);
+      const compact = directory.summaries.map(p => ({ id: p.id, title: p.title.slice(0, 60), goal: p.goal.slice(0, 80),
+        deadline: p.deadline, waiting: p.waiting, blocked: p.blocked,
+        preference: p.preference ? { importance: p.preference.importance, estimatedMinutes: p.preference.estimatedMinutes,
+          longTermGoal: p.preference.longTermGoal.slice(0, 80), notes: p.preference.notes.slice(0, 80) } : null }));
+      const r = await conversationModel(actor, turn.id, "ROUTE", focusSystemPrompt +
+        "\n按问题选择至多3个项目，intent=ANSWER/CLARIFY/PROPOSE_ACTION/OPEN_MISSION；query≤256字。返回 {intent,projectIds,query}。\n" +
+        JSON.stringify({ message: input.message, focus: focused, frozenRefs, pinnedConstraints: pinned, directory: compact,
+          coverage: directory.coverage }), routeSchema);
+      route = r.data; provider = r.provider;
+      const allowed = new Set(directory.summaries.map(p => p.id));
+      if (route.projectIds.some(p => !allowed.has(p))) throw new AppError("INVALID_ROUTE", "模型引用了观察范围外的项目，请重新限定问题", 409);
+      if (focused) route.projectIds = [focused, ...route.projectIds.filter(p => p !== focused)].slice(0, 3);
+    } else if (/创建.*行动|变成.*行动|帮我.*处理|整理.*待办/.test(input.message) && !/不创建|不要.*行动/.test(input.message)) route.intent = "PROPOSE_ACTION";
+    const observations = route.intent === "CLARIFY" ? { refs: frozenRefs, sources: [], coverage: { complete: false } }
+      : await observeProjects(actor, directory, route.projectIds, route.query || input.message, exactRef);
+    await db.conversationTurn.update({ where: { id: turn.id }, data: { status: "GENERATING", readManifestJson: json({
+      schemaVersion: 1, observedAt: new Date().toISOString(), directory: directory.coverage,
+      observedProjectIds: directory.summaries.map(p => p.id), route, observation: observations.coverage,
+      sourceRefs: observations.sources.map(s => ({ projectId: s.projectId, id: s.sourceId, revision: s.revision })),
+    }) } });
+    if (route.intent === "CLARIFY") advice = "你想继续哪一个项目？请选择下方原对象，再提出问题。";
+    else if (modelEnabled) {
+      const responseHistory = await readConversation(actor, id);
+      await validateReadSources(actor, observations.sources);
+      const r = await conversationModel(actor, turn.id, "ANSWER", focusSystemPrompt +
+        "\n返回 {advice,recommendedProjectId,observations:[{sourceId,quote}],priorities:[{projectId,tradeoff}],action:null或{projectId,title,description,priority}}。" +
+        "仅 intent=PROPOSE_ACTION 可以提出 action。未知字段不补造。\n" +
+        JSON.stringify({ message: input.message, intent: route.intent, focus: focused, pinnedConstraints: pinned,
+          recentDialogue: responseHistory.messages.filter(m => !m.restricted).slice(-6).map(m => ({ role: m.role, text: m.content.slice(0, 400), refs: m.refs.slice(0, 4) })),
+          projects: directory.summaries.filter(p => route.projectIds.includes(p.id)).map(p => ({
+            id: p.id, title: p.title, goal: p.goal.slice(0, 300), priority: p.priority,
+            missions: p.missions, actions: p.actions, actionCount: p.actionCount, coverage: p.coverage })),
+          sources: observations.sources,
+          coverage: directory.coverage }), answerSchema);
+      modelAnswer = r.data; provider = r.provider; advice = r.data.advice;
+      if (r.data.recommendedProjectId && route.projectIds.includes(r.data.recommendedProjectId)) focused = r.data.recommendedProjectId;
+      for (const o of r.data.observations) {
+        const source = observations.sources.find(s => s.id === o.sourceId);
+        if (!source || !source.excerpt.includes(o.quote)) throw new AppError("UNSUPPORTED_QUOTE", "回答引用与已读取原文不一致，请重新核对", 409);
+      }
+    } else {
+      advice = directory.summaries.filter(p => route.projectIds.includes(p.id))
+        .map(p => p.title + "：当前有 " + p.actionCount + " 项未完成行动、" + p.waiting + " 项待回应委托。").join("\n");
+      advice += "\n当前是规则观察，尚未进行模型优先级判断。可选择项目继续，或明确补充重要性与投入。";
+    }
+    const selected = focused ?? (route.projectIds.length === 1 ? route.projectIds[0] : undefined);
+    const priorities = directory.summaries.filter(p => route.projectIds.includes(p.id)).map(p => {
+      const generated = modelAnswer?.priorities.find(r => r.projectId === p.id);
+      return generated ? { ...p.priority, tradeoff: generated.tradeoff, basis: "MODEL_ADVICE" as const } : p.priority;
+    });
+    let action = route.intent === "PROPOSE_ACTION" ? modelAnswer?.action ?? null : null;
+    if (!modelEnabled && route.intent === "PROPOSE_ACTION" && selected) {
+      const p = directory.summaries.find(v => v.id === selected)!;
+      action = { projectId: p.id, title: "核对“" + p.title.slice(0, 80) + "”的下一步", description: input.message.slice(0, 500), priority: 3 };
+    }
+    if (action && (!selected || action.projectId !== selected || !route.projectIds.includes(action.projectId))) action = null;
+    if (pinned.some(v => /只读|(?:不要|不得|禁止|不允许|不).{0,8}(?:创建|新增).{0,12}(?:行动|待办)/.test(v))) action = null;
+    const result = await db.$transaction(async tx => {
+      await lockConversation(tx, id);
+      const current = await ownedConversation(actor, id, tx);
+      if (current.activeTurnId !== turn.id) throw new AppError("TURN_CHANGED", "原请求已中断或被接续", 409);
+      for (const p of directory.summaries) await assertProject(actor, p.id, tx);
+      await validateReadSources(actor, observations.sources, tx);
+      for (const ref of observations.refs.filter(r => r.kind === "MISSION")) {
+        if (!await tx.agentMission.findFirst({ where: { id: ref.id, projectId: ref.projectId, ownerUserId: actor.userId, version: ref.version,
+          project: { memberships: { some: { userId: actor.userId, role: "OWNER" } } } } }))
+          throw new AppError("MISSION_CHANGED", "原委托状态已变化，请刷新后继续", 409);
+      }
+      let refs = observations.refs;
+      if (route.intent === "CLARIFY" && !refs.length) refs = directory.summaries.slice(0, 6).map(p => ({
+        kind: "PROJECT", id: p.id, projectId: p.id, title: p.title, href: "/projects/" + p.id + "/knowledge",
+      }));
+      refs = await bindRefs(tx, id, refs);
+      const blocks: ConversationBlocks = { ...emptyBlocks(), refs, sources: observations.sources, priorities, provider,
+        observedProjectIds: directory.summaries.map(p => p.id),
+        limitations: [...directory.coverage.limitations, ...("limitations" in observations.coverage ? observations.coverage.limitations as string[] : [])] };
+      const run = await tx.agentRun.create({ data: { projectId: null, conversationId: id, turnId: turn.id,
+        runType: "CHAT", status: modelEnabled ? "SUCCESS" : "FALLBACK", provider,
+        fallbackReason: modelEnabled ? null : "MODEL_NOT_REQUESTED_OR_RULE_MODE",
+        trace: json({ purpose: "FOCUS_TURN", actorUserId: actor.userId, sourceIds: blocks.sources.map(s => s.id),
+          supportState: action ? "SUPPORTED" : "INSUFFICIENT", supportBasis: "ACTION_PROPOSAL_NOT_FACT_CLAIM" }),
+        resultJson: json({}) } });
+      if (action) {
+        const sources = await readCopilotContext(tx, action.projectId, actor);
+        const proposed = { kind: "create_action" as const, label: "创建行动", ...action };
+        await tx.agentRun.update({ where: { id: run.id }, data: { trace: json({
+          ...record(run.trace), copilotSources: sources.sourceManifest, copilotTargetProjectId: action.projectId,
+        }), resultJson: json({ proposedActions: [proposed] }) } });
+        await freezeCopilotProposals(tx, run.id, [proposed], sources.sourceManifest);
+        const execution = await tx.copilotToolExecution.findFirstOrThrow({ where: { sourceRunId: run.id } });
+        blocks.proposal = { executionId: execution.id, projectId: action.projectId, title: action.title,
+          description: action.description, proposalHash: execution.proposalHash, status: execution.status, resultId: null };
+      }
+      await appendConversationMessage(tx, id, actor.userId, "ASSISTANT", advice, blocks, turn.id, run.id);
+      await tx.conversation.update({ where: { id }, data: { activeTurnId: null,
+        focusJson: json({ projectId: selected ?? null, ...(exactRef && exactRef.projectId === selected ? { entityRef: exactRef } : {}) }), pinnedStateJson: json(pinned), version: { increment: 1 } } });
+      await tx.conversationTurn.update({ where: { id: turn.id }, data: { status: route.intent === "CLARIFY" ? "NEEDS_CLARIFICATION" : "ANSWERED", finishedAt: new Date() } });
+      return { turnId: turn.id, status: route.intent === "CLARIFY" ? "NEEDS_CLARIFICATION" : "ANSWERED" };
+    }, { timeout: 20000 });
+    return { ...result, conversation: await readConversation(actor, id) };
+  } catch (error) {
+    const old = await db.conversationTurn.findUnique({ where: { id: turn.id } });
+    const status = old?.callCount ? "UNKNOWN" : "FAILED";
+    await db.$transaction(async tx => {
+      await lockConversation(tx, id);
+      await tx.conversationTurn.update({ where: { id: turn.id }, data: { status, finishedAt: new Date(),
+        errorJson: { code: error instanceof AppError ? error.code : "MODEL_OR_PROTOCOL_ERROR", message: "请求未完成，未创建业务操作；不会自动重发模型" } } });
+      await tx.conversation.updateMany({ where: { id, activeTurnId: turn.id }, data: { activeTurnId: null } });
+      await tx.agentRun.create({ data: { projectId: null, conversationId: id, turnId: turn.id, runType: "CHAT",
+        status: "FAILED", provider: old?.callCount ? "configured-model" : "project_state",
+        fallbackReason: error instanceof AppError ? error.code : "MODEL_OR_PROTOCOL_ERROR",
+        trace: json({ purpose: "FOCUS_FAILED_TURN", actorUserId: actor.userId, usage: old?.usageJson,
+          reservation: old?.reservationJson, usageUnknown: status === "UNKNOWN" }) } });
+    });
+    throw error;
+  }
+}
+
+export async function readConversationTurn(actor: ConversationActor, id: string, turnId: string) {
+  await ownedConversation(actor, id);
+  const turn = await db.conversationTurn.findFirst({ where: { id: turnId, conversationId: id } });
+  if (!turn) throw new AppError("TURN_NOT_FOUND", "请求不存在", 404);
+  return { id: turn.id, requestId: turn.requestId, status: turn.status, error: turn.errorJson };
+}

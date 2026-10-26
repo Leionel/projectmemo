@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/focusConversation.test.ts tests/episodeAction.test.ts tests/missionContinuation.test.ts tests/missionArtifactAdoption.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  4 passed (4)
+      Tests  42 passed (42)
+   Start at  09:31:09
+   Duration  15.75s (transform 1.16s, setup 0ms, import 6.14s, tests 8.78s, environment 0ms)
+

@@ -2,11 +2,13 @@ import router from '@ohos.router';
 import { GoalQuestion, GoalQuestionInput } from '../models/DecisionEvolution';
 import { DecisionEvolutionService } from '../services/DecisionEvolutionService';
 import { SessionStore } from '../services/SessionStore';
+import { ConversationService } from '../services/ConversationService';
 import { ApiError } from '../models/Project';
 import { PMButton } from './PMReferencePrimitives';
 import { PMColors, PMFontSize, PMSpacing, PMRadius } from '../common/DesignTokens';
 @Component
 export struct GoalQuestionPanel {
+ @State private conversationEnabled: boolean = false;
  @Prop projectId: string = '';
  @Prop missionId: string = '';
  @Prop compact: boolean = false;
@@ -21,7 +23,7 @@ export struct GoalQuestionPanel {
  private keys: Record<string, string> = {};
  private exposed: string = '';
  private expired: () => void = () => { this.generation++; this.question = null; this.mutedMissionId = ''; this.fresh = false; this.busy = false; };
- aboutToAppear(): void { SessionStore.onSessionExpired(this.expired); this.load(); }
+ aboutToAppear(): void { SessionStore.onSessionExpired(this.expired); this.load(); const g = this.generation; const token = SessionStore.getToken(); new ConversationService().capabilities().then(v => { if (this.current(g, token)) this.conversationEnabled = v.enabled; }).catch(() => {}); }
  aboutToDisappear(): void { this.generation++; SessionStore.offSessionExpired(this.expired); }
  private input(q: GoalQuestion, action: string): GoalQuestionInput { const body = new GoalQuestionInput(); body.action = action; body.questionId = q.questionId; body.contextHash = q.contextHash; const key = `${q.contextHash}:${action}`; if (this.keys[key] === undefined) this.keys[key] = `question-${Date.now()}-${Math.random().toString(36).slice(2)}`; body.requestId = this.keys[key]; return body; }
  private current(g: number, token: string): boolean { return g === this.generation && token === SessionStore.getToken(); }
@@ -52,6 +54,7 @@ export struct GoalQuestionPanel {
       router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.projectId, missionId: this.question!.missionId, questionId: this.question!.kind === 'WAITING_INPUT' ? this.question!.questionId : '' } });
      } })
     }
+    if (this.conversationEnabled) { PMButton({ label: '围绕这项问题追问', secondary: true, onAction: (): void => { if (this.question !== null) router.pushUrl({ url: 'pages/FocusConversation', params: { projectId: this.projectId, originKind: 'GOAL_QUESTION', originId: this.question!.questionId } }); } }) }
     Row({ space: PMSpacing.SM }) {
      Button('还不知道').type(ButtonType.Normal).height(44).layoutWeight(1).fontSize(PMFontSize.SECONDARY)
       .fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).borderRadius(PMRadius.BUTTON)

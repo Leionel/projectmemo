@@ -147,7 +147,7 @@ export async function createScenarios(
     }
     if (
       ["SUCCEEDED", "CANCELLED", "RUNNING"].includes(m.status) ||
-      m.pauseRequestedAt ||
+      (m.pauseRequestedAt && m.status !== "PAUSED") ||
       m.cancelRequestedAt
     )
       throw new AppError(
@@ -451,11 +451,12 @@ export async function adoptScenario(
   actor: CopilotActor,
   id: string,
   raw: unknown,
+  transaction?: Tx,
 ) {
   const input = confirmSchema.parse(raw),
     hash = jsonHash({ id, input });
   // Reuse SQLite bounded busy retry/lock helper; no model or network is called in the commit transaction.
-  return writeTransaction(`decision:${id}`, async (tx) => {
+  const apply = async (tx: Tx) => {
     await tx.$executeRaw`UPDATE "DecisionScenarioProposal" SET "id"="id" WHERE "id"=${id}`;
     const p = await tx.decisionScenarioProposal.findFirst({
       where: { id, ownerUserId: actor.userId },
@@ -501,7 +502,7 @@ export async function adoptScenario(
       input.expectedVersion !== (p.baseManifest as {expectedVersion:number}).expectedVersion ||
       ["RUNNING", "SUCCEEDED", "CANCELLED"].includes(m.status) ||
       m.cancelRequestedAt ||
-      m.pauseRequestedAt
+      (m.pauseRequestedAt && m.status !== "PAUSED")
     )
       throw new AppError(
         "MISSION_CHANGED",
@@ -612,7 +613,8 @@ export async function adoptScenario(
     ]);
     await event(tx, m.id, "DECISION_SCENARIO_ADOPTED", receipt);
     return receipt;
-  });
+  };
+  return transaction ? apply(transaction) : writeTransaction(`decision:${id}`, apply);
 }
 export async function rejectScenario(actor: CopilotActor, id: string) {
   return db.$transaction(async (tx) => {

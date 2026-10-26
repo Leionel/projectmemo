@@ -10,6 +10,13 @@ export function GoalQuestion({
   missionId?: string;
   compact?: boolean;
 }) {
+  const [conversationEnabled, setConversationEnabled] = useState(false);
+  useEffect(() => {
+    let live = true;
+    void fetch("/api/conversations/capabilities", { cache: "no-store" }).then(r => r.ok ? r.json() : null)
+      .then(v => { if (live) setConversationEnabled(v?.enabled === true); }).catch(() => {});
+    return () => { live = false; };
+  }, []);
   const [q, setQ] = useState<Question | null>(null),
     [muted, setMuted] = useState<string | null>(null),
     [error, setError] = useState(""),
@@ -127,6 +134,7 @@ export function GoalQuestion({
               ? "补充到原问题 →"
               : "核对并接续原委托 →"}
           </a>
+          {conversationEnabled && <a className="workspace-link focus-ring" href={"/focus?entryKind=GOAL_QUESTION&entryId=" + encodeURIComponent(q.questionId) + "&entryProject=" + encodeURIComponent(projectId)}>围绕这项问题追问</a>}
           <div className="flex flex-wrap gap-2">
             {[
               ["UNKNOWN", "我还不知道"],

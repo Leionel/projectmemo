@@ -1,0 +1,25 @@
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+Datasource "db": SQLite database "test-vitest.db" at "file:./prisma/test-vitest.db"
+
+35 migrations found in prisma/migrations
+
+Applying migration `20261024090000_experience`
+Applying migration `20261024100000_repo_sensing`
+Applying migration `20261024120000_p3_review_boundaries`
+Applying migration `20261026010000_focus_conversations`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20261024090000_experience/
+    └─ migration.sql
+  └─ 20261024100000_repo_sensing/
+    └─ migration.sql
+  └─ 20261024120000_p3_review_boundaries/
+    └─ migration.sql
+  └─ 20261026010000_focus_conversations/
+    └─ migration.sql
+
+All migrations have been successfully applied.

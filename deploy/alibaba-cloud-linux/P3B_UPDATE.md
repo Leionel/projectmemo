@@ -10,15 +10,9 @@ Web 入口：项目概览上方「GitHub 仓库」→资料页直接展开连接
 
 ECS 仍使用下面的版本绑定更新方式，更新命令中的 TARGET 必须是本次已经推送的完整 commit。上线后核对 health.release、两个服务 active，以及 Prisma 迁移输出。构建失败的回滚保留已执行的增量迁移，不会自动覆盖生产数据库。
 
-沿用 2026-10-24 修复版 `safe-update.sh <本次已推送完整commit>`（typegen → 独立 tsc（堆下限 1280 MiB）→ 跳过构建内类型检查的单进程构建）。命令与 P3_UPDATE.md 相同：
+沿用 2026-10-24 修复版 `safe-update.sh <本次已推送完整commit>`（typegen → 独立 tsc（堆下限 1280 MiB）→ 跳过构建内类型检查的单进程构建）。执行方式见下方统一入口。
 
-```bash
-APP=/opt/projectmemo/app
-TARGET=<本次已推送完整commit>
-sudo -H -u projectmemo git -C "$APP" fetch origin codex/r3-runtime-research
-sudo -H -u projectmemo git -C "$APP" show "$TARGET:deploy/alibaba-cloud-linux/safe-update.sh" > /tmp/projectmemo-safe-update.sh
-bash /tmp/projectmemo-safe-update.sh "$TARGET"
-```
+日常发布统一使用 [ECS 更新命令](README.md#更新发布已部署机器)：在 root 终端用 heredoc、`mktemp` 提取目标提交的脚本，失败立即停止并清理临时文件。代码发布后另按 [Focus 开关与验收](FOCUS_UPDATE.md) 核对环境配置。
 
 此前基线迁移 `20261024100000_repo_sensing` 新增 `SourceConnection` / `ExternalSignal`；本次同时应用上方复查迁移。不运行 db:setup、seed 或 reset。
 

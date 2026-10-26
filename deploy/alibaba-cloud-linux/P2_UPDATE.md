@@ -2,13 +2,7 @@
 
 沿用 `safe-update.sh <本次已推送完整commit>`，不运行模型验收。脚本会备份库/附件/配置、停服后按实际可用内存收紧构建堆上限、安装原依赖、生成 Prisma、`next typegen` 后独立运行 `tsc --noEmit`（失败即回滚），再以单 worker、跳过构建内并行类型检查的方式执行 `next build --webpack`，然后增量迁移；健康失败恢复旧代码与构建，保留已迁移数据库。
 
-```bash
-APP=/opt/projectmemo/app
-TARGET=<本次已推送完整commit>
-sudo -H -u projectmemo git -C "$APP" fetch origin codex/r3-runtime-research
-sudo -H -u projectmemo git -C "$APP" show "$TARGET:deploy/alibaba-cloud-linux/safe-update.sh" > /tmp/projectmemo-safe-update.sh
-bash /tmp/projectmemo-safe-update.sh "$TARGET"
-```
+日常发布统一使用 [ECS 更新命令](README.md#更新发布已部署机器)：在 root 终端用 heredoc、`mktemp` 提取目标提交的脚本，失败立即停止并清理临时文件。代码发布后另按 [Focus 开关与验收](FOCUS_UPDATE.md) 核对环境配置。
 
 迁移 `20261024020000_goal_decision_impact` 只增加四张表、外键与唯一约束，不改写旧项目或回执。不要执行 db:setup、seed 或 reset。
 

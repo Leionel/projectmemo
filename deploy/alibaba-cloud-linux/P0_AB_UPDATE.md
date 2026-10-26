@@ -4,6 +4,8 @@
 
 ## 更新线上服务
 
+日常发布使用 [ECS 更新命令](README.md#更新发布已部署机器) 中的 root heredoc 和 `mktemp` 流程。下方保留本阶段迁移、历史故障与真实模型验收说明；Focus 上线另见 [开关与验收](FOCUS_UPDATE.md)。
+
 使用本轮最终提交的完整 40 位 commit。获取 `codex/r3-runtime-research`，不要使用示例中的旧版本 `4b8f706`。
 
 从目标 commit 提取并执行 `safe-update.sh`。它核对 Node 24、服务目录、持久库、附件目录、干净工作区及版本祖先关系。停止 Web / Worker 后备份数据库与附件，保留旧依赖、生成客户端和 `.next`；安装依赖、验证 SQLite 原生模块、生成 Prisma、构建、增量迁移、健康检查，最后启动 Worker。不执行 seed 或 `db:setup`。

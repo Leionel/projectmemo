@@ -2,15 +2,7 @@
 
 继续使用 `safe-update.sh <已推送的完整 commit>`，共用 Web / 鸿蒙后端；本地 HAP 需另行安装。
 
-服务器上以 root 执行（把 TARGET 换为本次完整提交号）：
-
-```bash
-APP=/opt/projectmemo/app
-TARGET=<本次完整提交号>
-sudo -H -u projectmemo git -C "$APP" fetch origin codex/r3-runtime-research
-sudo -H -u projectmemo git -C "$APP" show "$TARGET:deploy/alibaba-cloud-linux/safe-update.sh" > /tmp/projectmemo-safe-update.sh
-bash /tmp/projectmemo-safe-update.sh "$TARGET"
-```
+日常发布统一使用 [ECS 更新命令](README.md#更新发布已部署机器)：在 root 终端用 heredoc、`mktemp` 提取目标提交的脚本，失败立即停止并清理临时文件。代码发布后另按 [Focus 开关与验收](FOCUS_UPDATE.md) 核对环境配置。
 
 脚本核对目录、数据路径、已推送版本和干净工作区，备份数据库/附件/配置，增量迁移并独立构建，健康失败恢复旧代码与构建。`20261024010000_copilot_turn_identity` 为添加可空列的兼容迁移，不使用 seed，不清理旧聊天。
 

@@ -1,0 +1,22 @@
+[
+  {
+    "path": "AGENTS.md",
+    "unchanged": true
+  },
+  {
+    "path": "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md",
+    "unchanged": true
+  },
+  {
+    "path": "harmonyos/build-profile.json5",
+    "unchanged": true
+  },
+  {
+    "path": "next-env.d.ts",
+    "unchanged": true
+  },
+  {
+    "path": "tsconfig.json",
+    "unchanged": true
+  }
+]

@@ -5,10 +5,12 @@ import type { FocusEntry, GlobalFocus } from "@/lib/types/globalFocus";
 import { parseMetricRecord } from "@/lib/mission/gaps";
 import { readableRecord } from "@/lib/recordPresentation";
 import { getProjectAgentContext } from "@/lib/services/projectAgentContextService";
+import { readAnchorInbox } from "@/lib/conversation/anchorService";
 
 const LIMIT = 6;
 const waitingStates = ["WAITING_INPUT", "WAITING_APPROVAL", "PAUSED", "FAILED"];
 export async function loadGlobalFocus(userId: string, archived = false): Promise<GlobalFocus> {
+  const discussions = await readAnchorInbox(userId);
   const projectScope = { memberships: { some: { userId } }, ...(archived ? {} : { archivedAt: null }) };
   // Mission access requires both this user's ownership and the project's OWNER membership.
   const missionWhere = { ownerUserId: userId, project: { ...projectScope, memberships: { some: { userId, role: "OWNER" } } } };
@@ -37,7 +39,7 @@ export async function loadGlobalFocus(userId: string, archived = false): Promise
   const contextIds = [...new Set([...waiting, ...running, ...reminders, ...actions].map(row=>row.project.id))].slice(0,LIMIT);
   const contexts = await Promise.all(contextIds.map(id=>getProjectAgentContext(userId,id)));
   const primaryContext = contexts.filter(c=>c!==null).sort((a,b)=>a.nextStep.priority-b.nextStep.priority || b.observedAt.localeCompare(a.observedAt) || a.projectId.localeCompare(b.projectId))[0] ?? null;
-  return { primaryContext, counts: {waiting: waitingCount, running: runningCount, actions: actionCount, reminders: reminderCount},
+  return { discussions, primaryContext, counts: {waiting: waitingCount, running: runningCount, actions: actionCount, reminders: reminderCount},
     nextDeadline: nextDeadline?.deadline ? {projectId: nextDeadline.id, projectTitle: nextDeadline.title, at: nextDeadline.deadline.toISOString()} : null,
     schemaVersion: 1, missionEnabled, archived, hasMore: [waiting, running, actions, reminders].some(rows => rows.length > LIMIT) || new Set([...waiting,...running,...reminders,...actions].map(row=>row.project.id)).size>LIMIT,
     waiting: missions(waiting), running: missions(running),

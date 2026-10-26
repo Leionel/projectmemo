@@ -5,7 +5,7 @@ import { sourceHash } from "@/lib/mission/repository";
 import { conversationCreateSchema, focusPreferenceSchema } from "@/lib/types/conversation";
 import type { ConversationActor, ConversationBlocks, ConversationView, ConversationRef } from "@/lib/types/conversation";
 import { assertProject, assertSession, emptyBlocks, lockConversation, ownedConversation, record, type Tx } from "./repository";
-import { readConversationEntry } from "./entry";
+import { openConversationEntry } from "./anchorService";
 
 export async function appendConversationMessage(tx: Tx, conversationId: string, ownerUserId: string,
   role: "USER" | "ASSISTANT", content: string, blocks: ConversationBlocks, turnId?: string, runId?: string) {
@@ -31,46 +31,35 @@ export async function bindRefs(tx: Tx, conversationId: string, refs: Conversatio
 export async function createConversation(actor: ConversationActor, raw: unknown) {
   await assertSession(actor);
   const input = conversationCreateSchema.parse(raw), hash = jsonHash(input);
+  if (input.entry) return openConversationEntry(actor, input);
   if (input.projectId) await assertProject(actor, input.projectId);
-  if (input.scope === "PROJECT" && input.entry && input.entry.projectId !== input.projectId)
-    throw new AppError("CONTEXT_SCOPE_CHANGED", "提醒不属于这段项目讨论", 409);
   const old = await db.conversation.findUnique({ where: { ownerUserId_createRequestId: { ownerUserId: actor.userId, createRequestId: input.requestId } } });
   if (old) {
     if (old.createInputHash !== hash) throw new AppError("REQUEST_ID_REUSED", "请求编号已用于另一段讨论", 409);
     await ownedConversation(actor, old.id);
     return { id: old.id };
   }
-  const entry = input.entry ? await readConversationEntry(actor, input.entry) : null;
-  if (input.entry) {
-    const anchor = await db.conversationAnchor.findUnique({ where: { ownerUserId_originKind_originId_topicKey: {
-      ownerUserId: actor.userId, originKind: input.entry.kind, originId: input.entry.id, topicKey: "DISCUSS",
-    } } });
-    if (anchor) { await ownedConversation(actor, anchor.conversationId); return { id: anchor.conversationId }; }
-  }
   try {
     return await db.$transaction(async tx => {
+      await tx.authSession.updateMany({ where: { id: actor.sessionId, userId: actor.userId }, data: { id: actor.sessionId } });
       await assertSession(actor, tx);
+      if (await tx.conversationEntryRequest.findUnique({ where: { ownerUserId_requestId: { ownerUserId: actor.userId, requestId: input.requestId } } }))
+        throw new AppError("REQUEST_ID_REUSED", "请求编号已用于提醒入口", 409);
+      const replay = await tx.conversation.findUnique({ where: { ownerUserId_createRequestId: { ownerUserId: actor.userId, createRequestId: input.requestId } } });
+      if (replay) {
+        if (replay.createInputHash !== hash) throw new AppError("REQUEST_ID_REUSED", "请求编号已用于另一段讨论", 409);
+        await ownedConversation(actor, replay.id, tx); return { id: replay.id };
+      }
       if (input.projectId) await assertProject(actor, input.projectId, tx);
       const c = await tx.conversation.create({ data: { ownerUserId: actor.userId, createRequestId: input.requestId,
         createInputHash: hash, scope: input.scope, homeProjectId: input.scope === "PROJECT" ? input.projectId : null,
-        title: input.title ?? entry?.ref.title.slice(0, 100) ?? "项目协作",
-        focusJson: json({ projectId: input.projectId ?? entry?.ref.projectId ?? null }) } });
+        title: input.title ?? "项目协作",
+        focusJson: json({ projectId: input.projectId ?? null }) } });
       if (input.projectId) await tx.conversationProject.create({ data: { conversationId: c.id, projectId: input.projectId } });
-      if (entry && input.entry) {
-        const refs = await bindRefs(tx, c.id, [entry.ref]);
-        const blocks = { ...emptyBlocks(), refs, observedProjectIds: [entry.ref.projectId],
-          limitations: ["这是原提醒的说明，原因和结论需沿原资料核对。"] };
-        await appendConversationMessage(tx, c.id, actor.userId, "ASSISTANT", entry.ref.title + "\n" + entry.text, blocks);
-        await tx.conversationAnchor.create({ data: { ownerUserId: actor.userId, conversationId: c.id, projectId: entry.ref.projectId,
-          originKind: input.entry.kind, originId: input.entry.id, originRevision: entry.revision } });
-      }
       return { id: c.id };
     });
   } catch (error) {
     if ((error as { code?: string }).code !== "P2002") throw error;
-    const winner = input.entry ? await db.conversationAnchor.findUnique({ where: { ownerUserId_originKind_originId_topicKey: {
-      ownerUserId: actor.userId, originKind: input.entry.kind, originId: input.entry.id, topicKey: "DISCUSS" } } }) : null;
-    if (winner) { await ownedConversation(actor, winner.conversationId); return { id: winner.conversationId }; }
     const existing = await db.conversation.findUniqueOrThrow({ where: { ownerUserId_createRequestId: {
       ownerUserId: actor.userId, createRequestId: input.requestId } } });
     if (existing.createInputHash !== hash) throw new AppError("REQUEST_ID_REUSED", "请求编号已用于另一段讨论", 409);

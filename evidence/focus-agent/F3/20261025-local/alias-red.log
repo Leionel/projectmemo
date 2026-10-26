@@ -1,0 +1,40 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/conversationAnchor.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/conversationAnchor.test.ts (18 tests | 1 failed) 5820ms
+   × reuses one Mission topic across a different question and refuses reused entry request payloads 273ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/conversationAnchor.test.ts > reuses one Mission topic across a different question and refuses reused entry request payloads
+AssertionError: promise resolved "{ id: 'cmvot9wkg002avc8op5ahz8qb' }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "id": "cmvot9wkg002avc8op5ahz8qb",
+  }
+
+ ❯ tests/conversationAnchor.test.ts:107:109
+    105|   expect((await createConversation(f.actor, { requestId: "entry", scop…
+    106|   await expect(createConversation(f.actor, { requestId: "revision", sc…
+    107|   await expect(createConversation(f.actor, { requestId: "revision", sc…
+       |                                                                                                             ^
+    108| });
+    109| it("filters unrelated and stale materials; one relevant source revisio…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 17 passed (18)
+   Start at  22:23:37
+   Duration  9.00s (transform 1.07s, setup 0ms, import 2.94s, tests 5.82s, environment 0ms)
+

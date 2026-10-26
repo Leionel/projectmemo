@@ -40,13 +40,40 @@ export async function currentGoalQuestion(
 ) {
   if (!isFeatureEnabled("GOAL_QUESTION_ENABLED", true))
     return { question: null, reason: "DISABLED" };
-  return db.$transaction((tx) => selectGoalQuestion(tx, actor, projectId, now));
+  return db.$transaction((tx) => currentGoalQuestionInTx(tx, actor, projectId, now));
+}
+export async function currentGoalQuestionInTx(
+  tx: Tx,
+  actor: CopilotActor,
+  projectId: string,
+  now = new Date(),
+) {
+  if (!isFeatureEnabled("GOAL_QUESTION_ENABLED", true))
+    return { question: null, reason: "DISABLED" };
+  return selectGoalQuestion(tx, actor, projectId, now);
+}
+/** Explicit feedback may address a snoozed/unknown question without changing global selection. */
+export async function currentMissionGoalQuestionInTx(
+  tx: Tx,
+  actor: CopilotActor,
+  projectId: string,
+  missionId: string,
+  now = new Date(),
+) {
+  await assertActor(tx, projectId, actor);
+  const mission = await ownedMission(actor.userId, missionId, tx);
+  if (mission.projectId !== projectId)
+    throw new AppError("MISSION_NOT_FOUND", "委托不存在或无法访问", 404);
+  if (!isFeatureEnabled("GOAL_QUESTION_ENABLED", true))
+    return { question: null, reason: "DISABLED" };
+  return selectGoalQuestion(tx, actor, projectId, now, missionId);
 }
 async function selectGoalQuestion(
   tx: Tx,
   actor: CopilotActor,
   projectId: string,
   now: Date,
+  targetMissionId?: string,
 ) {
   await assertActor(tx, projectId, actor);
   const member = await tx.projectMembership.findUnique({
@@ -63,6 +90,7 @@ async function selectGoalQuestion(
       .map((i) => i.target.slice(8)),
   );
   const candidates = s.missions
+    .filter((m) => !targetMissionId || m.id === targetMissionId)
     .filter(
       (m) =>
         m.status === "WAITING_INPUT" ||
@@ -170,8 +198,8 @@ async function selectGoalQuestion(
       preferences.some(
         (p) =>
           p.mode === "STOP" ||
-          (p.mode === "LATER" && !!p.snoozedUntil && p.snoozedUntil > now) ||
-          (["UNKNOWN", "NOT_USEFUL"].includes(p.mode) &&
+          (!targetMissionId && p.mode === "LATER" && !!p.snoozedUntil && p.snoozedUntil > now) ||
+          ((p.mode === "NOT_USEFUL" || (!targetMissionId && p.mode === "UNKNOWN")) &&
             p.contextHash === contextHash),
       )
     )
@@ -211,6 +239,7 @@ async function selectGoalQuestion(
   const muted = await tx.goalQuestionPreference.findFirst({
     where: {
       userId: actor.userId,
+      ...(targetMissionId ? { missionId: targetMissionId } : {}),
       mission: { projectId, status: { notIn: ["SUCCEEDED", "CANCELLED"] } },
     },
     orderBy: { updatedAt: "desc" },
@@ -230,22 +259,47 @@ export async function interactGoalQuestion(
   projectId: string,
   raw: unknown,
   now = new Date(),
+  transaction?: Tx,
+  targetMissionId?: string,
 ) {
-  const input = inputSchema.parse(raw),
-    current = await currentGoalQuestion(actor, projectId, now),
+  const input = inputSchema.parse(raw);
+  if (transaction && input.action === "PRESENT")
+    throw new AppError(
+      "PRESENT_TRANSACTION_UNSUPPORTED",
+      "提醒展示策略不能在调用方事务内执行",
+      422,
+    );
+  if (targetMissionId && ["PRESENT", "EXPOSED"].includes(input.action))
+    throw new AppError(
+      "TARGETED_FEEDBACK_REQUIRED",
+      "指定委托的问题入口仅接受明确反馈",
+      422,
+    );
+  const readCurrent = (tx: Tx) => targetMissionId
+    ? currentMissionGoalQuestionInTx(tx, actor, projectId, targetMissionId, now)
+    : currentGoalQuestionInTx(tx, actor, projectId, now);
+  const current = transaction
+      ? await readCurrent(transaction)
+      : targetMissionId
+        ? await db.$transaction(readCurrent)
+        : await currentGoalQuestion(actor, projectId, now),
     q = current.question;
   // Replay committed feedback before re-selecting a question that the feedback deliberately hid.
-  const prior = await db.agentMissionEvent.findFirst({
+  const prior = await (transaction ?? db).agentMissionEvent.findFirst({
     where: {
       commandRequestId: `cmd:goal-question:${actor.userId}:${input.requestId}`,
       mission: { ownerUserId: actor.userId, projectId },
     },
   });
   if (prior) {
-    await db.$transaction(async (tx) => {
+    const verifyReplay = async (tx: Tx) => {
       await assertActor(tx, projectId, actor);
       await ownedMission(actor.userId, prior.missionId, tx);
-    });
+      if (targetMissionId && prior.missionId !== targetMissionId)
+        throw new AppError("REQUEST_ID_REUSED", "反馈编号已用于其他委托", 409);
+    };
+    if (transaction) await verifyReplay(transaction);
+    else await db.$transaction(verifyReplay);
     if (prior.commandPayloadHash !== jsonHash(input))
       throw new AppError("REQUEST_ID_REUSED", "反馈编号已用于其他选择", 409);
     return { recorded: true, alreadyRecorded: true };
@@ -285,7 +339,7 @@ export async function interactGoalQuestion(
         now,
         interventionPolicyScopeForUser(actor.userId),
         async (tx) => {
-          const latest = await selectGoalQuestion(tx, actor, projectId, now);
+          const latest = await readCurrent(tx);
           if (latest.question?.contextHash !== q.contextHash)
             throw new AppError(
               "QUESTION_CHANGED",
@@ -304,7 +358,7 @@ export async function interactGoalQuestion(
       interventionId: outcome?.interventionId ?? null,
     };
   }
-  return writeTransaction(`goal-question:${input.requestId}`, async (tx) => {
+  const apply = async (tx: Tx) => {
     const replay = await commandReplay(
       tx,
       q.missionId,
@@ -313,7 +367,7 @@ export async function interactGoalQuestion(
     );
     if (replay) return { recorded: true, alreadyRecorded: true };
     await assertActor(tx, projectId, actor);
-    const latest = await selectGoalQuestion(tx, actor, projectId, now);
+    const latest = await readCurrent(tx);
     if (latest.question?.contextHash !== q.contextHash)
       throw new AppError("QUESTION_CHANGED", "问题已更新，请重新读取", 409);
     await ownedMission(actor.userId, q.missionId, tx);
@@ -389,7 +443,10 @@ export async function interactGoalQuestion(
       missionId: q.missionId,
       deviceDelivered: false,
     };
-  });
+  };
+  return transaction
+    ? apply(transaction)
+    : writeTransaction(`goal-question:${input.requestId}`, apply);
 }
 export type GoalQuestion = NonNullable<
   Awaited<ReturnType<typeof currentGoalQuestion>>["question"]

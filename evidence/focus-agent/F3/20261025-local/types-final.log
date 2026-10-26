@@ -1,0 +1,1 @@
+tests/conversationAnchorContract.test.ts(93,131): error TS2694: Namespace 'Database' has no exported member 'BindParameters'.

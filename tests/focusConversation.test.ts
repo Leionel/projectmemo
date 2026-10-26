@@ -11,7 +11,7 @@ const isolated = await vi.hoisted(async () => {
   sql.close();
   // Upgrade a second old-schema database containing an actual legacy conversation.
   const old = new Database(path.join(dir, "old.db"));
-  for (const name of migrations.filter(n => n !== "20261026010000_focus_conversations"))
+  for (const name of migrations.filter(n => n < "20261026010000_focus_conversations"))
     old.exec(fs.readFileSync(path.join("prisma/migrations", name, "migration.sql"), "utf8"));
   old.exec(`INSERT INTO Project(id,title,description,goal,scenario,createdAt,updatedAt) VALUES('legacy-p','旧项目','旧资料','旧目标','RESEARCH',0,0);
     INSERT INTO AgentRun(id,projectId,runType,status,provider,trace,createdAt) VALUES('legacy-r','legacy-p','CHAT','SUCCESS','fixture','{}',0);

@@ -10,6 +10,7 @@ import { PMButton } from '../components/PMReferencePrimitives';
 import { PMColors, PMSpacing, PMRadius } from '../common/DesignTokens';
 import { ConversationWorkRef } from '../models/ConversationWork';
 import { ConversationWorkPanel } from '../components/ConversationWorkPanel';
+import { ConversationAnchorPanel } from '../components/ConversationAnchorPanel';
 
 @Entry
 @Component
@@ -18,6 +19,7 @@ struct FocusConversation {
   @State private sessions: ConversationListItem[] = [];
   @State private text: string = '';
   @State private busy: boolean = false;
+  @State private pageVisible: boolean = true;
   @State private error: string = '';
   @State private cloud: boolean = false;
   @State private target: string = '';
@@ -41,12 +43,16 @@ struct FocusConversation {
   private expired: () => void = (): void => { this.generation++; this.view = new ConversationView(); this.workRef = null; this.text = ''; this.pending = null; this.sessions = []; this.error = '登录已失效，请重新登录'; this.busy = false; };
   aboutToAppear(): void { SessionStore.onSessionExpired(this.expired); this.initialize(); }
   aboutToDisappear(): void { this.generation++; SessionStore.offSessionExpired(this.expired); }
-  onPageShow(): void { if (this.view.id !== '') this.refresh(); }
+  onPageShow(): void { this.pageVisible = true; if (this.view.id !== '' && !this.busy) this.refresh(); }
+  onPageHide(): void { this.pageVisible = false; }
   private async initialize(): Promise<void> {
     const epoch = ++this.generation; this.busy = true;
     try {
       const caps = await this.service.capabilities();
+      if (epoch !== this.generation) return;
       if (!caps.enabled) { this.error = '全局协作尚未开启'; return; }
+      await this.service.syncWorkspace();
+      if (epoch !== this.generation) return;
       const params = router.getParams() as Record<string, string>;
       const projectId = params?.['projectId'] ?? '';
       this.originProjectId = projectId;
@@ -57,7 +63,7 @@ struct FocusConversation {
       if (id === '' && params?.['originId']) {
         const input = new ConversationCreateInput(); input.requestId = util.generateRandomUUID();
         input.entry = { kind: params['originKind'], projectId: projectId, id: params['originId'] };
-        id = (await this.service.create(input)).id;
+        id = (await this.service.entry(input)).id;
         this.text = '为什么提醒我这个？';
       } else if (id === '') id = list.conversations[0]?.id ?? '';
       if (id !== '') { const loaded = await this.service.read(id); if (epoch !== this.generation) return; this.view = loaded; }
@@ -74,6 +80,7 @@ struct FocusConversation {
     if (e instanceof ApiError && [401, 403, 404].includes(e.status)) this.expired();
   }
   private async create(project: boolean = false): Promise<void> {
+    if (this.busy) return;
     const epoch = ++this.generation; this.busy = true; this.error = '';
     try {
       const input = new ConversationCreateInput(); input.requestId = util.generateRandomUUID();
@@ -88,9 +95,17 @@ struct FocusConversation {
     finally { if (epoch === this.generation) this.busy = false; }
   }
   private async refresh(): Promise<void> {
-    const epoch = this.generation;
+    const epoch = this.generation, owned = !this.busy; if (owned) this.busy = true;
     try { const v = await this.service.read(this.view.id); if (epoch === this.generation) this.view = v; }
     catch (e) { if (epoch === this.generation) this.fail(e); }
+    finally { if (owned && epoch === this.generation) this.busy = false; }
+  }
+  private async selectDiscussion(id: string): Promise<void> {
+    if (this.busy) return;
+    const epoch = ++this.generation; this.busy = true; this.pending = null; this.replyId = ''; this.workRef = null; this.historyOpen = false;
+    try { const view = await this.service.read(id); if (epoch === this.generation) { this.view = view; this.target = view.focusProjectId ?? ''; } }
+    catch (e) { if (epoch === this.generation) this.fail(e); }
+    finally { if (epoch === this.generation) this.busy = false; }
   }
   private async ask(): Promise<void> {
     if (this.busy || this.text.trim() === '' || this.view.id === '') return;
@@ -155,7 +170,7 @@ struct FocusConversation {
       ForEach(m.refs.filter((r: ConversationRef) => ['PROJECT', 'MISSION', 'ACTION'].includes(r.kind)).slice(0, 3), (r: ConversationRef) => {
         Text(r.title + '  ↗').fontSize(13).fontColor(PMColors.BRAND).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).padding({ top: 8, bottom: 8 }).onClick(() => { this.open(r, m.id); })
         if (r.kind === 'MISSION' || r.kind === 'ACTION') { PMButton({ label: '在此协作', secondary: true, disabled: this.busy, onAction: (): void => { this.workRef = { kind: r.kind, id: r.id, projectId: r.projectId }; this.messageScroller.scrollEdge(Edge.Bottom); } }) }
-        if (r.kind === 'MISSION' && r.status === 'PAUSED') { PMButton({ label: '预览接续原委托', disabled: this.busy, secondary: true, onAction: (): void => { const epoch = this.generation; this.service.previewResume(this.view.id, r.id).then(v => { if (epoch === this.generation) this.view = v.conversation; }).catch((e: Error) => { this.fail(e); }); } }) }
+        if (r.kind === 'MISSION' && r.status === 'PAUSED') { PMButton({ label: '预览接续原委托', disabled: this.busy, secondary: true, onAction: (): void => { if (this.busy) return; const epoch = this.generation; this.busy = true; this.service.previewResume(this.view.id, r.id).then(v => { if (epoch === this.generation) this.view = v.conversation; }).catch((e: Error) => { if (epoch === this.generation) this.fail(e); }).finally(() => { if (epoch === this.generation) this.busy = false; }); } }) }
       }, (r: ConversationRef) => r.bindingId ?? r.id)
       if (m.proposal !== null) {
         Text(m.proposal.title).fontSize(15).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
@@ -170,7 +185,7 @@ struct FocusConversation {
           if (m.proposal.resultCardId) { Text('复盘已保存 · ' + m.proposal.resultCardId).fontSize(12).fontColor(PMColors.BRAND) }
         } else if (m.proposal.status === 'PENDING') {
           PMButton({ label: m.proposal.tool === 'resume_mission' ? '确认接续原委托' : !m.proposal.tool || m.proposal.tool === 'create_action' ? '确认创建行动' : '确认此操作', disabled: this.busy, onAction: (): void => { this.confirm(m.proposal!); } })
-          PMButton({ label: '不采用', secondary: true, disabled: this.busy, onAction: (): void => { const epoch = this.generation; this.service.decline(this.view.id, m.proposal!.executionId).then(r => { if (epoch === this.generation) this.view = r.conversation; }).catch((e: Error) => this.fail(e)); } })
+          PMButton({ label: '不采用', secondary: true, disabled: this.busy, onAction: (): void => { if (this.busy) return; const epoch = this.generation; this.busy = true; this.service.decline(this.view.id, m.proposal!.executionId).then(r => { if (epoch === this.generation) this.view = r.conversation; }).catch((e: Error) => { if (epoch === this.generation) this.fail(e); }).finally(() => { if (epoch === this.generation) this.busy = false; }); } })
         }
       }
       if (m.role === 'ASSISTANT' && !m.restricted) { PMButton({ label: '追问这条', secondary: true, onAction: (): void => { this.replyId = m.id; this.text = '为什么这样建议？'; } }) }
@@ -201,7 +216,7 @@ struct FocusConversation {
         Scroll() {
           Column({ space: 4 }) {
             ForEach(this.sessions, (item: ConversationListItem) => {
-              PMButton({ label: item.title, secondary: true, onAction: (): void => { this.view.id = item.id; this.pending = null; this.replyId = ''; this.workRef = null; this.historyOpen = false; this.refresh(); } })
+              PMButton({ label: item.title, secondary: true, disabled: this.busy, onAction: (): void => { this.selectDiscussion(item.id); } })
             }, (item: ConversationListItem) => item.id)
           }.width('100%').padding(12)
         }.constraintSize({ maxHeight: 220 }).backgroundColor(PMColors.SURFACE)
@@ -211,6 +226,13 @@ struct FocusConversation {
       }
       Scroll(this.messageScroller) {
         Column({ space: 16 }) {
+          if (this.view.id !== '') {
+            ForEach([this.view.id], (id: string) => {
+              ConversationAnchorPanel({ conversationId: id, revision: this.view.version, busy: $busy, visible: this.pageVisible, suspended: this.workRef !== null,
+                onReadResults: (): void => { const epoch = this.generation; setTimeout(() => { if (epoch === this.generation && this.view.id === id) this.messageScroller.scrollEdge(Edge.Bottom); }, 50); },
+                onUpdated: (view: ConversationView): void => { if (this.view.id === view.id) this.view = view; } })
+            }, (id: string) => id)
+          }
           if (this.view.messages.length === 0) {
             Column({ space: 12 }) {
               Text('忆').fontSize(30).fontColor(PMColors.BRAND).width(60).height(60).textAlign(TextAlign.Center)
@@ -229,7 +251,7 @@ struct FocusConversation {
           if (this.view.id !== '') {
             Row({ space: 16 }) {
               if (this.target !== '') { Button('项目偏好', { type: ButtonType.Normal }).fontSize(12).fontColor(PMColors.INK_TERTIARY).backgroundColor(Color.Transparent).height(40).onClick(() => { this.loadPreference(); }) }
-              Button('刷新状态', { type: ButtonType.Normal }).fontSize(12).fontColor(PMColors.INK_TERTIARY).backgroundColor(Color.Transparent).height(40).onClick(() => { this.refresh(); })
+              Button('刷新状态', { type: ButtonType.Normal }).fontSize(12).fontColor(PMColors.INK_TERTIARY).backgroundColor(Color.Transparent).height(40).enabled(!this.busy).onClick(() => { if (!this.busy) this.refresh(); })
             }
           }
           if (this.showPreference) {

@@ -1,4 +1,12 @@
 import { test, expect } from "@playwright/test";
+import { execFileSync } from "node:child_process";
+import path from "node:path";
+import { E2E_ENV } from "../scripts/e2e-env";
+const focusEvidenceDir = process.env.FOCUS_EVIDENCE_DIR ?? "test-results/focus-agent";
+function focusFixture(operation: string, id: string, choice?: import("../lib/mission/contracts").Choice) {
+  execFileSync(process.execPath, [path.resolve("node_modules/tsx/dist/cli.mjs"), "scripts/e2e-mission-fixture.ts", operation, id, ...(choice ? [JSON.stringify(choice)] : [])],
+    { env: { ...process.env, ...E2E_ENV }, timeout: 30000, maxBuffer: 2 * 1024 * 1024 });
+}
 test("Focus discussion creates a real Action, reads it back, and survives project navigation", async ({ page }) => {
   const session = (await page.context().cookies()).find(c => c.name === "pm_session");
   expect(session).toBeTruthy();
@@ -34,7 +42,7 @@ test("Focus discussion creates a real Action, reads it back, and survives projec
   await page.getByRole("link", { name: "返回原焦点讨论", exact: true }).click();
   await expect(page).toHaveURL(/\/focus\?conversation=/);
   await expect(panel.getByText(/已创建行动 · 待办/)).toBeVisible();
-  await page.screenshot({ path: "evidence/focus-agent/F2/20261026-local/focus-desktop.png", fullPage: true });
+  await page.screenshot({ path: focusEvidenceDir + "/focus-desktop.png", fullPage: true });
   await panel.getByRole("button", { name: "记录与查看结果", exact: true }).click();
   const work = panel.getByRole("region", { name: "原任务协作", exact: true });
   await expect(work.getByRole("textbox", { name: "实际完成结果" })).toBeVisible();
@@ -42,13 +50,56 @@ test("Focus discussion creates a real Action, reads it back, and survives projec
   await work.getByRole("button", { name: "预览完成与复盘" }).click();
   await panel.getByRole("button", { name: "确认此操作", exact: true }).click();
   await expect(panel.getByText(/行动已完成，复盘已保存/)).toBeVisible();
-  await page.screenshot({ path: "evidence/focus-agent/F2/20261026-local/focus-collaboration.png", fullPage: true });
+  await page.screenshot({ path: focusEvidenceDir + "/focus-collaboration.png", fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
-  await page.screenshot({ path: "evidence/focus-agent/F2/20261026-local/focus-mobile.png", fullPage: true });
+  await page.screenshot({ path: focusEvidenceDir + "/focus-mobile.png", fullPage: true });
   const actions = await page.request.get("/api/projects/" + project.id + "/actions", { headers });
   const originals = (await actions.json()).actions.filter((a: {id:string}) => a.id === receipt.actionId);
   expect(originals).toHaveLength(1); expect(originals[0].status).toBe("DONE"); expect(originals[0].resultCardId).toBeTruthy();
+});
+test("F3 follows one original question, reads new evidence, retains unread across reload and stops", async ({ page }) => {
+  test.setTimeout(90000);
+  const session = (await page.context().cookies()).find(c => c.name === "pm_session")!;
+  const headers = { Authorization: "Bearer " + session.value };
+  const caps = await page.request.get("/api/conversations/capabilities", { headers });
+  expect(caps.ok()).toBe(true); const capabilities = await caps.json();
+  test.skip(!capabilities.enabled || !capabilities.followAvailable, "Focus follow is off in legacy regression");
+  const created = await page.request.post("/api/projects", { headers, data: { title: "F3 原问题关注 " + Date.now(), description: "独立的主动协作与未读恢复验证项目", goal: "核对本地实验记录", scenario: "RESEARCH" } });
+  expect(created.ok(), await created.text()).toBe(true); const project = (await created.json()).project;
+  const mr = await page.request.post("/api/missions", { headers, data: { projectId: project.id, requestId: crypto.randomUUID(), goal: "核对10月本地实验", llmContextApproved: true } });
+  expect(mr.ok(), await mr.text()).toBe(true); const mission = (await mr.json()).mission;
+  focusFixture("slice", mission.id, { kind: "ask", question: "请补充10月本地实验 Dice 数值", missing: "PRIVATE", requirements: { terms: ["Dice", "10月"], unit: "%", period: "10月", sourceType: "CAPTURE" } });
+  const qr = await page.request.get("/api/projects/" + project.id + "/goal-question", { headers });
+  expect(qr.ok(), await qr.text()).toBe(true); const q = (await qr.json()).question;
+  expect(q).toBeTruthy();
+  const opened = await page.request.post("/api/conversations/entry", { headers, data: { requestId: crypto.randomUUID(), scope: "WORKSPACE", entry: { kind: "GOAL_QUESTION", id: q.questionId, projectId: project.id } } });
+  expect(opened.ok(), await opened.text()).toBe(true); const id = (await opened.json()).id;
+  await page.goto("/focus?conversation=" + id);
+  const follow = page.getByRole("region", { name: "讨论后续", exact: true });
+  const followed = page.waitForResponse(r => /\/anchors\/[^/]+$/.test(r.url()) && r.request().method() === "POST");
+  await follow.getByRole("button", { name: "关注后续", exact: true }).click();
+  expect((await followed).ok()).toBe(true);
+  const captured = await page.request.post("/api/projects/" + project.id + "/captures", { headers, data: { requestId: crypto.randomUUID(), rawText: "10月本地实验 Dice 为82%，设备条件与原问题仍需人工核对。", sourceType: "实验记录" } });
+  expect(captured.ok(), await captured.text()).toBe(true); focusFixture("scan", mission.id);
+  await follow.getByRole("button", { name: "读取新结果", exact: true }).click();
+  await expect(page.getByText(/原问题收到一份可能相关的资料/)).toBeVisible();
+  await expect(page.getByText(/原问题收到一份可能相关的资料/)).toBeInViewport();
+  await page.screenshot({ path: focusEvidenceDir + "/focus-follow-desktop.png", fullPage: true });
+  await expect(follow.getByText("1 条未读", { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(follow.getByText("1 条未读", { exact: true })).toBeVisible();
+  await follow.getByRole("button", { name: "标记已读", exact: true }).click();
+  await expect(follow.getByText(/条未读/)).toHaveCount(0);
+  const stopped = page.waitForResponse(r => /\/anchors\/[^/]+$/.test(r.url()) && r.request().method() === "POST");
+  await follow.getByRole("button", { name: "停止关注", exact: true }).click();
+  expect((await stopped).ok()).toBe(true);
+  await expect(follow.getByText("已停止关注", { exact: true })).toBeVisible();
+  const detail = await page.request.get("/api/missions/" + mission.id, { headers });
+  expect((await detail.json()).mission.status).toBe("WAITING_INPUT");
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  await page.screenshot({ path: focusEvidenceDir + "/focus-follow-mobile.png", fullPage: true });
 });
 test("Focus compares frozen options and resumes the same original Mission inside the conversation", async ({ page }) => {
   const session = (await page.context().cookies()).find(c => c.name === "pm_session")!;
@@ -74,7 +125,7 @@ test("Focus compares frozen options and resumes the same original Mission inside
   await work.getByRole("button", { name: "生成方案对比", exact: true }).click();
   await expect(work.getByText("先核对变化依据", { exact: true })).toBeVisible();
   await work.getByText("先核对变化依据", { exact: true }).scrollIntoViewIfNeeded();
-  await page.screenshot({ path: "evidence/focus-agent/F2/20261026-local/focus-scenarios.png", fullPage: true });
+  await page.screenshot({ path: focusEvidenceDir + "/focus-scenarios.png", fullPage: true });
   await panel.getByRole("textbox", { name: "与忆程讨论项目" }).fill("选第一种");
   await panel.getByRole("button", { name: "发送", exact: true }).click();
   await panel.getByRole("button", { name: "确认此操作", exact: true }).click();

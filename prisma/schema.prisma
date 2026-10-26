@@ -265,6 +265,7 @@ model AgentIntervention {
 }
 
 model ActionItem {
+  anchorWatches ConversationAnchorAction[]
   id                   String               @id @default(cuid())
   projectId            String
   sourceInterventionId String?
@@ -348,6 +349,7 @@ model CopilotToolExecution {
 }
 
 model AgentMessage {
+  anchorProjection ConversationAnchorProjection?
   id              String            @id @default(cuid())
   projectId       String?
   conversationId  String?
@@ -440,7 +442,7 @@ model ConversationProject {
   @@id([conversationId,projectId])
 }
 
-/// 首版只在用户显式追问时锚定；不发送新通知。
+/// 用户显式进入后锚定；明确关注才投影后续原事件，不发送系统通知。
 model ConversationAnchor {
   id String @id @default(cuid())
   ownerUserId String
@@ -450,8 +452,55 @@ model ConversationAnchor {
   originId String
   topicKey String @default("DISCUSS")
   originRevision String
+  rootKey String? @unique
+  missionId String?
+  originEntryJson Json @default("{}")
+  mode String @default("MANUAL")
+  version Int @default(1)
+  snoozedUntil DateTime?
+  eventCursor Int @default(0)
+  projectedSeq Int @default(0)
+  seenSeq Int @default(0)
+  lastSyncedAt DateTime?
+  projections ConversationAnchorProjection[]
+  actionWatches ConversationAnchorAction[]
   conversation Conversation @relation(fields:[conversationId],references:[id],onDelete:Cascade)
   @@unique([ownerUserId,originKind,originId,topicKey])
+  @@index([ownerUserId,conversationId,mode])
+}
+
+model ConversationAnchorProjection {
+  id String @id @default(cuid())
+  anchorId String
+  revisionKey String
+  seq Int?
+  messageId String? @unique
+  message AgentMessage? @relation(fields:[messageId],references:[id],onDelete:SetNull)
+  payloadJson Json
+  createdAt DateTime @default(now())
+  anchor ConversationAnchor @relation(fields:[anchorId],references:[id],onDelete:Cascade)
+  @@unique([anchorId,revisionKey])
+  @@unique([anchorId,seq])
+}
+
+model ConversationAnchorAction {
+  anchorId String
+  actionId String
+  lastCheckedAt DateTime?
+  observedStatus String?
+  observedResultCardId String?
+  anchor ConversationAnchor @relation(fields:[anchorId],references:[id],onDelete:Cascade)
+  action ActionItem @relation(fields:[actionId],references:[id],onDelete:Cascade)
+  @@id([anchorId,actionId])
+  @@index([anchorId,lastCheckedAt])
+}
+
+model ConversationEntryRequest {
+  ownerUserId String
+  requestId String
+  inputHash String
+  conversationId String
+  @@id([ownerUserId,requestId])
 }
 
 model FocusProjectPreference {

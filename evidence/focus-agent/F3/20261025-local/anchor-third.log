@@ -1,0 +1,37 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/conversationAnchor.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/conversationAnchor.test.ts (13 tests | 1 failed) 3067ms
+   × does not repeat a result already committed by the same conversation 334ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/conversationAnchor.test.ts > does not repeat a result already committed by the same conversation
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/conversationAnchor.test.ts:186:68
+    184|   const p = preview.conversation.messages.at(-1)!.proposal!;
+    185|   await confirmConversationProposal(f.actor, f.id, p.executionId, { re…
+    186|   expect((await syncConversationAnchors(f.actor, f.id)).projected).toB…
+       |                                                                    ^
+    187| });
+    188|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 passed (13)
+   Start at  22:04:21
+   Duration  6.05s (transform 1.03s, setup 0ms, import 2.72s, tests 3.07s, environment 0ms)
+

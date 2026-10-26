@@ -8,6 +8,7 @@ import { emitWorkspaceChange } from "@/lib/client/workspaceEvents";
 import { Sparkles, ArrowUp, Plus, CornerDownRight } from "lucide-react";
 import type { ConversationWorkRef } from "@/lib/types/conversationWork";
 import { ConversationWorkCard } from "./ConversationWorkCard";
+import { ConversationAnchorPanel } from "./ConversationAnchorPanel";
 import { missionStatusLabels } from "@/lib/mission/presentation";
 import styles from "./ConversationPanel.module.css";
 
@@ -33,7 +34,9 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
   const [view, setView] = useState<ConversationView | null>(null);
   const [list, setList] = useState<Array<{ id: string; title: string }>>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
-  const [text, setText] = useState(""), [busy, setBusy] = useState(false), [error, setError] = useState("");
+  const [text, setText] = useState(""), [busy, setBusyState] = useState(false), [error, setError] = useState("");
+  const busyRef = useRef(false);
+  const setBusy = useCallback((value: boolean) => { busyRef.current = value; setBusyState(value); }, []);
   const [cloud, setCloud] = useState(false), [reply, setReply] = useState<ConversationMessage | null>(null);
   const [target, setTarget] = useState(projectId ?? ""), [showPreference, setShowPreference] = useState(false);
   const [workRef, setWorkRef] = useState<ConversationWorkRef | null>(null);
@@ -63,7 +66,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
       if (epoch !== generation.current) return;
       setList(rows.conversations);
       if (entry) {
-        const c = await api<{ id: string }>("/api/conversations", "POST", {
+        const c = await api<{ id: string }>("/api/conversations/entry", "POST", {
           requestId: createKey.current + ":" + entry.id, scope: "WORKSPACE", entry,
         });
         await load(c.id, epoch); setText("为什么提醒我这个？");
@@ -77,12 +80,15 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
     if (!view) return;
     const id = view.id, epoch = generation.current;
     const timer = setInterval(() => {
-      if (document.visibilityState !== "visible" || busy) return;
-      void load(id, epoch).catch(e => { if (epoch === generation.current && [401, 403, 404].includes(e.status)) { setView(null); setList([]); setError(e.message); } });
+      if (document.visibilityState !== "visible" || busyRef.current) return;
+      setBusy(true);
+      void load(id, epoch).catch(e => { if (epoch === generation.current && [401, 403, 404].includes(e.status)) { setView(null); setList([]); setError(e.message); } })
+        .finally(() => { if (epoch === generation.current) setBusy(false); });
     }, 5000);
     return () => clearInterval(timer);
-  }, [view, busy, load]);
+  }, [view, busy, load, setBusy]);
   async function create() {
+    if (busyRef.current) return;
     const epoch = ++generation.current;
     setBusy(true); setError("");
     try {
@@ -96,7 +102,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
     finally { if (epoch === generation.current) setBusy(false); }
   }
   async function ask(e: React.FormEvent) {
-    e.preventDefault(); if (!view || !text.trim() || busy) return;
+    e.preventDefault(); if (!view || !text.trim() || busyRef.current) return;
     const epoch = generation.current, currentText = text.trim();
     const intentKey = JSON.stringify({ text: currentText, target, replyId: reply?.id, entityId: selection?.id, cloud });
     if (!pending.current || pending.current.text !== intentKey) pending.current = { text: intentKey, id: crypto.randomUUID(),
@@ -123,7 +129,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
     } finally { if (epoch === generation.current) setBusy(false); }
   }
   async function confirm(m: ConversationMessage, decline = false) {
-    if (!view || !m.proposal || busy) return;
+    if (!view || !m.proposal || busyRef.current) return;
     const epoch = generation.current, p = m.proposal;
     setBusy(true); setError("");
     let key = confirmKeys.current.get(p.executionId);
@@ -138,18 +144,21 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
     finally { if (epoch === generation.current) setBusy(false); }
   }
   async function older() {
-    if (!view?.beforeSeq) return;
-    const epoch = generation.current;
+    if (!view?.beforeSeq || busyRef.current) return;
+    const epoch = generation.current; setBusy(true);
     try {
       const v = await api<ConversationView>("/api/conversations/" + view.id + "?beforeSeq=" + view.beforeSeq);
       if (epoch === generation.current) setView(old => old ? { ...old, messages: [...v.messages, ...old.messages], hasMore: v.hasMore, beforeSeq: v.beforeSeq } : v);
-    } catch (e) { setError(e instanceof Error ? e.message : "历史暂不可读"); }
+    } catch (e) { if (epoch === generation.current) setError(e instanceof Error ? e.message : "历史暂不可读"); }
+    finally { if (epoch === generation.current) setBusy(false); }
   }
   return <section className={styles.panel} aria-label="问忆程">
     <header className={styles.header}><div className={styles.agentTitle}><span className={styles.agentMark} aria-hidden="true"><Sparkles size={19}/></span><div><h2>与忆程协作</h2><p>{view?.scope === "PROJECT" ? "项目讨论" : "项目记忆 · 对话与接续"}</p></div></div><div className={styles.historyControls}>
       <select aria-label="选择讨论" value={view?.id ?? ""} disabled={busy} onChange={e => {
-        const epoch = ++generation.current; setReply(null); setWorkRef(null); pending.current = null;
-        void load(e.target.value, epoch).catch(err => setError(err.message));
+        if (busyRef.current) return;
+        const epoch = ++generation.current; setBusy(true); setReply(null); setWorkRef(null); pending.current = null;
+        void load(e.target.value, epoch).catch(err => { if (epoch === generation.current) setError(err.message); })
+          .finally(() => { if (epoch === generation.current) setBusy(false); });
       }}><option value="" disabled>选择讨论</option>{view && !list.some(c => c.id === view.id) && <option value={view.id}>{view.title}</option>}
         {list.map(c => <option value={c.id} key={c.id}>{c.title}</option>)}</select>
       <button type="button" aria-label="新讨论" title="新讨论" className={styles.newDiscussion + " focus-ring"} disabled={busy} onClick={() => void create()}><Plus size={17}/></button>
@@ -164,6 +173,11 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
     </div>}
     {view && showPreference && target && <FocusPreference key={target} projectId={target} onError={setError}/>}
     <div ref={messageRegion} className={styles.messages} aria-live="polite" aria-busy={busy}>
+      {view && <ConversationAnchorPanel key={view.id} conversationId={view.id} revision={view.version} busy={busy || workRef !== null}
+        acquire={() => { if (busyRef.current || workRef !== null) return false; setBusy(true); return true; }}
+        release={() => { if (loadedId.current === view.id) setBusy(false); }}
+        onReadResults={() => { if (loadedId.current === view.id && messageRegion.current) messageRegion.current.scrollTop = messageRegion.current.scrollHeight; }}
+        onUpdated={v => { if (loadedId.current === v.id) { setView(v); onUpdated?.(); } }}/>}
       {view?.hasMore && <button type="button" className="workspace-link focus-ring" onClick={() => void older()}>读取更早讨论</button>}
       {loadingHistory && <p role="status">正在读取讨论…</p>}
       {!view && !loadingHistory && <div className={styles.empty}><span className={styles.emptyMark} aria-hidden="true">忆</span><h3>从今天最重要的事开始</h3><p>忆程会带上项目记忆，和你一起往下走。</p><button className="editorial-button focus-ring" onClick={() => void create()} disabled={busy}>开始讨论</button></div>}
@@ -185,6 +199,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
           <Link className={styles.quietLink + " focus-ring"} href={conversationHref(r.href, view.id, m.id)}>查看{r.kind === "MISSION" ? "委托" : "项目"} ↗</Link>
           {["MISSION", "ACTION"].includes(r.kind) && <button type="button" className="workspace-link focus-ring" disabled={busy} onClick={() => setWorkRef({ kind: r.kind as "MISSION" | "ACTION", id: r.id, projectId: r.projectId })}>在此协作</button>}
           {r.kind === "MISSION" && r.status === "PAUSED" && <button type="button" className="workspace-link focus-ring" disabled={busy} onClick={() => {
+            if (busyRef.current) return;
             const epoch = generation.current; setBusy(true);
             void api<{conversation:ConversationView}>("/api/conversations/" + view.id + "/missions/" + r.id + "/resume-preview", "POST", {})
               .then(v => { if (epoch === generation.current) setView(v.conversation); }).catch(e => setError(e.message))

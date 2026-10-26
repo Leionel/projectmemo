@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/conversationAnchor.test.ts tests/focusConversation.test.ts tests/focusCollaboration.test.ts tests/decisionEvolution.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  4 passed (4)
+      Tests  84 passed (84)
+   Start at  22:19:18
+   Duration  34.02s (transform 1.73s, setup 0ms, import 11.02s, tests 22.04s, environment 0ms)
+

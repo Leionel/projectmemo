@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, MessageCircle, CircleAlert, Layers3, Clock3, CheckSquare2 } from "lucide-react";
@@ -7,7 +7,10 @@ import { ConversationPanel } from "./ConversationPanel";
 import type { GlobalFocus, FocusEntry } from "@/lib/types/globalFocus";
 import type { ConversationEntry } from "@/lib/types/conversation";
 import { missionStatusLabels } from "@/lib/mission/presentation";
+import { conversationHref } from "@/lib/conversation/navigation";
 import styles from "./FocusAgentWorkspace.module.css";
+type DiscussionUnread = { conversationId: string; title: string; unread: number };
+type WorkspaceSyncReply = { enabled: boolean; projected: number; discussions: DiscussionUnread[] };
 export function FocusAgentWorkspace({ focus }: { focus: GlobalFocus }) {
   const query = useSearchParams(), router = useRouter();
   const [entry, setEntry] = useState<ConversationEntry | undefined>(() => {
@@ -16,6 +19,23 @@ export function FocusAgentWorkspace({ focus }: { focus: GlobalFocus }) {
   });
   const [selection, setSelection] = useState<{ projectId: string; title: string; id: string; kind: "MISSION" | "ACTION" }>();
   const [mobileView, setMobileView] = useState("chat"), [filter, setFilter] = useState("all");
+  const [syncing, setSyncing] = useState(true);
+  const [synced, setSynced] = useState<{ source: GlobalFocus; discussions: DiscussionUnread[] } | null>(null);
+  const syncRequest = useRef<Promise<WorkspaceSyncReply> | null>(null);
+  const mountFocus = useRef(focus);
+  useEffect(() => {
+    let live = true;
+    syncRequest.current ??= fetch("/api/conversations/sync", { method: "POST", cache: "no-store" }).then(async response => {
+      if (!response.ok) throw new Error("讨论新结果暂不可读");
+      return await response.json() as WorkspaceSyncReply;
+    });
+    void syncRequest.current.then(reply => { if (live) setSynced({ source: mountFocus.current, discussions: reply.discussions }); })
+      .catch(() => { /* Keep the server-provided inbox and allow discussion to open. */ })
+      .finally(() => { if (live) setSyncing(false); });
+    return () => { live = false; };
+  }, []);
+  const discussions = Array.from(new Map([...(focus.discussions ?? []), ...(synced?.source === focus ? synced.discussions : [])]
+    .map(d => [d.conversationId, d])).values());
   const groups = [
     { title: "需要你判断", kind: "MISSION" as const, items: focus.waiting, Icon: CircleAlert },
     { title: "主动提醒", kind: "INTERVENTION" as const, items: focus.reminders, Icon: CircleAlert },
@@ -35,6 +55,9 @@ export function FocusAgentWorkspace({ focus }: { focus: GlobalFocus }) {
     <div className={styles.mobileSwitch} aria-label="焦点视图">{[["focus", "项目焦点"], ["chat", "与忆程协作"]].map(([key, title]) => <button type="button" key={key} aria-pressed={mobileView === key} className={mobileView === key ? styles.active : ""} onClick={() => setMobileView(key)}>{title}</button>)}</div>
     <div className={styles.columns} data-mobile={mobileView}>
       <aside className={styles.left} aria-label="项目焦点">
+        {discussions.some(d => d.unread > 0) && <section className={styles.taskList} aria-label="讨论新结果"><header><h2>讨论新结果</h2></header>
+          {discussions.filter(d => d.unread > 0).map(d => <article className={styles.item} key={d.conversationId}><span className={styles.itemIcon}><MessageCircle size={16}/></span><div><h3><Link className="focus-ring" href={conversationHref("/focus", d.conversationId)} onClick={() => { setEntry(undefined); setSelection(undefined); setMobileView("chat"); }}>{d.title}</Link></h3><p className={styles.excerpt}>{d.unread} 条未读</p></div></article>)}
+        </section>}
         {hero && heroKind && <section className={styles.hero}><div className={styles.heroMeta}><span>{missionStatusLabels[hero.status] ?? (heroKind === "INTERVENTION" ? "需要关注" : "下一步")}</span><span>{hero.projectTitle}</span></div><h2>{hero.title}</h2>{hero.detail && <p>{hero.detail}</p>}<div className={styles.heroActions}><button type="button" className="editorial-button focus-ring" onClick={() => discuss(hero, heroKind)}><MessageCircle size={14}/>和忆程讨论</button><Link className="workspace-tool focus-ring" href={href(hero, heroKind)}>查看原始依据<ArrowRight size={13}/></Link></div></section>}
         <div className={styles.metrics}>{[
           { title: "需要回应", value: focus.counts.waiting, Icon: CheckSquare2 },
@@ -47,7 +70,7 @@ export function FocusAgentWorkspace({ focus }: { focus: GlobalFocus }) {
         </section>
         {focus.hasMore && <Link className={styles.more + " focus-ring"} href="/projects">进入项目查看全部事项 →</Link>}
       </aside>
-      <div id="focus-conversation" className={styles.right}><ConversationPanel entry={entry} selection={selection} onUpdated={() => router.refresh()}/></div>
+      <div id="focus-conversation" className={styles.right}>{syncing ? <p role="status" className={styles.calm}>正在读取讨论…</p> : <ConversationPanel entry={entry} selection={selection} onUpdated={() => router.refresh()}/>}</div>
     </div>
   </div>;
 }

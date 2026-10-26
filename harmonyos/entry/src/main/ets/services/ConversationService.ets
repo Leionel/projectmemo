@@ -1,4 +1,5 @@
 import { ApiClient } from './ApiClient';
+import { ConversationAnchorListReply, ConversationAnchorReply, ConversationAnchorInput, ConversationWorkspaceSyncReply } from '../models/ConversationAnchor';
 import { ConversationWork, ConversationWorkRef, ConversationWorkInput, ConversationScenarioInput, ConversationWorkReply, ConversationMaterialAssessment } from '../models/ConversationWork';
 import { ConversationCapabilities, ConversationListReply, ConversationCreated, ConversationCreateInput,
   ConversationView, ConversationTurnInput, ConversationTurnReply, ConversationConfirmInput, ConversationConfirmReply,
@@ -10,6 +11,11 @@ export class ConversationService {
     return this.client.get<ConversationListReply>(`/api/conversations${projectId !== '' ? '?projectId=' + encodeURIComponent(projectId) : ''}`);
   }
   async create(input: ConversationCreateInput): Promise<ConversationCreated> { return this.client.post<ConversationCreated>('/api/conversations', input); }
+  async entry(input: ConversationCreateInput): Promise<ConversationCreated> { return this.client.post<ConversationCreated>('/api/conversations/entry', input); }
+  async syncWorkspace(): Promise<ConversationWorkspaceSyncReply> { return this.client.post<ConversationWorkspaceSyncReply>('/api/conversations/sync', undefined); }
+  async anchors(id: string): Promise<ConversationAnchorListReply> { return this.client.get<ConversationAnchorListReply>(`/api/conversations/${id}/anchors`); }
+  async syncAnchors(id: string): Promise<ConversationAnchorReply> { return this.client.post<ConversationAnchorReply>(`/api/conversations/${id}/anchors/sync`, undefined); }
+  async updateAnchor(id: string, anchorId: string, input: ConversationAnchorInput): Promise<ConversationAnchorReply> { return this.client.post<ConversationAnchorReply>(`/api/conversations/${id}/anchors/${anchorId}`, input); }
   async read(id: string, beforeSeq: number = 0): Promise<ConversationView> { return this.client.get<ConversationView>(`/api/conversations/${id}${beforeSeq > 0 ? '?beforeSeq=' + beforeSeq : ''}`); }
   async ask(id: string, input: ConversationTurnInput): Promise<ConversationTurnReply> { return this.client.post<ConversationTurnReply>(`/api/conversations/${id}/turns`, input); }
   async confirm(id: string, executionId: string, input: ConversationConfirmInput): Promise<ConversationConfirmReply> {

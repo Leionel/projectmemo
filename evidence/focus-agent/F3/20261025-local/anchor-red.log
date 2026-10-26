@@ -1,0 +1,42 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/conversationAnchor.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/conversationAnchor.test.ts (1 test | 1 failed) 551ms
+   × reopens one reminder topic, appends a changed origin once, and preserves the old explanation 538ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/conversationAnchor.test.ts > reopens one reminder topic, appends a changed origin once, and preserves the old explanation
+AssertionError: expected [ { schemaVersion: 1, …(12) } ] to have a length of 2 but got 1
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ tests/conversationAnchor.test.ts:29:25
+     27|   expect(second.id).toBe(first.id);
+     28|   const view = await readConversation(f.actor, first.id);
+     29|   expect(view.messages).toHaveLength(2);
+       |                         ^
+     30|   expect(view.messages[0].content).toContain("尚缺设备信息");
+     31|   expect(view.messages[1].content).toContain("仍缺目标阶段");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  21:52:22
+   Duration  14.59s (transform 1.78s, setup 0ms, import 8.53s, tests 551ms, environment 0ms)
+
+npm notice
+npm notice New major version of npm available! 11.15.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

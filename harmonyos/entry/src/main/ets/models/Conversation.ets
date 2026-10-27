@@ -37,6 +37,8 @@ export class ConversationConfirmInput { requestId: string = ''; proposalHash: st
 export interface ConversationCreated { id: string; }
 export interface ConversationTurnReply { turnId: string; status: string; conversation: ConversationView; }
 export interface ConversationConfirmReply { actionId?: string; missionId?: string; resultId?: string | null; alreadyExecuted?: boolean; conversation: ConversationView; }
+export class ConversationUIActionInput { messageId: string = ''; bindingId: string = ''; requestId: string = ''; expectedConversationVersion: number = 1; }
+export interface ConversationUIActionReply { conversation: ConversationView; href?: string; actionId?: string; alreadyExecuted?: boolean; }
 export class FocusPreferenceInput { expectedVersion: number = 0; importance: number | null = null; longTermGoal: string = ''; estimatedMinutes: number | null = null; notes: string = ''; }
 export interface FocusPreference { version: number; importance: number | null; longTermGoal: string; estimatedMinutes: number | null; notes: string; }
 export interface FocusPreferenceReply { preference: FocusPreference | null; }

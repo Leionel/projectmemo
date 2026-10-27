@@ -1,5 +1,23 @@
 # R4 Agent Experience 实施记录
 
+## 2026-10-26 PR-4 · 鸿蒙原生语义回答与稳定草稿
+
+ArkTS 原生渲染十种共享语义块：有限富文本、目标差距、依据、调查、问题、方案比较、确认、回执、变化和时间线。沿用纸白/墨绿资源、可展开依据与原文件指引，约 16fp 正文和至少 44vp 操作目标；未知顶层协议退回原正文，未知块显示可读 fallback。原 comparison/D1/D2 的完整业务接入仍在 PR-5。
+
+快速/标准/深入选项、真实进展轮询和停止接入同一 Conversation API；最长深入调用使用有界超时。操作只提交原 bindingId/messageId/版本和幂等键，确认后读回原 Action，仍由原服务校验。原任务面板按业务身份保持；问题、选项、答复、时间输入及主输入保存到当前用户私有 Preferences，64 份有界草稿，换用户/退出/会话失效清除。源版本改变保留内容并要求先核对。
+
+实际模拟器验收发现两处缺陷并修复：退出时必须先同步清空内存凭据再等待草稿清理；ArkUI Builder 按值传入消息导致确认成功后还显示待确认，改为官方的单对象引用参数和可更新属性，保留稳定 message/block 身份。参照 [官方 Builder 状态传递](https://github.com/openharmony/docs/blob/master/en/application-dev/ui/state-management/arkts-builder.md)，没有用会话版本重建整段表单。
+
+放大字验收还发现应用原来没有开启系统字体跟随。依照 [官方应用配置](https://github.com/openharmony/docs/blob/master/en/application-dev/quick-start/app-configuration-file.md) 增加 followSystem，当前上限 1.3；正文和操作随系统放大，布局仍使用原响应式资源。
+
+### 验收与交付范围
+
+鸿蒙 **86/86 测试通过**，最终原配置的 HAP 主编译通过；开发地址签名 HAP 已覆盖安装到用户打开的模拟器。模拟器连接专用临时 SQLite 与本机 4400 后端：真实模型的三领域历史来自 PR-3 合成库副本，额外 UI 数据明确为 HTTP stub，手机验收新增模型调用 0。个人数据库和签名配置未提交。
+
+已实际操作：确认原位转回执、查看原行动、结果草稿关闭重开/新消息到达/页面返回、合法资料变化调查入口、系统深色模式与放大字。首次陈旧 UI 和截图工具未覆盖旧文件的原记录保留，最终有效截图另命名。键盘弹出、全套读屏、所有十种块的目标真机交互和生产 ECS 尚未签收。详情见 [PR-4 验收回执](evidence/r4-agent-experience/20261026-pr3-pr4/pr4-validation.json)。
+
+下一步 PR-5：D1/D2、Mission、Capture、Artifact、旧 Copilot 的专责 Prompt 与对应真实业务覆盖；随后 PR-6 做独立留出集、用户决策成本和目标设备/生产验收。
+
 ## 2026-10-26 PR-3 · 原业务闭环与资料变化入口
 
 从 PR-2 `5b45b24` 继续。沿用原 Conversation、Anchor、MissionEvent、execution 和 Action，不增加执行状态表或迁移。合法 SOURCE_ARRIVED 经原等待资料筛选后生成 change 块，绑定原事件、目标原句、来源修订和私有会话。读回重新检查归属、权限、目标及来源版本；修订后保留历史正文，撤掉陈旧交互。提醒与读回不调用模型，点击调查只带入原消息，发送仍需用户操作；原延后、停止关注和去重继续生效。

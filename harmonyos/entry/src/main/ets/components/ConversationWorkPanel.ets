@@ -9,32 +9,43 @@ import { MissionEvidenceReview } from './MissionEvidenceReview';
 import { ConversationReviewPanel } from './ConversationReviewPanel';
 import { PMButton } from './PMReferencePrimitives';
 import { PMColors } from '../common/DesignTokens';
+import { ConversationDraftStore, ConversationDraft } from '../services/ConversationDraftStore';
 @Component
 export struct ConversationWorkPanel {
-  @Prop conversation: ConversationView = new ConversationView();
+  @Prop @Watch('conversationChanged') conversation: ConversationView = new ConversationView();
   @Prop workRef: ConversationWorkRef = new ConversationWorkRef();
   onUpdated: (view: ConversationView) => void = (): void => {};
   onClose: () => void = (): void => {};
   @State private work: ConversationWork = new ConversationWork();
-  @State private answer: string = '';
-  @State private selected: string[] = [];
-  @State private minutes: string = '';
-  @State private delivery: string = '';
+  @State @Watch('saveDraft') private answer: string = '';
+  @State @Watch('saveDraft') private selected: string[] = [];
+  @State @Watch('saveDraft') private minutes: string = '';
+  @State @Watch('saveDraft') private delivery: string = '';
   @State private error: string = '';
   @State private busy: boolean = false;
   @State private assessed: boolean = false;
   @State private assessmentText: string = '';
-  @State private mode: string = 'CONDITIONAL_ANALYSIS';
-  @State private premiseHash: string = '';
+  @State @Watch('saveDraft') private mode: string = 'CONDITIONAL_ANALYSIS';
+  @State @Watch('saveDraft') private premiseHash: string = '';
+  @State @Watch('saveDraft') private reviewedVersion: string = '';
   private service: ConversationService = new ConversationService();
   private generation: number = 0;
   private keys: Map<string, string> = new Map<string, string>();
-  aboutToAppear(): void { this.load(); }
-  aboutToDisappear(): void { this.generation++; }
+  private draftKey(): string { return `${this.conversation.id}:${this.workRef.kind}:${this.workRef.id}`; }
+  private saveDraft(): void {
+    const draft = new ConversationDraft(); draft.answer = this.answer; draft.selected = this.selected; draft.minutes = this.minutes; draft.delivery = this.delivery;
+    draft.mode = this.mode; draft.premiseHash = this.premiseHash; draft.versionToken = this.reviewedVersion; ConversationDraftStore.save(this.draftKey(), draft);
+  }
+  private conversationChanged(): void { this.load(); }
+  aboutToAppear(): void {
+    const saved = ConversationDraftStore.read(this.draftKey()); this.answer = saved.answer; this.selected = saved.selected; this.minutes = saved.minutes; this.delivery = saved.delivery;
+    this.mode = saved.mode; this.premiseHash = saved.premiseHash; this.reviewedVersion = saved.versionToken; this.load();
+  }
+  aboutToDisappear(): void { this.saveDraft(); this.generation++; }
   private fail(e: Error): void { this.error = e.message; if (e instanceof ApiError && [401, 403, 404].includes(e.status)) { this.work = new ConversationWork(); this.answer = ''; this.selected = []; this.premiseHash = ''; } }
   private async load(): Promise<void> {
     const epoch = ++this.generation; this.busy = true;
-    try { const w = await this.service.work(this.conversation.id, this.workRef); if (epoch === this.generation) { this.work = w; this.assessed = false; this.assessmentText = ''; } }
+    try { const w = await this.service.work(this.conversation.id, this.workRef); if (epoch === this.generation) { this.work = w; if (this.reviewedVersion === '') this.reviewedVersion = w.versionToken; this.assessed = false; this.assessmentText = ''; } }
     catch (e) { if (epoch === this.generation) this.fail(e); }
     finally { if (epoch === this.generation) this.busy = false; }
   }
@@ -53,6 +64,7 @@ export struct ConversationWorkPanel {
   }
   private async preview(operation: string, decision: string = '', choice?: WorkChoice): Promise<void> {
     if (this.busy) return;
+    if (this.reviewedVersion !== this.work.versionToken) { this.error = '原任务已有更新，草稿已保留，请先核对本次更新。'; return; }
     const epoch = this.generation; this.busy = true; this.error = '';
     try { const input = this.input(operation, choice); if (decision !== '') { input.decision = decision; input.requestId += ':' + decision; }
       const r = await this.service.previewWork(this.conversation.id, input); if (epoch === this.generation) { this.onUpdated(r.conversation); this.onClose(); } }
@@ -78,6 +90,10 @@ export struct ConversationWorkPanel {
     Column({ space: 12 }) {
       Row() { Text('原任务协作').fontSize(13).fontColor(PMColors.BRAND); Blank(); Button('收起').fontSize(12).fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).onClick(() => this.onClose()) }.width('100%')
       Text(this.work.title).fontSize(16).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
+      if (this.reviewedVersion !== '' && this.reviewedVersion !== this.work.versionToken) {
+        Text('原任务已有更新，你的草稿已保留。').fontSize(14).fontColor(PMColors.INK_SECONDARY)
+        PMButton({ label: '已核对本次更新', secondary: true, onAction: (): void => { this.reviewedVersion = this.work.versionToken; this.error = ''; } })
+      }
       Text(this.work.status === 'WAITING_INPUT' ? '等待补充' : this.work.status === 'PAUSED' ? '已暂停' : this.work.status === 'DONE' ? '行动已完成' : '原任务状态：' + this.work.status).fontSize(12).fontColor(PMColors.INK_TERTIARY)
       if (this.error !== '') { Text(this.error).fontSize(13).fontColor(PMColors.RISK) }
       if (this.work.question) {

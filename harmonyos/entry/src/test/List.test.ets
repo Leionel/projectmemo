@@ -8,6 +8,7 @@ import missionContractTest from './MissionContract.test';
 import globalFocusPresentationTest from './GlobalFocusPresentation.test';
 import experienceContractTest from './ExperienceContract.test';
 import repoSignalContractTest from './RepoSignalContract.test';
+import agentPresentationContractTest from './AgentPresentationContract.test';
 
 export default function testsuite() {
   localUnitTest();
@@ -20,4 +21,5 @@ export default function testsuite() {
   attachmentPresentationTest();
   experienceContractTest();
   repoSignalContractTest();
+  agentPresentationContractTest();
 }

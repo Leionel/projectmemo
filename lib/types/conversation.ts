@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { AgentPresentation } from "./agentExperience";
 
 const id = z.string().min(1).max(160);
 export const conversationEntrySchema = z.object({
@@ -65,6 +66,7 @@ export type ConversationBlocks = {
   provider: string; limitations: string[]; observedProjectIds: string[];
   citations?: ConversationCitation[];
   fileGuides?: ConversationFileGuide[];
+  presentation?: AgentPresentation;
   reviewRef?: { id: string; purpose: string; missionId: string; projectId: string; status: string; proposalHash: string };
   options?: Array<{ key: string; label: string; projectId: string; missionId: string; proposalId: string; proposalHash: string; expectedVersion: number; purpose?: "DYNAMIC_PLAN"; candidateId?: string }>;
 };

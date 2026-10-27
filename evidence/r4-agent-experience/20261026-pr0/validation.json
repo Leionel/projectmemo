@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "phase": "R4 PR-0",
+  "baseline": "c8c7072d01598de6d7315697bd505d84e33cd8f6",
+  "scope": "CONTRACTS_AND_SYNTHETIC_FIXTURES",
+  "fixtureSha256": "0eacb89b7b961b07ca49df2a041adb169b940864a13b4647f16f6839e68c6159",
+  "modelCalls": 0,
+  "businessEffects": 0,
+  "checks": {
+    "harmonyBuild": {
+      "signedSha256": "1c441f9b0cdcd1c6386699472863dd41224db399adb80b20532b9b4387c0ebac",
+      "unsignedSha256": "07f71417f9a70ba07b44511fa908a90775c3fcd4498f9020429dbb6a4993d485",
+      "passed": true,
+      "log": "harmony-build.log"
+    },
+    "newContractTests": {
+      "includedInTargetedTotal": true,
+      "passed": 43
+    },
+    "types": {
+      "log": "types.log",
+      "passed": true
+    },
+    "harmonyTest": {
+      "failed": 0,
+      "errors": 0,
+      "note": "Existing native suite; final DTO fields additionally verified by final main compilation and shared/native type checks.",
+      "passed": 83,
+      "log": "harmony-test.log"
+    },
+    "lint": {
+      "warnings": 0,
+      "passed": true,
+      "log": "lint.log"
+    },
+    "targetedTests": {
+      "passed": 68,
+      "log": "tests.log",
+      "files": 3
+    }
+  },
+  "preservedDirty": [
+    {
+      "path": "AGENTS.md",
+      "preserved": true
+    },
+    {
+      "path": "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md",
+      "preserved": true
+    },
+    {
+      "path": "harmonyos/build-profile.json5",
+      "preserved": true
+    },
+    {
+      "path": "next-env.d.ts",
+      "preserved": true
+    },
+    {
+      "path": "tsconfig.json",
+      "preserved": true
+    }
+  ],
+  "firstFailure": {
+    "fixed": true,
+    "log": "contract-first-failure.log",
+    "reason": "Virtual TypeScript source path mismatch on Windows"
+  },
+  "notRun": [
+    "Web E2E and Web production build: PR-0 does not change rendering or turn execution",
+    "Real model quality and C0-C3 ablation",
+    "Device installation and ECS deployment"
+  ],
+  "next": "PR-1 structured messages, durable budget, workspace actor adapter, adaptive investigation and GoalGap"
+}

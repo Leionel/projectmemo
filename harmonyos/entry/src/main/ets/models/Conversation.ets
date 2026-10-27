@@ -1,3 +1,4 @@
+import { AgentPresentation } from './AgentExperience';
 export interface ConversationEntry { kind: string; projectId: string; id: string; revision?: string; }
 export interface ConversationRef { bindingId?: string; kind: string; id: string; projectId: string; title: string; status?: string; version?: number; href: string; }
 export interface ConversationSource { id: string; projectId: string; sourceId: string; revision: string; title: string; excerpt: string; observedAt: string; temporalState: string; }
@@ -9,7 +10,7 @@ export interface ConversationCitation { sourceId: string; quote: string; }
 export interface PriorityReason { projectId: string; importance: string; urgency: string; blocking: string; effort: string; preference: string; tradeoff: string; unknown: string[]; basis: string; }
 export interface ConversationProposal { tool?: string; executionId: string; projectId: string; title: string; description: string; proposalHash: string; status: string; resultId: string | null; actionStatus?: string | null; resultCardId?: string | null; }
 export interface ConversationOption { key: string; label: string; projectId: string; missionId: string; proposalId: string; proposalHash: string; expectedVersion: number; purpose?: string; candidateId?: string; }
-export interface ConversationMessage { id: string; seq: number; role: string; content: string; restricted: boolean; refs: ConversationRef[]; sources: ConversationSource[]; priorities: PriorityReason[]; proposal: ConversationProposal | null; provider: string; limitations: string[]; options?: ConversationOption[]; fileGuides?: ConversationFileGuide[]; citations?: ConversationCitation[]; }
+export interface ConversationMessage { id: string; seq: number; role: string; content: string; restricted: boolean; refs: ConversationRef[]; sources: ConversationSource[]; priorities: PriorityReason[]; proposal: ConversationProposal | null; provider: string; limitations: string[]; options?: ConversationOption[]; fileGuides?: ConversationFileGuide[]; citations?: ConversationCitation[]; presentation?: AgentPresentation; }
 export interface ConversationProject { id: string; title: string; }
 export interface ConversationListItem { id: string; title: string; scope: string; homeProjectId: string | null; }
 export interface ConversationListReply { conversations: ConversationListItem[]; nextCursor: string | null; }

@@ -1,0 +1,40 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/r4ExperienceContract.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/r4ExperienceContract.test.ts (39 tests | 1 failed) 2197ms
+   × keeps native DTO fields aligned with shared contracts and old Conversation messages optional 2166ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/r4ExperienceContract.test.ts > keeps native DTO fields aligned with shared contracts and old Conversation messages optional
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "File 'D:/Projects/hongmen/tests/__r4-native-dto-check.ts' not found.
++   The file is in the program because:
++     Root file specified for compilation",
++ ]
+
+ ❯ tests/r4ExperienceContract.test.ts:218:81
+    216|   const program = ts.createProgram([file], { ...parsed.options, increm…
+    217|   const errors = ts.getPreEmitDiagnostics(program);
+    218|   expect(errors.map(e => ts.flattenDiagnosticMessageText(e.messageText…
+       |                                                                                 ^
+    219|   const nativeConversation = fs.readFileSync("harmonyos/entry/src/main…
+    220|   expect(nativeConversation).toContain("presentation?: AgentPresentati…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 38 passed (39)
+   Start at  17:35:38
+   Duration  7.51s (transform 941ms, setup 0ms, import 2.36s, tests 2.20s, environment 0ms)

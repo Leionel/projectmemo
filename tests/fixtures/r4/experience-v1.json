@@ -1,0 +1,3572 @@
+{
+  "schemaVersion": 1,
+  "provenance": "SYNTHETIC_CONTRACT_FIXTURES_NO_MODEL_NO_BUSINESS_EXECUTION",
+  "cases": [
+    {
+      "id": "research",
+      "domain": "RESEARCH",
+      "question": "现在的记录能证明可以部署吗？",
+      "initialAuthority": {
+        "conversationId": "conversation-research",
+        "conversationVersion": 4,
+        "userId": "fixture-user",
+        "conversationOwnerUserId": "fixture-user",
+        "sessionValid": true,
+        "scope": "WORKSPACE",
+        "homeProjectId": null,
+        "projectIds": [
+          "project-research"
+        ],
+        "now": "2026-10-26T12:00:00.000Z",
+        "entities": [
+          {
+            "ref": {
+              "kind": "PROJECT",
+              "id": "project-research",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "SOURCE",
+              "id": "research-old",
+              "projectId": "project-research",
+              "revision": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "PROPOSAL",
+              "id": "research-proposal",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          },
+          {
+            "ref": {
+              "kind": "RECEIPT",
+              "id": "research-receipt",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "QUESTION",
+              "id": "research-question",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          },
+          {
+            "ref": {
+              "kind": "EVENT",
+              "id": "research-event",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "REVIEW",
+              "id": "research-review",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          },
+          {
+            "ref": {
+              "kind": "ACTION",
+              "id": "research-action",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "MISSION",
+              "id": "research-mission",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          }
+        ],
+        "readSet": [
+          {
+            "kind": "PROJECT",
+            "id": "project-research",
+            "projectId": "project-research",
+            "revision": "1"
+          },
+          {
+            "kind": "SOURCE",
+            "id": "research-old",
+            "projectId": "project-research",
+            "revision": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684"
+          }
+        ],
+        "evidence": [
+          {
+            "source": {
+              "kind": "SOURCE",
+              "id": "research-old",
+              "projectId": "project-research",
+              "revision": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684"
+            },
+            "excerptHash": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684",
+            "quote": "训练阶段显存峰值 11GB，设备 T。",
+            "observedAt": "2026-10-26T12:00:00.000Z",
+            "readScope": "EXCERPT",
+            "applicability": "NOT_APPLICABLE",
+            "verification": "CHECKED",
+            "claim": "当前记录不能覆盖目标验收条件。",
+            "relation": "SUPPORTS",
+            "reason": "按目标的主体、阶段与条件判断适用范围。"
+          },
+          {
+            "source": {
+              "kind": "SOURCE",
+              "id": "research-old",
+              "projectId": "project-research",
+              "revision": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684"
+            },
+            "excerptHash": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684",
+            "quote": "训练阶段显存峰值 11GB，设备 T。",
+            "observedAt": "2026-10-26T12:00:00.000Z",
+            "readScope": "EXCERPT",
+            "applicability": "NOT_APPLICABLE",
+            "verification": "CHECKED",
+            "claim": "目标设备同条件推理显存不超过 6GB",
+            "relation": "UNDETERMINED",
+            "reason": "按目标的主体、阶段与条件判断适用范围。"
+          }
+        ],
+        "catalog": [
+          {
+            "blockKey": "research-goal_gap",
+            "emphasis": "supporting",
+            "semanticType": "goal_gap",
+            "fallbackText": "当前资料不足以核验目标条件。",
+            "refs": [
+              {
+                "kind": "PROJECT",
+                "id": "project-research",
+                "projectId": "project-research",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "goalGap": {
+              "schemaVersion": 1,
+              "id": "research-gap",
+              "projectId": "project-research",
+              "goalRef": {
+                "kind": "PROJECT",
+                "id": "project-research",
+                "projectId": "project-research",
+                "revision": "1"
+              },
+              "goalQuote": "模型 A 在设备 D、batch=1 的推理显存不超过 6GB",
+              "criteria": [
+                {
+                  "id": "research-criterion",
+                  "requirement": "目标设备同条件推理显存不超过 6GB",
+                  "state": "UNKNOWN",
+                  "explanation": "当前记录不能覆盖目标验收条件。",
+                  "evidence": [
+                    {
+                      "source": {
+                        "kind": "SOURCE",
+                        "id": "research-old",
+                        "projectId": "project-research",
+                        "revision": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684"
+                      },
+                      "excerptHash": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684",
+                      "quote": "训练阶段显存峰值 11GB，设备 T。",
+                      "observedAt": "2026-10-26T12:00:00.000Z",
+                      "readScope": "EXCERPT",
+                      "applicability": "NOT_APPLICABLE",
+                      "verification": "CHECKED",
+                      "claim": "目标设备同条件推理显存不超过 6GB",
+                      "relation": "UNDETERMINED",
+                      "reason": "按目标的主体、阶段与条件判断适用范围。"
+                    }
+                  ]
+                }
+              ],
+              "blockers": [],
+              "keyUnknowns": [
+                "寻找目标设备同条件推理记录"
+              ],
+              "nextInformationNeed": "寻找目标设备同条件推理记录"
+            }
+          },
+          {
+            "blockKey": "research-question",
+            "emphasis": "supporting",
+            "semanticType": "question",
+            "fallbackText": "同条件记录超过预算，先比较已有减负方案。",
+            "refs": [
+              {
+                "kind": "QUESTION",
+                "id": "research-question",
+                "projectId": "project-research",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "draftKey": "conversation-research-research-question",
+            "question": "寻找目标设备同条件推理记录，你希望先查已有资料吗？",
+            "inputKind": "SINGLE_CHOICE",
+            "required": false,
+            "choices": [
+              {
+                "id": "read",
+                "label": "先查已有资料"
+              },
+              {
+                "id": "keep",
+                "label": "保留计划"
+              }
+            ]
+          },
+          {
+            "blockKey": "research-timeline",
+            "emphasis": "supporting",
+            "semanticType": "timeline",
+            "fallbackText": "同条件记录超过预算，先比较已有减负方案。",
+            "refs": [
+              {
+                "kind": "EVENT",
+                "id": "research-event",
+                "projectId": "project-research",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "events": [
+              {
+                "ref": {
+                  "kind": "EVENT",
+                  "id": "research-event",
+                  "projectId": "project-research",
+                  "revision": "1"
+                },
+                "occurredAt": "2026-10-26T12:00:00.000Z",
+                "summary": "项目已有材料更新，产生一条待核对的目标关联候选。"
+              }
+            ]
+          },
+          {
+            "blockKey": "research-evidence",
+            "emphasis": "supporting",
+            "semanticType": "evidence",
+            "fallbackText": "同条件记录超过预算，先比较已有减负方案。",
+            "refs": [
+              {
+                "kind": "SOURCE",
+                "id": "research-old",
+                "projectId": "project-research",
+                "revision": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684"
+              }
+            ],
+            "actionBindingIds": [],
+            "state": "UNKNOWN",
+            "evidence": [
+              {
+                "source": {
+                  "kind": "SOURCE",
+                  "id": "research-old",
+                  "projectId": "project-research",
+                  "revision": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684"
+                },
+                "excerptHash": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684",
+                "quote": "训练阶段显存峰值 11GB，设备 T。",
+                "observedAt": "2026-10-26T12:00:00.000Z",
+                "readScope": "EXCERPT",
+                "applicability": "NOT_APPLICABLE",
+                "verification": "CHECKED",
+                "claim": "当前记录不能覆盖目标验收条件。",
+                "relation": "SUPPORTS",
+                "reason": "按目标的主体、阶段与条件判断适用范围。"
+              }
+            ]
+          }
+        ],
+        "allowedActions": [
+          {
+            "bindingId": "research-preview",
+            "conversationId": "conversation-research",
+            "actionKind": "PREVIEW",
+            "label": "查看采用后的操作",
+            "target": {
+              "kind": "PROPOSAL",
+              "id": "research-proposal",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "expectedConversationVersion": 4,
+            "enabled": true,
+            "disabledReason": null,
+            "frozen": {
+              "executionId": null,
+              "candidateId": "research-read",
+              "proposalHash": "645594d5dfc8aeb3313ea94bcd0500ddd585a6c7d4df13ed38ebe90cd50ff370",
+              "expiresAt": "2026-10-26T13:00:00.000Z"
+            }
+          },
+          {
+            "bindingId": "research-confirm",
+            "conversationId": "conversation-research",
+            "actionKind": "CONFIRM",
+            "label": "确认",
+            "target": {
+              "kind": "PROPOSAL",
+              "id": "research-proposal",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "expectedConversationVersion": 4,
+            "enabled": true,
+            "disabledReason": null,
+            "frozen": {
+              "executionId": "research-execution",
+              "candidateId": "research-read",
+              "proposalHash": "645594d5dfc8aeb3313ea94bcd0500ddd585a6c7d4df13ed38ebe90cd50ff370",
+              "expiresAt": "2026-10-26T13:00:00.000Z"
+            }
+          },
+          {
+            "bindingId": "research-decline",
+            "conversationId": "conversation-research",
+            "actionKind": "DECLINE",
+            "label": "保留原计划",
+            "target": {
+              "kind": "PROPOSAL",
+              "id": "research-proposal",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "expectedConversationVersion": 4,
+            "enabled": true,
+            "disabledReason": null,
+            "frozen": {
+              "executionId": "research-execution",
+              "candidateId": "research-read",
+              "proposalHash": "645594d5dfc8aeb3313ea94bcd0500ddd585a6c7d4df13ed38ebe90cd50ff370",
+              "expiresAt": "2026-10-26T13:00:00.000Z"
+            }
+          }
+        ]
+      },
+      "observedAuthority": {
+        "conversationId": "conversation-research",
+        "conversationVersion": 4,
+        "userId": "fixture-user",
+        "conversationOwnerUserId": "fixture-user",
+        "sessionValid": true,
+        "scope": "WORKSPACE",
+        "homeProjectId": null,
+        "projectIds": [
+          "project-research"
+        ],
+        "now": "2026-10-26T12:00:00.000Z",
+        "entities": [
+          {
+            "ref": {
+              "kind": "PROJECT",
+              "id": "project-research",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "SOURCE",
+              "id": "research-old",
+              "projectId": "project-research",
+              "revision": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "SOURCE",
+              "id": "research-new",
+              "projectId": "project-research",
+              "revision": "05d86c2dfc98e082ecea2ad87da46daaa8cab0289e405f1052e38e7020522c32"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "PROPOSAL",
+              "id": "research-proposal",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          },
+          {
+            "ref": {
+              "kind": "RECEIPT",
+              "id": "research-receipt",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "QUESTION",
+              "id": "research-question",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          },
+          {
+            "ref": {
+              "kind": "EVENT",
+              "id": "research-event",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "REVIEW",
+              "id": "research-review",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          },
+          {
+            "ref": {
+              "kind": "ACTION",
+              "id": "research-action",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "MISSION",
+              "id": "research-mission",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          }
+        ],
+        "readSet": [
+          {
+            "kind": "PROJECT",
+            "id": "project-research",
+            "projectId": "project-research",
+            "revision": "1"
+          },
+          {
+            "kind": "SOURCE",
+            "id": "research-old",
+            "projectId": "project-research",
+            "revision": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684"
+          },
+          {
+            "kind": "SOURCE",
+            "id": "research-new",
+            "projectId": "project-research",
+            "revision": "05d86c2dfc98e082ecea2ad87da46daaa8cab0289e405f1052e38e7020522c32"
+          }
+        ],
+        "evidence": [
+          {
+            "source": {
+              "kind": "SOURCE",
+              "id": "research-old",
+              "projectId": "project-research",
+              "revision": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684"
+            },
+            "excerptHash": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684",
+            "quote": "训练阶段显存峰值 11GB，设备 T。",
+            "observedAt": "2026-10-26T12:00:00.000Z",
+            "readScope": "EXCERPT",
+            "applicability": "NOT_APPLICABLE",
+            "verification": "CHECKED",
+            "claim": "当前记录不能覆盖目标验收条件。",
+            "relation": "SUPPORTS",
+            "reason": "按目标的主体、阶段与条件判断适用范围。"
+          },
+          {
+            "source": {
+              "kind": "SOURCE",
+              "id": "research-new",
+              "projectId": "project-research",
+              "revision": "05d86c2dfc98e082ecea2ad87da46daaa8cab0289e405f1052e38e7020522c32"
+            },
+            "excerptHash": "05d86c2dfc98e082ecea2ad87da46daaa8cab0289e405f1052e38e7020522c32",
+            "quote": "设备 D、模型 A v2、推理 batch=1，峰值显存 6.8GB。",
+            "observedAt": "2026-10-26T12:00:00.000Z",
+            "readScope": "EXCERPT",
+            "applicability": "DIRECT",
+            "verification": "CHECKED",
+            "claim": "同条件记录超过预算，先比较已有减负方案。",
+            "relation": "SUPPORTS",
+            "reason": "按目标的主体、阶段与条件判断适用范围。"
+          },
+          {
+            "source": {
+              "kind": "SOURCE",
+              "id": "research-old",
+              "projectId": "project-research",
+              "revision": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684"
+            },
+            "excerptHash": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684",
+            "quote": "训练阶段显存峰值 11GB，设备 T。",
+            "observedAt": "2026-10-26T12:00:00.000Z",
+            "readScope": "EXCERPT",
+            "applicability": "NOT_APPLICABLE",
+            "verification": "CHECKED",
+            "claim": "目标设备同条件推理显存不超过 6GB",
+            "relation": "UNDETERMINED",
+            "reason": "按目标的主体、阶段与条件判断适用范围。"
+          },
+          {
+            "source": {
+              "kind": "SOURCE",
+              "id": "research-new",
+              "projectId": "project-research",
+              "revision": "05d86c2dfc98e082ecea2ad87da46daaa8cab0289e405f1052e38e7020522c32"
+            },
+            "excerptHash": "05d86c2dfc98e082ecea2ad87da46daaa8cab0289e405f1052e38e7020522c32",
+            "quote": "设备 D、模型 A v2、推理 batch=1，峰值显存 6.8GB。",
+            "observedAt": "2026-10-26T12:00:00.000Z",
+            "readScope": "EXCERPT",
+            "applicability": "DIRECT",
+            "verification": "CHECKED",
+            "claim": "目标设备同条件推理显存不超过 6GB",
+            "relation": "CONTRADICTS",
+            "reason": "按目标的主体、阶段与条件判断适用范围。"
+          }
+        ],
+        "catalog": [
+          {
+            "blockKey": "research-evidence",
+            "emphasis": "supporting",
+            "semanticType": "evidence",
+            "fallbackText": "同条件记录超过预算，先比较已有减负方案。",
+            "refs": [
+              {
+                "kind": "SOURCE",
+                "id": "research-new",
+                "projectId": "project-research",
+                "revision": "05d86c2dfc98e082ecea2ad87da46daaa8cab0289e405f1052e38e7020522c32"
+              }
+            ],
+            "actionBindingIds": [],
+            "state": "SUPPORTED",
+            "evidence": [
+              {
+                "source": {
+                  "kind": "SOURCE",
+                  "id": "research-new",
+                  "projectId": "project-research",
+                  "revision": "05d86c2dfc98e082ecea2ad87da46daaa8cab0289e405f1052e38e7020522c32"
+                },
+                "excerptHash": "05d86c2dfc98e082ecea2ad87da46daaa8cab0289e405f1052e38e7020522c32",
+                "quote": "设备 D、模型 A v2、推理 batch=1，峰值显存 6.8GB。",
+                "observedAt": "2026-10-26T12:00:00.000Z",
+                "readScope": "EXCERPT",
+                "applicability": "DIRECT",
+                "verification": "CHECKED",
+                "claim": "同条件记录超过预算，先比较已有减负方案。",
+                "relation": "SUPPORTS",
+                "reason": "按目标的主体、阶段与条件判断适用范围。"
+              }
+            ]
+          },
+          {
+            "blockKey": "research-goal_gap",
+            "emphasis": "supporting",
+            "semanticType": "goal_gap",
+            "fallbackText": "同条件记录超过预算，先比较已有减负方案。",
+            "refs": [
+              {
+                "kind": "PROJECT",
+                "id": "project-research",
+                "projectId": "project-research",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "goalGap": {
+              "schemaVersion": 1,
+              "id": "research-gap",
+              "projectId": "project-research",
+              "goalRef": {
+                "kind": "PROJECT",
+                "id": "project-research",
+                "projectId": "project-research",
+                "revision": "1"
+              },
+              "goalQuote": "模型 A 在设备 D、batch=1 的推理显存不超过 6GB",
+              "criteria": [
+                {
+                  "id": "research-criterion",
+                  "requirement": "目标设备同条件推理显存不超过 6GB",
+                  "state": "BLOCKED",
+                  "explanation": "同条件记录超过预算，先比较已有减负方案。",
+                  "evidence": [
+                    {
+                      "source": {
+                        "kind": "SOURCE",
+                        "id": "research-new",
+                        "projectId": "project-research",
+                        "revision": "05d86c2dfc98e082ecea2ad87da46daaa8cab0289e405f1052e38e7020522c32"
+                      },
+                      "excerptHash": "05d86c2dfc98e082ecea2ad87da46daaa8cab0289e405f1052e38e7020522c32",
+                      "quote": "设备 D、模型 A v2、推理 batch=1，峰值显存 6.8GB。",
+                      "observedAt": "2026-10-26T12:00:00.000Z",
+                      "readScope": "EXCERPT",
+                      "applicability": "DIRECT",
+                      "verification": "CHECKED",
+                      "claim": "目标设备同条件推理显存不超过 6GB",
+                      "relation": "CONTRADICTS",
+                      "reason": "按目标的主体、阶段与条件判断适用范围。"
+                    }
+                  ]
+                }
+              ],
+              "blockers": [
+                "同条件记录超过预算，先比较已有减负方案。"
+              ],
+              "keyUnknowns": [],
+              "nextInformationNeed": null
+            }
+          },
+          {
+            "blockKey": "research-comparison",
+            "emphasis": "supporting",
+            "semanticType": "comparison",
+            "fallbackText": "同条件记录超过预算，先比较已有减负方案。",
+            "refs": [
+              {
+                "kind": "PROPOSAL",
+                "id": "research-proposal",
+                "projectId": "project-research",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [
+              "research-preview"
+            ],
+            "proposalHash": "645594d5dfc8aeb3313ea94bcd0500ddd585a6c7d4df13ed38ebe90cd50ff370",
+            "candidates": [
+              {
+                "id": "research-read",
+                "title": "核对已有减负方案的适用条件",
+                "tradeoff": "优先利用已有资料，缺少现实条件时停止。",
+                "feasibility": "READY",
+                "expectedObservation": "寻找目标设备同条件推理记录",
+                "branches": [
+                  {
+                    "observation": "找到直接适用结果",
+                    "consequence": "复核原决定"
+                  },
+                  {
+                    "observation": "条件仍不一致",
+                    "consequence": "保留未知并询问关键条件"
+                  }
+                ],
+                "stopCondition": "没有适用来源或用户否决时停止。"
+              },
+              {
+                "id": "research-keep",
+                "title": "保留当前计划",
+                "tradeoff": "不增加行动，等待必要新证据。",
+                "feasibility": "READY",
+                "expectedObservation": null,
+                "branches": [],
+                "stopCondition": "保持原业务对象不变。"
+              }
+            ]
+          },
+          {
+            "blockKey": "research-question",
+            "emphasis": "supporting",
+            "semanticType": "question",
+            "fallbackText": "同条件记录超过预算，先比较已有减负方案。",
+            "refs": [
+              {
+                "kind": "QUESTION",
+                "id": "research-question",
+                "projectId": "project-research",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "draftKey": "conversation-research-research-question",
+            "question": "寻找目标设备同条件推理记录，你希望先查已有资料吗？",
+            "inputKind": "SINGLE_CHOICE",
+            "required": false,
+            "choices": [
+              {
+                "id": "read",
+                "label": "先查已有资料"
+              },
+              {
+                "id": "keep",
+                "label": "保留计划"
+              }
+            ]
+          },
+          {
+            "blockKey": "research-approval",
+            "emphasis": "supporting",
+            "semanticType": "approval",
+            "fallbackText": "待你确认，原行动尚未创建。",
+            "refs": [
+              {
+                "kind": "PROPOSAL",
+                "id": "research-proposal",
+                "projectId": "project-research",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [
+              "research-confirm",
+              "research-decline"
+            ],
+            "executionId": "research-execution",
+            "proposalHash": "645594d5dfc8aeb3313ea94bcd0500ddd585a6c7d4df13ed38ebe90cd50ff370",
+            "expiresAt": "2026-10-26T13:00:00.000Z",
+            "state": "PENDING"
+          },
+          {
+            "blockKey": "research-receipt",
+            "emphasis": "supporting",
+            "semanticType": "receipt",
+            "fallbackText": "行动已创建，尚未执行；目标条件仍未验收。",
+            "refs": [
+              {
+                "kind": "RECEIPT",
+                "id": "research-receipt",
+                "projectId": "project-research",
+                "revision": "1"
+              },
+              {
+                "kind": "ACTION",
+                "id": "research-action",
+                "projectId": "project-research",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "state": "CREATED",
+            "verification": "NOT_CHECKED",
+            "evidence": []
+          },
+          {
+            "blockKey": "research-timeline",
+            "emphasis": "supporting",
+            "semanticType": "timeline",
+            "fallbackText": "同条件记录超过预算，先比较已有减负方案。",
+            "refs": [
+              {
+                "kind": "EVENT",
+                "id": "research-event",
+                "projectId": "project-research",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "events": [
+              {
+                "ref": {
+                  "kind": "EVENT",
+                  "id": "research-event",
+                  "projectId": "project-research",
+                  "revision": "1"
+                },
+                "occurredAt": "2026-10-26T12:00:00.000Z",
+                "summary": "项目已有材料更新，产生一条待核对的目标关联候选。"
+              }
+            ]
+          },
+          {
+            "blockKey": "research-change",
+            "emphasis": "supporting",
+            "semanticType": "change",
+            "fallbackText": "同条件记录超过预算，先比较已有减负方案。",
+            "refs": [
+              {
+                "kind": "REVIEW",
+                "id": "research-review",
+                "projectId": "project-research",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "disposition": "UNKNOWN",
+            "goalQuote": "模型 A 在设备 D、batch=1 的推理显存不超过 6GB",
+            "changeKind": "项目材料更新",
+            "relevance": "涉及原目标条件",
+            "unknowns": [
+              "寻找目标设备同条件推理记录"
+            ]
+          },
+          {
+            "blockKey": "research-investigation",
+            "emphasis": "supporting",
+            "semanticType": "investigation",
+            "fallbackText": "同条件记录超过预算，先比较已有减负方案。",
+            "refs": [
+              {
+                "kind": "SOURCE",
+                "id": "research-new",
+                "projectId": "project-research",
+                "revision": "05d86c2dfc98e082ecea2ad87da46daaa8cab0289e405f1052e38e7020522c32"
+              }
+            ],
+            "actionBindingIds": [],
+            "investigationId": "research-turn",
+            "state": "CONCLUDED",
+            "steps": [
+              {
+                "schemaVersion": 1,
+                "id": "research-step-1",
+                "turnId": "research-turn",
+                "seq": 1,
+                "decision": {
+                  "decision": "READ_EXISTING",
+                  "informationNeed": "寻找目标设备同条件推理记录",
+                  "expectedObservation": "找到能改变判断的项目记录或真实业务状态。",
+                  "call": {
+                    "tool": "search_memory",
+                    "projectId": "project-research",
+                    "query": "寻找目标设备同条件推理记录"
+                  }
+                },
+                "inputHash": "ead9a9b46fe15f533a60f46a8370277c858f6202a5449a618b71180953a0f56a",
+                "readSetHash": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684",
+                "status": "SUCCEEDED",
+                "startedAt": "2026-10-26T12:00:00.000Z",
+                "finishedAt": "2026-10-26T12:00:01.000Z",
+                "observationHash": "05d86c2dfc98e082ecea2ad87da46daaa8cab0289e405f1052e38e7020522c32",
+                "sources": [
+                  {
+                    "kind": "SOURCE",
+                    "id": "research-new",
+                    "projectId": "project-research",
+                    "revision": "05d86c2dfc98e082ecea2ad87da46daaa8cab0289e405f1052e38e7020522c32"
+                  }
+                ],
+                "coverage": {
+                  "complete": false,
+                  "description": "只读取本场景指明的项目记录，不代表全部资料。"
+                },
+                "reservationId": "research-call-1",
+                "provider": "FIXTURE_NO_MODEL",
+                "usage": {
+                  "inputTokens": null,
+                  "outputTokens": null
+                },
+                "failureReason": null
+              }
+            ]
+          }
+        ],
+        "allowedActions": [
+          {
+            "bindingId": "research-preview",
+            "conversationId": "conversation-research",
+            "actionKind": "PREVIEW",
+            "label": "查看采用后的操作",
+            "target": {
+              "kind": "PROPOSAL",
+              "id": "research-proposal",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "expectedConversationVersion": 4,
+            "enabled": true,
+            "disabledReason": null,
+            "frozen": {
+              "executionId": null,
+              "candidateId": "research-read",
+              "proposalHash": "645594d5dfc8aeb3313ea94bcd0500ddd585a6c7d4df13ed38ebe90cd50ff370",
+              "expiresAt": "2026-10-26T13:00:00.000Z"
+            }
+          },
+          {
+            "bindingId": "research-confirm",
+            "conversationId": "conversation-research",
+            "actionKind": "CONFIRM",
+            "label": "确认",
+            "target": {
+              "kind": "PROPOSAL",
+              "id": "research-proposal",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "expectedConversationVersion": 4,
+            "enabled": true,
+            "disabledReason": null,
+            "frozen": {
+              "executionId": "research-execution",
+              "candidateId": "research-read",
+              "proposalHash": "645594d5dfc8aeb3313ea94bcd0500ddd585a6c7d4df13ed38ebe90cd50ff370",
+              "expiresAt": "2026-10-26T13:00:00.000Z"
+            }
+          },
+          {
+            "bindingId": "research-decline",
+            "conversationId": "conversation-research",
+            "actionKind": "DECLINE",
+            "label": "保留原计划",
+            "target": {
+              "kind": "PROPOSAL",
+              "id": "research-proposal",
+              "projectId": "project-research",
+              "revision": "1"
+            },
+            "expectedConversationVersion": 4,
+            "enabled": true,
+            "disabledReason": null,
+            "frozen": {
+              "executionId": "research-execution",
+              "candidateId": "research-read",
+              "proposalHash": "645594d5dfc8aeb3313ea94bcd0500ddd585a6c7d4df13ed38ebe90cd50ff370",
+              "expiresAt": "2026-10-26T13:00:00.000Z"
+            }
+          }
+        ]
+      },
+      "initialPlan": {
+        "schemaVersion": 2,
+        "intent": "EXPLAIN",
+        "composition": [
+          {
+            "blockKey": "research-shown-goal_gap",
+            "emphasis": "primary",
+            "semanticType": "goal_gap",
+            "dataRefs": [
+              {
+                "kind": "PROJECT",
+                "id": "project-research",
+                "projectId": "project-research",
+                "revision": "1"
+              }
+            ]
+          },
+          {
+            "blockKey": "research-shown-evidence",
+            "emphasis": "supporting",
+            "semanticType": "evidence",
+            "dataRefs": [
+              {
+                "kind": "SOURCE",
+                "id": "research-old",
+                "projectId": "project-research",
+                "revision": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684"
+              }
+            ]
+          }
+        ],
+        "primaryIntent": "READ_MORE"
+      },
+      "observedPlan": {
+        "schemaVersion": 2,
+        "intent": "COMPARE",
+        "composition": [
+          {
+            "blockKey": "research-shown-evidence",
+            "emphasis": "primary",
+            "semanticType": "evidence",
+            "dataRefs": [
+              {
+                "kind": "SOURCE",
+                "id": "research-new",
+                "projectId": "project-research",
+                "revision": "05d86c2dfc98e082ecea2ad87da46daaa8cab0289e405f1052e38e7020522c32"
+              }
+            ]
+          },
+          {
+            "blockKey": "research-shown-comparison",
+            "emphasis": "supporting",
+            "semanticType": "comparison",
+            "dataRefs": [
+              {
+                "kind": "PROPOSAL",
+                "id": "research-proposal",
+                "projectId": "project-research",
+                "revision": "1"
+              }
+            ]
+          }
+        ],
+        "primaryIntent": "CONSIDER_ACTION"
+      },
+      "approvalPlan": {
+        "schemaVersion": 2,
+        "intent": "COMPARE",
+        "composition": [
+          {
+            "blockKey": "research-shown-approval",
+            "emphasis": "primary",
+            "semanticType": "approval",
+            "dataRefs": [
+              {
+                "kind": "PROPOSAL",
+                "id": "research-proposal",
+                "projectId": "project-research",
+                "revision": "1"
+              }
+            ]
+          }
+        ],
+        "primaryIntent": "CONSIDER_ACTION"
+      },
+      "receiptPlan": {
+        "schemaVersion": 2,
+        "intent": "COMPARE",
+        "composition": [
+          {
+            "blockKey": "research-shown-receipt",
+            "emphasis": "primary",
+            "semanticType": "receipt",
+            "dataRefs": [
+              {
+                "kind": "RECEIPT",
+                "id": "research-receipt",
+                "projectId": "project-research",
+                "revision": "1"
+              },
+              {
+                "kind": "ACTION",
+                "id": "research-action",
+                "projectId": "project-research",
+                "revision": "1"
+              }
+            ]
+          }
+        ],
+        "primaryIntent": "CONSIDER_ACTION"
+      },
+      "initialDecision": {
+        "decision": "READ_EXISTING",
+        "informationNeed": "寻找目标设备同条件推理记录",
+        "expectedObservation": "找到能改变判断的项目记录或真实业务状态。",
+        "call": {
+          "tool": "search_memory",
+          "projectId": "project-research",
+          "query": "寻找目标设备同条件推理记录"
+        }
+      },
+      "readAfterDiscovery": {
+        "decision": "READ_EXISTING",
+        "informationNeed": "寻找目标设备同条件推理记录",
+        "expectedObservation": "读取已发现来源的适用条件。",
+        "call": {
+          "tool": "read_project_material",
+          "projectId": "project-research",
+          "sourceId": "research-new",
+          "revision": "05d86c2dfc98e082ecea2ad87da46daaa8cab0289e405f1052e38e7020522c32"
+        }
+      },
+      "decisionAfterObservation": {
+        "decision": "ASK_USER",
+        "question": "现有 6.8GB 记录对应的模型版本能调整吗？",
+        "informationNeed": "决定是否继续现有模型优化路线。"
+      },
+      "observedStep": {
+        "schemaVersion": 1,
+        "id": "research-step-1",
+        "turnId": "research-turn",
+        "seq": 1,
+        "decision": {
+          "decision": "READ_EXISTING",
+          "informationNeed": "寻找目标设备同条件推理记录",
+          "expectedObservation": "找到能改变判断的项目记录或真实业务状态。",
+          "call": {
+            "tool": "search_memory",
+            "projectId": "project-research",
+            "query": "寻找目标设备同条件推理记录"
+          }
+        },
+        "inputHash": "ead9a9b46fe15f533a60f46a8370277c858f6202a5449a618b71180953a0f56a",
+        "readSetHash": "7f816edff85df39d930995fb554b53cd7c3d092f9cc73ff8332bf68e69085684",
+        "status": "SUCCEEDED",
+        "startedAt": "2026-10-26T12:00:00.000Z",
+        "finishedAt": "2026-10-26T12:00:01.000Z",
+        "observationHash": "05d86c2dfc98e082ecea2ad87da46daaa8cab0289e405f1052e38e7020522c32",
+        "sources": [
+          {
+            "kind": "SOURCE",
+            "id": "research-new",
+            "projectId": "project-research",
+            "revision": "05d86c2dfc98e082ecea2ad87da46daaa8cab0289e405f1052e38e7020522c32"
+          }
+        ],
+        "coverage": {
+          "complete": false,
+          "description": "只读取本场景指明的项目记录，不代表全部资料。"
+        },
+        "reservationId": "research-call-1",
+        "provider": "FIXTURE_NO_MODEL",
+        "usage": {
+          "inputTokens": null,
+          "outputTokens": null
+        },
+        "failureReason": null
+      },
+      "resultGoalGap": {
+        "schemaVersion": 1,
+        "id": "research-gap",
+        "projectId": "project-research",
+        "goalRef": {
+          "kind": "PROJECT",
+          "id": "project-research",
+          "projectId": "project-research",
+          "revision": "1"
+        },
+        "goalQuote": "模型 A 在设备 D、batch=1 的推理显存不超过 6GB",
+        "criteria": [
+          {
+            "id": "research-criterion",
+            "requirement": "目标设备同条件推理显存不超过 6GB",
+            "state": "REPORTED",
+            "explanation": "用户已提交结果，仍需核对独立验收条件。",
+            "evidence": [
+              {
+                "source": {
+                  "kind": "SOURCE",
+                  "id": "research-user-result",
+                  "projectId": "project-research",
+                  "revision": "42ac127a23a7bc7a33a6ee84fbfb2fa06e7555fb971759411b923ba11b94769f"
+                },
+                "excerptHash": "42ac127a23a7bc7a33a6ee84fbfb2fa06e7555fb971759411b923ba11b94769f",
+                "quote": "我调整模型后，在设备 D、batch=1 测得 5.8GB，尚未附独立日志。",
+                "observedAt": "2026-10-26T12:00:00.000Z",
+                "readScope": "EXCERPT",
+                "applicability": "DIRECT",
+                "verification": "REPORTED",
+                "claim": "目标设备同条件推理显存不超过 6GB",
+                "relation": "SUPPORTS",
+                "reason": "按目标的主体、阶段与条件判断适用范围。"
+              }
+            ]
+          }
+        ],
+        "blockers": [],
+        "keyUnknowns": [],
+        "nextInformationNeed": null
+      },
+      "expected": {
+        "initialTypes": [
+          "goal_gap",
+          "evidence"
+        ],
+        "observedTypes": [
+          "evidence",
+          "comparison"
+        ],
+        "decisionAfterObservation": "ASK_USER",
+        "criterionAfterObservation": "BLOCKED",
+        "businessEffectsOnSelection": 0,
+        "businessEffectsAfterConfirmation": 1
+      }
+    },
+    {
+      "id": "competition",
+      "domain": "COMPETITION",
+      "question": "距离正式提交还差什么？",
+      "initialAuthority": {
+        "conversationId": "conversation-competition",
+        "conversationVersion": 4,
+        "userId": "fixture-user",
+        "conversationOwnerUserId": "fixture-user",
+        "sessionValid": true,
+        "scope": "WORKSPACE",
+        "homeProjectId": null,
+        "projectIds": [
+          "project-competition"
+        ],
+        "now": "2026-10-26T12:00:00.000Z",
+        "entities": [
+          {
+            "ref": {
+              "kind": "PROJECT",
+              "id": "project-competition",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "SOURCE",
+              "id": "competition-old",
+              "projectId": "project-competition",
+              "revision": "c86549f1c4645e01988d0d6d658e9856b16587ef0fb4a98adbe1ece4eddcf11a"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "PROPOSAL",
+              "id": "competition-proposal",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          },
+          {
+            "ref": {
+              "kind": "RECEIPT",
+              "id": "competition-receipt",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "QUESTION",
+              "id": "competition-question",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          },
+          {
+            "ref": {
+              "kind": "EVENT",
+              "id": "competition-event",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "REVIEW",
+              "id": "competition-review",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          },
+          {
+            "ref": {
+              "kind": "ACTION",
+              "id": "competition-action",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "MISSION",
+              "id": "competition-mission",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          }
+        ],
+        "readSet": [
+          {
+            "kind": "PROJECT",
+            "id": "project-competition",
+            "projectId": "project-competition",
+            "revision": "1"
+          },
+          {
+            "kind": "SOURCE",
+            "id": "competition-old",
+            "projectId": "project-competition",
+            "revision": "c86549f1c4645e01988d0d6d658e9856b16587ef0fb4a98adbe1ece4eddcf11a"
+          }
+        ],
+        "evidence": [
+          {
+            "source": {
+              "kind": "SOURCE",
+              "id": "competition-old",
+              "projectId": "project-competition",
+              "revision": "c86549f1c4645e01988d0d6d658e9856b16587ef0fb4a98adbe1ece4eddcf11a"
+            },
+            "excerptHash": "c86549f1c4645e01988d0d6d658e9856b16587ef0fb4a98adbe1ece4eddcf11a",
+            "quote": "Web 构建通过，HAP 已生成。",
+            "observedAt": "2026-10-26T12:00:00.000Z",
+            "readScope": "EXCERPT",
+            "applicability": "CONDITIONAL",
+            "verification": "CHECKED",
+            "claim": "当前记录不能覆盖目标验收条件。",
+            "relation": "SUPPORTS",
+            "reason": "按目标的主体、阶段与条件判断适用范围。"
+          },
+          {
+            "source": {
+              "kind": "SOURCE",
+              "id": "competition-old",
+              "projectId": "project-competition",
+              "revision": "c86549f1c4645e01988d0d6d658e9856b16587ef0fb4a98adbe1ece4eddcf11a"
+            },
+            "excerptHash": "c86549f1c4645e01988d0d6d658e9856b16587ef0fb4a98adbe1ece4eddcf11a",
+            "quote": "Web 构建通过，HAP 已生成。",
+            "observedAt": "2026-10-26T12:00:00.000Z",
+            "readScope": "EXCERPT",
+            "applicability": "CONDITIONAL",
+            "verification": "CHECKED",
+            "claim": "目标设备演示与提交包使用同一构建版本",
+            "relation": "UNDETERMINED",
+            "reason": "按目标的主体、阶段与条件判断适用范围。"
+          }
+        ],
+        "catalog": [
+          {
+            "blockKey": "competition-goal_gap",
+            "emphasis": "supporting",
+            "semanticType": "goal_gap",
+            "fallbackText": "当前资料不足以核验目标条件。",
+            "refs": [
+              {
+                "kind": "PROJECT",
+                "id": "project-competition",
+                "projectId": "project-competition",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "goalGap": {
+              "schemaVersion": 1,
+              "id": "competition-gap",
+              "projectId": "project-competition",
+              "goalRef": {
+                "kind": "PROJECT",
+                "id": "project-competition",
+                "projectId": "project-competition",
+                "revision": "1"
+              },
+              "goalQuote": "交付同版本可演示、可正式提交的竞赛作品",
+              "criteria": [
+                {
+                  "id": "competition-criterion",
+                  "requirement": "目标设备演示与提交包使用同一构建版本",
+                  "state": "UNKNOWN",
+                  "explanation": "当前记录不能覆盖目标验收条件。",
+                  "evidence": [
+                    {
+                      "source": {
+                        "kind": "SOURCE",
+                        "id": "competition-old",
+                        "projectId": "project-competition",
+                        "revision": "c86549f1c4645e01988d0d6d658e9856b16587ef0fb4a98adbe1ece4eddcf11a"
+                      },
+                      "excerptHash": "c86549f1c4645e01988d0d6d658e9856b16587ef0fb4a98adbe1ece4eddcf11a",
+                      "quote": "Web 构建通过，HAP 已生成。",
+                      "observedAt": "2026-10-26T12:00:00.000Z",
+                      "readScope": "EXCERPT",
+                      "applicability": "CONDITIONAL",
+                      "verification": "CHECKED",
+                      "claim": "目标设备演示与提交包使用同一构建版本",
+                      "relation": "UNDETERMINED",
+                      "reason": "按目标的主体、阶段与条件判断适用范围。"
+                    }
+                  ]
+                }
+              ],
+              "blockers": [],
+              "keyUnknowns": [
+                "读取目标设备验收行动和原回执"
+              ],
+              "nextInformationNeed": "读取目标设备验收行动和原回执"
+            }
+          },
+          {
+            "blockKey": "competition-question",
+            "emphasis": "supporting",
+            "semanticType": "question",
+            "fallbackText": "先核对目标设备演示，已有构建不能代替设备验收。",
+            "refs": [
+              {
+                "kind": "QUESTION",
+                "id": "competition-question",
+                "projectId": "project-competition",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "draftKey": "conversation-competition-competition-question",
+            "question": "读取目标设备验收行动和原回执，你希望先查已有资料吗？",
+            "inputKind": "SINGLE_CHOICE",
+            "required": false,
+            "choices": [
+              {
+                "id": "read",
+                "label": "先查已有资料"
+              },
+              {
+                "id": "keep",
+                "label": "保留计划"
+              }
+            ]
+          },
+          {
+            "blockKey": "competition-timeline",
+            "emphasis": "supporting",
+            "semanticType": "timeline",
+            "fallbackText": "先核对目标设备演示，已有构建不能代替设备验收。",
+            "refs": [
+              {
+                "kind": "EVENT",
+                "id": "competition-event",
+                "projectId": "project-competition",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "events": [
+              {
+                "ref": {
+                  "kind": "EVENT",
+                  "id": "competition-event",
+                  "projectId": "project-competition",
+                  "revision": "1"
+                },
+                "occurredAt": "2026-10-26T12:00:00.000Z",
+                "summary": "项目已有材料更新，产生一条待核对的目标关联候选。"
+              }
+            ]
+          },
+          {
+            "blockKey": "competition-evidence",
+            "emphasis": "supporting",
+            "semanticType": "evidence",
+            "fallbackText": "先核对目标设备演示，已有构建不能代替设备验收。",
+            "refs": [
+              {
+                "kind": "SOURCE",
+                "id": "competition-old",
+                "projectId": "project-competition",
+                "revision": "c86549f1c4645e01988d0d6d658e9856b16587ef0fb4a98adbe1ece4eddcf11a"
+              }
+            ],
+            "actionBindingIds": [],
+            "state": "UNKNOWN",
+            "evidence": [
+              {
+                "source": {
+                  "kind": "SOURCE",
+                  "id": "competition-old",
+                  "projectId": "project-competition",
+                  "revision": "c86549f1c4645e01988d0d6d658e9856b16587ef0fb4a98adbe1ece4eddcf11a"
+                },
+                "excerptHash": "c86549f1c4645e01988d0d6d658e9856b16587ef0fb4a98adbe1ece4eddcf11a",
+                "quote": "Web 构建通过，HAP 已生成。",
+                "observedAt": "2026-10-26T12:00:00.000Z",
+                "readScope": "EXCERPT",
+                "applicability": "CONDITIONAL",
+                "verification": "CHECKED",
+                "claim": "当前记录不能覆盖目标验收条件。",
+                "relation": "SUPPORTS",
+                "reason": "按目标的主体、阶段与条件判断适用范围。"
+              }
+            ]
+          }
+        ],
+        "allowedActions": [
+          {
+            "bindingId": "competition-preview",
+            "conversationId": "conversation-competition",
+            "actionKind": "PREVIEW",
+            "label": "查看采用后的操作",
+            "target": {
+              "kind": "PROPOSAL",
+              "id": "competition-proposal",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "expectedConversationVersion": 4,
+            "enabled": true,
+            "disabledReason": null,
+            "frozen": {
+              "executionId": null,
+              "candidateId": "competition-read",
+              "proposalHash": "8018c9a7ae8ad5c9740d2334ca32e248faef948424b599af468c76293a70104f",
+              "expiresAt": "2026-10-26T13:00:00.000Z"
+            }
+          },
+          {
+            "bindingId": "competition-confirm",
+            "conversationId": "conversation-competition",
+            "actionKind": "CONFIRM",
+            "label": "确认",
+            "target": {
+              "kind": "PROPOSAL",
+              "id": "competition-proposal",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "expectedConversationVersion": 4,
+            "enabled": true,
+            "disabledReason": null,
+            "frozen": {
+              "executionId": "competition-execution",
+              "candidateId": "competition-read",
+              "proposalHash": "8018c9a7ae8ad5c9740d2334ca32e248faef948424b599af468c76293a70104f",
+              "expiresAt": "2026-10-26T13:00:00.000Z"
+            }
+          },
+          {
+            "bindingId": "competition-decline",
+            "conversationId": "conversation-competition",
+            "actionKind": "DECLINE",
+            "label": "保留原计划",
+            "target": {
+              "kind": "PROPOSAL",
+              "id": "competition-proposal",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "expectedConversationVersion": 4,
+            "enabled": true,
+            "disabledReason": null,
+            "frozen": {
+              "executionId": "competition-execution",
+              "candidateId": "competition-read",
+              "proposalHash": "8018c9a7ae8ad5c9740d2334ca32e248faef948424b599af468c76293a70104f",
+              "expiresAt": "2026-10-26T13:00:00.000Z"
+            }
+          }
+        ]
+      },
+      "observedAuthority": {
+        "conversationId": "conversation-competition",
+        "conversationVersion": 4,
+        "userId": "fixture-user",
+        "conversationOwnerUserId": "fixture-user",
+        "sessionValid": true,
+        "scope": "WORKSPACE",
+        "homeProjectId": null,
+        "projectIds": [
+          "project-competition"
+        ],
+        "now": "2026-10-26T12:00:00.000Z",
+        "entities": [
+          {
+            "ref": {
+              "kind": "PROJECT",
+              "id": "project-competition",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "SOURCE",
+              "id": "competition-old",
+              "projectId": "project-competition",
+              "revision": "c86549f1c4645e01988d0d6d658e9856b16587ef0fb4a98adbe1ece4eddcf11a"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "SOURCE",
+              "id": "competition-new",
+              "projectId": "project-competition",
+              "revision": "68cd35024255c9037a61b96268991e87bb0be839b6cbdca4685e2a28d34548d9"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "PROPOSAL",
+              "id": "competition-proposal",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          },
+          {
+            "ref": {
+              "kind": "RECEIPT",
+              "id": "competition-receipt",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "QUESTION",
+              "id": "competition-question",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          },
+          {
+            "ref": {
+              "kind": "EVENT",
+              "id": "competition-event",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "REVIEW",
+              "id": "competition-review",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          },
+          {
+            "ref": {
+              "kind": "ACTION",
+              "id": "competition-action",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "MISSION",
+              "id": "competition-mission",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          }
+        ],
+        "readSet": [
+          {
+            "kind": "PROJECT",
+            "id": "project-competition",
+            "projectId": "project-competition",
+            "revision": "1"
+          },
+          {
+            "kind": "SOURCE",
+            "id": "competition-old",
+            "projectId": "project-competition",
+            "revision": "c86549f1c4645e01988d0d6d658e9856b16587ef0fb4a98adbe1ece4eddcf11a"
+          },
+          {
+            "kind": "SOURCE",
+            "id": "competition-new",
+            "projectId": "project-competition",
+            "revision": "68cd35024255c9037a61b96268991e87bb0be839b6cbdca4685e2a28d34548d9"
+          }
+        ],
+        "evidence": [
+          {
+            "source": {
+              "kind": "SOURCE",
+              "id": "competition-old",
+              "projectId": "project-competition",
+              "revision": "c86549f1c4645e01988d0d6d658e9856b16587ef0fb4a98adbe1ece4eddcf11a"
+            },
+            "excerptHash": "c86549f1c4645e01988d0d6d658e9856b16587ef0fb4a98adbe1ece4eddcf11a",
+            "quote": "Web 构建通过，HAP 已生成。",
+            "observedAt": "2026-10-26T12:00:00.000Z",
+            "readScope": "EXCERPT",
+            "applicability": "CONDITIONAL",
+            "verification": "CHECKED",
+            "claim": "当前记录不能覆盖目标验收条件。",
+            "relation": "SUPPORTS",
+            "reason": "按目标的主体、阶段与条件判断适用范围。"
+          },
+          {
+            "source": {
+              "kind": "SOURCE",
+              "id": "competition-new",
+              "projectId": "project-competition",
+              "revision": "68cd35024255c9037a61b96268991e87bb0be839b6cbdca4685e2a28d34548d9"
+            },
+            "excerptHash": "68cd35024255c9037a61b96268991e87bb0be839b6cbdca4685e2a28d34548d9",
+            "quote": "设备验收行动仍为 TODO，尚无目标设备安装回执。",
+            "observedAt": "2026-10-26T12:00:00.000Z",
+            "readScope": "EXCERPT",
+            "applicability": "DIRECT",
+            "verification": "CHECKED",
+            "claim": "先核对目标设备演示，已有构建不能代替设备验收。",
+            "relation": "SUPPORTS",
+            "reason": "按目标的主体、阶段与条件判断适用范围。"
+          },
+          {
+            "source": {
+              "kind": "SOURCE",
+              "id": "competition-old",
+              "projectId": "project-competition",
+              "revision": "c86549f1c4645e01988d0d6d658e9856b16587ef0fb4a98adbe1ece4eddcf11a"
+            },
+            "excerptHash": "c86549f1c4645e01988d0d6d658e9856b16587ef0fb4a98adbe1ece4eddcf11a",
+            "quote": "Web 构建通过，HAP 已生成。",
+            "observedAt": "2026-10-26T12:00:00.000Z",
+            "readScope": "EXCERPT",
+            "applicability": "CONDITIONAL",
+            "verification": "CHECKED",
+            "claim": "目标设备演示与提交包使用同一构建版本",
+            "relation": "UNDETERMINED",
+            "reason": "按目标的主体、阶段与条件判断适用范围。"
+          },
+          {
+            "source": {
+              "kind": "SOURCE",
+              "id": "competition-new",
+              "projectId": "project-competition",
+              "revision": "68cd35024255c9037a61b96268991e87bb0be839b6cbdca4685e2a28d34548d9"
+            },
+            "excerptHash": "68cd35024255c9037a61b96268991e87bb0be839b6cbdca4685e2a28d34548d9",
+            "quote": "设备验收行动仍为 TODO，尚无目标设备安装回执。",
+            "observedAt": "2026-10-26T12:00:00.000Z",
+            "readScope": "EXCERPT",
+            "applicability": "DIRECT",
+            "verification": "CHECKED",
+            "claim": "目标设备演示与提交包使用同一构建版本",
+            "relation": "UNDETERMINED",
+            "reason": "按目标的主体、阶段与条件判断适用范围。"
+          }
+        ],
+        "catalog": [
+          {
+            "blockKey": "competition-evidence",
+            "emphasis": "supporting",
+            "semanticType": "evidence",
+            "fallbackText": "先核对目标设备演示，已有构建不能代替设备验收。",
+            "refs": [
+              {
+                "kind": "SOURCE",
+                "id": "competition-new",
+                "projectId": "project-competition",
+                "revision": "68cd35024255c9037a61b96268991e87bb0be839b6cbdca4685e2a28d34548d9"
+              }
+            ],
+            "actionBindingIds": [],
+            "state": "SUPPORTED",
+            "evidence": [
+              {
+                "source": {
+                  "kind": "SOURCE",
+                  "id": "competition-new",
+                  "projectId": "project-competition",
+                  "revision": "68cd35024255c9037a61b96268991e87bb0be839b6cbdca4685e2a28d34548d9"
+                },
+                "excerptHash": "68cd35024255c9037a61b96268991e87bb0be839b6cbdca4685e2a28d34548d9",
+                "quote": "设备验收行动仍为 TODO，尚无目标设备安装回执。",
+                "observedAt": "2026-10-26T12:00:00.000Z",
+                "readScope": "EXCERPT",
+                "applicability": "DIRECT",
+                "verification": "CHECKED",
+                "claim": "先核对目标设备演示，已有构建不能代替设备验收。",
+                "relation": "SUPPORTS",
+                "reason": "按目标的主体、阶段与条件判断适用范围。"
+              }
+            ]
+          },
+          {
+            "blockKey": "competition-goal_gap",
+            "emphasis": "supporting",
+            "semanticType": "goal_gap",
+            "fallbackText": "先核对目标设备演示，已有构建不能代替设备验收。",
+            "refs": [
+              {
+                "kind": "PROJECT",
+                "id": "project-competition",
+                "projectId": "project-competition",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "goalGap": {
+              "schemaVersion": 1,
+              "id": "competition-gap",
+              "projectId": "project-competition",
+              "goalRef": {
+                "kind": "PROJECT",
+                "id": "project-competition",
+                "projectId": "project-competition",
+                "revision": "1"
+              },
+              "goalQuote": "交付同版本可演示、可正式提交的竞赛作品",
+              "criteria": [
+                {
+                  "id": "competition-criterion",
+                  "requirement": "目标设备演示与提交包使用同一构建版本",
+                  "state": "UNKNOWN",
+                  "explanation": "先核对目标设备演示，已有构建不能代替设备验收。",
+                  "evidence": [
+                    {
+                      "source": {
+                        "kind": "SOURCE",
+                        "id": "competition-new",
+                        "projectId": "project-competition",
+                        "revision": "68cd35024255c9037a61b96268991e87bb0be839b6cbdca4685e2a28d34548d9"
+                      },
+                      "excerptHash": "68cd35024255c9037a61b96268991e87bb0be839b6cbdca4685e2a28d34548d9",
+                      "quote": "设备验收行动仍为 TODO，尚无目标设备安装回执。",
+                      "observedAt": "2026-10-26T12:00:00.000Z",
+                      "readScope": "EXCERPT",
+                      "applicability": "DIRECT",
+                      "verification": "CHECKED",
+                      "claim": "目标设备演示与提交包使用同一构建版本",
+                      "relation": "UNDETERMINED",
+                      "reason": "按目标的主体、阶段与条件判断适用范围。"
+                    }
+                  ]
+                }
+              ],
+              "blockers": [],
+              "keyUnknowns": [
+                "读取目标设备验收行动和原回执"
+              ],
+              "nextInformationNeed": "读取目标设备验收行动和原回执"
+            }
+          },
+          {
+            "blockKey": "competition-comparison",
+            "emphasis": "supporting",
+            "semanticType": "comparison",
+            "fallbackText": "先核对目标设备演示，已有构建不能代替设备验收。",
+            "refs": [
+              {
+                "kind": "PROPOSAL",
+                "id": "competition-proposal",
+                "projectId": "project-competition",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [
+              "competition-preview"
+            ],
+            "proposalHash": "8018c9a7ae8ad5c9740d2334ca32e248faef948424b599af468c76293a70104f",
+            "candidates": [
+              {
+                "id": "competition-read",
+                "title": "完成同版本设备演示核对",
+                "tradeoff": "优先利用已有资料，缺少现实条件时停止。",
+                "feasibility": "READY",
+                "expectedObservation": "读取目标设备验收行动和原回执",
+                "branches": [
+                  {
+                    "observation": "找到直接适用结果",
+                    "consequence": "复核原决定"
+                  },
+                  {
+                    "observation": "条件仍不一致",
+                    "consequence": "保留未知并询问关键条件"
+                  }
+                ],
+                "stopCondition": "没有适用来源或用户否决时停止。"
+              },
+              {
+                "id": "competition-keep",
+                "title": "保留当前计划",
+                "tradeoff": "不增加行动，等待必要新证据。",
+                "feasibility": "READY",
+                "expectedObservation": null,
+                "branches": [],
+                "stopCondition": "保持原业务对象不变。"
+              }
+            ]
+          },
+          {
+            "blockKey": "competition-question",
+            "emphasis": "supporting",
+            "semanticType": "question",
+            "fallbackText": "先核对目标设备演示，已有构建不能代替设备验收。",
+            "refs": [
+              {
+                "kind": "QUESTION",
+                "id": "competition-question",
+                "projectId": "project-competition",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "draftKey": "conversation-competition-competition-question",
+            "question": "读取目标设备验收行动和原回执，你希望先查已有资料吗？",
+            "inputKind": "SINGLE_CHOICE",
+            "required": false,
+            "choices": [
+              {
+                "id": "read",
+                "label": "先查已有资料"
+              },
+              {
+                "id": "keep",
+                "label": "保留计划"
+              }
+            ]
+          },
+          {
+            "blockKey": "competition-approval",
+            "emphasis": "supporting",
+            "semanticType": "approval",
+            "fallbackText": "待你确认，原行动尚未创建。",
+            "refs": [
+              {
+                "kind": "PROPOSAL",
+                "id": "competition-proposal",
+                "projectId": "project-competition",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [
+              "competition-confirm",
+              "competition-decline"
+            ],
+            "executionId": "competition-execution",
+            "proposalHash": "8018c9a7ae8ad5c9740d2334ca32e248faef948424b599af468c76293a70104f",
+            "expiresAt": "2026-10-26T13:00:00.000Z",
+            "state": "PENDING"
+          },
+          {
+            "blockKey": "competition-receipt",
+            "emphasis": "supporting",
+            "semanticType": "receipt",
+            "fallbackText": "行动已创建，尚未执行；目标条件仍未验收。",
+            "refs": [
+              {
+                "kind": "RECEIPT",
+                "id": "competition-receipt",
+                "projectId": "project-competition",
+                "revision": "1"
+              },
+              {
+                "kind": "ACTION",
+                "id": "competition-action",
+                "projectId": "project-competition",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "state": "CREATED",
+            "verification": "NOT_CHECKED",
+            "evidence": []
+          },
+          {
+            "blockKey": "competition-timeline",
+            "emphasis": "supporting",
+            "semanticType": "timeline",
+            "fallbackText": "先核对目标设备演示，已有构建不能代替设备验收。",
+            "refs": [
+              {
+                "kind": "EVENT",
+                "id": "competition-event",
+                "projectId": "project-competition",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "events": [
+              {
+                "ref": {
+                  "kind": "EVENT",
+                  "id": "competition-event",
+                  "projectId": "project-competition",
+                  "revision": "1"
+                },
+                "occurredAt": "2026-10-26T12:00:00.000Z",
+                "summary": "项目已有材料更新，产生一条待核对的目标关联候选。"
+              }
+            ]
+          },
+          {
+            "blockKey": "competition-change",
+            "emphasis": "supporting",
+            "semanticType": "change",
+            "fallbackText": "先核对目标设备演示，已有构建不能代替设备验收。",
+            "refs": [
+              {
+                "kind": "REVIEW",
+                "id": "competition-review",
+                "projectId": "project-competition",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "disposition": "UNKNOWN",
+            "goalQuote": "交付同版本可演示、可正式提交的竞赛作品",
+            "changeKind": "项目材料更新",
+            "relevance": "涉及原目标条件",
+            "unknowns": [
+              "读取目标设备验收行动和原回执"
+            ]
+          },
+          {
+            "blockKey": "competition-investigation",
+            "emphasis": "supporting",
+            "semanticType": "investigation",
+            "fallbackText": "先核对目标设备演示，已有构建不能代替设备验收。",
+            "refs": [
+              {
+                "kind": "SOURCE",
+                "id": "competition-new",
+                "projectId": "project-competition",
+                "revision": "68cd35024255c9037a61b96268991e87bb0be839b6cbdca4685e2a28d34548d9"
+              }
+            ],
+            "actionBindingIds": [],
+            "investigationId": "competition-turn",
+            "state": "CONCLUDED",
+            "steps": [
+              {
+                "schemaVersion": 1,
+                "id": "competition-step-1",
+                "turnId": "competition-turn",
+                "seq": 1,
+                "decision": {
+                  "decision": "READ_EXISTING",
+                  "informationNeed": "读取目标设备验收行动和原回执",
+                  "expectedObservation": "找到能改变判断的项目记录或真实业务状态。",
+                  "call": {
+                    "tool": "inspect_project",
+                    "projectId": "project-competition"
+                  }
+                },
+                "inputHash": "2baf72c99a48c976093850774fde077f376956fe2333154c5418bde7501bad3a",
+                "readSetHash": "c86549f1c4645e01988d0d6d658e9856b16587ef0fb4a98adbe1ece4eddcf11a",
+                "status": "SUCCEEDED",
+                "startedAt": "2026-10-26T12:00:00.000Z",
+                "finishedAt": "2026-10-26T12:00:01.000Z",
+                "observationHash": "68cd35024255c9037a61b96268991e87bb0be839b6cbdca4685e2a28d34548d9",
+                "sources": [
+                  {
+                    "kind": "SOURCE",
+                    "id": "competition-new",
+                    "projectId": "project-competition",
+                    "revision": "68cd35024255c9037a61b96268991e87bb0be839b6cbdca4685e2a28d34548d9"
+                  }
+                ],
+                "coverage": {
+                  "complete": false,
+                  "description": "只读取本场景指明的项目记录，不代表全部资料。"
+                },
+                "reservationId": "competition-call-1",
+                "provider": "FIXTURE_NO_MODEL",
+                "usage": {
+                  "inputTokens": null,
+                  "outputTokens": null
+                },
+                "failureReason": null
+              }
+            ]
+          }
+        ],
+        "allowedActions": [
+          {
+            "bindingId": "competition-preview",
+            "conversationId": "conversation-competition",
+            "actionKind": "PREVIEW",
+            "label": "查看采用后的操作",
+            "target": {
+              "kind": "PROPOSAL",
+              "id": "competition-proposal",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "expectedConversationVersion": 4,
+            "enabled": true,
+            "disabledReason": null,
+            "frozen": {
+              "executionId": null,
+              "candidateId": "competition-read",
+              "proposalHash": "8018c9a7ae8ad5c9740d2334ca32e248faef948424b599af468c76293a70104f",
+              "expiresAt": "2026-10-26T13:00:00.000Z"
+            }
+          },
+          {
+            "bindingId": "competition-confirm",
+            "conversationId": "conversation-competition",
+            "actionKind": "CONFIRM",
+            "label": "确认",
+            "target": {
+              "kind": "PROPOSAL",
+              "id": "competition-proposal",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "expectedConversationVersion": 4,
+            "enabled": true,
+            "disabledReason": null,
+            "frozen": {
+              "executionId": "competition-execution",
+              "candidateId": "competition-read",
+              "proposalHash": "8018c9a7ae8ad5c9740d2334ca32e248faef948424b599af468c76293a70104f",
+              "expiresAt": "2026-10-26T13:00:00.000Z"
+            }
+          },
+          {
+            "bindingId": "competition-decline",
+            "conversationId": "conversation-competition",
+            "actionKind": "DECLINE",
+            "label": "保留原计划",
+            "target": {
+              "kind": "PROPOSAL",
+              "id": "competition-proposal",
+              "projectId": "project-competition",
+              "revision": "1"
+            },
+            "expectedConversationVersion": 4,
+            "enabled": true,
+            "disabledReason": null,
+            "frozen": {
+              "executionId": "competition-execution",
+              "candidateId": "competition-read",
+              "proposalHash": "8018c9a7ae8ad5c9740d2334ca32e248faef948424b599af468c76293a70104f",
+              "expiresAt": "2026-10-26T13:00:00.000Z"
+            }
+          }
+        ]
+      },
+      "initialPlan": {
+        "schemaVersion": 2,
+        "intent": "EXPLAIN",
+        "composition": [
+          {
+            "blockKey": "competition-shown-timeline",
+            "emphasis": "primary",
+            "semanticType": "timeline",
+            "dataRefs": [
+              {
+                "kind": "EVENT",
+                "id": "competition-event",
+                "projectId": "project-competition",
+                "revision": "1"
+              }
+            ]
+          },
+          {
+            "blockKey": "competition-shown-goal_gap",
+            "emphasis": "supporting",
+            "semanticType": "goal_gap",
+            "dataRefs": [
+              {
+                "kind": "PROJECT",
+                "id": "project-competition",
+                "projectId": "project-competition",
+                "revision": "1"
+              }
+            ]
+          }
+        ],
+        "primaryIntent": "READ_MORE"
+      },
+      "observedPlan": {
+        "schemaVersion": 2,
+        "intent": "COMPARE",
+        "composition": [
+          {
+            "blockKey": "competition-shown-goal_gap",
+            "emphasis": "primary",
+            "semanticType": "goal_gap",
+            "dataRefs": [
+              {
+                "kind": "PROJECT",
+                "id": "project-competition",
+                "projectId": "project-competition",
+                "revision": "1"
+              }
+            ]
+          },
+          {
+            "blockKey": "competition-shown-question",
+            "emphasis": "supporting",
+            "semanticType": "question",
+            "dataRefs": [
+              {
+                "kind": "QUESTION",
+                "id": "competition-question",
+                "projectId": "project-competition",
+                "revision": "1"
+              }
+            ]
+          }
+        ],
+        "primaryIntent": "CONSIDER_ACTION"
+      },
+      "approvalPlan": {
+        "schemaVersion": 2,
+        "intent": "COMPARE",
+        "composition": [
+          {
+            "blockKey": "competition-shown-approval",
+            "emphasis": "primary",
+            "semanticType": "approval",
+            "dataRefs": [
+              {
+                "kind": "PROPOSAL",
+                "id": "competition-proposal",
+                "projectId": "project-competition",
+                "revision": "1"
+              }
+            ]
+          }
+        ],
+        "primaryIntent": "CONSIDER_ACTION"
+      },
+      "receiptPlan": {
+        "schemaVersion": 2,
+        "intent": "COMPARE",
+        "composition": [
+          {
+            "blockKey": "competition-shown-receipt",
+            "emphasis": "primary",
+            "semanticType": "receipt",
+            "dataRefs": [
+              {
+                "kind": "RECEIPT",
+                "id": "competition-receipt",
+                "projectId": "project-competition",
+                "revision": "1"
+              },
+              {
+                "kind": "ACTION",
+                "id": "competition-action",
+                "projectId": "project-competition",
+                "revision": "1"
+              }
+            ]
+          }
+        ],
+        "primaryIntent": "CONSIDER_ACTION"
+      },
+      "initialDecision": {
+        "decision": "READ_EXISTING",
+        "informationNeed": "读取目标设备验收行动和原回执",
+        "expectedObservation": "找到能改变判断的项目记录或真实业务状态。",
+        "call": {
+          "tool": "inspect_project",
+          "projectId": "project-competition"
+        }
+      },
+      "readAfterDiscovery": {
+        "decision": "READ_EXISTING",
+        "informationNeed": "读取目标设备验收行动和原回执",
+        "expectedObservation": "读取已发现来源的适用条件。",
+        "call": {
+          "tool": "read_project_material",
+          "projectId": "project-competition",
+          "sourceId": "competition-new",
+          "revision": "68cd35024255c9037a61b96268991e87bb0be839b6cbdca4685e2a28d34548d9"
+        }
+      },
+      "decisionAfterObservation": {
+        "decision": "READ_EXISTING",
+        "informationNeed": "核对原验收行动的实际状态",
+        "expectedObservation": "取得原行动状态，不把构建记录当设备回执。",
+        "call": {
+          "tool": "inspect_action",
+          "projectId": "project-competition",
+          "actionId": "competition-action",
+          "revision": "1"
+        }
+      },
+      "observedStep": {
+        "schemaVersion": 1,
+        "id": "competition-step-1",
+        "turnId": "competition-turn",
+        "seq": 1,
+        "decision": {
+          "decision": "READ_EXISTING",
+          "informationNeed": "读取目标设备验收行动和原回执",
+          "expectedObservation": "找到能改变判断的项目记录或真实业务状态。",
+          "call": {
+            "tool": "inspect_project",
+            "projectId": "project-competition"
+          }
+        },
+        "inputHash": "2baf72c99a48c976093850774fde077f376956fe2333154c5418bde7501bad3a",
+        "readSetHash": "c86549f1c4645e01988d0d6d658e9856b16587ef0fb4a98adbe1ece4eddcf11a",
+        "status": "SUCCEEDED",
+        "startedAt": "2026-10-26T12:00:00.000Z",
+        "finishedAt": "2026-10-26T12:00:01.000Z",
+        "observationHash": "68cd35024255c9037a61b96268991e87bb0be839b6cbdca4685e2a28d34548d9",
+        "sources": [
+          {
+            "kind": "SOURCE",
+            "id": "competition-new",
+            "projectId": "project-competition",
+            "revision": "68cd35024255c9037a61b96268991e87bb0be839b6cbdca4685e2a28d34548d9"
+          }
+        ],
+        "coverage": {
+          "complete": false,
+          "description": "只读取本场景指明的项目记录，不代表全部资料。"
+        },
+        "reservationId": "competition-call-1",
+        "provider": "FIXTURE_NO_MODEL",
+        "usage": {
+          "inputTokens": null,
+          "outputTokens": null
+        },
+        "failureReason": null
+      },
+      "resultGoalGap": {
+        "schemaVersion": 1,
+        "id": "competition-gap",
+        "projectId": "project-competition",
+        "goalRef": {
+          "kind": "PROJECT",
+          "id": "project-competition",
+          "projectId": "project-competition",
+          "revision": "1"
+        },
+        "goalQuote": "交付同版本可演示、可正式提交的竞赛作品",
+        "criteria": [
+          {
+            "id": "competition-criterion",
+            "requirement": "目标设备演示与提交包使用同一构建版本",
+            "state": "REPORTED",
+            "explanation": "用户已提交结果，仍需核对独立验收条件。",
+            "evidence": [
+              {
+                "source": {
+                  "kind": "SOURCE",
+                  "id": "competition-user-result",
+                  "projectId": "project-competition",
+                  "revision": "2b9cfe1e7be76d4d9abf6f909191de082454b9acaa9b32810d12fc130c6f66b7"
+                },
+                "excerptHash": "2b9cfe1e7be76d4d9abf6f909191de082454b9acaa9b32810d12fc130c6f66b7",
+                "quote": "我已在目标设备安装同版本 HAP 并演示三条核心流程，尚未附设备回执。",
+                "observedAt": "2026-10-26T12:00:00.000Z",
+                "readScope": "EXCERPT",
+                "applicability": "DIRECT",
+                "verification": "REPORTED",
+                "claim": "目标设备演示与提交包使用同一构建版本",
+                "relation": "SUPPORTS",
+                "reason": "按目标的主体、阶段与条件判断适用范围。"
+              }
+            ]
+          }
+        ],
+        "blockers": [],
+        "keyUnknowns": [],
+        "nextInformationNeed": null
+      },
+      "expected": {
+        "initialTypes": [
+          "timeline",
+          "goal_gap"
+        ],
+        "observedTypes": [
+          "goal_gap",
+          "question"
+        ],
+        "decisionAfterObservation": "READ_EXISTING",
+        "criterionAfterObservation": "UNKNOWN",
+        "businessEffectsOnSelection": 0,
+        "businessEffectsAfterConfirmation": 1
+      }
+    },
+    {
+      "id": "course",
+      "domain": "COURSE",
+      "question": "报告的结论现在可靠吗？",
+      "initialAuthority": {
+        "conversationId": "conversation-course",
+        "conversationVersion": 4,
+        "userId": "fixture-user",
+        "conversationOwnerUserId": "fixture-user",
+        "sessionValid": true,
+        "scope": "WORKSPACE",
+        "homeProjectId": null,
+        "projectIds": [
+          "project-course"
+        ],
+        "now": "2026-10-26T12:00:00.000Z",
+        "entities": [
+          {
+            "ref": {
+              "kind": "PROJECT",
+              "id": "project-course",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "SOURCE",
+              "id": "course-old",
+              "projectId": "project-course",
+              "revision": "0b38449ad1b87cf03d95f2b20e91e0437ea9ac10962f7678de2faf7741e9fc11"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "PROPOSAL",
+              "id": "course-proposal",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          },
+          {
+            "ref": {
+              "kind": "RECEIPT",
+              "id": "course-receipt",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "QUESTION",
+              "id": "course-question",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          },
+          {
+            "ref": {
+              "kind": "EVENT",
+              "id": "course-event",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "REVIEW",
+              "id": "course-review",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          },
+          {
+            "ref": {
+              "kind": "ACTION",
+              "id": "course-action",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "MISSION",
+              "id": "course-mission",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          }
+        ],
+        "readSet": [
+          {
+            "kind": "PROJECT",
+            "id": "project-course",
+            "projectId": "project-course",
+            "revision": "1"
+          },
+          {
+            "kind": "SOURCE",
+            "id": "course-old",
+            "projectId": "project-course",
+            "revision": "0b38449ad1b87cf03d95f2b20e91e0437ea9ac10962f7678de2faf7741e9fc11"
+          }
+        ],
+        "evidence": [
+          {
+            "source": {
+              "kind": "SOURCE",
+              "id": "course-old",
+              "projectId": "project-course",
+              "revision": "0b38449ad1b87cf03d95f2b20e91e0437ea9ac10962f7678de2faf7741e9fc11"
+            },
+            "excerptHash": "0b38449ad1b87cf03d95f2b20e91e0437ea9ac10962f7678de2faf7741e9fc11",
+            "quote": "草稿写实验 B 比 A 准确率更高，但未列对比条件。",
+            "observedAt": "2026-10-26T12:00:00.000Z",
+            "readScope": "EXCERPT",
+            "applicability": "UNKNOWN",
+            "verification": "CHECKED",
+            "claim": "当前记录不能覆盖目标验收条件。",
+            "relation": "SUPPORTS",
+            "reason": "按目标的主体、阶段与条件判断适用范围。"
+          },
+          {
+            "source": {
+              "kind": "SOURCE",
+              "id": "course-old",
+              "projectId": "project-course",
+              "revision": "0b38449ad1b87cf03d95f2b20e91e0437ea9ac10962f7678de2faf7741e9fc11"
+            },
+            "excerptHash": "0b38449ad1b87cf03d95f2b20e91e0437ea9ac10962f7678de2faf7741e9fc11",
+            "quote": "草稿写实验 B 比 A 准确率更高，但未列对比条件。",
+            "observedAt": "2026-10-26T12:00:00.000Z",
+            "readScope": "EXCERPT",
+            "applicability": "UNKNOWN",
+            "verification": "CHECKED",
+            "claim": "结论比较使用相同数据划分与参数条件",
+            "relation": "UNDETERMINED",
+            "reason": "按目标的主体、阶段与条件判断适用范围。"
+          }
+        ],
+        "catalog": [
+          {
+            "blockKey": "course-goal_gap",
+            "emphasis": "supporting",
+            "semanticType": "goal_gap",
+            "fallbackText": "当前资料不足以核验目标条件。",
+            "refs": [
+              {
+                "kind": "PROJECT",
+                "id": "project-course",
+                "projectId": "project-course",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "goalGap": {
+              "schemaVersion": 1,
+              "id": "course-gap",
+              "projectId": "project-course",
+              "goalRef": {
+                "kind": "PROJECT",
+                "id": "project-course",
+                "projectId": "project-course",
+                "revision": "1"
+              },
+              "goalQuote": "提交可复现实验且结论与结果一致的课程研究报告",
+              "criteria": [
+                {
+                  "id": "course-criterion",
+                  "requirement": "结论比较使用相同数据划分与参数条件",
+                  "state": "UNKNOWN",
+                  "explanation": "当前记录不能覆盖目标验收条件。",
+                  "evidence": [
+                    {
+                      "source": {
+                        "kind": "SOURCE",
+                        "id": "course-old",
+                        "projectId": "project-course",
+                        "revision": "0b38449ad1b87cf03d95f2b20e91e0437ea9ac10962f7678de2faf7741e9fc11"
+                      },
+                      "excerptHash": "0b38449ad1b87cf03d95f2b20e91e0437ea9ac10962f7678de2faf7741e9fc11",
+                      "quote": "草稿写实验 B 比 A 准确率更高，但未列对比条件。",
+                      "observedAt": "2026-10-26T12:00:00.000Z",
+                      "readScope": "EXCERPT",
+                      "applicability": "UNKNOWN",
+                      "verification": "CHECKED",
+                      "claim": "结论比较使用相同数据划分与参数条件",
+                      "relation": "UNDETERMINED",
+                      "reason": "按目标的主体、阶段与条件判断适用范围。"
+                    }
+                  ]
+                }
+              ],
+              "blockers": [],
+              "keyUnknowns": [
+                "读取两次实验的数据划分和参数"
+              ],
+              "nextInformationNeed": "读取两次实验的数据划分和参数"
+            }
+          },
+          {
+            "blockKey": "course-question",
+            "emphasis": "supporting",
+            "semanticType": "question",
+            "fallbackText": "现有结果不能支持同条件优劣结论，应先修订比较范围。",
+            "refs": [
+              {
+                "kind": "QUESTION",
+                "id": "course-question",
+                "projectId": "project-course",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "draftKey": "conversation-course-course-question",
+            "question": "读取两次实验的数据划分和参数，你希望先查已有资料吗？",
+            "inputKind": "SINGLE_CHOICE",
+            "required": false,
+            "choices": [
+              {
+                "id": "read",
+                "label": "先查已有资料"
+              },
+              {
+                "id": "keep",
+                "label": "保留计划"
+              }
+            ]
+          },
+          {
+            "blockKey": "course-timeline",
+            "emphasis": "supporting",
+            "semanticType": "timeline",
+            "fallbackText": "现有结果不能支持同条件优劣结论，应先修订比较范围。",
+            "refs": [
+              {
+                "kind": "EVENT",
+                "id": "course-event",
+                "projectId": "project-course",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "events": [
+              {
+                "ref": {
+                  "kind": "EVENT",
+                  "id": "course-event",
+                  "projectId": "project-course",
+                  "revision": "1"
+                },
+                "occurredAt": "2026-10-26T12:00:00.000Z",
+                "summary": "项目已有材料更新，产生一条待核对的目标关联候选。"
+              }
+            ]
+          },
+          {
+            "blockKey": "course-evidence",
+            "emphasis": "supporting",
+            "semanticType": "evidence",
+            "fallbackText": "现有结果不能支持同条件优劣结论，应先修订比较范围。",
+            "refs": [
+              {
+                "kind": "SOURCE",
+                "id": "course-old",
+                "projectId": "project-course",
+                "revision": "0b38449ad1b87cf03d95f2b20e91e0437ea9ac10962f7678de2faf7741e9fc11"
+              }
+            ],
+            "actionBindingIds": [],
+            "state": "UNKNOWN",
+            "evidence": [
+              {
+                "source": {
+                  "kind": "SOURCE",
+                  "id": "course-old",
+                  "projectId": "project-course",
+                  "revision": "0b38449ad1b87cf03d95f2b20e91e0437ea9ac10962f7678de2faf7741e9fc11"
+                },
+                "excerptHash": "0b38449ad1b87cf03d95f2b20e91e0437ea9ac10962f7678de2faf7741e9fc11",
+                "quote": "草稿写实验 B 比 A 准确率更高，但未列对比条件。",
+                "observedAt": "2026-10-26T12:00:00.000Z",
+                "readScope": "EXCERPT",
+                "applicability": "UNKNOWN",
+                "verification": "CHECKED",
+                "claim": "当前记录不能覆盖目标验收条件。",
+                "relation": "SUPPORTS",
+                "reason": "按目标的主体、阶段与条件判断适用范围。"
+              }
+            ]
+          }
+        ],
+        "allowedActions": [
+          {
+            "bindingId": "course-preview",
+            "conversationId": "conversation-course",
+            "actionKind": "PREVIEW",
+            "label": "查看采用后的操作",
+            "target": {
+              "kind": "PROPOSAL",
+              "id": "course-proposal",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "expectedConversationVersion": 4,
+            "enabled": true,
+            "disabledReason": null,
+            "frozen": {
+              "executionId": null,
+              "candidateId": "course-read",
+              "proposalHash": "5517afc70f548539467fc80ce191f31815c4b60a535833148fd4323ca598fde6",
+              "expiresAt": "2026-10-26T13:00:00.000Z"
+            }
+          },
+          {
+            "bindingId": "course-confirm",
+            "conversationId": "conversation-course",
+            "actionKind": "CONFIRM",
+            "label": "确认",
+            "target": {
+              "kind": "PROPOSAL",
+              "id": "course-proposal",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "expectedConversationVersion": 4,
+            "enabled": true,
+            "disabledReason": null,
+            "frozen": {
+              "executionId": "course-execution",
+              "candidateId": "course-read",
+              "proposalHash": "5517afc70f548539467fc80ce191f31815c4b60a535833148fd4323ca598fde6",
+              "expiresAt": "2026-10-26T13:00:00.000Z"
+            }
+          },
+          {
+            "bindingId": "course-decline",
+            "conversationId": "conversation-course",
+            "actionKind": "DECLINE",
+            "label": "保留原计划",
+            "target": {
+              "kind": "PROPOSAL",
+              "id": "course-proposal",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "expectedConversationVersion": 4,
+            "enabled": true,
+            "disabledReason": null,
+            "frozen": {
+              "executionId": "course-execution",
+              "candidateId": "course-read",
+              "proposalHash": "5517afc70f548539467fc80ce191f31815c4b60a535833148fd4323ca598fde6",
+              "expiresAt": "2026-10-26T13:00:00.000Z"
+            }
+          }
+        ]
+      },
+      "observedAuthority": {
+        "conversationId": "conversation-course",
+        "conversationVersion": 4,
+        "userId": "fixture-user",
+        "conversationOwnerUserId": "fixture-user",
+        "sessionValid": true,
+        "scope": "WORKSPACE",
+        "homeProjectId": null,
+        "projectIds": [
+          "project-course"
+        ],
+        "now": "2026-10-26T12:00:00.000Z",
+        "entities": [
+          {
+            "ref": {
+              "kind": "PROJECT",
+              "id": "project-course",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "SOURCE",
+              "id": "course-old",
+              "projectId": "project-course",
+              "revision": "0b38449ad1b87cf03d95f2b20e91e0437ea9ac10962f7678de2faf7741e9fc11"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "SOURCE",
+              "id": "course-new",
+              "projectId": "project-course",
+              "revision": "7ce89fe6f46c0c239a44cbebf17d5690f3aff5ce39d57bb7119d897dc899d19b"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "PROPOSAL",
+              "id": "course-proposal",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          },
+          {
+            "ref": {
+              "kind": "RECEIPT",
+              "id": "course-receipt",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "QUESTION",
+              "id": "course-question",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          },
+          {
+            "ref": {
+              "kind": "EVENT",
+              "id": "course-event",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "REVIEW",
+              "id": "course-review",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          },
+          {
+            "ref": {
+              "kind": "ACTION",
+              "id": "course-action",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "privateOwnerUserId": null
+          },
+          {
+            "ref": {
+              "kind": "MISSION",
+              "id": "course-mission",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "privateOwnerUserId": "fixture-user"
+          }
+        ],
+        "readSet": [
+          {
+            "kind": "PROJECT",
+            "id": "project-course",
+            "projectId": "project-course",
+            "revision": "1"
+          },
+          {
+            "kind": "SOURCE",
+            "id": "course-old",
+            "projectId": "project-course",
+            "revision": "0b38449ad1b87cf03d95f2b20e91e0437ea9ac10962f7678de2faf7741e9fc11"
+          },
+          {
+            "kind": "SOURCE",
+            "id": "course-new",
+            "projectId": "project-course",
+            "revision": "7ce89fe6f46c0c239a44cbebf17d5690f3aff5ce39d57bb7119d897dc899d19b"
+          }
+        ],
+        "evidence": [
+          {
+            "source": {
+              "kind": "SOURCE",
+              "id": "course-old",
+              "projectId": "project-course",
+              "revision": "0b38449ad1b87cf03d95f2b20e91e0437ea9ac10962f7678de2faf7741e9fc11"
+            },
+            "excerptHash": "0b38449ad1b87cf03d95f2b20e91e0437ea9ac10962f7678de2faf7741e9fc11",
+            "quote": "草稿写实验 B 比 A 准确率更高，但未列对比条件。",
+            "observedAt": "2026-10-26T12:00:00.000Z",
+            "readScope": "EXCERPT",
+            "applicability": "UNKNOWN",
+            "verification": "CHECKED",
+            "claim": "当前记录不能覆盖目标验收条件。",
+            "relation": "SUPPORTS",
+            "reason": "按目标的主体、阶段与条件判断适用范围。"
+          },
+          {
+            "source": {
+              "kind": "SOURCE",
+              "id": "course-new",
+              "projectId": "project-course",
+              "revision": "7ce89fe6f46c0c239a44cbebf17d5690f3aff5ce39d57bb7119d897dc899d19b"
+            },
+            "excerptHash": "7ce89fe6f46c0c239a44cbebf17d5690f3aff5ce39d57bb7119d897dc899d19b",
+            "quote": "实验 A 使用划分 s1，实验 B 使用 s2，两个结果不构成同条件对照。",
+            "observedAt": "2026-10-26T12:00:00.000Z",
+            "readScope": "EXCERPT",
+            "applicability": "DIRECT",
+            "verification": "CHECKED",
+            "claim": "现有结果不能支持同条件优劣结论，应先修订比较范围。",
+            "relation": "SUPPORTS",
+            "reason": "按目标的主体、阶段与条件判断适用范围。"
+          },
+          {
+            "source": {
+              "kind": "SOURCE",
+              "id": "course-old",
+              "projectId": "project-course",
+              "revision": "0b38449ad1b87cf03d95f2b20e91e0437ea9ac10962f7678de2faf7741e9fc11"
+            },
+            "excerptHash": "0b38449ad1b87cf03d95f2b20e91e0437ea9ac10962f7678de2faf7741e9fc11",
+            "quote": "草稿写实验 B 比 A 准确率更高，但未列对比条件。",
+            "observedAt": "2026-10-26T12:00:00.000Z",
+            "readScope": "EXCERPT",
+            "applicability": "UNKNOWN",
+            "verification": "CHECKED",
+            "claim": "结论比较使用相同数据划分与参数条件",
+            "relation": "UNDETERMINED",
+            "reason": "按目标的主体、阶段与条件判断适用范围。"
+          },
+          {
+            "source": {
+              "kind": "SOURCE",
+              "id": "course-new",
+              "projectId": "project-course",
+              "revision": "7ce89fe6f46c0c239a44cbebf17d5690f3aff5ce39d57bb7119d897dc899d19b"
+            },
+            "excerptHash": "7ce89fe6f46c0c239a44cbebf17d5690f3aff5ce39d57bb7119d897dc899d19b",
+            "quote": "实验 A 使用划分 s1，实验 B 使用 s2，两个结果不构成同条件对照。",
+            "observedAt": "2026-10-26T12:00:00.000Z",
+            "readScope": "EXCERPT",
+            "applicability": "DIRECT",
+            "verification": "CHECKED",
+            "claim": "结论比较使用相同数据划分与参数条件",
+            "relation": "CONTRADICTS",
+            "reason": "按目标的主体、阶段与条件判断适用范围。"
+          }
+        ],
+        "catalog": [
+          {
+            "blockKey": "course-evidence",
+            "emphasis": "supporting",
+            "semanticType": "evidence",
+            "fallbackText": "现有结果不能支持同条件优劣结论，应先修订比较范围。",
+            "refs": [
+              {
+                "kind": "SOURCE",
+                "id": "course-new",
+                "projectId": "project-course",
+                "revision": "7ce89fe6f46c0c239a44cbebf17d5690f3aff5ce39d57bb7119d897dc899d19b"
+              }
+            ],
+            "actionBindingIds": [],
+            "state": "SUPPORTED",
+            "evidence": [
+              {
+                "source": {
+                  "kind": "SOURCE",
+                  "id": "course-new",
+                  "projectId": "project-course",
+                  "revision": "7ce89fe6f46c0c239a44cbebf17d5690f3aff5ce39d57bb7119d897dc899d19b"
+                },
+                "excerptHash": "7ce89fe6f46c0c239a44cbebf17d5690f3aff5ce39d57bb7119d897dc899d19b",
+                "quote": "实验 A 使用划分 s1，实验 B 使用 s2，两个结果不构成同条件对照。",
+                "observedAt": "2026-10-26T12:00:00.000Z",
+                "readScope": "EXCERPT",
+                "applicability": "DIRECT",
+                "verification": "CHECKED",
+                "claim": "现有结果不能支持同条件优劣结论，应先修订比较范围。",
+                "relation": "SUPPORTS",
+                "reason": "按目标的主体、阶段与条件判断适用范围。"
+              }
+            ]
+          },
+          {
+            "blockKey": "course-goal_gap",
+            "emphasis": "supporting",
+            "semanticType": "goal_gap",
+            "fallbackText": "现有结果不能支持同条件优劣结论，应先修订比较范围。",
+            "refs": [
+              {
+                "kind": "PROJECT",
+                "id": "project-course",
+                "projectId": "project-course",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "goalGap": {
+              "schemaVersion": 1,
+              "id": "course-gap",
+              "projectId": "project-course",
+              "goalRef": {
+                "kind": "PROJECT",
+                "id": "project-course",
+                "projectId": "project-course",
+                "revision": "1"
+              },
+              "goalQuote": "提交可复现实验且结论与结果一致的课程研究报告",
+              "criteria": [
+                {
+                  "id": "course-criterion",
+                  "requirement": "结论比较使用相同数据划分与参数条件",
+                  "state": "BLOCKED",
+                  "explanation": "现有结果不能支持同条件优劣结论，应先修订比较范围。",
+                  "evidence": [
+                    {
+                      "source": {
+                        "kind": "SOURCE",
+                        "id": "course-new",
+                        "projectId": "project-course",
+                        "revision": "7ce89fe6f46c0c239a44cbebf17d5690f3aff5ce39d57bb7119d897dc899d19b"
+                      },
+                      "excerptHash": "7ce89fe6f46c0c239a44cbebf17d5690f3aff5ce39d57bb7119d897dc899d19b",
+                      "quote": "实验 A 使用划分 s1，实验 B 使用 s2，两个结果不构成同条件对照。",
+                      "observedAt": "2026-10-26T12:00:00.000Z",
+                      "readScope": "EXCERPT",
+                      "applicability": "DIRECT",
+                      "verification": "CHECKED",
+                      "claim": "结论比较使用相同数据划分与参数条件",
+                      "relation": "CONTRADICTS",
+                      "reason": "按目标的主体、阶段与条件判断适用范围。"
+                    }
+                  ]
+                }
+              ],
+              "blockers": [
+                "现有结果不能支持同条件优劣结论，应先修订比较范围。"
+              ],
+              "keyUnknowns": [],
+              "nextInformationNeed": null
+            }
+          },
+          {
+            "blockKey": "course-comparison",
+            "emphasis": "supporting",
+            "semanticType": "comparison",
+            "fallbackText": "现有结果不能支持同条件优劣结论，应先修订比较范围。",
+            "refs": [
+              {
+                "kind": "PROPOSAL",
+                "id": "course-proposal",
+                "projectId": "project-course",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [
+              "course-preview"
+            ],
+            "proposalHash": "5517afc70f548539467fc80ce191f31815c4b60a535833148fd4323ca598fde6",
+            "candidates": [
+              {
+                "id": "course-read",
+                "title": "整理同条件对照依据并修订结论",
+                "tradeoff": "优先利用已有资料，缺少现实条件时停止。",
+                "feasibility": "READY",
+                "expectedObservation": "读取两次实验的数据划分和参数",
+                "branches": [
+                  {
+                    "observation": "找到直接适用结果",
+                    "consequence": "复核原决定"
+                  },
+                  {
+                    "observation": "条件仍不一致",
+                    "consequence": "保留未知并询问关键条件"
+                  }
+                ],
+                "stopCondition": "没有适用来源或用户否决时停止。"
+              },
+              {
+                "id": "course-keep",
+                "title": "保留当前计划",
+                "tradeoff": "不增加行动，等待必要新证据。",
+                "feasibility": "READY",
+                "expectedObservation": null,
+                "branches": [],
+                "stopCondition": "保持原业务对象不变。"
+              }
+            ]
+          },
+          {
+            "blockKey": "course-question",
+            "emphasis": "supporting",
+            "semanticType": "question",
+            "fallbackText": "现有结果不能支持同条件优劣结论，应先修订比较范围。",
+            "refs": [
+              {
+                "kind": "QUESTION",
+                "id": "course-question",
+                "projectId": "project-course",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "draftKey": "conversation-course-course-question",
+            "question": "读取两次实验的数据划分和参数，你希望先查已有资料吗？",
+            "inputKind": "SINGLE_CHOICE",
+            "required": false,
+            "choices": [
+              {
+                "id": "read",
+                "label": "先查已有资料"
+              },
+              {
+                "id": "keep",
+                "label": "保留计划"
+              }
+            ]
+          },
+          {
+            "blockKey": "course-approval",
+            "emphasis": "supporting",
+            "semanticType": "approval",
+            "fallbackText": "待你确认，原行动尚未创建。",
+            "refs": [
+              {
+                "kind": "PROPOSAL",
+                "id": "course-proposal",
+                "projectId": "project-course",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [
+              "course-confirm",
+              "course-decline"
+            ],
+            "executionId": "course-execution",
+            "proposalHash": "5517afc70f548539467fc80ce191f31815c4b60a535833148fd4323ca598fde6",
+            "expiresAt": "2026-10-26T13:00:00.000Z",
+            "state": "PENDING"
+          },
+          {
+            "blockKey": "course-receipt",
+            "emphasis": "supporting",
+            "semanticType": "receipt",
+            "fallbackText": "行动已创建，尚未执行；目标条件仍未验收。",
+            "refs": [
+              {
+                "kind": "RECEIPT",
+                "id": "course-receipt",
+                "projectId": "project-course",
+                "revision": "1"
+              },
+              {
+                "kind": "ACTION",
+                "id": "course-action",
+                "projectId": "project-course",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "state": "CREATED",
+            "verification": "NOT_CHECKED",
+            "evidence": []
+          },
+          {
+            "blockKey": "course-timeline",
+            "emphasis": "supporting",
+            "semanticType": "timeline",
+            "fallbackText": "现有结果不能支持同条件优劣结论，应先修订比较范围。",
+            "refs": [
+              {
+                "kind": "EVENT",
+                "id": "course-event",
+                "projectId": "project-course",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "events": [
+              {
+                "ref": {
+                  "kind": "EVENT",
+                  "id": "course-event",
+                  "projectId": "project-course",
+                  "revision": "1"
+                },
+                "occurredAt": "2026-10-26T12:00:00.000Z",
+                "summary": "项目已有材料更新，产生一条待核对的目标关联候选。"
+              }
+            ]
+          },
+          {
+            "blockKey": "course-change",
+            "emphasis": "supporting",
+            "semanticType": "change",
+            "fallbackText": "现有结果不能支持同条件优劣结论，应先修订比较范围。",
+            "refs": [
+              {
+                "kind": "REVIEW",
+                "id": "course-review",
+                "projectId": "project-course",
+                "revision": "1"
+              }
+            ],
+            "actionBindingIds": [],
+            "disposition": "UNKNOWN",
+            "goalQuote": "提交可复现实验且结论与结果一致的课程研究报告",
+            "changeKind": "项目材料更新",
+            "relevance": "涉及原目标条件",
+            "unknowns": [
+              "读取两次实验的数据划分和参数"
+            ]
+          },
+          {
+            "blockKey": "course-investigation",
+            "emphasis": "supporting",
+            "semanticType": "investigation",
+            "fallbackText": "现有结果不能支持同条件优劣结论，应先修订比较范围。",
+            "refs": [
+              {
+                "kind": "SOURCE",
+                "id": "course-new",
+                "projectId": "project-course",
+                "revision": "7ce89fe6f46c0c239a44cbebf17d5690f3aff5ce39d57bb7119d897dc899d19b"
+              }
+            ],
+            "actionBindingIds": [],
+            "investigationId": "course-turn",
+            "state": "CONCLUDED",
+            "steps": [
+              {
+                "schemaVersion": 1,
+                "id": "course-step-1",
+                "turnId": "course-turn",
+                "seq": 1,
+                "decision": {
+                  "decision": "READ_EXISTING",
+                  "informationNeed": "读取两次实验的数据划分和参数",
+                  "expectedObservation": "找到能改变判断的项目记录或真实业务状态。",
+                  "call": {
+                    "tool": "search_memory",
+                    "projectId": "project-course",
+                    "query": "读取两次实验的数据划分和参数"
+                  }
+                },
+                "inputHash": "427fb2d4f0a0bad6e99e40a73250e2975d0d6819de54c91c1492974d0bf13800",
+                "readSetHash": "0b38449ad1b87cf03d95f2b20e91e0437ea9ac10962f7678de2faf7741e9fc11",
+                "status": "SUCCEEDED",
+                "startedAt": "2026-10-26T12:00:00.000Z",
+                "finishedAt": "2026-10-26T12:00:01.000Z",
+                "observationHash": "7ce89fe6f46c0c239a44cbebf17d5690f3aff5ce39d57bb7119d897dc899d19b",
+                "sources": [
+                  {
+                    "kind": "SOURCE",
+                    "id": "course-new",
+                    "projectId": "project-course",
+                    "revision": "7ce89fe6f46c0c239a44cbebf17d5690f3aff5ce39d57bb7119d897dc899d19b"
+                  }
+                ],
+                "coverage": {
+                  "complete": false,
+                  "description": "只读取本场景指明的项目记录，不代表全部资料。"
+                },
+                "reservationId": "course-call-1",
+                "provider": "FIXTURE_NO_MODEL",
+                "usage": {
+                  "inputTokens": null,
+                  "outputTokens": null
+                },
+                "failureReason": null
+              }
+            ]
+          }
+        ],
+        "allowedActions": [
+          {
+            "bindingId": "course-preview",
+            "conversationId": "conversation-course",
+            "actionKind": "PREVIEW",
+            "label": "查看采用后的操作",
+            "target": {
+              "kind": "PROPOSAL",
+              "id": "course-proposal",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "expectedConversationVersion": 4,
+            "enabled": true,
+            "disabledReason": null,
+            "frozen": {
+              "executionId": null,
+              "candidateId": "course-read",
+              "proposalHash": "5517afc70f548539467fc80ce191f31815c4b60a535833148fd4323ca598fde6",
+              "expiresAt": "2026-10-26T13:00:00.000Z"
+            }
+          },
+          {
+            "bindingId": "course-confirm",
+            "conversationId": "conversation-course",
+            "actionKind": "CONFIRM",
+            "label": "确认",
+            "target": {
+              "kind": "PROPOSAL",
+              "id": "course-proposal",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "expectedConversationVersion": 4,
+            "enabled": true,
+            "disabledReason": null,
+            "frozen": {
+              "executionId": "course-execution",
+              "candidateId": "course-read",
+              "proposalHash": "5517afc70f548539467fc80ce191f31815c4b60a535833148fd4323ca598fde6",
+              "expiresAt": "2026-10-26T13:00:00.000Z"
+            }
+          },
+          {
+            "bindingId": "course-decline",
+            "conversationId": "conversation-course",
+            "actionKind": "DECLINE",
+            "label": "保留原计划",
+            "target": {
+              "kind": "PROPOSAL",
+              "id": "course-proposal",
+              "projectId": "project-course",
+              "revision": "1"
+            },
+            "expectedConversationVersion": 4,
+            "enabled": true,
+            "disabledReason": null,
+            "frozen": {
+              "executionId": "course-execution",
+              "candidateId": "course-read",
+              "proposalHash": "5517afc70f548539467fc80ce191f31815c4b60a535833148fd4323ca598fde6",
+              "expiresAt": "2026-10-26T13:00:00.000Z"
+            }
+          }
+        ]
+      },
+      "initialPlan": {
+        "schemaVersion": 2,
+        "intent": "EXPLAIN",
+        "composition": [
+          {
+            "blockKey": "course-shown-prose",
+            "emphasis": "primary",
+            "semanticType": "prose",
+            "dataRefs": [],
+            "text": "先核对已有项目记录，再决定是否需要新行动。"
+          },
+          {
+            "blockKey": "course-shown-question",
+            "emphasis": "supporting",
+            "semanticType": "question",
+            "dataRefs": [
+              {
+                "kind": "QUESTION",
+                "id": "course-question",
+                "projectId": "project-course",
+                "revision": "1"
+              }
+            ]
+          }
+        ],
+        "primaryIntent": "READ_MORE"
+      },
+      "observedPlan": {
+        "schemaVersion": 2,
+        "intent": "COMPARE",
+        "composition": [
+          {
+            "blockKey": "course-shown-comparison",
+            "emphasis": "primary",
+            "semanticType": "comparison",
+            "dataRefs": [
+              {
+                "kind": "PROPOSAL",
+                "id": "course-proposal",
+                "projectId": "project-course",
+                "revision": "1"
+              }
+            ]
+          },
+          {
+            "blockKey": "course-shown-evidence",
+            "emphasis": "supporting",
+            "semanticType": "evidence",
+            "dataRefs": [
+              {
+                "kind": "SOURCE",
+                "id": "course-new",
+                "projectId": "project-course",
+                "revision": "7ce89fe6f46c0c239a44cbebf17d5690f3aff5ce39d57bb7119d897dc899d19b"
+              }
+            ]
+          }
+        ],
+        "primaryIntent": "CONSIDER_ACTION"
+      },
+      "approvalPlan": {
+        "schemaVersion": 2,
+        "intent": "COMPARE",
+        "composition": [
+          {
+            "blockKey": "course-shown-approval",
+            "emphasis": "primary",
+            "semanticType": "approval",
+            "dataRefs": [
+              {
+                "kind": "PROPOSAL",
+                "id": "course-proposal",
+                "projectId": "project-course",
+                "revision": "1"
+              }
+            ]
+          }
+        ],
+        "primaryIntent": "CONSIDER_ACTION"
+      },
+      "receiptPlan": {
+        "schemaVersion": 2,
+        "intent": "COMPARE",
+        "composition": [
+          {
+            "blockKey": "course-shown-receipt",
+            "emphasis": "primary",
+            "semanticType": "receipt",
+            "dataRefs": [
+              {
+                "kind": "RECEIPT",
+                "id": "course-receipt",
+                "projectId": "project-course",
+                "revision": "1"
+              },
+              {
+                "kind": "ACTION",
+                "id": "course-action",
+                "projectId": "project-course",
+                "revision": "1"
+              }
+            ]
+          }
+        ],
+        "primaryIntent": "CONSIDER_ACTION"
+      },
+      "initialDecision": {
+        "decision": "READ_EXISTING",
+        "informationNeed": "读取两次实验的数据划分和参数",
+        "expectedObservation": "找到能改变判断的项目记录或真实业务状态。",
+        "call": {
+          "tool": "search_memory",
+          "projectId": "project-course",
+          "query": "读取两次实验的数据划分和参数"
+        }
+      },
+      "readAfterDiscovery": {
+        "decision": "READ_EXISTING",
+        "informationNeed": "读取两次实验的数据划分和参数",
+        "expectedObservation": "读取已发现来源的适用条件。",
+        "call": {
+          "tool": "read_project_material",
+          "projectId": "project-course",
+          "sourceId": "course-new",
+          "revision": "7ce89fe6f46c0c239a44cbebf17d5690f3aff5ce39d57bb7119d897dc899d19b"
+        }
+      },
+      "decisionAfterObservation": {
+        "decision": "ANSWER_NOW",
+        "reason": "现有结果不能支持同条件优劣结论，应先修订比较范围。"
+      },
+      "observedStep": {
+        "schemaVersion": 1,
+        "id": "course-step-1",
+        "turnId": "course-turn",
+        "seq": 1,
+        "decision": {
+          "decision": "READ_EXISTING",
+          "informationNeed": "读取两次实验的数据划分和参数",
+          "expectedObservation": "找到能改变判断的项目记录或真实业务状态。",
+          "call": {
+            "tool": "search_memory",
+            "projectId": "project-course",
+            "query": "读取两次实验的数据划分和参数"
+          }
+        },
+        "inputHash": "427fb2d4f0a0bad6e99e40a73250e2975d0d6819de54c91c1492974d0bf13800",
+        "readSetHash": "0b38449ad1b87cf03d95f2b20e91e0437ea9ac10962f7678de2faf7741e9fc11",
+        "status": "SUCCEEDED",
+        "startedAt": "2026-10-26T12:00:00.000Z",
+        "finishedAt": "2026-10-26T12:00:01.000Z",
+        "observationHash": "7ce89fe6f46c0c239a44cbebf17d5690f3aff5ce39d57bb7119d897dc899d19b",
+        "sources": [
+          {
+            "kind": "SOURCE",
+            "id": "course-new",
+            "projectId": "project-course",
+            "revision": "7ce89fe6f46c0c239a44cbebf17d5690f3aff5ce39d57bb7119d897dc899d19b"
+          }
+        ],
+        "coverage": {
+          "complete": false,
+          "description": "只读取本场景指明的项目记录，不代表全部资料。"
+        },
+        "reservationId": "course-call-1",
+        "provider": "FIXTURE_NO_MODEL",
+        "usage": {
+          "inputTokens": null,
+          "outputTokens": null
+        },
+        "failureReason": null
+      },
+      "resultGoalGap": {
+        "schemaVersion": 1,
+        "id": "course-gap",
+        "projectId": "project-course",
+        "goalRef": {
+          "kind": "PROJECT",
+          "id": "project-course",
+          "projectId": "project-course",
+          "revision": "1"
+        },
+        "goalQuote": "提交可复现实验且结论与结果一致的课程研究报告",
+        "criteria": [
+          {
+            "id": "course-criterion",
+            "requirement": "结论比较使用相同数据划分与参数条件",
+            "state": "REPORTED",
+            "explanation": "用户已提交结果，仍需核对独立验收条件。",
+            "evidence": [
+              {
+                "source": {
+                  "kind": "SOURCE",
+                  "id": "course-user-result",
+                  "projectId": "project-course",
+                  "revision": "1c36420e4e869b56c4e5433186d274be804ad7a23db49adff1068916b3cde1d5"
+                },
+                "excerptHash": "1c36420e4e869b56c4e5433186d274be804ad7a23db49adff1068916b3cde1d5",
+                "quote": "我已按同一划分重新运行 A/B 并修订结论，尚未附原始输出。",
+                "observedAt": "2026-10-26T12:00:00.000Z",
+                "readScope": "EXCERPT",
+                "applicability": "DIRECT",
+                "verification": "REPORTED",
+                "claim": "结论比较使用相同数据划分与参数条件",
+                "relation": "SUPPORTS",
+                "reason": "按目标的主体、阶段与条件判断适用范围。"
+              }
+            ]
+          }
+        ],
+        "blockers": [],
+        "keyUnknowns": [],
+        "nextInformationNeed": null
+      },
+      "expected": {
+        "initialTypes": [
+          "prose",
+          "question"
+        ],
+        "observedTypes": [
+          "comparison",
+          "evidence"
+        ],
+        "decisionAfterObservation": "ANSWER_NOW",
+        "criterionAfterObservation": "BLOCKED",
+        "businessEffectsOnSelection": 0,
+        "businessEffectsAfterConfirmation": 1
+      }
+    }
+  ]
+}

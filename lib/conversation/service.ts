@@ -8,6 +8,7 @@ import { assertProject, assertSession, emptyBlocks, lockConversation, ownedConve
 import { openConversationEntry } from "./anchorService";
 import { discussionTitle, hasDefaultDiscussionTitle } from "./presentation";
 import { resolveFileGuides } from "./fileGuides";
+import { experienceProgress } from "./progress";
 
 export async function appendConversationMessage(tx: Tx, conversationId: string, ownerUserId: string,
   role: "USER" | "ASSISTANT", content: string, blocks: ConversationBlocks, turnId?: string, runId?: string) {
@@ -173,7 +174,7 @@ export async function readConversation(actor: ConversationActor, id: string, bef
   return { schemaVersion: 1, id, title: messages.some(m => m.restricted) ? "项目协作" : title,
     scope: c.scope, homeProjectId: c.homeProjectId, version: c.version, focusProjectId,
     messages, linkedProjects: linked.filter(p => latestAllowed.has(p.id)), hasMore: rows.length > 50, beforeSeq: rows.length ? rows[Math.min(49, rows.length - 1)].seq : null,
-    activeTurn: active ? { id: active.id, requestId: active.requestId, status: active.status } : null,
+    activeTurn: active && !messages.some(m => m.restricted) ? { id: active.id, requestId: active.requestId, status: active.status, progress: experienceProgress(active.readManifestJson) } : null,
     latestTurn: latest && !messages.some(m => m.restricted) ? { id: latest.id, status: latest.status,
       canRetry: ["FAILED", "UNKNOWN"].includes(latest.status),
       message: latest.status === "UNKNOWN" ? "上次分析中断，暂未取得可用回答。你可以读取状态，或重新提问。"

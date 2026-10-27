@@ -5,6 +5,7 @@ import { buildArtifactPrompt, buildCapturePrompt } from "@/lib/agent/prompts";
 import { getChatProviderConfig } from "@/lib/config/provider";
 import { knowledgeCardDraftSchema } from "@/lib/validation/schemas";
 import type { AgentExecutionResult, ArtifactTypeValue, CardDraft } from "@/lib/types";
+import { modelMessagesInputBound, modelMessagesSchema, validateModelCapabilities, type ModelMessage } from "./promptSpec";
 
 type ChatResponse = { id?: string; usage?: { prompt_tokens?: number; completion_tokens?: number }; choices?: Array<{ finish_reason?: string; message?: { content?: string } }> };
 
@@ -12,10 +13,14 @@ function config() {
   return getChatProviderConfig();
 }
 
-export async function chatWithLLMWithMeta(prompt: string, projectId?: string, workspace?: WorkspaceBilling, review?: ReviewBilling): Promise<AgentExecutionResult<string>> {
+export async function chatWithLLMWithMeta(prompt: string | ModelMessage[], projectId?: string, workspace?: WorkspaceBilling, review?: ReviewBilling): Promise<AgentExecutionResult<string>> {
   const startedAt = Date.now();
   const { provider, baseUrl, apiKey, model, timeoutMs } = config();
-  const billing = workspace ? { ...workspace, inputTokens: inputTokenBound(prompt), outputTokens: stageOutputLimit(workspace.purpose), provider: `llm:${provider}:${model}` } : undefined;
+  const messages = typeof prompt === "string" ? [{ role: "user", content: prompt }] : modelMessagesSchema.parse(prompt);
+  const supportsJson = provider === "deepseek" || process.env.LLM_JSON_MODE === "true";
+  if (typeof prompt !== "string") validateModelCapabilities(prompt, { systemMessages: true, toolMessages: false, jsonMode: supportsJson }, false);
+  const billing = workspace ? { ...workspace, inputTokens: typeof prompt === "string" ? inputTokenBound(prompt) : modelMessagesInputBound(prompt),
+    outputTokens: workspace.outputTokens ?? stageOutputLimit(workspace.purpose), provider: `llm:${provider}:${model}` } : undefined;
   if (review) await reserveReviewCloudCall(review);
   else if (billing) await reserveWorkspaceCloudCall(billing);
   else await reserveCloudCall(projectId);
@@ -23,14 +28,14 @@ export async function chatWithLLMWithMeta(prompt: string, projectId?: string, wo
     max_tokens: billing?.outputTokens ?? 2048,
     model,
     temperature: 0.2,
-    messages: [{ role: "user", content: prompt }],
+    messages,
   };
   // DeepSeek 当前默认启用思考模式。ProjectMemo 需要低延迟、可解析的
   // 结构化 content，因此显式使用非思考模式；其他兼容服务不接收该字段。
   if (provider === "deepseek") {
     requestBody.thinking = { type: "disabled" };
-    if (workspace || review) requestBody.response_format = { type: "json_object" };
   }
+  if (supportsJson && (workspace || review)) requestBody.response_format = { type: "json_object" };
   const response = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },

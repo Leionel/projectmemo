@@ -1,5 +1,7 @@
 # R4 Prompt 合同 · PR-0
 
+PR-1 已接入 `focus.route.v2`、`focus.investigate.v1`（联合 `focus.goal.v1`）与 `focus.answer.v2`；配置与输出 schema 见 `lib/conversation/promptSpecs.ts`。持久预占接原 cloudQuota，C0 字符串调用保留。`focus.ui_plan.v1` 随 PR-2 接入，其他专项按下表继续追踪。
+
 基线：`c8c7072`，2026-10-26。实现入口为 `lib/agent/promptSpec.ts`；本批冻结消息与预算接口，现有 Provider 和业务 Prompt 尚未切换。R4 总基线为本地 `docs/FINAL/AGENT_REVIEW/projectmemo_r4/PROJECTMEMO_AGENT_EXPERIENCE_R4_BASELINE_v1_2.md`。
 
 ## 消息与模型边界

@@ -17,6 +17,7 @@ export const conversationTurnSchema = z.object({
   replyToMessageId: id.optional(), bindingId: id.optional(), projectId: id.nullable().optional(),
   entityRef: z.object({ kind: z.enum(["MISSION", "ACTION"]), id, projectId: id }).strict().optional(),
   llmContextApproved: z.boolean().default(false),
+  investigationMode: z.enum(["QUICK", "STANDARD", "DEEP"]).optional(),
 }).strict();
 export const conversationConfirmSchema = z.object({
   requestId: id, proposalHash: z.string().regex(/^[a-f0-9]{64}$/),
@@ -40,6 +41,7 @@ export type ConversationSource = {
   id: string; projectId: string; sourceId: string; revision: string;
   title: string; excerpt: string; observedAt: string; temporalState: string;
   knowledgeClass: string; start: number; end: number; excerptHash: string;
+  readScope?: "SUMMARY" | "EXCERPT" | "STRUCTURED";
 };
 export type ConversationCitation = { sourceId: string; quote: string };
 export type ConversationFileGuide = {
@@ -73,11 +75,13 @@ export type ConversationBlocks = {
 export type ConversationMessage = ConversationBlocks & {
   id: string; seq: number; role: string; content: string; restricted: boolean;
 };
+export type ConversationProgress = { phase: string; mode: string; completedReads: number; readLimit: number;
+  steps: Array<{ id: string; label: string; status: string }>; stopReason: string | null };
 export type ConversationView = {
   schemaVersion: 1; id: string; title: string; scope: string; version: number;
   homeProjectId: string | null; focusProjectId: string | null;
   messages: ConversationMessage[]; hasMore: boolean; beforeSeq: number | null;
-  activeTurn: { id: string; requestId: string; status: string } | null;
+  activeTurn: { id: string; requestId: string; status: string; progress?: ConversationProgress } | null;
   latestTurn?: { id: string; status: string; message: string; canRetry: boolean } | null;
   linkedProjects: Array<{ id: string; title: string }>;
 };

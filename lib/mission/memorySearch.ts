@@ -11,7 +11,7 @@ export const memoryQuerySchema = z.object({ query: z.string().trim().min(1).max(
   afterId: z.string().min(1).max(160).optional(), sourceIds: z.array(z.string().min(1).max(180)).max(8).default([]) }).strict();
 
 /** SQL 按主题筛选后分页；既不只扫最新 N 条，也不补算或发送远程嵌入。已知来源可定向读取归档记录。 */
-export async function searchMissionMemory(actor: Actor, raw: unknown): Promise<ToolResult> {
+export async function searchMissionMemory(actor: Pick<Actor, "userId" | "projectId">, raw: unknown): Promise<ToolResult> {
   const input = memoryQuerySchema.parse(raw);
   const terms = [...new Set(input.query.toLowerCase().match(/[\p{Script=Han}]+|[a-z0-9_]+/gu) ?? [])]
     .flatMap(term => term.length > 4 && /^[\p{Script=Han}]+$/u.test(term) ? [term, ...Array.from({ length: term.length - 1 }, (_, i) => term.slice(i, i + 2))] : [term]).slice(0, 16);

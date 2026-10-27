@@ -92,7 +92,7 @@ export async function observeProjects(actor: ConversationActor, directory: Works
     sources.push({ id: p.id + "/project:" + p.id, projectId: p.id, sourceId: "project:" + p.id,
       revision: hash!, title: p.title + " 当前状态", excerpt, observedAt,
       temporalState: "CURRENT", knowledgeClass: "PROJECT_OBSERVATION", start: 0, end: excerpt.length, excerptHash: jsonHash(excerpt) });
-    const search = await searchMissionMemory({ userId: actor.userId, projectId: p.id, missionId: "" }, { query: query.slice(0, 256), limit: 3 });
+    const search = await searchMissionMemory({ userId: actor.userId, projectId: p.id }, { query: query.slice(0, 256), limit: 3 });
     for (const s of search.sources.slice(0, 3)) {
       const text = s.text.slice(0, 600);
       sources.push({ id: p.id + "/" + s.id, projectId: p.id, sourceId: s.id, revision: s.hash,

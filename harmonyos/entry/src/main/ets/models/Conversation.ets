@@ -14,7 +14,9 @@ export interface ConversationMessage { id: string; seq: number; role: string; co
 export interface ConversationProject { id: string; title: string; }
 export interface ConversationListItem { id: string; title: string; scope: string; homeProjectId: string | null; }
 export interface ConversationListReply { conversations: ConversationListItem[]; nextCursor: string | null; }
-export interface ConversationActiveTurn { id: string; requestId: string; status: string; }
+export interface ConversationReadStep { id: string; label: string; status: string; }
+export interface ConversationProgress { phase: string; mode: string; completedReads: number; readLimit: number; steps: ConversationReadStep[]; stopReason: string | null; }
+export interface ConversationActiveTurn { id: string; requestId: string; status: string; progress?: ConversationProgress; }
 export interface ConversationTurnState { id: string; status: string; message: string; canRetry: boolean; }
 export class ConversationView {
   schemaVersion: number = 1; id: string = ''; title: string = ''; scope: string = '';
@@ -29,6 +31,7 @@ export class ConversationEntityInput { kind: string = 'MISSION'; id: string = ''
 export class ConversationTurnInput {
   requestId: string = ''; expectedVersion: number = 1; message: string = '';
   projectId?: string | null; replyToMessageId?: string; llmContextApproved: boolean = false; entityRef?: ConversationEntityInput;
+  investigationMode?: string;
 }
 export class ConversationConfirmInput { requestId: string = ''; proposalHash: string = ''; confirmed: boolean = true; }
 export interface ConversationCreated { id: string; }

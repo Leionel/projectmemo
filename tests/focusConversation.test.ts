@@ -4,7 +4,7 @@ const isolated = await vi.hoisted(async () => {
   const Database = (await import("better-sqlite3")).default;
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pm-focus-f1-")), file = path.join(dir, "test.db");
   Object.assign(process.env, { DATABASE_URL: "file:" + file.replaceAll("\\", "/"), FOCUS_AGENT_ENABLED: "true",
-    MISSION_ENABLED: "true", MISSION_UI_ENABLED: "true", LLM_MODE: "mock", SEMANTIC_MEMORY_ENABLED: "false" });
+    MISSION_ENABLED: "true", MISSION_UI_ENABLED: "true", LLM_MODE: "mock", SEMANTIC_MEMORY_ENABLED: "false", FOCUS_AGENT_R4_ENABLED: "false" });
   const sql = new Database(file);
   const migrations = fs.readdirSync("prisma/migrations").sort().filter(n => fs.existsSync(path.join("prisma/migrations", n, "migration.sql")));
   for (const name of migrations) sql.exec(fs.readFileSync(path.join("prisma/migrations", name, "migration.sql"), "utf8"));

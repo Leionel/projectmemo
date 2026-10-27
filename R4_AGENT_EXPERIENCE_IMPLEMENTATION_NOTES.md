@@ -1,5 +1,23 @@
 # R4 Agent Experience 实施记录
 
+## 2026-10-26 PR-1 · 动态调查与 GoalGap 接入
+
+基线 0941f7ae。原 Provider 兼容角色消息数组，ROUTE/INVESTIGATE（含 Goal v1）/ANSWER 分责；每次调查观察后重新选择工具、询问或结束。GoalGap 的 nextInformationNeed 必须与下一读取绑定；来源条件适用、反证与报告语义分别保存，模型不得自行授予 VERIFIED。
+
+使用现有 ConversationTurn.readManifestJson 持久化预算、真实步骤、目标判断与读集，无新增迁移。callId 唯一预占、同 purpose 可多步；账号额度与根预算同事务检查，未知费用继续预占。审计保留 Prompt/Schema 版本、真实 provider、request/usage/finishReason 和有界哈希。超时、已收到坏输出和引用失败分别恢复；已知坏协议不追加修复调用，改为真实项目状态；网络 UNKNOWN 保留原请求。
+
+四个只读工具在 workspace user/project 上适配现有读取服务，searchMissionMemory 的读上下文缩窄为真实 user/project，不再伪造 missionId。定位的原记录/附件指针、正文、原行动、原 Mission owner、项目权限和全部已读版本在出站/返回/提交时检查。重复工具提前 NO_GAIN；没有增量、预算耗尽、用户问题或既有任务移交均可停止。进度只从持久步骤投影，不暴露模型原文。
+
+Quick/Standard/Deep 的初始根上限分别为 5/9/12 次模型、1/5/8 次动态读；深度须显式选择。额外 ANSWER/UI_PLAN 预算预留在同一个根内。当前按 UTF-8 消息封装上界预占，实际 usage 替换已知值。数字是待实模与体验校准的版本化初值，不作为智能能力上限。
+
+开关 `FOCUS_AGENT_R4_ENABLED` 默认关闭，原 Focus/C0 路径保留；PR-2 联合完成本机启用与发布说明。数据和 API 兼容，鸿蒙新增可选模式/真实进度 DTO；实际原生块渲染在 PR-4。
+
+隔离服务验证：科研/竞赛/课程的新原文实际被工具读取，下一次模型选择改变为 ANSWER_NOW；冻结 Action 经原确认服务产生一个效果。新调查 10 项通过；上一轮原会话/契约合并 73 项通过，其中新增前的调查 8 项，与最终 10 项重叠不累加。类型、lint、HAP 主编译通过；原课程 fixture 的 scenario 枚举错误已纠正，首轮失败保留。真实模型调用仍为 0；质量消融与设备/生产签收未执行。
+
+实现入口：`promptSpecs.ts`、`investigationService.ts`、`toolAdapter.ts`、原 `turnService.ts`、`cloudQuota.ts`、`llmAgent.ts`；测试 `r4Investigation.test.ts`。定向参考 [AI SDK loop control](https://ai-sdk.dev/docs/agents/loop-control) 的逐步工具选择/停止及 [LangGraph.js](https://github.com/langchain-ai/langgraphjs) 的 durable/interrupt 语义（2026-10-26 核查 3377 stars、MIT、近期更新），不引入第二个 Runtime 或依赖。
+
+下一步持续执行 PR-2：模型 UI Plan → 当前授权 catalog → 原操作绑定 → Web 原生语义块，稳定草稿与同会话状态回读。
+
 ## 2026-10-26 PR-0 · 共用契约与纵向 fixtures
 
 源码基线 `c8c7072d01598de6d7315697bd505d84e33cd8f6`；用户授权「开始 pr 0」。范围是合同冻结、纯校验、三领域 fixture 与对应测试。本批不改变现有 Provider/Runner、不运行模型、不迁移库或部署。首包产品仍需 PR-1/2/3/4 联合落地。

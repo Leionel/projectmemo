@@ -12,6 +12,9 @@ import { previewConversationWork, readConversationWork } from "./workService";
 import { workRefSchema, type ConversationWorkRef } from "@/lib/types/conversationWork";
 import { resolveFileGuides } from "./fileGuides";
 import { bindAnswerEvidence } from "./answerEvidence";
+import { isFeatureEnabled } from "@/lib/config/features";
+import { investigateConversation, turnTimeoutMs } from "./investigationService";
+import { experienceProgress } from "./progress";
 
 export async function submitConversationTurn(actor: ConversationActor, id: string, raw: unknown) {
   const input = conversationTurnSchema.parse(raw), hash = jsonHash(input);
@@ -21,7 +24,7 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     const prior = await tx.conversationTurn.findUnique({ where: { conversationId_requestId: { conversationId: id, requestId: input.requestId } } });
     if (prior) {
       if (prior.inputHash !== hash) throw new AppError("REQUEST_ID_REUSED", "请求编号已用于另一条输入", 409);
-      if (["ACCEPTED", "OBSERVING", "GENERATING"].includes(prior.status) && Date.now() - prior.createdAt.getTime() >= 120000) {
+      if (["ACCEPTED", "OBSERVING", "GENERATING"].includes(prior.status) && Date.now() - prior.createdAt.getTime() >= turnTimeoutMs(prior)) {
         const stopped = await tx.conversationTurn.update({ where: { id: prior.id }, data: {
           status: prior.callCount ? "UNKNOWN" : "FAILED", finishedAt: new Date(),
           errorJson: { code: "INTERRUPTED", message: "原请求中断，不会自动重发模型" },
@@ -33,7 +36,7 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     }
     if (c.activeTurnId) {
       const active = await tx.conversationTurn.findUnique({ where: { id: c.activeTurnId } });
-      if (active && Date.now() - active.createdAt.getTime() < 120000)
+      if (active && Date.now() - active.createdAt.getTime() < turnTimeoutMs(active))
         throw new AppError("CONVERSATION_BUSY", "另一条输入正在处理，请读取原请求状态", 409);
       if (active) await tx.conversationTurn.update({ where: { id: active.id }, data: {
         status: active.callCount ? "UNKNOWN" : "FAILED", finishedAt: new Date(),
@@ -78,7 +81,7 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     }
     const frozenRefs = frozenMessage?.refs ?? [];
     let focused = input.entityRef?.projectId ?? (input.projectId === null ? undefined : input.projectId ?? explicitBinding?.projectId ?? history.focusProjectId ?? undefined);
-    const directory = await workspaceDirectory(actor, c.scope, c.homeProjectId, focused);
+    let directory = await workspaceDirectory(actor, c.scope, c.homeProjectId, focused);
     const named = directory.summaries.filter(p => input.message.includes(p.title));
     const conflictingName = !!(input.projectId || input.entityRef || input.bindingId) && !!focused && named.some(p => p.id !== focused);
     if (!input.projectId && !explicitBinding && named.length === 1) focused = named[0].id;
@@ -129,11 +132,17 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     if (newConstraint && constraints.length >= 24) throw new AppError("CONSTRAINT_LIMIT", "已保留24项限制，请另开主题或整理限制后继续", 409);
     const pinned = newConstraint ? [...constraints, newConstraint] : constraints;
     const modelEnabled = input.llmContextApproved && process.env.LLM_MODE === "openai-compatible";
+    const r4 = modelEnabled && !ambiguous && isFeatureEnabled("FOCUS_AGENT_R4_ENABLED", false)
+      ? await investigateConversation(actor, id, turn.id, { message: input.message, mode: input.investigationMode, focus: focused,
+        constraints: pinned, frozenRefs, directory, exactRef,
+        recentDialogue: history.messages.filter(m => !m.restricted).map(m => ({ role: m.role, content: m.content })) }) : null;
+    if (r4) directory = r4.directory;
     let route = { intent: "ANSWER" as "ANSWER" | "CLARIFY" | "PROPOSE_ACTION" | "OPEN_MISSION",
       projectIds: focused ? [focused] : directory.summaries.slice(0, 3).map(p => p.id), query: input.message.slice(0, 256) };
     let provider = "rules", advice = "", modelAnswer: ReturnType<typeof answerSchema.parse> | null = null;
-    let fallbackReason: string | null = null;
-    if (ambiguous) route.intent = "CLARIFY";
+    let fallbackReason: string | null = r4?.fallbackReason ?? null;
+    if (r4) { route = r4.route; provider = r4.provider; }
+    else if (ambiguous) route.intent = "CLARIFY";
     else if (modelEnabled) {
       const permitted = await db.projectMembership.count({ where: { userId: actor.userId, projectId: { in: directory.summaries.map(p => p.id) } } });
       if (permitted !== directory.summaries.length) throw new AppError("PROJECT_NOT_FOUND", "项目权限已变化，请重新选择范围", 404);
@@ -150,19 +159,20 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
       if (route.projectIds.some(p => !allowed.has(p))) throw new AppError("INVALID_ROUTE", "模型引用了观察范围外的项目，请重新限定问题", 409);
       if (focused) route.projectIds = [focused, ...route.projectIds.filter(p => p !== focused)].slice(0, 3);
     } else if (/创建.*行动|变成.*行动|帮我.*处理|整理.*待办/.test(input.message) && !/不创建|不要.*行动/.test(input.message)) route.intent = "PROPOSE_ACTION";
-    const observations = route.intent === "CLARIFY" ? { refs: frozenRefs, sources: [], coverage: { complete: false } }
-      : await observeProjects(actor, directory, route.projectIds, route.query || input.message, exactRef);
+    const observations = r4?.observations ?? (route.intent === "CLARIFY" ? { refs: frozenRefs, sources: [], coverage: { complete: false } }
+      : await observeProjects(actor, directory, route.projectIds, route.query || input.message, exactRef));
     const fileGuides = await resolveFileGuides(observations.sources);
     await db.conversationTurn.update({ where: { id: turn.id }, data: { status: "GENERATING", readManifestJson: json({
       schemaVersion: 1, observedAt: new Date().toISOString(), directory: directory.coverage,
       observedProjectIds: directory.summaries.map(p => p.id), route, observation: observations.coverage,
       sourceRefs: observations.sources.map(s => ({ projectId: s.projectId, id: s.sourceId, revision: s.revision })),
+      ...(r4 ? { experience: r4.state } : {}),
     }) } });
-    if (route.intent === "CLARIFY") advice = "你想继续哪一个项目？请选择下方原对象，再提出问题。";
+    if (route.intent === "CLARIFY") advice = r4?.advice ?? "你想继续哪一个项目？请选择下方原对象，再提出问题。";
     else if (modelEnabled) {
       const responseHistory = await readConversation(actor, id);
       await validateReadSources(actor, observations.sources);
-      const r = await conversationModel(actor, turn.id, "ANSWER", focusSystemPrompt +
+      const r = r4 ? { data: r4.modelAnswer!, provider: r4.provider } : await conversationModel(actor, turn.id, "ANSWER", focusSystemPrompt +
         "\n返回 {advice,recommendedProjectId,observations:[{sourceId,quote}],priorities:[{projectId,tradeoff}],action:null或{projectId,title,description,priority}}。" +
         "仅 intent=PROPOSE_ACTION 可以提出 action。未知字段不补造。\n" +
         JSON.stringify({ message: input.message, intent: route.intent, focus: focused, pinnedConstraints: pinned,
@@ -188,7 +198,7 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
       if (fallbackReason) {
         // Discard the entire ungrounded draft and its action; do not auto-retry a paid call.
         modelAnswer = null;
-        advice = "这次云端回答的引用未通过核对，先为你列出已核实的项目状态：\n" + directory.summaries.filter(p => route.projectIds.includes(p.id))
+        advice = (/^UNSUPPORTED_/.test(fallbackReason) ? "这次云端回答的引用未通过核对，先为你列出项目状态：\n" : "这次云端分析未完成，先为你列出项目状态：\n") + directory.summaries.filter(p => route.projectIds.includes(p.id))
           .map(p => p.title + "：" + p.actionCount + " 项未完成行动，" + p.waiting + " 项待回应委托。").join("\n") + "\n可打开下方原任务继续核对。";
       }
     } else {
@@ -228,12 +238,13 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
         citations: modelAnswer?.observations ?? [],
         fileGuides,
         observedProjectIds: directory.summaries.map(p => p.id),
-        limitations: [...(fallbackReason ? ["云端回答未通过引用核对，已改为项目状态读回，未生成操作提案"] : []), ...directory.coverage.limitations, ...("limitations" in observations.coverage ? observations.coverage.limitations as string[] : [])] };
+        limitations: [...(fallbackReason ? ["云端分析未完成，已改为项目状态读回，未生成操作提案"] : []), ...directory.coverage.limitations, ...("limitations" in observations.coverage ? observations.coverage.limitations as string[] : [])] };
       const run = await tx.agentRun.create({ data: { projectId: null, conversationId: id, turnId: turn.id,
         runType: "CHAT", status: modelEnabled && !fallbackReason ? "SUCCESS" : "FALLBACK", provider,
         fallbackReason: fallbackReason ?? (modelEnabled ? null : "MODEL_NOT_REQUESTED_OR_RULE_MODE"),
         trace: json({ purpose: "FOCUS_TURN", actorUserId: actor.userId, sourceIds: blocks.sources.map(s => s.id),
-          supportState: action ? "SUPPORTED" : "INSUFFICIENT", supportBasis: "ACTION_PROPOSAL_NOT_FACT_CLAIM" }),
+          supportState: action ? "SUPPORTED" : "INSUFFICIENT", supportBasis: "ACTION_PROPOSAL_NOT_FACT_CLAIM",
+          ...(r4 ? { experience: r4.state } : {}) }),
         resultJson: json({}) } });
       if (action) {
         const sources = await readCopilotContext(tx, action.projectId, actor);
@@ -249,7 +260,9 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
       await appendConversationMessage(tx, id, actor.userId, "ASSISTANT", advice, blocks, turn.id, run.id);
       await tx.conversation.update({ where: { id }, data: { activeTurnId: null,
         focusJson: json({ projectId: selected ?? null, ...(exactRef && exactRef.projectId === selected ? { entityRef: exactRef } : {}) }), pinnedStateJson: json(pinned), version: { increment: 1 } } });
-      await tx.conversationTurn.update({ where: { id: turn.id }, data: { status: route.intent === "CLARIFY" ? "NEEDS_CLARIFICATION" : "ANSWERED", finishedAt: new Date() } });
+      await tx.conversationTurn.update({ where: { id: turn.id }, data: { status: route.intent === "CLARIFY" ? "NEEDS_CLARIFICATION" : "ANSWERED", finishedAt: new Date(),
+        ...(r4 ? { readManifestJson: json({ ...(record((await tx.conversationTurn.findUniqueOrThrow({ where: { id: turn.id } })).readManifestJson)),
+          experience: { ...r4.state, phase: route.intent === "CLARIFY" ? "WAITING_USER" : "READY" } }) } : {}) } });
       return { turnId: turn.id, status: route.intent === "CLARIFY" ? "NEEDS_CLARIFICATION" : "ANSWERED" };
     }, { timeout: 20000 });
     return { ...result, conversation: await readConversation(actor, id) };
@@ -279,5 +292,7 @@ export async function readConversationTurn(actor: ConversationActor, id: string,
   await ownedConversation(actor, id);
   const turn = await db.conversationTurn.findFirst({ where: { id: turnId, conversationId: id } });
   if (!turn) throw new AppError("TURN_NOT_FOUND", "请求不存在", 404);
-  return { id: turn.id, requestId: turn.requestId, status: turn.status, error: turn.errorJson };
+  const view = await readConversation(actor, id);
+  return { id: turn.id, requestId: turn.requestId, status: turn.status, error: view.messages.some(m => m.restricted) ? null : turn.errorJson,
+    progress: view.messages.some(m => m.restricted) ? undefined : experienceProgress(turn.readManifestJson) };
 }

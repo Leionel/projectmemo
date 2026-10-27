@@ -3,8 +3,11 @@ import { AppError } from "@/lib/api";
 import { json } from "@/lib/mission/contracts";
 import { reserveTurnTokens, stageOutputLimit, tokenReservations } from "@/lib/conversation/tokenBudget";
 import type { AgentExecutionResult } from "@/lib/types";
+import { investigationBudgetSchema } from "@/lib/types/agentExperience";
+import type { ModelPurpose } from "@/lib/conversation/tokenBudget";
 
-export type WorkspaceBilling = { userId: string; turnId: string; purpose: "ROUTE" | "ANSWER"; sessionId?: string; inputTokens?: number; outputTokens?: number; provider?: string };
+export type WorkspaceBilling = { userId: string; turnId: string; purpose: ModelPurpose; sessionId?: string; inputTokens?: number; outputTokens?: number; provider?: string;
+  callId?: string; promptId?: string; promptVersion?: string; outputSchemaVersion?: number };
 export type ReviewBilling = { userId: string; sessionId: string; reviewProposalId: string };
 /** One actor and one durable proposal reservation; never charges every project owner. */
 export async function reserveReviewCloudCall(billing: ReviewBilling): Promise<void> {
@@ -39,10 +42,22 @@ export async function reserveWorkspaceCloudCall(billing: WorkspaceBilling): Prom
       throw new AppError("TURN_CHANGED", "本次请求已结束或不可访问", 409);
     if (billing.sessionId && !await tx.authSession.findFirst({ where: { id: billing.sessionId, userId: billing.userId, revokedAt: null, expiresAt: { gt: new Date() } } }))
       throw new AppError("UNAUTHORIZED", "登录状态已变化，请重新登录", 401);
-    if (turn.callCount >= 2)
-      throw new AppError("CALL_ALREADY_RESERVED", "本次模型请求已经发出，请读取原回执", 409);
-    const reserved = reserveTurnTokens(turn.reservationJson, billing.purpose, billing.inputTokens ?? 12000, billing.outputTokens ?? stageOutputLimit(billing.purpose));
-    reserved[reserved.length - 1].provider = billing.provider;
+    const manifest = (turn.readManifestJson ?? {}) as { experience?: { policyVersion?: string; budget?: unknown } };
+    let adaptive: { callId: string; maxCalls: number; inputTokens: number; outputTokens: number } | undefined;
+    if (billing.callId) {
+      const budget = investigationBudgetSchema.parse(manifest.experience?.budget);
+      const c = await tx.conversation.findUniqueOrThrow({ where: { id: turn.conversationId } });
+      if (manifest.experience?.policyVersion !== "r4-v1" || c.activeTurnId !== turn.id)
+        throw new AppError("TURN_CHANGED", "本次调查已结束", 409);
+      if (Date.now() - turn.createdAt.getTime() >= budget.maxElapsedMs)
+        throw new AppError("INVESTIGATION_BUDGET_EXHAUSTED", "本轮调查时间已用完，可以根据已读资料继续讨论", 409);
+      adaptive = { callId: billing.callId, maxCalls: budget.maxModelCalls, inputTokens: budget.maxInputTokens, outputTokens: budget.maxOutputTokens };
+    } else if (manifest.experience?.policyVersion === "r4-v1" || !["ROUTE", "ANSWER"].includes(billing.purpose)) {
+      throw new AppError("INVALID_MODEL_RESERVATION", "调查调用缺少原步骤编号", 409);
+    }
+    const reserved = reserveTurnTokens(turn.reservationJson, billing.purpose, billing.inputTokens ?? 12000, billing.outputTokens ?? stageOutputLimit(billing.purpose), adaptive);
+    Object.assign(reserved[reserved.length - 1], { provider: billing.provider, promptId: billing.promptId,
+      promptVersion: billing.promptVersion, outputSchemaVersion: billing.outputSchemaVersion });
     const account = await tx.accountSecurity.findUnique({ where: { userId: billing.userId } });
     if (account) {
       if (!account.emailVerifiedAt || account.dailyCloudLimit <= 0)
@@ -67,13 +82,14 @@ export async function settleWorkspaceCloudCall(billing: WorkspaceBilling, result
   await db.$transaction(async tx => {
     await tx.conversationTurn.updateMany({ where: { id: billing.turnId }, data: { callCount: { increment: 0 } } });
     const turn = await tx.conversationTurn.findFirstOrThrow({ where: { id: billing.turnId, conversation: { ownerUserId: billing.userId } } });
-    const entries = tokenReservations(turn.reservationJson), entry = entries.find(e => e.purpose === billing.purpose);
+    const entries = tokenReservations(turn.reservationJson), entry = entries.find(e => billing.callId ? e.callId === billing.callId : e.purpose === billing.purpose && !e.callId);
     if (!entry || entry.state === "SETTLED") return;
     const valid = (n: number | null | undefined) => typeof n === "number" && Number.isSafeInteger(n) && n >= 0 ? n : null;
     const usage = { inputTokens: valid(result.usage?.inputTokens), outputTokens: valid(result.usage?.outputTokens) };
     entry.state = "SETTLED"; entry.usage = usage;
     await tx.conversationTurn.update({ where: { id: turn.id }, data: { reservationJson: json(entries), usageJson: json([
-      ...(Array.isArray(turn.usageJson) ? turn.usageJson : []), { purpose: billing.purpose, provider: result.provider,
+      ...(Array.isArray(turn.usageJson) ? turn.usageJson : []), { purpose: billing.purpose, callId: billing.callId,
+        promptId: billing.promptId, promptVersion: billing.promptVersion, outputSchemaVersion: billing.outputSchemaVersion, provider: result.provider,
         requestIdentity: result.requestIdentity, usage, usageUnknown: usage.inputTokens === null || usage.outputTokens === null,
         durationMs: result.durationMs, finishReason: result.finishReason ?? null },
     ]) } });

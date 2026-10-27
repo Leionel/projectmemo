@@ -34,7 +34,7 @@ export async function resolveFileGuides(sources: ConversationSource[], citations
     output.push({ number: index + 1, sourceId: source.id, projectId, entityId, kind, title,
       revision: source.revision, stale: currentHash !== null && currentHash !== source.revision, missing: missing || currentHash === null,
       archived, temporalState: source.temporalState, excerpt: source.excerpt, quote: citation?.quote ?? null,
-      readScope: source.sourceId.startsWith("card:") ? "SUMMARY" : "EXCERPT",
+      readScope: source.readScope === "SUMMARY" || !source.readScope && source.sourceId.startsWith("card:") ? "SUMMARY" : "EXCERPT",
       href: kind === "ATTACHMENT" ? `/api/projects/${encodeURIComponent(projectId)}/attachments/${encodeURIComponent(entityId)}/file`
         : `/projects/${encodeURIComponent(projectId)}/${kind === "ARTIFACT" ? "artifacts" : "knowledge"}${source.sourceId.startsWith("card:") ? "#card-" + encodeURIComponent(entityId) : ""}`,
     });

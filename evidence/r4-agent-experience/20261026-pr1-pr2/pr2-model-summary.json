@@ -1,0 +1,344 @@
+{
+  "provenance": "REAL_MODEL_SYNTHETIC_DEVELOPMENT_COMPARISON_NOT_HELD_OUT",
+  "provider": {
+    "provider": "deepseek",
+    "baseUrl": "https://api.deepseek.com",
+    "model": "deepseek-flash",
+    "timeoutMs": 20000
+  },
+  "actualModelCalls": 24,
+  "callLimit": 24,
+  "results": [
+    {
+      "episode": "research/C0_ORIGINAL",
+      "status": "ANSWERED",
+      "modelCalls": 2,
+      "durationMs": 4499,
+      "answer": "不能证明可以部署。现有记录只给出了目标（模型 A 在设备 D、batch=1 的推理显存不超过 6GB），并显示未完成行动 0 项、待回应委托 0 项、阻塞项 0 项【1】；资料索引也明确说明“资料摘要尚未列出实际条件，请查原始记录”【2】。也就是说，当前上下文中没有任何实测显存数据、设备 D 的配置记录或 batch=1 的验证结果，因此无法判断是否达标，更不能据此得出可部署的结论。下一步建议：先补齐可核验的实测证据（设备 D 上 batch=1 的推理显存实测值，与 6GB 阈值对比），再据此判断差距；由于该项目未记录截止日期、重要性与投入，建议先确认这次能投入的范围，再决定是否立即实测。",
+      "sources": [
+        {
+          "sourceId": "project:cmvq3pfb50002cs8odt441oth",
+          "revision": "516ac1f181792d7ac0e5e2158d7aae2dcdcc586c80e06e4cc6cfef8643a3f80e",
+          "excerpt": "RESEARCH 条件核对\n项目目标：模型 A 在设备 D、batch=1 的推理显存不超过 6GB\n截止日期：未知\n未完成行动：0 项\n待回应委托：0 项\n阻塞项：0 项",
+          "readScope": null
+        },
+        {
+          "sourceId": "card:cmvq3pfbk0005cs8ovd57ukpg",
+          "revision": "6f64af63dd6de711df899850c070fa2a56edf30fb9f9c057e5b6831bbe8a7c31",
+          "excerpt": "资料索引：模型 A 在设备 D、batch=1 的推理显存不超过 6GB\n模型 A 在设备 D、batch=1 的推理显存不超过 6GB。资料摘要尚未列出实际条件，请查原始记录。",
+          "readScope": null
+        }
+      ],
+      "stepCount": 0,
+      "stopReason": null,
+      "goalStates": [],
+      "blocks": [],
+      "fallbacks": [],
+      "business": null,
+      "usage": [
+        {
+          "inputTokens": 509,
+          "outputTokens": 74
+        },
+        {
+          "inputTokens": 1293,
+          "outputTokens": 414
+        }
+      ]
+    },
+    {
+      "episode": "research/C3_FULL",
+      "status": "ANSWERED",
+      "modelCalls": 6,
+      "durationMs": 21620,
+      "answer": "不能证明可以部署。现有唯一实测记录是“设备 D、模型 A v2、推理 batch=1，峰值显存 6.8GB。”【3】，已超过 6GB 目标，构成反证；项目状态里的“阻塞项：0 项”【1】只是流程信息，不能作为部署依据。资料索引也提示“资料摘要尚未列出实际条件，请查原始记录。”【2】。下一步建议先补齐设备 D 配置与测量方法、确认 6.8GB 是否可复现；若目标不可放宽，再在模型 A 其他版本/量化配置或显存优化下重新实测 ≤6GB，并补充余量与稳定性数据后再判断部署。以上为建议，未执行任何操作。",
+      "sources": [
+        {
+          "sourceId": "project:cmvq3pfb50002cs8odt441oth",
+          "revision": "516ac1f181792d7ac0e5e2158d7aae2dcdcc586c80e06e4cc6cfef8643a3f80e",
+          "excerpt": "RESEARCH 条件核对\n项目目标：模型 A 在设备 D、batch=1 的推理显存不超过 6GB\n截止日期：未知\n未完成行动：0 项\n待回应委托：0 项\n阻塞项：0 项",
+          "readScope": null
+        },
+        {
+          "sourceId": "card:cmvq3pfbk0005cs8ovd57ukpg",
+          "revision": "6f64af63dd6de711df899850c070fa2a56edf30fb9f9c057e5b6831bbe8a7c31",
+          "excerpt": "资料索引：模型 A 在设备 D、batch=1 的推理显存不超过 6GB\n模型 A 在设备 D、batch=1 的推理显存不超过 6GB。资料摘要尚未列出实际条件，请查原始记录。",
+          "readScope": "SUMMARY"
+        },
+        {
+          "sourceId": "capture:cmvq3pfbe0004cs8o3xwet52j",
+          "revision": "1ffc0173dfc6187fcb677bbe102b7a7f7dc9539ee5f58632442837ece9c0b658",
+          "excerpt": "设备 D、模型 A v2、推理 batch=1，峰值显存 6.8GB。",
+          "readScope": "EXCERPT"
+        }
+      ],
+      "stepCount": 2,
+      "stopReason": null,
+      "goalStates": [
+        "BLOCKED",
+        "REPORTED",
+        "BLOCKED"
+      ],
+      "blocks": [
+        "prose",
+        "goal_gap",
+        "prose",
+        "investigation"
+      ],
+      "fallbacks": [],
+      "business": null,
+      "usage": [
+        {
+          "inputTokens": 707,
+          "outputTokens": 168
+        },
+        {
+          "inputTokens": 3376,
+          "outputTokens": 691
+        },
+        {
+          "inputTokens": 5127,
+          "outputTokens": 810
+        },
+        {
+          "inputTokens": 5958,
+          "outputTokens": 915
+        },
+        {
+          "inputTokens": 4119,
+          "outputTokens": 372
+        },
+        {
+          "inputTokens": 3946,
+          "outputTokens": 566
+        }
+      ]
+    },
+    {
+      "episode": "competition/C0_ORIGINAL",
+      "status": "ANSWERED",
+      "modelCalls": 2,
+      "durationMs": 3772,
+      "answer": "现有记录只能确认该项目目标为“交付同版本可演示、可正式提交的竞赛作品”，截止日期未知，未完成行动 0 项、待回应委托 0 项、阻塞项 0 项【1】。因此无法从已有记录判断“距离正式提交还差什么”：资料索引也明确说明“资料摘要尚未列出实际条件，请查原始记录”【2】。建议下一步先补齐并核对正式提交的实际条件清单（提交物清单、版本一致性要求、演示环境要求、截止时间），再据此确定差距；在条件未知前不宜假定已接近提交或已无缺口。",
+      "sources": [
+        {
+          "sourceId": "project:cmvq3pzjs000qcs8o0j49fj01",
+          "revision": "bb182d56c003981b829e5764550c7330d53b2bf2239ebac1207188cb131aeb10",
+          "excerpt": "COMPETITION 条件核对\n项目目标：交付同版本可演示、可正式提交的竞赛作品\n截止日期：未知\n未完成行动：0 项\n待回应委托：0 项\n阻塞项：0 项",
+          "readScope": null
+        },
+        {
+          "sourceId": "card:cmvq3pzkm000tcs8o2yt9clqe",
+          "revision": "e0fed53ad68ba4fca07201391e11d669f68ef5644417f61e6f48daecacebe1f8",
+          "excerpt": "资料索引：交付同版本可演示、可正式提交的竞赛作品\n交付同版本可演示、可正式提交的竞赛作品。资料摘要尚未列出实际条件，请查原始记录。",
+          "readScope": null
+        }
+      ],
+      "stepCount": 0,
+      "stopReason": null,
+      "goalStates": [],
+      "blocks": [],
+      "fallbacks": [],
+      "business": null,
+      "usage": [
+        {
+          "inputTokens": 508,
+          "outputTokens": 64
+        },
+        {
+          "inputTokens": 1281,
+          "outputTokens": 335
+        }
+      ]
+    },
+    {
+      "episode": "competition/C3_FULL",
+      "status": "ANSWERED",
+      "modelCalls": 6,
+      "durationMs": 23444,
+      "answer": "目前无法确认“还差什么”：已读记录只显示项目状态为未完成行动、待回应委托、阻塞项均为 0 项【1】，但设备验收行动仍为 TODO，且尚无目标设备安装回执【3】；资料索引也明确说摘要尚未列出实际条件，需查原始记录【2】。因此，正式提交条件清单、演示与提交版本是否一致、设备验收与提交的关系都仍是未知。下一步建议先低成本补齐两项信息：一是竞赛官方提交条件清单（提交物、格式、截止时间），二是设备验收 TODO 的负责人与预计完成时间；拿到后再判断是否阻塞提交。在信息补齐前，不建议直接宣称可提交。",
+      "sources": [
+        {
+          "sourceId": "project:cmvq3pzjs000qcs8o0j49fj01",
+          "revision": "bb182d56c003981b829e5764550c7330d53b2bf2239ebac1207188cb131aeb10",
+          "excerpt": "COMPETITION 条件核对\n项目目标：交付同版本可演示、可正式提交的竞赛作品\n截止日期：未知\n未完成行动：0 项\n待回应委托：0 项\n阻塞项：0 项",
+          "readScope": null
+        },
+        {
+          "sourceId": "card:cmvq3pzkm000tcs8o2yt9clqe",
+          "revision": "e0fed53ad68ba4fca07201391e11d669f68ef5644417f61e6f48daecacebe1f8",
+          "excerpt": "资料索引：交付同版本可演示、可正式提交的竞赛作品\n交付同版本可演示、可正式提交的竞赛作品。资料摘要尚未列出实际条件，请查原始记录。",
+          "readScope": "SUMMARY"
+        },
+        {
+          "sourceId": "capture:cmvq3pzk7000scs8oyo50py2q",
+          "revision": "d6453c814d377f151e4fa2e187efafb391d7dce6381990f0cc68115a82ff2171",
+          "excerpt": "设备验收行动仍为 TODO，尚无目标设备安装回执。",
+          "readScope": "EXCERPT"
+        }
+      ],
+      "stepCount": 3,
+      "stopReason": "NO_GAIN",
+      "goalStates": [
+        "UNKNOWN",
+        "UNKNOWN",
+        "UNKNOWN"
+      ],
+      "blocks": [
+        "prose",
+        "goal_gap",
+        "investigation"
+      ],
+      "fallbacks": [
+        {
+          "purpose": "UI_PLAN",
+          "reason": "MODEL_PROTOCOL_INVALID"
+        }
+      ],
+      "business": null,
+      "usage": [
+        {
+          "inputTokens": 706,
+          "outputTokens": 108
+        },
+        {
+          "inputTokens": 3364,
+          "outputTokens": 559
+        },
+        {
+          "inputTokens": 4948,
+          "outputTokens": 650
+        },
+        {
+          "inputTokens": 5438,
+          "outputTokens": 619
+        },
+        {
+          "inputTokens": 3520,
+          "outputTokens": 410
+        },
+        {
+          "inputTokens": 3659,
+          "outputTokens": 1072
+        }
+      ]
+    },
+    {
+      "episode": "course/C0_ORIGINAL",
+      "status": "ANSWERED",
+      "modelCalls": 2,
+      "durationMs": 4510,
+      "answer": "现有记录不足以判断报告结论是否可靠：项目状态只显示目标为“提交可复现实验且结论与结果一致的课程研究报告”，截止日期未知、未完成行动 0 项、阻塞 0 项【1】；资料索引也明确说明“资料摘要尚未列出实际条件，请查原始记录”，即尚未提供实验条件、结果数据或结论核对记录【2】。因此“结论是否可靠”目前属于 UNKNOWN，不能视为已核实，也不能视为已失效。建议下一步先补齐可核对的原始材料：实验条件清单、原始结果数据、结论与结果逐条对应表，再据此判断差距；由于目标重要性、投入与截止时间均未记录，暂不判断优先级高低，也不宣称任何操作已执行。",
+      "sources": [
+        {
+          "sourceId": "project:cmvq3qknr001ecs8ootoxanvt",
+          "revision": "68d3ac7813efa65f68ec706084fb41600beaa45c904b7554f15538ba0c8d683d",
+          "excerpt": "COURSE 条件核对\n项目目标：提交可复现实验且结论与结果一致的课程研究报告\n截止日期：未知\n未完成行动：0 项\n待回应委托：0 项\n阻塞项：0 项",
+          "readScope": null
+        },
+        {
+          "sourceId": "card:cmvq3qkog001hcs8owi95ne8i",
+          "revision": "f0ad647a14528a53bb447ab0208e6c02b6cf4d0e11cd1346a412d7533961b723",
+          "excerpt": "资料索引：提交可复现实验且结论与结果一致的课程研究报告\n提交可复现实验且结论与结果一致的课程研究报告。资料摘要尚未列出实际条件，请查原始记录。",
+          "readScope": null
+        }
+      ],
+      "stepCount": 0,
+      "stopReason": null,
+      "goalStates": [],
+      "blocks": [],
+      "fallbacks": [],
+      "business": null,
+      "usage": [
+        {
+          "inputTokens": 503,
+          "outputTokens": 64
+        },
+        {
+          "inputTokens": 1263,
+          "outputTokens": 376
+        }
+      ]
+    },
+    {
+      "episode": "course/C3_FULL",
+      "status": "ANSWERED",
+      "modelCalls": 6,
+      "durationMs": 20116,
+      "answer": "结论可靠性目前为 UNKNOWN，不能视为已验证：资料索引明确说尚未列出实际条件，需查原始记录【2】；唯一实质原始记录只指出实验 A 使用划分 s1、实验 B 使用 s2，两个结果不构成同条件对照【3】。项目记录中行动为空、截止日期未知【1】，没有报告结论、结果数值或复现步骤可供核对。下一步建议：先补充同条件对照的实验结果与复现步骤，再逐条核对报告结论；同时确认提交状态与截止日期。以上为建议，未执行任何操作。",
+      "sources": [
+        {
+          "sourceId": "project:cmvq3qknr001ecs8ootoxanvt",
+          "revision": "68d3ac7813efa65f68ec706084fb41600beaa45c904b7554f15538ba0c8d683d",
+          "excerpt": "{\"project\":{\"title\":\"COURSE 条件核对\",\"goal\":\"提交可复现实验且结论与结果一致的课程研究报告\",\"deadline\":null},\"actions\":[]}",
+          "readScope": "STRUCTURED"
+        },
+        {
+          "sourceId": "card:cmvq3qkog001hcs8owi95ne8i",
+          "revision": "f0ad647a14528a53bb447ab0208e6c02b6cf4d0e11cd1346a412d7533961b723",
+          "excerpt": "资料索引：提交可复现实验且结论与结果一致的课程研究报告\n提交可复现实验且结论与结果一致的课程研究报告。资料摘要尚未列出实际条件，请查原始记录。",
+          "readScope": "SUMMARY"
+        },
+        {
+          "sourceId": "capture:cmvq3qko4001gcs8oi4spoem4",
+          "revision": "38fa7815f1b599678e58225f245f4e8d608b3fdb3798cbcd92ebdeb7f770b29f",
+          "excerpt": "实验 A 使用划分 s1，实验 B 使用 s2，两个结果不构成同条件对照。",
+          "readScope": "EXCERPT"
+        }
+      ],
+      "stepCount": 3,
+      "stopReason": null,
+      "goalStates": [
+        "UNKNOWN",
+        "UNKNOWN",
+        "UNKNOWN"
+      ],
+      "blocks": [
+        "prose",
+        "goal_gap",
+        "investigation"
+      ],
+      "fallbacks": [
+        {
+          "purpose": "UI_PLAN",
+          "reason": "MODEL_PROTOCOL_INVALID"
+        }
+      ],
+      "business": null,
+      "usage": [
+        {
+          "inputTokens": 701,
+          "outputTokens": 134
+        },
+        {
+          "inputTokens": 3341,
+          "outputTokens": 543
+        },
+        {
+          "inputTokens": 4916,
+          "outputTokens": 709
+        },
+        {
+          "inputTokens": 5658,
+          "outputTokens": 646
+        },
+        {
+          "inputTokens": 5779,
+          "outputTokens": 690
+        },
+        {
+          "inputTokens": 3826,
+          "outputTokens": 367
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Development synthetic cases, not held-out or independent user evaluation.",
+    "No C3 run produced a pending Action; paid-model business closure unproven.",
+    "Competition UI response is malformed JSON and safely fell back.",
+    "Course exhausted the shared 24-call evaluation ceiling before UI HTTP dispatch; its UI reservation is not an additional paid call.",
+    "Route 2.0.1 and UI Plan 1.0.1 prompt fixes were made after this run; not re-evaluated with paid calls.",
+    "C1/C2 ablations and full event/reassessment, native rendering, target device and ECS acceptance remain."
+  ]
+}

@@ -142,6 +142,16 @@ async function inspectConfirmation(tx: Tx, projectId: string, input: AgentToolCo
   if (!proposed) throw new AppError("UNAPPROVED_TOOL_PROPOSAL", "这个操作不属于该证据回执中的建议", 409);
   const key = keyOf(input.tool, proposed), confirmationHash = jsonHash({ tool: input.tool, payload: input.payload });
   const execution = await tx.copilotToolExecution.findUnique({ where: { sourceRunId_proposalKey: { sourceRunId: run.id, proposalKey: key } } });
+  if (trace.r4Draft === true) {
+    if (!await tx.agentMessage.findFirst({ where: { runId: run.id, conversationId: run.conversationId, ownerUserId: actor?.userId } }))
+      throw new AppError("PROPOSAL_NOT_PUBLISHED", "这项提案尚未完成发布", 409);
+    if (execution?.status !== "COMMITTED") {
+      if (typeof trace.proposalExpiresAt !== "string" || !Number.isFinite(Date.parse(trace.proposalExpiresAt)) || Date.parse(trace.proposalExpiresAt) <= Date.now())
+        throw new AppError("PROPOSAL_EXPIRED", "这项提案已过期，请重新讨论", 409);
+      if (run.conversationId && (await tx.conversation.findUnique({ where: { id: run.conversationId } }))?.activeTurnId)
+        throw new AppError("CONVERSATION_BUSY", "请等本轮讨论完成后确认", 409);
+    }
+  }
   if (execution?.status === "DECLINED") throw new AppError("PROPOSAL_DECLINED", "这项提案已被拒绝，请重新讨论", 409);
   if (execution?.confirmationHash && execution.confirmationHash !== confirmationHash) {
     throw new AppError("CONFIRMATION_PAYLOAD_CHANGED", "该建议已使用不同内容确认，请勿更改重试载荷", 409);

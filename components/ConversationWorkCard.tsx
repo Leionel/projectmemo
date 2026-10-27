@@ -8,6 +8,7 @@ import { MissionEvidenceReview, MissionEvidenceResult } from "./MissionEvidenceR
 import { ConversationReviewPanel } from "./ConversationReviewPanel";
 import { missionStatusLabels } from "@/lib/mission/presentation";
 import styles from "./ConversationPanel.module.css";
+import { readConversationDraft, saveConversationDraft } from "@/lib/client/conversationDrafts";
 async function request<T>(url: string, body?: unknown): Promise<T> {
   const r = await fetch(url, { method: body ? "POST" : "GET", cache: "no-store", headers: { "Content-Type": "application/json" }, ...(body ? { body: JSON.stringify(body) } : {}) });
   const v = await r.json();
@@ -18,14 +19,18 @@ export function ConversationWorkCard({ conversation, workRef, onChange, onClose 
   conversation: ConversationView; workRef: ConversationWorkRef; onChange: (v: ConversationView) => void; onClose: () => void;
 }) {
   const base = "/api/conversations/" + conversation.id + "/work";
+  const draftKey = `${conversation.id}:${workRef.kind}:${workRef.id}`;
+  const [saved] = useState(() => readConversationDraft(draftKey));
   const [work, setWork] = useState<ConversationWork | null>(null), [error, setError] = useState(""), [busy, setBusy] = useState(false);
-  const [answer, setAnswer] = useState(""), [selected, setSelected] = useState<string[]>([]), [minutes, setMinutes] = useState(""), [delivery, setDelivery] = useState("");
-  const [mode, setMode] = useState<EvidenceReview["mode"]>("CONDITIONAL_ANALYSIS"), [premiseHash, setPremiseHash] = useState("");
+  const [answer, setAnswer] = useState(saved.answer), [selected, setSelected] = useState<string[]>(saved.selected), [minutes, setMinutes] = useState(saved.minutes), [delivery, setDelivery] = useState(saved.delivery);
+  const [mode, setMode] = useState<EvidenceReview["mode"]>(saved.mode === "ANSWERING_EVIDENCE" ? "ANSWERING_EVIDENCE" : saved.mode === "BACKGROUND_ONLY" ? "BACKGROUND_ONLY" : "CONDITIONAL_ANALYSIS"), [premiseHash, setPremiseHash] = useState(saved.premiseHash);
+  const [reviewedVersion, setReviewedVersion] = useState(saved.versionToken);
   const [assessment, setAssessment] = useState<{ assessment: string; remaining: string[]; evidenceFit?: EvidenceFit; observationExcerpts?: FitExcerpt[] } | null>(null);
-  const live = useRef(true), keys = useRef(new Map<string, string>());
+  const live = useRef(true), keys = useRef(new Map<string, string>()), loadGeneration = useRef(0);
   const query = new URLSearchParams(workRef);
-  async function load() { const v = await request<ConversationWork>(base + "?" + query); if (live.current) setWork(v); }
-  useEffect(() => { live.current = true; void load().catch(e => { if (live.current) setError(e.message); }); return () => { live.current = false; }; }, [base, workRef.id, workRef.kind]); // eslint-disable-line react-hooks/exhaustive-deps
+  async function load() { const epoch = ++loadGeneration.current, v = await request<ConversationWork>(base + "?" + query); if (live.current && epoch === loadGeneration.current) { setWork(v); setReviewedVersion(old => old || v.versionToken); } }
+  useEffect(() => { live.current = true; void load().catch(e => { if (live.current) setError(e.message); }); return () => { live.current = false; loadGeneration.current++; }; }, [base, workRef.id, workRef.kind, conversation.version]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { saveConversationDraft(draftKey, { answer, selected, minutes, delivery, mode, premiseHash, versionToken: reviewedVersion }); }, [draftKey, answer, selected, minutes, delivery, mode, premiseHash, reviewedVersion]);
   async function run(fn: () => Promise<void>) { setBusy(true); setError(""); try { await fn(); } catch (e) { if (live.current) setError(e instanceof Error ? e.message : "操作失败"); } finally { if (live.current) setBusy(false); } }
   function key(value: unknown) { const hash = JSON.stringify(value); let k = keys.current.get(hash); if (!k) { k = crypto.randomUUID(); keys.current.set(hash, k); } return k; }
   function body(operation: ConversationWorkPreview["operation"], extra = {}): ConversationWorkPreview {
@@ -35,6 +40,7 @@ export function ConversationWorkCard({ conversation, workRef, onChange, onClose 
       ...(premise && premiseHash === premise.premiseHash ? { evidenceReview: { schemaVersion: 1, mode, confirmedPremise: true, premiseHash, note: answer.trim().slice(0, 1000) } } : {}), ...extra };
   }
   async function preview(operation: ConversationWorkPreview["operation"], extra = {}) {
+    if (work && reviewedVersion !== work.versionToken) { setError("原任务已有更新，草稿已保留，请先核对本次更新。"); return; }
     await run(async () => { const r = await request<{ conversation: ConversationView }>(base, body(operation, extra)); if (live.current) onChange(r.conversation); });
   }
   const pointers = work?.candidates.filter(c => selected.includes(c.sourcePointer.id)).map(c => c.sourcePointer) ?? [];
@@ -44,6 +50,7 @@ export function ConversationWorkCard({ conversation, workRef, onChange, onClose 
     {error && <p role="alert" className={styles.error}>{error}</p>}
     {!work ? <p role="status">正在读取原任务…</p> : <>
       <h3>{work.title}</h3><p className={styles.workStatus}>{missionStatusLabels[work.status] ?? ({ TODO: "待办", DOING: "进行中", DONE: "已完成", CANCELLED: "已取消" } as Record<string, string>)[work.status] ?? work.status}{work.planRevision > 0 && " · 计划 " + work.planRevision}</p>
+      {reviewedVersion && reviewedVersion !== work.versionToken && <div className={styles.reason} role="status">原任务已有更新，你的草稿已保留。<button type="button" className="workspace-link focus-ring" onClick={() => setReviewedVersion(work.versionToken)}>已核对本次更新</button></div>}
       {work.question && <><blockquote>{work.question.text}</blockquote>
         {!!work.candidates.length && <details><summary>从项目资料中选择 · {work.candidates.length}</summary><div className={styles.materialList}>{work.candidates.map(c => <label key={c.sourcePointer.id}><input type="checkbox" disabled={!c.readable || busy} checked={selected.includes(c.sourcePointer.id)} onChange={e => { setSelected(v => e.target.checked ? [...v, c.sourcePointer.id] : v.filter(i => i !== c.sourcePointer.id)); setAssessment(null); }}/><span><b>{c.title}</b><small>{c.excerpt}</small></span></label>)}</div></details>}
       </>}

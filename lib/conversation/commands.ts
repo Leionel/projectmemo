@@ -20,6 +20,8 @@ export async function confirmConversationAction(actor: ConversationActor, id: st
       throw new AppError("PROPOSAL_NOT_FOUND", "没有可访问的行动提案", 404);
     const projectId = target;
     await assertProject(actor, projectId, tx);
+    if (execution.status !== "COMMITTED" && input.expectedConversationVersion !== undefined && c.version !== input.expectedConversationVersion)
+      throw new AppError("CONVERSATION_CHANGED", "讨论已变化，请刷新原提案", 409);
     if (execution.proposalHash !== input.proposalHash) throw new AppError("PROPOSAL_CHANGED", "行动提案已变化，请重新核对", 409);
     const previous = await tx.conversationTurn.findUnique({ where: { conversationId_requestId: { conversationId: id, requestId: input.requestId } } });
     if (previous && previous.inputHash !== hash) throw new AppError("REQUEST_ID_REUSED", "请求编号已用于其他确认", 409);
@@ -30,7 +32,7 @@ export async function confirmConversationAction(actor: ConversationActor, id: st
       payload: record(execution.proposalJson),
     }, actor);
     if (!previous) await tx.conversationTurn.create({ data: { conversationId: id, requestId: input.requestId,
-      inputHash: hash, inputJson: json({ kind: "CONFIRM_ACTION", executionId }), baseVersion: c.version,
+      inputHash: hash, inputJson: json({ kind: "CONFIRM_ACTION", executionId, expectedConversationVersion: input.expectedConversationVersion }), baseVersion: c.version,
       status: "COMMITTED", finishedAt: new Date() } });
     return { projectId, actionId: receipt.result.id, alreadyExecuted: receipt.alreadyExecuted };
   }, { timeout: 20000 });

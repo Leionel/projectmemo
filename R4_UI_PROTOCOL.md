@@ -1,4 +1,6 @@
-# R4 UI 协议 · PR-0
+# R4 UI 协议
+
+PR-2 已接服务端实时 authority、Web 原生块与原确认回执；ArkTS 原生渲染仍在 PR-4。新回答持久保存模型 Plan，客户端只获得经当前权限/版本重绑定的 presentation。旧正文和提案继续可读。
 
 源码：`lib/types/agentExperience.ts`、`lib/conversation/experienceContract.ts`；鸿蒙镜像：`harmonyos/entry/src/main/ets/models/AgentExperience.ets`。
 
@@ -8,7 +10,7 @@
 2. 服务端从当前授权、版本与原业务服务构建 `ExperienceAuthority`，选择可信 catalog 块，产生 `AgentPresentation.schemaVersion=1`。`hydratePresentation` 保留模型选择的块、次序和强调，将业务内容与操作绑定到原对象。
 3. Web 与 ArkTS 消费相同 JSON，分别原生渲染。`ConversationBlocks.schemaVersion=1` 不变，仅增加可选 `presentation`；旧正文、来源、提案和历史继续可读。
 
-PR-0 实现契约及纯校验/hydration，不接数据库权限查询、不启用新模型循环、不发出新 presentation、不替换客户端 renderer。PR-1/2 必须在实际调用处构建并更新 authority，不能从客户端、模型或持久旧快照直接信任它。
+PR-0 冻结契约与纯 hydration。PR-1/2 在实际调用处构建 authority，模型选择语义块的次序与强调，服务端从当前原对象注入状态/按钮。不能从客户端、模型或持久旧快照直接信任业务字段。
 
 ## 来源与目标
 
@@ -45,13 +47,18 @@ PR-0 实现契约及纯校验/hydration，不接数据库权限查询、不启�
 
 提案动作另绑定 frozen proposalHash/candidateId/expiresAt。PREVIEW 可尚无 executionId；CONFIRM 必须已有原预览 executionId。比较卡的 PREVIEW 必须指向同一冻结候选且可行；审批卡的执行对象、hash、期限必须一致。陈旧/否决/过期状态不提供可用确认。
 
-客户端只发送原 API 要求的 requestId、expectedVersion、executionId、proposalHash 或原 work command 的冻结字段。当前 authority 校验不是长期授权；每次读取、预览和确认都由原服务重新鉴权、检查源版本、批准期限与幂等。操作和回执仍由原事务提交。
+新 Web 块通过 `/api/conversations/:id/ui-actions` 只发送 messageId、bindingId、requestId、expectedConversationVersion。服务端重读原回答的当前绑定，再调用原确认/否决服务；客户端不能上传命令、URL、目标或自行修改 hash。原 work command/API 保持兼容。每次确认由原服务重新鉴权、检查源版本、批准期限与幂等，业务效果和回执仍原子提交。
+
+PR-2 的实际 catalog 已接目标差距、引用证据、真实调查、澄清问题、创建行动审批与 Action 回执。comparison/change/timeline 已有 Web renderer 与共享 fixture，实际 D2/D1 业务绑定由原 WorkCard 继续，后续 PR-3/5 接入。服务端不发出尚未实现绑定的 PREVIEW 操作。
+
+冻结提案在同一短事务创建 PARTIAL AgentRun 与原 execution，模型 UI 请求在事务外；只有发布原回答后才允许原确认。原确认路径也检查发布、15 分钟期限与活跃 turn。确认后同一 approval 位置重绑定为当前真实 receipt；GET、刷新及状态读回不追加模型调用。
 
 ## 草稿与跨端接口
 
 - WorkCard 身份固定为 conversationId + 原业务 kind/id；不能拼消息条数。revision 变化需要显式冲突/交接，不以重挂载静默清空。
 - draftKey 来自原 Question/业务身份；新消息、readback、页面来回不得清空未提交内容；切换用户清除私有草稿。
 - 约 15–16px 等效正文、44–48px 触控目标，适配 360/390/430px、键盘、安全区、放大字、暗色。
-- 状态字典与实际 renderer 在 PR-2/4 交付；内部枚举不直接当产品提示。当前 WorkCard key 风险仍登记为待修。
+- Web 状态字典与 renderer 已接入；未知顶层版本退回旧正文，未知语义块显示 fallbackText。WorkCard 已去掉消息条数 key；问题、选项、原任务答复与主输入保存在当前会话的 sessionStorage，换用户/退出/401 清理。
+- 原任务版本变化保留草稿，预览前要求明确核对更新。选择新任务优先采用该对象的项目，旧讨论加载不能覆盖本次选择。
 
 共享 fixture：`tests/fixtures/r4/experience-v1.json`。科研、竞赛、课程有不同初始/观察后 UI Plan，包含同一对象的审批/创建回执及用户结果 REPORTED。它们是合成输入；模型动态性和真实业务效果另验收。

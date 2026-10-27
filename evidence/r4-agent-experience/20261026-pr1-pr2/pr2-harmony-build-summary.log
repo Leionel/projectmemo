@@ -1,0 +1,16 @@
+ 'pushUrl' has been deprecated.
+
+
+> hvigor Finished :entry:default@CompileArkTS... after 25 s 824 ms
+> hvigor Finished :entry:default@GeneratePkgModuleJson... after 7 ms
+> hvigor Finished :entry:default@ProcessCompiledResources... after 1 ms
+> hvigor Finished :entry:default@PackageHap... after 1 s 304 ms
+> hvigor Finished :entry:default@PackingCheck... after 17 ms
+> hvigor Finished :entry:default@SignHap... after 1 s 848 ms
+> hvigor Finished :entry:default@CollectDebugSymbol... after 3 ms
+> hvigor Finished :entry:assembleHap... after 1 ms
+> hvigor BUILD SUCCESSFUL in 46 s 361 ms
+
+[harmony-build] HAP: harmonyos\entry\build\default\outputs\default\entry-default-unsigned.hap
+[harmony-build] size: 6043877 bytes
+[harmony-build] sha256: 3a3bc80f3e1970278ad15faea0bc386cdff0df03f189e7651c1f578422729923

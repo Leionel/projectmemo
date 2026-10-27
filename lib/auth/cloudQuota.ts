@@ -5,6 +5,7 @@ import { reserveTurnTokens, stageOutputLimit, tokenReservations } from "@/lib/co
 import type { AgentExecutionResult } from "@/lib/types";
 import { investigationBudgetSchema } from "@/lib/types/agentExperience";
 import type { ModelPurpose } from "@/lib/conversation/tokenBudget";
+import { sourceHash } from "@/lib/mission/repository";
 
 export type WorkspaceBilling = { userId: string; turnId: string; purpose: ModelPurpose; sessionId?: string; inputTokens?: number; outputTokens?: number; provider?: string;
   callId?: string; promptId?: string; promptVersion?: string; outputSchemaVersion?: number };
@@ -42,13 +43,28 @@ export async function reserveWorkspaceCloudCall(billing: WorkspaceBilling): Prom
       throw new AppError("TURN_CHANGED", "本次请求已结束或不可访问", 409);
     if (billing.sessionId && !await tx.authSession.findFirst({ where: { id: billing.sessionId, userId: billing.userId, revokedAt: null, expiresAt: { gt: new Date() } } }))
       throw new AppError("UNAUTHORIZED", "登录状态已变化，请重新登录", 401);
-    const manifest = (turn.readManifestJson ?? {}) as { experience?: { policyVersion?: string; budget?: unknown } };
+    const manifest = (turn.readManifestJson ?? {}) as { stopRequested?: boolean; sourceRefs?: Array<{ projectId: string; id: string; revision: string }>;
+      experience?: { policyVersion?: string; budget?: unknown; observedProjectIds?: string[] } };
     let adaptive: { callId: string; maxCalls: number; inputTokens: number; outputTokens: number } | undefined;
     if (billing.callId) {
+      if (manifest.stopRequested) throw new AppError("TURN_STOP_REQUESTED", "已停止本轮调查", 409);
       const budget = investigationBudgetSchema.parse(manifest.experience?.budget);
       const c = await tx.conversation.findUniqueOrThrow({ where: { id: turn.conversationId } });
       if (manifest.experience?.policyVersion !== "r4-v1" || c.activeTurnId !== turn.id)
         throw new AppError("TURN_CHANGED", "本次调查已结束", 409);
+      for (const projectId of manifest.experience.observedProjectIds ?? []) {
+        if (!await tx.projectMembership.findUnique({ where: { userId_projectId: { userId: billing.userId, projectId } } }))
+          throw new AppError("PROJECT_NOT_FOUND", "项目权限已变化，未继续发出模型请求", 404);
+      }
+      for (const s of manifest.sourceRefs ?? []) {
+        let revision: string | null;
+        if (s.id.startsWith("mission:")) {
+          const mission = await tx.agentMission.findFirst({ where: { id: s.id.slice(8), projectId: s.projectId, ownerUserId: billing.userId,
+            project: { memberships: { some: { userId: billing.userId, role: "OWNER" } } } } });
+          revision = mission ? String(mission.version) : null;
+        } else revision = await sourceHash(s.projectId, s.id, tx);
+        if (revision !== s.revision) throw new AppError("SOURCE_CHANGED", "本轮资料已变化，未继续发出模型请求", 409);
+      }
       if (Date.now() - turn.createdAt.getTime() >= budget.maxElapsedMs)
         throw new AppError("INVESTIGATION_BUDGET_EXHAUSTED", "本轮调查时间已用完，可以根据已读资料继续讨论", 409);
       adaptive = { callId: billing.callId, maxCalls: budget.maxModelCalls, inputTokens: budget.maxInputTokens, outputTokens: budget.maxOutputTokens };

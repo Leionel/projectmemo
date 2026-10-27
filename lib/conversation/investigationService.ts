@@ -15,6 +15,7 @@ import { discoverMaterialPointers, experienceSourceRef, readWorkspaceTool, works
 export type R4State = {
   schemaVersion: 1; policyVersion: "r4-v1"; phase: "ROUTING" | "READING_SOURCE" | "EVALUATING" | "WAITING_MODEL" | "WAITING_USER" | "READY" | "UNKNOWN";
   budget: InvestigationBudget; projectIds: string[]; goalGaps: GoalGap[]; steps: InvestigationStep[];
+  observedProjectIds: string[];
   decision: InvestigationDecision | null; stopReason: string | null; pointers: MaterialPointer[];
 };
 export type R4Observation = { sources: ConversationSource[]; refs: ConversationRef[]; coverage: Record<string, unknown> };
@@ -37,6 +38,7 @@ export async function saveR4State(actor: ConversationActor, id: string, turnId: 
   await db.$transaction(async tx => {
     await lockConversation(tx, id);
     const c = await ownedConversation(actor, id, tx), turn = await tx.conversationTurn.findUniqueOrThrow({ where: { id: turnId } });
+    if (record(turn.readManifestJson).stopRequested === true) throw new AppError("TURN_STOP_REQUESTED", "已停止本轮调查", 409);
     if (c.activeTurnId !== turnId || c.version !== turn.baseVersion + 1 || !["OBSERVING", "GENERATING"].includes(turn.status))
       throw new AppError("TURN_CHANGED", "原讨论已中断或上下文已变化", 409);
     await validateReadSources(actor, sources, tx);
@@ -97,7 +99,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
   recentDialogue: Array<{ role: string; content: string }>;
 }) {
   const state: R4State = { schemaVersion: 1, policyVersion: "r4-v1", phase: "ROUTING", budget: investigationBudget(input.mode),
-    projectIds: [], goalGaps: [], steps: [], decision: null, stopReason: null, pointers: [] };
+    projectIds: [], observedProjectIds: input.directory.summaries.map(p => p.id), goalGaps: [], steps: [], decision: null, stopReason: null, pointers: [] };
   await saveR4State(actor, id, turnId, state);
   await validateContext(actor, input.directory);
   const routed = await conversationModelSpec(actor, id, turnId, "route", routeV2, { message: input.message, focus: input.focus,
@@ -121,7 +123,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
     sources: observations.sources.map((s, i) => ({ ...s, citationNumber: i + 1 })),
     goalGaps: state.goalGaps, materialPointers: state.pointers,
     recentDialogue: input.recentDialogue.slice(-6).map(m => ({ role: m.role, text: m.content.slice(0, 500) })) });
-  const seen = new Set<string>();
+  const seen = new Set<string>(); let noGain = 0;
   if (route.investigate && route.intent !== "CLARIFY") while (true) {
     await validateContext(actor, scopeDirectory, observations, state.pointers);
     const turn = await db.conversationTurn.findUniqueOrThrow({ where: { id: turnId } });
@@ -172,7 +174,8 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
         throw new AppError("CONTEXT_LIMIT", "已读资料达到本轮容量，请缩小问题后继续", 409);
       state.pointers = [...new Map([...state.pointers, ...result.discovered].map(p => [p.projectId + "/" + p.sourceId, p])).values()].slice(0, 64);
       await saveR4State(actor, id, turnId, state, observations.sources);
-      if (!added.length) { state.stopReason = "NO_GAIN"; state.decision = { decision: "STOP", reason: "NO_GAIN", explanation: "本次读取未补充新的依据，先保留当前判断。" }; break; }
+      noGain = added.length ? 0 : noGain + 1;
+      if (noGain >= 2) { state.stopReason = "NO_GAIN"; state.decision = { decision: "STOP", reason: "NO_GAIN", explanation: "连续读取未补充新的依据，先保留当前判断。" }; break; }
     } catch (e) {
       step.status = "FAILED"; step.finishedAt = new Date().toISOString(); step.failureReason = e instanceof AppError ? e.message : "资料读取中断";
       // Persist failure without stale source content; access checks still apply.

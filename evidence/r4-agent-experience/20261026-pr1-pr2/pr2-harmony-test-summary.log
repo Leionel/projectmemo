@@ -1,0 +1,16 @@
+WARN: ArkTS:WARN File: D:/Projects/hongmen/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:133:25
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:134:34
+ Function may throw exceptions. Special handling is required.
+
+
+> hvigor Finished :entry:default@UnitTestArkTS... after 9 s 846 ms
+> hvigor Windows_NT
+[2026-10-26T20:10:07.630] [INFO] default - Finished write html report
+> hvigor Finished :entry:default@GenerateUnitTestResult... after 5 s 784 ms
+> hvigor Finished :entry:test... after 1 ms
+> hvigor BUILD SUCCESSFUL in 28 s 492 ms
+[2026-10-26T20:10:07.810] [INFO] default - Finished file written successfully
+
+[harmony-test] Tests run: 83, Failure: 0, Error: 0, Pass: 83, Ignore: 0

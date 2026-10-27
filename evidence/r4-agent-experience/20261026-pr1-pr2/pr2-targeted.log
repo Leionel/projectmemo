@@ -1,0 +1,12 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/focusConversation.test.ts tests/r4Investigation.test.ts tests/r4PresentationClient.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  3 passed (3)
+      Tests  45 passed (45)
+   Start at  20:16:08
+   Duration  25.58s (transform 2.94s, setup 0ms, import 8.26s, tests 15.07s, environment 1.49s)

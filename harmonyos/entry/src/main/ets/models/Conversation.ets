@@ -25,7 +25,7 @@ export class ConversationView {
   activeTurn: ConversationActiveTurn | null = null; hasMore: boolean = false; beforeSeq: number | null = null;
   latestTurn?: ConversationTurnState | null;
 }
-export interface ConversationCapabilities { schemaVersion: number; enabled: boolean; cloudAvailable: boolean; intents: string[]; }
+export interface ConversationCapabilities { schemaVersion: number; enabled: boolean; cloudAvailable: boolean; intents: string[]; r4Available?: boolean; }
 export class ConversationCreateInput { requestId: string = ''; scope: string = 'WORKSPACE'; projectId?: string; entry?: ConversationEntry; }
 export class ConversationEntityInput { kind: string = 'MISSION'; id: string = ''; projectId: string = ''; }
 export class ConversationTurnInput {
@@ -33,7 +33,7 @@ export class ConversationTurnInput {
   projectId?: string | null; replyToMessageId?: string; llmContextApproved: boolean = false; entityRef?: ConversationEntityInput;
   investigationMode?: string;
 }
-export class ConversationConfirmInput { requestId: string = ''; proposalHash: string = ''; confirmed: boolean = true; }
+export class ConversationConfirmInput { requestId: string = ''; proposalHash: string = ''; confirmed: boolean = true; expectedConversationVersion?: number; }
 export interface ConversationCreated { id: string; }
 export interface ConversationTurnReply { turnId: string; status: string; conversation: ConversationView; }
 export interface ConversationConfirmReply { actionId?: string; missionId?: string; resultId?: string | null; alreadyExecuted?: boolean; conversation: ConversationView; }

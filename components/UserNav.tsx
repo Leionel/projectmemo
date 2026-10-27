@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { LogIn, LogOut, User, LoaderCircle } from "lucide-react";
+import { bindConversationDraftOwner, clearConversationDrafts } from "@/lib/client/conversationDrafts";
 
 interface UserState {
   id: string;
@@ -27,10 +28,11 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
         if (res.ok) {
           const data = await res.json();
           if (active && read === generation) {
+            if (data.user?.id) bindConversationDraftOwner(data.user.id);
             setUser(data.user ?? null);
           }
         } else {
-          if (active && read === generation) setUser(null);
+          if (active && read === generation) { if (res.status === 401) clearConversationDrafts(); setUser(null); }
         }
       } catch {
         if (active && read === generation) setUser(null);
@@ -52,6 +54,7 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
     try {
       const response = await fetch("/api/auth/logout", { method: "POST" });
       if (!response.ok) throw new Error("logout failed");
+      clearConversationDrafts();
       setUser(null);
       window.location.assign("/login");
     } catch {

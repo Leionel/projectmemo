@@ -15,6 +15,8 @@ import { bindAnswerEvidence } from "./answerEvidence";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { investigateConversation, turnTimeoutMs } from "./investigationService";
 import { experienceProgress } from "./progress";
+import { composeExperience, fallbackExperiencePlan, prepareExperienceDraft, refreshExperiencePresentation } from "./presentationRuntime";
+import type { PresentationPlan } from "@/lib/types/agentExperience";
 
 export async function submitConversationTurn(actor: ConversationActor, id: string, raw: unknown) {
   const input = conversationTurnSchema.parse(raw), hash = jsonHash(input);
@@ -218,9 +220,24 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     }
     if (action && (!selected || action.projectId !== selected || !route.projectIds.includes(action.projectId))) action = null;
     if (pinned.some(v => /只读|(?:不要|不得|禁止|不允许|不).{0,8}(?:创建|新增).{0,12}(?:行动|待办)/.test(v))) action = null;
+    const prepared = r4 && !fallbackReason ? await prepareExperienceDraft(actor, id, turn.id, action, provider) : null;
+    let uiPlan: PresentationPlan | undefined, uiFallback: string | null = null;
+    if (prepared && r4) {
+      const uiBlocks: ConversationBlocks = { ...emptyBlocks(), refs: observations.refs, sources: observations.sources,
+        observedProjectIds: directory.summaries.map(p => p.id), citations: modelAnswer?.observations ?? [], fileGuides, provider,
+        proposal: prepared.proposal };
+      try { uiPlan = (await composeExperience(actor, id, turn.id, input.message, advice, uiBlocks, r4.state)).plan; }
+      catch (e) {
+        if (e instanceof AppError && ["UNAUTHORIZED", "PROJECT_NOT_FOUND", "SOURCE_CHANGED", "TURN_CHANGED", "MISSION_CHANGED", "TURN_STOP_REQUESTED"].includes(e.code)) throw e;
+        uiFallback = e instanceof AppError ? e.code : "UI_PLAN_INVALID_OR_UNKNOWN";
+        uiPlan = await fallbackExperiencePlan(actor, id, turn.id, advice, uiBlocks, r4.state);
+      }
+    }
     const result = await db.$transaction(async tx => {
       await lockConversation(tx, id);
       const current = await ownedConversation(actor, id, tx);
+      if (record((await tx.conversationTurn.findUniqueOrThrow({ where: { id: turn.id } })).readManifestJson).stopRequested)
+        throw new AppError("TURN_STOP_REQUESTED", "已停止本轮调查", 409);
       if (current.activeTurnId !== turn.id) throw new AppError("TURN_CHANGED", "原请求已中断或被接续", 409);
       for (const p of directory.summaries) await assertProject(actor, p.id, tx);
       await validateReadSources(actor, observations.sources, tx);
@@ -239,14 +256,19 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
         fileGuides,
         observedProjectIds: directory.summaries.map(p => p.id),
         limitations: [...(fallbackReason ? ["云端分析未完成，已改为项目状态读回，未生成操作提案"] : []), ...directory.coverage.limitations, ...("limitations" in observations.coverage ? observations.coverage.limitations as string[] : [])] };
-      const run = await tx.agentRun.create({ data: { projectId: null, conversationId: id, turnId: turn.id,
+      const trace = {
+        purpose: "FOCUS_TURN", actorUserId: actor.userId, sourceIds: blocks.sources.map(s => s.id),
+        supportState: action ? "SUPPORTED" : "INSUFFICIENT", supportBasis: "ACTION_PROPOSAL_NOT_FACT_CLAIM",
+        ...(r4 ? { experience: r4.state, uiPlanOrigin: uiFallback ? "FALLBACK" : "MODEL", uiFallback } : {}),
+      };
+      const run = prepared ? await tx.agentRun.update({ where: { id: prepared.runId }, data: { status: "SUCCESS",
+        trace: json({ ...record((await tx.agentRun.findUniqueOrThrow({ where: { id: prepared.runId } })).trace), ...trace }) } }) : await tx.agentRun.create({ data: { projectId: null, conversationId: id, turnId: turn.id,
         runType: "CHAT", status: modelEnabled && !fallbackReason ? "SUCCESS" : "FALLBACK", provider,
         fallbackReason: fallbackReason ?? (modelEnabled ? null : "MODEL_NOT_REQUESTED_OR_RULE_MODE"),
-        trace: json({ purpose: "FOCUS_TURN", actorUserId: actor.userId, sourceIds: blocks.sources.map(s => s.id),
-          supportState: action ? "SUPPORTED" : "INSUFFICIENT", supportBasis: "ACTION_PROPOSAL_NOT_FACT_CLAIM",
-          ...(r4 ? { experience: r4.state } : {}) }),
+        trace: json(trace),
         resultJson: json({}) } });
-      if (action) {
+      if (prepared) blocks.proposal = prepared.proposal;
+      if (action && !prepared) {
         const sources = await readCopilotContext(tx, action.projectId, actor);
         const proposed = { kind: "create_action" as const, label: "创建行动", ...action };
         await tx.agentRun.update({ where: { id: run.id }, data: { trace: json({
@@ -256,6 +278,10 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
         const execution = await tx.copilotToolExecution.findFirstOrThrow({ where: { sourceRunId: run.id } });
         blocks.proposal = { executionId: execution.id, projectId: action.projectId, title: action.title,
           description: action.description, proposalHash: execution.proposalHash, status: execution.status, resultId: null };
+      }
+      if (r4 && uiPlan) {
+        blocks.presentationPlan = uiPlan;
+        blocks.presentation = await refreshExperiencePresentation(actor, id, blocks, r4.state, turn.id, tx, true);
       }
       await appendConversationMessage(tx, id, actor.userId, "ASSISTANT", advice, blocks, turn.id, run.id);
       await tx.conversation.update({ where: { id }, data: { activeTurnId: null,
@@ -272,20 +298,36 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     const reservations = Array.isArray(old?.reservationJson) ? old.reservationJson.map(record) : [];
     const completedCalls = usages.length;
     const observedProvider = [...usages, ...reservations].findLast(e => typeof e.provider === "string")?.provider;
-    const status = (old?.callCount ?? 0) > completedCalls ? "UNKNOWN" : "FAILED";
+    const stopped = record(old?.readManifestJson).stopRequested === true;
+    const status = stopped ? "CANCELLED" : (old?.callCount ?? 0) > completedCalls ? "UNKNOWN" : "FAILED";
     await db.$transaction(async tx => {
       await lockConversation(tx, id);
       await tx.conversationTurn.update({ where: { id: turn.id }, data: { status, finishedAt: new Date(),
         errorJson: { code: error instanceof AppError ? error.code : "MODEL_OR_PROTOCOL_ERROR", message: "请求未完成，未创建业务操作；不会自动重发模型" } } });
       await tx.conversation.updateMany({ where: { id, activeTurnId: turn.id }, data: { activeTurnId: null } });
+      await tx.copilotToolExecution.updateMany({ where: { status: "PENDING", sourceRun: { turnId: turn.id, conversationId: id, status: "PARTIAL" } }, data: { status: "DECLINED" } });
+      await tx.agentRun.updateMany({ where: { turnId: turn.id, conversationId: id, status: "PARTIAL" }, data: { status: "FAILED", fallbackReason: "UNPUBLISHED_DRAFT" } });
       await tx.agentRun.create({ data: { projectId: null, conversationId: id, turnId: turn.id, runType: "CHAT",
-        status: "FAILED", provider: typeof observedProvider === "string" ? observedProvider : old?.callCount ? "configured-model" : "project_state",
-        fallbackReason: error instanceof AppError ? error.code : "MODEL_OR_PROTOCOL_ERROR",
+        status: stopped ? "FALLBACK" : "FAILED", provider: typeof observedProvider === "string" ? observedProvider : old?.callCount ? "configured-model" : "project_state",
+        fallbackReason: stopped ? "USER_STOPPED" : error instanceof AppError ? error.code : "MODEL_OR_PROTOCOL_ERROR",
         trace: json({ purpose: "FOCUS_FAILED_TURN", actorUserId: actor.userId, usage: old?.usageJson,
           reservation: old?.reservationJson, usageUnknown: status === "UNKNOWN" || usages.some(e => e.usageUnknown !== false) }) } });
+      if (stopped) await appendConversationMessage(tx, id, actor.userId, "ASSISTANT", "已停止本轮调查，未提交业务操作。已完成的读取仍保留在这段讨论的调查记录中。", emptyBlocks());
     });
+    if (stopped) return { turnId: turn.id, status: "CANCELLED", conversation: await readConversation(actor, id) };
     throw error;
   }
+}
+
+export async function stopConversationTurn(actor: ConversationActor, id: string, turnId: string) {
+  await db.$transaction(async tx => {
+    await lockConversation(tx, id); const c = await ownedConversation(actor, id, tx);
+    const turn = await tx.conversationTurn.findFirst({ where: { id: turnId, conversationId: id } });
+    if (!turn || c.activeTurnId !== turn.id) return;
+    if (!record(turn.readManifestJson).experience) throw new AppError("TURN_NOT_STOPPABLE", "这条请求不支持调查停止，请读取原状态", 409);
+    await tx.conversationTurn.update({ where: { id: turn.id }, data: { readManifestJson: json({ ...record(turn.readManifestJson), stopRequested: true }) } });
+  });
+  return { conversation: await readConversation(actor, id) };
 }
 
 export async function readConversationTurn(actor: ConversationActor, id: string, turnId: string) {

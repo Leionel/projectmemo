@@ -12,13 +12,14 @@ import fs from "node:fs";
 import { db } from "@/lib/db";
 import { createSession } from "@/lib/auth/session";
 import { createConversation, readConversation } from "@/lib/conversation/service";
-import { submitConversationTurn } from "@/lib/conversation/turnService";
+import { stopConversationTurn, submitConversationTurn } from "@/lib/conversation/turnService";
 import { confirmConversationAction } from "@/lib/conversation/commands";
 import { reserveWorkspaceCloudCall } from "@/lib/auth/cloudQuota";
 import { investigationBudget, r4State } from "@/lib/conversation/investigationService";
 import type { ConversationSource } from "@/lib/types/conversation";
 import * as toolAdapter from "@/lib/conversation/toolAdapter";
 import { createMission } from "@/lib/mission/missionService";
+import { performConversationUIAction } from "@/lib/conversation/uiActions";
 
 afterEach(() => { vi.restoreAllMocks(); });
 afterAll(async () => { await db.$disconnect(); fs.rmSync(isolated.dir, { recursive: true, force: true }); });
@@ -39,7 +40,8 @@ async function fixture(seed: typeof domains[number] = domains[0]) {
   return { actor, user, p, capture, id: c.id, seed };
 }
 type Fixture = Awaited<ReturnType<typeof fixture>>;
-type ModelInput = { sources: ConversationSource[]; materialPointers: toolAdapter.MaterialPointer[] };
+type ModelInput = { sources: ConversationSource[]; materialPointers: toolAdapter.MaterialPointer[];
+  catalog?: Array<{ semanticType: string; dataRefs: unknown[]; summary: string }> };
 function model(f: Fixture, options: { repeat?: boolean; noAction?: boolean; onStage?: (stage: string, frame: number) => Promise<void>; networkAt?: string } = {}) {
   let frames = 0;
   const seen: Array<{ stage: string; body: { messages: Array<{ role: string; content: string }>; max_tokens: number } }> = [];
@@ -69,6 +71,12 @@ function model(f: Fixture, options: { repeat?: boolean; noAction?: boolean; onSt
       output = { advice: "原始记录尚不能支持目标已达成，需要先处理这个差距。【" + n + "】", recommendedProjectId: f.p.id,
         observations: [{ sourceId: source.id, quote: source.excerpt }], priorities: [{ projectId: f.p.id, tradeoff: "先消除目标条件的关键差距。" }],
         action: options.noAction ? null : { projectId: f.p.id, title: "核对原记录与目标条件", description: "保留当前差距，确认后再推进。", priority: 4 } };
+    } else if (stage === "focus.ui_plan.v1") {
+      const layouts = { RESEARCH: ["prose", "evidence", "approval"], COMPETITION: ["goal_gap", "approval"], COURSE: ["prose", "goal_gap", "investigation", "approval"] };
+      output = { schemaVersion: 2, intent: "DECIDE", primaryIntent: "CONSIDER_ACTION", composition: layouts[f.seed.domain]
+        .filter(type => type === "prose" || data.catalog?.some(b => b.semanticType === type)).map((type, i) => ({ blockKey: "shown-" + type,
+          semanticType: type, emphasis: i === 0 ? "primary" : "supporting", dataRefs: data.catalog?.find(b => b.semanticType === type)?.dataRefs ?? [],
+          ...(type === "prose" ? { text: "先处理原记录反映的目标差距，再继续推进。" } : {}) })) };
     } else throw new Error("Unexpected stage: " + stage);
     return new Response(JSON.stringify({ id: "fixture-" + seen.length, choices: [{ finish_reason: "stop", message: { content: JSON.stringify(output) } }], usage: { prompt_tokens: 100, completion_tokens: 100 } }), { status: 200 });
   });
@@ -82,20 +90,23 @@ describe.sequential("R4 durable adaptive investigation", () => {
   it.each(domains)("changes the next decision using a real $domain source and preserves one original Action", async seed => {
     const f = await fixture(seed), provider = model(f), tools = vi.spyOn(toolAdapter, "readWorkspaceTool");
     const result = await ask(f), message = result.conversation.messages.at(-1)!;
-    expect(provider.seen.map(s => s.stage)).toEqual(["focus.route.v2", "focus.investigate.v1", "focus.investigate.v1", "focus.answer.v2"]);
+    expect(provider.seen.map(s => s.stage)).toEqual(["focus.route.v2", "focus.investigate.v1", "focus.investigate.v1", "focus.answer.v2", "focus.ui_plan.v1"]);
     expect(provider.seen.every(s => s.body.messages[0].role === "system" && s.body.messages[1].role === "user")).toBe(true);
     expect(tools).toHaveBeenCalledTimes(1);
     const turn = await db.conversationTurn.findUniqueOrThrow({ where: { id: result.turnId } }), state = r4State(turn.readManifestJson)!;
     expect(state.steps[0]).toMatchObject({ status: "SUCCEEDED", decision: { decision: "READ_EXISTING" } });
     expect(state.decision?.decision).toBe("ANSWER_NOW");
     expect(state.goalGaps[0].criteria[0].state).toBe(seed.state);
-    expect(turn.callCount).toBe(4); expect(turn.reservationJson).toHaveLength(4); expect(turn.usageJson).toHaveLength(4);
+    expect(turn.callCount).toBe(5); expect(turn.reservationJson).toHaveLength(5); expect(turn.usageJson).toHaveLength(5);
     expect(message.sources.some(s => s.sourceId === "capture:" + f.capture.id && s.readScope === "EXCERPT")).toBe(true);
     expect(await db.actionItem.count({ where: { projectId: f.p.id } })).toBe(0);
+    expect(message.presentation?.blocks.some(b => b.semanticType === "approval")).toBe(true);
+    expect(message.presentationPlan).toBeUndefined();
     const p = message.proposal!, input = { requestId: "confirm", proposalHash: p.proposalHash, confirmed: true };
     const a = await confirmConversationAction(f.actor, f.id, p.executionId, input), b = await confirmConversationAction(f.actor, f.id, p.executionId, input);
     expect(a.actionId).toBe(b.actionId); expect(b.alreadyExecuted).toBe(true);
     expect(await db.actionItem.count({ where: { projectId: f.p.id } })).toBe(1);
+    expect(b.conversation.messages.at(-1)?.presentation?.blocks.some(b => b.semanticType === "receipt" && b.state === "CREATED")).toBe(true);
     expect((await db.agentRun.findMany({ where: { turnId: turn.id } })).some(r => JSON.stringify(r.trace).includes("focus.goal.v1"))).toBe(true);
   });
   it("stops duplicate reads and replays the same request without extra HTTP", async () => {
@@ -104,7 +115,7 @@ describe.sequential("R4 durable adaptive investigation", () => {
     const turn = await db.conversationTurn.findUniqueOrThrow({ where: { id: result.turnId } });
     expect(r4State(turn.readManifestJson)?.stopReason).toBe("NO_GAIN"); expect(tools).toHaveBeenCalledTimes(1);
     await submitConversationTurn(f.actor, f.id, turn.inputJson);
-    expect(provider.spy).toHaveBeenCalledTimes(4);
+    expect(provider.spy).toHaveBeenCalledTimes(5);
   });
   it("keeps network-unknown reservations and never auto-retries them", async () => {
     const f = await fixture(), provider = model(f, { networkAt: "focus.investigate.v1" });
@@ -192,5 +203,56 @@ describe.sequential("R4 durable adaptive investigation", () => {
     await db.conversationTurn.update({ where: { id: t.id }, data: { readManifestJson: {} } });
     await expect(reserveWorkspaceCloudCall({ ...call, callId: "next" })).rejects.toThrow();
     expect((await db.accountCloudUsage.findFirstOrThrow({ where: { userId: f.user.id } })).used).toBe(1);
+  });
+  it("confirms only published bindings and replays the same UI request as one effect", async () => {
+    const f = await fixture();
+    model(f, { onStage: async stage => {
+      if (stage !== "focus.ui_plan.v1") return;
+      const e = await db.copilotToolExecution.findFirstOrThrow({ where: { sourceRun: { conversationId: f.id, status: "PARTIAL" } } });
+      await db.conversation.update({ where: { id: f.id }, data: { focusJson: { projectId: f.p.id } } });
+      await expect(confirmConversationAction(f.actor, f.id, e.id, { requestId: "unpublished", proposalHash: e.proposalHash, confirmed: true })).rejects.toMatchObject({ code: "PROPOSAL_NOT_PUBLISHED" });
+      expect(await db.actionItem.count({ where: { projectId: f.p.id } })).toBe(0);
+    } });
+    const result = await ask(f), m = result.conversation.messages.at(-1)!, action = m.presentation!.allowedActions.find(a => a.actionKind === "CONFIRM")!;
+    const input = { messageId: m.id, bindingId: action.bindingId, requestId: "ui-confirm", expectedConversationVersion: result.conversation.version };
+    const first = await performConversationUIAction(f.actor, f.id, input), second = await performConversationUIAction(f.actor, f.id, input);
+    expect("actionId" in first && first.actionId).toBeTruthy();
+    expect(second).toMatchObject({ alreadyExecuted: true });
+    expect(await db.actionItem.count({ where: { projectId: f.p.id } })).toBe(1);
+    await expect(performConversationUIAction(f.actor, f.id, { ...input, bindingId: "confirm:invented", requestId: "forged" })).rejects.toMatchObject({ code: "UI_ACTION_UNAVAILABLE" });
+  });
+  it("expires R4 proposals on the original confirmation path and preserves readable history", async () => {
+    const f = await fixture(); model(f); const result = await ask(f), p = result.conversation.messages.at(-1)!.proposal!;
+    const e = await db.copilotToolExecution.findUniqueOrThrow({ where: { id: p.executionId }, include: { sourceRun: true } });
+    await db.agentRun.update({ where: { id: e.sourceRunId }, data: { trace: { ...(e.sourceRun.trace as object), proposalExpiresAt: "2020-01-01T00:00:00.000Z" } } });
+    const view = await readConversation(f.actor, f.id), presentation = view.messages.at(-1)!.presentation!;
+    expect(presentation.blocks.some(b => b.semanticType === "approval" && b.state === "EXPIRED")).toBe(true);
+    expect(presentation.allowedActions.every(a => !a.enabled)).toBe(true);
+    await expect(confirmConversationAction(f.actor, f.id, p.executionId, { requestId: "expired", proposalHash: p.proposalHash, confirmed: true })).rejects.toMatchObject({ code: "PROPOSAL_EXPIRED" });
+    expect(await db.actionItem.count({ where: { projectId: f.p.id } })).toBe(0);
+  });
+  it.each(["focus.investigate.v1", "focus.ui_plan.v1"])("stops %s without subsequent reads or published effects", async stageToStop => {
+    const f = await fixture(), tools = vi.spyOn(toolAdapter, "readWorkspaceTool");
+    model(f, { onStage: async stage => {
+      if (stage !== stageToStop) return;
+      const turn = await db.conversationTurn.findFirstOrThrow({ where: { conversationId: f.id } });
+      const stop = await stopConversationTurn(f.actor, f.id, turn.id);
+      expect(stop.conversation.activeTurn?.progress?.phase).toBe("STOPPING");
+    } });
+    const result = await ask(f);
+    expect(result.status).toBe("CANCELLED"); expect(result.conversation.messages.at(-1)!.content).toContain("已停止本轮调查");
+    expect(result.conversation.messages.at(-1)!.proposal).toBeNull();
+    if (stageToStop === "focus.investigate.v1") expect(tools).not.toHaveBeenCalled();
+    expect(await db.actionItem.count({ where: { projectId: f.p.id } })).toBe(0);
+    expect(await db.copilotToolExecution.count({ where: { status: "PENDING", sourceRun: { conversationId: f.id } } })).toBe(0);
+  });
+  it("keeps a known answer and original proposal if UI generation is unknown, without replaying the model", async () => {
+    const f = await fixture(), provider = model(f, { networkAt: "focus.ui_plan.v1" });
+    const result = await ask(f), message = result.conversation.messages.at(-1)!;
+    expect(result.status).toBe("ANSWERED"); expect(message.presentation?.blocks.some(b => b.semanticType === "approval")).toBe(true);
+    const turn = await db.conversationTurn.findUniqueOrThrow({ where: { id: result.turnId } });
+    expect(turn.reservationJson).toMatchObject([{}, {}, {}, {}, { callId: "ui-plan", state: "RESERVED" }]);
+    await readConversation(f.actor, f.id); await submitConversationTurn(f.actor, f.id, turn.inputJson);
+    expect(provider.spy).toHaveBeenCalledTimes(5);
   });
 });

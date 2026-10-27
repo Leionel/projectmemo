@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { ConversationEntry, ConversationView, ConversationMessage } from "@/lib/types/conversation";
 import { conversationHref } from "@/lib/conversation/navigation";
 import { emitWorkspaceChange } from "@/lib/client/workspaceEvents";
@@ -12,11 +12,15 @@ import { ConversationAnchorPanel } from "./ConversationAnchorPanel";
 import { ConversationFileGuides, ConversationAnswer } from "./ConversationFileGuides";
 import { missionStatusLabels } from "@/lib/mission/presentation";
 import styles from "./ConversationPanel.module.css";
+import { AgentMessageBlocks, supportsAgentPresentation } from "./AgentMessageBlocks";
+import type { AllowedAction } from "@/lib/types/agentExperience";
+import { clearConversationDrafts, clearConversationDraft, readConversationDraft, saveConversationDraft } from "@/lib/client/conversationDrafts";
 
 async function api<T>(url: string, method = "GET", body?: unknown): Promise<T> {
   const r = await fetch(url, { method, cache: "no-store", headers: body ? { "Content-Type": "application/json" } : {},
     body: body ? JSON.stringify(body) : undefined });
   const value = await r.json();
+  if (r.status === 401) clearConversationDrafts();
   if (!r.ok) throw Object.assign(new Error(value.error?.message ?? "讨论暂不可用"), { status: r.status, code: value.error?.code });
   return value as T;
 }
@@ -31,6 +35,7 @@ export function ConversationPanel(props: PanelProps) {
   return <ConversationContent key={[props.projectId, initial, props.entry?.kind, props.entry?.id].join(":")} {...props} initialConversationId={initial}/>;
 }
 function ConversationContent({ projectId, entry, initialConversationId, onUpdated, selection }: PanelProps) {
+  const router = useRouter();
   const search = useSearchParams(), initial = initialConversationId ?? search.get("conversation") ?? "";
   const [view, setView] = useState<ConversationView | null>(null);
   const [list, setList] = useState<Array<{ id: string; title: string }>>([]);
@@ -41,16 +46,18 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
   const [cloud, setCloud] = useState(false), [reply, setReply] = useState<ConversationMessage | null>(null);
   const [showCloudHelp, setShowCloudHelp] = useState(false);
   const [cloudAvailable, setCloudAvailable] = useState(false), [analysisReady, setAnalysisReady] = useState(false);
+  const [r4Available, setR4Available] = useState(false), [investigationMode, setInvestigationMode] = useState<"QUICK" | "STANDARD" | "DEEP">("STANDARD");
   const [target, setTarget] = useState(selection?.projectId ?? projectId ?? ""), [showPreference, setShowPreference] = useState(false);
   const [workRef, setWorkRef] = useState<ConversationWorkRef | null>(null);
   const generation = useRef(0), pending = useRef<{ text: string; id: string; body: unknown } | null>(null);
   const messageRegion = useRef<HTMLDivElement>(null);
   const createKey = useRef(crypto.randomUUID()), confirmKeys = useRef(new Map<string, string>());
   const loadedId = useRef("");
+  const uiKeys = useRef(new Map<string, { requestId: string; version: number }>());
   useEffect(() => {
     let live = true;
-    void api<{ cloudAvailable: boolean }>("/api/conversations/capabilities").then(caps => {
-      if (live) { setCloudAvailable(caps.cloudAvailable); setCloud(caps.cloudAvailable); setAnalysisReady(true); }
+    void api<{ cloudAvailable: boolean; r4Available?: boolean }>("/api/conversations/capabilities").then(caps => {
+      if (live) { setCloudAvailable(caps.cloudAvailable); setCloud(caps.cloudAvailable); setR4Available(caps.r4Available === true); setAnalysisReady(true); }
     }).catch(e => { if (live) setError(e.message); });
     return () => { live = false; };
   }, []);
@@ -64,11 +71,19 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
     if (epoch === generation.current) {
       setView(v);
       if (loadedId.current !== id) {
-        setTarget(v.focusProjectId ?? projectId ?? ""); loadedId.current = id;
+        if (!selection) setText(readConversationDraft(id + ":composer").answer);
+        setTarget(selection?.projectId ?? v.focusProjectId ?? projectId ?? ""); loadedId.current = id;
         requestAnimationFrame(() => { if (epoch === generation.current && messageRegion.current) messageRegion.current.scrollTop = messageRegion.current.scrollHeight; });
       }
     }
-  }, [projectId]);
+  }, [projectId, selection]);
+  useEffect(() => { if (view) saveConversationDraft(view.id + ":composer", { ...readConversationDraft(view.id + ":composer"), answer: text }); }, [view, text]);
+  useEffect(() => {
+    if (!busy || !view) return;
+    const id = view.id, epoch = generation.current;
+    const timer = setInterval(() => { void load(id, epoch).catch(() => undefined); }, 1200);
+    return () => clearInterval(timer);
+  }, [busy, view?.id, load]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     const epoch = ++generation.current;
     void (async () => {
@@ -118,12 +133,12 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
   async function ask(e: React.FormEvent) {
     e.preventDefault(); if (!view || !analysisReady || !text.trim() || busyRef.current) return;
     const epoch = generation.current, currentText = text.trim();
-    const intentKey = JSON.stringify({ text: currentText, target, replyId: reply?.id, entityId: selection?.id, cloud });
+    const intentKey = JSON.stringify({ text: currentText, target, replyId: reply?.id, entityId: selection?.id, cloud, investigationMode });
     if (!pending.current || pending.current.text !== intentKey) pending.current = { text: intentKey, id: crypto.randomUUID(),
       body: { requestId: crypto.randomUUID(), expectedVersion: view.version, message: currentText,
         projectId: target || null, ...(reply ? { replyToMessageId: reply.id } : {}),
         ...(selection && selection.projectId === target ? { entityRef: { kind: selection.kind, id: selection.id, projectId: selection.projectId } } : {}),
-        llmContextApproved: cloud && cloudAvailable } };
+        llmContextApproved: cloud && cloudAvailable, ...(r4Available ? { investigationMode } : {}) } };
     setBusy(true); setError("");
     try {
       const result = await api<{ conversation: ConversationView; status: string }>("/api/conversations/" + view.id + "/turns", "POST", pending.current.body);
@@ -132,7 +147,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
       setList(rows => rows.map(row => row.id === result.conversation.id ? { ...row, title: result.conversation.title } : row));
       setTarget(result.conversation.focusProjectId ?? "");
       requestAnimationFrame(() => { if (epoch === generation.current && messageRegion.current) messageRegion.current.scrollTop = messageRegion.current.scrollHeight; });
-      if (["ANSWERED", "NEEDS_CLARIFICATION"].includes(result.status)) { setText(""); setReply(null); pending.current = null; }
+      if (["ANSWERED", "NEEDS_CLARIFICATION", "CANCELLED"].includes(result.status)) { setText(""); setReply(null); pending.current = null; }
       else { setError(""); if (["UNKNOWN", "FAILED"].includes(result.status)) pending.current = null; }
     } catch (e) {
       if (epoch !== generation.current) return;
@@ -159,6 +174,38 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
       requestAnimationFrame(() => { if (epoch === generation.current && messageRegion.current) messageRegion.current.scrollTop = messageRegion.current.scrollHeight; });
     } catch (e) { if (epoch === generation.current) setError(e instanceof Error ? e.message : "确认失败，请刷新查看原结果"); }
     finally { if (epoch === generation.current) setBusy(false); }
+  }
+  async function uiAction(message: ConversationMessage, action: AllowedAction, answer?: string) {
+    if (!view || busyRef.current) return;
+    const epoch = generation.current;
+    setBusy(true); setError("");
+    let key = uiKeys.current.get(action.bindingId);
+    if (!key) { key = { requestId: crypto.randomUUID(), version: view.version }; uiKeys.current.set(action.bindingId, key); }
+    try {
+      let result = await api<{ conversation: ConversationView; href?: string }>(`/api/conversations/${view.id}/ui-actions`, "POST", {
+        messageId: message.id, bindingId: action.bindingId, requestId: key.requestId, expectedConversationVersion: key.version,
+      });
+      if (epoch !== generation.current) return;
+      if (action.actionKind === "ASK" && answer?.trim()) {
+        result = await api(`/api/conversations/${view.id}/turns`, "POST", { requestId: crypto.randomUUID(), expectedVersion: result.conversation.version,
+          message: answer.trim(), replyToMessageId: message.id, projectId: action.target.projectId, llmContextApproved: cloud && cloudAvailable,
+          ...(r4Available ? { investigationMode } : {}) });
+        clearConversationDraft(`${view.id}:${action.target.id}`);
+      }
+      if (epoch !== generation.current) return;
+      setView(result.conversation); onUpdated?.(); emitWorkspaceChange(action.target.projectId, ["actions"]);
+      if (action.actionKind === "CONFIRM") requestAnimationFrame(() => {
+        if (epoch === generation.current) document.getElementById("conversation-message-" + message.id)?.querySelector('[data-block="receipt"]')?.scrollIntoView({ block: "nearest" });
+      });
+      if (result.href) router.push(result.href);
+    } catch (e) {
+      if (epoch === generation.current) {
+        setError(e instanceof Error ? e.message : "操作尚未完成，请读取原状态");
+        // A lost confirmation response must replay the same durable request.
+        if (e instanceof Error && "status" in e && e.status !== 502 && e.status !== 504) uiKeys.current.delete(action.bindingId);
+        await load(view.id, epoch).catch(() => undefined);
+      }
+    } finally { if (epoch === generation.current) setBusy(false); }
   }
   async function older() {
     if (!view?.beforeSeq || busyRef.current) return;
@@ -192,16 +239,17 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
       {loadingHistory && <p role="status">正在读取讨论…</p>}
       {!view && !loadingHistory && <div className={styles.empty}><span className={styles.emptyMark} aria-hidden="true">忆</span><h3>从今天最重要的事开始</h3><p>忆程会带上项目记忆，和你一起往下走。</p><button className="editorial-button focus-ring" onClick={() => void create()} disabled={busy}>开始讨论</button></div>}
       {view && !view.messages.length && <div className={styles.empty}><span className={styles.emptyMark} aria-hidden="true">忆</span><h3>今天，先推进哪件事？</h3><div className={styles.starters}>{["最近哪个项目最值得先处理？", "这周有哪些待回应的事？"].map(q => <button key={q} type="button" className={styles.starter + " focus-ring"} onClick={() => setText(q)}>{q}<span aria-hidden="true">↗</span></button>)}</div></div>}
-      {view?.messages.map(m => <article key={m.id} className={m.role === "USER" ? styles.user : styles.assistant}>
+      {view?.messages.map(m => <article key={m.id} id={"conversation-message-" + m.id} className={m.role === "USER" ? styles.user : styles.assistant}>
         {m.role === "USER" && <div className={styles.userHead}><strong>你</strong><span aria-hidden="true">我</span></div>}
         {m.role === "ASSISTANT" && <div className={styles.answerHead}><span aria-hidden="true">忆</span><strong>忆程</strong><small>{m.provider === "rules" ? "规则观察" : m.provider === "project_state" ? "项目记录" : "基于本次授权资料"}</small></div>}
-        <p className={styles.body}><ConversationAnswer message={m} conversationId={view.id}/></p>
+        {supportsAgentPresentation(m) ? <AgentMessageBlocks message={m} conversationId={view.id} busy={busy} onAction={(action, answer) => uiAction(m, action, answer)}/>
+          : <p className={styles.body}><ConversationAnswer message={m} conversationId={view.id}/></p>}
         <ConversationFileGuides message={m} conversationId={view.id}/>
-        {!!m.priorities.length && <details><summary>优先级依据与取舍</summary>{m.priorities.map(p => <div key={p.projectId} className={styles.reason}>
+        {!supportsAgentPresentation(m) && !!m.priorities.length && <details><summary>优先级依据与取舍</summary>{m.priorities.map(p => <div key={p.projectId} className={styles.reason}>
           <strong>{view.linkedProjects.find(v => v.id === p.projectId)?.title ?? "项目"}</strong>
           <p>{p.importance}；{p.urgency}；{p.blocking}；{p.effort}</p><p>{p.preference}</p><p>{p.tradeoff}</p>
         </div>)}</details>}
-        {!!m.sources.length && <details><summary>来源与观察范围（{m.sources.length}）</summary>{m.sources.map(s => <blockquote key={s.id}>
+        {!supportsAgentPresentation(m) && !!m.sources.length && <details><summary>来源与观察范围（{m.sources.length}）</summary>{m.sources.map(s => <blockquote key={s.id}>
           <p>{s.title}</p><p>{s.excerpt}</p><small>{s.temporalState} · {new Date(s.observedAt).toLocaleString("zh-CN")}</small>
         </blockquote>)}{m.limitations.map((l, i) => <p key={i}>{l}</p>)}</details>}
         <div className={styles.refs}>{m.refs.filter(r => r.kind === "PROJECT" || r.kind === "MISSION").slice(0, 3).map(r => <div key={r.bindingId ?? r.id}>
@@ -218,7 +266,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
               .finally(() => { if (epoch === generation.current) setBusy(false); });
           }}>预览接续原委托</button>}
         </div>)}</div>
-        {m.proposal && <section className={styles.proposal} aria-label="行动提案">
+        {m.proposal && !(supportsAgentPresentation(m) && m.presentation!.blocks.some(b => ["approval", "receipt"].includes(b.semanticType))) && <section className={styles.proposal} aria-label="行动提案">
           <div className={styles.proposalMeta}><span>{m.proposal.resultId ? "已写入原项目" : "待你确认"}</span><span>{view.linkedProjects.find(v => v.id === m.proposal?.projectId)?.title}</span></div>
           <strong>{m.proposal.title}</strong><p>{m.proposal.description}</p>
           {m.proposal.resultId ? <p>{!m.proposal.tool || m.proposal.tool === "create_action" ? "已创建行动" : "已提交原操作"} · {statusLabel(m.proposal.actionStatus)} <Link className="workspace-link focus-ring" href={conversationHref("/projects/" + m.proposal.projectId + (m.proposal.tool === "adopt_artifact" ? "/artifacts" : !m.proposal.tool || ["create_action", "complete_action"].includes(m.proposal.tool) ? "/actions#action-" + m.proposal.resultId : "/missions?mission=" + m.proposal.resultId), view.id, m.id)}>查看原结果</Link>{(!m.proposal.tool || ["create_action", "complete_action"].includes(m.proposal.tool)) && <button className="workspace-link focus-ring" onClick={() => setWorkRef({ kind: "ACTION", id: m.proposal!.resultId!, projectId: m.proposal!.projectId })}>记录与查看结果</button>}{m.proposal.resultCardId && <span className={styles.receipt}>复盘已保存 · {m.proposal.resultCardId}</span>}</p>
@@ -227,8 +275,10 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
         </section>}
         {m.role === "ASSISTANT" && !m.restricted && <button className={styles.followup + " focus-ring"} onClick={() => setReply(m)}><CornerDownRight size={12}/>追问</button>}
       </article>)}
-      {view && workRef && <ConversationWorkCard key={view.id + workRef.kind + workRef.id + view.messages.length} conversation={view} workRef={workRef} onChange={v => { setView(v); onUpdated?.(); }} onClose={() => setWorkRef(null)}/>}
-      {busy && <p role="status">正在读取和处理，结果保存在这段讨论中…</p>}
+      {view && workRef && <ConversationWorkCard key={view.id + workRef.kind + workRef.id} conversation={view} workRef={workRef} onChange={v => { setView(v); onUpdated?.(); }} onClose={() => setWorkRef(null)}/>}
+      {busy && <div className={styles.liveProgress} role="status"><strong>{({ ROUTING: "正在定位相关项目", READING_SOURCE: "正在读取原资料", EVALUATING: "正在判断目标差距", WAITING_MODEL: "正在整理结论", READY: "正在保存本轮回答", WAITING_USER: "正在整理需要你补充的条件", STOPPING: "正在停止后续调查" } as Record<string, string>)[view?.activeTurn?.progress?.phase ?? ""] ?? "正在读取和处理…"}</strong>
+        {view?.activeTurn?.progress?.steps.map(s => <span key={s.id}>{s.status === "SUCCEEDED" ? "✓" : "·"} {s.label}</span>)}
+        {view?.activeTurn?.progress && <button type="button" className="workspace-link focus-ring" disabled={view.activeTurn.progress.phase === "STOPPING"} onClick={() => { const epoch = generation.current; void api<{ conversation: ConversationView }>(`/api/conversations/${view.id}/turns/${view.activeTurn!.id}/stop`, "POST", {}).then(r => { if (epoch === generation.current) setView(r.conversation); }).catch(e => { if (epoch === generation.current) setError(e.message); }); }}>停止本轮调查</button>}</div>}
     </div>
     {error && <p role="alert" className={styles.error}>{error} {view && <button className="workspace-link focus-ring" onClick={() => void load(view.id, generation.current).catch(e => setError(e.message))}>读取原状态</button>}</p>}
     {view && <form className={styles.composer} onSubmit={ask}>
@@ -243,6 +293,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
       {target && <button type="button" className={styles.quietLink + " focus-ring"} onClick={() => setShowPreference(v => !v)}>项目偏好</button>}
       {projectId && <Link className="workspace-link focus-ring" href={conversationHref("/focus", view.id)}>回到原焦点讨论</Link>}
     </div>}
+      {r4Available && cloud && <select className={styles.analysisMode} aria-label="调查深度" value={investigationMode} disabled={busy} onChange={e => { setInvestigationMode(e.target.value as typeof investigationMode); pending.current = null; }}><option value="QUICK">快速</option><option value="STANDARD">标准调查</option><option value="DEEP">深入调查 · 更多调用</option></select>}
       <button type="submit" className={styles.send + " focus-ring"} disabled={busy || !analysisReady || !text.trim()} aria-label="发送"><ArrowUp size={17}/></button></div>
       <p data-visible={showCloudHelp} className={styles.analysisHint}>{!analysisReady ? "正在确认分析方式…" : !cloudAvailable ? "未配置云模型，当前仅整理项目记录" : cloud ? "发送即允许云模型分析本次授权项目资料，可关闭" : "仅整理项目记录，不调用云模型"}</p>
     </form>}

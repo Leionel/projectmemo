@@ -1,6 +1,6 @@
 # R4 Prompt 合同 · PR-0
 
-PR-1 已接入 `focus.route.v2`、`focus.investigate.v1`（联合 `focus.goal.v1`）与 `focus.answer.v2`；配置与输出 schema 见 `lib/conversation/promptSpecs.ts`。持久预占接原 cloudQuota，C0 字符串调用保留。`focus.ui_plan.v1` 随 PR-2 接入，其他专项按下表继续追踪。
+PR-1/2 已接入 `focus.route.v2`、`focus.investigate.v1`（联合 `focus.goal.v1`）、`focus.answer.v2` 和 `focus.ui_plan.v1`；配置与输出 schema 见 `lib/conversation/promptSpecs.ts`。持久预占接原 cloudQuota，C0 字符串调用保留。其他专项按下表继续追踪。
 
 基线：`c8c7072`，2026-10-26。实现入口为 `lib/agent/promptSpec.ts`；本批冻结消息与预算接口，现有 Provider 和业务 Prompt 尚未切换。R4 总基线为本地 `docs/FINAL/AGENT_REVIEW/projectmemo_r4/PROJECTMEMO_AGENT_EXPERIENCE_R4_BASELINE_v1_2.md`。
 
@@ -20,11 +20,11 @@ PR-1 已接入 `focus.route.v2`、`focus.investigate.v1`（联合 `focus.goal.v1
 
 | ID / 版本 | purpose | 输出职责 | 必测负例 / 指标 | 接入批次 |
 |---|---|---|---|---|
-| focus.route.v2 / 2.0.0 | ROUTE | 选择授权项目、信息需求和澄清 | 同名项目、指代、撤权；项目定位准确率 | PR-1 |
+| focus.route.v2 / 2.0.1 | ROUTE | 选择授权项目、信息需求和澄清；区分处理请求与只问判断 | 同名项目、指代、撤权；项目定位准确率 | PR-1/2 |
 | focus.investigate.v1 / 1.0.0 | INVESTIGATE | InvestigationDecision；每次观察后重新决定 | 重复读取、无工具、注入；必要读取与信息增益 | PR-1 |
 | focus.goal.v1 / 1.0.0 | GOAL | GoalGap；条件、阻碍、下一信息需求 | 构建冒充部署、TODO 冒充进度；条件判断正确率 | PR-1 |
 | focus.answer.v2 / 2.0.0 | ANSWER | 结论、实际已读证据、影响决定的未知 | 无依据断言、模板长答；grounding precision | PR-1/2 |
-| focus.ui_plan.v1 / 1.0.0 | UI_PLAN | PresentationPlan v2；语义选择、次序、强调 | 伪造操作、机械卡片；布局合理性及用户操作成本 | PR-2 |
+| focus.ui_plan.v1 / 1.0.1 | UI_PLAN | PresentationPlan v2；语义选择、次序、强调；非 prose 逐项采用 catalog | 伪造操作、机械卡片；布局合理性及用户操作成本 | PR-2 |
 | decision.d1.v4 / 4.0.0 | CHANGE_REVIEW | 目标关联、前提变化、适用性、KEEP_PLAN | 背景误触发、UNKNOWN 当失败；无关误报率 | PR-3/5 |
 | decision.d2.v3 / 3.0.0 | DYNAMIC_PLAN | 候选取舍、分支、停止条件 | 无论结果均不改变决定的验证；候选可用性 | PR-5 |
 | mission.strategy.v2 / 2.0.0 | MISSION | 原 Mission 工具选择、输出与停止 | 重复工具、旧任务当当前；真实任务有效结束率 | PR-5 |

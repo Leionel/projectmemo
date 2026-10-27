@@ -236,6 +236,7 @@ test("Focus compares frozen options and resumes the same original Mission inside
   await panel.getByRole("button", { name: "发送", exact: true }).click();
   await panel.getByRole("button", { name: "确认此操作", exact: true }).click();
   await expect(panel.getByText(/已采用原方案；原委托保留/)).toBeVisible();
+  await work.getByRole("button", { name: "已核对本次更新", exact: true }).click();
   await work.getByRole("button", { name: "预览接续原委托", exact: true }).click();
   const resumed = page.waitForResponse(r => r.url().includes("/proposals/") && r.url().endsWith("/confirm"));
   await panel.getByRole("button", { name: "确认此操作", exact: true }).click();

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { AgentPresentation } from "./agentExperience";
+import type { AgentPresentation, PresentationPlan } from "./agentExperience";
 
 const id = z.string().min(1).max(160);
 export const conversationEntrySchema = z.object({
@@ -22,6 +22,7 @@ export const conversationTurnSchema = z.object({
 export const conversationConfirmSchema = z.object({
   requestId: id, proposalHash: z.string().regex(/^[a-f0-9]{64}$/),
   confirmed: z.literal(true),
+  expectedConversationVersion: z.number().int().positive().optional(),
 }).strict();
 export const focusPreferenceSchema = z.object({
   expectedVersion: z.number().int().nonnegative(),
@@ -69,6 +70,7 @@ export type ConversationBlocks = {
   citations?: ConversationCitation[];
   fileGuides?: ConversationFileGuide[];
   presentation?: AgentPresentation;
+  presentationPlan?: PresentationPlan;
   reviewRef?: { id: string; purpose: string; missionId: string; projectId: string; status: string; proposalHash: string };
   options?: Array<{ key: string; label: string; projectId: string; missionId: string; proposalId: string; proposalHash: string; expectedVersion: number; purpose?: "DYNAMIC_PLAN"; candidateId?: string }>;
 };

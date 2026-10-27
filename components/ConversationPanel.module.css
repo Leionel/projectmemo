@@ -184,3 +184,11 @@
 .cloud { position:relative; font-size:.75rem; flex-shrink:0; }
 .analysisHint { display:none; position:absolute; bottom:4rem; left:.75rem; right:.75rem; padding:.65rem .8rem; border:1px solid var(--rule); border-radius:10px; background:var(--card-bg); box-shadow:0 4px 18px #20383216; z-index:5; }
 .analysisHint[data-visible=true] { display:block; }
+.liveProgress { display:grid; gap:.35rem; padding:.6rem 0 .6rem 2.15rem; color:var(--muted); font-size:.8125rem; line-height:1.7; }
+.liveProgress strong { font-weight:500; color:var(--ink-soft); }
+.liveProgress span { font-size:.75rem; }
+.analysisMode { min-height:44px; max-width:8rem; background:transparent; border:0; color:var(--ink-soft); font-size:.75rem; }
+.body { font-size:.96875rem; line-height:1.85; }
+.answerHead strong,.userHead strong { font-size:.8125rem; }
+@media(max-width:500px) { .composerFooter { flex-wrap:wrap; } .analysisMode { max-width:7rem; } .body { font-size:.9375rem; } }
+@media(max-width:500px) { .agentTitle { flex-shrink:0; } .agentTitle h2 { white-space:nowrap; } .header select { max-width:4.5rem; } }

@@ -136,7 +136,7 @@ struct FocusConversation {
       this.view = reply.conversation; this.target = this.view.focusProjectId ?? '';
       this.sessions = this.sessions.map((item: ConversationListItem): ConversationListItem => item.id === this.view.id ? { id: item.id, title: this.view.title, scope: item.scope, homeProjectId: item.homeProjectId } : item);
       setTimeout(() => { if (epoch === this.generation) this.messageScroller.scrollEdge(Edge.Bottom); }, 50);
-      if (reply.status === 'ANSWERED' || reply.status === 'NEEDS_CLARIFICATION') { this.text = ''; this.pending = null; this.replyId = ''; }
+      if (reply.status === 'ANSWERED' || reply.status === 'NEEDS_CLARIFICATION' || reply.status === 'CANCELLED') { this.text = ''; this.pending = null; this.replyId = ''; }
       else { this.error = ''; if (['FAILED', 'UNKNOWN'].includes(reply.status)) this.pending = null; }
     } catch (e) { if (epoch === this.generation) { this.fail(e); await this.refresh(); } }
     finally { if (epoch === this.generation) this.busy = false; }

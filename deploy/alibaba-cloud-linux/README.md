@@ -11,7 +11,7 @@
 | `projectmemo.nginx.conf` | nginx 站点配置：TLS、登录限流、小艺独立限流、转发头覆盖 |
 | `projectmemo.env.example` | 生产环境变量样例 → 安装为 `/etc/projectmemo/projectmemo.env` |
 | `safe-update.sh` | 已部署机器的版本校验、停服备份、构建、迁移、重启与失败恢复 |
-| [Focus 更新说明](FOCUS_UPDATE.md) | F1–F3 环境开关、配置备份、重启与功能检查 |
+| [Focus 更新说明](FOCUS_UPDATE.md) | F1–F3 / R4 环境开关、配置备份、重启与功能检查 |
 | `backup.sh` | 数据库 + 附件备份（含完整性校验与回执清单） |
 | `restore-to-copy.sh` | 恢复演练：还原成独立副本，或明确授权后覆盖线上 |
 | `sqlite-tool.mjs` | 在线备份 / 校验 / 计数助手，被上面两个脚本调用 |
@@ -99,11 +99,12 @@ curl -fsS --max-time 10 http://127.0.0.1:4400/health
 | `FOCUS_AGENT_ENABLED=true` | 启用 `/focus` 全局对话和项目内关联会话入口 |
 | `FOCUS_AGENT_FOLLOW_ENABLED=true` | 启用 F3 显式关注、延后、停止和原会话结果回流；需同时开启上一项 |
 | `GOAL_CHANGE_REVIEW_ENABLED=true` | 启用原委托内D1资料变化复核与D2有界方案；先执行本轮迁移，再启用 |
+| `FOCUS_AGENT_R4_ENABLED=true` | 启用云端动态调查、目标差距与 Web 语义回答；与 Focus 同时开启 |
 | `MISSION_ENABLED=true`、`MISSION_UI_ENABLED=true` | 原长期委托及其页面入口；沿用服务器原配置，协作验收时核对 |
 
-两个 Focus 开关默认均为 `false`，部署新代码后仍可能看到旧焦点页。按 [Focus 更新说明](FOCUS_UPDATE.md) 执行带备份的环境修改、重启和检查；已部署到目标版本时只执行该配置步骤即可。
+Focus、关注、变化复核和 R4 调查四个开关默认均为 `false`，部署新代码后仍可能看到旧焦点页。按 [Focus 更新说明](FOCUS_UPDATE.md) 执行带备份的环境修改、重启和检查；已部署到目标版本时只执行该配置步骤即可。
 
-`/health` 只证明服务状态与版本，不返回 Focus 开关。登录后访问 `/api/conversations/capabilities`，应看到 `enabled: true` 和 `followAvailable: true`。F3 的“关注”需要先从已有提醒、问题或影响打开关联讨论，再由用户明确开启；普通空白聊天不会自动关注。
+`/health` 只证明服务状态与版本，不返回 Focus 开关。登录后访问 `/api/conversations/capabilities`，核对 `enabled`、`followAvailable`、`changeReviewAvailable`、`r4Available` 四项。F3 的“关注”需要先从已有提醒、问题或影响打开关联讨论，再由用户明确开启；普通空白聊天不会自动关注。
 
 ECS 更新覆盖 Web 与共享后端。鸿蒙新界面需要重新构建并安装 HAP；评审包连接 HTTPS ECS，开发包可能连接 `http://10.0.2.2:4400`。按 `Constants.ets` 核对实际构建模式与地址。
 
@@ -221,7 +222,7 @@ sudo systemctl restart projectmemo
 
 | 现象 | 先看什么 | 处理 |
 |---|---|---|
-| 新版代码已部署但仍是旧焦点页 | `/health.release`、登录后的 `/api/conversations/capabilities` | 按 [Focus 更新说明](FOCUS_UPDATE.md) 启用两个开关并重启，然后强制刷新 `/focus` |
+| 新版代码已部署但仍是旧焦点页 | `/health.release`、登录后的 `/api/conversations/capabilities` | 按 [Focus 更新说明](FOCUS_UPDATE.md) 核对四个开关并重启，然后强制刷新 `/focus` |
 | 没有“关注”按钮 | `followAvailable`、当前会话是否有关联提醒/问题/影响 | 核对 F3 开关，从已有提醒进入关联讨论；不向无来源的聊天自动添加关注 |
 | 鸿蒙仍是旧界面 | 已安装 HAP 版本、`Constants.ets` 构建模式与后端地址 | 安装新版 HAP，核对其连接的是 ECS 还是本机后端 |
 | 站点 502 | `systemctl status projectmemo`、`journalctl -u projectmemo -n 100` | 起服务；若因环境文件错误反复退出，先修 `projectmemo.env` |

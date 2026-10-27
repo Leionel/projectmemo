@@ -1,12 +1,12 @@
 # Focus Agent：ECS 开关与验收
 
-先按 [ECS 更新命令](README.md#更新发布已部署机器) 部署已经验证并推送的完整提交，再配置本页三个开关。已有正确版本时，只需执行下面的环境更新，无需重复构建。
+先按 [ECS 更新命令](README.md#更新发布已部署机器) 部署已经验证并推送的完整提交，再配置本页四个开关。已有正确版本时，只需执行下面的环境更新，无需重复构建。
 
 首次升级 Focus 时由更新脚本应用 `20261026010000_focus_conversations`、`20261026020000_focus_anchor_projection` 和 `20261026120000_goal_change_reviews` 等尚未执行的迁移。开启开关前确认脚本的迁移与健康检查成功；单独修改开关不会补建表。
 
 ## 开启 Focus 与 F3 关注
 
-在正确 ECS 的 root 终端整段执行。脚本保留其他配置，将三个开关各写成一条 `true`，保存原环境文件后重启 Web 和 Worker；检查失败时尝试恢复原配置。备份只保存在服务器 `/etc/projectmemo/focus-backup.*`，不要提交或回传环境文件。
+在正确 ECS 的 root 终端整段执行。脚本保留其他配置，将四个开关各写成一条 `true`，保存原环境文件后重启 Web 和 Worker；检查失败时尝试恢复原配置。备份只保存在服务器 `/etc/projectmemo/focus-backup.*`，不要提交或回传环境文件。
 
 ```bash
 bash <<'UPDATE'
@@ -50,12 +50,14 @@ awk '
   /^[[:space:]]*FOCUS_AGENT_ENABLED[[:space:]]*=/ { next }
   /^[[:space:]]*FOCUS_AGENT_FOLLOW_ENABLED[[:space:]]*=/ { next }
   /^[[:space:]]*GOAL_CHANGE_REVIEW_ENABLED[[:space:]]*=/ { next }
+  /^[[:space:]]*FOCUS_AGENT_R4_ENABLED[[:space:]]*=/ { next }
   { print }
   END {
     print ""
     print "FOCUS_AGENT_ENABLED=true"
     print "FOCUS_AGENT_FOLLOW_ENABLED=true"
     print "GOAL_CHANGE_REVIEW_ENABLED=true"
+    print "FOCUS_AGENT_R4_ENABLED=true"
   }
 ' "$ENV_FILE" > "$TEMP_ENV"
 chmod --reference="$ENV_FILE" "$TEMP_ENV"
@@ -77,10 +79,10 @@ done
 test "$READY" = 1
 systemctl is-active --quiet projectmemo projectmemo-mission-worker
 
-# 只检查三个开关，不输出服务完整环境
+# 只检查四个开关，不输出服务完整环境
 PID=$(systemctl show projectmemo -p MainPID --value)
 test "$PID" -gt 0
-for FLAG in FOCUS_AGENT_ENABLED FOCUS_AGENT_FOLLOW_ENABLED GOAL_CHANGE_REVIEW_ENABLED; do
+for FLAG in FOCUS_AGENT_ENABLED FOCUS_AGENT_FOLLOW_ENABLED GOAL_CHANGE_REVIEW_ENABLED FOCUS_AGENT_R4_ENABLED; do
   tr '\0' '\n' < "/proc/$PID/environ" | grep -qx "$FLAG=true"
   echo "$FLAG=true：已生效"
 done
@@ -92,12 +94,16 @@ UPDATE
 ## 验证实际功能
 
 1. 强制刷新并打开 `/focus`，应显示全局对话。若跳转到登录页，先登录自己的账号。
-2. 在同一浏览器打开 `/api/conversations/capabilities`，确认 `enabled: true`、`followAvailable: true` 和 `changeReviewAvailable: true`。未登录请求返回 401；不要用匿名返回结果判断开关。
+2. 在同一浏览器打开 `/api/conversations/capabilities`，确认 `enabled: true`、`followAvailable: true`、`changeReviewAvailable: true` 和 `r4Available: true`。未登录请求返回 401；不要用匿名返回结果判断开关。
 3. 从已有提醒、GoalQuestion 或 Impact 打开关联讨论，明确点击“关注”。普通空白聊天不会自动建立订阅，也不会因为开启开关就自动关注所有项目。
 4. 在原任务有新材料、状态、成果或行动回执后，回到同一讨论读取新结果。关注同步在进入 Focus 或可见会话的轮询中触发；不承诺离开页面后持续后台推送。消息会保留原任务引用，读取结果不自动接续、批准或完成任务。
 5. 验证“延后”“停止”和刷新后状态保留；只有明确读取新结果才清除对应未读。用原对象和原会话 ID 核对，避免把新建聊天当作接续。
 
 `cloudAvailable` 取决于原 `LLM_MODE`。已配置云模型时，Web / 鸿蒙发送区默认选中“云端分析”，用户可关闭。手机端长按或鼠标悬停在该选项可查看资料使用说明。仅进入页面不会调用模型；关闭后仅整理项目记录，未配置模型时显示本地整理与原因。本页不修改模型配置、不运行模型探针；主动发送的云模型对话按原凭据和额度计费。
+
+R4 复用现有会话表，无新增迁移。Web 发送区可选快速、标准和深入调查，运行时显示实际读取步骤，可停止后续调查。回答由模型选择文字、目标差距、证据和待确认操作；结构无效时保留已知回答。确认仍由原服务创建一个真实 Action，刷新同一回答显示原行动状态。已创建不表示已执行或核验。调查、回答、UI 规划共用根预算；单轮可能超过原来两次模型调用。将 `FOCUS_AGENT_R4_ENABLED=false` 并重启可恢复旧调查路径，历史回答和业务效果保留。
+
+当前鸿蒙接收可选调查 DTO，并继续显示兼容正文和原提案；R4 原生块渲染属于后续 PR-4。更新 ECS 或重新安装当前 HAP 不会让尚未实现的原生渲染自动出现。
 
 D1/D2 从“原任务协作 → 复核资料变化”进入：选择最多5份原资料，明确执行云端复核，再比较本轮方案、预览并确认。原委托仍须授权云端上下文、保有预算并处于READY或PAUSED。本轮最多两次方案分析与两次定向读取，读取由原Worker完成；保留原计划不改变计划版本。上传文件不会自动发起后台云分析。
 

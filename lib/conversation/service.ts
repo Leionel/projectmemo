@@ -9,6 +9,8 @@ import { openConversationEntry } from "./anchorService";
 import { discussionTitle, hasDefaultDiscussionTitle } from "./presentation";
 import { resolveFileGuides } from "./fileGuides";
 import { experienceProgress } from "./progress";
+import { refreshExperiencePresentation } from "./presentationRuntime";
+import type { R4State } from "./investigationService";
 
 export async function appendConversationMessage(tx: Tx, conversationId: string, ownerUserId: string,
   role: "USER" | "ASSISTANT", content: string, blocks: ConversationBlocks, turnId?: string, runId?: string) {
@@ -149,6 +151,15 @@ export async function readConversation(actor: ConversationActor, id: string, bef
       }
     }
     blocks.fileGuides = await resolveFileGuides(blocks.sources, blocks.citations, blocks.fileGuides);
+    if (blocks.presentationPlan && row.turnId) {
+      const turn = await db.conversationTurn.findUnique({ where: { id: row.turnId } });
+      const experience = record(turn?.readManifestJson).experience;
+      if (record(experience).policyVersion === "r4-v1") {
+        try { blocks.presentation = await refreshExperiencePresentation(actor, id, blocks, experience as R4State, row.turnId); }
+        catch { blocks.presentation = undefined; }
+      } else blocks.presentation = undefined;
+    } else blocks.presentation = undefined;
+    delete blocks.presentationPlan;
     messages.push({ ...blocks, id: row.id, seq: row.seq!, role: row.role, content: row.content, restricted: false });
   }
   await assertSession(actor);

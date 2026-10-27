@@ -323,7 +323,7 @@ describe.sequential("Focus conversations: real services and isolated persistence
       const result = await submitConversationTurn(f.actor, f.id, { requestId: "bad-quote", expectedVersion: 1, projectId: p.id, message: "帮我处理下一步", llmContextApproved: true });
       expect(result.status).toBe("ANSWERED"); expect(calls).toBe(2);
       const message = result.conversation.messages.at(-1)!;
-      expect(message.content).toContain("已核实的项目状态"); expect(message.content).not.toContain("全部完成并达标"); expect(message.proposal).toBeNull();
+      expect(message.content).toContain("引用未通过核对"); expect(message.content).toContain("项目状态"); expect(message.content).not.toContain("全部完成并达标"); expect(message.proposal).toBeNull();
       expect(message.provider).toBe("project_state");
       expect(await db.copilotToolExecution.count({ where: { sourceRun: { conversationId: f.id } } })).toBe(0);
       expect(await db.agentRun.findFirst({ where: { conversationId: f.id } })).toMatchObject({ status: "FALLBACK", fallbackReason: "UNSUPPORTED_QUOTE" });

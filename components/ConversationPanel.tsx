@@ -197,6 +197,9 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
       }
       if (epoch !== generation.current) return;
       setView(result.conversation); onUpdated?.(); emitWorkspaceChange(action.target.projectId, ["actions"]);
+      if (action.actionKind === "PREVIEW") requestAnimationFrame(() => {
+        document.getElementById("conversation-message-" + result.conversation.messages.at(-1)?.id)?.scrollIntoView({ block: "nearest" });
+      });
       if (action.actionKind === "CONFIRM") requestAnimationFrame(() => {
         if (epoch === generation.current) document.getElementById("conversation-message-" + message.id)?.querySelector('[data-block="receipt"]')?.scrollIntoView({ block: "nearest" });
       });

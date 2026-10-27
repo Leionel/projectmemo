@@ -4,6 +4,7 @@ import type { ConversationView } from "@/lib/types/conversation";
 import type { ConversationWork, ConversationWorkPreview } from "@/lib/types/conversationWork";
 import type { ChangeReviewResult, ConversationReviews, DynamicReviewResult } from "@/lib/types/changeReview";
 import styles from "./ConversationPanel.module.css";
+import { emptyConversationDraft, readConversationDraft, saveConversationDraft } from "@/lib/client/conversationDrafts";
 
 async function request<T>(url: string, body?: unknown): Promise<T> {
   const response = await fetch(url, { method: body ? "POST" : "GET", cache: "no-store", headers: { "Content-Type": "application/json" }, ...(body ? { body: JSON.stringify(body) } : {}) });
@@ -16,10 +17,14 @@ export function ConversationReviewPanel({ conversation, work, busy, run, onChang
   run: (fn: () => Promise<void>) => Promise<void>; onChange: (view: ConversationView) => void;
   preview: (operation: ConversationWorkPreview["operation"], extra?: Record<string, unknown>) => Promise<void>;
 }) {
-  const [data, setData] = useState<ConversationReviews | null>(null), [selected, setSelected] = useState<string[]>([]);
-  const [feedback, setFeedback] = useState(""), [rejected, setRejected] = useState<string[]>([]);
+  const draftKey = `${conversation.id}:${work.ref.kind}:${work.ref.id}:review`;
+  const [draft] = useState(() => readConversationDraft(draftKey));
+  const [data, setData] = useState<ConversationReviews | null>(null), [selected, setSelected] = useState<string[]>(draft.selected.filter(id => id.startsWith("m:")).map(id => id.slice(2)));
+  const [feedback, setFeedback] = useState(draft.answer), [rejected, setRejected] = useState<string[]>(draft.selected.filter(id => id.startsWith("c:")).map(id => id.slice(2)));
   const keys = useRef(new Map<string, string>()), live = useRef(true);
   useEffect(() => { live.current = true; return () => { live.current = false; }; }, []);
+  useEffect(() => { saveConversationDraft(draftKey, { ...emptyConversationDraft(), answer: feedback,
+    selected: [...selected.map(id => "m:" + id), ...rejected.map(id => "c:" + id)] }); }, [draftKey, feedback, selected, rejected]);
   const base = `/api/conversations/${conversation.id}/work/review`;
   const load = async () => { const next = await request<ConversationReviews>(base + "?" + new URLSearchParams(work.ref)); if (live.current) setData(next); };
   async function submit(purpose: "CHANGE_REVIEW" | "DYNAMIC_PLAN", retry = false) {
@@ -47,7 +52,11 @@ export function ConversationReviewPanel({ conversation, work, busy, run, onChang
       {change && <section className={styles.reason}>
         <strong>{change.stale ? "复核依据已变化" : ({ READY: "变化复核", UNKNOWN: "调用结果未知", BUILDING: "正在复核", STALE: "复核依据已变化", FAILED: "本轮未完成" } as Record<string, string>)[change.status] ?? "本轮已结束"}</strong>
         <p>{changeResult?.summary ?? "读取状态不会自动重发模型。"}</p>
-        {changeResult?.decision !== "KEEP_PLAN" && changeResult?.candidates.map(candidate => <p key={candidate.candidateId}>{candidate.question}</p>)}
+        {changeResult?.decision !== "KEEP_PLAN" && changeResult?.candidates.map(candidate => <div key={candidate.candidateId}>
+          <blockquote>{candidate.goalQuote}</blockquote><p>{candidate.reason}</p><p>{candidate.question}</p>
+          {!!candidate.unknown.length && <small>{candidate.unknown.join("；")}</small>}
+          <details><summary>查看依据</summary>{candidate.evidence.map((source, i) => <blockquote key={source.ref + i}>{source.quote}</blockquote>)}</details>
+        </div>)}
         {change.status === "READY" && !change.stale && changeResult?.decision !== "KEEP_PLAN" && !dynamic && <button type="button" className="workspace-link focus-ring" disabled={busy} onClick={() => void submit("DYNAMIC_PLAN")}>比较本轮推进方案 →</button>}
       </section>}
       {dynamic && <>
@@ -56,7 +65,9 @@ export function ConversationReviewPanel({ conversation, work, busy, run, onChang
         {dynamicResult?.candidates.map((candidate, index) => <section className={styles.scenario} key={candidate.candidateId}>
           <span>{String(index + 1).padStart(2, "0")}</span><div>
             <strong>{candidate.title}</strong><p>{candidate.reason}</p><p>{candidate.expectedObservation}</p>
-            <small>{candidate.feasibilityReasons.join("；") || candidate.stopCondition}</small>
+            {candidate.branches.map((branch, i) => <p key={i}>{branch.observation} → {branch.consequence}</p>)}
+            <small>{candidate.stopCondition}</small>
+            {!!candidate.feasibilityReasons.length && <small>{candidate.feasibilityReasons.join("；")}</small>}
             <div className={styles.actions}>
               <button type="button" className="workspace-link focus-ring" disabled={busy || dynamic.stale || dynamic.status !== "READY" || candidate.feasibility !== "READY" || rejected.includes(candidate.candidateId)} onClick={() => void preview("adopt_dynamic", { dynamicProposalId: dynamic.id, candidateId: candidate.candidateId })}>预览采用 →</button>
               <label><input type="checkbox" disabled={busy || dynamic.base.attempt >= 2} checked={rejected.includes(candidate.candidateId)} onChange={event => setRejected(value => event.target.checked ? [...value, candidate.candidateId] : value.filter(id => id !== candidate.candidateId))}/>不采用</label>

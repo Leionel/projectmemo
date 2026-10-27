@@ -29,6 +29,8 @@ PR-1/2 开发预实验已执行三领域 C0/C3，实际 HTTP 24/24 次；原文�
 
 ## 必须记录的指标
 
+2026-10-27 PR-5：`scripts/eval-r4-specialists.ts` 使用三领域新合成输入与 `36bb1a0` 冻结旧策略；六任务各做旧/新配对，共36次，另4次原 Action 结果重评。`scripts/eval-r4-fidelity-recheck.ts` 分两版追加4次归属复查，当前共44/48次。Capture 2.0.2 的输入收窄是明确实验变更，不能把后续结果混进2.0.0配对均值。旧组14/18、新组17/18仅是Schema指标；课程KEEP_PLAN与预期UNKNOWN、Mission多段JSON、接收中断均保留。原生新增交互与部署另签收，后续PR-6继续用剩余同一账本。
+
 2026-10-26 PR-3 开发轮：`scripts/eval-r4-closure.ts` 默认仅输出 PREPARED_ONLY，实模需显式参数、既有授权及本轮持久额度账本。48 次已全部消耗；继续运行会在 HTTP 前拒绝。三条新合成输入在 `tests/fixtures/r4/closure-cases.json`，没有进入正式留出集。科研 C0 类型失败、C1/C2 配对，三领域 C3 原服务闭环、竞赛澄清/协议失败/最终 UI 额度降级全部保留于 `evidence/r4-agent-experience/20261026-pr3-pr4/real-model/`。不得将这轮结果报告成完整 C0–C3 跨域独立评测。
 
 | 指标 | 判定单位 |

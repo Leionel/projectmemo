@@ -1,0 +1,16 @@
+[
+  {
+    "ordinal": 43,
+    "episode": "research/CAPTURE_ATTRIBUTION_RECHECK/2.0.2",
+    "httpStatus": 200,
+    "responseHash": "ac24ac09c32e1ab4c212be140b43c3c7aae9b1f871540feaa1fdd77f4be96160",
+    "response": "{\"id\":\"f71aab46-1ef3-4c1d-8eb2-8c8a217a8760\",\"object\":\"chat.completion\",\"created\":1793118300,\"model\":\"deepseek-flash\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"type\\\":\\\"reflection\\\",\\\"title\\\":\\\"用户记录称猜测模型V3好像跑通，60ms尚未确认\\\",\\\"summary\\\":\\\"用户记录称其猜测模型V3好像跑通了；用户表示还没核对设备与线程，因此不能确认达到60ms。\\\",\\\"keywords\\\":[\\\"模型V3\\\",\\\"跑通\\\",\\\"60ms\\\",\\\"设备\\\",\\\"线程\\\"],\\\"relatedTasks\\\":[],\\\"nextActions\\\":[\\\"核对运行所用设备与线程配置\\\",\\\"在确认设备与线程后复测延迟，判断是否达到60ms\\\"],\\\"importance\\\":3}\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":666,\"completion_tokens\":110,\"total_tokens\":776,\"prompt_tokens_details\":{\"cached_tokens\":384},\"prompt_cache_hit_tokens\":384,\"prompt_cache_miss_tokens\":282},\"system_fingerprint\":\"bc19ba97cbe016479903222bb1578db6\"}"
+  },
+  {
+    "ordinal": 44,
+    "episode": "course/CAPTURE_ATTRIBUTION_RECHECK/2.0.2",
+    "httpStatus": 200,
+    "responseHash": "42a2ec872ec9304e92b20a30569df59840a975f62238a3385cd2be780c8b85f8",
+    "response": "{\"id\":\"48b7ceb9-39b2-4b21-9a3b-3d5818029218\",\"object\":\"chat.completion\",\"created\":1793118302,\"model\":\"deepseek-flash\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"type\\\":\\\"reflection\\\",\\\"title\\\":\\\"用户记录称有人评价A优于B，暂属猜测\\\",\\\"summary\\\":\\\"用户记录称有人说A比B好；用户表示尚未看到同一划分的原始输出，暂时只是猜测。\\\",\\\"keywords\\\":[\\\"A与B比较\\\",\\\"同一划分\\\",\\\"原始输出\\\",\\\"猜测\\\"],\\\"relatedTasks\\\":[],\\\"nextActions\\\":[\\\"获取A与B在同一划分下的原始输出后再比较\\\"],\\\"importance\\\":2}\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":664,\"completion_tokens\":90,\"total_tokens\":754,\"prompt_tokens_details\":{\"cached_tokens\":512},\"prompt_cache_hit_tokens\":512,\"prompt_cache_miss_tokens\":152},\"system_fingerprint\":\"bc19ba97cbe016479903222bb1578db6\"}"
+  }
+]

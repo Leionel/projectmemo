@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/r4Specialists.test.ts tests/projectEpisode.test.ts tests/projectEpisodeStaleness.test.ts tests/llm.fallback.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  4 passed (4)
+      Tests  27 passed (27)
+   Start at  09:25:05
+   Duration  6.97s (transform 1.25s, setup 0ms, import 3.70s, tests 2.51s, environment 0ms)
+

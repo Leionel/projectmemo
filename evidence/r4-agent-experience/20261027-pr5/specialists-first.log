@@ -1,0 +1,76 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/r4Specialists.test.ts tests/goalChangeReview.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/r4Specialists.test.ts (6 tests | 2 failed) 619ms
+     × course: original completion receipt changes D1 and invalidates the old review 14ms
+     × uses the actual chat comparison binding to preview/confirm the frozen original Mission once 48ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/r4Specialists.test.ts > R4 PR5 original-result and specialist integration > course: original completion receipt changes D1 and invalidates the old review
+PrismaClientValidationError: 
+Invalid `db.project.create()` invocation in
+D:/Projects/hongmen/tests/r4Specialists.test.ts:38:36
+
+  35 async function fixture(sample = samples.cases[0]) {
+  36   const user = await db.user.create({ data: { username: crypto.randomUUID(), passwordHash: "unused", displayName: "专项隔离" } });
+  37   const actor = { userId: user.id, sessionId: (await createSession(user.id)).session.id };
+→ 38   const project = await db.project.create({
+         data: {
+           title: "course",
+           goal: "算法 A 与 B 在同一 S2 数据划分上有可复现的原始输出用于对比",
+           description: "PR5_SYNTHETIC_ONLY",
+           scenario: "COURSE",
+                     ~~~~~~~~
+           memberships: {
+             create: {
+               userId: "cmvqvcs8h000s948ove5456ho"
+             }
+           }
+         }
+       })
+
+Invalid value for argument `scenario`. Expected ProjectScenario.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ fixture tests/r4Specialists.test.ts:38:19
+
+ ❯ tests/r4Specialists.test.ts:68:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/r4Specialists.test.ts > R4 PR5 original-result and specialist integration > uses the actual chat comparison binding to preview/confirm the frozen original Mission once
+ZodError: [
+  {
+    "expected": "number",
+    "code": "invalid_type",
+    "path": [
+      "expectedConversationVersion"
+    ],
+    "message": "Invalid input: expected number, received undefined"
+  }
+]
+ ❯ Module.submitConversationReview lib/conversation/reviewService.ts:77:42
+     75| }
+     76| export async function submitConversationReview(actor: ConversationActo…
+     77|   const input = conversationReviewSchema.parse(raw), inputHash = jsonH…
+       |                                          ^
+     78|   if (input.ref.kind !== "MISSION") throw new AppError("MISSION_REQUIR…
+     79|   const prepared = await db.$transaction(async tx => {
+ ❯ tests/r4Specialists.test.ts:90:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 20 passed (22)
+   Start at  08:57:13
+   Duration  14.23s (transform 1.30s, setup 0ms, import 4.04s, tests 9.67s, environment 0ms)
+

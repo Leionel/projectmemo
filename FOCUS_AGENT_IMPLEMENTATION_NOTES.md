@@ -1,5 +1,7 @@
 # Focus Agent 实施记录
 
+2026-10-27 R4 PR-5：原 D1/D2 变化与比较进入聊天，选择绑定原预览，确认与结果读回沿原 Mission；原 Action 完成回执进入 Goal State，旧结果变化使旧方案失效。六项专项 Prompt 已接入，三领域开发实模与跨端验证见 [R4 实施记录](R4_AGENT_EXPERIENCE_IMPLEMENTATION_NOTES.md)。本轮未部署。
+
 R4 PR-3 已接入合法资料变化的原会话讨论入口和原行动结果重评，复用 F3 Anchor/事件、权限、去重、延后和停止。三领域实模开发闭环及剩余质量门槛见 [R4 实施记录](R4_AGENT_EXPERIENCE_IMPLEMENTATION_NOTES.md)。本轮未部署 ECS。
 
 R4 PR-4 已实现 ArkTS 原生语义回答、稳定私有草稿、原绑定回执、调查模式/进展/停止；用户打开的模拟器已安装本机隔离验收版本。系统深色与放大字、原位回执、原行动和草稿旅程有实际证据，目标真机和生产环境仍另验收。

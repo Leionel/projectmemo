@@ -216,6 +216,7 @@ struct FocusConversation {
       const result = await this.service.uiAction(this.view.id, input);
       if (epoch !== this.generation) return;
       this.view = result.conversation;
+      if (action.actionKind === 'PREVIEW') this.messageScroller.scrollEdge(Edge.Bottom);
       if (action.actionKind === 'ASK') {
         this.uiKeys.delete(action.bindingId); this.target = action.target.projectId; this.replyId = message.id; this.pending = null;
         this.text = answer || '请调查这条变化的依据，判断对原目标有什么影响，并给出待确认的下一步。'; this.saveComposer();

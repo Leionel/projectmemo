@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { missionStrategyV2 } from "@/lib/agent/specialistPrompts";
 import type { AgentMission } from "@/lib/generated/prisma/client";
 import { jsonHash, type ToolResult, type Source } from "./contracts";
 import { textHash } from "@/lib/research/sourceRepository";
@@ -51,7 +52,7 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
     .map(source => [source.id, { id: source.id, hash: source.hash, revision: source.revision, temporalState: source.temporalState ?? source.assessment?.temporalState ?? "UNKNOWN",
       knowledgeClass: source.knowledgeClass ?? (source.kind === "EXTERNAL" ? "EXTERNAL_REFERENCE" : "PROJECT_OBSERVATION"), observedAt: source.observedAt }])).values()];
   const inputs = [...new Map([...events, ...[question, input].filter(e => e !== null)].map(e => [e.id, e])).values()].sort((a, b) => a.seq - b.seq);
-  const context = { decisionScenario:(m.planJson as {decisionScenario?:unknown}).decisionScenario??null, schemaVersion: 2, promptVersion: fitReviews.length?"mission-context-v3-e0":"mission-context-v2", outputTokenLimit: decisionTokenLimit(m.lastErrorJson), goal: m.goal,
+  const context = { strategyPrompt: { id: missionStrategyV2.id, version: missionStrategyV2.version }, decisionScenario:(m.planJson as {decisionScenario?:unknown}).decisionScenario??null, schemaVersion: 2, promptVersion: fitReviews.length?"mission-context-v3-e0":"mission-context-v2", outputTokenLimit: decisionTokenLimit(m.lastErrorJson), goal: m.goal,
     protocolRepair: (m.lastErrorJson as {code?:string})?.code === "MODEL_PROTOCOL_ERROR" ? { reason: (m.lastErrorJson as {diagnostic?:{reason?:string}}).diagnostic?.reason } : undefined,
     successCriteria: m.successCriteriaJson, constraints: m.constraintsJson, constraintsVersion: m.constraintsVersion, researchScope: m.researchScopeJson,
     scopeRevision: m.researchScopeVersion, contextVersion: m.contextVersion, planRevision: m.planRevision, budgetUsed: m.budgetUsedJson,

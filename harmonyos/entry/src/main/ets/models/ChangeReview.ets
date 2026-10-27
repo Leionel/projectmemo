@@ -5,8 +5,11 @@ export interface ReviewMaterial { sourcePointer: MissionPointer; title: string; 
 export interface ReviewCandidate {
   candidateId: string; kind?: string; title?: string; reason: string; question: string | null;
   goalLink?: string;
+  goalQuote?: string; unknown?: string[]; evidence?: ReviewQuote[]; branches?: ReviewBranch[];
   expectedObservation?: string; stopCondition?: string; feasibility?: string; feasibilityReasons?: string[];
 }
+export interface ReviewQuote { ref: string; quote: string; }
+export interface ReviewBranch { observation: string; consequence: string; }
 export interface ReviewResult { summary: string; decision?: string; candidates: ReviewCandidate[]; }
 export interface ReviewBase { attempt: number; }
 export interface ReviewView { id: string; status: string; stale: boolean; proposalHash: string; result: ReviewResult | null; base: ReviewBase; toolAttempts: number; }

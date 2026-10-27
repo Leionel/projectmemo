@@ -43,6 +43,8 @@ PR-0 冻结契约与纯 hydration。PR-1/2 在实际调用处构建 authority，
 
 ## 动作与持久业务
 
+PR-5 将原 D1/D2 Review 读回为 change/comparison，数据来自规范化原结果，未追加 UI 模型调用。PREVIEW 绑定原 proposalId/hash/candidateId/期限，经 `/ui-actions` 转原 work 预览；它不会执行。预览编号按原 message/binding/客户端请求/版本派生，重复读取同一预览。确认继续走原 proposal API。Goal State 中原结果变化、撤权、否决、过期和当前 turn 均撤掉可用操作；旧历史仍可读。
+
 `AllowedAction` 只来自服务端注册表，包含 bindingId/conversationId/expectedConversationVersion/actionKind/target/enabled/disabledReason。动作只有 OPEN / ASK / PREVIEW / CONFIRM / DECLINE / REFRESH，无任意 URL 或请求体。
 
 提案动作另绑定 frozen proposalHash/candidateId/expiresAt。PREVIEW 可尚无 executionId；CONFIRM 必须已有原预览 executionId。比较卡的 PREVIEW 必须指向同一冻结候选且可行；审批卡的执行对象、hash、期限必须一致。陈旧/否决/过期状态不提供可用确认。

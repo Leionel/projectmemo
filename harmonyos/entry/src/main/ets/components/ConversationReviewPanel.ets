@@ -1,7 +1,8 @@
 import util from '@ohos.util';
+import { ConversationDraftStore, ConversationDraft } from '../services/ConversationDraftStore';
 import { ConversationView } from '../models/Conversation';
 import { ConversationWork, ConversationWorkInput } from '../models/ConversationWork';
-import { ConversationReviews, ConversationReviewInput, ReviewCandidate, ReviewMaterial } from '../models/ChangeReview';
+import { ConversationReviews, ConversationReviewInput, ReviewCandidate, ReviewMaterial, ReviewQuote, ReviewBranch } from '../models/ChangeReview';
 import { MissionPointer } from '../models/Mission';
 import { ConversationService } from '../services/ConversationService';
 import { PMButton } from './PMReferencePrimitives';
@@ -14,14 +15,17 @@ export struct ConversationReviewPanel {
   onUpdated: (view: ConversationView) => void = (_: ConversationView): void => {};
   @State private expanded: boolean = false;
   @State private data: ConversationReviews = new ConversationReviews();
-  @State private selected: string[] = [];
-  @State private rejected: string[] = [];
-  @State private feedback: string = '';
+  @State @Watch('saveDraft') private selected: string[] = [];
+  @State @Watch('saveDraft') private rejected: string[] = [];
+  @State @Watch('saveDraft') private feedback: string = '';
   @State private error: string = '';
   private service: ConversationService = new ConversationService();
   private keys: Map<string, string> = new Map<string, string>();
   private generation: number = 0;
-  aboutToDisappear(): void { this.generation++; }
+  private draftKey(): string { return `${this.conversation.id}:${this.work.ref.kind}:${this.work.ref.id}:review`; }
+  private saveDraft(): void { const draft = new ConversationDraft(); draft.answer = this.feedback; draft.selected = [...this.selected.map((id: string): string => 'm:' + id), ...this.rejected.map((id: string): string => 'c:' + id)]; ConversationDraftStore.save(this.draftKey(), draft); }
+  aboutToAppear(): void { const saved = ConversationDraftStore.read(this.draftKey()); this.feedback = saved.answer; this.selected = saved.selected.filter((id: string): boolean => id.startsWith('m:')).map((id: string): string => id.slice(2)); this.rejected = saved.selected.filter((id: string): boolean => id.startsWith('c:')).map((id: string): string => id.slice(2)); }
+  aboutToDisappear(): void { this.saveDraft(); this.generation++; }
   private async load(): Promise<void> {
     if (this.busy) return;
     const epoch = this.generation; this.busy = true; this.error = '';
@@ -73,7 +77,17 @@ export struct ConversationReviewPanel {
           PMButton({ label: '云端复核所选资料', secondary: true, disabled: this.busy || this.selected.length === 0 || !['READY', 'PAUSED'].includes(this.work.status), onAction: (): void => { this.submit('CHANGE_REVIEW'); } })
           if (this.data.change) {
             Text(this.data.change.stale ? '复核依据已变化' : this.data.change.result?.summary ?? '正在读取复核状态；不会自动重发模型').fontSize(14).lineHeight(23).fontColor(PMColors.INK_PRIMARY)
-            if (this.data.change.result && this.data.change.result.decision !== 'KEEP_PLAN') { ForEach(this.data.change.result.candidates, (c: ReviewCandidate) => { Text(c.question ?? '').fontSize(13).lineHeight(21).fontColor(PMColors.INK_SECONDARY) }, (c: ReviewCandidate) => c.candidateId) }
+            if (this.data.change.result && this.data.change.result.decision !== 'KEEP_PLAN') {
+              ForEach(this.data.change.result.candidates, (c: ReviewCandidate) => {
+                Column({ space: 6 }) {
+                  if (c.goalQuote) { Text(c.goalQuote).fontSize(13).lineHeight(21).fontColor(PMColors.INK_TERTIARY) }
+                  Text(c.reason).fontSize(14).lineHeight(23).fontColor(PMColors.INK_PRIMARY)
+                  Text(c.question ?? '').fontSize(14).lineHeight(23).fontColor(PMColors.INK_SECONDARY)
+                  ForEach(c.unknown ?? [], (v: string) => { Text(v).fontSize(13).lineHeight(21).fontColor(PMColors.INK_SECONDARY) })
+                  ForEach(c.evidence ?? [], (q: ReviewQuote) => { Text(q.quote).fontSize(13).lineHeight(21).fontColor(PMColors.INK_TERTIARY).padding({ left: 10 }).border({ width: { left: 1 }, color: PMColors.BORDER }) })
+                }.alignItems(HorizontalAlign.Start).width('100%')
+              }, (c: ReviewCandidate) => c.candidateId)
+            }
             if (this.data.change.status === 'READY' && !this.data.change.stale && this.data.change.result?.decision !== 'KEEP_PLAN' && !this.data.dynamic) { PMButton({ label: '比较本轮推进方案', secondary: true, disabled: this.busy, onAction: (): void => { this.submit('DYNAMIC_PLAN'); } }) }
           }
           if (this.data.dynamic) {
@@ -83,7 +97,10 @@ export struct ConversationReviewPanel {
                 Column({ space: 8 }) {
                   Text(c.title ?? '保留当前计划').fontSize(14).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
                   Text(c.reason).fontSize(13).lineHeight(21).fontColor(PMColors.INK_SECONDARY)
-                  Text((c.feasibilityReasons ?? []).join('；') || c.stopCondition || '').fontSize(12).fontColor(PMColors.INK_TERTIARY)
+                  if (c.expectedObservation) { Text(c.expectedObservation).fontSize(14).lineHeight(23).fontColor(PMColors.INK_SECONDARY) }
+                  ForEach(c.branches ?? [], (b: ReviewBranch) => { Text(b.observation + ' → ' + b.consequence).fontSize(13).lineHeight(22).fontColor(PMColors.INK_SECONDARY) })
+                  Text(c.stopCondition ?? '').fontSize(13).lineHeight(22).fontColor(PMColors.INK_TERTIARY)
+                  if ((c.feasibilityReasons ?? []).length > 0) { Text((c.feasibilityReasons ?? []).join('；')).fontSize(12).fontColor(PMColors.INK_TERTIARY) }
                   Row() { Checkbox().select(this.rejected.includes(c.candidateId)).selectedColor(PMColors.BRAND).enabled(!this.busy && this.data.dynamic!.base.attempt < 2).onChange((v: boolean) => { this.rejected = v ? [...this.rejected, c.candidateId] : this.rejected.filter((id: string) => id !== c.candidateId); }); Text('不采用').fontSize(12).fontColor(PMColors.INK_SECONDARY) }
                   PMButton({ label: '预览采用', secondary: true, disabled: this.busy || this.data.dynamic!.stale || this.data.dynamic!.status !== 'READY' || c.feasibility !== 'READY' || this.rejected.includes(c.candidateId), onAction: (): void => { this.preview(c); } })
                 }.width('100%').alignItems(HorizontalAlign.Start).padding({ top: 12, bottom: 12 }).border({ width: { bottom: 1 }, color: PMColors.BORDER })

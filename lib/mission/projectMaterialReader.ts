@@ -5,6 +5,16 @@ import { readProjectMaterialView } from "./sourceSignals";
 import { getTemporalSearchStates } from "@/lib/services/temporalLedgerService";
 
 export async function readReviewMaterial(projectId: string, id: string, tx: Tx = db) {
+  if (id.startsWith("action:")) {
+    const action = await tx.actionItem.findFirst({ where: { id: id.slice(7), projectId, isSimulated: false } });
+    if (!action) return null;
+    const hash = jsonHash(action), full = JSON.stringify({ title: action.title, status: action.status, resultText: action.resultText,
+      resultCardId: action.resultCardId, completedAt: action.completedAt, verification: "USER_REPORTED_NOT_INDEPENDENTLY_VERIFIED" }), text = full.slice(0, 12000);
+    return { title: action.title, readScope: "EXCERPT" as const,
+      source: { id, kind: "PROJECT", entityType: "ACTION", revision: hash, hash, text, observedAt: action.updatedAt.toISOString(),
+        temporalState: "UNKNOWN", knowledgeClass: "PROJECT_OBSERVATION" } as Source,
+      coverage: { loadedCharacters: text.length, totalCharacters: full.length, truncated: text.length < full.length, extractionStatus: "SUCCESS" } };
+  }
   const material = await readProjectMaterialView(projectId, id, tx);
   if (material) return { ...material, readScope: "EXCERPT" as const };
   if (id.startsWith("card:")) {

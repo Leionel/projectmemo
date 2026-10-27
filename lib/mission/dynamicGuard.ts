@@ -3,12 +3,14 @@ import { isFeatureEnabled } from "@/lib/config/features";
 import { json, jsonHash } from "./contracts";
 import { sourceHash, type Tx } from "./repository";
 import type { AgentMission } from "@/lib/generated/prisma/client";
+import { reviewGoalState } from "@/lib/decision/goalState";
 
 export type DynamicReviewGuard = {
   schemaVersion: 2; rootReviewId: string; originalRootReviewKey: string; proposalId: string; candidateId: string;
   kind: "READ_EXISTING" | "ASK_USER"; goalHash: string; successHash: string; constraintsHash: string; scopeHash: string; projectGoalHash: string;
   readSet: Array<{ id: string; hash: string }>; allowedReads: Array<{ id: string; hash: string }>;
   question: string | null; completed: boolean;
+  goalStateHash?: string;
 };
 export function dynamicGuard(m: Pick<AgentMission, "planJson">): DynamicReviewGuard | null {
   const guard = (m.planJson as { dynamicReview?: DynamicReviewGuard } | null)?.dynamicReview;
@@ -19,6 +21,8 @@ export function dynamicGuard(m: Pick<AgentMission, "planJson">): DynamicReviewGu
 export async function validateDynamicGuard(tx: Tx, m: AgentMission) {
   const guard = dynamicGuard(m);
   if (!guard) return;
+  if (guard.goalStateHash && (await reviewGoalState(m, tx)).hash !== guard.goalStateHash)
+    throw new AppError("SOURCE_CHANGED", "原行动结果或委托成果已变化，请重新核对目标判断", 409);
   if (!isFeatureEnabled("GOAL_CHANGE_REVIEW_ENABLED", false)) throw new AppError("CHANGE_REVIEW_DISABLED", "动态复核已暂停，原记录保留", 409);
   if (!await tx.decisionScenarioProposal.findFirst({ where: { id: guard.rootReviewId, ownerUserId: m.ownerUserId, missionId: m.id, purpose: "CHANGE_REVIEW", status: "READY" } }))
     throw new AppError("REVIEW_STOPPED", "原变化复核已停止或失效", 409);

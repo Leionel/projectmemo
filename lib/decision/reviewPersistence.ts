@@ -2,7 +2,9 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { isFeatureEnabled } from "@/lib/config/features";
-import { chatWithLLMWithMeta } from "@/lib/agent/llmAgent";
+import { chatWithLLMWithMeta, chatPromptWithMeta } from "@/lib/agent/llmAgent";
+import type { PromptSpec } from "@/lib/agent/promptSpec";
+import { reviewGoalState } from "./goalState";
 import { getChatProviderDefaults } from "@/lib/config/provider";
 import { parseReviewJSON } from "./reviewProtocol";
 import { assertActor, type CopilotActor } from "@/lib/copilot/confirmation";
@@ -23,6 +25,7 @@ export async function reviewMission(actor: CopilotActor, id: string, tx: Tx = db
   return mission;
 }
 export async function reviewFresh(base: ReviewBase, m: AgentMission, tx: Tx = db) {
+  if (base.goalStateHash && (await reviewGoalState(m, tx)).hash !== base.goalStateHash) return false;
   if (await tx.goalQuestionPreference.findFirst({ where: { userId: m.ownerUserId, missionId: m.id, questionId: "*", mode: "STOP" } })) return false;
   if (jsonHash(m.goal) !== base.goalHash || jsonHash(m.successCriteriaJson) !== base.successHash ||
     jsonHash(m.constraintsJson) !== base.constraintsHash || jsonHash(m.researchScopeJson) !== base.scopeHash ||
@@ -108,7 +111,8 @@ export async function prepareReview(input: {
   }, { timeout: 20000 });
 }
 export async function runPreparedReview<T>(actor: CopilotActor, p: DecisionScenarioProposal, prompt: string, schema: z.ZodType<T>,
-  normalize: (answer: T, base: ReviewBase, provider: string, usageUnknown: boolean) => ChangeReviewResult | DynamicReviewResult, provider?: ReviewProvider) {
+  normalize: (answer: T, base: ReviewBase, provider: string, usageUnknown: boolean) => ChangeReviewResult | DynamicReviewResult, provider?: ReviewProvider,
+  task?: { spec: PromptSpec<unknown, T>; input: unknown }) {
   const base = p.baseManifest as unknown as ReviewBase;
   let reply: AgentExecutionResult<string> | undefined, answer: ChangeReviewResult | DynamicReviewResult | null = null, error: unknown;
   let ignoredNullFields: string[] = [];
@@ -117,7 +121,8 @@ export async function runPreparedReview<T>(actor: CopilotActor, p: DecisionScena
     if (prompt.length > 22000) throw new AppError("REVIEW_CONTEXT_LIMIT", "复核资料超出本轮范围", 409);
     // The original provider wrapper consumes account quota once; preparation reserves only Mission budget.
     await db.decisionScenarioProposal.update({ where: { id: p.id }, data: { baseManifest: json({ ...base, reservation: { ...base.reservation!, sent: true } }) } });
-    reply = await (provider ? provider(prompt, p.purpose as ReviewPurpose) : chatWithLLMWithMeta(prompt, p.projectId, undefined, { userId: actor.userId, sessionId: actor.sessionId, reviewProposalId: p.id }));
+    const billing = { userId: actor.userId, sessionId: actor.sessionId, reviewProposalId: p.id };
+    reply = await (provider ? provider(prompt, p.purpose as ReviewPurpose) : task ? chatPromptWithMeta(task.spec, task.input, p.projectId, billing) : chatWithLLMWithMeta(prompt, p.projectId, undefined, billing));
     if (!["SUCCESS", "PARTIAL"].includes(reply.status)) throw new AppError(reply.fallbackReason ?? "REVIEW_MODEL_FAILED", "模型未提供完整复核，保留原计划", 409);
     const parsed = parseReviewJSON(reply.data, schema);
     ignoredNullFields = parsed.ignoredNullFields;
@@ -152,7 +157,7 @@ export async function runPreparedReview<T>(actor: CopilotActor, p: DecisionScena
     const config = getChatProviderDefaults();
     await tx.agentRun.create({ data: { projectId: p.projectId, runType: "CHAT", provider: reply?.provider ?? (provider ? "TEST_FIXTURE" : `llm:${config.provider}:${config.model}`),
       status: status === "READY" ? "SUCCESS" : "FAILED", fallbackReason: status === "READY" ? null : error instanceof AppError ? error.code : status,
-      trace: json({ purpose: p.purpose, reviewProposalId: p.id, actorUserId: actor.userId, usage: reply?.usage ?? null, usageUnknown: !reply?.usage || !!reply.usageUnknown, requestIdentity: reply?.requestIdentity ?? null, responseNormalization: { ignoredNullFields }, responseHash: reply ? jsonHash(reply.data) : null, durationMs: Date.now() - started }) } });
+      trace: json({ prompt: task ? { id: task.spec.id, version: task.spec.version, purpose: task.spec.purpose, outputSchemaVersion: task.spec.outputSchemaVersion } : null, purpose: p.purpose, reviewProposalId: p.id, actorUserId: actor.userId, usage: reply?.usage ?? null, usageUnknown: !reply?.usage || !!reply.usageUnknown, requestIdentity: reply?.requestIdentity ?? null, responseNormalization: { ignoredNullFields }, responseHash: reply ? jsonHash(reply.data) : null, durationMs: Date.now() - started }) } });
     if (status === "READY") await event(tx, m.id, p.purpose === "CHANGE_REVIEW" ? "CHANGE_REVIEW_READY" : "DYNAMIC_PLAN_READY", { proposalId: p.id });
   }, { timeout: 20000 });
   return readReview(actor, p.id);

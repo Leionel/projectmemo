@@ -1,0 +1,82 @@
+{
+  "baseCommit": "36bb1a0d0c3cf31da7bd35e879ca0153daa17013",
+  "scope": "PR5_SPECIALIST_POLICIES_AND_ORIGINAL_RESULT_REASSESSMENT",
+  "provenance": "isolated synthetic data; real provider development comparison + HTTP stubs in engineering tests",
+  "checks": [
+    {
+      "command": "npm.cmd test",
+      "exitCode": 0,
+      "files": 121,
+      "tests": 1095,
+      "log": "unit-all.log"
+    },
+    {
+      "command": "npm.cmd test -- tests/r4Specialists.test.ts tests/artifactAudit.test.ts tests/episodeAction.test.ts",
+      "exitCode": 0,
+      "files": 3,
+      "tests": 27,
+      "log": "checkpoint-last.log"
+    },
+    {
+      "command": "npm.cmd run test:e2e",
+      "exitCode": 0,
+      "tests": 23,
+      "skipped": 0,
+      "includesProductionBuild": true,
+      "log": "e2e-all.log"
+    },
+    {
+      "command": "npm.cmd exec tsc -- --noEmit",
+      "exitCode": 0,
+      "log": "types-delivery.log"
+    },
+    {
+      "command": "npm.cmd run lint",
+      "exitCode": 0,
+      "log": "lint-delivery.log"
+    },
+    {
+      "command": "npm.cmd run harmony:test",
+      "exitCode": 0,
+      "tests": 86,
+      "log": "harmony-test.log"
+    },
+    {
+      "command": "npm.cmd run harmony:build",
+      "exitCode": 0,
+      "log": "harmony-final.log",
+      "unsignedSHA256": "6b157f538c5e5b17578191c3c09245533533915196df40cd4bfeb5029b861125"
+    }
+  ],
+  "model": {
+    "used": 44,
+    "limit": 48,
+    "paired": {
+      "baselineSchemaValid": 14,
+      "r4SchemaValid": 17,
+      "eachGroupSize": 18
+    },
+    "originalResultReassessments": 3,
+    "captureAttributionRechecks": 4,
+    "versions": [
+      "capture.fidelity.v2/2.0.0",
+      "capture.fidelity.v2/2.0.1",
+      "capture.fidelity.v2/2.0.2"
+    ],
+    "remainingSharedWithPR6": 4,
+    "qualityLimits": [
+      "not heldout or independently graded",
+      "course D1 kept plan while retaining unknown; frozen expected decision UNKNOWN mismatch retained",
+      "one R4 Mission multi-JSON response rejected",
+      "one baseline D2 receive interruption; reservation retained",
+      "Artifact unsupported-claim and human decision-cost scoring still open"
+    ]
+  },
+  "protectedDirtyFilesUnchanged": true,
+  "notClaimed": [
+    "PR5 new native interactions on physical device",
+    "ECS deployment",
+    "independent model/user acceptance"
+  ],
+  "next": "PR6 proceeds in same authorized task and same 48-call ledger"
+}

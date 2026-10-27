@@ -46,7 +46,8 @@ export async function adoptDynamicPlan(actor: CopilotActor, proposalId: string, 
       const guard: DynamicReviewGuard = { schemaVersion: 2, rootReviewId: root.id, originalRootReviewKey: (root.baseManifest as unknown as ReviewBase).rootReviewKey,
         proposalId: p.id, candidateId: candidate.candidateId, kind: candidate.kind as "READ_EXISTING" | "ASK_USER",
         goalHash: base.goalHash, successHash: base.successHash, constraintsHash: base.constraintsHash, scopeHash: base.scopeHash, projectGoalHash: base.projectGoalHash,
-        readSet: base.sourcePointers, allowedReads: base.sourcePointers.filter(p => candidate.sourceIds.includes(p.id)), question: candidate.question, completed: false };
+        readSet: base.sourcePointers, allowedReads: base.sourcePointers.filter(p => candidate.sourceIds.includes(p.id)), question: candidate.question, completed: false,
+        ...(base.goalStateHash ? { goalStateHash: base.goalStateHash } : {}) };
       const pending = await tx.agentMissionStep.findMany({ where: { missionId: m.id, status: { in: ["READY", "RUNNING"] } }, take: 101 });
       if (pending.length > 100) throw new AppError("INCOMPLETE_PENDING_SCOPE", "未执行步骤范围过大，请先核对原计划", 409);
       for (const step of pending) {

@@ -17,6 +17,7 @@ export interface PromptSpec<TInput, TOutput> {
   system: string;
   outputSchemaVersion: number;
   maxOutputTokens: number;
+  outputFormat?: "JSON" | "TEXT";
   outputSchema: z.ZodType<TOutput>;
   // Only server-authored policy belongs in system. Source text is serialized data.
   buildMessages: (input: TInput) => Array<ModelMessage & { role: "user" | "assistant" | "tool" }>;

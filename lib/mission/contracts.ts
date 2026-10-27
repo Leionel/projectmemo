@@ -30,7 +30,7 @@ export const choiceSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("finish"), outputId: z.string().min(1) }).strict(),
 ]);
 export type Choice = z.infer<typeof choiceSchema>;
-export type Decision = { choice: Choice; provider: string; model: string; usage: { inputTokens: number | null; outputTokens: number | null }; protocol: string; callId?: string; serialization?: { escapedControls: number; responseHash: string } };
+export type Decision = { prompt?: { id: string; version: string; purpose: string; outputSchemaVersion: number }; choice: Choice; provider: string; model: string; usage: { inputTokens: number | null; outputTokens: number | null }; protocol: string; callId?: string; serialization?: { escapedControls: number; responseHash: string } };
 export type Source = { id: string; kind: "PROJECT" | "EXTERNAL"; entityType: "PROJECT" | "CARD" | "ACTION" | "ARTIFACT" | "CAPTURE" | "ATTACHMENT" | "EXTERNAL_SOURCE"; revision: string; hash: string; identityKey?: string; knowledgeClass?: "PROJECT_OBSERVATION" | "EXTERNAL_REFERENCE" | "MIXED" | "INFERENCE"; observationScopes?:Array<{start:number;end:number;knowledgeClass:"PROJECT_OBSERVATION"|"EXTERNAL_REFERENCE"|"INFERENCE"}>; text: string; observedAt: string; temporalState?: "CURRENT" | "SUPERSEDED" | "CONTESTED" | "UNKNOWN"; assessment?: import("../evidence/assessment").EvidenceAssessment };
 export type ToolResult = { data: unknown; sources: Source[]; status?: "SUCCESS" | "PARTIAL"; coverage?: Record<string, unknown> };
 export type Actor = { userId: string; projectId: string; missionId: string };

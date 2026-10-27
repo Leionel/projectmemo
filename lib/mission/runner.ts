@@ -10,6 +10,7 @@ import { gapRequirementsSchema } from "./gaps";
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
+import { missionStrategyV2 } from "@/lib/agent/specialistPrompts";
 import { chooseNext, type DecisionProvider } from "./modelAdapter";
 import { buildContext } from "./contextBuilder";
 import { choiceSchema, json, jsonHash, MISSION_PROTOCOL_SCHEMA_VERSION, type Decision, type Source } from "./contracts";
@@ -83,7 +84,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    step=await db.$transaction(async tx=>{
     const current=await fenced(tx,lease);
     await tx.agentMission.update({where:{id:m.id},data:{lastErrorJson:Prisma.DbNull}});
-    const run=await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"SUCCESS",provider:decision.provider,trace:json({missionId:m.id,phase:"DECISION",model:decision.model,protocol:decision.protocol,usage:decision.usage,serialization:decision.serialization,contextManifest}),resultJson:json({kind:choice.kind}),durationMs:Date.now()-started}});
+    const run=await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"SUCCESS",provider:decision.provider,trace:json({missionId:m.id,phase:"DECISION",model:decision.model,protocol:decision.protocol,prompt:decision.prompt??null,usage:decision.usage,serialization:decision.serialization,contextManifest}),resultJson:json({kind:choice.kind}),durationMs:Date.now()-started}});
     if(choice.kind==="ask"){
      phase="DECISION";const requirements=gapRequirementsSchema.parse(choice.requirements??{});if(!isFeatureEnabled("MISSION_EVIDENCE_FIT_ENABLED",false))delete requirements.evidenceFitV1;const gapId=randomUUID();phase="COMMIT";
      const evidencePremiseContext=requirements.evidenceFitV1?{constraintsVersion:current.constraintsVersion,scopeVersion:current.researchScopeVersion,goalHash:jsonHash(current.goal)}:undefined;
@@ -166,7 +167,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
     :repair?{kind:"MODEL_FORMAT_RETRY",automatic:true,message:"正在进行一次模型格式纠错，已有成功步骤保留。",attempt:failures+1,maxAttempts:2}
     :code==="BUDGET_EXHAUSTED"?{kind:"BUDGET_REVIEW",automatic:false,message:"任务预算已用完；继续不会重置预算，请核对目标和额度。"}
     :{kind:"REVIEW_REQUIRED",automatic:false,message:failure.protocol?"模型格式纠错仍未通过，请检查模型配置后人工继续。":"请核对当前失败原因后继续，已有步骤和结果保留。",...(failure.protocol?{attempt:failures+1,maxAttempts:2}:{})};
-   await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"FAILED",provider:metadata?.provider??(options.provider?"TEST_FIXTURE":"mission-adapter"),trace:json({missionId:m.id,stepId:activeStepId,sourceDecisionRunId,code,phase:failure.phase,category:failure.category,...metadata,diagnostic,recovery,contextManifest,...(failedSettlements.size?{usageSettlementFailures:[...failedSettlements]}:{})}),fallbackReason:code}});
+   await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"FAILED",provider:metadata?.provider??(options.provider?"TEST_FIXTURE":"mission-adapter"),trace:json({prompt:options.provider?null:{id:missionStrategyV2.id,version:missionStrategyV2.version,purpose:missionStrategyV2.purpose,outputSchemaVersion:missionStrategyV2.outputSchemaVersion},missionId:m.id,stepId:activeStepId,sourceDecisionRunId,code,phase:failure.phase,category:failure.category,...metadata,diagnostic,recovery,contextManifest,...(failedSettlements.size?{usageSettlementFailures:[...failedSettlements]}:{})}),fallbackReason:code}});
    await tx.agentMission.update({where:{id:m.id},data:{lastErrorJson:json({code,message:failure.message,diagnostic,phase:failure.phase,category:failure.category,recovery})}});
    await event(tx,m.id,failure.protocol?"MODEL_PROTOCOL_ERROR":"EXECUTION_STOPPED",{code,...diagnostic,phase:failure.phase,category:failure.category,recovery});
    const status=current.cancelRequestedAt?"CANCELLED":current.pauseRequestedAt?"PAUSED":retry||repair?"READY":"PAUSED";

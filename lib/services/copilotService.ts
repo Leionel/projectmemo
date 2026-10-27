@@ -10,8 +10,8 @@ import { assessCopilotSemantics } from "@/lib/evidence/copilotSemantic";
 import { evidenceAssessment } from "@/lib/evidence/assessment";
 import { jsonHash } from "@/lib/mission/contracts";
 import { z } from "zod";
-import { chatJsonWithMeta } from "@/lib/agent/llmAgent";
-import { buildCopilotPrompt } from "@/lib/agent/prompts";
+import { chatPromptWithMeta } from "@/lib/agent/llmAgent";
+import { legacyCopilotStyleV2 } from "@/lib/agent/specialistPrompts";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { evaluateTrustReceipt, guardedAnswerMessage, type ClaimDraft } from "@/lib/evidence/trustReceipt";
 import { AgentRunStatus, AgentRunType } from "@/lib/generated/prisma/client";
@@ -23,7 +23,7 @@ import { getDecisionTimeline } from "@/lib/services/temporalLedgerService";
 import { assertCopilotSources, confirmCopilotTool, freezeCopilotProposals, readCopilotContext, type CopilotActor } from "@/lib/copilot/confirmation";
 import type { AgentChatResponse, AgentCitation, CardSearchResult, EvidenceTrustReceipt, ProjectEvidenceRef, ProposedAction } from "@/lib/types";
 
-const responseSchema = z.object({
+export const responseSchema = z.object({
   message: z.string().trim().min(1).max(4000),
   citations: z.array(z.object({ cardId: z.string(), title: z.string(), excerpt: z.string().max(500) })).max(8).default([]),
   claims: z.array(z.object({
@@ -226,21 +226,22 @@ async function answerQuestion(projectId: string, question: string, actor?: Copil
   let fallback = true;
   let fallbackReason: string | null = "mock_mode";
   let provider = "mock";
+  let modelAudit: { prompt?: unknown; usage?: unknown; usageUnknown?: boolean; requestIdentity?: string | null } | null = null;
   if (process.env.LLM_MODE === "openai-compatible" && process.env.LLM_API_KEY) {
     try {
-      const execution = await chatJsonWithMeta(
-        buildCopilotPrompt({
+      const spec = legacyCopilotStyleV2(responseSchema);
+      modelAudit = { prompt: { id: spec.id, version: spec.version, purpose: spec.purpose, outputSchemaVersion: spec.outputSchemaVersion }, usageUnknown: true };
+      const execution = await chatPromptWithMeta(spec, {
           project,
           question,
           dialogue:{messages:dialogue,explicitConstraints},missionContext,
           cards: cards.filter((card) => evidenceSearch.citations.some((citation) => citation.cardId === card.id)).map((card) => ({ id: card.id, title: card.title, summary: card.summary, type: String(card.type), temporalState: temporalById.get(card.id)?.topLevelState ?? "UNKNOWN", sourceRevision: sourceManifest.cardHashes.find(item => item.id === card.id)?.hash ?? "", observedAt: sourceManifest.observedAt })),
           interventions: interventions.map((item) => ({ id: item.id, title: item.title, content: item.content, status: String(item.status) })),
           actions: actions.map((item) => ({ id: item.id, title: item.title, status: String(item.status) })),
-        }),
-        (value) => responseSchema.parse(value),
-        projectId,
-      );
-      answer = execution.data;
+        }, projectId);
+      modelAudit = { prompt: execution.prompt, usage: execution.usage, usageUnknown: execution.usageUnknown, requestIdentity: execution.requestIdentity };
+      if (execution.status === "FAILED") throw new Error(execution.fallbackReason ?? "MODEL_RESPONSE_INVALID");
+      answer = responseSchema.parse(JSON.parse(execution.data));
       fallback = false;
       fallbackReason = null;
       provider = execution.provider;
@@ -356,6 +357,7 @@ async function answerQuestion(projectId: string, question: string, actor?: Copil
       ...(actor ? { actorUserId: actor.userId } : {}),
       copilotSources: sourceManifest,
       dialogueManifest:{schemaVersion:1,messageIds:history.map(m=>m.id),hash:jsonHash({dialogue,explicitConstraints}),missionObservationHash:missionContext?.observationHash??null},
+      modelAudit,
       evidenceManifest: { schemaVersion: 1, promptVersion: "copilot-evidence-v1", questionHash: jsonHash(question),
         includedCardIds: answer.citations.map(c => c.cardId), sourceHashes: sourceManifest.cardHashes.filter(item => retrievedCardIds.has(item.id)),
         temporalAsOf: timeline.asOf, semanticJudgeEnabled: isFeatureEnabled("COPILOT_CLAIM_JUDGE_ENABLED", false) },

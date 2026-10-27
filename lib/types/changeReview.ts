@@ -51,6 +51,8 @@ export type ReviewBase = {
   reservation?: { outputTokens: number; activeMs: number; settled: boolean; sent: boolean };
   readAttempts?: number;
   rejectedCandidateIds?: string[];
+  goalStateHash?: string;
+  goalState?: Awaited<ReturnType<typeof import("@/lib/decision/goalState").reviewGoalState>>["snapshot"];
 };
 export type ChangeCandidate = z.infer<typeof changeAnswerSchema>["candidates"][number] & { candidateId: string };
 export type ChangeReviewResult = { schemaVersion: 2; decision: "ATTEND" | "KEEP_PLAN" | "UNKNOWN"; summary: string; candidates: ChangeCandidate[]; provider: string; usageUnknown: boolean };

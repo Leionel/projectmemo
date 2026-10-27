@@ -1,0 +1,16 @@
+[
+  {
+    "ordinal": 41,
+    "episode": "research/CAPTURE_ATTRIBUTION_RECHECK",
+    "httpStatus": 200,
+    "responseHash": "68f8bb8bec0a5927f41ff2c8ffe3ce880922b265f3f673683ea41cbcb7ddae64",
+    "response": "{\"id\":\"023bafa9-7f17-42f6-842e-84f30c929074\",\"object\":\"chat.completion\",\"created\":1793118191,\"model\":\"deepseek-flash\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"type\\\":\\\"reflection\\\",\\\"title\\\":\\\"用户记录称模型V3好像跑通，尚未核对设备与线程\\\",\\\"summary\\\":\\\"用户记录称其猜测模型V3好像跑通了，但还没核对设备与线程，因此不能确认达到60ms。项目目标要求模型V3在设备X、双线程下本轮P95推理延迟不超过60ms。\\\",\\\"keywords\\\":[\\\"模型V3\\\",\\\"跑通\\\",\\\"设备X\\\",\\\"双线程\\\",\\\"P95延迟\\\",\\\"60ms\\\",\\\"未核对\\\"],\\\"relatedTasks\\\":[\\\"核对模型V3运行所用设备与线程配置\\\",\\\"确认模型V3本轮P95推理延迟是否不超过60ms\\\"],\\\"nextActions\\\":[\\\"确认模型V3实际运行所用设备与线程数\\\",\\\"在设备X、双线程条件下测量本轮P95推理延迟并与60ms比较\\\"],\\\"importance\\\":3}\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":712,\"completion_tokens\":171,\"total_tokens\":883,\"prompt_tokens_details\":{\"cached_tokens\":0},\"prompt_cache_hit_tokens\":0,\"prompt_cache_miss_tokens\":712},\"system_fingerprint\":\"bc19ba97cbe016479903222bb1578db6\"}"
+  },
+  {
+    "ordinal": 42,
+    "episode": "course/CAPTURE_ATTRIBUTION_RECHECK",
+    "httpStatus": 200,
+    "responseHash": "5009df997d422ead927e244597cf4a15b19369cfb740e0b3fa5ca45129b2f868",
+    "response": "{\"id\":\"0744a906-a2de-46f8-a62e-95c6392d8d10\",\"object\":\"chat.completion\",\"created\":1793118192,\"model\":\"deepseek-flash\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"type\\\":\\\"reflection\\\",\\\"title\\\":\\\"用户记录称有人称A比B好，但尚未见同一划分原始输出\\\",\\\"summary\\\":\\\"用户记录称：有人说 A 比 B 好；用户表示自己还没看到同一 S2 数据划分上的原始输出，因此暂时只是猜测。项目目标要求算法 A 与 B 在同一 S2 数据划分上有可复现的原始输出用于对比。\\\",\\\"keywords\\\":[\\\"A与B对比\\\",\\\"S2数据划分\\\",\\\"原始输出\\\",\\\"猜测\\\",\\\"尚未核验\\\"],\\\"relatedTasks\\\":[],\\\"nextActions\\\":[\\\"向说法来源确认其比较所用的数据划分与原始输出\\\",\\\"在同一 S2 数据划分上分别运行 A 与 B，保存可复现的原始输出\\\",\\\"拿到原始输出后再判断 A 与 B 的相对表现\\\"],\\\"importance\\\":3}\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":711,\"completion_tokens\":171,\"total_tokens\":882,\"prompt_tokens_details\":{\"cached_tokens\":512},\"prompt_cache_hit_tokens\":512,\"prompt_cache_miss_tokens\":199},\"system_fingerprint\":\"bc19ba97cbe016479903222bb1578db6\"}"
+  }
+]

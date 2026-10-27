@@ -1,0 +1,9 @@
+{
+  "provenance": "FROZEN_SYNTHETIC_DEVELOPMENT_NOT_HELD_OUT",
+  "version": 1,
+  "cases": [
+    { "id": "research", "scenario": "RESEARCH", "goal": "模型 V3 在设备 X、双线程下本轮 P95 推理延迟不超过60ms", "observation": "模型 V3 在设备 X 双线程下，当前 P95 为78ms，未达到60ms目标。", "report": "本轮模型 V3 在设备 X 双线程复测 P95 为52ms；这是用户提交的测量记录，没有独立工具核验。", "expectedAfter": "KEEP_PLAN", "uncertainCapture": "我猜模型V3好像跑通了，还没核对设备与线程，不能确认达到60ms。" },
+    { "id": "competition", "scenario": "COMPETITION", "goal": "同版本签名 HAP 完成目标设备安装并可离线打开首页", "observation": "同版本签名 HAP 安装失败：profile 不匹配；离线首页尚未测试。", "report": "同版本签名 HAP 现在安装成功；离线打开首页仍失败，提示缺少本地模型。", "expectedAfter": "ATTEND", "uncertainCapture": "同学说好像装上了，但我没看回执，离线演示也没有跑过。" },
+    { "id": "course", "scenario": "COURSE_DESIGN", "goal": "算法 A 与 B 在同一 S2 数据划分上有可复现的原始输出用于对比", "observation": "算法 A 使用 S1，算法 B 使用 S2；目前不同划分的数值不能直接比较。", "report": "算法 A 已改为 S2；算法 B 的原始输出文件与随机种子尚未提供，当前无法判断是否可复现。", "expectedAfter": "UNKNOWN", "uncertainCapture": "有人说A比B好，我还没看到同一划分的原始输出，暂时只是猜测。" }
+  ]
+}

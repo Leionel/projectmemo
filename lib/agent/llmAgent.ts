@@ -1,11 +1,11 @@
 import { reserveCloudCall, reserveWorkspaceCloudCall, reserveReviewCloudCall, settleWorkspaceCloudCall, type WorkspaceBilling, type ReviewBilling } from "@/lib/auth/cloudQuota";
 import { inputTokenBound, stageOutputLimit } from "@/lib/conversation/tokenBudget";
 import { AppError } from "@/lib/api";
-import { buildArtifactPrompt, buildCapturePrompt } from "@/lib/agent/prompts";
+import { artifactCoverageV2, captureFidelityV2 } from "@/lib/agent/specialistPrompts";
 import { getChatProviderConfig } from "@/lib/config/provider";
 import { knowledgeCardDraftSchema } from "@/lib/validation/schemas";
 import type { AgentExecutionResult, ArtifactTypeValue, CardDraft } from "@/lib/types";
-import { modelMessagesInputBound, modelMessagesSchema, validateModelCapabilities, type ModelMessage } from "./promptSpec";
+import { buildPromptMessages, modelMessagesInputBound, modelMessagesSchema, validateModelCapabilities, type ModelMessage, type PromptSpec } from "./promptSpec";
 
 type ChatResponse = { id?: string; usage?: { prompt_tokens?: number; completion_tokens?: number }; choices?: Array<{ finish_reason?: string; message?: { content?: string } }> };
 
@@ -13,7 +13,8 @@ function config() {
   return getChatProviderConfig();
 }
 
-export async function chatWithLLMWithMeta(prompt: string | ModelMessage[], projectId?: string, workspace?: WorkspaceBilling, review?: ReviewBilling): Promise<AgentExecutionResult<string>> {
+export async function chatWithLLMWithMeta(prompt: string | ModelMessage[], projectId?: string, workspace?: WorkspaceBilling, review?: ReviewBilling,
+  task?: { outputTokens: number; jsonOutput: boolean }): Promise<AgentExecutionResult<string>> {
   const startedAt = Date.now();
   const { provider, baseUrl, apiKey, model, timeoutMs } = config();
   const messages = typeof prompt === "string" ? [{ role: "user", content: prompt }] : modelMessagesSchema.parse(prompt);
@@ -25,7 +26,7 @@ export async function chatWithLLMWithMeta(prompt: string | ModelMessage[], proje
   else if (billing) await reserveWorkspaceCloudCall(billing);
   else await reserveCloudCall(projectId);
   const requestBody: Record<string, unknown> = {
-    max_tokens: billing?.outputTokens ?? 2048,
+    max_tokens: billing?.outputTokens ?? task?.outputTokens ?? 2048,
     model,
     temperature: 0.2,
     messages,
@@ -35,7 +36,7 @@ export async function chatWithLLMWithMeta(prompt: string | ModelMessage[], proje
   if (provider === "deepseek") {
     requestBody.thinking = { type: "disabled" };
   }
-  if (supportsJson && (workspace || review)) requestBody.response_format = { type: "json_object" };
+  if (supportsJson && (workspace || review || task?.jsonOutput)) requestBody.response_format = { type: "json_object" };
   const response = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
@@ -75,13 +76,30 @@ export async function chatWithLLM(prompt: string, projectId?: string) {
   return (await chatWithLLMWithMeta(prompt, projectId)).data;
 }
 
+/** One versioned task, one original provider/quota call. Parsing stays with the existing consumer. */
+export async function chatPromptWithMeta<TInput, TOutput>(spec: PromptSpec<TInput, TOutput>, input: TInput, projectId?: string, review?: ReviewBilling) {
+  const result = await chatWithLLMWithMeta(buildPromptMessages(spec, input), projectId, undefined, review,
+    { outputTokens: spec.maxOutputTokens, jsonOutput: spec.outputFormat !== "TEXT" });
+  return { ...result, prompt: { id: spec.id, version: spec.version, purpose: spec.purpose, outputSchemaVersion: spec.outputSchemaVersion } };
+}
+
 export async function structureWithLLM(input: {
   project: { id?: string; title: string; description: string; goal: string };
   rawText: string;
   historyKeywords: string[];
 }) {
-  const content = await chatWithLLM(buildCapturePrompt(input), input.project.id);
-  return knowledgeCardDraftSchema.parse(JSON.parse(content));
+  return (await structureWithLLMWithMeta(input)).data;
+}
+
+export async function structureWithLLMWithMeta(input: Parameters<typeof structureWithLLM>[0]) {
+  const execution = await chatPromptWithMeta(captureFidelityV2, input, input.project.id);
+  try {
+    if (execution.status === "FAILED") throw new Error(execution.fallbackReason ?? "MODEL_RESPONSE_INVALID");
+    return { ...execution, data: knowledgeCardDraftSchema.parse(JSON.parse(execution.data)) };
+  } catch {
+    throw new AppError(execution.fallbackReason ?? "MODEL_OUTPUT_INVALID", "记录整理未完成，原文已保留", 503,
+      { modelAudit: { prompt: execution.prompt, usage: execution.usage, usageUnknown: execution.usageUnknown, requestIdentity: execution.requestIdentity } });
+  }
 }
 
 export async function generateArtifactWithLLM(input: {
@@ -89,15 +107,17 @@ export async function generateArtifactWithLLM(input: {
   artifactType: ArtifactTypeValue;
   cards: CardDraft[];
 }) {
-  return chatWithLLM(buildArtifactPrompt(input), input.project.id);
+  return (await generateArtifactWithLLMWithMeta(input)).data;
 }
 
 export async function generateArtifactWithLLMWithMeta(input: {
   project: { id?: string; title: string; goal: string };
   artifactType: ArtifactTypeValue;
   cards: CardDraft[];
+  sources?: unknown;
+  coverage?: unknown;
 }) {
-  return chatWithLLMWithMeta(buildArtifactPrompt(input), input.project.id);
+  return chatPromptWithMeta(artifactCoverageV2, input, input.project.id);
 }
 
 export async function chatJson<T>(prompt: string, parse: (value: unknown) => T, projectId?: string) {

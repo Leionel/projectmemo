@@ -12,6 +12,7 @@ import { experienceProgress } from "./progress";
 import { refreshExperiencePresentation } from "./presentationRuntime";
 import type { R4State } from "./investigationService";
 import { eventPresentation } from "./eventPresentation";
+import { reviewPresentation } from "./reviewPresentation";
 
 export async function appendConversationMessage(tx: Tx, conversationId: string, ownerUserId: string,
   role: "USER" | "ASSISTANT", content: string, blocks: ConversationBlocks, turnId?: string, runId?: string) {
@@ -159,6 +160,9 @@ export async function readConversation(actor: ConversationActor, id: string, bef
         try { blocks.presentation = await refreshExperiencePresentation(actor, id, blocks, experience as R4State, row.turnId); }
         catch { blocks.presentation = undefined; }
       } else blocks.presentation = undefined;
+    } else if (blocks.reviewRef) {
+      try { blocks.presentation = await reviewPresentation(actor, id, blocks); }
+      catch { blocks.presentation = undefined; }
     } else if (blocks.changeNotice) {
       try { blocks.presentation = await eventPresentation(actor, id, row.id, blocks); }
       catch { blocks.presentation = undefined; }

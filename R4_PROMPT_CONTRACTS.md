@@ -1,5 +1,7 @@
 # R4 Prompt 合同 · PR-0
 
+PR-5 专项已实际接入 `lib/agent/specialistPrompts.ts` 及原调用方。Capture 当前为 2.0.2，只传 rawText，防止背景归属混入；Artifact/Copilot/D1/D2 为本表版本，Mission 保留原协议且记录策略版本。原字符串构建器仅保留给旧评测/兼容测试，默认业务调用使用角色消息。实模开发轮已用 44/48 次，原始协议失败与内容差异见实施记录。
+
 PR-1/2 已接入 `focus.route.v2`、`focus.investigate.v1`（联合 `focus.goal.v1`）、`focus.answer.v2` 和 `focus.ui_plan.v1`；配置与输出 schema 见 `lib/conversation/promptSpecs.ts`。持久预占接原 cloudQuota，C0 字符串调用保留。其他专项按下表继续追踪。
 
 基线：`c8c7072`，2026-10-26。实现入口为 `lib/agent/promptSpec.ts`；本批冻结消息与预算接口，现有 Provider 和业务 Prompt 尚未切换。R4 总基线为本地 `docs/FINAL/AGENT_REVIEW/projectmemo_r4/PROJECTMEMO_AGENT_EXPERIENCE_R4_BASELINE_v1_2.md`。
@@ -29,7 +31,7 @@ PR-1/2 已接入 `focus.route.v2`、`focus.investigate.v1`（联合 `focus.goal.
 | decision.d1.v4 / 4.0.0 | CHANGE_REVIEW | 目标关联、前提变化、适用性、KEEP_PLAN | 背景误触发、UNKNOWN 当失败；无关误报率 | PR-3/5 |
 | decision.d2.v3 / 3.0.0 | DYNAMIC_PLAN | 候选取舍、分支、停止条件 | 无论结果均不改变决定的验证；候选可用性 | PR-5 |
 | mission.strategy.v2 / 2.0.0 | MISSION | 原 Mission 工具选择、输出与停止 | 重复工具、旧任务当当前；真实任务有效结束率 | PR-5 |
-| capture.fidelity.v2 / 2.0.0 | CAPTURE | 保留原文断言强度的旧 Schema 输出 | “好像”变“已核验”；保真率 | PR-5 |
+| capture.fidelity.v2 / 2.0.2 | CAPTURE | 仅本条 rawText，保留主张强度的旧 Schema 输出 | 背景条件归给用户、“好像”变“已核验”；保真率 | PR-5 已接 |
 | artifact.coverage.v2 / 2.0.0 | ARTIFACT | 来源覆盖、缺口、版本明确的成果 | 摘要冒充完整验收；无依据断言数 | PR-5 |
 | legacy_copilot.style.v2 / 2.0.0 | LEGACY_COPILOT | 原项目问答兼容与统一表达 | 私聊公共化、历史改写；历史可读性 | PR-5/6 |
 

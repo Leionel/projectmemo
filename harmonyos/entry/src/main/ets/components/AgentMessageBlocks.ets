@@ -1,5 +1,5 @@
 import { agentStateLabel, receiptDetail } from '../common/AgentPresentationContract';
-import { AgentPresentation, HydratedBlock, AllowedAction, RichTextNode, ExperienceInlineText, EvidenceLink, GoalCriterion, ExperienceCandidate, InvestigationStep, ExperienceTimelineEvent, ExperienceChoice } from '../models/AgentExperience';
+import { AgentPresentation, HydratedBlock, AllowedAction, RichTextNode, ExperienceInlineText, EvidenceLink, GoalCriterion, ExperienceCandidate, InvestigationStep, ExperienceTimelineEvent, ExperienceChoice, ExperienceBranch } from '../models/AgentExperience';
 import { ConversationFileGuide } from '../models/Conversation';
 import { ConversationFileGuides } from './ConversationFileGuides';
 import { ConversationDraftStore, ConversationDraft } from '../services/ConversationDraftStore';
@@ -112,7 +112,7 @@ struct AgentSemanticBlock {
         Text('下一步的取舍').fontSize(17).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
         ForEach(this.block.candidates ?? [], (c: ExperienceCandidate) => {
           Button({ type: ButtonType.Normal }) {
-            Column({ space: 6 }) { Text((this.selected === c.id ? '✓ ' : '') + c.title).fontSize(15).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY); Text(c.tradeoff).fontSize(14).lineHeight(23).fontColor(PMColors.INK_SECONDARY); if (c.expectedObservation) { Text('要明确：' + c.expectedObservation).fontSize(13).lineHeight(22).fontColor(PMColors.BRAND) } if (this.selected === c.id) { Text(c.stopCondition).fontSize(13).lineHeight(22).fontColor(PMColors.INK_SECONDARY) } }.alignItems(HorizontalAlign.Start).width('100%').padding(14)
+            Column({ space: 6 }) { Text((this.selected === c.id ? '✓ ' : '') + c.title).fontSize(15).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY); Text(c.tradeoff).fontSize(14).lineHeight(23).fontColor(PMColors.INK_SECONDARY); if (c.expectedObservation) { Text('要明确：' + c.expectedObservation).fontSize(13).lineHeight(22).fontColor(PMColors.BRAND) } if (this.selected === c.id) { Text(c.stopCondition).fontSize(13).lineHeight(22).fontColor(PMColors.INK_SECONDARY); ForEach(c.branches, (b: ExperienceBranch) => { Text(b.observation + ' → ' + b.consequence).fontSize(13).lineHeight(22).fontColor(PMColors.INK_SECONDARY) }) } }.alignItems(HorizontalAlign.Start).width('100%').padding(14)
           }.backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(10).width('100%').enabled(!this.busy && c.feasibility === 'READY').accessibilitySelected(this.selected === c.id).onClick(() => { this.selected = c.id; this.save(); })
         }, (c: ExperienceCandidate) => c.id)
         this.Controls()

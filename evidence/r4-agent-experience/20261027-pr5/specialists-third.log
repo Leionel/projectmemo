@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/r4Specialists.test.ts tests/r4Investigation.test.ts tests/goalChangeReview.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  3 passed (3)
+      Tests  39 passed (39)
+   Start at  09:00:19
+   Duration  38.97s (transform 1.39s, setup 0ms, import 5.39s, tests 32.87s, environment 0ms)
+

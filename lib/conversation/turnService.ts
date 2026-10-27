@@ -18,7 +18,8 @@ import { experienceProgress } from "./progress";
 import { composeExperience, fallbackExperiencePlan, prepareExperienceDraft, refreshExperiencePresentation } from "./presentationRuntime";
 import type { PresentationPlan } from "@/lib/types/agentExperience";
 
-export async function submitConversationTurn(actor: ConversationActor, id: string, raw: unknown) {
+// The optional ablation control is trusted CLI-only; it is not part of the HTTP request schema.
+export async function submitConversationTurn(actor: ConversationActor, id: string, raw: unknown, evaluation?: { variant: "PROMPT_ONLY" | "INVESTIGATION_ONLY" }) {
   const input = conversationTurnSchema.parse(raw), hash = jsonHash(input);
   const reserved = await db.$transaction(async tx => {
     await lockConversation(tx, id);
@@ -135,7 +136,7 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     const pinned = newConstraint ? [...constraints, newConstraint] : constraints;
     const modelEnabled = input.llmContextApproved && process.env.LLM_MODE === "openai-compatible";
     const r4 = modelEnabled && !ambiguous && isFeatureEnabled("FOCUS_AGENT_R4_ENABLED", false)
-      ? await investigateConversation(actor, id, turn.id, { message: input.message, mode: input.investigationMode, focus: focused,
+      ? await investigateConversation(actor, id, turn.id, { message: input.message, mode: input.investigationMode, focus: focused, evaluationVariant: evaluation?.variant,
         constraints: pinned, frozenRefs, directory, exactRef,
         recentDialogue: history.messages.filter(m => !m.restricted).map(m => ({ role: m.role, content: m.content })) }) : null;
     if (r4) directory = r4.directory;
@@ -220,7 +221,7 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     }
     if (action && (!selected || action.projectId !== selected || !route.projectIds.includes(action.projectId))) action = null;
     if (pinned.some(v => /只读|(?:不要|不得|禁止|不允许|不).{0,8}(?:创建|新增).{0,12}(?:行动|待办)/.test(v))) action = null;
-    const prepared = r4 && !fallbackReason ? await prepareExperienceDraft(actor, id, turn.id, action, provider) : null;
+    const prepared = r4 && !evaluation && !fallbackReason ? await prepareExperienceDraft(actor, id, turn.id, action, provider) : null;
     let uiPlan: PresentationPlan | undefined, uiFallback: string | null = null;
     if (prepared && r4) {
       const uiBlocks: ConversationBlocks = { ...emptyBlocks(), refs: observations.refs, sources: observations.sources,
@@ -259,7 +260,7 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
       const trace = {
         purpose: "FOCUS_TURN", actorUserId: actor.userId, sourceIds: blocks.sources.map(s => s.id),
         supportState: action ? "SUPPORTED" : "INSUFFICIENT", supportBasis: "ACTION_PROPOSAL_NOT_FACT_CLAIM",
-        ...(r4 ? { experience: r4.state, uiPlanOrigin: uiFallback ? "FALLBACK" : "MODEL", uiFallback } : {}),
+        ...(r4 ? { experience: r4.state, evaluationVariant: evaluation?.variant ?? "FULL", uiPlanOrigin: evaluation ? "EVALUATION_DISABLED" : uiFallback ? "FALLBACK" : "MODEL", uiFallback } : {}),
       };
       const run = prepared ? await tx.agentRun.update({ where: { id: prepared.runId }, data: { status: "SUCCESS",
         trace: json({ ...record((await tx.agentRun.findUniqueOrThrow({ where: { id: prepared.runId } })).trace), ...trace }) } }) : await tx.agentRun.create({ data: { projectId: null, conversationId: id, turnId: turn.id,

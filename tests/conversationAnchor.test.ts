@@ -20,6 +20,7 @@ import type { Choice } from "@/lib/mission/contracts";
 import { bindRefs } from "@/lib/conversation/service";
 import { previewConversationWork } from "@/lib/conversation/workService";
 import { confirmConversationProposal } from "@/lib/conversation/missionCommands";
+import { performConversationUIAction } from "@/lib/conversation/uiActions";
 import { readConversationWork } from "@/lib/conversation/workService";
 import { prepareActionResult, commitActionResult } from "@/lib/services/actionService";
 afterAll(async () => { await db.$disconnect(); fs.rmSync(isolated.dir, { recursive: true, force: true }); });
@@ -61,6 +62,38 @@ async function control(f: {actor: Fixture["actor"]; id: string}, action: "FOLLOW
   const a = (await listConversationAnchors(f.actor, f.id)).anchors[0];
   return commandConversationAnchor(f.actor, f.id, a.id, { requestId: crypto.randomUUID(), expectedVersion: a.version, action, ...extra });
 }
+it("binds an actual relevant SOURCE_ARRIVED event to a current goal and an inert follow-up action", async () => {
+  vi.stubEnv("FOCUS_AGENT_R4_ENABLED", "true");
+  try {
+    const f = await missionFixture(); await control(f, "FOLLOW");
+    await db.capture.create({ data: { projectId: f.project.id, rawText: "10月本地实验 Dice 82%，尚需核对适用条件" } });
+    await scanWaitingMaterials(100);
+    const result = await syncConversationAnchors(f.actor, f.id), message = result.conversation.messages.at(-1)!;
+    expect(message.presentation?.blocks[0]).toMatchObject({ semanticType: "change", goalQuote: f.m.goal });
+    const action = message.presentation!.allowedActions[0]; expect(action.target.kind).toBe("EVENT");
+    const response = await performConversationUIAction(f.actor, f.id, { messageId: message.id, bindingId: action.bindingId, expectedConversationVersion: result.conversation.version, requestId: "discuss-event" });
+    expect(response.conversation.id).toBe(f.id);
+    expect(await db.actionItem.count({ where: { projectId: f.project.id } })).toBe(0);
+    expect(await db.agentRun.count({ where: { conversationId: f.id } })).toBe(0);
+    expect((await syncConversationAnchors(f.actor, f.id)).projected).toBe(0);
+    await control(f, "STOP");
+    await db.capture.create({ data: { projectId: f.project.id, rawText: "10月本地实验 Dice 85%" } }); await scanWaitingMaterials(100);
+    expect((await syncConversationAnchors(f.actor, f.id)).projected).toBe(0);
+  } finally { vi.unstubAllEnvs(); }
+});
+it("retires event interactions when original material changes, without rewriting the old notice", async () => {
+  vi.stubEnv("FOCUS_AGENT_R4_ENABLED", "true");
+  try {
+    const f = await missionFixture(); await control(f, "FOLLOW");
+    const material = await db.capture.create({ data: { projectId: f.project.id, rawText: "10月本地实验 Dice 82%" } });
+    await scanWaitingMaterials(100); const original = await syncConversationAnchors(f.actor, f.id);
+    const message = original.conversation.messages.at(-1)!; expect(message.presentation).toBeTruthy();
+    await db.capture.update({ where: { id: material.id }, data: { rawText: "原数据已更正，条件不同" } });
+    const view = await readConversation(f.actor, f.id), saved = view.messages.find(m => m.id === message.id)!;
+    expect(saved.content).toBe(message.content); expect(saved.presentation).toBeUndefined();
+    await expect(performConversationUIAction(f.actor, f.id, { messageId: message.id, bindingId: message.presentation!.allowedActions[0].bindingId, expectedConversationVersion: view.version, requestId: "stale-event" })).rejects.toMatchObject({ code: "UI_ACTION_UNAVAILABLE" });
+  } finally { vi.unstubAllEnvs(); }
+});
 it("does not create topics while listing Focus, and manual entries never subscribe implicitly", async () => {
   const f = await fixture(); expect(await readAnchorInbox(f.actor.userId)).toEqual([]);
   expect(await db.conversation.count({ where: { ownerUserId: f.actor.userId } })).toBe(0);

@@ -62,7 +62,7 @@ export function AgentMessageBlocks({ message, conversationId, busy, onAction }: 
     if (block.semanticType === "prose") return <div key={block.blockKey} {...common} className={styles.prose}><RichText nodes={block.content} message={message} conversationId={conversationId}/></div>;
     if (block.semanticType === "goal_gap") return <section key={block.blockKey} {...common} className={styles.goal} aria-label="目标差距">
       <div className={styles.sectionHead}><GitBranch size={16} aria-hidden="true"/><h3>离目标还差什么</h3></div>
-      <p className={styles.goalQuote}>{block.goalGap.goalQuote}</p>
+      {(block.goalGap.criteria.length !== 1 || block.goalGap.criteria[0].requirement !== block.goalGap.goalQuote) && <p className={styles.goalQuote}>{block.goalGap.goalQuote}</p>}
       <ul>{block.goalGap.criteria.map(c => <li key={c.id}><span className={styles.state} data-state={c.state}>{c.state === "VERIFIED" ? <Check size={14}/> : <Circle size={10}/>}</span>
         <div><div className={styles.criterion}><strong>{c.requirement}</strong><span>{goalLabels[c.state]}</span></div><p>{c.explanation}</p></div></li>)}</ul>
       {block.goalGap.nextInformationNeed && <p className={styles.nextNeed}>接下来要明确：{block.goalGap.nextInformationNeed}</p>}{controls(block)}
@@ -99,7 +99,7 @@ export function AgentMessageBlocks({ message, conversationId, busy, onAction }: 
     if (block.semanticType === "receipt") return <section key={block.blockKey} {...common} className={styles.receipt} aria-label="原业务回执"><span className={styles.receiptMark}><Check size={17}/></span><div><strong>{receiptLabels[block.state]}</strong><p>{block.fallbackText}</p>
       <small>{block.state === "CREATED" ? "等待执行，目标条件尚未验收" : block.verification === "VERIFIED" ? "已有独立核验依据" : "按原任务记录显示"}</small>{controls(block)}</div></section>;
     if (block.semanticType === "question") return <section key={block.blockKey} {...common}><Question key={block.draftKey} block={block} actions={actionButtons(block)} busy={busy} onAction={onAction}/></section>;
-    if (block.semanticType === "change") return <section key={block.blockKey} {...common} className={styles.change}><h3>{block.disposition === "KEEP_PLAN" ? "保留当前计划" : "这条变化与目标有关"}</h3><p>{block.changeKind}</p><p>{block.relevance}</p>{block.unknowns.map((s, i) => <p key={i}>{s}</p>)}{controls(block)}</section>;
+    if (block.semanticType === "change") return <section key={block.blockKey} {...common} className={styles.change}><h3>{block.disposition === "KEEP_PLAN" ? "保留当前计划" : block.fallbackText}</h3><p>{block.goalQuote}</p><p>{block.relevance}</p>{block.unknowns.map((s, i) => <p key={i}>{s}</p>)}{controls(block)}</section>;
     if (block.semanticType === "timeline") return <ol key={block.blockKey} {...common} className={styles.timeline}>{block.events.map(e => <li key={e.ref.id}><time dateTime={e.occurredAt}>{new Date(e.occurredAt).toLocaleDateString("zh-CN")}</time><p>{e.summary}</p></li>)}</ol>;
     return <p key={(block as { blockKey: string }).blockKey} className={styles.prose}>{(block as { fallbackText: string }).fallbackText}</p>;
   })}</div>;

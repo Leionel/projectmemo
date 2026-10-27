@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { AgentPresentation, PresentationPlan } from "./agentExperience";
+export type ConversationChangeNotice = { anchorId: string; revisionKey: string; eventId: string; missionId: string; goalQuote: string; changeKind: "SOURCE_ARRIVED" };
 
 const id = z.string().min(1).max(160);
 export const conversationEntrySchema = z.object({
@@ -71,6 +72,7 @@ export type ConversationBlocks = {
   fileGuides?: ConversationFileGuide[];
   presentation?: AgentPresentation;
   presentationPlan?: PresentationPlan;
+  changeNotice?: ConversationChangeNotice;
   reviewRef?: { id: string; purpose: string; missionId: string; projectId: string; status: string; proposalHash: string };
   options?: Array<{ key: string; label: string; projectId: string; missionId: string; proposalId: string; proposalHash: string; expectedVersion: number; purpose?: "DYNAMIC_PLAN"; candidateId?: string }>;
 };

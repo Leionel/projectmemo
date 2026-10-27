@@ -1,0 +1,439 @@
+{
+  "limit": 48,
+  "used": 48,
+  "calls": [
+    {
+      "ordinal": 1,
+      "episode": "latency/C0",
+      "task": "C0_LEGACY",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:53:10.860Z",
+      "httpStatus": 200,
+      "responseHash": "0cbe2deac6dadfa4af34ff39fb42b3a85f9afb5e81f3795333bac9753ca5e395"
+    },
+    {
+      "ordinal": 2,
+      "episode": "latency/C0",
+      "task": "C0_LEGACY",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:53:12.011Z",
+      "httpStatus": 200,
+      "responseHash": "ee3153aadc63f96e9980512b31ef71c0b4ba6896c76e57ce694114626140617e"
+    },
+    {
+      "ordinal": 3,
+      "episode": "latency/C1",
+      "task": "focus.route.v2",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:53:15.079Z",
+      "httpStatus": 200,
+      "responseHash": "3d871cc984c80cb01c074621b0af092ada60cf66e284fb4a5dbbd1b4eb270732"
+    },
+    {
+      "ordinal": 4,
+      "episode": "latency/C1",
+      "task": "focus.answer.v2",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:53:17.095Z",
+      "httpStatus": 200,
+      "responseHash": "52d60590963ef009dd7c4b10dd97efa3584249ec548bd1b2c782689a11a8f689"
+    },
+    {
+      "ordinal": 5,
+      "episode": "latency/C2",
+      "task": "focus.route.v2",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:53:20.172Z",
+      "httpStatus": 200,
+      "responseHash": "24eb648fccfc1dbd5bd19721f10c7087c829c01ef40b90c1bb03f8bbbb130b70"
+    },
+    {
+      "ordinal": 6,
+      "episode": "latency/C2",
+      "task": "focus.read_investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:53:21.693Z",
+      "httpStatus": 200,
+      "responseHash": "0b27fcefe237935d042f83ea4608669217a313aac092e5fc1a5e1cd8a067a8ca"
+    },
+    {
+      "ordinal": 7,
+      "episode": "latency/C2",
+      "task": "focus.read_investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:53:23.162Z",
+      "httpStatus": 200,
+      "responseHash": "979064988930f8562f1a3db68222f95df34352e436a68d85619a2196517375ad"
+    },
+    {
+      "ordinal": 8,
+      "episode": "latency/C2",
+      "task": "focus.answer.v2",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:53:26.079Z",
+      "httpStatus": 200,
+      "responseHash": "314e74bf0ef378e18f698d53b08aad4d80bf342905dd8228d81b1815940db14b"
+    },
+    {
+      "ordinal": 9,
+      "episode": "latency/C3",
+      "task": "focus.route.v2",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:53:29.497Z",
+      "httpStatus": 200,
+      "responseHash": "2e43f260304e4b92c8b363fc723bfa3c8b968ad2e7c4f8adb2c6fe730a8d7c99"
+    },
+    {
+      "ordinal": 10,
+      "episode": "latency/C3",
+      "task": "focus.investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:53:31.075Z",
+      "httpStatus": 200,
+      "responseHash": "c5a2af45b480f9b4e69a4d1b73faeb7060d64c9d4c12471b43f452d0085d2e67"
+    },
+    {
+      "ordinal": 11,
+      "episode": "latency/C3",
+      "task": "focus.investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:53:34.938Z",
+      "httpStatus": 200,
+      "responseHash": "719e2d84a48c49d191e8b398c84ac479a9780198bce058d1dbac0cb8e76e137b"
+    },
+    {
+      "ordinal": 12,
+      "episode": "latency/C3",
+      "task": "focus.answer.v2",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:53:39.059Z",
+      "httpStatus": 200,
+      "responseHash": "83ec5f1594e6f6eb17bb462092ca371c1d579af1ba9600eb61731665915bf49b"
+    },
+    {
+      "ordinal": 13,
+      "episode": "latency/C3",
+      "task": "focus.ui_plan.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:53:42.063Z",
+      "httpStatus": 200,
+      "responseHash": "7e5985eef3afd30551e610ca133acb09787ea47b0c69e1517cecf747a77d3ec0"
+    },
+    {
+      "ordinal": 14,
+      "episode": "latency/C3_FEEDBACK",
+      "task": "focus.route.v2",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:53:46.225Z",
+      "httpStatus": 200,
+      "responseHash": "a96e02ac292d1a7852f5511e3401bf3d981cea41ab2fd61bdbc1a5613e20eb72"
+    },
+    {
+      "ordinal": 15,
+      "episode": "latency/C3_FEEDBACK",
+      "task": "focus.investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:53:47.641Z",
+      "httpStatus": 200,
+      "responseHash": "62f281e29d6528e83ba0ff83ecbcf3f11b59ee4890aac328a25aaf2bdb0d6b0d"
+    },
+    {
+      "ordinal": 16,
+      "episode": "latency/C3_FEEDBACK",
+      "task": "focus.answer.v2",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:53:52.433Z",
+      "httpStatus": 200,
+      "responseHash": "ff0e4ca0906539840e37277ea7d5b90c09d4ca02820885decf3aa8e706d920c7"
+    },
+    {
+      "ordinal": 17,
+      "episode": "latency/C3_FEEDBACK",
+      "task": "focus.ui_plan.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:53:55.925Z",
+      "httpStatus": 200,
+      "responseHash": "9179a9fa4fc1892ef26f30e8c8de920a281801006b1f7653382c197a03e06551"
+    },
+    {
+      "ordinal": 18,
+      "episode": "offline/C3",
+      "task": "focus.route.v2",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:55:25.088Z",
+      "httpStatus": 200,
+      "responseHash": "ebfafddf47edbececc4b091f36f0d53fe9331de4ded1896a40eeda88db05e84b"
+    },
+    {
+      "ordinal": 19,
+      "episode": "offline/C3",
+      "task": "focus.investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:55:27.084Z",
+      "httpStatus": 200,
+      "responseHash": "b0120916793876e87117e01de5e16f8816ddd30ac3fdeb74220adb994b048f67"
+    },
+    {
+      "ordinal": 20,
+      "episode": "offline/C3",
+      "task": "focus.investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:55:30.570Z",
+      "httpStatus": 200,
+      "responseHash": "2ba61d928361efc3c93a63e98e22805fe8b9ae8917b4cdb512eead9ba1325cbb"
+    },
+    {
+      "ordinal": 21,
+      "episode": "offline/C3",
+      "task": "focus.investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:55:34.710Z",
+      "httpStatus": 200,
+      "responseHash": "f7f55e5b653634542bac608c395565b70e25ced4a8a27a37dba34e43c5c7d8da"
+    },
+    {
+      "ordinal": 22,
+      "episode": "offline/C3",
+      "task": "focus.ui_plan.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:55:38.310Z",
+      "httpStatus": 200,
+      "responseHash": "4a0a2bc2a9e83149024e8d386c1e7e94eec3f6f91edbd63f9c096f864b46b692"
+    },
+    {
+      "ordinal": 23,
+      "episode": "split/C3",
+      "task": "focus.route.v2",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:55:42.643Z",
+      "httpStatus": 200,
+      "responseHash": "d32e53695963ddc5de3fc64584c3e6f47885845dd17e62cf40ec31b5c3394009"
+    },
+    {
+      "ordinal": 24,
+      "episode": "split/C3",
+      "task": "focus.investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:55:44.067Z",
+      "httpStatus": 200,
+      "responseHash": "6d7d88dc062264fbc95eecaca6db4493f7fc8c773ebd865c17ccc2f7f49efdc4"
+    },
+    {
+      "ordinal": 25,
+      "episode": "split/C3",
+      "task": "focus.investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:55:47.670Z",
+      "httpStatus": 200,
+      "responseHash": "a55e4d4b87496033228724847c9e1ebc9b5fbece70b17551e94cf2200e17cc4f"
+    },
+    {
+      "ordinal": 26,
+      "episode": "split/C3",
+      "task": "focus.investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:55:51.855Z",
+      "httpStatus": 200,
+      "responseHash": "8ac53cde6f7d9b3ae2244c21288934e8561a9c2b352c8c888a276d8eed8ed434"
+    },
+    {
+      "ordinal": 27,
+      "episode": "split/C3",
+      "task": "focus.answer.v2",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:55:56.155Z",
+      "httpStatus": 200,
+      "responseHash": "10177274469feb57988bb5b7568a5b9ebd2e9508c596b435a97eec9d140c38b3"
+    },
+    {
+      "ordinal": 28,
+      "episode": "split/C3",
+      "task": "focus.ui_plan.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:55:59.614Z",
+      "httpStatus": 200,
+      "responseHash": "5232b099ca9ecdba25459796fe80874b2f4f1443d9b1fac3f8886e8e61ae7b97"
+    },
+    {
+      "ordinal": 29,
+      "episode": "split/C3_FEEDBACK",
+      "task": "focus.route.v2",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:56:04.391Z",
+      "httpStatus": 200,
+      "responseHash": "0d5774c5b023337158e029001bcbb95d95290000875dc9ccb68000bd75797777"
+    },
+    {
+      "ordinal": 30,
+      "episode": "split/C3_FEEDBACK",
+      "task": "focus.investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:56:06.154Z",
+      "httpStatus": 200,
+      "responseHash": "2f907f963d066d78121fbb9de69ec6ca8608ef406ff23fe01c09cce539cf5fd9"
+    },
+    {
+      "ordinal": 31,
+      "episode": "split/C3_FEEDBACK",
+      "task": "focus.investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:56:11.167Z",
+      "httpStatus": 200,
+      "responseHash": "3498c63252e4eb28383ddb0a733014889d0317faeee9ab7cdcaa91a7e5621b85"
+    },
+    {
+      "ordinal": 32,
+      "episode": "split/C3_FEEDBACK",
+      "task": "focus.investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:56:15.249Z",
+      "httpStatus": 200,
+      "responseHash": "c9a9b2993a340d6b8962e12dc5e2f572eb70ea6f55775a8672ec9fc36a181bba"
+    },
+    {
+      "ordinal": 33,
+      "episode": "split/C3_FEEDBACK",
+      "task": "focus.answer.v2",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:56:21.123Z",
+      "httpStatus": 200,
+      "responseHash": "84a707b672553accbb966a2ecc0bc015e1b956b0a81a34841a64965d43e23bc0"
+    },
+    {
+      "ordinal": 34,
+      "episode": "split/C3_FEEDBACK",
+      "task": "focus.ui_plan.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:56:26.186Z",
+      "httpStatus": 200,
+      "responseHash": "4c87b4c6896be9ef66b8a368d2b2b0f484552e5c9dce730940495e2589c28279"
+    },
+    {
+      "ordinal": 35,
+      "episode": "offline/C3",
+      "task": "focus.route.v2",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:58:53.591Z",
+      "httpStatus": 200,
+      "responseHash": "415c30d2aa35274c907aac121190cc66d352f6a8d4ad473c6d4919a06459da92"
+    },
+    {
+      "ordinal": 36,
+      "episode": "offline/C3",
+      "task": "focus.investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:58:55.108Z",
+      "httpStatus": 200,
+      "responseHash": "b08500509aecf9572abb769220d5759b0daa59967b2e89ce1bbfcb2cae4d3edf"
+    },
+    {
+      "ordinal": 37,
+      "episode": "offline/C3",
+      "task": "focus.investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T05:58:58.851Z",
+      "httpStatus": 200,
+      "responseHash": "422b14a5791b0264936fb85b816d03d74ac54c474191e01459d56ad0d6e48c2f"
+    },
+    {
+      "ordinal": 38,
+      "episode": "offline/C3",
+      "task": "focus.route.v2",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T06:02:33.280Z",
+      "httpStatus": 200,
+      "responseHash": "50b95eab751d9fec01041885e52b913c278a7473ab1a13183e73f1b7566f0e74"
+    },
+    {
+      "ordinal": 39,
+      "episode": "offline/C3",
+      "task": "focus.investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T06:02:35.223Z",
+      "httpStatus": 200,
+      "responseHash": "1001708fa1e896c4e8c785b10d796f7cef3377daa07bc323249b0ac3e0ec0e1c"
+    },
+    {
+      "ordinal": 40,
+      "episode": "offline/C3",
+      "task": "focus.investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T06:02:39.324Z",
+      "httpStatus": 200,
+      "responseHash": "f201261ef53c7e2da04dea4df0bfff7ddd6e656d3013d2f2386ebb6a83ed62f9"
+    },
+    {
+      "ordinal": 41,
+      "episode": "offline/C3",
+      "task": "focus.answer.v2",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T06:02:43.821Z",
+      "httpStatus": 200,
+      "responseHash": "4ba0aeee0bb5aac1001cee8851c57b166bd41952dbffae13c1735259343e50f7"
+    },
+    {
+      "ordinal": 42,
+      "episode": "offline/C3",
+      "task": "focus.ui_plan.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T06:02:47.395Z",
+      "httpStatus": 200,
+      "responseHash": "78d5e5fa29dc92bcbda64bb5435790ef9634737643fb64679e4e065df190930a"
+    },
+    {
+      "ordinal": 43,
+      "episode": "offline/C3_FEEDBACK",
+      "task": "focus.route.v2",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T06:02:52.859Z",
+      "httpStatus": 200,
+      "responseHash": "42e0b1c0d2745099419f26f3cc1e6e556160c711220fba38676a63d3f82facc3"
+    },
+    {
+      "ordinal": 44,
+      "episode": "offline/C3_FEEDBACK",
+      "task": "focus.investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T06:02:54.593Z",
+      "httpStatus": 200,
+      "responseHash": "a5dd9cd403a93ffb6c789b0a447822a532d355b606f7c4ff977a1d7672df7af6"
+    },
+    {
+      "ordinal": 45,
+      "episode": "offline/C3_FEEDBACK",
+      "task": "focus.investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T06:02:59.077Z",
+      "httpStatus": 200,
+      "responseHash": "4ee09020fbfba51622f9a24eea9488bea4b3801373d5b6c2d2f4848f42497ad3"
+    },
+    {
+      "ordinal": 46,
+      "episode": "offline/C3_FEEDBACK",
+      "task": "focus.investigate.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T06:03:03.155Z",
+      "httpStatus": 200,
+      "responseHash": "4a389970fc8aab73ab739643d559831a171644590ef9c9dcaf856041d56ec877"
+    },
+    {
+      "ordinal": 47,
+      "episode": "offline/C3_FEEDBACK",
+      "task": "focus.answer.v2",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T06:03:07.658Z",
+      "httpStatus": 200,
+      "responseHash": "b1601e0534e5ab10a08ff6007be0b198e39c69d563657608a5faa3917b187a03"
+    },
+    {
+      "ordinal": 48,
+      "episode": "offline/C3_FEEDBACK",
+      "task": "focus.ui_plan.v1",
+      "state": "HTTP_RECEIVED",
+      "startedAt": "2026-10-27T06:03:11.855Z",
+      "httpStatus": 200,
+      "responseHash": "5adfea7777695fa9b2d68239d0614dbaa219265c3c18c5749941e90c494d55a8"
+    }
+  ],
+  "authorization": "User explicitly allowed quota for PR3/4; announced maximum 48 calls"
+}

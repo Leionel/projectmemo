@@ -191,6 +191,11 @@ test("F3 follows one original question, reads new evidence, retains unread acros
   await follow.getByRole("button", { name: "读取新结果", exact: true }).click();
   await expect(page.getByText(/原问题收到一份可能相关的资料/)).toBeVisible();
   await expect(page.getByText(/原问题收到一份可能相关的资料/)).toBeInViewport();
+  if (capabilities.r4Available) {
+    const change = page.locator('[data-block="change"]'); await expect(change).toBeVisible();
+    await change.getByRole("button", { name: "调查这条变化" }).click();
+    await expect(page.getByRole("textbox", { name: "与忆程讨论项目" })).toHaveValue(/请调查这条变化的依据/);
+  }
   await page.screenshot({ path: focusEvidenceDir + "/focus-follow-desktop.png", fullPage: true });
   await expect(follow.getByText("1 条未读", { exact: true })).toBeVisible();
   await page.reload();

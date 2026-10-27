@@ -29,6 +29,8 @@ PR-1/2 开发预实验已执行三领域 C0/C3，实际 HTTP 24/24 次；原文�
 
 ## 必须记录的指标
 
+2026-10-26 PR-3 开发轮：`scripts/eval-r4-closure.ts` 默认仅输出 PREPARED_ONLY，实模需显式参数、既有授权及本轮持久额度账本。48 次已全部消耗；继续运行会在 HTTP 前拒绝。三条新合成输入在 `tests/fixtures/r4/closure-cases.json`，没有进入正式留出集。科研 C0 类型失败、C1/C2 配对，三领域 C3 原服务闭环、竞赛澄清/协议失败/最终 UI 额度降级全部保留于 `evidence/r4-agent-experience/20261026-pr3-pr4/real-model/`。不得将这轮结果报告成完整 C0–C3 跨域独立评测。
+
 | 指标 | 判定单位 |
 |---|---|
 | task_resolution_rate | 真实有效结束的目标 / 全部任务；不是 JSON 成功率 |

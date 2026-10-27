@@ -1,5 +1,7 @@
 # Focus Agent 实施记录
 
+R4 PR-3 已接入合法资料变化的原会话讨论入口和原行动结果重评，复用 F3 Anchor/事件、权限、去重、延后和停止。三领域实模开发闭环及剩余质量门槛见 [R4 实施记录](R4_AGENT_EXPERIENCE_IMPLEMENTATION_NOTES.md)。本轮未部署 ECS。
+
 ## 2026-10-26 R4 PR-0：共用契约
 
 后续升级按 R4 v1.2 推进。PR-0 的目标差距、动态调查、角色消息、UI Plan/服务端绑定及 Web/ArkTS DTO 合同、三领域合成 fixtures 与验证另见 [R4 实施记录](R4_AGENT_EXPERIENCE_IMPLEMENTATION_NOTES.md)。本批不切换原模型路径；下述 F3 实际结果与未签收门槛保留。

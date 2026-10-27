@@ -21,7 +21,8 @@ PR-1/2 已接入 `focus.route.v2`、`focus.investigate.v1`（联合 `focus.goal.
 | ID / 版本 | purpose | 输出职责 | 必测负例 / 指标 | 接入批次 |
 |---|---|---|---|---|
 | focus.route.v2 / 2.0.1 | ROUTE | 选择授权项目、信息需求和澄清；区分处理请求与只问判断 | 同名项目、指代、撤权；项目定位准确率 | PR-1/2 |
-| focus.investigate.v1 / 1.0.0 | INVESTIGATE | InvestigationDecision；每次观察后重新决定 | 重复读取、无工具、注入；必要读取与信息增益 | PR-1 |
+| focus.investigate.v1 / 1.0.1 | INVESTIGATE | 每次观察后重新决定；同项目多条件合并一项评估 | 重复读取/项目、无工具、注入；必要读取与信息增益 | PR-1/3 |
+| focus.read_investigate.v1 / 1.0.0 | INVESTIGATE | 仅评测 C2 的逐步读取决定，不产生 GoalGap | 同工具/预算，无 UI 规划；HTTP 不接受消融模式 | PR-3 |
 | focus.goal.v1 / 1.0.0 | GOAL | GoalGap；条件、阻碍、下一信息需求 | 构建冒充部署、TODO 冒充进度；条件判断正确率 | PR-1 |
 | focus.answer.v2 / 2.0.0 | ANSWER | 结论、实际已读证据、影响决定的未知 | 无依据断言、模板长答；grounding precision | PR-1/2 |
 | focus.ui_plan.v1 / 1.0.1 | UI_PLAN | PresentationPlan v2；语义选择、次序、强调；非 prose 逐项采用 catalog | 伪造操作、机械卡片；布局合理性及用户操作成本 | PR-2 |

@@ -85,6 +85,12 @@ export async function observeProjects(actor: ConversationActor, directory: Works
       if (!action) throw new AppError("ACTION_NOT_FOUND", "原行动不可访问", 404);
       refs.push({ kind: "ACTION", id: action.id, projectId: p.id, title: action.title, status: action.status,
         href: "/projects/" + p.id + "/actions#action-" + action.id });
+      const revision = await sourceHash(p.id, "action:" + action.id);
+      const result = JSON.stringify({ title: action.title, status: action.status, resultText: action.resultText, resultCardId: action.resultCardId,
+        verification: "USER_REPORTED_NOT_INDEPENDENTLY_VERIFIED" }).slice(0, 2500);
+      sources.push({ id: p.id + "/action:" + action.id, projectId: p.id, sourceId: "action:" + action.id, revision: revision!, title: action.title,
+        excerpt: result, start: 0, end: result.length, excerptHash: jsonHash(result), observedAt,
+        temporalState: "CURRENT", knowledgeClass: "PROJECT_OBSERVATION", readScope: "STRUCTURED" });
     }
     const hash = await sourceHash(p.id, "project:" + p.id);
     const excerpt = [p.title, "项目目标：" + p.goal, "截止日期：" + (p.deadline ?? "未知"), "未完成行动：" + p.actionCount + " 项", "待回应委托：" + p.waiting + " 项", "阻塞项：" + p.blocked + " 项",

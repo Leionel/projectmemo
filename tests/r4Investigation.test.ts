@@ -48,25 +48,26 @@ function model(f: Fixture, options: { repeat?: boolean; noAction?: boolean; onSt
   const spy = vi.spyOn(globalThis, "fetch").mockImplementation(async (_url, init) => {
     const body = JSON.parse(init!.body as string), system = body.messages[0].content as string;
     const stage = system.match(/^任务 (\S+)/)?.[1] ?? "unknown";
-    if (stage === "focus.investigate.v1") frames++;
+    if (["focus.investigate.v1", "focus.read_investigate.v1"].includes(stage)) frames++;
     seen.push({ stage, body });
     if (options.networkAt === stage) throw new TypeError("isolated network interruption");
     await options.onStage?.(stage, frames);
     const data = JSON.parse(body.messages[1].content).data as ModelInput;
     let output: unknown;
     if (stage === "focus.route.v2") output = { intent: options.noAction ? "ANSWER" : "PROPOSE_ACTION", projectIds: [f.p.id], query: "资料", investigate: true, informationNeeds: ["核对原记录条件"] };
-    else if (stage === "focus.investigate.v1") {
+    else if (["focus.investigate.v1", "focus.read_investigate.v1"].includes(stage)) {
       const original = data.sources.find(s => s.sourceId === "capture:" + f.capture.id), source = original ?? data.sources.find(s => s.sourceId.startsWith("card:"))!;
       const need = "核对原记录条件", pointer = data.materialPointers.find(p => p.sourceId === "capture:" + f.capture.id)!;
-      output = { goalAssessments: [{ projectId: f.p.id, goalQuote: f.p.goal, criteria: [{ requirement: f.p.goal,
+      const frame = { goalAssessments: [{ projectId: f.p.id, goalQuote: f.p.goal, criteria: [{ requirement: f.p.goal,
         state: original ? f.seed.state : "UNKNOWN", explanation: original ? "原记录改变了此前的判断。" : "摘要尚未覆盖目标条件。",
         observations: [{ sourceId: source.id, quote: source.excerpt, applicability: original ? "DIRECT" : "UNKNOWN", relation: original && f.seed.state === "BLOCKED" ? "CONTRADICTS" : "UNDETERMINED" }] }],
         blockers: original && f.seed.state === "BLOCKED" ? ["记录与目标条件冲突"] : [], keyUnknowns: original ? [] : [need], nextInformationNeed: need }],
         decision: !original || options.repeat ? { decision: "READ_EXISTING", informationNeed: need, expectedObservation: "取得原始条件和真实测量/交付记录。",
           call: { tool: "read_project_material", projectId: f.p.id, sourceId: pointer.sourceId, revision: pointer.revision } }
           : { decision: "ANSWER_NOW", reason: "新观察已能改变关键判断。" } };
+      output = stage === "focus.read_investigate.v1" ? frame.decision : frame;
     } else if (stage === "focus.answer.v2") {
-      const source = data.sources.find(s => s.sourceId === "capture:" + f.capture.id)!;
+      const source = data.sources.find(s => s.sourceId === "capture:" + f.capture.id) ?? data.sources[0];
       const n = data.sources.indexOf(source) + 1;
       output = { advice: "原始记录尚不能支持目标已达成，需要先处理这个差距。【" + n + "】", recommendedProjectId: f.p.id,
         observations: [{ sourceId: source.id, quote: source.excerpt }], priorities: [{ projectId: f.p.id, tradeoff: "先消除目标条件的关键差距。" }],
@@ -87,6 +88,17 @@ async function ask(f: Fixture, requestId = "turn") {
   return submitConversationTurn(f.actor, f.id, { requestId, expectedVersion: v.version, message: "请调查这个项目最重要的目标差距，帮我先处理。", projectId: f.p.id, llmContextApproved: true });
 }
 describe.sequential("R4 durable adaptive investigation", () => {
+  it.each(["PROMPT_ONLY", "INVESTIGATION_ONLY"] as const)("runs %s ablation on the original loop without UI calls or client-visible switches", async variant => {
+    const f = await fixture(), provider = model(f, { noAction: true });
+    const input = { requestId: "ablation", expectedVersion: 1, message: "请调查项目的原记录", projectId: f.p.id, llmContextApproved: true };
+    await expect(submitConversationTurn(f.actor, f.id, { ...input, evaluationVariant: variant })).rejects.toThrow();
+    const result = await submitConversationTurn(f.actor, f.id, input, { variant });
+    expect(result.status).toBe("ANSWERED"); expect(result.conversation.messages.at(-1)!.presentation).toBeUndefined();
+    expect(provider.seen.some(s => s.stage === "focus.ui_plan.v1")).toBe(false);
+    expect(provider.seen.filter(s => s.stage === "focus.read_investigate.v1")).toHaveLength(variant === "INVESTIGATION_ONLY" ? 2 : 0);
+    const turn = await db.conversationTurn.findUniqueOrThrow({ where: { id: result.turnId } });
+    expect(turn.callCount).toBe(variant === "PROMPT_ONLY" ? 2 : 4);
+  });
   it.each(domains)("changes the next decision using a real $domain source and preserves one original Action", async seed => {
     const f = await fixture(seed), provider = model(f), tools = vi.spyOn(toolAdapter, "readWorkspaceTool");
     const result = await ask(f), message = result.conversation.messages.at(-1)!;

@@ -14,14 +14,14 @@ import { appendConversationMessage, bindRefs, readConversation } from "./service
 import { readConversationEntry } from "./entry";
 
 const enabled = () => isFeatureEnabled("FOCUS_AGENT_FOLLOW_ENABLED", false);
-type Snapshot = { key: string; content: string; refs: ConversationRef[]; sources?: ConversationBlocks["sources"]; silent?: boolean };
+type Snapshot = { key: string; content: string; refs: ConversationRef[]; sources?: ConversationBlocks["sources"]; changeNotice?: ConversationBlocks["changeNotice"]; silent?: boolean };
 async function allowed(actor: ConversationActor, a: ConversationAnchor, tx: Tx) {
   await assertProject(actor, a.projectId, tx);
   if (a.missionId) { const m = await ownedMission(actor.userId, a.missionId, tx); if (m.projectId !== a.projectId) throw new AppError("ANCHOR_NOT_FOUND", "原主题已不可访问", 404); }
 }
 async function projectSnapshot(tx: Tx, actor: ConversationActor, a: ConversationAnchor, s: Snapshot, baseline = false) {
   if (await tx.conversationAnchorProjection.findUnique({ where: { anchorId_revisionKey: { anchorId: a.id, revisionKey: s.key } } })) return false;
-  const blocks = { ...emptyBlocks(), refs: await bindRefs(tx, a.conversationId, s.refs), sources: s.sources ?? [], observedProjectIds: [a.projectId] };
+  const blocks = { ...emptyBlocks(), refs: await bindRefs(tx, a.conversationId, s.refs), sources: s.sources ?? [], observedProjectIds: [a.projectId], ...(s.changeNotice ? { changeNotice: s.changeNotice } : {}) };
   let messageId: string | null = null, seq: number | null = null;
   if (!baseline) {
     seq = (await tx.conversationAnchor.update({ where: { id: a.id }, data: { projectedSeq: { increment: 1 } } })).projectedSeq;
@@ -262,6 +262,7 @@ export async function syncConversationAnchors(actor: ConversationActor, id: stri
         if (assessment.relevance !== "RELATED" || assessment.evidenceFit?.fitStatus === "NOT_FIT" || !assessment.readable || assessment.temporalStates.some(s => ["SUPERSEDED", "CONTESTED"].includes(s.state))) continue;
         const source = view.source;
         if (await projectSnapshot(tx, actor, a, { key: "source:" + p.questionId + ":" + source.id + ":" + source.hash,
+          changeNotice: { anchorId: a.id, revisionKey: "source:" + p.questionId + ":" + source.id + ":" + source.hash, eventId: e.id, missionId: m.id, goalQuote: m.goal, changeKind: "SOURCE_ARRIVED" },
           content: "原问题收到一份可能相关的资料：" + view.title + "。适用条件与含义仍需核对；原任务尚未自动继续。",
           refs: [{ kind: "MISSION", id: m.id, projectId: m.projectId, title: m.goal, status: m.status, version: m.version, href: "/projects/" + m.projectId + "/missions?mission=" + m.id }],
           sources: [{ id: m.projectId + "/" + source.id, projectId: m.projectId, sourceId: source.id, revision: source.hash, title: view.title, excerpt: source.text.slice(0, 500), observedAt: source.observedAt, temporalState: assessment.temporalStates[0]?.state ?? "UNKNOWN",

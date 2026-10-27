@@ -55,6 +55,8 @@ PR-2 的实际 catalog 已接目标差距、引用证据、真实调查、澄清
 
 ## 草稿与跨端接口
 
+PR-3 增加合法 SOURCE_ARRIVED 的确定性 change 投影，复用原 Anchor/Event/来源版本，并提供 ASK 原消息绑定。提醒本身不调用模型；点击仅填写调查问题。来源修订、目标变化或权限不再满足时，撤掉该交互并保留历史正文。完整 D1/D2 的 comparison/timeline 仍由后续专责 Prompt 扩展。
+
 - WorkCard 身份固定为 conversationId + 原业务 kind/id；不能拼消息条数。revision 变化需要显式冲突/交接，不以重挂载静默清空。
 - draftKey 来自原 Question/业务身份；新消息、readback、页面来回不得清空未提交内容；切换用户清除私有草稿。
 - 约 15–16px 等效正文、44–48px 触控目标，适配 360/390/430px、键盘、安全区、放大字、暗色。

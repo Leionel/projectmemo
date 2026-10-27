@@ -9,7 +9,7 @@ import { bindAnswerEvidence } from "./answerEvidence";
 import { validateReadSources } from "./service";
 import { answerSchema, conversationModelSpec } from "./model";
 import type { z } from "zod";
-import { answerV2, investigateV1, routeV2, type InvestigationFrame } from "./promptSpecs";
+import { answerV2, investigateV1, investigateReadV1, routeV2, type InvestigationFrame } from "./promptSpecs";
 import { discoverMaterialPointers, experienceSourceRef, readWorkspaceTool, workspaceReadTools, type MaterialPointer } from "./toolAdapter";
 
 export type R4State = {
@@ -95,6 +95,7 @@ function normalizeGoals(frame: InvestigationFrame, directory: WorkspaceDirectory
 
 async function executeInvestigation(actor: ConversationActor, id: string, turnId: string, input: {
   message: string; mode?: "QUICK" | "STANDARD" | "DEEP"; focus?: string; constraints: string[]; frozenRefs: ConversationRef[];
+  evaluationVariant?: "PROMPT_ONLY" | "INVESTIGATION_ONLY";
   directory: WorkspaceDirectory; exactRef?: { kind: "MISSION" | "ACTION"; id: string; projectId: string };
   recentDialogue: Array<{ role: string; content: string }>;
 }) {
@@ -124,7 +125,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
     goalGaps: state.goalGaps, materialPointers: state.pointers,
     recentDialogue: input.recentDialogue.slice(-6).map(m => ({ role: m.role, text: m.content.slice(0, 500) })) });
   const seen = new Set<string>(); let noGain = 0;
-  if (route.investigate && route.intent !== "CLARIFY") while (true) {
+  if (input.evaluationVariant !== "PROMPT_ONLY" && route.investigate && route.intent !== "CLARIFY") while (true) {
     await validateContext(actor, scopeDirectory, observations, state.pointers);
     const turn = await db.conversationTurn.findUniqueOrThrow({ where: { id: turnId } });
     if (turn.callCount >= state.budget.maxModelCalls - 2 ||
@@ -134,10 +135,13 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
     }
     state.phase = "EVALUATING"; await saveR4State(actor, id, turnId, state, observations.sources);
     const callId = "investigate-" + state.steps.length;
-    const frame = await conversationModelSpec(actor, id, turnId, callId, investigateV1, { ...context(),
+    const frameInput = { ...context(),
       allowedTools: workspaceReadTools, toolSchemas: (await import("zod")).z.toJSONSchema((await import("@/lib/types/agentExperience")).investigationToolCallSchema),
       previousSteps: state.steps.map(s => ({ decision: s.decision, status: s.status, coverage: s.coverage })),
-      remaining: { modelCalls: state.budget.maxModelCalls - turn.callCount, reads: state.budget.maxToolReads - state.steps.length } });
+      remaining: { modelCalls: state.budget.maxModelCalls - turn.callCount, reads: state.budget.maxToolReads - state.steps.length } };
+    const frame = input.evaluationVariant === "INVESTIGATION_ONLY"
+      ? await conversationModelSpec(actor, id, turnId, callId, investigateReadV1, frameInput).then(result => ({ ...result, data: { goalAssessments: [], decision: result.data } }))
+      : await conversationModelSpec(actor, id, turnId, callId, investigateV1, frameInput);
     provider = frame.provider;
     await validateContext(actor, scopeDirectory, observations, state.pointers);
     state.goalGaps = normalizeGoals(frame.data, scopeDirectory, observations);
@@ -152,7 +156,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
       break;
     }
     const decision = state.decision, argsHash = jsonHash(decision.call);
-    if (!state.goalGaps.some(g => g.projectId === decision.call.projectId && g.nextInformationNeed === decision.informationNeed))
+    if (input.evaluationVariant !== "INVESTIGATION_ONLY" && !state.goalGaps.some(g => g.projectId === decision.call.projectId && g.nextInformationNeed === decision.informationNeed))
       throw new AppError("INVESTIGATION_GOAL_UNBOUND", "调查步骤没有关联当前目标缺口", 409);
     if (state.steps.length >= state.budget.maxToolReads) {
       state.stopReason = "BUDGET_EXHAUSTED"; state.decision = { decision: "STOP", reason: "BUDGET_EXHAUSTED", explanation: "本轮读取额度已用完，先依据当前资料回答。" }; break;

@@ -191,6 +191,9 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
           message: answer.trim(), replyToMessageId: message.id, projectId: action.target.projectId, llmContextApproved: cloud && cloudAvailable,
           ...(r4Available ? { investigationMode } : {}) });
         clearConversationDraft(`${view.id}:${action.target.id}`);
+      } else if (action.actionKind === "ASK") {
+        setText("请调查这条变化的依据，判断对原目标有什么影响，并给出待确认的下一步。");
+        setReply(message); setTarget(action.target.projectId); pending.current = null;
       }
       if (epoch !== generation.current) return;
       setView(result.conversation); onUpdated?.(); emitWorkspaceChange(action.target.projectId, ["actions"]);

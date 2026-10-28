@@ -1,0 +1,718 @@
+{
+  "schemaVersion": 1,
+  "provenance": "SYNTHETIC_FROZEN_COVERAGE_SET; not independently scored; never used to tune a prompt after results without relabeling",
+  "cases": [
+    {
+      "id": "official-1",
+      "category": "official",
+      "scenario": "COMPETITION",
+      "question": "现在的鸿蒙应用竞赛提交要求怎样核对？请查官网并区分届次、发布时间与生效时间。",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "鸿蒙开发者竞赛",
+        "publicTerms": [
+          "鸿蒙开发者竞赛"
+        ],
+        "allowedHosts": [
+          "developer.huawei.com"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": true,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "official-2",
+      "category": "official",
+      "scenario": "COMPETITION",
+      "question": "某份旧竞赛通知仍可作为当前要求吗？请查官方修订，不能只选最新抓取的页面。",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "鸿蒙开发者竞赛",
+        "publicTerms": [
+          "鸿蒙开发者竞赛"
+        ],
+        "allowedHosts": [
+          "developer.huawei.com"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": true,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "official-3",
+      "category": "official",
+      "scenario": "COMPETITION",
+      "question": "比赛规则和常见问题页说法不一致时，怎样决定适用的提交材料？",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "鸿蒙开发者竞赛",
+        "publicTerms": [
+          "鸿蒙开发者竞赛"
+        ],
+        "allowedHosts": [
+          "developer.huawei.com"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": true,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "official-4",
+      "category": "official",
+      "scenario": "COMPETITION",
+      "question": "官网只找到往届通知，请给有条件的准备建议，不要推断本届要求相同。",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "鸿蒙开发者竞赛",
+        "publicTerms": [
+          "鸿蒙开发者竞赛"
+        ],
+        "allowedHosts": [
+          "developer.huawei.com"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": true,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "papers-1",
+      "category": "papers",
+      "scenario": "RESEARCH",
+      "question": "比较公开三维医学图像分割方法的数据规模、标注条件与失败原因，不能只按公开 Dice 排名。",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "3D medical image segmentation",
+        "publicTerms": [
+          "3D medical image segmentation"
+        ],
+        "allowedHosts": [
+          "arxiv.org"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "papers-2",
+      "category": "papers",
+      "scenario": "RESEARCH",
+      "question": "小样本三维分割有哪些方法值得项目验证？请查英文原论文并说明和当前未知条件的关系。",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "3D medical image segmentation",
+        "publicTerms": [
+          "3D medical image segmentation"
+        ],
+        "allowedHosts": [
+          "arxiv.org"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "papers-3",
+      "category": "papers",
+      "scenario": "RESEARCH",
+      "question": "论文摘要报告更高指标就能证明方法更适合我的项目吗？请读取关键原文再比较。",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "3D medical image segmentation",
+        "publicTerms": [
+          "3D medical image segmentation"
+        ],
+        "allowedHosts": [
+          "arxiv.org"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "papers-4",
+      "category": "papers",
+      "scenario": "RESEARCH",
+      "question": "有哪些相互矛盾的公开分割结论？请区分评测划分、指标和训练条件。",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "3D medical image segmentation",
+        "publicTerms": [
+          "3D medical image segmentation"
+        ],
+        "allowedHosts": [
+          "arxiv.org"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "github-1",
+      "category": "github",
+      "scenario": "RESEARCH",
+      "question": "对照 Vercel AI SDK 当前官方文档，现有 Agent 的工具结果和来源引用可以如何改进？",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "Vercel AI SDK",
+        "publicTerms": [
+          "Vercel AI SDK"
+        ],
+        "allowedHosts": [
+          "github.com",
+          "ai-sdk.dev"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "github-2",
+      "category": "github",
+      "scenario": "RESEARCH",
+      "question": "GitHub README 和版本迁移文档不一致时，应如何确认采用哪个工具调用接口？",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "Vercel AI SDK",
+        "publicTerms": [
+          "Vercel AI SDK"
+        ],
+        "allowedHosts": [
+          "github.com",
+          "ai-sdk.dev"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "github-3",
+      "category": "github",
+      "scenario": "RESEARCH",
+      "question": "只读到框架 README 时能否断言整个仓库支持所需功能？请补充关键官方文档。",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "Vercel AI SDK",
+        "publicTerms": [
+          "Vercel AI SDK"
+        ],
+        "allowedHosts": [
+          "github.com",
+          "ai-sdk.dev"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "github-4",
+      "category": "github",
+      "scenario": "RESEARCH",
+      "question": "比较框架的工具审批与状态持久化能力，明确已读文件和未读代码边界。",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "Vercel AI SDK",
+        "publicTerms": [
+          "Vercel AI SDK"
+        ],
+        "allowedHosts": [
+          "github.com",
+          "ai-sdk.dev"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "practice-1",
+      "category": "practice",
+      "scenario": "COURSE_DESIGN",
+      "question": "中文博客建议在 Next.js 中直接切换 SQLite WAL，这对并发写入有什么适用条件？请核对官方资料。",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "SQLite WAL Next.js",
+        "publicTerms": [
+          "SQLite WAL Next.js"
+        ],
+        "allowedHosts": [
+          "sqlite.org",
+          "nextjs.org"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "practice-2",
+      "category": "practice",
+      "scenario": "COURSE_DESIGN",
+      "question": "旧版 Next.js 后台任务教程还能直接用于当前项目吗？请找官方边界和替代思路。",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "SQLite WAL Next.js",
+        "publicTerms": [
+          "SQLite WAL Next.js"
+        ],
+        "allowedHosts": [
+          "sqlite.org",
+          "nextjs.org"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "practice-3",
+      "category": "practice",
+      "scenario": "COURSE_DESIGN",
+      "question": "想减少 SQLite 锁等待，先查哪些官方依据、再测哪些项目指标比较合适？",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "SQLite WAL Next.js",
+        "publicTerms": [
+          "SQLite WAL Next.js"
+        ],
+        "allowedHosts": [
+          "sqlite.org",
+          "nextjs.org"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "practice-4",
+      "category": "practice",
+      "scenario": "COURSE_DESIGN",
+      "question": "网上对数据库事务里调用模型的建议相互矛盾，请比较来源并提出项目验证办法。",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "SQLite WAL Next.js",
+        "publicTerms": [
+          "SQLite WAL Next.js"
+        ],
+        "allowedHosts": [
+          "sqlite.org",
+          "nextjs.org"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "ambiguity-1",
+      "category": "ambiguity",
+      "scenario": "COURSE_DESIGN",
+      "question": "SAM 在我的图像分割任务里是什么含义？请消歧并核对原论文或仓库。",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "SAM segmentation",
+        "publicTerms": [
+          "SAM segmentation"
+        ],
+        "allowedHosts": [
+          "arxiv.org",
+          "github.com"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "ambiguity-2",
+      "category": "ambiguity",
+      "scenario": "COURSE_DESIGN",
+      "question": "同名开源项目很多，请解释如何定位 Segment Anything 的维护方与实际版本。",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "SAM segmentation",
+        "publicTerms": [
+          "SAM segmentation"
+        ],
+        "allowedHosts": [
+          "arxiv.org",
+          "github.com"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "ambiguity-3",
+      "category": "ambiguity",
+      "scenario": "COURSE_DESIGN",
+      "question": "搜索中的 SAM2、SAM-Med3D 不能直接混为同一模型，请比较其公开适用范围。",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "SAM segmentation",
+        "publicTerms": [
+          "SAM segmentation"
+        ],
+        "allowedHosts": [
+          "arxiv.org",
+          "github.com"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "ambiguity-4",
+      "category": "ambiguity",
+      "scenario": "COURSE_DESIGN",
+      "question": "找到同名工具但任务条件不相符，应该继续怎么查而不是直接推荐第一条结果？",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "SAM segmentation",
+        "publicTerms": [
+          "SAM segmentation"
+        ],
+        "allowedHosts": [
+          "arxiv.org",
+          "github.com"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "long_tail-1",
+      "category": "long_tail",
+      "scenario": "RESEARCH",
+      "question": "嗅裂自动分割资料较少，请按任务与评价条件改写公开查询；查不到就说明缺口。",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "olfactory cleft segmentation",
+        "publicTerms": [
+          "olfactory cleft segmentation"
+        ],
+        "allowedHosts": [
+          "arxiv.org",
+          "pubmed.ncbi.nlm.nih.gov"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "long_tail-2",
+      "category": "long_tail",
+      "scenario": "RESEARCH",
+      "question": "长尾分割任务只有摘要、缺少完整实验条件，哪些建议可以给，哪些应留给项目验证？",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "olfactory cleft segmentation",
+        "publicTerms": [
+          "olfactory cleft segmentation"
+        ],
+        "allowedHosts": [
+          "arxiv.org",
+          "pubmed.ncbi.nlm.nih.gov"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "long_tail-3",
+      "category": "long_tail",
+      "scenario": "RESEARCH",
+      "question": "若第一次专业术语搜索没有相关结果，请换一个有依据的公开查询方向并保留未知。",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "olfactory cleft segmentation",
+        "publicTerms": [
+          "olfactory cleft segmentation"
+        ],
+        "allowedHosts": [
+          "arxiv.org",
+          "pubmed.ncbi.nlm.nih.gov"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    },
+    {
+      "id": "long_tail-4",
+      "category": "long_tail",
+      "scenario": "RESEARCH",
+      "question": "公开论文没有与目标设备同条件的测量时，能否推断项目显存达标？请给最小验证提案。",
+      "goal": "依据适用的公开资料作出有条件的项目建议，明确需要本项目验证的部分",
+      "publicScope": {
+        "enabled": true,
+        "topic": "olfactory cleft segmentation",
+        "publicTerms": [
+          "olfactory cleft segmentation"
+        ],
+        "allowedHosts": [
+          "arxiv.org",
+          "pubmed.ncbi.nlm.nih.gov"
+        ],
+        "allowedCategories": [
+          "PUBLIC_TOPIC",
+          "PUBLIC_SOURCE"
+        ],
+        "excludedTerms": []
+      },
+      "expected": {
+        "readScopeTruthful": true,
+        "projectSuccessRemainsUnverified": true,
+        "citationSupportRequired": true,
+        "scopeAndVersionRequired": false,
+        "negativeEvidenceOrUnknownRequired": true
+      }
+    }
+  ]
+}

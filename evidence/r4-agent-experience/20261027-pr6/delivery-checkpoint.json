@@ -1,0 +1,22 @@
+{
+  "status": "IMPLEMENTATION_CHECKPOINT_NOT_RELEASED",
+  "reason": "User requested quick save because of low battery",
+  "modelReserved": 188,
+  "modelLimit": 336,
+  "externalReserved": 17,
+  "externalLimit": 96,
+  "frozenCompletedArms": 11,
+  "frozenPlannedArms": 48,
+  "unitNew": "21 passed",
+  "originalConversation": "22 passed after declined-proposal priority fix",
+  "types": "passed",
+  "lint": "passed before final fixture additions",
+  "harmonyTests": "86 passed",
+  "harmonyBuild": "passed",
+  "fullSuite": "interrupted; two initial failures fixed and targeted tests passed; full final run pending",
+  "webE2E": "new fixture and test saved; not run",
+  "emulator": "hdc list targets empty",
+  "production": "not migrated or deployed",
+  "protectedFiles": "all baseline hashes match",
+  "unknownRequests": "held, never automatically resent"
+}

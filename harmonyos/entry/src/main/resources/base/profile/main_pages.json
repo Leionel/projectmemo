@@ -9,6 +9,7 @@
     "pages/LoginPage",
     "pages/MissionDetail",
     "pages/AttachmentViewer",
-    "pages/FocusConversation"
+    "pages/FocusConversation",
+    "pages/ConversationWebSource"
   ]
 }

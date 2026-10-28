@@ -19,6 +19,8 @@ export const E2E_AUTH_STATE_PATH = path.resolve(process.cwd(), "test-results", "
 export const E2E_ENV = {
   DATABASE_URL: E2E_DATABASE_URL,
   LLM_MODE: "mock",
+  FOCUS_WEB_ENABLED: "true",
+  FOCUS_ASYNC_ENABLED: "false",
   PROJECT_STATE_ENABLED: "true",
   PROJECT_EPISODES_ENABLED: "true",
   MISSION_ENABLED: "true",

@@ -1,3 +1,4 @@
+import { ConversationResearchInfo, ResearchScopeInput, ResearchSummaryInput, ResearchSummaryReply } from '../models/ConversationResearch';
 import { ApiClient } from './ApiClient';
 import { ConversationReviews, ConversationReviewInput, ConversationReviewReply } from '../models/ChangeReview';
 import { ConversationAnchorListReply, ConversationAnchorReply, ConversationAnchorInput, ConversationWorkspaceSyncReply } from '../models/ConversationAnchor';
@@ -8,6 +9,8 @@ import { ConversationCapabilities, ConversationListReply, ConversationCreated, C
 export class ConversationService {
   async reviews(id: string, ref: ConversationWorkRef): Promise<ConversationReviews> { return this.client.get<ConversationReviews>(`/api/conversations/${id}/work/review?kind=${ref.kind}&id=${encodeURIComponent(ref.id)}&projectId=${encodeURIComponent(ref.projectId)}`); }
   async submitReview(id: string, input: ConversationReviewInput): Promise<ConversationReviewReply> { return this.client.post<ConversationReviewReply>(`/api/conversations/${id}/work/review`, input, 60000); }
+  async saveResearchScope(id: string, input: ResearchScopeInput): Promise<ConversationResearchInfo> { return this.client.patch<ConversationResearchInfo>(`/api/conversations/${id}/research-scope`, input); }
+  async researchSummary(id: string, messageId: string, input: ResearchSummaryInput): Promise<ResearchSummaryReply> { return this.client.post<ResearchSummaryReply>(`/api/conversations/${id}/messages/${messageId}/research-summary`, input); }
   private client: ApiClient = new ApiClient();
   async capabilities(): Promise<ConversationCapabilities> { return this.client.get<ConversationCapabilities>('/api/conversations/capabilities'); }
   async list(projectId: string = ''): Promise<ConversationListReply> {

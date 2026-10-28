@@ -1,10 +1,13 @@
+import { researchReadLevelLabel } from '../common/ResearchPresentation';
 import router from '@ohos.router';
 import { ConversationFileGuide } from '../models/Conversation';
 import { PMColors } from '../common/DesignTokens';
 
 export function openConversationFile(file: ConversationFileGuide, conversationId: string): void {
   if (file.missing) return;
-  if (file.kind === 'ATTACHMENT') {
+  if (file.kind === 'WEB' && file.external) {
+    router.pushUrl({ url: 'pages/ConversationWebSource', params: { conversationId: file.external.conversationId, turnId: file.external.turnId, sourceId: file.entityId } });
+  } else if (file.kind === 'ATTACHMENT') {
     router.pushUrl({ url: 'pages/AttachmentViewer', params: { projectId: file.projectId, attachmentId: file.entityId, conversationId: conversationId } });
   } else {
     router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: file.projectId, tab: file.kind === 'ARTIFACT' ? 'artifacts' : 'memory', conversationId: conversationId } });
@@ -49,12 +52,13 @@ export struct ConversationFileGuides {
             Text((file.quote ? '引用' : '读取') + (file.readScope === 'SUMMARY' ? '摘要' : '片段')).fontSize(11).fontColor(PMColors.INK_TERTIARY)
           }.width('100%')
           if (this.expanded === file.sourceId) {
+            if (file.external) { Text(researchReadLevelLabel(file.external.readLevel) + ' · 抓取于 ' + file.external.fetchedAt.slice(0, 10) + (file.external.truncated ? ' · 已截断' : '')).fontSize(12).fontColor(PMColors.INK_SECONDARY) }
             if (file.stale) { Text('引用后已有修订，下方保留当时读取的片段。').fontSize(12).fontColor(PMColors.WARNING) }
             if (file.missing) { Text('原资料已不可用，保留历史片段。').fontSize(12).fontColor(PMColors.INK_SECONDARY) }
             if (file.archived) { Text('资料已归档').fontSize(12).fontColor(PMColors.INK_SECONDARY) }
             Text(file.quote ?? file.excerpt).fontSize(13).lineHeight(21).fontColor(PMColors.INK_SECONDARY).copyOption(CopyOptions.LocalDevice)
             if (!file.missing) {
-              Button(file.kind === 'ATTACHMENT' ? '打开原文件 ↗' : file.kind === 'ARTIFACT' ? '查看原成果 ↗' : '查看项目资料 ↗', { type: ButtonType.Normal })
+              Button(file.kind === 'WEB' ? '查看网页来源 ↗' : file.kind === 'ATTACHMENT' ? '打开原文件 ↗' : file.kind === 'ARTIFACT' ? '查看原成果 ↗' : '查看项目资料 ↗', { type: ButtonType.Normal })
                 .height(44).fontSize(12).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).padding({ left: 0, right: 8 })
                 .onClick(() => { openConversationFile(file, this.conversationId); })
             }

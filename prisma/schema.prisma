@@ -389,6 +389,8 @@ model Conversation {
   nextSeq Int @default(0)
   activeTurnId String?
   focusJson Json @default("{}")
+  researchScopeJson Json @default("{}")
+  researchScopeVersion Int @default(1)
   pinnedStateJson Json @default("[]")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -411,6 +413,9 @@ model ConversationTurn {
   inputJson Json
   baseVersion Int
   status String @default("ACCEPTED")
+  sessionId String?
+  leaseToken String?
+  leaseUntil DateTime?
   callCount Int @default(0)
   reservationJson Json @default("[]")
   readManifestJson Json @default("{}")
@@ -420,6 +425,7 @@ model ConversationTurn {
   finishedAt DateTime?
   conversation Conversation @relation(fields:[conversationId],references:[id],onDelete:Cascade)
   @@unique([conversationId,requestId])
+  @@index([status,leaseUntil])
 }
 
 model ConversationBinding {

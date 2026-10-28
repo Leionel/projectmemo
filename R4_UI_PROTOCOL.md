@@ -1,5 +1,18 @@
 # R4 UI 协议
 
+## PR-6 Research View 补充（双端代码已接入，交互验收待完成，2026-10-27）
+
+[PR-6 方案 v2](R4_PR6_WEB_RESEARCH_PLAN.md) 的 Research Result / Investigation View 沿原 Conversation，复用既有语义块。模型选布局，服务端从原 turn / coverage / source snapshot / proposal 生成可信 catalog；本次未新增 semanticType 或切换生产 DTO。
+
+- 简单查找允许正文和引用；复杂研究可组合 investigation / evidence / comparison / question / approval / receipt，显示已核对什么、仍缺什么，以及为什么继续或停止。
+- 进度来自持久阶段事件与序号；离开/断线后读取原 turn，无分母不显示百分比。UNKNOWN、来源不可读、部分完成、用户停止和服务失败分别显示；停止后迟到结果不变成当前有效结论。
+- 来源区分 SEARCH_SNIPPET / SEARCH_SUMMARY / FETCH_EXCERPT / DOCUMENT_EXTRACT / UNAVAILABLE。元数据分别保留检索方式、片段/页章范围、截断、原发布时间、适用版本/生效状态和抓取时间；旧来源不自动升级全文，缓存回读不更新抓取时间。
+- 用户直接贴链接可经服务端登记后读取，无需先搜索；来源操作仍只提交原 binding。模型不提供可直接跳转 URL；打开页面由当前授权原来源解析。PDF/README/动态页只显示实际读到的范围。
+- “继续调查”绑定原 coverage、scope 和新有界预算；“为什么推荐”绑定原结论；“准备验证”转原 Mission/Action 预览，“保存研究总结”预览可见范围、版本与来源 manifest，确认后归入原 Artifact 并原位读回回执。
+- 选择、打开来源、预览或刷新均不等同业务写入。撤权、修订、取消或过期后撤掉不适用操作；新消息、读回和页面返回保留原草稿。Web/ArkTS 使用同字段、稳定身份和旧版 fallback。
+
+实施时以“简单查找、冲突比较、继续调查、准备验证、总结归入、停止/恢复、来源不可读”共享 fixture 验证差异化 UI，不能只提供一组来源按钮或独立研究页面。
+
 PR-2 已接服务端实时 authority、Web 原生块与原确认回执；ArkTS 原生渲染仍在 PR-4。新回答持久保存模型 Plan，客户端只获得经当前权限/版本重绑定的 presentation。旧正文和提案继续可读。
 
 源码：`lib/types/agentExperience.ts`、`lib/conversation/experienceContract.ts`；鸿蒙镜像：`harmonyos/entry/src/main/ets/models/AgentExperience.ets`。

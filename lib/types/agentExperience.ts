@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { researchToolSchemas } from "./conversationResearch";
 
 // R4 wire contracts. These schemas do not grant access or execute business commands.
 const id = z.string().trim().min(1).max(160);
@@ -47,12 +48,13 @@ export const goalGapSchema = z.object({
 });
 export type GoalGap = z.infer<typeof goalGapSchema>;
 
-export const investigationToolCallSchema = z.discriminatedUnion("tool", [
+export const internalInvestigationToolCallSchema = z.discriminatedUnion("tool", [
   z.object({ tool: z.literal("inspect_project"), projectId: id, afterId: id.optional() }).strict(),
   z.object({ tool: z.literal("search_memory"), projectId: id, query: z.string().trim().min(1).max(256), afterId: id.optional() }).strict(),
   z.object({ tool: z.literal("read_project_material"), projectId: id, sourceId: id, revision: id }).strict(),
   z.object({ tool: z.literal("inspect_action"), projectId: id, actionId: id, revision: id }).strict(),
 ]);
+export const investigationToolCallSchema = z.discriminatedUnion("tool", [...internalInvestigationToolCallSchema.options, ...researchToolSchemas]);
 export const investigationDecisionSchema = z.discriminatedUnion("decision", [
   z.object({ decision: z.literal("READ_EXISTING"), informationNeed: text, expectedObservation: text, call: investigationToolCallSchema }).strict(),
   z.object({ decision: z.literal("ANSWER_NOW"), reason: text }).strict(),
@@ -61,6 +63,10 @@ export const investigationDecisionSchema = z.discriminatedUnion("decision", [
   z.object({ decision: z.literal("STOP"), reason: z.enum(["KEEP_PLAN", "NO_ACTION", "BUDGET_EXHAUSTED", "NO_GAIN", "NO_TOOL", "SOURCE_CHANGED", "PERMISSION_REVOKED", "UNKNOWN"]), explanation: text }).strict(),
 ]);
 export type InvestigationDecision = z.infer<typeof investigationDecisionSchema>;
+export const internalInvestigationDecisionSchema = z.discriminatedUnion("decision", [
+  investigationDecisionSchema.options[0].extend({ call: internalInvestigationToolCallSchema }),
+  ...investigationDecisionSchema.options.slice(1) as [typeof investigationDecisionSchema.options[1], typeof investigationDecisionSchema.options[2], typeof investigationDecisionSchema.options[3], typeof investigationDecisionSchema.options[4]],
+]);
 
 export const investigationBudgetSchema = z.object({
   mode: z.enum(["QUICK", "STANDARD", "DEEP"]), deepApproved: z.boolean(),

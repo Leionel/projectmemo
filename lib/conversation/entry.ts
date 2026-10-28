@@ -4,12 +4,17 @@ import { jsonHash } from "@/lib/mission/contracts";
 import { currentGoalQuestionInTx } from "@/lib/decision/questions";
 import { assertProject, type Tx } from "./repository";
 import type { ConversationActor, ConversationEntry, ConversationRef } from "@/lib/types/conversation";
+import { readSourceObservation } from "./sourceObservation";
 
 export async function readConversationEntry(actor: ConversationActor, entry: ConversationEntry, tx: Tx = db) {
   const member = await assertProject(actor, entry.projectId, tx);
   let ref: ConversationRef, text: string, revision: string;
   let missionId: string | null = null;
-  if (entry.kind === "INTERVENTION") {
+  if (entry.kind === "SOURCE_OBSERVATION") {
+    const source = await readSourceObservation(actor, entry.projectId, entry.id, tx);
+    if (entry.revision && entry.revision !== source.revision) throw new AppError("ENTRY_CHANGED", "仓库观察已有修订，请刷新", 409);
+    return { ...source, missionId: null };
+  } else if (entry.kind === "INTERVENTION") {
     const row = await tx.agentIntervention.findFirst({ where: {
       id: entry.id, projectId: entry.projectId, isSimulated: false,
       NOT: { dedupeKey: { startsWith: "goal:" } },

@@ -1,24 +1,28 @@
 import { AgentPresentation } from './AgentExperience';
+import { ConversationResearchInfo, ExternalSourceMeta, ResearchCoverage } from './ConversationResearch';
 export interface ConversationEntry { kind: string; projectId: string; id: string; revision?: string; }
 export interface ConversationRef { bindingId?: string; kind: string; id: string; projectId: string; title: string; status?: string; version?: number; href: string; }
-export interface ConversationSource { id: string; projectId: string; sourceId: string; revision: string; title: string; excerpt: string; observedAt: string; temporalState: string; }
+export interface ConversationSource { id: string; projectId: string; sourceId: string; revision: string; title: string; excerpt: string; observedAt: string; temporalState: string; external?: ExternalSourceMeta; }
 export interface ConversationFileGuide {
   number: number; sourceId: string; projectId: string; entityId: string; kind: string; title: string; revision: string;
   stale: boolean; missing: boolean; archived: boolean; temporalState: string; excerpt: string; quote: string | null; readScope: string; href: string;
+  external?: ExternalSourceMeta;
 }
 export interface ConversationCitation { sourceId: string; quote: string; }
 export interface PriorityReason { projectId: string; importance: string; urgency: string; blocking: string; effort: string; preference: string; tradeoff: string; unknown: string[]; basis: string; }
 export interface ConversationProposal { tool?: string; executionId: string; projectId: string; title: string; description: string; proposalHash: string; status: string; resultId: string | null; actionStatus?: string | null; resultCardId?: string | null; }
 export interface ConversationOption { key: string; label: string; projectId: string; missionId: string; proposalId: string; proposalHash: string; expectedVersion: number; purpose?: string; candidateId?: string; }
-export interface ConversationMessage { id: string; seq: number; role: string; content: string; restricted: boolean; refs: ConversationRef[]; sources: ConversationSource[]; priorities: PriorityReason[]; proposal: ConversationProposal | null; provider: string; limitations: string[]; options?: ConversationOption[]; fileGuides?: ConversationFileGuide[]; citations?: ConversationCitation[]; presentation?: AgentPresentation; }
+export interface ConversationMessage { researchCoverage?: ResearchCoverage; id: string; seq: number; role: string; content: string; restricted: boolean; refs: ConversationRef[]; sources: ConversationSource[]; priorities: PriorityReason[]; proposal: ConversationProposal | null; provider: string; limitations: string[]; options?: ConversationOption[]; fileGuides?: ConversationFileGuide[]; citations?: ConversationCitation[]; presentation?: AgentPresentation; }
 export interface ConversationProject { id: string; title: string; }
 export interface ConversationListItem { id: string; title: string; scope: string; homeProjectId: string | null; }
 export interface ConversationListReply { conversations: ConversationListItem[]; nextCursor: string | null; }
 export interface ConversationReadStep { id: string; label: string; status: string; }
-export interface ConversationProgress { phase: string; mode: string; completedReads: number; readLimit: number; steps: ConversationReadStep[]; stopReason: string | null; }
+export interface ConversationProgressEvent { seq: number; phase: string; at: string; stepId: string | null; }
+export interface ConversationProgress { sequence?: number; events?: ConversationProgressEvent[]; phase: string; mode: string; completedReads: number; readLimit: number; steps: ConversationReadStep[]; stopReason: string | null; }
 export interface ConversationActiveTurn { id: string; requestId: string; status: string; progress?: ConversationProgress; }
 export interface ConversationTurnState { id: string; status: string; message: string; canRetry: boolean; }
 export class ConversationView {
+  research?: ConversationResearchInfo;
   schemaVersion: number = 1; id: string = ''; title: string = ''; scope: string = '';
   version: number = 1; homeProjectId: string | null = null; focusProjectId: string | null = null;
   messages: ConversationMessage[] = []; linkedProjects: ConversationProject[] = [];

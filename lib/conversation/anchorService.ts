@@ -12,16 +12,18 @@ import { conversationCreateSchema, conversationEntrySchema, type ConversationAct
 import { assertProject, assertSession, emptyBlocks, lockConversation, ownedConversation, record, type Tx } from "./repository";
 import { appendConversationMessage, bindRefs, readConversation } from "./service";
 import { readConversationEntry } from "./entry";
+import { readSourceObservation } from "./sourceObservation";
 
 const enabled = () => isFeatureEnabled("FOCUS_AGENT_FOLLOW_ENABLED", false);
-type Snapshot = { key: string; content: string; refs: ConversationRef[]; sources?: ConversationBlocks["sources"]; changeNotice?: ConversationBlocks["changeNotice"]; silent?: boolean };
+type Snapshot = { key: string; content: string; refs: ConversationRef[]; sources?: ConversationBlocks["sources"]; changeNotice?: ConversationBlocks["changeNotice"]; observationRef?: ConversationBlocks["observationRef"]; silent?: boolean };
 async function allowed(actor: ConversationActor, a: ConversationAnchor, tx: Tx) {
   await assertProject(actor, a.projectId, tx);
+  if (a.originKind === "SOURCE_OBSERVATION") await readSourceObservation(actor, a.projectId, a.originId, tx);
   if (a.missionId) { const m = await ownedMission(actor.userId, a.missionId, tx); if (m.projectId !== a.projectId) throw new AppError("ANCHOR_NOT_FOUND", "原主题已不可访问", 404); }
 }
 async function projectSnapshot(tx: Tx, actor: ConversationActor, a: ConversationAnchor, s: Snapshot, baseline = false) {
   if (await tx.conversationAnchorProjection.findUnique({ where: { anchorId_revisionKey: { anchorId: a.id, revisionKey: s.key } } })) return false;
-  const blocks = { ...emptyBlocks(), refs: await bindRefs(tx, a.conversationId, s.refs), sources: s.sources ?? [], observedProjectIds: [a.projectId], ...(s.changeNotice ? { changeNotice: s.changeNotice } : {}) };
+  const blocks = { ...emptyBlocks(), refs: await bindRefs(tx, a.conversationId, s.refs), sources: s.sources ?? [], observedProjectIds: [a.projectId], ...(s.changeNotice ? { changeNotice: s.changeNotice } : {}), ...(s.observationRef ? { observationRef: s.observationRef } : {}) };
   let messageId: string | null = null, seq: number | null = null;
   if (!baseline) {
     seq = (await tx.conversationAnchor.update({ where: { id: a.id }, data: { projectedSeq: { increment: 1 } } })).projectedSeq;
@@ -88,10 +90,11 @@ export async function openConversationEntry(actor: ConversationActor, raw: unkno
     }
     const refs: ConversationRef[] = [source.ref];
     if (source.missionId) { const m = await ownedMission(actor.userId, source.missionId, tx); refs.push({ kind: "MISSION", id: m.id, projectId: m.projectId, title: m.goal, version: m.version, status: m.status, href: "/projects/" + m.projectId + "/missions?mission=" + m.id }); }
-    await projectSnapshot(tx, actor, a, { key: "origin:" + source.revision, content: (isNew ? "" : "原主题有了修订。\n") + source.ref.title + "\n" + source.text, refs });
+    await projectSnapshot(tx, actor, a, { key: "origin:" + source.revision, content: (isNew ? "" : "原主题有了修订。\n") + source.ref.title + "\n" + source.text, refs,
+      ...(entry.kind === "SOURCE_OBSERVATION" ? { observationRef: entry } : {}) });
     const current = await tx.conversationAnchor.findUniqueOrThrow({ where: { id: a.id } });
     await tx.conversationAnchor.update({ where: { id: a.id }, data: { rootKey: a.rootKey ?? rootKey, missionId: source.missionId,
-      originRevision: source.revision, originEntryJson: json({ entry, title: source.ref.title }), ...(isNew ? { seenSeq: current.projectedSeq } : {}) } });
+      originRevision: source.revision, originEntryJson: json({ entry, title: source.ref.title, ...("signalIds" in source ? { signalIds: source.signalIds } : {}) }), ...(isNew ? { seenSeq: current.projectedSeq } : {}) } });
     await tx.conversationEntryRequest.create({ data: { ownerUserId: actor.userId, requestId: input.requestId, inputHash: hash, conversationId: a.conversationId } });
     return { id: a.conversationId };
   }, { timeout: 20000 });
@@ -247,8 +250,13 @@ export async function syncConversationAnchors(actor: ConversationActor, id: stri
         const parsed = conversationEntrySchema.safeParse(record(a.originEntryJson).entry);
         if (!parsed.success) continue;
         const source = await readConversationEntry(actor, { ...parsed.data, revision: undefined }, tx);
-        if (source.revision !== a.originRevision && await projectSnapshot(tx, actor, a, { key: "origin:" + source.revision, content: "关注的原提醒有了修订。\n" + source.ref.title + "\n" + source.text, refs: [source.ref] })) count++;
+        const oldIds = record(a.originEntryJson).signalIds as string[] | undefined;
+        const newIds = "signalIds" in source ? source.signalIds.filter(s => !oldIds?.includes(s)) : null;
+        if (source.revision !== a.originRevision && (newIds === null || newIds.length > 0) && await projectSnapshot(tx, actor, a, { key: "origin:" + source.revision,
+          content: (parsed.data.kind === "SOURCE_OBSERVATION" ? "关注的仓库有新线索，影响待核对。\n" : "关注的原提醒有了修订。\n") + source.ref.title + "\n" + source.text,
+          refs: [source.ref], ...(parsed.data.kind === "SOURCE_OBSERVATION" ? { observationRef: parsed.data } : {}) })) count++;
         await tx.conversationAnchor.update({ where: { id: a.id }, data: { originRevision: source.revision } });
+        if (newIds) await tx.conversationAnchor.update({ where: { id: a.id }, data: { originEntryJson: json({ ...record(a.originEntryJson), signalIds: [...new Set([...(oldIds ?? []), ...newIds])].slice(-256) }) } });
         continue;
       }
       const m = await ownedMission(actor.userId, a.missionId, tx);

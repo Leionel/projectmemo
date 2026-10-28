@@ -17,9 +17,11 @@ import { investigateConversation, turnTimeoutMs } from "./investigationService";
 import { experienceProgress } from "./progress";
 import { composeExperience, fallbackExperiencePlan, prepareExperienceDraft, refreshExperiencePresentation } from "./presentationRuntime";
 import type { PresentationPlan } from "@/lib/types/agentExperience";
+import type { ConversationTurn } from "@/lib/generated/prisma/client";
+import { assertTurnLease, mutateTurn, turnElapsedMs } from "./turnRuntime";
 
 // The optional ablation control is trusted CLI-only; it is not part of the HTTP request schema.
-export async function submitConversationTurn(actor: ConversationActor, id: string, raw: unknown, evaluation?: { variant: "PROMPT_ONLY" | "INVESTIGATION_ONLY" }) {
+export async function submitConversationTurn(actor: ConversationActor, id: string, raw: unknown, evaluation?: { variant: "PROMPT_ONLY" | "INVESTIGATION_ONLY" }, options?: { defer: boolean }) {
   const input = conversationTurnSchema.parse(raw), hash = jsonHash(input);
   const reserved = await db.$transaction(async tx => {
     await lockConversation(tx, id);
@@ -27,7 +29,7 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     const prior = await tx.conversationTurn.findUnique({ where: { conversationId_requestId: { conversationId: id, requestId: input.requestId } } });
     if (prior) {
       if (prior.inputHash !== hash) throw new AppError("REQUEST_ID_REUSED", "请求编号已用于另一条输入", 409);
-      if (["ACCEPTED", "OBSERVING", "GENERATING"].includes(prior.status) && Date.now() - prior.createdAt.getTime() >= turnTimeoutMs(prior)) {
+      if (["ACCEPTED", "OBSERVING", "GENERATING"].includes(prior.status) && turnElapsedMs(prior) >= turnTimeoutMs(prior)) {
         const stopped = await tx.conversationTurn.update({ where: { id: prior.id }, data: {
           status: prior.callCount ? "UNKNOWN" : "FAILED", finishedAt: new Date(),
           errorJson: { code: "INTERRUPTED", message: "原请求中断，不会自动重发模型" },
@@ -39,7 +41,7 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     }
     if (c.activeTurnId) {
       const active = await tx.conversationTurn.findUnique({ where: { id: c.activeTurnId } });
-      if (active && Date.now() - active.createdAt.getTime() < turnTimeoutMs(active))
+      if (active && turnElapsedMs(active) < turnTimeoutMs(active))
         throw new AppError("CONVERSATION_BUSY", "另一条输入正在处理，请读取原请求状态", 409);
       if (active) await tx.conversationTurn.update({ where: { id: active.id }, data: {
         status: active.callCount ? "UNKNOWN" : "FAILED", finishedAt: new Date(),
@@ -59,7 +61,8 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     if (input.bindingId && !await tx.conversationBinding.findFirst({ where: { id: input.bindingId, conversationId: id } }))
       throw new AppError("BINDING_NOT_FOUND", "讨论对象已不可访问", 404);
     const turn = await tx.conversationTurn.create({ data: { conversationId: id, requestId: input.requestId,
-      inputHash: hash, inputJson: json(input), baseVersion: c.version, status: "OBSERVING" } });
+      inputHash: hash, inputJson: json(input), baseVersion: c.version, status: "OBSERVING", sessionId: actor.sessionId,
+      readManifestJson: options?.defer ? { deferred: true } : {} } });
     if (target) await tx.conversationProject.upsert({ where: { conversationId_projectId: { conversationId: id, projectId: target } },
       create: { conversationId: id, projectId: target }, update: {} });
     await appendConversationMessage(tx, id, actor.userId, "USER", input.message,
@@ -68,7 +71,13 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     return { turn, replay: false };
   });
   if (reserved.replay) return { turnId: reserved.turn.id, status: reserved.turn.status, conversation: await readConversation(actor, id) };
-  const turn = reserved.turn;
+  if (options?.defer) return { turnId: reserved.turn.id, status: reserved.turn.status, conversation: await readConversation(actor, id) };
+  return executeAcceptedConversationTurn(actor, id, reserved.turn, evaluation);
+}
+
+export async function executeAcceptedConversationTurn(actor: ConversationActor, id: string, turn: ConversationTurn, evaluation?: { variant: "PROMPT_ONLY" | "INVESTIGATION_ONLY" }) {
+  const input = conversationTurnSchema.parse(turn.inputJson);
+  assertTurnLease(turn);
   try {
     const c = await ownedConversation(actor, id);
     const history = await readConversation(actor, id);
@@ -137,7 +146,8 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     const modelEnabled = input.llmContextApproved && process.env.LLM_MODE === "openai-compatible";
     const r4 = modelEnabled && !ambiguous && isFeatureEnabled("FOCUS_AGENT_R4_ENABLED", false)
       ? await investigateConversation(actor, id, turn.id, { message: input.message, mode: input.investigationMode, focus: focused, evaluationVariant: evaluation?.variant,
-        constraints: pinned, frozenRefs, directory, exactRef,
+        constraints: pinned, frozenRefs, directory, exactRef, userProvidedUrls: input.userProvidedUrls,
+        priorWebSources: frozenMessage?.sources.filter(s => !!s.external && (!frozenMessage?.citations?.length || frozenMessage.citations.some(c => c.sourceId === s.id))).slice(0, 4),
         recentDialogue: history.messages.filter(m => !m.restricted).map(m => ({ role: m.role, content: m.content })) }) : null;
     if (r4) directory = r4.directory;
     let route = { intent: "ANSWER" as "ANSWER" | "CLARIFY" | "PROPOSE_ACTION" | "OPEN_MISSION",
@@ -165,12 +175,15 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     const observations = r4?.observations ?? (route.intent === "CLARIFY" ? { refs: frozenRefs, sources: [], coverage: { complete: false } }
       : await observeProjects(actor, directory, route.projectIds, route.query || input.message, exactRef));
     const fileGuides = await resolveFileGuides(observations.sources);
-    await db.conversationTurn.update({ where: { id: turn.id }, data: { status: "GENERATING", readManifestJson: json({
+    await mutateTurn(actor, id, turn.id, async (manifest, tx) => {
+      await tx.conversationTurn.update({ where: { id: turn.id }, data: { status: "GENERATING" } });
+      return { ...manifest,
       schemaVersion: 1, observedAt: new Date().toISOString(), directory: directory.coverage,
       observedProjectIds: directory.summaries.map(p => p.id), route, observation: observations.coverage,
-      sourceRefs: observations.sources.map(s => ({ projectId: s.projectId, id: s.sourceId, revision: s.revision })),
+      sourceRefs: observations.sources.map(s => ({ projectId: s.projectId, id: s.sourceId, revision: s.revision, ...(s.external ? { webSource: s } : {}) })),
       ...(r4 ? { experience: r4.state } : {}),
-    }) } });
+      };
+    });
     if (route.intent === "CLARIFY") advice = r4?.advice ?? "你想继续哪一个项目？请选择下方原对象，再提出问题。";
     else if (modelEnabled) {
       const responseHistory = await readConversation(actor, id);
@@ -237,6 +250,7 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     const result = await db.$transaction(async tx => {
       await lockConversation(tx, id);
       const current = await ownedConversation(actor, id, tx);
+      assertTurnLease(await tx.conversationTurn.findUniqueOrThrow({ where: { id: turn.id } }));
       if (record((await tx.conversationTurn.findUniqueOrThrow({ where: { id: turn.id } })).readManifestJson).stopRequested)
         throw new AppError("TURN_STOP_REQUESTED", "已停止本轮调查", 409);
       if (current.activeTurnId !== turn.id) throw new AppError("TURN_CHANGED", "原请求已中断或被接续", 409);
@@ -253,11 +267,13 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
       }));
       refs = await bindRefs(tx, id, refs);
       const blocks: ConversationBlocks = { ...emptyBlocks(), refs, sources: observations.sources, priorities, provider: fallbackReason ? "project_state" : provider,
+        ...(r4?.state.researchCoverage ? { researchCoverage: r4.state.researchCoverage } : {}),
         citations: modelAnswer?.observations ?? [],
         fileGuides,
         observedProjectIds: directory.summaries.map(p => p.id),
         limitations: [...(fallbackReason ? ["云端分析未完成，已改为项目状态读回，未生成操作提案"] : []), ...directory.coverage.limitations, ...("limitations" in observations.coverage ? observations.coverage.limitations as string[] : [])] };
       const trace = {
+        focusSources: blocks.sources,
         purpose: "FOCUS_TURN", actorUserId: actor.userId, sourceIds: blocks.sources.map(s => s.id),
         supportState: action ? "SUPPORTED" : "INSUFFICIENT", supportBasis: "ACTION_PROPOSAL_NOT_FACT_CLAIM",
         ...(r4 ? { experience: r4.state, evaluationVariant: evaluation?.variant ?? "FULL", uiPlanOrigin: evaluation ? "EVALUATION_DISABLED" : uiFallback ? "FALLBACK" : "MODEL", uiFallback } : {}),
@@ -300,9 +316,11 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
     const completedCalls = usages.length;
     const observedProvider = [...usages, ...reservations].findLast(e => typeof e.provider === "string")?.provider;
     const stopped = record(old?.readManifestJson).stopRequested === true;
-    const status = stopped ? "CANCELLED" : (old?.callCount ?? 0) > completedCalls ? "UNKNOWN" : "FAILED";
+    const uncertain = error instanceof AppError && ["EXTERNAL_RESULT_UNKNOWN", "TURN_LEASE_LOST", "CALL_ALREADY_RESERVED"].includes(error.code);
+    const status = stopped ? "CANCELLED" : uncertain || (old?.callCount ?? 0) > completedCalls ? "UNKNOWN" : "FAILED";
     await db.$transaction(async tx => {
       await lockConversation(tx, id);
+      assertTurnLease(await tx.conversationTurn.findUniqueOrThrow({ where: { id: turn.id } }));
       await tx.conversationTurn.update({ where: { id: turn.id }, data: { status, finishedAt: new Date(),
         errorJson: { code: error instanceof AppError ? error.code : "MODEL_OR_PROTOCOL_ERROR", message: "请求未完成，未创建业务操作；不会自动重发模型" } } });
       await tx.conversation.updateMany({ where: { id, activeTurnId: turn.id }, data: { activeTurnId: null } });
@@ -325,6 +343,11 @@ export async function stopConversationTurn(actor: ConversationActor, id: string,
     await lockConversation(tx, id); const c = await ownedConversation(actor, id, tx);
     const turn = await tx.conversationTurn.findFirst({ where: { id: turnId, conversationId: id } });
     if (!turn || c.activeTurnId !== turn.id) return;
+    if (record(turn.readManifestJson).deferred && (!turn.leaseToken || !turn.leaseUntil || turn.leaseUntil.getTime() <= Date.now())) {
+      await tx.conversationTurn.update({ where: { id: turn.id }, data: { status: "CANCELLED", finishedAt: new Date(), readManifestJson: json({ ...record(turn.readManifestJson), stopRequested: true }) } });
+      await tx.conversation.update({ where: { id }, data: { activeTurnId: null } });
+      return;
+    }
     if (!record(turn.readManifestJson).experience) throw new AppError("TURN_NOT_STOPPABLE", "这条请求不支持调查停止，请读取原状态", 409);
     await tx.conversationTurn.update({ where: { id: turn.id }, data: { readManifestJson: json({ ...record(turn.readManifestJson), stopRequested: true }) } });
   });

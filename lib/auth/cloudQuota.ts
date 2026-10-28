@@ -6,6 +6,10 @@ import type { AgentExecutionResult } from "@/lib/types";
 import { investigationBudgetSchema } from "@/lib/types/agentExperience";
 import type { ModelPurpose } from "@/lib/conversation/tokenBudget";
 import { sourceHash } from "@/lib/mission/repository";
+import { assertTurnLease, turnElapsedMs } from "@/lib/conversation/turnRuntime";
+import { validateWebSource } from "@/lib/conversation/researchScope";
+import type { ConversationSource } from "@/lib/types/conversation";
+import { readSourceObservation } from "@/lib/conversation/sourceObservation";
 
 export type WorkspaceBilling = { userId: string; turnId: string; purpose: ModelPurpose; sessionId?: string; inputTokens?: number; outputTokens?: number; provider?: string;
   callId?: string; promptId?: string; promptVersion?: string; outputSchemaVersion?: number };
@@ -41,9 +45,10 @@ export async function reserveWorkspaceCloudCall(billing: WorkspaceBilling): Prom
     });
     if (!turn || !["OBSERVING", "GENERATING"].includes(turn.status))
       throw new AppError("TURN_CHANGED", "本次请求已结束或不可访问", 409);
+    assertTurnLease(turn);
     if (billing.sessionId && !await tx.authSession.findFirst({ where: { id: billing.sessionId, userId: billing.userId, revokedAt: null, expiresAt: { gt: new Date() } } }))
       throw new AppError("UNAUTHORIZED", "登录状态已变化，请重新登录", 401);
-    const manifest = (turn.readManifestJson ?? {}) as { stopRequested?: boolean; sourceRefs?: Array<{ projectId: string; id: string; revision: string }>;
+    const manifest = (turn.readManifestJson ?? {}) as { stopRequested?: boolean; sourceRefs?: Array<{ projectId: string; id: string; revision: string; webSource?: ConversationSource }>;
       experience?: { policyVersion?: string; budget?: unknown; observedProjectIds?: string[] } };
     let adaptive: { callId: string; maxCalls: number; inputTokens: number; outputTokens: number } | undefined;
     if (billing.callId) {
@@ -57,6 +62,14 @@ export async function reserveWorkspaceCloudCall(billing: WorkspaceBilling): Prom
           throw new AppError("PROJECT_NOT_FOUND", "项目权限已变化，未继续发出模型请求", 404);
       }
       for (const s of manifest.sourceRefs ?? []) {
+        if (s.id.startsWith("repo:")) {
+          if (!billing.sessionId || (await readSourceObservation({ userId: billing.userId, sessionId: billing.sessionId }, s.projectId, s.id.slice(5), tx)).revision !== s.revision) throw new AppError("SOURCE_CHANGED", "仓库线索已变化", 409);
+          continue;
+        }
+        if (s.id.startsWith("web:")) {
+          if (!s.webSource || !billing.sessionId) throw new AppError("SOURCE_CHANGED", "网页来源身份不完整", 409);
+          await validateWebSource({ userId: billing.userId, sessionId: billing.sessionId }, s.webSource, tx); continue;
+        }
         let revision: string | null;
         if (s.id.startsWith("mission:")) {
           const mission = await tx.agentMission.findFirst({ where: { id: s.id.slice(8), projectId: s.projectId, ownerUserId: billing.userId,
@@ -65,7 +78,7 @@ export async function reserveWorkspaceCloudCall(billing: WorkspaceBilling): Prom
         } else revision = await sourceHash(s.projectId, s.id, tx);
         if (revision !== s.revision) throw new AppError("SOURCE_CHANGED", "本轮资料已变化，未继续发出模型请求", 409);
       }
-      if (Date.now() - turn.createdAt.getTime() >= budget.maxElapsedMs)
+      if (turnElapsedMs(turn) >= budget.maxElapsedMs)
         throw new AppError("INVESTIGATION_BUDGET_EXHAUSTED", "本轮调查时间已用完，可以根据已读资料继续讨论", 409);
       adaptive = { callId: billing.callId, maxCalls: budget.maxModelCalls, inputTokens: budget.maxInputTokens, outputTokens: budget.maxOutputTokens };
     } else if (manifest.experience?.policyVersion === "r4-v1" || !["ROUTE", "ANSWER"].includes(billing.purpose)) {

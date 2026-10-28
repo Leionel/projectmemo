@@ -14,7 +14,7 @@ export function checkPublicQuery(query:string,rawScope:unknown){
  if(!q||[...q].length>128||/[\r\n\x00-\x1f]|https?:\/\/|[\w.+-]+@[\w.-]+\.[a-z]{2,}|\b(?:sk-|bearer\s|api[_ -]?key|password|token\s*[:=])|(?:内部实验|未公开|身份证|手机号|密钥)/i.test(q)||/%[a-f0-9]{2}|\\u[0-9a-f]{4}/i.test(q))throw new AppError("QUERY_SENSITIVE","搜索查询包含敏感信息或不支持的编码",409);
  if(scope.excludedTerms.some(t=>q.toLowerCase().includes(t.toLowerCase())))throw new AppError("QUERY_OUT_OF_SCOPE","查询涉及用户排除的内容",409);
  if(!scope.publicTerms.some(t=>q.toLowerCase().includes(t.toLowerCase())))throw new AppError("QUERY_OUT_OF_SCOPE","查询未关联批准的公开概念，请调整研究范围",409);
- const sites=[...q.matchAll(/(?:^|\s)-?site:([^\s]+)/gi)].map(m=>m[1]);
+ const sites=[...q.matchAll(/(?:^|\s)-?site:([^\s)]+)/gi)].map(m=>m[1]);
  if(sites.some(site=>scope.allowedHosts.length&&!scope.allowedHosts.includes(site)))throw new AppError("QUERY_OUT_OF_SCOPE","查询站点超出授权范围",409);
  return q;
 }

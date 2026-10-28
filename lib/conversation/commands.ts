@@ -6,7 +6,8 @@ import { conversationConfirmSchema } from "@/lib/types/conversation";
 import type { ConversationActor } from "@/lib/types/conversation";
 import { assertProject, lockConversation, ownedConversation, record } from "./repository";
 import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateService";
-import { readConversation } from "./service";
+import { readConversation, validateReadSources } from "./service";
+import type { ConversationSource } from "@/lib/types/conversation";
 
 export async function confirmConversationAction(actor: ConversationActor, id: string, executionId: string, raw: unknown) {
   const input = conversationConfirmSchema.parse(raw), hash = jsonHash({ executionId, input });
@@ -27,6 +28,9 @@ export async function confirmConversationAction(actor: ConversationActor, id: st
     if (previous && previous.inputHash !== hash) throw new AppError("REQUEST_ID_REUSED", "请求编号已用于其他确认", 409);
     if (execution.status !== "COMMITTED" && record(c.focusJson).projectId !== projectId)
       throw new AppError("CONTEXT_SCOPE_CHANGED", "讨论焦点已切换，请先回到提案所属项目", 409);
+    const sources = record(execution.sourceRun.trace).focusSources;
+    if (execution.status === "DECLINED") throw new AppError("PROPOSAL_DECLINED", "你已否决这项提案，请重新讨论", 409);
+    if (execution.status !== "COMMITTED" && Array.isArray(sources)) await validateReadSources(actor, sources as ConversationSource[], tx);
     const receipt = await confirmCopilotActionInTx(tx, projectId, {
       tool: "create_action", confirmed: true, sourceRunId: execution.sourceRunId,
       payload: record(execution.proposalJson),

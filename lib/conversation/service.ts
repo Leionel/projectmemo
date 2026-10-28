@@ -13,6 +13,8 @@ import { refreshExperiencePresentation } from "./presentationRuntime";
 import type { R4State } from "./investigationService";
 import { eventPresentation } from "./eventPresentation";
 import { reviewPresentation } from "./reviewPresentation";
+import { readResearchScope, validateWebSource } from "./researchScope";
+import { readSourceObservation } from "./sourceObservation";
 
 export async function appendConversationMessage(tx: Tx, conversationId: string, ownerUserId: string,
   role: "USER" | "ASSISTANT", content: string, blocks: ConversationBlocks, turnId?: string, runId?: string) {
@@ -93,6 +95,10 @@ export async function listConversations(actor: ConversationActor, projectId?: st
   const privateBindings = await db.conversationBinding.findMany({ where: { conversationId: { in: rows.map(c => c.id) },
     kind: { in: ["MISSION", "GOAL_QUESTION", "IMPACT"] }, projectId: { notIn: memberships.filter(m => m.role === "OWNER").map(m => m.projectId) } }, select: { conversationId: true } });
   const restricted = new Set(privateBindings.map(b => b.conversationId));
+  const observedConnections = await db.conversationAnchor.findMany({ where: { conversationId: { in: rows.map(c => c.id) }, originKind: "SOURCE_OBSERVATION" } });
+  for (const anchor of observedConnections) {
+    try { await readSourceObservation(actor, anchor.projectId, anchor.originId); } catch { restricted.add(anchor.conversationId); }
+  }
   const titleScopes = new Map(rows.map(row => [row.id, row.projects.map(p => p.projectId)]));
   const conversations = await Promise.all(rows.slice(0, 20).map(async ({ projects, ...row }) => {
     if (restricted.has(row.id) || projects.some(p => !allowed.has(p.projectId))) return { ...row, title: "部分历史不可用的讨论" };
@@ -132,7 +138,13 @@ export async function readConversation(actor: ConversationActor, id: string, bef
   const messages: ConversationView["messages"] = [];
   for (const row of rows.slice(0, 50).reverse()) {
     const blocks = { ...emptyBlocks(), ...record(row.blocksJson) } as ConversationBlocks;
-    let restricted = blocks.observedProjectIds.some(p => !allowed.has(p)) ||
+    let webRestricted = false;
+    try {
+      for (const source of blocks.sources.filter(s => s.external)) await validateWebSource(actor, source);
+      for (const source of blocks.sources.filter(s => s.sourceId.startsWith("repo:"))) await readSourceObservation(actor, source.projectId, source.sourceId.slice(5));
+      if (blocks.observationRef?.kind === "SOURCE_OBSERVATION") await readSourceObservation(actor, blocks.observationRef.projectId, blocks.observationRef.id);
+    } catch { webRestricted = true; }
+    let restricted = webRestricted || blocks.observedProjectIds.some(p => !allowed.has(p)) ||
       blocks.refs.some(ref => ["MISSION", "GOAL_QUESTION", "IMPACT"].includes(ref.kind) && !owners.has(ref.projectId));
     for (const ref of blocks.refs.filter(r => r.kind === "MISSION")) {
       if (!await db.agentMission.findFirst({ where: { id: ref.id, projectId: ref.projectId, ownerUserId: actor.userId } })) restricted = true;
@@ -177,7 +189,13 @@ export async function readConversation(actor: ConversationActor, id: string, bef
   const latestOwners = new Set(latestMemberships.filter(m => m.role === "OWNER").map(m => m.projectId));
   for (let index = 0; index < messages.length; index++) {
     const message = messages[index];
-    if (message.observedProjectIds.some(p => !latestAllowed.has(p)) ||
+    let webRestricted = false;
+    try {
+      for (const source of message.sources.filter(s => s.external)) await validateWebSource(actor, source);
+      for (const source of message.sources.filter(s => s.sourceId.startsWith("repo:"))) await readSourceObservation(actor, source.projectId, source.sourceId.slice(5));
+      if (message.observationRef?.kind === "SOURCE_OBSERVATION") await readSourceObservation(actor, message.observationRef.projectId, message.observationRef.id);
+    } catch { webRestricted = true; }
+    if (webRestricted || message.observedProjectIds.some(p => !latestAllowed.has(p)) ||
       message.refs.some(r => ["MISSION", "GOAL_QUESTION", "IMPACT"].includes(r.kind) && !latestOwners.has(r.projectId))) {
       messages[index] = { ...emptyBlocks(), id: message.id, seq: message.seq, role: message.role, content: "部分历史已不可访问", restricted: true };
     }
@@ -192,6 +210,7 @@ export async function readConversation(actor: ConversationActor, id: string, bef
     title = first ? scopes.some(p => !latestAllowed.has(p)) ? "项目协作" : discussionTitle(first.content, linked.find(p => p.id === projectId)?.title) : "新讨论";
   }
   return { schemaVersion: 1, id, title: messages.some(m => m.restricted) ? "项目协作" : title,
+    research: await readResearchScope(actor, id),
     scope: c.scope, homeProjectId: c.homeProjectId, version: c.version, focusProjectId,
     messages, linkedProjects: linked.filter(p => latestAllowed.has(p.id)), hasMore: rows.length > 50, beforeSeq: rows.length ? rows[Math.min(49, rows.length - 1)].seq : null,
     activeTurn: active && !messages.some(m => m.restricted) ? { id: active.id, requestId: active.requestId, status: active.status, progress: experienceProgress(active.readManifestJson) } : null,
@@ -216,6 +235,11 @@ export async function saveFocusPreference(actor: ConversationActor, projectId: s
 }
 export async function validateReadSources(actor: ConversationActor, sources: ConversationBlocks["sources"], tx: Tx = db) {
   for (const source of sources) {
+    if (source.external) { await validateWebSource(actor, source, tx); continue; }
+    if (source.sourceId.startsWith("repo:")) {
+      if ((await readSourceObservation(actor, source.projectId, source.sourceId.slice(5), tx)).revision !== source.revision) throw new AppError("SOURCE_CHANGED", "仓库线索已变化", 409);
+      continue;
+    }
     const member = await assertProject(actor, source.projectId, tx);
     const mission = source.sourceId.startsWith("mission:") && member.role === "OWNER"
       ? await tx.agentMission.findFirst({ where: { id: source.sourceId.slice(8), projectId: source.projectId, ownerUserId: actor.userId } }) : null;

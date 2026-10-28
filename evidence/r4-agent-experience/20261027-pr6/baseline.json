@@ -1,0 +1,31 @@
+{
+  "baseCommit": "bf7ca1a93c6b1fb5bf38b8e21d8cbf8edc2e3aaa",
+  "protectedFiles": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "dbff8a9d83193830b2fd06c5c131b9324c0a8e472be2c8aa2f66deff990e2750"
+    },
+    {
+      "path": "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md",
+      "sha256": "7328e70a94cbd17f400c23ef418d0a62f396a408ea9a1926c9d1f057f211f631"
+    },
+    {
+      "path": "harmonyos/build-profile.json5",
+      "sha256": "442618a372bd9a74d204e7162ffe6844b6fc49dbf4c09b8cc5bc58c6709a1924"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "af1b4fbd345a0d2b7e23394aca3540b524a3d4826fca6a51169b13b2a325ee4a"
+    },
+    {
+      "path": "next-env.d.ts",
+      "sha256": "083e23c4c5e7761db151134ea1ef7896120c86c5888cdc8a861f534f7e86d6fd"
+    }
+  ],
+  "backupDir": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\projectmemo-pr6-originals-b75ezh7w",
+  "modelBudget": {
+    "used": 44,
+    "limit": 48
+  },
+  "provenance": "PR6 isolated synthetic engineering fixtures; real-provider acceptance separately recorded"
+}

@@ -1,0 +1,19 @@
+{
+  "status": "PREPARED_ONLY",
+  "runId": "frozen-final-v1",
+  "sampleStatus": "FROZEN_NEW_24_NOT_USED_FOR_TUNING",
+  "fixtureHash": "c31b385e5d107c17ed20dffe1fe83ce4eb418a41b4518a4ff445457208862e22",
+  "runtimeHash": "f721da8ac27fb979c5278a6f7dd0f881c1828555219b5d32798a2136edf3cbe0",
+  "caseCount": 24,
+  "arms": [
+    "INTERNAL_QUICK",
+    "WEB_STANDARD"
+  ],
+  "modelCallLimit": 336,
+  "externalRequestLimit": 96,
+  "priceEstimateExternalUSD": 0.07200000000000001,
+  "provenance": "FROZEN_NEW_24_AFTER_DEVELOPMENT_V4; not used for prompt tuning; independent semantic scoring pending",
+  "priorCampaign": "output/r4-pr5/model-budget.json (44/48 preserved)",
+  "requiredLedger": "output/r4-pr6/authorized-budget.json",
+  "qualityScoring": "independent human scoring remains required"
+}

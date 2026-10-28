@@ -1,3 +1,4 @@
+import { ConversationResearchControl, ConversationResearchResult } from '../components/ConversationResearch';
 import { supportsAgentPresentation } from '../common/AgentPresentationContract';
 import router from '@ohos.router';
 import util from '@ohos.util';
@@ -153,7 +154,7 @@ struct FocusConversation {
       if (reply.status === 'ANSWERED' || reply.status === 'NEEDS_CLARIFICATION' || reply.status === 'CANCELLED') { this.text = ''; this.saveComposer(); this.pending = null; this.replyId = ''; }
       else { this.error = ''; if (['FAILED', 'UNKNOWN'].includes(reply.status)) this.pending = null; }
     } catch (e) { if (epoch === this.generation) { this.fail(e); await this.refresh(); } }
-    finally { if (epoch === this.generation) this.busy = false; }
+    finally { if (epoch === this.generation) this.busy = this.view.activeTurn !== null; }
   }
   private async confirm(p: ConversationProposal): Promise<void> {
     if (this.busy) return;
@@ -197,9 +198,12 @@ struct FocusConversation {
     return labels[this.view.activeTurn?.progress?.phase ?? ''] ?? '正在核对项目资料…';
   }
   private async pollProgress(): Promise<void> {
-    if (!this.busy || !this.pageVisible || this.view.id === '') return;
+    if ((!this.busy && this.view.activeTurn === null) || !this.pageVisible || this.view.id === '') return;
     const epoch = this.generation, id = this.view.id;
-    try { const view = await this.service.read(id); if (epoch === this.generation && this.view.id === id && view.version >= this.view.version) this.view = view; } catch { /* Original request handles errors. */ }
+    try { const view = await this.service.read(id); if (epoch === this.generation && this.view.id === id && view.version >= this.view.version) {
+      this.view = view; this.busy = view.activeTurn !== null;
+      if (!this.busy && this.pending && (view.latestTurn?.status === 'ANSWERED' || view.latestTurn?.status === 'NEEDS_CLARIFICATION' || view.latestTurn?.status === 'CANCELLED')) { if (this.text.trim() === this.pending.message) { this.text = ''; this.saveComposer(); } this.pending = null; this.replyId = ''; }
+    } } catch { /* Original request handles errors. */ }
   }
   private async stop(): Promise<void> {
     if (!this.view.activeTurn) return;
@@ -245,6 +249,9 @@ struct FocusConversation {
           Blank()
           Text($$.message.provider === 'rules' ? '本地整理' : $$.message.provider === 'project_state' ? '项目记录' : '云端分析').fontSize(11).fontColor(PMColors.INK_TERTIARY)
         }.width('100%')
+      }
+      if ($$.message.role === 'ASSISTANT' && !$$.message.restricted && ($$.message.researchCoverage || $$.message.sources.some((source: ConversationSource) => source.external !== undefined))) {
+        ConversationResearchResult({ message: $$.message, conversationId: this.view.id, version: this.view.version, disabled: this.busy, onContinue: (value: string): void => { this.replyId = $$.message.id; this.text = value; this.saveComposer(); } })
       }
       if (this.hasPresentation($$.message)) {
         AgentMessageBlocks({ presentation: $$.message.presentation!, files: $$.message.fileGuides ?? [], conversationId: this.view.id, messageId: $$.message.id, busy: this.busy,
@@ -396,6 +403,9 @@ struct FocusConversation {
           if (this.r4Available && this.cloud && this.cloudAvailable) {
             Select([{ value: '快速调查' }, { value: '标准调查' }, { value: '深入调查' }]).selected(this.modeIndex()).value(this.modeLabel()).font({ size: 13 }).fontColor(PMColors.INK_SECONDARY).height(44).width(128).enabled(!this.busy)
               .accessibilityText('调查深度').onSelect((index: number) => { this.investigationMode = ['QUICK', 'STANDARD', 'DEEP'][index]; this.pending = null; })
+          }
+          if (this.view.research?.available && this.cloud) {
+            ConversationResearchControl({ conversationId: this.view.id, projectId: this.target || this.view.homeProjectId || '', info: this.view.research!, disabled: this.busy, onSaved: (): void => { this.service.read(this.view.id).then(v => { this.view = v; }).catch((e: Error) => { this.fail(e); }); } })
           }
           TextArea({ text: this.text, placeholder: '聊聊下一步…' }).height(84).fontSize(15).fontColor(PMColors.INK_PRIMARY).backgroundColor(Color.Transparent).padding({ left: 15, right: 15, top: 14, bottom: 4 })
             .enabled(!this.busy).onChange((v: string) => { this.text = v; this.saveComposer(); })

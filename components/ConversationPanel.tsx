@@ -10,6 +10,7 @@ import type { ConversationWorkRef } from "@/lib/types/conversationWork";
 import { ConversationWorkCard } from "./ConversationWorkCard";
 import { ConversationAnchorPanel } from "./ConversationAnchorPanel";
 import { ConversationFileGuides, ConversationAnswer } from "./ConversationFileGuides";
+import { ConversationResearchScope, ConversationResearchView } from "./ConversationResearch";
 import { missionStatusLabels } from "@/lib/mission/presentation";
 import styles from "./ConversationPanel.module.css";
 import { AgentMessageBlocks, supportsAgentPresentation } from "./AgentMessageBlocks";
@@ -222,16 +223,17 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
     } catch (e) { if (epoch === generation.current) setError(e instanceof Error ? e.message : "历史暂不可读"); }
     finally { if (epoch === generation.current) setBusy(false); }
   }
+  const working = busy || !!view?.activeTurn;
   return <section className={styles.panel} aria-label="问忆程">
     <header className={styles.header}><div className={styles.agentTitle}><span className={styles.agentMark} aria-hidden="true"><Sparkles size={19}/></span><div><h2>与忆程协作</h2><p>{view?.scope === "PROJECT" ? "项目讨论" : "项目记忆 · 对话与接续"}</p></div></div><div className={styles.historyControls}>
-      <select aria-label="选择讨论" value={view?.id ?? ""} disabled={busy} onChange={e => {
+      <select aria-label="选择讨论" value={view?.id ?? ""} disabled={working} onChange={e => {
         if (busyRef.current) return;
         const epoch = ++generation.current; setBusy(true); setReply(null); setWorkRef(null); pending.current = null;
         void load(e.target.value, epoch).catch(err => { if (epoch === generation.current) setError(err.message); })
           .finally(() => { if (epoch === generation.current) setBusy(false); });
       }}><option value="" disabled>选择讨论</option>{view && !list.some(c => c.id === view.id) && <option value={view.id}>{view.title}</option>}
         {list.map(c => <option value={c.id} key={c.id}>{c.title}</option>)}</select>
-      <button type="button" aria-label="新讨论" title="新讨论" className={styles.newDiscussion + " focus-ring"} disabled={busy} onClick={() => void create()}><Plus size={17}/></button>
+      <button type="button" aria-label="新讨论" title="新讨论" className={styles.newDiscussion + " focus-ring"} disabled={working} onClick={() => void create()}><Plus size={17}/></button>
     </div></header>
     {view && showPreference && target && <FocusPreference key={target} projectId={target} onError={setError}/>}
     <div ref={messageRegion} className={styles.messages} aria-live="polite" aria-busy={busy}>
@@ -241,9 +243,9 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
         onReadResults={() => { if (loadedId.current === view.id && messageRegion.current) messageRegion.current.scrollTop = messageRegion.current.scrollHeight; }}
         onUpdated={v => { if (loadedId.current === v.id) { setView(v); onUpdated?.(); } }}/>}
       {view?.hasMore && <button type="button" className="workspace-link focus-ring" onClick={() => void older()}>读取更早讨论</button>}
-      {view?.latestTurn?.canRetry && <div className={styles.reason} role="status"><strong>这次分析未完成</strong><p>{view.latestTurn.message}</p><button type="button" className="workspace-link focus-ring" disabled={busy} onClick={() => { pending.current = null; setText(view.messages.filter(m => m.role === "USER").at(-1)?.content ?? ""); }}>重新提问 →</button></div>}
+      {view?.latestTurn?.canRetry && <div className={styles.reason} role="status"><strong>这次分析未完成</strong><p>{view.latestTurn.message}</p><button type="button" className="workspace-link focus-ring" disabled={working} onClick={() => { pending.current = null; setText(view.messages.filter(m => m.role === "USER").at(-1)?.content ?? ""); }}>重新提问 →</button></div>}
       {loadingHistory && <p role="status">正在读取讨论…</p>}
-      {!view && !loadingHistory && <div className={styles.empty}><span className={styles.emptyMark} aria-hidden="true">忆</span><h3>从今天最重要的事开始</h3><p>忆程会带上项目记忆，和你一起往下走。</p><button className="editorial-button focus-ring" onClick={() => void create()} disabled={busy}>开始讨论</button></div>}
+      {!view && !loadingHistory && <div className={styles.empty}><span className={styles.emptyMark} aria-hidden="true">忆</span><h3>从今天最重要的事开始</h3><p>忆程会带上项目记忆，和你一起往下走。</p><button className="editorial-button focus-ring" onClick={() => void create()} disabled={working}>开始讨论</button></div>}
       {view && !view.messages.length && <div className={styles.empty}><span className={styles.emptyMark} aria-hidden="true">忆</span><h3>今天，先推进哪件事？</h3><div className={styles.starters}>{["最近哪个项目最值得先处理？", "这周有哪些待回应的事？"].map(q => <button key={q} type="button" className={styles.starter + " focus-ring"} onClick={() => setText(q)}>{q}<span aria-hidden="true">↗</span></button>)}</div></div>}
       {view?.messages.map(m => <article key={m.id} id={"conversation-message-" + m.id} className={m.role === "USER" ? styles.user : styles.assistant}>
         {m.role === "USER" && <div className={styles.userHead}><strong>你</strong><span aria-hidden="true">我</span></div>}
@@ -259,12 +261,12 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
           <p>{s.title}</p><p>{s.excerpt}</p><small>{s.temporalState} · {new Date(s.observedAt).toLocaleString("zh-CN")}</small>
         </blockquote>)}{m.limitations.map((l, i) => <p key={i}>{l}</p>)}</details>}
         <div className={styles.refs}>{m.refs.filter(r => r.kind === "PROJECT" || r.kind === "MISSION").slice(0, 3).map(r => <div key={r.bindingId ?? r.id}>
-          <button type="button" className={styles.contextChip + " focus-ring"} disabled={busy} onClick={() => {
+          <button type="button" className={styles.contextChip + " focus-ring"} disabled={working} onClick={() => {
             setTarget(r.projectId); setReply(m); setText("帮我先处理这个项目最重要的待办。"); pending.current = null;
           }}>{r.title}</button>
           <Link className={styles.quietLink + " focus-ring"} href={conversationHref(r.href, view.id, m.id)}>查看{r.kind === "MISSION" ? "委托" : "项目"} ↗</Link>
-          {["MISSION", "ACTION"].includes(r.kind) && <button type="button" className="workspace-link focus-ring" disabled={busy} onClick={() => setWorkRef({ kind: r.kind as "MISSION" | "ACTION", id: r.id, projectId: r.projectId })}>在此协作</button>}
-          {r.kind === "MISSION" && r.status === "PAUSED" && <button type="button" className="workspace-link focus-ring" disabled={busy} onClick={() => {
+          {["MISSION", "ACTION"].includes(r.kind) && <button type="button" className="workspace-link focus-ring" disabled={working} onClick={() => setWorkRef({ kind: r.kind as "MISSION" | "ACTION", id: r.id, projectId: r.projectId })}>在此协作</button>}
+          {r.kind === "MISSION" && r.status === "PAUSED" && <button type="button" className="workspace-link focus-ring" disabled={working} onClick={() => {
             if (busyRef.current) return;
             const epoch = generation.current; setBusy(true);
             void api<{conversation:ConversationView}>("/api/conversations/" + view.id + "/missions/" + r.id + "/resume-preview", "POST", {})
@@ -276,31 +278,33 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
           <div className={styles.proposalMeta}><span>{m.proposal.resultId ? "已写入原项目" : "待你确认"}</span><span>{view.linkedProjects.find(v => v.id === m.proposal?.projectId)?.title}</span></div>
           <strong>{m.proposal.title}</strong><p>{m.proposal.description}</p>
           {m.proposal.resultId ? <p>{!m.proposal.tool || m.proposal.tool === "create_action" ? "已创建行动" : "已提交原操作"} · {statusLabel(m.proposal.actionStatus)} <Link className="workspace-link focus-ring" href={conversationHref("/projects/" + m.proposal.projectId + (m.proposal.tool === "adopt_artifact" ? "/artifacts" : !m.proposal.tool || ["create_action", "complete_action"].includes(m.proposal.tool) ? "/actions#action-" + m.proposal.resultId : "/missions?mission=" + m.proposal.resultId), view.id, m.id)}>查看原结果</Link>{(!m.proposal.tool || ["create_action", "complete_action"].includes(m.proposal.tool)) && <button className="workspace-link focus-ring" onClick={() => setWorkRef({ kind: "ACTION", id: m.proposal!.resultId!, projectId: m.proposal!.projectId })}>记录与查看结果</button>}{m.proposal.resultCardId && <span className={styles.receipt}>复盘已保存 · {m.proposal.resultCardId}</span>}</p>
-            : m.proposal.status === "PENDING" ? <div className={styles.actions}><button className="editorial-button focus-ring" disabled={busy} onClick={() => void confirm(m)}>{m.proposal.tool === "resume_mission" ? "确认接续原委托" : !m.proposal.tool || m.proposal.tool === "create_action" ? "确认创建行动" : "确认此操作"}</button>
-              <button className="workspace-tool focus-ring" disabled={busy} onClick={() => void confirm(m, true)}>不采用</button></div> : <p>{m.proposal.status === "DECLINED" ? "已不采用" : m.proposal.status}</p>}
+            : m.proposal.status === "PENDING" ? <div className={styles.actions}><button className="editorial-button focus-ring" disabled={working} onClick={() => void confirm(m)}>{m.proposal.tool === "resume_mission" ? "确认接续原委托" : !m.proposal.tool || m.proposal.tool === "create_action" ? "确认创建行动" : "确认此操作"}</button>
+              <button className="workspace-tool focus-ring" disabled={working} onClick={() => void confirm(m, true)}>不采用</button></div> : <p>{m.proposal.status === "DECLINED" ? "已不采用" : m.proposal.status}</p>}
         </section>}
+        {m.role === "ASSISTANT" && !m.restricted && <ConversationResearchView message={m} conversationId={view!.id} version={view!.version} onError={setError} onContinue={value => { setReply(m); setText(value); }}/>}
         {m.role === "ASSISTANT" && !m.restricted && <button className={styles.followup + " focus-ring"} onClick={() => setReply(m)}><CornerDownRight size={12}/>追问</button>}
       </article>)}
       {view && workRef && <ConversationWorkCard key={view.id + workRef.kind + workRef.id} conversation={view} workRef={workRef} onChange={v => { setView(v); onUpdated?.(); }} onClose={() => setWorkRef(null)}/>}
-      {busy && <div className={styles.liveProgress} role="status"><strong>{({ ROUTING: "正在定位相关项目", READING_SOURCE: "正在读取原资料", EVALUATING: "正在判断目标差距", WAITING_MODEL: "正在整理结论", READY: "正在保存本轮回答", WAITING_USER: "正在整理需要你补充的条件", STOPPING: "正在停止后续调查" } as Record<string, string>)[view?.activeTurn?.progress?.phase ?? ""] ?? "正在读取和处理…"}</strong>
+      {working && <div className={styles.liveProgress} role="status"><strong>{({ ROUTING: "正在定位相关项目", READING_SOURCE: "正在读取原资料", EVALUATING: "正在判断目标差距", WAITING_MODEL: "正在整理结论", READY: "正在保存本轮回答", WAITING_USER: "正在整理需要你补充的条件", STOPPING: "正在停止后续调查" } as Record<string, string>)[view?.activeTurn?.progress?.phase ?? ""] ?? "正在读取和处理…"}</strong>
         {view?.activeTurn?.progress?.steps.map(s => <span key={s.id}>{s.status === "SUCCEEDED" ? "✓" : "·"} {s.label}</span>)}
         {view?.activeTurn?.progress && <button type="button" className="workspace-link focus-ring" disabled={view.activeTurn.progress.phase === "STOPPING"} onClick={() => { const epoch = generation.current; void api<{ conversation: ConversationView }>(`/api/conversations/${view.id}/turns/${view.activeTurn!.id}/stop`, "POST", {}).then(r => { if (epoch === generation.current) setView(r.conversation); }).catch(e => { if (epoch === generation.current) setError(e.message); }); }}>停止本轮调查</button>}</div>}
     </div>
     {error && <p role="alert" className={styles.error}>{error} {view && <button className="workspace-link focus-ring" onClick={() => void load(view.id, generation.current).catch(e => setError(e.message))}>读取原状态</button>}</p>}
     {view && <form className={styles.composer} onSubmit={ask}>
       {reply && <div className={styles.reply}>围绕：{reply.content.slice(0, 55)}<button type="button" className="workspace-link focus-ring" onClick={() => { setReply(null); pending.current = null; }}>取消追问</button></div>}
-      <label className={styles.inputLabel}><textarea aria-label="与忆程讨论项目" value={text} onChange={e => setText(e.target.value)} maxLength={3000} placeholder="问忆程：先做什么？或请帮我继续…" disabled={busy} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); e.currentTarget.form?.requestSubmit(); } }}/></label>
-      <div className={styles.composerFooter}><label className={styles.cloud} onMouseEnter={() => setShowCloudHelp(true)} onMouseLeave={() => setShowCloudHelp(false)} onFocus={() => setShowCloudHelp(true)} onBlur={() => setShowCloudHelp(false)} onContextMenu={event => { event.preventDefault(); setShowCloudHelp(v => !v); }} title="长按查看资料使用说明"><input type="checkbox" aria-label="允许云模型使用本次授权项目资料" checked={cloud} disabled={!analysisReady || !cloudAvailable || busy} onChange={e => { setCloud(e.target.checked); pending.current = null; }}/>{cloudAvailable ? "云端分析" : "本地整理"}</label>
+      <ConversationResearchScope view={view} projectId={target} disabled={working} onChange={setView} onError={setError}/>
+      <label className={styles.inputLabel}><textarea aria-label="与忆程讨论项目" value={text} onChange={e => setText(e.target.value)} maxLength={3000} placeholder="问忆程：先做什么？或请帮我继续…" disabled={working} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); e.currentTarget.form?.requestSubmit(); } }}/></label>
+      <div className={styles.composerFooter}><label className={styles.cloud} onMouseEnter={() => setShowCloudHelp(true)} onMouseLeave={() => setShowCloudHelp(false)} onFocus={() => setShowCloudHelp(true)} onBlur={() => setShowCloudHelp(false)} onContextMenu={event => { event.preventDefault(); setShowCloudHelp(v => !v); }} title="长按查看资料使用说明"><input type="checkbox" aria-label="允许云模型使用本次授权项目资料" checked={cloud} disabled={!analysisReady || !cloudAvailable || working} onChange={e => { setCloud(e.target.checked); pending.current = null; }}/>{cloudAvailable ? "云端分析" : "本地整理"}</label>
       {view && <div className={styles.composerScope}>
-      <label><select aria-label="讨论项目范围" value={target} disabled={busy || view.scope === "PROJECT"} onChange={e => { setTarget(e.target.value); pending.current = null; }}>
+      <label><select aria-label="讨论项目范围" value={target} disabled={working || view.scope === "PROJECT"} onChange={e => { setTarget(e.target.value); pending.current = null; }}>
         <option value="">跨项目</option>{view.linkedProjects.map(p => <option value={p.id} key={p.id}>{p.title}</option>)}
         {projectId && !view.linkedProjects.some(p => p.id === projectId) && <option value={projectId}>当前项目</option>}
       </select></label>
       {target && <button type="button" className={styles.quietLink + " focus-ring"} onClick={() => setShowPreference(v => !v)}>项目偏好</button>}
       {projectId && <Link className="workspace-link focus-ring" href={conversationHref("/focus", view.id)}>回到原焦点讨论</Link>}
     </div>}
-      {r4Available && cloud && <select className={styles.analysisMode} aria-label="调查深度" value={investigationMode} disabled={busy} onChange={e => { setInvestigationMode(e.target.value as typeof investigationMode); pending.current = null; }}><option value="QUICK">快速</option><option value="STANDARD">标准调查</option><option value="DEEP">深入调查 · 更多调用</option></select>}
-      <button type="submit" className={styles.send + " focus-ring"} disabled={busy || !analysisReady || !text.trim()} aria-label="发送"><ArrowUp size={17}/></button></div>
+      {r4Available && cloud && <select className={styles.analysisMode} aria-label="调查深度" value={investigationMode} disabled={working} onChange={e => { setInvestigationMode(e.target.value as typeof investigationMode); pending.current = null; }}><option value="QUICK">快速</option><option value="STANDARD">标准调查</option><option value="DEEP">深入调查 · 更多调用</option></select>}
+      <button type="submit" className={styles.send + " focus-ring"} disabled={working || !analysisReady || !text.trim()} aria-label="发送"><ArrowUp size={17}/></button></div>
       <p data-visible={showCloudHelp} className={styles.analysisHint}>{!analysisReady ? "正在确认分析方式…" : !cloudAvailable ? "未配置云模型，当前仅整理项目记录" : cloud ? "发送即允许云模型分析本次授权项目资料，可关闭" : "仅整理项目记录，不调用云模型"}</p>
     </form>}
   </section>;

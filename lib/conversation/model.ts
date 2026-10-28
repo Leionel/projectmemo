@@ -8,6 +8,8 @@ import { db } from "@/lib/db";
 import { json, jsonHash } from "@/lib/mission/contracts";
 import type { ModelPurpose } from "./tokenBudget";
 import { getChatProviderDefaults } from "@/lib/config/provider";
+import { mutateTurn } from "./turnRuntime";
+import { record } from "./repository";
 export const routeSchema = z.object({
   intent: z.enum(["ANSWER", "CLARIFY", "PROPOSE_ACTION", "OPEN_MISSION"]),
   projectIds: z.array(z.string()).max(3),
@@ -44,18 +46,27 @@ export async function conversationModelSpec<T>(actor: ConversationActor, convers
   await assertSession(actor);
   if (!["ROUTE", "INVESTIGATE", "ANSWER", "UI_PLAN"].includes(spec.purpose)) throw new AppError("INVALID_MODEL_PURPOSE", "本轮讨论不支持该模型任务", 422);
   const messages = buildPromptMessages(spec, input), start = Date.now();
+  const fingerprint = jsonHash({ prompt: spec.id, version: spec.version, input: { ...record(input), remaining: undefined } });
+  const turn = await db.conversationTurn.findUniqueOrThrow({ where: { id: turnId } });
+  const cached = record(record(turn.readManifestJson).modelResults)[callId] as { fingerprint: string; data: unknown; provider: string; usage: { inputTokens: number | null; outputTokens: number | null } } | undefined;
+  if (cached) {
+    if (cached.fingerprint !== fingerprint) throw new AppError("MODEL_CHECKPOINT_CHANGED", "原模型检查点的输入已变化，不能自动重发", 409);
+    return { data: spec.outputSchema.parse(cached.data), provider: cached.provider, usage: cached.usage };
+  }
   let result: Awaited<ReturnType<typeof chatWithLLMWithMeta>> | undefined;
   try {
     result = await chatWithLLMWithMeta(messages, undefined, { ...actor, turnId, callId, purpose: spec.purpose as ModelPurpose,
       promptId: spec.id, promptVersion: spec.version, outputSchemaVersion: spec.outputSchemaVersion, outputTokens: spec.maxOutputTokens });
     if (result.status === "FAILED") throw new AppError(result.fallbackReason ?? "MODEL_OUTPUT_INVALID", "云端回答不完整，请读取原状态", 409);
     const data = spec.outputSchema.parse(JSON.parse(result.data));
+    const response = { data, provider: result.provider, usage: result.usage ?? { inputTokens: null, outputTokens: null } };
+    await mutateTurn(actor, conversationId, turnId, manifest => ({ ...manifest, modelResults: { ...record(manifest.modelResults), [callId]: { fingerprint, ...response } } }));
     await db.agentRun.create({ data: { conversationId, turnId, runType: "CHAT", status: "SUCCESS", provider: result.provider,
       trace: json({ purpose: spec.purpose, promptId: spec.id, promptVersion: spec.version, outputSchemaVersion: spec.outputSchemaVersion,
         callId, messageHash: jsonHash(messages), responseHash: jsonHash(result.data), durationMs: result.durationMs,
         requestIdentity: result.requestIdentity, usage: result.usage, usageUnknown: result.usageUnknown, finishReason: result.finishReason,
         ...(spec.purpose === "INVESTIGATE" ? { goalPromptId: "focus.goal.v1" } : {}) }) } });
-    return { data, provider: result.provider, usage: result.usage ?? { inputTokens: null, outputTokens: null } };
+    return response;
   } catch (e) {
     const configured = getChatProviderDefaults();
     await db.agentRun.create({ data: { conversationId, turnId, runType: "CHAT", status: "FAILED", provider: result?.provider ?? `llm:${configured.provider}:${configured.model}`,

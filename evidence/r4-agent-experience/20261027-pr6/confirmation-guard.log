@@ -1,0 +1,41 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/focusConversation.test.ts -t rejects stale source
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/focusConversation.test.ts (22 tests | 1 failed | 21 skipped) 1631ms
+     × rejects stale source, modified hash, denied proposal, foreign actor and revoked project 1613ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/focusConversation.test.ts > Focus conversations: real services and isolated persistence > rejects stale source, modified hash, denied proposal, foreign actor and revoked project
+AssertionError: expected Error: 本次读取的资料已变化，请重新提问 { …(3) } to match object { code: 'PROPOSAL_DECLINED' }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+- {
+-   "code": "PROPOSAL_DECLINED",
++ AppError {
++   "code": "SOURCE_CHANGED",
+  }
+
+ ❯ tests/focusConversation.test.ts:173:88
+    171|     const f2 = await fixture(); await expect(readConversation(f2.actor…
+    172|     await declineConversationAction(f.actor, f.id, proposal.executionI…
+    173|     await expect(confirmConversationAction(f.actor, f.id, proposal.exe…
+       |                                                                                        ^
+    174|     await db.projectMembership.delete({ where: { userId_projectId: { u…
+    175|     expect((await readConversation(f.actor, f.id)).messages.at(-1)!.re…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 21 skipped (22)
+   Start at  20:17:06
+   Duration  13.80s (transform 4.59s, setup 0ms, import 11.67s, tests 1.63s, environment 0ms)
+

@@ -1,5 +1,19 @@
 # Focus Agent：ECS 开关与验收
 
+## PR-6 联网研究升级
+
+PR-6 代码通过验证、提交并推送后，再按原 `safe-update.sh` 固定提交流程升级；不要只修改开关。新迁移 `20261028010000_conversation_research` 为原 Conversation 增加研究范围、为原 turn 增加会话与 lease 字段，保留旧记录。
+
+在原环境配置中增加 `FOCUS_WEB_ENABLED=true`、`FOCUS_ASYNC_ENABLED=true`；保留现有生成模型配置。搜索复用 `MISSION_SEARCH_API_KEY`，未单独配置时使用 `LLM_API_KEY`，接口固定为 DeepSeek 官方 Search/Fetch，不把密钥发给目标网页。不要在操作回执中输出密钥。
+
+原 `projectmemo-mission-worker` 现在也推进持久 ConversationTurn。开启异步前同时检查 Web 和该 Worker 均 active；本地调试需在隔离数据库环境分别启动后端与 `npm.cmd run mission:worker`。重启由 lease 接管和原检查点恢复，未知外部请求不自动重发，停止排队请求无需等待 worker。
+
+验收须登录检查：会话确认公开研究范围；直接提供公开链接后读到实际片段；回答引用能回读原来源；断线重开沿用原 turn；关闭范围后旧提案不可确认；总结预览确认后只新增一个原 Artifact。API 健康 200 不能代替这些交互。
+
+回滚功能时先关闭两个新开关并保留数据库列、历史来源和未知费用预占；已排队 turn 可显式停止。不要删除新列、清空原数据或假定降级后的旧二进制会接管新异步步骤。原生入口与来源页需要重新构建并安装 HAP，ECS 更新只改变 Web/API/Worker。
+
+本节是部署准备，本轮未操作生产 ECS。正式更新命令的 TARGET 必须取最终已验证且已推送的完整提交，不能使用本地尚未提交的改动。
+
 先按 [ECS 更新命令](README.md#更新发布已部署机器) 部署已经验证并推送的完整提交，再配置本页四个开关。已有正确版本时，只需执行下面的环境更新，无需重复构建。
 
 首次升级 Focus 时由更新脚本应用 `20261026010000_focus_conversations`、`20261026020000_focus_anchor_projection` 和 `20261026120000_goal_change_reviews` 等尚未执行的迁移。开启开关前确认脚本的迁移与健康检查成功；单独修改开关不会补建表。

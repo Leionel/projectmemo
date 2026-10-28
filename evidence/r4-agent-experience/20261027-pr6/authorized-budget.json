@@ -1,0 +1,1449 @@
+{
+  "authorizationId": "user-explicit-2026-10-27-pr6-336-model-96-external",
+  "modelLimit": 336,
+  "externalLimit": 96,
+  "modelUsed": 188,
+  "externalUsed": 17,
+  "priorCampaign": {
+    "path": "output/r4-pr5/model-budget.json",
+    "used": 44,
+    "limit": 48,
+    "unchanged": true
+  },
+  "calls": [
+    {
+      "id": 1,
+      "kind": "MODEL",
+      "episode": "official-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 2,
+      "kind": "MODEL",
+      "episode": "official-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 3,
+      "kind": "MODEL",
+      "episode": "official-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 4,
+      "kind": "MODEL",
+      "episode": "official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 5,
+      "kind": "MODEL",
+      "episode": "official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 6,
+      "kind": "MODEL",
+      "episode": "official-2/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 7,
+      "kind": "MODEL",
+      "episode": "official-2/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 8,
+      "kind": "MODEL",
+      "episode": "official-2/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 9,
+      "kind": "MODEL",
+      "episode": "official-2/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 10,
+      "kind": "MODEL",
+      "episode": "official-2/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 11,
+      "kind": "MODEL",
+      "episode": "official-2/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 12,
+      "kind": "MODEL",
+      "episode": "official-3/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 13,
+      "kind": "MODEL",
+      "episode": "official-3/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 14,
+      "kind": "MODEL",
+      "episode": "official-3/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 15,
+      "kind": "MODEL",
+      "episode": "official-3/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 16,
+      "kind": "MODEL",
+      "episode": "official-3/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 17,
+      "kind": "MODEL",
+      "episode": "official-3/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 18,
+      "kind": "MODEL",
+      "episode": "official-4/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 19,
+      "kind": "MODEL",
+      "episode": "official-4/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 20,
+      "kind": "MODEL",
+      "episode": "official-4/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 21,
+      "kind": "MODEL",
+      "episode": "official-4/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 22,
+      "kind": "MODEL",
+      "episode": "official-4/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 23,
+      "kind": "MODEL",
+      "episode": "official-4/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 24,
+      "kind": "MODEL",
+      "episode": "papers-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 25,
+      "kind": "MODEL",
+      "episode": "papers-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 26,
+      "kind": "MODEL",
+      "episode": "papers-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 27,
+      "kind": "MODEL",
+      "episode": "papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 28,
+      "kind": "MODEL",
+      "episode": "papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 29,
+      "kind": "MODEL",
+      "episode": "papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 30,
+      "kind": "EXTERNAL",
+      "episode": "papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 31,
+      "kind": "MODEL",
+      "episode": "papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 32,
+      "kind": "MODEL",
+      "episode": "papers-2/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 33,
+      "kind": "MODEL",
+      "episode": "papers-2/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 34,
+      "kind": "MODEL",
+      "episode": "papers-2/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 35,
+      "kind": "MODEL",
+      "episode": "papers-2/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 36,
+      "kind": "MODEL",
+      "episode": "papers-3/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 37,
+      "kind": "MODEL",
+      "episode": "papers-3/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 38,
+      "kind": "MODEL",
+      "episode": "papers-3/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 39,
+      "kind": "MODEL",
+      "episode": "papers-3/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 40,
+      "kind": "MODEL",
+      "episode": "papers-4/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 41,
+      "kind": "MODEL",
+      "episode": "papers-4/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 42,
+      "kind": "MODEL",
+      "episode": "papers-4/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 43,
+      "kind": "MODEL",
+      "episode": "github-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 44,
+      "kind": "MODEL",
+      "episode": "github-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 45,
+      "kind": "MODEL",
+      "episode": "github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 46,
+      "kind": "MODEL",
+      "episode": "github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 47,
+      "kind": "MODEL",
+      "episode": "github-2/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 48,
+      "kind": "MODEL",
+      "episode": "github-2/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 49,
+      "kind": "MODEL",
+      "episode": "github-2/INTERNAL_QUICK",
+      "state": "UNKNOWN"
+    },
+    {
+      "id": 50,
+      "kind": "MODEL",
+      "episode": "github-2/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 51,
+      "kind": "MODEL",
+      "episode": "github-2/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 52,
+      "kind": "MODEL",
+      "episode": "github-2/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 53,
+      "kind": "MODEL",
+      "episode": "github-3/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 54,
+      "kind": "MODEL",
+      "episode": "github-3/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 55,
+      "kind": "MODEL",
+      "episode": "github-3/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 56,
+      "kind": "MODEL",
+      "episode": "github-3/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 57,
+      "kind": "MODEL",
+      "episode": "github-3/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 58,
+      "kind": "MODEL",
+      "episode": "github-3/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 59,
+      "kind": "MODEL",
+      "episode": "github-4/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 60,
+      "kind": "MODEL",
+      "episode": "github-4/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 61,
+      "kind": "MODEL",
+      "episode": "github-4/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 62,
+      "kind": "MODEL",
+      "episode": "github-4/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 63,
+      "kind": "MODEL",
+      "episode": "github-4/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 64,
+      "kind": "MODEL",
+      "episode": "github-4/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 65,
+      "kind": "MODEL",
+      "episode": "practice-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 66,
+      "kind": "MODEL",
+      "episode": "practice-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 67,
+      "kind": "MODEL",
+      "episode": "practice-1/INTERNAL_QUICK",
+      "state": "UNKNOWN_PROCESS_INTERRUPTED",
+      "reason": "development pilot stopped after confirmed contract failures; reservation retained"
+    },
+    {
+      "id": 68,
+      "kind": "MODEL",
+      "episode": "development-v2/official-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 69,
+      "kind": "MODEL",
+      "episode": "development-v2/official-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 70,
+      "kind": "MODEL",
+      "episode": "development-v2/official-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 71,
+      "kind": "MODEL",
+      "episode": "development-v2/official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 72,
+      "kind": "MODEL",
+      "episode": "development-v2/official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 73,
+      "kind": "MODEL",
+      "episode": "development-v2/official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 74,
+      "kind": "EXTERNAL",
+      "episode": "development-v2/official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 75,
+      "kind": "MODEL",
+      "episode": "development-v2/papers-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 76,
+      "kind": "MODEL",
+      "episode": "development-v2/papers-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 77,
+      "kind": "MODEL",
+      "episode": "development-v2/papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 78,
+      "kind": "MODEL",
+      "episode": "development-v2/papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 79,
+      "kind": "MODEL",
+      "episode": "development-v2/papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 80,
+      "kind": "EXTERNAL",
+      "episode": "development-v2/papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 81,
+      "kind": "MODEL",
+      "episode": "development-v2/papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 82,
+      "kind": "MODEL",
+      "episode": "development-v2/papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 83,
+      "kind": "EXTERNAL",
+      "episode": "development-v2/papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 84,
+      "kind": "MODEL",
+      "episode": "development-v2/papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 85,
+      "kind": "MODEL",
+      "episode": "development-v2/papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 86,
+      "kind": "MODEL",
+      "episode": "development-v2/github-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 87,
+      "kind": "MODEL",
+      "episode": "development-v2/github-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 88,
+      "kind": "MODEL",
+      "episode": "development-v2/github-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 89,
+      "kind": "MODEL",
+      "episode": "development-v2/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 90,
+      "kind": "MODEL",
+      "episode": "development-v2/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 91,
+      "kind": "MODEL",
+      "episode": "development-v2/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 92,
+      "kind": "EXTERNAL",
+      "episode": "development-v2/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 93,
+      "kind": "MODEL",
+      "episode": "development-v2/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 94,
+      "kind": "MODEL",
+      "episode": "development-v3/official-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 95,
+      "kind": "MODEL",
+      "episode": "development-v3/official-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 96,
+      "kind": "MODEL",
+      "episode": "development-v3/official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 97,
+      "kind": "MODEL",
+      "episode": "development-v3/official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 98,
+      "kind": "MODEL",
+      "episode": "development-v3/official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 99,
+      "kind": "EXTERNAL",
+      "episode": "development-v3/official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 100,
+      "kind": "MODEL",
+      "episode": "development-v3/papers-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 101,
+      "kind": "MODEL",
+      "episode": "development-v3/papers-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 102,
+      "kind": "MODEL",
+      "episode": "development-v3/papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 103,
+      "kind": "MODEL",
+      "episode": "development-v3/papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 104,
+      "kind": "MODEL",
+      "episode": "development-v3/papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 105,
+      "kind": "EXTERNAL",
+      "episode": "development-v3/papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 106,
+      "kind": "MODEL",
+      "episode": "development-v3/papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 107,
+      "kind": "MODEL",
+      "episode": "development-v3/papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 108,
+      "kind": "EXTERNAL",
+      "episode": "development-v3/papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 109,
+      "kind": "MODEL",
+      "episode": "development-v3/papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 110,
+      "kind": "MODEL",
+      "episode": "development-v3/papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 111,
+      "kind": "MODEL",
+      "episode": "development-v3/github-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 112,
+      "kind": "MODEL",
+      "episode": "development-v3/github-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 113,
+      "kind": "MODEL",
+      "episode": "development-v3/github-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 114,
+      "kind": "MODEL",
+      "episode": "development-v3/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 115,
+      "kind": "MODEL",
+      "episode": "development-v3/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 116,
+      "kind": "MODEL",
+      "episode": "development-v3/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 117,
+      "kind": "EXTERNAL",
+      "episode": "development-v3/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 118,
+      "kind": "MODEL",
+      "episode": "development-v3/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 119,
+      "kind": "MODEL",
+      "episode": "development-v3/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 120,
+      "kind": "EXTERNAL",
+      "episode": "development-v3/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 121,
+      "kind": "MODEL",
+      "episode": "development-v3/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 122,
+      "kind": "MODEL",
+      "episode": "development-v3/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 123,
+      "kind": "MODEL",
+      "episode": "development-v3/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 124,
+      "kind": "MODEL",
+      "episode": "development-v4/official-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 125,
+      "kind": "MODEL",
+      "episode": "development-v4/official-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 126,
+      "kind": "MODEL",
+      "episode": "development-v4/official-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 127,
+      "kind": "MODEL",
+      "episode": "development-v4/official-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 128,
+      "kind": "MODEL",
+      "episode": "development-v4/official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 129,
+      "kind": "MODEL",
+      "episode": "development-v4/official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 130,
+      "kind": "MODEL",
+      "episode": "development-v4/official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 131,
+      "kind": "EXTERNAL",
+      "episode": "development-v4/official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 132,
+      "kind": "MODEL",
+      "episode": "development-v4/official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 133,
+      "kind": "MODEL",
+      "episode": "development-v4/github-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 134,
+      "kind": "MODEL",
+      "episode": "development-v4/github-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 135,
+      "kind": "MODEL",
+      "episode": "development-v4/github-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 136,
+      "kind": "MODEL",
+      "episode": "development-v4/github-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 137,
+      "kind": "MODEL",
+      "episode": "development-v4/github-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 138,
+      "kind": "MODEL",
+      "episode": "development-v4/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 139,
+      "kind": "MODEL",
+      "episode": "development-v4/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 140,
+      "kind": "MODEL",
+      "episode": "development-v4/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 141,
+      "kind": "EXTERNAL",
+      "episode": "development-v4/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 142,
+      "kind": "MODEL",
+      "episode": "development-v4/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 143,
+      "kind": "MODEL",
+      "episode": "development-v4/github-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 144,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 145,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 146,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 147,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 148,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 149,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 150,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 151,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 152,
+      "kind": "EXTERNAL",
+      "episode": "frozen-final-v1/frozen-official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 153,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 154,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 155,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 156,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-2/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 157,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-2/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 158,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-2/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 159,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-2/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 160,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-2/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 161,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-2/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 162,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-2/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 163,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-2/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 164,
+      "kind": "EXTERNAL",
+      "episode": "frozen-final-v1/frozen-official-2/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 165,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-2/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 166,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-2/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 167,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-2/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 168,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-3/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 169,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-3/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 170,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-3/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 171,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-3/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 172,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-3/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 173,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-3/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 174,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-3/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 175,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-3/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 176,
+      "kind": "EXTERNAL",
+      "episode": "frozen-final-v1/frozen-official-3/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 177,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-3/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 178,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-3/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 179,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-3/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 180,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-4/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 181,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-4/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 182,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-4/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 183,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-4/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 184,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-4/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 185,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-4/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 186,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-4/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 187,
+      "kind": "EXTERNAL",
+      "episode": "frozen-final-v1/frozen-official-4/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 188,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-official-4/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 189,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-papers-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 190,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-papers-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 191,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-papers-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 192,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-papers-1/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 193,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 194,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 195,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 196,
+      "kind": "EXTERNAL",
+      "episode": "frozen-final-v1/frozen-papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 197,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 198,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 199,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-papers-1/WEB_STANDARD",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 200,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-papers-2/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 201,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-papers-2/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 202,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-papers-2/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 203,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-papers-2/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 204,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-papers-2/INTERNAL_QUICK",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "id": 205,
+      "kind": "MODEL",
+      "episode": "frozen-final-v1/frozen-papers-2/WEB_STANDARD",
+      "state": "UNKNOWN_STOPPED_FOR_USER_POWERDOWN"
+    }
+  ],
+  "campaignStatus": "STOPPED_FOR_USER_POWERDOWN"
+}

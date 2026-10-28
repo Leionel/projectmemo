@@ -101,6 +101,7 @@ export function RepoSignalsCard({ projectId, initialOpen = false }: { projectId:
           </p>
           {c.status === "ACTIVE" && (
             <div className={styles.actions}>
+              <button disabled={busy} onClick={() => { setBusy(true); void api('/api/conversations/entry', 'POST', { requestId: crypto.randomUUID(), scope: 'PROJECT', projectId, entry: { kind: 'SOURCE_OBSERVATION', projectId, id: c.id } }).then(r => { window.location.href = '/focus?conversation=' + encodeURIComponent(r.id); }).catch(e => setError(e.message)).finally(() => setBusy(false)); }}>在忆程中讨论</button>
               <button disabled={busy} onClick={() => void refresh(c.id)}>{c.lastStatus === "PARTIAL" ? "继续同步提交" : "刷新提交"}</button>
               <button disabled={busy} onClick={() => void revoke(c.id)}>撤销连接（停止新请求，历史保留）</button>
             </div>

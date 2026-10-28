@@ -1,3 +1,6 @@
+import router from '@ohos.router';
+import { ConversationService } from '../services/ConversationService';
+import { ConversationCreateInput } from '../models/Conversation';
 import { ConnectionView, SignalView } from '../models/RepoSignal';
 import { ConnectionActionBody, ConnectionCreateBody, SignalActionBody } from '../models/RepoSignal';
 import { RepoSignalService } from '../services/RepoSignalService';
@@ -19,6 +22,11 @@ export struct RepoSignalPanel {
   @State newRepo: string = '';
   @State newRef: string = 'main';
   private service: RepoSignalService = new RepoSignalService();
+
+  private async discuss(connectionId: string): Promise<void> {
+    const input = new ConversationCreateInput(); input.requestId = 'repo-discuss-' + Date.now().toString(); input.scope = 'PROJECT'; input.projectId = this.projectId; input.entry = { kind: 'SOURCE_OBSERVATION', projectId: this.projectId, id: connectionId };
+    try { const created = await new ConversationService().entry(input); router.pushUrl({ url: 'pages/FocusConversation', params: { conversationId: created.id, projectId: this.projectId } }); } catch { this.error = '仓库观察已不可访问，请刷新原连接'; }
+  }
 
   aboutToAppear(): void {
     if (this.initialOpen) { this.open = true; this.load(); }
@@ -148,6 +156,7 @@ export struct RepoSignalPanel {
             Text(`候选 ${c.candidateCount} · 已采纳 ${c.adoptedCount}${c.lastError !== null && c.lastError !== '' ? ` · ${c.lastError}` : ''}`).fontSize(11).fontColor(PMColors.INK_TERTIARY)
             if (c.status === 'ACTIVE') {
               Row({ space: 8 }) {
+                Button('在忆程中讨论').height(44).fontSize(12).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy).onClick(() => { this.discuss(c.id); })
                 Button('刷新').fontSize(12).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy).onClick(() => { this.refresh(c.id); })
               }
             }

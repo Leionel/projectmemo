@@ -5,7 +5,15 @@ import type { ConversationCitation, ConversationFileGuide, ConversationSource } 
 /** Resolve only qualified source identities from the saved read manifest, never filenames in prose. */
 export async function resolveFileGuides(sources: ConversationSource[], citations: ConversationCitation[] = [], snapshots: ConversationFileGuide[] = []): Promise<ConversationFileGuide[]> {
   const output: ConversationFileGuide[] = [];
-  for (const [index, source] of sources.slice(0, 12).entries()) {
+  for (const [index, source] of sources.slice(0, 24).entries()) {
+    if (source.external) {
+      const meta = source.external;
+      output.push({ number: index + 1, sourceId: source.id, projectId: source.projectId, entityId: source.sourceId, kind: "WEB", title: source.title,
+        revision: source.revision, stale: false, missing: meta.readLevel === "UNAVAILABLE", archived: false, temporalState: source.temporalState,
+        excerpt: source.excerpt, quote: citations.find(c => c.sourceId === source.id)?.quote ?? null, readScope: source.readScope === "SUMMARY" ? "SUMMARY" : "EXCERPT", external: meta,
+        href: `/focus/source/${encodeURIComponent(meta.conversationId)}/${encodeURIComponent(meta.turnId)}/${encodeURIComponent(source.sourceId)}` });
+      continue;
+    }
     const projectId = source.projectId, rawId = source.sourceId.slice(source.sourceId.indexOf(":") + 1);
     let entityId = rawId, kind: ConversationFileGuide["kind"] = "RECORD", title = source.title;
     let attachmentId: string | null = null, missing = false, archived = false;

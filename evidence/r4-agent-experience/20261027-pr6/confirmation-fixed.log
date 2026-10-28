@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/focusConversation.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  1 passed (1)
+      Tests  22 passed (22)
+   Start at  20:18:39
+   Duration  13.79s (transform 2.15s, setup 0ms, import 6.40s, tests 7.06s, environment 0ms)
+

@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { modelDataMessage, type PromptSpec } from "@/lib/agent/promptSpec";
-import { investigationDecisionSchema, presentationPlanSchema } from "@/lib/types/agentExperience";
+import { investigationDecisionSchema, internalInvestigationDecisionSchema, presentationPlanSchema } from "@/lib/types/agentExperience";
 import { answerSchema, focusSystemPrompt, routeSchema } from "./model";
+import { researchCoverageSchema } from "@/lib/types/conversationResearch";
+const modelResearchCoverageSchema = researchCoverageSchema.omit({ schemaVersion: true, questionHash: true, scopeRevision: true, asOf: true });
 
 const observation = z.object({ sourceId: z.string().min(1).max(200), quote: z.string().min(1).max(500),
   applicability: z.enum(["DIRECT", "CONDITIONAL", "NOT_APPLICABLE", "UNKNOWN"]), relation: z.enum(["SUPPORTS", "CONTRADICTS", "UNDETERMINED"]) }).strict();
@@ -11,7 +13,7 @@ export const investigationFrameSchema = z.object({
       explanation: z.string().min(1).max(500), observations: z.array(observation).max(4) }).strict()).min(1).max(4),
     blockers: z.array(z.string().min(1).max(300)).max(4), keyUnknowns: z.array(z.string().min(1).max(300)).max(4),
     nextInformationNeed: z.string().min(1).max(500).nullable(),
-  }).strict()).max(3), decision: investigationDecisionSchema,
+  }).strict()).max(3), decision: investigationDecisionSchema, researchCoverage: modelResearchCoverageSchema.optional(),
 }).strict();
 export const routeV2Schema = routeSchema.extend({ investigate: z.boolean(), informationNeeds: z.array(z.string().min(1).max(300)).max(4) }).strict();
 export type InvestigationFrame = z.infer<typeof investigationFrameSchema>;
@@ -21,13 +23,21 @@ function spec<T>(id: string, purpose: PromptSpec<unknown, T>["purpose"], instruc
   return { id, version: (id.match(/v(\d+)$/)?.[1] ?? "1") + ".0." + patchVersion, purpose, system: "任务 " + id + "\n" + policy + "\n" + instruction + "\n严格返回 JSON，输出 schema：" + schema,
     outputSchemaVersion: 1, outputSchema, maxOutputTokens, buildMessages: data => [modelDataMessage(data)] };
 }
-export const routeV2 = spec("focus.route.v2", "ROUTE", "只选择授权目录中的至多3个项目和信息需求，不回答现实结果。复杂原因、证据条件、目标差距问题可进入调查；简单计数可直接回答。用户明确要求帮忙处理下一步时，使用 PROPOSE_ACTION 调查后提供待确认提案；若已有委托优先 OPEN_MISSION。仅询问判断使用 ANSWER。项目或意图不明先 CLARIFY。选择提案不代表批准执行。", routeV2Schema, 768, 1);
+export const routeV2 = spec("focus.route.v2", "ROUTE", "只选择授权目录中的至多3个项目和信息需求，不回答现实结果。复杂原因、证据条件、目标差距问题可进入调查；简单计数可直接回答。research.enabled 时，公开方法比较、官方现行规则或需要外部依据的问题应 investigate=true；公开范围已经给定时先查证，不用再次索要同样公开主题。用户提供 URL 先调查读取原链接。缺项目实测不能由联网替代。用户明确要求帮忙处理下一步时，使用 PROPOSE_ACTION 调查后提供待确认提案；若已有委托优先 OPEN_MISSION。仅询问判断使用 ANSWER。项目或意图不明先 CLARIFY。选择提案不代表批准执行。", routeV2Schema, 768, 2);
 export const investigateV1 = spec("focus.investigate.v1", "INVESTIGATE", `你同时按 focus.goal.v1 评估目标差距，并选择下一次调查。
 只对给定项目目标建立 goalAssessments。每个 projectId 最多一个 assessment，同一项目的条件合并放入该对象的 criteria，最多4项。先明确成功条件，再根据已读证据解释已报告进展、阻碍和关键未知，nextInformationNeed 必须参与工具选择。
 引用 sourceId 与 quote 必须来自 sources，逐字摘录；条件适用与支持结论分开。同条件的反证是 CONTRADICTS。VERIFIED 不可由你的判断自行授予，优先用 REPORTED/UNKNOWN/BLOCKED。
 每次新观察后重新决定：ANSWER_NOW、READ_EXISTING、ASK_USER、HANDOFF_MISSION 或 STOP。读取必须有具体 informationNeed 和 expectedObservation。
 READ_EXISTING.informationNeed 原样采用对应项目 goalAssessment.nextInformationNeed，确保读取服务于该目标缺口。
-工具仅使用 allowedTools，参数严格按 toolSchemas。原文件从 materialPointers 定向读取，不拼路径/URL；新发现可改变下一工具或结束。不要重复无增益查询，预算不足就停止。`, investigationFrameSchema, 3072, 1);
+工具仅使用 allowedTools，参数严格按输出 Schema 的 decision.call。原文件从 materialPointers 定向读取，不拼路径/URL；新发现可改变下一工具或结束。不要重复无增益查询，预算不足就停止。
+research 可用时，依据缺口按需 web_search 或 web_fetch，不固定两搜两读；用户原链接先读，不先搜索。仅公开研究范围可搜索，scopeRevision 使用给定值；web_fetch 只用实际网页 sourceId，revision 可省略，由服务器绑定不可变源版本。
+有公开研究时输出 researchCoverage，只输出 schema 中的研究判断；问题哈希、授权版本和 asOf 由服务器绑定，不回传这些字段。本轮最多3个决定相关方面，每项保持简短，引用实际 sources.id。按方法、适用条件、版本、指标、代价与失败原因拆分。短摘/长摘要不等于正文，正文片段不等于论文或仓库全文。比较来源的具体冲突与适用版本，不能由抓取时间推出当前生效。
+规则的 temporalAssessments 只引用实际片段，edition 与 ISO 生效起止日期逐字来自 quote；缺少日期填 null、状态 UNKNOWN，不从 publishedAt 推出生效。
+下一查询必须可能改变建议；缺用户实测就读项目或 ASK_USER，不能不停搜索。公开高分/论文指标不能证明本项目完成，READ_SUFFICIENT 也不是目标 VERIFIED。`, investigationFrameSchema, 3072, 3);
+export const investigateInternalV1 = spec("focus.investigate.v1", "INVESTIGATE", `按 focus.goal.v1 评估给定项目的目标差距，每项目最多一个 assessment，同项目条件合并到 criteria。未知保持未知；不得自行授予 VERIFIED。
+引用 sources 中的 sourceId 和逐字 quote，适用条件与支持/反证分开。选择 ANSWER_NOW、READ_EXISTING、ASK_USER、HANDOFF_MISSION 或 STOP。
+仅用给定内部工具，读取 informationNeed 原样采用项目 nextInformationNeed，原文从 materialPointers 定位；没有新增信息或预算不足停止。`,
+  investigationFrameSchema.omit({ researchCoverage: true }).extend({ decision: internalInvestigationDecisionSchema }), 3072, 2);
 export const answerV2 = spec("focus.answer.v2", "ANSWER", "依据实际已读 sources 与 goalGaps 回答用户。1—3句能说清就短答；复杂判断再解释条件。只引用已读来源，逐字给 observations。重要未知说明如何低成本获得；保持原计划也是有效选择。仅 intent=PROPOSE_ACTION 可以返回待确认 action。", answerSchema, 2048);
 // Offline evaluation uses the original loop with a reduced task contract, never a second Runner.
 export const investigateReadV1 = spec("focus.read_investigate.v1", "INVESTIGATE", "根据问题和当前观察，选择下一次只读调查或停止。工具只从 allowedTools/toolSchemas 选择，原资料只从 materialPointers 定向读取。不评估结构化 GoalGap，不编造来源或重复无增益读取。选择 ANSWER_NOW、READ_EXISTING、ASK_USER、HANDOFF_MISSION 或 STOP。", investigationDecisionSchema, 2048);

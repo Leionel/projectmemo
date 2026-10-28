@@ -1,0 +1,80 @@
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { createHash } from "node:crypto";
+import Database from "better-sqlite3";
+import development from "../tests/fixtures/r4/pr6-research-cases.json";
+import frozen from "../tests/fixtures/r4/pr6-research-frozen.json";
+const samples = process.argv.includes('--frozen') ? frozen : development;
+
+const runAt = process.argv.indexOf('--run-id'), runId = runAt >= 0 ? process.argv[runAt + 1] : 'evaluation-v2';
+if (!/^[a-z0-9-]{1,60}$/.test(runId)) throw new Error('INVALID_RUN_ID');
+const campaignRoot = path.resolve('output/r4-pr6'), root = path.join(campaignRoot, runId), fixtureHash = createHash("sha256").update(JSON.stringify(samples)).digest("hex");
+fs.mkdirSync(root, { recursive: true });
+const runtimeFiles = ['lib/conversation','lib/research','lib/types'].flatMap(dir => fs.readdirSync(dir,{recursive:true}).map(name=>path.join(dir,String(name))).filter(p=>p.endsWith('.ts'))).sort();
+const runtimeHash = createHash('sha256').update(runtimeFiles.map(p=>p+':'+createHash('sha256').update(fs.readFileSync(p)).digest('hex')).join('\n')).digest('hex');
+const plan = { status: "PREPARED_ONLY", runId, sampleStatus: process.argv.includes('--frozen') ? 'FROZEN_NEW_24_NOT_USED_FOR_TUNING' : "DEVELOPMENT_AFTER_PILOT_V1_CONTRACT_REPAIRS", fixtureHash, runtimeHash, caseCount: samples.cases.length, arms: ["INTERNAL_QUICK", "WEB_STANDARD"],
+  modelCallLimit: samples.cases.length * 14, externalRequestLimit: samples.cases.length * 4, priceEstimateExternalUSD: samples.cases.length * 4 * 0.00075,
+  provenance: samples.provenance, priorCampaign: "output/r4-pr5/model-budget.json (44/48 preserved)",
+  requiredLedger: "output/r4-pr6/authorized-budget.json", qualityScoring: "independent human scoring remains required" };
+fs.writeFileSync(path.join(root, "evaluation-plan.json"), JSON.stringify(plan, null, 2) + "\n");
+if (!process.argv.includes("--real")) { console.log(JSON.stringify(plan)); process.exit(0); }
+const ledgerPath = path.join(campaignRoot, "authorized-budget.json");
+if (!fs.existsSync(ledgerPath)) throw new Error("RESEARCH_EVALUATION_REQUIRES_EXPLICIT_ADDITIONAL_AUTHORIZATION");
+type Ledger = { authorizationId: string; modelLimit: number; externalLimit: number; modelUsed: number; externalUsed: number; calls: Array<{ id: number; kind: string; episode: string; state: string; httpStatus?: number }> };
+const ledger = (): Ledger => JSON.parse(fs.readFileSync(ledgerPath, "utf8"));
+if (!ledger().authorizationId || ledger().modelLimit > plan.modelCallLimit || ledger().externalLimit > plan.externalRequestLimit) throw new Error("INVALID_AUTHORIZED_BUDGET");
+await import("dotenv/config");
+const resultsPath = path.join(root, "evaluation-results.json");
+const previous = fs.existsSync(resultsPath) ? JSON.parse(fs.readFileSync(resultsPath,'utf8')) : null;
+if (previous && (previous.fixtureHash !== fixtureHash || previous.runtimeHash !== runtimeHash)) throw new Error('FROZEN_INPUT_OR_RUNTIME_CHANGED');
+const sqlite: string = previous?.database ?? path.join(fs.mkdtempSync(path.join(os.tmpdir(), "pm-pr6-real-")), "research.sqlite");
+if (!path.resolve(sqlite).startsWith(path.resolve(os.tmpdir()) + path.sep + 'pm-pr6-real-') || path.basename(sqlite) !== 'research.sqlite') throw new Error('UNSAFE_EVALUATION_DATABASE');
+Object.assign(process.env, { DATABASE_URL: "file:" + sqlite.replaceAll("\\", "/"), FOCUS_AGENT_ENABLED: "true", FOCUS_AGENT_R4_ENABLED: "true", FOCUS_WEB_ENABLED: "true", LLM_MODE: "openai-compatible", SEMANTIC_MEMORY_ENABLED: "false" });
+if (!previous) { const sql = new Database(sqlite);
+  for (const name of fs.readdirSync("prisma/migrations").sort()) { const p = path.join("prisma/migrations", name, "migration.sql"); if (fs.existsSync(p)) sql.exec(fs.readFileSync(p, "utf8")); }
+  sql.close();
+} else if (!fs.existsSync(sqlite)) throw new Error('ORIGINAL_EVALUATION_DATABASE_MISSING');
+const { db } = await import("../lib/db"), { createSession } = await import("../lib/auth/session"),
+  { createConversation, readConversation } = await import("../lib/conversation/service"), { submitConversationTurn } = await import("../lib/conversation/turnService"),
+  { updateResearchScope } = await import("../lib/conversation/researchScope");
+const original = globalThis.fetch; let episode = "";
+globalThis.fetch = async (target, init) => {
+  const url = new URL(typeof target === "string" ? target : target instanceof URL ? target.href : target.url);
+  const kind = url.pathname.endsWith("/chat/completions") ? "MODEL" : url.hostname === "api.deepseek.com" && /\/v1\/tools\/(search|fetch)$/.test(url.pathname) ? "EXTERNAL" : "FORBIDDEN";
+  if (kind === "FORBIDDEN") throw new Error("UNEXPECTED_EVALUATION_NETWORK_TARGET");
+  const lock = fs.openSync(ledgerPath + ".lock", "wx"); let callId: number;
+  try { const l = ledger(); if (kind === "MODEL" ? l.modelUsed >= l.modelLimit : l.externalUsed >= l.externalLimit) throw new Error("AUTHORIZED_BUDGET_EXHAUSTED");
+    if (kind === "MODEL") l.modelUsed++; else l.externalUsed++;
+    callId = l.calls.length + 1; l.calls.push({ id: callId, kind, episode: runId + "/" + episode, state: "RESERVED" }); fs.writeFileSync(ledgerPath, JSON.stringify(l, null, 2));
+  } finally { fs.closeSync(lock); fs.unlinkSync(ledgerPath + ".lock"); }
+  try {
+    const result = await original(target, { ...init, signal: AbortSignal.any([...(init?.signal ? [init.signal] : []), AbortSignal.timeout(25000)]) });
+    let raw = await result.clone().text(); for (const key of [process.env.LLM_API_KEY, process.env.MISSION_SEARCH_API_KEY].filter(Boolean)) raw = raw.split(key!).join("[REDACTED]");
+    fs.writeFileSync(path.join(root, `response-${callId!}.json`), JSON.stringify({ episode, kind, httpStatus: result.status, response: raw }));
+    const l = ledger(); Object.assign(l.calls.find(c => c.id === callId!)!, { state: "HTTP_RECEIVED", httpStatus: result.status }); fs.writeFileSync(ledgerPath, JSON.stringify(l, null, 2)); return result;
+  } catch (error) { const l = ledger(); Object.assign(l.calls.find(c => c.id === callId!)!, { state: "UNKNOWN" }); fs.writeFileSync(ledgerPath, JSON.stringify(l, null, 2)); throw error; }
+};
+const saved: { fixtureHash: string; runtimeHash: string; database: string; results: Array<{ episode: string; status: string; result?: unknown; error?: string }> } = previous ?? { fixtureHash, runtimeHash, database: sqlite, results: [] };
+if (saved.fixtureHash !== fixtureHash) throw new Error("FROZEN_INPUT_CHANGED");
+try {
+  const selectedAt = process.argv.indexOf('--cases'), selected = selectedAt >= 0 ? process.argv[selectedAt + 1].split(',') : null;
+  for (const sample of samples.cases.filter(c => !selected || selected.includes(c.id))) for (const arm of ["INTERNAL_QUICK", "WEB_STANDARD"]) {
+    episode = sample.id + "/" + arm; if (saved.results.some(r => r.episode === episode)) continue;
+    if (ledger().modelUsed >= ledger().modelLimit) break;
+    if (ledger().calls.some(c => c.episode === runId + '/' + episode)) { saved.results.push({ episode, status: 'NOT_RESENT', error: 'Original attempt interrupted; no new turn or network dispatch' }); fs.writeFileSync(resultsPath, JSON.stringify(saved,null,2)); continue; }
+    process.env.FOCUS_WEB_ENABLED = "true";
+    const user = await db.user.create({ data: { username: crypto.randomUUID(), displayName: "PR6 合成验收", passwordHash: "unused" } });
+    const actor = { userId: user.id, sessionId: (await createSession(user.id)).session.id };
+    const project = await db.project.create({ data: { title: "研究验证项目", description: "SYNTHETIC_PRIVATE_CANARY_PR6", goal: sample.goal, scenario: sample.scenario as "RESEARCH", memberships: { create: { userId: user.id } } } });
+    const conversation = await createConversation(actor, { requestId: "create", scope: "PROJECT", projectId: project.id });
+    if (arm === "WEB_STANDARD") await updateResearchScope(actor, conversation.id, { expectedRevision: 1, projectId: project.id, scope: sample.publicScope });
+    else process.env.FOCUS_WEB_ENABLED = "false";
+    try { const result = await submitConversationTurn(actor, conversation.id, { requestId: "evaluate", expectedVersion: 1, projectId: project.id, message: sample.question,
+      llmContextApproved: true, investigationMode: arm === "WEB_STANDARD" ? "STANDARD" : "QUICK" });
+      saved.results.push({ episode, status: "RECEIVED", result: { ...result, conversation: await readConversation(actor, conversation.id) } });
+    } catch (error) { saved.results.push({ episode, status: "FAILED_OR_UNKNOWN", error: error instanceof Error ? error.message : "unknown" }); }
+    fs.writeFileSync(resultsPath, JSON.stringify(saved, null, 2));
+    console.log(JSON.stringify({ episode, models: ledger().modelUsed, external: ledger().externalUsed }));
+  }
+} finally { globalThis.fetch = original; await db.$disconnect(); }

@@ -2,6 +2,9 @@ import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { json, jsonHash } from "@/lib/mission/contracts";
 import { sourceHash } from "@/lib/mission/repository";
+import { validateWebSource } from "./researchScope";
+import { readSourceObservation } from "./sourceObservation";
+import { assertTurnLease } from "./turnRuntime";
 import { assertCopilotSources, freezeCopilotProposals, readCopilotContext } from "@/lib/copilot/confirmation";
 import { agentPresentationSchema, presentationPlanSchema, type ExperienceEntityRef, type HydratedBlock, type PresentationPlan } from "@/lib/types/agentExperience";
 import type { ConversationActor, ConversationBlocks } from "@/lib/types/conversation";
@@ -20,10 +23,18 @@ export async function prepareExperienceDraft(actor: ConversationActor, id: strin
   return db.$transaction(async tx => {
     await lockConversation(tx, id);
     const c = await ownedConversation(actor, id, tx), turn = await tx.conversationTurn.findUniqueOrThrow({ where: { id: turnId } });
+    assertTurnLease(turn);
     if (record(turn.readManifestJson).stopRequested) throw new AppError("TURN_STOP_REQUESTED", "已停止本轮调查", 409);
     if (c.activeTurnId !== turnId || c.version !== turn.baseVersion + 1) throw new AppError("TURN_CHANGED", "原讨论已变化", 409);
+    const existing = await tx.agentRun.findFirst({ where: { conversationId: id, turnId, status: "PARTIAL" }, orderBy: { createdAt: "asc" } });
+    if (existing && record(existing.trace).r4Draft) {
+      if (record(existing.trace).draftActionHash !== jsonHash(action)) throw new AppError("DRAFT_CHECKPOINT_CHANGED", "原预览检查点的输入已变化", 409);
+      const e = await tx.copilotToolExecution.findFirst({ where: { sourceRunId: existing.id } });
+      return { runId: existing.id, proposal: e && action ? { executionId: e.id, projectId: action.projectId, title: action.title, description: action.description,
+        proposalHash: e.proposalHash, status: e.status, resultId: e.resultId } : null };
+    }
     const run = await tx.agentRun.create({ data: { projectId: null, conversationId: id, turnId, runType: "CHAT", status: "PARTIAL", provider,
-      trace: { purpose: "FOCUS_TURN", actorUserId: actor.userId, r4Draft: true, proposalExpiresAt: new Date(Date.now() + expiryMs).toISOString(),
+      trace: { purpose: "FOCUS_TURN", actorUserId: actor.userId, r4Draft: true, draftActionHash: jsonHash(action), proposalExpiresAt: new Date(Date.now() + expiryMs).toISOString(),
         supportState: action ? "SUPPORTED" : "INSUFFICIENT", supportBasis: "ACTION_PROPOSAL_NOT_FACT_CLAIM" }, resultJson: {} } });
     if (!action) return { runId: run.id, proposal: null };
     const sources = await readCopilotContext(tx, action.projectId, actor), proposed = { kind: "create_action" as const, label: "创建行动", ...action };
@@ -56,7 +67,9 @@ export async function experienceAuthority(actor: ConversationActor, id: string, 
     if (s.sourceId.startsWith("mission:")) {
       const m = member.role === "OWNER" ? await tx.agentMission.findFirst({ where: { id: s.sourceId.slice(8), projectId: s.projectId, ownerUserId: actor.userId } }) : null;
       revision = m ? String(m.version) : null;
-    } else revision = await sourceHash(s.projectId, s.sourceId, tx);
+    } else if (s.external) { await validateWebSource(actor, s, tx); revision = s.revision; }
+    else if (s.sourceId.startsWith("repo:")) revision = (await readSourceObservation(actor, s.projectId, s.sourceId.slice(5), tx)).revision;
+    else revision = await sourceHash(s.projectId, s.sourceId, tx);
     if (revision === s.revision) register({ kind: "SOURCE", id: s.id, projectId: s.projectId, revision: s.revision }, s.sourceId.startsWith("mission:") ? actor.userId : null);
   }
   for (const gap of state.goalGaps) {

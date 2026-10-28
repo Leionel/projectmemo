@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/r4ResearchRecovery.test.ts tests/r4ResearchMigration.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  2 passed (2)
+      Tests  3 passed (3)
+   Start at  19:42:31
+   Duration  16.32s (transform 46ms, setup 0ms, import 106ms, tests 15.63s, environment 0ms)
+

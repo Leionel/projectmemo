@@ -9,7 +9,7 @@ try {
     for(const c of conversations) { await db.agentRun.deleteMany({where:{conversationId:c.id}}); await db.conversation.delete({where:{id:c.id}}); }
     await db.project.delete({where:{id:project.id}});
   } else if(operation === 'create') {
-    Object.assign(process.env,{FOCUS_AGENT_ENABLED:'true',FOCUS_AGENT_R4_ENABLED:'true',FOCUS_WEB_ENABLED:'true',LLM_MODE:'mock'});
+    Object.assign(process.env,{FOCUS_AGENT_ENABLED:'true',FOCUS_AGENT_R4_ENABLED:'true',FOCUS_CONTINUITY_ENABLED:'false',FOCUS_WEB_ENABLED:'true',LLM_MODE:'mock'});
     const { createSession }=await import('../lib/auth/session');
     const actor={userId:value,sessionId:(await createSession(value)).session.id};
     const project=await db.project.create({data:{title:'PR6 公开研究交互验收',description:'PR6_BROWSER_FIXTURE_ONLY',goal:'核对公开方法与项目实测的边界',scenario:'RESEARCH',memberships:{create:{userId:value}}}});

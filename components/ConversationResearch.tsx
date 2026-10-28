@@ -22,7 +22,12 @@ export function ConversationResearchScope({ view, projectId, disabled, onChange,
           allowedHosts: hosts.split(/[,，\n]/).map(s => s.trim().toLowerCase()).filter(Boolean), excludedTerms: [], allowedCategories: ["PUBLIC_TOPIC", "PUBLIC_SOURCE"] }
           : { ...research.scope, enabled: false },
       });
-      onChange({ ...view, research: next }); setOpen(false);
+      // A changed grant invalidates prior web material immediately, including cached prose and UI blocks.
+      onChange({ ...view, research: next, messages: view.messages.map(message => message.sources.some(source => source.external)
+        ? { ...message, content: "来源权限已变化，正在读取当前状态", restricted: true, sources: [], citations: [], fileGuides: [], refs: [], priorities: [],
+          proposal: null, presentation: undefined, presentationPlan: undefined, researchCoverage: undefined } : message) });
+      setOpen(false);
+      const current = await request<ConversationView>(`/api/conversations/${view.id}`, "GET", undefined); onChange(current);
     } catch (e) { onError(e instanceof Error ? e.message : "研究范围未保存"); } finally { setSaving(false); }
   }
   return <div>

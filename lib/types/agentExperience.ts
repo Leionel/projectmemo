@@ -27,6 +27,8 @@ export const goalGapSchema = z.object({
   schemaVersion: z.literal(1), id, projectId: id,
   goalRef: entityRefSchema.refine(v => ["PROJECT", "MISSION"].includes(v.kind), "目标来自原项目或委托"),
   goalQuote: text,
+  workingObjective: text.nullable().optional(),
+  intentHash: z.string().optional(),
   criteria: z.array(z.object({
     id, requirement: text, state: z.enum(["VERIFIED", "REPORTED", "UNKNOWN", "BLOCKED", "NOT_APPLICABLE"]),
     explanation: text, evidence: z.array(evidenceLinkSchema).max(8),

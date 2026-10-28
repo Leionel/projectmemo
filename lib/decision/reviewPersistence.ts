@@ -1,3 +1,5 @@
+import { assertContinuityBinding } from "@/lib/continuity/directiveService";
+import { assertSourceUse } from "@/lib/continuity/sourcePolicy";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
@@ -25,6 +27,9 @@ export async function reviewMission(actor: CopilotActor, id: string, tx: Tx = db
   return mission;
 }
 export async function reviewFresh(base: ReviewBase, m: AgentMission, tx: Tx = db) {
+  try { await assertContinuityBinding(m.ownerUserId, { projectId: m.projectId, missionId: m.id }, base.continuity, tx);
+    for (const source of base.sourcePointers) await assertSourceUse(m.ownerUserId, m.projectId, source.id, tx, { missionId: m.id });
+  } catch (e) { if (e instanceof AppError) return false; throw e; }
   if (base.goalStateHash && (await reviewGoalState(m, tx)).hash !== base.goalStateHash) return false;
   if (await tx.goalQuestionPreference.findFirst({ where: { userId: m.ownerUserId, missionId: m.id, questionId: "*", mode: "STOP" } })) return false;
   if (jsonHash(m.goal) !== base.goalHash || jsonHash(m.successCriteriaJson) !== base.successHash ||

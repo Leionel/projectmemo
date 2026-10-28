@@ -18,3 +18,17 @@ export function checkPublicQuery(query:string,rawScope:unknown){
  if(sites.some(site=>scope.allowedHosts.length&&!scope.allowedHosts.includes(site)))throw new AppError("QUERY_OUT_OF_SCOPE","查询站点超出授权范围",409);
  return q;
 }
+
+/** Compile server-owned filters once. Only exact approved duplicate operators may be removed from model text. */
+export function compilePublicQuery(planned: string, rawScope: unknown, filters: string) {
+ if(/[\r\n\x00-\x1f]/.test(planned))throw new AppError("QUERY_SENSITIVE","搜索查询包含敏感信息或不支持的编码",409);
+ if(/(?:^|\s)-\s*(?:site|lang|after|before):/i.test(planned))throw new AppError("QUERY_FILTER_CONFLICT","查询条件与已确认的域名或时间范围不一致",409);
+ const selected = new Set([...filters.matchAll(/\b(site|lang|after|before):([^\s)]+)/gi)].map(m => `${m[1]}:${m[2]}`.toLowerCase()));
+ const content = planned.normalize("NFKC").replace(/(?:\s+(?:OR|AND)\s+)?\b(site|lang|after|before):([^\s()]+)/gi, (_match, operator: string, value: string) => {
+  if(!selected.has(`${operator}:${value}`.toLowerCase()))throw new AppError("QUERY_FILTER_CONFLICT","查询条件与已确认的域名或时间范围不一致",409);
+  return "";
+ }).replace(/\(\s*\)/g, " ").replace(/\s+/g, " ").trim();
+ if ([...content].length + (filters ? [...filters].length + 1 : 0) > 128) throw new AppError("QUERY_TOO_LONG","公开查询过长，请缩小公开概念或筛选条件",409);
+ checkPublicQuery(content,rawScope);
+ return checkPublicQuery(content + (filters ? " " + filters : ""),rawScope);
+}

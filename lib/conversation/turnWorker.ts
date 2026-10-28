@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { executeAcceptedConversationTurn } from "./turnService";
-import { newTurnLease, withTurnLease } from "./turnRuntime";
+import { newTurnLease, withTurnLease, heartbeatTurn } from "./turnRuntime";
 import { record } from "./repository";
 import { json } from "@/lib/mission/contracts";
 
@@ -24,13 +24,7 @@ export async function runConversationTurn() {
     return claimed;
   });
   if (!claim.count) return true;
-  const heartbeat = setInterval(() => { void withTurnLease(next.id, token, async () => {
-    const { mutateTurn } = await import("./turnRuntime");
-    await mutateTurn({ userId: next.conversation.ownerUserId, sessionId: next.sessionId! }, next.conversationId, next.id, async (manifest, tx) => {
-      await tx.conversationTurn.update({ where: { id: next.id }, data: { leaseUntil: new Date(Date.now() + 30000) } });
-      return { ...manifest, runtimeActiveCheckpointMs: accumulated + Date.now() - Date.parse(startedAt) };
-    });
-  }).catch(() => undefined); }, 5000);
+  const heartbeat = setInterval(() => { void withTurnLease(next.id, token, () => heartbeatTurn(next.id)).catch(() => undefined); }, 5000);
   try {
     const turn = await db.conversationTurn.findUniqueOrThrow({ where: { id: next.id } });
     await withTurnLease(next.id, token, () => executeAcceptedConversationTurn({ userId: next.conversation.ownerUserId, sessionId: next.sessionId! }, next.conversationId, turn));

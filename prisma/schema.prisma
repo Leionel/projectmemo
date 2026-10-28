@@ -999,6 +999,8 @@ model DeliverableEvidence {
 }
 
 model User {
+  continuitySeq Int @default(0)
+  directiveEvents AgentDirectiveEvent[]
   conversations Conversation[]
   focusPreferences FocusProjectPreference[]
   decisionProposals DecisionScenarioProposal[]
@@ -1020,6 +1022,36 @@ model User {
   cloudUsage   AccountCloudUsage[]
 
   @@index([username])
+}
+
+// User-owned work guidance, not project facts or tool authorization.
+model AgentDirectiveEvent {
+  id String @id @default(cuid())
+  ownerUserId String
+  seq Int
+  commandId String
+  eventIndex Int @default(0)
+  inputHash String
+  directiveId String
+  previousEventId String?
+  projectId String
+  conversationId String?
+  missionId String?
+  kind String
+  operation String
+  quote String
+  sourceJson Json
+  admissionJson Json
+  sourceIdsJson Json @default("[]")
+  validFrom DateTime
+  validUntil DateTime?
+  timezone String
+  createdAt DateTime @default(now())
+  owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
+  @@unique([ownerUserId,seq])
+  @@unique([ownerUserId,commandId,eventIndex])
+  @@index([ownerUserId,projectId,seq])
+  @@index([ownerUserId,directiveId,seq])
 }
 
 model AccountSecurity {

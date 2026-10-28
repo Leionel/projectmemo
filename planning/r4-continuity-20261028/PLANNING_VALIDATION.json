@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-28",
+  "timezone": "America/Los_Angeles",
+  "status": "PASS",
+  "validationKind": "PLANNING_ARTIFACTS_ONLY",
+  "markdownFiles": 9,
+  "relativeLinksChecked": 14,
+  "existingSourcePathsChecked": 51,
+  "plannedPathsExplicitlyMarked": [
+    "lib/conversation/directiveService.ts",
+    "tests/continuityIntent.test.ts"
+  ],
+  "sourceFilesHashed": 49,
+  "fixture": {
+    "cases": 36,
+    "coreJourneys": 12,
+    "multiDayAtLeast3": 15,
+    "safetyGateCases": 23,
+    "sha256": "7b2e29a5150481220aa10969a82fb6a8773860f23a050daba98c3289a9164089",
+    "independentHoldout": false,
+    "executionStatus": "PLANNING_FIXTURES_NOT_EXECUTED"
+  },
+  "worktree": {
+    "unchangedOutsidePlanningFolder": true,
+    "protectedFilesByteIdentical": {
+      "AGENTS.md": true,
+      "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md": true,
+      "harmonyos/build-profile.json5": true,
+      "tsconfig.json": true
+    },
+    "current": {
+      "head": "1132f30ee149e42d5f9fce79219ba1d9ecf02ea3",
+      "statusHash": "2bc622f59dc9b025c516d43ba9e8f1c332faf0ec87dffb6480b0c9c206892cad",
+      "diffHash": "2056d9726b71a01a2a27788b7d38b3cab4be627b48a18ea93f58319b3b212bcc"
+    },
+    "gitDiffCheckExitCode": 0
+  },
+  "businessTestsExecuted": [],
+  "paidModelCalls": 0,
+  "productionDeployments": 0,
+  "realDatabaseMutations": 0,
+  "externalWrites": 0,
+  "errors": [],
+  "notes": [],
+  "artifacts": [
+    {
+      "path": "planning/r4-continuity-20261028/EXECUTIVE_SUMMARY.md",
+      "sha256": "eb4420be2f29f7f6260871f32239975ef9e3d6feb2add93bfb5067ec8f9e801d",
+      "bytes": 6053
+    },
+    {
+      "path": "planning/r4-continuity-20261028/fixtures/continuity-journeys-v1.json",
+      "sha256": "7b2e29a5150481220aa10969a82fb6a8773860f23a050daba98c3289a9164089",
+      "bytes": 63617
+    },
+    {
+      "path": "planning/r4-continuity-20261028/R4_CONTINUITY_CONTEXT_HANDOFF_DESIGN.md",
+      "sha256": "fcbc4ddd1e34aaaa645b65332ef3ed39dab53bb7a11a9488a4a4f728130f9e90",
+      "bytes": 16360
+    },
+    {
+      "path": "planning/r4-continuity-20261028/R4_CONTINUITY_DECISIONS.md",
+      "sha256": "50b1aaa77871495344e33af1b294933794bfe13909caeedbd7275693ef52dcf3",
+      "bytes": 9754
+    },
+    {
+      "path": "planning/r4-continuity-20261028/R4_CONTINUITY_EVAL_PLAN.md",
+      "sha256": "2fbe2a5f91d4d25027705062f6c4774eea2d4368eb124c16821124c81973fd56",
+      "bytes": 13339
+    },
+    {
+      "path": "planning/r4-continuity-20261028/R4_CONTINUITY_EXISTING_CAPABILITIES.md",
+      "sha256": "c18a1105db72c848801212be05e13a7d64e43d0667c5f60223f23300d0ed3a55",
+      "bytes": 15103
+    },
+    {
+      "path": "planning/r4-continuity-20261028/R4_CONTINUITY_INTENT_CORRECTION_CONTRACT.md",
+      "sha256": "3ab5a0c6e124693784a06f6caf7b1593cc0685d4f7e337cf08fb983b42f6fa0c",
+      "bytes": 14208
+    },
+    {
+      "path": "planning/r4-continuity-20261028/R4_CONTINUITY_ROADMAP.md",
+      "sha256": "9b0564bdbd7e42b31da5be03044a78143a200eafb8ea72008cd98f5f7a82d398",
+      "bytes": 13399
+    },
+    {
+      "path": "planning/r4-continuity-20261028/R4_CONTINUITY_TOOL_INTEGRATION_MATRIX.md",
+      "sha256": "1a100fcc2edc484469b1871f106755a607f5ad0e6c6760cddc96698c11200a8c",
+      "bytes": 14131
+    },
+    {
+      "path": "planning/r4-continuity-20261028/R4_CONTINUITY_USER_EXPERIENCE.md",
+      "sha256": "2cdc1906244801b10b4bc4c6b7a5e190eee6ef9c9b5c652a52db483dc0646d31",
+      "bytes": 9827
+    },
+    {
+      "path": "planning/r4-continuity-20261028/SOURCE_SNAPSHOT.json",
+      "sha256": "6c52f490a3b24c6e67cccbef8ef6c6350a63cb1a424a5b90d8e4220b761d5b15",
+      "bytes": 11248
+    }
+  ]
+}

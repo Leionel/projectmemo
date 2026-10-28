@@ -1,3 +1,5 @@
+import { assertTurnCurrent } from "@/lib/continuity/turnCoordination";
+import { currentGeneration, generationCallId } from "./turnRuntime";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { json, jsonHash } from "@/lib/mission/contracts";
@@ -17,6 +19,7 @@ import { readConversationResearchTool, registerUserUrls, reuseWebSources, userUr
 import { researchCoverageSchema, type ResearchCoverage } from "@/lib/types/conversationResearch";
 import { readSourceObservation } from "./sourceObservation";
 import { bindResearchCoverage } from "./researchCoverage";
+import { admitDirective } from "@/lib/continuity/admission";
 
 export type R4State = {
   schemaVersion: 1; policyVersion: "r4-v1"; phase: "ROUTING" | "READING_SOURCE" | "EVALUATING" | "WAITING_MODEL" | "WAITING_USER" | "READY" | "UNKNOWN";
@@ -46,6 +49,7 @@ export async function saveR4State(actor: ConversationActor, id: string, turnId: 
     await lockConversation(tx, id);
     const c = await ownedConversation(actor, id, tx), turn = await tx.conversationTurn.findUniqueOrThrow({ where: { id: turnId } });
     assertTurnLease(turn);
+    await assertTurnCurrent(turn, actor.userId, currentGeneration(), tx);
     if (record(turn.readManifestJson).stopRequested === true) throw new AppError("TURN_STOP_REQUESTED", "已停止本轮调查", 409);
     if (c.activeTurnId !== turnId || c.version !== turn.baseVersion + 1 || !["OBSERVING", "GENERATING"].includes(turn.status))
       throw new AppError("TURN_CHANGED", "原讨论已中断或上下文已变化", 409);
@@ -101,7 +105,7 @@ function normalizeGoals(frame: InvestigationFrame, directory: WorkspaceDirectory
       return { id: `${p.id}-criterion-${ordinal}`, requirement: criterion.requirement, state, explanation: criterion.explanation, evidence };
     });
     return goalGapSchema.parse({ schemaVersion: 1, id: `${p.id}-gap-${index}`, projectId: p.id,
-      goalRef: { kind: "PROJECT", id: p.id, projectId: p.id, revision: goalSource.revision }, goalQuote: g.goalQuote,
+      goalRef: { kind: "PROJECT", id: p.id, projectId: p.id, revision: goalSource.revision }, goalQuote: g.goalQuote, workingObjective: p.workingObjective, intentHash: p.continuityHash,
       criteria, blockers: g.blockers, keyUnknowns: g.keyUnknowns, nextInformationNeed: g.nextInformationNeed });
   });
 }
@@ -122,11 +126,24 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
   const routed = await conversationModelSpec(actor, id, turnId, "route", routeV2, { message: input.message, focus: input.focus,
     ...(grant.available ? { research: { enabled: grant.scope.enabled, scope: grant.scope } } : {}),
     frozenRefs: input.frozenRefs, pinnedConstraints: input.constraints, coverage: input.directory.coverage,
-    directory: input.directory.summaries.map(p => ({ id: p.id, title: p.title.slice(0, 80), goal: p.goal.slice(0, 200), deadline: p.deadline,
+    directory: input.directory.summaries.map(p => ({ id: p.id, title: p.title.slice(0, 80), goal: p.goal.slice(0, 200), workingObjective: p.workingObjective, deadline: p.deadline,
       waiting: p.waiting, blocking: p.blocked, preference: p.preference })) });
   const route = routed.data;
   if (route.projectIds.some(p => !input.directory.summaries.some(v => v.id === p))) throw new AppError("INVALID_ROUTE", "模型选择了未授权项目", 409);
   if (input.focus) route.projectIds = [input.focus, ...route.projectIds.filter(p => p !== input.focus)].slice(0, 3);
+  const candidate = route.directiveCandidate;
+  if (candidate && admitDirective({ commandId: "classify", expectedSeq: 0, operation: "SET", scope: { projectId: candidate.projectId }, quote: input.message, admission: "LITERAL", timezone: "Asia/Shanghai" }).status !== "DIRECT_APPLIED" && input.message.includes(candidate.quote) && route.projectIds.includes(candidate.projectId) &&
+    !/[“”「」『』"<>]|他说|她说|据说|如果|假如/.test(input.message)) {
+    await mutateTurn(actor, id, turnId, manifest => {
+      if (!manifest.coordination) return manifest;
+      const generation = currentGeneration()!;
+      const coord = record(manifest.coordination), scopes = coord.scopes as Array<{ projectId: string }>, index = scopes.findIndex(s => s.projectId === candidate.projectId);
+      const bindingScope = scopes[index] as { projectId: string; conversationId?: string; missionId?: string };
+      return { ...manifest, directiveCandidate: { ...candidate, turnId, generation, bindingScope,
+        scope: { projectId: candidate.projectId, ...(bindingScope?.missionId ? { missionId: bindingScope.missionId } : {}) }, binding: (coord.bindings as unknown[])[index],
+        id: turnId + ":" + generation + ":" + jsonHash(candidate), status: "INTERPRETATION_CANDIDATE" } };
+    });
+  }
   state.projectIds = route.projectIds;
   const conversation = await ownedConversation(actor, id);
   const directory = await workspaceDirectory(actor, conversation.scope, conversation.homeProjectId, input.focus);
@@ -150,7 +167,8 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
   let provider = routed.provider;
   const scopeDirectory = { ...directory, summaries: directory.summaries.filter(p => route.projectIds.includes(p.id)) };
   const context = () => ({ message: input.message, intent: route.intent, pinnedConstraints: input.constraints,
-    projects: scopeDirectory.summaries.map(p => ({ id: p.id, title: p.title, goal: p.goal.slice(0, 1500), deadline: p.deadline, priority: p.priority })),
+    interpretationCandidate: candidate ? { ...candidate, authority: "UNCONFIRMED_MODEL_INTERPRETATION" } : undefined,
+    projects: scopeDirectory.summaries.map(p => ({ id: p.id, title: p.title, goal: p.goal.slice(0, 1500), workingObjective: p.workingObjective, deadline: p.deadline, priority: p.priority })),
     sources: observations.sources.map((s, i) => ({ id: s.id, sourceId: s.sourceId, revision: s.revision, projectId: s.projectId, title: s.title,
       excerpt: s.excerpt.slice(0, Math.min(1200, Math.floor(4800 / Math.max(1, observations.sources.length)))),
       readScope: s.readScope, knowledgeClass: s.knowledgeClass, temporalState: s.temporalState, citationNumber: i + 1,
@@ -164,7 +182,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
   if (input.evaluationVariant !== "PROMPT_ONLY" && route.investigate && route.intent !== "CLARIFY") while (true) {
     await validateContext(actor, scopeDirectory, observations, state.pointers);
     const turn = await db.conversationTurn.findUniqueOrThrow({ where: { id: turnId } });
-    const cachedDecision = record(record(turn.readManifestJson).modelResults)["investigate-" + state.steps.length];
+    const cachedDecision = record(record(turn.readManifestJson).modelResults)[generationCallId("investigate-" + state.steps.length)];
     if (!cachedDecision && (turn.callCount >= state.budget.maxModelCalls - 2 ||
       turnElapsedMs(turn) > state.budget.maxElapsedMs - 20000)) {
       state.decision = { decision: "STOP", reason: "BUDGET_EXHAUSTED", explanation: "本轮调查已到预算边界，先根据现有观察说明情况。" };
@@ -233,7 +251,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
       // Persist failure without stale source content; access checks still apply.
       await saveR4State(actor, id, turnId, state).catch(() => undefined);
       if ((decision.call.tool === "web_search" || decision.call.tool === "web_fetch") && e instanceof AppError &&
-        ["SOURCE_BLOCKED", "SOURCE_UNAVAILABLE", "EMPTY_SOURCE", "RESEARCH_RETRYABLE", "SEARCH_AUTH_ERROR", "SEARCH_BALANCE_EMPTY", "SEARCH_NOT_CONFIGURED", "EXTERNAL_BUDGET_EXHAUSTED", "CONTEXT_LIMIT"].includes(e.code)) {
+        ["SOURCE_BLOCKED", "SOURCE_UNAVAILABLE", "EMPTY_SOURCE", "RESEARCH_RETRYABLE", "SEARCH_AUTH_ERROR", "SEARCH_BALANCE_EMPTY", "SEARCH_NOT_CONFIGURED", "EXTERNAL_BUDGET_EXHAUSTED", "CONTEXT_LIMIT", "QUERY_TOO_LONG", "QUERY_FILTER_CONFLICT"].includes(e.code)) {
         if (["SEARCH_AUTH_ERROR", "SEARCH_BALANCE_EMPTY", "SEARCH_NOT_CONFIGURED", "EXTERNAL_BUDGET_EXHAUSTED", "CONTEXT_LIMIT"].includes(e.code)) {
           state.stopReason = e.code; state.decision = { decision: "STOP", reason: "BUDGET_EXHAUSTED", explanation: e.message }; break;
         }

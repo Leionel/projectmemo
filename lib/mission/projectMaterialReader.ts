@@ -1,10 +1,12 @@
+import { assertSourceUse } from "@/lib/continuity/sourcePolicy";
 import { db } from "@/lib/db";
 import { jsonHash, type Source } from "./contracts";
 import { sourceHash, type Tx } from "./repository";
 import { readProjectMaterialView } from "./sourceSignals";
 import { getTemporalSearchStates } from "@/lib/services/temporalLedgerService";
 
-export async function readReviewMaterial(projectId: string, id: string, tx: Tx = db) {
+export async function readReviewMaterial(projectId: string, id: string, tx: Tx = db, userId?: string) {
+  if (userId) await assertSourceUse(userId, projectId, id, tx);
   if (id.startsWith("action:")) {
     const action = await tx.actionItem.findFirst({ where: { id: id.slice(7), projectId, isSimulated: false } });
     if (!action) return null;

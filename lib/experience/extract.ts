@@ -1,3 +1,6 @@
+import { effectiveContinuity } from "@/lib/continuity/directiveService";
+import { sourceUse } from "@/lib/continuity/sourcePolicy";
+import { record } from "@/lib/conversation/repository";
 import { db } from "@/lib/db";
 import { createHash } from "node:crypto";
 import { json } from "@/lib/mission/contracts";
@@ -113,6 +116,18 @@ const SHADOW_SUPPORT_THRESHOLD = 2;
 /** 只读同步：并集样本、更新计数、CANDIDATE→SHADOW 上调；绝不自动激活，绝不删除或降级。 */
 export async function syncExperiences(ownerUserId: string, projectId: string): Promise<number> {
   const index = await buildTrajectoryIndex(ownerUserId, projectId);
+  const continuity = await effectiveContinuity(ownerUserId, { projectId });
+  if (continuity.directives.some(d => d.kind === "USE_SUPPRESSION")) {
+    const admittedEntries = [] as typeof index.entries;
+    for (const entry of index.entries) {
+      const steps = await db.agentMissionStep.findMany({ where: { missionId: entry.missionId }, select: { resultJson: true } });
+      const sources = steps.flatMap(s => (record(s.resultJson).sources ?? []) as Array<{ id: string }>);
+      let allowed = sources.length > 0;
+      for (const source of sources) if ((await sourceUse(ownerUserId, projectId, source.id)).state !== "ALLOWED") allowed = false;
+      if (allowed) admittedEntries.push(entry);
+    }
+    index.entries = admittedEntries;
+  }
   const candidates = extractCandidates(index);
   for (const candidate of candidates) {
     const existing = await db.agentExperience.findUnique({ where: { projectId_ownerUserId_kind_patternHash: { projectId, ownerUserId, kind: candidate.kind, patternHash: candidate.patternHash } } });

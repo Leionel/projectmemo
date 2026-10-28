@@ -8,7 +8,7 @@ import { db } from "@/lib/db";
 import { json, jsonHash } from "@/lib/mission/contracts";
 import type { ModelPurpose } from "./tokenBudget";
 import { getChatProviderDefaults } from "@/lib/config/provider";
-import { mutateTurn } from "./turnRuntime";
+import { mutateTurn, generationCallId } from "./turnRuntime";
 import { record } from "./repository";
 export const routeSchema = z.object({
   intent: z.enum(["ANSWER", "CLARIFY", "PROPOSE_ACTION", "OPEN_MISSION"]),
@@ -43,6 +43,8 @@ advice 是建议和取舍，不能宣称已执行或现实成功。不得执行�
 
 export async function conversationModelSpec<T>(actor: ConversationActor, conversationId: string, turnId: string,
   callId: string, spec: PromptSpec<unknown, T>, input: unknown) {
+  callId = generationCallId(callId);
+  await mutateTurn(actor, conversationId, turnId, manifest => manifest);
   await assertSession(actor);
   if (!["ROUTE", "INVESTIGATE", "ANSWER", "UI_PLAN"].includes(spec.purpose)) throw new AppError("INVALID_MODEL_PURPOSE", "本轮讨论不支持该模型任务", 422);
   const messages = buildPromptMessages(spec, input), start = Date.now();
@@ -54,8 +56,10 @@ export async function conversationModelSpec<T>(actor: ConversationActor, convers
     return { data: spec.outputSchema.parse(cached.data), provider: cached.provider, usage: cached.usage };
   }
   let result: Awaited<ReturnType<typeof chatWithLLMWithMeta>> | undefined;
+  const semanticInput = JSON.parse(JSON.stringify(input), (key, value) => ["intentHash", "continuityHash", "reusePolicyHash", "remaining"].includes(key) ? undefined : value);
   try {
     result = await chatWithLLMWithMeta(messages, undefined, { ...actor, turnId, callId, purpose: spec.purpose as ModelPurpose,
+      requestHash: jsonHash({ spec: spec.id, version: spec.version, input: semanticInput }),
       promptId: spec.id, promptVersion: spec.version, outputSchemaVersion: spec.outputSchemaVersion, outputTokens: spec.maxOutputTokens });
     if (result.status === "FAILED") throw new AppError(result.fallbackReason ?? "MODEL_OUTPUT_INVALID", "云端回答不完整，请读取原状态", 409);
     const data = spec.outputSchema.parse(JSON.parse(result.data));

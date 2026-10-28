@@ -14,7 +14,7 @@ export const conversationCreateSchema = z.object({
   entry: conversationEntrySchema.optional(),
 }).strict().refine(v => v.scope !== "PROJECT" || !!v.projectId, "项目讨论需要项目");
 export const conversationTurnSchema = z.object({
-  requestId: id, expectedVersion: z.number().int().positive(),
+  requestId: id, expectedVersion: z.number().int().positive(), expectedContinuitySeq: z.number().int().nonnegative().optional(),
   message: z.string().trim().min(1).max(3000),
   replyToMessageId: id.optional(), bindingId: id.optional(), projectId: id.nullable().optional(),
   entityRef: z.object({ kind: z.enum(["MISSION", "ACTION"]), id, projectId: id }).strict().optional(),
@@ -35,7 +35,7 @@ export const focusPreferenceSchema = z.object({
   notes: z.string().trim().max(500),
 }).strict();
 export type ConversationEntry = z.infer<typeof conversationEntrySchema>;
-export type ConversationActor = { userId: string; sessionId: string };
+export type ConversationActor = { userId: string; sessionId: string; conversationId?: string; missionId?: string; missionProjectId?: string };
 export type ConversationRef = {
   bindingId?: string; kind: "PROJECT" | "MISSION" | "ACTION" | "INTERVENTION" | "GOAL_QUESTION" | "IMPACT";
   id: string; projectId: string; title: string; status?: string; version?: number;
@@ -88,6 +88,7 @@ export type ConversationMessage = ConversationBlocks & {
 export type ConversationProgress = { sequence?: number; events?: Array<{ seq: number; phase: string; at: string; stepId: string | null }>; phase: string; mode: string; completedReads: number; readLimit: number;
   steps: Array<{ id: string; label: string; status: string }>; stopReason: string | null };
 export type ConversationView = {
+  continuity?: import("./continuity").ContinuityView;
   research?: { available: boolean; revision: number; projectId: string | null; scope: z.infer<typeof import("./mission").researchScopeSchema> };
   schemaVersion: 1; id: string; title: string; scope: string; version: number;
   homeProjectId: string | null; focusProjectId: string | null;

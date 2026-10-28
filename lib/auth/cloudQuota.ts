@@ -1,3 +1,4 @@
+import { assertTurnCurrent } from "@/lib/continuity/turnCoordination";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { json } from "@/lib/mission/contracts";
@@ -6,12 +7,12 @@ import type { AgentExecutionResult } from "@/lib/types";
 import { investigationBudgetSchema } from "@/lib/types/agentExperience";
 import type { ModelPurpose } from "@/lib/conversation/tokenBudget";
 import { sourceHash } from "@/lib/mission/repository";
-import { assertTurnLease, turnElapsedMs } from "@/lib/conversation/turnRuntime";
+import { assertTurnLease, turnElapsedMs, currentGeneration } from "@/lib/conversation/turnRuntime";
 import { validateWebSource } from "@/lib/conversation/researchScope";
 import type { ConversationSource } from "@/lib/types/conversation";
 import { readSourceObservation } from "@/lib/conversation/sourceObservation";
 
-export type WorkspaceBilling = { userId: string; turnId: string; purpose: ModelPurpose; sessionId?: string; inputTokens?: number; outputTokens?: number; provider?: string;
+export type WorkspaceBilling = { userId: string; turnId: string; purpose: ModelPurpose; sessionId?: string; inputTokens?: number; outputTokens?: number; provider?: string; requestHash?: string;
   callId?: string; promptId?: string; promptVersion?: string; outputSchemaVersion?: number };
 export type ReviewBilling = { userId: string; sessionId: string; reviewProposalId: string };
 /** One actor and one durable proposal reservation; never charges every project owner. */
@@ -46,6 +47,7 @@ export async function reserveWorkspaceCloudCall(billing: WorkspaceBilling): Prom
     if (!turn || !["OBSERVING", "GENERATING"].includes(turn.status))
       throw new AppError("TURN_CHANGED", "本次请求已结束或不可访问", 409);
     assertTurnLease(turn);
+    await assertTurnCurrent(turn, billing.userId, currentGeneration(), tx, "MODEL");
     if (billing.sessionId && !await tx.authSession.findFirst({ where: { id: billing.sessionId, userId: billing.userId, revokedAt: null, expiresAt: { gt: new Date() } } }))
       throw new AppError("UNAUTHORIZED", "登录状态已变化，请重新登录", 401);
     const manifest = (turn.readManifestJson ?? {}) as { stopRequested?: boolean; sourceRefs?: Array<{ projectId: string; id: string; revision: string; webSource?: ConversationSource }>;
@@ -57,7 +59,40 @@ export async function reserveWorkspaceCloudCall(billing: WorkspaceBilling): Prom
       const c = await tx.conversation.findUniqueOrThrow({ where: { id: turn.conversationId } });
       if (manifest.experience?.policyVersion !== "r4-v1" || c.activeTurnId !== turn.id)
         throw new AppError("TURN_CHANGED", "本次调查已结束", 409);
-      for (const projectId of manifest.experience.observedProjectIds ?? []) {
+      await validateWorkspaceReadSet(tx, billing, manifest);
+      if (turnElapsedMs(turn) >= budget.maxElapsedMs)
+        throw new AppError("INVESTIGATION_BUDGET_EXHAUSTED", "本轮调查时间已用完，可以根据已读资料继续讨论", 409);
+      adaptive = { callId: billing.callId, maxCalls: budget.maxModelCalls, inputTokens: budget.maxInputTokens, outputTokens: budget.maxOutputTokens };
+    } else if (manifest.experience?.policyVersion === "r4-v1" || !["ROUTE", "ANSWER"].includes(billing.purpose)) {
+      throw new AppError("INVALID_MODEL_RESERVATION", "调查调用缺少原步骤编号", 409);
+    }
+    if (billing.requestHash && tokenReservations(turn.reservationJson).some(e => e.requestHash === billing.requestHash && e.dispatchState === "DISPATCH_COMMITTED" && e.state !== "SETTLED"))
+      throw new AppError("CALL_ALREADY_RESERVED", "原模型请求结果未知，改变代次或步骤编号也不会自动重发", 409);
+    const reserved = reserveTurnTokens(turn.reservationJson, billing.purpose, billing.inputTokens ?? 12000, billing.outputTokens ?? stageOutputLimit(billing.purpose), adaptive);
+    Object.assign(reserved[reserved.length - 1], { provider: billing.provider, promptId: billing.promptId,
+      promptVersion: billing.promptVersion, outputSchemaVersion: billing.outputSchemaVersion, requestHash: billing.requestHash, dispatchState: "RESERVED" });
+    const account = await tx.accountSecurity.findUnique({ where: { userId: billing.userId } });
+    if (account) {
+      if (!account.emailVerifiedAt || account.dailyCloudLimit <= 0)
+        throw new AppError("CLOUD_ACCESS_DISABLED", "当前账号未开通云模型额度", 403);
+      const day = new Date().toISOString().slice(0, 10);
+      await tx.accountCloudUsage.upsert({ where: { userId_day: { userId: billing.userId, day } },
+        create: { userId: billing.userId, day, used: 0 }, update: {} });
+      const consumed = await tx.accountCloudUsage.updateMany({
+        where: { userId: billing.userId, day, used: { lt: account.dailyCloudLimit } },
+        data: { used: { increment: 1 } },
+      });
+      if (!consumed.count) throw new AppError("CLOUD_QUOTA_EXHAUSTED", "今日云模型调用额度已用完", 429);
+    }
+    await tx.conversationTurn.update({ where: { id: turn.id }, data: {
+      callCount: { increment: 1 }, reservationJson: json(reserved),
+    } });
+  });
+}
+
+type WorkspaceReadManifest = { sourceRefs?: Array<{ projectId: string; id: string; revision: string; webSource?: ConversationSource }>; experience?: { observedProjectIds?: string[] } };
+async function validateWorkspaceReadSet(tx: import("@/lib/generated/prisma/client").Prisma.TransactionClient, billing: WorkspaceBilling, manifest: WorkspaceReadManifest) {
+      for (const projectId of manifest.experience?.observedProjectIds ?? []) {
         if (!await tx.projectMembership.findUnique({ where: { userId_projectId: { userId: billing.userId, projectId } } }))
           throw new AppError("PROJECT_NOT_FOUND", "项目权限已变化，未继续发出模型请求", 404);
       }
@@ -78,31 +113,21 @@ export async function reserveWorkspaceCloudCall(billing: WorkspaceBilling): Prom
         } else revision = await sourceHash(s.projectId, s.id, tx);
         if (revision !== s.revision) throw new AppError("SOURCE_CHANGED", "本轮资料已变化，未继续发出模型请求", 409);
       }
-      if (turnElapsedMs(turn) >= budget.maxElapsedMs)
-        throw new AppError("INVESTIGATION_BUDGET_EXHAUSTED", "本轮调查时间已用完，可以根据已读资料继续讨论", 409);
-      adaptive = { callId: billing.callId, maxCalls: budget.maxModelCalls, inputTokens: budget.maxInputTokens, outputTokens: budget.maxOutputTokens };
-    } else if (manifest.experience?.policyVersion === "r4-v1" || !["ROUTE", "ANSWER"].includes(billing.purpose)) {
-      throw new AppError("INVALID_MODEL_RESERVATION", "调查调用缺少原步骤编号", 409);
-    }
-    const reserved = reserveTurnTokens(turn.reservationJson, billing.purpose, billing.inputTokens ?? 12000, billing.outputTokens ?? stageOutputLimit(billing.purpose), adaptive);
-    Object.assign(reserved[reserved.length - 1], { provider: billing.provider, promptId: billing.promptId,
-      promptVersion: billing.promptVersion, outputSchemaVersion: billing.outputSchemaVersion });
-    const account = await tx.accountSecurity.findUnique({ where: { userId: billing.userId } });
-    if (account) {
-      if (!account.emailVerifiedAt || account.dailyCloudLimit <= 0)
-        throw new AppError("CLOUD_ACCESS_DISABLED", "当前账号未开通云模型额度", 403);
-      const day = new Date().toISOString().slice(0, 10);
-      await tx.accountCloudUsage.upsert({ where: { userId_day: { userId: billing.userId, day } },
-        create: { userId: billing.userId, day, used: 0 }, update: {} });
-      const consumed = await tx.accountCloudUsage.updateMany({
-        where: { userId: billing.userId, day, used: { lt: account.dailyCloudLimit } },
-        data: { used: { increment: 1 } },
-      });
-      if (!consumed.count) throw new AppError("CLOUD_QUOTA_EXHAUSTED", "今日云模型调用额度已用完", 429);
-    }
-    await tx.conversationTurn.update({ where: { id: turn.id }, data: {
-      callCount: { increment: 1 }, reservationJson: json(reserved),
-    } });
+
+}
+/** Final dispatch fence, distinct from the durable budget reservation. HTTP is outside this transaction. */
+export async function commitWorkspaceDispatch(billing: WorkspaceBilling) {
+  await db.$transaction(async tx => {
+    await tx.user.updateMany({ where: { id: billing.userId }, data: { continuitySeq: { increment: 0 } } });
+    const turn = await tx.conversationTurn.findUniqueOrThrow({ where: { id: billing.turnId } });
+    assertTurnLease(turn); await assertTurnCurrent(turn, billing.userId, currentGeneration(), tx, "MODEL");
+    if (billing.sessionId && !await tx.authSession.findFirst({ where: { id: billing.sessionId, userId: billing.userId, revokedAt: null, expiresAt: { gt: new Date() } } }))
+      throw new AppError("UNAUTHORIZED", "登录状态已变化，未继续派发模型", 401);
+    const entries = tokenReservations(turn.reservationJson), entry = entries.find(e => billing.callId ? e.callId === billing.callId : e.purpose === billing.purpose && !e.callId);
+    if (!entry || entry.state !== "RESERVED" || entry.dispatchState === "DISPATCH_COMMITTED") throw new AppError("CALL_ALREADY_RESERVED", "原模型请求已派发，不能重复发送", 409);
+    await validateWorkspaceReadSet(tx, billing, turn.readManifestJson as WorkspaceReadManifest);
+    entry.dispatchState = "DISPATCH_COMMITTED";
+    await tx.conversationTurn.update({ where: { id: turn.id }, data: { reservationJson: json(entries) } });
   });
 }
 
@@ -111,6 +136,7 @@ export async function settleWorkspaceCloudCall(billing: WorkspaceBilling, result
   await db.$transaction(async tx => {
     await tx.conversationTurn.updateMany({ where: { id: billing.turnId }, data: { callCount: { increment: 0 } } });
     const turn = await tx.conversationTurn.findFirstOrThrow({ where: { id: billing.turnId, conversation: { ownerUserId: billing.userId } } });
+    assertTurnLease(turn);
     const entries = tokenReservations(turn.reservationJson), entry = entries.find(e => billing.callId ? e.callId === billing.callId : e.purpose === billing.purpose && !e.callId);
     if (!entry || entry.state === "SETTLED") return;
     const valid = (n: number | null | undefined) => typeof n === "number" && Number.isSafeInteger(n) && n >= 0 ? n : null;

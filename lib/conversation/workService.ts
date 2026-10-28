@@ -1,3 +1,4 @@
+import { effectiveContinuity, assertContinuityBinding, assertDirectiveEffect } from "@/lib/continuity/directiveService";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
@@ -163,7 +164,9 @@ export async function previewConversationWork(actor: ConversationActor, id: stri
     const current = input.ref.kind === "MISSION" ? missionToken(await ownedMission(actor.userId, input.ref.id, tx)) : actionResultVersion(await tx.actionItem.findUniqueOrThrow({ where: { id: input.ref.id } }));
     if (current !== input.versionToken) throw new AppError("OBJECT_CHANGED", "原任务已变化", 409);
     assertWorkPolicy(c.pinnedStateJson, op, command);
-    const payload = { schemaVersion: 1, inputHash, ref: input.ref, operation: op, versionToken: input.versionToken,
+    const scope = { projectId: input.ref.projectId, conversationId: id, ...(input.ref.kind === "MISSION" ? { missionId: input.ref.id } : {}) };
+    const continuity = await effectiveContinuity(actor.userId, scope, tx);
+    const payload = { schemaVersion: 1, continuity: { scope, intentHash: continuity.intentHash, reusePolicyHash: continuity.reusePolicyHash }, inputHash, ref: input.ref, operation: op, versionToken: input.versionToken,
       contextVersion: work.contextVersion, planRevision: work.planRevision, constraintHash: jsonHash(c.pinnedStateJson), command, expiresAt: Date.now() + 15 * 60 * 1000 };
     const run = await tx.agentRun.create({ data: { projectId: null, conversationId: id, runType: "CHAT", provider: "project_state", status: "SUCCESS",
       trace: { purpose: "FOCUS_WORK_PREVIEW", actorUserId: actor.userId, copilotTargetProjectId: input.ref.projectId } } });
@@ -191,6 +194,8 @@ export async function confirmConversationWork(actor: ConversationActor, id: stri
     const old = await tx.conversationTurn.findUnique({ where: { conversationId_requestId: { conversationId: id, requestId: input.requestId } } });
     if (old && old.inputHash !== hash) throw new AppError("REQUEST_ID_REUSED", "请求编号已用于其他确认", 409);
     if (e.status === "COMMITTED") return { projectId: ref.projectId, resultId: e.resultId, alreadyExecuted: true };
+    const continuity = await assertContinuityBinding(actor.userId, { projectId: ref.projectId, conversationId: id, ...(ref.kind === "MISSION" ? { missionId: ref.id } : {}) }, p.continuity, tx);
+    if (op === "complete_action" || op === "adopt_artifact" || op === "approval" && cmd.decision === "APPROVED") assertDirectiveEffect(continuity, "BUSINESS_WRITE");
     assertWorkPolicy(c.pinnedStateJson, op, cmd);
     if (jsonHash(c.pinnedStateJson) !== p.constraintHash) throw new AppError("CONSTRAINTS_CHANGED", "会话限制已变化，请重新预览", 409);
     if (e.status !== "PENDING" || Number(p.expiresAt) <= Date.now() || c.activeTurnId || record(c.focusJson).projectId !== ref.projectId) throw new AppError("PROPOSAL_EXPIRED", "提案已处理、过期或焦点已切换", 409);

@@ -1,3 +1,5 @@
+import { effectiveContinuity, assertContinuityBinding, boundDirectiveScope, assertDirectiveEffect } from "@/lib/continuity/directiveService";
+import { sourceUse, assertSourceUse } from "@/lib/continuity/sourcePolicy";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { AppError } from "@/lib/api";
@@ -51,6 +53,11 @@ export async function readCopilotContext(tx: Tx, projectId: string, actor?: Copi
   // Independent frozen proposals from the same answer may be consumed separately. Only
   // successful actions with this unforgeable server dedupe prefix are excluded from its base.
   const actions = ownRunId ? allActions.filter(action => !action.dedupeKey?.startsWith(`copilot:${ownRunId}:`)) : allActions;
+  if (actor) {
+    for (let i = cards.length - 1; i >= 0; i--) if ((await sourceUse(actor.userId, projectId, "card:" + cards[i].id, tx)).state !== "ALLOWED") cards.splice(i, 1);
+    for (let i = interventions.length - 1; i >= 0; i--) if (interventions[i].evidenceCardId && (await sourceUse(actor.userId, projectId, "card:" + interventions[i].evidenceCardId, tx)).state !== "ALLOWED") interventions.splice(i, 1);
+    for (let i = actions.length - 1; i >= 0; i--) if ((await sourceUse(actor.userId, projectId, "action:" + actions[i].id, tx)).state !== "ALLOWED") actions.splice(i, 1);
+  }
   const cardHashes = [];
   for (const card of [...cards].sort((a, b) => a.id.localeCompare(b.id))) {
     const hash = await sourceHash(projectId, `card:${card.id}`, tx);
@@ -93,6 +100,17 @@ const keyOf = (tool: string, proposal: Record<string, unknown>) => tool === "cre
 
 /** Must run in the same transaction that creates its source AgentRun. */
 export async function freezeCopilotProposals(tx: Tx, sourceRunId: string, proposals: ProposedAction[], manifest: SourceManifest) {
+  const run = await tx.agentRun.findUniqueOrThrow({ where: { id: sourceRunId }, include: { conversation: true } });
+  const trace = object(run.trace), userId = typeof trace.actorUserId === "string" ? trace.actorUserId : run.conversation?.ownerUserId;
+  const projectId = typeof trace.copilotTargetProjectId === "string" ? trace.copilotTargetProjectId : run.projectId;
+  if (userId && projectId) {
+    const turn = run.turnId ? await tx.conversationTurn.findUnique({ where: { id: run.turnId } }) : null;
+    const scoped = (object(object(turn?.readManifestJson).coordination).scopes ?? []) as Array<{ projectId: string; missionId?: string }>;
+    const scope = { projectId, ...(run.conversationId ? { conversationId: run.conversationId } : {}), ...(scoped.find(s => s.projectId === projectId)?.missionId ? { missionId: scoped.find(s => s.projectId === projectId)!.missionId } : {}) };
+    const view = await effectiveContinuity(userId, scope, tx);
+    await tx.agentRun.update({ where: { id: sourceRunId }, data: { trace: json({ ...trace, continuity: { scope, intentHash: view.intentHash, reusePolicyHash: view.reusePolicyHash } }) } });
+  }
+
   const seen = new Map<string, string>();
   for (const proposed of proposals) {
     const proposal = proposed as unknown as Record<string, unknown>;
@@ -163,6 +181,11 @@ async function inspectConfirmation(tx: Tx, projectId: string, input: AgentToolCo
       : await tx.generatedArtifact.findFirst({ where: { id: resultId, projectId } });
     if (!old) throw new AppError("COPILOT_RESULT_MISSING", "原确认结果已不可用，不能重复创建，请查看项目历史", 409);
     return { replay: { tool: input.tool, result: old, alreadyExecuted: true as const }, run, result, key, confirmationHash, execution, manifest: null };
+  }
+  if (actor) {
+    const binding = object(trace.continuity), scope = boundDirectiveScope(binding, projectId, run.conversationId ?? undefined);
+    assertDirectiveEffect(await assertContinuityBinding(actor.userId, scope, binding, tx), "BUSINESS_WRITE");
+    for (const c of (object(trace.copilotSources).cardHashes ?? []) as Array<{ id: string }>) await assertSourceUse(actor.userId, projectId, "card:" + c.id, tx, scope);
   }
   const parsed = manifestSchema.safeParse(trace.copilotSources);
   if (!execution || !parsed.success) throw new AppError("COPILOT_PROPOSAL_REGENERATE_REQUIRED", "这条旧建议缺少可校验的来源版本，请重新提问后确认", 409);

@@ -1,3 +1,5 @@
+import { actorDirectiveScope } from "@/lib/continuity/directiveService";
+import { assertSourceUse } from "@/lib/continuity/sourcePolicy";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { jsonHash } from "@/lib/mission/contracts";
@@ -6,6 +8,7 @@ import type { ConversationActor } from "@/lib/types/conversation";
 
 /** Read already-authorized cached GitHub observations only. Never refreshes the network or adopts a Capture. */
 export async function readSourceObservation(actor: ConversationActor, projectId: string, connectionId: string, tx: Tx = db) {
+  await assertSourceUse(actor.userId, projectId, "repo:" + connectionId, tx, actorDirectiveScope(actor, projectId));
   if ((await assertProject(actor, projectId, tx)).role !== "OWNER") throw new AppError("ENTRY_NOT_FOUND", "仓库观察不可访问", 404);
   const connection = await tx.sourceConnection.findFirst({ where: { id: connectionId, projectId, ownerUserId: actor.userId, status: "ACTIVE", revokedAt: null } });
   if (!connection) throw new AppError("ENTRY_NOT_FOUND", "仓库连接已撤销或不可访问", 404);

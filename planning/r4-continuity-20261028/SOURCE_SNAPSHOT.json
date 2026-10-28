@@ -1,0 +1,353 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-28",
+  "timezone": "America/Los_Angeles",
+  "baseline": {
+    "head": "1132f30ee149e42d5f9fce79219ba1d9ecf02ea3",
+    "statusHash": "2bc622f59dc9b025c516d43ba9e8f1c332faf0ec87dffb6480b0c9c206892cad",
+    "statusEntries": 475,
+    "diffHash": "2056d9726b71a01a2a27788b7d38b3cab4be627b48a18ea93f58319b3b212bcc",
+    "protectedFiles": {
+      "AGENTS.md": "dbff8a9d83193830b2fd06c5c131b9324c0a8e472be2c8aa2f66deff990e2750",
+      "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md": "7328e70a94cbd17f400c23ef418d0a62f396a408ea9a1926c9d1f057f211f631",
+      "harmonyos/build-profile.json5": "442618a372bd9a74d204e7162ffe6844b6fc49dbf4c09b8cc5bc58c6709a1924",
+      "tsconfig.json": "af1b4fbd345a0d2b7e23394aca3540b524a3d4826fca6a51169b13b2a325ee4a"
+    }
+  },
+  "scope": "静态源码审计和规划；测试源码及历史回执不等于本轮重跑",
+  "newBusinessCode": false,
+  "realDatabaseMutations": 0,
+  "paidModelCalls": 0,
+  "externalWrites": 0,
+  "productionDeployments": 0,
+  "externalReferenceRepos": [
+    {
+      "repo": "langchain-ai/langgraphjs",
+      "stars": 3383,
+      "pushed_at": "2026-10-28T02:21:45Z",
+      "archived": false,
+      "license": "MIT",
+      "url": "https://github.com/langchain-ai/langgraphjs"
+    },
+    {
+      "repo": "letta-ai/letta",
+      "stars": 25271,
+      "pushed_at": "2026-10-18T22:28:04Z",
+      "archived": false,
+      "license": "Apache-2.0",
+      "url": "https://github.com/letta-ai/letta"
+    },
+    {
+      "repo": "docling-project/docling",
+      "stars": 69718,
+      "pushed_at": "2026-10-27T20:21:53Z",
+      "archived": false,
+      "license": "MIT",
+      "url": "https://github.com/docling-project/docling"
+    },
+    {
+      "repo": "mlflow/mlflow",
+      "stars": 28563,
+      "pushed_at": "2026-10-28T07:31:32Z",
+      "archived": false,
+      "license": "Apache-2.0",
+      "url": "https://github.com/mlflow/mlflow"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "dbff8a9d83193830b2fd06c5c131b9324c0a8e472be2c8aa2f66deff990e2750",
+      "bytes": 5891,
+      "lines": 60
+    },
+    {
+      "path": "package.json",
+      "sha256": "90fd7835dd94af005a8c727bd8b92e63868c7a5a0f00ab4071dda8673ccd0787",
+      "bytes": 2766,
+      "lines": 69
+    },
+    {
+      "path": "prisma/schema.prisma",
+      "sha256": "e88bed140f1e2c7d87487764e5c2d90f6bc4c72da3e610040100c7ec4bd15fd2",
+      "bytes": 50642,
+      "lines": 1451
+    },
+    {
+      "path": "lib/conversation/turnService.ts",
+      "sha256": "ca510a802560a68c9650322d4441b3f21965f55613dcc763c885e8ab40fb2561",
+      "bytes": 32781,
+      "lines": 364
+    },
+    {
+      "path": "lib/conversation/investigationService.ts",
+      "sha256": "e5e5dbabd1566d4eed425f84082edd743c621740e63f7a457add6e4fd84e549f",
+      "bytes": 25712,
+      "lines": 287
+    },
+    {
+      "path": "lib/conversation/turnRuntime.ts",
+      "sha256": "665fc4cc93cbee507567858701dabd851a41cd3c5afe78de6b236728e2d617f3",
+      "bytes": 6728,
+      "lines": 90
+    },
+    {
+      "path": "lib/conversation/turnWorker.ts",
+      "sha256": "3688233f6cc1148f3292ce26d4be1903fa19e52e70f18e54d8d5d91fd649f138",
+      "bytes": 3111,
+      "lines": 40
+    },
+    {
+      "path": "lib/conversation/anchorService.ts",
+      "sha256": "c0c6733f90c41bf0d613c0351a1785c2e0ec47483728845e0937abff942cbbdd",
+      "bytes": 32561,
+      "lines": 320
+    },
+    {
+      "path": "lib/conversation/service.ts",
+      "sha256": "db67ddb9daa2e3e78c8969de4e462f3a19c4794ceed4317163d7699d55ce6818",
+      "bytes": 19547,
+      "lines": 251
+    },
+    {
+      "path": "lib/conversation/commands.ts",
+      "sha256": "de0fe2b2f790885d27be0b69d75c0238294971a0f5ca7c2c391f74de5ae8aedd",
+      "bytes": 4548,
+      "lines": 58
+    },
+    {
+      "path": "lib/conversation/workService.ts",
+      "sha256": "a4140157835a64cbef4764597adb3399241ab527d6f9b2a3d2ffc140aa9ab465",
+      "bytes": 23954,
+      "lines": 232
+    },
+    {
+      "path": "lib/conversation/uiActions.ts",
+      "sha256": "2e1c57e7f410e7d30efd9da93fa31a8a7ee7d6f23856b1eab8510f9884c516ea",
+      "bytes": 4805,
+      "lines": 53
+    },
+    {
+      "path": "lib/conversation/toolAdapter.ts",
+      "sha256": "aac695613864b3b4612b1bb945c1cf5d89e9f14fd73bb0f5fe2bf4505cdefb5c",
+      "bytes": 10148,
+      "lines": 114
+    },
+    {
+      "path": "lib/conversation/researchTools.ts",
+      "sha256": "37b652417107129be95055f6ccc3a4ee76cc00d29fb59929898b0a826cf7e557",
+      "bytes": 14365,
+      "lines": 161
+    },
+    {
+      "path": "lib/conversation/researchScope.ts",
+      "sha256": "f3b19bf8193af0ca4f80e28f2e3fd1707a2f5a3c004fba634973f98f4c41166f",
+      "bytes": 3238,
+      "lines": 40
+    },
+    {
+      "path": "lib/conversation/researchSummary.ts",
+      "sha256": "0652667d3e49e269f859e2fed6a346f1e9b30c48affa015220cadb314b22a78c",
+      "bytes": 5171,
+      "lines": 53
+    },
+    {
+      "path": "lib/conversation/researchCoverage.ts",
+      "sha256": "fc00dedcdaf6090c65989cc3bfe7b59f678460ca7c6de1d54b85a3fc29bc6ec3",
+      "bytes": 2687,
+      "lines": 32
+    },
+    {
+      "path": "lib/services/workspaceContextService.ts",
+      "sha256": "3547c07bc03d77beecdd0e81967716232007d0c013e2cb48d3b1da5e2e400451",
+      "bytes": 9764,
+      "lines": 115
+    },
+    {
+      "path": "lib/services/interventionPolicyService.ts",
+      "sha256": "fc8c17ead60903e6dc5fe0bed3ec56484f3b86ee8ee54d0901be414175cba8b6",
+      "bytes": 22244,
+      "lines": 617
+    },
+    {
+      "path": "lib/services/attachmentService.ts",
+      "sha256": "2dacbbd2559d32af284374844730b47c3a69451b9e8840b2de1986d87eb8516f",
+      "bytes": 18963,
+      "lines": 485
+    },
+    {
+      "path": "lib/memory/temporalLedger.ts",
+      "sha256": "644c488a78ff088492e2d7495f1b0073d9ac5cf8439e7e4d99c100dd13d58732",
+      "bytes": 7916,
+      "lines": 219
+    },
+    {
+      "path": "lib/mission/contextBuilder.ts",
+      "sha256": "93080c914a0fe3f31c747a27f4a025bddd83daeda03dc0655d34a54ee15faf78",
+      "bytes": 8780,
+      "lines": 82
+    },
+    {
+      "path": "lib/mission/runner.ts",
+      "sha256": "f870d629f7ee9d308b52abdd49bfc99f8d4d8bd8974b36d083c509039ce262c6",
+      "bytes": 20404,
+      "lines": 177
+    },
+    {
+      "path": "lib/mission/continuationService.ts",
+      "sha256": "0cf7b267e3e7a14e4cc43b43f319cc55920f2bea81349d0bd327fd6d5e365288",
+      "bytes": 17932,
+      "lines": 150
+    },
+    {
+      "path": "lib/mission/contracts.ts",
+      "sha256": "ae2a64b0639df25dc40e2770c0b05883a206fb8c481112715ce1f31ff10464ef",
+      "bytes": 4490,
+      "lines": 40
+    },
+    {
+      "path": "lib/mission/memorySearch.ts",
+      "sha256": "c42e6d5c2ecf45cb8da702bc9756cd04949038c6fb78164bb1e7351516988a3f",
+      "bytes": 4686,
+      "lines": 49
+    },
+    {
+      "path": "lib/mission/projectMaterialReader.ts",
+      "sha256": "2304116b2f2a9e5fb2fcfb877bda263862ecde2502dfe1de58b5bbe910c7c071",
+      "bytes": 3276,
+      "lines": 40
+    },
+    {
+      "path": "lib/decision/goalState.ts",
+      "sha256": "23a6a232f3b229f891037e1cbe0ea0795ea45711f352bac8566a93a58a968241",
+      "bytes": 1595,
+      "lines": 18
+    },
+    {
+      "path": "lib/decision/reviewPersistence.ts",
+      "sha256": "1bd330089ded540733b5181ed402562d5166a49bcc63c37396c009bcf3665928",
+      "bytes": 15264,
+      "lines": 164
+    },
+    {
+      "path": "lib/decision/impactJobs.ts",
+      "sha256": "84f4994108d322f7c923f276ffb47fdb21c44f5f90ebc1e8decb7ff4f2020f50",
+      "bytes": 5173,
+      "lines": 142
+    },
+    {
+      "path": "lib/experience/trajectoryIndex.ts",
+      "sha256": "444bc7462bf5ee2fb30f316ffbf3b0e45703204d9fe54bc2fe4c05a5c6fe63ce",
+      "bytes": 5376,
+      "lines": 98
+    },
+    {
+      "path": "lib/experience/injection.ts",
+      "sha256": "0f3d4b6b835c59470573e5105a8206f8f1c5a66e34457a2020c05c415acb5fca",
+      "bytes": 4228,
+      "lines": 86
+    },
+    {
+      "path": "lib/experience/extract.ts",
+      "sha256": "581c113a3d6fe18d91479aca62560c30804c923fbb9b4392af9e6787d17e64a5",
+      "bytes": 8191,
+      "lines": 147
+    },
+    {
+      "path": "lib/experience/service.ts",
+      "sha256": "0f4f14b8974610590ffce14d2b5e2f7042df5127159bf9545f799bc74f9f9fdb",
+      "bytes": 5484,
+      "lines": 109
+    },
+    {
+      "path": "lib/sensing/repoSource.ts",
+      "sha256": "2b7bb7354e0dc74298d0648ed9905a533c841154a7b08cb61efe27843449a268",
+      "bytes": 17234,
+      "lines": 270
+    },
+    {
+      "path": "lib/types/agentExperience.ts",
+      "sha256": "4c794e8e928158f7cfa810289eec9bf1de6235ae6b14ea81418317447a3315ed",
+      "bytes": 13961,
+      "lines": 189
+    },
+    {
+      "path": "lib/types/conversation.ts",
+      "sha256": "a41aa2aa4ceef84287d3f6a1b683589fc026076b2b9007bf1a68473a274e33f2",
+      "bytes": 5762,
+      "lines": 98
+    },
+    {
+      "path": "lib/types/conversationResearch.ts",
+      "sha256": "9c6316dafd5762cb224af1a5a1382e536d6c406e087038f7a1ec7e854db034ee",
+      "bytes": 3813,
+      "lines": 44
+    },
+    {
+      "path": "R4_AGENT_EXPERIENCE_IMPLEMENTATION_NOTES.md",
+      "sha256": "9121611b6fa4616a9cbe714ab48b8ec3bf9ee73a5bf8c61b1d80ec5c2e499a5f",
+      "bytes": 25386,
+      "lines": 179
+    },
+    {
+      "path": "R4_PR6_WEB_RESEARCH_PLAN.md",
+      "sha256": "d5bd689f48184db6b9e34360b02d2e7519706f003dfea010c9ac3957de571fcc",
+      "bytes": 30420,
+      "lines": 233
+    },
+    {
+      "path": "R4_PROMPT_CONTRACTS.md",
+      "sha256": "2d2ec1f2177fb1fb6f3be8894dbf6cff32e5758fe14844c7250702c75cad007b",
+      "bytes": 7522,
+      "lines": 61
+    },
+    {
+      "path": "R4_UI_PROTOCOL.md",
+      "sha256": "3a5ea52c25af4e0e44ba5e51272c280744212aef51943bdb4e913235b1d089f0",
+      "bytes": 10358,
+      "lines": 83
+    },
+    {
+      "path": "R4_EVALUATION_PROTOCOL.md",
+      "sha256": "4e7115e5119c47859b7692db638ff74d92cd5f244d97cbf570dab8b3b370e8a3",
+      "bytes": 8067,
+      "lines": 74
+    },
+    {
+      "path": "R4_REVIEW_TRACEABILITY.md",
+      "sha256": "44e10a9bd5fb05b428cd918cc85d1f1af8d661fb696033dea2db2d3d1140634d",
+      "bytes": 7451,
+      "lines": 56
+    },
+    {
+      "path": "evidence/r4-agent-experience/20261027-pr6/delivery-checkpoint.json",
+      "sha256": "df9ec9b9082d6ec8611b3b85a2df50f3d3fcd97d11a9f80377cea9b7c325d6a4",
+      "bytes": 875,
+      "lines": 22
+    },
+    {
+      "path": "docs/FINAL/tool&function/PROJECTMEMO_AGENT_EXPERIENCE_R4_BASELINE_v1_2.md",
+      "sha256": "5dae8fad4476f371b17682e46c21183f08396e2352659209b3ac15b46f2f4f04",
+      "bytes": 71385,
+      "lines": 633
+    },
+    {
+      "path": "docs/FINAL/tool&function/ProjectMemo_R4_Tool_Ecosystem_Codex_Planning_Baseline_2026-10-27.md",
+      "sha256": "e46164b987de6a2654d01492883417b99430bc1e29c01b56946a58cd99370a1e",
+      "bytes": 35897,
+      "lines": 400
+    },
+    {
+      "path": "docs/FINAL/tool&function/PROJECTMEMO_R4_CONTINUITY_TRUST_TOOL_INTEGRATION_PLANNING_BASELINE_2026-10-27.md",
+      "sha256": "fd67ca8e42e14864f38081c0d28362d027abb2dfefab50cd6935680fed357dee",
+      "bytes": 46813,
+      "lines": 486
+    },
+    {
+      "path": "docs/FINAL/AGENT_REVIEW/projectmemo_r4/PROJECTMEMO_AGENT_EXPERIENCE_R4_BASELINE_v1_2.md",
+      "sha256": "b8668949ed7bd15c0848bf394dea45140d83e29ae55f04b1d39507b6dd682b02",
+      "bytes": 72359,
+      "lines": 635
+    }
+  ]
+}

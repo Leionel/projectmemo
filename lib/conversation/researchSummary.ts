@@ -1,3 +1,4 @@
+import { effectiveContinuity, assertContinuityBinding, assertDirectiveEffect } from "@/lib/continuity/directiveService";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
@@ -22,13 +23,18 @@ export async function adoptResearchSummary(actor: ConversationActor, id: string,
     if (projectIds.length !== 1) throw new AppError("RESEARCH_PROJECT_AMBIGUOUS", "请先明确研究总结归入的单个项目", 409);
     const projectId = projectIds[0]; const membership = await assertProject(actor, projectId, tx);
     if (membership.role !== "OWNER") throw new AppError("FORBIDDEN", "仅项目所有者可将私有研究归入项目", 403);
+    const originTurn = await tx.conversationTurn.findUniqueOrThrow({ where: { id: message.turnId } });
+    const oldReceipts = record(record(originTurn.readManifestJson).researchSummaryReceipts);
+    const oldReceipt = input.previewHash ? record(oldReceipts[input.previewHash]) : {};
+    if (input.action === "CONFIRM" && typeof oldReceipt.artifactId === "string") return { previewHash: input.previewHash, content: "", projectId, artifactId: oldReceipt.artifactId };
+    const continuity = await effectiveContinuity(actor.userId, { projectId, conversationId: id }, tx);
     for (const source of blocks.sources.filter(s => s.external)) await validateWebSource(actor, source, tx);
     const coverage = blocks.researchCoverage;
     const content = ["# 项目研究总结", "", "## 建议与判断", message.content, "", "## 适用条件与待核对事项",
       ...(coverage?.facets.map(f => `- ${f.question}：${researchCoverageLabel(f.coverage)}${f.missing.length ? "；待核对 " + f.missing.join("、") : ""}${f.conflicts.length ? "；冲突 " + f.conflicts.map(x => x.claim).join("；") : ""}`) ?? ["- 本次保留建议与实际已读片段；项目实际结果需要原记录或后续验证。"]),
       "", "## 来源与阅读范围", ...blocks.sources.filter(s => s.external).map(s => `- ${s.title} · ${researchReadLevelLabel(s.external!.readLevel)} · ${s.external!.requestedUrl}\n  抓取于 ${s.external!.fetchedAt}\n  已读片段：${s.excerpt.slice(0, 1200)}`),
     ].join("\n");
-    const previewHash = jsonHash({ messageId, projectId, content, sources: blocks.sources.map(s => ({ id: s.id, revision: s.revision, excerptHash: s.excerptHash })) });
+    const previewHash = jsonHash({ continuity: { intentHash: continuity.intentHash, reusePolicyHash: continuity.reusePolicyHash }, messageId, projectId, content, sources: blocks.sources.map(s => ({ id: s.id, revision: s.revision, excerptHash: s.excerptHash })) });
     const turn = await tx.conversationTurn.findUniqueOrThrow({ where: { id: message.turnId } }), manifest = record(turn.readManifestJson);
     const receipts = record(manifest.researchSummaryReceipts), existing = receipts[previewHash] as { artifactId: string } | undefined;
     if (input.action === "CONFIRM" && input.previewHash !== previewHash) throw new AppError("SUMMARY_CHANGED", "研究总结已变化，请重新预览", 409);
@@ -38,13 +44,15 @@ export async function adoptResearchSummary(actor: ConversationActor, id: string,
     const previews = record(manifest.researchSummaryPreviews);
     if (input.action === "PREVIEW") {
       await tx.conversationTurn.update({ where: { id: turn.id }, data: { readManifestJson: json({ ...manifest, researchSummaryPreviews: {
-        ...previews, [previewHash]: { conversationVersion: c.version, expiresAt: new Date(Date.now() + 900000).toISOString() },
+        ...previews, [previewHash]: { continuity: { intentHash: continuity.intentHash, reusePolicyHash: continuity.reusePolicyHash }, conversationVersion: c.version, expiresAt: new Date(Date.now() + 900000).toISOString() },
       } }) } });
       return { previewHash, content, projectId };
     }
     const issued = record(previews[previewHash]);
+    await assertContinuityBinding(actor.userId, { projectId, conversationId: id }, issued.continuity, tx);
     if (issued.conversationVersion !== c.version || typeof issued.expiresAt !== "string" || Date.parse(issued.expiresAt) <= Date.now())
       throw new AppError("SUMMARY_PREVIEW_REQUIRED", "请先读取当前研究总结预览再确认", 409);
+    assertDirectiveEffect(continuity, "BUSINESS_WRITE");
     const artifact = await saveArtifactInTx(tx, projectId, "weekly_report", content, json({ schemaVersion: 1, kind: "CONVERSATION_RESEARCH", conversationId: id, messageId,
       sources: blocks.sources, researchCoverage: coverage ?? null, verification: "UNMAPPED_MODEL" }));
     await tx.conversationTurn.update({ where: { id: turn.id }, data: { readManifestJson: json({ ...manifest, researchSummaryReceipts: { ...receipts, [previewHash]: { artifactId: artifact.id, previewHash } } }) } });

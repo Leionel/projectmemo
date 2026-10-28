@@ -5,7 +5,10 @@ import { E2E_ENV } from '../scripts/e2e-env';
 function fixture(op:string,id:string){return execFileSync(process.execPath,[path.resolve('node_modules/tsx/dist/cli.mjs'),'scripts/e2e-pr6-fixture.ts',op,id],{env:{...process.env,...E2E_ENV},timeout:30000}).toString();}
 test('PR6 原回答来源回读、研究总结确认及撤权，桌面手机同一会话',async({page})=>{
   test.setTimeout(90000);
-  const me=await page.request.get('/api/auth/me'), user=(await me.json()).user;
+  const session=(await page.context().cookies()).find(c=>c.name==='pm_session')!;
+  const me=await page.request.get('/api/auth/me',{headers:{Authorization:'Bearer '+session.value}});
+  expect(me.ok(),await me.text()).toBe(true);
+  const user=(await me.json()).user;
   const data=JSON.parse(fixture('create',user.id));
   try {
     await page.goto('/focus?conversation='+data.conversationId);
@@ -24,7 +27,7 @@ test('PR6 原回答来源回读、研究总结确认及撤权，桌面手机同�
     for(const width of [1280,390]){
       await page.setViewportSize({width,height:900});
       expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
-      await page.screenshot({path:`evidence/r4-agent-experience/20261027-pr6/web/pr6-preview-${width}.png`,fullPage:true});
+      await page.screenshot({path:`evidence/r4-continuity/20261028-pr6-close-ct1/web/pr6-preview-${width}.png`,fullPage:true});
     }
     await panel.getByRole('button',{name:'确认归入项目'}).click();
     await expect(panel.getByRole('status').filter({hasText:'研究总结已归入项目'})).toBeVisible();

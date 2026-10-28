@@ -1,0 +1,12 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/continuityIntent.test.ts tests/continuityRuntime.test.ts tests/continuityJourney.test.ts tests/continuityCandidate.test.ts tests/continuityRecoordination.test.ts tests/continuitySuppression.test.ts tests/continuityMigration.test.ts tests/researchQueryCompilation.test.ts tests/researchEvaluationBudget.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  9 passed (9)
+      Tests  24 passed (24)
+   Start at  23:59:31
+   Duration  21.73s (transform 1.41s, setup 0ms, import 4.70s, tests 15.35s, environment 1ms)

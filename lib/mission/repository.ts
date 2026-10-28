@@ -1,3 +1,4 @@
+import { assertSourceUse } from "@/lib/continuity/sourcePolicy";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import type { Prisma } from "@/lib/generated/prisma/client";
@@ -41,6 +42,8 @@ export async function sourceHash(projectId: string, id: string, tx: Tx = db): Pr
   return null;
 }
 export async function validateSources(projectId: string, sources: Source[], tx: Tx = db, missionId?: string) {
+  const mission = missionId ? await tx.agentMission.findUnique({ where: { id: missionId } }) : null;
+  if (mission) for (const source of sources) await assertSourceUse(mission.ownerUserId, projectId, source.id, tx, { missionId });
   for(const s of sources.filter(s=>s.kind==="EXTERNAL")){const row=missionId?await tx.externalSource.findFirst({where:{id:s.id,missionId,retrievalMode:"PROVIDER_EXTRACT",availability:"AVAILABLE",normalizedContentHash:s.hash}}):null;if(!row)throw new AppError("SOURCE_CHANGED","外部来源不存在、失效或不属于当前委托",409);}
   for (const source of sources.filter(s=>s.kind==="PROJECT")) if (await sourceHash(projectId,source.id,tx)!==source.hash) throw new AppError("SOURCE_CHANGED","来源已变化，请重新读取并预览",409);
 }

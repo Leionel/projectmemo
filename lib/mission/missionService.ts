@@ -1,3 +1,4 @@
+import { effectiveContinuity } from "@/lib/continuity/directiveService";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { isFeatureEnabled } from "@/lib/config/features";
@@ -22,6 +23,8 @@ export async function createMission(userId: string, input: unknown) {
 export async function createMissionInTx(tx:Prisma.TransactionClient,userId:string,input:unknown){
     requireMissions();const body=createMissionSchema.parse(input);await assertOwner(userId,body.projectId,tx);const hash=jsonHash(body);
     const m=await tx.agentMission.create({data:{ownerUserId:userId,projectId:body.projectId,createRequestId:body.requestId,createPayloadHash:hash,goal:body.goal,successCriteriaJson:body.successCriteria,constraintsJson:json({...body.missionConstraints,llmContextApproved:body.llmContextApproved}),researchScopeJson:json(body.researchScope),continuationPolicyJson:body.continuationPolicy,budgetJson:defaultBudget}});
+    const continuity = await effectiveContinuity(userId, { projectId: m.projectId, missionId: m.id }, tx);
+    await tx.agentMission.update({ where: { id: m.id }, data: { planJson: json({ ...(m.planJson as object), continuityBinding: { intentHash: continuity.intentHash, reusePolicyHash: continuity.reusePolicyHash } }) } });
     await event(tx,m.id,"CREATED",{goal:m.goal,constraints:body.missionConstraints,researchScope:body.researchScope,llmContextApproved:body.llmContextApproved});return m;
 }
 export async function listMissions(userId:string,projectId:string,cursor?:string){
@@ -75,7 +78,8 @@ export async function commandMission(userId:string,id:string,action:string,raw:u
     }else if(action==="pause"){if(!["READY","RUNNING","WAITING_INPUT","WAITING_APPROVAL"].includes(m.status))throw new AppError("INVALID_TRANSITION","当前状态无法暂停",409);status=m.status==="RUNNING"?"RUNNING":"PAUSED";}
     else if(action==="cancel")status=m.status==="RUNNING"?"RUNNING":"CANCELLED";
     else throw new AppError("INVALID_COMMAND","不支持此操作",422);
-    const updated=await tx.agentMission.update({where:{id},data:{status,...(action==="pause"?{planJson:json({...m.planJson as object,resumeStatus:m.status==="RUNNING"?"READY":m.status})}:{}),...( ["resume","input","approval","replan"].includes(action)?{planJson:json({...m.planJson as object,resumeStatus:null,automaticContinuation:null,...((m.planJson as {dynamicReview?:{completed?:boolean}}).dynamicReview?.completed&&["resume","input"].includes(action)?{dynamicReview:null}:{})})}:{}),version:{increment:1},...(action==="input"?{contextVersion:{increment:1}}:{}),pauseRequestedAt:action==="pause"?new Date():null,cancelRequestedAt:action==="cancel"?new Date():m.cancelRequestedAt,pauseReason:action==="pause"?"USER":null}});
+    const continuity = await effectiveContinuity(userId, { projectId: m.projectId, missionId: m.id }, tx);
+    const updated=await tx.agentMission.update({where:{id},data:{status,...(action==="pause"?{planJson:json({...m.planJson as object,resumeStatus:m.status==="RUNNING"?"READY":m.status})}:{}),...( ["resume","input","approval","replan"].includes(action)?{planJson:json({...m.planJson as object,resumeStatus:null,automaticContinuation:null,continuityBinding:{intentHash:continuity.intentHash,reusePolicyHash:continuity.reusePolicyHash},...((m.planJson as {dynamicReview?:{completed?:boolean}}).dynamicReview?.completed&&["resume","input"].includes(action)?{dynamicReview:null}:{})})}:{}),version:{increment:1},...(action==="input"?{contextVersion:{increment:1}}:{}),pauseRequestedAt:action==="pause"?new Date():null,cancelRequestedAt:action==="cancel"?new Date():m.cancelRequestedAt,pauseReason:action==="pause"?"USER":null}});
     await event(tx,id,action.toUpperCase(),json(body),{id:`cmd:${body.requestId}`,hash});return updated;
   };
   return transaction ? apply(transaction) : db.$transaction(apply);

@@ -1,3 +1,4 @@
+import { sourceUse } from "@/lib/continuity/sourcePolicy";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { jsonHash } from "@/lib/mission/contracts";
@@ -34,13 +35,23 @@ export async function discoverMaterialPointers(actor: ConversationActor, project
       if (revision) pointers.push({ projectId, sourceId, revision, title: c.title + (sourceId.startsWith("attachment:") ? " · 原文件" : " · 原始记录") });
     }
     const actions = await db.actionItem.findMany({ where: { projectId, isSimulated: false }, orderBy: { id: "asc" }, take: 12, select: { id: true, title: true } });
+    // Unknown summary lineage must not cut off a fresh investigation of an accessible original.
+    // Neutral metadata can locate the original without reusing the summary's claims or title.
+    const originalCandidates = await db.knowledgeCard.findMany({ where: { projectId }, orderBy: { createdAt: "desc" }, take: 16, select: { captureId: true, attachmentId: true } });
+    for (const candidate of originalCandidates) for (const sourceId of ["capture:" + candidate.captureId, ...(candidate.attachmentId ? ["attachment:" + candidate.attachmentId] : [])]) {
+      if ((await sourceUse(actor.userId, projectId, sourceId, db, { conversationId: actor.conversationId, ...(actor.missionId ? { missionId: actor.missionId } : {}) })).state !== "ALLOWED") continue;
+      const revision = await sourceHash(projectId, sourceId);
+      if (revision && !pointers.some(p => p.projectId === projectId && p.sourceId === sourceId)) pointers.push({ projectId, sourceId, revision, title: sourceId.startsWith("capture:") ? "可重新核对的原始记录" : "可重新核对的原文件" });
+    }
     for (const action of actions) {
       const sourceId = "action:" + action.id, revision = await sourceHash(projectId, sourceId);
       if (revision) pointers.push({ projectId, sourceId, revision, title: action.title });
     }
     await assertProject(actor, projectId);
   }
-  return [...new Map(pointers.map(p => [p.projectId + "/" + p.sourceId, p])).values()].slice(0, 64);
+  const allowedPointers = [];
+  for (const p of pointers) if ((await sourceUse(actor.userId, p.projectId, p.sourceId, db, { conversationId: actor.conversationId, ...(actor.missionId ? { missionId: actor.missionId } : {}) })).state === "ALLOWED") allowedPointers.push(p);
+  return [...new Map(allowedPointers.map(p => [p.projectId + "/" + p.sourceId, p])).values()].slice(0, 64);
 }
 
 /** Uses user/project readers directly; no synthetic mission actor and no write tool is exposed. */
@@ -59,7 +70,7 @@ export async function readWorkspaceTool(actor: ConversationActor, raw: z.infer<t
       observedAt, temporalState, knowledgeClass, start: 0, end: excerpt.length, excerptHash: jsonHash(excerpt), readScope: scope });
   }
   if (call.tool === "search_memory") {
-    const result = await searchMissionMemory({ userId: actor.userId, projectId: call.projectId }, { query: call.query, limit: 3, ...(call.afterId ? { afterId: call.afterId } : {}) });
+    const result = await searchMissionMemory({ userId: actor.userId, projectId: call.projectId, conversationId: actor.conversationId, missionId: actor.missionId }, { query: call.query, limit: 3, ...(call.afterId ? { afterId: call.afterId } : {}) });
     data = result.data; coverage = result.coverage ?? coverage;
     for (const s of result.sources) source(s.id, s.hash, s.id, s.text, "SUMMARY", s.temporalState);
   } else if (call.tool === "read_project_material") {
@@ -84,7 +95,7 @@ export async function readWorkspaceTool(actor: ConversationActor, raw: z.infer<t
       data = { title: original.ref.title, content: original.text, goalImpact: "UNKNOWN", signalIds: original.signalIds };
       coverage = { complete: false, description: "已缓存仓库线索，不证明现实执行成功" };
     } else {
-    const material = await readReviewMaterial(call.projectId, call.sourceId);
+    const material = await readReviewMaterial(call.projectId, call.sourceId, db, actor.userId);
     if (!material || material.source.hash !== call.revision) throw new AppError("SOURCE_CHANGED", "原资料已修订，请重新定位", 409);
     if (!material.source.text.trim()) throw new AppError("SOURCE_NOT_READABLE", "这份资料还没有可读正文", 409);
     source(call.sourceId, material.source.hash, material.title, material.source.text, material.readScope, material.source.temporalState, material.source.knowledgeClass ?? "PROJECT_OBSERVATION");

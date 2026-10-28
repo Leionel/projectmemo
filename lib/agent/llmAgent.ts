@@ -1,4 +1,4 @@
-import { reserveCloudCall, reserveWorkspaceCloudCall, reserveReviewCloudCall, settleWorkspaceCloudCall, type WorkspaceBilling, type ReviewBilling } from "@/lib/auth/cloudQuota";
+import { reserveCloudCall, reserveWorkspaceCloudCall, reserveReviewCloudCall, settleWorkspaceCloudCall, commitWorkspaceDispatch, type WorkspaceBilling, type ReviewBilling } from "@/lib/auth/cloudQuota";
 import { inputTokenBound, stageOutputLimit } from "@/lib/conversation/tokenBudget";
 import { AppError } from "@/lib/api";
 import { artifactCoverageV2, captureFidelityV2 } from "@/lib/agent/specialistPrompts";
@@ -37,6 +37,7 @@ export async function chatWithLLMWithMeta(prompt: string | ModelMessage[], proje
     requestBody.thinking = { type: "disabled" };
   }
   if (supportsJson && (workspace || review || task?.jsonOutput)) requestBody.response_format = { type: "json_object" };
+  if (billing) await commitWorkspaceDispatch(billing);
   const response = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },

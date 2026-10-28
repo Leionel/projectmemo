@@ -9,7 +9,9 @@ export default function WebSourcePage() {
   const [source, setSource] = useState<ConversationSource | null>(null), [error, setError] = useState("");
   useEffect(() => {
     const control = new AbortController();
-    fetch(`/api/conversations/${encodeURIComponent(p.conversationId)}/turns/${encodeURIComponent(p.turnId)}/sources/${encodeURIComponent(p.sourceId)}`, { signal: control.signal })
+    // Client route params can retain escaped segments; normalize once before constructing the API URL.
+    const sourceId = decodeURIComponent(p.sourceId);
+    fetch(`/api/conversations/${encodeURIComponent(p.conversationId)}/turns/${encodeURIComponent(p.turnId)}/sources/${encodeURIComponent(sourceId)}`, { signal: control.signal })
       .then(async response => { const body = await response.json(); if (!response.ok) throw new Error(body.error?.message ?? body.message ?? "来源已不可访问"); setSource(body.data?.source ?? body.source); })
       .catch(e => { if (!control.signal.aborted) setError(e.message); });
     return () => control.abort();

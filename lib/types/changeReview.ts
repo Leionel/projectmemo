@@ -42,6 +42,7 @@ export const dynamicAdoptSchema = z.object({
 }).strict();
 export type EvidenceSlice = { ref: string; source: Source; title: string; role: "CURRENT" | "HISTORICAL"; text: string; readScope: "SUMMARY" | "EXCERPT" };
 export type ReviewBase = {
+  continuity?: { intentHash: string; reusePolicyHash: string };
   schemaVersion: 2; rootReviewKey: string; attempt: number; missionId: string; projectId: string;
   expectedVersion: number; goalHash: string; successHash: string; constraintsHash: string;
   scopeHash: string; planRevision: number; policyVersion: string; providerVersion: string;

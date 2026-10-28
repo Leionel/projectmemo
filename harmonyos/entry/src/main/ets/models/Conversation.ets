@@ -1,3 +1,4 @@
+import { ContinuityView } from "./Continuity";
 import { AgentPresentation } from './AgentExperience';
 import { ConversationResearchInfo, ExternalSourceMeta, ResearchCoverage } from './ConversationResearch';
 export interface ConversationEntry { kind: string; projectId: string; id: string; revision?: string; }
@@ -22,6 +23,7 @@ export interface ConversationProgress { sequence?: number; events?: Conversation
 export interface ConversationActiveTurn { id: string; requestId: string; status: string; progress?: ConversationProgress; }
 export interface ConversationTurnState { id: string; status: string; message: string; canRetry: boolean; }
 export class ConversationView {
+  continuity?: ContinuityView;
   research?: ConversationResearchInfo;
   schemaVersion: number = 1; id: string = ''; title: string = ''; scope: string = '';
   version: number = 1; homeProjectId: string | null = null; focusProjectId: string | null = null;
@@ -29,11 +31,11 @@ export class ConversationView {
   activeTurn: ConversationActiveTurn | null = null; hasMore: boolean = false; beforeSeq: number | null = null;
   latestTurn?: ConversationTurnState | null;
 }
-export interface ConversationCapabilities { schemaVersion: number; enabled: boolean; cloudAvailable: boolean; intents: string[]; r4Available?: boolean; }
+export interface ConversationCapabilities { schemaVersion: number; enabled: boolean; cloudAvailable: boolean; intents: string[]; r4Available?: boolean; continuityAvailable?: boolean; }
 export class ConversationCreateInput { requestId: string = ''; scope: string = 'WORKSPACE'; projectId?: string; entry?: ConversationEntry; }
 export class ConversationEntityInput { kind: string = 'MISSION'; id: string = ''; projectId: string = ''; }
 export class ConversationTurnInput {
-  requestId: string = ''; expectedVersion: number = 1; message: string = '';
+  requestId: string = ''; expectedVersion: number = 1; expectedContinuitySeq?: number; message: string = '';
   projectId?: string | null; replyToMessageId?: string; llmContextApproved: boolean = false; entityRef?: ConversationEntityInput;
   investigationMode?: string;
 }

@@ -1,3 +1,5 @@
+import { effectiveContinuity } from "@/lib/continuity/directiveService";
+import { sourceUse } from "@/lib/continuity/sourcePolicy";
 import { db } from "@/lib/db";
 import type { AgentMission } from "@/lib/generated/prisma/client";
 
@@ -24,8 +26,12 @@ export async function injectionDecisions(m: AgentMission, usedTools: Array<{ nam
     orderBy: { supportCount: "desc" },
     take: 8,
   });
+  const current = await effectiveContinuity(m.ownerUserId, { projectId: m.projectId, missionId: m.id });
+  const suppressing = current.directives.some(d => d.kind === "USE_SUPPRESSION");
   const decisions: InjectionDecision[] = [];
   for (const row of rows) {
+    const policy = await sourceUse(m.ownerUserId, m.projectId, "experience:" + row.id, db, { missionId: m.id });
+    if (policy.state === "SUPPRESSED" || policy.state === "UNKNOWN" && suppressing) { decisions.push({ suppressed: { experienceId: row.id, reason: policy.reason } }); continue; }
     if (row.revokedAt) { decisions.push({ suppressed: { experienceId: row.id, reason: "REVOKED" } }); continue; }
     const toolVersions = row.toolVersionsJson as Record<string, string>;
     const protocolVersions = row.protocolVersionsJson as number[];
@@ -70,7 +76,14 @@ export async function suggestionsForMission(m: AgentMission) {
     orderBy: [{ status: "asc" }, { supportCount: "desc" }],
     take: 10,
   });
-  return rows.map(row => ({
+  const current = await effectiveContinuity(m.ownerUserId, { projectId: m.projectId, missionId: m.id });
+  const safeRows = [] as typeof rows;
+  for (const row of rows) {
+    const policy = await sourceUse(m.ownerUserId, m.projectId, "experience:" + row.id, db, { missionId: m.id });
+    if (policy.state === "SUPPRESSED" || policy.state === "UNKNOWN" && current.directives.some(d => d.kind === "USE_SUPPRESSION")) continue;
+    safeRows.push(row);
+  }
+  return safeRows.map(row => ({
     id: row.id,
     kind: row.kind,
     status: row.status,

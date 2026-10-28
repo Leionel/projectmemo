@@ -1,3 +1,6 @@
+import { actorDirectiveScope } from "@/lib/continuity/directiveService";
+import { sourceUse } from "@/lib/continuity/sourcePolicy";
+import { effectiveContinuity } from "@/lib/continuity/directiveService";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { isFeatureEnabled } from "@/lib/config/features";
@@ -43,10 +46,12 @@ export async function workspaceDirectory(actor: ConversationActor, scope: string
       db.agentIntervention.findMany({ where: { projectId: p.id, isSimulated: false, status: "OPEN", NOT: { dedupeKey: { startsWith: "goal:" } } },
         take: 2, orderBy: [{ severity: "desc" }, { id: "asc" }], select: { id: true, title: true, content: true } }),
     ]);
+    for (let i = actions.length - 1; i >= 0; i--) if ((await sourceUse(actor.userId, p.id, "action:" + actions[i].id, db, { conversationId: actor.conversationId, ...(actor.missionId ? { missionId: actor.missionId } : {}) })).state !== "ALLOWED") actions.splice(i, 1);
+    const continuity = await effectiveContinuity(actor.userId, { projectId: p.id, ...(actor.conversationId ? { conversationId: actor.conversationId, ...(actor.missionId ? { missionId: actor.missionId } : {}) } : {}) });
     const pref = preferences.find(v => v.projectId === p.id);
     const preference = pref ? { importance: pref.importance, longTermGoal: pref.longTermGoal,
       estimatedMinutes: pref.estimatedMinutes, notes: pref.notes, version: pref.version } : null;
-    const summary = { id: p.id, title: p.title, goal: p.goal, deadline: p.deadline?.toISOString() ?? null,
+    const summary = { workingObjective: continuity.workingObjective, continuityHash: continuity.intentHash, id: p.id, title: p.title, goal: p.goal, deadline: p.deadline?.toISOString() ?? null,
       archived: !!p.archivedAt, actions, actionCount, missions, missionCount, waiting, blocked, reminders, preference,
       coverage: { actionsComplete: actionCount <= 4, missionsComplete: missionCount <= 4, remindersLimit: 2 } };
     return { ...summary, priority: explainPriority(summary), observationHash: jsonHash(summary) };
@@ -98,7 +103,7 @@ export async function observeProjects(actor: ConversationActor, directory: Works
     sources.push({ id: p.id + "/project:" + p.id, projectId: p.id, sourceId: "project:" + p.id,
       revision: hash!, title: p.title + " 当前状态", excerpt, observedAt,
       temporalState: "CURRENT", knowledgeClass: "PROJECT_OBSERVATION", start: 0, end: excerpt.length, excerptHash: jsonHash(excerpt) });
-    const search = await searchMissionMemory({ userId: actor.userId, projectId: p.id }, { query: query.slice(0, 256), limit: 3 });
+    const search = await searchMissionMemory({ userId: actor.userId, ...actorDirectiveScope(actor, p.id) }, { query: query.slice(0, 256), limit: 3 });
     for (const s of search.sources.slice(0, 3)) {
       const text = s.text.slice(0, 600);
       sources.push({ id: p.id + "/" + s.id, projectId: p.id, sourceId: s.id, revision: s.hash,
@@ -109,6 +114,7 @@ export async function observeProjects(actor: ConversationActor, directory: Works
   }
   const orderedRefs = entityRef ? [...refs.filter(r => r.kind === entityRef.kind && r.id === entityRef.id),
     ...refs.filter(r => r.kind !== entityRef.kind || r.id !== entityRef.id)] : refs;
+  for (let i = sources.length - 1; i >= 0; i--) if ((await sourceUse(actor.userId, sources[i].projectId, sources[i].sourceId, db, { conversationId: actor.conversationId, ...(actor.missionId ? { missionId: actor.missionId } : {}) })).state !== "ALLOWED") sources.splice(i, 1);
   return { sources: sources.slice(0, 12), refs: orderedRefs, coverage: { deepReadProjects: projects.map(p => p.id),
     policy: "STATE_AND_TITLE_SUMMARY_SEARCH", limits: { projects: 3, sources: 12 },
     complete: false, limitations: ["记忆检索只覆盖标题与摘要；无结果不表示不存在", "历史原因需要定向查看原任务事件"] } };

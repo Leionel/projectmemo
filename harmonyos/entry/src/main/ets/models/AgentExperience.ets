@@ -7,6 +7,7 @@ export interface EvidenceLink {
 }
 export interface GoalCriterion { id: string; requirement: string; state: string; explanation: string; evidence: EvidenceLink[]; }
 export interface GoalGap {
+  workingObjective?: string | null; intentHash?: string;
   schemaVersion: number; id: string; projectId: string; goalRef: ExperienceEntityRef; goalQuote: string;
   criteria: GoalCriterion[]; blockers: string[]; keyUnknowns: string[]; nextInformationNeed: string | null;
 }

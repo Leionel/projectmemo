@@ -1,3 +1,7 @@
+import { assertContinuityBinding, boundDirectiveScope } from "@/lib/continuity/directiveService";
+import { readContinuity } from "@/lib/continuity/handoff";
+import { isFeatureEnabled } from "@/lib/config/features";
+import { assertSourceUse, sourceUse } from "@/lib/continuity/sourcePolicy";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { json, jsonHash } from "@/lib/mission/contracts";
@@ -140,6 +144,7 @@ export async function readConversation(actor: ConversationActor, id: string, bef
     const blocks = { ...emptyBlocks(), ...record(row.blocksJson) } as ConversationBlocks;
     let webRestricted = false;
     try {
+      for (const source of blocks.sources) if ((await sourceUse(actor.userId, source.projectId, source.sourceId, db, { conversationId: id })).state !== "ALLOWED") webRestricted = true;
       for (const source of blocks.sources.filter(s => s.external)) await validateWebSource(actor, source);
       for (const source of blocks.sources.filter(s => s.sourceId.startsWith("repo:"))) await readSourceObservation(actor, source.projectId, source.sourceId.slice(5));
       if (blocks.observationRef?.kind === "SOURCE_OBSERVATION") await readSourceObservation(actor, blocks.observationRef.projectId, blocks.observationRef.id);
@@ -155,13 +160,15 @@ export async function readConversation(actor: ConversationActor, id: string, bef
     }
     if (blocks.proposal) {
       const e = await db.copilotToolExecution.findFirst({ where: { id: blocks.proposal.executionId,
-        sourceRun: { conversationId: id } } });
+        sourceRun: { conversationId: id } }, include: { sourceRun: true } });
       if (e) {
         const action = e.resultId ? !["create_action", "complete_action"].includes(e.tool)
           ? await db.agentMission.findFirst({ where: { id: e.resultId, projectId: blocks.proposal.projectId, ownerUserId: actor.userId } })
           : await db.actionItem.findFirst({ where: { id: e.resultId, projectId: blocks.proposal.projectId, isSimulated: false } }) : null;
         blocks.proposal = { ...blocks.proposal, status: e.status, resultId: e.resultId, actionStatus: action?.status ?? null,
           resultCardId: action && "resultCardId" in action ? action.resultCardId : null };
+        if (e.status === "PENDING") try { await assertContinuityBinding(actor.userId, boundDirectiveScope(record(e.proposalJson).continuity ?? record(e.sourceRun.trace).continuity, blocks.proposal.projectId, id), record(e.proposalJson).continuity ?? record(e.sourceRun.trace).continuity); }
+        catch (error) { if (error instanceof AppError) blocks.proposal.status = "STALE"; else throw error; }
       }
     }
     blocks.fileGuides = await resolveFileGuides(blocks.sources, blocks.citations, blocks.fileGuides);
@@ -210,6 +217,7 @@ export async function readConversation(actor: ConversationActor, id: string, bef
     title = first ? scopes.some(p => !latestAllowed.has(p)) ? "项目协作" : discussionTitle(first.content, linked.find(p => p.id === projectId)?.title) : "新讨论";
   }
   return { schemaVersion: 1, id, title: messages.some(m => m.restricted) ? "项目协作" : title,
+    continuity: (isFeatureEnabled("FOCUS_CONTINUITY_ENABLED", false) || (await db.user.findUniqueOrThrow({ where: { id: actor.userId }, select: { continuitySeq: true } })).continuitySeq > 0) ? await readContinuity(actor, id) ?? undefined : undefined,
     research: await readResearchScope(actor, id),
     scope: c.scope, homeProjectId: c.homeProjectId, version: c.version, focusProjectId,
     messages, linkedProjects: linked.filter(p => latestAllowed.has(p.id)), hasMore: rows.length > 50, beforeSeq: rows.length ? rows[Math.min(49, rows.length - 1)].seq : null,
@@ -235,6 +243,7 @@ export async function saveFocusPreference(actor: ConversationActor, projectId: s
 }
 export async function validateReadSources(actor: ConversationActor, sources: ConversationBlocks["sources"], tx: Tx = db) {
   for (const source of sources) {
+    await assertSourceUse(actor.userId, source.projectId, source.sourceId, tx, { conversationId: actor.conversationId, ...(actor.missionId ? { missionId: actor.missionId } : {}) });
     if (source.external) { await validateWebSource(actor, source, tx); continue; }
     if (source.sourceId.startsWith("repo:")) {
       if ((await readSourceObservation(actor, source.projectId, source.sourceId.slice(5), tx)).revision !== source.revision) throw new AppError("SOURCE_CHANGED", "仓库线索已变化", 409);

@@ -1,3 +1,4 @@
+import { assertSourceUse } from "@/lib/continuity/sourcePolicy";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { json, jsonHash } from "@/lib/mission/contracts";
@@ -28,6 +29,7 @@ export async function updateResearchScope(actor: ConversationActor, id: string, 
 }
 /** A snapshot is usable only while the original private conversation and its grant remain accessible. */
 export async function validateWebSource(actor: ConversationActor, source: ConversationSource, tx: Prisma.TransactionClient = db) {
+  await assertSourceUse(actor.userId, source.projectId, source.sourceId, tx, { conversationId: actor.conversationId, ...(actor.missionId ? { missionId: actor.missionId } : {}) });
   const meta = source.external;
   if (!meta || !source.sourceId.startsWith("web:")) throw new AppError("SOURCE_NOT_FOUND", "未找到原网页来源", 404);
   const current = await readResearchScope(actor, meta.conversationId, tx);

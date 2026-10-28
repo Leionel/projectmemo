@@ -10,9 +10,10 @@ import { emptyBlocks, lockConversation, ownedConversation, record } from "./repo
 import { appendConversationMessage, bindRefs, readConversation } from "./service";
 import { confirmConversationAction } from "./commands";
 import { confirmConversationWork } from "./workService";
+import { effectiveContinuity, assertContinuityBinding } from "@/lib/continuity/directiveService";
 
 const payloadSchema = z.object({ missionId: z.string(), projectId: z.string(), expectedVersion: z.number(),
-  contextVersion: z.number(), planRevision: z.number() }).strict();
+  contextVersion: z.number(), planRevision: z.number(), continuity: z.object({ intentHash: z.string(), reusePolicyHash: z.string() }).optional() }).strict();
 export async function previewConversationResume(actor: ConversationActor, id: string, missionId: string) {
   await db.$transaction(async tx => {
     await lockConversation(tx, id);
@@ -21,11 +22,12 @@ export async function previewConversationResume(actor: ConversationActor, id: st
     if (!await tx.conversationBinding.findFirst({ where: { conversationId: id, kind: "MISSION", entityId: m.id, projectId: m.projectId } }))
       throw new AppError("MISSION_NOT_BOUND", "先读取并讨论这条原委托", 409);
     if (m.status !== "PAUSED") throw new AppError("MISSION_NOT_PAUSED", "仅暂停的原委托可以恢复，其他状态请核对原问题", 409);
-    const key = "resume:" + m.id + ":" + m.version;
+    const continuity = await effectiveContinuity(actor.userId, { projectId: m.projectId, conversationId: id }, tx);
+    const key = "resume:" + m.id + ":" + m.version + ":" + continuity.intentHash;
     const previous = await tx.copilotToolExecution.findFirst({ where: { proposalKey: key, tool: "resume_mission", sourceRun: { conversationId: id } } });
     if (previous) return;
     const payload = { missionId: m.id, projectId: m.projectId, expectedVersion: m.version,
-      contextVersion: m.contextVersion, planRevision: m.planRevision };
+      contextVersion: m.contextVersion, planRevision: m.planRevision, continuity: { intentHash: continuity.intentHash, reusePolicyHash: continuity.reusePolicyHash } };
     const run = await tx.agentRun.create({ data: { projectId: null, conversationId: id, runType: "CHAT", provider: "project_state",
       status: "SUCCESS", trace: { purpose: "FOCUS_RESUME_PREVIEW", actorUserId: actor.userId, copilotTargetProjectId: m.projectId }, resultJson: {} } });
     const e = await tx.copilotToolExecution.create({ data: { sourceRunId: run.id, proposalKey: key, tool: "resume_mission",
@@ -60,6 +62,7 @@ export async function confirmConversationProposal(actor: ConversationActor, id: 
     const old = await tx.conversationTurn.findUnique({ where: { conversationId_requestId: { conversationId: id, requestId: input.requestId } } });
     if (old && old.inputHash !== hash) throw new AppError("REQUEST_ID_REUSED", "请求编号已用于其他选择", 409);
     if (e.status === "COMMITTED") return { missionId: p.missionId, alreadyExecuted: true };
+    await assertContinuityBinding(actor.userId, { projectId: p.projectId, conversationId: id }, p.continuity, tx);
     if (e.status !== "PENDING" || record(c.focusJson).projectId !== p.projectId) throw new AppError("CONTEXT_SCOPE_CHANGED", "提案已处理或讨论焦点已变化", 409);
     await commandMission(actor.userId, p.missionId, "resume", { requestId: "conversation:" + e.id, expectedVersion: p.expectedVersion },
       undefined, m => { if (m.contextVersion !== p.contextVersion || m.planRevision !== p.planRevision) throw new AppError("MISSION_CHANGED", "委托依据已变化，请重新预览", 409); }, tx);

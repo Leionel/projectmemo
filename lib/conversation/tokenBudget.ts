@@ -7,8 +7,10 @@ export type TokenReservation = {
   purpose: ModelPurpose; inputTokens: number; outputTokens: number;
   inputAccounting: "UTF8_UPPER_BOUND" | "LEGACY_UNKNOWN";
   state: "RESERVED" | "SETTLED";
+  dispatchState?: "RESERVED" | "DISPATCH_COMMITTED";
   provider?: string;
   callId?: string;
+  requestHash?: string;
   promptId?: string;
   promptVersion?: string;
   outputSchemaVersion?: number;

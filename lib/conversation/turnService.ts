@@ -18,7 +18,11 @@ import { experienceProgress } from "./progress";
 import { composeExperience, fallbackExperiencePlan, prepareExperienceDraft, refreshExperiencePresentation } from "./presentationRuntime";
 import type { PresentationPlan } from "@/lib/types/agentExperience";
 import type { ConversationTurn } from "@/lib/generated/prisma/client";
-import { assertTurnLease, mutateTurn, turnElapsedMs } from "./turnRuntime";
+import { assertTurnLease, mutateTurn, turnElapsedMs, newTurnLease, withTurnLease, withTurnGeneration, heartbeatTurn, currentGeneration } from "./turnRuntime";
+
+import { admitDirectiveInTx, effectiveContinuity } from "@/lib/continuity/directiveService";
+import { coordination, initialCoordination, assertTurnCurrent, activateNextGeneration } from "@/lib/continuity/turnCoordination";
+import { admitDirective } from "@/lib/continuity/admission";
 
 // The optional ablation control is trusted CLI-only; it is not part of the HTTP request schema.
 export async function submitConversationTurn(actor: ConversationActor, id: string, raw: unknown, evaluation?: { variant: "PROMPT_ONLY" | "INVESTIGATION_ONLY" }, options?: { defer: boolean }) {
@@ -38,6 +42,24 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
         return { turn: stopped, replay: true };
       }
       return { turn: prior, replay: true };
+    }
+    let directiveAdmission: { status: string; question?: string } | undefined;
+    const ctAdmissionEnabled = isFeatureEnabled("FOCUS_CONTINUITY_ENABLED", false);
+    const ctEnabled = ctAdmissionEnabled || (await tx.user.findUniqueOrThrow({ where: { id: actor.userId }, select: { continuitySeq: true } })).continuitySeq > 0;
+    const ctProject = input.entityRef?.projectId ?? input.projectId ?? c.homeProjectId;
+    if (ctAdmissionEnabled && ctProject) {
+        const command = { commandId: "turn:" + id + ":" + input.requestId, expectedSeq: input.expectedContinuitySeq ?? 0, scope: { projectId: ctProject, ...(input.entityRef?.kind === "MISSION" ? { missionId: input.entityRef.id } : {}) },
+        operation: "SET" as const, quote: input.message, timezone: "Asia/Shanghai", admission: "LITERAL" as const };
+      const admission = admitDirective(command);
+      if (["DIRECT_APPLIED", "NEEDS_CLARIFICATION"].includes(admission.status)) {
+        if (c.scope === "PROJECT" && c.homeProjectId !== ctProject) throw new AppError("DIRECTIVE_SCOPE_CHANGED", "Instruction scope changed", 409);
+        directiveAdmission = admission;
+        const admitted = await admitDirectiveInTx(actor, command, tx, { conversationId: id, requestId: input.requestId });
+        if (c.activeTurnId && admitted.events.length) {
+          const active = await tx.conversationTurn.findUniqueOrThrow({ where: { id: c.activeTurnId } });
+          return { turn: active, replay: true };
+        }
+      }
     }
     if (c.activeTurnId) {
       const active = await tx.conversationTurn.findUnique({ where: { id: c.activeTurnId } });
@@ -60,9 +82,14 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
       throw new AppError("MESSAGE_NOT_FOUND", "原消息已不可访问", 404);
     if (input.bindingId && !await tx.conversationBinding.findFirst({ where: { id: input.bindingId, conversationId: id } }))
       throw new AppError("BINDING_NOT_FOUND", "讨论对象已不可访问", 404);
+    const ctScopes = ctEnabled ? (c.scope === "PROJECT" && c.homeProjectId ? [c.homeProjectId] : [...new Set([...(await tx.projectMembership.findMany({ where: { userId: actor.userId, project: { archivedAt: null } }, orderBy: { projectId: "asc" }, take: 60 })).map(m => m.projectId), ...(ctProject ? [ctProject] : [])])])
+      .map(projectId => ({ projectId, conversationId: id, ...(input.entityRef?.kind === "MISSION" && input.entityRef.projectId === projectId ? { missionId: input.entityRef.id } : {}) })) : [];
+    const coord = ctEnabled ? await initialCoordination(actor.userId, ctScopes, tx) : null;
+    const leaseToken = coord && !options?.defer ? newTurnLease() : null;
     const turn = await tx.conversationTurn.create({ data: { conversationId: id, requestId: input.requestId,
       inputHash: hash, inputJson: json(input), baseVersion: c.version, status: "OBSERVING", sessionId: actor.sessionId,
-      readManifestJson: options?.defer ? { deferred: true } : {} } });
+      leaseToken, leaseUntil: leaseToken ? new Date(Date.now() + 30000) : null,
+      readManifestJson: json({ ...(directiveAdmission ? { directiveAdmission } : {}), ...(options?.defer ? { deferred: true } : {}), ...(coord ? { coordination: coord } : {}) }) } });
     if (target) await tx.conversationProject.upsert({ where: { conversationId_projectId: { conversationId: id, projectId: target } },
       create: { conversationId: id, projectId: target }, update: {} });
     await appendConversationMessage(tx, id, actor.userId, "USER", input.message,
@@ -72,14 +99,64 @@ export async function submitConversationTurn(actor: ConversationActor, id: strin
   });
   if (reserved.replay) return { turnId: reserved.turn.id, status: reserved.turn.status, conversation: await readConversation(actor, id) };
   if (options?.defer) return { turnId: reserved.turn.id, status: reserved.turn.status, conversation: await readConversation(actor, id) };
-  return executeAcceptedConversationTurn(actor, id, reserved.turn, evaluation);
+  return reserved.turn.leaseToken ? withTurnLease(reserved.turn.id, reserved.turn.leaseToken, () => executeAcceptedConversationTurn(actor, id, reserved.turn, evaluation)) : executeAcceptedConversationTurn(actor, id, reserved.turn, evaluation);
 }
 
 export async function executeAcceptedConversationTurn(actor: ConversationActor, id: string, turn: ConversationTurn, evaluation?: { variant: "PROMPT_ONLY" | "INVESTIGATION_ONLY" }) {
+  if (!coordination(turn)) return executeTurnGeneration(actor, id, turn, evaluation);
+  assertTurnLease(turn);
+  const heartbeat = setInterval(() => { void heartbeatTurn(turn.id).catch(() => undefined); }, 5000);
+  try {
+    while (true) {
+      const current = await db.conversationTurn.findUniqueOrThrow({ where: { id: turn.id } });
+      const coord = coordination(current)!;
+      try {
+        await withTurnGeneration(coord.generation, () => assertTurnCurrent(current, actor.userId, coord.generation));
+        return await withTurnGeneration(coord.generation, () => executeTurnGeneration(actor, id, current, evaluation));
+      } catch (error) {
+        if (!(error instanceof AppError) || error.code !== "TURN_RECOORDINATE") throw error;
+        let activated = await activateNextGeneration(actor, turn.id, current.leaseToken!);
+        while (!activated) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          activated = await activateNextGeneration(actor, turn.id, current.leaseToken!);
+        }
+      }
+    }
+  } catch (error) {
+    if (!(error instanceof AppError) || error.code !== "TURN_STOP_REQUESTED") throw error;
+    await db.$transaction(async tx => {
+      const current = await tx.conversationTurn.findUniqueOrThrow({ where: { id: turn.id } }); assertTurnLease(current);
+      await appendConversationMessage(tx, id, actor.userId, "ASSISTANT", "\u4f60\u5df2\u6682\u505c\u8fd9\u9879\u5de5\u4f5c\uff0c\u64a4\u56de\u6682\u505c\u540e\u53ef\u4ee5\u63a5\u7eed\u3002", emptyBlocks(), turn.id);
+      await tx.conversationTurn.update({ where: { id: turn.id }, data: { status: "CANCELLED", finishedAt: new Date(),
+        readManifestJson: json({ ...record(current.readManifestJson), stopRequested: true, coordination: { ...coordination(current), state: "TERMINAL" } }) } });
+      await tx.conversation.updateMany({ where: { id, activeTurnId: turn.id }, data: { activeTurnId: null } });
+    });
+    return { turnId: turn.id, status: "CANCELLED", conversation: await readConversation(actor, id) };
+  } finally {
+    clearInterval(heartbeat);
+    await db.conversationTurn.updateMany({ where: { id: turn.id, leaseToken: turn.leaseToken }, data: { leaseToken: null, leaseUntil: null } });
+  }
+}
+
+async function executeTurnGeneration(actor: ConversationActor, id: string, turn: ConversationTurn, evaluation?: { variant: "PROMPT_ONLY" | "INVESTIGATION_ONLY" }) {
+  actor = { ...actor, conversationId: id };
   const input = conversationTurnSchema.parse(turn.inputJson);
   assertTurnLease(turn);
   try {
     const c = await ownedConversation(actor, id);
+    const admission = record(record(turn.readManifestJson).directiveAdmission);
+    if (admission.status === "NEEDS_CLARIFICATION" && typeof admission.question === "string") {
+      await db.$transaction(async tx => {
+        await lockConversation(tx, id);
+        const current = await tx.conversationTurn.findUniqueOrThrow({ where: { id: turn.id } }); assertTurnLease(current);
+        await assertTurnCurrent(current, actor.userId, currentGeneration(), tx);
+        await appendConversationMessage(tx, id, actor.userId, "ASSISTANT", String(admission.question), emptyBlocks(), turn.id);
+        await tx.conversationTurn.update({ where: { id: turn.id }, data: { status: "NEEDS_CLARIFICATION", finishedAt: new Date(),
+          readManifestJson: json({ ...record(current.readManifestJson), ...(coordination(current) ? { coordination: { ...coordination(current), state: "TERMINAL" } } : {}) }) } });
+        await tx.conversation.update({ where: { id }, data: { activeTurnId: null, version: { increment: 1 } } });
+      });
+      return { turnId: turn.id, status: "NEEDS_CLARIFICATION", conversation: await readConversation(actor, id) };
+    }
     const history = await readConversation(actor, id);
     const explicitBinding = input.bindingId ? await db.conversationBinding.findFirst({ where: { id: input.bindingId, conversationId: id } }) : null;
     let frozenMessage = input.replyToMessageId ? history.messages.find(m => m.id === input.replyToMessageId && !m.restricted)
@@ -140,15 +217,27 @@ export async function executeAcceptedConversationTurn(actor: ConversationActor, 
     const ambiguous = conflictingName || !input.projectId && !explicitBinding && !focused &&
       (named.length > 1 || (/这个|那个|原来|继续/.test(input.message) && selectable.length > 1));
     const constraints = Array.isArray(c.pinnedStateJson) ? c.pinnedStateJson as string[] : [];
-    const newConstraint = /不要|禁止|不得|不允许|只读|不联网|不创建|不接受|不选/.test(input.message) ? input.message : null;
+    const newConstraint = !coordination(turn) && /不要|禁止|不得|不允许|只读|不联网|不创建|不接受|不选/.test(input.message) ? input.message : null;
     if (newConstraint && constraints.length >= 24) throw new AppError("CONSTRAINT_LIMIT", "已保留24项限制，请另开主题或整理限制后继续", 409);
-    const pinned = newConstraint ? [...constraints, newConstraint] : constraints;
-    const modelEnabled = input.llmContextApproved && process.env.LLM_MODE === "openai-compatible";
-    const r4 = modelEnabled && !ambiguous && isFeatureEnabled("FOCUS_AGENT_R4_ENABLED", false)
+    if (exactRef?.kind === "MISSION") { actor = { ...actor, missionId: exactRef.id, missionProjectId: exactRef.projectId }; directory = await workspaceDirectory(actor, c.scope, c.homeProjectId, focused); }
+    if (coordination(turn) && exactRef?.kind === "MISSION") await mutateTurn(actor, id, turn.id, async (manifest, tx) => {
+      const coord = record(manifest.coordination), scopes = coord.scopes as Array<{ projectId: string; conversationId?: string; missionId?: string }>;
+      if (scopes.some(s => s.projectId === exactRef.projectId && s.missionId !== exactRef.id)) {
+        const replacement = await initialCoordination(actor.userId, scopes.map(s => s.projectId === exactRef.projectId ? { ...s, missionId: exactRef.id } : s), tx);
+        return { ...manifest, coordination: { ...coord, ...replacement, generation: coord.generation } };
+      }
+      return manifest;
+    });
+    const continuity = coordination(turn) ? await Promise.all(directory.summaries.map(p => effectiveContinuity(actor.userId, { projectId: p.id, conversationId: id,
+      ...(exactRef?.kind === "MISSION" && exactRef.projectId === p.id ? { missionId: exactRef.id } : {}) }))) : [];
+    const pinned = [...(newConstraint ? [...constraints, newConstraint] : constraints), ...continuity.flatMap(v => [...v.constraints,
+      ...(v.workingObjective ? ["Current working objective (formal project goal unchanged): " + v.workingObjective] : [])])];
+    const modelEnabled = input.llmContextApproved && process.env.LLM_MODE === "openai-compatible" && !pinned.some(rule => /(?:\u4e0d\u8981|\u7981\u6b62|\u4e0d\u5f97|\u4e0d\u5141\u8bb8)(?:\u8c03\u7528\u6a21\u578b|\u4ed8\u8d39\u8c03\u7528)/.test(rule));
+    const r4 = modelEnabled && !ambiguous && (isFeatureEnabled("FOCUS_AGENT_R4_ENABLED", false) || !!coordination(turn))
       ? await investigateConversation(actor, id, turn.id, { message: input.message, mode: input.investigationMode, focus: focused, evaluationVariant: evaluation?.variant,
         constraints: pinned, frozenRefs, directory, exactRef, userProvidedUrls: input.userProvidedUrls,
         priorWebSources: frozenMessage?.sources.filter(s => !!s.external && (!frozenMessage?.citations?.length || frozenMessage.citations.some(c => c.sourceId === s.id))).slice(0, 4),
-        recentDialogue: history.messages.filter(m => !m.restricted).map(m => ({ role: m.role, content: m.content })) }) : null;
+        recentDialogue: continuity.some(v => v.directives.some(d => d.kind === "USE_SUPPRESSION")) ? [] : history.messages.filter(m => !m.restricted).map(m => ({ role: m.role, content: m.content })) }) : null;
     if (r4) directory = r4.directory;
     let route = { intent: "ANSWER" as "ANSWER" | "CLARIFY" | "PROPOSE_ACTION" | "OPEN_MISSION",
       projectIds: focused ? [focused] : directory.summaries.slice(0, 3).map(p => p.id), query: input.message.slice(0, 256) };
@@ -250,7 +339,9 @@ export async function executeAcceptedConversationTurn(actor: ConversationActor, 
     const result = await db.$transaction(async tx => {
       await lockConversation(tx, id);
       const current = await ownedConversation(actor, id, tx);
-      assertTurnLease(await tx.conversationTurn.findUniqueOrThrow({ where: { id: turn.id } }));
+      const currentTurn = await tx.conversationTurn.findUniqueOrThrow({ where: { id: turn.id } });
+      assertTurnLease(currentTurn);
+      await assertTurnCurrent(currentTurn, actor.userId, currentGeneration(), tx);
       if (record((await tx.conversationTurn.findUniqueOrThrow({ where: { id: turn.id } })).readManifestJson).stopRequested)
         throw new AppError("TURN_STOP_REQUESTED", "已停止本轮调查", 409);
       if (current.activeTurnId !== turn.id) throw new AppError("TURN_CHANGED", "原请求已中断或被接续", 409);
@@ -302,20 +393,24 @@ export async function executeAcceptedConversationTurn(actor: ConversationActor, 
       }
       await appendConversationMessage(tx, id, actor.userId, "ASSISTANT", advice, blocks, turn.id, run.id);
       await tx.conversation.update({ where: { id }, data: { activeTurnId: null,
-        focusJson: json({ projectId: selected ?? null, ...(exactRef && exactRef.projectId === selected ? { entityRef: exactRef } : {}) }), pinnedStateJson: json(pinned), version: { increment: 1 } } });
+        focusJson: json({ projectId: selected ?? null, ...(exactRef && exactRef.projectId === selected ? { entityRef: exactRef } : {}) }), pinnedStateJson: json(coordination(turn) ? constraints : pinned), version: { increment: 1 } } });
+      const finalTurn = await tx.conversationTurn.findUniqueOrThrow({ where: { id: turn.id } });
+      const finalManifest = record(finalTurn.readManifestJson), coord = coordination(finalTurn);
       await tx.conversationTurn.update({ where: { id: turn.id }, data: { status: route.intent === "CLARIFY" ? "NEEDS_CLARIFICATION" : "ANSWERED", finishedAt: new Date(),
-        ...(r4 ? { readManifestJson: json({ ...(record((await tx.conversationTurn.findUniqueOrThrow({ where: { id: turn.id } })).readManifestJson)),
-          experience: { ...r4.state, phase: route.intent === "CLARIFY" ? "WAITING_USER" : "READY" } }) } : {}) } });
+        readManifestJson: json({ ...finalManifest, ...(r4 ? { experience: { ...r4.state, phase: route.intent === "CLARIFY" ? "WAITING_USER" : "READY" } } : {}),
+          ...(coord ? { coordination: { ...coord, state: "TERMINAL", publishedGeneration: coord.generation } } : {}) }) } });
       return { turnId: turn.id, status: route.intent === "CLARIFY" ? "NEEDS_CLARIFICATION" : "ANSWERED" };
     }, { timeout: 20000 });
     return { ...result, conversation: await readConversation(actor, id) };
   } catch (error) {
+    if (error instanceof AppError && error.code === "TURN_RECOORDINATE") throw error;
     const old = await db.conversationTurn.findUnique({ where: { id: turn.id } });
+    if (old && coordination(old)) await assertTurnCurrent(old, actor.userId, currentGeneration()).catch(e => { if (e instanceof AppError && e.code === "TURN_RECOORDINATE") throw e; });
     const usages = Array.isArray(old?.usageJson) ? old.usageJson.map(record) : [];
     const reservations = Array.isArray(old?.reservationJson) ? old.reservationJson.map(record) : [];
     const completedCalls = usages.length;
     const observedProvider = [...usages, ...reservations].findLast(e => typeof e.provider === "string")?.provider;
-    const stopped = record(old?.readManifestJson).stopRequested === true;
+    const stopped = record(old?.readManifestJson).stopRequested === true || (old && coordination(old)?.state === "STOPPING") || error instanceof AppError && error.code === "TURN_STOP_REQUESTED";
     const uncertain = error instanceof AppError && ["EXTERNAL_RESULT_UNKNOWN", "TURN_LEASE_LOST", "CALL_ALREADY_RESERVED"].includes(error.code);
     const status = stopped ? "CANCELLED" : uncertain || (old?.callCount ?? 0) > completedCalls ? "UNKNOWN" : "FAILED";
     await db.$transaction(async tx => {

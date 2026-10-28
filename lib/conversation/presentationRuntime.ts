@@ -1,3 +1,6 @@
+import { assertContinuityBinding, boundDirectiveScope } from "@/lib/continuity/directiveService";
+import { assertTurnCurrent } from "@/lib/continuity/turnCoordination";
+import { currentGeneration } from "./turnRuntime";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { json, jsonHash } from "@/lib/mission/contracts";
@@ -24,9 +27,10 @@ export async function prepareExperienceDraft(actor: ConversationActor, id: strin
     await lockConversation(tx, id);
     const c = await ownedConversation(actor, id, tx), turn = await tx.conversationTurn.findUniqueOrThrow({ where: { id: turnId } });
     assertTurnLease(turn);
+    await assertTurnCurrent(turn, actor.userId, currentGeneration(), tx);
     if (record(turn.readManifestJson).stopRequested) throw new AppError("TURN_STOP_REQUESTED", "已停止本轮调查", 409);
     if (c.activeTurnId !== turnId || c.version !== turn.baseVersion + 1) throw new AppError("TURN_CHANGED", "原讨论已变化", 409);
-    const existing = await tx.agentRun.findFirst({ where: { conversationId: id, turnId, status: "PARTIAL" }, orderBy: { createdAt: "asc" } });
+    const existing = (await tx.agentRun.findMany({ where: { conversationId: id, turnId, status: "PARTIAL" }, orderBy: { createdAt: "asc" } })).find(r => record(r.trace).generation === currentGeneration());
     if (existing && record(existing.trace).r4Draft) {
       if (record(existing.trace).draftActionHash !== jsonHash(action)) throw new AppError("DRAFT_CHECKPOINT_CHANGED", "原预览检查点的输入已变化", 409);
       const e = await tx.copilotToolExecution.findFirst({ where: { sourceRunId: existing.id } });
@@ -34,7 +38,7 @@ export async function prepareExperienceDraft(actor: ConversationActor, id: strin
         proposalHash: e.proposalHash, status: e.status, resultId: e.resultId } : null };
     }
     const run = await tx.agentRun.create({ data: { projectId: null, conversationId: id, turnId, runType: "CHAT", status: "PARTIAL", provider,
-      trace: { purpose: "FOCUS_TURN", actorUserId: actor.userId, r4Draft: true, draftActionHash: jsonHash(action), proposalExpiresAt: new Date(Date.now() + expiryMs).toISOString(),
+      trace: { purpose: "FOCUS_TURN", actorUserId: actor.userId, r4Draft: true, generation: currentGeneration(), draftActionHash: jsonHash(action), proposalExpiresAt: new Date(Date.now() + expiryMs).toISOString(),
         supportState: action ? "SUPPORTED" : "INSUFFICIENT", supportBasis: "ACTION_PROPOSAL_NOT_FACT_CLAIM" }, resultJson: {} } });
     if (!action) return { runId: run.id, proposal: null };
     const sources = await readCopilotContext(tx, action.projectId, actor), proposed = { kind: "create_action" as const, label: "创建行动", ...action };
@@ -117,6 +121,8 @@ export async function experienceAuthority(actor: ConversationActor, id: string, 
       let disabledReason: string | null = e.status === "PENDING" ? null : "这项提案已处理";
       if (Date.parse(expiresAt) <= Date.now()) disabledReason = "这项提案已过期";
       if (c.activeTurnId && !publishing) disabledReason = "请等本轮讨论结束";
+      if (!disabledReason) try { await assertContinuityBinding(actor.userId, boundDirectiveScope(trace.continuity, p.projectId, id), trace.continuity, tx); }
+      catch (error) { if (error instanceof AppError) disabledReason = error.message; else throw error; }
       if (!disabledReason) try { await assertCopilotSources(tx, p.projectId, trace.copilotSources as Parameters<typeof assertCopilotSources>[2], actor, e.sourceRunId); }
       catch (error) { if (error instanceof AppError && error.code === "SOURCE_CHANGED") disabledReason = "提案依据已有变化"; else throw error; }
       const status = e.status === "COMMITTED" ? "COMMITTED" : e.status === "DECLINED" ? "DECLINED" : Date.parse(expiresAt) <= Date.now() ? "EXPIRED" : disabledReason && !c.activeTurnId ? "STALE" : "PENDING";

@@ -1,3 +1,4 @@
+import { DirectiveInput, DirectiveReply, OpenHandoffInput, OpenHandoffReply } from "../models/Continuity";
 import { ConversationResearchInfo, ResearchScopeInput, ResearchSummaryInput, ResearchSummaryReply } from '../models/ConversationResearch';
 import { ApiClient } from './ApiClient';
 import { ConversationReviews, ConversationReviewInput, ConversationReviewReply } from '../models/ChangeReview';
@@ -7,6 +8,8 @@ import { ConversationCapabilities, ConversationListReply, ConversationCreated, C
   ConversationView, ConversationTurnInput, ConversationTurnReply, ConversationConfirmInput, ConversationConfirmReply,
   FocusPreferenceInput, FocusPreferenceReply, ConversationUIActionInput, ConversationUIActionReply } from '../models/Conversation';
 export class ConversationService {
+  async openHandoff(id: string, input: OpenHandoffInput): Promise<OpenHandoffReply> { return this.client.post<OpenHandoffReply>(`/api/conversations/${id}/continuity`, input); }
+  async saveDirective(id: string, input: DirectiveInput): Promise<DirectiveReply> { return this.client.post<DirectiveReply>(`/api/conversations/${id}/continuity`, input); }
   async reviews(id: string, ref: ConversationWorkRef): Promise<ConversationReviews> { return this.client.get<ConversationReviews>(`/api/conversations/${id}/work/review?kind=${ref.kind}&id=${encodeURIComponent(ref.id)}&projectId=${encodeURIComponent(ref.projectId)}`); }
   async submitReview(id: string, input: ConversationReviewInput): Promise<ConversationReviewReply> { return this.client.post<ConversationReviewReply>(`/api/conversations/${id}/work/review`, input, 60000); }
   async saveResearchScope(id: string, input: ResearchScopeInput): Promise<ConversationResearchInfo> { return this.client.patch<ConversationResearchInfo>(`/api/conversations/${id}/research-scope`, input); }

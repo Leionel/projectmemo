@@ -1,3 +1,4 @@
+import { ConversationContinuity } from "../components/ConversationContinuity";
 import { ConversationResearchControl, ConversationResearchResult } from '../components/ConversationResearch';
 import { supportsAgentPresentation } from '../common/AgentPresentationContract';
 import router from '@ohos.router';
@@ -137,7 +138,7 @@ struct FocusConversation {
     if (this.busy || !this.analysisReady || this.text.trim() === '' || this.view.id === '') return;
     const epoch = this.generation; this.busy = true; this.error = '';
     if (this.pending === null || this.pending.message !== this.text.trim()) {
-      const input = new ConversationTurnInput(); input.requestId = util.generateRandomUUID(); input.expectedVersion = this.view.version;
+      const input = new ConversationTurnInput(); input.requestId = util.generateRandomUUID(); input.expectedVersion = this.view.version; input.expectedContinuitySeq = this.view.continuity?.seq;
       input.message = this.text.trim(); input.llmContextApproved = this.cloud && this.cloudAvailable;
       if (this.r4Available) input.investigationMode = this.investigationMode;
       input.projectId = this.target === '' ? null : this.target;
@@ -338,6 +339,11 @@ struct FocusConversation {
                 onReadResults: (): void => { const epoch = this.generation; setTimeout(() => { if (epoch === this.generation && this.view.id === id) this.messageScroller.scrollEdge(Edge.Bottom); }, 50); },
                 onUpdated: (view: ConversationView): void => { if (this.view.id === view.id) this.view = view; } })
             }, (id: string) => id)
+          }
+          if (this.view.continuity) {
+            ConversationContinuity({ conversationId: this.view.id, projectId: this.target || this.view.homeProjectId || this.view.focusProjectId || '', info: this.view.continuity!,
+              onSaved: (): void => { this.service.read(this.view.id).then((v: ConversationView) => { this.view = v; }).catch((e: Error) => { this.fail(e); }); },
+              onWork: (ref: ConversationWorkRef): void => { this.workRef = ref; } })
           }
           if (this.view.messages.length === 0) {
             Column({ space: 12 }) {

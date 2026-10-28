@@ -1,3 +1,4 @@
+import { effectiveContinuity } from "@/lib/continuity/directiveService";
 import { db } from "@/lib/db";
 import { changeReviewV4 } from "@/lib/agent/specialistPrompts";
 import { reviewGoalState } from "./goalState";
@@ -48,7 +49,8 @@ export async function createChangeReview(actor: CopilotActor, missionId: string,
   const project = await db.project.findUniqueOrThrow({ where: { id: m.projectId }, select: { goal: true } });
   const providerVersion = options.provider ? "TEST_FIXTURE" : (() => { const config = getChatProviderConfig(); return config.provider + ":" + config.model; })();
   const goalState = await reviewGoalState(m);
-  const stable = { missionId, goalStateHash: goalState.hash, goalHash: jsonHash(m.goal), projectGoalHash: jsonHash(project.goal), successHash: jsonHash(m.successCriteriaJson),
+  const ct = await effectiveContinuity(actor.userId, { projectId: m.projectId, missionId: m.id });
+  const stable = { continuity: { intentHash: ct.intentHash, reusePolicyHash: ct.reusePolicyHash }, missionId, goalStateHash: goalState.hash, goalHash: jsonHash(m.goal), projectGoalHash: jsonHash(project.goal), successHash: jsonHash(m.successCriteriaJson),
     constraintsHash: jsonHash(m.constraintsJson), scopeHash: jsonHash(m.researchScopeJson), planRevision: m.planRevision,
     sourcePointers: [...input.sources].sort((a, b) => a.id.localeCompare(b.id)), historical: evidence.filter(e => e.role === "HISTORICAL").map(e => e.ref).sort(), policyVersion: "goal-change-v4", providerVersion };
   const base: ReviewBase = { ...stable, schemaVersion: 2, rootReviewKey: jsonHash(stable), attempt: 1, projectId: m.projectId,

@@ -51,7 +51,7 @@ if (mode === "snapshot" || mode === "unknown") {
     const turn = await db.conversationTurn.findUniqueOrThrow({ where: { id: m.turnId } });
     const ops = (turn.readManifestJson as { operations?: Record<string, { status: string }> }).operations;
     if (mode === "snapshot" && ops?.["read-1"]?.status === "SUCCEEDED") process.exit(74);
-    if (mode === "unknown" && ops?.["web-1"]?.status === "DISPATCHING") process.exit(75);
+    if (mode === "unknown" && ["DISPATCHING", "DISPATCH_COMMITTED"].includes(ops?.["web-1"]?.status ?? "")) process.exit(75);
     return result;
   } });
 } else if (mode === "resume") await db.conversationTurn.update({ where: { id: m.turnId }, data: { leaseUntil: new Date(0) } });

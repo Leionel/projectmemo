@@ -1,0 +1,10 @@
+
+> projectmemo@0.1.0 lint
+> eslint .
+
+
+D:\Projects\hongmen\lib\mission\delegationObservation.ts
+  46:3  error  'stepId' is never reassigned. Use 'const' instead  prefer-const
+
+✖ 1 problem (1 error, 0 warnings)
+

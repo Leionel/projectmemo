@@ -9,6 +9,7 @@ import { readRepositoryCi, readRepositoryCiDetail, type CiHttpResult, type CiDis
 import { validateRepositoryObservation } from "@/lib/sensing/repoCiObservations";
 import { repositoryCiToolSchemas, type RepositorySourceMeta } from "@/lib/types/repositoryCi";
 import type { ToolSet } from "./tools";
+import { assertInvestigationDelegation } from "./investigationDelegation";
 
 type Operation = { state: "DISPATCH_COMMITTED" | "SUCCEEDED" | "FAILED" | "UNKNOWN"; units: number; response?: CiHttpResult };
 /** Per-HTTP records live in the original step; request accounting lives in the original Mission. */
@@ -52,15 +53,21 @@ export async function repositoryTools(lease: Lease, mission: { ownerUserId: stri
       schema: argsSchemas[name], effects: { businessWrite: false, cacheWrite: true, externalDisclosure: true },
       run: async (actor, raw) => {
         const input = raw as { connectionId?: string; sha?: string; sourceId?: string; revision?: string; runId?: number; attempt?: number; jobId?: number };
+        const checkScope = async (connectionId: string) => db.$transaction(async tx => {
+          const current = await fenced(tx, lease);
+          assertInvestigationDelegation(current, name, { connectionId });
+        });
         const repositoryActor = { userId: actor.userId, missionId: actor.missionId, missionProjectId: actor.projectId };
         let repository: RepositorySourceMeta, data: unknown, coverage: Record<string, unknown>;
         if (name === "read_repository_ci") {
+          await checkScope(input.connectionId!);
           if (!await db.externalSignal.findFirst({ where: { connectionId: input.connectionId, projectId: actor.projectId, ownerUserId: actor.userId, sha: input.sha, status: { in: ["CANDIDATE", "ADOPTED"] } } })) throw new AppError("CI_TARGET_NOT_OBSERVED", "先从原仓库提交列表选择 SHA", 409);
           const result = await readRepositoryCi(repositoryActor, actor.projectId, input.connectionId!, input.sha!, fetcher, dispatch); data = result; coverage = result.coverage;
           repository = { connectionId: result.connectionId, connectionRevision: result.connectionRevision, repo: result.repo, sha: result.sha, observedAt: result.observedAt, kind: "STATUS", runs: result.runs };
         } else {
           const source = await validateRepositoryObservation(actor.userId, actor.projectId, input.sourceId!, input.revision!);
           if (source.repository.missionId !== actor.missionId) throw new AppError("CI_TARGET_NOT_OBSERVED", "CI 来源不属于原委托", 409);
+          await checkScope(source.repository.connectionId);
           const result = await readRepositoryCiDetail(repositoryActor, actor.projectId, source.repository, input, fetcher, dispatch); repository = result.repository; data = result.body; coverage = result.coverage;
         }
         repository = { ...repository, missionId: actor.missionId };

@@ -1,0 +1,41 @@
+{
+  "status": "READY_FOR_GATED_MERGE",
+  "base": "84b0e7b",
+  "serviceTests": {
+    "files": 135,
+    "passed": 1158
+  },
+  "affectedTests": 25,
+  "webE2E": {
+    "failed": 0,
+    "passed": 24,
+    "skipped": 2
+  },
+  "harmonyTests": 86,
+  "types": 0,
+  "lint": 0,
+  "hapSHA256": "abb9ded03b14a69f94c6a37a95f8ed6b5f32b97eb6c57ab088008ae429965e49",
+  "modelPilot": {
+    "costUpperCny": 0.317104,
+    "unknownUsage": 0,
+    "model": "real",
+    "outcome": "isolated synthetic receipts",
+    "requests": 17,
+    "transport": "synthetic"
+  },
+  "publicCI": {
+    "sha": "8537cf478f5591a630d11140b99f91da987c264b",
+    "checks": 29,
+    "totalRuns": 26,
+    "reservedRequestsIncludingPriorUnknown": 4,
+    "coverageComplete": false,
+    "returnedRuns": 20
+  },
+  "openGates": [
+    "live failed log redirects",
+    "target device UI and notification",
+    "independent human quality and real multiday acceptance"
+  ],
+  "productionDeploy": false,
+  "realDatabaseMigration": false
+}

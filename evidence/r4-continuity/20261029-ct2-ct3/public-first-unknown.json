@@ -1,0 +1,31 @@
+{
+  "kind": "LIVE_PUBLIC_GITHUB_ISOLATED_DB",
+  "sourceHashes": {
+    "lib/mission/runner.ts": "c4151a735367df6a4af98e6f7ccaca01e542dd8405a0af87a556c314027576b0",
+    "lib/mission/repositoryTools.ts": "68d9bf2684d3f55751dcfc838f3090bb374d157b50f4df996384e73e823a8b27",
+    "lib/mission/delegationObservation.ts": "de79a2a688e5510db6b884fb7c220e93ac6f337cfa7c431bf18141e89c99ead6",
+    "lib/mission/investigationDelegation.ts": "e5be6dba5dcefd179fc317ebbcb5c00c106801f9a39f93b5c9c9e89c377a7730",
+    "lib/mission/contextBuilder.ts": "912fc2a724d26f346905589fe0f8bde603fd405053c8c7f67339cc814408155f",
+    "lib/mission/modelAdapter.ts": "9a6394a7c2e910fac68e04deabb0998744ccf0b61eaa5e5161b9845f56899c9e",
+    "lib/sensing/repoCi.ts": "a451f644d52764bef4a7388ab9d9c28926be8033c60b3ea0027029e5a17f517d",
+    "lib/continuity/sourcePolicy.ts": "a19e9227302090fe3418589c3bebec8fdd92ada6eddd9a37540a240dba30cf54"
+  },
+  "database": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-ct2-public-DKFtiQ\\evaluation.db",
+  "status": "FAILED_OR_UNKNOWN",
+  "maxRequests": 12,
+  "reservedRequests": 1,
+  "requests": [
+    {
+      "resource": "https://api.github.com/repos/octokit/rest.js/commits?per_page=1",
+      "units": 1,
+      "state": "UNKNOWN",
+      "httpStatus": null
+    }
+  ],
+  "statusObservation": null,
+  "jobObservation": null,
+  "logCoverage": null,
+  "errors": [
+    "PUBLIC_PROBE_FAILED"
+  ]
+}

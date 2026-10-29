@@ -33,3 +33,17 @@ Web/ArkTS 都支持核对期限、累计预算及撤销；原确认、Action/res
 
 ## 额度收尾检查点
 5 小时额度已用100%，北京时间2026-10-29 12:40:38重置。保存实现检查点，未标记CT-2/CT-3全部完成。全量1151项、最新保护8项、类型/lint及HAP通过；最终浏览器回执状态：PENDING，原始日志为 evidence/r4-continuity/20261029-ct2-ct3/e2e-fixed.log。额度后继续核查该结果并完成剩余Gate。
+
+## 2026-10-29 第三批：原 Runner 定时观察、私有注意力与双端收口
+
+本节替代上文“当前没有后台主动轮询”等未完成状态，保留早期失败记录。Web/ArkTS 原委托表单均可选择最多三个已经授权的 CI 连接，确认检查周期、累计请求预算及是否允许脱敏失败日志。保存连接 revision，不能因撤销再授权或 feature flag 自动扩大原许可。只读已收录的最新固定提交；新 ref/head 的发现沿原仓库信号刷新，不悄悄变成仓库全量追踪。
+
+原 worker 到期只将同一 Mission 置为可运行并写入观察意图，不在事务中联网。原 Runner 用原 MissionStep 执行声明过的 CI 状态读取，沿用 lease、HTTP 请求记录、累计工具及元数据预算。成功步骤可在进程恢复后复用，UNKNOWN 不换步骤重发；已知稳定观察比较忽略抓取时间和条目顺序。无变化返回原 WAITING_INPUT，零模型调用；首次/新状态才进入原动态 Goal Reasoning。调查仍由模型动态选择工具，没有固定 CI→job→log 流程。新测试修复了跨 planRevision 后步骤 ordinal 必须在整个 Mission 上单调递增的问题。
+
+私有注意力复用原 USER InterventionPolicy、BudgetLedger 和 InterventionDecision，channel=PRIVATE_MISSION；不创建共享 AgentIntervention，不向项目成员公开原任务。共享决策列表排除私有通道。普通事项留在任务收件箱，STOP/LATER、委托及用户静默期都生效。只有任务真实截止一小时内且存在 CRITICAL/CONFLICT 待答问题才申请一次个人打断预算；无预算继续排队。静默结束、预算日边界无需新资料即可重新判断，既有 GoalQuestion 的 PRESENT/EXPOSED 已接通同一私有决策，避免重复扣预算；主动打开原任务仍可查看问题。Web/ArkTS 可读回“我已看到”的带版本和幂等回执，不将 AVAILABLE 当成送达或已读。默认 systemPush=false，尚未进行设备通知签收。
+
+新增保护覆盖双 worker 同时扫描/领取、HTTP 途中暂停、截止瞬间迟到结果、稳定 CI 零模型、变更后改道、跨项目连接、撤销再授权、同 USER 跨任务预算、静默边界和私有已读权限。多日旅程仍是隔离库虚拟日期；独立 OS 重启长跑、真实多日/目标设备接受度留作环境验收，不改写为已通过。
+
+最终结果：完整服务 1158 项；受影响 25 项；完整 Web 24 通过/2 跳过；鸿蒙 86 项与最新 HAP；类型/lint 通过。付费 pilot 17 次模型请求，费用上界 0.317104 元，UNKNOWN usage=0，原 24 次/5 元 campaign 未重置；保留初次引用失败、同任务恢复和分离模型评审。公开固定 SHA 的真实传输已经取得，真实失败日志域名尚未签收。证据目录同上。
+
+用户追加交付顺序：先把 R3 runtime → PR-6 → CT-1 → CT-2/CT-3 合并到 master，再开始 CT-4 文档深读、CT-5 指标/固定沙箱和 CT-6 论文检索。合并不包含生产部署或真实库迁移。

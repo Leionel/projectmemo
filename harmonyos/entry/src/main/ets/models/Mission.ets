@@ -63,7 +63,12 @@ export interface MissionCompletionSummary {
   realityOutcome: string;
 }
 export interface MissionCompletionFact { label: string; value: string; }
+export class MissionAttentionReceipt { requestId: string = ''; expectedVersion: number = 1; decisionId: string = ''; }
+export interface MissionAttention { level: string; reason: string; decisionId?: string; delivery?: MissionAttentionDelivery; }
+export interface MissionAttentionDelivery { status: string; seenAt?: string | null; }
+export interface MissionDelegation { attention?: MissionAttention | null; }
 export class Mission {
+  delegation?: MissionDelegation | null;
   evidencePremise?: FitPremise | null;
   id: string = ''; projectId: string = ''; goal: string = ''; status: string = '';
   version: number = 1; contextVersion: number = 1; planRevision: number = 1;

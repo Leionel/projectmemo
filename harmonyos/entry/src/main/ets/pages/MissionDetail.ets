@@ -425,6 +425,7 @@ struct MissionDetail {
       }.width('100%')
       Text(this.mission.goal).fontSize(20).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
         .maxLines(this.showGoal ? 100 : 2).textOverflow({ overflow: TextOverflow.Ellipsis }).lineHeight(29)
+      if (this.mission.delegation?.attention?.level === 'URGENT') { Text('临近任务截止，需要你核对当前问题后决定下一步。').fontSize(14).fontColor(PMColors.BRAND) }
       if (this.mission.goal.length > 40) {
         Button(this.showGoal ? '收起目标原文' : '展开目标原文').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
           .fontSize(12).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent)

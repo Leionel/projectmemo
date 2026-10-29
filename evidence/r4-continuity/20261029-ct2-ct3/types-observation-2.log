@@ -1,0 +1,9 @@
+tests/continuityStages23.test.ts(106,55): error TS2322: Type '{ delegation: { attention: { delivery: unknown; level: string; decisionId: string; reasonCode: string; reason: string; occurredAt: string; needsUser: boolean; systemPush: boolean; } | null; }; }' is not assignable to type 'JsonNullClass | InputJsonValue | undefined'.
+  Types of property 'delegation' are incompatible.
+    Type '{ attention: { delivery: unknown; level: string; decisionId: string; reasonCode: string; reason: string; occurredAt: string; needsUser: boolean; systemPush: boolean; } | null; }' is not assignable to type 'InputJsonValue | null | undefined'.
+      Types of property 'attention' are incompatible.
+        Type '{ delivery: unknown; level: string; decisionId: string; reasonCode: string; reason: string; occurredAt: string; needsUser: boolean; systemPush: boolean; } | null' is not assignable to type 'InputJsonValue | null | undefined'.
+          Type '{ delivery: unknown; level: string; decisionId: string; reasonCode: string; reason: string; occurredAt: string; needsUser: boolean; systemPush: boolean; }' is not assignable to type 'InputJsonValue | null | undefined'.
+            Type '{ delivery: unknown; level: string; decisionId: string; reasonCode: string; reason: string; occurredAt: string; needsUser: boolean; systemPush: boolean; }' is not assignable to type 'InputJsonObject'.
+              Property 'delivery' is incompatible with index signature.
+                Type 'unknown' is not assignable to type 'InputJsonValue | null | undefined'.

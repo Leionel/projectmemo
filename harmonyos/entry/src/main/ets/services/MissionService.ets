@@ -1,5 +1,6 @@
 import { MissionReadTarget, MissionReadbackReply, missionReadbackQuery } from '../models/MissionReadback';
 import { ApiClient } from './ApiClient';
+import { MissionAttentionReceipt } from '../models/Mission';
 import { SessionStore } from './SessionStore';
 import { ApiError } from '../models/Project';
 import { Mission, MissionCreate, MissionReply, MissionDetailReply, MissionList, MissionEvents, MissionCommand,
@@ -8,6 +9,7 @@ import { Mission, MissionCreate, MissionReply, MissionDetailReply, MissionList, 
   MissionConstraintsEdit, MissionScopeEdit, MissionPolicyEdit, MissionCapabilities, MissionWorkspaceSummary } from '../models/Mission';
 
 export class MissionService {
+  async attention(id: string, body: MissionAttentionReceipt): Promise<void> { this.authorize(); await this.client.patch<Object>(`${this.path(id)}/attention`, body); }
   private client: ApiClient;
   constructor(client?: ApiClient) { this.client = client ?? new ApiClient(); }
   private authorize(): void {

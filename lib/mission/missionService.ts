@@ -24,6 +24,7 @@ export async function createMission(userId: string, input: unknown) {
 /** Shared creation path for confirmed Copilot handoff; caller owns the atomic receipt transaction. */
 export async function createMissionInTx(tx:Prisma.TransactionClient,userId:string,input:unknown){
     requireMissions();const body=createMissionSchema.parse(input);await assertOwner(userId,body.projectId,tx);const hash=jsonHash(body);
+    if(body.continuationPolicy.mode==="BOUNDED_INVESTIGATION")throw new AppError("DELEGATION_CONFIRMATION_REQUIRED","请先创建原委托，再核对持续调查的范围和预算",409);
     const m=await tx.agentMission.create({data:{ownerUserId:userId,projectId:body.projectId,createRequestId:body.requestId,createPayloadHash:hash,goal:body.goal,successCriteriaJson:body.successCriteria,constraintsJson:json({...body.missionConstraints,llmContextApproved:body.llmContextApproved}),researchScopeJson:json(body.researchScope),continuationPolicyJson:body.continuationPolicy,budgetJson:defaultBudget}});
     const continuity = await effectiveContinuity(userId, { projectId: m.projectId, missionId: m.id }, tx);
     await tx.agentMission.update({ where: { id: m.id }, data: { planJson: json({ ...(m.planJson as object), continuityBinding: { intentHash: continuity.intentHash, reusePolicyHash: continuity.reusePolicyHash } }) } });

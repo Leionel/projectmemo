@@ -31,3 +31,15 @@ CI 状态只属于外部观察，`goalImpact=UNKNOWN`，没有自动完成 Actio
 新证据：`evidence/r4-continuity/20261029-ct2-ct3/`。本批全量服务测试 135 文件 / 1151 项通过；随后受影响保护 11 项、调度公平性探针 4 项通过。最终类型、Web/HarmonyOS 与 E2E 状态见该目录回执，不沿用早期底层的结论。
 
 仍待签收：真实公开仓库 API 与不同日志下载域名探针、私有 OAuth 连接、独立模型质量、必要的有界 diff、模拟器/真机旅程。本批不能据此宣称 CT-2 全部产品验收完成。
+
+## 2026-10-29 第三批：纵向闭环与合并准备（替代上文当前状态）
+
+持续调查的 STATUS/JOBS/LOG 消费同时核对原委托工具许可及连接范围，不能用另一份已读 STATUS 绕过 connectionIds。持续许可保存当时的连接 revision；撤销再授权也必须重新确认委托范围。Copilot 共享建 Mission 路径同样禁止隐式创建长期委托许可。
+
+真实模型在隔离项目自主选择 inspect_project → CI → job → log，首次保存漏精确引用，被 EXACT_CITATION_REQUIRED 拦下。补强原 mission.strategy.v2 的引用说明（2.0.1）及保存工具说明后，在同一个 Mission、同一累计预算恢复，复用已读观察，保存引用完整的草稿并提出待批行动。原批准、Action 创建及 resultCardId 原子回执服务均实际运行；场景和结果仍为合成数据，没有声称现实修复或设备通过。单独模型评审六项通过，属于同 provider 的分离评审，不等于独立人工验收。绿 CI 场景也走通原批准和回执，明确保留部署/设备缺口。
+
+公开 GitHub 探针：直连请求 UNKNOWN 原样保留；识别系统已有代理后，仅在新进程启用 Node 环境代理。通过 git ls-remote 取得固定 SHA 8537cf478f5591a630d11140b99f91da987c264b，再实际运行原 CI 适配器。取得 29 checks 和 20/26 workflow runs，coverage.complete=false 如实返回，没有重发原 UNKNOWN 列表请求，原 12 次预算已占 4 次（含 1 次 UNKNOWN）。真实失败日志下载/重定向仍未签收。
+
+本批完整服务回归 135 文件 / 1158 项通过；最后受影响 25 项通过。完整 Web E2E 24 通过 / 2 个既有 flag 场景跳过；类型、lint、鸿蒙 86 项及 HAP 构建通过。最终 HAP SHA256 abb9ded03b14a69f94c6a37a95f8ed6b5f32b97eb6c57ab088008ae429965e49。详细原始记录和失败保留在 evidence/r4-continuity/20261029-ct2-ct3/。
+
+当前可合并的实现默认关闭新 CI/持续调查 flag。未进行生产部署、真实库迁移或外部业务写入。尚未完成的环境签收是：真实日志下载域名、目标设备交互；私有 OAuth 和必要 diff 按其独立权限/证据缺口增量处理。合并包含 R3 runtime、PR-6 和 CT-1 的祖先依赖，之后按用户新指令开始 CT-4/5/6。

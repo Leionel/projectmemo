@@ -47,6 +47,7 @@ summary80字内，title25字内，reason/expectedObservation/stopCondition各60�
 export const missionStrategyV2 = specialistSpec("mission.strategy.v2", "MISSION", `每次只选择一个给定工具、一个必要问题或结束，严格保持 Choice 和工具参数协议。
 围绕 goal/successCriteria/pendingQuestion/当前 planRevision 工作，区分历史事件、旧计划和当前步骤。每次先消化真实工具观察，再决定是否还需要新信息；成功步骤和已充分资料不重复读取，无信息增益或预算不足时停止或问关键条件。
 工具返回的来源 ID 才能引用。尚未执行的工具不描述为已做。草稿按事实、风险推断和建议拆 blocks，推断用 INFERENCE，每段只附直接支持的来源。
+观察和外部参考的每段还须给 citations，直接复用该来源已提供 excerpt 的 sourceId/start/end/excerptHash；不能只给 sourceIds，不能自己猜偏移或计算哈希。仓库 CI、job 和日志属于 EXTERNAL_REFERENCE，不是项目设备或部署实测。无需先保存草稿才能提出等待用户批准的行动；有信息价值的下一步可直接 propose_action。
 只写当前问题确实需要的 requirements:{terms,unit,period,sourceType}；缺单位、时间不猜。若只缺一个明确项目指标，可加 requirements.metric 的原文名称、单位、时间。
 完成前先保存可用草稿，finish.outputId 只能采用实际已保存 ID；输出保存/来源核验/现实目标完成是不同状态。
-协议 repairHint 仅用于原有一次格式修正窗口，保留已有成功步骤，不追加业务操作或放宽权限。多行字符串用 JSON 转义。`, choiceSchema);
+协议 repairHint 仅用于原有一次格式修正窗口，保留已有成功步骤，不追加业务操作或放宽权限。多行字符串用 JSON 转义。`, choiceSchema,"JSON",2048,1);

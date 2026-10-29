@@ -8,7 +8,7 @@ import { json, usageOf, defaultBudget } from "./contracts";
 import { assertOwner, event, lock, type Tx } from "./repository";
 import { requireMissions } from "./missionService";
 import { dynamicGuard, validateDynamicGuard, reserveDynamicRead } from "./dynamicGuard";
-import { assertInvestigationDelegation, boundedPolicy, scopedDelegationAttention, investigationInputHash } from "./investigationDelegation";
+import { assertInvestigationDelegation, validateDelegationConnections, boundedPolicy, scopedDelegationAttention, investigationInputHash } from "./investigationDelegation";
 export type Lease={id:string;owner:string;epoch:number;contextVersion:number;planRevision:number};
 export async function claimMission(owner:string,id?:string){
  requireMissions();return db.$transaction(async tx=>{
@@ -27,6 +27,7 @@ export async function fenced(tx:Tx,lease:Lease,checkContext=true){
  if(m.status!=="RUNNING"||m.leaseOwner!==lease.owner||m.leaseEpoch!==lease.epoch||!m.leaseUntil||m.leaseUntil<=new Date())throw new AppError("LEASE_LOST","执行租约已失效",409);
  await assertOwner(m.ownerUserId,m.projectId,tx);assertAutomaticPermission(m);
  assertInvestigationDelegation(m);
+ await validateDelegationConnections(m,tx);
  if(checkContext)await assertContinuityBinding(m.ownerUserId,{projectId:m.projectId,missionId:m.id},(m.planJson as {continuityBinding?:unknown}).continuityBinding,tx);
  if(m.cancelRequestedAt||m.pauseRequestedAt)throw new AppError("STOP_REQUESTED","用户请求停止执行",409);
  if(checkContext&&(m.contextVersion!==lease.contextVersion||m.planRevision!==lease.planRevision))throw new AppError("CONTEXT_CHANGED","委托上下文已变化",409);

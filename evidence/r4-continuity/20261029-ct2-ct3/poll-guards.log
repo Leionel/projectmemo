@@ -1,0 +1,52 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/continuityStages23.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/continuityStages23.test.ts (9 tests | 2 failed) 1161ms
+   × CT3 original Runner polls declared fixed SHA; stable CI uses zero models, changed CI resumes reasoning 218ms
+   × CT3 expired deadline fences late HTTP without another event or model 74ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/continuityStages23.test.ts > CT3 original Runner polls declared fixed SHA; stable CI uses zero models, changed CI resumes reasoning
+AssertionError: expected 'PAUSED' to be 'WAITING_INPUT' // Object.is equality
+
+Expected: "WAITING_INPUT"
+Received: "PAUSED"
+
+ ❯ tests/continuityStages23.test.ts:68:86
+     66|   await runMissionSlice({id:f.m.id,provider:provider({kind:"ask",quest…
+     67|   const before=(await missionDetail(f.u.id,f.m.id)).used;
+     68|   await poll();const stable=await missionDetail(f.u.id,f.m.id);expect(…
+       |                                                                                      ^
+     69|   conclusion="success";await poll();expect((await missionDetail(f.u.id…
+     70|   expect(forbiddenModel).not.toHaveBeenCalled();expect(calls).toBe(9);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/continuityStages23.test.ts > CT3 expired deadline fences late HTTP without another event or model
+AssertionError: expected { code: 'LEASE_LOST', …(4) } to match object { code: 'DELEGATION_EXPIRED' }
+(7 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "code": "DELEGATION_EXPIRED",
++   "code": "LEASE_LOST",
+  }
+
+ ❯ tests/continuityStages23.test.ts:92:170
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 7 passed (9)
+   Start at  13:15:40
+   Duration  3.49s (transform 1.22s, setup 0ms, import 1.95s, tests 1.16s, environment 0ms)
+

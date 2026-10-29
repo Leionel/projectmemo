@@ -26,6 +26,7 @@ import { Prisma } from "@/lib/generated/prisma/client";
 import { repositoryTools } from "./repositoryTools";
 import type { CiTransport } from "@/lib/sensing/repoCi";
 import { boundedPolicy } from "./investigationDelegation";
+import { runDelegationObservation } from "./delegationObservation";
 export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;repository?:CiTransport;judge?:ClaimJudge}={}){
  const m=await claimMission(options.workerId??randomUUID(),options.id);if(!m)return false;
  const lease:Lease={id:m.id,owner:m.leaseOwner!,epoch:m.leaseEpoch,contextVersion:m.contextVersion,planRevision:m.planRevision};
@@ -36,6 +37,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
  const settleFailed=async(kind:"models"|"tools",started:number,usage?:Decision["usage"])=>{try{await settleUsage(lease,kind,Date.now()-started,usage);}catch{failedSettlements.add(kind);}};
  const heartbeat=setInterval(()=>{void renew(lease).catch(()=>false);},10000);heartbeat.unref();
  try{
+  if(recordDelegationPoll(m.planJson)){phase="TOOL";if(await runDelegationObservation(lease,tools,id=>{activeStepId=id;}))return true;phase="CONTEXT";}
   const directed = dynamicGuard(m);
   if (directed) {
    const ready = await db.agentMissionStep.findFirst({where:{missionId:m.id,planRevision:m.planRevision,status:"READY",toolName:"read_project_material"},orderBy:{ordinal:"asc"}});
@@ -178,3 +180,4 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
   });return true;
  }finally{clearInterval(heartbeat);}
 }
+function recordDelegationPoll(plan:unknown){return !!(plan as {delegation?:{poll?:unknown}}|null)?.delegation?.poll;}

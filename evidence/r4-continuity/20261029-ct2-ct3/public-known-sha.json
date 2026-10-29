@@ -1,0 +1,375 @@
+{
+  "kind": "LIVE_PUBLIC_KNOWN_SHA_SAME_BUDGET",
+  "priorReportHash": "430242bfde3935ae7f9e631f1f258461de941f2ccf3489190a8ac212865ab5dd",
+  "priorReserved": 1,
+  "reservedRequests": 4,
+  "maxRequests": 12,
+  "sha": "8537cf478f5591a630d11140b99f91da987c264b",
+  "shaEvidence": "git ls-remote https://github.com/octokit/rest.js.git HEAD; recorded before this run",
+  "status": "FIXED_SHA_METADATA_RECEIVED",
+  "requests": [
+    {
+      "resource": "https://api.github.com/repos/octokit/rest.js/commits/8537cf478f5591a630d11140b99f91da987c264b",
+      "units": 1,
+      "state": "RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "resource": "https://api.github.com/repos/octokit/rest.js/commits/8537cf478f5591a630d11140b99f91da987c264b/check-runs?filter=latest&per_page=100",
+      "units": 1,
+      "state": "RECEIVED",
+      "httpStatus": 200
+    },
+    {
+      "resource": "https://api.github.com/repos/octokit/rest.js/actions/runs?head_sha=8537cf478f5591a630d11140b99f91da987c264b&per_page=20",
+      "units": 1,
+      "state": "RECEIVED",
+      "httpStatus": 200
+    }
+  ],
+  "observation": {
+    "schemaVersion": 1,
+    "kind": "REPOSITORY_CI",
+    "knowledgeClass": "EXTERNAL_REFERENCE",
+    "verification": "CI_OBSERVATION_NOT_DEPLOYMENT",
+    "projectId": "cmvt45tjg0001fg8ouiqmian5",
+    "connectionId": "cmvt45tjk0003fg8ojmwcqlhe",
+    "connectionRevision": 0,
+    "repo": "octokit/rest.js",
+    "sha": "8537cf478f5591a630d11140b99f91da987c264b",
+    "observedAt": "2026-10-29T05:39:35.940Z",
+    "intentHash": "8fcf9e095eb7deb371a2fb1c72ba62b6fe98b1e38baa3d0c91cf7f46a50b0441",
+    "reusePolicyHash": "16c3fafc002c792951407e00abfebb92effa125a5c4135f92c3e37c7a65c1623",
+    "checks": [
+      {
+        "id": 121697990256,
+        "name": "Dependabot",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 121262030856,
+        "name": "CodeQL-Build",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121036626619,
+        "name": "Dependabot",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 119068614658,
+        "name": "Dependabot",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 118883253755,
+        "name": "Dependabot",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 118876048029,
+        "name": "Dependabot",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 118817362380,
+        "name": "Dependabot",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 117762350859,
+        "name": "CodeQL-Build",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 117699966567,
+        "name": "Dependabot",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 117699966092,
+        "name": "Dependabot",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 114824608816,
+        "name": "Dependabot",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 114824606126,
+        "name": "Dependabot",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 114804298318,
+        "name": "Dependabot",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 114804242834,
+        "name": "Dependabot",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 114790232190,
+        "name": "Dependabot",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 114790223615,
+        "name": "Dependabot",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 114790213741,
+        "name": "Dependabot",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 114790045201,
+        "name": "Dependabot",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 114790018239,
+        "name": "Dependabot",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 114790017356,
+        "name": "Dependabot",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 114549902264,
+        "name": "CodeQL-Build",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 111518375906,
+        "name": "CodeQL-Build",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 111503418853,
+        "name": "test",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 111503337185,
+        "name": "test_matrix (24)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 111503337179,
+        "name": "release",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 111503337168,
+        "name": "test_matrix (22)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 111503337035,
+        "name": "test_matrix (20)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 111503336980,
+        "name": "update_docs",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 111503336742,
+        "name": "CodeQL-Build",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "runs": [
+      {
+        "id": 40358694531,
+        "attempt": 1,
+        "name": "npm_and_yarn in /. for @vitest/mocker - Update #1655547350",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 40224209281,
+        "attempt": 1,
+        "name": "Code scanning - action",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 40149091322,
+        "attempt": 1,
+        "name": "npm_and_yarn in /. for @vitest/mocker - Update #1650689199",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 39553756206,
+        "attempt": 1,
+        "name": "npm_and_yarn in /. for vite - Update #1641735300",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 39496628978,
+        "attempt": 1,
+        "name": "npm_and_yarn in /. for follow-redirects - Update #1640543724",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 39494542096,
+        "attempt": 1,
+        "name": "npm_and_yarn in /docs for follow-redirects - Update #1640516020",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 39477561662,
+        "attempt": 1,
+        "name": "npm_and_yarn in /docs for sanitize-html - Update #1640264725",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 39157062918,
+        "attempt": 1,
+        "name": "Code scanning - action",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 39135808868,
+        "attempt": 1,
+        "name": "npm_and_yarn in /docs for source-map-js - Update #1634290336",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 39135808918,
+        "attempt": 1,
+        "name": "npm_and_yarn in /. for proxy-addr - Update #1634290335",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 38253240564,
+        "attempt": 1,
+        "name": "npm_and_yarn in /docs for simple-git - Update #1622870497",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 38253239983,
+        "attempt": 1,
+        "name": "npm_and_yarn in /docs for sharp - Update #1622870477",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 38247296357,
+        "attempt": 1,
+        "name": "npm_and_yarn in /docs for simple-git - Update #1622783198",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 38247279841,
+        "attempt": 1,
+        "name": "npm_and_yarn in /docs for sharp - Update #1622783228",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 38243079941,
+        "attempt": 1,
+        "name": "npm_and_yarn in /docs for shell-quote - Update #1622714431",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 38243078636,
+        "attempt": 1,
+        "name": "npm_and_yarn in /docs for sharp - Update #1622714414",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 38243074969,
+        "attempt": 1,
+        "name": "npm_and_yarn in /docs for proxy-addr - Update #1622714373",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 38243021564,
+        "attempt": 1,
+        "name": "npm_and_yarn in /docs for joi - Update #1622714545",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 38243013397,
+        "attempt": 1,
+        "name": "npm_and_yarn in /docs for simple-git - Update #1622714398",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 38243013070,
+        "attempt": 1,
+        "name": "npm_and_yarn in /. for source-map-js - Update #1622714422",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "coverage": {
+      "complete": false,
+      "totalChecks": 29,
+      "totalRuns": 26,
+      "requests": 3,
+      "logsRead": false,
+      "refResolved": false
+    },
+    "authority": "UNTRUSTED_TOOL_DATA_NEVER_USER_DIRECTIVE",
+    "goalImpact": "UNKNOWN",
+    "href": "https://github.com/octokit/rest.js/commit/8537cf478f5591a630d11140b99f91da987c264b",
+    "revision": "3658838e44b1488005ce7f80fc2192b0081665941a207b4e35928737e77a8684"
+  },
+  "errors": []
+}

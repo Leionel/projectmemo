@@ -1,0 +1,69 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/continuityStages23.test.ts -t stable CI
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+stderr | tests/continuityStages23.test.ts > CT3 original Runner polls declared fixed SHA; stable CI uses zero models, changed CI resumes reasoning
+PrismaClientKnownRequestError: 
+Invalid `tx.agentMissionStep.create()` invocation in
+D:/Projects/hongmen/lib/mission/delegationObservation.ts:40:49
+
+  37 const connection=await tx.sourceConnection.findUnique({where:{id:next.connectionId}});
+  38 if(!connection||connection.revision!==next.revision)throw new AppError("CONNECTION_CHANGED","仓库授权版本已变化，请重新核对",409);
+  39 const existing=steps.find(s=>record(s.protocolJson).delegationCycle===poll.cycle&&record(s.canonicalInputJson).connectionId===next.connectionId&&s.status==="RUNNING");
+→ 40 const s=existing??await tx.agentMissionStep.create(
+Unique constraint failed on the fields: (`missionId`, `ordinal`)
+    at zr.handleRequestError (D:\Projects\hongmen\node_modules\@prisma\client\runtime\client.js:65:8286)
+    at zr.handleAndLogRequestError (D:\Projects\hongmen\node_modules\@prisma\client\runtime\client.js:65:7581)
+    at zr.request (D:\Projects\hongmen\node_modules\@prisma\client\runtime\client.js:65:7288)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at a (D:\Projects\hongmen\node_modules\@prisma\client\runtime\client.js:75:6862)
+    at D:/Projects/hongmen/lib/mission/delegationObservation.ts:40:23
+    at Proxy._transactionWithCallback (D:\Projects\hongmen\node_modules\@prisma\client\runtime\client.js:75:4800)
+    at runDelegationObservation (D:/Projects/hongmen/lib/mission/delegationObservation.ts:14:17)
+    at Module.runMissionSlice (D:/Projects/hongmen/lib/mission/runner.ts:40:40)
+    at poll (D:/Projects/hongmen/tests/continuityStages23.test.ts:64:101) {
+  code: 'P2002',
+  meta: {
+    modelName: 'AgentMissionStep',
+    driverAdapterError: DriverAdapterError: UniqueConstraintViolation
+        at BetterSQLite3Transaction.onError (file:///D:/Projects/hongmen/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:533:11)
+        at BetterSQLite3Transaction.performIO (file:///D:/Projects/hongmen/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:528:12)
+        at BetterSQLite3Transaction.queryRaw (file:///D:/Projects/hongmen/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:469:63)
+        at D:\Projects\hongmen\node_modules\@prisma\client\runtime\client.js:11:44665
+        at xr (D:\Projects\hongmen\node_modules\@prisma\client\runtime\client.js:11:26627)
+        at e.#u (D:\Projects\hongmen\node_modules\@prisma\client\runtime\client.js:11:47965)
+        at e.interpretNode (D:\Projects\hongmen\node_modules\@prisma\client\runtime\client.js:11:44634)
+        at e.interpretNode (D:\Projects\hongmen\node_modules\@prisma\client\runtime\client.js:11:45076)
+        at e.interpretNode (D:\Projects\hongmen\node_modules\@prisma\client\runtime\client.js:11:43816)
+        at processTicksAndRejections (node:internal/process/task_queues:104:5) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.8.0'
+}
+
+ ❯ tests/continuityStages23.test.ts (9 tests | 1 failed | 8 skipped) 467ms
+   × CT3 original Runner polls declared fixed SHA; stable CI uses zero models, changed CI resumes reasoning 456ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/continuityStages23.test.ts > CT3 original Runner polls declared fixed SHA; stable CI uses zero models, changed CI resumes reasoning
+AssertionError: {"code":"EXECUTION_FAILED","message":"委托上下文无法重建，请核对材料和配置后继续","phase":"CONTEXT","category":"EXECUTION","recovery":{"kind":"REVIEW_REQUIRED","automatic":false,"message":"请核对当前失败原因后继续，已有步骤和结果保留。"}}: expected 'PAUSED' to be 'WAITING_INPUT' // Object.is equality
+
+Expected: "WAITING_INPUT"
+Received: "PAUSED"
+
+ ❯ tests/continuityStages23.test.ts:68:115
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 skipped (9)
+   Start at  13:16:47
+   Duration  2.54s (transform 1.07s, setup 0ms, import 1.73s, tests 467ms, environment 0ms)
+

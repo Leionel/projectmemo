@@ -1,7 +1,9 @@
 import { db } from "@/lib/db";
 import { z } from "zod";
 import { AppError } from "@/lib/api";
-import { jsonHash } from "@/lib/mission/contracts";
+import { jsonHash, json } from "@/lib/mission/contracts";
+import { record } from "@/lib/conversation/repository";
+import { boundedPolicy, scopedDelegationAttention } from "@/lib/mission/investigationDelegation";
 import { ownedMission, event, commandReplay } from "@/lib/mission/repository";
 import {
   assertActor,
@@ -316,6 +318,14 @@ export async function interactGoalQuestion(
     );
   const dedupeKey = key(actor.userId, q.questionId, q.contextHash);
   if (input.action === "PRESENT") {
+    const privateMission=await ownedMission(actor.userId,q.missionId);
+    if(boundedPolicy(privateMission))return db.$transaction(async tx=>{
+      const latest=await readCurrent(tx);if(latest.question?.contextHash!==q.contextHash)throw new AppError("QUESTION_CHANGED","问题已更新，请重新读取",409);
+      const m=await ownedMission(actor.userId,q.missionId,tx),attention=await scopedDelegationAttention(tx,m,"WAITING_INPUT");
+      await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...record(m.planJson),delegation:{...record(record(m.planJson).delegation),attention}}),version:{increment:1}}});
+      const allowed=!!attention&&["DIGEST","URGENT"].includes(attention.level);
+      return {allowed,reason:attention?.reasonCode??"UNAVAILABLE",question:allowed?q:null,interventionId:null};
+    });
     if (!isFeatureEnabled("INTERVENTION_BUDGET_ENABLED", false))
       return { allowed: false, reason: "POLICY_DISABLED", question: null };
     const outcome = (
@@ -370,16 +380,19 @@ export async function interactGoalQuestion(
     const latest = await readCurrent(tx);
     if (latest.question?.contextHash !== q.contextHash)
       throw new AppError("QUESTION_CHANGED", "问题已更新，请重新读取", 409);
-    await ownedMission(actor.userId, q.missionId, tx);
+    const mission=await ownedMission(actor.userId, q.missionId, tx);
     const intervention = await tx.agentIntervention.findUnique({
       where: { projectId_dedupeKey: { projectId, dedupeKey } },
     });
-    if (input.action === "EXPOSED" && !intervention)
+    const privateAttention=record(record(record(mission.planJson).delegation).attention);
+    const privatePresented=boundedPolicy(mission)&&["DIGEST","URGENT"].includes(String(privateAttention.level))&&typeof privateAttention.decisionId==="string";
+    if (input.action === "EXPOSED" && !intervention&&!privatePresented)
       throw new AppError(
         "NOT_PRESENTED",
         "问题尚未通过提醒策略，请先重新读取",
         409,
       );
+    if(input.action==="EXPOSED"&&privatePresented)await tx.agentMission.update({where:{id:mission.id},data:{planJson:json({...record(mission.planJson),delegation:{...record(record(mission.planJson).delegation),attention:{...privateAttention,delivery:{channel:"PRIVATE_MISSION_INBOX",status:"SEEN",seenAt:now.toISOString()}}}}),version:{increment:1}}});
     if (["UNKNOWN", "LATER", "STOP", "NOT_USEFUL"].includes(input.action)) {
       const questionId = input.action === "STOP" ? "*" : q.questionId;
       await tx.goalQuestionPreference.upsert({

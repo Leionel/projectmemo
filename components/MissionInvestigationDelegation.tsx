@@ -1,23 +1,29 @@
 "use client";
-import { useState } from "react";
-type Policy={mode:string;expiresAt?:string;maxModels?:number;maxTools?:number};
+import { useEffect, useState } from "react";
+type Policy={mode:string;expiresAt?:string;maxModels?:number;maxTools?:number;maxMetadataRequests?:number;checkEveryMinutes?:number;connectionIds?:string[];allowedTools?:string[]};
+type Connection={id:string;repo:string;ref:string;status:string;access?:string;revokedAt?:string|null};
 const reasonLabel:Record<string,string>={WAITING_INPUT:"需要补充原任务的信息",BUDGET_EXHAUSTED:"调查预算已用完",DELEGATION_EXPIRED:"调查许可已到期",DIRECTIVE_STOPPED:"你已暂停这项工作",INPUT_COVERAGE_LIMIT:"资料变化较多，需要核对调查范围"};
-export function MissionInvestigationDelegation({id,version,policy,state,enabled,onSaved}:{id:string;version:number;policy?:Policy;state?:{attention?:{level:string;reason:string}|null}|null;enabled?:boolean;onSaved:()=>Promise<void>}){
-  const [until,setUntil]=useState(""),[models,setModels]=useState(8),[tools,setTools]=useState(12),[web,setWeb]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState("");
+export function MissionInvestigationDelegation({id,projectId,version,policy,state,enabled,onSaved}:{id:string;projectId:string;version:number;policy?:Policy;state?:{attention?:{level:string;reason:string;decisionId?:string;delivery?:{status:string}}|null}|null;enabled?:boolean;onSaved:()=>Promise<void>}){
+  const [until,setUntil]=useState(""),[models,setModels]=useState(policy?.maxModels??8),[tools,setTools]=useState(policy?.maxTools??12),[web,setWeb]=useState(policy?.allowedTools?.includes("web_search")??false),[busy,setBusy]=useState(false),[error,setError]=useState("");
+  const [connections,setConnections]=useState<Connection[]>([]),[selected,setSelected]=useState<string[]>(policy?.connectionIds??[]),[interval,setInterval]=useState(policy?.checkEveryMinutes??5),[metadata,setMetadata]=useState(policy?.maxMetadataRequests||12),[logs,setLogs]=useState(policy?.allowedTools?.includes("read_ci_log")??false),[connectionError,setConnectionError]=useState("");
+  useEffect(()=>{if(!enabled)return;const abort=new AbortController();void fetch(`/api/projects/${projectId}/repo-signals`,{signal:abort.signal}).then(async r=>{const value=await r.json();if(!r.ok)throw new Error(value.error?.message??"仓库范围未取得");setConnections((value.connections as Connection[]).filter(c=>c.status==="ACTIVE"&&!c.revokedAt&&["COMMITS_AND_CI","COMMITS_CI_LOGS"].includes(c.access??"")));}).catch(e=>{if(!abort.signal.aborted)setConnectionError(e instanceof Error?e.message:"仓库范围未取得");});return()=>abort.abort();},[projectId,enabled]);
   if(!enabled&&policy?.mode!=="BOUNDED_INVESTIGATION")return null;
   async function save(stop:boolean){setBusy(true);try{
-    const value=stop?{mode:"MANUAL"}:{mode:"BOUNDED_INVESTIGATION",schemaVersion:1,expiresAt:new Date(until).toISOString(),checkEveryMinutes:5,maxModels:models,maxTools:tools,maxMetadataRequests:0,
-      allowedTools:["inspect_project","search_memory","read_project_material","inspect_action","save_mission_output","propose_action",...(web?["web_search","web_fetch"]:[])],connectionIds:[],timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,quietStart:22,quietEnd:8,attention:"IMPORTANT_ONLY"};
+    const value=stop?{mode:"MANUAL"}:{mode:"BOUNDED_INVESTIGATION",schemaVersion:1,expiresAt:new Date(until).toISOString(),checkEveryMinutes:interval,maxModels:models,maxTools:tools,maxMetadataRequests:selected.length?metadata:0,
+      allowedTools:["inspect_project","search_memory","read_project_material","inspect_action","save_mission_output","propose_action",...(web?["web_search","web_fetch"]:[]),...(selected.length?["read_repository_ci","read_ci_jobs",...(logs&&selected.every(id=>connections.find(c=>c.id===id)?.access==="COMMITS_CI_LOGS")?["read_ci_log"]:[])]:[])],connectionIds:selected,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,quietStart:22,quietEnd:8,attention:"IMPORTANT_ONLY"};
     const response=await fetch(`/api/missions/${id}/continuation-policy`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({requestId:crypto.randomUUID(),expectedVersion:version,policy:value})});const result=await response.json();if(!response.ok)throw new Error(result.error?.message??"许可未保存");await onSaved();setError("");
   }catch(e){setError(e instanceof Error?e.message:"许可未保存");}finally{setBusy(false);}}
   return <details><summary>持续调查与打扰方式</summary><div className="grid gap-3 py-3">
-    <p>有新项目资料或已刷新的仓库线索时，接着调查原任务；需要决定时留在任务收件箱，22:00–08:00 排队。</p>
+    <p>新资料或所选提交的 CI 有变化时，接着调查原任务；需要决定时留在任务收件箱，22:00–08:00 排队。</p>
     {policy?.mode==="BOUNDED_INVESTIGATION"&&<p>已允许调查至 {new Date(policy.expiresAt!).toLocaleString("zh-CN")} · 原任务累计最多 {policy.maxModels} 次模型、{policy.maxTools} 次工具</p>}
-    {state?.attention&&state.attention.level!=="SUPPRESS"&&<p role="status">{state.attention.level==="QUEUE"?"已排队：":"等待你处理："}{reasonLabel[state.attention.reason]??"调查许可或来源需要重新核对"}</p>}
+    {state?.attention&&state.attention.level!=="SUPPRESS"&&<div><p role="status">{state.attention.level==="QUEUE"?"已排队：":state.attention.level==="URGENT"?"临近截止，需要你决定：":"等待你处理："}{reasonLabel[state.attention.reason]??"调查许可或来源需要重新核对"}</p>{state.attention.decisionId&&state.attention.delivery?.status!=="SEEN"&&<button disabled={busy} onClick={()=>{setBusy(true);void fetch(`/api/missions/${id}/attention`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({requestId:crypto.randomUUID(),expectedVersion:version,decisionId:state.attention!.decisionId})}).then(async r=>{if(!r.ok)throw new Error("提醒已变化，请刷新");await onSaved();}).catch(e=>setError(e.message)).finally(()=>setBusy(false));}}>我已看到</button>}</div>}
     <label>调查到什么时候<input aria-label="持续调查截止时间" type="datetime-local" value={until} onChange={e=>setUntil(e.target.value)}/></label>
     <label>模型调用总上限<input aria-label="持续调查模型上限" type="number" min={1} max={24} value={models} onChange={e=>setModels(Number(e.target.value))}/></label>
     <label>工具调用总上限<input aria-label="持续调查工具上限" type="number" min={1} max={64} value={tools} onChange={e=>setTools(Number(e.target.value))}/></label>
     <label><input type="checkbox" checked={web} onChange={e=>setWeb(e.target.checked)}/>允许在原公开研究范围内继续搜索和读取</label>
+    {connectionError&&<p role="alert">{connectionError}</p>}
+    {connections.length>0&&<fieldset><legend>持续观察的仓库（最多 3 个）</legend>{connections.map(c=><label key={c.id} className="block"><input type="checkbox" checked={selected.includes(c.id)} disabled={!selected.includes(c.id)&&selected.length>=3} onChange={e=>setSelected(e.target.checked?[...selected,c.id]:selected.filter(id=>id!==c.id))}/>{c.repo} · {c.ref}</label>)}</fieldset>}
+    {selected.length>0&&<><p>定时读取仓库已收录的最新固定提交；无变化不调用模型，每次状态观察最多使用 3 次仓库请求。</p><label>检查间隔（分钟）<input type="number" min={1} max={1440} value={interval} onChange={e=>setInterval(Number(e.target.value))}/></label><label>仓库请求累计上限<input type="number" min={3} max={96} value={metadata} onChange={e=>setMetadata(Number(e.target.value))}/></label>{selected.every(id=>connections.find(c=>c.id===id)?.access==="COMMITS_CI_LOGS")&&<label><input type="checkbox" checked={logs} onChange={e=>setLogs(e.target.checked)}/>允许调查时读取所选仓库的脱敏失败日志</label>}</>}
     {error&&<p role="alert">{error}</p>}<div className="flex gap-4"><button disabled={busy||!until} onClick={()=>void save(false)}>允许按此期限和总预算持续调查</button>{policy?.mode==="BOUNDED_INVESTIGATION"&&<button disabled={busy} onClick={()=>void save(true)}>撤销持续调查</button>}</div>
   </div></details>;
 }

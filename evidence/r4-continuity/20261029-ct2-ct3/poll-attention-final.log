@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/continuityStages23.test.ts tests/interventionPolicy.test.ts tests/goalChangeReview.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  3 passed (3)
+      Tests  36 passed (36)
+   Start at  13:21:50
+   Duration  12.12s (transform 1.62s, setup 0ms, import 4.51s, tests 6.74s, environment 0ms)
+

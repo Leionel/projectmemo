@@ -1,0 +1,49 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/projectNavigation.test.ts (12 tests | 2 failed) 25ms
+     × 真实链接带项目范围，当前页标明，功能页可直接访问 16ms
+     × 委托关闭时隐藏入口，其他功能仍可达 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/projectNavigation.test.ts > 单项目功能导航 > 真实链接带项目范围，当前页标明，功能页可直接访问
+ FAIL  tests/projectNavigation.test.ts > 单项目功能导航 > 委托关闭时隐藏入口，其他功能仍可达
+Error: [vitest] No "useSearchParams" export is defined on the "next/navigation" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+
+vi.mock(import("next/navigation"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ ProjectNavigation components/ProjectNavigation.tsx:13:15
+     11| export function ProjectNavigation({projectId,missionsEnabled}:{project…
+     12|  const path=usePathname(),base=`/projects/${projectId}`;
+     13|  const search=useSearchParams(),conversation=search.get("conversation"…
+       |               ^
+     14|  const preserve=(href:string)=>conversation?conversationHref(href,conv…
+     15|  const section=path.slice(base.length).split("/")[1]??"";
+ ❯ Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:20
+ ❯ renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:22
+ ❯ updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:19
+ ❯ beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:18
+ ❯ runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:874:13
+ ❯ performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:17641:22
+ ❯ workLoopSync node_modules/react-dom/cjs/react-dom-client.development.js:17469:41
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed | 112 passed (113)
+      Tests  2 failed | 941 passed (943)
+   Start at  08:46:01
+   Duration  197.69s (transform 4.88s, setup 0ms, import 58.57s, tests 93.03s, environment 25.76s)
+

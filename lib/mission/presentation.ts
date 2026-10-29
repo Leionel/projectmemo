@@ -15,3 +15,40 @@ export type MissionWorkspaceItem = {
   outputRevision: number | null;
 };
 export type MissionWorkspaceSummary = { enabled: boolean; totalActive: number; items: MissionWorkspaceItem[] };
+
+/** Read-only facets from existing criteria events, Output and adoption receipts. */
+export type MissionCompletionSummary = {
+  criteriaPassed: boolean | null;
+  criteriaCheckedAt: string | null;
+  draftVerification: string | null;
+  adoptionCount: number;
+  latestArtifactId: string | null;
+  realityOutcome: "NOT_INFERRED";
+};
+
+export type MissionRecovery = {
+  kind: string;
+  automatic: boolean;
+  message: string;
+  attempt?: number;
+  maxAttempts?: number;
+  nextAttemptAt?: string;
+};
+
+export function missionErrorPhaseLabel(phase?: string): string {
+  const labels: Record<string, string> = {
+    CONTEXT: "准备上下文", DECISION: "模型决策", TOOL: "工具执行",
+    VERIFY: "结果核验", COMMIT: "保存执行结果", APPROVAL: "批准与行动提交",
+  };
+  return phase ? labels[phase] ?? "执行阶段待确认" : "执行阶段未记录";
+}
+
+export function missionCompletionFacts(status: string, completion?: MissionCompletionSummary, draftVerification?: string): Array<{ label: string; value: string }> {
+  const verification = completion?.draftVerification ?? draftVerification;
+  return [
+    { label: "执行条件", value: completion?.criteriaPassed === true ? "已通过本委托设定的条件" : completion?.criteriaPassed === false ? "条件未通过，请核对执行记录" : status === "SUCCEEDED" ? "已验收，明细待读取" : "尚未完成条件验收" },
+    { label: "草稿核验", value: verification ? verification === "NEEDS_REVIEW" ? "待审阅，尚未整体核验" : `核验状态待核对（${verification}）` : "尚无已保存草稿" },
+    { label: "用户采纳", value: completion ? completion.adoptionCount > 0 ? `已确认归入 ${completion.adoptionCount} 份项目成果` : "尚未归入项目成果" : "采纳回执待读取" },
+    { label: "现实完成", value: "未从委托状态推断，以实际行动回执为准" },
+  ];
+}

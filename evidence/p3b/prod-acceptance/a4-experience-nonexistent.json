@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-24T10:57:31.777Z",
+  "request": {
+    "method": "POST",
+    "path": "/api/projects/cmt9uzmx10000xlratkg2nsil/experiences/nonexistent-id",
+    "body": {
+      "action": "ACTIVATE",
+      "requestId": "b8c7d640-de52-4561-a448-267b0db45ab5"
+    },
+    "authorized": true
+  },
+  "status": 404,
+  "body": {
+    "error": {
+      "code": "EXPERIENCE_NOT_FOUND",
+      "message": "经验不存在或不可访问"
+    }
+  }
+}

@@ -149,13 +149,15 @@ function runPlaywright() {
     }, 500);
 
     timers.hardTimeout = setTimeout(() => {
-      console.error("[e2e] test runner exceeded its 210-second safety limit.");
+      console.error("[e2e] test runner exceeded its 600-second safety limit.");
       // 卡住时同样回放输出：失败用例通常已经打印在列表里，但汇总行还没出现
       console.error("[e2e] runner output tail:");
       console.error(stripAnsi(output).split("\n").slice(-40).join("\n"));
       terminateProcessTree(runner);
       finish(1);
-    }, 210_000);
+    // The complete suite now includes persisted multi-turn Continuity and Mission journeys.
+    // Individual Playwright deadlines still fail a stuck interaction.
+    }, 600_000);
   });
 }
 

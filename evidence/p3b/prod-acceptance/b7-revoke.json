@@ -1,0 +1,36 @@
+{
+  "at": "2026-10-24T11:02:46.275Z",
+  "request": {
+    "method": "POST",
+    "path": "/api/projects/cmvmabwy10003svrawzrfth86/repo-signals/connections/cmvmahppf001dsvraei37ew7w",
+    "body": {
+      "action": "REVOKE",
+      "reason": "验收撤销测试",
+      "requestId": "b304836b-5084-4010-8dfe-35ecab54479c"
+    },
+    "authorized": true
+  },
+  "status": 200,
+  "body": {
+    "connection": {
+      "id": "cmvmahppf001dsvraei37ew7w",
+      "projectId": "cmvmabwy10003svrawzrfth86",
+      "ownerUserId": "cmu3sjpnj0000zlrasghegg46",
+      "repo": "Leionel/projectmemo",
+      "ref": "master",
+      "signalKind": "COMMITS",
+      "status": "REVOKED",
+      "revokedAt": "2026-10-24T11:02:46.407Z",
+      "revokedReason": "验收撤销测试",
+      "etag": "W/\"021daa93e8c3210faf84a7b3b8a10a734d18dff1267649b5425c70adbf2275b2\"",
+      "cursorSha": "b91c0b76581517a6fc2f7b8740c568ec54cd09c7",
+      "lastFetchedAt": "2026-10-24T11:02:21.761Z",
+      "lastStatus": "OK",
+      "lastError": null,
+      "createdAt": "2026-10-24T11:02:21.028Z",
+      "updatedAt": "2026-10-24T11:02:46.408Z"
+    },
+    "status": "REVOKED",
+    "created": 0
+  }
+}

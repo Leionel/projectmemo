@@ -4,6 +4,8 @@ export type FocusEntry = {
   status: string; activity: string; activityAt: string; recordedAt: string; dueAt: string; projectDeadline: string; recordFields: Array<{label: string; value: string}>;
 };
 export type GlobalFocus = {
+  discussions?: Array<{ conversationId: string; title: string; unread: number }>;
+  primaryContext?: import("./projectAgentContext").ProjectAgentContext | null;
   counts: {waiting: number; running: number; actions: number; reminders: number};
   nextDeadline: {projectId: string; projectTitle: string; at: string} | null;
   schemaVersion: 1; missionEnabled: boolean; archived: boolean; hasMore: boolean;

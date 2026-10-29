@@ -1,3 +1,4 @@
+import { ProjectAgentContext } from './ProjectAgentContext';
 // ---- R2 阶段检查点 / 排程 / 再入场（与 lib/types/episode.ts、schedule.ts、reentry.ts 契约保持一致） ----
 
 export class EpisodeSourceRef {
@@ -258,6 +259,7 @@ export class ReentrySchedulePart {
 }
 
 export class ReentryData {
+  agentContext?: ProjectAgentContext | null;
   projectId: string = '';
   projectName: string = '';
   freshness: string = 'FRESH';

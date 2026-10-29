@@ -98,7 +98,7 @@ export async function searchProjectCards(options: HybridSearchOptions): Promise<
   // 1. 获取 Query 的向量。关闭 feature flag 时严格回到旧关键词路径，
   // 避免把离线哈希向量包装成“真实语义检索”。
   const queryEmbedding = options.semantic !== false && isFeatureEnabled("SEMANTIC_MEMORY_ENABLED", false)
-    ? await getEmbedding(trimmedQuery)
+    ? await getEmbedding(trimmedQuery, projectId)
     : null;
   const now = new Date();
   const temporalStates = await getTemporalSearchStates(projectId, cards.map((card) => card.id), now);

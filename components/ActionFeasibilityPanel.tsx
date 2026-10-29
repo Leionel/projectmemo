@@ -198,86 +198,86 @@ export function ActionFeasibilityPanel({ projectId, action, otherActions, onActi
 
   return <div className="mt-2 rounded-md border border-[var(--rule)] bg-[var(--paper-strong)] p-3">
     <div className="flex flex-wrap items-center gap-2">
-      <span className={"inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-black " + verdict.className}><VerdictIcon size={13} />{verdict.label}</span>
+      <span className={"inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-black " + verdict.className}><VerdictIcon size={13} />{verdict.label}</span>
       {assessment.estimateMinutes === null
-        ? <span className="rounded-md bg-[var(--paper-strong)] px-2 py-1 text-[11px] font-bold text-[var(--amber)]">还没有填写预计用时</span>
-        : <span className="rounded-md bg-[var(--card-bg)] px-2 py-1 text-[11px] font-bold text-[var(--ink-soft)]">预计用时：{assessment.estimateMinutes} 分钟</span>}
-      {assessment.overdue && <span className="inline-flex items-center gap-1 rounded-md bg-[var(--brick-pale)] px-2 py-1 text-[11px] font-bold text-[var(--brick)]"><TriangleAlert size={12} />截止时间已过</span>}
+        ? <span className="rounded-md bg-[var(--paper-strong)] px-2 py-1 text-xs font-bold text-[var(--amber)]">还没有填写预计用时</span>
+        : <span className="rounded-md bg-[var(--card-bg)] px-2 py-1 text-xs font-bold text-[var(--ink-soft)]">预计用时：{assessment.estimateMinutes} 分钟</span>}
+      {assessment.overdue && <span className="inline-flex items-center gap-1 rounded-md bg-[var(--brick-pale)] px-2 py-1 text-xs font-bold text-[var(--brick)]"><TriangleAlert size={12} />截止时间已过</span>}
     </div>
-    <p className="mt-1.5 text-[11px] leading-5 text-[var(--ink-soft)]">{assessment.summary}</p>
-    <p className="mt-0.5 text-[11px] text-[var(--muted)]">{assessment.estimateNote} · 评估于 {new Date(assessment.assessedAt).toLocaleString("zh-CN", { hour12: false })}</p>
+    <p className="mt-1.5 text-xs leading-5 text-[var(--ink-soft)]">{assessment.summary}</p>
+    <p className="mt-0.5 text-xs text-[var(--muted)]">{assessment.estimateNote} · 评估于 {new Date(assessment.assessedAt).toLocaleString("zh-CN", { hour12: false })}</p>
 
-    {notice && <p role="status" className="mt-2 rounded-lg bg-[var(--teal-pale)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--teal-strong)]">{notice}</p>}
-    {error && <p role="alert" className="mt-2 rounded-lg bg-[var(--brick-pale)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--brick)]">{error}</p>}
+    {notice && <p role="status" className="mt-2 rounded-lg bg-[var(--teal-pale)] px-2.5 py-1.5 text-xs font-semibold text-[var(--teal-strong)]">{notice}</p>}
+    {error && <p role="alert" className="mt-2 rounded-lg bg-[var(--brick-pale)] px-2.5 py-1.5 text-xs font-semibold text-[var(--brick)]">{error}</p>}
 
     <div className="mt-2.5">
-      <p className="text-[11px] font-black text-[var(--navy)]">前置事项（{assessment.dependencies.length}）</p>
+      <p className="text-xs font-black text-[var(--navy)]">前置事项（{assessment.dependencies.length}）</p>
       {assessment.dependencies.length === 0
-        ? <p className="mt-1 text-[11px] leading-5 text-[var(--muted)]">没有需要先完成的事项。实际完成时间仍可能受临时情况影响。</p>
+        ? <p className="mt-1 text-xs leading-5 text-[var(--muted)]">没有需要先完成的事项。实际完成时间仍可能受临时情况影响。</p>
         : <ul className="mt-1.5 space-y-1.5">
           {assessment.dependencies.map((dependency) => {
             const state = stateLabels[dependency.state] ?? stateLabels.UNKNOWN;
             return <li key={dependency.requirementId} className="rounded-lg bg-[var(--card-bg)] px-2.5 py-2">
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="rounded bg-[var(--paper-strong)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--ink-soft)]">{kindLabels[dependency.targetKind] ?? dependency.targetKind}</span>
-                <span className="text-[11px] font-bold text-[var(--navy)]">{dependency.targetTitle ?? "（目标已不存在）"}</span>
-                <span className={"rounded px-1.5 py-0.5 text-[10px] font-bold " + state.className}>{state.label}</span>
-                <span className="text-[10px] font-bold text-[var(--muted)]">{dependency.hard ? "必须先完成" : "仅供参考"}</span>
+                <span className="rounded bg-[var(--paper-strong)] px-1.5 py-0.5 text-[11px] font-bold text-[var(--ink-soft)]">{kindLabels[dependency.targetKind] ?? dependency.targetKind}</span>
+                <span className="text-xs font-bold text-[var(--navy)]">{dependency.targetTitle ?? "（目标已不存在）"}</span>
+                <span className={"rounded px-1.5 py-0.5 text-[11px] font-bold " + state.className}>{state.label}</span>
+                <span className="text-[11px] font-bold text-[var(--muted)]">{dependency.hard ? "必须先完成" : "仅供参考"}</span>
                 <button type="button" onClick={() => void save({ removeRequirementIds: [dependency.requirementId] }, "已移除这条前置事项。")} disabled={busy !== null} aria-label={`移除前置事项 ${dependency.targetTitle ?? dependency.requirementId}`} className="focus-ring ml-auto rounded p-1 text-[var(--muted)] hover:bg-[var(--brick-pale)] hover:text-[var(--brick)] disabled:opacity-50"><Trash2 size={12} /></button>
               </div>
-              {dependency.note && <p className="mt-1 text-[11px] leading-5 text-[var(--ink-soft)]">{dependency.note}</p>}
+              {dependency.note && <p className="mt-1 text-xs leading-5 text-[var(--ink-soft)]">{dependency.note}</p>}
             </li>;
           })}
         </ul>}
     </div>
 
     {blocking.length > 0 && <div className="mt-2.5 rounded-lg bg-[var(--brick-pale)] p-2.5">
-      <p className="text-[11px] font-semibold leading-5 text-[var(--brick)]">受阻的待办不会进入「安排未来 7 天」，也不会被写入设备日历。</p>
-      <button type="button" onClick={() => void createUnblockAction(blocking[0])} disabled={busy !== null} className="focus-ring mt-1.5 rounded-md bg-[var(--card-bg)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)] disabled:opacity-50">
+      <p className="text-xs font-semibold leading-5 text-[var(--brick)]">受阻的待办不会进入「安排未来 7 天」，也不会被写入设备日历。</p>
+      <button type="button" onClick={() => void createUnblockAction(blocking[0])} disabled={busy !== null} className="focus-ring mt-1.5 rounded-md bg-[var(--card-bg)] px-2 py-1 text-xs font-bold text-[var(--teal-strong)] disabled:opacity-50">
         {busy === "unblock" ? <LoaderCircle size={12} className="mr-1 inline animate-spin" /> : <Plus size={12} className="mr-1 inline" />}创建「先解决依赖」待办
       </button>
     </div>}
 
     {!editing ? <div className="mt-2.5 flex flex-wrap gap-2">
-      <button type="button" onClick={() => setEditing(true)} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-[11px] font-bold text-[var(--navy)]">{assessment.dependencies.length === 0 && assessment.estimateMinutes === null ? "填写预计用时或前置事项" : "修改前置事项或用时"}</button>
-      <button type="button" onClick={() => void load()} disabled={busy !== null} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-[11px] font-bold text-[var(--muted)] disabled:opacity-50">重新评估</button>
+      <button type="button" onClick={() => setEditing(true)} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-xs font-bold text-[var(--navy)]">{assessment.dependencies.length === 0 && assessment.estimateMinutes === null ? "填写预计用时或前置事项" : "修改前置事项或用时"}</button>
+      <button type="button" onClick={() => void load()} disabled={busy !== null} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-xs font-bold text-[var(--muted)] disabled:opacity-50">重新评估</button>
     </div> : <div className="mt-2.5 rounded-lg border border-[var(--rule)] bg-[var(--card-bg)] p-2.5">
-      <label className="block text-[11px] font-bold text-[var(--ink-soft)]">预计需要多久？（分钟）
+      <label className="block text-xs font-bold text-[var(--ink-soft)]">预计需要多久？（分钟）
         <span className="mt-1 flex items-center gap-2">
           <input type="number" min={1} max={100000} value={estimate} onChange={(event) => setEstimate(event.target.value)} className="focus-ring w-28 rounded-lg border border-[var(--rule)] bg-[var(--paper-strong)] px-2 py-1.5 text-xs" />
-          <button type="button" onClick={() => void save({ estimatedMinutes: estimate.trim() === "" ? null : Number(estimate) }, estimate.trim() === "" ? "已清除预计用时；这条待办在补齐用时前不会进入排程。" : "预计用时已保存。")} disabled={busy !== null} className="focus-ring rounded-md bg-[var(--teal-pale)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)] disabled:opacity-50">
+          <button type="button" onClick={() => void save({ estimatedMinutes: estimate.trim() === "" ? null : Number(estimate) }, estimate.trim() === "" ? "已清除预计用时；这条待办在补齐用时前不会进入排程。" : "预计用时已保存。")} disabled={busy !== null} className="focus-ring rounded-md bg-[var(--teal-pale)] px-2 py-1 text-xs font-bold text-[var(--teal-strong)] disabled:opacity-50">
             {busy === "save" ? <LoaderCircle size={12} className="animate-spin" /> : null}保存用时
           </button>
-          {assessment.estimateMinutes !== null && <button type="button" onClick={() => { setEstimate(""); void save({ estimatedMinutes: null }, "已清除预计用时。"); }} disabled={busy !== null} className="focus-ring rounded-md px-2 py-1 text-[11px] font-bold text-[var(--muted)] disabled:opacity-50">清除</button>}
+          {assessment.estimateMinutes !== null && <button type="button" onClick={() => { setEstimate(""); void save({ estimatedMinutes: null }, "已清除预计用时。"); }} disabled={busy !== null} className="focus-ring rounded-md px-2 py-1 text-xs font-bold text-[var(--muted)] disabled:opacity-50">清除</button>}
         </span>
       </label>
 
       <div className="mt-2.5 border-t archive-rule pt-2.5">
-        <p className="text-[11px] font-bold text-[var(--ink-soft)]">添加前置事项</p>
+        <p className="text-xs font-bold text-[var(--ink-soft)]">添加前置事项</p>
         <div className="mt-1.5 grid gap-2 sm:grid-cols-2">
-          <label className="text-[11px] font-bold text-[var(--muted)]">类型
+          <label className="text-xs font-bold text-[var(--muted)]">类型
             <select value={draft.kind} onChange={(event) => { const kind = event.target.value as TargetKind; setDraft({ ...draft, kind, targetId: "" }); if (kind !== "action") void loadCandidates(); }} className="focus-ring editorial-input mt-1 w-full px-2 py-1.5 text-xs">
               {(["action", "card", "deliverable"] as TargetKind[]).map((kind) => <option key={kind} value={kind}>{kindLabels[kind]}</option>)}
             </select>
           </label>
-          <label className="text-[11px] font-bold text-[var(--muted)]">目标
+          <label className="text-xs font-bold text-[var(--muted)]">目标
             <select value={draft.targetId} onChange={(event) => setDraft({ ...draft, targetId: event.target.value })} onFocus={() => { if (draft.kind !== "action") void loadCandidates(); }} className="focus-ring editorial-input mt-1 w-full px-2 py-1.5 text-xs">
               <option value="">{busy === "candidates" ? "正在读取候选…" : "选择一个目标"}</option>
               {options.map((option) => <option key={option.id} value={option.id}>{option.title}</option>)}
             </select>
           </label>
-          <label className="text-[11px] font-bold text-[var(--muted)] sm:col-span-2">说明（选填，最多 200 字）
+          <label className="text-xs font-bold text-[var(--muted)] sm:col-span-2">说明（选填，最多 200 字）
             <input value={draft.note} onChange={(event) => setDraft({ ...draft, note: event.target.value })} maxLength={200} className="focus-ring editorial-input mt-1 w-full px-2 py-1.5 text-xs" placeholder="例如：需要先拿到对照组数据" />
           </label>
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-3">
-          <label className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--ink-soft)]">
+          <label className="flex items-center gap-1.5 text-xs font-bold text-[var(--ink-soft)]">
             <input type="checkbox" checked={draft.hard} onChange={(event) => setDraft({ ...draft, hard: event.target.checked })} className="focus-ring size-3.5" />必须先完成（取消勾选则仅供参考）
           </label>
-          <button type="button" onClick={() => void save({ addRequirements: [{ targetKind: draft.kind, targetId: draft.targetId, hard: draft.hard, note: draft.note.trim() || undefined }] }, "前置事项已添加，结论已重新评估。", true)} disabled={busy !== null || !draft.targetId} className="focus-ring rounded-md bg-[var(--navy)] px-2 py-1 text-[11px] font-bold text-white disabled:opacity-50">
+          <button type="button" onClick={() => void save({ addRequirements: [{ targetKind: draft.kind, targetId: draft.targetId, hard: draft.hard, note: draft.note.trim() || undefined }] }, "前置事项已添加，结论已重新评估。", true)} disabled={busy !== null || !draft.targetId} className="focus-ring rounded-md bg-[var(--navy)] px-2 py-1 text-xs font-bold text-white disabled:opacity-50">
             {busy === "save" ? <LoaderCircle size={12} className="mr-1 inline animate-spin" /> : <Plus size={12} className="mr-1 inline" />}添加
           </button>
-          <button type="button" onClick={() => setEditing(false)} className="focus-ring rounded-md px-2 py-1 text-[11px] font-bold text-[var(--muted)]">收起</button>
+          <button type="button" onClick={() => setEditing(false)} className="focus-ring rounded-md px-2 py-1 text-xs font-bold text-[var(--muted)]">收起</button>
         </div>
       </div>
     </div>}

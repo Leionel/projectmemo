@@ -1,3 +1,4 @@
+import {enqueueImpact} from "@/lib/decision/impactJobs";
 import { AppError } from "@/lib/api";
 import { db } from "@/lib/db";
 import type { MemoryLifecycleEvent, MemoryLifecycleEventType, Prisma } from "@/lib/generated/prisma/client";
@@ -125,7 +126,7 @@ export async function recordLifecycleEventInTx(
     relationId?: string | null;
   },
 ) {
-  await tx.memoryLifecycleEvent.create({
+  const receipt=await tx.memoryLifecycleEvent.create({
     data: {
       projectId: data.projectId,
       cardId: data.cardId,
@@ -135,4 +136,9 @@ export async function recordLifecycleEventInTx(
       relationId: data.relationId ?? null,
     },
   });
+  if(data.relationId&&["RELATION_CONFIRM","RELATION_REVOKE"].includes(data.eventType)){
+    const relation=await tx.cardRelation.findUnique({where:{id:data.relationId}});
+    if(relation?.currentCardId===data.cardId)await enqueueImpact(tx,data.projectId,receipt.id,[`card:${relation.currentCardId}`,`card:${relation.relatedCardId}`]);
+  }
+  return receipt;
 }

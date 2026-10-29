@@ -1,3 +1,6 @@
+import { MissionExperience } from './Experience';
+import { FitPremise, EvidenceReview, EvidenceFit, FitExcerpt } from './EvidenceFit';
+
 export class MissionConstraints {
   availableMinutes: number | null = null;
   resourceLimits: string[] = [];
@@ -18,7 +21,7 @@ export class MissionScope {
   excludedTerms: string[] = [];
   allowedHosts: string[] = [];
 }
-export class MissionPolicy { mode: string = 'MANUAL'; }
+export class MissionPolicy { mode: string = 'MANUAL'; schemaVersion?: number; expiresAt?: string; checkEveryMinutes?: number; maxModels?: number; maxTools?: number; maxMetadataRequests?: number; allowedTools?: string[]; connectionIds?: string[]; timezone?: string; quietStart?: number; quietEnd?: number; attention?: string; }
 export class MissionCreate {
   projectId: string = '';
   requestId: string = '';
@@ -49,8 +52,24 @@ export interface MissionBlock { blockId: string; text: string; kind: string; sou
 export interface MissionContent { blocks: MissionBlock[]; }
 export interface MissionClaim { claimId?: string; blockId?: string; text?: string; status: string; mode?: string; }
 export interface MissionOutput { id: string; revision: number; contentJson: MissionContent; verificationStatus: string; claimChecksJson: MissionClaim[]; }
-export interface MissionError { code?: string; message?: string; }
+export interface MissionRecovery {
+  kind: string; automatic: boolean; message: string;
+  attempt?: number; maxAttempts?: number; nextAttemptAt?: string;
+}
+export interface MissionError { code?: string; message?: string; phase?: string; recovery?: MissionRecovery; }
+export interface MissionCompletionSummary {
+  criteriaPassed: boolean | null; criteriaCheckedAt: string | null;
+  draftVerification: string | null; adoptionCount: number; latestArtifactId: string | null;
+  realityOutcome: string;
+}
+export interface MissionCompletionFact { label: string; value: string; }
+export class MissionAttentionReceipt { requestId: string = ''; expectedVersion: number = 1; decisionId: string = ''; }
+export interface MissionAttention { level: string; reason: string; decisionId?: string; delivery?: MissionAttentionDelivery; }
+export interface MissionAttentionDelivery { status: string; seenAt?: string | null; }
+export interface MissionDelegation { attention?: MissionAttention | null; }
 export class Mission {
+  delegation?: MissionDelegation | null;
+  evidencePremise?: FitPremise | null;
   id: string = ''; projectId: string = ''; goal: string = ''; status: string = '';
   version: number = 1; contextVersion: number = 1; planRevision: number = 1;
   constraintsVersion: number = 1; researchScopeVersion: number = 1;
@@ -58,26 +77,33 @@ export class Mission {
   researchScope: MissionScope = new MissionScope();
   continuationPolicy: MissionPolicy = new MissionPolicy();
   autoContinuationEnabled: boolean = false; artifactAdoptionEnabled: boolean = false;
+  investigationDelegationEnabled?: boolean;
   pauseRequestedAt: string | null = null; cancelRequestedAt: string | null = null;
   pauseReason: string | null = null; error: MissionError | null = null;
+  completion?: MissionCompletionSummary;
+  experience?: MissionExperience;
   question: MissionQuestion | null = null;
   steps: MissionStep[] = []; approvals: MissionApproval[] = []; outputs: MissionOutput[] = [];
 }
 export interface MissionEvent { id: string; seq: number; type: string; createdAt: string; payloadJson: Object; }
 export interface MissionEvents { events: MissionEvent[]; nextAfterSeq: number; }
 export class MissionCommand {
+  evidenceReview?: EvidenceReview;
   requestId: string = ''; expectedVersion: number = 1;
   questionId?: string; answer?: string; decision?: string; proposalHash?: string;
 }
 export interface MissionPointer { id: string; hash: string; }
-export interface MissionCandidate { sourcePointer: MissionPointer; readable: boolean; excerpt: string; observedAt: string; }
+export interface MissionCandidate { title?: string; sourcePointer: MissionPointer; readable: boolean; excerpt: string; observedAt: string; }
 export interface MissionCandidates { candidates: MissionCandidate[]; }
-export class MissionMaterialInput { questionId: string = ''; sourcePointers: MissionPointer[] = []; }
+export class MissionMaterialInput { questionId: string = ''; sourcePointers: MissionPointer[] = []; evidenceReview?: EvidenceReview; }
 export interface MissionMaterialPreview {
+  evidenceFit?: EvidenceFit; fitHash?: string;
+  observationExcerpts?: FitExcerpt[];
   questionId: string; version: number; contextVersion: number; assessment: string; relevance: string;
   sourcePointers: MissionPointer[]; assessmentHash: string; remaining: string[]; readable: boolean;
 }
 export class MissionMaterialConfirm extends MissionMaterialInput {
+  fitHash?: string;
   requestId: string = ''; expectedVersion: number = 1; expectedContextVersion: number = 1;
   assessmentHash: string = ''; answer: string = ''; confirmedGap: boolean = true;
 }

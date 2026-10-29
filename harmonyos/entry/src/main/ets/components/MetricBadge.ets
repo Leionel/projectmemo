@@ -214,11 +214,15 @@ export struct CategoryBadge {
   private getLabel(): string {
     switch (this.category) {
       case 'COMPETITION':
-        return '竞赛备赛';
+        return '学科竞赛';
       case 'COURSE_DESIGN':
         return '课程设计';
+      case 'LAB_TASK':
+        return '实验室任务';
+      case 'INNOVATION':
+        return '创新创业';
       case 'RESEARCH':
-        return '学术研究';
+        return '科研训练';
       case 'ACADEMIC':
         return '学术备赛';
       default:
@@ -252,7 +256,7 @@ export struct TemporalBadge {
   private getLabel(): string {
     switch (this.status) {
       case 'CURRENT':
-        return '当前有效';
+        return '当前时态';
       case 'SUPERSEDED':
         return '已被替代';
       case 'CONTESTED':
@@ -270,6 +274,7 @@ export struct TemporalBadge {
   private getBgColor(): ResourceColor {
     switch (this.status) {
       case 'CURRENT':
+        return PMColors.EVIDENCE_TINT;
       case 'SUPPORTED':
         return PMColors.SUCCESS_LIGHT;
       case 'SUPERSEDED':
@@ -287,6 +292,7 @@ export struct TemporalBadge {
   private getTextColor(): ResourceColor {
     switch (this.status) {
       case 'CURRENT':
+        return PMColors.EVIDENCE;
       case 'SUPPORTED':
         return PMColors.SUCCESS;
       case 'SUPERSEDED':

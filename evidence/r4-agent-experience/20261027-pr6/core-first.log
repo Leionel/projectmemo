@@ -1,0 +1,417 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/r4Research.test.ts tests/r4Investigation.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/r4Research.test.ts (12 tests | 10 failed) 657ms
+     × 服务端登记用户原链接，不需要搜索或额外 Mission 174ms
+     × 同原步骤 Fetch 仅请求一次，回读保留原时间和片段 40ms
+     × 模型不能用任意 sourceId 取得 URL 抓取权 52ms
+     × 公开授权修改使原来源不可用，其他 owner 不能读取 50ms
+     × 撤权发生在 Fetch 返回前，迟到结果不成为可用来源 50ms
+     × 网络结果 UNKNOWN 保留预占，重复派发不会再次调用 58ms
+     × 四次外部请求是总上限，不是固定执行顺序 37ms
+     × 原 lease 被替换后，旧推进者不能提交检查点 58ms
+     × HTTP 接受与原 turn 推进分离，重试不会重复用户消息 52ms
+     × 旧网页历史撤权后受到限制，不能从保存的回答绕过 42ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/r4Research.test.ts > PR6 原会话联网边界 > 服务端登记用户原链接，不需要搜索或额外 Mission
+PrismaClientValidationError: 
+Invalid `db.project.create()` invocation in
+D:/Projects/hongmen/tests/r4Research.test.ts:30:36
+
+  27 async function fixture() {
+  28   const user = await db.user.create({ data: { username: crypto.randomUUID(), displayName: "联网隔离", passwordHash: "unused" } });
+  29   const actor = { userId: user.id, sessionId: (await createSession(user.id)).session.id };
+→ 30   const project = await db.project.create({
+         data: {
+           title: "合成公开研究项目",
+           goal: "比较同条件方法，不把公开指标当实测",
+           scenario: "RESEARCH",
+           memberships: {
+             create: {
+               userId: "cmvrh3kqf0000g08onfg2ex5y"
+             }
+           },
+       +   description: String
+         }
+       })
+
+Argument `description` is missing.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ fixture tests/r4Research.test.ts:30:19
+     28|   const user = await db.user.create({ data: { username: crypto.randomU…
+     29|   const actor = { userId: user.id, sessionId: (await createSession(use…
+     30|   const project = await db.project.create({ data: { title: "合成公开研究项目",…
+       |                   ^
+     31|   const c = await createConversation(actor, { requestId: crypto.random…
+     32|   const input = { requestId: "original", expectedVersion: 1, message: …
+ ❯ tests/r4Research.test.ts:40:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  tests/r4Research.test.ts > PR6 原会话联网边界 > 同原步骤 Fetch 仅请求一次，回读保留原时间和片段
+PrismaClientValidationError: 
+Invalid `db.project.create()` invocation in
+D:/Projects/hongmen/tests/r4Research.test.ts:30:36
+
+  27 async function fixture() {
+  28   const user = await db.user.create({ data: { username: crypto.randomUUID(), displayName: "联网隔离", passwordHash: "unused" } });
+  29   const actor = { userId: user.id, sessionId: (await createSession(user.id)).session.id };
+→ 30   const project = await db.project.create({
+         data: {
+           title: "合成公开研究项目",
+           goal: "比较同条件方法，不把公开指标当实测",
+           scenario: "RESEARCH",
+           memberships: {
+             create: {
+               userId: "cmvrh3ksb0002g08ogm9s9j23"
+             }
+           },
+       +   description: String
+         }
+       })
+
+Argument `description` is missing.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ fixture tests/r4Research.test.ts:30:19
+     28|   const user = await db.user.create({ data: { username: crypto.randomU…
+     29|   const actor = { userId: user.id, sessionId: (await createSession(use…
+     30|   const project = await db.project.create({ data: { title: "合成公开研究项目",…
+       |                   ^
+     31|   const c = await createConversation(actor, { requestId: crypto.random…
+     32|   const input = { requestId: "original", expectedVersion: 1, message: …
+ ❯ tests/r4Research.test.ts:53:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  tests/r4Research.test.ts > PR6 原会话联网边界 > 模型不能用任意 sourceId 取得 URL 抓取权
+PrismaClientValidationError: 
+Invalid `db.project.create()` invocation in
+D:/Projects/hongmen/tests/r4Research.test.ts:30:36
+
+  27 async function fixture() {
+  28   const user = await db.user.create({ data: { username: crypto.randomUUID(), displayName: "联网隔离", passwordHash: "unused" } });
+  29   const actor = { userId: user.id, sessionId: (await createSession(user.id)).session.id };
+→ 30   const project = await db.project.create({
+         data: {
+           title: "合成公开研究项目",
+           goal: "比较同条件方法，不把公开指标当实测",
+           scenario: "RESEARCH",
+           memberships: {
+             create: {
+               userId: "cmvrh3ktg0004g08ocvys73af"
+             }
+           },
+       +   description: String
+         }
+       })
+
+Argument `description` is missing.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ fixture tests/r4Research.test.ts:30:19
+     28|   const user = await db.user.create({ data: { username: crypto.randomU…
+     29|   const actor = { userId: user.id, sessionId: (await createSession(use…
+     30|   const project = await db.project.create({ data: { title: "合成公开研究项目",…
+       |                   ^
+     31|   const c = await createConversation(actor, { requestId: crypto.random…
+     32|   const input = { requestId: "original", expectedVersion: 1, message: …
+ ❯ tests/r4Research.test.ts:62:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  tests/r4Research.test.ts > PR6 原会话联网边界 > 公开授权修改使原来源不可用，其他 owner 不能读取
+PrismaClientValidationError: 
+Invalid `db.project.create()` invocation in
+D:/Projects/hongmen/tests/r4Research.test.ts:30:36
+
+  27 async function fixture() {
+  28   const user = await db.user.create({ data: { username: crypto.randomUUID(), displayName: "联网隔离", passwordHash: "unused" } });
+  29   const actor = { userId: user.id, sessionId: (await createSession(user.id)).session.id };
+→ 30   const project = await db.project.create({
+         data: {
+           title: "合成公开研究项目",
+           goal: "比较同条件方法，不把公开指标当实测",
+           scenario: "RESEARCH",
+           memberships: {
+             create: {
+               userId: "cmvrh3kuv0006g08ozhs9a9o5"
+             }
+           },
+       +   description: String
+         }
+       })
+
+Argument `description` is missing.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ fixture tests/r4Research.test.ts:30:19
+     28|   const user = await db.user.create({ data: { username: crypto.randomU…
+     29|   const actor = { userId: user.id, sessionId: (await createSession(use…
+     30|   const project = await db.project.create({ data: { title: "合成公开研究项目",…
+       |                   ^
+     31|   const c = await createConversation(actor, { requestId: crypto.random…
+     32|   const input = { requestId: "original", expectedVersion: 1, message: …
+ ❯ tests/r4Research.test.ts:67:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  tests/r4Research.test.ts > PR6 原会话联网边界 > 撤权发生在 Fetch 返回前，迟到结果不成为可用来源
+PrismaClientValidationError: 
+Invalid `db.project.create()` invocation in
+D:/Projects/hongmen/tests/r4Research.test.ts:30:36
+
+  27 async function fixture() {
+  28   const user = await db.user.create({ data: { username: crypto.randomUUID(), displayName: "联网隔离", passwordHash: "unused" } });
+  29   const actor = { userId: user.id, sessionId: (await createSession(user.id)).session.id };
+→ 30   const project = await db.project.create({
+         data: {
+           title: "合成公开研究项目",
+           goal: "比较同条件方法，不把公开指标当实测",
+           scenario: "RESEARCH",
+           memberships: {
+             create: {
+               userId: "cmvrh3kwa0008g08ocp8ph35i"
+             }
+           },
+       +   description: String
+         }
+       })
+
+Argument `description` is missing.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ fixture tests/r4Research.test.ts:30:19
+     28|   const user = await db.user.create({ data: { username: crypto.randomU…
+     29|   const actor = { userId: user.id, sessionId: (await createSession(use…
+     30|   const project = await db.project.create({ data: { title: "合成公开研究项目",…
+       |                   ^
+     31|   const c = await createConversation(actor, { requestId: crypto.random…
+     32|   const input = { requestId: "original", expectedVersion: 1, message: …
+ ❯ tests/r4Research.test.ts:74:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
+
+ FAIL  tests/r4Research.test.ts > PR6 原会话联网边界 > 网络结果 UNKNOWN 保留预占，重复派发不会再次调用
+PrismaClientValidationError: 
+Invalid `db.project.create()` invocation in
+D:/Projects/hongmen/tests/r4Research.test.ts:30:36
+
+  27 async function fixture() {
+  28   const user = await db.user.create({ data: { username: crypto.randomUUID(), displayName: "联网隔离", passwordHash: "unused" } });
+  29   const actor = { userId: user.id, sessionId: (await createSession(user.id)).session.id };
+→ 30   const project = await db.project.create({
+         data: {
+           title: "合成公开研究项目",
+           goal: "比较同条件方法，不把公开指标当实测",
+           scenario: "RESEARCH",
+           memberships: {
+             create: {
+               userId: "cmvrh3kxn000ag08odouoo42j"
+             }
+           },
+       +   description: String
+         }
+       })
+
+Argument `description` is missing.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ fixture tests/r4Research.test.ts:30:19
+     28|   const user = await db.user.create({ data: { username: crypto.randomU…
+     29|   const actor = { userId: user.id, sessionId: (await createSession(use…
+     30|   const project = await db.project.create({ data: { title: "合成公开研究项目",…
+       |                   ^
+     31|   const c = await createConversation(actor, { requestId: crypto.random…
+     32|   const input = { requestId: "original", expectedVersion: 1, message: …
+ ❯ tests/r4Research.test.ts:84:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
+
+ FAIL  tests/r4Research.test.ts > PR6 原会话联网边界 > 四次外部请求是总上限，不是固定执行顺序
+PrismaClientValidationError: 
+Invalid `db.project.create()` invocation in
+D:/Projects/hongmen/tests/r4Research.test.ts:30:36
+
+  27 async function fixture() {
+  28   const user = await db.user.create({ data: { username: crypto.randomUUID(), displayName: "联网隔离", passwordHash: "unused" } });
+  29   const actor = { userId: user.id, sessionId: (await createSession(user.id)).session.id };
+→ 30   const project = await db.project.create({
+         data: {
+           title: "合成公开研究项目",
+           goal: "比较同条件方法，不把公开指标当实测",
+           scenario: "RESEARCH",
+           memberships: {
+             create: {
+               userId: "cmvrh3kz9000cg08o6yc19acx"
+             }
+           },
+       +   description: String
+         }
+       })
+
+Argument `description` is missing.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ fixture tests/r4Research.test.ts:30:19
+     28|   const user = await db.user.create({ data: { username: crypto.randomU…
+     29|   const actor = { userId: user.id, sessionId: (await createSession(use…
+     30|   const project = await db.project.create({ data: { title: "合成公开研究项目",…
+       |                   ^
+     31|   const c = await createConversation(actor, { requestId: crypto.random…
+     32|   const input = { requestId: "original", expectedVersion: 1, message: …
+ ❯ tests/r4Research.test.ts:92:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
+
+ FAIL  tests/r4Research.test.ts > PR6 原会话联网边界 > 原 lease 被替换后，旧推进者不能提交检查点
+PrismaClientValidationError: 
+Invalid `db.project.create()` invocation in
+D:/Projects/hongmen/tests/r4Research.test.ts:30:36
+
+  27 async function fixture() {
+  28   const user = await db.user.create({ data: { username: crypto.randomUUID(), displayName: "联网隔离", passwordHash: "unused" } });
+  29   const actor = { userId: user.id, sessionId: (await createSession(user.id)).session.id };
+→ 30   const project = await db.project.create({
+         data: {
+           title: "合成公开研究项目",
+           goal: "比较同条件方法，不把公开指标当实测",
+           scenario: "RESEARCH",
+           memberships: {
+             create: {
+               userId: "cmvrh3l0c000eg08o9bfxnjaw"
+             }
+           },
+       +   description: String
+         }
+       })
+
+Argument `description` is missing.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ fixture tests/r4Research.test.ts:30:19
+     28|   const user = await db.user.create({ data: { username: crypto.randomU…
+     29|   const actor = { userId: user.id, sessionId: (await createSession(use…
+     30|   const project = await db.project.create({ data: { title: "合成公开研究项目",…
+       |                   ^
+     31|   const c = await createConversation(actor, { requestId: crypto.random…
+     32|   const input = { requestId: "original", expectedVersion: 1, message: …
+ ❯ tests/r4Research.test.ts:98:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯
+
+ FAIL  tests/r4Research.test.ts > PR6 原会话联网边界 > HTTP 接受与原 turn 推进分离，重试不会重复用户消息
+PrismaClientValidationError: 
+Invalid `db.project.create()` invocation in
+D:/Projects/hongmen/tests/r4Research.test.ts:30:36
+
+  27 async function fixture() {
+  28   const user = await db.user.create({ data: { username: crypto.randomUUID(), displayName: "联网隔离", passwordHash: "unused" } });
+  29   const actor = { userId: user.id, sessionId: (await createSession(user.id)).session.id };
+→ 30   const project = await db.project.create({
+         data: {
+           title: "合成公开研究项目",
+           goal: "比较同条件方法，不把公开指标当实测",
+           scenario: "RESEARCH",
+           memberships: {
+             create: {
+               userId: "cmvrh3l1y000gg08otlr5r15h"
+             }
+           },
+       +   description: String
+         }
+       })
+
+Argument `description` is missing.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ fixture tests/r4Research.test.ts:30:19
+     28|   const user = await db.user.create({ data: { username: crypto.randomU…
+     29|   const actor = { userId: user.id, sessionId: (await createSession(use…
+     30|   const project = await db.project.create({ data: { title: "合成公开研究项目",…
+       |                   ^
+     31|   const c = await createConversation(actor, { requestId: crypto.random…
+     32|   const input = { requestId: "original", expectedVersion: 1, message: …
+ ❯ tests/r4Research.test.ts:104:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/10]⎯
+
+ FAIL  tests/r4Research.test.ts > PR6 原会话联网边界 > 旧网页历史撤权后受到限制，不能从保存的回答绕过
+PrismaClientValidationError: 
+Invalid `db.project.create()` invocation in
+D:/Projects/hongmen/tests/r4Research.test.ts:30:36
+
+  27 async function fixture() {
+  28   const user = await db.user.create({ data: { username: crypto.randomUUID(), displayName: "联网隔离", passwordHash: "unused" } });
+  29   const actor = { userId: user.id, sessionId: (await createSession(user.id)).session.id };
+→ 30   const project = await db.project.create({
+         data: {
+           title: "合成公开研究项目",
+           goal: "比较同条件方法，不把公开指标当实测",
+           scenario: "RESEARCH",
+           memberships: {
+             create: {
+               userId: "cmvrh3l3e000ig08ofkvtqt4o"
+             }
+           },
+       +   description: String
+         }
+       })
+
+Argument `description` is missing.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ fixture tests/r4Research.test.ts:30:19
+     28|   const user = await db.user.create({ data: { username: crypto.randomU…
+     29|   const actor = { userId: user.id, sessionId: (await createSession(use…
+     30|   const project = await db.project.create({ data: { title: "合成公开研究项目",…
+       |                   ^
+     31|   const c = await createConversation(actor, { requestId: crypto.random…
+     32|   const input = { requestId: "original", expectedVersion: 1, message: …
+ ❯ tests/r4Research.test.ts:114:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/10]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  10 failed | 19 passed (29)
+   Start at  19:05:00
+   Duration  71.96s (transform 4.01s, setup 0ms, import 16.75s, tests 46.46s, environment 0ms)
+

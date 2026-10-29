@@ -1,0 +1,223 @@
+{
+  "limit": 24,
+  "used": 24,
+  "calls": [
+    {
+      "ordinal": 1,
+      "episode": "research/C0_ORIGINAL",
+      "task": "C0_LEGACY",
+      "startedAt": "2026-10-27T03:03:28.330Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "b26073d407cbe0958a78784460dfcbb3cdee5bef112d037f8358c05ff6db01ca"
+    },
+    {
+      "ordinal": 2,
+      "episode": "research/C0_ORIGINAL",
+      "task": "C0_LEGACY",
+      "startedAt": "2026-10-27T03:03:29.621Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "fc7ddce726ec7ae8364c2b4f9fe58994f5b73a89d3af605b01126b82c00bc3e0"
+    },
+    {
+      "ordinal": 3,
+      "episode": "research/C3_FULL",
+      "task": "focus.route.v2",
+      "startedAt": "2026-10-27T03:03:32.817Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "4a0f6ac43a70c5dbeb1ba2a9e8821e2851094a070fe606e03597241083740dd5"
+    },
+    {
+      "ordinal": 4,
+      "episode": "research/C3_FULL",
+      "task": "focus.investigate.v1",
+      "startedAt": "2026-10-27T03:03:34.994Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "ee9bf65913d75f25432f35e4594a6051d80c42945b802acfdeb7e8c974cf9361"
+    },
+    {
+      "ordinal": 5,
+      "episode": "research/C3_FULL",
+      "task": "focus.investigate.v1",
+      "startedAt": "2026-10-27T03:03:39.432Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "59736293049f4b9c406d41d1601893e8d11b674f79bdbc3ea20698f4a3e8961c"
+    },
+    {
+      "ordinal": 6,
+      "episode": "research/C3_FULL",
+      "task": "focus.investigate.v1",
+      "startedAt": "2026-10-27T03:03:44.249Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "11c2530c0eb64df79a64e34f77c1ab4763cfcd30382a76e9c4c4ef4dda938445"
+    },
+    {
+      "ordinal": 7,
+      "episode": "research/C3_FULL",
+      "task": "focus.answer.v2",
+      "startedAt": "2026-10-27T03:03:48.950Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "7f219e469de6ce9efede817e17b9c4a19c878bcf3d2d20d46c68cbec5d4e438a"
+    },
+    {
+      "ordinal": 8,
+      "episode": "research/C3_FULL",
+      "task": "focus.ui_plan.v1",
+      "startedAt": "2026-10-27T03:03:51.353Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "d90ac43caee14335d5dcee21e17286671a80f5f21cfce57e704088a055e1cca0"
+    },
+    {
+      "ordinal": 9,
+      "episode": "competition/C0_ORIGINAL",
+      "task": "C0_LEGACY",
+      "startedAt": "2026-10-27T03:03:54.653Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "607109fb91f5e54d4d42d014527c9dcfdfc7a3300a365a7c1a547dacf2a0df93"
+    },
+    {
+      "ordinal": 10,
+      "episode": "competition/C0_ORIGINAL",
+      "task": "C0_LEGACY",
+      "startedAt": "2026-10-27T03:03:55.760Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "f245e60d58432f83cf9589496b2ee4fe350f59c2ecaff8af8b1c6abb9842073a"
+    },
+    {
+      "ordinal": 11,
+      "episode": "competition/C3_FULL",
+      "task": "focus.route.v2",
+      "startedAt": "2026-10-27T03:03:58.438Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "c2fe9f46c1aafcaf639000e3777a6c12865247a637754f7117a89099e2b581e4"
+    },
+    {
+      "ordinal": 12,
+      "episode": "competition/C3_FULL",
+      "task": "focus.investigate.v1",
+      "startedAt": "2026-10-27T03:04:00.153Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "a64a05d02e616d8a60175249cef76ddc3e2753de720ae2bdb3bbfc7036b1b5ff"
+    },
+    {
+      "ordinal": 13,
+      "episode": "competition/C3_FULL",
+      "task": "focus.investigate.v1",
+      "startedAt": "2026-10-27T03:04:03.927Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "4e37915deb034ae08782bbc60b724a00c7fce12972054d372d2861254c81f344"
+    },
+    {
+      "ordinal": 14,
+      "episode": "competition/C3_FULL",
+      "task": "focus.investigate.v1",
+      "startedAt": "2026-10-27T03:04:07.601Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "23e17649ac5b456cddcd86e8f73dd432714a2034672c59c6dd1142e1a1e29f04"
+    },
+    {
+      "ordinal": 15,
+      "episode": "competition/C3_FULL",
+      "task": "focus.answer.v2",
+      "startedAt": "2026-10-27T03:04:11.450Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "91e7ebcee2994597ac931286487731ef97d6e662afdd9a3ba50c19a211ca49e5"
+    },
+    {
+      "ordinal": 16,
+      "episode": "competition/C3_FULL",
+      "task": "focus.ui_plan.v1",
+      "startedAt": "2026-10-27T03:04:16.177Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "5ecbb523531ec54a7287ce60ae418e3dc97c2ed82bb234b1cde2da7721d6ad32"
+    },
+    {
+      "ordinal": 17,
+      "episode": "course/C0_ORIGINAL",
+      "task": "C0_LEGACY",
+      "startedAt": "2026-10-27T03:04:21.999Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "adddfc513dc72ffc8a2f47e15659867a95dfd048187fff292966ea1296c0a3dc"
+    },
+    {
+      "ordinal": 18,
+      "episode": "course/C0_ORIGINAL",
+      "task": "C0_LEGACY",
+      "startedAt": "2026-10-27T03:04:23.345Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "be55b08870567c51ddcc896735284281679914c9c44317cff2198dd41f7f6908"
+    },
+    {
+      "ordinal": 19,
+      "episode": "course/C3_FULL",
+      "task": "focus.route.v2",
+      "startedAt": "2026-10-27T03:04:26.540Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "869087b21b07571fd8428766b840d83b88e04506bd2e70a1de00be2cf9b90f4b"
+    },
+    {
+      "ordinal": 20,
+      "episode": "course/C3_FULL",
+      "task": "focus.investigate.v1",
+      "startedAt": "2026-10-27T03:04:28.221Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "a878c1d96125bb74361cc5da8a474bb8ab0f21b3c8473fa960340e9e5e2a1bd3"
+    },
+    {
+      "ordinal": 21,
+      "episode": "course/C3_FULL",
+      "task": "focus.investigate.v1",
+      "startedAt": "2026-10-27T03:04:31.890Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "276a976dd05484795e4c0d5506d1d4fe786733b412f512f76d08ce923205a2c7"
+    },
+    {
+      "ordinal": 22,
+      "episode": "course/C3_FULL",
+      "task": "focus.investigate.v1",
+      "startedAt": "2026-10-27T03:04:36.326Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "eca7db9695b567443abd797bf9ffc4808aa06fffde90687a73104b4446924b00"
+    },
+    {
+      "ordinal": 23,
+      "episode": "course/C3_FULL",
+      "task": "focus.investigate.v1",
+      "startedAt": "2026-10-27T03:04:39.768Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "b41705cdac639f7800f14a70dd7a0c261a58b7d2d988da50fafa85cd63e02d56"
+    },
+    {
+      "ordinal": 24,
+      "episode": "course/C3_FULL",
+      "task": "focus.answer.v2",
+      "startedAt": "2026-10-27T03:04:43.503Z",
+      "state": "HTTP_RECEIVED",
+      "httpStatus": 200,
+      "responseHash": "162cbca1f7552f6211f7ba913e5567e379847527ccaedfc7ee92e7d31829ee0d"
+    }
+  ],
+  "authorization": "User previously authorized quota; this work package announced a separate maximum of 24 calls"
+}

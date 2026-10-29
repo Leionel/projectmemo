@@ -1,0 +1,1 @@
+{"status":"RECEIVED","runId":"d47e4be1-222e-4284-b290-3da633f15de2","mode":"REAL_MODEL","model":"deepseek-flash","requestsStarted":17,"maxRequests":24,"costUpperCny":0.317104,"maxCostCny":5,"unknownUsageRequests":0,"realModelRequests":17,"priceSource":"https://api-docs.deepseek.com/zh-cn/quick_start/pricing/","priceVerifiedAt":"2026-10-23"}

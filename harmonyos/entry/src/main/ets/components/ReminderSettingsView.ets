@@ -1,7 +1,7 @@
 import { InterventionPolicyService } from '../services/InterventionPolicyService';
 import { PolicyUpdateBody } from '../models/Intervention';
 import { ApiError } from '../models/Project';
-import { PMColors, PMSpacing, PMFontSize } from '../common/DesignTokens';
+import { PMColors, PMSpacing, PMFontSize, PMRadius } from '../common/DesignTokens';
 
 @Component
 export struct ReminderSettingsView {
@@ -72,7 +72,7 @@ export struct ReminderSettingsView {
     Column({ space: PMSpacing.MD }) {
       Row() {
         Text('提醒策略').fontSize(PMFontSize.SECTION_TITLE).layoutWeight(1)
-        Button('关闭').onClick(() => this.onClose()).accessibilityText('关闭提醒策略')
+        Button('关闭').onClick(() => this.onClose()).accessibilityText('关闭提醒策略').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
       }.width('100%')
       Text('当前为服务端共享策略，修改会影响该服务上的项目。不会修改系统通知权限。')
         .fontColor(PMColors.INK_SECONDARY)
@@ -88,10 +88,10 @@ export struct ReminderSettingsView {
         TextInput({ text: this.quietEnd, placeholder: '08:00' })
           .enabled(!this.busy).onChange((v: string) => { this.quietEnd = v; })
         Button(this.busy ? '保存中…' : '保存提醒策略').width('100%')
-          .enabled(!this.busy).onClick(() => { this.save(); })
+          .enabled(!this.busy).onClick(() => { this.save(); }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).fontColor(PMColors.SURFACE).backgroundColor(PMColors.BRAND).constraintSize({ minHeight: 44 })
       } else {
         Button(this.busy ? '读取中…' : '重新读取').enabled(!this.busy)
-          .onClick(() => { this.load(); })
+          .onClick(() => { this.load(); }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
       }
       if (this.feedback !== '') { Text(this.feedback).fontColor(PMColors.INK_SECONDARY) }
     }

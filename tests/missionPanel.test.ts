@@ -20,7 +20,7 @@ describe("Mission 面板调用方",()=>{
   const holder=document.createElement("div");holder.innerHTML=markup;
   expect(holder.querySelector<HTMLTextAreaElement>("#mission-goal")!.disabled).toBe(true);
   render(createElement(MissionPanel,{projectId:"p"}));
-  const field=screen.getByRole("textbox",{name:"委托目标"}) as HTMLTextAreaElement;
+  const field=screen.getByRole("textbox",{name:"想推进什么"}) as HTMLTextAreaElement;
   expect(field.disabled).toBe(false);fireEvent.change(field,{target:{value:"准备有来源的阶段汇报"}});
   expect(field.value).toBe("准备有来源的阶段汇报");
  });
@@ -28,11 +28,11 @@ describe("Mission 面板调用方",()=>{
  it("模板写入真实只读约束但不代勾云模型许可；丢失响应先读回并保留请求编号",async()=>{
   fixture();const original=globalThis.fetch;const requests:Array<{requestId:string;missionConstraints:unknown;llmContextApproved:boolean}>=[];
   vi.stubGlobal("fetch",vi.fn(async(input,init)=>{if(input==="/api/missions"&&init?.method==="POST"){requests.push(JSON.parse(init.body as string));throw new Error("response lost");}return original(input,init);}));
-  render(createElement(MissionPanel,{projectId:"p"}));fireEvent.click(screen.getByRole("button",{name:"使用阶段汇报模板"}));
+  render(createElement(MissionPanel,{projectId:"p"}));await screen.findByRole("button",{name:"整理阶段汇报 · 等待执行"});fireEvent.click(screen.getByRole("button",{name:"使用阶段汇报模板"}));
   expect((screen.getByRole("checkbox",{name:/允许配置的云模型/}) as HTMLInputElement).checked).toBe(false);
-  expect((screen.getByRole("checkbox",{name:"仅允许读取、分析和保存草稿"}) as HTMLInputElement).checked).toBe(true);
-  fireEvent.click(screen.getByRole("button",{name:"创建委托"}));expect(await screen.findByText(/已读取最新状态/)).toBeTruthy();
-  expect((screen.getByRole("textbox",{name:"委托目标"}) as HTMLTextAreaElement).value).toContain("本次只读取");
+ expect((screen.getByRole("checkbox",{name:/仅允许读取、分析和保存草稿/}) as HTMLInputElement).checked).toBe(true);
+ fireEvent.click(screen.getByRole("button",{name:"创建委托"}));expect(await screen.findByText(/已读取最新状态/)).toBeTruthy();
+ expect((screen.getByRole("textbox",{name:"想推进什么"}) as HTMLTextAreaElement).value).toContain("本次只读取");
   fireEvent.click(screen.getByRole("button",{name:"创建委托"}));await waitFor(()=>expect(requests).toHaveLength(2));
   expect(requests[0].requestId).toBe(requests[1].requestId);expect(requests[0].missionConstraints).toEqual({executionBoundary:"READ_ANALYZE"});expect(requests[0].llmContextApproved).toBe(false);
  });
@@ -40,6 +40,13 @@ describe("Mission 面板调用方",()=>{
   const f=fixture(true);f.mission.approvals[0].expiresAt="2020-01-01T00:00:00Z";
   render(createElement(MissionPanel,{projectId:"p"}));fireEvent.click(await screen.findByRole("button",{name:"整理阶段汇报 · 等待你的批准"}));
   expect(await screen.findByText("提案已过期，请更新依据并重新预览。")).toBeTruthy();expect((screen.getByRole("button",{name:"批准创建行动"}) as HTMLButtonElement).disabled).toBe(true);expect(f.requests).toHaveLength(0);
+ });
+ it("临时读取失败保留标时历史并阻止写入，重新读取后恢复",async()=>{
+  const f=fixture();render(createElement(MissionPanel,{projectId:"p"}));const row=await screen.findByRole("button",{name:"整理阶段汇报 · 等待执行"});fireEvent.click(row);await screen.findByRole("heading",{name:"整理阶段汇报"});
+  const original=globalThis.fetch;vi.stubGlobal("fetch",vi.fn(async()=>({ok:false,status:503,json:async()=>({error:{message:"服务暂不可用"}})})));
+  fireEvent.click(row);await screen.findByText(/当前显示上次读取的历史状态/);expect(screen.getByRole("heading",{name:"整理阶段汇报"})).toBeTruthy();
+  fireEvent.click(screen.getByText("暂停与取消"));expect((screen.getByRole("button",{name:"暂停"}) as HTMLButtonElement).closest("fieldset")?.disabled).toBe(true);expect(f.requests).toHaveLength(0);
+  vi.stubGlobal("fetch",original);fireEvent.click(screen.getByRole("button",{name:"刷新重试"}));await waitFor(()=>expect(screen.queryByText(/当前显示上次读取的历史状态/)).toBeNull());
  });
  it("401时清除已显示的私有委托、来源和输入，不留下旧账号内容",async()=>{
   fixture();render(createElement(MissionPanel,{projectId:"p"}));const row=await screen.findByRole("button",{name:"整理阶段汇报 · 等待执行"});fireEvent.click(row);await screen.findByRole("heading",{name:"整理阶段汇报"});
@@ -51,15 +58,28 @@ describe("Mission 面板调用方",()=>{
   render(createElement(MissionPanel,{projectId:"p"}));
   const row=await screen.findByRole("button",{name:"整理阶段汇报 · 已暂停"});fireEvent.click(row);
   const alert=await screen.findByRole("alert");expect(alert.textContent).toContain("模型回复格式不符合要求");expect(alert.textContent).toContain("已有进度已保留");
-  fireEvent.click(screen.getByText("暂停、取消与恢复操作"));
-  expect(screen.getByRole("button",{name:"继续"})).toBeTruthy();expect(row.getAttribute("aria-pressed")).toBe("true");
+  fireEvent.click(screen.getByText("暂停与取消"));
+  expect(screen.getByRole("button",{name:"确认后继续执行"})).toBeTruthy();expect(row.getAttribute("aria-pressed")).toBe("true");
   fireEvent.click(screen.getByText(/执行详情与回执（/));
   expect(screen.getByRole("region",{name:"执行记录"})).toBeTruthy();
+ });
+ it("完成条件、草稿核验、采纳和现实结果并列，不把SUCCEEDED包装为事实完成",async()=>{
+  const f=fixture();Object.assign(f.mission,{status:"SUCCEEDED",completion:{criteriaPassed:true,criteriaCheckedAt:"2026-10-23T00:00:00Z",draftVerification:"NEEDS_REVIEW",adoptionCount:0,latestArtifactId:null,realityOutcome:"NOT_INFERRED"}});
+  render(createElement(MissionPanel,{projectId:"p"}));fireEvent.click(await screen.findByRole("button",{name:"整理阶段汇报 · 委托条件已验收"}));
+  expect(await screen.findByText("已通过本委托设定的条件")).toBeTruthy();
+  expect(screen.getByText("待审阅，尚未整体核验")).toBeTruthy();expect(screen.getByText("尚未归入项目成果")).toBeTruthy();
+  expect(screen.getByText("未从委托状态推断，以实际行动回执为准")).toBeTruthy();
+ });
+ it("自动协议纠错展示后端阶段与恢复原因，READY不提供手动继续",async()=>{
+  const f=fixture();Object.assign(f.mission,{status:"READY",error:{code:"MODEL_PROTOCOL_ERROR",phase:"DECISION",message:"模型回复格式不符合要求",recovery:{kind:"MODEL_FORMAT_RETRY",automatic:true,message:"将按限次策略重试原委托"}}});
+  render(createElement(MissionPanel,{projectId:"p"}));fireEvent.click(await screen.findByRole("button",{name:"整理阶段汇报 · 等待执行"}));
+  expect(await screen.findByText(/发生阶段：模型决策 · 错误类别：MODEL_PROTOCOL_ERROR/)).toBeTruthy();
+  expect(screen.getByText(/将按限次策略重试原委托/)).toBeTruthy();expect(screen.queryByRole("button",{name:"确认后继续执行"})).toBeNull();
  });
  it("创建失败保留用户目标和云模型选择，给出可重试提示",async()=>{
   fixture();const original=globalThis.fetch;
   vi.stubGlobal("fetch",vi.fn(async(input,init)=>init?.method==="POST"?{ok:false,json:async()=>({error:{message:"服务暂时不可用"}})}:original(input,init)));
-  render(createElement(MissionPanel,{projectId:"p"}));const goal=screen.getByRole("textbox",{name:"委托目标"});
+  render(createElement(MissionPanel,{projectId:"p"}));const goal=screen.getByRole("textbox",{name:"想推进什么"});
   fireEvent.change(goal,{target:{value:"请准备有来源的阶段汇报"}});const consent=screen.getByRole("checkbox",{name:/允许配置的云模型/});fireEvent.click(consent);
   fireEvent.click(screen.getByRole("button",{name:"创建委托"}));await screen.findByRole("alert");
   expect((goal as HTMLTextAreaElement).value).toBe("请准备有来源的阶段汇报");expect((consent as HTMLInputElement).checked).toBe(true);

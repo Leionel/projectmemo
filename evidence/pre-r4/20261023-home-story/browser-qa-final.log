@@ -1,0 +1,133 @@
+### Result
+{"checks":["metadata and positioning","self-hosted editorial serif loaded","logo left and brand identity above slogan","desktop wide identity scales with 1040px workspace","anonymous workspace login return path","verbatim seed source opens","source dialog Escape closes","dialog returns focus to source","receipt blocked before action confirmation","proposal awaits explicit confirmation","empty receipt cannot save","whitespace receipt cannot save","short receipt cannot save","receipt explicitly simulated","saved mock receipt joins evidence","mock receipt raw source opens","confirmation reflects saved receipt","judgment evidence expands","judgment evidence returns original requirement","tab Home navigation","tab End navigation","tab Left navigation","reset clears confirmation and receipt","reload restores initial local demo","story has zero mutation requests","anchor works: 产品体验","anchor works: 长期委托","anchor works: 使用场景","mission conditions expand","no layout overflow at 1440: {\"w\":1440,\"scroll\":1440,\"overflow\":[]}","brand and workspace edges align at 1440","no layout overflow at 768: {\"w\":768,\"scroll\":768,\"overflow\":[]}","brand and workspace edges align at 768","no layout overflow at 390: {\"w\":390,\"scroll\":390,\"overflow\":[]}","brand and workspace edges align at 390","no layout overflow at 320: {\"w\":320,\"scroll\":320,\"overflow\":[]}","brand and workspace edges align at 320","320px enlarged font has no horizontal overflow","mobile logo left and identity above slogan","mobile enlarged identity and readable positioning","mobile source fits viewport","reduced motion removes transitions","no browser runtime errors: "],"layouts":[{"w":1440,"scroll":1440,"overflow":[]},{"w":768,"scroll":768,"overflow":[]},{"w":390,"scroll":390,"overflow":[]},{"w":320,"scroll":320,"overflow":[]}],"mutations":[],"errors":[]}
+### Ran Playwright code
+```js
+await (async (page) => {
+  const out = [];
+  const assert = (value, name) => { if (!value) throw new Error(name); out.push(name); };
+  const mutations = [];
+  const errors = [];
+  page.on('request', r => { if (!['GET','HEAD','OPTIONS'].includes(r.method())) mutations.push(r.method()+' '+r.url()); });
+  page.on('pageerror', error => errors.push(error.message));
+  await page.setViewportSize({width:1440,height:1000});
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.goto('http://127.0.0.1:33324/');
+  await page.getByRole('heading',{level:1}).waitFor();
+  await page.waitForFunction(()=>[...document.images].every(img=>img.complete&&img.naturalWidth>0));
+  await page.evaluate(() => document.fonts.ready);
+  assert((await page.title()).includes('个人项目 Agent'), 'metadata and positioning');
+  assert(await page.evaluate(() => document.fonts.check('500 48px "PM Editorial"')), 'self-hosted editorial serif loaded');
+  const brandMetrics = () => page.evaluate(() => {
+    const logo = document.querySelector('main section img');
+    const name = [...document.querySelectorAll('main p')].find(el => el.textContent.trim() === '忆程 ProjectMemo');
+    const positioning = [...document.querySelectorAll('main p')].find(el => el.textContent.trim() === '面向大学生的个人项目 Agent');
+    const title = document.querySelector('h1');
+    return {logoLeft:logo.getBoundingClientRect().right <= name.getBoundingClientRect().left, brandAbove:name.getBoundingClientRect().bottom < title.getBoundingClientRect().top, nameSize:getComputedStyle(name).fontSize, positioningSize:getComputedStyle(positioning).fontSize};
+  });
+  let brand = await brandMetrics();
+  assert(brand.logoLeft && brand.brandAbove, 'logo left and brand identity above slogan');
+  assert(brand.nameSize === '104px' && brand.positioningSize === '32px', 'desktop wide identity scales with 1040px workspace');
+  assert(await page.getByRole('link',{name:'进入工作台',exact:true}).nth(1).getAttribute('href') === '/login?from=%2Ffocus', 'anonymous workspace login return path');
+  const tab = name => page.getByRole('tab',{name,exact:true});
+  const open = page.getByRole('button',{name:'查看原文：任务安排',exact:true});
+  await open.click();
+  await page.getByRole('dialog').waitFor({state:'visible'});
+  assert((await page.getByRole('dialog').innerText()).includes('目前还没有完整 Demo'), 'verbatim seed source opens');
+  await page.keyboard.press('Escape');
+  assert(!(await page.getByRole('dialog').isVisible()), 'source dialog Escape closes');
+  assert(await open.evaluate(el => el === document.activeElement), 'dialog returns focus to source');
+  await tab('填写回执').click();
+  assert(await page.locator('textarea').count() === 0, 'receipt blocked before action confirmation');
+  await page.getByRole('button',{name:'返回确认行动',exact:true}).click();
+  assert(await page.getByText('待用户确认',{exact:true}).isVisible(), 'proposal awaits explicit confirmation');
+  await page.getByRole('button',{name:'在示例中确认行动',exact:true}).click();
+  await page.getByRole('button',{name:'去填写模拟回执',exact:true}).click();
+  const save = page.getByRole('button',{name:'保存模拟回执',exact:true});
+  assert(await save.isDisabled(), 'empty receipt cannot save');
+  await page.getByLabel('填写一段模拟完成结果',{exact:true}).fill('    ');
+  assert(await save.isDisabled(), 'whitespace receipt cannot save');
+  await page.getByLabel('填写一段模拟完成结果',{exact:true}).fill('测试');
+  assert(await save.isDisabled(), 'short receipt cannot save');
+  const result = '模拟结果：已录入一条示例记录并生成草稿，来源尚待逐项核对。';
+  await page.getByLabel('填写一段模拟完成结果',{exact:true}).fill(result);
+  await save.click();
+  assert(await page.getByText('模拟回执已加入本页示例',{exact:true}).isVisible(), 'receipt explicitly simulated');
+  await page.locator('[aria-label="参赛项目交互示例"]').screenshot({path:'evidence/pre-r4/20261023-home-story/story-receipt.png'});
+  await page.getByRole('button',{name:'回到依据页查看',exact:true}).click();
+  assert(await page.getByText(result,{exact:true}).isVisible(), 'saved mock receipt joins evidence');
+  await page.getByRole('button',{name:'查看原文：模拟回执',exact:true}).click();
+  assert((await page.getByRole('dialog').innerText()).includes(result), 'mock receipt raw source opens');
+  await page.getByRole('button',{name:'关闭原始记录',exact:true}).click();
+  await page.locator('[aria-label="参赛项目交互示例"]').screenshot({path:'evidence/pre-r4/20261023-home-story/story-evidence.png'});
+  await tab('确认行动').click();
+  assert(await page.getByText('示例行动与模拟回执已保存在本页。',{exact:true}).isVisible(), 'confirmation reflects saved receipt');
+  await page.locator('[aria-label="参赛项目交互示例"]').screenshot({path:'evidence/pre-r4/20261023-home-story/story-confirmation.png'});
+  await tab('查看判断').click();
+  await page.getByText('展开这条建议的依据',{exact:true}).click();
+  assert(await page.getByRole('button',{name:'查看原文：比赛材料',exact:true}).isVisible(), 'judgment evidence expands');
+  await page.getByRole('button',{name:'查看原文：比赛材料',exact:true}).click();
+  assert((await page.getByRole('dialog').innerText()).includes('创意描述'), 'judgment evidence returns original requirement');
+  await page.keyboard.press('Escape');
+  await tab('查看判断').focus();
+  await page.keyboard.press('Home');
+  assert(await tab('查看记录').getAttribute('aria-selected') === 'true', 'tab Home navigation');
+  await page.keyboard.press('End');
+  assert(await tab('填写回执').getAttribute('aria-selected') === 'true', 'tab End navigation');
+  await page.keyboard.press('ArrowLeft');
+  assert(await tab('确认行动').getAttribute('aria-selected') === 'true', 'tab Left navigation');
+  await page.getByRole('button',{name:'重置示例',exact:true}).click();
+  await tab('填写回执').click();
+  assert(await page.locator('textarea').count() === 0, 'reset clears confirmation and receipt');
+  await page.reload();
+  assert(await tab('查看记录').getAttribute('aria-selected') === 'true', 'reload restores initial local demo');
+  assert(mutations.length === 0, 'story has zero mutation requests');
+  for (const name of ['产品体验','长期委托','使用场景']) {
+    await page.getByRole('link',{name,exact:true}).click();
+    assert(page.url().includes('#'), 'anchor works: '+name);
+  }
+  await page.getByText('哪些条件会影响执行？',{exact:true}).click();
+  assert(await page.getByText(/这里的自动接续仅限读取与分析/).isVisible(), 'mission conditions expand');
+  await page.getByText('哪些条件会影响执行？',{exact:true}).click();
+  const layouts=[];
+  for (const width of [1440,768,390,320]) {
+    await page.setViewportSize({width,height:width===768?1024:1000});
+    const metrics=await page.evaluate(() => ({w:innerWidth,scroll:document.documentElement.scrollWidth,overflow:[...document.querySelectorAll('main *,header a')].filter(el=>{const r=el.getBoundingClientRect();return r.width>0&&(r.right>innerWidth+1||r.left< -1)}).map(el=>el.tagName+'.'+el.className).slice(0,8)}));
+    assert(metrics.scroll<=width&&metrics.overflow.length===0, 'no layout overflow at '+width+': '+JSON.stringify(metrics));
+    layouts.push(metrics);
+    assert(await page.evaluate(()=>{const row=document.querySelector('main section > div > div').getBoundingClientRect();const product=document.querySelector('main section figure').getBoundingClientRect();return Math.abs(row.left-product.left)<1&&Math.abs(row.right-product.right)<1;}), 'brand and workspace edges align at '+width);
+  }
+  await page.setViewportSize({width:320,height:844});
+  await page.evaluate(()=>document.documentElement.style.fontSize='125%');
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth), '320px enlarged font has no horizontal overflow');
+  await page.evaluate(()=>document.documentElement.style.fontSize='');
+  await page.setViewportSize({width:390,height:844});
+  brand = await brandMetrics();
+  assert(brand.logoLeft && brand.brandAbove, 'mobile logo left and identity above slogan');
+  assert(parseFloat(brand.nameSize) >= 30 && brand.positioningSize === '16px', 'mobile enlarged identity and readable positioning');
+  await page.getByRole('button',{name:'查看原文：任务安排',exact:true}).click();
+  assert(await page.getByRole('dialog').evaluate(el=>{const r=el.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight}), 'mobile source fits viewport');
+  await page.screenshot({path:'evidence/pre-r4/20261023-home-story/mobile-source.png'});
+  await page.keyboard.press('Escape');
+  await page.evaluate(()=>{document.documentElement.classList.add('dark');window.scrollTo({top:0,behavior:'instant'});});
+  await page.screenshot({path:'evidence/pre-r4/20261023-home-story/dark-mobile.png'});
+  await page.evaluate(()=>document.documentElement.classList.remove('dark'));
+  await page.goto('http://127.0.0.1:33324/');
+  await page.getByRole('heading',{level:1}).waitFor();
+  await page.waitForFunction(()=>[...document.images].every(img=>img.complete&&img.naturalWidth>0));
+  await page.evaluate(()=>document.fonts.ready);
+  await page.screenshot({path:'evidence/pre-r4/20261023-home-story/after-mobile.png'});
+  await page.setViewportSize({width:1440,height:1000});
+  await page.goto('http://127.0.0.1:33324/');
+  await page.getByRole('heading',{level:1}).waitFor();
+  await page.waitForFunction(()=>[...document.images].every(img=>img.complete&&img.naturalWidth>0));
+  await page.evaluate(async()=>{await document.fonts.ready;await Promise.all([...document.images].map(img=>img.decode()));await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});
+  await page.screenshot({path:'evidence/pre-r4/20261023-home-story/after-desktop.png'});
+  await page.screenshot({path:'evidence/pre-r4/20261023-home-story/after-full.png',fullPage:true});
+  assert(await page.locator('main button').first().evaluate(el=>getComputedStyle(el).transitionDuration==='0s'), 'reduced motion removes transitions');
+  assert(errors.length===0, 'no browser runtime errors: '+errors.join(';'));
+  return {checks:out,layouts,mutations,errors};
+}
+)(page);
+```
+### Events
+- New console entries: .playwright-cli\console-2026-10-23T01-01-56-601Z.log#L307

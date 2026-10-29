@@ -81,10 +81,29 @@ export function GlobalSettings({ isMenuItem = false }: { isMenuItem?: boolean })
     }
   }
 
-  const inputClass = "focus-ring w-full rounded-md border border-[var(--rule)] bg-[var(--paper-strong)] px-4 py-2.5 text-sm font-medium text-[var(--ink)] outline-none transition-all focus:border-[var(--teal)] focus:shadow-[0_0_0_4px_var(--teal-pale)] dark:bg-[rgba(255,255,255,0.05)]";
+  const inputClass = "focus-ring w-full rounded-md border border-[var(--rule)] bg-[var(--paper-strong)] px-4 py-2.5 text-sm font-medium text-[var(--ink)] outline-none transition-all focus:border-[var(--teal)] focus:shadow-[0 0_0_4px_var(--teal-pale)] dark:bg-[rgba(255,255,255,0.05)]";
   const buttonClass = isMenuItem
     ? "focus-ring flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-[var(--ink-soft)] transition hover:bg-[var(--paper-strong)] hover:text-[var(--teal)]"
     : "focus-ring flex items-center gap-2 rounded-md px-3 py-2 text-[var(--ink-soft)] transition hover:bg-[var(--paper-strong)] hover:text-[var(--teal)] dark:hover:bg-[rgba(255,255,255,0.05)]";
+
+  // 模型「已配置」与「实际可执行」是两件事；这里没有实时探测结果，就不显示任何健康结论。
+  const executabilityNote = <div className="rounded-lg border border-[var(--rule)] bg-[var(--paper-strong)] p-4">
+    <p className="text-sm font-bold text-[var(--ink)]">可执行性说明</p>
+    <ul className="mt-2 space-y-1.5 text-xs leading-6 text-[var(--ink-soft)]">
+      <li>· 模型已配置不等于可执行：连接可达、协议校验、工具权限与本次运行成功是独立状态；</li>
+      <li>· 本页不显示实时健康结论；最近一次真实执行结果以各委托的运行记录与错误码为准；</li>
+      <li>· 模型或网络异常时，委托会暂停并保留已执行步骤，不会伪造完成。</li>
+    </ul>
+  </div>;
+
+  const safetyRules = <div className="rounded-lg border border-[var(--rule)] bg-[var(--paper-strong)] p-4">
+    <p className="text-sm font-bold text-[var(--ink)]">强制安全规则（服务端保证，不可在此关闭）</p>
+    <ul className="mt-2 space-y-1.5 text-xs leading-6 text-[var(--ink-soft)]">
+      <li>· 关键决策需用户确认：Agent 只提出候选，行动创建、重要修改由你批准后才生效；</li>
+      <li>· 证据不足保留未知：UNKNOWN 不当作 False，来源存在不等于结论成立；</li>
+      <li>· 项目隔离与来源保留：跨项目数据互不可见，原始记录与历史版本不被覆盖。</li>
+    </ul>
+  </div>;
 
   return (
     <>
@@ -109,8 +128,12 @@ export function GlobalSettings({ isMenuItem = false }: { isMenuItem?: boolean })
               {loading ? (
                 <div className="py-16 text-center text-[var(--muted)]"><LoaderCircle className="mx-auto animate-spin" size={28} /><p className="mt-3 text-sm font-medium">正在读取配置...</p></div>
               ) : !editable ? (
-                <div className="rounded-lg border border-[var(--rule)] bg-[var(--paper-strong)] p-5 text-sm leading-7 text-[var(--ink-soft)]">
-                  线上或非本机环境仅展示当前模型状态。请通过部署环境变量配置模型，不会在浏览器中读取或保存 API Key。
+                <div className="space-y-4">
+                  <div className="rounded-lg border border-[var(--rule)] bg-[var(--paper-strong)] p-5 text-sm leading-7 text-[var(--ink-soft)]">
+                    当前运行模式：<strong className="text-[var(--ink)]">{settings.llmMode === "openai-compatible" ? "真实模型（OpenAI-compatible）" : "Mock 模式（离线）"}</strong>{hasApiKey && "，已配置密钥"}。线上或非本机环境仅展示当前模型状态，请通过部署环境变量配置模型，不会在浏览器中读取或保存 API Key。
+                  </div>
+                  {executabilityNote}
+                  {safetyRules}
                 </div>
               ) : (
                 <form onSubmit={save} className="space-y-6">
@@ -158,6 +181,9 @@ export function GlobalSettings({ isMenuItem = false }: { isMenuItem?: boolean })
                       </>
                     )}
                   </fieldset>
+
+                  {executabilityNote}
+                  {safetyRules}
 
                   {error && <p role="alert" className="flex items-center gap-2 rounded-md bg-[var(--brick-pale)] px-4 py-3 text-sm font-bold text-[var(--brick)]"><X size={16} /> {error}</p>}
 

@@ -1,0 +1,12 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/continuitySuppression.test.ts tests/repoCi.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  2 passed (2)
+      Tests  5 passed (5)
+   Start at  10:23:40
+   Duration  7.87s (transform 3.01s, setup 0ms, import 5.19s, tests 1.82s, environment 0ms)

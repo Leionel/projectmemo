@@ -1,0 +1,10 @@
+
+> projectmemo@0.1.0 db:generate
+> prisma generate
+
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+
+✔ Generated Prisma Client (7.8.0) to .\lib\generated\prisma in 548ms
+

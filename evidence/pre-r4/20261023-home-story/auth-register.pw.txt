@@ -1,0 +1,17 @@
+async (page) => {
+ await page.goto('http://127.0.0.1:33324/register');
+ await page.getByRole('heading',{name:'创建你的账号',exact:true}).waitFor();
+ await page.setViewportSize({width:1440,height:1000});
+ await page.evaluate(()=>document.fonts.ready);
+ await page.getByLabel('账号',{exact:true}).fill('browser-acceptance-20261023');
+ await page.getByLabel('邮箱',{exact:true}).fill('browser-acceptance@example.test');
+ await page.getByLabel('密码',{exact:true}).fill('browser-local-password');
+ await page.getByLabel('确认密码',{exact:true}).fill('browser-local-password');
+ await page.getByRole('button',{name:'注册并发送验证邮件',exact:true}).waitFor();
+ await page.screenshot({path:'evidence/pre-r4/20261023-home-story/after-register-desktop.png'});
+ await page.setViewportSize({width:390,height:844});
+ await page.screenshot({path:'evidence/pre-r4/20261023-home-story/after-register-mobile.png',fullPage:true});
+ await page.getByRole('button',{name:'注册并发送验证邮件',exact:true}).click();
+ await page.getByRole('heading',{name:'请查收验证邮件',exact:true}).waitFor();
+ return {registration:'actual backend returned verified-email requirement; local TLS SMTP only',noLoginBeforeVerification:true};
+}

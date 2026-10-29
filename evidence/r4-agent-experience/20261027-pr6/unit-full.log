@@ -1,0 +1,11 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/r4Research.test.ts (18 tests | 1 failed) 4499ms
+     × 原 HTTP 适配器与 Focus 完成用户 URL→读取→引用→确认归入→重放 1367ms
+ ❯ tests/focusConversation.test.ts (22 tests | 1 failed) 14463ms
+     × rejects stale source, modified hash, denied proposal, foreign actor and revoked project 651ms

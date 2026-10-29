@@ -1,3 +1,4 @@
+import { reserveCloudCall } from "@/lib/auth/cloudQuota";
 import crypto from "crypto";
 import { getEmbeddingProviderConfig } from "@/lib/config/provider";
 
@@ -70,12 +71,13 @@ export function generateDeterministicEmbedding(text: string, dimensions = 128): 
 /**
  * 嵌入向量服务：优先调用 OpenAI-compatible /embeddings，失败或未配置时自动回退为确定性向量。
  */
-export async function getEmbedding(text: string): Promise<EmbeddingResult> {
+export async function getEmbedding(text: string, projectId?: string): Promise<EmbeddingResult> {
   const providerConfig = getEmbeddingProviderConfig();
   let fallbackReason: string | null = providerConfig ? "remote_embedding_unavailable" : "embedding_provider_not_configured";
 
   if (providerConfig) {
     try {
+      await reserveCloudCall(projectId);
       const response = await fetch(`${providerConfig.baseUrl}/embeddings`, {
         method: "POST",
         headers: {

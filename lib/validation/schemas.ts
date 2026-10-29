@@ -102,6 +102,7 @@ export const evaluateContextSchema = z.object({
 });
 
 export const agentChatSchema = z.object({
+  requestId: z.string().min(1).max(128).optional(),
   message: z.string().trim().min(1).max(2000),
 });
 

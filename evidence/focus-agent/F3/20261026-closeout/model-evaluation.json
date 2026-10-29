@@ -1,0 +1,546 @@
+{
+  "kind": "REAL_MODEL_DEVELOPMENT_REGRESSION",
+  "baseline": "71499b6d6e48fbf1116cdbcb76e2fe3d07e4602e",
+  "provider": "deepseek-flash",
+  "policy": "goal-change-v3",
+  "additionalBudgets": [
+    {
+      "used": 12,
+      "limit": 12
+    },
+    {
+      "used": 16,
+      "limit": 16
+    }
+  ],
+  "oldBudgetFinalAttempt": "No valid result; subsequent read-only auth check returned 401. Original UNKNOWN retained.",
+  "rotatedCredentialAuthStatus": 200,
+  "originalD1Status": {
+    "FAILED": 1,
+    "READY": 15
+  },
+  "originalFailurePreserved": true,
+  "offlineReplay": {
+    "calls": 0,
+    "passed": 16,
+    "results": [
+      {
+        "id": "R1",
+        "originalStatus": "READY",
+        "parseStatus": "PASS",
+        "decision": "ATTEND",
+        "ignoredNullFields": []
+      },
+      {
+        "id": "R2",
+        "originalStatus": "READY",
+        "parseStatus": "PASS",
+        "decision": "ATTEND",
+        "ignoredNullFields": []
+      },
+      {
+        "id": "R3",
+        "originalStatus": "READY",
+        "parseStatus": "PASS",
+        "decision": "ATTEND",
+        "ignoredNullFields": []
+      },
+      {
+        "id": "R4",
+        "originalStatus": "READY",
+        "parseStatus": "PASS",
+        "decision": "ATTEND",
+        "ignoredNullFields": []
+      },
+      {
+        "id": "U1",
+        "originalStatus": "READY",
+        "parseStatus": "PASS",
+        "decision": "KEEP_PLAN",
+        "ignoredNullFields": []
+      },
+      {
+        "id": "U2",
+        "originalStatus": "READY",
+        "parseStatus": "PASS",
+        "decision": "KEEP_PLAN",
+        "ignoredNullFields": []
+      },
+      {
+        "id": "U3",
+        "originalStatus": "READY",
+        "parseStatus": "PASS",
+        "decision": "KEEP_PLAN",
+        "ignoredNullFields": []
+      },
+      {
+        "id": "U4",
+        "originalStatus": "READY",
+        "parseStatus": "PASS",
+        "decision": "KEEP_PLAN",
+        "ignoredNullFields": []
+      },
+      {
+        "id": "M1",
+        "originalStatus": "READY",
+        "parseStatus": "PASS",
+        "decision": "KEEP_PLAN",
+        "ignoredNullFields": []
+      },
+      {
+        "id": "M2",
+        "originalStatus": "FAILED",
+        "parseStatus": "PASS",
+        "decision": "UNKNOWN",
+        "ignoredNullFields": [
+          "candidates_note"
+        ]
+      },
+      {
+        "id": "M3",
+        "originalStatus": "READY",
+        "parseStatus": "PASS",
+        "decision": "UNKNOWN",
+        "ignoredNullFields": []
+      },
+      {
+        "id": "M4",
+        "originalStatus": "READY",
+        "parseStatus": "PASS",
+        "decision": "ATTEND",
+        "ignoredNullFields": []
+      },
+      {
+        "id": "I1",
+        "originalStatus": "READY",
+        "parseStatus": "PASS",
+        "decision": "UNKNOWN",
+        "ignoredNullFields": []
+      },
+      {
+        "id": "I2",
+        "originalStatus": "READY",
+        "parseStatus": "PASS",
+        "decision": "UNKNOWN",
+        "ignoredNullFields": []
+      },
+      {
+        "id": "I3",
+        "originalStatus": "READY",
+        "parseStatus": "PASS",
+        "decision": "UNKNOWN",
+        "ignoredNullFields": []
+      },
+      {
+        "id": "I4",
+        "originalStatus": "READY",
+        "parseStatus": "PASS",
+        "decision": "UNKNOWN",
+        "ignoredNullFields": []
+      }
+    ],
+    "failed": 0
+  },
+  "realJourney": {
+    "status": "PASS",
+    "duplicateEffect": false,
+    "deviceAcceptance": "NOT_RUN",
+    "missionId": "cmvpa4gjm0004ec8o36egmhb3",
+    "duplicateProjection": false,
+    "arktsMode": "ACTUAL_SERVICE_TRANSPILED_TO_AUTHENTICATED_NEXT_HANDLERS",
+    "modelCalls": 2,
+    "runnerExtraModelCalls": 0,
+    "conversationId": "cmvpa4glc0007ec8oll4cvipu",
+    "missionStatus": "PAUSED",
+    "webArktsSameMessages": true
+  },
+  "intermediateRegression": "I1 was over-filtered in v2; original run retained, v3 recheck UNKNOWN. R1 D1/D2/feedback READY, U3 KEEP_PLAN.",
+  "independentQualityReview": "PENDING",
+  "targetUserStudy": "PENDING",
+  "scope": "D1-only final regression, real D2/Runner journey separately; not sixteen complete product episodes",
+  "cases": [
+    {
+      "id": "R1",
+      "group": "相关",
+      "goal": "在设备D的6GB预算内部署模型A",
+      "material": "设备D实测模型A推理batch=1，显存峰值6.8GB，重复3次。",
+      "expected": "识别预算前提变化，先核对条件或已有日志",
+      "originalStatus": "READY",
+      "originalDecision": "ATTEND",
+      "originalReceipt": null,
+      "httpStatus": 200,
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 1138,
+        "completion_tokens": 271,
+        "total_tokens": 1409,
+        "prompt_tokens_details": {
+          "cached_tokens": 768
+        },
+        "prompt_cache_hit_tokens": 768,
+        "prompt_cache_miss_tokens": 370
+      },
+      "rawContent": "{\"decision\":\"ATTEND\",\"summary\":\"设备D实测模型A显存峰值6.8GB，超出6GB预算，直接冲击原目标前提，需核对。\",\"candidates\":[{\"premise\":\"原目标要求在设备D的6GB预算内部署模型A，而当前观察显示实测显存峰值6.8GB，超出预算。\",\"goalQuote\":\"在设备D的6GB预算内部署模型A\",\"question\":\"设备D实测模型A推理batch=1显存峰值6.8GB（重复3次），已超出6GB预算，是否需要调整部署方案或预算假设？\",\"changeKind\":\"CONFLICT\",\"relevance\":\"DIRECT\",\"goalLink\":\"PROJECT_OBSERVATION\",\"reason\":\"项目自身实测观察直接显示显存峰值超过目标预算，构成对原目标前提的冲突。\",\"evidence\":[{\"ref\":\"capture:cmvpa7weo0006i08o8hgvwcn8@4fbc28b6b9b42f82\",\"quote\":\"设备D实测模型A推理batch=1，显存峰值6.8GB，重复3次。\"}],\"unknown\":[\"是否可通过量化、减小batch或优化降低显存至6GB以内\",\"6.8GB是否为稳定峰值及测量口径\"]}]}"
+    },
+    {
+      "id": "R2",
+      "group": "相关",
+      "goal": "周五前完成课程报告，引用原实验记录",
+      "material": "教师通知：提交提前到周三18点，必须附实验记录。",
+      "expected": "发现时效变化，保留真实截止来源",
+      "originalStatus": "READY",
+      "originalDecision": "ATTEND",
+      "originalReceipt": null,
+      "httpStatus": 200,
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 1119,
+        "completion_tokens": 235,
+        "total_tokens": 1354,
+        "prompt_tokens_details": {
+          "cached_tokens": 640
+        },
+        "prompt_cache_hit_tokens": 640,
+        "prompt_cache_miss_tokens": 479
+      },
+      "rawContent": "{\"decision\":\"ATTEND\",\"summary\":\"教师通知将截止提前到周三18点并强制附实验记录，直接改变原周五完成的前提。\",\"candidates\":[{\"premise\":\"原目标按周五前完成课程报告安排，但新材料显示提交截止提前到周三18点，且必须附实验记录。\",\"goalQuote\":\"周五前完成课程报告，引用原实验记录\",\"question\":\"是否已按周三18点的新截止重新安排报告草稿与实验记录引用，并确认实验记录可随报告提交？\",\"changeKind\":\"PREMISE_CHANGED\",\"relevance\":\"DIRECT\",\"goalLink\":\"APPLICABLE_REQUIREMENT\",\"reason\":\"教师通知明确改变截止时间并新增附件要求，影响原目标的时间前提与交付内容。\",\"evidence\":[{\"ref\":\"capture:cmvpa7y5w000ei08o540eugtf@dd221e12319fd959\",\"quote\":\"教师通知：提交提前到周三18点，必须附实验记录。\"}],\"unknown\":[\"实验记录是否已具备可提交版本\",\"周三18点前能否完成草稿\"]}]}"
+    },
+    {
+      "id": "R3",
+      "group": "相关",
+      "goal": "完成部署联调并保留失败回执",
+      "material": "联调日志：鉴权返回401，重试相同请求3次均失败。",
+      "expected": "先读已有错误日志或追问凭据状态，不宣布成功",
+      "originalStatus": "READY",
+      "originalDecision": "ATTEND",
+      "originalReceipt": null,
+      "httpStatus": 200,
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 1125,
+        "completion_tokens": 269,
+        "total_tokens": 1394,
+        "prompt_tokens_details": {
+          "cached_tokens": 640
+        },
+        "prompt_cache_hit_tokens": 640,
+        "prompt_cache_miss_tokens": 485
+      },
+      "rawContent": "{\"decision\":\"ATTEND\",\"summary\":\"联调日志显示鉴权401且重试3次失败，属项目自身观察，可能影响部署联调推进与失败回执保留，需核对。\",\"candidates\":[{\"premise\":\"联调日志报告鉴权返回401，相同请求重试3次均失败，但未说明失败回执是否已保存及联调是否可继续。\",\"goalQuote\":\"完成部署联调并保留失败回执\",\"question\":\"鉴权401重试3次失败后，失败回执是否已按目标要求保留？部署联调是否因此受阻或需调整方法？\",\"changeKind\":\"UNKNOWN\",\"relevance\":\"DIRECT\",\"goalLink\":\"PROJECT_OBSERVATION\",\"reason\":\"这是项目自身联调观察，直接涉及部署联调与失败回执；缺少回执保留和联调阶段信息，需核对。\",\"evidence\":[{\"ref\":\"capture:cmvpa7zkb000mi08of66y3cvk@fe33244a4b637171\",\"quote\":\"联调日志：鉴权返回401，重试相同请求3次均失败。\"}],\"unknown\":[\"失败回执是否已保存\",\"联调是否仍可继续\",\"401是否为预期鉴权失败\"]}]}"
+    },
+    {
+      "id": "R4",
+      "group": "相关",
+      "goal": "用原始测试集复核模型A的准确率",
+      "material": "数据审计记录：原测试集中的12例被误放进训练集。",
+      "expected": "识别有效性风险，先核对数据版本",
+      "originalStatus": "READY",
+      "originalDecision": "ATTEND",
+      "originalReceipt": null,
+      "httpStatus": 200,
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 1118,
+        "completion_tokens": 264,
+        "total_tokens": 1382,
+        "prompt_tokens_details": {
+          "cached_tokens": 640
+        },
+        "prompt_cache_hit_tokens": 640,
+        "prompt_cache_miss_tokens": 478
+      },
+      "rawContent": "{\"decision\":\"ATTEND\",\"summary\":\"数据审计发现原测试集12例混入训练集，直接动摇“原始测试集”复核前提，需核对污染范围与复核口径。\",\"candidates\":[{\"premise\":\"原测试集存在训练集污染，12例被误放入训练集，原始测试集已非干净留出集。\",\"goalQuote\":\"用原始测试集复核模型A的准确率\",\"question\":\"这12例污染是否覆盖模型A复核所用的原始测试集？若覆盖，是否需剔除污染样本或改用未污染子集复核准确率？\",\"changeKind\":\"PREMISE_CHANGED\",\"relevance\":\"DIRECT\",\"goalLink\":\"PROJECT_OBSERVATION\",\"reason\":\"项目自身数据审计直接改变“原始测试集”作为干净评估集的前提，影响复核方法与结论有效性。\",\"evidence\":[{\"ref\":\"capture:cmvpa817a000ui08otq9rxo2v@b236701f1dbe3513\",\"quote\":\"数据审计记录：原测试集中的12例被误放进训练集。\"}],\"unknown\":[\"污染12例是否属于模型A复核所用测试集\",\"模型A训练时是否实际使用这12例\",\"复核是否需剔除污染样本\"]}]}"
+    },
+    {
+      "id": "U1",
+      "group": "无关",
+      "goal": "在设备D的6GB预算内部署模型A",
+      "material": "社团周末聚餐改在北门集合，预算每人60元。",
+      "expected": "KEEP_PLAN，不新增问题或任务",
+      "originalStatus": "READY",
+      "originalDecision": "KEEP_PLAN",
+      "originalReceipt": null,
+      "httpStatus": 200,
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 1115,
+        "completion_tokens": 33,
+        "total_tokens": 1148,
+        "prompt_tokens_details": {
+          "cached_tokens": 768
+        },
+        "prompt_cache_hit_tokens": 768,
+        "prompt_cache_miss_tokens": 347
+      },
+      "rawContent": "{\"decision\":\"KEEP_PLAN\",\"summary\":\"本轮资料是社团聚餐通知，与设备D部署模型A的目标无联系。\",\"candidates\":[]}"
+    },
+    {
+      "id": "U2",
+      "group": "无关",
+      "goal": "完成课程报告并核对实验数据",
+      "material": "校园跑通知：周末体育场开放时间调整。",
+      "expected": "KEEP_PLAN，不制造会话打扰",
+      "originalStatus": "READY",
+      "originalDecision": "KEEP_PLAN",
+      "originalReceipt": null,
+      "httpStatus": 200,
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 1112,
+        "completion_tokens": 35,
+        "total_tokens": 1147,
+        "prompt_tokens_details": {
+          "cached_tokens": 640
+        },
+        "prompt_cache_hit_tokens": 640,
+        "prompt_cache_miss_tokens": 472
+      },
+      "rawContent": "{\"decision\":\"KEEP_PLAN\",\"summary\":\"本轮仅有体育场开放时间通知，与课程报告及实验数据核对无目标联系。\",\"candidates\":[]}"
+    },
+    {
+      "id": "U3",
+      "group": "无关",
+      "goal": "核对设备D的推理内存峰值",
+      "material": "课程教材介绍了操作系统的虚拟内存概念，没有项目测量。",
+      "expected": "不将术语重合作为实测变化",
+      "originalStatus": "READY",
+      "originalDecision": "KEEP_PLAN",
+      "originalReceipt": null,
+      "httpStatus": 200,
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 1115,
+        "completion_tokens": 39,
+        "total_tokens": 1154,
+        "prompt_tokens_details": {
+          "cached_tokens": 768
+        },
+        "prompt_cache_hit_tokens": 768,
+        "prompt_cache_miss_tokens": 347
+      },
+      "rawContent": "{\"decision\":\"KEEP_PLAN\",\"summary\":\"本轮只有虚拟内存通识教材，未建立与设备D推理内存峰值目标的联系，保留原计划。\",\"candidates\":[]}"
+    },
+    {
+      "id": "U4",
+      "group": "无关",
+      "goal": "完成项目Memo的接口联调",
+      "material": "另一个小组的Memo会议记录：讨论毕业旅行路线。",
+      "expected": "不因名称重合改变项目计划",
+      "originalStatus": "READY",
+      "originalDecision": "KEEP_PLAN",
+      "originalReceipt": null,
+      "httpStatus": 200,
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 1117,
+        "completion_tokens": 41,
+        "total_tokens": 1158,
+        "prompt_tokens_details": {
+          "cached_tokens": 640
+        },
+        "prompt_cache_hit_tokens": 640,
+        "prompt_cache_miss_tokens": 477
+      },
+      "rawContent": "{\"decision\":\"KEEP_PLAN\",\"summary\":\"本轮资料是另一小组的毕业旅行会议记录，与项目Memo接口联调无目标联系，保留原计划。\",\"candidates\":[]}"
+    },
+    {
+      "id": "M1",
+      "group": "条件错位",
+      "goal": "在设备D的6GB预算内部署模型A",
+      "material": "模型B在设备D推理batch=1，峰值4.2GB。",
+      "expected": "主体不匹配，不证明模型A满足预算",
+      "originalStatus": "READY",
+      "originalDecision": "KEEP_PLAN",
+      "originalReceipt": null,
+      "httpStatus": 200,
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 1121,
+        "completion_tokens": 40,
+        "total_tokens": 1161,
+        "prompt_tokens_details": {
+          "cached_tokens": 768
+        },
+        "prompt_cache_hit_tokens": 768,
+        "prompt_cache_miss_tokens": 353
+      },
+      "rawContent": "{\"decision\":\"KEEP_PLAN\",\"summary\":\"本轮观察是模型B在设备D的峰值内存，与目标模型A的6GB预算无直接联系。\",\"candidates\":[]}"
+    },
+    {
+      "id": "M2",
+      "group": "条件错位",
+      "goal": "核对模型A推理batch=1的显存是否小于6GB",
+      "material": "模型A训练batch=8，显存峰值11GB。",
+      "expected": "阶段与batch错位，保持未知或询问原条件",
+      "originalStatus": "FAILED",
+      "originalDecision": null,
+      "originalReceipt": {
+        "code": "INVALID_REVIEW_RESULT",
+        "finishReason": "stop",
+        "responseLength": 594,
+        "responseHash": "440cc58a37d360a69305faaa97e97d590de2e9865ac2f090949d8a74b8a89fe2",
+        "providerFailure": null,
+        "diagnostic": [
+          {
+            "code": "unrecognized_keys",
+            "path": "",
+            "message": "Unrecognized key: \"candidates_note\""
+          }
+        ],
+        "usageUnknown": false
+      },
+      "httpStatus": 200,
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 1123,
+        "completion_tokens": 267,
+        "total_tokens": 1390,
+        "prompt_tokens_details": {
+          "cached_tokens": 640
+        },
+        "prompt_cache_hit_tokens": 640,
+        "prompt_cache_miss_tokens": 483
+      },
+      "rawContent": "{\"decision\":\"UNKNOWN\",\"summary\":\"现有观察是模型A训练batch=8峰值11GB，未覆盖目标所需的推理batch=1显存，无法判断是否小于6GB。\",\"candidates\":[{\"premise\":\"项目观察报告模型A训练batch=8显存峰值11GB，但目标核对的是推理batch=1显存是否小于6GB。\",\"goalQuote\":\"核对模型A推理batch=1的显存是否小于6GB\",\"question\":\"是否存在模型A推理batch=1的显存实测或估算观察？\",\"changeKind\":\"UNKNOWN\",\"relevance\":\"DIRECT\",\"goalLink\":\"PROJECT_OBSERVATION\",\"reason\":\"项目自身观察与模型A显存相关，但阶段为训练、batch=8，缺少推理batch=1的显存数据，无法判断目标条件。\",\"evidence\":[{\"ref\":\"capture:cmvpa86vg0026i08ofhnisn1z@b67c2bb385bfe1d2\",\"quote\":\"模型A训练batch=8，显存峰值11GB。\"}],\"unknown\":[\"模型A推理batch=1的显存峰值\",\"推理与训练显存差异\",\"是否已有推理batch=1的测量记录\"]}],\"candidates_note\":null}"
+    },
+    {
+      "id": "M3",
+      "group": "条件错位",
+      "goal": "核对设备D上模型A的内存预算",
+      "material": "模型A在设备E推理batch=1，峰值4GB。",
+      "expected": "设备错位，不迁移为设备D的结论",
+      "originalStatus": "READY",
+      "originalDecision": "UNKNOWN",
+      "originalReceipt": null,
+      "httpStatus": 200,
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 1115,
+        "completion_tokens": 224,
+        "total_tokens": 1339,
+        "prompt_tokens_details": {
+          "cached_tokens": 640
+        },
+        "prompt_cache_hit_tokens": 640,
+        "prompt_cache_miss_tokens": 475
+      },
+      "rawContent": "{\"decision\":\"UNKNOWN\",\"summary\":\"新观察是模型A在设备E的峰值内存，非目标设备D；无法据此核对D的内存预算，保留UNKNOWN。\",\"candidates\":[{\"premise\":\"目标要核对设备D上模型A的内存预算，但当前观察只涉及设备E。\",\"goalQuote\":\"核对设备D上模型A的内存预算\",\"question\":\"是否存在设备D上模型A的内存实测或预算数据，可用于核对？\",\"changeKind\":\"UNKNOWN\",\"relevance\":\"PLAUSIBLE\",\"goalLink\":\"PROJECT_OBSERVATION\",\"reason\":\"项目自身观察提供了模型A的内存峰值，但设备为E而非D，不能直接判断D的预算是否满足。\",\"evidence\":[{\"ref\":\"capture:cmvpa88gl002di08oyc1nt2mt@3b5511ee8f71635f\",\"quote\":\"模型A在设备E推理batch=1，峰值4GB。\"}],\"unknown\":[\"设备D上模型A的内存峰值或预算数据\",\"设备D与设备E的内存配置差异\"]}]}"
+    },
+    {
+      "id": "M4",
+      "group": "条件错位",
+      "goal": "核对2026-10模型A当前版本的测试成绩",
+      "material": "2025-10模型A旧版本准确率91%，新版本还未测试。",
+      "expected": "区分时间与版本，不使用旧结果证明新版本",
+      "originalStatus": "READY",
+      "originalDecision": "ATTEND",
+      "originalReceipt": null,
+      "httpStatus": 200,
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 1124,
+        "completion_tokens": 221,
+        "total_tokens": 1345,
+        "prompt_tokens_details": {
+          "cached_tokens": 640
+        },
+        "prompt_cache_hit_tokens": 640,
+        "prompt_cache_miss_tokens": 484
+      },
+      "rawContent": "{\"decision\":\"ATTEND\",\"summary\":\"材料显示模型A新版本尚未测试，与核对当前版本测试成绩的目标直接相关，需确认测试是否已进行。\",\"candidates\":[{\"premise\":\"目标要求核对2026-10模型A当前版本的测试成绩，但材料称新版本还未测试。\",\"goalQuote\":\"核对2026-10模型A当前版本的测试成绩\",\"question\":\"模型A当前版本是否已有测试成绩，还是仍处于未测试状态？\",\"changeKind\":\"UNKNOWN\",\"relevance\":\"DIRECT\",\"goalLink\":\"PROJECT_OBSERVATION\",\"reason\":\"该观察直接涉及目标所指版本的测试状态，但未给出当前版本成绩，存在影响目标能否达成的缺口。\",\"evidence\":[{\"ref\":\"capture:cmvpa8a0e002li08oplpvmaqh@052d2380db4cfb64\",\"quote\":\"2025-10模型A旧版本准确率91%，新版本还未测试。\"}],\"unknown\":[\"当前版本是否已完成测试\",\"当前版本测试成绩是否存在\"]}]}"
+    },
+    {
+      "id": "I1",
+      "group": "信息不足",
+      "goal": "在设备D的6GB预算内部署模型A",
+      "material": "实验日志：模型运行正常，内存数据未记录。",
+      "expected": "UNKNOWN，追问能改变决策的缺口",
+      "originalStatus": "READY",
+      "originalDecision": "UNKNOWN",
+      "originalReceipt": null,
+      "httpStatus": 200,
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 1117,
+        "completion_tokens": 224,
+        "total_tokens": 1341,
+        "prompt_tokens_details": {
+          "cached_tokens": 768
+        },
+        "prompt_cache_hit_tokens": 768,
+        "prompt_cache_miss_tokens": 349
+      },
+      "rawContent": "{\"decision\":\"UNKNOWN\",\"summary\":\"项目实验日志显示模型运行正常，但未记录内存数据；无法判断是否满足6GB预算，需核对内存观察。\",\"candidates\":[{\"premise\":\"实验日志报告模型运行正常，但内存数据未记录，无法确认是否在6GB预算内。\",\"goalQuote\":\"在设备D的6GB预算内部署模型A\",\"question\":\"是否存在设备D上模型A运行时的内存占用观察，以核对是否满足6GB预算？\",\"changeKind\":\"UNKNOWN\",\"relevance\":\"DIRECT\",\"goalLink\":\"PROJECT_OBSERVATION\",\"reason\":\"项目自身运行观察缺少内存指标，无法判断预算约束是否满足，需核对内存观察。\",\"evidence\":[{\"ref\":\"capture:cmvpa8bjr002ti08od8o9hbnm@c906c418cba3fefd\",\"quote\":\"实验日志：模型运行正常，内存数据未记录。\"}],\"unknown\":[\"设备D上模型A运行时的内存占用\",\"是否在6GB预算内\"]}]}"
+    },
+    {
+      "id": "I2",
+      "group": "信息不足",
+      "goal": "核对模型A测试结果是否满足要求",
+      "material": "本次得分82，单位、测试集和阈值未写。",
+      "expected": "UNKNOWN，不伪造阈值或成功结论",
+      "originalStatus": "READY",
+      "originalDecision": "UNKNOWN",
+      "originalReceipt": null,
+      "httpStatus": 200,
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 1119,
+        "completion_tokens": 219,
+        "total_tokens": 1338,
+        "prompt_tokens_details": {
+          "cached_tokens": 640
+        },
+        "prompt_cache_hit_tokens": 640,
+        "prompt_cache_miss_tokens": 479
+      },
+      "rawContent": "{\"decision\":\"UNKNOWN\",\"summary\":\"项目观察显示模型A得分82，但缺单位、测试集和阈值，无法判断是否满足要求。\",\"candidates\":[{\"premise\":\"项目自身报告模型A本次得分82，但未记录单位、测试集和阈值。\",\"goalQuote\":\"核对模型A测试结果是否满足要求\",\"question\":\"模型A的82分对应什么单位、在哪个测试集上测得、要求阈值是多少？是否有完整测试记录可核对？\",\"changeKind\":\"UNKNOWN\",\"relevance\":\"DIRECT\",\"goalLink\":\"PROJECT_OBSERVATION\",\"reason\":\"这是项目自身测试观察，直接关联目标，但关键判定条件缺失，无法确认是否达标。\",\"evidence\":[{\"ref\":\"capture:cmvpa8cwg0031i08ox9ot5vme@d77c03b965c2467f\",\"quote\":\"本次得分82，单位、测试集和阈值未写。\"}],\"unknown\":[\"得分单位\",\"测试集\",\"要求阈值\",\"完整测试记录\"]}]}"
+    },
+    {
+      "id": "I3",
+      "group": "信息不足",
+      "goal": "下周交付可安装的软件包",
+      "material": "打包日志被截断，只保留开始时间，没有退出码或产物。",
+      "expected": "先读已有日志，未找到结果保持未知",
+      "originalStatus": "READY",
+      "originalDecision": "UNKNOWN",
+      "originalReceipt": null,
+      "httpStatus": 200,
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 1119,
+        "completion_tokens": 210,
+        "total_tokens": 1329,
+        "prompt_tokens_details": {
+          "cached_tokens": 640
+        },
+        "prompt_cache_hit_tokens": 640,
+        "prompt_cache_miss_tokens": 479
+      },
+      "rawContent": "{\"decision\":\"UNKNOWN\",\"summary\":\"打包日志被截断，缺少退出码和产物，无法确认可安装包是否已生成。\",\"candidates\":[{\"premise\":\"打包日志被截断，只保留开始时间，没有退出码或产物。\",\"goalQuote\":\"下周交付可安装的软件包\",\"question\":\"打包是否成功完成并生成了可安装产物？需要核对完整日志、退出码或产物文件是否存在。\",\"changeKind\":\"UNKNOWN\",\"relevance\":\"DIRECT\",\"goalLink\":\"PROJECT_OBSERVATION\",\"reason\":\"项目自身打包观察缺少退出码与产物，直接影响能否交付可安装包，需核对。\",\"evidence\":[{\"ref\":\"capture:cmvpa8e580039i08o3hoozkef@a86983e84ab014fd\",\"quote\":\"打包日志被截断，只保留开始时间，没有退出码或产物。\"}],\"unknown\":[\"打包退出码\",\"可安装产物是否存在\",\"打包是否完成\"]}]}"
+    },
+    {
+      "id": "I4",
+      "group": "信息不足",
+      "goal": "核对设备D部署失败的具体原因",
+      "material": "用户记录：昨天打不开，今天好像可以，但没有版本和复现步骤。",
+      "expected": "UNKNOWN，有界追问，禁止循环重试",
+      "originalStatus": "READY",
+      "originalDecision": "UNKNOWN",
+      "originalReceipt": null,
+      "httpStatus": 200,
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 1118,
+        "completion_tokens": 215,
+        "total_tokens": 1333,
+        "prompt_tokens_details": {
+          "cached_tokens": 640
+        },
+        "prompt_cache_hit_tokens": 640,
+        "prompt_cache_miss_tokens": 478
+      },
+      "rawContent": "{\"decision\":\"UNKNOWN\",\"summary\":\"用户记录显示设备D状态可能变化，但缺版本与复现步骤，无法核对部署失败原因。\",\"candidates\":[{\"premise\":\"用户记录称昨天打不开、今天好像可以，但无版本和复现步骤。\",\"goalQuote\":\"核对设备D部署失败的具体原因\",\"question\":\"设备D当前是否仍部署失败？若已恢复，是哪个版本、在什么步骤下恢复的？\",\"changeKind\":\"UNKNOWN\",\"relevance\":\"DIRECT\",\"goalLink\":\"PROJECT_OBSERVATION\",\"reason\":\"这是项目自身观察，但缺版本与复现步骤，无法判断失败原因是否仍成立。\",\"evidence\":[{\"ref\":\"capture:cmvpa8fgs003hi08ojfd8aw32@e38461dc36951d85\",\"quote\":\"用户记录：昨天打不开，今天好像可以，但没有版本和复现步骤。\"}],\"unknown\":[\"设备D当前部署状态\",\"涉及版本\",\"复现步骤\"]}]}"
+    }
+  ],
+  "evaluationRole": "DEVELOPMENT_REGRESSION_NOT_HELD_OUT"
+}

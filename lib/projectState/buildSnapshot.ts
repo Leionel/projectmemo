@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { getMissingEvidenceTypes } from "@/lib/milestones/evidenceGap";
 import { evaluateTemporalCard } from "@/lib/memory/temporalLedger";
+import { evidenceAssessment } from "@/lib/evidence/assessment";
 import type { CardRelationTypeValue, TemporalCardSummary, TemporalRelationData } from "@/lib/types";
 import {
   PROJECT_STATE_POLICY_VERSION,
@@ -109,7 +110,7 @@ export function buildProjectState(input: SnapshotSourceInput): BuiltProjectState
       };
     });
 
-  const involvedIds = new Set<string>();
+  const involvedIds = new Set<string>(input.cards.map(card => card.id));
   for (const relation of input.relations) {
     if (relation.relationType === "RELATED") continue;
     involvedIds.add(relation.currentCardId);
@@ -147,6 +148,10 @@ export function buildProjectState(input: SnapshotSourceInput): BuiltProjectState
         text = `决策「${card.title}」证据不足，无法确认当前有效性`;
     }
     factMap.set(`decision:${cardId}`, {
+      assessment: evidenceAssessment({ sourceId: `card:${cardId}`, sourceRevision: evidenceHash([card.title, card.summary]),
+        observedAt: input.now, sourceTime: card.createdAt, textRange: { start: 0, end: card.summary.length },
+        citationAdmissibility: "ADMITTED", temporalState: item.topLevelState,
+        reasonCode: "TEMPORAL_RELATION_ONLY" }),
       key: `decision:${cardId}`,
       text,
       truth,
@@ -271,9 +276,18 @@ export function buildProjectState(input: SnapshotSourceInput): BuiltProjectState
   // contentHash 基于剔除观察时间的业务投影：同一事实内容不因核对时刻不同而变化
   const contentHash = sha256Hex(stableStringify(stripObservationTime(payloadCore)));
 
+  const boundaries = input.relations.flatMap(r => [r.createdAt, r.confirmedAt, r.revokedAt, r.validFrom, r.validTo])
+    .filter((value): value is string => !!value).map(value => new Date(value).getTime());
+  if (input.deadline) {
+    const end = new Date(input.deadline).getTime();
+    boundaries.push(end - 7 * 86400000, end + 1);
+  }
+  const next = boundaries.filter(value => Number.isFinite(value) && value > now.getTime()).sort((a, b) => a - b)[0];
+
   return {
     ...payloadCore,
     evaluatedAt: input.now,
+    nextInvalidationAt: next === undefined ? null : new Date(next).toISOString(),
     sourceHash,
     contentHash,
     evaluationKey,

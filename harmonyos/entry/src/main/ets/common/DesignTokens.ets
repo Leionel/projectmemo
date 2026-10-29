@@ -5,7 +5,7 @@
  */
 
 export class PMFontFamily {
-  static readonly SANS: string = 'HarmonyOS Sans, Source Han Sans CN, sans-serif';
+  static readonly SANS: string = 'HarmonyOS Sans';
   // ArkUI 的 fontFamily 不解析逗号回退列表，自定义注册字体必须单独精确引用
   static readonly BRAND_SERIF: string = 'PMSerifBrand';
   static readonly SERIF: string = 'PMSerifBrand, Noto Serif SC, Source Han Serif SC, serif';
@@ -48,7 +48,7 @@ export class PMColors {
   static readonly AI_ACCENT: ResourceColor = $r('app.color.pm_ai_accent');
   static readonly AI_ACCENT_LIGHT: ResourceColor = $r('app.color.pm_ai_accent_light');
 
-  // 交互行动主色、当前选中国态 (沉静深蓝)
+  // 交互行动主色、当前选中态（参考稿深青绿）
   static readonly BRAND: ResourceColor = $r('app.color.pm_brand');
   static readonly BRAND_LIGHT: ResourceColor = $r('app.color.pm_brand_light');
   static readonly BRAND_PRESSED: ResourceColor = $r('app.color.pm_brand_pressed');
@@ -75,15 +75,16 @@ export class PMRadius {
   static readonly XS: number = 4;
   static readonly SM: number = 8;
   static readonly MD: number = 12;
-  static readonly LG: number = 16;
+  static readonly LG: number = 18;
   static readonly XL: number = 18;
+  static readonly BUTTON: number = 11;
   static readonly XXL: number = 24;
   static readonly FULL: number = 999;
 }
 
 export class PMFontSize {
   static readonly CAPTION: number = 12;
-  static readonly BOTTOM_NAV: number = 12;
+  static readonly BOTTOM_NAV: number = 11;
   static readonly SECONDARY: number = 13;
   static readonly BODY: number = 15;
   static readonly BUTTON: number = 15;
@@ -91,7 +92,7 @@ export class PMFontSize {
   static readonly SECTION_TITLE: number = 16;
   static readonly LG: number = 17;
   static readonly PRIMARY_JUDGEMENT: number = 18;
-  static readonly PAGE_TITLE: number = 20;
+  static readonly PAGE_TITLE: number = 24;
   static readonly TITLE: number = 22;
   static readonly BRAND: number = 24;
   static readonly DISPLAY: number = 26;
@@ -111,7 +112,7 @@ export class PMButtonSize {
   static readonly HEIGHT_LG: number = 48; // 主要交互按钮
   static readonly HEIGHT_MD: number = 40; // 次级/卡片操作按钮
   static readonly HEIGHT_SM: number = 32; // 标签/紧凑按钮
-  static readonly RADIUS: number = PMRadius.SM;
+  static readonly RADIUS: number = PMRadius.BUTTON;
 }
 
 /**

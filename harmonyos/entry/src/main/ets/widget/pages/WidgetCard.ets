@@ -5,175 +5,36 @@ let storage = new LocalStorage();
 @Entry(storage)
 @Component
 struct WidgetCard {
-  /* 存储卡片数据（通过 WidgetDataService 实时同步真实项目看板数据） */
-  @LocalStorageProp('formDimension') formDimension: number = 3; // 2=2*2, 3=2*4
+  @LocalStorageProp('formDimension') formDimension: number = 3;
   @LocalStorageProp('projectTitle') projectTitle: string = '忆程项目看板';
   @LocalStorageProp('daysLeft') daysLeft: number = 0;
   @LocalStorageProp('readiness') readiness: number = 0;
   @LocalStorageProp('nextAction') nextAction: string = '打开应用同步待办';
-  @LocalStorageProp('status') status: string = '进行中';
+  @LocalStorageProp('status') status: string = '待同步';
   @LocalStorageProp('checkpointInfo') checkpointInfo: string = '';
   @LocalStorageProp('missionId') missionId: string = '';
   @LocalStorageProp('missionProjectId') missionProjectId: string = '';
   @LocalStorageProp('missionSummary') missionSummary: string = '';
   @LocalStorageProp('missionUpdatedAt') missionUpdatedAt: string = '';
-
   build() {
-    Column() {
-      // ------------------------------------
-      // 顶栏：圆点 + 项目标题 + 倒计时胶囊
-      // ------------------------------------
-      Row() {
-        Row() {
-          Row()
-            .width(8)
-            .height(8)
-            .borderRadius(4)
-            .backgroundColor(this.daysLeft > 0 ? '#E5484D' : '#0284C7')
-            .margin({ right: 6 })
-
-          Text(this.projectTitle)
-            .fontSize(13)
-            .fontWeight(FontWeight.Bold)
-            .fontColor('#0F172A')
-            .maxLines(1)
-            .textOverflow({ overflow: TextOverflow.Ellipsis })
-            .layoutWeight(1)
-        }
-        .layoutWeight(1)
-        .alignItems(VerticalAlign.Center)
-
-        Row() {
-          Text(this.daysLeft > 0 ? '仅剩 ' : '')
-            .fontSize(10)
-            .fontColor(this.daysLeft > 0 ? '#E5484D' : '#64748B')
-          Text(this.daysLeft > 0 ? `${this.daysLeft}` : '无截止日')
-            .fontSize(this.daysLeft > 0 ? 13 : 10)
-            .fontWeight(FontWeight.Bold)
-            .fontColor(this.daysLeft > 0 ? '#E5484D' : '#64748B')
-          Text(this.daysLeft > 0 ? ' 天' : '')
-            .fontSize(10)
-            .fontColor('#E5484D')
-        }
-        .padding({ left: 6, right: 6, top: 2, bottom: 2 })
-        .backgroundColor(this.daysLeft > 0 ? '#FFEBEB' : '#F1F5F9')
-        .borderRadius(10)
-        .margin({ left: 6 })
-      }
-      .width('100%')
-      .alignItems(VerticalAlign.Center)
-
-      // ------------------------------------
-      // 中间：准备度指标 + 状态标签 + 弹性全宽进度条
-      // ------------------------------------
-      Column() {
-        Row() {
-          Row() {
-            Text('准备度 ')
-              .fontSize(11)
-              .fontColor('#64748B')
-            Text(`${this.readiness}%`)
-              .fontSize(18)
-              .fontWeight(FontWeight.Bolder)
-              .fontColor('#0284C7')
-          }
-          .alignItems(VerticalAlign.Bottom)
-
-          Text(this.status)
-            .fontSize(10)
-            .fontWeight(FontWeight.Medium)
-            .fontColor('#0284C7')
-            .padding({ left: 6, right: 6, top: 2, bottom: 2 })
-            .backgroundColor('#E0F2FE')
-            .borderRadius(4)
-        }
-        .width('100%')
-        .justifyContent(FlexAlign.SpaceBetween)
-        .alignItems(VerticalAlign.Center)
-
-        // 弹性自适应进度条
-        Stack({ alignContent: Alignment.Start }) {
-          Row()
-            .width('100%')
-            .height(5)
-            .backgroundColor('#E2E8F0')
-            .borderRadius(3)
-          Row()
-            .width(`${Math.min(100, Math.max(0, this.readiness))}%`)
-            .height(5)
-            .backgroundColor('#0284C7')
-            .borderRadius(3)
-        }
-        .width('100%')
-        .margin({ top: 4 })
-      }
-      .width('100%')
-      .margin({ top: 4, bottom: 4 })
-
-      // 检查点状态行（仅 2*4 展示：检查点新鲜度与新变化数量）
-      if (this.formDimension === 3 && this.checkpointInfo.length > 0) {
-        Text(this.checkpointInfo)
-          .fontSize(9)
-          .fontColor('#64748B')
-          .maxLines(1)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .width('100%')
-          .margin({ bottom: 2 })
-      }
-
-      // ------------------------------------
-      // 底栏：今日第一要务卡片（点击直达待办）
-      // ------------------------------------
-      Column() {
-        Row() {
-          Text(this.missionId !== '' ? '长期委托' : '今日第一要务')
-            .fontSize(10)
-            .fontWeight(FontWeight.Bold)
-            .fontColor('#0F172A')
-          Text('→')
-            .fontSize(12)
-            .fontWeight(FontWeight.Bold)
-            .fontColor('#0284C7')
-        }
-        .width('100%')
-        .justifyContent(FlexAlign.SpaceBetween)
-        .alignItems(VerticalAlign.Center)
-
-        Text(this.missionId !== '' ? this.missionSummary : this.nextAction)
-          .fontSize(11)
-          .fontColor('#0284C7')
-          .fontWeight(FontWeight.Medium)
-          .maxLines(1)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .width('100%')
-          .margin({ top: 2 })
-        if (this.missionId !== '' && this.formDimension === 3) {
-          Text(`同步 ${this.missionUpdatedAt}`).fontSize(9).fontColor('#64748B').maxLines(1)
-        }
-      }
-      .width('100%')
-      .padding({ left: 8, right: 8, top: 6, bottom: 6 })
-      .backgroundColor('#F1F5F9')
-      .border({ width: 1, color: '#E2E8F0' })
-      .borderRadius(8)
-    }
-    .width('100%')
-    .height('100%')
-    .padding(10)
-    .backgroundColor('#FFFFFF')
-    .border({ width: 1, color: '#E2E8F0' })
-    .borderRadius(16)
-    .justifyContent(FlexAlign.SpaceBetween)
-    .onClick(() => {
-      postCardAction(this, {
-        action: ACTION_ROUTER,
-        abilityName: ABILITY_NAME,
-        params: {
-          targetTab: 2,
-          missionId: this.missionId,
-          projectId: this.missionProjectId
-        }
-      });
-    })
+    Column({ space: 8 }) {
+      Row({ space: 6 }) {
+        Text('忆').fontSize(12).fontWeight(FontWeight.Medium).fontColor($r('app.color.pm_brand')).width(23).height(23).textAlign(TextAlign.Center).backgroundColor($r('app.color.pm_brand_light')).borderRadius(8)
+        Text('忆程').fontSize(12).fontColor($r('app.color.pm_ink_secondary'))
+        Blank()
+        if (this.formDimension === 3) { Text(this.status).fontSize(10).fontColor($r('app.color.pm_brand')).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).constraintSize({ maxWidth: 90 }) }
+      }.width('100%')
+      Text(this.projectTitle).fontSize(this.formDimension === 3 ? 16 : 14).fontWeight(FontWeight.Medium).fontColor($r('app.color.pm_ink_primary')).lineHeight(this.formDimension === 3 ? 23 : 20).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
+      Text(this.missionId !== '' ? this.missionSummary : this.nextAction).fontSize(12).lineHeight(19).fontColor($r('app.color.pm_brand')).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%').layoutWeight(1)
+      Row({ space: 6 }) {
+        Text(this.daysLeft > 0 ? `距截止 ${this.daysLeft} 天` : this.daysLeft < 0 ? `已过截止 ${Math.abs(this.daysLeft)} 天` : '查看项目日程').fontSize(10).fontColor($r('app.color.pm_ink_tertiary')).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
+        if (this.formDimension === 3 && this.checkpointInfo !== '') { Text(this.checkpointInfo).fontSize(10).fontColor($r('app.color.pm_ink_tertiary')).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).constraintSize({ maxWidth: 100 }) }
+        Text('↗').fontSize(15).fontColor($r('app.color.pm_brand'))
+      }.width('100%').padding({ top: 7 }).border({ width: { top: 1 }, color: $r('app.color.pm_border_subtle') })
+    }.width('100%').height('100%').padding(this.formDimension === 3 ? 15 : 12).alignItems(HorizontalAlign.Start)
+      .backgroundColor($r('app.color.pm_surface')).border({ width: 1, color: $r('app.color.pm_border_subtle') }).borderRadius(20).clip(true)
+      .onClick(() => {
+        postCardAction(this, { action: ACTION_ROUTER, abilityName: ABILITY_NAME, params: { targetTab: 2, missionId: this.missionId, projectId: this.missionProjectId } });
+      })
   }
 }

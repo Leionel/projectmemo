@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-25",
+  "baseCommit": "0b289a2ba92226b97458de76aa66acfe733a4416",
+  "scope": [
+    "P1 material return and readback",
+    "P2 first E0 resource-measurement slice",
+    "Web and HarmonyOS contract",
+    "HarmonyOS control and login polish"
+  ],
+  "checks": {
+    "commit-unit": {
+      "exitCode": 0,
+      "log": "commit-unit.log"
+    },
+    "commit-types": {
+      "exitCode": 0,
+      "log": "commit-types.log"
+    },
+    "commit-lint": {
+      "exitCode": 0,
+      "log": "commit-lint.log"
+    },
+    "e2e-final": {
+      "exitCode": 0,
+      "log": "e2e-final.log"
+    },
+    "web-build": {
+      "exitCode": 0,
+      "log": "web-build.log"
+    },
+    "harmony-test-complete": {
+      "exitCode": 0,
+      "log": "harmony-test-complete.log"
+    },
+    "harmony-dev-complete": {
+      "exitCode": 0,
+      "log": "harmony-dev-complete.log"
+    },
+    "web-ui-final": {
+      "exitCode": 0,
+      "log": "web-ui-final.log"
+    }
+  },
+  "unitTests": {
+    "passed": 929,
+    "failed": 0,
+    "files": 112
+  },
+  "harmonyTests": {
+    "passed": 83,
+    "failed": 0
+  },
+  "e2eTests": {
+    "passed": 14,
+    "failed": 0
+  },
+  "webUi": {
+    "source": "SYNTHETIC_MOCK",
+    "viewports": [
+      1360,
+      390
+    ],
+    "pageErrors": []
+  },
+  "hap": {
+    "flavor": "development",
+    "sha256": "5af596fee742e04130bf8c2544e74ad8a4197d7a3f9a5c9ccd9a4cb24278475f",
+    "installedAndAccepted": false
+  },
+  "featureDefault": {
+    "MISSION_EVIDENCE_FIT_ENABLED": false
+  },
+  "boundaries": {
+    "newDatabaseMigrations": 0,
+    "paidModelCalls": 0,
+    "realModelQualityVerified": false,
+    "humanGoldCompleted": false,
+    "D1D2Implemented": false,
+    "productionDeployed": false,
+    "emulatorIssue": "9568332 install sign info inconsistent; no application uninstall or data reset"
+  },
+  "excluded": [
+    "local signing configuration",
+    "credentials",
+    "local databases",
+    "generated Next configuration",
+    "historical research and packages"
+  ]
+}

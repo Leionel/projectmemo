@@ -1,0 +1,23 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/r4Investigation.test.ts (17 tests | 9 failed) 82607ms
+     × changes the next decision using a real 'RESEARCH' source and preserves one original Action 7172ms
+     × changes the next decision using a real 'COMPETITION' source and preserves one original Action 6890ms
+     × changes the next decision using a real 'COURSE' source and preserves one original Action 7112ms
+     × stops duplicate reads and replays the same request without extra HTTP 5914ms
+     × discards revoked and revised late responses before any proposal is published 8033ms
+     × confirms only published bindings and replays the same UI request as one effect 8553ms
+     × expires R4 proposals on the original confirmation path and preserves readable history 6664ms
+     × stops focus.ui_plan.v1 without subsequent reads or published effects 5248ms
+     × keeps a known answer and original proposal if UI generation is unknown, without replaying the model 6840ms
+ ❯ tests/copilotPersistence.test.ts (14 tests | 1 failed) 17716ms
+     × replays the additive migration on an old-schema copy without changing legacy data 6236ms
+ ❯ tests/missionContinuation.test.ts (10 tests | 1 failed) 21325ms
+     × 缺单位/时间、无关内容和冲突均继续等待 5703ms
+ ❯ tests/r4Research.test.ts (18 tests | 1 failed) 20983ms
+     × 原 HTTP 适配器与 Focus 完成用户 URL→读取→引用→确认归入→重放 7299ms

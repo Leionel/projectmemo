@@ -12,9 +12,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     if (!attachment) throw new AppError("NOT_FOUND", "附件不存在", 404);
     const data = await readAttachmentFile(attachment.storageKey).catch(() => null);
     if (!data) throw new AppError("NOT_FOUND", "附件原件暂时不可用", 404);
+    const url = new URL(request.url);
+    const isDownload = url.searchParams.get("download") === "1";
     return new Response(new Uint8Array(data), { headers: {
       "Content-Type": attachment.mimeType,
-      "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(attachment.fileName)}`,
+      "Content-Disposition": `${isDownload ? "attachment" : "inline"}; filename*=UTF-8''${encodeURIComponent(attachment.fileName)}`,
       "X-Content-Type-Options": "nosniff", "Cache-Control": "private, no-store",
     } });
   } catch (error) { return apiError(error); }

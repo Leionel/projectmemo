@@ -1,0 +1,13 @@
+async (page) => {
+  const metrics=[];
+  for (const [width,height] of [[1440,1000],[1280,900],[768,1024],[390,844]]) {
+    await page.setViewportSize({width,height});
+    await page.goto('http://127.0.0.1:33324/');
+    await page.getByRole('heading',{level:1}).waitFor();
+    await page.waitForFunction(()=>[...document.images].every(img=>img.complete&&img.naturalWidth>0));
+    await page.evaluate(async()=>{await document.fonts.ready;await Promise.all([...document.images].map(img=>img.decode()));await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});
+    metrics.push(await page.evaluate(()=>({width:innerWidth,headerHeight:document.querySelector('header').getBoundingClientRect().height,productTop:document.querySelector('main figure').getBoundingClientRect().top,titleSize:getComputedStyle(document.querySelector('h1')).fontSize})));
+    await page.screenshot({path:`evidence/pre-r4/20261023-hero-refinement/before-${width}.png`});
+  }
+  return metrics;
+}

@@ -1,0 +1,12 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/repoCi.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  10:28:33
+   Duration  3.31s (transform 1.43s, setup 0ms, import 2.34s, tests 530ms, environment 0ms)

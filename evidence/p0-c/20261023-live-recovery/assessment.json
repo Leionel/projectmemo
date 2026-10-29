@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "source": "USER_UPLOADED_ECS_RESULTS",
+  "dataOrigin": "SYNTHETIC",
+  "modelExecution": "REAL_MODEL",
+  "runId": "8c893117-6de1-414c-9d3e-788fc7217860",
+  "sourceRevision": "05c849aa974fb1a14cbe79763553721e4f37fd22c0e9417995506773134f96bd",
+  "files": {
+    "results.json": "8f2ea567d9db3b973ffae8ed8f2c687252f213e8fa46759a35ca6231814169b6",
+    "budget.json": "66d9d7a91ed9787ad73a6e188efd32b41c0b81b85ea5a307040f9b4d2ce6a2a2"
+  },
+  "totalCalls": 23,
+  "additionalCalls": 6,
+  "recordedCostUpperCny": 0.188372,
+  "unknownUsageRequests": 0,
+  "historicalFailures": 2,
+  "latestTrials": [
+    {
+      "repeat": 1,
+      "missionId": "cmvl1sume000nenra1b4on61l",
+      "status": "ENGINEERING_COMPLETED_PENDING_HUMAN_CONTENT_REVIEW",
+      "historical": true
+    },
+    {
+      "repeat": 2,
+      "missionId": "cmvl1t0wi001qenrahpk1j0jy",
+      "status": "ENGINEERING_COMPLETED_PENDING_HUMAN_CONTENT_REVIEW",
+      "historical": false
+    },
+    {
+      "repeat": 3,
+      "missionId": "cmvl1t7p0002menradxh3bqgm",
+      "status": "ENGINEERING_COMPLETED_PENDING_HUMAN_CONTENT_REVIEW",
+      "historical": false
+    }
+  ],
+  "review": {
+    "citationRangesAndHashes": "PASSED",
+    "claimRangesAndHashes": "PASSED",
+    "semanticJudge": "NOT_RUN",
+    "realProjectOutcome": "NOT_VERIFIED",
+    "freshVersionThreeIndependentTrials": "NOT_RUN",
+    "deviceAcceptance": "NOT_RUN"
+  }
+}

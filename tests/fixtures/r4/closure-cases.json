@@ -1,0 +1,9 @@
+{
+  "provenance": "FROZEN_SYNTHETIC_DEVELOPMENT_CASES_NOT_INDEPENDENTLY_GRADED",
+  "version": 1,
+  "cases": [
+    { "id": "latency", "domain": "RESEARCH", "title": "端侧延迟验收", "goal": "模型 V3 在设备 X、双线程下 P95 推理延迟不超过 60ms", "observation": "模型 V3，在设备 X，双线程，固定输入集，P95 推理延迟为 78ms；还未达到 60ms 目标。", "question": "这个部署能过验收吗？请调查原始记录，并提出一个待我确认的下一步行动。", "result": "用户执行记录：模型 V3，设备 X，双线程，固定输入集复测 P95 为 52ms。尚未核对长期稳定性，不能算系统独立验收。", "expectedInitial": ["78", "60"], "expectedFeedback": ["52"], "feedbackKind": "REPORTED_IMPROVEMENT" },
+    { "id": "offline", "domain": "COMPETITION", "title": "竞赛同版本交付", "goal": "竞赛同版本作品在目标机签名安装成功并完成离线首次演示", "observation": "竞赛作品同版本构建完成，但目标机签名安装失败，日志显示 profile 不匹配。没有离线首次启动回执。", "question": "离正式演示还差什么？先看原始记录，帮我处理最重要的一步，给我确认提案。", "result": "用户执行记录：同版本作品修正 profile 后已在目标机签名安装成功。离线首次启动失败：缺少本地模型资源；演示目标仍未完成。", "expectedInitial": ["签名", "安装"], "expectedFeedback": ["离线", "模型"], "feedbackKind": "REMAINING_BLOCKER" },
+    { "id": "split", "domain": "COURSE_DESIGN", "title": "课程同条件对照", "goal": "课程报告中 A 与 B 的结论来自同一 S2 数据划分且保留可复现原始输出", "observation": "课程实验 A 使用 S1 数据划分，B 使用 S2。当前两个分数不是同条件对照；报告的优势结论尚无同划分结果支持。", "question": "报告结论靠谱吗？请查原始实验记录，提出一项我确认后再创建的核对行动。", "result": "用户执行记录：A 已按 S2 重新运行。B 的原始输出和随机种子仍未找到，无法核对同条件对照结论；本轮结果保持未知。", "expectedInitial": ["S1", "S2"], "expectedFeedback": ["B", "未知"], "feedbackKind": "UNKNOWN" }
+  ]
+}

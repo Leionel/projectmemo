@@ -1,3 +1,6 @@
+import {readDecisionSnapshot} from "@/lib/decision/snapshot";
+import {assessImpact} from "@/lib/decision/impact";
+import {enqueueImpact} from "@/lib/decision/impactJobs";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { requireProject } from "@/lib/repositories/projects";
@@ -118,57 +121,11 @@ export async function analyzeChangeImpact(projectId: string, newFactText: string
   const ambiguousCandidateIds = picked.tieCandidateIds.length > 1 ? picked.tieCandidateIds : undefined;
 
 
-  // 3. 检索受影响的待办行动 (TODO 或 DOING)
-  const actions = await db.actionItem.findMany({
-    where: {
-      projectId,
-      status: { in: ["TODO", "DOING"] },
-    },
-  });
-
-  const impactedActions: ChangeImpactItem[] = [];
-  for (const act of actions) {
-    // 仅基于明确关系判断：待办直接源自被取代卡片，或待办标题明确提及旧卡片标题前缀
-    const isDirectlyRelated = supersededCard
-      ? act.sourceCardId === supersededCard.id ||
-        (supersededCard.title.length >= 2 && act.title.includes(supersededCard.title.substring(0, Math.min(6, supersededCard.title.length))))
-      : false;
-
-    if (isDirectlyRelated) {
-      impactedActions.push({
-        id: `impact-act-${act.id}`,
-        type: "ACTION",
-        targetId: act.id,
-        title: act.title,
-        impactReason: supersededCard
-          ? `该行动基于原决策【${supersededCard.title}】，新决策将导致其前提失效`
-          : "方案变更影响正在执行的任务前提",
-        proposedAction: "CANCEL",
-        confirmed: true,
-      });
-    }
-  }
-
-  // 4. 检索受影响的成果章节
-  const artifacts = await db.generatedArtifact.findMany({
-    where: { projectId },
-    orderBy: { createdAt: "desc" },
-    take: 3,
-  });
-
-  const impactedArtifacts: ChangeImpactItem[] = [];
-  for (const art of artifacts) {
-    impactedArtifacts.push({
-      id: `impact-art-${art.id}`,
-      type: "ARTIFACT",
-      targetId: art.id,
-      title: `${art.artifactType} 成果草稿`,
-      impactReason: "所引用的方案选型或关键实验数据已变更，建议重新生成以保证一致性",
-      proposedAction: "REGENERATE",
-      confirmed: true,
-    });
-  }
-
+  const snapshot=await db.$transaction(tx=>readDecisionSnapshot(tx,projectId));
+  const assessment=assessImpact(snapshot,supersededCard?[`card:${supersededCard.id}`]:[]);
+  const impactedActions:ChangeImpactItem[]=assessment.items.filter(i=>i.target.startsWith("action:")&&!i.historical).map(i=>({id:`impact-act-${i.target.slice(7)}`,type:"ACTION",targetId:i.target.slice(7),title:i.title,impactReason:"来源或相关依赖可能变化，请复核；这不证明旧事实为假",proposedAction:"UPDATE",confirmed:false}));
+  const artifactIds=[...new Set(assessment.items.filter(i=>i.target.startsWith("artifact:")).map(i=>i.target.slice(9).split("#")[0]))];
+  const impactedArtifacts:ChangeImpactItem[]=artifactIds.map(id=>({id:`impact-art-${id}`,type:"ARTIFACT",targetId:id,title:"含相关引用的成果块",impactReason:"仅相关引用块需复核，原成果和历史回执保留",proposedAction:"UPDATE",confirmed:false}));
   // 5. 将提案受控持久化到数据库 AgentRun (runType: EVALUATE)
   const run = await db.agentRun.create({
     data: {
@@ -177,6 +134,8 @@ export async function analyzeChangeImpact(projectId: string, newFactText: string
       status: "SUCCESS",
       provider: "change_impact_analyzer",
       trace: {
+        baseManifestHash:snapshot.sharedHash,
+        coverage:snapshot.coverage.state,
         newFactText: trimmed,
         supersededCardId: supersededCard ? supersededCard.id : null,
         ambiguousCandidateIds: ambiguousCandidateIds ?? [],
@@ -225,6 +184,7 @@ export async function confirmChangeImpact(projectId: string, input: ConfirmChang
   const result = await db.$transaction(async (tx) => {
     // 1. 校验提案受控合法性与项目归属
     const runId = input.proposalId.startsWith("cip_") ? input.proposalId.substring(4) : input.proposalId;
+    await tx.$executeRaw`UPDATE "AgentRun" SET "id"="id" WHERE "id"=${runId}`;
     const run = await tx.agentRun.findFirst({
       where: {
         id: runId,
@@ -252,6 +212,7 @@ export async function confirmChangeImpact(projectId: string, input: ConfirmChang
     const trace = (run.trace && typeof run.trace === "object" && !Array.isArray(run.trace)
       ? run.trace as Record<string, unknown>
       : {}) as {
+      baseManifestHash?:string; coverage?:string;
       newFactText?: string;
       supersededCardId?: string | null;
       ambiguousCandidateIds?: string[];
@@ -302,6 +263,7 @@ export async function confirmChangeImpact(projectId: string, input: ConfirmChang
       }
     }
 
+    if(trace.baseManifestHash){const current=await readDecisionSnapshot(tx,projectId);if(current.coverage.state!=="COMPLETE"||current.sharedHash!==trace.baseManifestHash)throw new AppError("SOURCE_CHANGED","依据已变化或超出当前分析范围，请重新分析再确认",409);}
     // 4. 创建新采集记录与知识卡片（严禁使用 JSON.stringify 存储 Json 数组）
     const capture = await tx.capture.create({
       data: {
@@ -383,6 +345,7 @@ export async function confirmChangeImpact(projectId: string, input: ConfirmChang
       createdActionsCount,
     };
 
+    await enqueueImpact(tx,projectId,`change:${run.id}`,[`card:${newCard.id}`,...(finalSupersededCardId?[`card:${finalSupersededCardId}`]:[])]);
     // 7. 原子标记提案已执行，记录幂等结果
     await tx.agentRun.update({
       where: { id: run.id },

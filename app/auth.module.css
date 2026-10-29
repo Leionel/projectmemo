@@ -1,0 +1,352 @@
+@font-face {
+  font-family: "PM Editorial";
+  src: url("/fonts/pm-editorial-serif.ttf") format("truetype");
+  font-weight: 500;
+  font-display: swap;
+}
+.auth {
+  width: min(1040px, calc(100% - 48px));
+  margin-inline: auto;
+  min-height: calc(100svh - 69px);
+  display: grid;
+  align-items: center;
+  padding-block: 4rem;
+}
+.auth * {
+  box-sizing: border-box;
+}
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7rem;
+  align-items: center;
+}
+.introduction {
+  padding-right: 1rem;
+}
+.eyebrow {
+  font-size: 0.8rem;
+  color: var(--teal);
+  margin-bottom: 1.5rem;
+}
+.introduction h2,
+.panel h1 {
+  font-family: "PM Editorial", "Songti SC", "SimSun", serif;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+}
+.introduction h2 {
+  font-size: clamp(2.5rem, 4vw, 3.5rem);
+  line-height: 1.5;
+}
+.introduction > p:last-of-type {
+  font-size: 0.95rem;
+  line-height: 2;
+  color: var(--ink-soft);
+  margin-top: 1.5rem;
+  max-width: 22rem;
+}
+.projectNote {
+  display: flex;
+  align-items: start;
+  gap: 0.9rem;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+  color: var(--teal);
+}
+.projectNote > svg {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+.projectNote strong {
+  display: block;
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 550;
+}
+.projectNote span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.8;
+  margin-top: 0.4rem;
+}
+.panel {
+  min-width: 0;
+  padding: 2.5rem;
+  border: 1px solid var(--rule);
+  border-radius: 1.5rem;
+  background: var(--paper-strong);
+  box-shadow: 0 24px 60px -40px rgb(28 46 44 / 24%);
+}
+.panel header {
+  margin-bottom: 1.8rem;
+}
+.panel h1 {
+  font-size: 1.9rem;
+  line-height: 1.55;
+}
+.panel header p {
+  font-size: 0.85rem;
+  line-height: 1.9;
+  color: var(--muted);
+  margin-top: 0.65rem;
+}
+.field {
+  margin-bottom: 1.25rem;
+}
+.field label {
+  display: block;
+  font-size: 0.83rem;
+  font-weight: 550;
+  color: var(--ink);
+}
+.field input {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 0.5rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 0.6rem;
+  background: var(--paper-strong);
+  color: var(--ink);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  transition:
+    border-color 120ms,
+    box-shadow 120ms;
+}
+.field input::placeholder {
+  color: var(--muted);
+  opacity: 0.85;
+}
+.field input:focus {
+  border-color: var(--teal);
+  outline: 2px solid var(--teal-pale);
+  outline-offset: 2px;
+}
+.field input:disabled {
+  opacity: 0.65;
+}
+.field > p {
+  font-size: 0.72rem;
+  line-height: 1.8;
+  color: var(--muted);
+  margin-top: 0.4rem;
+}
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.passwordToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 32px;
+  padding-inline: 0.25rem;
+  color: var(--muted);
+  font-size: 0.73rem;
+  cursor: pointer;
+}
+.submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 1.75rem;
+  border: 1px solid var(--teal);
+  border-radius: 0.65rem;
+  background: var(--teal);
+  color: var(--paper-strong);
+  font-size: 0.88rem;
+  font-weight: 550;
+  cursor: pointer;
+  transition:
+    transform 100ms,
+    filter 120ms;
+}
+.submit:active {
+  transform: scale(0.985);
+}
+.submit:hover {
+  filter: brightness(0.95);
+}
+.submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none;
+}
+.links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border-top: 1px solid var(--rule);
+  margin-top: 1.75rem;
+  padding-top: 1rem;
+}
+.links a,
+.resendLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--teal);
+  font-size: 0.78rem;
+}
+.resendLink {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+.links a:hover,
+.resendLink:hover,
+.help a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+.error,
+.serviceNotice {
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+  border-radius: 0.6rem;
+  font-size: 0.78rem;
+  line-height: 1.85;
+}
+.error {
+  display: flex;
+  align-items: start;
+  gap: 0.6rem;
+  background: var(--brick-pale);
+  color: var(--brick);
+}
+.error > svg {
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+}
+.serviceNotice {
+  background: var(--paper);
+  color: var(--ink-soft);
+  border: 1px solid var(--rule);
+}
+.serviceNotice a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 36px;
+  color: var(--teal);
+}
+.help {
+  font-size: 0.72rem;
+  line-height: 1.85;
+  color: var(--muted);
+  margin-top: 1rem;
+}
+.help a {
+  color: var(--teal);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.success {
+  padding-block: 0.5rem;
+}
+.success > svg {
+  color: var(--teal);
+  margin-bottom: 1rem;
+}
+.success h2 {
+  font-size: 1rem;
+  font-weight: 550;
+}
+.success p {
+  font-size: 0.85rem;
+  line-height: 1.95;
+  color: var(--ink-soft);
+  margin-top: 0.8rem;
+}
+.success > a:not(.submit) {
+  display: block;
+  margin-top: 1.2rem;
+  color: var(--teal);
+  font-size: 0.8rem;
+  min-height: 44px;
+}
+.loading {
+  text-align: center;
+  color: var(--muted);
+}
+.spinner {
+  animation: spin 1s linear infinite;
+}
+.auth a:focus-visible,
+.auth button:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 4px;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (max-width: 1000px) {
+  .layout {
+    gap: 3rem;
+  }
+  .panel {
+    padding: 2rem;
+  }
+}
+@media (max-width: 700px) {
+  .auth {
+    width: calc(100% - 36px);
+    padding-block: 2rem;
+    align-items: start;
+  }
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+    max-width: 28rem;
+    width: 100%;
+    margin-inline: auto;
+  }
+  .introduction {
+    padding: 0;
+  }
+  .eyebrow {
+    margin-bottom: 0.7rem;
+  }
+  .introduction h2 {
+    font-size: 1.9rem;
+  }
+  .introduction h2 br {
+    display: none;
+  }
+  .introduction > p:last-of-type,
+  .projectNote {
+    display: none;
+  }
+  .panel {
+    padding: 1.5rem;
+    border-radius: 1.2rem;
+  }
+  .panel h1 {
+    font-size: 1.65rem;
+  }
+  .passwordToggle {
+    min-height: 44px;
+  }
+  .panel header {
+    margin-bottom: 1.4rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth * {
+    transition: none;
+    animation: none;
+  }
+}

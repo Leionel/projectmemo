@@ -1,0 +1,21 @@
+### Result
+[{"width":1440,"headerHeight":69,"productTop":780.421875,"titleSize":"52px"},{"width":1280,"headerHeight":69,"productTop":778.171875,"titleSize":"51.2px"},{"width":768,"headerHeight":69,"productTop":694.625,"titleSize":"52px"},{"width":390,"headerHeight":65,"productTop":592.828125,"titleSize":"32.37px"}]
+### Ran Playwright code
+```js
+await (async (page) => {
+  const metrics=[];
+  for (const [width,height] of [[1440,1000],[1280,900],[768,1024],[390,844]]) {
+    await page.setViewportSize({width,height});
+    await page.goto('http://127.0.0.1:33324/');
+    await page.getByRole('heading',{level:1}).waitFor();
+    await page.waitForFunction(()=>[...document.images].every(img=>img.complete&&img.naturalWidth>0));
+    await page.evaluate(async()=>{await document.fonts.ready;await Promise.all([...document.images].map(img=>img.decode()));await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});
+    metrics.push(await page.evaluate(()=>({width:innerWidth,headerHeight:document.querySelector('header').getBoundingClientRect().height,productTop:document.querySelector('main figure').getBoundingClientRect().top,titleSize:getComputedStyle(document.querySelector('h1')).fontSize})));
+    await page.screenshot({path:`evidence/pre-r4/20261023-hero-refinement/before-${width}.png`});
+  }
+  return metrics;
+}
+)(page);
+```
+### Events
+- New console entries: .playwright-cli\console-2026-10-23T01-01-56-601Z.log#L308

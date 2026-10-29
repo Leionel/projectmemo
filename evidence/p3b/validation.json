@@ -1,0 +1,42 @@
+{
+  "baseline": "56f1edb7842f62b398a9ece65ab6f1136341c4a7",
+  "date": "2026-10-24",
+  "environment": "isolated local SQLite per test file; GitHub responses injected as fixtures (no real external calls from dev box)",
+  "paid_model_calls_this_phase": 0,
+  "external_credentials": "none (anonymous public-repo MVP)",
+  "unit": {
+    "files": 107,
+    "passed": 870,
+    "new": ["tests/repoSensing.test.ts (12)", "tests/repoSignalNativeContract.test.ts (1)"]
+  },
+  "harmony": {
+    "hypium": { "passed": 83, "failed": 0, "note": "includes repoSignalContract x3" },
+    "hap_build": "passed (harmony-build exit 0)"
+  },
+  "types_and_lint": { "tsc": "exit 0", "eslint": "0 errors 0 warnings" },
+  "e2e": {
+    "expected": 14,
+    "failed": 0,
+    "note": "one 13/14 run occurred when run-e2e was invoked without setup-e2e (stale isolated-DB demo state, '模拟数据' reminder assertion); canonical setup-then-run sequence passed 14/14"
+  },
+  "deploy_preflight": {
+    "typegen": "exit 0",
+    "tsc_heap_1280": "exit 0",
+    "logs": "evidence/p3b/deploy-preflight/"
+  },
+  "migration": {
+    "name": "20261024100000_repo_sensing",
+    "empty_replay": "passed (scratch database, deleted afterwards)",
+    "touches": "creates SourceConnection and ExternalSignal with indexes only"
+  },
+  "ecs_preflight_by_user": {
+    "api_github_reachability": "HTTP/2 200-class responses via GET (HEAD returns 404 by GitHub design)",
+    "anonymous_core_limit": "60/hour, remaining 60 at check time",
+    "target_demo_repo": "Leionel/luojia-math-tutor-skill (user-selected for the demo project)"
+  },
+  "open_gates": [
+    "real repo change -> candidate -> adopt chain on production (runs after deploy)",
+    "Harmony simulator and physical device",
+    "PR/CI signal classes, private credentials, periodic subscriptions (deferred by roadmap)"
+  ]
+}

@@ -9,6 +9,7 @@ export default defineConfig([
     ".next/**",
     ".workbuddy/**", // Local build output and agent scratch files, not application source.
     ".next-e2e/**",
+    ".next-*/**", // Isolated previews and guarded release builds are generated output.
     "lib/generated/**",
     "coverage/**",
     "playwright-report/**",
@@ -16,5 +17,7 @@ export default defineConfig([
     // generated preview/build output and third-party oh_modules as TypeScript.
     "harmonyos/**",
     "tmp/**",
+    "evidence/**", // Archived probes and receipts are validated separately from application source.
+    "docs/**", // Research notes and archived probe scripts (e.g. working/*.cjs), not application source.
   ]),
 ]);

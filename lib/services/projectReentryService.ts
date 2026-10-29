@@ -1,6 +1,7 @@
 import { AppError } from "@/lib/api";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { db } from "@/lib/db";
+import { getProjectAgentContext } from "./projectAgentContextService";
 import type {
   ReentryData,
   ReentryEpisodePart,
@@ -13,7 +14,7 @@ import type {
 import { assessActionFeasibility } from "@/lib/services/actionFeasibilityService";
 import { getLatestPublishedEpisode } from "@/lib/services/projectEpisodeService";
 import { getCurrentSchedulePlan } from "@/lib/services/scheduleService";
-import { getLatestProjectState, getProjectStateDiff } from "@/lib/services/projectStateService";
+import { getLatestProjectState, getProjectStateDiff, getProjectStateFreshness } from "@/lib/services/projectStateService";
 
 function ensureReentryEnabled() {
   if (!isFeatureEnabled("PROJECT_REENTRY_ENABLED", false)) {
@@ -58,6 +59,7 @@ async function resolveScheduleOwner(projectId: string): Promise<string | null> {
 function deriveFreshness(episode: ReentryEpisodePart, schedule: ReentrySchedulePart, risk: ReentryRiskPart): ReentryFreshness {
   const metas = [episode.meta, schedule.meta, risk.meta];
   if (metas.some((meta) => meta.status === "FAILED")) return "FAILED";
+  if (metas.some((meta) => meta.status === "STALE")) return "STALE";
   if (episode.status === "STALE" || episode.status === "PARTIALLY_STALE" || schedule.status === "STALE") return "STALE";
   if (metas.every((meta) => meta.status === "EMPTY")) return "EMPTY";
   return "FRESH";
@@ -159,6 +161,10 @@ export async function getProjectReentry(projectId: string, userId?: string | nul
         risk.meta = emptyMeta();
       } else {
         const payload = snapshot.payload;
+        const freshness = await getProjectStateFreshness(projectId);
+        const snapshotMeta: ReentrySectionMeta = freshness.status === "FRESH" ? okMeta(snapshot.evaluatedAt)
+          : { status: freshness.status === "FAILED" ? "FAILED" : "STALE", observedAt: snapshot.evaluatedAt,
+            errorCode: freshness.errorCode, message: freshness.errorMessage ?? "快照已到重新核对时间，请刷新状态后查看当前判断" };
         const severityOrder = { HIGH: 0, MEDIUM: 1, LOW: 2 } as const;
         const topRisk = [...payload.risks].sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity])[0];
         const unknown = payload.unknowns[0];
@@ -169,7 +175,7 @@ export async function getProjectReentry(projectId: string, userId?: string | nul
             entityId: topRisk.stableKey,
             kind: "RISK",
             actionId: null,
-            meta: okMeta(snapshot.evaluatedAt),
+            meta: snapshotMeta,
           };
         } else if (unknown) {
           risk = {
@@ -178,7 +184,7 @@ export async function getProjectReentry(projectId: string, userId?: string | nul
             entityId: null,
             kind: "UNKNOWN",
             actionId: null,
-            meta: okMeta(snapshot.evaluatedAt),
+            meta: snapshotMeta,
           };
         } else {
           risk.meta = emptyMeta();
@@ -227,7 +233,10 @@ export async function getProjectReentry(projectId: string, userId?: string | nul
     schedule = { ...schedule, meta: failedMeta(error) };
   }
 
-  const freshness = deriveFreshness(episode, schedule, risk);
+  const agentContext = userId ? await getProjectAgentContext(userId,projectId) : null;
+  let freshness = deriveFreshness(episode, schedule, risk);
+  if(agentContext?.freshness==="UNAVAILABLE"||agentContext?.freshness==="PARTIAL")freshness="FAILED";
+  else if(freshness==="EMPTY"&&agentContext&&agentContext.nextStep.attentionKind!=="CAPTURE")freshness="FRESH";
 
   // ---- 主操作：先看变化，再解阻塞，再开始行动 ----
   let primaryAction: ReentryPrimaryAction = "START_ACTION";
@@ -250,6 +259,10 @@ export async function getProjectReentry(projectId: string, userId?: string | nul
     primaryAction = "VIEW_CHANGES";
     primaryMessage = "风险数据暂时不可用，其余信息仍可查看";
     primaryTargetId = null;
+  } else if (risk.meta.status === "STALE") {
+    primaryAction = "VIEW_CHANGES";
+    primaryMessage = "项目状态已到重新核对时间，请先刷新状态";
+    primaryTargetId = null;
   } else if (!schedule.blockId) {
     primaryAction = episode.episodeId ? "START_ACTION" : "ADD_EVIDENCE";
     primaryMessage = episode.episodeId ? "从检查点选择下一步，并安排到未来时间" : "先整理一次阶段进展，再选择下一步";
@@ -261,6 +274,7 @@ export async function getProjectReentry(projectId: string, userId?: string | nul
   }
 
   return {
+    ...(userId ? {agentContext} : {}),
     projectId: project.id,
     projectName: project.title,
     freshness,

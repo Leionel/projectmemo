@@ -63,10 +63,10 @@ export function ArtifactAuditPanel({ projectId, artifactId, onClose }: { project
     <div className="flex flex-wrap items-start justify-between gap-2">
       <div>
         <p className="flex items-center gap-1.5 text-xs font-black text-[var(--navy)]"><ScanSearch size={15} className="text-[var(--teal-strong)]" />证据透视</p>
-        {audit && <p className="mt-1 text-[11px] text-[var(--muted)]">重新核对于 {new Date(audit.recheckedAt).toLocaleString("zh-CN", { hour12: false })} · 生成于 {new Date(audit.generatedAt).toLocaleString("zh-CN", { hour12: false })}</p>}
+        {audit && <p className="mt-1 text-xs text-[var(--muted)]">重新核对于 {new Date(audit.recheckedAt).toLocaleString("zh-CN", { hour12: false })} · 生成于 {new Date(audit.generatedAt).toLocaleString("zh-CN", { hour12: false })}</p>}
       </div>
       <div className="flex gap-2">
-        <button type="button" onClick={() => void reload()} disabled={loading} className="focus-ring rounded-md bg-[var(--paper-strong)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)] disabled:opacity-50">{loading ? <LoaderCircle size={12} className="animate-spin" /> : "重新核对"}</button>
+        <button type="button" onClick={() => void reload()} disabled={loading} className="focus-ring rounded-md bg-[var(--paper-strong)] px-2 py-1 text-xs font-bold text-[var(--teal-strong)] disabled:opacity-50">{loading ? <LoaderCircle size={12} className="animate-spin" /> : "重新核对"}</button>
         <button type="button" onClick={onClose} aria-label="收起证据透视" className="focus-ring rounded-md p-1 text-[var(--muted)] hover:bg-[var(--paper-strong)]"><X size={14} /></button>
       </div>
     </div>
@@ -75,44 +75,44 @@ export function ArtifactAuditPanel({ projectId, artifactId, onClose }: { project
     {error && <p role="alert" className="mt-3 rounded-lg bg-[var(--brick-pale)] px-3 py-2 text-xs font-semibold text-[var(--brick)]">{error}</p>}
 
     {audit && <>
-      <p className="mt-3 rounded-lg bg-[var(--paper-strong)] px-3 py-2 text-[11px] leading-5 text-[var(--ink-soft)]">{audit.message}</p>
-      <p className={"mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-bold " + (audit.untraceable ? "bg-[var(--amber)]/15 text-[var(--amber)]" : "bg-[var(--teal-pale)] text-[var(--teal-strong)]")}>
+      <p className="mt-3 rounded-lg bg-[var(--paper-strong)] px-3 py-2 text-xs leading-5 text-[var(--ink-soft)]">{audit.message}</p>
+      <p className={"mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-bold " + (audit.untraceable ? "bg-[var(--amber)]/15 text-[var(--amber)]" : "bg-[var(--teal-pale)] text-[var(--teal-strong)]")}>
         {audit.untraceable ? <TriangleAlert size={12} /> : <ShieldCheck size={12} />}{audit.missionProvenance?"委托成果来源映射 · 语义未核验":claimsStatusCopy[audit.claimsStatus] ?? audit.claimsStatus}
       </p>
 
       {audit.missionProvenance&&<div className="mt-3 text-xs"><p>来自委托草稿版本 {audit.missionProvenance.outputRevision}</p>{audit.missionProvenance.blocks.map(b=><p key={b.blockId}>{b.blockId} · {b.state==="STALE"?"来源已变化":b.state==="CONFLICT"?"来源存在争议":b.state==="UNKNOWN"?"来源状态未知":"来源版本相符，内容未核验"}</p>)}</div>}
       {audit.claims.length > 0 && <div className="mt-3">
-        <p className="text-[11px] font-black text-[var(--navy)]">逐句核验（{audit.claims.length}）</p>
+        <p className="text-xs font-black text-[var(--navy)]">逐句核验（{audit.claims.length}）</p>
         <ul className="mt-1.5 space-y-1.5">
           {audit.claims.map((claim) => <li key={claim.claimId} className="rounded-lg bg-[var(--paper-strong)] p-2.5">
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className={"rounded px-1.5 py-0.5 text-[10px] font-bold " + (stateTone[claim.state] ?? "bg-[var(--paper-strong)] text-[var(--muted)]")}>{claim.stateLabel}</span>
-              <span className="rounded bg-[var(--card-bg)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--ink-soft)]">{claim.verification === "TEMPLATE_BOUND" ? "模板绑定" : "语义未核验"}</span>
-              {claim.section && <span className="text-[10px] text-[var(--muted)]">{claim.section}</span>}
+              <span className={"rounded px-1.5 py-0.5 text-[11px] font-bold " + (stateTone[claim.state] ?? "bg-[var(--paper-strong)] text-[var(--muted)]")}>{claim.stateLabel}</span>
+              <span className="rounded bg-[var(--card-bg)] px-1.5 py-0.5 text-[11px] font-bold text-[var(--ink-soft)]">{claim.verification === "TEMPLATE_BOUND" ? "模板绑定" : "语义未核验"}</span>
+              {claim.section && <span className="text-[11px] text-[var(--muted)]">{claim.section}</span>}
             </div>
-            <p className="mt-1 text-[11px] leading-5 text-[var(--ink)]">{claim.text}</p>
+            <p className="mt-1 text-xs leading-5 text-[var(--ink)]">{claim.text}</p>
             {claim.cardStates.length > 0 && <ul className="mt-1.5 space-y-1">
-              {claim.cardStates.map((state) => <li key={state.cardId} className="rounded bg-[var(--card-bg)] px-2 py-1 text-[10px] leading-4 text-[var(--ink-soft)]">
+              {claim.cardStates.map((state) => <li key={state.cardId} className="rounded bg-[var(--card-bg)] px-2 py-1 text-[11px] leading-4 text-[var(--ink-soft)]">
                 <a href={projectHref(projectId,`#card-${state.cardId}`)} className="focus-ring font-bold text-[var(--teal-strong)] underline underline-offset-2">{state.statusLabel}</a>
                 {state.displayReason ? ` · ${state.displayReason}` : ""}
               </li>)}
             </ul>}
-            {claim.cardIds.length === 0 && <p className="mt-1 text-[10px] font-semibold text-[var(--amber)]">这句话没有绑定可核验的记录</p>}
+            {claim.cardIds.length === 0 && <p className="mt-1 text-[11px] font-semibold text-[var(--amber)]">这句话没有绑定可核验的记录</p>}
           </li>)}
         </ul>
       </div>}
 
       {audit.recheck.length > 0 && <div className="mt-3">
-        <p className="text-[11px] font-black text-[var(--navy)]">生成时引用的记录 · 当前重检（{audit.recheck.length}）</p>
+        <p className="text-xs font-black text-[var(--navy)]">生成时引用的记录 · 当前重检（{audit.recheck.length}）</p>
         <ul className="mt-1.5 space-y-1.5">
           {audit.recheck.map((item) => <li key={item.cardId} className="rounded-lg bg-[var(--paper-strong)] p-2.5">
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className={"rounded px-1.5 py-0.5 text-[10px] font-bold " + (stateTone[item.topLevelState] ?? "bg-[var(--paper-strong)] text-[var(--muted)]")}>{item.statusLabel}</span>
-              <a href={projectHref(projectId,`#card-${item.cardId}`)} className="focus-ring text-[11px] font-bold text-[var(--navy)] underline underline-offset-2">{item.titleSnapshot}</a>
+              <span className={"rounded px-1.5 py-0.5 text-[11px] font-bold " + (stateTone[item.topLevelState] ?? "bg-[var(--paper-strong)] text-[var(--muted)]")}>{item.statusLabel}</span>
+              <a href={projectHref(projectId,`#card-${item.cardId}`)} className="focus-ring text-xs font-bold text-[var(--navy)] underline underline-offset-2">{item.titleSnapshot}</a>
             </div>
-            <p className="mt-1 line-clamp-2 text-[10px] leading-4 text-[var(--ink-soft)]">冻结摘要：{item.summarySnapshot}</p>
-            {item.displayReason && <p className="mt-1 text-[10px] font-semibold text-[var(--amber)]">{item.displayReason}</p>}
-            {item.supersededByTitle && <p className="mt-1 rounded bg-[var(--card-bg)] px-2 py-1 text-[10px] leading-4 text-[var(--ink-soft)]">
+            <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-[var(--ink-soft)]">冻结摘要：{item.summarySnapshot}</p>
+            {item.displayReason && <p className="mt-1 text-[11px] font-semibold text-[var(--amber)]">{item.displayReason}</p>}
+            {item.supersededByTitle && <p className="mt-1 rounded bg-[var(--card-bg)] px-2 py-1 text-[11px] leading-4 text-[var(--ink-soft)]">
               已被「{item.supersededByTitle}」取代{item.supersededConfirmedAt ? ` · 确认于 ${new Date(item.supersededConfirmedAt).toLocaleString("zh-CN", { hour12: false })}` : ""}{item.supersededReason ? ` · 原因：${item.supersededReason}` : ""}
             </p>}
           </li>)}
@@ -120,18 +120,18 @@ export function ArtifactAuditPanel({ projectId, artifactId, onClose }: { project
       </div>}
 
       {audit.generationRefs.length > 0 && <details className="mt-3 rounded-lg bg-[var(--paper-strong)] p-2.5">
-        <summary className="focus-ring cursor-pointer text-[11px] font-bold text-[var(--ink-soft)]">生成时冻结的引用快照（{audit.generationRefs.length}）</summary>
+        <summary className="focus-ring cursor-pointer text-xs font-bold text-[var(--ink-soft)]">生成时冻结的引用快照（{audit.generationRefs.length}）</summary>
         <ul className="mt-1.5 space-y-1.5">
-          {audit.generationRefs.map((ref) => <li key={ref.cardId} className="rounded bg-[var(--card-bg)] p-2 text-[10px] leading-4 text-[var(--ink-soft)]">
+          {audit.generationRefs.map((ref) => <li key={ref.cardId} className="rounded bg-[var(--card-bg)] p-2 text-[11px] leading-4 text-[var(--ink-soft)]">
             <span className="font-bold text-[var(--navy)]">{ref.titleSnapshot}</span>
             <span className="ml-1.5 text-[var(--muted)]">观察于 {ref.observedAt ? new Date(ref.observedAt).toLocaleString("zh-CN", { hour12: false }) : "—"}</span>
             <span className="mt-0.5 block line-clamp-2">{ref.summarySnapshot}</span>
           </li>)}
         </ul>
-        <p className="mt-1.5 text-[10px] text-[var(--muted)]">快照保存生成当时的记录内容，不随后续编辑变化；当前状态以上面的重检结果为准。</p>
+        <p className="mt-1.5 text-[11px] text-[var(--muted)]">快照保存生成当时的记录内容，不随后续编辑变化；当前状态以上面的重检结果为准。</p>
       </details>}
 
-      {!audit.untraceable && audit.claims.length === 0 && audit.recheck.length === 0 && <p className="mt-3 rounded-lg bg-[var(--paper-strong)] px-3 py-2 text-[11px] leading-5 text-[var(--ink-soft)]">这份成果没有可核对的引用：它可能是在项目还没有记忆时生成的。补充记录后重新生成，就能逐句回溯。</p>}
+      {!audit.untraceable && audit.claims.length === 0 && audit.recheck.length === 0 && <p className="mt-3 rounded-lg bg-[var(--paper-strong)] px-3 py-2 text-xs leading-5 text-[var(--ink-soft)]">这份成果没有可核对的引用：它可能是在项目还没有记忆时生成的。补充记录后重新生成，就能逐句回溯。</p>}
     </>}
   </div>;
 }

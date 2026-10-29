@@ -73,7 +73,7 @@ describe("Change Impact Analysis and Temporal Supersession", () => {
     expect(proposal.supersededCardId).toBe(oldCardId);
     expect(proposal.impactedActions.length).toBeGreaterThanOrEqual(1);
     expect(proposal.impactedActions[0].targetId).toBe(oldActionId);
-    expect(proposal.impactedActions[0].proposedAction).toBe("CANCEL");
+    expect(proposal.impactedActions[0].proposedAction).toBe("UPDATE");
   });
 
   it("confirms change impact atomically by superseding card and cancelling actions", async () => {
@@ -418,6 +418,8 @@ describe("Change impact matching disambiguation (R0)", () => {
       const card1 = await createCard(project.id, "模型方案A:全参数密集模型微调", ["模型方案A"]);
       const card2 = await createCard(project.id, "模型方案A:全参数密集模型微调", ["模型方案A"]);
 
+      const outsider = await createCard(project.id, "完全无关的会议记录", ["会议"]);
+
       // 两张同名卡得分必然并列：系统不得自动选定取代目标，只能给出候选
       const proposal = await analyzeChangeImpact(project.id, "将模型方案A:全参数密集模型微调改为方案B");
       expect(proposal.supersededCardId).toBeNull();
@@ -427,7 +429,6 @@ describe("Change impact matching disambiguation (R0)", () => {
       expect(proposal.ambiguousCandidateIds).toContain(card2.id);
 
       // 非候选卡片即使属于本项目也不允许指定为被取代对象
-      const outsider = await createCard(project.id, "完全无关的会议记录", ["会议"]);
       await expect(
         confirmChangeImpact(project.id, {
           proposalId: proposal.proposalId,

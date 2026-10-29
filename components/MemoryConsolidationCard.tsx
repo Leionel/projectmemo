@@ -141,23 +141,23 @@ export function MemoryConsolidationCard({ projectId, enabled }: { projectId: str
           <p className="flex items-start gap-1.5 text-xs font-semibold text-[var(--amber)]"><TriangleAlert size={13} className="mt-0.5 shrink-0" />{proposal.reason}</p>
           <div className="mt-2.5 grid gap-2 sm:grid-cols-2">
             <div className="rounded-lg border border-[var(--teal)]/40 bg-[var(--teal-pale)] p-2.5">
-              <p className="text-[11px] font-black text-[var(--teal-strong)]">建议主记录</p>
+              <p className="text-xs font-black text-[var(--teal-strong)]">建议主记录</p>
               <p className="mt-1 text-xs font-bold text-[var(--navy)]">《{master?.title}》</p>
               <p className="mt-1 text-xs leading-5 text-[var(--ink-soft)]">{master?.summary}</p>
             </div>
             <div className="rounded-lg border border-[var(--rule)] bg-[var(--paper-strong)] p-2.5">
-              <p className="text-[11px] font-black text-[var(--muted)]">候选归并记录</p>
+              <p className="text-xs font-black text-[var(--muted)]">候选归并记录</p>
               {others.map((card) => <div key={card.id} className="mt-1">
                 <p className="text-xs font-bold text-[var(--navy)]">《{card.title}》</p>
                 <p className="text-xs leading-5 text-[var(--ink-soft)]">{card.summary}</p>
-                <a href={`#card-${card.id}`} className="focus-ring text-[11px] font-bold text-[var(--teal-strong)] underline underline-offset-2">打开原记录</a>
+                <a href={`#card-${card.id}`} className="focus-ring text-xs font-bold text-[var(--teal-strong)] underline underline-offset-2">打开原记录</a>
               </div>)}
             </div>
           </div>
           <details className="mt-2.5">
-            <summary className="focus-ring w-fit cursor-pointer list-none rounded text-[11px] font-bold text-[var(--muted)] hover:text-[var(--teal-strong)]">合并预览与保留的原始来源</summary>
+            <summary className="focus-ring w-fit cursor-pointer list-none rounded text-xs font-bold text-[var(--muted)] hover:text-[var(--teal-strong)]">合并预览与保留的原始来源</summary>
             <pre className="mt-2 whitespace-pre-wrap rounded-lg bg-[var(--paper-strong)] p-2.5 font-sans text-xs leading-5 text-[var(--ink-soft)]">{proposal.mergedPreview}</pre>
-            <p className="mt-2 text-[11px] text-[var(--muted)]">归并后仍保留：{proposal.preservedSources.join("、")}。</p>
+            <p className="mt-2 text-xs text-[var(--muted)]">归并后仍保留：{proposal.preservedSources.join("、")}。</p>
           </details>
           <div className="mt-3 flex flex-wrap justify-end gap-2">
             <button type="button" onClick={() => setProposals((old) => old.filter((item) => item.proposalId !== proposal.proposalId))} className="focus-ring rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--muted)] hover:bg-[var(--paper-strong)]">暂不处理</button>

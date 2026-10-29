@@ -3,6 +3,7 @@ import { common } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { UserInfo } from '../models/Auth';
 import { WidgetDataService } from './WidgetDataService';
+import { ConversationDraftStore } from './ConversationDraftStore';
 
 const TAG = 'SessionStore';
 const DOMAIN = 0x0000;
@@ -110,6 +111,7 @@ export class SessionStore {
     SessionStore.cachedToken = '';
     SessionStore.cachedExpiresAt = '';
     SessionStore.cachedUser = new UserInfo();
+    await ConversationDraftStore.clear().catch((): void => {});
 
     const ctx = SessionStore.appContext;
     if (ctx === undefined) {

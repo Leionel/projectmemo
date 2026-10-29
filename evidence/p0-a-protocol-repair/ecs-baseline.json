@@ -1,0 +1,30 @@
+{
+  "source": "USER_SUPPLIED_ECS_TERMINAL",
+  "release": "bda4da9cecb6ef39de36b5ef0c0717df7a22237f",
+  "deployment": "HEALTH_CHECK_PASSED",
+  "runId": "8c893117-6de1-414c-9d3e-788fc7217860",
+  "realModelRequests": 17,
+  "costUpperCny": 0.124676,
+  "protocol": "PASSED",
+  "trials": [
+    {
+      "repeat": 1,
+      "status": "ENGINEERING_COMPLETED_PENDING_HUMAN_CONTENT_REVIEW"
+    },
+    {
+      "repeat": 2,
+      "status": "FAILED",
+      "reason": "INVALID_JSON",
+      "finishReason": "stop",
+      "responseChars": 1164
+    },
+    {
+      "repeat": 3,
+      "status": "FAILED",
+      "reason": "INVALID_JSON",
+      "finishReason": "stop",
+      "responseChars": 758
+    }
+  ],
+  "rawFailedModelResponsesAvailable": false
+}

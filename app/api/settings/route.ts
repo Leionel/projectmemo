@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getChatProviderDefaults } from "@/lib/config/provider";
 import { authenticateUser } from "@/lib/auth/guard";
+import { requireLegacyConfigurationAccess } from "@/lib/auth/cloudQuota";
 
 export const runtime = "nodejs";
 
@@ -72,6 +73,9 @@ export async function POST(request: Request) {
   }
 
   try {
+    const { user } = await authenticateUser(request);
+    try { await requireLegacyConfigurationAccess(user.id); }
+    catch { return errorResponse("CONFIGURATION_FORBIDDEN", "公开注册账号无权修改服务器模型配置。", 403); }
     const parsed = settingsSchema.safeParse(await request.json());
     if (!parsed.success) {
       return errorResponse("INVALID_SETTINGS", "模型设置格式不正确。", 400);

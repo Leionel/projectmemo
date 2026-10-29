@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/r4Investigation.test.ts tests/conversationAnchor.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  2 passed (2)
+      Tests  38 passed (38)
+   Start at  23:06:28
+   Duration  18.56s (transform 1.17s, setup 0ms, import 4.14s, tests 13.92s, environment 0ms)
+

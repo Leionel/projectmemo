@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-24T10:59:08.628Z",
+  "request": {
+    "method": "POST",
+    "path": "/api/projects/cmvmabwy10003svrawzrfth86/repo-signals/signals/cmvmaceg0000zsvra9x7f6lsk",
+    "body": {
+      "action": "ADOPT",
+      "actionId": "cmvmacocy0012svra17vkkl97",
+      "requestId": "7c10cd3c-f987-40a6-bbf9-07d44c2bd461"
+    },
+    "authorized": true
+  },
+  "status": 200,
+  "body": {
+    "signal": {
+      "id": "cmvmaceg0000zsvra9x7f6lsk",
+      "connectionId": "cmvmacdtb0006svran5dce3b2",
+      "kind": "COMMITS",
+      "sha": "accd40d3401a9775bf8653c744af15bc003fc0c7",
+      "title": "docs: record clean R3 release validation",
+      "authorName": "Shengxin Xiao",
+      "committedAt": "2026-10-15T15:43:40.000Z",
+      "url": "https://github.com/Leionel/luojia-math-tutor-skill/commit/accd40d3401a9775bf8653c744af15bc003fc0c7",
+      "status": "ADOPTED",
+      "adoptedAt": "2026-10-24T10:59:08.761Z",
+      "adoptedCaptureId": "cmvmadlci0017svraqrfupk1u",
+      "linkedActionId": "cmvmacocy0012svra17vkkl97"
+    },
+    "captureId": "cmvmadlci0017svraqrfupk1u"
+  }
+}

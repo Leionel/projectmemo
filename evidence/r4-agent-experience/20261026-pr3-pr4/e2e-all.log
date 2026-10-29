@@ -1,0 +1,47 @@
+
+[e2e] build isolated production server
+▲ Next.js 16.2.11 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+Turbopack build encountered 1 warnings:
+./next.config.ts
+Encountered unexpected file in NFT list
+A file was traced that indicates that the whole project was traced unintentionally. Somewhere in the import trace below, there are:
+- filesystem operations (like path.join, path.resolve or fs.readFile), or
+- very dynamic requires (like require('./' + foo)).
+To resolve this, you can
+- remove them if possible, or
+- only use them in development, or
+- make sure they are statically scoped to some subfolder: path.join(process.cwd(), 'data', bar), or
+- add ignore comments: path.join(/*turbopackIgnore: true*/ process.cwd(), bar)
+
+Import trace:
+  App Route:
+    ./next.config.ts
+    ./lib/storage/attachmentStorage.ts
+    ./app/api/projects/[id]/attachments/[attachmentId]/file/route.ts
+
+
+✓ Compiled successfully in 9.2s
+  Running TypeScript ...
+Failed to type check.
+
+.next-r4-device/dev/types/routes.d.ts:162:6
+Type error: Declaration or statement expected.
+
+  160 |   }
+  161 | }
+> 162 | ing; }
+      |      ^
+  163 |   "/api/missions/[id]/approvals/[approvalId]": { "id": string; "approvalId": string; }
+  164 |   "/api/missions/[id]/cancel": { "id": string; }
+  165 |   "/api/missions/[id]/change-review": { "id": string; }
+Next.js build worker exited with code: 1 and signal: null
+Error: E2E production build failed with exit code 1
+    at runBuild (D:\Projects\hongmen\scripts\run-e2e.ts:25:34)
+    at main (D:\Projects\hongmen\scripts\run-e2e.ts:164:5)
+    at <anonymous> (D:\Projects\hongmen\scripts\run-e2e.ts:173:1)
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loader:633:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)

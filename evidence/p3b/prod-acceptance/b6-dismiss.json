@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-24T11:00:24.764Z",
+  "request": {
+    "method": "POST",
+    "path": "/api/projects/cmvmabwy10003svrawzrfth86/repo-signals/signals/cmvmaceg0000zsvra9x7f6lsk",
+    "body": {
+      "action": "DISMISS",
+      "requestId": "bfcd3dae-03e3-4d04-94d2-b5e416fc8a0f"
+    },
+    "authorized": true
+  },
+  "status": 409,
+  "body": {
+    "error": {
+      "code": "SIGNAL_ADOPTED",
+      "message": "已采纳的信号不再变更；项目事实请从资料侧修改"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "status": "LOCAL_IMPLEMENTATION_CHECKPOINT_NOT_RELEASE_ACCEPTED",
+  "baselineHead": "1132f30ee149e42d5f9fce79219ba1d9ecf02ea3",
+  "branch": "codex/ct1-continuity-trust",
+  "date": "2026-10-29",
+  "reason": "User requested stopping work and committing the current checkpoint.",
+  "finalChecks": {
+    "typecheck": { "exitCode": 0, "log": "checkpoint-types.log" },
+    "lint": { "exitCode": 0, "log": "checkpoint-lint.log" },
+    "targetedTests": { "exitCode": 0, "files": 9, "passed": 24, "log": "checkpoint-tests.log" },
+    "diffWhitespace": { "exitCode": 0 }
+  },
+  "pendingAcceptance": [
+    "Full regression on the final checkpoint; previous full run had one SQLite concurrency failure subsequently fixed and verified by its targeted probe.",
+    "Final Web build and browser acceptance after the latest contract edits.",
+    "Final HarmonyOS checks, HAP build and native/device acceptance after the latest DTO edits.",
+    "Direct Mission Artifact adoption hard-veto protection and complete source-consumer closure audit.",
+    "Fine-grained Mission/Conversation scope concurrency negative cases.",
+    "Paid Web Search rerun after deterministic query compilation repair and independent quality scoring."
+  ],
+  "paidCallsStopped": true,
+  "productionDeployment": false,
+  "realDatabaseMigration": false,
+  "remotePush": false,
+  "details": "R4_CONTINUITY_IMPLEMENTATION_NOTES.md"
+}

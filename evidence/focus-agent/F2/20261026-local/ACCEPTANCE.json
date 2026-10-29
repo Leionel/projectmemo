@@ -1,0 +1,180 @@
+{
+  "featureDefault": "off",
+  "protectedFiles": [
+    {
+      "path": "AGENTS.md",
+      "unchanged": true
+    },
+    {
+      "path": "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md",
+      "unchanged": true
+    },
+    {
+      "path": "harmonyos/build-profile.json5",
+      "unchanged": true
+    },
+    {
+      "path": "next-env.d.ts",
+      "unchanged": true
+    },
+    {
+      "path": "tsconfig.json",
+      "unchanged": true
+    }
+  ],
+  "checks": {
+    "nativeBuild": {
+      "passed": true,
+      "log": "harmony-build-delivery.log"
+    },
+    "nativeTests": {
+      "log": "harmony-test.log",
+      "passed": 83,
+      "failed": 0
+    },
+    "legacyE2E": {
+      "log": "e2e-legacy-final.log",
+      "passed": 14,
+      "skipped": 2
+    },
+    "types": {
+      "passed": true,
+      "log": "types-delivery.log"
+    },
+    "unit": {
+      "log": "unit-all-final.log",
+      "passed": 970,
+      "files": 114,
+      "failed": 0
+    },
+    "webBuild": {
+      "passed": true,
+      "log": "e2e-legacy-final.log"
+    },
+    "lint": {
+      "passed": true,
+      "log": "lint-delivery.log"
+    },
+    "focusE2E": {
+      "log": "focus-e2e-delivery.log",
+      "journeys": 2,
+      "includesAuthSetup": true,
+      "passed": 3,
+      "skipped": 0
+    },
+    "affected": {
+      "passed": 66,
+      "log": "affected-delivery.log"
+    }
+  },
+  "productionDeployed": false,
+  "screenshots": [
+    {
+      "path": "evidence\\focus-agent\\F2\\20261026-local\\focus-desktop.png",
+      "sha256": "BFBECE3A0DC9795752F463D1051BA8FBF8534E5193502ED106C970B0FC4EE769",
+      "bytes": 192615
+    },
+    {
+      "path": "evidence\\focus-agent\\F2\\20261026-local\\focus-mobile.png",
+      "sha256": "0AD9DE1A36E0DFF665B6E86F33DCA60A7F56BF1A44E6ADA01F54B4607C0D9E84",
+      "bytes": 47902
+    },
+    {
+      "path": "evidence\\focus-agent\\F2\\20261026-local\\focus-collaboration.png",
+      "sha256": "595171637DB5744FFC56C60FBEE5AC650107924E64668BD17B1DFDBB67CEBA6A",
+      "bytes": 175769
+    },
+    {
+      "path": "evidence\\focus-agent\\F2\\20261026-local\\focus-scenarios.png",
+      "sha256": "EFDC6F1F2323733CA90B08F65E24455D312F5A17BA58DDDC21A4A9B2DF6D7A73",
+      "bytes": 172844
+    },
+    {
+      "path": "evidence\\focus-agent\\F2\\20261026-local\\focus-dark.png",
+      "sha256": "8FE13DCA7C35093417E1955352EFE6C804F0C8C711DBAA28F26631EA1A8F9F40",
+      "bytes": 166794
+    }
+  ],
+  "realDevelopmentDatabaseMigrated": false,
+  "sourceFiles": [
+    {
+      "path": "components/FocusAgentWorkspace.tsx",
+      "sha256": "AB07D95C077052A1E7E335539AE3FBB1E612685E012CF685DA1C7C4702006FE5"
+    },
+    {
+      "path": "components/FocusAgentWorkspace.module.css",
+      "sha256": "FDAF85E1D1E5389A1A9D033868A65817A3E98A3334CC4A4A28075635ED72AEAD"
+    },
+    {
+      "path": "components/ConversationPanel.tsx",
+      "sha256": "BA983DAC29843278AFB4221B7B78F2DC31C55823B35F2F9FC93CC68B72720EF6"
+    },
+    {
+      "path": "components/ConversationPanel.module.css",
+      "sha256": "86F62B2695187669DD3FE2446C06E8BD15D56AC13B2D6043E38CC9B7E3600EE6"
+    },
+    {
+      "path": "components/ConversationWorkCard.tsx",
+      "sha256": "E7296A0E658D4FCBAF24E95B69848A11A97C8E365BCC80CA401821D675A50802"
+    },
+    {
+      "path": "lib/conversation/workService.ts",
+      "sha256": "26107973098E1C3C299F843A205BC81F92568736083EE2A947139D8A27A7999E"
+    },
+    {
+      "path": "lib/conversation/turnService.ts",
+      "sha256": "E74699476FCE66613D253AF9719861DFF194AD7901AEEFA4130734B4B8D7A175"
+    },
+    {
+      "path": "lib/types/conversationWork.ts",
+      "sha256": "8A9AFBF6B9F6CE64A5F1D74916938A593980D7C110C94B9858D2D9EDE0FE9C3B"
+    },
+    {
+      "path": "lib/services/actionService.ts",
+      "sha256": "626C0889B0518DF466C1A72D9BA31CA240E436021EA3A984CBABC1BCDE0F5E08"
+    },
+    {
+      "path": "harmonyos/entry/src/main/ets/components/ConversationWorkPanel.ets",
+      "sha256": "D71E300E597C41F163DFC950F92D2701B0C86286DEA267A7DCC7CD1404FACC56"
+    },
+    {
+      "path": "harmonyos/entry/src/main/ets/models/ConversationWork.ets",
+      "sha256": "B8646E8A23503D68F3497E3298C6D88DD4EED89DDFE79F2D09E2D67F83093CEC"
+    },
+    {
+      "path": "harmonyos/entry/src/main/ets/models/Conversation.ets",
+      "sha256": "58259EE068DF43AB5B9A6EECF2690249749927A750B41712EDCCCF143F7766C9"
+    },
+    {
+      "path": "harmonyos/entry/src/main/ets/services/ConversationService.ets",
+      "sha256": "E82662A5EE86F12EA1180C696FB96607FF4A2A472BF155EA863DD049C9132EE0"
+    },
+    {
+      "path": "tests/focusCollaboration.test.ts",
+      "sha256": "17E9D441C56AD877C8B43800CAFD8E963A3BEAE253175F89C6AF6F8777140C12"
+    },
+    {
+      "path": "e2e/focus-agent.spec.ts",
+      "sha256": "8346A9EEF9153C7FB6F6F45D89E5876D7A062F99B2D9B40258AA7C169755CD0A"
+    }
+  ],
+  "liveModelTested": false,
+  "generatedAt": "2026-10-26T10:03:49.5889004+08:00",
+  "baselineHead": "4d7b4796b83df7bb8e45e532883c0542948440aa",
+  "scope": "F2 original-object collaboration adapters and Focus UI based on supplied Demo",
+  "remaining": [
+    "12 real-model collaboration quality cases",
+    "semantic matching for necessary new Missions",
+    "precise cumulative token reservation",
+    "native device and cold-start acceptance"
+  ],
+  "deviceJourneyTested": false,
+  "hap": {
+    "sha256": "580026EB7BD2AF1FACA5BA7C337D27F9DF5D197610EFAA11C4032150F68CFF61",
+    "path": "harmonyos/entry/build/default/outputs/default/entry-default-unsigned.hap",
+    "deviceInstalled": false,
+    "bytes": 5838299
+  },
+  "commitRequestedAfterValidation": true,
+  "pushed": false
+}

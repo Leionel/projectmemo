@@ -1,0 +1,12 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/repoCi.test.ts tests/continuityStages23.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  2 passed (2)
+      Tests  6 passed (6)
+   Start at  10:55:13
+   Duration  4.41s (transform 1.36s, setup 0ms, import 2.80s, tests 951ms, environment 0ms)

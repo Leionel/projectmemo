@@ -1,0 +1,72 @@
+### Result
+{"checks":["no horizontal overflow 1440","navigation height 1440","readable navigation brand 1440","navigation typography and button 1440","value proposition is primary 1440","product preview starts within first 540px 1440","conditional registration link fits 1440","no horizontal overflow 1280","navigation height 1280","readable navigation brand 1280","navigation typography and button 1280","value proposition is primary 1280","product preview starts within first 540px 1280","conditional registration link fits 1280","no horizontal overflow 768","navigation height 768","readable navigation brand 768","navigation typography and button 768","value proposition is primary 768","product preview starts within first 540px 768","conditional registration link fits 768","no horizontal overflow 390","navigation height 390","readable navigation brand 390","navigation typography and button 390","value proposition is primary 390","product preview starts within first 540px 390","main CTA reaches existing demonstration","workspace login return preserved","existing source opens","source Escape closes","receipt remains gated by user confirmation","existing confirmation and simulated receipt work","navigation target preserved 产品体验","navigation target preserved 长期委托","navigation target preserved 使用场景","320px with enlarged fonts fits","reduced motion preserved","homepage navigation styling does not apply to account pages","public demonstration has no business writes","no browser runtime errors"],"layouts":[{"width":1440,"scroll":1440,"headerHeight":75,"brandSize":"22px","logoSize":32,"navSize":"16px","navWeight":"500","buttonSize":"16px","buttonHeight":44,"productTop":534,"titleSize":"64.8px","positionSize":"16px","heroLogos":0,"overflow":false},{"width":1280,"scroll":1280,"headerHeight":75,"brandSize":"22px","logoSize":32,"navSize":"16px","navWeight":"500","buttonSize":"16px","buttonHeight":44,"productTop":515,"titleSize":"57.6px","positionSize":"16px","heroLogos":0,"overflow":false},{"width":768,"scroll":768,"headerHeight":75,"brandSize":"20px","logoSize":32,"navSize":"16px","navWeight":"500","buttonSize":"16px","buttonHeight":44,"productTop":489,"titleSize":"52px","positionSize":"16px","heroLogos":0,"overflow":false},{"width":390,"scroll":390,"headerHeight":73,"brandSize":"20px","logoSize":32,"navSize":"16px","navWeight":"500","buttonSize":"15px","buttonHeight":44,"productTop":419,"titleSize":"32.37px","positionSize":"14px","heroLogos":0,"overflow":false}],"errors":[],"mutations":[]}
+### Ran Playwright code
+```js
+await (async (page) => {
+  const checks=[], layouts=[], errors=[], mutations=[];
+  const assert=(ok,label)=>{if(!ok)throw new Error(label);checks.push(label);};
+  page.on('pageerror',err=>errors.push(err.message));
+  page.on('request',request=>{if(!['GET','HEAD','OPTIONS'].includes(request.method()))mutations.push(request.url());});
+  for (const [width,height] of [[1440,1000],[1280,900],[768,1024],[390,844]]) {
+    await page.setViewportSize({width,height});
+    await page.goto('http://127.0.0.1:33324/');
+    await page.getByRole('heading',{level:1}).waitFor();
+    await page.waitForFunction(()=>[...document.images].every(img=>img.complete&&img.naturalWidth>0));
+    await page.evaluate(async()=>{await document.fonts.ready;await Promise.all([...document.images].map(img=>img.decode()));await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});
+    const metric=await page.evaluate(()=>{
+      const header=document.querySelector('header'), main=document.querySelector('main'), title=document.querySelector('h1'), figure=main.querySelector('figure'), nav=document.querySelector('header nav'), brand=header.querySelector('a'), button=nav.querySelector('a:last-child');
+      const position=main.querySelector('section p');
+      return {width:innerWidth,scroll:document.documentElement.scrollWidth,headerHeight:header.getBoundingClientRect().height,brandSize:getComputedStyle(brand).fontSize,logoSize:header.querySelector('img').getBoundingClientRect().width,navSize:getComputedStyle(nav).fontSize,navWeight:getComputedStyle(nav).fontWeight,buttonSize:getComputedStyle(button).fontSize,buttonHeight:button.getBoundingClientRect().height,productTop:Math.round(figure.getBoundingClientRect().top),titleSize:getComputedStyle(title).fontSize,positionSize:getComputedStyle(position).fontSize,heroLogos:main.querySelector('section > div').querySelectorAll('img').length,overflow:[...header.querySelectorAll('a'),title].some(el=>el.getBoundingClientRect().right>innerWidth+1)};
+    });
+    assert(metric.scroll===width&&!metric.overflow,'no horizontal overflow '+width);
+    assert(metric.headerHeight>=72&&metric.headerHeight<=76,'navigation height '+width);
+    assert(parseFloat(metric.brandSize)>=20&&parseFloat(metric.brandSize)<=22&&metric.logoSize===32,'readable navigation brand '+width);
+    assert(metric.navSize==='16px'&&metric.navWeight==='500'&&parseFloat(metric.buttonSize)>=15&&metric.buttonHeight===44,'navigation typography and button '+width);
+    assert(parseFloat(metric.titleSize)>parseFloat(metric.positionSize)*2&&metric.heroLogos===0,'value proposition is primary '+width);
+    assert(metric.productTop<540,'product preview starts within first 540px '+width);
+    // Stress the conditional registration link without enabling mail or changing server state.
+    if(width>=701) {
+      assert(await page.evaluate(()=>{const nav=document.querySelector('header nav'), link=document.createElement('a');link.textContent='注册';link.href='/register';nav.insertBefore(link,nav.lastElementChild);const brand=document.querySelector('header a').getBoundingClientRect(), r=nav.getBoundingClientRect();const fits=brand.right+12<=r.left&&r.right<=innerWidth;link.remove();return fits;}),'conditional registration link fits '+width);
+    }
+    await page.screenshot({path:`evidence/pre-r4/20261023-hero-refinement/after-${width}.png`});
+    layouts.push(metric);
+  }
+  const hero=page.locator('main section').first();
+  await hero.getByRole('link',{name:'体验项目接续',exact:true}).click();
+  assert(page.url().endsWith('#experience'),'main CTA reaches existing demonstration');
+  assert(await hero.getByRole('link',{name:'进入工作台',exact:true}).getAttribute('href')==='/login?from=%2Ffocus','workspace login return preserved');
+  await page.getByRole('button',{name:'查看原文：任务安排',exact:true}).click();
+  assert((await page.getByRole('dialog').innerText()).includes('目前还没有完整 Demo'),'existing source opens');
+  await page.keyboard.press('Escape');
+  assert(!(await page.getByRole('dialog').isVisible()),'source Escape closes');
+  await page.getByRole('tab',{name:'填写回执',exact:true}).click();
+  assert(await page.locator('textarea').count()===0,'receipt remains gated by user confirmation');
+  await page.getByRole('button',{name:'返回确认行动',exact:true}).click();
+  await page.getByRole('button',{name:'在示例中确认行动',exact:true}).click();
+  await page.getByRole('button',{name:'去填写模拟回执',exact:true}).click();
+  await page.getByLabel('填写一段模拟完成结果',{exact:true}).fill('模拟验收：完成演示记录，后续仍需核对来源。');
+  await page.getByRole('button',{name:'保存模拟回执',exact:true}).click();
+  assert(await page.getByText('模拟回执已加入本页示例',{exact:true}).isVisible(),'existing confirmation and simulated receipt work');
+  for(const name of ['产品体验','长期委托','使用场景']) {
+    const link=page.getByRole('link',{name,exact:true,includeHidden:true});
+    assert(await link.getAttribute('href')===({'产品体验':'#experience','长期委托':'#missions','使用场景':'#moments'})[name],'navigation target preserved '+name);
+  }
+  await page.setViewportSize({width:320,height:844});
+  await page.evaluate(()=>document.documentElement.style.fontSize='125%');
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'320px with enlarged fonts fits');
+  await page.evaluate(()=>document.documentElement.style.fontSize='');
+  await page.emulateMedia({reducedMotion:'reduce'});
+  assert(await hero.getByRole('link',{name:'体验项目接续',exact:true}).evaluate(el=>getComputedStyle(el).transitionDuration==='0s'),'reduced motion preserved');
+  await page.goto('http://127.0.0.1:33324/login');
+  assert(await page.locator('header').evaluate(el=>!el.className.includes('homeHeader')),'homepage navigation styling does not apply to account pages');
+  assert(mutations.length===0,'public demonstration has no business writes');
+  assert(errors.length===0,'no browser runtime errors');
+  return {checks,layouts,errors,mutations};
+}
+)(page);
+```
+### Page
+- Page URL: http://127.0.0.1:33324/login
+- Page Title: 登录忆程｜忆程 ProjectMemo
+### Events
+- New console entries: .playwright-cli\console-2026-10-23T01-01-56-601Z.log#L309-L310

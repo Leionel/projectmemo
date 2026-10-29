@@ -303,6 +303,7 @@ export interface AgentRunData {
 }
 
 export interface AgentCitation {
+  assessment?: import("./evidence/assessment").EvidenceAssessment;
   cardId: string;
   title: string;
   excerpt: string;
@@ -329,6 +330,7 @@ export interface ProjectEvidenceRef {
 }
 
 export interface EvidenceClaim {
+  assessments?: import("./evidence/assessment").EvidenceAssessment[];
   text: string;
   support: EvidenceSupportState;
   cardIds: string[];
@@ -337,6 +339,7 @@ export interface EvidenceClaim {
 }
 
 export interface EvidenceTrustReceipt {
+  schemaVersion?: 2;
   supportState: EvidenceSupportState;
   abstained: boolean;
   claims: EvidenceClaim[];
@@ -346,6 +349,7 @@ export interface EvidenceTrustReceipt {
 }
 
 export interface AgentChatResponse {
+  continuationSuggestion?: import("./types/copilotContinuation").CopilotContinuationSuggestion;
   message: string;
   citations: AgentCitation[];
   proposedActions: ProposedAction[];
@@ -373,6 +377,11 @@ export interface ProjectMetrics {
 
 
 export interface AgentExecutionResult<T> {
+  prompt?: { id: string; version: string; purpose: string; outputSchemaVersion: number };
+  finishReason?: string | null;
+  requestIdentity?: string | null;
+  usage?: { inputTokens: number | null; outputTokens: number | null };
+  usageUnknown?: boolean;
   data: T;
   provider: string;
   status: "SUCCESS" | "PARTIAL" | "FALLBACK" | "FAILED";
@@ -429,6 +438,14 @@ export type TemporalDecisionStatus =
 
 /** 面向跨端展示的统一顶层状态；supportState/status 保留细分兼容语义。 */
 export type TemporalTopLevelState = "CURRENT" | "SUPERSEDED" | "CONTESTED" | "UNKNOWN";
+
+/** 时态只描述记录与当前结论的关系，不代表事实经过独立核验。 */
+export const temporalStateLabels: Record<TemporalTopLevelState, string> = {
+  CURRENT: "当前有效",
+  SUPERSEDED: "已被取代",
+  CONTESTED: "存在争议",
+  UNKNOWN: "暂不能确定",
+};
 
 export interface TemporalEvidenceRef {
   entityKind: "card" | "relation";

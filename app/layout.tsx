@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import Image from "next/image";
 import { Menu } from "lucide-react";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GlobalSettings } from "@/components/GlobalSettings";
 import { GlobalNavigation } from "@/components/GlobalNavigation";
 import { UserNav } from "@/components/UserNav";
+import { SiteHeader } from "@/components/SiteHeader";
+import {BrandLink} from "@/components/BrandLink";
+import { accountMailConfiguration } from "@/lib/auth/mail";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "忆程 ProjectMemo｜知识资产沉淀与主动推进 Agent",
-  description: "忆程 ProjectMemo：面向大学生项目制学习的知识资产沉淀与主动推进 Agent",
+  title: "忆程 ProjectMemo｜你的个人项目 Agent",
+  description: "忆程 ProjectMemo：面向大学生的个人项目 Agent，留住过程、找回依据、看清变化、接续行动。",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -26,13 +27,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           disableTransitionOnChange
         >
           <a href="#main-content" className="skip-link">跳到主要内容</a>
-          <header className="sticky top-0 z-40 border-b border-[var(--rule)] bg-[var(--header-bg)] backdrop-blur-xl transition-colors duration-400">
+          <SiteHeader registrationEnabled={Boolean(accountMailConfiguration())}><header className="sticky top-0 z-40 border-b border-[var(--rule)] bg-[var(--header-bg)] backdrop-blur-xl transition-colors duration-400">
             <div className="shell flex h-14 items-center justify-between">
-              <Link href="/" className="focus-ring flex items-center gap-2.5 rounded-xl font-bold tracking-tight text-[var(--ink)]">
-                <Image src="/logo.png" alt="忆程 ProjectMemo 标志" width={36} height={36} className="h-7 w-7 shrink-0 rounded-md object-cover shadow-[var(--shadow-sm)]" />
-                <span className="majestic-heading text-base">忆程<span className="hidden sm:inline"> ProjectMemo</span></span>
-                <span className="hidden border-l border-[var(--rule-strong)] pl-2 text-[10px] font-black tracking-[.16em] text-[var(--ink-soft)] xl:inline">MEMORY AGENT</span>
-              </Link>
+              <BrandLink descriptor/>
               <nav className="flex items-center gap-2 text-sm font-medium">
                 <span className="hidden items-center gap-1.5 paper-tab px-3 py-1.5 text-[var(--ink-soft)] lg:flex">
                   <span className="h-1.5 w-1.5 rounded-full bg-[var(--teal)] shadow-[0_0_8px_var(--teal)]" /> {liveLlm ? "云模型已配置" : "演示模式"}
@@ -64,7 +61,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 </div>
               </nav>
             </div>
-          </header>
+          </header></SiteHeader>
           {children}
         </ThemeProvider>
       </body>

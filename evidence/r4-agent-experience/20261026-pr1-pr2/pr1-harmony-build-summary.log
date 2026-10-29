@@ -1,0 +1,17 @@
+WARN: ArkTS:WARN File: D:/Projects/hongmen/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:238:116
+ 'pushUrl' has been deprecated.
+
+
+> hvigor [32mFinished :entry:default@CompileArkTS... after 13 s 873 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@GeneratePkgModuleJson...  [39m
+> hvigor [32mFinished :entry:default@ProcessCompiledResources... after 1 ms [39m
+> hvigor [32mFinished :entry:default@PackageHap... after 548 ms [39m
+> hvigor [32mFinished :entry:default@PackingCheck... after 8 ms [39m
+> hvigor [32mFinished :entry:default@SignHap... after 1 s 591 ms [39m
+> hvigor [32mFinished :entry:default@CollectDebugSymbol... after 3 ms [39m
+> hvigor [32mFinished :entry:assembleHap... after 1 ms [39m
+> hvigor [32mBUILD SUCCESSFUL in 24 s 893 ms [39m
+
+[harmony-build] HAP: harmonyos\entry\build\default\outputs\default\entry-default-unsigned.hap
+[harmony-build] size: 6043737 bytes
+[harmony-build] sha256: fa2d322753f6db8efab59d8c6ca58e6100826bc14010d25286b5cdf36c8db136

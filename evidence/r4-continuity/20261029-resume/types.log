@@ -1,0 +1,1 @@
+lib/copilot/confirmation.ts(235,99): error TS18048: 'actor' is possibly 'undefined'.

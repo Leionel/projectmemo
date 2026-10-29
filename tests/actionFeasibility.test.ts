@@ -71,7 +71,7 @@ describe("Action feasibility (F1)", () => {
     expect(ready.feasibility).toBe("READY");
   });
 
-  it("treats a superseded supporting record as an unmet dependency", async () => {
+  it("keeps a superseded supporting record unknown rather than declaring it false", async () => {
     const card = await db.knowledgeCard.create({
       data: {
         projectId,
@@ -136,7 +136,7 @@ describe("Action feasibility (F1)", () => {
     });
 
     const blocked = await assessActionFeasibility(projectId, action.id);
-    expect(blocked.feasibility).toBe("BLOCKED");
+    expect(blocked.feasibility).toBe("UNKNOWN");
     expect(blocked.dependencies[0].note).toContain("取代");
   });
 
@@ -192,8 +192,8 @@ describe("Action feasibility (F1)", () => {
 
     await db.cardRelation.update({ where: { id: relation.id }, data: { revokedAt: new Date() } });
     const after = await assessActionFeasibility(projectId, action.id);
-    expect(after.feasibility).toBe("BLOCKED");
-    expect(after.dependencies[0].state).toBe("UNMET");
+    expect(after.feasibility).toBe("UNKNOWN");
+    expect(after.dependencies[0].state).toBe("UNKNOWN");
     expect(after.dependencies[0].note).toContain("撤销");
   });
 

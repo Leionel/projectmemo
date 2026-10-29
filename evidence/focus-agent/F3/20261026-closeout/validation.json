@@ -1,0 +1,81 @@
+{
+  "baseline": "71499b6d6e48fbf1116cdbcb76e2fe3d07e4602e",
+  "phase": "F3_CLOSEOUT",
+  "unit": {
+    "snapshot": "before final bounded protocol compatibility and client scope fixes",
+    "files": 117,
+    "passed": 1014,
+    "failed": 0
+  },
+  "finalAffected": {
+    "files": 3,
+    "passed": 46,
+    "failed": 0,
+    "overlapsFullSuite": true
+  },
+  "web": {
+    "widths": [
+      360,
+      390,
+      430
+    ],
+    "flags": [
+      "FOCUS_AGENT_ENABLED",
+      "FOCUS_AGENT_FOLLOW_ENABLED",
+      "GOAL_CHANGE_REVIEW_ENABLED"
+    ],
+    "flaky": 0,
+    "failed": 0,
+    "passed": 21,
+    "skipped": 0,
+    "productionBuild": "PASS"
+  },
+  "typecheck": "PASS",
+  "lint": "PASS",
+  "harmony": {
+    "signedSha256": "38ea4543149e54b22500f97c4156b692beb4fac25025f0067bf35943c4a87deb",
+    "deviceAcceptance": "NOT_INSTALLED_THIS_ROUND_NO_HDC_TARGET",
+    "failed": 0,
+    "passed": 83,
+    "unsignedSha256": "49156b42cc86c9ca5f6866d83830310e3b77caa9e3bc15e0d4972df5e6960335",
+    "build": "PASS"
+  },
+  "environmentFieldsChanged": [
+    "LLM_API_KEY"
+  ],
+  "originalDirtyFilesPreserved": 5,
+  "deployment": "NOT_DEPLOYED",
+  "inputTokenAccounting": "UTF8_UPPER_BOUND_NOT_EXACT_PROVIDER_TOKENIZER",
+  "independentQualityReview": "PENDING",
+  "targetUsers": "PENDING",
+  "logs": [
+    {
+      "path": "output\\focus-f3-closeout-20261026\\unit-all.log",
+      "sha256": "0a296b7742f47d50620189167e36243e997b682b67f2b25b84e5764cf69a1f7e"
+    },
+    {
+      "path": "output\\focus-f3-closeout-20261026\\affected-final.log",
+      "sha256": "de207a34279be0cd90aa44d3e52d1d3d446030d448f40f60fc88e80d7bd70f64"
+    },
+    {
+      "path": "output\\focus-f3-closeout-20261026\\types-release-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "output\\focus-f3-closeout-20261026\\lint-release-final.log",
+      "sha256": "539dfcd0fd1a8a7591e87b682790281238cc45a52fe814e2e526b140ac613535"
+    },
+    {
+      "path": "output\\focus-f3-closeout-20261026\\e2e-release-final.log",
+      "sha256": "651d24eef48429547c1dc618b8276a990b3a166a09ea62fd47b779ae400967bb"
+    },
+    {
+      "path": "output\\focus-f3-closeout-20261026\\harmony-test-release.log",
+      "sha256": "93185028eaedfac1caa79fd3930c79e15575a6f31d394884e915fde527ea4137"
+    },
+    {
+      "path": "output\\focus-f3-closeout-20261026\\harmony-build-release.log",
+      "sha256": "74f7c339b195be609c7d7cfe5ab4a95d13d9b52b3a71c64cf456ad8ed8991890"
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "recordedAt": "2026-10-24T02:51:13.033222+00:00",
+  "baselineCommit": "0555b088e6efab30b9aee2019dad55b0d32afe2c",
+  "mode": "LOCAL_ISOLATED_MOCK",
+  "paidModelCallsAdded": 0,
+  "unit": {
+    "files": 101,
+    "passed": 805,
+    "failed": 0
+  },
+  "e2e": {
+    "startTime": "2026-10-24T02:37:07.811Z",
+    "duration": 103116.00899999999,
+    "expected": 14,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "harmonyUnit": {
+    "passed": 77,
+    "failed": 0
+  },
+  "hap": {
+    "kind": "unsigned",
+    "sha256": "084a651c5a0aeb6a6b5bb382da3a2458475ef9f24570f98da7ef6cf7f6e9f367",
+    "bytes": 5137631
+  },
+  "migration": "20261024010000_copilot_turn_identity",
+  "crossClientContract": "actual ArkTS services against authenticated Next routes; same Mission/sourceRun/output identity",
+  "deviceJourneyVerified": false,
+  "nonDevelopmentNetworkVerified": false,
+  "platformAccepted": false,
+  "realProjectOutcomeVerified": false,
+  "screenshots": {
+    "viewports": [
+      1440,
+      390
+    ],
+    "data": "local mock fixture",
+    "visualReviewed": true
+  },
+  "previousAttempt": {
+    "log": "tmp/p1bc-final-unit.log",
+    "failed": 2,
+    "reason": "5000ms timeout in 16-task/five-safety-mode batch tests",
+    "fix": "only these two integration test timeouts increased to 30000ms; assertions unchanged"
+  },
+  "logs": [
+    {
+      "path": "tmp/p1bc-unit-delivery.log",
+      "sha256": "14fa03bb8bcc121b47af6f045409a21e3a69de50ef8a985d46095b88b323062d"
+    },
+    {
+      "path": "tmp/p1bc-final-e2e.log",
+      "sha256": "5a021968e4de764f77ec91b97d3d1c7de8f433d74f5c21c41842759486e34838"
+    },
+    {
+      "path": "tmp/p1bc-types-delivery.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/p1bc-lint-delivery.log",
+      "sha256": "539dfcd0fd1a8a7591e87b682790281238cc45a52fe814e2e526b140ac613535"
+    },
+    {
+      "path": "tmp/p1bc-harmony-tests.log",
+      "sha256": "6bebac519d66348bea5e5f6f76c6ea0ecd2ac868c442baeeda03a5846f54cbf6"
+    },
+    {
+      "path": "tmp/p1bc-hap-verified.log",
+      "sha256": "8a09e4e5e6100fa0612e6b6231208628139cc1175b6d7ab448ac6e66bbeff09e"
+    },
+    {
+      "path": "tmp/p1bc-test-migration.log",
+      "sha256": "97a092e5bffeacc3c38a8b9308b5da52bc67206ddd9fee053a3fe3e931edb65d"
+    },
+    {
+      "path": "tmp/p1bc-cold-start-final.log",
+      "sha256": "a49a187d7073579e3ebd3a7ab5c4bc1c11b17e11b1c3679444d5d4b6ad7b27aa"
+    },
+    {
+      "path": "tmp/p1bc-strict-mode.log",
+      "sha256": "1d51c87ebddb89039e81fd0102e0211a7abaf3f5090d915da1ce08dc387b25c4"
+    },
+    {
+      "path": "tmp/p1bc-final-unit.log",
+      "sha256": "04bcf428b2765f2ccb513ca7c4eed308e13c904c5a19a4386e3a577cfaed16f5"
+    },
+    {
+      "path": "tmp/p1bc-batch-regression.log",
+      "sha256": "3bfcb0296b7f71b7f4a2564750c912ce011d82cc5040cd38ed499e82b7481d53"
+    }
+  ]
+}

@@ -24,7 +24,7 @@ test("global memory and inbox retain project context, filtering and mobile acces
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByLabel("打开全局导航").click();
   await page.getByRole("link", { name: "记忆", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "项目记忆", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "项目记忆档案", exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
   await page.screenshot({ path: "test-results/global-memory-mobile.png", fullPage: true });
 });

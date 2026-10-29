@@ -98,7 +98,9 @@ export class TextFormatters {
       'action_unclosed': '存在未闭环的待办行动',
       'deadline_nearing': '临近项目截止日期'
     };
-    return map[triggerType] ?? (triggerType ? triggerType.replace(/_/g, ' ') : '主动提醒');
+    if (map[triggerType] !== undefined) return map[triggerType];
+    if (!triggerType) return '主动提醒';
+    return /^[A-Za-z0-9_:-]+$/.test(triggerType) ? '项目状态提醒' : triggerType;
   }
 
   /**
@@ -107,6 +109,27 @@ export class TextFormatters {
   static ruleDescriptionToChinese(rule: string): string {
     if (!rule) {
       return '基于项目事实与过程要求触发判断';
+    }
+    if (rule === 'no_project_activity_for_72_hours') {
+      return '项目超过 72 小时没有新的采集、成果或行动回执。';
+    }
+    if (rule === 'risk_without_completed_action') {
+      return '风险卡片尚未关联已完成的行动结果。';
+    }
+    if (rule === 'paper_notes_without_experiment_log') {
+      return '已有论文或方法记录，但还没有实验日志。';
+    }
+    if (rule === 'deadline_within_14_days') {
+      return '项目截止日期已进入 14 天内。';
+    }
+    if (rule === 'deliverable_missing_expected_evidence') {
+      return '交付物缺少预期的支撑证据。';
+    }
+    if (rule === 'demo_risk_cluster') {
+      return '演示情境模拟了尚未处理的风险。';
+    }
+    if (rule === 'completed_action_creates_reflection_card') {
+      return '完成行动后生成复盘记忆。';
     }
     if (rule.includes('requirement_without_competition_outline') || rule.includes('MATERIAL_GAP')) {
       return '系统已记录参赛要求，但当前尚未生成对应作品说明大纲。';
@@ -120,7 +143,7 @@ export class TextFormatters {
     if (rule.includes('CLOSE_TO_DEADLINE') || rule.includes('deadline')) {
       return '项目截止日期临近，核心交付物仍需闭环验证。';
     }
-    return rule;
+    return /^[A-Za-z0-9_:-]+$/.test(rule) ? '系统规则已触发，请核对项目事实与当前状态。' : rule;
   }
 
   /**
@@ -312,11 +335,11 @@ export class TextFormatters {
    */
   static scenarioToChinese(scenario: string): string {
     const map: Record<string, string> = {
-      'COMPETITION': '学术备赛',
-      'RESEARCH': '学术课题',
+      'COMPETITION': '学科竞赛',
+      'RESEARCH': '科研训练',
       'COURSE_DESIGN': '课程设计',
-      'INNOVATION': '创新项目',
-      'LAB_TASK': '实验任务',
+      'INNOVATION': '创新创业',
+      'LAB_TASK': '实验室任务',
       'HACKATHON': '创客黑客松'
     };
     return map[scenario] ?? '项目档案';

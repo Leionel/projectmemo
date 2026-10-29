@@ -1,0 +1,43 @@
+{
+  "baseline": "663c5d5a4278c9a8c47903c5649eee077ac05ce1",
+  "unit": {
+    "files": 117,
+    "passed": 1007,
+    "failed": 0,
+    "log": "output/focus-f3-20261026/unit-final.log"
+  },
+  "affectedAfterWebParity": {
+    "files": 3,
+    "passed": 32,
+    "failed": 0
+  },
+  "web": {
+    "productionBuild": "PASS",
+    "e2ePassed": 9,
+    "e2eSkipped": 0,
+    "e2eFailed": 0,
+    "typecheck": "PASS",
+    "lint": "PASS"
+  },
+  "harmony": {
+    "tests": 83,
+    "failed": 0,
+    "build": "PASS",
+    "signedSha256": "0585dbce8d596a83494d103750d0f675c9d00983cde3d2d273064211464e29a1",
+    "unsignedSha256": "dab11497b1e13792a7404864e084b52fba601bd5fbfbbb2d75df16ed0d6de72a",
+    "emulator": "covered install, preserved account and data",
+    "widgetDesktopAcceptance": "NOT_RECAPTURED"
+  },
+  "model": {
+    "provider": "deepseek-flash",
+    "episodes": 16,
+    "totalCalls": 47,
+    "ceiling": 48,
+    "initialFailuresRetained": true,
+    "independentReview": "PENDING",
+    "targetUserStudy": "PENDING"
+  },
+  "originalDirtyPreserved": 5,
+  "deployment": "NOT_DEPLOYED",
+  "notes": "All databases used by tests and real-model evaluation were isolated. Local ignored .env configured by user authorization."
+}

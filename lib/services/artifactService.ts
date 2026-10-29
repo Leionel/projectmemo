@@ -1,20 +1,23 @@
 import { AppError } from "@/lib/api";
+import { effectiveContinuity, assertContinuityBinding, assertDirectiveEffect } from "@/lib/continuity/directiveService";
+import { sourceUse, assertSourceUse } from "@/lib/continuity/sourcePolicy";
 import { db } from "@/lib/db";
 import { generateArtifactWithLLMWithMeta } from "@/lib/agent/llmAgent";
 import { cardToDraft, generateMockArtifactWithClaims } from "@/lib/generators/templates";
-import { saveArtifact } from "@/lib/repositories/artifacts";
+import { saveArtifact, saveArtifactInTx } from "@/lib/repositories/artifacts";
 import { requireProject } from "@/lib/repositories/projects";
-import { AgentRunStatus, AgentRunType } from "@/lib/generated/prisma/client";
-import { saveAgentRun } from "@/lib/repositories/agent";
+import { AgentRunStatus, AgentRunType, type Prisma } from "@/lib/generated/prisma/client";
 import type { AgentExecutionResult, ArtifactTypeValue } from "@/lib/types";
 import type { EpisodeSourceRef } from "@/lib/types/episode";
 import { artifactContentSchema } from "@/lib/validation/schemas";
+import { readReviewMaterial } from "@/lib/mission/projectMaterialReader";
+import { artifactCoverageV2 } from "@/lib/agent/specialistPrompts";
 
-async function loadArtifactContext(projectId: string, episodeId?: string) {
+async function loadArtifactContext(projectId: string, episodeId?: string, userId?: string) {
   const project = await requireProject(projectId);
   // R2-5：指定已确认检查点时，范围与证据快照只来自该检查点冻结的来源
   let scopedCardIds: string[] | null = null;
-  let scopedSourceRefs: Array<{ cardId: string; observedAt: string; titleSnapshot: string; summarySnapshot: string }> | null = null;
+  let scopedSourceRefs: Array<{ cardId: string; observedAt: string; titleSnapshot: string; summarySnapshot: string; revisionHash: string }> | null = null;
   let episodeTag: { episodeId: string; revisionId: string } | null = null;
   if (episodeId) {
     const episode = await db.projectEpisode.findFirst({
@@ -32,26 +35,39 @@ async function loadArtifactContext(projectId: string, episodeId?: string) {
       cardId: ref.entityId,
       observedAt: ref.observedAt,
       titleSnapshot: ref.title,
-      summarySnapshot: "",
+      summarySnapshot: ref.summary,
+      revisionHash: ref.contentHash,
     }));
     episodeTag = { episodeId: episode.id, revisionId: published.id };
   }
 
-  const rawCards = await db.knowledgeCard.findMany({
+  const totalCards = await db.knowledgeCard.count({ where: { projectId, ...(scopedCardIds ? { id: { in: scopedCardIds } } : {}) } });
+  const candidates = (await db.knowledgeCard.findMany({
     where: { projectId, ...(scopedCardIds ? { id: { in: scopedCardIds } } : {}) },
-    orderBy: { createdAt: "asc" },
-  });
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 24,
+  })).reverse();
+  const rawCards = [] as typeof candidates;
+  for (const card of candidates) if (!userId || (await sourceUse(userId, projectId, "card:" + card.id)).state === "ALLOWED") rawCards.push(card);
   if (!rawCards.length) throw new AppError("NO_KNOWLEDGE_CARDS", "请先输入至少一条项目记录，再生成成果", 400);
-  if (scopedSourceRefs) {
-    const summaryById = new Map(rawCards.map((card) => [card.id, card.summary]));
-    for (const ref of scopedSourceRefs) ref.summarySnapshot = summaryById.get(ref.cardId) ?? "";
-  }
+  const sources = await Promise.all(rawCards.map(async card => {
+    const frozen = scopedSourceRefs?.find(ref => ref.cardId === card.id);
+    if (frozen) return { cardId: card.id, sourceId: "card:" + card.id, revision: frozen.revisionHash, readScope: "FROZEN_SUMMARY",
+      text: frozen.titleSnapshot + "\n" + frozen.summarySnapshot, truncated: false, temporalState: "UNKNOWN" };
+    const id = card.captureId ? "capture:" + card.captureId : card.attachmentId ? "attachment:" + card.attachmentId : "card:" + card.id;
+    const material = await readReviewMaterial(projectId, id);
+    return { cardId: card.id, sourceId: id, revision: material?.source.hash ?? null,
+      readScope: material?.readScope ?? "SUMMARY", text: material?.source.text.slice(0, 2000) ?? card.summary,
+      truncated: (material?.source.text.length ?? card.summary.length) > 2000, temporalState: material?.source.temporalState ?? "UNKNOWN" };
+  }));
   return {
     project,
     episodeTag,
-    cards: rawCards.map((card) => ({ ...cardToDraft(card), id: card.id })),
+    cards: rawCards.map((card) => { const frozen = scopedSourceRefs?.find(ref => ref.cardId === card.id); return { ...cardToDraft(card), id: card.id,
+      ...(frozen ? { title: frozen.titleSnapshot, summary: frozen.summarySnapshot, keywords: [], relatedTasks: [], nextActions: [] } : {}) }; }),
+    sources, coverage: { loadedCards: rawCards.length, totalCards: scopedCardIds?.length ?? totalCards, complete: false,
+      policy: episodeTag ? "FROZEN_EPISODE_SUMMARIES" : "LATEST_24_CARDS_WITH_BOUNDED_SOURCE_EXCERPTS" },
     // 生成时的证据引用快照：固化 cardId、观察时间与当时摘要，供事后逐句回溯审计
-    sourceRefs: scopedSourceRefs ?? rawCards.map((card) => ({
+    sourceRefs: scopedSourceRefs?.filter(ref => rawCards.some(card => card.id === ref.cardId)) ?? rawCards.map((card) => ({
       cardId: card.id,
       observedAt: new Date().toISOString(),
       titleSnapshot: card.title,
@@ -60,8 +76,12 @@ async function loadArtifactContext(projectId: string, episodeId?: string) {
   };
 }
 
-export async function generateArtifact(projectId: string, artifactType: ArtifactTypeValue, options?: { episodeId?: string }) {
-  const { project, cards, sourceRefs, episodeTag } = await loadArtifactContext(projectId, options?.episodeId);
+/** Preparation can call the model; it must stay outside the final business transaction. */
+export async function prepareArtifactGeneration(projectId: string, artifactType: ArtifactTypeValue, options?: { episodeId?: string; userId?: string }) {
+  const continuity = options?.userId ? await effectiveContinuity(options.userId, { projectId }) : null;
+  if (continuity?.stopped) throw new AppError("DIRECTIVE_STOPPED", "你已暂停这项工作，可撤回暂停后继续", 409);
+  if (continuity) assertDirectiveEffect(continuity, "BUSINESS_WRITE");
+  const { project, cards, sourceRefs, episodeTag, sources, coverage } = await loadArtifactContext(projectId, options?.episodeId, options?.userId);
   const startedAt = Date.now();
   const mock = generateMockArtifactWithClaims(artifactType, { project, cards });
   // 模板绑定的逐句映射：模板路径自带，模型路径暂无映射（语义未核验，audit 明确标注）
@@ -77,13 +97,19 @@ export async function generateArtifact(projectId: string, artifactType: Artifact
     durationMs: 0,
   };
   if (process.env.LLM_MODE === "openai-compatible" && process.env.LLM_API_KEY) {
+    if (continuity) assertDirectiveEffect(continuity, "MODEL");
+    let received: AgentExecutionResult<string> | undefined;
     try {
-      const remote = await generateArtifactWithLLMWithMeta({ project, artifactType, cards });
+      const remote = received = await generateArtifactWithLLMWithMeta({ project, artifactType, cards, sources, coverage });
+      if (remote.status === "FAILED") throw new AppError(remote.fallbackReason ?? "MODEL_RESPONSE_INVALID", "成果草稿生成未完成", 503);
       execution = { ...remote, data: artifactContentSchema.parse(remote.data) };
       claims = { status: "UNMAPPED_MODEL", claims: [] };
     } catch (error) {
       console.warn("LLM artifact generation failed; using mock template", error);
       execution = {
+        ...received,
+        prompt: { id: artifactCoverageV2.id, version: artifactCoverageV2.version, purpose: artifactCoverageV2.purpose, outputSchemaVersion: artifactCoverageV2.outputSchemaVersion },
+        usageUnknown: received?.usageUnknown ?? true,
         data: mock.content,
         provider: "mock-fallback",
         status: "FALLBACK",
@@ -92,30 +118,53 @@ export async function generateArtifact(projectId: string, artifactType: Artifact
       };
     }
   }
-  const artifact = await saveArtifact(
+  return {
+    continuity: continuity ? { userId: options!.userId!, intentHash: continuity.intentHash, reusePolicyHash: continuity.reusePolicyHash } : null,
     projectId,
     artifactType,
-    execution.data,
+    content: execution.data,
     sourceRefs,
-    claims as unknown as Parameters<typeof saveArtifact>[4],
-  );
-  await saveAgentRun({
-    projectId,
-    runType: AgentRunType.ARTIFACT,
-    status: execution.status === "SUCCESS" ? AgentRunStatus.SUCCESS : AgentRunStatus.FALLBACK,
-    provider: execution.provider,
-    fallbackReason: execution.fallbackReason,
-    durationMs: Date.now() - startedAt,
-    trace: {
+    claims,
+    audit: {
+      status: execution.status === "SUCCESS" ? AgentRunStatus.SUCCESS : AgentRunStatus.FALLBACK,
+      provider: execution.provider,
+      fallbackReason: execution.fallbackReason,
+      durationMs: Date.now() - startedAt,
+      trace: {
       pipeline: ["load_project", "load_memory", "generate_artifact", "save_version"],
       artifactType,
-      artifactId: artifact.id,
       cardCount: cards.length,
+      coverage, sourcePointers: sources.map(s => ({ sourceId: s.sourceId, revision: s.revision, readScope: s.readScope, truncated: s.truncated })),
+      prompt: execution.prompt ?? null, usage: execution.usage ?? null, usageUnknown: execution.usageUnknown ?? null, requestIdentity: execution.requestIdentity ?? null,
       ...(episodeTag ? { episodeId: episodeTag.episodeId, episodeRevisionId: episodeTag.revisionId, scope: "EPISODE_CHECKPOINT" } : {}),
+      },
     },
-    resultJson: { artifactId: artifact.id, artifactType },
-  });
+  };
+}
+
+export async function savePreparedArtifactInTx(tx: Prisma.TransactionClient, prepared: Awaited<ReturnType<typeof prepareArtifactGeneration>>) {
+  if (prepared.continuity) {
+    const { userId } = prepared.continuity;
+    await tx.user.updateMany({ where: { id: userId }, data: { continuitySeq: { increment: 0 } } });
+    const current = await assertContinuityBinding(userId, { projectId: prepared.projectId }, prepared.continuity, tx);
+    assertDirectiveEffect(current, "BUSINESS_WRITE");
+    for (const ref of prepared.sourceRefs) await assertSourceUse(userId, prepared.projectId, "card:" + ref.cardId, tx);
+  }
+  const artifact = await saveArtifactInTx(tx, prepared.projectId, prepared.artifactType, prepared.content,
+    prepared.sourceRefs, prepared.claims as unknown as Prisma.InputJsonValue);
+  await tx.agentRun.create({ data: {
+    projectId: prepared.projectId,
+    runType: AgentRunType.ARTIFACT,
+    ...prepared.audit,
+    trace: { ...prepared.audit.trace, artifactId: artifact.id },
+    resultJson: { artifactId: artifact.id, artifactType: prepared.artifactType },
+  } });
   return artifact;
+}
+
+export async function generateArtifact(projectId: string, artifactType: ArtifactTypeValue, options?: { episodeId?: string; userId?: string }) {
+  const prepared = await prepareArtifactGeneration(projectId, artifactType, options);
+  return db.$transaction(tx => savePreparedArtifactInTx(tx, prepared));
 }
 
 export async function saveEditedArtifactVersion(projectId: string, artifactType: ArtifactTypeValue, content: string) {

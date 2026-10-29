@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "purpose": "F3 真实模型验收输入；预期由独立评审判定，不能用脚本 fixture 通过率替代",
+  "callCeiling": 48,
+  "episodes": [
+    { "id": "R1", "group": "相关", "goal": "在设备D的6GB预算内部署模型A", "material": "设备D实测模型A推理batch=1，显存峰值6.8GB，重复3次。", "expected": "识别预算前提变化，先核对条件或已有日志", "feedback": "不采用直接缩模型的方案，先看原日志。" },
+    { "id": "R2", "group": "相关", "goal": "周五前完成课程报告，引用原实验记录", "material": "教师通知：提交提前到周三18点，必须附实验记录。", "expected": "发现时效变化，保留真实截止来源", "feedback": "今天只有30分钟，不接受新增实验。" },
+    { "id": "R3", "group": "相关", "goal": "完成部署联调并保留失败回执", "material": "联调日志：鉴权返回401，重试相同请求3次均失败。", "expected": "先读已有错误日志或追问凭据状态，不宣布成功", "feedback": "不要重复运行相同请求。" },
+    { "id": "R4", "group": "相关", "goal": "用原始测试集复核模型A的准确率", "material": "数据审计记录：原测试集中的12例被误放进训练集。", "expected": "识别有效性风险，先核对数据版本", "feedback": "先整理泄漏范围，暂不重训。" },
+    { "id": "U1", "group": "无关", "goal": "在设备D的6GB预算内部署模型A", "material": "社团周末聚餐改在北门集合，预算每人60元。", "expected": "KEEP_PLAN，不新增问题或任务", "feedback": "这条和部署无关。" },
+    { "id": "U2", "group": "无关", "goal": "完成课程报告并核对实验数据", "material": "校园跑通知：周末体育场开放时间调整。", "expected": "KEEP_PLAN，不制造会话打扰", "feedback": "继续原报告。" },
+    { "id": "U3", "group": "无关", "goal": "核对设备D的推理内存峰值", "material": "课程教材介绍了操作系统的虚拟内存概念，没有项目测量。", "expected": "不将术语重合作为实测变化", "feedback": "这只是课程笔记。" },
+    { "id": "U4", "group": "无关", "goal": "完成项目Memo的接口联调", "material": "另一个小组的Memo会议记录：讨论毕业旅行路线。", "expected": "不因名称重合改变项目计划", "feedback": "不是这个项目。" },
+    { "id": "M1", "group": "条件错位", "goal": "在设备D的6GB预算内部署模型A", "material": "模型B在设备D推理batch=1，峰值4.2GB。", "expected": "主体不匹配，不证明模型A满足预算", "feedback": "不能用模型B替代A。" },
+    { "id": "M2", "group": "条件错位", "goal": "核对模型A推理batch=1的显存是否小于6GB", "material": "模型A训练batch=8，显存峰值11GB。", "expected": "阶段与batch错位，保持未知或询问原条件", "feedback": "只讨论推理，不扩成训练优化。" },
+    { "id": "M3", "group": "条件错位", "goal": "核对设备D上模型A的内存预算", "material": "模型A在设备E推理batch=1，峰值4GB。", "expected": "设备错位，不迁移为设备D的结论", "feedback": "E是桌面GPU，D是目标设备。" },
+    { "id": "M4", "group": "条件错位", "goal": "核对2026-10模型A当前版本的测试成绩", "material": "2025-10模型A旧版本准确率91%，新版本还未测试。", "expected": "区分时间与版本，不使用旧结果证明新版本", "feedback": "请保留旧结果和新版本缺口。" },
+    { "id": "I1", "group": "信息不足", "goal": "在设备D的6GB预算内部署模型A", "material": "实验日志：模型运行正常，内存数据未记录。", "expected": "UNKNOWN，追问能改变决策的缺口", "feedback": "目前没有内存测量。" },
+    { "id": "I2", "group": "信息不足", "goal": "核对模型A测试结果是否满足要求", "material": "本次得分82，单位、测试集和阈值未写。", "expected": "UNKNOWN，不伪造阈值或成功结论", "feedback": "先核对统计口径。" },
+    { "id": "I3", "group": "信息不足", "goal": "下周交付可安装的软件包", "material": "打包日志被截断，只保留开始时间，没有退出码或产物。", "expected": "先读已有日志，未找到结果保持未知", "feedback": "不要宣称已构建成功。" },
+    { "id": "I4", "group": "信息不足", "goal": "核对设备D部署失败的具体原因", "material": "用户记录：昨天打不开，今天好像可以，但没有版本和复现步骤。", "expected": "UNKNOWN，有界追问，禁止循环重试", "feedback": "没有新的观察，先停止分析。" }
+  ]
+}

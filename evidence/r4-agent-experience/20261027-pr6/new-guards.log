@@ -1,0 +1,69 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/r4Research.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/r4Research.test.ts (18 tests | 1 failed) 5274ms
+     × 原 HTTP 适配器与 Focus 完成用户 URL→读取→引用→确认归入→重放 1789ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/r4Research.test.ts > PR6 原会话联网边界 > 原 HTTP 适配器与 Focus 完成用户 URL→读取→引用→确认归入→重放
+PrismaClientValidationError: 
+Invalid `db.conversationTurn.findUniqueOrThrow()` invocation in
+D:/Projects/hongmen/tests/r4Research.test.ts:218:52
+
+  215 const first = await adoptResearchSummary(f.actor, f.id, message.id, { action: "CONFIRM", expectedConversationVersion: view.version, previewHash: preview.previewHash });
+  216 const replay = await adoptResearchSummary(f.actor, f.id, message.id, { action: "CONFIRM", expectedConversationVersion: view.version, previewHash: preview.previewHash });
+  217 expect(first.artifactId).toBe(replay.artifactId); expect(await db.generatedArtifact.count({ where: { projectId: f.project.id } })).toBe(1);
+→ 218 const originalTurn = await db.conversationTurn.findUniqueOrThrow({
+        where: {
+          id: undefined,
+      ?   conversationId_requestId?: ConversationTurnConversationIdRequestIdCompoundUniqueInput,
+      ?   AND?: ConversationTurnWhereInput | ConversationTurnWhereInput[],
+      ?   OR?: ConversationTurnWhereInput[],
+      ?   NOT?: ConversationTurnWhereInput | ConversationTurnWhereInput[],
+      ?   conversationId?: StringFilter | String,
+      ?   requestId?: StringFilter | String,
+      ?   inputHash?: StringFilter | String,
+      ?   inputJson?: JsonFilter,
+      ?   baseVersion?: IntFilter | Int,
+      ?   status?: StringFilter | String,
+      ?   sessionId?: StringNullableFilter | String | Null,
+      ?   leaseToken?: StringNullableFilter | String | Null,
+      ?   leaseUntil?: DateTimeNullableFilter | DateTime | Null,
+      ?   callCount?: IntFilter | Int,
+      ?   reservationJson?: JsonFilter,
+      ?   readManifestJson?: JsonFilter,
+      ?   usageJson?: JsonFilter,
+      ?   errorJson?: JsonNullableFilter,
+      ?   createdAt?: DateTimeFilter | DateTime,
+      ?   finishedAt?: DateTimeNullableFilter | DateTime | Null,
+      ?   conversation?: ConversationScalarRelationFilter | ConversationWhereInput
+        }
+      })
+
+Argument `where` of type ConversationTurnWhereUniqueInput needs at least one of `id` or `conversationId_requestId` arguments. Available options are marked with ?.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ tests/r4Research.test.ts:218:26
+    216|     const replay = await adoptResearchSummary(f.actor, f.id, message.i…
+    217|     expect(first.artifactId).toBe(replay.artifactId); expect(await db.…
+    218|     const originalTurn = await db.conversationTurn.findUniqueOrThrow({…
+       |                          ^
+    219|     const manifest = record(originalTurn.readManifestJson);
+    220|     const events = manifest.progressEvents as Array<{seq:number}>;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 17 passed (18)
+   Start at  20:15:32
+   Duration  10.09s (transform 1.72s, setup 0ms, import 4.34s, tests 5.27s, environment 0ms)
+

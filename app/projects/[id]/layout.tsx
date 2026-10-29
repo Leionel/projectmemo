@@ -7,6 +7,7 @@ import {loadWorkspaceProject} from "@/lib/server/projectWorkspace";
 import {isFeatureEnabled} from "@/lib/config/features";
 import {scenarioOptions} from "@/lib/types";
 import styles from "@/components/ProjectWorkspace.module.css";
+import {ProjectConversationAccess} from "@/components/ProjectConversationAccess";
 export const dynamic="force-dynamic";
 export const runtime="nodejs";
 export default async function ProjectLayout({params,children}:{params:Promise<{id:string}>;children:ReactNode}){
@@ -16,6 +17,6 @@ export default async function ProjectLayout({params,children}:{params:Promise<{i
  return <main id="main-content" className={styles.shell}>
   <Link className={styles.back} href="/projects"><ArrowLeft size={15}/>返回项目列表</Link>
   <header className={styles.heading}><div className="min-w-0"><div className={styles.headingMeta}><span>{scenarioOptions.find(s=>s.value===project.scenario)?.label??project.scenario}</span>{project.archivedAt&&<span>已归档</span>}<span>更新于 {project.updatedAt.toLocaleDateString("zh-CN")}</span></div><h1>{project.title}</h1><details className={styles.projectContext}><summary>项目目标与简介</summary><p>项目名称：{project.title}</p><p>{project.goal}</p><p>{project.description}</p></details></div><div className={styles.headingActions}><ProjectSettings project={{id,title:project.title,description:project.description,goal:project.goal,scenario:project.scenario,deadline:project.deadline?.toISOString().slice(0,10)??"",archivedAt:project.archivedAt?.toISOString()??null}}/></div></header>
-  <div className={styles.workspace}><ProjectNavigation projectId={id} missionsEnabled={workspace.missionOwner&&isFeatureEnabled("MISSION_ENABLED",false)}/><div className={styles.content}>{children}</div></div>
+  <div className={styles.workspace}><ProjectNavigation projectId={id} missionsEnabled={workspace.missionOwner&&isFeatureEnabled("MISSION_ENABLED",false)}/><div className={styles.content}>{isFeatureEnabled("FOCUS_AGENT_ENABLED",false)&&<ProjectConversationAccess key={workspace.user.id} projectId={id}/>} {children}</div></div>
  </main>;
 }

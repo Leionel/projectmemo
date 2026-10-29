@@ -47,18 +47,18 @@ export function ProjectInsightCard({ projectId, intervention }: { projectId: str
     <div className="flex flex-wrap items-center justify-between gap-2">
       <p className="flex items-center gap-1.5 text-xs font-black tracking-[.14em] text-[var(--navy)] uppercase"><Sparkles size={15} className="text-[var(--teal-strong)]" />ProjectMemo Insight</p>
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className={"rounded px-2 py-0.5 text-[11px] font-bold " + severity.className}>{severity.label}</span>
-        <span className="rounded bg-[var(--paper-strong)] px-2 py-0.5 text-[11px] font-bold text-[var(--ink-soft)]">{interventionTriggerLabels[current.triggerType] ?? current.triggerType}</span>
-        {current.isSimulated && <span className="rounded bg-[#fff0c7] px-2 py-0.5 text-[11px] font-bold text-[var(--amber)]">模拟数据</span>}
+        <span className={"rounded px-2 py-0.5 text-xs font-bold " + severity.className}>{severity.label}</span>
+        <span className="rounded bg-[var(--paper-strong)] px-2 py-0.5 text-xs font-bold text-[var(--ink-soft)]">{interventionTriggerLabels[current.triggerType] ?? current.triggerType}</span>
+        {current.isSimulated && <span className="rounded bg-[#fff0c7] px-2 py-0.5 text-xs font-bold text-[var(--amber)]">模拟数据</span>}
       </div>
     </div>
     <h2 id="project-insight-title" className="mt-3 text-base font-black leading-6 text-[var(--navy)] sm:text-lg">{current.title}</h2>
     <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--ink-soft)]">{current.content}</p>
     <div className="mt-3 flex flex-wrap items-center gap-2">
-      <span className="rounded-md bg-[var(--paper-strong)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)]">依据可查看</span>
-      <span className="rounded-md bg-[var(--paper-strong)] px-2 py-1 text-[11px] font-bold text-[var(--ink-soft)]">系统生成的建议</span>
+      <span className="rounded-md bg-[var(--paper-strong)] px-2 py-1 text-xs font-bold text-[var(--teal-strong)]">依据可查看</span>
+      <span className="rounded-md bg-[var(--paper-strong)] px-2 py-1 text-xs font-bold text-[var(--ink-soft)]">系统生成的建议</span>
       <a href="#interventions" className="focus-ring editorial-button-secondary ml-auto text-xs">查看依据并处理</a>
     </div>
-    {current.isSimulated && <p className="mt-2 text-[11px] font-semibold text-[var(--amber)]">这是演示情境生成的模拟提醒，不计入真实项目指标。</p>}
+    {current.isSimulated && <p className="mt-2 text-xs font-semibold text-[var(--amber)]">这是演示情境生成的模拟提醒，不计入真实项目指标。</p>}
   </section>;
 }

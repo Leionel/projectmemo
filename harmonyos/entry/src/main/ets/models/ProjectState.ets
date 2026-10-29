@@ -1,4 +1,13 @@
+import { EvidenceAssessment } from './Copilot';
 // ---- R2/S1 项目状态（与 lib/types/projectState.ts 契约保持一致） ----
+
+export class StateFact {
+  key: string = '';
+  text: string = '';
+  truth: string = 'UNKNOWN';
+  temporalState: string = 'UNKNOWN';
+  assessment: EvidenceAssessment | undefined = undefined;
+}
 
 export class StateEvidenceRef {
   entityKind: string = 'card';
@@ -24,6 +33,8 @@ export class StateUnknown {
 }
 
 export class StatePayload {
+  nextInvalidationAt: string | null = null;
+  facts: StateFact[] = [];
   snapshotId: string = '';
   projectId: string = '';
   schemaVersion: number = 1;

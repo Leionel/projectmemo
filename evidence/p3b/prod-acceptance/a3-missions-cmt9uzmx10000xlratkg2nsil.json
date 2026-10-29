@@ -1,0 +1,27 @@
+{
+  "at": "2026-10-24T10:57:31.503Z",
+  "request": {
+    "method": "GET",
+    "path": "/api/missions?projectId=cmt9uzmx10000xlratkg2nsil",
+    "body": null,
+    "authorized": true
+  },
+  "status": 200,
+  "body": {
+    "missions": [
+      {
+        "id": "cmvhu32ww0007w9racxjesok8",
+        "goal": "根据本项目已有材料，形成一份带来源的阶段汇报草稿，包括已完成事项、当前风险和下一步建议。没有依据的内容明确列为信息缺口，不编造实验指标。本次只读取、分析和保存草稿，不搜索网络，不创建或修改行动。",
+        "status": "PAUSED",
+        "version": 9
+      },
+      {
+        "id": "cmvhu98tl00002traikys1id1",
+        "goal": "根据本项目已有材料，形成一份带来源的阶段汇报草稿，包括已完成事项、当前风险和下一步建议。没有依据的内容明确列为信息缺口，不编造实验指标。本次只读取、分析和保存草稿，不搜索网络，不创建或修改行动。",
+        "status": "PAUSED",
+        "version": 18
+      }
+    ],
+    "nextCursor": null
+  }
+}

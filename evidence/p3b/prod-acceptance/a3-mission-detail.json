@@ -1,0 +1,490 @@
+{
+  "at": "2026-10-24T10:57:31.634Z",
+  "request": {
+    "method": "GET",
+    "path": "/api/missions/cmvhu32ww0007w9racxjesok8",
+    "body": null,
+    "authorized": true
+  },
+  "status": 200,
+  "body": {
+    "mission": {
+      "completion": {
+        "criteriaPassed": null,
+        "criteriaCheckedAt": null,
+        "draftVerification": null,
+        "adoptionCount": 0,
+        "latestArtifactId": null,
+        "realityOutcome": "NOT_INFERRED"
+      },
+      "experience": {
+        "enabled": true,
+        "suggestions": [],
+        "note": "建议不改变权限；影子观察不注入模型上下文。"
+      },
+      "semanticCheckEnabled": true,
+      "artifactAdoptionEnabled": true,
+      "id": "cmvhu32ww0007w9racxjesok8",
+      "projectId": "cmt9uzmx10000xlratkg2nsil",
+      "goal": "根据本项目已有材料，形成一份带来源的阶段汇报草稿，包括已完成事项、当前风险和下一步建议。没有依据的内容明确列为信息缺口，不编造实验指标。本次只读取、分析和保存草稿，不搜索网络，不创建或修改行动。",
+      "status": "PAUSED",
+      "version": 9,
+      "contextVersion": 1,
+      "planRevision": 1,
+      "continuationPolicy": {
+        "mode": "MANUAL"
+      },
+      "autoContinuationEnabled": false,
+      "successCriteria": [
+        "DRAFT_EXISTS"
+      ],
+      "constraints": {
+        "availableMinutes": null,
+        "resourceLimits": [],
+        "costCeiling": null,
+        "deadline": null,
+        "priority": null,
+        "forbiddenApproaches": [],
+        "rejectedActions": [],
+        "executionBoundary": "PROPOSE_ACTION",
+        "llmContextApproved": true
+      },
+      "constraintsVersion": 1,
+      "researchScope": {
+        "enabled": false,
+        "topic": "",
+        "publicTerms": [],
+        "allowedCategories": [
+          "PUBLIC_TOPIC"
+        ],
+        "excludedTerms": [],
+        "allowedHosts": []
+      },
+      "researchScopeVersion": 1,
+      "pauseReason": "REVIEW_REQUIRED",
+      "pauseRequestedAt": null,
+      "cancelRequestedAt": null,
+      "error": {
+        "code": "MODEL_PROTOCOL_ERROR",
+        "message": "委托执行失败，请检查服务配置后继续"
+      },
+      "budget": {
+        "models": 12,
+        "tools": 16,
+        "searches": 3,
+        "fetches": 4,
+        "activeMs": 180000,
+        "reservedOutputTokens": 12000
+      },
+      "used": {
+        "models": 4,
+        "tools": 2,
+        "searches": 0,
+        "fetches": 0,
+        "activeMs": 42128,
+        "reservedOutputTokens": 4000,
+        "inputTokens": 4466,
+        "outputTokens": 85,
+        "unknownCalls": 2
+      },
+      "question": null,
+      "steps": [
+        {
+          "id": "cmvhu33zn0002wsral0165kao",
+          "ordinal": 1,
+          "toolName": "inspect_project",
+          "status": "SUCCEEDED",
+          "result": {
+            "data": {
+              "project": {
+                "title": "人工智能创意赛 忆程 ProjectMemo 作品开发",
+                "goal": "完成可本地演示的忆程 MVP 与初赛材料，清晰展示知识沉淀、主动提醒、行动闭环和成果复用。",
+                "deadline": "2026-10-01T00:00:00.000Z"
+              },
+              "actions": [
+                {
+                  "id": "cmu82afl40006xqra37zz1edw",
+                  "title": "评估风险影响并完成最小规避验证",
+                  "status": "DOING",
+                  "priority": 5,
+                  "dependencyVersion": 2,
+                  "dueAt": "2026-09-21T12:00:00.000Z"
+                },
+                {
+                  "id": "cmucc3h0q000bzfrac2tt7n5p",
+                  "title": "制作讲解视频",
+                  "status": "DOING",
+                  "priority": 1,
+                  "dependencyVersion": 1,
+                  "dueAt": null
+                },
+                {
+                  "id": "cmumg85wh001cfgrad3u7qpxo",
+                  "title": "会议表示，报告需要马上a",
+                  "status": "TODO",
+                  "priority": 3,
+                  "dependencyVersion": 1,
+                  "dueAt": null
+                },
+                {
+                  "id": "cmumgaay8001hfgradqzd18s3",
+                  "title": "张三负责撰写初稿",
+                  "status": "TODO",
+                  "priority": 3,
+                  "dependencyVersion": 1,
+                  "dueAt": null
+                }
+              ],
+              "truncated": false
+            },
+            "sources": [
+              {
+                "id": "project:cmt9uzmx10000xlratkg2nsil",
+                "kind": "PROJECT",
+                "entityType": "PROJECT",
+                "revision": "779dcdaf9f23a1d7b42268475d95366e810876c33e533201e922c29e5b385f9f",
+                "hash": "779dcdaf9f23a1d7b42268475d95366e810876c33e533201e922c29e5b385f9f",
+                "text": "{\"project\":{\"title\":\"人工智能创意赛 忆程 ProjectMemo 作品开发\",\"goal\":\"完成可本地演示的忆程 MVP 与初赛材料，清晰展示知识沉淀、主动提醒、行动闭环和成果复用。\",\"deadline\":\"2026-10-01T00:00:00.000Z\"},\"actions\":[{\"id\":\"cmu82afl40006xqra37zz1edw\",\"title\":\"评估风险影响并完成最小规避验证\",\"status\":\"DOING\",\"priority\":5,\"dependencyVersion\":2,\"dueAt\":\"2026-09-21T12:00:00.000Z\"},{\"id\":\"cmucc3h0q000bzfrac2tt7n5p\",\"title\":\"制作讲解视频\",\"status\":\"DOING\",\"priority\":1,\"dependencyVersion\":1,\"dueAt\":null},{\"id\":\"cmumg85wh001cfgrad3u7qpxo\",\"title\":\"会议表示，报告需要马上a\",\"status\":\"TODO\",\"priority\":3,\"dependencyVersion\":1,\"dueAt\":null},{\"id\":\"cmumgaay8001hfgradqzd18s3\",\"title\":\"张三负责撰写初稿\",\"status\":\"TODO\",\"priority\":3,\"dependencyVersion\":1,\"dueAt\":null}],\"truncated\":false}",
+                "observedAt": "2026-10-21T08:12:01.191Z"
+              }
+            ]
+          }
+        },
+        {
+          "id": "cmvhu35660007wsrahu1xlqzp",
+          "ordinal": 2,
+          "toolName": "search_memory",
+          "status": "SUCCEEDED",
+          "result": {
+            "data": [
+              {
+                "cardId": "3d0948ba-34e9-4a29-a7b4-f2de1b56fbc9",
+                "title": "真实模型验收进展：公网后端与DeepSeek接入完成",
+                "summary": "忆程 ProjectMemo 已完成公网后端部署与 DeepSeek 真实模型接入，当前进入验收收尾阶段，下一步需生成签名 HAP、录制演示视频并整理最终提交包，以支撑可本地演示的 MVP 与初赛材料提交。",
+                "type": "experiment_log",
+                "score": 0.536,
+                "semanticScore": 0,
+                "keywordScore": 0.484,
+                "recencyScore": 0.312,
+                "importanceScore": 1,
+                "reason": "命中关键词 [MVP, 初赛材料]",
+                "source": "Keyword + metadata index",
+                "retrievalMode": "keyword_fallback",
+                "createdAt": "2026-09-16T08:44:34.125Z",
+                "current": true,
+                "supportState": "INSUFFICIENT",
+                "topLevelState": "UNKNOWN",
+                "reasonCode": "NO_SUPPORTING_EVIDENCE",
+                "displayReason": "尚无足够的时态关系证据，当前结论保持未知。",
+                "evidenceRefs": [
+                  {
+                    "entityKind": "card",
+                    "entityId": "3d0948ba-34e9-4a29-a7b4-f2de1b56fbc9",
+                    "field": "title+summary",
+                    "observedAt": "2026-09-16T08:44:34.125Z"
+                  }
+                ],
+                "supersededBy": null,
+                "temporalReason": null,
+                "temporal": "UNKNOWN"
+              },
+              {
+                "cardId": "55a1a1f4-ac78-4f37-8c73-4bb7cdd4f08f",
+                "title": "软件尚未形成HAP包",
+                "summary": "当前忆程软件还未生成可安装的HAP包，影响签名HAP、本地演示和初赛材料提交等关键节点。",
+                "type": "risk",
+                "score": 0.479,
+                "semanticScore": 0,
+                "keywordScore": 0.389,
+                "recencyScore": 0.38,
+                "importanceScore": 1,
+                "reason": "命中关键词 [MVP, 初赛材料]",
+                "source": "Keyword + metadata index",
+                "retrievalMode": "keyword_fallback",
+                "createdAt": "2026-09-22T07:08:26.398Z",
+                "current": true,
+                "supportState": "INSUFFICIENT",
+                "topLevelState": "UNKNOWN",
+                "reasonCode": "NO_SUPPORTING_EVIDENCE",
+                "displayReason": "尚无足够的时态关系证据，当前结论保持未知。",
+                "evidenceRefs": [
+                  {
+                    "entityKind": "card",
+                    "entityId": "55a1a1f4-ac78-4f37-8c73-4bb7cdd4f08f",
+                    "field": "title+summary",
+                    "observedAt": "2026-09-22T07:08:26.398Z"
+                  }
+                ],
+                "supersededBy": null,
+                "temporalReason": null,
+                "temporal": "UNKNOWN"
+              },
+              {
+                "cardId": "02b4992a-4af6-4061-b9ba-13e52d9366b3",
+                "title": "报告马上交",
+                "summary": "用户记录显示报告提交截止时间临近，需要立即处理报告交付事项。结合项目背景，该报告可能涉及忆程 ProjectMemo 的初赛材料、作品说明文档或项目记录等交付物。",
+                "type": "task",
+                "score": 0.472,
+                "semanticScore": 0,
+                "keywordScore": 0.357,
+                "recencyScore": 0.481,
+                "importanceScore": 1,
+                "reason": "命中关键词 [初赛材料]",
+                "source": "Keyword + metadata index",
+                "retrievalMode": "keyword_fallback",
+                "createdAt": "2026-09-29T08:56:46.143Z",
+                "current": true,
+                "supportState": "INSUFFICIENT",
+                "topLevelState": "UNKNOWN",
+                "reasonCode": "NO_SUPPORTING_EVIDENCE",
+                "displayReason": "尚无足够的时态关系证据，当前结论保持未知。",
+                "evidenceRefs": [
+                  {
+                    "entityKind": "card",
+                    "entityId": "02b4992a-4af6-4061-b9ba-13e52d9366b3",
+                    "field": "title+summary",
+                    "observedAt": "2026-09-29T08:56:46.143Z"
+                  }
+                ],
+                "supersededBy": null,
+                "temporalReason": null,
+                "temporal": "UNKNOWN"
+              },
+              {
+                "cardId": "9e2d32ab-99a2-45ef-9ee6-1884c7963fb0",
+                "title": "真实模型测试当前待办",
+                "summary": "真实模型测试阶段，当前需要完成签名 HAP、演示视频和作品说明文档，以支撑忆程 MVP 的本地演示与初赛材料提交。",
+                "type": "task",
+                "score": 0.472,
+                "semanticScore": 0,
+                "keywordScore": 0.437,
+                "recencyScore": 0.311,
+                "importanceScore": 0.8,
+                "reason": "命中关键词 [MVP, 初赛材料]",
+                "source": "Keyword + metadata index",
+                "retrievalMode": "keyword_fallback",
+                "createdAt": "2026-09-16T08:07:50.754Z",
+                "current": true,
+                "supportState": "INSUFFICIENT",
+                "topLevelState": "UNKNOWN",
+                "reasonCode": "NO_SUPPORTING_EVIDENCE",
+                "displayReason": "尚无足够的时态关系证据，当前结论保持未知。",
+                "evidenceRefs": [
+                  {
+                    "entityKind": "card",
+                    "entityId": "9e2d32ab-99a2-45ef-9ee6-1884c7963fb0",
+                    "field": "title+summary",
+                    "observedAt": "2026-09-16T08:07:50.754Z"
+                  }
+                ],
+                "supersededBy": null,
+                "temporalReason": null,
+                "temporal": "UNKNOWN"
+              },
+              {
+                "cardId": "7c14a6cd-681b-4b33-aae6-538a12ddcb34",
+                "title": "要求：初赛需要准备创意描述、设计稿、作品介绍文档和演示材料",
+                "summary": "初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。",
+                "type": "requirement",
+                "score": 0.295,
+                "semanticScore": 0,
+                "keywordScore": 0.175,
+                "recencyScore": 0.155,
+                "importanceScore": 1,
+                "reason": "命中关键词 [初赛]",
+                "source": "Keyword + metadata index",
+                "retrievalMode": "keyword_fallback",
+                "createdAt": "2026-08-26T08:55:44.740Z",
+                "current": true,
+                "supportState": "INSUFFICIENT",
+                "topLevelState": "UNKNOWN",
+                "reasonCode": "NO_SUPPORTING_EVIDENCE",
+                "displayReason": "尚无足够的时态关系证据，当前结论保持未知。",
+                "evidenceRefs": [
+                  {
+                    "entityKind": "card",
+                    "entityId": "7c14a6cd-681b-4b33-aae6-538a12ddcb34",
+                    "field": "title+summary",
+                    "observedAt": "2026-08-26T08:55:44.740Z"
+                  }
+                ],
+                "supersededBy": null,
+                "temporalReason": null,
+                "temporal": "UNKNOWN"
+              },
+              {
+                "cardId": "7d8de5a7-065f-4052-a67c-5bf4bc7017a0",
+                "title": "风险：如果功能太多，单人开发时间不够，应该优先保证 MV…",
+                "summary": "风险：如果功能太多，单人开发时间不够，应该优先保证 MVP 闭环。",
+                "type": "risk",
+                "score": 0.284,
+                "semanticScore": 0,
+                "keywordScore": 0.159,
+                "recencyScore": 0.155,
+                "importanceScore": 1,
+                "reason": "命中关键词 [MVP, 风险]",
+                "source": "Keyword + metadata index",
+                "retrievalMode": "keyword_fallback",
+                "createdAt": "2026-08-26T08:55:44.915Z",
+                "current": true,
+                "supportState": "INSUFFICIENT",
+                "topLevelState": "UNKNOWN",
+                "reasonCode": "NO_SUPPORTING_EVIDENCE",
+                "displayReason": "尚无足够的时态关系证据，当前结论保持未知。",
+                "evidenceRefs": [
+                  {
+                    "entityKind": "card",
+                    "entityId": "7d8de5a7-065f-4052-a67c-5bf4bc7017a0",
+                    "field": "title+summary",
+                    "observedAt": "2026-08-26T08:55:44.915Z"
+                  }
+                ],
+                "supersededBy": null,
+                "temporalReason": null,
+                "temporal": "UNKNOWN"
+              },
+              {
+                "cardId": "dbcdf067-6201-48c3-883b-2ed89d4f5942",
+                "title": "任务：后天就是ddl",
+                "summary": "后天就是ddl",
+                "type": "task",
+                "score": 0.219,
+                "semanticScore": 0,
+                "keywordScore": 0,
+                "recencyScore": 0.46,
+                "importanceScore": 1,
+                "reason": "项目知识库匹配",
+                "source": "Keyword + metadata index",
+                "retrievalMode": "keyword_fallback",
+                "createdAt": "2026-09-28T01:46:28.972Z",
+                "current": true,
+                "supportState": "INSUFFICIENT",
+                "topLevelState": "UNKNOWN",
+                "reasonCode": "NO_SUPPORTING_EVIDENCE",
+                "displayReason": "尚无足够的时态关系证据，当前结论保持未知。",
+                "evidenceRefs": [
+                  {
+                    "entityKind": "card",
+                    "entityId": "dbcdf067-6201-48c3-883b-2ed89d4f5942",
+                    "field": "title+summary",
+                    "observedAt": "2026-09-28T01:46:28.972Z"
+                  }
+                ],
+                "supersededBy": null,
+                "temporalReason": null,
+                "temporal": "UNKNOWN"
+              },
+              {
+                "cardId": "33b2c046-37b8-43be-807c-e5e85733ca5a",
+                "title": "要求：复赛阶段可能需要演示视频和源代码文件，因此代码结构要清晰…",
+                "summary": "复赛阶段可能需要演示视频和源代码文件，因此代码结构要清晰。",
+                "type": "requirement",
+                "score": 0.173,
+                "semanticScore": 0,
+                "keywordScore": 0,
+                "recencyScore": 0.155,
+                "importanceScore": 1,
+                "reason": "项目知识库匹配",
+                "source": "Keyword + metadata index",
+                "retrievalMode": "keyword_fallback",
+                "createdAt": "2026-08-26T08:55:44.895Z",
+                "current": true,
+                "supportState": "INSUFFICIENT",
+                "topLevelState": "UNKNOWN",
+                "reasonCode": "NO_SUPPORTING_EVIDENCE",
+                "displayReason": "尚无足够的时态关系证据，当前结论保持未知。",
+                "evidenceRefs": [
+                  {
+                    "entityKind": "card",
+                    "entityId": "33b2c046-37b8-43be-807c-e5e85733ca5a",
+                    "field": "title+summary",
+                    "observedAt": "2026-08-26T08:55:44.895Z"
+                  }
+                ],
+                "supersededBy": null,
+                "temporalReason": null,
+                "temporal": "UNKNOWN"
+              }
+            ],
+            "sources": [
+              {
+                "id": "card:3d0948ba-34e9-4a29-a7b4-f2de1b56fbc9",
+                "kind": "PROJECT",
+                "entityType": "CARD",
+                "revision": "f4d4bf27f24938bc8d6e7acf3396cecd63eab89d47deb3f674a5fa6cfd961f51",
+                "hash": "f4d4bf27f24938bc8d6e7acf3396cecd63eab89d47deb3f674a5fa6cfd961f51",
+                "text": "真实模型验收进展：公网后端与DeepSeek接入完成\n忆程 ProjectMemo 已完成公网后端部署与 DeepSeek 真实模型接入，当前进入验收收尾阶段，下一步需生成签名 HAP、录制演示视频并整理最终提交包，以支撑可本地演示的 MVP 与初赛材料提交。",
+                "observedAt": "2026-10-21T08:12:02.718Z"
+              },
+              {
+                "id": "card:55a1a1f4-ac78-4f37-8c73-4bb7cdd4f08f",
+                "kind": "PROJECT",
+                "entityType": "CARD",
+                "revision": "b7245de855019e035350a32054ef6c77d1ab0ccf7161314f69fb596e3caaaac2",
+                "hash": "b7245de855019e035350a32054ef6c77d1ab0ccf7161314f69fb596e3caaaac2",
+                "text": "软件尚未形成HAP包\n当前忆程软件还未生成可安装的HAP包，影响签名HAP、本地演示和初赛材料提交等关键节点。",
+                "observedAt": "2026-10-21T08:12:02.720Z"
+              },
+              {
+                "id": "card:02b4992a-4af6-4061-b9ba-13e52d9366b3",
+                "kind": "PROJECT",
+                "entityType": "CARD",
+                "revision": "412a2408e5cedd4c6d9f9a7f7c77777979ceb6bef56be6f990b3f047f1522fbf",
+                "hash": "412a2408e5cedd4c6d9f9a7f7c77777979ceb6bef56be6f990b3f047f1522fbf",
+                "text": "报告马上交\n用户记录显示报告提交截止时间临近，需要立即处理报告交付事项。结合项目背景，该报告可能涉及忆程 ProjectMemo 的初赛材料、作品说明文档或项目记录等交付物。",
+                "observedAt": "2026-10-21T08:12:02.722Z"
+              },
+              {
+                "id": "card:9e2d32ab-99a2-45ef-9ee6-1884c7963fb0",
+                "kind": "PROJECT",
+                "entityType": "CARD",
+                "revision": "01def111d58b5e67843c595f54bee7930aff3560de591611b38fb92c188856f6",
+                "hash": "01def111d58b5e67843c595f54bee7930aff3560de591611b38fb92c188856f6",
+                "text": "真实模型测试当前待办\n真实模型测试阶段，当前需要完成签名 HAP、演示视频和作品说明文档，以支撑忆程 MVP 的本地演示与初赛材料提交。",
+                "observedAt": "2026-10-21T08:12:02.725Z"
+              },
+              {
+                "id": "card:7c14a6cd-681b-4b33-aae6-538a12ddcb34",
+                "kind": "PROJECT",
+                "entityType": "CARD",
+                "revision": "fd3fc84c173a15b01b9f611bc412b9e0ef5ff0f470cc77057afbb53bb6c69642",
+                "hash": "fd3fc84c173a15b01b9f611bc412b9e0ef5ff0f470cc77057afbb53bb6c69642",
+                "text": "要求：初赛需要准备创意描述、设计稿、作品介绍文档和演示材料\n初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。",
+                "observedAt": "2026-10-21T08:12:02.728Z"
+              },
+              {
+                "id": "card:7d8de5a7-065f-4052-a67c-5bf4bc7017a0",
+                "kind": "PROJECT",
+                "entityType": "CARD",
+                "revision": "8ce5ddf0a661ca647efdcf295fbe49f7662c3aab6c398af345542edeee1636c9",
+                "hash": "8ce5ddf0a661ca647efdcf295fbe49f7662c3aab6c398af345542edeee1636c9",
+                "text": "风险：如果功能太多，单人开发时间不够，应该优先保证 MV…\n风险：如果功能太多，单人开发时间不够，应该优先保证 MVP 闭环。",
+                "observedAt": "2026-10-21T08:12:02.730Z"
+              },
+              {
+                "id": "card:dbcdf067-6201-48c3-883b-2ed89d4f5942",
+                "kind": "PROJECT",
+                "entityType": "CARD",
+                "revision": "74002fcfe42001a80a122f3484679e907cc290a9fead756958a508365703e442",
+                "hash": "74002fcfe42001a80a122f3484679e907cc290a9fead756958a508365703e442",
+                "text": "任务：后天就是ddl\n后天就是ddl",
+                "observedAt": "2026-10-21T08:12:02.732Z"
+              },
+              {
+                "id": "card:33b2c046-37b8-43be-807c-e5e85733ca5a",
+                "kind": "PROJECT",
+                "entityType": "CARD",
+                "revision": "ec4512d2fa17c4140e92dd97c2913fc0c667cfa1b56da9f11f759a53997d3362",
+                "hash": "ec4512d2fa17c4140e92dd97c2913fc0c667cfa1b56da9f11f759a53997d3362",
+                "text": "要求：复赛阶段可能需要演示视频和源代码文件，因此代码结构要清晰…\n复赛阶段可能需要演示视频和源代码文件，因此代码结构要清晰。",
+                "observedAt": "2026-10-21T08:12:02.734Z"
+              }
+            ]
+          }
+        }
+      ],
+      "approvals": [],
+      "outputs": []
+    }
+  }
+}

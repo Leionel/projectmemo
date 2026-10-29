@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/registration.test.ts tests/accountMail.test.ts tests/auth.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  3 passed (3)
+      Tests  41 passed (41)
+   Start at  09:12:54
+   Duration  13.85s (transform 1.12s, setup 0ms, import 7.37s, tests 4.19s, environment 0ms)
+

@@ -1,0 +1,30 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/r4Investigation.test.ts -t stops duplicate reads
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/r4Investigation.test.ts (17 tests | 1 failed | 16 skipped) 7669ms
+     × stops duplicate reads and replays the same request without extra HTTP 7639ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/r4Investigation.test.ts > R4 durable adaptive investigation > stops duplicate reads and replays the same request without extra HTTP
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/r4Investigation.test.ts:124:3
+    122|     expect((await db.agentRun.findMany({ where: { turnId: turn.id } })…
+    123|   });
+    124|   it("stops duplicate reads and replays the same request without extra…
+       |   ^
+    125|     const f = await fixture(), provider = model(f, { repeat: true, noA…
+    126|     const result = await ask(f);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 skipped (17)
+   Start at  09:57:40
+   Duration  17.94s (transform 5.16s, setup 0ms, import 9.62s, tests 7.67s, environment 0ms)

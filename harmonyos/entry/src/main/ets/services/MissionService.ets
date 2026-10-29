@@ -1,4 +1,6 @@
+import { MissionReadTarget, MissionReadbackReply, missionReadbackQuery } from '../models/MissionReadback';
 import { ApiClient } from './ApiClient';
+import { MissionAttentionReceipt } from '../models/Mission';
 import { SessionStore } from './SessionStore';
 import { ApiError } from '../models/Project';
 import { Mission, MissionCreate, MissionReply, MissionDetailReply, MissionList, MissionEvents, MissionCommand,
@@ -7,6 +9,7 @@ import { Mission, MissionCreate, MissionReply, MissionDetailReply, MissionList, 
   MissionConstraintsEdit, MissionScopeEdit, MissionPolicyEdit, MissionCapabilities, MissionWorkspaceSummary } from '../models/Mission';
 
 export class MissionService {
+  async attention(id: string, body: MissionAttentionReceipt): Promise<void> { this.authorize(); await this.client.patch<Object>(`${this.path(id)}/attention`, body); }
   private client: ApiClient;
   constructor(client?: ApiClient) { this.client = client ?? new ApiClient(); }
   private authorize(): void {
@@ -36,14 +39,22 @@ export class MissionService {
     this.authorize(); const suffix = approvalId === '' ? action : `approvals/${encodeURIComponent(approvalId)}`;
     return this.client.post<MissionReply>(`${this.path(id)}/${suffix}`, body);
   }
-  async candidates(id: string): Promise<MissionCandidates> {
-    this.authorize(); return this.client.get<MissionCandidates>(`${this.path(id)}/continuations`);
+  async candidates(id: string, questionId: string = '', sourceId: string = '', includeExisting: boolean = false): Promise<MissionCandidates> {
+    this.authorize();
+    const query: string[] = [];
+    if (questionId !== '') query.push(`questionId=${encodeURIComponent(questionId)}`);
+    if (sourceId !== '') query.push(`sourceId=${encodeURIComponent(sourceId)}`);
+    if (includeExisting) query.push('includeExisting=1');
+    return this.client.get<MissionCandidates>(`${this.path(id)}/continuations${query.length > 0 ? '?' + query.join('&') : ''}`);
   }
   async previewMaterial(id: string, body: MissionMaterialInput): Promise<MissionMaterialPreview> {
     this.authorize(); return this.client.post<MissionMaterialPreview>(`${this.path(id)}/continuations/preview`, body);
   }
   async confirmMaterial(id: string, body: MissionMaterialConfirm): Promise<MissionContinued> {
     this.authorize(); return this.client.post<MissionContinued>(`${this.path(id)}/continuations/confirm`, body);
+  }
+  async readback(id: string, target: MissionReadTarget): Promise<MissionReadbackReply> {
+    this.authorize(); return this.client.get<MissionReadbackReply>(`${this.path(id)}/readback?${missionReadbackQuery(target)}`);
   }
   async previewArtifact(id: string, outputId: string, body: MissionArtifactInput): Promise<MissionArtifactPreviewReply> {
     this.authorize(); return this.client.post<MissionArtifactPreviewReply>(`${this.path(id)}/outputs/${encodeURIComponent(outputId)}/artifact-preview`, body);

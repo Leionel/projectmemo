@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/continuityStages23.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  13:22:21
+   Duration  3.57s (transform 1.12s, setup 0ms, import 1.82s, tests 1.52s, environment 0ms)
+

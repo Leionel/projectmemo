@@ -1,3 +1,5 @@
+import { effectiveContinuity, assertDirectiveEffect } from "@/lib/continuity/directiveService";
+import { assertDynamicTool } from "./dynamicGuard";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { isFeatureEnabled } from "@/lib/config/features";
@@ -11,10 +13,11 @@ import { assertAutomaticTool } from "./automaticPolicy";
 export async function commitApprovedAction(lease:Lease,stepId:string){
  if(!isFeatureEnabled("MISSION_WRITES_ENABLED",false))throw new AppError("WRITES_DISABLED","行动写入已关闭，提案已保留",503);
  return db.$transaction(async tx=>{
-  const m=await fenced(tx,lease);assertAutomaticTool(m,"create_action",true);const step=await tx.agentMissionStep.findFirst({where:{id:stepId,missionId:m.id}});
+  const m=await fenced(tx,lease);assertDirectiveEffect(await effectiveContinuity(m.ownerUserId,{projectId:m.projectId,missionId:m.id},tx),"BUSINESS_WRITE");assertAutomaticTool(m,"create_action",true);const step=await tx.agentMissionStep.findFirst({where:{id:stepId,missionId:m.id}});
   const approval=await tx.agentMissionApproval.findUnique({where:{stepId}});
   if(!step||!approval||approval.missionId!==m.id)throw new AppError("APPROVAL_CHANGED","批准不存在",409);
   if(step.status==="SUCCEEDED"&&approval.status==="CONSUMED")return step.resultJson;
+   assertDynamicTool(m,"create_action",step.canonicalInputJson);
   if(approval.status!=="APPROVED"||approval.expectedPlanRevision!==m.planRevision||approval.expiresAt<=new Date()||approval.proposalHash!==jsonHash(approval.proposalJson))throw new AppError("APPROVAL_CHANGED","批准已失效，请重新预览",409);
   await validateSources(m.projectId,approval.readSetJson as unknown as Source[],tx,m.id);
   const proposal=approval.proposalJson as {args:unknown};const args=actionProposalSchema.parse(proposal.args);assertToolConstraints(m.constraintsJson,"propose_action",args);

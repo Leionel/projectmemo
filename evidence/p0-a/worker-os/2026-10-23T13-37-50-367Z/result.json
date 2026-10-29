@@ -1,0 +1,166 @@
+{
+  "startedAt": "2026-10-23T13:37:51.635Z",
+  "finishedAt": "2026-10-23T13:39:07.762Z",
+  "passed": true,
+  "provider": "LOCAL_HTTP_MOCK",
+  "realModelRequests": 0,
+  "database": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\projectmemo-p0a-os-5hBBrR\\workers.db",
+  "temporaryDatabaseRetained": true,
+  "sharedVitestDatabaseUsed": false,
+  "realOSProcesses": true,
+  "workerEntry": "scripts/mission-worker.ts",
+  "runtimeReimplemented": false,
+  "runtimeSourceHashes": {
+    "scripts/mission-worker.ts": "a4f6d27ccf824b79869300f9ae345afd2d26ceec2b88be07436e7d6116a11097",
+    "lib/mission/runner.ts": "77a04da0d08d1de29f8b80d0ca5a4cb7e2d6062c2b6b5e22ab6f9b2946bf35a3",
+    "lib/mission/modelAdapter.ts": "e54cc77f98e96b9641623de666fa6c60f3f3b8cb490883f4e3ff84d570ebae1b",
+    "lib/mission/runtimeStore.ts": "ff326f038ed470f8aadec1edb25a54a1d216bf69f8b6af5c43f2e158a5715888"
+  },
+  "runtimeSourcesUnchanged": true,
+  "calls": [
+    {
+      "case": "race",
+      "call": 1,
+      "at": "2026-10-23T13:37:52.596Z",
+      "action": "inspect_project"
+    },
+    {
+      "case": "fence",
+      "call": 2,
+      "at": "2026-10-23T13:37:53.753Z",
+      "action": "stale_propose_action_must_be_rejected"
+    },
+    {
+      "case": "fence",
+      "call": 3,
+      "at": "2026-10-23T13:38:04.641Z",
+      "action": "inspect_project"
+    },
+    {
+      "case": "crash",
+      "call": 4,
+      "at": "2026-10-23T13:38:05.817Z",
+      "action": "propose_action"
+    },
+    {
+      "case": "crash",
+      "call": 5,
+      "at": "2026-10-23T13:38:06.843Z",
+      "action": "held"
+    },
+    {
+      "case": "crash",
+      "call": 6,
+      "at": "2026-10-23T13:39:07.450Z",
+      "action": "save_mission_output"
+    },
+    {
+      "case": "crash",
+      "call": 7,
+      "at": "2026-10-23T13:39:07.544Z",
+      "action": "finish"
+    }
+  ],
+  "cases": [
+    {
+      "name": "two_os_workers_one_lease",
+      "passed": true,
+      "pids": [
+        5876,
+        73104
+      ],
+      "claimCount": 1,
+      "providerRequests": 1
+    },
+    {
+      "name": "heartbeat_and_old_owner_fence",
+      "passed": true,
+      "pids": [
+        62516,
+        75292
+      ],
+      "expiryFaultInjection": true,
+      "originalLeaseUntil": "2026-10-23T13:38:53.682Z",
+      "renewedLeaseUntil": "2026-10-23T13:39:03.705Z",
+      "oldEpoch": 1,
+      "newEpoch": 2,
+      "durableTools": [
+        "inspect_project"
+      ],
+      "staleWrites": 0
+    },
+    {
+      "name": "os_kill_natural_expiry_recovery_no_duplicate_action",
+      "passed": true,
+      "pids": [
+        55612,
+        66624
+      ],
+      "killedAt": "2026-10-23T13:38:06.863Z",
+      "originalLeaseUntil": "2026-10-23T13:39:06.785Z",
+      "reclaimedAt": "2026-10-23T13:39:07.391Z",
+      "recoveredAt": "2026-10-23T13:39:07.754Z",
+      "expiryFaultInjection": false,
+      "oldEpoch": 3,
+      "newEpoch": 4,
+      "actionCount": 1,
+      "actionStatus": "TODO",
+      "resultCardId": null,
+      "actionCreatedEventCount": 1,
+      "outputCount": 1,
+      "completion": {
+        "criteriaPassed": true,
+        "criteriaCheckedAt": "2026-10-23T13:39:07.565Z",
+        "draftVerification": "NEEDS_REVIEW",
+        "adoptionCount": 0,
+        "latestArtifactId": null,
+        "realityOutcome": "NOT_INFERRED"
+      },
+      "monotonicUniqueEventSeq": true
+    }
+  ],
+  "processes": [
+    {
+      "label": "race-a",
+      "pid": 5876,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "label": "race-b",
+      "pid": 73104,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "label": "fence-old",
+      "pid": 62516,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "label": "fence-new",
+      "pid": 75292,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "label": "approval-proposal",
+      "pid": 68484,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "label": "crash-after-approved-action",
+      "pid": 55612,
+      "code": null,
+      "signal": "SIGKILL"
+    },
+    {
+      "label": "crash-replacement",
+      "pid": 66624,
+      "code": null,
+      "signal": "SIGTERM"
+    }
+  ]
+}

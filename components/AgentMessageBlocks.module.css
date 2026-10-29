@@ -1,0 +1,76 @@
+.blocks { display:grid; gap:1.15rem; min-width:0; font-size:.96875rem; line-height:1.8; color:var(--ink); }
+.blocks h3,.blocks h4 { font-size:1rem; font-weight:650; line-height:1.65; }
+.blocks h4 { font-size:.9375rem; }
+.prose { overflow-wrap:anywhere; min-width:0; }
+.prose > * + * { margin-top:.65rem; }
+.prose ul,.prose ol { padding-left:1.3rem; }
+.prose ul { list-style:disc; }
+.prose ol { list-style:decimal; }
+.prose li + li { margin-top:.3rem; }
+.prose code { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:.85em; padding:.1rem .3rem; border-radius:4px; background:var(--paper); }
+.prose pre { overflow:auto; padding:.8rem; background:var(--paper); border:1px solid var(--rule); border-radius:8px; }
+.prose pre code { padding:0; background:none; }
+.tableScroll { overflow:auto; max-width:100%; }
+.tableScroll table { width:100%; border-collapse:collapse; min-width:18rem; font-size:.875rem; }
+.tableScroll th,.tableScroll td { padding:.6rem .7rem; border-bottom:1px solid var(--rule); text-align:left; vertical-align:top; }
+.tableScroll th { font-weight:600; color:var(--ink-soft); }
+.goal { border-top:1px solid var(--rule); padding-top:1rem; }
+.sectionHead { display:flex; gap:.5rem; align-items:center; color:var(--teal-strong); }
+.goalQuote { font-size:.8125rem; color:var(--muted); margin-top:.3rem; }
+.goal ul { display:grid; gap:.9rem; margin-top:1rem; }
+.goal li { display:flex; gap:.65rem; min-width:0; }
+.state { display:grid; place-items:center; flex-shrink:0; width:1.35rem; height:1.35rem; margin-top:.2rem; border-radius:50%; background:var(--paper); color:var(--muted); }
+.state[data-state=BLOCKED] { color:var(--brick); background:color-mix(in srgb,var(--brick) 8%,var(--card-bg)); }
+.state[data-state=VERIFIED] { color:var(--teal-strong); background:var(--teal-pale); }
+.criterion { display:flex; align-items:baseline; gap:.6rem; flex-wrap:wrap; }
+.criterion strong { font-size:.875rem; font-weight:550; }
+.criterion > span { font-size:.75rem; color:var(--muted); flex-shrink:0; }
+.goal li p { color:var(--ink-soft); font-size:.84375rem; margin-top:.2rem; }
+.nextNeed { color:var(--teal-strong); font-size:.8125rem; margin-top:.9rem; }
+.evidence,.trace { border:1px solid var(--rule); border-radius:10px; background:var(--card-bg); overflow:hidden; }
+.blocks summary { display:flex; align-items:center; gap:.5rem; min-height:44px; padding:.55rem .7rem; cursor:pointer; font-size:.8125rem; color:var(--ink-soft); list-style:none; }
+.blocks summary::-webkit-details-marker { display:none; }
+.blocks summary span { flex:1; min-width:0; }
+.source { padding:.7rem .85rem; border-top:1px solid var(--rule); }
+.source blockquote { margin:0; padding-left:.75rem; border-left:2px solid var(--teal); color:var(--ink); font-size:.875rem; white-space:pre-wrap; overflow-wrap:anywhere; }
+.source p { font-size:.8125rem; color:var(--ink-soft); margin-top:.5rem; }
+.source small { display:block; color:var(--brick); font-size:.75rem; margin-top:.35rem; }
+.source a { display:inline-flex; align-items:center; gap:.3rem; min-height:44px; color:var(--teal-strong); font-size:.8125rem; margin-top:.25rem; }
+.trace ol { padding:.3rem .8rem .8rem; display:grid; gap:.8rem; }
+.trace li { display:flex; gap:.65rem; align-items:flex-start; font-size:.8125rem; }
+.trace li > span { color:var(--teal-strong); margin-top:.3rem; }
+.trace li p { color:var(--muted); font-size:.75rem; }
+.trace li strong { font-weight:500; }
+.approval { padding:1rem; border:1px solid color-mix(in srgb,var(--teal) 28%,var(--rule)); background:color-mix(in srgb,var(--teal-pale) 25%,var(--card-bg)); border-radius:12px; }
+.status { display:block; font-size:.75rem; color:var(--teal-strong); margin-bottom:.4rem; }
+.approval p { font-size:.875rem; color:var(--ink-soft); margin-top:.4rem; white-space:pre-wrap; }
+.actions { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
+.actions:has(button) { margin-top:.8rem; }
+.actions small { width:100%; color:var(--muted); font-size:.75rem; }
+.primary,.secondary { display:inline-flex; align-items:center; justify-content:center; gap:.4rem; min-height:44px; padding:.55rem .85rem; border-radius:8px; font-size:.84375rem; font-weight:550; }
+.primary { background:var(--teal-strong); color:var(--paper-strong); }
+.secondary { background:var(--card-bg); color:var(--ink-soft); border:1px solid var(--rule); }
+.primary:disabled,.secondary:disabled { opacity:.5; cursor:not-allowed; }
+.primary:focus-visible,.secondary:focus-visible,.choices button:focus-visible { outline:2px solid var(--teal); outline-offset:3px; }
+.receipt { display:flex; gap:.75rem; padding:1rem; border:1px solid var(--rule); border-radius:12px; background:var(--paper); }
+.receiptMark { display:grid; place-items:center; width:2rem; height:2rem; border-radius:10px; flex-shrink:0; color:var(--teal-strong); background:var(--teal-pale); }
+.receipt strong { font-size:.9375rem; }
+.receipt p { margin-top:.25rem; font-size:.875rem; }
+.receipt small { font-size:.75rem; color:var(--muted); }
+.comparison h3 { margin-bottom:.65rem; }
+.choices { display:grid; gap:.5rem; }
+.choices button { padding:.8rem; text-align:left; border:1px solid var(--rule); border-radius:9px; min-height:44px; }
+.choices button[aria-pressed=true] { border-color:var(--teal); background:var(--teal-pale); }
+.choices button > * { display:block; }
+.choices button strong { font-size:.875rem; font-weight:600; }
+.choices button span,.choices button small { font-size:.8125rem; color:var(--ink-soft); margin-top:.25rem; }
+.question { display:grid; gap:.65rem; }
+.question label { font-weight:550; font-size:.9375rem; }
+.question textarea { width:100%; min-height:6rem; padding:.7rem; border:1px solid var(--rule-strong); border-radius:10px; background:var(--card-bg); color:var(--ink); resize:vertical; font:inherit; font-size:.9375rem; }
+.question > button { justify-self:start; }
+.change { padding-left:.85rem; border-left:2px solid var(--teal); }
+.change p { font-size:.875rem; color:var(--ink-soft); }
+.timeline { border-left:1px solid var(--rule-strong); padding-left:1rem; display:grid; gap:.8rem; }
+.timeline time { font-size:.75rem; color:var(--muted); }
+.timeline p { font-size:.875rem; }
+@media(max-width:500px) { .blocks { font-size:.9375rem; } .approval,.receipt { padding:.85rem; } .actions { gap:.4rem; } }

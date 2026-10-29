@@ -1,0 +1,32 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/missionArtifactAdoption.test.ts tests/continuitySuppression.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/missionArtifactAdoption.test.ts (9 tests | 1 failed) 12391ms
+     × 直接归入也遵守只读和停止；撤回后旧预览不复活，原回执仍可重放 1310ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/missionArtifactAdoption.test.ts > WP-31 受控成果归入 > 直接归入也遵守只读和停止；撤回后旧预览不复活，原回执仍可重放
+Error: 全局协作暂未开启
+ ❯ requireConversations lib/conversation/repository.ts:11:62
+      9|   v && typeof v === "object" && !Array.isArray(v) ? v as Record<string…
+     10| export function requireConversations() {
+     11|   if (!isFeatureEnabled("FOCUS_AGENT_ENABLED", false)) throw new AppEr…
+       |                                                              ^
+     12| }
+     13| export async function assertSession(actor: ConversationActor, tx: Tx =…
+ ❯ assertSession lib/conversation/repository.ts:14:3
+ ❯ Module.createConversation lib/conversation/service.ts:53:9
+ ❯ tests/missionArtifactAdoption.test.ts:33:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 9 passed (10)
+   Start at  09:43:29
+   Duration  25.83s (transform 3.80s, setup 0ms, import 11.23s, tests 13.04s, environment 0ms)

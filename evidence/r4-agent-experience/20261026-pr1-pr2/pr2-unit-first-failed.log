@@ -1,0 +1,38 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/focusConversation.test.ts (22 tests | 1 failed) 10856ms
+     × discards an unsupported cloud answer and its action, then returns verified state without another call 536ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/focusConversation.test.ts > Focus conversations: real services and isolated persistence > discards an unsupported cloud answer and its action, then returns verified state without another call
+AssertionError: expected '这次云端回答的引用未通过核对，先为你列出项目状态：\n项目0-cmvq40…' to contain '已核实的项目状态'
+
+- Expected
++ Received
+
+- 已核实的项目状态
++ 这次云端回答的引用未通过核对，先为你列出项目状态：
++ 项目0-cmvq40wtz009o108oalplko9s：0 项未完成行动，0 项待回应委托。
++ 可打开下方原任务继续核对。
+
+ ❯ tests/focusConversation.test.ts:326:31
+    324|       expect(result.status).toBe("ANSWERED"); expect(calls).toBe(2);
+    325|       const message = result.conversation.messages.at(-1)!;
+    326|       expect(message.content).toContain("已核实的项目状态"); expect(message.co…
+       |                               ^
+    327|       expect(message.provider).toBe("project_state");
+    328|       expect(await db.copilotToolExecution.count({ where: { sourceRun:…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 119 passed (120)
+      Tests  1 failed | 1080 passed (1081)
+   Start at  20:09:38
+   Duration  293.02s (transform 9.96s, setup 0ms, import 69.82s, tests 190.96s, environment 10.23s)

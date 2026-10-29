@@ -385,7 +385,7 @@ export struct ActionReminderBlock {
             .margin({ top: PMSpacing.SM })
             .onClick(() => {
               this.load();
-            })
+            }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
         }
         .width('100%')
         .alignItems(HorizontalAlign.Start)
@@ -625,7 +625,7 @@ export struct ActionReminderBlock {
           .enabled(this.busy === '' && !this.isLoading)
           .onClick(() => {
             this.load(true);
-          })
+          }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
       }
       if (this.state !== null && this.state.permissionPurpose !== '') {
         Text(this.state.permissionPurpose)

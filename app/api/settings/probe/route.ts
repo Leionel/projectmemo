@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getChatProviderDefaults } from "@/lib/config/provider";
 import { authenticateUser } from "@/lib/auth/guard";
+import { requireLegacyConfigurationAccess } from "@/lib/auth/cloudQuota";
 
 export const runtime = "nodejs";
 
@@ -34,7 +35,8 @@ export async function POST(request: Request) {
 
     // 开发模式下它仍会去请求调用方任意指定的地址，未鉴权就是一个局域网可达的 SSRF 代理。
     try {
-      await authenticateUser(request);
+      const { user } = await authenticateUser(request);
+      await requireLegacyConfigurationAccess(user.id);
     } catch {
       return NextResponse.json({
         success: false,

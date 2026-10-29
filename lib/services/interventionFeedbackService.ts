@@ -27,14 +27,15 @@ export async function recordFeedback(
   projectId: string,
   interventionId: string,
   input: { feedbackType: FeedbackType; reason?: string },
+  client: Prisma.TransactionClient = db,
 ) {
-  const intervention = await db.agentIntervention.findFirst({
+  const intervention = await client.agentIntervention.findFirst({
     where: { id: interventionId, projectId },
   });
   if (!intervention) {
     throw new AppError("INTERVENTION_NOT_FOUND", "提醒不存在或不属于当前项目", 404);
   }
-  const existing = await db.interventionFeedback.findUnique({
+  const existing = await client.interventionFeedback.findUnique({
     where: {
       interventionId_feedbackType: {
         interventionId,
@@ -46,7 +47,7 @@ export async function recordFeedback(
     return { feedback: existing, created: false };
   }
   try {
-    const feedback = await db.interventionFeedback.create({
+    const feedback = await client.interventionFeedback.create({
       data: {
         projectId,
         interventionId,
@@ -58,7 +59,7 @@ export async function recordFeedback(
   } catch (error) {
     // 两个设备同时上报同一种反馈时，以数据库唯一约束为幂等闸门。
     if (typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "P2002") {
-      const feedback = await db.interventionFeedback.findUnique({
+      const feedback = await client.interventionFeedback.findUnique({
         where: { interventionId_feedbackType: { interventionId, feedbackType: input.feedbackType } },
       });
       if (feedback) return { feedback, created: false };

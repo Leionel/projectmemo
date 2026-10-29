@@ -1,0 +1,12 @@
+Isolated attachment fixture listening on 127.0.0.1:4419
+{"method":"GET","path":"/api/projects/fixture/attachments","status":200}
+{"method":"GET","path":"/api/projects/fixture/attachments/image/file","status":200}
+{"method":"GET","path":"/api/projects/fixture/attachments","status":200}
+{"method":"GET","path":"/api/projects/fixture/attachments/pdf/file","status":200}
+{"method":"GET","path":"/api/projects/fixture/attachments","status":200}
+{"method":"GET","path":"/api/projects/fixture/attachments/missing/file","status":404}
+{"method":"GET","path":"/api/projects/fixture/attachments","status":200}
+{"method":"GET","path":"/api/projects/fixture/attachments/denied/file","status":403}
+{"method":"GET","path":"/api/projects/fixture/attachments/pdf/file","status":200}
+{"method":"GET","path":"/api/projects/fixture/attachments","status":200}
+{"method":"GET","path":"/api/projects/fixture/attachments/failed/file","status":200}

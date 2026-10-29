@@ -1,0 +1,14 @@
+{
+  "projectmemo-final-signed.hap": {
+    "sha256": "6805c1a477e2df294b02d93a88260bbb5d1426af5ef3f71e6fb9dacdfd1b50e1",
+    "bytes": 4979404
+  },
+  "viewport-final-test-signed.hap": {
+    "sha256": "14be94fef7a6e3bf737342d2c51c10be602d33512fa5a35b8eaf3b301ed4bb9b",
+    "bytes": 4981952
+  },
+  "attachment-fixture-portable-signed.hap": {
+    "sha256": "011af6bfc0b42212871b688d8cd997ae7c35a98d337be97fa40e058176a372a6",
+    "bytes": 5035213
+  }
+}

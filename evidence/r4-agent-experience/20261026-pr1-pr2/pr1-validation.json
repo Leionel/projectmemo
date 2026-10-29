@@ -1,0 +1,16 @@
+{
+  "phase": "PR-1",
+  "baseline": "0941f7aef145b7b6e24008bfb7b44c7032101f6d",
+  "data": "ISOLATED_SQLITE_AND_PROVIDER_STUB",
+  "checks": {
+    "types": "PASS",
+    "harmonyBuild": "PASS",
+    "lint": "PASS",
+    "newInvestigation": 10,
+    "overlapNotAdded": true,
+    "combinedBeforeFinalTwoAddedTests": 73
+  },
+  "realModelCalls": 0,
+  "featureFlag": "FOCUS_AGENT_R4_ENABLED=false by default",
+  "next": "PR-2 ongoing"
+}

@@ -2,11 +2,11 @@
   "color": [
     {
       "name": "start_window_background",
-      "value": "#F7F6F2"
+      "value": "#F7F5EF"
     },
     {
       "name": "pm_background",
-      "value": "#F7F6F2"
+      "value": "#F7F5EF"
     },
     {
       "name": "pm_surface",
@@ -22,7 +22,7 @@
     },
     {
       "name": "pm_ink_primary",
-      "value": "#1C2E2C"
+      "value": "#213732"
     },
     {
       "name": "pm_ink_secondary",
@@ -90,7 +90,7 @@
     },
     {
       "name": "pm_brand",
-      "value": "#27685D"
+      "value": "#176B60"
     },
     {
       "name": "pm_brand_light",
@@ -122,7 +122,7 @@
     },
     {
       "name": "pm_ai_accent",
-      "value": "#27685D"
+      "value": "#176B60"
     },
     {
       "name": "pm_ai_accent_light",

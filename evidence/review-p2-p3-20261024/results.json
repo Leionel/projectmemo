@@ -1,0 +1,90 @@
+{
+  "commit": "49da9fe3d6a0117bd50cb03360e97d44d3e3271a",
+  "fixture": "fresh isolated database, no network/provider/model calls",
+  "results": [
+    {
+      "name": "R1 concurrent same signal/request creates one Capture",
+      "expectedInvariant": false,
+      "observed": {
+        "captureDelta": 2,
+        "returnedCaptureIds": [
+          "cmvmb0gmn0007t88oakbrcd47",
+          "cmvmb0gmo0008t88o1tv6tsfl"
+        ]
+      }
+    },
+    {
+      "name": "R2 failed adoption leaves no business data",
+      "expectedInvariant": false,
+      "observed": {
+        "requestFailed": true,
+        "captureDelta": 1,
+        "status": "CANDIDATE"
+      }
+    },
+    {
+      "name": "R3 revoked connection drops late provider result",
+      "expectedInvariant": false,
+      "observed": {
+        "connectionStatus": "REVOKED",
+        "createdAfterRevocation": 1,
+        "lastStatus": "OK"
+      }
+    },
+    {
+      "name": "R4 private owner experience isolated in list and model context",
+      "expectedInvariant": false,
+      "observed": {
+        "httpStatus": 200,
+        "foreignPrivateGoalInList": true,
+        "foreignPrivateGoalInModelContext": true
+      }
+    },
+    {
+      "name": "R5 changed support invalidates new experience injection",
+      "expectedInvariant": false,
+      "observed": {
+        "stillAdvisory": true
+      }
+    },
+    {
+      "name": "R6 unsupported protocol 99 suppressed before first tool",
+      "expectedInvariant": false,
+      "observed": {
+        "injectedAtFreshMission": true,
+        "pastStepCount": 0
+      }
+    },
+    {
+      "name": "R7 unrelated edit does not reopen unknown",
+      "expectedInvariant": false,
+      "observed": {
+        "hiddenBeforeUnrelatedEdit": true,
+        "reopened": true,
+        "sameQuestion": true
+      }
+    },
+    {
+      "name": "R8 pagination gap is not silently marked complete",
+      "expectedInvariant": false,
+      "observed": {
+        "newCommitsAvailable": 40,
+        "stored": 30,
+        "status": "OK",
+        "cursorAdvancedToHead": true,
+        "providerCallsForFirstRefresh": 1
+      }
+    },
+    {
+      "name": "R9 failed signal persistence preserves retryable cursor",
+      "expectedInvariant": false,
+      "observed": {
+        "status": "OK",
+        "created": 1,
+        "failedShaMissing": true,
+        "cursorAdvanced": true,
+        "etag": "\"failed-write\""
+      }
+    }
+  ]
+}

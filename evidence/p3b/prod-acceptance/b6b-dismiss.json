@@ -1,0 +1,29 @@
+{
+  "at": "2026-10-24T11:01:43.805Z",
+  "request": {
+    "method": "POST",
+    "path": "/api/projects/cmvmabwy10003svrawzrfth86/repo-signals/signals/cmvmacefq000ysvranel549qx",
+    "body": {
+      "action": "DISMISS",
+      "requestId": "8caa4a4a-9cfd-4268-a5f2-1fcb7b0e81bf"
+    },
+    "authorized": true
+  },
+  "status": 200,
+  "body": {
+    "signal": {
+      "id": "cmvmacefq000ysvranel549qx",
+      "connectionId": "cmvmacdtb0006svran5dce3b2",
+      "kind": "COMMITS",
+      "sha": "a08f1003f7cf9a8b7446fc3064fef167de60d9ce",
+      "title": "fix: preserve generated UI catalog line endings",
+      "authorName": "Shengxin Xiao",
+      "committedAt": "2026-10-15T15:36:43.000Z",
+      "url": "https://github.com/Leionel/luojia-math-tutor-skill/commit/a08f1003f7cf9a8b7446fc3064fef167de60d9ce",
+      "status": "DISMISSED",
+      "adoptedAt": null,
+      "adoptedCaptureId": null,
+      "linkedActionId": null
+    }
+  }
+}

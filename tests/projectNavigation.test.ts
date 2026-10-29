@@ -4,10 +4,16 @@ import {render,screen,cleanup,within} from "@testing-library/react";
 import {afterEach,describe,expect,it,vi} from "vitest";
 import {projectHref} from "@/lib/projectNavigation";
 import {ProjectNavigation,ProjectLegacyRedirect} from "@/components/ProjectNavigation";
-const state=vi.hoisted(()=>({pathname:"/projects/p/records",replace:vi.fn()}));
-vi.mock("next/navigation",()=>({usePathname:()=>state.pathname,useRouter:()=>({replace:state.replace})}));
-afterEach(()=>{cleanup();state.replace.mockReset();window.history.replaceState(null,"","/");});
+const state=vi.hoisted(()=>({pathname:"/projects/p/records",query:"",replace:vi.fn()}));
+vi.mock("next/navigation",()=>({usePathname:()=>state.pathname,useSearchParams:()=>new URLSearchParams(state.query),useRouter:()=>({replace:state.replace})}));
+afterEach(()=>{cleanup();state.query="";state.replace.mockReset();window.history.replaceState(null,"","/");});
 describe("单项目功能导航",()=>{
+ it("跨页面保留原私有Conversation和来源消息",()=>{
+  state.query="conversation=original&originMessage=message";
+  render(createElement(ProjectNavigation,{projectId:"p",missionsEnabled:true}));
+  document.querySelector("details")!.open=true;
+  for(const a of document.querySelectorAll("nav a")) expect(a.getAttribute("href")).toContain("conversation=original&originMessage=message");
+ });
  it("真实链接带项目范围，当前页标明，功能页可直接访问",()=>{
   render(createElement(ProjectNavigation,{projectId:"p",missionsEnabled:true}));
   document.querySelector("details")!.open=true;

@@ -1,0 +1,2407 @@
+{
+  "kind": "REAL_MODEL_SEMANTIC_EVALUATION",
+  "provider": "deepseek-flash",
+  "firstBatchCalls": 41,
+  "episodes": 16,
+  "rootReady": 16,
+  "initialKnownFailures": [
+    "R1: dynamic structured response rejected",
+    "U3: irrelevant textbook classified UNKNOWN, not KEEP_PLAN"
+  ],
+  "r1SeparateRecheck": {
+    "calls": 3,
+    "dynamicStatus": "READY",
+    "replacesInitialResult": false
+  },
+  "normalConversation": {
+    "calls": 2,
+    "status": "ANSWERED",
+    "fileGuides": 1
+  },
+  "connectionProbeCalls": 1,
+  "totalCalls": 47,
+  "authorizedCeiling": 48,
+  "businessCommands": "NOT_RUN_IN_MODEL_EVAL",
+  "independentReview": "PENDING",
+  "targetUsers": "PENDING",
+  "results": [
+    {
+      "id": "R1",
+      "group": "相关",
+      "goal": "在设备D的6GB预算内部署模型A",
+      "material": "设备D实测模型A推理batch=1，显存峰值6.8GB，重复3次。",
+      "expected": "识别预算前提变化，先核对条件或已有日志",
+      "calls": 2,
+      "decision": "ATTEND",
+      "changeSummary": "新材料显示设备D上模型A推理显存峰值为6.8GB，超过原目标6GB预算，直接冲击“在6GB预算内部署模型A”的前提。需要核对是否仍坚持6GB硬上限，或是否存在降低显存占用的可行配置；当前证据为单条实测摘录，覆盖不完整，不能据此宣布目标不可行。",
+      "changeCandidates": [
+        {
+          "premise": "设备D上模型A推理batch=1的显存峰值为6.8GB，超过6GB预算。",
+          "goalQuote": "在设备D的6GB预算内部署模型A",
+          "question": "6.8GB峰值是否意味着原6GB预算前提已不成立，还是可通过调整batch、精度或推理配置压到6GB以内？",
+          "changeKind": "PREMISE_CHANGED",
+          "relevance": "DIRECT",
+          "reason": "实测峰值6.8GB高于目标中的6GB预算，直接触及部署可行性前提；但仅一条摘录且覆盖不完整，尚不能判定目标必然失败。",
+          "evidence": [
+            {
+              "ref": "capture:cmvp6ljpu0006708optdcu1y8@4fbc28b6b9b42f82",
+              "quote": "设备D实测模型A推理batch=1，显存峰值6.8GB，重复3次。"
+            }
+          ],
+          "unknown": [
+            "6.8GB是否为固定峰值还是可配置降低",
+            "是否存在量化或卸载方案",
+            "6GB预算是否为硬性约束"
+          ],
+          "candidateId": "c332d381af0270c958412073a5506a73"
+        }
+      ],
+      "dynamicStatus": "FAILED",
+      "dynamicResult": null,
+      "feedbackStatus": null,
+      "feedbackResult": null,
+      "error": null,
+      "receipt": {
+        "code": "INVALID_REVIEW_RESULT",
+        "usageUnknown": false
+      },
+      "independentPass": null
+    },
+    {
+      "id": "R2",
+      "group": "相关",
+      "goal": "周五前完成课程报告，引用原实验记录",
+      "material": "教师通知：提交提前到周三18点，必须附实验记录。",
+      "expected": "发现时效变化，保留真实截止来源",
+      "calls": 3,
+      "decision": "ATTEND",
+      "changeSummary": "新材料显示提交截止时间提前到周三18点，且必须附实验记录；原目标只写“周五前完成课程报告，引用原实验记录”，未明确截止日与附件要求。截止时间与交付物要求均可能影响计划，值得核对。",
+      "changeCandidates": [
+        {
+          "premise": "原目标按“周五前”安排，但教师通知将提交提前到周三18点。",
+          "goalQuote": "周五前完成课程报告",
+          "question": "截止时间是否已从周五提前到周三18点，需要据此重排报告完成计划？",
+          "changeKind": "PREMISE_CHANGED",
+          "relevance": "DIRECT",
+          "reason": "新证据直接改变原目标中的时间前提，属于需核对的目标前提变化。",
+          "evidence": [
+            {
+              "ref": "capture:cmvp6ls3b000g708oi8vlbwsn@dd221e12319fd959",
+              "quote": "教师通知：提交提前到周三18点，必须附实验记录。"
+            }
+          ],
+          "unknown": [
+            "通知是否适用于本课程报告",
+            "周三18点对应的具体日期"
+          ],
+          "candidateId": "837ca2ce2aa084b86e02b9274e4466e1"
+        },
+        {
+          "premise": "原目标要求“引用原实验记录”，教师通知要求“必须附实验记录”，交付形式可能不同。",
+          "goalQuote": "引用原实验记录",
+          "question": "“引用原实验记录”是否满足“必须附实验记录”，还是需要把实验记录作为附件一并提交？",
+          "changeKind": "CONFLICT",
+          "relevance": "PLAUSIBLE",
+          "reason": "引用与附件的交付要求可能不一致，需核对提交形式。",
+          "evidence": [
+            {
+              "ref": "capture:cmvp6ls3b000g708oi8vlbwsn@dd221e12319fd959",
+              "quote": "教师通知：提交提前到周三18点，必须附实验记录。"
+            }
+          ],
+          "unknown": [
+            "“附实验记录”是否接受正文引用形式",
+            "实验记录附件是否有格式要求"
+          ],
+          "candidateId": "2a73c22da726e53ac7ac862ae102a0fe"
+        }
+      ],
+      "dynamicStatus": "READY",
+      "dynamicResult": {
+        "schemaVersion": 2,
+        "summary": "新材料直接改变原目标的时间前提并新增附件要求，但通知是否适用于本课程报告、周三对应的具体日期仍未知。先读取现有通知资料确认适用范围与日期，再据此重排计划；在核对前保持原计划不变。",
+        "candidates": [
+          {
+            "kind": "READ_EXISTING",
+            "title": "读取教师通知原文，确认适用课程与周三具体日期",
+            "reason": "通知文本仅一行摘要，未说明是否针对本课程报告及周三对应的具体日期；这两点直接决定是否重排计划。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6ls3b000g708oi8vlbwsn"
+            ],
+            "expectedObservation": "通知中是否明确课程/报告名称，以及周三18点对应的具体日期。",
+            "stopCondition": "读到通知全文或确认资料仅含该摘要后停止，不再重复读取。",
+            "branches": [
+              {
+                "observation": "通知明确适用于本课程报告并给出具体日期",
+                "consequence": "确认截止提前，需按周三18点重排并纳入实验记录附件。"
+              },
+              {
+                "observation": "通知未指明课程或日期",
+                "consequence": "适用范围仍未知，需向用户确认后再决定是否重排。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6ls3b000g708oi8vlbwsn@dd221e12319fd959",
+                "quote": "教师通知：提交提前到周三18点，必须附实验记录。"
+              }
+            ],
+            "candidateId": "0c0b7037cce385b35487bfb00c5fc5b8",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "ASK_USER",
+            "title": "确认通知是否适用于本课程报告",
+            "reason": "若通知不适用于本报告，则原周五计划无需改动；这是会改变选择的关键未知。",
+            "question": "这份“提交提前到周三18点、必须附实验记录”的教师通知，是否适用于你这次要完成的课程报告？",
+            "sourceIds": [
+              "capture:cmvp6ls3b000g708oi8vlbwsn"
+            ],
+            "expectedObservation": "用户明确回答适用或不适用。",
+            "stopCondition": "用户给出适用性答复后停止追问。",
+            "branches": [
+              {
+                "observation": "用户回答适用",
+                "consequence": "按周三18点重排，并把实验记录列为必需附件。"
+              },
+              {
+                "observation": "用户回答不适用",
+                "consequence": "维持原周五计划，仅保留引用实验记录的原要求。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6ls3b000g708oi8vlbwsn@dd221e12319fd959",
+                "quote": "教师通知：提交提前到周三18点，必须附实验记录。"
+              }
+            ],
+            "candidateId": "8020040e2c58894ba07c4be339316b59",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "KEEP_PLAN",
+            "title": "在核对前维持原计划",
+            "reason": "截止日期与附件要求尚未确认，且无新信息支持改动；保持原目标与成功条件不变。",
+            "question": null,
+            "sourceIds": [],
+            "expectedObservation": "无。",
+            "stopCondition": "在适用性与日期确认前保持原计划，不推进改动。",
+            "branches": [],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6ls3b000g708oi8vlbwsn@dd221e12319fd959",
+                "quote": "教师通知：提交提前到周三18点，必须附实验记录。"
+              }
+            ],
+            "candidateId": "2c34123c57bed96a5b8d0e08b3b91ce4",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "feedbackStatus": "READY",
+      "feedbackResult": {
+        "schemaVersion": 2,
+        "summary": "反馈新增两项硬约束：今天仅30分钟、不接受新增实验；原目标与成功条件不变，仍为周五前完成并引用原实验记录，但通知可能把截止提前到周三18点且要求附实验记录。上轮已提出读取通知原文与确认适用性，本轮不重复追问；在30分钟内先核对通知适用范围与日期，再决定是否重排，核对前保持原计划。",
+        "candidates": [
+          {
+            "kind": "READ_EXISTING",
+            "title": "读取教师通知原文，核对适用课程与周三具体日期",
+            "reason": "上轮已提出读取但尚未执行；通知是否适用于本课程报告及周三对应日期仍未知，直接决定30分钟是否需优先重排。仅读取给定资料，不新增实验。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6ls3b000g708oi8vlbwsn"
+            ],
+            "expectedObservation": "通知全文或确认资料仅含该摘要，并可见适用课程与日期信息（或明确缺失）。",
+            "stopCondition": "读到通知全文，或确认资料仅含该摘要后停止，不再重复读取。",
+            "branches": [
+              {
+                "observation": "通知明确适用于本课程报告且周三日期早于周五",
+                "consequence": "时间前提改变，需在30分钟内优先安排报告定稿与实验记录附件准备。"
+              },
+              {
+                "observation": "通知不适用于本课程报告，或周三日期不早于周五",
+                "consequence": "原周五计划不变，30分钟用于推进报告草稿。"
+              },
+              {
+                "observation": "资料仅含摘要，无法判断适用范围或日期",
+                "consequence": "保持原计划，并将适用性作为待人工核对项，不据此重排。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6ls3b000g708oi8vlbwsn@dd221e12319fd959",
+                "quote": "教师通知：提交提前到周三18点，必须附实验记录。"
+              }
+            ],
+            "candidateId": "0c0b7037cce385b35487bfb00c5fc5b8",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "KEEP_PLAN",
+            "title": "在核对通知前维持原计划，30分钟只推进报告草稿",
+            "reason": "反馈限定今天30分钟且不接受新增实验；在通知适用性与日期未确认前，不改变原目标与成功条件，仅用现有时间推进草稿。",
+            "question": null,
+            "sourceIds": [],
+            "expectedObservation": "30分钟内产出报告草稿的可见进展，不启动新实验。",
+            "stopCondition": "30分钟用尽或草稿有实质进展即停止，不扩大范围。",
+            "branches": [
+              {
+                "observation": "30分钟内草稿有实质进展",
+                "consequence": "保留进展，待通知核对后再决定是否调整截止安排。"
+              },
+              {
+                "observation": "30分钟内草稿无实质进展",
+                "consequence": "记录阻塞点，保持原计划，不追加时间或新增实验。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6ls3b000g708oi8vlbwsn@dd221e12319fd959",
+                "quote": "教师通知：提交提前到周三18点，必须附实验记录。"
+              }
+            ],
+            "candidateId": "2c34123c57bed96a5b8d0e08b3b91ce4",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "error": null,
+      "receipt": null,
+      "independentPass": null
+    },
+    {
+      "id": "R3",
+      "group": "相关",
+      "goal": "完成部署联调并保留失败回执",
+      "material": "联调日志：鉴权返回401，重试相同请求3次均失败。",
+      "expected": "先读已有错误日志或追问凭据状态，不宣布成功",
+      "calls": 3,
+      "decision": "ATTEND",
+      "changeSummary": "新材料显示联调中鉴权持续返回401且相同请求重试3次均失败，这与“完成部署联调并保留失败回执”的目标前提直接相关：联调当前受阻，且失败回执的保留情况尚不明确。需要核对失败回执是否已保留、401是否为可修复的配置问题，以及是否应调整联调计划。",
+      "changeCandidates": [
+        {
+          "premise": "联调因鉴权401连续失败，部署联调尚未完成，失败回执是否保留未知。",
+          "goalQuote": "完成部署联调并保留失败回执",
+          "question": "鉴权401连续失败后，失败回执是否已按目标要求保留？该401是配置/凭证问题还是需要变更联调方案？",
+          "changeKind": "PREMISE_CHANGED",
+          "relevance": "DIRECT",
+          "reason": "新材料直接表明联调失败，影响“完成部署联调”的前提，同时未说明“保留失败回执”是否已满足，属于值得核对的未知。",
+          "evidence": [
+            {
+              "ref": "capture:cmvp6m239000u708o2kpwh166@fe33244a4b637171",
+              "quote": "联调日志：鉴权返回401，重试相同请求3次均失败。"
+            }
+          ],
+          "unknown": [
+            "失败回执是否已保存及保存位置",
+            "401的根因与可修复性",
+            "是否允许继续重试或需更换鉴权方式"
+          ],
+          "candidateId": "5ada493eca11121ac3ebcfa50f36f79a"
+        }
+      ],
+      "dynamicStatus": "READY",
+      "dynamicResult": {
+        "schemaVersion": 2,
+        "summary": "联调日志显示鉴权持续返回401且相同请求重试3次均失败，部署联调尚未完成；失败回执是否已保留、401根因及是否调整联调方案均未知。本轮在读取现有日志基础上，提出核对回执保留情况、确认401根因方向、以及保留原计划三项候选，不扩大权限、不修改成功条件。",
+        "candidates": [
+          {
+            "kind": "READ_EXISTING",
+            "title": "读取联调日志确认失败回执与401上下文",
+            "reason": "现有日志已能回答部分问题，先核对日志中是否记录了失败回执的保存动作或位置，以及401出现的请求上下文，避免重复追问资料已明确的事实。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6m239000u708o2kpwh166"
+            ],
+            "expectedObservation": "日志中是否出现失败回执的保存记录/路径，以及401对应的鉴权配置或凭证线索。",
+            "stopCondition": "若日志已明确回执保留状态与401根因方向则停止读取并据此更新计划；若日志未覆盖则转入针对性追问。",
+            "branches": [
+              {
+                "observation": "日志显示失败回执已保存且给出401配置线索",
+                "consequence": "回执要求已满足，聚焦401配置修复以推进联调。"
+              },
+              {
+                "observation": "日志显示回执未保存或未提及保存",
+                "consequence": "需在联调计划中补充失败回执保留步骤，再处理401。"
+              },
+              {
+                "observation": "日志未提供回执与根因信息",
+                "consequence": "转入一次针对性追问，确认回执保留与401方向。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6m239000u708o2kpwh166@fe33244a4b637171",
+                "quote": "联调日志：鉴权返回401，重试相同请求3次均失败。"
+              }
+            ],
+            "candidateId": "068d7828409c5e678bdad7276d6c8bb8",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "ASK_USER",
+            "title": "确认401根因方向与回执保留状态",
+            "reason": "资料未说明401是配置/凭证问题还是需变更联调方案，也未说明失败回执是否已保留，这一未知会改变后续是修复配置还是调整方案。",
+            "question": "鉴权401连续失败后，失败回执目前是否已保存？若已保存，401更可能是凭证/配置问题还是需要更换鉴权方式？",
+            "sourceIds": [
+              "capture:cmvp6m239000u708o2kpwh166"
+            ],
+            "expectedObservation": "用户说明回执保留状态及401的初步归因方向。",
+            "stopCondition": "用户给出回执状态与401方向后停止追问，据此选择修复配置或调整方案。",
+            "branches": [
+              {
+                "observation": "回执已保存且401为配置/凭证问题",
+                "consequence": "保持原目标，优先修复鉴权配置后重试联调。"
+              },
+              {
+                "observation": "回执未保存",
+                "consequence": "先补保留失败回执，再处理401，确保满足成功条件。"
+              },
+              {
+                "observation": "401需变更鉴权方式",
+                "consequence": "需评估方案调整，但不自行批准变更。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6m239000u708o2kpwh166@fe33244a4b637171",
+                "quote": "联调日志：鉴权返回401，重试相同请求3次均失败。"
+              }
+            ],
+            "candidateId": "669c755a4b61c10c1210e145d25c9df7",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "KEEP_PLAN",
+            "title": "维持原目标与成功条件不变",
+            "reason": "在回执保留状态与401根因未明确前，不扩大权限、不修改成功条件，保持“完成部署联调并保留失败回执”的原计划，等待核对结果。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6m239000u708o2kpwh166"
+            ],
+            "expectedObservation": "无新信息或核对未完成时，计划保持不变。",
+            "stopCondition": "出现能改变选择的新信息（回执状态或401根因）时再更新计划，否则停止。",
+            "branches": [
+              {
+                "observation": "无新信息",
+                "consequence": "保持原计划并停止。"
+              },
+              {
+                "observation": "核对得到回执或根因新信息",
+                "consequence": "据此更新候选计划。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6m239000u708o2kpwh166@fe33244a4b637171",
+                "quote": "联调日志：鉴权返回401，重试相同请求3次均失败。"
+              }
+            ],
+            "candidateId": "3bb5f1bb73a7de8eb371894627a79b72",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "feedbackStatus": "READY",
+      "feedbackResult": {
+        "schemaVersion": 2,
+        "summary": "联调日志显示鉴权持续返回401且相同请求重试3次均失败，部署联调尚未完成；失败回执是否已保留、401根因及是否调整联调方案均未知。用户反馈明确不要重复运行相同请求，因此不再提出重试类动作。本轮在读取现有日志基础上，提出核对回执保留情况、确认401根因方向、以及保留原计划三项候选，不扩大权限、不修改成功条件。",
+        "candidates": [
+          {
+            "kind": "READ_EXISTING",
+            "title": "读取联调日志确认失败回执与401上下文",
+            "reason": "现有日志是判断回执是否保留及401根因方向的最直接资料，且用户已明确不要重复运行相同请求，优先从已有日志中提取信息而非再次执行。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6m239000u708o2kpwh166"
+            ],
+            "expectedObservation": "日志中是否记录失败回执的保存位置或状态，以及401是否伴随凭证/配置相关线索。",
+            "stopCondition": "若日志已明确回执保留状态与401根因方向则停止读取并据此更新计划；若日志未覆盖则转入针对性追问。",
+            "branches": [
+              {
+                "observation": "日志显示回执已保存且401指向配置/凭证问题",
+                "consequence": "据此提出修复配置方向的候选，不重复运行相同请求。"
+              },
+              {
+                "observation": "日志显示回执未保存或401根因不明",
+                "consequence": "转入追问回执状态与401方向，不自行重试。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6m239000u708o2kpwh166@fe33244a4b637171",
+                "quote": "联调日志：鉴权返回401，重试相同请求3次均失败。"
+              }
+            ],
+            "candidateId": "068d7828409c5e678bdad7276d6c8bb8",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "ASK_USER",
+            "title": "确认401根因方向与回执保留状态",
+            "reason": "回执是否已保存及401是配置/凭证问题还是需更换鉴权方式，是决定后续修复或调整方案的关键未知，资料未明确。",
+            "question": "鉴权401连续失败后，失败回执目前是否已保存？若已保存，401更可能是凭证/配置问题还是需要更换鉴权方式？",
+            "sourceIds": [
+              "capture:cmvp6m239000u708o2kpwh166"
+            ],
+            "expectedObservation": "用户给出回执保存状态与401根因方向。",
+            "stopCondition": "用户给出回执状态与401方向后停止追问，据此选择修复配置或调整方案。",
+            "branches": [
+              {
+                "observation": "用户确认回执已保存且401为配置/凭证问题",
+                "consequence": "提出修复配置方向的候选，保持不重复运行相同请求。"
+              },
+              {
+                "observation": "用户确认回执未保存或需更换鉴权方式",
+                "consequence": "提出补存回执或调整联调方案的候选，不自行批准。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6m239000u708o2kpwh166@fe33244a4b637171",
+                "quote": "联调日志：鉴权返回401，重试相同请求3次均失败。"
+              }
+            ],
+            "candidateId": "669c755a4b61c10c1210e145d25c9df7",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "KEEP_PLAN",
+            "title": "维持原目标与成功条件不变",
+            "reason": "在回执状态与401根因未明确前，不扩大权限、不修改成功条件，保持原计划并等待新信息。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6m239000u708o2kpwh166"
+            ],
+            "expectedObservation": "无新信息时不改变目标与成功条件。",
+            "stopCondition": "出现能改变选择的新信息（回执状态或401根因）时再更新计划，否则停止。",
+            "branches": [
+              {
+                "observation": "无新信息",
+                "consequence": "保持原计划并停止。"
+              },
+              {
+                "observation": "出现回执状态或401根因新信息",
+                "consequence": "据此更新候选，不自行批准。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6m239000u708o2kpwh166@fe33244a4b637171",
+                "quote": "联调日志：鉴权返回401，重试相同请求3次均失败。"
+              }
+            ],
+            "candidateId": "3bb5f1bb73a7de8eb371894627a79b72",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "error": null,
+      "receipt": null,
+      "independentPass": null
+    },
+    {
+      "id": "R4",
+      "group": "相关",
+      "goal": "用原始测试集复核模型A的准确率",
+      "material": "数据审计记录：原测试集中的12例被误放进训练集。",
+      "expected": "识别有效性风险，先核对数据版本",
+      "calls": 3,
+      "decision": "ATTEND",
+      "changeSummary": "新证据显示原测试集存在数据泄漏：12例被误放入训练集。这直接动摇了“用原始测试集复核模型A准确率”的前提，因为原始测试集已不再独立，复核结果可能偏高。需要核对是否仍按原计划使用原始测试集，还是先修正/重建测试集。",
+      "changeCandidates": [
+        {
+          "premise": "原始测试集是独立、未参与训练的评估数据，可用于复核模型A准确率。",
+          "goalQuote": "用原始测试集复核模型A的准确率",
+          "question": "原测试集中12例已进入训练集，是否仍直接使用该原始测试集复核模型A准确率，还是先剔除污染样本或重建独立测试集？",
+          "changeKind": "PREMISE_CHANGED",
+          "relevance": "DIRECT",
+          "reason": "目标明确要求用原始测试集复核准确率，而新证据表明原始测试集已被训练数据污染，评估独立性前提不再成立，复核结论可能失真。",
+          "evidence": [
+            {
+              "ref": "capture:cmvp6mcsb0018708oz9u6q9oq@b236701f1dbe3513",
+              "quote": "数据审计记录：原测试集中的12例被误放进训练集。"
+            }
+          ],
+          "unknown": [
+            "12例污染对准确率的具体影响幅度",
+            "是否已有剔除污染样本后的测试集版本",
+            "模型A训练时是否实际使用了这12例"
+          ],
+          "candidateId": "747fa185d960be8eda5d8090788ca918"
+        }
+      ],
+      "dynamicStatus": "READY",
+      "dynamicResult": {
+        "schemaVersion": 2,
+        "summary": "新证据表明原测试集有12例进入训练集，原目标“用原始测试集复核模型A准确率”的独立性前提已动摇。当前仅有一份审计摘录，尚不清楚污染对准确率的影响、是否已有去污版本、模型A是否实际使用这12例。本轮优先读取该审计记录以确认污染范围与可用替代测试集信息，同时保留原计划作为对照，不扩大权限、不修改成功条件。",
+        "candidates": [
+          {
+            "kind": "READ_EXISTING",
+            "title": "读取数据审计记录，确认污染范围与是否已有去污测试集",
+            "reason": "审计记录是唯一给定资料，可能载明12例的标识、污染方式及是否已存在剔除后的测试集版本，这些直接决定是沿用原测试集还是先修正。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6mcsb0018708oz9u6q9oq"
+            ],
+            "expectedObservation": "记录中是否包含污染样本标识、污染发生环节，以及是否存在已剔除污染样本的测试集版本或重建说明。",
+            "stopCondition": "读到污染范围与替代测试集信息，或确认记录仅为一句摘要、无更多细节时停止。",
+            "branches": [
+              {
+                "observation": "记录显示已有剔除12例后的测试集版本",
+                "consequence": "可提出以该去污版本替代原始测试集复核，作为候选方案供人工核对"
+              },
+              {
+                "observation": "记录仅确认污染但无替代版本信息",
+                "consequence": "需就“剔除污染样本还是重建测试集”向用户确认方向"
+              },
+              {
+                "observation": "记录显示模型A训练未实际使用这12例",
+                "consequence": "污染对复核结论影响可能有限，但仍需说明独立性缺口"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6mcsb0018708oz9u6q9oq@b236701f1dbe3513",
+                "quote": "数据审计记录：原测试集中的12例被误放进训练集。"
+              }
+            ],
+            "candidateId": "024ab3a02ea33be55e1076be3675fb79",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "ASK_USER",
+            "title": "确认复核口径：剔除污染样本还是重建独立测试集",
+            "reason": "这是会改变方案走向的未知：沿用原测试集、剔除12例、或重建测试集对应不同的复核口径与结论解释，资料未明确用户偏好。",
+            "question": "在原始测试集12例已进入训练集的情况下，你希望复核采用哪种口径：剔除这12例后评估、重建独立测试集后评估，还是仍按原测试集评估并标注污染？",
+            "sourceIds": [],
+            "expectedObservation": "用户给出明确口径选择或说明约束。",
+            "stopCondition": "用户作出选择或明确表示暂不决定时停止。",
+            "branches": [
+              {
+                "observation": "用户选择剔除12例后评估",
+                "consequence": "方案聚焦于去污子集上的准确率复核及其解释边界"
+              },
+              {
+                "observation": "用户选择重建独立测试集",
+                "consequence": "方案转为测试集重建流程，复核需待新测试集就绪"
+              },
+              {
+                "observation": "用户选择仍用原测试集并标注污染",
+                "consequence": "方案保留原计划但须在结论中声明独立性缺口"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6mcsb0018708oz9u6q9oq@b236701f1dbe3513",
+                "quote": "数据审计记录：原测试集中的12例被误放进训练集。"
+              }
+            ],
+            "candidateId": "bc2e25afe976e5726d360146bd056fd8",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "KEEP_PLAN",
+            "title": "保留原计划：用原始测试集复核模型A准确率（附污染声明）",
+            "reason": "在用户未改变口径前，原目标与成功条件不变；保留原计划作为基线，避免在信息不足时擅自更改评估对象。",
+            "question": null,
+            "sourceIds": [],
+            "expectedObservation": "无新信息或用户未作选择时，维持原计划不变。",
+            "stopCondition": "出现新证据或用户明确改变口径时停止保留。",
+            "branches": [],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6mcsb0018708oz9u6q9oq@b236701f1dbe3513",
+                "quote": "数据审计记录：原测试集中的12例被误放进训练集。"
+              }
+            ],
+            "candidateId": "e536b8412faea3cbceeea49a7e822999",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "feedbackStatus": "READY",
+      "feedbackResult": {
+        "schemaVersion": 2,
+        "summary": "新证据显示原测试集有12例进入训练集，原目标“用原始测试集复核模型A准确率”的独立性前提已动摇。用户反馈明确：先整理泄漏范围，暂不重训。因此本轮不再追问复核口径，也不提议重训；优先读取现有审计记录以整理泄漏范围，同时保留原计划作为对照，不扩大权限、不修改成功条件。",
+        "candidates": [
+          {
+            "kind": "READ_EXISTING",
+            "title": "读取数据审计记录，整理12例泄漏的范围与影响面",
+            "reason": "用户要求先整理泄漏范围。现有审计摘录仅说明12例被误放入训练集，需读取该记录确认泄漏样本标识、涉及类别及是否已有去污测试集信息，为后续口径选择提供依据。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6mcsb0018708oz9u6q9oq"
+            ],
+            "expectedObservation": "审计记录中是否列出12例的具体标识、所属类别、泄漏发现方式，以及是否提及剔除后版本或替代测试集。",
+            "stopCondition": "读到泄漏范围明细与替代测试集信息，或确认记录仅为一句摘要、无更多细节时停止。",
+            "branches": [
+              {
+                "observation": "记录列出12例标识/类别及去污版本信息",
+                "consequence": "可据此整理泄漏范围清单，并在后续轮次提出剔除污染样本的复核口径候选。"
+              },
+              {
+                "observation": "记录仅为一句摘要，无明细",
+                "consequence": "泄漏范围无法从现有资料整理，需在后续轮次向用户询问可用的样本清单来源。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6mcsb0018708oz9u6q9oq@b236701f1dbe3513",
+                "quote": "数据审计记录：原测试集中的12例被误放进训练集。"
+              }
+            ],
+            "candidateId": "024ab3a02ea33be55e1076be3675fb79",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "KEEP_PLAN",
+            "title": "保留原计划：用原始测试集复核模型A准确率（附污染声明）",
+            "reason": "用户反馈暂不重训、先整理泄漏范围，未改变复核口径。原目标与成功条件保持不变，保留原计划作为对照，待泄漏范围整理后再决定是否调整。",
+            "question": null,
+            "sourceIds": [],
+            "expectedObservation": "无新增信息改变原目标前提前，原计划继续有效。",
+            "stopCondition": "出现新证据或用户明确改变复核口径时停止保留。",
+            "branches": [],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6mcsb0018708oz9u6q9oq@b236701f1dbe3513",
+                "quote": "数据审计记录：原测试集中的12例被误放进训练集。"
+              }
+            ],
+            "candidateId": "e536b8412faea3cbceeea49a7e822999",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "error": null,
+      "receipt": null,
+      "independentPass": null
+    },
+    {
+      "id": "U1",
+      "group": "无关",
+      "goal": "在设备D的6GB预算内部署模型A",
+      "material": "社团周末聚餐改在北门集合，预算每人60元。",
+      "expected": "KEEP_PLAN，不新增问题或任务",
+      "calls": 1,
+      "decision": "KEEP_PLAN",
+      "changeSummary": "新材料是社团聚餐通知，与“在设备D的6GB预算内部署模型A”这一目标无直接关联；未发现能改变目标前提或约束的有效观察，保持原计划。",
+      "changeCandidates": [],
+      "dynamicStatus": null,
+      "dynamicResult": null,
+      "feedbackStatus": null,
+      "feedbackResult": null,
+      "error": null,
+      "receipt": null,
+      "independentPass": null
+    },
+    {
+      "id": "U2",
+      "group": "无关",
+      "goal": "完成课程报告并核对实验数据",
+      "material": "校园跑通知：周末体育场开放时间调整。",
+      "expected": "KEEP_PLAN，不制造会话打扰",
+      "calls": 1,
+      "decision": "KEEP_PLAN",
+      "changeSummary": "新材料是校园跑通知，讲周末体育场开放时间调整，与“完成课程报告并核对实验数据”的目标前提没有可核对的关联。没有发现目标前提变化、冲突或需要复核的未知，因此保持原计划，不打扰。",
+      "changeCandidates": [],
+      "dynamicStatus": null,
+      "dynamicResult": null,
+      "feedbackStatus": null,
+      "feedbackResult": null,
+      "error": null,
+      "receipt": null,
+      "independentPass": null
+    },
+    {
+      "id": "U3",
+      "group": "无关",
+      "goal": "核对设备D的推理内存峰值",
+      "material": "课程教材介绍了操作系统的虚拟内存概念，没有项目测量。",
+      "expected": "不将术语重合作为实测变化",
+      "calls": 3,
+      "decision": "UNKNOWN",
+      "changeSummary": "新材料仅说明课程教材介绍虚拟内存概念且无项目测量，未提供设备D推理内存峰值的任何观察或前提变化。原目标与约束中没有可逐字引用的具体前提被新材料触及，因此无法判断是否值得核对，保留UNKNOWN。",
+      "changeCandidates": [
+        {
+          "premise": "设备D的推理内存峰值需要被核对，但当前材料未提供任何关于设备D或推理内存峰值的项目测量。",
+          "goalQuote": "核对设备D的推理内存峰值",
+          "question": "是否存在关于设备D推理内存峰值的项目测量或观察，而不仅是虚拟内存概念的教材介绍？",
+          "changeKind": "UNKNOWN",
+          "relevance": "PLAUSIBLE",
+          "reason": "教材内容与虚拟内存概念相关，但明确没有项目测量，不能确认或否定设备D的推理内存峰值前提，也无法据此判断目标是否需要调整。",
+          "evidence": [
+            {
+              "ref": "capture:cmvp6mqd30022708ogtai389u@cfc61fc0c733fb5b",
+              "quote": "课程教材介绍了操作系统的虚拟内存概念，没有项目测量。"
+            }
+          ],
+          "unknown": [
+            "设备D推理内存峰值的实际测量数据是否存在",
+            "教材内容是否与设备D的推理内存测量方法有关"
+          ],
+          "candidateId": "556073687dbf6ee6f36a22594b29893c"
+        }
+      ],
+      "dynamicStatus": "READY",
+      "dynamicResult": {
+        "schemaVersion": 2,
+        "summary": "新材料只说明课程教材介绍虚拟内存概念且无项目测量，未提供设备D推理内存峰值的任何观察，也未触及原目标或约束中的具体前提，因此无法判断是否值得核对，保留UNKNOWN。当前唯一可读资料已明确不含项目测量，重复读取无新信息；提出一项最小验证以区分是否存在可核对的测量来源，并保留原计划。",
+        "candidates": [
+          {
+            "kind": "PROPOSE_VERIFICATION",
+            "title": "确认是否存在设备D推理内存峰值的项目测量来源",
+            "reason": "现有资料明确只有教材概念介绍、没有项目测量，无法确认或否定设备D推理内存峰值这一前提。需用最小验证区分“存在可核对的项目测量”与“仅有概念材料”，从而决定是否继续核对目标。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6mqd30022708ogtai389u"
+            ],
+            "expectedObservation": "能指出设备D推理内存峰值的项目测量记录或明确说明不存在此类记录。",
+            "stopCondition": "一旦确认存在可核对的项目测量记录，或确认不存在任何项目测量，即停止验证并回到原目标判断。",
+            "branches": [
+              {
+                "observation": "存在设备D推理内存峰值的项目测量记录（日志、报告或采集数据）",
+                "consequence": "可据该记录核对峰值，原目标保持，进入读取该测量资料的下一步。"
+              },
+              {
+                "observation": "明确不存在任何设备D推理内存峰值的项目测量，仅有教材概念介绍",
+                "consequence": "原目标前提缺乏数据支撑，保留UNKNOWN，不调整成功条件，仅记录缺口。"
+              },
+              {
+                "observation": "无法确定是否存在此类测量记录",
+                "consequence": "维持UNKNOWN，不声称可执行，等待人工核对。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6mqd30022708ogtai389u@cfc61fc0c733fb5b",
+                "quote": "课程教材介绍了操作系统的虚拟内存概念，没有项目测量。"
+              }
+            ],
+            "candidateId": "65a08db6a294a944b5ee4d426ca9a56a",
+            "feasibility": "UNKNOWN",
+            "feasibilityReasons": [
+              "验证条件、投入与区分力仍需人工核对；先读资料或追问条件"
+            ],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "KEEP_PLAN",
+            "title": "保留原计划：核对设备D的推理内存峰值",
+            "reason": "新材料未提供设备D推理内存峰值的观察，也未触及原目标与约束中的具体前提，无新信息支持调整；按规则保持原计划并停止。",
+            "question": null,
+            "sourceIds": [],
+            "expectedObservation": "无新增可改变判断的信息。",
+            "stopCondition": "在无新信息或重复提问时保持原计划并停止。",
+            "branches": [],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6mqd30022708ogtai389u@cfc61fc0c733fb5b",
+                "quote": "课程教材介绍了操作系统的虚拟内存概念，没有项目测量。"
+              }
+            ],
+            "candidateId": "c3a6cd63fb48c79425d8c285bb3e2d69",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "feedbackStatus": "READY",
+      "feedbackResult": {
+        "schemaVersion": 2,
+        "summary": "反馈确认现有材料只是课程笔记，未提供设备D推理内存峰值的项目测量或观察，也未触及原目标与约束中的具体前提。当前唯一资料已明确不含项目测量，重复读取无新信息；本轮不再追问或验证，保留原计划并停止。",
+        "candidates": [
+          {
+            "kind": "KEEP_PLAN",
+            "title": "保留原计划：核对设备D的推理内存峰值",
+            "reason": "反馈与现有证据一致表明材料仅为课程笔记，无项目测量，无法据此调整目标或约束；无新信息时保持原计划并停止。",
+            "question": null,
+            "sourceIds": [],
+            "expectedObservation": "",
+            "stopCondition": "在无新信息或重复提问时保持原计划并停止。",
+            "branches": [],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6mqd30022708ogtai389u@cfc61fc0c733fb5b",
+                "quote": "课程教材介绍了操作系统的虚拟内存概念，没有项目测量。"
+              }
+            ],
+            "candidateId": "c3a6cd63fb48c79425d8c285bb3e2d69",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "error": null,
+      "receipt": null,
+      "independentPass": null
+    },
+    {
+      "id": "U4",
+      "group": "无关",
+      "goal": "完成项目Memo的接口联调",
+      "material": "另一个小组的Memo会议记录：讨论毕业旅行路线。",
+      "expected": "不因名称重合改变项目计划",
+      "calls": 1,
+      "decision": "KEEP_PLAN",
+      "changeSummary": "新材料是另一个小组关于毕业旅行路线的Memo会议记录，与“完成项目Memo的接口联调”这一目标没有可识别的关联；没有证据表明目标前提发生变化，也没有出现需要核对的新未知。保持原计划，不打扰。",
+      "changeCandidates": [],
+      "dynamicStatus": null,
+      "dynamicResult": null,
+      "feedbackStatus": null,
+      "feedbackResult": null,
+      "error": null,
+      "receipt": null,
+      "independentPass": null
+    },
+    {
+      "id": "M1",
+      "group": "条件错位",
+      "goal": "在设备D的6GB预算内部署模型A",
+      "material": "模型B在设备D推理batch=1，峰值4.2GB。",
+      "expected": "主体不匹配，不证明模型A满足预算",
+      "calls": 3,
+      "decision": "UNKNOWN",
+      "changeSummary": "新材料只说明模型B在设备D上batch=1推理峰值4.2GB，未涉及目标模型A，也未说明模型A是否可在6GB预算内部署。该信息与目标前提相关但不足以判断目标是否变化，保留UNKNOWN。",
+      "changeCandidates": [
+        {
+          "premise": "设备D的6GB预算内需要部署的是模型A，而当前证据只给出模型B的显存峰值。",
+          "goalQuote": "在设备D的6GB预算内部署模型A",
+          "question": "模型B的4.2GB峰值是否意味着目标模型已从A切换为B，或模型A的部署前提已被替代？",
+          "changeKind": "UNKNOWN",
+          "relevance": "PLAUSIBLE",
+          "reason": "证据提到同一设备D和显存预算相关数据，但对象是模型B而非目标模型A，无法确认目标前提变化。",
+          "evidence": [
+            {
+              "ref": "capture:cmvp6mzz2002o708ovxhqxq1e@451766600797caa0",
+              "quote": "模型B在设备D推理batch=1，峰值4.2GB。"
+            }
+          ],
+          "unknown": [
+            "模型A与模型B的关系",
+            "模型A在设备D上的显存峰值",
+            "目标是否已从模型A改为模型B"
+          ],
+          "candidateId": "732bb448d458be14d311d9112738cfb0"
+        }
+      ],
+      "dynamicStatus": "READY",
+      "dynamicResult": {
+        "schemaVersion": 2,
+        "summary": "新材料只给出模型B在设备D上batch=1推理峰值4.2GB，未涉及目标模型A，也未说明模型A能否在6GB预算内部署。目标前提是否变化仍为UNKNOWN，因此保留原计划，并优先用一次最小追问澄清目标对象是否已从A切换为B；不扩大权限、不修改成功条件。",
+        "candidates": [
+          {
+            "kind": "ASK_USER",
+            "title": "确认目标模型是否仍为A",
+            "reason": "现有证据只覆盖模型B的显存峰值，无法判断目标是否已从模型A改为模型B；该未知会直接改变后续方案对象，且资料未明确，需一次最小追问。",
+            "question": "目标模型是否仍为A（模型B的4.2GB数据仅作参考），还是目标已切换为B？",
+            "sourceIds": [
+              "capture:cmvp6mzz2002o708ovxhqxq1e"
+            ],
+            "expectedObservation": "用户明确回答目标模型仍为A、已切换为B，或说明A与B的关系。",
+            "stopCondition": "用户给出目标模型归属的明确答复，或明确表示暂不确认；收到答复后不再重复追问同一事实。",
+            "branches": [
+              {
+                "observation": "用户确认目标仍为模型A",
+                "consequence": "维持原目标与成功条件，模型B数据仅作旁证，不据此推断A可在6GB内部署。"
+              },
+              {
+                "observation": "用户确认目标已切换为模型B",
+                "consequence": "目标前提发生变化，需按新目标重新评估，但不得自行修改成功条件或扩大权限。"
+              },
+              {
+                "observation": "用户说明A与B存在替代/派生关系",
+                "consequence": "记录关系并保留UNKNOWN，待进一步澄清后再判断是否影响原目标。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6mzz2002o708ovxhqxq1e@451766600797caa0",
+                "quote": "模型B在设备D推理batch=1，峰值4.2GB。"
+              }
+            ],
+            "candidateId": "a385c3e1793c8428a8eb9fede46c55e9",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "KEEP_PLAN",
+            "title": "保留原计划并维持UNKNOWN",
+            "reason": "新材料未涉及目标模型A，也未说明A是否可在6GB预算内部署；在无新信息改变目标前提前，保持原计划与成功条件不变，不自行批准或推断。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6mzz2002o708ovxhqxq1e"
+            ],
+            "expectedObservation": "目标前提与成功条件维持不变，模型B数据仅作为待核对的旁证。",
+            "stopCondition": "在获得能明确回答目标模型归属或模型A显存峰值的新信息前，保持原计划并停止扩展。",
+            "branches": [],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6mzz2002o708ovxhqxq1e@451766600797caa0",
+                "quote": "模型B在设备D推理batch=1，峰值4.2GB。"
+              }
+            ],
+            "candidateId": "9fe81385e5d75a5d9b6cf8183ea8686c",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "feedbackStatus": "READY",
+      "feedbackResult": {
+        "schemaVersion": 2,
+        "summary": "反馈已明确“不能用模型B替代A”，因此目标对象不再需要追问，原目标“在设备D的6GB预算内部署模型A”保持不变。现有证据只覆盖模型B的显存峰值，无法回答模型A能否在6GB内运行，故保留原计划并维持UNKNOWN；不扩大权限、不修改成功条件。",
+        "candidates": [
+          {
+            "kind": "KEEP_PLAN",
+            "title": "保留原计划：目标仍为模型A，维持UNKNOWN",
+            "reason": "反馈已排除用模型B替代A，目标前提未变；现有证据仅涉及模型B，无法判断模型A在设备D上的显存占用，因此不改变计划，等待关于模型A的新信息。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6mzz2002o708ovxhqxq1e"
+            ],
+            "expectedObservation": "确认目标仍为模型A，且模型A在设备D上的显存峰值仍为未知。",
+            "stopCondition": "在获得能明确回答模型A在设备D上显存峰值或可部署性的新信息前，保持原计划并停止扩展。",
+            "branches": [],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6mzz2002o708ovxhqxq1e@451766600797caa0",
+                "quote": "模型B在设备D推理batch=1，峰值4.2GB。"
+              }
+            ],
+            "candidateId": "9fe81385e5d75a5d9b6cf8183ea8686c",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "error": null,
+      "receipt": null,
+      "independentPass": null
+    },
+    {
+      "id": "M2",
+      "group": "条件错位",
+      "goal": "核对模型A推理batch=1的显存是否小于6GB",
+      "material": "模型A训练batch=8，显存峰值11GB。",
+      "expected": "阶段与batch错位，保持未知或询问原条件",
+      "calls": 3,
+      "decision": "ATTEND",
+      "changeSummary": "新材料只给出模型A在batch=8时的显存峰值11GB，未直接覆盖目标所问的batch=1显存是否小于6GB。该观察与目标前提相关，但不足以判断batch=1的显存占用，需核对batch=1的实测或可外推依据。",
+      "changeCandidates": [
+        {
+          "premise": "现有观察是模型A在batch=8时显存峰值11GB，目标要核对的是batch=1时显存是否小于6GB，二者batch不同，不能直接等同。",
+          "goalQuote": "核对模型A推理batch=1的显存是否小于6GB",
+          "question": "模型A在推理batch=1时的显存峰值是多少，是否小于6GB？现有batch=8的11GB峰值能否用于外推？",
+          "changeKind": "UNKNOWN",
+          "relevance": "DIRECT",
+          "reason": "证据只覆盖batch=8训练场景的显存峰值，未提供batch=1推理的显存数据，无法确认目标条件是否成立。",
+          "evidence": [
+            {
+              "ref": "capture:cmvp6n7wn0032708oyh1wlg0h@b67c2bb385bfe1d2",
+              "quote": "模型A训练batch=8，显存峰值11GB。"
+            }
+          ],
+          "unknown": [
+            "模型A推理batch=1的显存峰值",
+            "batch=8到batch=1的显存缩放关系",
+            "训练与推理场景的显存差异"
+          ],
+          "candidateId": "c5fe1099d34e0cf0890e2ace6f24ea5c"
+        }
+      ],
+      "dynamicStatus": "READY",
+      "dynamicResult": {
+        "schemaVersion": 2,
+        "summary": "现有唯一证据只说明模型A训练batch=8时显存峰值11GB，与目标所问的推理batch=1显存是否小于6GB在batch和场景上均不同，不能直接等同或外推。本轮提出读取该资料确认是否含batch=1或推理相关信息，并保留原计划；不编造数值、不声称已执行。",
+        "candidates": [
+          {
+            "kind": "READ_EXISTING",
+            "title": "读取现有资料确认是否含batch=1或推理显存信息",
+            "reason": "当前证据仅为摘录，需确认该资料是否还包含batch=1推理的显存数据或可外推依据，避免重复追问资料已明确的事实。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6n7wn0032708oyh1wlg0h"
+            ],
+            "expectedObservation": "资料中是否出现batch=1推理显存峰值，或明确说明batch=8到batch=1的显存缩放关系/训练与推理差异。",
+            "stopCondition": "读到batch=1推理显存数据或明确的外推依据即停止读取；若资料仅含batch=8训练峰值则不再重复读取该资料。",
+            "branches": [
+              {
+                "observation": "资料含batch=1推理显存峰值",
+                "consequence": "可直接对照是否小于6GB，据此更新核对结论。"
+              },
+              {
+                "observation": "资料仅含batch=8训练峰值，无batch=1或推理信息",
+                "consequence": "确认无法从现有资料判断，需转向获取batch=1实测或可外推依据。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6n7wn0032708oyh1wlg0h@b67c2bb385bfe1d2",
+                "quote": "模型A训练batch=8，显存峰值11GB。"
+              }
+            ],
+            "candidateId": "01b042dcb2bcf750e408d1575d4e70fd",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "ASK_USER",
+            "title": "确认可用的batch=1推理显存实测或外推依据",
+            "reason": "资料未覆盖batch=1推理显存，需一个会改变选择的关键未知：是否存在batch=1实测数据或官方缩放依据。",
+            "question": "是否有模型A推理batch=1的实测显存峰值，或可用的batch缩放/推理显存外推依据？",
+            "sourceIds": [],
+            "expectedObservation": "用户提供batch=1实测值、可外推依据，或明确表示均无。",
+            "stopCondition": "用户给出实测值或明确外推依据即停止追问；用户表示均无则记录为未知并保留原计划。",
+            "branches": [
+              {
+                "observation": "用户提供batch=1实测显存峰值",
+                "consequence": "直接对照是否小于6GB，形成核对结论。"
+              },
+              {
+                "observation": "用户提供可外推依据",
+                "consequence": "按该依据评估batch=1显存，并标注外推假设。"
+              },
+              {
+                "observation": "用户表示无实测也无外推依据",
+                "consequence": "目标条件仍未知，保留原计划不编造结论。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6n7wn0032708oyh1wlg0h@b67c2bb385bfe1d2",
+                "quote": "模型A训练batch=8，显存峰值11GB。"
+              }
+            ],
+            "candidateId": "d32104dd13fbd69e0dc89725f35e0a13",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "KEEP_PLAN",
+            "title": "保留原计划：batch=1显存核对仍待依据",
+            "reason": "现有证据与目标在batch和场景上不同，无法确认batch=1显存是否小于6GB；在无新信息前不扩大权限、不修改成功条件，保持原计划。",
+            "question": null,
+            "sourceIds": [],
+            "expectedObservation": "无新增可判定信息时维持原计划状态。",
+            "stopCondition": "出现batch=1实测或可外推依据时再更新计划；否则保持原计划并停止。",
+            "branches": [
+              {
+                "observation": "仍无batch=1实测或外推依据",
+                "consequence": "维持原计划，目标条件保持未知。"
+              },
+              {
+                "observation": "出现batch=1实测或外推依据",
+                "consequence": "据此更新核对，不自行批准结论。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6n7wn0032708oyh1wlg0h@b67c2bb385bfe1d2",
+                "quote": "模型A训练batch=8，显存峰值11GB。"
+              }
+            ],
+            "candidateId": "481e6c7036891de0037fe08422b90f3f",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "feedbackStatus": "READY",
+      "feedbackResult": {
+        "schemaVersion": 2,
+        "summary": "现有唯一证据只说明模型A训练batch=8时显存峰值11GB，与目标所问的推理batch=1显存是否小于6GB在batch和场景上均不同，不能直接等同或外推。按反馈只讨论推理、不扩成训练优化。本轮保留原计划，并给出一个聚焦推理batch=1的验证候选；不编造数值、不声称已执行。",
+        "candidates": [
+          {
+            "kind": "PROPOSE_VERIFICATION",
+            "title": "验证模型A推理batch=1显存峰值是否小于6GB",
+            "reason": "现有证据仅覆盖训练batch=8的11GB峰值，无法回答推理batch=1的问题；需以推理场景、batch=1的实测或可外推依据来区分目标条件是否成立。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6n7wn0032708oyh1wlg0h"
+            ],
+            "expectedObservation": "获得模型A推理batch=1的显存峰值实测值，或明确说明缺少可用的推理batch=1外推依据。",
+            "stopCondition": "一旦得到推理batch=1的实测峰值或明确无可用依据即停止；不得用训练batch=8数据替代推理batch=1结论。",
+            "branches": [
+              {
+                "observation": "推理batch=1实测显存峰值小于6GB",
+                "consequence": "目标条件成立，记录实测值与来源，结束核对。"
+              },
+              {
+                "observation": "推理batch=1实测显存峰值大于或等于6GB",
+                "consequence": "目标条件不成立，记录实测值与来源，结束核对。"
+              },
+              {
+                "observation": "无推理batch=1实测，仅有训练batch=8的11GB峰值",
+                "consequence": "判定为未知，不外推、不下结论，保留原计划待补充依据。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6n7wn0032708oyh1wlg0h@b67c2bb385bfe1d2",
+                "quote": "模型A训练batch=8，显存峰值11GB。"
+              }
+            ],
+            "candidateId": "064302df3cbdd839f92d68eb6921d213",
+            "feasibility": "UNKNOWN",
+            "feasibilityReasons": [
+              "验证条件、投入与区分力仍需人工核对；先读资料或追问条件"
+            ],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "KEEP_PLAN",
+            "title": "保留原计划：推理batch=1显存核对仍待依据",
+            "reason": "当前无推理batch=1的实测或可外推依据，且不扩大范围到训练优化；在获得新信息前维持原计划并停止。",
+            "question": null,
+            "sourceIds": [],
+            "expectedObservation": "无新增可回答推理batch=1显存的信息。",
+            "stopCondition": "出现推理batch=1实测或可外推依据时再更新计划；否则保持原计划并停止。",
+            "branches": [],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6n7wn0032708oyh1wlg0h@b67c2bb385bfe1d2",
+                "quote": "模型A训练batch=8，显存峰值11GB。"
+              }
+            ],
+            "candidateId": "481e6c7036891de0037fe08422b90f3f",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "error": null,
+      "receipt": null,
+      "independentPass": null
+    },
+    {
+      "id": "M3",
+      "group": "条件错位",
+      "goal": "核对设备D上模型A的内存预算",
+      "material": "模型A在设备E推理batch=1，峰值4GB。",
+      "expected": "设备错位，不迁移为设备D的结论",
+      "calls": 3,
+      "decision": "UNKNOWN",
+      "changeSummary": "新材料只说明模型A在设备E上的推理峰值内存为4GB，而原目标是核对设备D上模型A的内存预算。设备不同，且材料未提供设备D的预算或实测数据，因此无法判断原目标前提是否变化，也无法据此更新核对计划。",
+      "changeCandidates": [
+        {
+          "premise": "原目标针对设备D上模型A的内存预算，但当前证据只涉及设备E。",
+          "goalQuote": "核对设备D上模型A的内存预算",
+          "question": "设备E上模型A的4GB峰值是否可用于推断设备D的内存预算，还是需要设备D自身的预算或实测数据？",
+          "changeKind": "UNKNOWN",
+          "relevance": "PLAUSIBLE",
+          "reason": "证据中的设备是E而非D，不能直接替代或确认设备D的内存预算；两者关系未知，需保留为待核对项。",
+          "evidence": [
+            {
+              "ref": "capture:cmvp6ni88003g708o6f1l5vf4@3b5511ee8f71635f",
+              "quote": "模型A在设备E推理batch=1，峰值4GB。"
+            }
+          ],
+          "unknown": [
+            "设备D与设备E的硬件配置是否相同",
+            "设备D上模型A的batch设置",
+            "设备D的内存预算数值"
+          ],
+          "candidateId": "0770349ef73aaa543fdb0e08209a0c1a"
+        }
+      ],
+      "dynamicStatus": "READY",
+      "dynamicResult": {
+        "schemaVersion": 2,
+        "summary": "新材料仅给出模型A在设备E上的推理峰值内存4GB，未提供设备D的预算或实测数据，设备差异使该数值不能直接用于核对设备D的内存预算。原目标与成功条件不变，保留原计划，并仅就设备D与设备E配置关系这一会改变选择的关键未知做一次确认。",
+        "candidates": [
+          {
+            "kind": "KEEP_PLAN",
+            "title": "保留原计划：继续核对设备D上模型A的内存预算",
+            "reason": "现有证据只覆盖设备E，无法确认或替代设备D的内存预算；原目标与成功条件DRAFT_EXISTS未被改变，故保持原计划，不据此更新核对内容。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6ni88003g708o6f1l5vf4"
+            ],
+            "expectedObservation": "确认设备E数据不适用于设备D，原核对计划维持不变。",
+            "stopCondition": "在获得设备D自身的预算或实测数据前，不修改原计划，也不将设备E的4GB作为设备D结论。",
+            "branches": [],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6ni88003g708o6f1l5vf4@3b5511ee8f71635f",
+                "quote": "模型A在设备E推理batch=1，峰值4GB。"
+              }
+            ],
+            "candidateId": "d35b34cbda61690fd3337f05308eaf75",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "ASK_USER",
+            "title": "确认设备D与设备E的硬件配置是否相同",
+            "reason": "该未知直接决定设备E的4GB峰值能否作为设备D预算的参考；资料未说明两者配置关系，需一次确认以决定后续核对路径。",
+            "question": "设备D与设备E的硬件配置是否相同（若不同，设备D上模型A的batch设置是多少）？",
+            "sourceIds": [
+              "capture:cmvp6ni88003g708o6f1l5vf4"
+            ],
+            "expectedObservation": "用户说明两设备配置是否一致，或给出设备D的batch设置。",
+            "stopCondition": "用户回答后即停止追问，按回答决定是否可参考设备E数据。",
+            "branches": [
+              {
+                "observation": "用户确认设备D与设备E硬件配置相同且batch设置一致",
+                "consequence": "可将设备E的4GB峰值作为设备D预算的参考线索，但仍需设备D自身预算或实测数据确认。"
+              },
+              {
+                "observation": "用户说明两设备配置不同或batch设置不同",
+                "consequence": "设备E的4GB峰值不可用于推断设备D预算，需获取设备D自身的预算或实测数据。"
+              },
+              {
+                "observation": "用户表示不清楚两设备配置关系",
+                "consequence": "维持原计划，将设备D预算列为待核对项，不采用设备E数值。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6ni88003g708o6f1l5vf4@3b5511ee8f71635f",
+                "quote": "模型A在设备E推理batch=1，峰值4GB。"
+              }
+            ],
+            "candidateId": "17741a4e3a1d586b3a45fe67d05f3924",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "feedbackStatus": "READY",
+      "feedbackResult": {
+        "schemaVersion": 2,
+        "summary": "反馈已明确设备E是桌面GPU、设备D是目标设备，这确认了设备E的4GB峰值不能直接用于核对设备D的内存预算，原目标与成功条件不变。当前资料仍无设备D的预算或实测数据，因此保留原计划，并将设备D自身数据作为唯一待核对项，不再重复追问已由反馈明确的设备差异。",
+        "candidates": [
+          {
+            "kind": "KEEP_PLAN",
+            "title": "保留原计划：继续核对设备D上模型A的内存预算",
+            "reason": "反馈确认E是桌面GPU、D是目标设备，设备E的4GB峰值不能替代设备D数据；原目标与成功条件DRAFT_EXISTS不变，在缺少设备D预算或实测数据前不更新核对结论。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6ni88003g708o6f1l5vf4"
+            ],
+            "expectedObservation": "维持原目标，等待设备D自身的预算或实测数据。",
+            "stopCondition": "在获得设备D自身的预算或实测数据前，不修改原计划，也不将设备E的4GB作为设备D结论。",
+            "branches": [],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6ni88003g708o6f1l5vf4@3b5511ee8f71635f",
+                "quote": "模型A在设备E推理batch=1，峰值4GB。"
+              }
+            ],
+            "candidateId": "d35b34cbda61690fd3337f05308eaf75",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "PROPOSE_VERIFICATION",
+            "title": "验证设备D上模型A的内存预算数据是否可得",
+            "reason": "设备E为桌面GPU、设备D为目标设备，二者配置关系未知，需以设备D自身数据区分能否完成核对；该验证依赖设备D可访问性等未知条件，须待人工核对。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6ni88003g708o6f1l5vf4"
+            ],
+            "expectedObservation": "取得设备D上模型A的预算数值或实测峰值内存，或确认无法取得。",
+            "stopCondition": "一旦取得设备D的预算或实测数据即停止验证并据此核对；若确认设备D数据不可得，则停止并保留原计划待决。",
+            "branches": [
+              {
+                "observation": "取得设备D上模型A的预算数值或实测峰值内存",
+                "consequence": "以设备D自身数据核对内存预算，不引用设备E的4GB。"
+              },
+              {
+                "observation": "确认设备D数据不可得或设备D不可访问",
+                "consequence": "停止验证，保留原计划，不将设备E数据外推为设备D结论。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6ni88003g708o6f1l5vf4@3b5511ee8f71635f",
+                "quote": "模型A在设备E推理batch=1，峰值4GB。"
+              }
+            ],
+            "candidateId": "35197fc69082599e203234784626d79a",
+            "feasibility": "UNKNOWN",
+            "feasibilityReasons": [
+              "验证条件、投入与区分力仍需人工核对；先读资料或追问条件"
+            ],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "error": null,
+      "receipt": null,
+      "independentPass": null
+    },
+    {
+      "id": "M4",
+      "group": "条件错位",
+      "goal": "核对2026-10模型A当前版本的测试成绩",
+      "material": "2025-10模型A旧版本准确率91%，新版本还未测试。",
+      "expected": "区分时间与版本，不使用旧结果证明新版本",
+      "calls": 3,
+      "decision": "UNKNOWN",
+      "changeSummary": "新材料提到的是2025-10模型A旧版本准确率91%，且新版本还未测试；原目标要求核对2026-10模型A当前版本的测试成绩。时间与版本均不一致，无法据此判断2026-10当前版本成绩，需保留未知并核对目标所指版本与时间。",
+      "changeCandidates": [
+        {
+          "premise": "原目标指向2026-10模型A当前版本的测试成绩，而现有材料只涉及2025-10旧版本且称新版本还未测试。",
+          "goalQuote": "核对2026-10模型A当前版本的测试成绩",
+          "question": "2026-10模型A当前版本是否已有测试成绩，还是仍处于未测试状态？",
+          "changeKind": "UNKNOWN",
+          "relevance": "PLAUSIBLE",
+          "reason": "材料中的时间（2025-10）与目标（2026-10）不一致，且明确说新版本还未测试，不能直接作为当前版本成绩证据。",
+          "evidence": [
+            {
+              "ref": "capture:cmvp6nqvt003u708oc2ndmg6r@052d2380db4cfb64",
+              "quote": "2025-10模型A旧版本准确率91%，新版本还未测试。"
+            }
+          ],
+          "unknown": [
+            "2026-10模型A当前版本是否已测试",
+            "当前版本测试成绩是否存在",
+            "材料中的“新版本”是否对应2026-10当前版本"
+          ],
+          "candidateId": "2e31e93462d35c1802db50dd9a634521"
+        }
+      ],
+      "dynamicStatus": "READY",
+      "dynamicResult": {
+        "schemaVersion": 2,
+        "summary": "现有材料只说明2025-10模型A旧版本准确率为91%，且新版本还未测试；这与原目标“核对2026-10模型A当前版本的测试成绩”在时间和版本上都不一致，因此不能据此判断2026-10当前版本的成绩。本轮保留原计划，并优先读取已给定的这份材料，以确认其中是否包含版本对应关系或测试状态线索。",
+        "candidates": [
+          {
+            "kind": "READ_EXISTING",
+            "title": "读取现有材料，确认版本与测试状态线索",
+            "reason": "该材料是当前唯一来源，且已明确提到旧版本成绩与新版本未测试；先完整读取可确认是否还有版本对应或测试状态的补充信息，避免重复追问资料已明确的事实。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6nqvt003u708oc2ndmg6r"
+            ],
+            "expectedObservation": "材料中是否出现“新版本”与2026-10当前版本的对应关系，或是否出现当前版本已测试/未测试的进一步说明。",
+            "stopCondition": "读完该材料后，若仍无2026-10当前版本测试成绩或版本对应信息，则停止读取并保留未知。",
+            "branches": [
+              {
+                "observation": "材料明确“新版本”即2026-10当前版本且仍未测试",
+                "consequence": "确认当前版本无测试成绩，保留未知并停止扩查。"
+              },
+              {
+                "observation": "材料出现2026-10当前版本已有测试成绩的记录",
+                "consequence": "将该记录作为候选证据，但仍需人工核对后再判断是否满足成功条件。"
+              },
+              {
+                "observation": "材料仅重复旧版本91%且未提版本对应",
+                "consequence": "无法据此判断2026-10当前版本成绩，保留未知并停止。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6nqvt003u708oc2ndmg6r@052d2380db4cfb64",
+                "quote": "2025-10模型A旧版本准确率91%，新版本还未测试。"
+              }
+            ],
+            "candidateId": "0f4e11f36501df655ad8d6a4c656f077",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "KEEP_PLAN",
+            "title": "保留原计划：核对2026-10模型A当前版本测试成绩",
+            "reason": "新材料时间与版本均不一致，且明确新版本还未测试，不能替代原目标证据；在无新信息前应保持原计划，不扩大权限、不修改成功条件。",
+            "question": null,
+            "sourceIds": [],
+            "expectedObservation": "维持原目标与成功条件不变，等待能回答2026-10当前版本测试成绩的材料或人工核对。",
+            "stopCondition": "在获得能直接回答2026-10当前版本测试成绩的新信息前，保持原计划不变。",
+            "branches": [],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6nqvt003u708oc2ndmg6r@052d2380db4cfb64",
+                "quote": "2025-10模型A旧版本准确率91%，新版本还未测试。"
+              }
+            ],
+            "candidateId": "19c9c07d57c578624fabb4f59e8106b4",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "feedbackStatus": "READY",
+      "feedbackResult": {
+        "schemaVersion": 2,
+        "summary": "现有材料只说明2025-10模型A旧版本准确率为91%，且新版本还未测试；这与原目标“核对2026-10模型A当前版本的测试成绩”在时间和版本上都不一致，因此不能据此判断2026-10当前版本的成绩。本轮保留原计划，并保留旧结果与新版本缺口。",
+        "candidates": [
+          {
+            "kind": "READ_EXISTING",
+            "title": "读取现有材料，确认版本与测试状态线索",
+            "reason": "该材料是当前唯一来源，需确认其中是否包含2026-10当前版本的对应关系或测试状态线索，以判断能否直接回答原目标。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6nqvt003u708oc2ndmg6r"
+            ],
+            "expectedObservation": "材料中是否出现2026-10当前版本的测试成绩，或明确说明该版本尚未测试。",
+            "stopCondition": "读完该材料后，若仍无2026-10当前版本测试成绩或版本对应信息，则停止读取并保留未知。",
+            "branches": [
+              {
+                "observation": "材料明确说明2026-10当前版本尚未测试",
+                "consequence": "保留“当前版本无测试成绩”的未知状态，不将2025-10旧版本91%作为当前版本成绩。"
+              },
+              {
+                "observation": "材料给出2026-10当前版本测试成绩或版本对应关系",
+                "consequence": "据此核对原目标，但仍需人工确认该成绩是否属于当前版本。"
+              },
+              {
+                "observation": "材料仍只涉及2025-10旧版本，无版本对应信息",
+                "consequence": "停止读取，保留未知并维持原计划。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6nqvt003u708oc2ndmg6r@052d2380db4cfb64",
+                "quote": "2025-10模型A旧版本准确率91%，新版本还未测试。"
+              }
+            ],
+            "candidateId": "0f4e11f36501df655ad8d6a4c656f077",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "ASK_USER",
+            "title": "确认2026-10模型A当前版本是否已有测试成绩",
+            "reason": "材料中的时间与版本均与目标不一致，且明确说新版本还未测试；需确认目标所指版本是否已有测试成绩，才能决定后续核对方向。",
+            "question": "2026-10模型A当前版本是否已有测试成绩，还是仍处于未测试状态？",
+            "sourceIds": [],
+            "expectedObservation": "用户明确回答当前版本是否已测试，或指出目标所指版本与材料中“新版本”的对应关系。",
+            "stopCondition": "用户回答后即停止追问；若回答仍不明确，保留未知并维持原计划。",
+            "branches": [
+              {
+                "observation": "用户回答当前版本已有测试成绩",
+                "consequence": "转向核对具体成绩来源，不沿用2025-10旧版本91%。"
+              },
+              {
+                "observation": "用户回答当前版本仍未测试",
+                "consequence": "保留“无当前版本成绩”的未知状态，不将旧版本结果当作当前成绩。"
+              },
+              {
+                "observation": "用户回答无法确认或指向其他版本",
+                "consequence": "保留未知，维持原计划并停止重复提问。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6nqvt003u708oc2ndmg6r@052d2380db4cfb64",
+                "quote": "2025-10模型A旧版本准确率91%，新版本还未测试。"
+              }
+            ],
+            "candidateId": "bdc0d9fb3c8202e7d0ca8e2cc443d316",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "KEEP_PLAN",
+            "title": "保留原计划：核对2026-10模型A当前版本测试成绩",
+            "reason": "反馈要求保留旧结果和新版本缺口；在获得能直接回答2026-10当前版本测试成绩的新信息前，不改变原目标与成功条件。",
+            "question": null,
+            "sourceIds": [],
+            "expectedObservation": "无新信息时保持原计划不变，旧结果91%仅作为2025-10旧版本记录，新版本缺口继续保留为未知。",
+            "stopCondition": "在获得能直接回答2026-10当前版本测试成绩的新信息前，保持原计划不变。",
+            "branches": [
+              {
+                "observation": "未出现能直接回答2026-10当前版本成绩的新信息",
+                "consequence": "维持原计划，保留旧结果与新版本缺口。"
+              },
+              {
+                "observation": "出现能直接回答2026-10当前版本成绩的新信息",
+                "consequence": "再评估是否调整计划，但不自行批准或修改成功条件。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6nqvt003u708oc2ndmg6r@052d2380db4cfb64",
+                "quote": "2025-10模型A旧版本准确率91%，新版本还未测试。"
+              }
+            ],
+            "candidateId": "19c9c07d57c578624fabb4f59e8106b4",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "error": null,
+      "receipt": null,
+      "independentPass": null
+    },
+    {
+      "id": "I1",
+      "group": "信息不足",
+      "goal": "在设备D的6GB预算内部署模型A",
+      "material": "实验日志：模型运行正常，内存数据未记录。",
+      "expected": "UNKNOWN，追问能改变决策的缺口",
+      "calls": 3,
+      "decision": "UNKNOWN",
+      "changeSummary": "新材料仅说明模型运行正常但未记录内存数据，无法核对设备D的6GB预算是否满足，也无法确认部署前提是否变化；保留原计划并标记为未知。",
+      "changeCandidates": [
+        {
+          "premise": "设备D的6GB预算是否足以部署模型A，需要内存占用数据来判断。",
+          "goalQuote": "在设备D的6GB预算内部署模型A",
+          "question": "模型A在设备D上的实际内存占用是多少，是否不超过6GB？",
+          "changeKind": "UNKNOWN",
+          "relevance": "DIRECT",
+          "reason": "当前证据明确说内存数据未记录，因此无法验证或推翻6GB预算前提，只能保留未知。",
+          "evidence": [
+            {
+              "ref": "capture:cmvp6o0c70048708ous4lnxz4@c906c418cba3fefd",
+              "quote": "实验日志：模型运行正常，内存数据未记录。"
+            }
+          ],
+          "unknown": [
+            "模型A在设备D上的实际内存占用",
+            "6GB预算是否被满足"
+          ],
+          "candidateId": "add97a8da8c17f07bc269b26426afca2"
+        }
+      ],
+      "dynamicStatus": "READY",
+      "dynamicResult": {
+        "schemaVersion": 2,
+        "summary": "现有唯一资料只说明模型运行正常、内存数据未记录，无法核对设备D的6GB预算是否满足，也无法确认部署前提是否变化。因此保留原计划，并将内存占用与预算满足情况标记为未知；不编造时长、费用或成功概率。",
+        "candidates": [
+          {
+            "kind": "KEEP_PLAN",
+            "title": "保留原计划并标记内存预算为未知",
+            "reason": "当前证据明确说内存数据未记录，既不能验证也不能推翻6GB预算前提，故维持原目标与成功条件不变，仅将内存占用与预算满足情况列为未知。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6o0c70048708ous4lnxz4"
+            ],
+            "expectedObservation": "确认无新增内存数据，原计划与未知标记保持不变。",
+            "stopCondition": "在获得模型A在设备D上的实际内存占用数据前，保持原计划并停止进一步推断。",
+            "branches": [],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6o0c70048708ous4lnxz4@c906c418cba3fefd",
+                "quote": "实验日志：模型运行正常，内存数据未记录。"
+              }
+            ],
+            "candidateId": "4375c252cf1bb8d56260134687b28bb0",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "ASK_USER",
+            "title": "询问是否已有模型A在设备D上的内存占用记录",
+            "reason": "内存占用是判断6GB预算是否满足的唯一缺失信息，且资料未记录；该未知会直接改变是否可继续部署的判断。",
+            "question": "你是否已有模型A在设备D上的实际内存占用数据（例如峰值内存），若有请提供数值？",
+            "sourceIds": [
+              "capture:cmvp6o0c70048708ous4lnxz4"
+            ],
+            "expectedObservation": "用户提供内存占用数值，或明确表示暂无该数据。",
+            "stopCondition": "用户给出内存数值或明确表示无数据后停止追问。",
+            "branches": [
+              {
+                "observation": "用户提供不超过6GB的内存占用数值",
+                "consequence": "可据此核对6GB预算前提，但仍需人工确认后才推进部署。"
+              },
+              {
+                "observation": "用户提供超过6GB的内存占用数值",
+                "consequence": "6GB预算前提被推翻，需重新评估部署可行性。"
+              },
+              {
+                "observation": "用户表示暂无内存数据",
+                "consequence": "维持未知标记并保留原计划。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6o0c70048708ous4lnxz4@c906c418cba3fefd",
+                "quote": "实验日志：模型运行正常，内存数据未记录。"
+              }
+            ],
+            "candidateId": "66fbc3ee31554df5b13ef61826bea6a8",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "PROPOSE_VERIFICATION",
+            "title": "提议在设备D上测量模型A峰值内存占用",
+            "reason": "资料缺少内存数据，需通过有区分力的测量结果判断6GB预算是否满足；该验证待人工核对，不声称已执行。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6o0c70048708ous4lnxz4"
+            ],
+            "expectedObservation": "获得模型A在设备D上的峰值内存占用数值，并与6GB比较。",
+            "stopCondition": "一旦测得峰值内存数值或测量无法进行，即停止该验证并交由人工核对。",
+            "branches": [
+              {
+                "observation": "测得峰值内存不超过6GB",
+                "consequence": "6GB预算前提得到支持，可进入人工核对后的下一步。"
+              },
+              {
+                "observation": "测得峰值内存超过6GB",
+                "consequence": "6GB预算前提不成立，需调整部署方案。"
+              },
+              {
+                "observation": "无法在设备D上完成测量",
+                "consequence": "内存占用仍为未知，维持原计划并保留未知标记。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6o0c70048708ous4lnxz4@c906c418cba3fefd",
+                "quote": "实验日志：模型运行正常，内存数据未记录。"
+              }
+            ],
+            "candidateId": "afb5dbe7075abb1449ad72c1810e02ad",
+            "feasibility": "UNKNOWN",
+            "feasibilityReasons": [
+              "验证条件、投入与区分力仍需人工核对；先读资料或追问条件"
+            ],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "feedbackStatus": "READY",
+      "feedbackResult": {
+        "schemaVersion": 2,
+        "summary": "现有唯一资料仍只说明模型运行正常、内存数据未记录；反馈也确认目前没有内存测量。没有新信息可改变判断，因此保留原计划，并将模型A在设备D上的实际内存占用与6GB预算是否满足标记为未知；不编造时长、费用或成功概率。",
+        "candidates": [
+          {
+            "kind": "KEEP_PLAN",
+            "title": "保留原计划并标记内存预算为未知",
+            "reason": "证据明确说内存数据未记录，反馈也确认目前没有内存测量，无法验证或推翻6GB预算前提，只能保留未知。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6o0c70048708ous4lnxz4"
+            ],
+            "expectedObservation": "无新增内存数据，维持原计划与未知标记。",
+            "stopCondition": "在获得模型A在设备D上的实际内存占用数据前，保持原计划并停止进一步推断。",
+            "branches": [],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6o0c70048708ous4lnxz4@c906c418cba3fefd",
+                "quote": "实验日志：模型运行正常，内存数据未记录。"
+              }
+            ],
+            "candidateId": "4375c252cf1bb8d56260134687b28bb0",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "error": null,
+      "receipt": null,
+      "independentPass": null
+    },
+    {
+      "id": "I2",
+      "group": "信息不足",
+      "goal": "核对模型A测试结果是否满足要求",
+      "material": "本次得分82，单位、测试集和阈值未写。",
+      "expected": "UNKNOWN，不伪造阈值或成功结论",
+      "calls": 3,
+      "decision": "UNKNOWN",
+      "changeSummary": "新材料只给出模型A本次得分82，但缺少单位、测试集和阈值，无法判断是否满足原目标“核对模型A测试结果是否满足要求”。目标本身未变，也没有可据以更新或冲突的完整观察；保留UNKNOWN，等待补充阈值、测试集与单位。",
+      "changeCandidates": [
+        {
+          "premise": "模型A本次得分82，但单位、测试集和阈值未写，无法与要求比较。",
+          "goalQuote": "核对模型A测试结果是否满足要求",
+          "question": "模型A的82分对应哪个测试集、什么单位，以及判定是否满足要求的阈值是多少？",
+          "changeKind": "UNKNOWN",
+          "relevance": "DIRECT",
+          "reason": "得分是核对测试结果的核心数据，但缺少阈值与测试集，无法判断是否满足要求，属于相关但不可判断。",
+          "evidence": [
+            {
+              "ref": "capture:cmvp6o85b004m708ojtrrwndt@d77c03b965c2467f",
+              "quote": "本次得分82，单位、测试集和阈值未写。"
+            }
+          ],
+          "unknown": [
+            "得分单位",
+            "测试集名称或版本",
+            "判定阈值",
+            "模型A与测试集的对应关系"
+          ],
+          "candidateId": "880705ec5ca163459d03a6905da65f22"
+        }
+      ],
+      "dynamicStatus": "READY",
+      "dynamicResult": {
+        "schemaVersion": 2,
+        "summary": "现有材料仅显示模型A本次得分82，但单位、测试集和阈值缺失，无法与“满足要求”的判定标准比较，目标保持不变。当前唯一有区分力的动作是向用户确认这三个缺失要素；在获得阈值、测试集与单位前，不提出验证执行方案，也不宣称任何结果。",
+        "candidates": [
+          {
+            "kind": "ASK_USER",
+            "title": "确认82分对应的测试集、单位与判定阈值",
+            "reason": "得分是核对测试结果的核心数据，但缺少阈值与测试集，无法判断是否满足要求；该信息只能由用户补充，且会直接决定后续是判定满足、不满足还是仍需验证。",
+            "question": "模型A的82分对应哪个测试集（名称或版本）、什么单位，以及判定是否满足要求的阈值是多少？",
+            "sourceIds": [
+              "capture:cmvp6o85b004m708ojtrrwndt"
+            ],
+            "expectedObservation": "用户给出测试集名称或版本、得分单位、判定阈值三项中的至少一项明确信息。",
+            "stopCondition": "用户提供完整三项信息，或明确表示无法提供其中任一项；收到后停止追问并据此更新判断。",
+            "branches": [
+              {
+                "observation": "用户给出测试集、单位与阈值，且82分可按同一口径与阈值比较。",
+                "consequence": "可据阈值直接判定是否满足要求，或据此提出最小验证方案。"
+              },
+              {
+                "observation": "用户仅补充部分信息（如只有阈值，缺测试集或单位）。",
+                "consequence": "仍无法完成同口径比较，保留UNKNOWN并仅针对剩余缺口继续确认。"
+              },
+              {
+                "observation": "用户表示无法提供阈值或测试集信息。",
+                "consequence": "无法判定是否满足要求，保持原目标与UNKNOWN状态，不提出执行性验证。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6o85b004m708ojtrrwndt@d77c03b965c2467f",
+                "quote": "本次得分82，单位、测试集和阈值未写。"
+              }
+            ],
+            "candidateId": "c00bf0dd32f2e5758f4a058a6d23da39",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "KEEP_PLAN",
+            "title": "维持原目标并保留UNKNOWN，等待补充阈值、测试集与单位",
+            "reason": "目标“核对模型A测试结果是否满足要求”未变，现有材料不足以更新或推翻任何判断；在缺失信息补齐前，保持原计划、不扩大权限、不自行批准。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6o85b004m708ojtrrwndt"
+            ],
+            "expectedObservation": "无新增可判定信息时，计划保持不变。",
+            "stopCondition": "出现新的可判定信息（阈值、测试集或单位）或用户明确终止时停止保持。",
+            "branches": [
+              {
+                "observation": "未收到新的阈值、测试集或单位信息。",
+                "consequence": "继续保留UNKNOWN，不提出验证执行或结论。"
+              },
+              {
+                "observation": "收到可判定信息。",
+                "consequence": "退出保持状态，转入基于新信息的判断或验证提议。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6o85b004m708ojtrrwndt@d77c03b965c2467f",
+                "quote": "本次得分82，单位、测试集和阈值未写。"
+              }
+            ],
+            "candidateId": "868e6c82be1593ceb960929bce99588f",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "feedbackStatus": "READY",
+      "feedbackResult": {
+        "schemaVersion": 2,
+        "summary": "现有材料仅显示模型A本次得分82，但单位、测试集和阈值缺失，无法与“满足要求”的判定标准比较，目标保持不变。反馈要求先核对统计口径，因此优先读取现有资料确认是否已载明口径；若资料未载明，则保留UNKNOWN并维持原计划，不提出验证执行方案，也不宣称任何结果。",
+        "candidates": [
+          {
+            "kind": "READ_EXISTING",
+            "title": "读取现有资料核对82分的统计口径",
+            "reason": "反馈要求先核对统计口径；现有资料可能已载明得分单位、测试集或阈值，读取后可避免重复追问已明确的事实。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6o85b004m708ojtrrwndt"
+            ],
+            "expectedObservation": "资料中是否载明82分的单位、测试集名称或版本、判定阈值，或明确说明这些要素缺失。",
+            "stopCondition": "读完该资料即停止；若资料未载明口径，不再重复读取同一资料。",
+            "branches": [
+              {
+                "observation": "资料载明单位、测试集与阈值中的至少一项",
+                "consequence": "据此更新对“是否满足要求”的判断；仍缺失的要素保留UNKNOWN，不自行补全。"
+              },
+              {
+                "observation": "资料仅说明三项均未写，未提供任何口径信息",
+                "consequence": "维持原计划，保留UNKNOWN，等待补充阈值、测试集与单位。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6o85b004m708ojtrrwndt@d77c03b965c2467f",
+                "quote": "本次得分82，单位、测试集和阈值未写。"
+              }
+            ],
+            "candidateId": "9fd6e0766f86d5f93ad265fe7589aa39",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "KEEP_PLAN",
+            "title": "维持原目标并保留UNKNOWN，等待补充阈值、测试集与单位",
+            "reason": "在统计口径未核对清楚前，无法判断82分是否满足要求；目标与成功条件不变，不扩大权限，也不提出验证执行方案。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6o85b004m708ojtrrwndt"
+            ],
+            "expectedObservation": "无新增可判定信息，或资料确认口径缺失。",
+            "stopCondition": "出现新的可判定信息（阈值、测试集或单位）或用户明确终止时停止保持。",
+            "branches": [
+              {
+                "observation": "仍无阈值、测试集或单位信息",
+                "consequence": "继续保留UNKNOWN，不宣称结果，不提出验证执行方案。"
+              },
+              {
+                "observation": "补充了阈值、测试集或单位中的任一项",
+                "consequence": "据此重新评估是否满足要求；仍不完整的部分继续保留UNKNOWN。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6o85b004m708ojtrrwndt@d77c03b965c2467f",
+                "quote": "本次得分82，单位、测试集和阈值未写。"
+              }
+            ],
+            "candidateId": "868e6c82be1593ceb960929bce99588f",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "error": null,
+      "receipt": null,
+      "independentPass": null
+    },
+    {
+      "id": "I3",
+      "group": "信息不足",
+      "goal": "下周交付可安装的软件包",
+      "material": "打包日志被截断，只保留开始时间，没有退出码或产物。",
+      "expected": "先读已有日志，未找到结果保持未知",
+      "calls": 3,
+      "decision": "UNKNOWN",
+      "changeSummary": "新材料只说明打包日志被截断，缺少退出码和产物，无法确认可安装软件包是否已生成或打包是否成功。原目标“下周交付可安装的软件包”的前提（打包能产出可安装产物）既未被证实也未被推翻，因此保留UNKNOWN，不打扰。",
+      "changeCandidates": [
+        {
+          "premise": "打包过程能产出可安装的软件包产物，且日志可验证打包结果。",
+          "goalQuote": "下周交付可安装的软件包",
+          "question": "打包日志被截断、缺少退出码和产物，是否意味着打包未成功或产物缺失，从而影响下周交付可安装软件包？",
+          "changeKind": "UNKNOWN",
+          "relevance": "DIRECT",
+          "reason": "证据显示日志不完整且无产物信息，直接关系到“可安装软件包”是否已存在，但不足以判定前提已变或冲突。",
+          "evidence": [
+            {
+              "ref": "capture:cmvp6ohqh0050708o5185dre1@a86983e84ab014fd",
+              "quote": "打包日志被截断，只保留开始时间，没有退出码或产物。"
+            }
+          ],
+          "unknown": [
+            "打包是否实际完成",
+            "是否存在可安装产物",
+            "退出码与失败原因"
+          ],
+          "candidateId": "19e81fbe67c28fbbc0a82dc8ac3e6a93"
+        }
+      ],
+      "dynamicStatus": "READY",
+      "dynamicResult": {
+        "schemaVersion": 2,
+        "summary": "现有唯一证据表明打包日志被截断，缺少退出码与产物信息，因此“打包能否产出可安装软件包”仍为UNKNOWN，原目标与成功条件不变。为在不扩大权限、不编造事实的前提下推进，先读取该日志中可回答问题的部分，再以最小验证区分“已产出可安装产物”与“打包未完成/产物缺失”，同时保留原计划作为兜底。",
+        "candidates": [
+          {
+            "kind": "READ_EXISTING",
+            "title": "读取现有打包日志以确认是否含退出码或产物线索",
+            "reason": "当前证据仅为摘录，日志可能包含开始时间之外的构建步骤、错误行或产物路径；先读已有资料成本最低且不扩大权限。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6ohqh0050708o5185dre1"
+            ],
+            "expectedObservation": "日志中出现退出码、失败/成功标记、产物文件名或路径等可判定打包结果的字段。",
+            "stopCondition": "若日志读完仍无退出码与产物信息，则停止读取并转入最小验证或保留原计划。",
+            "branches": [
+              {
+                "observation": "日志含明确退出码或产物路径",
+                "consequence": "可据此判定打包是否产出可安装包，更新前提状态。"
+              },
+              {
+                "observation": "日志仍仅有开始时间、无退出码与产物",
+                "consequence": "维持UNKNOWN，转入最小验证以区分产物是否存在。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6ohqh0050708o5185dre1@a86983e84ab014fd",
+                "quote": "打包日志被截断，只保留开始时间，没有退出码或产物。"
+              }
+            ],
+            "candidateId": "c613cce8dadbdc36e9086946a9dc40c7",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "PROPOSE_VERIFICATION",
+            "title": "最小验证：检查打包输出目录是否存在可安装产物",
+            "reason": "日志不足以判定，直接查看打包输出位置是否存在可安装包文件，可用最少动作区分“已产出”与“未产出”，且不改变成功条件。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6ohqh0050708o5185dre1"
+            ],
+            "expectedObservation": "在约定输出目录中列出文件清单，观察是否存在可安装包文件及其时间戳。",
+            "stopCondition": "一旦确认存在可安装产物或确认输出目录为空/无产物即停止验证；若输出目录位置未知则不得声称可执行。",
+            "branches": [
+              {
+                "observation": "输出目录存在可安装包文件",
+                "consequence": "前提得到支持，可继续按原目标推进交付准备。"
+              },
+              {
+                "observation": "输出目录为空或无产物文件",
+                "consequence": "前提被削弱，需重新评估打包流程，但仍不改变成功条件。"
+              },
+              {
+                "observation": "输出目录位置未知或不可访问",
+                "consequence": "验证不可执行，维持UNKNOWN并保留原计划。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6ohqh0050708o5185dre1@a86983e84ab014fd",
+                "quote": "打包日志被截断，只保留开始时间，没有退出码或产物。"
+              }
+            ],
+            "candidateId": "4aaac354b012cd981d8f9062f6c6e220",
+            "feasibility": "UNKNOWN",
+            "feasibilityReasons": [
+              "验证条件、投入与区分力仍需人工核对；先读资料或追问条件"
+            ],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "KEEP_PLAN",
+            "title": "保留原计划：维持下周交付可安装软件包目标不变",
+            "reason": "现有信息既未证实也未推翻打包能产出可安装产物这一前提，且无新信息支持修改目标或成功条件，故保留原计划并停止重复提问。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6ohqh0050708o5185dre1"
+            ],
+            "expectedObservation": "无新增可判定信息时，计划与成功条件保持DRAFT_EXISTS不变。",
+            "stopCondition": "若后续出现退出码或产物等新证据，再重新评估；否则保持原计划并停止。",
+            "branches": [
+              {
+                "observation": "无新证据出现",
+                "consequence": "维持原计划，不扩大权限、不修改成功条件。"
+              },
+              {
+                "observation": "出现退出码或产物新证据",
+                "consequence": "重新评估前提状态并据此调整候选。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6ohqh0050708o5185dre1@a86983e84ab014fd",
+                "quote": "打包日志被截断，只保留开始时间，没有退出码或产物。"
+              }
+            ],
+            "candidateId": "372a20336fbb2beb66d55ee099da770c",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "feedbackStatus": "READY",
+      "feedbackResult": {
+        "schemaVersion": 2,
+        "summary": "现有唯一证据仍只表明打包日志被截断、缺少退出码与产物，无法确认可安装软件包是否已生成；原目标与成功条件不变，且不宣称已构建成功。由于本轮无新信息且读取轮次已用尽，保持原计划并停止，不再重复读取或追问。",
+        "candidates": [
+          {
+            "kind": "KEEP_PLAN",
+            "title": "保留原计划：维持下周交付可安装软件包目标不变",
+            "reason": "证据仅显示日志不完整，既未证实也未推翻“打包能产出可安装产物”的前提，故不改变目标与成功条件，也不宣称已构建成功。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6ohqh0050708o5185dre1"
+            ],
+            "expectedObservation": "无新增可判定打包结果的信息，前提维持UNKNOWN。",
+            "stopCondition": "无新证据（退出码或产物信息）时保持原计划并停止；出现新证据再重新评估。",
+            "branches": [],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6ohqh0050708o5185dre1@a86983e84ab014fd",
+                "quote": "打包日志被截断，只保留开始时间，没有退出码或产物。"
+              }
+            ],
+            "candidateId": "372a20336fbb2beb66d55ee099da770c",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "error": null,
+      "receipt": null,
+      "independentPass": null
+    },
+    {
+      "id": "I4",
+      "group": "信息不足",
+      "goal": "核对设备D部署失败的具体原因",
+      "material": "用户记录：昨天打不开，今天好像可以，但没有版本和复现步骤。",
+      "expected": "UNKNOWN，有界追问，禁止循环重试",
+      "calls": 3,
+      "decision": "UNKNOWN",
+      "changeSummary": "新材料仅称“昨天打不开，今天好像可以”，缺少版本与复现步骤，无法确认设备D部署失败的具体原因是否已变化或已解决；原目标前提仍待核对。",
+      "changeCandidates": [
+        {
+          "premise": "设备D部署失败的具体原因尚未确认，且现有观察不足以判断失败是否仍存在。",
+          "goalQuote": "核对设备D部署失败的具体原因",
+          "question": "“今天好像可以”是否指设备D部署已恢复？若是，失败原因是否已定位或消失？需要版本与复现步骤来核对。",
+          "changeKind": "UNKNOWN",
+          "relevance": "DIRECT",
+          "reason": "新材料直接涉及设备D的可用性变化，但表述模糊且缺少版本、复现步骤，不能确认原失败前提已改变，也不能确认原因。",
+          "evidence": [
+            {
+              "ref": "capture:cmvp6opvc005e708o5gdef16d@e38461dc36951d85",
+              "quote": "用户记录：昨天打不开，今天好像可以，但没有版本和复现步骤。"
+            }
+          ],
+          "unknown": [
+            "“今天好像可以”具体指哪个设备或功能",
+            "设备D当前是否仍部署失败",
+            "失败发生的版本与环境",
+            "可复现步骤与错误信息"
+          ],
+          "candidateId": "2a74fa9c80a6ce244c0351520764992c"
+        }
+      ],
+      "dynamicStatus": "READY",
+      "dynamicResult": {
+        "schemaVersion": 2,
+        "summary": "新材料只给出“昨天打不开，今天好像可以”，未提供版本与复现步骤，无法判断设备D部署失败是否仍存在或原因是否已变化。原目标“核对设备D部署失败的具体原因”前提仍待核对。本轮优先读取该唯一现有资料以确认其可回答范围，并保留原计划；不扩大权限、不修改成功条件。",
+        "candidates": [
+          {
+            "kind": "READ_EXISTING",
+            "title": "读取现有记录确认“今天好像可以”的原始表述与范围",
+            "reason": "现有资料是唯一来源，需确认其是否已明确设备D当前状态、版本或复现信息，避免重复追问资料已写明的事实。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6opvc005e708o5gdef16d"
+            ],
+            "expectedObservation": "记录中是否出现设备D的具体状态、版本号、环境或复现步骤；若仅有模糊表述则确认信息缺口。",
+            "stopCondition": "读取完成后即停止，不再重复读取同一资料。",
+            "branches": [
+              {
+                "observation": "记录仅含“昨天打不开，今天好像可以”，无版本与复现步骤",
+                "consequence": "确认信息缺口，保留原计划并考虑向用户提出一个会改变选择的关键问题。"
+              },
+              {
+                "observation": "记录中包含设备D的版本、环境或复现步骤",
+                "consequence": "据此缩小未知范围，再决定是否追问或提出验证方案。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6opvc005e708o5gdef16d@e38461dc36951d85",
+                "quote": "用户记录：昨天打不开，今天好像可以，但没有版本和复现步骤。"
+              }
+            ],
+            "candidateId": "e4d485774bb5dae1df9d6783f51378fe",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "ASK_USER",
+            "title": "确认“今天好像可以”是否指设备D部署已恢复",
+            "reason": "该未知直接决定原失败前提是否仍成立，且资料未明确，属于会改变后续选择的关键问题。",
+            "question": "“今天好像可以”是否指设备D部署已恢复？若是，失败原因是否已定位或消失？请补充涉及的版本与复现步骤。",
+            "sourceIds": [
+              "capture:cmvp6opvc005e708o5gdef16d"
+            ],
+            "expectedObservation": "用户明确设备D当前是否仍部署失败，以及是否有版本与复现步骤。",
+            "stopCondition": "用户回答后停止追问；若仍无版本或复现信息，则不再重复提问并保留原计划。",
+            "branches": [
+              {
+                "observation": "用户确认设备D已恢复且原因已定位",
+                "consequence": "原失败前提改变，需重新核对目标是否仍适用。"
+              },
+              {
+                "observation": "用户确认设备D仍失败或原因未定位",
+                "consequence": "保留原目标，继续核对具体原因。"
+              },
+              {
+                "observation": "用户仍无法说明版本与复现步骤",
+                "consequence": "信息不足，保留原计划并停止重复提问。"
+              }
+            ],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6opvc005e708o5gdef16d@e38461dc36951d85",
+                "quote": "用户记录：昨天打不开，今天好像可以，但没有版本和复现步骤。"
+              }
+            ],
+            "candidateId": "af1fbca2e96e9886a51843b698eab0e1",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          },
+          {
+            "kind": "KEEP_PLAN",
+            "title": "保留原计划：核对设备D部署失败的具体原因",
+            "reason": "新材料未提供版本与复现步骤，无法确认失败前提已变化或已解决，原目标与成功条件不变。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6opvc005e708o5gdef16d"
+            ],
+            "expectedObservation": "维持原目标，等待补充版本与复现信息后再核对。",
+            "stopCondition": "在获得新信息前保持原计划并停止。",
+            "branches": [],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6opvc005e708o5gdef16d@e38461dc36951d85",
+                "quote": "用户记录：昨天打不开，今天好像可以，但没有版本和复现步骤。"
+              }
+            ],
+            "candidateId": "f0014d52a178f40fd81f1149fc4f6db7",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "feedbackStatus": "READY",
+      "feedbackResult": {
+        "schemaVersion": 2,
+        "summary": "反馈明确“没有新的观察，先停止分析”。现有唯一资料仍只支持“昨天打不开，今天好像可以，但没有版本和复现步骤”，无法确认设备D部署失败是否仍存在或原因是否已变化。按反馈不再追问或新增验证，保留原计划并停止。",
+        "candidates": [
+          {
+            "kind": "KEEP_PLAN",
+            "title": "保留原计划：核对设备D部署失败的具体原因",
+            "reason": "反馈要求无新观察时停止分析；现有资料不足以改变原目标前提，也不足以确认原因，故保持原计划，不扩大权限、不修改成功条件。",
+            "question": null,
+            "sourceIds": [
+              "capture:cmvp6opvc005e708o5gdef16d"
+            ],
+            "expectedObservation": "无新增观察；维持“设备D部署失败的具体原因尚未确认”的原计划状态。",
+            "stopCondition": "无新信息时保持原计划并停止，不再重复读取或提问。",
+            "branches": [],
+            "evidence": [
+              {
+                "ref": "capture:cmvp6opvc005e708o5gdef16d@e38461dc36951d85",
+                "quote": "用户记录：昨天打不开，今天好像可以，但没有版本和复现步骤。"
+              }
+            ],
+            "candidateId": "f0014d52a178f40fd81f1149fc4f6db7",
+            "feasibility": "READY",
+            "feasibilityReasons": [],
+            "estimatedMinutes": null,
+            "cost": null,
+            "estimateSource": "UNKNOWN"
+          }
+        ],
+        "provider": "llm:deepseek:deepseek-flash",
+        "usageUnknown": false
+      },
+      "error": null,
+      "receipt": null,
+      "independentPass": null
+    }
+  ]
+}

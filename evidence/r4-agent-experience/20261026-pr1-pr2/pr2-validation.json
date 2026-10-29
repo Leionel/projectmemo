@@ -1,0 +1,100 @@
+{
+  "baseHead": "9dbc01ff6d1a9e63b13859f36119c4a1634a50e0",
+  "scope": "R4_PR2_ENGINEERING",
+  "database": "Isolated Vitest/TEMP SQLite and rebuilt projectmemo-e2e.db; no development database mutation",
+  "paidModelCalls": 24,
+  "paidCallLimit": 24,
+  "modelQuality": "NOT_ACCEPTED: investigation improved three synthetic answers; one valid model UI, one invalid JSON UI, one evaluation budget stop, zero model Action proposals. Post-run prompt patch not paid-retested.",
+  "checks": {
+    "unit": {
+      "command": "npm.cmd test",
+      "exitCode": 0,
+      "files": 120,
+      "passed": 1082
+    },
+    "types": {
+      "command": "npm.cmd exec tsc -- --noEmit",
+      "exitCode": 0
+    },
+    "lint": {
+      "command": "npm.cmd run lint",
+      "exitCode": 0
+    },
+    "e2e": {
+      "command": "npm.cmd run test:e2e",
+      "exitCode": 0,
+      "isolatedProductionBuild": true,
+      "flags": [
+        "FOCUS_AGENT_ENABLED",
+        "FOCUS_AGENT_FOLLOW_ENABLED",
+        "GOAL_CHANGE_REVIEW_ENABLED",
+        "FOCUS_AGENT_R4_ENABLED"
+      ],
+      "startTime": "2026-10-27T03:23:32.822Z",
+      "duration": 80543.2,
+      "expected": 22,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "harmonyTest": {
+      "command": "npm.cmd run harmony:test",
+      "exitCode": 0,
+      "passed": 83
+    },
+    "harmonyBuild": {
+      "command": "npm.cmd run harmony:build",
+      "exitCode": 0,
+      "unsignedHapSha256": "3a3bc80f3e1970278ad15faea0bc386cdff0df03f189e7651c1f578422729923"
+    }
+  },
+  "screenshots": [
+    {
+      "path": "evidence/r4-agent-experience/20261026-pr1-pr2/browser-clean/r4-approval-1280.png",
+      "sha256": "0aa01c00250960b9a10b0b8e27dd74548f2e22ca8d56da79e04f90ef53d32338"
+    },
+    {
+      "path": "evidence/r4-agent-experience/20261026-pr1-pr2/browser-clean/r4-approval-360.png",
+      "sha256": "edca34c1f61e7d2fe9cf358cee771cb620faf060fbd42dd8f04b3920ac132153"
+    },
+    {
+      "path": "evidence/r4-agent-experience/20261026-pr1-pr2/browser-clean/r4-approval-390.png",
+      "sha256": "dfc31d9727beb4b541b5065e77a53e7a1701c3c7f3c28f21e8c4e47ea52878b5"
+    },
+    {
+      "path": "evidence/r4-agent-experience/20261026-pr1-pr2/browser-clean/r4-approval-430.png",
+      "sha256": "3c7b7a4d75c034ce062da65cb7d1bbbe763ea510d70db7ecdd90e2b5dfeed3dc"
+    },
+    {
+      "path": "evidence/r4-agent-experience/20261026-pr1-pr2/browser-clean/r4-dark-1280.png",
+      "sha256": "61b3fdcfdcd6f61d0bb4f1290fbfaaa2252261dd85ec208ce6d0c7915a9e09fc"
+    },
+    {
+      "path": "evidence/r4-agent-experience/20261026-pr1-pr2/browser-clean/r4-large-text-390.png",
+      "sha256": "9ad67601629d7762abbd94363e28916907a46ab9b1cce7145f72d5eb8dd5b549"
+    },
+    {
+      "path": "evidence/r4-agent-experience/20261026-pr1-pr2/browser-clean/r4-receipt-430.png",
+      "sha256": "00bcb3d8b19e9d77ab0d6f736d26ad4f5403633de727b3fc056fbda3e484d372"
+    }
+  ],
+  "localFlags": {
+    "FOCUS_AGENT_ENABLED": true,
+    "FOCUS_AGENT_R4_ENABLED": true
+  },
+  "preexistingFiveFilesPreserved": true,
+  "preservedFailures": [
+    "pr2-unit-first-failed.log",
+    "pr2-e2e-first-failed.log",
+    "pr2-e2e-reused-failed.log"
+  ],
+  "warnings": [
+    "Existing Next NFT tracing warning and platform SDK warnings retained in logs."
+  ],
+  "remaining": [
+    "PR3 event/model business closure and held-out quality",
+    "PR4 ArkTS semantic renderer",
+    "D1/D2 semantic block live binding",
+    "Target-device installation and ECS acceptance"
+  ]
+}

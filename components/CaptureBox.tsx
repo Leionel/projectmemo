@@ -24,9 +24,9 @@ function newRequestId() {
   return `capture-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-export function CaptureBox({ projectId, inboxEnabled = true }: { projectId: string; inboxEnabled?: boolean }) {
+export function CaptureBox({ projectId, inboxEnabled = true, onMaterialSaved, draftScope }: { projectId: string; inboxEnabled?: boolean; onMaterialSaved?: (sourceId: string) => void; draftScope?: string }) {
   const router = useRouter();
-  const draftKey = `projectmemo:capture:${projectId}`;
+  const draftKey = `projectmemo:capture:${projectId}${draftScope ? `:${draftScope}` : ""}`;
   const [text, setText] = useState("");
   const [sourceType, setSourceType] = useState(sources[0]);
   const [requestId, setRequestId] = useState("");
@@ -97,6 +97,7 @@ export function CaptureBox({ projectId, inboxEnabled = true }: { projectId: stri
       setRequestId("");
       window.localStorage.removeItem(draftKey);
       setNewCardId(data.card.id);
+      if (data.card.captureId) onMaterialSaved?.(`capture:${data.card.captureId}`);
       setMessage({
         ok: true,
         text: data.replayed ? `已恢复《${data.card.title}》知识卡片` : `已生成《${data.card.title}》知识卡片`,
@@ -128,7 +129,7 @@ export function CaptureBox({ projectId, inboxEnabled = true }: { projectId: stri
           <p className="archive-label">新建项目记录</p>
           <h2 className="mt-3 text-lg font-black">捕获一条项目碎片</h2>
           <p className="mt-1 text-sm text-[var(--ink-soft)]">
-            无需整理，Agent 会自动分类、提炼并关联历史知识。
+            原文完整保存；生成的知识卡保留来源，属待核对的候选结论，不会自动当作已确认事实。
           </p>
         </div>
         <label className="text-xs font-bold text-[var(--ink-soft)]">
@@ -188,6 +189,9 @@ export function CaptureBox({ projectId, inboxEnabled = true }: { projectId: stri
           </span>
           <span>{text.length} / 5000</span>
         </div>
+        <p className="mt-2 text-xs leading-5 text-[var(--ink-soft)]">
+          保存后：原始记录留存 → 生成带来源的知识卡（待核对）→ 在「项目记忆与问答」中核对结论与时态；与已有记录冲突时会以对照呈现，不静默覆盖。
+        </p>
         <div className="mt-3 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div
             aria-live="polite"
@@ -218,12 +222,12 @@ export function CaptureBox({ projectId, inboxEnabled = true }: { projectId: stri
               ) : (
                 <Sparkles size={18} />
               )}
-              {loading ? "Agent 正在沉淀…" : "沉淀为知识资产"}
+              {loading ? "正在保存并生成…" : "保存记录并生成知识卡"}
             </button>
           </div>
         </div>
       </form>
-      <AttachmentInbox projectId={projectId} enabled={inboxEnabled} />
+      <AttachmentInbox projectId={projectId} enabled={inboxEnabled} onMaterialSaved={onMaterialSaved} />
     </section>
   );
 }

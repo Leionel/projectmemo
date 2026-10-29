@@ -1,6 +1,6 @@
 # ECS 部署与运维（Alibaba Cloud Linux）
 
-本目录是**部署样例**，不是自动安装器：所有命令都需要在目标机器上按实际情况执行。
+已有 ECS 的更新统一使用本文的 `bash <<'UPDATE'` 命令，从目标提交提取 `safe-update.sh` 执行。所有 Linux 命令都在你确认的 ECS 上运行；本地 SSH 配置不能用来推断生产服务器。
 变量全集见 [`projectmemo.env.example`](projectmemo.env.example) 与仓库根目录 `.env.example`。
 
 ## 文件
@@ -10,6 +10,8 @@
 | `projectmemo.service` | systemd unit（监听 127.0.0.1:4400，由 nginx 反代） |
 | `projectmemo.nginx.conf` | nginx 站点配置：TLS、登录限流、小艺独立限流、转发头覆盖 |
 | `projectmemo.env.example` | 生产环境变量样例 → 安装为 `/etc/projectmemo/projectmemo.env` |
+| `safe-update.sh` | 已部署机器的版本校验、停服备份、构建、迁移、重启与失败恢复 |
+| [Focus 更新说明](FOCUS_UPDATE.md) | F1–F3 / R4 环境开关、配置备份、重启与功能检查 |
 | `backup.sh` | 数据库 + 附件备份（含完整性校验与回执清单） |
 | `restore-to-copy.sh` | 恢复演练：还原成独立副本，或明确授权后覆盖线上 |
 | `sqlite-tool.mjs` | 在线备份 / 校验 / 计数助手，被上面两个脚本调用 |
@@ -24,78 +26,87 @@
 | `/opt/projectmemo/storage` | 附件原件（图片、PDF） |
 
 `DATABASE_URL` 与 `ATTACHMENT_DIR` 必须指向这两个持久路径，见 `projectmemo.env.example`。
-代码目录 `/opt/projectmemo/app` 可以整体替换；数据目录不可以。systemd unit 的
+更新脚本在代码目录 `/opt/projectmemo/app` 切换固定提交，保留数据目录。systemd unit 的
 `ReadWritePaths` 已经把可写范围限制在 `/opt/projectmemo/data`、`/opt/projectmemo/storage`
 和 `.next/cache` 三处。
 
 ## 首次部署
 
-```bash
-sudo useradd --system --home /opt/projectmemo --shell /usr/sbin/nologin projectmemo
-sudo mkdir -p /opt/projectmemo/{app,data,storage,backups} /etc/projectmemo
-sudo chown -R projectmemo:projectmemo /opt/projectmemo
+`safe-update.sh` 要求机器上已有可运行版本、依赖、生成的 Prisma Client 和 `.next`，不能用于空机初始化。新机器先准备服务账号、Node.js 24、持久路径、环境文件、Web 和独立 Worker 的 systemd unit，以及 Nginx；核对实际路径后再配置首次构建与迁移。
 
-# 1. 代码与依赖
-sudo -u projectmemo git clone <repo> /opt/projectmemo/app
-cd /opt/projectmemo/app && sudo -u projectmemo npm ci
-sudo -u projectmemo npx prisma generate
-sudo -u projectmemo npm run build
-
-# 2. 环境文件（权限收紧，内含小艺 Token）
-sudo install -m 600 -o root -g projectmemo projectmemo.env.example /etc/projectmemo/projectmemo.env
-sudo editor /etc/projectmemo/projectmemo.env   # 填 PROJECTMEMO_RELEASE / XIAOYI_ADAPTER_TOKEN / XIAOYI_TEST_PROJECT_ID
-
-# 3. 迁移（先核对目标库，不要对已有数据的库盲跑 db:setup）
-sudo -u projectmemo npx prisma migrate deploy
-
-# 4. 服务
-sudo install -m 644 projectmemo.service /etc/systemd/system/projectmemo.service
-sudo systemctl daemon-reload
-sudo systemctl enable --now projectmemo
-
-# 5. nginx
-sudo install -m 644 projectmemo.nginx.conf /etc/nginx/conf.d/projectmemo.conf
-sudo nginx -t && sudo systemctl reload nginx
-```
+本目录的 `projectmemo.service` 是 Web unit 样例。现有机器保留实际 unit；本目录未提供 Worker unit 安装器，不要用样例覆盖现有服务。生产环境文件只在首次安装时从样例建立，后续更新保留原凭据并按需修改具体键。
 
 ## 更新发布（已部署机器）
 
-网页版与鸿蒙端共用此 Next.js 服务和数据库。启用网页版时，先部署包含网页登录页更新的固定提交，再安装该提交的 `projectmemo.nginx.conf` 并运行 `nginx -t`；配置会把 `/`、`/login`、`/projects` 和 Next.js 静态资源转发至本机 4400，保留 `/api/settings*` 的公网 404、登录限流及原有业务 API 规则。不要只改 Nginx 而继续使用展示默认演示密码的旧网页构建。
+1. 在正确 ECS 的 root 终端执行。目标分支为 `codex/r3-runtime-research`，`TARGET` 必须填写已经验证并推送的完整 40 位提交号；下方留空时命令会停止。
 
-上线后从公网检查：`/` 与 `/login` 应返回网页，未登录访问 `/projects` 应跳转到登录页，`/api/projects` 应返回 401，`/api/settings` 应返回 404，`/health` 应保持原有版本号。用专用评审账号验证登录与项目列表；不要用真实个人项目作共享演示。
+   当前脚本固定核对以下部署配置。不一致时先检查实际 unit 和目标提交中的脚本，不要直接改服务路径来绕过检查。
 
-固定顺序：`checkout → prisma generate → build → migrate deploy → restart`。两个必须注意的点：
+   | 项目 | 预期值 |
+   |---|---|
+   | 应用目录 | `/opt/projectmemo/app` |
+   | Node | `/home/projectmemo/.nvm/versions/node/v24.22.0/bin/node` |
+   | 环境文件 | `/etc/projectmemo/projectmemo.env` |
+   | 服务 | `projectmemo`、`projectmemo-mission-worker`，均已运行 |
+   | 数据与附件 | 上节两个持久路径 |
+   | 健康接口 | `http://127.0.0.1:4400/health` |
 
-1. `lib/generated/prisma` 在 `.gitignore` 里，**每次切换 commit 后都要重新 `prisma generate`**，
-   否则 `next build` 会因为客户端缺少新模型而类型检查失败。
-2. `prisma.config.ts` 在没有 `DATABASE_URL` 时回落到 `file:./prisma/dev.db`。systemd 的
-   `EnvironmentFile` 只对服务进程生效，手动执行 `migrate deploy` 必须显式带上生产库地址，
-   否则迁移会打到应用目录里的 stray 开发库，生产库毫无变化。
+2. 填写 `TARGET` 后整段执行。临时文件使用 `mktemp`；fetch、提取或检查失败会立即停止，退出时删除临时脚本。
 
 ```bash
-cd /opt/projectmemo/app
+bash <<'UPDATE'
+set -Eeuo pipefail
 
-# 0. 备份（见下节），发布前必做
-# 1. 代码：next-env.d.ts 是构建生成物，服务器上的本地改动可直接丢弃
-sudo -u projectmemo git restore next-env.d.ts
-sudo -u projectmemo git fetch --all
-sudo -u projectmemo git checkout <verified-commit>
+APP=/opt/projectmemo/app
+TARGET='' # 填入本次已验证并推送的完整 40 位 commit
+[[ "$TARGET" =~ ^[0-9a-f]{40}$ ]] || { echo '请先填写 TARGET'; exit 1; }
+UPDATE_SCRIPT=$(mktemp /tmp/projectmemo-safe-update.XXXXXX.sh)
+trap 'rm -f "$UPDATE_SCRIPT"' EXIT
 
-# 2. 生成客户端 + 构建
-sudo -u projectmemo npx prisma generate
-sudo -u projectmemo npm run build
+sudo -H -u projectmemo git -C "$APP" fetch origin codex/r3-runtime-research
 
-# 3. 迁移：显式指向生产库，先停服务避免写锁竞争
-sudo systemctl stop projectmemo
-sudo -u projectmemo sh -c 'cd /opt/projectmemo/app && DATABASE_URL="file:/opt/projectmemo/data/projectmemo.db" npx prisma migrate deploy'
+sudo -H -u projectmemo git -C "$APP" show \
+  "$TARGET:deploy/alibaba-cloud-linux/safe-update.sh" > "$UPDATE_SCRIPT"
 
-# 4. 环境变量（R2 开关与 PROJECTMEMO_RELEASE）
-sudo -e /etc/projectmemo/projectmemo.env
-
-# 5. 起服务并核对版本指纹
-sudo systemctl start projectmemo
-curl -s http://127.0.0.1:4400/health ; echo
+test -s "$UPDATE_SCRIPT"
+bash "$UPDATE_SCRIPT" "$TARGET"
+UPDATE
 ```
+
+脚本先检查版本祖先关系、工作区、服务与内存，再停止 Web 和 Worker 并备份。随后切换目标提交、安装依赖、验证 SQLite 原生模块、生成 Prisma Client，执行 `next typegen` 和独立 `tsc --noEmit`，再用单 worker 构建到独立目录。构建通过后才对 `file:/opt/projectmemo/data/projectmemo.db` 执行增量迁移与完整性检查，切换构建、设置 `PROJECTMEMO_RELEASE`、启动 Web 并核对健康版本，最后启动 Worker。
+
+默认构建堆上限为 1536 MiB。停服前要求 `MemAvailable + SwapFree` 至少为上限加 1024 MiB，停服后按实际内存收紧；独立类型检查所需下限为 1280 MiB，低内存时要求至少 3 GiB 空闲 swap 兜底。脚本不会自动增加 swap。需要调整上限时，在 `bash "$UPDATE_SCRIPT" "$TARGET"` 前加 `PROJECTMEMO_BUILD_HEAP_MB=3072`，先核对 `free -h`。
+
+备份位于 `/opt/projectmemo/backups/web-update-<UTC时间>/`：环境文件、前一提交、数据库与附件备份，以及被替换的依赖、Prisma Client 和构建。停服后失败会尝试恢复旧代码、依赖、构建和环境，保留数据库已执行的增量迁移；查看脚本最后输出确认恢复是否成功。不要用 `db:setup`、seed 或 reset 修复生产库。
+
+如果已经是目标提交，脚本只校验健康版本后退出，**不会重新构建、迁移或补写功能开关**。目标版本成功后仍需完成下面的环境与功能检查。
+
+3. 核对发布结果和功能。
+
+```bash
+systemctl is-active projectmemo projectmemo-mission-worker
+curl -fsS --max-time 10 http://127.0.0.1:4400/health
+```
+
+两个服务都应输出 `active`，`health.release` 应等于本次 `TARGET`。从公网检查 `/login` 可用、未登录业务 API 返回 401、`/api/settings` 返回 404，并用自己的账号登录验证业务。
+
+## 环境开关与 Focus 验收
+
+代码更新和功能启用是两个步骤。`safe-update.sh` 保留服务器环境配置，只更新发布指纹；它不会把仓库 `.env.example` 合并到 `/etc/projectmemo/projectmemo.env`。systemd 的环境文件只对服务进程生效，开发机 `.env` 和仅在终端 `export` 的值不改变线上服务。
+
+| 配置 | 用途 |
+|---|---|
+| `FOCUS_AGENT_ENABLED=true` | 启用 `/focus` 全局对话和项目内关联会话入口 |
+| `FOCUS_AGENT_FOLLOW_ENABLED=true` | 启用 F3 显式关注、延后、停止和原会话结果回流；需同时开启上一项 |
+| `GOAL_CHANGE_REVIEW_ENABLED=true` | 启用原委托内D1资料变化复核与D2有界方案；先执行本轮迁移，再启用 |
+| `FOCUS_AGENT_R4_ENABLED=true` | 启用云端动态调查、目标差距与 Web 语义回答；与 Focus 同时开启 |
+| `MISSION_ENABLED=true`、`MISSION_UI_ENABLED=true` | 原长期委托及其页面入口；沿用服务器原配置，协作验收时核对 |
+
+Focus、关注、变化复核和 R4 调查四个开关默认均为 `false`，部署新代码后仍可能看到旧焦点页。按 [Focus 更新说明](FOCUS_UPDATE.md) 执行带备份的环境修改、重启和检查；已部署到目标版本时只执行该配置步骤即可。
+
+`/health` 只证明服务状态与版本，不返回 Focus 开关。登录后访问 `/api/conversations/capabilities`，核对 `enabled`、`followAvailable`、`changeReviewAvailable`、`r4Available` 四项。F3 的“关注”需要先从已有提醒、问题或影响打开关联讨论，再由用户明确开启；普通空白聊天不会自动关注。
+
+ECS 更新覆盖 Web 与共享后端。鸿蒙新界面需要重新构建并安装 HAP；评审包连接 HTTPS ECS，开发包可能连接 `http://10.0.2.2:4400`。按 `Constants.ets` 核对实际构建模式与地址。
 
 R2 相关开关见 `projectmemo.env.example`：`PROJECT_EPISODES_ENABLED`、`PROJECT_SCHEDULING_ENABLED`、
 `PROJECT_REENTRY_ENABLED` 随发布启用。待办卡片的“日历提醒”依赖
@@ -113,7 +124,7 @@ TOKEN=$(curl -s -X POST http://127.0.0.1:4400/api/auth/login \
   -d '{"username":"<账号>","password":"<密码>"}' \
   | sed -n 's/.*"accessToken":"\([^"]*\)".*/\1/p')
 curl -s -H "Authorization: Bearer $TOKEN" http://127.0.0.1:4400/api/projects ; echo
-PROJECT_ID=<上一步返回的项目 id>
+PROJECT_ID='<上一步返回的项目 id>'
 curl -s -H "Authorization: Bearer $TOKEN" http://127.0.0.1:4400/api/projects/$PROJECT_ID/reentry ; echo
 curl -s -H "Authorization: Bearer $TOKEN" http://127.0.0.1:4400/api/projects/$PROJECT_ID/episodes ; echo
 curl -s -H "Authorization: Bearer $TOKEN" http://127.0.0.1:4400/api/projects/$PROJECT_ID/schedule/current ; echo
@@ -133,7 +144,7 @@ curl -s http://127.0.0.1:4400/health      # 期望返回 release 指纹
 ```
 
 `/health` 返回的 `release` 应当等于 `PROJECTMEMO_RELEASE`。它是判断"当前跑的是哪一版"
-的唯一依据，部署后先看它再看业务接口。
+的发布指纹，部署后先看它再验证功能开关和业务接口。
 
 真正验证开机自启需要一次重启（会短暂中断服务，请在非演示时段执行）：
 
@@ -191,7 +202,7 @@ CRON
 ```bash
 sudo -u projectmemo APP_DIR=/opt/projectmemo/app \
   bash /opt/projectmemo/app/deploy/alibaba-cloud-linux/restore-to-copy.sh \
-  /opt/projectmemo/backups/<时间戳>
+  '/opt/projectmemo/backups/<时间戳>'
 ```
 
 脚本会先对备份做 `integrity_check`，再还原副本，并打印用副本起验证实例的命令。
@@ -203,7 +214,7 @@ sudo -u projectmemo APP_DIR=/opt/projectmemo/app \
 ```bash
 sudo -u projectmemo APP_DIR=/opt/projectmemo/app \
   bash /opt/projectmemo/app/deploy/alibaba-cloud-linux/restore-to-copy.sh \
-  /opt/projectmemo/backups/<时间戳> --in-place --confirm
+  '/opt/projectmemo/backups/<时间戳>' --in-place --confirm
 sudo systemctl restart projectmemo
 ```
 
@@ -211,6 +222,9 @@ sudo systemctl restart projectmemo
 
 | 现象 | 先看什么 | 处理 |
 |---|---|---|
+| 新版代码已部署但仍是旧焦点页 | `/health.release`、登录后的 `/api/conversations/capabilities` | 按 [Focus 更新说明](FOCUS_UPDATE.md) 核对四个开关并重启，然后强制刷新 `/focus` |
+| 没有“关注”按钮 | `followAvailable`、当前会话是否有关联提醒/问题/影响 | 核对 F3 开关，从已有提醒进入关联讨论；不向无来源的聊天自动添加关注 |
+| 鸿蒙仍是旧界面 | 已安装 HAP 版本、`Constants.ets` 构建模式与后端地址 | 安装新版 HAP，核对其连接的是 ECS 还是本机后端 |
 | 站点 502 | `systemctl status projectmemo`、`journalctl -u projectmemo -n 100` | 起服务；若因环境文件错误反复退出，先修 `projectmemo.env` |
 | 服务反复重启 | `systemctl show projectmemo -p NRestarts` | 多为 `DATABASE_URL` 指向不存在目录或迁移未执行 |
 | 登录全部 401 | `/health` 与 `npx prisma migrate deploy` | 会话表缺失或迁移未跑 |

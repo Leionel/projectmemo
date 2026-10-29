@@ -61,15 +61,15 @@ export struct ProjectChangeBrief {
         .margin({ top: 2 })
 
       if (sentence.evidence.length > 0) {
-        Row({ space: PMSpacing.XS }) {
-          ForEach(sentence.evidence.slice(0, 3), (ref: BriefEvidence) => {
+        Flex({ wrap: FlexWrap.Wrap }) {
+          ForEach(sentence.evidence, (ref: BriefEvidence) => {
             Row() {
               PaperclipIcon({ iconSize: 12, color: PMColors.BRAND })
               Text(` ${ref.entityKind === 'card' ? '记忆' : ref.entityKind === 'action' ? '行动' : ref.entityKind === 'deliverable' ? '交付物' : ref.entityKind} · ${ref.field !== '' ? ref.field : '版本证据'}`)
                 .fontSize(PMFontSize.CAPTION)
                 .fontColor(PMColors.BRAND)
             }
-            .padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 3, bottom: 3 })
+            .margin({ right: 6, bottom: 6 }).constraintSize({ minHeight: 44 }).padding({ left: PMSpacing.SM, right: PMSpacing.SM, top: 6, bottom: 6 })
             .backgroundColor(PMColors.BRAND_LIGHT)
             .borderRadius(PMRadius.XS)
             .clickEffect(PMInteraction.PRESS_EFFECT)
@@ -78,11 +78,7 @@ export struct ProjectChangeBrief {
             })
             .accessibilityText(`打开${ref.entityKind}类证据，观察时间${ref.observedAt}`)
           }, (ref: BriefEvidence) => ref.entityId)
-          if (sentence.evidence.length > 3) {
-            Text(`+${sentence.evidence.length - 3}`)
-              .fontSize(PMFontSize.CAPTION)
-              .fontColor(PMColors.INK_TERTIARY)
-          }
+
         }
         .margin({ top: 4 })
       }
@@ -111,7 +107,7 @@ export struct ProjectChangeBrief {
             .fontSize(PMFontSize.TITLE)
             .fontWeight(FontWeight.Bold)
             .fontColor(PMColors.INK_PRIMARY)
-          Button('✕')
+          Button('✕').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
             .fontSize(PMFontSize.BODY)
             .fontColor(PMColors.INK_TERTIARY)
             .backgroundColor('transparent')
@@ -148,7 +144,7 @@ export struct ProjectChangeBrief {
         .scrollable(ScrollDirection.Vertical)
         .layoutWeight(1)
 
-        Button('去处理待办')
+        Button('去处理待办').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
           .height(44)
           .fontSize(PMFontSize.BUTTON)
           .fontColor(PMColors.SURFACE)

@@ -1,0 +1,37 @@
+{
+  "at": "2026-10-24T10:58:25.903Z",
+  "request": {
+    "method": "POST",
+    "path": "/api/projects/cmvmabwy10003svrawzrfth86/actions",
+    "body": {
+      "title": "复核仓库信号采纳演示行动",
+      "isSimulated": false
+    },
+    "authorized": true
+  },
+  "status": 201,
+  "body": {
+    "action": {
+      "id": "cmvmacocy0012svra17vkkl97",
+      "projectId": "cmvmabwy10003svrawzrfth86",
+      "sourceInterventionId": null,
+      "sourceCardId": null,
+      "dedupeKey": null,
+      "resultCardId": null,
+      "title": "复核仓库信号采纳演示行动",
+      "description": null,
+      "priority": 3,
+      "status": "TODO",
+      "estimatedMinutes": null,
+      "dependencyVersion": 1,
+      "dueAt": null,
+      "resultText": null,
+      "isSimulated": false,
+      "completedAt": null,
+      "createdAt": "2026-10-24T10:58:26.002Z",
+      "updatedAt": "2026-10-24T10:58:26.002Z",
+      "stateRefreshPending": false
+    },
+    "reused": false
+  }
+}

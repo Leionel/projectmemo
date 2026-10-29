@@ -1,0 +1,41 @@
+
+Running 3 tests using 1 worker
+
+(node:30064) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [setup] › e2e\auth.setup.ts:8:1 › authenticate as the E2E reviewer (334ms)
+(node:37244) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 2 [chromium] › e2e\focus-agent.spec.ts:2:1 › Focus discussion creates a real Action, reads it back, and survives project navigation (3.6s)
+  x  3 [chromium] › e2e\focus-agent.spec.ts:53:1 › Focus compares frozen options and resumes the same original Mission inside the conversation (165ms)
+
+
+  1) [chromium] › e2e\focus-agent.spec.ts:53:1 › Focus compares frozen options and resumes the same original Mission inside the conversation 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      59 |   expect(created.ok()).toBe(true); const project = (await created.json()).project;
+      60 |   const mr = await page.request.post("/api/missions", { headers, data: { projectId: project.id, requestId: "create", goal: "核对部署证据" } });
+    > 61 |   expect(mr.ok()).toBe(true); const mission = (await mr.json()).mission;
+         |                   ^
+      62 |   expect((await page.request.post("/api/missions/" + mission.id + "/pause", { headers, data: { requestId: "pause", expectedVersion: mission.version } })).ok()).toBe(true);
+      63 |   const cr = await page.request.post("/api/conversations", { headers, data: { requestId: crypto.randomUUID(), scope: "PROJECT", projectId: project.id } });
+      64 |   expect(cr.ok()).toBe(true); const id = (await cr.json()).id;
+        at D:\Projects\hongmen\e2e\focus-agent.spec.ts:61:19
+
+    Error Context: test-results\focus-agent-Focus-compares-be3b3-ion-inside-the-conversation-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\focus-agent-Focus-compares-be3b3-ion-inside-the-conversation-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\focus-agent-Focus-compares-be3b3-ion-inside-the-conversation-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › e2e\focus-agent.spec.ts:53:1 › Focus compares frozen options and resumes the same original Mission inside the conversation 
+  2 passed (5.9s)

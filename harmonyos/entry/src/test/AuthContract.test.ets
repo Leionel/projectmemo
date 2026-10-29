@@ -8,9 +8,36 @@ import {
 } from '../main/ets/common/ApiContract';
 import { SessionStore } from '../main/ets/services/SessionStore';
 import { UserInfo } from '../main/ets/models/Auth';
+import { buildRegisterInput, registrationError, accountEmailError } from '../main/ets/common/AccountContract';
 
 export default function authContractTest() {
   describe('authContract', () => {
+
+    it('registration_normalizes_account_but_preserves_password', 0, () => {
+      const body = buildRegisterInput('  My-Account  ', ' User@Example.com ', ' long password ', ' long password ');
+      expect(body.username).assertEqual('my-account');
+      expect(body.email).assertEqual('user@example.com');
+      expect(body.password).assertEqual(' long password ');
+      expect(registrationError(body)).assertEqual('');
+    });
+
+    it('registration_rejects_mismatch_and_short_password', 0, () => {
+      expect(registrationError(buildRegisterInput('my-account', 'a@example.com', 'short', 'short')) !== '').assertTrue();
+      expect(registrationError(buildRegisterInput('my-account', 'a@example.com', 'long-password', 'other-password'))).assertEqual('两次输入的密码不一致');
+    });
+
+    it('registration_rejects_invalid_email_and_account', 0, () => {
+      expect(accountEmailError('invalid-email') !== '').assertTrue();
+      expect(registrationError(buildRegisterInput('invalid/account', 'a@example.com', 'long-password', 'long-password')) !== '').assertTrue();
+    });
+
+    it('email_verification_and_mail_configuration_errors_retain_server_reason', 0, () => {
+      const pending = parseApiError('{"error":{"code":"EMAIL_NOT_VERIFIED","message":"请先验证注册邮箱"}}', 403);
+      expect(pending.code).assertEqual('EMAIL_NOT_VERIFIED');
+      expect(pending.message).assertEqual('请先验证注册邮箱');
+      const disabled = parseApiError('{"error":{"code":"ACCOUNT_MAIL_UNAVAILABLE","message":"账号邮件服务尚未配置"}}', 503);
+      expect(disabled.code).assertEqual('ACCOUNT_MAIL_UNAVAILABLE');
+    });
 
     // --- 1. 登录请求体契约 ---
     it('login_body_creation', 0, () => {

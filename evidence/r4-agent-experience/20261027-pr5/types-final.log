@@ -1,0 +1,24 @@
+error TS6053: File 'D:/Projects/hongmen/lib/generated/prisma/models/AgentExperience.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'D:/Projects/hongmen/tsconfig.json'
+error TS6053: File 'D:/Projects/hongmen/lib/generated/prisma/models/AgentExperienceUse.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'D:/Projects/hongmen/tsconfig.json'
+error TS6053: File 'D:/Projects/hongmen/lib/generated/prisma/models/DecisionReviewRequest.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'D:/Projects/hongmen/tsconfig.json'
+error TS6053: File 'D:/Projects/hongmen/lib/generated/prisma/models/DecisionScenarioProposal.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'D:/Projects/hongmen/tsconfig.json'
+error TS6053: File 'D:/Projects/hongmen/lib/generated/prisma/models/ExternalSignal.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'D:/Projects/hongmen/tsconfig.json'
+error TS6053: File 'D:/Projects/hongmen/lib/generated/prisma/models/GoalQuestionPreference.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'D:/Projects/hongmen/tsconfig.json'
+error TS6053: File 'D:/Projects/hongmen/lib/generated/prisma/models/RepoSignalCommand.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'D:/Projects/hongmen/tsconfig.json'
+error TS6053: File 'D:/Projects/hongmen/lib/generated/prisma/models/SourceConnection.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'D:/Projects/hongmen/tsconfig.json'

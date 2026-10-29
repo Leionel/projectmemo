@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/focusConversation.test.ts tests/copilotPersistence.test.ts tests/copilotContinuation.test.ts tests/missionRuntime.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  4 passed (4)
+      Tests  75 passed (75)
+   Start at  08:43:40
+   Duration  24.12s (transform 1.05s, setup 0ms, import 6.56s, tests 16.80s, environment 0ms)
+

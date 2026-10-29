@@ -1,7 +1,7 @@
 "use client";
 import {projectHref} from "@/lib/projectNavigation";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, BookmarkCheck, CalendarClock, LoaderCircle, TriangleAlert } from "lucide-react";
 import { subscribeWorkspaceChange } from "@/lib/client/workspaceEvents";
 import type { ReentryData, ReentryPrimaryAction } from "@/lib/types/reentry";
@@ -41,22 +41,28 @@ function formatTime(value: string | null) {
  * 这里只做汇总，不另存一份项目事实；每个分区都带自己的状态，
  * 局部失败时如实标注并保留其余部分，不伪造一个空项目。
  */
-export function ReentryBrief({ projectId, enabled, episodesEnabled, stateEnabled, schedulingEnabled }: { projectId: string; enabled: boolean; episodesEnabled: boolean; stateEnabled: boolean; schedulingEnabled: boolean }) {
+export function ReentryBrief({ projectId, enabled, episodesEnabled, stateEnabled, schedulingEnabled, showPrimary=true }: { projectId: string; enabled: boolean; episodesEnabled: boolean; stateEnabled: boolean; schedulingEnabled: boolean; showPrimary?: boolean }) {
+  const generation=useRef(0);
+  const invalidate=useCallback(()=>{generation.current++;},[]);
   const [data, setData] = useState<ReentryData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
+    const request=++generation.current;
     try {
-      const response = await fetch(`/api/projects/${projectId}/reentry`);
+      const response = await fetch(`/api/projects/${projectId}/reentry`,{cache:"no-store",signal:AbortSignal.timeout(10000)});
       const payload = await response.json().catch(() => null);
+      if(request!==generation.current)return;
       if (!response.ok) throw new Error(payload?.error?.message ?? "读取再入场摘要失败");
       setData(payload as ReentryData);
       setError("");
     } catch (caught) {
+      if(request!==generation.current)return;
+      setData(null);
       setError(caught instanceof Error ? caught.message : "读取再入场摘要失败");
     } finally {
-      setLoading(false);
+      if(request===generation.current)setLoading(false);
     }
   }, [projectId]);
 
@@ -64,7 +70,8 @@ export function ReentryBrief({ projectId, enabled, episodesEnabled, stateEnabled
     // 挂载后异步拉取；setState 均发生在 await 之后
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (enabled) void load();
-  }, [enabled, load]);
+    return invalidate;
+  }, [enabled, load,invalidate]);
 
   // 这份摘要聚合了检查点、状态与安排：任一写入后都要重新拉取，否则会继续展示旧结论
   useEffect(() => {
@@ -78,7 +85,7 @@ export function ReentryBrief({ projectId, enabled, episodesEnabled, stateEnabled
 
   if (!enabled) return null;
 
-  if (loading) {
+  if (loading || (data!==null&&data.projectId!==projectId)) {
     return <section id="reentry-brief" aria-label="回到项目" className="card-surface scroll-mt-24 rounded-lg p-5 sm:p-6">
       <p className="flex items-center gap-2 text-sm text-[var(--ink-soft)]"><LoaderCircle size={15} className="animate-spin" />正在汇总上次做到哪…</p>
     </section>;
@@ -114,72 +121,72 @@ export function ReentryBrief({ projectId, enabled, episodesEnabled, stateEnabled
   return <section id="reentry-brief" aria-labelledby="reentry-title" className="card-surface scroll-mt-24 rounded-lg p-5 sm:p-6">
     <div className="flex flex-wrap items-end justify-between gap-3 border-b archive-rule pb-4">
       <div className="min-w-0">
-        <p className="archive-label">60 秒回到项目</p>
-        <h2 id="reentry-title" className="mt-2 text-lg font-black">{data.primaryMessage}</h2>
+        <p className="archive-label">回到项目</p>
+        <h2 id="reentry-title" className="mt-2 text-lg font-black">{showPrimary?(data.agentContext?.nextStep.reason??data.primaryMessage):"阶段记录与安排"}</h2>
         <p className="mt-1 text-xs text-[var(--muted)]">汇总于 {formatTime(data.generatedAt)} · 与鸿蒙客户端、桌面卡片读取同一份结果</p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <span className={"rounded px-2.5 py-1 text-[11px] font-bold " + freshness.className}>{freshness.label}</span>
-        <a href={projectHref(projectId,target.href)} className="focus-ring editorial-button text-xs">{target.label}<ArrowRight size={14} /></a>
+        <span className={"rounded px-2.5 py-1 text-xs font-bold " + freshness.className}>{freshness.label}</span>
+        {showPrimary&&<a href={data.agentContext?.nextStep.href??projectHref(projectId,target.href)} className="focus-ring editorial-button text-xs">{data.agentContext?.nextStep.actionLabel??target.label}<ArrowRight size={14} /></a>}
       </div>
     </div>
 
     <div className="mt-4 grid gap-3 lg:grid-cols-3">
       <div className="rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3">
         <div className="flex items-center justify-between gap-1.5">
-          <p className="flex items-center gap-1.5 text-[11px] font-black text-[var(--navy)]"><BookmarkCheck size={13} className="text-[var(--teal-strong)]" />阶段检查点与结论</p>
-          {data.episode.isHistorical && <span className="rounded px-1.5 py-0.2 text-[10px] font-bold bg-[var(--amber)]/15 text-[var(--amber)]">历史参考</span>}
+          <p className="flex items-center gap-1.5 text-xs font-black text-[var(--navy)]"><BookmarkCheck size={13} className="text-[var(--teal-strong)]" />阶段检查点与结论</p>
+          {data.episode.isHistorical && <span className="rounded px-1.5 py-0.2 text-[11px] font-bold bg-[var(--amber)]/15 text-[var(--amber)]">历史参考</span>}
         </div>
         {data.episode.revision === null
           ? <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">{episodesEnabled ? "还没有已确认的检查点。整理一版后，这里会显示结论与之后的变化。" : "当前部署未开启阶段检查点。"}</p>
           : <>
             <p className="mt-1.5 text-xs font-bold text-[var(--navy)]">V{data.episode.revision} · {data.episode.title}</p>
-            {data.episode.keyConclusion && <p className="mt-1 rounded-md bg-[var(--paper-strong)] p-1.5 text-[11px] font-semibold leading-5 text-[var(--ink-soft)]"><span className="text-[var(--navy)] font-bold">{data.episode.isHistorical ? "历史结论：" : "当前结论："}</span>{data.episode.keyConclusion}</p>}
-            <p className="mt-0.5 text-[11px] text-[var(--muted)]">确认于 {formatTime(data.episode.confirmedAt)} · 冻结来源 {data.episode.sourceCount} 个</p>
+            {data.episode.keyConclusion && <p className="mt-1 rounded-md bg-[var(--paper-strong)] p-1.5 text-xs font-semibold leading-5 text-[var(--ink-soft)]"><span className="text-[var(--navy)] font-bold">{data.episode.isHistorical ? "历史结论：" : "当前结论："}</span>{data.episode.keyConclusion}</p>}
+            <p className="mt-0.5 text-xs text-[var(--muted)]">确认于 {formatTime(data.episode.confirmedAt)} · 冻结来源 {data.episode.sourceCount} 个</p>
             {data.episode.changesSince.length > 0
               ? <div className="mt-1.5">
-                  <p className="text-[10px] font-bold text-[var(--muted)]">检查点之后的变化：</p>
-                  <ul className="mt-0.5 space-y-1">{data.episode.changesSince.map((change) => <li key={change} className="text-[11px] leading-5 text-[var(--ink-soft)]">· {change}</li>)}</ul>
+                  <p className="text-[11px] font-bold text-[var(--muted)]">检查点之后的变化：</p>
+                  <ul className="mt-0.5 space-y-1">{data.episode.changesSince.map((change) => <li key={change} className="text-xs leading-5 text-[var(--ink-soft)]">· {change}</li>)}</ul>
                 </div>
-              : <p className="mt-1.5 text-[11px] leading-5 text-[var(--muted)]">检查点之后暂无已确认变化。</p>}
+              : <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">检查点之后暂无已确认变化。</p>}
           </>}
-        {data.episode.meta.status !== "OK" && data.episode.meta.message && <p className="mt-1.5 text-[11px] font-semibold text-[var(--amber)]">{data.episode.meta.message}</p>}
-        {episodesEnabled && <a href={projectHref(projectId,"#episode-checkpoint")} className="focus-ring mt-2 inline-block text-[11px] font-black text-[var(--teal-strong)] underline underline-offset-2">打开阶段检查点 →</a>}
+        {data.episode.meta.status !== "OK" && data.episode.meta.message && <p className="mt-1.5 text-xs font-semibold text-[var(--amber)]">{data.episode.meta.message}</p>}
+        {episodesEnabled && <a href={projectHref(projectId,"#episode-checkpoint")} className="focus-ring mt-2 inline-block text-xs font-black text-[var(--teal-strong)] underline underline-offset-2">打开阶段检查点 →</a>}
       </div>
 
       <div className="rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3">
-        <p className="flex items-center gap-1.5 text-[11px] font-black text-[var(--navy)]"><TriangleAlert size={13} className="text-[var(--brick)]" />最急需处理项</p>
+        <p className="flex items-center gap-1.5 text-xs font-black text-[var(--navy)]"><TriangleAlert size={13} className="text-[var(--brick)]" />最急需处理项</p>
         {data.risk.text
           ? <div className="mt-1.5">
             <div className="flex items-center gap-1.5">
-              {data.risk.kind === "BLOCKED" && <span className="rounded bg-[var(--brick-pale)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--brick)]">待办受阻</span>}
-              {data.risk.kind === "UNKNOWN" && <span className="rounded bg-[var(--paper-strong)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--ink-soft)]">信息不足</span>}
-              {data.risk.kind === "RISK" && data.risk.severity && <span className={"rounded px-1.5 py-0.5 text-[10px] font-bold " + (data.risk.severity === "HIGH" ? "bg-[var(--brick-pale)] text-[var(--brick)]" : data.risk.severity === "MEDIUM" ? "bg-[var(--amber)]/15 text-[var(--amber)]" : "bg-[var(--paper-strong)] text-[var(--muted)]")}>{data.risk.severity === "HIGH" ? "高风险" : data.risk.severity === "MEDIUM" ? "中风险" : "低风险"}</span>}
+              {data.risk.kind === "BLOCKED" && <span className="rounded bg-[var(--brick-pale)] px-1.5 py-0.5 text-[11px] font-bold text-[var(--brick)]">待办受阻</span>}
+              {data.risk.kind === "UNKNOWN" && <span className="rounded bg-[var(--paper-strong)] px-1.5 py-0.5 text-[11px] font-bold text-[var(--ink-soft)]">信息不足</span>}
+              {data.risk.kind === "RISK" && data.risk.severity && <span className={"rounded px-1.5 py-0.5 text-[11px] font-bold " + (data.risk.severity === "HIGH" ? "bg-[var(--brick-pale)] text-[var(--brick)]" : data.risk.severity === "MEDIUM" ? "bg-[var(--amber)]/15 text-[var(--amber)]" : "bg-[var(--paper-strong)] text-[var(--muted)]")}>{data.risk.severity === "HIGH" ? "高风险" : data.risk.severity === "MEDIUM" ? "中风险" : "低风险"}</span>}
             </div>
             <p className="mt-1 text-xs leading-5 text-[var(--ink-soft)]">{data.risk.text}</p>
-            {data.risk.kind === "BLOCKED" && <p className="mt-1 text-[10px] text-[var(--brick)] font-semibold">前置依赖尚未满足，需先补全依赖或创建解阻行动</p>}
+            {data.risk.kind === "BLOCKED" && <p className="mt-1 text-[11px] text-[var(--brick)] font-semibold">前置依赖尚未满足，需先补全依赖或创建解阻行动</p>}
           </div>
           : <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">当前没有受阻项或已确认风险；信息不足的部分会保留为未知，不会被当成「没有风险」。</p>}
-        {data.risk.meta.status !== "OK" && data.risk.meta.message && <p className="mt-1.5 text-[11px] font-semibold text-[var(--amber)]">{data.risk.meta.message}</p>}
-        <a href={projectHref(projectId,data.risk.kind === "BLOCKED" ? "#action-board" : "#interventions")} className="focus-ring mt-2 inline-block text-[11px] font-black text-[var(--teal-strong)] underline underline-offset-2">{data.risk.kind === "BLOCKED" ? "前往处理受阻待办 →" : "查看提醒与依据 →"}</a>
+        {data.risk.meta.status !== "OK" && data.risk.meta.message && <p className="mt-1.5 text-xs font-semibold text-[var(--amber)]">{data.risk.meta.message}</p>}
+        <a href={projectHref(projectId,data.risk.kind === "BLOCKED" ? "#action-board" : "#interventions")} className="focus-ring mt-2 inline-block text-xs font-black text-[var(--teal-strong)] underline underline-offset-2">{data.risk.kind === "BLOCKED" ? "前往处理受阻待办 →" : "查看提醒与依据 →"}</a>
       </div>
 
       <div className="rounded-md border border-[var(--rule)] bg-[var(--card-bg)] p-3">
-        <p className="flex items-center gap-1.5 text-[11px] font-black text-[var(--navy)]"><CalendarClock size={13} className="text-[var(--teal-strong)]" />下一个安排</p>
+        <p className="flex items-center gap-1.5 text-xs font-black text-[var(--navy)]"><CalendarClock size={13} className="text-[var(--teal-strong)]" />下一个安排</p>
         {data.schedule.start
           ? <>
             <p className="mt-1.5 text-xs font-bold text-[var(--navy)]">{data.schedule.actionTitle ?? "已安排时段"}</p>
-            <p className="mt-0.5 text-[11px] text-[var(--muted)]">{formatTime(data.schedule.start)} – {formatTime(data.schedule.end)}</p>
-            <p className="mt-1 text-[11px] font-semibold leading-5 text-[var(--ink-soft)]">{calendarLabels[data.schedule.calendarStatus ?? "NONE"] ?? data.schedule.calendarStatus}</p>
+            <p className="mt-0.5 text-xs text-[var(--muted)]">{formatTime(data.schedule.start)} – {formatTime(data.schedule.end)}</p>
+            <p className="mt-1 text-xs font-semibold leading-5 text-[var(--ink-soft)]">{calendarLabels[data.schedule.calendarStatus ?? "NONE"] ?? data.schedule.calendarStatus}</p>
           </>
           : <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">还没有已确认的时间安排。</p>}
-        {data.schedule.meta.status !== "OK" && data.schedule.meta.message && <p className="mt-1.5 text-[11px] font-semibold text-[var(--amber)]">{data.schedule.meta.message}</p>}
-        {schedulingEnabled && <a href={projectHref(projectId,"#schedule-planner")} className="focus-ring mt-2 inline-block text-[11px] font-black text-[var(--teal-strong)] underline underline-offset-2">安排未来几天 →</a>}
+        {data.schedule.meta.status !== "OK" && data.schedule.meta.message && <p className="mt-1.5 text-xs font-semibold text-[var(--amber)]">{data.schedule.meta.message}</p>}
+        {schedulingEnabled && <a href={projectHref(projectId,"#schedule-planner")} className="focus-ring mt-2 inline-block text-xs font-black text-[var(--teal-strong)] underline underline-offset-2">安排未来几天 →</a>}
       </div>
     </div>
 
 
-    <p className="mt-3 text-[11px] leading-5 text-[var(--muted)]">
+    <p className="mt-3 text-xs leading-5 text-[var(--muted)]">
       浏览器不能写系统日历：这里显示的是忆程里的应用内安排与设备同步状态。要收到设备提醒，请在鸿蒙客户端的这条待办里完成日历写入。
     </p>
   </section>;

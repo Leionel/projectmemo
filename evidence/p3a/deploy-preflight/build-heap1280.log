@@ -1,0 +1,172 @@
+
+> projectmemo@0.1.0 build
+> next build --webpack
+
+▲ Next.js 16.2.11 (webpack)
+- Environments: .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 30.7s
+  Skipping validation of types
+
+  We detected TypeScript in your project and reconfigured your tsconfig.json file for you.
+  The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
+
+  	- include was updated to add '.next-p3a-probe/types/**/*.ts'
+  	- include was updated to add '.next-p3a-probe/dev/types/**/*.ts'
+
+  Finished TypeScript config validation in 26ms ...
+  Collecting page data using 1 worker ...
+  Generating static pages using 1 worker (0/33) ...
+  Generating static pages using 1 worker (8/33) 
+  Generating static pages using 1 worker (16/33) 
+  Generating static pages using 1 worker (24/33) 
+✓ Generating static pages using 1 worker (33/33) in 422ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /actions
+├ ƒ /api/auth/capabilities
+├ ƒ /api/auth/forgot-password
+├ ƒ /api/auth/login
+├ ƒ /api/auth/logout
+├ ƒ /api/auth/me
+├ ƒ /api/auth/register
+├ ƒ /api/auth/resend-verification
+├ ƒ /api/auth/reset-password
+├ ƒ /api/auth/verify-email
+├ ƒ /api/decision-scenarios/[id]
+├ ƒ /api/missions
+├ ƒ /api/missions/[id]
+├ ƒ /api/missions/[id]/approvals/[approvalId]
+├ ƒ /api/missions/[id]/cancel
+├ ƒ /api/missions/[id]/constraints
+├ ƒ /api/missions/[id]/continuation-policy
+├ ƒ /api/missions/[id]/continuations
+├ ƒ /api/missions/[id]/continuations/confirm
+├ ƒ /api/missions/[id]/continuations/preview
+├ ƒ /api/missions/[id]/decision-scenarios
+├ ƒ /api/missions/[id]/events
+├ ƒ /api/missions/[id]/goal-question-preference
+├ ƒ /api/missions/[id]/input
+├ ƒ /api/missions/[id]/outputs/[outputId]
+├ ƒ /api/missions/[id]/outputs/[outputId]/artifact-confirm
+├ ƒ /api/missions/[id]/outputs/[outputId]/artifact-preview
+├ ƒ /api/missions/[id]/pause
+├ ƒ /api/missions/[id]/readback
+├ ƒ /api/missions/[id]/replan
+├ ƒ /api/missions/[id]/research-scope
+├ ƒ /api/missions/[id]/resume
+├ ƒ /api/missions/[id]/sources
+├ ƒ /api/missions/[id]/sources/[sourceId]
+├ ƒ /api/missions/capabilities
+├ ƒ /api/missions/summary
+├ ƒ /api/projects
+├ ƒ /api/projects/[id]
+├ ƒ /api/projects/[id]/actions
+├ ƒ /api/projects/[id]/actions/[actionId]
+├ ƒ /api/projects/[id]/actions/[actionId]/reminder
+├ ƒ /api/projects/[id]/actions/feasibility
+├ ƒ /api/projects/[id]/agent-context
+├ ƒ /api/projects/[id]/agent/chat
+├ ƒ /api/projects/[id]/agent/continuation/confirm
+├ ƒ /api/projects/[id]/agent/continuation/preview
+├ ƒ /api/projects/[id]/agent/evaluate
+├ ƒ /api/projects/[id]/agent/runs
+├ ƒ /api/projects/[id]/agent/tools
+├ ƒ /api/projects/[id]/archive
+├ ƒ /api/projects/[id]/artifacts
+├ ƒ /api/projects/[id]/artifacts/[artifactId]/audit
+├ ƒ /api/projects/[id]/attachment-revisions/[revisionId]
+├ ƒ /api/projects/[id]/attachments
+├ ƒ /api/projects/[id]/attachments/[attachmentId]/correct
+├ ƒ /api/projects/[id]/attachments/[attachmentId]/file
+├ ƒ /api/projects/[id]/attachments/[attachmentId]/retry
+├ ƒ /api/projects/[id]/attachments/[attachmentId]/revisions
+├ ƒ /api/projects/[id]/captures
+├ ƒ /api/projects/[id]/cards/[cardId]
+├ ƒ /api/projects/[id]/cards/[cardId]/lifecycle
+├ ƒ /api/projects/[id]/cards/[cardId]/relations/propose
+├ ƒ /api/projects/[id]/cards/archived
+├ ƒ /api/projects/[id]/cards/search
+├ ƒ /api/projects/[id]/consolidation
+├ ƒ /api/projects/[id]/consolidation/[receiptId]/revoke
+├ ƒ /api/projects/[id]/consolidation/receipts
+├ ƒ /api/projects/[id]/decisions/confirm-change
+├ ƒ /api/projects/[id]/decisions/impact-preview
+├ ƒ /api/projects/[id]/decisions/timeline
+├ ƒ /api/projects/[id]/deliverables
+├ ƒ /api/projects/[id]/episodes
+├ ƒ /api/projects/[id]/episodes/[episodeId]
+├ ƒ /api/projects/[id]/episodes/[episodeId]/actions
+├ ƒ /api/projects/[id]/episodes/[episodeId]/confirm
+├ ƒ /api/projects/[id]/episodes/[episodeId]/refresh
+├ ƒ /api/projects/[id]/episodes/preview
+├ ƒ /api/projects/[id]/experiences
+├ ƒ /api/projects/[id]/experiences/[experienceId]
+├ ƒ /api/projects/[id]/goal-question
+├ ƒ /api/projects/[id]/health
+├ ƒ /api/projects/[id]/impact
+├ ƒ /api/projects/[id]/interventions
+├ ƒ /api/projects/[id]/interventions/[interventionId]
+├ ƒ /api/projects/[id]/interventions/[interventionId]/deliveries
+├ ƒ /api/projects/[id]/interventions/[interventionId]/feedback
+├ ƒ /api/projects/[id]/interventions/exposures
+├ ƒ /api/projects/[id]/interventions/policy
+├ ƒ /api/projects/[id]/interventions/policy/restore
+├ ƒ /api/projects/[id]/interventions/policy/suggestion
+├ ƒ /api/projects/[id]/meetings/confirm
+├ ƒ /api/projects/[id]/meetings/impact-preview
+├ ƒ /api/projects/[id]/metrics
+├ ƒ /api/projects/[id]/milestones
+├ ƒ /api/projects/[id]/milestones/deliverables/[deliverableId]/evidence
+├ ƒ /api/projects/[id]/reentry
+├ ƒ /api/projects/[id]/relations/[relationId]/confirm
+├ ƒ /api/projects/[id]/relations/[relationId]/revoke
+├ ƒ /api/projects/[id]/reminders
+├ ƒ /api/projects/[id]/reminders/[reminderId]/cleanup
+├ ƒ /api/projects/[id]/reminders/[reminderId]/revoke
+├ ƒ /api/projects/[id]/reminders/[reminderId]/sync
+├ ƒ /api/projects/[id]/restore
+├ ƒ /api/projects/[id]/schedule/[planId]/calendar
+├ ƒ /api/projects/[id]/schedule/[planId]/confirm
+├ ƒ /api/projects/[id]/schedule/current
+├ ƒ /api/projects/[id]/schedule/preview
+├ ƒ /api/projects/[id]/state
+├ ƒ /api/projects/[id]/state/brief
+├ ƒ /api/projects/[id]/state/check-in
+├ ƒ /api/projects/[id]/state/diff
+├ ƒ /api/projects/[id]/state/refresh
+├ ƒ /api/settings
+├ ƒ /api/settings/probe
+├ ƒ /api/workspace/focus
+├ ƒ /focus
+├ ○ /forgot-password
+├ ƒ /health
+├ ○ /icon.svg
+├ ○ /login
+├ ƒ /memory
+├ ƒ /projects
+├ ƒ /projects/[id]
+├ ƒ /projects/[id]/[section]
+├ ƒ /projects/[id]/generate
+├ ƒ /projects/new
+├ ○ /register
+├ ○ /resend-verification
+├ ○ /reset-password
+├ ○ /verify-email
+├ ƒ /xiaoyi/v1/actions
+├ ƒ /xiaoyi/v1/memories
+├ ƒ /xiaoyi/v1/memories/search
+├ ƒ /xiaoyi/v1/missions/inspect
+├ ƒ /xiaoyi/v1/missions/resume
+├ ƒ /xiaoyi/v1/projects/inspect
+└ ƒ /xiaoyi/v1/requests/begin
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

@@ -1,0 +1,433 @@
+{
+  "provenance": "REAL_MODEL_SYNTHETIC_DEVELOPMENT_RECHECK",
+  "results": [
+    {
+      "episode": "research/CAPTURE_ATTRIBUTION_RECHECK/2.0.2",
+      "status": "SUCCESS",
+      "prompt": {
+        "id": "capture.fidelity.v2",
+        "version": "2.0.2",
+        "purpose": "CAPTURE",
+        "outputSchemaVersion": 1
+      },
+      "schemaValid": true,
+      "content": "{\"type\":\"reflection\",\"title\":\"用户记录称猜测模型V3好像跑通，60ms尚未确认\",\"summary\":\"用户记录称其猜测模型V3好像跑通了；用户表示还没核对设备与线程，因此不能确认达到60ms。\",\"keywords\":[\"模型V3\",\"跑通\",\"60ms\",\"设备\",\"线程\"],\"relatedTasks\":[],\"nextActions\":[\"核对运行所用设备与线程配置\",\"在确认设备与线程后复测延迟，判断是否达到60ms\"],\"importance\":3}",
+      "usage": {
+        "inputTokens": 666,
+        "outputTokens": 110
+      }
+    },
+    {
+      "episode": "course/CAPTURE_ATTRIBUTION_RECHECK/2.0.2",
+      "status": "SUCCESS",
+      "prompt": {
+        "id": "capture.fidelity.v2",
+        "version": "2.0.2",
+        "purpose": "CAPTURE",
+        "outputSchemaVersion": 1
+      },
+      "schemaValid": true,
+      "content": "{\"type\":\"reflection\",\"title\":\"用户记录称有人评价A优于B，暂属猜测\",\"summary\":\"用户记录称有人说A比B好；用户表示尚未看到同一划分的原始输出，暂时只是猜测。\",\"keywords\":[\"A与B比较\",\"同一划分\",\"原始输出\",\"猜测\"],\"relatedTasks\":[],\"nextActions\":[\"获取A与B在同一划分下的原始输出后再比较\"],\"importance\":2}",
+      "usage": {
+        "inputTokens": 664,
+        "outputTokens": 90
+      }
+    }
+  ],
+  "ledger": {
+    "limit": 48,
+    "used": 44,
+    "calls": [
+      {
+        "ordinal": 1,
+        "episode": "research/capture/BASELINE",
+        "task": "BASELINE",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:10:36.020Z",
+        "httpStatus": 200,
+        "responseHash": "5efd5c0b4eb719bb3656e5d2b4bf798bc2b594309080e9a52ab5ae32d0fdef7d"
+      },
+      {
+        "ordinal": 2,
+        "episode": "research/capture/R4",
+        "task": "capture.fidelity.v2",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:10:38.861Z",
+        "httpStatus": 200,
+        "responseHash": "43ba6be3bf0f753ffd9880467f84d756958bfd49bf64ebc1995dc22527684519"
+      },
+      {
+        "ordinal": 3,
+        "episode": "research/artifact/BASELINE",
+        "task": "BASELINE",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:10:40.767Z",
+        "httpStatus": 200,
+        "responseHash": "80a38b87fe97dcb2a640a14b7be9a96caa4700d294c24ddbd3911f94c375b101"
+      },
+      {
+        "ordinal": 4,
+        "episode": "research/artifact/R4",
+        "task": "artifact.coverage.v2",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:10:44.127Z",
+        "httpStatus": 200,
+        "responseHash": "8455dfc243869279b8302ff104a187160090475526c2cb2420ee86115286f8bc"
+      },
+      {
+        "ordinal": 5,
+        "episode": "research/copilot/BASELINE",
+        "task": "BASELINE",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:10:47.421Z",
+        "httpStatus": 200,
+        "responseHash": "ba35f53b5e2d1c2ff9a84c5341b6a67d1f168c7b5e2cc32c4c062cd0ba93e294"
+      },
+      {
+        "ordinal": 6,
+        "episode": "research/copilot/R4",
+        "task": "legacy_copilot.style.v2",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:10:49.871Z",
+        "httpStatus": 200,
+        "responseHash": "0985f20dce4933ba0348b60b31edabb152afcf1b26429b8f27b9e9d21cb88585"
+      },
+      {
+        "ordinal": 7,
+        "episode": "research/d1/BASELINE",
+        "task": "BASELINE",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:10:52.697Z",
+        "httpStatus": 200,
+        "responseHash": "37502ca8de69a27ca60b7b8bbb2a8744ca25b5b9e58d2d607bae29226118ebcb"
+      },
+      {
+        "ordinal": 8,
+        "episode": "research/d1/R4",
+        "task": "decision.d1.v4",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:10:55.152Z",
+        "httpStatus": 200,
+        "responseHash": "3e5445352c0bc3f49b728c178672f8943fdfa44204be5d63c6fc47dda655d20e"
+      },
+      {
+        "ordinal": 9,
+        "episode": "research/d2/BASELINE",
+        "task": "BASELINE",
+        "state": "RESERVED",
+        "startedAt": "2026-10-27T16:10:57.442Z"
+      },
+      {
+        "ordinal": 10,
+        "episode": "research/d2/R4",
+        "task": "decision.d2.v3",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:10:59.750Z",
+        "httpStatus": 200,
+        "responseHash": "4b99468a96df88f5b4f9eccdf1be8ebb283637bea52623511a65a4b6e8a628a6"
+      },
+      {
+        "ordinal": 11,
+        "episode": "research/mission/BASELINE",
+        "task": "BASELINE",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:02.848Z",
+        "httpStatus": 200,
+        "responseHash": "877a49a31e6f560452feefdc3e63b4b04e069a9872286307a0a3185bbb556534"
+      },
+      {
+        "ordinal": 12,
+        "episode": "research/mission/R4",
+        "task": "mission.strategy.v2",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:03.822Z",
+        "httpStatus": 200,
+        "responseHash": "01a0d4a302c1c2142ec440ca141476ae553ddb53778edaf8c50cd14fb6bfa53c"
+      },
+      {
+        "ordinal": 13,
+        "episode": "research/ORIGINAL_RESULT_REASSESSMENT",
+        "task": "decision.d1.v4",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:04.892Z",
+        "httpStatus": 200,
+        "responseHash": "b03f05254b1e09bb404a5efca6787934d04b353eef5f8ace7dd9bf141bd5e536"
+      },
+      {
+        "ordinal": 14,
+        "episode": "competition/capture/BASELINE",
+        "task": "BASELINE",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:07.007Z",
+        "httpStatus": 200,
+        "responseHash": "25b1f95a03c0d84732323ae125aabaf487d072fed23bd416cbe1875ee4477d41"
+      },
+      {
+        "ordinal": 15,
+        "episode": "competition/capture/R4",
+        "task": "capture.fidelity.v2",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:08.935Z",
+        "httpStatus": 200,
+        "responseHash": "5afe7cb790984d052700a8b335b19a4221cd04af964809fbb220ac2395daed73"
+      },
+      {
+        "ordinal": 16,
+        "episode": "competition/artifact/BASELINE",
+        "task": "BASELINE",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:10.256Z",
+        "httpStatus": 200,
+        "responseHash": "5cd3449a028bcf32511215004868d489ac6b696bdf22e3cb71a4fa63b42f4631"
+      },
+      {
+        "ordinal": 17,
+        "episode": "competition/artifact/R4",
+        "task": "artifact.coverage.v2",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:12.859Z",
+        "httpStatus": 200,
+        "responseHash": "853a8fc64dfa292b1a0675bbda7ca62837f14f82fbbc9600e49ad90b2790b08a"
+      },
+      {
+        "ordinal": 18,
+        "episode": "competition/copilot/BASELINE",
+        "task": "BASELINE",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:16.098Z",
+        "httpStatus": 200,
+        "responseHash": "4b0f97149439e77ff2464a86277ea5c3749d984d0cd81f8784cc9ba542b1029a"
+      },
+      {
+        "ordinal": 19,
+        "episode": "competition/copilot/R4",
+        "task": "legacy_copilot.style.v2",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:18.224Z",
+        "httpStatus": 200,
+        "responseHash": "d763c78953c56b3078315f4320755848237ca331692e415328de58a0ef6033c3"
+      },
+      {
+        "ordinal": 20,
+        "episode": "competition/d1/BASELINE",
+        "task": "BASELINE",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:20.463Z",
+        "httpStatus": 200,
+        "responseHash": "10e520ff4073b7c618e2e5cc7c4e2bfa3396cc4782c3107ea172fbf9afd81d20"
+      },
+      {
+        "ordinal": 21,
+        "episode": "competition/d1/R4",
+        "task": "decision.d1.v4",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:22.302Z",
+        "httpStatus": 200,
+        "responseHash": "4b784dab161a70ef158ec7a986c0f822a54bda7855f02c6830b803072ff0c3eb"
+      },
+      {
+        "ordinal": 22,
+        "episode": "competition/d2/BASELINE",
+        "task": "BASELINE",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:24.466Z",
+        "httpStatus": 200,
+        "responseHash": "76b9e71bce87b6576e118672c79a9104686f1698c83b3f06c2e735086cbac1e2"
+      },
+      {
+        "ordinal": 23,
+        "episode": "competition/d2/R4",
+        "task": "decision.d2.v3",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:26.880Z",
+        "httpStatus": 200,
+        "responseHash": "47eef2dfbd7872b3bf848762a817fbacbbc15bf0c7069808e9be8d843e3f3e55"
+      },
+      {
+        "ordinal": 24,
+        "episode": "competition/mission/BASELINE",
+        "task": "BASELINE",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:30.355Z",
+        "httpStatus": 200,
+        "responseHash": "2b28f03810c6df6dfa121fee1b46f116f78d9ce486f22ebcd2c9dad2e356bd38"
+      },
+      {
+        "ordinal": 25,
+        "episode": "competition/mission/R4",
+        "task": "mission.strategy.v2",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:31.250Z",
+        "httpStatus": 200,
+        "responseHash": "7d06398914d108a682c08cab4e56d284bfae8922a5600f7f5178940f4c66ef3b"
+      },
+      {
+        "ordinal": 26,
+        "episode": "competition/ORIGINAL_RESULT_REASSESSMENT",
+        "task": "decision.d1.v4",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:32.303Z",
+        "httpStatus": 200,
+        "responseHash": "4d3d88a13b30b638324d83c83b2864eb110276846a56bf206da13f650260ec78"
+      },
+      {
+        "ordinal": 27,
+        "episode": "competition/ORIGINAL_RESULT_REASSESSMENT",
+        "task": "decision.d2.v3",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:34.326Z",
+        "httpStatus": 200,
+        "responseHash": "b5b7974deca02eed7ed2ff855c6a7f631d5b63f62d40f85d0e38c093dab7a48a"
+      },
+      {
+        "ordinal": 28,
+        "episode": "course/capture/BASELINE",
+        "task": "BASELINE",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:38.251Z",
+        "httpStatus": 200,
+        "responseHash": "8f6a3301edfa98030807d697eba9445b46464a2f0b73bf92cc55663695c24e9e"
+      },
+      {
+        "ordinal": 29,
+        "episode": "course/capture/R4",
+        "task": "capture.fidelity.v2",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:39.977Z",
+        "httpStatus": 200,
+        "responseHash": "73975110174fb2028528d9a63412b5fb50a7b198154d8bc33373b89d93018614"
+      },
+      {
+        "ordinal": 30,
+        "episode": "course/artifact/BASELINE",
+        "task": "BASELINE",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:41.823Z",
+        "httpStatus": 200,
+        "responseHash": "f0f8dd1870e1ce80a40a333363534f11fb17441ad5d207d85239f7c3b74d1d20"
+      },
+      {
+        "ordinal": 31,
+        "episode": "course/artifact/R4",
+        "task": "artifact.coverage.v2",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:44.469Z",
+        "httpStatus": 200,
+        "responseHash": "5b6cbce6a95c71c68caa3dfac855714adcefcbc389ba50a53c78b37b539b6863"
+      },
+      {
+        "ordinal": 32,
+        "episode": "course/copilot/BASELINE",
+        "task": "BASELINE",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:47.242Z",
+        "httpStatus": 200,
+        "responseHash": "15ae2bdd08980dff973efbaf8fccf5f5807d603e28b5d9591a12fd9c80104e7e"
+      },
+      {
+        "ordinal": 33,
+        "episode": "course/copilot/R4",
+        "task": "legacy_copilot.style.v2",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:49.618Z",
+        "httpStatus": 200,
+        "responseHash": "ad64b60d92ba16e1fe37192c82addf6352ed4ad51d52c106c9b0a173e22f6b10"
+      },
+      {
+        "ordinal": 34,
+        "episode": "course/d1/BASELINE",
+        "task": "BASELINE",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:52.122Z",
+        "httpStatus": 200,
+        "responseHash": "77a8c2b7e2de636f7a721e709883458d84cc44f17ae16b8fe604037d35f8974e"
+      },
+      {
+        "ordinal": 35,
+        "episode": "course/d1/R4",
+        "task": "decision.d1.v4",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:54.089Z",
+        "httpStatus": 200,
+        "responseHash": "30896198ee645ed15c8bea24a2764f2911e34a6b0535326d136e9f8efc7dd9ea"
+      },
+      {
+        "ordinal": 36,
+        "episode": "course/d2/BASELINE",
+        "task": "BASELINE",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:55.851Z",
+        "httpStatus": 200,
+        "responseHash": "06566e8dff8c60bb0d3a5518fcfa6ae5c7df4c8f684275328fcc07bb8b464a3f"
+      },
+      {
+        "ordinal": 37,
+        "episode": "course/d2/R4",
+        "task": "decision.d2.v3",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:11:58.377Z",
+        "httpStatus": 200,
+        "responseHash": "9a945533586ae628e4d7a3d908761ed552f9049460ff40a19f119c5780cf46ae"
+      },
+      {
+        "ordinal": 38,
+        "episode": "course/mission/BASELINE",
+        "task": "BASELINE",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:12:01.246Z",
+        "httpStatus": 200,
+        "responseHash": "16134fc01fb128b671fc6bda6dfa0de346ab5e38eaf3f05d003a7f9c5bee5549"
+      },
+      {
+        "ordinal": 39,
+        "episode": "course/mission/R4",
+        "task": "mission.strategy.v2",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:12:02.615Z",
+        "httpStatus": 200,
+        "responseHash": "71ad06d82bda5c5275f4e5a9b7170aa2c39e47300bb55948eab7526fddf28bbd"
+      },
+      {
+        "ordinal": 40,
+        "episode": "course/ORIGINAL_RESULT_REASSESSMENT",
+        "task": "decision.d1.v4",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:12:03.953Z",
+        "httpStatus": 200,
+        "responseHash": "70e845b3624498f78d038e64bc4f9cf7c279e25133c0405e88ef47cd93d3b146"
+      },
+      {
+        "ordinal": 41,
+        "episode": "research/CAPTURE_ATTRIBUTION_RECHECK",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:23:10.637Z",
+        "httpStatus": 200,
+        "responseHash": "68f8bb8bec0a5927f41ff2c8ffe3ce880922b265f3f673683ea41cbcb7ddae64"
+      },
+      {
+        "ordinal": 42,
+        "episode": "course/CAPTURE_ATTRIBUTION_RECHECK",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:23:12.301Z",
+        "httpStatus": 200,
+        "responseHash": "5009df997d422ead927e244597cf4a15b19369cfb740e0b3fa5ca45129b2f868"
+      },
+      {
+        "ordinal": 43,
+        "episode": "research/CAPTURE_ATTRIBUTION_RECHECK/2.0.2",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:25:00.356Z",
+        "httpStatus": 200,
+        "responseHash": "ac24ac09c32e1ab4c212be140b43c3c7aae9b1f871540feaa1fdd77f4be96160"
+      },
+      {
+        "ordinal": 44,
+        "episode": "course/CAPTURE_ATTRIBUTION_RECHECK/2.0.2",
+        "state": "HTTP_RECEIVED",
+        "startedAt": "2026-10-27T16:25:01.847Z",
+        "httpStatus": 200,
+        "responseHash": "42a2ec872ec9304e92b20a30569df59840a975f62238a3385cd2be780c8b85f8"
+      }
+    ]
+  }
+}

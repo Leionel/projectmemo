@@ -1,0 +1,70 @@
+{
+  "baseCommit": "88da1dd",
+  "scope": "PR4_ARKTS_NATIVE_RENDERER",
+  "commands": [
+    {
+      "command": "npm.cmd run harmony:test",
+      "exitCode": 0,
+      "tests": 86,
+      "failures": 0,
+      "log": "harmony-test-final.log"
+    },
+    {
+      "command": "npm.cmd run harmony:build",
+      "exitCode": 0,
+      "flavor": "review",
+      "log": "native-review-font-final.log"
+    },
+    {
+      "command": "npm.cmd run harmony:build + hdc install -r",
+      "exitCode": 0,
+      "flavor": "development",
+      "log": "native-font-local.log",
+      "installedSignedHapSHA256": "e7efe7af5e6a3e016b5c153e84b757837c00d4f118db64eb75ab3960201bc991"
+    }
+  ],
+  "reviewUnsignedHapSHA256": "471a4299f9cb001680b22ab1254210ccfc53da1706230cfce9ea48670c080f8b",
+  "emulator": {
+    "device": "127.0.0.1:5555",
+    "bundle": "xyz.luojiatutor.projectmemo",
+    "resolution": "1320x2856",
+    "backend": "local 4400, isolated synthetic DB copy, LLM_MODE=mock",
+    "additionalPaidModelCalls": 0,
+    "fixtureProvider": "HTTP_STUB_NOT_PAID_MODEL",
+    "confirmedActionsInFixtureProject": 2,
+    "firstConfirmationBeforeBuilderFix": 1,
+    "newExplicitProposalAfterBuilderFix": 1,
+    "duplicateEffect": 0,
+    "checked": [
+      "approval immediately becomes original-action receipt",
+      "OPEN original action",
+      "action result draft close/reopen",
+      "draft after new message",
+      "draft after leaving and returning to page",
+      "SOURCE_ARRIVED change ASK fills original-message investigation",
+      "system dark appearance",
+      "system font setting 4 follows app cap 1.3 after configuration fix"
+    ],
+    "restoredSystemPreferences": {
+      "color": "light",
+      "fontSizeSetting": 2
+    }
+  },
+  "failuresRetained": [
+    "first ArkTS syntax/type build",
+    "logout clearSession async ordering regression fixed",
+    "initial value-passed Builder left approval visually stale; original server effect retained",
+    "early screenCap reused existing remote file; those images excluded from passing proof",
+    "initial font scaling did not follow system; app configuration added and rebuilt"
+  ],
+  "notAccepted": [
+    "physical target device",
+    "keyboard visible/insets on emulator with hardware input",
+    "full screen-reader navigation",
+    "every semantic block on physical device",
+    "ECS deployment",
+    "independent model/user quality"
+  ],
+  "protectedDirtyFilesUnchanged": true,
+  "uncommittedPrivateData": "signing profile, original auth Preferences backup and SQLite remain outside commit"
+}

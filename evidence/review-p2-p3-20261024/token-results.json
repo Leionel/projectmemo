@@ -1,0 +1,6 @@
+{
+  "fixture": "copied runner, synthetic login response, fetch stub, zero network calls",
+  "persistedBeforeFinally": true,
+  "cleanedAfterFinally": true,
+  "realTokenRead": false
+}

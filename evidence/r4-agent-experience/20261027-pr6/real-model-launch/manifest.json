@@ -1,0 +1,34 @@
+{
+  "campaign": "PR6 24 paired cases",
+  "label": "source snapshot at launch, before further runtime changes",
+  "files": [
+    {
+      "path": "lib/conversation/promptSpecs.ts",
+      "sha256": "b55533001dbd17ae7f1505c11121f0a38b5940c86029ed3f436657113871bcb6"
+    },
+    {
+      "path": "lib/conversation/model.ts",
+      "sha256": "0cc165e2c995a7e6efb4accd3968ac2fcc418ec2103b847147ecf71345eca049"
+    },
+    {
+      "path": "lib/conversation/investigationService.ts",
+      "sha256": "eb1094a5248cd11658f21cc1168f63c2e5cc760d3a9cb043deec62663bc2ebb1"
+    },
+    {
+      "path": "lib/conversation/researchTools.ts",
+      "sha256": "5a3dc4f31ee908ab5698dee6de357bf25d8f9398d1282b8ad987ece6d88925fb"
+    },
+    {
+      "path": "lib/conversation/turnService.ts",
+      "sha256": "520cd295dfc36d2392ef79559f73c467ea099b668a74f16b15b0ef3dd1447d8d"
+    },
+    {
+      "path": "lib/types/conversationResearch.ts",
+      "sha256": "3dd809b4f5c09703754061bbc5a8037ccedaae3be77f9c6517b18d1948f775dc"
+    },
+    {
+      "path": "scripts/eval-r4-research.ts",
+      "sha256": "ec617c441807f0a02b42e9a545b41003ac42512a07721d07f47bb6a0e87ace6a"
+    }
+  ]
+}

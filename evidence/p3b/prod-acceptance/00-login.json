@@ -1,0 +1,25 @@
+{
+  "user": {
+    "id": "cmu3sjpnj0000zlrasghegg46",
+    "username": "contest-demo",
+    "displayName": "复赛演示账号"
+  },
+  "accessToken": "[REDACTED - token kept in env only]",
+  "expiresAt": "2026-10-31T10:52:39.821Z",
+  "projects": [
+    {
+      "id": "cmudqprjk000gzfras28jdmzg",
+      "title": "轻量视觉模型复赛项目",
+      "description": "团队正在准备轻量视觉模型复赛演示，需要核对评审设备的显存预算，完成可复现实验，并记录方案变化、风险依据与最终交付材料。",
+      "scenario": "COMPETITION",
+      "updatedAt": "2026-09-23T09:43:13.205Z"
+    },
+    {
+      "id": "cmt9uzmx10000xlratkg2nsil",
+      "title": "人工智能创意赛 忆程 ProjectMemo 作品开发",
+      "description": "忆程 ProjectMemo 是面向大学生项目制学习的知识资产沉淀与主动推进 Agent。",
+      "scenario": "COMPETITION",
+      "updatedAt": "2026-10-21T08:17:17.465Z"
+    }
+  ]
+}

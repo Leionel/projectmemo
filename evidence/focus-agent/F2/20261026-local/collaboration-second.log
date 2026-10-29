@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/focusCollaboration.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  1 passed (1)
+      Tests  19 passed (19)
+   Start at  09:35:26
+   Duration  5.71s (transform 844ms, setup 0ms, import 2.16s, tests 3.29s, environment 0ms)
+

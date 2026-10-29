@@ -1,0 +1,75 @@
+{
+  "runId": "repair-20261029-ambiguity",
+  "fixtureHash": "c31b385e5d107c17ed20dffe1fe83ce4eb418a41b4518a4ff445457208862e22",
+  "runtimeHash": "bc241540334f0fdaa107558ac993392325b9505d1c509a8658b3fa2720ce139d",
+  "data": "isolated synthetic database; real model and Search/Fetch",
+  "results": [
+    {
+      "episode": "frozen-ambiguity-1/INTERNAL_QUICK",
+      "status": "RECEIVED",
+      "turnStatus": "ANSWERED",
+      "provider": "llm:deepseek:deepseek-flash",
+      "sourceReadLevels": [],
+      "error": null
+    },
+    {
+      "episode": "frozen-ambiguity-1/WEB_STANDARD",
+      "status": "RECEIVED",
+      "turnStatus": "ANSWERED",
+      "provider": "llm:deepseek:deepseek-flash",
+      "sourceReadLevels": [
+        "FETCH_EXCERPT",
+        "FETCH_EXCERPT",
+        "FETCH_EXCERPT",
+        "FETCH_EXCERPT"
+      ],
+      "error": null
+    },
+    {
+      "episode": "frozen-ambiguity-2/INTERNAL_QUICK",
+      "status": "RECEIVED",
+      "turnStatus": "ANSWERED",
+      "provider": "llm:deepseek:deepseek-flash",
+      "sourceReadLevels": [],
+      "error": null
+    },
+    {
+      "episode": "frozen-ambiguity-2/WEB_STANDARD",
+      "status": "RECEIVED",
+      "turnStatus": "ANSWERED",
+      "provider": "llm:deepseek:deepseek-flash",
+      "sourceReadLevels": [
+        "FETCH_EXCERPT",
+        "FETCH_EXCERPT",
+        "FETCH_EXCERPT"
+      ],
+      "error": null
+    },
+    {
+      "episode": "frozen-ambiguity-4/INTERNAL_QUICK",
+      "status": "RECEIVED",
+      "turnStatus": "ANSWERED",
+      "provider": "llm:deepseek:deepseek-flash",
+      "sourceReadLevels": [],
+      "error": null
+    },
+    {
+      "episode": "frozen-ambiguity-4/WEB_STANDARD",
+      "status": "RECEIVED",
+      "turnStatus": "ANSWERED",
+      "provider": "llm:deepseek:deepseek-flash",
+      "sourceReadLevels": [
+        "FETCH_EXCERPT",
+        "FETCH_EXCERPT",
+        "FETCH_EXCERPT"
+      ],
+      "error": null
+    }
+  ],
+  "modelCalls": 37,
+  "externalCalls": 8,
+  "unknown": 0,
+  "estimatedPeakUpperUSD": 0.07517820000000003,
+  "quality": "Execution regression only; independent semantic review pending",
+  "pricingSource": "https://api-docs.deepseek.com/quick_start/pricing/"
+}

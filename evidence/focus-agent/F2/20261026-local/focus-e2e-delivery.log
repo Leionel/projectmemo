@@ -1,0 +1,12 @@
+
+Running 3 tests using 1 worker
+
+(node:46404) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [setup] › e2e\auth.setup.ts:8:1 › authenticate as the E2E reviewer (337ms)
+(node:42820) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 2 [chromium] › e2e\focus-agent.spec.ts:2:1 › Focus discussion creates a real Action, reads it back, and survives project navigation (3.0s)
+  ok 3 [chromium] › e2e\focus-agent.spec.ts:53:1 › Focus compares frozen options and resumes the same original Mission inside the conversation (1.9s)
+
+  3 passed (7.1s)

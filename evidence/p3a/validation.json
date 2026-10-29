@@ -1,0 +1,47 @@
+{
+  "baseline": "d618f8c37a91ab11e3bc073a4da3964aa46d4655",
+  "date": "2026-10-24",
+  "environment": "isolated local SQLite per test file, rule/TEST_FIXTURE only",
+  "paid_model_calls_this_phase": 0,
+  "unit": {
+    "files": 105,
+    "passed": 857,
+    "new": ["tests/experienceReuse.test.ts (15)", "tests/experienceNativeContract.test.ts (1)"]
+  },
+  "frozen_task_probe": {
+    "file": "tests/experienceReuse.test.ts#P3-A 冻结任务对照探针",
+    "correctness": "advisories derive from real sampled trajectories with explicit conditions",
+    "no_overreach": "goal/successCriteria/constraints/planRevision identical with and without experience",
+    "negative_transfer_guard": "protocol-mismatch experience suppressed; no prohibition-style instructions",
+    "cost_bound": "<=3 advisories, advisory block <=2000 chars, total context delta <=2200 chars",
+    "real_model_outcome": "NOT_EVALUATED"
+  },
+  "types_and_lint": { "tsc": "exit 0", "eslint": "0 errors 0 warnings" },
+  "harmony": {
+    "hypium": { "passed": 80, "failed": 0, "note": "includes experienceContract x3" },
+    "hap": {
+      "path": "harmonyos/entry/build/default/outputs/default/entry-default-unsigned.hap",
+      "sha256": "45bb0f558ae9deaca5f1a705d67baf6d2dff2b671ace25476f62a12e5f028378",
+      "note": "engineering build only; not a signing/device/platform gate"
+    }
+  },
+  "e2e": {
+    "expected": 14,
+    "failed": 0,
+    "note": "first full run 13/14 with demo.spec.ts:13 timeout 45s while HAP build ran concurrently; isolated re-run passed and a second full run (no parallel load) passed 14/14"
+  },
+  "migration": {
+    "name": "20261024090000_experience",
+    "empty_replay": "passed (scratch database, deleted afterwards)",
+    "touches": "creates AgentExperience and AgentExperienceUse with indexes only"
+  },
+  "prod_acceptance": {
+    "health_release": "d618f8c37a91ab11e3bc073a4da3964aa46d4655",
+    "see": "prod-acceptance/README.md"
+  },
+  "open_gates": [
+    "real-model effectiveness of suggestions (task success / over-refusal / negative transfer)",
+    "Harmony simulator and physical device",
+    "production deployment of this commit"
+  ]
+}

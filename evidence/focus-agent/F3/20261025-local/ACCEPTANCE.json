@@ -1,0 +1,197 @@
+{
+  "pushed": false,
+  "oldEvidencePreserved": true,
+  "phaseStatus": "ENGINEERING_SLICE_VALIDATED_NOT_FULL_F3",
+  "productionDeployed": false,
+  "realDevelopmentDatabaseMigrated": false,
+  "checks": {
+    "harmonyBuild": {
+      "log": "harmony-build-final.log",
+      "passed": true
+    },
+    "legacyE2E": {
+      "log": "legacy-e2e-final.log",
+      "skipped": 3,
+      "passed": 14
+    },
+    "focusE2E": {
+      "journeys": 3,
+      "includesAuthSetup": true,
+      "skipped": 0,
+      "log": "focus-e2e-delivery.log",
+      "passed": 4
+    },
+    "webBuild": {
+      "log": "focus-e2e-delivery.log",
+      "passed": true
+    },
+    "unit": {
+      "log": "unit-all-delivery.log",
+      "files": 116,
+      "failed": 0,
+      "passed": 992
+    },
+    "harmonyTests": {
+      "log": "harmony-test.log",
+      "failed": 0,
+      "passed": 83
+    },
+    "affected": {
+      "log": "quality-green.log",
+      "files": 4,
+      "passed": 62
+    },
+    "lint": {
+      "log": "lint-delivery.log",
+      "passed": true
+    },
+    "types": {
+      "log": "types-delivery.log",
+      "passed": true
+    }
+  },
+  "baselineHead": "d004c8a555d9db594acc757149f07aeb2affc4c5",
+  "scope": "F3-A/B/D subscribed original-event collaboration foundation",
+  "clientDate": "2026-10-25",
+  "protectedFiles": [
+    {
+      "path": "AGENTS.md",
+      "unchanged": true
+    },
+    {
+      "path": "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md",
+      "unchanged": true
+    },
+    {
+      "path": "harmonyos/build-profile.json5",
+      "unchanged": true
+    },
+    {
+      "path": "next-env.d.ts",
+      "unchanged": true
+    },
+    {
+      "path": "tsconfig.json",
+      "unchanged": true
+    }
+  ],
+  "remaining": [
+    "D1 semantic change understanding",
+    "D2 V2 dynamic candidate/review contracts",
+    "16 real-model episodes",
+    "5-target-user study",
+    "device and cross-client cold-start acceptance"
+  ],
+  "featureDefault": "FOCUS_AGENT_FOLLOW_ENABLED=false",
+  "reviews": {
+    "quality": "PASS after regression fixes",
+    "spec": "PASS for scoped engineering slice",
+    "realModelQuality": "NOT_RUN"
+  },
+  "screenshots": [
+    {
+      "path": "evidence/focus-agent/F3/20261025-local/focus-collaboration.png",
+      "sha256": "D8498D76C957D877D4CE52F5F127D6340C5AAE9CD2D926CCB001F3D6DE1ECA98",
+      "bytes": 180543
+    },
+    {
+      "path": "evidence/focus-agent/F3/20261025-local/focus-desktop.png",
+      "sha256": "E8504B26BBF12DD3E1161B66817B4C19DA9930CDE535476CE4016D14090DFEF0",
+      "bytes": 185894
+    },
+    {
+      "path": "evidence/focus-agent/F3/20261025-local/focus-follow-desktop.png",
+      "sha256": "26736320A10CAAA07154EA2A453115871F43466E241B5D1EF1697EDB807A914C",
+      "bytes": 169499
+    },
+    {
+      "path": "evidence/focus-agent/F3/20261025-local/focus-follow-mobile.png",
+      "sha256": "608AD4078A83AAB7AA6A35D3F4BCA6E2E722FCFE3E7E32A881F4EBFB929BC3B8",
+      "bytes": 49162
+    },
+    {
+      "path": "evidence/focus-agent/F3/20261025-local/focus-mobile.png",
+      "sha256": "9FEE7AA00EC129ED2718847D19EC876C2EB65831553824E5D5B02C2703C5D056",
+      "bytes": 50264
+    },
+    {
+      "path": "evidence/focus-agent/F3/20261025-local/focus-scenarios.png",
+      "sha256": "0C9DC053E00A6E3222A26A1B7984F65F872DB2A16190C57AC3BE9116259A52F7",
+      "bytes": 176131
+    }
+  ],
+  "deviceJourneyTested": false,
+  "sourceFiles": [
+    {
+      "path": "lib/conversation/anchorService.ts",
+      "sha256": "2177E5D15570CC7C299F301145A234E567BE5343BB8ACC3E90657D4B55FF81C0"
+    },
+    {
+      "path": "lib/conversation/service.ts",
+      "sha256": "CC682C12DD9C89F4BC2E7E07A70FD1A8F92F481EB4ABFC25A4731926A11B717D"
+    },
+    {
+      "path": "lib/conversation/entry.ts",
+      "sha256": "AB202D306DFF41DAEFE567AFDEBBEC20DC3AB57981A9CFF39CD352AC8DA72EB7"
+    },
+    {
+      "path": "lib/decision/questions.ts",
+      "sha256": "87FC03BF5B3ACD55AB84FEDDEDFAF246EE7AF5E9124EC55C5B4E36A4E5A34B9A"
+    },
+    {
+      "path": "lib/mission/continuationService.ts",
+      "sha256": "0CF7B267E3E7A14E4CC43B43F319CC55920F2BEA81349D0BD327FD6D5E365288"
+    },
+    {
+      "path": "components/ConversationAnchorPanel.tsx",
+      "sha256": "879C7F1A9BA7E61A953595536FCC7D023314362A565706488DA8894B6783F8C6"
+    },
+    {
+      "path": "components/ConversationPanel.tsx",
+      "sha256": "92EACE3F04A5C3C3C02FE9E6344DFFF55E179F166D777870036FEBBC90B91A94"
+    },
+    {
+      "path": "components/FocusAgentWorkspace.tsx",
+      "sha256": "620DF21EDFEB362516DC83277F72E59034E8DB0C7E915D189F099241E2D615FB"
+    },
+    {
+      "path": "lib/types/conversationAnchor.ts",
+      "sha256": "18A8BD63163EE6C8191DB29CEC02635F40DD1B9D6D85A01E5517B6E47D1CCA3F"
+    },
+    {
+      "path": "harmonyos/entry/src/main/ets/components/ConversationAnchorPanel.ets",
+      "sha256": "66A09D0ACE786E456C8F8EA3D1BC8F26DAB74A780FF8F493D540BDFF6C5E8B83"
+    },
+    {
+      "path": "harmonyos/entry/src/main/ets/pages/FocusConversation.ets",
+      "sha256": "21586025180A70EE70EF9CE3104B9CB859293C4768CDCF407F1054BA0B6DDE84"
+    },
+    {
+      "path": "harmonyos/entry/src/main/ets/services/ConversationService.ets",
+      "sha256": "D3E5EE91052F691111EFE58D25B77DF083EF2B4AB3B432BEDA5CD31AA5099843"
+    },
+    {
+      "path": "tests/conversationAnchor.test.ts",
+      "sha256": "7B45A89302D146093729E0352FF60F17E3DEB1F02703212FE3559715719EA75A"
+    },
+    {
+      "path": "tests/conversationAnchorContract.test.ts",
+      "sha256": "2031700A391F4663D994FD503562C6799F50B5F7A9D584F885F112E34CF59EBA"
+    },
+    {
+      "path": "e2e/focus-agent.spec.ts",
+      "sha256": "46BEFB5A7C5D42CA4DB0A5F399FE1509EDD85C0ED2B316B3E12ABEA95D7330B8"
+    },
+    {
+      "path": "prisma/migrations/20261026020000_focus_anchor_projection/migration.sql",
+      "sha256": "112FB5486E8A7A9E29E5280581A436264DD640547BFF9D77DB150D809B37D518"
+    }
+  ],
+  "hap": {
+    "sha256": "9A33A47AA973C3096EBC22ED4FCA85746589CBFBE3CD62566EE5CAADDE45E191",
+    "path": "harmonyos/entry/build/default/outputs/default/entry-default-unsigned.hap",
+    "deviceInstalled": false,
+    "bytes": 5899164
+  },
+  "realModelTested": false
+}

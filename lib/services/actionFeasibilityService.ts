@@ -1,3 +1,4 @@
+import {enqueueImpact} from "@/lib/decision/impactJobs";
 import { AppError } from "@/lib/api";
 import { db } from "@/lib/db";
 import { Prisma } from "@/lib/generated/prisma/client";
@@ -148,10 +149,10 @@ async function assessDependent(
     const state = temporalStates.get(card.id);
     if (!state) return { ...base, targetTitle: card.title, state: "UNKNOWN", note: "无法确认依赖记录的当前状态" };
     if (state.supportState === "SUPERSEDED") {
-      return { ...base, targetTitle: card.title, state: "UNMET", note: `依赖的记录已被「${state.supersededByTitle ?? "新记录"}」取代` };
+      return { ...base, targetTitle: card.title, state: "UNKNOWN", note: `依赖记录已被「${state.supersededByTitle ?? "新记录"}」取代，请核对替代依据；这不证明旧事实为假` };
     }
     if (state.supportState === "REVOKED") {
-      return { ...base, targetTitle: card.title, state: "UNMET", note: "依赖记录的相关关系已撤销，前提不再成立" };
+      return { ...base, targetTitle: card.title, state: "UNKNOWN", note: "依赖关系已撤销，请重新核对前提" };
     }
     if (state.supportState === "SUPPORTED") {
       return { ...base, targetTitle: card.title, state: "MET", note: "依赖记录当前有效" };
@@ -314,6 +315,7 @@ export async function updateActionFeasibilityInput(
             dependencyVersion: { increment: 1 },
           },
         });
+        await enqueueImpact(tx,projectId,`requirements:${action.id}:${action.dependencyVersion+1}`,[`action:${action.id}`]);
       }
     });
   } catch (error) {

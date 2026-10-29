@@ -86,7 +86,7 @@ struct InterventionDetail {
       reasons.push(evidence.whyNow);
     }
     if (evidence.facts !== undefined && evidence.facts !== null && evidence.facts.length > 0) {
-      reasons.push(`本次判断引用了 ${evidence.facts.length} 条项目事实，可在上方「提醒依据」按编号逐条对照。`);
+      reasons.push(`本次判断引用了 ${evidence.facts.length} 条事实陈述，可在「提醒依据」查看原文；日期与来源仍需核对。`);
     }
     return reasons;
   }
@@ -280,14 +280,10 @@ struct InterventionDetail {
             // 2.5 为什么是现在：只列有真实来源的理由，不用模板句凑数
             Column() {
               Row() {
-                Text('为什么是现在')
+                Text('提醒触发原因')
                   .fontSize(PMFontSize.SECTION_TITLE)
                   .fontWeight(FontWeight.Bold)
                   .fontColor(PMColors.INK_PRIMARY)
-                Text('WHY NOW')
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontColor(PMColors.INK_MUTED)
-                  .margin({ left: PMSpacing.SM })
               }
               .width('100%')
               .alignItems(VerticalAlign.Bottom)
@@ -317,7 +313,7 @@ struct InterventionDetail {
                 }, (reason: string) => reason)
 
                 if (this.whyNowReasons().length === 0) {
-                  Text('目前只检测到关联事实，尚不能确认提醒时机。')
+                  Text('当前缺少可解释提醒时机的依据，请核对项目资料。')
                     .fontSize(PMFontSize.BODY)
                     .fontColor(PMColors.INK_SECONDARY)
                     .lineHeight(22)
@@ -476,7 +472,7 @@ struct InterventionDetail {
                       .border({ width: 1, color: PMColors.BORDER })
 
                     Row() {
-                      Button('收起')
+                      Button('收起').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                         .fontSize(PMFontSize.BODY)
                         .fontColor(PMColors.INK_SECONDARY)
                         .backgroundColor(PMColors.SURFACE)
@@ -487,7 +483,7 @@ struct InterventionDetail {
                           this.showDismissInput = false;
                         })
 
-                      Button('确认忽略')
+                      Button('确认忽略').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                         .fontSize(PMFontSize.BODY)
                         .fontColor(PMColors.SURFACE)
                         .backgroundColor(PMColors.RISK)
@@ -551,7 +547,7 @@ struct InterventionDetail {
                 .margin({ bottom: PMSpacing.SM })
             }
             Row() {
-              Button(this.isSubmitting ? '处理中...' : '创建行动')
+              Button(this.isSubmitting ? '处理中...' : '创建行动').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                 .fontSize(PMFontSize.BUTTON)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.SURFACE)
@@ -565,7 +561,7 @@ struct InterventionDetail {
                 })
                 .accessibilityText('采纳建议并创建行动')
 
-              Button('明天提醒')
+              Button('明天提醒').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                 .fontSize(PMFontSize.BUTTON)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
@@ -581,7 +577,7 @@ struct InterventionDetail {
                 })
                 .accessibilityText('稍后提醒我')
 
-              Button('忽略')
+              Button('忽略').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                 .fontSize(PMFontSize.BUTTON)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.RISK)

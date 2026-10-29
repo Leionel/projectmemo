@@ -4,13 +4,22 @@ import { json, jsonHash, type Source } from "./contracts";
 import { assertOwner, event, lock, sourceHash, type Tx } from "./repository";
 import type { WaitState } from "./gaps";
 
+export type MaterialCoverage = { loadedCharacters: number; totalCharacters: number; truncated: boolean; extractionStatus: string };
+export type ProjectMaterialView = { source: Source; title: string; coverage: MaterialCoverage };
 export async function readProjectMaterial(projectId: string, id: string, tx: Tx = db): Promise<Source | null> {
+  return (await readProjectMaterialView(projectId, id, tx))?.source ?? null;
+}
+/** Metadata for readers only. The source identity and 12k body are unchanged. */
+export async function readProjectMaterialView(projectId: string, id: string, tx: Tx = db): Promise<ProjectMaterialView | null> {
   if (id.startsWith("capture:")) {
     const row = await tx.capture.findFirst({where:{id:id.slice(8),projectId},include:{card:{select:{id:true}}}});
     if (!row) return null;
     const cardHash=row.card?await sourceHash(projectId,`card:${row.card.id}`,tx):null;
     const hash=jsonHash({rawText:row.rawText,sourceType:row.sourceType,cardHash});
-    return {id,kind:"PROJECT",entityType:"CAPTURE",revision:hash,hash,text:row.rawText.slice(0,12000),observedAt:row.createdAt.toISOString()};
+    const text = row.rawText.slice(0,12000);
+    return { source: {id,kind:"PROJECT",entityType:"CAPTURE",revision:hash,hash,text,observedAt:row.createdAt.toISOString()},
+      title: row.rawText.split(/\r?\n/,1)[0].slice(0,80) || row.sourceType || "项目记录",
+      coverage: {loadedCharacters:text.length,totalCharacters:row.rawText.length,truncated:text.length<row.rawText.length,extractionStatus:"SUCCESS"} };
   }
   if (id.startsWith("attachment:")) {
     const row=await tx.attachment.findFirst({where:{id:id.slice(11),projectId},include:{cards:{select:{id:true},orderBy:{id:"asc"}},revisions:{orderBy:[{revisionIndex:"desc"},{id:"desc"}],take:1}}});
@@ -19,7 +28,8 @@ export async function readProjectMaterial(projectId: string, id: string, tx: Tx 
     const text=row.extractionStatus==="SUCCESS"?(revision?.text??row.extractedText??""):"";
     const cardHashes=await Promise.all(row.cards.map(c=>sourceHash(projectId,`card:${c.id}`,tx)));
     const hash=jsonHash({sha256:row.sha256,status:row.extractionStatus,revisionId:revision?.id??null,text,cardHashes});
-    return{id,kind:"PROJECT",entityType:"ATTACHMENT",revision:revision?.id??hash,hash,text:text.slice(0,12000),observedAt:(revision?.createdAt??row.createdAt).toISOString()};
+    return { source: {id,kind:"PROJECT",entityType:"ATTACHMENT",revision:revision?.id??hash,hash,text:text.slice(0,12000),observedAt:(revision?.createdAt??row.createdAt).toISOString()}, title:row.fileName,
+      coverage:{loadedCharacters:Math.min(text.length,12000),totalCharacters:text.length,truncated:text.length>12000,extractionStatus:row.extractionStatus} };
   }
   return null;
 }

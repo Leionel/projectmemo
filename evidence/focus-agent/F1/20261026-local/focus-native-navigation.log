@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/focusConversation.test.ts tests/projectNavigation.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  2 passed (2)
+      Tests  28 passed (28)
+   Start at  08:50:02
+   Duration  7.16s (transform 963ms, setup 0ms, import 3.41s, tests 2.75s, environment 651ms)
+

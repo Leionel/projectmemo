@@ -1,0 +1,29 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/continuityStages23.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/continuityStages23.test.ts (9 tests | 1 failed) 1133ms
+   × CT3 original Runner polls declared fixed SHA; stable CI uses zero models, changed CI resumes reasoning 213ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/continuityStages23.test.ts > CT3 original Runner polls declared fixed SHA; stable CI uses zero models, changed CI resumes reasoning
+AssertionError: {"code":"EXECUTION_FAILED","message":"委托上下文无法重建，请核对材料和配置后继续","phase":"CONTEXT","category":"EXECUTION","recovery":{"kind":"REVIEW_REQUIRED","automatic":false,"message":"请核对当前失败原因后继续，已有步骤和结果保留。"}}: expected 'PAUSED' to be 'WAITING_INPUT' // Object.is equality
+
+Expected: "WAITING_INPUT"
+Received: "PAUSED"
+
+ ❯ tests/continuityStages23.test.ts:68:115
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 passed (9)
+   Start at  13:16:13
+   Duration  3.12s (transform 1.06s, setup 0ms, import 1.76s, tests 1.13s, environment 0ms)
+

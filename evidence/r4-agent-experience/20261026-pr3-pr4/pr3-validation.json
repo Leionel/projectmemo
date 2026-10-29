@@ -1,0 +1,42 @@
+{
+  "baseCommit": "5b45b24d14e7f2f7487e8e04a12cfa0d4a2406ea",
+  "scope": "PR3_SERVER_WEB_REAL_MODEL_DEVELOPMENT",
+  "commands": [
+    {
+      "command": "npm.cmd test",
+      "exitCode": 0,
+      "files": 120,
+      "tests": 1086,
+      "log": "unit-all.log"
+    },
+    {
+      "command": "npm.cmd exec tsx -- scripts/run-e2e.ts",
+      "exitCode": 0,
+      "tests": 22,
+      "skipped": 0,
+      "includesProductionBuild": true,
+      "log": "e2e-retry.log",
+      "originalFailure": "e2e-all.log generated dev routes corrupt"
+    },
+    {
+      "command": "npm.cmd exec tsc -- --noEmit",
+      "exitCode": 0,
+      "log": "types-final.log"
+    },
+    {
+      "command": "npm.cmd run lint",
+      "exitCode": 0,
+      "log": "lint-final.log"
+    }
+  ],
+  "realModelCalls": 48,
+  "limit": 48,
+  "data": "temporary isolated SQLite; synthetic new three-domain development cases",
+  "protectedDirtyFilesUnchanged": true,
+  "notRun": [
+    "independent scoring",
+    "complete three-domain C0-C3 heldout evaluation",
+    "ECS deployment",
+    "target physical device"
+  ]
+}

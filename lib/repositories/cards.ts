@@ -1,3 +1,4 @@
+import {enqueueImpact} from "@/lib/decision/impactJobs";
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import type { CardDraft, CardLink, LinkableCard } from "@/lib/types";
@@ -95,6 +96,7 @@ export async function saveCaptureResult(
       });
     }
     await tx.project.update({ where: { id: input.projectId }, data: { updatedAt: new Date() } });
+    await enqueueImpact(tx,input.projectId,`capture:${captureId}`,[`capture:${captureId}`,`card:${cardId}`]);
     return { ...card, relations: input.links };
   };
   if (client === (db as unknown as Prisma.TransactionClient)) {
@@ -122,6 +124,7 @@ export async function updateKnowledgeCard(projectId: string, cardId: string, inp
       },
     });
     await tx.project.update({ where: { id: projectId }, data: { updatedAt: new Date() } });
+    if(updated.title!==card.title||updated.summary!==card.summary||updated.type!==card.type)await enqueueImpact(tx,projectId,`card-edit:${randomUUID()}`,[`card:${cardId}`]);
     return updated;
   });
   const stateRefreshPending = await refreshProjectStateAfterMutation(projectId);
@@ -137,6 +140,7 @@ export async function deleteKnowledgeCard(projectId: string, cardId: string) {
     if (!card) throw new AppError("CARD_NOT_FOUND", "没有找到这个项目中的知识卡片", 404);
 
     await tx.capture.delete({ where: { id: card.captureId } });
+    await enqueueImpact(tx,projectId,`card-delete:${randomUUID()}`,[`card:${cardId}`,`capture:${card.captureId}`]);
     await tx.project.update({ where: { id: projectId }, data: { updatedAt: new Date() } });
   });
   await refreshProjectStateAfterMutation(projectId);

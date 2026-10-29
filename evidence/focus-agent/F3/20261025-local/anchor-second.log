@@ -1,0 +1,52 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/conversationAnchor.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/conversationAnchor.test.ts (12 tests | 2 failed) 2820ms
+   × repairs a missing chat projection without repeating the source mutation or original effect 374ms
+   × closes a terminal Mission topic after its actual output and status projection 153ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/conversationAnchor.test.ts > repairs a missing chat projection without repeating the source mutation or original effect
+AssertionError: expected 4 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 4
+
+ ❯ tests/conversationAnchor.test.ts:89:88
+     87|   expect((await syncConversationAnchors(f.actor, f.id)).projected).toB…
+     88|   expect((await syncConversationAnchors(f.actor, f.id)).projected).toB…
+     89|   expect((await db.agentMission.findUniqueOrThrow({ where: { id: f.m.i…
+       |                                                                                        ^
+     90| });
+     91| it("reuses one Mission topic across a different question and refuses r…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/conversationAnchor.test.ts > closes a terminal Mission topic after its actual output and status projection
+Error: 委托状态已变化，请刷新
+ ❯ apply lib/mission/missionService.ts:47:76
+     45|   const apply = async (tx:Prisma.TransactionClient) => {
+     46|     await lock(tx,id);const m=await ownedMission(userId,id,tx);guard?.…
+     47|     if(m.version!==body.expectedVersion||terminal.includes(m.status))t…
+       |                                                                            ^
+     48|     let status=m.status;
+     49|     if(action==="input"){
+ ❯ Proxy._transactionWithCallback node_modules/@prisma/client/src/runtime/getPrismaClient.ts:810:17
+ ❯ tests/conversationAnchor.test.ts:141:3
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 10 passed (12)
+   Start at  22:02:20
+   Duration  5.69s (transform 892ms, setup 0ms, import 2.50s, tests 2.82s, environment 0ms)
+

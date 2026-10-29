@@ -1,0 +1,88 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/focusConversation.test.ts tests/copilotPersistence.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/focusConversation.test.ts (11 tests | 2 failed) 1418ms
+     × binds existing reminders once for manual follow-up and never creates a Mission 44ms
+     × pins a user veto and never turns a negative instruction into an action 173ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/focusConversation.test.ts > Focus conversations: real services and isolated persistence > binds existing reminders once for manual follow-up and never creates a Mission
+PrismaClientValidationError: 
+Invalid `db.agentIntervention.create()` invocation in
+D:/Projects/hongmen/tests/focusConversation.test.ts:91:49
+
+  88 });
+  89 it("binds existing reminders once for manual follow-up and never creates a Mission", async () => {
+  90   const f = await fixture(), p = f.projects[0];
+→ 91   const reminder = await db.agentIntervention.create({
+         data: {
+           projectId: "cmvoiw96w001yvs8o2751m9lj",
+           triggerType: "MATERIAL_GAP",
+           dedupeKey: "a8292fba-f4ca-40fa-ab7c-38102415ddeb",
+           severity: 3,
+           title: "核对实验条件",
+           content: "原材料缺少设备说明",
+           evidenceFacts: [],
+           evidenceCardIds: [],
+           proposedActions: [],
+           isSimulated: false,
+       +   evidence: JsonNullValueInput | Json
+         }
+       })
+
+Argument `evidence` is missing.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ tests/focusConversation.test.ts:91:22
+     89|   it("binds existing reminders once for manual follow-up and never cre…
+     90|     const f = await fixture(), p = f.projects[0];
+     91|     const reminder = await db.agentIntervention.create({ data: { proje…
+       |                      ^
+     92|       severity: 3, title: "核对实验条件", content: "原材料缺少设备说明", evidenceFact…
+     93|     const entry = { kind: "INTERVENTION", projectId: p.id, id: reminde…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/focusConversation.test.ts > Focus conversations: real services and isolated persistence > pins a user veto and never turns a negative instruction into an action
+AssertionError: expected { …(9) } to be null
+
+- Expected:
+null
+
++ Received:
+{
+  "actionStatus": null,
+  "description": "帮我处理这个项目",
+  "executionId": "cmvoiw9mc0040vs8o5i8q43at",
+  "projectId": "cmvoiw9i4003kvs8o12h7wrxe",
+  "proposalHash": "a9c1bf042e883d19e861c918c25aedd1a2a233bbd1b5e331f1b0a7d7798fb9dc",
+  "resultCardId": null,
+  "resultId": null,
+  "status": "PENDING",
+  "title": "核对“项目0-cmvoiw9hw003ivs8ojrsfdrcy”的下一步",
+}
+
+ ❯ tests/focusConversation.test.ts:132:54
+    130|     await ask(f, "不要创建任何行动，只读", f.projects[0].id);
+    131|     const r = await ask(f, "帮我处理这个项目", f.projects[0].id);
+    132|     expect(r.conversation.messages.at(-1)!.proposal).toBeNull();
+       |                                                      ^
+    133|     expect((await db.conversation.findUniqueOrThrow({ where: { id: f.i…
+    134|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 23 passed (25)
+   Start at  08:32:52
+   Duration  16.64s (transform 1.29s, setup 0ms, import 6.67s, tests 9.63s, environment 0ms)
+

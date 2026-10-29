@@ -38,7 +38,7 @@ export struct ProjectStateDiffSheet {
             .fontSize(PMFontSize.TITLE)
             .fontWeight(FontWeight.Bold)
             .fontColor(PMColors.INK_PRIMARY)
-          Button('✕')
+          Button('✕').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
             .fontSize(PMFontSize.BODY)
             .fontColor(PMColors.INK_TERTIARY)
             .backgroundColor('transparent')
@@ -78,11 +78,16 @@ export struct ProjectStateDiffSheet {
                     .fontColor(PMColors.INK_PRIMARY)
                     .lineHeight(20)
                   if (item.before !== null || item.after !== null) {
-                    Text(`${item.before !== null ? item.before : ''}${item.before !== null && item.after !== null ? ' → ' : ''}${item.after !== null ? item.after : ''}`)
-                      .fontSize(PMFontSize.CAPTION)
-                      .fontColor(PMColors.INK_SECONDARY)
-                      .lineHeight(18)
-                      .margin({ top: 2 })
+                    Column({ space: 8 }) {
+                      if (item.before !== null) {
+                        Text('原状态').fontSize(11).fontColor(PMColors.INK_TERTIARY)
+                        Text(item.before ?? '').fontSize(14).fontColor(PMColors.INK_SECONDARY)
+                      }
+                      if (item.after !== null) {
+                        Text('当前状态').fontSize(11).fontColor(PMColors.BRAND)
+                        Text(item.after ?? '').fontSize(14).fontColor(PMColors.INK_PRIMARY)
+                      }
+                    }.width('100%').alignItems(HorizontalAlign.Start).padding(12).backgroundColor(PMColors.SURFACE).borderRadius(12).margin({ top: 8 })
                   }
                   Text(`依据 ${item.evidenceRefs.length} 项${item.evidenceRefs.length > 0 ?
                     `（${TextFormatters.evidenceKindToChinese(item.evidenceRefs[0].entityKind)}）` : ''}`)

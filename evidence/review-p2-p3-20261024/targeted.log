@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/repoSensing.test.ts tests/repoSignalNativeContract.test.ts tests/experienceReuse.test.ts tests/experienceNativeContract.test.ts tests/decisionEvolution.test.ts tests/decisionEvolutionUi.test.ts tests/deployUpdate.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  7 passed (7)
+      Tests  73 passed (73)
+   Start at  19:09:33
+   Duration  38.75s (transform 2.29s, setup 0ms, import 12.14s, tests 19.08s, environment 5.02s)
+

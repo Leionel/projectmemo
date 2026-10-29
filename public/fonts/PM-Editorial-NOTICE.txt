@@ -1,0 +1,11 @@
+PM Editorial is a landing-page character subset of Noto Serif SC,
+instanced at weight 500 and renamed for this project.
+
+Upstream copyright: 2017-2023 Adobe (http://www.adobe.com/).
+License: SIL Open Font License 1.1, included in OFL.txt in this directory.
+Upstream project: https://github.com/notofonts/noto-cjk
+Source metadata: Noto Serif SC, Version 2.02;241114204558;non-release.
+Reproduction: evidence/pre-r4/20261023-home-story/subset-font.py
+
+The subset is used only for public-homepage editorial headings.
+Body text and product controls retain the existing interface font.

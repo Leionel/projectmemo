@@ -236,7 +236,7 @@ export function ProjectStateCard({ projectId, enabled }: { projectId: string; en
       </button>
     </div>
 
-    {stale && <p role="status" className="mt-3 flex items-start gap-1.5 rounded-lg bg-[var(--brick-pale)] px-3 py-2 text-[11px] font-semibold text-[var(--brick)]">
+    {stale && <p role="status" className="mt-3 flex items-start gap-1.5 rounded-lg bg-[var(--brick-pale)] px-3 py-2 text-xs font-semibold text-[var(--brick)]">
       <TriangleAlert size={13} className="mt-0.5 shrink-0" />{freshness?.errorMessage || "当前快照不是最新评估结果，系统保留了上一份状态；刷新成功后再更新。"}
     </p>}
     {notice && <p role="status" className="mt-3 rounded-lg bg-[var(--teal-pale)] px-3 py-2 text-xs font-semibold text-[var(--teal-strong)]">{notice}</p>}
@@ -249,10 +249,10 @@ export function ProjectStateCard({ projectId, enabled }: { projectId: string; en
       {unread && lastSeenSnapshotId && diff && <div className="mt-2"><StateDiffView diff={diff} limit={showAll ? undefined : 3} /></div>}
       {unread && lastSeenSnapshotId && !diff && <p className="mt-1.5 text-xs text-[var(--muted)]">变化详情尚未取到，可点「刷新状态」重试。</p>}
       <div className="mt-2.5 flex flex-wrap gap-2">
-        {diff && diff.items.length > 3 && <button type="button" onClick={() => setShowAll((value) => !value)} className="focus-ring inline-flex items-center gap-1.5 rounded-md bg-[var(--paper-strong)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)]">
+        {diff && diff.items.length > 3 && <button type="button" onClick={() => setShowAll((value) => !value)} className="focus-ring inline-flex items-center gap-1.5 rounded-md bg-[var(--paper-strong)] px-2 py-1 text-xs font-bold text-[var(--teal-strong)]">
           <ChevronDown size={13} className={showAll ? "rotate-180" : ""} />{showAll ? "收起变化清单" : `查看全部 ${diff.items.length} 项变化与依据`}
         </button>}
-        <button type="button" onClick={() => void openBrief()} disabled={busy !== null} className="focus-ring inline-flex items-center gap-1.5 rounded-md bg-[var(--paper-strong)] px-2 py-1 text-[11px] font-bold text-[var(--teal-strong)] disabled:opacity-50">
+        <button type="button" onClick={() => void openBrief()} disabled={busy !== null} className="focus-ring inline-flex items-center gap-1.5 rounded-md bg-[var(--paper-strong)] px-2 py-1 text-xs font-bold text-[var(--teal-strong)] disabled:opacity-50">
           {busy === "brief" ? <LoaderCircle size={13} className="animate-spin" /> : <ChevronDown size={13} className={showBrief ? "rotate-180" : ""} />}查看简报（变化 / 影响 / 建议）
         </button>
       </div>
@@ -264,21 +264,21 @@ export function ProjectStateCard({ projectId, enabled }: { projectId: string; en
       <ul className="mt-2 space-y-2">
         {brief.sentences.map((sentence) => <li key={sentence.changeKey} className="rounded-lg bg-[var(--paper-strong)] p-2.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-[11px] font-black text-[var(--navy)]">变化</span>
-            <span className="text-[11px] text-[var(--muted)]">依据 {sentence.evidenceCount} 项</span>
+            <span className="text-xs font-black text-[var(--navy)]">变化</span>
+            <span className="text-xs text-[var(--muted)]">依据 {sentence.evidenceCount} 项</span>
           </div>
           <p className="mt-1 text-xs font-semibold leading-5 text-[var(--ink)]">{sentence.text}</p>
-          <p className="mt-1 text-[11px] leading-5 text-[var(--ink-soft)]">影响：{sentence.impact}</p>
-          <p className="mt-0.5 text-[11px] leading-5 text-[var(--teal-strong)]">建议：{sentence.suggestion}</p>
+          <p className="mt-1 text-xs leading-5 text-[var(--ink-soft)]">影响：{sentence.impact}</p>
+          <p className="mt-0.5 text-xs leading-5 text-[var(--teal-strong)]">建议：{sentence.suggestion}</p>
           {sentence.evidence.length > 0 && <p className="mt-1.5 flex flex-wrap gap-1.5">
-            {sentence.evidence.slice(0, 3).map((ref, index) => <a key={`${ref.entityId}-${index}`} href={projectHref(projectId,ref.entityKind === "card" ? `#card-${ref.entityId}` : evidenceHref[ref.entityKind] ?? "#project-state")} className="focus-ring rounded bg-[var(--teal-pale)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--teal-strong)]">
+            {sentence.evidence.slice(0, 3).map((ref, index) => <a key={`${ref.entityId}-${index}`} href={projectHref(projectId,ref.entityKind === "card" ? `#card-${ref.entityId}` : evidenceHref[ref.entityKind] ?? "#project-state")} className="focus-ring rounded bg-[var(--teal-pale)] px-1.5 py-0.5 text-[11px] font-bold text-[var(--teal-strong)]">
               {ref.entityKind === "card" ? "记忆" : ref.entityKind === "action" ? "行动" : ref.entityKind === "deliverable" ? "交付物" : ref.entityKind} · {ref.field || "版本证据"}
             </a>)}
-            {sentence.evidence.length > 3 && <span className="px-1 py-0.5 text-[10px] text-[var(--muted)]">+{sentence.evidence.length - 3}</span>}
+            {sentence.evidence.length > 3 && <span className="px-1 py-0.5 text-[11px] text-[var(--muted)]">+{sentence.evidence.length - 3}</span>}
           </p>}
         </li>)}
       </ul>
-      <p className="mt-2 text-[11px] text-[var(--muted)]">简报由服务端确定性模板生成；读简报不会创建行动，也不会改动项目。</p>
+      <p className="mt-2 text-xs text-[var(--muted)]">简报由服务端确定性模板生成；读简报不会创建行动，也不会改动项目。</p>
     </div>}
 
     <div className="mt-4 border-t archive-rule pt-4">
@@ -289,14 +289,14 @@ export function ProjectStateCard({ projectId, enabled }: { projectId: string; en
         : unknown ? <p className="mt-1 text-xs leading-5 text-[var(--ink-soft)]">未知项：{unknown.text}</p> : null}
       <p className="mt-1 text-xs leading-5 text-[var(--ink-soft)]">建议下一步：{nextStepText(payload)}</p>
       {payload.facts.length > 0 && <details className="mt-2 rounded-lg bg-[var(--paper-strong)] p-2.5">
-        <summary className="focus-ring cursor-pointer text-[11px] font-bold text-[var(--navy)]">当前事实句（{payload.facts.length}）与依据</summary>
+        <summary className="focus-ring cursor-pointer text-xs font-bold text-[var(--navy)]">当前事实句（{payload.facts.length}）与依据</summary>
         <ul className="mt-2 space-y-1.5">
-          {payload.facts.map((fact) => <li key={fact.key} className="text-[11px] leading-5 text-[var(--ink-soft)]">
-            <span className={"mr-1.5 rounded px-1.5 py-0.5 text-[10px] font-bold " + (fact.truth === "TRUE" ? "bg-[var(--teal-pale)] text-[var(--teal-strong)]" : fact.truth === "FALSE" ? "bg-[var(--brick-pale)] text-[var(--brick)]" : "bg-[var(--amber)]/15 text-[var(--amber)]")}>
+          {payload.facts.map((fact) => <li key={fact.key} className="text-xs leading-5 text-[var(--ink-soft)]">
+            <span className={"mr-1.5 rounded px-1.5 py-0.5 text-[11px] font-bold " + (fact.truth === "TRUE" ? "bg-[var(--teal-pale)] text-[var(--teal-strong)]" : fact.truth === "FALSE" ? "bg-[var(--brick-pale)] text-[var(--brick)]" : "bg-[var(--amber)]/15 text-[var(--amber)]")}>
               {fact.truth === "TRUE" ? "成立" : fact.truth === "FALSE" ? "不成立" : "未知"}
             </span>
             {fact.text}
-            <span className="ml-1.5 text-[10px] text-[var(--muted)]">依据 {fact.evidenceRefs.length} 项{fact.displayReason ? ` · ${fact.displayReason}` : ""}</span>
+            <span className="ml-1.5 text-[11px] text-[var(--muted)]">依据 {fact.evidenceRefs.length} 项{fact.displayReason ? ` · ${fact.displayReason}` : ""}</span>
           </li>)}
         </ul>
       </details>}

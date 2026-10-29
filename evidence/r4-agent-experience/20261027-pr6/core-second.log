@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/r4Research.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  19:08:15
+   Duration  11.92s (transform 3.75s, setup 0ms, import 6.77s, tests 4.66s, environment 0ms)
+

@@ -1,0 +1,60 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/conversationAnchor.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/conversationAnchor.test.ts (19 tests | 2 failed) 6066ms
+   × reuses one Mission topic across a different question and refuses reused entry request payloads 338ms
+   × follows completion of an older existing Action beyond the initial eight 284ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/conversationAnchor.test.ts > reuses one Mission topic across a different question and refuses reused entry request payloads
+AssertionError: promise resolved "{ id: 'cmvotc6d5002apo8ok4pvcuy5' }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "id": "cmvotc6d5002apo8ok4pvcuy5",
+  }
+
+ ❯ tests/conversationAnchor.test.ts:108:109
+    106|   expect((await createConversation(f.actor, { requestId: "entry", scop…
+    107|   await expect(createConversation(f.actor, { requestId: "revision", sc…
+    108|   await expect(createConversation(f.actor, { requestId: "revision", sc…
+       |                                                                                                             ^
+    109| });
+    110| it("filters unrelated and stale materials; one relevant source revisio…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/conversationAnchor.test.ts > follows completion of an older existing Action beyond the initial eight
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/conversationAnchor.test.ts:236:81
+    234|   await db.$transaction(tx => commitActionResult(tx, prepared));
+    235|   await syncConversationAnchors(f.actor, f.id); const r = await syncCo…
+    236|   expect(r.conversation.messages.some(m => m.content.includes("最早一条原行动…
+       |                                                                                 ^
+    237| });
+    238| it("rechecks access before feedback replays, projection repair, and in…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 17 passed (19)
+   Start at  22:25:23
+   Duration  9.30s (transform 1.14s, setup 0ms, import 2.88s, tests 6.07s, environment 0ms)
+

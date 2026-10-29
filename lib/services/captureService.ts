@@ -135,6 +135,10 @@ export async function processCapture(projectId: string, rawText: string, sourceT
       cardType: draft.type,
       linkedCardIds: links.map((link) => link.relatedCardId),
       keywordCount: draft.keywords.length,
+      prompt: execResult.prompt,
+      usage: execResult.usage,
+      usageUnknown: execResult.usageUnknown,
+      requestIdentity: execResult.requestIdentity,
     },
   });
   return saved;
@@ -251,7 +255,7 @@ export async function processCaptureWithRequest(
             trace: {
               source: "capture",
               provider,
-              modelProvider: execResult.provider,
+              modelProvider: execResult.provider, prompt: execResult.prompt ?? null, usage: execResult.usage ?? null, usageUnknown: execResult.usageUnknown ?? null, requestIdentity: execResult.requestIdentity ?? null,
               stage: "COMPLETED",
               requestId: options.requestId,
               requestHash: payloadHash,
@@ -306,7 +310,7 @@ export async function processCaptureWithRequest(
             trace: {
               source: "capture",
               provider,
-              modelProvider: execResult.provider,
+              modelProvider: execResult.provider, prompt: execResult.prompt ?? null, usage: execResult.usage ?? null, usageUnknown: execResult.usageUnknown ?? null, requestIdentity: execResult.requestIdentity ?? null,
               stage: "SAVED_POSTPROCESS_PENDING",
               requestId: options.requestId,
               requestHash: payloadHash,
@@ -332,7 +336,7 @@ export async function processCaptureWithRequest(
             trace: {
               source: "capture",
               provider,
-              modelProvider: execResult.provider,
+              modelProvider: execResult.provider, prompt: execResult.prompt ?? null, usage: execResult.usage ?? null, usageUnknown: execResult.usageUnknown ?? null, requestIdentity: execResult.requestIdentity ?? null,
               stage: stateRefreshPending ? "SAVED_STATE_REFRESH_PENDING" : "COMPLETED",
               requestId: options.requestId,
               requestHash: payloadHash,

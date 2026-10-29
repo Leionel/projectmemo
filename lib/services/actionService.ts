@@ -9,25 +9,27 @@ import { db } from "@/lib/db";
 import { requireProject } from "@/lib/repositories/projects";
 import { saveAgentRun } from "@/lib/repositories/agent";
 import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateService";
+import type { Prisma } from "@/lib/generated/prisma/client";
+import { jsonHash } from "@/lib/mission/contracts";
 
 const vectorStore = new KeywordVectorStore();
 
-export async function completeProjectAction(projectId: string, actionId: string, resultText: string) {
+export const actionResultVersion = (action: { id: string; projectId: string; status: string; updatedAt: Date; resultCardId: string | null; isSimulated: boolean }) =>
+  jsonHash({ id: action.id, projectId: action.projectId, status: action.status, updatedAt: action.updatedAt, resultCardId: action.resultCardId, isSimulated: action.isSimulated });
+/** Prepare outside the write transaction; callers can explicitly select local rules. */
+export async function prepareActionResult(projectId: string, actionId: string, resultText: string, localOnly = false) {
   const cleanResult = resultText.trim();
   if (cleanResult.length < 5) throw new AppError("INVALID_ACTION_RESULT", "请至少填写 5 个字的完成结果", 400);
   if (cleanResult.length > 2000) throw new AppError("INVALID_ACTION_RESULT", "完成结果不能超过 2000 个字", 400);
   const action = await findAction(projectId, actionId);
   if (action.isSimulated) throw new AppError("SIMULATED_ACTION", "演示模拟行动不会写入真实复盘，请清除模拟后再执行", 409);
-  if (action.status === ActionStatus.DONE && action.resultCardId) {
-    const card = await db.knowledgeCard.findUnique({ where: { id: action.resultCardId } });
-    return { ...action, resultCard: card, stateRefreshPending: false };
-  }
   if (action.status === ActionStatus.CANCELLED) throw new AppError("ACTION_CANCELLED", "已取消的行动不能完成", 409);
 
   const project = await requireProject(projectId);
   const existingCards = await loadRecentCards(projectId);
   const historyKeywords = [...new Set(existingCards.flatMap((card) => card.keywords))].slice(0, 30);
-  const draft = await structureCapture({
+  const draft = localOnly ? { type: "reflection" as const, title: action.title.slice(0, 100) + " · 行动复盘", summary: cleanResult,
+    keywords: [] as string[], relatedTasks: [] as string[], nextActions: [] as string[], importance: 3 } : await structureCapture({
     project,
     rawText: cleanResult,
     historyKeywords,
@@ -36,19 +38,25 @@ export async function completeProjectAction(projectId: string, actionId: string,
   const links = await vectorStore.search(draft, existingCards, 3);
   const captureId = randomUUID();
   const cardId = randomUUID();
-  const startedAt = Date.now();
-  const result = await db.$transaction(async (tx) => {
+  return { projectId, actionId, cleanResult, draft, links, captureId, cardId, actionVersion: actionResultVersion(action) };
+}
+export type PreparedActionResult = Awaited<ReturnType<typeof prepareActionResult>>;
+export async function commitActionResult(tx: Prisma.TransactionClient, prepared: PreparedActionResult, guard?: () => Promise<void>) {
+    const { projectId, actionId, cleanResult, draft, links, captureId, cardId } = prepared;
+    await guard?.();
     // 事务内原子检查：防止并发调用导致创建多张复盘卡
     const currentAction = await tx.actionItem.findUnique({
       where: { id: actionId },
     });
-    if (!currentAction) throw new AppError("ACTION_NOT_FOUND", "行动不存在", 404);
+    if (!currentAction || currentAction.projectId !== projectId) throw new AppError("ACTION_NOT_FOUND", "行动不存在", 404);
+    if (currentAction.isSimulated || currentAction.status === ActionStatus.CANCELLED) throw new AppError("ACTION_CHANGED", "行动已取消或属于模拟数据", 409);
     if (currentAction.status === ActionStatus.DONE && currentAction.resultCardId) {
       const existingCard = await tx.knowledgeCard.findUnique({
         where: { id: currentAction.resultCardId },
       });
       return { card: existingCard, updatedAction: currentAction, alreadyDone: true };
     }
+    if (actionResultVersion(currentAction) !== prepared.actionVersion) throw new AppError("ACTION_CHANGED", "行动已变化，请重新核对完成结果", 409);
 
     await tx.capture.create({
       data: { id: captureId, projectId, rawText: cleanResult, sourceType: "Agent行动回执" },
@@ -86,15 +94,24 @@ export async function completeProjectAction(projectId: string, actionId: string,
         completedAt: new Date(),
       },
     });
-    if (action.sourceInterventionId) {
+    if (currentAction.sourceInterventionId) {
       await tx.agentIntervention.update({
-        where: { id: action.sourceInterventionId },
+        where: { id: currentAction.sourceInterventionId },
         data: { status: InterventionStatus.RESOLVED, handledAt: new Date() },
       });
     }
     await tx.project.update({ where: { id: projectId }, data: { updatedAt: new Date() } });
     return { card, updatedAction, alreadyDone: false };
-  });
+}
+export async function completeProjectAction(projectId: string, actionId: string, resultText: string) {
+  const startedAt = Date.now();
+  if (resultText.trim().length < 5) throw new AppError("INVALID_ACTION_RESULT", "请至少填写 5 个字的完成结果", 400);
+  if (resultText.trim().length > 2000) throw new AppError("INVALID_ACTION_RESULT", "完成结果不能超过 2000 个字", 400);
+  const action = await findAction(projectId, actionId);
+  if (action.status === "DONE" && action.resultCardId && !action.isSimulated) return { ...action,
+    resultCard: await db.knowledgeCard.findUnique({ where: { id: action.resultCardId } }), stateRefreshPending: false };
+  const prepared = await prepareActionResult(projectId, actionId, resultText);
+  const result = await db.$transaction(tx => commitActionResult(tx, prepared));
   if (result.alreadyDone) {
     return { ...result.updatedAction, resultCard: result.card, stateRefreshPending: false };
   }
@@ -110,7 +127,7 @@ export async function completeProjectAction(projectId: string, actionId: string,
     trace: {
       actionId,
       resultCardId: result.card?.id ?? null,
-      linkedCardIds: links.map((link) => link.relatedCardId),
+      linkedCardIds: prepared.links.map((link) => link.relatedCardId),
       rule: "completed_action_creates_reflection_card",
     },
     durationMs: Date.now() - startedAt,

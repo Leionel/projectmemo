@@ -258,24 +258,24 @@ export function ActionReminderPanel({
   return <div className="mt-2 rounded-md border border-[var(--rule)] bg-[var(--paper-strong)] p-3">
     <div className="flex flex-wrap items-start justify-between gap-2">
       <div className="min-w-0">
-        <p className="text-[11px] font-black text-[var(--navy)]">日历提醒</p>
+        <p className="text-xs font-black text-[var(--navy)]">日历提醒</p>
         <p className="mt-1 text-xs font-bold text-[var(--ink-soft)]">{state.statusLabel}</p>
-        <p className="mt-0.5 text-[11px] leading-5 text-[var(--muted)]">{state.statusDetail}</p>
-        {state.reminder?.reminderAt && <p className="mt-1 text-[11px] text-[var(--muted)]">
+        <p className="mt-0.5 text-xs leading-5 text-[var(--muted)]">{state.statusDetail}</p>
+        {state.reminder?.reminderAt && <p className="mt-1 text-xs text-[var(--muted)]">
           忆程里的计划时间：{new Date(state.reminder.reminderAt).toLocaleString("zh-CN", { hour12: false })} · 持续 {state.durationMinutes} 分钟
         </p>}
-        {state.planBlock && <p className="mt-1 text-[11px] text-[var(--muted)]">
+        {state.planBlock && <p className="mt-1 text-xs text-[var(--muted)]">
           已确认的排程时段：{new Date(state.planBlock.start).toLocaleString("zh-CN", { hour12: false })}（这条来自「安排未来 7 天」）
         </p>}
-        {state.reminder?.error && <p className="mt-1 text-[11px] font-semibold text-[var(--brick)]">上次失败原因：{state.reminder.error}</p>}
+        {state.reminder?.error && <p className="mt-1 text-xs font-semibold text-[var(--brick)]">上次失败原因：{state.reminder.error}</p>}
       </div>
       {onClose && <button type="button" onClick={onClose} aria-label="收起提醒设置" className="focus-ring shrink-0 rounded-lg p-1.5 text-[var(--muted)] hover:bg-[var(--card-bg)]"><X size={14} /></button>}
     </div>
 
-    {message && <p role="status" className="mt-2 rounded-lg bg-[var(--teal-pale)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--teal-strong)]">{message}</p>}
-    {error && <p role="alert" className="mt-2 rounded-lg bg-[var(--brick-pale)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--brick)]">{error}</p>}
+    {message && <p role="status" className="mt-2 rounded-lg bg-[var(--teal-pale)] px-2.5 py-1.5 text-xs font-semibold text-[var(--teal-strong)]">{message}</p>}
+    {error && <p role="alert" className="mt-2 rounded-lg bg-[var(--brick-pale)] px-2.5 py-1.5 text-xs font-semibold text-[var(--brick)]">{error}</p>}
 
-    <dl className="mt-2 grid gap-1 text-[11px] leading-5">
+    <dl className="mt-2 grid gap-1 text-xs leading-5">
       <div className="flex flex-wrap gap-x-1.5">
         <dt className="font-bold text-[var(--ink-soft)]">计划时间：</dt>
         <dd className="text-[var(--muted)]">{decision.planStateLabel}</dd>
@@ -290,23 +290,23 @@ export function ActionReminderPanel({
       </div>
     </dl>
 
-    {decision.reason && <p className="mt-2 flex items-start gap-1.5 rounded-lg bg-[var(--amber)]/10 px-2.5 py-1.5 text-[11px] font-semibold text-[var(--amber)]">
+    {decision.reason && <p className="mt-2 flex items-start gap-1.5 rounded-lg bg-[var(--amber)]/10 px-2.5 py-1.5 text-xs font-semibold text-[var(--amber)]">
       <AlertTriangle size={13} className="mt-0.5 shrink-0" />{decision.reason}
     </p>}
 
-    {decision.requiresHarmonyDevice && <p className="mt-2 rounded-lg bg-[var(--paper-strong)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--ink-soft)]">
+    {decision.requiresHarmonyDevice && <p className="mt-2 rounded-lg bg-[var(--paper-strong)] px-2.5 py-1.5 text-xs font-semibold text-[var(--ink-soft)]">
       浏览器不能读写系统日历，因此设备上的日程只能在鸿蒙客户端处理；忆程只会清理自己创建、「忆程·」开头的日程。
     </p>}
 
-    {!decision.requiresHarmonyDevice && planAwaitingDeviceWrite && <p className="mt-2 rounded-lg bg-[var(--paper-strong)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--ink-soft)]">
+    {!decision.requiresHarmonyDevice && planAwaitingDeviceWrite && <p className="mt-2 rounded-lg bg-[var(--paper-strong)] px-2.5 py-1.5 text-xs font-semibold text-[var(--ink-soft)]">
       计划时间只保存在忆程里。浏览器不能写系统日历，要收到设备提醒，请在鸿蒙客户端打开这条待办完成日历写入；在那之前设备日历一栏会一直显示「还没有写进设备日历」。
     </p>}
 
-    {needsPermissionHelp && <p className="mt-2 rounded-lg bg-[var(--amber)]/10 px-2.5 py-1.5 text-[11px] font-semibold text-[var(--amber)]">
+    {needsPermissionHelp && <p className="mt-2 rounded-lg bg-[var(--amber)]/10 px-2.5 py-1.5 text-xs font-semibold text-[var(--amber)]">
       重新授权方式：在手机「设置 → 应用 → 忆程 → 权限」里允许「日历」的读取与写入，然后回到鸿蒙客户端重试写入。
     </p>}
 
-    {unsupported && <p className="mt-2 rounded-lg bg-[var(--paper-strong)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--ink-soft)]">
+    {unsupported && <p className="mt-2 rounded-lg bg-[var(--paper-strong)] px-2.5 py-1.5 text-xs font-semibold text-[var(--ink-soft)]">
       这台设备不支持系统日历，忆程只保存项目内的计划时间，不会有设备级提醒。
     </p>}
 
@@ -320,7 +320,7 @@ export function ActionReminderPanel({
           className="focus-ring w-full rounded-lg border border-[var(--rule)] bg-[var(--card-bg)] px-2.5 py-1.5 text-xs"
         />
       </label>
-      <label className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--ink-soft)]">
+      <label className="flex items-center gap-1.5 text-xs font-semibold text-[var(--ink-soft)]">
         持续
         <input
           type="number"
@@ -338,7 +338,7 @@ export function ActionReminderPanel({
       </button>
     </div>}
 
-    <p className="mt-1.5 text-[11px] leading-5 text-[var(--muted)]">
+    <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">
       默认持续 30 分钟，在事件开始时提醒；系统日历里的日程标题以「忆程·」开头，便于区分你自己的日程。
       {state.permissionPurpose ? ` ${state.permissionPurpose}` : ""}
     </p>
@@ -350,7 +350,7 @@ export function ActionReminderPanel({
       {(status === "FAILED" || status === "MISSING") && <button type="button" onClick={() => void retryDeviceWrite()} disabled={busy !== null} className="focus-ring editorial-button-secondary text-xs disabled:opacity-50">
         {busy === "retry" ? <LoaderCircle size={14} className="animate-spin" /> : <RefreshCw size={14} />}记录为待重试
       </button>}
-      {status === "SYNCED" && <span className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--teal-pale)] px-2.5 py-1.5 text-[11px] font-bold text-[var(--teal-strong)]"><Check size={13} />设备日历已写入</span>}
+      {status === "SYNCED" && <span className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--teal-pale)] px-2.5 py-1.5 text-xs font-bold text-[var(--teal-strong)]"><Check size={13} />设备日历已写入</span>}
     </div>
   </div>;
 }

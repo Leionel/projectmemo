@@ -90,7 +90,12 @@ enum CardRelationType {
 }
 
 model Project {
+  impactJobs ProjectImpactJob[]
+  decisionProposals DecisionScenarioProposal[]
   missionArtifactReceipts MissionArtifactReceipt[]
+  experiences AgentExperience[]
+  sourceConnections SourceConnection[]
+  externalSignals ExternalSignal[]
   missions AgentMission[]
   id          String              @id @default(cuid())
   title       String
@@ -260,6 +265,7 @@ model AgentIntervention {
 }
 
 model ActionItem {
+  anchorWatches ConversationAnchorAction[]
   id                   String               @id @default(cuid())
   projectId            String
   sourceInterventionId String?
@@ -294,7 +300,10 @@ model ActionItem {
 
 model AgentRun {
   id             String          @id @default(cuid())
-  projectId      String
+  projectId      String?
+  conversationId String?
+  turnId         String?
+  conversation   Conversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   runType        AgentRunType
   status         AgentRunStatus
   provider       String
@@ -306,28 +315,211 @@ model AgentRun {
   // 会议提案的唯一执行权。普通 CAPTURE 回执保持 NULL。
   confirmedAt    DateTime?
   createdAt      DateTime        @default(now())
-  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project        Project?        @relation(fields: [projectId], references: [id], onDelete: Cascade)
   messages       AgentMessage[]
   missionSteps   AgentMissionStep[]
+  copilotExecutions CopilotToolExecution[]
 
   @@index([projectId, createdAt])
   @@index([projectId, runType])
   @@unique([provider, externalRequestId])
 }
 
+/// A fixed Copilot proposal's preparation/consumption receipt, not another Agent runtime.
+model CopilotToolExecution {
+  id                String   @id @default(cuid())
+  sourceRunId       String
+  proposalKey       String
+  tool              String
+  proposalJson      Json
+  proposalHash      String
+  sourceManifestHash String
+  confirmationHash  String?
+  status            String   @default("PENDING")
+  leaseToken        String?
+  leaseUntil        DateTime?
+  resultId          String?
+  committedAt       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  sourceRun         AgentRun @relation(fields: [sourceRunId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceRunId, proposalKey])
+  @@index([status, leaseUntil])
+}
+
 model AgentMessage {
+  anchorProjection ConversationAnchorProjection?
   id              String            @id @default(cuid())
-  projectId       String
+  projectId       String?
+  conversationId  String?
+  turnId          String?
+  seq             Int?
+  blocksJson      Json?
+  conversation    Conversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   role            AgentMessageRole
   content         String
   citations       Json
   proposedActions Json
   runId           String?
+  ownerUserId     String?
+  requestId       String?
+  requestState    String?
   createdAt       DateTime          @default(now())
-  project         Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project         Project?          @relation(fields: [projectId], references: [id], onDelete: Cascade)
   run             AgentRun?         @relation(fields: [runId], references: [id], onDelete: SetNull)
 
   @@index([projectId, createdAt])
+  @@unique([projectId, ownerUserId, requestId, role])
+  @@unique([conversationId, seq])
+  @@unique([turnId, role])
+}
+
+/// 私有讨论；任务生命周期仍属于 AgentMission。
+model Conversation {
+  id String @id @default(cuid())
+  ownerUserId String
+  createRequestId String
+  createInputHash String
+  scope String
+  homeProjectId String?
+  title String @default("新讨论")
+  status String @default("ACTIVE")
+  version Int @default(1)
+  nextSeq Int @default(0)
+  activeTurnId String?
+  focusJson Json @default("{}")
+  researchScopeJson Json @default("{}")
+  researchScopeVersion Int @default(1)
+  pinnedStateJson Json @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  owner User @relation(fields:[ownerUserId], references:[id], onDelete:Cascade)
+  messages AgentMessage[]
+  runs AgentRun[]
+  turns ConversationTurn[]
+  bindings ConversationBinding[]
+  projects ConversationProject[]
+  anchors ConversationAnchor[]
+  @@unique([ownerUserId,createRequestId])
+  @@index([ownerUserId,updatedAt])
+}
+
+model ConversationTurn {
+  id String @id @default(cuid())
+  conversationId String
+  requestId String
+  inputHash String
+  inputJson Json
+  baseVersion Int
+  status String @default("ACCEPTED")
+  sessionId String?
+  leaseToken String?
+  leaseUntil DateTime?
+  callCount Int @default(0)
+  reservationJson Json @default("[]")
+  readManifestJson Json @default("{}")
+  usageJson Json @default("[]")
+  errorJson Json?
+  createdAt DateTime @default(now())
+  finishedAt DateTime?
+  conversation Conversation @relation(fields:[conversationId],references:[id],onDelete:Cascade)
+  @@unique([conversationId,requestId])
+  @@index([status,leaseUntil])
+}
+
+model ConversationBinding {
+  id String @id @default(cuid())
+  conversationId String
+  projectId String
+  kind String
+  entityId String
+  revisionKey String
+  valueJson Json
+  conversation Conversation @relation(fields:[conversationId],references:[id],onDelete:Cascade)
+  @@unique([conversationId,kind,entityId,revisionKey])
+  @@index([conversationId,projectId])
+}
+
+model ConversationProject {
+  conversationId String
+  projectId String
+  conversation Conversation @relation(fields:[conversationId],references:[id],onDelete:Cascade)
+  @@id([conversationId,projectId])
+}
+
+/// 用户显式进入后锚定；明确关注才投影后续原事件，不发送系统通知。
+model ConversationAnchor {
+  id String @id @default(cuid())
+  ownerUserId String
+  conversationId String
+  projectId String
+  originKind String
+  originId String
+  topicKey String @default("DISCUSS")
+  originRevision String
+  rootKey String? @unique
+  missionId String?
+  originEntryJson Json @default("{}")
+  mode String @default("MANUAL")
+  version Int @default(1)
+  snoozedUntil DateTime?
+  eventCursor Int @default(0)
+  projectedSeq Int @default(0)
+  seenSeq Int @default(0)
+  lastSyncedAt DateTime?
+  projections ConversationAnchorProjection[]
+  actionWatches ConversationAnchorAction[]
+  conversation Conversation @relation(fields:[conversationId],references:[id],onDelete:Cascade)
+  @@unique([ownerUserId,originKind,originId,topicKey])
+  @@index([ownerUserId,conversationId,mode])
+}
+
+model ConversationAnchorProjection {
+  id String @id @default(cuid())
+  anchorId String
+  revisionKey String
+  seq Int?
+  messageId String? @unique
+  message AgentMessage? @relation(fields:[messageId],references:[id],onDelete:SetNull)
+  payloadJson Json
+  createdAt DateTime @default(now())
+  anchor ConversationAnchor @relation(fields:[anchorId],references:[id],onDelete:Cascade)
+  @@unique([anchorId,revisionKey])
+  @@unique([anchorId,seq])
+}
+
+model ConversationAnchorAction {
+  anchorId String
+  actionId String
+  lastCheckedAt DateTime?
+  observedStatus String?
+  observedResultCardId String?
+  anchor ConversationAnchor @relation(fields:[anchorId],references:[id],onDelete:Cascade)
+  action ActionItem @relation(fields:[actionId],references:[id],onDelete:Cascade)
+  @@id([anchorId,actionId])
+  @@index([anchorId,lastCheckedAt])
+}
+
+model ConversationEntryRequest {
+  ownerUserId String
+  requestId String
+  inputHash String
+  conversationId String
+  @@id([ownerUserId,requestId])
+}
+
+model FocusProjectPreference {
+  id String @id @default(cuid())
+  userId String
+  projectId String
+  importance Int?
+  longTermGoal String @default("")
+  estimatedMinutes Int?
+  notes String @default("")
+  version Int @default(1)
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  @@unique([userId,projectId])
 }
 
 model CardEmbedding {
@@ -807,6 +999,15 @@ model DeliverableEvidence {
 }
 
 model User {
+  continuitySeq Int @default(0)
+  directiveEvents AgentDirectiveEvent[]
+  conversations Conversation[]
+  focusPreferences FocusProjectPreference[]
+  decisionProposals DecisionScenarioProposal[]
+  goalQuestionPreferences GoalQuestionPreference[]
+  experiences AgentExperience[]
+  sourceConnections SourceConnection[]
+  externalSignals ExternalSignal[]
   missions AgentMission[]
   id           String              @id @default(cuid())
   username     String              @unique
@@ -816,8 +1017,76 @@ model User {
   updatedAt    DateTime            @updatedAt
   sessions     AuthSession[]
   memberships  ProjectMembership[]
+  security     AccountSecurity?
+  accountTokens AccountToken[]
+  cloudUsage   AccountCloudUsage[]
 
   @@index([username])
+}
+
+// User-owned work guidance, not project facts or tool authorization.
+model AgentDirectiveEvent {
+  id String @id @default(cuid())
+  ownerUserId String
+  seq Int
+  commandId String
+  eventIndex Int @default(0)
+  inputHash String
+  directiveId String
+  previousEventId String?
+  projectId String
+  conversationId String?
+  missionId String?
+  kind String
+  operation String
+  quote String
+  sourceJson Json
+  admissionJson Json
+  sourceIdsJson Json @default("[]")
+  validFrom DateTime
+  validUntil DateTime?
+  timezone String
+  createdAt DateTime @default(now())
+  owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
+  @@unique([ownerUserId,seq])
+  @@unique([ownerUserId,commandId,eventIndex])
+  @@index([ownerUserId,projectId,seq])
+  @@index([ownerUserId,directiveId,seq])
+}
+
+model AccountSecurity {
+  userId String @id
+  email String @unique
+  emailVerifiedAt DateTime?
+  dailyCloudLimit Int @default(0)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuthRequestLimit {
+  key String @id
+  count Int
+  expiresAt DateTime
+  @@index([expiresAt])
+}
+
+model AccountToken {
+  id String @id @default(cuid())
+  userId String
+  tokenHash String @unique
+  purpose String
+  expiresAt DateTime
+  usedAt DateTime?
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, purpose])
+}
+
+model AccountCloudUsage {
+  userId String
+  day String
+  used Int @default(0)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@id([userId, day])
 }
 
 model AuthSession {
@@ -839,6 +1108,7 @@ model ProjectMembership {
   userId    String
   projectId String
   role      String   @default("OWNER")
+  focusMissionId String?
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -849,7 +1119,11 @@ model ProjectMembership {
 }
 
 model AgentMission {
+ decisionProposals DecisionScenarioProposal[]
+ impactEffects ProjectImpactEffect[]
+ goalQuestionPreferences GoalQuestionPreference[]
  artifactReceipts MissionArtifactReceipt[]
+ experienceUses AgentExperienceUse[]
  id String @id @default(cuid())
  ownerUserId String
  projectId String
@@ -1009,4 +1283,201 @@ model MissionArtifactReceipt {
  @@unique([outputId,artifactType])
  @@unique([createdByUserId,requestId])
  @@index([projectId,createdAt])
+}
+
+model ProjectImpactJob {
+ id String @id @default(cuid())
+ projectId String
+ mutationReceiptId String
+ ruleVersion String @default("impact-v1")
+ rootsJson Json
+ status String @default("PENDING")
+ attempts Int @default(0)
+ nextAttemptAt DateTime @default(now())
+ resultJson Json?
+ lastError String?
+ createdAt DateTime @default(now())
+ project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
+ effects ProjectImpactEffect[]
+ @@unique([projectId,mutationReceiptId])
+ @@index([status,nextAttemptAt])
+}
+model ProjectImpactEffect {
+ id String @id @default(cuid())
+ jobId String
+ missionId String
+ oldPlanRevision Int
+ newPlanRevision Int
+ createdAt DateTime @default(now())
+ job ProjectImpactJob @relation(fields:[jobId],references:[id],onDelete:Cascade)
+ mission AgentMission @relation(fields:[missionId],references:[id],onDelete:Cascade)
+ @@unique([jobId,missionId])
+}
+model DecisionScenarioProposal {
+ reviewRequests DecisionReviewRequest[]
+ id String @id @default(cuid())
+ projectId String
+ missionId String
+ ownerUserId String
+ createRequestId String
+ purpose String @default("FIXED_SCENARIOS")
+ reviewKey String?
+ reviewStateJson Json?
+ inputHash String
+ inputJson Json
+ baseManifest Json
+ scenariosJson Json
+ proposalHash String
+ status String @default("READY")
+ expiresAt DateTime
+ revision Int @default(1)
+ parentId String?
+ confirmRequestId String?
+ confirmHash String?
+ selectedKey String?
+ receiptJson Json?
+ createdAt DateTime @default(now())
+ project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
+ mission AgentMission @relation(fields:[missionId],references:[id],onDelete:Cascade)
+ owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
+ @@unique([ownerUserId,createRequestId])
+ @@unique([ownerUserId,confirmRequestId])
+ @@unique([ownerUserId,purpose,reviewKey])
+ @@index([missionId,purpose,createdAt])
+ @@index([parentId,purpose])
+ @@index([missionId,createdAt])
+}
+model DecisionReviewRequest {
+ ownerUserId String
+ requestId String
+ inputHash String
+ proposalId String
+ proposal DecisionScenarioProposal @relation(fields:[proposalId], references:[id], onDelete:Cascade)
+ @@id([ownerUserId,requestId])
+}
+model GoalQuestionPreference {
+ id String @id @default(cuid())
+ userId String
+ missionId String
+ questionId String
+ mode String
+ contextHash String
+ snoozedUntil DateTime?
+ updatedAt DateTime @updatedAt
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ mission AgentMission @relation(fields:[missionId],references:[id],onDelete:Cascade)
+ @@unique([userId,missionId,questionId])
+}
+
+// P3-A 项目内经验：一类成功工作方法（WORKFLOW）、一类失败防护（GUARDRAIL）。
+// 只以建议形式注入，不授予写入权限；样本不足时保持 CANDIDATE/SHADOW，激活必须由用户发起。
+model AgentExperience {
+ id String @id @default(cuid())
+ projectId String
+ ownerUserId String
+ kind String
+ patternHash String
+ title String
+ statement String
+ applicabilityJson Json
+ toolVersionsJson Json @default("{}")
+ protocolVersionsJson Json @default("[]")
+ counterExamplesJson Json @default("[]")
+ status String @default("CANDIDATE")
+ sampleMissionIdsJson Json @default("[]")
+ supportCount Int @default(0)
+ counterCount Int @default(0)
+ activatedAt DateTime?
+ revokedAt DateTime?
+ revokedReason String?
+ schemaVersion Int @default(1)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
+ owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
+ uses AgentExperienceUse[]
+ @@unique([projectId,ownerUserId,kind,patternHash])
+ @@index([projectId,status])
+}
+
+// 经验使用记录：撤销/失效/版本不兼容后停止新注入，但历史使用记录保留。
+model AgentExperienceUse {
+ id String @id @default(cuid())
+ experienceId String
+ missionId String
+ stage String
+ contextHash String?
+ injectedAt DateTime @default(now())
+ experience AgentExperience @relation(fields:[experienceId],references:[id],onDelete:Cascade)
+ mission AgentMission @relation(fields:[missionId],references:[id],onDelete:Cascade)
+ @@unique([experienceId,missionId,stage])
+ @@index([experienceId,injectedAt])
+}
+
+// P3-B 单仓库只读感知：连接与信号分层。信号只是候选资料（未采纳零事实写入），
+// 采纳须用户确认且只产生 Capture 记录与可选行动关联；CI/commit 不构成现实完成证明。
+model SourceConnection {
+ id String @id @default(cuid())
+ projectId String
+ ownerUserId String
+ repo String
+ ref String
+ signalKind String @default("COMMITS")
+ status String @default("ACTIVE")
+ revokedAt DateTime?
+ revokedReason String?
+ etag String?
+ cursorSha String?
+ revision Int @default(0)
+ scanHeadSha String?
+ scanNextPage Int?
+ scanEtag String?
+ lastFetchedAt DateTime?
+ lastStatus String?
+ lastError String?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
+ owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
+ signals ExternalSignal[]
+ @@unique([projectId,repo,ref])
+ @@index([projectId,status])
+}
+
+model ExternalSignal {
+ id String @id @default(cuid())
+ connectionId String
+ projectId String
+ ownerUserId String
+ sha String
+ kind String @default("COMMITS")
+ title String
+ authorName String
+ committedAt DateTime?
+ url String
+ status String @default("CANDIDATE")
+ adoptedByUserId String?
+ adoptedAt DateTime?
+ adoptedCaptureId String?
+ linkedActionId String?
+ fetchedAt DateTime @default(now())
+ connection SourceConnection @relation(fields:[connectionId],references:[id],onDelete:Cascade)
+ project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
+ owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
+ commands RepoSignalCommand[]
+ @@unique([connectionId,sha])
+ @@index([projectId,status,committedAt])
+}
+
+// 同一用户 requestId 绑定固定信号/载荷，业务与回执同事务提交。
+model RepoSignalCommand {
+ id String @id @default(cuid())
+ signalId String
+ ownerUserId String
+ requestId String
+ payloadHash String
+ resultJson Json
+ createdAt DateTime @default(now())
+ signal ExternalSignal @relation(fields:[signalId],references:[id],onDelete:Cascade)
+ @@unique([ownerUserId,requestId])
 }

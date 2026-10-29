@@ -1,4 +1,11 @@
+import { ProjectImpactPanel } from '../components/ProjectImpactPanel';
+import { CopilotContinuationCard } from '../components/CopilotContinuationCard';
+import { SessionStore } from '../services/SessionStore';
+import { ProjectAgentContext } from '../models/ProjectAgentContext';
+import { ProjectAgentContextService } from '../services/ProjectAgentContextService';
+import { EvidenceAssessment, evidenceAssessmentText } from '../models/Copilot';
 import router from '@ohos.router';
+import { FocusAgentLauncher } from '../components/FocusAgentLauncher';
 import promptAction from '@ohos.promptAction';
 import pasteboard from '@ohos.pasteboard';
 import { photoAccessHelper } from '@kit.MediaLibraryKit';
@@ -12,6 +19,7 @@ import { ActionCreateInput, ActionItem } from '../models/Action';
 import { ArtifactItem } from '../models/Artifact';
 import { AgentMessage, AgentCitation, EvidenceClaim, ProjectEvidenceRef, ActionCreatePayload, ArtifactGeneratePayload } from '../models/Copilot';
 import { Attachment } from '../models/Attachment';
+import { attachmentSize, attachmentStatus } from '../common/AttachmentPresentation';
 
 import { ProjectService } from '../services/ProjectService';
 import { InterventionService } from '../services/InterventionService';
@@ -20,6 +28,7 @@ import { MemoryLifecycleService } from '../services/MemoryLifecycleService';
 import { InterventionPolicyService } from '../services/InterventionPolicyService';
 import { ProjectStateService } from '../services/ProjectStateService';
 import { MeetingImportSheet } from '../components/MeetingImportSheet';
+import { deadlineReminderConflict } from '../common/GlobalFocusPresentation';
 import { DateOnly } from '../common/DateOnly';
 import { PolicyResponse, PolicySuggestion, PolicyUpdateBody } from '../models/Intervention';
 import { ActionService } from '../services/ActionService';
@@ -50,6 +59,8 @@ import {
   PaperclipIcon
 } from '../components/PMIcons';
 import { PMAppBar } from '../components/PMAppBar';
+import { ConversationService } from '../services/ConversationService';
+import { PMButton, PMPageIntro, PMStatusPill, PMListRow } from '../components/PMReferencePrimitives';
 import { TextFormatters } from '../common/TextFormatters';
 import { MarkdownView } from '../components/MarkdownView';
 import { DeadlineBadge } from '../components/DeadlineBadge';
@@ -71,6 +82,7 @@ import { AttachmentCorrectionModal } from '../components/AttachmentCorrectionMod
 import { ExportFormatter } from '../common/ExportFormatter';
 import { DeviceIdentity } from '../common/DeviceIdentity';
 import { MissionPanel } from '../components/MissionPanel';
+import { MissionService } from '../services/MissionService';
 import { MissionWorkspaceItem, MissionWorkspaceSummary } from '../models/Mission';
 import { missionStatusLabel } from '../common/MissionContract';
 import { selectProjectFocus } from '../common/ProjectAttention';
@@ -80,10 +92,16 @@ import { ProjectEvolutionPanel } from '../components/ProjectEvolutionPanel';
 @Component
 struct ProjectHome {
   @State projectId: string = '';
+  @State private focusConversationId: string = '';
+  @State private focusAgentEnabled: boolean = false;
   @State currentTabIndex: number = 0;
   @State missionRefreshKey: number = 0;
   @State showProjectStatus: boolean = false;
   @State showQuickCopilot: boolean = false;
+  @State private agentContext: ProjectAgentContext | null = null;
+  @State private agentContextError: string = '';
+  private agentContextGeneration: number = 0;
+  private agentContextExpired: () => void = () => { this.agentContextGeneration++; this.agentContext = null; this.homeMission = null; this.chatMessages = []; this.copilotTurnId = ''; this.copilotTurnText = ''; this.copilotQuestion = ''; this.agentContextError = '登录已失效，请重新登录。'; };
   @State homeMission: MissionWorkspaceItem | null = null;
   @State showEvolution: boolean = false;
   @StorageProp(PMStorageKey.WIDTH_BP) widthBp: string = PMWidthBp.SM;
@@ -97,6 +115,11 @@ struct ProjectHome {
   @State chatMessages: AgentMessage[] = [];
   @State milestones: Milestone[] = [];
   @State attachments: Attachment[] = [];
+  @State materialsMode: string = 'memory';
+  @State attachmentSearch: string = '';
+  @State attachmentLoadError: string = '';
+  @State actionStatusFilter: string = 'ALL';
+  @State lastUploadedAttachmentId: string = '';
   @State milestoneLoadError: string = '';
 
   // 通用状态
@@ -109,6 +132,11 @@ struct ProjectHome {
   @State rawText: string = '';
   @State sourceType: string = '随手记录';
   @State captureRequestId: string = '';
+  @State materialMissionId: string = '';
+  @State materialQuestionId: string = '';
+  @State materialQuestion: string = '';
+  @State materialSourceId: string = '';
+  private materialOwnerId: string = '';
   @State isCapturing: boolean = false;
   @State captureError: string = '';
   @State isUploadingAttachment: boolean = false;
@@ -244,13 +272,31 @@ struct ProjectHome {
     '随手记录', '论文笔记', '代码报错', '实验记录', '会议纪要', '老师建议', '参赛材料'
   ];
 
+  aboutToDisappear(): void { this.agentContextGeneration++; SessionStore.offSessionExpired(this.agentContextExpired); }
+
   aboutToAppear(): void {
+    SessionStore.onSessionExpired(this.agentContextExpired);
     const params: Record<string, string> | undefined = router.getParams() as Record<string, string>;
     if (params === undefined || params === null) {
       this.routeError = '页面参数缺失，无法定位项目';
       return;
     }
     this.projectId = params['projectId'] ?? '';
+    this.focusConversationId = params['conversationId'] ?? '';
+    const focusToken = SessionStore.getToken();
+    new ConversationService().capabilities().then(v => { if (focusToken === SessionStore.getToken()) this.focusAgentEnabled = v.enabled; }).catch(() => {});
+    this.showQuickCopilot = params['openCopilot'] === '1';
+    this.materialMissionId = params['materialMissionId'] ?? '';
+    this.materialQuestionId = params['materialQuestionId'] ?? '';
+    this.materialOwnerId = SessionStore.getUser().id;
+    if (this.materialMissionId !== '' && this.materialQuestionId !== '') {
+      this.currentTabIndex = 1; this.entrySheetMode = 'capture'; this.showEntrySheet = true;
+      this.loadMaterialQuestion();
+    }
+    this.sourceConversationRun = params['sourceRunId'] ?? '';
+    this.requestedArtifactId = params['artifactId'] ?? '';
+    if (this.requestedArtifactId !== '') this.currentTabIndex = 4;
+
     if (this.projectId !== '') WidgetDataService.selectProject(getContext(this), this.projectId).catch(() => {});
     if (params['tab'] === 'memory') {
       this.currentTabIndex = 1;
@@ -334,6 +380,7 @@ struct ProjectHome {
       this.isArtifactReader = false;
       return true;
     }
+    if (this.materialMissionId !== '') { this.returnToMaterialQuestion(); return true; }
     return false;
   }
 
@@ -410,12 +457,16 @@ struct ProjectHome {
   }
 
   private async uploadAttachment(uri: string, fileName: string, mimeType: string): Promise<void> {
+    const uploadToken = SessionStore.getToken();
     this.isUploadingAttachment = true;
     this.attachmentRetryId = '';
     this.attachmentFeedbackTone = 'info';
     this.attachmentFeedback = '正在上传并提取内容…';
     try {
       const result = await this.attachmentService.upload(this.projectId, uri, fileName, mimeType);
+      if (uploadToken !== SessionStore.getToken()) return;
+      this.lastUploadedAttachmentId = result.attachment.id;
+      if (this.materialOwnerId === SessionStore.getUser().id) this.materialSourceId = `attachment:${result.attachment.id}`;
       if (result.isDuplicate && result.attachment.extractionStatus === 'SUCCESS') {
         this.attachmentFeedback = '该附件已存在，已复用原记录';
         this.attachmentFeedbackTone = 'success';
@@ -425,11 +476,11 @@ struct ProjectHome {
         this.attachmentFeedbackTone = result.attachment.extractionStatus === 'NEEDS_OCR' ? 'warning' : 'error';
         this.attachmentRetryId = result.attachment.id;
       } else if (result.attachment.extractionStatus === 'SUCCESS') {
-        this.attachmentFeedback = '附件已归档并沉淀为项目记忆';
+        this.attachmentFeedback = '附件已保存并生成记忆，可在资料页查看原件';
         this.attachmentFeedbackTone = 'success';
         this.injectExtractedIntoMeeting(result.attachment.extractedText);
       } else if (result.attachment.extractionStatus === 'NEEDS_OCR') {
-        this.attachmentFeedback = '附件已保存；当前环境需要 OCR，未生成伪造记忆';
+        this.attachmentFeedback = '原件已保存，文字待提取；可在资料页查看原件';
         this.attachmentFeedbackTone = 'warning';
         this.attachmentRetryId = result.attachment.id;
       } else {
@@ -485,14 +536,25 @@ struct ProjectHome {
       this.isLoading = true;
     }
     this.errorMessage = '';
+    const contextGeneration = ++this.agentContextGeneration;
+    const contextToken = SessionStore.getToken();
+    const contextProject = this.projectId;
+    this.agentContextError = '';
+    let contextDenied = false; let missionDenied = false;
+    const contextP = new ProjectAgentContextService().read(contextProject).catch((e: ApiError) => { contextDenied = e instanceof ApiError && [401, 403, 404].includes(e.status); return null; });
     try {
       const detailP = this.projectService.getProjectDetail(this.projectId);
       const listP = this.projectService.listProjects();
       const intervP = this.interventionService.list(this.projectId);
       const actionP = this.actionService.list(this.projectId);
       const artifactP = this.artifactService.list(this.projectId);
-      const chatP = this.copilotService.getChatHistory(this.projectId);
-      const attachmentP = this.attachmentService.list(this.projectId).catch(() => [] as Attachment[]);
+      const chatP = this.copilotService.getChatHistory(this.projectId, this.sourceConversationRun);
+      const missionP = new MissionService().summary(this.projectId).catch((e: ApiError) => { missionDenied = e instanceof ApiError && [401, 403, 404].includes(e.status); return null; });
+      let attachmentError = '';
+      const attachmentP = this.attachmentService.list(this.projectId).catch((error: ApiError) => {
+        attachmentError = error instanceof ApiError ? error.message : '附件列表加载失败，请重试';
+        return this.attachments;
+      });
       let milestoneFailed = false;
       const milestoneP = this.milestoneService.list(this.projectId).catch(() => {
         milestoneFailed = true;
@@ -500,6 +562,14 @@ struct ProjectHome {
       });
 
       const res = await Promise.all([detailP, listP, intervP, actionP, artifactP, chatP, milestoneP, attachmentP]);
+      const missionSummary = await missionP;
+      const contextReply = await contextP;
+      if (contextGeneration !== this.agentContextGeneration || contextToken !== SessionStore.getToken() || contextProject !== this.projectId) return;
+      if (contextReply !== null) this.agentContext = contextReply.context;
+      else if (contextDenied) this.agentContext = null;
+      this.agentContextError = contextReply === null ? (this.agentContext !== null ? `当前显示上次读取 ${this.agentContext.observedAt} 的历史摘要，请刷新。` : '当前下一步暂时无法读取，请刷新重试。') : '';
+      if (missionSummary !== null) this.homeMission = missionSummary.enabled ? missionSummary.items[0] ?? null : null;
+      else if (missionDenied) this.homeMission = null;
       this.project = res[0];
       this.dashboard = this.findDashboard(res[1]);
       // R2 再入场：检查点/风险/下一安排聚合；失败保留上次缓存，不推送假空态
@@ -528,6 +598,7 @@ struct ProjectHome {
       }
       this.milestoneLoadError = milestoneFailed ? '里程碑阶段数据同步异常，保留展示历史缓存' : '';
       this.attachments = res[7];
+      this.attachmentLoadError = attachmentError;
 
       // 提取未成功附件中的第一个作为活跃重试 ID（若尚未指定）
       const failedAtt = this.attachments.find((att: Attachment) => att.extractionStatus === 'FAILED' || att.extractionStatus === 'NEEDS_OCR');
@@ -536,6 +607,13 @@ struct ProjectHome {
       }
 
       this.updateCurrentArtifact();
+      if (this.requestedArtifactId !== '') {
+        const fixed = this.artifacts.find((item: ArtifactItem) => item.id === this.requestedArtifactId);
+        this.currentArtifact = fixed;
+        if (fixed !== undefined) { this.selectedArtifactType = fixed.artifactType; this.isArtifactReader = true; this.currentTabIndex = 4; }
+        else { this.isArtifactReader = false; this.artifactError = '原成果版本当前不可访问，请核对后重新选择；不会自动替换为最新成果。'; }
+        this.requestedArtifactId = '';
+      }
       if (this.memorySearchQuery.trim() !== '') {
         await this.searchMemory();
       }
@@ -807,7 +885,7 @@ struct ProjectHome {
   SuggestionActions(claim: EpisodeClaim) {
     Column() {
       Row() {
-        Button(this.suggestionBusy === claim.claimId ? '处理中…' : '加入待办')
+        Button(this.suggestionBusy === claim.claimId ? '处理中…' : '加入待办').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
           .fontSize(PMFontSize.CAPTION)
           .fontColor(PMColors.SURFACE)
           .backgroundColor(PMColors.BRAND)
@@ -817,7 +895,7 @@ struct ProjectHome {
           .onClick(() => {
             this.createSuggestionTodo(claim, 'SUGGESTION', '');
           })
-        Button('查看建议依据')
+        Button('查看建议依据').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
           .fontSize(PMFontSize.CAPTION)
           .fontColor(PMColors.BRAND)
           .backgroundColor(PMColors.SURFACE_SUBTLE)
@@ -830,7 +908,7 @@ struct ProjectHome {
             this.showSourceSheet = true;
           })
         if (this.suggestionClaimId === claim.claimId && this.suggestionCanArrange && this.reminderAvailable) {
-          Button(this.reminderBlockForActionId === this.suggestionActionId ? '收起提醒设置' : '安排日历提醒')
+          Button(this.reminderBlockForActionId === this.suggestionActionId ? '收起提醒设置' : '安排日历提醒').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.BRAND)
             .backgroundColor(PMColors.EVIDENCE_LIGHT)
@@ -842,7 +920,7 @@ struct ProjectHome {
             })
         }
         if (this.suggestionClaimId === claim.claimId && !this.suggestionCanArrange && this.suggestionBlockedReason !== '') {
-          Button('先处理阻塞')
+          Button('先处理阻塞').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.WARNING)
             .backgroundColor(PMColors.WARNING_LIGHT)
@@ -1069,19 +1147,19 @@ struct ProjectHome {
       .margin({ top: 6 })
     }, (claim: EpisodeClaim) => claim.claimId)
     Row({ space: 8 }) {
-      Button('取消')
+      Button('取消').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
         .buttonStyle(ButtonStyleMode.NORMAL)
         .fontSize(PMFontSize.SECONDARY)
         .onClick(() => {
           this.cancelCheckpointPreview();
-        })
-      Button(this.checkpointBusy === 'confirm' ? '确认中…' : '确认这一版')
+        }).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
+      Button(this.checkpointBusy === 'confirm' ? '确认中…' : '确认这一版').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
         .buttonStyle(ButtonStyleMode.EMPHASIZED)
         .fontSize(PMFontSize.SECONDARY)
         .enabled(this.checkpointBusy === '')
         .onClick(() => {
           this.confirmCheckpoint();
-        })
+        }).fontColor(PMColors.SURFACE).backgroundColor(PMColors.BRAND).constraintSize({ minHeight: 44 })
     }
     .width('100%')
     .justifyContent(FlexAlign.End)
@@ -1116,7 +1194,7 @@ struct ProjectHome {
 
     if (this.reentry!.episode.keyConclusion !== null && this.reentry!.episode.keyConclusion !== '') {
       Column() {
-        Text(this.reentry!.episode.isHistorical ? '历史结论（来源已变化，供参考）：' : '当前有效结论：')
+        Text(this.reentry!.episode.isHistorical ? '历史结论（来源已变化，供参考）：' : '当前结论：')
           .fontSize(PMFontSize.CAPTION)
           .fontColor(this.reentry!.episode.isHistorical ? PMColors.WARNING : PMColors.BRAND)
           .fontWeight(FontWeight.Bold)
@@ -1265,19 +1343,19 @@ struct ProjectHome {
     }
 
     Row({ space: 8 }) {
-      Button('继续推进')
+      Button('继续推进').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
         .buttonStyle(ButtonStyleMode.EMPHASIZED)
         .fontSize(PMFontSize.SECONDARY)
         .onClick(() => {
           this.currentTabIndex = 2;
-        })
-      Button(this.checkpointBusy === 'refresh' ? '整理中…' : '根据最新来源重新整理')
+        }).fontColor(PMColors.SURFACE).backgroundColor(PMColors.BRAND).constraintSize({ minHeight: 44 })
+      Button(this.checkpointBusy === 'refresh' ? '整理中…' : '根据最新来源重新整理').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
         .buttonStyle(ButtonStyleMode.NORMAL)
         .fontSize(PMFontSize.SECONDARY)
         .enabled(this.checkpointBusy === '')
         .onClick(() => {
           this.refreshCheckpoint();
-        })
+        }).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
     }
     .width('100%')
     .justifyContent(FlexAlign.End)
@@ -1392,23 +1470,34 @@ struct ProjectHome {
     return selectProjectFocus(this.homeMission?.status ?? '', this.getTopOpenIntervention()?.severity ?? 0,
       this.dashboard.deadline.rank, this.getNextActionId() !== '');
   }
+  private homeDeadlineConflict(): boolean {
+    const reminder = this.getTopOpenIntervention();
+    if (reminder === undefined) return false;
+    return deadlineReminderConflict(reminder.title, reminder.content, this.project.deadline ?? '', Date.now());
+  }
   private homeFocusTitle(): string {
+    if (this.agentContext !== null) return this.agentContext.nextStep.title;
+    if (this.agentContextError !== '') return '项目摘要暂不可用';
     const kind = this.homeFocusKind();
-    if (kind === 'reminder') return this.getTopOpenIntervention()?.title ?? '查看提醒';
-    if (kind === 'mission') return this.homeMission?.attention ?? this.homeMission?.goal ?? '查看委托';
+    if (kind === 'reminder') return this.homeDeadlineConflict() ? '核对提醒与当前截止日' : this.getTopOpenIntervention()?.title ?? '查看提醒';
+    if (kind === 'mission') return this.homeMission?.attention ?? '查看长期委托进展';
     if (kind === 'deadline') return this.dashboard.deadline.label;
     if (kind === 'action') return this.getNextActionTitle();
     return this.project.cards.length === 0 ? '先留下一条真实的项目资料' : '记录新进展，或继续一个长期目标';
   }
   private homeFocusDetail(): string {
+    if (this.agentContext !== null) return this.agentContext.nextStep.reason;
+    if (this.agentContextError !== '') return this.agentContextError;
     const kind = this.homeFocusKind();
-    if (kind === 'reminder') return this.getTopOpenIntervention()?.content ?? '';
-    if (kind === 'mission') return this.homeMission?.attention !== null ? this.homeMission?.goal ?? '' : this.homeMission?.activity ?? '已有步骤与草稿会保留。';
+    if (kind === 'reminder') return this.homeDeadlineConflict() ? `历史提醒为「${this.getTopOpenIntervention()?.title ?? ''}」，当前截止日为 ${(this.project.deadline ?? '').substring(0, 10)}。请查看原提醒依据。` : this.getTopOpenIntervention()?.content ?? '';
+    if (kind === 'mission') return this.homeMission?.activity ?? this.homeMission?.goal ?? '已有步骤与草稿会保留。';
     if (kind === 'deadline') return '核对剩余行动和项目目标，决定本次先推进什么。';
     if (kind === 'action') return this.getNextActionDescription();
     return '记录进展、实验结果或会议要求，让后续判断有据可查。';
   }
   private homeFocusAction(): string {
+    if (this.agentContext !== null) return this.agentContext.nextStep.actionLabel;
+    if (this.agentContextError !== '') return '重新读取项目';
     const kind = this.homeFocusKind();
     if (kind === 'reminder') return '查看提醒依据';
     if (kind === 'mission') return this.homeMission?.status === 'WAITING_INPUT' ? '补充信息' : this.homeMission?.status === 'WAITING_APPROVAL' ? '审阅行动提案' : '查看原委托';
@@ -1416,6 +1505,16 @@ struct ProjectHome {
     return this.project.cards.length === 0 ? '记录第一条资料' : '记录项目进展';
   }
   private openHomeFocus(): void {
+    if (this.agentContextError !== '') { this.loadAllData(true); return; }
+    if (this.agentContext !== null) {
+      const target = this.agentContext.nextStep.entityRef;
+      if (target.kind === 'MISSION') router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.projectId, missionId: target.id } });
+      else if (target.kind === 'INTERVENTION') router.pushUrl({ url: 'pages/InterventionDetail', params: { projectId: this.projectId, interventionId: target.id } });
+      else if (target.kind === 'ACTION') { this.currentTabIndex = 2; this.focusedActionId = target.id; }
+      else if (this.agentContext.freshness === 'UNAVAILABLE') this.loadAllData(true);
+      else this.openCaptureEntry();
+      return;
+    }
     const kind = this.homeFocusKind();
     if (kind === 'reminder') router.pushUrl({ url: 'pages/InterventionDetail', params: { projectId: this.projectId, interventionId: this.getTopOpenIntervention()!.id } });
     else if (kind === 'mission' && this.homeMission !== null) router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.projectId, missionId: this.homeMission.id } });
@@ -1425,16 +1524,16 @@ struct ProjectHome {
 
   @Builder
   private HomeFocusView() {
-    Column({ space: PMSpacing.SM }) {
-      Text(this.homeFocusKind() === 'mission' ? missionStatusLabel(this.homeMission?.status ?? '') : '当前最重要的事项')
-        .fontSize(14).fontColor(PMColors.BRAND)
-      Text(this.homeFocusTitle()).fontSize(21).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
-        .maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis })
-      Text(this.homeFocusDetail()).fontSize(PMFontSize.BODY).fontColor(PMColors.INK_SECONDARY).maxLines(3)
-      Button(this.homeFocusAction()).constraintSize({ minHeight: 48 }).backgroundColor(PMColors.BRAND)
-        .fontColor(PMColors.SURFACE).onClick(() => { this.openHomeFocus(); })
-    }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.LG)
-      .backgroundColor(PMColors.BRAND_LIGHT).borderRadius(PMRadius.LG)
+    Column({ space: 12 }) {
+      if (this.agentContext !== null) { Text(`当前目标：${this.agentContext.goal}`).fontSize(12).fontColor(PMColors.INK_SECONDARY).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }) }
+      Text(this.agentContext !== null ? '当前下一步' : this.homeFocusKind() === 'mission' ? missionStatusLabel(this.homeMission?.status ?? '') : '当前先处理')
+        .fontSize(12).fontWeight(FontWeight.Medium).fontColor(PMColors.BRAND)
+      Text(this.homeFocusTitle()).fontSize(20).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
+        .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
+      Text(this.homeFocusDetail()).fontSize(14).lineHeight(22).fontColor(PMColors.INK_SECONDARY).maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis })
+      PMButton({ label: `${this.homeFocusAction()} →`, onAction: (): void => { this.openHomeFocus(); } })
+    }.width('100%').alignItems(HorizontalAlign.Start).padding(16)
+      .backgroundColor(PMColors.SURFACE).borderRadius(18).border({ width: 1, color: PMColors.BORDER_SUBTLE })
   }
 
   /** 准备项逐项入口：与「当前状态」卡里的缺口按钮同一套跳转规则 */
@@ -1710,8 +1809,33 @@ struct ProjectHome {
     return `harmony-capture-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
   }
 
+  private async loadMaterialQuestion(): Promise<void> {
+    const token = SessionStore.getToken();
+    try {
+      const m = await new MissionService().detail(this.materialMissionId);
+      if (token !== SessionStore.getToken() || m.projectId !== this.projectId) return;
+      this.materialQuestion = m.question?.id === this.materialQuestionId ? m.question.payloadJson.question : '原问题已变化，返回原委托核对后再继续';
+    } catch (_e) { if (token === SessionStore.getToken()) this.materialQuestion = '暂时无法读取原问题；资料仍可保存，返回后核对'; }
+  }
+  private captureDraftScope(): string {
+    return this.materialMissionId === '' ? this.projectId : `${this.projectId}:${this.materialOwnerId}:${this.materialMissionId}:${this.materialQuestionId}`;
+  }
+  private returnToMaterialQuestion(): void {
+    if (this.materialOwnerId !== SessionStore.getUser().id || !SessionStore.isTokenValid()) return;
+    this.showEntrySheet = false;
+    router.back({ url: 'pages/MissionDetail', params: { projectId: this.projectId, missionId: this.materialMissionId, questionId: this.materialQuestionId, sourceId: this.materialSourceId } });
+  }
+  @Builder private MaterialReturn() {
+    if (this.materialMissionId !== '') {
+      Column({ space: PMSpacing.XS }) {
+        Text(this.materialQuestion || '为原问题补充资料').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY)
+        PMButton({ label: this.materialSourceId === '' ? '返回原问题' : '回到原问题，核对这份资料 →', secondary: true, onAction: (): void => { this.returnToMaterialQuestion(); } })
+      }.width('100%').alignItems(HorizontalAlign.Start).padding({ top: PMSpacing.SM, bottom: PMSpacing.SM })
+    }
+  }
+
   private async restoreCaptureDraft(): Promise<void> {
-    const draft = await DeviceIdentity.loadCaptureDraft(this.projectId);
+    const draft = await DeviceIdentity.loadCaptureDraft(this.captureDraftScope());
     if (draft !== undefined && this.rawText === '') {
       this.rawText = draft.rawText;
       this.sourceType = draft.sourceType;
@@ -1724,7 +1848,7 @@ struct ProjectHome {
     if (this.captureRequestId === '') {
       this.captureRequestId = this.newCaptureRequestId();
     }
-    await DeviceIdentity.saveCaptureDraft(this.projectId, this.rawText, this.sourceType, this.captureRequestId);
+    await DeviceIdentity.saveCaptureDraft(this.captureDraftScope(), this.rawText, this.sourceType, this.captureRequestId);
   }
 
   private openCaptureEntry(preferredSource?: string): void {
@@ -1778,12 +1902,15 @@ struct ProjectHome {
     if (this.captureRequestId === '') {
       this.captureRequestId = this.newCaptureRequestId();
     }
-    await DeviceIdentity.saveCaptureDraft(this.projectId, trimmed, this.sourceType, this.captureRequestId);
+    await DeviceIdentity.saveCaptureDraft(this.captureDraftScope(), trimmed, this.sourceType, this.captureRequestId);
+    const captureToken = SessionStore.getToken();
     try {
-      await this.memoryService.capture(this.projectId, trimmed, this.sourceType, this.captureRequestId);
+      const saved = await this.memoryService.capture(this.projectId, trimmed, this.sourceType, this.captureRequestId);
+      if (captureToken !== SessionStore.getToken()) return;
+      if (this.materialOwnerId === SessionStore.getUser().id && saved.captureId !== '') this.materialSourceId = `capture:${saved.captureId}`;
       this.rawText = '';
       this.captureRequestId = '';
-      await DeviceIdentity.clearCaptureDraft(this.projectId);
+      await DeviceIdentity.clearCaptureDraft(this.captureDraftScope());
       promptAction.showToast({ message: '已归档并生成记忆卡片' });
       await this.loadAllData();
     } catch (e) {
@@ -2079,10 +2206,11 @@ struct ProjectHome {
     this.isSubmittingAction = true;
     this.dialogError = '';
     try {
-      await this.actionService.complete(this.projectId, this.completingActionId, trimmed);
+      const completed = await this.actionService.complete(this.projectId, this.completingActionId, trimmed);
       this.completingActionId = '';
       this.resultText = '';
-      promptAction.showToast({ message: '已完成并写入项目记忆' });
+      promptAction.showToast({ message: completed.status === 'DONE' && !completed.isSimulated && completed.resultCardId !== undefined && completed.resultCardId !== null && completed.resultCardId !== '' ?
+        '已完成并写入项目记忆' : '行动已提交，结果记忆关联待核对' });
       await this.loadAllData();
     } catch (e) {
       if (e instanceof ApiError) {
@@ -2096,6 +2224,10 @@ struct ProjectHome {
   }
 
   // --- 问忆程操作 ---
+  private requestedArtifactId: string = '';
+  private sourceConversationRun: string = '';
+  private copilotTurnId: string = '';
+  private copilotTurnText: string = '';
   private async sendCopilotMessage(): Promise<void> {
     if (this.isAskingCopilot) {
       return;
@@ -2104,17 +2236,21 @@ struct ProjectHome {
     if (text === '') {
       return;
     }
-    this.copilotQuestion = '';
+    const token = SessionStore.getToken(); const project = this.projectId;
+    if (this.copilotTurnText !== text || this.copilotTurnId === '') { this.copilotTurnText = text; this.copilotTurnId = `chat-${Date.now()}-${Math.random().toString(36).slice(2)}`; }
     this.isAskingCopilot = true;
     this.copilotFeedback = '';
 
     const userMsg = new AgentMessage();
     userMsg.role = 'USER';
     userMsg.content = text;
-    this.chatMessages.push(userMsg);
+
 
     try {
-      const res = await this.copilotService.askQuestion(this.projectId, text);
+      const res = await this.copilotService.askQuestion(project, text, this.copilotTurnId);
+      if (token !== SessionStore.getToken() || project !== this.projectId) return;
+      this.copilotQuestion = ''; this.copilotTurnId = ''; this.copilotTurnText = '';
+      this.chatMessages.push(userMsg);
       const assistantMsg = new AgentMessage();
       assistantMsg.role = 'ASSISTANT';
       assistantMsg.content = res.message;
@@ -2122,12 +2258,16 @@ struct ProjectHome {
       assistantMsg.proposedActions = res.proposedActions;
       assistantMsg.runId = res.runId;
       assistantMsg.trustReceipt = res.trustReceipt;
+      assistantMsg.continuationSuggestion = res.continuationSuggestion;
       this.chatMessages.push(assistantMsg);
       if (res.fallback) {
         this.copilotFeedback = '（已从项目记忆检索并整理回复）';
       }
     } catch (e) {
-      this.copilotFeedback = '问答服务异常，请稍后重试';
+      if (token !== SessionStore.getToken() || project !== this.projectId) return;
+      this.copilotFeedback = e instanceof ApiError ? e.message : '问答结果尚未确认，保留问题后可重试';
+      if (e instanceof ApiError && e.code === 'COPILOT_TURN_FAILED') this.copilotTurnId = '';
+      if (e instanceof ApiError && [401, 403, 404].includes(e.status)) { this.chatMessages = []; this.copilotQuestion = ''; this.copilotTurnId = ''; this.copilotTurnText = ''; }
     } finally {
       this.isAskingCopilot = false;
     }
@@ -2231,6 +2371,10 @@ struct ProjectHome {
             this.currentTabIndex === 3 ? '委托' : '成果'}`,
       backLabel: '项目',
       backDescription: '返回项目列表',
+      showRepository: true,
+      onRepositoryAction: () => {
+        router.pushUrl({ url: 'pages/MemoryTimeline', params: { projectId: this.projectId, openRepo: '1' } });
+      },
       showRightIcon: true,
       rightIconLabel: '更多项目设置',
       rightIconDescription: '编辑项目名称、目标和简介',
@@ -2261,7 +2405,9 @@ struct ProjectHome {
   @Builder
   private TabBarItem(index: number, label: string) {
     Column() {
-      this.TabBarItemIcon(index)
+      Row() { this.TabBarItemIcon(index) }
+        .width(36).height(30).justifyContent(FlexAlign.Center).borderRadius(10)
+        .backgroundColor(this.currentTabIndex === index ? PMColors.BRAND_LIGHT : Color.Transparent)
       Text(label)
         .fontSize(PMFontSize.BOTTOM_NAV)
         .fontFamily(PMFontFamily.SANS)
@@ -2270,7 +2416,7 @@ struct ProjectHome {
         .margin({ top: 3 })
     }
     .layoutWeight(1)
-    .height(56)
+    .height(58)
     .justifyContent(FlexAlign.Center)
     .clickEffect(PMInteraction.PRESS_EFFECT)
     .onClick(() => {
@@ -2317,7 +2463,7 @@ struct ProjectHome {
         .alignItems(VerticalAlign.Center)
 
         Row({ space: PMSpacing.SM }) {
-          Button('＋ 记录')
+          Button('＋ 记录').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
             .constraintSize({ minHeight: 48 })
             .fontSize(PMFontSize.CAPTION)
             .fontWeight(FontWeight.Medium)
@@ -2328,7 +2474,7 @@ struct ProjectHome {
               this.openCaptureEntry();
             })
 
-          Button('会议更新')
+          Button('会议更新').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
             .constraintSize({ minHeight: 48 })
             .fontSize(PMFontSize.CAPTION)
             .fontWeight(FontWeight.Medium)
@@ -2345,7 +2491,7 @@ struct ProjectHome {
       .alignItems(VerticalAlign.Center)
     }
     .width('100%')
-    .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM })
+    .padding({ top: PMSpacing.SM })
   }
 
   @Builder
@@ -2549,7 +2695,7 @@ struct ProjectHome {
       .accessibilityText(this.focusEvidenceLine(topIntervention))
 
       Row({ space: PMSpacing.MD }) {
-        Button('查看依据')
+        Button('查看依据').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
           .layoutWeight(1)
           .height(44)
           .fontSize(PMFontSize.BUTTON)
@@ -2565,7 +2711,7 @@ struct ProjectHome {
             });
           })
 
-        Button('＋ 创建行动')
+        Button('＋ 创建行动').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
           .layoutWeight(1)
           .height(44)
           .fontSize(PMFontSize.BUTTON)
@@ -2660,7 +2806,7 @@ struct ProjectHome {
             .lineHeight(18)
             .margin({ top: PMSpacing.XS })
 
-          Button(this.getNextActionStatus() === 'DOING' ? '查看待办' : '开始行动')
+          Button(this.getNextActionStatus() === 'DOING' ? '查看待办' : '开始行动').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
             .fontSize(PMFontSize.BUTTON)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.SURFACE)
@@ -2698,119 +2844,29 @@ struct ProjectHome {
 
   @Builder
   private RecentChangesView() {
-    Column() {
-      Row() {
-        Text('近期变化')
-          .fontSize(PMFontSize.SECTION_TITLE)
-          .fontWeight(FontWeight.Bold)
-          .fontColor(PMColors.INK_PRIMARY)
-        Text(`${this.project._count.cards} 条记忆 · ${this.actions.filter((a) => !a.isSimulated && a.status === 'DONE').length} 个行动完成`)
-          .fontSize(PMFontSize.CAPTION)
-          .fontColor(PMColors.INK_TERTIARY)
-      }
-      .width('100%')
-      .justifyContent(FlexAlign.SpaceBetween)
-      .padding({ left: 2, right: 2, bottom: PMSpacing.XS })
-
-      Column({ space: PMSpacing.SM }) {
+    Column({ space: 10 }) {
+      Text('最近记录').fontSize(17).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
+      Column() {
         if (this.project.cards.length > 0) {
-          Row() {
-            MemoryIcon({ isSelected: false, iconSize: 18 })
-            Column() {
-              Text(TextFormatters.readableText(this.project.cards[0].title, '最近新增的记忆文本无法读取'))
-                .fontSize(PMFontSize.BODY)
-                .fontWeight(FontWeight.Medium)
-                .fontColor(PMColors.INK_PRIMARY)
-                .maxLines(2)
-                .textOverflow({ overflow: TextOverflow.Ellipsis })
-              Text(`新增记忆 · ${this.project.cards[0].createdAt.length >= 10 ? this.project.cards[0].createdAt.substring(0, 10) : '近期'}`)
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.MEMORY)
-                .margin({ top: 2 })
-            }
-            .layoutWeight(1)
-            .alignItems(HorizontalAlign.Start)
-            .margin({ left: PMSpacing.SM })
-          }
-          .width('100%')
-          .padding(PMSpacing.MD)
-          .backgroundColor(PMColors.SURFACE)
-          .borderRadius(PMRadius.MD)
-          .border({ width: 1, color: PMColors.BORDER_SUBTLE })
-          .alignItems(VerticalAlign.Center)
+          PMListRow({ title: this.project.cards[0].title, meta: `新增记忆 · ${this.project.cards[0].createdAt.substring(0, 10)}`,
+            onOpen: (): void => { this.currentTabIndex = 1; this.materialsMode = 'memory'; this.expandedCardId = this.project.cards[0].id; this.selectedMemoryType = 'all'; this.memorySearchQuery = ''; } })
         }
-
-        ForEach(this.actions.filter((a) => !a.isSimulated && a.status === 'DONE').slice(0, 2), (action: ActionItem) => {
-          Row() {
-            CheckIcon({ iconSize: 18, color: PMColors.SUCCESS })
-            Column() {
-              Text(TextFormatters.readableText(action.title, '已完成行动标题无法读取'))
-                .fontSize(PMFontSize.BODY)
-                .fontWeight(FontWeight.Medium)
-                .fontColor(PMColors.INK_PRIMARY)
-                .maxLines(2)
-                .textOverflow({ overflow: TextOverflow.Ellipsis })
-              Text(action.resultText !== undefined && action.resultText !== null && action.resultText !== '' ?
-                TextFormatters.readableText(action.resultText, '完成回执文本无法读取') : '已完成并留下回执')
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.SUCCESS)
-                .maxLines(1)
-                .textOverflow({ overflow: TextOverflow.Ellipsis })
-                .margin({ top: 2 })
-            }
-            .layoutWeight(1)
-            .alignItems(HorizontalAlign.Start)
-            .margin({ left: PMSpacing.SM })
-          }
-          .width('100%')
-          .padding(PMSpacing.MD)
-          .backgroundColor(PMColors.SURFACE)
-          .borderRadius(PMRadius.MD)
-          .border({ width: 1, color: PMColors.BORDER_SUBTLE })
-          .alignItems(VerticalAlign.Center)
-        }, (action: ActionItem) => action.id)
-
+        ForEach(this.actions.filter((a: ActionItem) => !a.isSimulated && a.status === 'DONE')
+          .sort((a: ActionItem, b: ActionItem) => Date.parse(b.completedAt ?? b.updatedAt) - Date.parse(a.completedAt ?? a.updatedAt)).slice(0, 1), (item: ActionItem) => {
+          PMListRow({ title: item.title, kind: 'action', meta: `完成行动 · ${(item.completedAt ?? item.updatedAt).substring(0, 10)}`,
+            onOpen: (): void => { this.currentTabIndex = 2; this.actionStatusFilter = 'ALL'; this.focusedActionId = item.id; } })
+        }, (item: ActionItem) => item.id)
         if (this.artifacts.length > 0) {
-          Row() {
-            ArtifactIcon({ isSelected: false, iconSize: 18 })
-            Column() {
-              Text(`${TextFormatters.artifactTypeToChinese(this.artifacts[0].artifactType)} 已更新`)
-                .fontSize(PMFontSize.BODY)
-                .fontWeight(FontWeight.Medium)
-                .fontColor(PMColors.INK_PRIMARY)
-              Text(`成果 · ${this.artifacts[0].createdAt.length >= 10 ? this.artifacts[0].createdAt.substring(0, 10) : '近期'}`)
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.BRAND)
-                .margin({ top: 2 })
-            }
-            .layoutWeight(1)
-            .alignItems(HorizontalAlign.Start)
-            .margin({ left: PMSpacing.SM })
-          }
-          .width('100%')
-          .padding(PMSpacing.MD)
-          .backgroundColor(PMColors.SURFACE)
-          .borderRadius(PMRadius.MD)
-          .border({ width: 1, color: PMColors.BORDER_SUBTLE })
-          .alignItems(VerticalAlign.Center)
+          PMListRow({ title: TextFormatters.artifactTypeToChinese(this.artifacts[0].artifactType), meta: `成果草稿 · ${this.artifacts[0].createdAt.substring(0, 10)}`,
+            onOpen: (): void => { this.selectedArtifactType = this.artifacts[0].artifactType; this.currentArtifact = this.artifacts[0]; this.isArtifactReader = true; this.currentTabIndex = 4; } })
         }
-
-        if (this.project.cards.length === 0 && this.actions.filter((a) => !a.isSimulated && a.status === 'DONE').length === 0 && this.artifacts.length === 0) {
-          Text('还没有新的项目变化，先记录一条事实。')
-            .fontSize(PMFontSize.SECONDARY)
-            .fontColor(PMColors.INK_TERTIARY)
-            .margin({ top: PMSpacing.SM })
+        if (this.project.cards.length === 0 && this.actions.filter((a: ActionItem) => !a.isSimulated && a.status === 'DONE').length === 0 && this.artifacts.length === 0) {
+          Text('还没有项目记录，先留下一条新进展。').fontSize(14).fontColor(PMColors.INK_SECONDARY).padding(16)
         }
-      }
-      .width('100%')
-      .margin({ top: PMSpacing.XS })
-    }
-    .width('100%')
-    .margin({ top: PMSpacing.MD })
-    .alignItems(HorizontalAlign.Start)
+      }.width('100%').backgroundColor(PMColors.SURFACE).borderRadius(18).border({ width: 1, color: PMColors.BORDER_SUBTLE })
+    }.width('100%').alignItems(HorizontalAlign.Start)
   }
 
-  /** 最近一条真实完成的行动：模拟数据不进闭环展示 */
   private latestClosedLoopAction(): ActionItem | null {
     let best: ActionItem | null = null;
     for (const action of this.actions) {
@@ -3002,7 +3058,7 @@ struct ProjectHome {
           }
 
           Button(this.latestClosedLoopAction()!.resultCardId !== undefined && this.latestClosedLoopAction()!.resultCardId !== null && this.latestClosedLoopAction()!.resultCardId !== '' ?
-            '查看回执与来源 →' : '去待办查看这条行动 →')
+            '查看回执与来源 →' : '去待办查看这条行动 →').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
             .fontSize(PMFontSize.CAPTION)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.BRAND)
@@ -3044,480 +3100,78 @@ struct ProjectHome {
   @Builder
   private CockpitView() {
     Scroll() {
-      Column() {
-        // 项目头部场景与快捷操作入口
-        this.ProjectBanner()
+      Column({ space: 18 }) {
+        Column({ space: 10 }) {
+          Row() {
+            CategoryBadge({ category: this.project.scenario })
+            Blank()
+            DeadlineBadge({ deadline: this.dashboard.deadline })
+          }.width('100%')
+          if (this.project.description !== '') {
+            Text(this.project.description).fontSize(14).lineHeight(22).fontColor(PMColors.INK_SECONDARY).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
+          }
+        }.width('100%').alignItems(HorizontalAlign.Start)
 
         this.HomeFocusView()
-        if (this.homeMission === null) {
-          Column({ space: PMSpacing.XS }) {
-            Text(this.project.cards.length === 0 ?
-              (this.project._count.captures > 0 ? '资料已记录：到资料页核对处理结果，再查看记忆与来源。' : '从真实记录开始：留下资料 → 核对记忆与来源 → 委托下一个目标。') :
-              '资料已沉淀：可到资料页核对记忆与来源，再到委托页填写下一个目标。')
-              .fontSize(PMFontSize.BODY).fontColor(PMColors.INK_SECONDARY)
-            Button('查看资料与记忆').constraintSize({ minHeight: 48 }).backgroundColor(PMColors.BRAND_LIGHT)
-              .fontColor(PMColors.BRAND).onClick(() => { this.currentTabIndex = 1; })
-          }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.SM)
-        }
-        MissionPanel({ projectId: this.projectId, compact: true, refreshKey: this.missionRefreshKey,
-          excludedMissionId: this.homeFocusKind() === 'mission' ? this.homeMission?.id ?? '' : '',
-          onSummary: (summary: MissionWorkspaceSummary): void => { this.homeMission = summary.enabled ? summary.items[0] ?? null : null; }
-        })
-        if (this.getNextActionId() !== '' && this.homeFocusKind() !== 'action') { this.NextActionView() }
-
-        // 问题零：变了什么、依据是什么（R2/S1 状态快照与 Diff）
-        ProjectStatePanel({
-          projectId: this.projectId,
-          onOpenDiffSheet: (diff: StateDiff) => {
-            this.stateDiffForSheet = diff;
-            this.showStateDiffSheet = true;
-          },
-          onOpenBrief: (fromId: string, toId: string) => {
-            this.openChangeBrief(fromId, toId);
-          },
-          onGoActions: () => {
-            this.currentTabIndex = 2;
-          },
-          onDiffUpdated: (diff: StateDiff) => {
-            this.stateDiff = diff;
-          }
-        })
-
         this.RecentChangesView()
-        Button(this.showEvolution ? '收起项目演进与阶段检查点' : '查看项目演进与阶段检查点')
-          .constraintSize({ minHeight: 48 }).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND)
-          .onClick(() => { this.showEvolution = !this.showEvolution; })
-        if (this.showEvolution) {
-          ProjectEvolutionPanel({ projectId: this.projectId, onOpenSources: (cardId: string): void => {
-            this.memorySearchQuery = ''; this.memorySearchResults = []; this.selectedMemoryType = 'all';
-            this.expandedCardId = cardId; this.currentTabIndex = 1;
-            if (cardId !== '') AppStorage.setOrCreate<string>('stateEvidenceEntityId', cardId);
-          } })
-          this.EpisodeCheckpointCardView()
-        }
-        Button(this.showProjectStatus ? '收起更多项目状态' : '更多项目状态、体检与阶段检查')
-          .backgroundColor(PMColors.SURFACE).fontColor(PMColors.BRAND)
+
+        Row({ space: 10 }) {
+          PMButton({ label: '＋ 记录进展', secondary: true, onAction: (): void => { this.openCaptureEntry(); } }).layoutWeight(1)
+          PMButton({ label: '整理会议', secondary: true, onAction: (): void => { this.openMeetingEntry(); } }).layoutWeight(1)
+        }.width('100%')
+
+        Button(this.showProjectStatus ? '收起项目档案与工具 ↑' : '项目档案与更多工具 ↓', { type: ButtonType.Normal })
+          .constraintSize({ minHeight: 44 }).width('100%').fontSize(13).fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent)
           .onClick(() => { this.showProjectStatus = !this.showProjectStatus; })
         if (this.showProjectStatus) {
-        this.MetricsOverviewGrid()
-        // 阶段记忆和完整检查按需展开，原入口保留。
-
-        // 项目体检：只读、确定性地列出当前问题与修复入口
-        this.ProjectHealthCardView()
-
-        // 问题一：现在怎么样？（当前判断与准备度）
-        Column() {
-          Row() {
-            Column() {
-              Text('当前状态')
-                .fontSize(PMFontSize.SECONDARY)
-                .fontColor(PMColors.INK_TERTIARY)
-              Text(this.dashboard.readiness.items.length === 0 ? '准备项清单未返回' :
-                this.project._count.cards === 0 && this.project._count.artifacts === 0 ?
-                  '尚未形成项目进度' :
-                  `项目内准备项 ${this.dashboard.readiness.items.filter((item: ReadinessItem) => item.complete).length}/${this.dashboard.readiness.items.length} 已形成 · ${this.dashboard.readiness.percentage}%`)
-                .fontSize(PMFontSize.SECTION_TITLE)
-                .fontWeight(FontWeight.Bold)
-                .fontColor(PMColors.INK_PRIMARY)
-                .margin({ top: 2 })
-            }
-            .alignItems(HorizontalAlign.Start)
-
-            DeadlineBadge({ deadline: this.dashboard.deadline })
-          }
-          .width('100%')
-          .justifyContent(FlexAlign.SpaceBetween)
-
-          // 准备度进度条
-          Stack({ alignContent: Alignment.Start }) {
-            Row()
-              .width('100%')
-              .height(5)
-              .backgroundColor(PMColors.BORDER)
-              .borderRadius(PMRadius.FULL)
-            Row()
-              .width(`${Math.min(100, Math.max(0, this.dashboard.readiness.percentage))}%`)
-              .height(5)
-              .backgroundColor(PMColors.BRAND)
-              .borderRadius(PMRadius.FULL)
-          }
-          .width('100%')
-          .margin({ top: PMSpacing.SM })
-
-          Row() {
-            Text('按项目记录、行动回执与成果草稿是否形成计数，不是模型评分')
-              .fontSize(PMFontSize.CAPTION)
-              .fontColor(PMColors.INK_TERTIARY)
-              .lineHeight(18)
-              .layoutWeight(1)
-            Text('计算口径 →')
-              .fontSize(PMFontSize.CAPTION)
-              .fontWeight(FontWeight.Medium)
-              .fontColor(PMColors.BRAND)
-              .margin({ left: PMSpacing.SM })
-          }
-          .width('100%')
-          .alignItems(VerticalAlign.Top)
-          .padding({ top: PMSpacing.SM, bottom: PMSpacing.SM })
-          .clickEffect(PMInteraction.PRESS_EFFECT)
-          .onClick(() => {
-            this.showReadinessSheet = true;
+          Column({ space: 10 }) {
+            Row() {
+              Text('项目内准备项').fontSize(14).fontColor(PMColors.INK_SECONDARY).layoutWeight(1)
+              Text(this.dashboard.readiness.items.length === 0 ? '暂无清单' : `${this.dashboard.readiness.items.filter((i: ReadinessItem) => i.complete).length} / ${this.dashboard.readiness.items.length} 项已形成`)
+                .fontSize(15).fontWeight(FontWeight.Medium).fontColor(PMColors.BRAND)
+            }.width('100%')
+            Progress({ value: Math.min(100, Math.max(0, this.dashboard.readiness.percentage)), total: 100, type: ProgressType.Linear }).width('100%').color(PMColors.BRAND).height(5)
+            Text(`${this.project.cards.length} 条记忆 · ${this.actions.filter((a: ActionItem) => !a.isSimulated && a.status !== 'DONE').length} 项待推进行动 · ${this.artifacts.length} 份成果草稿`)
+              .fontSize(12).fontColor(PMColors.INK_TERTIARY)
+            PMButton({ label: '查看准备项与缺口 →', secondary: true, onAction: (): void => { this.showReadinessSheet = true; } })
+          }.width('100%').padding(16).backgroundColor(PMColors.SURFACE).borderRadius(18).alignItems(HorizontalAlign.Start)
+          ProjectStatePanel({ projectId: this.projectId,
+            onOpenDiffSheet: (diff: StateDiff): void => { this.stateDiffForSheet = diff; this.showStateDiffSheet = true; },
+            onOpenBrief: (fromId: string, toId: string): void => { this.openChangeBrief(fromId, toId); },
+            onGoActions: (): void => { this.currentTabIndex = 2; },
+            onDiffUpdated: (diff: StateDiff): void => { this.stateDiff = diff; }
           })
-          .accessibilityText('查看项目内准备项的逐项计算口径')
-
-          // 项目进度清单：已具备 (弱化收起) vs 当前缺口 (重点放大)
-          Column() {
-            // 当前缺口 (重点展示)
-            Text('当前缺口')
-              .fontSize(PMFontSize.SECONDARY)
-              .fontWeight(FontWeight.Bold)
-              .fontColor(PMColors.RISK)
-              .margin({ top: PMSpacing.MD, bottom: PMSpacing.XS })
-
-            ForEach(this.dashboard.readiness.items.filter((item: ReadinessItem) => !item.complete), (item: ReadinessItem) => {
-              Row() {
-                Column() {
-                  Text(item.pendingLabel !== '' ? item.pendingLabel : item.label)
-                    .fontSize(PMFontSize.BODY)
-                    .fontWeight(FontWeight.Medium)
-                    .fontColor(PMColors.INK_PRIMARY)
-
-                  Text(item.key === 'competition_outline' ? '尚未生成作品说明大纲初稿' :
-                    item.key === 'defense_ppt' ? '尚无可复用答辩结构' :
-                    item.key === 'experiment' ? '尚未形成完整实验证据' : '尚未沉淀关键交付物')
-                    .fontSize(PMFontSize.SECONDARY)
-                    .fontColor(PMColors.INK_SECONDARY)
-                    .margin({ top: 2 })
-                }
-                .alignItems(HorizontalAlign.Start)
-                .layoutWeight(1)
-
-                Button(`${item.actionLabel} →`)
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontWeight(FontWeight.Medium)
-                  .fontColor(PMColors.BRAND)
-                  .padding({ left: PMSpacing.MD, right: PMSpacing.MD, top: 6, bottom: 6 })
-                  .backgroundColor(PMColors.BRAND_LIGHT)
-                  .borderRadius(PMRadius.SM)
-                  .height(36)
-                  .onClick(() => {
-                    if (item.key === 'competition_outline' || item.key === 'defense_ppt' || item.key === 'readme') {
-                      this.selectedArtifactType = item.key;
-                      this.updateCurrentArtifact();
-                      this.currentTabIndex = 4; // 跳转成果
-                    } else if (item.key === 'requirement') {
-                      this.openCaptureEntry('参赛材料');
-                    } else if (item.key === 'experiment') {
-                      this.openCaptureEntry('实验记录');
-                    } else if (item.key === 'closed_loop') {
-                      this.currentTabIndex = 2; // 跳转待办
-                    } else {
-                      this.currentTabIndex = 1; // 跳转记忆
-                    }
-                  })
-              }
-              .width('100%')
-              .padding(PMSpacing.MD)
-              .backgroundColor(PMColors.SURFACE_SUBTLE)
-              .borderRadius(PMRadius.SM)
-              .border({ width: 1, color: PMColors.BORDER })
-              .margin({ top: PMSpacing.XS })
-            }, (item: ReadinessItem) => item.key)
-
-            // 已具备 (弱化展示)
-            if (this.dashboard.readiness.items.some((item: ReadinessItem) => item.complete)) {
-              Text('已具备')
-                .fontSize(PMFontSize.SECONDARY)
-                .fontColor(PMColors.INK_TERTIARY)
-                .margin({ top: PMSpacing.MD, bottom: PMSpacing.XS })
-
-              Row() {
-                ForEach(this.dashboard.readiness.items.filter((item: ReadinessItem) => item.complete), (item: ReadinessItem) => {
-                  Row() {
-                    Text('✓ ')
-                      .fontSize(PMFontSize.CAPTION)
-                      .fontColor(PMColors.SUCCESS)
-                    Text(item.label)
-                      .fontSize(PMFontSize.SECONDARY)
-                      .fontColor(PMColors.INK_SECONDARY)
-                  }
-                  .margin({ right: PMSpacing.MD })
-                }, (item: ReadinessItem) => item.key)
-              }
-              .width('100%')
-              .padding({ top: 2 })
-            }
+          this.ProjectHealthCardView()
+          ProjectImpactPanel({ projectId: this.projectId })
+          this.ClosedLoopView()
+          this.MilestoneEvidenceView()
+          PMButton({ label: this.showEvolution ? '收起演进与检查点' : '查看演进与检查点', secondary: true,
+            onAction: (): void => { this.showEvolution = !this.showEvolution; } })
+          if (this.showEvolution) {
+            ProjectEvolutionPanel({ projectId: this.projectId, onOpenSources: (cardId: string): void => {
+              this.memorySearchQuery = ''; this.memorySearchResults = []; this.selectedMemoryType = 'all';
+              this.expandedCardId = cardId; this.currentTabIndex = 1;
+              if (cardId !== '') AppStorage.setOrCreate<string>('stateEvidenceEntityId', cardId);
+            } })
+            this.EpisodeCheckpointCardView()
           }
-          .width('100%')
-          .alignItems(HorizontalAlign.Start)
-        }
-        .width('100%')
-        .padding(PMSpacing.LG)
-        .backgroundColor(PMColors.SURFACE)
-        .borderRadius(PMRadius.LG)
-        .border({ width: 1, color: PMColors.BORDER_SUBTLE })
-
-        this.ClosedLoopView()
-
-        this.MilestoneEvidenceView()
-
-        // 问题二：为什么？（主动提醒与依据）
-        Column() {
-          Row() {
-            Text('主动提醒')
-              .fontSize(PMFontSize.SECTION_TITLE)
-              .fontWeight(FontWeight.Medium)
-              .fontColor(PMColors.INK_PRIMARY)
-
-            Text(`${this.interventions.filter((i) => i.status === 'OPEN' && !i.isSimulated).length} 项待处理`)
-              .fontSize(PMFontSize.CAPTION)
-              .fontColor(PMColors.INK_TERTIARY)
-          }
-          .width('100%')
-          .justifyContent(FlexAlign.SpaceBetween)
-
-          if (this.interventions.filter((i) => i.status === 'OPEN' && !i.isSimulated).length > 0) {
-            ForEach(this.interventions.filter((i) => i.status === 'OPEN' && !i.isSimulated).slice(0, 1), (interv: Intervention) => {
-              Column() {
-                Row() {
-                  SeverityBadge({ severity: interv.severity })
-                  Text(TextFormatters.readableText(interv.title, '提醒标题无法读取，请重新评估。'))
-                    .fontSize(PMFontSize.BODY)
-                    .fontWeight(FontWeight.Medium)
-                    .fontColor(PMColors.INK_PRIMARY)
-                    .layoutWeight(1)
-                    .margin({ left: PMSpacing.SM })
-                }
-                .width('100%')
-
-                Text(TextFormatters.readableText(interv.content, '提醒依据文本无法读取，请重新评估。'))
-                  .fontSize(PMFontSize.BODY)
-                  .fontColor(PMColors.INK_SECONDARY)
-                  .lineHeight(20)
-                  .margin({ top: PMSpacing.XS })
-
-                Row() {
-                  Button('查看提醒依据 →')
-                    .fontSize(PMFontSize.CAPTION)
-                    .fontWeight(FontWeight.Medium)
-                    .fontColor(PMColors.SURFACE)
-                    .backgroundColor(PMColors.BRAND)
-                    .borderRadius(PMRadius.XS)
-                    .padding({ left: PMSpacing.MD, right: PMSpacing.MD, top: 4, bottom: 4 })
-                    .onClick(() => {
-                      router.pushUrl({
-                        url: 'pages/InterventionDetail',
-                        params: { projectId: this.projectId, interventionId: interv.id }
-                      });
-                    })
-                }
-                .width('100%')
-                .justifyContent(FlexAlign.End)
-                .margin({ top: PMSpacing.SM })
-              }
-              .width('100%')
-              .padding(PMSpacing.MD)
-              .backgroundColor(PMColors.SURFACE_SUBTLE)
-              .borderRadius(PMRadius.SM)
-              .border({ width: 1, color: PMColors.BORDER })
-              .margin({ top: PMSpacing.SM })
-            }, (interv: Intervention) => interv.id)
-          } else if (this.evaluateError !== '') {
-            // 评估失败不能伪装成「没有风险」：如实说明展示的是上次结果
-            Column() {
-              Text('暂未获取最新提醒，下面显示的是上次结果。')
-                .fontSize(PMFontSize.BODY)
-                .fontColor(PMColors.RISK)
-                .lineHeight(20)
-              Text(this.evaluateError)
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.INK_TERTIARY)
-                .lineHeight(18)
-                .margin({ top: 2 })
-            }
-            .width('100%')
-            .alignItems(HorizontalAlign.Start)
-            .margin({ top: PMSpacing.MD })
-          } else {
-            Text('当前没有待处理的提醒')
-              .fontSize(PMFontSize.BODY)
-              .fontColor(PMColors.INK_SECONDARY)
-              .margin({ top: PMSpacing.MD })
-          }
-
-          // 演示情境控制：默认折叠，比赛时仍可快速打开。
-          Row() {
-            Text('比赛演示情境控制')
-              .fontSize(PMFontSize.SECONDARY)
-              .fontWeight(FontWeight.Medium)
-              .fontColor(PMColors.INK_SECONDARY)
-            Text(this.showDemoControls ? '收起' : '展开')
-              .fontSize(PMFontSize.CAPTION)
-              .fontColor(PMColors.BRAND)
-          }
-          .width('100%')
-          .justifyContent(FlexAlign.SpaceBetween)
-          .padding({ top: PMSpacing.SM, bottom: PMSpacing.SM })
-          .margin({ top: PMSpacing.MD })
-          .clickEffect(PMInteraction.PRESS_EFFECT)
-          .onClick(() => {
-            this.showDemoControls = !this.showDemoControls;
-          })
-          .accessibilityText(`比赛演示情境控制，${this.showDemoControls ? '收起' : '展开'}`)
-
+          PMButton({ label: '查看证据变化与确认', secondary: true, onAction: (): void => { this.showChangeImpactDialog = true; } })
+          PMButton({ label: this.showDemoControls ? '收起演示与重新评估' : '演示与重新评估', secondary: true,
+            onAction: (): void => { this.showDemoControls = !this.showDemoControls; } })
           if (this.showDemoControls) {
-            Column() {
-              Row() {
-                Button('模拟截止 48h')
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontColor(PMColors.INK_PRIMARY)
-                  .backgroundColor(PMColors.SURFACE_SUBTLE)
-                  .border({ width: 1, color: PMColors.BORDER })
-                  .borderRadius(PMRadius.XS)
-                  .height(48)
-                  .layoutWeight(1)
-                  .onClick(() => {
-                    this.evaluate('deadline_48h');
-                  })
-
-                Button('模拟停滞 72h')
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontColor(PMColors.INK_PRIMARY)
-                  .backgroundColor(PMColors.SURFACE_SUBTLE)
-                  .border({ width: 1, color: PMColors.BORDER })
-                  .borderRadius(PMRadius.XS)
-                  .height(48)
-                  .layoutWeight(1)
-                  .margin({ left: PMSpacing.SM })
-                  .onClick(() => {
-                    this.evaluate('stale_72h');
-                  })
-              }
-              .width('100%')
-
-              Row() {
-                Button('模拟风险集中')
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontColor(PMColors.INK_PRIMARY)
-                  .backgroundColor(PMColors.SURFACE_SUBTLE)
-                  .border({ width: 1, color: PMColors.BORDER })
-                  .borderRadius(PMRadius.XS)
-                  .height(48)
-                  .layoutWeight(1)
-                  .margin({ top: PMSpacing.SM })
-                  .onClick(() => {
-                    this.evaluate('risk_cluster');
-                  })
-
-                Button('清除模拟')
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontColor(PMColors.RISK)
-                  .backgroundColor(PMColors.RISK_LIGHT)
-                  .borderRadius(PMRadius.XS)
-                  .height(48)
-                  .layoutWeight(1)
-                  .margin({ left: PMSpacing.SM, top: PMSpacing.SM })
-                  .onClick(() => {
-                    this.evaluate(undefined, true);
-                  })
-              }
-              .width('100%')
-
-              Row() {
-                Button('模拟突发方案变更 (模块 A)')
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontWeight(FontWeight.Medium)
-                  .fontColor(PMColors.SURFACE)
-                  .backgroundColor(PMColors.RISK)
-                  .borderRadius(PMRadius.SM)
-                  .height(48)
-                  .width('100%')
-                  .margin({ top: PMSpacing.SM })
-                  .onClick(() => {
-                    this.showChangeImpactDialog = true;
-                  })
-              }
-              .width('100%')
-            }
-            .width('100%')
-            .alignItems(HorizontalAlign.Start)
-            .transition(TransitionEffect.OPACITY.animation({ duration: PMMotion.LOCAL, curve: PMMotion.CURVE_CONTENT }))
+            Column({ space: 10 }) {
+              Text('演示提醒带模拟标记，真实评估读取当前项目记录。').fontSize(12).fontColor(PMColors.INK_SECONDARY)
+              PMButton({ label: '演示：截止临近', secondary: true, disabled: this.isEvaluating, onAction: (): void => { this.evaluate('deadline_48h'); } })
+              PMButton({ label: '演示：长期未推进', secondary: true, disabled: this.isEvaluating, onAction: (): void => { this.evaluate('stale_72h'); } })
+              PMButton({ label: '演示：风险聚集', secondary: true, disabled: this.isEvaluating, onAction: (): void => { this.evaluate('risk_cluster'); } })
+              PMButton({ label: '重新评估当前项目', disabled: this.isEvaluating, onAction: (): void => { this.evaluate(undefined, true); } })
+              if (this.evaluateError !== '') { Text(this.evaluateError).fontSize(13).fontColor(PMColors.RISK) }
+            }.width('100%').alignItems(HorizontalAlign.Start)
           }
         }
-        .width('100%')
-        .padding(PMSpacing.LG)
-        .backgroundColor(PMColors.SURFACE)
-        .borderRadius(PMRadius.MD)
-        .border({ width: 1, color: PMColors.BORDER })
-        .margin({ top: PMSpacing.MD })
-
-        }
-        // 问题三：记录与沉淀——输入区已改为底部半模态面板，此处仅保留入口
-        Column() {
-          Row() {
-            Column() {
-              Text('记录项目碎片')
-                .fontSize(PMFontSize.SECTION_TITLE)
-                .fontWeight(FontWeight.Medium)
-                .fontColor(PMColors.INK_PRIMARY)
-              Text('快速记录文字、图片或 PDF，并保留来源。')
-                .fontSize(PMFontSize.SECONDARY)
-                .fontColor(PMColors.INK_SECONDARY)
-                .margin({ top: PMSpacing.XS })
-            }
-            .alignItems(HorizontalAlign.Start)
-            .layoutWeight(1)
-
-            Text(`已积累 ${this.project._count.cards} 条记忆`)
-              .fontSize(PMFontSize.CAPTION)
-              .fontColor(PMColors.MEMORY)
-          }
-          .width('100%')
-          .justifyContent(FlexAlign.SpaceBetween)
-
-          Row({ space: PMSpacing.SM }) {
-            Button('开始记录')
-              .fontSize(PMFontSize.BUTTON)
-              .fontWeight(FontWeight.Medium)
-              .fontColor(PMColors.BRAND)
-              .backgroundColor(PMColors.BRAND_LIGHT)
-              .border({ width: 1, color: PMColors.BRAND })
-              .borderRadius(PMRadius.SM)
-              .height(48)
-              .layoutWeight(1)
-              .onClick(() => {
-                this.openCaptureEntry();
-              })
-              .accessibilityText('打开记录项目碎片面板')
-
-            Button('整理会议内容')
-              .fontSize(PMFontSize.BUTTON)
-              .fontColor(PMColors.INK_SECONDARY)
-              .backgroundColor(PMColors.SURFACE_SUBTLE)
-              .border({ width: 1, color: PMColors.BORDER })
-              .borderRadius(PMRadius.SM)
-              .height(48)
-              .layoutWeight(1)
-              .onClick(() => {
-                this.entrySheetMode = 'meeting'; this.showEntrySheet = true;
-              })
-              .accessibilityText('打开会议内容整理')
-          }
-          .width('100%')
-          .margin({ top: PMSpacing.MD })
-        }
-        .width('100%')
-        .padding(PMSpacing.LG)
-        .backgroundColor(PMColors.SURFACE)
-        .borderRadius(PMRadius.MD)
-        .border({ width: 1, color: PMColors.BORDER })
-        .margin({ top: PMSpacing.MD })
-      }
-      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.XL })
-    }
-    .layoutWeight(1)
-    .transition(PMTransition.CONTENT_ENTER)
-    .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
+      }.width('100%').padding(16).alignItems(HorizontalAlign.Start)
+    }.layoutWeight(1).width('100%').align(Alignment.TopStart).scrollBar(BarState.Off)
+      .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
   }
 
   // 单一 bindSheet 入口：按模式渲染记录面板或会议导入，避免同节点重复绑定
@@ -3567,7 +3221,7 @@ struct ProjectHome {
         .alignItems(HorizontalAlign.Start)
         .layoutWeight(1)
 
-        Button('✕')
+        Button('✕').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
           .fontSize(PMFontSize.BODY)
           .fontColor(PMColors.INK_TERTIARY)
           .backgroundColor('transparent')
@@ -3584,10 +3238,12 @@ struct ProjectHome {
       .justifyContent(FlexAlign.SpaceBetween)
       .alignItems(VerticalAlign.Top)
 
+      this.MaterialReturn()
+
       Scroll() {
         Row() {
           ForEach(this.sourceOptions, (src: string) => {
-            Button(src)
+            Button(src).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
               .fontSize(PMFontSize.CAPTION)
               .fontWeight(this.sourceType === src ? FontWeight.Medium : FontWeight.Regular)
               .fontColor(this.sourceType === src ? PMColors.BRAND : PMColors.INK_SECONDARY)
@@ -3611,7 +3267,7 @@ struct ProjectHome {
       }
       .width('100%')
       .scrollable(ScrollDirection.Horizontal)
-      .scrollBar(BarState.Off)
+      .align(Alignment.TopStart).scrollBar(BarState.Off)
       .margin({ top: PMSpacing.SM })
 
       if (this.attachmentFeedback !== '') {
@@ -3626,7 +3282,7 @@ struct ProjectHome {
 
       if (this.attachmentRetryId !== '') {
         Row() {
-          Button(this.isRetryingAttachment ? '重新提取中…' : '重试提取')
+          Button(this.isRetryingAttachment ? '重新提取中…' : '重试提取').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.BRAND)
             .backgroundColor(PMColors.BRAND_LIGHT)
@@ -3639,7 +3295,7 @@ struct ProjectHome {
               this.retryAttachment();
             })
 
-          Button('人工校对内容 (模块 E)')
+          Button('人工校对内容 (模块 E)').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.EVIDENCE)
             .backgroundColor(PMColors.EVIDENCE_LIGHT)
@@ -3661,6 +3317,14 @@ struct ProjectHome {
         .margin({ top: PMSpacing.SM })
       }
 
+      if (this.lastUploadedAttachmentId !== '') {
+        PMButton({ label: '查看刚上传的原件 →', secondary: true, onAction: (): void => { this.openAttachment(this.lastUploadedAttachmentId); } })
+      }
+      if (this.attachments.length > 0) {
+        Button(`全部附件 ${this.attachments.length} 份 · 查看原件`, { type: ButtonType.Normal })
+          .constraintSize({ minHeight: 44 }).backgroundColor(Color.Transparent).fontColor(PMColors.BRAND)
+          .onClick(() => { this.showEntrySheet = false; this.currentTabIndex = 1; this.materialsMode = 'attachments'; })
+      }
       if (this.attachments.filter((a: Attachment) => a.extractionStatus !== 'SUCCESS').length > 0) {
         Column() {
           Row() {
@@ -3694,7 +3358,7 @@ struct ProjectHome {
               .layoutWeight(1)
               .alignItems(HorizontalAlign.Start)
 
-              Button(this.isRetryingAttachment && this.attachmentRetryId === item.id ? '重试中…' : '重试提取')
+              Button(this.isRetryingAttachment && this.attachmentRetryId === item.id ? '重试中…' : '重试提取').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                 .fontSize(PMFontSize.CAPTION)
                 .fontColor(PMColors.BRAND)
                 .backgroundColor(PMColors.BRAND_LIGHT)
@@ -3777,7 +3441,7 @@ struct ProjectHome {
       .alignItems(VerticalAlign.Center)
       .margin({ top: PMSpacing.MD })
 
-      Button(this.isCapturing ? '正在归档...' : '沉淀为项目记忆')
+      Button(this.isCapturing ? '正在归档...' : '沉淀为项目记忆').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
         .fontSize(PMFontSize.BUTTON)
         .fontWeight(FontWeight.Medium)
         .fontColor(PMColors.SURFACE)
@@ -3841,7 +3505,7 @@ struct ProjectHome {
                       .layoutWeight(1)
 
                     if (this.isEvidenceConfirmed(deliverable, evidenceType)) {
-                      Button(this.isConfirmingEvidence ? '撤销中…' : '撤销关联')
+                      Button(this.isConfirmingEvidence ? '撤销中…' : '撤销关联').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                         .fontSize(PMFontSize.CAPTION)
                         .fontColor(PMColors.RISK)
                         .backgroundColor(PMColors.SURFACE)
@@ -3889,7 +3553,7 @@ struct ProjectHome {
                           .layoutWeight(1)
                           .alignItems(HorizontalAlign.Start)
 
-                          Button(this.isConfirmingEvidence ? '确认中…' : '关联此条')
+                          Button(this.isConfirmingEvidence ? '确认中…' : '关联此条').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                             .fontSize(PMFontSize.CAPTION)
                             .fontColor(PMColors.BRAND)
                             .backgroundColor(PMColors.BRAND_LIGHT)
@@ -3954,109 +3618,93 @@ struct ProjectHome {
   // ----------------------------------------------------
   // Tab 1: 记忆脉络 (Memory) 视图
   // ----------------------------------------------------
+  private openAttachment(attachmentId: string): void {
+    router.pushUrl({ url: 'pages/AttachmentViewer', params: { projectId: this.projectId, attachmentId: attachmentId } });
+  }
+
+  @Builder
+  private AttachmentLibrary() {
+    if (this.attachmentLoadError !== '') {
+      Column({ space: 8 }) {
+        Text(this.attachmentLoadError).fontSize(13).fontColor(PMColors.RISK)
+        PMButton({ label: '重新加载附件', secondary: true, onAction: (): void => { this.loadAllData(true); } })
+      }.width('100%').padding(16)
+    }
+    TextInput({ text: this.attachmentSearch, placeholder: '搜索附件文件名' })
+      .height(44).margin({ left: 16, right: 16, bottom: 10 }).backgroundColor(PMColors.SURFACE)
+      .onChange((value: string) => { this.attachmentSearch = value; })
+    List({ space: 10 }) {
+      if (this.attachments.length === 0 && this.attachmentLoadError === '') {
+        ListItem() {
+          EmptyStateView({ title: '还没有附件', description: '上传图片或 PDF 后，原件会保留在这里。', actionText: '上传附件', onAction: (): void => { this.openCaptureEntry(); } })
+        }
+      } else if (this.attachments.filter((a: Attachment) => a.fileName.toLowerCase().includes(this.attachmentSearch.trim().toLowerCase())).length === 0) {
+        ListItem() { Text('没有找到匹配的附件').padding(20).fontColor(PMColors.INK_TERTIARY) }
+      }
+      ForEach(this.attachments.filter((a: Attachment) => a.fileName.toLowerCase().includes(this.attachmentSearch.trim().toLowerCase())), (item: Attachment) => {
+        ListItem() {
+          Column({ space: 10 }) {
+            PMListRow({ title: item.fileName, subtitle: attachmentStatus(item), meta: `${attachmentSize(item.size)} · ${(item.createdAt ?? '').substring(0, 10)} · 查看原件 ›`, onOpen: (): void => { this.openAttachment(item.id); } })
+            if (item.extractionStatus !== 'SUCCESS') {
+              Row({ space: 10 }) {
+                Button(this.isRetryingAttachment && this.attachmentRetryId === item.id ? '提取中…' : '重试提取', { type: ButtonType.Normal })
+                  .constraintSize({ minHeight: 44 }).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).borderRadius(11).layoutWeight(1)
+                  .enabled(!this.isRetryingAttachment).onClick(() => { this.retrySpecificAttachment(item.id); })
+                Button('人工校对', { type: ButtonType.Normal }).constraintSize({ minHeight: 44 }).layoutWeight(1)
+                  .fontColor(PMColors.BRAND).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(11)
+                  .onClick(() => { this.correctingAttachment = item; this.showAttachmentCorrection = true; })
+              }.padding({ left: 14, right: 14, bottom: 12 }).width('100%')
+            }
+          }.width('100%').backgroundColor(PMColors.SURFACE).borderRadius(18).border({ width: 1, color: PMColors.BORDER_SUBTLE })
+        }
+      }, (item: Attachment) => item.id)
+    }.layoutWeight(1).padding({ left: 16, right: 16, bottom: 16 })
+  }
+
   @Builder
   private MemoryView() {
     Column() {
-      // 搜索框与类型胶囊
       Column() {
-        TextInput({ text: this.memorySearchQuery, placeholder: '搜索记忆标题、摘要或关键词...' })
-          .onChange((value: string) => {
-            this.onMemoryQueryChange(value);
-          })
-          .fontSize(PMFontSize.BODY)
-          .height(40)
-          .backgroundColor(PMColors.SURFACE_SUBTLE)
-          .borderRadius(PMRadius.SM)
-          .border({ width: 1, color: PMColors.BORDER })
-
+        Row({ space: 10 }) {
+          Row({ space: 2 }) {
+          Button(`项目记忆 ${this.project.cards.length}`, { type: ButtonType.Normal }).layoutWeight(1).constraintSize({ minHeight: 44 }).fontSize(14)
+            .fontColor(this.materialsMode === 'memory' ? PMColors.BRAND : PMColors.INK_SECONDARY)
+            .fontWeight(this.materialsMode === 'memory' ? FontWeight.Medium : FontWeight.Regular)
+            .backgroundColor(this.materialsMode === 'memory' ? PMColors.SURFACE : Color.Transparent).borderRadius(9)
+            .accessibilitySelected(this.materialsMode === 'memory').onClick(() => { this.materialsMode = 'memory'; })
+          Button(this.attachmentLoadError === '' ? `附件原件 ${this.attachments.length}` : '附件 · 未同步', { type: ButtonType.Normal }).layoutWeight(1).constraintSize({ minHeight: 44 }).fontSize(14)
+            .fontColor(this.materialsMode === 'attachments' ? PMColors.BRAND : PMColors.INK_SECONDARY)
+            .fontWeight(this.materialsMode === 'attachments' ? FontWeight.Medium : FontWeight.Regular)
+            .backgroundColor(this.materialsMode === 'attachments' ? PMColors.SURFACE : Color.Transparent).borderRadius(9)
+            .accessibilitySelected(this.materialsMode === 'attachments').onClick(() => { this.materialsMode = 'attachments'; })
+          }.layoutWeight(1).padding(3).borderRadius(12).backgroundColor(PMColors.SURFACE_SUBTLE)
+          Button('＋ 新增', { type: ButtonType.Normal }).constraintSize({ minHeight: 44 }).padding({ left: 12, right: 12 }).fontSize(13)
+            .fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).borderRadius(11)
+            .accessibilityText('记录或上传附件').onClick(() => { this.openCaptureEntry(); })
+        }.width('100%')
+      }.padding({ left: 16, right: 16, top: 12, bottom: 10 }).width('100%')
+      if (this.materialsMode === 'attachments') {
+        this.AttachmentLibrary()
+      } else {
+      Column({ space: 6 }) {
+        TextInput({ text: this.memorySearchQuery, placeholder: '搜索标题、摘要或关键词' })
+          .onChange((value: string) => { this.onMemoryQueryChange(value); })
+          .fontSize(14).height(44).backgroundColor(PMColors.SURFACE).borderRadius(11)
+          .border({ width: 1, color: PMColors.BORDER_SUBTLE })
         Scroll() {
-          Row() {
-            Button('全部')
-              .fontSize(PMFontSize.CAPTION)
-              .fontColor(this.selectedMemoryType === 'all' ? PMColors.BRAND : PMColors.INK_SECONDARY)
-              .backgroundColor(this.selectedMemoryType === 'all' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
-              .borderRadius(PMRadius.XS)
-              .height(44)
-              .margin({ right: PMSpacing.XS })
-              .accessibilityText('按记忆类型筛选：全部')
-              .accessibilitySelected(this.selectedMemoryType === 'all')
-              .onClick(() => {
-                this.selectMemoryType('all');
-              })
-
-            Button('论文笔记')
-              .fontSize(PMFontSize.CAPTION)
-              .fontColor(this.selectedMemoryType === 'paper_note' ? PMColors.BRAND : PMColors.INK_SECONDARY)
-              .backgroundColor(this.selectedMemoryType === 'paper_note' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
-              .borderRadius(PMRadius.XS)
-              .height(44)
-              .margin({ right: PMSpacing.XS })
-              .accessibilityText('按记忆类型筛选：论文笔记')
-              .accessibilitySelected(this.selectedMemoryType === 'paper_note')
-              .onClick(() => {
-                this.selectMemoryType('paper_note');
-              })
-
-            Button('实验记录')
-              .fontSize(PMFontSize.CAPTION)
-              .fontColor(this.selectedMemoryType === 'experiment_log' ? PMColors.BRAND : PMColors.INK_SECONDARY)
-              .backgroundColor(this.selectedMemoryType === 'experiment_log' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
-              .borderRadius(PMRadius.XS)
-              .height(44)
-              .margin({ right: PMSpacing.XS })
-              .accessibilityText('按记忆类型筛选：实验记录')
-              .accessibilitySelected(this.selectedMemoryType === 'experiment_log')
-              .onClick(() => {
-                this.selectMemoryType('experiment_log');
-              })
-
-            Button('阶段复盘')
-              .fontSize(PMFontSize.CAPTION)
-              .fontColor(this.selectedMemoryType === 'reflection' ? PMColors.BRAND : PMColors.INK_SECONDARY)
-              .backgroundColor(this.selectedMemoryType === 'reflection' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
-              .borderRadius(PMRadius.XS)
-              .height(44)
-              .margin({ right: PMSpacing.XS })
-              .accessibilityText('按记忆类型筛选：阶段复盘')
-              .accessibilitySelected(this.selectedMemoryType === 'reflection')
-              .onClick(() => {
-                this.selectMemoryType('reflection');
-              })
-
-            Button('代码问题')
-              .fontSize(PMFontSize.CAPTION)
-              .fontColor(this.selectedMemoryType === 'code_issue' ? PMColors.BRAND : PMColors.INK_SECONDARY)
-              .backgroundColor(this.selectedMemoryType === 'code_issue' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
-              .borderRadius(PMRadius.XS)
-              .height(44)
-              .margin({ right: PMSpacing.XS })
-              .accessibilityText('按记忆类型筛选：代码问题')
-              .accessibilitySelected(this.selectedMemoryType === 'code_issue')
-              .onClick(() => {
-                this.selectMemoryType('code_issue');
-              })
+          Row({ space: 8 }) {
+            ForEach(['all', 'paper_note', 'experiment_log', 'reflection', 'code_issue'], (type: string) => {
+              Button(type === 'all' ? '全部' : type === 'paper_note' ? '论文笔记' : type === 'experiment_log' ? '实验记录' : type === 'reflection' ? '阶段复盘' : '代码问题', { type: ButtonType.Normal })
+                .fontSize(13).fontColor(this.selectedMemoryType === type ? PMColors.BRAND : PMColors.INK_SECONDARY)
+                .fontWeight(this.selectedMemoryType === type ? FontWeight.Medium : FontWeight.Regular)
+                .backgroundColor(Color.Transparent)
+                .borderRadius(0).constraintSize({ minHeight: 44 }).padding({ left: 10, right: 10 })
+                .border({ width: { bottom: this.selectedMemoryType === type ? 2 : 0 }, color: PMColors.BRAND })
+                .accessibilitySelected(this.selectedMemoryType === type).onClick(() => { this.selectMemoryType(type); })
+            })
           }
-        }
-        .width('100%')
-        .scrollable(ScrollDirection.Horizontal)
-        .scrollBar(BarState.Off)
-        .margin({ top: PMSpacing.SM })
-      }
-      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.SM })
-      .backgroundColor(PMColors.SURFACE)
-      .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
-
-      // 项目内记忆与全局记忆的分工要说清：这里只有当前项目的时态关系与原始来源
-      Text('仅当前项目的记忆：这里展示时态状态、演化关系与原始采集碎片。跨项目检索请用底部「记忆」。')
-        .fontSize(PMFontSize.CAPTION)
-        .fontColor(PMColors.INK_SECONDARY)
-        .lineHeight(18)
-        .width('100%')
-        .padding(PMSpacing.MD)
-        .backgroundColor(PMColors.EVIDENCE_TINT)
-        .borderRadius(PMRadius.SM)
-        .margin({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD })
-        .accessibilityText('范围说明：仅当前项目的记忆，跨项目检索请使用底部的记忆页签')
+        }.width('100%').scrollable(ScrollDirection.Horizontal).align(Alignment.TopStart).scrollBar(BarState.Off)
+      }.width('100%').padding({ left: 16, right: 16, bottom: 10 })
 
       if (this.memorySearchQuery.trim() !== '' && this.isSearchingMemory) {
         Text('正在检索项目记忆…')
@@ -4095,7 +3743,7 @@ struct ProjectHome {
                 .fontColor(PMColors.INK_TERTIARY)
                 .lineHeight(19)
                 .margin({ top: PMSpacing.XS })
-              Button(this.project.cards.length === 0 ? '＋ 记录第一条事实' : '清空类型筛选')
+              Button(this.project.cards.length === 0 ? '＋ 记录第一条事实' : '清空类型筛选').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                 .fontSize(PMFontSize.CAPTION)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.SURFACE)
@@ -4175,7 +3823,7 @@ struct ProjectHome {
                   .fontColor(card.topLevelState === 'SUPERSEDED' ? PMColors.INK_TERTIARY : PMColors.INK_PRIMARY)
                   .margin({ top: PMSpacing.SM })
 
-                if (card.topLevelState !== 'CURRENT' && card.displayReason !== '') {
+                if (card.displayReason !== '') {
                   Text(card.displayReason)
                     .fontSize(PMFontSize.CAPTION)
                     .fontColor(card.topLevelState === 'SUPERSEDED' ? PMColors.INK_MUTED : PMColors.INK_TERTIARY)
@@ -4186,6 +3834,7 @@ struct ProjectHome {
                 if (TextFormatters.shouldShowSummary(card.title, card.summary)) {
                   Text(TextFormatters.readableText(card.summary, '这条记忆摘要无法读取，请重新录入。'))
                     .fontSize(PMFontSize.BODY)
+                    .maxLines(this.expandedCardId === card.id ? 1000 : 2).textOverflow({ overflow: TextOverflow.Ellipsis })
                     .fontColor(PMColors.INK_SECONDARY)
                     .lineHeight(20)
                     .margin({ top: PMSpacing.XS })
@@ -4194,12 +3843,12 @@ struct ProjectHome {
 
               // 原始记录展开
               Row() {
-                Text(this.expandedCardId === card.id ? '▲ 收起原始碎片' : '▼ 查看原始采集碎片')
+                Text(this.expandedCardId === card.id ? '收起详情与来源 ↑' : '查看详情与来源 →')
                   .fontSize(PMFontSize.SECONDARY)
                   .fontWeight(FontWeight.Medium)
                   .fontColor(PMColors.BRAND)
               }
-              .padding({ top: PMSpacing.SM, bottom: PMSpacing.XS })
+              .constraintSize({ minHeight: 44 }).padding({ top: PMSpacing.SM, bottom: PMSpacing.XS })
               .accessibilityText(this.expandedCardId === card.id ? '收起原始采集碎片' : '查看原始采集碎片')
               .accessibilityDescription(this.isDamagedMemoryCard(card) ? '该记忆需要修复，原始采集碎片仍可查看' : '展开查看这条记忆的来源与原始内容')
               .clickEffect(PMInteraction.PRESS_EFFECT)
@@ -4224,10 +3873,14 @@ struct ProjectHome {
                 .alignItems(HorizontalAlign.Start)
               }
 
+              if (this.expandedCardId === card.id && card.attachment !== undefined && card.attachment !== null) {
+                PMButton({ label: `查看附件原件：${card.attachment.fileName}`, secondary: true,
+                  onAction: (): void => { this.openAttachment(card.attachment!.id); } })
+              }
               // 生命周期操作：人工确认来源 / 归档（可恢复，双击防护）
               if (this.expandedCardId === card.id) {
                 Row({ space: PMSpacing.SM }) {
-                  Button(this.lifecycleActionCardId === card.id ? '处理中…' : '确认来源')
+                  Button(this.lifecycleActionCardId === card.id ? '处理中…' : '确认来源').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                     .height(36)
                     .fontSize(PMFontSize.CAPTION)
                     .fontColor(PMColors.BRAND)
@@ -4238,7 +3891,7 @@ struct ProjectHome {
                       this.confirmCardSource(card.id);
                     })
 
-                  Button('归档')
+                  Button('归档').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                     .height(36)
                     .fontSize(PMFontSize.CAPTION)
                     .fontColor(PMColors.INK_SECONDARY)
@@ -4265,6 +3918,7 @@ struct ProjectHome {
       }
       .layoutWeight(1)
       .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.LG })
+      }
     }
     .layoutWeight(1)
     .transition(PMTransition.CONTENT_ENTER)
@@ -4298,94 +3952,36 @@ struct ProjectHome {
   @Builder
   private ActionView() {
     Column() {
-      // 轻量状态栏 (无三个巨大 Card)
-      Row() {
-        Row() {
-          Text('进行中')
-            .fontSize(PMFontSize.SECONDARY)
-            .fontColor(PMColors.INK_TERTIARY)
-          Text(` ${this.actions.filter((a) => !a.isSimulated && a.status === 'DOING').length}`)
-            .fontSize(PMFontSize.BODY)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.BRAND)
-        }
-        .margin({ right: PMSpacing.LG })
-
-        Row() {
-          Text('待开始')
-            .fontSize(PMFontSize.SECONDARY)
-            .fontColor(PMColors.INK_TERTIARY)
-          Text(` ${this.actions.filter((a) => !a.isSimulated && a.status === 'TODO').length}`)
-            .fontSize(PMFontSize.BODY)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.INK_PRIMARY)
-        }
-        .margin({ right: PMSpacing.LG })
-
-        Row() {
-          Text('已完成')
-            .fontSize(PMFontSize.SECONDARY)
-            .fontColor(PMColors.INK_TERTIARY)
-          Text(` ${this.actions.filter((a) => !a.isSimulated && a.status === 'DONE').length}`)
-            .fontSize(PMFontSize.BODY)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.SUCCESS)
-        }
-      }
-      .width('100%')
-      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.SM })
-      .backgroundColor(PMColors.SURFACE)
-      .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
-
-      Column() {
-        Row({ space: PMSpacing.SM }) {
-          Button('＋ 新增待办')
-            .fontSize(PMFontSize.BUTTON)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.SURFACE)
-            .backgroundColor(PMColors.BRAND)
-            .borderRadius(PMRadius.SM)
-            .height(44)
-            .layoutWeight(1)
-            .onClick(() => {
-              this.openCreateAction();
+      Column({ space: 8 }) {
+        Row({ space: 8 }) {
+          Text('项目行动').fontSize(18).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY).layoutWeight(1)
+          Button('＋ 新增', { type: ButtonType.Normal }).constraintSize({ minHeight: 44 }).padding({ left: 12, right: 12 })
+            .fontSize(13).fontWeight(FontWeight.Medium).fontColor(PMColors.SURFACE).backgroundColor(PMColors.BRAND).borderRadius(11)
+            .accessibilityText('手动新增待办').onClick(() => { this.openCreateAction(); })
+          Button('安排时间', { type: ButtonType.Normal }).constraintSize({ minHeight: 44 }).padding({ left: 12, right: 12 })
+            .fontSize(13).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).borderRadius(11)
+            .accessibilityDescription('安排待办时间，同步到手机日历前会再次确认')
+            .onClick(() => { router.pushUrl({ url: 'pages/ActionBoard', params: { projectId: this.projectId } }); })
+        }.width('100%')
+        Text(`待推进 ${this.actions.filter((a: ActionItem) => !a.isSimulated && a.status !== 'DONE').length}  ·  已完成 ${this.actions.filter((a: ActionItem) => !a.isSimulated && a.status === 'DONE').length}  ·  不含演示`)
+          .fontSize(12).fontColor(PMColors.INK_TERTIARY)
+        Scroll() {
+          Row({ space: 6 }) {
+            ForEach(['ALL', 'ACTIVE', 'TODO', 'DOING', 'DONE'], (status: string) => {
+              Button(status === 'ALL' ? '全部' : status === 'ACTIVE' ? '待推进' : status === 'TODO' ? '待开始' : status === 'DOING' ? '进行中' : '已完成', { type: ButtonType.Normal })
+                .constraintSize({ minHeight: 44 }).padding({ left: 12, right: 12 }).fontSize(13).borderRadius(10)
+                .fontColor(this.actionStatusFilter === status ? PMColors.BRAND : PMColors.INK_SECONDARY)
+                .backgroundColor(this.actionStatusFilter === status ? PMColors.BRAND_LIGHT : Color.Transparent)
+                .accessibilitySelected(this.actionStatusFilter === status).onClick(() => { this.actionStatusFilter = status; this.focusedActionId = ''; })
             })
-            .accessibilityText('手动新增待办')
-
-          Button('安排时间')
-            .fontSize(PMFontSize.BUTTON)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.BRAND)
-            .backgroundColor(PMColors.BRAND_LIGHT)
-            .borderRadius(PMRadius.SM)
-            .height(44)
-            .layoutWeight(1)
-            .onClick(() => {
-              router.pushUrl({
-                url: 'pages/ActionBoard',
-                params: { projectId: this.projectId }
-              });
-            })
-            .accessibilityText('安排待办时间')
-            .accessibilityDescription('预览并确认未来几天的行动安排，可选择同步到手机日历')
-        }
-        .width('100%')
-
-        Text('可为单条待办设置日历提醒，或安排未来几天的时间；写入手机日历前会再次确认。')
-          .fontSize(PMFontSize.CAPTION)
-          .fontColor(PMColors.INK_TERTIARY)
-          .margin({ top: PMSpacing.XS })
-      }
-      .width('100%')
-      .padding(PMSpacing.LG)
-      .backgroundColor(PMColors.SURFACE)
-      .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
-      .alignItems(HorizontalAlign.Start)
+          }
+        }.scrollable(ScrollDirection.Horizontal).scrollBar(BarState.Off).width('100%')
+      }.width('100%').padding({ left: 16, right: 16, top: 10, bottom: 2 }).alignItems(HorizontalAlign.Start)
 
       List({ space: PMSpacing.MD }) {
         if (this.focusedActionId !== '') {
           ListItem() {
-            Button('查看全部待办').onClick(() => { this.focusedActionId = ''; })
+            Button('查看全部待办').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).onClick(() => { this.focusedActionId = ''; }).fontSize(PMFontSize.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
           }
         }
         if (this.focusedActionId !== '' && !this.actions.some((item: ActionItem) => item.id === this.focusedActionId)) {
@@ -4393,7 +3989,7 @@ struct ProjectHome {
             Text('这项行动已移除或当前不可访问，可查看全部行动。').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY)
           }
         }
-        ForEach(this.focusedActionId === '' ? this.actions : this.actions.filter((item: ActionItem) => item.id === this.focusedActionId), (action: ActionItem) => {
+        ForEach(this.focusedActionId === '' ? this.actions.filter((item: ActionItem) => this.actionStatusFilter === 'ALL' || (this.actionStatusFilter === 'ACTIVE' ? item.status !== 'DONE' : item.status === this.actionStatusFilter)) : this.actions.filter((item: ActionItem) => item.id === this.focusedActionId), (action: ActionItem) => {
           ListItem() {
             Column() {
               Row() {
@@ -4419,6 +4015,15 @@ struct ProjectHome {
                 .fontColor(PMColors.INK_PRIMARY)
                 .margin({ top: PMSpacing.SM })
 
+      if ((action.description ?? '').trim() !== '') {
+        Column({ space: 4 }) {
+          Text('预期结果').fontSize(12).fontColor(PMColors.INK_TERTIARY)
+          Text(action.description ?? '').fontSize(14).lineHeight(21).fontColor(PMColors.INK_SECONDARY)
+        }.width('100%').alignItems(HorizontalAlign.Start).padding(12).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(12).margin({ top: 10 })
+      }
+      if ((action.dueAt ?? '') !== '') {
+        Text(`截止：${(action.dueAt ?? '').substring(0, 10)}`).fontSize(12).fontColor(PMColors.INK_TERTIARY).margin({ top: 8 })
+      }
               if (action.sourceIntervention !== null && action.sourceIntervention !== undefined && action.sourceIntervention.title !== '') {
                 Text(`来源：${TextFormatters.readableText(action.sourceIntervention.title, '提醒来源无法读取')}`)
                   .fontSize(PMFontSize.CAPTION)
@@ -4446,7 +4051,8 @@ struct ProjectHome {
                 .margin({ top: PMSpacing.SM })
               }
 
-              if (action.resultCard !== null && action.resultCard !== undefined && action.resultCard.title !== '') {
+              if (action.status === 'DONE' && !action.isSimulated && action.resultCardId !== undefined && action.resultCardId !== null && action.resultCardId !== '' &&
+                action.resultCard !== null && action.resultCard !== undefined && action.resultCard.title !== '') {
                 Row() {
                   SpineNodeIcon({ iconSize: 14, color: PMColors.SUCCESS })
                   Text('已闭环沉淀为项目记忆')
@@ -4478,9 +4084,19 @@ struct ProjectHome {
                 })
               }
               if (action.status === 'TODO' || action.status === 'DOING') {
-                Row({ space: PMSpacing.SM }) {
+                Column({ space: PMSpacing.SM }) {
+                  Button('填写完成回执').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
+                    .fontSize(PMFontSize.BUTTON)
+                    .fontWeight(FontWeight.Medium)
+                    .fontColor(PMColors.SURFACE)
+                    .backgroundColor(PMColors.BRAND)
+                    .borderRadius(PMRadius.MD)
+                    .height(48)
+                    .width('100%')
+                    .onClick(() => { this.openCompleteDialog(action.id); })
+                  Row({ space: PMSpacing.SM }) {
                   if (this.reminderAvailable) {
-                    Button(this.actionReminderCardId === action.id ? '收起提醒设置' : '日历提醒')
+                    Button(this.actionReminderCardId === action.id ? '收起提醒设置' : '日历提醒').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                       .fontSize(PMFontSize.BUTTON)
                       .fontColor(PMColors.BRAND)
                       .backgroundColor(PMColors.BRAND_LIGHT)
@@ -4493,7 +4109,7 @@ struct ProjectHome {
                       })
                   }
                   if (action.status === 'TODO') {
-                    Button(this.startingActionId === action.id ? '启动中...' : '开始行动')
+                    Button(this.startingActionId === action.id ? '启动中...' : '开始行动').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                       .fontSize(PMFontSize.BUTTON)
                       .fontColor(PMColors.INK_PRIMARY)
                       .backgroundColor(PMColors.SURFACE_SUBTLE)
@@ -4507,17 +4123,7 @@ struct ProjectHome {
                       })
                   }
 
-                  Button('完成并写回执')
-                    .fontSize(PMFontSize.BUTTON)
-                    .fontWeight(FontWeight.Medium)
-                    .fontColor(PMColors.SURFACE)
-                    .backgroundColor(PMColors.BRAND)
-                    .borderRadius(PMRadius.SM)
-                    .height(36)
-                    .layoutWeight(1.2)
-                    .onClick(() => {
-                      this.openCompleteDialog(action.id);
-                    })
+                  }.width('100%')
                 }
                 .width('100%')
                 .margin({ top: PMSpacing.MD })
@@ -4580,17 +4186,28 @@ struct ProjectHome {
   private MissionView() {
     if (this.showQuickCopilot) {
       Column() {
-        Button('返回委托').backgroundColor(PMColors.SURFACE).fontColor(PMColors.BRAND)
+        Button('返回委托').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).backgroundColor(PMColors.SURFACE).fontColor(PMColors.BRAND)
           .onClick(() => { this.showQuickCopilot = false; })
         this.CopilotView()
-      }.layoutWeight(1).width('100%')
+      }.layoutWeight(1).width('100%').align(Alignment.TopStart)
     } else {
       Scroll() {
         Column({ space: PMSpacing.MD }) {
+          PMPageIntro({ compact: true, title: '委托与对话', description: '设定长期目标，或围绕项目随时提问。' })
+          PMButton({ label: '＋ 新建长期委托', onAction: (): void => {
+            router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.projectId, mode: 'create' } });
+          } })
+          Row({ space: 12 }) {
+            Column({ space: 4 }) {
+              Text('问忆程').fontSize(16).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
+              Text(`基于 ${this.project._count.cards} 条记忆解释项目情况`).fontSize(12).fontColor(PMColors.INK_SECONDARY)
+            }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+            Button('提问 →', { type: ButtonType.Normal }).constraintSize({ minHeight: 44 }).fontSize(14).borderRadius(11)
+              .fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).onClick(() => { if (this.focusAgentEnabled) router.pushUrl({ url: 'pages/FocusConversation', params: { conversationId: this.focusConversationId, projectId: this.projectId } }); else this.showQuickCopilot = true; })
+          }.width('100%').padding(14).backgroundColor(PMColors.SURFACE).borderRadius(18).border({ width: 1, color: PMColors.BORDER_SUBTLE })
           MissionPanel({ projectId: this.projectId, refreshKey: this.missionRefreshKey })
-          Button('快速提问：问忆程').onClick(() => { this.showQuickCopilot = true; })
-        }.padding(PMSpacing.MD).width('100%')
-      }.layoutWeight(1).width('100%')
+        }.padding(PMSpacing.MD).width('100%').justifyContent(FlexAlign.Start)
+      }.layoutWeight(1).width('100%').align(Alignment.TopStart).align(Alignment.TopStart).scrollBar(BarState.Off)
     }
   }
 
@@ -4600,11 +4217,11 @@ struct ProjectHome {
       // 问忆程项目上下文看板 (避免空白页面)
       Column() {
         Text('问忆程')
-          .fontSize(PMFontSize.SECTION_TITLE)
+          .fontSize(22)
           .fontWeight(FontWeight.Medium)
           .fontColor(PMColors.INK_PRIMARY)
 
-        Text(`基于当前项目的 ${this.project._count.cards} 条记忆、${this.actions.filter((a) => !a.isSimulated && a.status === 'DONE').length} 项完成行动与 ${this.interventions.filter((i) => !i.isSimulated && i.status === 'OPEN').length} 条提醒，回答状态事实、历史依据与下一步建议。`)
+        Text(`可检索 ${this.project._count.cards} 条项目记忆、${this.actions.filter((a) => !a.isSimulated && a.status === 'DONE').length} 项已完成行动。回答会区分已知事实与缺失依据。`)
           .fontSize(PMFontSize.SECONDARY)
           .fontColor(PMColors.INK_SECONDARY)
           .lineHeight(18)
@@ -4682,7 +4299,7 @@ struct ProjectHome {
         .padding({ left: PMSpacing.LG, right: PMSpacing.LG })
       }
       .scrollable(ScrollDirection.Horizontal)
-      .scrollBar(BarState.Off)
+      .align(Alignment.TopStart).scrollBar(BarState.Off)
       .width('100%')
       .margin({ top: PMSpacing.SM, bottom: PMSpacing.SM })
 
@@ -4728,7 +4345,7 @@ struct ProjectHome {
               if (msg.role === 'ASSISTANT' && msg.trustReceipt !== undefined && msg.trustReceipt !== null) {
                 Column() {
                   Row() {
-                    Text(msg.trustReceipt.supportState === 'SUPPORTED' ? '依据充分' :
+                    Text(msg.trustReceipt.supportState === 'SUPPORTED' ? '引用可用 · 语义另行核验' :
                       msg.trustReceipt.supportState === 'CONTESTED' ? '存在冲突' : '证据不足')
                       .fontSize(PMFontSize.CAPTION)
                       .fontWeight(FontWeight.Medium)
@@ -4738,12 +4355,12 @@ struct ProjectHome {
                       .backgroundColor(msg.trustReceipt.supportState === 'SUPPORTED' ? PMColors.SUCCESS_LIGHT :
                         msg.trustReceipt.supportState === 'CONTESTED' ? PMColors.EVIDENCE_LIGHT : PMColors.RISK_LIGHT)
                       .borderRadius(PMRadius.FULL)
-                      .accessibilityText(`证据支持状态：${msg.trustReceipt.supportState === 'SUPPORTED' ? '依据充分' :
+                      .accessibilityText(`证据支持状态：${msg.trustReceipt.supportState === 'SUPPORTED' ? '引用可用 · 语义另行核验' :
                         msg.trustReceipt.supportState === 'CONTESTED' ? '存在冲突' : '证据不足'}`)
 
                     Blank()
 
-                    Button(this.expandedCopilotReceiptId === (msg.runId ?? `message-${idx}`) ? '收起回执' : '查看证据回执')
+                    Button(this.expandedCopilotReceiptId === (msg.runId ?? `message-${idx}`) ? '收起回执' : '查看证据回执').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                       .fontSize(PMFontSize.CAPTION)
                       .fontColor(PMColors.BRAND)
                       .backgroundColor(Color.Transparent)
@@ -4754,6 +4371,20 @@ struct ProjectHome {
                   }
                   .width('100%')
                   .margin({ top: PMSpacing.SM })
+
+                  if (msg.trustReceipt.supportState !== 'SUPPORTED') {
+                    Text(`缺失依据：${msg.trustReceipt.refusalReason !== undefined && msg.trustReceipt.refusalReason !== null && msg.trustReceipt.refusalReason !== '' ? msg.trustReceipt.refusalReason : '现有资料不足以支持这项结论。'}`)
+                      .fontSize(PMFontSize.CAPTION)
+                      .fontColor(PMColors.INK_SECONDARY)
+                      .lineHeight(18)
+                      .margin({ top: PMSpacing.SM })
+                    Button('查看项目资料').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
+                      .height(40).fontSize(PMFontSize.CAPTION)
+                      .fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT)
+                      .borderRadius(PMRadius.MD)
+                      .margin({ top: PMSpacing.XS })
+                      .onClick(() => { this.currentTabIndex = 1; })
+                  }
 
                   if (this.expandedCopilotReceiptId === (msg.runId ?? `message-${idx}`)) {
                     Column({ space: PMSpacing.SM }) {
@@ -4766,10 +4397,23 @@ struct ProjectHome {
 
                       ForEach(msg.trustReceipt.claims, (claim: EvidenceClaim, claimIndex: number) => {
                         Column() {
-                          Text(`结论 ${claimIndex + 1} · ${claim.support === 'SUPPORTED' ? '依据充分' : claim.support === 'CONTESTED' ? '存在冲突' : '证据不足'}`)
+                          Text(`结论 ${claimIndex + 1} · ${claim.support === 'SUPPORTED' ? '引用可用 · 语义另行核验' : claim.support === 'CONTESTED' ? '存在冲突' : '证据不足'}`)
                             .fontSize(PMFontSize.CAPTION)
                             .fontWeight(FontWeight.Medium)
                             .fontColor(PMColors.INK_PRIMARY)
+                          if (claim.assessments !== undefined && claim.assessments !== null && claim.assessments.length > 0) {
+                            ForEach(claim.assessments, (assessment: EvidenceAssessment) => {
+                              Text(evidenceAssessmentText(assessment))
+                                .fontSize(PMFontSize.CAPTION)
+                                .fontColor(PMColors.INK_SECONDARY)
+                                .lineHeight(18)
+                              Text(`来源版本：${assessment.sourceRevision || '未提供'}`)
+                                .fontSize(PMFontSize.CAPTION)
+                                .fontColor(PMColors.INK_SECONDARY)
+                            }, (assessment: EvidenceAssessment) => assessment.sourceId)
+                          } else {
+                            Text('语义尚未核验').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
+                          }
                           Text(claim.text)
                             .fontSize(PMFontSize.CAPTION)
                             .fontColor(PMColors.INK_SECONDARY)
@@ -4813,6 +4457,8 @@ struct ProjectHome {
                           .border({ width: 1, color: PMColors.BORDER_SUBTLE })
                           .borderRadius(PMRadius.SM)
                           .alignItems(HorizontalAlign.Start)
+                          .constraintSize({ minHeight: 44 }).onClick(() => { this.currentTabIndex = 1; this.materialsMode = 'memory'; this.memorySearchQuery = ''; this.selectedMemoryType = 'all'; this.expandedCardId = cite.cardId; })
+                          .accessibilityText(`查看来源记忆：${cite.title}`)
                         }, (cite: AgentCitation) => cite.cardId)
                       }
 
@@ -4853,8 +4499,8 @@ struct ProjectHome {
                   ForEach(msg.citations, (cite: AgentCitation) => {
                     EvidenceItemView({
                       title: TextFormatters.readableText(cite.title, '记忆依据'),
-                      sourceLabel: cite.title.indexOf('风险') >= 0 ? '风险' : cite.title.indexOf('要求') >= 0 ? '交付要求' : '项目记忆',
-                      iconType: cite.title.indexOf('风险') >= 0 ? 'risk' : cite.title.indexOf('要求') >= 0 ? 'requirement' : 'memory'
+                      sourceLabel: '项目记忆',
+                      iconType: 'memory'
                     })
                   }, (cite: AgentCitation) => cite.cardId)
                 }
@@ -4886,7 +4532,7 @@ struct ProjectHome {
                       .layoutWeight(1)
                       .alignItems(HorizontalAlign.Start)
 
-                      Button(this.executingToolTitle === act.title ? '执行中...' : '确认执行')
+                      Button(this.executingToolTitle === act.title ? '执行中...' : '确认执行').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                         .fontSize(PMFontSize.BUTTON)
                         .fontWeight(FontWeight.Medium)
                         .fontColor(PMColors.SURFACE)
@@ -4910,6 +4556,8 @@ struct ProjectHome {
                 .width('100%')
                 .alignItems(HorizontalAlign.Start)
               }
+              if (msg.runId === this.sourceConversationRun) { Text('原委托的来源对话').fontSize(12).fontColor(PMColors.BRAND) }
+              if (msg.continuationSuggestion !== undefined) { CopilotContinuationCard({ suggestion: msg.continuationSuggestion }) }
             }
             .width('100%')
             .padding(PMSpacing.LG)
@@ -4947,7 +4595,7 @@ struct ProjectHome {
           .border({ width: 1, color: PMColors.BORDER })
           .accessibilityText('输入项目问题')
 
-        Button(this.isAskingCopilot ? '思考中...' : '发送')
+        Button(this.isAskingCopilot ? '思考中...' : '发送').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
           .fontSize(PMFontSize.BUTTON)
           .fontWeight(FontWeight.Medium)
           .fontColor(PMColors.SURFACE)
@@ -5033,10 +4681,14 @@ struct ProjectHome {
       Column() {
         Row() {
           Column() {
-            Text('正文')
+            Text(TextFormatters.artifactTypeToChinese(this.selectedArtifactType))
               .fontSize(PMFontSize.SECTION_TITLE)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.INK_PRIMARY)
+            Text('成果草稿 · 待人工复核；保存不代表已交付')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.WARNING)
+              .margin({ top: PMSpacing.XS })
             Text(`最后生成于 ${this.currentArtifact !== undefined && this.currentArtifact.createdAt.length >= 10 ? this.currentArtifact.createdAt.substring(0, 10) : '近期'}`)
               .fontSize(PMFontSize.CAPTION)
               .fontColor(PMColors.INK_TERTIARY)
@@ -5044,9 +4696,12 @@ struct ProjectHome {
           }
           .alignItems(HorizontalAlign.Start)
           .layoutWeight(1)
+        }
+        .width('100%')
+        .alignItems(VerticalAlign.Center)
 
-          Row() {
-            Button('证据透视')
+        Row({ space: PMSpacing.SM }) {
+            Button('证据透视').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
               .fontSize(PMFontSize.CAPTION)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.BRAND)
@@ -5058,7 +4713,7 @@ struct ProjectHome {
                 this.showClaimAuditor = true;
               })
 
-            Button('评委质询')
+            Button('评委质询').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
               .fontSize(PMFontSize.CAPTION)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.RISK)
@@ -5066,12 +4721,12 @@ struct ProjectHome {
               .borderRadius(PMRadius.XS)
               .height(36)
               .padding({ left: PMSpacing.SM, right: PMSpacing.SM })
-              .margin({ left: 6 })
               .onClick(() => {
                 this.showJudgeRebuttal = true;
               })
+        }.width('100%').margin({ top: PMSpacing.MD })
 
-            Button(this.isExportingProvenance ? '导出中…' : '带存证导出')
+        Button(this.isExportingProvenance ? '导出中…' : '带存证导出').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
               .fontSize(PMFontSize.CAPTION)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.SURFACE)
@@ -5079,15 +4734,13 @@ struct ProjectHome {
               .borderRadius(PMRadius.XS)
               .height(36)
               .padding({ left: PMSpacing.SM, right: PMSpacing.SM })
-              .margin({ left: 6 })
+              .width('100%')
+              .margin({ top: PMSpacing.SM })
               .enabled(!this.isExportingProvenance)
               .onClick(() => {
                 this.copyArtifactWithProvenance();
               })
-          }
-        }
-        .width('100%')
-        .alignItems(VerticalAlign.Center)
+
 
         Text(this.project.title !== '' ? TextFormatters.readableText(this.project.title, '项目档案') : '项目档案')
           .fontSize(PMFontSize.BODY)
@@ -5109,13 +4762,13 @@ struct ProjectHome {
         }
       }
       .width('100%')
-      .padding({ left: PMSpacing.XL, right: PMSpacing.XL, top: PMSpacing.LG, bottom: PMSpacing.SECTION })
+      .padding({ left: 18, right: 18, top: 18, bottom: PMSpacing.SECTION })
       .backgroundColor(PMColors.SURFACE)
       .alignItems(HorizontalAlign.Start)
     }
     .layoutWeight(1)
     .backgroundColor(PMColors.BACKGROUND)
-    .scrollBar(BarState.Off)
+    .align(Alignment.TopStart).scrollBar(BarState.Off)
     .transition(PMTransition.CONTENT_ENTER)
     .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
   }
@@ -5126,9 +4779,12 @@ struct ProjectHome {
       this.ArtifactReaderContent()
     } else {
       Column() {
+      Column() {
+        PMPageIntro({ compact: true, title: '成果草稿', description: `${this.artifacts.length} 份已保存 · 待人工复核` })
+      }.width('100%').padding({ left: 16, right: 16, top: 16 })
       // 4 大成果类型切换
       Row() {
-        Button('作品说明')
+        Button('作品说明').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
           .fontSize(PMFontSize.CAPTION)
           .fontColor(this.selectedArtifactType === 'competition_outline' ? PMColors.BRAND : PMColors.INK_SECONDARY)
           .backgroundColor(this.selectedArtifactType === 'competition_outline' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
@@ -5144,7 +4800,7 @@ struct ProjectHome {
             this.isArtifactReader = false;
           })
 
-        Button('答辩 PPT')
+        Button('答辩 PPT').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
           .fontSize(PMFontSize.CAPTION)
           .fontColor(this.selectedArtifactType === 'defense_ppt' ? PMColors.BRAND : PMColors.INK_SECONDARY)
           .backgroundColor(this.selectedArtifactType === 'defense_ppt' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
@@ -5161,7 +4817,7 @@ struct ProjectHome {
             this.isArtifactReader = false;
           })
 
-        Button('项目周报')
+        Button('项目周报').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
           .fontSize(PMFontSize.CAPTION)
           .fontColor(this.selectedArtifactType === 'weekly_report' ? PMColors.BRAND : PMColors.INK_SECONDARY)
           .backgroundColor(this.selectedArtifactType === 'weekly_report' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
@@ -5178,7 +4834,7 @@ struct ProjectHome {
             this.isArtifactReader = false;
           })
 
-        Button('README')
+        Button('README').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
           .fontSize(PMFontSize.CAPTION)
           .fontColor(this.selectedArtifactType === 'readme' ? PMColors.BRAND : PMColors.INK_SECONDARY)
           .backgroundColor(this.selectedArtifactType === 'readme' ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
@@ -5208,77 +4864,24 @@ struct ProjectHome {
       // 成果内容展示区
       Scroll() {
         Column() {
-          if (this.currentArtifact !== undefined && this.currentArtifact.content !== '') {
-            // 已生成状态：展示元信息、正文与复制/生成新版本操作
+          if (this.artifacts.filter((a: ArtifactItem) => a.artifactType === this.selectedArtifactType).length > 0) {
             Column() {
-              Row() {
-                Column() {
-                  Text(TextFormatters.artifactTypeToChinese(this.selectedArtifactType))
-                    .fontSize(PMFontSize.SECTION_TITLE)
-                    .fontWeight(FontWeight.Medium)
-                    .fontColor(PMColors.INK_PRIMARY)
-
-                  Text(`最后生成于 ${this.currentArtifact.createdAt.length >= 10 ? this.currentArtifact.createdAt.substring(0, 10) : '近期'}`)
-                    .fontSize(PMFontSize.CAPTION)
-                    .fontColor(PMColors.INK_TERTIARY)
-                    .margin({ top: 2 })
-                }
-                .alignItems(HorizontalAlign.Start)
-
-                Row() {
-                  Button('复制正文')
-                    .fontSize(PMFontSize.CAPTION)
-                    .fontColor(PMColors.INK_PRIMARY)
-                    .backgroundColor(PMColors.SURFACE_SUBTLE)
-                    .border({ width: 1, color: PMColors.BORDER })
-                    .borderRadius(PMRadius.SM)
-                    .onClick(() => {
-                      this.copyArtifactContent();
-                    })
-
-                  Button(this.isGeneratingArtifact ? '生成中...' : '生成新版本')
-                    .fontSize(PMFontSize.CAPTION)
-                    .fontWeight(FontWeight.Medium)
-                    .fontColor(PMColors.SURFACE)
-                    .backgroundColor(PMColors.BRAND)
-                    .borderRadius(PMRadius.SM)
-                    .margin({ left: PMSpacing.SM })
-                    .enabled(!this.isGeneratingArtifact)
-                    .onClick(() => {
-                      this.generateArtifact();
-                    })
-                }
-              }
-              .width('100%')
-              .justifyContent(FlexAlign.SpaceBetween)
-
-              Button('进入阅读模式')
-                .fontSize(PMFontSize.BUTTON)
-                .fontWeight(FontWeight.Medium)
-                .fontColor(PMColors.BRAND)
-                .backgroundColor(PMColors.BRAND_LIGHT)
-                .border({ width: 1, color: PMColors.BRAND })
-                .borderRadius(PMRadius.SM)
-                .height(48)
-                .width('100%')
-                .margin({ top: PMSpacing.MD })
-                .onClick(() => {
-                  this.isArtifactReader = true;
-                })
-                .accessibilityText('进入成果阅读模式')
-
-              Column() {
-                MarkdownView({ content: TextFormatters.readableMarkdown(this.currentArtifact.content) })
-              }
-              .width('100%')
-              .margin({ top: PMSpacing.MD })
-            }
-            .width('100%')
-            .padding(PMSpacing.LG)
-            .backgroundColor(PMColors.SURFACE)
-            .borderRadius(PMRadius.MD)
-            .border({ width: 1, color: PMColors.BORDER })
-            .alignItems(HorizontalAlign.Start)
+              Text('已保存版本').fontSize(16).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY).padding(14)
+              ForEach(this.artifacts.filter((a: ArtifactItem) => a.artifactType === this.selectedArtifactType), (item: ArtifactItem) => {
+                PMListRow({ title: TextFormatters.artifactTypeToChinese(item.artifactType), subtitle: '待人工复核', meta: new Date(item.createdAt).toLocaleString('zh-CN'),
+                  status: this.currentArtifact?.id === item.id ? '选中' : '', onOpen: (): void => { this.currentArtifact = item; this.isArtifactReader = true; } })
+              }, (item: ArtifactItem) => item.id)
+            }.width('100%').backgroundColor(PMColors.SURFACE).borderRadius(18).alignItems(HorizontalAlign.Start).margin({ bottom: 16 })
+          }
+          if (this.currentArtifact !== undefined && this.currentArtifact.content !== '') {
+            Column({ space: 12 }) {
+              PMButton({ label: '阅读选中草稿 →', onAction: (): void => { this.isArtifactReader = true; } })
+              Row({ space: 10 }) {
+                PMButton({ label: '复制正文', secondary: true, onAction: (): void => { this.copyArtifactContent(); } }).layoutWeight(1)
+                PMButton({ label: this.isGeneratingArtifact ? '生成中…' : '生成新版本', secondary: true, disabled: this.isGeneratingArtifact,
+                  onAction: (): void => { this.generateArtifact(); } }).layoutWeight(1)
+              }.width('100%')
+            }.width('100%').padding(16).backgroundColor(PMColors.SURFACE).borderRadius(18)
           } else {
             // 成果中心引导式生成卡片 (替换苍白空状态)
             Column() {
@@ -5419,7 +5022,7 @@ struct ProjectHome {
               .borderRadius(PMRadius.MD)
               .margin({ top: PMSpacing.MD })
 
-              Button(this.isGeneratingArtifact ? '正在基于事实生成成果...' : `生成${TextFormatters.artifactTypeToChinese(this.selectedArtifactType)}`)
+              Button(this.isGeneratingArtifact ? '正在基于事实生成成果...' : `生成${TextFormatters.artifactTypeToChinese(this.selectedArtifactType)}`).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                 .fontSize(PMFontSize.BUTTON)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.SURFACE)
@@ -5457,7 +5060,7 @@ struct ProjectHome {
   // 主构建入口
   // ----------------------------------------------------
   build() {
-    Stack() {
+    Stack({ alignContent: Alignment.BottomEnd }) {
       Column() {
         if (this.currentTabIndex === 4 && this.isArtifactReader) {
           this.ArtifactReaderHeader()
@@ -5490,7 +5093,7 @@ struct ProjectHome {
                 .layoutWeight(1)
                 .maxLines(2)
               if (!this.isLoading) {
-                Button('重试同步')
+                Button('重试同步').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                   .fontSize(PMFontSize.CAPTION)
                   .fontColor(PMColors.BRAND)
                   .backgroundColor(PMColors.SURFACE)
@@ -5527,6 +5130,10 @@ struct ProjectHome {
       .height('100%')
       .backgroundColor(PMColors.BACKGROUND)
 
+      if ((this.focusConversationId !== '' || this.focusAgentEnabled) && this.hasLoadedProjectSnapshot && this.routeError === '' && !this.isArtifactReader && !this.showQuickCopilot) {
+        FocusAgentLauncher({ onOpen: (): void => { router.pushUrl({ url: 'pages/FocusConversation', params: { conversationId: this.focusConversationId, projectId: this.projectId } }); } })
+          .align(Alignment.BottomEnd).margin({ right: 18, bottom: 90 })
+      }
       if (this.showCreateAction) {
         Column() {
           Column() {
@@ -5535,7 +5142,7 @@ struct ProjectHome {
                 .fontSize(PMFontSize.PAGE_TITLE)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
-              Button('✕')
+              Button('✕').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                 .fontSize(PMFontSize.BODY)
                 .fontColor(PMColors.INK_TERTIARY)
                 .backgroundColor('transparent')
@@ -5590,7 +5197,7 @@ struct ProjectHome {
               .margin({ top: PMSpacing.MD })
             Row({ space: PMSpacing.SM }) {
               ForEach([1, 3, 5], (priority: number) => {
-                Button(priority === 1 ? '优先' : priority === 3 ? '普通' : '稍后')
+                Button(priority === 1 ? '优先' : priority === 3 ? '普通' : '稍后').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                   .fontSize(PMFontSize.CAPTION)
                   .fontColor(this.newActionPriority === priority ? PMColors.SURFACE : PMColors.INK_SECONDARY)
                   .backgroundColor(this.newActionPriority === priority ? PMColors.BRAND : PMColors.SURFACE_SUBTLE)
@@ -5613,7 +5220,7 @@ struct ProjectHome {
                 .margin({ top: PMSpacing.SM })
             }
 
-            Button(this.isCreatingAction ? '正在添加…' : '加入待办')
+            Button(this.isCreatingAction ? '正在添加…' : '加入待办').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
               .fontSize(PMFontSize.BUTTON)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.SURFACE)
@@ -5674,7 +5281,7 @@ struct ProjectHome {
             }
 
             Row() {
-              Button('取消')
+              Button('取消').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                 .fontSize(PMFontSize.BUTTON)
                 .fontColor(PMColors.INK_SECONDARY)
                 .backgroundColor(PMColors.SURFACE_SUBTLE)
@@ -5683,7 +5290,7 @@ struct ProjectHome {
                   this.completingActionId = '';
                 })
 
-              Button(this.isSubmittingAction ? '提交中...' : '确认完成')
+              Button(this.isSubmittingAction ? '提交中...' : '确认完成').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                 .fontSize(PMFontSize.BUTTON)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.SURFACE)
@@ -5768,7 +5375,7 @@ struct ProjectHome {
                 .fontColor(PMColors.INK_SECONDARY)
                 .layoutWeight(1)
               if (this.editDeadline !== '') {
-                Button('清除截止日期')
+                Button('清除截止日期').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                   .fontSize(PMFontSize.CAPTION)
                   .fontColor(PMColors.RISK)
                   .backgroundColor(PMColors.SURFACE_SUBTLE)
@@ -5782,7 +5389,7 @@ struct ProjectHome {
             .width('100%')
             .margin({ top: PMSpacing.SM })
 
-            Button(this.editDeadline === '' ? '选择截止日期' : this.editDeadline)
+            Button(this.editDeadline === '' ? '选择截止日期' : this.editDeadline).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
               .fontSize(PMFontSize.BODY)
               .fontColor(PMColors.INK_PRIMARY)
               .height(48)
@@ -5857,7 +5464,7 @@ struct ProjectHome {
                       .fontColor(PMColors.INK_SECONDARY)
                       .lineHeight(18)
                     Row({ space: PMSpacing.SM }) {
-                      Button('降低频率')
+                      Button('降低频率').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                         .height(32)
                         .fontSize(PMFontSize.CAPTION)
                         .fontColor(PMColors.SURFACE)
@@ -5866,7 +5473,7 @@ struct ProjectHome {
                         .onClick(() => {
                           this.decideSuggestion('CONFIRM', suggestion.triggerType);
                         })
-                      Button('保持现状')
+                      Button('保持现状').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                         .height(32)
                         .fontSize(PMFontSize.CAPTION)
                         .fontColor(PMColors.INK_SECONDARY)
@@ -5904,7 +5511,7 @@ struct ProjectHome {
               }
 
               Row({ space: PMSpacing.SM }) {
-                Button(this.isSavingPolicy ? '保存中…' : '保存策略')
+                Button(this.isSavingPolicy ? '保存中…' : '保存策略').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                   .height(36)
                   .fontSize(PMFontSize.CAPTION)
                   .fontColor(PMColors.SURFACE)
@@ -5915,7 +5522,7 @@ struct ProjectHome {
                   .onClick(() => {
                     this.savePolicy();
                   })
-                Button('恢复默认')
+                Button('恢复默认').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                   .height(36)
                   .fontSize(PMFontSize.CAPTION)
                   .fontColor(PMColors.INK_SECONDARY)
@@ -5936,7 +5543,7 @@ struct ProjectHome {
             .alignItems(HorizontalAlign.Start)
 
             Row() {
-              Button('取消')
+              Button('取消').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                 .fontSize(PMFontSize.BUTTON)
                 .fontColor(PMColors.INK_SECONDARY)
                 .backgroundColor(PMColors.SURFACE_SUBTLE)
@@ -5947,7 +5554,7 @@ struct ProjectHome {
                   this.showSettingsDialog = false;
                 })
 
-              Button(this.isSavingSettings ? '保存中...' : '保存修改')
+              Button(this.isSavingSettings ? '保存中...' : '保存修改').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
                 .fontSize(PMFontSize.BUTTON)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.SURFACE)

@@ -1,0 +1,1083 @@
+{
+  "schemaVersion": 1,
+  "suiteId": "projectmemo-continuity-r1-contract-cases-v1",
+  "revision": "R1",
+  "frozenDate": "2026-10-28",
+  "displayTimezone": "Asia/Singapore",
+  "baselineHead": "1132f30ee149e42d5f9fce79219ba1d9ecf02ea3",
+  "baseSuite": {
+    "path": "continuity-journeys-v1.json",
+    "sha256": "7b2e29a5150481220aa10969a82fb6a8773860f23a050daba98c3289a9164089",
+    "caseCount": 36,
+    "preserved": true
+  },
+  "status": "PLANNING_FIXTURES_NOT_EXECUTED",
+  "independentHoldout": false,
+  "dataOrigin": "作者设计的合同增量，非已执行业务测试或独立留出样本",
+  "raceProtocol": {
+    "database": "独立SQLite真实原服务，多连接；lease/崩溃用OS子进程",
+    "scheduling": "显式barrier按releaseOrder分别释放，禁止仅靠sleep或UI stale模拟",
+    "provider": "脚本Provider/Tool，可控响应、UNKNOWN和费用回执，无付费或外部写入",
+    "clock": "注入UTC clock并保留每个case的用户时区；now边界变化不伪造DirectiveEvent",
+    "oracle": "检查每个指定顺序的合法串行结果及全部禁止事件，非唯一工具流程"
+  },
+  "caseCount": 28,
+  "cases": [
+    {
+      "id": "R1-01",
+      "contract": "ADMISSION",
+      "internalStage": "A",
+      "title": "认证消息中的转述和否定反转",
+      "initialState": [
+        "owner=u1, project=A，源消息可核对"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "转述",
+          "releaseOrder": "同一认证原文：导师说先别扩功能，但我决定继续。",
+          "must": [
+            "不得将转述的禁止项写为用户指令"
+          ]
+        },
+        {
+          "name": "否定反转",
+          "releaseOrder": "同一认证原文：我不是说不要创建行动。",
+          "must": [
+            "不得凭出现不要二字创建禁止项",
+            "实质歧义只澄清一次"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "auth或quoteHash替代speech-act证明",
+        "候选自动变永久目标"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-02",
+      "contract": "ADMISSION",
+      "internalStage": "A",
+      "title": "逐字原话存在但模型解释反向",
+      "initialState": [
+        "原话：本周先测部署，不重训练",
+        "candidate：本周重训练；quoteHash与源原文匹配"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "规范解释失真",
+          "releaseOrder": "先提交candidate再请求自动入库",
+          "must": [
+            "不准入该规范解释",
+            "原目标和禁止未被反转",
+            "可用字面已证明条款继续合法调查"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "仅引用命中就APPLIED",
+        "模型自己确认自己"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-03",
+      "contract": "ADMISSION",
+      "internalStage": "A/B",
+      "title": "三领域明确有界指令直接生效",
+      "initialState": [
+        "scope唯一、IANA用户时区已知",
+        "有可检查的版本化字面Admission规则"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "竞赛",
+          "releaseOrder": "本人原文：这个比赛本周先稳定演示。",
+          "must": [
+            "DIRECT_APPLIED且范围为A本周",
+            "原Project.goal不自动改写",
+            "B阶段实际工具选择围绕演示阻碍"
+          ]
+        },
+        {
+          "name": "科研",
+          "releaseOrder": "本人原文：项目A今天先核对部署日志。",
+          "must": [
+            "DIRECT_APPLIED且保留原话和时间界限"
+          ]
+        },
+        {
+          "name": "课程",
+          "releaseOrder": "本人原文：这次只查第二题的原始推导。",
+          "must": [
+            "scope=TURN，不能推广到整门课"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "每条明确指令都再确认",
+        "自动拓展研究/费用权限"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-04",
+      "contract": "ADMISSION",
+      "internalStage": "A",
+      "title": "无期限/全用户推广缺明确解释",
+      "initialState": [
+        "当前A只允许本周稳定性工作",
+        "模型根据一句以后都这样归纳全用户永久目标"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "关键歧义",
+          "releaseOrder": "用户：以后都这样。",
+          "must": [
+            "NEEDS_CLARIFICATION",
+            "一次询问缺失的范围/期限",
+            "不写永久active目标"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "模型分类直接全局化",
+        "重复澄清已回答部分"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-05",
+      "contract": "ADMISSION",
+      "internalStage": "B",
+      "title": "候选假设仍能推动只读调查",
+      "initialState": [
+        "用户只要求找A的当前阻碍",
+        "模型推断启动兼容性可能是子目标，暂无用户确认"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "低风险假设",
+          "releaseOrder": "保留INTERPRETATION_CANDIDATE，读取已授权启动日志",
+          "must": [
+            "允许动态读取以验证假设",
+            "不把假设写为永久指导",
+            "不为该读取重复审批"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "为安全把所有推断都停止",
+        "候选覆盖用户明确目标"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-06",
+      "contract": "ADMISSION",
+      "internalStage": "A",
+      "title": "精确确认后候选被改scope",
+      "initialState": [
+        "已展示candidateHash=c1/sourceHash=s1/expectedScopeHash=h1"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "确认篡改",
+          "releaseOrder": "确认前把期限本周改为永久或A改全用户",
+          "must": [
+            "旧确认拒绝",
+            "不得写active事件"
+          ]
+        },
+        {
+          "name": "重复相同确认",
+          "releaseOrder": "确认同一c1两次",
+          "must": [
+            "一个事件批次",
+            "返回原回执和当前有效视图"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "旧确认批准新解释",
+        "确认解释即业务写授权"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-07",
+      "contract": "IN_FLIGHT",
+      "internalStage": "B",
+      "title": "目标修订与旧generation最终发布",
+      "initialState": [
+        "g=2, lease=L1有效，旧模型已返回",
+        "两个原DB连接在最终guard前等barrier"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "修订先提交",
+          "releaseOrder": "revise_commit -> publish_guard",
+          "must": [
+            "旧g不能发布回答/UI/提案",
+            "进入INVALIDATED并协调最新目标"
+          ]
+        },
+        {
+          "name": "发布先提交",
+          "releaseOrder": "publish_guard_commit -> revise_commit",
+          "must": [
+            "保留当时合法历史回答",
+            "旧controls随修订立即不可确认",
+            "不倒改已发布历史"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "UI标stale但后端仍确认",
+        "同一结果双重发布"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-08",
+      "contract": "IN_FLIGHT",
+      "internalStage": "B",
+      "title": "预占/派发许可与撤权竞争",
+      "initialState": [
+        "operation=RESERVED，尚无派发权",
+        "原grant=v1"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "撤权先",
+          "releaseOrder": "revoke_commit -> dispatch_commit",
+          "must": [
+            "DISPATCH_COMMITTED CAS失败",
+            "stub HTTP次数=0"
+          ]
+        },
+        {
+          "name": "派发权先",
+          "releaseOrder": "dispatch_commit -> revoke_commit -> late_response",
+          "must": [
+            "最多一个已授权在途HTTP",
+            "后续无新派发",
+            "迟到内容不得进入当前语义",
+            "预占不因取消清零"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "RESERVED等于已发请求",
+        "声称撤权收回已披露数据"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-09",
+      "contract": "IN_FLIGHT",
+      "internalStage": "B",
+      "title": "drain期间连续两次目标修订",
+      "initialState": [
+        "g=0、L1有效、一个旧请求在途",
+        "根预算已有使用记录"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "合并最新",
+          "releaseOrder": "revise_v2 -> DRAINING -> revise_v3 -> response -> activation_CAS",
+          "must": [
+            "只激活最新可用manifest",
+            "g严格递增且不回0",
+            "不发布中间v2提案",
+            "全部generation共用原预算"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "每次修订新建Turn洗预算",
+        "drain无限等待"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-10",
+      "contract": "IN_FLIGHT",
+      "internalStage": "B",
+      "title": "失权worker的heartbeat与结算",
+      "initialState": [
+        "A持L1；lease到期后B通过原claim拿L2"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "旧响应到达",
+          "releaseOrder": "claim_L2 -> A_heartbeat -> A_settle -> A_publish",
+          "must": [
+            "旧A三类写入均拒绝",
+            "B的g/结果和预算不被A修改"
+          ]
+        },
+        {
+          "name": "token已经释放",
+          "releaseOrder": "set_lease_null -> old_L1_settle",
+          "must": [
+            "null不得匹配旧L1",
+            "保持原UNKNOWN或由新合法对账路径处理"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "旧lease结算修改replacement状态"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-11",
+      "contract": "IN_FLIGHT",
+      "internalStage": "B",
+      "title": "同一lease下旧模型迟到",
+      "initialState": [
+        "g=1派出模型，后激活g=2，同一L1仍有效"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "已知usage迟到",
+          "releaseOrder": "old_model_response -> restricted_settlement",
+          "must": [
+            "原callId用量结算一次",
+            "旧输出仅允许历史诊断",
+            "不能进入新Goal/Route/Answer/UI/admission"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "JSON合法就复用旧认知",
+        "已付费意味着可用作当前证据"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-12",
+      "contract": "IN_FLIGHT",
+      "internalStage": "B",
+      "title": "成功原始读取复用但认知重算",
+      "initialState": [
+        "g=0已成功读source r1",
+        "g=1新目标，r1仍有权/未抑制/版本未变"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "合法复用",
+          "releaseOrder": "activate_g1 -> cache_recheck -> new_goal_decision",
+          "must": [
+            "相同原文无需第二次HTTP",
+            "新目标重新评估",
+            "根计费只保留实际请求"
+          ]
+        },
+        {
+          "name": "授权或源版本改变",
+          "releaseOrder": "change_revision_or_suppress -> cache_recheck",
+          "must": [
+            "原缓存不可直接消费"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "跨g复用旧模型答案",
+        "只比较URL忽略scope/revision"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-13",
+      "contract": "IN_FLIGHT",
+      "internalStage": "B",
+      "title": "UNKNOWN跨generation更名不重发",
+      "initialState": [
+        "op-old已DISPATCH_COMMITTED但无响应",
+        "预占未结算"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "包装更名",
+          "releaseOrder": "g+1并换seq/requestId，再请求相同provider/目标/payload",
+          "must": [
+            "unknownReplayKey仍命中",
+            "stub新增HTTP=0",
+            "预算预占保留"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "改步骤号绕过UNKNOWN",
+        "自动创建新Mission重发"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-14",
+      "contract": "IN_FLIGHT",
+      "internalStage": "B",
+      "title": "STOP中有界heartbeat与迟到响应",
+      "initialState": [
+        "DRAINING(g)，L1有效，已有drainDeadline"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "当前lease内响应",
+          "releaseOrder": "STOP -> response_before_deadline",
+          "must": [
+            "只允许原operation受限结算",
+            "不能激活g+1/发布新提案"
+          ]
+        },
+        {
+          "name": "超过deadline",
+          "releaseOrder": "STOP -> no_response -> drain_deadline",
+          "must": [
+            "有限时间终结或保持原UNKNOWN",
+            "不再无限续租/派发",
+            "之后旧token无写权"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "删除stop检查换heartbeat可用",
+        "取消冒充未计费"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-15",
+      "contract": "IN_FLIGHT",
+      "internalStage": "B",
+      "title": "激活generation前再次失效",
+      "initialState": [
+        "RECOORDINATING已解析h2但尚未CAS激活"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "更正插入",
+          "releaseOrder": "new_suppression_or_time_boundary -> activation_CAS(h2)",
+          "must": [
+            "激活旧h2失败并重解析",
+            "不发布旧context"
+          ]
+        },
+        {
+          "name": "根预算不足",
+          "releaseOrder": "budget_exhausted -> activation_attempt",
+          "must": [
+            "不发新模型",
+            "保留已得事实及原接续入口"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "激活使用事务外旧hash",
+        "把预算错误包装为任务已完成"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-16",
+      "contract": "IN_FLIGHT",
+      "internalStage": "B",
+      "title": "重复响应/对账结算幂等",
+      "initialState": [
+        "原op-7为UNKNOWN，reserved仍在",
+        "provider可用同operation查询"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "同回执两次",
+          "releaseOrder": "lookup_receipt_1 -> duplicate_receipt_1",
+          "must": [
+            "settlement仅一次",
+            "实际usage/未知预占守恒",
+            "旧g的结果不因此发布"
+          ]
+        },
+        {
+          "name": "无查询能力",
+          "releaseOrder": "resume -> provider_has_no_lookup",
+          "must": [
+            "保持UNKNOWN和预占",
+            "不猜测零费用"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "二次扣款或退款",
+        "结算提高根硬上限"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-17",
+      "contract": "SUPPRESSION",
+      "internalStage": "A/B/C",
+      "title": "SUPPRESS_USE九类消费者逐路径",
+      "initialState": [
+        "原root-x被u1在A范围SUPPRESS_USE",
+        "异步索引/impact清理暂停",
+        "旧缓存/原ID读取入口仍存在"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "每消费者独立运行",
+          "releaseOrder": "suppress_commit -> consumer_guard",
+          "must": [
+            "不向新prompt/提案提供root-x正文或派生结论",
+            "不从title/pointer/否定复述泄漏",
+            "guard不依赖清理任务"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "只删检索命中仍允许按ID读取",
+        "旧UI/草稿绕过后端"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ],
+      "parameterizedConsumers": [
+        "RETRIEVAL_AND_DIRECT_READ",
+        "INITIAL_CONTEXT_AND_POINTERS",
+        "INVESTIGATION_GOAL_AND_RECENT_DIALOGUE",
+        "PR6_REUSE_AND_RESEARCH_SUMMARY",
+        "ARTIFACT_AND_SUMMARY",
+        "MISSION_AND_DECISION",
+        "EXPERIENCE_INJECTION",
+        "PENDING_PROPOSAL",
+        "ANCHOR_UI_AND_DRAFT"
+      ]
+    },
+    {
+      "id": "R1-18",
+      "contract": "SUPPRESSION",
+      "internalStage": "A/B",
+      "title": "来源链未知/环/超过深度",
+      "initialState": [
+        "旧summary无法解析独立根或构成环"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "未知链",
+          "releaseOrder": "resolve_lineage -> evidence_assessment",
+          "must": [
+            "lineage=UNKNOWN",
+            "不作为独立来源支持可操作结论",
+            "可用安全定位另查有权原文"
+          ]
+        },
+        {
+          "name": "超界限",
+          "releaseOrder": "depth_limit -> evidence_assessment",
+          "must": [
+            "覆盖不足被记录",
+            "不退回默认允许"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "有citation就视为独立事实",
+        "UNKNOWN阻止所有无关合法调查"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-19",
+      "contract": "SUPPRESSION",
+      "internalStage": "A/B",
+      "title": "原文到摘要到Artifact到ACTIVE经验",
+      "initialState": [
+        "raw-r -> summary-s -> artifact-a -> experience-e",
+        "experience-e=ACTIVE",
+        "raw-r被屏蔽"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "派生闭包",
+          "releaseOrder": "suppress_raw -> compose_summary -> read_artifact -> inject_experience",
+          "must": [
+            "相关块/claim排除",
+            "无块映射整份不作新依据",
+            "不新增支持计数",
+            "原Source业务记录不被倒改"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "ACTIVE豁免使用抑制",
+        "Artifact复制产生新根证据"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-20",
+      "contract": "SUPPRESSION",
+      "internalStage": "A/C",
+      "title": "抑制与原确认竞争",
+      "initialState": [
+        "原提案p-x依赖root-x",
+        "两个DB连接；影响job暂停"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "抑制先",
+          "releaseOrder": "suppress_commit -> original_confirm_guard",
+          "must": [
+            "零新业务效果",
+            "旧按钮即使可点也被原服务拒绝"
+          ]
+        },
+        {
+          "name": "效果先",
+          "releaseOrder": "original_confirm_commit -> suppress_commit -> replay",
+          "must": [
+            "一个合法历史效果及相同resultCardId",
+            "精确重放不再执行业务",
+            "新判断不消费被抑制内容"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "等待UI或job后才失效",
+        "抑制删除已发生回执"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-21",
+      "contract": "TIME_SCOPE",
+      "internalStage": "A/B",
+      "title": "无新事件过期发生在构建后",
+      "initialState": [
+        "validUntil=T，context构建于T-epsilon",
+        "User.seq保持N，无新用户消息"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "发布跨界",
+          "releaseOrder": "compose_at_T_minus -> advance_clock_T -> publish_guard",
+          "must": [
+            "旧intentHash失效",
+            "validitySegment变化",
+            "进入再协调"
+          ]
+        },
+        {
+          "name": "确认跨界",
+          "releaseOrder": "preview_before_T -> advance_clock_T_plus -> confirm_guard",
+          "must": [
+            "旧预览拒绝",
+            "不得只校验turn启动asOf"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "需新DirectiveEvent才能到期",
+        "到期后旧缓存仍可执行"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-22",
+      "contract": "TIME_SCOPE",
+      "internalStage": "A/B",
+      "title": "未来起点和替代条款到期",
+      "initialState": [
+        "D1已被D2替代，D2在T2到期",
+        "D3从T3生效"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "D2到期",
+          "releaseOrder": "advance_clock_T2_without_event",
+          "must": [
+            "D1不复活",
+            "原正式目标需重新协调",
+            "旧Proposal不复活"
+          ]
+        },
+        {
+          "name": "D3起点",
+          "releaseOrder": "advance_clock_T3_without_event",
+          "must": [
+            "nextValidityBoundary包含未来起点",
+            "适用视图/hash改变"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "后继到期恢复被替代私人条款"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-23",
+      "contract": "TIME_SCOPE",
+      "internalStage": "A/C",
+      "title": "跨项目迁移双scope原子性",
+      "initialState": [
+        "A指令当前active；目标B同owner且需访问与两份scopeCAS"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "成功迁移",
+          "releaseOrder": "withdraw_A_and_set_B_same_transaction",
+          "must": [
+            "A/B epoch都更新",
+            "相关未提交提案失效",
+            "原Mission/Action/source/grant不移动"
+          ]
+        },
+        {
+          "name": "B拒绝访问或CAS过期",
+          "releaseOrder": "check_B_fails -> rollback",
+          "must": [
+            "A撤回与B新增都不落库"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "只完成迁移一半",
+        "把A外发许可复制给B"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-24",
+      "contract": "TIME_SCOPE",
+      "internalStage": "A/C",
+      "title": "A到B到A身份及无关scope对照",
+      "initialState": [
+        "当前指令A及原预览h1"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "同文本新身份",
+          "releaseOrder": "REPLACE_B -> REPLACE_A -> confirm_old_h1",
+          "must": [
+            "新epoch身份使旧预览失效"
+          ]
+        },
+        {
+          "name": "撤回重放",
+          "releaseOrder": "WITHDRAW -> replay_old_command",
+          "must": [
+            "原历史回执与当前非active状态分别显示"
+          ]
+        },
+        {
+          "name": "无关变化",
+          "releaseOrder": "B项目表达偏好变化 -> A原确认",
+          "must": [
+            "A效果读集不含无关B偏好",
+            "A仍可合法确认"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "仅按文本hash恢复旧批准",
+        "全用户seq使无关提案失效"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-25",
+      "contract": "TIME_SCOPE",
+      "internalStage": "A",
+      "title": "已准入期限与时区/DST",
+      "initialState": [
+        "原指令本周按America/Los_Angeles冻结UTC边界",
+        "随后客户端显示时区改Asia/Singapore"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "用户显示时区改变",
+          "releaseOrder": "change_client_timezone_without_revision",
+          "must": [
+            "旧期限UTC瞬间不变",
+            "显示可转换但不重新解释原本周"
+          ]
+        },
+        {
+          "name": "DST边界",
+          "releaseOrder": "advance_across_DST -> guard",
+          "must": [
+            "按原IANA解析的UTC界限执行，不按24小时乘日数"
+          ]
+        },
+        {
+          "name": "时钟回退",
+          "releaseOrder": "detect_live_clock_rollback -> effect_guard",
+          "must": [
+            "暂停效果并重新校时",
+            "不拿历史asOf重启失效批准"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "采用宿主时区自动迁移期限"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-26",
+      "contract": "TIME_SCOPE",
+      "internalStage": "A/B",
+      "title": "起止同瞬间与缓存分段",
+      "initialState": [
+        "D1 validUntil=T；D2 validFrom=T；两者已Admission"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "边界正好T",
+          "releaseOrder": "evaluate_T_minus -> evaluate_T -> evaluate_T_plus",
+          "must": [
+            "半开区间使T时D1非active、D2 active",
+            "hash只在有效边界改变",
+            "now每毫秒变化不制造新hash"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "两条互斥目标在T同时active",
+        "每个GET都让缓存失效"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-27",
+      "contract": "SUPPRESSION",
+      "internalStage": "A/C",
+      "title": "已发布副本许可不能覆盖后来的抑制",
+      "initialState": [
+        "研究Artifact有明确project独立用途",
+        "用户后来明确屏蔽root及其派生物未来使用"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "消费新Artifact",
+          "releaseOrder": "suppress_commit -> artifact_or_proposal_consumption",
+          "must": [
+            "发布许可仍是历史保留依据",
+            "新认知/提案必须服从最新SUPPRESS_USE"
+          ]
+        },
+        {
+          "name": "合法历史查看",
+          "releaseOrder": "explicit_history_read_with_access",
+          "must": [
+            "标历史与使用受限，不转为当前支持"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "用project发布许可自动豁免抑制",
+        "软隐藏称物理删除"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    },
+    {
+      "id": "R1-28",
+      "contract": "TIME_SCOPE",
+      "internalStage": "A/B/C",
+      "title": "定时器/影响job离线仍即时守护",
+      "initialState": [
+        "nextValidityBoundary=T，worker唤醒任务及impact job暂停"
+      ],
+      "execution": "拟用真实原服务/独立SQLite及可控Provider；本轮未执行",
+      "runs": [
+        {
+          "name": "用户直接确认",
+          "releaseOrder": "advance_clock_T -> direct_original_confirm",
+          "must": [
+            "后端现时guard拒绝旧预览"
+          ]
+        },
+        {
+          "name": "原worker恢复",
+          "releaseOrder": "resume_existing_root_after_T",
+          "must": [
+            "先协调当前有效视图再派发",
+            "不自动付费补跑边界事件"
+          ]
+        }
+      ],
+      "alwaysForbidden": [
+        "等待后台通知才能失效",
+        "为守护到期另建Runner"
+      ],
+      "observables": [
+        "原有效指令/使用策略与时间分段hash",
+        "根Turn generation/lease/operation与预算",
+        "真实派发stub次数及原业务回执",
+        "双端当前投影与历史状态"
+      ]
+    }
+  ]
+}

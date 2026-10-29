@@ -1,0 +1,37 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/r4Specialists.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/r4Specialists.test.ts (6 tests | 1 failed) 2512ms
+     × uses the actual chat comparison binding to preview/confirm the frozen original Mission once 994ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/r4Specialists.test.ts > R4 PR5 original-result and specialist integration > uses the actual chat comparison binding to preview/confirm the frozen original Mission once
+AssertionError: expected 4 to be 5 // Object.is equality
+
+- Expected
++ Received
+
+- 5
++ 4
+
+ ❯ tests/r4Specialists.test.ts:98:49
+     96|     const input = { messageId: message.id, bindingId: action.bindingId…
+     97|     const pre = await performConversationUIAction(f.actor, c.id, input…
+     98|     expect(repeat.conversation.messages.length).toBe(pre.conversation.…
+       |                                                 ^
+     99|     expect(await db.agentMissionStep.count({ where: { missionId: f.mis…
+    100|     const proposal = pre.conversation.messages.at(-1)!.proposal!;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  08:59:16
+   Duration  5.33s (transform 1.20s, setup 0ms, import 2.63s, tests 2.51s, environment 0ms)
+

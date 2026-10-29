@@ -1,0 +1,25 @@
+{
+  "head": "d004c8a555d9db594acc757149f07aeb2affc4c5",
+  "protected": [
+    {
+      "path": "AGENTS.md",
+      "hash": "DBFF8A9D83193830B2FD06C5C131B9324C0A8E472BE2C8AA2F66DEFF990E2750"
+    },
+    {
+      "path": "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md",
+      "hash": "7328E70A94CBD17F400C23EF418D0A62F396A408EA9A1926C9D1F057F211F631"
+    },
+    {
+      "path": "harmonyos/build-profile.json5",
+      "hash": "442618A372BD9A74D204E7162FFE6844B6FC49DBF4C09B8CC5BC58C6709A1924"
+    },
+    {
+      "path": "next-env.d.ts",
+      "hash": "6B5B82C53D6B825B253D27B2C7F3A241B16B25AC0EFAC6EFC41D3F710AE2B420"
+    },
+    {
+      "path": "tsconfig.json",
+      "hash": "AF1B4FBD345A0D2B7E23394ACA3540B524A3D4826FCA6A51169B13B2A325EE4A"
+    }
+  ]
+}

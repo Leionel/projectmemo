@@ -2,7 +2,7 @@ import { z } from "zod";
 export const boundedInvestigationPolicySchema=z.object({mode:z.literal("BOUNDED_INVESTIGATION"),schemaVersion:z.literal(1),
   expiresAt:z.string().datetime(),checkEveryMinutes:z.number().int().min(1).max(1440),
   maxModels:z.number().int().min(1).max(24),maxTools:z.number().int().min(1).max(64),maxMetadataRequests:z.number().int().min(0).max(96),
-  allowedTools:z.array(z.enum(["inspect_project","search_memory","read_project_material","inspect_action","web_search","web_fetch","read_repository_ci","read_ci_jobs","read_ci_log","inspect_document","read_document_page","read_document_section","read_document_table","save_mission_output","propose_action"])).min(1).max(15),
+  allowedTools:z.array(z.enum(["inspect_project","search_memory","read_project_material","inspect_action","web_search","web_fetch","read_repository_ci","read_ci_jobs","read_ci_log","inspect_document","read_document_page","read_document_section","read_document_table","inspect_experiment_metrics","compare_experiment_metrics","read_paper_metadata","propose_metric_verification","save_mission_output","propose_action"])).min(1).max(19),
   connectionIds:z.array(z.string().min(1).max(160)).max(3).default([]),timezone:z.string().max(80).default("Asia/Shanghai"),
   quietStart:z.number().int().min(0).max(23).default(22),quietEnd:z.number().int().min(0).max(23).default(8),attention:z.enum(["INBOX","IMPORTANT_ONLY"]).default("IMPORTANT_ONLY")}).strict();
 export const continuationPolicySchema=z.discriminatedUnion("mode",[z.object({mode:z.literal("MANUAL")}).strict(),z.object({mode:z.literal("LOW_RISK_READ_ANALYZE")}).strict(),boundedInvestigationPolicySchema]);
@@ -16,6 +16,7 @@ export const constraintsSchema = z.object({
   executionBoundary: z.enum(["READ_ANALYZE", "PROPOSE_ACTION"]).default("PROPOSE_ACTION"),
 }).strict();
 export const researchScopeSchema = z.object({
+  academicMetadata:z.boolean().default(false),
   enabled: z.boolean().default(false), topic: z.string().trim().max(300).default(""),
   publicTerms: z.array(z.string().trim().min(1).max(80)).max(20).default([]),
   allowedCategories: z.array(z.enum(["PUBLIC_TOPIC", "PUBLIC_SOURCE"])).max(2).default(["PUBLIC_TOPIC"]),

@@ -5,6 +5,9 @@ export const missionStatusLabels: Record<string, string> = {
   SUCCEEDED: "委托条件已验收", CANCELLED: "已取消",
 };
 export const missionToolLabels: Record<string, string> = {
+  read_paper_metadata:"读取论文元数据",
+  propose_metric_verification:"提交固定核算预览",
+  inspect_experiment_metrics:"读取实验指标",compare_experiment_metrics:"比较实验条件与结果",
   inspect_document:"读取文档目录",read_document_page:"读取原文件页",read_document_section:"读取章节片段",read_document_table:"读取候选表格",
   inspect_project: "读取项目", search_memory: "检索项目记忆", web_search: "检索公开资料",
   web_fetch: "读取公开来源", save_mission_output: "保存草稿", propose_action: "提议行动",
@@ -39,7 +42,7 @@ export type MissionRecovery = {
 export function missionErrorPhaseLabel(phase?: string): string {
   const labels: Record<string, string> = {
     CONTEXT: "准备上下文", DECISION: "模型决策", TOOL: "工具执行",
-    VERIFY: "结果核验", COMMIT: "保存执行结果", APPROVAL: "批准与行动提交",
+    VERIFY: "结果核验", COMMIT: "保存执行结果", APPROVAL: "批准与执行提交",
   };
   return phase ? labels[phase] ?? "执行阶段待确认" : "执行阶段未记录";
 }

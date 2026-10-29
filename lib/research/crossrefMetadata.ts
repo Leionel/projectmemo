@@ -25,18 +25,19 @@ export function normalizeCrossrefWork(raw:unknown){
  return {...data,normalizedContentHash:createHash("sha256").update(JSON.stringify(data)).digest("hex"),provider:"Crossref",requestedUrl:"https://api.crossref.org/works/"+encodeURIComponent(doi)};
 }
 /** Caller must supply original Turn/Step dispatch, public-scope admission and cumulative HTTP reservation. No standalone network entry point. */
-export async function readCrossrefMetadata(doi:string,dispatch:(url:string,run:()=>Promise<unknown>)=>Promise<unknown>,transport:typeof fetch=fetch){
+export async function readCrossrefMetadata(doi:string,dispatch:(url:string,run:()=>Promise<unknown>)=>Promise<unknown>,transport:typeof fetch=fetch,signal?:AbortSignal){
  doi=normalizeDoi(doi);const url="https://api.crossref.org/works/"+encodeURIComponent(doi);
  const body=await dispatch(url,async()=>{
-  const response=await transport(url,{method:"GET",redirect:"error",signal:AbortSignal.timeout(15000),headers:{Accept:"application/json","User-Agent":"ProjectMemo/CT6-metadata"}});
+  const response=await transport(url,{method:"GET",redirect:"error",signal:AbortSignal.any([AbortSignal.timeout(30000),...(signal?[signal]:[])]),headers:{Accept:"application/json","User-Agent":"ProjectMemo/CT6-metadata"}});
   if(!response.ok)throw new AppError("ACADEMIC_SOURCE_UNAVAILABLE","论文元数据暂不可读，请保留原请求状态",502);
   const reader=response.body?.getReader();if(!reader)throw new AppError("ACADEMIC_EMPTY_RESPONSE","没有取得元数据正文",502);
   const chunks:Uint8Array[]=[];let length=0;
   try{while(true){const next=await reader.read();if(next.done)break;length+=next.value.length;if(length>131072)throw new AppError("ACADEMIC_RESPONSE_LIMIT","元数据超出读取上限",422);chunks.push(next.value);}}
   finally{await reader.cancel().catch(()=>undefined);}
-  return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+  const parsed=z.object({message:workSchema}).parse(JSON.parse(Buffer.concat(chunks).toString("utf8")));
+  return {message:workSchema.strip().parse(parsed.message),projectMemoObservedAt:new Date().toISOString()};
  });
- const result=normalizeCrossrefWork(z.object({message:z.unknown()}).parse(body).message);
+ const envelope=z.object({message:z.unknown(),projectMemoObservedAt:z.string().datetime().optional()}).parse(body),result=normalizeCrossrefWork(envelope.message);
  if(result.doi!==doi)throw new AppError("ACADEMIC_IDENTITY_CHANGED","元数据返回 DOI 与原请求不一致",409);
- return {...result,observedAt:new Date().toISOString()};
+ return {...result,observedAt:envelope.projectMemoObservedAt??new Date().toISOString()};
 }

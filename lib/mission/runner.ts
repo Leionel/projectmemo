@@ -1,3 +1,6 @@
+import { academicTools } from "./academicTools";
+import type { DockerCommand } from "@/lib/experiments/sandbox";
+import { commitApprovedMetricVerification } from "./metricVerification";
 import { reserveCloudCall } from "@/lib/auth/cloudQuota";
 import {verifyResearchClaims,type ClaimJudge,type ClaimCheck} from "./claimVerifier";
 import {configuredClaimJudge} from "./claimJudgeAdapter";
@@ -30,10 +33,10 @@ import { runDelegationObservation } from "./delegationObservation";
 import { documentTools } from "./documentTools";
 import type { DocumentExtractor } from "@/lib/documents/reader";
 import { experimentTools } from "./experimentTools";
-export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;repository?:CiTransport;document?:DocumentExtractor;judge?:ClaimJudge}={}){
+export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;repository?:CiTransport;document?:DocumentExtractor;sandbox?:DockerCommand;academic?:typeof fetch;judge?:ClaimJudge}={}){
  const m=await claimMission(options.workerId??randomUUID(),options.id);if(!m)return false;
  const lease:Lease={id:m.id,owner:m.leaseOwner!,epoch:m.leaseEpoch,contextVersion:m.contextVersion,planRevision:m.planRevision};
- const tools={...(options.tools??{...projectTools,...researchTools(lease,options.research),...await repositoryTools(lease,m,options.repository),...documentTools(lease,options.document),...experimentTools(lease)})};const delegation=boundedPolicy(m);if(delegation)for(const name of Object.keys(tools))if(!delegation.allowedTools.includes(name as typeof delegation.allowedTools[number]))delete tools[name];let activeStepId:string|undefined;
+ const tools={...(options.tools??{...projectTools,...researchTools(lease,options.research),...await repositoryTools(lease,m,options.repository),...documentTools(lease,options.document),...experimentTools(lease),...academicTools(lease,options.academic)})};const delegation=boundedPolicy(m);if(delegation)for(const name of Object.keys(tools))if(!delegation.allowedTools.includes(name as typeof delegation.allowedTools[number]))delete tools[name];let activeStepId:string|undefined;
  let phase:MissionPhase="CONTEXT",contextManifest:MissionContextManifest|undefined,sourceDecisionRunId:string|null|undefined;
  const failedSettlements=new Set<"models"|"tools">();
  // Keep failed reservations and unknown usage; a lost lease must not hide the original failure.
@@ -62,8 +65,8 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    }
    if(ready&&!running)await db.$transaction(async tx=>{const current=await fenced(tx,lease);assertDynamicTool(current,ready.toolName,ready.canonicalInputJson);await tx.agentMissionStep.update({where:{id:ready.id},data:{status:"RUNNING",startedAt:new Date()}});});
   }
-  const pending=await db.agentMissionStep.findFirst({where:{missionId:m.id,status:"READY",approval:{status:"APPROVED"}},orderBy:{ordinal:"asc"}});
-  if(pending){phase="APPROVAL";activeStepId=pending.id;sourceDecisionRunId=pending.agentRunId;await commitApprovedAction(lease,pending.id);return true;}
+  const pending=await db.agentMissionStep.findFirst({where:{missionId:m.id,status:{in:["READY","RUNNING","UNKNOWN"]},approval:{status:"APPROVED"}},orderBy:{ordinal:"asc"}});
+  if(pending){phase="APPROVAL";activeStepId=pending.id;sourceDecisionRunId=pending.agentRunId;if(pending.toolName==="propose_metric_verification")await commitApprovedMetricVerification(lease,pending.id,options.sandbox);else await commitApprovedAction(lease,pending.id);return true;}
   const unfinished=await db.agentMissionStep.findFirst({where:{missionId:m.id,status:"RUNNING",planRevision:m.planRevision},orderBy:{ordinal:"asc"}});
   let step=unfinished;
   if(!step){
@@ -139,11 +142,19 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
 
   phase="COMMIT";await db.$transaction(async tx=>{
    const current=await fenced(tx,lease);assertDynamicTool(current,step!.toolName,step!.canonicalInputJson);let data=result;
-   if(step!.toolName==="compare_experiment_metrics")await validateSources(m.projectId,result.sources,tx,m.id);
+   if(["compare_experiment_metrics","inspect_experiment_metrics"].includes(step!.toolName))await validateSources(m.projectId,result.sources,tx,m.id);
    for(const source of result.sources.filter(s=>s.document)){if(!await(await import("@/lib/documents/observations")).documentObservationCurrent(m.projectId,{...source,document:source.document!},tx))throw new AppError("SOURCE_CHANGED","文档在读取后发生修订，请重新核对",409);}
-   if(step!.toolName==="web_search"||step!.toolName==="web_fetch")await persistObservations(tx,m.id,result.data);
+   if(step!.toolName==="web_search"||step!.toolName==="web_fetch"||step!.toolName==="read_paper_metadata")await persistObservations(tx,m.id,result.data);
    if(step!.toolName==="save_mission_output"){
     phase="VERIFY";const output=await saveOutput(tx,m.id,step!.id,step!.canonicalInputJson,step!.readSetJson as unknown as Source[],claimChecks);phase="COMMIT";data={data:{outputId:output.id,revision:output.revision},sources:[]};
+   }
+   if(step!.toolName==="propose_metric_verification"){
+    const readSet=sourcesFrom([{sources:step!.readSetJson as unknown as Source[]},result]);await validateSources(m.projectId,readSet,tx,m.id);
+    const data=result.data as {title:string;description:string;job:unknown;sourceBindings?:unknown};const expiresAt=new Date(Date.now()+600000);
+    const proposal={tool:"verify_experiment_metrics",toolVersion:"1",args:{title:data.title,description:data.description,sourceBindings:data.sourceBindings,job:data.job},ownerUserId:m.ownerUserId,projectId:m.projectId,planRevision:m.planRevision,contextVersion:m.contextVersion,constraintsVersion:current.constraintsVersion,readSet,expiresAt:expiresAt.toISOString()};
+    await tx.agentMissionApproval.create({data:{missionId:m.id,stepId:step!.id,proposalJson:json(proposal),proposalHash:jsonHash(proposal),expectedPlanRevision:m.planRevision,readSetJson:json(readSet),expiresAt}});
+    await tx.agentMissionStep.update({where:{id:step!.id},data:{status:"WAITING_APPROVAL",effectKey:`mission:${m.id}:step:${step!.id}`,readSetJson:json(readSet),resultJson:json(result)}});
+    await event(tx,m.id,"APPROVAL_REQUESTED",{stepId:step!.id,proposal,phase:"APPROVAL"});await release(tx,current,"WAITING_APPROVAL");return;
    }
    if(step!.toolName==="propose_action"){
     phase="VERIFY";await validateSources(m.projectId,step!.readSetJson as unknown as Source[],tx,m.id);phase="APPROVAL";
@@ -166,7 +177,11 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    const active=activeStepId?await tx.agentMissionStep.findUnique({where:{id:activeStepId}}):null;
    const retry=!stop&&code==="RESEARCH_RETRYABLE"&&active?.status==="RUNNING"&&active.attempts<3;let nextAttemptAt:Date|undefined;
    if(retry){await tx.agentMissionStep.update({where:{id:active!.id},data:{attempts:{increment:1}}});const requested=(error as AppError).details as {retryAfterMs?:number}|undefined;const delay=Math.min(30000,Math.max(1000*2**(active!.attempts-1),requested?.retryAfterMs??0));nextAttemptAt=new Date(Date.now()+delay);await tx.agentMission.update({where:{id:m.id},data:{nextAttemptAt}});}
-   if(activeStepId&&!stop&&!retry)await tx.agentMissionStep.updateMany({where:{id:activeStepId,status:"RUNNING"},data:{status:code==="CONTEXT_CHANGED"?"OBSOLETE":"FAILED"}});
+   const sandboxHistorical=active?.toolName==="propose_metric_verification"&&["SOURCE_CHANGED","APPROVAL_CHANGED","CONTEXT_CHANGED","DIRECTIVE_EFFECT_DENIED"].includes(code);
+   if(sandboxHistorical)await tx.agentMissionStep.update({where:{id:activeStepId!},data:{status:"OBSOLETE"}});
+   const sandboxUnknown=!sandboxHistorical&&active?.toolName==="propose_metric_verification"&&!!(active.protocolJson as {sandboxJob?:{phase?:string}})?.sandboxJob?.phase&&!["SANDBOX_JOB_FAILED","SANDBOX_IDENTITY_CHANGED","SANDBOX_RESULT_MISMATCH"].includes(code);
+   if(sandboxUnknown)await tx.agentMissionStep.update({where:{id:activeStepId!},data:{status:"UNKNOWN"}});
+   if(activeStepId&&!stop&&!retry&&!sandboxUnknown)await tx.agentMissionStep.updateMany({where:{id:activeStepId,status:"RUNNING"},data:{status:code==="CONTEXT_CHANGED"?"OBSOLETE":"FAILED"}});
    if(code==="SOURCE_CHANGED"||code==="APPROVAL_CHANGED"||code==="CONTEXT_CHANGED"){await obsoleteApprovals(tx,m.id);await tx.agentMission.update({where:{id:m.id},data:{planRevision:{increment:1}}});}
    const diagnostic=failure.diagnostic,metadata=failure.metadata;
    const boundary=failure.protocol?await tx.agentMissionEvent.findFirst({where:{missionId:m.id,type:{in:["TOOL_FINISHED","QUESTION","CRITERIA_CHECKED","RESUME","INPUT"]}},orderBy:{seq:"desc"}}):null;

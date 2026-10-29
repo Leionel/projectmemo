@@ -19,7 +19,7 @@ type Attachment = {
 type Revision = { revisionIndex: number; source: string; text: string; createdAt: string };
 
 const statusCopy: Record<string, { label: string; className: string }> = {
-  SUCCESS: { label: "已提取并沉淀为记忆", className: "bg-[var(--teal-pale)] text-[var(--teal-strong)] border-transparent" },
+  SUCCESS: { label: "已提取内容", className: "bg-[var(--teal-pale)] text-[var(--teal-strong)] border-transparent" },
   NEEDS_OCR: { label: "待处理：需要 OCR", className: "bg-[var(--amber)]/15 text-[var(--amber)] border-[var(--amber)]/30" },
   PENDING: { label: "待处理", className: "bg-[var(--amber)]/15 text-[var(--amber)] border-[var(--amber)]/30" },
   FAILED: { label: "提取失败", className: "bg-[var(--brick-pale)] text-[var(--brick)] border-[var(--brick)]/30" },
@@ -137,7 +137,7 @@ export function AttachmentInbox({ projectId, enabled, onMaterialSaved }: { proje
       if (!response.ok) {
         const reason = readError(data, "附件上传失败");
         throw new Error((data as { error?: { code?: string } } | null)?.error?.code === "ATTACHMENT_INVALID"
-          ? `这个文件没有被接受：忆程只支持 PDF 与图片，并按文件内容校验类型（服务端原因：${reason}）`
+          ? `这个文件没有被接受：忆程支持 PDF、图片及开启实验功能后的 CSV/JSON 指标文件，并按文件内容校验类型（服务端原因：${reason}）`
           : reason);
       }
       const attachment = data.attachment as Attachment;
@@ -270,7 +270,7 @@ export function AttachmentInbox({ projectId, enabled, onMaterialSaved }: { proje
         <label className="focus-ring inline-flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--rule-strong)] bg-[var(--paper-strong)] px-3.5 py-2 text-xs font-bold text-[var(--ink)] shadow-xs transition hover:border-[var(--teal)] hover:text-[var(--teal-strong)]">
           <input
             type="file"
-            accept=".pdf,image/png,image/jpeg,image/webp,image/gif,image/bmp"
+            accept=".pdf,.csv,.json,image/png,image/jpeg,image/webp,image/gif,image/bmp"
             className="hidden"
             disabled={busy !== null}
             onChange={(event) => {

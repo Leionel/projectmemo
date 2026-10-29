@@ -30,3 +30,7 @@
 CT-4 工程链路已形成可提交切片；剩余质量探针：未知日期归因的完整最终回答、QUICK静态协议开销与预算适配、真实大文档/OCR、鸿蒙原页导航和设备交互。禁止以扩大预算或清空 UNKNOWN 隐藏本轮失败。
 
 CT-5/6 尚未交付：CT-5 先完成 CSV/JSON 条件比较及原来源回读，再接获批固定脚本与真实沙箱 job；本机 Docker 启动命令返回后仍无可用 daemon，不能把普通 Node 子进程冒充安全沙箱。CT-6 以单一 Crossref metadata adapter 接原公开研究授权/预算，metadata 不冒充全文，全文复用 PR-6/OA/本批附件。已查阅 node-csv（MIT，4.3k star）、Crossref官方REST文档与Docker官方安全说明，尚无对应业务代码落地。
+
+## CT-5/6 接续更新（2026-10-29）
+
+上述CT-5/6未交付和Docker不可用是本检查点历史状态。后续原工具集、获批真实容器、论文元数据及双端接入见 `R4_EXPERIMENT_ACADEMIC_IMPLEMENTATION_NOTES.md`。新的Conversation回合已缩小可用工具schema并保留动态调查，QUICK新回合输入预算48k、耗尽保留已读来源；旧Turn预算与UNKNOWN没有改写。旧QUICK完整答案质量失败记录保留，尚不将工程修复视为该质量用例PASS。

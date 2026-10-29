@@ -11,6 +11,7 @@ export struct ConversationResearchControl {
   @Prop disabled: boolean = false;
   onSaved: () => void = (): void => {};
   @State private open: boolean = false;
+  @State private academic: boolean = false;
   @State private topic: string = '';
   @State private terms: string = '';
   @State private hosts: string = '';
@@ -20,7 +21,7 @@ export struct ConversationResearchControl {
   private async save(enabled: boolean): Promise<void> {
     const input = new ResearchScopeInput(); input.expectedRevision = this.info.revision;
     input.projectId = this.projectId || this.info.projectId || '';
-    input.scope.enabled = enabled; input.scope.topic = this.topic.trim(); input.scope.publicTerms = this.terms.split(/[,，\n]/).map((v: string) => v.trim()).filter((v: string) => v !== '');
+    input.scope.academicMetadata = this.academic; input.scope.enabled = enabled; input.scope.topic = this.topic.trim(); input.scope.publicTerms = this.terms.split(/[,，\n]/).map((v: string) => v.trim()).filter((v: string) => v !== '');
     input.scope.allowedHosts = this.hosts.split(/[,，\n]/).map((v: string) => v.trim().toLowerCase()).filter((v: string) => v !== '');
     this.saving = true;
     try { await this.service.saveResearchScope(this.conversationId, input); this.open = false; this.onSaved(); }
@@ -30,11 +31,13 @@ export struct ConversationResearchControl {
   build() {
     Column({ space: 8 }) {
       Button(this.info.scope.enabled ? '联网研究 ✓' : '联网研究', { type: ButtonType.Normal }).height(44).fontSize(12).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent)
-        .enabled(!this.disabled && !this.saving).onClick(() => { this.topic = this.info.scope.topic; this.terms = this.info.scope.publicTerms.join('，'); this.hosts = this.info.scope.allowedHosts.join('，'); this.open = !this.open; })
+        .enabled(!this.disabled && !this.saving).onClick(() => { this.academic = this.info.scope.academicMetadata === true; this.topic = this.info.scope.topic; this.terms = this.info.scope.publicTerms.join('，'); this.hosts = this.info.scope.allowedHosts.join('，'); this.open = !this.open; })
       if (this.open) {
         TextInput({ text: this.topic, placeholder: '公开研究主题' }).height(44).fontSize(14).onChange((v: string) => { this.topic = v; })
         TextInput({ text: this.terms, placeholder: '允许外发的公开概念，用逗号分隔' }).height(44).fontSize(14).onChange((v: string) => { this.terms = v; })
         TextInput({ text: this.hosts, placeholder: '限定域名（可选）' }).height(44).fontSize(14).onChange((v: string) => { this.hosts = v; })
+        Row({ space: 8 }) { Checkbox({ name: 'academicMetadata' }).select(this.academic).onChange((value: boolean) => { this.academic = value; })
+          Text('允许向Crossref发送公开DOI，读取论文元数据与摘要（非全文）').fontSize(13).layoutWeight(1) }
         Text('搜索仅发送确认的公开范围。私聊和未公开实验值不作为搜索词。').fontSize(12).fontColor(PMColors.INK_SECONDARY)
         if (this.error !== '') { Text(this.error).fontSize(12).fontColor(PMColors.WARNING) }
         Row({ space: 12 }) {

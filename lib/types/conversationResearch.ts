@@ -5,12 +5,13 @@ export const conversationResearchScopeSchema = z.object({
   expectedRevision: z.number().int().positive(), projectId: z.string().min(1).max(160),
   scope: researchScopeSchema,
 }).strict();
-export const researchReadLevelSchema = z.enum(["SEARCH_SNIPPET", "SEARCH_SUMMARY", "FETCH_EXCERPT", "DOCUMENT_EXTRACT", "UNAVAILABLE"]);
+export const researchReadLevelSchema = z.enum(["SEARCH_SNIPPET", "SEARCH_SUMMARY", "FETCH_EXCERPT", "DOCUMENT_EXTRACT", "ACADEMIC_METADATA", "UNAVAILABLE"]);
 export const externalSourceMetaSchema = z.object({
   conversationId: z.string(), turnId: z.string(), scopeRevision: z.number().int().positive(),
+  provenanceSourceIds:z.array(z.string().max(200)).max(4).optional(),
   origin: z.enum(["SEARCH", "USER_PROVIDED"]), provider: z.string(), requestedUrl: z.string().max(8192),
   resolvedUrl: z.string().nullable(), publishedAt: z.string().nullable(), fetchedAt: z.string(),
-  readLevel: researchReadLevelSchema, retrievalMethod: z.enum(["SEARCH", "SEARCH_INLINE_CONTENT", "PROVIDER_FETCH", "DOCUMENT_PARSER"]),
+  readLevel: researchReadLevelSchema, retrievalMethod: z.enum(["SEARCH", "SEARCH_INLINE_CONTENT", "PROVIDER_FETCH", "DOCUMENT_PARSER", "CROSSREF_METADATA"]),
   truncated: z.boolean(), totalCharacters: z.number().int().nonnegative(),
   applicability: z.object({ edition: z.string().max(200).nullable(), effectiveFrom: z.string().nullable(), effectiveUntil: z.string().nullable(),
     status: z.enum(["CURRENT", "FUTURE", "SUPERSEDED", "CONFLICTED", "UNKNOWN"]), evidenceSourceIds: z.array(z.string()).max(8) }),
@@ -32,6 +33,7 @@ export const researchCoverageSchema = z.object({
 }).strict();
 export type ResearchCoverage = z.infer<typeof researchCoverageSchema>;
 export const researchToolSchemas = [
+  z.object({tool:z.literal("read_paper_metadata"),projectId:z.string(),sourceId:z.string(),revision:z.string(),scopeRevision:z.number().int().positive()}).strict(),
   z.object({ tool: z.literal("web_search"), projectId: z.string(), scopeRevision: z.number().int().positive(),
     focus: z.enum(["METHODS", "PAPERS", "EVALUATION", "COMPARISON", "OFFICIAL_RULES", "LIMITATIONS"]),
     language: z.enum(["zh", "en"]).optional(), after: z.string().regex(/^\d{4}(?:-\d{2}-\d{2})?$/).optional(),

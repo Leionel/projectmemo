@@ -1,3 +1,4 @@
+import { experimentToolSchemas } from "./experiment";
 import { z } from "zod";
 import { documentToolSchemas } from "./document";
 import { researchToolSchemas } from "./conversationResearch";
@@ -58,7 +59,7 @@ export const internalInvestigationToolCallSchema = z.discriminatedUnion("tool", 
   z.object({ tool: z.literal("read_project_material"), projectId: id, sourceId: id, revision: id }).strict(),
   z.object({ tool: z.literal("inspect_action"), projectId: id, actionId: id, revision: id }).strict(),
 ]);
-export const investigationToolCallSchema = z.discriminatedUnion("tool", [...internalInvestigationToolCallSchema.options, ...researchToolSchemas, ...repositoryCiToolSchemas,...documentToolSchemas]);
+export const investigationToolCallSchema = z.discriminatedUnion("tool", [...internalInvestigationToolCallSchema.options, ...researchToolSchemas, ...repositoryCiToolSchemas,...documentToolSchemas,...experimentToolSchemas]);
 export const investigationDecisionSchema = z.discriminatedUnion("decision", [
   z.object({ decision: z.literal("READ_EXISTING"), informationNeed: text, expectedObservation: text, call: investigationToolCallSchema }).strict(),
   z.object({ decision: z.literal("ANSWER_NOW"), reason: text }).strict(),
@@ -68,7 +69,7 @@ export const investigationDecisionSchema = z.discriminatedUnion("decision", [
 ]);
 export type InvestigationDecision = z.infer<typeof investigationDecisionSchema>;
 export const internalInvestigationDecisionSchema = z.discriminatedUnion("decision", [
-  investigationDecisionSchema.options[0].extend({ call: z.discriminatedUnion("tool", [...internalInvestigationToolCallSchema.options, ...repositoryCiToolSchemas,...documentToolSchemas]) }),
+  investigationDecisionSchema.options[0].extend({ call: z.discriminatedUnion("tool", [...internalInvestigationToolCallSchema.options, ...repositoryCiToolSchemas,...documentToolSchemas,...experimentToolSchemas]) }),
   ...investigationDecisionSchema.options.slice(1) as [typeof investigationDecisionSchema.options[1], typeof investigationDecisionSchema.options[2], typeof investigationDecisionSchema.options[3], typeof investigationDecisionSchema.options[4]],
 ]);
 

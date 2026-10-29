@@ -38,14 +38,14 @@ export function researchTools(lease:Lease,deps:ResearchDependencies={}):ToolSet{
   await db.$transaction(async tx=>{await fenced(tx,lease);await event(tx,m.id,"QUERY_SENT",{query,scopeRevision:m.researchScopeVersion,categories:scope.allowedCategories,provider:provider.name});await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"SUCCESS",provider:decision.provider,trace:json({missionId:m.id,purpose:"PUBLIC_QUERY",model:decision.model,usage:decision.usage}),resultJson:{queryHash:jsonHash(query)}}});});
   if(!deps.provider)await reserveCloudCall(m.projectId);
   const hits=await provider.search(query);const observations=[];
-  for(const hit of hits.slice(0,5)){let url:string;try{url=publicUrl(hit.url,scope.allowedHosts);}catch{continue;}observations.push(observation(m.id,url,"SEARCH_SNIPPET",hit.title,hit.snippet.slice(0,1200),hit.date));}
-  return{data:{query,results:observations.map(s=>({sourceId:s.id,url:s.requestedUrl,title:s.title,snippet:s.excerpt.text,publishedAt:s.publishedAt})),observations},sources:[]};
+  for(const hit of hits.slice(0,5)){let url:string;try{url=publicUrl(hit.url,scope.allowedHosts);}catch{continue;}observations.push(observation(m.id,url,"SEARCH_SNIPPET",hit.title,hit.snippet.slice(0,1200),hit.date,m.researchScopeVersion));}
+  return{data:{query,results:observations.map(s=>({sourceId:s.id,revision:s.normalizedContentHash,url:s.requestedUrl,title:s.title,snippet:s.excerpt.text,publishedAt:s.publishedAt})),observations},sources:[]};
  }},
  web_fetch:{description:"读取本委托已检索的公开来源正文。参数只能是来源ID，不接受任意URL。返回托管提取文本，最终域名未独立验证。",schema:z.object({sourceId:z.string().min(1),scopeRevision:z.number().int().positive()}).strict(),effects,run:async(actor,raw)=>{
   const input=raw as {sourceId:string;scopeRevision:number};const {m,scope}=await researchMission(lease);if(input.scopeRevision!==m.researchScopeVersion)throw new AppError("SCOPE_CHANGED","研究范围已变化",409);
   const found=await db.externalSource.findFirst({where:{id:input.sourceId,missionId:m.id}});if(!found)throw new AppError("SOURCE_NOT_FOUND","资料不属于当前委托",404);
   const url=publicUrl(found.requestedUrl,scope.allowedHosts);if(!deps.provider)await reserveCloudCall(m.projectId);const page=await provider.fetchPage(url);if(!page.content.trim())throw new AppError("EMPTY_SOURCE","该网页没有可读取正文，请换一个来源",422);
-  const record=observation(m.id,url,"PROVIDER_EXTRACT",page.title,page.content,found.publishedAt?.toISOString());
+  const record=observation(m.id,url,"PROVIDER_EXTRACT",page.title,page.content,found.publishedAt?.toISOString(),m.researchScopeVersion);
   const source:Source={id:record.id,kind:"EXTERNAL",entityType:"EXTERNAL_SOURCE",revision:record.normalizedContentHash,hash:record.normalizedContentHash,identityKey:url,text:record.excerpt.text,observedAt:new Date().toISOString()};
   return{data:{sourceId:record.id,title:record.title,url,content:record.excerpt.text,retrievalMode:"PROVIDER_EXTRACT",resolvedUrl:null,truncated:record.excerpt.truncated,observations:[record]},sources:[source]};
  }},

@@ -1,5 +1,11 @@
+import { verifyMissionResult } from "./resultVerifier";
+import { AppError } from "@/lib/api";
+import { metricInputSources } from "./metricInputSources";
+import { record } from "@/lib/conversation/repository";
+import { jsonHash as sourceJsonHash } from "./contracts";
 import { effectiveContinuity } from "@/lib/continuity/directiveService";
 import { sourceUse, type SourceUse } from "@/lib/continuity/sourcePolicy";
+import { validateSources } from "./repository";
 import { db } from "@/lib/db";
 import { missionStrategyV2 } from "@/lib/agent/specialistPrompts";
 import type { AgentMission } from "@/lib/generated/prisma/client";
@@ -48,6 +54,9 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
   const policies = new Map<string, SourceUse>();
   const steps = [] as typeof collectedSteps;
   for (const step of collectedSteps) {
+    if(step.toolName==="propose_metric_verification"&&step.status==="SUCCEEDED"){
+      const approval=await db.agentMissionApproval.findUnique({where:{stepId:step.id}});if(approval){try{const inputs=metricInputSources(approval.readSetJson as unknown as Source[],record(record(approval.proposalJson).args).sourceBindings);step.resultJson={...record(step.resultJson),sources:inputs} as unknown as typeof step.resultJson;}catch{/* Unknown input lineage remains excluded by validation. */}}
+    }
     const sources = (step.resultJson as ToolResult | null)?.sources ?? [];
     let allowed = !suppressing || sources.length > 0;
     // An old inspect_project snapshot embeds Action text in a project-level source.
@@ -57,6 +66,7 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
       for (const action of actions) if ((await sourceUse(m.ownerUserId, m.projectId, "action:" + action.id, db, { missionId: m.id })).state !== "ALLOWED") allowed = false;
     }
     for (const source of sources) { const policy = await sourceUse(m.ownerUserId, m.projectId, source.id, db, { missionId: m.id }); policies.set(source.id, policy); if (policy.state === "SUPPRESSED" || policy.state === "UNKNOWN" && suppressing) allowed = false; }
+    if(["inspect_experiment_metrics","compare_experiment_metrics","propose_metric_verification"].includes(step.toolName)){try{await validateSources(m.projectId,sources,db,m.id);}catch{allowed=false;}}
     if (allowed) steps.push(step);
   }
   if (suppressing) fitReviews.splice(0);
@@ -75,10 +85,20 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
     .map(source => [source.id, { id: source.id, hash: source.hash, revision: source.revision, temporalState: source.temporalState ?? source.assessment?.temporalState ?? "UNKNOWN",
       knowledgeClass: source.knowledgeClass ?? (source.kind === "EXTERNAL" ? "EXTERNAL_REFERENCE" : "PROJECT_OBSERVATION"), observedAt: source.observedAt }])).values()];
   const inputs = [...new Map([...events, ...[question, input].filter(e => e !== null)].map(e => [e.id, e])).values()].sort((a, b) => a.seq - b.seq);
-  const context = { investigationDelegation: delegation ? { policy: m.continuationPolicyJson, newSourcePointers: delegation.candidateSources ?? [] } : undefined, evidencePolicy: "UNKNOWN provenance is reference only, never independent supporting evidence; re-read original sources before a claim or effect.", continuity: { intentHash: continuity.intentHash, reusePolicyHash: continuity.reusePolicyHash, workingObjective: continuity.workingObjective, constraints: continuity.constraints }, strategyPrompt: { id: missionStrategyV2.id, version: missionStrategyV2.version }, decisionScenario:(m.planJson as {decisionScenario?:unknown}).decisionScenario??null, schemaVersion: 2, promptVersion: fitReviews.length?"mission-context-v3-e0":"mission-context-v2", outputTokenLimit: decisionTokenLimit(m.lastErrorJson), goal: m.goal,
+  const actionReadbacks=[];
+  for(const approval of await db.agentMissionApproval.findMany({where:{missionId:m.id,status:"CONSUMED"},include:{step:true}})){
+    const id=(approval.step.resultJson as {data?:{actionId?:string}}|null)?.data?.actionId;if(!id)continue;
+    const action=await db.actionItem.findFirst({where:{id,projectId:m.projectId,isSimulated:false}});if(!action)continue;
+    if((await sourceUse(m.ownerUserId,m.projectId,"action:"+id,db,{missionId:m.id})).state!=="ALLOWED")continue;
+    actionReadbacks.push({actionId:id,sourceId:"action:"+id,revision:sourceJsonHash(action),reportedState:action.status,hasResultReceipt:!!action.resultCardId,note:"当前服务端状态指针；创建时的TODO回执不是当前状态。需要结果内容或引用时使用inspect_action回读原行动。"});
+  }
+  let completionReadback:unknown={canFinish:false,reason:"OUTPUT_REQUIRED"};
+  if(outputs[0])try{completionReadback={canFinish:true,...await verifyMissionResult(db,m,outputs[0].id),note:"服务端验收条件已满足；若草稿回答了目标，选择finish，不重复保存相同草稿。NEEDS_REVIEW标识内容核验状态，不冒充现实效果。"};}
+  catch(error){if(!(error instanceof AppError))throw error;completionReadback={canFinish:false,outputId:outputs[0].id,reason:error.code,checks:error.details};}
+  const context = { completionReadback,actionReadbacks,investigationDelegation: delegation ? { policy: m.continuationPolicyJson, newSourcePointers: delegation.candidateSources ?? [] } : undefined, evidencePolicy: "UNKNOWN provenance is reference only, never independent supporting evidence; re-read original sources before a claim or effect.", continuity: { intentHash: continuity.intentHash, reusePolicyHash: continuity.reusePolicyHash, workingObjective: continuity.workingObjective, constraints: continuity.constraints }, strategyPrompt: { id: missionStrategyV2.id, version: missionStrategyV2.version }, decisionScenario:(m.planJson as {decisionScenario?:unknown}).decisionScenario??null, schemaVersion: 2, promptVersion: fitReviews.length?"mission-context-v3-e0":"mission-context-v2", outputTokenLimit: decisionTokenLimit(m.lastErrorJson), goal: m.goal,
     protocolRepair: (m.lastErrorJson as {code?:string})?.code === "MODEL_PROTOCOL_ERROR" ? { reason: (m.lastErrorJson as {diagnostic?:{reason?:string}}).diagnostic?.reason } : undefined,
     successCriteria: m.successCriteriaJson, constraints: m.constraintsJson, constraintsVersion: m.constraintsVersion, researchScope: m.researchScopeJson,
-    scopeRevision: m.researchScopeVersion, contextVersion: m.contextVersion, planRevision: m.planRevision, budgetUsed: m.budgetUsedJson,
+    scopeRevision: m.researchScopeVersion, contextVersion: m.contextVersion, planRevision: m.planRevision, budgetLimits:m.budgetJson,budgetUsed: m.budgetUsedJson,
     evidenceReviews:fitReviews.map((e,index)=>{const value=e.payloadJson as unknown as NonNullable<Awaited<ReturnType<typeof assessEvidenceFit>>>;return{eventId:e.id,...(index===0?fitContextSummary(value):fitReviewReference(value)),premiseCurrent:value.evidenceFit.premise.constraintsVersion===m.constraintsVersion&&value.evidenceFit.premise.scopeVersion===m.researchScopeVersion};}),
     pendingQuestion: suppressing ? { note: "Source use policy changed; re-read admissible original material before continuing." } : m.waitStateJson ? { ...(m.waitStateJson as object), readSet: undefined, evidenceFitReview: fitReviewReference((m.waitStateJson as {evidenceFitReview?:Awaited<ReturnType<typeof assessEvidenceFit>>}).evidenceFitReview ?? null) } : null,
     recentInputs: (suppressing ? inputs.filter(e => e.type !== "INPUT" && e.type !== "QUESTION") : inputs).map(e => ({ seq: e.seq, type: e.type, payload: e.payloadJson })),

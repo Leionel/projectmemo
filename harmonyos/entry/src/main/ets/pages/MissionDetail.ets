@@ -1,3 +1,5 @@
+import { MissionBudgetReview } from "../models/Mission";
+import { MissionMetricReceipt } from '../components/MissionMetricReceipt';
 import { MissionInvestigationDelegation } from "../components/MissionInvestigationDelegation";
 import { EvidenceReview, FitGroup, FitExcerpt } from '../models/EvidenceFit';
 import { MissionEvidenceReview } from '../components/MissionEvidenceReview';
@@ -236,6 +238,15 @@ struct MissionDetail {
     if (!premise || !this.premiseReviewed || this.answer.trim() === '') return undefined;
     const review = new EvidenceReview(); review.mode = this.evidenceMode; review.note = this.answer.trim().substring(0, 1000); review.premiseHash = premise.premiseHash;
     return review;
+  }
+  private async reviewBudget():Promise<void> {
+    if(this.busy||this.readState!=='fresh')return;
+    const body=new MissionBudgetReview();body.expectedVersion=this.mission.version;
+    body.totals.models=Math.min(24,this.mission.budget.models+6);body.totals.tools=Math.min(64,this.mission.budget.tools+8);
+    body.totals.activeMs=Math.min(900000,this.mission.budget.activeMs+180000);body.totals.reservedOutputTokens=Math.min(48000,this.mission.budget.reservedOutputTokens+12000);
+    body.requestId=this.requestKey(body);this.busy=true;
+    try{await this.service.budgetReview(this.missionId,body);this.notice='累计预算已复核，已用与UNKNOWN预占保留；委托保持暂停';}
+    catch(e){this.error=(e as Error).message;}finally{this.busy=false;await this.refresh();}
   }
   private async command(action: string, decision: string = ''): Promise<void> {
     if (this.busy || this.readState !== 'fresh') return;
@@ -476,6 +487,10 @@ struct MissionDetail {
       GoalQuestionPanel({ projectId: this.projectId, missionId: this.missionId, compact: true })
       ProjectImpactPanel({ projectId: this.projectId })
       MissionReadbackView({ missionId: this.missionId, target: this.readTarget, missionVersion: this.mission.version, refreshKey: this.readbackRefreshKey, targetKey: JSON.stringify(this.readTarget) })
+      if(this.mission.status==='PAUSED'&&this.missionUiEnabled&&this.mission.budget.models<24){
+        Text(`模型已用或预占${this.mission.used.models??0}次，累计上限${this.mission.budget.models}→${Math.min(24,this.mission.budget.models+6)}；工具上限${Math.min(64,this.mission.budget.tools+8)}，活动时间上限${Math.min(900000,this.mission.budget.activeMs+180000)/60000}分钟，输出预留${Math.min(48000,this.mission.budget.reservedOutputTokens+12000)} tokens`).fontSize(PMFontSize.CAPTION)
+        Button('确认累计预算，保持暂停').enabled(!this.busy&&this.readState==='fresh').onClick(()=>{this.reviewBudget();})
+      }
       if (this.mission.status === 'PAUSED' && this.missionUiEnabled) { Button('继续原委托').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).backgroundColor(PMColors.BRAND).fontColor(PMColors.SURFACE).enabled(this.readState === 'fresh' && !this.busy).onClick(() => { this.command('resume'); }) }
       Button(this.showSettings ? '收起委托设置与控制' : '委托设置与控制').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
         .fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).borderRadius(PMRadius.MD)
@@ -518,8 +533,10 @@ struct MissionDetail {
       ForEach(this.mission.steps, (step: MissionStep) => {
         Column({ space: 6 }) {
           Text(`${step.ordinal} · ${missionToolLabel(step.toolName)} · ${step.status === 'SUCCEEDED' ? '工具已执行' : missionStatusLabel(step.status)}`)
+          if (step.execution && step.execution!.phase !== 'NOT_DISPATCHED') { MissionMetricReceipt({ execution: step.execution!, stepStatus: step.status }) }
           if (this.actionReceipt(step) !== '') { Text(this.actionReceipt(step)) }
           ForEach(step.result?.sources ?? [], (source: MissionSource) => {
+            if (source.kind === 'EXTERNAL') { Button('查看公开资料与阅读级别').height(48).fontColor(PMColors.BRAND).onClick(() => { router.pushUrl({ url: 'pages/ConversationWebSource', params: { missionId: this.missionId, sourceId: source.id } }); }) }
             if (source.document) { Button(source.document!.fileName + (source.document!.pages.length > 0 ? ' · 物理第 ' + source.document!.pages[0].toString() + ' 页' : ' · 目录或文本修订')).height(48).fontColor(PMColors.BRAND).onClick(() => { router.pushUrl({ url: 'pages/ConversationWebSource', params: { missionId: this.missionId, sourceId: source.id } }); }) }
             Text(`${this.knowledge(source.knowledgeClass ?? source.kind)} · ${source.id}\n${source.text ?? ''}`).fontSize(13)
           }, (source: MissionSource) => source.id)

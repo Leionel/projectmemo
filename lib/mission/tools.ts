@@ -32,7 +32,13 @@ export const projectTools:ToolSet={
    const connections=await db.sourceConnection.findMany({where:{projectId:actor.projectId,ownerUserId:actor.userId,status:"ACTIVE",revokedAt:null},take:3,include:{signals:{where:{status:{in:["CANDIDATE","ADOPTED"]}},orderBy:{fetchedAt:"desc"},take:5}}});
    const repositoryPointers=[];for(const c of connections){try{await assertSourceUse(actor.userId,actor.projectId,"repo:"+c.id,db,{missionId:actor.missionId});repositoryPointers.push({connectionId:c.id,repo:c.repo,access:c.signalKind,shas:c.signals.map(s=>s.sha)});}catch(error){if(!(error instanceof AppError))throw error;}}
    const documentPointers=[];if(isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false))for(const a of await db.attachment.findMany({where:{projectId:actor.projectId,type:"PDF"},orderBy:{createdAt:"desc"},take:8})){const sourceId="attachment:"+a.id;try{await assertSourceUse(actor.userId,actor.projectId,sourceId,db,{missionId:actor.missionId});const revision=await sourceHash(actor.projectId,sourceId);if(revision)documentPointers.push({sourceId,revision,fileName:a.fileName});}catch(error){if(!(error instanceof AppError))throw error;}}
-   return{data:{...data,repositoryPointers,documentPointers},coverage,sources:[{id:`project:${actor.projectId}`,kind:"PROJECT",entityType:"PROJECT",revision:hash!,hash:hash!,text:JSON.stringify(data),observedAt:new Date().toISOString()}]};
+   const metricPointers=[];
+   if(isFeatureEnabled("EXPERIMENT_OBSERVER_ENABLED",false)){
+    const captures=await db.capture.findMany({where:{projectId:actor.projectId,sourceType:"EXPERIMENT_METRICS"},orderBy:{createdAt:"desc"},take:8});
+    const attachments=await db.attachment.findMany({where:{projectId:actor.projectId,type:{in:["CSV","JSON"]}},orderBy:{createdAt:"desc"},take:8});
+    for(const entry of [...captures.map(c=>({sourceId:"capture:"+c.id,title:"原实验指标记录"})),...attachments.map(a=>({sourceId:"attachment:"+a.id,title:a.fileName}))]){try{await assertSourceUse(actor.userId,actor.projectId,entry.sourceId,db,{missionId:actor.missionId});const revision=await sourceHash(actor.projectId,entry.sourceId);if(revision)metricPointers.push({...entry,revision});}catch(error){if(!(error instanceof AppError))throw error;}}
+   }
+   return{data:{...data,repositoryPointers,documentPointers,metricPointers},coverage,sources:[{id:`project:${actor.projectId}`,kind:"PROJECT",entityType:"PROJECT",revision:hash!,hash:hash!,text:JSON.stringify(data),observedAt:new Date().toISOString()}]};
  }},
  search_memory:{description:"按主题分页检索本项目标题与摘要。coverage说明范围；用afterId继续，用sourceIds定向读已知旧/归档卡片；无结果不等于不存在。",schema:memoryQuerySchema,effects:readEffects,run:searchMissionMemory},
  save_mission_output:{description:"保存委托私有 Output 新版本。PROJECT_OBSERVATION/EXTERNAL_REFERENCE 段落必须有 sourceIds 和精确 citations，复用来源 excerpts 的 sourceId/start/end/excerptHash，不猜偏移或哈希；推断用 INFERENCE。CI 是外部参考，不证明部署。",schema:outputSchema,effects:readEffects,run:async(_actor,input)=>({data:input,sources:[]})},

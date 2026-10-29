@@ -303,7 +303,7 @@ async function executeTurnGeneration(actor: ConversationActor, id: string, turn:
       if (fallbackReason) {
         // Discard the entire ungrounded draft and its action; do not auto-retry a paid call.
         modelAnswer = null;
-        advice = (/^UNSUPPORTED_/.test(fallbackReason) ? "这次云端回答的引用未通过核对，先为你列出项目状态：\n" : "这次云端分析未完成，先为你列出项目状态：\n") + directory.summaries.filter(p => route.projectIds.includes(p.id))
+        advice = r4?.fallbackReason && r4.advice ? r4.advice : (/^UNSUPPORTED_/.test(fallbackReason) ? "这次云端回答的引用未通过核对，先为你列出项目状态：\n" : "这次云端分析未完成，先为你列出项目状态：\n") + directory.summaries.filter(p => route.projectIds.includes(p.id))
           .map(p => p.title + "：" + p.actionCount + " 项未完成行动，" + p.waiting + " 项待回应委托。").join("\n") + "\n可打开下方原任务继续核对。";
       }
     } else {

@@ -113,8 +113,8 @@ describe("附件收件箱：不伪造提取成功", () => {
     expect(source).toContain("ATTACHMENT_TEXT_CHANGED");
   });
 
-  it("声明的可选文件类型与服务端实际校验一致（PDF 与图片）", () => {
-    expect(source).toContain('accept=".pdf,image/png,image/jpeg,image/webp,image/gif,image/bmp"');
+  it("声明的可选文件类型与服务端实际校验一致（PDF、指标数据与图片）", () => {
+    expect(source).toContain('accept=".pdf,.csv,.json,image/png,image/jpeg,image/webp,image/gif,image/bmp"');
     expect(source).not.toContain(".docx");
   });
 

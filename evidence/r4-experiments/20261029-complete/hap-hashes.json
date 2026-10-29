@@ -1,0 +1,10 @@
+{
+  "harmonyos\\entry\\build\\default\\outputs\\default\\entry-default-signed.hap": {
+    "sha256": "69cb1b57fddb5ed9063bc881bf440a33c6ea23c5b5ad179a80e9a00ccc64b11f",
+    "bytes": 6620899
+  },
+  "harmonyos\\entry\\build\\default\\outputs\\default\\entry-default-unsigned.hap": {
+    "sha256": "8aaa7acdd8b87c2b8c1faa6182735d6f4a29eb1730d9a4333c43070a04a6d87c",
+    "bytes": 6541353
+  }
+}

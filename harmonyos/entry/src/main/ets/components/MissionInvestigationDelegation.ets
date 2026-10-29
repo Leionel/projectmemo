@@ -16,6 +16,9 @@ export struct MissionInvestigationDelegation {
   @State interval: string = '5';
   @State metadata: string = '12';
   @State web: boolean = false;
+  @State experiments: boolean = false;
+  @State papers: boolean = false;
+  @State verification: boolean = false;
   @State documents: boolean = false;
   @State logs: boolean = false;
   aboutToAppear(): void {
@@ -23,6 +26,9 @@ export struct MissionInvestigationDelegation {
     this.models = (this.mission.continuationPolicy.maxModels || 8).toString(); this.tools = (this.mission.continuationPolicy.maxTools || 12).toString();
     this.interval = (this.mission.continuationPolicy.checkEveryMinutes || 5).toString(); this.metadata = (this.mission.continuationPolicy.maxMetadataRequests || 12).toString();
     this.web = (this.mission.continuationPolicy.allowedTools || []).includes('web_search');
+    this.experiments = (this.mission.continuationPolicy.allowedTools || []).includes('inspect_experiment_metrics');
+    this.papers = (this.mission.continuationPolicy.allowedTools || []).includes('read_paper_metadata');
+    this.verification = (this.mission.continuationPolicy.allowedTools || []).includes('propose_metric_verification');
     this.documents = (this.mission.continuationPolicy.allowedTools || []).includes('inspect_document');
     this.logs = (this.mission.continuationPolicy.allowedTools || []).includes('read_ci_log');
     this.loadConnections();
@@ -43,9 +49,12 @@ export struct MissionInvestigationDelegation {
       const body = new MissionPolicyEdit(); body.requestId = 'delegation-' + Date.now().toString(); body.expectedVersion = this.mission.version;
       if (!stop) {
         body.policy.mode = 'BOUNDED_INVESTIGATION'; body.policy.schemaVersion = 1; body.policy.expiresAt = new Date(this.until.replace(' ', 'T') + '+08:00').toISOString();
-        body.policy.checkEveryMinutes = Number(this.interval); body.policy.maxModels = Number(this.models); body.policy.maxTools = Number(this.tools); body.policy.maxMetadataRequests = this.selected.length > 0 ? Number(this.metadata) : 0;
+        body.policy.checkEveryMinutes = Number(this.interval); body.policy.maxModels = Number(this.models); body.policy.maxTools = Number(this.tools); body.policy.maxMetadataRequests = this.selected.length > 0 || this.papers ? Number(this.metadata) : 0;
         body.policy.allowedTools = ['inspect_project', 'search_memory', 'read_project_material', 'inspect_action', 'save_mission_output', 'propose_action'];
         if (this.web) body.policy.allowedTools.push('web_search', 'web_fetch');
+        if (this.experiments) body.policy.allowedTools.push('inspect_experiment_metrics', 'compare_experiment_metrics');
+        if (this.papers) body.policy.allowedTools.push('read_paper_metadata');
+        if (this.verification) body.policy.allowedTools.push('propose_metric_verification');
         if (this.documents) body.policy.allowedTools.push('inspect_document', 'read_document_page', 'read_document_section', 'read_document_table');
         if (this.selected.length > 0) body.policy.allowedTools.push('read_repository_ci', 'read_ci_jobs');
         if (this.logs && this.logAllowed()) body.policy.allowedTools.push('read_ci_log');
@@ -68,6 +77,10 @@ export struct MissionInvestigationDelegation {
       TextInput({ text: this.tools, placeholder: '工具调用总上限' }).type(InputType.Number).onChange((v: string) => { this.tools = v; })
       Row() { Checkbox().select(this.web).onChange((v: boolean) => { this.web = v; }); Text('允许在原公开研究范围内搜索和读取').fontSize(13) }
       if (this.mission.documentDeepReadEnabled) { Row() { Checkbox().select(this.documents).onChange((v: boolean) => { this.documents = v; }); Text('允许按页、章节和表格深读本项目 PDF').fontSize(13) } }
+      if (this.mission.experimentObserverEnabled) { Row() { Checkbox().select(this.experiments).onChange((v: boolean) => { this.experiments = v; }); Text('允许继续读取与比较原指标').fontSize(13) } }
+      if (this.mission.academicResearchEnabled) { Row() { Checkbox().select(this.papers).onChange((v: boolean) => { this.papers = v; }); Text('允许在原许可内核对论文元数据').fontSize(13) } }
+      if (this.mission.sandboxVerificationEnabled) { Row() { Checkbox().select(this.verification).onChange((v: boolean) => { this.verification = v; }); Text('允许提出核算预览，每次执行仍需批准').fontSize(13) } }
+      if (this.papers && this.selected.length === 0) { TextInput({text:this.metadata,placeholder:'公开元数据请求累计上限'}).type(InputType.Number).onChange((v:string) => { this.metadata = v; }) }
       ForEach(this.connections, (c: ConnectionView) => {
         Row() { Checkbox().select(this.selected.includes(c.id)).enabled(this.selected.includes(c.id) || this.selected.length < 3).onChange((v: boolean) => { this.selected = v ? [...this.selected, c.id] : this.selected.filter((id: string) => id !== c.id); }); Text(c.repo + ' · ' + c.ref).fontSize(13) }
       }, (c: ConnectionView) => c.id)

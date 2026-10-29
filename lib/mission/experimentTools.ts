@@ -1,33 +1,26 @@
-import { z } from "zod";
+import { METRIC_IMAGE,METRIC_SCRIPT_HASH,metricJobSchema } from "@/lib/experiments/sandbox";
+import { metricComparisonSchema } from "@/lib/types/experiment";
 import { db } from "@/lib/db";
-import { AppError } from "@/lib/api";
 import { isFeatureEnabled } from "@/lib/config/features";
-import { parseMetricRecords,compareMetricRecords } from "@/lib/experiments/metrics";
-import { readReviewMaterial } from "./projectMaterialReader";
-import { ownedMission,sourceHash } from "./repository";
+import { readExperiment } from "@/lib/experiments/reader";
+import { experimentToolSchemas,type ExperimentCall } from "@/lib/types/experiment";
 import type { ToolSet } from "./tools";
 import { fenced,type Lease } from "./runtimeStore";
 import { assertInvestigationDelegation } from "./investigationDelegation";
-
-const inputSchema=z.object({sourceId:z.string().regex(/^capture:[^/]{1,160}$/),revision:z.string().regex(/^[a-f0-9]{64}$/),format:z.enum(["JSON","CSV"]),leftRun:z.string().min(1).max(100),rightRun:z.string().min(1).max(100),metric:z.string().min(1).max(100)}).strict();
 export function experimentTools(lease:Lease):ToolSet{
  if(!isFeatureEnabled("EXPERIMENT_OBSERVER_ENABLED",false))return {};
- return {compare_experiment_metrics:{version:"1",description:"读取本项目原始Capture中粘贴的JSON数组或CSV指标，比较指定两个run的同名指标。须有完整dataset/split/seed/evaluationCode/environment/phase/batchSize条件；不同或未知条件不可比。不运行实验，不证明论文或本地目标达成。",schema:inputSchema,effects:{businessWrite:false,cacheWrite:false,externalDisclosure:false},run:async(actor,raw)=>{
-  const input=inputSchema.parse(raw);
-  const guard=async()=>{
-   if(!isFeatureEnabled("EXPERIMENT_OBSERVER_ENABLED",false))throw new AppError("EXPERIMENT_OBSERVER_DISABLED","实验指标读取已关闭",503);
-   await db.$transaction(async tx=>{const m=await fenced(tx,lease);if(m.ownerUserId!==actor.userId||m.projectId!==actor.projectId||m.id!==actor.missionId)throw new AppError("MISSION_NOT_FOUND","委托不可访问",404);assertInvestigationDelegation(m,"compare_experiment_metrics",input);});
-   await ownedMission(actor.userId,actor.missionId);
-   const material=await readReviewMaterial(actor.projectId,input.sourceId,db,actor.userId,{missionId:actor.missionId});
-   if(!material||material.source.hash!==input.revision)throw new AppError("SOURCE_CHANGED","指标原记录已变化，请重新定位",409);return material;
-  };
-  const original=await guard(),capture=await db.capture.findFirstOrThrow({where:{id:input.sourceId.slice(8),projectId:actor.projectId}});
-  if(capture.rawText.length>original.source.text.length)throw new AppError("METRIC_INPUT_LIMIT","指标原记录超出可引用范围，请提供较小的完整副本",422);
-  const records=parseMetricRecords(capture.rawText,input.format);
-  const left=records.find(r=>r.runId===input.leftRun&&r.metric===input.metric),right=records.find(r=>r.runId===input.rightRun&&r.metric===input.metric);
-  if(!left||!right)throw new AppError("METRIC_NOT_FOUND","指定实验或指标不在原记录内",422);
-  const comparison=compareMetricRecords(left,right),material=await guard();
-  if(await sourceHash(actor.projectId,input.sourceId)!==input.revision)throw new AppError("SOURCE_CHANGED","指标原记录已变化",409);
-  return {data:{left,right,comparison,authority:"MEASUREMENTS_ARE_DATA_NOT_AUTHORIZATION",execution:"NO_JOB_EXECUTED"},sources:[material.source],coverage:{complete:true,records:records.length}};
- }}};
+ const schemas={inspect_experiment_metrics:experimentToolSchemas[0].omit({tool:true,projectId:true}),compare_experiment_metrics:experimentToolSchemas[1].omit({tool:true,projectId:true})};
+ const tools:ToolSet={};for(const schema of experimentToolSchemas){const name=schema.shape.tool.value;
+  tools[name]={version:"2",description:"读取原JSON/CSV实验记录目录或比较两个run。同条件才计算差值，未知/不同条件不可比；下降保留。不运行训练，不证明本地复现或论文成立。",schema:schemas[name],effects:{businessWrite:false,cacheWrite:false,externalDisclosure:false},run:async(actor,raw)=>{
+   await db.$transaction(async tx=>{const m=await fenced(tx,lease);assertInvestigationDelegation(m,name,raw);});
+   return readExperiment({userId:actor.userId,missionId:actor.missionId},{...raw as object,tool:name,projectId:actor.projectId} as ExperimentCall);
+  }};
+ }
+ if(isFeatureEnabled("SANDBOX_VERIFICATION_ENABLED",false))tools.propose_metric_verification={version:"1",description:"提出待用户逐项确认的固定算术核算job：只核算已上传两条实验记录，不训练、不执行模型代码、不联网。用户确认镜像、脚本、只读输入与CPU/内存/时间限制后才运行。",schema:metricComparisonSchema,effects:{businessWrite:false,cacheWrite:false,externalDisclosure:false},run:async(actor,raw)=>{
+  await db.$transaction(async tx=>{const m=await fenced(tx,lease);assertInvestigationDelegation(m,"propose_metric_verification",raw);});
+  const result=await readExperiment({userId:actor.userId,missionId:actor.missionId},{...raw as object,tool:"compare_experiment_metrics",projectId:actor.projectId} as ExperimentCall);
+  const data=result.data as unknown as {left:unknown;right:unknown;sourceBindings?:Array<{sourceId:string;mapping:Record<string,string>|null}>};const job=metricJobSchema.parse({schemaVersion:1,image:METRIC_IMAGE,scriptHash:METRIC_SCRIPT_HASH,left:data.left,right:data.right});
+  return {...result,data:{...result.data,title:"固定脚本核算两条实验指标",description:"仅在无网、只读输入、非root容器中重算差值；CPU 0.5核 / 内存64MB / 最长8秒，不进行训练或复现实验。"+(data.sourceBindings?.some(s=>s.mapping)?" 列映射："+data.sourceBindings.filter(s=>s.mapping).map(s=>Object.entries(s.mapping!).map(([k,v])=>k+" ← "+v).join("；")).join(" / "):""),sourceBindings:data.sourceBindings,job}};
+ }};
+ return tools;
 }

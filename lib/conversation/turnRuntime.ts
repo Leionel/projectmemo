@@ -41,7 +41,7 @@ export type TurnOperation = { id: string; inputHash: string; kind: string; gener
   startedAt: string; finishedAt?: string; observedAt?: string; reusedFrom?: string; result?: unknown; failure?: string; reservedMicrousd: number; billedMicrousd?: number | null };
 export async function turnOperation<T>(actor: ConversationActor, conversationId: string, turnId: string, operationId: string,
   kind: string, input: unknown, run: () => Promise<T>, external = false): Promise<T> {
-  const metadata = kind === "REPO_CI_HTTP", network = external || metadata;
+  const metadata = ["REPO_CI_HTTP","ACADEMIC_HTTP"].includes(kind), network = external || metadata;
   const inputHash = jsonHash(input), opId = generationCallId(operationId), canonical: Record<string, unknown> = { ...record(input), scopeRevision: undefined, revision: undefined };
   if (kind === "WEB_FETCH" && canonical.url) canonical.sourceId = undefined;
   const replayKey = jsonHash({ kind, input: canonical }); let replay: TurnOperation | undefined;
@@ -64,7 +64,7 @@ export async function turnOperation<T>(actor: ConversationActor, conversationId:
     }
     if (Object.keys(ops).length >= 32) throw new AppError("INVESTIGATION_BUDGET_EXHAUSTED", "本轮步骤达到预算边界", 409);
     const requestUnits = metadata ? Math.min(2, Math.max(1, Number(record(input).requestUnits) || 1)) : 0;
-    if (metadata && (Object.values(ops) as TurnOperation[]).filter(o => o.kind === kind && !o.reusedFrom).reduce((n,o) => n + (o.requestUnits ?? 1), 0) + requestUnits > 12)
+    if (metadata && (Object.values(ops) as TurnOperation[]).filter(o => ["REPO_CI_HTTP","ACADEMIC_HTTP"].includes(o.kind) && !o.reusedFrom).reduce((n,o) => n + (o.requestUnits ?? 1), 0) + requestUnits > 12)
       throw new AppError("CI_REQUEST_BUDGET_EXHAUSTED", "本轮仓库请求额度已用完", 409);
     if (external) {
       const entries = Object.values(ops) as TurnOperation[];

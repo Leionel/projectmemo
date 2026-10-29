@@ -11,7 +11,7 @@ import { bindAnswerEvidence } from "./answerEvidence";
 import { validateReadSources } from "./service";
 import { answerSchema, conversationModelSpec } from "./model";
 import type { z } from "zod";
-import { answerV2, investigateV1, investigateInternalV1, investigateReadV1, routeV2, type InvestigationFrame } from "./promptSpecs";
+import { answerV2, investigateV1, investigateInternalV1, investigateReadV1, routeV2, type InvestigationFrame,scopeInvestigationPrompt } from "./promptSpecs";
 import { discoverMaterialPointers, experienceSourceRef, readWorkspaceTool, workspaceReadTools, type MaterialPointer } from "./toolAdapter";
 import { assertTurnLease, mutateTurn, turnOperation, turnElapsedMs } from "./turnRuntime";
 import { readResearchScope, validateWebSource } from "./researchScope";
@@ -37,7 +37,7 @@ export type R4State = {
 export type R4Observation = { sources: ConversationSource[]; refs: ConversationRef[]; coverage: Record<string, unknown> };
 export function investigationBudget(mode: "QUICK" | "STANDARD" | "DEEP" = "STANDARD"): InvestigationBudget {
   const profiles = {
-    QUICK: { maxModelCalls: 5, maxToolReads: 1, maxInputTokens: 24000, maxOutputTokens: 12000, maxElapsedMs: 70000 },
+    QUICK: { maxModelCalls: 5, maxToolReads: 1, maxInputTokens: 48000, maxOutputTokens: 12000, maxElapsedMs: 70000 },
     STANDARD: { maxModelCalls: 9, maxToolReads: 5, maxInputTokens: 80000, maxOutputTokens: 24000, maxElapsedMs: 110000 },
     DEEP: { maxModelCalls: 12, maxToolReads: 8, maxInputTokens: 160000, maxOutputTokens: 32000, maxElapsedMs: 180000 },
   };
@@ -124,6 +124,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
   directory: WorkspaceDirectory; exactRef?: { kind: "MISSION" | "ACTION"; id: string; projectId: string };
   recentDialogue: Array<{ role: string; content: string }>;
 }) {
+  actor={...actor,conversationId:id};
   const state: R4State = { schemaVersion: 1, policyVersion: "r4-v1", phase: "ROUTING", budget: investigationBudget(input.mode),
     projectIds: [], observedProjectIds: input.directory.summaries.map(p => p.id), goalGaps: [], steps: [], decision: null, stopReason: null, pointers: [] };
   await saveR4State(actor, id, turnId, state);
@@ -199,12 +200,12 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
     state.phase = "EVALUATING"; await saveR4State(actor, id, turnId, state, observations.sources);
     const callId = "investigate-" + state.steps.length;
     const frameInput = { ...context(),
-      allowedTools: [...(researchAllowed ? [...workspaceReadTools, ...(grant.scope.enabled ? ["web_search"] : []), "web_fetch"] : workspaceReadTools), ...(ciAllowed ? ["read_repository_ci", "read_ci_jobs", "read_ci_log"] : []),...(isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false)?["inspect_document","read_document_page","read_document_section","read_document_table"]:[])],
+      allowedTools: [...(researchAllowed ? [...workspaceReadTools, ...(grant.scope.enabled ? ["web_search",...(grant.scope.academicMetadata&&isFeatureEnabled("ACADEMIC_RESEARCH_ENABLED",false)?["read_paper_metadata"]:[])] : []), "web_fetch"] : workspaceReadTools), ...(ciAllowed ? ["read_repository_ci", "read_ci_jobs", "read_ci_log"] : []),...(isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false)?["inspect_document","read_document_page","read_document_section","read_document_table"]:[]),...(isFeatureEnabled("EXPERIMENT_OBSERVER_ENABLED",false)?["inspect_experiment_metrics","compare_experiment_metrics"]:[])],
       previousSteps: state.steps.map(s => ({ decision: s.decision, status: s.status, coverage: s.coverage, failureReason: s.failureReason })),
       remaining: { modelCalls: state.budget.maxModelCalls - turn.callCount, reads: state.budget.maxToolReads - state.steps.length } };
     const frame = input.evaluationVariant === "INVESTIGATION_ONLY"
-      ? await conversationModelSpec(actor, id, turnId, callId, investigateReadV1, frameInput).then(result => ({ ...result, data: { goalAssessments: [], decision: result.data, researchCoverage: undefined } }))
-      : await conversationModelSpec(actor, id, turnId, callId, researchAllowed ? investigateV1 : investigateInternalV1, frameInput);
+      ? await conversationModelSpec(actor, id, turnId, callId, scopeInvestigationPrompt(investigateReadV1,frameInput.allowedTools,researchAllowed), frameInput).then(result => ({ ...result, data: { goalAssessments: [], decision: result.data, researchCoverage: undefined } }))
+      : await conversationModelSpec(actor, id, turnId, callId, scopeInvestigationPrompt(researchAllowed ? investigateV1 : investigateInternalV1,frameInput.allowedTools,researchAllowed), frameInput);
     provider = frame.provider;
     await validateContext(actor, scopeDirectory, observations, state.pointers);
     state.goalGaps = normalizeGoals(frame.data, scopeDirectory, observations);
@@ -239,12 +240,12 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
       coverage: { complete: false, description: decision.informationNeed }, reservationId: callId, provider, usage: frame.usage, failureReason: null };
     state.steps.push(step); state.phase = "READING_SOURCE"; await saveR4State(actor, id, turnId, state, observations.sources);
     try {
-      const web = decision.call.tool === "web_search" || decision.call.tool === "web_fetch";
+      const web = decision.call.tool === "web_search" || decision.call.tool === "web_fetch" || decision.call.tool === "read_paper_metadata";
       const ci = ["read_repository_ci", "read_ci_jobs", "read_ci_log"].includes(decision.call.tool);
       const doc=["inspect_document","read_document_page","read_document_section","read_document_table"].includes(decision.call.tool);
       if (ci && !ciAllowed) throw new AppError("CI_NOT_AUTHORIZED", "本轮没有获准的 CI 连接", 409);
       if (web && !researchAllowed) throw new AppError("RESEARCH_NOT_ALLOWED", "本轮未授权联网调查", 409);
-      const result = await turnOperation(actor, id, turnId, "read-" + step.seq, "READ", decision.call, () => doc?readConversationDocumentTool(actor,id,turnId,decision.call as DocumentCall,state.pointers):ci
+      const result = await turnOperation<{data:unknown;sources:ConversationSource[];coverage:Record<string,unknown>;discovered:MaterialPointer[]}>(actor, id, turnId, "read-" + step.seq, "READ", decision.call, () => doc?readConversationDocumentTool(actor,id,turnId,decision.call as DocumentCall,state.pointers):ci
         ? readConversationRepositoryTool(actor, id, turnId, decision.call as RepositoryCiCall, state.pointers, observations.sources)
         : web
         ? readConversationResearchTool(actor, id, turnId, "web-" + step.seq, decision.call as import("@/lib/types/conversationResearch").ResearchToolCall)
@@ -265,7 +266,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
       step.status = "FAILED"; step.finishedAt = new Date().toISOString(); step.failureReason = e instanceof AppError ? e.message : "资料读取中断";
       // Persist failure without stale source content; access checks still apply.
       await saveR4State(actor, id, turnId, state).catch(() => undefined);
-      if ((decision.call.tool === "web_search" || decision.call.tool === "web_fetch") && e instanceof AppError &&
+      if ((decision.call.tool === "web_search" || decision.call.tool === "web_fetch" || decision.call.tool === "read_paper_metadata") && e instanceof AppError &&
         ["SOURCE_BLOCKED", "SOURCE_UNAVAILABLE", "EMPTY_SOURCE", "RESEARCH_RETRYABLE", "SEARCH_AUTH_ERROR", "SEARCH_BALANCE_EMPTY", "SEARCH_NOT_CONFIGURED", "EXTERNAL_BUDGET_EXHAUSTED", "CONTEXT_LIMIT", "QUERY_TOO_LONG", "QUERY_FILTER_CONFLICT"].includes(e.code)) {
         if (["SEARCH_AUTH_ERROR", "SEARCH_BALANCE_EMPTY", "SEARCH_NOT_CONFIGURED", "EXTERNAL_BUDGET_EXHAUSTED", "CONTEXT_LIMIT"].includes(e.code)) {
           state.stopReason = e.code; state.decision = { decision: "STOP", reason: "BUDGET_EXHAUSTED", explanation: e.message }; break;
@@ -307,13 +308,17 @@ export async function investigateConversation(...args: Parameters<typeof execute
     const projectIds = (state.projectIds.length ? state.projectIds : input.focus ? [input.focus] : directory.summaries.slice(0, 3).map(p => p.id));
     const observations = await observeProjects(actor, directory, projectIds, input.message.slice(0, 256), input.exactRef);
     const retainedWeb = (record(turn.readManifestJson).webSources ?? []) as ConversationSource[];
+    const retainedReads=(Object.values(record(record(turn.readManifestJson).operations)) as Array<{kind?:string;status?:string;result?:{sources?:ConversationSource[]}}>).filter(o=>o.kind==="READ"&&o.status==="SUCCEEDED").flatMap(o=>o.result?.sources??[]);
+    const retained=[...new Map([...retainedReads,...retainedWeb].map(s=>[s.id+"@"+s.revision,s])).values()];
+    await validateReadSources(actor,retained);
+
     for (const source of retainedWeb) await validateWebSource(actor, source);
     let characters = observations.sources.reduce((n, s) => n + s.excerpt.length, 0);
-    for (const source of retainedWeb) if (characters + source.excerpt.length <= 24000 && observations.sources.length < 24) { observations.sources.push(source); characters += source.excerpt.length; }
+    for (const source of retained) if (!observations.sources.some(s=>s.id===source.id&&s.revision===source.revision) && characters + source.excerpt.length <= 24000 && observations.sources.length < 24) { observations.sources.push(source); characters += source.excerpt.length; }
     await validateContext(actor, directory, observations);
-    state.goalGaps = []; state.projectIds = projectIds; state.stopReason = e.code; state.phase = "READY";
+    if(["GOAL_CHANGED","UNSUPPORTED_QUOTE"].includes(e.code))state.goalGaps=[]; state.projectIds = projectIds; state.stopReason = e.code; state.phase = "READY";
     await saveR4State(actor, id, turnId, state, observations.sources);
-    const advice = "本次仅整理项目状态：\n" + directory.summaries.filter(p => projectIds.includes(p.id)).map(p => `${p.title}：${p.actionCount} 项未完成行动，${p.waiting} 项待回应委托。`).join("\n");
+    const advice = (e.code==="CONVERSATION_TOKEN_BUDGET_EXHAUSTED"?"本轮调查达到总预算，已保留实际读取的资料，可打开来源核对或在原讨论接续；尚未形成新的模型结论。\n":"本次仅整理项目状态：\n") + directory.summaries.filter(p => projectIds.includes(p.id)).map(p => `${p.title}：${p.actionCount} 项未完成行动，${p.waiting} 项待回应委托。`).join("\n");
     return { route: { intent: "ANSWER", projectIds, query: input.message.slice(0, 256), investigate: false, informationNeeds: [] }, observations, directory, state,
       advice, modelAnswer: { advice, observations: [], priorities: [], action: null, recommendedProjectId: null }, provider: "project_state", fallbackReason: e.code };
   }

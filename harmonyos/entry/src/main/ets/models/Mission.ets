@@ -15,6 +15,7 @@ export class MissionConstraints {
 }
 export class MissionCost { amount: number = 0; currency: string = 'CNY'; }
 export class MissionScope {
+  academicMetadata: boolean = false;
   enabled: boolean = false;
   topic: string = '';
   publicTerms: string[] = [];
@@ -24,6 +25,7 @@ export class MissionScope {
 }
 export class MissionPolicy { mode: string = 'MANUAL'; schemaVersion?: number; expiresAt?: string; checkEveryMinutes?: number; maxModels?: number; maxTools?: number; maxMetadataRequests?: number; allowedTools?: string[]; connectionIds?: string[]; timezone?: string; quietStart?: number; quietEnd?: number; attention?: string; }
 export class MissionCreate {
+  successCriteria: string[] = ['DRAFT_EXISTS'];
   projectId: string = '';
   requestId: string = '';
   goal: string = '';
@@ -46,8 +48,14 @@ export interface MissionSource {
   knowledgeClass?: string;
 }
 export interface MissionResult { data?: Object; sources?: MissionSource[]; }
-export interface MissionStep { id: string; ordinal: number; toolName: string; status: string; result: MissionResult | null; }
-export interface MissionActionArgs { title: string; description?: string; priority?: number; dueAt?: string | null; }
+export interface MissionMetricReceiptData { jobName:string; containerId:string; receiptHash:string; finishedAt:string; image:string; scriptHash:string; exitCode:number; result:MissionMetricResult; }
+export interface MissionMetricResult { state:string; delta:number|null; }
+export interface MissionMetricFailure { exitCode?:number; }
+export interface MissionMetricExecution { phase:string; jobName:string; current:boolean; receipt:MissionMetricReceiptData|null; failure:MissionMetricFailure|null; }
+export interface MissionStep { execution?:MissionMetricExecution; id: string; ordinal: number; toolName: string; status: string; result: MissionResult | null; }
+export interface MetricJobRecord { runId: string; metric: string; value: number; unit: string|null; period:string|null; direction:string|null; dataset:string|null; split:string|null; seed:string|null; evaluationCode:string|null; environment:string|null; phase:string|null; batchSize:string|null; }
+export interface MetricVerificationJob { image: string; scriptHash: string; left: MetricJobRecord; right: MetricJobRecord; }
+export interface MissionActionArgs { job?: MetricVerificationJob; title: string; description?: string; priority?: number; dueAt?: string | null; }
 export interface MissionProposal { tool: string; args: MissionActionArgs; }
 export interface MissionApproval { id: string; proposalHash: string; proposal: MissionProposal; expiresAt: string; }
 export interface MissionBlock { blockId: string; text: string; kind: string; sourceIds: string[]; }
@@ -70,6 +78,7 @@ export interface MissionAttention { level: string; reason: string; decisionId?: 
 export interface MissionAttentionDelivery { status: string; seenAt?: string | null; }
 export interface MissionDelegation { attention?: MissionAttention | null; }
 export class Mission {
+  experimentObserverEnabled?: boolean; academicResearchEnabled?: boolean; sandboxVerificationEnabled?: boolean;
   documentDeepReadEnabled?: boolean;
   delegation?: MissionDelegation | null;
   evidencePremise?: FitPremise | null;
@@ -86,10 +95,14 @@ export class Mission {
   completion?: MissionCompletionSummary;
   experience?: MissionExperience;
   question: MissionQuestion | null = null;
+  budget:MissionBudgetTotals=new MissionBudgetTotals(); used:MissionBudgetUsage=new MissionBudgetUsage();
   steps: MissionStep[] = []; approvals: MissionApproval[] = []; outputs: MissionOutput[] = [];
 }
 export interface MissionEvent { id: string; seq: number; type: string; createdAt: string; payloadJson: Object; }
 export interface MissionEvents { events: MissionEvent[]; nextAfterSeq: number; }
+export class MissionBudgetTotals { models:number=12; tools:number=16; activeMs:number=180000; reservedOutputTokens:number=12000; }
+export class MissionBudgetUsage { models:number=0; tools:number=0; activeMs:number=0; reservedOutputTokens:number=0; }
+export class MissionBudgetReview { requestId:string=""; expectedVersion:number=1; totals:MissionBudgetTotals=new MissionBudgetTotals(); }
 export class MissionCommand {
   evidenceReview?: EvidenceReview;
   requestId: string = ''; expectedVersion: number = 1;

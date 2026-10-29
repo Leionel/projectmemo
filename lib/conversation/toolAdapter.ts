@@ -28,6 +28,11 @@ export async function discoverMaterialPointers(actor: ConversationActor, project
       const source = await readSourceObservation(actor, projectId, c.id);
       pointers.push({ projectId, sourceId: "repo:" + c.id, revision: source.revision, title: source.ref.title, commitShas: source.signalIds.slice(0, 5), ciAccess: source.access });
     }
+    if(isFeatureEnabled("EXPERIMENT_OBSERVER_ENABLED",false)){
+      const captures=await db.capture.findMany({where:{projectId,sourceType:"EXPERIMENT_METRICS"},orderBy:{createdAt:"desc"},take:8});
+      const attachments=await db.attachment.findMany({where:{projectId,type:{in:["CSV","JSON"]}},orderBy:{createdAt:"desc"},take:8});
+      for(const entry of [...captures.map(c=>({id:"capture:"+c.id,title:"原实验指标记录"})),...attachments.map(a=>({id:"attachment:"+a.id,title:a.fileName}))]){const revision=await sourceHash(projectId,entry.id);if(revision)pointers.push({projectId,sourceId:entry.id,revision,title:entry.title});}
+    }
     const ids = sources.filter(s => s.projectId === projectId && s.sourceId.startsWith("card:")).map(s => s.sourceId.slice(5));
     const cards = await db.knowledgeCard.findMany({ where: { projectId, id: { in: ids } }, take: 12,
       select: { captureId: true, attachmentId: true, title: true } });
@@ -62,7 +67,7 @@ export async function readWorkspaceTool(actor: ConversationActor, raw: z.infer<t
   const call = investigationToolCallSchema.parse(raw);
   if(call.tool==="inspect_document"||call.tool==="read_document_page"||call.tool==="read_document_section"||call.tool==="read_document_table")throw new AppError("INVALID_TOOL_ACTOR","文档观察需要原 Turn 的读取记录",409);
   if (call.tool === "read_repository_ci" || call.tool === "read_ci_jobs" || call.tool === "read_ci_log") throw new AppError("INVALID_TOOL_ACTOR", "CI 观察需要原 Turn 请求账本", 409);
-  if (call.tool === "web_search" || call.tool === "web_fetch") throw new AppError("INVALID_TOOL_ACTOR", "公开研究需要原会话授权入口", 409);
+  if (call.tool === "web_search" || call.tool === "web_fetch" || call.tool === "read_paper_metadata") throw new AppError("INVALID_TOOL_ACTOR", "公开研究需要原会话授权入口", 409);
   if (!projectIds.includes(call.projectId)) throw new AppError("INVALID_ROUTE", "本轮调查没有包含该项目", 409);
   await validateReadSources(actor, priorSources);
   await assertProject(actor, call.projectId);
@@ -72,6 +77,13 @@ export async function readWorkspaceTool(actor: ConversationActor, raw: z.infer<t
     const excerpt = rawText.slice(0, scope === "SUMMARY" ? 1200 : 5000);
     sources.push({ id: call.projectId + "/" + sourceId, projectId: call.projectId, sourceId, revision, title, excerpt,
       observedAt, temporalState, knowledgeClass, start: 0, end: excerpt.length, excerptHash: jsonHash(excerpt), readScope: scope });
+  }
+  if(call.tool==="inspect_experiment_metrics"||call.tool==="compare_experiment_metrics"){
+    if(!pointers.some(p=>p.projectId===call.projectId&&p.sourceId===call.sourceId&&p.revision===call.revision))throw new AppError("SOURCE_NOT_OBSERVED","请先定位原指标资料",409);
+    if(call.tool==="compare_experiment_metrics"&&call.rightSource&&!pointers.some(p=>p.projectId===call.projectId&&p.sourceId===call.rightSource!.sourceId&&p.revision===call.rightSource!.revision))throw new AppError("SOURCE_NOT_OBSERVED","请先定位另一份原指标资料",409);
+    const result=await(await import("@/lib/experiments/reader")).readExperiment({...actor,missionId:actor.missionProjectId===call.projectId?actor.missionId:undefined},call);
+    for(const s of result.sources)source(s.id,s.hash,"实验原始指标",s.text,"STRUCTURED","UNKNOWN","PROJECT_OBSERVATION");
+    return {data:result.data,sources,coverage:result.coverage,discovered:[]};
   }
   if (call.tool === "search_memory") {
     const result = await searchMissionMemory({ userId: actor.userId, projectId: call.projectId, conversationId: actor.conversationId, missionId: actor.missionId }, { query: call.query, limit: 3, ...(call.afterId ? { afterId: call.afterId } : {}) });

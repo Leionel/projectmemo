@@ -59,10 +59,13 @@ export async function sourceLineage(projectId: string, id: string, tx: Tx = db, 
     if (a?.resultCardId) childIds.push("card:" + a.resultCardId);
   } else if (id.startsWith("mission:")) known = !!await tx.agentMission.findFirst({ where: { id: id.slice(8), projectId } });
   else if (id.startsWith("web:")) {
-    const matches = await tx.$queryRaw<Array<{ value: string }>>`
-      SELECT s.value FROM "ConversationTurn" t, json_each(t."readManifestJson", '$.webSources') s
+    const matches = await tx.$queryRaw<Array<{ value: string;currentScopeVersion:number }>>`
+      SELECT s.value,c."researchScopeVersion" as currentScopeVersion FROM "ConversationTurn" t JOIN "Conversation" c ON c.id=t."conversationId", json_each(t."readManifestJson", '$.webSources') s
       WHERE json_extract(s.value, '$.sourceId') = ${id} AND json_extract(s.value, '$.projectId') = ${projectId} LIMIT 1`;
     const source = matches[0] ? record(JSON.parse(matches[0].value)) : {};
+    if(matches[0]&&record(source.external).scopeRevision!==matches[0].currentScopeVersion){blocked=true;blockedReason="SOURCE_SCOPE_CHANGED";}
+    const parents=record(source.external).provenanceSourceIds;
+    if(Array.isArray(parents)){for(const parent of parents.slice(0,4))if(typeof parent==="string")childIds.push(parent);else known=false;derived=true;}
     const url = record(source.external).requestedUrl;
     if (typeof url === "string") { const canonical = new URL(url); canonical.hash = ""; childIds.push("url:" + canonical.href); }
     else known = false;
@@ -71,7 +74,9 @@ export async function sourceLineage(projectId: string, id: string, tx: Tx = db, 
   } else if (id.startsWith("repo:") || id === "project:" + projectId) {
     // Identity/revision/grant are checked by the original adapter; these are original observations, never user authority.
   } else {
-    const external = await tx.externalSource.findFirst({ where: { id, mission: { projectId } }, select: { id: true } }); known = !!external;
+    const external = await tx.externalSource.findFirst({ where: { id, mission: { projectId } }, select: { id: true,requestedUrl:true,excerptJson:true,retrievalMode:true,mission:{select:{researchScopeVersion:true}} } }); known = !!external;
+    if(external?.retrievalMode==="ACADEMIC_METADATA"&&record(external.excerptJson).scopeRevision!==external.mission.researchScopeVersion){blocked=true;blockedReason="SOURCE_SCOPE_CHANGED";}
+    if(external){childIds.push("url:"+external.requestedUrl);const parents=record(external.excerptJson).parentSourceIds;if(Array.isArray(parents)){for(const parent of parents.slice(0,4))if(typeof parent==="string")childIds.push(parent);else known=false;derived=true;}}
   }
   const roots = [id];
   for (const child of new Set(childIds)) { const line = await sourceLineage(projectId, child, tx, next, budget); roots.push(...line.roots); known &&= line.known; blocked ||= line.blocked === true;blockedReason??=line.blockedReason; }
@@ -88,6 +93,7 @@ export async function sourceUse(userId: string, projectId: string, sourceId: str
 }
 export async function assertSourceUse(userId: string, projectId: string, sourceId: string, tx: Tx = db, scope?: { conversationId?: string; missionId?: string }) {
   const policy = await sourceUse(userId, projectId, sourceId, tx, scope);
+  if(policy.reason==="SOURCE_SCOPE_CHANGED")throw new AppError("SCOPE_CHANGED","原研究授权已变化，请重新核对范围和来源",409);
   if(policy.reason==="DOCUMENT_VERSION_CHANGED")throw new AppError("SOURCE_CHANGED","原文件或文本修订已变化，请重新读取后继续",409);
   if(policy.reason==="DOCUMENT_READER_DISABLED")throw new AppError("DOCUMENT_READER_DISABLED","文档深读当前已关闭，原观察保留为历史",503);
   if (policy.state !== "ALLOWED") throw new AppError(policy.state === "SUPPRESSED" ? "SOURCE_USE_SUPPRESSED" : "SOURCE_LINEAGE_UNKNOWN",

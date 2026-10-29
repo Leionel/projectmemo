@@ -10,6 +10,7 @@ export function ConversationResearchScope({ view, projectId, disabled, onChange,
   view: ConversationView; projectId: string; disabled: boolean; onChange: (view: ConversationView) => void; onError: (message: string) => void;
 }) {
   const [open, setOpen] = useState(false), [topic, setTopic] = useState(""), [terms, setTerms] = useState(""), [hosts, setHosts] = useState(""), [saving, setSaving] = useState(false);
+  const [academic,setAcademic]=useState(false);
   const research = view.research;
   if (!research?.available) return null;
   async function save(enabled: boolean) {
@@ -18,7 +19,7 @@ export function ConversationResearchScope({ view, projectId, disabled, onChange,
     try {
       const next = await request<NonNullable<ConversationView["research"]>>(`/api/conversations/${view.id}/research-scope`, "PATCH", {
         expectedRevision: research.revision, projectId: projectId || research.projectId || view.homeProjectId,
-        scope: enabled ? { enabled: true, topic: topic.trim(), publicTerms: terms.split(/[,，\n]/).map(s => s.trim()).filter(Boolean),
+        scope: enabled ? { academicMetadata:academic,enabled: true, topic: topic.trim(), publicTerms: terms.split(/[,，\n]/).map(s => s.trim()).filter(Boolean),
           allowedHosts: hosts.split(/[,，\n]/).map(s => s.trim().toLowerCase()).filter(Boolean), excludedTerms: [], allowedCategories: ["PUBLIC_TOPIC", "PUBLIC_SOURCE"] }
           : { ...research.scope, enabled: false },
       });
@@ -32,12 +33,13 @@ export function ConversationResearchScope({ view, projectId, disabled, onChange,
   }
   return <div>
     <button type="button" className="workspace-link focus-ring" disabled={disabled || saving} aria-expanded={open} onClick={() => {
-      setTopic(research!.scope.topic); setTerms(research!.scope.publicTerms.join("，")); setHosts(research!.scope.allowedHosts.join("，")); setOpen(v => !v);
+      setAcademic(research!.scope.academicMetadata===true); setTopic(research!.scope.topic); setTerms(research!.scope.publicTerms.join("，")); setHosts(research!.scope.allowedHosts.join("，")); setOpen(v => !v);
     }}>{research.scope.enabled ? "联网研究 ✓" : "联网研究"}</button>
     {open && <section role="group" aria-label="公开研究范围" className="my-3 grid gap-3 rounded-xl border border-current/10 p-4">
       <label>公开主题<input className="workspace-input" value={topic} maxLength={300} onChange={e => setTopic(e.target.value)}/></label>
       <label>允许外发的公开概念<input className="workspace-input" value={terms} placeholder="用逗号分隔" onChange={e => setTerms(e.target.value)}/></label>
       <label>限定域名（可选）<input className="workspace-input" value={hosts} placeholder="例如 arxiv.org，github.com" onChange={e => setHosts(e.target.value)}/></label>
+      <label><input type="checkbox" checked={academic} onChange={e=>setAcademic(e.target.checked)}/>允许向 Crossref 发送已定位的公开 DOI，读取论文元数据与摘要（非全文）</label>
       <p className="text-sm">搜索仅发送以上公开范围。项目私聊和未公开实验值不作为搜索词；读取你贴的公开链接无需先搜索。</p>
       <div className="flex gap-4"><button type="button" className="workspace-link" disabled={saving || !topic.trim() || !terms.trim() || !(projectId || research.projectId || view.homeProjectId)} onClick={() => void save(true)}>确认范围</button>
         {research.scope.enabled && <button type="button" className="workspace-link" disabled={saving} onClick={() => void save(false)}>关闭联网</button>}

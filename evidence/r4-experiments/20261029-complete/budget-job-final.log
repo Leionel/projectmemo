@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/metricSandbox.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  21:00:42
+   Duration  4.53s (transform 1.49s, setup 0ms, import 2.63s, tests 1.54s, environment 0ms)
+

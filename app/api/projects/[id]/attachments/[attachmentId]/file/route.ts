@@ -14,8 +14,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     if (!data) throw new AppError("NOT_FOUND", "附件原件暂时不可用", 404);
     const url = new URL(request.url);
     const isDownload = url.searchParams.get("download") === "1";
+    const safeMime=attachment.type==="PDF"?"application/pdf":attachment.type==="JSON"?"application/json":attachment.type==="CSV"?"text/csv":/^image\/(png|jpeg|webp|gif|bmp)$/.test(attachment.mimeType)?attachment.mimeType:"application/octet-stream";
     return new Response(new Uint8Array(data), { headers: {
-      "Content-Type": attachment.mimeType,
+      "Content-Type": safeMime,
       "Content-Disposition": `${isDownload ? "attachment" : "inline"}; filename*=UTF-8''${encodeURIComponent(attachment.fileName)}`,
       "X-Content-Type-Options": "nosniff", "Cache-Control": "private, no-store",
     } });

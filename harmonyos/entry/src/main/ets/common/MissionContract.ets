@@ -33,7 +33,7 @@ export function editableMissionConstraints(value: MissionConstraints): MissionCo
 export function missionTerminal(status: string): boolean { return status === 'SUCCEEDED' || status === 'CANCELLED'; }
 export function missionErrorPhaseLabel(phase?: string): string {
   const labels: Record<string, string> = { 'CONTEXT': '准备上下文', 'DECISION': '模型决策', 'TOOL': '工具执行',
-    'VERIFY': '结果核验', 'COMMIT': '保存执行结果', 'APPROVAL': '批准与行动提交' };
+    'VERIFY': '结果核验', 'COMMIT': '保存执行结果', 'APPROVAL': '批准与执行提交' };
   return phase ? labels[phase] ?? '执行阶段待确认' : '执行阶段未记录';
 }
 export function missionCompletionFacts(status: string, completion?: MissionCompletionSummary, draftVerification?: string): MissionCompletionFact[] {
@@ -47,6 +47,10 @@ export function missionCompletionFacts(status: string, completion?: MissionCompl
 }
 export function missionToolLabel(tool: string): string {
   if (tool === 'inspect_document') return '读取文档目录';
+  if (tool === 'read_paper_metadata') return '读取论文元数据';
+  if (tool === 'propose_metric_verification') return '提交固定核算预览';
+  if (tool === 'inspect_experiment_metrics') return '读取实验指标';
+  if (tool === 'compare_experiment_metrics') return '比较实验条件与结果';
   if (tool === 'read_document_page') return '读取原文件页';
   if (tool === 'read_document_section') return '读取章节片段';
   if (tool === 'read_document_table') return '读取候选表格';

@@ -3,7 +3,7 @@ import { open, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import type { ChatProviderConfig } from "../../lib/config/provider";
 
 export const PRICE_SOURCE = "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/";
-export const PRICE_VERIFIED_AT = "2026-10-23";
+export const PRICE_VERIFIED_AT = "2026-10-29";
 type Price = { inputPerMillionCny: number; outputPerMillionCny: number; maxInputTokens: number };
 export function evaluationPrice(config: Pick<ChatProviderConfig, "baseUrl" | "model">): Price {
   const url = new URL(config.baseUrl);

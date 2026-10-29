@@ -1,3 +1,4 @@
+import { MissionBudgetReview } from "../models/Mission";
 import { MissionReadTarget, MissionReadbackReply, missionReadbackQuery } from '../models/MissionReadback';
 import { ApiClient } from './ApiClient';
 import { MissionAttentionReceipt } from '../models/Mission';
@@ -68,6 +69,7 @@ export class MissionService {
   async scope(id: string, body: MissionScopeEdit): Promise<MissionReply> {
     this.authorize(); return this.client.patch<MissionReply>(`${this.path(id)}/research-scope`, body);
   }
+  async budgetReview(id:string,body:MissionBudgetReview):Promise<MissionReply> { this.authorize(); return this.client.post<MissionReply>(`${this.path(id)}/budget-review`,body); }
   async policy(id: string, body: MissionPolicyEdit): Promise<MissionReply> {
     this.authorize(); return this.client.patch<MissionReply>(`${this.path(id)}/continuation-policy`, body);
   }

@@ -410,16 +410,18 @@ struct ProjectHome {
     }
     try {
       const menu = await promptAction.showActionMenu({
-        title: '上传照片 / PDF',
+        title: '上传项目资料',
         buttons: [
           { text: '从相册选图片', color: '#0A7EA4' },
-          { text: '选择文件（PDF 等）', color: '#0A7EA4' }
+          { text: '选择文件（PDF）', color: '#0A7EA4' },
+          { text: '导入实验指标（CSV / JSON）', color: '#0A7EA4' }
         ]
       });
       if (menu.index === 0) {
         await this.pickAndUploadImage();
       } else if (menu.index === 1) {
         await this.pickAndUploadPdf();
+      } else if(menu.index === 2) { await this.pickAndUploadMetrics();
       }
     } catch (_e) {
       // 用户取消菜单，无需提示
@@ -456,6 +458,17 @@ struct ProjectHome {
     }
   }
 
+  private async pickAndUploadMetrics(): Promise<void> {
+    if (this.isUploadingAttachment) return;
+    try {
+      const menu = await promptAction.showActionMenu({ title: '指标副本格式', buttons: [{text:'CSV',color:'#0A7EA4'},{text:'JSON',color:'#0A7EA4'}] });
+      const csv = menu.index === 0;
+      const options = new picker.DocumentSelectOptions(); options.fileSuffixFilters = [csv ? 'CSV|.csv' : 'JSON|.json']; options.maxSelectNumber = 1;
+      const uris = await new picker.DocumentViewPicker().select(options);
+      if (uris.length > 0) await this.uploadAttachment(uris[0], 'experiment-' + Date.now().toString() + (csv ? '.csv' : '.json'), csv ? 'text/csv' : 'application/json');
+    } catch { this.attachmentFeedback = '未选择指标文件或文件选择器不可用'; }
+  }
+
   private async uploadAttachment(uri: string, fileName: string, mimeType: string): Promise<void> {
     const uploadToken = SessionStore.getToken();
     this.isUploadingAttachment = true;
@@ -476,7 +489,7 @@ struct ProjectHome {
         this.attachmentFeedbackTone = result.attachment.extractionStatus === 'NEEDS_OCR' ? 'warning' : 'error';
         this.attachmentRetryId = result.attachment.id;
       } else if (result.attachment.extractionStatus === 'SUCCESS') {
-        this.attachmentFeedback = '附件已保存并生成记忆，可在资料页查看原件';
+        this.attachmentFeedback = result.attachment.type === 'CSV' || result.attachment.type === 'JSON' ? '原指标副本已保存，可在资料页核对；尚未执行实验' : '附件已保存并生成记忆，可在资料页查看原件';
         this.attachmentFeedbackTone = 'success';
         this.injectExtractedIntoMeeting(result.attachment.extractedText);
       } else if (result.attachment.extractionStatus === 'NEEDS_OCR') {

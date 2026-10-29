@@ -3,12 +3,16 @@ const isolated=await vi.hoisted(async()=>(await import("./helpers/continuityData
 import fs from "node:fs";
 import { db } from "@/lib/db";
 import { parseMetricRecords,compareMetricRecords,type MetricRecord } from "@/lib/experiments/metrics";
+import { inspectMetricTable } from "@/lib/experiments/table";
 import { createMission,missionDetail,commandMission } from "@/lib/mission/missionService";
 import { runMissionSlice } from "@/lib/mission/runner";
 import { sourceHash } from "@/lib/mission/repository";
 import type { Choice } from "@/lib/mission/contracts";
 afterAll(async()=>{await db.$disconnect();fs.rmSync(isolated.dir,{recursive:true,force:true});});
 const row:MetricRecord={runId:"baseline",method:"A",metric:"accuracy",value:0.8,unit:"ratio",period:"2026-10-29",direction:"HIGHER_BETTER",dataset:"D@sha256",split:"test@sha256",seed:"42",evaluationCode:"eval@sha256",environment:"CPU@env",phase:"inference",batchSize:"1"};
+test("nested JSON paths cannot overwrite a literal column with the same name",()=>{
+ expect(()=>inspectMetricTable(JSON.stringify([{run:"a","metrics.accuracy":0.8,metrics:{accuracy:0.9}}]),"JSON")).toThrow();
+});
 test("metrics compare exact conditions, zero and negative results without declaring reproduction",()=>{
  expect(compareMetricRecords(row,{...row,runId:"candidate",method:"B",value:0.7})).toMatchObject({state:"SAME_CONDITIONS",improvement:"REGRESSED",verification:"REPORTED_INPUTS_NOT_REPRODUCED"});
  expect(compareMetricRecords(row,{...row,runId:"candidate"})).toMatchObject({delta:0,improvement:"UNCHANGED"});

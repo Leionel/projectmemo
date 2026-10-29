@@ -1,3 +1,4 @@
+import { inspectMetricTable } from "@/lib/experiments/table";
 import {enqueueImpact} from "@/lib/decision/impactJobs";
 import { reserveCloudCall } from "@/lib/auth/cloudQuota";
 import { db } from "@/lib/db";
@@ -119,7 +120,7 @@ async function extractImageText(mimeType: string, buffer: Buffer, projectId: str
   }
 }
 
-function inferAndValidateFileType(fileName: string, mimeType: string, buffer: Buffer): "IMAGE" | "PDF" {
+function inferAndValidateFileType(fileName: string, mimeType: string, buffer: Buffer): "IMAGE" | "PDF" | "CSV" | "JSON" {
   if (buffer.length === 0) {
     throw new Error("Attachment is empty");
   }
@@ -136,6 +137,13 @@ function inferAndValidateFileType(fileName: string, mimeType: string, buffer: Bu
     return "PDF";
   }
 
+  const metricFormat=lowerName.endsWith(".csv")?"CSV":lowerName.endsWith(".json")?"JSON":null;
+  if(metricFormat){
+    if(!isFeatureEnabled("EXPERIMENT_OBSERVER_ENABLED",false))throw new AppError("EXPERIMENT_OBSERVER_DISABLED","实验指标附件入口当前已关闭",503);
+    let text:string;try{text=new TextDecoder("utf-8",{fatal:true}).decode(buffer);}catch{throw new AppError("METRIC_FORMAT_INVALID","指标文件须为UTF-8文本",422);}
+    inspectMetricTable(text,metricFormat);if(text.length>12000)throw new AppError("METRIC_INPUT_LIMIT","请提供12000字以内的完整指标副本",422);
+    return metricFormat;
+  }
   const isImage = mimeType.startsWith("image/") || /\.(png|jpe?g|webp|bmp|gif)$/i.test(fileName);
   if (!isImage) {
     throw new Error("Only PDF and image attachments are supported");
@@ -163,6 +171,8 @@ export async function processAttachmentUpload(input: UploadAttachmentInput) {
 
   // 1. 校验文件内容，而不是只信任客户端提供的扩展名/MIME。
   const fileType = inferAndValidateFileType(fileName, mimeType, buffer);
+  const safeMimeType=fileType==="JSON"?"application/json":fileType==="CSV"?"text/csv":fileType==="PDF"?"application/pdf":buffer.subarray(0,8).equals(Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]))?"image/png":buffer[0]===0xff?"image/jpeg":buffer.subarray(0,3).toString("ascii")==="GIF"?"image/gif":buffer.subarray(0,2).toString("ascii")==="BM"?"image/bmp":"image/webp";
+
 
   // 2. 写盘前去重，避免重复上传遗留孤儿文件。
   const sha256 = computeFileSha256(buffer);
@@ -189,8 +199,9 @@ export async function processAttachmentUpload(input: UploadAttachmentInput) {
   try {
     if (fileType === "PDF") {
       extractedText = await extractPdfText(buffer) ?? "";
+    } else if(fileType==="CSV"||fileType==="JSON"){extractedText=new TextDecoder("utf-8",{fatal:true}).decode(buffer);
     } else {
-      extractedText = await extractImageText(mimeType, buffer, projectId) ?? "";
+      extractedText = await extractImageText(safeMimeType, buffer, projectId) ?? "";
     }
     if (!extractedText) {
       extractionStatus = "NEEDS_OCR";
@@ -213,7 +224,7 @@ export async function processAttachmentUpload(input: UploadAttachmentInput) {
         type: fileType,
         storageKey: stored.storageKey,
         fileName,
-        mimeType,
+        mimeType:safeMimeType,
         size: stored.size,
         sha256: stored.sha256,
         extractedText: extractedText || null,
@@ -239,7 +250,7 @@ export async function processAttachmentUpload(input: UploadAttachmentInput) {
 
   // 6. 自动将提取的文本转入 Capture Pipeline 生成 KnowledgeCard，并关联 attachmentId
   let card = null;
-  if (extractedText && extractionStatus === "SUCCESS") {
+  if (extractedText && extractionStatus === "SUCCESS" && fileType!=="CSV" && fileType!=="JSON") {
     try {
       const sourceType = fileType === "IMAGE" ? "图片附件" : fileType === "PDF" ? "PDF文档" : "文件附件";
       card = await processCapture(projectId, `【附件导入：${fileName}】\n${extractedText}`, sourceType);
@@ -287,9 +298,7 @@ export async function retryAttachmentExtraction(projectId: string, attachmentId:
   const fileType = inferAndValidateFileType(attachment.fileName, attachment.mimeType, buffer);
   let extractedText: string | null = null;
   try {
-    extractedText = fileType === "PDF"
-      ? await extractPdfText(buffer)
-      : await extractImageText(attachment.mimeType, buffer, projectId);
+    extractedText = fileType === "PDF" ? await extractPdfText(buffer) : fileType==="CSV"||fileType==="JSON" ? new TextDecoder("utf-8",{fatal:true}).decode(buffer) : await extractImageText(attachment.mimeType, buffer, projectId);
   } catch (error) {
     const failed = await db.attachment.update({
       where: { id: attachment.id },
@@ -317,7 +326,7 @@ export async function retryAttachmentExtraction(projectId: string, attachmentId:
   }
 
   let card = attachment.cards[0] ?? null;
-  if (!card) {
+  if (!card && fileType!=="CSV" && fileType!=="JSON") {
     card = await processCapture(
       projectId,
       `【附件导入：${attachment.fileName}】\n${extractedText}`,
@@ -371,6 +380,7 @@ export async function correctAttachmentText(
     throw new AppError("ATTACHMENT_TEXT_CHANGED", "附件文本已被其他校对修改，请重新载入后再提交", 409);
   }
 
+  if(existing.type==="CSV"||existing.type==="JSON")throw new AppError("METRIC_CORRECTION_REQUIRED","请通过指标校对入口修改此文件",422);
   // 结构化生成在事务外（与普通捕获同一结构化管线，离线时回退确定性模板）
   const project = await requireProject(projectId);
   const recentCards = await db.knowledgeCard.findMany({
@@ -482,4 +492,26 @@ export async function correctAttachmentText(
 
   const stateRefreshPending = await refreshProjectStateAfterMutation(projectId);
   return { attachment: result.attachment, card: result.card, idempotentReplay: false, stateRefreshPending };
+}
+
+/** Same attachment revision chain; metric corrections do not invoke a model or create memory facts. */
+export async function correctMetricAttachmentText(projectId:string,attachmentId:string,correctedText:string,expectedCurrentText?:string|null){
+  await requireProject(projectId);const trimmed=correctedText.trim();
+  const existing=await db.attachment.findFirst({where:{id:attachmentId,projectId}});
+  if(!existing||!['CSV','JSON'].includes(existing.type))throw new AppError("NOT_FOUND","指标附件未找到",404);
+  if(existing.extractedText===trimmed)return {attachment:existing,card:null,idempotentReplay:true};
+  if(expectedCurrentText!==undefined&&existing.extractedText!==expectedCurrentText)throw new AppError("ATTACHMENT_TEXT_CHANGED","指标已变化，请重新载入",409);
+
+    if(!isFeatureEnabled("EXPERIMENT_OBSERVER_ENABLED",false))throw new AppError("EXPERIMENT_OBSERVER_DISABLED","实验指标读取已关闭",503);
+    inspectMetricTable(trimmed,existing.type as "CSV"|"JSON");if(trimmed.length>12000)throw new AppError("METRIC_INPUT_LIMIT","指标副本超出可引用范围",422);
+    return db.$transaction(async tx=>{
+      const claimed=await tx.attachment.updateMany({where:{id:existing.id,projectId,extractedText:existing.extractedText},data:{extractedText:trimmed,extractionStatus:"SUCCESS",extractionError:null}});
+      if(claimed.count!==1)throw new AppError("ATTACHMENT_TEXT_CHANGED","指标记录已被其他操作修改，请重新载入",409);
+      const latest=await tx.attachmentRevision.findFirst({where:{attachmentId:existing.id},orderBy:{revisionIndex:"desc"}});
+      await tx.attachmentRevision.create({data:{attachmentId:existing.id,revisionIndex:(latest?.revisionIndex??-1)+1,text:trimmed,source:"MANUAL_CORRECTION"}});
+      await tx.project.update({where:{id:projectId},data:{updatedAt:new Date()}});
+      await enqueueImpact(tx,projectId,`attachment-revision:${existing.id}:${(latest?.revisionIndex??-1)+1}`,[`attachment:${existing.id}`]);
+      return {attachment:await tx.attachment.findUniqueOrThrow({where:{id:existing.id}}),card:null,idempotentReplay:false};
+    });
+
 }

@@ -4,4 +4,4 @@ export const fetchResponseSchema=z.object({title:z.string().max(2000),content:z.
 export type SearchHit=z.infer<typeof searchResponseSchema>["results"][number];
 export type ResearchRequestOptions={signal?:AbortSignal;count?:number;needContent?:boolean};
 export interface ResearchProvider{ name:string; search(query:string,options?:ResearchRequestOptions):Promise<SearchHit[]>;fetchPage(url:string,options?:ResearchRequestOptions):Promise<{title:string;content:string}>; }
-export type Observation={id:string;requestedUrl:string;retrievalMode:"SEARCH_SNIPPET"|"PROVIDER_EXTRACT";title:string;publisher:string|null;publishedAt:string|null;normalizedContentHash:string;excerpt:{schemaVersion:1;text:string;start:number;end:number;truncated:boolean};};
+export type Observation={observedAt?:string;id:string;requestedUrl:string;retrievalMode:"SEARCH_SNIPPET"|"PROVIDER_EXTRACT"|"ACADEMIC_METADATA";title:string;publisher:string|null;publishedAt:string|null;normalizedContentHash:string;excerpt:{schemaVersion:1;text:string;start:number;end:number;truncated:boolean;scopeRevision?:number;parentSourceIds?:string[]};};

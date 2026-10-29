@@ -11,6 +11,9 @@ export struct MissionSettingsForm {
   @Prop busy: boolean = false;
   onSubmit: (value: MissionCreate) => void = () => {};
   onClose: () => void = () => {};
+  @State requireMetric: boolean = false;
+  @State requirePaper: boolean = false;
+  @State requireResult: boolean = false;
   @State goal: string = '';
   @State minutes: string = '';
   @State resources: string = '';
@@ -27,6 +30,7 @@ export struct MissionSettingsForm {
   @State terms: string = '';
   @State excluded: string = '';
   @State hosts: string = '';
+  @State academic: boolean = false;
   @State publicSources: boolean = false;
   @State error: string = '';
   @State showConstraints: boolean = false;
@@ -42,13 +46,17 @@ export struct MissionSettingsForm {
     this.priority = c.priority === null ? '' : `${c.priority}`;
     this.forbidden = c.forbiddenApproaches.join('\n'); this.rejected = c.rejectedActions.join('\n');
     this.readOnly = c.executionBoundary === 'READ_ANALYZE'; this.llmApproved = c.llmContextApproved === true;
-    const s = this.initialScope; this.researchEnabled = s.enabled; this.topic = s.topic;
+    const s = this.initialScope; this.academic = s.academicMetadata === true; this.researchEnabled = s.enabled; this.topic = s.topic;
     this.terms = s.publicTerms.join('\n'); this.excluded = s.excludedTerms.join('\n');
     this.hosts = s.allowedHosts.join('\n'); this.publicSources = s.allowedCategories.includes('PUBLIC_SOURCE');
   }
   private lines(text: string): string[] { return text.split('\n').map((s: string) => s.trim()).filter((s: string) => s !== ''); }
   private submit(): void {
-    const value = new MissionCreate(); value.goal = this.goal.trim();
+    const value = new MissionCreate();
+    if (this.requireMetric) value.successCriteria.push('FIXED_METRIC_JOB_RECORDED');
+    if (this.requirePaper) value.successCriteria.push('PAPER_METADATA_READ');
+    if (this.requireResult) value.successCriteria.push('ACTION_CREATED', 'ACTION_RESULT_RECORDED');
+    value.goal = this.goal.trim();
     if (this.mode === 'create' && value.goal.length < 3) { this.error = '请先填写委托目标，至少三个字'; return; }
     const c = editableMissionConstraints(this.initialConstraints);
     if (this.mode !== 'scope') {
@@ -75,7 +83,7 @@ export struct MissionSettingsForm {
       c.rejectedActions = this.lines(this.rejected); c.executionBoundary = this.readOnly ? 'READ_ANALYZE' : 'PROPOSE_ACTION';
     }
     value.missionConstraints = c; value.llmContextApproved = this.llmApproved;
-    const s = new MissionScope(); s.enabled = this.researchEnabled; s.topic = this.topic.trim();
+    const s = new MissionScope(); s.academicMetadata = this.academic; s.enabled = this.researchEnabled; s.topic = this.topic.trim();
     s.publicTerms = this.lines(this.terms); s.excludedTerms = this.lines(this.excluded); s.allowedHosts = this.lines(this.hosts);
     s.allowedCategories = this.publicSources ? ['PUBLIC_TOPIC', 'PUBLIC_SOURCE'] : ['PUBLIC_TOPIC'];
     value.researchScope = s;
@@ -117,6 +125,9 @@ export struct MissionSettingsForm {
           TextArea({ placeholder: '例如：结合后续实验记录，持续整理一份带来源的阶段汇报草稿。', text: this.goal })
             .height(120).fontSize(15).maxLength(2000).borderRadius(12).backgroundColor(PMColors.SURFACE_SUBTLE)
             .enabled(!this.busy).onChange((v: string) => { this.goal = v; })
+          Row() { Checkbox().select(this.requireMetric).onChange((v: boolean) => { this.requireMetric = v; }); Text('完成时必须有固定核算回执，执行仍需批准').fontSize(13).layoutWeight(1) }
+          Row() { Checkbox().select(this.requirePaper).onChange((v: boolean) => { this.requirePaper = v; }); Text('完成时必须读到论文元数据，非全文').fontSize(13).layoutWeight(1) }
+          Row() { Checkbox().select(this.requireResult).onChange((v: boolean) => { this.requireResult = v; }); Text('完成时必须记录行动结果回执').fontSize(13).layoutWeight(1) }
           Button('填入阶段汇报示例', { type: ButtonType.Normal }).fontSize(13).enabled(!this.busy)
             .backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).borderRadius(11)
             .constraintSize({ minHeight: 44 }).padding({ left: 12, right: 12 }).onClick(() => {
@@ -217,6 +228,10 @@ export struct MissionSettingsForm {
               this.Label('允许访问的域名 · 选填', '每行一个；留空仍由服务端检查访问范围。')
               TextArea({ placeholder: '例如：arxiv.org', text: this.hosts }).height(80).fontSize(14).borderRadius(12)
                 .backgroundColor(PMColors.SURFACE_SUBTLE).enabled(!this.busy).onChange((v: string) => { this.hosts = v; })
+              Row({ space: 10 }) {
+                Text('向Crossref发送公开DOI，读取论文元数据与摘要（非全文）').fontSize(13).layoutWeight(1)
+                Toggle({ type: ToggleType.Switch, isOn: this.academic }).selectedColor(PMColors.BRAND).enabled(!this.busy).onChange((v: boolean) => { this.academic = v; })
+              }.width('100%')
               Row({ space: 10 }) {
                 Text('允许外传公开来源信息').fontSize(14).fontColor(PMColors.INK_PRIMARY).layoutWeight(1)
                 Toggle({ type: ToggleType.Switch, isOn: this.publicSources }).selectedColor(PMColors.BRAND).enabled(!this.busy)

@@ -13,32 +13,33 @@ import { assertInvestigationDelegation } from "./investigationDelegation";
 
 type Operation = { state: "DISPATCH_COMMITTED" | "SUCCEEDED" | "FAILED" | "UNKNOWN"; units: number; response?: CiHttpResult };
 /** Per-HTTP records live in the original step; request accounting lives in the original Mission. */
-export function missionCiDispatch(lease: Lease): CiDispatch {
+export function missionCiDispatch(lease: Lease,namespace:"ciOperations"|"academicOperations"="ciOperations"): CiDispatch {
   return async (url, units, run) => {
     const key = jsonHash({ url, units }); let replay: Operation | undefined, stepId = "";
     await db.$transaction(async tx => {
       const m = await fenced(tx, lease);
       const step = await tx.agentMissionStep.findFirstOrThrow({ where: { missionId: m.id, planRevision: m.planRevision, status: "RUNNING" }, orderBy: { ordinal: "desc" } }); stepId = step.id;
-      const protocol = record(step.protocolJson), operations = record(protocol.ciOperations); replay = operations[key] as Operation | undefined;
+      const protocol = record(step.protocolJson), operations = record(protocol[namespace]); replay = operations[key] as Operation | undefined;
       if (replay) return;
       const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,id:{not:step.id}},select:{protocolJson:true}});
-      if(history.some(s=>["DISPATCH_COMMITTED","UNKNOWN"].includes(String(record(record(record(s.protocolJson).ciOperations)[key]).state))))throw new AppError("EXTERNAL_RESULT_UNKNOWN","原委托中该仓库请求仍未结算，不换步骤重发",409);
+      if(history.some(s=>["DISPATCH_COMMITTED","UNKNOWN"].includes(String(record(record(record(s.protocolJson)[namespace])[key]).state))))throw new AppError("EXTERNAL_RESULT_UNKNOWN","原委托中该仓库请求仍未结算，不换步骤重发",409);
       const used = record(m.budgetUsedJson), policy = record(m.continuationPolicyJson), limits = record(m.budgetJson);
       const cap = Math.min(Number(limits.metadataRequests ?? 24), Number(policy.maxMetadataRequests ?? 24));
       if (Number(used.metadataRequests ?? 0) + units > cap) throw new AppError("CI_REQUEST_BUDGET_EXHAUSTED", "原委托的仓库请求预算已用完", 409);
       await tx.agentMission.update({ where: { id: m.id }, data: { budgetUsedJson: json({ ...used, metadataRequests: Number(used.metadataRequests ?? 0) + units }) } });
-      await tx.agentMissionStep.update({ where: { id: step.id }, data: { protocolJson: json({ ...protocol, ciOperations: { ...operations, [key]: { state: "DISPATCH_COMMITTED", units } } }) } });
+      await tx.agentMissionStep.update({ where: { id: step.id }, data: { protocolJson: json({ ...protocol, [namespace]: { ...operations, [key]: { state: "DISPATCH_COMMITTED", units } } }) } });
     });
     if (replay) { if (replay.state === "SUCCEEDED") return replay.response!; throw new AppError("EXTERNAL_RESULT_UNKNOWN", "原仓库请求未可靠结算，不自动重发", 409); }
     try {
       const response = await run();
       await db.$transaction(async tx => {
         await fenced(tx, lease, false); const step = await tx.agentMissionStep.findUniqueOrThrow({ where: { id: stepId } }), p = record(step.protocolJson);
-        await tx.agentMissionStep.update({ where: { id: stepId }, data: { protocolJson: json({ ...p, ciOperations: { ...record(p.ciOperations), [key]: { state: "SUCCEEDED", units, response } } }) } });
+        await tx.agentMissionStep.update({ where: { id: stepId }, data: { protocolJson: json({ ...p, [namespace]: { ...record(p[namespace]), [key]: { state: "SUCCEEDED", units, response } } }) } });
       }); return response;
     } catch (error) {
       await db.$transaction(async tx => { await fenced(tx, lease, false); const step = await tx.agentMissionStep.findUniqueOrThrow({ where: { id: stepId } }), p = record(step.protocolJson);
-        await tx.agentMissionStep.update({ where: { id: stepId }, data: { protocolJson: json({ ...p, ciOperations: { ...record(p.ciOperations), [key]: { state: error instanceof AppError ? "FAILED" : "UNKNOWN", units } } }) } }); }).catch(() => undefined);
+        await tx.agentMissionStep.update({ where: { id: stepId }, data: { protocolJson: json({ ...p, [namespace]: { ...record(p[namespace]), [key]: { state: error instanceof AppError ? "FAILED" : "UNKNOWN", units } } }) } }); }).catch(() => undefined);
+      if(namespace==="academicOperations"&&!(error instanceof AppError))throw new AppError("EXTERNAL_RESULT_UNKNOWN","论文元数据请求结果未知，保留原请求额度，不会换步骤重发",409);
       throw error;
     }
   };

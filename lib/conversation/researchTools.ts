@@ -1,3 +1,6 @@
+import { isFeatureEnabled } from "@/lib/config/features";
+import { readCrossrefMetadata } from "@/lib/research/crossrefMetadata";
+import { doiFromPublicSource,academicMetadataText } from "@/lib/research/academic";
 import { assertTurnCurrent } from "@/lib/continuity/turnCoordination";
 import { sourceUse } from "@/lib/continuity/sourcePolicy";
 import { z } from "zod";
@@ -66,7 +69,7 @@ function source(context: { id: string; turnId: string; projectId: string; revisi
   const sourceId = "web:" + revision;
   return { id: context.projectId + "/" + sourceId, projectId: context.projectId, sourceId, revision, title: title.slice(0, 300) || new URL(url).hostname,
     excerpt, observedAt: context.observedAt ?? new Date().toISOString(), temporalState: "UNKNOWN", knowledgeClass: "EXTERNAL_REFERENCE", start: 0, end: excerpt.length,
-    excerptHash: jsonHash(excerpt), readScope: readLevel === "SEARCH_SNIPPET" || readLevel === "SEARCH_SUMMARY" ? "SUMMARY" : "EXCERPT",
+    excerptHash: jsonHash(excerpt), readScope: readLevel === "SEARCH_SNIPPET" || readLevel === "SEARCH_SUMMARY" || readLevel === "ACADEMIC_METADATA" ? "SUMMARY" : "EXCERPT",
     external: { conversationId: context.id, turnId: context.turnId, scopeRevision: context.revision, origin, provider: context.provider, requestedUrl: url, resolvedUrl: null,
       publishedAt: date && Number.isFinite(Date.parse(date)) ? new Date(date).toISOString() : null, fetchedAt: context.observedAt ?? new Date().toISOString(), readLevel, retrievalMethod: method,
       truncated: excerpt.length < normalized.length, totalCharacters: normalized.length,
@@ -107,6 +110,22 @@ export async function readConversationResearchTool(actor: ConversationActor, id:
   const context: { id: string; turnId: string; projectId: string; revision: number; provider: string; observedAt?: string } = { id, turnId, projectId: call.projectId, revision: grant.revision, provider: provider.name };
   const observationTime = async () => { const m = record((await db.conversationTurn.findUniqueOrThrow({ where: { id: turnId } })).readManifestJson); const op = record(record(m.operations)[generationCallId(operationId)]); context.observedAt = String(op.observedAt ?? op.finishedAt ?? new Date().toISOString()); };
   let sources: ConversationSource[];
+  if(call.tool==="read_paper_metadata"){
+    if(!isFeatureEnabled("ACADEMIC_RESEARCH_ENABLED",false)||!grant.scope.enabled||!grant.scope.academicMetadata||grant.projectId!==call.projectId)throw new AppError("ACADEMIC_NOT_APPROVED","请先确认向Crossref读取公开DOI元数据的范围",409);
+    const original=(await currentSources(turnId,actor)).find(s=>(s.sourceId===call.sourceId||s.id===call.sourceId)&&s.revision===call.revision&&s.projectId===call.projectId);
+    if(!original?.external)throw new AppError("SOURCE_NOT_OBSERVED","请先定位公开DOI链接或原公开来源",409);
+    await validateWebSource(actor,original);safeResearchUrl(original.external.requestedUrl,grant.scope.allowedHosts);
+    const doi=doiFromPublicSource(original.external.requestedUrl,original.excerpt,grant.scope.allowedCategories.includes("PUBLIC_SOURCE"));
+    const dispatch=(url:string,run:()=>Promise<unknown>)=>turnOperation(actor,id,turnId,operationId+":metadata","ACADEMIC_HTTP",{url,scopeRevision:grant.revision,requestUnits:1},run);
+    await before();const metadata=await abortable(actor,id,turnId,grant.revision,signal=>readCrossrefMetadata(doi,dispatch,fetch,signal));await before();
+    if(!isFeatureEnabled("ACADEMIC_RESEARCH_ENABLED",false))throw new AppError("ACADEMIC_DISABLED","论文元数据功能已关闭",503);
+    await validateWebSource(actor,original);
+    const result=source({...context,provider:"Crossref",observedAt:metadata.observedAt},"https://doi.org/"+metadata.doi,metadata.title,academicMetadataText(metadata),"ACADEMIC_METADATA",original.external.origin,"CROSSREF_METADATA");
+    const existing=(await currentSources(turnId,actor)).find(s=>s.sourceId===result.sourceId&&s.revision===result.revision);
+    if(existing)Object.assign(result,existing);else result.external={...result.external!,provenanceSourceIds:[original.sourceId]};
+    await storeSources(actor,id,turnId,[result]);await validateWebSource(actor,result);
+    return {data:{metadata,readingLevel:"METADATA_NOT_FULL_TEXT",sources:[result]},sources:[result],coverage:{complete:false,fullTextRead:false,description:"论文元数据及可用摘要，不是全文或本项目实测"},discovered:[{projectId:result.projectId,sourceId:result.sourceId,revision:result.revision,title:result.title}]};
+  }
   if (call.tool === "web_search") {
     if (!grant.scope.enabled || grant.projectId !== call.projectId) throw new AppError("RESEARCH_NOT_ALLOWED", "请先确认该项目的公开研究主题", 409);
     const known = await currentSources(turnId, actor);

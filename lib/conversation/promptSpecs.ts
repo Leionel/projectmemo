@@ -3,6 +3,7 @@ import { modelDataMessage, type PromptSpec } from "@/lib/agent/promptSpec";
 import { investigationDecisionSchema, internalInvestigationDecisionSchema, presentationPlanSchema } from "@/lib/types/agentExperience";
 import { answerSchema, focusSystemPrompt, routeSchema } from "./model";
 import { researchCoverageSchema } from "@/lib/types/conversationResearch";
+import { investigationToolCallSchema } from "@/lib/types/agentExperience";
 const modelResearchCoverageSchema = researchCoverageSchema.omit({ schemaVersion: true, questionHash: true, scopeRevision: true, asOf: true });
 
 const observation = z.object({ sourceId: z.string().min(1).max(200), quote: z.string().min(1).max(500),
@@ -45,3 +46,13 @@ export const answerV2 = spec("focus.answer.v2", "ANSWER", "依据实际已读 so
 // Offline evaluation uses the original loop with a reduced task contract, never a second Runner.
 export const investigateReadV1 = spec("focus.read_investigate.v1", "INVESTIGATE", "根据问题和当前观察，选择下一次只读调查或停止。工具只从 allowedTools/toolSchemas 选择，原资料只从 materialPointers 定向读取。不评估结构化 GoalGap，不编造来源或重复无增益读取。选择 ANSWER_NOW、READ_EXISTING、ASK_USER、HANDOFF_MISSION 或 STOP。", investigationDecisionSchema, 2048);
 export const uiPlanV1 = spec("focus.ui_plan.v1", "UI_PLAN", "根据问题、证据、目标和已冻结 catalog 选择语义展示块，保留重要信息。prose 可以自由组织；其他 semanticType 只能选择 catalog 已有条目，dataRefs 数组从单个条目完整原样复制，不能拼接多个条目或创造 question/approval/操作/状态。catalog 没有问题表单时用 prose 提出建议。简单问题可以只用 prose，复杂问题可用证据/目标/比较/审批/回执。prose 优先使用 text；选择 content 时必须完整闭合 AST 与 JSON。不要每个问题都套同样卡片；优先一个主要判断与操作，避免复制整段答案到多个块。", presentationPlanSchema, 3072, 1);
+
+/** Narrow only the available tool schema, preserving the model's dynamic investigation and Goal Reasoning. */
+export function scopeInvestigationPrompt<T>(base:PromptSpec<unknown,T>,allowedTools:string[],research:boolean):PromptSpec<unknown,T>{
+ const calls=investigationToolCallSchema.options.filter(s=>allowedTools.includes(s.shape.tool.value));
+ if(!calls.length)throw new Error("EMPTY_INVESTIGATION_TOOL_SCOPE");
+ const decision=z.discriminatedUnion("decision",[investigationDecisionSchema.options[0].extend({call:z.discriminatedUnion("tool",[calls[0],...calls.slice(1)])}),...investigationDecisionSchema.options.slice(1) as [typeof investigationDecisionSchema.options[1],typeof investigationDecisionSchema.options[2],typeof investigationDecisionSchema.options[3],typeof investigationDecisionSchema.options[4]]]);
+ const schema=base.id===investigateReadV1.id?decision:research?investigationFrameSchema.extend({decision}):investigationFrameSchema.omit({researchCoverage:true}).extend({decision});
+ const marker="\n严格返回 JSON，输出 schema：",index=base.system.indexOf(marker);if(index<0)throw new Error("INVESTIGATION_PROMPT_SCHEMA_MARKER_MISSING");
+ return {...base,version:base.version+"-scoped-tools-v1",system:base.system.slice(0,index)+marker+JSON.stringify(z.toJSONSchema(schema)),outputSchema:schema as unknown as z.ZodType<T>};
+}

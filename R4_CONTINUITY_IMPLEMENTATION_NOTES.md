@@ -73,3 +73,5 @@ PR-6 原冻结集的三次拒绝已定位到批准筛选条件重复编译，已
 4. CT-2 接入原 Investigation 动态工具、固定失败 job 的有界日志、原 GoalGap/Action 结果及 Web/ArkTS 展示，并按原路线完成纵向验收。
 
 本轮无生产部署、真实数据库迁移、外部业务写入或远程 push。定时接续已暂停，避免重复执行。
+
+第一阶段收尾提交：`0289755`，分支 `codex/ct1-continuity-trust`。第二阶段已在独立分支 `codex/ct2-repository-ci` 开始底层实现，见 [CT-2 实施记录](R4_REPO_CI_IMPLEMENTATION_NOTES.md)；其完整动态工具、日志与双端纵向交付仍待继续。

@@ -5,11 +5,11 @@ import { effectiveContinuity } from "./directiveService";
 
 export type SourceUse = { state: "ALLOWED" | "SUPPRESSED" | "UNKNOWN"; roots: string[]; independentEvidence: boolean; reason: string };
 /** Follow original roots, not copies of conclusions. Cycles, missing manifests and cross-project edges stay unknown. */
-export async function sourceLineage(projectId: string, id: string, tx: Tx = db, seen = new Set<string>(), budget = { remaining: 64 }): Promise<{ roots: string[]; known: boolean; derived: boolean }> {
+export async function sourceLineage(projectId: string, id: string, tx: Tx = db, seen = new Set<string>(), budget = { remaining: 64 }): Promise<{ roots: string[]; known: boolean; derived: boolean; blocked?: boolean }> {
   if (typeof id !== "string" || !id) return { roots: [], known: false, derived: true };
   if (seen.has(id) || seen.size >= 32 || budget.remaining-- <= 0) return { roots: [], known: false, derived: true };
   const next = new Set(seen).add(id), childIds: string[] = [];
-  let known = true, derived = false;
+  let known = true, derived = false, blocked = false;
   if (id.startsWith("card:")) {
     const card = await tx.knowledgeCard.findFirst({ where: { id: id.slice(5), projectId } });
     if (!card) return { roots: [], known: false, derived: true };
@@ -37,6 +37,14 @@ export async function sourceLineage(projectId: string, id: string, tx: Tx = db, 
     for (const step of steps) for (const s of (record(step.resultJson).sources ?? []) as Array<{ id: string }>) childIds.push(s.id);
     known = Array.isArray(rawIds) && rawIds.length === missionIds.length && missions.length === new Set(missionIds).size &&
       missionIds.length > 0 && missionIds.every(id => steps.some(s => s.missionId === id && Array.isArray(record(s.resultJson).sources) && (record(s.resultJson).sources as unknown[]).length > 0)); derived = true;
+  } else if (id.startsWith("ci:")) {
+    const source = await (await import("@/lib/sensing/repoCiObservations")).findRepositoryObservation(projectId, id, tx);
+    if (source?.repository) {
+      const r = source.repository; childIds.push("repo:" + r.connectionId);
+      const c = await tx.sourceConnection.findFirst({ where: { id: r.connectionId, projectId, status: "ACTIVE", revokedAt: null, revision: r.connectionRevision } });
+      blocked = !c || !["COMMITS_AND_CI", "COMMITS_CI_LOGS"].includes(c.signalKind) || r.kind === "LOG" && c.signalKind !== "COMMITS_CI_LOGS";
+    } else known = false;
+    derived = true;
   } else if (id.startsWith("capture:")) known = !!await tx.capture.findFirst({ where: { id: id.slice(8), projectId }, select: { id: true } });
   else if (id.startsWith("attachment:")) known = !!await tx.attachment.findFirst({ where: { id: id.slice(11), projectId }, select: { id: true } });
   else if (id.startsWith("action:")) {
@@ -60,13 +68,14 @@ export async function sourceLineage(projectId: string, id: string, tx: Tx = db, 
     const external = await tx.externalSource.findFirst({ where: { id, mission: { projectId } }, select: { id: true } }); known = !!external;
   }
   const roots = [id];
-  for (const child of new Set(childIds)) { const line = await sourceLineage(projectId, child, tx, next, budget); roots.push(...line.roots); known &&= line.known; }
-  return { roots: [...new Set(roots)], known, derived };
+  for (const child of new Set(childIds)) { const line = await sourceLineage(projectId, child, tx, next, budget); roots.push(...line.roots); known &&= line.known; blocked ||= line.blocked === true; }
+  return { roots: [...new Set(roots)], known, derived, blocked };
 }
 export async function sourceUse(userId: string, projectId: string, sourceId: string, tx: Tx = db, scope?: { conversationId?: string; missionId?: string }): Promise<SourceUse> {
   const view = await effectiveContinuity(userId, { projectId, ...scope }, tx);
   const suppressed = new Set(view.directives.filter(d => d.kind === "USE_SUPPRESSION").flatMap(d => d.sourceIds));
   const line = await sourceLineage(projectId, sourceId, tx);
+  if (line.blocked) return { state: "SUPPRESSED", roots: line.roots, independentEvidence: false, reason: "SOURCE_PERMISSION_REVOKED" };
   if (line.roots.some(r => suppressed.has(r))) return { state: "SUPPRESSED", roots: line.roots, independentEvidence: false, reason: "ROOT_SUPPRESSED" };
   if (!line.known) return { state: "UNKNOWN", roots: line.roots, independentEvidence: false, reason: "LINEAGE_UNKNOWN" };
   return { state: "ALLOWED", roots: line.roots, independentEvidence: !line.derived, reason: line.derived ? "DERIVED_REFERENCE" : "ORIGINAL_OBSERVATION" };

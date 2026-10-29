@@ -17,6 +17,7 @@ export interface SignalView {
 }
 
 export interface ConnectionView {
+  access?: string; revision?: number;
   id: string;
   repo: string;
   ref: string;
@@ -31,6 +32,7 @@ export interface ConnectionView {
 }
 
 export interface RepoSignalListReply {
+  ciAvailable?: boolean;
   enabled: boolean;
   note: string;
   connections: ConnectionView[];
@@ -42,6 +44,7 @@ export interface ConnectionMutationReply {
   status?: string;
   created?: number;
 }
+export class RepoCiGrant { requestId: string = ''; expectedRevision: number = 0; access: string = 'COMMITS'; confirmed: boolean = true; }
 
 export interface ConnectionIdentity {
   id: string;

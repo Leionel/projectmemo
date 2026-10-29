@@ -1,0 +1,74 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/continuityStages23.test.ts tests/continuityRuntime.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/continuityStages23.test.ts (4 tests | 2 failed) 653ms
+   × CT2 UNKNOWN HTTP cannot be resent by a new original step and retains root metadata usage 30ms
+   × CT3 three-day restart uses original Mission, zero model calls without change, cumulative budget and expiry 27ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/continuityStages23.test.ts > CT2 UNKNOWN HTTP cannot be resent by a new original step and retains root metadata usage
+PrismaClientValidationError:
+Invalid `db.agentMissionStep.create()` invocation in
+D:/Projects/hongmen/tests/continuityStages23.test.ts:59:40
+
+  56 test("CT2 UNKNOWN HTTP cannot be resent by a new original step and retains root metadata usage",async()=>{
+  57   const f=await fixture(),m=await claimMission("probe",f.m.id);expect(m).toBeTruthy();
+  58   const lease:Lease={id:m!.id,owner:m!.leaseOwner!,epoch:m!.leaseEpoch,contextVersion:m!.contextVersion,planRevision:m!.planRevision};
+→ 59   const step=await db.agentMissionStep.create({
+         data: {
+           missionId: "cmvsymtb1000z5s8ouiyjv3ez",
+           ordinal: 1,
+           planRevision: 1,
+           status: "RUNNING",
+           toolName: "read_repository_ci",
+           canonicalInputJson: {},
+           inputHash: "probe",
+       +   readSetJson: JsonNullValueInput | Json
+         }
+       })
+
+Argument `readSetJson` is missing.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ tests/continuityStages23.test.ts:59:14
+     57|   const f=await fixture(),m=await claimMission("probe",f.m.id);expect(…
+     58|   const lease:Lease={id:m!.id,owner:m!.leaseOwner!,epoch:m!.leaseEpoch…
+     59|   const step=await db.agentMissionStep.create({data:{missionId:m!.id,o…
+       |              ^
+     60|   const dispatch=missionCiDispatch(lease);let calls=0;
+     61|   await expect(dispatch("https://api.github.com/repos/octokit/rest.js/…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/continuityStages23.test.ts > CT3 three-day restart uses original Mission, zero model calls without change, cumulative budget and expiry
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ tests/continuityStages23.test.ts:79:59
+     77|   await db.capture.create({data:{projectId:f.p.id,rawText:"D3 新的原始失败条件…
+     78|   vi.setSystemTime(Date.now()+6*60000);
+     79|   expect((await processInvestigationDelegations()).woken).toBe(1);
+       |                                                           ^
+     80|   await runMissionSlice({id:f.m.id,provider:async context=>{expect(con…
+     81|   const after=await db.agentMission.findUniqueOrThrow({where:{id:f.m.i…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 5 passed (7)
+   Start at  11:04:44
+   Duration  4.90s (transform 1.64s, setup 0ms, import 3.13s, tests 1.07s, environment 0ms)

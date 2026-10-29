@@ -1,3 +1,4 @@
+import { MissionInvestigationDelegation } from "../components/MissionInvestigationDelegation";
 import { EvidenceReview, FitGroup, FitExcerpt } from '../models/EvidenceFit';
 import { MissionEvidenceReview } from '../components/MissionEvidenceReview';
 import { DecisionScenarioPanel } from '../components/DecisionScenarioPanel';
@@ -483,6 +484,7 @@ struct MissionDetail {
         Button('取消委托').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(this.readState === 'fresh' && !this.busy).onClick(() => { this.cancel(); })
         Button('查看与修改个人约束').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(this.readState === 'fresh' && !this.busy).onClick(() => { this.openForm('constraints'); })
         Button('查看与修改公开研究范围').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(this.readState === 'fresh' && !this.busy).onClick(() => { this.openForm('scope'); })
+        if (this.mission.investigationDelegationEnabled) { MissionInvestigationDelegation({ mission: this.mission, onSaved: (): void => { this.refresh(); } }) }
         if (this.mission.autoContinuationEnabled || this.mission.continuationPolicy.mode !== 'MANUAL') {
           Text(`接续许可：${this.mission.continuationPolicy.mode === 'MANUAL' ? '每次确认' : '满足条件后自动读取与分析'}`)
           Button(this.mission.continuationPolicy.mode === 'MANUAL' ? '允许低风险自动接续' : '撤销自动接续许可').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)

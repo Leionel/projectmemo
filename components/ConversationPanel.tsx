@@ -1,4 +1,5 @@
 "use client";
+import { RepositorySources } from "./RepositorySources";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -261,6 +262,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
         {!supportsAgentPresentation(m) && !!m.sources.length && <details><summary>来源与观察范围（{m.sources.length}）</summary>{m.sources.map(s => <blockquote key={s.id}>
           <p>{s.title}</p><p>{s.excerpt}</p><small>{s.temporalState} · {new Date(s.observedAt).toLocaleString("zh-CN")}</small>
         </blockquote>)}{m.limitations.map((l, i) => <p key={i}>{l}</p>)}</details>}
+        <RepositorySources sources={m.sources}/>
         <div className={styles.refs}>{m.refs.filter(r => r.kind === "PROJECT" || r.kind === "MISSION").slice(0, 3).map(r => <div key={r.bindingId ?? r.id}>
           <button type="button" className={styles.contextChip + " focus-ring"} disabled={working} onClick={() => {
             setTarget(r.projectId); setReply(m); setText("帮我先处理这个项目最重要的待办。"); pending.current = null;

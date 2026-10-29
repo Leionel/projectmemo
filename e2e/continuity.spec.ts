@@ -28,7 +28,7 @@ test("CT1 direction correction, stale confirmation, original Mission resume, wit
     await ct.getByRole("button", { name: "整理演示记录", exact: true }).click();
     await panel.getByRole("button", { name: "预览接续原委托", exact: true }).click();
     await panel.getByRole("button", { name: "确认此操作", exact: true }).click();
-    await expect(ct.getByText("Agent 处理中", { exact: false })).toBeVisible();
+    await expect(ct.getByText("等待 Agent 接续", { exact: false })).toBeVisible();
     const evidence = `evidence/r4-continuity/browser-${Date.now()}`; fs.mkdirSync(evidence, { recursive: true });
     for (const width of [1280, 390]) { await page.setViewportSize({ width, height: 900 }); await page.screenshot({ path: `${evidence}/ct1-direction-${width}.png`, fullPage: true }); }
     await ct.getByRole("button", { name: "撤回", exact: true }).click();

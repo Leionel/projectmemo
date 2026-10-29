@@ -20,6 +20,9 @@ import { researchCoverageSchema, type ResearchCoverage } from "@/lib/types/conve
 import { readSourceObservation } from "./sourceObservation";
 import { bindResearchCoverage } from "./researchCoverage";
 import { admitDirective } from "@/lib/continuity/admission";
+import { isFeatureEnabled } from "@/lib/config/features";
+import { readConversationRepositoryTool } from "./repositoryTools";
+import type { RepositoryCiCall } from "@/lib/types/repositoryCi";
 
 export type R4State = {
   schemaVersion: 1; policyVersion: "r4-v1"; phase: "ROUTING" | "READING_SOURCE" | "EVALUATING" | "WAITING_MODEL" | "WAITING_USER" | "READY" | "UNKNOWN";
@@ -164,6 +167,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
     route.investigate = true;
   }
   state.pointers = await discoverMaterialPointers(actor, route.projectIds, observations.sources);
+  const ciAllowed = isFeatureEnabled("REPO_CI_OBSERVER_ENABLED", false) && state.pointers.some(p => p.ciAccess && p.ciAccess !== "COMMITS");
   let provider = routed.provider;
   const scopeDirectory = { ...directory, summaries: directory.summaries.filter(p => route.projectIds.includes(p.id)) };
   const context = () => ({ message: input.message, intent: route.intent, pinnedConstraints: input.constraints,
@@ -191,7 +195,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
     state.phase = "EVALUATING"; await saveR4State(actor, id, turnId, state, observations.sources);
     const callId = "investigate-" + state.steps.length;
     const frameInput = { ...context(),
-      allowedTools: researchAllowed ? [...workspaceReadTools, ...(grant.scope.enabled ? ["web_search"] : []), "web_fetch"] : workspaceReadTools,
+      allowedTools: [...(researchAllowed ? [...workspaceReadTools, ...(grant.scope.enabled ? ["web_search"] : []), "web_fetch"] : workspaceReadTools), ...(ciAllowed ? ["read_repository_ci", "read_ci_jobs", "read_ci_log"] : [])],
       previousSteps: state.steps.map(s => ({ decision: s.decision, status: s.status, coverage: s.coverage, failureReason: s.failureReason })),
       remaining: { modelCalls: state.budget.maxModelCalls - turn.callCount, reads: state.budget.maxToolReads - state.steps.length } };
     const frame = input.evaluationVariant === "INVESTIGATION_ONLY"
@@ -230,8 +234,12 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
     state.steps.push(step); state.phase = "READING_SOURCE"; await saveR4State(actor, id, turnId, state, observations.sources);
     try {
       const web = decision.call.tool === "web_search" || decision.call.tool === "web_fetch";
+      const ci = ["read_repository_ci", "read_ci_jobs", "read_ci_log"].includes(decision.call.tool);
+      if (ci && !ciAllowed) throw new AppError("CI_NOT_AUTHORIZED", "本轮没有获准的 CI 连接", 409);
       if (web && !researchAllowed) throw new AppError("RESEARCH_NOT_ALLOWED", "本轮未授权联网调查", 409);
-      const result = await turnOperation(actor, id, turnId, "read-" + step.seq, "READ", decision.call, () => web
+      const result = await turnOperation(actor, id, turnId, "read-" + step.seq, "READ", decision.call, () => ci
+        ? readConversationRepositoryTool(actor, id, turnId, decision.call as RepositoryCiCall, state.pointers, observations.sources)
+        : web
         ? readConversationResearchTool(actor, id, turnId, "web-" + step.seq, decision.call as import("@/lib/types/conversationResearch").ResearchToolCall)
         : readWorkspaceTool(actor, decision.call, route.projectIds, state.pointers, observations.sources));
       for (const source of result.sources.filter(s => s.external)) await validateWebSource(actor, source);

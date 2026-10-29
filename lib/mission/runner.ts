@@ -23,10 +23,13 @@ import { commitApprovedAction, obsoleteApprovals } from "./approvalService";
 import { decisionTokenLimit, ModelProtocolError, protocolDiagnostic, missionFailure, missionContextManifest, type MissionPhase, type MissionRecovery, type MissionContextManifest } from "./modelProtocol";
 import { dynamicGuard, assertDynamicTool } from "./dynamicGuard";
 import { Prisma } from "@/lib/generated/prisma/client";
-export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;judge?:ClaimJudge}={}){
+import { repositoryTools } from "./repositoryTools";
+import type { CiTransport } from "@/lib/sensing/repoCi";
+import { boundedPolicy } from "./investigationDelegation";
+export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;repository?:CiTransport;judge?:ClaimJudge}={}){
  const m=await claimMission(options.workerId??randomUUID(),options.id);if(!m)return false;
  const lease:Lease={id:m.id,owner:m.leaseOwner!,epoch:m.leaseEpoch,contextVersion:m.contextVersion,planRevision:m.planRevision};
- const tools=options.tools??{...projectTools,...researchTools(lease,options.research)};let activeStepId:string|undefined;
+ const tools={...(options.tools??{...projectTools,...researchTools(lease,options.research),...await repositoryTools(lease,m,options.repository)})};const delegation=boundedPolicy(m);if(delegation)for(const name of Object.keys(tools))if(!delegation.allowedTools.includes(name as typeof delegation.allowedTools[number]))delete tools[name];let activeStepId:string|undefined;
  let phase:MissionPhase="CONTEXT",contextManifest:MissionContextManifest|undefined,sourceDecisionRunId:string|null|undefined;
  const failedSettlements=new Set<"models"|"tools">();
  // Keep failed reservations and unknown usage; a lost lease must not hide the original failure.

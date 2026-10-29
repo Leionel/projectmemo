@@ -12,7 +12,7 @@ import type { ConversationActor, ConversationSource } from "@/lib/types/conversa
 import type { z } from "zod";
 import { readSourceObservation } from "./sourceObservation";
 
-export type MaterialPointer = { projectId: string; sourceId: string; revision: string; title: string };
+export type MaterialPointer = { projectId: string; sourceId: string; revision: string; title: string; commitShas?: string[]; ciAccess?: string; repository?: import("@/lib/types/repositoryCi").RepositorySourceMeta };
 export const workspaceReadTools = ["inspect_project", "search_memory", "read_project_material", "inspect_action"];
 export function experienceSourceRef(s: ConversationSource) {
   return { kind: "SOURCE" as const, id: s.id, projectId: s.projectId, revision: s.revision };
@@ -24,7 +24,7 @@ export async function discoverMaterialPointers(actor: ConversationActor, project
     const connections = await db.sourceConnection.findMany({ where: { projectId, ownerUserId: actor.userId, status: "ACTIVE", revokedAt: null, project: { memberships: { some: { userId: actor.userId, role: "OWNER" } } } }, take: 3 });
     for (const c of connections) {
       const source = await readSourceObservation(actor, projectId, c.id);
-      pointers.push({ projectId, sourceId: "repo:" + c.id, revision: source.revision, title: source.ref.title });
+      pointers.push({ projectId, sourceId: "repo:" + c.id, revision: source.revision, title: source.ref.title, commitShas: source.signalIds.slice(0, 5), ciAccess: source.access });
     }
     const ids = sources.filter(s => s.projectId === projectId && s.sourceId.startsWith("card:")).map(s => s.sourceId.slice(5));
     const cards = await db.knowledgeCard.findMany({ where: { projectId, id: { in: ids } }, take: 12,
@@ -58,6 +58,7 @@ export async function discoverMaterialPointers(actor: ConversationActor, project
 export async function readWorkspaceTool(actor: ConversationActor, raw: z.infer<typeof investigationToolCallSchema>,
   projectIds: string[], pointers: MaterialPointer[], priorSources: ConversationSource[]) {
   const call = investigationToolCallSchema.parse(raw);
+  if (call.tool === "read_repository_ci" || call.tool === "read_ci_jobs" || call.tool === "read_ci_log") throw new AppError("INVALID_TOOL_ACTOR", "CI 观察需要原 Turn 请求账本", 409);
   if (call.tool === "web_search" || call.tool === "web_fetch") throw new AppError("INVALID_TOOL_ACTOR", "公开研究需要原会话授权入口", 409);
   if (!projectIds.includes(call.projectId)) throw new AppError("INVALID_ROUTE", "本轮调查没有包含该项目", 409);
   await validateReadSources(actor, priorSources);

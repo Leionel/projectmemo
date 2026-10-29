@@ -9,11 +9,12 @@ type SignalView = {
   committedAt: string | null; url: string; status: string; adoptedAt: string | null; adoptedCaptureId: string | null; linkedActionId: string | null;
 };
 type ConnectionView = {
+  access?: string; revision?: number;
   id: string; repo: string; ref: string; status: string; lastFetchedAt: string | null;
   lastStatus: string | null; lastError: string | null; revokedAt: string | null; revokedReason: string | null;
   candidateCount: number; adoptedCount: number;
 };
-type ListReply = { enabled: boolean; note: string; connections: ConnectionView[]; signals: SignalView[] };
+type ListReply = { enabled: boolean; ciAvailable?: boolean; note: string; connections: ConnectionView[]; signals: SignalView[] };
 
 const STATUS_LABEL: Record<string, string> = {
   CANDIDATE: "候选", ADOPTED: "已采纳", DISMISSED: "已忽略",
@@ -74,6 +75,7 @@ export function RepoSignalsCard({ projectId, initialOpen = false }: { projectId:
   });
   const refresh = (id: string) => run(async () => { await api(`/api/projects/${projectId}/repo-signals/connections/${id}`, "POST", { action: "REFRESH", requestId: crypto.randomUUID() }); await load(); });
   const revoke = (id: string) => run(async () => { await api(`/api/projects/${projectId}/repo-signals/connections/${id}`, "POST", { action: "REVOKE", requestId: crypto.randomUUID() }); await load(); });
+  const setCi = (c: ConnectionView, access: string) => run(async () => { await api(`/api/projects/${projectId}/repo-signals/connections/${c.id}/ci-grant`, "POST", { requestId: crypto.randomUUID(), expectedRevision: c.revision, access, confirmed: true }); await load(); });
   const adopt = (id: string) => run(async () => {
     await api(`/api/projects/${projectId}/repo-signals/signals/${id}`, "POST", { action: "ADOPT", requestId: crypto.randomUUID(), ...(actionChoice[id] ? { actionId: actionChoice[id] } : {}) });
     await load();
@@ -103,6 +105,8 @@ export function RepoSignalsCard({ projectId, initialOpen = false }: { projectId:
             <div className={styles.actions}>
               <button disabled={busy} onClick={() => { setBusy(true); void api('/api/conversations/entry', 'POST', { requestId: crypto.randomUUID(), scope: 'PROJECT', projectId, entry: { kind: 'SOURCE_OBSERVATION', projectId, id: c.id } }).then(r => { window.location.href = '/focus?conversation=' + encodeURIComponent(r.id); }).catch(e => setError(e.message)).finally(() => setBusy(false)); }}>在忆程中讨论</button>
               <button disabled={busy} onClick={() => void refresh(c.id)}>{c.lastStatus === "PARTIAL" ? "继续同步提交" : "刷新提交"}</button>
+              {data.ciAvailable && <><button disabled={busy} onClick={() => void setCi(c, c.access === "COMMITS" ? "COMMITS_AND_CI" : "COMMITS")}>{c.access === "COMMITS" ? "允许 Agent 读取 CI 状态" : "停止 CI 读取"}</button>
+                {c.access !== "COMMITS" && <button disabled={busy} onClick={() => void setCi(c, c.access === "COMMITS_CI_LOGS" ? "COMMITS_AND_CI" : "COMMITS_CI_LOGS")}>{c.access === "COMMITS_CI_LOGS" ? "停止日志读取" : "允许读取脱敏的失败日志"}</button>}</>}
               <button disabled={busy} onClick={() => void revoke(c.id)}>撤销连接（停止新请求，历史保留）</button>
             </div>
           )}

@@ -59,7 +59,7 @@ export function ConversationContinuity({ view, onChange, onError, onWork }: { vi
       {preview && <div role="group" aria-label="工作指引确认"><p>{preview.scope.missionId ? "仅此委托" : "仅此项目"}：{preview.quote}，有效到 {new Date(preview.validUntil!).toLocaleString("zh-CN")}。</p>
         <button type="button" disabled={saving} onClick={() => void send(preview)}>确认这条工作指引</button><button type="button" onClick={() => setPreview(null)}>返回修改</button></div>}
     </div>}
-    {ct.handoff?.missions.map(m => <p key={m.id}><button type="button" className="workspace-link focus-ring" onClick={() => void openWork("MISSION", m.id)}>{m.goal}</button> · {m.nextOwner === "USER" ? "等你接续" : "Agent 处理中"}</p>)}
+    {ct.handoff?.missions.map(m => <p key={m.id}><button type="button" className="workspace-link focus-ring" onClick={() => void openWork("MISSION", m.id)}>{m.goal}</button> · {m.nextOwner === "USER" ? "等你接续" : m.status === "RUNNING" ? "Agent 处理中" : "等待 Agent 接续"}</p>)}
     {ct.handoff?.results.map(a => <p key={a.id}><button type="button" className="workspace-link focus-ring" onClick={() => void openWork("ACTION", a.id)}>{a.title}</button> · 已记录结果 <Link href={a.href}>查看原回执</Link></p>)}
   </section>;
 }

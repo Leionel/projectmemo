@@ -146,6 +146,7 @@ export async function readConversation(actor: ConversationActor, id: string, bef
     try {
       for (const source of blocks.sources) if ((await sourceUse(actor.userId, source.projectId, source.sourceId, db, { conversationId: id })).state !== "ALLOWED") webRestricted = true;
       for (const source of blocks.sources.filter(s => s.external)) await validateWebSource(actor, source);
+      for (const source of blocks.sources.filter(s => s.repository)) await (await import("@/lib/sensing/repoCiObservations")).validateRepositoryObservation(actor.userId, source.projectId, source.sourceId, source.revision);
       for (const source of blocks.sources.filter(s => s.sourceId.startsWith("repo:"))) await readSourceObservation(actor, source.projectId, source.sourceId.slice(5));
       if (blocks.observationRef?.kind === "SOURCE_OBSERVATION") await readSourceObservation(actor, blocks.observationRef.projectId, blocks.observationRef.id);
     } catch { webRestricted = true; }
@@ -244,6 +245,7 @@ export async function saveFocusPreference(actor: ConversationActor, projectId: s
 export async function validateReadSources(actor: ConversationActor, sources: ConversationBlocks["sources"], tx: Tx = db) {
   for (const source of sources) {
     await assertSourceUse(actor.userId, source.projectId, source.sourceId, tx, { conversationId: actor.conversationId, ...(actor.missionId ? { missionId: actor.missionId } : {}) });
+    if (source.repository) { await (await import("@/lib/sensing/repoCiObservations")).validateRepositoryObservation(actor.userId, source.projectId, source.sourceId, source.revision, tx); continue; }
     if (source.external) { await validateWebSource(actor, source, tx); continue; }
     if (source.sourceId.startsWith("repo:")) {
       if ((await readSourceObservation(actor, source.projectId, source.sourceId.slice(5), tx)).revision !== source.revision) throw new AppError("SOURCE_CHANGED", "仓库线索已变化", 409);

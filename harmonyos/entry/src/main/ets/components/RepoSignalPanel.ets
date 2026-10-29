@@ -1,4 +1,5 @@
 import router from '@ohos.router';
+import { RepoCiGrant } from '../models/RepoSignal';
 import { ConversationService } from '../services/ConversationService';
 import { ConversationCreateInput } from '../models/Conversation';
 import { ConnectionView, SignalView } from '../models/RepoSignal';
@@ -14,6 +15,7 @@ export struct RepoSignalPanel {
   @Prop initialOpen: boolean = false;
   @State open: boolean = false;
   @State loaded: boolean = false;
+  @State ciAvailable: boolean = false;
   @State busy: boolean = false;
   @State error: string = '';
   @State note: string = '来自公开仓库的只读候选；未采纳不写入任何项目事实。';
@@ -55,6 +57,7 @@ export struct RepoSignalPanel {
     try {
       const reply = await this.service.list(this.projectId);
       this.note = reply.note;
+      this.ciAvailable = reply.ciAvailable === true;
       this.connections = reply.connections;
       this.signals = reply.signals;
       this.loaded = true;
@@ -138,6 +141,11 @@ export struct RepoSignalPanel {
     }
   }
 
+  private async setCi(c: ConnectionView, access: string): Promise<void> {
+    if (this.busy) return; this.busy = true;
+    const body = new RepoCiGrant(); body.requestId = 'ci-' + Date.now().toString(); body.expectedRevision = c.revision || 0; body.access = access;
+    try { await this.service.ciGrant(this.projectId, c.id, body); await this.load(); } catch { this.error = 'CI 授权未保存，请刷新原连接'; } finally { this.busy = false; }
+  }
   build() {
     Column({ space: 8 }) {
       Button(this.open ? '收起 GitHub 仓库' : `GitHub 仓库 · ${this.loaded ? `${this.connections.filter((c: ConnectionView) => c.status === 'ACTIVE').length} 个连接` : '连接与提交记录'}`)
@@ -155,6 +163,10 @@ export struct RepoSignalPanel {
             }.width('100%')
             Text(`候选 ${c.candidateCount} · 已采纳 ${c.adoptedCount}${c.lastError !== null && c.lastError !== '' ? ` · ${c.lastError}` : ''}`).fontSize(11).fontColor(PMColors.INK_TERTIARY)
             if (c.status === 'ACTIVE') {
+              if (this.ciAvailable) {
+                Button(c.access === 'COMMITS' ? '允许 Agent 读取 CI 状态' : '停止 CI 读取').enabled(!this.busy).onClick(() => { this.setCi(c, c.access === 'COMMITS' ? 'COMMITS_AND_CI' : 'COMMITS'); })
+                if (c.access !== 'COMMITS') { Button(c.access === 'COMMITS_CI_LOGS' ? '停止日志读取' : '允许读取脱敏的失败日志').enabled(!this.busy).onClick(() => { this.setCi(c, c.access === 'COMMITS_CI_LOGS' ? 'COMMITS_AND_CI' : 'COMMITS_CI_LOGS'); }) }
+              }
               Row({ space: 8 }) {
                 Button('在忆程中讨论').height(44).fontSize(12).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy).onClick(() => { this.discuss(c.id); })
                 Button('刷新').fontSize(12).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy).onClick(() => { this.refresh(c.id); })

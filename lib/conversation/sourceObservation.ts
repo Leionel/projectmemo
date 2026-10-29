@@ -15,9 +15,9 @@ export async function readSourceObservation(actor: ConversationActor, projectId:
   const signals = await tx.externalSignal.findMany({ where: { connectionId, projectId, ownerUserId: actor.userId, status: { in: ["CANDIDATE", "ADOPTED"] } },
     orderBy: [{ fetchedAt: "desc" }, { id: "desc" }], take: 20 });
   const signalIds = signals.map(s => s.sha);
-  const revision = jsonHash({ connectionId, repo: connection.repo, ref: connection.ref, signals: signals.map(s => ({ sha: s.sha, title: s.title, linkedActionId: s.linkedActionId })) });
+  const revision = jsonHash({ connectionId, connectionRevision: connection.revision, access: connection.signalKind, repo: connection.repo, ref: connection.ref, signals: signals.map(s => ({ sha: s.sha, title: s.title, linkedActionId: s.linkedActionId })) });
   const text = ["已授权仓库 " + connection.repo + " · " + connection.ref,
     ...signals.map(s => `- ${s.title} · ${s.sha.slice(0, 10)}${s.linkedActionId ? " · 关联原行动 " + s.linkedActionId : ""}`),
     signals.length ? "提交记录只是外部线索，是否影响当前目标仍待核对，不能证明部署、实验或行动完成。" : "尚无已缓存的提交线索；可在原资料页明确刷新。"].join("\n");
-  return { revision, text, signalIds, ref: { kind: "PROJECT" as const, id: projectId, projectId, title: connection.repo + " 仓库线索", href: "/projects/" + projectId + "/knowledge" } };
+  return { revision, text, signalIds, access: connection.signalKind, ref: { kind: "PROJECT" as const, id: projectId, projectId, title: connection.repo + " 仓库线索", href: "/projects/" + projectId + "/knowledge" } };
 }

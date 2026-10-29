@@ -1,0 +1,9 @@
+lib/conversation/investigationService.ts(240,110): error TS2322: Type 'Promise<{ data: unknown; coverage: Record<string, unknown>; sources: ConversationSource[]; discovered: { projectId: string; sourceId: string; revision: string; title: string; repository: RepositorySourceMeta; }[]; }> | Promise<...> | Promise<...>' is not assignable to type 'Promise<{ data: unknown; coverage: Record<string, unknown>; sources: ConversationSource[]; discovered: { projectId: string; sourceId: string; revision: string; title: string; repository: RepositorySourceMeta; }[]; }>'.
+  Type 'Promise<{ data: unknown; coverage: Record<string, unknown>; sources: ConversationSource[]; discovered: MaterialPointer[]; }>' is not assignable to type 'Promise<{ data: unknown; coverage: Record<string, unknown>; sources: ConversationSource[]; discovered: { projectId: string; sourceId: string; revision: string; title: string; repository: RepositorySourceMeta; }[]; }>'.
+    Type '{ data: unknown; coverage: Record<string, unknown>; sources: ConversationSource[]; discovered: MaterialPointer[]; }' is not assignable to type '{ data: unknown; coverage: Record<string, unknown>; sources: ConversationSource[]; discovered: { projectId: string; sourceId: string; revision: string; title: string; repository: RepositorySourceMeta; }[]; }'.
+      Types of property 'discovered' are incompatible.
+        Type 'MaterialPointer[]' is not assignable to type '{ projectId: string; sourceId: string; revision: string; title: string; repository: RepositorySourceMeta; }[]'.
+          Type 'MaterialPointer' is not assignable to type '{ projectId: string; sourceId: string; revision: string; title: string; repository: RepositorySourceMeta; }'.
+            Types of property 'repository' are incompatible.
+              Type 'RepositorySourceMeta | undefined' is not assignable to type 'RepositorySourceMeta'.
+                Type 'undefined' is not assignable to type 'RepositorySourceMeta'.

@@ -1,0 +1,87 @@
+import { afterAll, afterEach, expect, test, vi } from "vitest";
+const isolated = await vi.hoisted(async () => (await import("./helpers/continuityDatabase")).continuityDatabase("stages23"));
+import fs from "node:fs";
+import { db } from "@/lib/db";
+import { createSession } from "@/lib/auth/session";
+import { createMission, editContinuationPolicy } from "@/lib/mission/missionService";
+import { runMissionSlice } from "@/lib/mission/runner";
+import { sourceUse } from "@/lib/continuity/sourcePolicy";
+import { grantRepositoryCiAccess } from "@/lib/sensing/repoCiGrant";
+import { processInvestigationDelegations } from "@/lib/mission/investigationDelegation";
+import { scopedDelegationAttention } from "@/lib/mission/investigationDelegation";
+import { claimMission, type Lease } from "@/lib/mission/runtimeStore";
+import { missionCiDispatch } from "@/lib/mission/repositoryTools";
+import type { Choice } from "@/lib/mission/contracts";
+afterEach(()=>vi.useRealTimers());
+afterAll(async()=>{await db.$disconnect();fs.rmSync(isolated.dir,{recursive:true,force:true});});
+async function fixture(){
+  process.env.REPO_CI_OBSERVER_ENABLED="true";process.env.MISSION_INVESTIGATION_DELEGATION_ENABLED="true";
+  const u=await db.user.create({data:{username:crypto.randomUUID(),displayName:"跨阶段合成用户",passwordHash:"unused"}});
+  const p=await db.project.create({data:{title:"工程项目",description:"synthetic",goal:"修复失败检查并保留真实验收",scenario:"COMPETITION",memberships:{create:{userId:u.id}}}});
+  const m=await createMission(u.id,{projectId:p.id,requestId:"m",goal:"调查失败检查及缺失的部署证据",llmContextApproved:true});
+  return {u,p,m,actor:{userId:u.id,sessionId:(await createSession(u.id)).session.id}};
+}
+const provider=(choice:Choice)=>async()=>({choice,provider:"SCRIPTED_LOCAL",model:"fixture",protocol:"JSON_CHOICE",usage:{inputTokens:1,outputTokens:1}});
+test("CT2 original Mission dynamically reads pinned CI, jobs and redacted log; revoke blocks derived Artifact reuse",async()=>{
+  const f=await fixture(),sha="a".repeat(40);
+  const c=await db.sourceConnection.create({data:{projectId:f.p.id,ownerUserId:f.u.id,repo:"octokit/rest.js",ref:"main"}});
+  const grant={requestId:"grant",expectedRevision:0,access:"COMMITS_CI_LOGS",confirmed:true};
+  await grantRepositoryCiAccess(f.u.id,f.p.id,c.id,grant);await grantRepositoryCiAccess(f.u.id,f.p.id,c.id,grant);
+  expect((await db.sourceConnection.findUniqueOrThrow({where:{id:c.id}})).revision).toBe(1);
+  await db.externalSignal.create({data:{connectionId:c.id,projectId:f.p.id,ownerUserId:f.u.id,sha,title:"修复检查",authorName:"fixture",url:`https://github.com/octokit/rest.js/commit/${sha}`}});
+  const run={id:7,head_sha:sha,run_attempt:1,name:"CI",status:"completed",conclusion:"failure"};
+  const job={id:9,run_id:7,run_attempt:1,head_sha:sha,name:"tests",status:"completed",conclusion:"failure"};
+  let requests=0;
+  const repository=async(url:string)=>{requests++;return{status:200,body:url.endsWith("/logs")?"password=VERY_SECRET\nAssertionError: missing condition":url.endsWith("/jobs/9")?job:url.includes("/attempts/")?{total_count:1,jobs:[job]}:url.endsWith("/runs/7")?run:url.includes("check-runs")?{total_count:0,check_runs:[]}:url.includes("actions/runs?")?{total_count:1,workflow_runs:[run]}:{sha}};};
+  const slice=async(choice:Choice)=>{await runMissionSlice({id:f.m.id,provider:provider(choice),repository});const s=await db.agentMissionStep.findFirstOrThrow({where:{missionId:f.m.id},orderBy:{ordinal:"desc"}});expect(s.status).toBe("SUCCEEDED");return(s.resultJson as unknown as {sources:Array<{id:string;hash:string}>}).sources[0];};
+  const status=await slice({kind:"tool",tool:"read_repository_ci",args:{connectionId:c.id,sha},summary:"先读状态"});
+  const jobs=await slice({kind:"tool",tool:"read_ci_jobs",args:{sourceId:status.id,revision:status.hash,runId:7,attempt:1},summary:"观察到失败，再选择任务"});
+  const log=await slice({kind:"tool",tool:"read_ci_log",args:{sourceId:jobs.id,revision:jobs.hash,jobId:9},summary:"再定位失败片段"});
+  expect(requests).toBe(8);
+  expect(JSON.stringify(await db.agentMissionStep.findMany({where:{missionId:f.m.id}}))).not.toContain("VERY_SECRET");
+  expect(await db.actionItem.count({where:{projectId:f.p.id,status:"DONE"}})).toBe(0);
+  const artifact=await db.generatedArtifact.create({data:{projectId:f.p.id,artifactType:"weekly_report",content:"CI观察",sourceRefs:{sources:[{id:log.id}]}}});
+  expect((await sourceUse(f.u.id,f.p.id,"artifact:"+artifact.id)).state).toBe("ALLOWED");
+  await grantRepositoryCiAccess(f.u.id,f.p.id,c.id,{requestId:"withdraw",expectedRevision:1,access:"COMMITS",confirmed:true});
+  expect((await sourceUse(f.u.id,f.p.id,"artifact:"+artifact.id)).state).toBe("SUPPRESSED");
+},30000);
+test("CT3 attention honors private STOP and quiet hours; no system notification is fabricated",async()=>{
+  const f=await fixture();const policy={mode:"BOUNDED_INVESTIGATION",schemaVersion:1,expiresAt:new Date(Date.now()+86400000).toISOString(),checkEveryMinutes:5,maxModels:4,maxTools:6,maxMetadataRequests:0,allowedTools:["inspect_project"],connectionIds:[],timezone:"Asia/Shanghai",quietStart:22,quietEnd:8,attention:"IMPORTANT_ONLY"};
+  await editContinuationPolicy(f.u.id,f.m.id,{requestId:"attention",expectedVersion:f.m.version,policy});
+  const m=await db.agentMission.findUniqueOrThrow({where:{id:f.m.id}});vi.useFakeTimers({toFake:["Date"]});vi.setSystemTime(new Date("2026-10-29T15:00:00Z"));
+  expect(await db.$transaction(tx=>scopedDelegationAttention(tx,m,"WAITING_INPUT"))).toMatchObject({level:"QUEUE",systemPush:false});
+  await db.goalQuestionPreference.create({data:{userId:f.u.id,missionId:m.id,questionId:"*",mode:"STOP",contextHash:"test"}});
+  expect(await db.$transaction(tx=>scopedDelegationAttention(tx,m,"WAITING_INPUT"))).toMatchObject({level:"SUPPRESS"});
+});
+test("CT2 UNKNOWN HTTP cannot be resent by a new original step and retains root metadata usage",async()=>{
+  const f=await fixture(),m=await claimMission("probe",f.m.id);expect(m).toBeTruthy();
+  const lease:Lease={id:m!.id,owner:m!.leaseOwner!,epoch:m!.leaseEpoch,contextVersion:m!.contextVersion,planRevision:m!.planRevision};
+  const step=await db.agentMissionStep.create({data:{missionId:m!.id,ordinal:1,planRevision:m!.planRevision,status:"RUNNING",toolName:"read_repository_ci",canonicalInputJson:{},readSetJson:[],inputHash:"probe"}});
+  const dispatch=missionCiDispatch(lease);let calls=0;
+  await expect(dispatch("https://api.github.com/repos/octokit/rest.js/commits/a",1,async()=>{calls++;throw new TypeError("unknown transport");})).rejects.toThrow();
+  await db.agentMissionStep.update({where:{id:step.id},data:{status:"FAILED"}});
+  await db.agentMissionStep.create({data:{missionId:m!.id,ordinal:2,planRevision:m!.planRevision,status:"RUNNING",toolName:"read_repository_ci",canonicalInputJson:{},readSetJson:[],inputHash:"renamed"}});
+  await expect(dispatch("https://api.github.com/repos/octokit/rest.js/commits/a",1,async()=>{calls++;return{status:200,body:{}};})).rejects.toMatchObject({code:"EXTERNAL_RESULT_UNKNOWN"});
+  expect(calls).toBe(1);expect((await db.agentMission.findUniqueOrThrow({where:{id:m!.id}})).budgetUsedJson).toMatchObject({metadataRequests:1});
+  await db.agentMission.update({where:{id:m!.id},data:{status:"PAUSED",executionSlot:null,leaseOwner:null,leaseUntil:null}});
+});
+test("CT3 three-day restart uses original Mission, zero model calls without change, cumulative budget and expiry",async()=>{
+  const f=await fixture();const current=await db.agentMission.findUniqueOrThrow({where:{id:f.m.id}});
+  for(let i=0;i<9;i++){const legacy=await createMission(f.u.id,{projectId:f.p.id,requestId:"manual-"+i,goal:"人工等待不阻塞持续调查"});await db.agentMission.update({where:{id:legacy.id},data:{status:"WAITING_INPUT"}});}
+  const expiresAt=new Date(Date.now()+5*86400000).toISOString();
+  await editContinuationPolicy(f.u.id,f.m.id,{requestId:"delegate",expectedVersion:current.version,policy:{mode:"BOUNDED_INVESTIGATION",schemaVersion:1,expiresAt,checkEveryMinutes:5,maxModels:4,maxTools:6,maxMetadataRequests:0,allowedTools:["inspect_project","search_memory","read_project_material","save_mission_output"],connectionIds:[],timezone:"Asia/Shanghai",quietStart:22,quietEnd:8,attention:"IMPORTANT_ONLY"}});
+  await runMissionSlice({id:f.m.id,provider:provider({kind:"ask",question:"等待新的项目原始资料",missing:"PRIVATE"})});
+  const before=await db.agentMission.findUniqueOrThrow({where:{id:f.m.id}});
+  vi.useFakeTimers({toFake:["Date"]});vi.setSystemTime(Date.now()+3*86400000);
+  expect((await processInvestigationDelegations()).woken).toBe(0);
+  expect((await db.agentMission.findUniqueOrThrow({where:{id:f.m.id}})).budgetUsedJson).toEqual(before.budgetUsedJson);
+  await db.capture.create({data:{projectId:f.p.id,rawText:"D3 新的原始失败条件"}});
+  vi.setSystemTime(Date.now()+6*60000);
+  expect((await processInvestigationDelegations()).woken).toBe(1);
+  await runMissionSlice({id:f.m.id,provider:async context=>{expect(context).toContain("newSourcePointers");return provider({kind:"ask",question:"已看到新的资料入口，等用户补验收条件",missing:"PRIVATE"})();}});
+  const after=await db.agentMission.findUniqueOrThrow({where:{id:f.m.id}});
+  expect((after.budgetUsedJson as {models:number}).models).toBe((before.budgetUsedJson as {models:number}).models+1);
+  vi.setSystemTime(Date.parse(expiresAt)+1);await processInvestigationDelegations();
+  expect((await db.agentMission.findUniqueOrThrow({where:{id:f.m.id}})).status).toBe("PAUSED");
+  expect(await db.agentMission.count({where:{projectId:f.p.id}})).toBe(10);
+},30000);

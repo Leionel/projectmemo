@@ -37,24 +37,25 @@ export async function mutateTurn(actor: ConversationActor, conversationId: strin
     return next;
   });
 }
-export type TurnOperation = { id: string; inputHash: string; kind: string; generation?: number; replayKey?: string; status: "RESERVED" | "DISPATCH_COMMITTED" | "DISPATCHING" | "SUCCEEDED" | "FAILED" | "UNKNOWN";
+export type TurnOperation = { id: string; inputHash: string; kind: string; generation?: number; replayKey?: string; requestUnits?: number; status: "RESERVED" | "DISPATCH_COMMITTED" | "DISPATCHING" | "SUCCEEDED" | "FAILED" | "UNKNOWN";
   startedAt: string; finishedAt?: string; observedAt?: string; reusedFrom?: string; result?: unknown; failure?: string; reservedMicrousd: number; billedMicrousd?: number | null };
 export async function turnOperation<T>(actor: ConversationActor, conversationId: string, turnId: string, operationId: string,
   kind: string, input: unknown, run: () => Promise<T>, external = false): Promise<T> {
+  const metadata = kind === "REPO_CI_HTTP", network = external || metadata;
   const inputHash = jsonHash(input), opId = generationCallId(operationId), canonical: Record<string, unknown> = { ...record(input), scopeRevision: undefined, revision: undefined };
   if (kind === "WEB_FETCH" && canonical.url) canonical.sourceId = undefined;
   const replayKey = jsonHash({ kind, input: canonical }); let replay: TurnOperation | undefined;
   await mutateTurn(actor, conversationId, turnId, async (manifest, tx) => {
-    if (external) { const current = await tx.conversationTurn.findUniqueOrThrow({ where: { id: turnId } }); await assertTurnCurrent(current, actor.userId, currentGeneration(), tx, "EXTERNAL_READ"); }
+    if (network) { const current = await tx.conversationTurn.findUniqueOrThrow({ where: { id: turnId } }); await assertTurnCurrent(current, actor.userId, currentGeneration(), tx, "EXTERNAL_READ"); }
     const ops = { ...record(manifest.operations) };
     const old = ops[opId] as TurnOperation | undefined;
     if (old) {
       if (old.inputHash !== inputHash || old.kind !== kind) throw new AppError("OPERATION_INPUT_CHANGED", "原步骤输入已变化，请重新开始调查", 409);
       replay = old; return manifest;
     }
-    if (external && (Object.values(ops) as TurnOperation[]).some(o => (o.replayKey ?? jsonHash({ kind: o.kind, input: {} })) === replayKey && ["DISPATCH_COMMITTED", "DISPATCHING", "UNKNOWN"].includes(o.status)))
+    if (network && (Object.values(ops) as TurnOperation[]).some(o => (o.replayKey ?? jsonHash({ kind: o.kind, input: {} })) === replayKey && ["DISPATCH_COMMITTED", "DISPATCHING", "UNKNOWN"].includes(o.status)))
       throw new AppError("EXTERNAL_RESULT_UNKNOWN", "原请求结果未知，换步骤或代次也不会自动重发", 409);
-    const raw = external && (Object.values(ops) as TurnOperation[]).find(o => o.replayKey === replayKey && o.status === "SUCCEEDED");
+    const raw = network && (Object.values(ops) as TurnOperation[]).find(o => o.replayKey === replayKey && o.status === "SUCCEEDED");
     if (raw) {
       // Caller still checks current grant, URL, revision and source-use policy. This reuses a raw observation, never model output.
       replay = { ...raw, id: opId, inputHash, generation: currentGeneration(), observedAt: raw.observedAt ?? raw.finishedAt,
@@ -62,6 +63,9 @@ export async function turnOperation<T>(actor: ConversationActor, conversationId:
       ops[opId] = replay; return { ...manifest, operations: ops };
     }
     if (Object.keys(ops).length >= 32) throw new AppError("INVESTIGATION_BUDGET_EXHAUSTED", "本轮步骤达到预算边界", 409);
+    const requestUnits = metadata ? Math.min(2, Math.max(1, Number(record(input).requestUnits) || 1)) : 0;
+    if (metadata && (Object.values(ops) as TurnOperation[]).filter(o => o.kind === kind && !o.reusedFrom).reduce((n,o) => n + (o.requestUnits ?? 1), 0) + requestUnits > 12)
+      throw new AppError("CI_REQUEST_BUDGET_EXHAUSTED", "本轮仓库请求额度已用完", 409);
     if (external) {
       const entries = Object.values(ops) as TurnOperation[];
       if (entries.filter(o => o.reservedMicrousd > 0).length >= 4) throw new AppError("EXTERNAL_BUDGET_EXHAUSTED", "本轮联网额度已用完，可以依据现有资料回答", 409);
@@ -74,17 +78,17 @@ export async function turnOperation<T>(actor: ConversationActor, conversationId:
           throw new AppError("CLOUD_QUOTA_EXHAUSTED", "今日云端调用额度已用完", 429);
       }
     }
-    ops[opId] = { id: opId, inputHash, kind, replayKey, generation: currentGeneration(), status: "RESERVED", startedAt: new Date().toISOString(), reservedMicrousd: external ? 750 : 0 } satisfies TurnOperation;
+    ops[opId] = { id: opId, inputHash, kind, replayKey, ...(metadata ? { requestUnits } : {}), generation: currentGeneration(), status: "RESERVED", startedAt: new Date().toISOString(), reservedMicrousd: external ? 750 : 0 } satisfies TurnOperation;
     return { ...manifest, operations: ops };
   });
   if (replay) {
     if (replay.status === "SUCCEEDED") return replay.result as T;
-    if (replay.reservedMicrousd > 0 || replay.status === "FAILED")
+    if (network || replay.reservedMicrousd > 0 || replay.status === "FAILED")
       throw new AppError(replay.status === "FAILED" ? "OPERATION_FAILED" : "EXTERNAL_RESULT_UNKNOWN", replay.failure ?? "原步骤可能已经发出，不能自动重发；请读取已有结果后决定是否重新调查", 409);
   }
   // Dispatch linearization is separate from reservation; a correction winning this transaction prevents HTTP.
   await mutateTurn(actor, conversationId, turnId, async (manifest, tx) => {
-    if (external) await assertTurnCurrent(await tx.conversationTurn.findUniqueOrThrow({ where: { id: turnId } }), actor.userId, currentGeneration(), tx, "EXTERNAL_READ");
+    if (network) await assertTurnCurrent(await tx.conversationTurn.findUniqueOrThrow({ where: { id: turnId } }), actor.userId, currentGeneration(), tx, "EXTERNAL_READ");
     return ({ ...manifest, operations: { ...record(manifest.operations), [opId]: {
     ...record(record(manifest.operations)[opId]), status: "DISPATCH_COMMITTED",
   } } }); });
@@ -104,7 +108,7 @@ export async function turnOperation<T>(actor: ConversationActor, conversationId:
       failure: error instanceof AppError ? error.message : "外部请求结果未知，保留额度预占", billedMicrousd: null,
     })).catch(() => undefined);
     if (error instanceof AppError && ["TURN_RECOORDINATE", "TURN_STOP_REQUESTED", "TURN_LEASE_LOST"].includes(error.code)) throw error;
-    if (!known && external) throw new AppError("EXTERNAL_RESULT_UNKNOWN", "外部请求结果未知，保留额度预占；不会自动重发", 409);
+    if (!known && network) throw new AppError("EXTERNAL_RESULT_UNKNOWN", "外部请求结果未知，保留额度预占；不会自动重发", 409);
     throw error;
   }
 }

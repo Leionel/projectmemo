@@ -21,7 +21,7 @@ export class MissionScope {
   excludedTerms: string[] = [];
   allowedHosts: string[] = [];
 }
-export class MissionPolicy { mode: string = 'MANUAL'; }
+export class MissionPolicy { mode: string = 'MANUAL'; schemaVersion?: number; expiresAt?: string; checkEveryMinutes?: number; maxModels?: number; maxTools?: number; maxMetadataRequests?: number; allowedTools?: string[]; connectionIds?: string[]; timezone?: string; quietStart?: number; quietEnd?: number; attention?: string; }
 export class MissionCreate {
   projectId: string = '';
   requestId: string = '';
@@ -72,6 +72,7 @@ export class Mission {
   researchScope: MissionScope = new MissionScope();
   continuationPolicy: MissionPolicy = new MissionPolicy();
   autoContinuationEnabled: boolean = false; artifactAdoptionEnabled: boolean = false;
+  investigationDelegationEnabled?: boolean;
   pauseRequestedAt: string | null = null; cancelRequestedAt: string | null = null;
   pauseReason: string | null = null; error: MissionError | null = null;
   completion?: MissionCompletionSummary;

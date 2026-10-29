@@ -42,6 +42,7 @@ export type ConversationRef = {
   questionId?: string | null; href: string;
 };
 export type ConversationSource = {
+  repository?: import("./repositoryCi").RepositorySourceMeta;
   external?: ExternalSourceMeta;
   id: string; projectId: string; sourceId: string; revision: string;
   title: string; excerpt: string; observedAt: string; temporalState: string;

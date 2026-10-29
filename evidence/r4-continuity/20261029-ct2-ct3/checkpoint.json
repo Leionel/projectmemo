@@ -1,0 +1,32 @@
+{
+  "status": "QUOTA_CHECKPOINT_NOT_FULL_ACCEPTANCE",
+  "baseline": "665e84fbca58e3c5ea4fd1f6e31ce111abd63627",
+  "date": "2026-10-29",
+  "codexFiveHourUsedPercent": 100,
+  "resetBeijing": "2026-10-29 12:40:38",
+  "fullServiceTests": {
+    "exitCode": 0,
+    "files": 135,
+    "passed": 1151
+  },
+  "latestGuardTests": {
+    "exitCode": 0,
+    "files": 2,
+    "passed": 8
+  },
+  "typecheckExit": 0,
+  "lintExit": 0,
+  "harmonyBuildExit": 0,
+  "webE2EFinal": "PENDING",
+  "paidModelCallsThisBatch": 0,
+  "productionDeployment": false,
+  "realDatabaseMigration": false,
+  "push": false,
+  "remaining": [
+    "Final browser result and device acceptance",
+    "Private CI/OAuth and live log transport probes",
+    "Delegation CI selector and periodic remote observation",
+    "Private urgent Intervention/Delivery integration",
+    "Independent model quality and cross-worker long-journey evaluation"
+  ]
+}

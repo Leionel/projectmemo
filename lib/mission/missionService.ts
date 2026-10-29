@@ -12,9 +12,11 @@ import { suggestionsForMission } from "@/lib/experience/injection";
 import type {Prisma} from "@/lib/generated/prisma/client";
 import { premiseFor, assessEvidenceFit, requireFitReview, recordFitReview } from "./evidenceFitService";
 import type { WaitState } from "./gaps";
+import { initializeDelegation, boundedPolicy } from "./investigationDelegation";
 export function requireMissions() { if (!isFeatureEnabled("MISSION_ENABLED", false)) throw new AppError("MISSION_DISABLED", "委托功能尚未启用", 503); }
 export async function createMission(userId: string, input: unknown) {
   requireMissions(); const body=createMissionSchema.parse(input); await assertOwner(userId,body.projectId); const hash=jsonHash(body);
+  if(body.continuationPolicy.mode==="BOUNDED_INVESTIGATION")throw new AppError("DELEGATION_CONFIRMATION_REQUIRED","请先创建原委托，再核对持续调查的范围和预算",409);
   const find=()=>db.agentMission.findUnique({where:{ownerUserId_createRequestId:{ownerUserId:userId,createRequestId:body.requestId}}});
   const existing=await find(); if(existing){if(existing.createPayloadHash!==hash)throw new AppError("REQUEST_ID_REUSED","请求编号已用于其他委托",409);return existing;}
   try{return await db.$transaction(tx=>createMissionInTx(tx,userId,body));}catch(error){const raced=await find();if(raced?.createPayloadHash===hash)return raced;throw error;}
@@ -39,7 +41,7 @@ export async function missionDetail(userId:string,id:string){
   const completion=await readMissionCompletion(id,outputs[0]?.verificationStatus??null);
   const fitPremise=m.waitStateJson&&m.status==="WAITING_INPUT"?premiseFor(m,m.waitStateJson as unknown as WaitState):null;
   const experience=isFeatureEnabled("PROJECT_EXPERIENCE_ENABLED",true)?{enabled:true as const,suggestions:await suggestionsForMission(m),note:"建议不改变权限；影子观察不注入模型上下文。"}:{enabled:false as const,suggestions:[],note:"项目经验复用当前未开启。"};
-  return {evidencePremise:fitPremise,completion,experience,semanticCheckEnabled:isFeatureEnabled("MISSION_SEMANTIC_CHECK_ENABLED",false),artifactAdoptionEnabled:isFeatureEnabled("MISSION_ARTIFACT_ADOPTION_ENABLED",false),id:m.id,projectId:m.projectId,goal:m.goal,status:m.status,version:m.version,contextVersion:m.contextVersion,planRevision:m.planRevision,continuationPolicy:m.continuationPolicyJson,autoContinuationEnabled:isFeatureEnabled("MISSION_AUTO_CONTINUATION_ENABLED",false),successCriteria:m.successCriteriaJson,constraints:m.constraintsJson,constraintsVersion:m.constraintsVersion,researchScope:m.researchScopeJson,researchScopeVersion:m.researchScopeVersion,pauseReason:m.pauseReason,pauseRequestedAt:m.pauseRequestedAt?.toISOString()??null,cancelRequestedAt:m.cancelRequestedAt?.toISOString()??null,error:m.lastErrorJson,budget:m.budgetJson,used:m.budgetUsedJson,question:m.status==="WAITING_INPUT"?questions[0]??null:null,steps:steps.map(s=>({id:s.id,ordinal:s.ordinal,toolName:s.toolName,status:s.status,result:s.resultJson})),approvals:approvals.map(a=>({id:a.id,proposal:a.proposalJson,proposalHash:a.proposalHash,expiresAt:a.expiresAt})),outputs};
+  return {investigationDelegationEnabled:isFeatureEnabled("MISSION_INVESTIGATION_DELEGATION_ENABLED",false),delegation:(m.planJson as {delegation?:unknown}).delegation??null,evidencePremise:fitPremise,completion,experience,semanticCheckEnabled:isFeatureEnabled("MISSION_SEMANTIC_CHECK_ENABLED",false),artifactAdoptionEnabled:isFeatureEnabled("MISSION_ARTIFACT_ADOPTION_ENABLED",false),id:m.id,projectId:m.projectId,goal:m.goal,status:m.status,version:m.version,contextVersion:m.contextVersion,planRevision:m.planRevision,continuationPolicy:m.continuationPolicyJson,autoContinuationEnabled:isFeatureEnabled("MISSION_AUTO_CONTINUATION_ENABLED",false),successCriteria:m.successCriteriaJson,constraints:m.constraintsJson,constraintsVersion:m.constraintsVersion,researchScope:m.researchScopeJson,researchScopeVersion:m.researchScopeVersion,pauseReason:m.pauseReason,pauseRequestedAt:m.pauseRequestedAt?.toISOString()??null,cancelRequestedAt:m.cancelRequestedAt?.toISOString()??null,error:m.lastErrorJson,budget:m.budgetJson,used:m.budgetUsedJson,question:m.status==="WAITING_INPUT"?questions[0]??null:null,steps:steps.map(s=>({id:s.id,ordinal:s.ordinal,toolName:s.toolName,status:s.status,result:s.resultJson})),approvals:approvals.map(a=>({id:a.id,proposal:a.proposalJson,proposalHash:a.proposalHash,expiresAt:a.expiresAt})),outputs};
 }
 export async function readOutput(userId:string,id:string,outputId:string){await ownedMission(userId,id);const output=await db.agentMissionOutput.findFirst({where:{id:outputId,missionId:id}});if(!output)throw new AppError("OUTPUT_NOT_FOUND","没有找到成果草稿",404);return output;}
 export async function missionEvents(userId:string,id:string,after=0){await ownedMission(userId,id);const events=await db.agentMissionEvent.findMany({where:{missionId:id,seq:{gt:after}},orderBy:{seq:"asc"},take:100});return{events,nextAfterSeq:events.at(-1)?.seq??after};}
@@ -104,11 +106,12 @@ export async function editContinuationPolicy(userId:string,id:string,raw:unknown
  return db.$transaction(async tx=>{
   await lock(tx,id);const m=await ownedMission(userId,id,tx);if(await commandReplay(tx,id,body.requestId,hash))return m;
   if(m.version!==body.expectedVersion||terminal.includes(m.status))throw new AppError("MISSION_CHANGED","委托已变化，请刷新",409);
-  const active=!!(m.planJson as {automaticContinuation?:unknown}).automaticContinuation;
+  const active=!!(m.planJson as {automaticContinuation?:unknown}).automaticContinuation||!!boundedPolicy(m);
+  const delegation=body.policy.mode==="BOUNDED_INVESTIGATION"?await initializeDelegation(tx,m,body.policy):null;
   await tx.agentMissionApproval.updateMany({where:{missionId:id,status:{in:["PENDING","APPROVED"]}},data:{status:"EXPIRED"}});
   await tx.agentMissionStep.updateMany({where:{missionId:id,status:{in:["READY","WAITING_APPROVAL"]}},data:{status:"OBSOLETE"}});
   const status=active&&m.status==="READY"?"PAUSED":m.status==="WAITING_APPROVAL"?"READY":m.status;
-  const updated=await tx.agentMission.update({where:{id},data:{continuationPolicyJson:json(body.policy),contextVersion:{increment:1},planRevision:{increment:1},version:{increment:1},status,pauseRequestedAt:active&&m.status==="RUNNING"?new Date():m.pauseRequestedAt,planJson:json({...m.planJson as object,automaticContinuation:null,...(status==="PAUSED"?{resumeStatus:"READY"}:{})})}});
+  const updated=await tx.agentMission.update({where:{id},data:{continuationPolicyJson:json(body.policy),contextVersion:{increment:1},planRevision:{increment:1},version:{increment:1},status:delegation&&m.status==="WAITING_INPUT"?"READY":status,nextAttemptAt:null,pauseRequestedAt:active&&m.status==="RUNNING"?new Date():m.pauseRequestedAt,planJson:json({...m.planJson as object,automaticContinuation:null,delegation,...(status==="PAUSED"?{resumeStatus:"READY"}:{})})}});
   await event(tx,id,"CONTINUATION_POLICY_CHANGED",{policy:body.policy,source:"USER_CONFIRMED"},{id:`cmd:${body.requestId}`,hash});return updated;
  });
 }

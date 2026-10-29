@@ -88,7 +88,7 @@ export struct ConversationContinuity {
       }
       if (this.info.handoff) {
         ForEach(this.info.handoff.missions, (m: HandoffMission) => {
-          Button(m.goal + (m.nextOwner === 'USER' ? ' · 等你接续' : ' · Agent 处理中'), { type: ButtonType.Normal }).fontSize(13).constraintSize({ minHeight: 44 }).backgroundColor(Color.Transparent).fontColor(PMColors.BRAND).onClick(() => { this.openWork('MISSION', m.id); })
+          Button(m.goal + (m.nextOwner === 'USER' ? ' · 等你接续' : m.status === 'RUNNING' ? ' · Agent 处理中' : ' · 等待 Agent 接续'), { type: ButtonType.Normal }).fontSize(13).constraintSize({ minHeight: 44 }).backgroundColor(Color.Transparent).fontColor(PMColors.BRAND).onClick(() => { this.openWork('MISSION', m.id); })
         }, (m: HandoffMission) => m.id)
         ForEach(this.info.handoff.results, (a: HandoffResult) => {
           Button(a.title + ' · 查看原回执', { type: ButtonType.Normal }).fontSize(13).constraintSize({ minHeight: 44 }).backgroundColor(Color.Transparent).fontColor(PMColors.BRAND).onClick(() => { this.openWork('ACTION', a.id); })

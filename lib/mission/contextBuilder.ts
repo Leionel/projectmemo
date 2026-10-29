@@ -26,6 +26,7 @@ function compactData(value: unknown) {
 }
 export async function buildContext(m: AgentMission, tools: ToolSet = projectTools) {
   const continuity = await effectiveContinuity(m.ownerUserId, { projectId: m.projectId, missionId: m.id });
+  const delegation = (m.planJson as { delegation?: { candidateSources?: unknown } }).delegation;
   const suppressing = continuity.directives.some(d => d.kind === "USE_SUPPRESSION");
   const where = { missionId: m.id };
   const adopted=!!(m.planJson as {impactGuard?:string}).impactGuard;
@@ -73,7 +74,7 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
     .map(source => [source.id, { id: source.id, hash: source.hash, revision: source.revision, temporalState: source.temporalState ?? source.assessment?.temporalState ?? "UNKNOWN",
       knowledgeClass: source.knowledgeClass ?? (source.kind === "EXTERNAL" ? "EXTERNAL_REFERENCE" : "PROJECT_OBSERVATION"), observedAt: source.observedAt }])).values()];
   const inputs = [...new Map([...events, ...[question, input].filter(e => e !== null)].map(e => [e.id, e])).values()].sort((a, b) => a.seq - b.seq);
-  const context = { evidencePolicy: "UNKNOWN provenance is reference only, never independent supporting evidence; re-read original sources before a claim or effect.", continuity: { intentHash: continuity.intentHash, reusePolicyHash: continuity.reusePolicyHash, workingObjective: continuity.workingObjective, constraints: continuity.constraints }, strategyPrompt: { id: missionStrategyV2.id, version: missionStrategyV2.version }, decisionScenario:(m.planJson as {decisionScenario?:unknown}).decisionScenario??null, schemaVersion: 2, promptVersion: fitReviews.length?"mission-context-v3-e0":"mission-context-v2", outputTokenLimit: decisionTokenLimit(m.lastErrorJson), goal: m.goal,
+  const context = { investigationDelegation: delegation ? { policy: m.continuationPolicyJson, newSourcePointers: delegation.candidateSources ?? [] } : undefined, evidencePolicy: "UNKNOWN provenance is reference only, never independent supporting evidence; re-read original sources before a claim or effect.", continuity: { intentHash: continuity.intentHash, reusePolicyHash: continuity.reusePolicyHash, workingObjective: continuity.workingObjective, constraints: continuity.constraints }, strategyPrompt: { id: missionStrategyV2.id, version: missionStrategyV2.version }, decisionScenario:(m.planJson as {decisionScenario?:unknown}).decisionScenario??null, schemaVersion: 2, promptVersion: fitReviews.length?"mission-context-v3-e0":"mission-context-v2", outputTokenLimit: decisionTokenLimit(m.lastErrorJson), goal: m.goal,
     protocolRepair: (m.lastErrorJson as {code?:string})?.code === "MODEL_PROTOCOL_ERROR" ? { reason: (m.lastErrorJson as {diagnostic?:{reason?:string}}).diagnostic?.reason } : undefined,
     successCriteria: m.successCriteriaJson, constraints: m.constraintsJson, constraintsVersion: m.constraintsVersion, researchScope: m.researchScopeJson,
     scopeRevision: m.researchScopeVersion, contextVersion: m.contextVersion, planRevision: m.planRevision, budgetUsed: m.budgetUsedJson,

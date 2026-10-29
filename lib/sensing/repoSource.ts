@@ -183,16 +183,16 @@ export async function listSignals(userId: string, projectId: string) {
     take: 40,
   });
   return {
-    enabled: true,
+    enabled: true, ciAvailable: isFeatureEnabled("REPO_CI_OBSERVER_ENABLED", false),
     note: "信号只是候选资料；采纳需确认，未采纳不写入任何项目事实。commit/CI 不构成现实完成证明。",
     connections: await Promise.all(connections.map(async c => ({ ...viewOfConnection(c), ...(await refreshSummary(c)) }))),
     signals: signals.map(viewOfSignal),
   };
 }
 
-function viewOfConnection(c: { id: string; repo: string; ref: string; status: string; lastFetchedAt: Date | null; lastStatus: string | null; lastError: string | null; revokedAt: Date | null; revokedReason: string | null }) {
+function viewOfConnection(c: { id: string; repo: string; ref: string; status: string; signalKind: string; revision: number; lastFetchedAt: Date | null; lastStatus: string | null; lastError: string | null; revokedAt: Date | null; revokedReason: string | null }) {
   return {
-    id: c.id, repo: c.repo, ref: c.ref, status: c.status,
+    id: c.id, repo: c.repo, ref: c.ref, status: c.status, access: c.signalKind, revision: c.revision,
     lastFetchedAt: c.lastFetchedAt?.toISOString() ?? null, lastStatus: c.lastStatus, lastError: c.lastError,
     revokedAt: c.revokedAt?.toISOString() ?? null, revokedReason: c.revokedReason ?? null,
   };

@@ -28,7 +28,9 @@ export const projectTools:ToolSet={
    const total=await db.actionItem.count({where:{projectId:actor.projectId,isSimulated:false}});
    const coverage={totalActions:total,returnedActions:actions.length,usePolicyExcluded:Math.min(20,rawCount)-actions.length,nextCursor,complete:!(raw as {afterId?:string}).afterId&&rawCount<=20};
    const data={project,actions:actions.slice(0,20),coverage,truncated:!coverage.complete};
-   return{data,coverage,sources:[{id:`project:${actor.projectId}`,kind:"PROJECT",entityType:"PROJECT",revision:hash!,hash:hash!,text:JSON.stringify(data),observedAt:new Date().toISOString()}]};
+   const connections=await db.sourceConnection.findMany({where:{projectId:actor.projectId,ownerUserId:actor.userId,status:"ACTIVE",revokedAt:null},take:3,include:{signals:{where:{status:{in:["CANDIDATE","ADOPTED"]}},orderBy:{fetchedAt:"desc"},take:5}}});
+   const repositoryPointers=[];for(const c of connections){try{await assertSourceUse(actor.userId,actor.projectId,"repo:"+c.id,db,{missionId:actor.missionId});repositoryPointers.push({connectionId:c.id,repo:c.repo,access:c.signalKind,shas:c.signals.map(s=>s.sha)});}catch(error){if(!(error instanceof AppError))throw error;}}
+   return{data:{...data,repositoryPointers},coverage,sources:[{id:`project:${actor.projectId}`,kind:"PROJECT",entityType:"PROJECT",revision:hash!,hash:hash!,text:JSON.stringify(data),observedAt:new Date().toISOString()}]};
  }},
  search_memory:{description:"按主题分页检索本项目标题与摘要。coverage说明范围；用afterId继续，用sourceIds定向读已知旧/归档卡片；无结果不等于不存在。",schema:memoryQuerySchema,effects:readEffects,run:searchMissionMemory},
  save_mission_output:{description:"保存委托私有 Output 新版本。观察须引用来源，推断标明；不发布项目事实。",schema:outputSchema,effects:readEffects,run:async(_actor,input)=>({data:input,sources:[]})},

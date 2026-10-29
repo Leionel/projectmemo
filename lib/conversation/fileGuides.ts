@@ -14,6 +14,7 @@ export async function resolveFileGuides(sources: ConversationSource[], citations
         href: `/focus/source/${encodeURIComponent(meta.conversationId)}/${encodeURIComponent(meta.turnId)}/${encodeURIComponent(source.sourceId)}` });
       continue;
     }
+    if(source.document){const d=source.document,a=await db.attachment.findFirst({where:{id:d.attachmentId,projectId:source.projectId}});output.push({number:index+1,sourceId:source.id,projectId:source.projectId,entityId:d.attachmentId,kind:"ATTACHMENT",title:source.title,revision:source.revision,stale:!a||await sourceHash(source.projectId,"attachment:"+d.attachmentId)!==d.attachmentHash,missing:!a,archived:false,temporalState:source.temporalState,excerpt:source.excerpt,quote:citations.find(c=>c.sourceId===source.id)?.quote??null,readScope:"EXCERPT",document:d,href:`/focus/source/${encodeURIComponent(d.conversationId!)}/${encodeURIComponent(d.turnId!)}/${encodeURIComponent(source.sourceId)}`});continue;}
     const projectId = source.projectId, rawId = source.sourceId.slice(source.sourceId.indexOf(":") + 1);
     let entityId = rawId, kind: ConversationFileGuide["kind"] = "RECORD", title = source.title;
     let attachmentId: string | null = null, missing = false, archived = false;

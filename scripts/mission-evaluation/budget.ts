@@ -91,7 +91,7 @@ export class EvaluationBudget {
         throw new Error("EVALUATION_NETWORK_BLOCKED: this run permits only the selected model, no Search/Fetch or other outbound requests");
       if (init?.method !== "POST" || typeof init.body !== "string") throw new Error("INVALID_EVALUATION_REQUEST");
       const body = JSON.parse(init.body) as { model: string; max_tokens?: number; thinking?: { type?: string }; messages?: Array<{ role: string; content?: string }> };
-      if (body.model !== this.ledger.model || !validTokens(body.max_tokens) || body.max_tokens < 1 || body.max_tokens > 2000 || body.thinking?.type !== "disabled")
+      if (body.model !== this.ledger.model || !validTokens(body.max_tokens) || body.max_tokens < 1 || body.max_tokens > 8192 || body.thinking?.type !== "disabled")
         throw new Error("INVALID_EVALUATION_REQUEST: model/output/thinking must match the bounded price contract");
       const reservation = ceilCost(this.ledger.price.maxInputTokens * this.ledger.price.inputPerMillionCny / 1e6 + body.max_tokens * this.ledger.price.outputPerMillionCny / 1e6);
       const summary = this.summary();

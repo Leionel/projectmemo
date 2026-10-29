@@ -2,12 +2,19 @@ import {
   agentPresentationSchema, investigationBudgetSchema, investigationDecisionSchema, presentationPlanSchema,
   type AgentPresentation, type AllowedAction, type EvidenceLink, type ExperienceEntityRef,
   type HydratedBlock, type InvestigationBudget, type InvestigationDecision, type PresentationPlan, type RichTextNode,
+  type GoalGap,
 } from "@/lib/types/agentExperience";
 import { reservedModelUsage, type ModelCallReservation } from "@/lib/agent/promptSpec";
 import { isDeepStrictEqual } from "node:util";
 
 export class ExperienceContractError extends Error {
   constructor(public code: string) { super(code); }
+}
+/** One normalized gap per selected project. Rationale wording is not an access-control token. */
+export function bindInvestigationGoal(decision:Extract<InvestigationDecision,{decision:"READ_EXISTING"}>,gaps:GoalGap[]){
+  const selected=gaps.filter(g=>g.projectId===decision.call.projectId);
+  if(selected.length!==1||!selected[0].nextInformationNeed?.trim()||selected[0].goalRef.projectId!==decision.call.projectId)throw new ExperienceContractError("INVESTIGATION_GOAL_UNBOUND");
+  const gap=selected[0];return {gapId:gap.id,goalRevision:gap.goalRef.revision,canonicalNeed:gap.nextInformationNeed!,modelNeed:decision.informationNeed};
 }
 function reject(code: string): never { throw new ExperienceContractError(code); }
 const key = (ref: ExperienceEntityRef) => JSON.stringify([ref.kind, ref.projectId, ref.id, ref.revision]);

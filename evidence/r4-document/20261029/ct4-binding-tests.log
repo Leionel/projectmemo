@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/documentReader.test.ts tests/r4ExperienceContract.test.ts tests/missionEvaluationBudget.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  3 passed (3)
+      Tests  62 passed (62)
+   Start at  15:14:13
+   Duration  14.88s (transform 2.99s, setup 0ms, import 4.96s, tests 8.99s, environment 0ms)
+

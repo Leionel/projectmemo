@@ -520,6 +520,7 @@ struct MissionDetail {
           Text(`${step.ordinal} · ${missionToolLabel(step.toolName)} · ${step.status === 'SUCCEEDED' ? '工具已执行' : missionStatusLabel(step.status)}`)
           if (this.actionReceipt(step) !== '') { Text(this.actionReceipt(step)) }
           ForEach(step.result?.sources ?? [], (source: MissionSource) => {
+            if (source.document) { Button(source.document!.fileName + (source.document!.pages.length > 0 ? ' · 物理第 ' + source.document!.pages[0].toString() + ' 页' : ' · 目录或文本修订')).height(48).fontColor(PMColors.BRAND).onClick(() => { router.pushUrl({ url: 'pages/ConversationWebSource', params: { missionId: this.missionId, sourceId: source.id } }); }) }
             Text(`${this.knowledge(source.knowledgeClass ?? source.kind)} · ${source.id}\n${source.text ?? ''}`).fontSize(13)
           }, (source: MissionSource) => source.id)
         }.width('100%').alignItems(HorizontalAlign.Start)

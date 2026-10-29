@@ -1,3 +1,4 @@
+import { DocumentSourceMeta } from './Document';
 import { MissionExperience } from './Experience';
 import { FitPremise, EvidenceReview, EvidenceFit, FitExcerpt } from './EvidenceFit';
 
@@ -39,6 +40,7 @@ export interface MissionCapabilities { enabled: boolean; widgetEnabled: boolean;
 export interface MissionQuestionPayload { question: string; missing: string; gapId?: string; }
 export interface MissionQuestion { id: string; seq: number; payloadJson: MissionQuestionPayload; }
 export interface MissionSource {
+  document?: DocumentSourceMeta;
   id: string; kind: string; entityType: string; hash: string; revision: string;
   text?: string; url?: string; excerpts?: string[];
   knowledgeClass?: string;
@@ -68,6 +70,7 @@ export interface MissionAttention { level: string; reason: string; decisionId?: 
 export interface MissionAttentionDelivery { status: string; seenAt?: string | null; }
 export interface MissionDelegation { attention?: MissionAttention | null; }
 export class Mission {
+  documentDeepReadEnabled?: boolean;
   delegation?: MissionDelegation | null;
   evidencePremise?: FitPremise | null;
   id: string = ''; projectId: string = ''; goal: string = ''; status: string = '';

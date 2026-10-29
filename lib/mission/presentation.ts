@@ -5,6 +5,7 @@ export const missionStatusLabels: Record<string, string> = {
   SUCCEEDED: "委托条件已验收", CANCELLED: "已取消",
 };
 export const missionToolLabels: Record<string, string> = {
+  inspect_document:"读取文档目录",read_document_page:"读取原文件页",read_document_section:"读取章节片段",read_document_table:"读取候选表格",
   inspect_project: "读取项目", search_memory: "检索项目记忆", web_search: "检索公开资料",
   web_fetch: "读取公开来源", save_mission_output: "保存草稿", propose_action: "提议行动",
   inspect_action: "读取行动", bind_project_sources: "选入补充材料",

@@ -1,0 +1,1 @@
+export interface DocumentSourceMeta { attachmentId: string; fileName: string; attachmentHash: string; fileHash: string; revisionId: string | null; parser: string; kind: string; pages: number[]; pageMapping: string; observedAt: string; conversationId?: string; turnId?: string; missionId?: string; }

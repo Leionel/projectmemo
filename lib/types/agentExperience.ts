@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { documentToolSchemas } from "./document";
 import { researchToolSchemas } from "./conversationResearch";
 import { repositoryCiToolSchemas } from "./repositoryCi";
 
@@ -57,7 +58,7 @@ export const internalInvestigationToolCallSchema = z.discriminatedUnion("tool", 
   z.object({ tool: z.literal("read_project_material"), projectId: id, sourceId: id, revision: id }).strict(),
   z.object({ tool: z.literal("inspect_action"), projectId: id, actionId: id, revision: id }).strict(),
 ]);
-export const investigationToolCallSchema = z.discriminatedUnion("tool", [...internalInvestigationToolCallSchema.options, ...researchToolSchemas, ...repositoryCiToolSchemas]);
+export const investigationToolCallSchema = z.discriminatedUnion("tool", [...internalInvestigationToolCallSchema.options, ...researchToolSchemas, ...repositoryCiToolSchemas,...documentToolSchemas]);
 export const investigationDecisionSchema = z.discriminatedUnion("decision", [
   z.object({ decision: z.literal("READ_EXISTING"), informationNeed: text, expectedObservation: text, call: investigationToolCallSchema }).strict(),
   z.object({ decision: z.literal("ANSWER_NOW"), reason: text }).strict(),
@@ -67,7 +68,7 @@ export const investigationDecisionSchema = z.discriminatedUnion("decision", [
 ]);
 export type InvestigationDecision = z.infer<typeof investigationDecisionSchema>;
 export const internalInvestigationDecisionSchema = z.discriminatedUnion("decision", [
-  investigationDecisionSchema.options[0].extend({ call: z.discriminatedUnion("tool", [...internalInvestigationToolCallSchema.options, ...repositoryCiToolSchemas]) }),
+  investigationDecisionSchema.options[0].extend({ call: z.discriminatedUnion("tool", [...internalInvestigationToolCallSchema.options, ...repositoryCiToolSchemas,...documentToolSchemas]) }),
   ...investigationDecisionSchema.options.slice(1) as [typeof investigationDecisionSchema.options[1], typeof investigationDecisionSchema.options[2], typeof investigationDecisionSchema.options[3], typeof investigationDecisionSchema.options[4]],
 ]);
 
@@ -81,6 +82,7 @@ export type InvestigationBudget = z.infer<typeof investigationBudgetSchema>;
 export const investigationStepSchema = z.object({
   schemaVersion: z.literal(1), id, turnId: id, seq: z.number().int().positive(),
   decision: investigationDecisionSchema, inputHash: hash, readSetHash: hash,
+  goalBinding: z.object({ gapId:id, goalRevision:id, canonicalNeed:text, modelNeed:text }).strict().optional(),
   status: z.enum(["STARTED", "SUCCEEDED", "FAILED", "UNKNOWN", "STOPPED"]),
   startedAt: time, finishedAt: time.nullable(), observationHash: hash.nullable(),
   sources: z.array(entityRefSchema).max(32),

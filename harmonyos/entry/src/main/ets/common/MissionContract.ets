@@ -46,6 +46,10 @@ export function missionCompletionFacts(status: string, completion?: MissionCompl
   ];
 }
 export function missionToolLabel(tool: string): string {
+  if (tool === 'inspect_document') return '读取文档目录';
+  if (tool === 'read_document_page') return '读取原文件页';
+  if (tool === 'read_document_section') return '读取章节片段';
+  if (tool === 'read_document_table') return '读取候选表格';
   const labels: Record<string, string> = { 'inspect_project': '读取项目状态', 'search_memory': '检索项目记忆',
     'web_search': '搜索公开资料', 'web_fetch': '读取公开来源', 'save_mission_output': '保存草稿',
     'propose_action': '提议行动', 'create_action': '创建行动', 'inspect_action': '检查行动结果', 'bind_project_sources': '绑定补充资料' };

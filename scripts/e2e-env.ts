@@ -18,6 +18,8 @@ export const E2E_AUTH_STATE_PATH = path.resolve(process.cwd(), "test-results", "
 
 export const E2E_ENV = {
   DATABASE_URL: E2E_DATABASE_URL,
+  ATTACHMENT_DIR:path.resolve(process.cwd(),"tmp","e2e-attachments"),
+  DOCUMENT_DEEP_READ_ENABLED:"true",
   LLM_MODE: "mock",
   FOCUS_AGENT_ENABLED: "true",
   FOCUS_AGENT_R4_ENABLED: "true",

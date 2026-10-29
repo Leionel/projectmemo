@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/documentReader.test.ts tests/continuitySuppression.test.ts tests/r4Investigation.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  3 passed (3)
+      Tests  26 passed (26)
+   Start at  14:37:28
+   Duration  28.53s (transform 1.75s, setup 0ms, import 5.27s, tests 22.44s, environment 0ms)
+

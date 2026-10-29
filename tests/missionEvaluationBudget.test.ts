@@ -72,4 +72,10 @@ describe("P0-A isolated evaluation authorization and cumulative budget", () => {
     await expect(guarded(config.baseUrl + "/chat/completions", { ...request(), body: JSON.stringify({ model: "unknown" }) })).rejects.toThrow("INVALID_EVALUATION_REQUEST");
     expect(transport).not.toHaveBeenCalled(); expect(budget.summary().requestsStarted).toBe(0); await budget.close();
   });
+  it("admits Focus output sizes, reserves their actual bound, and rejects outputs above 8192", async () => {
+    const {file,budget}=await fixture(2);const transport=vi.fn(async()=>response());const guarded=budget.wrapFetch(transport);
+    for(const max_tokens of [2048,8192]) await guarded(config.baseUrl+"/chat/completions",{method:"POST",body:JSON.stringify({model:config.model,max_tokens,thinking:{type:"disabled"}})});
+    await expect(guarded(config.baseUrl+"/chat/completions",{method:"POST",body:JSON.stringify({model:config.model,max_tokens:8193,thinking:{type:"disabled"}})})).rejects.toThrow("INVALID_EVALUATION_REQUEST");
+    const ledger=JSON.parse(await readFile(file,"utf8"));expect(ledger.entries.map((entry:{maxOutputTokens:number})=>entry.maxOutputTokens)).toEqual([2048,8192]);expect(ledger.entries[1].reservedCny).toBeGreaterThan(ledger.entries[0].reservedCny);expect(transport).toHaveBeenCalledTimes(2);await budget.close();
+  });
 });

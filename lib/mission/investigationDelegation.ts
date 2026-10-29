@@ -46,6 +46,7 @@ export async function investigationInputHash(m:AgentMission,tx:Tx=db){
 export async function initializeDelegation(tx:Tx,m:AgentMission,raw:unknown){
   const p=boundedInvestigationPolicySchema.parse(raw);
   if(!isFeatureEnabled("MISSION_INVESTIGATION_DELEGATION_ENABLED",false))throw new AppError("DELEGATION_DISABLED","持续调查暂未开启",503);
+  if(p.allowedTools.some(t=>["inspect_document","read_document_page","read_document_section","read_document_table"].includes(t))&&!isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false))throw new AppError("DOCUMENT_READER_DISABLED","文档深读当前未开启，不能新增这项持续许可",503);
   if(Date.parse(p.expiresAt)<=Date.now()||Date.parse(p.expiresAt)>Date.now()+30*86400000)throw new AppError("INVALID_DELEGATION_PERIOD","请选择未来30天内的调查期限",422);
   try{new Intl.DateTimeFormat("zh-CN",{timeZone:p.timezone}).format();}catch{throw new AppError("INVALID_TIMEZONE","时区无法识别",422);}
   if((m.constraintsJson as {llmContextApproved?:boolean}).llmContextApproved!==true)throw new AppError("LLM_CONTEXT_NOT_APPROVED","请先允许云模型使用原委托上下文",409);

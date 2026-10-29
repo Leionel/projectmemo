@@ -1,0 +1,39 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/documentReader.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/documentReader.test.ts (7 tests | 1 failed) 1908ms
+   × CT4 original Conversation investigates the real PDF and publishes a bound dual-client citation 869ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/documentReader.test.ts > CT4 original Conversation investigates the real PDF and publishes a bound dual-client citation
+AssertionError: {"frames":3,"sources":[{"id":"cmvt66rtd001s9s8ofxo87fdo/project:cmvt66rtd001s9s8ofxo87fdo"},{"id":"cmvt66rtd001s9s8ofxo87fdo/doc:058f4359-ab1f-410f-97ba-3eba46da22cc"},{"id":"cmvt66rtd001s9s8ofxo87fdo/doc:a9af56e1-8888-4008-aef9-7ce007c31331"}]}: expected undefined to be truthy
+
+- Expected:
+true
+
++ Received:
+undefined
+
+ ❯ tests/documentReader.test.ts:80:200
+
+ ❯ chatWithLLMWithMeta lib/agent/llmAgent.ts:41:26
+ ❯ conversationModelSpec lib/conversation/model.ts:61:14
+ ❯ executeInvestigation lib/conversation/investigationService.ts:284:20
+ ❯ investigateConversation lib/conversation/investigationService.ts:294:16
+ ❯ executeTurnGeneration lib/conversation/turnService.ts:237:9
+ ❯ executeAcceptedConversationTurn lib/conversation/turnService.ts:115:16
+ ❯ tests/documentReader.test.ts:84:67
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  14:36:11
+   Duration  4.75s (transform 1.62s, setup 0ms, import 2.60s, tests 1.91s, environment 0ms)
+

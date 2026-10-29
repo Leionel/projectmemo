@@ -42,6 +42,7 @@ export type ConversationRef = {
   questionId?: string | null; href: string;
 };
 export type ConversationSource = {
+  document?: import("./document").DocumentMeta;
   repository?: import("./repositoryCi").RepositorySourceMeta;
   external?: ExternalSourceMeta;
   id: string; projectId: string; sourceId: string; revision: string;
@@ -51,6 +52,7 @@ export type ConversationSource = {
 };
 export type ConversationCitation = { sourceId: string; quote: string };
 export type ConversationFileGuide = {
+  document?: import("./document").DocumentMeta;
   number: number; sourceId: string; projectId: string; entityId: string;
   kind: "ATTACHMENT" | "RECORD" | "ARTIFACT" | "WEB"; title: string; revision: string;
   external?: ExternalSourceMeta;

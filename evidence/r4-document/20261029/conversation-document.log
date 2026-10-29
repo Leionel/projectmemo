@@ -1,0 +1,32 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/documentReader.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/documentReader.test.ts (7 tests | 1 failed) 1814ms
+   × CT4 original Conversation investigates the real PDF and publishes a bound dual-client citation 845ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/documentReader.test.ts > CT4 original Conversation investigates the real PDF and publishes a bound dual-client citation
+TypeError: Cannot read properties of undefined (reading 'id')
+ ❯ tests/documentReader.test.ts:80:201
+
+ ❯ chatWithLLMWithMeta lib/agent/llmAgent.ts:41:26
+ ❯ conversationModelSpec lib/conversation/model.ts:61:14
+ ❯ executeInvestigation lib/conversation/investigationService.ts:284:20
+ ❯ investigateConversation lib/conversation/investigationService.ts:294:16
+ ❯ executeTurnGeneration lib/conversation/turnService.ts:237:9
+ ❯ executeAcceptedConversationTurn lib/conversation/turnService.ts:115:16
+ ❯ tests/documentReader.test.ts:84:67
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  14:35:35
+   Duration  5.11s (transform 1.81s, setup 0ms, import 2.89s, tests 1.81s, environment 0ms)
+

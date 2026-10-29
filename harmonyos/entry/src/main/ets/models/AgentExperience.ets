@@ -20,9 +20,10 @@ export interface InvestigationDecision {
 }
 export interface InvestigationCoverage { complete: boolean; description: string; }
 export interface InvestigationUsage { inputTokens: number | null; outputTokens: number | null; }
+export interface InvestigationGoalBinding { gapId: string; goalRevision: string; canonicalNeed: string; modelNeed: string; }
 export interface InvestigationStep {
   schemaVersion: number; id: string; turnId: string; seq: number; decision: InvestigationDecision;
-  inputHash: string; readSetHash: string; status: string; startedAt: string; finishedAt: string | null;
+  inputHash: string; readSetHash: string; status: string; startedAt: string; finishedAt: string | null; goalBinding?: InvestigationGoalBinding;
   observationHash: string | null; sources: ExperienceEntityRef[]; coverage: InvestigationCoverage;
   reservationId: string | null; provider: string | null; usage: InvestigationUsage; failureReason: string | null;
 }

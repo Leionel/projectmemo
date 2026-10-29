@@ -2,14 +2,16 @@ import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { record, type Tx } from "@/lib/conversation/repository";
 import { effectiveContinuity } from "./directiveService";
+import { isFeatureEnabled } from "@/lib/config/features";
 
 export type SourceUse = { state: "ALLOWED" | "SUPPRESSED" | "UNKNOWN"; roots: string[]; independentEvidence: boolean; reason: string };
 /** Follow original roots, not copies of conclusions. Cycles, missing manifests and cross-project edges stay unknown. */
-export async function sourceLineage(projectId: string, id: string, tx: Tx = db, seen = new Set<string>(), budget = { remaining: 64 }): Promise<{ roots: string[]; known: boolean; derived: boolean; blocked?: boolean }> {
+export async function sourceLineage(projectId: string, id: string, tx: Tx = db, seen = new Set<string>(), budget = { remaining: 64 }): Promise<{ roots: string[]; known: boolean; derived: boolean; blocked?: boolean;blockedReason?:string }> {
   if (typeof id !== "string" || !id) return { roots: [], known: false, derived: true };
   if (seen.has(id) || seen.size >= 32 || budget.remaining-- <= 0) return { roots: [], known: false, derived: true };
   const next = new Set(seen).add(id), childIds: string[] = [];
   let known = true, derived = false, blocked = false;
+  let blockedReason:string|undefined;
   if (id.startsWith("card:")) {
     const card = await tx.knowledgeCard.findFirst({ where: { id: id.slice(5), projectId } });
     if (!card) return { roots: [], known: false, derived: true };
@@ -37,6 +39,10 @@ export async function sourceLineage(projectId: string, id: string, tx: Tx = db, 
     for (const step of steps) for (const s of (record(step.resultJson).sources ?? []) as Array<{ id: string }>) childIds.push(s.id);
     known = Array.isArray(rawIds) && rawIds.length === missionIds.length && missions.length === new Set(missionIds).size &&
       missionIds.length > 0 && missionIds.every(id => steps.some(s => s.missionId === id && Array.isArray(record(s.resultJson).sources) && (record(s.resultJson).sources as unknown[]).length > 0)); derived = true;
+  } else if(id.startsWith("doc:")){
+    const observationsModule=await import("@/lib/documents/observations"),source=await observationsModule.findDocumentObservation(projectId,id,tx);
+    if(source?.document){childIds.push("attachment:"+source.document.attachmentId);blocked=!await observationsModule.documentObservationCurrent(projectId,source,tx);if(blocked)blockedReason=isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false)?"DOCUMENT_VERSION_CHANGED":"DOCUMENT_READER_DISABLED";}else known=false;
+    derived=true;
   } else if (id.startsWith("ci:")) {
     const source = await (await import("@/lib/sensing/repoCiObservations")).findRepositoryObservation(projectId, id, tx);
     if (source?.repository) {
@@ -68,20 +74,22 @@ export async function sourceLineage(projectId: string, id: string, tx: Tx = db, 
     const external = await tx.externalSource.findFirst({ where: { id, mission: { projectId } }, select: { id: true } }); known = !!external;
   }
   const roots = [id];
-  for (const child of new Set(childIds)) { const line = await sourceLineage(projectId, child, tx, next, budget); roots.push(...line.roots); known &&= line.known; blocked ||= line.blocked === true; }
-  return { roots: [...new Set(roots)], known, derived, blocked };
+  for (const child of new Set(childIds)) { const line = await sourceLineage(projectId, child, tx, next, budget); roots.push(...line.roots); known &&= line.known; blocked ||= line.blocked === true;blockedReason??=line.blockedReason; }
+  return { roots: [...new Set(roots)], known, derived, blocked,blockedReason };
 }
 export async function sourceUse(userId: string, projectId: string, sourceId: string, tx: Tx = db, scope?: { conversationId?: string; missionId?: string }): Promise<SourceUse> {
   const view = await effectiveContinuity(userId, { projectId, ...scope }, tx);
   const suppressed = new Set(view.directives.filter(d => d.kind === "USE_SUPPRESSION").flatMap(d => d.sourceIds));
   const line = await sourceLineage(projectId, sourceId, tx);
-  if (line.blocked) return { state: "SUPPRESSED", roots: line.roots, independentEvidence: false, reason: "SOURCE_PERMISSION_REVOKED" };
+  if (line.blocked) return { state: "SUPPRESSED", roots: line.roots, independentEvidence: false, reason: line.blockedReason??"SOURCE_PERMISSION_REVOKED" };
   if (line.roots.some(r => suppressed.has(r))) return { state: "SUPPRESSED", roots: line.roots, independentEvidence: false, reason: "ROOT_SUPPRESSED" };
   if (!line.known) return { state: "UNKNOWN", roots: line.roots, independentEvidence: false, reason: "LINEAGE_UNKNOWN" };
   return { state: "ALLOWED", roots: line.roots, independentEvidence: !line.derived, reason: line.derived ? "DERIVED_REFERENCE" : "ORIGINAL_OBSERVATION" };
 }
 export async function assertSourceUse(userId: string, projectId: string, sourceId: string, tx: Tx = db, scope?: { conversationId?: string; missionId?: string }) {
   const policy = await sourceUse(userId, projectId, sourceId, tx, scope);
+  if(policy.reason==="DOCUMENT_VERSION_CHANGED")throw new AppError("SOURCE_CHANGED","原文件或文本修订已变化，请重新读取后继续",409);
+  if(policy.reason==="DOCUMENT_READER_DISABLED")throw new AppError("DOCUMENT_READER_DISABLED","文档深读当前已关闭，原观察保留为历史",503);
   if (policy.state !== "ALLOWED") throw new AppError(policy.state === "SUPPRESSED" ? "SOURCE_USE_SUPPRESSED" : "SOURCE_LINEAGE_UNKNOWN",
     policy.state === "SUPPRESSED" ? "你已要求停止使用这条资料及其派生结论，请重新调查" : "这条结论的原始来源尚不明确，请读取原始资料后继续", 409);
   return policy;

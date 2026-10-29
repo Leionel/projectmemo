@@ -23,6 +23,9 @@ import { admitDirective } from "@/lib/continuity/admission";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { readConversationRepositoryTool } from "./repositoryTools";
 import type { RepositoryCiCall } from "@/lib/types/repositoryCi";
+import { readConversationDocumentTool } from "./documentTools";
+import type { DocumentCall } from "@/lib/types/document";
+import { bindInvestigationGoal } from "./experienceContract";
 
 export type R4State = {
   schemaVersion: 1; policyVersion: "r4-v1"; phase: "ROUTING" | "READING_SOURCE" | "EVALUATING" | "WAITING_MODEL" | "WAITING_USER" | "READY" | "UNKNOWN";
@@ -176,6 +179,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
     sources: observations.sources.map((s, i) => ({ id: s.id, sourceId: s.sourceId, revision: s.revision, projectId: s.projectId, title: s.title,
       excerpt: s.excerpt.slice(0, Math.min(1200, Math.floor(4800 / Math.max(1, observations.sources.length)))),
       readScope: s.readScope, knowledgeClass: s.knowledgeClass, temporalState: s.temporalState, citationNumber: i + 1,
+      ...(s.document?{document:s.document}:{}),
       ...(s.external ? { external: { readLevel: s.external.readLevel, requestedUrl: s.external.requestedUrl, publishedAt: s.external.publishedAt, fetchedAt: s.external.fetchedAt,
         modelExcerptTruncated: s.excerpt.length > Math.min(1200, Math.floor(4800 / Math.max(1, observations.sources.length))) || s.external.truncated } } : {}) })),
     goalGaps: state.goalGaps, materialPointers: state.pointers,
@@ -195,7 +199,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
     state.phase = "EVALUATING"; await saveR4State(actor, id, turnId, state, observations.sources);
     const callId = "investigate-" + state.steps.length;
     const frameInput = { ...context(),
-      allowedTools: [...(researchAllowed ? [...workspaceReadTools, ...(grant.scope.enabled ? ["web_search"] : []), "web_fetch"] : workspaceReadTools), ...(ciAllowed ? ["read_repository_ci", "read_ci_jobs", "read_ci_log"] : [])],
+      allowedTools: [...(researchAllowed ? [...workspaceReadTools, ...(grant.scope.enabled ? ["web_search"] : []), "web_fetch"] : workspaceReadTools), ...(ciAllowed ? ["read_repository_ci", "read_ci_jobs", "read_ci_log"] : []),...(isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false)?["inspect_document","read_document_page","read_document_section","read_document_table"]:[])],
       previousSteps: state.steps.map(s => ({ decision: s.decision, status: s.status, coverage: s.coverage, failureReason: s.failureReason })),
       remaining: { modelCalls: state.budget.maxModelCalls - turn.callCount, reads: state.budget.maxToolReads - state.steps.length } };
     const frame = input.evaluationVariant === "INVESTIGATION_ONLY"
@@ -220,24 +224,27 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
       break;
     }
     const decision = state.decision, argsHash = jsonHash(decision.call);
-    if (input.evaluationVariant !== "INVESTIGATION_ONLY" && !state.goalGaps.some(g => g.projectId === decision.call.projectId && g.nextInformationNeed === decision.informationNeed))
-      throw new AppError("INVESTIGATION_GOAL_UNBOUND", "调查步骤没有关联当前目标缺口", 409);
+    let goalBinding:InvestigationStep["goalBinding"];
+    if(input.evaluationVariant!=="INVESTIGATION_ONLY"){
+      try{goalBinding=bindInvestigationGoal(decision,state.goalGaps);}catch{throw new AppError("INVESTIGATION_GOAL_UNBOUND","调查步骤没有关联当前目标缺口",409);}
+    }
     if (state.steps.length >= state.budget.maxToolReads) {
       state.stopReason = "BUDGET_EXHAUSTED"; state.decision = { decision: "STOP", reason: "BUDGET_EXHAUSTED", explanation: "本轮读取额度已用完，先依据当前资料回答。" }; break;
     }
     if (seen.has(argsHash)) { state.stopReason = "NO_GAIN"; state.decision = { decision: "STOP", reason: "NO_GAIN", explanation: "重复读取不会带来新信息，本轮先停止。" }; break; }
     seen.add(argsHash);
     const step: InvestigationStep = { schemaVersion: 1, id: `${turnId}-read-${state.steps.length + 1}`, turnId, seq: state.steps.length + 1,
-      decision, inputHash: argsHash, readSetHash: jsonHash(observations.sources.map(s => ({ id: s.id, revision: s.revision, excerptHash: s.excerptHash }))),
+      decision, goalBinding, inputHash: argsHash, readSetHash: jsonHash(observations.sources.map(s => ({ id: s.id, revision: s.revision, excerptHash: s.excerptHash }))),
       status: "STARTED", startedAt: new Date().toISOString(), finishedAt: null, observationHash: null, sources: [],
       coverage: { complete: false, description: decision.informationNeed }, reservationId: callId, provider, usage: frame.usage, failureReason: null };
     state.steps.push(step); state.phase = "READING_SOURCE"; await saveR4State(actor, id, turnId, state, observations.sources);
     try {
       const web = decision.call.tool === "web_search" || decision.call.tool === "web_fetch";
       const ci = ["read_repository_ci", "read_ci_jobs", "read_ci_log"].includes(decision.call.tool);
+      const doc=["inspect_document","read_document_page","read_document_section","read_document_table"].includes(decision.call.tool);
       if (ci && !ciAllowed) throw new AppError("CI_NOT_AUTHORIZED", "本轮没有获准的 CI 连接", 409);
       if (web && !researchAllowed) throw new AppError("RESEARCH_NOT_ALLOWED", "本轮未授权联网调查", 409);
-      const result = await turnOperation(actor, id, turnId, "read-" + step.seq, "READ", decision.call, () => ci
+      const result = await turnOperation(actor, id, turnId, "read-" + step.seq, "READ", decision.call, () => doc?readConversationDocumentTool(actor,id,turnId,decision.call as DocumentCall,state.pointers):ci
         ? readConversationRepositoryTool(actor, id, turnId, decision.call as RepositoryCiCall, state.pointers, observations.sources)
         : web
         ? readConversationResearchTool(actor, id, turnId, "web-" + step.seq, decision.call as import("@/lib/types/conversationResearch").ResearchToolCall)

@@ -1,0 +1,2 @@
+lib/mission/documentTools.ts(14,209): error TS2349: This expression is not callable.
+  Each member of the union type '(<M extends Mask<"projectId" | "revision" | "sourceId" | "tool" | "page">>(mask: M & Record<Exclude<keyof M, "projectId" | "revision" | "sourceId" | "tool" | "page">, never>) => ZodObject<...>) | (<M extends Mask<...>>(mask: M & Record<...>) => ZodObject<...>) | (<M extends Mask<...>>(mask: M & Record<...>) => ZodOb...' has signatures, but none of those signatures are compatible with each other.

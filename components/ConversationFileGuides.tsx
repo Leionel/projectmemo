@@ -29,10 +29,11 @@ export function ConversationFileGuides({ message, conversationId }: { message: C
       {file.missing && <p className={styles.fileNotice}>原资料已不可用，下方保留历史片段。</p>}
       {file.archived && <p className={styles.fileNotice}>资料已归档，归档不改变引用时的事实状态。</p>}
       {file.external && <p className={styles.fileNotice}>{researchReadLevelLabel(file.external.readLevel)} · 抓取于 {file.external.fetchedAt.slice(0, 10)}{file.external.publishedAt ? " · 发布于 " + file.external.publishedAt.slice(0, 10) : ""}{file.external.truncated ? " · 已截断" : ""}</p>}
+      {file.document&&<p className={styles.fileNotice}>{file.document.pages.length?`原件物理第 ${file.document.pages[0]} 页`:"校对文本或文件目录"}{file.document.kind==="TABLE"?" · 表头待核对":""}</p>}
       <blockquote>{file.quote ?? file.excerpt}</blockquote>
       {!file.missing && <a href={destination(file, conversationId, message.id)} className="workspace-link focus-ring"
         target={file.kind === "ATTACHMENT" ? "_blank" : undefined} rel={file.kind === "ATTACHMENT" ? "noopener noreferrer" : undefined}>
-        {file.kind === "WEB" ? "查看网页来源" : file.kind === "ATTACHMENT" ? "打开原文件" : file.kind === "ARTIFACT" ? "查看原成果" : "查看项目资料"}<ArrowUpRight size={13} aria-hidden="true"/>
+        {file.document?"查看原页与引用":file.kind === "WEB" ? "查看网页来源" : file.kind === "ATTACHMENT" ? "打开原文件" : file.kind === "ARTIFACT" ? "查看原成果" : "查看项目资料"}<ArrowUpRight size={13} aria-hidden="true"/>
       </a>}
     </details>)}
   </div>;

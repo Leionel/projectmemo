@@ -5,7 +5,9 @@ import { PMColors } from '../common/DesignTokens';
 
 export function openConversationFile(file: ConversationFileGuide, conversationId: string): void {
   if (file.missing) return;
-  if (file.kind === 'WEB' && file.external) {
+  if (file.document) {
+    router.pushUrl({ url: 'pages/ConversationWebSource', params: { conversationId: file.document.conversationId || conversationId, turnId: file.document.turnId || '', sourceId: file.sourceId.split('/').pop() || '', missionId: file.document.missionId || '' } });
+  } else if (file.kind === 'WEB' && file.external) {
     router.pushUrl({ url: 'pages/ConversationWebSource', params: { conversationId: file.external.conversationId, turnId: file.external.turnId, sourceId: file.entityId } });
   } else if (file.kind === 'ATTACHMENT') {
     router.pushUrl({ url: 'pages/AttachmentViewer', params: { projectId: file.projectId, attachmentId: file.entityId, conversationId: conversationId } });
@@ -53,6 +55,7 @@ export struct ConversationFileGuides {
           }.width('100%')
           if (this.expanded === file.sourceId) {
             if (file.external) { Text(researchReadLevelLabel(file.external.readLevel) + ' · 抓取于 ' + file.external.fetchedAt.slice(0, 10) + (file.external.truncated ? ' · 已截断' : '')).fontSize(12).fontColor(PMColors.INK_SECONDARY) }
+            if (file.document) { Text((file.document.pages.length > 0 ? '原件物理第 ' + file.document.pages[0].toString() + ' 页' : '目录或校对文本') + (file.document.kind === 'TABLE' ? ' · 表头待核对' : '')).fontSize(12).fontColor(PMColors.INK_SECONDARY) }
             if (file.stale) { Text('引用后已有修订，下方保留当时读取的片段。').fontSize(12).fontColor(PMColors.WARNING) }
             if (file.missing) { Text('原资料已不可用，保留历史片段。').fontSize(12).fontColor(PMColors.INK_SECONDARY) }
             if (file.archived) { Text('资料已归档').fontSize(12).fontColor(PMColors.INK_SECONDARY) }

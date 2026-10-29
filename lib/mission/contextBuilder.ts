@@ -16,10 +16,11 @@ export function sourceContext(source: Source, policy?: SourceUse) {
   const text = source.text, ranges = text.length > 800 ? [[0, 400], [text.length - 400, text.length]] : [[0, text.length]];
   return { ...(policy ? { provenance: { state: policy.state, independentEvidence: policy.independentEvidence, reason: policy.reason } } : {}), id: source.id, kind: source.kind, entityType: source.entityType, knowledgeClass: source.knowledgeClass ?? (source.kind === "EXTERNAL" ? "EXTERNAL_REFERENCE" : "PROJECT_OBSERVATION"),
     hash: source.hash, revision: source.revision, observedAt: source.observedAt, temporalState: source.temporalState ?? source.assessment?.temporalState ?? "UNKNOWN",
-    assessment: source.assessment, excerpts: ranges.map(([start, end]) => ({ sourceId: source.id, start, end, text: text.slice(start, end), excerptHash: textHash(text.slice(start, end)) })),
+    assessment: source.assessment, document:source.document, excerpts: ranges.map(([start, end]) => ({ sourceId: source.id, start, end, text: text.slice(start, end), excerptHash: textHash(text.slice(start, end)) })),
     truncated: text.length > 800 };
 }
 function compactData(value: unknown) {
+  if(value&&typeof value==="object"&&(value as {kind?:string}).kind==="DOCUMENT_CATALOG")return {value,truncated:false};
   const serialized = JSON.stringify(value ?? null);
   return serialized.length <= 1600 ? { value, truncated: false } : { preview: serialized.slice(0, 1000), truncated: true, originalCharacters: serialized.length,
     note: "数据正文已裁剪；来源状态完整保留在sources和sourceIndex" };

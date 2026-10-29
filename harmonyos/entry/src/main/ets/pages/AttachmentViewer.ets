@@ -12,11 +12,12 @@ import { PMColors } from '../common/DesignTokens';
 import { PMAppBar } from '../components/PMAppBar';
 import { PMButton, PMStatusPill } from '../components/PMReferencePrimitives';
 
-class AttachmentParams { projectId: string = ''; attachmentId: string = ''; }
+class AttachmentParams { projectId: string = ''; attachmentId: string = ''; physicalPage: number = 0; }
 
 @Entry
 @Component
 struct AttachmentViewer {
+  @State physicalPage: number = 0;
   @State item: Attachment = new Attachment();
   @State loading: boolean = true;
   @State error: string = '';
@@ -37,6 +38,7 @@ struct AttachmentViewer {
     const params = router.getParams() as AttachmentParams;
     this.projectId = params.projectId ?? '';
     this.attachmentId = params.attachmentId ?? '';
+    this.physicalPage = params.physicalPage >= 1 && params.physicalPage <= 10000 ? Math.floor(params.physicalPage) : 0;
     this.active = true;
     SessionStore.onSessionExpired(this.onExpired);
     this.load();
@@ -127,6 +129,7 @@ struct AttachmentViewer {
             Column({ space: 8 }) {
               PMStatusPill({ label: attachmentStatus(this.item) })
               Text(this.item.fileName).fontSize(20).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
+              if (this.physicalPage > 0) { Text('引用定位：原件物理第 ' + this.physicalPage.toString() + ' 页').fontSize(13).fontColor(PMColors.INK_SECONDARY) }
               Text(`${attachmentSize(this.item.size)} · ${(this.item.createdAt ?? '').substring(0, 10)}`).fontSize(12).fontColor(PMColors.INK_TERTIARY)
             }.width('100%').alignItems(HorizontalAlign.Start)
             if (this.originalError !== '') {

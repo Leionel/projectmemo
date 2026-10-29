@@ -1,0 +1,7 @@
+/** Small deterministic PDF, with real physical pages. Synthetic English text avoids machine font dependencies. */
+export function documentPdfFixture(){
+ const objects=["<< /Type /Catalog /Pages 2 0 R >>","<< /Type /Pages /Kids [3 0 R 5 0 R] /Count 2 >>", "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 7 0 R >> >> /Contents 4 0 R >>","", "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 7 0 R >> >> /Contents 6 0 R >>","", "<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>"];
+ const lines=[["1 Requirements 2026","Deadline: 2026-11-15 +08:00","Metric      Value    Unit","accuracy    0.90     ratio"],["Appendix 2025","Deadline: 2025-10-10","Example only. Not the current rules."]];
+ for(const [index,page]of[[3,0],[5,1]]){const stream="BT /F1 12 Tf 40 740 Td "+lines[page].map((line,i)=>(i?"0 -20 Td ":"")+`(${line}) Tj`).join(" ")+" ET";objects[index]=`<< /Length ${Buffer.byteLength(stream)} >>\nstream\n${stream}\nendstream`;}
+ let raw="%PDF-1.4\n";const offsets=[0];for(let i=0;i<objects.length;i++){offsets.push(Buffer.byteLength(raw));raw+=`${i+1} 0 obj\n${objects[i]}\nendobj\n`;}const xref=Buffer.byteLength(raw);raw+=`xref\n0 ${objects.length+1}\n0000000000 65535 f \n`+offsets.slice(1).map(n=>String(n).padStart(10,"0")+" 00000 n \n").join("")+`trailer\n<< /Root 1 0 R /Size ${objects.length+1} >>\nstartxref\n${xref}\n%%EOF`;return Buffer.from(raw);
+}

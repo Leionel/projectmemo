@@ -10,11 +10,18 @@ import {
 import {
   hydratePresentation, validateHydratedPresentation, validateInvestigationBudget, validateInvestigationDecision,
   validatePresentationPlan, type ExperienceAuthority,
+  bindInvestigationGoal,
 } from "@/lib/conversation/experienceContract";
 import {
   buildPromptMessages, modelDataMessage, modelMessagesInputBound, modelMessagesSchema,
   reservedModelUsage, validateModelCapabilities, type ModelCallReservation, type PromptSpec,
 } from "@/lib/agent/promptSpec";
+it("goal read binding tolerates paraphrase but requires one current gap in the same project",()=>{
+ const gap=goalGapSchema.parse(fixtureData.cases[0].observedAuthority.catalog.find((b:{semanticType:string})=>b.semanticType==="goal_gap")?.goalGap);
+ const call={decision:"READ_EXISTING" as const,informationNeed:"换一种说法核对原页",expectedObservation:"原页的适用条款",call:{tool:"inspect_project" as const,projectId:gap.projectId}};
+ expect(bindInvestigationGoal(call,[{...gap,nextInformationNeed:"核对适用条款"}])).toMatchObject({gapId:gap.id,goalRevision:gap.goalRef.revision,canonicalNeed:"核对适用条款",modelNeed:call.informationNeed});
+ for(const gaps of [[],[gap,gap],[{...gap,nextInformationNeed:null}],[{...gap,projectId:"another-project"}]])expect(()=>bindInvestigationGoal(call,gaps)).toThrow("INVESTIGATION_GOAL_UNBOUND");
+});
 
 function authority(value: unknown): ExperienceAuthority {
   const a = structuredClone(value) as ExperienceAuthority;

@@ -1,0 +1,713 @@
+{
+  "kind": "REAL_MODEL_REAL_POPPLER_SYNTHETIC_PDF_FOLLOWUP",
+  "status": "RECEIVED_FOR_TRACE_REVIEW",
+  "reason": "Original ANSWER failed in the local 2000-token preflight before transport. New question; original UNKNOWN and reservations remain unchanged.",
+  "database": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\pm-ct4-live-XillJi\\evaluation.db",
+  "oldTurn": {
+    "id": "cmvt6ow340007wo8olbv0tncl",
+    "status": "UNKNOWN",
+    "callCount": 2,
+    "reservation": [
+      {
+        "purpose": "ROUTE",
+        "callId": "g0:route",
+        "inputTokens": 4988,
+        "outputTokens": 768,
+        "inputAccounting": "UTF8_UPPER_BOUND",
+        "state": "SETTLED",
+        "provider": "llm:deepseek:deepseek-flash",
+        "promptId": "focus.route.v2",
+        "promptVersion": "2.1.2",
+        "outputSchemaVersion": 1,
+        "requestHash": "d53ce3b319f7920f66dafcd7aea1fef2cee35db21444fb8ac115d2a52a1bea0e",
+        "dispatchState": "DISPATCH_COMMITTED",
+        "usage": {
+          "inputTokens": 1078,
+          "outputTokens": 217
+        }
+      },
+      {
+        "purpose": "ANSWER",
+        "callId": "g0:answer",
+        "inputTokens": 6868,
+        "outputTokens": 2048,
+        "inputAccounting": "UTF8_UPPER_BOUND",
+        "state": "RESERVED",
+        "provider": "llm:deepseek:deepseek-flash",
+        "promptId": "focus.answer.v2",
+        "promptVersion": "2.1.0",
+        "outputSchemaVersion": 1,
+        "requestHash": "c56ce92852aec0b2a9977892e901d272fdb7ad570ad4f379b893eed332234fd9",
+        "dispatchState": "DISPATCH_COMMITTED"
+      }
+    ]
+  },
+  "view": {
+    "turnId": "cmvt78mkq0000ik8oy77qmol7",
+    "status": "ANSWERED",
+    "conversation": {
+      "schemaVersion": 1,
+      "id": "cmvt6ow1v0006wo8owt0bbvnc",
+      "title": "2026 合成规则核 · 深读本项目原PDF的正式要求和旧附录，核对本…",
+      "continuity": {
+        "schemaVersion": 1,
+        "seq": 0,
+        "intentHash": "dec58f9d8ba8ada600f86ac9157b21c840d4250d466346a02d66d5886202e41b",
+        "reusePolicyHash": "d6777b7911ba2e77104904316c81db9b98917029c769bee846c3ae8d48e10073",
+        "nextBoundary": null,
+        "directives": [],
+        "workingObjective": null,
+        "constraints": [],
+        "stopped": false,
+        "candidate": {
+          "id": "cmvt78mkq0000ik8oy77qmol7:0:be43136093ce9e73352b44c28d0012b6c5a3e76b5f0c8291a0dee6e957dee49e",
+          "quote": "请实际读取已上传PDF的第1页和第2页，比较2026正式要求与2025示例附录。分别引用两页原文后，判断本届截止日期；请先自主查原文件，不要只根据摘要回答。不创建行动、不改目标。",
+          "interpretation": "当前工作重点为核对已上传PDF第1、2页原文，比较2026正式要求与2025示例附录并据此判断本届截止日期；仅调查与回答，不创建行动、不修改目标。",
+          "kind": "WORKING_OBJECTIVE",
+          "turnId": "cmvt78mkq0000ik8oy77qmol7",
+          "conversationId": "cmvt6ow1v0006wo8owt0bbvnc",
+          "scope": {
+            "projectId": "cmvt6ovsw0001wo8oha8picjf"
+          }
+        },
+        "handoff": {
+          "missions": [],
+          "results": []
+        }
+      },
+      "research": {
+        "available": false,
+        "revision": 1,
+        "projectId": "cmvt6ovsw0001wo8oha8picjf",
+        "scope": {
+          "enabled": false,
+          "topic": "",
+          "publicTerms": [],
+          "allowedCategories": [
+            "PUBLIC_TOPIC"
+          ],
+          "excludedTerms": [],
+          "allowedHosts": []
+        }
+      },
+      "scope": "PROJECT",
+      "homeProjectId": "cmvt6ovsw0001wo8oha8picjf",
+      "version": 4,
+      "focusProjectId": "cmvt6ovsw0001wo8oha8picjf",
+      "messages": [
+        {
+          "schemaVersion": 1,
+          "refs": [],
+          "sources": [],
+          "priorities": [],
+          "proposal": null,
+          "provider": "project_state",
+          "limitations": [],
+          "observedProjectIds": [
+            "cmvt6ovsw0001wo8oha8picjf"
+          ],
+          "fileGuides": [],
+          "id": "cmvt6ow3g0008wo8ozlvyzjlj",
+          "seq": 1,
+          "role": "USER",
+          "content": "请深读本项目原PDF的正式要求和旧附录，核对本届真正适用的截止日期。具体比较两页，区分正式要求与示例，不创建行动或改目标。",
+          "restricted": false
+        },
+        {
+          "schemaVersion": 1,
+          "refs": [],
+          "sources": [],
+          "priorities": [],
+          "proposal": null,
+          "provider": "project_state",
+          "limitations": [],
+          "observedProjectIds": [
+            "cmvt6ovsw0001wo8oha8picjf"
+          ],
+          "fileGuides": [],
+          "id": "cmvt78mkz0001ik8oi5p9ckjj",
+          "seq": 2,
+          "role": "USER",
+          "content": "补充核对：请实际读取已上传PDF的第1页和第2页，比较2026正式要求与2025示例附录。分别引用两页原文后，判断本届截止日期；请先自主查原文件，不要只根据摘要回答。不创建行动、不改目标。",
+          "restricted": false
+        },
+        {
+          "schemaVersion": 1,
+          "refs": [
+            {
+              "kind": "PROJECT",
+              "id": "cmvt6ovsw0001wo8oha8picjf",
+              "projectId": "cmvt6ovsw0001wo8oha8picjf",
+              "title": "2026 合成规则核对",
+              "href": "/projects/cmvt6ovsw0001wo8oha8picjf/knowledge",
+              "bindingId": "cmvt791an0009ik8oa51j22fi"
+            }
+          ],
+          "sources": [
+            {
+              "id": "cmvt6ovsw0001wo8oha8picjf/project:cmvt6ovsw0001wo8oha8picjf",
+              "projectId": "cmvt6ovsw0001wo8oha8picjf",
+              "sourceId": "project:cmvt6ovsw0001wo8oha8picjf",
+              "revision": "cbb2bfadc4d2ac9b55490ac4afa6a36abb85e396bbf081693ef504ea7d47b9ea",
+              "title": "2026 合成规则核对 当前状态",
+              "excerpt": "2026 合成规则核对\n项目目标：按本届正式要求准备作品，并保留适用版本证据\n截止日期：未知\n未完成行动：0 项\n待回应委托：0 项\n阻塞项：0 项",
+              "observedAt": "2026-10-29T07:05:43.433Z",
+              "temporalState": "CURRENT",
+              "knowledgeClass": "PROJECT_OBSERVATION",
+              "start": 0,
+              "end": 74,
+              "excerptHash": "f8c0e20aff69974c8b965616c7fcaea3b5c6be803c0f632a5fb9133bef8901fe"
+            },
+            {
+              "id": "cmvt6ovsw0001wo8oha8picjf/doc:b6660d92-2d99-44c8-a85d-9158ee71dc18",
+              "sourceId": "doc:b6660d92-2d99-44c8-a85d-9158ee71dc18",
+              "projectId": "cmvt6ovsw0001wo8oha8picjf",
+              "revision": "c355ac2d6b5c23b6d3f5d167f279cc98d980cb5b80c914c5e5d39cbdb63ebabb",
+              "document": {
+                "attachmentId": "cmvt6ow0t0004wo8oygkidct2",
+                "fileName": "requirements-2026-with-old-appendix.pdf",
+                "attachmentHash": "e243cf766da272357446a54fd6508ebd7eb0d89485ff0371b910a729fdba050a",
+                "fileHash": "2053d226953f5c362ac6fe967690c03f82934646127ca79a0d3a40d5712631be",
+                "revisionId": "cmvt6ow0u0005wo8ok7pda7b8",
+                "parser": "poppler-24.03.0/pm-document-v1",
+                "kind": "PAGE",
+                "locatorId": "page-1",
+                "pages": [
+                  1
+                ],
+                "span": {
+                  "start": 0,
+                  "end": 107,
+                  "coordinate": "EXTRACTED_PAGE_UTF16"
+                },
+                "pageMapping": "PHYSICAL_PDF",
+                "observedAt": "2026-10-29T07:05:46.209Z",
+                "conversationId": "cmvt6ow1v0006wo8owt0bbvnc",
+                "turnId": "cmvt78mkq0000ik8oy77qmol7"
+              },
+              "title": "requirements-2026-with-old-appendix.pdf · 第1页 · 原页",
+              "excerpt": "1 Requirements 2026\r\nDeadline: 2026-11-15 +08:00\r\nMetric      Value     Unit\r\naccuracy    0.90      ratio\r\n",
+              "start": 0,
+              "end": 107,
+              "excerptHash": "f4a6ba5ff7f631f58016ca8980fc783321ca1b98f862af2defeb59b882559052",
+              "observedAt": "2026-10-29T07:05:46.209Z",
+              "temporalState": "UNKNOWN",
+              "knowledgeClass": "MIXED",
+              "readScope": "EXCERPT"
+            },
+            {
+              "id": "cmvt6ovsw0001wo8oha8picjf/doc:70e6141c-f182-4b7b-8437-37008fcbafc0",
+              "sourceId": "doc:70e6141c-f182-4b7b-8437-37008fcbafc0",
+              "projectId": "cmvt6ovsw0001wo8oha8picjf",
+              "revision": "57fe51e531b8ed9749dea07e5f022ad055e64c8aecba1fa37b53ccb4dfe72dfa",
+              "document": {
+                "attachmentId": "cmvt6ow0t0004wo8oygkidct2",
+                "fileName": "requirements-2026-with-old-appendix.pdf",
+                "attachmentHash": "e243cf766da272357446a54fd6508ebd7eb0d89485ff0371b910a729fdba050a",
+                "fileHash": "2053d226953f5c362ac6fe967690c03f82934646127ca79a0d3a40d5712631be",
+                "revisionId": "cmvt6ow0u0005wo8ok7pda7b8",
+                "parser": "poppler-24.03.0/pm-document-v1",
+                "kind": "PAGE",
+                "locatorId": "page-2",
+                "pages": [
+                  2
+                ],
+                "span": {
+                  "start": 0,
+                  "end": 75,
+                  "coordinate": "EXTRACTED_PAGE_UTF16"
+                },
+                "pageMapping": "PHYSICAL_PDF",
+                "observedAt": "2026-10-29T07:05:50.023Z",
+                "conversationId": "cmvt6ow1v0006wo8owt0bbvnc",
+                "turnId": "cmvt78mkq0000ik8oy77qmol7"
+              },
+              "title": "requirements-2026-with-old-appendix.pdf · 第2页 · 原页",
+              "excerpt": "Appendix 2025\r\nDeadline: 2025-10-10\r\nExample only. Not the current rules.\r\n",
+              "start": 0,
+              "end": 75,
+              "excerptHash": "9cdac3098b4ff48f067e98526c24fd85e904c3d9540d8217a1193fac0a6481aa",
+              "observedAt": "2026-10-29T07:05:50.023Z",
+              "temporalState": "UNKNOWN",
+              "knowledgeClass": "MIXED",
+              "readScope": "EXCERPT"
+            }
+          ],
+          "priorities": [
+            {
+              "projectId": "cmvt6ovsw0001wo8oha8picjf",
+              "basis": "MODEL_ADVICE",
+              "importance": "长期重要性未明确",
+              "urgency": "未记录项目截止日",
+              "blocking": "观察范围内没有等待回应的委托",
+              "effort": "本次投入未知",
+              "preference": "未记录明确偏好",
+              "tradeoff": "本届截止日期已由原页确认，但项目记录尚未同步；长期重要性未明确，投入未知，因此先保留核对证据，不据此推断紧迫程度。",
+              "unknown": [
+                "目标重要性",
+                "投入"
+              ]
+            }
+          ],
+          "proposal": null,
+          "provider": "llm:deepseek:deepseek-flash",
+          "limitations": [
+            "每项目只列部分任务和提醒；计数覆盖授权范围",
+            "目录超过60项时需限定项目，不能宣称全局最优",
+            "记忆检索只覆盖标题与摘要；无结果不表示不存在",
+            "历史原因需要定向查看原任务事件"
+          ],
+          "observedProjectIds": [
+            "cmvt6ovsw0001wo8oha8picjf"
+          ],
+          "citations": [
+            {
+              "sourceId": "cmvt6ovsw0001wo8oha8picjf/doc:b6660d92-2d99-44c8-a85d-9158ee71dc18",
+              "quote": "1 Requirements 2026"
+            },
+            {
+              "sourceId": "cmvt6ovsw0001wo8oha8picjf/doc:b6660d92-2d99-44c8-a85d-9158ee71dc18",
+              "quote": "Deadline: 2026-11-15 +08:00"
+            },
+            {
+              "sourceId": "cmvt6ovsw0001wo8oha8picjf/doc:70e6141c-f182-4b7b-8437-37008fcbafc0",
+              "quote": "Appendix 2025"
+            },
+            {
+              "sourceId": "cmvt6ovsw0001wo8oha8picjf/doc:70e6141c-f182-4b7b-8437-37008fcbafc0",
+              "quote": "Deadline: 2025-10-10"
+            },
+            {
+              "sourceId": "cmvt6ovsw0001wo8oha8picjf/doc:70e6141c-f182-4b7b-8437-37008fcbafc0",
+              "quote": "Example only. Not the current rules."
+            },
+            {
+              "sourceId": "cmvt6ovsw0001wo8oha8picjf/project:cmvt6ovsw0001wo8oha8picjf",
+              "quote": "截止日期：未知"
+            }
+          ],
+          "fileGuides": [
+            {
+              "number": 2,
+              "sourceId": "cmvt6ovsw0001wo8oha8picjf/doc:b6660d92-2d99-44c8-a85d-9158ee71dc18",
+              "projectId": "cmvt6ovsw0001wo8oha8picjf",
+              "entityId": "cmvt6ow0t0004wo8oygkidct2",
+              "kind": "ATTACHMENT",
+              "title": "requirements-2026-with-old-appendix.pdf · 第1页 · 原页",
+              "revision": "c355ac2d6b5c23b6d3f5d167f279cc98d980cb5b80c914c5e5d39cbdb63ebabb",
+              "stale": false,
+              "missing": false,
+              "archived": false,
+              "temporalState": "UNKNOWN",
+              "excerpt": "1 Requirements 2026\r\nDeadline: 2026-11-15 +08:00\r\nMetric      Value     Unit\r\naccuracy    0.90      ratio\r\n",
+              "quote": "1 Requirements 2026",
+              "readScope": "EXCERPT",
+              "document": {
+                "attachmentId": "cmvt6ow0t0004wo8oygkidct2",
+                "fileName": "requirements-2026-with-old-appendix.pdf",
+                "attachmentHash": "e243cf766da272357446a54fd6508ebd7eb0d89485ff0371b910a729fdba050a",
+                "fileHash": "2053d226953f5c362ac6fe967690c03f82934646127ca79a0d3a40d5712631be",
+                "revisionId": "cmvt6ow0u0005wo8ok7pda7b8",
+                "parser": "poppler-24.03.0/pm-document-v1",
+                "kind": "PAGE",
+                "locatorId": "page-1",
+                "pages": [
+                  1
+                ],
+                "span": {
+                  "start": 0,
+                  "end": 107,
+                  "coordinate": "EXTRACTED_PAGE_UTF16"
+                },
+                "pageMapping": "PHYSICAL_PDF",
+                "observedAt": "2026-10-29T07:05:46.209Z",
+                "conversationId": "cmvt6ow1v0006wo8owt0bbvnc",
+                "turnId": "cmvt78mkq0000ik8oy77qmol7"
+              },
+              "href": "/focus/source/cmvt6ow1v0006wo8owt0bbvnc/cmvt78mkq0000ik8oy77qmol7/doc%3Ab6660d92-2d99-44c8-a85d-9158ee71dc18"
+            },
+            {
+              "number": 3,
+              "sourceId": "cmvt6ovsw0001wo8oha8picjf/doc:70e6141c-f182-4b7b-8437-37008fcbafc0",
+              "projectId": "cmvt6ovsw0001wo8oha8picjf",
+              "entityId": "cmvt6ow0t0004wo8oygkidct2",
+              "kind": "ATTACHMENT",
+              "title": "requirements-2026-with-old-appendix.pdf · 第2页 · 原页",
+              "revision": "57fe51e531b8ed9749dea07e5f022ad055e64c8aecba1fa37b53ccb4dfe72dfa",
+              "stale": false,
+              "missing": false,
+              "archived": false,
+              "temporalState": "UNKNOWN",
+              "excerpt": "Appendix 2025\r\nDeadline: 2025-10-10\r\nExample only. Not the current rules.\r\n",
+              "quote": "Appendix 2025",
+              "readScope": "EXCERPT",
+              "document": {
+                "attachmentId": "cmvt6ow0t0004wo8oygkidct2",
+                "fileName": "requirements-2026-with-old-appendix.pdf",
+                "attachmentHash": "e243cf766da272357446a54fd6508ebd7eb0d89485ff0371b910a729fdba050a",
+                "fileHash": "2053d226953f5c362ac6fe967690c03f82934646127ca79a0d3a40d5712631be",
+                "revisionId": "cmvt6ow0u0005wo8ok7pda7b8",
+                "parser": "poppler-24.03.0/pm-document-v1",
+                "kind": "PAGE",
+                "locatorId": "page-2",
+                "pages": [
+                  2
+                ],
+                "span": {
+                  "start": 0,
+                  "end": 75,
+                  "coordinate": "EXTRACTED_PAGE_UTF16"
+                },
+                "pageMapping": "PHYSICAL_PDF",
+                "observedAt": "2026-10-29T07:05:50.023Z",
+                "conversationId": "cmvt6ow1v0006wo8owt0bbvnc",
+                "turnId": "cmvt78mkq0000ik8oy77qmol7"
+              },
+              "href": "/focus/source/cmvt6ow1v0006wo8owt0bbvnc/cmvt78mkq0000ik8oy77qmol7/doc%3A70e6141c-f182-4b7b-8437-37008fcbafc0"
+            }
+          ],
+          "presentation": {
+            "schemaVersion": 1,
+            "blocks": [
+              {
+                "blockKey": "answer",
+                "emphasis": "primary",
+                "fallbackText": "结论：本届（2026 正式要求）的截止日期是 2026-11-15 +08:00。第1页标题为“1 Requirements 2026”，其下写明“Deadline: 2026-11-15 +08:00”【2】；第2页标题为“Appendix 2025”，写明“Deadline: 2025-10-10”，并自述“Example only. Not the current rules.”【3】，因此 2025-10-10 只是示例，不适用于本届。项目状态记录仍写“截止日期：未知”【1】，这是尚未同步的旧记录，不能推翻原页原文。以上结论来自页面摘录报告，尚未经过独立验收；本次未创建行动，也未修改目标。",
+                "refs": [],
+                "actionBindingIds": [],
+                "semanticType": "prose",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "spans": [
+                      {
+                        "kind": "text",
+                        "text": "结论：本届（2026 正式要求）的截止日期是 2026-11-15 +08:00。第1页标题为“1 Requirements 2026”，其下写明“Deadline: 2026-11-15 +08:00”【2】；第2页标题为“Appendix 2025”，写明“Deadline: 2025-10-10”，并自述“Example only. Not the current rules.”【3】，因此 2025-10-10 只是示例，不适用于本届。项目状态记录仍写“截止日期：未知”【1】，这是尚未同步的旧记录，不能推翻原页原文。以上结论来自页面摘录报告，尚未经过独立验收；本次未创建行动，也未修改目标。"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "blockKey": "goal_gap:cmvt6ovsw0001wo8oha8picjf",
+                "emphasis": "supporting",
+                "fallbackText": "按本届正式要求准备作品，并保留适用版本证据",
+                "refs": [
+                  {
+                    "kind": "PROJECT",
+                    "id": "cmvt6ovsw0001wo8oha8picjf",
+                    "projectId": "cmvt6ovsw0001wo8oha8picjf",
+                    "revision": "cbb2bfadc4d2ac9b55490ac4afa6a36abb85e396bbf081693ef504ea7d47b9ea"
+                  }
+                ],
+                "actionBindingIds": [],
+                "semanticType": "goal_gap",
+                "goalGap": {
+                  "schemaVersion": 1,
+                  "id": "cmvt6ovsw0001wo8oha8picjf-gap-0",
+                  "projectId": "cmvt6ovsw0001wo8oha8picjf",
+                  "goalRef": {
+                    "kind": "PROJECT",
+                    "id": "cmvt6ovsw0001wo8oha8picjf",
+                    "projectId": "cmvt6ovsw0001wo8oha8picjf",
+                    "revision": "cbb2bfadc4d2ac9b55490ac4afa6a36abb85e396bbf081693ef504ea7d47b9ea"
+                  },
+                  "goalQuote": "按本届正式要求准备作品，并保留适用版本证据",
+                  "workingObjective": null,
+                  "intentHash": "dec58f9d8ba8ada600f86ac9157b21c840d4250d466346a02d66d5886202e41b",
+                  "criteria": [
+                    {
+                      "id": "cmvt6ovsw0001wo8oha8picjf-criterion-0",
+                      "requirement": "确认本届（2026）正式要求中的截止日期",
+                      "state": "REPORTED",
+                      "explanation": "第1页原文标题为“1 Requirements 2026”，其下写明“Deadline: 2026-11-15 +08:00”；第2页原文标题为“Appendix 2025”，写明“Example only. Not the current rules.”，其截止日期2025-10-10属示例，不构成本届要求。据此本届截止日期指向2026-11-15 +08:00，但仅为页面摘录报告，未获独立验收。",
+                      "evidence": [
+                        {
+                          "source": {
+                            "kind": "SOURCE",
+                            "id": "cmvt6ovsw0001wo8oha8picjf/doc:b6660d92-2d99-44c8-a85d-9158ee71dc18",
+                            "projectId": "cmvt6ovsw0001wo8oha8picjf",
+                            "revision": "c355ac2d6b5c23b6d3f5d167f279cc98d980cb5b80c914c5e5d39cbdb63ebabb"
+                          },
+                          "excerptHash": "f4a6ba5ff7f631f58016ca8980fc783321ca1b98f862af2defeb59b882559052",
+                          "quote": "1 Requirements 2026",
+                          "observedAt": "2026-10-29T07:05:46.209Z",
+                          "readScope": "EXCERPT",
+                          "applicability": "DIRECT",
+                          "claim": "确认本届（2026）正式要求中的截止日期",
+                          "relation": "SUPPORTS",
+                          "verification": "REPORTED",
+                          "reason": "项目记录与模型判断；尚未作为独立验收结论"
+                        },
+                        {
+                          "source": {
+                            "kind": "SOURCE",
+                            "id": "cmvt6ovsw0001wo8oha8picjf/doc:b6660d92-2d99-44c8-a85d-9158ee71dc18",
+                            "projectId": "cmvt6ovsw0001wo8oha8picjf",
+                            "revision": "c355ac2d6b5c23b6d3f5d167f279cc98d980cb5b80c914c5e5d39cbdb63ebabb"
+                          },
+                          "excerptHash": "f4a6ba5ff7f631f58016ca8980fc783321ca1b98f862af2defeb59b882559052",
+                          "quote": "Deadline: 2026-11-15 +08:00",
+                          "observedAt": "2026-10-29T07:05:46.209Z",
+                          "readScope": "EXCERPT",
+                          "applicability": "DIRECT",
+                          "claim": "确认本届（2026）正式要求中的截止日期",
+                          "relation": "SUPPORTS",
+                          "verification": "REPORTED",
+                          "reason": "项目记录与模型判断；尚未作为独立验收结论"
+                        },
+                        {
+                          "source": {
+                            "kind": "SOURCE",
+                            "id": "cmvt6ovsw0001wo8oha8picjf/doc:70e6141c-f182-4b7b-8437-37008fcbafc0",
+                            "projectId": "cmvt6ovsw0001wo8oha8picjf",
+                            "revision": "57fe51e531b8ed9749dea07e5f022ad055e64c8aecba1fa37b53ccb4dfe72dfa"
+                          },
+                          "excerptHash": "9cdac3098b4ff48f067e98526c24fd85e904c3d9540d8217a1193fac0a6481aa",
+                          "quote": "Example only. Not the current rules.",
+                          "observedAt": "2026-10-29T07:05:50.023Z",
+                          "readScope": "EXCERPT",
+                          "applicability": "DIRECT",
+                          "claim": "确认本届（2026）正式要求中的截止日期",
+                          "relation": "SUPPORTS",
+                          "verification": "REPORTED",
+                          "reason": "项目记录与模型判断；尚未作为独立验收结论"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "cmvt6ovsw0001wo8oha8picjf-criterion-1",
+                      "requirement": "保留适用版本证据（区分2026正式要求与2025示例附录）",
+                      "state": "REPORTED",
+                      "explanation": "两页原文已分别读取：第1页为2026正式要求，第2页为2025示例附录并自述仅为示例、非现行规则；版本区分有原文依据，但项目记录中尚未形成正式证据归档。",
+                      "evidence": [
+                        {
+                          "source": {
+                            "kind": "SOURCE",
+                            "id": "cmvt6ovsw0001wo8oha8picjf/doc:b6660d92-2d99-44c8-a85d-9158ee71dc18",
+                            "projectId": "cmvt6ovsw0001wo8oha8picjf",
+                            "revision": "c355ac2d6b5c23b6d3f5d167f279cc98d980cb5b80c914c5e5d39cbdb63ebabb"
+                          },
+                          "excerptHash": "f4a6ba5ff7f631f58016ca8980fc783321ca1b98f862af2defeb59b882559052",
+                          "quote": "1 Requirements 2026",
+                          "observedAt": "2026-10-29T07:05:46.209Z",
+                          "readScope": "EXCERPT",
+                          "applicability": "DIRECT",
+                          "claim": "保留适用版本证据（区分2026正式要求与2025示例附录）",
+                          "relation": "SUPPORTS",
+                          "verification": "REPORTED",
+                          "reason": "项目记录与模型判断；尚未作为独立验收结论"
+                        },
+                        {
+                          "source": {
+                            "kind": "SOURCE",
+                            "id": "cmvt6ovsw0001wo8oha8picjf/doc:70e6141c-f182-4b7b-8437-37008fcbafc0",
+                            "projectId": "cmvt6ovsw0001wo8oha8picjf",
+                            "revision": "57fe51e531b8ed9749dea07e5f022ad055e64c8aecba1fa37b53ccb4dfe72dfa"
+                          },
+                          "excerptHash": "9cdac3098b4ff48f067e98526c24fd85e904c3d9540d8217a1193fac0a6481aa",
+                          "quote": "Appendix 2025",
+                          "observedAt": "2026-10-29T07:05:50.023Z",
+                          "readScope": "EXCERPT",
+                          "applicability": "DIRECT",
+                          "claim": "保留适用版本证据（区分2026正式要求与2025示例附录）",
+                          "relation": "SUPPORTS",
+                          "verification": "REPORTED",
+                          "reason": "项目记录与模型判断；尚未作为独立验收结论"
+                        },
+                        {
+                          "source": {
+                            "kind": "SOURCE",
+                            "id": "cmvt6ovsw0001wo8oha8picjf/doc:70e6141c-f182-4b7b-8437-37008fcbafc0",
+                            "projectId": "cmvt6ovsw0001wo8oha8picjf",
+                            "revision": "57fe51e531b8ed9749dea07e5f022ad055e64c8aecba1fa37b53ccb4dfe72dfa"
+                          },
+                          "excerptHash": "9cdac3098b4ff48f067e98526c24fd85e904c3d9540d8217a1193fac0a6481aa",
+                          "quote": "Deadline: 2025-10-10",
+                          "observedAt": "2026-10-29T07:05:50.023Z",
+                          "readScope": "EXCERPT",
+                          "applicability": "NOT_APPLICABLE",
+                          "claim": "保留适用版本证据（区分2026正式要求与2025示例附录）",
+                          "relation": "CONTRADICTS",
+                          "verification": "REPORTED",
+                          "reason": "项目记录与模型判断；尚未作为独立验收结论"
+                        }
+                      ]
+                    }
+                  ],
+                  "blockers": [],
+                  "keyUnknowns": [
+                    "项目记录中截止日期仍标为未知，未同步更新",
+                    "2026正式要求除截止日期与accuracy指标外是否还有其他条款",
+                    "示例附录是否还有其他被误用的内容"
+                  ],
+                  "nextInformationNeed": null
+                }
+              },
+              {
+                "blockKey": "investigation:cmvt78mkq0000ik8oy77qmol7",
+                "emphasis": "supporting",
+                "fallbackText": "本轮完成 2 次资料读取",
+                "refs": [],
+                "actionBindingIds": [],
+                "semanticType": "investigation",
+                "investigationId": "cmvt78mkq0000ik8oy77qmol7",
+                "state": "CONCLUDED",
+                "steps": [
+                  {
+                    "schemaVersion": 1,
+                    "id": "cmvt78mkq0000ik8oy77qmol7-read-1",
+                    "turnId": "cmvt78mkq0000ik8oy77qmol7",
+                    "seq": 1,
+                    "decision": {
+                      "decision": "READ_EXISTING",
+                      "informationNeed": "读取 requirements-2026-with-old-appendix.pdf 第1页和第2页原文，比较2026正式要求与2025示例附录并确定本届截止日期",
+                      "expectedObservation": "第1页含2026正式要求（含截止日期），第2页为2025示例附录，可区分正式与示例",
+                      "call": {
+                        "projectId": "cmvt6ovsw0001wo8oha8picjf",
+                        "sourceId": "attachment:cmvt6ow0t0004wo8oygkidct2",
+                        "revision": "e243cf766da272357446a54fd6508ebd7eb0d89485ff0371b910a729fdba050a",
+                        "tool": "read_document_page",
+                        "page": 1
+                      }
+                    },
+                    "inputHash": "9d45258931c74f9de4d97bc9a528d38a9546e53406234020023c08b4efcb5157",
+                    "readSetHash": "7648a102212c0049f219149c245b475f6c40bff234d78500dce14d3a53c60889",
+                    "status": "SUCCEEDED",
+                    "startedAt": "2026-10-29T07:05:45.919Z",
+                    "finishedAt": "2026-10-29T07:05:46.225Z",
+                    "observationHash": "ab9ad369abfa23d8eb732a50050de830a51e029fa5e989ab0a2df755a6e23145",
+                    "sources": [
+                      {
+                        "kind": "SOURCE",
+                        "id": "cmvt6ovsw0001wo8oha8picjf/doc:b6660d92-2d99-44c8-a85d-9158ee71dc18",
+                        "projectId": "cmvt6ovsw0001wo8oha8picjf",
+                        "revision": "c355ac2d6b5c23b6d3f5d167f279cc98d980cb5b80c914c5e5d39cbdb63ebabb"
+                      }
+                    ],
+                    "coverage": {
+                      "complete": true,
+                      "description": "{\"complete\":true,\"readSpanComplete\":true,\"sectionMayContinue\":false,\"structureTruncated\":false,\"documentComplete\":false,\"indexComplete\":true,\"physicalPages\":2,\"indexedPages\":1,\"loadedCharacters\":107,\"truncated\":false,\"ocrVerified\":false,\"sourceExcerptTruncated\":false}"
+                    },
+                    "reservationId": "investigate-0",
+                    "provider": "llm:deepseek:deepseek-flash",
+                    "usage": {
+                      "inputTokens": 3716,
+                      "outputTokens": 468
+                    },
+                    "failureReason": null
+                  },
+                  {
+                    "schemaVersion": 1,
+                    "id": "cmvt78mkq0000ik8oy77qmol7-read-2",
+                    "turnId": "cmvt78mkq0000ik8oy77qmol7",
+                    "seq": 2,
+                    "decision": {
+                      "decision": "READ_EXISTING",
+                      "informationNeed": "读取 requirements-2026-with-old-appendix.pdf 第2页原文，与第1页2026正式要求对照，确认2025示例附录是否含不同截止日期",
+                      "expectedObservation": "第2页为2025示例附录，可能含示例截止日期；据此区分正式要求与示例，确定本届截止日期",
+                      "call": {
+                        "projectId": "cmvt6ovsw0001wo8oha8picjf",
+                        "sourceId": "attachment:cmvt6ow0t0004wo8oygkidct2",
+                        "revision": "e243cf766da272357446a54fd6508ebd7eb0d89485ff0371b910a729fdba050a",
+                        "tool": "read_document_page",
+                        "page": 2
+                      }
+                    },
+                    "inputHash": "c09c34e0087e8685248c14630690d28caf2960ccbe80676c09d845c6f9104537",
+                    "readSetHash": "656d9c962a470d5b2a6369cece72aebb7053da249d2a2673b36c4a84d17cd929",
+                    "status": "SUCCEEDED",
+                    "startedAt": "2026-10-29T07:05:49.733Z",
+                    "finishedAt": "2026-10-29T07:05:50.041Z",
+                    "observationHash": "572711460137e89ef8f9a66360667e18ac23165fdb34bfb6437161e169c037b0",
+                    "sources": [
+                      {
+                        "kind": "SOURCE",
+                        "id": "cmvt6ovsw0001wo8oha8picjf/doc:70e6141c-f182-4b7b-8437-37008fcbafc0",
+                        "projectId": "cmvt6ovsw0001wo8oha8picjf",
+                        "revision": "57fe51e531b8ed9749dea07e5f022ad055e64c8aecba1fa37b53ccb4dfe72dfa"
+                      }
+                    ],
+                    "coverage": {
+                      "complete": true,
+                      "description": "{\"complete\":true,\"readSpanComplete\":true,\"sectionMayContinue\":false,\"structureTruncated\":false,\"documentComplete\":false,\"indexComplete\":true,\"physicalPages\":2,\"indexedPages\":1,\"loadedCharacters\":75,\"truncated\":false,\"ocrVerified\":false,\"sourceExcerptTruncated\":false}"
+                    },
+                    "reservationId": "investigate-1",
+                    "provider": "llm:deepseek:deepseek-flash",
+                    "usage": {
+                      "inputTokens": 5411,
+                      "outputTokens": 624
+                    },
+                    "failureReason": null
+                  }
+                ]
+              }
+            ],
+            "allowedActions": []
+          },
+          "id": "cmvt791bg000aik8ov3kq2q4n",
+          "seq": 3,
+          "role": "ASSISTANT",
+          "content": "结论：本届（2026 正式要求）的截止日期是 2026-11-15 +08:00。第1页标题为“1 Requirements 2026”，其下写明“Deadline: 2026-11-15 +08:00”【2】；第2页标题为“Appendix 2025”，写明“Deadline: 2025-10-10”，并自述“Example only. Not the current rules.”【3】，因此 2025-10-10 只是示例，不适用于本届。项目状态记录仍写“截止日期：未知”【1】，这是尚未同步的旧记录，不能推翻原页原文。以上结论来自页面摘录报告，尚未经过独立验收；本次未创建行动，也未修改目标。",
+          "restricted": false
+        }
+      ],
+      "linkedProjects": [
+        {
+          "id": "cmvt6ovsw0001wo8oha8picjf",
+          "title": "2026 合成规则核对"
+        }
+      ],
+      "hasMore": false,
+      "beforeSeq": 1,
+      "activeTurn": null,
+      "latestTurn": {
+        "id": "cmvt78mkq0000ik8oy77qmol7",
+        "status": "ANSWERED",
+        "canRetry": false,
+        "message": ""
+      }
+    }
+  },
+  "review": {
+    "id": "24570595-662f-43ea-a8f4-5cc3b6579029",
+    "object": "chat.completion",
+    "created": 1793257561,
+    "model": "deepseek-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\"type\":\"json_object\",\"items\":[{\"item\":\"实际PDF两页读取\",\"verdict\":\"PASS\",\"evidence\":\"第1页与第2页均有独立PAGE级来源记录，pageMapping=PHYSICAL_PDF，locatorId分别为page-1/page-2，observedAt分别为07:05:46.209Z与07:05:50.023Z，两次read_document_page均status=SUCCEEDED。但注意：readScope均为EXCERPT，loadedCharacters仅107与75，documentComplete=false，ocrVerified=false，因此属摘录级读取而非全文验收。\"},{\"item\":\"2026/2025版次区分\",\"verdict\":\"PASS\",\"evidence\":\"第1页原文'1 Requirements 2026' + 'Deadline: 2026-11-15 +08:00'；第2页原文'Appendix 2025' + 'Deadline: 2025-10-10' + 'Example only. Not the current rules.'。据此判定本届截止2026-11-15 +08:00，2025-10-10为示例，区分有原文依据。\"},{\"item\":\"物理页可追溯\",\"verdict\":\"PASS\",\"evidence\":\"两页共享attachmentId=cmvt6ow0t0004wo8oygkidct2、fileHash=2053d226...、revisionId=cmvt6ow0u0005wo8ok7pda7b8，locatorId=page-1/page-2，span坐标EXTRACTED_PAGE_UTF16，可回溯至同一物理PDF的具体页。\"},{\"item\":\"不扩授权/改永久事实\",\"verdict\":\"PASS\",\"evidence\":\"allowedActions为空，proposal=null，未创建行动；项目目标引用保持原句'按本届正式要求准备作品，并保留适用版本证据'；项目记录'截止日期：未知'被保留并标注为未同步旧记录，未被改写为永久事实。\"},{\"item\":\"未知和未执行状态诚实\",\"verdict\":\"PASS\",\"evidence\":\"明确标注'尚未经过独立验收'、'来自页面摘录报告'；keyUnknowns列出项目记录未同步、2026其他条款未知、示例附录其他误用未知；coverage中documentComplete=false、ocrVerified=false如实披露。\"},{\"item\":\"真实模型合成PDF不等于真实用户或设备验收\",\"verdict\":\"UNVERIFIED\",\"evidence\":\"来源为模型合成PDF（requirements-2026-with-old-appendix.pdf），无真实用户确认、无设备端验收记录、无独立第三方核验；结论仅为摘录级REPORTED，不构成真实用户或设备验收。\"}]}"
+        },
+        "logprobs": null,
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 8217,
+      "completion_tokens": 564,
+      "total_tokens": 8781,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 8217
+    },
+    "system_fingerprint": "bc19ba97cbe016479903222bb1578db6"
+  },
+  "budget": {
+    "runId": "67486fed-bb0e-44f5-b632-dd92cfd4ff31",
+    "mode": "REAL_MODEL",
+    "model": "deepseek-flash",
+    "requestsStarted": 8,
+    "maxRequests": 16,
+    "costUpperCny": 0.104832,
+    "maxCostCny": 5,
+    "unknownUsageRequests": 0,
+    "realModelRequests": 8,
+    "priceSource": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "priceVerifiedAt": "2026-10-23"
+  }
+}

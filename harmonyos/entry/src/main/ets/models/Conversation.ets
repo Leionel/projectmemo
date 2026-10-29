@@ -1,13 +1,15 @@
 import { ContinuityView } from "./Continuity";
+import { DocumentSourceMeta } from './Document';
 import { AgentPresentation } from './AgentExperience';
 import { ConversationResearchInfo, ExternalSourceMeta, ResearchCoverage } from './ConversationResearch';
 export interface ConversationEntry { kind: string; projectId: string; id: string; revision?: string; }
 export interface ConversationRef { bindingId?: string; kind: string; id: string; projectId: string; title: string; status?: string; version?: number; href: string; }
-export interface ConversationSource { id: string; projectId: string; sourceId: string; revision: string; title: string; excerpt: string; observedAt: string; temporalState: string; external?: ExternalSourceMeta; }
+export interface ConversationSource { id: string; projectId: string; sourceId: string; revision: string; title: string; excerpt: string; observedAt: string; temporalState: string; external?: ExternalSourceMeta; document?: DocumentSourceMeta; }
 export interface ConversationFileGuide {
   number: number; sourceId: string; projectId: string; entityId: string; kind: string; title: string; revision: string;
   stale: boolean; missing: boolean; archived: boolean; temporalState: string; excerpt: string; quote: string | null; readScope: string; href: string;
   external?: ExternalSourceMeta;
+  document?: DocumentSourceMeta;
 }
 export interface ConversationCitation { sourceId: string; quote: string; }
 export interface PriorityReason { projectId: string; importance: string; urgency: string; blocking: string; effort: string; preference: string; tradeoff: string; unknown: string[]; basis: string; }

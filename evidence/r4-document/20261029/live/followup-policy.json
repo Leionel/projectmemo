@@ -1,0 +1,63 @@
+{
+  "kind": "REAL_MODEL_REAL_POPPLER_SYNTHETIC_PDF_FOLLOWUP",
+  "status": "FAILED_OR_UNKNOWN",
+  "reason": "Original ANSWER failed in the local 2000-token preflight before transport. New question; original UNKNOWN and reservations remain unchanged.",
+  "database": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\pm-ct4-live-XillJi\\evaluation.db",
+  "oldTurn": {
+    "id": "cmvt6ow340007wo8olbv0tncl",
+    "status": "UNKNOWN",
+    "callCount": 2,
+    "reservation": [
+      {
+        "purpose": "ROUTE",
+        "callId": "g0:route",
+        "inputTokens": 4988,
+        "outputTokens": 768,
+        "inputAccounting": "UTF8_UPPER_BOUND",
+        "state": "SETTLED",
+        "provider": "llm:deepseek:deepseek-flash",
+        "promptId": "focus.route.v2",
+        "promptVersion": "2.1.2",
+        "outputSchemaVersion": 1,
+        "requestHash": "d53ce3b319f7920f66dafcd7aea1fef2cee35db21444fb8ac115d2a52a1bea0e",
+        "dispatchState": "DISPATCH_COMMITTED",
+        "usage": {
+          "inputTokens": 1078,
+          "outputTokens": 217
+        }
+      },
+      {
+        "purpose": "ANSWER",
+        "callId": "g0:answer",
+        "inputTokens": 6868,
+        "outputTokens": 2048,
+        "inputAccounting": "UTF8_UPPER_BOUND",
+        "state": "RESERVED",
+        "provider": "llm:deepseek:deepseek-flash",
+        "promptId": "focus.answer.v2",
+        "promptVersion": "2.1.0",
+        "outputSchemaVersion": 1,
+        "requestHash": "c56ce92852aec0b2a9977892e901d272fdb7ad570ad4f379b893eed332234fd9",
+        "dispatchState": "DISPATCH_COMMITTED"
+      }
+    ]
+  },
+  "view": null,
+  "review": {
+    "code": "INVESTIGATION_GOAL_UNBOUND",
+    "message": "调查步骤没有关联当前目标缺口"
+  },
+  "budget": {
+    "runId": "67486fed-bb0e-44f5-b632-dd92cfd4ff31",
+    "mode": "REAL_MODEL",
+    "model": "deepseek-flash",
+    "requestsStarted": 11,
+    "maxRequests": 16,
+    "costUpperCny": 0.135823,
+    "maxCostCny": 5,
+    "unknownUsageRequests": 0,
+    "realModelRequests": 11,
+    "priceSource": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "priceVerifiedAt": "2026-10-23"
+  }
+}

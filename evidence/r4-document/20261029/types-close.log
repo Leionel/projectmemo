@@ -1,0 +1,2 @@
+scripts/resume-ct4-known-preflight.ts(19,57): error TS2561: Object literal may only specify known properties, but 'homeProject' does not exist in type 'ConversationWhereInput'. Did you mean to write 'homeProjectId'?
+scripts/resume-ct4-known-preflight.ts(22,25): error TS2339: Property 'session' does not exist on type 'PrismaClient'.

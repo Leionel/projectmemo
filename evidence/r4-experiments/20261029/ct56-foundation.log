@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/crossrefMetadata.test.ts tests/experimentMetrics.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  2 passed (2)
+      Tests  6 passed (6)
+   Start at  19:02:54
+   Duration  4.90s (transform 2.08s, setup 0ms, import 3.52s, tests 721ms, environment 0ms)
+

@@ -29,10 +29,11 @@ import { boundedPolicy } from "./investigationDelegation";
 import { runDelegationObservation } from "./delegationObservation";
 import { documentTools } from "./documentTools";
 import type { DocumentExtractor } from "@/lib/documents/reader";
+import { experimentTools } from "./experimentTools";
 export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;repository?:CiTransport;document?:DocumentExtractor;judge?:ClaimJudge}={}){
  const m=await claimMission(options.workerId??randomUUID(),options.id);if(!m)return false;
  const lease:Lease={id:m.id,owner:m.leaseOwner!,epoch:m.leaseEpoch,contextVersion:m.contextVersion,planRevision:m.planRevision};
- const tools={...(options.tools??{...projectTools,...researchTools(lease,options.research),...await repositoryTools(lease,m,options.repository),...documentTools(lease,options.document)})};const delegation=boundedPolicy(m);if(delegation)for(const name of Object.keys(tools))if(!delegation.allowedTools.includes(name as typeof delegation.allowedTools[number]))delete tools[name];let activeStepId:string|undefined;
+ const tools={...(options.tools??{...projectTools,...researchTools(lease,options.research),...await repositoryTools(lease,m,options.repository),...documentTools(lease,options.document),...experimentTools(lease)})};const delegation=boundedPolicy(m);if(delegation)for(const name of Object.keys(tools))if(!delegation.allowedTools.includes(name as typeof delegation.allowedTools[number]))delete tools[name];let activeStepId:string|undefined;
  let phase:MissionPhase="CONTEXT",contextManifest:MissionContextManifest|undefined,sourceDecisionRunId:string|null|undefined;
  const failedSettlements=new Set<"models"|"tools">();
  // Keep failed reservations and unknown usage; a lost lease must not hide the original failure.
@@ -138,6 +139,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
 
   phase="COMMIT";await db.$transaction(async tx=>{
    const current=await fenced(tx,lease);assertDynamicTool(current,step!.toolName,step!.canonicalInputJson);let data=result;
+   if(step!.toolName==="compare_experiment_metrics")await validateSources(m.projectId,result.sources,tx,m.id);
    for(const source of result.sources.filter(s=>s.document)){if(!await(await import("@/lib/documents/observations")).documentObservationCurrent(m.projectId,{...source,document:source.document!},tx))throw new AppError("SOURCE_CHANGED","文档在读取后发生修订，请重新核对",409);}
    if(step!.toolName==="web_search"||step!.toolName==="web_fetch")await persistObservations(tx,m.id,result.data);
    if(step!.toolName==="save_mission_output"){

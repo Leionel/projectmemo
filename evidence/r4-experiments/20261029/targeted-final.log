@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/experimentMetrics.test.ts tests/crossrefMetadata.test.ts tests/documentReader.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  3 passed (3)
+      Tests  14 passed (14)
+   Start at  19:05:36
+   Duration  13.15s (transform 3.36s, setup 0ms, import 7.83s, tests 4.04s, environment 0ms)
+

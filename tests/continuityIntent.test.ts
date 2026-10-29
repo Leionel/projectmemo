@@ -26,6 +26,7 @@ function command(projectId: string, quote = "本周先稳演示，先别加功�
 test("literal admission separates authentication, quotation and interpretation; exact confirmation is bound", () => {
   const base = command("p");
   expect(admitDirective(base, new Date("2026-10-28T12:00:00Z"))).toMatchObject({ status: "DIRECT_APPLIED", until: "2026-11-01T16:00:00.000Z" });
+  expect(admitDirective({ ...base, quote: "停止" })).toMatchObject({ status: "DIRECT_APPLIED", kind: "STOP" });
   for (const quote of ["他说本周先稳演示", "不是本周先稳演示", "如果本周先稳演示", "永久改成演示目标", "本周先授权自动部署", "接下来先稳演示"]) expect(admitDirective({ ...base, quote }).status).not.toBe("DIRECT_APPLIED");
   const confirmed = { ...base, admission: "CONFIRMED" as const, kind: "WORKING_OBJECTIVE" as const, confirmed: true as const, validUntil: "2026-11-02T00:00:00Z" };
   expect(admitDirective({ ...confirmed, candidateHash: candidateHash(confirmed) }).status).toBe("CONFIRMED_APPLIED");

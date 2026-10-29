@@ -1,0 +1,40 @@
+{
+  "stats": {
+    "startTime": "2026-10-29T02:27:57.335Z",
+    "duration": 114476.499,
+    "expected": 23,
+    "skipped": 2,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "skipped": [
+    {
+      "title": "Focus reads a D1/D2 proposal, confirms a directed read and returns its original result",
+      "annotations": [
+        {
+          "type": "skip",
+          "description": "Review flag is off",
+          "location": {
+            "file": "D:\\Projects\\hongmen\\e2e\\focus-agent.spec.ts",
+            "line": 39,
+            "column": 93
+          }
+        }
+      ]
+    },
+    {
+      "title": "F3 follows one original question, reads new evidence, retains unread across reload and stops",
+      "annotations": [
+        {
+          "type": "skip",
+          "description": "Focus follow is off in legacy regression",
+          "location": {
+            "file": "D:\\Projects\\hongmen\\e2e\\focus-agent.spec.ts",
+            "line": 173,
+            "column": 8
+          }
+        }
+      ]
+    }
+  ]
+}

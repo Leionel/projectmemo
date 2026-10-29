@@ -48,6 +48,12 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
   for (const step of collectedSteps) {
     const sources = (step.resultJson as ToolResult | null)?.sources ?? [];
     let allowed = !suppressing || sources.length > 0;
+    // An old inspect_project snapshot embeds Action text in a project-level source.
+    // Check those original Action roots too; a fresh read can return a filtered snapshot.
+    if (step.toolName === "inspect_project") {
+      const actions = (step.resultJson as { data?: { actions?: Array<{ id: string }> } } | null)?.data?.actions ?? [];
+      for (const action of actions) if ((await sourceUse(m.ownerUserId, m.projectId, "action:" + action.id, db, { missionId: m.id })).state !== "ALLOWED") allowed = false;
+    }
     for (const source of sources) { const policy = await sourceUse(m.ownerUserId, m.projectId, source.id, db, { missionId: m.id }); policies.set(source.id, policy); if (policy.state === "SUPPRESSED" || policy.state === "UNKNOWN" && suppressing) allowed = false; }
     if (allowed) steps.push(step);
   }

@@ -1,0 +1,40 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/continuitySuppression.test.ts tests/continuityJourney.test.ts tests/continuityIntent.test.ts tests/missionArtifactAdoption.test.ts tests/repoCi.test.ts tests/r4Investigation.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/continuitySuppression.test.ts (2 tests | 1 failed) 831ms
+   × one root suppression closes memory, Investigation sources, dialogue, Artifact, Mission context and ACTIVE experience consumers 706ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/continuitySuppression.test.ts > one root suppression closes memory, Investigation sources, dialogue, Artifact, Mission context and ACTIVE experience consumers
+AssertionError: expected Error: 本次读取的资料已变化，请重新提问 { …(3) } to match object { code: 'SOURCE_USE_SUPPRESSED' }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+- {
+-   "code": "SOURCE_USE_SUPPRESSED",
++ AppError {
++   "code": "SOURCE_CHANGED",
+  }
+
+ ❯ tests/continuitySuppression.test.ts:51:65
+     49|   await expect(readReviewMaterial(p.id, "artifact:" + artifact.id, db,…
+     50|   expect((await sourceUse(user.id, p.id, "artifact:" + legacyArtifact.…
+     51|   await expect(validateReadSources(actor, observations.sources)).rejec…
+       |                                                                 ^
+     52|   expect(JSON.stringify((await readConversation(actor, c.id)).messages…
+     53|   const current = await db.agentMission.findUniqueOrThrow({ where: { i…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 5 passed (6)
+      Tests  1 failed | 37 passed (38)
+   Start at  10:15:09
+   Duration  69.99s (transform 4.57s, setup 0ms, import 13.34s, tests 54.78s, environment 1ms)

@@ -6,6 +6,7 @@ import { effectiveContinuity } from "./directiveService";
 export type SourceUse = { state: "ALLOWED" | "SUPPRESSED" | "UNKNOWN"; roots: string[]; independentEvidence: boolean; reason: string };
 /** Follow original roots, not copies of conclusions. Cycles, missing manifests and cross-project edges stay unknown. */
 export async function sourceLineage(projectId: string, id: string, tx: Tx = db, seen = new Set<string>(), budget = { remaining: 64 }): Promise<{ roots: string[]; known: boolean; derived: boolean }> {
+  if (typeof id !== "string" || !id) return { roots: [], known: false, derived: true };
   if (seen.has(id) || seen.size >= 32 || budget.remaining-- <= 0) return { roots: [], known: false, derived: true };
   const next = new Set(seen).add(id), childIds: string[] = [];
   let known = true, derived = false;
@@ -22,17 +23,20 @@ export async function sourceLineage(projectId: string, id: string, tx: Tx = db, 
     const manifest = a.missionReceipt?.sourceManifestJson ?? record(a.sourceRefs).sources ?? a.sourceRefs;
     if (Array.isArray(manifest)) for (const raw of manifest) {
       const s = record(raw); if (s.projectId && s.projectId !== projectId) { known = false; continue; }
-      const sourceId = typeof s.sourceId === "string" ? s.sourceId : typeof s.id === "string" ? s.id : null;
+      const sourceId = typeof s.sourceId === "string" ? s.sourceId : typeof s.id === "string" ? s.id : typeof s.cardId === "string" ? "card:" + s.cardId : null;
       if (sourceId) childIds.push(sourceId); else known = false;
     } else known = false;
     if (!childIds.length) known = false; derived = true;
   } else if (id.startsWith("experience:")) {
     const e = await tx.agentExperience.findFirst({ where: { id: id.slice(11), projectId } });
     if (!e) return { roots: [], known: false, derived: true };
-    const missionIds = e.sampleMissionIdsJson as string[];
-    const steps = await tx.agentMissionStep.findMany({ where: { missionId: { in: missionIds }, mission: { projectId } }, select: { resultJson: true } });
+    const rawIds = e.sampleMissionIdsJson;
+    const missionIds = Array.isArray(rawIds) ? rawIds.filter((v): v is string => typeof v === "string").slice(0, 64) : [];
+    const missions = await tx.agentMission.findMany({ where: { id: { in: missionIds }, projectId }, select: { id: true } });
+    const steps = await tx.agentMissionStep.findMany({ where: { missionId: { in: missionIds }, mission: { projectId } }, select: { missionId: true, resultJson: true } });
     for (const step of steps) for (const s of (record(step.resultJson).sources ?? []) as Array<{ id: string }>) childIds.push(s.id);
-    known = childIds.length > 0; derived = true;
+    known = Array.isArray(rawIds) && rawIds.length === missionIds.length && missions.length === new Set(missionIds).size &&
+      missionIds.length > 0 && missionIds.every(id => steps.some(s => s.missionId === id && Array.isArray(record(s.resultJson).sources) && (record(s.resultJson).sources as unknown[]).length > 0)); derived = true;
   } else if (id.startsWith("capture:")) known = !!await tx.capture.findFirst({ where: { id: id.slice(8), projectId }, select: { id: true } });
   else if (id.startsWith("attachment:")) known = !!await tx.attachment.findFirst({ where: { id: id.slice(11), projectId }, select: { id: true } });
   else if (id.startsWith("action:")) {

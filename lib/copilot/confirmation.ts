@@ -232,7 +232,7 @@ export async function confirmCopilotTool(projectId: string, input: AgentToolConf
   });
   if (reserved.replay) return reserved.replay;
   try {
-    const prepared = await prepareArtifactGeneration(projectId, reserved.artifactType!);
+    const prepared = await prepareArtifactGeneration(projectId, reserved.artifactType!, { userId: actor?.userId });
     return await writeTransaction(sourceRunId, async tx => {
       const state = await inspectConfirmation(tx, projectId, input, actor);
       if (state.replay) return state.replay;

@@ -1,0 +1,32 @@
+{
+  "status": "ENGINEERING_CHECKPOINT_WITH_EXPLICIT_ACCEPTANCE_GATES",
+  "baselineHead": "df2368b0291af65903ae98beee61857a34b822d9",
+  "date": "2026-10-29",
+  "data": "Independent synthetic databases; original business services and persisted receipts",
+  "checks": {
+    "fullUnitIntegration": { "files": 134, "passed": 1146, "exitCode": 0, "log": "full-tests-final.log", "scope": "working tree including CT-2 prototype; subsequent CT-1 changes covered by affected tests" },
+    "affectedFinal": { "files": 6, "passed": 38, "exitCode": 0, "log": "affected-fixed.log" },
+    "additionalGuards": { "files": 2, "passed": 5, "exitCode": 0, "log": "final-guards.log" },
+    "typecheck": { "exitCode": 0, "log": "types-submit.log" },
+    "fullLint": { "exitCode": 0, "log": "lint-final.log" },
+    "latestChangedFileLint": { "exitCode": 0, "logs": ["lint-affected.log", "lint-checkpoint.log", "lint-submit.log"] },
+    "webBuild": { "exitCode": 0, "log": "web-e2e-fixed.log" },
+    "webE2E": { "passed": 23, "skipped": 2, "failed": 0, "flaky": 0, "exitCode": 0, "log": "web-e2e-fixed.log", "details": "web-e2e-success-summary.json" },
+    "harmonyTests": { "passed": 86, "exitCode": 0, "log": "harmony-tests.log" },
+    "harmonyBuild": { "exitCode": 0, "log": "harmony-build.log", "unsignedHapSha256": "dfd730ab30063ab2b943028951f4d9250ac2c05de75e94a4be30ba6a42d4afd3" }
+  },
+  "paidQueryRepair": { "results": 6, "answered": 6, "modelCalls": 37, "externalCalls": 8, "unknown": 0, "estimatedPeakUpperUSD": 0.0751782, "summary": "pr6-repair-summary.json" },
+  "acceptancePending": [
+    "Independent semantic quality scoring and cross-generation live CT-1 x PR-6 journeys",
+    "Further fine-grained scope concurrency negative cases",
+    "Two legacy feature-flag browser journeys skipped; see E2E summary",
+    "Isolated native simulator and target-device interaction acceptance",
+    "Product latency acceptance; integration timeout increases are not latency proof",
+    "CT-2 full vertical integration beyond the separately delivered metadata foundation"
+  ],
+  "productionDeployment": false,
+  "realDatabaseMigration": false,
+  "remotePush": false,
+  "newPaidCallsRunning": false,
+  "details": "R4_CONTINUITY_IMPLEMENTATION_NOTES.md"
+}

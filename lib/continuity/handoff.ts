@@ -16,7 +16,8 @@ export async function readContinuity(actor: ConversationActor, conversationId: s
   if (c.scope === "PROJECT" && target !== c.homeProjectId) throw new AppError("DIRECTIVE_SCOPE_CHANGED", "请切换到对应项目", 409);
   const member = await assertProject(actor, target);
   const focused = record(record(c.focusJson).entityRef);
-  const view = await effectiveContinuity(actor.userId, { projectId: target, conversationId, ...(focused.kind === "MISSION" && focused.projectId === target && typeof focused.id === "string" ? { missionId: focused.id } : {}) });
+  const scope = { projectId: target, conversationId, ...(focused.kind === "MISSION" && focused.projectId === target && typeof focused.id === "string" ? { missionId: focused.id } : {}) };
+  const view = await effectiveContinuity(actor.userId, scope);
   const recent = await db.conversationTurn.findMany({ where: { conversation: { ownerUserId: actor.userId, OR: [{ homeProjectId: target }, { projects: { some: { projectId: target } } }] }, status: { in: ["ANSWERED", "NEEDS_CLARIFICATION"] } }, orderBy: { createdAt: "desc" }, take: 16 });
   let candidate: import("@/lib/types/continuity").ContinuityView["candidate"];
   for (const t of recent) {
@@ -34,7 +35,7 @@ export async function readContinuity(actor: ConversationActor, conversationId: s
     db.actionItem.findMany({ where: { projectId: target, isSimulated: false, status: "DONE", resultCardId: { not: null } }, orderBy: { completedAt: "desc" }, take: 5 }),
   ]);
   const results = [];
-  for (const a of actions) if ((await sourceUse(actor.userId, target, "action:" + a.id, db, { conversationId })).state === "ALLOWED")
+  for (const a of actions) if ((await sourceUse(actor.userId, target, "action:" + a.id, db, scope)).state === "ALLOWED")
     results.push({ id: a.id, title: a.title, resultText: a.resultText, resultCardId: a.resultCardId, verification: "REPORTED" as const, href: `/projects/${target}/actions#action-${a.id}` });
   return { ...view, ...(candidate ? { candidate } : {}), handoff: { missions: missions.map(m => ({ id: m.id, goal: m.goal, status: m.status,
     nextOwner: ["WAITING_INPUT", "WAITING_APPROVAL", "PAUSED"].includes(m.status) ? "USER" : "AGENT",

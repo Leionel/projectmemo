@@ -60,8 +60,8 @@ test("first material leads to an explicitly authorized Mission; multiple waiting
    await expect(input).toHaveValue(/核对阶段汇报的资料范围/);
    const send=discussion.getByRole("button",{name:"发送",exact:true});await expect(send).toBeEnabled();await send.click();
    await expect(input).toHaveValue("");
-   const source=discussion.getByRole("button",{name:"核对阶段汇报的资料范围",exact:true}).last();await expect(source).toBeVisible();
-   await source.locator("..").getByRole("button",{name:"在此协作",exact:true}).click();
+   const source=discussion.getByRole("button",{name:"核对阶段汇报的资料范围",exact:true}).locator("..").filter({has:page.getByRole("button",{name:"在此协作",exact:true})}).last();await expect(source).toBeVisible();
+   await source.getByRole("button",{name:"在此协作",exact:true}).click();
    await expect(discussion.getByRole("region",{name:"原任务协作",exact:true})).toContainText("核对阶段汇报的资料范围");
  }else{
    const waitingFocus=page.getByRole("region",{name:"需要回应的委托"});

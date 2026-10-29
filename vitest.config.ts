@@ -9,6 +9,9 @@ export default defineConfig({
     env: { DATABASE_URL: "file:./prisma/test-vitest.db" },
     // Test files switch DATABASE_URL and share the Prisma singleton; parallel files race on SQLite.
     fileParallelism: false,
+    // Persistent Turn/source fencing and old-schema replay include SQLite fsync work.
+    // Functional/race assertions remain unchanged; elapsed time is not a product latency pass.
+    testTimeout: 20_000,
     /**
      * 几个集成测试在 beforeAll 里把 prisma/migrations 下全部迁移逐个 exec 到独立库。
      * 本机跑完整个迁移集需要约 10–12 秒（每条迁移各自一次隐式事务与落盘），

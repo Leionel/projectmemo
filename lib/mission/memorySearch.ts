@@ -43,7 +43,7 @@ export async function searchMissionMemory(actor: Pick<Actor, "userId" | "project
   const artifacts = !ids.length && !input.afterId ? await searchAdoptedArtifacts(actor.projectId, input.query, 2, actor.userId, { missionId: actor.missionId, conversationId: actor.conversationId }) : { results: [], sources: [] };
   const coverage = { schemaVersion: 1, policy: ids.length ? "TARGETED_INCLUDE_ARCHIVED" : "TITLE_SUMMARY_PAGE", totalCards: total, activeCards: active,
     archivedExcluded: ids.length ? 0 : total - active, matchedCards: matched, returnedCards: page.length, usePolicyExcluded: unfilteredPage.length - page.length,
-    nextCursor: cards.length > input.limit ? page.at(-1)!.id : null, requestedSourceIds: input.sourceIds,
+    nextCursor: cards.length > input.limit ? unfilteredPage.at(-1)!.id : null, requestedSourceIds: input.sourceIds,
     sourceIdsNotOnThisPage: input.sourceIds.filter(id => !page.some(card => `card:${card.id}` === id || card.id === id)),
     complete: !input.afterId && matched <= input.limit && page.length === unfilteredPage.length, limitations: ["仅匹配标题与摘要；无结果不表示项目中不存在该事实", "归档记录须使用 sourceIds 定向读取", "成果最多附带两条"] };
   return { data: { results: page.map(card => ({ cardId: card.id, title: card.title, summary: card.summary.slice(0, 1200), archived: !!card.archivedAt,

@@ -1,0 +1,79 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/missionArtifactAdoption.test.ts tests/continuitySuppression.test.ts tests/r4Specialists.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/missionArtifactAdoption.test.ts (9 tests | 1 failed) 9017ms
+     × 直接归入也遵守只读和停止；撤回后旧预览不复活，原回执仍可重放 2835ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/missionArtifactAdoption.test.ts > WP-31 受控成果归入 > 直接归入也遵守只读和停止；撤回后旧预览不复活，原回执仍可重放
+AssertionError: promise resolved "{ schemaVersion: 1, …(13) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "artifactType": "weekly_report",
++   "blockMap": [
++     {
++       "blockId": "goal",
++       "kind": "PROJECT_OBSERVATION",
++       "sourceIds": [
++         "project:cmvsvsvsj0001ck8opupie8ca",
++       ],
++       "state": "NOT_CHECKED",
++     },
++   ],
++   "content": "本月进展仍需完善",
++   "contextVersion": 3,
++   "factConfirmation": false,
++   "missionId": "cmvsvsvxw0003ck8oop3dnftm",
++   "outputHash": "3ac780be01365465dd3e1eefff6781a0580315ecb406f7916537f78c27189989",
++   "outputId": "cmvsvsws3000eck8oetudy7jv",
++   "outputRevision": 1,
++   "previewHash": "43e4abaf918d07eebaa49bfa29e4aa090969b3fecf5dd7d6118a9a4460c5db57",
++   "schemaVersion": 1,
++   "sourceManifest": [
++     {
++       "entityType": "PROJECT",
++       "excerpts": [],
++       "hash": "eb6dca878251b8e36b9d48e0e06ab83827c57912fe87c64752807019f22b4f8d",
++       "id": "project:cmvsvsvsj0001ck8opupie8ca",
++       "kind": "PROJECT",
++       "observedAt": "2026-10-29T01:45:31.897Z",
++       "revision": "eb6dca878251b8e36b9d48e0e06ab83827c57912fe87c64752807019f22b4f8d",
++     },
++   ],
++   "verification": {
++     "claims": [
++       {
++         "blockId": "goal",
++         "status": "NOT_CHECKED",
++       },
++     ],
++     "status": "NEEDS_REVIEW",
++   },
++   "visibility": "本项目有权查看成果的成员；不共享原委托私有对话或未选入来源",
+  }
+
+ ❯ tests/missionArtifactAdoption.test.ts:47:110
+     45|   const receipt=await confirmArtifactAdoption(userId,f.m.id,f.output.i…
+     46|   await submitDirective(actor,c.id,{commandId:crypto.randomUUID(),expe…
+     47|   await expect(previewArtifactAdoption(userId,f.m.id,f.output.id,{expe…
+       |                                                                                                              ^
+     48|   expect((await confirmArtifactAdoption(userId,f.m.id,f.output.id,body…
+     49|  });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 19 passed (20)
+   Start at  09:45:26
+   Duration  32.02s (transform 3.65s, setup 0ms, import 9.93s, tests 20.96s, environment 0ms)

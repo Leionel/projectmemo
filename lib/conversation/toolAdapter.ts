@@ -86,6 +86,7 @@ export async function readWorkspaceTool(actor: ConversationActor, raw: z.infer<t
       if (revision !== call.revision) throw new AppError("SOURCE_CHANGED", "原项目已有修订，请重新定位", 409);
       const project = await db.project.findUniqueOrThrow({ where: { id: call.projectId }, select: { title: true, goal: true, deadline: true } });
       const actions = await db.actionItem.findMany({ where: { projectId: call.projectId, isSimulated: false }, take: 8, orderBy: { id: "asc" }, select: { id: true, title: true, status: true } });
+      for (let i = actions.length - 1; i >= 0; i--) if ((await sourceUse(actor.userId, call.projectId, "action:" + actions[i].id, db, { conversationId: actor.conversationId, ...(actor.missionProjectId === call.projectId ? { missionId: actor.missionId } : {}) })).state !== "ALLOWED") actions.splice(i, 1);
       data = { project, actions }; source(call.sourceId, revision!, project.title, JSON.stringify(data), "STRUCTURED", "CURRENT");
       coverage = { complete: false, description: "原项目目标与最多8项行动，不代表全部资料" };
     } else if (call.sourceId.startsWith("repo:")) {
@@ -95,7 +96,7 @@ export async function readWorkspaceTool(actor: ConversationActor, raw: z.infer<t
       data = { title: original.ref.title, content: original.text, goalImpact: "UNKNOWN", signalIds: original.signalIds };
       coverage = { complete: false, description: "已缓存仓库线索，不证明现实执行成功" };
     } else {
-    const material = await readReviewMaterial(call.projectId, call.sourceId, db, actor.userId);
+    const material = await readReviewMaterial(call.projectId, call.sourceId, db, actor.userId, { conversationId: actor.conversationId, ...(actor.missionProjectId === call.projectId ? { missionId: actor.missionId } : {}) });
     if (!material || material.source.hash !== call.revision) throw new AppError("SOURCE_CHANGED", "原资料已修订，请重新定位", 409);
     if (!material.source.text.trim()) throw new AppError("SOURCE_NOT_READABLE", "这份资料还没有可读正文", 409);
     source(call.sourceId, material.source.hash, material.title, material.source.text, material.readScope, material.source.temporalState, material.source.knowledgeClass ?? "PROJECT_OBSERVATION");
@@ -114,8 +115,11 @@ export async function readWorkspaceTool(actor: ConversationActor, raw: z.infer<t
     const project = await db.project.findUniqueOrThrow({ where: { id: call.projectId }, select: { title: true, goal: true, deadline: true } });
     const actions = await db.actionItem.findMany({ where: { projectId: call.projectId, isSimulated: false,
       ...(call.afterId ? { id: { gt: call.afterId } } : {}) }, orderBy: { id: "asc" }, take: 9, select: { id: true, title: true, status: true } });
+    const nextCursor = actions.length > 8 ? actions[7].id : null;
+    actions.splice(8);
+    for (let i = actions.length - 1; i >= 0; i--) if ((await sourceUse(actor.userId, call.projectId, "action:" + actions[i].id, db, { conversationId: actor.conversationId, ...(actor.missionProjectId === call.projectId ? { missionId: actor.missionId } : {}) })).state !== "ALLOWED") actions.splice(i, 1);
     if (before !== await sourceHash(call.projectId, "project:" + call.projectId)) throw new AppError("SOURCE_CHANGED", "项目刚发生变化", 409);
-    data = { project, actions: actions.slice(0, 8) }; coverage = { complete: !call.afterId && actions.length <= 8, nextCursor: actions.length > 8 ? actions[7].id : null };
+    data = { project, actions: actions.slice(0, 8) }; coverage = { complete: !call.afterId && !nextCursor, nextCursor };
     source("project:" + call.projectId, before!, project.title, JSON.stringify(data), "STRUCTURED", "CURRENT");
   }
   await validateReadSources(actor, [...priorSources, ...sources]);

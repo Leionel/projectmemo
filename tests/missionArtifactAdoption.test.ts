@@ -13,6 +13,9 @@ import {getArtifactAudit} from "@/lib/services/artifactAuditService";
 import fs from "node:fs";
 import {saveOutput} from "@/lib/mission/outputService";
 import {textHash} from "@/lib/research/sourceRepository";
+import {createSession} from "@/lib/auth/session";
+import {createConversation} from "@/lib/conversation/service";
+import {submitDirective} from "@/lib/continuity/directiveService";
 let userId:string;
 beforeAll(async()=>{userId=(await db.user.create({data:{username:`adopt-${Date.now()}`,displayName:"测试",passwordHash:"unused"}})).id;});
 afterAll(async()=>{await db.$disconnect();for(const name of fs.readdirSync(isolated.dir))fs.unlinkSync(`${isolated.dir}/${name}`);fs.rmdirSync(isolated.dir);});
@@ -24,6 +27,26 @@ async function fixture(){
  const body={requestId:crypto.randomUUID(),expectedOutputRevision:output.revision,expectedContextVersion:d.contextVersion,previewHash:preview.previewHash};return{project,m,output,preview,body};
 }
 describe("WP-31 受控成果归入",()=>{
+ it("直接归入也遵守只读和停止；撤回后旧预览不复活，原回执仍可重放",async()=>{
+  process.env.FOCUS_AGENT_ENABLED="true";
+  const f=await fixture(),other=await fixture();
+  const actor={userId,sessionId:(await createSession(userId)).session.id};
+  const c=await createConversation(actor,{requestId:crypto.randomUUID(),scope:"PROJECT",projectId:f.project.id});
+  const seq=(await db.user.findUniqueOrThrow({where:{id:userId}})).continuitySeq;
+  const denied=await submitDirective(actor,c.id,{commandId:crypto.randomUUID(),expectedSeq:seq,scope:{projectId:f.project.id},operation:"SET",quote:"今天先只读"});
+  await expect(confirmArtifactAdoption(userId,f.m.id,f.output.id,f.body)).rejects.toMatchObject({code:"DIRECTIVE_EFFECT_DENIED"});
+  expect(await db.generatedArtifact.count({where:{projectId:f.project.id}})).toBe(0);
+  await confirmArtifactAdoption(userId,other.m.id,other.output.id,other.body);
+  const withdrawn=await submitDirective(actor,c.id,{commandId:crypto.randomUUID(),expectedSeq:denied.view.seq,scope:{projectId:f.project.id},operation:"WITHDRAW",directiveId:denied.view.directives[0].directiveId});
+  await expect(confirmArtifactAdoption(userId,f.m.id,f.output.id,f.body)).rejects.toMatchObject({code:"OUTPUT_CHANGED"});
+  const preview=await previewArtifactAdoption(userId,f.m.id,f.output.id,{expectedOutputRevision:f.output.revision});
+  const m=await db.agentMission.findUniqueOrThrow({where:{id:f.m.id}});
+  const body={...f.body,previewHash:preview.previewHash,expectedContextVersion:m.contextVersion};
+  const receipt=await confirmArtifactAdoption(userId,f.m.id,f.output.id,body);
+  await submitDirective(actor,c.id,{commandId:crypto.randomUUID(),expectedSeq:withdrawn.view.seq,scope:{projectId:f.project.id,missionId:f.m.id},operation:"SET",quote:"停止"});
+  await expect(previewArtifactAdoption(userId,f.m.id,f.output.id,{expectedOutputRevision:f.output.revision})).rejects.toMatchObject({code:"DIRECTIVE_STOPPED"});
+  expect((await confirmArtifactAdoption(userId,f.m.id,f.output.id,body)).id).toBe(receipt.id);
+ });
  it("真实完成状态读回保留resultCardId并记录USER_REPORTED，不把创建当完成",async()=>{const f=await fixture();const capture=await db.capture.create({data:{projectId:f.project.id,rawText:"已完成本地验证",sourceType:"Agent行动回执"}});const card=await db.knowledgeCard.create({data:{projectId:f.project.id,captureId:capture.id,type:"reflection",title:"实验复盘",summary:"保留回执",keywords:[],relatedTasks:[],nextActions:[],importance:3}});const action=await db.actionItem.create({data:{projectId:f.project.id,title:"验证实验",status:"DONE",resultCardId:card.id}});await runMissionSlice({id:f.m.id,provider:async()=>({choice:{kind:"tool",tool:"inspect_action",args:{actionId:action.id},summary:"读回"},provider:"TEST_FIXTURE",model:"fixture",protocol:"JSON_CHOICE",usage:{inputTokens:1,outputTokens:1}})});const events=await db.agentMissionEvent.findMany({where:{missionId:f.m.id,type:"USER_REPORTED"}});expect(events).toHaveLength(1);expect(events[0].payloadJson).toMatchObject({actionId:action.id,resultCardId:card.id});expect(await db.knowledgeCard.count({where:{projectId:f.project.id}})).toBe(1);});
  it("重复归入的新请求别名持久绑定，不能被另一Output复用",async()=>{const f=await fixture();await confirmArtifactAdoption(userId,f.m.id,f.output.id,f.body);const alias={...f.body,requestId:crypto.randomUUID()};await confirmArtifactAdoption(userId,f.m.id,f.output.id,alias);const other=await fixture();await expect(confirmArtifactAdoption(userId,other.m.id,other.output.id,{...other.body,requestId:alias.requestId})).rejects.toMatchObject({code:"REQUEST_ID_REUSED"});});
  it("归入后外部来源链不能借PROJECT容器升级为项目实测",async()=>{const f=await fixture(),text="公开模型Dice达到0.85",hash=textHash(text),sourceId=`external-${f.m.id}`;await db.externalSource.create({data:{id:sourceId,missionId:f.m.id,requestedUrl:"https://example.org/paper",retrievalMode:"PROVIDER_EXTRACT",title:"公开论文",normalizedContentHash:hash,excerptJson:{text}}});const source={id:sourceId,kind:"EXTERNAL",entityType:"EXTERNAL_SOURCE",revision:hash,hash,text,observedAt:new Date().toISOString()};await db.agentMissionOutput.update({where:{id:f.output.id},data:{contentJson:{schemaVersion:1,kind:"NOTE",blocks:[{blockId:"paper",kind:"EXTERNAL_REFERENCE",text,sourceIds:[sourceId],citations:[{sourceId,start:0,end:text.length,excerptHash:hash}]}],missingInformation:[]},sourceRefsJson:[source]}});const preview=await previewArtifactAdoption(userId,f.m.id,f.output.id,{expectedOutputRevision:1});await confirmArtifactAdoption(userId,f.m.id,f.output.id,{...f.body,previewHash:preview.previewHash});const found=await searchAdoptedArtifacts(f.project.id,"公开模型",3);expect(found.sources[0].knowledgeClass).toBe("EXTERNAL_REFERENCE");const step=await db.agentMissionStep.create({data:{missionId:f.m.id,ordinal:3,planRevision:1,toolName:"save_mission_output",canonicalInputJson:{},inputHash:"test",readSetJson:[]}});await expect(db.$transaction(tx=>saveOutput(tx,f.m.id,step.id,{blocks:[{blockId:"laundered",kind:"PROJECT_OBSERVATION",text:"本项目实测达到0.85",sourceIds:[found.sources[0].id]}]},found.sources))).rejects.toMatchObject({code:"EXTERNAL_NOT_PROJECT_FACT"});});

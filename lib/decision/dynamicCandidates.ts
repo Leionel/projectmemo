@@ -73,7 +73,7 @@ export async function createDynamicReview(actor: CopilotActor, missionId: string
   const observations = await db.agentMissionStep.findMany({ where: { missionId, status: "SUCCEEDED", toolName: "read_project_material" }, orderBy: { ordinal: "desc" }, take: 16, select: { resultJson: true, protocolJson: true } });
   for (const step of observations.filter(step => (step.protocolJson as { rootReviewId?: string } | null)?.rootReviewId === parent.id).slice(0, 2)) {
     for (const source of (step.resultJson as unknown as import("@/lib/mission/contracts").ToolResult | null)?.sources ?? []) {
-      const material = await readReviewMaterial(m.projectId, source.id);
+      const material = await readReviewMaterial(m.projectId, source.id, db, actor.userId, { missionId });
       if (!material || material.source.hash !== source.hash) continue;
       const next = { ref: evidenceKey(source), source, role: "CURRENT" as const, title: material.title, text: source.text.slice(0, 2000), readScope: material.readScope };
       const index = evidence.findIndex(e => e.ref === next.ref);
@@ -83,7 +83,7 @@ export async function createDynamicReview(actor: CopilotActor, missionId: string
   }
   for (const historical of parent.base.evidence.filter(e => e.role === "HISTORICAL")) {
     if (evidence.length >= 8 || pointers.some(p => p.id === historical.source.id)) continue;
-    const current = await readReviewMaterial(m.projectId, historical.source.id);
+    const current = await readReviewMaterial(m.projectId, historical.source.id, db, actor.userId, { missionId });
     if (current && current.source.text.trim()) {
       pointers.push({ id: current.source.id, hash: current.source.hash });
       if (!evidence.some(e => e.ref === evidenceKey(current.source))) evidence.push({ ref: evidenceKey(current.source), source: current.source,

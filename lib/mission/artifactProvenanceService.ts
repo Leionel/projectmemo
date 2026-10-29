@@ -1,4 +1,5 @@
 import { sourceUse } from "@/lib/continuity/sourcePolicy";
+import { effectiveContinuity } from "@/lib/continuity/directiveService";
 import { materialTemporalStates } from "./readSetValidator";
 import { db } from "@/lib/db";
 import { jsonHash,type Source } from "./contracts";
@@ -30,7 +31,8 @@ export async function missionArtifactAudit(projectId:string,artifactId:string,tx
 }
 export async function artifactSourceHash(projectId:string,id:string,tx:Tx=db){const row=await tx.generatedArtifact.findFirst({where:{id,projectId}});if(!row)return null;const audit=await missionArtifactAudit(projectId,id,tx);return jsonHash({content:row.content,audit:audit?.blocks??[]});}
 export async function searchAdoptedArtifacts(projectId:string,query:string,limit:number,userId?:string,scope?:{missionId?:string;conversationId?:string}){
+ const suppressing=userId?(await effectiveContinuity(userId,{projectId,...scope})).directives.some(d=>d.kind==="USE_SUPPRESSION"):false;
  const rows=await db.generatedArtifact.findMany({where:{projectId,content:{contains:query},missionReceipt:{isNot:null}},orderBy:{createdAt:"desc"},take:limit});const sources:Source[]=[];const results=[];
- for(const row of rows){if(userId && (await sourceUse(userId,projectId,"artifact:"+row.id,db,scope)).state!=="ALLOWED")continue;const audit=await missionArtifactAudit(projectId,row.id),hash=await artifactSourceHash(projectId,row.id);sources.push({id:`artifact:${row.id}`,kind:"PROJECT",entityType:"ARTIFACT",knowledgeClass:audit?.blocks.every(b=>b.kind==="PROJECT_OBSERVATION")?"PROJECT_OBSERVATION":audit?.blocks.every(b=>b.kind==="EXTERNAL_REFERENCE")?"EXTERNAL_REFERENCE":"MIXED",revision:row.id,hash:hash!,text:row.content.slice(0,12000),observedAt:new Date().toISOString()});results.push({artifactId:row.id,content:row.content.slice(0,1500),audit});}
+ for(const row of rows){const policy=userId?await sourceUse(userId,projectId,"artifact:"+row.id,db,scope):null;if(policy?.state==="SUPPRESSED"||policy?.state==="UNKNOWN"&&suppressing)continue;const audit=await missionArtifactAudit(projectId,row.id),hash=await artifactSourceHash(projectId,row.id);sources.push({id:`artifact:${row.id}`,kind:"PROJECT",entityType:"ARTIFACT",knowledgeClass:audit?.blocks.every(b=>b.kind==="PROJECT_OBSERVATION")?"PROJECT_OBSERVATION":audit?.blocks.every(b=>b.kind==="EXTERNAL_REFERENCE")?"EXTERNAL_REFERENCE":"MIXED",revision:row.id,hash:hash!,text:row.content.slice(0,12000),observedAt:new Date().toISOString()});results.push({artifactId:row.id,content:row.content.slice(0,1500),audit,provenance:policy,independentEvidence:false});}
  return{sources,results};
 }

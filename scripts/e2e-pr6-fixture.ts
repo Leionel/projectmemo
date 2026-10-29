@@ -23,6 +23,10 @@ try {
     await updateResearchScope(actor,c.id,{expectedRevision:1,projectId:project.id,scope:{enabled:true,topic:'公开研究验证',publicTerms:['公开研究'],allowedHosts:['arxiv.org']}});
     const message='请核对公开来源 https://arxiv.org/abs/2601.00001';
     const turn=await submitConversationTurn(actor,c.id,{requestId:'fixture',expectedVersion:1,message,projectId:project.id},undefined,{defer:true});
+    const {newTurnLease,withTurnLease,withTurnGeneration}=await import('../lib/conversation/turnRuntime');
+    const lease=newTurnLease();
+    await db.conversationTurn.update({where:{id:turn.turnId},data:{leaseToken:lease,leaseUntil:new Date(Date.now()+60000)}});
+    await withTurnLease(turn.turnId,lease,()=>withTurnGeneration(0,async()=>{
     const [original]=await registerUserUrls(actor,c.id,turn.turnId,project.id,message);
     const read=await readConversationResearchTool(actor,c.id,turn.turnId,'fixture-fetch',{tool:'web_fetch',projectId:project.id,sourceId:original.sourceId,scopeRevision:2},{name:'SYNTHETIC_HTTP_STUB',search:async()=>[],fetchPage:async()=>({title:'合成公开研究资料',content:'这份合成资料仅用于界面验收。公开结果需要在本项目的同条件数据上验证。'})});
     const s=read.sources[0], coverage={schemaVersion:1 as const,questionHash:'fixture',scopeRevision:2,asOf:'2026-10-27',facets:[{id:'validation',question:'公开结果能否外推到本项目',kind:'PROJECT_FACT' as const,coverage:'UNKNOWN' as const,sourceIds:[s.id],missing:['本项目同条件实测'],conflicts:[]}],nextDecision:'ANSWER_CONDITIONALLY' as const,expectedDecisionChange:'取得实测后再决定',stopReason:'NEED_PROJECT_RESULT' as const};
@@ -31,6 +35,7 @@ try {
       await tx.conversationTurn.update({where:{id:turn.turnId},data:{status:'ANSWERED'}});
       await tx.conversation.update({where:{id:c.id},data:{activeTurnId:null,version:{increment:1},focusJson:json({projectId:project.id})}});
     });
+    }));
     console.log(JSON.stringify({projectId:project.id,conversationId:c.id}));
   } else throw new Error('Expected create/remove');
 } finally { await db.$disconnect(); }

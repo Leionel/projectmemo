@@ -27,7 +27,7 @@ test('PR6 原回答来源回读、研究总结确认及撤权，桌面手机同�
     for(const width of [1280,390]){
       await page.setViewportSize({width,height:900});
       expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
-      await page.screenshot({path:`evidence/r4-continuity/20261028-pr6-close-ct1/web/pr6-preview-${width}.png`,fullPage:true});
+      await page.screenshot({path:`evidence/r4-continuity/browser-${Date.now()}/pr6-preview-${width}.png`,fullPage:true});
     }
     await panel.getByRole('button',{name:'确认归入项目'}).click();
     await expect(panel.getByRole('status').filter({hasText:'研究总结已归入项目'})).toBeVisible();

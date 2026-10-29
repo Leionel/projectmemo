@@ -1,0 +1,40 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/r4Investigation.test.ts (17 tests | 10 failed) 94989ms
+     × changes the next decision using a real 'RESEARCH' source and preserves one original Action 6899ms
+     × changes the next decision using a real 'COMPETITION' source and preserves one original Action 6728ms
+     × changes the next decision using a real 'COURSE' source and preserves one original Action 6417ms
+     × stops duplicate reads and replays the same request without extra HTTP 5770ms
+     × reads actual in-flight progress and replays an active request without a second driver 5753ms
+     × discards revoked and revised late responses before any proposal is published 8824ms
+     × confirms only published bindings and replays the same UI request as one effect 12374ms
+     × expires R4 proposals on the original confirmation path and preserves readable history 10725ms
+     × stops focus.ui_plan.v1 without subsequent reads or published effects 7566ms
+     × keeps a known answer and original proposal if UI generation is unknown, without replaying the model 7261ms
+Exception in PromiseRejectCallback:
+D:/Projects/hongmen/tests/copilotPersistence.test.ts:315
+			return prepared;
+
+RangeError: Maximum call stack size exceeded
+
+Exception in PromiseRejectCallback:
+file:///D:/Projects/hongmen/node_modules/@vitest/spy/dist/index.js:361
+					returnValue.then((settledValue) => {
+					            ^
+
+RangeError: Maximum call stack size exceeded
+
+ ❯ tests/copilotPersistence.test.ts (14 tests | 4 failed) 17636ms
+     × allows two frozen proposals from one run without invalidating the second with its own first action 166ms
+     × generates outside the write transaction and rejects sources changed while generation is in flight 5018ms
+     × rechecks membership/session inside the final commit after generation 512ms
+     × recovers an OS exit before receipt commit for generate_artifact atomically 1831ms
+ ❯ tests/p3ReviewBoundaries.test.ts (12 tests | 1 failed) 13201ms
+   × 旧库增量升级清除混入的异主样本，保留历史使用与旧仓库信号 6036ms
+ ❯ tests/conversationAnchor.test.ts (21 tests | 1 failed) 33329ms
+   × rotates workspace synchronization past the first eight conversations 5717ms

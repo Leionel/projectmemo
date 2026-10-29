@@ -41,7 +41,7 @@ export function admitDirective(command: DirectiveCommand, now = new Date()): Adm
     return { status: "NEEDS_CLARIFICATION", reason: "AMBIGUOUS_REFERENT", question: "这次指的是哪一项工作？" };
   if (/[“”「」『』"<>]|(?:他说|她说|网页上写|论文指出|日志说|据说|如果|假如|并非|不是|不要理解|别理解|能否|是否|[?？])/.test(q))
     return { status: "INTERPRETATION_CANDIDATE", reason: "QUOTED_CONDITIONAL_OR_AMBIGUOUS" };
-  if (/^(?:请)?(?:停止|暂停)(?:本轮|当前|这次)?(?:调查|任务|执行|推进)[。！!]?$/u.test(q))
+  if (/^(?:请)?(?:停止|暂停)(?:本轮|当前|这次)?(?:调查|任务|执行|推进)?[。！!]?$/u.test(q))
     return { status: "DIRECT_APPLIED", kind: "STOP", reason: "LITERAL_STOP_UNTIL_WITHDRAWN" };
   if (/^(?:请)?(?:只读(?:不联网)?|不联网|不创建行动|(?:不要|禁止|不得|不允许)(?:联网|调用外部工具|调用模型|付费调用|创建行动|新增行动|外部写入|写入业务))[。！!]?$/u.test(q))
     return { status: "DIRECT_APPLIED", kind: "CONSTRAINT", constraints: [q], reason: "LITERAL_VETO_UNTIL_WITHDRAWN" };

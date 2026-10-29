@@ -1,4 +1,5 @@
 import { effectiveContinuity } from "@/lib/continuity/directiveService";
+import { sourceUse } from "@/lib/continuity/sourcePolicy";
 import { db } from "@/lib/db";
 import { changeReviewV4 } from "@/lib/agent/specialistPrompts";
 import { reviewGoalState } from "./goalState";
@@ -18,7 +19,8 @@ export async function listChangeMaterials(actor: CopilotActor, missionId: string
   const completed = await db.actionItem.findMany({ where: { projectId: m.projectId, isSimulated: false, status: "DONE", resultCardId: { not: null } }, orderBy: [{ updatedAt: "desc" }, { id: "desc" }], take: 8, select: { id: true } });
   const materials = [];
   for (const id of [...captures.map(c => "capture:" + c.id), ...attachments.map(a => "attachment:" + a.id), ...completed.map(a => "action:" + a.id)]) {
-    const material = await readReviewMaterial(m.projectId, id);
+    if ((await sourceUse(actor.userId, m.projectId, id, db, { missionId })).state !== "ALLOWED") continue;
+    const material = await readReviewMaterial(m.projectId, id, db, actor.userId, { missionId });
     if (material) materials.push({ sourcePointer: { id, hash: material.source.hash }, title: material.title,
       excerpt: material.source.text.slice(0, 300), readable: !!material.source.text.trim(), extractionStatus: material.coverage.extractionStatus });
   }
@@ -35,7 +37,7 @@ export async function createChangeReview(actor: CopilotActor, missionId: string,
   if (new Set(input.sources.map(s => s.id)).size !== input.sources.length) throw new AppError("DUPLICATE_SOURCE", "同一份资料只能选择一次", 422);
   const evidence: EvidenceSlice[] = [];
   for (const pointer of [...input.sources].sort((a, b) => a.id.localeCompare(b.id))) {
-    const material = await readReviewMaterial(m.projectId, pointer.id);
+    const material = await readReviewMaterial(m.projectId, pointer.id, db, actor.userId, { missionId });
     if (!material || material.source.hash !== pointer.hash) throw new AppError("SOURCE_CHANGED", "所选资料已变化或不可访问", 409);
     if (!material.source.text.trim()) throw new AppError("SOURCE_NOT_READABLE", "所选资料尚不可读，请等待提取或纠错后再核对", 409);
     evidence.push({ ref: evidenceKey(material.source), source: material.source, title: material.title, role: "CURRENT", text: material.source.text.slice(0, 1200), readScope: material.readScope });
@@ -43,7 +45,8 @@ export async function createChangeReview(actor: CopilotActor, missionId: string,
   const steps = await db.agentMissionStep.findMany({ where: { missionId, status: "SUCCEEDED" }, orderBy: { ordinal: "desc" }, take: 8, select: { resultJson: true } });
   const historical = new Map<string, Source>();
   for (const step of steps) for (const source of (step.resultJson as unknown as ToolResult | null)?.sources ?? []) {
-    if (source.kind === "PROJECT" && !evidence.some(e => evidenceKey(e.source) === evidenceKey(source))) historical.set(evidenceKey(source), source);
+    if (source.kind === "PROJECT" && !evidence.some(e => evidenceKey(e.source) === evidenceKey(source)) &&
+      (await sourceUse(actor.userId, m.projectId, source.id, db, { missionId })).state === "ALLOWED") historical.set(evidenceKey(source), source);
   }
   for (const [ref, source] of [...historical].slice(0, 8 - evidence.length)) evidence.push({ ref, source, title: "原委托已读取的历史资料", role: "HISTORICAL", text: source.text.slice(0, 600), readScope: "EXCERPT" });
   const project = await db.project.findUniqueOrThrow({ where: { id: m.projectId }, select: { goal: true } });

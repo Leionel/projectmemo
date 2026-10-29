@@ -87,7 +87,9 @@ async function ask(f: Fixture, requestId = "turn") {
   const v = await readConversation(f.actor, f.id);
   return submitConversationTurn(f.actor, f.id, { requestId, expectedVersion: v.version, message: "请调查这个项目最重要的目标差距，帮我先处理。", projectId: f.p.id, llmContextApproved: true });
 }
-describe.sequential("R4 durable adaptive investigation", () => {
+// Full persisted provenance/intent fencing adds several database round trips to a scripted Turn.
+// Keep the functional/race assertions intact; this is an integration budget, not a latency acceptance claim.
+describe.sequential("R4 durable adaptive investigation", { timeout: 20_000 }, () => {
   it.each(["PROMPT_ONLY", "INVESTIGATION_ONLY"] as const)("runs %s ablation on the original loop without UI calls or client-visible switches", async variant => {
     const f = await fixture(), provider = model(f, { noAction: true });
     const input = { requestId: "ablation", expectedVersion: 1, message: "请调查项目的原记录", projectId: f.p.id, llmContextApproved: true };

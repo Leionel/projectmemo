@@ -1,6 +1,8 @@
 # R4 Agent UX：核心页面与跨端交互合同
 
-本方案落实 [统一 Roadmap](D:/Projects/hongmen/planning/r4-agent-ux-integration/R4_AGENT_UX_INTEGRATION_ROADMAP.md) 的三个任务：回来了解变化、查清当前问题、交代持续工作。当前实现差异见 [代码对账](D:/Projects/hongmen/planning/r4-agent-ux-integration/CODE_DEMO_AUDIT.md)。所有新增字段、文案和布局均为待实施方案。
+R2说明：UX-1已实施；Memory/Dream和持续责任的深化以 [UX-2 R2](D:/Projects/hongmen/planning/r4-agent-ux-integration/ux2-deepening/UX2_DEEPENING_ROADMAP.md)／[UX-3 R2](D:/Projects/hongmen/planning/r4-agent-ux-integration/ux3-deepening/UX3_DEEPENING_ROADMAP.md) 为准。本轮只修订规划。
+
+本方案落实 [统一 Roadmap](D:/Projects/hongmen/planning/r4-agent-ux-integration/R4_AGENT_UX_INTEGRATION_ROADMAP.md) 的三个任务：回来了解变化、查清当前问题、交代持续工作。原 [代码对账](D:/Projects/hongmen/planning/r4-agent-ux-integration/CODE_DEMO_AUDIT.md) 是 UX-0 快照；UX-1 交付见 [实施记录](D:/Projects/hongmen/R4_AGENT_UX_IMPLEMENTATION_NOTES.md)。本文件保留完整交互目标，UX-2/3 新增字段、文案和布局尚待实施。
 
 ## 1. 页面职责与渐进展示
 
@@ -151,7 +153,7 @@
 
 显示主张、来源类型及原对象、最近证据变化、当前有效性、Agent 使用状态。用户自述、模型推断、原工具观察、独立验证分开。未知状态不使用绿色勾；CURRENT 可译“当前记录”，不能直接译“真实”。
 
-“待核实”只读聚合现有 GoalGap/Investigation、Output INFERENCE、Decision 候选，不新建 Dream 数据库或队列。已有 AgentExperience 保留独立的适用条件、SHADOW/ACTIVE 状态、支持案例／反例与撤销入口，不把所有推测都包装成经验。
+“待核实”复用现有 GoalGap/Investigation、Output INFERENCE、Decision 候选，R2在原数据库增加稳定 Claim/Event 和派生 Digest，接实际动态验证与上下文消费；不建立独立 Dream 数据库或执行队列。已有 AgentExperience 保留独立的适用条件、SHADOW/ACTIVE 状态、支持案例／反例与撤销入口，不把所有推测都包装成经验。
 
 展示身份包含 owner/project/originalRef/revision/claim locator。没有唯一来源的二手总结，显示“出处需核对”，可以继续调查；不把它计为独立证据。三份同根摘要按一条来源链解释，不能显示成“三个独立来源一致”。
 
@@ -160,7 +162,7 @@
 | 操作 | 原服务 | 用户可理解的结果 |
 |---|---|---|
 | 补充新证据 | 原 Capture／附件修订、ImpactJob | 新材料到达，相关判断需重核 |
-| 纠正解释 | 拟增原 Continuity 的 INTERPRETATION_CORRECTION 类型和 target/locator metadata，复用 SET/WITHDRAW/有效视图 | 哪一句、怎样理解、只对哪个范围生效；不改变工作目标或授权 |
+| 纠正解释 | R2采用原数据库的 ClaimEvent 追加纠正／撤回，target/locator 核对原对象；复用原协调和 reuse hash | 哪一句、怎样理解、只对哪个范围生效；不改变工作目标或授权 |
 | 原记录被替代／反驳 | 原 Temporal relation proposal/confirm/revoke | 新旧记录和关系都可追溯；关系需原证据 |
 | 用户确认内容 | 原 memoryLifecycle | “你确认了这条记录”；不会标独立核验 |
 | 不再参考 | 原 SUPPRESS_USE/sourcePolicy | 后续消费排除该来源及派生；历史仍可读 |

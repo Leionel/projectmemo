@@ -1,0 +1,525 @@
+{
+  "schemaVersion": 2,
+  "recordedAt": "2026-10-30T02:09:27.899345+00:00",
+  "timezone": "Asia/Shanghai",
+  "head": "2017c317f2db3ceeabf3e30e51f4c25ee0d49bd6",
+  "branch": "codex/ux2-memory-planning",
+  "scope": "UX-2 and UX-3 incremental audit and planning only",
+  "priorUx1Receipt": {
+    "path": "evidence/r4-agent-ux/20261030-ux1/acceptance-summary.json",
+    "sha256": "fa709df3007ce27e1361f1909b5574f62bbb2940b08b37670d73eac804ab01ef",
+    "status": "PASS_WITH_OPEN_ENVIRONMENT_AND_QUALITY_GATES",
+    "newRuntimeAcceptanceThisRound": false
+  },
+  "userUx2BriefSha256": "b2c7fb18e23364a30a31769427a70856706e668a95e1abc60635bd93e26160eb",
+  "protectedFiles": {
+    "AGENTS.md": {
+      "expectedSha256": "dbff8a9d83193830b2fd06c5c131b9324c0a8e472be2c8aa2f66deff990e2750",
+      "currentSha256": "dbff8a9d83193830b2fd06c5c131b9324c0a8e472be2c8aa2f66deff990e2750",
+      "unchanged": true
+    },
+    "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md": {
+      "expectedSha256": "7328e70a94cbd17f400c23ef418d0a62f396a408ea9a1926c9d1f057f211f631",
+      "currentSha256": "7328e70a94cbd17f400c23ef418d0a62f396a408ea9a1926c9d1f057f211f631",
+      "unchanged": true
+    },
+    "harmonyos/build-profile.json5": {
+      "expectedSha256": "442618a372bd9a74d204e7162ffe6844b6fc49dbf4c09b8cc5bc58c6709a1924",
+      "currentSha256": "442618a372bd9a74d204e7162ffe6844b6fc49dbf4c09b8cc5bc58c6709a1924",
+      "unchanged": true
+    },
+    "tsconfig.json": {
+      "expectedSha256": "af1b4fbd345a0d2b7e23394aca3540b524a3d4826fca6a51169b13b2a325ee4a",
+      "currentSha256": "af1b4fbd345a0d2b7e23394aca3540b524a3d4826fca6a51169b13b2a325ee4a",
+      "unchanged": true
+    }
+  },
+  "ux1ImplementationFiles": {
+    "app/api/conversations/capabilities/route.ts": {
+      "expectedSha256": "2588e440009b33b0508ad70ec6133fc3e1ec4667b59835e51f6da40cddec52dc",
+      "currentSha256": "2588e440009b33b0508ad70ec6133fc3e1ec4667b59835e51f6da40cddec52dc",
+      "unchanged": true
+    },
+    "app/api/missions/capabilities/route.ts": {
+      "expectedSha256": "71057dc97e107dfb780d40060c7d15f70357007246fb4c56b96514c98da28fea",
+      "currentSha256": "71057dc97e107dfb780d40060c7d15f70357007246fb4c56b96514c98da28fea",
+      "unchanged": true
+    },
+    "app/focus/page.tsx": {
+      "expectedSha256": "763610b0c38c5c74dbbdb4190cf8e732dfbee1a4c9c7ecd154e5449c92579b5b",
+      "currentSha256": "763610b0c38c5c74dbbdb4190cf8e732dfbee1a4c9c7ecd154e5449c92579b5b",
+      "unchanged": true
+    },
+    "components/ConversationContinuity.tsx": {
+      "expectedSha256": "2e7c059ed7e5a1fec030448e6382c78ba5c6a4ae116ae63d3493dee379da820b",
+      "currentSha256": "2e7c059ed7e5a1fec030448e6382c78ba5c6a4ae116ae63d3493dee379da820b",
+      "unchanged": true
+    },
+    "components/ConversationPanel.tsx": {
+      "expectedSha256": "5fea08264991b2ed8a016028d0b5c3c9cbbebe75b9bc159cd4976fda3e975b75",
+      "currentSha256": "5fea08264991b2ed8a016028d0b5c3c9cbbebe75b9bc159cd4976fda3e975b75",
+      "unchanged": true
+    },
+    "components/FocusAgentWorkspace.module.css": {
+      "expectedSha256": "1245523cb53ef91de309a5a9cf13cbd7b5e09e6a374db64a26e45ca7fc288e90",
+      "currentSha256": "1245523cb53ef91de309a5a9cf13cbd7b5e09e6a374db64a26e45ca7fc288e90",
+      "unchanged": true
+    },
+    "components/FocusAgentWorkspace.tsx": {
+      "expectedSha256": "e1d096f218ab65d44814c26dbbe842528881af76bec14a2324c153078f57051f",
+      "currentSha256": "e1d096f218ab65d44814c26dbbe842528881af76bec14a2324c153078f57051f",
+      "unchanged": true
+    },
+    "components/MissionPanel.tsx": {
+      "expectedSha256": "4eca06674aeea15a5ee6a584e3dfc02dd9a3504f9b577d6a5199a57857a69a45",
+      "currentSha256": "4eca06674aeea15a5ee6a584e3dfc02dd9a3504f9b577d6a5199a57857a69a45",
+      "unchanged": true
+    },
+    "e2e/agent-ux-integration.spec.ts": {
+      "expectedSha256": "39e8335430a5fc0aab8c885672bca3711adc021f15f1866ffb60ac442b523c72",
+      "currentSha256": "39e8335430a5fc0aab8c885672bca3711adc021f15f1866ffb60ac442b523c72",
+      "unchanged": true
+    },
+    "e2e/continuity.spec.ts": {
+      "expectedSha256": "1c641c4910550e5dec420d15ce89e08863cdbec4a9eb19bf21720fdec6221f9f",
+      "currentSha256": "1c641c4910550e5dec420d15ce89e08863cdbec4a9eb19bf21720fdec6221f9f",
+      "unchanged": true
+    },
+    "e2e/pre-r4-ux.spec.ts": {
+      "expectedSha256": "712a2755c6c96fc3c8e80a04484bc100bb6368d273316581d7368bdd48bfc23d",
+      "currentSha256": "712a2755c6c96fc3c8e80a04484bc100bb6368d273316581d7368bdd48bfc23d",
+      "unchanged": true
+    },
+    "harmonyos/entry/src/main/ets/common/GlobalFocusPresentation.ets": {
+      "expectedSha256": "ee19e548063110ef5a3df42218f069b4208b14022e15675d92b001b73edb4636",
+      "currentSha256": "ee19e548063110ef5a3df42218f069b4208b14022e15675d92b001b73edb4636",
+      "unchanged": true
+    },
+    "harmonyos/entry/src/main/ets/components/ConversationContinuity.ets": {
+      "expectedSha256": "68e8cfd67e6ef70cf1c79a2b708019bf6beb6fb7a1745dd23f21ea356d01baf1",
+      "currentSha256": "68e8cfd67e6ef70cf1c79a2b708019bf6beb6fb7a1745dd23f21ea356d01baf1",
+      "unchanged": true
+    },
+    "harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets": {
+      "expectedSha256": "147ae5304ed3e8845dc1e9c65c5493a04ac30c63f5a930b13ab50db1e65afec1",
+      "currentSha256": "147ae5304ed3e8845dc1e9c65c5493a04ac30c63f5a930b13ab50db1e65afec1",
+      "unchanged": true
+    },
+    "harmonyos/entry/src/main/ets/components/MissionPanel.ets": {
+      "expectedSha256": "2333650f27559eee3e5300448a1804f83def0f10d29925abc310baa3a5b5002d",
+      "currentSha256": "2333650f27559eee3e5300448a1804f83def0f10d29925abc310baa3a5b5002d",
+      "unchanged": true
+    },
+    "harmonyos/entry/src/main/ets/models/Continuity.ets": {
+      "expectedSha256": "dc1aa9902c14292ca08e87888f8236cae9796c2866b14b96acef0d6e4cf82876",
+      "currentSha256": "dc1aa9902c14292ca08e87888f8236cae9796c2866b14b96acef0d6e4cf82876",
+      "unchanged": true
+    },
+    "harmonyos/entry/src/main/ets/models/GlobalFocus.ets": {
+      "expectedSha256": "f879b91b985d049d4dceccb9484fa62223a9aea46ace9348d18976dc1f816839",
+      "currentSha256": "f879b91b985d049d4dceccb9484fa62223a9aea46ace9348d18976dc1f816839",
+      "unchanged": true
+    },
+    "harmonyos/entry/src/main/ets/models/Mission.ets": {
+      "expectedSha256": "7ec536222fe9d419df60170162aa038b6872679129dfc8b3b69f241c22ab58b1",
+      "currentSha256": "7ec536222fe9d419df60170162aa038b6872679129dfc8b3b69f241c22ab58b1",
+      "unchanged": true
+    },
+    "harmonyos/entry/src/main/ets/models/MissionReadback.ets": {
+      "expectedSha256": "6296178baf3563c02023774c50360eac34a7b4b66fb2674f3d872e93c5d83068",
+      "currentSha256": "6296178baf3563c02023774c50360eac34a7b4b66fb2674f3d872e93c5d83068",
+      "unchanged": true
+    },
+    "harmonyos/entry/src/main/ets/models/ProjectAgentContext.ets": {
+      "expectedSha256": "607c2fdfd81fbfa8b15e32fb9256fa717861c326d16d8f1ab1c52b77b97c0c45",
+      "currentSha256": "607c2fdfd81fbfa8b15e32fb9256fa717861c326d16d8f1ab1c52b77b97c0c45",
+      "unchanged": true
+    },
+    "harmonyos/entry/src/main/ets/models/WorkState.ets": {
+      "expectedSha256": "4121197627bd0830a071647bc83b68922b2cb881e4c8afbca307649e95d65e49",
+      "currentSha256": "4121197627bd0830a071647bc83b68922b2cb881e4c8afbca307649e95d65e49",
+      "unchanged": true
+    },
+    "harmonyos/entry/src/main/ets/pages/FocusConversation.ets": {
+      "expectedSha256": "3402ad118b708c86b9cdc9759b90a1c620bdd0139951b5aa89956375152bd1aa",
+      "currentSha256": "3402ad118b708c86b9cdc9759b90a1c620bdd0139951b5aa89956375152bd1aa",
+      "unchanged": true
+    },
+    "harmonyos/entry/src/main/ets/pages/MissionDetail.ets": {
+      "expectedSha256": "0a158d0001b41f85344d1c271c3ef3d5469306f8d2a1bdac8e6956e9c620bbe2",
+      "currentSha256": "0a158d0001b41f85344d1c271c3ef3d5469306f8d2a1bdac8e6956e9c620bbe2",
+      "unchanged": true
+    },
+    "harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets": {
+      "expectedSha256": "c7f05d41689c0f543d13a9b777a2018995984e1d33cbd9549ade64cc8cada07f",
+      "currentSha256": "c7f05d41689c0f543d13a9b777a2018995984e1d33cbd9549ade64cc8cada07f",
+      "unchanged": true
+    },
+    "lib/client/conversationDrafts.ts": {
+      "expectedSha256": "66d30f688cf22588d43945ae0226737567e088f1052dea207b636a64d9a746ab",
+      "currentSha256": "66d30f688cf22588d43945ae0226737567e088f1052dea207b636a64d9a746ab",
+      "unchanged": true
+    },
+    "lib/client/focusPresentation.ts": {
+      "expectedSha256": "99d8cffe7116b475400f7a75397549ad2ceb7d7360f2d0216c1d11e145239755",
+      "currentSha256": "99d8cffe7116b475400f7a75397549ad2ceb7d7360f2d0216c1d11e145239755",
+      "unchanged": true
+    },
+    "lib/continuity/handoff.ts": {
+      "expectedSha256": "070aef01deac5b29151e9bc603c3f14a2931ea5bc5d8671abba2ae1324d8937c",
+      "currentSha256": "070aef01deac5b29151e9bc603c3f14a2931ea5bc5d8671abba2ae1324d8937c",
+      "unchanged": true
+    },
+    "lib/mission/delegationObservation.ts": {
+      "expectedSha256": "26c2abd6830f00233b6530177a43be507ba23fb6ebf011343cb2a77f82ddd6b0",
+      "currentSha256": "26c2abd6830f00233b6530177a43be507ba23fb6ebf011343cb2a77f82ddd6b0",
+      "unchanged": true
+    },
+    "lib/mission/missionService.ts": {
+      "expectedSha256": "e94695e2662aa594a2d9a97418ba0fc4aa4eb3921d52d3b38ee0d95aff176f97",
+      "currentSha256": "e94695e2662aa594a2d9a97418ba0fc4aa4eb3921d52d3b38ee0d95aff176f97",
+      "unchanged": true
+    },
+    "lib/mission/presentation.ts": {
+      "expectedSha256": "98092eccc208391a6c27b2c5c410aa410b2562cbcf5c120be4ae475de42adb6f",
+      "currentSha256": "98092eccc208391a6c27b2c5c410aa410b2562cbcf5c120be4ae475de42adb6f",
+      "unchanged": true
+    },
+    "lib/mission/readback.ts": {
+      "expectedSha256": "db4998e6b11695af2b4689bbb72183e858611862e6c1e4ea866207b1d93f63f5",
+      "currentSha256": "db4998e6b11695af2b4689bbb72183e858611862e6c1e4ea866207b1d93f63f5",
+      "unchanged": true
+    },
+    "lib/mission/runner.ts": {
+      "expectedSha256": "d541d13d17e9249a858b41a04d0928752288015838a9f6db1dc707003720a273",
+      "currentSha256": "d541d13d17e9249a858b41a04d0928752288015838a9f6db1dc707003720a273",
+      "unchanged": true
+    },
+    "lib/mission/workState.ts": {
+      "expectedSha256": "9cfed8093c202e91a63384619f74fe56a2778a150699c49c7fae1785fd135f95",
+      "currentSha256": "9cfed8093c202e91a63384619f74fe56a2778a150699c49c7fae1785fd135f95",
+      "unchanged": true
+    },
+    "lib/mission/workspaceSummary.ts": {
+      "expectedSha256": "b3fc05b15ced3f0cc9077b005bcafc7361e402ea48597c85a70a84f4db0847c3",
+      "currentSha256": "b3fc05b15ced3f0cc9077b005bcafc7361e402ea48597c85a70a84f4db0847c3",
+      "unchanged": true
+    },
+    "lib/projectAgentContext.ts": {
+      "expectedSha256": "87e7d6d4da4e1158a354a537a72d7e51fc2842bab801aa2df1d7a909ba3e49de",
+      "currentSha256": "87e7d6d4da4e1158a354a537a72d7e51fc2842bab801aa2df1d7a909ba3e49de",
+      "unchanged": true
+    },
+    "lib/server/globalFocus.ts": {
+      "expectedSha256": "0b76c6cf59f00fea7ad52101c031bafd99442c52b01599bff0a2b6f4d1e56324",
+      "currentSha256": "0b76c6cf59f00fea7ad52101c031bafd99442c52b01599bff0a2b6f4d1e56324",
+      "unchanged": true
+    },
+    "lib/services/projectAgentContextService.ts": {
+      "expectedSha256": "a3d7e784270090b71aa73cb17a54995f89e355930399c06eac00c2465f5d1d99",
+      "currentSha256": "a3d7e784270090b71aa73cb17a54995f89e355930399c06eac00c2465f5d1d99",
+      "unchanged": true
+    },
+    "lib/types/continuity.ts": {
+      "expectedSha256": "37474cbe3d3a4cecc44ceb9e031ed2bd36cd479dd66543687484448e224e41ea",
+      "currentSha256": "37474cbe3d3a4cecc44ceb9e031ed2bd36cd479dd66543687484448e224e41ea",
+      "unchanged": true
+    },
+    "lib/types/globalFocus.ts": {
+      "expectedSha256": "891f4791367ee9366f4b3a3bfc6a962b61a80bbd2b5bbf34f1d1980f49e39fa5",
+      "currentSha256": "891f4791367ee9366f4b3a3bfc6a962b61a80bbd2b5bbf34f1d1980f49e39fa5",
+      "unchanged": true
+    },
+    "lib/types/projectAgentContext.ts": {
+      "expectedSha256": "dafb49ba18ea282beb6f0d025203c409f8fb26a464e15b8ff77b5cb607fb452d",
+      "currentSha256": "dafb49ba18ea282beb6f0d025203c409f8fb26a464e15b8ff77b5cb607fb452d",
+      "unchanged": true
+    },
+    "lib/types/workState.ts": {
+      "expectedSha256": "2cde50bacc6947ce6ccdbd48559282b805181a06beab5fcfb8ebcb229124b7fd",
+      "currentSha256": "2cde50bacc6947ce6ccdbd48559282b805181a06beab5fcfb8ebcb229124b7fd",
+      "unchanged": true
+    },
+    "tests/agentUxControls.test.ts": {
+      "expectedSha256": "5947b69b8b3d99ded328ee0f79db0495a8a4f8f561e09d5329783ba73f3e71e6",
+      "currentSha256": "5947b69b8b3d99ded328ee0f79db0495a8a4f8f561e09d5329783ba73f3e71e6",
+      "unchanged": true
+    },
+    "tests/agentUxJourney.test.ts": {
+      "expectedSha256": "3954f18333ea28827566783ff67a17901408d4e4d014ee0aec03635c4580031d",
+      "currentSha256": "3954f18333ea28827566783ff67a17901408d4e4d014ee0aec03635c4580031d",
+      "unchanged": true
+    },
+    "tests/agentUxWorkState.test.ts": {
+      "expectedSha256": "4d601475fed4d72ccc5ac6d9fc8e23bc5d9ed6861d4a60285605339726e00fed",
+      "currentSha256": "4d601475fed4d72ccc5ac6d9fc8e23bc5d9ed6861d4a60285605339726e00fed",
+      "unchanged": true
+    },
+    "tests/globalWorkspace.integration.test.ts": {
+      "expectedSha256": "15846558d2960f662eb675151535a8e109b4522d75135412231a647cba801eda",
+      "currentSha256": "15846558d2960f662eb675151535a8e109b4522d75135412231a647cba801eda",
+      "unchanged": true
+    },
+    "tests/missionPanel.test.ts": {
+      "expectedSha256": "78db92f8794fec70b68b36fe141947a79a17bcb6e482e1409d0d44cb5373a5d5",
+      "currentSha256": "78db92f8794fec70b68b36fe141947a79a17bcb6e482e1409d0d44cb5373a5d5",
+      "unchanged": true
+    },
+    "tests/projectAgentContext.test.ts": {
+      "expectedSha256": "a28128bb7861f62f7bc2a8a9060d2dd8a1210afd6764deabf8a5a9007ff68509",
+      "currentSha256": "a28128bb7861f62f7bc2a8a9060d2dd8a1210afd6764deabf8a5a9007ff68509",
+      "unchanged": true
+    }
+  },
+  "localSourceHashes": {
+    "AGENTS.md": "dbff8a9d83193830b2fd06c5c131b9324c0a8e472be2c8aa2f66deff990e2750",
+    "app/api/missions/[id]/attention/route.ts": "f15b32328b06cf5e8c7d00c40bc0900948acb75f531a98e558a017d3f7741786",
+    "app/api/missions/[id]/events/route.ts": "f336c4a8bbbf3127f10d90204df32716d80b89102e4e27f7707f65fe5e158236",
+    "app/api/missions/[id]/readback/route.ts": "90da1599cb7148d09e2205c60273df47f0f7f7f347aba952018df01637c9da2c",
+    "app/api/missions/[id]/route.ts": "9065c4dbe73683236713d8ca885f6f7b0a69e816cf45d2fbebc909a27ca5aae7",
+    "components/AgentMessageBlocks.tsx": "13c7c28d6dff3ca8b3bb2aa21425c1a2717ada83390242067b88bb972a4bb151",
+    "components/FocusAgentWorkspace.tsx": "e1d096f218ab65d44814c26dbbe842528881af76bec14a2324c153078f57051f",
+    "components/MissionInvestigationDelegation.tsx": "56301afaa53fee10261d349d345ccbabc844e2e40cda91826c73fc6f1e31642b",
+    "components/MissionPanel.tsx": "4eca06674aeea15a5ee6a584e3dfc02dd9a3504f9b577d6a5199a57857a69a45",
+    "harmonyos/entry/src/main/ets/common/MissionWidgetContract.ets": "e1983d47edf83c27a5667330e81a92a06fdf8d982c5f4fc3d0369abf0a69d055",
+    "harmonyos/entry/src/main/ets/components/AgentMessageBlocks.ets": "a08e2379b13ee53a9024d5e476633c4aa122feaec2b4c403da809891b75f1127",
+    "harmonyos/entry/src/main/ets/components/MissionInvestigationDelegation.ets": "2151f16c970fc1078814fe7324523f87edc88f9165afa0a00bc4fc338a5f359c",
+    "harmonyos/entry/src/main/ets/components/MissionPanel.ets": "2333650f27559eee3e5300448a1804f83def0f10d29925abc310baa3a5b5002d",
+    "harmonyos/entry/src/main/ets/models/Mission.ets": "7ec536222fe9d419df60170162aa038b6872679129dfc8b3b69f241c22ab58b1",
+    "harmonyos/entry/src/main/ets/services/MissionService.ets": "c3ee36972388adb6832d8d69420579800b82f98063f9163e85af4d94509c274c",
+    "harmonyos/entry/src/main/ets/services/NotificationService.ets": "f1236fc5cc617700d6bb3e6262a3b3d7ec011d711dd71fda7bccb947d0a5d1af",
+    "harmonyos/entry/src/main/ets/services/WidgetDataService.ets": "14ab4413d9dbee63366b9b83e371cb05b6fe29ba1a07513e20b03465cdec8786",
+    "harmonyos/entry/src/main/module.json5": "c2b62a9c9cf3c25ab177b4b3d4ccd31cbc4bff1723a1276351e814343e2354ac",
+    "lib/continuity/admission.ts": "b44ac3504647119796d107b5dcfe411e43a2f11a88978d461c6c3450e898d8e5",
+    "lib/continuity/directiveService.ts": "84fd5c7e1a6d751a87c3737d1c3483260af6712ceffdaa645fae07fa10c1a8cc",
+    "lib/continuity/handoff.ts": "070aef01deac5b29151e9bc603c3f14a2931ea5bc5d8671abba2ae1324d8937c",
+    "lib/continuity/sourcePolicy.ts": "19fd72047345e58eec68f63e8a81afc8b094b85ef87f373b83fc998e3a59db63",
+    "lib/continuity/turnCoordination.ts": "5d8e10cf0c931b4fd5f1f9f0e0ccb0c7dd2c85738867d86810fa1c4bf4bec3f5",
+    "lib/conversation/anchorService.ts": "c0c6733f90c41bf0d613c0351a1785c2e0ec47483728845e0937abff942cbbdd",
+    "lib/conversation/investigationService.ts": "46268bffd4d5f462044deaf0fd8b05fa5d9d800b2951d2acb87426c3c2564a5e",
+    "lib/conversation/presentationRuntime.ts": "e7c46e7fbd996c5547f833c05dc3c7d74589df6faeaae6a280145d1f676408b8",
+    "lib/conversation/researchTools.ts": "192ef830108bd3ffd39714e088da035812cc63068ba151db04d287f77a269349",
+    "lib/conversation/turnWorker.ts": "78ab03c30d0c65f59e35cb8ef5c13581ce1034f367636b923ae0ae83f66c8792",
+    "lib/conversation/uiActions.ts": "2e1c57e7f410e7d30efd9da93fa31a8a7ee7d6f23856b1eab8510f9884c516ea",
+    "lib/decision/impact.ts": "d684ace90853a8ec62d85c13ae668ef8f26503745f487ca4d16c7441ffbe2868",
+    "lib/decision/impactJobs.ts": "84f4994108d322f7c923f276ffb47fdb21c44f5f90ebc1e8decb7ff4f2020f50",
+    "lib/documents/observations.ts": "21bd0c190f730808e3054e051f0ff3a6aa21ea7726e046a3dc64ea09914b3c53",
+    "lib/experience/injection.ts": "5bef8c162d63cd4870afcccc50edd6c8013db167c5f9140a0aacf23abd2e7404",
+    "lib/experience/service.ts": "0f4f14b8974610590ffce14d2b5e2f7042df5127159bf9545f799bc74f9f9fdb",
+    "lib/experience/trajectoryIndex.ts": "444bc7462bf5ee2fb30f316ffbf3b0e45703204d9fe54bc2fe4c05a5c6fe63ce",
+    "lib/experiments/metrics.ts": "37e8373a4ea6604636e8b4e6c3510035f8f0c94c1751fd7c93ccf86b5c33499d",
+    "lib/memory/temporalLedger.ts": "644c488a78ff088492e2d7495f1b0073d9ac5cf8439e7e4d99c100dd13d58732",
+    "lib/mission/attentionReceipt.ts": "ac79dc907a71c4d22a04439070b3bf3031ece64bf98d7a95906b72782c56804c",
+    "lib/mission/contextBuilder.ts": "38aa72a0759475fd596185f05e101dfef1f2e82c35e48de68d9d4d2170457920",
+    "lib/mission/delegationObservation.ts": "26c2abd6830f00233b6530177a43be507ba23fb6ebf011343cb2a77f82ddd6b0",
+    "lib/mission/investigationDelegation.ts": "34bec05e548e40531ec05ddc65f1a6e9fc41db3596303697496054f356f646d1",
+    "lib/mission/missionService.ts": "e94695e2662aa594a2d9a97418ba0fc4aa4eb3921d52d3b38ee0d95aff176f97",
+    "lib/mission/readback.ts": "db4998e6b11695af2b4689bbb72183e858611862e6c1e4ea866207b1d93f63f5",
+    "lib/mission/runner.ts": "d541d13d17e9249a858b41a04d0928752288015838a9f6db1dc707003720a273",
+    "lib/mission/runtimeStore.ts": "0a09140f03e7dc0da2b1f4787f67aa576ea52f16f5876abf5134fde11685c934",
+    "lib/projectAgentContext.ts": "87e7d6d4da4e1158a354a537a72d7e51fc2842bab801aa2df1d7a909ba3e49de",
+    "lib/repositories/cards.ts": "c23922a62152a53b754ae4d1854db0bf99fd9989439b88f73346bea0261448f2",
+    "lib/research/academic.ts": "2effc4b64f870a206d5b3048e598e444c4881e0e05c4ad51521611baaa2df23f",
+    "lib/sensing/repoSource.ts": "55b668caaeecfcce25f21383cbc873c7c943ba920628957a13b4a5b46618a15d",
+    "lib/server/globalFocus.ts": "0b76c6cf59f00fea7ad52101c031bafd99442c52b01599bff0a2b6f4d1e56324",
+    "lib/server/globalWorkspace.ts": "502428e4e8afc885225f5d2d79d0c8b535ac23a7e71703a03fdc5b627800f191",
+    "lib/services/interventionPolicyService.ts": "d433253da2ebe694600042e768802e9eb488d272627b1dae3e3209fc85fc3f34",
+    "lib/services/memoryConsolidationService.ts": "205245c08f75c004ffe2a49ba6448ed7ff6df51b4b09d9d164c9686ac4be73a9",
+    "lib/services/memoryLifecycleService.ts": "a1e3924b5305be0af3e1a10a4812d87878fdd0d9b374368221761c30079c4bdd",
+    "lib/services/projectEpisodeService.ts": "bf70628d3e28e1805d11c6a7685d5cc724b6ea2e11cecdabeb91ba478786111c",
+    "lib/services/workspaceContextService.ts": "29a689e5bdf21adbceda94f5d18c0b6738238a34e6e606095fb7e8080868f60a",
+    "lib/types/agentExperience.ts": "c707ca279acf62bbbc7e3b775d764de8d7f7cc7029dcaa23c6dcd4040b533096",
+    "lib/types/episode.ts": "7f5820a3bcf1cb27fbb21df0fc9bd9c0f8175403d4fd35ffa69a9f6194efdfa6",
+    "lib/types/mission.ts": "58ca5d4962710fae605ed441c891d83ebc431ffe7ea1fd56d164832c251e1691",
+    "lib/xiaoyi/missionAccess.ts": "d17511cf7175a2a09eb8958386dfade0df4c554c9348bd3e94f45b8845593b5d",
+    "prisma/schema.prisma": "7a0ee798c350e3a01e0582b468bc4da8242f4f5c72f3de2e982853dfd611fb81",
+    "scripts/mission-worker.ts": "be686ccaee65e884a4906bb45ba351216d8cfda53c52b5223c8c3611339e735d"
+  },
+  "planningMarkdownHashes": {
+    "planning/r4-agent-ux-integration/R4_AGENT_UX_INTEGRATION_ROADMAP.md": "39a512ed020cd5de53c32d58684d250439fdbce66e45f45a8ccded014282bbc7",
+    "planning/r4-agent-ux-integration/CORE_PAGE_DESIGN.md": "9821d87dff7eb433bedafdc9dcc54b214bdde1fc720ca36629a08c21806fdd11",
+    "planning/r4-agent-ux-integration/ux2-deepening/AGENT_CONTEXT_AND_UX.md": "65ac6fbee48a670295a280eb71a675ffd09581438a43a8b3734536bcfa3b0b4b",
+    "planning/r4-agent-ux-integration/ux2-deepening/CODE_AND_RESEARCH_AUDIT.md": "d7beb4ffa690de874aa71753777b44dbdcfbadb17682d04a6fa7bb7c7c334a2c",
+    "planning/r4-agent-ux-integration/ux2-deepening/EVAL_AND_IMPLEMENTATION.md": "7871fc280a046aae038a1a2a4a14e7f6f2b9c0ebd1aba734583a763c7be80033",
+    "planning/r4-agent-ux-integration/ux2-deepening/MEMORY_EVOLUTION_CONTRACT.md": "08fc5c8d940762be21062f3b51cb5a9e1d48852ecb700ad276493e25a04b21c0",
+    "planning/r4-agent-ux-integration/ux2-deepening/UX2_DEEPENING_ROADMAP.md": "a4be93a31b45015f6f572829265e805de91ced51efce9ddb14fdff2d7c181bb1",
+    "planning/r4-agent-ux-integration/ux3-deepening/RESPONSIBILITY_AND_CONTINUATION.md": "e0a67e4189384161a9e150a4aa072a6b313f35841adeac5e05139664adcf224c",
+    "planning/r4-agent-ux-integration/ux3-deepening/UX3_DEEPENING_ROADMAP.md": "009bef1c4bd997a7b0266cccfbba350e1dad24c254ef5afc4bd29c1276491408",
+    "planning/r4-agent-ux-integration/ux3-deepening/UX_AND_EVAL.md": "cc91a38ca71716938268254527c3c6abbd4b1ff08b2fd2bc1f52d8818d3a4a08"
+  },
+  "primaryPublicSources": [
+    {
+      "name": "OpenAI Dreaming",
+      "url": "https://openai.com/index/chatgpt-memory-dreaming/",
+      "evidenceClass": "PUBLIC_PRODUCT_DESCRIPTION",
+      "consultedDate": "2026-10-30",
+      "privateArchitectureInferred": false
+    },
+    {
+      "name": "Claude Memory",
+      "url": "https://support.claude.com/en/articles/11817273-use-claude-s-chat-search-and-memory-to-build-on-previous-context",
+      "evidenceClass": "PUBLIC_PRODUCT_HELP",
+      "consultedDate": "2026-10-30",
+      "privateArchitectureInferred": false
+    },
+    {
+      "name": "Meta Muse",
+      "url": "https://about.fb.com/news/2026/09/introducing-muse-personal-ai-agent/",
+      "evidenceClass": "PUBLIC_PRODUCT_DESCRIPTION",
+      "consultedDate": "2026-10-30",
+      "privateArchitectureInferred": false
+    },
+    {
+      "name": "OpenAI Dots",
+      "url": "https://help.openai.com/en/articles/20001530-getting-started-with-your-dot",
+      "evidenceClass": "PUBLIC_PRODUCT_HELP",
+      "consultedDate": "2026-10-30",
+      "privateArchitectureInferred": false
+    },
+    {
+      "name": "ChatGPT Scheduled Tasks",
+      "url": "https://help.openai.com/en/articles/10291617-scheduled-tasks-in-chatgpt",
+      "evidenceClass": "PUBLIC_PRODUCT_HELP",
+      "consultedDate": "2026-10-30",
+      "privateArchitectureInferred": false
+    },
+    {
+      "name": "Claude Cowork recurring tasks",
+      "url": "https://support.claude.com/en/articles/13854387-schedule-recurring-tasks-in-claude-cowork",
+      "evidenceClass": "PUBLIC_PRODUCT_HELP",
+      "consultedDate": "2026-10-30",
+      "privateArchitectureInferred": false
+    },
+    {
+      "name": "Claude Agent SDK hosting",
+      "url": "https://platform.claude.com/cookbook/claude-agent-sdk-07-hosting-the-agent",
+      "evidenceClass": "PUBLISHED_ENGINEERING_EXAMPLE",
+      "consultedDate": "2026-10-30",
+      "privateArchitectureInferred": false
+    },
+    {
+      "name": "Grok Automations",
+      "url": "https://x.ai/news/grok-automations",
+      "evidenceClass": "PUBLIC_PRODUCT_DESCRIPTION",
+      "consultedDate": "2026-10-30",
+      "privateArchitectureInferred": false
+    },
+    {
+      "name": "Letta legacy memory entry",
+      "url": "https://docs.letta.com/guides/agents/memory/",
+      "evidenceClass": "LEGACY_REDIRECT_NOT_CURRENT_CODE",
+      "consultedDate": "2026-10-30",
+      "privateArchitectureInferred": false
+    },
+    {
+      "name": "Mem0 Update",
+      "url": "https://docs.mem0.ai/core-concepts/memory-operations/update",
+      "evidenceClass": "OFFICIAL_ENGINEERING_DOCUMENTATION",
+      "consultedDate": "2026-10-30",
+      "privateArchitectureInferred": false
+    },
+    {
+      "name": "LangGraph memory",
+      "url": "https://docs.langchain.com/oss/python/concepts/memory",
+      "evidenceClass": "OFFICIAL_ENGINEERING_DOCUMENTATION",
+      "consultedDate": "2026-10-30",
+      "privateArchitectureInferred": false
+    },
+    {
+      "name": "LangGraph persistence",
+      "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+      "evidenceClass": "OFFICIAL_ENGINEERING_DOCUMENTATION",
+      "consultedDate": "2026-10-30",
+      "privateArchitectureInferred": false
+    }
+  ],
+  "openSourceSelection": [
+    {
+      "repo": "letta-ai/letta",
+      "stars": 25290,
+      "license": "Apache-2.0",
+      "pushedAt": "2026-10-18T22:28:04Z",
+      "archived": false,
+      "observedDate": "2026-10-30",
+      "metadataSource": "https://api.github.com/repos/letta-ai/letta"
+    },
+    {
+      "repo": "letta-ai/letta-code",
+      "stars": 3738,
+      "license": "Apache-2.0",
+      "pushedAt": "2026-10-30T00:45:51Z",
+      "archived": false,
+      "observedDate": "2026-10-30",
+      "metadataSource": "https://api.github.com/repos/letta-ai/letta-code"
+    },
+    {
+      "repo": "mem0ai/mem0",
+      "stars": 68064,
+      "license": "Apache-2.0",
+      "pushedAt": "2026-10-29T22:00:03Z",
+      "archived": false,
+      "observedDate": "2026-10-30",
+      "metadataSource": "https://api.github.com/repos/mem0ai/mem0"
+    },
+    {
+      "repo": "langchain-ai/langgraph",
+      "stars": 44120,
+      "license": "MIT",
+      "pushedAt": "2026-10-29T19:10:23Z",
+      "archived": false,
+      "observedDate": "2026-10-30",
+      "metadataSource": "https://api.github.com/repos/langchain-ai/langgraph"
+    }
+  ],
+  "pinnedSourceReads": [
+    {
+      "repo": "mem0ai/mem0",
+      "commit": "26cdefb46600c0fa5953c4b5ee5003c125539fc4",
+      "path": "mem0/memory/main.py",
+      "sha256": "f329ca4a17af1fbefb32ac10d4cc7ae7ddbdb7435a87eb74c30915cff98b8b7c",
+      "url": "https://github.com/mem0ai/mem0/blob/26cdefb46600c0fa5953c4b5ee5003c125539fc4/mem0/memory/main.py"
+    },
+    {
+      "repo": "langchain-ai/langgraph",
+      "commit": "6f2df053f4487ce6ea8decc0d7482c8e46e0f132",
+      "path": "libs/checkpoint/langgraph/store/base/__init__.py",
+      "sha256": "b44aef2b8aa293fdf6c9dac2bc003ab6108da7127e4a45e3611cb619997b1b8c",
+      "url": "https://github.com/langchain-ai/langgraph/blob/6f2df053f4487ce6ea8decc0d7482c8e46e0f132/libs/checkpoint/langgraph/store/base/__init__.py"
+    },
+    {
+      "repo": "letta-ai/letta-code",
+      "commit": "8f6f77306d36b7b087f642ef9e1785b5af9075a9",
+      "path": "src/agent/memory-filesystem.ts",
+      "sha256": "721b73673aa34ba2405a9dcb07305b4c2ee0b486dc440568990319c34abfb68c",
+      "url": "https://github.com/letta-ai/letta-code/blob/8f6f77306d36b7b087f642ef9e1785b5af9075a9/src/agent/memory-filesystem.ts"
+    },
+    {
+      "repo": "letta-ai/letta-code",
+      "commit": "8f6f77306d36b7b087f642ef9e1785b5af9075a9",
+      "path": "src/agent/memory-conflict-repair.ts",
+      "sha256": "d45b77562bb6954e3d265a804803de32d424f6faf31b0c5940bc8ed109d9589e",
+      "url": "https://github.com/letta-ai/letta-code/blob/8f6f77306d36b7b087f642ef9e1785b5af9075a9/src/agent/memory-conflict-repair.ts"
+    },
+    {
+      "repo": "letta-ai/letta-code",
+      "commit": "8f6f77306d36b7b087f642ef9e1785b5af9075a9",
+      "path": "src/agent/subagents/memory-worker.ts",
+      "sha256": "2310908903088916275406d758c64f05331fbd0d8a7be72f4a64f91605f18a0e",
+      "url": "https://github.com/letta-ai/letta-code/blob/8f6f77306d36b7b087f642ef9e1785b5af9075a9/src/agent/subagents/memory-worker.ts"
+    }
+  ],
+  "actionAttestation": {
+    "businessCodeChanged": false,
+    "workerStarted": false,
+    "databaseMigrated": false,
+    "paidModelCalls": 0,
+    "externalWrites": 0,
+    "productionDeployed": false
+  },
+  "limits": [
+    "Static source audit does not establish runtime race outcomes or worker health.",
+    "Public descriptions establish reported product behavior, not private implementation.",
+    "UX-1 prior engineering tests are not re-run or relabeled as UX-2/3 acceptance.",
+    "Real devices, independent quality, natural-day usage and deployment remain separate gates."
+  ]
+}

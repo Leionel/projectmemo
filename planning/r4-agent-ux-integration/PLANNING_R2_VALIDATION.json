@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 2,
+  "recordedAt": "2026-10-30T02:09:27.899345+00:00",
+  "status": "PASS_DOCUMENT_CHECKS_WITH_IMPLEMENTATION_PROBES_OPEN",
+  "sourceSnapshot": {
+    "path": "planning/r4-agent-ux-integration/R2_SOURCE_SNAPSHOT.json",
+    "sha256": "6975e63d8ee38481e9912fe0a29d6d8ae89cdeb260e04268d2e19134dc8774db"
+  },
+  "checks": {
+    "all47Ux1ImplementationFilesUnchanged": true,
+    "all4ProtectedFilesUnchanged": true,
+    "noUnexpectedTrackedContentChanges": true,
+    "allLocalLinksResolve": true,
+    "allLineTargetsValid": true,
+    "allJourneyDefinitionsPresentExactlyOnce": true,
+    "newDeepeningMarkdownCountIs8": true,
+    "gitDiffCheckPassed": true
+  },
+  "localLinkCount": 105,
+  "brokenLinks": [],
+  "lineTargetErrors": [],
+  "journeys": {
+    "UX-J": {
+      "definitions": [
+        "UX-J01",
+        "UX-J02",
+        "UX-J03",
+        "UX-J04",
+        "UX-J05",
+        "UX-J06",
+        "UX-J07",
+        "UX-J08",
+        "UX-J09",
+        "UX-J10",
+        "UX-J11",
+        "UX-J12",
+        "UX-J13",
+        "UX-J14"
+      ],
+      "expected": 14,
+      "allPresentExactlyOnce": true
+    },
+    "M-J": {
+      "definitions": [
+        "M-J01",
+        "M-J02",
+        "M-J03",
+        "M-J04",
+        "M-J05",
+        "M-J06",
+        "M-J07",
+        "M-J08",
+        "M-J09",
+        "M-J10",
+        "M-J11",
+        "M-J12",
+        "M-J13",
+        "M-J14",
+        "M-J15",
+        "M-J16"
+      ],
+      "expected": 16,
+      "allPresentExactlyOnce": true
+    },
+    "A-J": {
+      "definitions": [
+        "A-J01",
+        "A-J02",
+        "A-J03",
+        "A-J04",
+        "A-J05",
+        "A-J06",
+        "A-J07",
+        "A-J08",
+        "A-J09",
+        "A-J10",
+        "A-J11",
+        "A-J12",
+        "A-J13",
+        "A-J14"
+      ],
+      "expected": 14,
+      "allPresentExactlyOnce": true
+    }
+  },
+  "trackedContentChanges": [
+    "AGENTS.md",
+    "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md",
+    "harmonyos/build-profile.json5",
+    "planning/r4-agent-ux-integration/CORE_PAGE_DESIGN.md",
+    "planning/r4-agent-ux-integration/R4_AGENT_UX_INTEGRATION_ROADMAP.md",
+    "tsconfig.json"
+  ],
+  "unexpectedTrackedChanges": [],
+  "nextEnvRawBytesMatchHead": true,
+  "planningDocuments": [
+    "planning/r4-agent-ux-integration/R4_AGENT_UX_INTEGRATION_ROADMAP.md",
+    "planning/r4-agent-ux-integration/CORE_PAGE_DESIGN.md",
+    "planning/r4-agent-ux-integration/ux2-deepening/AGENT_CONTEXT_AND_UX.md",
+    "planning/r4-agent-ux-integration/ux2-deepening/CODE_AND_RESEARCH_AUDIT.md",
+    "planning/r4-agent-ux-integration/ux2-deepening/EVAL_AND_IMPLEMENTATION.md",
+    "planning/r4-agent-ux-integration/ux2-deepening/MEMORY_EVOLUTION_CONTRACT.md",
+    "planning/r4-agent-ux-integration/ux2-deepening/UX2_DEEPENING_ROADMAP.md",
+    "planning/r4-agent-ux-integration/ux3-deepening/RESPONSIBILITY_AND_CONTINUATION.md",
+    "planning/r4-agent-ux-integration/ux3-deepening/UX3_DEEPENING_ROADMAP.md",
+    "planning/r4-agent-ux-integration/ux3-deepening/UX_AND_EVAL.md",
+    "planning/r4-agent-ux-integration/R2_SOURCE_SNAPSHOT.json",
+    "planning/r4-agent-ux-integration/PLANNING_R2_VALIDATION.json"
+  ],
+  "planReview": {
+    "answersRequest": "Roadmap R2 plus UX-2 and UX-3 child plans map all requested capabilities.",
+    "scope": "Original runners, budgets, permissions, facts, CT goals and UX journeys retained.",
+    "verification": "14 inherited UX journeys plus 16 memory and 14 responsibility regression cases; real quality and devices separate.",
+    "feasibility": "Source paths and original contracts verified; concurrency, performance and delivery probes remain unrun.",
+    "assumptions": "Version semantics, source lineage, fairness, UNKNOWN and platform conditions have falsifiable probes.",
+    "independentExternalReviewPerformed": false
+  },
+  "notExecutedThisPlanningRound": [
+    "Business unit/E2E/build suites",
+    "New model/tool/background executions",
+    "Migration or application write probes",
+    "Concurrency and worker crash injection",
+    "Real-device or natural-day user acceptance"
+  ],
+  "openImplementationProbes": [
+    "F07 captured authorization identity versus observation/CAS revisions and inherited Capture lineage",
+    "Claim correction atomicity, reuse hash compatibility and in-flight invalidation",
+    "Compiler/context selection source closure, token coverage and negative transfer",
+    "Fair worker scheduling, wake watermark CAS and process recovery",
+    "Finite lifetime budget calibration and late/UNKNOWN settlement",
+    "Cross-entry attention merge, false-silence detection and actual channels",
+    "Independent hidden quality, target-device and three natural-day journey"
+  ],
+  "validationAttempts": [
+    {
+      "attempt": 1,
+      "result": "CASE_PARSER_MISMATCH",
+      "detail": "Original UX-J ID column includes a stage suffix; parser expected a bare ID. Definitions were present; parser corrected without reducing expected cases."
+    },
+    {
+      "attempt": 2,
+      "result": "RECHECKED_ALL_DEFINITIONS"
+    }
+  ],
+  "diffCheck": {
+    "exitCode": 0,
+    "output": ""
+  }
+}

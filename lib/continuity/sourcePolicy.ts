@@ -102,6 +102,14 @@ export async function sourceLineage(projectId: string, id: string, tx: Tx = db, 
     const observationsModule=await import("@/lib/documents/observations"),source=await observationsModule.findDocumentObservation(projectId,id,tx);
     if(source?.document){childIds.push("attachment:"+source.document.attachmentId);blocked=!await observationsModule.documentObservationCurrent(projectId,source,tx);if(blocked)blockedReason=isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false)?"DOCUMENT_VERSION_CHANGED":"DOCUMENT_READER_DISABLED";}else known=false;
     derived=true;
+  } else if (id.startsWith("connection:")) {
+    const c=await tx.sourceConnection.findFirst({where:{id:id.slice(11),projectId,provider:"DEPLOYMENT"}});
+    known=Boolean(c);
+    if(c){try{await(await import("@/lib/sensing/deploymentConnections")).deploymentConnection(c.ownerUserId,projectId,c.id,tx);}catch(error){if(!(error instanceof AppError))throw error;blocked=true;blockedReason=error.code;}}
+  } else if (id.startsWith("deploy:")) {
+    const observations=await import("@/lib/sensing/deploymentObservations"),source=await observations.findDeploymentObservation(projectId,id,tx);
+    if(source?.deployment){childIds.push("connection:"+source.deployment.connectionId);blocked=!await observations.deploymentObservationCurrent(projectId,source,tx);if(blocked)blockedReason="DEPLOYMENT_OBSERVATION_STALE";}else known=false;
+    derived=true;
   } else if (id.startsWith("ci:")) {
     const source = await (await import("@/lib/sensing/repoCiObservations")).findRepositoryObservation(projectId, id, tx);
     if (source?.repository) {
@@ -163,6 +171,8 @@ export async function sourceUse(userId: string, projectId: string, sourceId: str
   const view = await effectiveContinuity(userId, { projectId, ...scope }, tx);
   const suppressed = new Set(view.directives.filter(d => d.kind === "USE_SUPPRESSION").flatMap(d => d.sourceIds));
   const line = await sourceLineage(projectId, sourceId, tx);
+  const connectionIds=line.roots.filter(r=>r.startsWith("connection:")).map(r=>r.slice(11));
+  if(connectionIds.length&&await tx.sourceConnection.count({where:{id:{in:connectionIds},projectId,ownerUserId:{not:userId}}}))return{state:"UNKNOWN",roots:[],independentEvidence:false,reason:"PRIVATE_CONNECTION"};
   const claimIds = line.roots.filter(r => r.startsWith("claim:") || r.startsWith("claim-origin:")).map(r => r.slice(r.startsWith("claim:") ? 6 : 13));
   if (claimIds.length && await tx.agentClaim.count({ where: { id: { in: claimIds }, ownerUserId: { not: userId } } }))
     return { state: "UNKNOWN", roots: [], independentEvidence: false, reason: "PRIVATE_CLAIM" };
@@ -173,6 +183,7 @@ export async function sourceUse(userId: string, projectId: string, sourceId: str
 }
 export async function assertSourceUse(userId: string, projectId: string, sourceId: string, tx: Tx = db, scope?: { conversationId?: string; missionId?: string }) {
   const policy = await sourceUse(userId, projectId, sourceId, tx, scope);
+  if(policy.reason==="DEPLOYMENT_OBSERVATION_STALE")throw new AppError("DEPLOYMENT_OBSERVATION_STALE","原环境观察已过期或许可变化，请重新核对",409);
   if(policy.reason==="SOURCE_SCOPE_CHANGED")throw new AppError("SCOPE_CHANGED","原研究授权已变化，请重新核对范围和来源",409);
   if(policy.reason==="DOCUMENT_VERSION_CHANGED")throw new AppError("SOURCE_CHANGED","原文件或文本修订已变化，请重新读取后继续",409);
   if(policy.reason==="DOCUMENT_READER_DISABLED")throw new AppError("DOCUMENT_READER_DISABLED","文档深读当前已关闭，原观察保留为历史",503);

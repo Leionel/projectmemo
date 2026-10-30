@@ -222,7 +222,7 @@ it("旧库增量升级清除混入的异主样本，保留历史使用与旧仓�
   let sql = new Database(file);
   for (const name of fs.readdirSync("prisma/migrations").sort()) {
     const migration = path.join("prisma/migrations", name, "migration.sql");
-    if (name !== migrationName && fs.existsSync(migration)) sql.exec(fs.readFileSync(migration, "utf8"));
+    if (name !== migrationName && name !== "20261030233000_ct7_deployment_connections" && fs.existsSync(migration)) sql.exec(fs.readFileSync(migration, "utf8"));
   }
   sql.close();
   const client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file.replaceAll("\\", "/")}` }) });
@@ -239,7 +239,8 @@ it("旧库增量升级清除混入的异主样本，保留历史使用与旧仓�
     sql = new Database(file);
     sql.prepare('INSERT INTO SourceConnection (id,projectId,ownerUserId,repo,ref,updatedAt) VALUES (?,?,?,?,?,?)').run("old-connection", p.id, a.id, "fixture/old", "main", new Date().toISOString());
     sql.prepare('INSERT INTO ExternalSignal (id,connectionId,projectId,ownerUserId,sha,title,authorName,url) VALUES (?,?,?,?,?,?,?,?)').run("old-signal", "old-connection", p.id, a.id, sha(1), "旧提交", "fixture", "https://github.com/fixture/old");
-    sql.exec(fs.readFileSync(path.join("prisma/migrations", migrationName, "migration.sql"), "utf8")); sql.close();
+    sql.exec(fs.readFileSync(path.join("prisma/migrations", migrationName, "migration.sql"), "utf8"));
+    sql.exec(fs.readFileSync("prisma/migrations/20261030233000_ct7_deployment_connections/migration.sql", "utf8")); sql.close();
     const after = await client.agentExperience.findUniqueOrThrow({ where: { id: e.id } });
     expect(after.sampleMissionIdsJson).toEqual([ma.id]); expect(after.supportCount).toBe(1); expect(after.status).toBe("CANDIDATE");
     expect(await client.agentExperienceUse.count()).toBe(1); expect(await client.externalSignal.count()).toBe(1);

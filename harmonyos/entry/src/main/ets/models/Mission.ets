@@ -104,7 +104,7 @@ export class Mission {workingObjective?:string|null;nextBoundary?:string|null; w
 }
 export interface MissionEvent { id: string; seq: number; type: string; createdAt: string; payloadJson: Object; }
 export interface MissionEvents { events: MissionEvent[]; nextAfterSeq: number; }
-export class MissionBudgetTotals { models:number=12; tools:number=16; activeMs:number=180000; reservedOutputTokens:number=12000; }
+export class MissionBudgetTotals { metadataRequests?:number; models:number=12; tools:number=16; activeMs:number=180000; reservedOutputTokens:number=12000; }
 export class MissionBudgetUsage { models:number=0; tools:number=0; activeMs:number=0; reservedOutputTokens:number=0; }
 export class MissionBudgetReview { requestId:string=""; expectedVersion:number=1; totals:MissionBudgetTotals=new MissionBudgetTotals(); }
 export class MissionCommand {

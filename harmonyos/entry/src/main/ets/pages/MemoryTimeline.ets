@@ -1,3 +1,4 @@
+import { DeploymentConnectionsPanel } from '../components/DeploymentConnectionsPanel';
 import { AgentMemoryPanel } from "../components/AgentMemoryPanel";
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
@@ -703,6 +704,7 @@ struct MemoryTimeline {
             AgentMemoryPanel({ projectId: this.projectId })
             Text('连接公开仓库，查看提交，再选择哪些记录加入项目资料。').fontSize(14).fontColor(PMColors.INK_SECONDARY)
             RepoSignalPanel({ projectId: this.projectId, initialOpen: true })
+            DeploymentConnectionsPanel({ projectId: this.projectId })
           }.width('100%').padding(16).alignItems(HorizontalAlign.Start)
         }.layoutWeight(1).width('100%')
       } else if (this.isLoading) {
@@ -724,6 +726,7 @@ struct MemoryTimeline {
             }
           }
           ListItem() { RepoSignalPanel({ projectId: this.projectId }) }
+          ListItem() { DeploymentConnectionsPanel({ projectId: this.projectId }) }
           if (this.consolidationVisible) {
             ListItem() {
               Column() {

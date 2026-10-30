@@ -1,0 +1,11 @@
+{
+  "status": "CHECKPOINT_VALIDATION_PAUSED_BY_USER",
+  "date": "2026-10-31",
+  "base": "d3bc339",
+  "fullRegressionPassed": false,
+  "nativeDeviceAccepted": false,
+  "productionDeployed": false,
+  "paidModelCalls": 0,
+  "externalBusinessWrites": 0,
+  "next": "Resume required gates from R4_DEPLOYMENT_IMPLEMENTATION_NOTES.md; no CT8/CT9 merge"
+}

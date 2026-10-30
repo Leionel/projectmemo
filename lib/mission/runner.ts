@@ -1,4 +1,5 @@
 import { assertCognitiveReadSet } from "@/lib/memory/hypothesisService";
+import {assertSourceUse} from "@/lib/continuity/sourcePolicy";
 import { nextBudgetDay } from "./dailyBoundary";
 import { record } from "@/lib/conversation/repository";
 import { assertProjectInputReadSet } from "@/lib/memory/inputReadSet";
@@ -37,11 +38,13 @@ import { runDelegationObservation } from "./delegationObservation";
 import { documentTools } from "./documentTools";
 import type { DocumentExtractor } from "@/lib/documents/reader";
 import { experimentTools } from "./experimentTools";
-export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;repository?:CiTransport;document?:DocumentExtractor;sandbox?:DockerCommand;academic?:typeof fetch;judge?:ClaimJudge;onClaim?:()=>void}={}){
+import { deploymentTools } from "./deploymentTools";
+import type {DeploymentTransport} from "@/lib/sensing/deploymentTransport";
+export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;repository?:CiTransport;deployment?:DeploymentTransport;document?:DocumentExtractor;sandbox?:DockerCommand;academic?:typeof fetch;judge?:ClaimJudge;onClaim?:()=>void}={}){
  const m=await claimMission(options.workerId??randomUUID(),options.id);if(!m)return false;
  options.onClaim?.();
  const lease:Lease={id:m.id,owner:m.leaseOwner!,epoch:m.leaseEpoch,contextVersion:m.contextVersion,planRevision:m.planRevision};
- const tools={...(options.tools??{...projectTools,...researchTools(lease,options.research),...await repositoryTools(lease,m,options.repository),...documentTools(lease,options.document),...experimentTools(lease),...academicTools(lease,options.academic)})};const delegation=boundedPolicy(m);if(delegation)for(const name of Object.keys(tools))if(!delegation.allowedTools.includes(name as typeof delegation.allowedTools[number]))delete tools[name];let activeStepId:string|undefined;
+ const tools={...(options.tools??{...projectTools,...researchTools(lease,options.research),...await repositoryTools(lease,m,options.repository),...await deploymentTools(lease,m,options.deployment),...documentTools(lease,options.document),...experimentTools(lease),...academicTools(lease,options.academic)})};const delegation=boundedPolicy(m);if(delegation)for(const name of Object.keys(tools))if(!delegation.allowedTools.includes(name as typeof delegation.allowedTools[number]))delete tools[name];let activeStepId:string|undefined;
  let phase:MissionPhase="CONTEXT",contextManifest:MissionContextManifest|undefined,sourceDecisionRunId:string|null|undefined;
  const failedSettlements=new Set<"models"|"tools">();
  // Keep failed reservations and unknown usage; a lost lease must not hide the original failure.
@@ -160,6 +163,10 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    }
    if(["compare_experiment_metrics","inspect_experiment_metrics"].includes(step!.toolName))await validateSources(m.projectId,result.sources,tx,m.id);
    for(const source of result.sources.filter(s=>s.document)){if(!await(await import("@/lib/documents/observations")).documentObservationCurrent(m.projectId,{...source,document:source.document!},tx))throw new AppError("SOURCE_CHANGED","文档在读取后发生修订，请重新核对",409);}
+   for(const source of result.sources.filter(s=>s.deployment)){
+    await assertSourceUse(m.ownerUserId,m.projectId,"connection:"+source.deployment!.connectionId,tx,{missionId:m.id});
+    if(!await(await import("@/lib/sensing/deploymentObservations")).deploymentObservationCurrent(m.projectId,{...source,deployment:source.deployment!},tx))throw new AppError("SOURCE_CHANGED","环境许可或观察在读取后变化，请重新核对",409);
+   }
    if(step!.toolName==="web_search"||step!.toolName==="web_fetch"||step!.toolName==="read_paper_metadata")await persistObservations(tx,m.id,result.data);
    if(step!.toolName==="save_mission_output"){
     phase="VERIFY";const output=await saveOutput(tx,m.id,step!.id,step!.canonicalInputJson,step!.readSetJson as unknown as Source[],claimChecks);phase="COMMIT";data={data:{outputId:output.id,revision:output.revision},sources:[]};

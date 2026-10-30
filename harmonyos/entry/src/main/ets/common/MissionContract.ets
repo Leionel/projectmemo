@@ -46,6 +46,8 @@ export function missionCompletionFacts(status: string, completion?: MissionCompl
   ];
 }
 export function missionToolLabel(tool: string): string {
+  if(tool==='inspect_deployment')return '检查获准环境';
+  if(tool==='read_deployment_logs')return '读取脱敏环境日志';
   if (tool === 'inspect_document') return '读取文档目录';
   if (tool === 'read_paper_metadata') return '读取论文元数据';
   if (tool === 'propose_metric_verification') return '提交固定核算预览';

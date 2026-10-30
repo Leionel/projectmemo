@@ -15,7 +15,7 @@ export const missionToolLabels: Record<string, string> = {
 };
 export type MissionWorkspaceItem = {
   id: string; goal: string; status: string; version: number;
-  attention: string | null; activity: string | null; activityAt: string | null;
+  workState?: import("@/lib/types/workState").WorkState; attention: string | null; activity: string | null; activityAt: string | null;
   outputRevision: number | null;
 };
 export type MissionWorkspaceSummary = { enabled: boolean; totalActive: number; items: MissionWorkspaceItem[] };

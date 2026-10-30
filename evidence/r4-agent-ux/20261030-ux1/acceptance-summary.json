@@ -1,0 +1,116 @@
+{
+  "recordedAt": "2026-10-30T01:02:47.336461+00:00",
+  "baseCommit": "e8281d6b8bb8781447eb1ebfb1a60ebcfcd0dd3a",
+  "branch": "codex/ux1-agent-integration",
+  "engineeringStatus": "PASS_WITH_OPEN_ENVIRONMENT_AND_QUALITY_GATES",
+  "unitFull": {
+    "files": 143,
+    "passed": 1197,
+    "log": "unit-release.log"
+  },
+  "affectedFinal": {
+    "files": 11,
+    "passed": 55,
+    "log": "final-checks.log"
+  },
+  "webFull": {
+    "startTime": "2026-10-30T00:50:02.703Z",
+    "duration": 166175.901,
+    "expected": 27,
+    "skipped": 2,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "webFinal": {
+    "startTime": "2026-10-30T00:55:57.717Z",
+    "duration": 57855.324,
+    "expected": 6,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "checks": {
+    "types": 0,
+    "webFinal": 0,
+    "harmonyTests": 0,
+    "lint": 0,
+    "harmonyBuild": 0,
+    "affected": 0
+  },
+  "harmonyTests": 86,
+  "paidModelCalls": 0,
+  "transport": "Isolated mocks/scripted providers; UI uses original local services",
+  "protectedFiles": {
+    "AGENTS.md": "dbff8a9d83193830b2fd06c5c131b9324c0a8e472be2c8aa2f66deff990e2750",
+    "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md": "7328e70a94cbd17f400c23ef418d0a62f396a408ea9a1926c9d1f057f211f631",
+    "harmonyos/build-profile.json5": "442618a372bd9a74d204e7162ffe6844b6fc49dbf4c09b8cc5bc58c6709a1924",
+    "tsconfig.json": "af1b4fbd345a0d2b7e23394aca3540b524a3d4826fca6a51169b13b2a325ee4a"
+  },
+  "implementationFileHashes": {
+    "app/api/conversations/capabilities/route.ts": "2588e440009b33b0508ad70ec6133fc3e1ec4667b59835e51f6da40cddec52dc",
+    "app/api/missions/capabilities/route.ts": "71057dc97e107dfb780d40060c7d15f70357007246fb4c56b96514c98da28fea",
+    "app/focus/page.tsx": "763610b0c38c5c74dbbdb4190cf8e732dfbee1a4c9c7ecd154e5449c92579b5b",
+    "components/ConversationContinuity.tsx": "2e7c059ed7e5a1fec030448e6382c78ba5c6a4ae116ae63d3493dee379da820b",
+    "components/ConversationPanel.tsx": "5fea08264991b2ed8a016028d0b5c3c9cbbebe75b9bc159cd4976fda3e975b75",
+    "components/FocusAgentWorkspace.module.css": "1245523cb53ef91de309a5a9cf13cbd7b5e09e6a374db64a26e45ca7fc288e90",
+    "components/FocusAgentWorkspace.tsx": "e1d096f218ab65d44814c26dbbe842528881af76bec14a2324c153078f57051f",
+    "components/MissionPanel.tsx": "4eca06674aeea15a5ee6a584e3dfc02dd9a3504f9b577d6a5199a57857a69a45",
+    "e2e/agent-ux-integration.spec.ts": "39e8335430a5fc0aab8c885672bca3711adc021f15f1866ffb60ac442b523c72",
+    "e2e/continuity.spec.ts": "1c641c4910550e5dec420d15ce89e08863cdbec4a9eb19bf21720fdec6221f9f",
+    "e2e/pre-r4-ux.spec.ts": "712a2755c6c96fc3c8e80a04484bc100bb6368d273316581d7368bdd48bfc23d",
+    "harmonyos/entry/src/main/ets/common/GlobalFocusPresentation.ets": "ee19e548063110ef5a3df42218f069b4208b14022e15675d92b001b73edb4636",
+    "harmonyos/entry/src/main/ets/components/ConversationContinuity.ets": "68e8cfd67e6ef70cf1c79a2b708019bf6beb6fb7a1745dd23f21ea356d01baf1",
+    "harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets": "147ae5304ed3e8845dc1e9c65c5493a04ac30c63f5a930b13ab50db1e65afec1",
+    "harmonyos/entry/src/main/ets/components/MissionPanel.ets": "2333650f27559eee3e5300448a1804f83def0f10d29925abc310baa3a5b5002d",
+    "harmonyos/entry/src/main/ets/models/Continuity.ets": "dc1aa9902c14292ca08e87888f8236cae9796c2866b14b96acef0d6e4cf82876",
+    "harmonyos/entry/src/main/ets/models/GlobalFocus.ets": "f879b91b985d049d4dceccb9484fa62223a9aea46ace9348d18976dc1f816839",
+    "harmonyos/entry/src/main/ets/models/Mission.ets": "7ec536222fe9d419df60170162aa038b6872679129dfc8b3b69f241c22ab58b1",
+    "harmonyos/entry/src/main/ets/models/MissionReadback.ets": "6296178baf3563c02023774c50360eac34a7b4b66fb2674f3d872e93c5d83068",
+    "harmonyos/entry/src/main/ets/models/ProjectAgentContext.ets": "607c2fdfd81fbfa8b15e32fb9256fa717861c326d16d8f1ab1c52b77b97c0c45",
+    "harmonyos/entry/src/main/ets/models/WorkState.ets": "4121197627bd0830a071647bc83b68922b2cb881e4c8afbca307649e95d65e49",
+    "harmonyos/entry/src/main/ets/pages/FocusConversation.ets": "3402ad118b708c86b9cdc9759b90a1c620bdd0139951b5aa89956375152bd1aa",
+    "harmonyos/entry/src/main/ets/pages/MissionDetail.ets": "0a158d0001b41f85344d1c271c3ef3d5469306f8d2a1bdac8e6956e9c620bbe2",
+    "harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets": "c7f05d41689c0f543d13a9b777a2018995984e1d33cbd9549ade64cc8cada07f",
+    "lib/client/conversationDrafts.ts": "66d30f688cf22588d43945ae0226737567e088f1052dea207b636a64d9a746ab",
+    "lib/client/focusPresentation.ts": "99d8cffe7116b475400f7a75397549ad2ceb7d7360f2d0216c1d11e145239755",
+    "lib/continuity/handoff.ts": "070aef01deac5b29151e9bc603c3f14a2931ea5bc5d8671abba2ae1324d8937c",
+    "lib/mission/delegationObservation.ts": "26c2abd6830f00233b6530177a43be507ba23fb6ebf011343cb2a77f82ddd6b0",
+    "lib/mission/missionService.ts": "e94695e2662aa594a2d9a97418ba0fc4aa4eb3921d52d3b38ee0d95aff176f97",
+    "lib/mission/presentation.ts": "98092eccc208391a6c27b2c5c410aa410b2562cbcf5c120be4ae475de42adb6f",
+    "lib/mission/readback.ts": "db4998e6b11695af2b4689bbb72183e858611862e6c1e4ea866207b1d93f63f5",
+    "lib/mission/runner.ts": "d541d13d17e9249a858b41a04d0928752288015838a9f6db1dc707003720a273",
+    "lib/mission/workState.ts": "9cfed8093c202e91a63384619f74fe56a2778a150699c49c7fae1785fd135f95",
+    "lib/mission/workspaceSummary.ts": "b3fc05b15ced3f0cc9077b005bcafc7361e402ea48597c85a70a84f4db0847c3",
+    "lib/projectAgentContext.ts": "87e7d6d4da4e1158a354a537a72d7e51fc2842bab801aa2df1d7a909ba3e49de",
+    "lib/server/globalFocus.ts": "0b76c6cf59f00fea7ad52101c031bafd99442c52b01599bff0a2b6f4d1e56324",
+    "lib/services/projectAgentContextService.ts": "a3d7e784270090b71aa73cb17a54995f89e355930399c06eac00c2465f5d1d99",
+    "lib/types/continuity.ts": "37474cbe3d3a4cecc44ceb9e031ed2bd36cd479dd66543687484448e224e41ea",
+    "lib/types/globalFocus.ts": "891f4791367ee9366f4b3a3bfc6a962b61a80bbd2b5bbf34f1d1980f49e39fa5",
+    "lib/types/projectAgentContext.ts": "dafb49ba18ea282beb6f0d025203c409f8fb26a464e15b8ff77b5cb607fb452d",
+    "lib/types/workState.ts": "2cde50bacc6947ce6ccdbd48559282b805181a06beab5fcfb8ebcb229124b7fd",
+    "tests/agentUxControls.test.ts": "5947b69b8b3d99ded328ee0f79db0495a8a4f8f561e09d5329783ba73f3e71e6",
+    "tests/agentUxJourney.test.ts": "3954f18333ea28827566783ff67a17901408d4e4d014ee0aec03635c4580031d",
+    "tests/agentUxWorkState.test.ts": "4d601475fed4d72ccc5ac6d9fc8e23bc5d9ed6861d4a60285605339726e00fed",
+    "tests/globalWorkspace.integration.test.ts": "15846558d2960f662eb675151535a8e109b4522d75135412231a647cba801eda",
+    "tests/missionPanel.test.ts": "78db92f8794fec70b68b36fe141947a79a17bcb6e482e1409d0d44cb5373a5d5",
+    "tests/projectAgentContext.test.ts": "a28128bb7861f62f7bc2a8a9060d2dd8a1210afd6764deabf8a5a9007ff68509"
+  },
+  "haps": {
+    "entry-default-signed.hap": "91e04d3d97abbe47276b9ef902256de9b992217ad70c824eb0946b20e0f4b570",
+    "entry-default-unsigned.hap": "469dd63103d668826e1974ef6dd08a194000dc9f5dd684fe9468ffc68425dc7b"
+  },
+  "openGates": [
+    "HDC Empty: no native installation or target-device interaction",
+    "real natural-day users",
+    "independent held-out semantic quality",
+    "inherited CT1-6 quality gates"
+  ],
+  "notPerformed": [
+    "production deployment",
+    "real database migration",
+    "paid model API calls",
+    "external business writes",
+    "remote push"
+  ],
+  "ux2": "Deepening planning only, per latest user brief; no UX2 implementation yet"
+}

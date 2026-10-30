@@ -45,3 +45,6 @@
 @media(pointer:coarse) { .filters button,.discuss { min-height:44px; } }
 .mobileLauncher.mobileLauncher { display: none; }
 @media(max-width:850px) { .mobileLauncher.mobileLauncher { display:flex; } }
+
+.itemActions {display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;}
+.itemActions a,.itemActions button {min-height:44px;display:inline-flex;align-items:center;}

@@ -112,7 +112,8 @@ it("焦点分别投影真实状态，Mission双重归属、关闭开关和API身
   await db.project.update({where:{id:foreign.id},data:{deadline:new Date("2099-01-01T00:00:00Z")}});
   await db.project.update({where:{id:archived.id},data:{deadline:new Date("2090-01-01T00:00:00Z")}});
   const macro = await loadGlobalFocus(user.id);
-  expect(macro.counts).toEqual({waiting:4,running:2,actions:1,reminders:2});
+  expect(macro.counts).toEqual({waiting:3,running:2,actions:1,reminders:2});
+  expect(macro.waiting.find(m=>m.status==="FAILED")?.workState?.requiresUser).toBe(false);
   expect(macro.nextDeadline?.projectId).toBe(owned.id);
   expect((await loadGlobalFocus(user.id,true)).nextDeadline?.projectId).toBe(archived.id);
   const raw=JSON.stringify({schemaVersion:1,kind:"PROJECT_METRIC",projectId:owned.id,subject:"LOCAL_EXPERIMENT",name:"Dice",unit:"%",period:"2026-10",value:82});

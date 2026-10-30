@@ -199,7 +199,9 @@ struct FocusConversation {
     return labels[this.view.activeTurn?.progress?.phase ?? ''] ?? '正在核对项目资料…';
   }
   private async pollProgress(): Promise<void> {
-    if ((!this.busy && this.view.activeTurn === null) || !this.pageVisible || this.view.id === '') return;
+    const boundary=this.view.continuity?.nextBoundary;
+    const due=boundary!==null&&boundary!==undefined&&Date.parse(boundary)<=Date.now();
+    if ((!this.busy && this.view.activeTurn === null && !due) || !this.pageVisible || this.view.id === '') return;
     const epoch = this.generation, id = this.view.id;
     try { const view = await this.service.read(id); if (epoch === this.generation && this.view.id === id && view.version >= this.view.version) {
       this.view = view; this.busy = view.activeTurn !== null;

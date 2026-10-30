@@ -1,3 +1,4 @@
+import { workPhaseLabel } from '../common/GlobalFocusPresentation';
 import { MissionBudgetReview } from "../models/Mission";
 import { MissionMetricReceipt } from '../components/MissionMetricReceipt';
 import { MissionInvestigationDelegation } from "../components/MissionInvestigationDelegation";
@@ -429,7 +430,7 @@ struct MissionDetail {
   @Builder private MissionBody() {
     Column({ space: 12 }) {
       Row() {
-        PMStatusPill({ label: missionStatusLabel(this.mission.status), tone: this.mission.status === 'PAUSED' || this.mission.status === 'FAILED' ? 'risk' : 'brand' })
+        PMStatusPill({ label: this.mission.workState ? workPhaseLabel(this.mission.workState!.phase) : missionStatusLabel(this.mission.status), tone: this.mission.status === 'PAUSED' || this.mission.status === 'FAILED' ? 'risk' : 'brand' })
         Blank()
         Button(this.showCompletion ? '收起状态 ⌃' : '状态详情 ⌄', { type: ButtonType.Normal }).height(44).fontSize(12)
           .fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).padding({ left: 8, right: 0 }).onClick(() => { this.showCompletion = !this.showCompletion; })
@@ -477,6 +478,9 @@ struct MissionDetail {
         }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.LG)
           .backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.LG).border({ width: 1, color: PMColors.BORDER_SUBTLE })
       }
+      if(this.mission.workState){Text(this.mission.workState.reasonText).fontSize(14).fontColor(PMColors.INK_SECONDARY)}
+      if(this.mission.workingObjective){Text('当前重点：'+this.mission.workingObjective).fontSize(14).fontColor(PMColors.INK_SECONDARY)}
+      PMButton({label:'调整当前重点／继续讨论',secondary:true,onAction:():void=>{router.pushUrl({url:'pages/FocusConversation',params:{projectId:this.projectId,entityKind:'MISSION',entityId:this.missionId}});}})
       if (this.mission.status === 'RUNNING' && (this.mission.cancelRequestedAt || this.mission.pauseRequestedAt)) { Text(this.mission.cancelRequestedAt ? '取消请求已受理，等待当前步骤停止' : '暂停请求已受理，等待当前步骤停止').fontColor(PMColors.WARNING) }
       if (this.readState === 'lastKnown') { Text(`上次读取于 ${this.updatedAt}；当前为历史状态，刷新成功后可操作。`).fontSize(12).fontColor(PMColors.RISK) }
       if (this.mission.status === 'WAITING_INPUT' && this.mission.question !== null) { this.WaitingInput() }
@@ -495,7 +499,7 @@ struct MissionDetail {
       Button(this.showSettings ? '收起委托设置与控制' : '委托设置与控制').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
         .fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).borderRadius(PMRadius.MD)
         .onClick(() => { this.showSettings = !this.showSettings; })
-      if (this.showSettings && !missionTerminal(this.mission.status) && this.missionUiEnabled) {
+      if (!missionTerminal(this.mission.status) && this.missionUiEnabled) {
         if (['READY', 'RUNNING', 'WAITING_INPUT', 'WAITING_APPROVAL'].includes(this.mission.status)) { Button('暂停委托').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(this.readState === 'fresh' && !this.busy).onClick(() => { this.command('pause'); }) }
         Button('取消委托').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(this.readState === 'fresh' && !this.busy).onClick(() => { this.cancel(); })
         Button('查看与修改个人约束').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(this.readState === 'fresh' && !this.busy).onClick(() => { this.openForm('constraints'); })

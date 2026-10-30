@@ -1,0 +1,1127 @@
+{
+  "schemaVersion": 1,
+  "artifactRole": "planning-source-snapshot",
+  "capturedAtUtc": "2026-10-30T00:13:30.457944+00:00",
+  "clientDate": "2026-10-30",
+  "clientTimezone": "Asia/Shanghai",
+  "repository": {
+    "root": "D:\\Projects\\hongmen",
+    "head": "e8281d6b8bb8781447eb1ebfb1a60ebcfcd0dd3a",
+    "branch": "codex/ct5-ct6-research",
+    "master": "e87b8eeb79003c0a0798378611304c09db90cd87",
+    "originMaster": "e87b8eeb79003c0a0798378611304c09db90cd87",
+    "preExistingTrackedDirtyFiles": {
+      "AGENTS.md": {
+        "expectedSha256": "dbff8a9d83193830b2fd06c5c131b9324c0a8e472be2c8aa2f66deff990e2750",
+        "currentSha256": "dbff8a9d83193830b2fd06c5c131b9324c0a8e472be2c8aa2f66deff990e2750",
+        "matches": true
+      },
+      "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md": {
+        "expectedSha256": "7328e70a94cbd17f400c23ef418d0a62f396a408ea9a1926c9d1f057f211f631",
+        "currentSha256": "7328e70a94cbd17f400c23ef418d0a62f396a408ea9a1926c9d1f057f211f631",
+        "matches": true
+      },
+      "harmonyos/build-profile.json5": {
+        "expectedSha256": "442618a372bd9a74d204e7162ffe6844b6fc49dbf4c09b8cc5bc58c6709a1924",
+        "currentSha256": "442618a372bd9a74d204e7162ffe6844b6fc49dbf4c09b8cc5bc58c6709a1924",
+        "matches": true
+      },
+      "tsconfig.json": {
+        "expectedSha256": "af1b4fbd345a0d2b7e23394aca3540b524a3d4826fca6a51169b13b2a325ee4a",
+        "currentSha256": "af1b4fbd345a0d2b7e23394aca3540b524a3d4826fca6a51169b13b2a325ee4a",
+        "matches": true
+      }
+    },
+    "prePauseUntrackedCount": 713
+  },
+  "scope": {
+    "businessCodeEdited": false,
+    "databaseAccessPerformed": false,
+    "businessTestsRunThisRound": false,
+    "paidModelCallsThisRound": 0,
+    "productionDeployment": false,
+    "externalWrites": false,
+    "commitOrPushPerformed": false,
+    "outputDirectory": "planning/r4-agent-ux-integration"
+  },
+  "inputSelection": "File links in the planning documents plus explicit implementation, acceptance, Demo and continuity-planning inputs. Hashing identifies the file snapshot; historical tests are not rerun.",
+  "inputFiles": {
+    "AGENTS.md": {
+      "sha256": "dbff8a9d83193830b2fd06c5c131b9324c0a8e472be2c8aa2f66deff990e2750",
+      "bytes": 5891
+    },
+    "app/api/conversations/[id]/continuity/route.ts": {
+      "sha256": "772adf675b6f33e8f8fac0fc9b26c2fcdee23f80f8caacc6ad17eab0d2c5ae1a",
+      "bytes": 962
+    },
+    "app/api/conversations/capabilities/route.ts": {
+      "sha256": "9377cf49fd2c0c6266d57f2b2dd56ca53ec13a04fb22e95f5ad948fdacbf4525",
+      "bytes": 906
+    },
+    "app/api/missions/capabilities/route.ts": {
+      "sha256": "8adc3e04841ab88352905d121bbd7b443fe3d4bdc933a3c52a045070472ee8ae",
+      "bytes": 802
+    },
+    "app/focus/page.tsx": {
+      "sha256": "2980eaedaa4e41899bcb54264a0bd56e845bd96f6918115502da05784dbc8960",
+      "bytes": 16258
+    },
+    "app/memory/page.tsx": {
+      "sha256": "341cbb25060d293dd27dd7dc86e2542421449ad76f5107ac1fb67a04b3b77503",
+      "bytes": 605
+    },
+    "components/AgentMessageBlocks.tsx": {
+      "sha256": "13c7c28d6dff3ca8b3bb2aa21425c1a2717ada83390242067b88bb972a4bb151",
+      "bytes": 12326
+    },
+    "components/ConversationContinuity.tsx": {
+      "sha256": "d8718031244a70cf7b35461694a68f5263c1353fa4cca699340cb4d0219648ed",
+      "bytes": 6863
+    },
+    "components/ConversationPanel.tsx": {
+      "sha256": "b8706be56854e2630587c2ec51c1a71ffd703926d75be31b547ffb4d38a22261",
+      "bytes": 33073
+    },
+    "components/FocusAgentWorkspace.tsx": {
+      "sha256": "9e7982578c1db53343eefcd50401711ab80a1360ddf66028bf133ae7662d2953",
+      "bytes": 8296
+    },
+    "components/GlobalWorkspacePage.tsx": {
+      "sha256": "b8d3dae401f6d5ce2ffffa73a751a33e311208b802776d13e9cde3dc186c20f5",
+      "bytes": 7953
+    },
+    "components/KnowledgeCardView.tsx": {
+      "sha256": "74aff0ee24c2ee2c135a6123662e61932b691c49aa060dafe560b4f2b6926a2f",
+      "bytes": 11678
+    },
+    "components/MissionInvestigationDelegation.tsx": {
+      "sha256": "56301afaa53fee10261d349d345ccbabc844e2e40cda91826c73fc6f1e31642b",
+      "bytes": 8750
+    },
+    "components/MissionPanel.tsx": {
+      "sha256": "d4781afe730e93271281594a863131d696fb6ae2c982dd52c8124282e8efdfe5",
+      "bytes": 32902
+    },
+    "components/ProjectNavigation.tsx": {
+      "sha256": "30a35654c96cfcbf4e56f95d76a350b6e05ed573c7256149a9fc4a1ab00af292",
+      "bytes": 3249
+    },
+    "components/RepoSignalsCard.tsx": {
+      "sha256": "ab40484913397a1d3a58670f38f6e17550fb0e721dff279914162be524ed1806",
+      "bytes": 10456
+    },
+    "docs/FINAL/AGENT_REVIEW/HARMONY_CLAUDE_PROTOTYPE_REVIEW_2026-10-29.md": {
+      "sha256": "c99ed05f47c68e3540f750763e6be1404f64044c7887d864bec16abb2ab3958f",
+      "bytes": 7250
+    },
+    "e2e/continuity.spec.ts": {
+      "sha256": "917935959bb333aaf072fd34d57ff9f8a84b3576ae03b06e97b57da598b26e1a",
+      "bytes": 3194
+    },
+    "e2e/focus-agent.spec.ts": {
+      "sha256": "beb5e5285e53c8795adcbb1303f5024181c6399b2646184079dd838214a04a45",
+      "bytes": 21985
+    },
+    "evidence/r4-continuity/20261029-ct2-ct3/merge-validation.json": {
+      "sha256": "268d35f60a036b19a78c68400b9d0d6a69570658f9163f86a21a6e0b00768949",
+      "bytes": 1019
+    },
+    "evidence/r4-experiments/20261029-complete/acceptance-summary.json": {
+      "sha256": "14a828292a2d7059949803fcb0bddafb27d1681b1ff7cf833b78c1998a7f5451",
+      "bytes": 11147
+    },
+    "evidence/r4-experiments/20261029-complete/metric-approval.png": {
+      "sha256": "be19df39a8531b9f7c6f93c4899e6af8885209d6bb632b32b1654ce8ef4b24e0",
+      "bytes": 195265
+    },
+    "evidence/r4-experiments/20261029-complete/metric-receipt.png": {
+      "sha256": "2cc94879c27e0b9c28d2a882d97dbb64dc0ad09df0b919260c1422a2363ae788",
+      "bytes": 160191
+    },
+    "harmonyos/build-profile.json5": {
+      "sha256": "442618a372bd9a74d204e7162ffe6844b6fc49dbf4c09b8cc5bc58c6709a1924",
+      "bytes": 1749
+    },
+    "harmonyos/entry/src/main/ets/common/GlobalFocusPresentation.ets": {
+      "sha256": "63fb7e81d50eedb0ba0947e1a5dedc2dc2bff7fb0bfb6fe075398207057e3805",
+      "bytes": 3202
+    },
+    "harmonyos/entry/src/main/ets/common/MissionWidgetContract.ets": {
+      "sha256": "e1983d47edf83c27a5667330e81a92a06fdf8d982c5f4fc3d0369abf0a69d055",
+      "bytes": 513
+    },
+    "harmonyos/entry/src/main/ets/components/AgentMessageBlocks.ets": {
+      "sha256": "a08e2379b13ee53a9024d5e476633c4aa122feaec2b4c403da809891b75f1127",
+      "bytes": 13886
+    },
+    "harmonyos/entry/src/main/ets/components/ConversationContinuity.ets": {
+      "sha256": "f9a8d7481b1e7642a3a1e952bb0caa1931f11c7e610abc6f00c6ef58267b0ce8",
+      "bytes": 7370
+    },
+    "harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets": {
+      "sha256": "9614fcfaa7af75c11cc44ac925aa5e4ce2292bf65c89cdf56a39c3b8c4d26bd1",
+      "bytes": 13693
+    },
+    "harmonyos/entry/src/main/ets/components/MissionApprovalSheet.ets": {
+      "sha256": "f8f985502c63ee627aeacaac3c05f438314e0c8f4b26468c541d4d0a25db1ef9",
+      "bytes": 4596
+    },
+    "harmonyos/entry/src/main/ets/components/MissionInvestigationDelegation.ets": {
+      "sha256": "2151f16c970fc1078814fe7324523f87edc88f9165afa0a00bc4fc338a5f359c",
+      "bytes": 9540
+    },
+    "harmonyos/entry/src/main/ets/components/MissionReadbackView.ets": {
+      "sha256": "609d3e61fc8e62802844ccca17c383f420f8a027c8aa04a992d7bb1f1961f0fb",
+      "bytes": 11099
+    },
+    "harmonyos/entry/src/main/ets/components/RepoSignalPanel.ets": {
+      "sha256": "620be512f26d0854192e04456817a919d598d0b13b585abdbea3885312ca7100",
+      "bytes": 11242
+    },
+    "harmonyos/entry/src/main/ets/models/Continuity.ets": {
+      "sha256": "0ee3f45f7a1036e736896965cb413c8162fcc6c518e8773b05e594386f196770",
+      "bytes": 2334
+    },
+    "harmonyos/entry/src/main/ets/models/GlobalFocus.ets": {
+      "sha256": "694e60928dc2abf235279a187fd70ae6d4a4e623c50511868ad3288d5f45ecb3",
+      "bytes": 1102
+    },
+    "harmonyos/entry/src/main/ets/models/Mission.ets": {
+      "sha256": "5b5918aa3a01c8c12f2a0cc9356fb1d5528fcb4ae1b31bcba936b223256c31eb",
+      "bytes": 10307
+    },
+    "harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets": {
+      "sha256": "366b1aefeca4b0728d8840fb38d8b554075ff1d60a7afad4cc44e5a166602fa6",
+      "bytes": 10118
+    },
+    "harmonyos/entry/src/main/ets/pages/ConversationWebSource.ets": {
+      "sha256": "9e59c209c0c49422f4900773aa0d001fb82efbb54aea142d78c0518baa1b04f5",
+      "bytes": 4236
+    },
+    "harmonyos/entry/src/main/ets/pages/FocusConversation.ets": {
+      "sha256": "984f61febcb9a375ec5127b89abb5a7161147403c4be9eddf11583e3e88c7247",
+      "bytes": 38958
+    },
+    "harmonyos/entry/src/main/ets/pages/Index.ets": {
+      "sha256": "0df3d156a010176ee2a2c61d50f336e75d00637d39233b5965abaa5adc2a7c09",
+      "bytes": 131472
+    },
+    "harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets": {
+      "sha256": "b628e78f4c8b09b1b99c6b13d479d3d21caa88a0b338abfd95ff05c78bc54f2f",
+      "bytes": 46721
+    },
+    "harmonyos/entry/src/main/ets/pages/MissionDetail.ets": {
+      "sha256": "db11b8bcf311b6468f42055166a4110e4945c1ae6fafe42adf64941b6fef594d",
+      "bytes": 53164
+    },
+    "harmonyos/entry/src/main/ets/services/GlobalFocusService.ets": {
+      "sha256": "5a6a112282d6df66da6b5a0418909bd1a1c83c941f4f8ed3e81d3df028c050a7",
+      "bytes": 357
+    },
+    "harmonyos/entry/src/main/ets/services/MissionService.ets": {
+      "sha256": "c3ee36972388adb6832d8d69420579800b82f98063f9163e85af4d94509c274c",
+      "bytes": 5469
+    },
+    "harmonyos/entry/src/main/ets/services/NotificationService.ets": {
+      "sha256": "f1236fc5cc617700d6bb3e6262a3b3d7ec011d711dd71fda7bccb947d0a5d1af",
+      "bytes": 7899
+    },
+    "harmonyos/entry/src/main/ets/services/WidgetDataService.ets": {
+      "sha256": "14ab4413d9dbee63366b9b83e371cb05b6fe29ba1a07513e20b03465cdec8786",
+      "bytes": 17226
+    },
+    "harmonyos/entry/src/main/ets/widget/pages/WidgetCard.ets": {
+      "sha256": "5442c394787bc61fd1fb49047cb0ac0cc207ec7edad839547a20960723f09cb3",
+      "bytes": 3210
+    },
+    "harmonyos/entry/src/main/module.json5": {
+      "sha256": "c2b62a9c9cf3c25ab177b4b3d4ccd31cbc4bff1723a1276351e814343e2354ac",
+      "bytes": 2446
+    },
+    "lib/continuity/admission.ts": {
+      "sha256": "b44ac3504647119796d107b5dcfe411e43a2f11a88978d461c6c3450e898d8e5",
+      "bytes": 5556
+    },
+    "lib/continuity/directiveService.ts": {
+      "sha256": "84fd5c7e1a6d751a87c3737d1c3483260af6712ceffdaa645fae07fa10c1a8cc",
+      "bytes": 17376
+    },
+    "lib/continuity/handoff.ts": {
+      "sha256": "d0972b2dd12cd89c1c75b1ce0edf42ef4ba65a7a0fe63267acb8e00f47c4532e",
+      "bytes": 5402
+    },
+    "lib/continuity/sourcePolicy.ts": {
+      "sha256": "19fd72047345e58eec68f63e8a81afc8b094b85ef87f373b83fc998e3a59db63",
+      "bytes": 10096
+    },
+    "lib/continuity/turnCoordination.ts": {
+      "sha256": "5d8e10cf0c931b4fd5f1f9f0e0ccb0c7dd2c85738867d86810fa1c4bf4bec3f5",
+      "bytes": 6029
+    },
+    "lib/conversation/anchorService.ts": {
+      "sha256": "c0c6733f90c41bf0d613c0351a1785c2e0ec47483728845e0937abff942cbbdd",
+      "bytes": 32561
+    },
+    "lib/conversation/documentTools.ts": {
+      "sha256": "2f1ba2ac7bd4ed789ab59841376d4500d0bdcf43c18b699bca5736b0a9d89316",
+      "bytes": 2218
+    },
+    "lib/conversation/experienceContract.ts": {
+      "sha256": "e54e716071733260bc7acf1bd5035a3c0190ff3a51560be80a5878a8a67926ae",
+      "bytes": 10845
+    },
+    "lib/conversation/investigationService.ts": {
+      "sha256": "46268bffd4d5f462044deaf0fd8b05fa5d9d800b2951d2acb87426c3c2564a5e",
+      "bytes": 30417
+    },
+    "lib/conversation/presentationRuntime.ts": {
+      "sha256": "e7c46e7fbd996c5547f833c05dc3c7d74589df6faeaae6a280145d1f676408b8",
+      "bytes": 18900
+    },
+    "lib/conversation/researchCoverage.ts": {
+      "sha256": "fc00dedcdaf6090c65989cc3bfe7b59f678460ca7c6de1d54b85a3fc29bc6ec3",
+      "bytes": 2687
+    },
+    "lib/conversation/researchSummary.ts": {
+      "sha256": "d85499f65f529fd7033b938c4290efffc44ac78cbc1eaffb280332af7879a1ac",
+      "bytes": 6279
+    },
+    "lib/conversation/researchTools.ts": {
+      "sha256": "192ef830108bd3ffd39714e088da035812cc63068ba151db04d287f77a269349",
+      "bytes": 18461
+    },
+    "lib/conversation/toolAdapter.ts": {
+      "sha256": "1eb272ae3c259a249bcc148797d068f53355730ba72f74fabe04df7f9c612e7e",
+      "bytes": 15251
+    },
+    "lib/conversation/turnService.ts": {
+      "sha256": "7610fab0e9501815f901c263599fa0b1a5f424e6b4722c5de1a2ca60d2687019",
+      "bytes": 41793
+    },
+    "lib/conversation/uiActions.ts": {
+      "sha256": "2e1c57e7f410e7d30efd9da93fa31a8a7ee7d6f23856b1eab8510f9884c516ea",
+      "bytes": 4805
+    },
+    "lib/documents/observations.ts": {
+      "sha256": "21bd0c190f730808e3054e051f0ff3a6aa21ea7726e046a3dc64ea09914b3c53",
+      "bytes": 2406
+    },
+    "lib/documents/reader.ts": {
+      "sha256": "be644e7471ef5460113f88c20e348535fe6bbb62b2be92625f5fc6cfde45bee2",
+      "bytes": 12184
+    },
+    "lib/experience/extract.ts": {
+      "sha256": "b60c854f1f91c9e0c5c7a1e4380d5f0a5c6de114bc97d41fa9609207a838b8e0",
+      "bytes": 9285
+    },
+    "lib/experience/injection.ts": {
+      "sha256": "5bef8c162d63cd4870afcccc50edd6c8013db167c5f9140a0aacf23abd2e7404",
+      "bytes": 5395
+    },
+    "lib/experience/service.ts": {
+      "sha256": "0f4f14b8974610590ffce14d2b5e2f7042df5127159bf9545f799bc74f9f9fdb",
+      "bytes": 5484
+    },
+    "lib/experience/trajectoryIndex.ts": {
+      "sha256": "444bc7462bf5ee2fb30f316ffbf3b0e45703204d9fe54bc2fe4c05a5c6fe63ce",
+      "bytes": 5376
+    },
+    "lib/experiments/metrics.ts": {
+      "sha256": "37e8373a4ea6604636e8b4e6c3510035f8f0c94c1751fd7c93ccf86b5c33499d",
+      "bytes": 3663
+    },
+    "lib/experiments/sandbox.ts": {
+      "sha256": "4ffa629dbd0847049b32f367487221d781b3403ed7b73b124daf9a892a74e13a",
+      "bytes": 7810
+    },
+    "lib/memory/temporalLedger.ts": {
+      "sha256": "644c488a78ff088492e2d7495f1b0073d9ac5cf8439e7e4d99c100dd13d58732",
+      "bytes": 7916
+    },
+    "lib/mission/academicTools.ts": {
+      "sha256": "0af3b9eebc14ad18b5f6fa4aa4fb347e8b3b6ec6fce8f445c215a2cebfb22720",
+      "bytes": 4328
+    },
+    "lib/mission/attentionReceipt.ts": {
+      "sha256": "ac79dc907a71c4d22a04439070b3bf3031ece64bf98d7a95906b72782c56804c",
+      "bytes": 1412
+    },
+    "lib/mission/delegationObservation.ts": {
+      "sha256": "723047feb3c8af83fe64ad4f8159c1b6b7818903eae81b399930ec48f591e438",
+      "bytes": 5170
+    },
+    "lib/mission/documentTools.ts": {
+      "sha256": "a7547bdc358c80b7a075c7cb84ddc47286da9945b1d45fb6ca82dbbca8b2162b",
+      "bytes": 2222
+    },
+    "lib/mission/investigationDelegation.ts": {
+      "sha256": "34bec05e548e40531ec05ddc65f1a6e9fc41db3596303697496054f356f646d1",
+      "bytes": 14189
+    },
+    "lib/mission/metricInputSources.ts": {
+      "sha256": "05c3e8b9011657b054f6ab52cd4b14597dd69dbcf6d9facc6ee170720d4b46cb",
+      "bytes": 732
+    },
+    "lib/mission/metricVerification.ts": {
+      "sha256": "b174dd8bb00ca91859652146919449ad127c6f6a6f2dd8af7f67faf9c0960307",
+      "bytes": 8970
+    },
+    "lib/mission/readback.ts": {
+      "sha256": "d02dd645600f75808998e44650fc1a0ae24ffa2cf036bb9d1845222b3bf3113a",
+      "bytes": 7483
+    },
+    "lib/mission/workspaceSummary.ts": {
+      "sha256": "189202dbc8deb42702bbf58e16e37fef71c2584d2bce3af8b16e0a1c31a7129a",
+      "bytes": 3451
+    },
+    "lib/projectAgentContext.ts": {
+      "sha256": "150c72ec722e5821d39ad2b5f9f9e492d141c61f4b04110cbb129005fc0d5a62",
+      "bytes": 4306
+    },
+    "lib/repositories/cards.ts": {
+      "sha256": "c23922a62152a53b754ae4d1854db0bf99fd9989439b88f73346bea0261448f2",
+      "bytes": 6152
+    },
+    "lib/research/academic.ts": {
+      "sha256": "2effc4b64f870a206d5b3048e598e444c4881e0e05c4ad51521611baaa2df23f",
+      "bytes": 1290
+    },
+    "lib/research/crossrefMetadata.ts": {
+      "sha256": "242102c8ac1ae57aa21dfbea3759bc80142c89218bf3ce3900596adb582c9f96",
+      "bytes": 4099
+    },
+    "lib/sensing/repoSource.ts": {
+      "sha256": "55b668caaeecfcce25f21383cbc873c7c943ba920628957a13b4a5b46618a15d",
+      "bytes": 17382
+    },
+    "lib/server/globalFocus.ts": {
+      "sha256": "84d2a4210c498ee6214086c52b38fe442dbf2293caa0ecaa2cc879a1ec40531e",
+      "bytes": 6375
+    },
+    "lib/server/globalWorkspace.ts": {
+      "sha256": "502428e4e8afc885225f5d2d79d0c8b535ac23a7e71703a03fdc5b627800f191",
+      "bytes": 4460
+    },
+    "lib/services/interventionDeliveryService.ts": {
+      "sha256": "2b9591d7ed21d599c7695e242fd9a59c2fc3f583e0b7e18a073bc9bb4bef8b0e",
+      "bytes": 4223
+    },
+    "lib/services/interventionPolicyService.ts": {
+      "sha256": "d433253da2ebe694600042e768802e9eb488d272627b1dae3e3209fc85fc3f34",
+      "bytes": 24270
+    },
+    "lib/services/memoryConsolidationService.ts": {
+      "sha256": "205245c08f75c004ffe2a49ba6448ed7ff6df51b4b09d9d164c9686ac4be73a9",
+      "bytes": 16261
+    },
+    "lib/services/memoryLifecycleService.ts": {
+      "sha256": "a1e3924b5305be0af3e1a10a4812d87878fdd0d9b374368221761c30079c4bdd",
+      "bytes": 5003
+    },
+    "lib/services/temporalLedgerService.ts": {
+      "sha256": "d85ced2d13699cb87656c63c62a30dd42db5ebdb0735fa31453a4d7dd4138ee2",
+      "bytes": 5248
+    },
+    "lib/types/agentExperience.ts": {
+      "sha256": "c707ca279acf62bbbc7e3b775d764de8d7f7cc7029dcaa23c6dcd4040b533096",
+      "bytes": 14710
+    },
+    "lib/types/continuity.ts": {
+      "sha256": "d4456c69018666b0f0623bb269885ddc52cdc26ee8b6218ff1392bfa9ba420fb",
+      "bytes": 2332
+    },
+    "lib/types/globalFocus.ts": {
+      "sha256": "10c651b2062891ead4dec15a3b0eee92248e7c3e20a5fb3a7bce10af8e34f08c",
+      "bytes": 934
+    },
+    "lib/types/mission.ts": {
+      "sha256": "58ca5d4962710fae605ed441c891d83ebc431ffe7ea1fd56d164832c251e1691",
+      "bytes": 2811
+    },
+    "lib/types/projectAgentContext.ts": {
+      "sha256": "0d2094f29f5d7abe0d92d6eb9a6928f99e9062b1cd2860690fe6a4ac8edd9190",
+      "bytes": 1063
+    },
+    "lib/xiaoyi/inspectMissionService.ts": {
+      "sha256": "da92238c7500dfb9f080b71e3c485f7dd4169d9cf7367a17c6179b70bd17f563",
+      "bytes": 1174
+    },
+    "lib/xiaoyi/missionAccess.ts": {
+      "sha256": "d17511cf7175a2a09eb8958386dfade0df4c554c9348bd3e94f45b8845593b5d",
+      "bytes": 1344
+    },
+    "lib/xiaoyi/resumeMissionService.ts": {
+      "sha256": "8b738f11e05d965f58a0b2770f8f316f8300a5f619504e9f1f507dcc87ee0124",
+      "bytes": 2048
+    },
+    "package.json": {
+      "sha256": "240932ed16877281e7b6dd6c06a926b0a73e2f1d134490fc663ea23dbc2cb9b2",
+      "bytes": 2794
+    },
+    "planning/r4-continuity-20261028/EXECUTIVE_SUMMARY.md": {
+      "sha256": "eb4420be2f29f7f6260871f32239975ef9e3d6feb2add93bfb5067ec8f9e801d",
+      "bytes": 6053
+    },
+    "planning/r4-continuity-20261028/R4_CONTINUITY_CONTEXT_HANDOFF_DESIGN.md": {
+      "sha256": "bed70fc548826cd2bf797ce9aef74621cf3f5c4a99b3c1ceb8b3849bc9b342b9",
+      "bytes": 29679
+    },
+    "planning/r4-continuity-20261028/R4_CONTINUITY_DECISIONS.md": {
+      "sha256": "6b398e413e24b33c234d3e59af1ca13cf9bfd3b7826d917de393304b3712de9f",
+      "bytes": 12335
+    },
+    "planning/r4-continuity-20261028/R4_CONTINUITY_EVAL_PLAN.md": {
+      "sha256": "e1bd22ded8b14a352aa3faebcd60955805386d987a14009a324824f5e1b56c21",
+      "bytes": 18293
+    },
+    "planning/r4-continuity-20261028/R4_CONTINUITY_EXISTING_CAPABILITIES.md": {
+      "sha256": "c18a1105db72c848801212be05e13a7d64e43d0667c5f60223f23300d0ed3a55",
+      "bytes": 15103
+    },
+    "planning/r4-continuity-20261028/R4_CONTINUITY_INTENT_CORRECTION_CONTRACT.md": {
+      "sha256": "2844ab5631fb8ce182175b795c4effc66459221e13cb1a5e5b11d501b22b4c1c",
+      "bytes": 22327
+    },
+    "planning/r4-continuity-20261028/R4_CONTINUITY_ROADMAP.md": {
+      "sha256": "e8a6aabf7dad71e3d3cfd2dfa4fef09d72956ff75033a21ae30c551741c6cd36",
+      "bytes": 17185
+    },
+    "planning/r4-continuity-20261028/R4_CONTINUITY_TOOL_INTEGRATION_MATRIX.md": {
+      "sha256": "1a100fcc2edc484469b1871f106755a607f5ad0e6c6760cddc96698c11200a8c",
+      "bytes": 14131
+    },
+    "planning/r4-continuity-20261028/R4_CONTINUITY_USER_EXPERIENCE.md": {
+      "sha256": "2cdc1906244801b10b4bc4c6b7a5e190eee6ef9c9b5c652a52db483dc0646d31",
+      "bytes": 9827
+    },
+    "prisma/schema.prisma": {
+      "sha256": "7a0ee798c350e3a01e0582b468bc4da8242f4f5c72f3de2e982853dfd611fb81",
+      "bytes": 51546
+    },
+    "prototypes/ProjectMemo_CodeGrounded_Agent_Research_Web_Harmony_Demo_v2_2026-10-29/ProjectMemo_CodeGrounded_v2/mobile_v2.png": {
+      "sha256": "bc9e3f756513b0928fcc6ec5f8859a1c8e2233fe4db3d7e17f22503499a7c5ff",
+      "bytes": 133361
+    },
+    "prototypes/ProjectMemo_CodeGrounded_Agent_Research_Web_Harmony_Demo_v2_2026-10-29/ProjectMemo_CodeGrounded_v2/mobile_viewport_v2.png": {
+      "sha256": "28dd554b3f11b380183b66efdcbe771673de31711ea1f10df271a51701a21353",
+      "bytes": 124436
+    },
+    "prototypes/ProjectMemo_CodeGrounded_Agent_Research_Web_Harmony_Demo_v2_2026-10-29/ProjectMemo_CodeGrounded_v2/PROJECTMEMO_CODE_GROUNDED_RESEARCH_AND_UX_REVISION_2026-10-29.md": {
+      "sha256": "483ce757b71445e7cce58a5f647458930db0cc719d2f99ca4042a39f7a89f2f4",
+      "bytes": 22963
+    },
+    "prototypes/ProjectMemo_CodeGrounded_Agent_Research_Web_Harmony_Demo_v2_2026-10-29/ProjectMemo_CodeGrounded_v2/ProjectMemo_CodeGrounded_Web_Harmony_Demo_v2.html": {
+      "sha256": "2b5f9c46691199cc8ada65eace9e0c4f9de03b7f5342028936df7dd98b09c54f",
+      "bytes": 44190
+    },
+    "prototypes/ProjectMemo_CodeGrounded_Agent_Research_Web_Harmony_Demo_v2_2026-10-29/ProjectMemo_CodeGrounded_v2/README_START_HERE.md": {
+      "sha256": "7af7b1d95079a7ba74e13460358823fbf9cd50e2debd9541ae4c72f5b1379a1a",
+      "bytes": 1398
+    },
+    "prototypes/ProjectMemo_CodeGrounded_Agent_Research_Web_Harmony_Demo_v2_2026-10-29/ProjectMemo_CodeGrounded_v2/web_v2.png": {
+      "sha256": "c60f6bc6484865fe3ba1fbccd31106e94be8cbd4f344ad29ee052ec6f32db5f9",
+      "bytes": 240148
+    },
+    "R4_AGENT_EXPERIENCE_IMPLEMENTATION_NOTES.md": {
+      "sha256": "9121611b6fa4616a9cbe714ab48b8ec3bf9ee73a5bf8c61b1d80ec5c2e499a5f",
+      "bytes": 25386
+    },
+    "R4_CONTINUITY_IMPLEMENTATION_NOTES.md": {
+      "sha256": "5cb8598b47153281d3bb688f0bbadcb691e0c434e3b64e1515268e4d454c419a",
+      "bytes": 9752
+    },
+    "R4_DOCUMENT_DEEP_READ_IMPLEMENTATION_NOTES.md": {
+      "sha256": "921705b458d0833983186020fb015729ff11b92069b3600e6b9899862f9b9f51",
+      "bytes": 5474
+    },
+    "R4_EXPERIMENT_ACADEMIC_IMPLEMENTATION_NOTES.md": {
+      "sha256": "6d0d6dbfa13b9b5e4b445ffab1a5d0d6c2b8133fa5d0eb556e5c81918072920b",
+      "bytes": 10421
+    },
+    "R4_INVESTIGATION_DELEGATION_IMPLEMENTATION_NOTES.md": {
+      "sha256": "c6719aecce15b510a199b36571fe33c18250ae5c8acbd2733b9f58b45c6ea11e",
+      "bytes": 7229
+    },
+    "R4_REPO_CI_IMPLEMENTATION_NOTES.md": {
+      "sha256": "c5aee094cd95a10fd924bf7ab3694c7432862bc7c092ba9aeed9071729faab9c",
+      "bytes": 6828
+    },
+    "scripts/e2e-env.ts": {
+      "sha256": "424e8c5794427e0b62864e77fae57ef07a6621a13434ae31e42a97b161766a23",
+      "bytes": 2064
+    },
+    "scripts/run-e2e.ts": {
+      "sha256": "56071eb8e32c134e47e5b6d61011dfae26dd9cc674857b2d04f81bc27a1a2c0c",
+      "bytes": 6907
+    },
+    "scripts/setup-e2e.ts": {
+      "sha256": "add90e2adffaf8ba7e4b0e1856d54806790d7d4d792c511308e3c04fab1e921e",
+      "bytes": 1935
+    },
+    "tests/continuityJourney.test.ts": {
+      "sha256": "d97f08bc22ad1c59de4ebce98721bfe04ad08a18f340c9b727c39a885dd67fa5",
+      "bytes": 8527
+    },
+    "tests/continuityRecoordination.test.ts": {
+      "sha256": "d49aee93cb7315b63f1f49fb8e441a6aea8f571d1162c7be9c3aa72a09f37ac4",
+      "bytes": 4242
+    },
+    "tests/continuitySuppression.test.ts": {
+      "sha256": "fddd862d6957cac454007d4bd44717660fb40c4c7912e92b9558d0c4a5c3f8d1",
+      "bytes": 10055
+    },
+    "tests/experienceNativeContract.test.ts": {
+      "sha256": "18341ae3ba8b98461eff30c346bf6af5dbdcc26c73defc800c5da7d03b09690a",
+      "bytes": 6994
+    },
+    "tests/globalFocusPresentation.test.ts": {
+      "sha256": "034a5df1281750599f2405c1aaf4826be77eb177419826e396619bf79e04dbc0",
+      "bytes": 2497
+    },
+    "tests/missionReadbackPanel.test.ts": {
+      "sha256": "2f6f3549061fccf58c7dadb9f6cbeb9d96b664730ea1cac7f322acb77efb6812",
+      "bytes": 3716
+    },
+    "tests/missionWorkspaceSummary.test.ts": {
+      "sha256": "ea1c3d0ed00b7ac5ec19a2c73204d043b6d6989fca5d4467576bcdc87c181663",
+      "bytes": 4408
+    },
+    "tests/projectAgentContext.test.ts": {
+      "sha256": "ffae2821262a4e708eb71c9047820b6dd26a50a7bd960261defb2fd062215bcd",
+      "bytes": 9213
+    },
+    "tsconfig.json": {
+      "sha256": "af1b4fbd345a0d2b7e23394aca3540b524a3d4826fca6a51169b13b2a325ee4a",
+      "bytes": 897
+    },
+    "vitest.config.ts": {
+      "sha256": "831ec82f083f0cb947c57e09ec3664b736a0618e015fe72bf729f400563fdf8e",
+      "bytes": 1284
+    }
+  },
+  "historicalAcceptanceComparison": {
+    "record": "evidence/r4-experiments/20261029-complete/acceptance-summary.json",
+    "matched": 80,
+    "total": 80,
+    "files": [
+      {
+        "path": ".env.example",
+        "expectedSha256": "8693c56c3ed3247dfee073b09c74d49d39fd714a4bd53d05b0d1c4aaa38ebc13",
+        "currentSha256": "8693c56c3ed3247dfee073b09c74d49d39fd714a4bd53d05b0d1c4aaa38ebc13",
+        "matches": true
+      },
+      {
+        "path": "R4_DOCUMENT_DEEP_READ_IMPLEMENTATION_NOTES.md",
+        "expectedSha256": "921705b458d0833983186020fb015729ff11b92069b3600e6b9899862f9b9f51",
+        "currentSha256": "921705b458d0833983186020fb015729ff11b92069b3600e6b9899862f9b9f51",
+        "matches": true
+      },
+      {
+        "path": "R4_EXPERIMENT_ACADEMIC_IMPLEMENTATION_NOTES.md",
+        "expectedSha256": "6d0d6dbfa13b9b5e4b445ffab1a5d0d6c2b8133fa5d0eb556e5c81918072920b",
+        "currentSha256": "6d0d6dbfa13b9b5e4b445ffab1a5d0d6c2b8133fa5d0eb556e5c81918072920b",
+        "matches": true
+      },
+      {
+        "path": "app/api/missions/[id]/budget-review/route.ts",
+        "expectedSha256": "96268f7c6f337dc2bc42807d22483daec18dc483e2a98bdec5a180ed835450d2",
+        "currentSha256": "96268f7c6f337dc2bc42807d22483daec18dc483e2a98bdec5a180ed835450d2",
+        "matches": true
+      },
+      {
+        "path": "app/api/missions/[id]/sources/[sourceId]/route.ts",
+        "expectedSha256": "85040e17c842371778abe6f1051d35d8716740cff71370350d34b320318673b4",
+        "currentSha256": "85040e17c842371778abe6f1051d35d8716740cff71370350d34b320318673b4",
+        "matches": true
+      },
+      {
+        "path": "app/api/projects/[id]/attachments/[attachmentId]/correct/route.ts",
+        "expectedSha256": "43eb93bd9a31afc57d7304fc1d9d296eb7014f0867ea189b35889d607d4301ba",
+        "currentSha256": "43eb93bd9a31afc57d7304fc1d9d296eb7014f0867ea189b35889d607d4301ba",
+        "matches": true
+      },
+      {
+        "path": "app/api/projects/[id]/attachments/[attachmentId]/file/route.ts",
+        "expectedSha256": "bc0c6e6e4977200e6df4bd2ee388ffcfca817589b9754415029eeeba756c672a",
+        "currentSha256": "bc0c6e6e4977200e6df4bd2ee388ffcfca817589b9754415029eeeba756c672a",
+        "matches": true
+      },
+      {
+        "path": "components/AttachmentInbox.tsx",
+        "expectedSha256": "da6626df2bc8b3fc0e98adb23a02b21d167f8ae7ce22d0b72b6efffdca068a85",
+        "currentSha256": "da6626df2bc8b3fc0e98adb23a02b21d167f8ae7ce22d0b72b6efffdca068a85",
+        "matches": true
+      },
+      {
+        "path": "components/ConversationResearch.tsx",
+        "expectedSha256": "b470eccf2dd5b3c2af2f925089598835709b44c7cb854ee8222dcba154d4c9b0",
+        "currentSha256": "b470eccf2dd5b3c2af2f925089598835709b44c7cb854ee8222dcba154d4c9b0",
+        "matches": true
+      },
+      {
+        "path": "components/MetricJobInputs.tsx",
+        "expectedSha256": "30002a2beddd5a04897a510b08db8fe84a3ac8da661d17c8f81cd13ac4d63c05",
+        "currentSha256": "30002a2beddd5a04897a510b08db8fe84a3ac8da661d17c8f81cd13ac4d63c05",
+        "matches": true
+      },
+      {
+        "path": "components/MissionBudgetReview.tsx",
+        "expectedSha256": "c5b1d4e940585183ec8039f8cb8c5543344d033bc43bc5e145c7acda64c31382",
+        "currentSha256": "c5b1d4e940585183ec8039f8cb8c5543344d033bc43bc5e145c7acda64c31382",
+        "matches": true
+      },
+      {
+        "path": "components/MissionInvestigationDelegation.tsx",
+        "expectedSha256": "56301afaa53fee10261d349d345ccbabc844e2e40cda91826c73fc6f1e31642b",
+        "currentSha256": "56301afaa53fee10261d349d345ccbabc844e2e40cda91826c73fc6f1e31642b",
+        "matches": true
+      },
+      {
+        "path": "components/MissionMetricReceipts.tsx",
+        "expectedSha256": "9654834e90c026693f63163a9f5545c987ca0cbee824cb6cf000ed8061e72f86",
+        "currentSha256": "9654834e90c026693f63163a9f5545c987ca0cbee824cb6cf000ed8061e72f86",
+        "matches": true
+      },
+      {
+        "path": "components/MissionPanel.tsx",
+        "expectedSha256": "d4781afe730e93271281594a863131d696fb6ae2c982dd52c8124282e8efdfe5",
+        "currentSha256": "d4781afe730e93271281594a863131d696fb6ae2c982dd52c8124282e8efdfe5",
+        "matches": true
+      },
+      {
+        "path": "components/MissionResearchScopeEditor.tsx",
+        "expectedSha256": "adaf2abf43446d841cd1a32048561bbe7c887635202d8386a8f555d1243f3637",
+        "currentSha256": "adaf2abf43446d841cd1a32048561bbe7c887635202d8386a8f555d1243f3637",
+        "matches": true
+      },
+      {
+        "path": "e2e/experiments.spec.ts",
+        "expectedSha256": "5b8661794c04331b495e2e597e884d51fcc2f2c6c301227353c9fd6786f78995",
+        "currentSha256": "5b8661794c04331b495e2e597e884d51fcc2f2c6c301227353c9fd6786f78995",
+        "matches": true
+      },
+      {
+        "path": "harmonyos/entry/src/main/ets/common/MissionContract.ets",
+        "expectedSha256": "9ac33afedefd22462fac2ed7f8c75bde8d61fa2a245306d993539a14de432e29",
+        "currentSha256": "9ac33afedefd22462fac2ed7f8c75bde8d61fa2a245306d993539a14de432e29",
+        "matches": true
+      },
+      {
+        "path": "harmonyos/entry/src/main/ets/common/ResearchPresentation.ets",
+        "expectedSha256": "410941d43505229e20bb6531bceccc829db321ac2b23f7c547b037b7f995c78f",
+        "currentSha256": "410941d43505229e20bb6531bceccc829db321ac2b23f7c547b037b7f995c78f",
+        "matches": true
+      },
+      {
+        "path": "harmonyos/entry/src/main/ets/components/ConversationResearch.ets",
+        "expectedSha256": "d677f49cab3e3751b39e5eaef43c2f3043cdcab2d4b0e47a898295b861b3143d",
+        "currentSha256": "d677f49cab3e3751b39e5eaef43c2f3043cdcab2d4b0e47a898295b861b3143d",
+        "matches": true
+      },
+      {
+        "path": "harmonyos/entry/src/main/ets/components/MissionApprovalSheet.ets",
+        "expectedSha256": "f8f985502c63ee627aeacaac3c05f438314e0c8f4b26468c541d4d0a25db1ef9",
+        "currentSha256": "f8f985502c63ee627aeacaac3c05f438314e0c8f4b26468c541d4d0a25db1ef9",
+        "matches": true
+      },
+      {
+        "path": "harmonyos/entry/src/main/ets/components/MissionInvestigationDelegation.ets",
+        "expectedSha256": "2151f16c970fc1078814fe7324523f87edc88f9165afa0a00bc4fc338a5f359c",
+        "currentSha256": "2151f16c970fc1078814fe7324523f87edc88f9165afa0a00bc4fc338a5f359c",
+        "matches": true
+      },
+      {
+        "path": "harmonyos/entry/src/main/ets/components/MissionMetricReceipt.ets",
+        "expectedSha256": "f28ba8d50b7dc70aa382af724c324916b49bca2a4358afbcf82ca59ad78f79f0",
+        "currentSha256": "f28ba8d50b7dc70aa382af724c324916b49bca2a4358afbcf82ca59ad78f79f0",
+        "matches": true
+      },
+      {
+        "path": "harmonyos/entry/src/main/ets/components/MissionSettingsForm.ets",
+        "expectedSha256": "d5d5a29c5968f1b8b30e469905bb06187911e4399a2f0873ac7fada67c4bac0c",
+        "currentSha256": "d5d5a29c5968f1b8b30e469905bb06187911e4399a2f0873ac7fada67c4bac0c",
+        "matches": true
+      },
+      {
+        "path": "harmonyos/entry/src/main/ets/models/ConversationResearch.ets",
+        "expectedSha256": "26eb96bbfdd95d741947f143996a2564e584ea4943255707b309c873d1690497",
+        "currentSha256": "26eb96bbfdd95d741947f143996a2564e584ea4943255707b309c873d1690497",
+        "matches": true
+      },
+      {
+        "path": "harmonyos/entry/src/main/ets/models/Mission.ets",
+        "expectedSha256": "5b5918aa3a01c8c12f2a0cc9356fb1d5528fcb4ae1b31bcba936b223256c31eb",
+        "currentSha256": "5b5918aa3a01c8c12f2a0cc9356fb1d5528fcb4ae1b31bcba936b223256c31eb",
+        "matches": true
+      },
+      {
+        "path": "harmonyos/entry/src/main/ets/pages/MissionDetail.ets",
+        "expectedSha256": "db11b8bcf311b6468f42055166a4110e4945c1ae6fafe42adf64941b6fef594d",
+        "currentSha256": "db11b8bcf311b6468f42055166a4110e4945c1ae6fafe42adf64941b6fef594d",
+        "matches": true
+      },
+      {
+        "path": "harmonyos/entry/src/main/ets/pages/ProjectHome.ets",
+        "expectedSha256": "a1447c6d03343c461fd4c41d86b382f47480cecb9b02ca6fa33f2d11f777f864",
+        "currentSha256": "a1447c6d03343c461fd4c41d86b382f47480cecb9b02ca6fa33f2d11f777f864",
+        "matches": true
+      },
+      {
+        "path": "harmonyos/entry/src/main/ets/services/MissionService.ets",
+        "expectedSha256": "c3ee36972388adb6832d8d69420579800b82f98063f9163e85af4d94509c274c",
+        "currentSha256": "c3ee36972388adb6832d8d69420579800b82f98063f9163e85af4d94509c274c",
+        "matches": true
+      },
+      {
+        "path": "lib/agent/specialistPrompts.ts",
+        "expectedSha256": "c261c2c29dd9711aa5d33733c89b8009fe644d6ca41a970dfe7488b5988ee9d6",
+        "currentSha256": "c261c2c29dd9711aa5d33733c89b8009fe644d6ca41a970dfe7488b5988ee9d6",
+        "matches": true
+      },
+      {
+        "path": "lib/continuity/sourcePolicy.ts",
+        "expectedSha256": "19fd72047345e58eec68f63e8a81afc8b094b85ef87f373b83fc998e3a59db63",
+        "currentSha256": "19fd72047345e58eec68f63e8a81afc8b094b85ef87f373b83fc998e3a59db63",
+        "matches": true
+      },
+      {
+        "path": "lib/conversation/investigationService.ts",
+        "expectedSha256": "46268bffd4d5f462044deaf0fd8b05fa5d9d800b2951d2acb87426c3c2564a5e",
+        "currentSha256": "46268bffd4d5f462044deaf0fd8b05fa5d9d800b2951d2acb87426c3c2564a5e",
+        "matches": true
+      },
+      {
+        "path": "lib/conversation/promptSpecs.ts",
+        "expectedSha256": "ef9d17f864b582f7ef0b58dabb20aa5f411513f73c7bdd6f880f3329be87afc4",
+        "currentSha256": "ef9d17f864b582f7ef0b58dabb20aa5f411513f73c7bdd6f880f3329be87afc4",
+        "matches": true
+      },
+      {
+        "path": "lib/conversation/researchLabels.ts",
+        "expectedSha256": "8a35a7ce3e52c01bd382ead6ca5ea20c9055ee20890c869d37cf1ebae7a49244",
+        "currentSha256": "8a35a7ce3e52c01bd382ead6ca5ea20c9055ee20890c869d37cf1ebae7a49244",
+        "matches": true
+      },
+      {
+        "path": "lib/conversation/researchTools.ts",
+        "expectedSha256": "192ef830108bd3ffd39714e088da035812cc63068ba151db04d287f77a269349",
+        "currentSha256": "192ef830108bd3ffd39714e088da035812cc63068ba151db04d287f77a269349",
+        "matches": true
+      },
+      {
+        "path": "lib/conversation/toolAdapter.ts",
+        "expectedSha256": "1eb272ae3c259a249bcc148797d068f53355730ba72f74fabe04df7f9c612e7e",
+        "currentSha256": "1eb272ae3c259a249bcc148797d068f53355730ba72f74fabe04df7f9c612e7e",
+        "matches": true
+      },
+      {
+        "path": "lib/conversation/turnRuntime.ts",
+        "expectedSha256": "73f1e088a4a8d7f5359fe24efc7c228468a9fd3bf14730216c6c4a2789dd2519",
+        "currentSha256": "73f1e088a4a8d7f5359fe24efc7c228468a9fd3bf14730216c6c4a2789dd2519",
+        "matches": true
+      },
+      {
+        "path": "lib/conversation/turnService.ts",
+        "expectedSha256": "7610fab0e9501815f901c263599fa0b1a5f424e6b4722c5de1a2ca60d2687019",
+        "currentSha256": "7610fab0e9501815f901c263599fa0b1a5f424e6b4722c5de1a2ca60d2687019",
+        "matches": true
+      },
+      {
+        "path": "lib/experiments/metrics.ts",
+        "expectedSha256": "37e8373a4ea6604636e8b4e6c3510035f8f0c94c1751fd7c93ccf86b5c33499d",
+        "currentSha256": "37e8373a4ea6604636e8b4e6c3510035f8f0c94c1751fd7c93ccf86b5c33499d",
+        "matches": true
+      },
+      {
+        "path": "lib/experiments/reader.ts",
+        "expectedSha256": "849f44ddee556d9c6aa022ef270993964eab3799dde6e00620f9a97d1f9073ec",
+        "currentSha256": "849f44ddee556d9c6aa022ef270993964eab3799dde6e00620f9a97d1f9073ec",
+        "matches": true
+      },
+      {
+        "path": "lib/experiments/sandbox.ts",
+        "expectedSha256": "4ffa629dbd0847049b32f367487221d781b3403ed7b73b124daf9a892a74e13a",
+        "currentSha256": "4ffa629dbd0847049b32f367487221d781b3403ed7b73b124daf9a892a74e13a",
+        "matches": true
+      },
+      {
+        "path": "lib/experiments/table.ts",
+        "expectedSha256": "ba08f07285bae052413206203d9841f34b2ed5eed8f87b23e5171d6260795bf1",
+        "currentSha256": "ba08f07285bae052413206203d9841f34b2ed5eed8f87b23e5171d6260795bf1",
+        "matches": true
+      },
+      {
+        "path": "lib/mission/academicTools.ts",
+        "expectedSha256": "0af3b9eebc14ad18b5f6fa4aa4fb347e8b3b6ec6fce8f445c215a2cebfb22720",
+        "currentSha256": "0af3b9eebc14ad18b5f6fa4aa4fb347e8b3b6ec6fce8f445c215a2cebfb22720",
+        "matches": true
+      },
+      {
+        "path": "lib/mission/budgetReview.ts",
+        "expectedSha256": "1286d759fc74ca8e528651123c1ffa395d86ab959a69269400adbd2387ff459f",
+        "currentSha256": "1286d759fc74ca8e528651123c1ffa395d86ab959a69269400adbd2387ff459f",
+        "matches": true
+      },
+      {
+        "path": "lib/mission/contextBuilder.ts",
+        "expectedSha256": "38aa72a0759475fd596185f05e101dfef1f2e82c35e48de68d9d4d2170457920",
+        "currentSha256": "38aa72a0759475fd596185f05e101dfef1f2e82c35e48de68d9d4d2170457920",
+        "matches": true
+      },
+      {
+        "path": "lib/mission/contracts.ts",
+        "expectedSha256": "4632ecf9ddd6ed38d53162454e6bdf7ed193db086b503856e97f729b82d4f5f3",
+        "currentSha256": "4632ecf9ddd6ed38d53162454e6bdf7ed193db086b503856e97f729b82d4f5f3",
+        "matches": true
+      },
+      {
+        "path": "lib/mission/experimentTools.ts",
+        "expectedSha256": "2e075da013a242af23ac5372a0e29afca6bc194069afe049ee9d696db75a9f78",
+        "currentSha256": "2e075da013a242af23ac5372a0e29afca6bc194069afe049ee9d696db75a9f78",
+        "matches": true
+      },
+      {
+        "path": "lib/mission/investigationDelegation.ts",
+        "expectedSha256": "34bec05e548e40531ec05ddc65f1a6e9fc41db3596303697496054f356f646d1",
+        "currentSha256": "34bec05e548e40531ec05ddc65f1a6e9fc41db3596303697496054f356f646d1",
+        "matches": true
+      },
+      {
+        "path": "lib/mission/metricInputSources.ts",
+        "expectedSha256": "05c3e8b9011657b054f6ab52cd4b14597dd69dbcf6d9facc6ee170720d4b46cb",
+        "currentSha256": "05c3e8b9011657b054f6ab52cd4b14597dd69dbcf6d9facc6ee170720d4b46cb",
+        "matches": true
+      },
+      {
+        "path": "lib/mission/metricVerification.ts",
+        "expectedSha256": "b174dd8bb00ca91859652146919449ad127c6f6a6f2dd8af7f67faf9c0960307",
+        "currentSha256": "b174dd8bb00ca91859652146919449ad127c6f6a6f2dd8af7f67faf9c0960307",
+        "matches": true
+      },
+      {
+        "path": "lib/mission/missionService.ts",
+        "expectedSha256": "fe708d4139916b040effe388eeb897d374f7c02db554489747b5b89a6318e8cc",
+        "currentSha256": "fe708d4139916b040effe388eeb897d374f7c02db554489747b5b89a6318e8cc",
+        "matches": true
+      },
+      {
+        "path": "lib/mission/presentation.ts",
+        "expectedSha256": "5dc6a6678ca07876a9d878202bd396a2a767a06ddbf693f654d1268f648f4c55",
+        "currentSha256": "5dc6a6678ca07876a9d878202bd396a2a767a06ddbf693f654d1268f648f4c55",
+        "matches": true
+      },
+      {
+        "path": "lib/mission/repository.ts",
+        "expectedSha256": "0fc7d9c7990b200e1fb0ed1a9f976451110a83234df803683608b240f73c55e8",
+        "currentSha256": "0fc7d9c7990b200e1fb0ed1a9f976451110a83234df803683608b240f73c55e8",
+        "matches": true
+      },
+      {
+        "path": "lib/mission/repositoryTools.ts",
+        "expectedSha256": "053498b2d9950e0a6f77de206cbcd0ac6a55d39a9287b39784f3dd51747a9dfa",
+        "currentSha256": "053498b2d9950e0a6f77de206cbcd0ac6a55d39a9287b39784f3dd51747a9dfa",
+        "matches": true
+      },
+      {
+        "path": "lib/mission/resultVerifier.ts",
+        "expectedSha256": "08e6bcec0733129cd2f1ebc0945110a1f06cd497bd0b2b6ca2c6896f843dbad0",
+        "currentSha256": "08e6bcec0733129cd2f1ebc0945110a1f06cd497bd0b2b6ca2c6896f843dbad0",
+        "matches": true
+      },
+      {
+        "path": "lib/mission/runner.ts",
+        "expectedSha256": "ad854cbf0ab4cd7693468fd31e985f0a7442dc4f0992fdef78d14b595252ff63",
+        "currentSha256": "ad854cbf0ab4cd7693468fd31e985f0a7442dc4f0992fdef78d14b595252ff63",
+        "matches": true
+      },
+      {
+        "path": "lib/mission/tools.ts",
+        "expectedSha256": "04679db8f53ab015e9d403ff5c35ef647c06237f3a44fba82b06ccfce96ac04e",
+        "currentSha256": "04679db8f53ab015e9d403ff5c35ef647c06237f3a44fba82b06ccfce96ac04e",
+        "matches": true
+      },
+      {
+        "path": "lib/mission/tools/researchTools.ts",
+        "expectedSha256": "736b51bfe6f284aa53df7e701bd3600c7edbe2f2c23151d3311aabd497876a39",
+        "currentSha256": "736b51bfe6f284aa53df7e701bd3600c7edbe2f2c23151d3311aabd497876a39",
+        "matches": true
+      },
+      {
+        "path": "lib/research/academic.ts",
+        "expectedSha256": "2effc4b64f870a206d5b3048e598e444c4881e0e05c4ad51521611baaa2df23f",
+        "currentSha256": "2effc4b64f870a206d5b3048e598e444c4881e0e05c4ad51521611baaa2df23f",
+        "matches": true
+      },
+      {
+        "path": "lib/research/contracts.ts",
+        "expectedSha256": "e9e13fa19b9c4ade31beb402f38be70d7f32b408f7cd6cca5dd8ae2bb3dfdac7",
+        "currentSha256": "e9e13fa19b9c4ade31beb402f38be70d7f32b408f7cd6cca5dd8ae2bb3dfdac7",
+        "matches": true
+      },
+      {
+        "path": "lib/research/crossrefMetadata.ts",
+        "expectedSha256": "242102c8ac1ae57aa21dfbea3759bc80142c89218bf3ce3900596adb582c9f96",
+        "currentSha256": "242102c8ac1ae57aa21dfbea3759bc80142c89218bf3ce3900596adb582c9f96",
+        "matches": true
+      },
+      {
+        "path": "lib/research/sourceRepository.ts",
+        "expectedSha256": "2183e95f25d38d6ac277a7f4e5e6c0a2db086a6d7e95713dd6f3abbe81b21073",
+        "currentSha256": "2183e95f25d38d6ac277a7f4e5e6c0a2db086a6d7e95713dd6f3abbe81b21073",
+        "matches": true
+      },
+      {
+        "path": "lib/services/attachmentService.ts",
+        "expectedSha256": "0c95eea7187a3e10bd08a5099dc7e6152de06aa038ce06b0afe2d53bedfb600f",
+        "currentSha256": "0c95eea7187a3e10bd08a5099dc7e6152de06aa038ce06b0afe2d53bedfb600f",
+        "matches": true
+      },
+      {
+        "path": "lib/types/agentExperience.ts",
+        "expectedSha256": "c707ca279acf62bbbc7e3b775d764de8d7f7cc7029dcaa23c6dcd4040b533096",
+        "currentSha256": "c707ca279acf62bbbc7e3b775d764de8d7f7cc7029dcaa23c6dcd4040b533096",
+        "matches": true
+      },
+      {
+        "path": "lib/types/conversationResearch.ts",
+        "expectedSha256": "74fa5d1d3e703521aa09e39a9116f34275aa27618dd517ad5b8fbf22f0b16fc4",
+        "currentSha256": "74fa5d1d3e703521aa09e39a9116f34275aa27618dd517ad5b8fbf22f0b16fc4",
+        "matches": true
+      },
+      {
+        "path": "lib/types/experiment.ts",
+        "expectedSha256": "8df71d26697c91db16ce0925bdca8e12fea5da12fcc9ed4bd69f86551b8579be",
+        "currentSha256": "8df71d26697c91db16ce0925bdca8e12fea5da12fcc9ed4bd69f86551b8579be",
+        "matches": true
+      },
+      {
+        "path": "lib/types/mission.ts",
+        "expectedSha256": "58ca5d4962710fae605ed441c891d83ebc431ffe7ea1fd56d164832c251e1691",
+        "currentSha256": "58ca5d4962710fae605ed441c891d83ebc431ffe7ea1fd56d164832c251e1691",
+        "matches": true
+      },
+      {
+        "path": "lib/types/missionBudget.ts",
+        "expectedSha256": "bf1bc5341c391a5517a48c2c15e33e6534a1f758359551406b5c5b4dd1b145ca",
+        "currentSha256": "bf1bc5341c391a5517a48c2c15e33e6534a1f758359551406b5c5b4dd1b145ca",
+        "matches": true
+      },
+      {
+        "path": "scripts/e2e-ct56-fixture.ts",
+        "expectedSha256": "e4ab7c70ef2a0c8ae62af7ed024fbd7884f257b8139167908b3b58289a9747bc",
+        "currentSha256": "e4ab7c70ef2a0c8ae62af7ed024fbd7884f257b8139167908b3b58289a9747bc",
+        "matches": true
+      },
+      {
+        "path": "scripts/e2e-env.ts",
+        "expectedSha256": "424e8c5794427e0b62864e77fae57ef07a6621a13434ae31e42a97b161766a23",
+        "currentSha256": "424e8c5794427e0b62864e77fae57ef07a6621a13434ae31e42a97b161766a23",
+        "matches": true
+      },
+      {
+        "path": "scripts/eval-ct56.ts",
+        "expectedSha256": "e0f6f220e3b1f597c353f737f372e82a533bc150f67c319fd99c90cb06706aa0",
+        "currentSha256": "e0f6f220e3b1f597c353f737f372e82a533bc150f67c319fd99c90cb06706aa0",
+        "matches": true
+      },
+      {
+        "path": "scripts/mission-evaluation/budget.ts",
+        "expectedSha256": "4c8e991b5e16756c3d2610e8f24a75b87bd4cea236bed9abcac7dd855c0c9792",
+        "currentSha256": "4c8e991b5e16756c3d2610e8f24a75b87bd4cea236bed9abcac7dd855c0c9792",
+        "matches": true
+      },
+      {
+        "path": "scripts/probe-metric-sandbox.ts",
+        "expectedSha256": "979dd9de88fe8eccea32662e3e2e79e6b16c57d291811d7c3e6e12bd509672a8",
+        "currentSha256": "979dd9de88fe8eccea32662e3e2e79e6b16c57d291811d7c3e6e12bd509672a8",
+        "matches": true
+      },
+      {
+        "path": "scripts/resume-ct56.ts",
+        "expectedSha256": "7df2d45f625c4cb47dcb5fbad781d2f0ae0f974a7beb89fe3c9313133ba9e2b3",
+        "currentSha256": "7df2d45f625c4cb47dcb5fbad781d2f0ae0f974a7beb89fe3c9313133ba9e2b3",
+        "matches": true
+      },
+      {
+        "path": "tests/academicIntegration.test.ts",
+        "expectedSha256": "0fc05c976742eb7c0ab147e7ba811b9bea18e9410bd03be87deda39bd1948493",
+        "currentSha256": "0fc05c976742eb7c0ab147e7ba811b9bea18e9410bd03be87deda39bd1948493",
+        "matches": true
+      },
+      {
+        "path": "tests/experimentIntegration.test.ts",
+        "expectedSha256": "a1d701e96e500006766e6e038509f920e78f15ad0681bd2f88af553284ea5002",
+        "currentSha256": "a1d701e96e500006766e6e038509f920e78f15ad0681bd2f88af553284ea5002",
+        "matches": true
+      },
+      {
+        "path": "tests/experimentMetrics.test.ts",
+        "expectedSha256": "9d51e22442f32420249225babd8a0e4ca6f58465970b9855425b35cb23c4bce1",
+        "currentSha256": "9d51e22442f32420249225babd8a0e4ca6f58465970b9855425b35cb23c4bce1",
+        "matches": true
+      },
+      {
+        "path": "tests/helpers/metricDockerFixture.ts",
+        "expectedSha256": "0169f8e9b081b2ab357fdb7f7c69c32242617f7d89c112bf5c69d33bee405dd2",
+        "currentSha256": "0169f8e9b081b2ab357fdb7f7c69c32242617f7d89c112bf5c69d33bee405dd2",
+        "matches": true
+      },
+      {
+        "path": "tests/metricSandbox.test.ts",
+        "expectedSha256": "828708d97c76de0c6f18009ef58182dd6ad897dc5ff424660f2eecc6652c8eca",
+        "currentSha256": "828708d97c76de0c6f18009ef58182dd6ad897dc5ff424660f2eecc6652c8eca",
+        "matches": true
+      },
+      {
+        "path": "tests/missionPanel.test.ts",
+        "expectedSha256": "29180635b4e15713558758875683d95d0fe55bdbdd512ee603a31ef37e734c6c",
+        "currentSha256": "29180635b4e15713558758875683d95d0fe55bdbdd512ee603a31ef37e734c6c",
+        "matches": true
+      },
+      {
+        "path": "tests/webClientContract.test.ts",
+        "expectedSha256": "9bbc0b7db07c491fd2b668bc106c3921d696858dae675e29f5d20d00ddba3d8e",
+        "currentSha256": "9bbc0b7db07c491fd2b668bc106c3921d696858dae675e29f5d20d00ddba3d8e",
+        "matches": true
+      }
+    ]
+  },
+  "primaryReferences": [
+    {
+      "url": "https://github.com/ag-ui-protocol/ag-ui",
+      "observedDuringPlanningDate": "2026-10-29",
+      "license": "MIT",
+      "observedStars": 16905,
+      "observedLastPush": "2026-10-29T15:45:31Z",
+      "decision": "Borrow event-lifecycle design; no new SDK/runtime"
+    },
+    {
+      "url": "https://github.com/a2ui-project/a2ui",
+      "observedDuringPlanningDate": "2026-10-29",
+      "license": "Apache-2.0",
+      "observedStars": 16873,
+      "observedLastPush": "2026-10-29T15:33:45Z",
+      "decision": "Borrow trusted component catalog boundary; no ArkTS renderer assumption"
+    },
+    {
+      "url": "https://developer.huawei.com.cn/consumer/cn/sdk/intents-kit",
+      "purpose": "System entry and distribution; product identity and authority remain separate"
+    },
+    {
+      "url": "https://developer.huawei.com/consumer/cn/multidevice/wearables/",
+      "purpose": "Device-family selection; no wearable implementation claim"
+    }
+  ],
+  "openAcceptanceGates": [
+    "independent held-out semantic quality",
+    "real multi-day users",
+    "target native device interactions",
+    "real CI failure-log download domains",
+    "complex PDF/OCR and full-paper quality",
+    "complete real Conversation with CT5/6 and generative UI",
+    "formal Xiaoyi identity and channel release",
+    "private Mission background system delivery",
+    "wearable feasibility"
+  ],
+  "missingExplicitInputs": []
+}

@@ -1,0 +1,34 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/agentUxWorkState.test.ts tests/agentUxJourney.test.ts tests/globalWorkspace.integration.test.ts tests/projectAgentContext.test.ts tests/missionPanel.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/projectAgentContext.test.ts (9 tests | 1 failed) 804ms
+     × 各入口读取相同目标与原问题，读取无任务或回执写入 208ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/projectAgentContext.test.ts > shared next step > 各入口读取相同目标与原问题，读取无任务或回执写入
+AssertionError: expected '672a2673ac1e87a676baefa9aebdde46d699b…' to be 'a926b8d83266d2f8ce6c8860d05b13210dc57…' // Object.is equality
+
+Expected: "a926b8d83266d2f8ce6c8860d05b13210dc57df9eaa4bc3100dddaa688f529dc"
+Received: "672a2673ac1e87a676baefa9aebdde46d699b9647226bfaa97daf114b8d54b7e"
+
+ ❯ tests/projectAgentContext.test.ts:53:51
+     51|     expect(context?.nextStep).toMatchObject({attentionKind:"WAITING_IN…
+     52|     expect(context?.nextStep.entityRef.questionId).toBeTruthy();
+     53|     expect(focus.primaryContext?.observationHash).toBe(context?.observ…
+       |                                                   ^
+     54|     expect(await db.agentMissionEvent.count()).toBe(before);expect(awa…
+     55|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  1 failed | 31 passed (32)
+   Start at  08:32:48
+   Duration  12.67s (transform 1.99s, setup 0ms, import 4.09s, tests 6.41s, environment 956ms)
+

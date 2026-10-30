@@ -1,3 +1,4 @@
+import { WorkState } from './WorkState';
 import { DocumentSourceMeta } from './Document';
 import { MissionExperience } from './Experience';
 import { FitPremise, EvidenceReview, EvidenceFit, FitExcerpt } from './EvidenceFit';
@@ -77,7 +78,7 @@ export class MissionAttentionReceipt { requestId: string = ''; expectedVersion: 
 export interface MissionAttention { level: string; reason: string; decisionId?: string; delivery?: MissionAttentionDelivery; }
 export interface MissionAttentionDelivery { status: string; seenAt?: string | null; }
 export interface MissionDelegation { attention?: MissionAttention | null; }
-export class Mission {
+export class Mission {workingObjective?:string|null;nextBoundary?:string|null; workState?:WorkState;
   experimentObserverEnabled?: boolean; academicResearchEnabled?: boolean; sandboxVerificationEnabled?: boolean;
   documentDeepReadEnabled?: boolean;
   delegation?: MissionDelegation | null;
@@ -149,7 +150,7 @@ export class MissionPolicyEdit {
   requestId: string = ''; expectedVersion: number = 1; policy: MissionPolicy = new MissionPolicy();
 }
 
-export interface MissionWorkspaceItem {
+export interface MissionWorkspaceItem { workState?:WorkState;
   id: string; goal: string; status: string; version: number; attention: string | null;
   activity: string | null; activityAt: string | null; outputRevision: number | null;
 }

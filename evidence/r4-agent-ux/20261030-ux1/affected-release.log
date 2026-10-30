@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/agentUxControls.test.ts tests/agentUxWorkState.test.ts tests/agentUxJourney.test.ts tests/globalWorkspace.integration.test.ts tests/projectAgentContext.test.ts tests/missionPanel.test.ts tests/continuityStages23.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  7 passed (7)
+      Tests  45 passed (45)
+   Start at  08:49:22
+   Duration  41.91s (transform 4.51s, setup 0ms, import 12.20s, tests 22.14s, environment 3.85s)
+

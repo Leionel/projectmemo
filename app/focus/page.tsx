@@ -20,8 +20,8 @@ export const runtime = "nodejs";
 type Hero = { kind: "mission" | "reminder" | "action"; item: FocusEntry; context?: ProjectAgentContext };
 
 function pickHero(focus: GlobalFocus): Hero | null {
-  if(focus.primaryContext){const c=focus.primaryContext,n=c.nextStep;return {kind:n.entityRef.kind==="MISSION"?"mission":n.entityRef.kind==="INTERVENTION"?"reminder":"action",context:c,item:{id:n.entityRef.id,projectId:c.projectId,projectTitle:c.projectTitle,title:n.title,detail:n.reason,status:n.status,activity:"",activityAt:c.observedAt,recordedAt:"",dueAt:"",projectDeadline:"",recordFields:[]}};}
-  const judgment = focus.waiting.find(item => item.status === "WAITING_INPUT" || item.status === "WAITING_APPROVAL");
+  if(focus.primaryContext){const c=focus.primaryContext,n=c.nextStep;return {kind:n.entityRef.kind==="MISSION"?"mission":n.entityRef.kind==="INTERVENTION"?"reminder":"action",context:c,item:{id:n.entityRef.id,projectId:c.projectId,projectTitle:c.projectTitle,title:n.title,detail:n.reason,status:n.status,workState:n.workState,actionLabel:n.actionLabel,activity:"",activityAt:c.observedAt,recordedAt:"",dueAt:"",projectDeadline:"",recordFields:[]}};}
+  const judgment = focus.waiting.find(item => item.workState ? item.workState.requiresUser : item.status === "WAITING_INPUT" || item.status === "WAITING_APPROVAL");
   if (judgment) return { kind: "mission", item: judgment };
   if (focus.reminders.length) return { kind: "reminder", item: focus.reminders[0] };
   if (focus.actions.length) return { kind: "action", item: focus.actions[0] };

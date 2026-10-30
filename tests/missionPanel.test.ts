@@ -56,7 +56,7 @@ describe("Mission 面板调用方",()=>{
   const f=fixture();render(createElement(MissionPanel,{projectId:"p"}));const row=await screen.findByRole("button",{name:"整理阶段汇报 · 等待执行"});fireEvent.click(row);await screen.findByRole("heading",{name:"整理阶段汇报"});
   const original=globalThis.fetch;vi.stubGlobal("fetch",vi.fn(async()=>({ok:false,status:503,json:async()=>({error:{message:"服务暂不可用"}})})));
   fireEvent.click(row);await screen.findByText(/当前显示上次读取的历史状态/);expect(screen.getByRole("heading",{name:"整理阶段汇报"})).toBeTruthy();
-  fireEvent.click(screen.getByText("暂停与取消"));expect((screen.getByRole("button",{name:"暂停"}) as HTMLButtonElement).closest("fieldset")?.disabled).toBe(true);expect(f.requests).toHaveLength(0);
+  expect((screen.getByRole("button",{name:"暂停"}) as HTMLButtonElement).closest("fieldset")?.disabled).toBe(true);expect(f.requests).toHaveLength(0);
   vi.stubGlobal("fetch",original);fireEvent.click(screen.getByRole("button",{name:"刷新重试"}));await waitFor(()=>expect(screen.queryByText(/当前显示上次读取的历史状态/)).toBeNull());
  });
  it("401时清除已显示的私有委托、来源和输入，不留下旧账号内容",async()=>{
@@ -69,7 +69,7 @@ describe("Mission 面板调用方",()=>{
   render(createElement(MissionPanel,{projectId:"p"}));
   const row=await screen.findByRole("button",{name:"整理阶段汇报 · 已暂停"});fireEvent.click(row);
   const alert=await screen.findByRole("alert");expect(alert.textContent).toContain("模型回复格式不符合要求");expect(alert.textContent).toContain("已有进度已保留");
-  fireEvent.click(screen.getByText("暂停与取消"));
+  
   expect(screen.getByRole("button",{name:"确认后继续执行"})).toBeTruthy();expect(row.getAttribute("aria-pressed")).toBe("true");
   fireEvent.click(screen.getByText(/执行详情与回执（/));
   expect(screen.getByRole("region",{name:"执行记录"})).toBeTruthy();

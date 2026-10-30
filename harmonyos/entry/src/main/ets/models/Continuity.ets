@@ -1,3 +1,4 @@
+import { WorkState } from './WorkState';
 import { ConversationWorkRef } from './ConversationWork';
 export class DirectiveScope {
   projectId: string = '';
@@ -9,7 +10,7 @@ export class EffectiveDirective {
   scope: DirectiveScope = new DirectiveScope(); kind: string = ''; quote: string = '';
   sourceIds: string[] = []; validFrom: string = ''; validUntil: string | null = null;
 }
-export class HandoffMission { id: string = ''; goal: string = ''; status: string = ''; nextOwner: string = ''; href: string = ''; }
+export class HandoffMission { workState?:WorkState; id: string = ''; goal: string = ''; status: string = ''; nextOwner: string = ''; href: string = ''; }
 export class HandoffResult { id: string = ''; title: string = ''; resultText: string | null = null; resultCardId: string | null = null; verification: string = 'REPORTED'; href: string = ''; }
 export class ContinuityHandoff { missions: HandoffMission[] = []; results: HandoffResult[] = []; }
 export class DirectiveCandidate { id: string = ''; quote: string = ''; interpretation: string = ''; kind: string = ''; turnId: string = ''; conversationId: string = ''; scope: DirectiveScope = new DirectiveScope(); }

@@ -1,0 +1,53 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/agentUxWorkState.test.ts tests/agentUxJourney.test.ts tests/projectAgentContext.test.ts tests/continuityJourney.test.ts tests/continuityStages23.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/agentUxJourney.test.ts (1 test | 1 failed) 172ms
+   × 超过六项目普通失败不挤掉原问题；详情/接续共享责任方，读取无派发 162ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agentUxJourney.test.ts > 超过六项目普通失败不挤掉原问题；详情/接续共享责任方，读取无派发
+PrismaClientValidationError: 
+Invalid `db.project.create()` invocation in
+D:/Projects/hongmen/tests/agentUxJourney.test.ts:22:30
+
+  19 const observation=await make(project.id,"等待观察","WAITING_INPUT");
+  20 await db.agentMission.update({where:{id:observation.id},data:{waitStateJson:{waitingFor:"OBSERVATION",resolved:true},continuationPolicyJson:{mode:"BOUNDED_INVESTIGATION",expiresAt:new Date(Date.now()+86400000).toISOString()}}});
+  21 for(let i=0;i<8;i++){
+→ 22   const p=await db.project.create({
+         data: {
+           title: "普通故障0",
+           goal: "测试",
+           description: "synthetic",
+           scenario: "COURSE",
+                     ~~~~~~~~
+           memberships: {
+             create: {
+               userId: "cmvu8cygt0000s08osbjqs4za",
+               role: "OWNER"
+             }
+           }
+         }
+       })
+
+Invalid value for argument `scenario`. Expected ProjectScenario.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ tests/agentUxJourney.test.ts:22:13
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  1 failed | 27 passed (28)
+   Start at  08:24:38
+   Duration  11.31s (transform 2.39s, setup 0ms, import 6.62s, tests 3.30s, environment 0ms)
+

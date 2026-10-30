@@ -118,6 +118,15 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
     }, 5000);
     return () => clearInterval(timer);
   }, [view, busy, load, setBusy]);
+  useEffect(()=>{
+    if(!view)return;
+    const id=view.id,epoch=generation.current;
+    const refresh=()=>{void load(id,epoch).catch(()=>undefined);};
+    window.addEventListener("focus",refresh);
+    const boundary=view.continuity?.nextBoundary,delay=boundary?Date.parse(boundary)-Date.now():NaN;
+    const timer=Number.isFinite(delay)?setTimeout(refresh,Math.min(Math.max(delay+10,10),2147483647)):undefined;
+    return()=>{window.removeEventListener("focus",refresh);clearTimeout(timer);};
+  },[view?.id,view?.continuity?.nextBoundary,load]); // eslint-disable-line react-hooks/exhaustive-deps
   async function create() {
     if (busyRef.current) return;
     const epoch = ++generation.current;

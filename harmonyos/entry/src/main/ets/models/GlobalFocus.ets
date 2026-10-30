@@ -1,9 +1,11 @@
+import { WorkState } from './WorkState';
 import { ProjectAgentContext } from './ProjectAgentContext';
-export interface FocusEntry {
+export interface FocusEntry { workState?:WorkState; actionLabel?:string; entityKind?:string;
   id: string; projectId: string; projectTitle: string; title: string; detail: string;
   status: string; activity: string; activityAt: string; recordedAt: string; dueAt: string; projectDeadline?: string; recordFields?: FocusRecordField[];
 }
 export class GlobalFocusReply {
+  coverage?:FocusCoverage;
   primaryContext?: ProjectAgentContext | null;
   // Additive Web presentation fields are optional for older clients.
   counts?: FocusCounts;
@@ -22,3 +24,5 @@ export class GlobalFocusReply {
 export interface FocusCounts { waiting: number; running: number; actions: number; reminders: number; }
 export interface FocusDeadline { projectId: string; projectTitle: string; at: string; }
 export interface FocusRecordField { label: string; value: string; }
+
+export interface FocusCoverage {complete:boolean;consideredProjectIds:string[];countsAreBounded:boolean;}

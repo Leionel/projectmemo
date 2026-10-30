@@ -1,3 +1,4 @@
+import {missionWorkState} from "./workState";
 import { metricInputSources } from "./metricInputSources";
 import { record } from "@/lib/conversation/repository";
 import { effectiveContinuity } from "@/lib/continuity/directiveService";
@@ -39,7 +40,7 @@ export async function listMissions(userId:string,projectId:string,cursor?:string
 }
 export async function missionDetail(userId:string,id:string){
   const m=await ownedMission(userId,id);const [steps,approvals,outputs,questions]=await Promise.all([
-    db.agentMissionStep.findMany({where:{missionId:id},orderBy:{ordinal:"asc"}}),db.agentMissionApproval.findMany({where:{missionId:id,status:"PENDING"}}),db.agentMissionOutput.findMany({where:{missionId:id},orderBy:{revision:"desc"},take:5}),db.agentMissionEvent.findMany({where:{missionId:id,type:"QUESTION"},orderBy:{seq:"desc"},take:1}),
+    db.agentMissionStep.findMany({where:{missionId:id},orderBy:{ordinal:"asc"}}),db.agentMissionApproval.findMany({where:{missionId:id,status:"PENDING"}}),db.agentMissionOutput.findMany({where:{missionId:id},orderBy:{revision:"desc"},take:5}),db.agentMissionEvent.findMany({where:{missionId:id,type:{in:["QUESTION","INVESTIGATION_NO_NEW_INFORMATION","INVESTIGATION_OBSERVATION_CHANGED"]}},orderBy:{seq:"desc"},take:1}),
   ]);
   const projectedSteps=await Promise.all(steps.map(async s=>{
     let execution:{phase:string;jobName:string;current:boolean;receipt:unknown;failure:unknown}|undefined;
@@ -51,9 +52,12 @@ export async function missionDetail(userId:string,id:string){
     return {id:s.id,ordinal:s.ordinal,toolName:s.toolName,status:s.status,result:s.resultJson,execution};
   }));
   const completion=await readMissionCompletion(id,outputs[0]?.verificationStatus??null);
+  const continuity=await effectiveContinuity(userId,{projectId:m.projectId,missionId:m.id});
+  const workState=missionWorkState({...m,delegationEnabled:isFeatureEnabled("MISSION_INVESTIGATION_DELEGATION_ENABLED",false),events:questions,approvals});
+  const currentQuestion=workState.exactQuestionRef?await db.agentMissionEvent.findFirst({where:{id:workState.exactQuestionRef,missionId:id,type:"QUESTION"}}):null;
   const fitPremise=m.waitStateJson&&m.status==="WAITING_INPUT"?premiseFor(m,m.waitStateJson as unknown as WaitState):null;
   const experience=isFeatureEnabled("PROJECT_EXPERIENCE_ENABLED",true)?{enabled:true as const,suggestions:await suggestionsForMission(m),note:"建议不改变权限；影子观察不注入模型上下文。"}:{enabled:false as const,suggestions:[],note:"项目经验复用当前未开启。"};
-  return {experimentObserverEnabled:isFeatureEnabled("EXPERIMENT_OBSERVER_ENABLED",false),academicResearchEnabled:isFeatureEnabled("ACADEMIC_RESEARCH_ENABLED",false),sandboxVerificationEnabled:isFeatureEnabled("SANDBOX_VERIFICATION_ENABLED",false),documentDeepReadEnabled:isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false),investigationDelegationEnabled:isFeatureEnabled("MISSION_INVESTIGATION_DELEGATION_ENABLED",false),delegation:(m.planJson as {delegation?:unknown}).delegation??null,evidencePremise:fitPremise,completion,experience,semanticCheckEnabled:isFeatureEnabled("MISSION_SEMANTIC_CHECK_ENABLED",false),artifactAdoptionEnabled:isFeatureEnabled("MISSION_ARTIFACT_ADOPTION_ENABLED",false),id:m.id,projectId:m.projectId,goal:m.goal,status:m.status,version:m.version,contextVersion:m.contextVersion,planRevision:m.planRevision,continuationPolicy:m.continuationPolicyJson,autoContinuationEnabled:isFeatureEnabled("MISSION_AUTO_CONTINUATION_ENABLED",false),successCriteria:m.successCriteriaJson,constraints:m.constraintsJson,constraintsVersion:m.constraintsVersion,researchScope:m.researchScopeJson,researchScopeVersion:m.researchScopeVersion,pauseReason:m.pauseReason,pauseRequestedAt:m.pauseRequestedAt?.toISOString()??null,cancelRequestedAt:m.cancelRequestedAt?.toISOString()??null,error:m.lastErrorJson,budget:m.budgetJson,used:m.budgetUsedJson,question:m.status==="WAITING_INPUT"?questions[0]??null:null,steps:projectedSteps,approvals:approvals.map(a=>({id:a.id,proposal:a.proposalJson,proposalHash:a.proposalHash,expiresAt:a.expiresAt})),outputs};
+  return {workState,workingObjective:continuity.workingObjective,nextBoundary:continuity.nextBoundary,experimentObserverEnabled:isFeatureEnabled("EXPERIMENT_OBSERVER_ENABLED",false),academicResearchEnabled:isFeatureEnabled("ACADEMIC_RESEARCH_ENABLED",false),sandboxVerificationEnabled:isFeatureEnabled("SANDBOX_VERIFICATION_ENABLED",false),documentDeepReadEnabled:isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false),investigationDelegationEnabled:isFeatureEnabled("MISSION_INVESTIGATION_DELEGATION_ENABLED",false),delegation:(m.planJson as {delegation?:unknown}).delegation??null,evidencePremise:fitPremise,completion,experience,semanticCheckEnabled:isFeatureEnabled("MISSION_SEMANTIC_CHECK_ENABLED",false),artifactAdoptionEnabled:isFeatureEnabled("MISSION_ARTIFACT_ADOPTION_ENABLED",false),id:m.id,projectId:m.projectId,goal:m.goal,status:m.status,version:m.version,contextVersion:m.contextVersion,planRevision:m.planRevision,continuationPolicy:m.continuationPolicyJson,autoContinuationEnabled:isFeatureEnabled("MISSION_AUTO_CONTINUATION_ENABLED",false),successCriteria:m.successCriteriaJson,constraints:m.constraintsJson,constraintsVersion:m.constraintsVersion,researchScope:m.researchScopeJson,researchScopeVersion:m.researchScopeVersion,pauseReason:m.pauseReason,pauseRequestedAt:m.pauseRequestedAt?.toISOString()??null,cancelRequestedAt:m.cancelRequestedAt?.toISOString()??null,error:m.lastErrorJson,budget:m.budgetJson,used:m.budgetUsedJson,question:currentQuestion,steps:projectedSteps,approvals:approvals.map(a=>({id:a.id,proposal:a.proposalJson,proposalHash:a.proposalHash,expiresAt:a.expiresAt})),outputs};
 }
 export async function readOutput(userId:string,id:string,outputId:string){await ownedMission(userId,id);const output=await db.agentMissionOutput.findFirst({where:{id:outputId,missionId:id}});if(!output)throw new AppError("OUTPUT_NOT_FOUND","没有找到成果草稿",404);return output;}
 export async function missionEvents(userId:string,id:string,after=0){await ownedMission(userId,id);const events=await db.agentMissionEvent.findMany({where:{missionId:id,seq:{gt:after}},orderBy:{seq:"asc"},take:100});return{events,nextAfterSeq:events.at(-1)?.seq??after};}
@@ -64,7 +68,7 @@ export async function commandMission(userId:string,id:string,action:string,raw:u
     if(m.version!==body.expectedVersion||terminal.includes(m.status))throw new AppError("MISSION_CHANGED","委托状态已变化，请刷新",409);
     let status=m.status;
     if(action==="input"){
-      const q=await tx.agentMissionEvent.findFirst({where:{missionId:id,type:"QUESTION"},orderBy:{seq:"desc"}});
+      const q=await tx.agentMissionEvent.findFirst({where:{missionId:id,type:{in:["QUESTION","INVESTIGATION_NO_NEW_INFORMATION","INVESTIGATION_OBSERVATION_CHANGED"]}},orderBy:{seq:"desc"}});
       if(m.status!=="WAITING_INPUT"||!body.answer||q?.id!==body.questionId)throw new AppError("INPUT_CHANGED","问题已变化，请刷新后补充",409);status="READY";
       const wait=m.waitStateJson as unknown as WaitState;
       const fit=await assessEvidenceFit(tx,m,wait,[],body.evidenceReview);

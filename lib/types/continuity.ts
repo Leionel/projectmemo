@@ -21,6 +21,6 @@ export type EffectiveDirective = { id: string; directiveId: string; seq: number;
 export type ContinuityView = { schemaVersion: 1; seq: number; intentHash: string; reusePolicyHash: string; nextBoundary: string | null;
   candidate?: { id: string; quote: string; interpretation: string; kind: "WORKING_OBJECTIVE" | "CONSTRAINT"; turnId: string; conversationId: string; scope: DirectiveScope };
   directives: EffectiveDirective[]; workingObjective: string | null; constraints: string[]; stopped: boolean;
-  handoff?: { missions: Array<{ id: string; goal: string; status: string; nextOwner: string; href: string }>;
+  handoff?: { missions: Array<{ id: string; goal: string; status: string; workState?:import("./workState").WorkState; nextOwner: string; href: string }>;
     results: Array<{ id: string; title: string; resultCardId: string | null; resultText: string | null; verification: "REPORTED"; href: string }> };
 };

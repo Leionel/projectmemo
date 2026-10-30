@@ -1,0 +1,40 @@
+import {afterAll,expect,it,vi} from "vitest";
+const isolated=await vi.hoisted(async()=>(await import("./helpers/continuityDatabase")).continuityDatabase("ux1"));
+import fs from "node:fs";
+import {db} from "@/lib/db";
+import {loadGlobalFocus} from "@/lib/server/globalFocus";
+import {missionDetail} from "@/lib/mission/missionService";
+import {getProjectAgentContext} from "@/lib/services/projectAgentContextService";
+import {readContinuity} from "@/lib/continuity/handoff";
+import {createConversation} from "@/lib/conversation/service";
+import {createSession} from "@/lib/auth/session";
+afterAll(async()=>{await db.$disconnect();fs.rmSync(isolated.dir,{recursive:true,force:true});});
+it("超过六项目普通失败不挤掉原问题；详情/接续共享责任方，读取无派发",async()=>{
+  process.env.MISSION_INVESTIGATION_DELEGATION_ENABLED="true";
+  const u=await db.user.create({data:{username:crypto.randomUUID(),displayName:"UX1",passwordHash:"unused"}});
+  const actor={userId:u.id,sessionId:(await createSession(u.id)).session.id};
+  const project=await db.project.create({data:{title:"待演示",goal:"目标设备验收",description:"synthetic",scenario:"COMPETITION",memberships:{create:{userId:u.id,role:"OWNER"}}}});
+  const make=(p:string,key:string,status:string)=>db.agentMission.create({data:{projectId:p,ownerUserId:u.id,goal:key,createRequestId:key,createPayloadHash:key,status,successCriteriaJson:[],constraintsJson:{},budgetJson:{}}});
+  const pending=await make(project.id,"原问题","WAITING_INPUT");
+  const q=await db.agentMissionEvent.create({data:{missionId:pending.id,seq:1,type:"QUESTION",payloadJson:{question:"请补充安装日志"}}});
+  const observation=await make(project.id,"等待观察","WAITING_INPUT");
+  await db.agentMission.update({where:{id:observation.id},data:{waitStateJson:{waitingFor:"OBSERVATION",resolved:true},continuationPolicyJson:{mode:"BOUNDED_INVESTIGATION",expiresAt:new Date(Date.now()+86400000).toISOString()}}});
+  for(let i=0;i<8;i++){
+    const p=await db.project.create({data:{title:"普通故障"+i,goal:"测试",description:"synthetic",scenario:"COURSE_DESIGN",memberships:{create:{userId:u.id,role:"OWNER"}}}});
+    await make(p.id,"失败"+i,"FAILED");
+  }
+  const before=await db.agentMissionEvent.count();
+  const focus=await loadGlobalFocus(u.id);
+  expect(focus.primaryContext?.nextStep.entityRef).toMatchObject({id:pending.id,questionId:q.id});
+  expect(focus.counts.waiting).toBe(1);
+  expect(focus.coverage?.complete).toBe(false);
+  const detail=await missionDetail(u.id,observation.id);
+  expect(detail.workState.phase).toBe("WAITING_OBSERVATION");expect(detail.question).toBeNull();
+  const conversation=await createConversation(actor,{requestId:"ux1-resume",scope:"PROJECT",projectId:project.id});
+  const handoff=await readContinuity(actor,conversation.id);
+  expect(handoff?.handoff.missions.find(m=>m.id===observation.id)).toMatchObject({nextOwner:"AGENT",workState:{phase:"WAITING_OBSERVATION"}});
+  expect(handoff?.handoff.missions.find(m=>m.id===pending.id)?.workState?.exactQuestionRef).toBe(q.id);
+  expect(await db.agentMissionEvent.count()).toBe(before);
+  const a=await getProjectAgentContext(u.id,project.id),b=await getProjectAgentContext(u.id,project.id);
+  expect(a?.observationHash).toBe(b?.observationHash);
+});

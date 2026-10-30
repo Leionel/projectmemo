@@ -1,3 +1,5 @@
+import {ApiError} from '../models/Project';
+import {ConversationDraftStore,ConversationDraft} from '../services/ConversationDraftStore';
 import util from '@ohos.util';
 import { ContinuityView, DirectiveInput, EffectiveDirective, HandoffMission, HandoffResult, OpenHandoffInput, DirectiveScope } from '../models/Continuity';
 import { ConversationService } from '../services/ConversationService';
@@ -20,7 +22,11 @@ export struct ConversationContinuity {
   @State private candidateId: string = '';
   @State private kind: string = 'WORKING_OBJECTIVE';
   @State private candidateScope: DirectiveScope = new DirectiveScope();
+  private pendingCommands:Map<string,DirectiveInput>=new Map();
   private service: ConversationService = new ConversationService();
+  aboutToAppear():void {const draft=ConversationDraftStore.read(this.conversationId+':directive:'+this.projectId);this.quote=draft.answer;this.until=draft.delivery;try{if(draft.directiveRequest){const input=JSON.parse(draft.directiveRequest) as DirectiveInput;this.pendingCommands.set(this.retryKey(input),input);}}catch{}}
+  private retryKey(input:DirectiveInput):string{return String(input.operation)+':'+String(input.directiveId)+':'+String(input.quote)+':'+JSON.stringify(input.scope);}
+  private saveDraft():void {const d=new ConversationDraft();d.answer=this.quote;d.delivery=this.until;this.pendingCommands.forEach((input:DirectiveInput)=>{d.directiveRequest=JSON.stringify(input);});ConversationDraftStore.save(this.conversationId+':directive:'+this.projectId,d);}
   private input(): DirectiveInput {
     const input = new DirectiveInput(); input.commandId = util.generateRandomUUID(true); input.expectedSeq = this.info.seq;
     input.scope.projectId = this.projectId; if (this.quote.trim() !== '') input.quote = this.quote;
@@ -29,14 +35,17 @@ export struct ConversationContinuity {
   }
   private async send(input: DirectiveInput): Promise<void> {
     if (this.saving) return;
+    const retryKey=this.retryKey(input);
+    if(!input.preview){const previous=this.pendingCommands.get(retryKey);if(previous)input=previous;else this.pendingCommands.set(retryKey,input);this.saveDraft();}
     const conversationId = this.conversationId; this.saving = true;
     try {
       const result = await this.service.saveDirective(conversationId, input);
+      if(!input.preview){this.pendingCommands.delete(retryKey);this.saveDraft();}
       if (this.conversationId !== conversationId) return;
       if (result.command) { this.preview = result.command; return; }
-      if (result.events && result.events.length > 0) { this.open = false; this.quote = ''; this.question = ''; this.preview = null; this.candidateId = ''; this.onSaved(); }
+      if (result.events && result.events.length > 0) { this.open = false; this.quote = ''; this.question = ''; this.preview = null; this.candidateId = '';this.saveDraft(); this.onSaved(); }
       else { this.question = result.admission?.question || '这句话还未生效，请核对措辞和有效期'; }
-    } catch { if (this.conversationId === conversationId) this.question = '指引暂未保存，请读取原状态后核对'; }
+    } catch (e) { if(e instanceof ApiError&&e.status>=400&&e.status<500){this.pendingCommands.delete(retryKey);this.saveDraft();} if (this.conversationId === conversationId) this.question = '指引暂未保存，请读取原状态后核对'; }
     finally { this.saving = false; }
   }
   private withdraw(d: EffectiveDirective): void {
@@ -73,11 +82,11 @@ export struct ConversationContinuity {
         })
       }
       if (this.open) {
-        TextInput({ text: this.quote, placeholder: '例如：本周先稳演示，先别加功能' }).height(44).onChange((v: string) => { this.quote = v; this.preview = null; this.question = ''; this.candidateId = ''; })
+        TextInput({ text: this.quote, placeholder: '例如：本周先稳演示，先别加功能' }).height(44).onChange((v: string) => { this.quote = v;this.saveDraft(); this.preview = null; this.question = ''; this.candidateId = ''; })
         Button('按这句话调整').height(44).enabled(!this.saving && this.quote.trim() !== '').onClick(() => { if (this.candidateId !== '') this.question = '这项理解先持续到什么时候？'; else this.send(this.input()); })
         if (this.question !== '') {
           Text(this.question).fontSize(13).fontColor(PMColors.WARNING)
-          TextInput({ text: this.until, placeholder: '有效至（北京时间）：2026-10-30 20:00' }).height(44).onChange((v: string) => { this.until = v; this.preview = null; })
+          TextInput({ text: this.until, placeholder: '有效至（北京时间）：2026-10-30 20:00' }).height(44).onChange((v: string) => { this.until = v;this.saveDraft(); this.preview = null; })
           Button('核对调整内容').height(44).enabled(!this.saving && this.until.trim() !== '').onClick(() => { this.prepare(); })
         }
         if (this.preview !== null) {
@@ -88,7 +97,7 @@ export struct ConversationContinuity {
       }
       if (this.info.handoff) {
         ForEach(this.info.handoff.missions, (m: HandoffMission) => {
-          Button(m.goal + (m.nextOwner === 'USER' ? ' · 等你接续' : m.status === 'RUNNING' ? ' · Agent 处理中' : ' · 等待 Agent 接续'), { type: ButtonType.Normal }).fontSize(13).constraintSize({ minHeight: 44 }).backgroundColor(Color.Transparent).fontColor(PMColors.BRAND).onClick(() => { this.openWork('MISSION', m.id); })
+          Button(m.goal + (m.workState ? ' · '+m.workState.reasonText : m.nextOwner === 'USER' ? ' · 等你接续' : m.nextOwner === 'AGENT' ? ' · 等待 Agent 接续' : ' · 状态需核对'), { type: ButtonType.Normal }).fontSize(13).constraintSize({ minHeight: 44 }).backgroundColor(Color.Transparent).fontColor(PMColors.BRAND).onClick(() => { this.openWork('MISSION', m.id); })
         }, (m: HandoffMission) => m.id)
         ForEach(this.info.handoff.results, (a: HandoffResult) => {
           Button(a.title + ' · 查看原回执', { type: ButtonType.Normal }).fontSize(13).constraintSize({ minHeight: 44 }).backgroundColor(Color.Transparent).fontColor(PMColors.BRAND).onClick(() => { this.openWork('ACTION', a.id); })

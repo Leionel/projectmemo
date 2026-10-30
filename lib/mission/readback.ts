@@ -1,3 +1,5 @@
+import {isFeatureEnabled} from "@/lib/config/features";
+import {missionWorkState} from "./workState";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
@@ -120,13 +122,15 @@ export async function readMissionBack(
       : [];
     const sourceRunId = (origin?.payloadJson as { sourceRunId?: string } | null)
       ?.sourceRunId;
+    const latestEvents=await tx.agentMissionEvent.findMany({where:{missionId:id,type:{in:["QUESTION","INVESTIGATION_NO_NEW_INFORMATION"]}},orderBy:{seq:"desc"},take:1});
+    const workState=missionWorkState({...m,delegationEnabled:isFeatureEnabled("MISSION_INVESTIGATION_DELEGATION_ENABLED",false),events:latestEvents,approvals:await tx.agentMissionApproval.findMany({where:{missionId:id,status:"PENDING"}})});
     const wait = m.waitStateJson as { questionId?: string } | null;
     const materialUses = await materialUseProjection(tx, {
       missionId: id, projectId: m.projectId,
       questionId: input.questionId ?? wait?.questionId ?? null, sourceId: input.sourceId,
     });
     return {
-      schemaVersion: 1 as const,
+      workState,schemaVersion: 1 as const,
       missionId: id,
       projectId: m.projectId,
       missionVersion: m.version,
@@ -149,7 +153,7 @@ export async function readMissionBack(
                 (question.payloadJson as { question?: string }).question ??
                 "原问题",
               historical:
-                m.status !== "WAITING_INPUT" ||
+                question.id!==workState.exactQuestionRef || m.status !== "WAITING_INPUT" ||
                 question.seq !==
                   (
                     await tx.agentMissionEvent.findFirst({

@@ -1,3 +1,4 @@
+import { workPhaseLabel } from '../common/GlobalFocusPresentation';
 import { failedReadState } from '../common/ReadState';
 import { ProjectAgentContextService } from '../services/ProjectAgentContextService';
 import router from '@ohos.router';
@@ -90,7 +91,7 @@ export struct MissionPanel {
           ForEach(this.visibleItems(), (item: MissionWorkspaceItem) => {
             Column({ space: 11 }) {
               Row({ space: 8 }) {
-                PMStatusPill({ label: missionStatusLabel(item.status), tone: item.status === 'FAILED' || item.status === 'PAUSED' ? 'risk' : 'brand' })
+                PMStatusPill({ label: item.workState ? workPhaseLabel(item.workState!.phase) : missionStatusLabel(item.status), tone: item.status === 'FAILED' || item.status === 'PAUSED' ? 'risk' : 'brand' })
                 if (this.sameFailureCount(item) > 1) { Text(`${this.sameFailureCount(item)} 条同类记录已合并`).fontSize(11).fontColor(PMColors.INK_TERTIARY) }
               }.width('100%')
               Text(item.goal).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -107,7 +108,7 @@ export struct MissionPanel {
                   try { await new ProjectAgentContextService().focus(this.projectId, item.id); this.error = ''; this.probe(); }
                   catch (e) { this.error = e instanceof ApiError ? e.message : '未能设置关注委托'; }
                 })
-              PMButton({ label: item.status === 'WAITING_INPUT' ? '补充信息 →' : item.status === 'WAITING_APPROVAL' ? '审阅行动提案 →' : '查看委托详情 →',
+              PMButton({ label: item.workState?.actionLabel ?? (item.status === 'WAITING_INPUT' ? '补充信息 →' : item.status === 'WAITING_APPROVAL' ? '审阅行动提案 →' : '查看委托详情 →'),
                 secondary: true, onAction: (): void => { this.open(item.id); } })
             }.width('100%').alignItems(HorizontalAlign.Start).padding(16).backgroundColor(PMColors.SURFACE)
               .borderRadius(PMRadius.LG).border({ width: 1, color: PMColors.BORDER_SUBTLE })

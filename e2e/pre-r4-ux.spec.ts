@@ -50,9 +50,9 @@ test("first material leads to an explicitly authorized Mission; multiple waiting
  await page.goto("/focus");
  if(process.env.FOCUS_AGENT_ENABLED==="true"){
    const waitingFocus=page.getByRole("complementary",{name:"项目焦点",exact:true});
-   const item=waitingFocus.locator("article").filter({has:page.getByRole("heading",{name:"核对阶段汇报的资料范围",exact:true})});
-   await expect(item.getByText("需要你判断",{exact:true})).toBeVisible();
-   await item.getByRole("button",{name:"与忆程讨论",exact:true}).click();
+   const item=waitingFocus.locator("article,section").filter({has:page.getByRole("heading",{name:"核对阶段汇报的资料范围",exact:true})}).last();
+   await expect(item.getByText(/需要你判断|等你补充/)).toBeVisible();
+   await item.getByRole("button",{name:/与忆程讨论|和忆程讨论/}).click();
    const discussion=page.getByRole("region",{name:"问忆程",exact:true});
    await expect(discussion.getByText("正在读取讨论…")).toHaveCount(0);
    if(await discussion.getByRole("button",{name:"开始讨论",exact:true}).isVisible())await discussion.getByRole("button",{name:"开始讨论",exact:true}).click();

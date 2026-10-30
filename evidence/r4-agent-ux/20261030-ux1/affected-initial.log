@@ -1,0 +1,29 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/globalFocusPresentation.test.ts tests/projectAgentContext.test.ts tests/missionWorkspaceSummary.test.ts tests/missionReadbackPanel.test.ts tests/continuityStages23.test.ts tests/continuityJourney.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/projectAgentContext.test.ts (9 tests | 1 failed) 1208ms
+     × 查询局部失败保留明确降级；不让用户误以为没有委托 79ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/projectAgentContext.test.ts > shared next step > 查询局部失败保留明确降级；不让用户误以为没有委托
+AssertionError: expected 'FRESH' to be 'UNAVAILABLE' // Object.is equality
+
+Expected: "UNAVAILABLE"
+Received: "FRESH"
+
+ ❯ tests/projectAgentContext.test.ts:73:81
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 5 passed (6)
+      Tests  1 failed | 35 passed (36)
+   Start at  08:20:18
+   Duration  46.78s (transform 3.93s, setup 0ms, import 18.56s, tests 4.57s, environment 18.95s)
+

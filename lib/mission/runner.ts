@@ -54,7 +54,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
      const current=await fenced(tx,lease);const guard=dynamicGuard(current)!;
      if(guard.kind==="ASK_USER"&&!guard.completed){
       const question=await event(tx,m.id,"QUESTION",{question:guard.question,missing:"PRIVATE",requirements:{},reviewProposalId:guard.proposalId,phase:"DYNAMIC_REVIEW"});
-      await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...current.planJson as object,dynamicReview:{...guard,completed:true}}),waitStateJson:json({questionId:question.id,gapId:question.id,question:guard.question,missing:"PRIVATE",requirements:{},startedAt:new Date().toISOString(),readSet:[],reviewProposalId:guard.proposalId})}});
+      await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...current.planJson as object,dynamicReview:{...guard,completed:true}}),waitStateJson:json({waitingFor:"USER",questionId:question.id,gapId:question.id,question:guard.question,missing:"PRIVATE",requirements:{},startedAt:new Date().toISOString(),readSet:[],reviewProposalId:guard.proposalId})}});
       await release(tx,current,"WAITING_INPUT");
      }else{
       const completed=await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...current.planJson as object,dynamicReview:{...guard,completed:true}})}});
@@ -101,7 +101,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
      const evidencePremiseContext=requirements.evidenceFitV1?{constraintsVersion:current.constraintsVersion,scopeVersion:current.researchScopeVersion,goalHash:jsonHash(current.goal)}:undefined;
      const q=await event(tx,m.id,"QUESTION",{question:choice.question,missing:choice.missing,gapId,requirements,evidencePremiseContext,phase:"DECISION"});
      const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,status:"SUCCEEDED",...((current.planJson as {impactGuard?:string}).impactGuard?{planRevision:current.planRevision}:{})},orderBy:{ordinal:"asc"}});
-     await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...current.planJson as object,automaticContinuation:null}),waitStateJson:json({questionId:q.id,gapId,question:choice.question,missing:choice.missing,requirements,evidencePremiseContext,startedAt:new Date().toISOString(),readSet:sourcesFrom(history.map(s=>s.resultJson))})}});await release(tx,current,"WAITING_INPUT");return null;
+     await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...current.planJson as object,automaticContinuation:null}),waitStateJson:json({waitingFor:"USER",questionId:q.id,gapId,question:choice.question,missing:choice.missing,requirements,evidencePremiseContext,startedAt:new Date().toISOString(),readSet:sourcesFrom(history.map(s=>s.resultJson))})}});await release(tx,current,"WAITING_INPUT");return null;
     }
     if(choice.kind==="finish"){
      phase="VERIFY";const verification=await verifyMissionResult(tx,current,choice.outputId);phase="COMMIT";

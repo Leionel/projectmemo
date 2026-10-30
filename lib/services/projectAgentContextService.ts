@@ -1,3 +1,4 @@
+import {effectiveContinuity} from "@/lib/continuity/directiveService";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { isFeatureEnabled } from "@/lib/config/features";
@@ -14,8 +15,9 @@ export async function getProjectAgentContext(userId: string, projectId: string) 
   // One candidate per lifecycle state plus the user's focus: bounded independently of project size.
   if (enabled) {
     const rows = (await Promise.all(["WAITING_INPUT","WAITING_APPROVAL","PAUSED","FAILED","RUNNING","READY"].map(status =>
-      db.agentMission.findFirst({where:{projectId,ownerUserId:userId,status},select:{...missionSummarySelect,updatedAt:true,planRevision:true},orderBy:[{updatedAt:"desc"},{id:"asc"}]})))
-      .catch(() => {failures.push("MISSION_SUMMARY_UNAVAILABLE");return [];})).filter(row=>row!==null);
+      db.agentMission.findMany({take:7,where:{projectId,ownerUserId:userId,status},select:{...missionSummarySelect,updatedAt:true,planRevision:true},orderBy:[{updatedAt:"desc"},{id:"asc"}]})))
+      .catch(() => {failures.push("MISSION_SUMMARY_UNAVAILABLE");return [];})).flat().filter(row=>row!==null);
+    if(rows.length>=7)failures.push("CANDIDATE_COVERAGE_BOUNDED");
     if (member.focusMissionId) {
       const focused = await db.agentMission.findFirst({where:{id:member.focusMissionId,projectId,ownerUserId:userId,status:{notIn:["SUCCEEDED","CANCELLED"]}},select:{...missionSummarySelect,updatedAt:true,planRevision:true}})
         .catch(() => {failures.push("FOCUS_MISSION_UNAVAILABLE");return null;});
@@ -23,7 +25,7 @@ export async function getProjectAgentContext(userId: string, projectId: string) 
     }
     for (const row of rows) if(row && !candidates.some(c=>c.id===row.id)) {
       const summary = presentMissionSummary(row), error = row.lastErrorJson as {code?:string} | null;
-      candidates.push({kind:"MISSION",id:row.id,status:row.status,title:row.goal,reason:summary.attention ?? summary.activity ?? (row.status==="RUNNING"?"忆程正在执行，步骤与草稿保留在原委托中。":"委托已就绪，可查看原任务和执行记录。"),updatedAt:row.updatedAt.toISOString(),version:row.version,planRevision:row.planRevision,questionId:row.events[0]?.id,approvalId:row.approvals[0]?.id,outputRevision:summary.outputRevision,sourceChanged:error?.code==="SOURCE_CHANGED"});
+      candidates.push({kind:"MISSION",id:row.id,status:row.status,title:row.goal,workState:summary.workState,reason:summary.attention ?? summary.activity ?? (row.status==="RUNNING"?"忆程正在执行，步骤与草稿保留在原委托中。":"委托已就绪，可查看原任务和执行记录。"),updatedAt:row.updatedAt.toISOString(),version:row.version,planRevision:row.planRevision,questionId:summary.workState.exactQuestionRef,approvalId:summary.workState.exactApprovalRef,outputRevision:summary.outputRevision,sourceChanged:error?.code==="SOURCE_CHANGED"});
     }
   }
   await Promise.all([
@@ -32,10 +34,13 @@ export async function getProjectAgentContext(userId: string, projectId: string) 
       candidates.push({kind:"INTERVENTION",id:row.id,status:row.status,title:deadlineConflict?"核对提醒与当前截止日":row.title,
         reason:deadlineConflict?`历史提醒为「${row.title}」，当前项目截止日为 ${project.deadline!.toISOString().slice(0,10)}。请核对原始通知及适用阶段。`:row.content,severity:row.severity,updatedAt:row.updatedAt.toISOString()});
     }}).catch(()=>{failures.push("REMINDER_SUMMARY_UNAVAILABLE");}),
-    db.actionItem.findFirst({where:{projectId,isSimulated:false,status:{in:["TODO","DOING"]}},orderBy:[{priority:"desc"},{createdAt:"desc"},{id:"asc"}]}).then(row=>{if(row)candidates.push({kind:"ACTION",id:row.id,status:row.status,title:row.title,reason:row.description ?? "查看行动要求，完成后记录实际结果。",updatedAt:row.updatedAt.toISOString()});}).catch(()=>{failures.push("ACTION_SUMMARY_UNAVAILABLE");}),
+    db.actionItem.findFirst({where:{projectId,isSimulated:false,status:{in:["TODO","DOING"]}},orderBy:[{priority:"desc"},{createdAt:"desc"},{id:"asc"}]}).then(row=>{if(row)candidates.push({kind:"ACTION",id:row.id,status:row.status,title:row.title,reason:row.description ?? "查看行动要求，完成后记录实际结果。",dueAt:row.dueAt?.toISOString(),updatedAt:row.updatedAt.toISOString()});}).catch(()=>{failures.push("ACTION_SUMMARY_UNAVAILABLE");}),
   ]);
   const focusMissionId = candidates.some(c=>c.kind==="MISSION"&&c.id===member.focusMissionId) ? member.focusMissionId : null;
-  return selectProjectAgentContext({projectId,projectTitle:project.title,projectGoal:project.goal,projectUpdatedAt:project.updatedAt.toISOString(),candidates,focusMissionId,failures:failures.sort(),hasRecords:project._count.captures>0});
+  const continuity=await effectiveContinuity(userId,{projectId});
+  const context=selectProjectAgentContext({projectId,projectTitle:project.title,projectGoal:project.goal,projectUpdatedAt:project.updatedAt.toISOString(),candidates,focusMissionId,failures:failures.sort(),hasRecords:project._count.captures>0});
+  const boundaries=[continuity.nextBoundary,context.nextStep.workState?.nextBoundary,context.nextStep.workState?.nextCheckAt,...candidates.map(c=>c.dueAt?new Date(Date.parse(c.dueAt)-86400000).toISOString():null)].filter((v):v is string=>!!v&&Date.parse(v)>Date.now()).sort();
+  return {...context,workingObjective:continuity.workingObjective,nextBoundary:boundaries[0]??null,observationHash:(await import("@/lib/mission/contracts")).jsonHash({contextHash:context.observationHash,intentHash:continuity.intentHash,reusePolicyHash:continuity.reusePolicyHash})};
 }
 
 export async function setProjectAgentFocus(userId:string,projectId:string,missionId:string|null) {

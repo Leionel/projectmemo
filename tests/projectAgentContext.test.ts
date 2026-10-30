@@ -69,7 +69,7 @@ describe("shared next step",()=>{
     const member=await getProjectAgentContext(other,project);expect(member?.goalRef.missionId).toBeNull();expect(member?.goal).toBe("完成课程研究");
   });
   it("查询局部失败保留明确降级；不让用户误以为没有委托",async()=>{
-    const failure=vi.spyOn(db.agentMission,"findFirst").mockRejectedValue(new Error("internal details"));
+    const failure=vi.spyOn(db.agentMission,"findMany").mockRejectedValue(new Error("internal details"));
     try{const c=await getProjectAgentContext(user,project);expect(c?.freshness).toBe("UNAVAILABLE");expect(c?.fallbackReason).toContain("MISSION_SUMMARY_UNAVAILABLE");expect(JSON.stringify(c)).not.toContain("internal details");}finally{failure.mockRestore();}
   });
   it("真实API校验会话和严格载荷，个人关注接口不变更任务",async()=>{

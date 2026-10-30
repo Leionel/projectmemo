@@ -1,0 +1,410 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "D:\\Projects\\hongmen\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "e2e/agent-ux-integration.spec.ts",
+      "e2e/continuity.spec.ts",
+      "e2e/continuity-stages23.spec.ts",
+      "e2e/missions.spec.ts",
+      "e2e/pre-r4-ux.spec.ts"
+    ],
+    "configFile": "D:\\Projects\\hongmen\\playwright.config.ts",
+    "rootDir": "D:/Projects/hongmen/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "D:/Projects/hongmen/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "setup",
+        "name": "setup",
+        "testDir": "D:/Projects/hongmen/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/auth\\.setup\\.ts/"
+        ],
+        "timeout": 45000
+      },
+      {
+        "outputDir": "D:/Projects/hongmen/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "D:/Projects/hongmen/e2e",
+        "testIgnore": [
+          "/auth\\.setup\\.ts/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 45000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/e2e-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.61.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "auth.setup.ts",
+      "file": "auth.setup.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "authenticate as the E2E reviewer",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "setup",
+              "projectName": "setup",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 717,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-30T00:55:58.524Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "17e3fe6f4d9d8bd79c6b-6e5726efb99eaddede2e",
+          "file": "auth.setup.ts",
+          "line": 8,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "agent-ux-integration.spec.ts",
+      "file": "agent-ux-integration.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "UX1: focus opens the exact question, then an inline direction survives reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6132,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [
+                    {
+                      "buffer": "KG5vZGU6MTA1ODApIFdhcm5pbmc6IFRoZSAnTk9fQ09MT1InIGVudiBpcyBpZ25vcmVkIGR1ZSB0byB0aGUgJ0ZPUkNFX0NPTE9SJyBlbnYgYmVpbmcgc2V0LgooVXNlIGBub2RlIC0tdHJhY2Utd2FybmluZ3MgLi4uYCB0byBzaG93IHdoZXJlIHRoZSB3YXJuaW5nIHdhcyBjcmVhdGVkKQoobm9kZToyODUyOCkgV2FybmluZzogVGhlICdOT19DT0xPUicgZW52IGlzIGlnbm9yZWQgZHVlIHRvIHRoZSAnRk9SQ0VfQ09MT1InIGVudiBiZWluZyBzZXQuCihVc2UgYG5vZGUgLS10cmFjZS13YXJuaW5ncyAuLi5gIHRvIHNob3cgd2hlcmUgdGhlIHdhcm5pbmcgd2FzIGNyZWF0ZWQpCg=="
+                    }
+                  ],
+                  "retry": 0,
+                  "startTime": "2026-10-30T00:56:00.642Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "76d8dd4ab9c3170f99fd-7a1ad27e0c2f282047b5",
+          "file": "agent-ux-integration.spec.ts",
+          "line": 5,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "continuity-stages23.spec.ts",
+      "file": "continuity-stages23.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "CT2 explicit CI/log grant and CT3 bounded delegation can be understood and withdrawn",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5149,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [
+                    {
+                      "buffer": "KG5vZGU6MjMyMCkgV2FybmluZzogVGhlICdOT19DT0xPUicgZW52IGlzIGlnbm9yZWQgZHVlIHRvIHRoZSAnRk9SQ0VfQ09MT1InIGVudiBiZWluZyBzZXQuCihVc2UgYG5vZGUgLS10cmFjZS13YXJuaW5ncyAuLi5gIHRvIHNob3cgd2hlcmUgdGhlIHdhcm5pbmcgd2FzIGNyZWF0ZWQpCihub2RlOjQ1NDIwKSBXYXJuaW5nOiBUaGUgJ05PX0NPTE9SJyBlbnYgaXMgaWdub3JlZCBkdWUgdG8gdGhlICdGT1JDRV9DT0xPUicgZW52IGJlaW5nIHNldC4KKFVzZSBgbm9kZSAtLXRyYWNlLXdhcm5pbmdzIC4uLmAgdG8gc2hvdyB3aGVyZSB0aGUgd2FybmluZyB3YXMgY3JlYXRlZCkK"
+                    },
+                    {
+                      "buffer": "KG5vZGU6MTI4MjApIFdhcm5pbmc6IFRoZSAnTk9fQ09MT1InIGVudiBpcyBpZ25vcmVkIGR1ZSB0byB0aGUgJ0ZPUkNFX0NPTE9SJyBlbnYgYmVpbmcgc2V0LgooVXNlIGBub2RlIC0tdHJhY2Utd2FybmluZ3MgLi4uYCB0byBzaG93IHdoZXJlIHRoZSB3YXJuaW5nIHdhcyBjcmVhdGVkKQoobm9kZTo0NzExMikgV2FybmluZzogVGhlICdOT19DT0xPUicgZW52IGlzIGlnbm9yZWQgZHVlIHRvIHRoZSAnRk9SQ0VfQ09MT1InIGVudiBiZWluZyBzZXQuCihVc2UgYG5vZGUgLS10cmFjZS13YXJuaW5ncyAuLi5gIHRvIHNob3cgd2hlcmUgdGhlIHdhcm5pbmcgd2FzIGNyZWF0ZWQpCg=="
+                    }
+                  ],
+                  "retry": 0,
+                  "startTime": "2026-10-30T00:56:07.198Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "797253f88c5bafe062c1-a63738249e1b220244ca",
+          "file": "continuity-stages23.spec.ts",
+          "line": 6,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "continuity.spec.ts",
+      "file": "continuity.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "CT1 direction correction, stale confirmation, original Mission resume, withdrawal and draft continuity",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5018,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [
+                    {
+                      "buffer": "KG5vZGU6MzY3MzYpIFdhcm5pbmc6IFRoZSAnTk9fQ09MT1InIGVudiBpcyBpZ25vcmVkIGR1ZSB0byB0aGUgJ0ZPUkNFX0NPTE9SJyBlbnYgYmVpbmcgc2V0LgooVXNlIGBub2RlIC0tdHJhY2Utd2FybmluZ3MgLi4uYCB0byBzaG93IHdoZXJlIHRoZSB3YXJuaW5nIHdhcyBjcmVhdGVkKQoobm9kZToyNTc0MCkgV2FybmluZzogVGhlICdOT19DT0xPUicgZW52IGlzIGlnbm9yZWQgZHVlIHRvIHRoZSAnRk9SQ0VfQ09MT1InIGVudiBiZWluZyBzZXQuCihVc2UgYG5vZGUgLS10cmFjZS13YXJuaW5ncyAuLi5gIHRvIHNob3cgd2hlcmUgdGhlIHdhcm5pbmcgd2FzIGNyZWF0ZWQpCg=="
+                    },
+                    {
+                      "buffer": "KG5vZGU6NDQxNTYpIFdhcm5pbmc6IFRoZSAnTk9fQ09MT1InIGVudiBpcyBpZ25vcmVkIGR1ZSB0byB0aGUgJ0ZPUkNFX0NPTE9SJyBlbnYgYmVpbmcgc2V0LgooVXNlIGBub2RlIC0tdHJhY2Utd2FybmluZ3MgLi4uYCB0byBzaG93IHdoZXJlIHRoZSB3YXJuaW5nIHdhcyBjcmVhdGVkKQoobm9kZTozMjc0MCkgV2FybmluZzogVGhlICdOT19DT0xPUicgZW52IGlzIGlnbm9yZWQgZHVlIHRvIHRoZSAnRk9SQ0VfQ09MT1InIGVudiBiZWluZyBzZXQuCihVc2UgYG5vZGUgLS10cmFjZS13YXJuaW5ncyAuLi5gIHRvIHNob3cgd2hlcmUgdGhlIHdhcm5pbmcgd2FzIGNyZWF0ZWQpCg=="
+                    }
+                  ],
+                  "retry": 0,
+                  "startTime": "2026-10-30T00:56:12.381Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "cc77f0d4c920969ee960-57194e22cf3f82acd3d7",
+          "file": "continuity.spec.ts",
+          "line": 7,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "missions.spec.ts",
+      "file": "missions.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "same Mission survives reload, receives metric, auto continues, waits for approval and adopts a reusable draft",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 26468,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [
+                    {
+                      "text": "(node:35720) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:48760) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+                    },
+                    {
+                      "text": "(node:45864) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:46144) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+                    },
+                    {
+                      "text": "(node:41352) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:23796) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+                    },
+                    {
+                      "text": "(node:16996) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:34668) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+                    },
+                    {
+                      "text": "(node:30004) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:14840) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+                    },
+                    {
+                      "text": "(node:41612) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:39552) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+                    },
+                    {
+                      "text": "(node:26580) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:48080) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+                    },
+                    {
+                      "text": "(node:2824) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:40932) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+                    },
+                    {
+                      "text": "(node:28192) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:28904) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+                    },
+                    {
+                      "text": "(node:32160) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:29212) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+                    },
+                    {
+                      "text": "(node:23712) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:37800) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+                    },
+                    {
+                      "text": "(node:36336) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:39428) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+                    },
+                    {
+                      "text": "(node:21768) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:25168) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+                    }
+                  ],
+                  "retry": 0,
+                  "startTime": "2026-10-30T00:56:17.433Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3da627105cb0fc597f2d-6e7056601cffa7700718",
+          "file": "missions.spec.ts",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "pre-r4-ux.spec.ts",
+      "file": "pre-r4-ux.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "first material leads to an explicitly authorized Mission; multiple waiting tasks remain reachable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11019,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-30T00:56:43.943Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8e808f01b1e40fef1493-60f428af46f0396482aa",
+          "file": "pre-r4-ux.spec.ts",
+          "line": 8,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-30T00:55:57.717Z",
+    "duration": 57855.324,
+    "expected": 6,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

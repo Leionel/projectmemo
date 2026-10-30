@@ -1,0 +1,3 @@
+components/ConversationContinuity.tsx(44,7): error TS1005: 'try' expected.
+components/ConversationContinuity.tsx(46,3): error TS1472: 'catch' or 'finally' expected.
+components/ConversationContinuity.tsx(70,1): error TS1005: '}' expected.

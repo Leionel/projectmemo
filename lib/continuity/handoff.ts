@@ -1,3 +1,4 @@
+import {missionSummarySelect,presentMissionSummary} from "@/lib/mission/workspaceSummary";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { assertProject, ownedConversation, record } from "@/lib/conversation/repository";
@@ -31,14 +32,14 @@ export async function readContinuity(actor: ConversationActor, conversationId: s
     }
   }
   const [missions, actions] = await Promise.all([
-    member.role === "OWNER" ? db.agentMission.findMany({ where: { ownerUserId: actor.userId, projectId: target, status: { notIn: ["CANCELLED", "SUCCEEDED"] } }, orderBy: { updatedAt: "desc" }, take: 8 }) : [],
+    member.role === "OWNER" ? db.agentMission.findMany({ where: { ownerUserId: actor.userId, projectId: target, status: { notIn: ["CANCELLED", "SUCCEEDED"] } }, orderBy: { updatedAt: "desc" }, take: 8,select:missionSummarySelect }) : [],
     db.actionItem.findMany({ where: { projectId: target, isSimulated: false, status: "DONE", resultCardId: { not: null } }, orderBy: { completedAt: "desc" }, take: 5 }),
   ]);
   const results = [];
   for (const a of actions) if ((await sourceUse(actor.userId, target, "action:" + a.id, db, scope)).state === "ALLOWED")
     results.push({ id: a.id, title: a.title, resultText: a.resultText, resultCardId: a.resultCardId, verification: "REPORTED" as const, href: `/projects/${target}/actions#action-${a.id}` });
   return { ...view, ...(candidate ? { candidate } : {}), handoff: { missions: missions.map(m => ({ id: m.id, goal: m.goal, status: m.status,
-    nextOwner: ["WAITING_INPUT", "WAITING_APPROVAL", "PAUSED"].includes(m.status) ? "USER" : "AGENT",
+    workState:presentMissionSummary(m).workState,nextOwner: presentMissionSummary(m).workState.nextActor,
     href: `/projects/${target}/missions?mission=${m.id}` })), results } };
 }
 const openSchema = z.object({ kind: z.enum(["MISSION", "ACTION"]), id: z.string().min(1).max(180), projectId: z.string().min(1).max(180) }).strict();

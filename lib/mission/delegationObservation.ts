@@ -29,7 +29,7 @@ export async function runDelegationObservation(lease:Lease,tools:ToolSet,onStep:
       const input=await investigationInputHash(m,tx),previous=record(state.remoteSnapshots);
       if(input.truncated)throw new AppError("INPUT_COVERAGE_LIMIT","资料变化较多，请核对调查范围",409);
       const changed=input.hash!==state.inputHash||Object.entries(snapshots).some(([key,value])=>previous[key]!==value);
-      const fresh=await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...record(m.planJson),delegation:{...state,poll:null,remoteSnapshots:snapshots,lastObservedAt:new Date().toISOString(),attention:changed?null:state.attention}}),...(changed?{contextVersion:{increment:1},planRevision:{increment:1}}:{})}});
+      const fresh=await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...record(m.planJson),delegation:{...state,poll:null,remoteSnapshots:snapshots,lastObservedAt:new Date().toISOString(),attention:changed?null:state.attention}}),...(!changed&&!(record(m.waitStateJson).questionId&&record(m.waitStateJson).resolved!==true)?{waitStateJson:json({...record(m.waitStateJson),waitingFor:"OBSERVATION"})}:{}),...(changed?{contextVersion:{increment:1},planRevision:{increment:1}}:{})}});
       await event(tx,m.id,changed?"INVESTIGATION_OBSERVATION_CHANGED":"INVESTIGATION_NO_NEW_INFORMATION",{cycle:poll.cycle,changed,observationStepIds:observed.map(s=>s.id)});
       await release(tx,fresh,changed?"READY":"WAITING_INPUT");return {done:true} as const;
     }

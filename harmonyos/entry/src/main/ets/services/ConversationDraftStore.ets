@@ -2,6 +2,7 @@ import preferences from '@ohos.data.preferences';
 import { common } from '@kit.AbilityKit';
 
 export class ConversationDraft {
+  directiveRequest:string='';
   key: string = '';
   answer: string = '';
   selected: string[] = [];

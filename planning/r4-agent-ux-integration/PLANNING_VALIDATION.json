@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "artifactRole": "planning-validation",
+  "checkedAtUtc": "2026-10-30T00:13:31.604773+00:00",
+  "status": "PASS",
+  "checks": {
+    "fourRequiredDocumentsPresent": true,
+    "localLinksAndNonblankLineReferencesValid": true,
+    "fourteenUniqueJourneyDefinitions": true,
+    "tenUniqueAuditFindings": true,
+    "publishedNpmRunCommandsExist": true,
+    "codeFencesBalanced": true,
+    "sourceSnapshotExplicitInputsFound": true,
+    "headUnchanged": true,
+    "protectedTrackedFilesUnchanged": true,
+    "trackedDiffContainsOnlyPreExistingFiles": true,
+    "historicalImplementationHashesMatch80of80": true
+  },
+  "documentFiles": {
+    "CODE_DEMO_AUDIT.md": {
+      "sha256": "e2b2e04cae6c622ceeac2f79ea6150856a3952556df74c920b4b6321f1a39cf7",
+      "lines": 137,
+      "bytes": 22744
+    },
+    "CORE_PAGE_DESIGN.md": {
+      "sha256": "4fca3392e638ba5315b57165935240864032d8f90be64d3640f99339ce0eaa8d",
+      "lines": 235,
+      "bytes": 24794
+    },
+    "R4_AGENT_UX_INTEGRATION_ROADMAP.md": {
+      "sha256": "31f1212334fb4212b1c92850ae0bde16d64ffe4835fd7c59cad88b01f9ea48a0",
+      "lines": 275,
+      "bytes": 35830
+    },
+    "UX1_IMPLEMENTATION_PROMPT.md": {
+      "sha256": "dae4960ea601c6b1c3d6587d9319d241414aaeaedc169fd56eda366afbae91d6",
+      "lines": 142,
+      "bytes": 13457
+    }
+  },
+  "sourceSnapshotSha256": "4b44caa0a87bb3d439237e7e7e8d0d69288263e77e6f042c685d9fac7f1d506e",
+  "localLinkCount": 103,
+  "uniqueLocalTargets": 71,
+  "brokenLinks": [],
+  "journeyIds": [
+    "UX-J01",
+    "UX-J02",
+    "UX-J03",
+    "UX-J04",
+    "UX-J05",
+    "UX-J06",
+    "UX-J07",
+    "UX-J08",
+    "UX-J09",
+    "UX-J10",
+    "UX-J11",
+    "UX-J12",
+    "UX-J13",
+    "UX-J14"
+  ],
+  "auditFindingIds": [
+    "F01",
+    "F02",
+    "F03",
+    "F04",
+    "F05",
+    "F06",
+    "F07",
+    "F08",
+    "F09",
+    "F10"
+  ],
+  "checkedNpmScripts": [
+    "build",
+    "harmony:build",
+    "harmony:test",
+    "lint",
+    "test:e2e"
+  ],
+  "unknownNpmScripts": [],
+  "trackedDiffFiles": [
+    "AGENTS.md",
+    "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md",
+    "harmonyos/build-profile.json5",
+    "tsconfig.json"
+  ],
+  "manualReviewCoverage": [
+    "three core user tasks and progressive disclosure",
+    "Memory/Dream lifecycle and original data reuse",
+    "bounded investigation and attention policy",
+    "Web/App/widget/Xiaoyi/wearable capability boundaries",
+    "natural correction and trustworthy action controls",
+    "first-use, cross-session and multi-day quality evaluation",
+    "UX0-3 with CT7-10 dependencies and deferrals",
+    "single-PR UX1 stages with original Mission/Action/result receipts"
+  ],
+  "validationMethod": "Read-only git, Python standard-library link/line/script checks and SHA-256 comparisons. Semantic audit recorded in CODE_DEMO_AUDIT.md; no business test or live-device acceptance run.",
+  "notEstablishedByThisValidation": [
+    "new UX implementation",
+    "current business-test pass",
+    "production readiness",
+    "device acceptance",
+    "independent human review",
+    "real-world experiment success"
+  ]
+}

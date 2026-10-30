@@ -1,0 +1,42 @@
+import {test,expect} from "@playwright/test";
+import {execFileSync} from "node:child_process";
+import path from "node:path";
+import {E2E_ENV} from "../scripts/e2e-env";
+test("UX1: focus opens the exact question, then an inline direction survives reload",async({page})=>{
+  const token=(await page.context().cookies()).find(c=>c.name==="pm_session")!.value;
+  const headers={Authorization:"Bearer "+token};
+  const caps=await page.request.get("/api/conversations/capabilities",{headers});
+  test.skip(!(await caps.json()).continuityAvailable,"Continuity flag is off");
+  const created=await page.request.post("/api/projects",{headers,data:{title:"UX1 原任务 "+Date.now(),description:"独立隔离数据库的UX1合成验收旅程",goal:"目标设备完成演示",scenario:"COMPETITION"}});
+  expect(created.ok(),await created.text()).toBe(true);const p=(await created.json()).project;
+  const made=await page.request.post("/api/missions",{headers,data:{requestId:crypto.randomUUID(),projectId:p.id,goal:"UX1 核对目标设备安装日志",llmContextApproved:true}});
+  expect(made.ok()).toBe(true);const m=(await made.json()).mission;
+  for(let i=0;i<2;i++){
+    execFileSync(process.execPath,[path.resolve("node_modules/tsx/dist/cli.mjs"),"scripts/e2e-mission-fixture.ts","slice",m.id,JSON.stringify({kind:"ask",question:"请补充UX1目标设备安装日志",missing:"CRITICAL"})],{env:{...process.env,...E2E_ENV},timeout:30000});
+    const state=await page.request.get("/api/missions/"+m.id,{headers});
+    if((await state.json()).mission.status==="WAITING_INPUT")break;
+  }
+  const detail=(await(await page.request.get("/api/missions/"+m.id,{headers})).json()).mission;
+  expect(detail.workState).toMatchObject({phase:"WAITING_USER",exactQuestionRef:detail.question.id});
+  await page.goto("/focus");
+  const target=page.locator('a[href*="mission='+m.id+'"]').filter({hasText:"回答原问题"}).first();
+  await expect(target).toBeVisible();
+  await target.click();
+  await expect(page).toHaveURL(new RegExp("mission="+m.id));
+  await expect(page.getByText("请补充UX1目标设备安装日志",{exact:true}).first()).toBeVisible();
+  const conversation=await page.request.post("/api/conversations",{headers,data:{requestId:crypto.randomUUID(),scope:"PROJECT",projectId:p.id}});
+  const id=(await conversation.json()).id;
+  await page.goto("/focus?conversation="+id);
+  const continuity=page.getByRole("region",{name:"当前工作与接续"});
+  await continuity.getByRole("button",{name:"调整当前方向"}).click();
+  await continuity.getByRole("textbox",{name:"更正当前工作方向"}).fill("本周先稳演示，先别加功能");
+  await continuity.getByRole("button",{name:"按这句话调整"}).click();
+  await expect(continuity.getByText(/当前重点：.*稳演示/)).toBeVisible();
+  await page.reload();
+  await expect(continuity.getByText(/当前重点：.*稳演示/)).toBeVisible();
+  await page.screenshot({path:"evidence/r4-agent-ux/20261030-ux1/web-continuity.png",fullPage:true});
+  await page.setViewportSize({width:390,height:844});
+  await page.goto("/focus");
+  await expect(page.getByRole("heading",{name:"今日项目焦点",exact:true})).toBeVisible();
+  await page.screenshot({path:"evidence/r4-agent-ux/20261030-ux1/web-focus-390.png",fullPage:true});
+});

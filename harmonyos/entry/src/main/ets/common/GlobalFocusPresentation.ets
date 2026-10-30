@@ -3,9 +3,9 @@ import { FocusEntry, GlobalFocusReply } from '../models/GlobalFocus';
 export function focusPrimary(view: GlobalFocusReply): FocusEntry | null {
   if (view.primaryContext !== undefined && view.primaryContext !== null) {
     const c = view.primaryContext; const n = c.nextStep;
-    return { id: n.entityRef.id, projectId: c.projectId, projectTitle: c.projectTitle, title: n.title, detail: n.reason, status: n.status, activity: '', activityAt: c.observedAt, recordedAt: '', dueAt: '', recordFields: [] };
+    return { id: n.entityRef.id, projectId: c.projectId, projectTitle: c.projectTitle, title: n.title, detail: n.reason, status: n.status, entityKind:n.entityRef.kind,actionLabel:n.actionLabel,workState:n.workState,activity: '', activityAt: c.observedAt, recordedAt: '', dueAt: '', recordFields: [] };
   }
-  const needsUser = view.waiting.find((item: FocusEntry) => item.status === 'WAITING_INPUT' || item.status === 'WAITING_APPROVAL');
+  const needsUser = view.waiting.find((item: FocusEntry) => item.workState ? item.workState.requiresUser : item.status === 'WAITING_INPUT' || item.status === 'WAITING_APPROVAL');
   return needsUser ?? view.reminders[0] ?? view.actions[0] ?? view.running[0] ?? view.waiting[0] ?? view.records[0] ?? null;
 }
 
@@ -54,3 +54,17 @@ export function focusActionLabel(status: string, kind: string): string {
     if (kind === 'reminder') return '查看提醒依据 →';
     return '查看资料与来源 →';
   }
+
+export function workPhaseLabel(phase:string):string {
+  if(phase==='QUEUED')return '待执行';
+  if(phase==='RUNNING')return '正在调查';
+  if(phase==='WAITING_OBSERVATION')return '等待新变化';
+  if(phase==='WAITING_USER')return '等你补充';
+  if(phase==='WAITING_APPROVAL')return '等你确认';
+  if(phase==='PAUSED')return '已暂停';
+  if(phase==='FAILED')return '这一步未完成';
+  if(phase==='UNKNOWN')return '状态待核对';
+  if(phase==='COMPLETED')return '已结束';
+  if(phase==='UNAVAILABLE')return '状态暂不可用';
+  return '状态待核对';
+}

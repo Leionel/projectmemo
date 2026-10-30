@@ -1,3 +1,4 @@
+import { workPhaseLabel } from '../common/GlobalFocusPresentation';
 import { GoalQuestionPanel } from './GoalQuestionPanel';
 import { SessionStore } from '../services/SessionStore';
 import router from '@ohos.router';
@@ -24,10 +25,11 @@ export struct GlobalFocusPanel {
   @State private includeArchived: boolean = false;
   @State private expandedGroups: string[] = [];
   private generation: number = 0;
+  private boundaryTimer:number=-1;
   private service: GlobalFocusService = new GlobalFocusService();
   private expired: () => void = () => { this.generation++; this.view = new GlobalFocusReply(); this.lastKnown = false; this.observedAt = ''; this.errorText = '请重新登录后查看焦点'; this.busy = false; };
   aboutToAppear(): void { SessionStore.onSessionExpired(this.expired); this.refresh(); const epoch = this.generation; new ConversationService().capabilities().then(c => { if (epoch === this.generation) this.agentEnabled = c.enabled; }).catch(() => {}); }
-  aboutToDisappear(): void { this.generation++; SessionStore.offSessionExpired(this.expired); }
+  aboutToDisappear(): void { if(this.boundaryTimer>=0)clearTimeout(this.boundaryTimer);this.generation++; SessionStore.offSessionExpired(this.expired); }
   private async refresh(): Promise<void> {
     const generation = ++this.generation; const token = SessionStore.getToken();
     this.busy = true; this.errorText = '';
@@ -35,7 +37,7 @@ export struct GlobalFocusPanel {
       const reply = await this.service.read(this.includeArchived);
       if (generation !== this.generation || token !== SessionStore.getToken()) return;
       if (reply.schemaVersion !== 1) throw new Error('当前客户端尚不支持这份焦点摘要，请更新应用');
-      this.view = reply; this.observedAt = new Date().toLocaleString('zh-CN'); this.lastKnown = false;
+      this.view = reply;if(this.boundaryTimer>=0)clearTimeout(this.boundaryTimer);const boundary=reply.primaryContext?.nextBoundary;if(boundary){this.boundaryTimer=setTimeout(()=>{this.refresh();},Math.min(Math.max(Date.parse(boundary)-Date.now()+20,20),2147483647));} this.observedAt = new Date().toLocaleString('zh-CN'); this.lastKnown = false;
     } catch (error) {
       if (generation !== this.generation || token !== SessionStore.getToken()) return;
       if (error instanceof ApiError && [401, 403, 404].includes(error.status)) { this.view = new GlobalFocusReply(); this.observedAt = ''; }
@@ -57,7 +59,7 @@ export struct GlobalFocusPanel {
   }
   private remaining(items: FocusEntry[]): FocusEntry[] {
     const primary = this.primary();
-    return items.filter((item: FocusEntry) => primary === null || item.id !== primary.id);
+    return items.filter((item: FocusEntry) => primary === null || item.id !== primary.id || item.projectId !== primary.projectId);
   }
   private visible(title: string, items: FocusEntry[], kind: string): FocusEntry[] {
     const remaining = this.remaining(items);
@@ -103,13 +105,14 @@ export struct GlobalFocusPanel {
   @Builder private Primary(item: FocusEntry) {
     Column({ space: 12 }) {
       Row({ space: 8 }) {
-        PMStatusPill({ label: this.view.primaryContext !== undefined && this.view.primaryContext !== null && this.view.primaryContext.freshness !== 'FRESH' ? '部分摘要暂不可用' : this.kind(item) === 'reminder' ? '待你核对' : this.kind(item) === 'record' ? '最近记录' : focusStatusLabel(item.status),
+        PMStatusPill({ label: this.view.primaryContext !== undefined && this.view.primaryContext !== null && this.view.primaryContext.freshness !== 'FRESH' ? '部分摘要暂不可用' : this.kind(item) === 'reminder' ? '待你核对' : this.kind(item) === 'record' ? '最近记录' : item.workState ? workPhaseLabel(item.workState!.phase) : focusStatusLabel(item.status),
           tone: item.status === 'PAUSED' || item.status === 'FAILED' ? 'risk' : 'warning' })
         Text(item.projectTitle).fontSize(12).fontColor(PMColors.INK_TERTIARY).layoutWeight(1)
           .textAlign(TextAlign.End).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
       }.width('100%')
       Text(this.rowTitle(item, this.kind(item))).fontSize(21).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
         .maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis }).lineHeight(29)
+      if (this.view.primaryContext?.workingObjective) { Text('当前重点：'+this.view.primaryContext!.workingObjective).fontSize(14).fontColor(PMColors.INK_SECONDARY) }
       if (this.primaryDetail(item) !== '') { Text(this.primaryDetail(item)).fontSize(14).lineHeight(22).fontColor(PMColors.INK_SECONDARY).maxLines(4).textOverflow({ overflow: TextOverflow.Ellipsis }) }
       if (this.kind(item) !== 'mission') { PMStatusPill({ label: this.kind(item) === 'reminder' ? '待核对提醒依据' : '查看原始记录' }) }
       PMButton({ label: this.view.primaryContext?.nextStep.actionLabel ?? focusActionLabel(item.status, this.kind(item)), onAction: (): void => { this.open(item, this.kind(item)); } })
@@ -165,7 +168,7 @@ export struct GlobalFocusPanel {
               .onClick(() => { this.refresh(); })
           }.width('100%').margin({ top: 16 })
           if (!this.view.missionEnabled) { Text('长期委托当前未开启，已有记录仍保留。').fontSize(12).fontColor(PMColors.INK_TERTIARY) }
-          if (this.view.hasMore) { Text('当前显示部分摘要，进入所属项目可查看全部。').fontSize(12).fontColor(PMColors.INK_TERTIARY) }
+          if (this.view.hasMore || this.view.coverage?.complete===false) { Text('当前显示部分摘要，进入所属项目可查看全部。').fontSize(12).fontColor(PMColors.INK_TERTIARY) }
         }.width('100%').alignItems(HorizontalAlign.Start).padding({ left: 16, right: 16, top: 22, bottom: this.agentEnabled ? 88 : 20 })
       }.width('100%').height('100%').align(Alignment.TopStart).scrollBar(BarState.Off)
       if (this.agentEnabled) {

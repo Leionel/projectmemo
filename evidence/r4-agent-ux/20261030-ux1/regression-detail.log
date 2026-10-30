@@ -1,0 +1,938 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/globalWorkspace.integration.test.ts tests/missionPanel.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/globalWorkspace.integration.test.ts (2 tests | 1 failed) 3453ms
+   × 焦点分别投影真实状态，Mission双重归属、关闭开关和API身份均有效 943ms
+ ❯ tests/missionPanel.test.ts (14 tests | 2 failed) 1776ms
+     × 临时读取失败保留标时历史并阻止写入，重新读取后恢复 130ms
+     × 暂停时展示具体协议原因和继续入口，旧通用错误也能读懂 71ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/globalWorkspace.integration.test.ts > 焦点分别投影真实状态，Mission双重归属、关闭开关和API身份均有效
+AssertionError: expected { waiting: 3, running: 2, …(2) } to deeply equal { waiting: 4, running: 2, …(2) }
+
+- Expected
++ Received
+
+  {
+    "actions": 1,
+    "reminders": 2,
+    "running": 2,
+-   "waiting": 4,
++   "waiting": 3,
+  }
+
+ ❯ tests/globalWorkspace.integration.test.ts:115:24
+    113|   await db.project.update({where:{id:archived.id},data:{deadline:new D…
+    114|   const macro = await loadGlobalFocus(user.id);
+    115|   expect(macro.counts).toEqual({waiting:4,running:2,actions:1,reminder…
+       |                        ^
+    116|   expect(macro.nextDeadline?.projectId).toBe(owned.id);
+    117|   expect((await loadGlobalFocus(user.id,true)).nextDeadline?.projectId…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/missionPanel.test.ts > Mission 面板调用方 > 临时读取失败保留标时历史并阻止写入，重新读取后恢复
+TestingLibraryElementError: Unable to find an element with the text: 暂停与取消. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <section
+      aria-labelledby="mission-heading"
+      class="_panel_145283"
+      id="mission-agent"
+    >
+      <header
+        class="_header_145283"
+      >
+        <div>
+          <h2
+            id="mission-heading"
+          >
+            长期项目委托
+          </h2>
+          <p>
+            交给 Agent 一个目标，在同一委托中持续推进、补充材料和审阅成果。
+          </p>
+        </div>
+        <span
+          class="_count_145283"
+        >
+          已加载 
+          1
+           项委托
+        </span>
+      </header>
+      <div
+        class="_error_145283"
+        role="alert"
+      >
+        <p>
+          服务暂不可用
+        </p>
+        <button>
+          刷新重试
+        </button>
+      </div>
+      <p
+        class="_notice_145283"
+        role="status"
+      >
+        当前显示上次读取的历史状态（
+        2026/10/30 08:30:46
+        ）；重新读取后可提交操作。
+      </p>
+      <button
+        aria-expanded="false"
+        class="_listToggle_145283"
+      >
+        查看委托列表与新建
+      </button>
+      <div
+        class="_workspace_145283"
+      >
+        <aside
+          aria-label="委托列表与创建"
+          class="_sidebar_145283 _collapsedSidebar_145283"
+        >
+          <details
+            class="_newMission_145283"
+          >
+            <summary>
+              委托新目标
+            </summary>
+            <form
+              class="_composer_145283"
+            >
+              <h3>
+                新建委托
+              </h3>
+              <fieldset
+                class="_step_145283"
+              >
+                <legend>
+                  01 · 委托目标
+                </legend>
+                <button
+                  type="button"
+                >
+                  使用阶段汇报模板
+                </button>
+                <label
+                  for="mission-goal"
+                >
+                  想推进什么
+                </label>
+                <textarea
+                  id="mission-goal"
+                  maxlength="2000"
+                  minlength="3"
+                  placeholder="例如：根据已有材料准备阶段汇报，列出风险和缺失信息。"
+                  required=""
+                  rows="4"
+                />
+              </fieldset>
+              <fieldset
+                class="_step_145283"
+              >
+                <legend>
+                  02 · 执行边界
+                </legend>
+                <label
+                  class="_consent_145283"
+                >
+                  <input
+                    type="checkbox"
+                  />
+                  <span>
+                    仅允许读取、分析和保存草稿（创建或修改行动需要另行批准）
+                  </span>
+                </label>
+              </fieldset>
+              <fieldset
+                class="_step_145283"
+              >
+                <legend>
+                  03 · 用户授权
+                </legend>
+                <label
+                  class="_consent_145283"
+                >
+                  <input
+                    type="checkbox"
+                  />
+                  完成时必须有固定核算回执（执行仍需另行批准）
+                </label>
+                <label
+                  class="_consent_145283"
+                >
+                  <input
+                    type="checkbox"
+                  />
+                  完成时必须读到论文元数据（非全文）
+                </label>
+                <label
+                  class="_consent_145283"
+                >
+                  <input
+                    type="checkbox"
+                  />
+                  完成时必须记录真实行动的结果回执
+                </label>
+                <label
+                  class="_consent_145283"
+                >
+                  <input
+                    type="checkbox"
+                  />
+                  <span>
+                    允许配置的云模型使用本委托目标、选入的项目资料和任务历史
+                  </span>
+                </label>
+                <p
+                  class="_stepHint_145283"
+                >
+                  高级约束（费用、研究范围、接续许可）在创建后于「委托设置」中调整。
+                </p>
+              </fieldset>
+              <button
+                class="_primary_145283"
+                disabled=""
+              >
+                创建委托
+              </button>
+            </form>
+          </details>
+          <nav
+            aria-label="已有委托"
+            class="_missionList_145283"
+          >
+            <h3>
+              已有委托
+            </h3>
+            <button
+              aria-label="整理阶段汇报 · 等待执行"
+              aria-pressed="true"
+              class="_missionRow_145283"
+            >
+              <span
+                class="_rowGoal_145283"
+              >
+                整理阶段汇报
+              </span>
+              <span
+                class="_rowMeta_145283"
+              >
+                <span
+                  class="_statusDot_145283"
+                  data-status="READY"
+                />
+                等待执行
+              </span>
+            </button>
+          </nav>
+        </aside>
+        <div
+          aria-busy="false"
+          class="_detail_145283"
+        >
+          <fieldset
+            class="contents"
+            disabled=""
+          >
+            <div>
+              <button
+                class="workspace-tool focus-ring"
+                type="button"
+              >
+                设为当前关注
+              </button>
+            </div>
+            <header
+              class="_detailHeader_145283"
+            >
+              <div
+                class="_detailMeta_145283"
+              >
+                <span
+                  class="_badge_145283"
+                  data-status="READY"
+                >
+                  等待执行
+                </span>
+                <span>
+                  0
+                   个步骤已执行 · 
+                  0
+                   份草稿
+                </span>
+              </div>
+              <h3
+                class="_goal_145283"
+              >
+                整理阶段汇报
+              </h3>
+              <div
+                class="_statusText_145283"
+                role="status"
+              >
+                等待执行
+                ，进度已保存，等待开始
+              </div>
+              <dl
+                aria-label="完成与核验"
+                class="_completionFacts_145283"
+              >
+                <div>
+                  <dt>
+                    执行条件
+                  </dt>
+                  <dd>
+                    尚未完成条件验收
+                  </dd>
+                </div>
+                <div>
+                  <dt>
+                    草稿核验
+                  </dt>
+                  <dd>
+                    尚无已保存草稿
+                  </dd>
+                </div>
+                <div>
+                  <dt>
+                    用户采纳
+                  </dt>
+                  <dd>
+                    采纳回执待读取
+                  </dd>
+                </div>
+                <div>
+                  <dt>
+                    现实完成
+                  </dt>
+                  <dd>
+                    未从委托状态推断，以实际行动回执为准
+                  </dd>
+                </div>
+              </dl>
+              <div
+                aria-label="暂停与取消"
+                class="_actions_145283"
+              >
+                <button>
+                  暂停
+                </button>
+                <button
+                  class="_cancel_145283"
+                >
+                  取消委托
+                </button>
+              </div>
+            </header>
+            <details
+              class="_activity_145283"
+            >
+              <summary>
+                最近进展
+              </summary>
+              <p>
+                尚无已完成步骤；当前状态：
+                等待执行
+                。
+              </p>
+            </details>
+            <details
+              class="mt-4 border-t border-[var(--rule)] pt-3"
+            >
+              <summary
+                class="focus-ring cursor-pointer text-sm font-bold"
+              >
+                对比本轮推进方案
+              </summary>
+              <div
+                class="mt-3 space-y-3 text-sm leading-6"
+              >
+                <p>
+                  保留原目标和成功条件，比较先核对依据与先整理草稿的取舍。采用只更新当前委托，不创建新的任务或日历安排。
+                </p>
+                <form
+                  class="grid gap-3 sm:grid-cols-2"
+                >
+                  <label>
+                    这轮最多可投入几分钟
+                    <input
+                      class="editorial-input block w-full p-2"
+                      max="100000"
+                      min="1"
+                      required=""
+                      type="number"
+                      value=""
+                    />
+                  </label>
+                  <label>
+                    你估计最小草稿需要几分钟
+                    <input
+                      class="editorial-input block w-full p-2"
+                      max="100000"
+                      min="1"
+                      required=""
+                      type="number"
+                      value=""
+                    />
+                  </label>
+                  <label
+                    class="flex items-start gap-2 sm:col-span-2"
+                  >
+                    <input
+                      type="checkbox"
+                    />
+                    允许「先整理草稿」方案提议行动；创建行动仍需逐项批准
+                  </label>
+                  <label
+                    class="flex items-start gap-2 sm:col-span-2"
+                  >
+                    <input
+                      type="checkbox"
+                    />
+                    另请已授权的云模型补充一轮定性权衡（占用原委托与账户额度）
+                  </label>
+                  <button
+                    class="workspace-tool focus-ring justify-self-start"
+                    disabled=""
+                  >
+                    生成对比预览
+                  </button>
+                </form>
+              </div>
+            </details>
+            <div
+              aria-label="当前目标的一项问题"
+              class="mt-3 space-y-2 text-sm"
+            />
+            <section
+              aria-label="原任务与完成回执"
+              class="mt-3 rounded-lg border border-[var(--rule)] p-3 text-xs"
+            >
+              <button
+                class="workspace-tool focus-ring"
+                type="button"
+              >
+                重新读取回执
+              </button>
+            </section>
+            <details
+              class="_progress_145283"
+              id="mission-progress"
+            >
+              <summary
+                id="mission-progress-summary"
+              >
+                执行详情与回执（
+                0
+                 个步骤已执行）
+              </summary>
+              <section
+                aria-label="执行记录"
+              >
+                <div
+                  class="_sectionTitle_145283"
+                >
+                  <h4>
+                    执行记录
+                  </h4>
+                  <span>
+                    0
+                     个步骤已执行
+                  </span>
+                </div>
+                <p
+                  class="_muted_145283"
+                >
+                  委托已保存，等待开始执行。
+                </p>
+                <p
+                  class="_taskId_145283"
+                >
+                  任务编号：
+                  m
+                </p>
+                <ol />
+              </section>
+            </details>
+            <div
+              class="_settings_145283"
+            >
+              <h4>
+                委托设置与来源
+              </h4>
+              <details>
+                <summary>
+                  材料到达后的接续许可
+                </summary>
+                <div
+                  class="_settingBody_145283"
+                >
+                  <p>
+                    当前：
+                    人工确认后继续
+                    。
+                  </p>
+                  <p>
+                    自动接续只接受字段完全匹配的结构化本项目实验记录，不会自动创建行动或发布成果。
+                  </p>
+                  <p>
+                    服务端自动接续未开启，当前仍需人工确认。
+                  </p>
+                  <button>
+                    授权满足结构化缺口后自动读取与分析
+                  </button>
+                </div>
+              </details>
+              <details>
+                <summary>
+                  查看或修改个人约束
+                </summary>
+                <div
+                  class="mt-3 grid gap-3 text-sm"
+                >
+                  <label>
+                    可投入时间（分钟，留空表示未设定）
+                    <input
+                      class="ml-2 rounded border p-1"
+                      min="1"
+                      type="number"
+                      value=""
+                    />
+                  </label>
+                  <label>
+                    截止日期
+                    <input
+                      class="ml-2 rounded border p-1"
+                      type="datetime-local"
+                      value=""
+                    />
+                  </label>
+                  <label>
+                    优先级
+                    <select>
+                      <option
+                        value=""
+                      >
+                        未设定
+                      </option>
+                      <option
+                        value="1"
+                      >
+                        1
+                      </option>
+                      <option
+                        value="2"
+                      >
+                        2
+                      </option>
+                      <option
+                        value="3"
+                      >
+                        3
+                      </option>
+                      <option
+                        value="4"
+                      >
+                        4
+                      </option>
+                      <option
+                        value="5"
+                      >
+                        5
+                      </option>
+                    </select>
+                  </label>
+                  <label>
+                    资源限制（每行一项）
+                    <textarea
+                      class="block w-full rounded border p-2"
+                    />
+                  </label>
+                  <label>
+                    费用上限
+                    <input
+                      class="ml-2 rounded border p-1"
+                      min="0"
+                      type="number"
+                      value=""
+                    />
+                    <select
+                      aria-label="费用币种"
+                    >
+                      <option>
+                        CNY
+                      </option>
+                      <option>
+                        USD
+                      </option>
+                    </select>
+                  </label>
+                  <label>
+                    禁止方案（每行一项）
+                    <textarea
+                      class="block w-full rounded border p-2"
+                    />
+                  </label>
+                  <label>
+                    已否决的行动（每行一项）
+                    <textarea
+                      class="block w-full rounded border p-2"
+                    />
+                  </label>
+                  <label>
+                    执行范围
+                    <select>
+                      <option
+                        value="READ_ANALYZE"
+                      >
+                        只读取和分析
+                      </option>
+                      <option
+                        value="PROPOSE_ACTION"
+                      >
+                        可提议行动，批准后创建
+                      </option>
+                    </select>
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                    />
+                    允许云模型使用任务上下文
+                  </label>
+                  <button
+                    class="editorial-button justify-self-start"
+                    disabled=""
+                  >
+                    确认保存约束与许可
+                  </button>
+                </div>
+              </details>
+              <details>
+                <summary>
+                  公开研究范围
+                </summary>
+                <div
+                  class="mt-3 grid gap-3 text-sm"
+                >
+                  <label>
+                    <input
+                      type="checkbox"
+                    />
+                    允许在以下公开范围自主研究
+                  </label>
+                  <label>
+                    公开研究主题
+                    <input
+                      class="block w-full rounded border p-2"
+                      placeholder="近期3D医学图像分割方法与公开评测"
+                      value=""
+                    />
+                  </label>
+                  <label>
+                    公开概念（逗号分隔）
+                    <input
+                      class="block w-full rounded border p-2"
+                      placeholder="分割,segmentation,3D"
+                      value=""
+                    />
+                  </label>
+                  <label>
+                    排除的研究内容
+                    <input
+                      class="block w-full rounded border p-2"
+                      value=""
+                    />
+                  </label>
+                  <label>
+                    允许的资料站点（留空表示公开站点）
+                    <input
+                      class="block w-full rounded border p-2"
+                      placeholder="arxiv.org,pubmed.ncbi.nlm.nih.gov"
+                      value=""
+                    />
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                    />
+                    允许用已取得的公开来源标题与摘录拓展检索
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                    />
+                    允许向 Crossref 发送已定位的公开 DOI，读取论文元数据与摘要（非全文）
+                  </label>
+                  <p>
+                    Agent 可在此范围自主选查询；主题批准不授权外传内部实验、身份或私有文档。云模型上下文许可单独设置。
+                  </p>
+                  <button
+                    class="editorial-button justify-self-start"
+                    disabled=""
+                  >
+                    确认研究范围
+                  </button>
+                </div>
+              </details>
+              <details>
+                <summary>
+                  公开资料与获取记录（
+                  0
+                  ）
+                </summary>
+                <div
+                  class="_settingBody_145283"
+                >
+                  <p
+                    class="_muted_145283"
+                  >
+                    此委托尚未获取公开资料。
+                  </p>
+                </div>
+              </details>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ tests/missionPanel.test.ts:59:26
+     57|   const original=globalThis.fetch;vi.stubGlobal("fetch",vi.fn(async()=…
+     58|   fireEvent.click(row);await screen.findByText(/当前显示上次读取的历史状态/);expect…
+     59|   fireEvent.click(screen.getByText("暂停与取消"));expect((screen.getByRole(…
+       |                          ^
+     60|   vi.stubGlobal("fetch",original);fireEvent.click(screen.getByRole("bu…
+     61|  });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/missionPanel.test.ts > Mission 面板调用方 > 暂停时展示具体协议原因和继续入口，旧通用错误也能读懂
+TestingLibraryElementError: Unable to find an element with the text: 暂停与取消. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <section
+      aria-labelledby="mission-heading"
+      class="_panel_145283"
+      id="mission-agent"
+    >
+      <header
+        class="_header_145283"
+      >
+        <div>
+          <h2
+            id="mission-heading"
+          >
+            长期项目委托
+          </h2>
+          <p>
+            交给 Agent 一个目标，在同一委托中持续推进、补充材料和审阅成果。
+          </p>
+        </div>
+        <span
+          class="_count_145283"
+        >
+          已加载 
+          1
+           项委托
+        </span>
+      </header>
+      <button
+        aria-expanded="false"
+        class="_listToggle_145283"
+      >
+        查看委托列表与新建
+      </button>
+      <div
+        class="_workspace_145283"
+      >
+        <aside
+          aria-label="委托列表与创建"
+          class="_sidebar_145283 _collapsedSidebar_145283"
+        >
+          <details
+            class="_newMission_145283"
+          >
+            <summary>
+              委托新目标
+            </summary>
+            <form
+              class="_composer_145283"
+            >
+              <h3>
+                新建委托
+              </h3>
+              <fieldset
+                class="_step_145283"
+              >
+                <legend>
+                  01 · 委托目标
+                </legend>
+                <button
+                  type="button"
+                >
+                  使用阶段汇报模板
+                </button>
+                <label
+                  for="mission-goal"
+                >
+                  想推进什么
+                </label>
+                <textarea
+                  id="mission-goal"
+                  maxlength="2000"
+                  minlength="3"
+                  placeholder="例如：根据已有材料准备阶段汇报，列出风险和缺失信息。"
+                  required=""
+                  rows="4"
+                />
+              </fieldset>
+              <fieldset
+                class="_step_145283"
+              >
+                <legend>
+                  02 · 执行边界
+                </legend>
+                <label
+                  class="_consent_145283"
+                >
+                  <input
+                    type="checkbox"
+                  />
+                  <span>
+                    仅允许读取、分析和保存草稿（创建或修改行动需要另行批准）
+                  </span>
+                </label>
+              </fieldset>
+              <fieldset
+                class="_step_145283"
+              >
+                <legend>
+                  03 · 用户授权
+                </legend>
+                <label
+                  class="_consent_145283"
+                >
+                  <input
+                    type="checkbox"
+                  />
+                  完成时必须有固定核算回执（执行仍需另行批准）
+                </label>
+                <label
+                  class="_consent_145283"
+                >
+                  <input
+                    type="checkbox"
+                  />
+                  完成时必须读到论文元数据（非全文）
+                </label>
+                <label
+                  class="_consent_145283"
+                >
+                  <input
+                    type="checkbox"
+                  />
+                  完成时必须记录真实行动的结果回执
+                </label>
+                <label
+                  class="_consent_145283"
+                >
+                  <input
+                    type="checkbox"
+                  />
+                  <span>
+                    允许配置的云模型使用本委托目标、选入的项目资料和任务历史
+                  </span>
+                </label>
+                <p
+                  class="_stepHint_145283"
+                >
+                  高级约束（费用、研究范围、接续许可）在创建后于「委托设置」中调整。
+                </p>
+              </fieldset>
+              <button
+                class="_primary_145283"
+                disabled=""
+              >
+                创建委托
+              </button>
+            </form>
+          </details>
+          <nav
+            aria-label="已有委托"
+            class="_missionList_145283"
+          >
+            <h3>
+              已有委托
+            </h3>
+            <button
+              aria-label="整理阶段汇报 · 已暂停"
+              aria-pressed="true"
+              class="_missionRow_145283"
+            >
+              <span
+                class="_rowGoal_145283"
+              >
+                整理阶段汇报
+              </span>
+              <span
+                class="_rowMeta_145283"
+              >
+                <span
+                  class="_statusDot_145283"
+                  data-status="PAUSED"
+                />
+                已暂停
+              </span>
+            </button>
+          </nav>
+        </aside>
+        <div
+          aria-busy="false"
+          class="_detail_145283"
+        >
+          <fieldset
+            class="contents"
+          >
+            <div>
+              <button
+                class="workspac...
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ tests/missionPanel.test.ts:72:26
+     70|   const row=await screen.findByRole("button",{name:"整理阶段汇报 · 已暂停"});fi…
+     71|   const alert=await screen.findByRole("alert");expect(alert.textConten…
+     72|   fireEvent.click(screen.getByText("暂停与取消"));
+       |                          ^
+     73|   expect(screen.getByRole("button",{name:"确认后继续执行"})).toBeTruthy();exp…
+     74|   fireEvent.click(screen.getByText(/执行详情与回执（/));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  3 failed | 13 passed (16)
+   Start at  08:30:39
+   Duration  7.83s (transform 1.88s, setup 0ms, import 1.02s, tests 5.23s, environment 968ms)
+

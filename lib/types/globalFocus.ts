@@ -1,9 +1,11 @@
 /** Read projection shared by Web and ArkTS. No commands or synthetic progress. */
 export type FocusEntry = {
+  workState?:import("./workState").WorkState; actionLabel?:string; entityKind?:"MISSION"|"ACTION"|"INTERVENTION"|"PROJECT";
   id: string; projectId: string; projectTitle: string; title: string; detail: string;
   status: string; activity: string; activityAt: string; recordedAt: string; dueAt: string; projectDeadline: string; recordFields: Array<{label: string; value: string}>;
 };
 export type GlobalFocus = {
+  coverage?:{complete:boolean;consideredProjectIds:string[];countsAreBounded:boolean};
   discussions?: Array<{ conversationId: string; title: string; unread: number }>;
   primaryContext?: import("./projectAgentContext").ProjectAgentContext | null;
   counts: {waiting: number; running: number; actions: number; reminders: number};

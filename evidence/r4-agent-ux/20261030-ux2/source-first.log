@@ -1,0 +1,287 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/ux2SourceBinding.test.ts tests/repoSensing.test.ts tests/repoSignalNativeContract.test.ts tests/p3ReviewBoundaries.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/p3ReviewBoundaries.test.ts (12 tests | 3 failed) 4896ms
+   × 同信号并发采纳只生成一条资料，回执重放且拒绝同 requestId 异载荷 94ms
+   × 第二次持久化失败时资料与回执一起回滚，重试可以恢复 54ms
+   × 两个独立 OS 进程同时采纳，持久回执仍只生成一条资料 1553ms
+ ❯ tests/ux2SourceBinding.test.ts (5 tests | 5 failed) 141ms
+     × 撤权后的新采纳被拒绝，历史候选仍可见且不可采纳 11ms
+     × 304 只改变观察版本，不撤销合法候选的授权 2ms
+     × 原已提交请求在撤权后只回放原效果，不再创建 Capture 2ms
+     × 旧无绑定候选不能凭当前 ACTIVE 猜测授权 2ms
+     × 来源身份损坏或换连接的同 SHA 不能借新许可复活 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/p3ReviewBoundaries.test.ts > 同信号并发采纳只生成一条资料，回执重放且拒绝同 requestId 异载荷
+Error: 原信号缺少有效来源绑定，请重新读取原来源后核对
+ ❯ lib/sensing/repoSource.ts:269:11
+    267|     throw new AppError("CONNECTION_REVOKED", "原连接已撤销，不能继续采纳；历史记录保留", 4…
+    268|   if (!repositoryGrantCurrent(signal.sourceBindingJson, connection))
+    269|     throw new AppError("SIGNAL_SOURCE_RECHECK_REQUIRED", "原信号缺少有效来源绑定，…
+       |           ^
+    270|   let linkedActionId: string | null = null;
+    271|   if (input.actionId) {
+ ❯ Proxy._transactionWithCallback node_modules/@prisma/client/src/runtime/getPrismaClient.ts:810:17
+ ❯ writeTransaction lib/copilot/confirmation.ts:132:14
+ ❯ tests/p3ReviewBoundaries.test.ts:55:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  tests/p3ReviewBoundaries.test.ts > 第二次持久化失败时资料与回执一起回滚，重试可以恢复
+Error: 原信号缺少有效来源绑定，请重新读取原来源后核对
+ ❯ lib/sensing/repoSource.ts:269:11
+    267|     throw new AppError("CONNECTION_REVOKED", "原连接已撤销，不能继续采纳；历史记录保留", 4…
+    268|   if (!repositoryGrantCurrent(signal.sourceBindingJson, connection))
+    269|     throw new AppError("SIGNAL_SOURCE_RECHECK_REQUIRED", "原信号缺少有效来源绑定，…
+       |           ^
+    270|   let linkedActionId: string | null = null;
+    271|   if (input.actionId) {
+ ❯ Proxy._transactionWithCallback node_modules/@prisma/client/src/runtime/getPrismaClient.ts:810:17
+ ❯ writeTransaction lib/copilot/confirmation.ts:132:14
+ ❯ tests/p3ReviewBoundaries.test.ts:73:3
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  tests/p3ReviewBoundaries.test.ts > 两个独立 OS 进程同时采纳，持久回执仍只生成一条资料
+Error: child 1: D:\Projects\hongmen\lib\sensing\repoSource.ts:269
+    throw new AppError("SIGNAL_SOURCE_RECHECK_REQUIRED", "原信号缺少有效来源绑定，请重新读取原来源后核对", 409);
+          ^
+
+AppError: 原信号缺少有效来源绑定，请重新读取原来源后核对
+    at <anonymous> (D:\Projects\hongmen\lib\sensing\repoSource.ts:269:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Proxy._transactionWithCallback (D:\Projects\hongmen\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:810:18)
+    at async writeTransaction (D:\Projects\hongmen\lib\copilot\confirmation.ts:132:14)
+    at async file:///D:/Projects/hongmen/[eval1]:1:197 {
+  code: 'SIGNAL_SOURCE_RECHECK_REQUIRED',
+  status: 409,
+  details: undefined
+}
+
+Node.js v24.16.0
+
+ ❯ <anonymous> lib/sensing/repoSource.ts:269:11
+    267|     throw new AppError("CONNECTION_REVOKED", "原连接已撤销，不能继续采纳；历史记录保留", 4…
+    268|   if (!repositoryGrantCurrent(signal.sourceBindingJson, connection))
+    269|     throw new AppError("SIGNAL_SOURCE_RECHECK_REQUIRED", "原信号缺少有效来源绑定，…
+       |           ^
+    270|   let linkedActionId: string | null = null;
+    271|   if (input.actionId) {
+ ❯ Proxy._transactionWithCallback node_modules/@prisma/client/src/runtime/getPrismaClient.ts:810:18
+ ❯ writeTransaction lib/copilot/confirmation.ts:132:14
+ ❯ ChildProcess.<anonymous> tests/p3ReviewBoundaries.test.ts:89:143
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  tests/ux2SourceBinding.test.ts > UX-2A 来源准入与转存血缘 > 撤权后的新采纳被拒绝，历史候选仍可见且不可采纳
+PrismaClientValidationError: 
+Invalid `db.project.create()` invocation in
+D:/Projects/hongmen/tests/ux2SourceBinding.test.ts:16:30
+
+  13 afterAll(async () => { await db.$disconnect(); fs.rmSync(isolated.dir, { recursive: true, force: true }); });
+  14 const fetcher: FetchLike = async () => ({ status: 200, etag: "fixture", body: [{ sha: "a".repeat(40), commit: { message: "候选资料", author: { name: "测试" } } }] });
+  15 async function fixture() {
+→ 16   const p = await db.project.create({
+         data: {
+           title: "来源隔离",
+           goal: "核对",
+           description: "fixture",
+           memberships: {
+             create: {
+               userId: "cmvuchapq0000608o9mvsr18w",
+               role: "OWNER"
+             }
+           },
+       +   scenario: ProjectScenario
+         }
+       })
+
+Argument `scenario` is missing.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ fixture tests/ux2SourceBinding.test.ts:16:13
+     14| const fetcher: FetchLike = async () => ({ status: 200, etag: "fixture"…
+     15| async function fixture() {
+     16|   const p = await db.project.create({ data: { title: "来源隔离", goal: "核对…
+       |             ^
+     17|   const { connection: c } = await createConnection(owner, p.id, { repo…
+     18|   const s = await db.externalSignal.findFirstOrThrow({ where: { connec…
+ ❯ tests/ux2SourceBinding.test.ts:23:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  tests/ux2SourceBinding.test.ts > UX-2A 来源准入与转存血缘 > 304 只改变观察版本，不撤销合法候选的授权
+PrismaClientValidationError: 
+Invalid `db.project.create()` invocation in
+D:/Projects/hongmen/tests/ux2SourceBinding.test.ts:16:30
+
+  13 afterAll(async () => { await db.$disconnect(); fs.rmSync(isolated.dir, { recursive: true, force: true }); });
+  14 const fetcher: FetchLike = async () => ({ status: 200, etag: "fixture", body: [{ sha: "a".repeat(40), commit: { message: "候选资料", author: { name: "测试" } } }] });
+  15 async function fixture() {
+→ 16   const p = await db.project.create({
+         data: {
+           title: "来源隔离",
+           goal: "核对",
+           description: "fixture",
+           memberships: {
+             create: {
+               userId: "cmvuchapq0000608o9mvsr18w",
+               role: "OWNER"
+             }
+           },
+       +   scenario: ProjectScenario
+         }
+       })
+
+Argument `scenario` is missing.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ fixture tests/ux2SourceBinding.test.ts:16:13
+     14| const fetcher: FetchLike = async () => ({ status: 200, etag: "fixture"…
+     15| async function fixture() {
+     16|   const p = await db.project.create({ data: { title: "来源隔离", goal: "核对…
+       |             ^
+     17|   const { connection: c } = await createConnection(owner, p.id, { repo…
+     18|   const s = await db.externalSignal.findFirstOrThrow({ where: { connec…
+ ❯ tests/ux2SourceBinding.test.ts:30:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  tests/ux2SourceBinding.test.ts > UX-2A 来源准入与转存血缘 > 原已提交请求在撤权后只回放原效果，不再创建 Capture
+PrismaClientValidationError: 
+Invalid `db.project.create()` invocation in
+D:/Projects/hongmen/tests/ux2SourceBinding.test.ts:16:30
+
+  13 afterAll(async () => { await db.$disconnect(); fs.rmSync(isolated.dir, { recursive: true, force: true }); });
+  14 const fetcher: FetchLike = async () => ({ status: 200, etag: "fixture", body: [{ sha: "a".repeat(40), commit: { message: "候选资料", author: { name: "测试" } } }] });
+  15 async function fixture() {
+→ 16   const p = await db.project.create({
+         data: {
+           title: "来源隔离",
+           goal: "核对",
+           description: "fixture",
+           memberships: {
+             create: {
+               userId: "cmvuchapq0000608o9mvsr18w",
+               role: "OWNER"
+             }
+           },
+       +   scenario: ProjectScenario
+         }
+       })
+
+Argument `scenario` is missing.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ fixture tests/ux2SourceBinding.test.ts:16:13
+     14| const fetcher: FetchLike = async () => ({ status: 200, etag: "fixture"…
+     15| async function fixture() {
+     16|   const p = await db.project.create({ data: { title: "来源隔离", goal: "核对…
+       |             ^
+     17|   const { connection: c } = await createConnection(owner, p.id, { repo…
+     18|   const s = await db.externalSignal.findFirstOrThrow({ where: { connec…
+ ❯ tests/ux2SourceBinding.test.ts:37:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  tests/ux2SourceBinding.test.ts > UX-2A 来源准入与转存血缘 > 旧无绑定候选不能凭当前 ACTIVE 猜测授权
+PrismaClientValidationError: 
+Invalid `db.project.create()` invocation in
+D:/Projects/hongmen/tests/ux2SourceBinding.test.ts:16:30
+
+  13 afterAll(async () => { await db.$disconnect(); fs.rmSync(isolated.dir, { recursive: true, force: true }); });
+  14 const fetcher: FetchLike = async () => ({ status: 200, etag: "fixture", body: [{ sha: "a".repeat(40), commit: { message: "候选资料", author: { name: "测试" } } }] });
+  15 async function fixture() {
+→ 16   const p = await db.project.create({
+         data: {
+           title: "来源隔离",
+           goal: "核对",
+           description: "fixture",
+           memberships: {
+             create: {
+               userId: "cmvuchapq0000608o9mvsr18w",
+               role: "OWNER"
+             }
+           },
+       +   scenario: ProjectScenario
+         }
+       })
+
+Argument `scenario` is missing.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ fixture tests/ux2SourceBinding.test.ts:16:13
+     14| const fetcher: FetchLike = async () => ({ status: 200, etag: "fixture"…
+     15| async function fixture() {
+     16|   const p = await db.project.create({ data: { title: "来源隔离", goal: "核对…
+       |             ^
+     17|   const { connection: c } = await createConnection(owner, p.id, { repo…
+     18|   const s = await db.externalSignal.findFirstOrThrow({ where: { connec…
+ ❯ tests/ux2SourceBinding.test.ts:45:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  tests/ux2SourceBinding.test.ts > UX-2A 来源准入与转存血缘 > 来源身份损坏或换连接的同 SHA 不能借新许可复活
+PrismaClientValidationError: 
+Invalid `db.project.create()` invocation in
+D:/Projects/hongmen/tests/ux2SourceBinding.test.ts:16:30
+
+  13 afterAll(async () => { await db.$disconnect(); fs.rmSync(isolated.dir, { recursive: true, force: true }); });
+  14 const fetcher: FetchLike = async () => ({ status: 200, etag: "fixture", body: [{ sha: "a".repeat(40), commit: { message: "候选资料", author: { name: "测试" } } }] });
+  15 async function fixture() {
+→ 16   const p = await db.project.create({
+         data: {
+           title: "来源隔离",
+           goal: "核对",
+           description: "fixture",
+           memberships: {
+             create: {
+               userId: "cmvuchapq0000608o9mvsr18w",
+               role: "OWNER"
+             }
+           },
+       +   scenario: ProjectScenario
+         }
+       })
+
+Argument `scenario` is missing.
+ ❯ ar node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:211:6
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ fixture tests/ux2SourceBinding.test.ts:16:13
+     14| const fetcher: FetchLike = async () => ({ status: 200, etag: "fixture"…
+     15| async function fixture() {
+     16|   const p = await db.project.create({ data: { title: "来源隔离", goal: "核对…
+       |             ^
+     17|   const { connection: c } = await createConnection(owner, p.id, { repo…
+     18|   const s = await db.externalSignal.findFirstOrThrow({ where: { connec…
+ ❯ tests/ux2SourceBinding.test.ts:50:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+
+ Test Files  2 failed | 2 passed (4)
+      Tests  8 failed | 22 passed (30)
+   Start at  10:19:55
+   Duration  14.78s (transform 1.42s, setup 0ms, import 7.63s, tests 5.84s, environment 0ms)
+

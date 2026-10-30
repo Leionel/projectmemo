@@ -191,8 +191,11 @@ export struct RepoSignalPanel {
             Text(`${s.sha.substring(0, 10)} · ${s.authorName}${s.status === 'ADOPTED' && s.adoptedCaptureId !== null ? ' · 已写入资料记录' : ''}`).fontSize(11).fontColor(PMColors.INK_TERTIARY)
             if (s.status === 'CANDIDATE') {
               Row({ space: 8 }) {
-                Button('采纳为项目资料').fontSize(12).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy).onClick(() => { this.adopt(s.id); })
+                Button('采纳为项目资料').fontSize(12).backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).enabled(!this.busy && s.canAdopt !== false).onClick(() => { this.adopt(s.id); })
                 Button('忽略').fontSize(12).backgroundColor(PMColors.SURFACE).fontColor(PMColors.INK_SECONDARY).enabled(!this.busy).onClick(() => { this.dismiss(s.id); })
+              }
+              if (s.canAdopt === false && s.adoptionUnavailableReason) {
+                Text(s.adoptionUnavailableReason ?? '').fontSize(12).fontColor(PMColors.INK_SECONDARY)
               }
             }
           }.width('100%').alignItems(HorizontalAlign.Start).padding(10).borderRadius(10)

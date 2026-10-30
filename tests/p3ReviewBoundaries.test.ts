@@ -21,6 +21,7 @@ import { PrismaClient } from "@/lib/generated/prisma/client";
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { db } from "@/lib/db";
 import { actOnSignal, actOnConnection, refreshConnection, type FetchLike } from "@/lib/sensing/repoSource";
+import { repositoryGrantBinding } from "@/lib/sensing/repoGrantBinding";
 import { createMission } from "@/lib/mission/missionService";
 import { createSession } from "@/lib/auth/session";
 import { event } from "@/lib/mission/repository";
@@ -46,7 +47,7 @@ async function project() {
 async function signalFixture() {
   const p = await project();
   const c = await db.sourceConnection.create({ data: { projectId: p.id, ownerUserId: owner, repo: "fixture/repo", ref: "main" } });
-  const s = await db.externalSignal.create({ data: { connectionId: c.id, projectId: p.id, ownerUserId: owner, sha: sha(1), title: "真实候选", authorName: "fixture", url: `https://github.com/fixture/repo/commit/${sha(1)}` } });
+  const s = await db.externalSignal.create({ data: { connectionId: c.id, projectId: p.id, ownerUserId: owner, sourceBindingJson: repositoryGrantBinding(c, c.revision), sha: sha(1), title: "真实候选", authorName: "fixture", url: `https://github.com/fixture/repo/commit/${sha(1)}` } });
   return { p, c, s };
 }
 

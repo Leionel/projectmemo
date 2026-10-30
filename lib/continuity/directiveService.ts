@@ -1,3 +1,5 @@
+import { invalidateContinuityConsumers } from "./invalidation";
+import { claimControlState } from "@/lib/memory/claimEffective";
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
@@ -40,8 +42,11 @@ export async function effectiveContinuity(userId: string, scope: DirectiveScope,
   const epoch = (subset: typeof rows) => subset.map(e => ({ id: e.id, seq: e.seq, operation: e.operation,
     segment: +now < +e.validFrom ? "BEFORE" : e.validUntil && +now >= +e.validUntil ? "AFTER" : "ACTIVE" }));
   const future = rows.flatMap(e => [e.validFrom, e.validUntil]).filter((v): v is Date => !!v && +v > +now).sort((a, b) => +a - +b);
+  const cognition = await claimControlState(userId, scope, tx, now);
+  if (cognition.nextBoundary) future.push(cognition.nextBoundary);
+  future.sort((a,b) => +a-+b);
   return { schemaVersion: 1, seq: user.continuitySeq, intentHash: jsonHash({ policy: intentPolicy, scope, epoch: epoch(rows) }),
-    reusePolicyHash: jsonHash({ scope, epoch: epoch(rows.filter(e => e.kind === "USE_SUPPRESSION")) }), nextBoundary: future[0]?.toISOString() ?? null,
+    reusePolicyHash: jsonHash({ scope, epoch: epoch(rows.filter(e => e.kind === "USE_SUPPRESSION")), ...(cognition.epoch.length ? { cognitionEpoch: cognition.epoch } : {}) }), nextBoundary: future[0]?.toISOString() ?? null,
     directives, workingObjective: [...directives].reverse().find(d => d.kind === "WORKING_OBJECTIVE")?.quote ?? null,
     constraints: [...new Set(active.flatMap(e => e.kind === "CONSTRAINT" ? [e.quote] : (record(e.admissionJson).constraints ?? []) as string[]))], stopped: directives.some(d => d.kind === "STOP") };
 }
@@ -126,25 +131,7 @@ export async function admitDirectiveInTx(actor: ConversationActor, raw: unknown,
     const t = await tx.conversationTurn.findUniqueOrThrow({ where: { id: String(candidateSource.turnId) } });
     await tx.conversationTurn.update({ where: { id: t.id }, data: { readManifestJson: json({ ...record(t.readManifestJson), directiveCandidate: { ...record(record(t.readManifestJson).directiveCandidate), status: "USER_CONFIRMED" } }) } });
   }
-  // No Conversation.version change: the original in-flight turn retains its base-version slot.
-  const active = await tx.conversationTurn.findMany({ where: { status: { in: ["OBSERVING", "GENERATING"] }, conversation: { ownerUserId: actor.userId } } });
-  for (const t of active) {
-    const m = record(t.readManifestJson), coord = record(m.coordination), scopes = coord.scopes as DirectiveScope[] | undefined;
-    if (scopes?.some(s => projectIds.includes(s.projectId) && (!input.scope.conversationId || input.scope.conversationId === t.conversationId) && (!input.scope.missionId || s.missionId === input.scope.missionId)))
-      await tx.conversationTurn.update({ where: { id: t.id }, data: { readManifestJson: json({ ...m, coordination: { ...coord,
-        state: kind === "STOP" && input.operation !== "WITHDRAW" ? "STOPPING" : "INVALIDATED", invalidatedAt: now.toISOString(),
-        drainDeadline: new Date(+now + 25000).toISOString(), pendingEvents: [...(coord.pendingEvents as string[] ?? []), ...events].slice(-64) } }) } });
-  }
-  const missions = await tx.agentMission.findMany({ where: { ownerUserId: actor.userId, projectId: { in: projectIds },
-    ...(input.scope.missionId ? { id: input.scope.missionId } : {}), status: { notIn: ["SUCCEEDED", "FAILED", "CANCELLED"] } } });
-  if (!input.scope.conversationId) for (const m of missions) {
-    const pause = ["RUNNING", "READY", "WAITING_APPROVAL"].includes(m.status);
-    await tx.agentMissionApproval.updateMany({ where: { missionId: m.id, status: { in: ["PENDING", "APPROVED"] } }, data: { status: "OBSOLETE" } });
-    await tx.agentMissionStep.updateMany({ where: { missionId: m.id, status: { in: ["READY", "PLANNED", "RUNNING", "WAITING_APPROVAL"] } }, data: { status: "OBSOLETE" } });
-    await tx.agentMission.update({ where: { id: m.id }, data: { version: { increment: 1 }, contextVersion: { increment: 1 }, planRevision: { increment: 1 },
-      ...(pause ? { status: "PAUSED", pauseReason: "REVIEW_REQUIRED", executionSlot: null, leaseOwner: null, leaseUntil: null, leaseEpoch: { increment: 1 } } : {}),
-      planJson: json({ ...record(m.planJson), continuityInvalidated: events, ...(pause ? { resumeStatus: "READY" } : {}) }) } });
-  }
+  await invalidateContinuityConsumers(tx, actor.userId, input.scope, events, kind === "STOP" && input.operation !== "WITHDRAW", projectIds, now);
   return { admission, events, view: await effectiveContinuity(actor.userId, input.scope, tx) };
 }
 export async function submitDirective(actor: ConversationActor, conversationId: string, raw: unknown) {

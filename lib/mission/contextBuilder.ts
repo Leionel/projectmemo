@@ -1,3 +1,4 @@
+import { claimControlState } from "@/lib/memory/claimEffective";
 import { verifyMissionResult } from "./resultVerifier";
 import { AppError } from "@/lib/api";
 import { metricInputSources } from "./metricInputSources";
@@ -33,6 +34,7 @@ function compactData(value: unknown) {
 }
 export async function buildContext(m: AgentMission, tools: ToolSet = projectTools) {
   const continuity = await effectiveContinuity(m.ownerUserId, { projectId: m.projectId, missionId: m.id });
+  const cognitiveControls = await claimControlState(m.ownerUserId, { projectId: m.projectId, missionId: m.id });
   const delegation = (m.planJson as { delegation?: { candidateSources?: unknown } }).delegation;
   const suppressing = continuity.directives.some(d => d.kind === "USE_SUPPRESSION");
   const where = { missionId: m.id };
@@ -95,7 +97,7 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
   let completionReadback:unknown={canFinish:false,reason:"OUTPUT_REQUIRED"};
   if(outputs[0])try{completionReadback={canFinish:true,...await verifyMissionResult(db,m,outputs[0].id),note:"服务端验收条件已满足；若草稿回答了目标，选择finish，不重复保存相同草稿。NEEDS_REVIEW标识内容核验状态，不冒充现实效果。"};}
   catch(error){if(!(error instanceof AppError))throw error;completionReadback={canFinish:false,outputId:outputs[0].id,reason:error.code,checks:error.details};}
-  const context = { completionReadback,actionReadbacks,investigationDelegation: delegation ? { policy: m.continuationPolicyJson, newSourcePointers: delegation.candidateSources ?? [] } : undefined, evidencePolicy: "UNKNOWN provenance is reference only, never independent supporting evidence; re-read original sources before a claim or effect.", continuity: { intentHash: continuity.intentHash, reusePolicyHash: continuity.reusePolicyHash, workingObjective: continuity.workingObjective, constraints: continuity.constraints }, strategyPrompt: { id: missionStrategyV2.id, version: missionStrategyV2.version }, decisionScenario:(m.planJson as {decisionScenario?:unknown}).decisionScenario??null, schemaVersion: 2, promptVersion: fitReviews.length?"mission-context-v3-e0":"mission-context-v2", outputTokenLimit: decisionTokenLimit(m.lastErrorJson), goal: m.goal,
+  const context = { userInterpretationCorrections: { items: cognitiveControls.corrections.slice(-16), total: cognitiveControls.corrections.length, complete: cognitiveControls.corrections.length <= 16, policy: "用户对原主张的解释纠正，仅适用原定位；不是新目标、工具许可或独立实证" }, completionReadback,actionReadbacks,investigationDelegation: delegation ? { policy: m.continuationPolicyJson, newSourcePointers: delegation.candidateSources ?? [] } : undefined, evidencePolicy: "UNKNOWN provenance is reference only, never independent supporting evidence; re-read original sources before a claim or effect.", continuity: { intentHash: continuity.intentHash, reusePolicyHash: continuity.reusePolicyHash, workingObjective: continuity.workingObjective, constraints: continuity.constraints }, strategyPrompt: { id: missionStrategyV2.id, version: missionStrategyV2.version }, decisionScenario:(m.planJson as {decisionScenario?:unknown}).decisionScenario??null, schemaVersion: 2, promptVersion: fitReviews.length?"mission-context-v3-e0":"mission-context-v2", outputTokenLimit: decisionTokenLimit(m.lastErrorJson), goal: m.goal,
     protocolRepair: (m.lastErrorJson as {code?:string})?.code === "MODEL_PROTOCOL_ERROR" ? { reason: (m.lastErrorJson as {diagnostic?:{reason?:string}}).diagnostic?.reason } : undefined,
     successCriteria: m.successCriteriaJson, constraints: m.constraintsJson, constraintsVersion: m.constraintsVersion, researchScope: m.researchScopeJson,
     scopeRevision: m.researchScopeVersion, contextVersion: m.contextVersion, planRevision: m.planRevision, budgetLimits:m.budgetJson,budgetUsed: m.budgetUsedJson,

@@ -3,6 +3,7 @@ import { AppError } from "@/lib/api";
 import { record, type Tx } from "@/lib/conversation/repository";
 import { effectiveContinuity } from "./directiveService";
 import { isFeatureEnabled } from "@/lib/config/features";
+import { repositoryGrantCurrent } from "@/lib/sensing/repoGrantBinding";
 
 export type SourceUse = { state: "ALLOWED" | "SUPPRESSED" | "UNKNOWN"; roots: string[]; independentEvidence: boolean; reason: string };
 /** Follow original roots, not copies of conclusions. Cycles, missing manifests and cross-project edges stay unknown. */
@@ -51,7 +52,25 @@ export async function sourceLineage(projectId: string, id: string, tx: Tx = db, 
       blocked = !c || !["COMMITS_AND_CI", "COMMITS_CI_LOGS"].includes(c.signalKind) || r.kind === "LOG" && c.signalKind !== "COMMITS_CI_LOGS";
     } else known = false;
     derived = true;
-  } else if (id.startsWith("capture:")) known = !!await tx.capture.findFirst({ where: { id: id.slice(8), projectId }, select: { id: true } });
+  } else if (id.startsWith("capture:")) {
+    const capture = await tx.capture.findFirst({ where: { id: id.slice(8), projectId }, select: { id: true, sourceType: true } });
+    known = !!capture;
+    const signals = await tx.externalSignal.findMany({ where: { adoptedCaptureId: id.slice(8), projectId }, select: { id: true } });
+    childIds.push(...signals.map(s => "signal:" + s.id));
+    if (signals.length || capture?.sourceType === "仓库信号") { derived = true; known &&= signals.length > 0; }
+  } else if (id.startsWith("signal:")) {
+    const signal = await tx.externalSignal.findFirst({ where: { id: id.slice(7), projectId }, include: { connection: true } });
+    known = !!signal;
+    if (signal) {
+      childIds.push("repo:" + signal.connectionId); derived = true;
+      if (signal.connection.projectId !== projectId || signal.connection.ownerUserId !== signal.ownerUserId) known = false;
+      if (!repositoryGrantCurrent(signal.sourceBindingJson, signal.connection)) {
+        blocked = signal.connection.status !== "ACTIVE" || signal.connection.revokedAt !== null;
+        if (!blocked) known = false;
+        else blockedReason = "SOURCE_PERMISSION_REVOKED";
+      }
+    }
+  }
   else if (id.startsWith("attachment:")) known = !!await tx.attachment.findFirst({ where: { id: id.slice(11), projectId }, select: { id: true } });
   else if (id.startsWith("action:")) {
     const a = await tx.actionItem.findFirst({ where: { id: id.slice(7), projectId } }); known = !!a;

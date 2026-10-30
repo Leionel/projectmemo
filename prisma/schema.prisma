@@ -90,6 +90,7 @@ enum CardRelationType {
 }
 
 model Project {
+ cognitiveClaims AgentClaim[]
   impactJobs ProjectImpactJob[]
   decisionProposals DecisionScenarioProposal[]
   missionArtifactReceipts MissionArtifactReceipt[]
@@ -999,6 +1000,7 @@ model DeliverableEvidence {
 }
 
 model User {
+ cognitiveClaims AgentClaim[]
   continuitySeq Int @default(0)
   directiveEvents AgentDirectiveEvent[]
   conversations Conversation[]
@@ -1461,6 +1463,7 @@ model ExternalSignal {
  adoptedCaptureId String?
  linkedActionId String?
  fetchedAt DateTime @default(now())
+ sourceBindingJson Json?
  connection SourceConnection @relation(fields:[connectionId],references:[id],onDelete:Cascade)
  project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
  owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
@@ -1480,4 +1483,50 @@ model RepoSignalCommand {
  createdAt DateTime @default(now())
  signal ExternalSignal @relation(fields:[signalId],references:[id],onDelete:Cascade)
  @@unique([ownerUserId,requestId])
+}
+
+model AgentClaim {
+ id String @id @default(cuid())
+ ownerUserId String
+ projectId String
+ scopeKey String
+ conversationId String?
+ missionId String?
+ originKey String
+ originJson Json
+ kind String
+ canonicalStatement String
+ conditionsJson Json
+ currentRevision Int @default(1)
+ statusProjection String @default("PROPOSED")
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
+ project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
+ events AgentClaimEvent[]
+ @@unique([ownerUserId,scopeKey,originKey])
+ @@index([ownerUserId,projectId])
+}
+model AgentClaimEvent {
+ id String @id @default(cuid())
+ claimId String
+ ownerUserId String
+ revision Int
+ requestId String
+ payloadHash String
+ eventKind String
+ actorKind String
+ userQuote String?
+ modelInterpretation String?
+ targetHash String
+ evidenceManifestJson Json
+ assessmentJson Json
+ validFrom DateTime @default(now())
+ validUntil DateTime?
+ controlSeq Int?
+ createdAt DateTime @default(now())
+ claim AgentClaim @relation(fields:[claimId],references:[id],onDelete:Cascade)
+ @@unique([claimId,revision])
+ @@unique([ownerUserId,requestId])
+ @@index([ownerUserId,controlSeq])
 }

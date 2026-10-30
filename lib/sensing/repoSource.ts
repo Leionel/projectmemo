@@ -5,6 +5,7 @@ import { z } from "zod";
 import { writeTransaction } from "@/lib/copilot/confirmation";
 import { json, jsonHash } from "@/lib/mission/contracts";
 import type { Prisma } from "@/lib/generated/prisma/client";
+import { repositoryGrantBinding, repositoryGrantCurrent } from "./repoGrantBinding";
 
 /**
  * P3-B 单仓库只读感知（最小版）：GitHub 公开仓库 commits 信号。
@@ -140,6 +141,7 @@ export async function refreshConnection(userId: string, projectId: string, conne
           await tx.externalSignal.create({
             data: {
               connectionId: connection.id, projectId, ownerUserId: userId, sha: commit.sha,
+              sourceBindingJson: repositoryGrantBinding(connection, connection.revision + 1),
               kind: "COMMITS", title: sanitizeTitle(commit.commit?.message ?? ""),
               authorName: (commit.commit?.author?.name ?? "未知").slice(0, 80),
               committedAt: commit.commit?.author?.date ? new Date(commit.commit.author.date) : null,
@@ -147,6 +149,11 @@ export async function refreshConnection(userId: string, projectId: string, conne
             },
           });
           created += 1;
+        } else if (existing.status === "CANDIDATE") {
+          // Rebind only a candidate actually observed by this authorized request, never an old adopted Capture.
+          await tx.externalSignal.update({ where: { id: existing.id }, data: {
+            sourceBindingJson: repositoryGrantBinding(connection, connection.revision + 1),
+          } });
         }
       }
       await tx.sourceConnection.update({ where: { id: connectionId }, data: complete
@@ -186,7 +193,13 @@ export async function listSignals(userId: string, projectId: string) {
     enabled: true, ciAvailable: isFeatureEnabled("REPO_CI_OBSERVER_ENABLED", false),
     note: "信号只是候选资料；采纳需确认，未采纳不写入任何项目事实。commit/CI 不构成现实完成证明。",
     connections: await Promise.all(connections.map(async c => ({ ...viewOfConnection(c), ...(await refreshSummary(c)) }))),
-    signals: signals.map(viewOfSignal),
+    signals: signals.map(s => {
+      const connection = connections.find(c => c.id === s.connectionId);
+      const current = !!connection && repositoryGrantCurrent(s.sourceBindingJson, connection);
+      return { ...viewOfSignal(s), canAdopt: s.status === "CANDIDATE" && current,
+        adoptionUnavailableReason: s.status !== "CANDIDATE" || current ? null : connection?.status === "REVOKED"
+          ? "连接已撤销，保留历史资料" : "原来源需要重新核对" };
+    }),
   };
 }
 
@@ -249,6 +262,11 @@ export async function actOnSignal(userId: string, projectId: string, signalId: s
     return finish({ signal: viewOfSignal(signal), ...(signal.adoptedCaptureId ? { captureId: signal.adoptedCaptureId } : {}) });
   }
   if (signal.status !== "CANDIDATE") throw new AppError("SIGNAL_CHANGED", "该信号已处理，请刷新列表", 409);
+  const connection = await tx.sourceConnection.findFirst({ where: { id: signal.connectionId, projectId, ownerUserId: userId } });
+  if (!connection || connection.status !== "ACTIVE" || connection.revokedAt)
+    throw new AppError("CONNECTION_REVOKED", "原连接已撤销，不能继续采纳；历史记录保留", 409);
+  if (!repositoryGrantCurrent(signal.sourceBindingJson, connection))
+    throw new AppError("SIGNAL_SOURCE_RECHECK_REQUIRED", "原信号缺少有效来源绑定，请重新读取原来源后核对", 409);
   let linkedActionId: string | null = null;
   if (input.actionId) {
     // 关联行动只作资料指引：不改变行动状态，不产生完成回执；跨项目/模拟/已完成行动一律拒绝。

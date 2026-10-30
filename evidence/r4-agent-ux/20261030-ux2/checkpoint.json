@@ -1,0 +1,69 @@
+{
+  "recordedAt": "2026-10-30T02:35:21.137550+00:00",
+  "status": "IN_PROGRESS_CHECKPOINT_NOT_UX2_ACCEPTANCE",
+  "baseline": "2017c317f2db3ceeabf3e30e51f4c25ee0d49bd6",
+  "branch": "codex/ux2-memory-evolution",
+  "checks": {
+    "targetedTests": {
+      "files": 8,
+      "passed": 45,
+      "exitCode": 0,
+      "log": "checkpoint-tests.log"
+    },
+    "types": {
+      "exitCode": 0,
+      "log": "checkpoint-types.log"
+    },
+    "affectedLint": {
+      "exitCode": 0,
+      "log": "checkpoint-lint.log"
+    },
+    "harmonyTests": {
+      "passed": 86,
+      "exitCode": 0,
+      "log": "checkpoint-harmony.log"
+    }
+  },
+  "protectedFilesUnchanged": {
+    "AGENTS.md": true,
+    "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md": true,
+    "harmonyos/build-profile.json5": true,
+    "tsconfig.json": true
+  },
+  "paidModelCalls": 0,
+  "realDatabaseMigrated": false,
+  "externalWrites": 0,
+  "deployed": false,
+  "remaining": [
+    "Complete UX-2A Web/Harmony correction and evidence interactions",
+    "Race/expiry/all-consumer/source-policy tests and fixes",
+    "Old-copy migration upgrade, full suite, Web E2E, HAP",
+    "UX-2B compiler/digest/composer",
+    "UX-2C hypothesis lifecycle and original outcome journey",
+    "Independent quality, real model budget, natural days and device acceptance"
+  ],
+  "notes": "R4_AGENT_UX_IMPLEMENTATION_NOTES.md",
+  "implementationFileHashes": {
+    "components/RepoSignalsCard.tsx": "802c891687f835c185bdebe7a1da4172e7e9aea2cc3ca789d6ddfe1a6ff42ac4",
+    "harmonyos/entry/src/main/ets/components/RepoSignalPanel.ets": "de2b8a6f42742f52a41134fb5516759f1581cd37dd136465ce4df041c6882851",
+    "harmonyos/entry/src/main/ets/models/RepoSignal.ets": "17979210c0bf3d6fa0b27bdd343046c50f237db122b223c22ca9cd87077da6d1",
+    "lib/continuity/directiveService.ts": "f7bd56b7ac69c0b736652f7dc7a5b93a19402f26ab8e46a1d132f854971dcb01",
+    "lib/continuity/sourcePolicy.ts": "62f8a68f90c328b1c3e420c4518fb19e3e68356228f3b7ce3ac73d7f95a76c11",
+    "lib/continuity/invalidation.ts": "33e3ff1d02494c18f50daff015aac26a34b75d925e9c3b10ebd773b749176925",
+    "lib/conversation/investigationService.ts": "94cf3048ff39cff4a963557494308c7af29dac1c8f8fe21695e8b68b3f1bf507",
+    "lib/mission/contextBuilder.ts": "ced719450a264bb03c08c7b6254e8b40cdc8b0749c6c3146bfb914ae239b538a",
+    "lib/sensing/repoSource.ts": "8bfa4f7c7e26962f0f8ea370daa5ed9c28a435bc5463f38117e59cc258d12dc8",
+    "lib/sensing/repoGrantBinding.ts": "d1d240e7c54dedb77be98ab02b9fe901297014a45f04a0444040cae4beeacc61",
+    "lib/memory/claimLocator.ts": "735f91899ed5432de2da08954b44b88276b709083ecddc89b201ba0d9a1850ff",
+    "lib/memory/claimEffective.ts": "d38f57113a4ac4b71df258069a298653fd7d527b9bad962c16243d42e7b50184",
+    "lib/memory/claimService.ts": "87ab4f603e5164adb202d677ad7b9172597f7b33fb8a36a24521047afe0b1d93",
+    "app/api/projects/[id]/agent-claims/route.ts": "21c523ef6374f8c741ad89ab6f37b7776873be9e1ef41d635677b0c42b89339d",
+    "prisma/schema.prisma": "fa05b058c15bee522f8477f86ba6a3a2dc32fe8eb94f74bd2e7217ed980f3361",
+    "prisma/migrations/20261030103000_ux2_signal_source_binding/migration.sql": "7f8d5d692462b7059c46fddd4e8f25bf4975dda0349d8cd77a088b2bc1f00590",
+    "prisma/migrations/20261030110000_ux2_claim_history/migration.sql": "f134c5cae85cfe763124cd379ff85f4c483d8bc4d3f0a309e2e29f23aded816f",
+    "tests/p3ReviewBoundaries.test.ts": "9dd82de50cc7bf457425520b33cc9d779e4cf26c04a77015664a99f00d6d43ce",
+    "tests/ux2SourceBinding.test.ts": "2ac1e59f285bea513540900df416bc0295f5069889368ea804b7aacc7e381de3",
+    "tests/ux2ClaimCorrection.test.ts": "ef89815d1286a4b2e8433b059f37298c03307a98c253e4de5d7bba939ae862ce",
+    "R4_AGENT_UX_IMPLEMENTATION_NOTES.md": "c549276e8fa078833cc1634283cab533832afa44c41c2043d001023d8affe3b8"
+  }
+}

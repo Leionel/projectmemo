@@ -2,6 +2,8 @@
 // 信号只是候选资料；采纳需用户确认；commit/CI 不构成现实完成证明。
 
 export interface SignalView {
+  canAdopt?: boolean;
+  adoptionUnavailableReason?: string | null;
   id: string;
   connectionId: string;
   kind: string;

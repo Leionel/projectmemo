@@ -5,6 +5,7 @@ import styles from "./MissionPanel.module.css";
 import repoStyles from "./RepoSignalsCard.module.css";
 
 type SignalView = {
+  canAdopt?: boolean; adoptionUnavailableReason?: string | null;
   id: string; connectionId: string; kind: string; sha: string; title: string; authorName: string;
   committedAt: string | null; url: string; status: string; adoptedAt: string | null; adoptedCaptureId: string | null; linkedActionId: string | null;
 };
@@ -142,7 +143,8 @@ export function RepoSignalsCard({ projectId, initialOpen = false }: { projectId:
                 <option value="">不关联行动</option>
                 {actions.map(a => <option key={a.id} value={a.id}>{a.title}</option>)}
               </select>
-              <button disabled={busy} onClick={() => void adopt(s.id)}>采纳为项目资料</button>
+              <button disabled={busy || s.canAdopt === false} onClick={() => void adopt(s.id)}>采纳为项目资料</button>
+              {s.canAdopt === false && s.adoptionUnavailableReason && <span role="status">{s.adoptionUnavailableReason}</span>}
               <button disabled={busy} onClick={() => void dismiss(s.id)}>忽略</button>
             </div>
           )}

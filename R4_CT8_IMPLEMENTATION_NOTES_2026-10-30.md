@@ -49,14 +49,22 @@
 | `npm.cmd run test:e2e` | 隔离库 + 生产构建 E2E 通过 |
 | `npm.cmd run harmony:test` | 86 tests, 0 failure/error |
 | `npm.cmd run harmony:build` | 通过；`entry-default-unsigned.hap` 6,747,344 bytes，sha256 `13b03c3fabb501d4e48b2b66a0ba2939726e1f84af9bdb4abc54f1e138527f1b` |
+| Web 浏览器核对（隔离 E2E 库 + 生产构建） | 登录 e2e-reviewer 后打开项目 missions，展开“项目经验历史”，ACTIVE 经验卡显示适用条件、支持/反例计数、未注入/资格说明与“回原结果核对”入口；PASS |
 
 新增 `tests/ct8OutcomeExperience.test.ts`（11 场景）：结果分层、未采用/反例、条件拆分、独立样本去重、Step 失败归因、Mission 注入与模型决策/撤销、Conversation 匹配器与 use、来源抑制/时间边界/条件不匹配、GET 纯读与显式整理、CAS/幂等、跨项目迁移、注入上限。
 
 迁移证据：`prisma/test-vitest.db`、`prisma/projectmemo-e2e.db` 均从空库重放全部迁移成功；`p3ReviewBoundaries` 旧库增量升级用例通过。
+
+## 提交
+
+- `58c475b` chore(db): restore UX-2 baseline schema migrations in CT-8 worktree
+- `31c5fa1` feat(experience): implement CT-8 conditional outcome experience
+- `eabc457` feat(ui): expose CT-8 experience eligibility on web and harmony
+- `cb83b87` test(experience): add CT-8 scenarios and implementation notes
 
 ## 剩余 Gate
 
 - 真实模型 campaign / 隐藏题 / 独立人评未执行；当前为规则、脚本模型与隔离数据库工程验证，不能宣称 CT-8 质量对照通过。
 - HAP 为 unsigned，未安装目标设备；签名、模拟器/真机旅程不在此次通过范围。
 - 未部署、未迁移真实开发库、未做真实外部写入。
-- Web 新经验区块未做独立截图/人评；E2E 通过不等于视觉验收。
+- Web 新经验区块已做隔离浏览器路径核对，但未做独立视觉人评；E2E/浏览器 PASS 不等于视觉验收。

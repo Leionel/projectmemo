@@ -490,7 +490,7 @@ struct MissionDetail {
       if (this.mission.status === 'WAITING_INPUT' && this.mission.question !== null) { this.WaitingInput() }
       DecisionScenarioPanel({ missionId: this.missionId, disabled: this.readState !== 'fresh' || this.busy || missionTerminal(this.mission.status), onAdopted: (): void => { this.refresh(); } })
       if (this.mission.experience !== undefined && this.mission.experience.enabled && this.mission.experience.suggestions.length > 0) {
-        ExperiencePanel({ projectId: this.projectId, suggestions: this.mission.experience.suggestions, onChanged: (): void => { this.refresh(); } })
+        ExperiencePanel({ projectId: this.projectId, missionId: this.mission.id, suggestions: this.mission.experience.suggestions, onChanged: (): void => { this.refresh(); } })
       }
       GoalQuestionPanel({ projectId: this.projectId, missionId: this.missionId, compact: true })
       ProjectImpactPanel({ projectId: this.projectId })

@@ -1,3 +1,5 @@
+import { ExperienceListReply } from './Experience';
+
 export class ClaimOrigin {
   kind: string = 'MESSAGE'; id: string = ''; contentHash: string = '';
   offsetEncoding: string = 'UTF16_CODE_UNITS'; normalization: string = 'RAW_V1';
@@ -37,4 +39,4 @@ export interface HypothesisView {
 }
 export interface HypothesisCoverage { hasMore: boolean; }
 export class HypothesisListView { items: HypothesisView[] = []; coverage: HypothesisCoverage = { hasMore: false }; }
-export interface AgentMemoryReply { memory: DigestListView; hypotheses: HypothesisListView; }
+export interface AgentMemoryReply { memory: DigestListView; hypotheses: HypothesisListView; experience: ExperienceListReply | null; }

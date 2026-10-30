@@ -58,8 +58,13 @@ export function AgentMemoryPanel({ projectId }: { projectId: string }) {
         </details>}
       </article>)}
       {view.hypotheses.coverage.hasMore && <p>这里只展示最近的部分推测。</p>}
-      {!!view.experience?.experiences.length && <details><summary>方法经验</summary>
-        {view.experience.experiences.slice(0, 5).map(e => <p key={e.id}>{e.statement} · {e.suppressed ? "已停止使用" : e.status === "ACTIVE" ? "已启用" : e.status === "REVOKED" ? "已撤销" : "观察中"}</p>)}
+      {!!view.experience?.experiences.length && <details><summary>方法经验与适用条件</summary>
+        {view.experience.experiences.slice(0, 5).map(e => <div key={e.id}>
+          <p>{e.statement}</p>
+          <p>{e.eligibility.eligible ? "当前证据有效，可作为建议" : `未注入：${e.eligibility.reason}`} · 支持 {e.supportCount} · 反例 {e.counterCount} · 案例 {e.caseReferenceCount}{e.suppressed ? " · 来源已停止使用" : ""}</p>
+          {!!e.unknownConditions.length && <p>未知条件：{e.unknownConditions.join("；")}</p>}
+          {e.originMissionId && <Link href={`/projects/${projectId}/missions?mission=${encodeURIComponent(e.originMissionId)}`}>回原结果核对</Link>}
+        </div>)}
         <Link href={`/projects/${projectId}/missions`}>查看适用条件与原任务</Link>
       </details>}
     </>}

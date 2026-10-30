@@ -160,3 +160,34 @@
 - 回归测试：`tests/ux3ResponsibilityRevision.test.ts`、`tests/ux3Responsibility.test.ts`、`tests/ux3WorkerCycle.test.ts`（7项通过）。
 - 代码规范：`npm.cmd run lint` 0 errors, 0 warnings。
 
+---
+
+## 2026-10-30 UX-3C 注意力与跨端协作交付记录
+
+### 实现与进展
+
+1. **跨入口去重与打扰预算控制（A-J08）**：
+   - `decidePrivateMissionAttention`：私有委托注意力决策基于规范化的 `candidateKey`（包含 missionId、contextVersion、questionId、reason、localDate 与 policyVersion）；同事项决策命中 `prior` 时直接复用，不重复扣除用户的每日全局打扰预算；
+   - 区分用户 STOP 与普通入队：用户显式配置 STOP 时判定为 `USER_STOPPED`（SUPPRESS），绝不越权打扰；
+2. **安静时段与关键漏报防护（A-J07）**：
+   - 智能静默：夜间安静时段（如 22:00-08:00），一般事项判定为 `QUEUE`，不发起系统推送（`systemPush: false`），但待办问题在任务 `waitStateJson` 中对客户端完全可见（`status: "AVAILABLE"`）；
+   - 紧急穿透防漏报：距离 deadline 不足 1 小时的 CRITICAL 或 CONFLICT 关键问题判定为 `urgent: true`，穿透安静时段申请打扰预算并升级为 `URGENT`，防止全静音刷分导致关键事项严重漏报；
+   - 静默时段结束后随时间推进自动恢复为 `DIGEST`；
+3. **严格分离状态语义（A-J09）**：
+   - `lib/mission/attentionReceipt.ts` 扩展支持 `PLATFORM_ACCEPTED` 与 `SEEN` 两级回执；
+   - 明确状态阶梯：`AVAILABLE`（就绪） -> `PLATFORM_ACCEPTED`（平台/卡片收下） -> `SEEN`（用户看见） -> `APPROVED`（用户显式批准） -> `EXECUTED`（执行完成）；
+   - 严格安全不变量：用户查阅置为 `SEEN` 绝不自动批准方案；方案 `agentMissionApproval` 依然保持 `PENDING`，步骤保持 `WAITING_APPROVAL`，未批准前绝对不产生 `resultCardId`，Runner 绝对不执行写入；
+4. **鸿蒙端模型与服务对接（A-J14）**：
+   - `harmonyos/entry/src/main/ets/models/Mission.ets`：更新 `MissionAttentionReceipt` 支持 `status`（`PLATFORM_ACCEPTED` / `SEEN`），更新 `MissionAttentionDelivery` 支持 `platformAcceptedAt`、`channel` 与 `seenAt`；
+   - 保持真实语义：私人任务 `systemPush: false` 真实表达，不伪造已通过系统平台推送送达。
+
+### 自动化验证
+
+- `tests/ux3AttentionContinuity.test.ts`（3项通过）：
+  - A-J07: 安静时段保留有效问题可见，关键紧急问题升级可见，静默结束重新判断；
+  - A-J08: 同事项跨入口共用 candidateKey，用户打扰预算只扣一次；
+  - A-J09 & A-J14: 严格区分 AVAILABLE/PLATFORM_ACCEPTED/SEEN/APPROVED/EXECUTED，SEEN 绝不当作已批准。
+- 鸿蒙测试：`npm.cmd run harmony:test` 86项通过，0 failure，0 error。
+- 代码规范：`npm.cmd run lint` 0 errors, 0 warnings。
+
+

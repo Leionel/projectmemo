@@ -74,9 +74,9 @@ export interface MissionCompletionSummary {
   realityOutcome: string;
 }
 export interface MissionCompletionFact { label: string; value: string; }
-export class MissionAttentionReceipt { requestId: string = ''; expectedVersion: number = 1; decisionId: string = ''; }
+export class MissionAttentionReceipt { requestId: string = ''; expectedVersion: number = 1; decisionId: string = ''; status?: string = 'SEEN'; }
 export interface MissionAttention { level: string; reason: string; decisionId?: string; delivery?: MissionAttentionDelivery; }
-export interface MissionAttentionDelivery { status: string; seenAt?: string | null; }
+export interface MissionAttentionDelivery { status: string; seenAt?: string | null; platformAcceptedAt?: string | null; channel?: string; }
 export interface MissionDelegation { attention?: MissionAttention | null; }
 export class Mission {workingObjective?:string|null;nextBoundary?:string|null; workState?:WorkState;
   experimentObserverEnabled?: boolean; academicResearchEnabled?: boolean; sandboxVerificationEnabled?: boolean;

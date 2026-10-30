@@ -621,7 +621,7 @@ export async function decidePrivateMissionAttention(tx:Prisma.TransactionClient,
   const scope=interventionPolicyScopeForUser(input.userId);
   const policy=await tx.interventionPolicy.upsert({where:{scope},create:{scope},update:{}});
   const parts=localTimeParts(policy.timezone,input.now);
-  const reason=input.level==="SUPPRESS"?"USER_STOPPED":input.level==="QUEUE"?"SNOOZED_OR_QUIET":!policy.isActive?"POLICY_DISABLED":isQuietTime(policy,parts)?"QUIET_HOURS":!input.urgent?"INBOX_ONLY":null;
+  const reason=input.level==="SUPPRESS"?"USER_STOPPED":input.urgent?null:input.level==="QUEUE"?"SNOOZED_OR_QUIET":!policy.isActive?"POLICY_DISABLED":isQuietTime(policy,parts)?"QUIET_HOURS":!input.urgent?"INBOX_ONLY":null;
   // Time is part of the suppression key, so a quiet/budget boundary can be reevaluated without a source event.
   const candidateKey=`private-mission:${input.candidateKey}:${reason??"urgent"}:${parts.localDate}:${policy.version}`;
   const prior=await tx.interventionDecision.findFirst({where:{projectId:input.projectId,candidateKey,channel:"PRIVATE_MISSION"},orderBy:{createdAt:"desc"}});

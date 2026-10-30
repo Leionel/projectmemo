@@ -162,8 +162,8 @@ export function delegationAttention(m: AgentMission, reason: string, now = new D
   return { level: quiet ? "QUEUE" : "DIGEST", reason, occurredAt: now.toISOString(), needsUser: true, systemPush: false };
 }
 
-export async function scopedDelegationAttention(tx: Tx, m: AgentMission, reason: string) {
-  const attention = delegationAttention(m, reason);
+export async function scopedDelegationAttention(tx: Tx, m: AgentMission, reason: string, now = new Date()) {
+  const attention = delegationAttention(m, reason, now);
   if (!attention) return null;
   const preferences = await tx.goalQuestionPreference.findMany({
     where: { userId: m.ownerUserId, missionId: m.id, OR: [{ questionId: "*" }, { questionId: String(record(m.waitStateJson).questionId ?? "") }] },
@@ -171,9 +171,10 @@ export async function scopedDelegationAttention(tx: Tx, m: AgentMission, reason:
   const anchors = await tx.conversationAnchor.findMany({ where: { ownerUserId: m.ownerUserId, missionId: m.id }, select: { mode: true, snoozedUntil: true } });
   let level = attention.level;
   if (preferences.some(p => p.mode === "STOP") || anchors.some(a => a.mode === "STOPPED")) level = "SUPPRESS";
-  else if ([...preferences, ...anchors].some(p => p.mode === "LATER" && p.snoozedUntil && p.snoozedUntil > new Date())) level = "QUEUE";
+  else if ([...preferences, ...anchors].some(p => p.mode === "LATER" && p.snoozedUntil && p.snoozedUntil > now)) level = "QUEUE";
   const wait = record(m.waitStateJson), deadline = Date.parse(String(record(m.constraintsJson).deadline ?? ""));
-  const urgent = reason === "WAITING_INPUT" && ["CRITICAL", "CONFLICT"].includes(String(wait.missing)) && Number.isFinite(deadline) && deadline > Date.now() && deadline - Date.now() <= 3600000;
+  const urgent = reason === "WAITING_INPUT" && ["CRITICAL", "CONFLICT"].includes(String(wait.missing)) && Number.isFinite(deadline) && deadline > +now && deadline - +now <= 3600000;
+  if (urgent && level !== "SUPPRESS") level = "URGENT";
   const decision = await decidePrivateMissionAttention(tx, {
     userId: m.ownerUserId,
     projectId: m.projectId,
@@ -181,7 +182,7 @@ export async function scopedDelegationAttention(tx: Tx, m: AgentMission, reason:
     urgent,
     level,
     reason,
-    now: new Date(),
+    now,
   });
   const previous = record(record(record(m.planJson).delegation).attention);
   return { ...attention, ...decision, delivery: previous.decisionId === decision.decisionId ? previous.delivery : { channel: "PRIVATE_MISSION_INBOX", status: "AVAILABLE", seenAt: null } };

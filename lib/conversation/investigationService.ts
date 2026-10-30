@@ -28,6 +28,9 @@ import type { RepositoryCiCall } from "@/lib/types/repositoryCi";
 import { readConversationDocumentTool } from "./documentTools";
 import type { DocumentCall } from "@/lib/types/document";
 import { bindInvestigationGoal } from "./experienceContract";
+import { resolveConversationExperience, recordConversationExperience, recordModelDecision, type ExperienceReadRef } from "@/lib/experience/injection";
+import { facetsFromConversation } from "@/lib/experience/conditions";
+import { MISSION_PROTOCOL_SCHEMA_VERSION } from "@/lib/mission/contracts";
 
 export type R4State = {
   schemaVersion: 1; policyVersion: "r4-v1"; phase: "ROUTING" | "READING_SOURCE" | "EVALUATING" | "WAITING_MODEL" | "WAITING_USER" | "READY" | "UNKNOWN";
@@ -183,8 +186,29 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
   const fittedFacets = (await import("@/lib/memory/facetBudget")).fitFacetGroups([...hypotheses, ...effectiveMemory], 6000).groups;
   const keptHypotheses = fittedFacets.slice(0, hypotheses.length) as typeof hypotheses, keptMemory = fittedFacets.slice(hypotheses.length) as typeof effectiveMemory;
   await mutateTurn(actor, id, turnId, manifest => ({...manifest, cognitiveReadSet:keptHypotheses.flatMap(v=>v.readSet)}));
+  const allowedTools = [...(researchAllowed ? [...workspaceReadTools, ...(grant.scope.enabled ? ["web_search",...(grant.scope.academicMetadata&&isFeatureEnabled("ACADEMIC_RESEARCH_ENABLED",false)?["read_paper_metadata"]:[])] : []), "web_fetch"] : workspaceReadTools), ...(ciAllowed ? ["read_repository_ci", "read_ci_jobs", "read_ci_log"] : []),...(isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false)?["inspect_document","read_document_page","read_document_section","read_document_table"]:[]),...(isFeatureEnabled("EXPERIMENT_OBSERVER_ENABLED",false)?["inspect_experiment_metrics","compare_experiment_metrics"]:[])];
+  // CT-8：Conversation/Focus 用同一条件匹配器，但数据/划分等缺失保持 UNKNOWN，不冒用 Mission 条件。
+  const experienceProjects = await db.project.findMany({ where: { id: { in: route.projectIds } }, select: { id: true, goal: true, scenario: true } });
+  const experienceGroups = await Promise.all(route.projectIds.map(async projectId => {
+    const project = experienceProjects.find(p => p.id === projectId);
+    const facets = facetsFromConversation({ goal: project?.goal ?? "", scenario: project?.scenario ?? null,
+      constraints: input.constraints, researchScope: grant.available ? { topic: grant.scope.topic, allowedHosts: grant.scope.allowedHosts } : null,
+      tools: allowedTools.map(name => ({ name, version: "1" })) });
+    const resolved = await resolveConversationExperience({ ownerUserId: actor.userId, projectId, conversationId: id, turnId,
+      facets, usedTools: allowedTools.map(name => ({ name, version: "1" })), protocolSchemaVersion: MISSION_PROTOCOL_SCHEMA_VERSION });
+    return { projectId, ...resolved };
+  }));
+  const experienceAdvisories = experienceGroups.flatMap(group => group.decisions.flatMap(d =>
+    "advisory" in d ? [{ ...d.advisory, projectId: group.projectId }] : [])).slice(0, 3);
+  const injectedExperienceIds = new Set(experienceAdvisories.map(a => a.id));
+  const experienceReadSet: ExperienceReadRef[] = experienceGroups.flatMap(group => group.readSet).filter(ref => injectedExperienceIds.has(ref.experienceId)).slice(0, 8);
+  await mutateTurn(actor, id, turnId, manifest => ({ ...manifest, experienceReadSet }));
+  const experienceContextHash = jsonHash({ message: input.message, projectIds: route.projectIds,
+    advisories: experienceAdvisories.map(a => [a.id, a.version, a.contentHash]), sources: observations.sources.map(s => [s.id, s.revision]) });
+  for (const group of experienceGroups) await recordConversationExperience({ projectId: group.projectId, conversationId: id, turnId }, group.decisions, experienceContextHash);
   const corrections = cognitiveControls.flatMap(c => c.corrections);
-  const context = () => ({ hypotheses: keptHypotheses, effectiveMemory: keptMemory, userInterpretationCorrections: { items: corrections.slice(-16), total: corrections.length, complete: corrections.length <= 16, policy: "仅适用原定位的用户解释，不是工作指令、授权或独立实证；覆盖不足须读原记录" }, message: input.message, intent: route.intent, pinnedConstraints: input.constraints,
+  const context = () => ({ hypotheses: keptHypotheses, effectiveMemory: keptMemory, experienceAdvisories,
+    userInterpretationCorrections: { items: corrections.slice(-16), total: corrections.length, complete: corrections.length <= 16, policy: "仅适用原定位的用户解释，不是工作指令、授权或独立实证；覆盖不足须读原记录" }, message: input.message, intent: route.intent, pinnedConstraints: input.constraints,
     interpretationCandidate: candidate ? { ...candidate, authority: "UNCONFIRMED_MODEL_INTERPRETATION" } : undefined,
     projects: scopeDirectory.summaries.map(p => ({ id: p.id, title: p.title, goal: p.goal.slice(0, 1500), workingObjective: p.workingObjective, deadline: p.deadline, priority: p.priority })),
     sources: observations.sources.map((s, i) => ({ id: s.id, sourceId: s.sourceId, revision: s.revision, projectId: s.projectId, title: s.title,
@@ -210,7 +234,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
     state.phase = "EVALUATING"; await saveR4State(actor, id, turnId, state, observations.sources);
     const callId = "investigate-" + state.steps.length;
     const frameInput = { ...context(),
-      allowedTools: [...(researchAllowed ? [...workspaceReadTools, ...(grant.scope.enabled ? ["web_search",...(grant.scope.academicMetadata&&isFeatureEnabled("ACADEMIC_RESEARCH_ENABLED",false)?["read_paper_metadata"]:[])] : []), "web_fetch"] : workspaceReadTools), ...(ciAllowed ? ["read_repository_ci", "read_ci_jobs", "read_ci_log"] : []),...(isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false)?["inspect_document","read_document_page","read_document_section","read_document_table"]:[]),...(isFeatureEnabled("EXPERIMENT_OBSERVER_ENABLED",false)?["inspect_experiment_metrics","compare_experiment_metrics"]:[])],
+      allowedTools,
       previousSteps: state.steps.map(s => ({ decision: s.decision, status: s.status, coverage: s.coverage, failureReason: s.failureReason })),
       remaining: { modelCalls: state.budget.maxModelCalls - turn.callCount, reads: state.budget.maxToolReads - state.steps.length } };
     const frame = input.evaluationVariant === "INVESTIGATION_ONLY"
@@ -225,6 +249,14 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
       state.researchCoverage = bindResearchCoverage(coverage, observations.sources);
     }
     state.decision = investigationDecisionSchema.parse(frame.data.decision);
+    const frameExperienceUse = (frame.data as { experienceUse?: Array<{ experienceId: string; disposition: string; reason?: string }> }).experienceUse ?? [];
+    if (frameExperienceUse.some(use => !injectedExperienceIds.has(use.experienceId)))
+      throw new AppError("EXPERIENCE_NOT_INJECTED", "模型引用了本轮未注入的经验，未执行新读取", 409);
+    for (const use of frameExperienceUse) {
+      const advisory = experienceAdvisories.find(a => a.id === use.experienceId)!;
+      await recordModelDecision({ conversationId: id, turnId, experienceId: use.experienceId, disposition: use.disposition,
+        reason: use.reason ?? null, version: advisory.version, contentHash: advisory.contentHash, contextHash: experienceContextHash }).catch(() => undefined);
+    }
     if (state.decision.decision !== "READ_EXISTING") {
       if (state.decision.decision === "STOP") state.stopReason = state.decision.reason;
       if (state.decision.decision === "HANDOFF_MISSION") {

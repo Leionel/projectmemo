@@ -1,5 +1,6 @@
 import { record } from "@/lib/conversation/repository";
 import { assertCognitiveReadSet } from "@/lib/memory/hypothesisService";
+import { assertExperienceReadSet } from "@/lib/experience/injection";
 import { effectiveContinuity, assertDirectiveEffect } from "@/lib/continuity/directiveService";
 import { assertDynamicTool } from "./dynamicGuard";
 import { db } from "@/lib/db";
@@ -20,6 +21,7 @@ export async function commitApprovedAction(lease:Lease,stepId:string){
   if(!step||!approval||approval.missionId!==m.id)throw new AppError("APPROVAL_CHANGED","批准不存在",409);
   if(step.status==="SUCCEEDED"&&approval.status==="CONSUMED")return step.resultJson;
   await assertCognitiveReadSet(m.ownerUserId,record(step.protocolJson).cognitiveReadSet,tx);
+  await assertExperienceReadSet(m.ownerUserId,record(step.protocolJson).experienceReadSet,tx);
    assertDynamicTool(m,"create_action",step.canonicalInputJson);
   if(approval.status!=="APPROVED"||approval.expectedPlanRevision!==m.planRevision||approval.expiresAt<=new Date()||approval.proposalHash!==jsonHash(approval.proposalJson))throw new AppError("APPROVAL_CHANGED","批准已失效，请重新预览",409);
   await validateSources(m.projectId,approval.readSetJson as unknown as Source[],tx,m.id);

@@ -1195,6 +1195,8 @@ model AgentMissionStep {
  agentRun AgentRun? @relation(fields:[agentRunId], references:[id], onDelete:SetNull)
  usageJson Json?
  verificationJson Json?
+ // CT-8：失败原因绑定本步骤/操作与当时上下文；不再用委托最后一条全局错误推断所有步骤。
+ failureJson Json?
  startedAt DateTime @default(now())
  finishedAt DateTime?
  mission AgentMission @relation(fields:[missionId], references:[id], onDelete:Cascade)
@@ -1374,49 +1376,97 @@ model GoalQuestionPreference {
  @@unique([userId,missionId,questionId])
 }
 
-// P3-A 项目内经验：一类成功工作方法（WORKFLOW）、一类失败防护（GUARDRAIL）。
-// 只以建议形式注入，不授予写入权限；样本不足时保持 CANDIDATE/SHADOW，激活必须由用户发起。
+// P3-A / CT-8 项目内经验：条件化结果经验。patternHash 是稳定方法身份，conditionKey 区分
+// 数据/划分/单位/环境/目标等适用条件；同一工具序列在不同条件下不合并。只以建议形式注入，
+// 不授予写入权限；激活必须由用户发起，撤销/来源失效/反例/时间边界停止新复用。
 model AgentExperience {
  id String @id @default(cuid())
  projectId String
  ownerUserId String
  kind String
  patternHash String
+ conditionKey String @default("LEGACY")
  title String
  statement String
  applicabilityJson Json
  toolVersionsJson Json @default("{}")
  protocolVersionsJson Json @default("[]")
  counterExamplesJson Json @default("[]")
+ evidenceJson Json @default("{}")
+ eligibilityJson Json @default("{}")
+ originJson Json @default("{}")
+ resultLabelsJson Json @default("{}")
  status String @default("CANDIDATE")
  sampleMissionIdsJson Json @default("[]")
  supportCount Int @default(0)
  counterCount Int @default(0)
+ version Int @default(1)
+ evidenceVersion Int @default(0)
+ lastSyncedAt DateTime?
+ lastSyncFingerprint String?
+ validUntil DateTime?
  activatedAt DateTime?
+ activatedByUserId String?
  revokedAt DateTime?
  revokedReason String?
+ revokedByUserId String?
  schemaVersion Int @default(1)
  createdAt DateTime @default(now())
  updatedAt DateTime @updatedAt
  project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
  owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
  uses AgentExperienceUse[]
- @@unique([projectId,ownerUserId,kind,patternHash])
- @@index([projectId,status])
+ events AgentExperienceEvent[]
+ @@unique([projectId,ownerUserId,kind,patternHash,conditionKey])
+ @@index([projectId,status,conditionKey])
 }
 
-// 经验使用记录：撤销/失效/版本不兼容后停止新注入，但历史使用记录保留。
+// 经验使用记录：区分检索命中 RETRIEVED、注入 INJECTED、模型决策 MODEL_DECISION、
+// 用户反馈 USER_FEEDBACK、结果回读 OUTCOME_OBSERVED；撤销/失效后历史保留。
 model AgentExperienceUse {
  id String @id @default(cuid())
  experienceId String
- missionId String
+ missionId String?
+ conversationId String?
+ turnId String?
+ scopeKey String @default("")
+ actorKind String @default("MISSION")
  stage String
+ experienceVersion Int?
+ contentHash String?
+ conditionKey String?
+ matchState String?
  contextHash String?
+ outcomeJson Json?
  injectedAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
  experience AgentExperience @relation(fields:[experienceId],references:[id],onDelete:Cascade)
- mission AgentMission @relation(fields:[missionId],references:[id],onDelete:Cascade)
- @@unique([experienceId,missionId,stage])
+ mission AgentMission? @relation(fields:[missionId],references:[id],onDelete:Cascade)
+ @@unique([experienceId,scopeKey,stage])
  @@index([experienceId,injectedAt])
+ @@index([conversationId,turnId])
+ @@index([missionId,stage])
+}
+
+// CT-8 用户操作事件：激活/撤销/反馈/迁移的幂等回执与当前版本 CAS；历史不覆盖。
+model AgentExperienceEvent {
+ id String @id @default(cuid())
+ experienceId String
+ projectId String
+ ownerUserId String
+ seq Int
+ requestId String
+ action String
+ actorKind String @default("USER")
+ expectedVersion Int?
+ resultVersion Int
+ payloadHash String
+ payloadJson Json
+ createdAt DateTime @default(now())
+ experience AgentExperience @relation(fields:[experienceId],references:[id],onDelete:Cascade)
+ @@unique([ownerUserId,requestId])
+ @@unique([experienceId,seq])
+ @@index([experienceId,createdAt])
 }
 
 // P3-B 单仓库只读感知：连接与信号分层。信号只是候选资料（未采纳零事实写入），

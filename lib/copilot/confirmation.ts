@@ -1,4 +1,5 @@
 import { assertCognitiveReadSet } from "@/lib/memory/hypothesisService";
+import { assertExperienceReadSet } from "@/lib/experience/injection";
 import { effectiveContinuity, assertContinuityBinding, boundDirectiveScope, assertDirectiveEffect } from "@/lib/continuity/directiveService";
 import { sourceUse, assertSourceUse } from "@/lib/continuity/sourcePolicy";
 import { randomUUID } from "node:crypto";
@@ -185,6 +186,7 @@ async function inspectConfirmation(tx: Tx, projectId: string, input: AgentToolCo
   }
   if (actor) {
     await assertCognitiveReadSet(actor.userId, trace.cognitiveReadSet, tx);
+    await assertExperienceReadSet(actor.userId, trace.experienceReadSet, tx);
     const binding = object(trace.continuity), scope = boundDirectiveScope(binding, projectId, run.conversationId ?? undefined);
     assertDirectiveEffect(await assertContinuityBinding(actor.userId, scope, binding, tx), "BUSINESS_WRITE");
     for (const c of (object(trace.copilotSources).cardHashes ?? []) as Array<{ id: string }>) await assertSourceUse(actor.userId, projectId, "card:" + c.id, tx, scope);

@@ -24,10 +24,12 @@ export const createMissionSchema = z.object({
   continuationPolicy: continuationPolicySchema.default({mode:"MANUAL"}),
 }).strict();
 export const commandSchema = z.object({ requestId: z.string().min(1).max(128), expectedVersion: z.number().int().positive(), questionId: z.string().optional(), answer: z.string().trim().min(1).max(3000).optional(), decision: z.enum(["APPROVED", "REJECTED"]).optional(), proposalHash: z.string().optional(), evidenceReview: evidenceReviewSchema.optional() }).strict();
+const experienceUseSchema = z.object({ experienceId: z.string().min(1).max(160),
+  disposition: z.enum(["ADOPT", "ADAPT", "REJECT", "INVESTIGATE"]), reason: z.string().max(300).optional() }).strict();
 export const choiceSchema = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("tool"), tool: z.string(), args: z.unknown(), summary: z.string().max(240).default("") }).strict(),
-  z.object({ kind: z.literal("ask"), question: z.string().min(1).max(500), missing: z.enum(["PRIVATE", "CRITICAL", "CONFLICT"]), requirements: gapRequirementsSchema.optional() }).strict(),
-  z.object({ kind: z.literal("finish"), outputId: z.string().min(1) }).strict(),
+  z.object({ kind: z.literal("tool"), tool: z.string(), args: z.unknown(), summary: z.string().max(240).default(""), experienceUse: z.array(experienceUseSchema).max(3).optional() }).strict(),
+  z.object({ kind: z.literal("ask"), question: z.string().min(1).max(500), missing: z.enum(["PRIVATE", "CRITICAL", "CONFLICT"]), requirements: gapRequirementsSchema.optional(), experienceUse: z.array(experienceUseSchema).max(3).optional() }).strict(),
+  z.object({ kind: z.literal("finish"), outputId: z.string().min(1), experienceUse: z.array(experienceUseSchema).max(3).optional() }).strict(),
 ]);
 export type Choice = z.infer<typeof choiceSchema>;
 export type Decision = { prompt?: { id: string; version: string; purpose: string; outputSchemaVersion: number }; choice: Choice; provider: string; model: string; usage: { inputTokens: number | null; outputTokens: number | null }; protocol: string; callId?: string; serialization?: { escapedControls: number; responseHash: string } };

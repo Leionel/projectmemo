@@ -368,6 +368,7 @@ async function executeTurnGeneration(actor: ConversationActor, id: string, turn:
       const trace = {
         focusSources: blocks.sources,
         cognitiveReadSet: record((await tx.conversationTurn.findUniqueOrThrow({where:{id:turn.id}})).readManifestJson).cognitiveReadSet ?? [],
+        experienceReadSet: record((await tx.conversationTurn.findUniqueOrThrow({where:{id:turn.id}})).readManifestJson).experienceReadSet ?? [],
         purpose: "FOCUS_TURN", actorUserId: actor.userId, sourceIds: blocks.sources.map(s => s.id),
         supportState: action ? "SUPPORTED" : "INSUFFICIENT", supportBasis: "ACTION_PROPOSAL_NOT_FACT_CLAIM",
         ...(r4 ? { experience: r4.state, evaluationVariant: evaluation?.variant ?? "FULL", uiPlanOrigin: evaluation ? "EVALUATION_DISABLED" : uiFallback ? "FALLBACK" : "MODEL", uiFallback } : {}),

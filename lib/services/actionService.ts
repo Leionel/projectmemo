@@ -12,6 +12,7 @@ import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateSer
 import { enqueueImpact } from "@/lib/decision/impactJobs";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import { jsonHash } from "@/lib/mission/contracts";
+import { refreshExperiencesForProject } from "@/lib/experience/service";
 
 const vectorStore = new KeywordVectorStore();
 
@@ -118,6 +119,7 @@ export async function completeProjectAction(projectId: string, actionId: string,
     return { ...result.updatedAction, resultCard: result.card, stateRefreshPending: false };
   }
   const stateRefreshPending = await refreshProjectStateAfterMutation(projectId);
+  await refreshExperiencesForProject(projectId);
   if (result.card) {
     await vectorStore.index({ id: result.card.id, title: result.card.title, keywords: result.card.keywords as string[] });
   }

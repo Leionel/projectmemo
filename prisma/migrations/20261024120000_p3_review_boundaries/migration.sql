@@ -1,4 +1,5 @@
-DROP INDEX "AgentExperience_projectId_kind_patternHash_key";
+-- IF EXISTS：CT-8 之后重放旧库升级时，旧索引可能已由后续迁移移除。
+DROP INDEX IF EXISTS "AgentExperience_projectId_kind_patternHash_key";
 CREATE UNIQUE INDEX "AgentExperience_projectId_ownerUserId_kind_patternHash_key"
 ON "AgentExperience"("projectId","ownerUserId","kind","patternHash");
 

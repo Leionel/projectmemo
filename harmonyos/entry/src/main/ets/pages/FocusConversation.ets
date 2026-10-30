@@ -268,7 +268,20 @@ struct FocusConversation {
         AgentMessageBlocks({ presentation: $$.message.presentation!, files: $$.message.fileGuides ?? [], conversationId: this.view.id, messageId: $$.message.id, busy: this.busy,
           onAction: (action: AllowedAction, answer: string): void => { this.uiAction($$.message, action, answer); } })
       } else {
-      ConversationAnswer({ content: $$.message.content, files: $$.message.fileGuides ?? [], conversationId: this.view.id, rightAligned: $$.message.role === 'USER' })
+      if ($$.message.role === 'USER') {
+        Row() {
+          Blank()
+          Column({ space: 8 }) {
+            ConversationAnswer({ content: $$.message.content, files: $$.message.fileGuides ?? [], conversationId: this.view.id, rightAligned: true })
+            if ($$.message.fileGuides && $$.message.fileGuides.length > 0) { ConversationFileGuides({ files: $$.message.fileGuides, conversationId: this.view.id }) }
+          }.constraintSize({ maxWidth: '91%' }).alignItems(HorizontalAlign.End)
+            .backgroundColor(PMColors.SURFACE_SUBTLE)
+            .borderRadius({ topLeft: PMRadius.BUBBLE, topRight: PMRadius.BUBBLE, bottomLeft: PMRadius.BUBBLE, bottomRight: PMRadius.BUBBLE_TAIL })
+            .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+            .padding({ left: 16, right: 16, top: 12, bottom: 12 })
+        }.width('100%')
+      } else {
+      ConversationAnswer({ content: $$.message.content, files: $$.message.fileGuides ?? [], conversationId: this.view.id, rightAligned: false })
       if ($$.message.fileGuides && $$.message.fileGuides.length > 0) { ConversationFileGuides({ files: $$.message.fileGuides, conversationId: this.view.id }) }
       if ($$.message.priorities.length > 0 || $$.message.sources.length > 0) {
         Button(this.expanded === $$.message.id ? '收起依据  ⌃' : '优先级与来源  ⌄', { type: ButtonType.Normal }).height(44).fontSize(12).fontColor(PMColors.BRAND)
@@ -277,6 +290,7 @@ struct FocusConversation {
       if (this.expanded === $$.message.id) {
         ForEach($$.message.priorities, (p: PriorityReason) => { Text(p.importance + '；' + p.urgency + '；' + p.blocking + '；' + p.effort + '\n' + p.preference + '\n' + p.tradeoff).fontSize(13).lineHeight(21).fontColor(PMColors.INK_SECONDARY) }, (p: PriorityReason) => p.projectId)
         ForEach($$.message.sources, (s: ConversationSource) => { Text(s.title + '\n' + s.excerpt).fontSize(13).lineHeight(21).fontColor(PMColors.INK_SECONDARY) }, (s: ConversationSource) => s.id)
+      }
       }
       }
       ForEach($$.message.refs.filter((r: ConversationRef) => ['PROJECT', 'MISSION', 'ACTION'].includes(r.kind)).slice(0, this.expandedRefs === $$.message.id ? $$.message.refs.length : 2), (r: ConversationRef) => {

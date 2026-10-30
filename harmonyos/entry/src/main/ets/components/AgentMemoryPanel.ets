@@ -39,10 +39,10 @@ export struct AgentMemoryPanel {
   build() {
     Column({ space: 8 }) {
       if (this.available) {
-      Button(this.opened ? '收起当前理解' : '当前理解与待核实', { type: ButtonType.Normal }).height(44)
+      Button(this.opened ? '收起当前理解' : '当前理解与待核实', { type: ButtonType.Normal }).height(44).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).padding({ left: 0, right: 8 })
         .fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).onClick(() => { this.opened = !this.opened; if (this.opened) this.load(); })
       if (this.opened) {
-        Button('重新核对', { type: ButtonType.Normal }).height(44).enabled(!this.busy).onClick(() => { this.load(); })
+        Button('重新核对', { type: ButtonType.Normal }).height(44).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).padding({ left: 0, right: 8 }).enabled(!this.busy).onClick(() => { this.load(); })
         if (this.busy) { Text('正在核对来源与当前条件…').fontSize(12) }
         if (this.error) { Text(this.error).fontSize(13).fontColor(PMColors.INK_SECONDARY) }
         if (!this.busy && !this.error && this.data.items.length === 0) { Text('还没有调查综合，已有记录仍可在下方查看。').fontSize(13) }
@@ -51,16 +51,16 @@ export struct AgentMemoryPanel {
             Text(item.effectiveState === 'CURRENT' ? '当前理解' : '历史理解 · 需要重新核对').fontSize(12).fontColor(PMColors.INK_SECONDARY)
             Text(item.synthesis?.summary ?? '这份综合暂不可读，请回原调查查看。').fontSize(15).copyOption(CopyOptions.InApp)
             if (item.sourceMissionId) {
-              Button('查看原调查与来源', { type: ButtonType.Normal }).height(44).onClick(() => {
+              Button('查看原调查与来源', { type: ButtonType.Normal }).height(44).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).padding({ left: 0, right: 8 }).onClick(() => {
                 router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.projectId, missionId: item.sourceMissionId } });
               })
             }
             if (item.sourceConversationId) {
-              Button('回原讨论接续', { type: ButtonType.Normal }).height(44).onClick(() => {
+              Button('回原讨论接续', { type: ButtonType.Normal }).height(44).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).padding({ left: 0, right: 8 }).onClick(() => {
                 router.pushUrl({ url: 'pages/FocusConversation', params: { conversationId: item.sourceConversationId } });
               })
             }
-            Button(this.expanded === item.id ? '收起依据' : '依据、条件与待核实', { type: ButtonType.Normal }).height(44)
+            Button(this.expanded === item.id ? '收起依据' : '依据、条件与待核实', { type: ButtonType.Normal }).height(44).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).padding({ left: 0, right: 8 })
               .onClick(() => { this.expanded = this.expanded === item.id ? '' : item.id; })
             if (this.expanded === item.id && item.synthesis) {
               Text('这是带来源的模型综合，不是独立证据。').fontSize(12)
@@ -77,7 +77,7 @@ export struct AgentMemoryPanel {
             Text(this.status(item.effectiveStatus)).fontSize(12).fontColor(PMColors.INK_SECONDARY)
             Text(item.statement).fontSize(15)
             if (item.effectiveStatus !== 'RESTRICTED') {
-              Button(this.expanded === item.id ? '收起依据' : '条件与依据', { type: ButtonType.Normal }).height(44)
+              Button(this.expanded === item.id ? '收起依据' : '条件与依据', { type: ButtonType.Normal }).height(44).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).padding({ left: 0, right: 8 })
                 .onClick(() => { this.expanded = this.expanded === item.id ? '' : item.id; })
               if (this.expanded === item.id) {
                 ForEach(item.conditions, (line: string) => { Text(line).fontSize(13) })
@@ -88,12 +88,12 @@ export struct AgentMemoryPanel {
                 })
                 if (item.nextInformationNeed) { Text(`下一步核对：${item.nextInformationNeed}`).fontSize(13) }
                 if (item.sourceMissionId) {
-                  Button('回原调查继续核对', { type: ButtonType.Normal }).height(44).onClick(() => {
+                  Button('回原调查继续核对', { type: ButtonType.Normal }).height(44).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).padding({ left: 0, right: 8 }).onClick(() => {
                     router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.projectId, missionId: item.sourceMissionId } });
                   })
                 }
                 if (item.sourceConversationId) {
-                  Button('回原讨论接续', { type: ButtonType.Normal }).height(44).onClick(() => {
+                  Button('回原讨论接续', { type: ButtonType.Normal }).height(44).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).padding({ left: 0, right: 8 }).onClick(() => {
                     router.pushUrl({ url: 'pages/FocusConversation', params: { conversationId: item.sourceConversationId } });
                   })
                 }

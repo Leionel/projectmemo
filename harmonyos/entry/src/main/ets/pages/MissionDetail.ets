@@ -429,14 +429,15 @@ struct MissionDetail {
   }
   @Builder private MissionBody() {
     Column({ space: 12 }) {
+      Column({ space: 12 }) {
       Row() {
         PMStatusPill({ label: this.mission.workState ? workPhaseLabel(this.mission.workState!.phase) : missionStatusLabel(this.mission.status), tone: this.mission.status === 'PAUSED' || this.mission.status === 'FAILED' ? 'risk' : 'brand' })
         Blank()
         Button(this.showCompletion ? '收起状态 ⌃' : '状态详情 ⌄', { type: ButtonType.Normal }).height(44).fontSize(12)
           .fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).padding({ left: 8, right: 0 }).onClick(() => { this.showCompletion = !this.showCompletion; })
       }.width('100%')
-      Text(this.mission.goal).fontSize(20).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
-        .maxLines(this.showGoal ? 100 : 2).textOverflow({ overflow: TextOverflow.Ellipsis }).lineHeight(29)
+      Text(this.mission.goal).fontSize(22).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
+        .maxLines(this.showGoal ? 100 : 3).textOverflow({ overflow: TextOverflow.Ellipsis }).lineHeight(32)
       if (this.mission.delegation?.attention?.level === 'URGENT') { Text('临近任务截止，需要你核对当前问题后决定下一步。').fontSize(14).fontColor(PMColors.BRAND) }
       if (this.mission.goal.length > 40) {
         Button(this.showGoal ? '收起目标原文' : '展开目标原文').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
@@ -454,6 +455,9 @@ struct MissionDetail {
       }.width('100%').alignItems(HorizontalAlign.Start).padding({ top: 10, bottom: 10 })
         .border({ width: { top: 1, bottom: 1 }, color: PMColors.BORDER_SUBTLE })
       }
+      }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.LG)
+        .backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.CARD)
+        .border({ width: 1, color: PMColors.BORDER_SUBTLE })
       if (this.mission.error !== null || this.mission.status === 'PAUSED' || this.mission.status === 'FAILED') {
         Column({ space: PMSpacing.SM }) {
           Text('当前状态').fontSize(12).fontColor(PMColors.INK_TERTIARY)
@@ -493,7 +497,7 @@ struct MissionDetail {
       MissionReadbackView({ missionId: this.missionId, target: this.readTarget, missionVersion: this.mission.version, refreshKey: this.readbackRefreshKey, targetKey: JSON.stringify(this.readTarget) })
       if(this.mission.status==='PAUSED'&&this.missionUiEnabled&&this.mission.budget.models<24){
         Text(`模型已用或预占${this.mission.used.models??0}次，累计上限${this.mission.budget.models}→${Math.min(24,this.mission.budget.models+6)}；工具上限${Math.min(64,this.mission.budget.tools+8)}，活动时间上限${Math.min(900000,this.mission.budget.activeMs+180000)/60000}分钟，输出预留${Math.min(48000,this.mission.budget.reservedOutputTokens+12000)} tokens`).fontSize(PMFontSize.CAPTION)
-        Button('确认累计预算，保持暂停').enabled(!this.busy&&this.readState==='fresh').onClick(()=>{this.reviewBudget();})
+        Button('确认累计预算，保持暂停', { type: ButtonType.Normal }).height(44).borderRadius(PMRadius.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).enabled(!this.busy&&this.readState==='fresh').onClick(()=>{this.reviewBudget();})
       }
       if (this.mission.status === 'PAUSED' && this.missionUiEnabled) { Button('继续原委托').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).backgroundColor(PMColors.BRAND).fontColor(PMColors.SURFACE).enabled(this.readState === 'fresh' && !this.busy).onClick(() => { this.command('resume'); }) }
       Button(this.showSettings ? '收起委托设置与控制' : '委托设置与控制').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
@@ -540,7 +544,7 @@ struct MissionDetail {
           if (step.execution && step.execution!.phase !== 'NOT_DISPATCHED') { MissionMetricReceipt({ execution: step.execution!, stepStatus: step.status }) }
           if (this.actionReceipt(step) !== '') { Text(this.actionReceipt(step)) }
           ForEach(step.result?.sources ?? [], (source: MissionSource) => {
-            if (source.kind === 'EXTERNAL') { Button('查看公开资料与阅读级别').height(48).fontColor(PMColors.BRAND).onClick(() => { router.pushUrl({ url: 'pages/ConversationWebSource', params: { missionId: this.missionId, sourceId: source.id } }); }) }
+            if (source.kind === 'EXTERNAL') { Button('查看公开资料与阅读级别', { type: ButtonType.Normal }).height(48).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).padding({ left: 0, right: 8 }).onClick(() => { router.pushUrl({ url: 'pages/ConversationWebSource', params: { missionId: this.missionId, sourceId: source.id } }); }) }
             if (source.document) { Button(source.document!.fileName + (source.document!.pages.length > 0 ? ' · 物理第 ' + source.document!.pages[0].toString() + ' 页' : ' · 目录或文本修订')).height(48).fontColor(PMColors.BRAND).onClick(() => { router.pushUrl({ url: 'pages/ConversationWebSource', params: { missionId: this.missionId, sourceId: source.id } }); }) }
             Text(`${this.knowledge(source.knowledgeClass ?? source.kind)} · ${source.id}\n${source.text ?? ''}`).fontSize(13)
           }, (source: MissionSource) => source.id)

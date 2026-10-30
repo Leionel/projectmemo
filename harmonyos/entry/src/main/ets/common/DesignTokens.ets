@@ -80,6 +80,11 @@ export class PMRadius {
   static readonly BUTTON: number = 11;
   static readonly XXL: number = 24;
   static readonly FULL: number = 999;
+  // Agent 控制台原型（ProjectMemo_Agent_UI_Prototype）：气泡 15/收尾 3、委托卡 13、详情卡 20
+  static readonly BUBBLE: number = 16;
+  static readonly BUBBLE_TAIL: number = 4;
+  static readonly ITEM: number = 13;
+  static readonly CARD: number = 20;
 }
 
 export class PMFontSize {

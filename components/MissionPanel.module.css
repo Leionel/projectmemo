@@ -24,7 +24,7 @@
 .panel button.cancel { color: var(--muted); background: transparent; border-color: transparent; }
 .missionList { display: grid; gap: .5rem; margin-top: 1.75rem; max-height: 28rem; overflow-y: auto; padding: .25rem; margin-inline: -.25rem; }
 .missionList h3 { color: var(--ink-soft); font-size: .75rem; margin-bottom: .25rem; }
-.panel button.missionRow { display: grid; width: 100%; gap: .5rem; padding: .75rem; text-align: left; font-weight: 400; border-color: transparent; background: transparent; }
+.panel button.missionRow { display: grid; width: 100%; gap: .5rem; padding: .875rem .875rem; text-align: left; font-weight: 400; border-color: transparent; background: transparent; border-radius: 11px; }
 .panel button.missionRow[aria-pressed=true] { border-color: var(--rule-strong); background: var(--paper-strong); box-shadow: inset 3px 0 var(--teal); }
 .rowGoal { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; line-height: 1.6; }
 .rowMeta { display: flex; gap: .375rem; align-items: center; color: var(--ink-soft); font-size: .6875rem; }
@@ -37,7 +37,7 @@
 .badge { display: inline-flex; align-items: center; padding: .1875rem .625rem; border-radius: .375rem; color: var(--ink-soft); background: var(--paper); border: 1px solid var(--rule); font-weight: 600; }
 .badge[data-status=PAUSED],.badge[data-status=WAITING_INPUT],.badge[data-status=WAITING_APPROVAL] { color: var(--ink-soft); border-color: var(--amber); }
 .badge[data-status=RUNNING],.badge[data-status=SUCCEEDED] { color: var(--teal-strong); background: var(--teal-pale); }
-.panel h3.goal { font-size: 1rem; line-height: 1.8; font-weight: 600; overflow-wrap: anywhere; }
+.panel h3.goal { font-size: 1.0625rem; line-height: 1.8; font-weight: 650; letter-spacing: -.01em; overflow-wrap: anywhere; }
 .taskId { color: var(--muted); font-size: .6875rem; overflow-wrap: anywhere; }
 .statusText { font-size: .8125rem; color: var(--ink-soft); }
 .completionFacts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.625rem 1rem; padding-block:.75rem; border-block:1px solid var(--rule); }

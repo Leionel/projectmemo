@@ -260,10 +260,11 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
       {!view && !loadingHistory && <div className={styles.empty}><span className={styles.emptyMark} aria-hidden="true">忆</span><h3>从今天最重要的事开始</h3><p>忆程会带上项目记忆，和你一起往下走。</p><button className="editorial-button focus-ring" onClick={() => void create()} disabled={working}>开始讨论</button></div>}
       {view && !view.messages.length && <div className={styles.empty}><span className={styles.emptyMark} aria-hidden="true">忆</span><h3>今天，先推进哪件事？</h3><div className={styles.starters}>{["最近哪个项目最值得先处理？", "这周有哪些待回应的事？"].map(q => <button key={q} type="button" className={styles.starter + " focus-ring"} onClick={() => setText(q)}>{q}<span aria-hidden="true">↗</span></button>)}</div></div>}
       {view?.messages.map(m => <article key={m.id} id={"conversation-message-" + m.id} className={m.role === "USER" ? styles.user : styles.assistant}>
-        {m.role === "USER" && <div className={styles.userHead}><strong>你</strong><span aria-hidden="true">我</span></div>}
         {m.role === "ASSISTANT" && <div className={styles.answerHead}><span aria-hidden="true">忆</span><strong>忆程</strong><small>{m.provider === "rules" ? "规则观察" : m.provider === "project_state" ? "项目记录" : "基于本次授权资料"}</small></div>}
         {supportsAgentPresentation(m) ? <AgentMessageBlocks message={m} conversationId={view.id} busy={busy} onAction={(action, answer) => uiAction(m, action, answer)}/>
-          : <p className={styles.body}><ConversationAnswer message={m} conversationId={view.id}/></p>}
+          : m.role === "USER"
+            ? <div className={styles.userBubble}><p className={styles.body}><ConversationAnswer message={m} conversationId={view.id}/></p></div>
+            : <p className={styles.body}><ConversationAnswer message={m} conversationId={view.id}/></p>}
         <ConversationFileGuides message={m} conversationId={view.id}/>
         {m.role === "ASSISTANT" && !m.restricted && <ScopedMessageCorrection key={m.id} projects={view.linkedProjects} sourceId={m.id} onChanged={() => { void load(view.id, generation.current); }}/> }
         {!supportsAgentPresentation(m) && !!m.priorities.length && <details><summary>优先级依据与取舍</summary>{m.priorities.map(p => <div key={p.projectId} className={styles.reason}>

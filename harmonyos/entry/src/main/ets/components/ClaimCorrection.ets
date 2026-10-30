@@ -4,7 +4,7 @@ import { ClaimControls, ClaimCommand, ClaimHead, ClaimText, ClaimOrigin } from '
 import { ConversationDraftStore } from '../services/ConversationDraftStore';
 import { SessionStore } from '../services/SessionStore';
 import { ApiError } from '../models/Project';
-import { PMColors } from '../common/DesignTokens';
+import { PMColors, PMRadius } from '../common/DesignTokens';
 
 @Component
 export struct ClaimCorrection {
@@ -98,14 +98,15 @@ export struct ClaimCorrection {
         }
         TextArea({ text: this.quote, placeholder: '应怎样理解' }).maxLength(2000).accessibilityText('应怎样理解').enabled(!this.busy && this.pending === undefined)
           .onChange((v: string) => { this.quote = v; const draft = ConversationDraftStore.read(this.draftKey()); draft.answer = v; ConversationDraftStore.save(this.draftKey(), draft); })
-        Button(this.pending ? '核对原次提交' : '保存纠正').height(44).enabled(!this.busy && this.ready).onClick(() => { this.save(); })
-        Button('重新核对', { type: ButtonType.Normal }).height(44).enabled(!this.busy).onClick(() => { this.load(); })
+        Button(this.pending ? '核对原次提交' : '保存纠正', { type: ButtonType.Normal }).height(44).borderRadius(PMRadius.BUTTON)
+          .fontColor(Color.White).backgroundColor(PMColors.BRAND).enabled(!this.busy && this.ready).onClick(() => { this.save(); })
+        Button('重新核对', { type: ButtonType.Normal }).height(44).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).padding({ left: 0, right: 8 }).enabled(!this.busy).onClick(() => { this.load(); })
         ForEach(this.heads(), (h: ClaimHead) => {
           Column({ space: 4 }) {
             Text(h.origin.quote).fontSize(13)
             Text(h.userQuote ?? '').fontSize(14)
             Text(h.active ? '当前纠正' : '历史纠正').fontSize(12)
-            if (h.active) { Button('撤回这次纠正').height(44).enabled(!this.busy && this.pending === undefined).onClick(() => { this.save(h); }) }
+            if (h.active) { Button('撤回这次纠正', { type: ButtonType.Normal }).height(44).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).padding({ left: 0, right: 8 }).enabled(!this.busy && this.pending === undefined).onClick(() => { this.save(h); }) }
           }.width('100%').alignItems(HorizontalAlign.Start)
         }, (h: ClaimHead) => h.claimId)
         if (this.busy) { Text('正在核对原记录…').fontSize(12) }

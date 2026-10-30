@@ -4,7 +4,7 @@ import { json } from "@/lib/mission/contracts";
 import type { DirectiveScope } from "@/lib/types/continuity";
 
 /** Shared original control invalidation; caller holds the user write slot. */
-export async function invalidateContinuityConsumers(tx: Tx, userId: string, scope: DirectiveScope, events: string[], stop = false, projectIds = [scope.projectId], now = new Date()) {
+export async function invalidateContinuityConsumers(tx: Tx, userId: string, scope: DirectiveScope, events: string[], stop = false, projectIds = [scope.projectId], now = new Date(), excludedMissionIds: string[] = []) {
   // No Conversation.version change: the original in-flight turn retains its base-version slot.
   const active = await tx.conversationTurn.findMany({ where: { status: { in: ["OBSERVING", "GENERATING"] }, conversation: { ownerUserId: userId } } });
   for (const t of active) {
@@ -16,7 +16,7 @@ export async function invalidateContinuityConsumers(tx: Tx, userId: string, scop
   }
   const missions = await tx.agentMission.findMany({ where: { ownerUserId: userId, projectId: { in: projectIds },
     ...(scope.missionId ? { id: scope.missionId } : {}), status: { notIn: ["SUCCEEDED", "FAILED", "CANCELLED"] } } });
-  if (!scope.conversationId) for (const m of missions) {
+  if (!scope.conversationId) for (const m of missions.filter(m => !excludedMissionIds.includes(m.id))) {
     const pause = ["RUNNING", "READY", "WAITING_APPROVAL"].includes(m.status);
     await tx.agentMissionApproval.updateMany({ where: { missionId: m.id, status: { in: ["PENDING", "APPROVED"] } }, data: { status: "OBSOLETE" } });
     await tx.agentMissionStep.updateMany({ where: { missionId: m.id, status: { in: ["READY", "PLANNED", "RUNNING", "WAITING_APPROVAL"] } }, data: { status: "OBSOLETE" } });

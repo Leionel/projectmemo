@@ -1,4 +1,5 @@
 import { assertContinuityBinding } from "@/lib/continuity/directiveService";
+import { record } from "@/lib/conversation/repository";
 import {readDecisionSnapshot} from "@/lib/decision/snapshot";
 import { assertAutomaticPermission,validateAutomaticEvidence } from "./automaticPolicy";
 import { db } from "@/lib/db";
@@ -39,21 +40,38 @@ export async function fenced(tx:Tx,lease:Lease,checkContext=true){
 }
 export async function renew(lease:Lease){requireMissions();const result=await db.agentMission.updateMany({where:{id:lease.id,status:"RUNNING",leaseOwner:lease.owner,leaseEpoch:lease.epoch,leaseUntil:{gt:new Date()}},data:{leaseUntil:new Date(Date.now()+60000)}});return result.count===1;}
 export async function reserve(lease:Lease,kind:"models"|"tools",tool?:string,outputTokens=1000){return db.$transaction(async tx=>{
- const m=await fenced(tx,lease);const used=usageOf(m.budgetUsedJson),limits={...defaultBudget,...m.budgetJson as object};
- assertInvestigationDelegation(m,tool);const delegated=boundedPolicy(m);if(delegated){limits.models=Math.min(limits.models,delegated.maxModels);limits.tools=Math.min(limits.tools,delegated.maxTools);}
+ const m=await fenced(tx,lease);const raw=record(m.budgetUsedJson);const used=usageOf(raw),limits={...defaultBudget,...m.budgetJson as object};
+ assertInvestigationDelegation(m,tool);const delegated=boundedPolicy(m);
+ let dailyUsage: { date: string; models: number; tools: number } | undefined;
+ if(delegated){
+  limits.models=Math.min(limits.models,delegated.maxModels);limits.tools=Math.min(limits.tools,delegated.maxTools);
+  if(delegated.dailyBurst){
+   const today=new Intl.DateTimeFormat("en-CA",{timeZone:delegated.timezone||"Asia/Shanghai"}).format(new Date());
+   const existingDaily=record(raw.dailyUsage);
+   dailyUsage=existingDaily.date===today
+    ? { date: today, models: Number(existingDaily.models??0), tools: Number(existingDaily.tools??0) }
+    : { date: today, models: 0, tools: 0 };
+   if(delegated.dailyBurst.maxModels!==undefined&&kind==="models"&&dailyUsage.models+1>delegated.dailyBurst.maxModels){
+    throw new AppError("DAILY_BURST_EXCEEDED","今日模型调用预算已达上限，将在明日恢复",409);
+   }
+   if(delegated.dailyBurst.maxTools!==undefined&&kind==="tools"&&dailyUsage.tools+1>delegated.dailyBurst.maxTools){
+    throw new AppError("DAILY_BURST_EXCEEDED","今日工具调用预算已达上限，将在明日恢复",409);
+   }
+  }
+ }
  if(dynamicGuard(m)){
   if(kind==="models")throw new AppError("DYNAMIC_MODEL_BOUNDARY","本轮定向调查不新增模型循环，请读取结果后明确复核",409);
   if(tool!=="read_project_material")throw new AppError("DYNAMIC_SCOPE_VIOLATION","本轮只允许读取已确认资料",409);
   await reserveDynamicRead(tx,m);
  }
- used[kind]++;if(tool==="web_search")used.searches++;if(tool==="web_fetch")used.fetches++;used.activeMs+=20000;if(kind==="models"){used.reservedOutputTokens+=outputTokens;used.unknownCalls++;}
- if(Object.entries(limits).some(([key,value])=>used[key as keyof typeof used]>value))throw new AppError("BUDGET_EXHAUSTED","委托预算已用完，请检查后处理",409);
- await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json(used)}});return used;
+ used[kind]++;if(dailyUsage)dailyUsage[kind]++;if(tool==="web_search")used.searches++;if(tool==="web_fetch")used.fetches++;used.activeMs+=20000;if(kind==="models"){used.reservedOutputTokens+=outputTokens;used.unknownCalls++;}
+ if(Object.entries(limits).some(([key,value])=>typeof value === "number" && (used[key as keyof typeof used] ?? 0) > value))throw new AppError("BUDGET_EXHAUSTED","委托预算已用完，请检查后处理",409);
+ await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json({...raw,...used,...(dailyUsage?{dailyUsage}:{})})}});return used;
  });}
 export async function settleUsage(lease:Lease,kind:"models"|"tools",durationMs:number,tokens?:{inputTokens:number|null;outputTokens:number|null}){return db.$transaction(async tx=>{
- const m=await fenced(tx,lease,false);const used=usageOf(m.budgetUsedJson);used.activeMs=Math.max(0,used.activeMs-20000)+durationMs;
+ const m=await fenced(tx,lease,false);const raw=record(m.budgetUsedJson);const used=usageOf(raw);used.activeMs=Math.max(0,used.activeMs-20000)+durationMs;
  if(kind==="models"&&tokens){if(tokens.inputTokens!==null)used.inputTokens+=tokens.inputTokens;if(tokens.outputTokens!==null)used.outputTokens+=tokens.outputTokens;if(tokens.inputTokens!==null&&tokens.outputTokens!==null)used.unknownCalls=Math.max(0,used.unknownCalls-1);}
- await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json(used)}});
+ await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json({...raw,...used})}});
  });}
 export async function release(tx:Tx,m:AgentMission,status:string,reason?:string){
  const p=boundedPolicy(m);let plan=m.planJson as object,nextAttemptAt:Date|null|undefined;

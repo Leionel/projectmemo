@@ -1,0 +1,74 @@
+{
+  "scope": "UX3_REVIEW_MAIN_CHAIN_ONLY",
+  "baseCommit": "fa58dce7c241d1a5ea166875d69aa93c7375c152",
+  "createdAt": "2026-10-30T15:19:41.475376+00:00",
+  "checks": {
+    "unit-final": {
+      "exitCode": 0,
+      "log": "unit-final.log",
+      "sha256": "ebcb0fd41663ef6a9d1f258221666e89fe025c7ddacaa0af3d86c2ccde376e23"
+    },
+    "types-final": {
+      "exitCode": 0,
+      "log": "types-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "lint-final": {
+      "exitCode": 0,
+      "log": "lint-final.log",
+      "sha256": "539dfcd0fd1a8a7591e87b682790281238cc45a52fe814e2e526b140ac613535"
+    },
+    "build-final": {
+      "exitCode": 0,
+      "log": "build-final.log",
+      "sha256": "d4c6d66ae6a158ac3a095b6c2060db981494fcf8a7a703bdd53297b8b3a0f2f5"
+    },
+    "web-e2e-final": {
+      "exitCode": 0,
+      "log": "web-e2e-final.log",
+      "sha256": "35c2fe4dae9709b148affacf4dce2de8c9cdbd6f8d3be7a95e6b90d8d479c450"
+    },
+    "harmony-final": {
+      "exitCode": 0,
+      "log": "harmony-final.log",
+      "sha256": "edd6dce538deb50b9824d947e3401448d5419bbdc82a5ee0c510acdea87af1ef"
+    },
+    "hap-final": {
+      "exitCode": 0,
+      "log": "hap-final.log",
+      "sha256": "5195c893e8ce4379d2db005fed4dce164965056eed529df480df0edcf180a90e"
+    }
+  },
+  "unit": {
+    "files": 163,
+    "passed": 1257
+  },
+  "webE2E": {
+    "passed": 7,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "harmonyUnit": {
+    "passed": 88
+  },
+  "unsignedHapSha256": "881a079368e2bf181e79840b12cfb3a0b6d97b2310ec53ac8c2fe83a35823c67",
+  "engineeredReliability": true,
+  "nativeDeviceAcceptance": false,
+  "naturalDayModelQualityAcceptance": false,
+  "platformPushAcceptance": false,
+  "productionDeployment": false,
+  "realDatabaseMigration": false,
+  "paidModelCalls": 0,
+  "externalBusinessWrites": 0,
+  "excludedBranches": [
+    "codex/ct8-outcome-experience-impl",
+    "codex/ct9-browser-read"
+  ],
+  "preservedUserFileHashes": {
+    "AGENTS.md": "dbff8a9d83193830b2fd06c5c131b9324c0a8e472be2c8aa2f66deff990e2750",
+    "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md": "7328e70a94cbd17f400c23ef418d0a62f396a408ea9a1926c9d1f057f211f631",
+    "harmonyos/build-profile.json5": "442618a372bd9a74d204e7162ffe6844b6fc49dbf4c09b8cc5bc58c6709a1924",
+    "tsconfig.json": "af1b4fbd345a0d2b7e23394aca3540b524a3d4826fca6a51169b13b2a325ee4a"
+  }
+}

@@ -24,7 +24,10 @@ export class MissionScope {
   excludedTerms: string[] = [];
   allowedHosts: string[] = [];
 }
-export class MissionPolicy { mode: string = 'MANUAL'; schemaVersion?: number; expiresAt?: string; checkEveryMinutes?: number; maxModels?: number; maxTools?: number; maxMetadataRequests?: number; allowedTools?: string[]; connectionIds?: string[]; timezone?: string; quietStart?: number; quietEnd?: number; attention?: string; }
+export class MissionDailyBurst { maxModels?: number; maxTools?: number; }
+export class MissionPolicy { mode: string = 'MANUAL'; schemaVersion?: number; expiresAt?: string; checkEveryMinutes?: number; maxModels?: number; maxTools?: number; maxMetadataRequests?: number; allowedTools?: string[]; connectionIds?: string[]; trackBranchHead?: boolean; dailyBurst?: MissionDailyBurst; timezone?: string; quietStart?: number; quietEnd?: number; attention?: string; }
+export interface MissionSourceCountCriterion { type: string; minimum: number; }
+export type MissionSuccessCriterion = string | MissionSourceCountCriterion;
 export class MissionCreate {
   successCriteria: string[] = ['DRAFT_EXISTS'];
   projectId: string = '';
@@ -156,9 +159,19 @@ export interface MissionWorkspaceItem { workState?:WorkState;
 }
 export interface MissionWorkspaceSummary { enabled: boolean; totalActive: number; items: MissionWorkspaceItem[]; }
 
+export interface MissionBudgetUsageDetail {
+  models?: number;
+  tools?: number;
+  maxModels?: number;
+  maxTools?: number;
+  metadataRequests?: number;
+  maxMetadataRequests?: number;
+  unknownCalls?: number;
+}
+
 export interface MissionResponsibilityBudget {
-  limits: Object;
-  cumulativeUsed: Object;
+  limits: MissionBudgetUsageDetail;
+  cumulativeUsed: MissionBudgetUsageDetail;
   additionalUsed: Object;
   policy: string;
   monetaryCost: string | null;
@@ -177,7 +190,8 @@ export interface MissionResponsibilityView {
   projectId: string;
   controlVersion: string;
   goal: string;
-  successCriteria: string[];
+  successCriteria: MissionSuccessCriterion[];
+  successCriteriaLabels?: string[];
   workingObjective?: string | null;
   constraints: MissionConstraints;
   researchScope: MissionScope;
@@ -203,7 +217,7 @@ export class MissionResponsibilityRevisionInput {
   requestId: string = '';
   expectedControlVersion: string = '';
   goal?: string;
-  successCriteria?: string[];
+  successCriteria?: MissionSuccessCriterion[];
   workingObjective?: string;
   constraints?: MissionConstraints;
   researchScope?: MissionScope;

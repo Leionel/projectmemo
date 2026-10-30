@@ -1,8 +1,9 @@
+import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { record } from "@/lib/conversation/repository";
 import { effectiveContinuity } from "@/lib/continuity/directiveService";
 import { isFeatureEnabled } from "@/lib/config/features";
-import { json, jsonHash, usageOf, terminal } from "./contracts";
+import { json, jsonHash, usageOf, terminal, successCriterionSchema, defaultBudget } from "./contracts";
 import { commandReplay, event, lock, ownedMission, type Tx } from "./repository";
 import { missionWorkState } from "./workState";
 import { readWorkerPresence } from "./workerPresence";
@@ -14,6 +15,7 @@ import {
   researchScopeSchema,
 } from "@/lib/types/mission";
 import { initializeDelegation } from "./investigationDelegation";
+import { invalidateContinuityConsumers } from "@/lib/continuity/invalidation";
 
 export async function resolveSourceGrantVersions(tx: Tx, userId: string, projectId: string, connectionIds: string[]) {
   const membership = await tx.projectMembership.findUnique({
@@ -26,13 +28,14 @@ export async function resolveSourceGrantVersions(tx: Tx, userId: string, project
   const conns = await tx.sourceConnection.findMany({
     where: { id: { in: connectionIds }, projectId, ownerUserId: userId },
     orderBy: { id: "asc" },
-    select: { id: true, revision: true, status: true, revokedAt: true, signalKind: true },
+    select: { id: true, repo: true, ref: true, status: true, revokedAt: true, signalKind: true },
   });
   return {
     membershipRole: membership?.role ?? null,
     connections: conns.map(c => ({
       id: c.id,
-      revision: c.revision,
+      repo: c.repo,
+      ref: c.ref,
       status: c.status,
       revokedAt: c.revokedAt ? c.revokedAt.toISOString() : null,
       signalKind: c.signalKind,
@@ -59,7 +62,8 @@ export async function readMissionResponsibility(userId: string, id: string, exte
 
     const controlVersion = jsonHash({
       missionId: id,
-      version: m.version,
+      goal: m.goal,
+      successCriteria: m.successCriteriaJson,
       contextVersion: m.contextVersion,
       planRevision: m.planRevision,
       constraintsVersion: m.constraintsVersion,
@@ -79,6 +83,15 @@ export async function readMissionResponsibility(userId: string, id: string, exte
       approvalIds: approvals.map(a => a.id),
     };
 
+    const baseLimits = { ...defaultBudget, metadataRequests:24, ...(m.budgetJson as Record<string, unknown>) } as Record<string, unknown>;
+    const limits = policy.mode === "BOUNDED_INVESTIGATION" ? {
+      ...baseLimits,
+      models: Math.min(Number(policy.maxModels), Number(baseLimits.models)),
+      tools: Math.min(Number(policy.maxTools), Number(baseLimits.tools)),
+      metadataRequests: Math.min(Number(policy.maxMetadataRequests), Number(baseLimits.metadataRequests ?? 24)),
+      dailyBurst: policy.dailyBurst,
+    } : baseLimits;
+
     return {
       schemaVersion: 1 as const,
       missionId: id,
@@ -86,15 +99,20 @@ export async function readMissionResponsibility(userId: string, id: string, exte
       controlVersion,
       goal: m.goal,
       successCriteria: m.successCriteriaJson,
+      successCriteriaLabels: (Array.isArray(m.successCriteriaJson)?m.successCriteriaJson:[]).map(c=>{
+        const labels:Record<string,string>={DRAFT_EXISTS:"草稿已保存",ACTION_CREATED:"已创建行动",APPROVAL_CONSUMED:"已执行获批提案",REQUIRED_INPUT_PRESENT:"必要资料已补齐",FIXED_METRIC_JOB_RECORDED:"固定核算回执已记录",PAPER_METADATA_READ:"已核对论文元数据",ACTION_RESULT_RECORDED:"行动完成回执已记录"};
+        return typeof c==="string"?labels[c]??"需核对的验收条件":record(c).type==="SOURCE_COUNT"?`至少核对 ${record(c).minimum} 个来源`:"需核对的验收条件";
+      }),
       workingObjective: continuity.workingObjective,
       constraints: m.constraintsJson,
       researchScope: m.researchScopeJson,
       continuationPolicy: m.continuationPolicyJson,
+      llmContextApproved: Boolean(constraints.llmContextApproved),
       deadline: typeof constraints.deadline === "string" ? constraints.deadline : null,
       permissionExpiresAt: typeof policy.expiresAt === "string" ? policy.expiresAt : null,
       permissionState: continuity.stopped ? "STOPPED" : expired ? "EXPIRED" : "WITHIN_TIME_BOUNDARY",
       budget: {
-        limits: m.budgetJson,
+        limits,
         cumulativeUsed: usageOf(m.budgetUsedJson),
         additionalUsed: m.budgetUsedJson,
         policy: "CUMULATIVE_NOT_RESET_ON_RESTART_OR_DATE" as const,
@@ -110,6 +128,9 @@ export async function readMissionResponsibility(userId: string, id: string, exte
         lastHeartbeatAt: presence.lastHeartbeatAt,
         lastScanAt: presence.lastScanAt,
         lastClaimAt: presence.lastClaimAt,
+        isProcessAlive: presence.isProcessAlive,
+        isActivelyInspecting: presence.isActivelyInspecting,
+        hasClaimedWork: presence.hasClaimedWork,
       } : null,
       activity: events.slice(0, 20).map(e => ({ id: e.id, sequence: e.seq, kind: e.type, at: e.createdAt.toISOString() })),
       coverage: { activityHasMore: events.length > 20 },
@@ -120,13 +141,17 @@ export async function readMissionResponsibility(userId: string, id: string, exte
   return externalTx ? run(externalTx) : db.$transaction(run);
 }
 
+export const reviseConstraintsSchema = constraintsSchema.extend({
+  llmContextApproved: z.boolean().optional(),
+});
+
 export const reviseResponsibilitySchema = z.object({
   requestId: z.string().min(1).max(128),
   expectedControlVersion: z.string().min(1).max(128),
   goal: z.string().trim().min(1).max(300).optional(),
-  successCriteria: z.array(z.string().trim().min(1).max(200)).max(12).optional(),
+  successCriteria: z.array(successCriterionSchema).min(1).max(8).optional(),
   workingObjective: z.string().trim().max(300).optional(),
-  constraints: constraintsSchema.optional(),
+  constraints: reviseConstraintsSchema.optional(),
   researchScope: researchScopeSchema.optional(),
   continuationPolicy: continuationPolicySchema.optional(),
   llmContextApproved: z.boolean().optional(),
@@ -139,6 +164,7 @@ export async function reviseMissionResponsibility(userId: string, id: string, ra
   const hash = jsonHash(body);
 
   return db.$transaction(async tx => {
+    await tx.user.updateMany({where:{id:userId},data:{continuitySeq:{increment:0}}});
     await lock(tx, id);
     const m = await ownedMission(userId, id, tx);
 
@@ -179,14 +205,59 @@ export async function reviseMissionResponsibility(userId: string, id: string, ra
       }
     }
 
+    let continuity = await effectiveContinuity(userId, { projectId: m.projectId, missionId: id }, tx);
+    if (body.workingObjective !== undefined && body.workingObjective !== (currentSnapshot.workingObjective ?? "")) {
+      const user = await tx.user.findUniqueOrThrow({ where: { id: userId } });
+      const now = new Date();
+      const directiveEvent = await tx.agentDirectiveEvent.create({
+        data: {
+          id: randomUUID(),
+          ownerUserId: userId,
+          projectId: m.projectId,
+          missionId: id,
+          seq: user.continuitySeq + 1,
+          commandId: body.requestId,
+          eventIndex: 0,
+          inputHash: hash,
+          directiveId: randomUUID(),
+          kind: "WORKING_OBJECTIVE",
+          operation: "SET",
+          quote: body.workingObjective,
+          sourceJson: json({ origin: "RESPONSIBILITY_REVISION", requestId: body.requestId }),
+          admissionJson: json({ status: "DIRECT_APPLIED", kind: "WORKING_OBJECTIVE" }),
+          sourceIdsJson: json([]),
+          validFrom: now,
+          timezone: "Asia/Shanghai",
+        },
+      });
+      await tx.user.update({ where: { id: userId }, data: { continuitySeq: { increment: 1 } } });
+      await invalidateContinuityConsumers(tx,userId,{projectId:m.projectId,missionId:id},[directiveEvent.id],false,[m.projectId],now,[id]);
+      continuity = await effectiveContinuity(userId, { projectId: m.projectId, missionId: id }, tx);
+    }
+
     let delegation = null;
     if (mergedPolicy.mode === "BOUNDED_INVESTIGATION") {
-      const syntheticMission = {
-        ...m,
-        constraintsJson: json(mergedConstraints),
-        researchScopeJson: json(mergedScope),
-      };
-      delegation = await initializeDelegation(tx, syntheticMission, mergedPolicy);
+      const existingPlan = record(m.planJson);
+      const existingDelegation = record(existingPlan.delegation);
+      if (existingDelegation.policyHash || existingDelegation.wakeSeq !== undefined || existingDelegation.remoteSnapshots !== undefined) {
+        // Reconcile delegation state: preserve execution watermarks, wake state, and observation history
+        const validated = await initializeDelegation(tx,{...m,constraintsJson:json(mergedConstraints),researchScopeJson:json(mergedScope)},mergedPolicy);
+        delegation = {
+          ...existingDelegation,
+          policyHash: jsonHash(mergedPolicy),
+          connectionVersions: validated.connectionVersions,
+          grantRunIds: validated.grantRunIds,
+          grantBindings: validated.grantBindings,
+          ...(body.continuationPolicy || body.researchScope ? {poll:null} : {}),
+        };
+      } else {
+        const syntheticMission = {
+          ...m,
+          constraintsJson: json(mergedConstraints),
+          researchScopeJson: json(mergedScope),
+        };
+        delegation = await initializeDelegation(tx, syntheticMission, mergedPolicy);
+      }
     }
 
     // Invalidate existing pending approvals and ready steps so no half-expanded authority remains
@@ -207,7 +278,7 @@ export async function reviseMissionResponsibility(userId: string, id: string, ra
 
     const newStatus = m.status === "WAITING_APPROVAL"
       ? "READY"
-      : (delegation && m.status === "WAITING_INPUT" ? "READY" : m.status);
+      : m.status;
 
     await tx.agentMission.update({
       where: { id },
@@ -226,6 +297,7 @@ export async function reviseMissionResponsibility(userId: string, id: string, ra
           ...record(m.planJson),
           automaticContinuation: null,
           delegation,
+          continuityBinding: { intentHash: continuity.intentHash, reusePolicyHash: continuity.reusePolicyHash },
           resumeStatus: newStatus === "PAUSED" ? "READY" : (m.planJson as { resumeStatus?: string }).resumeStatus,
         }),
       },

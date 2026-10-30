@@ -1,4 +1,4 @@
-import { Mission, MissionPolicyEdit, MissionAttentionReceipt } from '../models/Mission';
+import { Mission, MissionPolicyEdit, MissionAttentionReceipt, MissionDailyBurst } from '../models/Mission';
 import { MissionService } from '../services/MissionService';
 import { RepoSignalService } from '../services/RepoSignalService';
 import { ConnectionView } from '../models/RepoSignal';
@@ -21,6 +21,10 @@ export struct MissionInvestigationDelegation {
   @State verification: boolean = false;
   @State documents: boolean = false;
   @State logs: boolean = false;
+  @State trackHead: boolean = false;
+  @State daily: boolean = false;
+  @State dailyModels: string = '4';
+  @State dailyTools: string = '8';
   aboutToAppear(): void {
     this.selected = this.mission.continuationPolicy.connectionIds || [];
     this.models = (this.mission.continuationPolicy.maxModels || 8).toString(); this.tools = (this.mission.continuationPolicy.maxTools || 12).toString();
@@ -31,6 +35,10 @@ export struct MissionInvestigationDelegation {
     this.verification = (this.mission.continuationPolicy.allowedTools || []).includes('propose_metric_verification');
     this.documents = (this.mission.continuationPolicy.allowedTools || []).includes('inspect_document');
     this.logs = (this.mission.continuationPolicy.allowedTools || []).includes('read_ci_log');
+    this.trackHead = this.mission.continuationPolicy.trackBranchHead || false;
+    this.daily = this.mission.continuationPolicy.dailyBurst !== undefined;
+    this.dailyModels = (this.mission.continuationPolicy.dailyBurst?.maxModels || 4).toString();
+    this.dailyTools = (this.mission.continuationPolicy.dailyBurst?.maxTools || 8).toString();
     this.loadConnections();
   }
   private async loadConnections(): Promise<void> {
@@ -58,7 +66,9 @@ export struct MissionInvestigationDelegation {
         if (this.documents) body.policy.allowedTools.push('inspect_document', 'read_document_page', 'read_document_section', 'read_document_table');
         if (this.selected.length > 0) body.policy.allowedTools.push('read_repository_ci', 'read_ci_jobs');
         if (this.logs && this.logAllowed()) body.policy.allowedTools.push('read_ci_log');
-        body.policy.connectionIds = this.selected; body.policy.timezone = 'Asia/Shanghai'; body.policy.quietStart = 22; body.policy.quietEnd = 8; body.policy.attention = 'IMPORTANT_ONLY';
+        body.policy.connectionIds = this.selected; body.policy.trackBranchHead = this.selected.length > 0 && this.trackHead;
+        if (this.daily) { body.policy.dailyBurst = new MissionDailyBurst(); body.policy.dailyBurst.maxModels = Number(this.dailyModels); body.policy.dailyBurst.maxTools = Number(this.dailyTools); }
+        body.policy.timezone = this.mission.continuationPolicy.timezone || 'Asia/Shanghai'; body.policy.quietStart = this.mission.continuationPolicy.quietStart ?? 22; body.policy.quietEnd = this.mission.continuationPolicy.quietEnd ?? 8; body.policy.attention = this.mission.continuationPolicy.attention || 'IMPORTANT_ONLY';
       }
       await new MissionService().policy(this.mission.id, body); this.error = ''; this.onSaved();
     } catch { this.error = '许可未保存，请核对期限、预算和原任务状态'; } finally { this.saving = false; }
@@ -66,7 +76,8 @@ export struct MissionInvestigationDelegation {
   build() {
     Column({ space: 8 }) {
       Text('持续调查与打扰方式').fontSize(16)
-      Text('新资料或所选提交的 CI 有变化时继续原任务；22:00–08:00 需要你处理的事项排队。').fontSize(13)
+      Text('新资料或所选提交的 CI 有变化时继续原任务；按你的安静时段排队。').fontSize(13)
+      Text('实际额度取调查许可与原任务预算中较低的值；原任务总账不会重置。').fontSize(13)
       if (this.mission.continuationPolicy.mode === 'BOUNDED_INVESTIGATION') { Text('已允许调查至 ' + (this.mission.continuationPolicy.expiresAt || '') + ' · 原任务累计最多 ' + (this.mission.continuationPolicy.maxModels || 0).toString() + ' 次模型、' + (this.mission.continuationPolicy.maxTools || 0).toString() + ' 次工具').fontSize(13) }
       if (this.mission.delegation?.attention && this.mission.delegation?.attention?.level !== 'SUPPRESS') {
         Text(this.mission.delegation?.attention?.level === 'QUEUE' ? '需要你处理的事项已排队' : this.mission.delegation?.attention?.level === 'URGENT' ? '临近截止，需要你决定' : '任务收件箱有待处理事项').fontSize(13)
@@ -75,6 +86,12 @@ export struct MissionInvestigationDelegation {
       TextInput({ text: this.until, placeholder: '截止时间（北京时间）：2026-10-31 20:00' }).onChange((v: string) => { this.until = v; })
       TextInput({ text: this.models, placeholder: '模型调用总上限' }).type(InputType.Number).onChange((v: string) => { this.models = v; })
       TextInput({ text: this.tools, placeholder: '工具调用总上限' }).type(InputType.Number).onChange((v: string) => { this.tools = v; })
+      Row() { Checkbox().select(this.daily).onChange((v: boolean) => { this.daily = v; }); Text('再限制每天的调用量').fontSize(13) }
+      if (this.daily) {
+        TextInput({ text: this.dailyModels, placeholder: '每日模型上限' }).type(InputType.Number).onChange((v: string) => { this.dailyModels = v; })
+        TextInput({ text: this.dailyTools, placeholder: '每日工具上限' }).type(InputType.Number).onChange((v: string) => { this.dailyTools = v; })
+        Text('按许可时区换日；次日只恢复每日额度，累计用量和停止状态保留。').fontSize(13)
+      }
       Row() { Checkbox().select(this.web).onChange((v: boolean) => { this.web = v; }); Text('允许在原公开研究范围内搜索和读取').fontSize(13) }
       if (this.mission.documentDeepReadEnabled) { Row() { Checkbox().select(this.documents).onChange((v: boolean) => { this.documents = v; }); Text('允许按页、章节和表格深读本项目 PDF').fontSize(13) } }
       if (this.mission.experimentObserverEnabled) { Row() { Checkbox().select(this.experiments).onChange((v: boolean) => { this.experiments = v; }); Text('允许继续读取与比较原指标').fontSize(13) } }
@@ -85,7 +102,9 @@ export struct MissionInvestigationDelegation {
         Row() { Checkbox().select(this.selected.includes(c.id)).enabled(this.selected.includes(c.id) || this.selected.length < 3).onChange((v: boolean) => { this.selected = v ? [...this.selected, c.id] : this.selected.filter((id: string) => id !== c.id); }); Text(c.repo + ' · ' + c.ref).fontSize(13) }
       }, (c: ConnectionView) => c.id)
       if (this.selected.length > 0) {
-        Text('定时读取已收录的最新固定提交；无变化不调用模型，每次最多 3 次仓库请求。').fontSize(13)
+        Row() { Checkbox().select(this.trackHead).onChange((v: boolean) => { this.trackHead = v; }); Text('跟踪所选分支的新提交').fontSize(13) }
+        Text(this.trackHead ? '先读取分支 head，再核对固定提交 CI；每仓库额外计一次 head 请求。' : '只核对已收录的固定提交；无变化不调用模型。').fontSize(13)
+        Text('CI 每仓库最多 3 次请求；实际仍受原任务请求总额约束（默认 24 次）。').fontSize(13)
         TextInput({ text: this.interval, placeholder: '检查间隔（分钟）' }).type(InputType.Number).onChange((v: string) => { this.interval = v; })
         TextInput({ text: this.metadata, placeholder: '仓库请求累计上限' }).type(InputType.Number).onChange((v: string) => { this.metadata = v; })
         if (this.logAllowed()) { Row() { Checkbox().select(this.logs).onChange((v: boolean) => { this.logs = v; }); Text('允许读取脱敏的失败日志').fontSize(13) } }

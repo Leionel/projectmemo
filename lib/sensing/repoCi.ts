@@ -79,6 +79,13 @@ async function context(actor: RepositoryActor, projectId: string, connectionId: 
   };
   return { c, continuity, guard, read, requests: () => requests, observedAt: () => observedAt || new Date().toISOString() };
 }
+/** A moving ref is resolved only as an observation; it never rewrites the manual refresh cursor. */
+export async function readRepositoryHead(actor: RepositoryActor, projectId: string, connectionId: string, fetcher: CiTransport = ciTransport, dispatch?: CiDispatch) {
+  const ctx = await context(actor, projectId, connectionId, fetcher, dispatch);
+  const commit = z.object({ sha: shaSchema }).parse((await ctx.read(`/commits/${encodeURIComponent(ctx.c.ref)}`)).body);
+  await ctx.guard();
+  return { connectionId, sha: commit.sha, repo: ctx.c.repo, ref: ctx.c.ref, observedAt: ctx.observedAt(), connectionRevision: ctx.c.revision };
+}
 export async function readRepositoryCi(actor: RepositoryActor, projectId: string, connectionId: string, rawSha: string, fetcher: CiTransport = ciTransport, dispatch?: CiDispatch) {
   const sha = shaSchema.parse(rawSha), ctx = await context(actor, projectId, connectionId, fetcher, dispatch);
   const commit = z.object({ sha: shaSchema }).parse((await ctx.read(`/commits/${sha}`)).body);

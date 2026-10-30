@@ -1,6 +1,7 @@
 import { z } from "zod";
+export const missionBudgetReviewCaps = { models:240, tools:640, activeMs:86400000, reservedOutputTokens:480000 } as const;
 /** New cumulative totals; never a fresh allowance or a retry authorization. */
 export const missionBudgetReviewSchema = z.object({
   requestId:z.string().min(1).max(128), expectedVersion:z.number().int().positive(),
-  totals:z.object({models:z.number().int().min(1).max(24),tools:z.number().int().min(1).max(64),activeMs:z.number().int().min(1).max(900000),reservedOutputTokens:z.number().int().min(1).max(48000)}).strict(),
+  totals:z.object({models:z.number().int().min(1).max(missionBudgetReviewCaps.models),tools:z.number().int().min(1).max(missionBudgetReviewCaps.tools),activeMs:z.number().int().min(1).max(missionBudgetReviewCaps.activeMs),reservedOutputTokens:z.number().int().min(1).max(missionBudgetReviewCaps.reservedOutputTokens)}).strict(),
 }).strict();

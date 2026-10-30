@@ -6,11 +6,14 @@ import { event } from "./repository";
 import { fenced, release, reserve, settleUsage, type Lease } from "./runtimeStore";
 import { investigationInputHash } from "./investigationDelegation";
 import type { ToolSet } from "./tools";
+import { runBranchObservation } from "./branchObservation";
+import type { CiTransport } from "@/lib/sensing/repoCi";
 
 type Target = { connectionId: string; sha: string; revision: number };
 
 /** A declared read before reasoning. Uses the same MissionStep, lease, HTTP ledger and cumulative budget. */
-export async function runDelegationObservation(lease: Lease, tools: ToolSet, onStep: (id: string) => void): Promise<boolean> {
+export async function runDelegationObservation(lease: Lease, tools: ToolSet, onStep: (id: string) => void, transport?: CiTransport): Promise<boolean> {
+  if (await runBranchObservation(lease, onStep, transport)) return true;
   const pending = await db.$transaction(async tx => {
     const m = await fenced(tx, lease);
     const state = record(record(m.planJson).delegation);
@@ -27,7 +30,7 @@ export async function runDelegationObservation(lease: Lease, tools: ToolSet, onS
       const observation = record(record(record(s.resultJson).data).observation), args = record(s.canonicalInputJson);
       // Ignore observation timestamps; ordering and first baseline are explicit, no false 'new information' per poll.
       const byId = (a: unknown) => Array.isArray(a) ? [...a].sort((x, y) => Number(record(x).id) - Number(record(y).id)) : [];
-      snapshots[String(args.connectionId)] = jsonHash({ sha: observation.sha, connectionRevision: observation.connectionRevision, checks: byId(observation.checks), runs: byId(observation.runs), coverage: observation.coverage });
+      snapshots[String(args.connectionId)] = jsonHash({ sha: observation.sha, checks: byId(observation.checks), runs: byId(observation.runs), coverage: observation.coverage });
     }
     const next = targets.find(t => snapshots[t.connectionId] === undefined);
     if (!next) {
@@ -35,12 +38,25 @@ export async function runDelegationObservation(lease: Lease, tools: ToolSet, onS
       if (input.truncated) throw new AppError("INPUT_COVERAGE_LIMIT", "资料变化较多，请核对调查范围", 409);
       const changed = input.hash !== state.inputHash || Object.entries(snapshots).some(([key, value]) => previous[key] !== value);
 
-      // Preserve newer pendingWake if a concurrent wake arrived; advance appliedWake safely
+      // Consume strictly the wake frozen for this poll cycle; newer concurrent wakes stay pending
+      const pendingWakeObj = record(state.pendingWake);
+      const targetWakeSeq = Number(poll.targetWakeSeq) || Number(pendingWakeObj.seq ?? 0);
+      const targetWakeKey = (poll.targetWakeKey as string | undefined) ?? (pendingWakeObj.key as string | undefined) ?? "";
+      const appliedWake = targetWakeSeq > 0 ? {
+        seq: targetWakeSeq,
+        key: targetWakeKey,
+        appliedAt: new Date().toISOString(),
+      } : (state.appliedWake ?? null);
+
       const freshDb = await tx.agentMission.findUniqueOrThrow({ where: { id: m.id } });
       const latestPlan = record(freshDb.planJson);
       const latestDelegation = record(latestPlan.delegation);
-      const activePendingWake = latestDelegation.pendingWake ?? state.pendingWake;
-      const appliedWake = activePendingWake ? { ...activePendingWake, appliedAt: new Date().toISOString() } : (latestDelegation.appliedWake ?? null);
+      const latestPending = record(latestDelegation.pendingWake);
+      const latestWakeSeq = Math.max(Number(state.wakeSeq ?? 0), Number(latestDelegation.wakeSeq ?? 0));
+      // If a newer wake arrived while poll was running, it MUST remain pending!
+      const pendingWake = latestDelegation.pendingWake && Number(latestPending.seq ?? 0) > targetWakeSeq
+        ? latestDelegation.pendingWake
+        : null;
 
       const fresh = await tx.agentMission.update({
         where: { id: m.id },
@@ -49,10 +65,11 @@ export async function runDelegationObservation(lease: Lease, tools: ToolSet, onS
             ...record(m.planJson),
             delegation: {
               ...state,
+              wakeSeq: latestWakeSeq,
               poll: null,
               remoteSnapshots: snapshots,
               lastObservedAt: new Date().toISOString(),
-              pendingWake: latestDelegation.pendingWake && latestDelegation.pendingWake.seq > (state.pendingWake?.seq ?? 0) ? latestDelegation.pendingWake : null,
+              pendingWake,
               appliedWake,
               attention: changed ? null : state.attention,
             },
@@ -76,7 +93,9 @@ export async function runDelegationObservation(lease: Lease, tools: ToolSet, onS
     }
 
     const connection = await tx.sourceConnection.findUnique({ where: { id: next.connectionId } });
-    if (!connection || connection.revision !== next.revision) throw new AppError("CONNECTION_CHANGED", "仓库授权版本已变化，请重新核对", 409);
+    if (!connection || connection.status !== "ACTIVE" || connection.revokedAt !== null) {
+      throw new AppError("CONNECTION_CHANGED", "仓库授权已被撤销，请重新核对", 409);
+    }
     const existing = steps.find(s => record(s.protocolJson).delegationCycle === poll.cycle && record(s.canonicalInputJson).connectionId === next.connectionId && s.status === "RUNNING");
     const last = await tx.agentMissionStep.aggregate({ where: { missionId: m.id }, _max: { ordinal: true } });
     const s = existing ?? await tx.agentMissionStep.create({

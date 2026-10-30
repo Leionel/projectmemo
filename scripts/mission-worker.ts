@@ -16,27 +16,28 @@ const state: WorkerCycleState = { first: "CONVERSATION", nextScanAt: 0 };
 process.on("SIGTERM", () => { stopping = true; });
 process.on("SIGINT", () => { stopping = true; });
 
+recordWorkerPresence({workerId,version:"r4-ux3-worker"});
+const heartbeat=setInterval(()=>recordWorkerPresence({workerId,version:"r4-ux3-worker"}),10000);heartbeat.unref();
 try {
   do {
-    recordWorkerPresence({ workerId, version: "r4-ux3-worker", scan: true });
+    let successfulScans=0;
+    const scanned=async(run:()=>Promise<unknown>)=>{const result=await run();if(++successfulScans===3)recordWorkerPresence({workerId,scan:true});return result;};
     const result = await runWorkerCycle(state, {
       scan: [
-        { name: "IMPACT", run: () => consumeImpactJobs() },
-        { name: "MATERIAL", run: () => processMaterialContinuationBatch() },
-        { name: "DELEGATION", run: () => processInvestigationDelegations() },
+        { name: "IMPACT", run: () => scanned(()=>consumeImpactJobs()) },
+        { name: "MATERIAL", run: () => scanned(()=>processMaterialContinuationBatch()) },
+        { name: "DELEGATION", run: () => scanned(()=>processInvestigationDelegations()) },
       ],
       conversation: () => runConversationTurn(),
-      mission: () => runMissionSlice({ workerId }),
+      mission: () => runMissionSlice({ workerId,onClaim:()=>recordWorkerPresence({workerId,claim:true}) }),
       onError: (name) => console.error(`委托 Worker ${name} 本次处理失败，请核对功能开关、迁移和原任务记录`),
     });
 
-    if (result.ran) {
-      recordWorkerPresence({ workerId, claim: true });
-    }
 
     if (process.argv.includes("--once") && result.failures) process.exitCode = 1;
     if (!result.ran && !process.argv.includes("--once")) await setTimeout(result.failures ? 2000 : 1000);
   } while (!stopping && !process.argv.includes("--once"));
 } finally {
+  clearInterval(heartbeat);
   await db.$disconnect();
 }

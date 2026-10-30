@@ -1,4 +1,5 @@
 import { assertCognitiveReadSet } from "@/lib/memory/hypothesisService";
+import { nextBudgetDay } from "./dailyBoundary";
 import { record } from "@/lib/conversation/repository";
 import { assertProjectInputReadSet } from "@/lib/memory/inputReadSet";
 import { academicTools } from "./academicTools";
@@ -36,8 +37,9 @@ import { runDelegationObservation } from "./delegationObservation";
 import { documentTools } from "./documentTools";
 import type { DocumentExtractor } from "@/lib/documents/reader";
 import { experimentTools } from "./experimentTools";
-export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;repository?:CiTransport;document?:DocumentExtractor;sandbox?:DockerCommand;academic?:typeof fetch;judge?:ClaimJudge}={}){
+export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;repository?:CiTransport;document?:DocumentExtractor;sandbox?:DockerCommand;academic?:typeof fetch;judge?:ClaimJudge;onClaim?:()=>void}={}){
  const m=await claimMission(options.workerId??randomUUID(),options.id);if(!m)return false;
+ options.onClaim?.();
  const lease:Lease={id:m.id,owner:m.leaseOwner!,epoch:m.leaseEpoch,contextVersion:m.contextVersion,planRevision:m.planRevision};
  const tools={...(options.tools??{...projectTools,...researchTools(lease,options.research),...await repositoryTools(lease,m,options.repository),...documentTools(lease,options.document),...experimentTools(lease),...academicTools(lease,options.academic)})};const delegation=boundedPolicy(m);if(delegation)for(const name of Object.keys(tools))if(!delegation.allowedTools.includes(name as typeof delegation.allowedTools[number]))delete tools[name];let activeStepId:string|undefined;
  let phase:MissionPhase="CONTEXT",contextManifest:MissionContextManifest|undefined,sourceDecisionRunId:string|null|undefined;
@@ -46,7 +48,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
  const settleFailed=async(kind:"models"|"tools",started:number,usage?:Decision["usage"])=>{try{await settleUsage(lease,kind,Date.now()-started,usage);}catch{failedSettlements.add(kind);}};
  const heartbeat=setInterval(()=>{void renew(lease).catch(()=>false);},10000);heartbeat.unref();
  try{
-  if(recordDelegationPoll(m.planJson)){phase="TOOL";if(await runDelegationObservation(lease,tools,id=>{activeStepId=id;}))return true;phase="CONTEXT";}
+  if(recordDelegationPoll(m.planJson)){phase="TOOL";if(await runDelegationObservation(lease,tools,id=>{activeStepId=id;},options.repository))return true;phase="CONTEXT";}
   const directed = dynamicGuard(m);
   if (directed) {
    const ready = await db.agentMissionStep.findFirst({where:{missionId:m.id,planRevision:m.planRevision,status:"READY",toolName:"read_project_material"},orderBy:{ordinal:"asc"}});
@@ -196,6 +198,21 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
     await event(tx,m.id,"COGNITIVE_RECOORDINATED",{stepId:active?.id??null,reason:code,budgetRetained:true});
     await release(tx,await tx.agentMission.findUniqueOrThrow({where:{id:m.id}}),"READY");return;
    }
+   if(!stop&&code==="CONTEXT_CHANGED"&&!record(active?.protocolJson).sandboxJob){
+    await obsoleteApprovals(tx,m.id);
+    if(activeStepId)await tx.agentMissionStep.updateMany({where:{id:activeStepId,status:"RUNNING"},data:{status:"OBSOLETE"}});
+    await tx.agentMission.update({where:{id:m.id},data:{lastErrorJson:Prisma.DbNull}});
+    await event(tx,m.id,"CONTEXT_RECOORDINATED",{stepId:activeStepId??null,reason:"RESPONSIBILITY_REVISED",budgetRetained:true});
+    await release(tx,await tx.agentMission.findUniqueOrThrow({where:{id:m.id}}),"READY");return;
+   }
+   if(!stop&&code==="DAILY_BURST_EXCEEDED"){
+    const policy=boundedPolicy(current);
+    if(policy){
+     const nextAttemptAt=new Date(Math.min(+nextBudgetDay(policy.timezone),Date.parse(policy.expiresAt)));
+     await event(tx,m.id,"DAILY_BUDGET_WAITING",{nextAttemptAt:nextAttemptAt.toISOString(),budgetRetained:true});
+     await release(tx,current,"READY");await tx.agentMission.update({where:{id:m.id},data:{nextAttemptAt}});return;
+    }
+   }
    const retry=!stop&&code==="RESEARCH_RETRYABLE"&&active?.status==="RUNNING"&&active.attempts<3;let nextAttemptAt:Date|undefined;
    if(retry){await tx.agentMissionStep.update({where:{id:active!.id},data:{attempts:{increment:1}}});const requested=(error as AppError).details as {retryAfterMs?:number}|undefined;const delay=Math.min(30000,Math.max(1000*2**(active!.attempts-1),requested?.retryAfterMs??0));nextAttemptAt=new Date(Date.now()+delay);await tx.agentMission.update({where:{id:m.id},data:{nextAttemptAt}});}
    const sandboxHistorical=active?.toolName==="propose_metric_verification"&&["SOURCE_CHANGED","APPROVAL_CHANGED","CONTEXT_CHANGED","DIRECTIVE_EFFECT_DENIED"].includes(code);
@@ -216,7 +233,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"FAILED",provider:metadata?.provider??(options.provider?"TEST_FIXTURE":"mission-adapter"),trace:json({prompt:options.provider?null:{id:missionStrategyV2.id,version:missionStrategyV2.version,purpose:missionStrategyV2.purpose,outputSchemaVersion:missionStrategyV2.outputSchemaVersion},missionId:m.id,stepId:activeStepId,sourceDecisionRunId,code,phase:failure.phase,category:failure.category,...metadata,diagnostic,recovery,contextManifest,...(failedSettlements.size?{usageSettlementFailures:[...failedSettlements]}:{})}),fallbackReason:code}});
    await tx.agentMission.update({where:{id:m.id},data:{lastErrorJson:json({code,message:failure.message,diagnostic,phase:failure.phase,category:failure.category,recovery})}});
    await event(tx,m.id,failure.protocol?"MODEL_PROTOCOL_ERROR":"EXECUTION_STOPPED",{code,...diagnostic,phase:failure.phase,category:failure.category,recovery});
-   const status=current.cancelRequestedAt?"CANCELLED":current.pauseRequestedAt?"PAUSED":retry||repair?"READY":"PAUSED";
+   const status=current.cancelRequestedAt?"CANCELLED":current.pauseRequestedAt?"PAUSED":(retry||repair||code==="CONTEXT_CHANGED")?"READY":"PAUSED";
    await release(tx,current,status,stop?"USER":code==="BUDGET_EXHAUSTED"?"BUDGET":"REVIEW_REQUIRED");
   });return true;
  }finally{clearInterval(heartbeat);}

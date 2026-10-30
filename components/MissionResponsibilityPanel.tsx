@@ -1,6 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+import { readConversationDraft, saveConversationDraft, clearConversationDraft } from "@/lib/client/conversationDrafts";
+
+type WorkerPresenceDetail = {
+  workerId: string | null;
+  lastHeartbeatAt: string | null;
+  lastScanAt: string | null;
+  lastClaimAt: string | null;
+  isProcessAlive?: boolean;
+  isActivelyInspecting?: boolean;
+  hasClaimedWork?: boolean;
+};
 
 type Responsibility = {
   schemaVersion: number;
@@ -8,7 +20,8 @@ type Responsibility = {
   projectId: string;
   controlVersion: string;
   goal: string;
-  successCriteria: string[];
+  successCriteria: Array<string|{type:"SOURCE_COUNT";minimum:number}>;
+  successCriteriaLabels?: string[];
   workingObjective?: string | null;
   constraints: Record<string, unknown>;
   researchScope: Record<string, unknown>;
@@ -17,7 +30,7 @@ type Responsibility = {
   permissionExpiresAt: string | null;
   permissionState: string;
   budget: {
-    limits: Record<string, number>;
+    limits: Record<string, unknown>;
     cumulativeUsed: Record<string, number>;
     additionalUsed?: Record<string, unknown>;
     policy: string;
@@ -34,25 +47,83 @@ type Responsibility = {
   };
   nextCheckAt: string | null;
   workerPresence: "UNOBSERVED" | "RECENT" | "STALE";
-  workerPresenceDetail?: {
-    workerId: string | null;
-    lastHeartbeatAt: string | null;
-    lastScanAt: string | null;
-  } | null;
+  workerPresenceDetail?: WorkerPresenceDetail | null;
   activity: Array<{ id: string; sequence: number; kind: string; at: string }>;
 };
 
 const presenceLabels: Record<string, string> = {
-  RECENT: "后台正常（最近有活跃观察）",
-  STALE: "心跳超时（未在近期收到心跳）",
-  UNOBSERVED: "未观察到 Worker 进程",
+  RECENT: "近期收到后台心跳",
+  STALE: "心跳超时",
+  UNOBSERVED: "尚未观测到后台",
 };
 
 const permissionLabels: Record<string, string> = {
-  WITHIN_TIME_BOUNDARY: "在许可有效期内",
+  WITHIN_TIME_BOUNDARY: "在许可期内",
   EXPIRED: "许可已到期",
   STOPPED: "已由用户停止",
 };
+
+const toolLabels: Record<string, string> = {
+  inspect_project: "项目资料",
+  search_memory: "记忆检索",
+  read_project_material: "项目材料",
+  inspect_action: "行动进展",
+  web_search: "网页搜索",
+  web_fetch: "网页读取",
+  read_repository_ci: "仓库与CI",
+  read_ci_jobs: "CI作业",
+  read_ci_log: "CI日志",
+  inspect_document: "文档浏览",
+  read_document_page: "文档页面",
+  read_document_section: "文档章节",
+  read_document_table: "文档表格",
+  inspect_experiment_metrics: "实验指标",
+  compare_experiment_metrics: "指标比对",
+  read_paper_metadata: "论文元数据",
+  propose_metric_verification: "指标核算提案",
+  save_mission_output: "沉淀结论",
+  propose_action: "建议行动",
+};
+
+const DRAFT_PREFIX = "responsibility:";
+
+type ResponsibilityDraft = {
+  requestId: string;
+  initialControlVersion: string;
+  goal: string;
+  workingObjective: string;
+  deadlineDraft: string;
+  pendingPayload?: string;
+};
+
+function loadDraft(id: string): ResponsibilityDraft | null {
+  try {return JSON.parse(readConversationDraft(DRAFT_PREFIX+id).directiveRequest ?? "null");}catch{return null;}
+}
+function persistDraft(id: string, d: ResponsibilityDraft) {
+  const value=JSON.stringify(d), draft=readConversationDraft(DRAFT_PREFIX+id);
+  draft.directiveRequest=value; saveConversationDraft(DRAFT_PREFIX+id,draft);
+  return readConversationDraft(DRAFT_PREFIX+id).directiveRequest===value;
+}
+function removeDraft(id: string) { clearConversationDraft(DRAFT_PREFIX+id); }
+
+function toLocalDatetimeString(isoString: string | null | undefined): string {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+function fromLocalDatetimeString(localString: string): string | null {
+  if (!localString.trim()) return null;
+  const date = new Date(localString);
+  if (isNaN(date.getTime())) return null;
+  return date.toISOString();
+}
 
 export function MissionResponsibilityPanel({
   missionId,
@@ -64,70 +135,198 @@ export function MissionResponsibilityPanel({
   const [data, setData] = useState<Responsibility | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [editingInitialControlVersion, setEditingInitialControlVersion] = useState<string>("");
+  const [revisionRequestId, setRevisionRequestId] = useState<string>("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [pendingPayload,setPendingPayload]=useState("");
+  const mounted=useRef(true);
+  const mutationError=useRef(false);
+  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  // Edit draft states
+  // Draft states
   const [goalDraft, setGoalDraft] = useState("");
+  const [workingObjectiveDraft, setWorkingObjectiveDraft] = useState("");
   const [deadlineDraft, setDeadlineDraft] = useState("");
 
+  // Restore persistent draft on missionId switch or mount
   useEffect(() => {
-    const abort = new AbortController();
-    void fetch(`/api/missions/${missionId}/responsibility`, { signal: abort.signal })
-      .then(async res => {
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      if (cancelled) return;
+      const saved = loadDraft(missionId);
+      if (saved) {
+        setEditing(true);
+        setPendingPayload(saved.pendingPayload ?? "");
+        setRevisionRequestId(saved.requestId);
+        setEditingInitialControlVersion(saved.initialControlVersion);
+        setGoalDraft(saved.goal);
+        setWorkingObjectiveDraft(saved.workingObjective);
+        setDeadlineDraft(saved.deadlineDraft);
+      } else {
+        setEditing(false);
+        setRevisionRequestId("");
+        setEditingInitialControlVersion("");
+        setGoalDraft("");
+        setWorkingObjectiveDraft("");
+        setDeadlineDraft("");
+      }
+    }, 0);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [missionId]);
+
+  // Continuous polling that preserves user draft when editing
+  useEffect(() => {
+    let active = true, inFlight=false;
+    const abort=new AbortController();
+
+    const fetchResponsibility = async () => {
+      if(inFlight)return;inFlight=true;
+      try {
+        const res = await fetch(`/api/missions/${missionId}/responsibility`,{signal:AbortSignal.any([abort.signal,AbortSignal.timeout(20000)])});
+        if([401,403,404].includes(res.status)&&active){setData(null);setEditing(false);removeDraft(missionId);}
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.error?.message ?? "无法加载责任视图");
+        }
         const body = await res.json();
-        if (!res.ok) throw new Error(body.error?.message ?? "无法加载责任视图");
+        if (!active) return;
         setData(body.responsibility);
-        setGoalDraft(body.responsibility.goal);
-        setDeadlineDraft(body.responsibility.deadline ?? "");
-        setError("");
-      })
-      .catch(e => {
-        if (!abort.signal.aborted) {
+        if (!editing) {
+          const saved = loadDraft(missionId);
+          if (!saved) {
+            setGoalDraft(body.responsibility.goal ?? "");
+            setWorkingObjectiveDraft(body.responsibility.workingObjective ?? "");
+            setDeadlineDraft(toLocalDatetimeString(body.responsibility.deadline));
+          }
+        }
+        if(!mutationError.current)setError("");
+      } catch (e) {
+        if (active) {
           setError(e instanceof Error ? e.message : "加载失败");
         }
-      })
-      .finally(() => {
-        if (!abort.signal.aborted) {
-          setLoading(false);
-        }
-      });
-    return () => abort.abort();
-  }, [missionId, refreshTrigger]);
+      } finally {
+        inFlight=false;if (active) setLoading(false);
+      }
+    };
 
-  async function handleRevise() {
+    void fetchResponsibility();
+    const interval = setInterval(() => {
+      void fetchResponsibility();
+    }, 5000);
+
+    return () => {
+      active = false;abort.abort();
+      clearInterval(interval);
+    };
+  }, [missionId, editing, refreshTrigger]);
+
+  function startEditing() {
     if (!data) return;
-    setBusy(true);
+    const reqId = revisionRequestId || crypto.randomUUID();
+    const initVersion = data.controlVersion;
+    const g = data.goal ?? "";
+    const w = data.workingObjective ?? "";
+    const d = toLocalDatetimeString(data.deadline);
+
+    mutationError.current=false;setEditing(true);
+    setEditingInitialControlVersion(initVersion);
+    setRevisionRequestId(reqId);
+    setGoalDraft(g);
+    setWorkingObjectiveDraft(w);
+    setDeadlineDraft(d);
     setError("");
-    try {
-      const res = await fetch(`/api/missions/${missionId}/responsibility`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          requestId: crypto.randomUUID(),
-          expectedControlVersion: data.controlVersion,
-          goal: goalDraft,
-          constraints: {
-            ...data.constraints,
-            deadline: deadlineDraft ? new Date(deadlineDraft).toISOString() : null,
-          },
-        }),
-      });
-      const resBody = await res.json();
-      if (!res.ok) throw new Error(resBody.error?.message ?? "修订失败");
-      setData(resBody.responsibility);
-      setEditing(false);
-      setRefreshTrigger(v => v + 1);
-      onRevised?.();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "修订失败");
-    } finally {
-      setBusy(false);
+
+    persistDraft(missionId, {
+      requestId: reqId,
+      initialControlVersion: initVersion,
+      goal: g,
+      workingObjective: w,
+      deadlineDraft: d,
+    });
+  }
+
+  function cancelEditing() {
+    removeDraft(missionId);
+    setEditing(false);
+    setRevisionRequestId("");
+    setEditingInitialControlVersion("");
+    setError("");
+    if (data) {
+      setGoalDraft(data.goal ?? "");
+      setWorkingObjectiveDraft(data.workingObjective ?? "");
+      setDeadlineDraft(toLocalDatetimeString(data.deadline));
     }
   }
 
-  if (loading && !data) {
+  function handleDraftChange(goalVal: string, objVal: string, dVal: string) {
+    setGoalDraft(goalVal);
+    setWorkingObjectiveDraft(objVal);
+    setDeadlineDraft(dVal);
+    if (editing && revisionRequestId) {
+      persistDraft(missionId, {
+        requestId: revisionRequestId,
+        initialControlVersion: editingInitialControlVersion,
+        goal: goalVal,
+        workingObjective: objVal,
+        deadlineDraft: dVal,
+      });
+    }
+  }
+
+  async function handleRevise() {
+    if (!data || data.missionId!==missionId || busy) return;
+    setBusy(true);
+    setError("");
+
+    const reqId = revisionRequestId || crypto.randomUUID();
+    if (!revisionRequestId) setRevisionRequestId(reqId);
+
+    const deadlineValue =
+      deadlineDraft === toLocalDatetimeString(data.deadline)
+        ? data.deadline
+        : fromLocalDatetimeString(deadlineDraft);
+
+    try {
+      const payload = pendingPayload || JSON.stringify({
+        requestId:reqId, expectedControlVersion:editingInitialControlVersion || data.controlVersion,
+        goal:goalDraft.trim(),workingObjective:workingObjectiveDraft.trim(),constraints:{...data.constraints,deadline:deadlineValue}
+      });
+      if(!persistDraft(missionId,{requestId:reqId,initialControlVersion:editingInitialControlVersion||data.controlVersion,
+        goal:goalDraft,workingObjective:workingObjectiveDraft,deadlineDraft,pendingPayload:payload}))throw new Error("草稿尚未保存，暂未提交");
+      setPendingPayload(payload);
+      const res = await fetch(`/api/missions/${missionId}/responsibility`, {
+        signal:AbortSignal.timeout(25000),method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body:payload,
+      });
+      if(!mounted.current)return;
+      if(res.status>=400&&res.status<500){
+        setPendingPayload("");setRevisionRequestId("");
+        persistDraft(missionId,{requestId:"",initialControlVersion:editingInitialControlVersion,goal:goalDraft,workingObjective:workingObjectiveDraft,deadlineDraft});
+      }
+      const resBody = await res.json();
+      if (!res.ok) throw new Error(resBody.error?.message ?? "修订失败");
+      removeDraft(missionId);setPendingPayload("");
+      setData(resBody.responsibility);
+      setEditing(false);
+      setRevisionRequestId("");
+      setEditingInitialControlVersion("");
+      setRefreshTrigger(v => v + 1);
+      onRevised?.();
+    } catch (e) {
+      if(!mounted.current)return;
+      mutationError.current=true;setError(e instanceof Error ? e.message : "修订失败");
+    } finally {
+      if(mounted.current)setBusy(false);
+    }
+  }
+
+  if (loading && !data || data && data.missionId!==missionId) {
     return <div className="p-4 text-sm text-neutral-500">正在读取责任合同...</div>;
   }
 
@@ -135,45 +334,111 @@ export function MissionResponsibilityPanel({
     return error ? <div className="p-4 text-sm text-red-500">{error}</div> : null;
   }
 
-  const { budget, workerPresence, permissionState, deadline, permissionExpiresAt } = data;
+  const { budget, workerPresence, workerPresenceDetail, permissionState, deadline, permissionExpiresAt, workingObjective, continuationPolicy } = data;
+  const isStaleConflict = Boolean(
+    editing && data && editingInitialControlVersion && data.controlVersion !== editingInitialControlVersion
+  );
+
+  const modelLimit = (budget.limits.models ?? budget.limits.maxModels) as number | string | undefined;
+  const toolLimit = (budget.limits.tools ?? budget.limits.maxTools) as number | string | undefined;
+  const metadataLimit = (budget.limits.metadataRequests ?? budget.limits.maxMetadataRequests) as number | string | undefined;
+  const dailyBurst = budget.limits.dailyBurst as { models?: number; maxModels?: number; tools?: number; maxTools?: number } | undefined;
+
+  const policy = continuationPolicy as {
+    mode?: string;
+    allowedTools?: string[];
+    connectionIds?: string[];
+    checkEveryMinutes?: number;
+    quietStart?: number;
+    quietEnd?: number;
+    trackBranchHead?: boolean;
+  } | undefined;
 
   return (
     <div className="border rounded-lg p-4 bg-white shadow-sm space-y-4 my-3 text-sm">
       <div className="flex justify-between items-center border-b pb-2">
         <h4 className="font-semibold text-base text-neutral-800">长期责任与授权合同</h4>
-        <span
-          className={`px-2 py-0.5 text-xs rounded font-medium ${
-            workerPresence === "RECENT"
-              ? "bg-emerald-100 text-emerald-800"
-              : workerPresence === "STALE"
-              ? "bg-amber-100 text-amber-800"
-              : "bg-neutral-100 text-neutral-700"
-          }`}
-        >
-          {presenceLabels[workerPresence] ?? workerPresence}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className={`px-2 py-0.5 text-xs rounded font-medium ${
+              workerPresence === "RECENT"
+                ? "bg-emerald-100 text-emerald-800"
+                : workerPresence === "STALE"
+                ? "bg-amber-100 text-amber-800"
+                : "bg-neutral-100 text-neutral-700"
+            }`}
+          >
+            {presenceLabels[workerPresence] ?? workerPresence}
+          </span>
+          {workerPresenceDetail && (
+            <span className="text-xs text-neutral-400">
+              {workerPresenceDetail.isActivelyInspecting ? "近期有成功巡检" : "尚无近期巡检回执"}
+              {workerPresenceDetail.hasClaimedWork ? " · 有领取记录" : ""}
+            </span>
+          )}
+        </div>
       </div>
 
       {error && <div className="text-red-600 bg-red-50 p-2 rounded text-xs">{error}</div>}
 
+      {isStaleConflict && (
+        <div className="text-amber-800 bg-amber-50 border border-amber-200 p-2 rounded text-xs">
+          责任合同已被其他端更新，提交时可能发生冲突，请核对后再保存（本地草稿已保留）。
+        </div>
+      )}
+
       {!editing ? (
         <div className="space-y-3">
-          <div>
-            <span className="font-medium text-neutral-700">办什么：</span>
-            <p className="mt-0.5 text-neutral-900 bg-neutral-50 p-2 rounded border border-neutral-100">
-              {data.goal}
-            </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <p className="text-xs text-neutral-500 mb-1">委托目标</p>
+              <div className="text-neutral-900 bg-neutral-50 p-2.5 rounded border border-neutral-100 font-medium">
+                {data.goal}
+              </div>
+            </div>
+            <div>
+              <p className="text-xs text-neutral-500 mb-1">当前重点</p>
+              <div className="text-neutral-800 bg-neutral-50 p-2.5 rounded border border-neutral-100">
+                {workingObjective || "与委托目标一致"}
+              </div>
+            </div>
           </div>
+
+          {Array.isArray(data.successCriteria) && data.successCriteria.length > 0 && (
+            <div>
+              <p className="text-xs text-neutral-500 mb-1">验收准则</p>
+              <div className="flex flex-wrap gap-1.5">
+                {(data.successCriteriaLabels??["验收准则待读取"]).map((c, i) => (
+                  <span key={i} className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs">
+                    {c}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {policy?.allowedTools && policy.allowedTools.length > 0 && (
+            <div>
+              <p className="text-xs text-neutral-500 mb-1">允许工具</p>
+              <div className="flex flex-wrap gap-1.5">
+                {policy.allowedTools.map(t => (
+                  <span key={t} className="px-2 py-0.5 bg-neutral-100 text-neutral-700 rounded text-xs">
+                    {toolLabels[t] ?? t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <span className="text-neutral-500 block text-xs">目标截止时间 (deadline)</span>
+              <span className="text-neutral-500 block text-xs">任务截止时间</span>
               <span className="font-medium text-neutral-800">
                 {deadline ? new Date(deadline).toLocaleString("zh-CN") : "未限定"}
               </span>
             </div>
             <div>
-              <span className="text-neutral-500 block text-xs">持续许可到期 (expiresAt)</span>
+              <span className="text-neutral-500 block text-xs">巡检授权有效期</span>
               <span className="font-medium text-neutral-800">
                 {permissionExpiresAt ? new Date(permissionExpiresAt).toLocaleString("zh-CN") : "手动模式"}
                 <span className="ml-1 text-xs text-neutral-500">({permissionLabels[permissionState] ?? permissionState})</span>
@@ -181,16 +446,38 @@ export function MissionResponsibilityPanel({
             </div>
           </div>
 
+          {policy?.connectionIds && policy.connectionIds.length > 0 && (
+            <div className="text-xs text-neutral-600 bg-neutral-50 p-2 rounded border border-neutral-100">
+              持续巡检：关联 {policy.connectionIds.length} 个代码仓库{policy.trackBranchHead ? " · 跟踪分支 HEAD" : ""} · 每 {policy.checkEveryMinutes ?? 15} 分钟核对一次
+              {typeof policy.quietStart === "number" && typeof policy.quietEnd === "number" && (
+                <span> · {policy.quietStart}:00–{policy.quietEnd}:00 自动静音排队</span>
+              )}
+            </div>
+          )}
+
           <div className="bg-neutral-50 p-3 rounded border border-neutral-100">
-            <span className="text-xs font-medium text-neutral-600 block mb-1">
+            <span className="text-xs font-medium text-neutral-600 block mb-2">
               累计消耗与总包（永不清零）
             </span>
-            <div className="flex gap-4 text-xs text-neutral-700">
-              <div>模型：<span className="font-semibold">{budget.cumulativeUsed.models ?? 0}</span> / {budget.limits.maxModels ?? "-"}</div>
-              <div>工具：<span className="font-semibold">{budget.cumulativeUsed.tools ?? 0}</span> / {budget.limits.maxTools ?? "-"}</div>
-              <div>未知请求 (UNKNOWN)：<span className="font-semibold">{budget.cumulativeUsed.unknownCalls ?? 0}</span></div>
-              <div>元数据请求：<span className="font-semibold">{budget.cumulativeUsed.metadataRequests ?? 0}</span></div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-neutral-700">
+              <div>
+                模型：<span className="font-semibold text-neutral-900">{budget.cumulativeUsed.models ?? 0}</span> / {modelLimit ?? "待核对"}
+              </div>
+              <div>
+                工具：<span className="font-semibold text-neutral-900">{budget.cumulativeUsed.tools ?? 0}</span> / {toolLimit ?? "待核对"}
+              </div>
+              <div>
+                元数据：<span className="font-semibold text-neutral-900">{budget.cumulativeUsed.metadataRequests ?? 0}</span> / {metadataLimit ?? "待核对"}
+              </div>
+              <div>
+                未知请求：<span className="font-semibold text-neutral-900">{budget.cumulativeUsed.unknownCalls ?? 0}</span>
+              </div>
             </div>
+            {dailyBurst && (
+              <div className="mt-2 text-xs text-neutral-500">
+                每日突发上限：模型 ≤ {dailyBurst.maxModels ?? dailyBurst.models ?? "-"}，工具 ≤ {dailyBurst.maxTools ?? dailyBurst.tools ?? "-"}
+              </div>
+            )}
           </div>
 
           {data.nextCheckAt && (
@@ -201,39 +488,54 @@ export function MissionResponsibilityPanel({
 
           <div className="pt-2 flex justify-end">
             <button
-              onClick={() => setEditing(true)}
+              onClick={startEditing}
               className="px-3 py-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded text-xs font-medium transition"
             >
-              原子修订合同
+              修订责任范围
             </button>
           </div>
         </div>
       ) : (
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-neutral-700 mb-1">修订目标</label>
+            <label className="block text-xs font-medium text-neutral-700 mb-1">委托目标</label>
             <textarea
               className="w-full border rounded p-2 text-sm"
-              rows={3}
+              rows={2}
               value={goalDraft}
-              onChange={e => setGoalDraft(e.target.value)}
+              disabled={busy || !!pendingPayload}
+              onChange={e => handleDraftChange(e.target.value, workingObjectiveDraft, deadlineDraft)}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-700 mb-1">目标截止时间</label>
+            <label className="block text-xs font-medium text-neutral-700 mb-1">当前重点（可选）</label>
             <input
-              type="datetime-local"
-              className="border rounded p-1.5 text-sm"
-              value={deadlineDraft ? deadlineDraft.slice(0, 16) : ""}
-              onChange={e => setDeadlineDraft(e.target.value)}
+              type="text"
+              className="w-full border rounded p-2 text-sm"
+              value={workingObjectiveDraft}
+              disabled={busy || !!pendingPayload}
+              onChange={e => handleDraftChange(goalDraft, e.target.value, deadlineDraft)}
+              placeholder="留空则沿用原目标"
             />
           </div>
 
+          <div>
+            <label className="block text-xs font-medium text-neutral-700 mb-1">任务截止时间</label>
+            <input
+              type="datetime-local"
+              className="border rounded p-1.5 text-sm"
+              value={deadlineDraft}
+              disabled={busy || !!pendingPayload}
+              onChange={e => handleDraftChange(goalDraft, workingObjectiveDraft, e.target.value)}
+            />
+          </div>
+
+          {isStaleConflict && !pendingPayload && <button onClick={()=>{setEditingInitialControlVersion(data.controlVersion);setRevisionRequestId(crypto.randomUUID());setError("");}}>核对最新版本，保留我的修改</button>}
           <div className="flex justify-end gap-2 pt-2">
             <button
-              disabled={busy}
-              onClick={() => setEditing(false)}
+              disabled={busy || !!pendingPayload}
+              onClick={cancelEditing}
               className="px-3 py-1.5 border rounded text-xs text-neutral-600 hover:bg-neutral-50"
             >
               取消
@@ -243,7 +545,7 @@ export function MissionResponsibilityPanel({
               onClick={() => void handleRevise()}
               className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700 disabled:opacity-50"
             >
-              {busy ? "正在保存..." : "确认修订（失效原有提案）"}
+              {busy ? "正在保存..." : pendingPayload ? "核对上次提交结果" : "确认修订（失效原有提案）"}
             </button>
           </div>
         </div>

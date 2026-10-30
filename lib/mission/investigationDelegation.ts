@@ -4,11 +4,13 @@ import { isFeatureEnabled } from "@/lib/config/features";
 import type { AgentMission } from "@/lib/generated/prisma/client";
 import { boundedInvestigationPolicySchema, type WakeReason } from "@/lib/types/mission";
 import { json, jsonHash, usageOf } from "./contracts";
+
 import { record } from "@/lib/conversation/repository";
 import { event, lock, assertOwner, sourceHash, type Tx } from "./repository";
 import { assertContinuityBinding } from "@/lib/continuity/directiveService";
 import { sourceUse } from "@/lib/continuity/sourcePolicy";
 import { decidePrivateMissionAttention } from "@/lib/services/interventionPolicyService";
+import { repositoryGrantBinding, repositoryGrantCurrent } from "@/lib/sensing/repoGrantBinding";
 import { composeHypotheses } from "@/lib/memory/hypothesisService";
 
 export function boundedPolicy(m: Pick<AgentMission, "continuationPolicyJson">) {
@@ -43,7 +45,16 @@ export function assertInvestigationDelegation(m: AgentMission, tool?: string, ar
 export async function validateDelegationConnections(m: AgentMission, tx: Tx) {
   const p = boundedPolicy(m);
   if (!p) return;
-  const versions = record(record(record(m.planJson).delegation).connectionVersions);
+  const delegation = record(record(m.planJson).delegation);
+  const storedGrantRunIds: string[] | undefined = Array.isArray(delegation.grantRunIds) ? delegation.grantRunIds : undefined;
+  const currentGrantRuns = await tx.agentRun.findMany({
+    where: {
+      projectId: m.projectId,
+      provider: "USER_CONFIRMED_CONNECTION_CONTROL",
+    },
+    select: { id: true, trace: true },
+  });
+
   for (const id of p.connectionIds) {
     const c = await tx.sourceConnection.findFirst({
       where: {
@@ -55,8 +66,27 @@ export async function validateDelegationConnections(m: AgentMission, tx: Tx) {
         signalKind: { in: p.allowedTools.includes("read_ci_log") ? ["COMMITS_CI_LOGS"] : ["COMMITS_AND_CI", "COMMITS_CI_LOGS"] },
       },
     });
-    if (!c || versions[id] !== c.revision) {
+    if (!c) {
       throw new AppError("DELEGATION_CONNECTION_CHANGED", "仓库授权版本已变化，请重新确认持续调查范围", 409);
+    }
+
+    const binding = record(delegation.grantBindings)[id];
+    if (binding && !repositoryGrantCurrent(binding,c)) throw new AppError("DELEGATION_CONNECTION_CHANGED","来源身份或范围已变化",409);
+    if (!binding && c.revision !== Number(record(delegation.connectionVersions)[id])) throw new AppError("DELEGATION_CONNECTION_CHANGED","旧来源绑定不完整，请重新核对",409);
+    const currentRunsForConn = currentGrantRuns
+      .filter(r => record(r.trace).connectionId === id)
+      .map(r => r.id);
+
+    if (storedGrantRunIds !== undefined) {
+      if (currentRunsForConn.some(runId => !storedGrantRunIds.includes(runId))) {
+        throw new AppError("DELEGATION_CONNECTION_CHANGED", "仓库授权版本已变化，请重新确认持续调查范围", 409);
+      }
+    } else {
+      const versions = record(delegation.connectionVersions);
+      const baseRevision = Number(versions[id] ?? 0);
+      if (currentRunsForConn.length > 0 && c.revision !== baseRevision) {
+        throw new AppError("DELEGATION_CONNECTION_CHANGED", "仓库授权版本已变化，请重新确认持续调查范围", 409);
+      }
     }
   }
 }
@@ -78,7 +108,7 @@ export async function investigationInputHash(m: AgentMission, tx: Tx = db) {
       take: 101,
       select: { id: true, sha: true, status: true },
     }),
-    composeHypotheses(m.ownerUserId, m.projectId, [m.projectId], tx).catch(() => ({ readSet: [] })),
+    composeHypotheses(m.ownerUserId, m.projectId, [m.projectId], tx),
   ]);
   const allowed = [];
   for (const capture of captures) if ((await sourceUse(m.ownerUserId, m.projectId, "capture:" + capture.id, tx, { missionId: m.id })).state === "ALLOWED") allowed.push(capture);
@@ -97,6 +127,7 @@ export async function investigationInputHash(m: AgentMission, tx: Tx = db) {
 
 export async function initializeDelegation(tx: Tx, m: AgentMission, raw: unknown) {
   const p = boundedInvestigationPolicySchema.parse(raw);
+  if (p.trackBranchHead && (!p.connectionIds.length || !p.allowedTools.includes("read_repository_ci"))) throw new AppError("CI_NOT_AUTHORIZED", "分支跟踪需要明确的仓库读取许可与连接", 409);
   if (!isFeatureEnabled("MISSION_INVESTIGATION_DELEGATION_ENABLED", false)) throw new AppError("DELEGATION_DISABLED", "持续调查暂未开启", 503);
   if (p.allowedTools.some(t => ["inspect_document", "read_document_page", "read_document_section", "read_document_table"].includes(t)) && !isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED", false)) {
     throw new AppError("DOCUMENT_READER_DISABLED", "文档深读当前未开启，不能新增这项持续许可", 503);
@@ -125,6 +156,7 @@ export async function initializeDelegation(tx: Tx, m: AgentMission, raw: unknown
     throw new AppError("CI_NOT_AUTHORIZED", "请选择原来已授权的仓库连接", 409);
   }
   const connectionVersions: Record<string, number> = {};
+  const grantBindings: Record<string, ReturnType<typeof repositoryGrantBinding>> = {};
   for (const id of p.connectionIds) {
     const c = await tx.sourceConnection.findFirst({
       where: {
@@ -138,11 +170,24 @@ export async function initializeDelegation(tx: Tx, m: AgentMission, raw: unknown
     });
     if (!c) throw new AppError("CI_NOT_AUTHORIZED", "持续调查不能扩大原仓库授权", 409);
     connectionVersions[id] = c.revision;
+    grantBindings[id] = repositoryGrantBinding(c,c.revision);
   }
+  const grantRuns = await tx.agentRun.findMany({
+    where: {
+      projectId: m.projectId,
+      provider: "USER_CONFIRMED_CONNECTION_CONTROL",
+    },
+    select: { id: true, trace: true },
+  });
+  const grantRunIds = grantRuns
+    .filter(r => p.connectionIds.includes(String(record(r.trace).connectionId ?? "")))
+    .map(r => r.id);
   const input = await investigationInputHash({ ...m, continuationPolicyJson: json(p) }, tx);
   return {
     policyHash: jsonHash(p),
     connectionVersions,
+    grantBindings,
+    grantRunIds,
     inputHash: input.hash,
     grantedAt: new Date().toISOString(),
     attention: null,
@@ -174,7 +219,7 @@ export async function scopedDelegationAttention(tx: Tx, m: AgentMission, reason:
   else if ([...preferences, ...anchors].some(p => p.mode === "LATER" && p.snoozedUntil && p.snoozedUntil > now)) level = "QUEUE";
   const wait = record(m.waitStateJson), deadline = Date.parse(String(record(m.constraintsJson).deadline ?? ""));
   const urgent = reason === "WAITING_INPUT" && ["CRITICAL", "CONFLICT"].includes(String(wait.missing)) && Number.isFinite(deadline) && deadline > +now && deadline - +now <= 3600000;
-  if (urgent && level !== "SUPPRESS") level = "URGENT";
+  if (urgent && level !== "SUPPRESS" && level !== "QUEUE") level = "URGENT";
   const decision = await decidePrivateMissionAttention(tx, {
     userId: m.ownerUserId,
     projectId: m.projectId,
@@ -205,27 +250,6 @@ export async function processInvestigationDelegations(limit = 8) {
         const p = boundedPolicy(m);
         if (!p || m.status !== "WAITING_INPUT" || m.pauseRequestedAt || m.cancelRequestedAt) return;
 
-        // If there is an unresolved user question, preserve waiting for user
-        const wait = record(m.waitStateJson);
-        if (wait.questionId && wait.resolved !== true) {
-          const nextAttemptAt = new Date(Math.min(Date.parse(p.expiresAt), Date.now() + p.checkEveryMinutes * 60000));
-          await tx.agentMission.update({
-            where: { id: m.id },
-            data: {
-              nextAttemptAt,
-              planJson: json({
-                ...record(m.planJson),
-                delegation: {
-                  ...record(record(m.planJson).delegation),
-                  lastObservedAt: now.toISOString(),
-                  attention: await scopedDelegationAttention(tx, m, "WAITING_INPUT"),
-                },
-              }),
-            },
-          });
-          return;
-        }
-
         const state = record(record(m.planJson).delegation);
         const hold = async (reason: string) => {
           const attention = await scopedDelegationAttention(tx, m, reason);
@@ -242,6 +266,11 @@ export async function processInvestigationDelegations(limit = 8) {
           await event(tx, m.id, "INVESTIGATION_HELD", { reason });
         };
 
+        if (Date.parse(p.expiresAt) <= +now) {
+          await hold("DELEGATION_EXPIRED");
+          return;
+        }
+
         try {
           await assertOwner(m.ownerUserId, m.projectId, tx);
           assertInvestigationDelegation(m);
@@ -252,7 +281,6 @@ export async function processInvestigationDelegations(limit = 8) {
           await hold(error.code);
           return;
         }
-
         const used = usageOf(m.budgetUsedJson);
         if (used.models >= p.maxModels || used.tools >= p.maxTools) {
           await hold("BUDGET_EXHAUSTED");
@@ -267,65 +295,22 @@ export async function processInvestigationDelegations(limit = 8) {
 
         const nextAttemptAt = new Date(Math.min(Date.parse(p.expiresAt), Date.now() + p.checkEveryMinutes * 60000));
 
-        // 1. Branch Head Discovery: If trackBranchHead is enabled, check for new commits on connection
+        // Moving-head reads are declared steps, dispatched outside this scan transaction.
         if (p.trackBranchHead && p.connectionIds.length) {
+          const targets = [];
           for (const connectionId of p.connectionIds) {
-            const connection = await tx.sourceConnection.findFirst({
-              where: { id: connectionId, projectId: m.projectId, ownerUserId: m.ownerUserId, status: "ACTIVE", revokedAt: null },
-            });
-            if (connection?.cursorSha) {
-              const existingSignal = await tx.externalSignal.findFirst({
-                where: { connectionId, projectId: m.projectId, ownerUserId: m.ownerUserId, sha: connection.cursorSha },
-              });
-              if (!existingSignal) {
-                // New commit head discovered: record as CANDIDATE, not auto-adopted
-                await tx.externalSignal.create({
-                  data: {
-                    connectionId,
-                    projectId: m.projectId,
-                    ownerUserId: m.ownerUserId,
-                    sha: connection.cursorSha,
-                    title: `分支 ${connection.ref ?? "HEAD"} 新提交 ${connection.cursorSha.slice(0, 7)}`,
-                    authorName: "git",
-                    url: `https://github.com/${connection.repo}/commit/${connection.cursorSha}`,
-                    status: "CANDIDATE",
-                    fetchedAt: now,
-                  },
-                });
-                const wakeSeq = (Number(state.wakeSeq) || 0) + 1;
-                const wakeKey = jsonHash({ missionId: m.id, reason: "SOURCE_CHANGED" as WakeReason, sha: connection.cursorSha, version: m.version });
-                await tx.agentMission.update({
-                  where: { id: m.id },
-                  data: {
-                    status: "READY",
-                    nextAttemptAt: null,
-                    contextVersion: { increment: 1 },
-                    planRevision: { increment: 1 },
-                    version: { increment: 1 },
-                    planJson: json({
-                      ...record(m.planJson),
-                      delegation: {
-                        ...state,
-                        wakeSeq,
-                        pendingWake: { seq: wakeSeq, reason: "SOURCE_CHANGED" as WakeReason, key: wakeKey, requestedAt: now.toISOString(), fingerprint: connection.cursorSha },
-                        lastWakeAt: now.toISOString(),
-                        attention: null,
-                      },
-                    }),
-                  },
-                });
-                await event(tx, m.id, "INVESTIGATION_BRANCH_HEAD_DISCOVERED", {
-                  connectionId,
-                  repo: connection.repo,
-                  ref: connection.ref,
-                  sha: connection.cursorSha,
-                  status: "CANDIDATE",
-                });
-                woken++;
-                return;
-              }
-            }
+            const c = await tx.sourceConnection.findUniqueOrThrow({where:{id:connectionId}});
+            targets.push({connectionId, revision:c.revision});
           }
+          const wakeSeq = Number(state.wakeSeq ?? 0)+1;
+          const wakeKey = jsonHash({missionId:m.id,reason:"OBSERVATION_DUE",wakeSeq});
+          await tx.agentMission.update({where:{id:m.id},data:{status:"READY",nextAttemptAt:null,version:{increment:1},planJson:json({
+            ...record(m.planJson),delegation:{...state,wakeSeq,
+              pendingWake:{seq:wakeSeq,key:wakeKey,reason:"OBSERVATION_DUE",requestedAt:now.toISOString()},
+              poll:{kind:"BRANCH_HEAD",cycle:crypto.randomUUID(),targets,requestedAt:now.toISOString(),targetWakeSeq:wakeSeq,targetWakeKey:wakeKey}}
+          })}});
+          await event(tx,m.id,"INVESTIGATION_OBSERVATION_DUE",{kind:"BRANCH_HEAD",targets});
+          woken++;return;
         }
 
         // 2. Fixed SHA CI observation
@@ -365,7 +350,7 @@ export async function processInvestigationDelegations(limit = 8) {
                     ...state,
                     wakeSeq,
                     pendingWake: { seq: wakeSeq, reason: "OBSERVATION_DUE" as WakeReason, key: wakeKey, requestedAt: now.toISOString() },
-                    poll: { cycle: crypto.randomUUID(), targets, requestedAt: now.toISOString() },
+                    poll: { cycle: crypto.randomUUID(), targets, requestedAt: now.toISOString(), targetWakeSeq: wakeSeq, targetWakeKey: wakeKey },
                   },
                 }),
               },
@@ -376,7 +361,17 @@ export async function processInvestigationDelegations(limit = 8) {
           }
           await tx.agentMission.update({
             where: { id: m.id },
-            data: { nextAttemptAt, planJson: json({ ...record(m.planJson), delegation: { ...state, attention: await scopedDelegationAttention(tx, m, "WAITING_INPUT") } }) },
+            data: {
+              nextAttemptAt,
+              planJson: json({
+                ...record(m.planJson),
+                delegation: {
+                  ...state,
+                  lastCheckedAt: now.toISOString(),
+                  attention: await scopedDelegationAttention(tx, m, "WAITING_INPUT"),
+                },
+              }),
+            },
           });
           return;
         }

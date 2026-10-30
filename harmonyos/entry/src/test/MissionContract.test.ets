@@ -1,7 +1,7 @@
 import { EvidenceAssessment, evidenceAssessmentText } from '../main/ets/models/Copilot';
 import { describe, it, expect } from '@ohos/hypium';
-import { MissionConstraints, MissionEvent } from '../main/ets/models/Mission';
-import { editableMissionConstraints, mergeMissionEvents, missionStatusLabel, missionCompletionFacts, missionErrorPhaseLabel } from '../main/ets/common/MissionContract';
+import { MissionConstraints, MissionEvent, MissionBudgetUsageDetail, MissionResponsibilityRevisionInput } from '../main/ets/models/Mission';
+import { editableMissionConstraints, mergeMissionEvents, missionStatusLabel, missionCompletionFacts, missionErrorPhaseLabel, missionToolLabel } from '../main/ets/common/MissionContract';
 import { MissionWidgetSnapshot, visibleMissionWidget } from '../main/ets/common/MissionWidgetContract';
 import { isSuccessCode } from '../main/ets/common/ApiContract';
 export default function missionContractTest() {
@@ -50,6 +50,34 @@ export default function missionContractTest() {
       expect(visibleMissionWidget(snapshot, 'user-b', 'project-a', 100)).assertFalse();
       expect(visibleMissionWidget(snapshot, 'user-a', 'project-b', 100)).assertFalse();
       expect(visibleMissionWidget(snapshot, 'user-a', 'project-a', 200)).assertFalse();
+    });
+    it('responsibility_budget_details_and_tool_labels', 0, () => {
+      const budgetDetail: MissionBudgetUsageDetail = {
+        models: 2,
+        tools: 5,
+        maxModels: 10,
+        maxTools: 50,
+        metadataRequests: 3
+      };
+      expect(budgetDetail.models).assertEqual(2);
+      expect(budgetDetail.maxModels).assertEqual(10);
+      expect(missionToolLabel('read_repository_ci')).assertEqual('仓库与CI');
+      expect(missionToolLabel('read_ci_jobs')).assertEqual('CI作业');
+      expect(missionToolLabel('read_ci_log')).assertEqual('CI日志');
+    });
+    it('responsibility_revision_input_contract', 0, () => {
+      const input = new MissionResponsibilityRevisionInput();
+      input.requestId = 'req-123';
+      input.expectedControlVersion = 'hash-abc';
+      input.goal = '目标说明';
+      input.workingObjective = '当前重点';
+      const constraints = new MissionConstraints();
+      constraints.deadline = '2026-10-31T20:00:00Z';
+      input.constraints = constraints;
+      expect(input.requestId).assertEqual('req-123');
+      expect(input.expectedControlVersion).assertEqual('hash-abc');
+      expect(input.goal).assertEqual('目标说明');
+      expect(input.constraints.deadline).assertEqual('2026-10-31T20:00:00Z');
     });
   });
 }

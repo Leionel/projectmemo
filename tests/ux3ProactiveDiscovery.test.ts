@@ -24,7 +24,7 @@ beforeEach(() => {
   clearWorkerPresenceForTest();
 });
 
-test("A-J03: 同状态CI或条目换序零新增模型调用、零重复提醒；必要HTTP检查计入原账本", async () => {
+test("A-J03: 同状态CI、普通刷新版本或条目换序零新增模型调用、零重复提醒", async () => {
   process.env.MISSION_INVESTIGATION_DELEGATION_ENABLED = "true";
   const u = await db.user.create({ data: { username: crypto.randomUUID(), displayName: "CI排序测试", passwordHash: "fixture" } });
   const p = await db.project.create({
@@ -72,7 +72,6 @@ test("A-J03: 同状态CI或条目换序零新增模型调用、零重复提醒�
   // 预先计算期望的快照 hash（有序 baseline）
   const expectedSnapshotHash = jsonHash({
     sha: "sha-100",
-    connectionRevision: 1,
     checks: [
       { id: 101, name: "test", status: "SUCCESS" },
       { id: 102, name: "lint", status: "SUCCESS" },
@@ -104,6 +103,8 @@ test("A-J03: 同状态CI或条目换序零新增模型调用、零重复提醒�
   let runCount = 0;
   const mockTools: ToolSet = {
     read_repository_ci: {
+      description: "mock CI observation tool",
+      effects: { businessWrite: false, cacheWrite: false, externalDisclosure: false },
       schema: z.object({ connectionId: z.string(), sha: z.string() }),
       version: "1",
       run: async () => {
@@ -112,7 +113,7 @@ test("A-J03: 同状态CI或条目换序零新增模型调用、零重复提醒�
           data: {
             observation: {
               sha: "sha-100",
-              connectionRevision: 1,
+              connectionRevision: 2,
               checks: [
                 { id: 102, name: "lint", status: "SUCCESS" },
                 { id: 101, name: "test", status: "SUCCESS" },
@@ -121,11 +122,13 @@ test("A-J03: 同状态CI或条目换序零新增模型调用、零重复提醒�
               coverage: "95%",
             },
           },
+          sources: [],
         };
       },
     },
   };
 
+  await db.sourceConnection.update({where:{id:conn.id},data:{revision:2}});
   // Step 1: 运行第一步观察（此时创建并执行 step，状态 SUCCEEDED）
   const claimed = await claimMission("worker-1", m.id);
   expect(claimed).toBeTruthy();
@@ -159,7 +162,8 @@ test("A-J03: 同状态CI或条目换序零新增模型调用、零重复提醒�
   expect(budgetUsed?.models ?? 0).toBe(0); // 零新增模型调用
 });
 
-test("A-J10: 分支新head候选发现与撤权后不自动复活", async () => {
+test("A-J10: 原Worker步骤实际读取分支head，扫描零网络；撤权后不自动复活", async () => {
+  process.env.REPO_CI_OBSERVER_ENABLED="true";
   process.env.MISSION_INVESTIGATION_DELEGATION_ENABLED = "true";
   const u = await db.user.create({ data: { username: crypto.randomUUID(), displayName: "Head发现测试", passwordHash: "fixture" } });
   const p = await db.project.create({
@@ -174,7 +178,7 @@ test("A-J10: 分支新head候选发现与撤权后不自动复活", async () => 
       projectId: p.id, ownerUserId: u.id,
       repo: "hongmen/tracked-repo", ref: "main", signalKind: "COMMITS_AND_CI",
       status: "ACTIVE", revision: 1,
-      cursorSha: "commit-sha-200", // 新发现的 commit
+      cursorSha: "a".repeat(40), // 手动刷新游标不可被分支观察覆盖
     },
   });
 
@@ -220,9 +224,15 @@ test("A-J10: 分支新head候选发现与撤权后不自动复活", async () => 
   const res = await processInvestigationDelegations(8);
   expect(res.woken).toBe(1);
 
+  expect(await db.externalSignal.count({where:{connectionId:conn.id}})).toBe(0);
+  const transport=vi.fn(async()=>({status:200,body:{sha:"b".repeat(40)}}));
+  await runMissionSlice({id:m.id,repository:transport,provider:async()=>{throw new Error("head观察不能调用模型");}});
+  expect(transport).toHaveBeenCalledTimes(1);
+  expect((await db.sourceConnection.findUniqueOrThrow({where:{id:conn.id}})).cursorSha).toBe("a".repeat(40));
+  expect((await db.agentMission.findUniqueOrThrow({where:{id:m.id}})).budgetUsedJson).toMatchObject({metadataRequests:1,models:0});
   // 验证新 signal 记录为 CANDIDATE
   const signal = await db.externalSignal.findFirst({
-    where: { connectionId: conn.id, sha: "commit-sha-200" },
+    where: { connectionId: conn.id, sha: "b".repeat(40) },
   });
   expect(signal).toBeTruthy();
   expect(signal?.status).toBe("CANDIDATE");
@@ -459,6 +469,8 @@ test("A-J04: 可恢复观察失败（网络抖动、退避）不污染长期结�
   // 工具抛出临时性网络错误
   const flakyTools: ToolSet = {
     read_repository_ci: {
+      description: "mock flaky tool",
+      effects: { businessWrite: false, cacheWrite: false, externalDisclosure: false },
       schema: z.object({ connectionId: z.string(), sha: z.string() }),
       version: "1",
       run: async () => {

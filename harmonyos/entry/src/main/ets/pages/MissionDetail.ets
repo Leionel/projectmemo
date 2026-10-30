@@ -28,6 +28,7 @@ import { PMStatusPill, PMButton } from '../components/PMReferencePrimitives';
 import { MissionSettingsForm } from '../components/MissionSettingsForm';
 import { MissionApprovalSheet } from '../components/MissionApprovalSheet';
 import { MissionEventList } from '../components/MissionEventList';
+import { MissionResponsibilitySection } from '../components/MissionResponsibilitySection';
 
 interface MissionActionReceipt { actionId?: string; id?: string; title?: string; status?: string; resultCardId?: string | null; }
 
@@ -243,8 +244,8 @@ struct MissionDetail {
   private async reviewBudget():Promise<void> {
     if(this.busy||this.readState!=='fresh')return;
     const body=new MissionBudgetReview();body.expectedVersion=this.mission.version;
-    body.totals.models=Math.min(24,this.mission.budget.models+6);body.totals.tools=Math.min(64,this.mission.budget.tools+8);
-    body.totals.activeMs=Math.min(900000,this.mission.budget.activeMs+180000);body.totals.reservedOutputTokens=Math.min(48000,this.mission.budget.reservedOutputTokens+12000);
+    body.totals.models=Math.min(240,this.mission.budget.models+6);body.totals.tools=Math.min(640,this.mission.budget.tools+8);
+    body.totals.activeMs=Math.min(86400000,this.mission.budget.activeMs+180000);body.totals.reservedOutputTokens=Math.min(480000,this.mission.budget.reservedOutputTokens+12000);
     body.requestId=this.requestKey(body);this.busy=true;
     try{await this.service.budgetReview(this.missionId,body);this.notice='累计预算已复核，已用与UNKNOWN预占保留；委托保持暂停';}
     catch(e){this.error=(e as Error).message;}finally{this.busy=false;await this.refresh();}
@@ -439,6 +440,9 @@ struct MissionDetail {
       Text(this.mission.goal).fontSize(22).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
         .maxLines(this.showGoal ? 100 : 3).textOverflow({ overflow: TextOverflow.Ellipsis }).lineHeight(32)
       if (this.mission.delegation?.attention?.level === 'URGENT') { Text('临近任务截止，需要你核对当前问题后决定下一步。').fontSize(14).fontColor(PMColors.BRAND) }
+      if (this.mission.id !== '') {
+        MissionResponsibilitySection({ missionId: this.mission.id, onRevised: (): void => { this.refresh(); } })
+      }
       if (this.mission.goal.length > 40) {
         Button(this.showGoal ? '收起目标原文' : '展开目标原文').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
           .fontSize(12).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent)
@@ -495,8 +499,8 @@ struct MissionDetail {
       GoalQuestionPanel({ projectId: this.projectId, missionId: this.missionId, compact: true })
       ProjectImpactPanel({ projectId: this.projectId })
       MissionReadbackView({ missionId: this.missionId, target: this.readTarget, missionVersion: this.mission.version, refreshKey: this.readbackRefreshKey, targetKey: JSON.stringify(this.readTarget) })
-      if(this.mission.status==='PAUSED'&&this.missionUiEnabled&&this.mission.budget.models<24){
-        Text(`模型已用或预占${this.mission.used.models??0}次，累计上限${this.mission.budget.models}→${Math.min(24,this.mission.budget.models+6)}；工具上限${Math.min(64,this.mission.budget.tools+8)}，活动时间上限${Math.min(900000,this.mission.budget.activeMs+180000)/60000}分钟，输出预留${Math.min(48000,this.mission.budget.reservedOutputTokens+12000)} tokens`).fontSize(PMFontSize.CAPTION)
+      if(this.mission.status==='PAUSED'&&this.missionUiEnabled&&this.mission.budget.models<240){
+        Text(`模型已用或预占${this.mission.used.models??0}次，累计上限${this.mission.budget.models}→${Math.min(240,this.mission.budget.models+6)}；工具上限${Math.min(640,this.mission.budget.tools+8)}，活动时间上限${Math.min(86400000,this.mission.budget.activeMs+180000)/60000}分钟，输出预留${Math.min(480000,this.mission.budget.reservedOutputTokens+12000)} tokens`).fontSize(PMFontSize.CAPTION)
         Button('确认累计预算，保持暂停', { type: ButtonType.Normal }).height(44).borderRadius(PMRadius.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).enabled(!this.busy&&this.readState==='fresh').onClick(()=>{this.reviewBudget();})
       }
       if (this.mission.status === 'PAUSED' && this.missionUiEnabled) { Button('继续原委托').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).backgroundColor(PMColors.BRAND).fontColor(PMColors.SURFACE).enabled(this.readState === 'fresh' && !this.busy).onClick(() => { this.command('resume'); }) }

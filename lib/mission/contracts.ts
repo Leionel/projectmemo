@@ -35,6 +35,6 @@ export type Source = { document?: import("@/lib/types/document").DocumentMeta; r
 export type ToolResult = { data: unknown; sources: Source[]; status?: "SUCCESS" | "PARTIAL"; coverage?: Record<string, unknown> };
 export type Actor = { userId: string; projectId: string; missionId: string };
 export const defaultBudget = { models: 12, tools: 16, searches: 3, fetches: 4, activeMs: 180000, reservedOutputTokens: 12000 };
-export type Usage = { models: number; tools: number; searches: number; fetches: number; activeMs: number; reservedOutputTokens: number; inputTokens: number; outputTokens: number; unknownCalls: number };
-export function usageOf(value: unknown): Usage { return { models: 0, tools: 0, searches: 0, fetches: 0, activeMs: 0, reservedOutputTokens: 0, inputTokens: 0, outputTokens: 0, unknownCalls: 0, ...(value as Partial<Usage>) }; }
+export type Usage = { models: number; tools: number; searches: number; fetches: number; activeMs: number; reservedOutputTokens: number; inputTokens: number; outputTokens: number; unknownCalls: number; metadataRequests: number };
+export function usageOf(value: unknown): Usage { return { models: 0, tools: 0, searches: 0, fetches: 0, activeMs: 0, reservedOutputTokens: 0, inputTokens: 0, outputTokens: 0, unknownCalls: 0, metadataRequests: 0, ...(value as Partial<Usage>) }; }
 export const terminal = ["SUCCEEDED", "CANCELLED"];

@@ -14,6 +14,7 @@ export const SUPPRESS_REASON_CODES = [
   "INSUFFICIENT_EVIDENCE",
   "NO_MATERIAL_CHANGE",
   "TOPIC_REDUCED",
+  "POLICY_DISABLED",
 ] as const;
 
 export interface PolicyCandidate {
@@ -621,13 +622,13 @@ export async function decidePrivateMissionAttention(tx:Prisma.TransactionClient,
   const scope=interventionPolicyScopeForUser(input.userId);
   const policy=await tx.interventionPolicy.upsert({where:{scope},create:{scope},update:{}});
   const parts=localTimeParts(policy.timezone,input.now);
-  const reason=input.level==="SUPPRESS"?"USER_STOPPED":input.urgent?null:input.level==="QUEUE"?"SNOOZED_OR_QUIET":!policy.isActive?"POLICY_DISABLED":isQuietTime(policy,parts)?"QUIET_HOURS":!input.urgent?"INBOX_ONLY":null;
+  const reason = input.level === "SUPPRESS" ? "USER_STOPPED" : !policy.isActive ? "POLICY_DISABLED" : input.level === "QUEUE" ? "SNOOZED_OR_QUIET" : isQuietTime(policy, parts) ? "QUIET_HOURS" : !input.urgent ? "INBOX_ONLY" : null;
   // Time is part of the suppression key, so a quiet/budget boundary can be reevaluated without a source event.
-  const candidateKey=`private-mission:${input.candidateKey}:${reason??"urgent"}:${parts.localDate}:${policy.version}`;
-  const prior=await tx.interventionDecision.findFirst({where:{projectId:input.projectId,candidateKey,channel:"PRIVATE_MISSION"},orderBy:{createdAt:"desc"}});
-  if(prior)return {level:prior.decision==="FIRE"?"URGENT":reason==="USER_STOPPED"?"SUPPRESS":reason==="INBOX_ONLY"?"DIGEST":"QUEUE",decisionId:prior.id,reasonCode:prior.reasonCode};
-  const budget=reason?null:await claimBudget(tx,{scope:`${scope}:GLOBAL`,localDate:parts.localDate,timezone:policy.timezone,limit:policy.dailyBudget,now:input.now});
-  const fired=budget?.granted===true,reasonCode=reason??(fired?"PRIVATE_ATTENTION_READY":"BUDGET_EXHAUSTED");
-  const decision=await tx.interventionDecision.create({data:{projectId:input.projectId,candidateKey,decision:fired?"FIRE":"SUPPRESS",reasonCode,whyNow:"私有委托注意力决策",channel:"PRIVATE_MISSION",policyVersion:policy.version,createdAt:input.now}});
-  return {level:fired?"URGENT":reason==="USER_STOPPED"?"SUPPRESS":reason==="INBOX_ONLY"?"DIGEST":"QUEUE",decisionId:decision.id,reasonCode};
+  const candidateKey = `private-mission:${input.candidateKey}:${reason ?? "urgent"}:${parts.localDate}:${policy.version}`;
+  const prior = await tx.interventionDecision.findFirst({ where: { projectId: input.projectId, candidateKey, channel: "PRIVATE_MISSION" }, orderBy: { createdAt: "desc" } });
+  if (prior) return { level: prior.decision === "FIRE" ? "URGENT" : (reason === "USER_STOPPED" || reason === "POLICY_DISABLED") ? "SUPPRESS" : reason === "INBOX_ONLY" ? "DIGEST" : "QUEUE", decisionId: prior.id, reasonCode: prior.reasonCode };
+  const budget = reason ? null : await claimBudget(tx, { scope: `${scope}:GLOBAL`, localDate: parts.localDate, timezone: policy.timezone, limit: policy.dailyBudget, now: input.now });
+  const fired = budget?.granted === true, reasonCode = reason ?? (fired ? "PRIVATE_ATTENTION_READY" : "BUDGET_EXHAUSTED");
+  const decision = await tx.interventionDecision.create({ data: { projectId: input.projectId, candidateKey, decision: fired ? "FIRE" : "SUPPRESS", reasonCode, whyNow: "私有委托注意力决策", channel: "PRIVATE_MISSION", policyVersion: policy.version, createdAt: input.now } });
+  return { level: fired ? "URGENT" : (reason === "USER_STOPPED" || reason === "POLICY_DISABLED") ? "SUPPRESS" : reason === "INBOX_ONLY" ? "DIGEST" : "QUEUE", decisionId: decision.id, reasonCode };
 }

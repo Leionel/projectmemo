@@ -18,7 +18,7 @@ beforeEach(() => {
   clearWorkerPresenceForTest();
 });
 
-test("A-J07: 安静时段保留有效问题可见，关键紧急问题升级可见，静默结束重新判断", async () => {
+test("A-J07: 安静时段仍可查看关键问题，但不能由紧急判断绕过静默；结束后重新判断", async () => {
   process.env.MISSION_INVESTIGATION_DELEGATION_ENABLED = "true";
   const u = await db.user.create({ data: { username: crypto.randomUUID(), displayName: "静默测试用户", passwordHash: "fixture" } });
   const p = await db.project.create({
@@ -75,7 +75,7 @@ test("A-J07: 安静时段保留有效问题可见，关键紧急问题升级可�
   expect(quietAttention).toBeTruthy();
   expect(quietAttention?.level).toBe("QUEUE");
   expect(quietAttention?.systemPush).toBe(false);
-  expect(quietAttention?.delivery?.status).toBe("AVAILABLE");
+  expect((quietAttention as { delivery?: { status?: string } } | null)?.delivery?.status).toBe("AVAILABLE");
 
   // 2. 紧急问题升级：当 missing 为 CRITICAL 且距离 deadline 不足 1 小时时升级
   const criticalDeadline = new Date(quietNight.getTime() + 30 * 60000).toISOString(); // 30 分钟后到期
@@ -90,8 +90,9 @@ test("A-J07: 安静时段保留有效问题可见，关键紧急问题升级可�
   const urgentMission = await db.agentMission.findUniqueOrThrow({ where: { id: m.id } });
   const urgentAttention = await db.$transaction(tx => scopedDelegationAttention(tx, urgentMission, "WAITING_INPUT", quietNight));
   expect(urgentAttention).toBeTruthy();
-  // 紧急关键问题在安静时段升级为 URGENT（打扰决策 FIRE）
-  expect(urgentAttention?.level).toBe("URGENT");
+  expect(urgentAttention?.level).toBe("QUEUE");
+  const urgentDecision=await db.interventionDecision.findUniqueOrThrow({where:{id:urgentAttention!.decisionId}});
+  expect(urgentDecision.decision).toBe("SUPPRESS");
 
   // 3. 静默时段结束后（上午 09:30），普通问题转为 DIGEST
   const morningTime = new Date("2026-10-31T09:30:00+08:00");
@@ -228,7 +229,7 @@ test("A-J09 & A-J14: 严格区分 AVAILABLE/PLATFORM_ACCEPTED/SEEN/APPROVED/EXEC
       status: "PENDING",
       proposalHash: "prop-hash-1",
       proposalJson: { action: "publish" },
-      expiresAt: new Date(now + 86400000),
+      expiresAt: new Date(Date.now() + 86400000),
       expectedPlanRevision: 1,
       readSetJson: [],
     },
@@ -252,24 +253,22 @@ test("A-J09 & A-J14: 严格区分 AVAILABLE/PLATFORM_ACCEPTED/SEEN/APPROVED/EXEC
   expect(del1?.status).toBe("AVAILABLE");
 
   // 2. PLATFORM_ACCEPTED: 端侧/卡片平台成功接收并回执
-  const acceptedRes = await acknowledgeMissionAttention(u.id, m.id, {
+  await expect(acknowledgeMissionAttention(u.id, m.id, {
     requestId: "ack-platform-1",
     expectedVersion: 1,
     decisionId: "dec-100",
     status: "PLATFORM_ACCEPTED",
-  });
-  expect(acceptedRes.acknowledged).toBe(true);
-  expect(acceptedRes.status).toBe("PLATFORM_ACCEPTED");
+  })).rejects.toMatchObject({code:"PLATFORM_RECEIPT_REQUIRED"});
 
   const m2 = await db.agentMission.findUniqueOrThrow({ where: { id: m.id } });
   const del2 = (m2.planJson as { delegation?: { attention?: { delivery?: { status: string; platformAcceptedAt?: string } } } })?.delegation?.attention?.delivery;
-  expect(del2?.status).toBe("PLATFORM_ACCEPTED");
-  expect(del2?.platformAcceptedAt).toBeTruthy();
+  expect(del2?.status).toBe("AVAILABLE");
+  expect(del2?.platformAcceptedAt).toBeFalsy();
 
   // 3. SEEN: 用户在客户端看见了该提醒
   const seenRes = await acknowledgeMissionAttention(u.id, m.id, {
     requestId: "ack-seen-1",
-    expectedVersion: 2, // 版本已递增
+    expectedVersion: 1, // 被拒绝的平台自报不改变版本
     decisionId: "dec-100",
     status: "SEEN",
   });

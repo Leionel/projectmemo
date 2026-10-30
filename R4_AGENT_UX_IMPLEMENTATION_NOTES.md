@@ -190,4 +190,69 @@
 - 鸿蒙测试：`npm.cmd run harmony:test` 86项通过，0 failure，0 error。
 - 代码规范：`npm.cmd run lint` 0 errors, 0 warnings。
 
+---
 
+## 2026-10-30 UX-3D 三日可靠性与全矩阵验收记录
+
+### 实施与旅程验证（A-J01～A-J14 全覆盖）
+
+1. **三日纵向旅程闭环**：
+   - **D1（交代责任与初始认知）**：一次性交代目标、范围、期限、长期总包预算与安静时段；生成初始责任快照与条件推测 h1（SUPPORTED），状态进入 `WAITING_INPUT`；
+   - **D2（跨天预算保持、安静时段与动态唤醒）**：
+     - 跨天自然日推进后累积预算严格保持，永不归零（`CUMULATIVE_NOT_RESET_ON_RESTART_OR_DATE`）；
+     - 凌晨安静时段到达轮询周期唤醒执行确定性 CI 观察，状态回到 `WAITING_INPUT`（`waitingFor: "OBSERVATION"`），零新增模型调用；
+     - 上午新提交到达触发分支跟踪发现，记录 `CANDIDATE` 信号并唤醒，Worker 重启保留 UNKNOWN 与累积预算，生成待审批 Action 方案；
+   - **D3（手机纠正、显式审批与 Web 读回）**：
+     - 手机端纠正推测（USER_CORRECTION），推测读集更新；
+     - 手机端显式批准方案，Runner 事务内执行 Action 写入并生成 `resultCardId`，方案置为 `CONSUMED`，步骤置为 `SUCCEEDED`；
+     - Web 端读回同一 Mission、推测变更、Action 及结果回执链，累积预算完整对齐。
+2. **迟到旧 generation/lease 防护（A-J06）**：
+   - 任务被重新抢占或租约递增后，旧 Worker 的延迟模型调用调用 `fenced` 被 409 `LEASE_LOST` 拦截，绝不发布旧生成内容；
+   - 外部版本跃迁（`contextVersion` 推进）导致旧租约提交被 409 `CONTEXT_CHANGED` 拦截，杜绝基于过期前提的写入。
+
+### 自动化验证与质量硬指标（A-J01～A-J14）
+
+- `tests/ux3WorkerCycle.test.ts`（3项通过）：A-J01 队列公平轮换与单 slice 隔离；
+- `tests/ux3ResponsibilityRevision.test.ts`（12项通过）：A-J02 责任原子修订、防扩权绑定来源版本、待批方案与运行步骤原子失效、WAITING_INPUT 保持与水位置信、WORKING_OBJECTIVE 指令推进、单向送达流转防倒退、关闭策略优先拦截、模型在途修订协调、到期资格先检、普通刷新与撤权分离、唤醒并发竞争；
+- `tests/ux3ProactiveDiscovery.test.ts`（4项通过）：
+  - A-J03: 同状态CI或条目换序零新增模型调用、零重复提醒；
+  - A-J04: 可恢复观察失败（网络抖动、退避）不污染长期结论，失败状态与“已核对无变化”在数据上严格区分；
+  - A-J10: 分支新head候选发现与撤权后不自动复活；
+  - A-J12: 推测到期/纠正后更新 inputHash，唤醒任务进行重协调；
+- `tests/ux3AttentionContinuity.test.ts`（3项通过）：
+  - A-J07: 安静时段保留有效问题可见，关键紧急问题升级可见，静默结束重新判断；
+  - A-J08: 同事项跨入口共用 candidateKey，用户打扰预算只扣一次；
+  - A-J09 & A-J14: 严格区分 AVAILABLE/PLATFORM_ACCEPTED/SEEN/APPROVED/EXECUTED，SEEN 绝不当作已批准；鸿蒙快速接续与私人任务 systemPush=false 真实表达；
+- `tests/ux3ThreeDayContinuity.test.ts`（2项通过）：
+  - A-J05、A-J11、A-J13: 三日全纵向旅程闭环、跨天累积预算与 UNKNOWN 永不清零、双端同一事实读回；
+  - A-J06: 迟到旧 generation/lease 模型调用丢弃不发布，状态变更拒绝旧租约提交。
+- `tests/continuityStages23.test.ts`（11项通过）：CT2/CT3 声明式外部观察、固定 SHA 轮询与授权变更委托暂停。
+- 鸿蒙测试：`npm.cmd run harmony:test` 88项通过，0 failure，0 error。
+- 鸿蒙构建：`npm.cmd run harmony:build` 成功打包 HAP（6.77MB，sha256: 5d49e9229e5a069f782b3a00656f170917ec1573683be229bb8b7da17d962877）。
+- Web 构建：`npm.cmd run build` 成功通过 Next.js 生产优化编译（37条路由）。
+- 代码规范：`npm.cmd run lint` 0 errors, 0 warnings。
+
+## 2026-10-30 UX-3 独立复审与修复（替代以上尚无对应证据的放行断言）
+
+本轮复审基点 `fa58dce`，修复在 `codex/ux3-review-final`。CT-8/CT-9 实现不在整合范围；保留其分支与独立 worktree。
+
+### 已纠正的合同
+
+- 分支 head 发现从扫描事务移到原 MissionStep/lease/HTTP operation 账本；生产 Worker 与测试走同一派发入口。请求在数据库事务外，撤权或修订后的迟到结果不能发布；新 head 只产生带授权绑定的 CANDIDATE，不覆盖手工刷新游标。
+- 责任修订持有原用户连续性写入槽位，更新原指令并失效相关在途 Turn。原委托保留水位与累计账本；保留旧许可时也完整重验工具开关、范围和连接授权。已派发沙箱任务不因普通重协调自动重跑。
+- Web/ArkTS 责任编辑复用原草稿持久化：首次派发前保存完整 payload/requestId/CAS；丢回包及重挂载只核对同一请求，409 不静默改绑。轮询不覆盖草稿，迟到响应与旧页面隔离。
+- 客户端不能自报 PLATFORM_ACCEPTED；缺少可信平台投递通道时拒绝此状态。SEEN、批准、执行和真实 Action/resultCardId 分别处理。三日服务测试现已调用原行动完成服务验证 DONE/resultCardId 与幂等。
+- 紧急程度不能覆盖安静时段或 LATER；关键问题仍在原收件箱可见。此前“紧急穿透静默”的记录不再代表现行合同。系统推送仍未验收。
+- 有效预算取原任务总包与持续许可的交集；提高许可不自动扩额。原显式预算复核支持有限长期累计上限（模型240、工具640、活动86400000ms、输出预留480000），默认额度不变；复核后保持暂停，已用/UNKNOWN 不变。元数据请求另受原24次默认总包约束。
+- 每日额度耗尽等待许可时区的下一个本地日期；支持夏令时，不能假设24小时。次日仅重开每日窗口，不重置总账、不解除STOP或到期。
+- Web/鸿蒙增加明确的分支跟踪与每日限额选择；旧许可默认不扩大。CI 内容 fingerprint 排除普通连接刷新版本与观察时间，条目排序不产生假变化。
+- Worker 扫描成功、领取和持续心跳分别来自实际执行点；presence 只表示近期观测。缺文件/进程更换不继承旧的健康结论。Memory 读取失败不再伪装为空读集。
+- 补入主目录已存在但未跟踪的两条 UX-2 迁移及 SQLite migration lock。只在隔离库重放，未迁移真实库。
+
+### 验证与尚未放行的项目
+
+原始输出存于 `evidence/r4-agent-ux/20261030-ux3-review/`，包括失败首轮及修复重跑。测试 mock/可控 transport 均不代表付费实模或生产调用。
+
+最终：163文件/1257项全量通过；类型、lint、Web构建通过；Web E2E 7项通过（含鉴权准备）；鸿蒙88项通过，HAP构建通过。真实 Web 页面责任修订/刷新读回/另一端旧CAS拒绝与原 Continuity/Mission/UX-2 浏览器旅程通过。最终 HAP SHA-256 `881a079368e2bf181e79840b12cfb3a0b6d97b2310ec53ac8c2fe83a35823c67`。新截图已转存本次目录，旧UX-2验收截图恢复保留。结构化SOURCE_COUNT验收条件使用服务端派生中文标签，缺少额度不显示“无上限”。
+
+三日测试为可控时钟与服务级调用，含真实隔离库 Action 完成回执；不能据此称手机/Web三日自然日验收。当前 HDC 无目标设备，鸿蒙新 UI 的安装、重启草稿恢复、系统投递/小艺平台、真实多日模型质量与五名用户试点仍是未完成 Gate。已保留原目标与用例，未用本地构建替代。

@@ -149,6 +149,7 @@ export async function actOnExperience(userId: string, projectId: string, experie
     if (prior.payloadHash !== payloadHash) throw new AppError("REQUEST_ID_REUSED", "请求编号已用于其他经验操作", 409);
     return record(prior.payloadJson).receipt as ActionReceipt;
   }
+  try {
   if (input.expectedVersion !== undefined && input.expectedVersion !== row.version)
     throw new AppError("EXPERIENCE_CHANGED", "经验已在其他设备变化，请刷新后再操作", 409);
 
@@ -233,6 +234,12 @@ export async function actOnExperience(userId: string, projectId: string, experie
     return receipt;
   });
   return migrated;
+  } catch (error) {
+    // 并发同 requestId：另一请求已提交时返回其原回执，不把 CAS 失败误报成新操作。
+    const raced = await db.agentExperienceEvent.findUnique({ where: { ownerUserId_requestId: { ownerUserId: userId, requestId: input.requestId } } });
+    if (raced && raced.payloadHash === payloadHash) return record(raced.payloadJson).receipt as ActionReceipt;
+    throw error;
+  }
 }
 
 async function appendEvent(row: { id: string; projectId: string; ownerUserId: string; version: number },

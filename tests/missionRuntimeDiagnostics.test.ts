@@ -221,6 +221,7 @@ describe("Mission 阶段诊断与恢复（独立 SQLite，无模型或网络请�
     const hash = createHash("sha256").update(secret).digest("hex");
     vi.spyOn(contexts, "buildContext").mockResolvedValueOnce(JSON.stringify({
       schemaVersion: 1, goal: secret, recentInputs: [{ seq: 7, payload: secret }], manifest: { excludedStepIds: ["old-step"] },
+      sourceInput: { projectId: p.id, revision: 0, role: "OWNER" },
       observations: [{ stepId: "existing-step", observation: { data: secret, sources: [{ id: "attachment:attachment-id", hash, revision: "revision-id", excerpts: [{ text: secret }] }, { id: "artifact:artifact-id", hash, revision: "artifact-id" }] } }],
     }));
     await runMissionSlice({ id: m.id, provider: provider({ kind: "ask", question: "请提供需要的实验单位", missing: "PRIVATE" }) });

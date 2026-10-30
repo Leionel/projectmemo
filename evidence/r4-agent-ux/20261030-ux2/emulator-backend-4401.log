@@ -1,0 +1,443 @@
+▲ Next.js 16.2.11 (Turbopack)
+- Local:         http://127.0.0.1:4401
+- Network:       http://127.0.0.1:4401
+- Environments: .env
+✓ Ready in 1027ms
+
+ POST /api/auth/login 200 in 1136ms (next.js: 815ms, application-code: 321ms)
+ GET /api/auth/capabilities 200 in 237ms (next.js: 209ms, application-code: 27ms)
+ POST /api/auth/login 200 in 80ms (next.js: 8ms, application-code: 73ms)
+ GET /api/projects 200 in 311ms (next.js: 248ms, application-code: 63ms)
+ GET /api/settings 200 in 411ms (next.js: 392ms, application-code: 19ms)
+ GET /api/projects?archived=true 200 in 30ms (next.js: 5ms, application-code: 25ms)
+ GET /api/workspace/focus 200 in 274ms (next.js: 188ms, application-code: 87ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm 200 in 1554ms (next.js: 1521ms, application-code: 33ms)
+ GET /api/conversations/capabilities 200 in 2.1s (next.js: 2.1s, application-code: 18ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/interventions 200 in 1396ms (next.js: 1373ms, application-code: 22ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/actions 200 in 1383ms (next.js: 1355ms, application-code: 27ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs 200 in 48ms (next.js: 26ms, application-code: 21ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/interventions 200 in 53ms (next.js: 33ms, application-code: 20ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/actions 200 in 54ms (next.js: 22ms, application-code: 32ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/decisions/timeline 200 in 1487ms (next.js: 1459ms, application-code: 28ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/decisions/timeline 200 in 46ms (next.js: 26ms, application-code: 20ms)
+ GET /api/conversations/capabilities 200 in 25ms (next.js: 8ms, application-code: 17ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs 200 in 48ms (next.js: 25ms, application-code: 23ms)
+ GET /api/projects 200 in 72ms (next.js: 51ms, application-code: 21ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/interventions 200 in 36ms (next.js: 19ms, application-code: 17ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/actions 200 in 78ms (next.js: 54ms, application-code: 24ms)
+ GET /api/missions/summary?projectId=cmvunzcz600026w8ovoktwmgs 200 in 140ms (next.js: 106ms, application-code: 33ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-context 200 in 1780ms (next.js: 1717ms, application-code: 63ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/artifacts 200 in 1789ms (next.js: 1749ms, application-code: 40ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/milestones 200 in 1811ms (next.js: 1785ms, application-code: 26ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/reminders?deviceKey=device-1793257216290-145102 200 in 1884ms (next.js: 1857ms, application-code: 27ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/attachments 200 in 1931ms (next.js: 1908ms, application-code: 23ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent/chat 200 in 1700ms (next.js: 1676ms, application-code: 24ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/reentry 503 in 1334ms (next.js: 1311ms, application-code: 22ms)
+ POST /api/projects/cmvunzcz600026w8ovoktwmgs/state/refresh 200 in 1312ms (next.js: 1255ms, application-code: 57ms)
+[project-health] section "episodes" failed {
+  code: 'EPISODES_DISABLED',
+  error: Error: 阶段检查点功能当前已关闭
+      at episodeDetector (lib\services\projectHealthService.ts:144:11)
+      at runDetector (lib\services\projectHealthService.ts:121:11)
+      at buildProjectHealthReport (lib\services\projectHealthService.ts:643:11)
+      at GET (app\api\projects\[id]\health\route.ts:18:66)
+    142 | const episodeDetector: Detector = async ({ projectId, now, findings }) => {
+    143 |   if (!isFeatureEnabled("PROJECT_EPISODES_ENABLED", false)) {
+  > 144 |     throw new AppError("EPISODES_DISABLED", "阶段检查点功能当前已关闭", 503);
+        |           ^
+    145 |   }
+    146 |   const episode = await db.projectEpisode.findFirst({
+    147 |     where: { projectId, status: { not: "ARCHIVED" } }, {
+    code: 'EPISODES_DISABLED',
+    status: 503,
+    details: undefined
+  }
+}
+[project-health] section "attachments" failed {
+  code: 'PROJECT_INBOX_DISABLED',
+  error: Error: 附件入口当前已关闭
+      at attachmentDetector (lib\services\projectHealthService.ts:509:11)
+      at runDetector (lib\services\projectHealthService.ts:121:11)
+      at buildProjectHealthReport (lib\services\projectHealthService.ts:643:11)
+      at async GET (app\api\projects\[id]\health\route.ts:18:36)
+    507 | const attachmentDetector: Detector = async ({ projectId, now, findings }) => {
+    508 |   if (!isFeatureEnabled("PROJECT_INBOX_ENABLED", false)) {
+  > 509 |     throw new AppError("PROJECT_INBOX_DISABLED", "附件入口当前已关闭", 503);
+        |           ^
+    510 |   }
+    511 |   const failed = await db.attachment.findMany({
+    512 |     where: { projectId, extractionStatus: "FAILED" }, {
+    code: 'PROJECT_INBOX_DISABLED',
+    status: 503,
+    details: undefined
+  }
+}
+[project-health] section "memory" failed {
+  code: 'MEMORY_CONSOLIDATION_DISABLED',
+  error: Error: 记忆整理功能当前已关闭
+      at memoryDetector (lib\services\projectHealthService.ts:573:11)
+      at runDetector (lib\services\projectHealthService.ts:121:11)
+      at buildProjectHealthReport (lib\services\projectHealthService.ts:643:11)
+      at async GET (app\api\projects\[id]\health\route.ts:18:36)
+    571 | const memoryDetector: Detector = async ({ projectId, now, findings }) => {
+    572 |   if (!isFeatureEnabled("PROJECT_MEMORY_CONSOLIDATION_ENABLED", false)) {
+  > 573 |     throw new AppError("MEMORY_CONSOLIDATION_DISABLED", "记忆整理功能当前已关闭", 503);
+        |           ^
+    574 |   }
+    575 |   const { listConsolidationProposals } = await import("@/lib/services/memoryConsolidation...
+    576 |   const proposals = await listConsolidationProposals(projectId); {
+    code: 'MEMORY_CONSOLIDATION_DISABLED',
+    status: 503,
+    details: undefined
+  }
+}
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/health 200 in 1747ms (next.js: 1399ms, application-code: 348ms)
+ GET /api/projects 200 in 32ms (next.js: 6ms, application-code: 26ms)
+ GET /api/projects?archived=true 200 in 32ms (next.js: 15ms, application-code: 17ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm 200 in 40ms (next.js: 17ms, application-code: 24ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/interventions 200 in 46ms (next.js: 24ms, application-code: 22ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/actions 200 in 62ms (next.js: 40ms, application-code: 22ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs 200 in 41ms (next.js: 16ms, application-code: 25ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/interventions 200 in 32ms (next.js: 6ms, application-code: 26ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/actions 200 in 36ms (next.js: 7ms, application-code: 29ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/decisions/timeline 200 in 55ms (next.js: 24ms, application-code: 30ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/decisions/timeline 200 in 53ms (next.js: 24ms, application-code: 29ms)
+ GET /api/conversations/capabilities 200 in 27ms (next.js: 6ms, application-code: 21ms)
+ GET /api/projects 200 in 37ms (next.js: 13ms, application-code: 24ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/agent-context 200 in 84ms (next.js: 36ms, application-code: 47ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/interventions 200 in 134ms (next.js: 105ms, application-code: 29ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm 200 in 187ms (next.js: 158ms, application-code: 29ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/agent/chat 200 in 223ms (next.js: 196ms, application-code: 27ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/actions 200 in 278ms (next.js: 251ms, application-code: 27ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/artifacts 200 in 329ms (next.js: 302ms, application-code: 27ms)
+ GET /api/missions/summary?projectId=cmvunzczd00046w8o66gxvkbm 200 in 53ms (next.js: 23ms, application-code: 30ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/milestones 200 in 101ms (next.js: 68ms, application-code: 33ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/attachments 200 in 143ms (next.js: 106ms, application-code: 37ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/reminders?deviceKey=device-1793257216290-145102 200 in 205ms (next.js: 167ms, application-code: 39ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/reentry 503 in 70ms (next.js: 43ms, application-code: 27ms)
+ POST /api/projects/cmvunzczd00046w8o66gxvkbm/state/refresh 200 in 65ms (next.js: 23ms, application-code: 42ms)
+ GET /api/projects 200 in 37ms (next.js: 10ms, application-code: 27ms)
+[project-health] section "episodes" failed {
+  code: 'EPISODES_DISABLED',
+  error: Error: 阶段检查点功能当前已关闭
+      at episodeDetector (lib\services\projectHealthService.ts:144:11)
+      at runDetector (lib\services\projectHealthService.ts:121:11)
+      at buildProjectHealthReport (lib\services\projectHealthService.ts:643:11)
+      at GET (app\api\projects\[id]\health\route.ts:18:66)
+    142 | const episodeDetector: Detector = async ({ projectId, now, findings }) => {
+    143 |   if (!isFeatureEnabled("PROJECT_EPISODES_ENABLED", false)) {
+  > 144 |     throw new AppError("EPISODES_DISABLED", "阶段检查点功能当前已关闭", 503);
+        |           ^
+    145 |   }
+    146 |   const episode = await db.projectEpisode.findFirst({
+    147 |     where: { projectId, status: { not: "ARCHIVED" } }, {
+    code: 'EPISODES_DISABLED',
+    status: 503,
+    details: undefined
+  }
+}
+[project-health] section "attachments" failed {
+  code: 'PROJECT_INBOX_DISABLED',
+  error: Error: 附件入口当前已关闭
+      at attachmentDetector (lib\services\projectHealthService.ts:509:11)
+      at runDetector (lib\services\projectHealthService.ts:121:11)
+      at buildProjectHealthReport (lib\services\projectHealthService.ts:643:11)
+      at async GET (app\api\projects\[id]\health\route.ts:18:36)
+    507 | const attachmentDetector: Detector = async ({ projectId, now, findings }) => {
+    508 |   if (!isFeatureEnabled("PROJECT_INBOX_ENABLED", false)) {
+  > 509 |     throw new AppError("PROJECT_INBOX_DISABLED", "附件入口当前已关闭", 503);
+        |           ^
+    510 |   }
+    511 |   const failed = await db.attachment.findMany({
+    512 |     where: { projectId, extractionStatus: "FAILED" }, {
+    code: 'PROJECT_INBOX_DISABLED',
+    status: 503,
+    details: undefined
+  }
+}
+[project-health] section "memory" failed {
+  code: 'MEMORY_CONSOLIDATION_DISABLED',
+  error: Error: 记忆整理功能当前已关闭
+      at memoryDetector (lib\services\projectHealthService.ts:573:11)
+      at runDetector (lib\services\projectHealthService.ts:121:11)
+      at buildProjectHealthReport (lib\services\projectHealthService.ts:643:11)
+      at async GET (app\api\projects\[id]\health\route.ts:18:36)
+    571 | const memoryDetector: Detector = async ({ projectId, now, findings }) => {
+    572 |   if (!isFeatureEnabled("PROJECT_MEMORY_CONSOLIDATION_ENABLED", false)) {
+  > 573 |     throw new AppError("MEMORY_CONSOLIDATION_DISABLED", "记忆整理功能当前已关闭", 503);
+        |           ^
+    574 |   }
+    575 |   const { listConsolidationProposals } = await import("@/lib/services/memoryConsolidation...
+    576 |   const proposals = await listConsolidationProposals(projectId); {
+    code: 'MEMORY_CONSOLIDATION_DISABLED',
+    status: 503,
+    details: undefined
+  }
+}
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/health 200 in 452ms (next.js: 26ms, application-code: 426ms)
+ GET /api/projects?archived=true 200 in 32ms (next.js: 6ms, application-code: 25ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm 200 in 66ms (next.js: 37ms, application-code: 29ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/interventions 200 in 60ms (next.js: 35ms, application-code: 25ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/actions 200 in 45ms (next.js: 20ms, application-code: 25ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs 200 in 30ms (next.js: 6ms, application-code: 24ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/interventions 200 in 31ms (next.js: 7ms, application-code: 24ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/actions 200 in 30ms (next.js: 6ms, application-code: 24ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/decisions/timeline 200 in 57ms (next.js: 33ms, application-code: 24ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/decisions/timeline 200 in 43ms (next.js: 18ms, application-code: 25ms)
+ GET /api/conversations/capabilities 200 in 30ms (next.js: 6ms, application-code: 24ms)
+ GET /api/projects 200 in 35ms (next.js: 9ms, application-code: 26ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/agent-context 200 in 80ms (next.js: 31ms, application-code: 49ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm 200 in 114ms (next.js: 86ms, application-code: 28ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/interventions 200 in 149ms (next.js: 120ms, application-code: 30ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/artifacts 200 in 95ms (next.js: 67ms, application-code: 28ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/actions 200 in 132ms (next.js: 101ms, application-code: 30ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/reminders?deviceKey=device-1793257216290-145102 200 in 62ms (next.js: 33ms, application-code: 29ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/attachments 200 in 118ms (next.js: 88ms, application-code: 31ms)
+ GET /api/missions/summary?projectId=cmvunzczd00046w8o66gxvkbm 200 in 165ms (next.js: 131ms, application-code: 34ms)
+(node:50388) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 unpipe listeners added to [SyncWriteStream]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:50388) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 error listeners added to [SyncWriteStream]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:50388) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 close listeners added to [SyncWriteStream]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:50388) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 finish listeners added to [SyncWriteStream]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:50388) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 unpipe listeners added to [SyncWriteStream]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:50388) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 error listeners added to [SyncWriteStream]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:50388) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 close listeners added to [SyncWriteStream]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:50388) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 finish listeners added to [SyncWriteStream]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/milestones 200 in 228ms (next.js: 193ms, application-code: 35ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/agent/chat 200 in 293ms (next.js: 262ms, application-code: 32ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/reentry 503 in 81ms (next.js: 54ms, application-code: 27ms)
+ POST /api/projects/cmvunzczd00046w8o66gxvkbm/state/refresh 200 in 70ms (next.js: 24ms, application-code: 45ms)
+[project-health] section "episodes" failed {
+  code: 'EPISODES_DISABLED',
+  error: Error: 阶段检查点功能当前已关闭
+      at episodeDetector (lib\services\projectHealthService.ts:144:11)
+      at runDetector (lib\services\projectHealthService.ts:121:11)
+      at buildProjectHealthReport (lib\services\projectHealthService.ts:643:11)
+      at GET (app\api\projects\[id]\health\route.ts:18:66)
+    142 | const episodeDetector: Detector = async ({ projectId, now, findings }) => {
+    143 |   if (!isFeatureEnabled("PROJECT_EPISODES_ENABLED", false)) {
+  > 144 |     throw new AppError("EPISODES_DISABLED", "阶段检查点功能当前已关闭", 503);
+        |           ^
+    145 |   }
+    146 |   const episode = await db.projectEpisode.findFirst({
+    147 |     where: { projectId, status: { not: "ARCHIVED" } }, {
+    code: 'EPISODES_DISABLED',
+    status: 503,
+    details: undefined
+  }
+}
+[project-health] section "attachments" failed {
+  code: 'PROJECT_INBOX_DISABLED',
+  error: Error: 附件入口当前已关闭
+      at attachmentDetector (lib\services\projectHealthService.ts:509:11)
+      at runDetector (lib\services\projectHealthService.ts:121:11)
+      at buildProjectHealthReport (lib\services\projectHealthService.ts:643:11)
+      at async GET (app\api\projects\[id]\health\route.ts:18:36)
+    507 | const attachmentDetector: Detector = async ({ projectId, now, findings }) => {
+    508 |   if (!isFeatureEnabled("PROJECT_INBOX_ENABLED", false)) {
+  > 509 |     throw new AppError("PROJECT_INBOX_DISABLED", "附件入口当前已关闭", 503);
+        |           ^
+    510 |   }
+    511 |   const failed = await db.attachment.findMany({
+    512 |     where: { projectId, extractionStatus: "FAILED" }, {
+    code: 'PROJECT_INBOX_DISABLED',
+    status: 503,
+    details: undefined
+  }
+}
+[project-health] section "memory" failed {
+  code: 'MEMORY_CONSOLIDATION_DISABLED',
+  error: Error: 记忆整理功能当前已关闭
+      at memoryDetector (lib\services\projectHealthService.ts:573:11)
+      at runDetector (lib\services\projectHealthService.ts:121:11)
+      at buildProjectHealthReport (lib\services\projectHealthService.ts:643:11)
+      at async GET (app\api\projects\[id]\health\route.ts:18:36)
+    571 | const memoryDetector: Detector = async ({ projectId, now, findings }) => {
+    572 |   if (!isFeatureEnabled("PROJECT_MEMORY_CONSOLIDATION_ENABLED", false)) {
+  > 573 |     throw new AppError("MEMORY_CONSOLIDATION_DISABLED", "记忆整理功能当前已关闭", 503);
+        |           ^
+    574 |   }
+    575 |   const { listConsolidationProposals } = await import("@/lib/services/memoryConsolidation...
+    576 |   const proposals = await listConsolidationProposals(projectId); {
+    code: 'MEMORY_CONSOLIDATION_DISABLED',
+    status: 503,
+    details: undefined
+  }
+}
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/health 200 in 544ms (next.js: 38ms, application-code: 506ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/repo-signals 200 in 3.1s (next.js: 3.1s, application-code: 33ms)
+ POST /api/auth/login 200 in 89ms (next.js: 7ms, application-code: 82ms)
+ GET /api/auth/capabilities 200 in 20ms (next.js: 6ms, application-code: 14ms)
+ POST /api/auth/login 200 in 107ms (next.js: 10ms, application-code: 97ms)
+ GET /api/conversations/capabilities 200 in 26ms (next.js: 6ms, application-code: 20ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/agent-context 200 in 69ms (next.js: 20ms, application-code: 49ms)
+ GET /api/projects 200 in 58ms (next.js: 27ms, application-code: 31ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm 200 in 59ms (next.js: 27ms, application-code: 32ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/interventions 200 in 109ms (next.js: 80ms, application-code: 29ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/actions 200 in 159ms (next.js: 131ms, application-code: 29ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/artifacts 200 in 218ms (next.js: 184ms, application-code: 33ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/agent/chat 200 in 222ms (next.js: 191ms, application-code: 31ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/attachments 200 in 69ms (next.js: 37ms, application-code: 32ms)
+ GET /api/missions/summary?projectId=cmvunzczd00046w8o66gxvkbm 200 in 121ms (next.js: 85ms, application-code: 36ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/milestones 200 in 177ms (next.js: 144ms, application-code: 32ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/reentry 503 in 79ms (next.js: 52ms, application-code: 27ms)
+ GET /api/projects 200 in 25ms (next.js: 4ms, application-code: 20ms)
+ GET /api/projects?archived=true 200 in 23ms (next.js: 5ms, application-code: 18ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm 200 in 69ms (next.js: 37ms, application-code: 32ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/interventions 200 in 82ms (next.js: 60ms, application-code: 22ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/actions 200 in 43ms (next.js: 20ms, application-code: 23ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs 200 in 30ms (next.js: 5ms, application-code: 25ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/interventions 200 in 33ms (next.js: 14ms, application-code: 20ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/actions 200 in 38ms (next.js: 15ms, application-code: 22ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/decisions/timeline 200 in 58ms (next.js: 34ms, application-code: 24ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/decisions/timeline 200 in 39ms (next.js: 17ms, application-code: 22ms)
+ GET /api/conversations/capabilities 200 in 19ms (next.js: 5ms, application-code: 14ms)
+ GET /api/projects 200 in 33ms (next.js: 8ms, application-code: 25ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/interventions 200 in 42ms (next.js: 22ms, application-code: 19ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-context 200 in 107ms (next.js: 66ms, application-code: 41ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs 200 in 152ms (next.js: 125ms, application-code: 27ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/artifacts 200 in 51ms (next.js: 27ms, application-code: 24ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent/chat 200 in 114ms (next.js: 88ms, application-code: 26ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/actions 200 in 164ms (next.js: 137ms, application-code: 27ms)
+ GET /api/missions/summary?projectId=cmvunzcz600026w8ovoktwmgs 200 in 35ms (next.js: 7ms, application-code: 28ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/attachments 200 in 82ms (next.js: 57ms, application-code: 25ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/reminders?deviceKey=device-1793257216290-145102 200 in 131ms (next.js: 105ms, application-code: 26ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/milestones 200 in 194ms (next.js: 159ms, application-code: 35ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/reentry 503 in 114ms (next.js: 88ms, application-code: 26ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/repo-signals 200 in 42ms (next.js: 21ms, application-code: 21ms)
+ GET /api/projects 200 in 22ms (next.js: 6ms, application-code: 16ms)
+ GET /api/settings 200 in 41ms (next.js: 26ms, application-code: 14ms)
+ GET /api/workspace/focus 200 in 36ms (next.js: 5ms, application-code: 31ms)
+ GET /api/conversations/capabilities 200 in 55ms (next.js: 40ms, application-code: 16ms)
+ GET /api/projects?archived=true 200 in 20ms (next.js: 5ms, application-code: 14ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm 200 in 34ms (next.js: 14ms, application-code: 19ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/interventions 200 in 31ms (next.js: 15ms, application-code: 16ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/actions 200 in 38ms (next.js: 21ms, application-code: 17ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs 200 in 23ms (next.js: 5ms, application-code: 19ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/interventions 200 in 26ms (next.js: 5ms, application-code: 21ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/actions 200 in 34ms (next.js: 15ms, application-code: 19ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/decisions/timeline 200 in 39ms (next.js: 15ms, application-code: 23ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/decisions/timeline 200 in 26ms (next.js: 5ms, application-code: 22ms)
+ GET /api/conversations/capabilities 200 in 18ms (next.js: 4ms, application-code: 13ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-context 200 in 50ms (next.js: 17ms, application-code: 33ms)
+ GET /api/projects 200 in 33ms (next.js: 12ms, application-code: 22ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/artifacts 200 in 42ms (next.js: 19ms, application-code: 23ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs 200 in 87ms (next.js: 63ms, application-code: 24ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/actions 200 in 132ms (next.js: 107ms, application-code: 25ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/interventions 200 in 179ms (next.js: 154ms, application-code: 25ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/reminders?deviceKey=device-1793257216290-145102 200 in 58ms (next.js: 34ms, application-code: 24ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/attachments 200 in 120ms (next.js: 97ms, application-code: 23ms)
+ GET /api/missions/summary?projectId=cmvunzcz600026w8ovoktwmgs 200 in 154ms (next.js: 125ms, application-code: 28ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/milestones 200 in 196ms (next.js: 169ms, application-code: 28ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent/chat 200 in 245ms (next.js: 219ms, application-code: 27ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/reentry 503 in 70ms (next.js: 39ms, application-code: 31ms)
+ GET /api/conversations/capabilities 200 in 39ms (next.js: 23ms, application-code: 17ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/repo-signals 200 in 71ms (next.js: 49ms, application-code: 22ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-memory 200 in 2.8s (next.js: 2.7s, application-code: 130ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-claims 200 in 1628ms (next.js: 1603ms, application-code: 25ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-claims?kind=CLAIM&sourceId=cmvunzd62000a6w8ouh83u74u 200 in 59ms (next.js: 17ms, application-code: 42ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-context 200 in 75ms (next.js: 27ms, application-code: 48ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs 200 in 81ms (next.js: 45ms, application-code: 37ms)
+ GET /api/projects 200 in 112ms (next.js: 87ms, application-code: 25ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/interventions 200 in 141ms (next.js: 115ms, application-code: 26ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent/chat 200 in 84ms (next.js: 47ms, application-code: 37ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/actions 200 in 139ms (next.js: 108ms, application-code: 31ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/artifacts 200 in 193ms (next.js: 167ms, application-code: 27ms)
+ GET /api/missions/summary?projectId=cmvunzcz600026w8ovoktwmgs 200 in 219ms (next.js: 181ms, application-code: 39ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/attachments 200 in 81ms (next.js: 51ms, application-code: 30ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/milestones 200 in 139ms (next.js: 111ms, application-code: 28ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/reentry 503 in 91ms (next.js: 65ms, application-code: 27ms)
+ GET /api/missions/summary?projectId=cmvunzcz600026w8ovoktwmgs 200 in 31ms (next.js: 6ms, application-code: 25ms)
+ GET /api/conversations/capabilities 200 in 25ms (next.js: 5ms, application-code: 19ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/repo-signals 200 in 77ms (next.js: 51ms, application-code: 25ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-memory 200 in 162ms (next.js: 21ms, application-code: 140ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-context 200 in 82ms (next.js: 26ms, application-code: 56ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs 200 in 60ms (next.js: 31ms, application-code: 29ms)
+ GET /api/projects 200 in 132ms (next.js: 90ms, application-code: 42ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/interventions 200 in 94ms (next.js: 50ms, application-code: 44ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/actions 200 in 154ms (next.js: 122ms, application-code: 33ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/artifacts 200 in 219ms (next.js: 192ms, application-code: 27ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent/chat 200 in 293ms (next.js: 261ms, application-code: 32ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/attachments 200 in 112ms (next.js: 86ms, application-code: 26ms)
+ GET /api/missions/summary?projectId=cmvunzcz600026w8ovoktwmgs 200 in 275ms (next.js: 247ms, application-code: 29ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/milestones 200 in 218ms (next.js: 189ms, application-code: 29ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/reentry 503 in 69ms (next.js: 44ms, application-code: 25ms)
+ GET /api/conversations/capabilities 200 in 31ms (next.js: 7ms, application-code: 24ms)
+ POST /api/conversations/sync 200 in 2.4s (next.js: 2.3s, application-code: 29ms)
+ GET /api/conversations?projectId=cmvunzcz600026w8ovoktwmgs 200 in 686ms (next.js: 640ms, application-code: 45ms)
+ GET /api/conversations/cmvunzczq00076w8osyg2vx3o 200 in 2.1s (next.js: 2.0s, application-code: 107ms)
+ GET /api/conversations/cmvunzczq00076w8osyg2vx3o/anchors 200 in 1811ms (next.js: 1777ms, application-code: 34ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-claims 200 in 61ms (next.js: 26ms, application-code: 36ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-claims?kind=MESSAGE&sourceId=cmvunzd0q00096w8o4mfoc87y 200 in 77ms (next.js: 33ms, application-code: 44ms)
+ GET /api/projects 200 in 36ms (next.js: 7ms, application-code: 29ms)
+ GET /api/settings 200 in 36ms (next.js: 10ms, application-code: 27ms)
+ GET /api/workspace/focus 200 in 120ms (next.js: 49ms, application-code: 71ms)
+ GET /api/conversations/capabilities 200 in 150ms (next.js: 127ms, application-code: 23ms)
+ GET /api/projects?archived=true 200 in 52ms (next.js: 34ms, application-code: 18ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm 200 in 32ms (next.js: 15ms, application-code: 17ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/interventions 200 in 39ms (next.js: 18ms, application-code: 21ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/actions 200 in 40ms (next.js: 21ms, application-code: 19ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs 200 in 27ms (next.js: 6ms, application-code: 22ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/interventions 200 in 26ms (next.js: 6ms, application-code: 20ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/actions 200 in 38ms (next.js: 16ms, application-code: 21ms)
+ GET /api/projects/cmvunzczd00046w8o66gxvkbm/decisions/timeline 200 in 55ms (next.js: 36ms, application-code: 19ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/decisions/timeline 200 in 38ms (next.js: 12ms, application-code: 26ms)
+ GET /api/conversations/capabilities 200 in 72ms (next.js: 24ms, application-code: 48ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-context 200 in 123ms (next.js: 51ms, application-code: 72ms)
+ GET /api/projects 200 in 161ms (next.js: 135ms, application-code: 26ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs 200 in 218ms (next.js: 188ms, application-code: 31ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/interventions 200 in 63ms (next.js: 33ms, application-code: 30ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/actions 200 in 110ms (next.js: 81ms, application-code: 28ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/artifacts 200 in 162ms (next.js: 136ms, application-code: 26ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/attachments 200 in 85ms (next.js: 57ms, application-code: 28ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/reminders?deviceKey=device-1793257216290-145102 200 in 143ms (next.js: 114ms, application-code: 30ms)
+ GET /api/missions/summary?projectId=cmvunzcz600026w8ovoktwmgs 200 in 193ms (next.js: 151ms, application-code: 42ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/milestones 200 in 274ms (next.js: 241ms, application-code: 32ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent/chat 200 in 380ms (next.js: 347ms, application-code: 34ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/reentry 503 in 75ms (next.js: 48ms, application-code: 26ms)
+ GET /api/conversations/capabilities 200 in 43ms (next.js: 4ms, application-code: 39ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/repo-signals 200 in 54ms (next.js: 33ms, application-code: 21ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-memory 200 in 240ms (next.js: 35ms, application-code: 206ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-claims 200 in 40ms (next.js: 16ms, application-code: 24ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-claims?kind=CLAIM&sourceId=cmvunzd62000a6w8ouh83u74u 200 in 71ms (next.js: 5ms, application-code: 65ms)
+ POST /api/projects/cmvunzcz600026w8ovoktwmgs/agent-claims 200 in 218ms (next.js: 25ms, application-code: 193ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-memory 200 in 333ms (next.js: 90ms, application-code: 243ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-claims 200 in 182ms (next.js: 13ms, application-code: 169ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-claims?kind=CLAIM&sourceId=cmvunzd62000a6w8ouh83u74u 200 in 97ms (next.js: 7ms, application-code: 90ms)
+ POST /api/projects/cmvunzcz600026w8ovoktwmgs/agent-claims 200 in 86ms (next.js: 21ms, application-code: 65ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-memory 200 in 146ms (next.js: 32ms, application-code: 115ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-claims 200 in 28ms (next.js: 6ms, application-code: 22ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-claims?kind=CLAIM&sourceId=cmvunzd62000a6w8ouh83u74u 200 in 74ms (next.js: 14ms, application-code: 60ms)
+ POST /api/projects/cmvunzcz600026w8ovoktwmgs/agent-claims 409 in 54ms (next.js: 18ms, application-code: 36ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-claims 200 in 59ms (next.js: 17ms, application-code: 42ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-claims?kind=CLAIM&sourceId=cmvunzd62000a6w8ouh83u74u 200 in 95ms (next.js: 24ms, application-code: 70ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-context 200 in 136ms (next.js: 35ms, application-code: 101ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs 200 in 223ms (next.js: 159ms, application-code: 64ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/interventions 200 in 75ms (next.js: 30ms, application-code: 45ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/milestones 200 in 144ms (next.js: 97ms, application-code: 47ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent/chat 200 in 209ms (next.js: 177ms, application-code: 32ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/actions 200 in 274ms (next.js: 237ms, application-code: 37ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/artifacts 200 in 355ms (next.js: 301ms, application-code: 54ms)
+ GET /api/projects 200 in 436ms (next.js: 388ms, application-code: 48ms)
+ GET /api/missions/summary?projectId=cmvunzcz600026w8ovoktwmgs 200 in 91ms (next.js: 34ms, application-code: 56ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/attachments 200 in 107ms (next.js: 62ms, application-code: 45ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/reentry 503 in 169ms (next.js: 53ms, application-code: 117ms)
+ GET /api/conversations/capabilities 200 in 49ms (next.js: 12ms, application-code: 38ms)
+ POST /api/conversations/sync 200 in 48ms (next.js: 12ms, application-code: 36ms)
+ GET /api/conversations?projectId=cmvunzcz600026w8ovoktwmgs 200 in 48ms (next.js: 10ms, application-code: 38ms)
+ GET /api/conversations/cmvunzczq00076w8osyg2vx3o 200 in 123ms (next.js: 44ms, application-code: 79ms)
+ GET /api/conversations/cmvunzczq00076w8osyg2vx3o/anchors 200 in 69ms (next.js: 20ms, application-code: 49ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-context 200 in 67ms (next.js: 20ms, application-code: 47ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs 200 in 49ms (next.js: 25ms, application-code: 24ms)
+ GET /api/projects 200 in 93ms (next.js: 67ms, application-code: 27ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/interventions 200 in 130ms (next.js: 100ms, application-code: 30ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/actions 200 in 181ms (next.js: 153ms, application-code: 29ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/artifacts 200 in 236ms (next.js: 206ms, application-code: 31ms)
+ GET /api/missions/summary?projectId=cmvunzcz600026w8ovoktwmgs 200 in 50ms (next.js: 25ms, application-code: 25ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent/chat 200 in 101ms (next.js: 72ms, application-code: 29ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/milestones 200 in 130ms (next.js: 105ms, application-code: 25ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/attachments 200 in 155ms (next.js: 122ms, application-code: 32ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/reentry 503 in 54ms (next.js: 25ms, application-code: 29ms)
+ GET /api/conversations/capabilities 200 in 22ms (next.js: 6ms, application-code: 16ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/repo-signals 200 in 46ms (next.js: 21ms, application-code: 25ms)
+ GET /api/projects/cmvunzcz600026w8ovoktwmgs/agent-memory 200 in 157ms (next.js: 22ms, application-code: 135ms)

@@ -1,3 +1,4 @@
+import { AgentMemoryPanel } from "../components/AgentMemoryPanel";
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
 import { ApiError } from '../models/Project';
@@ -699,6 +700,7 @@ struct MemoryTimeline {
       } else if (this.repoMode) {
         Scroll() {
           Column({ space: 12 }) {
+            AgentMemoryPanel({ projectId: this.projectId })
             Text('连接公开仓库，查看提交，再选择哪些记录加入项目资料。').fontSize(14).fontColor(PMColors.INK_SECONDARY)
             RepoSignalPanel({ projectId: this.projectId, initialOpen: true })
           }.width('100%').padding(16).alignItems(HorizontalAlign.Start)
@@ -712,17 +714,15 @@ struct MemoryTimeline {
             this.loadTimeline();
           }
         })
-      } else if (this.cards.length === 0 && this.archivedCards.length === 0) {
-        EmptyStateView({
-          title: '暂无记忆档案',
-          description: '项目尚未记录任何碎片，返回项目首页记录第一条知识',
-          actionText: '返回工作台',
-          onAction: () => {
-            router.back();
-          }
-        })
       } else {
         List({ space: PMSpacing.MD }) {
+          ListItem() { AgentMemoryPanel({ projectId: this.projectId }) }
+          if (this.cards.length === 0 && this.archivedCards.length === 0) {
+            ListItem() {
+              EmptyStateView({ title: '暂无原始记忆档案', description: '原始记录与调查综合分开保存，可返回工作台记录进展。',
+                actionText: '返回工作台', onAction: () => { router.back(); } })
+            }
+          }
           ListItem() { RepoSignalPanel({ projectId: this.projectId }) }
           if (this.consolidationVisible) {
             ListItem() {

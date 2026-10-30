@@ -1,0 +1,30 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/ux2HypothesisRuntime.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/ux2HypothesisRuntime.test.ts (3 tests | 1 failed) 1191ms
+   × D1提出、D3同一推测反证、D5新任务接续，原批准→真实Action→resultCardId读回 987ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/ux2HypothesisRuntime.test.ts > D1提出、D3同一推测反证、D5新任务接续，原批准→真实Action→resultCardId读回
+TypeError: Cannot read properties of undefined (reading 'models')
+ ❯ tests/ux2HypothesisRuntime.test.ts:79:102
+     77|     const digest = (await readEffectiveDigests(user.id, p.id)).items.f…
+     78|     expect(digest?.commitments[0]).toMatchObject({ actionStatus: "DONE…
+     79|     detail = await missionDetail(user.id, next.id); expect((detail.bud…
+       |                                                                                                      ^
+     80|     expect((await db.project.findUniqueOrThrow({ where: { id: p.id } }…
+     81|   } finally { vi.useRealTimers(); }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  15:12:04
+   Duration  3.80s (transform 1.51s, setup 0ms, import 2.35s, tests 1.19s, environment 0ms)
+

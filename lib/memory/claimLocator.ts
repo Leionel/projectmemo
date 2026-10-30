@@ -3,7 +3,7 @@ import { z } from "zod";
 import { AppError } from "@/lib/api";
 
 export const claimOriginSchema = z.object({
-  kind: z.enum(["CAPTURE", "CARD", "MESSAGE", "MISSION_OUTPUT", "ARTIFACT", "EPISODE"]),
+  kind: z.enum(["CAPTURE", "CARD", "MESSAGE", "MISSION_OUTPUT", "ARTIFACT", "EPISODE", "CLAIM"]),
   id: z.string().min(1).max(180), contentHash: z.string().regex(/^[a-f0-9]{64}$/),
   offsetEncoding: z.literal("UTF16_CODE_UNITS"), normalization: z.literal("RAW_V1"),
   start: z.number().int().nonnegative(), end: z.number().int().positive(),

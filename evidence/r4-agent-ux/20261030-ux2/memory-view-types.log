@@ -1,0 +1,1 @@
+components/AgentMemoryPanel.tsx(37,104): error TS2367: This comparison appears to be unintentional because the types '"TODO" | "DOING" | "CANCELLED" | null' and '"BLOCKED"' have no overlap.

@@ -1,3 +1,4 @@
+import { AgentMemoryPanel } from "@/components/AgentMemoryPanel";
 import {ProjectImpact} from "@/components/ProjectImpact";
 import Link from "next/link";
 import {notFound} from "next/navigation";
@@ -45,7 +46,7 @@ export default async function ProjectFeaturePage({params,searchParams}:{params:P
  }else if(section==="knowledge"){
   const [project,timeline]=await Promise.all([getProjectDetail(id),getDecisionTimeline(id)]);const byId=new Map(timeline.items.map(i=>[i.card.id,i]));
   const cards=project.cards.map(card=>{const temporal=byId.get(card.id);return {...card,temporal:temporal?{topLevelState:temporal.topLevelState,reasonCode:temporal.reasonCode,displayReason:temporal.displayReason,evidenceRefs:temporal.evidenceRefs}:undefined};});
-  content=<>{isFeatureEnabled("FOCUS_AGENT_ENABLED",false)?<details className={styles.secondary}><summary>历史项目问答</summary><MemoryCopilot key={workspace.user.id} projectId={id} historyOnly/></details>:<MemoryCopilot key={workspace.user.id} projectId={id}/>}<KnowledgeFeed projectId={id} cards={cards}/><ArchivedMemoryList projectId={id}/><MemoryConsolidationCard projectId={id} enabled={enabled("PROJECT_MEMORY_CONSOLIDATION_ENABLED")}/></>;
+  content=<>{isFeatureEnabled("FOCUS_AGENT_ENABLED",false)?<details className={styles.secondary}><summary>历史项目问答</summary><MemoryCopilot key={workspace.user.id} projectId={id} historyOnly/></details>:<MemoryCopilot key={workspace.user.id} projectId={id}/>}{enabled("FOCUS_AGENT_ENABLED")&&<AgentMemoryPanel key={workspace.user.id+id} projectId={id}/>}<KnowledgeFeed projectId={id} cards={cards}/><ArchivedMemoryList projectId={id}/><MemoryConsolidationCard projectId={id} enabled={enabled("PROJECT_MEMORY_CONSOLIDATION_ENABLED")}/></>;
  }else if(section==="health"){
   const {dashboard,metrics}=await loadWorkspaceOverview(id);
   const readiness={...dashboard.readiness,items:dashboard.readiness.items.map(i=>({...i,href:projectHref(id,i.href)}))};

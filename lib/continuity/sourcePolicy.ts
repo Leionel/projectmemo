@@ -13,7 +13,65 @@ export async function sourceLineage(projectId: string, id: string, tx: Tx = db, 
   const next = new Set(seen).add(id), childIds: string[] = [];
   let known = true, derived = false, blocked = false;
   let blockedReason:string|undefined;
-  if (id.startsWith("card:")) {
+  if (id.startsWith("claim:")) {
+    const claim = await tx.agentClaim.findFirst({ where: { id: id.slice(6), projectId } });
+    const origin = record(claim?.originJson);
+    const prefixes: Record<string, string> = { CLAIM: "claim:", CAPTURE: "capture:", CARD: "card:", ARTIFACT: "artifact:", EPISODE: "episode:", MESSAGE: "message:", MISSION_OUTPUT: "mission-output:" };
+    if (claim?.kind === "HYPOTHESIS") {
+      childIds.push("claim-origin:" + claim.id);
+      const event = await tx.agentClaimEvent.findUnique({ where: { claimId_revision: { claimId: claim.id, revision: claim.currentRevision } } });
+      for (const raw of Array.isArray(event?.evidenceManifestJson) ? event.evidenceManifestJson : []) {
+        const entry = record(raw);
+        if (entry.projectId === projectId && typeof entry.sourceId === "string") childIds.push(entry.sourceId);
+        else known = false;
+      }
+    } else if (claim && typeof origin.kind === "string" && prefixes[origin.kind] && typeof origin.id === "string") childIds.push(prefixes[origin.kind] + origin.id);
+    else known = false;
+    derived = true;
+  } else if (id.startsWith("claim-origin:")) {
+    const claim = await tx.agentClaim.findFirst({ where: { id: id.slice(13), projectId } });
+    const origin = record(claim?.originJson);
+    if (origin.kind === "MISSION_OUTPUT") known = !!await tx.agentMissionOutput.findFirst({ where: { id: String(origin.id), mission: { projectId, ownerUserId: claim?.ownerUserId,
+      project: { memberships: { some: { userId: claim?.ownerUserId, role: "OWNER" } } } } } });
+    else if (origin.kind === "MESSAGE" && claim) {
+      const privacy = await (await import("@/lib/memory/conversationDigest")).validateConversationDigest(tx, claim.ownerUserId, projectId, String(origin.conversationId), { id: origin.id }, []);
+      known = !privacy.restricted;
+    }
+    else known = false;
+    derived = true; // Known model authorship is never independent evidence.
+  } else if (id.startsWith("episode:")) {
+    const revision = await tx.episodeRevision.findFirst({ where: { id: id.slice(8), episode: { projectId } } });
+    if (!revision || !Array.isArray(revision.sourceRefs) || !revision.sourceRefs.length) known = false;
+    else for (const raw of revision.sourceRefs) {
+      const ref = record(raw);
+      if (typeof ref.entityId !== "string") { known = false; continue; }
+      if (ref.kind === "CARD" || ref.kind === "ACTION_RESULT") childIds.push("card:" + ref.entityId);
+      else if (ref.kind === "RELATION") {
+        const relation = await tx.cardRelation.findFirst({ where: { id: ref.entityId, currentCard: { projectId }, relatedCard: { projectId } } });
+        if (relation) childIds.push("card:" + relation.currentCardId, "card:" + relation.relatedCardId); else known = false;
+      } else if (ref.kind === "ATTACHMENT_REVISION") {
+        const attachment = await tx.attachmentRevision.findFirst({ where: { id: ref.entityId, attachment: { projectId } } });
+        if (attachment) childIds.push("attachment:" + attachment.attachmentId); else known = false;
+      } else known = false; // A snapshot without a leaf manifest is not independent evidence.
+    }
+    derived = true;
+  } else if (id.startsWith("message:") || id.startsWith("mission-output:")) {
+    let manifest: unknown;
+    if (id.startsWith("message:")) {
+      const message = await tx.agentMessage.findFirst({ where: { id: id.slice(8), OR: [{ projectId }, { conversation: { homeProjectId: projectId } }] } });
+      manifest = record(message?.blocksJson).sources;
+    } else {
+      const output = await tx.agentMissionOutput.findFirst({ where: { id: id.slice(15), mission: { projectId } } });
+      manifest = output?.sourceRefsJson;
+    }
+    if (!Array.isArray(manifest) || !manifest.length) known = false;
+    else for (const raw of manifest) {
+      const ref = record(raw), sourceId = ref.sourceId ?? ref.id;
+      if (ref.projectId && ref.projectId !== projectId || typeof sourceId !== "string") known = false;
+      else childIds.push(sourceId);
+    }
+    derived = true;
+  } else if (id.startsWith("card:")) {
     const card = await tx.knowledgeCard.findFirst({ where: { id: id.slice(5), projectId } });
     if (!card) return { roots: [], known: false, derived: true };
     childIds.push("capture:" + card.captureId); if (card.attachmentId) childIds.push("attachment:" + card.attachmentId);
@@ -105,6 +163,9 @@ export async function sourceUse(userId: string, projectId: string, sourceId: str
   const view = await effectiveContinuity(userId, { projectId, ...scope }, tx);
   const suppressed = new Set(view.directives.filter(d => d.kind === "USE_SUPPRESSION").flatMap(d => d.sourceIds));
   const line = await sourceLineage(projectId, sourceId, tx);
+  const claimIds = line.roots.filter(r => r.startsWith("claim:") || r.startsWith("claim-origin:")).map(r => r.slice(r.startsWith("claim:") ? 6 : 13));
+  if (claimIds.length && await tx.agentClaim.count({ where: { id: { in: claimIds }, ownerUserId: { not: userId } } }))
+    return { state: "UNKNOWN", roots: [], independentEvidence: false, reason: "PRIVATE_CLAIM" };
   if (line.blocked) return { state: "SUPPRESSED", roots: line.roots, independentEvidence: false, reason: line.blockedReason??"SOURCE_PERMISSION_REVOKED" };
   if (line.roots.some(r => suppressed.has(r))) return { state: "SUPPRESSED", roots: line.roots, independentEvidence: false, reason: "ROOT_SUPPRESSED" };
   if (!line.known) return { state: "UNKNOWN", roots: line.roots, independentEvidence: false, reason: "LINEAGE_UNKNOWN" };

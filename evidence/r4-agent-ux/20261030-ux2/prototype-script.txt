@@ -1,0 +1,70 @@
+<script>
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const icon = (name, cls='') => `<svg class="icon ${cls}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+  const safe = (v) => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const missions = [
+    {id:'m1',name:'阶段汇报草稿',short:'带来源的阶段汇报与当前风险总结',goal:'根据本项目已有材料，形成一份带来源的阶段汇报草稿，包括已完成事项、当前风险和下一步建议。没有依据的内容明确列为信息缺口，不编造实验指标。本次只读取、分析和保存草稿，不搜索网络，不创建外部行动。',state:'paused',updated:'今天 09:34',steps:2,output:0,progress:44,summary:'已读取项目材料，尚未生成有效草稿',detail:'资料读取与记忆检索均有执行记录。但草稿生成阶段的模型响应未通过协议校验，本次执行已暂停，原有步骤与回执已保留。',reason:'模型输出格式不符合当前协议，无法生成可信草稿。',error:'MODEL_PROTOCOL_ERROR',source:'用户在项目内创建的长期委托',history:[{t:'读取项目资料',d:'已完成 · 项目内材料'},{t:'检索项目记忆',d:'已完成 · 保留检索来源'},{t:'生成阶段汇报草稿',d:'模型协议校验失败 · 草稿未保存',blocked:true}]},
+    {id:'m2',name:'复赛材料核对',short:'补齐方案比较、预算和可复现日志',goal:'核对复赛资料中的方案 A 与替代方案比较、目标设备显存预算、实验日志和演示截图。缺少关键指标时先提出具体问题，所有结论必须保留来源。本次不主动修改项目记录。',state:'waiting',updated:'昨天 21:10',steps:2,output:0,progress:38,summary:'已发现资料缺口，等待补充验证结果',detail:'项目材料已经完成初步检查，但缺少目标设备的实测峰值显存与可复现日志，因此不能将方案 A 的可行性判定为已证实。',reason:'需要用户补充基准测试记录，才能判断现有方案是否适合演示。',error:'MISSING_EVIDENCE',source:'用户在项目内创建的长期委托',history:[{t:'读取竞赛资料',d:'已完成 · 读取已有来源'},{t:'对齐演示要求',d:'已完成 · 整理缺口清单'},{t:'验证显存预算',d:'等待实测数据 · 不推断结果',blocked:true}]}
+  ];
+  let selected = 'm1', currentView = 'mission', refsExpanded = false, toastTimer = null;
+  const stateText = (s) => s==='paused'?'已暂停':s==='waiting'?'等待补充':'待开始';
+  const stateClass = (s) => s==='paused'?'paused':s==='waiting'?'waiting':'ready';
+  function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3400)}
+  function closeNav(){$('sidebar').classList.remove('open');$('mobileOverlay').classList.remove('open');$('menuButton').setAttribute('aria-expanded','false')}
+  function setView(view){
+    currentView=view;
+    $('missionView').classList.toggle('active',view==='mission');$('chatView').classList.toggle('active',view==='chat');
+    document.querySelectorAll('[data-view]').forEach(el=>{const active=el.dataset.view===view;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});
+    document.title=(view==='chat'?'与忆程协作':'长期委托')+' · ProjectMemo 原型';closeNav();window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function renderList(){
+    $('sidebarCount').textContent=missions.length;$('dialogMissionCount').textContent=missions.length+' 项';
+    $('missionList').innerHTML=`<div class="list-heading">我的委托 <span class="count">${missions.length}</span></div>` + missions.map((m)=>`
+      <button class="mission-item ${m.id===selected?'selected':''}" data-mission-id="${safe(m.id)}" aria-pressed="${m.id===selected}">
+        <span class="item-title">${safe(m.name)}${m.id===selected?icon('chevron-right','sm'):''}</span>
+        <span class="item-desc">${safe(m.short)}</span>
+        <span class="item-footer"><span class="mini-state"><span class="state-dot ${m.state==='paused'?'':'neutral'}"></span>${stateText(m.state)}</span><span>${safe(m.updated)}</span></span>
+      </button>`).join('') + `<div class="list-note">一个目标对应一条持续执行的委托。选择左侧项目后查看详情与回执。</div>`;
+    $('missionList').querySelectorAll('[data-mission-id]').forEach(btn=>btn.addEventListener('click',()=>{selected=btn.dataset.missionId;renderList();renderDetail()}));
+  }
+  function renderDetail(){
+    const m=missions.find(m=>m.id===selected)||missions[0];
+    const blocked=m.state==='paused',waiting=m.state==='waiting',ready=m.state==='ready';
+    const html=`<div class="detail-body">
+      <div class="breadcrumb">项目 <span> / </span> 轻量视觉模型复赛 <span> / </span> 长期委托</div>
+      <div class="detail-title-row"><div><h2 class="detail-title">${safe(m.name)}</h2><p class="detail-subtitle">${safe(m.short)}</p></div><span class="badge ${stateClass(m.state)}">${icon(ready?'clock':waiting?'info':'pause','sm')}${stateText(m.state)}</span></div>
+      <button class="expand-line" data-toggle="goal" aria-expanded="false">${icon('chevron-right','sm')} 查看完整委托目标</button>
+      <div class="goal-copy" id="goalContent" hidden>${safe(m.goal)}</div>
+      <div class="hr"></div>
+      <div class="section-kicker">当前进展</div>
+      <h3 class="section-title">${safe(m.summary)}</h3>
+      <p class="section-desc">${safe(m.detail)}</p>
+      <div class="metrics"><div class="metric"><div class="number">${m.steps}</div><div class="label">已执行步骤</div></div><div class="metric"><div class="number">${m.output}</div><div class="label">有效草稿</div></div><div class="metric"><div class="number small-number">${ready?'待启动':waiting?'待补充':'待核查'}</div><div class="label">下一步状态</div></div></div>
+      <div class="progress-head"><strong>执行进度</strong><span>已保留执行步骤 · 非目标完成率</span></div><div class="progress-track" role="progressbar" aria-label="演示执行步骤进度" aria-valuenow="${m.progress}" aria-valuemin="0" aria-valuemax="100"><div class="fill" style="width:${m.progress}%"></div></div><div class="progress-caption">${icon('info','sm')} 图示仅反映示例步骤，不代表草稿质量或目标完成度。</div>
+      <div class="notice ${waiting?'waiting':''}"><div class="notice-icon">${icon(waiting?'info':ready?'clock':'alert','lg')}</div><div class="notice-body"><div class="notice-title">${ready?'待启动：尚未执行':waiting?'等待补充：存在关键资料缺口':'需要处理：本次执行未通过校验'}</div><p>${safe(m.reason)}</p><div class="notice-actions"><button class="btn ${waiting?'light':'primary'}" data-action="${waiting?'prefill':'check'}">${icon(waiting?'chat':ready?'info':'shield','sm')}${waiting?'在对话中补充资料':'检查继续条件'}</button><button class="btn" data-action="history">${icon('history','sm')}查看执行记录</button></div>
+      <div class="technical-box" id="techContent" hidden><strong>技术诊断</strong><br>错误标识：<code>${safe(m.error)}</code><br>处理方式：${waiting?'补充实测证据后由原委托评估是否足够':'检查服务端模型协议、预算、权限和来源版本；不得通过前端操作绕过服务端校验。'}<ul><li>已记录的步骤不会因阅读错误详情而重新执行。</li><li>本页面没有真实后端连接，不会自动恢复任务。</li></ul></div>
+      </div></div>
+      <div class="hr"></div>
+      <div class="accordion"><button class="accordion-head" data-toggle="history" aria-expanded="false">${icon('history')} 执行记录与回执 <span class="accordion-desc">${m.history.length} 项记录</span>${icon('chevron-down','sm chevron')}</button><div class="accordion-content" id="historyContent" hidden><div class="timeline-meta">已记录的步骤与失败原样保留，不将协议成功视作业务完成。</div><div class="timeline">${m.history.map(h=>`<div class="timeline-row ${h.blocked?'blocked':''}"><strong>${safe(h.t)}</strong><p>${safe(h.d)}</p></div>`).join('')}</div><button class="btn small" data-action="tech" style="margin-top:20px">${icon('terminal','sm')} 展开技术诊断</button></div></div>
+      <div class="accordion"><button class="accordion-head" data-toggle="settings" aria-expanded="false">${icon('shield')} 委托约束与资料来源 <span class="accordion-desc">授权 / 预算 / 来源</span>${icon('chevron-down','sm chevron')}</button><div class="accordion-content" id="settingsContent" hidden><div class="setting-grid"><div class="setting"><small>执行范围</small><strong>只读分析与保存草稿</strong></div><div class="setting"><small>审批策略</small><strong>关键写入仍需用户确认</strong></div><div class="setting"><small>任务来源</small><strong>${safe(m.source)}</strong></div><div class="setting"><small>最后活动</small><strong>${safe(m.updated)}</strong></div></div><p class="hint" style="margin:12px 0 0">本节展示建议的信息层级；具体预算、授权与证据版本应从服务端读取，不应由前端猜测。</p></div></div>
+    </div>`;
+    $('missionDetail').innerHTML=html;
+    $('missionDetail').querySelectorAll('[data-toggle]').forEach(btn=>btn.addEventListener('click',()=>{
+      const name=btn.dataset.toggle;const target=$(name+'Content');const open=btn.getAttribute('aria-expanded')==='true';btn.setAttribute('aria-expanded',String(!open));target.hidden=open;
+      if(name==='goal')btn.innerHTML=icon(open?'chevron-right':'chevron-down','sm')+' 查看完整委托目标';
+    }));
+    $('missionDetail').querySelectorAll('[data-action]').forEach(btn=>btn.addEventListener('click',()=>{
+      const act=btn.dataset.action;
+      if(act==='check')$('checksDialog').showModal();
+      if(act==='prefill'){setView('chat');$('chatInput').value='我想补充目标设备的显存基准测试结果，请先列出还缺哪些数据。';$('chatInput').focus()}
+      if(act==='history'){const h=$('missionDetail').querySelector('[data-toggle="history"]');if(h.getAttribute('aria-expanded')!=='true')h.click();$('historyContent').scrollIntoView({behavior:'smooth',block:'center'})}
+      if(act==='tech'){const t=$('techContent');t.hidden=!t.hidden;if(!t.hidden)t.scrollIntoView({behavior:'smooth',block:'nearest'})}
+    }));
+  }
+  function showEvidence(index){
+    const refs=[
+      ['设备显存预算与方案 A 风险说明','已有记录提到方案 A 的演示风险与显存预算有关。但是否超出预算，需要在目标设备上测得峰值显存后才能确认。'],
+      ['轻量视觉模型复赛答辩材料要求','已有材料提及需要方案比较、可复现实验日志和结果截图。是否符合最新要求，需要以当前赛事规则和有效版本为准。'],
+      ['演示准备与显存预算核对记录','示例项目记录了演示准备工作与待完成的显存核查。该记录不能代替实际设备测试结论。']
+    ];const v=refs[index];if(!v)return;$('sourceTitle').textContent=v[0];$('sourceBody').innerHTML='<p>'+safe(v[1])+'</p><p style="font-size:12px;color:var(--muted)">演示资料：这里用于说明原文、版本、项目归属和语义核验结果在正

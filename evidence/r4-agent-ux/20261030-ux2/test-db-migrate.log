@@ -1,0 +1,19 @@
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+Datasource "db": SQLite database "test-vitest.db" at "file:D:/Projects/hongmen/prisma/test-vitest.db"
+
+41 migrations found in prisma/migrations
+
+Applying migration `20261030103000_ux2_signal_source_binding`
+Applying migration `20261030110000_ux2_claim_history`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20261030103000_ux2_signal_source_binding/
+    └─ migration.sql
+  └─ 20261030110000_ux2_claim_history/
+    └─ migration.sql
+
+All migrations have been successfully applied.

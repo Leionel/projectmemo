@@ -2,6 +2,7 @@ import preferences from '@ohos.data.preferences';
 import { common } from '@kit.AbilityKit';
 
 export class ConversationDraft {
+  claimRequest: string = '';
   directiveRequest:string='';
   key: string = '';
   answer: string = '';
@@ -47,13 +48,16 @@ export class ConversationDraftStore {
     if (ConversationDraftStore.timer >= 0) clearTimeout(ConversationDraftStore.timer);
     ConversationDraftStore.timer = setTimeout(() => { ConversationDraftStore.flush(); }, 300);
   }
-  static flush(): void {
+  static async flush(): Promise<boolean> {
     const store = ConversationDraftStore.store, epoch = ConversationDraftStore.generation, snapshot = JSON.stringify(ConversationDraftStore.entries);
-    if (store === undefined) return;
+    if (store === undefined) return false;
+    let saved = false;
     ConversationDraftStore.writes = ConversationDraftStore.writes.then(async (): Promise<void> => {
       if (epoch !== ConversationDraftStore.generation) return;
-      await store.put('drafts', snapshot); await store.flush();
+      await store.put('drafts', snapshot); await store.flush(); saved = true;
     }).catch((): void => {});
+    await ConversationDraftStore.writes;
+    return saved && epoch === ConversationDraftStore.generation;
   }
   static async clear(): Promise<void> {
     ConversationDraftStore.generation++; ConversationDraftStore.entries = []; ConversationDraftStore.owner = '';

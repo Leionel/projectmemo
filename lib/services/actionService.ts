@@ -9,6 +9,7 @@ import { db } from "@/lib/db";
 import { requireProject } from "@/lib/repositories/projects";
 import { saveAgentRun } from "@/lib/repositories/agent";
 import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateService";
+import { enqueueImpact } from "@/lib/decision/impactJobs";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import { jsonHash } from "@/lib/mission/contracts";
 
@@ -101,6 +102,7 @@ export async function commitActionResult(tx: Prisma.TransactionClient, prepared:
       });
     }
     await tx.project.update({ where: { id: projectId }, data: { updatedAt: new Date() } });
+    await enqueueImpact(tx, projectId, `action-result:${actionId}`, [`action:${actionId}`, `capture:${captureId}`, `card:${cardId}`]);
     return { card, updatedAction, alreadyDone: false };
 }
 export async function completeProjectAction(projectId: string, actionId: string, resultText: string) {

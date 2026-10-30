@@ -6,7 +6,7 @@ import { createSession } from "@/lib/auth/session";
 import { correctClaim } from "@/lib/memory/claimService";
 import { claimControlState } from "@/lib/memory/claimEffective";
 import { claimTextHash, validateClaimLocator } from "@/lib/memory/claimLocator";
-import { effectiveContinuity } from "@/lib/continuity/directiveService";
+import { effectiveContinuity, assertContinuityBinding } from "@/lib/continuity/directiveService";
 afterAll(async () => { await db.$disconnect(); fs.rmSync(isolated.dir, { recursive: true, force: true }); });
 async function fixture() {
   const u = await db.user.create({ data: { username: crypto.randomUUID(), displayName: "纠正测试", passwordHash: "fixture" } });
@@ -46,4 +46,33 @@ test("跨项目伪造原件和同请求异载荷被拒绝", async () => {
   await expect(correctClaim(actor, { ...command, origin: other.origin })).rejects.toMatchObject({ code: "CLAIM_SOURCE_NOT_FOUND" });
   await correctClaim(actor, command);
   await expect(correctClaim(actor, { ...command, userQuote: "另外一句" })).rejects.toMatchObject({ code: "REQUEST_CONFLICT" });
+});
+
+test("原文删除后仍可撤回原纠正，不能借撤回新建主张", async () => {
+  const { actor, c, command } = await fixture();
+  await correctClaim(actor, command);
+  await db.capture.delete({ where: { id: c.id } });
+  await correctClaim(actor, { ...command, requestId: crypto.randomUUID(), operation: "WITHDRAW", expectedSeq: 1, expectedRevision: 1 });
+  expect((await claimControlState(actor.userId, command.scope)).corrections).toHaveLength(0);
+  expect((await claimControlState(actor.userId, command.scope)).heads[0].eventKind).toBe("WITHDRAW_CORRECTION");
+});
+test("无新事件跨纠正有效边界，reuse hash 改变而 intent 不变", async () => {
+  const { actor, command } = await fixture();
+  const until = new Date(Date.now() + 60000);
+  await correctClaim(actor, { ...command, validUntil: until.toISOString() });
+  const before = await effectiveContinuity(actor.userId, command.scope, db, new Date(+until - 1));
+  const after = await effectiveContinuity(actor.userId, command.scope, db, until);
+  expect(before.nextBoundary).toBe(until.toISOString()); expect(after.reusePolicyHash).not.toBe(before.reusePolicyHash);
+  expect(after.intentHash).toBe(before.intentHash);
+  expect((await claimControlState(actor.userId, command.scope, db, until)).corrections).toHaveLength(0);
+});
+
+test("只有旧 intentHash 而缺复用绑定的提案，在纠正和撤回后都拒绝新效果", async () => {
+  const { actor, command } = await fixture();
+  const before = await effectiveContinuity(actor.userId, command.scope);
+  await assertContinuityBinding(actor.userId, command.scope, { intentHash: before.intentHash });
+  await correctClaim(actor, command);
+  await expect(assertContinuityBinding(actor.userId, command.scope, { intentHash: before.intentHash })).rejects.toMatchObject({ code: "CONTINUITY_CHANGED" });
+  await correctClaim(actor, { ...command, requestId: crypto.randomUUID(), operation: "WITHDRAW", expectedSeq: 1, expectedRevision: 1 });
+  await expect(assertContinuityBinding(actor.userId, command.scope, {})).rejects.toMatchObject({ code: "CONTINUITY_CHANGED" });
 });

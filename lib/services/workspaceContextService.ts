@@ -19,14 +19,14 @@ export async function workspaceDirectory(actor: ConversationActor, scope: string
   const [total, page] = await Promise.all([
     db.project.count({ where }),
     db.project.findMany({ where, orderBy: { id: "asc" }, take: 61,
-      select: { id: true, title: true, goal: true, deadline: true, archivedAt: true } }),
+      select: { id: true, title: true, goal: true, deadline: true, archivedAt: true, contextRevision: true } }),
   ]);
   const rows = page.slice(0, 60);
   if (scope === "PROJECT" && targeted && targeted !== homeProjectId)
     throw new AppError("CONTEXT_SCOPE_CHANGED", "这段讨论限定在原项目，请另开跨项目讨论", 409);
   if (targeted && !rows.some(p => p.id === targeted)) {
     const named = await db.project.findUniqueOrThrow({ where: { id: targeted },
-      select: { id: true, title: true, goal: true, deadline: true, archivedAt: true } });
+      select: { id: true, title: true, goal: true, deadline: true, archivedAt: true, contextRevision: true } });
     rows.push(named);
   }
   const preferences = await db.focusProjectPreference.findMany({ where: { userId: actor.userId, projectId: { in: rows.map(p => p.id) } } });
@@ -51,7 +51,7 @@ export async function workspaceDirectory(actor: ConversationActor, scope: string
     const pref = preferences.find(v => v.projectId === p.id);
     const preference = pref ? { importance: pref.importance, longTermGoal: pref.longTermGoal,
       estimatedMinutes: pref.estimatedMinutes, notes: pref.notes, version: pref.version } : null;
-    const summary = { workingObjective: continuity.workingObjective, continuityHash: continuity.intentHash, id: p.id, title: p.title, goal: p.goal, deadline: p.deadline?.toISOString() ?? null,
+    const summary = { sourceRevision: p.contextRevision, scopeRole: member.role, workingObjective: continuity.workingObjective, continuityHash: continuity.intentHash, id: p.id, title: p.title, goal: p.goal, deadline: p.deadline?.toISOString() ?? null,
       archived: !!p.archivedAt, actions, actionCount, missions, missionCount, waiting, blocked, reminders, preference,
       coverage: { actionsComplete: actionCount <= 4, missionsComplete: missionCount <= 4, remindersLimit: 2 } };
     return { ...summary, priority: explainPriority(summary), observationHash: jsonHash(summary) };

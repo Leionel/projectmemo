@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { json } from "@/lib/mission/contracts";
 import { writeTransaction } from "@/lib/copilot/confirmation";
@@ -11,15 +12,18 @@ export async function enqueueImpact(
   mutationReceiptId: string,
   roots: string[],
 ) {
-  return tx.projectImpactJob.upsert({
+  const createdId = randomUUID();
+  const job = await tx.projectImpactJob.upsert({
     where: { projectId_mutationReceiptId: { projectId, mutationReceiptId } },
     create: {
-      projectId,
+      id: createdId, projectId,
       mutationReceiptId,
       rootsJson: json([...new Set(roots)]),
     },
     update: {},
   });
+  if (job.id === createdId) await tx.project.update({ where: { id: projectId }, data: { contextRevision: { increment: 1 } } });
+  return job;
 }
 /** The existing Worker consumes bounded jobs. The transaction is the claim/fence: crashes roll back all effects. */
 export async function consumeImpactJobs(limit = 5) {

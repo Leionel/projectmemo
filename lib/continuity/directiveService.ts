@@ -56,7 +56,7 @@ export async function assertContinuityBinding(userId: string, scope: DirectiveSc
   // Legacy publications remain usable only where there has never been relevant guidance.
   const empty = jsonHash({ policy: intentPolicy, scope, epoch: [] });
   if ((old.intentHash ? old.intentHash !== current.intentHash : current.intentHash !== empty) ||
-    (old.reusePolicyHash && old.reusePolicyHash !== current.reusePolicyHash))
+    (old.reusePolicyHash ? old.reusePolicyHash !== current.reusePolicyHash : current.reusePolicyHash !== jsonHash({ scope, epoch: [] })))
     throw new AppError("CONTINUITY_CHANGED", "工作方向或资料使用要求已变化，请按当前要求重新预览", 409);
   return current;
 }

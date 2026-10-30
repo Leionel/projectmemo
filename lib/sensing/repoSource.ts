@@ -1,3 +1,4 @@
+import { enqueueImpact } from "@/lib/decision/impactJobs";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { isFeatureEnabled } from "@/lib/config/features";
@@ -279,6 +280,7 @@ export async function actOnSignal(userId: string, projectId: string, signalId: s
   const capture = await tx.capture.create({
     data: { projectId, rawText: `仓库提交 ${signal.sha.slice(0, 10)}：${signal.title}（${signal.url}）`, sourceType: "仓库信号" },
   });
+  await enqueueImpact(tx, projectId, "repo-adopt:" + signal.id, ["capture:" + capture.id, "repo:" + signal.connectionId]);
   const updated = await tx.externalSignal.update({
     where: { id: signal.id },
     data: { status: "ADOPTED", adoptedByUserId: userId, adoptedAt: new Date(), adoptedCaptureId: capture.id, linkedActionId },

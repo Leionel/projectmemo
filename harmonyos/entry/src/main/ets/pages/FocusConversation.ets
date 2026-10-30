@@ -1,3 +1,4 @@
+import { ClaimCorrection } from "../components/ClaimCorrection";
 import { ConversationContinuity } from "../components/ConversationContinuity";
 import { ConversationResearchControl, ConversationResearchResult } from '../components/ConversationResearch';
 import { supportsAgentPresentation } from '../common/AgentPresentationContract';
@@ -26,6 +27,8 @@ interface AgentMessageInput { message: ConversationMessage; }
 @Entry
 @Component
 struct FocusConversation {
+  @State correctionMessage: string = '';
+  @State correctionProject: string = '';
   @State private view: ConversationView = new ConversationView();
   @State private sessions: ConversationListItem[] = [];
   @State private text: string = '';
@@ -238,13 +241,6 @@ struct FocusConversation {
   }
   @Builder private Message($$: AgentMessageInput) {
     Column({ space: 10 }) {
-      if ($$.message.role === 'USER') {
-        Row({ space: 8 }) {
-          Blank()
-          Text('你').fontSize(13).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_SECONDARY)
-          Text('我').fontSize(12).fontColor(PMColors.INK_SECONDARY).width(27).height(27).textAlign(TextAlign.Center).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(10)
-        }.width('100%')
-      }
       if ($$.message.role === 'ASSISTANT') {
         Row({ space: 8 }) {
           Text('忆').fontSize(13).fontWeight(FontWeight.Medium).fontColor(PMColors.BRAND).width(26).height(26).textAlign(TextAlign.Center).backgroundColor(PMColors.BRAND_LIGHT).borderRadius(8)
@@ -255,6 +251,18 @@ struct FocusConversation {
       }
       if ($$.message.role === 'ASSISTANT' && !$$.message.restricted && ($$.message.researchCoverage || $$.message.sources.some((source: ConversationSource) => source.external !== undefined))) {
         ConversationResearchResult({ message: $$.message, conversationId: this.view.id, version: this.view.version, disabled: this.busy, onContinue: (value: string): void => { this.replyId = $$.message.id; this.text = value; this.saveComposer(); } })
+      }
+      if ($$.message.role === 'ASSISTANT' && !$$.message.restricted) {
+        if (this.view.homeProjectId) {
+          ClaimCorrection({ projectId: this.view.homeProjectId ?? '', sourceId: $$.message.id, onChanged: (): void => { this.refresh(); } })
+        } else {
+          ForEach(this.view.linkedProjects.filter((p: ConversationProject): boolean => ($$.message.observedProjectIds ?? []).includes(p.id)), (p: ConversationProject) => {
+            Button(`在“${p.title}”中纠正`, { type: ButtonType.Normal }).height(44).onClick(() => { this.correctionMessage = $$.message.id; this.correctionProject = p.id; })
+          }, (p: ConversationProject) => p.id)
+          if (this.correctionMessage === $$.message.id && this.correctionProject) {
+            ClaimCorrection({ projectId: this.correctionProject, sourceId: $$.message.id, onChanged: (): void => { this.refresh(); } })
+          }
+        }
       }
       if (this.hasPresentation($$.message)) {
         AgentMessageBlocks({ presentation: $$.message.presentation!, files: $$.message.fileGuides ?? [], conversationId: this.view.id, messageId: $$.message.id, busy: this.busy,

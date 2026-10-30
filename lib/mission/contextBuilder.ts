@@ -1,3 +1,6 @@
+import { composeEffectiveMemory } from "@/lib/memory/digestService";
+import { composeHypotheses } from "@/lib/memory/hypothesisService";
+import { fitFacetGroups } from "@/lib/memory/facetBudget";
 import { claimControlState } from "@/lib/memory/claimEffective";
 import { verifyMissionResult } from "./resultVerifier";
 import { AppError } from "@/lib/api";
@@ -32,8 +35,23 @@ function compactData(value: unknown) {
   return serialized.length <= 1600 ? { value, truncated: false } : { preview: serialized.slice(0, 1000), truncated: true, originalCharacters: serialized.length,
     note: "数据正文已裁剪；来源状态完整保留在sources和sourceIndex" };
 }
+type CognitiveFacets = {
+  hypotheses: Awaited<ReturnType<typeof composeHypotheses>>;
+  effectiveMemory: Awaited<ReturnType<typeof composeEffectiveMemory>>;
+};
+/** Trims facets (and their read set together) so added cognition never turns a large history into CONTEXT_LIMIT. */
+function fitCognitiveFacets(facets: CognitiveFacets, budget: number) {
+  const { groups, omitted } = fitFacetGroups([facets.hypotheses, facets.effectiveMemory], budget);
+  return { hypotheses: groups[0], effectiveMemory: groups[1], omitted: { hypotheses: omitted[0], memory: omitted[1] } };
+}
 export async function buildContext(m: AgentMission, tools: ToolSet = projectTools) {
+  const membership = await db.projectMembership.findUnique({ where: { userId_projectId: { userId: m.ownerUserId, projectId: m.projectId } },
+    include: { project: { select: { contextRevision: true } } } });
+  if (!membership) throw new AppError("PROJECT_NOT_FOUND", "项目不存在或无法访问", 404);
+  const sourceInput = { projectId: m.projectId, revision: membership.project.contextRevision, role: membership.role };
   const continuity = await effectiveContinuity(m.ownerUserId, { projectId: m.projectId, missionId: m.id });
+  const effectiveMemory = await composeEffectiveMemory(m.ownerUserId, m.projectId, m.goal);
+  const hypotheses = await composeHypotheses(m.ownerUserId, m.projectId);
   const cognitiveControls = await claimControlState(m.ownerUserId, { projectId: m.projectId, missionId: m.id });
   const delegation = (m.planJson as { delegation?: { candidateSources?: unknown } }).delegation;
   const suppressing = continuity.directives.some(d => d.kind === "USE_SUPPRESSION");
@@ -97,7 +115,7 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
   let completionReadback:unknown={canFinish:false,reason:"OUTPUT_REQUIRED"};
   if(outputs[0])try{completionReadback={canFinish:true,...await verifyMissionResult(db,m,outputs[0].id),note:"服务端验收条件已满足；若草稿回答了目标，选择finish，不重复保存相同草稿。NEEDS_REVIEW标识内容核验状态，不冒充现实效果。"};}
   catch(error){if(!(error instanceof AppError))throw error;completionReadback={canFinish:false,outputId:outputs[0].id,reason:error.code,checks:error.details};}
-  const context = { userInterpretationCorrections: { items: cognitiveControls.corrections.slice(-16), total: cognitiveControls.corrections.length, complete: cognitiveControls.corrections.length <= 16, policy: "用户对原主张的解释纠正，仅适用原定位；不是新目标、工具许可或独立实证" }, completionReadback,actionReadbacks,investigationDelegation: delegation ? { policy: m.continuationPolicyJson, newSourcePointers: delegation.candidateSources ?? [] } : undefined, evidencePolicy: "UNKNOWN provenance is reference only, never independent supporting evidence; re-read original sources before a claim or effect.", continuity: { intentHash: continuity.intentHash, reusePolicyHash: continuity.reusePolicyHash, workingObjective: continuity.workingObjective, constraints: continuity.constraints }, strategyPrompt: { id: missionStrategyV2.id, version: missionStrategyV2.version }, decisionScenario:(m.planJson as {decisionScenario?:unknown}).decisionScenario??null, schemaVersion: 2, promptVersion: fitReviews.length?"mission-context-v3-e0":"mission-context-v2", outputTokenLimit: decisionTokenLimit(m.lastErrorJson), goal: m.goal,
+  const base = { sourceRevision: sourceInput.revision, sourceInput, userInterpretationCorrections: { items: cognitiveControls.corrections.slice(-16), total: cognitiveControls.corrections.length, complete: cognitiveControls.corrections.length <= 16, policy: "用户对原主张的解释纠正，仅适用原定位；不是新目标、工具许可或独立实证" }, completionReadback,actionReadbacks,investigationDelegation: delegation ? { policy: m.continuationPolicyJson, newSourcePointers: delegation.candidateSources ?? [] } : undefined, evidencePolicy: "UNKNOWN provenance is reference only, never independent supporting evidence; re-read original sources before a claim or effect.", continuity: { intentHash: continuity.intentHash, reusePolicyHash: continuity.reusePolicyHash, workingObjective: continuity.workingObjective, constraints: continuity.constraints }, strategyPrompt: { id: missionStrategyV2.id, version: missionStrategyV2.version }, decisionScenario:(m.planJson as {decisionScenario?:unknown}).decisionScenario??null, schemaVersion: 2, promptVersion: fitReviews.length?"mission-context-v3-e0":"mission-context-v2", outputTokenLimit: decisionTokenLimit(m.lastErrorJson), goal: m.goal,
     protocolRepair: (m.lastErrorJson as {code?:string})?.code === "MODEL_PROTOCOL_ERROR" ? { reason: (m.lastErrorJson as {diagnostic?:{reason?:string}}).diagnostic?.reason } : undefined,
     successCriteria: m.successCriteriaJson, constraints: m.constraintsJson, constraintsVersion: m.constraintsVersion, researchScope: m.researchScopeJson,
     scopeRevision: m.researchScopeVersion, contextVersion: m.contextVersion, planRevision: m.planRevision, budgetLimits:m.budgetJson,budgetUsed: m.budgetUsedJson,
@@ -107,11 +125,14 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
     outputs: outputs.map(o => ({ id: o.id, revision: o.revision, kind: o.kind, verificationStatus: o.verificationStatus })),
     keySources: outputSources.slice(0, 8).map(source => sourceContext(source, policies.get(source.id))), sourceIndex, observations };
   const excluded: string[] = stepIndex.map(step => step.id).filter(id => !steps.some(step => step.id === id));
-  while (JSON.stringify(context).length > 24000) {
+  while (JSON.stringify(base).length > 24000) {
     const index = observations.findIndex(o => !pinned.has(o.stepId));
     if (index < 0) break;
     excluded.push(observations.splice(index, 1)[0].stepId);
   }
+  // Cognition facets are bounded against the remaining capacity and report what was left out.
+  const fitted = fitCognitiveFacets({ hypotheses, effectiveMemory }, Math.max(0, 29400 - JSON.stringify(base).length));
+  const context = { ...base, hypotheses: fitted.hypotheses, effectiveMemory: fitted.effectiveMemory };
   if (JSON.stringify(context).length > 30000) throw new Error("CONTEXT_LIMIT");
   // P3-A 项目内经验：仅 ACTIVE 经验以建议形式注入；版本不兼容、撤销或反例追平时停止注入，历史使用记录保留。
   let experienceAdvisories: ExperienceAdvisory[] = [];
@@ -123,5 +144,6 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
   const hash = jsonHash(context);
   if (experienceAdvisories.length) await recordUses(m.id, experienceAdvisories.map(advisory => ({ advisory, experienceId: advisory.id })), hash);
   return JSON.stringify({ ...context, experienceAdvisories, manifest: { excludedStepIds: excluded, unlistedStepCount: Math.max(0, stepCount - stepIndex.length), historyStepCount: stepCount, notLoadedStepCount: stepCount - steps.length,
-    historyEventCount: eventCount, includedEventSeqs: [...new Set([...inputs.map(e => e.seq),...fitReviews.map(e=>e.seq)])].sort((a,b)=>a-b), promptVersion: context.promptVersion, source: "MISSION_EVENTS_AND_STEPS", hash } });
+    historyEventCount: eventCount, includedEventSeqs: [...new Set([...inputs.map(e => e.seq),...fitReviews.map(e=>e.seq)])].sort((a,b)=>a-b), promptVersion: context.promptVersion, source: "MISSION_EVENTS_AND_STEPS", hash,
+    omittedCognition: fitted.omitted } });
 }

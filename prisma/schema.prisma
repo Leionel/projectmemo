@@ -90,6 +90,8 @@ enum CardRelationType {
 }
 
 model Project {
+ contextRevision Int @default(0)
+ contextDigests AgentContextDigest[]
  cognitiveClaims AgentClaim[]
   impactJobs ProjectImpactJob[]
   decisionProposals DecisionScenarioProposal[]
@@ -1000,6 +1002,7 @@ model DeliverableEvidence {
 }
 
 model User {
+ contextDigests AgentContextDigest[]
  cognitiveClaims AgentClaim[]
   continuitySeq Int @default(0)
   directiveEvents AgentDirectiveEvent[]
@@ -1529,4 +1532,29 @@ model AgentClaimEvent {
  @@unique([claimId,revision])
  @@unique([ownerUserId,requestId])
  @@index([ownerUserId,controlSeq])
+}
+
+model AgentContextDigest {
+ id String @id @default(cuid())
+ ownerUserId String
+ projectId String
+ missionId String?
+ conversationId String?
+ scopeKey String
+ inputHash String
+ originJson Json
+ sourceManifestJson Json
+ claimHeadsJson Json
+ intentHash String
+ reusePolicyHash String
+ compilerSpecVersion String
+ budgetRootJson Json
+ provider String?
+ summaryJson Json
+ statusProjection String @default("CURRENT")
+ createdAt DateTime @default(now())
+ owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
+ project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
+ @@unique([ownerUserId,scopeKey,inputHash])
+ @@index([ownerUserId,projectId,createdAt])
 }

@@ -1,4 +1,5 @@
 "use client";
+import { ScopedMessageCorrection } from "./ClaimCorrection";
 import { RepositorySources } from "./RepositorySources";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -264,6 +265,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
         {supportsAgentPresentation(m) ? <AgentMessageBlocks message={m} conversationId={view.id} busy={busy} onAction={(action, answer) => uiAction(m, action, answer)}/>
           : <p className={styles.body}><ConversationAnswer message={m} conversationId={view.id}/></p>}
         <ConversationFileGuides message={m} conversationId={view.id}/>
+        {m.role === "ASSISTANT" && !m.restricted && <ScopedMessageCorrection key={m.id} projects={view.linkedProjects} sourceId={m.id} onChanged={() => { void load(view.id, generation.current); }}/> }
         {!supportsAgentPresentation(m) && !!m.priorities.length && <details><summary>优先级依据与取舍</summary>{m.priorities.map(p => <div key={p.projectId} className={styles.reason}>
           <strong>{view.linkedProjects.find(v => v.id === p.projectId)?.title ?? "项目"}</strong>
           <p>{p.importance}；{p.urgency}；{p.blocking}；{p.effort}</p><p>{p.preference}</p><p>{p.tradeoff}</p>

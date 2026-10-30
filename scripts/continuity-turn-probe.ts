@@ -29,7 +29,16 @@ try {
     fs.writeFileSync(path.join(root, "fixture.json"), JSON.stringify({ actor, projectId: p.id, conversationId: c.id, turnId: turn.turnId, captures, goal: p.goal }));
   } else {
     const f = JSON.parse(fs.readFileSync(path.join(root, "fixture.json"), "utf8"));
-    if (mode === "revise" || mode === "revise-a" || mode === "revise-b") {
+    if (mode === "correct") {
+      const { correctClaim } = await import("../lib/memory/claimService");
+      const { claimTextHash } = await import("../lib/memory/claimLocator");
+      const source = await db.capture.findUniqueOrThrow({ where: { id: f.captures[0] } });
+      await correctClaim(f.actor, { requestId: "correct-in-flight", scope: { projectId: f.projectId }, expectedSeq: 0,
+        operation: "CORRECT", userQuote: "旧版不是本届要求，只作为历史背景",
+        origin: { kind: "CAPTURE", id: source.id, contentHash: claimTextHash(source.rawText), offsetEncoding: "UTF16_CODE_UNITS",
+          normalization: "RAW_V1", start: 0, end: source.rawText.length, quote: source.rawText } });
+      fs.writeFileSync(path.join(root, "release"), "corrected");
+    } else if (mode === "revise" || mode === "revise-a" || mode === "revise-b") {
       const { submitDirective } = await import("../lib/continuity/directiveService");
       try {
         await submitDirective(f.actor, f.conversationId, { commandId: mode, expectedSeq: 0, scope: { projectId: f.projectId }, operation: "SET", quote: mode === "revise-b" ? "今天先核对启动日志" : "本周先稳演示，先别加功能" });
@@ -46,6 +55,7 @@ try {
         if (mode === "takeover") throw new Error("TAKEOVER_MUST_NOT_REDISPATCH");
         const body = JSON.parse(String(init?.body)), stage = body.messages[0].content.match(/^任务 (\S+)/)?.[1];
         const data = JSON.parse(body.messages[1].content).data;
+        if (data.userInterpretationCorrections?.items?.length) fs.writeFileSync(path.join(root, "model-corrections.json"), JSON.stringify(data.userInterpretationCorrections));
         if (calls === 1) {
           fs.writeFileSync(path.join(root, "route-dispatched"), "1");
           const deadline = Date.now() + 25000;

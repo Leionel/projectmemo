@@ -7,6 +7,7 @@ import { AppError } from "@/lib/api";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { commandSchema, constraintsSchema, createMissionSchema, defaultBudget, json, jsonHash, researchScopeSchema, terminal } from "./contracts";
 import { assertOwner, commandReplay, event, lock, ownedMission, validateSources } from "./repository";
+import { assertCognitiveReadSet } from "@/lib/memory/hypothesisService";
 import type { Source } from "./contracts";
 import { z } from "zod";
 import { continuationPolicySchema } from "@/lib/types/mission";
@@ -82,7 +83,11 @@ export async function commandMission(userId:string,id:string,action:string,raw:u
     }else if(action==="approval"){
       const a=await tx.agentMissionApproval.findFirst({where:{id:approvalId,missionId:id,status:"PENDING"}});
       if(m.status!=="WAITING_APPROVAL"||!a||!body.decision||a.proposalHash!==body.proposalHash||a.expiresAt<=new Date()||a.expectedPlanRevision!==m.planRevision)throw new AppError("APPROVAL_CHANGED","批准预览已失效，请重新预览",409);
-      if(body.decision==="APPROVED")await validateSources(m.projectId,a.readSetJson as unknown as Source[],tx,m.id);
+      if(body.decision==="APPROVED"){
+        const step=await tx.agentMissionStep.findUniqueOrThrow({where:{id:a.stepId}});
+        await assertCognitiveReadSet(userId,record(step.protocolJson).cognitiveReadSet,tx);
+        await validateSources(m.projectId,a.readSetJson as unknown as Source[],tx,m.id);
+      }
       await tx.agentMissionApproval.update({where:{id:a.id},data:{status:body.decision,approverUserId:userId,decidedAt:new Date()}});
       await tx.agentMissionStep.update({where:{id:a.stepId},data:{status:body.decision==="APPROVED"?"READY":"SKIPPED"}});status="READY";
       if(body.decision==="REJECTED"){const c=m.constraintsJson as Record<string,unknown>;const title=(a.proposalJson as {args:{title:string}}).args.title;await tx.agentMission.update({where:{id},data:{constraintsJson:json({...c,rejectedActions:[...new Set([...(c.rejectedActions as string[]??[]),title])].slice(-12)}),constraintsVersion:{increment:1},contextVersion:{increment:1},planRevision:{increment:1}}});await event(tx,id,"CONSTRAINTS_CHANGED",{rejectedAction:title,source:"USER_REJECTED_APPROVAL"});}

@@ -1,3 +1,4 @@
+import { publishConversationDigest } from "@/lib/memory/conversationDigest";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { json, jsonHash } from "@/lib/mission/contracts";
@@ -232,6 +233,7 @@ async function executeTurnGeneration(actor: ConversationActor, id: string, turn:
       ...(exactRef?.kind === "MISSION" && exactRef.projectId === p.id ? { missionId: exactRef.id } : {}) }))) : [];
     const pinned = [...(newConstraint ? [...constraints, newConstraint] : constraints), ...continuity.flatMap(v => [...v.constraints,
       ...(v.workingObjective ? ["Current working objective (formal project goal unchanged): " + v.workingObjective] : [])])];
+    await mutateTurn(actor, id, turn.id, manifest => ({ ...manifest, sourceRevisionReadSet: directory.summaries.map(p => ({ projectId: p.id, revision: p.sourceRevision, role: p.scopeRole })) }));
     const modelEnabled = input.llmContextApproved && process.env.LLM_MODE === "openai-compatible" && !pinned.some(rule => /(?:\u4e0d\u8981|\u7981\u6b62|\u4e0d\u5f97|\u4e0d\u5141\u8bb8)(?:\u8c03\u7528\u6a21\u578b|\u4ed8\u8d39\u8c03\u7528)/.test(rule));
     const r4 = modelEnabled && !ambiguous && (isFeatureEnabled("FOCUS_AGENT_R4_ENABLED", false) || !!coordination(turn))
       ? await investigateConversation(actor, id, turn.id, { message: input.message, mode: input.investigationMode, focus: focused, evaluationVariant: evaluation?.variant,
@@ -365,6 +367,7 @@ async function executeTurnGeneration(actor: ConversationActor, id: string, turn:
         limitations: [...(fallbackReason ? ["云端分析未完成，已改为项目状态读回，未生成操作提案"] : []), ...directory.coverage.limitations, ...("limitations" in observations.coverage ? observations.coverage.limitations as string[] : [])] };
       const trace = {
         focusSources: blocks.sources,
+        cognitiveReadSet: record((await tx.conversationTurn.findUniqueOrThrow({where:{id:turn.id}})).readManifestJson).cognitiveReadSet ?? [],
         purpose: "FOCUS_TURN", actorUserId: actor.userId, sourceIds: blocks.sources.map(s => s.id),
         supportState: action ? "SUPPORTED" : "INSUFFICIENT", supportBasis: "ACTION_PROPOSAL_NOT_FACT_CLAIM",
         ...(r4 ? { experience: r4.state, evaluationVariant: evaluation?.variant ?? "FULL", uiPlanOrigin: evaluation ? "EVALUATION_DISABLED" : uiFallback ? "FALLBACK" : "MODEL", uiFallback } : {}),
@@ -391,7 +394,16 @@ async function executeTurnGeneration(actor: ConversationActor, id: string, turn:
         blocks.presentationPlan = uiPlan;
         blocks.presentation = await refreshExperiencePresentation(actor, id, blocks, r4.state, turn.id, tx, true);
       }
-      await appendConversationMessage(tx, id, actor.userId, "ASSISTANT", advice, blocks, turn.id, run.id);
+      const publishedMessage = await appendConversationMessage(tx, id, actor.userId, "ASSISTANT", advice, blocks, turn.id, run.id);
+      if (modelAnswer?.memoryUpdate && !fallbackReason && route.intent !== "CLARIFY") {
+        await publishConversationDigest(tx, actor, publishedMessage.id, modelAnswer.memoryUpdate.projectId,
+          modelAnswer.memoryUpdate.synthesis, observations.sources, route.projectIds);
+        // This publication may revise its own hypotheses. Bind the published proposal to those post-write heads.
+        const { composeHypotheses } = await import("@/lib/memory/hypothesisService");
+        const post = await Promise.all(route.projectIds.map(p => composeHypotheses(actor.userId, p, route.projectIds, tx)));
+        const saved = await tx.agentRun.findUniqueOrThrow({where:{id:run.id}});
+        await tx.agentRun.update({where:{id:run.id},data:{trace:json({...record(saved.trace),cognitiveReadSet:post.flatMap(v=>v.readSet)})}});
+      }
       await tx.conversation.update({ where: { id }, data: { activeTurnId: null,
         focusJson: json({ projectId: selected ?? null, ...(exactRef && exactRef.projectId === selected ? { entityRef: exactRef } : {}) }), pinnedStateJson: json(coordination(turn) ? constraints : pinned), version: { increment: 1 } } });
       const finalTurn = await tx.conversationTurn.findUniqueOrThrow({ where: { id: turn.id } });

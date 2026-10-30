@@ -1,0 +1,994 @@
+
+> projectmemo@0.1.0 test
+> vitest run --reporter=default --reporter=./evidence/r4-agent-ux/20261030-ux2/progress-reporter.mjs
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+[QUEUED] D:/Projects/hongmen/tests/r4Investigation.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/r4Investigation.test.ts
+ ✓ tests/r4Investigation.test.ts (17 tests) 25196ms
+[ENDED] D:/Projects/hongmen/tests/r4Investigation.test.ts
+     ✓ runs PROMPT_ONLY ablation on the original loop without UI calls or client-visible switches  957ms
+     ✓ runs INVESTIGATION_ONLY ablation on the original loop without UI calls or client-visible switches  1220ms
+     ✓ changes the next decision using a real 'RESEARCH' source and preserves one original Action  1910ms
+     ✓ changes the next decision using a real 'COMPETITION' source and preserves one original Action  1968ms
+     ✓ changes the next decision using a real 'COURSE' source and preserves one original Action  1715ms
+     ✓ stops duplicate reads and replays the same request without extra HTTP  1529ms
+     ✓ keeps network-unknown reservations and never auto-retries them  610ms
+     ✓ falls back to actual state after a received protocol failure without repair calls  631ms
+     ✓ reads actual in-flight progress and replays an active request without a second driver  1525ms
+     ✓ does not hand off to another owner's private Mission in a shared project  530ms
+     ✓ discards revoked and revised late responses before any proposal is published  2130ms
+     ✓ confirms only published bindings and replays the same UI request as one effect  3360ms
+     ✓ expires R4 proposals on the original confirmation path and preserves readable history  1766ms
+     ✓ stops focus.investigate.v1 without subsequent reads or published effects  524ms
+     ✓ stops focus.ui_plan.v1 without subsequent reads or published effects  1967ms
+     ✓ keeps a known answer and original proposal if UI generation is unknown, without replaying the model  2763ms
+[QUEUED] D:/Projects/hongmen/tests/continuityRecoordination.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/continuityRecoordination.test.ts
+[ENDED] D:/Projects/hongmen/tests/continuityRecoordination.test.ts
+ ✓ tests/continuityRecoordination.test.ts (3 tests) 16307ms
+   ✓ two OS directive writers with distinct commands and the same expected sequence have one winner  4057ms
+   ✓ real OS worker competition: revise during dispatched model  6482ms
+   ✓ real OS worker competition: takeover during dispatched model  5766ms
+[QUEUED] D:/Projects/hongmen/tests/r4ResearchRecovery.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/r4ResearchRecovery.test.ts
+ ✓ tests/r4ResearchRecovery.test.ts (2 tests) 15392ms
+     ✓ 重启复用已完成网页检查点，不再次发送请求  7746ms
+     ✓ 发送意图后中断，重启保留未知且不重发  7643ms
+[ENDED] D:/Projects/hongmen/tests/r4ResearchRecovery.test.ts
+[QUEUED] D:/Projects/hongmen/tests/copilotPersistence.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/copilotPersistence.test.ts
+ ✓ tests/copilotPersistence.test.ts (14 tests) 11664ms
+     ✓ freezes generation-time sources and atomically replays one action for identical confirmations  337ms
+     ✓ uses two OS processes without duplicate create_action effects  1792ms
+     ✓ uses two OS processes without duplicate generate_artifact effects  1846ms
+     ✓ recovers an OS exit before receipt commit for create_action atomically  1768ms
+     ✓ recovers an OS exit before receipt commit for generate_artifact atomically  1782ms
+     ✓ replays an artifact committed by a child that exits before returning a response  1721ms
+     ✓ replays the additive migration on an old-schema copy without changing legacy data  1537ms
+[ENDED] D:/Projects/hongmen/tests/copilotPersistence.test.ts
+[QUEUED] D:/Projects/hongmen/tests/missionRuntime.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionRuntime.test.ts
+ ✓ tests/missionRuntime.test.ts (31 tests) 11392ms
+[ENDED] D:/Projects/hongmen/tests/missionRuntime.test.ts
+     ✓ 观察→草稿→完成，来源版本与步骤保留  635ms
+     ✓ 批准前零写入，20次并发重复批准只创建同一行动  329ms
+     ✓ 来源改变后旧批准409，未创建行动  363ms
+     ✓ 批准后提交前再查来源，改变或取消都不写  428ms
+     ✓ 约束可修改/撤销，旧批准失效，模型不能覆盖  308ms
+     ✓ 重启后不重做成功步骤，事件序号单调  401ms
+     ✓ 子进程提交后未回包即退出，恢复后只保留一个Action  2047ms
+     ✓ 事务中断10次均不遗留Action或消费回执，修复后仅提交一次  885ms
+     ✓ 连续无进展调用达到上限后停止  546ms
+     ✓ 等待批准暂停恢复保留等待状态，随后故障恢复不会跳回旧等待  439ms
+     ✓ 过期批准可显式重规划并得到新预览  305ms
+     ✓ 成功进展和人工继续后各允许一次纠错，不重做已有步骤  708ms
+     ✓ 模拟 HTTP 的截断→纠错→保存→完成，记录来源模型与失败用量，不落原始回复  329ms
+     ✓ 行动读回后来源在批准前取消，不得按旧依据创建后续行动  333ms
+     ✓ 行动读回后来源在提交前取消，不得按旧依据创建后续行动  369ms
+     ✓ 等待输入暂停后编辑constraints，恢复仍须回答原问题才可执行  306ms
+     ✓ 等待输入暂停后编辑research-scope，恢复仍须回答原问题才可执行  339ms
+[QUEUED] D:/Projects/hongmen/tests/deployUpdate.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/deployUpdate.test.ts
+ ✓ tests/deployUpdate.test.ts (14 tests) 3819ms
+[ENDED] D:/Projects/hongmen/tests/deployUpdate.test.ts
+     ✓ checks heap and memory headroom before stopping services: '' / 4096 / +0  313ms
+     ✓ sizes the heap from post-stop memory before building: avail=3072 swapfree=+0 -> '1536'  344ms
+     ✓ sizes the heap from post-stop memory before building: avail=1800 swapfree=+0 -> '1416'  351ms
+     ✓ sizes the heap from post-stop memory before building: avail=1300 swapfree=4096 -> '1280'  317ms
+     ✓ sizes the heap from post-stop memory before building: avail=1300 swapfree=1024 -> ''  344ms
+     ✓ failure trap restores only after services were stopped: STOPPED=1  870ms
+[QUEUED] D:/Projects/hongmen/tests/missionAutomaticContinuation.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionAutomaticContinuation.test.ts
+ ✓ tests/missionAutomaticContinuation.test.ts (12 tests) 8821ms
+     ✓ 16个等待任务共享到达/接续批次，不被updatedAt双扫描饿死  2245ms
+     ✓ 单个结构化缺口自动接续同ID，重复/双Worker只绑定一次，原始记录不变  346ms
+     ✓ 未授权、普通语义问题或含额外指令的记录均回到人审  482ms
+     ✓ 单位/时间/主体/项目不符与非结构化普通文字不误恢复  1139ms
+     ✓ 相同指标出现两个不同值或来源已纠正则不恢复  568ms
+     ✓ 预算耗尽、云许可撤销、取消、暂停和成员撤权均不恢复  1514ms
+     ✓ 自动片段可保存私有草稿，遇到新问题后重新等待  578ms
+     ✓ 自动提案停在用户批准边界，批准后仅创建一次TODO  576ms
+     ✓ 执行中撤销自动许可，旧片段不能保存草稿  475ms
+     ✓ 自动开关关闭后已入队的自动片段也不调用模型  410ms
+[ENDED] D:/Projects/hongmen/tests/missionAutomaticContinuation.test.ts
+[QUEUED] D:/Projects/hongmen/tests/focusCollaboration.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/focusCollaboration.test.ts
+ ✓ tests/focusCollaboration.test.ts (25 tests) 8479ms
+     ✓ completes the same Action, persists one reflection and reads it after repeated confirmation  549ms
+     ✓ preserves the target across continuous result references and asks before writing  435ms
+     ✓ binds an answer to the exact original question, and never substitutes a second Mission  486ms
+     ✓ confirms APPROVED against the original approval; approval alone is not Action completion  600ms
+     ✓ confirms REJECTED against the original approval; approval alone is not Action completion  554ms
+     ✓ uses real materials, preserves unmet gaps and refuses changed sources  528ms
+     ✓ commits selected materials to the same Mission once and reads a READY receipt  715ms
+     ✓ freezes option order, resolves first choice to the original proposal and keeps a user veto  401ms
+     ✓ adopts the existing scenario without creating another proposal or Mission  365ms
+     ✓ lets a vetoed first option remain unadopted while previewing a different frozen option  398ms
+[ENDED] D:/Projects/hongmen/tests/focusCollaboration.test.ts
+     ✓ resolves first-choice replies against their original project and refuses a contradictory project parameter  563ms
+     ✓ adopts one exact Output revision and reads the original artifact receipt  514ms
+     ✓ resumes a PAUSED Mission, rejects tampering, expiry, changed constraints and revoked access  437ms
+     ✓ runs the ArkTS adapter through authenticated work, preview, confirm and receipt reconciliation APIs  340ms
+[QUEUED] D:/Projects/hongmen/tests/conversationAnchor.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/conversationAnchor.test.ts
+ ✓ tests/conversationAnchor.test.ts (21 tests) 8479ms
+   ✓ reopens one reminder topic, appends a changed origin once, and preserves the old explanation  344ms
+   ✓ binds an actual relevant SOURCE_ARRIVED event to a current goal and an inert follow-up action  704ms
+   ✓ retires event interactions when original material changes, without rewriting the old notice  393ms
+   ✓ repairs a missing chat projection without repeating the source mutation or original effect  337ms
+   ✓ reuses one Mission topic across a different question and refuses reused entry request payloads  331ms
+   ✓ filters unrelated and stale materials; one relevant source revision yields one qualified snapshot  345ms
+   ✓ closes a terminal Mission topic after its actual output and status projection  656ms
+   ✓ targets original LATER at the anchored Mission even when another Mission is selected  356ms
+   ✓ does not let an old resolved question's LATER suppress the next question  362ms
+   ✓ rotates workspace synchronization past the first eight conversations  1228ms
+   ✓ does not discard valid output revisions behind the per-sync event limit  567ms
+   ✓ drains existing action snapshots before closing a cancelled topic  355ms
+   ✓ follows completion of an older existing Action beyond the initial eight  358ms
+   ✓ does not repeat a result already committed by the same conversation  506ms
+[ENDED] D:/Projects/hongmen/tests/conversationAnchor.test.ts
+[QUEUED] D:/Projects/hongmen/tests/r4Research.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/r4Research.test.ts
+ ✓ tests/r4Research.test.ts (18 tests) 5234ms
+     ✓ 服务端登记用户原链接，不需要搜索或额外 Mission  354ms
+     ✓ 同原步骤 Fetch 仅请求一次，回读保留原时间和片段  351ms
+     ✓ HTTP 接受与原 turn 推进分离，重试不会重复用户消息  306ms
+     ✓ 已读网页可以定向回读原快照，不冒充再次联网或升级范围  325ms
+     ✓ 原授权仓库入口复用同会话，关注去重、忽略不误报、撤销限制历史  744ms
+     ✓ 原 HTTP 适配器与 Focus 完成用户 URL→读取→引用→确认归入→重放  1769ms
+[ENDED] D:/Projects/hongmen/tests/r4Research.test.ts
+[QUEUED] D:/Projects/hongmen/tests/goalChangeReview.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/goalChangeReview.test.ts
+[ENDED] D:/Projects/hongmen/tests/goalChangeReview.test.ts
+ ✓ tests/goalChangeReview.test.ts (16 tests) 5344ms
+     ✓ deduplicates a stable source batch across request IDs and keeps V1 separate  474ms
+     ✓ keeps incomplete project observations, requirements and applicable methods eligible  538ms
+     ✓ keeps malformed/truncated dynamic responses FAILED, retains usage, and replays without resending (R1)  385ms
+     ✓ records a received provider rejection as FAILED and holds its unknown usage  300ms
+     ✓ accepts null root annotations from the observed M2 response, but refuses extra facts or nested commands  393ms
+     ✓ keeps unrelated uploads outside the local guard and executes a directed read without extra models  454ms
+     ✓ settles stale/STOP/revoked in-flight responses without changing business state  362ms
+     ✓ reads an existing review back into the same discussion and confirms the exact candidate once  1061ms
+[QUEUED] D:/Projects/hongmen/tests/missionResearch.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionResearch.test.ts
+ ✓ tests/missionResearch.test.ts (35 tests) 7355ms
+[ENDED] D:/Projects/hongmen/tests/missionResearch.test.ts
+     ✓ 公开查询生成失败仍结算服务端用量，不发送搜索请求  369ms
+     ✓ 检索→读取→研究Output→完成，外部来源不产生项目事实  617ms
+     ✓ 只找到搜索摘要，不能作为已读取正文引用  309ms
+     ✓ 错误摘录hash、外部指标冒充本项目实测被拒绝  473ms
+     ✓ 同URL更新保留旧观察并使旧源不可继续验收  464ms
+     ✓ 其他Mission来源不可读取或抓取  456ms
+     ✓ 缺少私有实验指标时等待，用户回答后保留原输出与约束  557ms
+     ✓ 搜索失败最多重试两次，计入预算；零结果可等待不伪造  585ms
+     ✓ 研究后可以提案，长网页引用片段与hash完整进入模型上下文  640ms
+     ✓ 同URL新观察替代当前读集，旧观察仍保留且不会永久阻断新提案  558ms
+     ✓ 外部块不能通过顶层kind=NOTE绕过研究守卫  401ms
+     ✓ 外部块不能通过顶层kind=undefined绕过研究守卫  408ms
+     ✓ NOTE的外部引用仍需精确摘录  415ms
+[QUEUED] D:/Projects/hongmen/tests/focusConversation.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/focusConversation.test.ts
+ ✓ tests/focusConversation.test.ts (22 tests) 6501ms
+[ENDED] D:/Projects/hongmen/tests/focusConversation.test.ts
+     ✓ names a discussion from its first question, keeps it across follow-ups and preserves explicit titles  980ms
+     ✓ routes beyond the six Focus candidates and does not invent priority preference  486ms
+     ✓ creates exactly one actual Action using the shared confirmation transaction and reads current state  320ms
+     ✓ rejects stale source, modified hash, denied proposal, foreign actor and revoked project  333ms
+     ✓ pins a user veto and never turns a negative instruction into an action  318ms
+     ✓ uses a frozen request, rejects changed payload, and clarifies ambiguous references  336ms
+     ✓ settles truncated/empty received responses as FAILED with real usage and never auto-replays HTTP  332ms
+     ✓ uses structured model routing, keeps private audit outside project runs, and bills the current user once per request stage  650ms
+     ✓ discards an unsupported cloud answer and its action, then returns verified state without another call  320ms
+     ✓ resumes the bound paused Mission through the original service, once, without creating another task  400ms
+     ✓ runs the real ArkTS ConversationService against authenticated Next handlers and reads the same Action back on Web  397ms
+[QUEUED] D:/Projects/hongmen/tests/decisionEvolution.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/decisionEvolution.test.ts
+[ENDED] D:/Projects/hongmen/tests/decisionEvolution.test.ts
+ ✓ tests/decisionEvolution.test.ts (26 tests) 7178ms
+     ✓ one root traverses typed two-layer requirements, one exact block and original Mission  352ms
+     ✓ blocks expired, revoked, wrong-user, unknown estimate and over-budget adoption; rejects without changing the Mission  458ms
+     ✓ a process dying after durable intent leaves work for two replacement OS consumers; effect is once  2631ms
+   ✓ actual ArkTS ↔ Next routes round-trip the same proposal, Mission and receipt, with revoked and cross-user boundaries  478ms
+   ✓ 模型只能补充定性取舍，沿用原在线模式、许可及预算；确定性计算不能被模型改写  309ms
+[QUEUED] D:/Projects/hongmen/tests/missionContinuation.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionContinuation.test.ts
+ ✓ tests/missionContinuation.test.ts (10 tests) 6439ms
+     ✓ 材料到达不调用模型、不恢复；确认后同Mission继续且旧成果逐字保留  579ms
+     ✓ 缺单位/时间、无关内容和冲突均继续等待  1631ms
+     ✓ 解析失败附件只记到达，修订成功后才有可读新候选  381ms
+     ✓ 重复扫描与重启补查不重复事件，迟提交较早ID在下轮发现  1089ms
+     ✓ 十次并发确认同回执，异载荷409，之后来源变化不破坏已提交重放  397ms
+     ✓ 跨项目、撤权、取消、旧问题及预览后材料变化都拒绝  626ms
+     ✓ 上下文或约束改变使评估失效；预算和云许可不足保留等待  399ms
+     ✓ 结构化成功条件不因有草稿或已恢复而跳过，足量来源和答复才通过  599ms
+     ✓ 开关关闭不扫描也不能确认，原补充问题接口仍可使用  311ms
+[ENDED] D:/Projects/hongmen/tests/missionContinuation.test.ts
+[QUEUED] D:/Projects/hongmen/tests/missionArtifactAdoption.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionArtifactAdoption.test.ts
+ ✓ tests/missionArtifactAdoption.test.ts (9 tests) 4170ms
+     ✓ 直接归入也遵守只读和停止；撤回后旧预览不复活，原回执仍可重放  926ms
+     ✓ 真实完成状态读回保留resultCardId并记录USER_REPORTED，不把创建当完成  413ms
+     ✓ 重复归入的新请求别名持久绑定，不能被另一Output复用  554ms
+     ✓ 归入后外部来源链不能借PROJECT容器升级为项目实测  307ms
+     ✓ 预览不发布，十次并发只写一个Artifact/Receipt；后续可检索并保留未核验语义  365ms
+     ✓ 来源变化定位原块但不改正文，原请求重放仍返回原成果  304ms
+     ✓ 跨用户/项目、旧版本、篡改Hash、旧上下文与取消都拒绝  548ms
+     ✓ Receipt故障与Artifact原子回滚，已归入Mission/Output不可单独删除，整体项目删除兼容  335ms
+[ENDED] D:/Projects/hongmen/tests/missionArtifactAdoption.test.ts
+[QUEUED] D:/Projects/hongmen/tests/p3ReviewBoundaries.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/p3ReviewBoundaries.test.ts
+ ✓ tests/p3ReviewBoundaries.test.ts (12 tests) 4647ms
+[ENDED] D:/Projects/hongmen/tests/p3ReviewBoundaries.test.ts
+   ✓ 两个独立 OS 进程同时采纳，持久回执仍只生成一条资料  1343ms
+   ✓ 同项目两位用户的同模式提炼、真实接口、详情和模型上下文都隔离  498ms
+   ✓ 旧库增量升级清除混入的异主样本，保留历史使用与旧仓库信号  1646ms
+[QUEUED] D:/Projects/hongmen/tests/r4ExperienceContract.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/r4ExperienceContract.test.ts
+ ✓ tests/r4ExperienceContract.test.ts (44 tests) 3463ms
+[ENDED] D:/Projects/hongmen/tests/r4ExperienceContract.test.ts
+   ✓ keeps native DTO fields aligned with shared contracts and old Conversation messages optional  3423ms
+[QUEUED] D:/Projects/hongmen/tests/missionRuntimeDiagnostics.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionRuntimeDiagnostics.test.ts
+ ✓ tests/missionRuntimeDiagnostics.test.ts (21 tests) 4096ms
+[ENDED] D:/Projects/hongmen/tests/missionRuntimeDiagnostics.test.ts
+     ✓ 重复观察无进展归TOOL阶段，不被模型格式纠错重新排队  495ms
+     ✓ Judge超时仍保留待审草稿，VERIFY失败trace与未知usage各记一次  427ms
+[QUEUED] D:/Projects/hongmen/tests/conversationAnchorContract.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/conversationAnchorContract.test.ts
+ ✓ tests/conversationAnchorContract.test.ts (3 tests) 3156ms
+   ✓ upgrades populated F1 GoalQuestion/Intervention anchors while preserving original messages and manual policy  1993ms
+   ✓ executes the real ArkTS entry/follow/sync/ACK/reconcile contract and respects STOP from the original UI  800ms
+   ✓ authenticates entry and every anchor route, and hides another user's conversation with 404  353ms
+[ENDED] D:/Projects/hongmen/tests/conversationAnchorContract.test.ts
+[QUEUED] D:/Projects/hongmen/tests/missionNativeContract.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionNativeContract.test.ts
+ ✓ tests/missionNativeContract.test.ts (15 tests) 2891ms
+     ✓ 原生预览确认材料保持Mission，固定Output归入回执可重试  405ms
+     ✓ 原生读回指定草稿修订与归入回执，和Web读同一outputId/revision/receiptId  371ms
+     ✓ 旧问题定向读取409且历史读回只读；会话失效在发请求前拦截  319ms
+     ✓ P2实际原生DTO→路由核对：旧端明确拒绝，核对后同对象读回  315ms
+[ENDED] D:/Projects/hongmen/tests/missionNativeContract.test.ts
+[QUEUED] D:/Projects/hongmen/tests/missionClaimVerification.integration.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionClaimVerification.integration.test.ts
+ ✓ tests/missionClaimVerification.integration.test.ts (5 tests) 2015ms
+[ENDED] D:/Projects/hongmen/tests/missionClaimVerification.integration.test.ts
+     ✓ Judge计入同一模型预算，Output保存判断与来源hash，归入不改变事实  445ms
+     ✓ 核验期间来源变化或用户取消，旧片段不能提交Output  587ms
+[QUEUED] D:/Projects/hongmen/tests/globalWorkspace.integration.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/globalWorkspace.integration.test.ts
+ ✓ tests/globalWorkspace.integration.test.ts (2 tests) 2075ms
+   ✓ 全局检索只读取成员项目，保留归档筛选、稳定分页和提醒实际状态  906ms
+   ✓ 焦点分别投影真实状态，Mission双重归属、关闭开关和API身份均有效  373ms
+[ENDED] D:/Projects/hongmen/tests/globalWorkspace.integration.test.ts
+[QUEUED] D:/Projects/hongmen/tests/missionEvidenceFitIntegration.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionEvidenceFitIntegration.test.ts
+ ✓ tests/missionEvidenceFitIntegration.test.ts (10 tests) 2497ms
+     ✓ 预览纯读；同义有效负结果绕开字面缺词，确认原子落审阅与绑定，重试不重复  418ms
+[ENDED] D:/Projects/hongmen/tests/missionEvidenceFitIntegration.test.ts
+[QUEUED] D:/Projects/hongmen/tests/copilotContinuation.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/copilotContinuation.test.ts
+ ✓ tests/copilotContinuation.test.ts (16 tests) 3054ms
+[ENDED] D:/Projects/hongmen/tests/copilotContinuation.test.ts
+     ✓ pure question stays a question; request replay returns the original answer without another run  347ms
+     ✓ preview is editable without creating a task; confirmation retry and races create exactly one original Mission  304ms
+   ✓ Web dialogue → actual ArkTS preview/confirm/readback → Web preserves source run, Mission and pinned output  442ms
+[QUEUED] D:/Projects/hongmen/tests/registration.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/registration.test.ts
+stderr | tests/registration.test.ts > Public account lifecycle > verifies once, logs in through existing cookie/session and logs out server-side
+Promise returned by `expect(actual).resolves.toMatchObject(expected)` was not awaited. Vitest currently auto-awaits hanging assertions at the end of the test, but this will cause the test to fail in the next Vitest major. Please remember to await the assertion.
+    at D:/Projects/hongmen/tests/registration.test.ts:172:6
+
+stderr | tests/registration.test.ts > Public account lifecycle > blocks all paid chat/embedding calls by default and atomically enforces a provisioned daily limit
+LLM structure failed; falling back to deterministic mock agent: 当前账号未开通云模型额度，可继续使用记录和规则模式
+
+ ❯ tests/registration.test.ts (14 tests | 1 failed) 1655ms
+     ✓ requires verified email, stores only hashes and grants no projects or cloud budget  311ms
+     ✓ verifies once, logs in through existing cookie/session and logs out server-side 153ms
+     ✓ enforces password confirmation, account syntax, email validation and rejects injected roles 46ms
+     ✓ handles duplicate account races and email reuse without extra sessions or memberships 117ms
+     ✓ keeps configured and default demo account names reserved 25ms
+     ✓ expires verification links and invalidates the previous link when resending 93ms
+     ✓ resets password with a single-use purpose-bound token and revokes every old session  324ms
+     ✓ does not disclose whether a recovery email exists and does not send to unknown addresses 129ms
+     ✓ fails closed without SMTP in production and never creates an unverified session 3ms
+     ✓ reports delivery failure and leaves a retryable account with no usable verification token or session 79ms
+     ✓ limits rotating usernames by source, including malformed requests, and sets Retry-After 22ms
+     ✓ rejects cross-origin and oversized bodies before creating users 7ms
+     × prevents cross-user project, memory, action, mission and artifact reads and writes 172ms
+     ✓ blocks all paid chat/embedding calls by default and atomically enforces a provisioned daily limit 174ms
+[ENDED] D:/Projects/hongmen/tests/registration.test.ts
+[QUEUED] D:/Projects/hongmen/tests/ux2MigrationUpgrade.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/ux2MigrationUpgrade.test.ts
+ ✓ tests/ux2MigrationUpgrade.test.ts (1 test) 1509ms
+[ENDED] D:/Projects/hongmen/tests/ux2MigrationUpgrade.test.ts
+   ✓ UX2 在旧库副本增量升级，保留原记录且不猜测回填授权  1508ms
+[QUEUED] D:/Projects/hongmen/tests/r4Specialists.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/r4Specialists.test.ts
+stderr | tests/r4Specialists.test.ts > R4 PR5 original-result and specialist integration > keeps received Capture usage and task identity on invalid output fallback
+LLM structure failed; falling back to deterministic mock agent: 记录整理未完成，原文已保留
+
+ ✓ tests/r4Specialists.test.ts (10 tests) 3182ms
+     ✓ research: original completion receipt changes D1 and invalidates the old review  693ms
+     ✓ competition: original completion receipt changes D1 and invalidates the old review  353ms
+     ✓ course: original completion receipt changes D1 and invalidates the old review  361ms
+     ✓ uses the actual chat comparison binding to preview/confirm the frozen original Mission once  1177ms
+[ENDED] D:/Projects/hongmen/tests/r4Specialists.test.ts
+[QUEUED] D:/Projects/hongmen/tests/pageAuth.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/pageAuth.test.ts
+ ✓ tests/pageAuth.test.ts (12 tests) 2789ms
+     ✓ 匿名访问项目列表页被重定向到登录页  626ms
+     ✓ 匿名访问全局focus需登录，不能返回聚合内容  619ms
+     ✓ 无关用户访问成果生成页按 404 处理  509ms
+[ENDED] D:/Projects/hongmen/tests/pageAuth.test.ts
+[QUEUED] D:/Projects/hongmen/tests/xiaoyi.adapter.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/xiaoyi.adapter.test.ts
+ ✓ tests/xiaoyi.adapter.test.ts (13 tests) 1780ms
+[ENDED] D:/Projects/hongmen/tests/xiaoyi.adapter.test.ts
+[QUEUED] D:/Projects/hongmen/tests/experienceReuse.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/experienceReuse.test.ts
+ ✓ tests/experienceReuse.test.ts (15 tests) 2055ms
+[ENDED] D:/Projects/hongmen/tests/experienceReuse.test.ts
+[QUEUED] D:/Projects/hongmen/tests/missionPanel.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionPanel.test.ts
+ ✓ tests/missionPanel.test.ts (14 tests) 1867ms
+     ✓ 选择的核算、论文和行动结果完成条件进入真实创建请求，不扩大研究许可  347ms
+[ENDED] D:/Projects/hongmen/tests/missionPanel.test.ts
+[QUEUED] D:/Projects/hongmen/tests/database.integration.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/database.integration.test.ts
+ ✓ tests/database.integration.test.ts (13 tests) 2289ms
+     ✓ creates project, card, relation and artifact through services  680ms
+[ENDED] D:/Projects/hongmen/tests/database.integration.test.ts
+[QUEUED] D:/Projects/hongmen/tests/documentReader.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/documentReader.test.ts
+ ✓ tests/documentReader.test.ts (8 tests) 2346ms
+   ✓ CT4 catalog/page/section/table preserve physical locators, dates and untrusted content  301ms
+   ✓ CT4 original Conversation investigates the real PDF and publishes a bound dual-client citation  1117ms
+   ✓ CT4 actual Poppler locates two physical PDF pages and records parser version  529ms
+[ENDED] D:/Projects/hongmen/tests/documentReader.test.ts
+[QUEUED] D:/Projects/hongmen/tests/trustReceipt.integration.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/trustReceipt.integration.test.ts
+[ENDED] D:/Projects/hongmen/tests/trustReceipt.integration.test.ts
+ ✓ tests/trustReceipt.integration.test.ts (3 tests) 1762ms
+     ✓ abstains without evidence and blocks a forged write  766ms
+[QUEUED] D:/Projects/hongmen/tests/missionMaterialUseProjection.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionMaterialUseProjection.test.ts
+[ENDED] D:/Projects/hongmen/tests/missionMaterialUseProjection.test.ts
+ ✓ tests/missionMaterialUseProjection.test.ts (6 tests) 1765ms
+     ✓ 无知识卡/扫描事件的旧Capture可定向选择；GET和读回无副作用  325ms
+     ✓ 绑定、真实fixture上下文指针、草稿摘录和指定归入回执分开读回；重放不重复推进  387ms
+[QUEUED] D:/Projects/hongmen/tests/auth.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/auth.test.ts
+[ENDED] D:/Projects/hongmen/tests/auth.test.ts
+ ✓ tests/auth.test.ts (19 tests) 1882ms
+[QUEUED] D:/Projects/hongmen/tests/temporalLedger.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/temporalLedger.test.ts
+ ✓ tests/temporalLedger.test.ts (12 tests) 1714ms
+[ENDED] D:/Projects/hongmen/tests/temporalLedger.test.ts
+     ✓ runs propose, confirm, search, timeline and revoke without silent activation  859ms
+[QUEUED] D:/Projects/hongmen/tests/continuityMigration.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/continuityMigration.test.ts
+ ✓ tests/continuityMigration.test.ts (1 test) 2261ms
+   ✓ additive upgrade preserves legacy user/conversation bytes and foreign keys; empty replay is covered by integration databases  2260ms
+[ENDED] D:/Projects/hongmen/tests/continuityMigration.test.ts
+[QUEUED] D:/Projects/hongmen/tests/missionProtocolRecovery.integration.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionProtocolRecovery.integration.test.ts
+ ✓ tests/missionProtocolRecovery.integration.test.ts (1 test) 976ms
+[ENDED] D:/Projects/hongmen/tests/missionProtocolRecovery.integration.test.ts
+     ✓ two invalid decisions pause; explicit resume keeps Mission, successful reads and cumulative budget  970ms
+[QUEUED] D:/Projects/hongmen/tests/continuityStages23.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/continuityStages23.test.ts
+ ✓ tests/continuityStages23.test.ts (11 tests) 1742ms
+[ENDED] D:/Projects/hongmen/tests/continuityStages23.test.ts
+   ✓ CT2 original Mission dynamically reads pinned CI, jobs and redacted log; revoke blocks derived Artifact reuse  645ms
+   ✓ CT3 original Runner polls declared fixed SHA; stable CI uses zero models, changed CI resumes reasoning  444ms
+[QUEUED] D:/Projects/hongmen/tests/r4ResearchMigration.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/r4ResearchMigration.test.ts
+ ✓ tests/r4ResearchMigration.test.ts (1 test) 1520ms
+[ENDED] D:/Projects/hongmen/tests/r4ResearchMigration.test.ts
+   ✓ PR6 增量迁移保留旧会话/回执，空库也可完整重放  1519ms
+[QUEUED] D:/Projects/hongmen/tests/metricSandbox.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/metricSandbox.test.ts
+ ✓ tests/metricSandbox.test.ts (7 tests) 1520ms
+[ENDED] D:/Projects/hongmen/tests/metricSandbox.test.ts
+   ✓ lost start reply keeps original reservation; user resume reconciles same job with zero second create/start  547ms
+   ✓ lost create reply reconciles an existing never-started job, while an absent UNKNOWN job is never recreated  349ms
+[QUEUED] D:/Projects/hongmen/tests/p0bEvidence.integration.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/p0bEvidence.integration.test.ts
+ ✓ tests/p0bEvidence.integration.test.ts (4 tests) 1576ms
+     ✓ 301+ cards retain an old targeted record; pagination and archived lookup stay project scoped  661ms
+     ✓ eighth historical source and old material/question/rejection survive observation compaction  396ms
+[ENDED] D:/Projects/hongmen/tests/p0bEvidence.integration.test.ts
+[QUEUED] D:/Projects/hongmen/tests/actionReminder.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/actionReminder.test.ts
+ ✓ tests/actionReminder.test.ts (20 tests) 1481ms
+     ✓ saves the in-app plan time first and only reports synced after a real event id exists  408ms
+[ENDED] D:/Projects/hongmen/tests/actionReminder.test.ts
+[QUEUED] D:/Projects/hongmen/tests/projectHealth.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectHealth.test.ts
+stderr | tests/projectHealth.test.ts > project health (只读确定性项目体检) > keeps other results and names the section when one sub-check fails
+[project-health] section "state" failed {
+  code: 'PROJECT_STATE_DISABLED',
+  error: AppError: 项目状态功能当前已关闭
+      at stateDetector (D:/Projects/hongmen/lib/services/projectHealthService.ts:245:11)
+      at runDetector (D:/Projects/hongmen/lib/services/projectHealthService.ts:121:11)
+      at buildProjectHealthReport (D:/Projects/hongmen/lib/services/projectHealthService.ts:643:11)
+      at processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at D:/Projects/hongmen/tests/projectHealth.test.ts:379:22
+      at file:///D:/Projects/hongmen/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20 {
+    code: 'PROJECT_STATE_DISABLED',
+    status: 503,
+    details: undefined
+  }
+}
+
+stderr | tests/projectHealth.test.ts > project health isolation (体检的用户隔离与错误清洗) > returns a stable Chinese classification instead of raw internal error text
+[project-health] section "episodes" failed {
+  code: 'SECTION_UNAVAILABLE',
+  error: TypeError: claims is not iterable
+      at evaluateEpisodeFreshness (D:/Projects/hongmen/lib/services/projectEpisodeService.ts:940:23)
+      at episodeDetector (D:/Projects/hongmen/lib/services/projectHealthService.ts:182:27)
+      at processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at runDetector (D:/Projects/hongmen/lib/services/projectHealthService.ts:121:5)
+      at buildProjectHealthReport (D:/Projects/hongmen/lib/services/projectHealthService.ts:643:5)
+      at D:/Projects/hongmen/tests/projectHealth.test.ts:606:20
+      at file:///D:/Projects/hongmen/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+}
+
+stderr | tests/projectHealth.test.ts > project health isolation (体检的用户隔离与错误清洗) > only reports a known disabled section as disabled, not as an internal failure
+[project-health] section "state" failed {
+  code: 'PROJECT_STATE_DISABLED',
+  error: AppError: 项目状态功能当前已关闭
+      at stateDetector (D:/Projects/hongmen/lib/services/projectHealthService.ts:245:11)
+      at runDetector (D:/Projects/hongmen/lib/services/projectHealthService.ts:121:11)
+      at buildProjectHealthReport (D:/Projects/hongmen/lib/services/projectHealthService.ts:643:11)
+      at processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at D:/Projects/hongmen/tests/projectHealth.test.ts:624:22
+      at file:///D:/Projects/hongmen/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20 {
+    code: 'PROJECT_STATE_DISABLED',
+    status: 503,
+    details: undefined
+  }
+}
+
+stderr | tests/projectHealth.test.ts > project health isolation (体检的用户隔离与错误清洗) > folds SQLITE-style error codes into the stable unavailable classification
+[project-health] section "episodes" failed {
+  code: 'SQLITE_BUSY',
+  error: Error: SQLITE raw detail should stay server-side
+      at D:/Projects/hongmen/tests/projectHealth.test.ts:638:35
+      at processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at file:///D:/Projects/hongmen/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20 {
+    code: 'SQLITE_BUSY'
+  }
+}
+
+ ✓ tests/projectHealth.test.ts (15 tests) 698ms
+[ENDED] D:/Projects/hongmen/tests/projectHealth.test.ts
+[QUEUED] D:/Projects/hongmen/tests/academicIntegration.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/academicIntegration.test.ts
+[ENDED] D:/Projects/hongmen/tests/academicIntegration.test.ts
+ ✓ tests/academicIntegration.test.ts (3 tests) 836ms
+   ✓ original Turn persists metadata, reuses same HTTP reply, and parent suppression taints metadata and Artifact  441ms
+[QUEUED] D:/Projects/hongmen/tests/projectLifecycle.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectLifecycle.test.ts
+ ✓ tests/projectLifecycle.test.ts (12 tests) 1057ms
+[ENDED] D:/Projects/hongmen/tests/projectLifecycle.test.ts
+[QUEUED] D:/Projects/hongmen/tests/projectEpisodeStaleness.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectEpisodeStaleness.test.ts
+ ✓ tests/projectEpisodeStaleness.test.ts (6 tests) 707ms
+     ✓ attachment correction only expires claims citing the old revision  301ms
+[ENDED] D:/Projects/hongmen/tests/projectEpisodeStaleness.test.ts
+[QUEUED] D:/Projects/hongmen/tests/projectState.integration.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectState.integration.test.ts
+ ✓ tests/projectState.integration.test.ts (13 tests) 891ms
+[ENDED] D:/Projects/hongmen/tests/projectState.integration.test.ts
+[QUEUED] D:/Projects/hongmen/tests/continuityJourney.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/continuityJourney.test.ts
+ ✓ tests/continuityJourney.test.ts (1 test) 1006ms
+   ✓ D1 → D3 correction → original Mission resume → Action/resultCardId → D5 new session; stale proposal stays rejected  990ms
+[ENDED] D:/Projects/hongmen/tests/continuityJourney.test.ts
+[QUEUED] D:/Projects/hongmen/tests/actionFeasibility.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/actionFeasibility.test.ts
+ ✓ tests/actionFeasibility.test.ts (12 tests) 616ms
+[ENDED] D:/Projects/hongmen/tests/actionFeasibility.test.ts
+[QUEUED] D:/Projects/hongmen/tests/missionCompletion.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionCompletion.test.ts
+[ENDED] D:/Projects/hongmen/tests/missionCompletion.test.ts
+ ✓ tests/missionCompletion.test.ts (3 tests) 632ms
+     ✓ 形式条件通过、草稿待审、用户归入、现实未推断各自来自原持久记录  341ms
+[QUEUED] D:/Projects/hongmen/tests/schedule.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/schedule.test.ts
+ ✓ tests/schedule.test.ts (13 tests) 1014ms
+[ENDED] D:/Projects/hongmen/tests/schedule.test.ts
+     ✓ places READY actions in stable order with no overlap; blocked and estimateless actions are reported  440ms
+[QUEUED] D:/Projects/hongmen/tests/experienceNativeContract.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/experienceNativeContract.test.ts
+ ✓ tests/experienceNativeContract.test.ts (1 test) 486ms
+[ENDED] D:/Projects/hongmen/tests/experienceNativeContract.test.ts
+[QUEUED] D:/Projects/hongmen/tests/settingsAuth.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/settingsAuth.test.ts
+ ✓ tests/settingsAuth.test.ts (10 tests) 786ms
+[ENDED] D:/Projects/hongmen/tests/settingsAuth.test.ts
+[QUEUED] D:/Projects/hongmen/tests/projectAgentContext.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectAgentContext.test.ts
+ ✓ tests/projectAgentContext.test.ts (9 tests) 852ms
+[ENDED] D:/Projects/hongmen/tests/projectAgentContext.test.ts
+[QUEUED] D:/Projects/hongmen/tests/projectsPageArchive.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectsPageArchive.test.ts
+ ✓ tests/projectsPageArchive.test.ts (3 tests) 601ms
+[ENDED] D:/Projects/hongmen/tests/projectsPageArchive.test.ts
+     ✓ 在册项目进主列表，已归档项目进已归档分区且不在主列表  471ms
+[QUEUED] D:/Projects/hongmen/tests/interventionPolicy.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/interventionPolicy.test.ts
+ ✓ tests/interventionPolicy.test.ts (9 tests) 657ms
+[ENDED] D:/Projects/hongmen/tests/interventionPolicy.test.ts
+[QUEUED] D:/Projects/hongmen/tests/missionContinuationPanel.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionContinuationPanel.test.ts
+ ✓ tests/missionContinuationPanel.test.ts (8 tests) 527ms
+[ENDED] D:/Projects/hongmen/tests/missionContinuationPanel.test.ts
+[QUEUED] D:/Projects/hongmen/tests/continuityCandidate.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/continuityCandidate.test.ts
+ ✓ tests/continuityCandidate.test.ts (2 tests) 756ms
+[ENDED] D:/Projects/hongmen/tests/continuityCandidate.test.ts
+   ✓ model interpretation is a candidate only, authenticated quote and exact user control are separate: true  573ms
+[QUEUED] D:/Projects/hongmen/tests/calendarSync.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/calendarSync.test.ts
+ ✓ tests/calendarSync.test.ts (7 tests) 847ms
+     ✓ records external eventId and sync status without touching the in-app schedule  413ms
+[ENDED] D:/Projects/hongmen/tests/calendarSync.test.ts
+[QUEUED] D:/Projects/hongmen/tests/projectReentry.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectReentry.test.ts
+ ❯ tests/projectReentry.test.ts (5 tests | 2 failed) 578ms
+     ✓ returns structured empty sections for a fresh project without fabricating progress 152ms
+     ✓ aggregates confirmed episode, risk, and confirmed schedule into one result 146ms
+     × reports STALE when a cited source is superseded but keeps other sections usable 136ms
+     ✓ keeps other sections available when the schedule part is disabled 38ms
+     × prioritizes RESOLVE_BLOCKED when a blocked action exists and targets the blocked item directly 63ms
+[ENDED] D:/Projects/hongmen/tests/projectReentry.test.ts
+[QUEUED] D:/Projects/hongmen/tests/copilotContinuationPanel.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/copilotContinuationPanel.test.ts
+ ✓ tests/copilotContinuationPanel.test.ts (2 tests) 291ms
+[ENDED] D:/Projects/hongmen/tests/copilotContinuationPanel.test.ts
+[QUEUED] D:/Projects/hongmen/tests/changeImpact.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/changeImpact.test.ts
+ ✓ tests/changeImpact.test.ts (12 tests) 637ms
+[ENDED] D:/Projects/hongmen/tests/changeImpact.test.ts
+[QUEUED] D:/Projects/hongmen/tests/continuitySuppression.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/continuitySuppression.test.ts
+ ✓ tests/continuitySuppression.test.ts (2 tests) 663ms
+[ENDED] D:/Projects/hongmen/tests/continuitySuppression.test.ts
+   ✓ one root suppression closes memory, Investigation sources, dialogue, Artifact, Mission context and ACTIVE experience consumers  585ms
+[QUEUED] D:/Projects/hongmen/tests/meetingStateDiff.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/meetingStateDiff.test.ts
+ ✓ tests/meetingStateDiff.test.ts (11 tests) 508ms
+[ENDED] D:/Projects/hongmen/tests/meetingStateDiff.test.ts
+[QUEUED] D:/Projects/hongmen/tests/artifactAudit.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/artifactAudit.test.ts
+[ENDED] D:/Projects/hongmen/tests/artifactAudit.test.ts
+ ✓ tests/artifactAudit.test.ts (8 tests) 447ms
+[QUEUED] D:/Projects/hongmen/tests/r3Baseline.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/r3Baseline.test.ts
+[ENDED] D:/Projects/hongmen/tests/r3Baseline.test.ts
+ ✓ tests/r3Baseline.test.ts (6 tests) 530ms
+[QUEUED] D:/Projects/hongmen/tests/missionContinuation.review.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionContinuation.review.test.ts
+ ✓ tests/missionContinuation.review.test.ts (1 test) 511ms
+   ✓ 已被取代的Capture即便使用最新hash，也不能补当前实验缺口并恢复  506ms
+[ENDED] D:/Projects/hongmen/tests/missionContinuation.review.test.ts
+[QUEUED] D:/Projects/hongmen/tests/missionWorkspaceSummary.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionWorkspaceSummary.test.ts
+ ✓ tests/missionWorkspaceSummary.test.ts (4 tests) 410ms
+[ENDED] D:/Projects/hongmen/tests/missionWorkspaceSummary.test.ts
+[QUEUED] D:/Projects/hongmen/tests/episodeAction.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/episodeAction.test.ts
+ ✓ tests/episodeAction.test.ts (9 tests) 737ms
+[ENDED] D:/Projects/hongmen/tests/episodeAction.test.ts
+[QUEUED] D:/Projects/hongmen/tests/continuityIntent.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/continuityIntent.test.ts
+ ✓ tests/continuityIntent.test.ts (6 tests) 671ms
+[ENDED] D:/Projects/hongmen/tests/continuityIntent.test.ts
+[QUEUED] D:/Projects/hongmen/tests/phase1Reliability.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/phase1Reliability.test.ts
+ ✓ tests/phase1Reliability.test.ts (6 tests) 568ms
+[ENDED] D:/Projects/hongmen/tests/phase1Reliability.test.ts
+[QUEUED] D:/Projects/hongmen/tests/experimentIntegration.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/experimentIntegration.test.ts
+ ✓ tests/experimentIntegration.test.ts (2 tests) 354ms
+[ENDED] D:/Projects/hongmen/tests/experimentIntegration.test.ts
+[QUEUED] D:/Projects/hongmen/tests/r2ClosedLoop.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/r2ClosedLoop.test.ts
+ ✓ tests/r2ClosedLoop.test.ts (1 test) 520ms
+[ENDED] D:/Projects/hongmen/tests/r2ClosedLoop.test.ts
+     ✓ walks capture → checkpoint → drift → schedule → reentry → artifact  491ms
+[QUEUED] D:/Projects/hongmen/tests/decisionEvolutionUi.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/decisionEvolutionUi.test.ts
+[ENDED] D:/Projects/hongmen/tests/decisionEvolutionUi.test.ts
+ ✓ tests/decisionEvolutionUi.test.ts (4 tests) 479ms
+[QUEUED] D:/Projects/hongmen/tests/memoryLifecycle.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/memoryLifecycle.test.ts
+[ENDED] D:/Projects/hongmen/tests/memoryLifecycle.test.ts
+ ✓ tests/memoryLifecycle.test.ts (8 tests) 474ms
+[QUEUED] D:/Projects/hongmen/tests/repoSensing.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/repoSensing.test.ts
+ ✓ tests/repoSensing.test.ts (12 tests) 528ms
+[ENDED] D:/Projects/hongmen/tests/repoSensing.test.ts
+[QUEUED] D:/Projects/hongmen/tests/memoryConsolidation.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/memoryConsolidation.test.ts
+ ✓ tests/memoryConsolidation.test.ts (6 tests) 446ms
+[ENDED] D:/Projects/hongmen/tests/memoryConsolidation.test.ts
+[QUEUED] D:/Projects/hongmen/tests/phase2Acceptance.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/phase2Acceptance.test.ts
+ ✓ tests/phase2Acceptance.test.ts (7 tests) 510ms
+[ENDED] D:/Projects/hongmen/tests/phase2Acceptance.test.ts
+[QUEUED] D:/Projects/hongmen/tests/attachmentCorrection.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/attachmentCorrection.test.ts
+ ✓ tests/attachmentCorrection.test.ts (2 tests) 255ms
+[ENDED] D:/Projects/hongmen/tests/attachmentCorrection.test.ts
+[QUEUED] D:/Projects/hongmen/tests/projectEpisode.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectEpisode.test.ts
+ ✓ tests/projectEpisode.test.ts (10 tests) 520ms
+[ENDED] D:/Projects/hongmen/tests/projectEpisode.test.ts
+[QUEUED] D:/Projects/hongmen/tests/deliverableGap.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/deliverableGap.test.ts
+ ✓ tests/deliverableGap.test.ts (32 tests) 289ms
+[ENDED] D:/Projects/hongmen/tests/deliverableGap.test.ts
+[QUEUED] D:/Projects/hongmen/tests/continuityRuntime.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/continuityRuntime.test.ts
+[ENDED] D:/Projects/hongmen/tests/continuityRuntime.test.ts
+ ✓ tests/continuityRuntime.test.ts (3 tests) 440ms
+   ✓ UNKNOWN canonical target cannot be resent through generation, alias or scope revision  332ms
+[QUEUED] D:/Projects/hongmen/tests/repoSignalNativeContract.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/repoSignalNativeContract.test.ts
+ ✓ tests/repoSignalNativeContract.test.ts (1 test) 372ms
+[ENDED] D:/Projects/hongmen/tests/repoSignalNativeContract.test.ts
+[QUEUED] D:/Projects/hongmen/tests/demoUser.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/demoUser.test.ts
+stderr | tests/demoUser.test.ts > 演示账号初始化 > 生产环境显式开启但缺少口令时拒绝使用内置默认密码
+[auth] 演示账号已启用但缺少 DEMO_PASSWORD 或 DEMO_PASSWORD_HASH，跳过初始化。
+
+ ✓ tests/demoUser.test.ts (6 tests) 373ms
+[ENDED] D:/Projects/hongmen/tests/demoUser.test.ts
+[QUEUED] D:/Projects/hongmen/tests/attachment.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/attachment.test.ts
+ ✓ tests/attachment.test.ts (2 tests) 251ms
+[ENDED] D:/Projects/hongmen/tests/attachment.test.ts
+[QUEUED] D:/Projects/hongmen/tests/webProjectState.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/webProjectState.test.ts
+ ✓ tests/webProjectState.test.ts (8 tests) 404ms
+[ENDED] D:/Projects/hongmen/tests/webProjectState.test.ts
+[QUEUED] D:/Projects/hongmen/tests/r4PresentationClient.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/r4PresentationClient.test.ts
+ ✓ tests/r4PresentationClient.test.ts (9 tests) 409ms
+[ENDED] D:/Projects/hongmen/tests/r4PresentationClient.test.ts
+[QUEUED] D:/Projects/hongmen/tests/ux2ClaimCorrection.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/ux2ClaimCorrection.test.ts
+ ✓ tests/ux2ClaimCorrection.test.ts (6 tests) 315ms
+[ENDED] D:/Projects/hongmen/tests/ux2ClaimCorrection.test.ts
+[QUEUED] D:/Projects/hongmen/tests/projectNavigation.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectNavigation.test.ts
+ ✓ tests/projectNavigation.test.ts (13 tests) 382ms
+[ENDED] D:/Projects/hongmen/tests/projectNavigation.test.ts
+[QUEUED] D:/Projects/hongmen/tests/missionArtifactAdoptionPanel.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionArtifactAdoptionPanel.test.ts
+ ✓ tests/missionArtifactAdoptionPanel.test.ts (1 test) 216ms
+[ENDED] D:/Projects/hongmen/tests/missionArtifactAdoptionPanel.test.ts
+[QUEUED] D:/Projects/hongmen/tests/ux2SourceBinding.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/ux2SourceBinding.test.ts
+ ✓ tests/ux2SourceBinding.test.ts (5 tests) 307ms
+[ENDED] D:/Projects/hongmen/tests/ux2SourceBinding.test.ts
+[QUEUED] D:/Projects/hongmen/tests/experimentMetrics.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/experimentMetrics.test.ts
+ ✓ tests/experimentMetrics.test.ts (4 tests) 456ms
+[ENDED] D:/Projects/hongmen/tests/experimentMetrics.test.ts
+   ✓ original Mission reads captures, stores comparison and invalidates an old proposal after source revision  419ms
+[QUEUED] D:/Projects/hongmen/tests/agentUxJourney.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/agentUxJourney.test.ts
+ ✓ tests/agentUxJourney.test.ts (1 test) 374ms
+   ✓ 超过六项目普通失败不挤掉原问题；详情/接续共享责任方，读取无派发  355ms
+[ENDED] D:/Projects/hongmen/tests/agentUxJourney.test.ts
+[QUEUED] D:/Projects/hongmen/tests/projectDecisionTimeline.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectDecisionTimeline.test.ts
+ ✓ tests/projectDecisionTimeline.test.ts (2 tests) 228ms
+[ENDED] D:/Projects/hongmen/tests/projectDecisionTimeline.test.ts
+[QUEUED] D:/Projects/hongmen/tests/copilotConcurrency.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/copilotConcurrency.test.ts
+ ✓ tests/copilotConcurrency.test.ts (2 tests) 269ms
+[ENDED] D:/Projects/hongmen/tests/copilotConcurrency.test.ts
+[QUEUED] D:/Projects/hongmen/tests/userNav.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/userNav.test.ts
+ ✓ tests/userNav.test.ts (2 tests) 249ms
+[ENDED] D:/Projects/hongmen/tests/userNav.test.ts
+[QUEUED] D:/Projects/hongmen/tests/repoCi.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/repoCi.test.ts
+[ENDED] D:/Projects/hongmen/tests/repoCi.test.ts
+ ✓ tests/repoCi.test.ts (4 tests) 361ms
+[QUEUED] D:/Projects/hongmen/tests/ux2CorrectionControls.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/ux2CorrectionControls.test.ts
+ ✓ tests/ux2CorrectionControls.test.ts (2 tests) 259ms
+[ENDED] D:/Projects/hongmen/tests/ux2CorrectionControls.test.ts
+[QUEUED] D:/Projects/hongmen/tests/missionEvaluationBudget.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionEvaluationBudget.test.ts
+ ✓ tests/missionEvaluationBudget.test.ts (10 tests) 164ms
+[ENDED] D:/Projects/hongmen/tests/missionEvaluationBudget.test.ts
+[QUEUED] D:/Projects/hongmen/tests/agentUxControls.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/agentUxControls.test.ts
+ ✓ tests/agentUxControls.test.ts (1 test) 209ms
+[ENDED] D:/Projects/hongmen/tests/agentUxControls.test.ts
+[QUEUED] D:/Projects/hongmen/tests/harmonyAttachmentAuth.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/harmonyAttachmentAuth.test.ts
+ ✓ tests/harmonyAttachmentAuth.test.ts (7 tests) 210ms
+[ENDED] D:/Projects/hongmen/tests/harmonyAttachmentAuth.test.ts
+[QUEUED] D:/Projects/hongmen/tests/projectEvolutionSummary.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectEvolutionSummary.test.ts
+ ✓ tests/projectEvolutionSummary.test.ts (3 tests) 194ms
+[ENDED] D:/Projects/hongmen/tests/projectEvolutionSummary.test.ts
+[QUEUED] D:/Projects/hongmen/tests/hybridSearch.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/hybridSearch.test.ts
+ ✓ tests/hybridSearch.test.ts (4 tests) 234ms
+[ENDED] D:/Projects/hongmen/tests/hybridSearch.test.ts
+[QUEUED] D:/Projects/hongmen/tests/projectOverviewToolbar.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectOverviewToolbar.test.ts
+ ✓ tests/projectOverviewToolbar.test.ts (2 tests) 142ms
+[ENDED] D:/Projects/hongmen/tests/projectOverviewToolbar.test.ts
+[QUEUED] D:/Projects/hongmen/tests/missionTargetPanels.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionTargetPanels.test.ts
+ ✓ tests/missionTargetPanels.test.ts (2 tests) 178ms
+[ENDED] D:/Projects/hongmen/tests/missionTargetPanels.test.ts
+[QUEUED] D:/Projects/hongmen/tests/projectStartGuide.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectStartGuide.test.ts
+ ✓ tests/projectStartGuide.test.ts (2 tests) 180ms
+[ENDED] D:/Projects/hongmen/tests/projectStartGuide.test.ts
+[QUEUED] D:/Projects/hongmen/tests/missionReadbackPanel.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionReadbackPanel.test.ts
+ ✓ tests/missionReadbackPanel.test.ts (3 tests) 86ms
+[ENDED] D:/Projects/hongmen/tests/missionReadbackPanel.test.ts
+[QUEUED] D:/Projects/hongmen/tests/harmonyEntryIsolation.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/harmonyEntryIsolation.test.ts
+ ✓ tests/harmonyEntryIsolation.test.ts (2 tests) 67ms
+[ENDED] D:/Projects/hongmen/tests/harmonyEntryIsolation.test.ts
+[QUEUED] D:/Projects/hongmen/tests/researchEvaluationBudget.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/researchEvaluationBudget.test.ts
+[ENDED] D:/Projects/hongmen/tests/researchEvaluationBudget.test.ts
+ ✓ tests/researchEvaluationBudget.test.ts (3 tests) 64ms
+[QUEUED] D:/Projects/hongmen/tests/captureDraftReady.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/captureDraftReady.test.ts
+ ✓ tests/captureDraftReady.test.ts (1 test) 58ms
+[ENDED] D:/Projects/hongmen/tests/captureDraftReady.test.ts
+[QUEUED] D:/Projects/hongmen/tests/agentUxWorkState.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/agentUxWorkState.test.ts
+[ENDED] D:/Projects/hongmen/tests/agentUxWorkState.test.ts
+ ✓ tests/agentUxWorkState.test.ts (7 tests) 75ms
+[QUEUED] D:/Projects/hongmen/tests/missionProtocolRepair.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionProtocolRepair.test.ts
+ ✓ tests/missionProtocolRepair.test.ts (12 tests) 45ms
+[ENDED] D:/Projects/hongmen/tests/missionProtocolRepair.test.ts
+[QUEUED] D:/Projects/hongmen/tests/missionModelProtocol.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionModelProtocol.test.ts
+ ✓ tests/missionModelProtocol.test.ts (10 tests) 45ms
+[ENDED] D:/Projects/hongmen/tests/missionModelProtocol.test.ts
+[QUEUED] D:/Projects/hongmen/tests/missionClaimVerifier.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionClaimVerifier.test.ts
+ ✓ tests/missionClaimVerifier.test.ts (10 tests) 37ms
+[ENDED] D:/Projects/hongmen/tests/missionClaimVerifier.test.ts
+[QUEUED] D:/Projects/hongmen/tests/missionEvaluationRetry.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionEvaluationRetry.test.ts
+[ENDED] D:/Projects/hongmen/tests/missionEvaluationRetry.test.ts
+ ✓ tests/missionEvaluationRetry.test.ts (4 tests) 35ms
+[QUEUED] D:/Projects/hongmen/tests/missionEvidenceFit.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionEvidenceFit.test.ts
+ ✓ tests/missionEvidenceFit.test.ts (18 tests) 24ms
+[ENDED] D:/Projects/hongmen/tests/missionEvidenceFit.test.ts
+[QUEUED] D:/Projects/hongmen/tests/missionClaimSegments.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/missionClaimSegments.test.ts
+[ENDED] D:/Projects/hongmen/tests/missionClaimSegments.test.ts
+ ✓ tests/missionClaimSegments.test.ts (4 tests) 26ms
+[QUEUED] D:/Projects/hongmen/tests/health.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/health.test.ts
+ ✓ tests/health.test.ts (2 tests) 27ms
+[ENDED] D:/Projects/hongmen/tests/health.test.ts
+[QUEUED] D:/Projects/hongmen/tests/evidenceAssessment.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/evidenceAssessment.test.ts
+ ✓ tests/evidenceAssessment.test.ts (9 tests) 21ms
+[ENDED] D:/Projects/hongmen/tests/evidenceAssessment.test.ts
+[QUEUED] D:/Projects/hongmen/tests/focusRunning.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/focusRunning.test.ts
+ ✓ tests/focusRunning.test.ts (1 test) 16ms
+[ENDED] D:/Projects/hongmen/tests/focusRunning.test.ts
+[QUEUED] D:/Projects/hongmen/tests/llm.fallback.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/llm.fallback.test.ts
+stderr | tests/llm.fallback.test.ts > S03: LLM Capture and Deterministic Fallback Audit > should gracefully fallback to mock and log reason when LLM call fails or times out
+LLM structure failed; falling back to deterministic mock agent: fetch failed
+
+ ✓ tests/llm.fallback.test.ts (2 tests) 20ms
+[ENDED] D:/Projects/hongmen/tests/llm.fallback.test.ts
+[QUEUED] D:/Projects/hongmen/tests/projectOverviewContext.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectOverviewContext.test.ts
+ ✓ tests/projectOverviewContext.test.ts (3 tests) 20ms
+[ENDED] D:/Projects/hongmen/tests/projectOverviewContext.test.ts
+[QUEUED] D:/Projects/hongmen/tests/reminderClientContract.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/reminderClientContract.test.ts
+ ✓ tests/reminderClientContract.test.ts (10 tests) 20ms
+[ENDED] D:/Projects/hongmen/tests/reminderClientContract.test.ts
+[QUEUED] D:/Projects/hongmen/tests/p0cEvidence.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/p0cEvidence.test.ts
+ ✓ tests/p0cEvidence.test.ts (1 test) 16ms
+[ENDED] D:/Projects/hongmen/tests/p0cEvidence.test.ts
+[QUEUED] D:/Projects/hongmen/tests/crossrefMetadata.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/crossrefMetadata.test.ts
+ ✓ tests/crossrefMetadata.test.ts (3 tests) 18ms
+[ENDED] D:/Projects/hongmen/tests/crossrefMetadata.test.ts
+[QUEUED] D:/Projects/hongmen/tests/projectState.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectState.test.ts
+ ✓ tests/projectState.test.ts (15 tests) 16ms
+[ENDED] D:/Projects/hongmen/tests/projectState.test.ts
+[QUEUED] D:/Projects/hongmen/tests/accountMail.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/accountMail.test.ts
+ ✓ tests/accountMail.test.ts (8 tests) 15ms
+[ENDED] D:/Projects/hongmen/tests/accountMail.test.ts
+[QUEUED] D:/Projects/hongmen/tests/validation.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/validation.test.ts
+ ✓ tests/validation.test.ts (7 tests) 20ms
+[ENDED] D:/Projects/hongmen/tests/validation.test.ts
+[QUEUED] D:/Projects/hongmen/tests/provider-config.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/provider-config.test.ts
+ ✓ tests/provider-config.test.ts (8 tests) 11ms
+[ENDED] D:/Projects/hongmen/tests/provider-config.test.ts
+[QUEUED] D:/Projects/hongmen/tests/researchQueryCompilation.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/researchQueryCompilation.test.ts
+ ✓ tests/researchQueryCompilation.test.ts (4 tests) 13ms
+[ENDED] D:/Projects/hongmen/tests/researchQueryCompilation.test.ts
+[QUEUED] D:/Projects/hongmen/tests/projectChangeBrief.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectChangeBrief.test.ts
+ ✓ tests/projectChangeBrief.test.ts (5 tests) 8ms
+[ENDED] D:/Projects/hongmen/tests/projectChangeBrief.test.ts
+[QUEUED] D:/Projects/hongmen/tests/projectWorkspaceAuth.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectWorkspaceAuth.test.ts
+[ENDED] D:/Projects/hongmen/tests/projectWorkspaceAuth.test.ts
+ ✓ tests/projectWorkspaceAuth.test.ts (5 tests) 8ms
+[QUEUED] D:/Projects/hongmen/tests/globalFocusPresentation.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/globalFocusPresentation.test.ts
+[ENDED] D:/Projects/hongmen/tests/globalFocusPresentation.test.ts
+ ✓ tests/globalFocusPresentation.test.ts (8 tests) 8ms
+[QUEUED] D:/Projects/hongmen/tests/trustReceipt.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/trustReceipt.test.ts
+ ✓ tests/trustReceipt.test.ts (6 tests) 7ms
+[ENDED] D:/Projects/hongmen/tests/trustReceipt.test.ts
+[QUEUED] D:/Projects/hongmen/tests/webClientContract.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/webClientContract.test.ts
+ ✓ tests/webClientContract.test.ts (32 tests) 7ms
+[ENDED] D:/Projects/hongmen/tests/webClientContract.test.ts
+[QUEUED] D:/Projects/hongmen/tests/suggestions.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/suggestions.test.ts
+[ENDED] D:/Projects/hongmen/tests/suggestions.test.ts
+ ✓ tests/suggestions.test.ts (3 tests) 6ms
+[QUEUED] D:/Projects/hongmen/tests/projectDashboard.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectDashboard.test.ts
+[ENDED] D:/Projects/hongmen/tests/projectDashboard.test.ts
+ ✓ tests/projectDashboard.test.ts (5 tests) 5ms
+[QUEUED] D:/Projects/hongmen/tests/projectWorkspaceOverview.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectWorkspaceOverview.test.ts
+ ✓ tests/projectWorkspaceOverview.test.ts (1 test) 5ms
+[ENDED] D:/Projects/hongmen/tests/projectWorkspaceOverview.test.ts
+[QUEUED] D:/Projects/hongmen/tests/mockAgent.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/mockAgent.test.ts
+ ✓ tests/mockAgent.test.ts (3 tests) 5ms
+[ENDED] D:/Projects/hongmen/tests/mockAgent.test.ts
+[QUEUED] D:/Projects/hongmen/tests/harmonySettingsEditable.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/harmonySettingsEditable.test.ts
+[ENDED] D:/Projects/hongmen/tests/harmonySettingsEditable.test.ts
+ ✓ tests/harmonySettingsEditable.test.ts (1 test) 4ms
+[QUEUED] D:/Projects/hongmen/tests/artifacts.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/artifacts.test.ts
+ ✓ tests/artifacts.test.ts (6 tests) 4ms
+[ENDED] D:/Projects/hongmen/tests/artifacts.test.ts
+[QUEUED] D:/Projects/hongmen/tests/sessionCookie.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/sessionCookie.test.ts
+ ✓ tests/sessionCookie.test.ts (4 tests) 4ms
+[ENDED] D:/Projects/hongmen/tests/sessionCookie.test.ts
+[QUEUED] D:/Projects/hongmen/tests/projectAttention.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/projectAttention.test.ts
+ ✓ tests/projectAttention.test.ts (11 tests) 4ms
+[ENDED] D:/Projects/hongmen/tests/projectAttention.test.ts
+[QUEUED] D:/Projects/hongmen/tests/linker.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/linker.test.ts
+ ✓ tests/linker.test.ts (1 test) 4ms
+[ENDED] D:/Projects/hongmen/tests/linker.test.ts
+[QUEUED] D:/Projects/hongmen/tests/recordPresentation.test.ts
+[COLLECTED] D:/Projects/hongmen/tests/recordPresentation.test.ts
+ ✓ tests/recordPresentation.test.ts (1 test) 3ms
+[ENDED] D:/Projects/hongmen/tests/recordPresentation.test.ts
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/projectReentry.test.ts > ProjectReentry aggregation (R2-4) > reports STALE when a cited source is superseded but keeps other sections usable
+PrismaClientKnownRequestError: 
+Invalid `tx.agentClaimEvent.findMany()` invocation in
+D:/Projects/hongmen/lib/memory/claimEffective.ts:7:43
+
+  4 
+  5 /** No directiveService import: effective cognition is consumed by the original continuity clock. */
+  6 export async function claimControlState(userId: string, scope: DirectiveScope, tx: Tx = db, now = new Date()) {
+→ 7   const events = await tx.agentClaimEvent.findMany(
+The table `main.AgentClaimEvent` does not exist in the current database.
+ ❯ zr.handleRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:237:12
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ claimControlState lib/memory/claimEffective.ts:7:18
+      5| /** No directiveService import: effective cognition is consumed by the…
+      6| export async function claimControlState(userId: string, scope: Directi…
+      7|   const events = await tx.agentClaimEvent.findMany({ where: { ownerUse…
+       |                  ^
+      8|     ownerUserId: userId, projectId: scope.projectId,
+      9|     AND: [{ OR: [{ conversationId: null }, ...(scope.conversationId ? …
+ ❯ effectiveContinuity lib/continuity/directiveService.ts:45:21
+ ❯ getProjectAgentContext lib/services/projectAgentContextService.ts:40:20
+ ❯ getProjectReentry lib/services/projectReentryService.ts:236:33
+ ❯ tests/projectReentry.test.ts:141:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/projectReentry.test.ts > ProjectReentry aggregation (R2-4) > prioritizes RESOLVE_BLOCKED when a blocked action exists and targets the blocked item directly
+PrismaClientKnownRequestError: 
+Invalid `tx.agentClaimEvent.findMany()` invocation in
+D:/Projects/hongmen/lib/memory/claimEffective.ts:7:43
+
+  4 
+  5 /** No directiveService import: effective cognition is consumed by the original continuity clock. */
+  6 export async function claimControlState(userId: string, scope: DirectiveScope, tx: Tx = db, now = new Date()) {
+→ 7   const events = await tx.agentClaimEvent.findMany(
+The table `main.AgentClaimEvent` does not exist in the current database.
+ ❯ zr.handleRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:237:12
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ claimControlState lib/memory/claimEffective.ts:7:18
+      5| /** No directiveService import: effective cognition is consumed by the…
+      6| export async function claimControlState(userId: string, scope: Directi…
+      7|   const events = await tx.agentClaimEvent.findMany({ where: { ownerUse…
+       |                  ^
+      8|     ownerUserId: userId, projectId: scope.projectId,
+      9|     AND: [{ OR: [{ conversationId: null }, ...(scope.conversationId ? …
+ ❯ effectiveContinuity lib/continuity/directiveService.ts:45:21
+ ❯ getProjectAgentContext lib/services/projectAgentContextService.ts:40:20
+ ❯ getProjectReentry lib/services/projectReentryService.ts:236:33
+ ❯ tests/projectReentry.test.ts:212:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/registration.test.ts > Public account lifecycle > prevents cross-user project, memory, action, mission and artifact reads and writes
+PrismaClientKnownRequestError: 
+Invalid `tx.agentClaimEvent.findMany()` invocation in
+D:/Projects/hongmen/lib/memory/claimEffective.ts:7:43
+
+  4 
+  5 /** No directiveService import: effective cognition is consumed by the original continuity clock. */
+  6 export async function claimControlState(userId: string, scope: DirectiveScope, tx: Tx = db, now = new Date()) {
+→ 7   const events = await tx.agentClaimEvent.findMany(
+The table `main.AgentClaimEvent` does not exist in the current database.
+ ❯ zr.handleRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:237:12
+ ❯ zr.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:11
+ ❯ zr.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:23
+ ❯ claimControlState lib/memory/claimEffective.ts:7:18
+      5| /** No directiveService import: effective cognition is consumed by the…
+      6| export async function claimControlState(userId: string, scope: Directi…
+      7|   const events = await tx.agentClaimEvent.findMany({ where: { ownerUse…
+       |                  ^
+      8|     ownerUserId: userId, projectId: scope.projectId,
+      9|     AND: [{ OR: [{ conversationId: null }, ...(scope.conversationId ? …
+ ❯ effectiveContinuity lib/continuity/directiveService.ts:45:21
+ ❯ createMissionInTx lib/mission/missionService.ts:32:24
+ ❯ Proxy._transactionWithCallback node_modules/@prisma/client/src/runtime/getPrismaClient.ts:810:17
+ ❯ Module.createMission lib/mission/missionService.ts:25:14
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  2 failed | 146 passed (148)
+      Tests  3 failed | 1209 passed (1212)
+   Start at  13:57:12
+   Duration  424.14s (transform 8.55s, setup 0ms, import 119.49s, tests 249.28s, environment 15.86s)
+

@@ -1,0 +1,11 @@
+
+> projectmemo@0.1.0 lint
+> eslint .
+
+
+D:\Projects\hongmen\tests\ux2HypothesisRuntime.test.ts
+  69:9  error  'detail' is never reassigned. Use 'const' instead  prefer-const
+
+✖ 1 problem (1 error, 0 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

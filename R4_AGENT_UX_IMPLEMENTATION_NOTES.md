@@ -55,3 +55,40 @@
 5. 真实模型、隐藏题独立评分、自然日和目标设备 Gate 单列；此检查点没有这些验收证据。
 
 所有 Deviations：先落实 F07 与纠正失效纵向基础，因额度提示暂停后续范围；原 R2 规划不缩减。新增 API 的定位以认证原件的原始文本／结构化 JSON 为准，尚未完成物理页／块级 UI 映射；未知映射不得伪造。
+
+
+## UX-2 完整实施（2026-10-30，接续 6abfcab 未提交工作树）
+
+状态：UX-2A/B/C 工程实现、审查修复、双端与模拟器验收完成。本轮模型／网络测试全部为隔离库合成响应；正式质量评测未启动。基线 6abfcab 之上的未提交改动与本轮修复一并提交；未部署、未迁移真实库、未新增后台执行器、未 push。
+
+### 实现（在 6abfcab 检查点之上，保留全部目标）
+
+- A 纠正与双端：Web `ClaimCorrection`／`ScopedMessageCorrection`（跨项目显式选择适用项目，不自动扩散）；ArkTS `ClaimCorrection`／`AgentMemoryService` 接入 FocusConversation 与 MemoryTimeline；`ConversationDraftStore.flush()` 改为 `Promise<boolean>`，纠正先持久草稿再派发。
+- B 综合与上下文：`AgentContextDigest` 与迁移 `20261030120000_ux2_context_digest`；`publishMissionDigest`／`publishConversationDigest` 在原 fenced 发布事务内保存，不新增模型调用；Mission ContextBuilder 与 R4 Investigation 消费有效综合；`readExperiences` 纯读不触发同步；GET `/api/projects/[id]/agent-memory` 私有派生视图。
+- 新输入版本：Project `contextRevision` 与迁移 `20261030123000_ux2_project_input_version`；复用原 ProjectImpactJob 幂等回执递增，重放不递增；turn.readManifestJson 持久 sourceRevisionReadSet，`assertTurnCurrent` 前置核查。
+- C 稳定推测：`hypothesisService`（PROPOSED→EXPIRED 生命周期、逐句 exact quote、独立性与版本核查、SUPPORTED/REFUTED 不足降级 INCONCLUSIVE）；`cognitiveReadSet` 绑定实际消费版本，原 turn coordinator／Runner／批准／业务确认／核算全链核查；`COGNITIVE_RECOORDINATE` 复用原 generation/lease 与预算，已派发 sandbox 不丢弃原 UNKNOWN。
+
+### 本轮审查发现并修复
+
+1. 纠正原文读取权限（原 GET 可绕过 restricted 保护）：`resolveClaimText` 重写为共用 `lib/memory/claimReadable.ts`——CLAIM 复用 readHypotheses 的 RESTRICTED 判定（含依赖项目失权与根来源 OWNER 校验）；MESSAGE 改为对话归属＋关联项目（homeProjectId 或 ConversationProject）＋消息自身与 observedProjectIds 全部成员校验，与 readConversation 的屏蔽规则一致，模型观察集合不再作为放行依据；MISSION_OUTPUT 补 OWNER 角色校验。`readClaimCorrections` 同步过滤不可读 corrections；WITHDRAW 仍不要求源可读（有测试锁定）。
+2. AgentMemoryPanel／ClaimCorrection 项目切换：view 绑定 projectId（加载失败清空），纠控件按 project+source 加 key 重建，杜绝跨项目陈旧资料。
+3. 输入版本覆盖补口：行动复盘 `commitActionResult`、会议确认 `confirmMeetingChanges` 补 `enqueueImpact`（稳定 receipt，重放不递增）；此前只有测试主动 enqueue 的事实会推进版本。
+4. 上下文容量：新 `lib/memory/facetBudget.ts`——hypotheses 先淘汰并与自身 readSet 同步裁剪，mission 侧按剩余容量（29400）分配并在 manifest 记 `omittedCognition`，conversation 侧 6000 上限；大历史不再因新增 facets 抛 CONTEXT_LIMIT，覆盖不足显式标注。
+5. Runner 不再硬编码 `role:"OWNER"`：`buildContext.sourceInput` 携带真实 membership role／revision。
+6. 经验视图：`experienceView` 增加指令级 `suppressed` 标注；注入路径原有完整 lineage 检查保留。
+7. ArkTS 两个真实缺陷（模拟器验收发现）：MemoryTimeline 唯一入口传 `openRepo:'1'`，而 AgentMemoryPanel 只在非 repoMode 分支——记忆面板此前在设备上不可达，已在 repoMode 分支补渲染；ClaimCorrection 未绑定 ConversationDraftStore，记忆页纠正永远报"草稿尚未保存"——`aboutToAppear` 绑定并在保存前 await。
+
+### 验证记录（证据目录 evidence/r4-agent-ux/20261030-ux2/）
+
+- 全量单测首轮：292 文件／1226 项，3 失败（unit-final-full.json）。修复：missionRuntimeDiagnostics 的 buildContext mock 缺新 `sourceInput` 契约；documentReader 2 项为本机 PATH 优先选中 mingw `pdftotext 4.00`（非 Poppler），设 `PDFTOTEXT_PATH` 指向 TeX Live Poppler 24.03 后 8/8 通过——环境问题，非代码缺陷。
+- 最终全量单测：292 文件／1226 项全部通过（unit-final2.json，exit 0；documentReader 两项按上述环境变量运行）。
+- 新增自动化：`ux2ClaimSourceRights`（5 项：观察集合不放行、跨项目失权、OWNER 降级、推测受限屏蔽与撤回保留）、`ux2ConversationDigest`（对话发布→新讨论消费→撤权 RESTRICTED→抑制 STALE→新输入 PROJECT_INPUT_CHANGED）、`ux2InputVersion`（行动复盘推进版本且重放不递增；大量推测按剩余容量进入并显式 omitted）。
+- Web E2E：29 通过／0 失败／2 个既有跳过；含新增"记忆页显示带来源综合与待核实，并回原讨论接续"旅程与既有纠正旅程。
+- ArkTS：harmony:test 86 通过；HAP 构建通过。正式 signed HAP SHA256 `b7f0eaecbf575718a5cfc50f04b03e689b4176646d9e3a2818234e4f4596575c`，unsigned `67a8b6870a9c55f23a10dc2e0f0f76aee622c2b5b98ad2512e022bf9caba2b18`。
+- 模拟器验收（隔离，127.0.0.1:6555）：验收 HAP（临时 development/4401 构建）SHA256 `701c50ec8339f955d5fee0fc93d27c525a80c408995d07517e62665a428fa206`；后端 `next dev -p 4401`＋隔离库 `prisma/harmony-ux2.db`（43 迁移）＋`scripts/harmony-ux2-fixture.ts` 种子身份 ux2-acceptance（LLM_MODE=mock）。实机操作：登录→项目→记忆页显示"当前理解／待核实"→选择推测并保存纠正（POST /agent-claims 200，AgentClaimEvent USER_CORRECTION controlSeq 1、continuitySeq 递增）→撤回（WITHDRAW_CORRECTION seq 2）→重复撤回被 409 拒绝→综合变为"历史理解 · 需要重新核对"→"回原讨论接续"打开原会话并显示原引用。截图 emulator-ux2-*.jpeg 与后端日志、DB 回执查询脚本（check-claims-all.ts）均在证据目录。
+- 环境与边界：4400 被 aTrustAgent 占用（EACCES），经用户同意临时把 Constants 改为 development/4401 构建验收包，验收后按原字节还原（SHA256 `dc1cb22e32f49a6200c8d59a0a2fbd64dba7f44a2bf66371d1e68428fed0bbe8`）。还原前验收机曾以 review 构建把测试账号发往生产登录一次（401 失败，无任何写入），如实记录。验收期间 `.env`、真实库、用户其他文件未动；用户模拟器上的 contest-demo 会话已按验收流程登出。
+
+### Gate 分层（不相互替代）
+
+- 已签收：工程实现、原执行链与事务边界（合成模型＋隔离库）；双端交互与模拟器真实操作（隔离身份＋mock 模型）。
+- 未签收：真实模型语义质量与 C0–C3 消融、独立盲评、三类项目×多用户×三自然日真实使用、真机（非模拟器）验收、生产部署。本记录不得据此宣称这些通过。

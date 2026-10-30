@@ -1,0 +1,64 @@
+  <div class="page-head">
+            <div><div class="eyebrow">AGENT MISSIONS</div><h1 id="missionPageTitle">长期委托</h1><p>目标、推进情况和需要你处理的事项，集中在同一个地方。</p></div>
+            <button class="btn primary" id="newMissionButton"><svg class="icon sm"><use href="#i-plus"/></svg> 新建委托</button>
+          </div>
+          <div class="mission-layout">
+            <div class="mission-list" aria-label="委托列表" id="missionList"></div>
+            <article class="detail-card" id="missionDetail" aria-live="polite"></article>
+          </div>
+        </section>
+        <section class="view" id="chatView" aria-labelledby="chatPageTitle">
+          <div class="page-head">
+            <div><div class="eyebrow">PROJECT CONVERSATION</div><h1 id="chatPageTitle">与忆程协作</h1><p>围绕项目资料讨论问题，并将需要持续推进的工作交给原委托。</p></div>
+            <button class="btn" id="goMissionTop"><svg class="icon sm"><use href="#i-layers"/></svg> 查看长期委托</button>
+          </div>
+          <div class="chat-shell">
+            <div class="chat-heading">
+              <div class="agent-avatar">忆</div>
+              <div><h2>项目协作对话</h2><p>轻量视觉模型复赛项目 · 来源可查 · 决策需确认</p></div>
+              <div class="chat-status"><span class="dot"></span> 项目范围</div>
+            </div>
+            <div class="chat-stream" id="chatStream" aria-live="polite">
+              <div class="chat-entry user"><div class="user-bubble">根据已有材料，复赛演示应该先做什么？</div></div>
+              <div class="chat-entry assistant">
+                <div class="chat-avatar"><svg class="icon"><use href="#i-sparkles"/></svg></div>
+                <div class="assistant-content">
+                  <div class="speaker">忆程 <span class="speaker-note">基于已有项目资料 · 示例回复</span></div>
+                  <h2 class="answer-title">先验证显存预算，再决定演示方案</h2>
+                  <p class="answer-body">当前材料提示方案 A 可能存在峰值显存风险。建议先在目标设备补做最小规模基准测试，确定是否超过预算；如果确实超出，再评估替代方案。答辩材料可以同步准备，但最终大纲应等待验证结论。</p>
+                  <div class="suggestion-card">
+                    <h3>建议的下一步</h3>
+                    <div class="suggestion-row"><svg class="icon sm"><use href="#i-check-circle"/></svg><span>验证方案 A 的峰值显存与运行表现</span></div>
+                    <div class="suggestion-row"><svg class="icon sm"><use href="#i-check-circle"/></svg><span>补齐方案对比、实验日志与展示截图</span></div>
+                    <div class="suggestion-row"><svg class="icon sm"><use href="#i-check-circle"/></svg><span>根据验证结果确认最终答辩大纲</span></div>
+                  </div>
+                  <button class="refs-toggle" id="refsToggle" aria-expanded="false"><svg class="icon sm"><use href="#i-book"/></svg> 查看 3 条资料依据 <svg class="icon sm" id="refsChevron"><use href="#i-chevron-down"/></svg></button>
+                  <div class="source-list" id="sourceList" hidden>
+                    <button class="source-card" data-source="0"><span class="source-id">[1]</span><svg class="icon sm"><use href="#i-file"/></svg><span>设备显存预算与方案 A 风险说明</span><svg class="icon sm source-chevron"><use href="#i-chevron-right"/></svg></button>
+                    <button class="source-card" data-source="1"><span class="source-id">[2]</span><svg class="icon sm"><use href="#i-file"/></svg><span>轻量视觉模型复赛答辩材料要求</span><svg class="icon sm source-chevron"><use href="#i-chevron-right"/></svg></button>
+                    <button class="source-card" data-source="2"><span class="source-id">[3]</span><svg class="icon sm"><use href="#i-file"/></svg><span>演示准备与显存预算核对记录</span><svg class="icon sm source-chevron"><use href="#i-chevron-right"/></svg></button>
+                  </div>
+                  <div class="answer-actions">
+                    <button class="btn primary small" id="chatGoMission"><svg class="icon sm"><use href="#i-layers"/></svg> 查看相关委托</button>
+                    <button class="btn small" id="askFollowup">继续追问 <svg class="icon sm"><use href="#i-arrow-right"/></svg></button>
+                  </div>
+                  <p class="hint" style="margin:12px 0 0">注意：记录中的项目截止日期为 2026-09-30，已过期；需要确认当前适用阶段。</p>
+                </div>
+              </div>
+            </div>
+            <form class="composer" id="chatForm">
+              <label class="visually-hidden" for="chatInput">对话输入</label>
+              <textarea id="chatInput" rows="2" placeholder="问忆程：下一步做什么？或请帮我继续…" maxlength="2000"></textarea>
+              <div class="composer-bottom"><span class="composer-foot"><span class="dot"></span> 本地交互示例 · 不调用云端模型</span><button type="submit" class="btn primary" id="chatSend">发送 <svg class="icon sm"><use href="#i-arrow-up"/></svg></button></div>
+            </form>
+            <div class="chat-footer">本页展示交互结构，不接入正式 ProjectMemo 服务与真实用户数据。</div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+<dialog id="sourceDialog"><div class="dialog-inner"><div class="dialog-top"><div><h2 id="sourceTitle">资料来源</h2><p>来源摘要 · 本地示例数据</p></div><button class="dialog-close" data-close-dialog aria-label="关闭"><svg class="icon"><use href="#i-x"/></svg></button></div><div class="dialog-content" id="sourceBody"></div><div class="dialog-actions"><button class="btn" data-close-dialog>关闭</button></div></div></dialog>
+<dialog id="newMissionDialog"><form id="newMissionForm" class="dialog-inner"><div class="dialog-top"><div><h2>新建长期委托</h2><p>创建一个本地示例委托，不会产生真实 Agent 任务。</p></div><button class="dialog-close" type="button" data-close-dialog aria-label="关闭"><svg class="icon"><use href="#i-x"/></svg></button></div><label class="field-label" for="missionNameInput">委托名称</label><input class="field" id="missionNameInput" name="name" maxlength="40" required placeholder="例如：整理决赛演示材料" /><label class="field-label" for="missionGoalInput">你希望达成什么目标？</label><textarea class="field textarea" id="missionGoalInput" name="goal" required maxlength="1500" placeholder="说明目标、可用资料与需要遵守的限制…"></textarea><div class="dialog-actions"><button class="btn" type="button" data-close-dialog>取消</button><button class="btn primary" type="submit">添加到演示列表</button></div></form></dialog>
+<dialog id="checksDialog"><div class="dialog-inner"><div class="dialog-top"><div><h2>继续前需要确认</h2><p>此检查表仅用于演示真实产品应呈现的操作边界。</p></div><button class="dialog-close" data-close-dialog aria-label="关闭"><svg class="icon"><use href="#i-x"/></svg></button></div><div class="dialog-content"><label class="check-line"><input type="checkbox" id="checkModel"><span>模型服务与输出协议已重新验证</span></label><label class="check-line"><input type="checkbox" id="checkSource"><span>项目来源、目标版本与执行预算仍然有效</span></label><label class="check-line"><input type="checkbox" id="checkPermission"><span>用户授权仍允许当前范围的只读分析</span></label><p style="margin-top:15px">正式产品应由服务端再次校验这些条件，而不是仅信任页面勾选。本示例不执行恢复命令。</p></div><div class="dialog-actions"><button class="btn" data-close-dialog>返回</button><button class="btn primary" id="simulateCheckButton">核对演示说明</button></div></div></dialog>
+<dialog id="projectDialog"><div class="dialog-inner"><div class="dialog-top"><div><h2>当前项目摘要</h2><p>轻量视觉模型复赛项目</p></div><button class="dialog-close" d

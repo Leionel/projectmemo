@@ -1,0 +1,10 @@
+⨯ Failed to start server
+Error: listen EACCES: permission denied 127.0.0.1:4400
+    at <unknown> (Error: listen EACCES: permission denied 127.0.0.1:4400) {
+  code: 'EACCES',
+  errno: -4092,
+  syscall: 'listen',
+  address: '127.0.0.1',
+  port: 4400
+}
+[?25h

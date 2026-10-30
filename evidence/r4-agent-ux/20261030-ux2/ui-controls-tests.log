@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/ux2ClaimCorrection.test.ts tests/ux2SourceBinding.test.ts tests/continuityRecoordination.test.ts tests/continuitySuppression.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  4 passed (4)
+      Tests  16 passed (16)
+   Start at  13:47:14
+   Duration  28.56s (transform 2.35s, setup 0ms, import 5.53s, tests 21.09s, environment 0ms)
+

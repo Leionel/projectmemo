@@ -1,0 +1,12 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+ ❯ tests/registration.test.ts (14 tests | 1 failed) 1707ms
+     × prevents cross-user project, memory, action, mission and artifact reads and writes 164ms
+ ❯ tests/projectReentry.test.ts (5 tests | 2 failed) 678ms
+     × reports STALE when a cited source is superseded but keeps other sections usable 130ms
+     × prioritizes RESOLVE_BLOCKED when a blocked action exists and targets the blocked item directly 60ms

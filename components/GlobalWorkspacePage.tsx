@@ -1,3 +1,5 @@
+import { isFeatureEnabled } from "@/lib/config/features";
+import { AgentMemoryPanel } from "./AgentMemoryPanel";
 import Link from "next/link";
 import { ArrowRight, Plus, Search } from "lucide-react";
 import { PageHeading } from "@/components/PageHeading";
@@ -32,6 +34,7 @@ export async function GlobalWorkspacePage({ userId, mode, input }: { userId: str
       <label className="flex items-center gap-2 text-xs text-[var(--ink-soft)]"><input type="checkbox" name="archived" value="1" defaultChecked={f.archived} />包含归档项目</label>
       <button className="editorial-button focus-ring" type="submit">应用筛选</button>{filtered && <Link prefetch={false} className="workspace-link focus-ring" href={path}>清除筛选</Link>}
     </form>
+    {memory && isFeatureEnabled("FOCUS_AGENT_ENABLED",false) && f.project && data.projects.some(p=>p.id===f.project) && <AgentMemoryPanel key={userId+f.project} projectId={f.project}/>} 
     {memory ? <section aria-label="跨项目记忆" className="workspace-list-panel">
       <div className="workspace-panel-heading"><h2>已保存的记忆</h2><span>时态只描述与当前结论的关系；有效性请在原项目核验</span></div>
       {data.cards.map(card => <article key={card.id} className="workspace-row"><div className="min-w-0"><div className="workspace-row-meta"><span>{knowledgeTypeLabels[card.type]}</span>{card.capture.sourceType && <span className="paper-tab px-2 py-1">{card.capture.sourceType}</span>}{card.temporal && card.temporal.reasonCode !== "NO_SUPPORTING_EVIDENCE" && <span className={`rounded px-1.5 py-0.5 text-xs font-bold ${temporalBadge[card.temporal.topLevelState]}`} title={card.temporal.displayReason}>时态：{temporalStateLabels[card.temporal.topLevelState]}</span>}<span>{card.project.title}{card.project.archivedAt ? " · 已归档" : ""}</span><time dateTime={card.createdAt.toISOString()}>{card.createdAt.toLocaleDateString("zh-CN")}</time></div><h3>{card.title}</h3><p><EvidenceText text={card.summary} /></p></div><Link prefetch={false} className="workspace-link focus-ring" href={`/projects/${card.project.id}/knowledge#card-${card.id}`}>查看记忆与来源<ArrowRight size={14} aria-hidden="true" /></Link></article>)}

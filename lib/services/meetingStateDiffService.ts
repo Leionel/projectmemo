@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { pickSupersedeCard } from "@/lib/services/changeImpactService";
 import { refreshProjectState } from "@/lib/services/projectStateService";
 import { recordLifecycleEventInTx } from "@/lib/services/memoryLifecycleService";
+import { enqueueImpact } from "@/lib/decision/impactJobs";
 import type {
   MeetingConfirmResult,
   MeetingImpactPreview,
@@ -369,6 +370,7 @@ export async function confirmMeetingChanges(projectId: string, input: MeetingCon
   }
 
   const applied: MeetingConfirmResult["applied"] = [];
+  const impactRoots: string[] = [];
   let afterSnapshotId: string | null = null;
 
   const transactionResult = await db.$transaction(async (tx) => {
@@ -472,6 +474,7 @@ export async function confirmMeetingChanges(projectId: string, input: MeetingCon
           supersededCardId: change.supersededCardId,
           deadlineISO: null,
         });
+        impactRoots.push(`capture:${capture.id}`, `card:${newCard.id}`, `card:${change.supersededCardId}`);
         continue;
       }
 
@@ -493,6 +496,7 @@ export async function confirmMeetingChanges(projectId: string, input: MeetingCon
           supersededCardId: null,
           deadlineISO: null,
         });
+        impactRoots.push(`action:${action.id}`);
         continue;
       }
 
@@ -543,9 +547,11 @@ export async function confirmMeetingChanges(projectId: string, input: MeetingCon
           supersededCardId: null,
           deadlineISO: null,
         });
+        impactRoots.push(`capture:${capture.id}`, `card:${newCard.id}`);
       }
     }
 
+    await enqueueImpact(tx, projectId, `meeting-confirm:${run.id}`, impactRoots);
     await tx.agentRun.update({
       where: { id: run.id },
       data: {

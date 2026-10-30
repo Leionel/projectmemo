@@ -6,6 +6,8 @@ import type { ConversationTurn } from "@/lib/generated/prisma/client";
 import type { ConversationActor } from "@/lib/types/conversation";
 import type { DirectiveScope } from "@/lib/types/continuity";
 import { effectiveContinuity, assertDirectiveEffect } from "./directiveService";
+import { assertProjectInputReadSet } from "@/lib/memory/inputReadSet";
+import { assertCognitiveReadSet } from "@/lib/memory/hypothesisService";
 
 export type Coordination = { generation: number; state: "ACTIVE" | "INVALIDATED" | "DRAINING" | "RECOORDINATING" | "STOPPING" | "TERMINAL";
   scopes: DirectiveScope[]; bindings: Array<{ intentHash: string; reusePolicyHash: string; nextBoundary: string | null }>;
@@ -19,6 +21,14 @@ export async function initialCoordination(userId: string, scopes: DirectiveScope
     bindings: views.map(v => ({ intentHash: v.intentHash, reusePolicyHash: v.reusePolicyHash, nextBoundary: v.nextBoundary })) };
 }
 export async function assertTurnCurrent(turn: ConversationTurn, userId: string, generation: number | undefined, tx: Tx = db, effect?: "MODEL" | "EXTERNAL_READ") {
+  try {
+    const manifest = record(turn.readManifestJson);
+    await assertProjectInputReadSet(userId, manifest.sourceRevisionReadSet, tx);
+    await assertCognitiveReadSet(userId, manifest.cognitiveReadSet, tx);
+  } catch (error) {
+    if (error instanceof AppError && error.code === "COGNITIVE_RECOORDINATE") throw new AppError(coordination(turn) ? "TURN_RECOORDINATE" : "CONTEXT_CHANGED", error.message, 409);
+    throw error;
+  }
   const c = coordination(turn); if (!c) return;
   if (c.state === "STOPPING" || record(turn.readManifestJson).stopRequested) throw new AppError("TURN_STOP_REQUESTED", "已停止本轮调查", 409);
   if (generation !== c.generation || c.state !== "ACTIVE") throw new AppError("TURN_RECOORDINATE", "工作方向已变化，正在重新协调", 409);
@@ -60,7 +70,7 @@ export async function activateNextGeneration(actor: ConversationActor, turnId: s
     const runs = await tx.agentRun.findMany({ where: { turnId, conversationId: turn.conversationId } });
     for (const run of runs) if (record(run.trace).r4Draft && !await tx.agentMessage.findFirst({ where: { runId: run.id } }))
       await tx.copilotToolExecution.updateMany({ where: { sourceRunId: run.id, status: "PENDING" }, data: { status: "DECLINED" } });
-    const nextManifest = { ...manifest, operations: ops, coordination: next, experience: undefined, modelResults: {}, directiveCandidate: undefined, initialObservation: undefined,
+    const nextManifest = { ...manifest, sourceRevisionReadSet: undefined, cognitiveReadSet: undefined, operations: ops, coordination: next, experience: undefined, modelResults: {}, directiveCandidate: undefined, initialObservation: undefined,
       sourceRefs: [], presentationDraft: undefined, progressEvents: manifest.progressEvents };
     await tx.conversationTurn.update({ where: { id: turnId }, data: { readManifestJson: json(nextManifest) } });
     return next;

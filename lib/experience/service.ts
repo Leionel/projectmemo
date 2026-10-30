@@ -4,6 +4,7 @@ import { isFeatureEnabled } from "@/lib/config/features";
 import { z } from "zod";
 import { syncExperiences } from "./extract";
 import { buildTrajectoryIndex } from "./trajectoryIndex";
+import { effectiveContinuity } from "@/lib/continuity/directiveService";
 
 /**
  * P3-A 经验管理服务。
@@ -37,17 +38,20 @@ async function requirePrivateAccess(userId: string, projectId: string) {
     throw new AppError("PROJECT_NOT_FOUND", "项目不存在或不可访问", 404);
 }
 
-export async function listExperiences(userId: string, projectId: string) {
+export async function listExperiences(userId: string, projectId: string) { return experienceView(userId, projectId, true); }
+export async function readExperiences(userId: string, projectId: string) { return experienceView(userId, projectId, false); }
+async function experienceView(userId: string, projectId: string, synchronize: boolean) {
   const enabled = isFeatureEnabled("PROJECT_EXPERIENCE_ENABLED", true);
   if (!enabled) return { enabled: false as const, experiences: [], trajectory: null };
   await requirePrivateAccess(userId, projectId);
-  await syncExperiences(userId, projectId);
+  if (synchronize) await syncExperiences(userId, projectId);
   const [rows, index] = await Promise.all([
     db.agentExperience.findMany({ where: { projectId, ownerUserId: userId }, orderBy: { supportCount: "desc" }, take: 50 }),
     buildTrajectoryIndex(userId, projectId),
   ]);
   const statusOrder: Record<string, number> = { SHADOW: 0, ACTIVE: 1, CANDIDATE: 2, REVOKED: 3 };
   rows.sort((a, b) => (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9) || b.supportCount - a.supportCount);
+  const suppressed = new Set((await effectiveContinuity(userId, { projectId })).directives.filter(d => d.kind === "USE_SUPPRESSION").flatMap(d => d.sourceIds));
   const trajectory = {
     missionCount: index.entries.length,
     truncated: index.truncated,
@@ -76,6 +80,7 @@ export async function listExperiences(userId: string, projectId: string) {
       activatedAt: row.activatedAt?.toISOString() ?? null,
       revokedAt: row.revokedAt?.toISOString() ?? null,
       revokedReason: row.revokedReason ?? null,
+      suppressed: suppressed.has("experience:" + row.id),
       createdAt: row.createdAt.toISOString(),
     })),
   };

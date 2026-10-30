@@ -30,7 +30,7 @@ export async function sourceHash(projectId: string, id: string, tx: Tx = db): Pr
     return action ? jsonHash(action) : null;
   }
   if (id === `project:${projectId}`) {
-    const project = await tx.project.findUnique({where:{id:projectId},select:{title:true,goal:true,deadline:true}});
+    const project = await tx.project.findUnique({where:{id:projectId},select:{title:true,goal:true,deadline:true,contextRevision:true}});
     const actions = await tx.actionItem.findMany({where:{projectId,isSimulated:false},orderBy:{id:"asc"},select:{id:true,title:true,status:true,dependencyVersion:true,dueAt:true}});
     return project ? jsonHash({project,actions}) : null;
   }

@@ -1,0 +1,49 @@
+mission-layout{display:grid;grid-template-columns:276px minmax(0,1fr);gap:20px;align-items:start}
+
+mission-layout{grid-template-columns:234px minmax(0,1fr);gap:13px}
+
+mission-layout{grid-template-columns:240px minmax(0,1fr)}
+
+mission-layout{grid-template-columns:minmax(0,1fr)}
+
+.mission-item{width:100%;border:1px solid transparent;background:transparent;text-align:left;padding:15px 14px;display:grid;gap:7px;border-radius:13px;color:var(--ink);transition:background .16s,border-color .16s}
+
+.mission-item{flex:0 0 220px;scroll-snap-align:start;background:#fff;border-color:var(--line)}
+
+.mission-item{min-width:0;flex:none;scroll-snap-align:none}
+
+.detail-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-xl);box-shadow:var(--shadow);overflow:hidden}
+
+.chat-shell{max-width:1000px;margin:0 auto}
+
+.chat-heading{display:flex;align-items:center;gap:12px;padding-bottom:22px;border-bottom:1px solid var(--line)}
+
+.chat-stream{display:grid;gap:30px;padding:35px 8px 28px}
+
+.chat-stream{padding:24px 0 18px;gap:26px}
+
+.chat-entry{display:flex;gap:15px;align-items:start}
+
+.chat-entry{gap:9px}
+
+.user-bubble{max-width:78%;background:#ecf2ec;border:1px solid #e1e8e0;border-radius:15px 15px 3px 15px;padding:14px 18px;line-height:1.75;font-size:13px}
+
+.user-bubble{max-width:91%}
+
+.assistant-content{flex:1;min-width:0;max-width:840px}
+
+.answer-title{font-size:19px;font-weight:750;letter-spacing:-.02em;margin:0 0 13px;line-height:1.5}
+
+.answer-title{font-size:17px}
+
+.suggestion-card{background:#f4f7f3;border:1px solid #e3ebe2;border-radius:14px;padding:18px 20px;margin:20px 0}
+
+.suggestion-card{padding:14px}
+
+.source-card{border:1px solid var(--line);border-radius:11px;background:#fff;padding:12px 14px;text-align:left;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--ink-soft)}
+
+.speaker{font-weight:730;font-size:12px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+
+.refs-toggle{display:inline-flex;align-items:center;gap:7px;background:none;border:0;padding:9px 0;color:var(--accent);font-size:12px;font-weight:680}
+
+.progress-track{height:7px;border-radius:20px;background:#ebeee9;overflow:hidden}

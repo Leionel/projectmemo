@@ -1,0 +1,1 @@
+lib/memory/hypothesisService.ts(51,114): error TS18047: 'claim' is possibly 'null'.

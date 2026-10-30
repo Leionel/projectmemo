@@ -31,6 +31,8 @@ import { bindInvestigationGoal } from "./experienceContract";
 import { resolveConversationExperience, recordConversationExperience, recordModelDecision, type ExperienceReadRef } from "@/lib/experience/injection";
 import { facetsFromConversation } from "@/lib/experience/conditions";
 import { MISSION_PROTOCOL_SCHEMA_VERSION } from "@/lib/mission/contracts";
+import { browserReadAvailable } from "@/lib/browser/reader";
+import type { BrowserReader } from "@/lib/browser/contracts";
 
 export type R4State = {
   schemaVersion: 1; policyVersion: "r4-v1"; phase: "ROUTING" | "READING_SOURCE" | "EVALUATING" | "WAITING_MODEL" | "WAITING_USER" | "READY" | "UNKNOWN";
@@ -128,6 +130,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
   evaluationVariant?: "PROMPT_ONLY" | "INVESTIGATION_ONLY";
   directory: WorkspaceDirectory; exactRef?: { kind: "MISSION" | "ACTION"; id: string; projectId: string };
   recentDialogue: Array<{ role: string; content: string }>;
+  browserReader?: BrowserReader;
 }) {
   actor={...actor,conversationId:id};
   const state: R4State = { schemaVersion: 1, policyVersion: "r4-v1", phase: "ROUTING", budget: investigationBudget(input.mode),
@@ -186,7 +189,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
   const fittedFacets = (await import("@/lib/memory/facetBudget")).fitFacetGroups([...hypotheses, ...effectiveMemory], 6000).groups;
   const keptHypotheses = fittedFacets.slice(0, hypotheses.length) as typeof hypotheses, keptMemory = fittedFacets.slice(hypotheses.length) as typeof effectiveMemory;
   await mutateTurn(actor, id, turnId, manifest => ({...manifest, cognitiveReadSet:keptHypotheses.flatMap(v=>v.readSet)}));
-  const allowedTools = [...(researchAllowed ? [...workspaceReadTools, ...(grant.scope.enabled ? ["web_search",...(grant.scope.academicMetadata&&isFeatureEnabled("ACADEMIC_RESEARCH_ENABLED",false)?["read_paper_metadata"]:[])] : []), "web_fetch"] : workspaceReadTools), ...(ciAllowed ? ["read_repository_ci", "read_ci_jobs", "read_ci_log"] : []),...(isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false)?["inspect_document","read_document_page","read_document_section","read_document_table"]:[]),...(isFeatureEnabled("EXPERIMENT_OBSERVER_ENABLED",false)?["inspect_experiment_metrics","compare_experiment_metrics"]:[])];
+  const allowedTools = [...(researchAllowed ? [...workspaceReadTools, ...(grant.scope.enabled ? ["web_search",...(grant.scope.academicMetadata&&isFeatureEnabled("ACADEMIC_RESEARCH_ENABLED",false)?["read_paper_metadata"]:[])] : []), "web_fetch", ...(researchAllowed&&browserReadAvailable()?["browser_read"]:[])] : workspaceReadTools), ...(ciAllowed ? ["read_repository_ci", "read_ci_jobs", "read_ci_log"] : []),...(isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false)?["inspect_document","read_document_page","read_document_section","read_document_table"]:[]),...(isFeatureEnabled("EXPERIMENT_OBSERVER_ENABLED",false)?["inspect_experiment_metrics","compare_experiment_metrics"]:[])];
   // CT-8：Conversation/Focus 用同一条件匹配器，但数据/划分等缺失保持 UNKNOWN，不冒用 Mission 条件。
   const experienceProjects = await db.project.findMany({ where: { id: { in: route.projectIds } }, select: { id: true, goal: true, scenario: true } });
   const experienceGroups = await Promise.all(route.projectIds.map(async projectId => {
@@ -282,7 +285,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
       coverage: { complete: false, description: decision.informationNeed }, reservationId: callId, provider, usage: frame.usage, failureReason: null };
     state.steps.push(step); state.phase = "READING_SOURCE"; await saveR4State(actor, id, turnId, state, observations.sources);
     try {
-      const web = decision.call.tool === "web_search" || decision.call.tool === "web_fetch" || decision.call.tool === "read_paper_metadata";
+      const web = decision.call.tool === "web_search" || decision.call.tool === "web_fetch" || decision.call.tool === "read_paper_metadata" || decision.call.tool === "browser_read";
       const ci = ["read_repository_ci", "read_ci_jobs", "read_ci_log"].includes(decision.call.tool);
       const doc=["inspect_document","read_document_page","read_document_section","read_document_table"].includes(decision.call.tool);
       if (ci && !ciAllowed) throw new AppError("CI_NOT_AUTHORIZED", "本轮没有获准的 CI 连接", 409);
@@ -290,7 +293,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
       const result = await turnOperation<{data:unknown;sources:ConversationSource[];coverage:Record<string,unknown>;discovered:MaterialPointer[]}>(actor, id, turnId, "read-" + step.seq, "READ", decision.call, () => doc?readConversationDocumentTool(actor,id,turnId,decision.call as DocumentCall,state.pointers):ci
         ? readConversationRepositoryTool(actor, id, turnId, decision.call as RepositoryCiCall, state.pointers, observations.sources)
         : web
-        ? readConversationResearchTool(actor, id, turnId, "web-" + step.seq, decision.call as import("@/lib/types/conversationResearch").ResearchToolCall)
+        ? readConversationResearchTool(actor, id, turnId, "web-" + step.seq, decision.call as import("@/lib/types/conversationResearch").ResearchToolCall, undefined, input.browserReader)
         : readWorkspaceTool(actor, decision.call, route.projectIds, state.pointers, observations.sources));
       for (const source of result.sources.filter(s => s.external)) await validateWebSource(actor, source);
       const added = result.sources.filter(s => !observations.sources.some(old => old.id === s.id && old.revision === s.revision && old.excerptHash === s.excerptHash));
@@ -308,9 +311,10 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
       step.status = "FAILED"; step.finishedAt = new Date().toISOString(); step.failureReason = e instanceof AppError ? e.message : "资料读取中断";
       // Persist failure without stale source content; access checks still apply.
       await saveR4State(actor, id, turnId, state).catch(() => undefined);
-      if ((decision.call.tool === "web_search" || decision.call.tool === "web_fetch" || decision.call.tool === "read_paper_metadata") && e instanceof AppError &&
-        ["SOURCE_BLOCKED", "SOURCE_UNAVAILABLE", "EMPTY_SOURCE", "RESEARCH_RETRYABLE", "SEARCH_AUTH_ERROR", "SEARCH_BALANCE_EMPTY", "SEARCH_NOT_CONFIGURED", "EXTERNAL_BUDGET_EXHAUSTED", "CONTEXT_LIMIT", "QUERY_TOO_LONG", "QUERY_FILTER_CONFLICT"].includes(e.code)) {
-        if (["SEARCH_AUTH_ERROR", "SEARCH_BALANCE_EMPTY", "SEARCH_NOT_CONFIGURED", "EXTERNAL_BUDGET_EXHAUSTED", "CONTEXT_LIMIT"].includes(e.code)) {
+      if ((decision.call.tool === "web_search" || decision.call.tool === "web_fetch" || decision.call.tool === "read_paper_metadata" || decision.call.tool === "browser_read") && e instanceof AppError &&
+        ["SOURCE_BLOCKED", "SOURCE_UNAVAILABLE", "EMPTY_SOURCE", "RESEARCH_RETRYABLE", "SEARCH_AUTH_ERROR", "SEARCH_BALANCE_EMPTY", "SEARCH_NOT_CONFIGURED", "EXTERNAL_BUDGET_EXHAUSTED", "CONTEXT_LIMIT", "QUERY_TOO_LONG", "QUERY_FILTER_CONFLICT",
+          "BROWSER_UNAVAILABLE", "BROWSER_RUNTIME_MISSING", "BROWSER_TURN_LIMIT", "BROWSER_URL_BLOCKED", "BROWSER_PRIVATE_ADDRESS", "BROWSER_DNS_FAILED", "BROWSER_EMPTY", "BROWSER_NAVIGATION_TIMEOUT", "BROWSER_NAVIGATION_FAILED", "BROWSER_PARTIAL_RENDER", "BROWSER_FAILED"].includes(e.code)) {
+        if (["SEARCH_AUTH_ERROR", "SEARCH_BALANCE_EMPTY", "SEARCH_NOT_CONFIGURED", "EXTERNAL_BUDGET_EXHAUSTED", "CONTEXT_LIMIT", "BROWSER_UNAVAILABLE", "BROWSER_RUNTIME_MISSING", "BROWSER_TURN_LIMIT", "BROWSER_URL_BLOCKED", "BROWSER_PRIVATE_ADDRESS", "BROWSER_DNS_FAILED"].includes(e.code)) {
           state.stopReason = e.code; state.decision = { decision: "STOP", reason: "BUDGET_EXHAUSTED", explanation: e.message }; break;
         }
         await validateContext(actor, scopeDirectory, observations, state.pointers); continue;

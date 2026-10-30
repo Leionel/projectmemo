@@ -26,7 +26,7 @@ export function sourceContext(source: Source, policy?: SourceUse) {
   const text = source.text, ranges = text.length > 800 ? [[0, 400], [text.length - 400, text.length]] : [[0, text.length]];
   return { ...(policy ? { provenance: { state: policy.state, independentEvidence: policy.independentEvidence, reason: policy.reason } } : {}), id: source.id, kind: source.kind, entityType: source.entityType, knowledgeClass: source.knowledgeClass ?? (source.kind === "EXTERNAL" ? "EXTERNAL_REFERENCE" : "PROJECT_OBSERVATION"),
     hash: source.hash, revision: source.revision, observedAt: source.observedAt, temporalState: source.temporalState ?? source.assessment?.temporalState ?? "UNKNOWN",
-    assessment: source.assessment, document:source.document, excerpts: ranges.map(([start, end]) => ({ sourceId: source.id, start, end, text: text.slice(start, end), excerptHash: textHash(text.slice(start, end)) })),
+    assessment: source.assessment, document:source.document, ...(source.browser?{browser:{status:source.browser.status,finalUrl:source.browser.finalUrl,observedAt:source.browser.observedAt,complete:source.browser.coverage.complete,failureCode:source.browser.failureCode}}:{}), excerpts: ranges.map(([start, end]) => ({ sourceId: source.id, start, end, text: text.slice(start, end), excerptHash: textHash(text.slice(start, end)) })),
     truncated: text.length > 800 };
 }
 function compactData(value: unknown) {

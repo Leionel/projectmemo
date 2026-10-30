@@ -49,6 +49,9 @@ struct ConversationWebSource {
             if (this.source!.document) {
               Text((this.source!.document!.pages.length > 0 ? '原件物理第 ' + this.source!.document!.pages[0].toString() + ' 页' : '校对文本或目录') + ' · 读取于 ' + this.source!.document!.observedAt.slice(0, 10)).fontSize(12).fontColor(PMColors.INK_SECONDARY)
               if (this.source!.document!.kind === 'TABLE') { Text('表头、合并单元格和跨页关系需对照原页核对。').fontSize(13).fontColor(PMColors.INK_SECONDARY) }
+            } else if (this.source!.external?.browser) {
+              Text('网页渲染读取 · 快照 ' + this.source!.external!.browser!.observedAt.slice(0, 16).replace('T', ' ')).fontSize(12).fontColor(PMColors.INK_SECONDARY)
+              Text(this.source!.external!.browser!.coverage.complete ? '已取得本次可见正文；页面请求 ' + this.source!.external!.browser!.coverage.requests.toString() + ' 次，拦截 ' + this.source!.external!.browser!.coverage.blockedRequests.toString() + ' 次。' : '仅取得部分可见正文：' + (this.source!.external!.browser!.failureMessage ?? '页面尚未加载完成') + '。').fontSize(13).fontColor(PMColors.INK_SECONDARY)
             } else { Text(researchReadLevelLabel(this.source!.external?.readLevel ?? '') + ' · 抓取于 ' + (this.source!.external?.fetchedAt.slice(0, 10) ?? '')).fontSize(12).fontColor(PMColors.INK_SECONDARY) }
             Text(this.source!.excerpt || '尚未取得可读正文').fontSize(16).lineHeight(27).fontColor(PMColors.INK_PRIMARY).copyOption(CopyOptions.LocalDevice)
             Button(this.source!.document ? '打开原文件 ↗' : '打开原网页 ↗', { type: ButtonType.Normal }).height(48).fontSize(15).fontColor(PMColors.BRAND).backgroundColor(PMColors.SURFACE_SUBTLE).onClick(() => { this.openOriginal(); })

@@ -37,7 +37,7 @@ export const investigateV1 = spec("focus.investigate.v1", "INVESTIGATE", `你同
 每次新观察后重新决定：ANSWER_NOW、READ_EXISTING、ASK_USER、HANDOFF_MISSION 或 STOP。读取必须有具体 informationNeed 和 expectedObservation。
 READ_EXISTING.informationNeed 原样采用对应项目 goalAssessment.nextInformationNeed，确保读取服务于该目标缺口。
 工具仅使用 allowedTools，参数严格按输出 Schema 的 decision.call。原文件从 materialPointers 定向读取，不拼路径/URL；新发现可改变下一工具或结束。不要重复无增益查询，预算不足就停止。
-research 可用时，依据缺口按需 web_search 或 web_fetch，不固定两搜两读；用户原链接先读，不先搜索。仅公开研究范围可搜索，scopeRevision 使用给定值；web_fetch 只用实际网页 sourceId，revision 可省略，由服务器绑定不可变源版本。
+research 可用时，依据缺口按需 web_search 或 web_fetch，不固定两搜两读；用户原链接先读，不先搜索。仅公开研究范围可搜索，scopeRevision 使用给定值；web_fetch 只用实际网页 sourceId，revision 可省略，由服务器绑定不可变源版本。已定位网页的 Fetch 正文不足且渲染有明确价值时，可用 browser_read 读取隔离浏览器的实际可见正文；不登录、不填表、不点击未审查控件；Fetch 已足够时不要重复浏览；浏览器观察与截图只算同根来源，覆盖和失败原因保持未知或部分。
 有公开研究时输出 researchCoverage，只输出 schema 中的研究判断；问题哈希、授权版本和 asOf 由服务器绑定，不回传这些字段。本轮最多3个决定相关方面，每项保持简短，引用实际 sources.id。按方法、适用条件、版本、指标、代价与失败原因拆分。短摘/长摘要不等于正文，正文片段不等于论文或仓库全文。比较来源的具体冲突与适用版本，不能由抓取时间推出当前生效。
 规则的 temporalAssessments 只引用实际片段，edition 与 ISO 生效起止日期逐字来自 quote；缺少日期填 null、状态 UNKNOWN，不从 publishedAt 推出生效。
 下一查询必须可能改变建议；缺用户实测就读项目或 ASK_USER，不能不停搜索。公开高分/论文指标不能证明本项目完成，READ_SUFFICIENT 也不是目标 VERIFIED。

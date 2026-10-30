@@ -7,7 +7,8 @@ import { ApiError } from '../models/Project';
 import { Mission, MissionCreate, MissionReply, MissionDetailReply, MissionList, MissionEvents, MissionCommand,
   MissionCandidates, MissionMaterialInput, MissionMaterialPreview, MissionMaterialConfirm, MissionContinued,
   MissionArtifactInput, MissionArtifactPreviewReply, MissionArtifactConfirm, MissionArtifactReply,
-  MissionConstraintsEdit, MissionScopeEdit, MissionPolicyEdit, MissionCapabilities, MissionWorkspaceSummary } from '../models/Mission';
+  MissionConstraintsEdit, MissionScopeEdit, MissionPolicyEdit, MissionCapabilities, MissionWorkspaceSummary,
+  MissionResponsibilityView, MissionResponsibilityReply, MissionResponsibilityRevisionInput } from '../models/Mission';
 
 export class MissionService {
   async attention(id: string, body: MissionAttentionReceipt): Promise<void> { this.authorize(); await this.client.patch<Object>(`${this.path(id)}/attention`, body); }
@@ -72,5 +73,15 @@ export class MissionService {
   async budgetReview(id:string,body:MissionBudgetReview):Promise<MissionReply> { this.authorize(); return this.client.post<MissionReply>(`${this.path(id)}/budget-review`,body); }
   async policy(id: string, body: MissionPolicyEdit): Promise<MissionReply> {
     this.authorize(); return this.client.patch<MissionReply>(`${this.path(id)}/continuation-policy`, body);
+  }
+  async responsibility(id: string): Promise<MissionResponsibilityView> {
+    this.authorize();
+    const reply = await this.client.get<MissionResponsibilityReply>(`${this.path(id)}/responsibility`);
+    return reply.responsibility;
+  }
+  async reviseResponsibility(id: string, body: MissionResponsibilityRevisionInput): Promise<MissionResponsibilityView> {
+    this.authorize();
+    const reply = await this.client.patch<MissionResponsibilityReply>(`${this.path(id)}/responsibility`, body);
+    return reply.responsibility;
   }
 }

@@ -5,6 +5,7 @@ import { MetricJobInputs,type MetricJobInput } from "./MetricJobInputs";
 import { MissionBudgetReview } from "./MissionBudgetReview";
 import { MissionMetricReceipts } from "./MissionMetricReceipts";
 import { MissionInvestigationDelegation } from "./MissionInvestigationDelegation";
+import { MissionResponsibilityPanel } from "./MissionResponsibilityPanel";
 import { MissionDocumentSources } from "./MissionDocumentSources";
 
 import {DecisionScenarios} from "./DecisionScenarios";
@@ -127,6 +128,7 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
       {!terminal&&<button className={styles.cancel} disabled={busy} onClick={()=>void command("cancel")}>取消委托</button>}
      </div>
     </header>
+    <MissionResponsibilityPanel key={`resp:${mission.id}:${mission.version}`} missionId={mission.id} onRevised={()=>void refresh(mission.id)} />
 {mission.status==="PAUSED"&&mission.budget&&mission.used&&<MissionBudgetReview budget={mission.budget} used={mission.used} busy={busy} onReview={totals=>void perform(async()=>{await api(`/api/missions/${mission.id}/budget-review`,"POST",{requestId:requestId({kind:"budget",version:mission.version,totals}),expectedVersion:mission.version,totals});await refresh(mission.id);})}/>}
     {mission.error&&<section className={styles.stoppedBlock} role={mission.status==="PAUSED"||mission.status==="FAILED"?"alert":"status"} aria-label="暂停原因与恢复条件">
       <strong>{mission.status==="PAUSED"?"执行已暂停，已有进度已保留":mission.status==="FAILED"?"执行失败，已执行的结果保留":"本次执行需要恢复，已有进度已保留"}</strong>

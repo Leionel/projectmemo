@@ -1,5 +1,31 @@
 # R4 Agent UX Integration 实施记录
 
+## UX-3A 完整实施 · 2026-10-30
+
+基线 HEAD bb48d1a，分支 codex/ux3-proactive-collaboration。在 bb48d1a 启动检查点之上完成完整 UX-3A 责任合同、原子修订、Worker Presence 与双端接入。
+
+- 统一 ResponsibilityView 与共享 DTO：
+  - 绑定相关来源授权版本至 `controlVersion`：将 continuationPolicy 中的连接 revision、状态、revokedAt、signalKind 以及用户项目角色完整纳入 controlVersion 的哈希计算，杜绝未绑定来源权限的扩大授权修订。
+  - 区分目标截止时间（constraints.deadline）与持续许可有效期（continuationPolicy.expiresAt），permissionState 细分为 STOPPED、EXPIRED、WITHIN_TIME_BOUNDARY。
+  - 累计消耗与长期总包：放宽上限至 maxModels 240、maxTools 640、maxMetadataRequests 960，支持 dailyBurst；累计消耗（cumulativeUsed）与 UNKNOWN 永不清零、不跨天重置。
+- 在原 Mission 服务边界完成原子修订（`reviseMissionResponsibility` / `PATCH /api/missions/[id]/responsibility`）：
+  - 幂等性：同 requestId 同载荷返回已有责任快照；异载荷抛 409 REQUEST_ID_REUSED。
+  - 事务内强校验 expectedControlVersion 与 OWNER 角色，任何来源撤权或版本更新均拒绝旧修订（409 MISSION_CHANGED）。
+  - 修订合同原子使所有 PENDING/APPROVED 方案标为 EXPIRED，READY/WAITING_APPROVAL 步骤标为 OBSOLETE，不留下半份扩大授权。
+  - 记录审计事件 `RESPONSIBILITY_REVISED`，版本号 CAS 递增。
+- Worker Presence 真实观测：
+  - 新增 `lib/mission/workerPresence.ts`，记录 workerId、心跳、扫描与领取事实；状态细化为 UNOBSERVED、RECENT（60秒内活跃）、STALE（超时）。
+  - 接入 `scripts/mission-worker.ts` 与 `workerCycle.ts`，扫描与领取事实可观测。
+- 双端接入：
+  - Web：新增 `components/MissionResponsibilityPanel.tsx` 并嵌入 `MissionPanel.tsx`，直观展示目标、截止/到期时间、累计消耗/总包、Worker 状态，就地支持原子修订。
+  - ArkTS：`Mission.ets` 新增 `MissionResponsibilityView`、`MissionResponsibilityRevisionInput`；`MissionService.ets` 接入 `responsibility` 与 `reviseResponsibility`。
+- 验证记录：
+  - 新增 `tests/ux3ResponsibilityRevision.test.ts`（来源授权绑定防扩权、幂等与异载荷拒绝、待批方案与步骤失效、累计预算与 UNKNOWN 保留、Worker Presence 状态跃迁 3 项通过）；
+  - `tests/ux3Responsibility.test.ts` 与 `tests/ux3WorkerCycle.test.ts` 全部通过（7项）；
+  - `npm.cmd run harmony:test` 86 项全过；
+  - `npm.cmd run build` 成功完成 Turbopack 编译与 Next.js 路由生成；
+  - `npm.cmd run lint` 0 errors 0 warnings。
+
 ## UX-3A 启动检查点 · 2026-10-30
 
 基线 HEAD 96429cb，分支 codex/ux3-proactive-collaboration。按用户要求复查 UX-2 后开始 UX-3；UX-2 权限、跨会话综合、输入版本和推测链四文件11项复跑通过。既有全量1226项与模拟器证据另按 UX-2 记录保存，未重复宣称真实模型／自然日质量通过。

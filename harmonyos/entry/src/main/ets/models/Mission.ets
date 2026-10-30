@@ -155,3 +155,58 @@ export interface MissionWorkspaceItem { workState?:WorkState;
   activity: string | null; activityAt: string | null; outputRevision: number | null;
 }
 export interface MissionWorkspaceSummary { enabled: boolean; totalActive: number; items: MissionWorkspaceItem[]; }
+
+export interface MissionResponsibilityBudget {
+  limits: Object;
+  cumulativeUsed: Object;
+  additionalUsed: Object;
+  policy: string;
+  monetaryCost: string | null;
+}
+
+export interface MissionResponsibilityActivity {
+  id: string;
+  sequence: number;
+  kind: string;
+  at: string;
+}
+
+export interface MissionResponsibilityView {
+  schemaVersion: number;
+  missionId: string;
+  projectId: string;
+  controlVersion: string;
+  goal: string;
+  successCriteria: string[];
+  workingObjective?: string | null;
+  constraints: MissionConstraints;
+  researchScope: MissionScope;
+  continuationPolicy: MissionPolicy;
+  deadline: string | null;
+  permissionExpiresAt: string | null;
+  permissionState: string;
+  budget: MissionResponsibilityBudget;
+  workState: WorkState;
+  pendingOriginalRefs?: Object;
+  nextCheckAt: string | null;
+  workerPresence: string;
+  workerPresenceDetail?: Object | null;
+  activity: MissionResponsibilityActivity[];
+  authority: string;
+}
+
+export interface MissionResponsibilityReply {
+  responsibility: MissionResponsibilityView;
+}
+
+export class MissionResponsibilityRevisionInput {
+  requestId: string = '';
+  expectedControlVersion: string = '';
+  goal?: string;
+  successCriteria?: string[];
+  workingObjective?: string;
+  constraints?: MissionConstraints;
+  researchScope?: MissionScope;
+  continuationPolicy?: MissionPolicy;
+  llmContextApproved?: boolean;
+}

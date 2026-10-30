@@ -6,6 +6,7 @@ type Operations = {
   mission: () => Promise<boolean>;
   onError: (name: string, error: unknown) => void;
 };
+
 /** Arbitration inside the existing worker. Original database leases still own all execution. */
 export async function runWorkerCycle(state: WorkerCycleState, operations: Operations, now = Date.now()) {
   let failures = 0;

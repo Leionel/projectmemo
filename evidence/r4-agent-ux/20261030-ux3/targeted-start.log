@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/ux2ClaimSourceRights.test.ts tests/ux2ConversationDigest.test.ts tests/ux2InputVersion.test.ts tests/ux2HypothesisRuntime.test.ts tests/ux3WorkerCycle.test.ts tests/ux3Responsibility.test.ts tests/missionRuntime.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  7 passed (7)
+      Tests  46 passed (46)
+   Start at  17:42:46
+   Duration  24.27s (transform 2.00s, setup 0ms, import 7.29s, tests 15.16s, environment 1ms)
+

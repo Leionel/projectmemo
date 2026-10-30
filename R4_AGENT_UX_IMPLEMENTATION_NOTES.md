@@ -1,5 +1,17 @@
 # R4 Agent UX Integration 实施记录
 
+## UX-3A 启动检查点 · 2026-10-30
+
+基线 HEAD 96429cb，分支 codex/ux3-proactive-collaboration。按用户要求复查 UX-2 后开始 UX-3；UX-2 权限、跨会话综合、输入版本和推测链四文件11项复跑通过。既有全量1226项与模拟器证据另按 UX-2 记录保存，未重复宣称真实模型／自然日质量通过。
+
+本检查点复用原 Worker、Mission 数据和租约；没有启动后台进程、迁移数据库、付费调用、部署或外部写入。
+
+- 原 worker 的 Conversation `||` Mission 短路改为逐轮轮换，空队列回退，单轮最多运行一个成功 slice；各扫描独立记录失败，坏扫描不跳过其余扫描及队列。仍由原数据库 lease/epoch 和累计预算决定执行资格。当前证明的是两类队列的公平机会，不是跨用户／项目公平或固定耗时 SLA。
+- 新增 `readMissionResponsibility` 及原 Mission 下 `/responsibility` 只读接口；事务快照投影原目标、成功标准、当前重点、deadline、许可 expiresAt、累计消耗／未知、等待状态和有界事件身份。读取零派发；缺少 Worker 心跳证据时显示 UNOBSERVED，不显示“后台正常”；日期跨许可边界无需新事件就改变快照版本并停止展示下一检查。
+- 该接口当前是服务检查点，未接双端 UI，合成版本尚不作为修改授权。统一责任预览／原子修订、来源授权版本绑定、真实 presence、wake 水位竞争、跨用户公平、后台长跑及双端纵向验收继续原 3A；3B/C/D 的认知联动、分支发现、注意力和三日旅程范围不变。不能把本检查点标为完整 UX-3A 或 UX-3 放行。
+
+验证：新 Worker/责任测试4项通过；原 Mission runtime 31项通过；与 UX-2 关键回归联合复跑7文件46项通过；tsc 与受影响文件 eslint 通过。首轮责任测试因 approval 无 createdAt 字段失败，已改按原 id 有界排序并重跑。证据目录 evidence/r4-agent-ux/20261030-ux3；联合复跑结果见 targeted-start.log/exit。用户原四项修改 hash 与交接值一致。
+
 ## UX-1 · 2026-10-30
 
 基线 e8281d6b8bb8781447eb1ebfb1a60ebcfcd0dd3a，实施分支 codex/ux1-agent-integration。复用原 CT-1～6、ConversationTurn、Mission Runner、指令事件、来源策略与批准／Action 回执；没有迁移真实数据库或新增执行框架。本轮模型／HTTP 传输测试使用隔离夹具，新增付费模型调用 0。

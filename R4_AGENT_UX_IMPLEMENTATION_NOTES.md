@@ -130,3 +130,33 @@
 
 - 已签收：工程实现、原执行链与事务边界（合成模型＋隔离库）；双端交互与模拟器真实操作（隔离身份＋mock 模型）。
 - 未签收：真实模型语义质量与 C0–C3 消融、独立盲评、三类项目×多用户×三自然日真实使用、真机（非模拟器）验收、生产部署。本记录不得据此宣称这些通过。
+
+---
+
+## 2026-10-30 UX-3A/B 责任与主动发现交付记录
+
+基线：b71c384（feat(mission): complete UX-3A responsibility view, atomic revision, worker presence and dual-client preview）
+
+### 实现与进展
+
+1. **UX-3A 责任模型与双端接续（已完成并提交）**：
+   - `lib/mission/responsibility.ts`：统一 `readMissionResponsibility` 与 `reviseMissionResponsibility`；将来源连接快照（revision、status、revokedAt、signalKind）及成员角色绑定入 `controlVersion`，防扩权逃逸；时间边界分离 `deadline` 与 `permissionExpiresAt`；长期总包 Cumulative 预算与 UNKNOWN 永不清零；原子失效待批方案与运行步骤。
+   - `lib/mission/workerPresence.ts`：进程心跳与健康观测，状态跃迁 `UNOBSERVED` -> `RECENT` (<=60s) -> `STALE` (>60s)。
+   - 双端预览：Web `MissionResponsibilityPanel` 与 HarmonyOS ArkTS `MissionResponsibilityView` DTO 及 `MissionService.responsibility()` / `reviseResponsibility()`。
+2. **UX-3B 主动发现与记忆联动（当前阶段完成）**：
+   - 跟踪分支 head 发现：支持 `trackBranchHead: true`，检测到新 commit 时创建 `CANDIDATE` 信号（不自动采纳为事实或完成 Action），发射 `INVESTIGATION_BRANCH_HEAD_DISCOVERED`；
+   - 确定性核对与零变化保持：`delegationObservation.ts` 对 checks/runs 按 ID 排序规范化并忽略易变时间戳，同状态 CI 或条目换序计算出一致 snapshotHash，触发 `INVESTIGATION_NO_NEW_INFORMATION`，状态置为 `WAITING_INPUT`（`waitingFor: "OBSERVATION"`），零新增模型、零重复提醒；HTTP 观察开销计入 `budgetUsedJson.tools`；
+   - 错误状态与无变化严格隔离：网络抖动或临时失败由 Runner 指数退避重试或转为 `PAUSED`（REVIEW_REQUIRED），结构化 `lastErrorJson` 记录 recovery 信息与重试入口，数据上与 `waitingFor: "OBSERVATION"` 严格区分，不污染长期结论；
+   - 授权撤销硬隔离：连接被撤权（revokedAt）后任务进入 `PAUSED`（REVIEW_REQUIRED），`nextAttemptAt: null`，绝不自动复活；
+   - 认知与推测联动（Cognitive Integration）：`investigationInputHash` 纳入 `composeHypotheses` 的 `cognitiveReadSet`；推测过期（EXPIRED）或被用户纠正（USER_CORRECTION）后 inputHash 变化，任务被唤醒为 `READY`，重置旧待批方案并触发重协调。
+
+### 自动化验证
+
+- `tests/ux3ProactiveDiscovery.test.ts`（4项通过）：
+  - A-J03: 同状态CI或条目换序零新增模型调用、零重复提醒；必要HTTP检查计入原账本；
+  - A-J04: 可恢复观察失败（网络抖动、退避）不污染长期结论，失败状态与“已核对无变化”在数据上严格区分；
+  - A-J10: 分支新head候选发现与撤权后不自动复活；
+  - A-J12: 推测到期/纠正后更新 inputHash，唤醒任务进行重协调。
+- 回归测试：`tests/ux3ResponsibilityRevision.test.ts`、`tests/ux3Responsibility.test.ts`、`tests/ux3WorkerCycle.test.ts`（7项通过）。
+- 代码规范：`npm.cmd run lint` 0 errors, 0 warnings。
+

@@ -99,6 +99,7 @@ model Project {
   experiences AgentExperience[]
   sourceConnections SourceConnection[]
   externalSignals ExternalSignal[]
+  calendarConnections CalendarConnection[]
   missions AgentMission[]
   id          String              @id @default(cuid())
   title       String
@@ -1013,6 +1014,7 @@ model User {
   experiences AgentExperience[]
   sourceConnections SourceConnection[]
   externalSignals ExternalSignal[]
+  calendarConnections CalendarConnection[]
   missions AgentMission[]
   id           String              @id @default(cuid())
   username     String              @unique
@@ -1607,4 +1609,95 @@ model AgentContextDigest {
  project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
  @@unique([ownerUserId,scopeKey,inputHash])
  @@index([ownerUserId,projectId,createdAt])
+}
+
+/// CT-9B：一个用户选择的 Google Calendar 只读连接。token 只存服务端 AES-GCM 密文，绝不进入模型/API/ArkTS。
+model CalendarConnection {
+  id              String   @id @default(cuid())
+  projectId       String
+  ownerUserId     String
+  provider        String   @default("FEISHU_CALENDAR")
+  accountId       String
+  accountEmail    String
+  accountName     String   @default("")
+  calendarId      String
+  calendarSummary String   @default("")
+  calendarTimeZone String  @default("UTC")
+  accessRole      String   @default("reader")
+  scope           String
+  authGeneration  Int      @default(1)
+  status          String   @default("ACTIVE")
+  revokedAt       DateTime?
+  revokedReason   String?
+  tokenCipher     String?
+  tokenVersion    Int      @default(1)
+  tokenExpiresAt  DateTime?
+  syncToken       String?
+  windowStart     DateTime?
+  windowEnd       DateTime?
+  lastFetchedAt   DateTime?
+  lastStatus      String?
+  lastError       String?
+  revision        Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  owner           User     @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  observations    CalendarObservation[]
+  @@unique([projectId, provider, accountId, calendarId])
+  @@index([projectId, status])
+}
+
+/// OAuth state/PKCE 一次性记录；state 只存 hash，verifier 只存密文。
+model CalendarOAuthState {
+  id                 String   @id @default(cuid())
+  stateHash          String   @unique
+  ownerUserId        String
+  projectId          String
+  provider           String
+  redirectUri        String
+  scope              String
+  codeVerifierCipher String
+  calendarId         String?
+  expiresAt          DateTime
+  consumedAt         DateTime?
+  createdAt          DateTime @default(now())
+  @@index([ownerUserId, expiresAt])
+}
+
+/// 每次只读窗口产生独立快照；来源 ID 为 calendar:<observationId>，撤权后立即不可再消费。
+model CalendarObservation {
+  id              String   @id @default(cuid())
+  connectionId    String
+  projectId       String
+  ownerUserId     String
+  calendarId      String
+  eventKey        String
+  eventId         String
+  recurringEventId String?
+  eventStatus     String
+  title           String
+  startAt         DateTime?
+  endAt           DateTime?
+  allDay          Boolean  @default(false)
+  startDate       String?
+  endDate         String?
+  eventTimeZone   String?
+  transparency    String?
+  eventUpdatedAt  DateTime?
+  eventEtag       String?
+  revision        String
+  scopeKey        String   @default("PROJECT")
+  windowStart     DateTime
+  windowEnd       DateTime
+  windowComplete  Boolean  @default(false)
+  missionId       String?
+  conversationTurnId String?
+  payloadJson     Json
+  observedAt      DateTime @default(now())
+  connection      CalendarConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  @@unique([connectionId, eventKey, revision, scopeKey])
+  @@index([connectionId, startAt])
+  @@index([projectId, calendarId, startAt])
+  @@index([missionId])
 }

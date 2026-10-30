@@ -44,6 +44,7 @@ export type ConversationRef = {
 export type ConversationSource = {
   document?: import("./document").DocumentMeta;
   repository?: import("./repositoryCi").RepositorySourceMeta;
+  calendar?: import("@/lib/calendar/contracts").CalendarSourceMeta;
   external?: ExternalSourceMeta;
   id: string; projectId: string; sourceId: string; revision: string;
   title: string; excerpt: string; observedAt: string; temporalState: string;
@@ -54,8 +55,9 @@ export type ConversationCitation = { sourceId: string; quote: string };
 export type ConversationFileGuide = {
   document?: import("./document").DocumentMeta;
   number: number; sourceId: string; projectId: string; entityId: string;
-  kind: "ATTACHMENT" | "RECORD" | "ARTIFACT" | "WEB"; title: string; revision: string;
+  kind: "ATTACHMENT" | "RECORD" | "ARTIFACT" | "WEB" | "CALENDAR"; title: string; revision: string;
   external?: ExternalSourceMeta;
+  calendar?: import("@/lib/calendar/contracts").CalendarSourceMeta;
   stale: boolean; missing: boolean; archived: boolean; temporalState: string;
   excerpt: string; quote: string | null; readScope: "SUMMARY" | "EXCERPT"; href: string;
 };

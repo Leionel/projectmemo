@@ -38,10 +38,12 @@ import { documentTools } from "./documentTools";
 import type { DocumentExtractor } from "@/lib/documents/reader";
 import { experimentTools } from "./experimentTools";
 import { browserTools,type BrowserDependencies } from "./tools/browserTools";
-export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;browser?:BrowserDependencies;repository?:CiTransport;document?:DocumentExtractor;sandbox?:DockerCommand;academic?:typeof fetch;judge?:ClaimJudge}={}){
+import { calendarTools } from "./tools/calendarTools";
+import type { CalendarDependencies } from "./tools/calendarTools";
+export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;browser?:BrowserDependencies;calendar?:CalendarDependencies;repository?:CiTransport;document?:DocumentExtractor;sandbox?:DockerCommand;academic?:typeof fetch;judge?:ClaimJudge}={}){
  const m=await claimMission(options.workerId??randomUUID(),options.id);if(!m)return false;
  const lease:Lease={id:m.id,owner:m.leaseOwner!,epoch:m.leaseEpoch,contextVersion:m.contextVersion,planRevision:m.planRevision};
- const tools={...(options.tools??{...projectTools,...researchTools(lease,options.research),...browserTools(lease,options.browser),...await repositoryTools(lease,m,options.repository),...documentTools(lease,options.document),...experimentTools(lease),...academicTools(lease,options.academic)})};const delegation=boundedPolicy(m);if(delegation)for(const name of Object.keys(tools))if(!delegation.allowedTools.includes(name as typeof delegation.allowedTools[number]))delete tools[name];let activeStepId:string|undefined;
+ const tools={...(options.tools??{...projectTools,...researchTools(lease,options.research),...browserTools(lease,options.browser),...calendarTools(lease,options.calendar),...await repositoryTools(lease,m,options.repository),...documentTools(lease,options.document),...experimentTools(lease),...academicTools(lease,options.academic)})};const delegation=boundedPolicy(m);if(delegation)for(const name of Object.keys(tools))if(!delegation.allowedTools.includes(name as typeof delegation.allowedTools[number]))delete tools[name];let activeStepId:string|undefined;
  let phase:MissionPhase="CONTEXT",contextManifest:MissionContextManifest|undefined,sourceDecisionRunId:string|null|undefined;
  const failedSettlements=new Set<"models"|"tools">();
  // Keep failed reservations and unknown usage; a lost lease must not hide the original failure.

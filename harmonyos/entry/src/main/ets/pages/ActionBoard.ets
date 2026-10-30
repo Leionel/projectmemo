@@ -10,6 +10,7 @@ import { CalendarSyncService, CalendarOption, CalendarConflict } from '../servic
 import { ReminderService } from '../services/ReminderService';
 import { ReminderCompletionOption } from '../models/Reminder';
 import { ActionReminderBlock } from '../components/ActionReminderBlock';
+import { DeviceCalendarReadCard } from '../components/DeviceCalendarReadCard';
 import { DeviceIdentity } from '../common/DeviceIdentity';
 import { common } from '@kit.AbilityKit';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMaterial } from '../common/DesignTokens';
@@ -1189,6 +1190,7 @@ struct ActionBoard {
 
           // R2 可执行安排：预览并确认未来 7 天的应用内时段
           this.ScheduleSection()
+          DeviceCalendarReadCard()
 
           List({ space: PMSpacing.MD }) {
             // 进行中

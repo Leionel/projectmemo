@@ -6,6 +6,15 @@ import type { ConversationCitation, ConversationFileGuide, ConversationSource } 
 export async function resolveFileGuides(sources: ConversationSource[], citations: ConversationCitation[] = [], snapshots: ConversationFileGuide[] = []): Promise<ConversationFileGuide[]> {
   const output: ConversationFileGuide[] = [];
   for (const [index, source] of sources.slice(0, 24).entries()) {
+    if (source.calendar) {
+      const calendar = source.calendar;
+      output.push({ number: index + 1, sourceId: source.id, projectId: source.projectId, entityId: calendar.eventId, kind: "CALENDAR", title: source.title,
+        revision: source.revision, stale: false, missing: false, archived: false, temporalState: source.temporalState, excerpt: source.excerpt,
+        quote: citations.find(c => c.sourceId === source.id)?.quote ?? null, readScope: "EXCERPT", calendar,
+        href: calendar.conversationId && calendar.turnId ? `/focus/source/${encodeURIComponent(calendar.conversationId)}/${encodeURIComponent(calendar.turnId)}/${encodeURIComponent(source.sourceId)}`
+          : `/projects/${encodeURIComponent(source.projectId)}/records` });
+      continue;
+    }
     if (source.external) {
       const meta = source.external;
       output.push({ number: index + 1, sourceId: source.id, projectId: source.projectId, entityId: source.sourceId, kind: "WEB", title: source.title,

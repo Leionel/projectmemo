@@ -4,9 +4,20 @@ import { ownedMission } from "@/lib/mission/repository";
 import { validateDocumentObservation,findDocumentObservation } from "@/lib/documents/observations";
 import { assertSourceUse } from "@/lib/continuity/sourcePolicy";
 import { readSource } from "@/lib/research/sourceRepository";
+import { db } from "@/lib/db";
+import { record } from "@/lib/conversation/repository";
+import { calendarSourceMetaSchema } from "@/lib/calendar/contracts";
 export const runtime="nodejs";
 export async function GET(request:Request,c:{params:Promise<{id:string;sourceId:string}>}){try{
  const {user}=await authenticateUser(request),p=await c.params;
+ if(p.sourceId.startsWith("calendar:")){
+  const m=await ownedMission(user.id,p.id),observation=await db.calendarObservation.findFirst({where:{id:p.sourceId.slice(9),missionId:m.id},include:{connection:true}});
+  if(!observation)throw new AppError("SOURCE_NOT_FOUND","日历来源不属于当前委托",404);
+  await assertSourceUse(user.id,m.projectId,p.sourceId,undefined,{missionId:m.id});
+  const payload=record(observation.payloadJson),calendar=calendarSourceMetaSchema.parse(payload.meta);
+  return Response.json({source:{id:p.sourceId,sourceId:p.sourceId,projectId:m.projectId,revision:observation.revision,title:observation.title,
+    excerpt:String(payload.excerpt??""),observedAt:observation.observedAt.toISOString(),temporalState:"UNKNOWN",knowledgeClass:"EXTERNAL_REFERENCE",readScope:"STRUCTURED",calendar}});
+ }
  if(!p.sourceId.startsWith("doc:")){
   const mission=await ownedMission(user.id,p.id),raw=await readSource(user.id,p.id,p.sourceId);await assertSourceUse(user.id,mission.projectId,p.sourceId,undefined,{missionId:p.id});
   const excerpt=raw.excerptJson as {text?:string;browser?:unknown};

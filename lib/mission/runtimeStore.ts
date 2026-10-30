@@ -70,6 +70,18 @@ export async function settleBrowserUsage(lease:Lease,reserved:{requests:number;b
  used.browserBytes=Math.max(0,used.browserBytes-reserved.bytes)+actual.bytes;
  await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json(used)}});
  });}
+/** Bounded external calendar HTTP ledger; token refresh and event read share the same root. */
+export async function reserveCalendar(lease:Lease,requests:number){return db.$transaction(async tx=>{
+ const m=await fenced(tx,lease);const used=usageOf(m.budgetUsedJson),limits={...defaultBudget,...m.budgetJson as object};
+ if(used.calendarRequests+requests>limits.calendarRequests)throw new AppError("CALENDAR_REQUEST_BUDGET_EXHAUSTED","委托的日历请求额度已用完",409);
+ used.calendarRequests+=requests;
+ await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json(used)}});
+ });}
+export async function settleCalendarUsage(lease:Lease,reserved:number,actual:number){return db.$transaction(async tx=>{
+ const m=await fenced(tx,lease,false);const used=usageOf(m.budgetUsedJson);
+ used.calendarRequests=Math.max(0,used.calendarRequests-reserved)+actual;
+ await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json(used)}});
+ });}
 export async function release(tx:Tx,m:AgentMission,status:string,reason?:string){
  const p=boundedPolicy(m);let plan=m.planJson as object,nextAttemptAt:Date|null|undefined;
  if(p){const current=await tx.agentMission.findUniqueOrThrow({where:{id:m.id}}),state=(current.planJson as {delegation?:object}).delegation??{};

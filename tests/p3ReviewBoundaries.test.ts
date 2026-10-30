@@ -26,6 +26,7 @@ import { createMission } from "@/lib/mission/missionService";
 import { createSession } from "@/lib/auth/session";
 import { event } from "@/lib/mission/repository";
 import { listExperiences, actOnExperience } from "@/lib/experience/service";
+import { syncExperiences } from "@/lib/experience/extract";
 import { suggestionsForMission } from "@/lib/experience/injection";
 import { buildContext } from "@/lib/mission/contextBuilder";
 import { currentGoalQuestion, interactGoalQuestion } from "@/lib/decision/questions";
@@ -155,13 +156,21 @@ it("信号插入失败不能吞为去重，整批回滚且保留旧 ETag/游标"
 async function activeExperience(userId: string, projectId: string, marker: string) {
   for (let i = 0; i < 2; i++) {
     const m = await createMission(userId, { projectId, requestId: crypto.randomUUID(), goal: `${marker}-${i}` });
-    await db.agentMissionStep.create({ data: { missionId: m.id, ordinal: 1, planRevision: 1, toolName: "inspect_project", toolVersion: "1", status: "SUCCEEDED", canonicalInputJson: {}, inputHash: "fixture", readSetJson: [], protocolJson: { schemaVersion: 1 } } });
-    const o = await db.agentMissionOutput.create({ data: { missionId: m.id, revision: 1, kind: "NOTE", contentJson: {}, sourceRefsJson: [], claimChecksJson: [] } });
+    const capture = await db.capture.create({ data: { projectId, rawText: "经验来源", sourceType: "fixture" } });
+    const source = { id: `capture:${capture.id}`, kind: "PROJECT", entityType: "CAPTURE", revision: "v1", hash: "h1", text: capture.rawText, observedAt: new Date().toISOString() };
+    await db.agentMissionStep.create({ data: { missionId: m.id, ordinal: 1, planRevision: 1, toolName: "inspect_project", toolVersion: "1", status: "SUCCEEDED", canonicalInputJson: {}, inputHash: "fixture", readSetJson: json([source]), protocolJson: { schemaVersion: 1 }, resultJson: json({ data: {}, sources: [source] }) } });
+    const o = await db.agentMissionOutput.create({ data: { missionId: m.id, revision: 1, kind: "NOTE", contentJson: { blocks: [] }, sourceRefsJson: json([source]), claimChecksJson: [] } });
     const a = await db.generatedArtifact.create({ data: { projectId, artifactType: "weekly_report", content: "fixture" } });
     await db.missionArtifactReceipt.create({ data: { missionId: m.id, outputId: o.id, projectId, outputRevision: 1, outputHash: "fixture", artifactId: a.id, artifactType: "weekly_report", sourceManifestJson: {}, blockMapJson: {}, verificationSnapshotJson: {}, createdByUserId: userId, requestId: crypto.randomUUID(), payloadHash: "fixture" } });
+    const cap = await db.capture.create({ data: { projectId, rawText: "行动复盘", sourceType: "Agent行动回执" } });
+    const card = await db.knowledgeCard.create({ data: { projectId, captureId: cap.id, type: "reflection", title: "复盘", summary: "复盘", keywords: [], relatedTasks: [], nextActions: [], importance: 3 } });
+    const effectKey = `mission:${m.id}:step:1`;
+    const action = await db.actionItem.create({ data: { projectId, title: "行动", dedupeKey: effectKey, status: "DONE", resultCardId: card.id } });
+    await db.agentMissionStep.update({ where: { missionId_ordinal: { missionId: m.id, ordinal: 1 } }, data: { effectKey, resultJson: json({ data: { actionId: action.id }, sources: [source] }) } });
     await db.agentMission.update({ where: { id: m.id }, data: { status: "SUCCEEDED" } });
   }
-  const list = await listExperiences(userId, projectId), experience = list.experiences[0];
+  await syncExperiences(userId, projectId);
+  const list = await listExperiences(userId, projectId), experience = list.experiences.find(e => e.status === "SHADOW")!;
   await actOnExperience(userId, projectId, experience.id, { action: "ACTIVATE", requestId: crypto.randomUUID() });
   return experience;
 }
@@ -189,7 +198,7 @@ it("零步骤新 Mission 在注入前检查当前协议和工具版本", async (
   expect(JSON.parse(await buildContext(m)).experienceAdvisories).toEqual([]);
   await db.agentExperience.update({ where: { id: e.id }, data: { protocolVersionsJson: [1], toolVersionsJson: { inspect_project: "99" } } });
   expect(JSON.parse(await buildContext(m)).experienceAdvisories).toEqual([]);
-  expect(await db.agentExperienceUse.count({ where: { missionId: m.id } })).toBe(0);
+  expect(await db.agentExperienceUse.count({ where: { missionId: m.id, stage: "INJECTED" } })).toBe(0);
 });
 
 it("无关资料编辑不重开 UNKNOWN；相关新资料仍能重评同问题", async () => {

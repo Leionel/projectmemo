@@ -168,6 +168,8 @@ export interface ProposedAction {
   timeZone?: string;
   allDay?: boolean;
   recurrence?: string | null;
+  attendees?: Array<{ type: "open_id"; openId: string } | { type: "email"; email: string }>;
+  attachments?: string[];
   dueAt?: string;
 }
 

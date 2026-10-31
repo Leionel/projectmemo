@@ -57,10 +57,14 @@ export interface MissionStep { execution?:MissionMetricExecution; id: string; or
 export interface MetricJobRecord { runId: string; metric: string; value: number; unit: string|null; period:string|null; direction:string|null; dataset:string|null; split:string|null; seed:string|null; evaluationCode:string|null; environment:string|null; phase:string|null; batchSize:string|null; }
 export interface MetricVerificationJob { image: string; scriptHash: string; left: MetricJobRecord; right: MetricJobRecord; }
 export interface MissionActionArgs { job?: MetricVerificationJob; title: string; description?: string; priority?: number; dueAt?: string | null; }
-export interface MissionCalendarPayload { title?: string; description?: string; startAt?: string; endAt?: string; timeZone?: string; }
+export interface MissionCalendarAttendee { type: string; openId?: string; email?: string; }
+export interface MissionCalendarPayload { title?: string; description?: string; startAt?: string; endAt?: string; timeZone?: string; allDay?: boolean; recurrence?: string | null;
+  attendees?: MissionCalendarAttendee[]; attachments?: string[]; }
 export interface MissionCalendarTarget { accountName?: string; accountEmail?: string; calendarSummary?: string; calendarId?: string; authGeneration?: number; connectionRevision?: number; }
 export interface MissionEffectQuery { marker?: string; timeMin?: string; timeMax?: string; }
-export interface MissionProposal { tool: string; args: MissionActionArgs; payload?: MissionCalendarPayload; target?: MissionCalendarTarget; marker?: string; effectQuery?: MissionEffectQuery; }
+export interface MissionCalendarBatchItem { index: number; marker: string; payload: MissionCalendarPayload; }
+export interface MissionProposal { tool: string; args: MissionActionArgs; payload?: MissionCalendarPayload; target?: MissionCalendarTarget; marker?: string; effectQuery?: MissionEffectQuery;
+  operationId?: string; events?: MissionCalendarBatchItem[]; }
 export interface MissionApproval { id: string; proposalHash: string; proposal: MissionProposal; expiresAt: string; }
 export interface MissionBlock { blockId: string; text: string; kind: string; sourceIds: string[]; }
 export interface MissionContent { blocks: MissionBlock[]; }

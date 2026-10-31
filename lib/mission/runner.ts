@@ -41,7 +41,7 @@ import { browserTools,type BrowserDependencies } from "./tools/browserTools";
 import { calendarTools } from "./tools/calendarTools";
 import type { CalendarDependencies } from "./tools/calendarTools";
 import { calendarWriteTools } from "./tools/calendarWriteTools";
-import { commitApprovedCalendarEvent } from "./calendarWriteService";
+import { commitApprovedCalendarEvent, commitApprovedCalendarEvents } from "./calendarWriteService";
 export type CalendarWriteDependencies = { fetcher?: typeof fetch };
 export async function runMissionSlice(options:{id?:string;workerId?:string;provider?:DecisionProvider;tools?:ToolSet;research?:ResearchDependencies;browser?:BrowserDependencies;calendar?:CalendarDependencies;calendarWrite?:CalendarWriteDependencies;repository?:CiTransport;document?:DocumentExtractor;sandbox?:DockerCommand;academic?:typeof fetch;judge?:ClaimJudge}={}){
  const m=await claimMission(options.workerId??randomUUID(),options.id);if(!m)return false;
@@ -76,7 +76,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    if(ready&&!running)await db.$transaction(async tx=>{const current=await fenced(tx,lease);assertDynamicTool(current,ready.toolName,ready.canonicalInputJson);await tx.agentMissionStep.update({where:{id:ready.id},data:{status:"RUNNING",startedAt:new Date()}});});
   }
   const pending=await db.agentMissionStep.findFirst({where:{missionId:m.id,status:{in:["READY","RUNNING","UNKNOWN"]},approval:{status:{in:["APPROVED","DISPATCHING"]}}},orderBy:{ordinal:"asc"}});
-  if(pending){phase="APPROVAL";activeStepId=pending.id;sourceDecisionRunId=pending.agentRunId;if(pending.toolName==="propose_metric_verification")await commitApprovedMetricVerification(lease,pending.id,options.sandbox);else if(pending.toolName==="propose_calendar_event")await commitApprovedCalendarEvent(lease,pending.id,options.calendarWrite?.fetcher);else await commitApprovedAction(lease,pending.id);return true;}
+  if(pending){phase="APPROVAL";activeStepId=pending.id;sourceDecisionRunId=pending.agentRunId;if(pending.toolName==="propose_metric_verification")await commitApprovedMetricVerification(lease,pending.id,options.sandbox);else if(pending.toolName==="propose_calendar_event")await commitApprovedCalendarEvent(lease,pending.id,options.calendarWrite?.fetcher);else if(pending.toolName==="propose_calendar_events")await commitApprovedCalendarEvents(lease,pending.id,options.calendarWrite?.fetcher);else await commitApprovedAction(lease,pending.id);return true;}
   const unfinished=await db.agentMissionStep.findFirst({where:{missionId:m.id,status:"RUNNING",planRevision:m.planRevision},orderBy:{ordinal:"asc"}});
   let step=unfinished;
   if(!step){
@@ -189,6 +189,17 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
     const proposal={tool:"verify_experiment_metrics",toolVersion:"1",args:{title:data.title,description:data.description,sourceBindings:data.sourceBindings,job:data.job},ownerUserId:m.ownerUserId,projectId:m.projectId,planRevision:m.planRevision,contextVersion:m.contextVersion,constraintsVersion:current.constraintsVersion,readSet,expiresAt:expiresAt.toISOString()};
     await tx.agentMissionApproval.create({data:{missionId:m.id,stepId:step!.id,proposalJson:json(proposal),proposalHash:jsonHash(proposal),expectedPlanRevision:m.planRevision,readSetJson:json(readSet),expiresAt}});
     await tx.agentMissionStep.update({where:{id:step!.id},data:{status:"WAITING_APPROVAL",effectKey:`mission:${m.id}:step:${step!.id}`,readSetJson:json(readSet),resultJson:json(result)}});
+    await event(tx,m.id,"APPROVAL_REQUESTED",{stepId:step!.id,proposal,phase:"APPROVAL"});await release(tx,current,"WAITING_APPROVAL");return;
+   }
+   if(step!.toolName==="propose_calendar_events"){
+    phase="VERIFY";await validateSources(m.projectId,step!.readSetJson as unknown as Source[],tx,m.id);phase="APPROVAL";
+    const data=result.data as {connectionId:string;operationId:string;batchHash:string;target:unknown;events:Array<{index:number;operationId:string;itemHash:string;marker:string;payload:unknown;payloadHash:string;effectQuery:unknown}>};
+    const expiresAt=new Date(Date.now()+600000);
+    const proposal={tool:"create_calendar_events",toolVersion:"1",operationId:data.operationId,batchHash:data.batchHash,args:{connectionId:data.connectionId,events:data.events.map(item=>item.payload)},
+      target:data.target,events:data.events,readSet:step!.readSetJson,ownerUserId:m.ownerUserId,projectId:m.projectId,planRevision:m.planRevision,expiresAt:expiresAt.toISOString()};
+    await tx.agentMissionApproval.create({data:{missionId:m.id,stepId:step!.id,proposalJson:json(proposal),proposalHash:jsonHash(proposal),expectedPlanRevision:m.planRevision,readSetJson:json(step!.readSetJson),expiresAt}});
+    await tx.agentMissionStep.update({where:{id:step!.id},data:{status:"WAITING_APPROVAL",effectKey:`mission:${m.id}:step:${step!.id}`,resultJson:json(result)}});
+    await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...current.planJson as object,automaticContinuation:null})}});
     await event(tx,m.id,"APPROVAL_REQUESTED",{stepId:step!.id,proposal,phase:"APPROVAL"});await release(tx,current,"WAITING_APPROVAL");return;
    }
    if(step!.toolName==="propose_calendar_event"){

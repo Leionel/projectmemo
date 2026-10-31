@@ -18,7 +18,7 @@ import type { ProposedAction } from "@/lib/types";
 import { CALENDAR_PROVIDER, calendarEventProposalSchema } from "@/lib/calendar/contracts";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { calendarAccessTokenFor } from "@/lib/services/calendarConnectionService";
-import { createFeishuCalendarEvent, getFeishuCalendarEvent } from "@/lib/calendar/feishuWrite";
+import { createFeishuCalendarEvent, getFeishuCalendarEvent, addFeishuCalendarAttendees, listFeishuCalendarAttendees, deleteFeishuCalendarEvent } from "@/lib/calendar/feishuWrite";
 
 type Tx = Prisma.TransactionClient;
 export type CopilotActor = { userId: string; sessionId: string };
@@ -102,22 +102,24 @@ function proposalPayload(proposal: Record<string, unknown>, tool: string) {
     description: proposal.description ?? "", priority: proposal.priority ?? 3, dueAt: proposal.dueAt ?? undefined });
   return { artifactType: artifactCreateSchema.parse({ artifactType: proposal.artifactType }).artifactType };
 }
-const keyOf = (tool: string, proposal: Record<string, unknown>) => tool === "create_action" ? `action:${proposal.title}` : tool === "generate_artifact" ? `artifact:${proposal.artifactType}` : `calendar:${proposal.connectionId}:${proposal.startAt}:${proposal.title}`;
+const keyOf = (tool: string, proposal: Record<string, unknown>) => tool === "create_action" ? `action:${proposal.title}` : tool === "generate_artifact" ? `artifact:${proposal.artifactType}` : `calendar:${proposal.connectionId}:${proposal.startAt}:${proposal.title}:${jsonHash({ attendees: proposal.attendees ?? [], attachments: proposal.attachments ?? [] }).slice(0, 12)}`;
 
 async function freezeCalendarProposal(tx: Tx, projectId: string, proposal: Record<string, unknown>) {
   if (!isFeatureEnabled("CALENDAR_EVENT_WRITE_ENABLED", false)) throw new AppError("CALENDAR_WRITE_DISABLED", "外部日历写入未开启", 503);
   const input = calendarEventProposalSchema.parse({ connectionId: proposal.connectionId, title: proposal.title,
     description: proposal.description ?? "", startAt: proposal.startAt, endAt: proposal.endAt, timeZone: proposal.timeZone,
-    allDay: proposal.allDay ?? false, recurrence: proposal.recurrence ?? null });
+    allDay: proposal.allDay ?? false, recurrence: proposal.recurrence ?? null,
+    attendees: proposal.attendees ?? [], attachments: proposal.attachments ?? [] });
   const connection = await tx.calendarConnection.findFirst({ where: { id: input.connectionId, projectId, status: "ACTIVE", revokedAt: null } });
   if (!connection) throw new AppError("CALENDAR_CONNECTION_NOT_FOUND", "日历连接不存在、已撤销或不属于当前项目", 404);
   if (!connection.scope.split(/\s+/).includes("calendar:calendar") || !connection.scope.split(/\s+/).includes("offline_access"))
     throw new AppError("CALENDAR_WRITE_SCOPE_MISSING", "该连接没有写入权限，请先重新授权", 409);
   const baseHash = jsonHash({ projectId, connectionId: connection.id, title: input.title, description: input.description, startAt: input.startAt, endAt: input.endAt,
-    timeZone: input.timeZone, allDay: input.allDay, recurrence: input.recurrence });
+    timeZone: input.timeZone, allDay: input.allDay, recurrence: input.recurrence, attendees: input.attendees, attachments: input.attachments });
   const operationId = "pm-cal-" + baseHash.slice(0, 32), marker = `PM-CAL-${baseHash.slice(0, 14)}`;
   const finalDescription = `${input.description}${input.description ? "\n\n" : ""}ProjectMemo 操作标记：${marker}`.slice(0, 500);
-  const payload = { title: input.title, description: finalDescription, startAt: input.startAt, endAt: input.endAt, timeZone: input.timeZone, allDay: input.allDay, recurrence: input.recurrence };
+  const payload = { title: input.title, description: finalDescription, startAt: input.startAt, endAt: input.endAt, timeZone: input.timeZone, allDay: input.allDay,
+    recurrence: input.recurrence, attendees: input.attendees, attachments: input.attachments };
   const start = Date.parse(input.allDay ? `${input.startAt}T00:00:00Z` : input.startAt), end = Date.parse(input.allDay ? `${input.endAt}T23:59:59Z` : input.endAt);
   return { tool: "create_calendar_event", operationId, connectionId: connection.id, payload, payloadHash: jsonHash(payload), marker,
     target: { provider: CALENDAR_PROVIDER, accountId: connection.accountId, accountEmail: connection.accountEmail, accountName: connection.accountName,
@@ -272,15 +274,21 @@ async function confirmCopilotCalendarEvent(projectId: string, input: AgentToolCo
   });
   if (reserved.replay) return reserved.replay;
   const frozen = object(reserved.frozen), payload = object(frozen.payload) as { title: string; description: string; startAt: string; endAt: string; timeZone: string;
-    allDay: boolean; recurrence: string | null };
+    allDay: boolean; recurrence: string | null; attendees: Array<{ type: "open_id"; openId: string } | { type: "email"; email: string }>; attachments: string[] };
   const target = object(frozen.target) as { calendarId: string; calendarTimeZone: string };
   const marker = String(frozen.marker ?? "");
-  let externalId: string | null = null, outcome: { ok: boolean; known: boolean; code?: string; message?: string; readback?: unknown };
+  let externalId: string | null = null, access = "";
+  let outcome: { ok: boolean; known: boolean; code?: string; message?: string; readback?: unknown; compensation?: { eventId: string; deleted: boolean } };
+  const compensate = async (accessToken: string, eventId: string) => {
+    try { await deleteFeishuCalendarEvent({ accessToken, calendarId: target.calendarId, eventId, needNotification: false }, fetch); return true; }
+    catch { return false; }
+  };
   try {
     const create = async (accessToken: string) => createFeishuCalendarEvent({ accessToken, calendarId: target.calendarId, title: payload.title,
       description: payload.description, startAt: payload.startAt, endAt: payload.endAt, timeZone: payload.timeZone, allDay: payload.allDay,
-      recurrence: payload.recurrence, idempotencyKey: String(frozen.operationId) }, fetch);
-    let access = await calendarAccessTokenFor(reserved.connection, fetch), created;
+      recurrence: payload.recurrence, attachments: payload.attachments, idempotencyKey: String(frozen.operationId) }, fetch);
+    let created;
+    access = await calendarAccessTokenFor(reserved.connection, fetch);
     try { created = await create(access); }
     catch (error) {
       if (!(error instanceof AppError) || error.code !== "CALENDAR_TOKEN_EXPIRED") throw error;
@@ -288,15 +296,34 @@ async function confirmCopilotCalendarEvent(projectId: string, input: AgentToolCo
       created = await create(access);
     }
     externalId = created.eventId;
+    if (payload.attendees.length) {
+      try { await addFeishuCalendarAttendees({ accessToken: access, calendarId: target.calendarId, eventId: created.eventId, attendees: payload.attendees, needNotification: false }, fetch); }
+      catch { /* verification below decides */ }
+    }
     const readback = await getFeishuCalendarEvent({ accessToken: access, calendarId: target.calendarId, eventId: created.eventId, timeZone: payload.timeZone }, fetch);
     const timeOk = payload.allDay ? readback.allDay && readback.startDate === payload.startAt && readback.endDate === payload.endAt
       : !!readback.startAt && !!readback.endAt && Math.abs(Date.parse(readback.startAt) - Date.parse(payload.startAt)) <= 1000 && Math.abs(Date.parse(readback.endAt) - Date.parse(payload.endAt)) <= 1000;
     const recurrenceOk = !payload.recurrence || readback.recurrence === payload.recurrence;
-    if (readback.eventId !== created.eventId || readback.title !== payload.title || !readback.description.includes(marker) || !timeOk || !recurrenceOk)
+    const actualAttachments = readback.attachments ?? [], expectedAttachments = payload.attachments;
+    const attachmentsOk = actualAttachments.length === expectedAttachments.length && expectedAttachments.every(token => actualAttachments.includes(token));
+    if (readback.eventId !== created.eventId || readback.title !== payload.title || !readback.description.includes(marker) || !timeOk || !recurrenceOk || !attachmentsOk)
       outcome = { ok: false, known: false, code: "CALENDAR_EFFECT_MISMATCH", message: "provider 返回对象与冻结 payload 不匹配" };
-    else outcome = { ok: true, known: true, readback };
+    else if (payload.attendees.length) {
+      const actual = await listFeishuCalendarAttendees({ accessToken: access, calendarId: target.calendarId, eventId: created.eventId }, fetch);
+      const attendeesOk = payload.attendees.every(item => item.type === "open_id"
+        ? actual.some(row => row.type === "user" && row.userId === item.openId) : actual.some(row => row.email === item.email));
+      if (!attendeesOk) {
+        const deleted = await compensate(access, created.eventId);
+        outcome = { ok: false, known: deleted, code: "CALENDAR_ATTENDEE_MISMATCH", message: deleted ? "参与人与冻结提案不一致，已删除本次创建的日程" : "参与人不一致，补偿删除未获确认",
+          compensation: { eventId: created.eventId, deleted } };
+      } else outcome = { ok: true, known: true, readback };
+    } else outcome = { ok: true, known: true, readback };
   } catch (error) {
-    if (error instanceof AppError && ["CALENDAR_WRITE_REJECTED", "CALENDAR_WRITE_SCOPE_MISSING", "CALENDAR_CONNECTION_REVOKED", "CALENDAR_CONNECTION_CHANGED"].includes(error.code))
+    if (externalId && access && error instanceof AppError && ["CALENDAR_WRITE_REJECTED", "CALENDAR_ATTENDEE_UNKNOWN"].includes(error.code)) {
+      const deleted = await compensate(access, externalId);
+      outcome = { ok: false, known: deleted, code: error.code, message: deleted ? `${error.message}；已删除本次创建的日程` : `${error.message}；补偿删除未获确认`,
+        compensation: { eventId: externalId, deleted } };
+    } else if (error instanceof AppError && ["CALENDAR_WRITE_REJECTED", "CALENDAR_WRITE_SCOPE_MISSING", "CALENDAR_CONNECTION_REVOKED", "CALENDAR_CONNECTION_CHANGED"].includes(error.code))
       outcome = { ok: false, known: true, code: error.code, message: error.message };
     else outcome = { ok: false, known: false, code: error instanceof AppError ? error.code : "CALENDAR_WRITE_UNKNOWN",
       message: error instanceof AppError ? error.message : "外部日历写入结果未知，不会自动重发" };
@@ -315,6 +342,8 @@ async function confirmCopilotCalendarEvent(projectId: string, input: AgentToolCo
     }
     await tx.copilotToolExecution.update({ where: { id: state.execution!.id }, data: { status: outcome.known ? "FAILED" : "UNKNOWN",
       resultId: externalId, leaseToken: null, leaseUntil: null } });
+    if (outcome.compensation) await tx.agentRun.update({ where: { id: state.run.id }, data: { resultJson: json({ ...state.result,
+      compensation: outcome.compensation }) } });
     return { failed: true as const, code: outcome.code ?? "CALENDAR_WRITE_UNKNOWN", message: outcome.message ?? "外部日历写入未成功", known: outcome.known };
   });
   if (finalized.failed) throw new AppError(finalized.code, finalized.message, finalized.known ? 409 : 503);

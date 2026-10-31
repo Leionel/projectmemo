@@ -9,6 +9,7 @@ import { configuredClaimJudge } from "@/lib/mission/claimJudgeAdapter";
 import { assessCopilotSemantics } from "@/lib/evidence/copilotSemantic";
 import { evidenceAssessment } from "@/lib/evidence/assessment";
 import { jsonHash } from "@/lib/mission/contracts";
+import { calendarAttendeeSchema } from "@/lib/calendar/contracts";
 import { z } from "zod";
 import { chatPromptWithMeta } from "@/lib/agent/llmAgent";
 import { legacyCopilotStyleV2 } from "@/lib/agent/specialistPrompts";
@@ -43,6 +44,8 @@ export const responseSchema = z.object({
     timeZone: z.string().min(1).max(100).optional(),
     allDay: z.boolean().optional(),
     recurrence: z.string().trim().max(2000).nullable().optional(),
+    attendees: z.array(calendarAttendeeSchema).max(50).optional(),
+    attachments: z.array(z.string().trim().max(200)).max(10).optional(),
   })).max(4).default([]),
 });
 

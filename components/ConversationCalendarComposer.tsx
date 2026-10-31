@@ -21,7 +21,7 @@ export function ConversationCalendarComposer({ conversationId, projectId, versio
 }) {
   const [open, setOpen] = useState(false), [connections, setConnections] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(false), [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ connectionId: "", title: "", description: "", allDay: false, start: "", end: "", recurrence: "" });
+  const [form, setForm] = useState({ connectionId: "", title: "", description: "", allDay: false, start: "", end: "", recurrence: "", attendees: "", attachments: "" });
   const requests = useRef(new Map<string, string>());
   const zone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Shanghai";
   useEffect(() => {
@@ -39,8 +39,11 @@ export function ConversationCalendarComposer({ conversationId, projectId, versio
     if (!ready || !connection) return;
     const startAt = form.allDay ? form.start : new Date(form.start).toISOString();
     const endAt = form.allDay ? form.end : new Date(form.end).toISOString();
+    const attendees = form.attendees.split(/[,，\s]+/).filter(Boolean).map(value => value.startsWith("ou_")
+      ? { type: "open_id" as const, openId: value } : { type: "email" as const, email: value });
+    const attachments = form.attachments.split(/[,，\s]+/).filter(Boolean);
     const body = { projectId, connectionId: connection.id, title: form.title.trim(), description: form.description.trim(), timeZone: zone,
-      allDay: form.allDay, recurrence: form.recurrence.trim() || null, startAt, endAt };
+      allDay: form.allDay, recurrence: form.recurrence.trim() || null, startAt, endAt, attendees, attachments };
     const intent = JSON.stringify(body), requestId = requests.current.get(intent) ?? crypto.randomUUID();
     requests.current.set(intent, requestId);
     setSaving(true); onError("");
@@ -49,7 +52,7 @@ export function ConversationCalendarComposer({ conversationId, projectId, versio
         { ...body, requestId, expectedVersion: version });
       requests.current.delete(intent);
       onCreated(created.conversation);
-      setOpen(false); setForm({ connectionId: "", title: "", description: "", allDay: false, start: "", end: "", recurrence: "" });
+      setOpen(false); setForm({ connectionId: "", title: "", description: "", allDay: false, start: "", end: "", recurrence: "", attendees: "", attachments: "" });
     } catch (error) { onError(error instanceof Error ? error.message : "日历提案创建失败"); }
     finally { setSaving(false); }
   }
@@ -69,6 +72,8 @@ export function ConversationCalendarComposer({ conversationId, projectId, versio
         <label>结束<input type={form.allDay ? "date" : "datetime-local"} value={form.end} onChange={e => setForm({ ...form, end: e.target.value })}/></label>
         <label className={styles.calendarCheck}><input type="checkbox" checked={form.allDay} onChange={e => setForm({ ...form, allDay: e.target.checked })}/> 全天</label>
         <label>重复<input value={form.recurrence} placeholder="可选，如 FREQ=WEEKLY;BYDAY=MO" onChange={e => setForm({ ...form, recurrence: e.target.value })}/></label>
+        <label>参与人<input value={form.attendees} placeholder="邮箱或 ou_ 开头的 open_id，逗号分隔" onChange={e => setForm({ ...form, attendees: e.target.value })}/></label>
+        <label>附件<input value={form.attachments} placeholder="飞书 file_token，逗号分隔（需先上传）" onChange={e => setForm({ ...form, attachments: e.target.value })}/></label>
         <label className={styles.calendarDescription}>描述<textarea value={form.description} maxLength={400} placeholder="可选；批准后会附上操作标记" onChange={e => setForm({ ...form, description: e.target.value })}/></label>
         <div className={styles.calendarFoot}><small>时区 {zone}；提交只生成待确认提案，不会直接写入飞书。</small><button className="workspace-tool focus-ring" disabled={!ready}>{saving ? "正在冻结提案…" : "生成待确认提案"}</button></div>
       </>}

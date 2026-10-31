@@ -14,7 +14,9 @@ export const conversationCalendarProposalSchema = calendarEventProposalBaseSchem
 
 function summaryOf(payload: z.infer<typeof conversationCalendarProposalSchema>, target: { accountName: string; accountEmail: string; calendarSummary: string; calendarId: string }) {
   const when = payload.allDay ? `${payload.startAt} 至 ${payload.endAt}（全天）` : `${payload.startAt} → ${payload.endAt}（${payload.timeZone}）`;
-  return `飞书日历 ${target.accountName || target.accountEmail} / ${target.calendarSummary || target.calendarId} · ${when}${payload.recurrence ? ` · 重复 ${payload.recurrence}` : ""}`;
+  const people = payload.attendees.length ? ` · 参与人 ${payload.attendees.map(item => item.type === "open_id" ? item.openId : item.email).join("、")}` : "";
+  const files = payload.attachments.length ? ` · 附件 ${payload.attachments.length} 个` : "";
+  return `飞书日历 ${target.accountName || target.accountEmail} / ${target.calendarSummary || target.calendarId} · ${when}${payload.recurrence ? ` · 重复 ${payload.recurrence}` : ""}${people}${files}`;
 }
 
 /** User-initiated proposal in the original conversation; it freezes the exact payload and waits for the original confirm route. */
@@ -39,7 +41,8 @@ export async function createConversationCalendarProposal(actor: ConversationActo
         supportState: "SUPPORTED", supportBasis: "USER_EXPLICIT_CALENDAR_PROPOSAL", proposalExpiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString() },
       resultJson: {} } });
     const proposed = { kind: "create_calendar_event" as const, label: "创建飞书日程", title: input.title, description: input.description,
-      connectionId: input.connectionId, startAt: input.startAt, endAt: input.endAt, timeZone: input.timeZone, allDay: input.allDay, recurrence: input.recurrence };
+      connectionId: input.connectionId, startAt: input.startAt, endAt: input.endAt, timeZone: input.timeZone, allDay: input.allDay, recurrence: input.recurrence,
+      attendees: input.attendees, attachments: input.attachments };
     await tx.agentRun.update({ where: { id: run.id }, data: { resultJson: json({ proposedActions: [proposed] }) } });
     await freezeCopilotProposals(tx, run.id, [proposed], sources.sourceManifest);
     const execution = await tx.copilotToolExecution.findFirstOrThrow({ where: { sourceRunId: run.id } });

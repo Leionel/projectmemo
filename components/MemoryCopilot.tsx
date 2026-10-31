@@ -155,7 +155,8 @@ function ProjectCopilot({projectId,historyOnly}:{projectId:string;historyOnly:bo
       ? { artifactType: action.artifactType }
       : action.kind === "create_calendar_event"
         ? { title: action.title, description: action.description ?? "", startAt: action.startAt, endAt: action.endAt,
-            timeZone: action.timeZone, allDay: action.allDay ?? false, recurrence: action.recurrence ?? null }
+            timeZone: action.timeZone, allDay: action.allDay ?? false, recurrence: action.recurrence ?? null,
+            attendees: action.attendees ?? [], attachments: action.attachments ?? [] }
         : { title: action.title, description: action.description, priority: action.priority };
     try {
       const response = await fetch(`/api/projects/${projectId}/agent/tools`, {

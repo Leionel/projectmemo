@@ -28,6 +28,7 @@ export type CalendarEvent = {
   title: string; startAt: string | null; endAt: string | null; allDay: boolean; startDate: string | null; endDate: string | null;
   startLocalDate: string | null; endLocalDate: string | null; description: string;
   timeZone: string | null; transparency: string | null; recurrence: string | null; isException: boolean; updatedAt: string | null; etag: string | null; revision: string;
+  attachments?: string[];
 };
 export type CalendarWindowCoverage = {
   windowStart: string; windowEnd: string; pages: number; complete: boolean; truncated: boolean; eventCount: number;
@@ -59,34 +60,63 @@ export type CalendarConnectionView = {
   lastFetchedAt: string | null; lastStatus: string | null; lastError: string | null; revision: number; connected: boolean; writeCapable: boolean;
 };
 export type CalendarOAuthStart = { authorizationUrl: string; expiresAt: string; scope: string; redirectUri: string };
-export const calendarEventProposalBaseSchema = z.object({
-  connectionId: z.string().min(1).max(160), title: z.string().trim().min(2).max(160), description: z.string().trim().max(400).default(""),
+export const calendarAttendeeSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("open_id"), openId: z.string().trim().regex(/^ou_[A-Za-z0-9_-]{6,}$/, "飞书 open_id 格式无效") }).strict(),
+  z.object({ type: z.literal("email"), email: z.string().trim().email("参与人邮箱格式无效").max(320) }).strict(),
+]);
+export type CalendarAttendee = z.infer<typeof calendarAttendeeSchema>;
+const calendarEventFields = {
+  title: z.string().trim().min(2).max(160), description: z.string().trim().max(400).default(""),
   startAt: z.string().min(10).max(64), endAt: z.string().min(10).max(64), timeZone: z.string().min(1).max(100),
   allDay: z.boolean().default(false), recurrence: z.string().trim().max(2000).nullable().default(null),
+  attendees: z.array(calendarAttendeeSchema).max(50).default([]),
+  attachments: z.array(z.string().trim().regex(/^[A-Za-z0-9_-]{1,200}$/, "附件需要飞书 file_token")).max(10).default([]),
+};
+export const calendarEventItemSchema = z.object(calendarEventFields).strict();
+export const calendarEventProposalBaseSchema = calendarEventItemSchema.extend({ connectionId: z.string().min(1).max(160) }).strict();
+export const calendarEventBatchProposalBaseSchema = z.object({
+  connectionId: z.string().min(1).max(160), events: z.array(calendarEventItemSchema).min(2).max(10),
 }).strict();
-export function refineCalendarEventProposal(value: {
+export function calendarEventProposalIssues(value: {
   allDay: boolean; startAt: string; endAt: string; recurrence: string | null;
-}, ctx: z.RefinementCtx) {
+}): string[] {
+  const issues: string[] = [];
   if (value.allDay) {
     const datePattern = /^\d{4}-\d{2}-\d{2}$/;
-    if (!datePattern.test(value.startAt) || !datePattern.test(value.endAt)) ctx.addIssue({ code: "custom", message: "全天日程必须使用 YYYY-MM-DD 日期" });
-    else if (value.endAt < value.startAt) ctx.addIssue({ code: "custom", message: "全天日程结束日期不能早于开始日期" });
-    else if ((Date.parse(value.endAt) - Date.parse(value.startAt)) / 86400000 > 366) ctx.addIssue({ code: "custom", message: "全天日程跨度最多 366 天" });
+    if (!datePattern.test(value.startAt) || !datePattern.test(value.endAt)) issues.push("全天日程必须使用 YYYY-MM-DD 日期");
+    else if (value.endAt < value.startAt) issues.push("全天日程结束日期不能早于开始日期");
+    else if ((Date.parse(value.endAt) - Date.parse(value.startAt)) / 86400000 > 366) issues.push("全天日程跨度最多 366 天");
   } else {
     const offsetIso = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/;
-    if (!offsetIso.test(value.startAt) || !offsetIso.test(value.endAt)) ctx.addIssue({ code: "custom", message: "定时日程必须使用带时区的 ISO 时间" });
+    if (!offsetIso.test(value.startAt) || !offsetIso.test(value.endAt)) issues.push("定时日程必须使用带时区的 ISO 时间");
     else {
       const start = Date.parse(value.startAt), end = Date.parse(value.endAt);
-      if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) ctx.addIssue({ code: "custom", message: "日程结束必须晚于开始" });
-      else if (end - start > 24 * 60 * 60 * 1000) ctx.addIssue({ code: "custom", message: "首个外部写只支持 24 小时内的定时日程" });
-      if (Number.isFinite(start) && start < Date.now() - 60 * 1000) ctx.addIssue({ code: "custom", message: "不能创建已经开始或过去的日程" });
+      if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) issues.push("日程结束必须晚于开始");
+      else if (end - start > 24 * 60 * 60 * 1000) issues.push("首个外部写只支持 24 小时内的定时日程");
+      if (Number.isFinite(start) && start < Date.now() - 60 * 1000) issues.push("不能创建已经开始或过去的日程");
     }
   }
   if (value.recurrence && !/^FREQ=(DAILY|WEEKLY|MONTHLY|YEARLY)(;[A-Z]+=[^;\r\n]+)*$/.test(value.recurrence))
-    ctx.addIssue({ code: "custom", message: "重复规则只支持有限 RFC5545 形式" });
+    issues.push("重复规则只支持有限 RFC5545 形式");
+  return issues;
+}
+export function refineCalendarEventProposal(value: {
+  allDay: boolean; startAt: string; endAt: string; recurrence: string | null;
+}, ctx: z.RefinementCtx) {
+  for (const message of calendarEventProposalIssues(value)) ctx.addIssue({ code: "custom", message });
 }
 export const calendarEventProposalSchema = calendarEventProposalBaseSchema.superRefine(refineCalendarEventProposal);
 export type CalendarEventProposal = z.infer<typeof calendarEventProposalSchema>;
+export const calendarEventBatchProposalSchema = calendarEventBatchProposalBaseSchema.superRefine((value, ctx) => {
+  const seen = new Set<string>();
+  value.events.forEach((event, index) => {
+    for (const message of calendarEventProposalIssues(event)) ctx.addIssue({ code: "custom", message, path: ["events", index] });
+    const key = `${event.startAt}|${event.endAt}|${event.title}`;
+    if (seen.has(key)) ctx.addIssue({ code: "custom", message: "同一批次不能包含时间与标题完全相同的事件", path: ["events", index] });
+    seen.add(key);
+  });
+});
+export type CalendarEventBatchProposal = z.infer<typeof calendarEventBatchProposalSchema>;
 export const calendarToolSchemas = [
   z.object({ tool: z.literal("calendar_read"), projectId: z.string().min(1).max(160), connectionId: z.string().min(1).max(160),
     timeMin: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/),

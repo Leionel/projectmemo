@@ -1,7 +1,7 @@
 import { AppError } from "@/lib/api";
 import { feishuEndpoints, type CalendarFetch } from "./feishuOAuth";
 import { normalizeFeishuEvent } from "./feishuCalendar";
-import type { CalendarEvent } from "./contracts";
+import type { CalendarAttendee, CalendarEvent } from "./contracts";
 
 export type CreatedCalendarEvent = { eventId: string; event: CalendarEvent | null };
 async function body(response: Response): Promise<Record<string, unknown>> {
@@ -18,7 +18,7 @@ function failure(status: number, code: number, message: string): never {
 
 /** Feishu v4 create event supports a native idempotency key in the query string; it is unique per app+calendar. */
 export async function createFeishuCalendarEvent(input: { accessToken: string; calendarId: string; title: string; description: string; startAt: string; endAt: string; timeZone: string;
-  allDay?: boolean; recurrence?: string | null; idempotencyKey: string }, fetcher: CalendarFetch = fetch, signal?: AbortSignal): Promise<CreatedCalendarEvent> {
+  allDay?: boolean; recurrence?: string | null; attachments?: string[]; idempotencyKey: string }, fetcher: CalendarFetch = fetch, signal?: AbortSignal): Promise<CreatedCalendarEvent> {
   const startSeconds = Math.floor(Date.parse(input.startAt) / 1000), endSeconds = Math.floor(Date.parse(input.endAt) / 1000);
   if (!input.allDay && (!Number.isFinite(startSeconds) || !Number.isFinite(endSeconds))) throw new AppError("CALENDAR_WINDOW_INVALID", "日程时间无效", 422);
   const url = new URL(feishuEndpoints.events(input.calendarId));
@@ -28,7 +28,8 @@ export async function createFeishuCalendarEvent(input: { accessToken: string; ca
     body: JSON.stringify({ summary: input.title, description: input.description,
       start_time: input.allDay ? { date: input.startAt } : { timestamp: String(startSeconds), timezone: input.timeZone },
       end_time: input.allDay ? { date: input.endAt } : { timestamp: String(endSeconds), timezone: input.timeZone },
-      ...(input.recurrence ? { recurrence: input.recurrence } : {}) }) });
+      ...(input.recurrence ? { recurrence: input.recurrence } : {}),
+      ...(input.attachments?.length ? { attachments: input.attachments.map(fileToken => ({ file_token: fileToken })) } : {}) }) });
   const parsed = await body(response), code = Number(parsed.code ?? 0);
   if (!response.ok || code !== 0) failure(response.status, code, String(parsed.msg ?? ""));
   const data = parsed.data as { event?: Record<string, unknown> } | undefined, eventId = String(data?.event?.event_id ?? "");
@@ -50,4 +51,56 @@ export async function getFeishuCalendarEvent(input: { accessToken: string; calen
   const normalized = normalizeFeishuEvent(event, input.timeZone);
   if (normalized.malformed || !normalized.event) throw new AppError("CALENDAR_EFFECT_UNREADABLE", "飞书日程回读时间无法解析", 503);
   return normalized.event;
+}
+
+export type FeishuEventAttendee = { type: string; userId: string | null; email: string | null; rsvpStatus: string | null };
+function attendeePayload(attendees: CalendarAttendee[]) {
+  return attendees.map(item => item.type === "open_id"
+    ? { type: "user", user_id: item.openId }
+    : { type: "third_party", third_party_email: item.email });
+}
+function attendeeOf(raw: Record<string, unknown>): FeishuEventAttendee {
+  return { type: String(raw.type ?? "").slice(0, 20), userId: typeof raw.user_id === "string" ? raw.user_id.slice(0, 200) : null,
+    email: typeof raw.third_party_email === "string" ? raw.third_party_email.slice(0, 320) : null,
+    rsvpStatus: typeof raw.rsvp_status === "string" ? raw.rsvp_status.slice(0, 20) : null };
+}
+
+/** Add invitees after creation; Feishu's create endpoint does not accept attendees. */
+export async function addFeishuCalendarAttendees(input: { accessToken: string; calendarId: string; eventId: string; attendees: CalendarAttendee[]; needNotification?: boolean },
+  fetcher: CalendarFetch = fetch, signal?: AbortSignal): Promise<FeishuEventAttendee[]> {
+  const url = new URL(`${feishuEndpoints.events(input.calendarId)}/${encodeURIComponent(input.eventId)}/attendees`);
+  url.searchParams.set("user_id_type", "open_id");
+  const response = await fetcher(url.href, { method: "POST", redirect: "error", signal: signal ?? AbortSignal.timeout(20000),
+    headers: { Authorization: `Bearer ${input.accessToken}`, "Content-Type": "application/json; charset=utf-8", Accept: "application/json" },
+    body: JSON.stringify({ attendees: attendeePayload(input.attendees), need_notification: input.needNotification ?? false }) });
+  const parsed = await body(response), code = Number(parsed.code ?? 0);
+  if (!response.ok || code !== 0) failure(response.status, code, String(parsed.msg ?? ""));
+  const rows = (parsed.data as { attendees?: Array<Record<string, unknown>> } | undefined)?.attendees;
+  return Array.isArray(rows) ? rows.map(attendeeOf) : [];
+}
+
+export async function listFeishuCalendarAttendees(input: { accessToken: string; calendarId: string; eventId: string },
+  fetcher: CalendarFetch = fetch, signal?: AbortSignal): Promise<FeishuEventAttendee[]> {
+  const url = new URL(`${feishuEndpoints.events(input.calendarId)}/${encodeURIComponent(input.eventId)}/attendees`);
+  url.searchParams.set("page_size", "100"); url.searchParams.set("user_id_type", "open_id");
+  const response = await fetcher(url.href, { redirect: "error", signal: signal ?? AbortSignal.timeout(20000),
+    headers: { Authorization: `Bearer ${input.accessToken}`, Accept: "application/json" } });
+  const parsed = await body(response), code = Number(parsed.code ?? 0);
+  if (!response.ok || code !== 0) failure(response.status, code, String(parsed.msg ?? ""));
+  const rows = (parsed.data as { items?: Array<Record<string, unknown>> } | undefined)?.items;
+  return Array.isArray(rows) ? rows.map(attendeeOf) : [];
+}
+
+/** Provider-side delete used only as batch compensation; a missing event counts as already removed. */
+export async function deleteFeishuCalendarEvent(input: { accessToken: string; calendarId: string; eventId: string; needNotification?: boolean },
+  fetcher: CalendarFetch = fetch, signal?: AbortSignal): Promise<{ deleted: boolean }> {
+  const url = new URL(`${feishuEndpoints.events(input.calendarId)}/${encodeURIComponent(input.eventId)}`);
+  url.searchParams.set("need_notification", String(input.needNotification ?? false));
+  const response = await fetcher(url.href, { method: "DELETE", redirect: "error", signal: signal ?? AbortSignal.timeout(20000),
+    headers: { Authorization: `Bearer ${input.accessToken}`, Accept: "application/json" } });
+  if (response.status === 404) return { deleted: false };
+  const parsed = await body(response), code = Number(parsed.code ?? 0);
+  if (code === 191000 || code === 193003) return { deleted: false };
+  if (!response.ok || code !== 0) failure(response.status, code, String(parsed.msg ?? ""));
+  return { deleted: true };
 }

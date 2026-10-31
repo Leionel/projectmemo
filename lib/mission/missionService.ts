@@ -52,6 +52,9 @@ export async function missionDetail(userId:string,id:string){
     if(s.toolName==="propose_calendar_event"){const protocol=s.protocolJson as {externalEffect?:{phase?:string;externalId?:string|null;marker?:string}};
       execution={phase:protocol.externalEffect?.phase??"NOT_DISPATCHED",jobName:"",current:true,receipt:protocol.externalEffect??null,failure:s.failureJson??null};
     }
+    if(s.toolName==="propose_calendar_events"){const protocol=s.protocolJson as {externalEffect?:{phase?:string;items?:unknown[]}};
+      execution={phase:protocol.externalEffect?.phase??"NOT_DISPATCHED",jobName:"",current:true,receipt:protocol.externalEffect??null,failure:s.failureJson??null};
+    }
     return {id:s.id,ordinal:s.ordinal,toolName:s.toolName,status:s.status,result:s.resultJson,execution};
   }));
   const completion=await readMissionCompletion(id,outputs[0]?.verificationStatus??null);

@@ -67,6 +67,8 @@ export function normalizeFeishuEvent(raw: Record<string, unknown>, calendarTimeZ
   const recurrence = typeof raw.recurrence === "string" && raw.recurrence.trim() ? raw.recurrence.trim().slice(0, 2000) : null;
   const isException = raw.is_exception === true;
   const recurringEventId = isException && typeof raw.recurring_event_id === "string" ? raw.recurring_event_id.slice(0, 300) : null;
+  const attachments = Array.isArray(raw.attachments) ? raw.attachments.map(item => item && typeof item === "object" ? String((item as { file_token?: unknown }).file_token ?? "") : "")
+    .filter(token => token.length > 0 && token.length <= 200).slice(0, 10) : [];
   const startKey = startDate ?? startAt!, endKey = endDate ?? endAt!;
   const event: CalendarEvent = {
     eventKey: `${eventId}|${recurringEventId ?? ""}|${startKey}|${endKey}`, eventId, recurringEventId, status,
@@ -74,9 +76,9 @@ export function normalizeFeishuEvent(raw: Record<string, unknown>, calendarTimeZ
     startLocalDate: allDay ? startDate : localDate(startAt, timeZone), endLocalDate: allDay ? endDate : localDate(endAt, timeZone),
     description: String(raw.description ?? "").slice(0, 2000),
     timeZone, transparency: typeof raw.free_busy_status === "string" ? raw.free_busy_status.slice(0, 20) : null,
-    recurrence, isException, updatedAt: null, etag: null,
+    recurrence, isException, updatedAt: null, etag: null, attachments,
     revision: jsonHash({ provider: CALENDAR_PROVIDER, eventId, recurringEventId, status, title: sanitizeTitle(raw.summary), startAt, endAt, startDate, endDate,
-      description: String(raw.description ?? "").slice(0, 2000), recurrence, isException, freeBusy: raw.free_busy_status ?? null }),
+      description: String(raw.description ?? "").slice(0, 2000), recurrence, isException, freeBusy: raw.free_busy_status ?? null, attachments }),
   };
   return { event, malformed: false };
 }

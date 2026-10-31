@@ -67,3 +67,39 @@
 4. 首个外部写只支持单个定时日程；不支持参与人、提醒、重复、全天、附件、批量、删除/补偿或跨日历。
 5. 未在真机/模拟器验证鸿蒙审批弹层；HAP 可编译、单测通过。
 6. 飞书原生 `idempotency_key` 降低重复创建风险，但不宣称 exactly-once；一切以回读结果为准。
+
+## 后续扩展（2026-10-31，同分支）
+
+### Conversation / Copilot 提案
+
+- 新增用户发起的 `create_calendar_event` 提案：`POST /api/conversations/[id]/calendar-proposals` 冻结完整 payload（账号/日历/标题/描述/起止/时区/全天/重复/参与人/附件），生成原 Conversation 提案消息；确认仍走原 `/proposals/[executionId]/confirm` 与 `CopilotToolExecution` 事务。
+- `confirmConversationProposal` 将 `create_calendar_event` 分派到 `confirmConversationCalendar`；requestId 幂等、conversation version、焦点项目、proposalHash、连接状态/scope 与来源 manifest 均由服务端校验。
+- 项目 Copilot 只在 `calendarConnections`（已连接、ACTIVE、含 `calendar:calendar`）中提出日程建议；mock 与模型路径共享同一冻结/确认链，`MemoryCopilot` 支持确认创建日程并显示外部 ID。
+- 对话输入面板支持标题、起止、全天、重复、参与人（邮箱或 `ou_` open_id）、附件 `file_token`；提交只生成待确认提案。
+
+### 单日程能力扩展
+
+- 全天：`YYYY-MM-DD` 起止，创建时使用 provider `date` 字段；回读比对日期。
+- 重复：有限 RFC5545 `FREQ=...` 形式；创建后回读 `recurrence` 比对。
+- 参与人：创建后调用 `POST .../events/:event_id/attendees`（`user` open_id 或 `third_party` 邮箱），再通过 `GET .../attendees` 核对；添加失败或参与人不一致时删除本次创建的日程作为补偿。
+- 附件：接受已上传的飞书 `file_token` 列表，随创建请求写入 `attachments`，回读比对 token；产品内不做 Drive 上传，不新增 `drive:drive` scope。
+- 批量：仅 Mission 新增 `propose_calendar_events`（2–10 个日程、同一连接）；批准后按顺序创建，逐项回读/参与人核对；任一失败删除本批已创建日程并记录 `compensation { deleted, remaining }`；任一项结果未知时保持 UNKNOWN，但仍删除已确认创建的项。
+- 删除补偿：批量失败或参与人核对失败时调用 `DELETE .../events/:event_id`；补偿成功才记已知失败，补偿未确认则保持 UNKNOWN，不宣称全部回滚。
+
+### 验证结果（扩展）
+
+- `npm.cmd exec tsc -- --noEmit`：通过。
+- `npm.cmd run lint`：通过。
+- `npm.cmd test`：163 个测试文件、1328 项通过。新增 `tests/conversationCalendarProposal.test.ts` 7 项（冻结/幂等/焦点/只读/Copilot/全天重复）与 `tests/calendarEventExtensions.test.ts` 5 项（参与人+附件、参与人补偿、批量成功、批量拒绝补偿、批量未知补偿）。
+- `npm.cmd run build`：通过。
+- `npm.cmd run test:e2e`：46 条迁移空库重放、seed、生产构建与浏览器 E2E 通过（`[e2e] completed with passing result.`）。
+- `npm.cmd run harmony:test`：86/86 通过。
+- `npm.cmd run harmony:build`：通过；unsigned HAP 6,804,959 bytes，sha256 `b223e7000f0960431ee1c02d8cd117d3046d2a770d1ff61ffd712b7fd2350d54`。
+
+### 当前仍受限
+
+- 真实飞书 OAuth 写授权与真实事件 1 次仍未执行（产品应用凭据/写 scope 未配置）。
+- 附件只接受外部已上传的 `file_token`，未实现 Drive 上传/选择；没有 `drive:drive` scope。
+- 批量只在 Mission 纵向切片，Conversation/Copilot 仍为单日程提案。
+- 删除补偿仅自动用于失败批次/参与人不一致；没有面向用户的“删除已创建日程”手动操作。
+- 未在真机/模拟器验证鸿蒙审批弹层。

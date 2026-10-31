@@ -52,6 +52,7 @@ export const constraintsSchema = z.object({
   forbiddenApproaches: z.array(z.string().min(1).max(160)).max(12).default([]),
   rejectedActions: z.array(z.string().min(1).max(160)).max(12).default([]),
   executionBoundary: z.enum(["READ_ANALYZE", "PROPOSE_ACTION"]).default("PROPOSE_ACTION"),
+  externalWriteProposal: z.boolean().default(false),
 }).strict();
 
 export const researchScopeSchema = z.object({

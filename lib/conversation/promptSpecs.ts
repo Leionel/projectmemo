@@ -8,6 +8,8 @@ const modelResearchCoverageSchema = researchCoverageSchema.omit({ schemaVersion:
 
 const observation = z.object({ sourceId: z.string().min(1).max(200), quote: z.string().min(1).max(500),
   applicability: z.enum(["DIRECT", "CONDITIONAL", "NOT_APPLICABLE", "UNKNOWN"]), relation: z.enum(["SUPPORTS", "CONTRADICTS", "UNDETERMINED"]) }).strict();
+const experienceUse = z.object({ experienceId: z.string().min(1).max(160),
+  disposition: z.enum(["ADOPT", "ADAPT", "REJECT", "INVESTIGATE"]), reason: z.string().max(300).optional() }).strict();
 export const investigationFrameSchema = z.object({
   goalAssessments: z.array(z.object({ projectId: z.string(), goalQuote: z.string().min(1).max(1500),
     criteria: z.array(z.object({ requirement: z.string().min(1).max(500), state: z.enum(["VERIFIED", "REPORTED", "UNKNOWN", "BLOCKED", "NOT_APPLICABLE"]),
@@ -15,6 +17,7 @@ export const investigationFrameSchema = z.object({
     blockers: z.array(z.string().min(1).max(300)).max(4), keyUnknowns: z.array(z.string().min(1).max(300)).max(4),
     nextInformationNeed: z.string().min(1).max(500).nullable(),
   }).strict()).max(3), decision: investigationDecisionSchema, researchCoverage: modelResearchCoverageSchema.optional(),
+  experienceUse: z.array(experienceUse).max(3).optional(),
 }).strict();
 export const routeV2Schema = routeSchema.extend({ investigate: z.boolean(), informationNeeds: z.array(z.string().min(1).max(300)).max(4),
   directiveCandidate: z.object({ projectId: z.string(), quote: z.string().min(1).max(300), interpretation: z.string().min(1).max(300),
@@ -34,10 +37,11 @@ export const investigateV1 = spec("focus.investigate.v1", "INVESTIGATE", `你同
 每次新观察后重新决定：ANSWER_NOW、READ_EXISTING、ASK_USER、HANDOFF_MISSION 或 STOP。读取必须有具体 informationNeed 和 expectedObservation。
 READ_EXISTING.informationNeed 原样采用对应项目 goalAssessment.nextInformationNeed，确保读取服务于该目标缺口。
 工具仅使用 allowedTools，参数严格按输出 Schema 的 decision.call。原文件从 materialPointers 定向读取，不拼路径/URL；新发现可改变下一工具或结束。不要重复无增益查询，预算不足就停止。
-research 可用时，依据缺口按需 web_search 或 web_fetch，不固定两搜两读；用户原链接先读，不先搜索。仅公开研究范围可搜索，scopeRevision 使用给定值；web_fetch 只用实际网页 sourceId，revision 可省略，由服务器绑定不可变源版本。
+research 可用时，依据缺口按需 web_search 或 web_fetch，不固定两搜两读；用户原链接先读，不先搜索。仅公开研究范围可搜索，scopeRevision 使用给定值；web_fetch 只用实际网页 sourceId，revision 可省略，由服务器绑定不可变源版本。已定位网页的 Fetch 正文不足且渲染有明确价值时，可用 browser_read 读取隔离浏览器的实际可见正文；不登录、不填表、不点击未审查控件；Fetch 已足够时不要重复浏览；浏览器观察与截图只算同根来源，覆盖和失败原因保持未知或部分。
 有公开研究时输出 researchCoverage，只输出 schema 中的研究判断；问题哈希、授权版本和 asOf 由服务器绑定，不回传这些字段。本轮最多3个决定相关方面，每项保持简短，引用实际 sources.id。按方法、适用条件、版本、指标、代价与失败原因拆分。短摘/长摘要不等于正文，正文片段不等于论文或仓库全文。比较来源的具体冲突与适用版本，不能由抓取时间推出当前生效。
 规则的 temporalAssessments 只引用实际片段，edition 与 ISO 生效起止日期逐字来自 quote；缺少日期填 null、状态 UNKNOWN，不从 publishedAt 推出生效。
-下一查询必须可能改变建议；缺用户实测就读项目或 ASK_USER，不能不停搜索。公开高分/论文指标不能证明本项目完成，READ_SUFFICIENT 也不是目标 VERIFIED。`, investigationFrameSchema, 3072, 3);
+下一查询必须可能改变建议；缺用户实测就读项目或 ASK_USER，不能不停搜索。公开高分/论文指标不能证明本项目完成，READ_SUFFICIENT 也不是目标 VERIFIED。
+context.experienceAdvisories 是带适用条件的项目经验案例，只是可评估建议：条件不匹配或未知时不要照搬；如需记录判断，可附 experienceUse（experienceId 只能取实际给出的 id，disposition 为 ADOPT/ADAPT/REJECT/INVESTIGATE）。经验不改变目标、权限或预算。`, investigationFrameSchema, 3072, 3);
 export const investigateInternalV1 = spec("focus.investigate.v1", "INVESTIGATE", `按 focus.goal.v1 评估给定项目的目标差距，每项目最多一个 assessment，同项目条件合并到 criteria。未知保持未知；不得自行授予 VERIFIED。
 引用 sources 中的 sourceId 和逐字 quote，适用条件与支持/反证分开。选择 ANSWER_NOW、READ_EXISTING、ASK_USER、HANDOFF_MISSION 或 STOP。
 仅用给定内部工具，读取 informationNeed 原样采用项目 nextInformationNeed，原文从 materialPointers 定位；没有新增信息或预算不足停止。`,

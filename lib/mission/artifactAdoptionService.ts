@@ -8,6 +8,7 @@ import { json,jsonHash,type Source } from "./contracts";
 import { validateResearchOutput } from "./researchOutputSchema";
 import { outputSchema } from "./tools";
 import { event,lock,ownedMission,validateSources,type Tx } from "./repository";
+import { refreshExperiencesForProject } from "@/lib/experience/service";
 const previewSchema=z.object({artifactType:z.literal("weekly_report").default("weekly_report"),expectedOutputRevision:z.number().int().positive()}).strict();
 const confirmSchema=previewSchema.extend({requestId:z.string().min(1).max(128),previewHash:z.string(),expectedContextVersion:z.number().int().positive()}).strict();
 function enabled(){if(!isFeatureEnabled("MISSION_ARTIFACT_ADOPTION_ENABLED",false))throw new AppError("ADOPTION_DISABLED","成果归入暂未启用",503);}
@@ -41,5 +42,5 @@ export async function confirmArtifactAdoption(userId:string,id:string,outputId:s
   const receipt=await tx.missionArtifactReceipt.create({data:{projectId:m.projectId,missionId:id,outputId,outputRevision:a.value.outputRevision,outputHash:a.value.outputHash,artifactId:artifact.id,artifactType:body.artifactType,sourceManifestJson:json(a.value.sourceManifest),blockMapJson:json(a.value.blockMap),verificationSnapshotJson:json(a.value.verification),createdByUserId:userId,requestId:body.requestId,payloadHash:hash}});
   await event(tx,id,"OUTPUT_ADOPTED",{receiptId:receipt.id,artifactId:artifact.id,outputId,outputRevision:a.value.outputRevision});return receipt;
  };
- return transaction?apply(transaction):db.$transaction(apply);
+ return transaction?apply(transaction):db.$transaction(apply).then(async receipt => { await refreshExperiencesForProject(receipt.projectId); return receipt; });
 }

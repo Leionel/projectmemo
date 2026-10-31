@@ -1,4 +1,5 @@
 "use client";
+import {CalendarProposalPreview} from "./CalendarEventApproval";
 import {projectHref} from "@/lib/projectNavigation";
 
 import { useEffect, useRef, useState } from "react";
@@ -153,7 +154,11 @@ function ProjectCopilot({projectId,historyOnly}:{projectId:string;historyOnly:bo
     setFeedbackHref("");
     const payload = action.kind === "generate_artifact"
       ? { artifactType: action.artifactType }
-      : { title: action.title, description: action.description, priority: action.priority };
+      : action.kind === "create_calendar_event"
+        ? { title: action.title, description: action.description ?? "", startAt: action.startAt, endAt: action.endAt,
+            timeZone: action.timeZone, allDay: action.allDay ?? false, recurrence: action.recurrence ?? null,
+            attendees: action.attendees ?? [], attachments: action.attachments ?? [] }
+        : { title: action.title, description: action.description, priority: action.priority };
     try {
       const response = await fetch(`/api/projects/${projectId}/agent/tools`, {
         method: "POST",
@@ -166,6 +171,8 @@ function ProjectCopilot({projectId,historyOnly}:{projectId:string;historyOnly:bo
         setFeedback("已创建行动项。");
         setFeedbackHref("#action-board");
         emitWorkspaceChange(projectId, ["actions", "metrics", "projects"]);
+      } else if (action.kind === "create_calendar_event") {
+        setFeedback(`已创建飞书日程 · ${String((data as { result?: { externalId?: string } } | null)?.result?.externalId ?? "已写入")}；创建后不会自动删除。`);
       } else {
         setFeedback("已生成成果草稿。");
         setFeedbackHref(`/projects/${projectId}/generate?type=${action.artifactType ?? "competition_outline"}`);
@@ -191,7 +198,7 @@ function ProjectCopilot({projectId,historyOnly}:{projectId:string;historyOnly:bo
           {item.role === "ASSISTANT" && item.trustReceipt && <Receipt receipt={item.trustReceipt} citations={item.citations} />}
           {!item.trustReceipt && item.citations.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{item.citations.map((citation) => <a key={citation.cardId} href={`#card-${citation.cardId}`} className="focus-ring rounded-md bg-[var(--card-bg)] px-2 py-1 text-xs font-bold text-[var(--teal-strong)]">引用：{citation.title}</a>)}</div>}
           {!historyOnly && item.continuationSuggestion && <CopilotContinuation key={item.runId} suggestion={item.continuationSuggestion}/>}
-          {!historyOnly && item.proposedActions.length > 0 && <div className="mt-3 space-y-2">{item.proposedActions.map((action) => <div key={action.title} className="rounded-lg border border-[var(--teal)]/30 bg-[var(--teal-pale)] p-2.5"><p className="text-xs font-bold text-[var(--navy)]">{action.title}</p><button type="button" onClick={() => void confirmTool(action, item.runId)} disabled={Boolean(toolBusy)} className="focus-ring mt-2 inline-flex items-center gap-1 rounded-md bg-[var(--paper-strong)] px-2 py-1 text-xs font-black text-[var(--teal-strong)] disabled:opacity-60">{toolBusy === action.title ? <LoaderCircle size={12} className="animate-spin" /> : <Check size={12} />}确认执行</button></div>)}</div>}
+          {!historyOnly && item.proposedActions.length > 0 && <div className="mt-3 space-y-2">{item.proposedActions.map((action) => <div key={action.title} className="rounded-lg border border-[var(--teal)]/30 bg-[var(--teal-pale)] p-2.5"><p className="text-xs font-bold text-[var(--navy)]">{action.title}</p>{action.kind==="create_calendar_event"&&action.calendarPreview&&<CalendarProposalPreview preview={action.calendarPreview}/>}<button type="button" onClick={() => void confirmTool(action, item.runId)} disabled={Boolean(toolBusy)||(action.kind==="create_calendar_event"&&!action.calendarPreview)} className="focus-ring mt-2 inline-flex items-center gap-1 rounded-md bg-[var(--paper-strong)] px-2 py-1 text-xs font-black text-[var(--teal-strong)] disabled:opacity-60">{toolBusy === action.title ? <LoaderCircle size={12} className="animate-spin" /> : <Check size={12} />}{action.kind === "create_calendar_event" ? "确认创建日程" : "确认执行"}</button></div>)}</div>}
         </div>) : <p className="rounded-md bg-[var(--paper-strong)] p-5 text-center text-sm text-[var(--ink-soft)]">试试问“当前进展如何？”或“消融实验完成了吗？”</p>}
         {loading && <div className="mr-4 rounded-md bg-[var(--paper-strong)] p-3 text-sm text-[var(--muted)]"><LoaderCircle size={15} className="mr-2 inline animate-spin" />正在检索并核验证据…</div>}
       </div>

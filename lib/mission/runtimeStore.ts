@@ -73,6 +73,33 @@ export async function settleUsage(lease:Lease,kind:"models"|"tools",durationMs:n
  if(kind==="models"&&tokens){if(tokens.inputTokens!==null)used.inputTokens+=tokens.inputTokens;if(tokens.outputTokens!==null)used.outputTokens+=tokens.outputTokens;if(tokens.inputTokens!==null&&tokens.outputTokens!==null)used.unknownCalls=Math.max(0,used.unknownCalls-1);}
  await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json({...raw,...used})}});
  });}
+/** Reserves worst-case browser subrequests/bytes in the mission ledger before any page is opened. */
+export async function reserveBrowser(lease:Lease,requests:number,bytes:number){return db.$transaction(async tx=>{
+ const m=await fenced(tx,lease);const used=usageOf(m.budgetUsedJson),limits={...defaultBudget,...m.budgetJson as object};
+ if(used.browserRequests+requests>limits.browserRequests)throw new AppError("BROWSER_REQUEST_BUDGET_EXHAUSTED","委托的网页渲染请求额度已用完",409);
+ if(used.browserBytes+bytes>limits.browserBytes)throw new AppError("BROWSER_BYTE_BUDGET_EXHAUSTED","委托的网页渲染流量额度已用完",409);
+ used.browserRequests+=requests;used.browserBytes+=bytes;
+ await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json(used)}});
+ });}
+/** Actual usage is settled against the reservation; a crash leaves the reserved cost visible. */
+export async function settleBrowserUsage(lease:Lease,reserved:{requests:number;bytes:number},actual:{requests:number;bytes:number}){return db.$transaction(async tx=>{
+ const m=await fenced(tx,lease,false);const used=usageOf(m.budgetUsedJson);
+ used.browserRequests=Math.max(0,used.browserRequests-reserved.requests)+actual.requests;
+ used.browserBytes=Math.max(0,used.browserBytes-reserved.bytes)+actual.bytes;
+ await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json(used)}});
+ });}
+/** Bounded external calendar HTTP ledger; token refresh and event read share the same root. */
+export async function reserveCalendar(lease:Lease,requests:number){return db.$transaction(async tx=>{
+ const m=await fenced(tx,lease);const used=usageOf(m.budgetUsedJson),limits={...defaultBudget,...m.budgetJson as object};
+ if(used.calendarRequests+requests>limits.calendarRequests)throw new AppError("CALENDAR_REQUEST_BUDGET_EXHAUSTED","委托的日历请求额度已用完",409);
+ used.calendarRequests+=requests;
+ await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json(used)}});
+ });}
+export async function settleCalendarUsage(lease:Lease,reserved:number,actual:number){return db.$transaction(async tx=>{
+ const m=await fenced(tx,lease,false);const used=usageOf(m.budgetUsedJson);
+ used.calendarRequests=Math.max(0,used.calendarRequests-reserved)+actual;
+ await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json(used)}});
+ });}
 export async function release(tx:Tx,m:AgentMission,status:string,reason?:string){
  const p=boundedPolicy(m);let plan=m.planJson as object,nextAttemptAt:Date|null|undefined;
  if(p){const current=await tx.agentMission.findUniqueOrThrow({where:{id:m.id}}),state=(current.planJson as {delegation?:object}).delegation??{};

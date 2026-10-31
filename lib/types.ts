@@ -155,13 +155,27 @@ export interface AgentEvidence {
   evaluatedAt?: string;
 }
 
+export interface CalendarApprovalPreview {
+  payload: import("./calendar/contracts").CalendarEventProposal;
+  target: { accountName?:string;accountEmail?:string;calendarSummary?:string;calendarId?:string };
+  compensationPolicy?:string;
+}
 export interface ProposedAction {
-  kind: "create_action" | "generate_artifact";
+  calendarPreview?: CalendarApprovalPreview;
+  kind: "create_action" | "generate_artifact" | "create_calendar_event";
   label: string;
   title: string;
   description?: string;
   priority?: number;
   artifactType?: ArtifactTypeValue;
+  connectionId?: string;
+  startAt?: string;
+  endAt?: string;
+  timeZone?: string;
+  allDay?: boolean;
+  recurrence?: string | null;
+  attendees?: Array<{ type: "open_id"; openId: string } | { type: "email"; email: string }>;
+  attachments?: string[];
   dueAt?: string;
 }
 

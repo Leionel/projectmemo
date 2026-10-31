@@ -4,12 +4,24 @@ import { ownedMission } from "@/lib/mission/repository";
 import { validateDocumentObservation,findDocumentObservation } from "@/lib/documents/observations";
 import { assertSourceUse } from "@/lib/continuity/sourcePolicy";
 import { readSource } from "@/lib/research/sourceRepository";
+import { db } from "@/lib/db";
+import { record } from "@/lib/conversation/repository";
+import { calendarSourceMetaSchema } from "@/lib/calendar/contracts";
 export const runtime="nodejs";
 export async function GET(request:Request,c:{params:Promise<{id:string;sourceId:string}>}){try{
  const {user}=await authenticateUser(request),p=await c.params;
+ if(p.sourceId.startsWith("calendar:")){
+  const m=await ownedMission(user.id,p.id),observation=await db.calendarObservation.findFirst({where:{id:p.sourceId.slice(9),missionId:m.id},include:{connection:true}});
+  if(!observation)throw new AppError("SOURCE_NOT_FOUND","日历来源不属于当前委托",404);
+  await assertSourceUse(user.id,m.projectId,p.sourceId,undefined,{missionId:m.id});
+  const payload=record(observation.payloadJson),calendar=calendarSourceMetaSchema.parse(payload.meta);
+  return Response.json({source:{id:p.sourceId,sourceId:p.sourceId,projectId:m.projectId,revision:observation.revision,title:observation.title,
+    excerpt:String(payload.excerpt??""),observedAt:observation.observedAt.toISOString(),temporalState:"UNKNOWN",knowledgeClass:"EXTERNAL_REFERENCE",readScope:"STRUCTURED",calendar}});
+ }
  if(!p.sourceId.startsWith("doc:")){
   const mission=await ownedMission(user.id,p.id),raw=await readSource(user.id,p.id,p.sourceId);await assertSourceUse(user.id,mission.projectId,p.sourceId,undefined,{missionId:p.id});
-  return Response.json({source:{...raw,sourceId:raw.id,projectId:mission.projectId,revision:raw.normalizedContentHash,excerpt:(raw.excerptJson as {text?:string}).text??"",external:{provider:raw.retrievalMode==="ACADEMIC_METADATA"?"Crossref":"Web",requestedUrl:raw.requestedUrl,readLevel:raw.retrievalMode==="ACADEMIC_METADATA"?"ACADEMIC_METADATA":raw.retrievalMode==="SEARCH_SNIPPET"?"SEARCH_SNIPPET":"FETCH_EXCERPT",fetchedAt:raw.fetchedAt}}});
+  const excerpt=raw.excerptJson as {text?:string;browser?:unknown};
+  return Response.json({source:{...raw,sourceId:raw.id,projectId:mission.projectId,revision:raw.normalizedContentHash,excerpt:excerpt.text??"",external:{provider:raw.retrievalMode==="ACADEMIC_METADATA"?"Crossref":"Web",requestedUrl:raw.requestedUrl,resolvedUrl:raw.resolvedUrl,readLevel:raw.retrievalMode==="ACADEMIC_METADATA"?"ACADEMIC_METADATA":raw.retrievalMode==="SEARCH_SNIPPET"?"SEARCH_SNIPPET":raw.retrievalMode==="BROWSER_RENDER"?"BROWSER_RENDER":"FETCH_EXCERPT",retrievalMethod:raw.retrievalMode==="BROWSER_RENDER"?"ISOLATED_BROWSER":raw.retrievalMode==="ACADEMIC_METADATA"?"CROSSREF_METADATA":"PROVIDER_FETCH",fetchedAt:raw.fetchedAt,...(excerpt.browser?{browser:excerpt.browser}:{})}}});
  }
  const m=await ownedMission(user.id,p.id),found=await findDocumentObservation(m.projectId,p.sourceId,undefined,user.id);
  if(!found?.document||found.document.missionId!==m.id)throw new AppError("SOURCE_NOT_FOUND","来源不属于原委托",404);

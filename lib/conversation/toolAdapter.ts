@@ -67,7 +67,8 @@ export async function readWorkspaceTool(actor: ConversationActor, raw: z.infer<t
   const call = investigationToolCallSchema.parse(raw);
   if(call.tool==="inspect_document"||call.tool==="read_document_page"||call.tool==="read_document_section"||call.tool==="read_document_table")throw new AppError("INVALID_TOOL_ACTOR","文档观察需要原 Turn 的读取记录",409);
   if (call.tool === "read_repository_ci" || call.tool === "read_ci_jobs" || call.tool === "read_ci_log") throw new AppError("INVALID_TOOL_ACTOR", "CI 观察需要原 Turn 请求账本", 409);
-  if (call.tool === "web_search" || call.tool === "web_fetch" || call.tool === "read_paper_metadata") throw new AppError("INVALID_TOOL_ACTOR", "公开研究需要原会话授权入口", 409);
+  if (call.tool === "web_search" || call.tool === "web_fetch" || call.tool === "read_paper_metadata" || call.tool === "browser_read") throw new AppError("INVALID_TOOL_ACTOR", "公开研究需要原会话授权入口", 409);
+  if (call.tool === "calendar_read") throw new AppError("INVALID_TOOL_ACTOR", "日历读取需要原会话连接与请求账本", 409);
   if (!projectIds.includes(call.projectId)) throw new AppError("INVALID_ROUTE", "本轮调查没有包含该项目", 409);
   await validateReadSources(actor, priorSources);
   await assertProject(actor, call.projectId);

@@ -1,17 +1,19 @@
 import { z } from "zod";
 import { researchScopeSchema } from "./mission";
+import { browserReadModeSchema, browserSourceMetaSchema } from "@/lib/browser/contracts";
 
 export const conversationResearchScopeSchema = z.object({
   expectedRevision: z.number().int().positive(), projectId: z.string().min(1).max(160),
   scope: researchScopeSchema,
 }).strict();
-export const researchReadLevelSchema = z.enum(["SEARCH_SNIPPET", "SEARCH_SUMMARY", "FETCH_EXCERPT", "DOCUMENT_EXTRACT", "ACADEMIC_METADATA", "UNAVAILABLE"]);
+export const researchReadLevelSchema = z.enum(["SEARCH_SNIPPET", "SEARCH_SUMMARY", "FETCH_EXCERPT", "DOCUMENT_EXTRACT", "ACADEMIC_METADATA", "BROWSER_RENDER", "UNAVAILABLE"]);
 export const externalSourceMetaSchema = z.object({
   conversationId: z.string(), turnId: z.string(), scopeRevision: z.number().int().positive(),
   provenanceSourceIds:z.array(z.string().max(200)).max(4).optional(),
   origin: z.enum(["SEARCH", "USER_PROVIDED"]), provider: z.string(), requestedUrl: z.string().max(8192),
   resolvedUrl: z.string().nullable(), publishedAt: z.string().nullable(), fetchedAt: z.string(),
-  readLevel: researchReadLevelSchema, retrievalMethod: z.enum(["SEARCH", "SEARCH_INLINE_CONTENT", "PROVIDER_FETCH", "DOCUMENT_PARSER", "CROSSREF_METADATA"]),
+  readLevel: researchReadLevelSchema, retrievalMethod: z.enum(["SEARCH", "SEARCH_INLINE_CONTENT", "PROVIDER_FETCH", "DOCUMENT_PARSER", "CROSSREF_METADATA", "ISOLATED_BROWSER"]),
+  browser: browserSourceMetaSchema.optional(),
   truncated: z.boolean(), totalCharacters: z.number().int().nonnegative(),
   applicability: z.object({ edition: z.string().max(200).nullable(), effectiveFrom: z.string().nullable(), effectiveUntil: z.string().nullable(),
     status: z.enum(["CURRENT", "FUTURE", "SUPERSEDED", "CONFLICTED", "UNKNOWN"]), evidenceSourceIds: z.array(z.string()).max(8) }),
@@ -42,5 +44,7 @@ export const researchToolSchemas = [
     publicSourceIds: z.array(z.string()).max(3).optional(), publicTermIndexes: z.array(z.number().int().min(0).max(19)).max(5).optional(), hostIndexes: z.array(z.number().int().min(0).max(19)).max(3).optional(),
   }).strict(),
   z.object({ tool: z.literal("web_fetch"), projectId: z.string(), sourceId: z.string(), revision: z.string().optional(), scopeRevision: z.number().int().positive() }).strict(),
+  z.object({ tool: z.literal("browser_read"), projectId: z.string(), sourceId: z.string(), revision: z.string().optional(),
+    scopeRevision: z.number().int().positive(), mode: browserReadModeSchema.default("READ_VISIBLE"), scrolls: z.number().int().min(0).max(2).default(0) }).strict(),
 ] as const;
 export type ResearchToolCall = z.infer<(typeof researchToolSchemas)[number]>;

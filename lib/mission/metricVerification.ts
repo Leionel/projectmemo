@@ -1,4 +1,5 @@
 import { assertCognitiveReadSet } from "@/lib/memory/hypothesisService";
+import { assertExperienceReadSet } from "@/lib/experience/injection";
 import { metricInputSources } from "./metricInputSources";
 import { AppError } from "@/lib/api";
 import { db } from "@/lib/db";
@@ -22,6 +23,7 @@ export async function commitApprovedMetricVerification(lease:Lease,stepId:string
   assertAutomaticTool(mission,"verify_experiment_metrics",true);assertDynamicTool(mission,"verify_experiment_metrics",step.canonicalInputJson);
   const proposal=record(approval.proposalJson);
   if(!record(record(step.protocolJson).sandboxJob).phase)await assertCognitiveReadSet(mission.ownerUserId,record(step.protocolJson).cognitiveReadSet,tx);
+  if(!record(record(step.protocolJson).sandboxJob).phase)await assertExperienceReadSet(mission.ownerUserId,record(step.protocolJson).experienceReadSet,tx);
   if(approval.status!=="APPROVED"||approval.proposalHash!==jsonHash(proposal)||approval.expiresAt<=new Date()||approval.expectedPlanRevision!==mission.planRevision||proposal.contextVersion!==mission.contextVersion||proposal.constraintsVersion!==mission.constraintsVersion||proposal.tool!=="verify_experiment_metrics")throw new AppError("APPROVAL_CHANGED","核算批准已失效，请重新预览",409);
   metricJobSchema.parse(record(proposal.args).job);await validateSources(mission.projectId,approval.readSetJson as unknown as Source[],tx,mission.id);
   return {mission,step,approval,replay:false};

@@ -17,7 +17,7 @@ import { jsonHash, type ToolResult, type Source } from "./contracts";
 import { textHash } from "@/lib/research/sourceRepository";
 import { decisionTokenLimit } from "./modelProtocol";
 import { isFeatureEnabled } from "@/lib/config/features";
-import { injectionDecisions, recordUses, type ExperienceAdvisory } from "@/lib/experience/injection";
+import { resolveExperience, recordRetrieval, recordUses, type ExperienceAdvisory, type ExperienceReadRef } from "@/lib/experience/injection";
 import { projectTools, type ToolSet } from "./tools";
 import { MISSION_PROTOCOL_SCHEMA_VERSION } from "./contracts";
 import { fitContextSummary, fitReviewReference, type assessEvidenceFit } from "./evidenceFitService";
@@ -26,7 +26,7 @@ export function sourceContext(source: Source, policy?: SourceUse) {
   const text = source.text, ranges = text.length > 800 ? [[0, 400], [text.length - 400, text.length]] : [[0, text.length]];
   return { ...(policy ? { provenance: { state: policy.state, independentEvidence: policy.independentEvidence, reason: policy.reason } } : {}), id: source.id, kind: source.kind, entityType: source.entityType, knowledgeClass: source.knowledgeClass ?? (source.kind === "EXTERNAL" ? "EXTERNAL_REFERENCE" : "PROJECT_OBSERVATION"),
     hash: source.hash, revision: source.revision, observedAt: source.observedAt, temporalState: source.temporalState ?? source.assessment?.temporalState ?? "UNKNOWN",
-    assessment: source.assessment, document:source.document, excerpts: ranges.map(([start, end]) => ({ sourceId: source.id, start, end, text: text.slice(start, end), excerptHash: textHash(text.slice(start, end)) })),
+    assessment: source.assessment, document:source.document, ...(source.browser?{browser:{status:source.browser.status,finalUrl:source.browser.finalUrl,observedAt:source.browser.observedAt,complete:source.browser.coverage.complete,failureCode:source.browser.failureCode}}:{}), ...(source.calendar?{calendar:{provider:source.calendar.provider,accountEmail:source.calendar.accountEmail,calendarSummary:source.calendar.calendarSummary,eventStatus:source.calendar.eventStatus,startAt:source.calendar.startAt,endAt:source.calendar.endAt,allDay:source.calendar.allDay,windowComplete:source.calendar.window.complete,truncated:source.calendar.window.truncated,malformedCount:source.calendar.window.malformedCount}}:{}), excerpts: ranges.map(([start, end]) => ({ sourceId: source.id, start, end, text: text.slice(start, end), excerptHash: textHash(text.slice(start, end)) })),
     truncated: text.length > 800 };
 }
 function compactData(value: unknown) {
@@ -134,16 +134,26 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
   const fitted = fitCognitiveFacets({ hypotheses, effectiveMemory }, Math.max(0, 29400 - JSON.stringify(base).length));
   const context = { ...base, hypotheses: fitted.hypotheses, effectiveMemory: fitted.effectiveMemory };
   if (JSON.stringify(context).length > 30000) throw new Error("CONTEXT_LIMIT");
-  // P3-A 项目内经验：仅 ACTIVE 经验以建议形式注入；版本不兼容、撤销或反例追平时停止注入，历史使用记录保留。
+  // CT-8 项目内经验：只有条件 MATCH + ACTIVE + 来源有效的经验进入模型上下文；
+  // 上下文上限显式裁剪，检索命中/注入分别记录。经验只是建议，不改变权限、目标或系统 Prompt。
   let experienceAdvisories: ExperienceAdvisory[] = [];
+  let experienceReadSet: ExperienceReadRef[] = [];
+  let experienceCoverage = { available: 0, injected: 0, omitted: 0, complete: true };
+  let experienceDecisions: Awaited<ReturnType<typeof resolveExperience>>["decisions"] = [];
   if (isFeatureEnabled("PROJECT_EXPERIENCE_ENABLED", true)) {
     const currentTools = Object.entries(tools).map(([name, tool]) => ({ name, version: tool.version ?? "1" }));
-    const decisions = await injectionDecisions(m, currentTools, MISSION_PROTOCOL_SCHEMA_VERSION);
-    experienceAdvisories = decisions.flatMap(d => ("advisory" in d ? [d.advisory] : [])).slice(0, 3);
+    const resolved = await resolveExperience(m, currentTools, MISSION_PROTOCOL_SCHEMA_VERSION);
+    experienceDecisions = resolved.decisions;
+    experienceReadSet = resolved.readSet;
+    experienceAdvisories = resolved.decisions.flatMap(d => ("advisory" in d ? [d.advisory] : [])).slice(0, 3);
+    experienceCoverage = { available: resolved.decisions.length, injected: experienceAdvisories.length,
+      omitted: resolved.decisions.filter(d => !("advisory" in d)).length,
+      complete: resolved.decisions.length <= 24 };
   }
   const hash = jsonHash(context);
   if (experienceAdvisories.length) await recordUses(m.id, experienceAdvisories.map(advisory => ({ advisory, experienceId: advisory.id })), hash);
-  return JSON.stringify({ ...context, experienceAdvisories, manifest: { excludedStepIds: excluded, unlistedStepCount: Math.max(0, stepCount - stepIndex.length), historyStepCount: stepCount, notLoadedStepCount: stepCount - steps.length,
+  if (experienceDecisions.length) await recordRetrieval(m, experienceDecisions, hash);
+  return JSON.stringify({ ...context, experienceAdvisories, experienceReadSet, experienceCoverage, manifest: { excludedStepIds: excluded, unlistedStepCount: Math.max(0, stepCount - stepIndex.length), historyStepCount: stepCount, notLoadedStepCount: stepCount - steps.length,
     historyEventCount: eventCount, includedEventSeqs: [...new Set([...inputs.map(e => e.seq),...fitReviews.map(e=>e.seq)])].sort((a,b)=>a-b), promptVersion: context.promptVersion, source: "MISSION_EVENTS_AND_STEPS", hash,
     omittedCognition: fitted.omitted } });
 }

@@ -1,0 +1,37 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/browserPolicy.test.ts tests/browserTransport.test.ts tests/browserReader.test.ts tests/calendarFeishu.test.ts tests/calendarWrite.test.ts tests/calendarEventExtensions.test.ts tests/conversationCalendarProposal.test.ts tests/ct8OutcomeExperience.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-ct8-10-audit
+
+ ❯ tests/calendarFeishu.test.ts (11 tests | 1 failed) 1926ms
+     × 会话工具写回原 operation 与带内外部来源，重复输入回放 364ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/calendarFeishu.test.ts > CT-9B 飞书日历只读连接 > 会话工具写回原 operation 与带内外部来源，重复输入回放
+AssertionError: expected { …(14) } to match object { …(3) }
+(39 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "excerpt": "2025-11-03 09:00–10:00 · 项目评审 · confirmed · busy",
+    "revision": "b13b17314b5c27fbbc4b51ae96a0eea47b63bfb96c7b36022a435a454dcfddbe",
+-   "sourceId": "calendar:cmvvxk02l0022ac8ovegboctz",
++   "sourceId": "calendar:cmvvxk05c0023ac8opnss1n4g",
+  }
+
+ ❯ tests/calendarFeishu.test.ts:184:31
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 7 passed (8)
+      Tests  1 failed | 93 passed (94)
+   Start at  12:57:49
+   Duration  47.07s (transform 2.55s, setup 0ms, import 10.74s, tests 34.71s, environment 0ms)
+

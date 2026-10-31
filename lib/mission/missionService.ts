@@ -45,10 +45,15 @@ export async function missionDetail(userId:string,id:string){
   ]);
   const projectedSteps=await Promise.all(steps.map(async s=>{
     let execution:{phase:string;jobName:string;current:boolean;receipt:unknown;failure:unknown}|undefined;
-    if(s.toolName==="propose_metric_verification"){
-      const protocol=s.protocolJson as {sandboxJob?:{phase?:string;name?:string};sandboxObservation?:unknown;sandboxFailure?:unknown};let current=true;
+    if(s.toolName==="propose_metric_verification"){      const protocol=s.protocolJson as {sandboxJob?:{phase?:string;name?:string};sandboxObservation?:unknown;sandboxFailure?:unknown};let current=true;
       try{const approval=await db.agentMissionApproval.findUnique({where:{stepId:s.id}});const inputs=metricInputSources(s.readSetJson as unknown as Source[],record(record(approval?.proposalJson).args).sourceBindings);await validateSources(m.projectId,inputs,db,m.id);}catch{current=false;}
       execution={phase:protocol?.sandboxJob?.phase??"NOT_DISPATCHED",jobName:protocol?.sandboxJob?.name??"",current,receipt:protocol?.sandboxObservation??null,failure:protocol?.sandboxFailure??null};
+    }
+    if(s.toolName==="propose_calendar_event"){const protocol=s.protocolJson as {externalEffect?:{phase?:string;externalId?:string|null;marker?:string}};
+      execution={phase:protocol.externalEffect?.phase??"NOT_DISPATCHED",jobName:"",current:true,receipt:protocol.externalEffect??null,failure:s.failureJson??null};
+    }
+    if(s.toolName==="propose_calendar_events"){const protocol=s.protocolJson as {externalEffect?:{phase?:string;items?:unknown[]}};
+      execution={phase:protocol.externalEffect?.phase??"NOT_DISPATCHED",jobName:"",current:true,receipt:protocol.externalEffect??null,failure:s.failureJson??null};
     }
     return {id:s.id,ordinal:s.ordinal,toolName:s.toolName,status:s.status,result:s.resultJson,execution};
   }));

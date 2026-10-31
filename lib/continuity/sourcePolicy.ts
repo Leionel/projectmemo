@@ -148,6 +148,21 @@ export async function sourceLineage(projectId: string, id: string, tx: Tx = db, 
     else known = false;
   } else if (id.startsWith("url:")) {
     // This edge is obtained from an original adapter's persisted observation.
+  } else if (id.startsWith("calendar:")) {
+    const observation = await tx.calendarObservation.findFirst({ where: { id: id.slice(9), projectId }, include: { connection: true } });
+    known = !!observation;
+    if (observation) {
+      derived = true;
+      const connection = observation.connection;
+      if (connection.projectId !== projectId || connection.ownerUserId !== observation.ownerUserId) known = false;
+      else if (connection.status !== "ACTIVE" || connection.revokedAt !== null || connection.authGeneration !== Number(record(observation.payloadJson).authGeneration)) {
+        blocked = true; blockedReason = "SOURCE_PERMISSION_REVOKED";
+      } else if (+observation.observedAt+15*60*1000<=Date.now()) {
+        blocked=true;blockedReason="CALENDAR_OBSERVATION_STALE";
+      } else if (connection.calendarId !== observation.calendarId) {
+        blocked = true; blockedReason = "SOURCE_SCOPE_CHANGED";
+      }
+    }
   } else if (id.startsWith("repo:") || id === "project:" + projectId) {
     // Identity/revision/grant are checked by the original adapter; these are original observations, never user authority.
   } else {

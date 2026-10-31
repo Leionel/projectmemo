@@ -9,6 +9,7 @@ import { configuredClaimJudge } from "@/lib/mission/claimJudgeAdapter";
 import { assessCopilotSemantics } from "@/lib/evidence/copilotSemantic";
 import { evidenceAssessment } from "@/lib/evidence/assessment";
 import { jsonHash } from "@/lib/mission/contracts";
+import { calendarAttendeeSchema } from "@/lib/calendar/contracts";
 import { z } from "zod";
 import { chatPromptWithMeta } from "@/lib/agent/llmAgent";
 import { legacyCopilotStyleV2 } from "@/lib/agent/specialistPrompts";
@@ -31,12 +32,20 @@ export const responseSchema = z.object({
     cardIds: z.array(z.string()).max(8).default([]),
   })).max(12).default([]),
   proposedActions: z.array(z.object({
-    kind: z.enum(["create_action", "generate_artifact"]),
+    kind: z.enum(["create_action", "generate_artifact", "create_calendar_event"]),
     label: z.string().min(1).max(60),
     title: z.string().min(2).max(160),
     description: z.string().max(500).optional(),
     priority: z.number().int().min(1).max(5).optional(),
     artifactType: z.enum(["weekly_report", "competition_outline", "defense_ppt", "readme", "resume_description", "next_week_plan"]).optional(),
+    connectionId: z.string().min(1).max(160).optional(),
+    startAt: z.string().min(10).max(64).optional(),
+    endAt: z.string().min(10).max(64).optional(),
+    timeZone: z.string().min(1).max(100).optional(),
+    allDay: z.boolean().optional(),
+    recurrence: z.string().trim().max(2000).nullable().optional(),
+    attendees: z.array(calendarAttendeeSchema).max(50).optional(),
+    attachments: z.array(z.string().trim().max(200)).max(10).optional(),
   })).max(4).default([]),
 });
 
@@ -87,11 +96,20 @@ function mockAnswer(input: {
   cards: Array<{ id: string; title: string; summary: string; type: string; keywords: unknown }>;
   interventions: Array<{ id: string; title: string; content: string; status: string; evidenceCardId: string | null }>;
   actions: Array<{ id: string; title: string; status: string }>;
+  calendarConnections: Array<{ id: string; accountName: string; accountEmail: string; calendarSummary: string }>;
 }) {
   const question = input.question.toLowerCase();
   const citations = input.citations;
   const proposedActions: ProposedAction[] = [];
-  if (/创建|安排|任务|下一步|做什么/.test(question)) {
+  const writableCalendar = input.calendarConnections[0];
+  const wantsCalendar = Boolean(writableCalendar) && /日程|日历|会议|约个|面谈/.test(question);
+  if (writableCalendar && wantsCalendar) {
+    const day = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    proposedActions.push({ kind: "create_calendar_event", label: "创建飞书日程", title: "安排一次项目讨论",
+      description: "确认后在已授权的飞书日历创建日程；创建后不会自动删除。",
+      connectionId: writableCalendar.id, startAt: `${day}T02:00:00.000Z`, endAt: `${day}T02:30:00.000Z`,
+      timeZone: "Asia/Shanghai", allDay: false, recurrence: null });
+  } else if (/创建|安排|任务|下一步|做什么/.test(question)) {
     proposedActions.push({ kind: "create_action", label: "创建行动项", title: "把这个下一步拆成可执行行动", description: "确认后写入项目行动板，完成时会生成复盘卡片。", priority: 3 });
   }
   if (/周报|ppt|答辩|readme|材料|作品说明/.test(question)) {
@@ -165,6 +183,11 @@ async function answerQuestion(projectId: string, question: string, actor?: Copil
   const dialogue=history.slice(0,6).reverse().map(m=>({role:m.role,text:m.content.slice(0,1000)}));
   const explicitConstraints=history.filter(m=>m.role==="USER"&&/不要|禁止|不允许|只读|不得|不创建|不使用/.test(m.content)).slice(0,6).map(m=>m.content.slice(0,1000));
   const missionContext=actor?await getProjectAgentContext(actor.userId,projectId):null;
+  const calendarConnections = actor && isFeatureEnabled("CALENDAR_EVENT_WRITE_ENABLED", false)
+    ? (await db.calendarConnection.findMany({ where: { projectId, ownerUserId: actor.userId, status: "ACTIVE", revokedAt: null },
+      select: { id: true, accountName: true, accountEmail: true, calendarSummary: true, calendarId: true, scope: true } }))
+      .filter(item => item.scope.split(/\s+/).includes("calendar:calendar"))
+    : [];
   if(!turn)await saveAgentMessage({ projectId, role: "USER", content: question, citations: [], proposedActions: [],ownerUserId:actor?.userId,requestState:"ANSWERED" });
   const suggested=await continuationSuggestion(projectId,question,actor);
   // 当前提醒数和提醒原文是本项目的持久化事实，可以直接核对；不必强迫它们
@@ -222,7 +245,7 @@ async function answerQuestion(projectId: string, question: string, actor?: Copil
   const timeline = await getDecisionTimeline(projectId);
   const temporalById = new Map(timeline.items.map(item => [item.card.id, item]));
   const evidenceSearch = await getCopilotEvidence(projectId, question, cards);
-  let answer = mockAnswer({ question, citations: evidenceSearch.citations, cards, interventions, actions });
+  let answer = mockAnswer({ question, citations: evidenceSearch.citations, cards, interventions, actions, calendarConnections });
   let fallback = true;
   let fallbackReason: string | null = "mock_mode";
   let provider = "mock";
@@ -238,6 +261,7 @@ async function answerQuestion(projectId: string, question: string, actor?: Copil
           cards: cards.filter((card) => evidenceSearch.citations.some((citation) => citation.cardId === card.id)).map((card) => ({ id: card.id, title: card.title, summary: card.summary, type: String(card.type), temporalState: temporalById.get(card.id)?.topLevelState ?? "UNKNOWN", sourceRevision: sourceManifest.cardHashes.find(item => item.id === card.id)?.hash ?? "", observedAt: sourceManifest.observedAt })),
           interventions: interventions.map((item) => ({ id: item.id, title: item.title, content: item.content, status: String(item.status) })),
           actions: actions.map((item) => ({ id: item.id, title: item.title, status: String(item.status) })),
+          calendarConnections: calendarConnections.map(({ id, accountName, accountEmail, calendarSummary, calendarId }) => ({ id, accountName, accountEmail, calendarSummary, calendarId })),
         }, projectId);
       modelAudit = { prompt: execution.prompt, usage: execution.usage, usageUnknown: execution.usageUnknown, requestIdentity: execution.requestIdentity };
       if (execution.status === "FAILED") throw new Error(execution.fallbackReason ?? "MODEL_RESPONSE_INVALID");
@@ -394,6 +418,6 @@ export async function getProjectChat(projectId: string,ownerUserId?:string,sourc
     : message);
 }
 
-export async function executeCopilotTool(projectId: string, input: { tool: "create_action" | "generate_artifact"; confirmed: boolean; payload: Record<string, unknown>; sourceRunId?: string }, actor?: CopilotActor) {
+export async function executeCopilotTool(projectId: string, input: Parameters<typeof confirmCopilotTool>[1], actor?: CopilotActor) {
   return confirmCopilotTool(projectId, input, actor);
 }

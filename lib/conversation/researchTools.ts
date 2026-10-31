@@ -13,6 +13,8 @@ import type { ResearchProvider } from "@/lib/research/contracts";
 import { publicUrl, compilePublicQuery } from "@/lib/research/queryPolicy";
 import type { ConversationActor, ConversationSource } from "@/lib/types/conversation";
 import type { ResearchToolCall, ExternalSourceMeta } from "@/lib/types/conversationResearch";
+import { browserReadAvailable, isolatedBrowserReader } from "@/lib/browser/reader";
+import { DEFAULT_BROWSER_LIMITS, type BrowserReader, type BrowserSourceMeta } from "@/lib/browser/contracts";
 import { assertProject, record } from "./repository";
 import { readResearchScope, validateWebSource } from "./researchScope";
 import { assertTurnLease, mutateTurn, turnOperation, currentGeneration, generationCallId } from "./turnRuntime";
@@ -63,14 +65,17 @@ async function storeSources(actor: ConversationActor, id: string, turnId: string
   });
 }
 function source(context: { id: string; turnId: string; projectId: string; revision: number; provider: string; maxExcerptChars?: number; observedAt?: string }, url: string,
-  title: string, rawText: string, readLevel: ExternalSourceMeta["readLevel"], origin: ExternalSourceMeta["origin"], method: ExternalSourceMeta["retrievalMethod"], date?: string | null): ConversationSource {
-  const normalized = rawText.normalize("NFKC").replace(/\r\n/g, "\n").trim(), excerpt = normalized.slice(0, Math.min(context.maxExcerptChars ?? 4000, readLevel === "FETCH_EXCERPT" ? 4000 : 1600));
-  const revision = jsonHash({ url, contentHash: jsonHash(normalized), readLevel, scopeRevision: context.revision, turnId: context.turnId });
+  title: string, rawText: string, readLevel: ExternalSourceMeta["readLevel"], origin: ExternalSourceMeta["origin"], method: ExternalSourceMeta["retrievalMethod"], date?: string | null,
+  extra?: { resolvedUrl?: string | null; browser?: BrowserSourceMeta }): ConversationSource {
+  const normalized = rawText.normalize("NFKC").replace(/\r\n/g, "\n").trim(), excerpt = normalized.slice(0, Math.min(context.maxExcerptChars ?? 4000, ["FETCH_EXCERPT", "BROWSER_RENDER"].includes(readLevel) ? 4000 : 1600));
+  const revision = jsonHash({ url, resolvedUrl: extra?.resolvedUrl ?? undefined, contentHash: jsonHash(normalized), readLevel, scopeRevision: context.revision, turnId: context.turnId,
+    ...(extra?.browser ? { browser: { status: extra.browser.status, observedAt: extra.browser.observedAt, locator: extra.browser.locator, coverage: extra.browser.coverage } } : {}) });
   const sourceId = "web:" + revision;
   return { id: context.projectId + "/" + sourceId, projectId: context.projectId, sourceId, revision, title: title.slice(0, 300) || new URL(url).hostname,
     excerpt, observedAt: context.observedAt ?? new Date().toISOString(), temporalState: "UNKNOWN", knowledgeClass: "EXTERNAL_REFERENCE", start: 0, end: excerpt.length,
     excerptHash: jsonHash(excerpt), readScope: readLevel === "SEARCH_SNIPPET" || readLevel === "SEARCH_SUMMARY" || readLevel === "ACADEMIC_METADATA" ? "SUMMARY" : "EXCERPT",
-    external: { conversationId: context.id, turnId: context.turnId, scopeRevision: context.revision, origin, provider: context.provider, requestedUrl: url, resolvedUrl: null,
+    external: { conversationId: context.id, turnId: context.turnId, scopeRevision: context.revision, origin, provider: context.provider, requestedUrl: url, resolvedUrl: extra?.resolvedUrl ?? null,
+      ...(extra?.browser ? { browser: extra.browser } : {}),
       publishedAt: date && Number.isFinite(Date.parse(date)) ? new Date(date).toISOString() : null, fetchedAt: context.observedAt ?? new Date().toISOString(), readLevel, retrievalMethod: method,
       truncated: excerpt.length < normalized.length, totalCharacters: normalized.length,
       applicability: { edition: null, effectiveFrom: null, effectiveUntil: null, status: "UNKNOWN", evidenceSourceIds: [] } } };
@@ -98,7 +103,7 @@ export async function reuseWebSources(actor: ConversationActor, id: string, turn
   await storeSources(actor, id, turnId, approved); return approved;
 }
 export async function readConversationResearchTool(actor: ConversationActor, id: string, turnId: string, operationId: string,
-  call: ResearchToolCall, provider: ResearchProvider = deepSeekResearch) {
+  call: ResearchToolCall, provider: ResearchProvider = deepSeekResearch, browser: BrowserReader = isolatedBrowserReader) {
   const grant = await readResearchScope(actor, id);
   if (!grant.available || grant.revision !== call.scopeRevision) throw new AppError("SCOPE_CHANGED", "公开研究授权已变化", 409);
   await assertProject(actor, call.projectId);
@@ -162,6 +167,55 @@ export async function readConversationResearchTool(actor: ConversationActor, id:
       const saved = retained.find(s => s.sourceId === candidate.sourceId);
       if (saved || perSource >= 200) sources.push(saved ?? candidate);
     }
+  } else if (call.tool === "browser_read") {
+    if (!browserReadAvailable()) throw new AppError("BROWSER_UNAVAILABLE", "当前环境没有可用的隔离浏览器，请继续使用原网页读取或其他资料", 503);
+    const original = (await currentSources(turnId, actor)).find(s => (s.sourceId === call.sourceId || s.id === call.sourceId) &&
+      (!call.revision || s.revision === call.revision) && s.projectId === call.projectId && s.external);
+    if (!original) throw new AppError("SOURCE_NOT_OBSERVED", "只能对已经定位的公开链接使用浏览器读取", 409);
+    await validateWebSource(actor, original); const meta = original.external!;
+    const url = safeResearchUrl(meta.requestedUrl, grant.scope.allowedHosts);
+    const retained = await currentSources(turnId, actor), availableCharacters = Math.max(0, 20000 - retained.reduce((n, s) => n + s.excerpt.length, 0));
+    const previousOperation = record(record((await db.conversationTurn.findUniqueOrThrow({ where: { id: turnId } })).readManifestJson).operations)[generationCallId(operationId)] as { status?: string } | undefined;
+    if (availableCharacters < 200 && previousOperation?.status !== "SUCCEEDED") throw new AppError("EXTERNAL_BUDGET_EXHAUSTED", "本轮资料容量已满，先依据已读片段回答", 409);
+    type BrowserReadResult = { status: "RENDERED" | "PARTIAL" | "EMPTY" | "BLOCKED" | "FAILED"; finalUrl: string; title: string; observedAt: string; renderMs: number;
+      readyState: "loading" | "interactive" | "complete" | "unknown"; mode: "READ_VISIBLE" | "READ_DETAILS"; coverage: BrowserSourceMeta["coverage"];
+      locator: BrowserSourceMeta["locator"]; screenshotHash: string | null; failure: { code: string; message: string } | null;
+      visibleText: string; headings: Array<{ level: number; text: string }> };
+    const observed = await turnOperation<BrowserReadResult>(actor, id, turnId, operationId, "BROWSER_READ",
+      { sourceId: call.sourceId, url, revision: call.revision, scopeRevision: grant.revision, mode: call.mode, scrolls: call.scrolls },
+      async () => {
+        const result = await abortable(actor, id, turnId, grant.revision, signal => browser.read({ url, allowedHosts: grant.scope.allowedHosts,
+          mode: call.mode, scrolls: call.scrolls, limits: DEFAULT_BROWSER_LIMITS }, { signal }));
+        return { status: result.status, finalUrl: result.finalUrl, title: result.title, observedAt: result.observedAt, renderMs: result.renderMs,
+          readyState: result.readyState, mode: result.mode, coverage: result.coverage, locator: result.locator, screenshotHash: result.screenshotHash,
+          failure: result.failure, visibleText: result.visibleText.slice(0, 5000), headings: result.headings.slice(0, 12) };
+      }, true, operations => {
+        const attempts = Object.values(operations).filter(operation => operation.kind === "BROWSER_READ");
+        if (attempts.length >= 2) throw new AppError("BROWSER_TURN_LIMIT", "本轮最多执行两次网页渲染读取", 409);
+        const requests = attempts.reduce((total, operation) => {
+          const coverage = (operation.result as { coverage?: { requests?: number } } | undefined)?.coverage;
+          return total + (Number(coverage?.requests) || 0);
+        }, 0);
+        if (requests >= 60) throw new AppError("BROWSER_TURN_LIMIT", "本轮网页渲染请求额度已用完", 409);
+      });
+    await before();
+    if (observed.status === "BLOCKED" || observed.status === "FAILED") throw new AppError(observed.failure?.code ?? "BROWSER_BLOCKED",
+      observed.failure?.message ?? "隔离浏览器没有取得可核验内容", observed.status === "BLOCKED" ? 409 : 503);
+    if (!observed.visibleText.trim()) throw new AppError("BROWSER_EMPTY", observed.failure?.message ?? "页面没有可见正文", 422);
+    await observationTime();
+    const browserMeta: BrowserSourceMeta = { renderer: "ISOLATED_BROWSER", version: 1, status: observed.status, requestedUrl: url, finalUrl: observed.finalUrl,
+      observedAt: observed.observedAt, renderMs: observed.renderMs, mode: observed.mode, readyState: observed.readyState, coverage: observed.coverage,
+      locator: observed.locator, screenshotHash: observed.screenshotHash, failureCode: observed.failure?.code ?? null, failureMessage: observed.failure?.message ?? null };
+    const candidate = source({ ...context, provider: browser.name, maxExcerptChars: Math.min(4000, availableCharacters) }, url, observed.title, observed.visibleText,
+      "BROWSER_RENDER", meta.origin, "ISOLATED_BROWSER", meta.publishedAt, { resolvedUrl: observed.finalUrl, browser: browserMeta });
+    sources = [retained.find(s => s.sourceId === candidate.sourceId && s.revision === candidate.revision) ?? candidate];
+    const priorSources = await currentSources(turnId, actor);
+    sources = sources.map(s => priorSources.find(p => p.sourceId === s.sourceId && p.revision === s.revision) ?? s);
+    await storeSources(actor, id, turnId, sources);
+    for (const s of sources) await validateWebSource(actor, s);
+    return { data: { sources, browser: { status: observed.status, finalUrl: observed.finalUrl, coverage: observed.coverage, failure: observed.failure } }, sources,
+      coverage: { complete: observed.coverage.complete, description: `隔离浏览器可见正文；页面请求 ${observed.coverage.requests}，拦截 ${observed.coverage.blockedRequests}${observed.failure ? `；${observed.failure.message}` : ""}` },
+      discovered: sources.map(s => ({ projectId: s.projectId, sourceId: s.sourceId, revision: s.revision, title: s.title })) };
   } else {
     const original = (await currentSources(turnId, actor)).find(s => (s.sourceId === call.sourceId || s.id === call.sourceId) && (!call.revision || s.revision === call.revision) && s.projectId === call.projectId);
     if (!original) throw new AppError("SOURCE_NOT_OBSERVED", "请先定位搜索结果或用户提供的原链接", 409);

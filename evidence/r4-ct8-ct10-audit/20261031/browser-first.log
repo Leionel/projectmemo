@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/browserReader.test.ts tests/browserPolicy.test.ts tests/browserConversation.test.ts tests/browserMission.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-ct8-10-audit
+
+
+ Test Files  4 passed (4)
+      Tests  61 passed (61)
+   Start at  12:38:16
+   Duration  33.26s (transform 2.07s, setup 0ms, import 5.84s, tests 26.65s, environment 0ms)
+

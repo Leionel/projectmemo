@@ -26,6 +26,7 @@ import { createMission } from "@/lib/mission/missionService";
 import { createSession } from "@/lib/auth/session";
 import { event } from "@/lib/mission/repository";
 import { listExperiences, actOnExperience } from "@/lib/experience/service";
+import { syncExperiences } from "@/lib/experience/extract";
 import { suggestionsForMission } from "@/lib/experience/injection";
 import { buildContext } from "@/lib/mission/contextBuilder";
 import { currentGoalQuestion, interactGoalQuestion } from "@/lib/decision/questions";
@@ -155,13 +156,21 @@ it("信号插入失败不能吞为去重，整批回滚且保留旧 ETag/游标"
 async function activeExperience(userId: string, projectId: string, marker: string) {
   for (let i = 0; i < 2; i++) {
     const m = await createMission(userId, { projectId, requestId: crypto.randomUUID(), goal: `${marker}-${i}` });
-    await db.agentMissionStep.create({ data: { missionId: m.id, ordinal: 1, planRevision: 1, toolName: "inspect_project", toolVersion: "1", status: "SUCCEEDED", canonicalInputJson: {}, inputHash: "fixture", readSetJson: [], protocolJson: { schemaVersion: 1 } } });
-    const o = await db.agentMissionOutput.create({ data: { missionId: m.id, revision: 1, kind: "NOTE", contentJson: {}, sourceRefsJson: [], claimChecksJson: [] } });
+    const capture = await db.capture.create({ data: { projectId, rawText: "经验来源", sourceType: "fixture" } });
+    const source = { id: `capture:${capture.id}`, kind: "PROJECT", entityType: "CAPTURE", revision: "v1", hash: "h1", text: capture.rawText, observedAt: new Date().toISOString() };
+    await db.agentMissionStep.create({ data: { missionId: m.id, ordinal: 1, planRevision: 1, toolName: "inspect_project", toolVersion: "1", status: "SUCCEEDED", canonicalInputJson: {}, inputHash: "fixture", readSetJson: json([source]), protocolJson: { schemaVersion: 1 }, resultJson: json({ data: {}, sources: [source] }) } });
+    const o = await db.agentMissionOutput.create({ data: { missionId: m.id, revision: 1, kind: "NOTE", contentJson: { blocks: [] }, sourceRefsJson: json([source]), claimChecksJson: [] } });
     const a = await db.generatedArtifact.create({ data: { projectId, artifactType: "weekly_report", content: "fixture" } });
     await db.missionArtifactReceipt.create({ data: { missionId: m.id, outputId: o.id, projectId, outputRevision: 1, outputHash: "fixture", artifactId: a.id, artifactType: "weekly_report", sourceManifestJson: {}, blockMapJson: {}, verificationSnapshotJson: {}, createdByUserId: userId, requestId: crypto.randomUUID(), payloadHash: "fixture" } });
+    const cap = await db.capture.create({ data: { projectId, rawText: "行动复盘", sourceType: "Agent行动回执" } });
+    const card = await db.knowledgeCard.create({ data: { projectId, captureId: cap.id, type: "reflection", title: "复盘", summary: "复盘", keywords: [], relatedTasks: [], nextActions: [], importance: 3 } });
+    const effectKey = `mission:${m.id}:step:1`;
+    const action = await db.actionItem.create({ data: { projectId, title: "行动", dedupeKey: effectKey, status: "DONE", resultCardId: card.id } });
+    await db.agentMissionStep.update({ where: { missionId_ordinal: { missionId: m.id, ordinal: 1 } }, data: { effectKey, resultJson: json({ data: { actionId: action.id }, sources: [source] }) } });
     await db.agentMission.update({ where: { id: m.id }, data: { status: "SUCCEEDED" } });
   }
-  const list = await listExperiences(userId, projectId), experience = list.experiences[0];
+  await syncExperiences(userId, projectId);
+  const list = await listExperiences(userId, projectId), experience = list.experiences.find(e => e.status === "SHADOW")!;
   await actOnExperience(userId, projectId, experience.id, { action: "ACTIVATE", requestId: crypto.randomUUID() });
   return experience;
 }
@@ -189,7 +198,7 @@ it("零步骤新 Mission 在注入前检查当前协议和工具版本", async (
   expect(JSON.parse(await buildContext(m)).experienceAdvisories).toEqual([]);
   await db.agentExperience.update({ where: { id: e.id }, data: { protocolVersionsJson: [1], toolVersionsJson: { inspect_project: "99" } } });
   expect(JSON.parse(await buildContext(m)).experienceAdvisories).toEqual([]);
-  expect(await db.agentExperienceUse.count({ where: { missionId: m.id } })).toBe(0);
+  expect(await db.agentExperienceUse.count({ where: { missionId: m.id, stage: "INJECTED" } })).toBe(0);
 });
 
 it("无关资料编辑不重开 UNKNOWN；相关新资料仍能重评同问题", async () => {
@@ -219,27 +228,31 @@ it("验收 runner 即使在登录后强制终止，也不会把合成令牌写�
 
 it("旧库增量升级清除混入的异主样本，保留历史使用与旧仓库信号", async () => {
   const file = path.join(isolated.dir, "upgrade.db"), migrationName = "20261024120000_p3_review_boundaries";
-  let sql = new Database(file);
-  for (const name of fs.readdirSync("prisma/migrations").sort()) {
-    const migration = path.join("prisma/migrations", name, "migration.sql");
-    if (name !== migrationName && fs.existsSync(migration)) sql.exec(fs.readFileSync(migration, "utf8"));
-  }
+  const sql = new Database(file);
+  const names=fs.readdirSync("prisma/migrations").sort();
+  for(const name of names.filter(name=>name<migrationName)){const migration=path.join("prisma/migrations",name,"migration.sql");if(fs.existsSync(migration))sql.exec(fs.readFileSync(migration,"utf8"));}
+  const insert=(table:string,values:Record<string,unknown>)=>{
+    const columns=new Set((sql.prepare(`PRAGMA table_info("${table}")`).all() as Array<{name:string}>).map(c=>c.name));
+    const entries=Object.entries(values).filter(([k])=>columns.has(k));
+    sql.prepare(`INSERT INTO "${table}" (${entries.map(([k])=>`"${k}"`).join(",")}) VALUES (${entries.map(()=>"?").join(",")})`).run(...entries.map(([,v])=>v instanceof Date?v.toISOString():v!==null&&typeof v==="object"?JSON.stringify(v):typeof v==="boolean"?Number(v):v));
+  };
+  const now=new Date();
+  insert("User",{id:"upgrade-a",username:"upgrade-a",displayName:"甲",passwordHash:"fixture",updatedAt:now});
+  insert("User",{id:"upgrade-b",username:"upgrade-b",displayName:"乙",passwordHash:"fixture",updatedAt:now});
+  const a={id:"upgrade-a"},b={id:"upgrade-b"},p={id:"upgrade-project"},ma={id:"upgrade-ma"},mb={id:"upgrade-mb"},e={id:"upgrade-experience"};
+  insert("Project",{id:p.id,title:"旧项目",description:"fixture",goal:"fixture",scenario:"RESEARCH",updatedAt:now});
+  const fields=await db.agentMission.findFirstOrThrow();
+  insert("AgentMission",{...fields,id:ma.id,projectId:p.id,ownerUserId:a.id,createRequestId:"a",executionSlot:null});
+  insert("AgentMission",{...fields,id:mb.id,projectId:p.id,ownerUserId:b.id,createRequestId:"b",executionSlot:null});
+  insert("AgentExperience",{id:e.id,projectId:p.id,ownerUserId:a.id,kind:"WORKFLOW",patternHash:"old",title:"旧方法",statement:"历史方法",applicabilityJson:{},sampleMissionIdsJson:[ma.id,mb.id],supportCount:2,status:"ACTIVE",updatedAt:now});
+  insert("AgentExperienceUse",{id:"upgrade-use",experienceId:e.id,missionId:ma.id,stage:"SUGGESTION"});
+  sql.prepare('INSERT INTO SourceConnection (id,projectId,ownerUserId,repo,ref,updatedAt) VALUES (?,?,?,?,?,?)').run("old-connection",p.id,a.id,"fixture/old","main",now.toISOString());
+  sql.prepare('INSERT INTO ExternalSignal (id,connectionId,projectId,ownerUserId,sha,title,authorName,url) VALUES (?,?,?,?,?,?,?,?)').run("old-signal","old-connection",p.id,a.id,sha(1),"旧提交","fixture","https://github.com/fixture/old");
+  // Apply all newer migrations in real chronological order; never edit an already-deployed migration for a fixture.
+  for(const name of names.filter(name=>name>=migrationName)){const migration=path.join("prisma/migrations",name,"migration.sql");if(fs.existsSync(migration))sql.exec(fs.readFileSync(migration,"utf8"));}
   sql.close();
-  const client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file.replaceAll("\\", "/")}` }) });
+  const client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:`file:${file.replaceAll("\\","/")}`})});
   try {
-    const a = await client.user.create({ data: { username: "upgrade-a", displayName: "甲", passwordHash: "fixture" } });
-    const b = await client.user.create({ data: { username: "upgrade-b", displayName: "乙", passwordHash: "fixture" } });
-    const p = await client.project.create({ data: { title: "旧项目", description: "fixture", goal: "fixture", scenario: "RESEARCH" } });
-    // 从已验证库复制真实 Mission 行形状，只替换身份，避免依赖新建任务的其他服务。
-    const fields = await db.agentMission.findFirstOrThrow();
-    const ma = await client.agentMission.create({ data: json({ ...fields, id: "upgrade-ma", projectId: p.id, ownerUserId: a.id, createRequestId: "a" }) });
-    const mb = await client.agentMission.create({ data: json({ ...fields, id: "upgrade-mb", projectId: p.id, ownerUserId: b.id, createRequestId: "b" }) });
-    const e = await client.agentExperience.create({ data: { projectId: p.id, ownerUserId: a.id, kind: "WORKFLOW", patternHash: "old", title: "旧方法", statement: "历史方法", applicabilityJson: {}, sampleMissionIdsJson: [ma.id, mb.id], supportCount: 2, status: "ACTIVE" } });
-    await client.agentExperienceUse.create({ data: { experienceId: e.id, missionId: ma.id, stage: "SUGGESTION" } });
-    sql = new Database(file);
-    sql.prepare('INSERT INTO SourceConnection (id,projectId,ownerUserId,repo,ref,updatedAt) VALUES (?,?,?,?,?,?)').run("old-connection", p.id, a.id, "fixture/old", "main", new Date().toISOString());
-    sql.prepare('INSERT INTO ExternalSignal (id,connectionId,projectId,ownerUserId,sha,title,authorName,url) VALUES (?,?,?,?,?,?,?,?)').run("old-signal", "old-connection", p.id, a.id, sha(1), "旧提交", "fixture", "https://github.com/fixture/old");
-    sql.exec(fs.readFileSync(path.join("prisma/migrations", migrationName, "migration.sql"), "utf8")); sql.close();
     const after = await client.agentExperience.findUniqueOrThrow({ where: { id: e.id } });
     expect(after.sampleMissionIdsJson).toEqual([ma.id]); expect(after.supportCount).toBe(1); expect(after.status).toBe("CANDIDATE");
     expect(await client.agentExperienceUse.count()).toBe(1); expect(await client.externalSignal.count()).toBe(1);

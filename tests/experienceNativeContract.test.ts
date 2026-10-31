@@ -70,6 +70,12 @@ beforeAll(async () => {
     const output = await db.agentMissionOutput.create({ data: { missionId: m.id, revision: 1, kind: "REPORT_DRAFT", contentJson: { blocks: [] }, sourceRefsJson: [], claimChecksJson: [] } });
     const artifact = await db.generatedArtifact.create({ data: { projectId, artifactType: "weekly_report", content: "c" } });
     await db.missionArtifactReceipt.create({ data: { projectId, missionId: m.id, outputId: output.id, outputRevision: 1, outputHash: "x", artifactId: artifact.id, artifactType: "weekly_report", sourceManifestJson: {}, blockMapJson: {}, verificationSnapshotJson: {}, createdByUserId: userId, requestId: `r-${crypto.randomUUID()}`, payloadHash: "x" } });
+    const capture = await db.capture.create({ data: { projectId, rawText: "行动复盘", sourceType: "Agent行动回执" } });
+    const card = await db.knowledgeCard.create({ data: { projectId, captureId: capture.id, type: "reflection", title: "复盘", summary: "复盘", keywords: [], relatedTasks: [], nextActions: [], importance: 3 } });
+    const effectKey = `mission:${m.id}:step:1`;
+    const action = await db.actionItem.create({ data: { projectId, title: "行动", dedupeKey: effectKey, status: "DONE", resultCardId: card.id } });
+    const firstStep = await db.agentMissionStep.findFirstOrThrow({ where: { missionId: m.id, ordinal: 1 } });
+    await db.agentMissionStep.update({ where: { id: firstStep.id }, data: { effectKey, resultJson: { data: { actionId: action.id }, sources: [{ id: `capture:${capture.id}`, kind: "PROJECT", entityType: "CAPTURE", revision: "v1", hash: "h1", text: capture.rawText, observedAt: new Date().toISOString() }] } as never } });
     await db.agentMission.update({ where: { id: m.id }, data: { status: "SUCCEEDED" } });
   }
   await syncExperiences(userId, projectId);

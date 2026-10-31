@@ -1,0 +1,34 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/ct8OutcomeExperience.test.ts -t 经验状态与命令回执原子提交
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-ct8-10-audit
+
+ ❯ tests/ct8OutcomeExperience.test.ts (12 tests | 1 failed | 11 skipped) 167ms
+   × 经验状态与命令回执原子提交，回执失败不留下永久激活 58ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/ct8OutcomeExperience.test.ts > 经验状态与命令回执原子提交，回执失败不留下永久激活
+AssertionError: expected 'ACTIVE' to be 'SHADOW' // Object.is equality
+
+Expected: "SHADOW"
+Received: "ACTIVE"
+
+ ❯ tests/ct8OutcomeExperience.test.ts:354:84
+    352|  try{
+    353|   await expect(actOnExperience(userId,projectId,row.id,{action:"ACTIVA…
+    354|   expect((await db.agentExperience.findUniqueOrThrow({where:{id:row.id…
+       |                                                                                    ^
+    355|  }finally{await db.$executeRawUnsafe("DROP TRIGGER audit_experience_re…
+    356| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 11 skipped (12)
+   Start at  12:44:43
+   Duration  3.13s (transform 1.27s, setup 0ms, import 2.79s, tests 167ms, environment 0ms)
+

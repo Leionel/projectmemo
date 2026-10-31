@@ -52,7 +52,7 @@ test("one root suppression closes memory, Investigation sources, dialogue, Artif
   expect(JSON.stringify((await readConversation(actor, c.id)).messages)).not.toContain(canary);
   const current = await db.agentMission.findUniqueOrThrow({ where: { id: m.id } });
   expect(await buildContext(current)).not.toContain(canary);
-  expect(await injectionDecisions(current, [], 1)).toEqual([{ suppressed: { experienceId: experience.id, reason: "ROOT_SUPPRESSED" } }]);
+  expect(await injectionDecisions(current, [], 1)).toEqual([{ suppressed: { experienceId: experience.id, reason: "ROOT_SUPPRESSED", matchState: "UNKNOWN" } }]);
   expect(await suggestionsForMission(current)).toEqual([]);
   expect(await db.capture.findUniqueOrThrow({ where: { id: capture.id } })).toMatchObject({ rawText: canary + " 原始记录" });
   const colleague = await db.user.create({ data: { username: crypto.randomUUID(), displayName: "另一位成员", passwordHash: "unused" } });

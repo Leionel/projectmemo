@@ -190,3 +190,18 @@
 .answerHead strong { font-size:.8125rem; }
 @media(max-width:500px) { .composerFooter { flex-wrap:wrap; } .analysisMode { max-width:7rem; } .body { font-size:.9375rem; } }
 @media(max-width:500px) { .agentTitle { flex-shrink:0; } .agentTitle h2 { white-space:nowrap; } .header select { max-width:4.5rem; } }
+
+.calendarComposer { display:grid; grid-template-columns:1fr 1fr; gap:.5rem .625rem; margin:.4rem 0 .5rem; padding:.75rem; border:1px solid var(--rule); border-radius:12px; background:var(--card-bg); font-size:.75rem; }
+.calendarComposer > label { display:grid; gap:.25rem; min-width:0; color:var(--muted); }
+.calendarComposer input,.calendarComposer select,.calendarComposer textarea { width:100%; min-height:2.1rem; padding:.3rem .45rem; color:var(--ink); background:var(--paper); border:1px solid var(--rule); border-radius:6px; font-size:.75rem; }
+.calendarComposer textarea { min-height:3rem; resize:vertical; }
+.calendarHead { grid-column:1/-1; display:flex; justify-content:space-between; align-items:center; }
+.calendarHead strong { font-size:.8125rem; }
+.calendarCheck { display:flex !important; align-items:center; gap:.4rem; justify-content:start; }
+.calendarCheck input { width:auto; min-height:0; }
+.calendarDescription { grid-column:1/-1; }
+.calendarFoot { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; gap:.5rem; flex-wrap:wrap; }
+.calendarFoot small { color:var(--muted); }
+@media(max-width:760px) { .calendarComposer { grid-template-columns:1fr; } }
+.calendarBar { padding:0 .625rem; }
+.calendarBar > button { display:inline-flex; align-items:center; gap:.3rem; margin:.25rem 0 .4rem; }

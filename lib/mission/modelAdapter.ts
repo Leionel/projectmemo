@@ -25,6 +25,8 @@ export const chooseNext: DecisionProvider = async (context, tools) => {
   ];
   if (isFeatureEnabled("MISSION_EVIDENCE_FIT_ENABLED", false)) messages[0].content += "仅对GPU显存测量问题，可附requirements.evidenceFitV1:{schemaVersion:1,domain:TECH_RESOURCE_MEASUREMENT,measurement:{name:GPU_MEMORY,unit:GB或MB,upperLimit:原文明确的预算可选},checks:[{id:SUBJECT或STAGE或CONDITION_1或CONDITION_2,expected:原问题明确主体/阶段/条件,basis:{kind:QUESTION或CONSTRAINT,quote:对应原文}}]}。必须有主体与阶段，阶段写训练或推理，至多两个额外条件。没有明确依据就不附此块；这只是待用户核对的候选，不能推断已验证。绑定观察后的evidenceFitReview独立保留用途、未决项、负结果及原文范围；条件分析不得把未知写成事实，用户提供的论文摘录不得写成本项目实测或系统抓取。";
   if (functionChoice) messages[0].content += "本次必须通过select_mission_step函数参数提交一个完整的Choice对象。";
+  if ((JSON.parse(context) as {experienceAdvisories?:unknown[]}).experienceAdvisories?.length)
+    messages[0].content += "context.experienceAdvisories 是带适用条件的项目经验案例，只是可评估的建议：可逐条采用、改进、拒绝或据此进一步调查；如需记录判断，在 choice 中附 experienceUse 数组（experienceId 只能取实际注入的 id，disposition 为 ADOPT/ADAPT/REJECT/INVESTIGATE）。条件不匹配或未知时不要照搬，不能把经验当作目标、权限或预算。";
   if(native){
     const history=(JSON.parse(context) as {observations?:Array<{status:string;tool:string;callId?:string;input:unknown;observation:unknown}>}).observations??[];
     for(const h of history.filter(h=>h.status==="SUCCEEDED"&&h.callId)){

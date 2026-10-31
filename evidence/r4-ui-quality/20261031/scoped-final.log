@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/missionPanel.test.ts tests/ux3ResponsibilityControls.test.ts tests/focusUiQuality.test.ts tests/globalFocusPresentation.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-ui-quality
+
+
+ Test Files  4 passed (4)
+      Tests  29 passed (29)
+   Start at  16:40:18
+   Duration  8.45s (transform 439ms, setup 0ms, import 1.96s, tests 2.08s, environment 3.63s)
+

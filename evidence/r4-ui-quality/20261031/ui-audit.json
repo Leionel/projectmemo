@@ -1,0 +1,131 @@
+{
+  "audit": {
+    "ranAt": "2026-10-31T16:28:00+08:00",
+    "skill": "ui-design",
+    "mode": "audit",
+    "scope": {
+      "mode": "files",
+      "diffBase": "2b0067d",
+      "files": [
+        "app/projects/[id]/page.tsx",
+        "components/FocusAgentWorkspace.module.css",
+        "components/FocusAgentWorkspace.tsx",
+        "components/MissionPanel.tsx",
+        "components/MissionResponsibilityPanel.tsx",
+        "components/ProjectConversationAccess.tsx",
+        "harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets",
+        "harmonyos/entry/src/main/ets/components/MissionResponsibilitySection.ets",
+        "lib/server/globalFocus.ts",
+        "tests/missionPanel.test.ts",
+        "tests/ux3ResponsibilityControls.test.ts",
+        "components/MissionResponsibilityPanel.module.css",
+        "lib/projectNotice.ts",
+        "tests/focusUiQuality.test.ts",
+        "scripts/ui-quality-fixture.ts"
+      ],
+      "filesAudited": 15
+    },
+    "featuresDetected": [
+      "dashboard",
+      "list",
+      "form"
+    ],
+    "rulesPlanned": 3,
+    "rulesRun": 3,
+    "selfCheck": {
+      "passed": true,
+      "failures": []
+    }
+  },
+  "verdict": "READY",
+  "summary": {
+    "found": {
+      "releaseBlockers": 0,
+      "fixThisSprint": 2,
+      "backlog": 0,
+      "total": 2
+    },
+    "applied": {
+      "releaseBlockers": 0,
+      "fixThisSprint": 2,
+      "backlog": 0,
+      "total": 2
+    },
+    "remaining": {
+      "releaseBlockers": 0,
+      "fixThisSprint": 0,
+      "backlog": 0,
+      "total": 0
+    },
+    "outOfScope": 0,
+    "unknown": 0,
+    "suppressed": 0
+  },
+  "consideredAndRejected": [
+    {
+      "candidate": "焦点单层渐变",
+      "rule": "slop-decoration-no-role",
+      "guard": "单层不足规则三层阈值，去除属于额外层级优化，不计缺陷"
+    },
+    {
+      "candidate": "责任范围展开按钮",
+      "rule": "interaction-target-size",
+      "guard": "保留 44px 高度，中文标签宽度超过44px，编辑仍可达"
+    }
+  ],
+  "deferredTo": [
+    {
+      "concern": "设备与读屏",
+      "tool": "真实设备验收",
+      "reason": "模拟器截图与单测不证明字体放大、推送、小艺和读屏可用"
+    }
+  ],
+  "findings": [
+    {
+      "id": "UI-01",
+      "rule": "states-no-empty-state",
+      "category": "states",
+      "detect": "static",
+      "feature": "dashboard",
+      "surface": "FocusAgentWorkspace",
+      "file": "components/FocusAgentWorkspace.tsx",
+      "line": 71,
+      "result": "fail",
+      "defaultTier": "fix-this-sprint",
+      "assignedTier": "fix-this-sprint",
+      "severity": "MEDIUM",
+      "observed": "零结果分支没有原因与恢复入口",
+      "fix": "增加按筛选说明与查看全部事项入口",
+      "applied": true,
+      "appliedChange": "components/FocusAgentWorkspace.tsx:71-71: 增加按筛选说明与查看全部事项入口",
+      "suppressed": false,
+      "evidence": [
+        "evidence/r4-ui-quality/20261031/before/web-focus-mobile.png",
+        "evidence/r4-ui-quality/20261031/after/web-focus-mobile.png"
+      ]
+    },
+    {
+      "id": "UI-02",
+      "rule": "interaction-target-size",
+      "category": "interaction",
+      "detect": "static",
+      "feature": "dashboard",
+      "surface": "FocusAgentWorkspace",
+      "file": "components/FocusAgentWorkspace.module.css",
+      "line": 41,
+      "result": "fail",
+      "defaultTier": "fix-this-sprint",
+      "assignedTier": "fix-this-sprint",
+      "severity": "MEDIUM",
+      "observed": "窄屏筛选入口依赖文字与小 padding，未达到 44px 高度",
+      "fix": "在窄屏及粗指针环境设置 44px 最小高度",
+      "applied": true,
+      "appliedChange": "components/FocusAgentWorkspace.module.css:41-41: 在窄屏及粗指针环境设置 44px 最小高度",
+      "suppressed": false,
+      "evidence": [
+        "evidence/r4-ui-quality/20261031/before/web-focus-mobile.png",
+        "evidence/r4-ui-quality/20261031/after/web-focus-mobile.png"
+      ]
+    }
+  ]
+}

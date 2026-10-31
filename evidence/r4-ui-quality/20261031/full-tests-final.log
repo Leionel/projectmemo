@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-ui-quality
+
+
+ Test Files  176 passed (176)
+      Tests  1388 passed (1388)
+   Start at  16:13:15
+   Duration  490.63s (transform 8.75s, setup 0ms, import 137.92s, tests 284.08s, environment 27.96s)
+

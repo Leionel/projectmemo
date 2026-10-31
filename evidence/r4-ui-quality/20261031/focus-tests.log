@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/focusUiQuality.test.ts tests/globalFocusPresentation.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-ui-quality
+
+
+ Test Files  2 passed (2)
+      Tests  10 passed (10)
+   Start at  15:47:49
+   Duration  2.77s (transform 213ms, setup 0ms, import 890ms, tests 150ms, environment 1.19s)
+

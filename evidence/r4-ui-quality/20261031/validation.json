@@ -1,0 +1,69 @@
+{
+  "sourceCommit": "93164142ab074272c5ecb6462106fa30434171e7",
+  "baseline": "2b0067d",
+  "checks": {
+    "full-tests-final": 0,
+    "scoped-final": 0,
+    "types-final": 0,
+    "lint-final": 0,
+    "web-build-final": 0,
+    "harmony-tests": 0,
+    "native-local-build": 0,
+    "native-local-install": 0,
+    "e2e-final": 0
+  },
+  "unit": {
+    "files": 176,
+    "passed": 1388
+  },
+  "finalScoped": {
+    "files": 4,
+    "passed": 29
+  },
+  "harmony": {
+    "passed": 88
+  },
+  "e2e": {
+    "startTime": "2026-10-31T08:37:36.393Z",
+    "duration": 119115.79800000001,
+    "expected": 30,
+    "skipped": 2,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "e2eSkipped": [
+    {
+      "title": "Focus reads a D1/D2 proposal, confirms a directed read and returns its original result",
+      "annotations": [
+        {
+          "type": "skip",
+          "description": "Review flag is off",
+          "location": {
+            "file": "D:\\Projects\\hongmen-ui-quality\\e2e\\focus-agent.spec.ts",
+            "line": 39,
+            "column": 93
+          }
+        }
+      ]
+    },
+    {
+      "title": "F3 follows one original question, reads new evidence, retains unread across reload and stops",
+      "annotations": [
+        {
+          "type": "skip",
+          "description": "Focus follow is off in legacy regression",
+          "location": {
+            "file": "D:\\Projects\\hongmen-ui-quality\\e2e\\focus-agent.spec.ts",
+            "line": 173,
+            "column": 8
+          }
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "E2E was run before the final text-color token change; final style change verified by scoped tests, lint, production build and measured contrast.",
+    "Native keyboard-follow, accessibility and other device classes remain pending.",
+    "No production deployment, real database migration, paid model call or external calendar operation."
+  ]
+}

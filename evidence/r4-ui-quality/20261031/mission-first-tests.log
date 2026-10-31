@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/missionPanel.test.ts tests/focusUiQuality.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-ui-quality
+
+
+ Test Files  2 passed (2)
+      Tests  16 passed (16)
+   Start at  15:57:39
+   Duration  7.34s (transform 586ms, setup 0ms, import 1.73s, tests 2.47s, environment 2.51s)
+

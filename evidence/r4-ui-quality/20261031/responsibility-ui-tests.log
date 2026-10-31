@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/missionPanel.test.ts tests/ux3ResponsibilityPanel.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-ui-quality
+
+
+ Test Files  1 passed (1)
+      Tests  14 passed (14)
+   Start at  16:04:21
+   Duration  5.04s (transform 447ms, setup 0ms, import 1.12s, tests 2.14s, environment 1.46s)
+

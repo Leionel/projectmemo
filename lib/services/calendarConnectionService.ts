@@ -1,4 +1,5 @@
 import {randomUUID} from "node:crypto";
+import {assertDirectiveEffect,effectiveContinuity} from "@/lib/continuity/directiveService";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { isFeatureEnabled } from "@/lib/config/features";
@@ -147,7 +148,7 @@ async function rotateToken(connection: { id: string; ownerUserId: string; projec
   if (!updated.count) throw new AppError("CALENDAR_CONNECTION_CHANGED", "日历连接已变化，刷新结果未采用", 409);
   return token.access_token!;
 }
-async function accessTokenFor(connection: { id: string; ownerUserId: string; projectId: string; status: string; authGeneration: number; tokenVersion: number; tokenCipher: string | null; tokenExpiresAt: Date | null; scope: string }, fetcher: CalendarFetch, forceRefresh = false) {
+async function accessTokenFor(connection: { id: string; ownerUserId: string; projectId: string; status: string; authGeneration: number; tokenVersion: number; tokenCipher: string | null; tokenExpiresAt: Date | null; scope: string }, fetcher: CalendarFetch, forceRefresh = false, allowRefresh = true) {
   const latest=await db.calendarConnection.findFirst({where:{id:connection.id,ownerUserId:connection.ownerUserId,projectId:connection.projectId,status:"ACTIVE",revokedAt:null}});
   if(!latest)throw new AppError("CALENDAR_CONNECTION_REVOKED","日历连接已撤销，不再发起新请求",409);
   if(latest.authGeneration!==connection.authGeneration)throw new AppError("CALENDAR_CONNECTION_CHANGED","日历授权身份已变化，停止使用旧凭据",409);
@@ -155,6 +156,7 @@ async function accessTokenFor(connection: { id: string; ownerUserId: string; pro
   const current = readToken(connection);
   const expires = current.expiresAt ? Date.parse(current.expiresAt) : connection.tokenExpiresAt?.getTime() ?? 0;
   if (!forceRefresh && expires > Date.now() + TOKEN_EXPIRY_MARGIN_MS) return current.accessToken;
+  if(!allowRefresh)throw new AppError("CALENDAR_REAUTH_REQUIRED","只读核对所需的访问凭据已过期，请先重新连接；没有发送刷新请求",409);
   return rotateToken(connection, current, fetcher);
 }
 
@@ -171,9 +173,11 @@ export async function readCalendarWindow(userId: string, raw: unknown, options: 
   const scopeKey = (options.missionId ? `mission:${options.missionId}` : options.conversationTurnId ? `turn:${options.conversationTurnId}` : "PROJECT") + ":" + randomUUID();
   let httpRequests=0;
   const fetcher:CalendarFetch=async(url,init)=>{
+    await options.beforeRequest?.();
+    assertDirectiveEffect(await effectiveContinuity(userId,{projectId:input.projectId,...(options.missionId?{missionId:options.missionId}:{})}),"EXTERNAL_READ");
     const active=await db.calendarConnection.findFirst({where:{id:connection.id,status:"ACTIVE",revokedAt:null,revision:snapshot.revision,authGeneration:snapshot.authGeneration}});
     if(!active)throw new AppError("CALENDAR_CONNECTION_REVOKED","日历授权已变化，停止后续请求",409);
-    await options.beforeRequest?.();httpRequests++;return underlying(url,init);
+    httpRequests++;return underlying(url,init);
   };
   let token=await accessTokenFor(connection,fetcher);
   let page;

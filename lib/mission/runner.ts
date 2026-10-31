@@ -197,7 +197,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
     phase="VERIFY";await validateSources(m.projectId,step!.readSetJson as unknown as Source[],tx,m.id);phase="APPROVAL";
     const data=result.data as {connectionId:string;operationId:string;batchHash:string;target:unknown;events:Array<{index:number;operationId:string;itemHash:string;marker:string;payload:unknown;payloadHash:string;effectQuery:unknown}>};
     const expiresAt=new Date(Date.now()+600000);
-    const proposal={tool:"create_calendar_events",toolVersion:"2",compensationPolicy:"DELETE_UNCHANGED_CREATED_EVENTS_ONLY",operationId:data.operationId,batchHash:data.batchHash,args:{connectionId:data.connectionId,events:data.events.map(item=>item.payload)},
+    const proposal={tool:"create_calendar_events",toolVersion:"2",compensationPolicy:"RECHECK_THEN_DELETE_CREATED_EVENTS",operationId:data.operationId,batchHash:data.batchHash,args:{connectionId:data.connectionId,events:data.events.map(item=>item.payload)},
       target:data.target,events:data.events,readSet:step!.readSetJson,ownerUserId:m.ownerUserId,projectId:m.projectId,planRevision:m.planRevision,expiresAt:expiresAt.toISOString()};
     await tx.agentMissionApproval.create({data:{missionId:m.id,stepId:step!.id,proposalJson:json(proposal),proposalHash:jsonHash(proposal),expectedPlanRevision:m.planRevision,readSetJson:json(step!.readSetJson),expiresAt}});
     await tx.agentMissionStep.update({where:{id:step!.id},data:{status:"WAITING_APPROVAL",effectKey:`mission:${m.id}:step:${step!.id}`,resultJson:json(result)}});
@@ -208,7 +208,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
     phase="VERIFY";await validateSources(m.projectId,step!.readSetJson as unknown as Source[],tx,m.id);phase="APPROVAL";
     const data=result.data as {connectionId:string;operationId:string;target:unknown;payload:unknown;payloadHash:string;marker:string;effectQuery:unknown};
     const expiresAt=new Date(Date.now()+600000);
-    const proposal={tool:"create_calendar_event",toolVersion:"2",compensationPolicy:"DELETE_UNCHANGED_CREATED_EVENTS_ONLY",operationId:data.operationId,args:{...data.payload as object,connectionId:data.connectionId},payload:data.payload,payloadHash:data.payloadHash,
+    const proposal={tool:"create_calendar_event",toolVersion:"2",compensationPolicy:"RECHECK_THEN_DELETE_CREATED_EVENTS",operationId:data.operationId,args:{...data.payload as object,connectionId:data.connectionId},payload:data.payload,payloadHash:data.payloadHash,
       target:data.target,marker:data.marker,effectQuery:data.effectQuery,readSet:step!.readSetJson,ownerUserId:m.ownerUserId,projectId:m.projectId,planRevision:m.planRevision,expiresAt:expiresAt.toISOString()};
     await tx.agentMissionApproval.create({data:{missionId:m.id,stepId:step!.id,proposalJson:json(proposal),proposalHash:jsonHash(proposal),expectedPlanRevision:m.planRevision,readSetJson:json(step!.readSetJson),expiresAt}});
     await tx.agentMissionStep.update({where:{id:step!.id},data:{status:"WAITING_APPROVAL",effectKey:`mission:${m.id}:step:${step!.id}`,resultJson:json(result)}});

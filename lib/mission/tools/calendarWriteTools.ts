@@ -55,7 +55,7 @@ export function calendarWriteTools(lease: Lease): ToolSet {
     },
     propose_calendar_events: {
       version: "1",
-      description: "提出在已授权的飞书日历批量创建 2-10 个日程，等待用户逐项批准；任一失败会删除本批次已创建的日程作为补偿。只能使用已连接日历。",
+      description: "提出在已授权的飞书日历批量创建 2-10 个日程，等待用户逐项批准；失败按冻结批准范围逐项核对补偿；不是跨平台原子回滚。只能使用已连接日历。",
       schema: calendarEventBatchProposalSchema, effects: { businessWrite: false, cacheWrite: false, externalDisclosure: false },
       run: async (actor, raw) => {
         const input = calendarEventBatchProposalSchema.parse(raw);

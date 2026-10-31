@@ -25,7 +25,7 @@ export async function createFeishuCalendarEvent(input: { accessToken: string; ca
   url.searchParams.set("idempotency_key", input.idempotencyKey.slice(0, 64));
   const response = await fetcher(url.href, { method: "POST", redirect: "error", signal: signal ?? AbortSignal.timeout(20000),
     headers: { Authorization: `Bearer ${input.accessToken}`, "Content-Type": "application/json; charset=utf-8", Accept: "application/json" },
-    body: JSON.stringify({ summary: input.title, description: input.description,
+    body: JSON.stringify({ summary: input.title, description: input.description, need_notification:false,
       start_time: input.allDay ? { date: input.startAt } : { timestamp: String(startSeconds), timezone: input.timeZone },
       end_time: input.allDay ? { date: input.endAt } : { timestamp: String(endSeconds), timezone: input.timeZone },
       ...(input.recurrence ? { recurrence: input.recurrence } : {}),
@@ -81,14 +81,19 @@ export async function addFeishuCalendarAttendees(input: { accessToken: string; c
 
 export async function listFeishuCalendarAttendees(input: { accessToken: string; calendarId: string; eventId: string },
   fetcher: CalendarFetch = fetch, signal?: AbortSignal): Promise<FeishuEventAttendee[]> {
-  const url = new URL(`${feishuEndpoints.events(input.calendarId)}/${encodeURIComponent(input.eventId)}/attendees`);
-  url.searchParams.set("page_size", "100"); url.searchParams.set("user_id_type", "open_id");
-  const response = await fetcher(url.href, { redirect: "error", signal: signal ?? AbortSignal.timeout(20000),
-    headers: { Authorization: `Bearer ${input.accessToken}`, Accept: "application/json" } });
-  const parsed = await body(response), code = Number(parsed.code ?? 0);
-  if (!response.ok || code !== 0) failure(response.status, code, String(parsed.msg ?? ""));
-  const rows = (parsed.data as { items?: Array<Record<string, unknown>> } | undefined)?.items;
-  return Array.isArray(rows) ? rows.map(attendeeOf) : [];
+  const rows:FeishuEventAttendee[]=[],seen=new Set<string>();let token:string|undefined;
+  for(let page=0;page<4;page++){
+    const url=new URL(`${feishuEndpoints.events(input.calendarId)}/${encodeURIComponent(input.eventId)}/attendees`);
+    url.searchParams.set("page_size","100");url.searchParams.set("user_id_type","open_id");if(token)url.searchParams.set("page_token",token);
+    const response=await fetcher(url.href,{redirect:"error",signal:signal??AbortSignal.timeout(20000),headers:{Authorization:`Bearer ${input.accessToken}`,Accept:"application/json"}});
+    const parsed=await body(response),code=Number(parsed.code??0);if(!response.ok||code!==0)failure(response.status,code,String(parsed.msg??""));
+    const data=parsed.data as {items?:Array<Record<string,unknown>>;has_more?:boolean;page_token?:string}|undefined;
+    if(!Array.isArray(data?.items))throw new AppError("CALENDAR_ATTENDEE_INCOMPLETE","参与人列表缺少可核对的数据",503);
+    rows.push(...data.items.map(attendeeOf));
+    if(!data.has_more)return rows;
+    token=data.page_token;if(!token||seen.has(token))break;seen.add(token);
+  }
+  throw new AppError("CALENDAR_ATTENDEE_INCOMPLETE","参与人列表尚未完整读取，不能确认或补偿删除",409);
 }
 
 /** Provider-side delete used only as batch compensation; a missing event counts as already removed. */

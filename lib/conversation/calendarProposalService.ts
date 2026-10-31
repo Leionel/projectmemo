@@ -16,7 +16,7 @@ function summaryOf(payload: z.infer<typeof conversationCalendarProposalSchema>, 
   const when = payload.allDay ? `${payload.startAt} 至 ${payload.endAt}（全天）` : `${payload.startAt} → ${payload.endAt}（${payload.timeZone}）`;
   const people = payload.attendees.length ? ` · 参与人 ${payload.attendees.map(item => item.type === "open_id" ? item.openId : item.email).join("、")}` : "";
   const files = payload.attachments.length ? ` · 附件 ${payload.attachments.join("、")}` : "";
-  return `飞书日历 ${target.accountName || target.accountEmail} / ${target.calendarSummary || target.calendarId} · ${when}${payload.recurrence ? ` · 重复 ${payload.recurrence}` : ""}${people}${files}。外发描述：${payload.description}。批准包含参与人添加与失败时删除本次未被修改日程，不发送通知；停止或撤权后不再写入。`;
+  return `飞书日历 ${target.accountName || target.accountEmail} / ${target.calendarSummary || target.calendarId} · ${when}${payload.recurrence ? ` · 重复 ${payload.recurrence}` : ""}${people}${files}。外发描述：${payload.description}。批准包含参与人添加与失败时先核对再删除本次日程，不发送通知；停止或撤权后不再写入。先读后删与飞书编辑不原子互斥，核对后发生的编辑仍可能被删除。`;
 }
 
 /** User-initiated proposal in the original conversation; it freezes the exact payload and waits for the original confirm route. */

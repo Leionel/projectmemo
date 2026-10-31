@@ -46,5 +46,5 @@ export type BrowserReadRequest = {
 };
 export interface BrowserReader {
   name: string;
-  read(request: BrowserReadRequest, options: { signal: AbortSignal }): Promise<BrowserObservation>;
+  read(request: BrowserReadRequest, options: { signal: AbortSignal; beforeRequest?:()=>Promise<void> }): Promise<BrowserObservation>;
 }

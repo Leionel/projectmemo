@@ -41,8 +41,9 @@ function proposalOf(value: unknown): Proposal {
     throw new AppError("APPROVAL_CHANGED", "日历提案格式无效", 409);
   return proposal as Proposal;
 }
-function matches(eventId: string, payload: Payload, marker: string, readback: { eventId: string; title: string; startAt: string | null; endAt: string | null; description: string;
+function matches(eventId: string, payload: Payload, marker: string, readback: { status?:string; eventId: string; title: string; startAt: string | null; endAt: string | null; description: string;
   allDay: boolean; startDate: string | null; endDate: string | null; recurrence: string | null; attachments?: string[] }) {
+  if(readback.status==="cancelled")return "EVENT_CANCELLED";
   if (readback.eventId !== eventId) return "IDENTITY_MISMATCH";
   if (readback.title !== payload.title) return "CONTENT_MISMATCH";
   if (!readback.description.includes(marker)||readback.description!==payload.description) return "MARKER_MISSING";
@@ -58,7 +59,7 @@ function matches(eventId: string, payload: Payload, marker: string, readback: { 
   return null;
 }
 function attendeeMatches(attendees: CalendarAttendee[], actual: Array<{ type: string; userId: string | null; email: string | null }>) {
-  return attendees.every(item => item.type === "open_id"
+  return actual.length===attendees.length&&attendees.every(item => item.type === "open_id"
     ? actual.some(row => row.type === "user" && row.userId === item.openId)
     : actual.some(row => row.email === item.email));
 }
@@ -77,22 +78,22 @@ async function compensate(accessToken: string, calendarId: string, eventId: stri
 }
 async function readbackTarget(connection: { id: string; projectId: string; ownerUserId: string } & Parameters<typeof calendarAccessTokenFor>[0],
   target: { calendarId: string; calendarTimeZone: string }, payload: Pick<Payload, "timeZone" | "title">, marker: string,
-  window: { timeMin: string; timeMax: string }, externalId: string | null, fetcher: CalendarFetch) {
-  const access = await calendarAccessTokenFor(connection, fetcher);
+  window: { timeMin: string; timeMax: string }, externalId: string | null, fetcher: CalendarFetch, allowRefresh = true) {
+  const access = await calendarAccessTokenFor(connection, fetcher,false,allowRefresh);
   if (externalId) {
     const result = await getFeishuCalendarEvent({ accessToken: access, calendarId: target.calendarId, eventId: externalId, timeZone: payload.timeZone }, fetcher);
-    return { eventId: result.eventId, title: result.title, startAt: result.startAt, endAt: result.endAt, description: result.description,
+    return { status:result.status,eventId: result.eventId, title: result.title, startAt: result.startAt, endAt: result.endAt, description: result.description,
       allDay: result.allDay, startDate: result.startDate, endDate: result.endDate, recurrence: result.recurrence, attachments: result.attachments ?? [] };
   }
   const page = await readFeishuEvents({ accessToken: access, calendarId: target.calendarId, timeMin: window.timeMin, timeMax: window.timeMax,
     maxResults: 50, calendarTimeZone: target.calendarTimeZone }, fetcher);
   const found = page.events.find(item => item.description.includes(marker) && item.title === payload.title);
   if (!found) throw new AppError("CALENDAR_EFFECT_NOT_FOUND", "本次标记的日程尚未找到；最终一致性延迟不能证明未写入", 404);
-  return { eventId: found.eventId, title: found.title, startAt: found.startAt, endAt: found.endAt, description: found.description,
+  return { status:found.status,eventId: found.eventId, title: found.title, startAt: found.startAt, endAt: found.endAt, description: found.description,
     allDay: found.allDay, startDate: found.startDate, endDate: found.endDate, recurrence: found.recurrence, attachments: found.attachments ?? [] };
 }
-async function readback(connection: { id: string; projectId: string; ownerUserId: string } & Parameters<typeof calendarAccessTokenFor>[0], proposal: Proposal, externalId: string | null, fetcher: CalendarFetch) {
-  return readbackTarget(connection, proposal.target, proposal.payload, proposal.marker, proposal.effectQuery, externalId, fetcher);
+async function readback(connection: { id: string; projectId: string; ownerUserId: string } & Parameters<typeof calendarAccessTokenFor>[0], proposal: Proposal, externalId: string | null, fetcher: CalendarFetch, allowRefresh = true) {
+  return readbackTarget(connection, proposal.target, proposal.payload, proposal.marker, proposal.effectQuery, externalId, fetcher,allowRefresh);
 }
 async function assertPublication(tx:Prisma.TransactionClient,proposal:Proposal|BatchProposal){
  const connection=await tx.calendarConnection.findFirst({where:{id:proposal.args.connectionId,projectId:proposal.projectId,ownerUserId:proposal.ownerUserId,status:"ACTIVE",revokedAt:null,revision:proposal.target.connectionRevision,authGeneration:proposal.target.authGeneration,calendarId:proposal.target.calendarId}});
@@ -179,13 +180,13 @@ export async function commitApprovedCalendarEvent(lease: Lease, stepId: string, 
     const connection = await db.calendarConnection.findFirst({ where: { id: prep.proposal.args.connectionId, projectId: prep.proposal.projectId, ownerUserId: prep.proposal.ownerUserId } });
     if (!connection||connection.status!=="ACTIVE") return finalize(lease, stepId, { ok: false, known: false, code: "CALENDAR_CONNECTION_REVOKED", message: "日历连接已撤销，结果保持待核对" });
     try {
-      const verified = await readback(connection as never, prep.proposal, prep.externalEffect?.externalId ?? null, fetcher);
+      const verified = await readback(connection as never, prep.proposal, prep.externalEffect?.externalId ?? null, fetcher,false);
       const mismatch = matches(verified.eventId, prep.proposal.payload, prep.proposal.marker, verified);
       if (mismatch) return finalize(lease, stepId, { ok: false, known: false, code: "CALENDAR_EFFECT_MISMATCH", message: "原日程存在但内容/身份不匹配" });
       if (prep.proposal.payload.attendees.length) {
         let actual;
         try {
-          const access = await calendarAccessTokenFor(connection as never, fetcher);
+          const access = await calendarAccessTokenFor(connection as never, fetcher,false,false);
           actual = await listFeishuCalendarAttendees({ accessToken: access, calendarId: prep.proposal.target.calendarId, eventId: verified.eventId }, fetcher);
         } catch {
           return finalize(lease, stepId, { ok: false, known: false, code: "CALENDAR_ATTENDEE_UNKNOWN", message: "原日程存在，但参与人状态无法核对" });
@@ -216,7 +217,7 @@ export async function commitApprovedCalendarEvent(lease: Lease, stepId: string, 
     await db.$transaction(async tx => {
       const current = await tx.agentMissionStep.findUniqueOrThrow({ where: { id: stepId } });
       await tx.agentMissionStep.update({ where: { id: stepId }, data: { protocolJson: json({ ...record(current.protocolJson),
-        externalEffect: { ...record(record(current.protocolJson).externalEffect), externalId: created.eventId, phase: "SUBMITTED" } }) } });
+        externalEffect: { ...record(record(current.protocolJson).externalEffect), externalId: created.eventId, ...(current.status==="RUNNING"?{phase:"SUBMITTED"}:{}) } }) } });
     });
     if (proposal.payload.attendees.length) {
       // A lost response may still have applied; verification below decides.
@@ -346,10 +347,10 @@ export async function commitApprovedCalendarEvents(lease: Lease, stepId: string,
       const verified: Array<{ index: number; eventId: string }> = [], snapshots: unknown[] = [];
       for (const item of proposal.events) {
         const externalId = effect.items?.find(entry => entry.index === item.index)?.externalId ?? null;
-        const result = await readbackTarget(connection as never, proposal.target, item.payload, item.marker, item.effectQuery, externalId, fetcher);
+        const result = await readbackTarget(connection as never, proposal.target, item.payload, item.marker, item.effectQuery, externalId, fetcher,false);
         if (matches(result.eventId, item.payload, item.marker, result)) return finalizeBatch(lease, stepId, { ok: false, known: false, code: "CALENDAR_EFFECT_MISMATCH", message: "原批次日程存在但内容/身份不匹配" });
         if (item.payload.attendees.length) {
-          const access = await calendarAccessTokenFor(connection as never, fetcher);
+          const access = await calendarAccessTokenFor(connection as never, fetcher,false,false);
           const actual = await listFeishuCalendarAttendees({ accessToken: access, calendarId: proposal.target.calendarId, eventId: result.eventId }, fetcher);
           if (!attendeeMatches(item.payload.attendees, actual))
             return finalizeBatch(lease, stepId, { ok: false, known: false, code: "CALENDAR_ATTENDEE_MISMATCH", message: "原批次日程存在，但参与人与冻结提案不一致" });

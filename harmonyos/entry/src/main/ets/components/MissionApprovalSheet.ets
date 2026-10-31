@@ -59,7 +59,7 @@ export struct MissionApprovalSheet {
           Text('固定脚本：' + this.approval.proposal.args.job!.scriptHash).fontSize(12).copyOption(CopyOptions.LocalDevice)
         }
       }
-      if(this.approval.proposal.tool==='create_calendar_event'||this.approval.proposal.tool==='create_calendar_events'){Text(this.approval.proposal.compensationPolicy==='DELETE_UNCHANGED_CREATED_EVENTS_ONLY'?'批准包含上述创建、参与人添加和失败补偿删除；补偿前重新读取核对，发现变化、停止或撤权则保留待核对。不发送参与人通知。':'本提案不包含自动删除许可。').fontColor(PMColors.INK_SECONDARY).fontSize(13)}
+      if(this.approval.proposal.tool==='create_calendar_event'||this.approval.proposal.tool==='create_calendar_events'){Text(this.approval.proposal.compensationPolicy==='RECHECK_THEN_DELETE_CREATED_EVENTS'?'批准包含上述创建、参与人添加和失败补偿删除；补偿前重新读取核对，发现变化、停止或撤权则保留待核对。不发送参与人通知。先读后删与飞书编辑不原子互斥，核对后发生的编辑仍可能被删除。':'本提案不包含自动删除许可。').fontColor(PMColors.INK_SECONDARY).fontSize(13)}
       Text(`提案有效期至 ${this.approval.expiresAt}`).fontSize(13)
       Text(this.approval.proposal.tool === 'verify_experiment_metrics' ? '批准后在无网、只读副本、非root容器中重算差值，CPU 0.5核 / 内存64MB / 最长8秒；不是训练或复现实验。' : this.approval.proposal.tool === 'create_calendar_event' ? '批准后只在上述账号与日历创建一条日程，并完成原对象回读；外部创建不等于现实目标达成。' : this.approval.proposal.tool === 'create_calendar_events' ? '批准后按顺序创建本批日程，按上述范围处理失败，保留部分结果与待核对回执。' : '批准后由服务端执行，并在步骤中返回行动回执。创建行动仍是待办，完成后需记录实际结果。').fontColor(PMColors.INK_SECONDARY)
       if (Date.parse(this.approval.expiresAt) <= Date.now()) { Text('提案已过期，请返回委托更新依据并重新预览。').fontColor(PMColors.WARNING) }

@@ -1,4 +1,6 @@
 import { z } from "zod";
+import {assertDirectiveEffect,effectiveContinuity} from "@/lib/continuity/directiveService";
+import {assertSourceUse} from "@/lib/continuity/sourcePolicy";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { researchScopeSchema } from "@/lib/types/mission";
@@ -42,7 +44,9 @@ export function browserTools(lease: Lease, deps: BrowserDependencies = {}): Tool
         const reserved = { requests: DEFAULT_BROWSER_LIMITS.maxRequests, bytes: DEFAULT_BROWSER_LIMITS.maxBytes };
         await reserveBrowser(lease, reserved.requests, reserved.bytes);
         const result = await reader.read({ url, allowedHosts: scope.allowedHosts, mode: input.mode, scrolls: input.scrolls, limits: DEFAULT_BROWSER_LIMITS },
-          { signal: AbortSignal.timeout(DEFAULT_BROWSER_LIMITS.maxRenderMs + 5000) });
+          { signal: AbortSignal.timeout(DEFAULT_BROWSER_LIMITS.maxRenderMs + 5000),beforeRequest:async()=>{
+            await db.$transaction(async tx=>{const current=await fenced(tx,lease);if(current.researchScopeVersion!==input.scopeRevision)throw new AppError("SCOPE_CHANGED","研究许可已变化",409);assertDirectiveEffect(await effectiveContinuity(current.ownerUserId,{projectId:current.projectId,missionId:current.id},tx),"EXTERNAL_READ");await assertSourceUse(current.ownerUserId,current.projectId,found.id,tx,{missionId:current.id});});
+          } });
         await settleBrowserUsage(lease, reserved, { requests: result.coverage.requests, bytes: result.coverage.bytes });
         if (result.status === "BLOCKED" || result.status === "FAILED")
           throw new AppError(result.failure?.code ?? "BROWSER_BLOCKED", result.failure?.message ?? failureMessage("BROWSER_BLOCKED"), result.status === "BLOCKED" ? 409 : 503);

@@ -29,7 +29,7 @@ export function missionCalendarFetch(lease:Lease,stepId:string,fetcher:CalendarF
    if(!connection)throw new AppError("CALENDAR_CONNECTION_REVOKED","日历授权已撤回，停止后续请求",409);
    if(connection.revision!==target.connectionRevision||connection.authGeneration!==target.authGeneration||connection.calendarId!==target.calendarId)throw new AppError("CALENDAR_CONNECTION_CHANGED","日历许可已变化，停止后续请求",409);
    if(write&&!connection.scope.split(/\s+/).includes("calendar:calendar"))throw new AppError("CALENDAR_WRITE_SCOPE_MISSING","当前连接没有写权限",409);
-   if(init.method==="DELETE"&&proposal.compensationPolicy!=="DELETE_UNCHANGED_CREATED_EVENTS_ONLY")throw new AppError("CALENDAR_COMPENSATION_NOT_APPROVED","原批准不包含删除补偿",409);
+   if(init.method==="DELETE"&&proposal.compensationPolicy!=="RECHECK_THEN_DELETE_CREATED_EVENTS")throw new AppError("CALENDAR_COMPENSATION_NOT_APPROVED","原批准不包含删除补偿",409);
    const used=usageOf(m.budgetUsedJson),limits={...defaultBudget,...m.budgetJson as object};
    if(used.calendarRequests+1>limits.calendarRequests)throw new AppError("CALENDAR_REQUEST_BUDGET_EXHAUSTED","日历累计HTTP额度已用完，停止后续请求",409);
    used.calendarRequests++;await tx.agentMission.update({where:{id:m.id},data:{budgetUsedJson:json(used)}});

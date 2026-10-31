@@ -185,7 +185,7 @@ export async function readConversationResearchTool(actor: ConversationActor, id:
       { sourceId: call.sourceId, url, revision: call.revision, scopeRevision: grant.revision, mode: call.mode, scrolls: call.scrolls },
       async () => {
         const result = await abortable(actor, id, turnId, grant.revision, signal => browser.read({ url, allowedHosts: grant.scope.allowedHosts,
-          mode: call.mode, scrolls: call.scrolls, limits: DEFAULT_BROWSER_LIMITS }, { signal }));
+          mode: call.mode, scrolls: call.scrolls, limits: DEFAULT_BROWSER_LIMITS }, { signal,beforeRequest:async()=>{await before();await validateWebSource(actor,original);} }));
         return { status: result.status, finalUrl: result.finalUrl, title: result.title, observedAt: result.observedAt, renderMs: result.renderMs,
           readyState: result.readyState, mode: result.mode, coverage: result.coverage, locator: result.locator, screenshotHash: result.screenshotHash,
           failure: result.failure, visibleText: result.visibleText.slice(0, 5000), headings: result.headings.slice(0, 12) };

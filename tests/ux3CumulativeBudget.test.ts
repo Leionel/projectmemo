@@ -65,3 +65,16 @@ test("夏令时换日使用本地日期边界，不能假设每天24小时",()=>
     expect(Math.abs(+nextBudgetDay("America/New_York",Date.parse(start))-Date.parse(end))).toBeLessThanOrEqual(1000);
   }
 });
+
+test("新增工具预算按累计总额复核：遗漏不扩权，UNKNOWN不退还，旧版本及降低被拒绝",async()=>{
+ const {u,m}=await fixture();const used={calendarRequests:5,externalWrites:2,unknownCalls:1};
+ const paused=await db.agentMission.update({where:{id:m.id},data:{status:"PAUSED",budgetUsedJson:used}});
+ const base={models:12,tools:16,activeMs:180000,reservedOutputTokens:12000};
+ const first=await reviewMissionBudget(u.id,m.id,{requestId:"omit",expectedVersion:paused.version,totals:base});
+ expect(first.budgetJson).toMatchObject({calendarRequests:8,externalWrites:2});
+ const body={requestId:"expand",expectedVersion:first.version,totals:{...base,calendarRequests:40,externalWrites:10,browserRequests:80,browserBytes:8000000}};
+ const raised=await reviewMissionBudget(u.id,m.id,body);expect(raised.budgetUsedJson).toEqual(used);expect(raised.status).toBe("PAUSED");
+ expect((await reviewMissionBudget(u.id,m.id,body)).version).toBe(raised.version);
+ await expect(reviewMissionBudget(u.id,m.id,{...body,requestId:"stale"})).rejects.toMatchObject({code:"MISSION_CHANGED"});
+ await expect(reviewMissionBudget(u.id,m.id,{...body,requestId:"reduce",expectedVersion:raised.version,totals:{...body.totals,calendarRequests:39}})).rejects.toMatchObject({code:"BUDGET_TOTAL_TOO_SMALL"});
+});

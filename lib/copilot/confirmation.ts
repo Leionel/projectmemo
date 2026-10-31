@@ -106,13 +106,13 @@ function proposalPayload(proposal: Record<string, unknown>, tool: string) {
 }
 const keyOf = (tool: string, proposal: Record<string, unknown>) => tool === "create_action" ? `action:${proposal.title}` : tool === "generate_artifact" ? `artifact:${proposal.artifactType}` : `calendar:${proposal.connectionId}:${proposal.startAt}:${proposal.title}:${jsonHash({ attendees: proposal.attendees ?? [], attachments: proposal.attachments ?? [] }).slice(0, 12)}`;
 
-async function freezeCalendarProposal(tx: Tx, projectId: string, sourceRunId:string, proposal: Record<string, unknown>) {
+async function freezeCalendarProposal(tx: Tx, projectId: string, sourceRunId:string, ownerUserId:string, proposal: Record<string, unknown>) {
   if (!isFeatureEnabled("CALENDAR_EVENT_WRITE_ENABLED", false)) throw new AppError("CALENDAR_WRITE_DISABLED", "外部日历写入未开启", 503);
   const input = calendarEventProposalSchema.parse({ connectionId: proposal.connectionId, title: proposal.title,
     description: proposal.description ?? "", startAt: proposal.startAt, endAt: proposal.endAt, timeZone: proposal.timeZone,
     allDay: proposal.allDay ?? false, recurrence: proposal.recurrence ?? null,
     attendees: proposal.attendees ?? [], attachments: proposal.attachments ?? [] });
-  const connection = await tx.calendarConnection.findFirst({ where: { id: input.connectionId, projectId, status: "ACTIVE", revokedAt: null } });
+  const connection = await tx.calendarConnection.findFirst({ where: { id: input.connectionId, projectId, ownerUserId,status: "ACTIVE", revokedAt: null } });
   if (!connection) throw new AppError("CALENDAR_CONNECTION_NOT_FOUND", "日历连接不存在、已撤销或不属于当前项目", 404);
   if (!connection.scope.split(/\s+/).includes("calendar:calendar") || !connection.scope.split(/\s+/).includes("offline_access"))
     throw new AppError("CALENDAR_WRITE_SCOPE_MISSING", "该连接没有写入权限，请先重新授权", 409);
@@ -123,7 +123,7 @@ async function freezeCalendarProposal(tx: Tx, projectId: string, sourceRunId:str
   const payload = { title: input.title, description: finalDescription, startAt: input.startAt, endAt: input.endAt, timeZone: input.timeZone, allDay: input.allDay,
     recurrence: input.recurrence, attendees: input.attendees, attachments: input.attachments };
   const start = Date.parse(input.allDay ? `${input.startAt}T00:00:00Z` : input.startAt), end = Date.parse(input.allDay ? `${input.endAt}T23:59:59Z` : input.endAt);
-  return { tool: "create_calendar_event", compensationPolicy:"DELETE_UNCHANGED_CREATED_EVENTS_ONLY", operationId, connectionId: connection.id, payload, payloadHash: jsonHash(payload), marker,
+  return { tool: "create_calendar_event", compensationPolicy:"RECHECK_THEN_DELETE_CREATED_EVENTS", operationId, connectionId: connection.id, payload, payloadHash: jsonHash(payload), marker,
     target: { provider: CALENDAR_PROVIDER, accountId: connection.accountId, accountEmail: connection.accountEmail, accountName: connection.accountName,
       calendarId: connection.calendarId, calendarSummary: connection.calendarSummary, calendarTimeZone: connection.calendarTimeZone,
       connectionRevision: connection.revision, authGeneration: connection.authGeneration, scope: connection.scope },
@@ -147,8 +147,9 @@ export async function freezeCopilotProposals(tx: Tx, sourceRunId: string, propos
   for (const proposed of proposals) {
     const proposal = proposed as unknown as Record<string, unknown>;
     const calendar = proposed.kind === "create_calendar_event";
+    if(calendar&&!userId)throw new AppError("CALENDAR_ACTOR_REQUIRED","外部日历提案需要当前用户身份",409);
     if (calendar && !projectId) throw new AppError("PROJECT_NOT_FOUND", "外部写提案需要项目范围", 409);
-    const key = keyOf(proposed.kind, proposal), payload = calendar ? await freezeCalendarProposal(tx, projectId!, sourceRunId, proposal) : proposalPayload(proposal, proposed.kind);
+    const key = keyOf(proposed.kind, proposal), payload = calendar ? await freezeCalendarProposal(tx, projectId!, sourceRunId, userId!, proposal) : proposalPayload(proposal, proposed.kind);
     if(calendar){const frozen=object(payload);proposed.calendarPreview={payload:{...object(frozen.payload),connectionId:String(frozen.connectionId)} as import("@/lib/calendar/contracts").CalendarEventProposal,target:object(frozen.target),compensationPolicy:String(frozen.compensationPolicy??"")};}
     const proposalHash = jsonHash({ tool: proposed.kind, payload });
     if (seen.has(key)) {
@@ -283,7 +284,7 @@ async function reconcileCopilotCalendar(projectId:string,input:AgentToolConfirmI
  if(!recovery)return null;
  const {run,execution,frozen,connection}=recovery;
  if(object(object(run.resultJson).calendarEffect).deleteAttempted){await db.copilotToolExecution.updateMany({where:{id:execution.id,leaseToken},data:{status:"UNKNOWN",leaseToken:null,leaseUntil:null}});throw new AppError("CALENDAR_COMPENSATION_UNKNOWN","原操作包含删除补偿，不能宣称原创建成功；请核对原日程",409);}
- const payload=calendarEventProposalBaseSchema.parse({...object(frozen.payload),connectionId:connection.id}),target=object(frozen.target);
+ const payload=calendarEventProposalBaseSchema.extend({description:z.string().max(500)}).parse({...object(frozen.payload),connectionId:connection.id}),target=object(frozen.target);
  const readOnly:CalendarFetch=async(url,init)=>{
   if((init.method??"GET")!=="GET")throw new AppError("CALENDAR_RECONCILE_READ_ONLY","结果核对只能读取原对象",409);
   await writeTransaction(run.id,async tx=>{
@@ -300,13 +301,13 @@ async function reconcileCopilotCalendar(projectId:string,input:AgentToolConfirmI
  };
  try{
   // A valid access token is required; refresh would itself be a new POST and is not performed here.
-  const access=await calendarAccessTokenFor(connection,readOnly);
+  const access=await calendarAccessTokenFor(connection,readOnly,false,false);
   let id=execution.resultId??String(object(object(run.resultJson).calendarEffect).externalId??"");
   if(!id){const q=object(frozen.effectQuery);const page=await readFeishuEvents({accessToken:access,calendarId:connection.calendarId,timeMin:String(q.timeMin),timeMax:String(q.timeMax),calendarTimeZone:connection.calendarTimeZone},readOnly);const candidates=page.events.filter(e=>e.description.includes(String(frozen.marker)));if(candidates.length!==1)throw new AppError("CALENDAR_EFFECT_UNKNOWN","没有唯一的原效果，不能证明未创建",409);id=candidates[0].eventId;}
   const event=await getFeishuCalendarEvent({accessToken:access,calendarId:connection.calendarId,eventId:id,timeZone:payload.timeZone},readOnly);
   const timeOk=payload.allDay?event.startDate===payload.startAt&&event.endDate===payload.endAt:!!event.startAt&&!!event.endAt&&Math.abs(Date.parse(event.startAt)-Date.parse(payload.startAt))<=1000&&Math.abs(Date.parse(event.endAt)-Date.parse(payload.endAt))<=1000;
-  if(event.title!==payload.title||event.description!==payload.description||!timeOk||(event.recurrence??null)!==payload.recurrence||jsonHash([...(event.attachments??[])].sort())!==jsonHash([...payload.attachments].sort()))throw new AppError("CALENDAR_EFFECT_MISMATCH","原对象与冻结提案不一致",409);
-  if(payload.attendees.length){const actual=await listFeishuCalendarAttendees({accessToken:access,calendarId:connection.calendarId,eventId:id},readOnly);if(!payload.attendees.every(a=>a.type==="open_id"?actual.some(v=>v.userId===a.openId):actual.some(v=>v.email===a.email)))throw new AppError("CALENDAR_ATTENDEE_UNKNOWN","原参与人尚未核清",409);}
+  if(event.status==="cancelled"||event.title!==payload.title||event.description!==payload.description||!timeOk||(event.recurrence??null)!==payload.recurrence||jsonHash([...(event.attachments??[])].sort())!==jsonHash([...payload.attachments].sort()))throw new AppError("CALENDAR_EFFECT_MISMATCH","原对象与冻结提案不一致",409);
+  if(payload.attendees.length){const actual=await listFeishuCalendarAttendees({accessToken:access,calendarId:connection.calendarId,eventId:id},readOnly);if(actual.length!==payload.attendees.length||!payload.attendees.every(a=>a.type==="open_id"?actual.some(v=>v.userId===a.openId):actual.some(v=>v.email===a.email)))throw new AppError("CALENDAR_ATTENDEE_UNKNOWN","原参与人尚未核清",409);}
   const result={id,externalId:id,calendarId:String(target.calendarId),status:"CREATED",readback:event,reconciled:true};
   await writeTransaction(run.id,async tx=>{const current=await tx.copilotToolExecution.findUniqueOrThrow({where:{id:execution.id}});if(current.leaseToken!==leaseToken||current.status!=="RECONCILING")throw new AppError("LEASE_LOST","核对租约失效",409);await assertActor(tx,projectId,actor);const currentGrant=await tx.calendarConnection.findFirst({where:{id:connection.id,status:"ACTIVE",revokedAt:null,authGeneration:connection.authGeneration,revision:connection.revision}});if(!currentGrant)throw new AppError("CALENDAR_CONNECTION_REVOKED","日历许可已撤回",409);assertDirectiveEffect(await effectiveContinuity(connection.ownerUserId,{projectId,...(run.conversationId?{conversationId:run.conversationId}:{})},tx),"EXTERNAL_READ");const fresh=await tx.agentRun.findUniqueOrThrow({where:{id:run.id}}),body=object(fresh.resultJson);await tx.copilotToolExecution.update({where:{id:execution.id},data:{status:"COMMITTED",resultId:id,committedAt:new Date(),leaseToken:null,leaseUntil:null}});await tx.agentRun.update({where:{id:run.id},data:{resultJson:json({...body,executedProposals:{...object(body.executedProposals),[execution.proposalKey]:{tool:input.tool,resultId:id,result}}})}});});
   return {tool:input.tool,result,alreadyExecuted:true};
@@ -350,7 +351,7 @@ async function confirmCopilotCalendarEvent(projectId: string, input: AgentToolCo
       if(connection.revision!==binding.connectionRevision||connection.authGeneration!==binding.authGeneration)throw new AppError("CALENDAR_CONNECTION_CHANGED","日历许可已变化",409);
       const write=!["GET","HEAD"].includes(init.method??"GET");
       if(write&&state.run.conversationId){const c=await tx.conversation.findUniqueOrThrow({where:{id:state.run.conversationId}});if(c.activeTurnId||object(c.focusJson).projectId!==projectId)throw new AppError("CONTEXT_SCOPE_CHANGED","讨论方向已变化，停止后续写入",409);}
-      if(init.method==="DELETE"&&frozen.compensationPolicy!=="DELETE_UNCHANGED_CREATED_EVENTS_ONLY")throw new AppError("CALENDAR_COMPENSATION_NOT_APPROVED","原批准不包含删除补偿",409);
+      if(init.method==="DELETE"&&frozen.compensationPolicy!=="RECHECK_THEN_DELETE_CREATED_EVENTS")throw new AppError("CALENDAR_COMPENSATION_NOT_APPROVED","原批准不包含删除补偿",409);
       const effect=object(state.result.calendarEffect),count=Number(effect.httpRequests??0);
       if(count>=16)throw new AppError("CALENDAR_REQUEST_BUDGET_EXHAUSTED","本次确认的日历HTTP额度已用完",409);
       await tx.agentRun.update({where:{id:state.run.id},data:{resultJson:json({...state.result,calendarEffect:{...effect,httpRequests:count+1,...(init.method==="DELETE"?{deleteAttempted:true}:{}),lastRequest:{method:init.method??"GET",hash:jsonHash({url,body:init.body??null}),state:"DISPATCHING"}}})}});
@@ -397,11 +398,11 @@ async function confirmCopilotCalendarEvent(projectId: string, input: AgentToolCo
     const recurrenceOk = (readback.recurrence??null) === payload.recurrence;
     const actualAttachments = readback.attachments ?? [], expectedAttachments = payload.attachments;
     const attachmentsOk = actualAttachments.length === expectedAttachments.length && expectedAttachments.every(token => actualAttachments.includes(token));
-    if (readback.eventId !== created.eventId || readback.title !== payload.title || (!readback.description.includes(marker)||readback.description!==payload.description) || !timeOk || !recurrenceOk || !attachmentsOk)
+    if (readback.status==="cancelled"||readback.eventId !== created.eventId || readback.title !== payload.title || (!readback.description.includes(marker)||readback.description!==payload.description) || !timeOk || !recurrenceOk || !attachmentsOk)
       outcome = { ok: false, known: false, code: "CALENDAR_EFFECT_MISMATCH", message: "provider 返回对象与冻结 payload 不匹配" };
     else if (payload.attendees.length) {
       const actual = await listFeishuCalendarAttendees({ accessToken: access, calendarId: target.calendarId, eventId: created.eventId }, dispatch);
-      const attendeesOk = payload.attendees.every(item => item.type === "open_id"
+      const attendeesOk = actual.length===payload.attendees.length&&payload.attendees.every(item => item.type === "open_id"
         ? actual.some(row => row.type === "user" && row.userId === item.openId) : actual.some(row => row.email === item.email));
       if (!attendeesOk) {
         const deleted = await compensate(access, created.eventId);

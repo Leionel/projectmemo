@@ -35,9 +35,10 @@ export class DeviceCalendarReadService {
         }
       }
       result.events.sort((left: DeviceCalendarEvent, right: DeviceCalendarEvent) => left.startTime - right.startTime);
+      if (result.events.length > 12) result.error = '仅读取前 12 项设备日程，未展示部分不能当作不存在';
       result.events = result.events.slice(0, 12);
       result.complete = result.error === '' && calendars.length <= 3;
-      if (result.calendarsRead === 0) result.error = '设备上没有本应用可见的日历';
+      if (result.calendarsRead === 0) { result.error = '设备上没有本应用可见的日历'; result.complete = false; }
     } catch (error) {
       result.error = '无法读取设备日历，请检查日历权限';
     }

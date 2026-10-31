@@ -13,6 +13,7 @@ const isolation = await vi.hoisted(async () => {
 import fs from "node:fs";
 import { db } from "@/lib/db";
 import { createMission, missionDetail, commandMission } from "@/lib/mission/missionService";
+import {reviewMissionBudget} from "@/lib/mission/budgetReview";
 import { runMissionSlice } from "@/lib/mission/runner";
 import type { Choice } from "@/lib/mission/contracts";
 import { completeCalendarConnection, startCalendarConnection } from "@/lib/services/calendarConnectionService";
@@ -114,7 +115,7 @@ describe.sequential("单日程参与人与附件", () => {
     expect(step.status).toBe("SUCCEEDED");
     expect(step.result).toMatchObject({ data: { status: "CREATED", readback: { attachments: ["fileTokenABC"] } } });
     const post = f.mock.calls.find(([url, init]) => new URL(String(url)).pathname.endsWith("/events") && (init as RequestInit).method === "POST");
-    expect(JSON.parse(String((post?.[1] as RequestInit).body))).toMatchObject({ attachments: [{ file_token: "fileTokenABC" }] });
+    expect(JSON.parse(String((post?.[1] as RequestInit).body))).toMatchObject({ need_notification:false,attachments: [{ file_token: "fileTokenABC" }] });
     const attendeesPost = f.mock.calls.find(([url, init]) => String(url).includes("/attendees") && (init as RequestInit).method === "POST");
     expect(JSON.parse(String((attendeesPost?.[1] as RequestInit).body))).toMatchObject({ attendees: [{ type: "third_party", third_party_email: "teammate@example.com" }] });
     expect(f.deletes()).toBe(0);
@@ -192,4 +193,51 @@ it("首个日程已创建后撤权，不再派发第二次创建或补偿删除"
  await approve(user.id,mission.id,f);
  expect(writes).toBe(1);expect(base.deletes()).toBe(0);
  const step=await db.agentMissionStep.findFirstOrThrow({where:{missionId:mission.id,toolName:"propose_calendar_events"}});expect(step.status).toBe("UNKNOWN");
+});
+
+it("补偿前用户已修改日程，保留对象且不发送DELETE",async()=>{
+ const {user,project,connection}=await fixture(),base=provider({second:"reject"});
+ const f=vi.fn(async(url:string,init:RequestInit={})=>{
+  const result=await base(url,init);
+  if(new URL(url).pathname.endsWith("/events")&&init.method==="POST"&&base.creates()===2){const first=[...base.events().values()][0];first.summary="用户已修改";}
+  return result;
+ }) as unknown as ReturnType<typeof provider>;
+ const mission=await proposed(user.id,project.id,connection.id,f,{connectionId:connection.id,events:[{title:"第一个",description:"",startAt,endAt,timeZone:"Asia/Shanghai"},{title:"第二个",description:"",startAt:"2026-11-03T02:00:00Z",endAt:"2026-11-03T02:30:00Z",timeZone:"Asia/Shanghai"}]},"propose_calendar_events");
+ await approve(user.id,mission.id,f);expect(base.deletes()).toBe(0);expect(base.events().size).toBe(1);
+ const step=await db.agentMissionStep.findFirstOrThrow({where:{missionId:mission.id,toolName:"propose_calendar_events"}});expect(step.status).toBe("UNKNOWN");expect(step.resultJson).toMatchObject({data:{compensation:{remaining:["evt-ext-1"]}}});
+});
+it("创建请求await中用户暂停，迟到创建身份保留但不再添加参与人/继续批次",async()=>{
+ const {user,project,connection}=await fixture(),base=provider();let release!:()=>void,entered!:()=>void;
+ const gate=new Promise<void>(r=>release=r),started=new Promise<void>(r=>entered=r);
+ const f=vi.fn(async(url:string,init:RequestInit={})=>{const response=await base(url,init);if(new URL(url).pathname.endsWith("/events")&&init.method==="POST"){entered();await gate;}return response;}) as unknown as ReturnType<typeof provider>;
+ const mission=await proposed(user.id,project.id,connection.id,f,{connectionId:connection.id,title:"停止竞争",description:"",startAt,endAt,timeZone:"Asia/Shanghai",attendees:[{type:"email",email:"a@example.com"}]});
+ const running=approve(user.id,mission.id,f);await started;
+ const current=await db.agentMission.findUniqueOrThrow({where:{id:mission.id}});await commandMission(user.id,mission.id,"pause",{requestId:"pause-in-flight",expectedVersion:current.version});release();await running;
+ expect(base.creates()).toBe(1);expect(base.deletes()).toBe(0);
+ expect(base.mock.calls.filter(([url,init])=>String(url).includes("/attendees")&&(init as RequestInit).method==="POST")).toHaveLength(0);
+ const step=await db.agentMissionStep.findFirstOrThrow({where:{missionId:mission.id,toolName:"propose_calendar_event"}});expect(step.status).toBe("UNKNOWN");expect(step.protocolJson).toMatchObject({externalEffect:{externalId:"evt-ext-1"}});
+ expect((await db.agentMission.findUniqueOrThrow({where:{id:mission.id}})).status).toBe("PAUSED");
+});
+
+it("长描述含服务端标记仍完整回读，取消的外部对象不算创建成功",async()=>{
+ for(const cancelled of [false,true]){
+  const {user,project,connection}=await fixture(),base=provider();
+  const f=vi.fn(async(url:string,init:RequestInit={})=>{const response=await base(url,init);if(cancelled&&url.includes("/events/")&&(!init.method||init.method==="GET")){const data=await response.json();if(data.data?.event)data.data.event.status="cancelled";return ok(data);}return response;}) as unknown as ReturnType<typeof provider>;
+  const mission=await proposed(user.id,project.id,connection.id,f,{connectionId:connection.id,title:"长描述",description:"证".repeat(400),startAt,endAt,timeZone:"Asia/Shanghai"});await approve(user.id,mission.id,f);
+  const step=await db.agentMissionStep.findFirstOrThrow({where:{missionId:mission.id,toolName:"propose_calendar_event"}});expect(step.status).toBe(cancelled?"UNKNOWN":"SUCCEEDED");
+ }
+});
+
+it("十项批次经原预算复核后纵向完成，每个HTTP和外部创建累计计量",async()=>{
+ const {user,project,connection}=await fixture(),f=provider();
+ const events=Array.from({length:10},(_,i)=>({title:`第${i+1}次讨论`,description:"",startAt:`2026-11-${String(i+2).padStart(2,"0")}T02:00:00Z`,endAt:`2026-11-${String(i+2).padStart(2,"0")}T02:30:00Z`,timeZone:"Asia/Shanghai"}));
+ const mission=await proposed(user.id,project.id,connection.id,f,{connectionId:connection.id,events},"propose_calendar_events");
+ let current=await db.agentMission.findUniqueOrThrow({where:{id:mission.id}});
+ await commandMission(user.id,mission.id,"pause",{requestId:"pause-budget",expectedVersion:current.version});
+ current=await db.agentMission.findUniqueOrThrow({where:{id:mission.id}});
+ const reviewed=await reviewMissionBudget(user.id,mission.id,{requestId:"review-ten",expectedVersion:current.version,totals:{models:12,tools:16,activeMs:180000,reservedOutputTokens:12000,externalWrites:10,calendarRequests:40}});
+ await commandMission(user.id,mission.id,"resume",{requestId:"resume-ten",expectedVersion:reviewed.version});
+ await approve(user.id,mission.id,f);expect(f.creates()).toBe(10);
+ const step=await db.agentMissionStep.findFirstOrThrow({where:{missionId:mission.id,toolName:"propose_calendar_events"}});expect(step.status).toBe("SUCCEEDED");
+ expect((await db.agentMission.findUniqueOrThrow({where:{id:mission.id}})).budgetUsedJson).toMatchObject({externalWrites:10,calendarRequests:20});
 });

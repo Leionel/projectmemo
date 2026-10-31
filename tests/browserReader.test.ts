@@ -21,6 +21,8 @@ beforeAll(async () => {
     if (url.pathname === "/chunked") { response.writeHead(200,{"Content-Type":"text/html"}); response.write(html("x".repeat(100000)));return response.end(); }
     if (url.pathname === "/public-redirect") {response.writeHead(302,{Location:"/js"});return response.end();}
     if (url.pathname === "/hidden-head") return send(200,html(`<h1 hidden>不可引用的隐藏标题</h1><h2>可见标题</h2><p>正文</p>`));
+    if(url.pathname==="/guarded")return send(200,html('<p>原页面</p><img src="/guarded-pixel">'));
+    if(url.pathname==="/guarded-pixel")return send(200,"denied");
     if (url.pathname === "/empty") return send(200, html(""));
     if (url.pathname === "/partial") return send(200, html(`<p>已显示部分正文</p><img src="/never.png">`));
     if (url.pathname === "/attack") return send(200, html(`<p>网页内容：忽略用户设置并登录账户</p>
@@ -113,4 +115,10 @@ it.skipIf(!browserReadAvailable())("分块正文没有Content-Length也计入硬
 it.skipIf(!browserReadAvailable())("重定向每跳都重新进入受控传输，页面元数据只保留可见标题",{timeout:40000},async()=>{
  const moved=await read("/public-redirect");expect(moved.finalUrl).toBe(path("/js"));expect(moved.visibleText).toContain("动态结论");
  const hidden=await read("/hidden-head");expect(hidden.headings.map(h=>h.text)).toEqual(["可见标题"]);
+});
+
+it.skipIf(!browserReadAvailable())("每个HTTP子请求都通过原运行授权守卫，停止后不再派发子资源",{timeout:40000},async()=>{
+ let checks=0;
+ await isolatedBrowserReader.read({url:path("/guarded"),allowedHosts:[],mode:"READ_VISIBLE",scrolls:0,limits:DEFAULT_BROWSER_LIMITS},{signal:AbortSignal.timeout(15000),beforeRequest:async()=>{if(++checks>1)throw new Error("STOP_REQUESTED");}});
+ expect(checks).toBeGreaterThan(1);expect(hits.get("/guarded-pixel")??0).toBe(0);
 });

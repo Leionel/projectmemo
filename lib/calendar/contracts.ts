@@ -77,6 +77,39 @@ export const calendarEventProposalBaseSchema = calendarEventItemSchema.extend({ 
 export const calendarEventBatchProposalBaseSchema = z.object({
   connectionId: z.string().min(1).max(160), events: z.array(calendarEventItemSchema).min(2).max(10),
 }).strict();
+
+/** The supported RFC5545 subset is checked before freezing; the exact rule remains in the approval. */
+export function validCalendarRecurrence(rule: string): boolean {
+  const fields = rule.split(";").map(part => part.split("="));
+  if (fields.some(pair => pair.length !== 2 || !pair[1]) || new Set(fields.map(([key]) => key)).size !== fields.length) return false;
+  const values = Object.fromEntries(fields);
+  if (!["DAILY", "WEEKLY", "MONTHLY", "YEARLY"].includes(values.FREQ) || (values.COUNT && values.UNTIL)) return false;
+  const integers = (raw: string, low: number, high: number, excludeZero = false) => raw.split(",").every(value =>
+    /^[+-]?\d+$/.test(value) && Number.isSafeInteger(Number(value)) && Number(value) >= low && Number(value) <= high && (!excludeZero || Number(value) !== 0));
+  const validDate = (date: string) => {
+    const iso = `${date.slice(0,4)}-${date.slice(4,6)}-${date.slice(6,8)}`;
+    return /^\d{8}$/.test(date) && Number.isFinite(Date.parse(iso)) && new Date(iso).toISOString().slice(0,10) === iso;
+  };
+  for (const [key, value] of fields) {
+    if (key === "FREQ") continue;
+    if (key === "COUNT" || key === "INTERVAL") { if (!/^\d+$/.test(value) || !integers(value, 1, 2147483647)) return false; }
+    else if (key === "UNTIL") {
+      if (!validDate(value.slice(0,8))) return false;
+      if (value.length !== 8 && !/^\d{8}T(?:[01]\d|2[0-3])[0-5]\d[0-5]\dZ$/.test(value)) return false;
+    } else if (key === "WKST") { if (!/^(MO|TU|WE|TH|FR|SA|SU)$/.test(value)) return false; }
+    else if (key === "BYDAY") {
+      if (!value.split(",").every(day => /^([+-]?[1-9]\d?)?(MO|TU|WE|TH|FR|SA|SU)$/.test(day) &&
+        (!/^[+-]?\d/.test(day) || (["MONTHLY","YEARLY"].includes(values.FREQ) && Math.abs(Number(day.slice(0,-2))) <= 53)))) return false;
+    } else {
+      const bounds: Record<string, [number, number, boolean]> = { BYMONTH: [1,12,false], BYMONTHDAY: [-31,31,true], BYYEARDAY: [-366,366,true], BYWEEKNO: [-53,53,true], BYSETPOS: [-366,366,true], BYHOUR: [0,23,false], BYMINUTE: [0,59,false], BYSECOND: [0,60,false] };
+      if (!bounds[key] || !integers(value, ...bounds[key])) return false;
+      if (key === "BYWEEKNO" && values.FREQ !== "YEARLY") return false;
+      if (key === "BYMONTHDAY" && values.FREQ === "WEEKLY") return false;
+      if (key === "BYYEARDAY" && ["DAILY","WEEKLY","MONTHLY"].includes(values.FREQ)) return false;
+    }
+  }
+  return true;
+}
 export function calendarEventProposalIssues(value: {
   allDay: boolean; startAt: string; endAt: string; recurrence: string | null; timeZone?:string;
 }): string[] {
@@ -98,8 +131,8 @@ export function calendarEventProposalIssues(value: {
       if (Number.isFinite(start) && start < Date.now() - 60 * 1000) issues.push("不能创建已经开始或过去的日程");
     }
   }
-  if (value.recurrence && !/^FREQ=(DAILY|WEEKLY|MONTHLY|YEARLY)(;[A-Z]+=[^;\r\n]+)*$/.test(value.recurrence))
-    issues.push("重复规则只支持有限 RFC5545 形式");
+  if (value.recurrence && !validCalendarRecurrence(value.recurrence))
+    issues.push("重复规则不符合支持的 RFC5545 形式，请核对次数、日期和重复条件");
   return issues;
 }
 export function refineCalendarEventProposal(value: {

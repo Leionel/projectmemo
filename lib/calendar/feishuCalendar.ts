@@ -63,7 +63,8 @@ export function normalizeFeishuEvent(raw: Record<string, unknown>, calendarTimeZ
   if (allDay && (!startDate || !endDate)) return { event: null, malformed: true };
   const timeZone = allDay ? "UTC" : (typeof start?.timezone === "string" ? start.timezone.slice(0, 100) : calendarTimeZone);
   const statusRaw = String(raw.status ?? "confirmed");
-  const status = (["confirmed", "tentative", "cancelled"].includes(statusRaw) ? statusRaw : "confirmed") as CalendarEvent["status"];
+  if(!["confirmed","tentative","cancelled"].includes(statusRaw))return {event:null,malformed:true};
+  const status=statusRaw as CalendarEvent["status"];
   const recurrence = typeof raw.recurrence === "string" && raw.recurrence.trim() ? raw.recurrence.trim().slice(0, 2000) : null;
   const isException = raw.is_exception === true;
   const recurringEventId = isException && typeof raw.recurring_event_id === "string" ? raw.recurring_event_id.slice(0, 300) : null;
@@ -74,11 +75,11 @@ export function normalizeFeishuEvent(raw: Record<string, unknown>, calendarTimeZ
     eventKey: `${eventId}|${recurringEventId ?? ""}|${startKey}|${endKey}`, eventId, recurringEventId, status,
     title: sanitizeTitle(raw.summary), startAt, endAt, allDay, startDate, endDate,
     startLocalDate: allDay ? startDate : localDate(startAt, timeZone), endLocalDate: allDay ? endDate : localDate(endAt, timeZone),
-    description: String(raw.description ?? "").slice(0, 2000),
+    description: String(raw.description ?? "").slice(0, 8192),
     timeZone, transparency: typeof raw.free_busy_status === "string" ? raw.free_busy_status.slice(0, 20) : null,
     recurrence, isException, updatedAt: null, etag: null, attachments,
     revision: jsonHash({ provider: CALENDAR_PROVIDER, eventId, recurringEventId, status, title: sanitizeTitle(raw.summary), startAt, endAt, startDate, endDate,
-      description: String(raw.description ?? "").slice(0, 2000), recurrence, isException, freeBusy: raw.free_busy_status ?? null, attachments }),
+      description: String(raw.description ?? "").slice(0, 8192), recurrence, isException, freeBusy: raw.free_busy_status ?? null, attachments }),
   };
   return { event, malformed: false };
 }
@@ -93,12 +94,14 @@ export async function readFeishuEvents(input: { accessToken: string; calendarId:
     headers: { Authorization: `Bearer ${input.accessToken}`, Accept: "application/json" } });
   const body = await readJson(response) as { code?: number; msg?: string; data?: { has_more?: boolean; page_token?: string; sync_token?: string; items?: Array<Record<string, unknown>> } };
   if (!response.ok || body.code !== 0) providerError(response.status, Number(body.code), String(body.msg ?? ""));
+  if(!Array.isArray(body.data?.items))throw new AppError("CALENDAR_PROVIDER_FORMAT","飞书没有返回可核对的日程列表，不能当作空窗口",503);
   let malformedCount = 0; const events: CalendarEvent[] = [];
-  for (const raw of body.data?.items ?? []) {
+  const limit=Math.min(200,Math.max(1,input.maxResults??CALENDAR_PAGE_SIZE));
+  for (const raw of body.data.items) {
     const normalized = normalizeFeishuEvent(raw, input.calendarTimeZone ?? defaultTimeZone());
     if (normalized.malformed || !normalized.event) { malformedCount++; continue; }
-    if (events.length >= 200) break;
+    if (events.length >= limit) break;
     events.push(normalized.event);
   }
-  return { events, hasMore: body.data?.has_more === true, pageToken: body.data?.page_token || null, syncToken: body.data?.sync_token || null, malformedCount, status: response.status };
+  return { events, hasMore: body.data.has_more !== false || body.data.items.length > limit || body.data.items.length >= Number(url.searchParams.get("page_size")), pageToken: body.data?.page_token || null, syncToken: body.data?.sync_token || null, malformedCount, status: response.status };
 }

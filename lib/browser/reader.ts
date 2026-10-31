@@ -45,7 +45,7 @@ function normalizeText(value: string) { return value.normalize("NFKC").replace(/
  */
 class IsolatedChromiumReader implements BrowserReader {
   name = "isolated-chromium";
-  async read(request: BrowserReadRequest, options: { signal: AbortSignal }): Promise<BrowserObservation> {
+  async read(request: BrowserReadRequest, options: { signal: AbortSignal; beforeRequest?:()=>Promise<void> }): Promise<BrowserObservation> {
     const runtime = browserRuntimeInfo();
     if (!runtime.available) throw new AppError(runtime.reason, "隔离浏览器读取当前不可用", 503);
     if (options.signal.aborted) throw new AppError("BROWSER_ABORTED", "本轮读取已停止", 409);
@@ -114,6 +114,7 @@ class IsolatedChromiumReader implements BrowserReader {
           let resource=target;
           for(let hop=0;hop<6;hop++){
             const addresses=await bounded(hostCache.get(resource.hostname)!,signal);
+            await options.beforeRequest?.();signal.throwIfAborted();
             const result=await readBrowserResource(resource.url,addresses,signal,size=>{
               bytes+=size;if(bytes>limits.maxBytes){overBudget=true;budgetAbort.abort(new AppError("BROWSER_BUDGET_EXCEEDED","网页正文超过累计读取预算",409));throw new AppError("BROWSER_BUDGET_EXCEEDED","网页正文超过累计读取预算",409);}
             });

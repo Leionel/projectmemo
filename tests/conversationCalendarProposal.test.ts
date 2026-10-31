@@ -167,3 +167,42 @@ describe.sequential("Conversation 侧飞书日历外部写提案", () => {
     expect(fetchImpl.posts()).toBe(1);
   });
 });
+
+for(const phase of ["UNKNOWN","DISPATCHING"]){
+ it(`创建成功后回读中断，${phase}跨时段只读核对，不重发POST`,async()=>{
+  const f=await fixture(),api=provider();let fail=true;
+  const network=vi.fn(async(url:string,init:RequestInit={})=>{if(url.includes("/events/")&&(!init.method||init.method==="GET")&&fail)throw new TypeError("lost readback");return api(url,init);});
+  vi.stubGlobal("fetch",network);
+  const created=await createConversationCalendarProposal(f.actor,f.conversation.id,proposalInput(f,{description:"证".repeat(400)}));
+  const proposal=created.conversation.messages.at(-1)!.proposal!;
+  const body={requestId:"recover-"+crypto.randomUUID(),proposalHash:proposal.proposalHash,confirmed:true};
+  await expect(confirmConversationProposal(f.actor,f.conversation.id,proposal.executionId,body)).rejects.toMatchObject({code:"CALENDAR_WRITE_UNKNOWN"});
+  expect(await db.copilotToolExecution.findUniqueOrThrow({where:{id:proposal.executionId}})).toMatchObject({status:"UNKNOWN",resultId:"evt-conv-1"});
+  if(phase==="DISPATCHING")await db.copilotToolExecution.update({where:{id:proposal.executionId},data:{status:"DISPATCHING",leaseToken:"dead-process",leaseUntil:new Date(Date.now()-1000)}});
+  fail=false;const clock=vi.spyOn(Date,"now").mockReturnValue(Date.now()+70*60000);
+  try{const receipt=await confirmConversationProposal(f.actor,f.conversation.id,proposal.executionId,body);expect(receipt).toMatchObject({alreadyExecuted:true,result:{status:"CREATED",reconciled:true}});}finally{clock.mockRestore();}
+  expect(api.posts()).toBe(1);
+  expect(await db.copilotToolExecution.findUniqueOrThrow({where:{id:proposal.executionId}})).toMatchObject({status:"COMMITTED",leaseToken:null});
+ });
+}
+it("两次同时确认只能派发一笔创建",async()=>{
+ const f=await fixture(),api=provider();let release!:()=>void,entered!:()=>void;const gate=new Promise<void>(r=>release=r),started=new Promise<void>(r=>entered=r);
+ vi.stubGlobal("fetch",async(url:string,init:RequestInit={})=>{if(url.includes("/events")&&init.method==="POST"){entered();await gate;}return api(url,init);});
+ const created=await createConversationCalendarProposal(f.actor,f.conversation.id,proposalInput(f)),proposal=created.conversation.messages.at(-1)!.proposal!;
+ const body={requestId:"concurrent-"+crypto.randomUUID(),proposalHash:proposal.proposalHash,confirmed:true};
+ const first=confirmConversationProposal(f.actor,f.conversation.id,proposal.executionId,body);await started;
+ await expect(confirmConversationProposal(f.actor,f.conversation.id,proposal.executionId,body)).rejects.toMatchObject({code:"COPILOT_CONFIRMATION_IN_PROGRESS"});
+ release();await first;expect(api.posts()).toBe(1);
+});
+
+it("只读核对遇到过期token不认领刷新、不消耗原旋转凭据",async()=>{
+ const f=await fixture(),api=provider();let fail=true;
+ vi.stubGlobal("fetch",async(url:string,init:RequestInit={})=>{if(url.includes("/events/")&&fail)throw new TypeError("lost readback");return api(url,init);});
+ const created=await createConversationCalendarProposal(f.actor,f.conversation.id,proposalInput(f)),proposal=created.conversation.messages.at(-1)!.proposal!;
+ const body={requestId:"expired-recovery",proposalHash:proposal.proposalHash,confirmed:true};
+ await expect(confirmConversationProposal(f.actor,f.conversation.id,proposal.executionId,body)).rejects.toMatchObject({code:"CALENDAR_WRITE_UNKNOWN"});
+ const before=await db.calendarConnection.findUniqueOrThrow({where:{id:f.connection.id}});fail=false;
+ const clock=vi.spyOn(Date,"now").mockReturnValue(Date.now()+3*3600000);
+ try{await expect(confirmConversationProposal(f.actor,f.conversation.id,proposal.executionId,body)).rejects.toMatchObject({code:"COPILOT_RESULT_UNKNOWN"});}finally{clock.mockRestore();}
+ const after=await db.calendarConnection.findUniqueOrThrow({where:{id:f.connection.id}});expect(after.tokenVersion).toBe(before.tokenVersion);expect(after.tokenCipher).toBe(before.tokenCipher);expect(api.posts()).toBe(1);
+});

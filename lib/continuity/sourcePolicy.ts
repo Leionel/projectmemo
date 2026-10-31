@@ -162,6 +162,13 @@ export async function sourceLineage(projectId: string, id: string, tx: Tx = db, 
       } else if (connection.calendarId !== observation.calendarId) {
         blocked = true; blockedReason = "SOURCE_SCOPE_CHANGED";
       }
+      if (!blocked) {
+        const newer = await tx.calendarObservation.findFirst({
+          where: { connectionId: observation.connectionId, eventId: observation.eventId, observedAt: { gt: observation.observedAt } },
+          orderBy: { observedAt: "desc" },
+        });
+        if (newer && newer.revision !== observation.revision) { blocked = true; blockedReason = "SOURCE_REVISION_CHANGED"; }
+      }
     }
   } else if (id.startsWith("repo:") || id === "project:" + projectId) {
     // Identity/revision/grant are checked by the original adapter; these are original observations, never user authority.

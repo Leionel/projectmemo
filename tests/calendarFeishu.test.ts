@@ -221,3 +221,12 @@ it("再次观察不会改写历史快照；经过时效边界立即不能作为�
  await db.calendarObservation.update({where:{id:old.id},data:{observedAt:new Date(Date.now()-16*60000)}});
  expect((await sourceUse(user.id,project.id,"calendar:"+old.id)).state).not.toBe("ALLOWED");
 });
+
+it("已观察到事件新版本后，旧观察即时失效而不是等TTL",async()=>{
+ const {user,project}=await fixture(),connection=await connect(user.id,project.id);
+ const first=await readCalendarWindow(user.id,{projectId:project.id,connectionId:connection.id,...window},{fetcher:fetcher({events:[timed("changed")]})});
+ const old=await db.calendarObservation.findUniqueOrThrow({where:{id:first.sources[0].observationId}});
+ await readCalendarWindow(user.id,{projectId:project.id,connectionId:connection.id,...window},{fetcher:fetcher({events:[timed("changed",{summary:"新版本"})]})});
+ expect((await sourceUse(user.id,project.id,"calendar:"+old.id)).state).not.toBe("ALLOWED");
+ expect(await db.calendarObservation.findUniqueOrThrow({where:{id:old.id}})).toEqual(old);
+});

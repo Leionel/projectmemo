@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 type Connection = { id: string; provider: string; accountEmail: string; accountName: string; calendarId: string; calendarSummary: string; calendarTimeZone: string;
-  accessRole: string; scope: string; status: string; revokedAt: string | null; lastFetchedAt: string | null; lastStatus: string | null; lastError: string | null; revision: number; connected: boolean };
+  accessRole: string; scope: string; status: string; revokedAt: string | null; lastFetchedAt: string | null; lastStatus: string | null; lastError: string | null; revision: number; connected: boolean; writeCapable: boolean };
 const label = (connection: Connection) => connection.accountName || connection.accountEmail || "飞书账号";
 const statusText = (connection: Connection) => connection.status === "REVOKED" ? "已断开" : connection.lastStatus === "REAUTH_REQUIRED" ? "需要重新授权" : connection.lastStatus === "UNKNOWN" ? "上次刷新结果未知" : connection.lastFetchedAt ? "已连接" : "已连接，尚未读取日程";
 
@@ -18,11 +18,11 @@ export function CalendarConnectionsCard({ projectId, enabled }: { projectId: str
   // eslint-disable-next-line react-hooks/set-state-in-effect -- state is applied only after the server response resolves.
   useEffect(() => { if (enabled) void load().catch(failLoad); }, [enabled, load, failLoad]);
   if (!enabled) return null;
-  const connect = async () => {
+  const connect = async (mode: "READ" | "WRITE" = "READ") => {
     setBusy(true); setError("");
     try {
       const response = await fetch(`/api/projects/${projectId}/calendar-connections`, { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requestId: crypto.randomUUID() }) });
+        body: JSON.stringify({ requestId: crypto.randomUUID(), mode }) });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error?.message ?? "无法开始飞书日历授权");
       if (!body.authorizationUrl) throw new Error("授权地址缺失");
@@ -52,9 +52,10 @@ export function CalendarConnectionsCard({ projectId, enabled }: { projectId: str
           </div>
           {connection.connected ? <button type="button" disabled={busy} onClick={() => void revoke(connection)} className="editorial-button-secondary">断开连接</button> : null}
         </div>
-        <p className="mt-2 text-xs text-ink-secondary">权限：{connection.scope.includes("calendar:calendar:readonly") ? "读取日历与日程" : "未知"}；离线刷新{connection.scope.includes("offline_access") ? "已允许" : "未允许"}。{connection.lastError ? ` ${connection.lastError}` : ""}</p>
+        <p className="mt-2 text-xs text-ink-secondary">权限：{connection.scope.includes("calendar:calendar") ? "读取与创建日程（写入仍需逐项批准）" : connection.scope.includes("calendar:calendar:readonly") ? "仅读取日历与日程" : "未知"}；离线刷新{connection.scope.includes("offline_access") ? "已允许" : "未允许"}。{connection.lastError ? ` ${connection.lastError}` : ""}</p>
       </div>)}
     </div>
-    {connections.some(connection => connection.connected) ? null : <button type="button" disabled={busy} onClick={() => void connect()} className="editorial-button-secondary mt-4">{busy ? "正在准备授权…" : "连接飞书日历"}</button>}
+    {connections.some(connection => connection.connected) ? null : <button type="button" disabled={busy} onClick={() => void connect("READ")} className="editorial-button-secondary mt-4">{busy ? "正在准备授权…" : "连接飞书日历"}</button>}
+    {connections.some(connection => connection.connected && !connection.writeCapable) ? <button type="button" disabled={busy} onClick={() => void connect("WRITE")} className="editorial-button-secondary mt-4">{busy ? "正在准备授权…" : "授权创建日程（仍需逐项批准）"}</button> : null}
   </details>;
 }

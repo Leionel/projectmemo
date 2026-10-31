@@ -1657,6 +1657,7 @@ model CalendarOAuthState {
   provider           String
   redirectUri        String
   scope              String
+  mode               String   @default("READ")
   codeVerifierCipher String
   calendarId         String?
   expiresAt          DateTime

@@ -43,10 +43,10 @@ async function postToken(body: Record<string, string>, fetcher: CalendarFetch, s
   return parsed;
 }
 
-export function feishuAuthorizationUrl(input: { state: string; codeChallenge: string; redirectUri: string }) {
+export function feishuAuthorizationUrl(input: { state: string; codeChallenge: string; redirectUri: string; scope?: string }) {
   const url = new URL(feishuEndpoints.authorize);
   url.search = new URLSearchParams({ client_id: feishuCalendarConfig().clientId, response_type: "code", redirect_uri: input.redirectUri,
-    scope: CALENDAR_SCOPE, state: input.state, code_challenge: input.codeChallenge, code_challenge_method: "S256", prompt: "consent" }).toString();
+    scope: input.scope ?? CALENDAR_SCOPE, state: input.state, code_challenge: input.codeChallenge, code_challenge_method: "S256", prompt: "consent" }).toString();
   return url.href;
 }
 export async function exchangeFeishuCode(input: { code: string; codeVerifier: string; redirectUri: string }, fetcher: CalendarFetch = fetch, signal?: AbortSignal) {
@@ -58,10 +58,11 @@ export async function refreshFeishuToken(refreshToken: string, fetcher: Calendar
   const { clientId, clientSecret } = feishuCalendarConfig();
   return postToken({ grant_type: "refresh_token", client_id: clientId, client_secret: clientSecret, refresh_token: refreshToken }, fetcher, signal);
 }
-export function assertFeishuCalendarScope(scope: string | undefined) {
+export function assertFeishuCalendarScope(scope: string | undefined, mode: "READ" | "WRITE" = "READ") {
   const values = (scope ?? "").split(/\s+/).filter(Boolean);
-  if (!values.includes("calendar:calendar:readonly") || !values.includes("offline_access"))
-    throw new AppError("CALENDAR_SCOPE_MISSING", "飞书未授予日历只读或离线访问权限，请重新连接", 409);
+  const required = mode === "WRITE" ? "calendar:calendar" : "calendar:calendar:readonly";
+  if (!values.includes(required) || !values.includes("offline_access"))
+    throw new AppError("CALENDAR_SCOPE_MISSING", mode === "WRITE" ? "飞书未授予日历写入权限，请重新授权" : "飞书未授予日历只读或离线访问权限，请重新连接", 409);
 }
 export async function readFeishuIdentity(accessToken: string, fetcher: CalendarFetch = fetch, signal?: AbortSignal) {
   const response = await fetcher(feishuEndpoints.userinfo, { redirect: "error", signal: signal ?? AbortSignal.timeout(15000),

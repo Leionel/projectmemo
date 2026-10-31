@@ -46,7 +46,7 @@ export function choosePrimaryFeishuCalendar(calendars: FeishuCalendar[]) {
   return usable.find(calendar => calendar.type === "primary") ?? usable.find(calendar => calendar.role === "owner") ?? usable[0] ?? null;
 }
 
-function normalizeEvent(raw: Record<string, unknown>, calendarTimeZone: string): { event: CalendarEvent | null; malformed: boolean } {
+export function normalizeFeishuEvent(raw: Record<string, unknown>, calendarTimeZone: string): { event: CalendarEvent | null; malformed: boolean } {
   const eventId = String(raw.event_id ?? "");
   if (!eventId || eventId.length > 300) return { event: null, malformed: true };
   const start = raw.start_time as { date?: unknown; timestamp?: unknown; timezone?: unknown } | undefined;
@@ -72,10 +72,11 @@ function normalizeEvent(raw: Record<string, unknown>, calendarTimeZone: string):
     eventKey: `${eventId}|${recurringEventId ?? ""}|${startKey}|${endKey}`, eventId, recurringEventId, status,
     title: sanitizeTitle(raw.summary), startAt, endAt, allDay, startDate, endDate,
     startLocalDate: allDay ? startDate : localDate(startAt, timeZone), endLocalDate: allDay ? endDate : localDate(endAt, timeZone),
+    description: String(raw.description ?? "").slice(0, 2000),
     timeZone, transparency: typeof raw.free_busy_status === "string" ? raw.free_busy_status.slice(0, 20) : null,
     recurrence, isException, updatedAt: null, etag: null,
     revision: jsonHash({ provider: CALENDAR_PROVIDER, eventId, recurringEventId, status, title: sanitizeTitle(raw.summary), startAt, endAt, startDate, endDate,
-      recurrence, isException, freeBusy: raw.free_busy_status ?? null }),
+      description: String(raw.description ?? "").slice(0, 2000), recurrence, isException, freeBusy: raw.free_busy_status ?? null }),
   };
   return { event, malformed: false };
 }
@@ -92,7 +93,7 @@ export async function readFeishuEvents(input: { accessToken: string; calendarId:
   if (!response.ok || body.code !== 0) providerError(response.status, Number(body.code), String(body.msg ?? ""));
   let malformedCount = 0; const events: CalendarEvent[] = [];
   for (const raw of body.data?.items ?? []) {
-    const normalized = normalizeEvent(raw, input.calendarTimeZone ?? defaultTimeZone());
+    const normalized = normalizeFeishuEvent(raw, input.calendarTimeZone ?? defaultTimeZone());
     if (normalized.malformed || !normalized.event) { malformedCount++; continue; }
     if (events.length >= 200) break;
     events.push(normalized.event);

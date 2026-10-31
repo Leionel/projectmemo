@@ -10,7 +10,7 @@ export const missionToolLabels: Record<string, string> = {
   inspect_experiment_metrics:"读取实验指标",compare_experiment_metrics:"比较实验条件与结果",
   inspect_document:"读取文档目录",read_document_page:"读取原文件页",read_document_section:"读取章节片段",read_document_table:"读取候选表格",
   inspect_project: "读取项目", search_memory: "检索项目记忆", web_search: "检索公开资料",
-  web_fetch: "读取公开来源", save_mission_output: "保存草稿", propose_action: "提议行动",
+  web_fetch: "读取公开来源", save_mission_output: "保存草稿", propose_action: "提议行动", propose_calendar_event: "提出日历事件预览",
   inspect_action: "读取行动", bind_project_sources: "选入补充材料",
 };
 export type MissionWorkspaceItem = {

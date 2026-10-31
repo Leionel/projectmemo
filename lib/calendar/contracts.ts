@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const CALENDAR_PROVIDER = "FEISHU_CALENDAR" as const;
 export const CALENDAR_SCOPE = "calendar:calendar:readonly offline_access";
+export const CALENDAR_WRITE_SCOPE = "calendar:calendar offline_access";
 export const CALENDAR_MAX_WINDOW_MS = 31 * 24 * 60 * 60 * 1000;
 export const CALENDAR_MAX_PAGES = 4;
 export const CALENDAR_PAGE_SIZE = 50;
@@ -17,7 +18,7 @@ export const calendarReadInputSchema = calendarWindowInputSchema.extend({ projec
 });
 export type CalendarReadInput = z.infer<typeof calendarReadInputSchema>;
 
-export const calendarConnectionStartSchema = z.object({ requestId: z.string().min(1).max(128) }).strict();
+export const calendarConnectionStartSchema = z.object({ requestId: z.string().min(1).max(128), mode: z.enum(["READ", "WRITE"]).default("READ") }).strict();
 export const calendarConnectionActionSchema = z.object({
   action: z.literal("REVOKE"), requestId: z.string().min(1).max(128), reason: z.string().trim().max(200).optional(),
 }).strict();
@@ -25,7 +26,7 @@ export const calendarConnectionActionSchema = z.object({
 export type CalendarEvent = {
   eventKey: string; eventId: string; recurringEventId: string | null; status: "confirmed" | "tentative" | "cancelled";
   title: string; startAt: string | null; endAt: string | null; allDay: boolean; startDate: string | null; endDate: string | null;
-  startLocalDate: string | null; endLocalDate: string | null;
+  startLocalDate: string | null; endLocalDate: string | null; description: string;
   timeZone: string | null; transparency: string | null; recurrence: string | null; isException: boolean; updatedAt: string | null; etag: string | null; revision: string;
 };
 export type CalendarWindowCoverage = {
@@ -55,9 +56,21 @@ export type CalendarSourceMeta = z.infer<typeof calendarSourceMetaSchema>;
 export type CalendarConnectionView = {
   id: string; provider: string; accountEmail: string; accountName: string; calendarId: string; calendarSummary: string; calendarTimeZone: string;
   accessRole: string; scope: string; status: string; revokedAt: string | null; revokedReason: string | null;
-  lastFetchedAt: string | null; lastStatus: string | null; lastError: string | null; revision: number; connected: boolean;
+  lastFetchedAt: string | null; lastStatus: string | null; lastError: string | null; revision: number; connected: boolean; writeCapable: boolean;
 };
 export type CalendarOAuthStart = { authorizationUrl: string; expiresAt: string; scope: string; redirectUri: string };
+export const calendarEventProposalSchema = z.object({
+  connectionId: z.string().min(1).max(160), title: z.string().trim().min(2).max(160), description: z.string().trim().max(400).default(""),
+  startAt: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/),
+  endAt: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/),
+  timeZone: z.string().min(1).max(100),
+}).strict().superRefine((value, ctx) => {
+  const start = Date.parse(value.startAt), end = Date.parse(value.endAt);
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) ctx.addIssue({ code: "custom", message: "日程结束必须晚于开始" });
+  else if (end - start > 24 * 60 * 60 * 1000) ctx.addIssue({ code: "custom", message: "首个外部写只支持 24 小时内的日程" });
+  if (Number.isFinite(start) && start < Date.now() - 60 * 1000) ctx.addIssue({ code: "custom", message: "不能创建已经开始或过去的日程" });
+});
+export type CalendarEventProposal = z.infer<typeof calendarEventProposalSchema>;
 export const calendarToolSchemas = [
   z.object({ tool: z.literal("calendar_read"), projectId: z.string().min(1).max(160), connectionId: z.string().min(1).max(160),
     timeMin: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/),

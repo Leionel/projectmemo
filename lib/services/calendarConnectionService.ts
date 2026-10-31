@@ -4,7 +4,7 @@ import { isFeatureEnabled } from "@/lib/config/features";
 import { json } from "@/lib/mission/contracts";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import { calendarConfigured, openSecret, pkceChallenge, randomUrlToken, sealSecret, sha256 } from "@/lib/calendar/crypto";
-import { CALENDAR_PROVIDER, CALENDAR_SCOPE, calendarConnectionActionSchema, calendarConnectionStartSchema, calendarReadInputSchema,
+import { CALENDAR_PROVIDER, CALENDAR_SCOPE, CALENDAR_WRITE_SCOPE, calendarConnectionActionSchema, calendarConnectionStartSchema, calendarReadInputSchema,
   calendarSourceMetaSchema, type CalendarConnectionView, type CalendarOAuthStart, type CalendarReadResult, type CalendarSourceMeta } from "@/lib/calendar/contracts";
 import { assertFeishuCalendarScope, exchangeFeishuCode, feishuCalendarConfig, feishuAuthorizationUrl, readFeishuIdentity, refreshFeishuToken, type CalendarFetch } from "@/lib/calendar/feishuOAuth";
 import { choosePrimaryFeishuCalendar, listFeishuCalendars, readFeishuEvents } from "@/lib/calendar/feishuCalendar";
@@ -27,25 +27,25 @@ function view(connection: { id: string; provider: string; accountEmail: string; 
     calendarId: connection.calendarId, calendarSummary: connection.calendarSummary, calendarTimeZone: connection.calendarTimeZone,
     accessRole: connection.accessRole, scope: connection.scope, status: connection.status, revokedAt: connection.revokedAt?.toISOString() ?? null,
     revokedReason: connection.revokedReason, lastFetchedAt: connection.lastFetchedAt?.toISOString() ?? null, lastStatus: connection.lastStatus,
-    lastError: connection.lastError, revision: connection.revision, connected: connection.status === "ACTIVE" };
+    lastError: connection.lastError, revision: connection.revision, connected: connection.status === "ACTIVE",
+    writeCapable: connection.status === "ACTIVE" && connection.scope.split(/\s+/).includes("calendar:calendar") };
 }
 const defaultTimeZone = () => process.env.FEISHU_CALENDAR_DEFAULT_TIMEZONE?.trim() || "Asia/Shanghai";
 
 export async function startCalendarConnection(userId: string, projectId: string, raw: unknown): Promise<CalendarOAuthStart> {
   requireEnabled();
   if (!calendarConfigured()) throw new AppError("CALENDAR_NOT_CONFIGURED", "服务端尚未配置日历凭据加密密钥", 503);
-  const input = calendarConnectionStartSchema.parse(raw), config = feishuCalendarConfig();
+  const input = calendarConnectionStartSchema.parse(raw), config = feishuCalendarConfig(), requestedScope = input.mode === "WRITE" ? CALENDAR_WRITE_SCOPE : CALENDAR_SCOPE;
   await ownedOwner(userId, projectId);
   const state = randomUrlToken(), verifier = randomUrlToken(), now = new Date();
   await db.$transaction(async tx => {
     await ownedOwner(userId, projectId, tx);
     await tx.calendarOAuthState.deleteMany({ where: { ownerUserId: userId, expiresAt: { lt: now } } });
     await tx.calendarOAuthState.create({ data: { stateHash: sha256(state), ownerUserId: userId, projectId, provider: CALENDAR_PROVIDER,
-      redirectUri: config.redirectUri, scope: CALENDAR_SCOPE, codeVerifierCipher: sealSecret(verifier), expiresAt: new Date(now.getTime() + STATE_TTL_MS) } });
+      redirectUri: config.redirectUri, scope: requestedScope, mode: input.mode, codeVerifierCipher: sealSecret(verifier), expiresAt: new Date(now.getTime() + STATE_TTL_MS) } });
   });
-  void input;
-  return { authorizationUrl: feishuAuthorizationUrl({ state, codeChallenge: pkceChallenge(verifier), redirectUri: config.redirectUri }),
-    expiresAt: new Date(now.getTime() + STATE_TTL_MS).toISOString(), scope: CALENDAR_SCOPE, redirectUri: config.redirectUri };
+  return { authorizationUrl: feishuAuthorizationUrl({ state, codeChallenge: pkceChallenge(verifier), redirectUri: config.redirectUri, scope: requestedScope }),
+    expiresAt: new Date(now.getTime() + STATE_TTL_MS).toISOString(), scope: requestedScope, redirectUri: config.redirectUri };
 }
 
 export async function completeCalendarConnection(userId: string, rawState: string, code: string, fetcher: CalendarFetch = fetch) {
@@ -59,7 +59,7 @@ export async function completeCalendarConnection(userId: string, rawState: strin
   const consumed = await db.calendarOAuthState.updateMany({ where: { id: state.id, consumedAt: null, expiresAt: { gt: now } }, data: { consumedAt: now } });
   if (!consumed.count) throw new AppError("CALENDAR_STATE_REPLAY", "该授权回调已被使用，请重新连接", 409);
   const token = await exchangeFeishuCode({ code, codeVerifier: openSecret(state.codeVerifierCipher), redirectUri: state.redirectUri }, fetcher);
-  assertFeishuCalendarScope(token.scope);
+  assertFeishuCalendarScope(token.scope, state.mode === "WRITE" ? "WRITE" : "READ");
   const identity = await readFeishuIdentity(token.access_token!, fetcher);
   const calendars = await listFeishuCalendars(token.access_token!, fetcher);
   const calendar = choosePrimaryFeishuCalendar(calendars);
@@ -123,7 +123,7 @@ function readToken(connection: { tokenCipher: string | null; tokenVersion: numbe
     throw new AppError("CALENDAR_TOKEN_INVALID", "日历凭据无法读取，请重新连接", 409);
   }
 }
-async function rotateToken(connection: { id: string; ownerUserId: string; projectId: string; status: string; authGeneration: number; tokenVersion: number; tokenCipher: string | null }, current: ReturnType<typeof readToken>, fetcher: CalendarFetch) {
+async function rotateToken(connection: { id: string; ownerUserId: string; projectId: string; status: string; authGeneration: number; tokenVersion: number; tokenCipher: string | null; scope: string }, current: ReturnType<typeof readToken>, fetcher: CalendarFetch) {
   if (!current.refreshToken) throw new AppError("CALENDAR_REAUTH_REQUIRED", "日历授权缺少刷新凭据，请重新连接", 409);
   let token;
   try { token = await refreshFeishuToken(current.refreshToken, fetcher); }
@@ -133,7 +133,7 @@ async function rotateToken(connection: { id: string; ownerUserId: string; projec
     if (code === "CALENDAR_TOKEN_REFRESH_UNKNOWN") throw new AppError("CALENDAR_TOKEN_REFRESH_UNKNOWN", "刷新日历授权时网络中断，结果未知；不会自动重试，请重新连接", 409);
     throw new AppError("CALENDAR_REAUTH_REQUIRED", "飞书日历授权已过期，请重新连接", 409);
   }
-  assertFeishuCalendarScope(token.scope);
+  assertFeishuCalendarScope(token.scope, connection.scope.split(/\s+/).includes("calendar:calendar") ? "WRITE" : "READ");
   const expiresAt = token.expires_in ? new Date(Date.now() + token.expires_in * 1000) : null;
   const sealed = sealSecret(JSON.stringify({ accessToken: token.access_token, refreshToken: token.refresh_token ?? current.refreshToken, expiresAt: expiresAt?.toISOString() ?? null }));
   const updated = await db.calendarConnection.updateMany({ where: { id: connection.id, status: "ACTIVE", tokenVersion: connection.tokenVersion, authGeneration: connection.authGeneration },
@@ -141,7 +141,7 @@ async function rotateToken(connection: { id: string; ownerUserId: string; projec
   if (!updated.count) throw new AppError("CALENDAR_CONNECTION_CHANGED", "日历连接已变化，刷新结果未采用", 409);
   return token.access_token!;
 }
-async function accessTokenFor(connection: { id: string; ownerUserId: string; projectId: string; status: string; authGeneration: number; tokenVersion: number; tokenCipher: string | null; tokenExpiresAt: Date | null }, fetcher: CalendarFetch, forceRefresh = false) {
+async function accessTokenFor(connection: { id: string; ownerUserId: string; projectId: string; status: string; authGeneration: number; tokenVersion: number; tokenCipher: string | null; tokenExpiresAt: Date | null; scope: string }, fetcher: CalendarFetch, forceRefresh = false) {
   if (connection.status !== "ACTIVE") throw new AppError("CALENDAR_CONNECTION_REVOKED", "日历连接已撤销，不再发起新请求", 409);
   const current = readToken(connection);
   const expires = current.expiresAt ? Date.parse(current.expiresAt) : connection.tokenExpiresAt?.getTime() ?? 0;
@@ -230,4 +230,4 @@ function formatLocalTime(iso: string | null, timeZone: string | null) {
   try { return new Intl.DateTimeFormat("en-GB", { timeZone: timeZone || defaultTimeZone(), hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(iso)); }
   catch { return iso.slice(11, 16); }
 }
-export { CALENDAR_SCOPE };
+export { accessTokenFor as calendarAccessTokenFor };

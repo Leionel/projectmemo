@@ -18,6 +18,7 @@ export struct MissionResponsibilitySection {
   @State data: MissionResponsibilityView | null = null;
   @State loading: boolean = true;
   @State editing: boolean = false;
+  @State expanded: boolean = false;
   @State busy: boolean = false;
   @State error: string = '';
   @State goalDraft: string = '';
@@ -46,6 +47,7 @@ export struct MissionResponsibilitySection {
     this.data = null;
     this.loading = true;
     this.editing = false;
+    this.expanded = false;
     this.clientRequestId = '';
     this.editingInitialControlVersion = '';
     this.error = '';
@@ -188,7 +190,7 @@ export struct MissionResponsibilitySection {
   build() {
     Column({ space: 8 }) {
       Row() {
-        Text('长期责任与授权合同').fontSize(16).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY).layoutWeight(1)
+        Text('运行与接续').fontSize(16).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY).layoutWeight(1)
         if (this.data !== null) {
           Text(this.data.workerPresence === 'RECENT' ? '近期收到后台心跳' : this.data.workerPresence === 'STALE' ? '心跳超时' : '尚未观测到后台')
             .fontSize(12)
@@ -213,6 +215,14 @@ export struct MissionResponsibilitySection {
       if (this.loading && this.data === null) {
         Text('正在读取责任视图...').fontSize(13).fontColor(PMColors.INK_SECONDARY)
       } else if (this.data !== null && !this.editing) {
+        if (this.data.nextCheckAt && this.data.nextCheckAt !== '') {
+          Text('下次计划核对：' + this.data.nextCheckAt).fontSize(13).fontColor(PMColors.INK_SECONDARY).width('100%')
+        }
+        Button(this.expanded ? '收起委托范围与累计用量' : '查看委托范围与累计用量', { type: ButtonType.Normal })
+          .height(44).width('100%').fontSize(14).fontColor(PMColors.BRAND)
+          .backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.SM)
+          .onClick(() => { this.expanded = !this.expanded; })
+        if (this.expanded) {
         Column({ space: 6 }) {
           Text('委托目标').fontSize(12).fontColor(PMColors.INK_SECONDARY)
           Text(this.data.goal).fontSize(14).fontColor(PMColors.INK_PRIMARY).fontWeight(FontWeight.Medium)
@@ -279,9 +289,6 @@ export struct MissionResponsibilitySection {
             }
           }.width('100%').padding(8).backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.SM).margin({ top: 4 })
 
-          if (this.data.nextCheckAt && this.data.nextCheckAt !== '') {
-            Text('下次计划核对：' + this.data.nextCheckAt).fontSize(11).fontColor(PMColors.INK_SECONDARY).margin({ top: 2 })
-          }
 
           Button('修订责任范围', { type: ButtonType.Normal })
             .height(44)
@@ -290,6 +297,7 @@ export struct MissionResponsibilitySection {
             .backgroundColor(PMColors.BRAND_LIGHT)
             .onClick(() => { this.startEditing(); })
         }.width('100%').alignItems(HorizontalAlign.Start)
+        }
       } else if (this.data !== null && this.editing) {
         if (this.pendingPayload === '' && this.data.controlVersion !== this.editingInitialControlVersion) {
           Button('核对最新版本，保留我的修改').height(44).onClick(() => { if(this.data){this.editingInitialControlVersion=this.data.controlVersion;this.clientRequestId=util.generateRandomUUID(true);this.persist();} })

@@ -1,0 +1,10 @@
+.panel { margin-block: 1rem; padding-block: .875rem; border-block: 1px solid var(--rule); color: var(--ink); font-size: .875rem; }
+.heading { display:flex; align-items:baseline; justify-content:space-between; gap:.75rem; flex-wrap:wrap; }
+.heading > div { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
+.schedule { margin-top:.5rem; color:var(--ink-soft); font-size:.8125rem; }
+.disclosure { margin-top:.25rem; }
+.disclosure > summary { color:var(--teal-strong); font-size:.8125rem; min-height:44px; padding-block:.625rem; cursor:pointer; }
+.disclosure > div { padding-block:.5rem; }
+.panel button { min-height:44px; }
+.panel :is(button,input,textarea,summary):focus-visible { outline:2px solid var(--teal); outline-offset:3px; }
+.panel :is(input,textarea) { color:var(--ink); background:var(--card-bg); border-color:var(--rule-strong); }

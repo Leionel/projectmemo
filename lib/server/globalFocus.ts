@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { readableProjectNotice } from "@/lib/projectNotice";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { missionSummarySelect, presentMissionSummary } from "@/lib/mission/workspaceSummary";
 import type { FocusEntry, GlobalFocus } from "@/lib/types/globalFocus";
@@ -44,7 +45,7 @@ export async function loadGlobalFocus(userId: string, archived = false): Promise
     const projectRows=[...waiting,...running,...reminders,...actions].filter(r=>r.project.id===id),p=projectRows[0].project;
     const candidates:AgentCandidate[]=[...[...waiting,...running].filter(m=>m.project.id===id).map(m=>{
       const v=presentMissionSummary(m);return {kind:"MISSION" as const,id:m.id,status:m.status,title:m.goal,reason:v.attention??"",updatedAt:m.updatedAt.toISOString(),version:m.version,planRevision:m.planRevision,workState:v.workState,sourceChanged:(m.lastErrorJson as {code?:string}|null)?.code==="SOURCE_CHANGED",questionId:v.workState.exactQuestionRef,approvalId:v.workState.exactApprovalRef,outputRevision:v.outputRevision};
-    }),...reminders.filter(r=>r.project.id===id).map(r=>({kind:"INTERVENTION" as const,id:r.id,status:r.status,title:p.deadline&&+p.deadline>Date.now()&&(r.title==="截止日期已经过去"||r.content.includes("项目已经超过截止日期"))?"核对提醒与当前截止日":r.title,reason:p.deadline&&+p.deadline>Date.now()&&(r.title==="截止日期已经过去"||r.content.includes("项目已经超过截止日期"))?`历史提醒为「${r.title}」，当前项目截止日为 ${p.deadline.toISOString().slice(0,10)}。请核对原始通知及适用阶段。`:r.content,updatedAt:r.createdAt.toISOString(),severity:r.severity})),...actions.filter(a=>a.project.id===id).map(a=>({kind:"ACTION" as const,id:a.id,status:a.status,title:a.title,reason:a.description??"查看行动要求，完成后记录实际结果。",updatedAt:a.createdAt.toISOString(),dueAt:a.dueAt?.toISOString()}))];
+    }),...reminders.filter(r=>r.project.id===id).map(r=>({kind:"INTERVENTION" as const,id:r.id,status:r.status,title:p.deadline&&+p.deadline>Date.now()&&(r.title==="截止日期已经过去"||r.content.includes("项目已经超过截止日期"))?"核对提醒与当前截止日":r.title,reason:p.deadline&&+p.deadline>Date.now()&&(r.title==="截止日期已经过去"||r.content.includes("项目已经超过截止日期"))?`历史提醒为「${r.title}」，当前项目截止日为 ${p.deadline.toISOString().slice(0,10)}。请核对原始通知及适用阶段。`:readableProjectNotice(r.content),updatedAt:r.createdAt.toISOString(),severity:r.severity})),...actions.filter(a=>a.project.id===id).map(a=>({kind:"ACTION" as const,id:a.id,status:a.status,title:a.title,reason:a.description??"查看行动要求，完成后记录实际结果。",updatedAt:a.createdAt.toISOString(),dueAt:a.dueAt?.toISOString()}))];
     const c=selectProjectAgentContext({projectId:id,projectTitle:p.title,projectGoal:p.goal,projectUpdatedAt:p.updatedAt.toISOString(),candidates,focusMissionId:candidates.some(c=>c.kind==="MISSION"&&c.id===p.memberships[0]?.focusMissionId)?p.memberships[0]?.focusMissionId:null,hasRecords:p._count.captures>0});
     const continuity=await effectiveContinuity(userId,{projectId:id});
     const boundaries=[continuity.nextBoundary,c.nextStep.workState?.nextBoundary,c.nextStep.workState?.nextCheckAt,...candidates.map(x=>x.dueAt?new Date(Date.parse(x.dueAt)-86400000).toISOString():null)].filter((v):v is string=>!!v&&Date.parse(v)>Date.now()).sort();
@@ -57,7 +58,7 @@ export async function loadGlobalFocus(userId: string, archived = false): Promise
     schemaVersion: 1, missionEnabled, archived, hasMore: [waiting, running, actions, reminders].some(rows => rows.length > LIMIT) || new Set([...waiting,...running,...reminders,...actions].map(row=>row.project.id)).size>LIMIT,
     waiting: missions([...responsive,...waiting.filter(row=>!presentMissionSummary(row).workState.requiresUser)]), running: missions(running),
     actions: actions.slice(0, LIMIT).map(row => ({ ...common(row), status: row.status, detail: row.description ?? "", dueAt: row.dueAt?.toISOString() ?? "" })),
-    reminders: reminders.slice(0, LIMIT).map(row => ({ ...common(row), status: row.status, detail: row.content })),
+    reminders: reminders.slice(0, LIMIT).map(row => ({ ...common(row), status: row.status, detail: readableProjectNotice(row.content) })),
     records: records.slice(0, 3).map(row => {
       const text = readableRecord(row.title, row.summary), parsed = parseMetricRecord(row.capture.rawText);
       const metric = parsed?.success && parsed.data.projectId === row.project.id ? parsed.data : null;

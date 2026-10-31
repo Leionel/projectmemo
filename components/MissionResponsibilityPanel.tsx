@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import styles from "./MissionResponsibilityPanel.module.css";
 
 import { readConversationDraft, saveConversationDraft, clearConversationDraft } from "@/lib/client/conversationDrafts";
 
@@ -327,11 +328,11 @@ export function MissionResponsibilityPanel({
   }
 
   if (loading && !data || data && data.missionId!==missionId) {
-    return <div className="p-4 text-sm text-neutral-500">正在读取责任合同...</div>;
+    return <div className="p-4 text-sm text-[var(--muted)]">正在读取责任合同...</div>;
   }
 
   if (!data) {
-    return error ? <div className="p-4 text-sm text-red-500">{error}</div> : null;
+    return error ? <div className="p-4 text-sm text-[var(--brick)]">{error}</div> : null;
   }
 
   const { budget, workerPresence, workerPresenceDetail, permissionState, deadline, permissionExpiresAt, workingObjective, continuationPolicy } = data;
@@ -355,23 +356,23 @@ export function MissionResponsibilityPanel({
   } | undefined;
 
   return (
-    <div className="border rounded-lg p-4 bg-white shadow-sm space-y-4 my-3 text-sm">
-      <div className="flex justify-between items-center border-b pb-2">
-        <h4 className="font-semibold text-base text-neutral-800">长期责任与授权合同</h4>
+    <section className={styles.panel} aria-label="运行与接续">
+      <div className={styles.heading}>
+        <h4 className="font-semibold text-base text-[var(--ink)]">运行与接续</h4>
         <div className="flex items-center gap-2">
           <span
             className={`px-2 py-0.5 text-xs rounded font-medium ${
               workerPresence === "RECENT"
-                ? "bg-emerald-100 text-emerald-800"
+                ? "bg-[var(--teal-pale)] text-[var(--teal-strong)]"
                 : workerPresence === "STALE"
-                ? "bg-amber-100 text-amber-800"
-                : "bg-neutral-100 text-neutral-700"
+                ? "bg-[var(--paper)] text-[var(--amber)]"
+                : "bg-[var(--paper)] text-[var(--ink-soft)]"
             }`}
           >
             {presenceLabels[workerPresence] ?? workerPresence}
           </span>
           {workerPresenceDetail && (
-            <span className="text-xs text-neutral-400">
+            <span className="text-xs text-[var(--muted)]">
               {workerPresenceDetail.isActivelyInspecting ? "近期有成功巡检" : "尚无近期巡检回执"}
               {workerPresenceDetail.hasClaimedWork ? " · 有领取记录" : ""}
             </span>
@@ -379,26 +380,27 @@ export function MissionResponsibilityPanel({
         </div>
       </div>
 
-      {error && <div className="text-red-600 bg-red-50 p-2 rounded text-xs">{error}</div>}
+      {data.nextCheckAt && <p className={styles.schedule}>下次计划核对：<time dateTime={data.nextCheckAt}>{new Date(data.nextCheckAt).toLocaleString("zh-CN")}</time></p>}
+      {error && <div className="text-[var(--brick)] bg-[var(--brick-pale)] p-2 rounded text-xs">{error}</div>}
 
       {isStaleConflict && (
-        <div className="text-amber-800 bg-amber-50 border border-amber-200 p-2 rounded text-xs">
+        <div className="text-[var(--amber)] bg-[var(--paper)] border border-[var(--rule)] p-2 rounded text-xs">
           责任合同已被其他端更新，提交时可能发生冲突，请核对后再保存（本地草稿已保留）。
         </div>
       )}
 
       {!editing ? (
-        <div className="space-y-3">
+        <details className={styles.disclosure}><summary>委托范围与累计用量</summary><div className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <p className="text-xs text-neutral-500 mb-1">委托目标</p>
-              <div className="text-neutral-900 bg-neutral-50 p-2.5 rounded border border-neutral-100 font-medium">
+              <p className="text-xs text-[var(--muted)] mb-1">委托目标</p>
+              <div className="text-[var(--ink)] bg-[var(--paper)] p-2.5 rounded border border-[var(--rule)] font-medium">
                 {data.goal}
               </div>
             </div>
             <div>
-              <p className="text-xs text-neutral-500 mb-1">当前重点</p>
-              <div className="text-neutral-800 bg-neutral-50 p-2.5 rounded border border-neutral-100">
+              <p className="text-xs text-[var(--muted)] mb-1">当前重点</p>
+              <div className="text-[var(--ink)] bg-[var(--paper)] p-2.5 rounded border border-[var(--rule)]">
                 {workingObjective || "与委托目标一致"}
               </div>
             </div>
@@ -406,10 +408,10 @@ export function MissionResponsibilityPanel({
 
           {Array.isArray(data.successCriteria) && data.successCriteria.length > 0 && (
             <div>
-              <p className="text-xs text-neutral-500 mb-1">验收准则</p>
+              <p className="text-xs text-[var(--muted)] mb-1">验收准则</p>
               <div className="flex flex-wrap gap-1.5">
                 {(data.successCriteriaLabels??["验收准则待读取"]).map((c, i) => (
-                  <span key={i} className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs">
+                  <span key={i} className="px-2 py-0.5 bg-[var(--teal-pale)] text-[var(--teal-strong)] rounded text-xs">
                     {c}
                   </span>
                 ))}
@@ -419,10 +421,10 @@ export function MissionResponsibilityPanel({
 
           {policy?.allowedTools && policy.allowedTools.length > 0 && (
             <div>
-              <p className="text-xs text-neutral-500 mb-1">允许工具</p>
+              <p className="text-xs text-[var(--muted)] mb-1">允许工具</p>
               <div className="flex flex-wrap gap-1.5">
                 {policy.allowedTools.map(t => (
-                  <span key={t} className="px-2 py-0.5 bg-neutral-100 text-neutral-700 rounded text-xs">
+                  <span key={t} className="px-2 py-0.5 bg-[var(--paper)] text-[var(--ink-soft)] rounded text-xs">
                     {toolLabels[t] ?? t}
                   </span>
                 ))}
@@ -432,22 +434,22 @@ export function MissionResponsibilityPanel({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <span className="text-neutral-500 block text-xs">任务截止时间</span>
-              <span className="font-medium text-neutral-800">
+              <span className="text-[var(--muted)] block text-xs">任务截止时间</span>
+              <span className="font-medium text-[var(--ink)]">
                 {deadline ? new Date(deadline).toLocaleString("zh-CN") : "未限定"}
               </span>
             </div>
             <div>
-              <span className="text-neutral-500 block text-xs">巡检授权有效期</span>
-              <span className="font-medium text-neutral-800">
+              <span className="text-[var(--muted)] block text-xs">巡检授权有效期</span>
+              <span className="font-medium text-[var(--ink)]">
                 {permissionExpiresAt ? new Date(permissionExpiresAt).toLocaleString("zh-CN") : "手动模式"}
-                <span className="ml-1 text-xs text-neutral-500">({permissionLabels[permissionState] ?? permissionState})</span>
+                <span className="ml-1 text-xs text-[var(--muted)]">({permissionLabels[permissionState] ?? permissionState})</span>
               </span>
             </div>
           </div>
 
           {policy?.connectionIds && policy.connectionIds.length > 0 && (
-            <div className="text-xs text-neutral-600 bg-neutral-50 p-2 rounded border border-neutral-100">
+            <div className="text-xs text-[var(--ink-soft)] bg-[var(--paper)] p-2 rounded border border-[var(--rule)]">
               持续巡检：关联 {policy.connectionIds.length} 个代码仓库{policy.trackBranchHead ? " · 跟踪分支 HEAD" : ""} · 每 {policy.checkEveryMinutes ?? 15} 分钟核对一次
               {typeof policy.quietStart === "number" && typeof policy.quietEnd === "number" && (
                 <span> · {policy.quietStart}:00–{policy.quietEnd}:00 自动静音排队</span>
@@ -455,50 +457,44 @@ export function MissionResponsibilityPanel({
             </div>
           )}
 
-          <div className="bg-neutral-50 p-3 rounded border border-neutral-100">
-            <span className="text-xs font-medium text-neutral-600 block mb-2">
+          <div className="bg-[var(--paper)] p-3 rounded border border-[var(--rule)]">
+            <span className="text-xs font-medium text-[var(--ink-soft)] block mb-2">
               累计消耗与总包（永不清零）
             </span>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-neutral-700">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-[var(--ink-soft)]">
               <div>
-                模型：<span className="font-semibold text-neutral-900">{budget.cumulativeUsed.models ?? 0}</span> / {modelLimit ?? "待核对"}
+                模型：<span className="font-semibold text-[var(--ink)]">{budget.cumulativeUsed.models ?? 0}</span> / {modelLimit ?? "待核对"}
               </div>
               <div>
-                工具：<span className="font-semibold text-neutral-900">{budget.cumulativeUsed.tools ?? 0}</span> / {toolLimit ?? "待核对"}
+                工具：<span className="font-semibold text-[var(--ink)]">{budget.cumulativeUsed.tools ?? 0}</span> / {toolLimit ?? "待核对"}
               </div>
               <div>
-                元数据：<span className="font-semibold text-neutral-900">{budget.cumulativeUsed.metadataRequests ?? 0}</span> / {metadataLimit ?? "待核对"}
+                元数据：<span className="font-semibold text-[var(--ink)]">{budget.cumulativeUsed.metadataRequests ?? 0}</span> / {metadataLimit ?? "待核对"}
               </div>
               <div>
-                未知请求：<span className="font-semibold text-neutral-900">{budget.cumulativeUsed.unknownCalls ?? 0}</span>
+                未知请求：<span className="font-semibold text-[var(--ink)]">{budget.cumulativeUsed.unknownCalls ?? 0}</span>
               </div>
             </div>
             {dailyBurst && (
-              <div className="mt-2 text-xs text-neutral-500">
+              <div className="mt-2 text-xs text-[var(--muted)]">
                 每日突发上限：模型 ≤ {dailyBurst.maxModels ?? dailyBurst.models ?? "-"}，工具 ≤ {dailyBurst.maxTools ?? dailyBurst.tools ?? "-"}
               </div>
             )}
           </div>
 
-          {data.nextCheckAt && (
-            <div className="text-xs text-neutral-500">
-              下次计划核对时间：{new Date(data.nextCheckAt).toLocaleString("zh-CN")}
-            </div>
-          )}
-
           <div className="pt-2 flex justify-end">
             <button
               onClick={startEditing}
-              className="px-3 py-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded text-xs font-medium transition"
+              className="px-3 py-1 bg-[var(--paper)] hover:bg-[var(--paper-strong)] text-[var(--ink-soft)] rounded text-xs font-medium transition"
             >
               修订责任范围
             </button>
           </div>
-        </div>
+        </div></details>
       ) : (
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-neutral-700 mb-1">委托目标</label>
+            <label className="block text-xs font-medium text-[var(--ink-soft)] mb-1">委托目标</label>
             <textarea
               className="w-full border rounded p-2 text-sm"
               rows={2}
@@ -509,7 +505,7 @@ export function MissionResponsibilityPanel({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-700 mb-1">当前重点（可选）</label>
+            <label className="block text-xs font-medium text-[var(--ink-soft)] mb-1">当前重点（可选）</label>
             <input
               type="text"
               className="w-full border rounded p-2 text-sm"
@@ -521,7 +517,7 @@ export function MissionResponsibilityPanel({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-700 mb-1">任务截止时间</label>
+            <label className="block text-xs font-medium text-[var(--ink-soft)] mb-1">任务截止时间</label>
             <input
               type="datetime-local"
               className="border rounded p-1.5 text-sm"
@@ -536,20 +532,20 @@ export function MissionResponsibilityPanel({
             <button
               disabled={busy || !!pendingPayload}
               onClick={cancelEditing}
-              className="px-3 py-1.5 border rounded text-xs text-neutral-600 hover:bg-neutral-50"
+              className="px-3 py-1.5 border rounded text-xs text-[var(--ink-soft)] hover:bg-[var(--paper)]"
             >
               取消
             </button>
             <button
               disabled={busy || !goalDraft.trim()}
               onClick={() => void handleRevise()}
-              className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700 disabled:opacity-50"
+              className="px-3 py-1.5 bg-[var(--teal)] text-white rounded text-xs font-medium hover:bg-[var(--teal-strong)] disabled:opacity-50"
             >
               {busy ? "正在保存..." : pendingPayload ? "核对上次提交结果" : "确认修订（失效原有提案）"}
             </button>
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 }

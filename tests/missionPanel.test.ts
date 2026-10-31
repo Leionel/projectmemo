@@ -100,3 +100,30 @@ describe("Mission 面板调用方",()=>{
  it("多行约束和多个公开概念完整提交，不在逐键编辑时丢分隔符",async()=>{const f=fixture();render(createElement(MissionPanel,{projectId:"p"}));fireEvent.click(await screen.findByRole("button",{name:"整理阶段汇报 · 等待执行"}));await screen.findByRole("heading",{name:"整理阶段汇报"});fireEvent.click(screen.getByText("查看或修改个人约束"));fireEvent.change(screen.getByRole("textbox",{name:"资源限制（每行一项）"}),{target:{value:"仅用CPU\n公开数据集"}});fireEvent.click(screen.getByRole("button",{name:"确认保存约束与许可"}));await waitFor(()=>expect(f.requests.find(r=>r.url.endsWith("/constraints"))?.body).toMatchObject({constraints:{resourceLimits:["仅用CPU","公开数据集"]}}));fireEvent.click(screen.getByText("公开研究范围"));fireEvent.click(screen.getByRole("checkbox",{name:"允许在以下公开范围自主研究"}));fireEvent.change(screen.getByRole("textbox",{name:"公开研究主题"}),{target:{value:"公开分割评测"}});fireEvent.change(screen.getByRole("textbox",{name:"公开概念（逗号分隔）"}),{target:{value:"分割,segmentation"}});fireEvent.click(screen.getByRole("button",{name:"确认研究范围"}));await waitFor(()=>expect(f.requests.find(r=>r.url.endsWith("/research-scope"))?.body).toMatchObject({scope:{publicTerms:["分割","segmentation"],enabled:true}}));});
  it("批准展示完整参数；行动回执可定位，重复读取不反复刷新行动板",async()=>{fixture(true);render(createElement(MissionPanel,{projectId:"p"}));const select=await screen.findByRole("button",{name:"整理阶段汇报 · 等待你的批准"});fireEvent.click(select);await screen.findByText(/优先级：4/);fireEvent.click(screen.getByText(/执行详情与回执（/));expect(screen.getByText(/截止时间：/)).toBeTruthy();expect(screen.getByText(/批准有效至：/)).toBeTruthy();const link=screen.getByRole("link",{name:"已创建行动：核对实验条件"});expect(link.getAttribute("href")).toBe("/projects/p/actions#action-a");await waitFor(()=>expect(emit).toHaveBeenCalledWith("p",["actions"]));fireEvent.click(select);await waitFor(()=>expect(screen.getByRole("link",{name:"已创建行动：核对实验条件"})).toBeTruthy());expect(emit).toHaveBeenCalledTimes(1);});
 });
+
+
+describe("已有委托首次打开与恢复",()=>{
+ it("默认打开服务端列表首项，读取本身不会执行任何业务写入",async()=>{
+  const f=fixture();render(createElement(MissionPanel,{projectId:"p"}));
+  await screen.findByRole("heading",{name:"整理阶段汇报"});
+  expect(screen.getByRole("button",{name:"整理阶段汇报 · 等待执行"}).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.queryByRole("heading",{name:"委托一个需要持续跟进的目标"})).toBeNull();
+  expect(f.requests).toHaveLength(0);
+ });
+ it("显式深链接优先于列表首项，迟到列表不覆盖所选委托",async()=>{
+  const {mission}=fixture();const linked={...mission,id:"linked",goal:"来自跨端接续的委托"};
+  vi.stubGlobal("fetch",vi.fn(async(raw:string)=>({ok:true,json:async()=>raw.includes("/sources")?{sources:[]}:raw.includes("?projectId=")?{missions:[mission,linked]}:{mission:raw.includes("/linked")?linked:mission}})));
+  render(createElement(MissionPanel,{projectId:"p",initialMissionId:"linked"}));
+  await screen.findByRole("heading",{name:"来自跨端接续的委托"});
+  expect(screen.queryByRole("heading",{name:"整理阶段汇报"})).toBeNull();
+ });
+ it("首次详情失败显示恢复入口，重试读取原委托，不展示新用户引导",async()=>{
+  fixture();const original=globalThis.fetch;let fail=true;
+  vi.stubGlobal("fetch",vi.fn(async(raw:string,init?:RequestInit)=>raw==="/api/missions/m"&&fail?{ok:false,status:503,json:async()=>({error:{message:"隔离验收的临时失败"}})}:original(raw,init)));
+  render(createElement(MissionPanel,{projectId:"p"}));
+  await screen.findByRole("heading",{name:"委托详情暂不可用"});
+  expect(screen.queryByRole("heading",{name:"委托一个需要持续跟进的目标"})).toBeNull();
+  fail=false;fireEvent.click(screen.getByRole("button",{name:"刷新重试"}));
+  await screen.findByRole("heading",{name:"整理阶段汇报"});
+ });
+});

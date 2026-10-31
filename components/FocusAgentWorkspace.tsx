@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, MessageCircle, CircleAlert, Layers3, CheckSquare2 } from "lucide-react";
 import { ConversationPanel } from "./ConversationPanel";
-import { FocusAgentLauncher } from "./FocusAgentLauncher";
 import type { GlobalFocus, FocusEntry } from "@/lib/types/globalFocus";
 import type { ConversationEntry } from "@/lib/types/conversation";
 import { missionStatusLabels } from "@/lib/mission/presentation";
@@ -47,6 +46,9 @@ export function FocusAgentWorkspace({ focus }: { focus: GlobalFocus }) {
   ];
   const hero=focusPrimary(focus);
   const heroKind=hero?.entityKind??groups.find(g=>g.items.some(x=>x.id===hero?.id&&x.projectId===hero?.projectId))?.kind;
+  const visibleGroups = groups.filter(g => filter === "all" || filter === "waiting" && g.title === "需要你判断" || filter === "running" && g.title === "正在接续")
+    .map(g => ({ ...g, items: g.items.filter(item => item.id !== hero?.id || item.projectId !== hero?.projectId).slice(0, 3) }));
+  const hasVisibleItems = visibleGroups.some(g => g.items.length > 0);
   useEffect(()=>{const refresh=()=>router.refresh();window.addEventListener("focus",refresh);const boundary=focus.primaryContext?.nextBoundary;const delay=boundary?Date.parse(boundary)-Date.now():NaN;const timer=Number.isFinite(delay)?setTimeout(refresh,Math.min(Math.max(delay+50,50),2147483647)):undefined;return()=>{window.removeEventListener("focus",refresh);clearTimeout(timer);};},[focus.primaryContext?.nextBoundary,router]);
   function discuss(item: FocusEntry, kind: "MISSION" | "ACTION" | "INTERVENTION") {
     if (kind === "INTERVENTION") { setEntry({ kind, projectId: item.projectId, id: item.id }); setSelection(undefined); }
@@ -56,8 +58,7 @@ export function FocusAgentWorkspace({ focus }: { focus: GlobalFocus }) {
   }
   function href(item: FocusEntry, kind: string) { if(kind==="PROJECT")return "/projects/"+item.projectId+"/records";return "/projects/" + item.projectId + (kind === "MISSION" ? "/missions?mission=" + item.id : "/actions#" + (kind === "ACTION" ? "action-" : "intervention-") + item.id); }
   return <div className={styles.root}>
-    {mobileView === "focus" && <FocusAgentLauncher className={styles.mobileLauncher} onOpen={() => { setMobileView("chat"); requestAnimationFrame(() => document.getElementById("focus-conversation")?.scrollIntoView({ block: "nearest" })); }}/>}
-    <header className={styles.pageHead}><div><p className={styles.eyebrow}>我的工作台 / 焦点</p><h1>今日项目焦点</h1></div><Link className="workspace-tool focus-ring" href="/projects">全部项目<ArrowRight size={14}/></Link></header>
+    <header className={styles.pageHead}><h1>今日项目焦点</h1><Link className="workspace-tool focus-ring" href="/projects">全部项目<ArrowRight size={14}/></Link></header>
     <div className={styles.mobileSwitch} aria-label="焦点视图">{[["focus", "项目焦点"], ["chat", "与忆程协作"]].map(([key, title]) => <button type="button" key={key} aria-pressed={mobileView === key} className={mobileView === key ? styles.active : ""} onClick={() => setMobileView(key)}>{title}</button>)}</div>
     <div className={styles.columns} data-mobile={mobileView}>
       <aside className={styles.left} aria-label="项目焦点">
@@ -66,8 +67,8 @@ export function FocusAgentWorkspace({ focus }: { focus: GlobalFocus }) {
         </section>}
         {hero && heroKind && <section className={styles.hero}><div className={styles.heroMeta}><span>{(hero.workState?workPhaseLabel(hero.workState.phase):missionStatusLabels[hero.status]) ?? (heroKind === "INTERVENTION" ? "需要关注" : "下一步")}</span><span>{hero.projectTitle}</span></div><h2>{hero.title}</h2>{focus.primaryContext?.workingObjective&&<p>当前重点：{focus.primaryContext.workingObjective}</p>}{hero.detail && <p>{hero.detail}</p>}<div className={styles.heroActions}><Link className="editorial-button focus-ring" href={href(hero,heroKind)}>{hero.actionLabel??"打开原事项"}<ArrowRight size={13}/></Link>{heroKind!=="PROJECT"&&<button type="button" className="workspace-tool focus-ring" onClick={() => discuss(hero,heroKind)}><MessageCircle size={14}/>和忆程讨论</button>}</div></section>}
         <section className={styles.taskList}><header><h2>项目焦点</h2><div className={styles.filters}>{[["all", "全部"], ["waiting", (focus.coverage?.complete===false?"当前待回应 ":"待回应 ")+focus.counts.waiting], ["running", "推进中 "+focus.counts.running]].map(([key, label]) => <button type="button" key={key} className={filter === key ? styles.active : ""} aria-pressed={filter === key} onClick={() => setFilter(key)}>{label}</button>)}</div></header>
-          {groups.filter(g => filter === "all" || filter === "waiting" && g.title === "需要你判断" || filter === "running" && g.title === "正在接续").map(g => g.items.filter(item=>item.id!==hero?.id||item.projectId!==hero?.projectId).slice(0, 3).map(item => <article key={g.kind + item.id} className={styles.item}><span className={g.title === "需要你判断" || g.kind === "INTERVENTION" ? styles.warmIcon : styles.itemIcon}><g.Icon size={16}/></span><div><p className={styles.project}>{item.projectTitle}<span>{item.workState?workPhaseLabel(item.workState.phase):g.title}</span></p><h3>{item.title}</h3>{item.detail && <p className={styles.excerpt}>{item.detail}</p>}<div className={styles.itemActions}><Link className={styles.discuss+" focus-ring"} href={href(item,g.kind)}>{item.actionLabel??"打开原事项"}</Link><button type="button" className={styles.discuss + " focus-ring"} onClick={() => discuss(item, g.kind)}>与忆程讨论<ArrowRight size={12}/></button></div></div></article>))}
-          {!groups.some(g => g.items.length) && <p className={styles.calm}>暂时没有待回应的事。从一个项目开始，和忆程讨论下一步。</p>}
+          {visibleGroups.map(g => g.items.map(item => <article key={g.kind + item.id} className={styles.item}><span className={g.title === "需要你判断" || g.kind === "INTERVENTION" ? styles.warmIcon : styles.itemIcon}><g.Icon size={16}/></span><div><p className={styles.project}>{item.projectTitle}<span>{item.workState?workPhaseLabel(item.workState.phase):g.title}</span></p><h3>{item.title}</h3>{item.detail && <p className={styles.excerpt}>{item.detail}</p>}<div className={styles.itemActions}><Link className={styles.discuss+" focus-ring"} href={href(item,g.kind)}>{item.actionLabel??"打开原事项"}</Link><button type="button" className={styles.discuss + " focus-ring"} onClick={() => discuss(item, g.kind)}>与忆程讨论<ArrowRight size={12}/></button></div></div></article>))}
+          {!hasVisibleItems && <div className={styles.emptyFilter} role="status"><p>{filter === "waiting" ? "目前没有等待你回应的委托。" : filter === "running" ? "目前没有等待执行或正在执行的委托。" : "目前没有更多待处理事项。"}</p>{filter !== "all" ? <button type="button" className="workspace-tool focus-ring" onClick={() => setFilter("all")}>查看全部事项</button> : !hero && <Link className="workspace-tool focus-ring" href="/projects">查看项目</Link>}</div>}
         </section>
         {(focus.hasMore||focus.coverage?.complete===false) && <Link className={styles.more + " focus-ring"} href="/projects">当前范围建议先处理 · 查看全部项目 →</Link>}
       </aside>

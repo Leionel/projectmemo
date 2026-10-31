@@ -22,6 +22,7 @@ test("责任修订丢回包、轮询变版与重挂载后，仍重放同一请�
     return response({responsibility:snapshot});
   }));
   const first=render(createElement(MissionResponsibilityPanel,{missionId:"m",onRevised:changed}));
+  fireEvent.click(await screen.findByText("委托范围与累计用量"));
   fireEvent.click(await screen.findByRole("button",{name:"修订责任范围"}));
   const inputs=screen.getAllByRole("textbox");fireEvent.change(inputs[0],{target:{value:"本次明确的新目标"}});
   fireEvent.click(screen.getByRole("button",{name:"确认修订（失效原有提案）"}));
@@ -31,4 +32,17 @@ test("责任修订丢回包、轮询变版与重挂载后，仍重放同一请�
   fireEvent.click(retry);await waitFor(()=>expect(changed).toHaveBeenCalledTimes(1));
   expect(calls).toHaveLength(2);expect(calls[1]).toEqual(calls[0]);
   expect(calls[0]).toMatchObject({goal:"本次明确的新目标",expectedControlVersion:"v1",constraints:{deadline:initial.deadline}});
+});
+
+
+test("默认收起管理合同，但后台状态和实际下次核对时间保持可见",async()=>{
+ vi.stubGlobal("fetch",vi.fn(async()=>response({responsibility:{...initial,nextCheckAt:"2026-11-01T10:00:00.000Z"}})));
+ render(createElement(MissionResponsibilityPanel,{missionId:"m",onRevised:()=>{}}));
+ await screen.findByText("尚未观测到后台");
+ expect(screen.getByText(/下次计划核对/)).toBeTruthy();
+ const summary=screen.getByText("委托范围与累计用量");
+ expect(summary.closest("details")?.open).toBe(false);
+ fireEvent.click(summary);
+ expect(summary.closest("details")?.open).toBe(true);
+ expect(screen.getByRole("button",{name:"修订责任范围"})).toBeTruthy();
 });

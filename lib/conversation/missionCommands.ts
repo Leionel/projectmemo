@@ -9,6 +9,7 @@ import type { ConversationActor, ConversationProposal } from "@/lib/types/conver
 import { emptyBlocks, lockConversation, ownedConversation, record } from "./repository";
 import { appendConversationMessage, bindRefs, readConversation } from "./service";
 import { confirmConversationAction } from "./commands";
+import { confirmConversationCalendar } from "./calendarProposalService";
 import { confirmConversationWork } from "./workService";
 import { effectiveContinuity, assertContinuityBinding } from "@/lib/continuity/directiveService";
 
@@ -48,6 +49,7 @@ export async function confirmConversationProposal(actor: ConversationActor, id: 
   const execution = await db.copilotToolExecution.findFirst({ where: { id: executionId, sourceRun: { conversationId: id } } });
   if (!execution) throw new AppError("PROPOSAL_NOT_FOUND", "原提案不存在", 404);
   if (execution.tool === "create_action") return confirmConversationAction(actor, id, executionId, raw);
+  if (execution.tool === "create_calendar_event") return confirmConversationCalendar(actor, id, executionId, raw);
   const run = await db.agentRun.findUniqueOrThrow({ where: { id: execution.sourceRunId } });
   if (record(run.trace).purpose === "FOCUS_WORK_PREVIEW") return confirmConversationWork(actor, id, executionId, raw);
   if (execution.tool !== "resume_mission") throw new AppError("UNSUPPORTED_TOOL", "此操作尚未开放", 422);

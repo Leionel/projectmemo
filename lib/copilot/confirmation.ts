@@ -15,6 +15,10 @@ import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateSer
 import { actionCreateSchema, artifactCreateSchema } from "@/lib/validation/schemas";
 import type { AgentToolConfirmInput } from "@/lib/validation/schemas";
 import type { ProposedAction } from "@/lib/types";
+import { CALENDAR_PROVIDER, calendarEventProposalSchema } from "@/lib/calendar/contracts";
+import { isFeatureEnabled } from "@/lib/config/features";
+import { calendarAccessTokenFor } from "@/lib/services/calendarConnectionService";
+import { createFeishuCalendarEvent, getFeishuCalendarEvent } from "@/lib/calendar/feishuWrite";
 
 type Tx = Prisma.TransactionClient;
 export type CopilotActor = { userId: string; sessionId: string };
@@ -98,7 +102,29 @@ function proposalPayload(proposal: Record<string, unknown>, tool: string) {
     description: proposal.description ?? "", priority: proposal.priority ?? 3, dueAt: proposal.dueAt ?? undefined });
   return { artifactType: artifactCreateSchema.parse({ artifactType: proposal.artifactType }).artifactType };
 }
-const keyOf = (tool: string, proposal: Record<string, unknown>) => tool === "create_action" ? `action:${proposal.title}` : `artifact:${proposal.artifactType}`;
+const keyOf = (tool: string, proposal: Record<string, unknown>) => tool === "create_action" ? `action:${proposal.title}` : tool === "generate_artifact" ? `artifact:${proposal.artifactType}` : `calendar:${proposal.connectionId}:${proposal.startAt}:${proposal.title}`;
+
+async function freezeCalendarProposal(tx: Tx, projectId: string, proposal: Record<string, unknown>) {
+  if (!isFeatureEnabled("CALENDAR_EVENT_WRITE_ENABLED", false)) throw new AppError("CALENDAR_WRITE_DISABLED", "外部日历写入未开启", 503);
+  const input = calendarEventProposalSchema.parse({ connectionId: proposal.connectionId, title: proposal.title,
+    description: proposal.description ?? "", startAt: proposal.startAt, endAt: proposal.endAt, timeZone: proposal.timeZone,
+    allDay: proposal.allDay ?? false, recurrence: proposal.recurrence ?? null });
+  const connection = await tx.calendarConnection.findFirst({ where: { id: input.connectionId, projectId, status: "ACTIVE", revokedAt: null } });
+  if (!connection) throw new AppError("CALENDAR_CONNECTION_NOT_FOUND", "日历连接不存在、已撤销或不属于当前项目", 404);
+  if (!connection.scope.split(/\s+/).includes("calendar:calendar") || !connection.scope.split(/\s+/).includes("offline_access"))
+    throw new AppError("CALENDAR_WRITE_SCOPE_MISSING", "该连接没有写入权限，请先重新授权", 409);
+  const baseHash = jsonHash({ projectId, connectionId: connection.id, title: input.title, description: input.description, startAt: input.startAt, endAt: input.endAt,
+    timeZone: input.timeZone, allDay: input.allDay, recurrence: input.recurrence });
+  const operationId = "pm-cal-" + baseHash.slice(0, 32), marker = `PM-CAL-${baseHash.slice(0, 14)}`;
+  const finalDescription = `${input.description}${input.description ? "\n\n" : ""}ProjectMemo 操作标记：${marker}`.slice(0, 500);
+  const payload = { title: input.title, description: finalDescription, startAt: input.startAt, endAt: input.endAt, timeZone: input.timeZone, allDay: input.allDay, recurrence: input.recurrence };
+  const start = Date.parse(input.allDay ? `${input.startAt}T00:00:00Z` : input.startAt), end = Date.parse(input.allDay ? `${input.endAt}T23:59:59Z` : input.endAt);
+  return { tool: "create_calendar_event", operationId, connectionId: connection.id, payload, payloadHash: jsonHash(payload), marker,
+    target: { provider: CALENDAR_PROVIDER, accountId: connection.accountId, accountEmail: connection.accountEmail, accountName: connection.accountName,
+      calendarId: connection.calendarId, calendarSummary: connection.calendarSummary, calendarTimeZone: connection.calendarTimeZone,
+      connectionRevision: connection.revision, authGeneration: connection.authGeneration, scope: connection.scope },
+    effectQuery: { kind: "CALENDAR_EVENT_BY_ID_OR_MARKER", marker, timeMin: new Date(start).toISOString(), timeMax: new Date(end).toISOString() } };
+}
 
 /** Must run in the same transaction that creates its source AgentRun. */
 export async function freezeCopilotProposals(tx: Tx, sourceRunId: string, proposals: ProposedAction[], manifest: SourceManifest) {
@@ -116,7 +142,9 @@ export async function freezeCopilotProposals(tx: Tx, sourceRunId: string, propos
   const seen = new Map<string, string>();
   for (const proposed of proposals) {
     const proposal = proposed as unknown as Record<string, unknown>;
-    const key = keyOf(proposed.kind, proposal), payload = proposalPayload(proposal, proposed.kind);
+    const calendar = proposed.kind === "create_calendar_event";
+    if (calendar && !projectId) throw new AppError("PROJECT_NOT_FOUND", "外部写提案需要项目范围", 409);
+    const key = keyOf(proposed.kind, proposal), payload = calendar ? await freezeCalendarProposal(tx, projectId!, proposal) : proposalPayload(proposal, proposed.kind);
     const proposalHash = jsonHash({ tool: proposed.kind, payload });
     if (seen.has(key)) {
       if (seen.get(key) !== proposalHash) throw new AppError("COPILOT_PROPOSAL_AMBIGUOUS", "同一建议包含冲突内容，请重新提问", 409);
@@ -158,10 +186,13 @@ async function inspectConfirmation(tx: Tx, projectId: string, input: AgentToolCo
   if (trace.supportState !== "SUPPORTED") throw new AppError("EVIDENCE_NOT_SUPPORTED", "证据存在冲突或不足，已阻止写操作", 409);
   const allowed = Array.isArray(result.proposedActions) ? result.proposedActions.map(object) : [];
   const proposed = allowed.find(proposal => proposal.kind === input.tool && (input.tool === "create_action"
-    ? proposal.title === input.payload.title : proposal.artifactType === input.payload.artifactType));
+    ? proposal.title === input.payload.title : input.tool === "create_calendar_event" ? proposal.title === input.payload.title && proposal.startAt === input.payload.startAt
+    : proposal.artifactType === input.payload.artifactType));
   if (!proposed) throw new AppError("UNAPPROVED_TOOL_PROPOSAL", "这个操作不属于该证据回执中的建议", 409);
   const key = keyOf(input.tool, proposed), confirmationHash = jsonHash({ tool: input.tool, payload: input.payload });
   const execution = await tx.copilotToolExecution.findUnique({ where: { sourceRunId_proposalKey: { sourceRunId: run.id, proposalKey: key } } });
+  if (execution?.status === "UNKNOWN") throw new AppError("COPILOT_RESULT_UNKNOWN", "原外部写入结果未知；请核对原结果，不会自动重发", 409);
+  if (execution?.status === "FAILED") throw new AppError("COPILOT_RESULT_FAILED", "原外部写入已确定失败；不会自动重试", 409);
   if (trace.r4Draft === true) {
     if (!await tx.agentMessage.findFirst({ where: { runId: run.id, conversationId: run.conversationId, ownerUserId: actor?.userId } }))
       throw new AppError("PROPOSAL_NOT_PUBLISHED", "这项提案尚未完成发布", 409);
@@ -179,6 +210,8 @@ async function inspectConfirmation(tx: Tx, projectId: string, input: AgentToolCo
   const legacyReceipt = object(object(result.executedProposals)[key]);
   const resultId = execution?.status === "COMMITTED" ? execution.resultId : !execution ? legacyReceipt.resultId : null;
   if (typeof resultId === "string") {
+    if (input.tool === "create_calendar_event") return { replay: { tool: input.tool, result: { id: resultId, externalId: resultId, status: "CREATED" }, alreadyExecuted: true as const },
+      run, result, key, confirmationHash, execution, manifest: null };
     const old = input.tool === "create_action" ? await tx.actionItem.findFirst({ where: { id: resultId, projectId } })
       : await tx.generatedArtifact.findFirst({ where: { id: resultId, projectId } });
     if (!old) throw new AppError("COPILOT_RESULT_MISSING", "原确认结果已不可用，不能重复创建，请查看项目历史", 409);
@@ -193,9 +226,15 @@ async function inspectConfirmation(tx: Tx, projectId: string, input: AgentToolCo
   }
   const parsed = manifestSchema.safeParse(trace.copilotSources);
   if (!execution || !parsed.success) throw new AppError("COPILOT_PROPOSAL_REGENERATE_REQUIRED", "这条旧建议缺少可校验的来源版本，请重新提问后确认", 409);
-  if (execution.tool !== input.tool || execution.proposalHash !== jsonHash({ tool: input.tool, payload: proposalPayload(proposed, input.tool) }) ||
-    execution.proposalHash !== jsonHash({ tool: execution.tool, payload: execution.proposalJson }) || execution.sourceManifestHash !== jsonHash(parsed.data)) {
+  if (execution.tool !== input.tool || execution.sourceManifestHash !== jsonHash(parsed.data) ||
+    (input.tool !== "create_calendar_event" && execution.proposalHash !== jsonHash({ tool: input.tool, payload: proposalPayload(proposed, input.tool) }))) {
     throw new AppError("COPILOT_PROPOSAL_CHANGED", "建议或来源回执不一致，请重新提问", 409);
+  }
+  if (execution.proposalHash !== jsonHash({ tool: execution.tool, payload: execution.proposalJson })) throw new AppError("COPILOT_PROPOSAL_CHANGED", "建议回执哈希不一致", 409);
+  if (input.tool === "create_calendar_event") {
+    const frozen = object(execution.proposalJson), payload = object(frozen.payload);
+    if (input.payload.title !== payload.title || input.payload.startAt !== payload.startAt || input.payload.endAt !== payload.endAt)
+      throw new AppError("CONFIRMATION_PAYLOAD_CHANGED", "确认内容与冻结提案不一致", 409);
   }
   await assertCopilotSources(tx, projectId, parsed.data, actor, run.id);
   return { replay: null, run, result, key, confirmationHash, execution, manifest: parsed.data };
@@ -212,10 +251,81 @@ async function recordConsumption(tx: Tx, state: Awaited<ReturnType<typeof inspec
   }) } });
 }
 
+async function confirmCopilotCalendarEvent(projectId: string, input: AgentToolConfirmInput, actor?: CopilotActor) {
+  const leaseToken = randomUUID();
+  const reserved = await writeTransaction(input.sourceRunId!, async tx => {
+    const state = await inspectConfirmation(tx, projectId, input, actor);
+    if (state.replay) return { replay: state.replay, frozen: null, connection: null };
+    if (state.execution!.status === "DISPATCHING") throw new AppError("COPILOT_CONFIRMATION_IN_PROGRESS", "这条日历提案正在执行，请稍后查看原结果", 409);
+    if (state.execution!.status !== "PENDING") throw new AppError("COPILOT_PROPOSAL_CHANGED", "这项日历提案已处理", 409);
+    const frozen = object(state.execution!.proposalJson), connectionId = String(frozen.connectionId ?? "");
+    const connection = await tx.calendarConnection.findFirst({ where: { id: connectionId, projectId, status: "ACTIVE", revokedAt: null,
+      ...(actor ? { ownerUserId: actor.userId } : {}) } });
+    if (!connection) throw new AppError("CALENDAR_CONNECTION_REVOKED", "日历连接已撤销或不可访问", 409);
+    if (!connection.scope.split(/\s+/).includes("calendar:calendar")) throw new AppError("CALENDAR_WRITE_SCOPE_MISSING", "连接没有写入权限", 409);
+    const target = object(frozen.target);
+    if (connection.authGeneration !== target.authGeneration || connection.revision !== target.connectionRevision || connection.calendarId !== target.calendarId)
+      throw new AppError("CALENDAR_CONNECTION_CHANGED", "日历连接或资源已变化，请重新预览", 409);
+    await tx.copilotToolExecution.update({ where: { id: state.execution!.id }, data: { status: "DISPATCHING", confirmationHash: state.confirmationHash,
+      leaseToken, leaseUntil: new Date(Date.now() + 120000) } });
+    return { replay: null, frozen, connection };
+  });
+  if (reserved.replay) return reserved.replay;
+  const frozen = object(reserved.frozen), payload = object(frozen.payload) as { title: string; description: string; startAt: string; endAt: string; timeZone: string;
+    allDay: boolean; recurrence: string | null };
+  const target = object(frozen.target) as { calendarId: string; calendarTimeZone: string };
+  const marker = String(frozen.marker ?? "");
+  let externalId: string | null = null, outcome: { ok: boolean; known: boolean; code?: string; message?: string; readback?: unknown };
+  try {
+    const create = async (accessToken: string) => createFeishuCalendarEvent({ accessToken, calendarId: target.calendarId, title: payload.title,
+      description: payload.description, startAt: payload.startAt, endAt: payload.endAt, timeZone: payload.timeZone, allDay: payload.allDay,
+      recurrence: payload.recurrence, idempotencyKey: String(frozen.operationId) }, fetch);
+    let access = await calendarAccessTokenFor(reserved.connection, fetch), created;
+    try { created = await create(access); }
+    catch (error) {
+      if (!(error instanceof AppError) || error.code !== "CALENDAR_TOKEN_EXPIRED") throw error;
+      access = await calendarAccessTokenFor(reserved.connection, fetch, true);
+      created = await create(access);
+    }
+    externalId = created.eventId;
+    const readback = await getFeishuCalendarEvent({ accessToken: access, calendarId: target.calendarId, eventId: created.eventId, timeZone: payload.timeZone }, fetch);
+    const timeOk = payload.allDay ? readback.allDay && readback.startDate === payload.startAt && readback.endDate === payload.endAt
+      : !!readback.startAt && !!readback.endAt && Math.abs(Date.parse(readback.startAt) - Date.parse(payload.startAt)) <= 1000 && Math.abs(Date.parse(readback.endAt) - Date.parse(payload.endAt)) <= 1000;
+    const recurrenceOk = !payload.recurrence || readback.recurrence === payload.recurrence;
+    if (readback.eventId !== created.eventId || readback.title !== payload.title || !readback.description.includes(marker) || !timeOk || !recurrenceOk)
+      outcome = { ok: false, known: false, code: "CALENDAR_EFFECT_MISMATCH", message: "provider 返回对象与冻结 payload 不匹配" };
+    else outcome = { ok: true, known: true, readback };
+  } catch (error) {
+    if (error instanceof AppError && ["CALENDAR_WRITE_REJECTED", "CALENDAR_WRITE_SCOPE_MISSING", "CALENDAR_CONNECTION_REVOKED", "CALENDAR_CONNECTION_CHANGED"].includes(error.code))
+      outcome = { ok: false, known: true, code: error.code, message: error.message };
+    else outcome = { ok: false, known: false, code: error instanceof AppError ? error.code : "CALENDAR_WRITE_UNKNOWN",
+      message: error instanceof AppError ? error.message : "外部日历写入结果未知，不会自动重发" };
+  }
+  const finalized = await writeTransaction(input.sourceRunId!, async tx => {
+    const state = await inspectConfirmation(tx, projectId, input, actor);
+    if (state.replay && outcome.ok) return { failed: false as const, value: state.replay };
+    if (state.execution!.leaseToken !== leaseToken || state.execution!.status !== "DISPATCHING")
+      throw new AppError("COPILOT_CONFIRMATION_CHANGED", "日历写入许可已过期或被接续", 409);
+    if (outcome.ok) {
+      const result = { id: externalId!, externalId, calendarId: target.calendarId, status: "CREATED", readback: outcome.readback };
+      await recordConsumption(tx, state, input.tool, externalId!);
+      await tx.agentRun.update({ where: { id: state.run.id }, data: { resultJson: json({ ...state.result,
+        executedProposals: { ...object(state.result.executedProposals), [state.key]: { tool: input.tool, resultId: externalId, result } } }) } });
+      return { failed: false as const, value: { tool: input.tool, result, alreadyExecuted: false } };
+    }
+    await tx.copilotToolExecution.update({ where: { id: state.execution!.id }, data: { status: outcome.known ? "FAILED" : "UNKNOWN",
+      resultId: externalId, leaseToken: null, leaseUntil: null } });
+    return { failed: true as const, code: outcome.code ?? "CALENDAR_WRITE_UNKNOWN", message: outcome.message ?? "外部日历写入未成功", known: outcome.known };
+  });
+  if (finalized.failed) throw new AppError(finalized.code, finalized.message, finalized.known ? 409 : 503);
+  return finalized.value;
+}
+
 export async function confirmCopilotTool(projectId: string, input: AgentToolConfirmInput, actor?: CopilotActor) {
   if (!input.confirmed) throw new AppError("CONFIRMATION_REQUIRED", "写操作需要你确认后才能执行", 400);
   if (!input.sourceRunId) throw new AppError("TRUST_RECEIPT_REQUIRED", "缺少证据回执，请重新提问后确认", 409);
   const sourceRunId = input.sourceRunId;
+  if (input.tool === "create_calendar_event") return confirmCopilotCalendarEvent(projectId, input, actor);
   if (input.tool === "create_action") {
     const outcome = await writeTransaction(sourceRunId, tx => confirmCopilotActionInTx(tx, projectId, input, actor));
     const stateRefreshPending = await refreshProjectStateAfterMutation(projectId);
@@ -259,9 +369,9 @@ export async function confirmCopilotActionInTx(tx: Tx, projectId: string, input:
   if (input.tool !== "create_action" || !input.confirmed || !input.sourceRunId)
     throw new AppError("CONFIRMATION_REQUIRED", "创建行动需要明确确认", 400);
   const state = await inspectConfirmation(tx, projectId, input, actor);
-  if (state.replay) return state.replay;
+  if (state.replay) return { tool: "create_action" as const, result: state.replay.result as Awaited<ReturnType<typeof createActionInTx>>, alreadyExecuted: true as const };
   const payload = actionCreateSchema.parse(state.execution!.proposalJson);
   const action = await createActionInTx(tx, projectId, payload, `copilot:${input.sourceRunId}:${state.execution!.id}`);
   await recordConsumption(tx, state, input.tool, action.id);
-  return { tool: input.tool, result: action, alreadyExecuted: false };
+  return { tool: "create_action" as const, result: action, alreadyExecuted: false as const };
 }

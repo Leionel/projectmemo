@@ -107,7 +107,7 @@ export const agentChatSchema = z.object({
 });
 
 export const agentToolConfirmSchema = z.object({
-  tool: z.enum(["create_action", "generate_artifact"]),
+  tool: z.enum(["create_action", "generate_artifact", "create_calendar_event"]),
   confirmed: z.boolean(),
   payload: z.record(z.string(), z.unknown()).default({}),
   sourceRunId: z.string().trim().min(1).optional(),

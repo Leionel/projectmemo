@@ -16,7 +16,7 @@ import type { CalendarFetch } from "@/lib/calendar/feishuOAuth";
 
 type Target = { provider: string; accountId: string; accountEmail: string; accountName: string; calendarId: string; calendarSummary: string;
   calendarTimeZone: string; connectionRevision: number; authGeneration: number; scope: string };
-type Payload = { title: string; description: string; startAt: string; endAt: string; timeZone: string };
+type Payload = { title: string; description: string; startAt: string; endAt: string; timeZone: string; allDay: boolean; recurrence: string | null };
 type Proposal = { tool: "create_calendar_event"; toolVersion: "1"; operationId: string; args: Payload & { connectionId: string }; payload: Payload; payloadHash: string;
   target: Target; marker: string; effectQuery: { kind: string; marker: string; timeMin: string; timeMax: string }; readSet: MissionSource[]; expiresAt: string;
   ownerUserId: string; projectId: string; planRevision: number };
@@ -29,25 +29,33 @@ function proposalOf(value: unknown): Proposal {
     throw new AppError("APPROVAL_CHANGED", "日历提案格式无效", 409);
   return proposal as Proposal;
 }
-function matches(eventId: string, payload: Payload, marker: string, readback: { eventId: string; title: string; startAt: string | null; endAt: string | null; description: string }) {
+function matches(eventId: string, payload: Payload, marker: string, readback: { eventId: string; title: string; startAt: string | null; endAt: string | null; description: string;
+  allDay: boolean; startDate: string | null; endDate: string | null; recurrence: string | null }) {
   if (readback.eventId !== eventId) return "IDENTITY_MISMATCH";
   if (readback.title !== payload.title) return "CONTENT_MISMATCH";
   if (!readback.description.includes(marker)) return "MARKER_MISSING";
-  const expectedStart = Date.parse(payload.startAt), expectedEnd = Date.parse(payload.endAt);
-  if (!readback.startAt || !readback.endAt || Math.abs(Date.parse(readback.startAt) - expectedStart) > 1000 || Math.abs(Date.parse(readback.endAt) - expectedEnd) > 1000) return "TIME_MISMATCH";
+  if (payload.allDay) {
+    if (!readback.allDay || readback.startDate !== payload.startAt || readback.endDate !== payload.endAt) return "TIME_MISMATCH";
+  } else {
+    const expectedStart = Date.parse(payload.startAt), expectedEnd = Date.parse(payload.endAt);
+    if (!readback.startAt || !readback.endAt || Math.abs(Date.parse(readback.startAt) - expectedStart) > 1000 || Math.abs(Date.parse(readback.endAt) - expectedEnd) > 1000) return "TIME_MISMATCH";
+  }
+  if (payload.recurrence && readback.recurrence !== payload.recurrence) return "RECURRENCE_MISMATCH";
   return null;
 }
 async function readback(connection: { id: string; projectId: string; ownerUserId: string } & Parameters<typeof calendarAccessTokenFor>[0], proposal: Proposal, externalId: string | null, fetcher: CalendarFetch) {
   const access = await calendarAccessTokenFor(connection, fetcher);
   if (externalId) {
     const result = await getFeishuCalendarEvent({ accessToken: access, calendarId: proposal.target.calendarId, eventId: externalId, timeZone: proposal.payload.timeZone }, fetcher);
-    return { eventId: result.eventId, title: result.title, startAt: result.startAt, endAt: result.endAt, description: result.description };
+    return { eventId: result.eventId, title: result.title, startAt: result.startAt, endAt: result.endAt, description: result.description,
+      allDay: result.allDay, startDate: result.startDate, endDate: result.endDate, recurrence: result.recurrence };
   }
   const page = await readFeishuEvents({ accessToken: access, calendarId: proposal.target.calendarId, timeMin: proposal.effectQuery.timeMin, timeMax: proposal.effectQuery.timeMax,
     maxResults: 50, calendarTimeZone: proposal.target.calendarTimeZone }, fetcher);
   const found = page.events.find(item => item.description.includes(proposal.marker) && item.title === proposal.payload.title);
   if (!found) throw new AppError("CALENDAR_EFFECT_NOT_FOUND", "本次标记的日程尚未找到；最终一致性延迟不能证明未写入", 404);
-  return { eventId: found.eventId, title: found.title, startAt: found.startAt, endAt: found.endAt, description: found.description };
+  return { eventId: found.eventId, title: found.title, startAt: found.startAt, endAt: found.endAt, description: found.description,
+    allDay: found.allDay, startDate: found.startDate, endDate: found.endDate, recurrence: found.recurrence };
 }
 async function finalize(lease: Lease, stepId: string, outcome: Outcome) {
   return db.$transaction(async tx => {
@@ -136,13 +144,13 @@ export async function commitApprovedCalendarEvent(lease: Lease, stepId: string, 
     let created;
     try { created = await createFeishuCalendarEvent({ accessToken: access, calendarId: proposal.target.calendarId, title: proposal.payload.title,
       description: proposal.payload.description, startAt: proposal.payload.startAt, endAt: proposal.payload.endAt, timeZone: proposal.payload.timeZone,
-      idempotencyKey: proposal.operationId }, fetcher); }
+      allDay: proposal.payload.allDay, recurrence: proposal.payload.recurrence, idempotencyKey: proposal.operationId }, fetcher); }
     catch (error) {
       if (error instanceof AppError && error.code === "CALENDAR_TOKEN_EXPIRED") {
         access = await calendarAccessTokenFor(connection, fetcher, true);
         created = await createFeishuCalendarEvent({ accessToken: access, calendarId: proposal.target.calendarId, title: proposal.payload.title,
           description: proposal.payload.description, startAt: proposal.payload.startAt, endAt: proposal.payload.endAt, timeZone: proposal.payload.timeZone,
-          idempotencyKey: proposal.operationId }, fetcher);
+          allDay: proposal.payload.allDay, recurrence: proposal.payload.recurrence, idempotencyKey: proposal.operationId }, fetcher);
       } else throw error;
     }
     await db.$transaction(async tx => {

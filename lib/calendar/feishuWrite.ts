@@ -17,16 +17,18 @@ function failure(status: number, code: number, message: string): never {
 }
 
 /** Feishu v4 create event supports a native idempotency key in the query string; it is unique per app+calendar. */
-export async function createFeishuCalendarEvent(input: { accessToken: string; calendarId: string; title: string; description: string; startAt: string; endAt: string; timeZone: string; idempotencyKey: string },
-  fetcher: CalendarFetch = fetch, signal?: AbortSignal): Promise<CreatedCalendarEvent> {
+export async function createFeishuCalendarEvent(input: { accessToken: string; calendarId: string; title: string; description: string; startAt: string; endAt: string; timeZone: string;
+  allDay?: boolean; recurrence?: string | null; idempotencyKey: string }, fetcher: CalendarFetch = fetch, signal?: AbortSignal): Promise<CreatedCalendarEvent> {
   const startSeconds = Math.floor(Date.parse(input.startAt) / 1000), endSeconds = Math.floor(Date.parse(input.endAt) / 1000);
-  if (!Number.isFinite(startSeconds) || !Number.isFinite(endSeconds)) throw new AppError("CALENDAR_WINDOW_INVALID", "日程时间无效", 422);
+  if (!input.allDay && (!Number.isFinite(startSeconds) || !Number.isFinite(endSeconds))) throw new AppError("CALENDAR_WINDOW_INVALID", "日程时间无效", 422);
   const url = new URL(feishuEndpoints.events(input.calendarId));
   url.searchParams.set("idempotency_key", input.idempotencyKey.slice(0, 64));
   const response = await fetcher(url.href, { method: "POST", redirect: "error", signal: signal ?? AbortSignal.timeout(20000),
     headers: { Authorization: `Bearer ${input.accessToken}`, "Content-Type": "application/json; charset=utf-8", Accept: "application/json" },
-    body: JSON.stringify({ summary: input.title, description: input.description, start_time: { timestamp: String(startSeconds), timezone: input.timeZone },
-      end_time: { timestamp: String(endSeconds), timezone: input.timeZone } }) });
+    body: JSON.stringify({ summary: input.title, description: input.description,
+      start_time: input.allDay ? { date: input.startAt } : { timestamp: String(startSeconds), timezone: input.timeZone },
+      end_time: input.allDay ? { date: input.endAt } : { timestamp: String(endSeconds), timezone: input.timeZone },
+      ...(input.recurrence ? { recurrence: input.recurrence } : {}) }) });
   const parsed = await body(response), code = Number(parsed.code ?? 0);
   if (!response.ok || code !== 0) failure(response.status, code, String(parsed.msg ?? ""));
   const data = parsed.data as { event?: Record<string, unknown> } | undefined, eventId = String(data?.event?.event_id ?? "");

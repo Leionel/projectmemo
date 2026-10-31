@@ -156,12 +156,18 @@ export interface AgentEvidence {
 }
 
 export interface ProposedAction {
-  kind: "create_action" | "generate_artifact";
+  kind: "create_action" | "generate_artifact" | "create_calendar_event";
   label: string;
   title: string;
   description?: string;
   priority?: number;
   artifactType?: ArtifactTypeValue;
+  connectionId?: string;
+  startAt?: string;
+  endAt?: string;
+  timeZone?: string;
+  allDay?: boolean;
+  recurrence?: string | null;
   dueAt?: string;
 }
 

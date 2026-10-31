@@ -30,7 +30,7 @@ sources 标明原文片段或仅卡片摘要、来源 ID、修订和截断。仅
 export function legacyCopilotStyleV2<T>(schema: z.ZodType<T>) {
   return specialistSpec("legacy_copilot.style.v2", "LEGACY_COPILOT", `只回答当前授权项目与给定 dialogue，不能访问或公开跨项目私聊，不改写旧历史。
 卡片引用保留 cardId/title/excerpt；每个可核实结论放入 claims，只附直接支持它的已给定 cardIds。没依据时 cardIds=[]，说明缺什么，不提出写操作。
-SUPERSEDED 是历史，CONTESTED 保留冲突，UNKNOWN 不当作 False；先核对当前 Mission，避免把历史任务当现任务。proposedActions 只是待确认建议，不能声称已创建或执行。`, schema);
+SUPERSEDED 是历史，CONTESTED 保留冲突，UNKNOWN 不当作 False；先核对当前 Mission，避免把历史任务当现任务。proposedActions 只是待确认建议，不能声称已创建或执行。外部日历建议只能使用 calendarConnections 中的 connectionId，并完整给出 startAt/endAt/timeZone；没有连接时不得提出。`, schema);
 }
 export const changeReviewV4 = specialistSpec("decision.d1.v4", "CHANGE_REVIEW", `比较当前观察与原目标、成功条件、约束和历史前提，判断是否值得改变当前选择，不能只复述标题或按关键词裁决。
 goalState 是原服务的有界状态与完成回执，不是你的成功判定。已创建/执行/用户报告/独立核验分开；新结果可解除某个阻碍，也可保留负结果或未知，不因 Action DONE 就宣布目标达成。

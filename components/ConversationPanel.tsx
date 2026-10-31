@@ -14,6 +14,7 @@ import { ConversationWorkCard } from "./ConversationWorkCard";
 import { ConversationAnchorPanel } from "./ConversationAnchorPanel";
 import { ConversationFileGuides, ConversationAnswer } from "./ConversationFileGuides";
 import { ConversationResearchScope, ConversationResearchView } from "./ConversationResearch";
+import { ConversationCalendarComposer } from "./ConversationCalendarComposer";
 import { missionStatusLabels } from "@/lib/mission/presentation";
 import styles from "./ConversationPanel.module.css";
 import { AgentMessageBlocks, supportsAgentPresentation } from "./AgentMessageBlocks";
@@ -51,6 +52,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
   const [showCloudHelp, setShowCloudHelp] = useState(false);
   const [cloudAvailable, setCloudAvailable] = useState(false), [analysisReady, setAnalysisReady] = useState(false);
   const [r4Available, setR4Available] = useState(false), [investigationMode, setInvestigationMode] = useState<"QUICK" | "STANDARD" | "DEEP">("STANDARD");
+  const [calendarWriteAvailable, setCalendarWriteAvailable] = useState(false);
   const [target, setTarget] = useState(selection?.projectId ?? projectId ?? ""), [showPreference, setShowPreference] = useState(false);
   const [workRef, setWorkRef] = useState<ConversationWorkRef | null>(null);
   const generation = useRef(0), pending = useRef<{ text: string; id: string; body: unknown } | null>(null);
@@ -60,8 +62,8 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
   const uiKeys = useRef(new Map<string, { requestId: string; version: number }>());
   useEffect(() => {
     let live = true;
-    void api<{ cloudAvailable: boolean; r4Available?: boolean }>("/api/conversations/capabilities").then(caps => {
-      if (live) { setCloudAvailable(caps.cloudAvailable); setCloud(caps.cloudAvailable); setR4Available(caps.r4Available === true); setAnalysisReady(true); }
+    void api<{ cloudAvailable: boolean; r4Available?: boolean; calendarWriteAvailable?: boolean }>("/api/conversations/capabilities").then(caps => {
+      if (live) { setCloudAvailable(caps.cloudAvailable); setCloud(caps.cloudAvailable); setR4Available(caps.r4Available === true); setCalendarWriteAvailable(caps.calendarWriteAvailable === true); setAnalysisReady(true); }
     }).catch(e => { if (live) setError(e.message); });
     return () => { live = false; };
   }, []);
@@ -292,8 +294,10 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
         {m.proposal && !(supportsAgentPresentation(m) && m.presentation!.blocks.some(b => ["approval", "receipt"].includes(b.semanticType))) && <section className={styles.proposal} aria-label="行动提案">
           <div className={styles.proposalMeta}><span>{m.proposal.resultId ? "已写入原项目" : "待你确认"}</span><span>{view.linkedProjects.find(v => v.id === m.proposal?.projectId)?.title}</span></div>
           <strong>{m.proposal.title}</strong><p>{m.proposal.description}</p>
-          {m.proposal.resultId ? <p>{!m.proposal.tool || m.proposal.tool === "create_action" ? "已创建行动" : "已提交原操作"} · {statusLabel(m.proposal.actionStatus)} <Link className="workspace-link focus-ring" href={conversationHref("/projects/" + m.proposal.projectId + (m.proposal.tool === "adopt_artifact" ? "/artifacts" : !m.proposal.tool || ["create_action", "complete_action"].includes(m.proposal.tool) ? "/actions#action-" + m.proposal.resultId : "/missions?mission=" + m.proposal.resultId), view.id, m.id)}>查看原结果</Link>{(!m.proposal.tool || ["create_action", "complete_action"].includes(m.proposal.tool)) && <button className="workspace-link focus-ring" onClick={() => setWorkRef({ kind: "ACTION", id: m.proposal!.resultId!, projectId: m.proposal!.projectId })}>记录与查看结果</button>}{m.proposal.resultCardId && <span className={styles.receipt}>复盘已保存 · {m.proposal.resultCardId}</span>}</p>
-            : m.proposal.status === "PENDING" ? <div className={styles.actions}><button className="editorial-button focus-ring" disabled={working} onClick={() => void confirm(m)}>{m.proposal.tool === "resume_mission" ? "确认接续原委托" : !m.proposal.tool || m.proposal.tool === "create_action" ? "确认创建行动" : "确认此操作"}</button>
+          {m.proposal.resultId ? (m.proposal.tool === "create_calendar_event"
+            ? <p>已创建飞书日程 · {m.proposal.resultId}；创建后不会自动删除。</p>
+            : <p>{!m.proposal.tool || m.proposal.tool === "create_action" ? "已创建行动" : "已提交原操作"} · {statusLabel(m.proposal.actionStatus)} <Link className="workspace-link focus-ring" href={conversationHref("/projects/" + m.proposal.projectId + (m.proposal.tool === "adopt_artifact" ? "/artifacts" : !m.proposal.tool || ["create_action", "complete_action"].includes(m.proposal.tool) ? "/actions#action-" + m.proposal.resultId : "/missions?mission=" + m.proposal.resultId), view.id, m.id)}>查看原结果</Link>{(!m.proposal.tool || ["create_action", "complete_action"].includes(m.proposal.tool)) && <button className="workspace-link focus-ring" onClick={() => setWorkRef({ kind: "ACTION", id: m.proposal!.resultId!, projectId: m.proposal!.projectId })}>记录与查看结果</button>}{m.proposal.resultCardId && <span className={styles.receipt}>复盘已保存 · {m.proposal.resultCardId}</span>}</p>)
+            : m.proposal.status === "PENDING" ? <div className={styles.actions}><button className="editorial-button focus-ring" disabled={working} onClick={() => void confirm(m)}>{m.proposal.tool === "resume_mission" ? "确认接续原委托" : m.proposal.tool === "create_calendar_event" ? "确认创建飞书日程" : !m.proposal.tool || m.proposal.tool === "create_action" ? "确认创建行动" : "确认此操作"}</button>
               <button className="workspace-tool focus-ring" disabled={working} onClick={() => void confirm(m, true)}>不采用</button></div> : <p>{m.proposal.status === "DECLINED" ? "已不采用" : m.proposal.status === "STALE" ? "方向或依据已变化，请重新预览" : m.proposal.status}</p>}
         </section>}
         {m.role === "ASSISTANT" && !m.restricted && <ConversationResearchView message={m} conversationId={view!.id} version={view!.version} onError={setError} onContinue={value => { setReply(m); setText(value); }}/>}
@@ -305,6 +309,10 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
         {view?.activeTurn?.progress && <button type="button" className="workspace-link focus-ring" disabled={view.activeTurn.progress.phase === "STOPPING"} onClick={() => { const epoch = generation.current; void api<{ conversation: ConversationView }>(`/api/conversations/${view.id}/turns/${view.activeTurn!.id}/stop`, "POST", {}).then(r => { if (epoch === generation.current) setView(r.conversation); }).catch(e => { if (epoch === generation.current) setError(e.message); }); }}>停止本轮调查</button>}</div>}
     </div>
     {error && <p role="alert" className={styles.error}>{error} {view && <button className="workspace-link focus-ring" onClick={() => void load(view.id, generation.current).catch(e => setError(e.message))}>读取原状态</button>}</p>}
+    {view && target && calendarWriteAvailable && <div className={styles.calendarBar}>
+      <ConversationCalendarComposer key={view.id + ":" + target} conversationId={view.id} projectId={target} version={view.version}
+        disabled={working} onError={setError} onCreated={next => { setView(next); onUpdated?.(); }}/>
+    </div>}
     {view && <form className={styles.composer} onSubmit={ask}>
       {reply && <div className={styles.reply}>围绕：{reply.content.slice(0, 55)}<button type="button" className="workspace-link focus-ring" onClick={() => { setReply(null); pending.current = null; }}>取消追问</button></div>}
       <ConversationContinuity key={view.id + ":" + (view.homeProjectId ?? view.focusProjectId)} view={view} onChange={setView} onError={setError} onWork={(kind, id, projectId) => setWorkRef({ kind, id, projectId })}/>

@@ -539,7 +539,7 @@ export function MissionResponsibilityPanel({
             <button
               disabled={busy || !goalDraft.trim()}
               onClick={() => void handleRevise()}
-              className="px-3 py-1.5 bg-[var(--teal)] text-white rounded text-xs font-medium hover:bg-[var(--teal-strong)] disabled:opacity-50"
+              className="px-3 py-1.5 bg-[var(--teal)] text-[var(--paper-strong)] rounded text-xs font-medium hover:bg-[var(--teal-strong)] disabled:opacity-50"
             >
               {busy ? "正在保存..." : pendingPayload ? "核对上次提交结果" : "确认修订（失效原有提案）"}
             </button>

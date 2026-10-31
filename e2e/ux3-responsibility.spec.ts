@@ -15,8 +15,9 @@ test("UX3责任：原页面保存目标与重点、刷新读回；另一端旧�
   try{
     const original=await(await page.request.get(`/api/missions/${f.missionId}/responsibility`,{headers})).json();
     await page.goto(`/projects/${f.projectId}/missions?mission=${f.missionId}`);
+    await page.getByText("委托范围与累计用量",{exact:true}).click();
     await page.getByRole("button",{name:"修订责任范围",exact:true}).click();
-    const panel=page.locator("div").filter({has:page.getByRole("heading",{name:"长期责任与授权合同",exact:true})}).filter({has:page.getByRole("button",{name:"确认修订（失效原有提案）",exact:true})}).last();
+    const panel=page.getByRole("region",{name:"运行与接续",exact:true});
     await panel.locator("textarea").fill("先核对目标设备，保留原结果链");
     await panel.locator('input[type="text"]').fill("先查启动日志");
     const saved=page.waitForResponse(r=>r.url().endsWith(`/missions/${f.missionId}/responsibility`)&&r.request().method()==="PATCH");
@@ -28,6 +29,6 @@ test("UX3责任：原页面保存目标与重点、刷新读回；另一端旧�
     expect(current.responsibility.workingObjective).toBe("先查启动日志");
     const stale=await page.request.patch(`/api/missions/${f.missionId}/responsibility`,{headers,data:{requestId:"stale-other-device",expectedControlVersion:original.responsibility.controlVersion,goal:"旧端目标"}});
     expect(stale.status()).toBe(409);
-    await page.screenshot({path:"evidence/r4-agent-ux/20261030-ux3-review/web-responsibility.png",fullPage:true});
+    await page.screenshot({path:"evidence/r4-ui-quality/20261031/after/web-responsibility-edit.png",fullPage:true});
   }finally{fixture(["remove",f.projectId]);}
 });

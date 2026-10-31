@@ -19,6 +19,14 @@ async function fixture(){
 }
 const response=()=>({status:200,contentType:"application/json",body:{status:"ok",release:"abcdef012345",checked_at:new Date().toISOString(),secret:"SHOULD_NOT_PERSIST"},observedAt:new Date().toISOString()});
 const choice=(id:string)=>async()=>({choice:{kind:"tool" as const,tool:"inspect_deployment",args:{connectionId:id},summary:"检查原环境"},provider:"SCRIPTED_LOCAL",model:"fixture",protocol:"JSON_CHOICE",usage:{inputTokens:1,outputTokens:1}});
+
+test("原HTTP缓存缺少读取时间或返回未来时间时拒绝发布，不将读取时刻补成现在",async()=>{
+  const {u,p,c,m}=await fixture();
+  const {readDeploymentObservation}=await import("@/lib/sensing/deploymentObserver");
+  for(const observedAt of [undefined,"invalid",new Date(Date.now()+60000).toISOString()]){
+    await expect(readDeploymentObservation({userId:u.id,missionId:m.id},p.id,c.id,"STATUS",async(_url,_cost,request)=>({...await request(),observedAt}),async()=>response())).rejects.toMatchObject({code:"DEPLOYMENT_OBSERVATION_TIME_INVALID"});
+  }
+});
 test("原Mission动态选工具、累计HTTP与分层来源：旧release/登录HTML不产生现实完成",async()=>{
   const {u,p,c,m}=await fixture();
   const transport:DeploymentTransport=vi.fn(async url=>url.endsWith("/health")?{...response(),body:{...response().body,release:"oldrelease"}}:{...response(),contentType:"text/html",body:"login"});

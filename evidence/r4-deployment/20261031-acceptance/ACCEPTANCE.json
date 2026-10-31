@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-31",
+  "timezone": "Asia/Singapore",
+  "status": "ENGINEERING_AND_CORE_EMULATOR_JOURNEY_ACCEPTED_WITH_REMAINING_GATES",
+  "baseCommit": "ca94cbf0ae20d57d9455a1998295d0f36ad32805",
+  "branch": "codex/ct7-deployment-observer",
+  "data": "ISOLATED_SQLITE_SYNTHETIC_MODEL_AND_DEPLOYMENT_HTTP_REAL_BROWSER_AND_ARKUI",
+  "validations": {
+    "unit-final": {
+      "exitCode": 0,
+      "log": "unit-final.log",
+      "sha256": "0dd96129b5822e080cee48a8ddd5fa717a28191fa3f7b12dfff68e8f99587db3"
+    },
+    "affected": {
+      "exitCode": 0,
+      "log": "affected.log",
+      "sha256": "cddd88874b626a78c3302cfdfd4315ba82133b1cb359a92e0cfe0f3b169c8f16"
+    },
+    "web-e2e": {
+      "exitCode": 0,
+      "log": "web-e2e.log",
+      "sha256": "0923db526742f28d12c44ec5e7b973cf5d6b4d15aa8e12e759027de5f4d21671"
+    },
+    "web-readback-race": {
+      "exitCode": 0,
+      "log": "web-readback-race.log",
+      "sha256": "e2729ee12cc206d53f53f4acccc5591c419a2bb3d07c5a77be756a17a27bd04d"
+    },
+    "types-readback": {
+      "exitCode": 0,
+      "log": "types-readback.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "lint-readback": {
+      "exitCode": 0,
+      "log": "lint-readback.log",
+      "sha256": "539dfcd0fd1a8a7591e87b682790281238cc45a52fe814e2e526b140ac613535"
+    },
+    "harmony-unit-readback": {
+      "exitCode": 0,
+      "log": "harmony-unit-readback.log",
+      "sha256": "ee6cac21f83faddbd9719f76ee3278dc8016f7f95856b0e2aab57516a9767ba1"
+    },
+    "harmony-review-readback": {
+      "exitCode": 0,
+      "log": "harmony-review-readback.log",
+      "sha256": "3277bf8ed3cdaf3f55ee1656d7e3bbc8113d410c83f5f1a0f424bcf505949d03"
+    },
+    "harmony-device-readback": {
+      "exitCode": 0,
+      "log": "harmony-device-readback.log",
+      "sha256": "defee1269a0d3b7423bb717e365fd64b621f9ae1fcd9f36512e1914df0c66fa2"
+    },
+    "native-verify": {
+      "exitCode": 0,
+      "log": "native-verify.log",
+      "sha256": "ac13715c3afc26608878e37ae6defc319559322a12e24006875665a2d18143a4"
+    },
+    "harmony-device-layout": {
+      "exitCode": 0,
+      "log": "harmony-device-layout.log",
+      "sha256": "014f276d088d299614aca1a7d1aa59b40dec2b817f1af5b8e954fe5b830977b9"
+    },
+    "harmony-review-layout": {
+      "exitCode": 0,
+      "log": "harmony-review-layout.log",
+      "sha256": "1344ee9caa0d06e30f7dbddc23f1e863c66536388ebed8b4119cfb79919c4f82"
+    },
+    "lint-affected-final": {
+      "exitCode": 0,
+      "log": "lint-affected-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "counts": {
+    "unitFiles": 167,
+    "unitTests": 1272,
+    "affectedTests": 11,
+    "webFull": {
+      "startTime": "2026-10-31T02:12:09.282Z",
+      "duration": 143569.48200000002,
+      "expected": 31,
+      "skipped": 2,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "webAffected": {
+      "startTime": "2026-10-31T02:36:37.685Z",
+      "duration": 18051.762000000002,
+      "expected": 4,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "harmonyTests": 88
+  },
+  "fixes": [
+    "Semantic themes, progressive grant form and visible native context entry",
+    "Native row keys bind revision and observation source",
+    "Both clients fence late polling and force readback after mutations",
+    "Missing, invalid or future original observation time is rejected",
+    "192.88.99.0/24 address range is denied"
+  ],
+  "native": {
+    "device": "127.0.0.1:5555",
+    "bundle": "xyz.luojiatutor.projectmemo.ct7acceptance",
+    "backend": "http://127.0.0.1:4401",
+    "login": "MANUAL_BY_USER",
+    "installationAndCoreJourney": "PASS",
+    "revocationAndOriginalReceipts": {
+      "revoked": true,
+      "revisionAdvanced": true,
+      "originalDiscussionCreated": true,
+      "productionTouched": false
+    },
+    "deviceHapSha256": "4aacbd046a68b2e142d11aa70fbbbbdea27df680877c842c520d33d7dcee6a71",
+    "normalUnsignedHapSha256": "45fbcc3df0225a72f8ae43018cb86e1621983ac04f84fc324932f5f55c8caacf",
+    "temporaryBuildConfigRestored": true,
+    "fullUiAcceptance": "PARTIAL",
+    "coreBehaviorPackageSha256": "6af557cda7ed883ad295ab27a6ce613670c9bb96ded4b40fc7260bad4df68d20",
+    "finalLayoutPackageRetested": [
+      "session restore",
+      "visible context entry",
+      "revoked readback",
+      "no investigate action",
+      "top alignment"
+    ]
+  },
+  "webUi": {
+    "viewport390": {
+      "scrollWidth": 390,
+      "innerWidth": 390
+    },
+    "darkTheme": "VISUALLY_CHECKED",
+    "crossDeviceRevocationReadback": "REVOKED_NO_INVESTIGATE_BUTTON",
+    "oldCasDraftRetention": "PASS",
+    "latePollAfterMutation": "PASS"
+  },
+  "scope": {
+    "ct7FullTargetComplete": false,
+    "productionProbe": false,
+    "productionDeployment": false,
+    "realDatabaseMigration": false,
+    "paidModelCalls": false,
+    "externalBusinessWrites": false,
+    "ct8Ct9Merged": false,
+    "masterMerged": false,
+    "pushed": false
+  },
+  "remainingGates": [
+    "Independent deployment pipeline and artifact receipts adapter",
+    "Real TLS transport and real authorized target validation",
+    "Independent live-model quality assessment",
+    "Natural-day delegation campaign",
+    "Physical device and native dark theme, enlarged text, screen reader, frame-time acceptance",
+    "Additional independent lease, scope, approval and UNKNOWN probes"
+  ],
+  "artifacts": {
+    "native-Open.png": "cb34ce142390e523f43a5414df3af041a0aaa1ead41eee7bae51132c26fcce59",
+    "native-VerifyRevoked.png": "cb34ce142390e523f43a5414df3af041a0aaa1ead41eee7bae51132c26fcce59",
+    "native-discussion.png": "80d2832f9038eca05e9d17b49c58f7b6bbf98e155594af6d83cb97da0d2c6810",
+    "ct7-web-desktop.png": "c18711633a62d439d0b8565eda8e5242a72416ff72490ee6ed9f58690f5a5877",
+    "ct7-web-390-form.png": "9ec2d7dc838c27329c59b5af4c7a7dd1953d6c272a4e28286228aa279f583b98",
+    "ct7-web-dark.png": "968f38b0f0fb0ce263f986d689adf0951e877e49cce7085f0a4b1d6ccb291b3d",
+    "ct7-web-revoked.png": "6d834652b6e1e3a4935290057b8f3ccc844914abf94ecef3672549937d276b23",
+    "native-database-receipt.json": "f34748c12149dad017afc7ca47bff90c3ca7c5f8555710a7f258d76524e469ce",
+    "web-e2e-results.json": "cbef0b31a58a5325d5cd5cac5600d139ce50bf2d029d337bc86da01b8fa184c4",
+    "web-readback-race-results.json": "97b8353b90813a838925d5f7228c003119c75070064636aa50cb6c88a7611109"
+  },
+  "sourceHashes": {
+    "R4_DEPLOYMENT_IMPLEMENTATION_NOTES.md": "fb504854a64ea117d39565f055bd1f232ce6377ee80f847b0eb51a069a084018",
+    "components/DeploymentConnectionsCard.tsx": "7c1b9bc866d8dfd1ad12fc83a6b8108fa1c5d3655313b4b52588c47fe6b27f54",
+    "e2e/deployment.spec.ts": "585ec026235dfb7c6436d62e3fd59a7fe157d75936ca5dfaeeb2c9ff6704fe00",
+    "harmonyos/entry/src/main/ets/components/DeploymentConnectionsPanel.ets": "b689487ccd4aafd21334f052e2450b11a0b6c237a9667beca0c86953c8c0baaf",
+    "harmonyos/entry/src/main/ets/models/Deployment.ets": "8969f696b554940d43c2a1c6337a2b34ba3e4701f060baeb4a31171c292dc150",
+    "harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets": "6e2382198be7832220b153815bc859314f1dc2ff045c6b9a08d6185265028af0",
+    "harmonyos/entry/src/main/ets/pages/ProjectHome.ets": "0a18d86e136b664264c02d5f79c0efcb494401bd550b83a5ce331b29c5478fb2",
+    "lib/sensing/deploymentObserver.ts": "6b18bcd227537a7d4eb5bea50c9c5ea5457a0802695cad2a4930b0cadf6c4ea5",
+    "lib/sensing/deploymentTransport.ts": "dbb4857752faba65c98084b571d22570ef9221e6800bb94e82e5d871a1917451",
+    "tests/deploymentRuntime.test.ts": "a36284263e05b0accf73fc0539e744bddc14ec1c7aef49d7a0f9dfb232a2ea85",
+    "tests/deploymentTransport.test.ts": "5d0d01261cc1572a95c7727e4e92257116f7c966ad68863e5164d34dafdc1705",
+    "scripts/ct7-device-fixture.ts": "6ed9ca1f2446e09337868d995ee1028eaf5eaaa990d6464c900d9811b1d6a546",
+    "scripts/ct7-native-acceptance.ps1": "8baf9e15a33d41f839ef1d7232ab1bc23a798d4aec466d46fde136d662cd3625"
+  },
+  "screenshotIntegrityNote": "Early duplicate Revise/Revoke screenshots excluded. Final VerifyRevoked uses a unique remote capture path."
+}

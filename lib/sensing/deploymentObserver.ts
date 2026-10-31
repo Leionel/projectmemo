@@ -41,7 +41,8 @@ export async function readDeploymentObservation(actor:RepositoryActor,projectId:
       return{status:response.status,observedAt:response.observedAt,body:{contentType:response.contentType,payload:log?{text:redactDeploymentLog(lines),hasStructuredLines:Array.isArray(raw.lines)}:healthBody(response.body)}};
     });
     requestCount++;await guard();const wrapped=record(r.body);
-    return{status:r.status,contentType:String(wrapped.contentType??""),body:wrapped.payload,observedAt:r.observedAt??new Date().toISOString()};
+    if(!r.observedAt||!Number.isFinite(Date.parse(r.observedAt))||Date.parse(r.observedAt)>Date.now()+1000)throw new AppError("DEPLOYMENT_OBSERVATION_TIME_INVALID","观察缺少有效的原始读取时间，不能刷新证据有效期",409);
+    return{status:r.status,contentType:String(wrapped.contentType??""),body:wrapped.payload,observedAt:r.observedAt};
   };
   const health=await read(kind==="LOG"?original.config.logPath!:original.config.healthPath,kind==="LOG");
   const userPath=kind==="STATUS"&&original.config.userPath?await read(original.config.userPath):undefined;

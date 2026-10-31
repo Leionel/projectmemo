@@ -21,6 +21,7 @@ import { RepoSignalPanel } from '../components/RepoSignalPanel';
 struct MemoryTimeline {
   @State projectId: string = '';
   @State repoMode: boolean = false;
+  @State contextMode: boolean = false;
   @State cards: KnowledgeCard[] = [];
   @State isLoading: boolean = false;
   @State errorMessage: string = '';
@@ -51,7 +52,8 @@ struct MemoryTimeline {
       return;
     }
     this.projectId = params['projectId'] ?? '';
-    this.repoMode = params['openRepo'] === '1';
+    this.contextMode = params['openContext'] === '1';
+    this.repoMode = params['openRepo'] === '1' || this.contextMode;
     if (this.projectId === '') {
       this.routeError = '页面参数缺失，项目ID无效';
       return;
@@ -685,7 +687,7 @@ struct MemoryTimeline {
   build() {
     Column() {
       PMAppBar({
-        title: this.repoMode ? 'GitHub 仓库' : '记忆',
+        title: this.repoMode ? (this.contextMode ? '项目理解与工具' : 'GitHub 仓库') : '记忆',
         subtitle: '',
         backLabel: '项目',
         showBack: true
@@ -702,11 +704,11 @@ struct MemoryTimeline {
         Scroll() {
           Column({ space: 12 }) {
             AgentMemoryPanel({ projectId: this.projectId })
-            Text('连接公开仓库，查看提交，再选择哪些记录加入项目资料。').fontSize(14).fontColor(PMColors.INK_SECONDARY)
-            RepoSignalPanel({ projectId: this.projectId, initialOpen: true })
-            DeploymentConnectionsPanel({ projectId: this.projectId })
+            if (!this.contextMode) { Text('连接公开仓库，查看提交，再选择哪些记录加入项目资料。').fontSize(14).fontColor(PMColors.INK_SECONDARY) }
+            RepoSignalPanel({ projectId: this.projectId, initialOpen: !this.contextMode })
+            DeploymentConnectionsPanel({ projectId: this.projectId, initialOpen: this.contextMode })
           }.width('100%').padding(16).alignItems(HorizontalAlign.Start)
-        }.layoutWeight(1).width('100%')
+        }.layoutWeight(1).width('100%').align(Alignment.TopStart)
       } else if (this.isLoading) {
         LoadingStateView({ message: '加载记忆脉络...' })
       } else if (this.errorMessage !== '') {

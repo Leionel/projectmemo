@@ -8,7 +8,7 @@ import {deploymentConfigSchema} from "@/lib/types/deployment";
 import {deploymentTransport,publicDeploymentAddress} from "@/lib/sensing/deploymentTransport";
 beforeEach(()=>vi.resetAllMocks());
 test("部署观察拒绝内网/映射地址与文档网段，但保留公网IPv4/IPv6",()=>{
-  for(const ip of ["127.0.0.1","10.1.2.3","169.254.169.254","100.100.100.200","192.168.1.1","198.18.1.1","203.0.113.1","::1","fc00::1","fe80::1","::ffff:127.0.0.1","2002:7f00:1::1","2001:db8::1","3fff::1"])expect(publicDeploymentAddress(ip),ip).toBe(false);
+  for(const ip of ["127.0.0.1","10.1.2.3","169.254.169.254","100.100.100.200","192.168.1.1","192.88.99.1","198.18.1.1","203.0.113.1","::1","fc00::1","fe80::1","::ffff:127.0.0.1","2002:7f00:1::1","2001:db8::1","3fff::1"])expect(publicDeploymentAddress(ip),ip).toBe(false);
   for(const ip of ["8.8.8.8","1.1.1.1","2606:4700:4700::1111","2001:4860:4860::8888"])expect(publicDeploymentAddress(ip),ip).toBe(true);
 });
 test("DNS混合内网结果在任何HTTP前拒绝；固定已验证解析结果而不是再次查询DNS",async()=>{

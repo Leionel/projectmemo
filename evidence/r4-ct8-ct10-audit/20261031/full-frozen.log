@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-ct8-10-audit
+
+
+ Test Files  175 passed (175)
+      Tests  1382 passed (1382)
+   Start at  15:25:21
+   Duration  413.68s (transform 7.16s, setup 0ms, import 121.68s, tests 235.73s, environment 21.59s)
+

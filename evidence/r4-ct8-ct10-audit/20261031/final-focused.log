@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/browserPolicy.test.ts tests/browserTransport.test.ts tests/browserReader.test.ts tests/browserMission.test.ts tests/browserConversation.test.ts tests/calendarApprovalUi.test.ts tests/calendarEventExtensions.test.ts tests/calendarFeishu.test.ts tests/calendarWrite.test.ts tests/conversationCalendarProposal.test.ts tests/ux3CumulativeBudget.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-ct8-10-audit
+
+
+ Test Files  11 passed (11)
+      Tests  113 passed (113)
+   Start at  15:16:29
+   Duration  57.59s (transform 2.44s, setup 0ms, import 16.35s, tests 37.57s, environment 1.27s)
+

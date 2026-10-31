@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/calendarProviderContract.test.ts tests/calendarEventExtensions.test.ts tests/calendarWrite.test.ts tests/calendarFeishu.test.ts tests/conversationCalendarProposal.test.ts tests/browserReader.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-ct8-10-audit
+
+
+ Test Files  6 passed (6)
+      Tests  58 passed (58)
+   Start at  15:23:31
+   Duration  47.62s (transform 2.39s, setup 0ms, import 11.78s, tests 34.45s, environment 0ms)
+

@@ -1,0 +1,9 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-ct8-10-audit
+
+ ❯ tests/conversationCalendarProposal.test.ts (11 tests | 1 failed) 2234ms
+   × 只读核对遇到过期token不认领刷新、不消耗原旋转凭据 135ms

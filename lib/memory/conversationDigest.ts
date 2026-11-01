@@ -10,7 +10,7 @@ import { assertProjectInputReadSet, type ProjectInputRef } from "./inputReadSet"
 import { recordHypothesisUpdates, conversationHypothesisSources, composeHypotheses } from "./hypothesisService";
 
 export async function conversationClaimHeads(tx: Tx, userId: string, projectId: string, conversationId: string) {
-  return tx.agentClaim.findMany({ where: { ownerUserId: userId, projectId, missionId: null,
+  return tx.agentClaim.findMany({ where: { ownerUserId: userId, scopeType: "PROJECT", projectId, missionId: null,
     OR: [{ conversationId: null }, { conversationId }] }, select: { id: true, currentRevision: true }, orderBy: { id: "asc" } });
 }
 

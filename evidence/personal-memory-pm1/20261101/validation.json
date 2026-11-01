@@ -1,0 +1,34 @@
+{
+  "slice": "PM-1 account-scope personal memory vertical slice",
+  "worktree": "D:/Projects/hongmen-personal-memory",
+  "branch": "codex/personal-memory-explicit",
+  "baseline": "1c3b6a5",
+  "date": "2026-11-01",
+  "model": "script providers only (UX2/PM1_SYNTHETIC, explicitly labeled in tests); no real-model claims",
+  "database": "isolated temp SQLite per test file via tests/helpers/continuityDatabase.py-style replay; no production or dev database touched; db:setup/demo-reset not used",
+  "commands": [
+    { "cmd": "npx tsc --noEmit", "result": "pass" },
+    { "cmd": "npm run lint", "result": "0 errors (2 pre-existing warnings in tests/ux2CorrectionControls.test.ts)" },
+    { "cmd": "npx vitest run tests/pm1PersonalMemoryScope.test.ts tests/pm1PersonalAdmission.test.ts tests/pm1PersonalConsumption.test.ts tests/ux2MigrationUpgrade.test.ts", "result": "25/25 pass", "log": "pm1-final-tests.log" },
+    { "cmd": "npm test (full regression, serial)", "result": "1415/1418 pass; 3 failures investigated and resolved: 2x CT4 PDF = environment parser path (see document-reader-poppler.log), 1x ux2MigrationUpgrade = migration-set boundary adapted for the PM-1 migration", "log": "full-regression.log" },
+    { "cmd": "PDFINFO_PATH/PDFTOTEXT_PATH=texlive poppler npx vitest run tests/documentReader.test.ts", "result": "8/8 pass", "log": "document-reader-poppler.log", "note": "Git Bash PATH resolves a broken mingw64 pdftotext; texlive 2024 poppler works. Parser path should be recorded in ops config." },
+    { "cmd": "npm run harmony:test", "result": "90/90 pass", "log": "harmony-test.log" },
+    { "cmd": "npm run harmony:build", "result": "BUILD SUCCESSFUL (page ArkTS actually compiled; PersonalMemoryPage + service included)", "log": "harmony-build.log" },
+    { "cmd": "npm run build (web)", "result": "pass; /settings/memory dynamic route compiled", "log": "web-build.log" }
+  ],
+  "gates": {
+    "unitAndIntegration": "pass",
+    "typecheck": "pass",
+    "lint": "pass",
+    "webBuild": "pass",
+    "harmonyUnitTest": "pass",
+    "harmonyHapBuild": "pass",
+    "deviceAcceptance": "NOT RUN - no emulator/device connected to this worktree during the slice; HAP hash not treated as device acceptance",
+    "realModelAcceptance": "NOT RUN - script providers only; per roadmap this is a separate gate"
+  },
+  "notes": [
+    "First build attempt failed with Turbopack because worktree node_modules was a junction to the main repo; replaced with a real npm install, second build passed.",
+    "First harmony:test failed because the fresh worktree lacked oh_modules; ohpm install resolved it.",
+    "UX2 upgrade test migration-set boundary extended to include the pm1_ migration (old baseline stays pre-UX2); test intent unchanged."
+  ]
+}

@@ -5,7 +5,7 @@ import type { DirectiveScope } from "@/lib/types/continuity";
 /** No directiveService import: effective cognition is consumed by the original continuity clock. */
 export async function claimControlState(userId: string, scope: DirectiveScope, tx: Tx = db, now = new Date()) {
   const events = await tx.agentClaimEvent.findMany({ where: { ownerUserId: userId, controlSeq: { not: null }, claim: {
-    ownerUserId: userId, projectId: scope.projectId,
+    ownerUserId: userId, scopeType: "PROJECT", projectId: scope.projectId,
     AND: [{ OR: [{ conversationId: null }, ...(scope.conversationId ? [{ conversationId: scope.conversationId }] : [])] },
       { OR: [{ missionId: null }, ...(scope.missionId ? [{ missionId: scope.missionId }] : [])] }],
   } }, orderBy: { controlSeq: "asc" }, include: { claim: true } });

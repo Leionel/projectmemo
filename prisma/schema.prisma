@@ -1027,6 +1027,8 @@ model User {
   security     AccountSecurity?
   accountTokens AccountToken[]
   cloudUsage   AccountCloudUsage[]
+  memoryPolicy UserMemoryPolicy?
+  memoryControlReceipts UserMemoryControlReceipt[]
 
   @@index([username])
 }
@@ -1116,6 +1118,9 @@ model ProjectMembership {
   projectId String
   role      String   @default("OWNER")
   focusMissionId String?
+  // 个人记忆项目例外：INHERIT 跟随账户策略；PROJECT_ONLY 本项目不用个人上下文；ALLOW 显式允许。
+  personalMemoryMode String @default("INHERIT")
+  personalMemoryModeVersion Int @default(0)
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -1543,7 +1548,9 @@ model RepoSignalCommand {
 model AgentClaim {
  id String @id @default(cuid())
  ownerUserId String
- projectId String
+ // PROJECT 行保留原项目归属；ACCOUNT 行 projectId/conversationId/missionId 必须为空（迁移 CHECK 约束）。
+ projectId String?
+ scopeType String @default("PROJECT")
  scopeKey String
  conversationId String?
  missionId String?
@@ -1557,10 +1564,11 @@ model AgentClaim {
  createdAt DateTime @default(now())
  updatedAt DateTime @updatedAt
  owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
- project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
+ project Project? @relation(fields:[projectId],references:[id],onDelete:Cascade)
  events AgentClaimEvent[]
  @@unique([ownerUserId,scopeKey,originKey])
  @@index([ownerUserId,projectId])
+ @@index([ownerUserId,scopeType,statusProjection])
 }
 model AgentClaimEvent {
  id String @id @default(cuid())
@@ -1584,6 +1592,37 @@ model AgentClaimEvent {
  @@unique([claimId,revision])
  @@unique([ownerUserId,requestId])
  @@index([ownerUserId,controlSeq])
+}
+
+/// 账户个人记忆策略：只管"能否被当前上下文使用"与处理许可；不存任何记忆正文。
+model UserMemoryPolicy {
+ id String @id @default(cuid())
+ ownerUserId String @unique
+ useInContextEnabled Boolean @default(true)
+ explicitCaptureEnabled Boolean @default(true)
+ candidateInferenceEnabled Boolean @default(false)
+ cloudProcessingEnabled Boolean @default(false)
+ settingsVersion Int @default(1)
+ privacyRevision Int @default(1)
+ extractionNotBefore DateTime?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
+}
+/// 最小账户控制回执：幂等重放与清除状态；绝不保存被删记忆正文。
+model UserMemoryControlReceipt {
+ id String @id @default(cuid())
+ ownerUserId String
+ requestId String
+ operation String
+ targetClaimId String?
+ payloadHash String
+ resultVersionJson Json
+ purgeJson Json
+ createdAt DateTime @default(now())
+ owner User @relation(fields:[ownerUserId],references:[id],onDelete:Cascade)
+ @@unique([ownerUserId,requestId])
+ @@index([ownerUserId,createdAt])
 }
 
 model AgentContextDigest {

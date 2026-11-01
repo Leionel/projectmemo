@@ -1784,6 +1784,35 @@ struct Index {
 
           Row() {
             Column() {
+              Text('我的记忆')
+                .fontSize(PMFontSize.BODY)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+              Text('你明确保存的协作偏好与背景；可查看、纠正、暂停或删除')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.INK_SECONDARY)
+                .margin({ top: 2 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+
+            Text('›')
+              .fontSize(20)
+              .fontColor(PMColors.INK_TERTIARY)
+          }
+          .width('100%')
+          .height(52)
+          .alignItems(VerticalAlign.Center)
+          .clickEffect(PMInteraction.PRESS_EFFECT)
+          .onClick(() => {
+            router.pushUrl({ url: 'pages/PersonalMemoryPage' });
+          })
+          .accessibilityText('打开我的记忆，管理个人协作偏好与背景')
+
+          Divider().color(PMColors.BORDER_SUBTLE)
+
+          Row() {
+            Column() {
               Text('退出登录')
                 .fontSize(PMFontSize.BODY)
                 .fontWeight(FontWeight.Medium)

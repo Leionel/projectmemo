@@ -17,7 +17,7 @@ async function claimTextReadable(userId: string, projectId: string, claim: { id:
 
 export async function readClaimSourceText(userId: string, projectId: string, kind: string, id: string, tx: Tx = db, depth = 0): Promise<string | undefined> {
   if (kind === "CLAIM") {
-    const claim = await tx.agentClaim.findFirst({ where: { id, projectId, ownerUserId: userId } });
+    const claim = await tx.agentClaim.findFirst({ where: { id, projectId, ownerUserId: userId, scopeType: "PROJECT" } });
     if (!claim || !await claimTextReadable(userId, projectId, claim, tx, depth)) return undefined;
     return claim.canonicalStatement;
   }

@@ -77,7 +77,7 @@ export async function readClaimCorrections(actor: ConversationActor, projectId: 
     const view = await effectiveContinuity(actor.userId, scope, tx);
     const corrections: typeof state.corrections = [];
     for (const correction of state.corrections) {
-      const claim = await tx.agentClaim.findFirst({ where: { id: correction.claimId, projectId, ownerUserId: actor.userId } });
+      const claim = await tx.agentClaim.findFirst({ where: { id: correction.claimId, projectId, ownerUserId: actor.userId, scopeType: "PROJECT" } });
       if (claim && await readClaimSourceText(actor.userId, projectId, "CLAIM", claim.id, tx) !== undefined) corrections.push(correction);
     }
     return { ...state, corrections, ownerUserId: actor.userId, seq: view.seq, reusePolicyHash: view.reusePolicyHash, nextBoundary: view.nextBoundary };

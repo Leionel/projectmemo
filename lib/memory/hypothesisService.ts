@@ -42,7 +42,7 @@ export async function recordHypothesisUpdates(tx: Tx, root: CognitiveRoot, updat
     const update = hypothesisUpdateSchema.parse(raw), requestId = `model:${root.kind}:${root.id}:${index}`, payloadHash = jsonHash(update);
     const replay = await tx.agentClaimEvent.findUnique({ where: { ownerUserId_requestId: { ownerUserId: root.userId, requestId } } });
     if (replay) { if (replay.payloadHash !== payloadHash) throw new AppError("REQUEST_CONFLICT", "原判断回执与本次内容不同", 409); changed.push(replay.claimId); continue; }
-    let claim = update.claimId ? await tx.agentClaim.findFirst({ where: { id: update.claimId, ownerUserId: root.userId, projectId: root.projectId, kind: "HYPOTHESIS" } }) : null;
+    let claim = update.claimId ? await tx.agentClaim.findFirst({ where: { id: update.claimId, ownerUserId: root.userId, scopeType: "PROJECT", projectId: root.projectId, kind: "HYPOTHESIS" } }) : null;
     if (update.claimId && (!claim || claim.currentRevision !== update.expectedRevision)) throw new AppError("COGNITIVE_RECOORDINATE", "原推测已更新，需要重读后继续", 409);
     if (claim) {
       const prior = (await readHypotheses(root.userId, root.projectId, tx, [claim.id])).items[0];
@@ -91,7 +91,7 @@ export async function recordHypothesisUpdates(tx: Tx, root: CognitiveRoot, updat
 export async function readHypotheses(userId: string, projectId: string, tx: Tx = db, ids?: string[]) {
   const member = await tx.projectMembership.findUnique({ where: { userId_projectId: { userId, projectId } } });
   if (!member) throw new AppError("PROJECT_NOT_FOUND", "项目不存在或不可访问", 404);
-  const claims = await tx.agentClaim.findMany({ where: { ownerUserId: userId, projectId, kind: "HYPOTHESIS", ...(ids ? { id: { in: ids.slice(0, 16) } } : {}) },
+  const claims = await tx.agentClaim.findMany({ where: { ownerUserId: userId, scopeType: "PROJECT", projectId, kind: "HYPOTHESIS", ...(ids ? { id: { in: ids.slice(0, 16) } } : {}) },
     orderBy: { updatedAt: "desc" }, take: 17 });
   const items = [];
   for (const claim of claims.slice(0, 16)) {

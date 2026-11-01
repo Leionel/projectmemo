@@ -21,6 +21,7 @@ import { AppError } from "@/lib/api";
 import { missionStrategyV2 } from "@/lib/agent/specialistPrompts";
 import { chooseNext, type DecisionProvider } from "./modelAdapter";
 import { buildContext } from "./contextBuilder";
+import { assertPersonalMemoryReadSet } from "@/lib/memory/userMemoryPolicy";
 import { choiceSchema, json, jsonHash, MISSION_PROTOCOL_SCHEMA_VERSION, type Decision, type Source } from "./contracts";
 import { event, lock, validateSources } from "./repository";
 import { claimMission, fenced, release, renew, reserve, settleUsage, type Lease } from "./runtimeStore";
@@ -86,15 +87,18 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    const constraints=m.constraintsJson as {llmContextApproved?:boolean;costCeiling?:{amount:number}|null};
    if(!options.provider&&!constraints.llmContextApproved)throw new AppError("LLM_CONTEXT_NOT_APPROVED","请先确认云模型使用本委托上下文的范围",409);
    if(!options.provider&&constraints.costCeiling)throw new AppError("COST_POLICY_REQUIRED","金额上限尚无法自动换算，需确认调用额度或使用不计费模式",409);
-   const context=await buildContext(m,tools);contextManifest=missionContextManifest(context,m);
+   const context=await buildContext(m,tools,{remoteProcessing:!options.provider});contextManifest=missionContextManifest(context,m);
    const built=JSON.parse(context) as { sourceInput: { projectId: string; revision: number; role: string }; hypotheses?: { readSet?: { claimId: string; projectId: string; revision: number; validityHash: string }[] };
-     experienceReadSet?: ExperienceReadRef[]; experienceAdvisories?: Array<{ id: string; version: number; contentHash: string }> };
+     experienceReadSet?: ExperienceReadRef[]; experienceAdvisories?: Array<{ id: string; version: number; contentHash: string }>;
+     personalMemoryReadSet?: unknown };
    const sourceRevisionReadSet=[built.sourceInput];
    const cognitiveReadSet=built.hypotheses?.readSet??[];
    const experienceReadSet=built.experienceReadSet??[];
    await assertProjectInputReadSet(m.ownerUserId,sourceRevisionReadSet);
    await assertCognitiveReadSet(m.ownerUserId,cognitiveReadSet);
    await assertExperienceReadSet(m.ownerUserId,experienceReadSet);
+   const personalMemoryReadSet=built.personalMemoryReadSet??null;
+   await assertPersonalMemoryReadSet(m.ownerUserId,personalMemoryReadSet);
    phase="DECISION";await reserve(lease,"models",undefined,decisionTokenLimit(m.lastErrorJson));const started=Date.now();
    const decision=await (async()=>{try{if(!options.provider)await reserveCloudCall(m.projectId);return await (options.provider??chooseNext)(context,tools);}catch(error){
     await settleFailed("models",started,error instanceof ModelProtocolError?error.metadata.usage:undefined);
@@ -120,6 +124,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
     await assertProjectInputReadSet(m.ownerUserId,sourceRevisionReadSet,tx);
     await assertCognitiveReadSet(m.ownerUserId,cognitiveReadSet,tx);
     await assertExperienceReadSet(m.ownerUserId,experienceReadSet,tx);
+    await assertPersonalMemoryReadSet(m.ownerUserId,personalMemoryReadSet,tx);
     await tx.agentMission.update({where:{id:m.id},data:{lastErrorJson:Prisma.DbNull}});
     const run=await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"SUCCESS",provider:decision.provider,trace:json({missionId:m.id,phase:"DECISION",model:decision.model,protocol:decision.protocol,prompt:decision.prompt??null,usage:decision.usage,serialization:decision.serialization,contextManifest}),resultJson:json({kind:choice.kind}),durationMs:Date.now()-started}});
     if(choice.kind==="ask"){
@@ -137,7 +142,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
     const history=await tx.agentMissionStep.findMany({where:{missionId:m.id,status:"SUCCEEDED",...((current.planJson as {impactGuard?:string}).impactGuard?{planRevision:current.planRevision}:{})},orderBy:{ordinal:"asc"}});const sources=sourcesFrom(history.map(s=>s.resultJson));const inputHash=toolInputHash(choice.tool,args,sources);
     if(history.slice(-2).length===2&&history.slice(-2).every(s=>s.inputHash===inputHash))throw new AppError("NO_PROGRESS","连续调用没有新信息，请调整目标或补充资料",409);
     phase="COMMIT";const last=await tx.agentMissionStep.aggregate({where:{missionId:m.id},_max:{ordinal:true}});
-    const created=await tx.agentMissionStep.create({data:{missionId:m.id,ordinal:(last._max.ordinal??0)+1,planRevision:m.planRevision,toolName:choice.tool,toolVersion:tools[choice.tool].version??"1",canonicalInputJson:json(args),inputHash,readSetJson:json(sources),agentRunId:run.id,providerCallId:decision.callId,protocolJson:{protocol:decision.protocol,schemaVersion:MISSION_PROTOCOL_SCHEMA_VERSION,sourceRevisionReadSet,cognitiveReadSet,experienceReadSet}}});
+    const created=await tx.agentMissionStep.create({data:{missionId:m.id,ordinal:(last._max.ordinal??0)+1,planRevision:m.planRevision,toolName:choice.tool,toolVersion:tools[choice.tool].version??"1",canonicalInputJson:json(args),inputHash,readSetJson:json(sources),agentRunId:run.id,providerCallId:decision.callId,protocolJson:{protocol:decision.protocol,schemaVersion:MISSION_PROTOCOL_SCHEMA_VERSION,sourceRevisionReadSet,cognitiveReadSet,experienceReadSet,personalMemoryReadSet}}});
     await event(tx,m.id,"TOOL_STARTED",{stepId:created.id,tool:choice.tool,summary:choice.summary,phase:"TOOL"});return created;
    });
    if(choice.experienceUse?.length){
@@ -150,7 +155,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
   phase="TOOL";activeStepId=step.id;sourceDecisionRunId=step.agentRunId;const tool=tools[step.toolName];if(!tool)throw new AppError("UNKNOWN_TOOL","该工具版本不可恢复",409);
   const currentMission=await db.agentMission.findUniqueOrThrow({where:{id:m.id}});assertAutomaticTool(currentMission,step.toolName,tool.effects.businessWrite);
   assertToolConstraints(currentMission.constraintsJson,step.toolName,step.canonicalInputJson);
-  const args=tool.schema.parse(step.canonicalInputJson);assertDynamicTool(currentMission,step.toolName,args);await assertExperienceReadSet(m.ownerUserId,record(step.protocolJson).experienceReadSet);await reserve(lease,"tools",step.toolName);const started=Date.now();
+  const args=tool.schema.parse(step.canonicalInputJson);assertDynamicTool(currentMission,step.toolName,args);await assertExperienceReadSet(m.ownerUserId,record(step.protocolJson).experienceReadSet);await assertPersonalMemoryReadSet(m.ownerUserId,record(step.protocolJson).personalMemoryReadSet);await reserve(lease,"tools",step.toolName);const started=Date.now();
   const result=await(async()=>{try{const value=await tool.run({userId:m.ownerUserId,projectId:m.projectId,missionId:m.id},args);if(JSON.stringify(value).length>40000)throw new AppError("TOOL_OUTPUT_LIMIT","工具结果超出任务读取范围",409);return value;}catch(error){await settleFailed("tools",started);throw error;}})();
   await settleUsage(lease,"tools",Date.now()-started);
   let claimChecks:ClaimCheck[]|undefined;
@@ -178,6 +183,7 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
     await assertProjectInputReadSet(m.ownerUserId,record(step!.protocolJson).sourceRevisionReadSet,tx);
     await assertCognitiveReadSet(m.ownerUserId,record(step!.protocolJson).cognitiveReadSet,tx);
     await assertExperienceReadSet(m.ownerUserId,record(step!.protocolJson).experienceReadSet,tx);
+    await assertPersonalMemoryReadSet(m.ownerUserId,record(step!.protocolJson).personalMemoryReadSet,tx);
    }
    if(["compare_experiment_metrics","inspect_experiment_metrics"].includes(step!.toolName))await validateSources(m.projectId,result.sources,tx,m.id);
    for(const source of result.sources.filter(s=>s.document)){if(!await(await import("@/lib/documents/observations")).documentObservationCurrent(m.projectId,{...source,document:source.document!},tx))throw new AppError("SOURCE_CHANGED","文档在读取后发生修订，请重新核对",409);}

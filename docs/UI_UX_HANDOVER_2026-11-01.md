@@ -1,4 +1,4 @@
-# 交接文档 — 问忆程对话 / 焦点 / 委托 / 资料行动 UI 精修（2026-11-01）
+# 交接文档 — 问忆程对话 / 焦点 / 委托 / 资料行动 / Widget UI 精修（2026-11-01）
 
 本文件记录本轮多批次 UI/UX 改造的完成状态、验证结果与一个**未解决的编译阻塞点**，供下一次接手直接继续。
 
@@ -16,7 +16,9 @@
 2. `GlobalMemoryTab()` 内常驻 `TextInput` 搜索框改为：收起态「搜索：xx 清除✕」提示条 + 顶栏放大镜展开（约 1342 行）。
 3. 记忆卡摘要 `.constraintSize({ minHeight: 40 })`（约 1523 行）——解决「记忆 / 随手记录卡片不一样大」。
 
-**已回退**：`Index.ets` 当前保持在 HEAD 基线（可编译），三处改动未包含在本次提交中。接手后建议逐条二分定位触发者（怀疑与 Builder 内 `if` 顶层条件渲染 + 尾部嵌套收尾的组合有关），修复合入即可完成全局记忆页与项目资料页的搜索/卡片统一。
+**已回退**：`Index.ets` 当前保持在 HEAD 基线（可编译），三处改动未包含在提交中。接手后建议**逐条二分**定位触发者（改动 1 顶栏 if 包裹删除 / 改动 2 Builder 内 if 条件渲染芯片 / 改动 3 摘要 minHeight，逐条合入各自构建），修复合入即可完成全局记忆页与项目资料页的搜索/卡片统一。注意两点排查线索：
+- 同期并行会话曾在 `Index.ets` 尾部留下游离 `}`（`.width` 属性悬在 struct 外），已修复为 HEAD 的双组收尾形态——重新合入时不要把该形态当作错误删掉；
+- `npm.cmd run harmony:test` 的 UnitTestArkTS **不编译页面文件**，页面包是否可编译必须以 `npm.cmd run harmony:build` 为准（曾出现 90/90 测试通过但构建失败的情况）。
 
 ## 已完成并验证（`harmony:test` 88/88、`harmony:build` 通过、模拟器实测）
 
@@ -30,10 +32,22 @@
 - `ProjectHome.ets` `getRecentActivities()`：误挂 `@Builder` 导致编译失败 → 移除注解（数据函数）。
 - `WidgetDataService.ets` `formatDeadlineState`：对象字面量类型违反 arkts 规则 → 抽出 `DeadlineState` 接口。
 
+## 提交状态（未推送）
+
+- `1319fc1` feat(ui): unify conversation, focus, mission and materials/action UX across web and harmony（对话/焦点/委托/资料行动多轮精修 + 测试 + E2E 适配 + 截图证据 + 本文档）。
+- `bec5515` feat(harmony-ui): widget card dual-size persistence and overview restructure（并行会话的 Widget 双尺寸持久化、隐私脱敏、截止日语义、卡片跳转路由；ProjectHome 概览三层收敛；本会话修复其 `Index.ets` 尾部游离括号后一并提交）。
+
+## Widget/概览（bec5515，另一会话完成，本会话收尾提交）
+
+- `WidgetCard.ets` 2×2 / 2×4 独立布局分支；`WidgetDataService.ets` 按 formId 持久化尺寸、`safeSanitizeText` 脱敏、`formatDeadlineState` 截止日语义（无虚假倒计时）；`EntryFormAbility.ets` 按 `formDimension` 推送。
+- `Index.ets` 桌面卡片仅带 projectId 时路由到 `pages/ProjectHome`（通知路由 WIP 一并入库）。
+- `ReentryMapping.test.ets` Hypium 用例；`harmony:test` 90/90。
+
 ## 遗留与建议
 
 - `Index.ets` 阻塞点见上；修复后需补截图（全局记忆默认/搜索展开/卡片等高对比）。
 - `tests/documentReader.test.ts` 2 个失败为本机 pdftotext（Git mingw64 版）与测试要求不符，环境基线，与本轮改动无关。
 - 评审环境（review 包连生产后端）下部分只读视图报 HTTP 404（如委托「运行与接续」、纠正面板），按约定本轮未处理。
-- 用户未提交 WIP 备份：`.zcode/Index.ets.user-wip-backup.ets`（含通知路由改动与全局记忆页 WIP，均在可编译基线之外的中间状态）。
+- `Index.ets` 的通知路由改动（仅带 projectId 时打开 ProjectHome）已随 `bec5515` 入库；其记忆页 WIP 的中间状态备份在 `.zcode/Index.ets.user-wip-backup.ets`（含损坏尾部，仅作对照，勿直接覆盖）。
+- 工作树中仍有意未提交：`AGENTS.md`、`harmonyos/build-profile.json5`（review flavor）与 `Constants.ets`（评审包地址）、`next-env.d.ts`、`tsconfig.json`、`docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md`、`components/ProjectHealthCard.tsx`——属评审打包与另一条线内容，提交前需与所有者确认。
 - 截图证据：`evidence/agent-conversation-ux/`（对话、焦点、委托四视图、资料/行动、任务全部轮次）。

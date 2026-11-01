@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { authenticateUser } from "@/lib/auth/guard";
 import { apiError } from "@/lib/api";
-import { commandPersonalMemory, listPersonalMemory, personalEntryDetail, type PersonalCommandInput } from "@/lib/memory/personalMemoryService";
+import { commandPersonalMemory, listPersonalMemory, listPendingCandidates, personalEntryDetail, type PersonalCommandInput } from "@/lib/memory/personalMemoryService";
 import { admitPersonalMemory } from "@/lib/memory/personalAdmission";
 import { readPolicy } from "@/lib/memory/userMemoryPolicy";
 import { db } from "@/lib/db";
@@ -11,7 +11,7 @@ export const runtime = "nodejs";
 
 const commandSchema = z.object({
   requestId: z.string().trim().min(1).max(128),
-  operation: z.enum(["ADD_EXPLICIT", "ADD_FROM_EXPRESSION", "UPDATE", "PAUSE", "RESUME", "WITHDRAW", "DELETE", "DELETE_ALL"]),
+  operation: z.enum(["ADD_EXPLICIT", "ADD_FROM_EXPRESSION", "UPDATE", "PAUSE", "RESUME", "WITHDRAW", "DELETE", "DELETE_ALL", "CONFIRM_CANDIDATE", "REJECT_CANDIDATE"]),
   expectedPolicyVersion: z.number().int().nonnegative().optional(),
   expectedRevision: z.number().int().positive().optional(),
   claimId: z.string().min(1).max(64).optional(),
@@ -19,6 +19,9 @@ const commandSchema = z.object({
   kind: z.string().max(40).optional(),
   topics: z.array(z.string().trim().min(1).max(40)).max(6).optional(),
   expiresAt: z.string().datetime().nullable().optional(),
+  frozenContentHash: z.string().regex(/^[a-f0-9]{64}$/).optional(),
+  confirmedStatement: z.string().max(2000).optional(),
+  useScope: z.object({ mode: z.enum(["ALL", "PROJECTS"]), projectIds: z.array(z.string().max(64)).max(8).optional() }).strict().optional(),
 }).strict();
 
 export async function GET(request: Request) {
@@ -27,6 +30,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const claimId = url.searchParams.get("claimId");
     if (claimId) return NextResponse.json(await personalEntryDetail(user.id, claimId));
+    if (url.searchParams.get("candidates") === "1") return NextResponse.json(await listPendingCandidates(user.id));
     const includeStopped = url.searchParams.get("includeStopped") === "1";
     const list = await listPersonalMemory(user.id, { includeStopped });
     const policy = await readPolicy(user.id);

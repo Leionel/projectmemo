@@ -5,7 +5,7 @@ import { LoaderCircle, Plus, ShieldCheck, Trash2 } from "lucide-react";
 
 type PersonalEntry = {
   claimId: string; kind: string; statement: string; status: string;
-  revision: number; conditions: { topics: string[]; expiresAt: string | null };
+  revision: number; contentHash: string; conditions: { topics: string[]; expiresAt: string | null };
   updatedAt: string;
 };
 
@@ -15,9 +15,12 @@ type Policy = {
   settingsVersion: number; privacyRevision: number;
 } | null;
 
+type Candidate = PersonalEntry & { basis: string };
+
 type Detail = {
   entry: PersonalEntry & { quote: string | null };
   source: { kind: string; description: string; formedAt: string };
+  uses: Array<{ kind: string; id: string; at: string; stage: string }>;
   history: Array<{ revision: number; eventKind: string; at: string; quote: string | null }>;
 };
 
@@ -29,6 +32,10 @@ async function callApi<T>(url: string, init?: RequestInit): Promise<T> {
   const data = await response.json() as T & { error?: { message?: string } };
   if (!response.ok) throw new Error(data.error?.message || "请求未完成，请稍后重试");
   return data;
+}
+
+function newRequestId(prefix: string): string {
+  return prefix + "-" + Date.now() + "-" + Math.floor(Math.random() * 100000);
 }
 
 export function PersonalMemoryManager({ displayName }: { displayName: string }) {
@@ -43,11 +50,17 @@ export function PersonalMemoryManager({ displayName }: { displayName: string }) 
   const [kind, setKind] = useState("PREFERENCE");
   const [topic, setTopic] = useState("");
   const [includeStopped, setIncludeStopped] = useState(false);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [projects, setProjects] = useState<Array<{ id: string; title: string }>>([]);
+  const [candidateBusyId, setCandidateBusyId] = useState("");
+  const [editingId, setEditingId] = useState("");
+  const [editDraft, setEditDraft] = useState("");
 
   const reload = useCallback(async () => {
     try {
       const data = await callApi<{ items: PersonalEntry[]; policy: Policy }>(`/api/me/memory${includeStopped ? "?includeStopped=1" : ""}`);
-      setEntries(data.items); setPolicy(data.policy); setError("");
+      const candidateData = await callApi<{ items: Candidate[] }>("/api/me/memory?candidates=1");
+      setEntries(data.items); setPolicy(data.policy); setCandidates(candidateData.items); setError("");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "读取失败，请稍后重试");
     } finally { setLoading(false); }
@@ -57,7 +70,40 @@ export function PersonalMemoryManager({ displayName }: { displayName: string }) 
     // 挂载后异步拉取；setState 均发生在 await 之后
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void reload();
+    void (async () => {
+      try {
+        const data = await callApi<{ projects?: Array<{ id: string; title: string }> }>("/api/projects");
+        setProjects(data.projects ?? []);
+      } catch { /* 项目列表仅用于“仅本项目”选择；失败时该入口降级为不可用 */ }
+    })();
   }, [reload]);
+
+  async function confirmCandidate(candidate: Candidate, patch: { confirmedStatement?: string; useScope?: { mode: "ALL" | "PROJECTS"; projectIds?: string[] } }, successNotice: string) {
+    if (candidateBusyId !== "") return;
+    setCandidateBusyId(candidate.claimId); setError(""); setNotice("");
+    try {
+      await callApi("/api/me/memory", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requestId: newRequestId("pm-confirm-" + candidate.claimId + "-" + candidate.revision),
+          operation: "CONFIRM_CANDIDATE", claimId: candidate.claimId, expectedRevision: candidate.revision,
+          frozenContentHash: candidate.contentHash, ...patch }) });
+      setNotice(successNotice); setEditingId(""); await reload();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "确认未完成，请稍后重试");
+    } finally { setCandidateBusyId(""); }
+  }
+
+  async function rejectCandidate(candidate: Candidate) {
+    if (candidateBusyId !== "") return;
+    setCandidateBusyId(candidate.claimId); setError(""); setNotice("");
+    try {
+      await callApi("/api/me/memory", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requestId: newRequestId("pm-reject-" + candidate.claimId + "-" + candidate.revision),
+          operation: "REJECT_CANDIDATE", claimId: candidate.claimId, expectedRevision: candidate.revision }) });
+      setNotice("已拒绝；同类依据不变化时不会重复提议。"); await reload();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "操作未完成，请稍后重试");
+    } finally { setCandidateBusyId(""); }
+  }
 
   async function command(input: Record<string, unknown>, successNotice: string) {
     setBusy(true); setError(""); setNotice("");
@@ -80,7 +126,7 @@ export function PersonalMemoryManager({ displayName }: { displayName: string }) 
     setBusy(true); setError(""); setNotice("");
     try {
       await callApi("/api/me/memory/policy", { method: "PATCH", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requestId: `pm-policy-${Date.now()}-${Math.floor(Math.random() * 100000)}`, ...patch }) });
+        body: JSON.stringify({ requestId: newRequestId("pm-policy"), ...patch }) });
       setNotice(label); await reload();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "策略未更新，请稍后重试");
@@ -120,12 +166,12 @@ export function PersonalMemoryManager({ displayName }: { displayName: string }) 
           <input value={topic} onChange={(event) => setTopic(event.target.value)} placeholder="适用主题（可选，如：技术讨论）"
             className="editorial-input min-h-9 w-auto flex-1 px-3 py-1.5 text-sm" aria-label="适用主题" />
           <button type="button" disabled={busy || quote.trim().length === 0}
-            onClick={() => void command({ requestId: `pm-add-${Date.now()}-${Math.floor(Math.random() * 100000)}`, operation: "ADD_EXPLICIT", quote, kind, ...(topic.trim() ? { topics: [topic.trim()] } : {}) }, "已保存，之后的对话与委托会按当前版本使用。")}
+            onClick={() => void command({ requestId: newRequestId("pm-add"), operation: "ADD_EXPLICIT", quote, kind, ...(topic.trim() ? { topics: [topic.trim()] } : {}) }, "已保存，之后的对话与委托会按当前版本使用。")}
             className="focus-ring editorial-button inline-flex items-center gap-1.5 px-4 py-2 text-sm disabled:opacity-50">
             {busy ? <LoaderCircle size={15} className="animate-spin" /> : <Plus size={15} />}保存
           </button>
           <button type="button" disabled={busy || quote.trim().length === 0}
-            onClick={() => void command({ requestId: `pm-admit-${Date.now()}-${Math.floor(Math.random() * 100000)}`, operation: "ADD_FROM_EXPRESSION", quote }, "已按你这句话的范围保存。")}
+            onClick={() => void command({ requestId: newRequestId("pm-admit"), operation: "ADD_FROM_EXPRESSION", quote }, "已按你这句话的范围保存。")}
             className="focus-ring rounded-lg px-3 py-2 text-sm font-bold text-[var(--teal-strong)] transition hover:bg-[var(--teal-pale)] disabled:opacity-50">
             按原话判断并保存
           </button>
@@ -162,13 +208,13 @@ export function PersonalMemoryManager({ displayName }: { displayName: string }) 
                   <div className="flex shrink-0 flex-wrap gap-1.5">
                     <button type="button" onClick={() => void openDetail(entry.claimId)} className="focus-ring rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--navy)] hover:bg-[var(--paper)]">来源与使用</button>
                     {entry.status === "ACTIVE" && (
-                      <button type="button" disabled={busy} onClick={() => void command({ requestId: `pm-pause-${entry.claimId}-${entry.revision}-${Date.now()}`, operation: "PAUSE", claimId: entry.claimId, expectedRevision: entry.revision }, "已暂停使用；内容保留，模型上下文不再使用。")}
+                      <button type="button" disabled={busy} onClick={() => void command({ requestId: newRequestId("pm-pause-" + entry.claimId + "-" + entry.revision), operation: "PAUSE", claimId: entry.claimId, expectedRevision: entry.revision }, "已暂停使用；内容保留，模型上下文不再使用。")}
                         className="focus-ring rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--ink-soft)] hover:bg-[var(--paper-strong)]">暂停</button>)}
                     {entry.status === "PAUSED" && (
-                      <button type="button" disabled={busy} onClick={() => void command({ requestId: `pm-resume-${entry.claimId}-${entry.revision}-${Date.now()}`, operation: "RESUME", claimId: entry.claimId, expectedRevision: entry.revision }, "已恢复使用。")}
+                      <button type="button" disabled={busy} onClick={() => void command({ requestId: newRequestId("pm-resume-" + entry.claimId + "-" + entry.revision), operation: "RESUME", claimId: entry.claimId, expectedRevision: entry.revision }, "已恢复使用。")}
                         className="focus-ring rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--teal-strong)] hover:bg-[var(--teal-pale)]">恢复</button>)}
                     {entry.status !== "DELETED" && (
-                      <button type="button" disabled={busy} onClick={() => { if (confirm("删除这条记忆？正文会被清除，正在进行中的使用会立即停止。")) void command({ requestId: `pm-del-${entry.claimId}-${entry.revision}-${Date.now()}`, operation: "DELETE", claimId: entry.claimId, expectedRevision: entry.revision }, "已删除：先停止使用，正文清除完成前会在详情中标示。"); }}
+                      <button type="button" disabled={busy} onClick={() => { if (confirm("删除这条记忆？正文会被清除，正在进行中的使用会立即停止。")) void command({ requestId: newRequestId("pm-del-" + entry.claimId + "-" + entry.revision), operation: "DELETE", claimId: entry.claimId, expectedRevision: entry.revision }, "已删除：先停止使用，正文清除完成前会在详情中标示。"); }}
                         className="focus-ring inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--brick)] hover:bg-[var(--brick-pale)]"><Trash2 size={12} />删除</button>)}
                   </div>
                 </div>
@@ -191,7 +237,51 @@ export function PersonalMemoryManager({ displayName }: { displayName: string }) 
               <li key={item.revision}>#{item.revision} {item.eventKind} · {new Date(item.at).toLocaleString("zh-CN")}{item.quote ? ` · “${item.quote}”` : ""}</li>
             ))}
           </ul>
-          <p className="mt-3 text-xs leading-5 text-[var(--muted)]">使用记录：生成中的任务会在各自“为什么这样建议”里说明引用了哪条记忆；此处随后展示可核对的引用轨迹。</p>
+          <p className="mt-3 text-xs leading-5 text-[var(--muted)]">使用记录：{detail.uses.length > 0
+            ? `最近 ${detail.uses.length} 次进入任务上下文（首次 ${new Date(detail.uses[0].at).toLocaleString("zh-CN")}）。`
+            : "还没有进入过任务上下文。"}生成中的任务会在各自“为什么这样建议”里说明引用了哪条记忆。</p>
+        </section>
+      )}
+
+      {candidates.length > 0 && (
+        <section className="mt-6">
+          <h2 className="text-sm font-bold text-[var(--ink)]">待确认的理解（{candidates.length}）</h2>
+          <ul className="mt-3 space-y-2">
+            {candidates.map((candidate) => (
+              <li key={candidate.claimId} className="card-surface rounded-xl p-4">
+                <p className="text-sm font-bold leading-6 text-[var(--ink)]">{candidate.statement}</p>
+                <p className="mt-1 text-xs leading-5 text-[var(--muted)]">依据：{candidate.basis}{candidate.conditions.topics.length > 0 && ` · 适用：${candidate.conditions.topics.join("、")}`}</p>
+                {editingId === candidate.claimId && (
+                  <textarea value={editDraft} onChange={(event) => setEditDraft(event.target.value)} rows={2}
+                    className="editorial-input mt-2 w-full text-sm" aria-label="编辑候选表述" />
+                )}
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  <button type="button" disabled={candidateBusyId === candidate.claimId}
+                    onClick={() => void confirmCandidate(candidate, {}, "已按候选范围记住，之后的协作会使用。")}
+                    className="focus-ring rounded-lg bg-[var(--teal-pale)] px-3 py-1.5 text-xs font-bold text-[var(--teal-strong)] disabled:opacity-50">按这个范围记住</button>
+                  {editingId === candidate.claimId ? (
+                    <button type="button" disabled={candidateBusyId === candidate.claimId || editDraft.trim().length === 0}
+                      onClick={() => void confirmCandidate(candidate, { confirmedStatement: editDraft.trim() }, "已按你修改后的表述记住。")}
+                      className="focus-ring rounded-lg px-3 py-1.5 text-xs font-bold text-[var(--navy)] hover:bg-[var(--paper)] disabled:opacity-50">保存修改后的表述</button>
+                  ) : (
+                    <button type="button" onClick={() => { setEditingId(candidate.claimId); setEditDraft(candidate.statement); }}
+                      className="focus-ring rounded-lg px-3 py-1.5 text-xs font-bold text-[var(--navy)] hover:bg-[var(--paper)]">修改后记住</button>
+                  )}
+                  {projects.length > 0 && (
+                    <select aria-label="仅保留在该项目" defaultValue="" disabled={candidateBusyId === candidate.claimId}
+                      onChange={(event) => { if (event.target.value) void confirmCandidate(candidate, { useScope: { mode: "PROJECTS", projectIds: [event.target.value] } }, "已仅在该项目中使用。"); }}
+                      className="editorial-input min-h-8 w-auto px-2 py-1 text-xs">
+                      <option value="">仅保留在…</option>
+                      {projects.map((project) => <option key={project.id} value={project.id}>{project.title}</option>)}
+                    </select>
+                  )}
+                  <button type="button" disabled={candidateBusyId === candidate.claimId}
+                    onClick={() => void rejectCandidate(candidate)}
+                    className="focus-ring rounded-lg px-3 py-1.5 text-xs font-bold text-[var(--ink-soft)] hover:bg-[var(--paper-strong)] disabled:opacity-50">拒绝</button>
+                </div>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 
@@ -214,6 +304,7 @@ export function PersonalMemoryManager({ displayName }: { displayName: string }) 
                 className="mt-1 h-4 w-4 shrink-0" />
             </label>
             <p className="border-t border-[var(--rule)]/60 pt-3 text-xs leading-5 text-[var(--muted)]">候选归纳：{policy.candidateInferenceEnabled ? "已开启" : "默认关闭（首批）"}；删除全部条目后不会自动从旧聊天重建。</p>
+            <p className="text-xs leading-5 text-[var(--muted)]"><a className="focus-ring font-bold text-[var(--teal-strong)] underline" href="/api/me/memory/export">导出我的记忆</a>（区分自述、候选与失效历史；不能用于导入恢复）</p>
           </div>
         ) : <p className="mt-3 text-xs text-[var(--muted)]">首次保存后生成策略。</p>}
       </section>

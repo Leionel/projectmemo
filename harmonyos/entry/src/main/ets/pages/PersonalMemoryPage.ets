@@ -6,6 +6,8 @@ import { LoadingStateView, ErrorStateView, EmptyStateView } from '../components/
 import { TextFormatters } from '../common/TextFormatters';
 import { PersonalMemoryService, PersonalEntry, PersonalMemoryCommandInput, PersonalMemoryPolicyInput,
   PersonalMemoryDetail, personalMemoryErrorMessage } from '../services/PersonalMemoryService';
+import { ProjectService } from '../services/ProjectService';
+import { Project } from '../models/Project';
 
 /**
  * 我的记忆（账户级）：查看、添加、暂停/恢复、删除与使用策略。
@@ -19,6 +21,8 @@ struct PersonalMemoryPage {
   @State error: string = '';
   @State notice: string = '';
   @State entries: PersonalEntry[] = [];
+  @State candidates: PersonalEntry[] = [];
+  @State projects: Project[] = [];
   @State policyUseEnabled: boolean = false;
   @State policyCloudEnabled: boolean = false;
   @State policyVersion: number = 0;
@@ -43,6 +47,8 @@ struct PersonalMemoryPage {
     try {
       const result = await this.service.list(this.showStopped);
       this.entries = result.items;
+      this.candidates = await this.service.listCandidates();
+      this.projects = await new ProjectService().listProjects();
       if (result.policy !== undefined) {
         this.hasPolicy = true;
         this.policyUseEnabled = result.policy.useInContextEnabled;
@@ -177,6 +183,50 @@ struct PersonalMemoryPage {
     return input;
   }
 
+  private async confirmCandidate(entry: PersonalEntry, scopeProjectId: string): Promise<void> {
+    if (this.busy) {
+      return;
+    }
+    this.busy = true;
+    this.error = '';
+    this.notice = '';
+    try {
+      const input = new PersonalMemoryCommandInput();
+      input.requestId = `pm-confirm-${entry.claimId}-${entry.revision}-${Date.now()}`;
+      input.operation = 'CONFIRM_CANDIDATE';
+      input.claimId = entry.claimId;
+      input.expectedRevision = entry.revision;
+      input.frozenContentHash = entry.contentHash;
+      if (scopeProjectId !== '') {
+        input.useScopeMode = 'PROJECTS';
+        input.useScopeProjectIds = [scopeProjectId];
+      }
+      await this.service.command(input);
+      this.notice = scopeProjectId === '' ? '已按候选范围记住，之后的协作会使用。' : '已仅在该项目中使用。';
+      await this.load();
+    } catch (e) {
+      this.error = personalMemoryErrorMessage(e);
+    } finally {
+      this.busy = false;
+    }
+  }
+
+  private async rejectCandidate(entry: PersonalEntry): Promise<void> {
+    if (this.busy) {
+      return;
+    }
+    this.busy = true;
+    try {
+      await this.service.command(this.commandFor(entry, 'REJECT_CANDIDATE'));
+      this.notice = '已拒绝；同类依据不变化时不会重复提议。';
+      await this.load();
+    } catch (e) {
+      this.error = personalMemoryErrorMessage(e);
+    } finally {
+      this.busy = false;
+    }
+  }
+
   @Builder
   private EntryAction(label: string, color: ResourceColor, onRun: () => void) {
     Text(label)
@@ -306,6 +356,70 @@ struct PersonalMemoryPage {
                 ForEach(this.entries, (entry: PersonalEntry) => {
                   this.EntryRow(entry)
                 }, (entry: PersonalEntry) => entry.claimId + ':' + entry.revision.toString())
+              }
+
+              if (this.candidates.length > 0) {
+                Column({ space: PMSpacing.SM }) {
+                  Text(`待确认的理解（${this.candidates.length}）`)
+                    .fontSize(PMFontSize.SECTION_TITLE)
+                    .fontWeight(FontWeight.Bold)
+                    .fontColor(PMColors.INK_PRIMARY)
+                    .width('100%')
+                  ForEach(this.candidates, (candidate: PersonalEntry) => {
+                    Column({ space: PMSpacing.SM }) {
+                      Text(candidate.statement)
+                        .fontSize(PMFontSize.BODY)
+                        .fontWeight(FontWeight.Medium)
+                        .fontColor(PMColors.INK_PRIMARY)
+                        .width('100%')
+                      Text(`依据：${candidate.basis}`)
+                        .fontSize(PMFontSize.CAPTION)
+                        .fontColor(PMColors.INK_TERTIARY)
+                        .width('100%')
+                      Row({ space: PMSpacing.SM }) {
+                        Text('按这个范围记住')
+                          .fontSize(PMFontSize.CAPTION)
+                          .fontWeight(FontWeight.Medium)
+                          .fontColor(PMColors.SURFACE)
+                          .padding({ left: 10, right: 10, top: 6, bottom: 6 })
+                          .backgroundColor(PMColors.BRAND)
+                          .borderRadius(PMRadius.SM)
+                          .clickEffect(PMInteraction.PRESS_EFFECT)
+                          .onClick(() => {
+                            this.confirmCandidate(candidate, '');
+                          })
+                        Select(this.projects.map((project: Project): SelectOption => ({ value: project.title } as SelectOption)))
+                          .value('仅保留在…')
+                          .font({ size: PMFontSize.CAPTION })
+                          .onSelect((index: number) => {
+                            if (index >= 0 && index < this.projects.length) {
+                              this.confirmCandidate(candidate, this.projects[index].id);
+                            }
+                          })
+                        Text('拒绝')
+                          .fontSize(PMFontSize.CAPTION)
+                          .fontWeight(FontWeight.Medium)
+                          .fontColor(PMColors.INK_SECONDARY)
+                          .padding({ left: 10, right: 10, top: 6, bottom: 6 })
+                          .backgroundColor(PMColors.SURFACE_SUBTLE)
+                          .borderRadius(PMRadius.SM)
+                          .clickEffect(PMInteraction.PRESS_EFFECT)
+                          .onClick(() => {
+                            this.rejectCandidate(candidate);
+                          })
+                      }
+                      .width('100%')
+                    }
+                    .width('100%')
+                    .padding(PMSpacing.MD)
+                    .backgroundColor(PMColors.SURFACE)
+                    .borderRadius(PMRadius.MD)
+                    .border({ width: PMCardStyle.BORDER_WIDTH, color: PMColors.BORDER_SUBTLE })
+                    .alignItems(HorizontalAlign.Start)
+                  }, (candidate: PersonalEntry) => candidate.claimId + ':' + candidate.revision.toString())
+                }
+                .width('100%')
+                .alignItems(HorizontalAlign.Start)
               }
 
               // 使用与控制：账户开关只影响个人上下文，不影响项目资料与原任务

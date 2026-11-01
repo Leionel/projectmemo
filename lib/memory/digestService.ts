@@ -47,6 +47,9 @@ export async function publishMissionDigest(tx: Tx, missionId: string, outputId: 
   if (roots.length > 64) throw new AppError("MEMORY_SOURCE_LIMIT", "综合依据超过当前范围，请拆分问题", 422);
   await validateSources(mission.projectId, roots, tx, missionId);
   const scope = { projectId: mission.projectId, missionId }, continuity = await effectiveContinuity(mission.ownerUserId, scope, tx);
+  // PM-2: candidates are recorded in the same fenced transaction as the digest; policy switch decides.
+  const { recordSynthesisCandidates } = await import("./personalCandidates");
+  await recordSynthesisCandidates(tx, mission.ownerUserId, synthesis, { projectId: mission.projectId, missionId }, roots);
   if (continuity.stopped) throw new AppError("DIRECTIVE_STOPPED", "工作已停止，未发布新的综合", 409);
   const heads = await tx.agentClaim.findMany({ where: { ownerUserId: mission.ownerUserId, scopeType: "PROJECT", projectId: mission.projectId,
     conversationId: null, OR: [{ missionId: null }, { missionId }] }, select: { id: true, currentRevision: true }, orderBy: { id: "asc" } });

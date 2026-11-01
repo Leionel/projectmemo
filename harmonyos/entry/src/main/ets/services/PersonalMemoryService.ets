@@ -6,6 +6,8 @@ import { ApiError } from '../models/Project';
 export class PersonalEntry {
   claimId: string = '';
   quote: string = '';
+  basis: string = '';
+  contentHash: string = '';
   kind: string = '';
   statement: string = '';
   status: string = '';
@@ -52,6 +54,10 @@ export class PersonalMemoryCommandInput {
   quote: string | undefined = undefined;
   kind: string | undefined = undefined;
   topics: string[] | undefined = undefined;
+  frozenContentHash: string | undefined = undefined;
+  confirmedStatement: string | undefined = undefined;
+  useScopeMode: string | undefined = undefined;
+  useScopeProjectIds: string[] | undefined = undefined;
 }
 
 export class PersonalMemoryDetail {
@@ -89,6 +95,18 @@ export class PersonalMemoryService {
     return this.client.get<PersonalMemoryListResponse>(path);
   }
 
+  async listCandidates(): Promise<PersonalEntry[]> {
+    const raw = await this.client.get<Record<string, object>>('/api/me/memory?candidates=1');
+    const items = raw['items'] as Array<Record<string, object>>;
+    const result: PersonalEntry[] = [];
+    for (const item of items) {
+      const entry = PersonalMemoryService.parseEntry(item);
+      entry.basis = typeof item['basis'] === 'string' ? item['basis'] as string : '';
+      result.push(entry);
+    }
+    return result;
+  }
+
   async detail(claimId: string): Promise<PersonalMemoryDetail> {
     const raw = await this.client.get<Record<string, object>>(`/api/me/memory?claimId=${claimId}`);
     const detail = new PersonalMemoryDetail();
@@ -118,6 +136,7 @@ export class PersonalMemoryService {
     parsed.status = typeof entry['status'] === 'string' ? entry['status'] as string : '';
     parsed.revision = typeof entry['revision'] === 'number' ? entry['revision'] as number : 0;
     parsed.updatedAt = typeof entry['updatedAt'] === 'string' ? entry['updatedAt'] as string : '';
+    parsed.contentHash = typeof entry['contentHash'] === 'string' ? entry['contentHash'] as string : '';
     const conditions = entry['conditions'] as Record<string, object>;
     const topics = conditions !== undefined && Array.isArray(conditions['topics']) ? conditions['topics'] as Array<object> : [];
     for (const topic of topics) if (typeof topic === 'string') parsed.topics.push(topic);

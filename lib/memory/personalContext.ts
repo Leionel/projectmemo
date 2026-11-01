@@ -63,9 +63,15 @@ export async function resolvePersonalContext(userId: string, input: PersonalCont
   let characters = 0;
   let nextBoundary: string | null = null;
   for (const claim of claims) {
-    const conditions = claim.conditionsJson as { topics?: string[]; expiresAt?: string };
+    const conditions = claim.conditionsJson as { topics?: string[]; expiresAt?: string; useScope?: { mode?: string; projectIds?: string[] } };
     if (!allowedByModes) { omissions.push({ claimId: claim.id, reason: "PROJECT_ONLY" }); continue; }
     if (!["ACTIVE", "PAUSED"].includes(claim.statusProjection)) { omissions.push({ claimId: claim.id, reason: "STATUS_UNAVAILABLE" }); continue; }
+    // 候选确认时的目标范围：仅项目保留的条目不得进入范围外用途（J11/J14 边界）。
+    const useScope = conditions?.useScope;
+    if (useScope?.mode === "PROJECTS") {
+      const allowed = Array.isArray(useScope.projectIds) ? useScope.projectIds : [];
+      if (input.projectIds.some(p => !allowed.includes(p))) { omissions.push({ claimId: claim.id, reason: "PROJECT_ONLY" }); continue; }
+    }
     const expiry = conditions?.expiresAt ? new Date(conditions.expiresAt) : null;
     if (expiry && +expiry <= +now) {
       omissions.push({ claimId: claim.id, reason: "EXPIRED" });

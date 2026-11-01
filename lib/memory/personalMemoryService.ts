@@ -31,17 +31,26 @@ function entryView(claim: {
     conditions: recordConditions(claim.conditionsJson), createdAt: claim.createdAt.toISOString(), updatedAt: claim.updatedAt.toISOString() };
 }
 
-function recordConditions(raw: unknown): { topics: string[]; expiresAt: string | null } {
+function recordConditions(raw: unknown): { topics: string[]; expiresAt: string | null; useScope: { mode: string; projectIds: string[] } } {
   const value = raw && typeof raw === "object" ? raw as Record<string, unknown> : {};
   const topics = Array.isArray(value.topics) ? value.topics.filter((t): t is string => typeof t === "string").slice(0, 6) : [];
   const expiresAt = typeof value.expiresAt === "string" ? value.expiresAt : null;
-  return { topics, expiresAt };
+  const useScopeRaw = value.useScope && typeof value.useScope === "object" ? value.useScope as Record<string, unknown> : {};
+  const useScope = { mode: typeof useScopeRaw.mode === "string" ? useScopeRaw.mode : "ALL",
+    projectIds: Array.isArray(useScopeRaw.projectIds) ? useScopeRaw.projectIds.filter((p): p is string => typeof p === "string") : [] };
+  return { topics, expiresAt, useScope };
 }
 
 export type PersonalCommandInput = {
-  requestId: string; operation: "ADD_EXPLICIT" | "ADD_FROM_EXPRESSION" | "UPDATE" | "PAUSE" | "RESUME" | "WITHDRAW" | "DELETE" | "DELETE_ALL";
+  requestId: string; operation: "ADD_EXPLICIT" | "ADD_FROM_EXPRESSION" | "UPDATE" | "PAUSE" | "RESUME" | "WITHDRAW" | "DELETE" | "DELETE_ALL"
+    | "CONFIRM_CANDIDATE" | "REJECT_CANDIDATE";
   expectedPolicyVersion?: number; expectedRevision?: number;
   claimId?: string; quote?: string; kind?: string; topics?: string[]; expiresAt?: string | null;
+  /** 冻结确认：候选内容 hash + 来源 manifest + 目标范围一起核对，不能只传 confirmed=true。 */
+  frozenContentHash?: string;
+  useScope?: { mode: "ALL" | "PROJECTS"; projectIds?: string[] };
+  /** 编辑后确认：以用户核对过的表述激活，替换候选表述。 */
+  confirmedStatement?: string;
 };
 
 export type PersonalCommandResult = {
@@ -83,6 +92,10 @@ export async function commandPersonalMemory(userId: string, raw: PersonalCommand
   const kind = raw.kind ? (raw.kind as PersonalKind) : undefined;
   if (kind && !PERSONAL_KINDS.includes(kind)) throw new AppError("KIND_INVALID", "不支持的条目类别", 422);
   const quote = raw.quote?.trim();
+  if (raw.operation === "CONFIRM_CANDIDATE" && raw.confirmedStatement !== undefined && raw.confirmedStatement.trim() !== "") {
+    const edited = admitPersonalMemory(raw.confirmedStatement.trim());
+    if (edited.status === "REJECTED_FOR_MEMORY") throw new AppError("MEMORY_REJECTED", edited.reason, 422);
+  }
   if (["ADD_EXPLICIT", "ADD_FROM_EXPRESSION", "UPDATE"].includes(raw.operation)) {
     if (!quote) throw new AppError("QUOTE_REQUIRED", "请提供要记住的原文", 422);
     if (quote.length > 2000) throw new AppError("QUOTE_TOO_LONG", "原文过长，请精简后保存", 422);
@@ -125,6 +138,52 @@ export async function commandPersonalMemory(userId: string, raw: PersonalCommand
       await tx.agentClaimEvent.create({ data: { claimId: created.id, ownerUserId: userId, revision: 1, requestId, payloadHash,
         eventKind: "PERSONAL_ADD", actorKind: "USER", userQuote: quote, targetHash: contentHash(quote!, conditions),
         evidenceManifestJson: [], assessmentJson: json({ admission: origin.admission }) } });
+    } else if (raw.operation === "CONFIRM_CANDIDATE" || raw.operation === "REJECT_CANDIDATE") {
+      const claim = await loadPersonalClaim(tx, userId, raw.claimId!);
+      if (raw.expectedRevision !== undefined && claim.currentRevision !== raw.expectedRevision)
+        throw new AppError("CLAIM_CHANGED", "该候选已在另一端处理，请刷新后操作", 409);
+      if (claim.statusProjection !== "CANDIDATE") throw new AppError("CLAIM_STATE_CHANGED", "该候选已处理或已变化，请刷新后操作", 409);
+      const origin = claim.originJson as { kind?: string; rootIds?: string[]; projectId?: string };
+      if (origin.kind !== "MODEL_CANDIDATE") throw new AppError("CLAIM_STATE_CHANGED", "只有模型归纳的候选走确认流程", 409);
+      const contentNow = personalEntryContentHash(claim);
+      if (raw.operation === "CONFIRM_CANDIDATE") {
+        // 冻结核对：候选内容、策略版本与来源根必须仍是预览时的状态。
+        if (raw.frozenContentHash !== contentNow) throw new AppError("CANDIDATE_CHANGED", "候选内容已变化，请重新预览", 409);
+        const effectiveStatement = raw.confirmedStatement !== undefined && raw.confirmedStatement.trim() !== "" ? raw.confirmedStatement.trim() : claim.canonicalStatement;
+        if (effectiveStatement !== claim.canonicalStatement) {
+          const editedAdmission = admitPersonalMemory(effectiveStatement);
+          if (editedAdmission.status === "REJECTED_FOR_MEMORY" || editedAdmission.status === "NOT_USER_MEMORY_COMMAND")
+            throw new AppError("MEMORY_REJECTED", editedAdmission.reason, 422);
+        }
+        const scopeProjectIds = raw.useScope?.mode === "PROJECTS" ? (raw.useScope.projectIds ?? []).slice(0, 8) : [];
+        const useScope = raw.useScope?.mode === "PROJECTS" ? { mode: "PROJECTS", projectIds: scopeProjectIds } : { mode: "ALL" };
+        if (useScope.mode === "PROJECTS" && scopeProjectIds.length === 0)
+          throw new AppError("SCOPE_REQUIRED", "仅项目保留需要至少一个项目", 422);
+        for (const projectId of scopeProjectIds) {
+          if (!await tx.projectMembership.findUnique({ where: { userId_projectId: { userId, projectId } } }))
+            throw new AppError("PROJECT_NOT_FOUND", "保留范围包含不可访问的项目", 404);
+        }
+        // 来源根复验：项目撤权/删除/来源停用后，候选不得越过原根直接激活。
+        const { sourceUse } = await import("@/lib/continuity/sourcePolicy");
+        for (const rootId of origin.rootIds ?? []) {
+          const rootProjectId = typeof origin.projectId === "string" ? origin.projectId : "";
+          if (!rootProjectId || (await sourceUse(userId, rootProjectId, rootId, tx)).state !== "ALLOWED")
+            throw new AppError("CANDIDATE_SOURCE_UNAVAILABLE", "候选的原来源已不可访问，无法确认；可拒绝或稍后重试", 409);
+        }
+        const nextConditions = { ...recordConditions(claim.conditionsJson), useScope };
+        revision = claim.currentRevision + 1; status = "ACTIVE"; claimId = claim.id;
+        await tx.agentClaimEvent.create({ data: { claimId: claim.id, ownerUserId: userId, revision, requestId, payloadHash,
+          eventKind: "PERSONAL_ACTIVATE", actorKind: "USER", userQuote: effectiveStatement, targetHash: contentHash(effectiveStatement, nextConditions),
+          evidenceManifestJson: json(origin.rootIds ?? []), assessmentJson: json({ useScope }) } });
+        await tx.agentClaim.update({ where: { id: claim.id }, data: { currentRevision: revision, statusProjection: "ACTIVE",
+          canonicalStatement: effectiveStatement, conditionsJson: json(nextConditions) } });
+      } else {
+        revision = claim.currentRevision + 1; status = "REJECTED"; claimId = claim.id;
+        await tx.agentClaimEvent.create({ data: { claimId: claim.id, ownerUserId: userId, revision, requestId, payloadHash,
+          eventKind: "PERSONAL_REJECT", actorKind: "USER", userQuote: null, targetHash: contentNow,
+          evidenceManifestJson: json(origin.rootIds ?? []), assessmentJson: {} } });
+        await tx.agentClaim.update({ where: { id: claim.id }, data: { currentRevision: revision, statusProjection: "REJECTED" } });
+      }
     } else if (raw.operation === "DELETE_ALL") {
       // 清空全部：逐条清除正文并停用；不要求目标条目，提取起点同步推进。
       const rows = await tx.agentClaim.findMany({ where: { ownerUserId: userId, scopeType: "ACCOUNT", statusProjection: { not: "DELETED" } }, select: { id: true } });
@@ -186,14 +245,26 @@ export async function listPersonalMemory(userId: string, filter: { includeStoppe
   return { items: rows.map(row => entryView(row, null)), coverage: { loaded: rows.length, hasMore: rows.length >= 100 } };
 }
 
+/** 待确认列表：仅候选；确认冻结所需的 contentHash 与依据说明一并返回。 */
+export async function listPendingCandidates(userId: string) {
+  const rows = await db.agentClaim.findMany({ where: { ownerUserId: userId, scopeType: "ACCOUNT", statusProjection: "CANDIDATE" },
+    orderBy: { updatedAt: "desc" }, take: 24 });
+  return { items: rows.map(row => ({ ...entryView(row, null), basis: (row.originJson as { basis?: string }).basis ?? "" })) };
+}
+
 export async function personalEntryDetail(userId: string, claimId: string) {
   const claim = await loadPersonalClaim(db, userId, claimId);
   const events = await db.agentClaimEvent.findMany({ where: { claimId: claim.id, ownerUserId: userId }, orderBy: { revision: "asc" } });
   const history = events.map(e => ({ revision: e.revision, eventKind: e.eventKind, at: e.createdAt.toISOString(),
     quote: e.userQuote, actorKind: e.actorKind }));
-  const origin = claim.originJson as { kind?: string; via?: string };
+  const origin = claim.originJson as { kind?: string; via?: string; basis?: string };
+  const { readPersonalMemoryUses } = await import("./personalCandidates");
+  const uses = await readPersonalMemoryUses(userId, claim.id);
   return { entry: entryView(claim, events.find(e => e.eventKind === "PERSONAL_ADD")?.userQuote ?? null),
-    source: { kind: "USER_ENTRY", description: origin.via === "ADD_FROM_EXPRESSION" ? "你在对话或输入中明确提出，按明确范围保存。" : "你在\"我的记忆\"中主动添加。",
+    source: { kind: origin.kind === "MODEL_CANDIDATE" ? "MODEL_CANDIDATE" : "USER_ENTRY",
+      description: origin.kind === "MODEL_CANDIDATE"
+        ? `来自你在项目中的原任务输出归纳（${origin.basis ?? "依据未记录"}）；确认前未参与任何决策。`
+        : origin.via === "ADD_FROM_EXPRESSION" ? "你在对话或输入中明确提出，按明确范围保存。" : "你在\"我的记忆\"中主动添加。",
       formedAt: claim.createdAt.toISOString() },
-    history };
+    uses, history };
 }

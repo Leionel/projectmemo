@@ -48,3 +48,13 @@
 - 主题匹配为子串级（中英文标签），PM-3 的语义召回会替换该排序；不会造成越权（匹配只影响选择，不影响资格）。
 - 删除后的再提取防护：单条删除清除正文 + 事件引文；清空全部推进 `extractionNotBefore`；候选归纳关闭使旧聊天不会进入任何提取管道。导出/向量/夜间整理不在首批，未引入新绕路。
 - 未动生产、未迁移真实库、未开启任何后台任务；`AGENTS.md` 未修改。
+
+## PM-2 增补（同日，同工作树）：候选理解、使用控制与完整管理
+
+- **候选生成**：`memorySynthesis` 合同新增可选 `memoryCandidates`（在原推理输出内产生，不新增模型调用）；`publishMissionDigest`/`publishConversationDigest` 在同一事务内调用 `recordSynthesisCandidates`——账户开关 `candidateInferenceEnabled`（默认关闭）决定是否落库；准入规则二次过滤（凭据/引文拒绝）；`statement+rootIds` 归一化为 originKey，同根同表述（任意状态）不重复提议（拒绝后冷却）。
+- **确认合同**：`CONFIRM_CANDIDATE` 冻结 `expectedRevision + frozenContentHash(=personalEntryContentHash) + 来源根复验（sourceUse）+ useScope`；支持编辑后确认（confirmedStatement 经准入再核对）；`REJECT_CANDIDATE` 置 REJECTED。两端竞争由 revision CAS 裁决（J08）。候选状态永远不进决策上下文（读集与 facet 均排除）。
+- **useScope**：确认时可选 `ALL` 或 `PROJECTS[...]`；`resolvePersonalContext` 对范围外用途按 PROJECT_ONLY 遗漏（J14：新项目不继承）。
+- **使用记录**：Turn `personalMemoryReadSet` / Step `protocolJson` 是权威轨迹；`readPersonalMemoryUses` 有界扫描返回最小指针（kind/id/at/INJECTED），条目详情展示。
+- **导出**：`GET /api/me/memory/export` 区分 USER_STATED/CANDIDATE/状态标记；已删除只剩无正文状态行；文件不可作导入恢复入口。
+- **双端**：Web 候选区（确认/修改后记住/仅本项目/拒绝）+ 导出入口 + 详情使用计数；鸿蒙候选区（按范围记住/仅本项目 Select/拒绝）。同一服务端合同与错误语义。
+- **测试**：`tests/pm2PersonalCandidates.test.ts` 4/4（J05 条件候选不激活+开关关闭零候选+敏感拒绝；J08 竞争只激活一次+冻结核对+同根去重；J23 拒绝冷却；J14 仅本项目范围外不继承+跨账号隔离；J16/17 删除正文不回流+owner 绑定）。回归：ux2MigrationUpgrade 适配迁移集合边界（pm1_ 增量），CT4 PDF 用例需 texlive Poppler 路径（环境记录，见 evidence validation.json）。

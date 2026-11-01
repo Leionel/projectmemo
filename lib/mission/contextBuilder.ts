@@ -154,11 +154,23 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
   // PM-1: account personal context is a bounded advisory facet; it never widens project scope.
   const personal = await resolvePersonalContext(m.ownerUserId, { purpose: "MISSION", projectIds: [m.projectId], missionId: m.id,
     query: m.goal, remoteProcessing: options.remoteProcessing === true, audience: "MISSION_INTERNAL" });
-  const contextWithPersonal = { ...context, personalContext: { items: personal.items, coverage: personal.coverage, processingAllowed: personal.processingAllowed, usagePolicy: personal.usagePolicy }, personalMemoryReadSet: personal.readSet };
+  // PM-3 J25: personal context yields to capacity before hard limits do; the read set keeps
+  // every eligible item (superset of injected) so a trimmed statement can never outlive its dependency.
+  const personalOmittedForBudget: string[] = [];
+  const personalItems = [...personal.items];
+  let contextWithPersonal = { ...context, personalContext: { items: personalItems, coverage: personal.coverage, processingAllowed: personal.processingAllowed, usagePolicy: personal.usagePolicy }, personalMemoryReadSet: personal.readSet };
+  while (JSON.stringify(contextWithPersonal).length > 30000 && personalItems.length > 0) {
+    const dropped = personalItems.pop()!;
+    personalOmittedForBudget.push(dropped.claimId);
+    contextWithPersonal = { ...context, personalContext: { items: personalItems,
+      coverage: { ...personal.coverage, selected: personalItems.length, complete: false },
+      processingAllowed: personal.processingAllowed, usagePolicy: personal.usagePolicy }, personalMemoryReadSet: personal.readSet };
+  }
   const hash = jsonHash(contextWithPersonal);
   if (experienceAdvisories.length) await recordUses(m.id, experienceAdvisories.map(advisory => ({ advisory, experienceId: advisory.id })), hash);
   if (experienceDecisions.length) await recordRetrieval(m, experienceDecisions, hash);
-  return JSON.stringify({ ...contextWithPersonal, experienceAdvisories, experienceReadSet, experienceCoverage, manifest: { excludedStepIds: excluded, unlistedStepCount: Math.max(0, stepCount - stepIndex.length), historyStepCount: stepCount, notLoadedStepCount: stepCount - steps.length,
+  return JSON.stringify({ ...contextWithPersonal, experienceAdvisories, experienceReadSet, experienceCoverage,
+    personalCoverage: { ...personal.coverage, omissions: personal.omissions, omittedForBudget: personalOmittedForBudget, nextBoundary: personal.nextBoundary }, manifest: { excludedStepIds: excluded, unlistedStepCount: Math.max(0, stepCount - stepIndex.length), historyStepCount: stepCount, notLoadedStepCount: stepCount - steps.length,
     historyEventCount: eventCount, includedEventSeqs: [...new Set([...inputs.map(e => e.seq),...fitReviews.map(e=>e.seq)])].sort((a,b)=>a-b), promptVersion: context.promptVersion, source: "MISSION_EVENTS_AND_STEPS", hash,
     omittedCognition: fitted.omitted } });
 }

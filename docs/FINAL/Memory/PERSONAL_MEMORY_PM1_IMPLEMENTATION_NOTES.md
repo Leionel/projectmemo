@@ -58,3 +58,12 @@
 - **导出**：`GET /api/me/memory/export` 区分 USER_STATED/CANDIDATE/状态标记；已删除只剩无正文状态行；文件不可作导入恢复入口。
 - **双端**：Web 候选区（确认/修改后记住/仅本项目/拒绝）+ 导出入口 + 详情使用计数；鸿蒙候选区（按范围记住/仅本项目 Select/拒绝）。同一服务端合同与错误语义。
 - **测试**：`tests/pm2PersonalCandidates.test.ts` 4/4（J05 条件候选不激活+开关关闭零候选+敏感拒绝；J08 竞争只激活一次+冻结核对+同根去重；J23 拒绝冷却；J14 仅本项目范围外不继承+跨账号隔离；J16/17 删除正文不回流+owner 绑定）。回归：ux2MigrationUpgrade 适配迁移集合边界（pm1_ 增量），CT4 PDF 用例需 texlive Poppler 路径（环境记录，见 evidence validation.json）。
+
+## PM-3 增补（同日，同工作树）：长期召回与 Personal × Project Composer
+
+- **资格先于窗口**：个人条目通道从不经过"最近 8 条/16 条"窗口（J06：12 份近期综合噪声 + 90 天前条目仍进上下文）；`resolvePersonalContext` 即共享的 eligibility/selection/manifest 服务，顺序为策略/处理许可 → 状态与 useScope → 时间/条件 → 主题相关 → 预算。
+- **指纹（B.4）**：Mission 上下文 hash 覆盖 `personalMemoryReadSet`——它包含全部资格条目（含因预算未选中的），因此"未选集合变化"同样使指纹失效（测试：新增条目 → hash 变化；条目暂停 → hash 变化）。个人文本与读集同步：读集是注入的超集，被裁剪的正文不会失去依赖（J25）。
+- **预算（B.5）**：个人 facet 上限 6 条/2400 字符（可调初始值，非能力上限）；`personalCoverage.omissions` 逐条暴露 BUDGET/TOPIC_MISMATCH/PROJECT_ONLY 等原因；溢出时个人先让位（`omittedForBudget` 安全网），硬限制/约束/原观察按原循环保留。
+- **J19**：同根多份综合无"支持次数"累计——摘要选择有界、候选身份按 `statement+rootIds` 归一，同根同表述重复归纳不再提议。
+- **语义召回边界（记录遗漏原因）**：主题匹配为子串/词元级，纯语义相关的旧条目召回（如同义改写）属 hybridSearch/向量加速（PM-3 后续，B.6——个人条目不进向量库，J29 的 embedding 许可约束不涉及）；未做，不冒称已具备。
+- **测试**：`tests/pm3LongTermRecall.test.ts` 5/5（J06/J03/J25/J19 + 指纹）；回归 PM-1/PM-2 全部 34 用例通过。真实模型质量与相似度召回未测，另列 Gate。

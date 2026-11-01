@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import type { Tx } from "@/lib/conversation/repository";
-import { json, jsonHash } from "@/lib/mission/contracts";
+import { jsonHash } from "@/lib/mission/contracts";
 
 /**
  * 账户个人记忆策略：一行 per user；读取资格与处理许可的服务端权威。

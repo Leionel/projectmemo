@@ -8,7 +8,11 @@ import { MissionWorkspaceItem, MissionWorkspaceSummary } from '../models/Mission
 import { ApiError } from '../models/Project';
 import { missionStatusLabel } from '../common/MissionContract';
 import { PMColors, PMSpacing, PMRadius } from '../common/DesignTokens';
-import { PMButton, PMStatusPill } from './PMReferencePrimitives';
+import { PMStatusPill } from './PMReferencePrimitives';
+
+interface MissionGroupView { title: string; statuses: string[]; }
+
+/** 项目内委托列表：按「需要回应 / 正在推进 / 暂停或异常 / 已结束」组织，行内保留真实进展与当前所需操作。 */
 @Component
 export struct MissionPanel {
   @Prop projectId: string = '';
@@ -50,34 +54,89 @@ export struct MissionPanel {
   private open(id: string = ''): void {
     router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.projectId, missionId: id } });
   }
-  private visibleItems(): MissionWorkspaceItem[] {
-    const candidates = this.items.filter((item: MissionWorkspaceItem) => item.id !== this.excludedMissionId);
+  private groups(): MissionGroupView[] {
+    return [
+      { title: '需要回应', statuses: ['WAITING_INPUT', 'WAITING_APPROVAL'] },
+      { title: '正在推进', statuses: ['READY', 'RUNNING'] },
+      { title: '暂停或异常', statuses: ['PAUSED', 'FAILED', 'UNKNOWN'] },
+      { title: '已结束', statuses: ['SUCCEEDED', 'CANCELLED', 'OBSOLETE', 'SKIPPED'] },
+    ];
+  }
+  private groupItems(statuses: string[]): MissionWorkspaceItem[] {
+    const base = this.items.filter((item: MissionWorkspaceItem) => item.id !== this.excludedMissionId && statuses.includes(item.status));
     const seen: string[] = [];
-    return candidates.filter((item: MissionWorkspaceItem) => {
+    return base.filter((item: MissionWorkspaceItem) => {
       if (item.status !== 'PAUSED' && item.status !== 'FAILED') return true;
       const key = `${item.status}|${item.attention ?? item.goal}`;
       if (seen.includes(key)) return false;
-      seen.push(key);
-      return true;
-    }).slice(0, this.compact ? 2 : 3);
+      seen.push(key); return true;
+    }).slice(0, this.compact ? 2 : 4);
   }
-  private sameFailureCount(item: MissionWorkspaceItem): number {
-    if (item.status !== 'PAUSED' && item.status !== 'FAILED') return 1;
-    return this.items.filter((other: MissionWorkspaceItem) => other.id !== this.excludedMissionId &&
-      other.status === item.status && (other.attention ?? other.goal) === (item.attention ?? item.goal)).length;
+  private groupCount(statuses: string[]): number {
+    return this.items.filter((item: MissionWorkspaceItem) => item.id !== this.excludedMissionId && statuses.includes(item.status)).length;
+  }
+  private actionLabel(item: MissionWorkspaceItem): string {
+    if (item.workState?.actionLabel) { return item.workState.actionLabel; }
+    if (item.status === 'WAITING_INPUT') { return '补充信息 →'; }
+    if (item.status === 'WAITING_APPROVAL') { return '审阅提案 →'; }
+    if (['SUCCEEDED', 'CANCELLED'].includes(item.status)) { return '查看成果与回执 →'; }
+    return '查看委托详情 →';
+  }
+  private shortTime(at: string | null): string {
+    if (at === null || at === '') { return ''; }
+    const t = Date.parse(at);
+    if (Number.isNaN(t)) { return ''; }
+    const d = new Date(t);
+    return `${d.getMonth() + 1}月${d.getDate()}日`;
+  }
+  @Builder
+  private MissionRow(item: MissionWorkspaceItem) {
+    Column({ space: 8 }) {
+      Row({ space: 8 }) {
+        PMStatusPill({ label: item.workState ? workPhaseLabel(item.workState!.phase) : missionStatusLabel(item.status),
+          tone: item.status === 'FAILED' || item.status === 'PAUSED' ? 'risk' : 'brand' })
+        Blank()
+        if (this.shortTime(item.activityAt) !== '') { Text('更新于 ' + this.shortTime(item.activityAt)).fontSize(11).fontColor(PMColors.INK_TERTIARY) }
+      }.width('100%')
+      Text(item.goal).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
+        .fontSize(15).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY).lineHeight(22)
+      if (item.attention !== null) {
+        Text(item.status === 'FAILED' || item.status === 'PAUSED' ? '执行中断，进入详情查看原因与恢复方式。' : item.attention)
+          .fontSize(13).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
+          .fontColor(item.status === 'FAILED' || item.status === 'PAUSED' ? PMColors.INK_PRIMARY : PMColors.INK_SECONDARY).lineHeight(20)
+      }
+      if (item.activity !== null && item.activity !== '') {
+        Text('最近进展：' + item.activity).fontSize(12).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
+          .fontColor(PMColors.INK_SECONDARY).lineHeight(18)
+      }
+      Row({ space: 10 }) {
+        Text('设为当前关注', ).fontSize(12).fontColor(PMColors.INK_TERTIARY).height(36)
+          .enabled(this.readState === 'fresh' && item.status !== 'SUCCEEDED' && item.status !== 'CANCELLED')
+          .onClick(async () => {
+            try { await new ProjectAgentContextService().focus(this.projectId, item.id); this.error = ''; this.probe(); }
+            catch (e) { this.error = e instanceof ApiError ? e.message : '未能设置关注委托'; }
+          })
+          .accessibilityText('把这条委托设为当前关注')
+        Blank()
+        Text(this.actionLabel(item)).fontSize(13).fontWeight(FontWeight.Medium).fontColor(PMColors.BRAND).height(36)
+          .onClick(() => { this.open(item.id); })
+          .accessibilityText(this.actionLabel(item))
+      }.width('100%')
+    }.width('100%').alignItems(HorizontalAlign.Start).padding(14).backgroundColor(PMColors.SURFACE)
+      .borderRadius(PMRadius.LG).border({ width: 1, color: PMColors.BORDER_SUBTLE })
   }
   build() {
     if (this.available || this.loading || this.error !== '' || !this.compact) {
       Column({ space: PMSpacing.MD }) {
         Row() {
-          Text('长期委托').fontSize(16).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY).layoutWeight(1)
-          Text(this.total > 0 ? `全部 ${this.total} 项 ›` : '管理委托 ›').fontSize(12).fontColor(PMColors.BRAND).height(44)
+          Blank()
+          Text(this.total > 0 ? `全部 ${this.total} 项 ›` : '管理委托 ›').fontSize(12).fontColor(PMColors.BRAND).height(36)
             .onClick(() => { this.open(); }).accessibilityText('管理全部长期委托')
         }.width('100%')
         if (this.loading) { Text('正在读取委托状态…').fontSize(14).fontColor(PMColors.INK_SECONDARY) }
         else if (this.error !== '') {
           Text(this.error).fontSize(14).fontColor(PMColors.RISK)
-          Button('重新读取委托').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).height(44).fontColor(PMColors.BRAND)
+          Button('重新读取委托').type(ButtonType.Normal).height(44).fontSize(13).fontColor(PMColors.BRAND)
             .backgroundColor(PMColors.BRAND_LIGHT).borderRadius(PMRadius.MD)
             .onClick(() => { this.probe(); })
         } else if (!this.available) {
@@ -88,32 +147,18 @@ export struct MissionPanel {
           if (this.items.length === 0) {
             Text('交给忆程一个目标，步骤、草稿和审阅记录会保留。').fontSize(14).fontColor(PMColors.INK_SECONDARY)
           }
-          ForEach(this.visibleItems(), (item: MissionWorkspaceItem) => {
-            Column({ space: 11 }) {
-              Row({ space: 8 }) {
-                PMStatusPill({ label: item.workState ? workPhaseLabel(item.workState!.phase) : missionStatusLabel(item.status), tone: item.status === 'FAILED' || item.status === 'PAUSED' ? 'risk' : 'brand' })
-                if (this.sameFailureCount(item) > 1) { Text(`${this.sameFailureCount(item)} 条同类记录已合并`).fontSize(11).fontColor(PMColors.INK_TERTIARY) }
-              }.width('100%')
-              Text(item.goal).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
-                .fontSize(15).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY).lineHeight(22)
-              if (item.attention !== null) { Text(item.attention).fontSize(13).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).fontColor(PMColors.INK_SECONDARY).lineHeight(20) }
-              if (item.activity !== null) {
-                Column({ space: 4 }) {
-                  Text('最近一次进展').fontSize(11).fontColor(PMColors.INK_TERTIARY)
-                  Text(item.activity).fontSize(13).maxLines(2).fontColor(PMColors.INK_PRIMARY)
-                }.width('100%').padding(12).alignItems(HorizontalAlign.Start).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(12)
-              }
-              Button('设为当前关注').enabled(this.readState === 'fresh').height(44).fontSize(12).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT)
-                .onClick(async () => {
-                  try { await new ProjectAgentContextService().focus(this.projectId, item.id); this.error = ''; this.probe(); }
-                  catch (e) { this.error = e instanceof ApiError ? e.message : '未能设置关注委托'; }
-                })
-              PMButton({ label: item.workState?.actionLabel ?? (item.status === 'WAITING_INPUT' ? '补充信息 →' : item.status === 'WAITING_APPROVAL' ? '审阅行动提案 →' : '查看委托详情 →'),
-                secondary: true, onAction: (): void => { this.open(item.id); } })
-            }.width('100%').alignItems(HorizontalAlign.Start).padding(16).backgroundColor(PMColors.SURFACE)
-              .borderRadius(PMRadius.LG).border({ width: 1, color: PMColors.BORDER_SUBTLE })
-          }, (item: MissionWorkspaceItem) => item.id)
-          if (this.total === 0) { PMButton({ label: '委托一个目标 →', secondary: true, onAction: (): void => { this.open(); } }) }
+          ForEach(this.groups(), (group: MissionGroupView) => {
+            if (this.groupItems(group.statuses).length > 0) {
+              Column({ space: 8 }) {
+                Text(group.title + (this.groupCount(group.statuses) > this.groupItems(group.statuses).length
+                  ? ` · ${this.groupCount(group.statuses)}` : '')).fontSize(13).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_SECONDARY)
+                ForEach(this.groupItems(group.statuses), (item: MissionWorkspaceItem) => {
+                  this.MissionRow(item)
+                }, (item: MissionWorkspaceItem) => item.id)
+              }.width('100%').alignItems(HorizontalAlign.Start)
+            }
+          }, (group: MissionGroupView) => group.title)
+          if (this.total === 0) { Text('还没有进行中的委托。').fontSize(13).fontColor(PMColors.INK_TERTIARY) }
         }
       }.width('100%').alignItems(HorizontalAlign.Start)
     }

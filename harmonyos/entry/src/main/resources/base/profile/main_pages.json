@@ -10,6 +10,7 @@
     "pages/MissionDetail",
     "pages/AttachmentViewer",
     "pages/FocusConversation",
+    "pages/ConversationHistory",
     "pages/ConversationWebSource"
   ]
 }

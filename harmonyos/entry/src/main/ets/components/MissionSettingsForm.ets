@@ -35,6 +35,7 @@ export struct MissionSettingsForm {
   @State error: string = '';
   @State showConstraints: boolean = false;
   @State showResearch: boolean = false;
+  @State showCompletion: boolean = false;
 
   aboutToAppear(): void {
     this.showConstraints = this.mode === 'constraints';
@@ -125,12 +126,9 @@ export struct MissionSettingsForm {
           TextArea({ placeholder: '例如：结合后续实验记录，持续整理一份带来源的阶段汇报草稿。', text: this.goal })
             .height(120).fontSize(15).maxLength(2000).borderRadius(12).backgroundColor(PMColors.SURFACE_SUBTLE)
             .enabled(!this.busy).onChange((v: string) => { this.goal = v; })
-          Row() { Checkbox().select(this.requireMetric).onChange((v: boolean) => { this.requireMetric = v; }); Text('完成时必须有固定核算回执，执行仍需批准').fontSize(13).layoutWeight(1) }
-          Row() { Checkbox().select(this.requirePaper).onChange((v: boolean) => { this.requirePaper = v; }); Text('完成时必须读到论文元数据，非全文').fontSize(13).layoutWeight(1) }
-          Row() { Checkbox().select(this.requireResult).onChange((v: boolean) => { this.requireResult = v; }); Text('完成时必须记录行动结果回执').fontSize(13).layoutWeight(1) }
-          Button('填入阶段汇报示例', { type: ButtonType.Normal }).fontSize(13).enabled(!this.busy)
-            .backgroundColor(PMColors.BRAND_LIGHT).fontColor(PMColors.BRAND).borderRadius(11)
-            .constraintSize({ minHeight: 44 }).padding({ left: 12, right: 12 }).onClick(() => {
+          Button('需要示例？填入阶段汇报写法', { type: ButtonType.Normal }).fontSize(13).enabled(!this.busy)
+            .backgroundColor(Color.Transparent).fontColor(PMColors.INK_TERTIARY).borderRadius(11)
+            .padding({ left: 0, right: 8 }).height(40).onClick(() => {
             this.goal = '根据本项目已有材料，形成带来源的阶段汇报草稿，包括已完成事项、当前风险和下一步建议。缺少依据的内容列为信息缺口，不编造实验指标。本次只读取、分析和保存草稿，不搜索网络，不创建或修改行动。';
             this.readOnly = true;
           })
@@ -240,6 +238,29 @@ export struct MissionSettingsForm {
             }
           }
         }.width('100%').padding(14).alignItems(HorizontalAlign.Start).backgroundColor(PMColors.SURFACE).borderRadius(18)
+      }
+      if (this.mode === 'create') {
+        Column({ space: 10 }) {
+          Button(this.showCompletion ? '完成要求（可选）  收起 ↑' : '完成要求（可选）  展开 ↓', { type: ButtonType.Normal })
+            .width('100%').constraintSize({ minHeight: 44 }).fontSize(14).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent)
+            .enabled(!this.busy).onClick(() => { this.showCompletion = !this.showCompletion; })
+          if (this.showCompletion) {
+            Row() { Checkbox().select(this.requireMetric).onChange((v: boolean) => { this.requireMetric = v; }); Text('完成时必须有固定核算回执，执行仍需批准').fontSize(13).layoutWeight(1) }
+            Row() { Checkbox().select(this.requirePaper).onChange((v: boolean) => { this.requirePaper = v; }); Text('完成时必须读到论文元数据，非全文').fontSize(13).layoutWeight(1) }
+            Row() { Checkbox().select(this.requireResult).onChange((v: boolean) => { this.requireResult = v; }); Text('完成时必须记录行动结果回执').fontSize(13).layoutWeight(1) }
+          }
+        }.width('100%').padding(14).alignItems(HorizontalAlign.Start).backgroundColor(PMColors.SURFACE).borderRadius(18)
+      }
+      if (this.mode === 'create') {
+        Column({ space: 6 }) {
+          Text('提交前确认').fontSize(13).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
+          Text('执行方式：' + (this.readOnly ? '仅读取与分析' : '可提出行动建议；创建或修改行动仍需逐项批准')).fontSize(12).fontColor(PMColors.INK_SECONDARY).lineHeight(18)
+          Text('模型资料授权：' + (this.llmApproved ? '已允许云模型使用本任务资料' : '未授权；仅本地整理项目记录')).fontSize(12).fontColor(PMColors.INK_SECONDARY).lineHeight(18)
+          Text('公开网络研究：' + (this.researchEnabled ? '已开启 · 主题「' + this.topic.trim() + '」' : '未开启')).fontSize(12).fontColor(PMColors.INK_SECONDARY).lineHeight(18)
+          Text('完成要求：' + (this.requireMetric || this.requirePaper || this.requireResult ? '已设置额外完成条件' : '未额外设置，按默认流程判定')).fontSize(12).fontColor(PMColors.INK_SECONDARY).lineHeight(18)
+          Text('时间与限制：' + (this.minutes.trim() !== '' || this.deadline.trim() !== '' || this.cost.trim() !== '' ? '已设置' : '未额外设置')).fontSize(12).fontColor(PMColors.INK_SECONDARY).lineHeight(18)
+        }.width('100%').padding(12).alignItems(HorizontalAlign.Start)
+          .backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(12)
       }
       if (this.error !== '') { Text(this.error).fontSize(13).fontColor(PMColors.RISK).accessibilityText(this.error) }
       PMButton({ label: this.busy ? '正在保存…' : this.mode === 'create' ? '创建长期委托' : '保存修改', disabled: this.busy, onAction: () => { this.submit(); } })

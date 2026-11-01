@@ -1,23 +1,26 @@
 "use client";
-import { ScopedMessageCorrection } from "./ClaimCorrection";
-import { RepositorySources } from "./RepositorySources";
+import { CorrectionDialog } from "./ClaimCorrection";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { ConversationEntry, ConversationView, ConversationMessage } from "@/lib/types/conversation";
+import type { ConversationEntry, ConversationView, ConversationMessage, ConversationRef } from "@/lib/types/conversation";
 import { conversationHref } from "@/lib/conversation/navigation";
 import { emitWorkspaceChange } from "@/lib/client/workspaceEvents";
-import { Sparkles, ArrowUp, Plus, CornerDownRight } from "lucide-react";
+import { Sparkles, ArrowUp, Plus } from "lucide-react";
 import type { ConversationWorkRef } from "@/lib/types/conversationWork";
 import { ConversationContinuity } from "./ConversationContinuity";
 import { ConversationWorkCard } from "./ConversationWorkCard";
 import { ConversationAnchorPanel } from "./ConversationAnchorPanel";
-import { ConversationFileGuides, ConversationAnswer } from "./ConversationFileGuides";
+import { ConversationAnswer } from "./ConversationFileGuides";
+import { SourcePanelDialog, sourceEntryCount } from "./ConversationSourcePanel";
+import { PriorityBasisPanel } from "./ConversationPriorityBasis";
+import { MessageToolbar } from "./MessageToolbar";
 import { ConversationResearchScope, ConversationResearchView } from "./ConversationResearch";
 import { ConversationCalendarComposer } from "./ConversationCalendarComposer";
 import { missionStatusLabels } from "@/lib/mission/presentation";
 import styles from "./ConversationPanel.module.css";
 import { AgentMessageBlocks, supportsAgentPresentation } from "./AgentMessageBlocks";
+import { OverlayPanel } from "./OverlayPanel";
 import type { AllowedAction } from "@/lib/types/agentExperience";
 import { clearConversationDrafts, clearConversationDraft, readConversationDraft, saveConversationDraft } from "@/lib/client/conversationDrafts";
 
@@ -43,7 +46,9 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
   const router = useRouter();
   const search = useSearchParams(), initial = initialConversationId ?? search.get("conversation") ?? "";
   const [view, setView] = useState<ConversationView | null>(null);
-  const [list, setList] = useState<Array<{ id: string; title: string }>>([]);
+  const [list, setList] = useState<Array<{ id: string; title: string; scope: string; updatedAt: string }>>([]);
+  const [historyOpen, setHistoryOpen] = useState(false), [historyFilter, setHistoryFilter] = useState("");
+  const [toolsOpen, setToolsOpen] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [text, setText] = useState(selection ? "请先调查“" + selection.title + "”的依据和下一步。" : ""), [busy, setBusyState] = useState(false), [error, setError] = useState("");
   const busyRef = useRef(false);
@@ -54,9 +59,14 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
   const [r4Available, setR4Available] = useState(false), [investigationMode, setInvestigationMode] = useState<"QUICK" | "STANDARD" | "DEEP">("STANDARD");
   const [calendarWriteAvailable, setCalendarWriteAvailable] = useState(false);
   const [target, setTarget] = useState(selection?.projectId ?? projectId ?? ""), [showPreference, setShowPreference] = useState(false);
+  const [expandedRefs, setExpandedRefs] = useState("");
+  const [correctionMessageId, setCorrectionMessageId] = useState<string | null>(null);
+  const [sourceMessageId, setSourceMessageId] = useState<string | null>(null);
+  const [basisMessageId, setBasisMessageId] = useState("");
   const [workRef, setWorkRef] = useState<ConversationWorkRef | null>(null);
   const generation = useRef(0), pending = useRef<{ text: string; id: string; body: unknown } | null>(null);
   const messageRegion = useRef<HTMLDivElement>(null);
+  const nearBottomRef = useRef(true);
   const createKey = useRef(crypto.randomUUID()), confirmKeys = useRef(new Map<string, string>());
   const loadedId = useRef("");
   const uiKeys = useRef(new Map<string, { requestId: string; version: number }>());
@@ -79,7 +89,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
       if (loadedId.current !== id) {
         if (!selection) setText(readConversationDraft(id + ":composer").answer);
         setTarget(selection?.projectId ?? v.focusProjectId ?? projectId ?? ""); loadedId.current = id;
-        requestAnimationFrame(() => { if (epoch === generation.current && messageRegion.current) messageRegion.current.scrollTop = messageRegion.current.scrollHeight; });
+        requestAnimationFrame(() => { if (epoch === generation.current && messageRegion.current) { nearBottomRef.current = true; messageRegion.current.scrollTop = messageRegion.current.scrollHeight; } });
       }
     }
   }, [projectId, selection]);
@@ -93,7 +103,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
   useEffect(() => {
     const epoch = ++generation.current;
     void (async () => {
-      const rows = await api<{ conversations: Array<{ id: string; title: string; scope: "WORKSPACE" | "PROJECT" }> }>("/api/conversations" + (projectId ? "?projectId=" + encodeURIComponent(projectId) : ""));
+      const rows = await api<{ conversations: Array<{ id: string; title: string; scope: "WORKSPACE" | "PROJECT"; updatedAt: string }> }>("/api/conversations" + (projectId ? "?projectId=" + encodeURIComponent(projectId) : ""));
       if (epoch !== generation.current) return;
       setList(rows.conversations);
       if (entry) {
@@ -140,7 +150,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
       });
       await load(c.id, epoch); setReply(null); setWorkRef(null); pending.current = null;
       if (selection && epoch === generation.current) setTarget(selection.projectId);
-      const rows = await api<{ conversations: Array<{ id: string; title: string }> }>("/api/conversations" + (projectId ? "?projectId=" + encodeURIComponent(projectId) : ""));
+      const rows = await api<{ conversations: Array<{ id: string; title: string; scope: string; updatedAt: string }> }>("/api/conversations" + (projectId ? "?projectId=" + encodeURIComponent(projectId) : ""));
       if (epoch === generation.current) setList(rows.conversations);
     } catch (e) { if (epoch === generation.current) setError(e instanceof Error ? e.message : "创建失败"); }
     finally { if (epoch === generation.current) setBusy(false); }
@@ -161,7 +171,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
       setView(result.conversation);
       setList(rows => rows.map(row => row.id === result.conversation.id ? { ...row, title: result.conversation.title } : row));
       setTarget(result.conversation.focusProjectId ?? "");
-      requestAnimationFrame(() => { if (epoch === generation.current && messageRegion.current) messageRegion.current.scrollTop = messageRegion.current.scrollHeight; });
+      requestAnimationFrame(() => { if (epoch === generation.current && messageRegion.current) { nearBottomRef.current = true; messageRegion.current.scrollTop = messageRegion.current.scrollHeight; } });
       if (["ANSWERED", "NEEDS_CLARIFICATION", "CANCELLED"].includes(result.status)) { setText(""); setReply(null); pending.current = null; }
       else { setError(""); if (["UNKNOWN", "FAILED"].includes(result.status)) pending.current = null; }
     } catch (e) {
@@ -186,7 +196,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
         "POST", decline ? {} : { requestId: key, confirmed: true, proposalHash: p.proposalHash });
       if (epoch !== generation.current) return;
       setView(result.conversation); onUpdated?.(); emitWorkspaceChange(p.projectId, ["actions"]);
-      requestAnimationFrame(() => { if (epoch === generation.current && messageRegion.current) messageRegion.current.scrollTop = messageRegion.current.scrollHeight; });
+      requestAnimationFrame(() => { if (epoch === generation.current && messageRegion.current) { nearBottomRef.current = true; messageRegion.current.scrollTop = messageRegion.current.scrollHeight; } });
     } catch (e) { if (epoch === generation.current) setError(e instanceof Error ? e.message : "确认失败，请刷新查看原结果"); }
     finally { if (epoch === generation.current) setBusy(false); }
   }
@@ -240,21 +250,36 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
   const working = busy || !!view?.activeTurn;
   return <section className={styles.panel} aria-label="问忆程">
     <header className={styles.header}><div className={styles.agentTitle}><span className={styles.agentMark} aria-hidden="true"><Sparkles size={19}/></span><div><h2>与忆程协作</h2><p>{view?.scope === "PROJECT" ? "项目讨论" : "项目记忆 · 对话与接续"}</p></div></div><div className={styles.historyControls}>
-      <select aria-label="选择讨论" value={view?.id ?? ""} disabled={working} onChange={e => {
-        if (busyRef.current) return;
-        const epoch = ++generation.current; setBusy(true); setReply(null); setWorkRef(null); pending.current = null;
-        void load(e.target.value, epoch).catch(err => { if (epoch === generation.current) setError(err.message); })
-          .finally(() => { if (epoch === generation.current) setBusy(false); });
-      }}><option value="" disabled>选择讨论</option>{view && !list.some(c => c.id === view.id) && <option value={view.id}>{view.title}</option>}
-        {list.map(c => <option value={c.id} key={c.id}>{c.title}</option>)}</select>
+      <button type="button" className={styles.historyButton + " focus-ring"} aria-haspopup="dialog" aria-expanded={historyOpen} disabled={working}
+        onClick={() => setHistoryOpen(true)}>历史讨论</button>
       <button type="button" aria-label="新讨论" title="新讨论" className={styles.newDiscussion + " focus-ring"} disabled={working} onClick={() => void create()}><Plus size={17}/></button>
     </div></header>
-    {view && showPreference && target && <FocusPreference key={target} projectId={target} onError={setError}/>}
-    <div ref={messageRegion} className={styles.messages} aria-live="polite" aria-busy={busy}>
+    {historyOpen && <OverlayPanel label="历史讨论" title="历史讨论" variant="drawer" onClose={() => setHistoryOpen(false)}>
+      <input className={styles.historySearch} aria-label="筛选历史讨论" placeholder="按标题筛选" value={historyFilter}
+        onChange={e => setHistoryFilter(e.target.value)}/>
+      <div className={styles.historyList}>
+        {list.filter(c => !historyFilter.trim() || c.title.includes(historyFilter.trim())).map(c => <button type="button" key={c.id}
+          className={styles.historyRow + (view?.id === c.id ? " " + styles.historyRowCurrent : "") + " focus-ring"} aria-current={view?.id === c.id ? "true" : undefined}
+          onClick={() => {
+            if (busyRef.current || c.id === view?.id) { setHistoryOpen(false); return; }
+            const epoch = ++generation.current; setBusy(true); setReply(null); setWorkRef(null); pending.current = null; setHistoryOpen(false);
+            void load(c.id, epoch).catch(err => { if (epoch === generation.current) setError(err.message); })
+              .finally(() => { if (epoch === generation.current) setBusy(false); });
+          }}>
+          <span className={styles.historyRowTitle}>{c.title}</span>
+          <span className={styles.historyRowMeta}>{c.scope === "PROJECT" ? "项目讨论" : "跨项目"} · {new Date(c.updatedAt).toLocaleString("zh-CN", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+          {view?.id === c.id && <span className={styles.historyRowMark}>当前讨论</span>}
+        </button>)}
+        {!list.filter(c => !historyFilter.trim() || c.title.includes(historyFilter.trim())).length && <p className={styles.panelNote}>{list.length ? "没有匹配的讨论" : "还没有历史讨论"}</p>}
+      </div>
+      <button type="button" className="editorial-button focus-ring" disabled={working} onClick={() => { setHistoryOpen(false); void create(); }}>新建讨论</button>
+    </OverlayPanel>}
+    <div ref={messageRegion} className={styles.messages} aria-live="polite" aria-busy={busy}
+      onScroll={e => { const el = e.currentTarget; nearBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 160; }}>
       {view && <ConversationAnchorPanel key={view.id} conversationId={view.id} revision={view.version} busy={busy || workRef !== null}
         acquire={() => { if (busyRef.current || workRef !== null) return false; setBusy(true); return true; }}
         release={() => { if (loadedId.current === view.id) setBusy(false); }}
-        onReadResults={() => { if (loadedId.current === view.id && messageRegion.current) messageRegion.current.scrollTop = messageRegion.current.scrollHeight; }}
+        onReadResults={() => { if (loadedId.current === view.id && messageRegion.current && nearBottomRef.current) messageRegion.current.scrollTop = messageRegion.current.scrollHeight; }}
         onUpdated={v => { if (loadedId.current === v.id) { setView(v); onUpdated?.(); } }}/>}
       {view?.hasMore && <button type="button" className="workspace-link focus-ring" onClick={() => void older()}>读取更早讨论</button>}
       {view?.latestTurn?.canRetry && <div className={styles.reason} role="status"><strong>这次分析未完成</strong><p>{view.latestTurn.message}</p><button type="button" className="workspace-link focus-ring" disabled={working} onClick={() => { pending.current = null; setText(view.messages.filter(m => m.role === "USER").at(-1)?.content ?? ""); }}>重新提问 →</button></div>}
@@ -267,30 +292,6 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
           : m.role === "USER"
             ? <div className={styles.userBubble}><p className={styles.body}><ConversationAnswer message={m} conversationId={view.id}/></p></div>
             : <p className={styles.body}><ConversationAnswer message={m} conversationId={view.id}/></p>}
-        <ConversationFileGuides message={m} conversationId={view.id}/>
-        {m.role === "ASSISTANT" && !m.restricted && <ScopedMessageCorrection key={m.id} projects={view.linkedProjects} sourceId={m.id} onChanged={() => { void load(view.id, generation.current); }}/> }
-        {!supportsAgentPresentation(m) && !!m.priorities.length && <details><summary>优先级依据与取舍</summary>{m.priorities.map(p => <div key={p.projectId} className={styles.reason}>
-          <strong>{view.linkedProjects.find(v => v.id === p.projectId)?.title ?? "项目"}</strong>
-          <p>{p.importance}；{p.urgency}；{p.blocking}；{p.effort}</p><p>{p.preference}</p><p>{p.tradeoff}</p>
-        </div>)}</details>}
-        {!supportsAgentPresentation(m) && !!m.sources.length && <details><summary>来源与观察范围（{m.sources.length}）</summary>{m.sources.map(s => <blockquote key={s.id}>
-          <p>{s.title}</p><p>{s.excerpt}</p><small>{s.temporalState} · {new Date(s.observedAt).toLocaleString("zh-CN")}</small>
-        </blockquote>)}{m.limitations.map((l, i) => <p key={i}>{l}</p>)}</details>}
-        <RepositorySources sources={m.sources}/>
-        <div className={styles.refs}>{m.refs.filter(r => r.kind === "PROJECT" || r.kind === "MISSION").slice(0, 3).map(r => <div key={r.bindingId ?? r.id}>
-          <button type="button" className={styles.contextChip + " focus-ring"} disabled={working} onClick={() => {
-            setTarget(r.projectId); setReply(m); setText("帮我先处理这个项目最重要的待办。"); pending.current = null;
-          }}>{r.title}</button>
-          <Link className={styles.quietLink + " focus-ring"} href={conversationHref(r.href, view.id, m.id)}>查看{r.kind === "MISSION" ? "委托" : "项目"} ↗</Link>
-          {["MISSION", "ACTION"].includes(r.kind) && <button type="button" className="workspace-link focus-ring" disabled={working} onClick={() => setWorkRef({ kind: r.kind as "MISSION" | "ACTION", id: r.id, projectId: r.projectId })}>在此协作</button>}
-          {r.kind === "MISSION" && r.status === "PAUSED" && <button type="button" className="workspace-link focus-ring" disabled={working} onClick={() => {
-            if (busyRef.current) return;
-            const epoch = generation.current; setBusy(true);
-            void api<{conversation:ConversationView}>("/api/conversations/" + view.id + "/missions/" + r.id + "/resume-preview", "POST", {})
-              .then(v => { if (epoch === generation.current) setView(v.conversation); }).catch(e => setError(e.message))
-              .finally(() => { if (epoch === generation.current) setBusy(false); });
-          }}>预览接续原委托</button>}
-        </div>)}</div>
         {m.proposal && !(supportsAgentPresentation(m) && m.presentation!.blocks.some(b => ["approval", "receipt"].includes(b.semanticType))) && <section className={styles.proposal} aria-label="行动提案">
           <div className={styles.proposalMeta}><span>{m.proposal.resultId ? "已写入原项目" : "待你确认"}</span><span>{view.linkedProjects.find(v => v.id === m.proposal?.projectId)?.title}</span></div>
           <strong>{m.proposal.title}</strong><p>{m.proposal.description}</p>
@@ -301,8 +302,27 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
             : m.proposal.status === "PENDING" ? <div className={styles.actions}><button className="editorial-button focus-ring" disabled={working} onClick={() => void confirm(m)}>{m.proposal.tool === "resume_mission" ? "确认接续原委托" : m.proposal.tool === "create_calendar_event" ? "确认创建飞书日程" : !m.proposal.tool || m.proposal.tool === "create_action" ? "确认创建行动" : "确认此操作"}</button>
               <button className="workspace-tool focus-ring" disabled={working} onClick={() => void confirm(m, true)}>不采用</button></div> : <p>{m.proposal.status === "DECLINED" ? "已不采用" : m.proposal.status === "STALE" ? "方向或依据已变化，请重新预览" : m.proposal.status}</p>}
         </section>}
+        <MessageToolbar message={m} sourceCount={sourceEntryCount(m)} busy={busy}
+          showBasis={m.role === "ASSISTANT" && !supportsAgentPresentation(m) && !!m.priorities.length}
+          basisOpen={basisMessageId === m.id}
+          canCorrect={m.role === "ASSISTANT" && !m.restricted && view.linkedProjects.length > 0}
+          onSources={() => setSourceMessageId(m.id)}
+          onBasis={() => setBasisMessageId(basisMessageId === m.id ? "" : m.id)}
+          onCorrect={() => setCorrectionMessageId(m.id)}
+          onAsk={() => setReply(m)}/>
+        {basisMessageId === m.id && <PriorityBasisPanel priorities={m.priorities} projects={view.linkedProjects}/>}
         {m.role === "ASSISTANT" && !m.restricted && <ConversationResearchView message={m} conversationId={view!.id} version={view!.version} onError={setError} onContinue={value => { setReply(m); setText(value); }}/>}
-        {m.role === "ASSISTANT" && !m.restricted && <button className={styles.followup + " focus-ring"} onClick={() => setReply(m)}><CornerDownRight size={12}/>追问</button>}
+        <RelatedTasks message={m} conversationId={view.id} working={working} expanded={expandedRefs === m.id}
+          onToggle={() => setExpandedRefs(expandedRefs === m.id ? "" : m.id)}
+          onContinue={ref => setWorkRef(ref)}
+          onProject={r => { setTarget(r.projectId); setReply(m); setText("帮我先处理这个项目最重要的待办。"); pending.current = null; }}
+          onResume={r => {
+            if (busyRef.current) return;
+            const epoch = generation.current; setBusy(true);
+            void api<{conversation:ConversationView}>("/api/conversations/" + view.id + "/missions/" + r.id + "/resume-preview", "POST", {})
+              .then(v => { if (epoch === generation.current) setView(v.conversation); }).catch(e => setError(e.message))
+              .finally(() => { if (epoch === generation.current) setBusy(false); });
+          }}/>
       </article>)}
       {view && workRef && <ConversationWorkCard key={view.id + workRef.kind + workRef.id} conversation={view} workRef={workRef} onChange={v => { setView(v); onUpdated?.(); }} onClose={() => setWorkRef(null)}/>}
       {working && <div className={styles.liveProgress} role="status"><strong>{({ RECOORDINATING: "\u65b9\u5411\u5df2\u66f4\u65b0\uff0c\u6b63\u5728\u91cd\u65b0\u534f\u8c03", ROUTING: "正在定位相关项目", READING_SOURCE: "正在读取原资料", EVALUATING: "正在判断目标差距", WAITING_MODEL: "正在整理结论", READY: "正在保存本轮回答", WAITING_USER: "正在整理需要你补充的条件", STOPPING: "正在停止后续调查" } as Record<string, string>)[view?.activeTurn?.progress?.phase ?? ""] ?? "正在读取和处理…"}</strong>
@@ -318,21 +338,73 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
       {reply && <div className={styles.reply}>围绕：{reply.content.slice(0, 55)}<button type="button" className="workspace-link focus-ring" onClick={() => { setReply(null); pending.current = null; }}>取消追问</button></div>}
       <ConversationContinuity key={view.id + ":" + (view.homeProjectId ?? view.focusProjectId)} view={view} onChange={setView} onError={setError} onWork={(kind, id, projectId) => setWorkRef({ kind, id, projectId })}/>
       <ConversationResearchScope view={view} projectId={target} disabled={working} onChange={setView} onError={setError}/>
-      <label className={styles.inputLabel}><textarea aria-label="与忆程讨论项目" value={text} onChange={e => setText(e.target.value)} maxLength={3000} placeholder="问忆程：先做什么？或请帮我继续…" disabled={working} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); e.currentTarget.form?.requestSubmit(); } }}/></label>
+      <label className={styles.inputLabel}><textarea aria-label="与忆程讨论项目" value={text} rows={2} maxLength={3000} placeholder="问忆程：先做什么？或请帮我继续…" disabled={working}
+        onChange={e => { setText(e.target.value); const el = e.currentTarget; el.style.height = "auto"; el.style.height = Math.min(el.scrollHeight, 132) + "px"; }}
+        onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); e.currentTarget.form?.requestSubmit(); } }}/></label>
       <div className={styles.composerFooter}><label className={styles.cloud} onMouseEnter={() => setShowCloudHelp(true)} onMouseLeave={() => setShowCloudHelp(false)} onFocus={() => setShowCloudHelp(true)} onBlur={() => setShowCloudHelp(false)} onContextMenu={event => { event.preventDefault(); setShowCloudHelp(v => !v); }} title="长按查看资料使用说明"><input type="checkbox" aria-label="允许云模型使用本次授权项目资料" checked={cloud} disabled={!analysisReady || !cloudAvailable || working} onChange={e => { setCloud(e.target.checked); pending.current = null; }}/>{cloudAvailable ? "云端分析" : "本地整理"}</label>
       {view && <div className={styles.composerScope}>
       <label><select aria-label="讨论项目范围" value={target} disabled={working || view.scope === "PROJECT"} onChange={e => { setTarget(e.target.value); pending.current = null; }}>
         <option value="">跨项目</option>{view.linkedProjects.map(p => <option value={p.id} key={p.id}>{p.title}</option>)}
         {projectId && !view.linkedProjects.some(p => p.id === projectId) && <option value={projectId}>当前项目</option>}
       </select></label>
-      {target && <button type="button" className={styles.quietLink + " focus-ring"} onClick={() => setShowPreference(v => !v)}>项目偏好</button>}
       {projectId && <Link className="workspace-link focus-ring" href={conversationHref("/focus", view.id)}>回到原焦点讨论</Link>}
     </div>}
       {r4Available && cloud && <select className={styles.analysisMode} aria-label="调查深度" value={investigationMode} disabled={working} onChange={e => { setInvestigationMode(e.target.value as typeof investigationMode); pending.current = null; }}><option value="QUICK">快速</option><option value="STANDARD">标准调查</option><option value="DEEP">深入调查 · 更多调用</option></select>}
+      <div className={styles.toolsWrap}>
+        <button type="button" className={styles.toolsButton + " focus-ring"} aria-haspopup="menu" aria-expanded={toolsOpen}
+          onKeyDown={e => { if (e.key === "Escape") setToolsOpen(false); }}
+          onClick={() => setToolsOpen(v => !v)}>更多</button>
+        {toolsOpen && <button type="button" tabIndex={-1} aria-hidden="true" className={styles.menuBackdrop}
+          onClick={() => setToolsOpen(false)}/>}
+        {toolsOpen && <div className={styles.toolsMenu} role="menu" aria-label="更多操作">
+          <button type="button" role="menuitem" className="focus-ring" disabled={working}
+            onClick={() => { setToolsOpen(false); void load(view.id, generation.current).catch(e => setError(e.message)); }}>刷新讨论状态</button>
+          {target && <button type="button" role="menuitem" className="focus-ring"
+            onClick={() => { setToolsOpen(false); setShowPreference(true); }}>项目偏好</button>}
+        </div>}
+      </div>
       <button type="submit" className={styles.send + " focus-ring"} disabled={working || !analysisReady || !text.trim()} aria-label="发送"><ArrowUp size={17}/></button></div>
       <p data-visible={showCloudHelp} className={styles.analysisHint}>{!analysisReady ? "正在确认分析方式…" : !cloudAvailable ? "未配置云模型，当前仅整理项目记录" : cloud ? "发送即允许云模型分析本次授权项目资料，可关闭" : "仅整理项目记录，不调用云模型"}</p>
     </form>}
+    {view && showPreference && target && <OverlayPanel label="项目偏好" title="项目偏好" onClose={() => setShowPreference(false)}>
+      <FocusPreference key={target} projectId={target} onError={setError}/>
+    </OverlayPanel>}
+    {view && correctionMessageId && <CorrectionDialog open onClose={() => setCorrectionMessageId(null)} projects={view.linkedProjects}
+      sourceId={correctionMessageId} onChanged={() => { void load(view.id, generation.current); }}/>}
+    {view && sourceMessageId && <SourcePanelDialog open message={view.messages.find(m => m.id === sourceMessageId) ?? null}
+      conversationId={view.id} onClose={() => setSourceMessageId(null)}/>}
   </section>;
+}
+/** UX-04：关联任务收敛为轻量卡片，最多默认展示 2 个；项目引用保持安静的小芯片。 */
+function RelatedTasks({ message, conversationId, working, expanded, onToggle, onContinue, onProject, onResume }: {
+  message: ConversationMessage; conversationId: string; working: boolean; expanded: boolean;
+  onToggle: () => void; onContinue: (ref: ConversationWorkRef) => void;
+  onProject: (r: ConversationRef) => void; onResume: (r: ConversationRef) => void;
+}) {
+  const projectRefs = message.refs.filter(r => r.kind === "PROJECT");
+  const taskRefs = message.refs.filter(r => r.kind === "MISSION" || r.kind === "ACTION");
+  if (!projectRefs.length && !taskRefs.length) return null;
+  const shown = expanded ? taskRefs : taskRefs.slice(0, 2);
+  return <>
+    {!!projectRefs.length && <div className={styles.refs}>{projectRefs.map(r => <div key={r.bindingId ?? r.id}>
+      <button type="button" className={styles.contextChip + " focus-ring"} disabled={working} onClick={() => onProject(r)}>{r.title}</button>
+      <Link className={styles.quietLink + " focus-ring"} href={conversationHref(r.href, conversationId, message.id)}>查看项目 ↗</Link>
+    </div>)}</div>}
+    {!!taskRefs.length && <div className={styles.taskCards}>
+      {shown.map(r => <div key={r.bindingId ?? r.id} className={styles.taskCard}>
+        <span className={styles.taskKind}>{r.kind === "MISSION" ? "长期委托" : "行动"}{r.status ? " · " + (missionStatusLabels[r.status] ?? r.status) : ""}</span>
+        <strong>{r.title}</strong>
+        <div className={styles.taskActions}>
+          <Link className={styles.quietLink + " focus-ring"} href={conversationHref(r.href, conversationId, message.id)}>查看{r.kind === "MISSION" ? "委托" : "行动"} ↗</Link>
+          <button type="button" className="workspace-link focus-ring" disabled={working}
+            onClick={() => onContinue({ kind: r.kind as "MISSION" | "ACTION", id: r.id, projectId: r.projectId })}>在此继续</button>
+          {r.kind === "MISSION" && r.status === "PAUSED" && <button type="button" className="workspace-link focus-ring" disabled={working} onClick={() => onResume(r)}>预览接续原委托</button>}
+        </div>
+      </div>)}
+      {taskRefs.length > 2 && <button type="button" className={styles.moreTasks + " workspace-link focus-ring"} onClick={onToggle}>
+        {expanded ? "收起关联任务" : `查看全部关联任务（${taskRefs.length}）`}</button>}
+    </div>}
+  </>;
 }
 function FocusPreference({ projectId, onError }: { projectId: string; onError: (v: string) => void }) {
   const [v, setV] = useState({ importance: "", longTermGoal: "", estimatedMinutes: "", notes: "", version: 0 });

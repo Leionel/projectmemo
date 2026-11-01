@@ -92,7 +92,7 @@ export async function listConversations(actor: ConversationActor, projectId?: st
   if (projectId) await assertProject(actor, projectId);
   const rows = await db.conversation.findMany({ where: { ownerUserId: actor.userId, status: "ACTIVE",
     ...(projectId ? { projects: { some: { projectId } } } : {}), ...(cursor ? { id: { lt: cursor } } : {}) },
-    orderBy: { id: "desc" }, take: 21, select: { id: true, title: true, scope: true, homeProjectId: true,
+    orderBy: { id: "desc" }, take: 21, select: { id: true, title: true, scope: true, homeProjectId: true, updatedAt: true,
       projects: { select: { projectId: true } } } });
   const memberships = await db.projectMembership.findMany({ where: { userId: actor.userId }, select: { projectId: true, role: true } });
   const allowed = new Set(memberships.map(m => m.projectId));

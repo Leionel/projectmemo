@@ -15,7 +15,7 @@ export struct MissionReadbackView {
   @Prop @Watch('targetChanged') missionVersion: number = 0;
   @Prop @Watch('targetChanged') refreshKey: number = 0;
   @Prop @Watch('targetChanged') targetKey: string = '';
-  @State showMaterials: boolean = false;
+  @State showSection: string = '';
   @State expandedMaterial: string = '';
   private observedScope: string = '';
   @State data: MissionReadback | null = null;
@@ -42,31 +42,73 @@ export struct MissionReadbackView {
     }
   }
   private materials(): ReadbackMaterial[] { return this.data?.materialUses?.items ?? []; }
+  private shortTime(at: string): string {
+    const t = Date.parse(at);
+    if (Number.isNaN(t)) { return at; }
+    const d = new Date(t);
+    const hh = d.getHours().toString().padStart(2, '0');
+    const mm = d.getMinutes().toString().padStart(2, '0');
+    return `${d.getMonth() + 1}月${d.getDate()}日 ${hh}:${mm}`;
+  }
+  @Builder
+  private SummaryRow(label: string, value: string, onToggle: () => void, open: boolean) {
+    Row({ space: 8 }) {
+      Text(label).fontSize(13).fontColor(PMColors.INK_SECONDARY).layoutWeight(1)
+      if (open) { Text('收起 ⌃').fontSize(12).fontColor(PMColors.BRAND) }
+      else { Text(`${value} 条 ›`).fontSize(12).fontColor(PMColors.BRAND) }
+    }.width('100%').height(44).alignItems(VerticalAlign.Center)
+      .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
+      .onClick(() => { onToggle(); })
+      .accessibilityText(`${label} ${value} 条，展开查看`)
+  }
   build() {
     Column({ space: 8 }) {
-      Text('原任务与完成回执').fontSize(15).fontWeight(FontWeight.Medium)
+      Row({ space: 8 }) {
+        Text('结果与回执').fontSize(15).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY).layoutWeight(1)
+        Text('重新读取').fontSize(12).fontColor(PMColors.BRAND).height(36).onClick(() => { this.load(); })
+          .accessibilityText('重新读取回执')
+      }.width('100%')
       if (this.error !== '') { Text(`${this.error}${this.state === 'lastKnown' ? '；以下为上次读取的历史结果' : ''}`).fontSize(12).fontColor(PMColors.RISK) }
-      Button('重新读取回执').onClick(() => this.load()).height(36).fontSize(12).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
       if (this.data !== null) {
         if (this.data.missionVersion < this.missionVersion) { Text('委托版本已变化，正在重读回执；以下为上次结果').fontSize(12).fontColor(PMColors.INK_SECONDARY) }
-        Text(`读取于 ${this.data.observedAt} · 委托版本 ${this.data.missionVersion}`).fontSize(11).fontColor(PMColors.INK_TERTIARY)
-        if (this.data.sourceConversation !== null) {
-          Button('返回来源对话 →').onClick(() => { router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: this.data?.projectId ?? '', sourceRunId: this.data?.sourceConversation?.sourceRunId ?? '', openCopilot: '1' } }); }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
-        }
-        if (this.data.selected.question !== null) { Text(`${this.data.selected.question.historical ? '历史问题（只读）' : '链接指向的问题'}：${this.data.selected.question.text}`).fontSize(13) }
-        if (this.data.selected.approval !== null) { Text(`指定提案：${this.data.selected.approval.status}；批准需回到当前有效预览。`).fontSize(12) }
+        Text(`读取于 ${this.shortTime(this.data.observedAt)} · 委托版本 ${this.data.missionVersion}`).fontSize(11).fontColor(PMColors.INK_TERTIARY)
+        if (this.data.selected.question !== null) { Text(`${this.data.selected.question.historical ? '历史问题（只读）' : '链接指向的问题'}：${this.data.selected.question.text}`).fontSize(13).lineHeight(20) }
+        if (this.data.selected.approval !== null) { Text(`指定提案：${this.data.selected.approval.status}；批准需回到当前有效预览。`).fontSize(12).fontColor(PMColors.INK_SECONDARY) }
         if (this.data.selected.output !== null) {
           Text(`指定草稿版本 ${this.data.selected.output.revision}（只读）`).fontSize(13)
-          ForEach(this.data.selected.output.contentJson.blocks, (b: MissionBlock) => { Text(b.text).fontSize(13) }, (b: MissionBlock) => b.blockId)
+          ForEach(this.data.selected.output.contentJson.blocks, (b: MissionBlock) => { Text(b.text).fontSize(13).lineHeight(20) }, (b: MissionBlock) => b.blockId)
         }
-        if (this.data.selected.receipt !== null) { Text(`归入回执 ${this.data.selected.receipt.id} · 草稿版本 ${this.data.selected.receipt.outputRevision}`).fontSize(12) }
-        ForEach(this.data.adoptions, (r: ReadbackAdoption) => { Text(`已归入成果：${r.title} · ${r.artifactCreatedAt}（来自草稿 ${r.outputRevision}；回执 ${r.receiptId}）`).fontSize(12)
-          Button('阅读这份已归入成果 →').onClick(() => { router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: this.data?.projectId ?? '', artifactId: r.artifactId } }); }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
-        }, (r: ReadbackAdoption) => r.receiptId)
-        ForEach(this.data.actionReceipts, (a: ReadbackAction) => {
-          Text(`${a.isSimulated ? '演示情境 · ' : ''}${a.title}：${a.status === 'DONE' && a.resultCardId !== null ? '已填写行动完成回执' : a.status === 'DONE' ? '已标记完成，未找到复盘回执' : '尚未填写完成回执'}`).fontSize(12)
-          if (a.resultCardId !== null) { Button('查看复盘记录 →').onClick(() => { router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: this.data?.projectId ?? '', tab: 'memory', cardId: a.resultCardId ?? '' } }); }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 }) }
-        }, (a: ReadbackAction) => a.id)
+        if (this.data.selected.receipt !== null) { Text(`归入回执 ${this.data.selected.receipt.id} · 草稿版本 ${this.data.selected.receipt.outputRevision}`).fontSize(12).fontColor(PMColors.INK_SECONDARY) }
+        if (this.data.adoptions.length > 0) {
+          this.SummaryRow('已归入成果', `${this.data.adoptions.length}`, (): void => { this.showSection = this.showSection === 'adoption' ? '' : 'adoption'; }, this.showSection === 'adoption')
+          if (this.showSection === 'adoption') {
+            ForEach(this.data.adoptions, (r: ReadbackAdoption) => {
+              Column({ space: 4 }) {
+                Text(`已归入成果：${r.title}`).fontSize(13).fontColor(PMColors.INK_PRIMARY)
+                Text(`来自草稿 ${r.outputRevision} · 回执 ${r.receiptId}`).fontSize(11).fontColor(PMColors.INK_TERTIARY)
+                Text('阅读这份已归入成果 ›').fontSize(13).fontColor(PMColors.BRAND).height(36)
+                  .onClick(() => { router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: this.data?.projectId ?? '', artifactId: r.artifactId } }); })
+              }.width('100%').alignItems(HorizontalAlign.Start).padding(10)
+                .backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.MD)
+            }, (r: ReadbackAdoption) => r.receiptId)
+          }
+        }
+        if (this.data.actionReceipts.length > 0) {
+          this.SummaryRow('行动回执', `${this.data.actionReceipts.length}`, (): void => { this.showSection = this.showSection === 'action' ? '' : 'action'; }, this.showSection === 'action')
+          if (this.showSection === 'action') {
+            ForEach(this.data.actionReceipts, (a: ReadbackAction) => {
+              Column({ space: 4 }) {
+                Text(`${a.isSimulated ? '演示情境 · ' : ''}${a.title}`).fontSize(13).fontColor(PMColors.INK_PRIMARY)
+                Text(a.status === 'DONE' && a.resultCardId !== null ? '已填写行动完成回执' : a.status === 'DONE' ? '已标记完成，未找到复盘回执' : '尚未填写完成回执').fontSize(12).fontColor(PMColors.INK_SECONDARY)
+                if (a.resultCardId !== null) {
+                  Text('查看复盘记录 ›').fontSize(13).fontColor(PMColors.BRAND).height(36)
+                    .onClick(() => { router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: this.data?.projectId ?? '', tab: 'memory', cardId: a.resultCardId ?? '' } }); })
+                }
+              }.width('100%').alignItems(HorizontalAlign.Start).padding(10)
+                .backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.MD)
+            }, (a: ReadbackAction) => a.id)
+          }
+        }
         if (this.data.evidenceReviews && this.data.evidenceReviews!.items.length > 0) {
           ForEach(this.data.evidenceReviews!.items, (review: EvidenceReviewReceipt) => {
             Column({ space: PMSpacing.SM }) {
@@ -78,27 +120,34 @@ export struct MissionReadbackView {
           }, (review: EvidenceReviewReceipt) => review.eventId)
         }
         if (this.materials().length > 0) {
-          Button(this.showMaterials ? '收起资料使用位置' : `这份资料用在哪里 · ${this.materials().length}`).onClick(() => { this.showMaterials = !this.showMaterials; }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
-          if (this.showMaterials) {
+          this.SummaryRow('这份资料用在哪里', `${this.materials().length}`, (): void => { this.showSection = this.showSection === 'material' ? '' : 'material'; }, this.showSection === 'material')
+          if (this.showSection === 'material') {
             ForEach(this.materials(), (item: ReadbackMaterial) => {
               Column({ space: 6 }) {
                 Text(item.title).fontSize(PMFontSize.SECONDARY).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
                 Text(`${item.availability === 'CHANGED' ? '历史版本 · ' : ''}${materialUseSummary(item.facts)}`).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
                 if (item.availability === 'UNAVAILABLE') { Text('原资料暂不可访问，历史关联仍保留').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY) }
                 if (item.excerpt !== null && item.excerpt !== '') {
-                  Button(this.expandedMaterial === item.sourcePointer.hash ? '收起记录摘录' : '查看原记录摘录').onClick(() => { this.expandedMaterial = this.expandedMaterial === item.sourcePointer.hash ? '' : item.sourcePointer.hash; }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
+                  Text(this.expandedMaterial === item.sourcePointer.hash ? '收起记录摘录 ⌃' : '查看原记录摘录 ⌄').fontSize(12).fontColor(PMColors.BRAND)
+                    .onClick(() => { this.expandedMaterial = this.expandedMaterial === item.sourcePointer.hash ? '' : item.sourcePointer.hash; })
                   if (this.expandedMaterial === item.sourcePointer.hash) { Text(item.excerpt).fontSize(PMFontSize.SECONDARY).copyOption(CopyOptions.LocalDevice) }
                 }
                 if (item.sourcePointer.id.startsWith('attachment:') && item.availability === 'CURRENT') {
-                  Button('查看附件原件 →').onClick(() => { router.pushUrl({ url: 'pages/AttachmentViewer', params: { projectId: this.data?.projectId ?? '', attachmentId: item.sourcePointer.id.substring(11) } }); }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
+                  Text('查看附件原件 ›').fontSize(13).fontColor(PMColors.BRAND).height(36)
+                    .onClick(() => { router.pushUrl({ url: 'pages/AttachmentViewer', params: { projectId: this.data?.projectId ?? '', attachmentId: item.sourcePointer.id.substring(11) } }); })
                 }
                 ForEach(item.facts.filter((f: ReadbackMaterialFact) => f.kind === 'OUTPUT_REFERENCE'), (f: ReadbackMaterialFact) => {
-                  Button(`查看草稿版本 ${f.revision} →`).onClick(() => { router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.data?.projectId ?? '', missionId: this.missionId, outputId: f.refId, revision: `${f.revision}` } }); }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
+                  Text(`查看草稿版本 ${f.revision} ›`).fontSize(13).fontColor(PMColors.BRAND).height(36)
+                    .onClick(() => { router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.data?.projectId ?? '', missionId: this.missionId, outputId: f.refId, revision: `${f.revision}` } }); })
                 }, (f: ReadbackMaterialFact) => f.refId)
               }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.MD).backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.MD).border({ width: 1, color: PMColors.BORDER_SUBTLE })
             }, (item: ReadbackMaterial) => `${item.sourcePointer.id}:${item.sourcePointer.hash}`)
             Text('仅展示直接来源与有限历史；引用不表示结论已核验').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
           }
+        }
+        if (this.data.sourceConversation !== null) {
+          Text('返回来源对话 ›').fontSize(13).fontColor(PMColors.BRAND).height(40)
+            .onClick(() => { router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: this.data?.projectId ?? '', sourceRunId: this.data?.sourceConversation?.sourceRunId ?? '', openCopilot: '1' } }); })
         }
       }
     }.width('100%').alignItems(HorizontalAlign.Start).padding(12).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(12)

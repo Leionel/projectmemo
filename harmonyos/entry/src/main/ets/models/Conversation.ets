@@ -17,7 +17,7 @@ export interface ConversationProposal { tool?: string; executionId: string; proj
 export interface ConversationOption { key: string; label: string; projectId: string; missionId: string; proposalId: string; proposalHash: string; expectedVersion: number; purpose?: string; candidateId?: string; }
 export interface ConversationMessage { observedProjectIds?: string[]; researchCoverage?: ResearchCoverage; id: string; seq: number; role: string; content: string; restricted: boolean; refs: ConversationRef[]; sources: ConversationSource[]; priorities: PriorityReason[]; proposal: ConversationProposal | null; provider: string; limitations: string[]; options?: ConversationOption[]; fileGuides?: ConversationFileGuide[]; citations?: ConversationCitation[]; presentation?: AgentPresentation; }
 export interface ConversationProject { id: string; title: string; }
-export interface ConversationListItem { id: string; title: string; scope: string; homeProjectId: string | null; }
+export interface ConversationListItem { id: string; title: string; scope: string; homeProjectId: string | null; updatedAt?: string; }
 export interface ConversationListReply { conversations: ConversationListItem[]; nextCursor: string | null; }
 export interface ConversationReadStep { id: string; label: string; status: string; }
 export interface ConversationProgressEvent { seq: number; phase: string; at: string; stepId: string | null; }

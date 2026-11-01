@@ -164,7 +164,7 @@
 .reviewPanel > summary { cursor: pointer; font-weight: 600; }
 .reviewPanel > textarea { width: 100%; min-height: 78px; margin-block: 10px; padding: 12px; border: 1px solid #dde5df; border-radius: 10px; resize: vertical; color: inherit; background: transparent; }
 .user { display: grid; justify-items: end; width: 100%; padding: 0 0 8px; background: transparent; border: 0; }
-.userBubble { width: fit-content; max-width: 91%; padding: .75rem 1rem; background: color-mix(in srgb, var(--teal-pale) 42%, var(--card-bg)); border: 1px solid var(--rule); border-radius: 16px 16px 4px 16px; }
+.userBubble { width: fit-content; max-width: 85%; padding: .625rem .875rem; background: color-mix(in srgb, var(--teal-pale) 42%, var(--card-bg)); border: 1px solid var(--rule); border-radius: 16px 16px 4px 16px; }
 .userBubble .body { text-align: left; }
 .launcher { position:fixed; right:max(18px,env(safe-area-inset-right)); bottom:calc(5.5rem + env(safe-area-inset-bottom)); z-index:35; display:flex; align-items:center; gap:8px; height:48px; padding:0 15px 0 12px; border:1px solid var(--rule-strong); border-radius:16px; background:var(--card-bg); color:var(--ink); font-size:15px; font-weight:500; box-shadow:0 4px 14px #20383216; }
 .launcher > span { display:grid; place-items:center; width:27px; height:27px; border-radius:9px; background:var(--teal-pale); color:var(--teal-strong); }
@@ -173,7 +173,7 @@
 .projectDrawer > .return { justify-content:space-between; background:var(--card-bg); padding:.5rem .75rem; border:1px solid var(--rule); border-radius:10px; }
 .composer { position:relative; margin:.5rem .625rem .625rem; padding:.75rem .75rem .5rem; border:1px solid var(--rule); border-radius:22px; background:var(--paper); }
 .composer .inputLabel { padding:0 .15rem; border:0; box-shadow:none; }
-.composer textarea { min-height:4.25rem; background:transparent; font-size:.875rem; }
+.composer textarea { min-height:3.55rem; max-height:8.25rem; overflow-y:auto; resize:none; background:transparent; font-size:.875rem; }
 .composerFooter { display:flex; align-items:center; gap:.625rem; margin-top:.5rem; }
 .composerScope { display:flex; align-items:center; flex-wrap:wrap; gap:.4rem; min-width:0; }
 .composerScope select { max-width:9rem; border:0; border-radius:6px; background:transparent; color:var(--ink-soft); font-size:.75rem; min-height:2rem; }
@@ -205,3 +205,112 @@
 @media(max-width:760px) { .calendarComposer { grid-template-columns:1fr; } }
 .calendarBar { padding:0 .625rem; }
 .calendarBar > button { display:inline-flex; align-items:center; gap:.3rem; margin:.25rem 0 .4rem; }
+
+/* Conversation UX2 shared surfaces: quiet correction entry and overlay panels. */
+.correctionEntry { display:inline-flex; align-items:center; min-height:2rem; margin-top:.3rem; padding:.2rem .5rem; border-radius:7px; font-size:.75rem; color:var(--muted); }
+.correctionEntry:hover { color:var(--teal-strong); background:var(--paper); }
+.correctionEntry[aria-expanded="true"] { color:var(--teal-strong); }
+.overlay { position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; padding:1.5rem; background:color-mix(in srgb,var(--ink) 26%,transparent); }
+.dialog { display:flex; flex-direction:column; gap:.7rem; width:min(33rem,100%); max-height:min(44rem,100%); overflow-y:auto; overscroll-behavior:contain; background:var(--card-bg); border:1px solid var(--rule); border-radius:16px; padding:1.15rem; box-shadow:0 18px 44px color-mix(in srgb,var(--ink) 14%,transparent); }
+.dialog:focus { outline:none; }
+.dialogHead { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+.dialogHead strong { font-size:.9375rem; font-weight:650; letter-spacing:-.01em; }
+.dialogClose { display:grid; place-items:center; width:2rem; height:2rem; border-radius:8px; color:var(--muted); }
+.dialogClose:hover { background:var(--paper); color:var(--ink); }
+.field { display:grid; gap:.35rem; font-size:.75rem; color:var(--ink-soft); }
+.field select,.field textarea,.field input { width:100%; min-height:2.25rem; padding:.4rem .55rem; color:var(--ink); background:var(--paper); border:1px solid var(--rule); border-radius:8px; font-size:.8125rem; }
+.field textarea { resize:vertical; line-height:1.7; }
+.panelNote { font-size:.75rem; color:var(--muted); line-height:1.7; }
+.selectionQuote { font-size:.75rem; color:var(--teal-strong); line-height:1.7; overflow-wrap:anywhere; }
+.dialogActions { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
+.claimBody { display:grid; gap:.65rem; }
+.claimSource { font-family:inherit; line-height:1.8; }
+.claimHistory { display:grid; gap:.55rem; border-top:1px solid var(--rule); padding-top:.7rem; }
+.historyTitle { font-size:.75rem; font-weight:600; color:var(--ink-soft); }
+.claimHead { display:grid; gap:.35rem; }
+.claimHead blockquote { margin:0; padding:.45rem .65rem; border-left:2px solid var(--rule-strong); border-radius:0 7px 7px 0; background:var(--paper); font-size:.75rem; line-height:1.7; overflow-wrap:anywhere; }
+.claimHead p { font-size:.8125rem; color:var(--ink); overflow-wrap:anywhere; }
+.claimHeadFoot { display:flex; align-items:center; justify-content:space-between; gap:.5rem; font-size:.6875rem; color:var(--muted); }
+.claimError { font-size:.75rem; color:var(--brick); line-height:1.7; }
+@media (max-width:760px) {
+  .overlay { align-items:flex-end; padding:0; }
+  .dialog { width:100%; max-height:84dvh; border-radius:18px 18px 0 0; border-bottom:0; padding:1rem .9rem max(1rem,env(safe-area-inset-bottom)); }
+  .dialog { animation:conversationSheetUp .22s cubic-bezier(.22,1,.36,1); }
+}
+@media (min-width:761px) { .dialog { animation:conversationDialogIn .18s cubic-bezier(.22,1,.36,1); } }
+@keyframes conversationSheetUp { from { transform:translateY(24px); opacity:.6; } to { transform:translateY(0); opacity:1; } }
+@keyframes conversationDialogIn { from { transform:scale(.97); opacity:.5; } to { transform:scale(1); opacity:1; } }
+@media (prefers-reduced-motion:reduce) { .dialog { animation:none; } }
+
+/* Judgment basis (UX-05): mapped headlines up front, full fields in a secondary detail. */
+.priorityBasis { margin-top:.65rem; display:grid; gap:.4rem; }
+.priorityTitle { font-size:.75rem; font-weight:600; color:var(--ink-soft); }
+.priorityBasis ul { display:grid; gap:.25rem; font-size:.75rem; color:var(--muted); line-height:1.7; }
+.priorityBasis details { font-size:.75rem; }
+.priorityBasis summary { display:inline-flex; align-items:center; gap:.3rem; min-height:1.875rem; cursor:pointer; color:var(--muted); list-style:none; }
+.priorityBasis summary::-webkit-details-marker { display:none; }
+.priorityBasis summary::after { content:""; width:.4rem; height:.4rem; border-right:1px solid currentColor; border-bottom:1px solid currentColor; transform:rotate(45deg) translateY(-.1rem); transition:transform .15s ease; }
+.priorityBasis details[open] summary::after { transform:rotate(-135deg) translateY(-.15rem); }
+.priorityBasis summary:hover { color:var(--teal-strong); }
+.priorityDetail { margin-top:.55rem; display:grid; gap:.25rem; color:var(--ink-soft); line-height:1.7; overflow-wrap:anywhere; }
+.priorityBasisLabel { color:var(--muted); }
+
+/* Source entry + drawer panel (UX-03). */
+.messageTools { display:flex; flex-wrap:wrap; align-items:center; gap:.1rem .35rem; margin-top:.55rem; min-height:2rem; }
+.toolEntry { display:inline-flex; align-items:center; gap:.25rem; min-height:2.1rem; padding:.25rem .55rem; border-radius:7px; font-size:.78125rem; color:var(--ink-soft); }
+.toolEntry:hover { color:var(--teal-strong); background:var(--paper); }
+.toolEntry:disabled { opacity:.45; cursor:not-allowed; }
+.menuBackdrop { position:fixed; inset:0; z-index:15; background:transparent; border:0; cursor:default; }
+.overlayDrawer { justify-content:flex-end; padding:0; }
+.dialogDrawer { width:min(26rem,100vw); max-height:100dvh; height:100dvh; border-radius:0; border-block:0; border-right:0; animation:conversationDrawerIn .2s cubic-bezier(.22,1,.36,1); }
+@keyframes conversationDrawerIn { from { transform:translateX(24px); opacity:.5; } to { transform:translateX(0); opacity:1; } }
+.sourceGroups { display:grid; gap:1.1rem; }
+.sourceGroup { display:grid; gap:.55rem; }
+.sourceGroupTitle { font-size:.75rem; font-weight:600; color:var(--ink-soft); }
+.sourceCard { display:grid; gap:.4rem; padding:.75rem .85rem; border:1px solid var(--rule); border-radius:10px; background:var(--card-bg); }
+.sourceCard header { display:flex; align-items:baseline; justify-content:space-between; gap:.6rem; }
+.sourceCard header strong { font-size:.8125rem; font-weight:600; color:var(--ink); min-width:0; overflow-wrap:anywhere; }
+.sourceFlag { flex-shrink:0; font-size:.625rem; color:var(--muted); }
+.sourceNotice { font-size:.71875rem; color:var(--muted); line-height:1.65; }
+.sourceMeta { font-size:.6875rem; color:var(--muted); line-height:1.6; overflow-wrap:anywhere; }
+.sourceCard blockquote { margin:0; padding:.45rem .65rem; border-left:2px solid var(--rule-strong); border-radius:0 7px 7px 0; background:var(--paper); font-size:.75rem; line-height:1.7; color:var(--ink-soft); white-space:pre-wrap; overflow-wrap:anywhere; }
+.sourceCard a { display:inline-flex; align-items:center; gap:.25rem; min-height:2rem; font-size:.75rem; }
+@media (max-width:760px) {
+  .overlayDrawer { align-items:flex-end; }
+  .dialogDrawer { width:100%; height:auto; max-height:84dvh; border-radius:18px 18px 0 0; border:0; animation:conversationSheetUp .22s cubic-bezier(.22,1,.36,1); }
+}
+@media (prefers-reduced-motion:reduce) { .dialogDrawer { animation:none; } }
+
+/* Related-task cards (UX-04): quiet bottom cards, at most two before a grouped entry. */
+.taskCards { display:grid; gap:.15rem; margin-top:.4rem; }
+.taskCard { display:grid; gap:.15rem; padding:.45rem .55rem; border-radius:9px; }
+.taskCard:hover { background:var(--paper); }
+.taskKind { font-size:.6875rem; color:var(--muted); }
+.taskCard > strong { font-size:.8125rem; font-weight:550; color:var(--ink); line-height:1.65; overflow-wrap:anywhere; }
+.taskActions { display:flex; align-items:center; flex-wrap:wrap; gap:.25rem .8rem; margin-top:.2rem; }
+.taskActions a,.taskActions button { font-size:.75rem; min-height:2rem; }
+.moreTasks { margin-top:.35rem; }
+
+/* History management entry (UX-07): quiet header trigger, drawer with filter. */
+.historyButton { min-height:2rem; padding:.25rem .65rem; border:1px solid var(--rule); border-radius:8px; font-size:.75rem; color:var(--ink-soft); white-space:nowrap; }
+.historyButton:hover { border-color:var(--teal); color:var(--teal-strong); }
+.historySearch { width:100%; min-height:2.35rem; padding:.45rem .6rem; border:1px solid var(--rule); border-radius:9px; background:var(--paper); color:var(--ink); font-size:.8125rem; }
+.historyList { display:grid; gap:.35rem; overflow-y:auto; min-height:3rem; }
+.historyRow { position:relative; display:grid; gap:.15rem; text-align:left; padding:.6rem .7rem; border:1px solid var(--rule); border-radius:10px; background:var(--card-bg); }
+.historyRow:hover { border-color:var(--teal); }
+.historyRowCurrent { border-color:var(--teal); background:color-mix(in srgb,var(--teal-pale) 30%,var(--card-bg)); }
+.historyRowTitle { font-size:.8125rem; color:var(--ink); line-height:1.6; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.historyRowMeta { font-size:.6875rem; color:var(--muted); }
+.historyRowMark { position:absolute; top:.6rem; right:.65rem; font-size:.625rem; color:var(--teal-strong); }
+
+/* Composer tool menu (UX-06): low-frequency tools live beside the send button. */
+.toolsWrap { position:relative; margin-left:auto; flex-shrink:0; }
+.toolsButton { min-height:2rem; padding:.25rem .6rem; border:1px solid var(--rule); border-radius:8px; font-size:.75rem; color:var(--ink-soft); }
+.toolsButton:hover,.toolsButton[aria-expanded="true"] { border-color:var(--teal); color:var(--teal-strong); }
+.toolsMenu { position:absolute; right:0; bottom:2.6rem; display:grid; gap:.15rem; min-width:9.5rem; padding:.35rem; border:1px solid var(--rule); border-radius:10px; background:var(--card-bg); box-shadow:0 8px 24px color-mix(in srgb,var(--ink) 12%,transparent); z-index:20; animation:conversationDialogIn .15s cubic-bezier(.22,1,.36,1); }
+.toolsMenu button { text-align:left; min-height:2.25rem; padding:.45rem .6rem; border-radius:8px; font-size:.75rem; color:var(--ink-soft); }
+.toolsMenu button:hover:not(:disabled) { background:var(--paper); color:var(--teal-strong); }
+.toolsMenu button:disabled { opacity:.5; cursor:not-allowed; }
+.dialog .preference { padding:0; border:0; }
+@media (prefers-reduced-motion:reduce) { .toolsMenu { animation:none; } }
+.send { margin-left: 0; }

@@ -56,7 +56,9 @@ import {
   CheckIcon,
   AlertIcon,
   SpineNodeIcon,
-  PaperclipIcon
+  PaperclipIcon,
+  SearchIcon,
+  PlusIcon
 } from '../components/PMIcons';
 import { PMAppBar } from '../components/PMAppBar';
 import { ConversationService } from '../services/ConversationService';
@@ -88,6 +90,14 @@ import { missionStatusLabel } from '../common/MissionContract';
 import { selectProjectFocus } from '../common/ProjectAttention';
 import { ProjectEvolutionPanel } from '../components/ProjectEvolutionPanel';
 
+interface HomeRecentActivity {
+  id: string;
+  kind: string;
+  title: string;
+  meta: string;
+  timestamp: number;
+}
+
 @Entry
 @Component
 struct ProjectHome {
@@ -117,6 +127,12 @@ struct ProjectHome {
   @State attachments: Attachment[] = [];
   @State materialsMode: string = 'memory';
   @State attachmentSearch: string = '';
+  @State attachmentSearchOpen: boolean = false;
+  @State memorySearchOpen: boolean = false;
+  @State actionSearchOpen: boolean = false;
+  @State actionSearchQuery: string = '';
+  @State expandedActionDescId: string = '';
+  @State selectedActionId: string = '';
   @State attachmentLoadError: string = '';
   @State actionStatusFilter: string = 'ALL';
   @State lastUploadedAttachmentId: string = '';
@@ -179,6 +195,8 @@ struct ProjectHome {
   @State editDescription: string = '';
   @State editDeadline: string = '';
   @State isSavingSettings: boolean = false;
+  @State settingsTabIndex: number = 0;
+  @State showSuppressionDetail: boolean = false;
 
   // Tab 1: 记忆专属状态
   @State memorySearchQuery: string = '';
@@ -1022,10 +1040,48 @@ struct ProjectHome {
       projectId: this.projectId,
       active: true,
       onGoTarget: (kind: string, objectId: string, suggestedAction: string) => {
-        if (kind === 'action' || kind === 'reminder') {
+        if (kind === 'action') {
           this.currentTabIndex = 2;
-        } else if (kind === 'card' || kind === 'memory' || kind === 'attachment') {
+          this.actionStatusFilter = 'ALL';
+          if (objectId !== '') {
+            this.focusedActionId = objectId;
+          }
+        } else if (kind === 'reminder') {
+          this.currentTabIndex = 2;
+          if (objectId !== '') {
+            this.focusedActionId = objectId;
+            const matchingIntervention = this.interventions.find((i: Intervention) => i.id === objectId);
+            if (matchingIntervention !== undefined) {
+              router.pushUrl({ url: 'pages/InterventionDetail', params: { projectId: this.projectId, interventionId: objectId } });
+              return;
+            }
+          }
+        } else if (kind === 'card' || kind === 'memory') {
           this.currentTabIndex = 1;
+          this.materialsMode = 'memory';
+          this.selectedMemoryType = 'all';
+          this.memorySearchQuery = '';
+          if (objectId !== '') {
+            this.expandedCardId = objectId;
+          }
+        } else if (kind === 'attachment') {
+          this.currentTabIndex = 1;
+          this.materialsMode = 'attachments';
+          if (objectId !== '') {
+            this.openAttachment(objectId);
+          }
+        } else if (kind === 'deliverable') {
+          this.currentTabIndex = 4;
+          if (objectId !== '') {
+            this.selectedArtifactType = objectId;
+            this.updateCurrentArtifact();
+          }
+        } else if (kind === 'episode') {
+          this.currentTabIndex = 0;
+          this.showProjectStatus = true;
+          this.showEvolution = true;
+          promptAction.showToast({ message: '已展开阶段检查点' });
+          return;
         } else {
           this.currentTabIndex = 0;
         }
@@ -1537,16 +1593,59 @@ struct ProjectHome {
 
   @Builder
   private HomeFocusView() {
-    Column({ space: 12 }) {
-      if (this.agentContext !== null) { Text(`当前目标：${this.agentContext.goal}`).fontSize(12).fontColor(PMColors.INK_SECONDARY).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }) }
-      Text(this.agentContext !== null ? '当前下一步' : this.homeFocusKind() === 'mission' ? missionStatusLabel(this.homeMission?.status ?? '') : '当前先处理')
-        .fontSize(12).fontWeight(FontWeight.Medium).fontColor(PMColors.BRAND)
-      Text(this.homeFocusTitle()).fontSize(20).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
-        .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
-      Text(this.homeFocusDetail()).fontSize(14).lineHeight(22).fontColor(PMColors.INK_SECONDARY).maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis })
-      PMButton({ label: `${this.homeFocusAction()} →`, onAction: (): void => { this.openHomeFocus(); } })
-    }.width('100%').alignItems(HorizontalAlign.Start).padding(16)
-      .backgroundColor(PMColors.SURFACE).borderRadius(18).border({ width: 1, color: PMColors.BORDER_SUBTLE })
+    Column({ space: 10 }) {
+      Row() {
+        Text(this.agentContext !== null ? '当前下一步' : this.homeFocusKind() === 'mission' ? missionStatusLabel(this.homeMission?.status ?? '') : '当前先处理')
+          .fontSize(12)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.BRAND)
+          .padding({ left: 8, right: 8, top: 2, bottom: 2 })
+          .backgroundColor(PMColors.BRAND_LIGHT)
+          .borderRadius(PMRadius.XS)
+
+        Blank()
+
+        if (this.agentContext !== null && this.agentContext.goal !== '') {
+          Text(`目标：${this.agentContext.goal}`)
+            .fontSize(12)
+            .fontColor(PMColors.INK_TERTIARY)
+            .maxLines(1)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .layoutWeight(1)
+            .textAlign(TextAlign.End)
+            .margin({ left: 8 })
+        }
+      }
+      .width('100%')
+      .alignItems(VerticalAlign.Center)
+
+      Text(this.homeFocusTitle())
+        .fontSize(20)
+        .fontWeight(FontWeight.Bold)
+        .fontColor(PMColors.INK_PRIMARY)
+        .lineHeight(28)
+        .maxLines(2)
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+
+      Text(this.homeFocusDetail())
+        .fontSize(14)
+        .lineHeight(22)
+        .fontColor(PMColors.INK_SECONDARY)
+        .maxLines(3)
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+
+      PMButton({
+        label: `${this.homeFocusAction()} →`,
+        onAction: (): void => { this.openHomeFocus(); }
+      })
+    }
+    .width('100%')
+    .alignItems(HorizontalAlign.Start)
+    .padding(16)
+    .backgroundColor(PMColors.SURFACE)
+    .borderRadius(PMRadius.LG)
+    .border({ width: 1, color: PMColors.BORDER })
+    .shadow({ radius: 8, color: 'rgba(19, 36, 58, 0.04)', offsetX: 0, offsetY: 2 })
   }
 
   /** 准备项逐项入口：与「当前状态」卡里的缺口按钮同一套跳转规则 */
@@ -2035,8 +2134,69 @@ struct ProjectHome {
     }
   }
 
+  private cockpitAddMenuItems(): MenuElement[] {
+    const items: MenuElement[] = [];
+    items.push({
+      value: '记录进展',
+      action: (): void => {
+        this.openCaptureEntry();
+      }
+    });
+    items.push({
+      value: '整理会议',
+      action: (): void => {
+        this.openMeetingEntry();
+      }
+    });
+    return items;
+  }
+
+  private pickQuietStart(): void {
+    const parts = this.policyQuietStart.split(':');
+    const d = new Date();
+    if (parts.length === 2) {
+      const hh = Number.parseInt(parts[0], 10);
+      const mm = Number.parseInt(parts[1], 10);
+      if (!Number.isNaN(hh) && !Number.isNaN(mm)) {
+        d.setHours(hh, mm, 0, 0);
+      }
+    }
+    TimePickerDialog.show({
+      selected: d,
+      useMilitaryTime: true,
+      onAccept: (time: TimePickerResult) => {
+        const hh = time.hour < 10 ? `0${time.hour}` : `${time.hour}`;
+        const mm = time.minute < 10 ? `0${time.minute}` : `${time.minute}`;
+        this.policyQuietStart = `${hh}:${mm}`;
+      }
+    });
+  }
+
+  private pickQuietEnd(): void {
+    const parts = this.policyQuietEnd.split(':');
+    const d = new Date();
+    if (parts.length === 2) {
+      const hh = Number.parseInt(parts[0], 10);
+      const mm = Number.parseInt(parts[1], 10);
+      if (!Number.isNaN(hh) && !Number.isNaN(mm)) {
+        d.setHours(hh, mm, 0, 0);
+      }
+    }
+    TimePickerDialog.show({
+      selected: d,
+      useMilitaryTime: true,
+      onAccept: (time: TimePickerResult) => {
+        const hh = time.hour < 10 ? `0${time.hour}` : `${time.hour}`;
+        const mm = time.minute < 10 ? `0${time.minute}` : `${time.minute}`;
+        this.policyQuietEnd = `${hh}:${mm}`;
+      }
+    });
+  }
+
   private openSettingsDialog(): void {
     this.policyFeedback = '';
+    this.settingsTabIndex = 0;
+    this.showSuppressionDetail = false;
     this.loadPolicy();
     this.editTitle = this.project.title;
     this.editGoal = this.project.goal;
@@ -2855,29 +3015,147 @@ struct ProjectHome {
     }
   }
 
+  private getRecentActivities(): HomeRecentActivity[] {
+    const list: HomeRecentActivity[] = [];
+    for (let i = 0; i < this.project.cards.length; i++) {
+      const card = this.project.cards[i];
+      const time = Date.parse(card.createdAt);
+      const day = card.createdAt && card.createdAt.length >= 10 ? card.createdAt.substring(0, 10) : '';
+      list.push({
+        id: card.id,
+        kind: 'card',
+        title: card.title,
+        meta: `新增记忆 · ${day}`,
+        timestamp: isNaN(time) ? 0 : time
+      });
+    }
+    const doneActions = this.actions.filter((a: ActionItem) => !a.isSimulated && a.status === 'DONE');
+    for (let i = 0; i < doneActions.length; i++) {
+      const action = doneActions[i];
+      const rawDate = action.completedAt ?? action.updatedAt;
+      const time = Date.parse(rawDate);
+      const day = rawDate && rawDate.length >= 10 ? rawDate.substring(0, 10) : '';
+      list.push({
+        id: action.id,
+        kind: 'action',
+        title: action.title,
+        meta: `完成行动 · ${day}`,
+        timestamp: isNaN(time) ? 0 : time
+      });
+    }
+    for (let i = 0; i < this.artifacts.length; i++) {
+      const art = this.artifacts[i];
+      const time = Date.parse(art.createdAt);
+      const day = art.createdAt && art.createdAt.length >= 10 ? art.createdAt.substring(0, 10) : '';
+      list.push({
+        id: art.artifactType,
+        kind: 'artifact',
+        title: TextFormatters.artifactTypeToChinese(art.artifactType),
+        meta: `成果草稿 · ${day}`,
+        timestamp: isNaN(time) ? 0 : time
+      });
+    }
+    list.sort((a: HomeRecentActivity, b: HomeRecentActivity) => b.timestamp - a.timestamp);
+    return list.slice(0, 3);
+  }
+
   @Builder
   private RecentChangesView() {
     Column({ space: 10 }) {
-      Text('最近记录').fontSize(17).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
+      Text('最近活动').fontSize(17).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
       Column() {
-        if (this.project.cards.length > 0) {
-          PMListRow({ title: this.project.cards[0].title, meta: `新增记忆 · ${this.project.cards[0].createdAt.substring(0, 10)}`,
-            onOpen: (): void => { this.currentTabIndex = 1; this.materialsMode = 'memory'; this.expandedCardId = this.project.cards[0].id; this.selectedMemoryType = 'all'; this.memorySearchQuery = ''; } })
+        if (this.getRecentActivities().length === 0) {
+          Text('还没有项目记录，先留下一条新进展。')
+            .fontSize(14)
+            .fontColor(PMColors.INK_SECONDARY)
+            .padding(16)
+        } else {
+          ForEach(this.getRecentActivities(), (item: HomeRecentActivity) => {
+            PMListRow({
+              title: item.title,
+              kind: item.kind === 'action' ? 'action' : undefined,
+              meta: item.meta,
+              onOpen: (): void => {
+                if (item.kind === 'card') {
+                  this.currentTabIndex = 1;
+                  this.materialsMode = 'memory';
+                  this.expandedCardId = item.id;
+                  this.selectedMemoryType = 'all';
+                  this.memorySearchQuery = '';
+                } else if (item.kind === 'action') {
+                  this.currentTabIndex = 2;
+                  this.actionStatusFilter = 'ALL';
+                  this.focusedActionId = item.id;
+                } else if (item.kind === 'artifact') {
+                  this.selectedArtifactType = item.id;
+                  const found = this.artifacts.find((a: ArtifactItem) => a.artifactType === item.id);
+                  if (found !== undefined) {
+                    this.currentArtifact = found;
+                  }
+                  this.isArtifactReader = true;
+                  this.currentTabIndex = 4;
+                }
+              }
+            })
+          }, (item: HomeRecentActivity) => `${item.kind}-${item.id}`)
         }
-        ForEach(this.actions.filter((a: ActionItem) => !a.isSimulated && a.status === 'DONE')
-          .sort((a: ActionItem, b: ActionItem) => Date.parse(b.completedAt ?? b.updatedAt) - Date.parse(a.completedAt ?? a.updatedAt)).slice(0, 1), (item: ActionItem) => {
-          PMListRow({ title: item.title, kind: 'action', meta: `完成行动 · ${(item.completedAt ?? item.updatedAt).substring(0, 10)}`,
-            onOpen: (): void => { this.currentTabIndex = 2; this.actionStatusFilter = 'ALL'; this.focusedActionId = item.id; } })
-        }, (item: ActionItem) => item.id)
-        if (this.artifacts.length > 0) {
-          PMListRow({ title: TextFormatters.artifactTypeToChinese(this.artifacts[0].artifactType), meta: `成果草稿 · ${this.artifacts[0].createdAt.substring(0, 10)}`,
-            onOpen: (): void => { this.selectedArtifactType = this.artifacts[0].artifactType; this.currentArtifact = this.artifacts[0]; this.isArtifactReader = true; this.currentTabIndex = 4; } })
-        }
-        if (this.project.cards.length === 0 && this.actions.filter((a: ActionItem) => !a.isSimulated && a.status === 'DONE').length === 0 && this.artifacts.length === 0) {
-          Text('还没有项目记录，先留下一条新进展。').fontSize(14).fontColor(PMColors.INK_SECONDARY).padding(16)
-        }
-      }.width('100%').backgroundColor(PMColors.SURFACE).borderRadius(18).border({ width: 1, color: PMColors.BORDER_SUBTLE })
-    }.width('100%').alignItems(HorizontalAlign.Start)
+      }
+      .width('100%')
+      .backgroundColor(PMColors.SURFACE)
+      .borderRadius(18)
+      .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+    }
+    .width('100%')
+    .alignItems(HorizontalAlign.Start)
+  }
+
+  @Builder
+  private CompactStatusSummaryView() {
+    Column({ space: 8 }) {
+      Row() {
+        Text('项目内准备项')
+          .fontSize(PMFontSize.CAPTION)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(PMColors.INK_SECONDARY)
+        Blank()
+        Text(this.dashboard.readiness.items.length === 0 ? '暂无清单' : `${this.dashboard.readiness.items.filter((i: ReadinessItem) => i.complete).length} / ${this.dashboard.readiness.items.length} 项已形成`)
+          .fontSize(PMFontSize.CAPTION)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.BRAND)
+      }
+      .width('100%')
+
+      Progress({
+        value: Math.min(100, Math.max(0, this.dashboard.readiness.percentage)),
+        total: 100,
+        type: ProgressType.Linear
+      })
+      .width('100%')
+      .color(PMColors.BRAND)
+      .height(4)
+
+      Row() {
+        Text(`${this.project.cards.length} 条记忆 · ${this.actions.filter((a: ActionItem) => !a.isSimulated && a.status !== 'DONE').length} 项待推进行动 · ${this.artifacts.length} 份成果草稿`)
+          .fontSize(11)
+          .fontColor(PMColors.INK_TERTIARY)
+          .layoutWeight(1)
+
+        Text('查看清单与缺口 →')
+          .fontSize(11)
+          .fontColor(PMColors.BRAND)
+          .fontWeight(FontWeight.Medium)
+          .onClick(() => {
+            this.showReadinessSheet = true;
+          })
+      }
+      .width('100%')
+      .alignItems(VerticalAlign.Center)
+    }
+    .width('100%')
+    .padding(14)
+    .backgroundColor(PMColors.SURFACE)
+    .borderRadius(PMRadius.MD)
+    .border({ width: 1, color: PMColors.BORDER_SUBTLE })
   }
 
   private latestClosedLoopAction(): ActionItem | null {
@@ -3113,78 +3391,247 @@ struct ProjectHome {
   @Builder
   private CockpitView() {
     Scroll() {
-      Column({ space: 18 }) {
-        Column({ space: 10 }) {
+      Column({ space: 16 }) {
+        // 1. 项目基本状态
+        Column({ space: 8 }) {
           Row() {
             CategoryBadge({ category: this.project.scenario })
+            DeadlineBadge({ deadline: this.dashboard.deadline }).margin({ left: 8 })
             Blank()
-            DeadlineBadge({ deadline: this.dashboard.deadline })
-          }.width('100%')
+            Button('＋ 新增', { type: ButtonType.Normal })
+              .fontSize(13)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.BRAND)
+              .backgroundColor(PMColors.BRAND_LIGHT)
+              .borderRadius(PMRadius.SM)
+              .height(32)
+              .padding({ left: 12, right: 12 })
+              .accessibilityText('新增项目内容：记录进展或整理会议')
+              .bindMenu(this.cockpitAddMenuItems())
+          }
+          .width('100%')
+          .alignItems(VerticalAlign.Center)
           if (this.project.description !== '') {
-            Text(this.project.description).fontSize(14).lineHeight(22).fontColor(PMColors.INK_SECONDARY).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
+            Text(this.project.description)
+              .fontSize(14)
+              .lineHeight(22)
+              .fontColor(PMColors.INK_SECONDARY)
+              .maxLines(2)
+              .textOverflow({ overflow: TextOverflow.Ellipsis })
           }
         }.width('100%').alignItems(HorizontalAlign.Start)
 
+        // 2. 当前下一步
         this.HomeFocusView()
+
+        // 3. 准备项与关键指标紧凑摘要
+        this.CompactStatusSummaryView()
+
+        // 4. 最近活动
         this.RecentChangesView()
 
-        Row({ space: 10 }) {
-          PMButton({ label: '＋ 记录进展', secondary: true, onAction: (): void => { this.openCaptureEntry(); } }).layoutWeight(1)
-          PMButton({ label: '整理会议', secondary: true, onAction: (): void => { this.openMeetingEntry(); } }).layoutWeight(1)
-        }.width('100%')
-
-        Button(this.showProjectStatus ? '收起项目档案与工具 ↑' : '项目档案与更多工具 ↓', { type: ButtonType.Normal })
-          .constraintSize({ minHeight: 44 }).width('100%').fontSize(13).fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent)
-          .onClick(() => { this.showProjectStatus = !this.showProjectStatus; })
-        if (this.showProjectStatus) {
-          Column({ space: 10 }) {
-            Row() {
-              Text('项目内准备项').fontSize(14).fontColor(PMColors.INK_SECONDARY).layoutWeight(1)
-              Text(this.dashboard.readiness.items.length === 0 ? '暂无清单' : `${this.dashboard.readiness.items.filter((i: ReadinessItem) => i.complete).length} / ${this.dashboard.readiness.items.length} 项已形成`)
-                .fontSize(15).fontWeight(FontWeight.Medium).fontColor(PMColors.BRAND)
-            }.width('100%')
-            Progress({ value: Math.min(100, Math.max(0, this.dashboard.readiness.percentage)), total: 100, type: ProgressType.Linear }).width('100%').color(PMColors.BRAND).height(5)
-            Text(`${this.project.cards.length} 条记忆 · ${this.actions.filter((a: ActionItem) => !a.isSimulated && a.status !== 'DONE').length} 项待推进行动 · ${this.artifacts.length} 份成果草稿`)
-              .fontSize(12).fontColor(PMColors.INK_TERTIARY)
-            PMButton({ label: '查看准备项与缺口 →', secondary: true, onAction: (): void => { this.showReadinessSheet = true; } })
-          }.width('100%').padding(16).backgroundColor(PMColors.SURFACE).borderRadius(18).alignItems(HorizontalAlign.Start)
-          ProjectStatePanel({ projectId: this.projectId,
-            onOpenDiffSheet: (diff: StateDiff): void => { this.stateDiffForSheet = diff; this.showStateDiffSheet = true; },
-            onOpenBrief: (fromId: string, toId: string): void => { this.openChangeBrief(fromId, toId); },
-            onGoActions: (): void => { this.currentTabIndex = 2; },
-            onDiffUpdated: (diff: StateDiff): void => { this.stateDiff = diff; }
-          })
-          this.ProjectHealthCardView()
-          ProjectImpactPanel({ projectId: this.projectId })
-          this.ClosedLoopView()
-          this.MilestoneEvidenceView()
-          PMButton({ label: this.showEvolution ? '收起演进与检查点' : '查看演进与检查点', secondary: true,
-            onAction: (): void => { this.showEvolution = !this.showEvolution; } })
-          if (this.showEvolution) {
-            ProjectEvolutionPanel({ projectId: this.projectId, onOpenSources: (cardId: string): void => {
-              this.memorySearchQuery = ''; this.memorySearchResults = []; this.selectedMemoryType = 'all';
-              this.expandedCardId = cardId; this.currentTabIndex = 1;
-              if (cardId !== '') AppStorage.setOrCreate<string>('stateEvidenceEntityId', cardId);
-            } })
-            this.EpisodeCheckpointCardView()
-          }
-          PMButton({ label: '查看证据变化与确认', secondary: true, onAction: (): void => { this.showChangeImpactDialog = true; } })
-          PMButton({ label: this.showDemoControls ? '收起演示与重新评估' : '演示与重新评估', secondary: true,
-            onAction: (): void => { this.showDemoControls = !this.showDemoControls; } })
-          if (this.showDemoControls) {
-            Column({ space: 10 }) {
-              Text('演示提醒带模拟标记，真实评估读取当前项目记录。').fontSize(12).fontColor(PMColors.INK_SECONDARY)
-              PMButton({ label: '演示：截止临近', secondary: true, disabled: this.isEvaluating, onAction: (): void => { this.evaluate('deadline_48h'); } })
-              PMButton({ label: '演示：长期未推进', secondary: true, disabled: this.isEvaluating, onAction: (): void => { this.evaluate('stale_72h'); } })
-              PMButton({ label: '演示：风险聚集', secondary: true, disabled: this.isEvaluating, onAction: (): void => { this.evaluate('risk_cluster'); } })
-              PMButton({ label: '重新评估当前项目', disabled: this.isEvaluating, onAction: (): void => { this.evaluate(undefined, true); } })
-              if (this.evaluateError !== '') { Text(this.evaluateError).fontSize(13).fontColor(PMColors.RISK) }
-            }.width('100%').alignItems(HorizontalAlign.Start)
-          }
+        // 5. 项目档案与工具（紧凑导航行折叠，分为3组清晰收敛）
+        Row() {
+          Text('项目档案与工具')
+            .fontSize(14)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(PMColors.INK_SECONDARY)
+          Blank()
+          Text(this.showProjectStatus ? '收起 ↑' : '展开 ↓')
+            .fontSize(13)
+            .fontColor(PMColors.INK_TERTIARY)
         }
-      }.width('100%').padding(16).alignItems(HorizontalAlign.Start)
-    }.layoutWeight(1).width('100%').align(Alignment.TopStart).scrollBar(BarState.Off)
-      .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
+        .width('100%')
+        .padding({ left: 16, right: 16, top: 12, bottom: 12 })
+        .backgroundColor(PMColors.SURFACE)
+        .borderRadius(PMRadius.SM)
+        .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+        .accessibilityText(this.showProjectStatus ? '收起项目档案与工具' : '展开项目档案与工具')
+        .onClick(() => { this.showProjectStatus = !this.showProjectStatus; })
+
+        if (this.showProjectStatus) {
+          Column({ space: 14 }) {
+            // 分组一：项目状态 (状态与变化、项目体检)
+            Text('项目状态')
+              .fontSize(13)
+              .fontWeight(FontWeight.Bold)
+              .fontColor(PMColors.INK_TERTIARY)
+              .margin({ top: 4 })
+
+            ProjectStatePanel({
+              projectId: this.projectId,
+              onOpenDiffSheet: (diff: StateDiff): void => { this.stateDiffForSheet = diff; this.showStateDiffSheet = true; },
+              onOpenBrief: (fromId: string, toId: string): void => { this.openChangeBrief(fromId, toId); },
+              onGoActions: (): void => { this.currentTabIndex = 2; },
+              onDiffUpdated: (diff: StateDiff): void => { this.stateDiff = diff; }
+            })
+
+            this.ProjectHealthCardView()
+
+            // 层次一：最近闭环
+            this.ClosedLoopView()
+
+            ProjectImpactPanel({ projectId: this.projectId })
+
+            this.MilestoneEvidenceView()
+
+            // 层次二：深入查看
+            Text('深入查看')
+              .fontSize(13)
+              .fontWeight(FontWeight.Bold)
+              .fontColor(PMColors.INK_TERTIARY)
+              .margin({ top: 10 })
+
+            Column() {
+              // 1. 演进与检查点
+              Row() {
+                Column({ space: 4 }) {
+                  Text('演进与检查点')
+                    .fontSize(14)
+                    .fontWeight(FontWeight.Medium)
+                    .fontColor(PMColors.INK_PRIMARY)
+                  Text('关键结论的演进轨迹与阶段检查记录')
+                    .fontSize(12)
+                    .fontColor(PMColors.INK_SECONDARY)
+                }
+                .layoutWeight(1)
+                .alignItems(HorizontalAlign.Start)
+
+                Text(this.showEvolution ? '收起 ↑' : '展开 ↓')
+                  .fontSize(13)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.BRAND)
+                  .padding({ left: 10, right: 10, top: 4, bottom: 4 })
+                  .backgroundColor(PMColors.BRAND_LIGHT)
+                  .borderRadius(PMRadius.XS)
+              }
+              .width('100%')
+              .padding({ left: 16, right: 16, top: 14, bottom: 14 })
+              .alignItems(VerticalAlign.Center)
+              .clickEffect(PMInteraction.PRESS_EFFECT)
+              .onClick(() => {
+                this.showEvolution = !this.showEvolution;
+              })
+
+              if (this.showEvolution) {
+                Column({ space: 10 }) {
+                  ProjectEvolutionPanel({
+                    projectId: this.projectId,
+                    onOpenSources: (cardId: string): void => {
+                      this.memorySearchQuery = '';
+                      this.memorySearchResults = [];
+                      this.selectedMemoryType = 'all';
+                      this.expandedCardId = cardId;
+                      this.currentTabIndex = 1;
+                      if (cardId !== '') AppStorage.setOrCreate<string>('stateEvidenceEntityId', cardId);
+                    }
+                  })
+                  this.EpisodeCheckpointCardView()
+                }
+                .width('100%')
+                .padding({ left: 12, right: 12, bottom: 14 })
+              }
+
+              Divider()
+                .color(PMColors.BORDER_SUBTLE)
+                .strokeWidth(1)
+
+              // 2. 证据变化与确认
+              Row() {
+                Column({ space: 4 }) {
+                  Text('证据变化与确认')
+                    .fontSize(14)
+                    .fontWeight(FontWeight.Medium)
+                    .fontColor(PMColors.INK_PRIMARY)
+                  Text('核对新证据影响与变更依据')
+                    .fontSize(12)
+                    .fontColor(PMColors.INK_SECONDARY)
+                }
+                .layoutWeight(1)
+                .alignItems(HorizontalAlign.Start)
+
+                Text('›')
+                  .fontSize(22)
+                  .fontColor(PMColors.INK_TERTIARY)
+              }
+              .width('100%')
+              .padding({ left: 16, right: 16, top: 14, bottom: 14 })
+              .alignItems(VerticalAlign.Center)
+              .clickEffect(PMInteraction.PRESS_EFFECT)
+              .onClick(() => {
+                this.showChangeImpactDialog = true;
+              })
+            }
+            .width('100%')
+            .backgroundColor(PMColors.SURFACE)
+            .borderRadius(PMRadius.MD)
+            .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+
+            // 层次三：管理与工具
+            Text('管理与工具')
+              .fontSize(13)
+              .fontWeight(FontWeight.Bold)
+              .fontColor(PMColors.INK_TERTIARY)
+              .margin({ top: 10 })
+
+            Column({ space: 6 }) {
+              Row() {
+                Column({ space: 4 }) {
+                  Text('重新评估')
+                    .fontSize(14)
+                    .fontWeight(FontWeight.Medium)
+                    .fontColor(PMColors.INK_PRIMARY)
+                  Text('重新扫描项目记忆、状态与体检指标')
+                    .fontSize(12)
+                    .fontColor(PMColors.INK_SECONDARY)
+                }
+                .layoutWeight(1)
+                .alignItems(HorizontalAlign.Start)
+
+                Button(this.isEvaluating ? '评估中...' : '重新评估', { type: ButtonType.Normal })
+                  .fontSize(13)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.BRAND)
+                  .backgroundColor(PMColors.BRAND_LIGHT)
+                  .borderRadius(PMRadius.SM)
+                  .height(34)
+                  .padding({ left: 14, right: 14 })
+                  .enabled(!this.isEvaluating)
+                  .clickEffect(PMInteraction.PRESS_EFFECT)
+                  .onClick(() => {
+                    this.evaluate(undefined, true);
+                  })
+              }
+              .width('100%')
+              .padding({ left: 16, right: 16, top: 14, bottom: 14 })
+              .backgroundColor(PMColors.SURFACE)
+              .borderRadius(PMRadius.MD)
+              .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+              .alignItems(VerticalAlign.Center)
+
+              if (this.evaluateError !== '') {
+                Text(this.evaluateError)
+                  .fontSize(12)
+                  .fontColor(PMColors.RISK)
+                  .padding({ left: 4 })
+              }
+            }
+            .width('100%')
+            .alignItems(HorizontalAlign.Start)
+          }
+          .width('100%')
+          .alignItems(HorizontalAlign.Start)
+        }
+      }
+      .width('100%')
+      .padding({ left: 16, right: 16, top: 16, bottom: 160 })
+      .alignItems(HorizontalAlign.Start)
+    }
+    .layoutWeight(1)
+    .width('100%')
+    .align(Alignment.TopStart)
+    .scrollBar(BarState.Off)
+    .constraintSize({ maxWidth: PMBreakpoint.contentMaxWidth(this.widthBp) })
   }
 
   // 单一 bindSheet 入口：按模式渲染记录面板或会议导入，避免同节点重复绑定
@@ -3643,9 +4090,24 @@ struct ProjectHome {
         PMButton({ label: '重新加载附件', secondary: true, onAction: (): void => { this.loadAllData(true); } })
       }.width('100%').padding(16)
     }
-    TextInput({ text: this.attachmentSearch, placeholder: '搜索附件文件名' })
-      .height(44).margin({ left: 16, right: 16, bottom: 10 }).backgroundColor(PMColors.SURFACE)
-      .onChange((value: string) => { this.attachmentSearch = value; })
+if (this.attachmentSearchOpen) {
+        Row({ space: 8 }) {
+              TextInput({ text: this.attachmentSearch, placeholder: '搜索附件文件名' })
+        .height(44).margin({ left: 16, right: 16, bottom: 10 }).backgroundColor(PMColors.SURFACE)
+        .onChange((value: string) => { this.attachmentSearch = value; })
+          Text('✕').fontSize(15).fontColor(PMColors.INK_TERTIARY).width(36).height(44).textAlign(TextAlign.Center)
+            .accessibilityText('关闭附件搜索并清空关键词')
+            .onClick(() => { this.attachmentSearchOpen = false; this.attachmentSearch = ''; })
+        }.width('100%').padding({ left: 16, right: 16 })
+      } else if (this.attachmentSearch.trim() !== '') {
+        Row({ space: 8 }) {
+          Text('搜索：' + this.attachmentSearch).fontSize(12).fontColor(PMColors.BRAND)
+            .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
+          Text('清除 ✕').fontSize(12).fontColor(PMColors.INK_TERTIARY).height(36)
+            .accessibilityText('清除附件搜索关键词')
+            .onClick(() => { this.attachmentSearch = ''; })
+        }.width('100%').padding({ left: 28, right: 28 }).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(10)
+      }
     List({ space: 10 }) {
       if (this.attachments.length === 0 && this.attachmentLoadError === '') {
         ListItem() {
@@ -3691,8 +4153,15 @@ struct ProjectHome {
             .backgroundColor(this.materialsMode === 'attachments' ? PMColors.SURFACE : Color.Transparent).borderRadius(9)
             .accessibilitySelected(this.materialsMode === 'attachments').onClick(() => { this.materialsMode = 'attachments'; })
           }.layoutWeight(1).padding(3).borderRadius(12).backgroundColor(PMColors.SURFACE_SUBTLE)
-          Button('＋ 新增', { type: ButtonType.Normal }).constraintSize({ minHeight: 44 }).padding({ left: 12, right: 12 }).fontSize(13)
-            .fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).borderRadius(11)
+          Button({ type: ButtonType.Circle }) { SearchIcon({ iconSize: 18 }) }
+            .width(40).height(40).backgroundColor(Color.Transparent)
+            .accessibilityText(this.materialsMode === 'memory' ? '搜索项目记忆' : '搜索附件文件名')
+            .onClick(() => {
+              if (this.materialsMode === 'memory') { this.memorySearchOpen = !this.memorySearchOpen; }
+              else { this.attachmentSearchOpen = !this.attachmentSearchOpen; }
+            })
+          Button({ type: ButtonType.Circle }) { PlusIcon({ iconSize: 18 }) }
+            .width(40).height(40).backgroundColor(Color.Transparent)
             .accessibilityText('记录或上传附件').onClick(() => { this.openCaptureEntry(); })
         }.width('100%')
       }.padding({ left: 16, right: 16, top: 12, bottom: 10 }).width('100%')
@@ -3700,10 +4169,25 @@ struct ProjectHome {
         this.AttachmentLibrary()
       } else {
       Column({ space: 6 }) {
-        TextInput({ text: this.memorySearchQuery, placeholder: '搜索标题、摘要或关键词' })
-          .onChange((value: string) => { this.onMemoryQueryChange(value); })
-          .fontSize(14).height(44).backgroundColor(PMColors.SURFACE).borderRadius(11)
-          .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+        if (this.memorySearchOpen) {
+          Row({ space: 8 }) {
+            TextInput({ text: this.memorySearchQuery, placeholder: '搜索标题、摘要或关键词' })
+              .onChange((value: string) => { this.onMemoryQueryChange(value); })
+              .fontSize(14).height(44).backgroundColor(PMColors.SURFACE).borderRadius(11)
+              .border({ width: 1, color: PMColors.BORDER_SUBTLE }).layoutWeight(1)
+            Text('✕').fontSize(15).fontColor(PMColors.INK_TERTIARY).width(36).height(44).textAlign(TextAlign.Center)
+              .accessibilityText('关闭搜索并清空关键词')
+              .onClick(() => { this.memorySearchOpen = false; this.onMemoryQueryChange(''); })
+          }.width('100%')
+        } else if (this.memorySearchQuery.trim() !== '') {
+          Row({ space: 8 }) {
+            Text('搜索：' + this.memorySearchQuery).fontSize(12).fontColor(PMColors.BRAND)
+              .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
+            Text('清除 ✕').fontSize(12).fontColor(PMColors.INK_TERTIARY).height(36)
+              .accessibilityText('清除搜索关键词')
+              .onClick(() => { this.onMemoryQueryChange(''); })
+          }.width('100%').padding({ left: 12, right: 12 }).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(10)
+        }
         Scroll() {
           Row({ space: 8 }) {
             ForEach(['all', 'paper_note', 'experiment_log', 'reflection', 'code_issue'], (type: string) => {
@@ -3861,7 +4345,7 @@ struct ProjectHome {
                   .fontWeight(FontWeight.Medium)
                   .fontColor(PMColors.BRAND)
               }
-              .constraintSize({ minHeight: 44 }).padding({ top: PMSpacing.SM, bottom: PMSpacing.XS })
+              .constraintSize({ minHeight: 40 }).padding({ top: PMSpacing.SM, bottom: PMSpacing.XS })
               .accessibilityText(this.expandedCardId === card.id ? '收起原始采集碎片' : '查看原始采集碎片')
               .accessibilityDescription(this.isDamagedMemoryCard(card) ? '该记忆需要修复，原始采集碎片仍可查看' : '展开查看这条记忆的来源与原始内容')
               .clickEffect(PMInteraction.PRESS_EFFECT)
@@ -3962,21 +4446,84 @@ struct ProjectHome {
   // ----------------------------------------------------
   // Tab 2: 待办 (Actions) 视图 —— 轻量状态栏与中文语义化
   // ----------------------------------------------------
+  /** 行动文本搜索（标题+预期结果）与状态筛选相与；只作用于当前已加载列表。 */
+  private actionMatches(action: ActionItem): boolean {
+    const q = this.actionSearchQuery.trim().toLowerCase();
+    if (q !== '') {
+      const inTitle = (action.title ?? '').toLowerCase().includes(q);
+      const inDesc = (action.description ?? '').toLowerCase().includes(q);
+      if (!inTitle && !inDesc) { return false; }
+    }
+    return this.actionStatusFilter === 'ALL' || (this.actionStatusFilter === 'ACTIVE' ? action.status !== 'DONE' : action.status === this.actionStatusFilter);
+  }
+  @Builder
+  private ActionRow(action: ActionItem) {
+    Column({ space: 4 }) {
+      Row({ space: 8 }) {
+        StatusBadge({ status: action.status })
+        Text(TextFormatters.priorityToChinese(action.priority)).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+        Blank()
+        if ((action.dueAt ?? '') !== '') { Text('截止 ' + (action.dueAt ?? '').substring(5, 10).replace('-', '月') + '日').fontSize(11).fontColor(PMColors.INK_TERTIARY) }
+      }.width('100%')
+      Text(TextFormatters.readableText(action.title, '行动标题无法读取，请重新录入。'))
+        .fontSize(15).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
+        .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
+      if ((action.description ?? '').trim() !== '') {
+        Text(action.description ?? '').fontSize(13).lineHeight(19).fontColor(PMColors.INK_SECONDARY)
+          .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
+      }
+      if (action.sourceIntervention !== null && action.sourceIntervention !== undefined && action.sourceIntervention.title !== '') {
+        Text('来源：' + TextFormatters.readableText(action.sourceIntervention.title, '提醒来源无法读取'))
+          .fontSize(11).fontColor(PMColors.EVIDENCE).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
+      }
+    }.width('100%').alignItems(HorizontalAlign.Start).padding({ top: 12, bottom: 12, left: 14, right: 14 })
+      .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
+      .clickEffect(PMInteraction.PRESS_EFFECT)
+      .onClick(() => { this.selectedActionId = action.id; })
+      .accessibilityText(`行动：${action.title}，${action.status}，点按查看详情与操作`)
+  }
   @Builder
   private ActionView() {
     Column() {
       Column({ space: 8 }) {
-        Row({ space: 8 }) {
+        Row({ space: 6 }) {
           Text('项目行动').fontSize(18).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY).layoutWeight(1)
-          Button('＋ 新增', { type: ButtonType.Normal }).constraintSize({ minHeight: 44 }).padding({ left: 12, right: 12 })
-            .fontSize(13).fontWeight(FontWeight.Medium).fontColor(PMColors.SURFACE).backgroundColor(PMColors.BRAND).borderRadius(11)
+          Button({ type: ButtonType.Circle }) { SearchIcon({ iconSize: 18 }) }
+            .width(40).height(40).backgroundColor(Color.Transparent)
+            .accessibilityText('搜索行动标题与预期结果')
+            .onClick(() => { this.actionSearchOpen = !this.actionSearchOpen; })
+          Button({ type: ButtonType.Circle }) { PlusIcon({ iconSize: 18 }) }
+            .width(40).height(40).backgroundColor(Color.Transparent)
             .accessibilityText('手动新增待办').onClick(() => { this.openCreateAction(); })
-          Button('安排时间', { type: ButtonType.Normal }).constraintSize({ minHeight: 44 }).padding({ left: 12, right: 12 })
-            .fontSize(13).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).borderRadius(11)
-            .accessibilityDescription('安排待办时间，同步到手机日历前会再次确认')
-            .onClick(() => { router.pushUrl({ url: 'pages/ActionBoard', params: { projectId: this.projectId } }); })
+          Button('更多', { type: ButtonType.Normal }).constraintSize({ minHeight: 40 }).padding({ left: 10, right: 10 })
+            .fontSize(13).fontColor(PMColors.INK_SECONDARY).backgroundColor(Color.Transparent).borderRadius(10)
+            .accessibilityText('更多操作：安排时间')
+            .bindMenu([{
+              value: '安排时间（行动安排页）',
+              action: (): void => { router.pushUrl({ url: 'pages/ActionBoard', params: { projectId: this.projectId } }); }
+            } as MenuElement])
         }.width('100%')
-        Text(`待推进 ${this.actions.filter((a: ActionItem) => !a.isSimulated && a.status !== 'DONE').length}  ·  已完成 ${this.actions.filter((a: ActionItem) => !a.isSimulated && a.status === 'DONE').length}  ·  不含演示`)
+        if (this.actionSearchOpen) {
+          Row({ space: 8 }) {
+            TextInput({ text: this.actionSearchQuery, placeholder: '搜索标题与预期结果' })
+              .fontSize(14).height(44).backgroundColor(PMColors.SURFACE).borderRadius(11)
+              .border({ width: 1, color: PMColors.BORDER_SUBTLE }).layoutWeight(1)
+              .accessibilityText('搜索行动')
+              .onChange((value: string) => { this.actionSearchQuery = value; })
+            Text('✕').fontSize(15).fontColor(PMColors.INK_TERTIARY).width(36).height(44).textAlign(TextAlign.Center)
+              .accessibilityText('关闭行动搜索并清空关键词')
+              .onClick(() => { this.actionSearchOpen = false; this.actionSearchQuery = ''; })
+          }.width('100%')
+        } else if (this.actionSearchQuery.trim() !== '') {
+          Row({ space: 8 }) {
+            Text('搜索：' + this.actionSearchQuery).fontSize(12).fontColor(PMColors.BRAND)
+              .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
+            Text('清除 ✕').fontSize(12).fontColor(PMColors.INK_TERTIARY).height(36)
+              .accessibilityText('清除行动搜索关键词')
+              .onClick(() => { this.actionSearchQuery = ''; })
+          }.width('100%').padding({ left: 12, right: 12 }).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(10)
+        }
+        Text(`待推进 ${this.actions.filter((a: ActionItem) => !a.isSimulated && a.status !== 'DONE').length} · 已完成 ${this.actions.filter((a: ActionItem) => !a.isSimulated && a.status === 'DONE').length} · 统计不含演示行动，列表保留演示标记`)
           .fontSize(12).fontColor(PMColors.INK_TERTIARY)
         Scroll() {
           Row({ space: 6 }) {
@@ -4002,7 +4549,34 @@ struct ProjectHome {
             Text('这项行动已移除或当前不可访问，可查看全部行动。').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY)
           }
         }
-        ForEach(this.focusedActionId === '' ? this.actions.filter((item: ActionItem) => this.actionStatusFilter === 'ALL' || (this.actionStatusFilter === 'ACTIVE' ? item.status !== 'DONE' : item.status === this.actionStatusFilter)) : this.actions.filter((item: ActionItem) => item.id === this.focusedActionId), (action: ActionItem) => {
+        if (this.selectedActionId !== '' && this.focusedActionId === '') {
+          ListItem() {
+            Row({ space: 8 }) {
+              Text('‹ 返回行动列表').fontSize(13).fontColor(PMColors.BRAND).height(44)
+                .onClick(() => { this.selectedActionId = ''; })
+                .accessibilityText('返回行动列表')
+              Blank()
+            }.width('100%')
+          }
+        }
+        if (this.selectedActionId === '' && this.focusedActionId === '' && this.actionSearchQuery.trim() !== '' &&
+          !this.actions.some((item: ActionItem) => this.actionMatches(item))) {
+          ListItem() {
+            Text('没有匹配的行动；可清除搜索或更换状态筛选。').fontSize(PMFontSize.SECONDARY)
+              .fontColor(PMColors.INK_SECONDARY).padding({ top: 12, bottom: 12 })
+          }
+        }
+        if (this.selectedActionId === '' && this.focusedActionId === '') {
+          ListItem() {
+            Column({ space: 0 }) {
+              ForEach(this.actions.filter((item: ActionItem) => this.actionMatches(item)), (action: ActionItem) => {
+                this.ActionRow(action)
+              }, (action: ActionItem) => action.id)
+            }.width('100%').backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.LG)
+              .border({ width: 1, color: PMColors.BORDER_SUBTLE }).clip(true)
+          }
+        }
+        ForEach(this.actions.filter((item: ActionItem) => item.id === (this.focusedActionId !== '' ? this.focusedActionId : this.selectedActionId)), (action: ActionItem) => {
           ListItem() {
             Column() {
               Row() {
@@ -4029,10 +4603,15 @@ struct ProjectHome {
                 .margin({ top: PMSpacing.SM })
 
       if ((action.description ?? '').trim() !== '') {
-        Column({ space: 4 }) {
+        Column({ space: 2 }) {
           Text('预期结果').fontSize(12).fontColor(PMColors.INK_TERTIARY)
           Text(action.description ?? '').fontSize(14).lineHeight(21).fontColor(PMColors.INK_SECONDARY)
-        }.width('100%').alignItems(HorizontalAlign.Start).padding(12).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(12).margin({ top: 10 })
+            .maxLines(this.expandedActionDescId === action.id ? 100 : 2).textOverflow({ overflow: TextOverflow.Ellipsis })
+          if ((action.description ?? '').length > 56) {
+            Text(this.expandedActionDescId === action.id ? '收起 ⌃' : '展开全文 ⌄').fontSize(12).fontColor(PMColors.BRAND).height(32)
+              .onClick(() => { this.expandedActionDescId = this.expandedActionDescId === action.id ? '' : action.id; })
+          }
+        }.width('100%').alignItems(HorizontalAlign.Start).margin({ top: 8 })
       }
       if ((action.dueAt ?? '') !== '') {
         Text(`截止：${(action.dueAt ?? '').substring(0, 10)}`).fontSize(12).fontColor(PMColors.INK_TERTIARY).margin({ top: 8 })
@@ -4098,44 +4677,48 @@ struct ProjectHome {
               }
               if (action.status === 'TODO' || action.status === 'DOING') {
                 Column({ space: PMSpacing.SM }) {
-                  Button('填写完成回执').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-                    .fontSize(PMFontSize.BUTTON)
-                    .fontWeight(FontWeight.Medium)
-                    .fontColor(PMColors.SURFACE)
-                    .backgroundColor(PMColors.BRAND)
-                    .borderRadius(PMRadius.MD)
-                    .height(48)
-                    .width('100%')
-                    .onClick(() => { this.openCompleteDialog(action.id); })
-                  Row({ space: PMSpacing.SM }) {
-                  if (this.reminderAvailable) {
-                    Button(this.actionReminderCardId === action.id ? '收起提醒设置' : '日历提醒').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-                      .fontSize(PMFontSize.BUTTON)
-                      .fontColor(PMColors.BRAND)
-                      .backgroundColor(PMColors.BRAND_LIGHT)
-                      .borderRadius(PMRadius.SM)
-                      .height(36)
-                      .layoutWeight(1)
-                      .accessibilityDescription('打开这条待办的日历提醒设置')
-                      .onClick(() => {
-                        this.actionReminderCardId = this.actionReminderCardId === action.id ? '' : action.id;
-                      })
-                  }
+                  // 主操作按状态唯一：TODO 先开始；DOING 直接完成。开始不是完成的先决条件。
                   if (action.status === 'TODO') {
-                    Button(this.startingActionId === action.id ? '启动中...' : '开始行动').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
+                    Button(this.startingActionId === action.id ? '启动中...' : '开始行动').type(ButtonType.Normal)
+                      .borderRadius(PMRadius.MD)
                       .fontSize(PMFontSize.BUTTON)
-                      .fontColor(PMColors.INK_PRIMARY)
-                      .backgroundColor(PMColors.SURFACE_SUBTLE)
-                      .border({ width: 1, color: PMColors.BORDER })
-                      .borderRadius(PMRadius.SM)
-                      .height(36)
-                      .layoutWeight(1)
+                      .fontWeight(FontWeight.Medium)
+                      .fontColor(PMColors.SURFACE)
+                      .backgroundColor(PMColors.BRAND)
+                      .height(48)
+                      .width('100%')
                       .enabled(this.startingActionId === '')
+                      .accessibilityText('开始这条行动')
                       .onClick(() => {
                         this.startAction(action.id);
                       })
+                  } else {
+                    Button('完成并回执').type(ButtonType.Normal)
+                      .borderRadius(PMRadius.MD)
+                      .fontSize(PMFontSize.BUTTON)
+                      .fontWeight(FontWeight.Medium)
+                      .fontColor(PMColors.SURFACE)
+                      .backgroundColor(PMColors.BRAND)
+                      .height(48)
+                      .width('100%')
+                      .accessibilityText('填写完成回执')
+                      .onClick(() => { this.openCompleteDialog(action.id); })
                   }
-
+                  Row({ space: PMSpacing.MD }) {
+                    if (action.status === 'TODO') {
+                      Text('直接填写完成回执').fontSize(13).fontColor(PMColors.INK_SECONDARY).height(40)
+                        .accessibilityText('不开始行动，直接填写完成回执')
+                        .onClick(() => { this.openCompleteDialog(action.id); })
+                    }
+                    if (this.reminderAvailable) {
+                      Blank()
+                      Text(this.actionReminderCardId === action.id ? '收起提醒设置 ⌃' : '日历提醒').fontSize(13)
+                        .fontColor(PMColors.INK_SECONDARY).height(40)
+                        .accessibilityDescription('打开这条待办的日历提醒设置')
+                        .onClick(() => {
+                          this.actionReminderCardId = this.actionReminderCardId === action.id ? '' : action.id;
+                        })
+                    }
                   }.width('100%')
                 }
                 .width('100%')
@@ -4206,18 +4789,11 @@ struct ProjectHome {
     } else {
       Scroll() {
         Column({ space: PMSpacing.MD }) {
-          PMPageIntro({ compact: true, title: '委托与对话', description: '设定长期目标，或围绕项目随时提问。' })
+          // 问忆程入口由页面右下角悬浮胶囊承担，这里不再放置重复的提问卡片。
+          PMPageIntro({ compact: true, title: '长期委托', description: '交给忆程一个目标，持续推进、补充材料并审阅成果。' })
           PMButton({ label: '＋ 新建长期委托', onAction: (): void => {
             router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.projectId, mode: 'create' } });
           } })
-          Row({ space: 12 }) {
-            Column({ space: 4 }) {
-              Text('问忆程').fontSize(16).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
-              Text(`基于 ${this.project._count.cards} 条记忆解释项目情况`).fontSize(12).fontColor(PMColors.INK_SECONDARY)
-            }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-            Button('提问 →', { type: ButtonType.Normal }).constraintSize({ minHeight: 44 }).fontSize(14).borderRadius(11)
-              .fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).onClick(() => { if (this.focusAgentEnabled) router.pushUrl({ url: 'pages/FocusConversation', params: { conversationId: this.focusConversationId, projectId: this.projectId } }); else this.showQuickCopilot = true; })
-          }.width('100%').padding(14).backgroundColor(PMColors.SURFACE).borderRadius(18).border({ width: 1, color: PMColors.BORDER_SUBTLE })
           MissionPanel({ projectId: this.projectId, refreshKey: this.missionRefreshKey })
         }.padding(PMSpacing.MD).width('100%').justifyContent(FlexAlign.Start)
       }.layoutWeight(1).width('100%').align(Alignment.TopStart).align(Alignment.TopStart).scrollBar(BarState.Off)
@@ -5143,7 +5719,7 @@ struct ProjectHome {
       .height('100%')
       .backgroundColor(PMColors.BACKGROUND)
 
-      if ((this.focusConversationId !== '' || this.focusAgentEnabled) && this.hasLoadedProjectSnapshot && this.routeError === '' && !this.isArtifactReader && !this.showQuickCopilot) {
+      if ((this.focusConversationId !== '' || this.focusAgentEnabled) && this.hasLoadedProjectSnapshot && this.routeError === '' && !this.isArtifactReader && !this.showQuickCopilot && !this.showCreateAction && !this.showEntrySheet && !this.showReadinessSheet && !this.showStateDiffSheet && !this.showChangeImpactDialog) {
         FocusAgentLauncher({ onOpen: (): void => { router.pushUrl({ url: 'pages/FocusConversation', params: { conversationId: this.focusConversationId, projectId: this.projectId } }); } })
           .align(Alignment.BottomEnd).margin({ right: 18, bottom: 90 })
       }
@@ -5335,260 +5911,370 @@ struct ProjectHome {
         .transition(TransitionEffect.OPACITY.animation({ duration: PMMotion.COLOR, curve: PMMotion.CURVE_CONTENT }))
       }
 
-      // 项目设置弹窗
+      // 项目设置弹窗（重构为双 Tab 结构）
       if (this.showSettingsDialog) {
         Column() {
-          Scroll() {
           Column() {
-            Text('项目设置')
-              .fontSize(PMFontSize.PAGE_TITLE)
-              .fontWeight(FontWeight.Medium)
-              .fontColor(PMColors.INK_PRIMARY)
-
-            Text('只修改项目基本信息，不会改变已有的记忆、提醒或行动。')
-              .fontSize(PMFontSize.BODY)
-              .fontColor(PMColors.INK_SECONDARY)
-              .lineHeight(20)
-              .margin({ top: PMSpacing.XS })
-
-            Text('项目名称')
-              .fontSize(PMFontSize.SECONDARY)
-              .fontWeight(FontWeight.Medium)
-              .fontColor(PMColors.INK_SECONDARY)
-              .margin({ top: PMSpacing.MD })
-            TextInput({ text: this.editTitle })
-              .onChange((v: string) => {
-                this.editTitle = v;
-              })
-              .fontSize(PMFontSize.BODY)
-              .height(48)
-              .backgroundColor(PMColors.SURFACE_SUBTLE)
-              .borderRadius(PMRadius.SM)
-              .border({ width: 1, color: PMColors.BORDER })
-
-            Text('项目目标')
-              .fontSize(PMFontSize.SECONDARY)
-              .fontWeight(FontWeight.Medium)
-              .fontColor(PMColors.INK_SECONDARY)
-              .margin({ top: PMSpacing.SM })
-            TextInput({ text: this.editGoal })
-              .onChange((v: string) => {
-                this.editGoal = v;
-              })
-              .fontSize(PMFontSize.BODY)
-              .height(48)
-              .backgroundColor(PMColors.SURFACE_SUBTLE)
-              .borderRadius(PMRadius.SM)
-              .border({ width: 1, color: PMColors.BORDER })
-
+            // 1. 顶部固定区：标题 + 关闭按钮 + Tab 胶囊
             Row() {
-              Text('截止日期')
-                .fontSize(PMFontSize.SECONDARY)
-                .fontWeight(FontWeight.Medium)
-                .fontColor(PMColors.INK_SECONDARY)
-                .layoutWeight(1)
-              if (this.editDeadline !== '') {
-                Button('清除截止日期').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontColor(PMColors.RISK)
-                  .backgroundColor(PMColors.SURFACE_SUBTLE)
-                  .borderRadius(PMRadius.XS)
-                  .height(28)
-                  .onClick(() => {
-                    this.editDeadline = '';
-                  })
-              }
-            }
-            .width('100%')
-            .margin({ top: PMSpacing.SM })
-
-            Button(this.editDeadline === '' ? '选择截止日期' : this.editDeadline).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-              .fontSize(PMFontSize.BODY)
-              .fontColor(PMColors.INK_PRIMARY)
-              .height(48)
-              .backgroundColor(PMColors.SURFACE_SUBTLE)
-              .borderRadius(PMRadius.SM)
-              .border({ width: 1, color: PMColors.BORDER })
-              .width('100%')
-              .accessibilityText(this.editDeadline === '' ? '选择项目截止日期' : `项目截止日期：${this.editDeadline}，点击修改`)
-              .onClick(() => {
-                this.pickEditDeadline();
-              })
-
-            // 提醒策略（B1）：预算与静默时段；V1 为本机安装的全局共享预算
-            Column() {
-              Text('提醒策略')
-                .fontSize(PMFontSize.SECONDARY)
-                .fontWeight(FontWeight.Medium)
+              Text('项目设置')
+                .fontSize(PMFontSize.PAGE_TITLE)
+                .fontWeight(FontWeight.Bold)
                 .fontColor(PMColors.INK_PRIMARY)
-
-              Text('每日预算（全局共享，0–50 次）')
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.INK_SECONDARY)
-                .margin({ top: PMSpacing.SM })
-              TextInput({ text: this.policyDailyBudget, placeholder: '3' })
-                .onChange((v: string) => {
-                  this.policyDailyBudget = v;
-                })
-                .fontSize(PMFontSize.BODY)
-                .height(40)
-                .backgroundColor(PMColors.SURFACE_SUBTLE)
+              Blank()
+              Button('✕', { type: ButtonType.Normal })
+                .fontSize(16)
+                .fontColor(PMColors.INK_TERTIARY)
+                .backgroundColor(Color.Transparent)
+                .width(36)
+                .height(36)
                 .borderRadius(PMRadius.SM)
-                .border({ width: 1, color: PMColors.BORDER })
-                .margin({ top: 4 })
-                .accessibilityText('每天最多提醒次数')
-
-              Text('静默时段（跨午夜可用，格式 HH:mm）')
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.INK_SECONDARY)
-                .margin({ top: PMSpacing.SM })
-              Row({ space: PMSpacing.SM }) {
-                TextInput({ text: this.policyQuietStart, placeholder: '23:00' })
-                  .onChange((v: string) => {
-                    this.policyQuietStart = v;
-                  })
-                  .fontSize(PMFontSize.BODY)
-                  .height(40)
-                  .backgroundColor(PMColors.SURFACE_SUBTLE)
-                  .borderRadius(PMRadius.SM)
-                  .border({ width: 1, color: PMColors.BORDER })
-                  .layoutWeight(1)
-                  .accessibilityText('静默开始时间')
-                TextInput({ text: this.policyQuietEnd, placeholder: '08:00' })
-                  .onChange((v: string) => {
-                    this.policyQuietEnd = v;
-                  })
-                  .fontSize(PMFontSize.BODY)
-                  .height(40)
-                  .backgroundColor(PMColors.SURFACE_SUBTLE)
-                  .borderRadius(PMRadius.SM)
-                  .border({ width: 1, color: PMColors.BORDER })
-                  .layoutWeight(1)
-                  .accessibilityText('静默结束时间')
-              }
-              .width('100%')
-              .margin({ top: 4 })
-
-              if (this.policySuggestions.length > 0) {
-                ForEach(this.policySuggestions, (suggestion: PolicySuggestion) => {
-                  Column() {
-                    Text(suggestion.text)
-                      .fontSize(PMFontSize.CAPTION)
-                      .fontColor(PMColors.INK_SECONDARY)
-                      .lineHeight(18)
-                    Row({ space: PMSpacing.SM }) {
-                      Button('降低频率').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-                        .height(32)
-                        .fontSize(PMFontSize.CAPTION)
-                        .fontColor(PMColors.SURFACE)
-                        .backgroundColor(PMColors.BRAND)
-                        .borderRadius(PMRadius.SM)
-                        .onClick(() => {
-                          this.decideSuggestion('CONFIRM', suggestion.triggerType);
-                        })
-                      Button('保持现状').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-                        .height(32)
-                        .fontSize(PMFontSize.CAPTION)
-                        .fontColor(PMColors.INK_SECONDARY)
-                        .backgroundColor(PMColors.SURFACE_SUBTLE)
-                        .borderRadius(PMRadius.SM)
-                        .onClick(() => {
-                          this.decideSuggestion('DISMISS', suggestion.triggerType);
-                        })
-                    }
-                    .margin({ top: PMSpacing.XS })
-                  }
-                  .width('100%')
-                  .padding(PMSpacing.SM)
-                  .backgroundColor(PMColors.BRAND_LIGHT)
-                  .borderRadius(PMRadius.SM)
-                  .margin({ top: PMSpacing.SM })
-                  .alignItems(HorizontalAlign.Start)
-                }, (suggestion: PolicySuggestion) => suggestion.triggerType)
-              }
-
-              if (this.policyRecentSuppressions !== '') {
-                Text(this.policyRecentSuppressions)
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontColor(PMColors.INK_TERTIARY)
-                  .lineHeight(18)
-                  .margin({ top: PMSpacing.SM })
-              }
-
-              if (this.policyFeedback !== '') {
-                Text(this.policyFeedback)
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontColor(this.policyFeedback.indexOf('失败') >= 0 || this.policyFeedback.indexOf('必须') >= 0 || this.policyFeedback.indexOf('格式') >= 0
-                    ? PMColors.RISK : PMColors.SUCCESS)
-                  .margin({ top: PMSpacing.XS })
-              }
-
-              Row({ space: PMSpacing.SM }) {
-                Button(this.isSavingPolicy ? '保存中…' : '保存策略').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-                  .height(36)
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontColor(PMColors.SURFACE)
-                  .backgroundColor(PMColors.BRAND)
-                  .borderRadius(PMRadius.SM)
-                  .layoutWeight(1)
-                  .enabled(!this.isSavingPolicy)
-                  .onClick(() => {
-                    this.savePolicy();
-                  })
-                Button('恢复默认').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-                  .height(36)
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontColor(PMColors.INK_SECONDARY)
-                  .backgroundColor(PMColors.SURFACE_SUBTLE)
-                  .borderRadius(PMRadius.SM)
-                  .onClick(() => {
-                    this.restorePolicyDefaults();
-                  })
-              }
-              .width('100%')
-              .margin({ top: PMSpacing.SM })
-            }
-            .width('100%')
-            .padding(PMSpacing.MD)
-            .backgroundColor(PMColors.SURFACE_SUBTLE)
-            .borderRadius(PMRadius.SM)
-            .margin({ top: PMSpacing.LG })
-            .alignItems(HorizontalAlign.Start)
-
-            Row() {
-              Button('取消').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-                .fontSize(PMFontSize.BUTTON)
-                .fontColor(PMColors.INK_SECONDARY)
-                .backgroundColor(PMColors.SURFACE_SUBTLE)
-                .borderRadius(PMRadius.SM)
-                .height(48)
-                .layoutWeight(1)
+                .accessibilityText('关闭项目设置')
                 .onClick(() => {
                   this.showSettingsDialog = false;
                 })
+            }
+            .width('100%')
+            .alignItems(VerticalAlign.Center)
+            .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.LG, bottom: PMSpacing.SM })
 
-              Button(this.isSavingSettings ? '保存中...' : '保存修改').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-                .fontSize(PMFontSize.BUTTON)
-                .fontWeight(FontWeight.Medium)
-                .fontColor(PMColors.SURFACE)
-                .backgroundColor(PMColors.BRAND)
+            // 双 Tab 胶囊切换
+            Row({ space: 8 }) {
+              Button('基本信息', { type: ButtonType.Normal })
+                .fontSize(14)
+                .fontWeight(this.settingsTabIndex === 0 ? FontWeight.Bold : FontWeight.Normal)
+                .fontColor(this.settingsTabIndex === 0 ? PMColors.BRAND : PMColors.INK_SECONDARY)
+                .backgroundColor(this.settingsTabIndex === 0 ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
                 .borderRadius(PMRadius.SM)
-                .height(48)
-                .layoutWeight(1.8)
-                .margin({ left: PMSpacing.MD })
+                .layoutWeight(1)
+                .height(36)
                 .onClick(() => {
-                  this.saveSettings();
+                  this.settingsTabIndex = 0;
+                })
+
+              Button('提醒策略', { type: ButtonType.Normal })
+                .fontSize(14)
+                .fontWeight(this.settingsTabIndex === 1 ? FontWeight.Bold : FontWeight.Normal)
+                .fontColor(this.settingsTabIndex === 1 ? PMColors.BRAND : PMColors.INK_SECONDARY)
+                .backgroundColor(this.settingsTabIndex === 1 ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
+                .borderRadius(PMRadius.SM)
+                .layoutWeight(1)
+                .height(36)
+                .onClick(() => {
+                  this.settingsTabIndex = 1;
                 })
             }
-            .margin({ top: PMSpacing.LG })
             .width('100%')
+            .padding({ left: PMSpacing.LG, right: PMSpacing.LG, bottom: PMSpacing.SM })
+
+            Divider().color(PMColors.BORDER_SUBTLE).width('100%')
+
+            // 2. 中间可滚动表单区域
+            Scroll() {
+              Column({ space: PMSpacing.MD }) {
+                if (this.settingsTabIndex === 0) {
+                  // --- Tab 1: 基本信息 ---
+                  Text('修改项目基本信息，不会影响已有的记忆、提醒或行动。')
+                    .fontSize(PMFontSize.BODY)
+                    .fontColor(PMColors.INK_SECONDARY)
+                    .lineHeight(20)
+
+                  Column({ space: 6 }) {
+                    Text('项目名称')
+                      .fontSize(PMFontSize.SECONDARY)
+                      .fontWeight(FontWeight.Medium)
+                      .fontColor(PMColors.INK_PRIMARY)
+                    TextInput({ text: this.editTitle })
+                      .onChange((v: string) => { this.editTitle = v; })
+                      .fontSize(PMFontSize.BODY)
+                      .height(44)
+                      .backgroundColor(PMColors.SURFACE_SUBTLE)
+                      .borderRadius(PMRadius.SM)
+                      .border({ width: 1, color: PMColors.BORDER })
+                  }
+                  .width('100%')
+                  .alignItems(HorizontalAlign.Start)
+
+                  Column({ space: 6 }) {
+                    Text('项目目标')
+                      .fontSize(PMFontSize.SECONDARY)
+                      .fontWeight(FontWeight.Medium)
+                      .fontColor(PMColors.INK_PRIMARY)
+                    TextArea({ text: this.editGoal })
+                      .onChange((v: string) => { this.editGoal = v; })
+                      .fontSize(PMFontSize.BODY)
+                      .height(84)
+                      .backgroundColor(PMColors.SURFACE_SUBTLE)
+                      .borderRadius(PMRadius.SM)
+                      .border({ width: 1, color: PMColors.BORDER })
+                  }
+                  .width('100%')
+                  .alignItems(HorizontalAlign.Start)
+
+                  Column({ space: 6 }) {
+                    Text('项目描述')
+                      .fontSize(PMFontSize.SECONDARY)
+                      .fontWeight(FontWeight.Medium)
+                      .fontColor(PMColors.INK_PRIMARY)
+                    TextArea({ text: this.editDescription })
+                      .onChange((v: string) => { this.editDescription = v; })
+                      .fontSize(PMFontSize.BODY)
+                      .height(64)
+                      .backgroundColor(PMColors.SURFACE_SUBTLE)
+                      .borderRadius(PMRadius.SM)
+                      .border({ width: 1, color: PMColors.BORDER })
+                  }
+                  .width('100%')
+                  .alignItems(HorizontalAlign.Start)
+
+                  Column({ space: 6 }) {
+                    Text('截止日期')
+                      .fontSize(PMFontSize.SECONDARY)
+                      .fontWeight(FontWeight.Medium)
+                      .fontColor(PMColors.INK_PRIMARY)
+
+                    Row() {
+                      Text(this.editDeadline !== '' ? this.editDeadline : '未设置截止日期')
+                        .fontSize(PMFontSize.BODY)
+                        .fontColor(this.editDeadline !== '' ? PMColors.INK_PRIMARY : PMColors.INK_TERTIARY)
+                        .layoutWeight(1)
+
+                      if (this.editDeadline !== '') {
+                        Button('清除', { type: ButtonType.Normal })
+                          .fontSize(PMFontSize.CAPTION)
+                          .fontColor(PMColors.RISK)
+                          .backgroundColor(PMColors.SURFACE_SUBTLE)
+                          .borderRadius(PMRadius.XS)
+                          .height(28)
+                          .padding({ left: 8, right: 8 })
+                          .margin({ right: 8 })
+                          .onClick(() => { this.editDeadline = ''; })
+                      }
+
+                      Button(this.editDeadline !== '' ? '修改' : '选择日期', { type: ButtonType.Normal })
+                        .fontSize(PMFontSize.CAPTION)
+                        .fontColor(PMColors.BRAND)
+                        .backgroundColor(PMColors.BRAND_LIGHT)
+                        .borderRadius(PMRadius.XS)
+                        .height(28)
+                        .padding({ left: 10, right: 10 })
+                        .onClick(() => { this.pickEditDeadline(); })
+                    }
+                    .width('100%')
+                    .padding({ left: 12, right: 12, top: 8, bottom: 8 })
+                    .backgroundColor(PMColors.SURFACE_SUBTLE)
+                    .borderRadius(PMRadius.SM)
+                    .border({ width: 1, color: PMColors.BORDER })
+                  }
+                  .width('100%')
+                  .alignItems(HorizontalAlign.Start)
+
+                } else {
+                  // --- Tab 2: 提醒策略 ---
+                  Text('当前为服务端共享策略，修改会影响该服务上的项目，不会改变系统通知权限。')
+                    .fontSize(PMFontSize.BODY)
+                    .fontColor(PMColors.INK_SECONDARY)
+                    .lineHeight(20)
+
+                  Column({ space: 6 }) {
+                    Row() {
+                      Text('每日提醒上限')
+                        .fontSize(PMFontSize.SECONDARY)
+                        .fontWeight(FontWeight.Medium)
+                        .fontColor(PMColors.INK_PRIMARY)
+                      Blank()
+                      Text('当前服务共享 (0–50 次)')
+                        .fontSize(PMFontSize.CAPTION)
+                        .fontColor(PMColors.INK_TERTIARY)
+                    }
+                    .width('100%')
+
+                    TextInput({ text: this.policyDailyBudget, placeholder: '3' })
+                      .type(InputType.Number)
+                      .onChange((v: string) => { this.policyDailyBudget = v; })
+                      .fontSize(PMFontSize.BODY)
+                      .height(44)
+                      .backgroundColor(PMColors.SURFACE_SUBTLE)
+                      .borderRadius(PMRadius.SM)
+                      .border({ width: 1, color: PMColors.BORDER })
+                  }
+                  .width('100%')
+                  .alignItems(HorizontalAlign.Start)
+
+                  Column({ space: 6 }) {
+                    Row() {
+                      Text('免打扰时段')
+                        .fontSize(PMFontSize.SECONDARY)
+                        .fontWeight(FontWeight.Medium)
+                        .fontColor(PMColors.INK_PRIMARY)
+                      Blank()
+                      Text('跨午夜可用')
+                        .fontSize(PMFontSize.CAPTION)
+                        .fontColor(PMColors.INK_TERTIARY)
+                    }
+                    .width('100%')
+
+                    Row({ space: PMSpacing.SM }) {
+                      Button(`开始：${this.policyQuietStart}`, { type: ButtonType.Normal })
+                        .fontSize(PMFontSize.BODY)
+                        .fontColor(PMColors.INK_PRIMARY)
+                        .backgroundColor(PMColors.SURFACE_SUBTLE)
+                        .borderRadius(PMRadius.SM)
+                        .border({ width: 1, color: PMColors.BORDER })
+                        .height(44)
+                        .layoutWeight(1)
+                        .onClick(() => { this.pickQuietStart(); })
+
+                      Text('至')
+                        .fontSize(PMFontSize.SECONDARY)
+                        .fontColor(PMColors.INK_TERTIARY)
+
+                      Button(`结束：${this.policyQuietEnd}`, { type: ButtonType.Normal })
+                        .fontSize(PMFontSize.BODY)
+                        .fontColor(PMColors.INK_PRIMARY)
+                        .backgroundColor(PMColors.SURFACE_SUBTLE)
+                        .borderRadius(PMRadius.SM)
+                        .border({ width: 1, color: PMColors.BORDER })
+                        .height(44)
+                        .layoutWeight(1)
+                        .onClick(() => { this.pickQuietEnd(); })
+                    }
+                    .width('100%')
+                    .alignItems(VerticalAlign.Center)
+                  }
+                  .width('100%')
+                  .alignItems(HorizontalAlign.Start)
+
+                  // 抑制记录：紧凑折叠摘要
+                  if (this.policyRecentSuppressions !== '') {
+                    Column({ space: 4 }) {
+                      Row() {
+                        Text('最近提醒抑制记录')
+                          .fontSize(PMFontSize.CAPTION)
+                          .fontColor(PMColors.INK_SECONDARY)
+                        Blank()
+                        Button(this.showSuppressionDetail ? '收起 ↑' : '查看详情 ↓', { type: ButtonType.Normal })
+                          .fontSize(11)
+                          .fontColor(PMColors.BRAND)
+                          .backgroundColor(Color.Transparent)
+                          .height(24)
+                          .onClick(() => { this.showSuppressionDetail = !this.showSuppressionDetail; })
+                      }
+                      .width('100%')
+
+                      if (this.showSuppressionDetail) {
+                        Text(this.policyRecentSuppressions)
+                          .fontSize(PMFontSize.CAPTION)
+                          .fontColor(PMColors.INK_TERTIARY)
+                          .lineHeight(18)
+                          .padding(8)
+                          .backgroundColor(PMColors.SURFACE_SUBTLE)
+                          .borderRadius(PMRadius.SM)
+                      }
+                    }
+                    .width('100%')
+                    .alignItems(HorizontalAlign.Start)
+                  }
+
+                  // 提醒建议
+                  if (this.policySuggestions.length > 0) {
+                    ForEach(this.policySuggestions, (suggestion: PolicySuggestion) => {
+                      Column({ space: 4 }) {
+                        Text(suggestion.text)
+                          .fontSize(PMFontSize.CAPTION)
+                          .fontColor(PMColors.INK_SECONDARY)
+                          .lineHeight(18)
+                        Row({ space: PMSpacing.SM }) {
+                          Button('降低频率', { type: ButtonType.Normal })
+                            .height(30)
+                            .fontSize(PMFontSize.CAPTION)
+                            .fontColor(PMColors.SURFACE)
+                            .backgroundColor(PMColors.BRAND)
+                            .borderRadius(PMRadius.SM)
+                            .onClick(() => { this.decideSuggestion('CONFIRM', suggestion.triggerType); })
+                          Button('保持现状', { type: ButtonType.Normal })
+                            .height(30)
+                            .fontSize(PMFontSize.CAPTION)
+                            .fontColor(PMColors.INK_SECONDARY)
+                            .backgroundColor(PMColors.SURFACE_SUBTLE)
+                            .borderRadius(PMRadius.SM)
+                            .onClick(() => { this.decideSuggestion('DISMISS', suggestion.triggerType); })
+                        }
+                      }
+                      .width('100%')
+                      .padding(PMSpacing.SM)
+                      .backgroundColor(PMColors.BRAND_LIGHT)
+                      .borderRadius(PMRadius.SM)
+                      .alignItems(HorizontalAlign.Start)
+                    }, (suggestion: PolicySuggestion) => suggestion.triggerType)
+                  }
+
+                  if (this.policyFeedback !== '') {
+                    Text(this.policyFeedback)
+                      .fontSize(PMFontSize.CAPTION)
+                      .fontColor(this.policyFeedback.indexOf('失败') >= 0 || this.policyFeedback.indexOf('必须') >= 0 || this.policyFeedback.indexOf('格式') >= 0
+                        ? PMColors.RISK : PMColors.SUCCESS)
+                  }
+                }
+              }
+              .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.MD })
+              .width('100%')
+            }
+            .layoutWeight(1)
+            .width('100%')
+            .align(Alignment.TopStart)
+
+            Divider().color(PMColors.BORDER_SUBTLE).width('100%')
+
+            // 3. 底部固定操作栏
+            Row({ space: PMSpacing.MD }) {
+              if (this.settingsTabIndex === 0) {
+                Button('取消', { type: ButtonType.Normal })
+                  .fontSize(PMFontSize.BUTTON)
+                  .fontColor(PMColors.INK_SECONDARY)
+                  .backgroundColor(PMColors.SURFACE_SUBTLE)
+                  .borderRadius(PMRadius.SM)
+                  .height(44)
+                  .layoutWeight(1)
+                  .onClick(() => { this.showSettingsDialog = false; })
+
+                Button(this.isSavingSettings ? '保存中...' : '保存修改', { type: ButtonType.Normal })
+                  .fontSize(PMFontSize.BUTTON)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.SURFACE)
+                  .backgroundColor(PMColors.BRAND)
+                  .borderRadius(PMRadius.SM)
+                  .height(44)
+                  .layoutWeight(1.5)
+                  .enabled(!this.isSavingSettings)
+                  .onClick(() => { this.saveSettings(); })
+              } else {
+                Button('恢复默认', { type: ButtonType.Normal })
+                  .fontSize(PMFontSize.BUTTON)
+                  .fontColor(PMColors.INK_SECONDARY)
+                  .backgroundColor(PMColors.SURFACE_SUBTLE)
+                  .borderRadius(PMRadius.SM)
+                  .height(44)
+                  .layoutWeight(1)
+                  .onClick(() => { this.restorePolicyDefaults(); })
+
+                Button(this.isSavingPolicy ? '保存中…' : '保存策略', { type: ButtonType.Normal })
+                  .fontSize(PMFontSize.BUTTON)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.SURFACE)
+                  .backgroundColor(PMColors.BRAND)
+                  .borderRadius(PMRadius.SM)
+                  .height(44)
+                  .layoutWeight(1.5)
+                  .enabled(!this.isSavingPolicy)
+                  .onClick(() => { this.savePolicy(); })
+              }
+            }
+            .width('100%')
+            .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.LG })
           }
           .width('100%')
-          .padding(PMSpacing.XL)
-          }
-          .width('100%')
-          .constraintSize({ maxHeight: '90%' })
-          .scrollable(ScrollDirection.Vertical)
+          .constraintSize({ maxHeight: '85%' })
           .backgroundColor(PMColors.SURFACE)
           .borderRadius(PMRadius.LG)
           .border({ width: 1, color: PMColors.BORDER })

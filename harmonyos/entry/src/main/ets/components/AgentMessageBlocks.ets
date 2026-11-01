@@ -1,7 +1,5 @@
 import { agentStateLabel, receiptDetail } from '../common/AgentPresentationContract';
 import { AgentPresentation, HydratedBlock, AllowedAction, RichTextNode, ExperienceInlineText, EvidenceLink, GoalCriterion, ExperienceCandidate, InvestigationStep, ExperienceTimelineEvent, ExperienceChoice, ExperienceBranch } from '../models/AgentExperience';
-import { ConversationFileGuide } from '../models/Conversation';
-import { ConversationFileGuides } from './ConversationFileGuides';
 import { ConversationDraftStore, ConversationDraft } from '../services/ConversationDraftStore';
 import { PMColors } from '../common/DesignTokens';
 
@@ -130,7 +128,6 @@ struct AgentSemanticBlock {
 @Component
 export struct AgentMessageBlocks {
   @Prop presentation: AgentPresentation = { schemaVersion: 1, blocks: [], allowedActions: [] };
-  @Prop files: ConversationFileGuide[] = [];
   @Prop conversationId: string = '';
   @Prop messageId: string = '';
   @Prop busy: boolean = false;
@@ -141,7 +138,6 @@ export struct AgentMessageBlocks {
         AgentSemanticBlock({ block: this.presentation.blocks[index], conversationId: this.conversationId, messageId: this.messageId, busy: this.busy,
           actions: this.presentation.allowedActions.filter((a: AllowedAction) => this.presentation.blocks[index].actionBindingIds.includes(a.bindingId)), onAction: this.onAction })
       }, (block: HydratedBlock) => block.blockKey)
-      if (this.files.length > 0) { ConversationFileGuides({ files: this.files, conversationId: this.conversationId }) }
     }.width('100%').alignItems(HorizontalAlign.Start)
   }
 }

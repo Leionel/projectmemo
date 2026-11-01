@@ -16,8 +16,8 @@ test('PR6 原回答来源回读、研究总结确认及撤权，桌面手机同�
     await expect(panel.getByText('先补同条件验证，再决定是否采用。',{exact:false})).toBeVisible();
     await panel.getByText('调查覆盖与缺口',{exact:true}).click();
     await expect(panel.getByText('待核对：本项目同条件实测')).toBeVisible();
-    const guides=panel.getByLabel('本条回答的资料指引');
-    await guides.locator('summary').click();
+    await panel.getByRole('button',{name:/资料 \d+/}).first().click();
+    const guides=page.getByRole('dialog',{name:'本次回答的资料'});
     await expect(guides).toContainText('正文片段');
     await guides.getByRole('link',{name:'查看网页来源'}).click();
     await expect(page.getByText('这份合成资料仅用于界面验收。',{exact:false})).toBeVisible();

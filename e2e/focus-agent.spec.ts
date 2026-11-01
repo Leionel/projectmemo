@@ -21,10 +21,15 @@ test("Focus keeps file guidance inside its answer and names discussions from the
   const panel = page.getByRole("region", { name: "问忆程", exact: true });
   await panel.getByRole("textbox", { name: "与忆程讨论项目" }).fill("实验部署记录还需要核对什么？");
   await panel.getByRole("button", { name: "发送", exact: true }).click();
-  const guides = panel.getByLabel("本条回答的资料指引"); await expect(guides).toBeVisible();
-  await guides.locator("summary").first().click();
+  const entry = panel.getByRole("button", { name: /资料 \d+/ }).first(); await expect(entry).toBeVisible();
+  await entry.click();
+  const guides = page.getByRole("dialog", { name: "本次回答的资料" });
   await expect(guides.getByRole("link", { name: "查看项目资料", exact: true }).first()).toHaveAttribute("href", new RegExp(project.id + "/knowledge.*conversation="));
-  await expect(panel.getByRole("combobox", { name: "选择讨论" }).locator("option:checked")).toContainText("实验部署记录还需要核对什么");
+  await guides.getByRole("button", { name: "关闭", exact: true }).click();
+  await panel.getByRole("button", { name: "历史讨论", exact: true }).click();
+  const history = page.getByRole("dialog", { name: "历史讨论" });
+  await expect(history.locator("button").filter({ hasText: "实验部署记录还需要核对什么" })).toContainText("当前讨论");
+  await history.getByRole("button", { name: "关闭", exact: true }).click();
   for (const width of [360, 390, 430]) {
     await page.setViewportSize({ width, height: 844 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
@@ -48,7 +53,7 @@ test("Focus reads a D1/D2 proposal, confirms a directed read and returns its ori
   expect(turn.ok(), await turn.text()).toBe(true);
   await page.goto("/focus?conversation=" + id);
   const panel = page.getByRole("region", { name: "问忆程", exact: true });
-  await panel.getByRole("button", { name: "在此协作", exact: true }).first().click();
+  await panel.getByRole("button", { name: "在此继续", exact: true }).first().click();
   const work = panel.getByRole("region", { name: "原任务协作", exact: true });
   await work.getByText("复核资料变化", { exact: true }).click();
   await expect(work.getByText("设备D部署测量超过原预算，需要核对。", { exact: true })).toBeVisible();
@@ -228,7 +233,7 @@ test("Focus compares frozen options and resumes the same original Mission inside
   expect((await page.request.post("/api/conversations/" + id + "/turns", { headers, data: { requestId: "inspect", expectedVersion: cv.version, message: "查已有证据", entityRef: { kind: "MISSION", id: mission.id, projectId: project.id } } })).ok()).toBe(true);
   await page.goto("/focus?conversation=" + id);
   const panel = page.getByRole("region", { name: "问忆程", exact: true });
-  await panel.getByRole("button", { name: "在此协作", exact: true }).first().click();
+  await panel.getByRole("button", { name: "在此继续", exact: true }).first().click();
   const work = panel.getByRole("region", { name: "原任务协作", exact: true });
   await work.getByText("对比推进方案", { exact: true }).click();
   await work.getByRole("spinbutton", { name: "可用时间（分钟）" }).fill("60");

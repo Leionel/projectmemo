@@ -16,14 +16,14 @@ test("R4 native Web blocks keep drafts and confirm one original Action on deskto
     const panel = page.getByRole("region", { name: "问忆程", exact: true });
     await expect(panel.getByTestId("agent-message-blocks")).toBeVisible();
     await expect(panel.getByRole("heading", { name: "离目标还差什么" })).toBeVisible();
-    await panel.getByRole("button", { name: "在此协作", exact: true }).first().click();
+    await panel.getByRole("button", { name: "在此继续", exact: true }).first().click();
     const draft = panel.getByRole("textbox", { name: "原问题答复" }); await draft.fill("设备信息待确认，先保留这个草稿。");
     await panel.getByRole("textbox", { name: "与忆程讨论项目" }).fill("目前还有什么待处理？");
     await panel.getByRole("button", { name: "发送", exact: true }).click();
     await expect(panel.getByRole("textbox", { name: "与忆程讨论项目" })).toHaveValue("");
     await expect(draft).toHaveValue("设备信息待确认，先保留这个草稿。");
     await panel.getByRole("button", { name: "收起原任务协作" }).click();
-    await panel.getByRole("button", { name: "在此协作", exact: true }).first().click();
+    await panel.getByRole("button", { name: "在此继续", exact: true }).first().click();
     await expect(draft).toHaveValue("设备信息待确认，先保留这个草稿。");
     await panel.getByRole("button", { name: "收起原任务协作" }).click();
     const screenshotDir = process.env.FOCUS_EVIDENCE_DIR ?? "test-results/r4-experience";

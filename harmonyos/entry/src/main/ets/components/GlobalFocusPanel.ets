@@ -9,7 +9,9 @@ import { ConversationService } from '../services/ConversationService';
 import { ApiError } from '../models/Project';
 import { LoadingStateView, ErrorStateView } from './AsyncStateView';
 import { PMColors, PMRadius } from '../common/DesignTokens';
-import { PMButton, PMStatusPill, PMPageIntro, PMMetricTile, PMListRow } from './PMReferencePrimitives';
+import { PMButton, PMStatusPill, PMPageIntro, PMListRow } from './PMReferencePrimitives';
+import { SettingsIcon } from './PMIcons';
+import { FocusAgentLauncher } from './FocusAgentLauncher';
 
 @Component
 export struct GlobalFocusPanel {
@@ -82,17 +84,46 @@ export struct GlobalFocusPanel {
     if (kind === 'mission' && item.status === 'FAILED') return '委托未能完成';
     return item.title;
   }
+  private missionInterrupted(item: FocusEntry): string {
+    return item.status === 'FAILED' ? '执行已中断，进入详情查看原因与恢复方式。' : '进入详情查看原因与继续方式。';
+  }
   private rowSubtitle(item: FocusEntry, items: FocusEntry[]): string {
     if (this.kind(item) === 'reminder' && focusDeadlineConflict(item, Date.now())) return this.primaryDetail(item);
+    if (this.kind(item) === 'mission' && (item.status === 'PAUSED' || item.status === 'FAILED')) {
+      const count = this.duplicateCount(item, items);
+      return `${count > 1 ? '已合并 ' + count + ' 条同类记录 · ' : ''}${this.missionInterrupted(item)}`;
+    }
     const count = this.duplicateCount(item, items);
     return `${count > 1 ? '已合并 ' + count + ' 条同类记录 · ' : ''}${item.detail || item.activity}`;
   }
   private primaryDetail(item: FocusEntry): string {
+    if (this.kind(item) === 'mission' && (item.status === 'PAUSED' || item.status === 'FAILED')) { return this.missionInterrupted(item); }
     if (this.kind(item) === 'reminder' && focusDeadlineConflict(item, Date.now())) {
       const deadline = new Date(item.projectDeadline!).toLocaleDateString('zh-CN');
       return `原提醒写“${item.title}”，当前项目截止日为 ${deadline}。请核对日期与适用阶段。`;
     }
     return item.detail;
+  }
+  /** 用用户能理解的时间表达提醒截止；不直接展示 ISO 时间戳。 */
+  private reminderTime(item: FocusEntry): string {
+    const raw = item.dueAt !== '' ? item.dueAt : (item.projectDeadline ?? '');
+    if (raw === '') { return ''; }
+    const due = Date.parse(raw);
+    if (isNaN(due)) { return ''; }
+    const d = new Date(due);
+    const md = (d.getMonth() + 1) + '月' + d.getDate() + '日';
+    const days = Math.ceil((due - Date.now()) / 86400000);
+    if (days < 0) { return '已逾期 · 截止于 ' + md; }
+    if (days === 0) { return '今日截止'; }
+    if (days <= 7) { return '距截止 ' + days + ' 天 · ' + md; }
+    return '截止于 ' + md;
+  }
+  private reminderMeta(item: FocusEntry): string {
+    const parts: string[] = [];
+    const time = this.reminderTime(item);
+    if (time !== '') { parts.push(time); }
+    parts.push(item.projectTitle);
+    return parts.join(' · ');
   }
   private open(item: FocusEntry, kind: string): void {
     if (kind === 'project') { router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: item.projectId } }); return; }
@@ -100,6 +131,17 @@ export struct GlobalFocusPanel {
     else if (kind === 'reminder') router.pushUrl({ url: 'pages/InterventionDetail', params: { projectId: item.projectId, interventionId: item.id } });
     else router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: item.projectId,
       tab: kind === 'action' ? 'actions' : 'memory', actionId: kind === 'action' ? item.id : '', cardId: kind === 'record' ? item.id : '' } });
+  }
+  private askReason(item: FocusEntry): void {
+    router.pushUrl({ url: 'pages/FocusConversation', params: { projectId: item.projectId, originKind: 'INTERVENTION', originId: item.id } });
+  }
+  private focusMenuItems(): MenuElement[] {
+    const items: MenuElement[] = [];
+    items.push({ value: this.includeArchived ? '包含归档项目 · 已开启' : '包含归档项目 · 未开启', action: (): void => {
+      this.includeArchived = !this.includeArchived; this.refresh();
+    } });
+    items.push({ value: '刷新焦点', action: (): void => { this.refresh(); } });
+    return items;
   }
   @Builder private Primary(item: FocusEntry) {
     Column({ space: 12 }) {
@@ -111,24 +153,72 @@ export struct GlobalFocusPanel {
       }.width('100%')
       Text(this.rowTitle(item, this.kind(item))).fontSize(21).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
         .maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis }).lineHeight(29)
+      if (this.kind(item) === 'reminder' && this.reminderTime(item) !== '') {
+        Text(this.reminderTime(item)).fontSize(13).fontColor(PMColors.INK_SECONDARY)
+      }
       if (this.view.primaryContext?.workingObjective) { Text('当前重点：'+this.view.primaryContext!.workingObjective).fontSize(14).fontColor(PMColors.INK_SECONDARY) }
       if (this.primaryDetail(item) !== '') { Text(this.primaryDetail(item)).fontSize(14).lineHeight(22).fontColor(PMColors.INK_SECONDARY).maxLines(4).textOverflow({ overflow: TextOverflow.Ellipsis }) }
-      if (this.kind(item) !== 'mission') { PMStatusPill({ label: this.kind(item) === 'reminder' ? '待核对提醒依据' : '查看原始记录' }) }
       PMButton({ label: this.view.primaryContext?.nextStep.actionLabel ?? focusActionLabel(item.status, this.kind(item)), onAction: (): void => { this.open(item, this.kind(item)); } })
-      if (this.agentEnabled && this.kind(item) === 'reminder') { PMButton({ label: '问问提醒原因', secondary: true, onAction: (): void => { router.pushUrl({ url: 'pages/FocusConversation', params: { projectId: item.projectId, originKind: 'INTERVENTION', originId: item.id } }); } }) }
+      if (this.agentEnabled && this.kind(item) === 'reminder') { PMButton({ label: '问问提醒原因', secondary: true, onAction: (): void => { this.askReason(item); } }) }
       if (this.kind(item) === 'mission') { GoalQuestionPanel({ projectId: item.projectId, missionId: item.id, compact: true }) }
     }.width('100%').alignItems(HorizontalAlign.Start).padding(16).backgroundColor(PMColors.SURFACE)
       .borderRadius(PMRadius.LG).border({ width: 1, color: PMColors.BORDER }).margin({ bottom: 12 })
   }
+  @Builder private SummaryChip(label: string, value: string, onOpen: () => void) {
+    Row({ space: 6 }) {
+      Text(label).fontSize(13).fontColor(value === '0' ? PMColors.INK_TERTIARY : PMColors.INK_SECONDARY)
+      Text(value).fontSize(16).fontWeight(FontWeight.Bold).fontColor(value === '0' ? PMColors.INK_TERTIARY : PMColors.INK_PRIMARY)
+    }.height(36).padding({ left: 14, right: 14 }).borderRadius(999)
+      .backgroundColor(PMColors.SURFACE).border({ width: 1, color: value === '0' ? PMColors.BORDER_SUBTLE : PMColors.BORDER })
+      .clickEffect({ level: ClickEffectLevel.LIGHT, scale: 0.96 })
+      .onClick(() => { onOpen(); })
+      .accessibilityText(label + ' ' + value + '，查看' + label + '列表')
+  }
+  @Builder private ReminderRow(item: FocusEntry) {
+    Row({ space: 8 }) {
+      Column({ space: 4 }) {
+        Text(this.rowTitle(item, 'reminder')).fontSize(14).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
+          .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
+        Text(this.rowSubtitle(item, this.view.reminders)).fontSize(12).lineHeight(18).fontColor(PMColors.INK_SECONDARY)
+          .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
+        Text(this.reminderMeta(item)).fontSize(11).fontColor(PMColors.INK_TERTIARY)
+          .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
+      }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+        .onClick(() => { this.open(item, 'reminder'); })
+      Column({ space: 2 }) {
+        if (this.agentEnabled) {
+          Text('提醒原因').fontSize(12).fontColor(PMColors.BRAND).padding({ left: 8, right: 4, top: 8, bottom: 8 })
+            .onClick(() => { this.askReason(item); })
+        }
+        Text('›').fontSize(20).fontColor(PMColors.INK_TERTIARY).padding({ left: 8, right: 2, bottom: 6 })
+          .onClick(() => { this.open(item, 'reminder'); })
+      }.alignItems(HorizontalAlign.End)
+    }.width('100%').alignItems(VerticalAlign.Top).padding({ top: 12, bottom: 12, left: 14, right: 10 })
+      .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
+  }
+  @Builder private RecordRow(item: FocusEntry) {
+    Column({ space: 3 }) {
+      Text(item.title).fontSize(14).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
+        .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
+      Text(item.projectTitle).fontSize(11).fontColor(PMColors.INK_TERTIARY)
+        .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
+    }.width('100%').alignItems(HorizontalAlign.Start).padding({ top: 10, bottom: 10, left: 14, right: 14 })
+      .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
+      .onClick(() => { this.open(item, 'record'); })
+      .accessibilityText(item.title + '，' + item.projectTitle + '，查看原始记录')
+  }
   @Builder private Group(title: string, items: FocusEntry[], kind: string) {
     if (this.remaining(items).length > 0) {
-      Text(title).fontSize(16).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY).margin({ top: 22, bottom: 10 })
+      Text(title).fontSize(15).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY).margin({ top: 18, bottom: 8 })
       Column() {
         ForEach(this.visible(title, items, kind), (item: FocusEntry) => {
-          PMListRow({ title: this.rowTitle(item, kind), subtitle: this.rowSubtitle(item, items), meta: item.projectTitle,
-            kind: kind, status: kind === 'mission' && (item.status === 'PAUSED' || item.status === 'FAILED') ? '需处理' : '',
-            risk: item.status === 'PAUSED' || item.status === 'FAILED', onOpen: (): void => { this.open(item, kind); } })
-          if (this.agentEnabled && kind === 'reminder') { PMButton({ label: '为什么提醒我？', secondary: true, onAction: (): void => { router.pushUrl({ url: 'pages/FocusConversation', params: { projectId: item.projectId, originKind: 'INTERVENTION', originId: item.id } }); } }) }
+          if (kind === 'reminder') { this.ReminderRow(item) }
+          else if (kind === 'record') { this.RecordRow(item) }
+          else {
+            PMListRow({ title: this.rowTitle(item, kind), subtitle: this.rowSubtitle(item, items), meta: item.projectTitle,
+              kind: kind, status: kind === 'mission' && (item.status === 'PAUSED' || item.status === 'FAILED') ? '需处理' : '',
+              risk: item.status === 'PAUSED' || item.status === 'FAILED', onOpen: (): void => { this.open(item, kind); } })
+          }
         }, (item: FocusEntry) => item.id)
         if (this.remaining(items).length > this.visible(title, items, kind).length && !this.expandedGroups.includes(title)) {
           Button('展开本组全部原记录', { type: ButtonType.Normal }).height(44).width('100%').fontSize(12)
@@ -146,31 +236,33 @@ export struct GlobalFocusPanel {
       Scroll() {
         Column() {
           if (this.errorText !== '') { Text(this.errorText).fontSize(12).fontColor(PMColors.RISK) }
-          PMPageIntro({ eyebrow: this.dateLabel(), title: '今天，先处理重要的事', description: '优先回应与你有关的判断，再继续推进项目。' })
-          if (this.agentEnabled) { PMButton({ label: '与忆程讨论', secondary: true, onAction: (): void => { router.pushUrl({ url: 'pages/FocusConversation' }); } }) }
+          Row({ space: 8 }) {
+            PMPageIntro({ eyebrow: this.dateLabel(), title: '今日焦点', compact: true }).layoutWeight(1)
+            Button({ type: ButtonType.Circle }) { SettingsIcon({ iconSize: 18 }) }
+              .width(40).height(40).backgroundColor(Color.Transparent)
+              .accessibilityText('焦点设置：归档筛选与刷新')
+              .bindMenu(this.focusMenuItems())
+          }.width('100%').alignItems(VerticalAlign.Top)
           if (this.primary() !== null) { this.Primary(this.primary()!) }
           else { Text('当前范围内没有待回应的事项，进入项目记录新进展。').fontSize(14).fontColor(PMColors.INK_SECONDARY).margin({ bottom: 16 }) }
           Row({ space: 10 }) {
-            PMMetricTile({ label: '待处理行动', value: this.count(false), hint: '查看待办 →', onOpen: (): void => { this.onOpenActions(false); } }).layoutWeight(1)
-            PMMetricTile({ label: '主动提醒', value: this.count(true), hint: '查看原因 →', onOpen: (): void => { this.onOpenActions(true); } }).layoutWeight(1)
+            this.SummaryChip('待办', this.count(false), (): void => { this.onOpenActions(false); })
+            this.SummaryChip('提醒', this.count(true), (): void => { this.onOpenActions(true); })
+            Blank()
           }.width('100%')
           this.Group('其他需要关注', this.view.waiting, 'mission')
           this.Group('正在推进', this.view.running, 'mission')
           this.Group('下一步行动', this.view.actions, 'action')
           this.Group('其他提醒', this.view.reminders, 'reminder')
           this.Group('最近保存的资料', this.view.records, 'record')
-          Row() {
-            Checkbox({ name: '包含归档项目' }).selectedColor(PMColors.BRAND).width(20).height(20).select(this.includeArchived)
-              .onChange((value: boolean) => { this.includeArchived = value; this.refresh(); }).accessibilityText('包含归档项目')
-            Text('包含归档项目').fontSize(12).fontColor(PMColors.INK_TERTIARY)
-            Blank()
-            Button('刷新焦点', { type: ButtonType.Normal }).height(44).fontSize(12).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent)
-              .onClick(() => { this.refresh(); })
-          }.width('100%').margin({ top: 16 })
-          if (!this.view.missionEnabled) { Text('长期委托当前未开启，已有记录仍保留。').fontSize(12).fontColor(PMColors.INK_TERTIARY) }
-          if (this.view.hasMore || this.view.coverage?.complete===false) { Text('当前显示部分摘要，进入所属项目可查看全部。').fontSize(12).fontColor(PMColors.INK_TERTIARY) }
-        }.width('100%').alignItems(HorizontalAlign.Start).padding({ left: 16, right: 16, top: 22, bottom: 20 })
+          if (!this.view.missionEnabled) { Text('长期委托当前未开启，已有记录仍保留。').fontSize(12).fontColor(PMColors.INK_TERTIARY).margin({ top: 14 }) }
+          if (this.view.hasMore || this.view.coverage?.complete===false) { Text('当前显示部分摘要，进入所属项目可查看全部。').fontSize(12).fontColor(PMColors.INK_TERTIARY).margin({ top: 8 }) }
+        }.width('100%').alignItems(HorizontalAlign.Start).padding({ left: 16, right: 16, top: 18, bottom: 88 })
       }.width('100%').height('100%').align(Alignment.TopStart).scrollBar(BarState.Off)
+      if (this.agentEnabled) {
+        FocusAgentLauncher({ onOpen: (): void => { router.pushUrl({ url: 'pages/FocusConversation' }); } })
+          .margin({ right: 16, bottom: 16 })
+      }
       }.width('100%').height('100%')
     }
   }

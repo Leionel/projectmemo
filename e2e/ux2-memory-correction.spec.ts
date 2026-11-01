@@ -15,8 +15,9 @@ test("UX2: 原文纠正跨刷新保留，旧批准拒绝，撤回保留历史", 
   try {
     const original = JSON.parse(fixture("scripts/e2e-ux2-fixture.ts", [f.conversationId]));
     await page.goto("/focus?conversation=" + f.conversationId);
-    const message = page.locator("#conversation-message-" + original.messageId), correction = message.locator("details").filter({ has: page.locator("summary", { hasText: "纠正理解" }) });
-    await correction.locator("summary").click();
+    const message = page.locator("#conversation-message-" + original.messageId);
+    await message.getByRole("button", { name: "纠正", exact: true }).click();
+    const correction = page.getByRole("dialog", { name: "纠正对这条回答的理解" });
     const raw = correction.getByRole("textbox", { name: "选择需要纠正的原文" });
     await expect(raw).toHaveValue(original.content);
     await raw.click(); await raw.press("ControlOrMeta+A");
@@ -26,7 +27,7 @@ test("UX2: 原文纠正跨刷新保留，旧批准拒绝，撤回保留历史", 
     const denied = await page.request.post(`/api/conversations/${f.conversationId}/proposals/${f.old.executionId}/confirm`,
       { headers, data: { requestId: "ux2-old-button", proposalHash: f.old.proposalHash, confirmed: true } });
     expect(denied.status()).toBe(409);
-    await page.reload(); await correction.locator("summary").click();
+    await page.reload(); await page.locator("#conversation-message-" + original.messageId).getByRole("button", { name: "纠正", exact: true }).click();
     await expect(correction.getByText("52ms只是口头报告，不能当作实测达标。", { exact: true })).toBeVisible();
     await correction.getByRole("button", { name: "撤回这次纠正" }).click();
     await expect(correction.getByText("历史纠正", { exact: true })).toBeVisible();

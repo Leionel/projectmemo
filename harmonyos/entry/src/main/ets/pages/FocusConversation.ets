@@ -13,7 +13,7 @@ import { missionStatusLabel } from '../common/MissionContract';
 import { ConversationPresentation } from '../common/ConversationPresentation';
 import { PMAppBar } from '../components/PMAppBar';
 import { PMButton } from '../components/PMReferencePrimitives';
-import { PMColors, PMSpacing, PMRadius } from '../common/DesignTokens';
+import { PMColors, PMSpacing, PMRadius, PMInteraction } from '../common/DesignTokens';
 import { ConversationWorkRef } from '../models/ConversationWork';
 import { ConversationWorkPanel } from '../components/ConversationWorkPanel';
 import { ConversationAnchorPanel } from '../components/ConversationAnchorPanel';
@@ -249,6 +249,12 @@ struct FocusConversation {
   private trackScroll(yOffset: number): void {
     if (yOffset < this.lastScrollY - 2) { this.nearBottom = false; }
     this.lastScrollY = yOffset;
+  }
+  private starterQuestions(): string[] {
+    if (this.target !== '') {
+      return ['这个项目当前最需要处理什么？', '最近哪些变化需要我确认？'];
+    }
+    return ['最近哪个项目最值得先处理？', '这周有哪些待回应的事？'];
   }
   private cloudExplanation(): string {
     return !this.analysisReady ? '正在确认分析方式…' : !this.cloudAvailable ? '未配置云模型，当前仅整理项目记录' : this.cloud ? '发送即允许云模型分析本次授权项目资料，可关闭' : '仅整理项目记录，不调用云模型';
@@ -518,7 +524,7 @@ struct FocusConversation {
   }
   build() {
     Column() {
-      PMAppBar({ title: '与忆程协作', subtitle: this.headerSubtitle(), showBack: true, rightActionText: '新讨论', showRightIcon: true, rightIconLabel: '历史讨论', onRightAction: (): void => { this.openHistory(); }, onRightTextAction: (): void => { if (!this.busy) { this.create(); } } })
+      PMAppBar({ title: '与忆程协作', subtitle: this.headerSubtitle(), showBack: true, rightActionText: this.view.messages.length > 0 ? '新讨论' : '', showRightIcon: true, rightIconLabel: '历史讨论', onRightAction: (): void => { this.openHistory(); }, onRightTextAction: (): void => { if (!this.busy) { this.create(); } } })
       Scroll(this.messageScroller) {
         Column({ space: 20 }) {
           if (this.view.id !== '') {
@@ -535,15 +541,26 @@ struct FocusConversation {
           }
           if (this.view.messages.length === 0) {
             Column({ space: 12 }) {
-              Text('忆').fontSize(30).fontColor(PMColors.BRAND).width(60).height(60).textAlign(TextAlign.Center)
-                .backgroundColor(PMColors.BRAND_LIGHT).borderRadius(20)
-              Text('今天，先推进哪件事？').fontSize(20).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
+              Text('忆').fontSize(20).fontColor(PMColors.BRAND).width(40).height(40).textAlign(TextAlign.Center)
+                .backgroundColor(PMColors.BRAND_LIGHT).borderRadius(13)
+              Text('有什么需要一起推进？').fontSize(18).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY)
               if (this.view.id === '') { PMButton({ label: '开始讨论', disabled: this.busy, onAction: (): void => { this.create(); } }) }
               else {
-                PMButton({ label: '最近哪个项目最值得先处理？', secondary: true, onAction: (): void => { this.text = '最近哪个项目最值得先处理？'; } })
-                PMButton({ label: '这周有哪些待回应的事？', secondary: true, onAction: (): void => { this.text = '这周有哪些待回应的事？'; } })
+                // 快捷问题与当前对话范围一致：项目内问项目，跨项目才问全局
+                ForEach(this.starterQuestions(), (q: string) => {
+                  Row({ space: 8 }) {
+                    Text(q).fontSize(14).fontColor(PMColors.INK_PRIMARY).layoutWeight(1)
+                      .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
+                    Text('↗').fontSize(13).fontColor(PMColors.INK_TERTIARY)
+                  }.width('100%').constraintSize({ minHeight: 44 }).padding({ left: 12, right: 10 })
+                    .backgroundColor(PMColors.SURFACE).borderRadius(11)
+                    .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+                    .clickEffect(PMInteraction.PRESS_EFFECT)
+                    .accessibilityText(q + '，填入输入框')
+                    .onClick(() => { this.text = q; this.saveComposer(); })
+                }, (q: string) => q)
               }
-            }.width('100%').padding({ top: 64, bottom: 48 })
+            }.width('100%').padding({ top: 96, bottom: 56 })
           }
           ForEach(this.view.messages, (m: ConversationMessage, index: number) => { this.Message({ message: this.view.messages[index] }) }, (m: ConversationMessage) => m.id)
           if (!this.busy && (this.view.latestTurn?.message || this.error !== '')) {
@@ -623,6 +640,6 @@ struct FocusConversation {
           showClose: false
         })
       }
-    }.width('100%').height('100%').backgroundColor(PMColors.SURFACE)
+    }.width('100%').height('100%').backgroundColor(PMColors.BACKGROUND)
   }
 }

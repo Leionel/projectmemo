@@ -9,7 +9,7 @@ import type { ToolSet } from "./tools";
 import { runBranchObservation } from "./branchObservation";
 import type { CiTransport } from "@/lib/sensing/repoCi";
 
-type Target = { connectionId: string; sha: string; revision: number };
+type Target = { connectionId: string; sha?: string; revision: number;kind?:"DEPLOYMENT" };
 
 /** A declared read before reasoning. Uses the same MissionStep, lease, HTTP ledger and cumulative budget. */
 export async function runDelegationObservation(lease: Lease, tools: ToolSet, onStep: (id: string) => void, transport?: CiTransport): Promise<boolean> {
@@ -30,7 +30,8 @@ export async function runDelegationObservation(lease: Lease, tools: ToolSet, onS
       const observation = record(record(record(s.resultJson).data).observation), args = record(s.canonicalInputJson);
       // Ignore observation timestamps; ordering and first baseline are explicit, no false 'new information' per poll.
       const byId = (a: unknown) => Array.isArray(a) ? [...a].sort((x, y) => Number(record(x).id) - Number(record(y).id)) : [];
-      snapshots[String(args.connectionId)] = jsonHash({ sha: observation.sha, checks: byId(observation.checks), runs: byId(observation.runs), coverage: observation.coverage });
+      const metadata=record(observation.metadata);
+      snapshots[String(args.connectionId)] = s.toolName==="inspect_deployment"?jsonHash({expectedRelease:metadata.expectedRelease,reportedRelease:metadata.reportedRelease,layers:observation.layers}):jsonHash({ sha: observation.sha, checks: byId(observation.checks), runs: byId(observation.runs), coverage: observation.coverage });
     }
     const next = targets.find(t => snapshots[t.connectionId] === undefined);
     if (!next) {
@@ -104,9 +105,9 @@ export async function runDelegationObservation(lease: Lease, tools: ToolSet, onS
         ordinal: (last._max.ordinal ?? 0) + 1,
         planRevision: m.planRevision,
         status: "RUNNING",
-        toolName: "read_repository_ci",
+        toolName: next.kind==="DEPLOYMENT"?"inspect_deployment":"read_repository_ci",
         toolVersion: "1",
-        canonicalInputJson: { connectionId: next.connectionId, sha: next.sha },
+        canonicalInputJson: json({ connectionId: next.connectionId, ...(next.kind==="DEPLOYMENT"?{}:{sha:next.sha}) }),
         inputHash: jsonHash(next),
         readSetJson: [],
         protocolJson: { schemaVersion: 1, delegationCycle: poll.cycle },
@@ -118,13 +119,13 @@ export async function runDelegationObservation(lease: Lease, tools: ToolSet, onS
 
   if (!pending) return false;
   if (pending.done) return true;
-  const tool = tools.read_repository_ci;
+  const toolName=pending.step.toolName,tool = tools[toolName];
   if (!tool) throw new AppError("CI_NOT_AUTHORIZED", "原仓库观察工具不可用", 409);
   const stepId = pending.step.id;
   onStep(stepId);
 
   // reserve() rechecks deadline, STOP, continuity and tool permission before any request.
-  await reserve(lease, "tools", "read_repository_ci");
+  await reserve(lease, "tools", toolName);
   const started = Date.now();
   let result;
   try {
@@ -138,8 +139,12 @@ export async function runDelegationObservation(lease: Lease, tools: ToolSet, onS
 
   await db.$transaction(async tx => {
     const m = await fenced(tx, lease);
+    for(const source of result.sources.filter(s=>s.deployment)){
+      await(await import("@/lib/continuity/sourcePolicy")).assertSourceUse(m.ownerUserId,m.projectId,"connection:"+source.deployment!.connectionId,tx,{missionId:m.id});
+      if(!await(await import("@/lib/sensing/deploymentObservations")).deploymentObservationCurrent(m.projectId,{...source,deployment:source.deployment!},tx))throw new AppError("SOURCE_CHANGED","环境观察在提交前失效",409);
+    }
     await tx.agentMissionStep.update({ where: { id: stepId }, data: { status: "SUCCEEDED", resultJson: json(result), finishedAt: new Date() } });
-    await event(tx, m.id, "TOOL_FINISHED", { stepId, tool: "read_repository_ci", purpose: "DECLARED_OBSERVATION", result });
+    await event(tx, m.id, "TOOL_FINISHED", { stepId, tool: toolName, purpose: "DECLARED_OBSERVATION", result });
     await release(tx, m, "READY");
   });
   return true;

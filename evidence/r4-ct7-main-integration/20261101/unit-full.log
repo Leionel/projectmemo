@@ -1,0 +1,44 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-ct7-main-integration
+
+ ❯ tests/actionReminder.test.ts (20 tests | 20 failed) 209ms
+     × saves the in-app plan time first and only reports synced after a real event id exists 141ms
+     × refuses to report synced without a real event id, and reports the orphan event for compensation 3ms
+     × replays the same requestId payload and rejects a reused requestId with a different payload 3ms
+     × never leaves two own events when changing the reminder time 3ms
+     × keeps cleanup acknowledgement scoped and prevents a delayed old acknowledgement from clearing a new event 3ms
+     × keeps revocation retry-safe and scoped to its own recorded event 3ms
+     × keeps receipts isolated per user, per device and per project 3ms
+     × falls back honestly when permission is denied or the device has no calendar 3ms
+     × asks about the future event when completing a todo and honours both choices 3ms
+     × blocks arranging a reminder for a blocked or unconfirmable todo 4ms
+     × reads reminder state without creating business writes 3ms
+     × shows the event written by a confirmed schedule under the same status vocabulary 3ms
+     × stays unavailable while the feature flag is off and keeps the saved plan time 3ms
+     × routes completion to the confirmed plan when the device event came from scheduling 3ms
+     × does not let a delayed replay of an older request overwrite a newer reminder 3ms
+     × rejects the same requestId reused with another payload, another action or another project 3ms
+     × requires expectedRevision for modifications and rejects a stale version 8ms
+     × lets only one of two concurrent modifications with the same expectedRevision win 3ms
+     × returns a deterministic result when two first-arranges race on the same todo 3ms
+     × keeps revoke idempotent through the request receipt and rejects cross-target reuse 3ms
+ ❯ tests/projectHealth.test.ts (15 tests | 15 failed) 173ms
+     × handles an empty project without inventing progress 121ms
+     × reports no findings for a healthy project 3ms
+     × marks a checkpoint partially stale when only some of its sources changed 4ms
+     × marks a checkpoint stale when most of its conclusions changed 4ms
+     × reports unsourced conclusions and open questions inside a checkpoint 5ms
+     × reports state refresh failure, blocked actions, missing estimates, overdue work and calendar failures 4ms
+     × reports failed attachments, unapproved meeting changes, duplicate memories and missing deliverable evidence 3ms
+     × keeps other results and names the section when one sub-check fails 4ms
+     × keeps the recommended action stable and deterministic across repeated reads 3ms
+     × reads the report without creating business writes 3ms
+     × never leaks another member's reminders, device state or private schedule 4ms
+     × does not check personal reminders when there is no viewer identity 3ms
+     × returns a stable Chinese classification instead of raw internal error text 3ms
+     × only reports a known disabled section as disabled, not as an internal failure 3ms
+     × folds SQLITE-style error codes into the stable unavailable classification 3ms

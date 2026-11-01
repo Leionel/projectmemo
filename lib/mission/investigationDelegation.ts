@@ -12,6 +12,7 @@ import { sourceUse } from "@/lib/continuity/sourcePolicy";
 import { decidePrivateMissionAttention } from "@/lib/services/interventionPolicyService";
 import { repositoryGrantBinding, repositoryGrantCurrent } from "@/lib/sensing/repoGrantBinding";
 import { composeHypotheses } from "@/lib/memory/hypothesisService";
+import {deploymentConnection} from "@/lib/sensing/deploymentConnections";
 
 export function boundedPolicy(m: Pick<AgentMission, "continuationPolicyJson">) {
   const parsed = boundedInvestigationPolicySchema.safeParse(m.continuationPolicyJson);
@@ -34,7 +35,7 @@ export function assertInvestigationDelegation(m: AgentMission, tool?: string, ar
   if (
     tool &&
     (!p.allowedTools.includes(tool as typeof p.allowedTools[number]) ||
-      (["read_repository_ci", "read_ci_jobs", "read_ci_log"].includes(tool) &&
+      (["read_repository_ci", "read_ci_jobs", "read_ci_log", "inspect_deployment", "read_deployment_logs"].includes(tool) &&
         typeof record(args).connectionId === "string" &&
         !p.connectionIds.includes(String(record(args).connectionId))))
   ) {
@@ -63,12 +64,17 @@ export async function validateDelegationConnections(m: AgentMission, tx: Tx) {
         ownerUserId: m.ownerUserId,
         status: "ACTIVE",
         revokedAt: null,
-        signalKind: { in: p.allowedTools.includes("read_ci_log") ? ["COMMITS_CI_LOGS"] : ["COMMITS_AND_CI", "COMMITS_CI_LOGS"] },
       },
     });
     if (!c) {
       throw new AppError("DELEGATION_CONNECTION_CHANGED", "仓库授权版本已变化，请重新确认持续调查范围", 409);
     }
+    if(c.provider==="DEPLOYMENT"){
+      const current=await deploymentConnection(m.ownerUserId,m.projectId,id,tx);
+      if(record(record(delegation.grantBindings)[id]).scopeHash!==current.revision)throw new AppError("DELEGATION_CONNECTION_CHANGED","环境只读许可已变化，请重新核对",409);
+      continue;
+    }
+    if(c.provider!=="GITHUB"||![...(p.allowedTools.includes("read_ci_log")?["COMMITS_CI_LOGS"]:["COMMITS_AND_CI","COMMITS_CI_LOGS"])].includes(c.signalKind))throw new AppError("DELEGATION_CONNECTION_CHANGED","仓库读取许可已变化",409);
 
     const binding = record(delegation.grantBindings)[id];
     if (binding && !repositoryGrantCurrent(binding,c)) throw new AppError("DELEGATION_CONNECTION_CHANGED","来源身份或范围已变化",409);
@@ -129,6 +135,7 @@ export async function initializeDelegation(tx: Tx, m: AgentMission, raw: unknown
   const p = boundedInvestigationPolicySchema.parse(raw);
   if (p.trackBranchHead && (!p.connectionIds.length || !p.allowedTools.includes("read_repository_ci"))) throw new AppError("CI_NOT_AUTHORIZED", "分支跟踪需要明确的仓库读取许可与连接", 409);
   if (!isFeatureEnabled("MISSION_INVESTIGATION_DELEGATION_ENABLED", false)) throw new AppError("DELEGATION_DISABLED", "持续调查暂未开启", 503);
+  if(p.allowedTools.some(t=>["inspect_deployment","read_deployment_logs"].includes(t))&&!isFeatureEnabled("DEPLOYMENT_OBSERVER_ENABLED",false))throw new AppError("DEPLOYMENT_OBSERVER_DISABLED","环境观察未开启，不能新增持续许可",503);
   if (p.allowedTools.some(t => ["inspect_document", "read_document_page", "read_document_section", "read_document_table"].includes(t)) && !isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED", false)) {
     throw new AppError("DOCUMENT_READER_DISABLED", "文档深读当前未开启，不能新增这项持续许可", 503);
   }
@@ -165,10 +172,15 @@ export async function initializeDelegation(tx: Tx, m: AgentMission, raw: unknown
         ownerUserId: m.ownerUserId,
         status: "ACTIVE",
         revokedAt: null,
-        signalKind: { in: p.allowedTools.includes("read_ci_log") ? ["COMMITS_CI_LOGS"] : ["COMMITS_AND_CI", "COMMITS_CI_LOGS"] },
       },
     });
     if (!c) throw new AppError("CI_NOT_AUTHORIZED", "持续调查不能扩大原仓库授权", 409);
+    if(c.provider==="DEPLOYMENT"){
+      const current=await deploymentConnection(m.ownerUserId,m.projectId,id,tx);
+      if(!p.allowedTools.includes("inspect_deployment")||p.allowedTools.includes("read_deployment_logs")&&!current.config.logPath)throw new AppError("DEPLOYMENT_NOT_APPROVED","持续环境观察需要明确的检查许可，日志另行授权",409);
+      connectionVersions[id]=c.revision;grantBindings[id]={schemaVersion:1,connectionId:id,scopeHash:current.revision,observedRevision:c.revision};continue;
+    }
+    if(c.provider!=="GITHUB"||!(p.allowedTools.includes("read_ci_log")?["COMMITS_CI_LOGS"]:["COMMITS_AND_CI","COMMITS_CI_LOGS"]).includes(c.signalKind))throw new AppError("CI_NOT_AUTHORIZED","持续调查不能扩大原仓库授权",409);
     connectionVersions[id] = c.revision;
     grantBindings[id] = repositoryGrantBinding(c,c.revision);
   }
@@ -179,6 +191,7 @@ export async function initializeDelegation(tx: Tx, m: AgentMission, raw: unknown
     },
     select: { id: true, trace: true },
   });
+  if(p.trackBranchHead&&!await tx.sourceConnection.count({where:{id:{in:p.connectionIds},provider:"GITHUB"}}))throw new AppError("CI_NOT_AUTHORIZED","分支跟踪需要已获准的仓库连接",409);
   const grantRunIds = grantRuns
     .filter(r => p.connectionIds.includes(String(record(r.trace).connectionId ?? "")))
     .map(r => r.id);
@@ -300,7 +313,7 @@ export async function processInvestigationDelegations(limit = 8) {
           const targets = [];
           for (const connectionId of p.connectionIds) {
             const c = await tx.sourceConnection.findUniqueOrThrow({where:{id:connectionId}});
-            targets.push({connectionId, revision:c.revision});
+            targets.push({connectionId, revision:c.revision,...(c.provider==="DEPLOYMENT"?{kind:"DEPLOYMENT"}:{})});
           }
           const wakeSeq = Number(state.wakeSeq ?? 0)+1;
           const wakeKey = jsonHash({missionId:m.id,reason:"OBSERVATION_DUE",wakeSeq});
@@ -315,9 +328,11 @@ export async function processInvestigationDelegations(limit = 8) {
 
         // 2. Fixed SHA CI observation
         if (input.hash === state.inputHash) {
-          if (p.connectionIds.length && p.allowedTools.includes("read_repository_ci")) {
+          if (p.connectionIds.length && (p.allowedTools.includes("read_repository_ci")||p.allowedTools.includes("inspect_deployment"))) {
             const targets = [];
             for (const connectionId of p.connectionIds) {
+              const deploymentRow=await tx.sourceConnection.findFirst({where:{id:connectionId,projectId:m.projectId,ownerUserId:m.ownerUserId,provider:"DEPLOYMENT"}});
+              if(deploymentRow){targets.push({connectionId,kind:"DEPLOYMENT",revision:deploymentRow.revision});continue;}
               const connection = await tx.sourceConnection.findFirst({
                 where: { id: connectionId, projectId: m.projectId, ownerUserId: m.ownerUserId, status: "ACTIVE", revokedAt: null, signalKind: { in: ["COMMITS_AND_CI", "COMMITS_CI_LOGS"] } },
               });

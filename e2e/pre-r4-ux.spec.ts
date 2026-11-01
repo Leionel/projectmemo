@@ -60,7 +60,8 @@ test("first material leads to an explicitly authorized Mission; multiple waiting
    await expect(input).toHaveValue(/核对阶段汇报的资料范围/);
    const send=discussion.getByRole("button",{name:"发送",exact:true});await expect(send).toBeEnabled();await send.click();
    await expect(input).toHaveValue("");
-   const card=discussion.locator("div").filter({has:page.getByText("核对阶段汇报的资料范围")}).filter({has:discussion.getByRole("button",{name:"在此继续",exact:true})}).last();await expect(card).toBeVisible();
+   // has 从候选卡片内重新定位，不能再带外层「问忆程」region 路径。
+   const card=discussion.locator("div").filter({has:page.getByText("核对阶段汇报的资料范围",{exact:true})}).filter({has:page.getByRole("button",{name:"在此继续",exact:true})}).last();await expect(card).toBeVisible();
    await card.getByRole("button",{name:"在此继续",exact:true}).click();
    await expect(discussion.getByRole("region",{name:"原任务协作",exact:true})).toContainText("核对阶段汇报的资料范围");
  }else{

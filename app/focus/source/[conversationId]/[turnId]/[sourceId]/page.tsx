@@ -22,7 +22,7 @@ export default function WebSourcePage() {
     <a className="workspace-link" href={`/focus?conversation=${encodeURIComponent(p.conversationId)}`}>← 返回原讨论</a>
     {error ? <p role="alert">{error}</p> : source ? <>
       <h1 className="mt-6 text-2xl font-semibold">{source.title}</h1>
-      {source.document?<DocumentSourceView projectId={source.projectId} document={source.document} text={source.excerpt}/>:source.calendar?<CalendarSourceView source={source}/>:<>
+      {source.deployment?<><p>观察于 {source.deployment.observedAt} · 只读环境证据</p><pre className="whitespace-pre-wrap break-words">{source.excerpt}</pre></>:source.document?<DocumentSourceView projectId={source.projectId} document={source.document} text={source.excerpt}/>:source.calendar?<CalendarSourceView source={source}/>:<>
       {source.external?.browser ? <>
         <p className="mt-3 text-sm">{researchReadLevelLabel(source.external.readLevel)} · {new URL(source.external.browser.finalUrl).hostname} · 快照 {source.external.browser.observedAt.slice(0, 16).replace("T", " ")}</p>
         <p className="mt-2 text-sm">{source.external.browser.coverage.complete ? "已取得本次可见正文。" : `仅取得部分可见正文：${source.external.browser.failureMessage ?? "页面尚未加载完成"}。`}页面请求 {source.external.browser.coverage.requests} 次，拦截 {source.external.browser.coverage.blockedRequests} 次；读取层级为可见正文，不代表整站或隐藏内容。</p>

@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/deploymentTransport.test.ts tests/deploymentRuntime.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-ct7
+
+
+ Test Files  2 passed (2)
+      Tests  11 passed (11)
+   Start at  10:13:09
+   Duration  3.84s (transform 1.50s, setup 0ms, import 2.21s, tests 1.21s, environment 0ms)
+

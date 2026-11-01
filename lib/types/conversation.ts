@@ -42,6 +42,7 @@ export type ConversationRef = {
   questionId?: string | null; href: string;
 };
 export type ConversationSource = {
+  deployment?: import("./deployment").DeploymentSourceMeta;
   document?: import("./document").DocumentMeta;
   repository?: import("./repositoryCi").RepositorySourceMeta;
   calendar?: import("@/lib/calendar/contracts").CalendarSourceMeta;

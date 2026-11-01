@@ -7,6 +7,7 @@ import { writeTransaction } from "@/lib/copilot/confirmation";
 import { json, jsonHash } from "@/lib/mission/contracts";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import { repositoryGrantBinding, repositoryGrantCurrent } from "./repoGrantBinding";
+import { githubConnection } from "./githubConnection";
 
 /**
  * P3-B 单仓库只读感知（最小版）：GitHub 公开仓库 commits 信号。
@@ -65,7 +66,7 @@ async function ownedProject(userId: string, projectId: string, client: Prisma.Tr
 async function ownedConnection(userId: string, projectId: string, connectionId: string) {
   const row = await db.sourceConnection.findFirst({ where: { id: connectionId, projectId } });
   if (!row || row.ownerUserId !== userId) throw new AppError("CONNECTION_NOT_FOUND", "仓库连接不存在或不可访问", 404);
-  return row;
+  return githubConnection(row);
 }
 
 export async function createConnection(userId: string, projectId: string, raw: unknown, fetcher: FetchLike = defaultFetch) {
@@ -78,7 +79,7 @@ export async function createConnection(userId: string, projectId: string, raw: u
     if (existing.status === "REVOKED") throw new AppError("CONNECTION_REVOKED", "该连接已撤销；撤销长期生效，请新建其他 ref 的连接", 409);
     return { connection: existing, summary: await refreshSummary(existing) };
   }
-  const count = await db.sourceConnection.count({ where: { projectId, status: "ACTIVE" } });
+  const count = await db.sourceConnection.count({ where: { projectId, provider:"GITHUB", status: "ACTIVE" } });
   if (count >= MAX_CONNECTIONS_PER_PROJECT)
     throw new AppError("CONNECTION_LIMIT", `每个项目最多 ${MAX_CONNECTIONS_PER_PROJECT} 个活跃连接`, 409);
   const created = await db.sourceConnection.create({ data: { projectId, ownerUserId: userId, repo: input.repo, ref: input.ref } });
@@ -182,7 +183,7 @@ export async function listSignals(userId: string, projectId: string) {
   requireEnabled();
   await ownedProject(userId, projectId);
   const connections = await db.sourceConnection.findMany({
-    where: { projectId, ownerUserId: userId },
+    where: { projectId, ownerUserId: userId, provider:"GITHUB" },
     orderBy: { createdAt: "asc" },
   });
   const signals = await db.externalSignal.findMany({
@@ -193,7 +194,7 @@ export async function listSignals(userId: string, projectId: string) {
   return {
     enabled: true, ciAvailable: isFeatureEnabled("REPO_CI_OBSERVER_ENABLED", false),
     note: "信号只是候选资料；采纳需确认，未采纳不写入任何项目事实。commit/CI 不构成现实完成证明。",
-    connections: await Promise.all(connections.map(async c => ({ ...viewOfConnection(c), ...(await refreshSummary(c)) }))),
+    connections: await Promise.all(connections.map(async c => ({ ...viewOfConnection(githubConnection(c)), ...(await refreshSummary(c)) }))),
     signals: signals.map(s => {
       const connection = connections.find(c => c.id === s.connectionId);
       const current = !!connection && repositoryGrantCurrent(s.sourceBindingJson, connection);

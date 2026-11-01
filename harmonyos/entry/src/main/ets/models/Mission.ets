@@ -1,5 +1,6 @@
 import { WorkState } from './WorkState';
 import { DocumentSourceMeta } from './Document';
+import { DeploymentSourceMeta } from './Deployment';
 import { MissionExperience } from './Experience';
 import { FitPremise, EvidenceReview, EvidenceFit, FitExcerpt } from './EvidenceFit';
 
@@ -46,6 +47,7 @@ export interface MissionCapabilities { enabled: boolean; widgetEnabled: boolean;
 export interface MissionQuestionPayload { question: string; missing: string; gapId?: string; }
 export interface MissionQuestion { id: string; seq: number; payloadJson: MissionQuestionPayload; }
 export interface MissionSource {
+  deployment?: DeploymentSourceMeta;
   document?: DocumentSourceMeta;
   id: string; kind: string; entityType: string; hash: string; revision: string;
   text?: string; url?: string; excerpts?: string[];
@@ -111,8 +113,8 @@ export class Mission {workingObjective?:string|null;nextBoundary?:string|null; w
 }
 export interface MissionEvent { id: string; seq: number; type: string; createdAt: string; payloadJson: Object; }
 export interface MissionEvents { events: MissionEvent[]; nextAfterSeq: number; }
-export class MissionBudgetTotals { browserRequests:number=40;browserBytes:number=4000000;calendarRequests:number=8;externalWrites:number=2; models:number=12; tools:number=16; activeMs:number=180000; reservedOutputTokens:number=12000; }
-export class MissionBudgetUsage { browserRequests:number=0;browserBytes:number=0;calendarRequests:number=0;externalWrites:number=0; models:number=0; tools:number=0; activeMs:number=0; reservedOutputTokens:number=0; }
+export class MissionBudgetTotals { metadataRequests?:number; browserRequests:number=40;browserBytes:number=4000000;calendarRequests:number=8;externalWrites:number=2; models:number=12; tools:number=16; activeMs:number=180000; reservedOutputTokens:number=12000; }
+export class MissionBudgetUsage { metadataRequests:number=0; browserRequests:number=0;browserBytes:number=0;calendarRequests:number=0;externalWrites:number=0; models:number=0; tools:number=0; activeMs:number=0; reservedOutputTokens:number=0; }
 export class MissionBudgetReview { requestId:string=""; expectedVersion:number=1; totals:MissionBudgetTotals=new MissionBudgetTotals(); }
 export class MissionCommand {
   evidenceReview?: EvidenceReview;

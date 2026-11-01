@@ -21,6 +21,8 @@ export async function event(tx: Tx, id: string, type: string, payload: unknown, 
 }
 export async function lock(tx: Tx, id: string) { await tx.agentMission.updateMany({ where: { id }, data: { version: { increment: 0 } } }); }
 export async function sourceHash(projectId: string, id: string, tx: Tx = db): Promise<string | null> {
+  if(id.startsWith("deploy:")){const s=await(await import("@/lib/sensing/deploymentObservations")).findDeploymentObservation(projectId,id,tx);return s?.hash??s?.revision??null;}
+  if(id.startsWith("connection:")){const c=await tx.sourceConnection.findFirst({where:{id:id.slice(11),projectId,provider:"DEPLOYMENT"}});return c?(await(await import("@/lib/sensing/deploymentConnections")).deploymentConnection(c.ownerUserId,projectId,c.id,tx)).revision:null;}
   if(id.startsWith("doc:")){const source=await(await import("@/lib/documents/observations")).findDocumentObservation(projectId,id,tx);return source?.hash??source?.revision??null;}
   if (id.startsWith("ci:")) { const row = await (await import("@/lib/sensing/repoCiObservations")).findRepositoryObservation(projectId, id, tx); return row?.hash ?? row?.revision ?? null; }
   if(id.startsWith("artifact:"))return artifactSourceHash(projectId,id.slice(9),tx);
@@ -46,6 +48,7 @@ export async function sourceHash(projectId: string, id: string, tx: Tx = db): Pr
 export async function validateSources(projectId: string, sources: Source[], tx: Tx = db, missionId?: string) {
   const mission = missionId ? await tx.agentMission.findUnique({ where: { id: missionId } }) : null;
   if (mission) for (const source of sources) await assertSourceUse(mission.ownerUserId, projectId, source.id, tx, { missionId });
+  if(mission)for(const source of sources.filter(s=>s.deployment))await(await import("@/lib/sensing/deploymentObservations")).validateDeploymentObservation(mission.ownerUserId,projectId,source.id,source.hash,tx);
   if(mission)for(const source of sources.filter(s=>s.document))await(await import("@/lib/documents/observations")).validateDocumentObservation(mission.ownerUserId,projectId,source.id,source.hash,tx);
   if (mission) for (const source of sources.filter(s => s.repository)) await (await import("@/lib/sensing/repoCiObservations")).validateRepositoryObservation(mission.ownerUserId, projectId, source.id, source.hash, tx);
   for(const s of sources.filter(s=>s.kind==="EXTERNAL")){const row=missionId?await tx.externalSource.findFirst({where:{id:s.id,missionId,retrievalMode:{in:["PROVIDER_EXTRACT","ACADEMIC_METADATA"]},availability:"AVAILABLE",normalizedContentHash:s.hash}}):null;if(!row)throw new AppError("SOURCE_CHANGED","外部来源不存在、失效或不属于当前委托",409);}

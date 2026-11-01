@@ -1,0 +1,12 @@
+{
+  "stats": {
+    "startTime": "2026-11-01T09:55:32.211Z",
+    "duration": 213077.996,
+    "expected": 33,
+    "skipped": 2,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "errors": [],
+  "note": "Isolated synthetic E2E; production build included. Authentication state and raw traces excluded."
+}

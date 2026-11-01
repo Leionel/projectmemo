@@ -9,6 +9,14 @@ export const runtime = "nodejs";
 export async function GET(request: Request, context: { params: Promise<{ id: string; turnId: string; sourceId: string }> }) {
   return conversationHttp(request, async actor => {
     const p = await context.params; await ownedConversation(actor, p.id);
+    if(p.sourceId.startsWith("deploy:")){
+      const turn=await db.conversationTurn.findFirst({where:{id:p.turnId,conversationId:p.id}});
+      const found=((record(turn?.readManifestJson).deploymentSources??[]) as ConversationSource[]).find(s=>s.sourceId===p.sourceId);
+      if(!found?.deployment||found.deployment.conversationId!==p.id||found.deployment.turnId!==p.turnId)throw new AppError("SOURCE_NOT_FOUND","观察不属于原讨论",404);
+      await(await import("@/lib/sensing/deploymentObservations")).validateDeploymentObservation(actor.userId,found.projectId,p.sourceId,found.revision);
+      await(await import("@/lib/continuity/sourcePolicy")).assertSourceUse(actor.userId,found.projectId,p.sourceId,undefined,{conversationId:p.id});
+      return {source:found};
+    }
     if(p.sourceId.startsWith("doc:"))return {source:await readConversationDocumentSource(actor,p.id,p.turnId,p.sourceId)};
     const turn = await db.conversationTurn.findFirst({ where: { id: p.turnId, conversationId: p.id } });
     const source = ((record(turn?.readManifestJson).webSources ?? []) as ConversationSource[]).find(s => s.sourceId === p.sourceId);

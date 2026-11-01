@@ -4165,6 +4165,13 @@ if (this.attachmentSearchOpen) {
             .accessibilityText('记录或上传附件').onClick(() => { this.openCaptureEntry(); })
         }.width('100%')
       }.padding({ left: 16, right: 16, top: 12, bottom: 10 }).width('100%')
+      Button('当前理解与工程观察 →', { type: ButtonType.Normal })
+        .constraintSize({ minHeight: 44 }).width('100%').fontSize(14)
+        .fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT)
+        .accessibilityDescription('打开已有的 Agent 记忆、仓库连接与环境观察')
+        .onClick(() => {
+          router.pushUrl({ url: 'pages/MemoryTimeline', params: { projectId: this.projectId, openContext: '1' } });
+        })
       if (this.materialsMode === 'attachments') {
         this.AttachmentLibrary()
       } else {

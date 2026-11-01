@@ -1,0 +1,201 @@
+{
+  "date": "2026-11-01",
+  "baseline": "1c3b6a5428d0fc01405b4474fc27441703f16fc3",
+  "integratedBranch": "codex/ct7-deployment-observer",
+  "integratedTip": "cb5fec8c3d516f4ff62fdf24850229e08e958a79",
+  "isolation": {
+    "database": "prisma/test-vitest.db in this independent worktree; E2E uses its own setup",
+    "model": "mock/scripted provider only",
+    "externalTransport": "synthetic",
+    "productionDeployment": false,
+    "realDatabaseMigration": false,
+    "paidModelCalls": false,
+    "freshDeviceInstall": false
+  },
+  "checks": {
+    "unit-full-ready": {
+      "exit": 0,
+      "log": "unit-full-ready.log"
+    },
+    "types-final": {
+      "exit": 0,
+      "log": "types-final.log"
+    },
+    "lint-final": {
+      "exit": 0,
+      "log": "lint-final.log"
+    },
+    "web-build": {
+      "exit": 0,
+      "log": "web-build.log"
+    },
+    "web-e2e-final": {
+      "exit": 0,
+      "log": "web-e2e-final.log"
+    },
+    "harmony-unit": {
+      "exit": 0,
+      "log": "harmony-unit.log"
+    },
+    "harmony-build-final": {
+      "exit": 0,
+      "log": "harmony-build-final.log"
+    },
+    "test-database-init": {
+      "exit": 0,
+      "log": "test-database-init.log"
+    }
+  },
+  "unit": {
+    "files": 181,
+    "passed": 1411
+  },
+  "e2e": {
+    "startTime": "2026-11-01T09:55:32.211Z",
+    "duration": 213077.996,
+    "expected": 33,
+    "skipped": 2,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "harmony": {
+    "unitPassed": 90,
+    "hap": "unsigned, build only",
+    "sha256": "86924a3a86b14aed7a22dbb03d90753f95c4e03c23f75ba86e0d5775d135e600"
+  },
+  "lintWarnings": {
+    "count": 2,
+    "files": [
+      "tests/ux2CorrectionControls.test.ts"
+    ],
+    "origin": "pre-existing unused variables"
+  },
+  "initialFailures": {
+    "unit-full": "empty isolated test DB, migrated only isolated DB then rerun",
+    "harmony-build": "MissionSource deployment metadata declaration missing; fixed and rebuilt",
+    "web-e2e": "nested locator repeated outer region; fixed without weakening original-task continuation assertions"
+  },
+  "dependencyAudit": {
+    "exit": 1,
+    "counts": {
+      "info": 0,
+      "low": 0,
+      "moderate": 5,
+      "high": 10,
+      "critical": 1,
+      "total": 16
+    },
+    "businessFixesApplied": false,
+    "productionReleaseGate": "Assess reachability and apply a separate compatible security patch; not a fresh CT7 regression"
+  },
+  "pendingAcceptance": [
+    "independent deployment/pipeline/artifact receipt",
+    "real TLS and live target transport",
+    "target physical device",
+    "three real natural days",
+    "independent live-model quality"
+  ],
+  "sourceSha256": {
+    ".env.example": "dc4736cfdad713371459b41025a50671f136fe2b1a360f47a8cf69139491d4e3",
+    "R4_DEPLOYMENT_IMPLEMENTATION_NOTES.md": "844359a1139bb8bdb7b158464011fc9595c9c5a099cdb1e9ee30dd6da744d9d0",
+    "app/api/conversations/[id]/turns/[turnId]/sources/[sourceId]/route.ts": "391ed3110cc598208f2b4b11cbb9a65723c9b7d05fee873e0352bb326e48d1c7",
+    "app/api/missions/[id]/sources/[sourceId]/route.ts": "3c9c95838e7c0fb12c6d15ff5fc5d98e99f08d05b1e645759c5949ed2e0cca7d",
+    "app/api/projects/[id]/deployment-connections/[connectionId]/route.ts": "bf1a4e6a08a4ea9f63b69b560aa91236a562765e1b9f403fb8d91a9502423d5c",
+    "app/api/projects/[id]/deployment-connections/route.ts": "9b2acecdcf5b8acb870a5efde07b50e8fcb7267085f796c6d88368b82534b2b4",
+    "app/focus/source/[conversationId]/[turnId]/[sourceId]/page.tsx": "6c703330e4a3ea539e840c09987ff6ac7996db8a2cd083e52b8939721e956e28",
+    "app/missions/source/[missionId]/[sourceId]/page.tsx": "2dabacf5efce9e8c284ed3a2cd2696f5666d1888b1d5892b6b1bf514b8e2098f",
+    "app/projects/[id]/[section]/page.tsx": "3c90a6c04a14c414c64ccad96f8d8eea8bc54d788df8098cf14cf57bc570687c",
+    "components/DeploymentConnectionsCard.tsx": "7c1b9bc866d8dfd1ad12fc83a6b8108fa1c5d3655313b4b52588c47fe6b27f54",
+    "components/MissionBudgetReview.tsx": "4c97265063a64a60de1b523107f640e28e7855e86d32e258f435f91fd649988d",
+    "components/MissionInvestigationDelegation.tsx": "2b2ef6112c5439fd4c2b2a663ccabd2675f3ff10503486c17dbe3af293a7c456",
+    "e2e/deployment.spec.ts": "585ec026235dfb7c6436d62e3fd59a7fe157d75936ca5dfaeeb2c9ff6704fe00",
+    "e2e/pre-r4-ux.spec.ts": "2609ee0301c15738fdeae1ec875227131b46849ac8c043a186e514cc30bd1be1",
+    "harmonyos/entry/src/main/ets/common/MissionContract.ets": "c39db988a255f0f7b3ca5c4db4c8e670ccc72bfaf2f10f65717da2bb88ada834",
+    "harmonyos/entry/src/main/ets/components/DeploymentConnectionsPanel.ets": "b689487ccd4aafd21334f052e2450b11a0b6c237a9667beca0c86953c8c0baaf",
+    "harmonyos/entry/src/main/ets/components/MissionInvestigationDelegation.ets": "503f93d2db5f43c485ce0fb11472967c468ecfdbd008a584d9d2f3b82cffc529",
+    "harmonyos/entry/src/main/ets/models/Conversation.ets": "03b20f14e47fa452c95d96f9cb9b24fd1a64e63330328f5ce1749bf8b57b2853",
+    "harmonyos/entry/src/main/ets/models/Deployment.ets": "8969f696b554940d43c2a1c6337a2b34ba3e4701f060baeb4a31171c292dc150",
+    "harmonyos/entry/src/main/ets/models/Mission.ets": "0175393fca79a84b413d1f4eb212d9cf93086dade8fb9c0d84da10972463b01a",
+    "harmonyos/entry/src/main/ets/pages/ConversationWebSource.ets": "9b75abb6a0c08f1bdb02755390695d1863582884e3d5e4efc9720bcbf89b798c",
+    "harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets": "6e2382198be7832220b153815bc859314f1dc2ff045c6b9a08d6185265028af0",
+    "harmonyos/entry/src/main/ets/pages/MissionDetail.ets": "1a66c818ab101807a61d643abae9e4771a8f7a0b68d4d229ffca5ba4d18dc1aa",
+    "harmonyos/entry/src/main/ets/pages/ProjectHome.ets": "6d2364a2c3c685f54a6d31483bf7b28f79b15fbdefeff5a7d2b96b94c519edcd",
+    "harmonyos/entry/src/main/ets/services/DeploymentService.ets": "5a6b255e22ca04b8648da693b08381bc98ae2768a6f47b0b0cdab27979f157f2",
+    "lib/continuity/sourcePolicy.ts": "d3e3eb331febb3efc492258e0b032b4dfbb069e4f39d736349fc026980de855e",
+    "lib/conversation/anchorService.ts": "de6755a1ad3de3792e5731940c68900a70b0a17d22c0dc1a6214b551ce5219d8",
+    "lib/conversation/deploymentTools.ts": "a7f57ebbef5b4d0440acb1a5640d9ef06743e061bd8ec096a850ac1231e25ab6",
+    "lib/conversation/entry.ts": "9f928d408f081cd653fab464eb7e26068202e688a4fd325ab9db4e0400d033c5",
+    "lib/conversation/investigationService.ts": "8529b6cb1365297fe763f1a528f5d91350d81fa318c80256e080f6cda4d30356",
+    "lib/conversation/service.ts": "3b7b88c851fbb763dcd03a69c79e0bd997c533682549bdc06f73291bb328fe06",
+    "lib/conversation/sourceObservation.ts": "21795c44eed431bdd8aa4f1bceac5a9cba3e763a226560273024b271c3fc5cfa",
+    "lib/conversation/toolAdapter.ts": "7d48c5ee69ded753c2299c095219be77ef6771a1e1e93a82532e93d19bacfaca",
+    "lib/conversation/turnRuntime.ts": "8d2bc412bd76c663c2a5c6d27931cbc866d8ba838444c6661ddf14225c501561",
+    "lib/mission/branchObservation.ts": "7cf645e811afa91dedf318d45ef0a2af027552b323a6fd6fbfe6167d18cdad71",
+    "lib/mission/budgetReview.ts": "6f598c3b226c090a009c25d846d7cfb3100438bed8de648166c4eb648a72a044",
+    "lib/mission/contracts.ts": "efd9c3b0a76a7852992c48a0dc92a63003ae3de07b7156633fd91091525178a4",
+    "lib/mission/delegationObservation.ts": "faa3f564f3b10d01bbfbcc804f2cbac9d449c24dee5af657d5076490fd4aed65",
+    "lib/mission/deploymentTools.ts": "7ef007fa6ae0a545205cd24a8e8b765583f1b7219de5443ef4945c1bef9a8d34",
+    "lib/mission/investigationDelegation.ts": "78dd918d6640d482c0af8f8ca226d03f7432d480b08bc8314262e28a39490813",
+    "lib/mission/repository.ts": "cd76d460b21dd6b325692799e529d728f67dc48174804963ba4aef60e53646da",
+    "lib/mission/repositoryTools.ts": "e96fe1d54be41ad75e06af8fa5baedfb29fb566d2c118687bae42269c9806dae",
+    "lib/mission/responsibility.ts": "b1506589d8d6b9359251355346baf63818db781710b8bceff3513e6af43fea35",
+    "lib/mission/runner.ts": "9adce8b4fbeb82e207595304eacb2f12d375eae065e830456a60f1c537695b6a",
+    "lib/mission/tools.ts": "71841b261db20ba1da400962666422ea4ba97adf9c48e0e75743aa591cf0bb6d",
+    "lib/sensing/deploymentConnections.ts": "66034b12abe9f87c0a11f66398e8e96efc8698be572887462d8892def18bddb5",
+    "lib/sensing/deploymentEvidence.ts": "9f68001ca2e608e0158d3c143f9de3ed50b071a554975f1ef960bba48d07fad3",
+    "lib/sensing/deploymentObservations.ts": "e4f60f0e34355b846d39b8c1adf5e5322ac6e7dd3d757f3a142f51d695c9b688",
+    "lib/sensing/deploymentObserver.ts": "05340ed4c5bafce79b4dfcbcf4748440c4d2b64da5dda1e9ec4c4fae4efff205",
+    "lib/sensing/deploymentTransport.ts": "e940efe11b32725bcbf31f76c41f982e16b83a2e3c3ee5fc8423e7a8e6686d42",
+    "lib/sensing/githubConnection.ts": "af91836c41d63853025cdc4cfc2c6a7b42340fb15f0bdfc1e41cee96661c0e0f",
+    "lib/sensing/repoCi.ts": "c605f08bd4c189ce3cbb8b40fe62689954997a8d3680807a915757cbb355d43b",
+    "lib/sensing/repoCiGrant.ts": "fc2741acd52458e3f86c145eb1dddd75d59a63a702903a59dd74eea874a84f29",
+    "lib/sensing/repoGrantBinding.ts": "8d40bded16b9a16fec89d5edd3800cf380fce74cd7158a5b800a63cdd35f736e",
+    "lib/sensing/repoSource.ts": "d5d875c0df26f13cc96972006bacbf216401267e3720af1792500951398686f1",
+    "lib/types/agentExperience.ts": "5a086a7761424e18ead1b09790c771c38d3737134f681b35a6e35cd0f2208f48",
+    "lib/types/conversation.ts": "372b4cd0350992d46d8d64e62d723c31a1c1cf12f322f8bffdb43e5bb4b29b3c",
+    "lib/types/deployment.ts": "290b4123f92239c2d6fda9b20b750dc1778d6d195ebdd502fba9d805c8d11bed",
+    "lib/types/mission.ts": "fa5091b75213c5340558f270f237378ccaf19aa339573d9a19e199b3c4857265",
+    "lib/types/missionBudget.ts": "09645a555792319d9086c081a9ef93968b6cde463c65b819fd823b2e27cf3a29",
+    "prisma/migrations/20261030233000_ct7_deployment_connections/migration.sql": "ca4bd44aa1a3b403ec67992d28ef250cb1e3a7ca8126bb39639fccf7e9150d84",
+    "prisma/schema.prisma": "82185bbe7130724e2fd74ee34f4ffcea0638d330d9eda16266916f69403a17c3",
+    "scripts/ct7-device-fixture.ts": "dfc43d3af713af01377a0a561313ebc347168d0a3617f8c210df9ed17d71e06d",
+    "scripts/ct7-native-acceptance.ps1": "4f64a5dc7435a77a277ca1a1ebdde649b239b0d814ff921de90181a66b06d0cf",
+    "scripts/e2e-env.ts": "159bc28b1baa7669cd09d7e325fd13a7602117b8ff6ac8bf186678f10963db2d",
+    "scripts/probe-ct2-public.ts": "abe8522ffb6badf21dc542c1577753a05a72ec3c285c3b93465b0dfe4c29edab",
+    "tests/deploymentEvidence.test.ts": "49831921d9ea2ea871921b5c86276f4b0b5957f576496e8db86b9b4199008afd",
+    "tests/deploymentMigration.test.ts": "9784aa2eb1d601a45270311c6770e9c8ed879ab7fc500286e9594f93c188e577",
+    "tests/deploymentRuntime.test.ts": "9a38d512bf5fc74cdaf8c5911bf39133a0d97026ca1e1b540bb28dbf68071546",
+    "tests/deploymentTransport.test.ts": "8261959d6fa5e23b984712d7b29fb9cedb4749e7c903ee7ab73aa5ac8af4b785"
+  },
+  "evidenceSha256": {
+    "harmony-build-final.exit": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "harmony-build-final.log": "e0c75cf282c1df8bd34debf719d14b232c4cc645f61b2e6c2b22defa64ecfeb8",
+    "harmony-build.exit": "186a919b8c7cb84aebf4e53c70cd1cc028a93a1d183ee29dd6e10cd18a714577",
+    "harmony-build.log": "79e93457c6dfaa686dccf3c09451dbd40c425ad18030e01e646ee4afeab3eb2c",
+    "harmony-unit.exit": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "harmony-unit.log": "5e00ebf603a498f74543857d6d843cc22f7b3bcfb292f9673567daf347715736",
+    "lint-final.exit": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "lint-final.log": "90901623939391bb587a48e479caae03ce81780aeab013a1111788ac0f40f688",
+    "lint.exit": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "lint.log": "90901623939391bb587a48e479caae03ce81780aeab013a1111788ac0f40f688",
+    "npm-production-audit.exit": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+    "test-database-init.exit": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "test-database-init.log": "b428a6c011bc273c2b6dc34fe1128e562a39036b7d6836fac4f66fa803305864",
+    "types-final.exit": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "types-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "types.exit": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "types.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unit-full-ready.exit": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "unit-full-ready.log": "1de1a66b8cc0c73afee97ed6e3ab2b509e25069b94f885ff94c7fe88653aa3c7",
+    "unit-full.exit": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+    "unit-full.log": "842d6e54d23733d01344a44be223c5e2cd9172cebd81c43fec567a0a984c6e13",
+    "web-build.exit": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "web-build.log": "4411f5a0dfb0104b67ac7771ef86f86836c1bf3dcd08b4925e449425e7a6a219",
+    "web-e2e-final.exit": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "web-e2e-final.log": "17f60a5eefb1cb0c4daf035568986b9cd9bdf3575a1ef83bc1e09303823aff6a",
+    "web-e2e.exit": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+    "web-e2e.log": "0a9dfa99eb2edf3854267b8ad398b6448bdcde9b867570c7e7a84cffbaca7bef",
+    "web-e2e-final-summary.json": "6ce8ee484ec4490496c271941d4187427805e53c994a59bb14c9e7b212ecbaa9",
+    "npm-production-audit.json": "e4238a229301c02b88ea67c4ea985eea606c8f2c3a8b50b3044d4024acab6d71"
+  }
+}

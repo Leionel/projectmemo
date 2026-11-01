@@ -251,6 +251,7 @@ struct MissionDetail {
   private async reviewBudget():Promise<void> {
     if(this.busy||this.readState!=='fresh')return;
     const body=new MissionBudgetReview();body.expectedVersion=this.mission.version;
+    body.totals.metadataRequests=Math.min(960,(this.mission.budget.metadataRequests??24)+24);
     body.totals.browserRequests=Math.min(1000,(this.mission.budget.browserRequests??40)+40);body.totals.browserBytes=Math.min(64000000,(this.mission.budget.browserBytes??4000000)+4000000);
     body.totals.calendarRequests=Math.min(128,(this.mission.budget.calendarRequests??8)+16);body.totals.externalWrites=Math.min(32,(this.mission.budget.externalWrites??2)+10);
     body.totals.models=Math.min(240,this.mission.budget.models+6);body.totals.tools=Math.min(640,this.mission.budget.tools+8);
@@ -471,6 +472,7 @@ struct MissionDetail {
       this.BudgetRow('活动时间', Math.round((this.mission.used.activeMs ?? 0) / 60000), Math.round(this.mission.budget.activeMs / 60000), Math.round(Math.min(86400000, this.mission.budget.activeMs + 180000) / 60000), ' 分钟')
       this.BudgetRow('输出预留（tokens）', this.mission.used.reservedOutputTokens ?? 0, this.mission.budget.reservedOutputTokens, Math.min(480000, this.mission.budget.reservedOutputTokens + 12000), '')
       if (this.showBudgetDetail) {
+        this.BudgetRow('元数据与环境 HTTP', this.mission.used.metadataRequests ?? 0, this.mission.budget.metadataRequests ?? 24, Math.min(960, (this.mission.budget.metadataRequests ?? 24) + 24), ' 次')
         this.BudgetRow('浏览器请求', this.mission.used.browserRequests ?? 0, this.mission.budget.browserRequests ?? 40, Math.min(1000, (this.mission.budget.browserRequests ?? 40) + 40), '')
         this.BudgetRow('浏览器字节', this.mission.used.browserBytes ?? 0, this.mission.budget.browserBytes ?? 4000000, Math.min(64000000, (this.mission.budget.browserBytes ?? 4000000) + 4000000), '')
         this.BudgetRow('日历调用', this.mission.used.calendarRequests ?? 0, this.mission.budget.calendarRequests ?? 8, Math.min(128, (this.mission.budget.calendarRequests ?? 8) + 16), '')
@@ -620,7 +622,10 @@ struct MissionDetail {
         Text(MissionProgressPresentation.sourcePreview(source)).fontSize(12).lineHeight(19).fontColor(PMColors.INK_SECONDARY)
       }
       Row({ space: 10 }) {
-        if (source.kind === 'EXTERNAL') {
+        if (source.deployment) {
+          Text('查看环境观察与证据层级 ›').fontSize(12).fontColor(PMColors.BRAND).height(36)
+            .onClick(() => { router.pushUrl({ url: 'pages/ConversationWebSource', params: { missionId: this.missionId, sourceId: source.id } }); })
+        } else if (source.kind === 'EXTERNAL') {
           Text('查看公开资料与阅读级别 ›').fontSize(12).fontColor(PMColors.BRAND).height(36)
             .onClick(() => { router.pushUrl({ url: 'pages/ConversationWebSource', params: { missionId: this.missionId, sourceId: source.id } }); })
         }

@@ -28,7 +28,7 @@ export async function resolveSourceGrantVersions(tx: Tx, userId: string, project
   const conns = await tx.sourceConnection.findMany({
     where: { id: { in: connectionIds }, projectId, ownerUserId: userId },
     orderBy: { id: "asc" },
-    select: { id: true, repo: true, ref: true, status: true, revokedAt: true, signalKind: true },
+    select: { id: true, repo: true, ref: true, status: true, revokedAt: true, signalKind: true,provider:true,environmentKey:true,deploymentConfigJson:true,revision:true },
   });
   return {
     membershipRole: membership?.role ?? null,
@@ -39,6 +39,7 @@ export async function resolveSourceGrantVersions(tx: Tx, userId: string, project
       status: c.status,
       revokedAt: c.revokedAt ? c.revokedAt.toISOString() : null,
       signalKind: c.signalKind,
+      ...(c.provider==="DEPLOYMENT"?{provider:c.provider,environment:c.environmentKey,configHash:jsonHash(c.deploymentConfigJson),revision:c.revision,withinTimeBoundary:Date.parse(String(record(c.deploymentConfigJson).expiresAt))>Date.now()}:{}),
     })),
   };
 }

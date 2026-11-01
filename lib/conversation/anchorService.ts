@@ -251,9 +251,9 @@ export async function syncConversationAnchors(actor: ConversationActor, id: stri
         if (!parsed.success) continue;
         const source = await readConversationEntry(actor, { ...parsed.data, revision: undefined }, tx);
         const oldIds = record(a.originEntryJson).signalIds as string[] | undefined;
-        const newIds = "signalIds" in source ? source.signalIds.filter(s => !oldIds?.includes(s)) : null;
+        const newIds = "signalIds" in source && source.access!=="DEPLOYMENT" ? source.signalIds.filter(s => !oldIds?.includes(s)) : null;
         if (source.revision !== a.originRevision && (newIds === null || newIds.length > 0) && await projectSnapshot(tx, actor, a, { key: "origin:" + source.revision,
-          content: (parsed.data.kind === "SOURCE_OBSERVATION" ? "关注的仓库有新线索，影响待核对。\n" : "关注的原提醒有了修订。\n") + source.ref.title + "\n" + source.text,
+          content: (parsed.data.kind === "SOURCE_OBSERVATION" ? "关注的来源有了变化，影响待核对。\n" : "关注的原提醒有了修订。\n") + source.ref.title + "\n" + source.text,
           refs: [source.ref], ...(parsed.data.kind === "SOURCE_OBSERVATION" ? { observationRef: parsed.data } : {}) })) count++;
         await tx.conversationAnchor.update({ where: { id: a.id }, data: { originRevision: source.revision } });
         if (newIds) await tx.conversationAnchor.update({ where: { id: a.id }, data: { originEntryJson: json({ ...record(a.originEntryJson), signalIds: [...new Set([...(oldIds ?? []), ...newIds])].slice(-256) }) } });

@@ -9,6 +9,7 @@ import { assertSourceUse } from "@/lib/continuity/sourcePolicy";
 import { jsonHash } from "@/lib/mission/contracts";
 import type { ConversationActor } from "@/lib/types/conversation";
 import type { RepositorySourceMeta } from "@/lib/types/repositoryCi";
+import { githubConnection } from "./githubConnection";
 
 const shaSchema = z.string().regex(/^[0-9a-f]{40}$/);
 const checkSchema = z.object({ id: z.number().int().positive(), head_sha: shaSchema, name: z.string().max(1000), status: z.string().max(80), conclusion: z.string().max(80).nullable() });
@@ -54,8 +55,10 @@ async function context(actor: RepositoryActor, projectId: string, connectionId: 
   if (!isFeatureEnabled("REPO_CI_OBSERVER_ENABLED", false)) throw new AppError("CI_OBSERVER_DISABLED", "CI 观察暂未开启", 503);
   const scope = { projectId, ...(actor.conversationId ? { conversationId: actor.conversationId } : {}), ...(actor.missionId && (actor.missionProjectId ?? projectId) === projectId ? { missionId: actor.missionId } : {}) };
   await owner(actor, projectId);
-  const c = await db.sourceConnection.findFirst({ where: { id: connectionId, projectId, ownerUserId: actor.userId, status: "ACTIVE", revokedAt: null } });
-  if (!c || !/^[A-Za-z0-9_][A-Za-z0-9_.-]{0,99}\/[A-Za-z0-9_][A-Za-z0-9_.-]{0,99}$/.test(c.repo)) throw new AppError("CONNECTION_NOT_FOUND", "仓库连接不可访问", 404);
+  const row = await db.sourceConnection.findFirst({ where: { id: connectionId, projectId, ownerUserId: actor.userId, provider:"GITHUB", status: "ACTIVE", revokedAt: null } });
+  if (!row) throw new AppError("CONNECTION_NOT_FOUND", "仓库连接不可访问", 404);
+  const c=githubConnection(row);
+  if (!/^[A-Za-z0-9_][A-Za-z0-9_.-]{0,99}\/[A-Za-z0-9_][A-Za-z0-9_.-]{0,99}$/.test(c.repo)) throw new AppError("CONNECTION_NOT_FOUND", "仓库连接不可访问", 404);
   if (!["COMMITS_AND_CI", "COMMITS_CI_LOGS"].includes(c.signalKind)) throw new AppError("CI_NOT_AUTHORIZED", "请先明确允许读取 CI", 409);
   if (parent && (parent.connectionRevision !== c.revision || parent.repo !== c.repo)) throw new AppError("CONNECTION_CHANGED", "原 CI 来源的授权已变化，请重新读取", 409);
   const continuity = await effectiveContinuity(actor.userId, scope);

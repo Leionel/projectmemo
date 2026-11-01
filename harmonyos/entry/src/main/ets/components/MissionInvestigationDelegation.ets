@@ -1,3 +1,5 @@
+import { DeploymentService } from '../services/DeploymentService';
+import { DeploymentConnection } from '../models/Deployment';
 import { Mission, MissionPolicyEdit, MissionAttentionReceipt, MissionDailyBurst } from '../models/Mission';
 import { MissionService } from '../services/MissionService';
 import { RepoSignalService } from '../services/RepoSignalService';
@@ -20,6 +22,8 @@ export struct MissionInvestigationDelegation {
   @State papers: boolean = false;
   @State verification: boolean = false;
   @State documents: boolean = false;
+  @State environments: DeploymentConnection[] = [];
+  @State deploymentLogs: boolean = false;
   @State logs: boolean = false;
   @State trackHead: boolean = false;
   @State daily: boolean = false;
@@ -39,13 +43,15 @@ export struct MissionInvestigationDelegation {
     this.daily = this.mission.continuationPolicy.dailyBurst !== undefined;
     this.dailyModels = (this.mission.continuationPolicy.dailyBurst?.maxModels || 4).toString();
     this.dailyTools = (this.mission.continuationPolicy.dailyBurst?.maxTools || 8).toString();
+    this.deploymentLogs=(this.mission.continuationPolicy.allowedTools||[]).includes('read_deployment_logs');
     this.loadConnections();
+    new DeploymentService().list(this.mission.projectId).then(reply=>{if(reply.enabled)this.environments=reply.connections.filter((c:DeploymentConnection)=>c.status==='ACTIVE');}).catch(()=>{});
   }
   private async loadConnections(): Promise<void> {
     try { const reply = await new RepoSignalService().list(this.mission.projectId); this.connections = reply.connections.filter((c: ConnectionView) => c.status === 'ACTIVE' && c.revokedAt === null && (c.access === 'COMMITS_AND_CI' || c.access === 'COMMITS_CI_LOGS')); }
     catch { this.error = '仓库范围未取得，请刷新后核对；仍可只调查项目资料'; }
   }
-  private logAllowed(): boolean { return this.selected.length > 0 && this.selected.every((id: string) => this.connections.some((c: ConnectionView) => c.id === id && c.access === 'COMMITS_CI_LOGS')); }
+  private logAllowed(): boolean { const repos=this.selected.filter((id:string)=>this.connections.some((c:ConnectionView)=>c.id===id)); return repos.length > 0 && repos.every((id: string) => this.connections.some((c: ConnectionView) => c.id === id && c.access === 'COMMITS_CI_LOGS')); }
   private async seen(): Promise<void> {
     if (this.saving) return; this.saving = true;
     try { const body = new MissionAttentionReceipt(); body.requestId = 'attention-' + Date.now().toString(); body.expectedVersion = this.mission.version; body.decisionId = this.mission.delegation?.attention?.decisionId || ''; await new MissionService().attention(this.mission.id, body); this.onSaved(); }
@@ -64,9 +70,11 @@ export struct MissionInvestigationDelegation {
         if (this.papers) body.policy.allowedTools.push('read_paper_metadata');
         if (this.verification) body.policy.allowedTools.push('propose_metric_verification');
         if (this.documents) body.policy.allowedTools.push('inspect_document', 'read_document_page', 'read_document_section', 'read_document_table');
-        if (this.selected.length > 0) body.policy.allowedTools.push('read_repository_ci', 'read_ci_jobs');
+        if (this.selected.some((id:string)=>this.connections.some((c:ConnectionView)=>c.id===id))) body.policy.allowedTools.push('read_repository_ci', 'read_ci_jobs');
+        const environmentIds=this.selected.filter((id:string)=>this.environments.some((c:DeploymentConnection)=>c.id===id));
+        if(environmentIds.length>0){body.policy.allowedTools.push('inspect_deployment');if(this.deploymentLogs&&environmentIds.every((id:string)=>Boolean(this.environments.find((c:DeploymentConnection)=>c.id===id)?.config.logPath)))body.policy.allowedTools.push('read_deployment_logs');}
         if (this.logs && this.logAllowed()) body.policy.allowedTools.push('read_ci_log');
-        body.policy.connectionIds = this.selected; body.policy.trackBranchHead = this.selected.length > 0 && this.trackHead;
+        body.policy.connectionIds = this.selected; body.policy.trackBranchHead = this.selected.some((id:string)=>this.connections.some((c:ConnectionView)=>c.id===id)) && this.trackHead;
         if (this.daily) { body.policy.dailyBurst = new MissionDailyBurst(); body.policy.dailyBurst.maxModels = Number(this.dailyModels); body.policy.dailyBurst.maxTools = Number(this.dailyTools); }
         body.policy.timezone = this.mission.continuationPolicy.timezone || 'Asia/Shanghai'; body.policy.quietStart = this.mission.continuationPolicy.quietStart ?? 22; body.policy.quietEnd = this.mission.continuationPolicy.quietEnd ?? 8; body.policy.attention = this.mission.continuationPolicy.attention || 'IMPORTANT_ONLY';
       }
@@ -98,16 +106,25 @@ export struct MissionInvestigationDelegation {
       if (this.mission.academicResearchEnabled) { Row() { Checkbox().select(this.papers).onChange((v: boolean) => { this.papers = v; }); Text('允许在原许可内核对论文元数据').fontSize(13) } }
       if (this.mission.sandboxVerificationEnabled) { Row() { Checkbox().select(this.verification).onChange((v: boolean) => { this.verification = v; }); Text('允许提出核算预览，每次执行仍需批准').fontSize(13) } }
       if (this.papers && this.selected.length === 0) { TextInput({text:this.metadata,placeholder:'公开元数据请求累计上限'}).type(InputType.Number).onChange((v:string) => { this.metadata = v; }) }
+      ForEach(this.environments,(c:DeploymentConnection)=>{
+        Row(){Checkbox().select(this.selected.includes(c.id)).enabled(this.selected.includes(c.id)||this.selected.length<3).onChange((v:boolean)=>{this.selected=v?[...this.selected,c.id]:this.selected.filter((id:string)=>id!==c.id);});Text(c.config.environment+' · 只读环境').fontSize(13)}
+      },(c:DeploymentConnection)=>c.id)
+      if(this.environments.some((c:DeploymentConnection)=>this.selected.includes(c.id))){Row(){Checkbox().select(this.deploymentLogs).onChange((v:boolean)=>{this.deploymentLogs=v;});Text('按原环境许可读取脱敏日志').fontSize(13)}}
       ForEach(this.connections, (c: ConnectionView) => {
         Row() { Checkbox().select(this.selected.includes(c.id)).enabled(this.selected.includes(c.id) || this.selected.length < 3).onChange((v: boolean) => { this.selected = v ? [...this.selected, c.id] : this.selected.filter((id: string) => id !== c.id); }); Text(c.repo + ' · ' + c.ref).fontSize(13) }
       }, (c: ConnectionView) => c.id)
-      if (this.selected.length > 0) {
+      if (this.selected.some((id:string)=>this.connections.some((c:ConnectionView)=>c.id===id))) {
         Row() { Checkbox().select(this.trackHead).onChange((v: boolean) => { this.trackHead = v; }); Text('跟踪所选分支的新提交').fontSize(13) }
         Text(this.trackHead ? '先读取分支 head，再核对固定提交 CI；每仓库额外计一次 head 请求。' : '只核对已收录的固定提交；无变化不调用模型。').fontSize(13)
         Text('CI 每仓库最多 3 次请求；实际仍受原任务请求总额约束（默认 24 次）。').fontSize(13)
         TextInput({ text: this.interval, placeholder: '检查间隔（分钟）' }).type(InputType.Number).onChange((v: string) => { this.interval = v; })
         TextInput({ text: this.metadata, placeholder: '仓库请求累计上限' }).type(InputType.Number).onChange((v: string) => { this.metadata = v; })
         if (this.logAllowed()) { Row() { Checkbox().select(this.logs).onChange((v: boolean) => { this.logs = v; }); Text('允许读取脱敏的失败日志').fontSize(13) } }
+      }
+      if(this.environments.some((c:DeploymentConnection)=>this.selected.includes(c.id))&&!this.connections.some((c:ConnectionView)=>this.selected.includes(c.id))){
+        TextInput({text:this.interval,placeholder:'环境检查间隔（分钟）'}).type(InputType.Number).onChange((v:string)=>{this.interval=v;})
+        TextInput({text:this.metadata,placeholder:'环境HTTP累计上限'}).type(InputType.Number).onChange((v:string)=>{this.metadata=v;})
+        Text('每条固定路径计一次请求，仍受原任务累计总额约束（默认24次）。').fontSize(13)
       }
       if (this.error !== '') { Text(this.error).fontSize(13) }
       Button('允许按此期限和总预算持续调查').enabled(!this.saving && this.until !== '').onClick(() => { this.save(false); })

@@ -1335,9 +1335,18 @@ struct Index {
     Column() {
       // 搜索框与筛选
       Column() {
-        TextInput({ text: this.globalSearchQuery, placeholder: '搜索记忆、摘要或项目名称' })
-          .height(44).fontSize(15).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(11)
-          .onChange((value: string) => { this.globalSearchQuery = value; })
+        if (!this.searchOpen && this.globalSearchQuery.trim() !== '') {
+          Row({ space: 8 }) {
+            Text('搜索：' + this.globalSearchQuery)
+              .fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY)
+              .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
+            Button('清除', { type: ButtonType.Normal })
+              .height(44).fontSize(PMFontSize.SECONDARY)
+              .backgroundColor(Color.Transparent).fontColor(PMColors.BRAND)
+              .accessibilityText('清除记忆搜索关键词')
+              .onClick(() => { this.globalSearchQuery = ''; })
+          }.width('100%')
+        }
         Scroll() {
           Row() {
             ForEach(this.globalTypeFilters(), (filter: MemoryTypeFilter) => {
@@ -1508,6 +1517,7 @@ struct Index {
                     .fontSize(PMFontSize.BODY)
                     .fontColor(PMColors.INK_SECONDARY)
                     .lineHeight(20)
+                    .constraintSize({ minHeight: 40 })
                     .maxLines(2)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
                     .margin({ top: PMSpacing.XS })
@@ -2646,12 +2656,10 @@ struct Index {
               })
 
               if (this.currentMainTabIndex < 3) {
-                if (this.currentMainTabIndex !== 1) {
                 Row() { SearchIcon({ iconSize: 19 }) }
                   .width(44).height(44).justifyContent(FlexAlign.Center)
                   .accessibilityText(this.searchOpen ? '关闭搜索' : `搜索${this.searchTargetName()}`)
                   .onClick(() => { this.toggleSearch(); })
-                }
                 Row() { PlusIcon({ iconSize: 20, iconColor: PMColors.BRAND }) }
                   .width(44).height(44).justifyContent(FlexAlign.Center)
                   .accessibilityText(this.createActionName())

@@ -1,8 +1,28 @@
 # 交接文档 — 问忆程对话 / 焦点 / 委托 / 资料行动 / Widget UI 精修（2026-11-01）
 
-本文件记录本轮多批次 UI/UX 改造的完成状态、验证结果与一个**未解决的编译阻塞点**，供下一次接手直接继续。
+本文件记录本轮多批次 UI/UX 改造的完成状态、验证结果与编译阻塞点的修复记录，供下一次接手直接继续。
 
-## P0 阻塞点：Index.ets 记忆页三处改动触发 ArkTS 编译失败（未合入）
+## 本次接手结果（2026-11-01）
+
+已从 `9a9479f` 的干净 Index.ets 重新应用三处改动，没有复制 `.zcode` 备份的嵌套收尾：
+
+- 顶栏搜索入口覆盖记忆 Tab，继续复用原 `searchOpen` / `globalSearchQuery` / 搜索与筛选逻辑。
+- 移除全局记忆页重复的常驻输入框；搜索仍由顶栏展开，收起且有关键词时显示轻量条件与清除按钮，按钮保留 44 高度。
+- 现有记忆摘要保留两行截断并增加 40 最小高度，不补造摘要或修改记忆事实。
+
+**验证**：先仅恢复顶栏入口构建，再加入搜索布局构建，最后加入摘要高度组合构建，三次 `harmony:build` 均退出 0；最终页面编译实际执行，并非只运行不包含页面的 UnitTestArkTS。`harmony:test` 90/90。`tests/documentReader.test.ts` 当前 8/8 通过（包含真实 PDF 提取的两个用例），无需降低页码与来源校验。
+
+当前文件最后 85 行与 HEAD 一致；备份 WIP 尾部与 HEAD 有额外结构差异。本次没有复现三处 UI 改动本身造成语法失败，不能沿用原报告把它们认定为编译根因。保留旧备份，仅供排查，禁止整份覆盖。
+
+证据在 `evidence/ui-handover-fix/20261101/`；最终 unsigned HAP SHA-256 为 `5361d37a0c6e34575a88bdd85a7c49daa49668ba73b28f804c7ddf1f0c4b00d7`。
+
+**仍待验收**：全局记忆默认/搜索展开/摘要高度的模拟器截图。本轮未安装包或连接生产做交互验收。构建通过不等于视觉验收通过，也不证明不同标题/无摘要的整张卡片一律等高。
+
+**生产 404**：本地责任合同接口存在；404 也可能表示归属/对象不可访问，不能仅据状态码认定服务器版本落后。需对照实际请求路径、响应体、用户归属与服务端发布版本；不能用静默空列表代替错误，不能未经授权部署或自动批准操作。本轮不改生产地址、不迁移数据库，保留此项。
+
+**其他工作树**：原有 ProjectHealthCard、RepositorySources 删除、Health/Metric/Impact/State 原生组件及打包配置等未提交内容均未由本轮修改或纳入提交。
+
+## P0 历史阻塞：Index.ets 记忆页三处改动（已修复，原排查记录保留）
 
 为全局「项目记忆档案」页做了三处小改动，但合入后 `harmony:build` 在 `Index.ets` 尾部（约 3201-3212 行的嵌套 `Column` 收尾属性区）报 `arkts-no-any-unknown` 与 `Declaration or statement expected`。**已验证与缓存无关**（清空 `harmony/entry/build` 与 hvigor 缓存后仍复现），且：
 
@@ -45,8 +65,8 @@
 
 ## 遗留与建议
 
-- `Index.ets` 阻塞点见上；修复后需补截图（全局记忆默认/搜索展开/卡片等高对比）。
-- `tests/documentReader.test.ts` 2 个失败为本机 pdftotext（Git mingw64 版）与测试要求不符，环境基线，与本轮改动无关。
+- `Index.ets` 编译阻塞已解除，三次分步构建及最终 90/90 已通过；全局记忆默认/搜索展开/摘要高度截图待补。
+- 原文档记录的 `documentReader.test.ts` 两项环境失败本次未复现，当前 8/8 通过；后续应记录实际解析器路径，不将历史环境失败当作当前基线。
 - 评审环境（review 包连生产后端）下部分只读视图报 HTTP 404（如委托「运行与接续」、纠正面板），按约定本轮未处理。
 - `Index.ets` 的通知路由改动（仅带 projectId 时打开 ProjectHome）已随 `bec5515` 入库；其记忆页 WIP 的中间状态备份在 `.zcode/Index.ets.user-wip-backup.ets`（含损坏尾部，仅作对照，勿直接覆盖）。
 - 工作树中仍有意未提交：`AGENTS.md`、`harmonyos/build-profile.json5`（review flavor）与 `Constants.ets`（评审包地址）、`next-env.d.ts`、`tsconfig.json`、`docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md`、`components/ProjectHealthCard.tsx`——属评审打包与另一条线内容，提交前需与所有者确认。

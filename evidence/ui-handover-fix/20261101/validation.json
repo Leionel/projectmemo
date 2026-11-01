@@ -1,0 +1,14 @@
+{
+  "baseCommit": "9a9479f",
+  "checks": {
+    "build-search-entry": 0,
+    "build-search-layout": 0,
+    "build-combined": 0,
+    "harmony-test": 0,
+    "document-reader": 0
+  },
+  "harmonyTests": 90,
+  "documentTests": 8,
+  "deviceAcceptance": false,
+  "productionTouched": false
+}

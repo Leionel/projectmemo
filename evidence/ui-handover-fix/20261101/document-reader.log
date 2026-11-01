@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/documentReader.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen
+
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  15:33:56
+   Duration  9.03s (transform 2.93s, setup 0ms, import 6.23s, tests 2.39s, environment 0ms)
+

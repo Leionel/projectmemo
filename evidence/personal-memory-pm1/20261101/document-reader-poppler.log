@@ -1,0 +1,14 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mD:/Projects/hongmen-personal-memory[39m
+
+ [32m✓[39m tests/documentReader.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 3295[2mms[22m[39m
+   [33m[2m✓[22m[39m CT4 catalog/page/section/table preserve physical locators, dates and untrusted content [33m 455[2mms[22m[39m
+   [33m[2m✓[22m[39m CT4 original Mission publishes doc locators and correction blocks both a derived Artifact and pending Action [33m 506[2mms[22m[39m
+   [33m[2m✓[22m[39m CT4 original Conversation investigates the real PDF and publishes a bound dual-client citation [33m 1628[2mms[22m[39m
+   [33m[2m✓[22m[39m CT4 actual Poppler locates two physical PDF pages and records parser version [33m 389[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m8 passed[39m[22m[90m (8)[39m
+[2m   Start at [22m 19:11:54
+[2m   Duration [22m 7.47s[2m (transform 2.36s, setup 0ms, import 3.66s, tests 3.30s, environment 0ms)[22m
+

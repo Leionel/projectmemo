@@ -2,6 +2,7 @@ import { composeEffectiveMemory } from "@/lib/memory/digestService";
 import { composeHypotheses } from "@/lib/memory/hypothesisService";
 import { fitFacetGroups } from "@/lib/memory/facetBudget";
 import { claimControlState } from "@/lib/memory/claimEffective";
+import { resolvePersonalContext } from "@/lib/memory/personalContext";
 import { verifyMissionResult } from "./resultVerifier";
 import { AppError } from "@/lib/api";
 import { metricInputSources } from "./metricInputSources";
@@ -44,7 +45,7 @@ function fitCognitiveFacets(facets: CognitiveFacets, budget: number) {
   const { groups, omitted } = fitFacetGroups([facets.hypotheses, facets.effectiveMemory], budget);
   return { hypotheses: groups[0], effectiveMemory: groups[1], omitted: { hypotheses: omitted[0], memory: omitted[1] } };
 }
-export async function buildContext(m: AgentMission, tools: ToolSet = projectTools) {
+export async function buildContext(m: AgentMission, tools: ToolSet = projectTools, options: { remoteProcessing?: boolean } = {}) {
   const membership = await db.projectMembership.findUnique({ where: { userId_projectId: { userId: m.ownerUserId, projectId: m.projectId } },
     include: { project: { select: { contextRevision: true } } } });
   if (!membership) throw new AppError("PROJECT_NOT_FOUND", "项目不存在或无法访问", 404);
@@ -150,10 +151,26 @@ export async function buildContext(m: AgentMission, tools: ToolSet = projectTool
       omitted: resolved.decisions.filter(d => !("advisory" in d)).length,
       complete: resolved.decisions.length <= 24 };
   }
-  const hash = jsonHash(context);
+  // PM-1: account personal context is a bounded advisory facet; it never widens project scope.
+  const personal = await resolvePersonalContext(m.ownerUserId, { purpose: "MISSION", projectIds: [m.projectId], missionId: m.id,
+    query: m.goal, remoteProcessing: options.remoteProcessing === true, audience: "MISSION_INTERNAL" });
+  // PM-3 J25: personal context yields to capacity before hard limits do; the read set keeps
+  // every eligible item (superset of injected) so a trimmed statement can never outlive its dependency.
+  const personalOmittedForBudget: string[] = [];
+  const personalItems = [...personal.items];
+  let contextWithPersonal = { ...context, personalContext: { items: personalItems, coverage: personal.coverage, processingAllowed: personal.processingAllowed, usagePolicy: personal.usagePolicy }, personalMemoryReadSet: personal.readSet };
+  while (JSON.stringify(contextWithPersonal).length > 30000 && personalItems.length > 0) {
+    const dropped = personalItems.pop()!;
+    personalOmittedForBudget.push(dropped.claimId);
+    contextWithPersonal = { ...context, personalContext: { items: personalItems,
+      coverage: { ...personal.coverage, selected: personalItems.length, complete: false },
+      processingAllowed: personal.processingAllowed, usagePolicy: personal.usagePolicy }, personalMemoryReadSet: personal.readSet };
+  }
+  const hash = jsonHash(contextWithPersonal);
   if (experienceAdvisories.length) await recordUses(m.id, experienceAdvisories.map(advisory => ({ advisory, experienceId: advisory.id })), hash);
   if (experienceDecisions.length) await recordRetrieval(m, experienceDecisions, hash);
-  return JSON.stringify({ ...context, experienceAdvisories, experienceReadSet, experienceCoverage, manifest: { excludedStepIds: excluded, unlistedStepCount: Math.max(0, stepCount - stepIndex.length), historyStepCount: stepCount, notLoadedStepCount: stepCount - steps.length,
+  return JSON.stringify({ ...contextWithPersonal, experienceAdvisories, experienceReadSet, experienceCoverage,
+    personalCoverage: { ...personal.coverage, omissions: personal.omissions, omittedForBudget: personalOmittedForBudget, nextBoundary: personal.nextBoundary }, manifest: { excludedStepIds: excluded, unlistedStepCount: Math.max(0, stepCount - stepIndex.length), historyStepCount: stepCount, notLoadedStepCount: stepCount - steps.length,
     historyEventCount: eventCount, includedEventSeqs: [...new Set([...inputs.map(e => e.seq),...fitReviews.map(e=>e.seq)])].sort((a,b)=>a-b), promptVersion: context.promptVersion, source: "MISSION_EVENTS_AND_STEPS", hash,
     omittedCognition: fitted.omitted } });
 }

@@ -11,6 +11,7 @@
     "pages/AttachmentViewer",
     "pages/FocusConversation",
     "pages/ConversationHistory",
-    "pages/ConversationWebSource"
+    "pages/ConversationWebSource",
+    "pages/PersonalMemoryPage"
   ]
 }

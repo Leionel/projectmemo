@@ -2,6 +2,7 @@ import { isFeatureEnabled } from "@/lib/config/features";
 import { AgentMemoryPanel } from "./AgentMemoryPanel";
 import Link from "next/link";
 import { ArrowRight, Plus, Search } from "lucide-react";
+import { MemoryScopeNav } from "@/components/MemoryScopeNav";
 import { PageHeading } from "@/components/PageHeading";
 import { EvidenceText } from "@/components/EvidenceText";
 import { knowledgeTypeLabels, knowledgeTypes, temporalStateLabels, type TemporalTopLevelState } from "@/lib/types";
@@ -27,6 +28,7 @@ export async function GlobalWorkspacePage({ userId, mode, input }: { userId: str
     <PageHeading eyebrow="我的工作台" title={memory ? "项目记忆档案" : "行动与提醒"}
       description={memory ? "跨项目查找已保存的记忆，回到所属项目查看来源与结论演进。" : "集中查看各项目的待办行动和当前提醒，回到原项目处理。"}
       actions={<Link prefetch={false} className="editorial-button-secondary focus-ring" href={f.project && data.projects.some(p => p.id === f.project) ? `/projects/${f.project}/${memory ? "records#capture-box" : "actions#action-board"}` : "/projects"}><Plus size={14} aria-hidden="true" />{memory ? "选择项目记录进展" : "选择项目新增行动"}</Link>} />
+    {memory && <MemoryScopeNav />}
     <form action={path} className="workspace-filters" aria-label={memory ? "筛选项目记忆" : "筛选待办与提醒"}>
       <label className="workspace-search"><span className="sr-only">{memory ? "搜索记忆标题或摘要" : "搜索行动或提醒"}</span><Search size={15} aria-hidden="true" /><input className="editorial-input focus-ring" name="q" defaultValue={f.q} placeholder={memory ? "搜索标题或摘要" : "搜索行动或提醒"} maxLength={200} /></label>
       <label><span className="sr-only">所属项目</span><select name="project" defaultValue={f.project} className="editorial-input focus-ring"><option value="">全部项目</option>{f.project && !data.projects.some(p => p.id === f.project) && <option value={f.project}>项目不可访问或已归档</option>}{data.projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}</select></label>

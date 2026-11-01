@@ -1,0 +1,113 @@
+# PM-1 实施记录：账户个人记忆首个纵向切片（2026-11-01）
+
+基线 `1c3b6a5`，分支 `codex/personal-memory-explicit`，独立 worktree `D:/Projects/hongmen-personal-memory`。规划依据 `docs/FINAL/Memory/` 六份文档；本文只记录实际改变与验证，不重复合同条款。
+
+## 用户现在能做什么
+
+用户在 Web `/settings/memory` 或鸿蒙「设置 → 我的记忆」明确保存一条非敏感协作偏好（例如"以后技术讨论先给结论"），原 Conversation 的调查上下文与原 Mission 的上下文构建都会按当前版本带入该条目；用户可查看来源与版本经过，可暂停、恢复、撤回、删除，或整体清空；关闭账户使用或设置项目例外后，新派发与新发布立即不再包含个人正文。原批准创建 Action、原完成服务留下 `resultCardId` 的业务闭环保持原样（旅程测试覆盖）。
+
+## 实际新增（全部在 AgentClaim 统一账本内，无第二个记忆框架）
+
+| 层 | 文件 | 内容 |
+|---|---|---|
+| 迁移 | `prisma/migrations/20261101170000_pm1_account_memory_scope/` | AgentClaim 重建（`scopeType`，`projectId` 可空 + 两条 CHECK：PROJECT 必有 projectId、ACCOUNT 三字段必空）；ProjectMembership 加 `personalMemoryMode/Version`；新表 `UserMemoryPolicy`（策略与 privacyRevision，不存正文）、`UserMemoryControlReceipt`（owner+requestId 幂等，不存正文） |
+| 范围 | `lib/memory/scope.ts` | 判别联合 + 项目查询显式化辅助；项目侧所有 AgentClaim 查询补 `scopeType:"PROJECT"`（claimEffective/claimReadable/claimService/conversationDigest/digestService/hypothesisService/sourcePolicy） |
+| 策略 | `lib/memory/userMemoryPolicy.ts` | 策略零初始化（原 User 锁内）、个人内容 hash、读集构建、`assertPersonalMemoryReadSet` 同步失效守卫（抛 `COGNITIVE_RECOORDINATE`，由原 assertTurnCurrent 映射为 TURN_RECOORDINATE） |
+| 准入 | `lib/memory/personalAdmission.ts` | 纯规则分类：DIRECT_APPLIED / SESSION_ONLY / PROJECT_GUIDANCE / NEEDS_CLARIFICATION / NOT_USER_MEMORY_COMMAND / REJECTED_FOR_MEMORY（凭据+首批敏感）；不依赖模型分类激活 |
+| 写路径 | `lib/memory/personalMemoryService.ts` | ADD_EXPLICIT/ADD_FROM_EXPRESSION/UPDATE/PAUSE/RESUME/WITHDRAW/DELETE/DELETE_ALL；User 写锁、CAS（expectedRevision/expectedPolicyVersion）、payloadHash 幂等、控制回执、删除清除正文（条目+历史事件 userQuote 置空）、DELETE_ALL 推进 `extractionNotBefore`；每类变更同事务推进 `privacyRevision` |
+| 失效 | `lib/memory/personalInvalidation.ts` | 账户级扇出：该用户所有活跃 Turn（携带个人读集的）置 INVALIDATED，所有活跃 Mission 走原暂停/废弃/版本推进；未携带读集的旧在途轮次不追溯 |
+| 选择 | `lib/memory/personalContext.ts` | 两个 Composer 共用：资格（策略/项目例外/状态/有效期/主题/处理许可）、预算（6 条/2400 字符）、遗漏原因、`nextBoundary`、J29 处理许可（`cloudProcessingEnabled` 或本地 provider） |
+| 消费 | `investigationService.ts` / `contextBuilder.ts` / `runner.ts` / `digestService.ts` | Conversation composer 增加 `personalContext` facet + `personalMemoryReadSet`；Mission context 以 hash 绑定同一 facet；runner 模型前/COMMIT/工具派发/结算四处断言读集；综合发布前断言；`activateNextGeneration` 重置该读集 |
+| API | `app/api/me/memory(/policy)/route.ts` | GET 列表/详情、POST 命令、PUT 准入预览、GET/PATCH 策略；owner 只来自认证会话 |
+| Web | `app/settings/memory/page.tsx` + `components/PersonalMemoryManager.tsx` | 列表、添加（表单+原话判断）、暂停/恢复/删除（次级动作）、来源与版本详情、使用与控制开关（含解释文案） |
+| 鸿蒙 | `pages/PersonalMemoryPage.ets` + `services/PersonalMemoryService.ets` + `Index.ets` SettingsTab 入口 + `main_pages.json` | 单列列表、底部弹层添加（失败保留草稿）、44vp 行命中、暂停/恢复/删除、策略开关 |
+
+## 合同变化
+
+- `AgentClaim.projectId` 变为可空并新增 `scopeType`：所有项目侧查询已显式过滤（测试含负例）；旧 `owner+scopeKey+originKey` 唯一性保留，ACCOUNT 行 scopeKey 固定 `ACCOUNT`。
+- `AgentClaimEvent` 结构未变；个人事件 `controlSeq` 保持为空，不进入原项目 ClaimCorrection 解释链。
+- Turn readManifest / Step protocolJson 新增可选 `personalMemoryReadSet`；`assertTurnCurrent` 对携带该读集的轮次做同步检查。旧轮次无此字段 → 检查直通（兼容）。
+- 项目成员级例外默认 `INHERIT`；不改任何既有授权语义。
+
+## 首切片未包含（合同已预留）
+
+- 对话内联自动捕获（本轮提供表单 + 原话判断两种入口，同一准入服务；会话中自动拦截属 PM-2 的提取路径）。
+- 候选理解与晋升（`candidateInferenceEnabled` 默认关闭；CANDIDATE 状态、晋升冻结合同见审计 4.2/5 节）。
+- 项目派生个人条目（来源根走 SourcePolicy 的消费检查已在读集设计中预留，实现属 PM-2）。
+- 使用记录的独立索引（本轮从 Turn/Step protocolJson 有界扫描可核对轨迹；文档 8.5 节允许先留最小轨迹）。
+
+## 验证记录（本 worktree，2026-11-01）
+
+- `npx tsc --noEmit` 通过；`npm run lint` 0 error（2 条历史 warning + 本切片无 warning）。
+- `npx vitest run tests/pm1PersonalMemoryScope.test.ts tests/pm1PersonalAdmission.test.ts tests/pm1PersonalConsumption.test.ts`：24/24 通过。覆盖：空库迁移重放（含新迁移 + CHECK 负例）、旧库副本升级回填、范围隔离负例（项目查询/跨 owner/同 scopeKey）、requestId 幂等与换载荷 409、状态机（暂停/恢复/撤回/删除/清空 + 正文清除 + 重放不复活 + extractionNotBefore）、策略 CAS、读集守卫（策略/条目/项目例外/边界）、准入矩阵 12 例、J29 处理许可、Mission/Conversation 上下文注入与排除、在途失效（预算不重置、INVALIDATED、assertTurnCurrent 拒绝旧 generation、旧轮次不追溯）、完整旅程（脚本模型明确标注：个人偏好进上下文 → 原批准 → Action → 原完成服务 resultCardId）。
+- 全量 `npm test`、`npm run build`、`harmony:test`、`harmony:build`：见证据目录 validation 记录（退出码逐项保存）。
+- 设备与真实模型验收：未执行（本轮无真机连接与真实凭据授权）；旅程与并发均使用隔离库与脚本 provider，不能据此宣称真实模型收益。
+
+## 边界与风险
+
+- 主题匹配为子串级（中英文标签），PM-3 的语义召回会替换该排序；不会造成越权（匹配只影响选择，不影响资格）。
+- 删除后的再提取防护：单条删除清除正文 + 事件引文；清空全部推进 `extractionNotBefore`；候选归纳关闭使旧聊天不会进入任何提取管道。导出/向量/夜间整理不在首批，未引入新绕路。
+- 未动生产、未迁移真实库、未开启任何后台任务；`AGENTS.md` 未修改。
+
+## PM-2 增补（同日，同工作树）：候选理解、使用控制与完整管理
+
+- **候选生成**：`memorySynthesis` 合同新增可选 `memoryCandidates`（在原推理输出内产生，不新增模型调用）；`publishMissionDigest`/`publishConversationDigest` 在同一事务内调用 `recordSynthesisCandidates`——账户开关 `candidateInferenceEnabled`（默认关闭）决定是否落库；准入规则二次过滤（凭据/引文拒绝）；`statement+rootIds` 归一化为 originKey，同根同表述（任意状态）不重复提议（拒绝后冷却）。
+- **确认合同**：`CONFIRM_CANDIDATE` 冻结 `expectedRevision + frozenContentHash(=personalEntryContentHash) + 来源根复验（sourceUse）+ useScope`；支持编辑后确认（confirmedStatement 经准入再核对）；`REJECT_CANDIDATE` 置 REJECTED。两端竞争由 revision CAS 裁决（J08）。候选状态永远不进决策上下文（读集与 facet 均排除）。
+- **useScope**：确认时可选 `ALL` 或 `PROJECTS[...]`；`resolvePersonalContext` 对范围外用途按 PROJECT_ONLY 遗漏（J14：新项目不继承）。
+- **使用记录**：Turn `personalMemoryReadSet` / Step `protocolJson` 是权威轨迹；`readPersonalMemoryUses` 有界扫描返回最小指针（kind/id/at/INJECTED），条目详情展示。
+- **导出**：`GET /api/me/memory/export` 区分 USER_STATED/CANDIDATE/状态标记；已删除只剩无正文状态行；文件不可作导入恢复入口。
+- **双端**：Web 候选区（确认/修改后记住/仅本项目/拒绝）+ 导出入口 + 详情使用计数；鸿蒙候选区（按范围记住/仅本项目 Select/拒绝）。同一服务端合同与错误语义。
+- **测试**：`tests/pm2PersonalCandidates.test.ts` 4/4（J05 条件候选不激活+开关关闭零候选+敏感拒绝；J08 竞争只激活一次+冻结核对+同根去重；J23 拒绝冷却；J14 仅本项目范围外不继承+跨账号隔离；J16/17 删除正文不回流+owner 绑定）。回归：ux2MigrationUpgrade 适配迁移集合边界（pm1_ 增量），CT4 PDF 用例需 texlive Poppler 路径（环境记录，见 evidence validation.json）。
+
+## PM-3 增补（同日，同工作树）：长期召回与 Personal × Project Composer
+
+- **资格先于窗口**：个人条目通道从不经过"最近 8 条/16 条"窗口（J06：12 份近期综合噪声 + 90 天前条目仍进上下文）；`resolvePersonalContext` 即共享的 eligibility/selection/manifest 服务，顺序为策略/处理许可 → 状态与 useScope → 时间/条件 → 主题相关 → 预算。
+- **指纹（B.4）**：Mission 上下文 hash 覆盖 `personalMemoryReadSet`——它包含全部资格条目（含因预算未选中的），因此"未选集合变化"同样使指纹失效（测试：新增条目 → hash 变化；条目暂停 → hash 变化）。个人文本与读集同步：读集是注入的超集，被裁剪的正文不会失去依赖（J25）。
+- **预算（B.5）**：个人 facet 上限 6 条/2400 字符（可调初始值，非能力上限）；`personalCoverage.omissions` 逐条暴露 BUDGET/TOPIC_MISMATCH/PROJECT_ONLY 等原因；溢出时个人先让位（`omittedForBudget` 安全网），硬限制/约束/原观察按原循环保留。
+- **J19**：同根多份综合无"支持次数"累计——摘要选择有界、候选身份按 `statement+rootIds` 归一，同根同表述重复归纳不再提议。
+- **语义召回边界（记录遗漏原因）**：主题匹配为子串/词元级，纯语义相关的旧条目召回（如同义改写）属 hybridSearch/向量加速（PM-3 后续，B.6——个人条目不进向量库，J29 的 embedding 许可约束不涉及）；未做，不冒称已具备。
+- **测试**：`tests/pm3LongTermRecall.test.ts` 5/5（J06/J03/J25/J19 + 指纹）；回归 PM-1/PM-2 全部 34 用例通过。真实模型质量与相似度召回未测，另列 Gate。
+
+## PM-4 增补：演化、失效分级与持续责任（同日，同工作树）
+
+- **分级失效（修正 PM-1 的过宽行为）**：`invalidatePersonalMemoryConsumers` 改为按依赖 readSet 扇出 ——
+  `NONE`（ADD 表达默认，不打扰在途任务）、`CLAIM`（条目级变化，只影响引用该条目的轮次/委托）、
+  `ALL_DEPENDENT`（DELETE_ALL 与账户策略变化，覆盖所有带个人依赖的消费者）。
+  `privacyRevision` 只在 DELETE/DELETE_ALL/策略变化时推进；条目级变化依赖读集条目 hash 精确失效。
+- **依赖证据**：Step `protocolJson.personalMemoryReadSet` + （新增）AgentRun `trace.contextManifest.personalClaimIds`，
+  覆盖"上下文已构建但尚未产生步骤"的委托；无依赖记录的任务不受波及。
+- **责任投影**：`readMissionResponsibility` 新增 `personalMemory{ dependencyCount, items, nextBoundary, nextBoundarySource }`
+  与 `effectiveNextCheckAt`（原下次检查与个人最早边界取早）；只暴露身份/状态/边界，不回显个人原话。
+  Web `MissionResponsibilityPanel` 渲染依赖数量、失效提示与提前的核对时间。
+- **测试**：`tests/pm4EvolutionResponsibility.test.ts` 5/5 —— J27 分级扇出（ADD 不暂停、条目级只影响引用者、预算不清零）、
+  J15 无事件跨边界守卫 + 责任视图边界 + 过期遗漏、J07 在途暂停与恢复、J12 删除不伪造外部撤销、
+  D1→D3 工程旅程（个人偏好→原批准→Action→resultCardId→停用后不再消费）。全量 1447/1449（2 条 CT4 poppler 环境失败）。
+- **未做（如实记录）**：夜间/独立 Dream 服务（整理仍只在原输出调用内）；跨项目方法候选（Experience 迁移未实现，
+  `AgentExperience.projectId` 未改动）；观察类"无变化 vs 失败"新增测试（沿用原 delegation 实现，未新增用例）；
+  真实自然日观察与真实模型收益未测。
+
+## 可见性与用户控制修复（同日，独立审查后）
+
+**对账结论**：个人记忆服务与页面（`/settings/memory` + `PersonalMemoryManager`）已实现，但
+`/settings/memory` **没有任何入口**（B 类）；`/memory` 只有项目范围、两页之间无切换（B 类）；
+已生效条目缺"修改"（C 类：服务支持 UPDATE，页面只有候选编辑）；缺清空全部与清除状态展示（C 类）；
+用户菜单只有退出登录（B 类）；鸿蒙「记忆」页无个人记忆入口（B 类）。
+
+**修复**：
+- 新增 `components/MemoryScopeNav.tsx`：`个人记忆 ↔ 项目记忆` 唯一切换；接在 `/settings/memory` 顶部与 `/memory`（仅 memory 模式）顶部。
+- `UserNav` 菜单新增"我的记忆"（桌面与移动共用同一菜单；不加第五个全局一级导航）。
+- `PersonalMemoryManager`：已生效条目就地"修改"（复用 UPDATE + expectedRevision）；"清空全部个人记忆"（DELETE_ALL）；
+  删除后按服务真实 `purge` 显示停止使用/正文清除/提取边界；补一句"使用中不等于每次任务都会使用"的真实语义说明。
+- 鸿蒙 `GlobalMemoryTab` 顶部加"项目记忆 | 我的记忆 ›"范围入口，跳转既有 `PersonalMemoryPage`（未新建页面）。
+- 真实服务验收 `evidence/personal-memory-visibility/20261101/`：`prepare-db.mjs` + `acceptance.mjs`，26 项全部 PASS
+  （登录→用户菜单点击→个人页→390px 范围导航→返回项目记忆→浏览器后退→键盘聚焦→空状态→添加→读回→详情/来源/使用
+  →修改→409→暂停→导出→候选空→删除清除→换账号隔离→未登录 401）。数据为合成账号与合成文本，独立临时库，未接触开发/生产库。
+
+
+## 主目录整合复核（2026-11-01）
+
+PM-4 321fc7c、记忆入口 da92ba1 与主目录UI检查点7ba1c62整合。保留新设置/设备/账号布局，个人记忆入口复用SettingsNavRow置于“提醒与偏好”，记忆页快捷入口仍到同一个PersonalMemoryPage。
+
+隔离库全量187文件/1449项通过，明确指定TeX Live Poppler后原两项PDF失败消失；类型/lint退出0（lint有6项未用变量警告），Web生产构建及最终完整E2E通过；Harmony90项、页面unsigned HAP通过。E2E首次因旧文案断言失败，现核对标题、数量与非整体完成率说明，保留原项目/提醒断言。证据见evidence/pm-main-merge/20261101/ACCEPTANCE.json及同目录首次/最终日志。
+
+没有真实库迁移、部署、实模调用或新设备安装；生产安全/独立质量Gate未因此关闭。ECS更新文档改为fetch master，原数据/环境/备份流程保留。

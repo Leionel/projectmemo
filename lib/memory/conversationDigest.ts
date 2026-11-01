@@ -10,7 +10,7 @@ import { assertProjectInputReadSet, type ProjectInputRef } from "./inputReadSet"
 import { recordHypothesisUpdates, conversationHypothesisSources, composeHypotheses } from "./hypothesisService";
 
 export async function conversationClaimHeads(tx: Tx, userId: string, projectId: string, conversationId: string) {
-  return tx.agentClaim.findMany({ where: { ownerUserId: userId, projectId, missionId: null,
+  return tx.agentClaim.findMany({ where: { ownerUserId: userId, scopeType: "PROJECT", projectId, missionId: null,
     OR: [{ conversationId: null }, { conversationId }] }, select: { id: true, currentRevision: true }, orderBy: { id: "asc" } });
 }
 
@@ -44,6 +44,10 @@ export async function publishConversationDigest(tx: Tx, actor: ConversationActor
   const compilerSpecVersion = "original-conversation-synthesis-v1", scopeKey = jsonHash(scope);
   const inputHash = jsonHash({ body, sources: sources.map(s => ({ projectId: s.projectId, sourceId: s.sourceId, revision: s.revision })), heads,
     sourceRevisionReadSet, intentHash: continuity.intentHash, reusePolicyHash: continuity.reusePolicyHash, compilerSpecVersion });
+  // PM-2: same-transaction candidate recording, gated by the account policy switch.
+  const { recordSynthesisCandidates } = await import("./personalCandidates");
+  await recordSynthesisCandidates(tx, actor.userId, body, { projectId, conversationId: message.conversationId ?? undefined },
+    sources.map(s => ({ id: s.sourceId })));
   return tx.agentContextDigest.upsert({ where: { ownerUserId_scopeKey_inputHash: { ownerUserId: actor.userId, scopeKey, inputHash } }, update: {},
     create: { ownerUserId: actor.userId, projectId, conversationId: message.conversationId, scopeKey, inputHash,
       originJson: { kind: "MESSAGE", id: messageId, generation: coordination.generation ?? 0,

@@ -26,6 +26,9 @@ export async function publishMissionDigest(tx: Tx, missionId: string, outputId: 
   const sourceRevisionReadSet = record(step.protocolJson).sourceRevisionReadSet;
   if (!Array.isArray(sourceRevisionReadSet) || !sourceRevisionReadSet.length) throw new AppError("COGNITIVE_RECOORDINATE", "缺少原调查输入版本，请重新调查", 409);
   await assertProjectInputReadSet(mission.ownerUserId, sourceRevisionReadSet, tx);
+  // PM-1: a digest may only publish when the personal memory read set recorded at step start is still current.
+  const { assertPersonalMemoryReadSet } = await import("./userMemoryPolicy");
+  await assertPersonalMemoryReadSet(mission.ownerUserId, record(step.protocolJson).personalMemoryReadSet, tx);
   const cognitiveReadSet = (await composeHypotheses(mission.ownerUserId, mission.projectId, [mission.projectId], tx)).readSet;
   const roots = [...new Map(sources.map(s => [s.id, s])).values()];
   if (roots.length > 64) throw new AppError("MEMORY_SOURCE_LIMIT", "综合依据过多，请按问题拆分并保留原来源", 422);
@@ -44,8 +47,11 @@ export async function publishMissionDigest(tx: Tx, missionId: string, outputId: 
   if (roots.length > 64) throw new AppError("MEMORY_SOURCE_LIMIT", "综合依据超过当前范围，请拆分问题", 422);
   await validateSources(mission.projectId, roots, tx, missionId);
   const scope = { projectId: mission.projectId, missionId }, continuity = await effectiveContinuity(mission.ownerUserId, scope, tx);
+  // PM-2: candidates are recorded in the same fenced transaction as the digest; policy switch decides.
+  const { recordSynthesisCandidates } = await import("./personalCandidates");
+  await recordSynthesisCandidates(tx, mission.ownerUserId, synthesis, { projectId: mission.projectId, missionId }, roots);
   if (continuity.stopped) throw new AppError("DIRECTIVE_STOPPED", "工作已停止，未发布新的综合", 409);
-  const heads = await tx.agentClaim.findMany({ where: { ownerUserId: mission.ownerUserId, projectId: mission.projectId,
+  const heads = await tx.agentClaim.findMany({ where: { ownerUserId: mission.ownerUserId, scopeType: "PROJECT", projectId: mission.projectId,
     conversationId: null, OR: [{ missionId: null }, { missionId }] }, select: { id: true, currentRevision: true }, orderBy: { id: "asc" } });
   const scopeKey = jsonHash(scope), inputHash = jsonHash({ synthesis, roots: roots.map(s => ({ id: s.id, hash: s.hash })).sort((a,b) => a.id.localeCompare(b.id)),
     heads, sourceRevisionReadSet, intentHash: continuity.intentHash, reusePolicyHash: continuity.reusePolicyHash, compilerVersion });
@@ -93,7 +99,7 @@ export async function readEffectiveDigests(userId: string, projectId: string, tx
         await validateSources(projectId, sources, tx, digest.missionId ?? undefined);
         for (const source of sources) if ((await sourceUse(userId, projectId, source.id, tx, scope)).state !== "ALLOWED") throw new Error("SOURCE_UNAVAILABLE");
       }
-      const heads = digest.conversationId ? await conversationClaimHeads(tx, userId, projectId, digest.conversationId) : await tx.agentClaim.findMany({ where: { ownerUserId: userId, projectId, conversationId: null,
+      const heads = digest.conversationId ? await conversationClaimHeads(tx, userId, projectId, digest.conversationId) : await tx.agentClaim.findMany({ where: { ownerUserId: userId, scopeType: "PROJECT", projectId, conversationId: null,
         OR: [{ missionId: null }, { missionId: digest.missionId }] }, select: { id: true, currentRevision: true }, orderBy: { id: "asc" } });
       if (jsonHash(heads) !== jsonHash(digest.claimHeadsJson)) throw new Error("CLAIM_CHANGED");
     } catch (error) { current = false; reason = error instanceof AppError || error instanceof Error && ["CLAIM_CHANGED", "SOURCE_UNAVAILABLE"].includes(error.message)

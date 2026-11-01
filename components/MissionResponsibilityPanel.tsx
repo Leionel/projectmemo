@@ -47,6 +47,14 @@ type Responsibility = {
     approvalIds: string[];
   };
   nextCheckAt: string | null;
+  // PM-4：个人记忆依赖与最早边界（仅元数据，不含个人原话）
+  personalMemory?: {
+    dependencyCount: number;
+    items: Array<{ claimId: string; status: string; revision: number; expiresAt: string | null; inUse: boolean }>;
+    nextBoundary: string | null;
+    nextBoundarySource: "PERSONAL_MEMORY" | null;
+  } | null;
+  effectiveNextCheckAt?: string | null;
   workerPresence: "UNOBSERVED" | "RECENT" | "STALE";
   workerPresenceDetail?: WorkerPresenceDetail | null;
   activity: Array<{ id: string; sequence: number; kind: string; at: string }>;
@@ -381,6 +389,16 @@ export function MissionResponsibilityPanel({
       </div>
 
       {data.nextCheckAt && <p className={styles.schedule}>下次计划核对：<time dateTime={data.nextCheckAt}>{new Date(data.nextCheckAt).toLocaleString("zh-CN")}</time></p>}
+      {data.personalMemory && data.personalMemory.dependencyCount > 0 && (
+        <p className={styles.schedule}>
+          依赖 {data.personalMemory.dependencyCount} 条个人记忆
+          {data.personalMemory.items.some(item => !item.inUse) && "（其中有已暂停/停用的条目，本轮已按失效处理）"}
+          {data.personalMemory.nextBoundary && `；最早有效边界 ${new Date(data.personalMemory.nextBoundary).toLocaleString("zh-CN")}`}
+        </p>
+      )}
+      {data.effectiveNextCheckAt && data.effectiveNextCheckAt !== data.nextCheckAt && (
+        <p className={styles.schedule}>个人记忆边界将使下次核对提前到：<time dateTime={data.effectiveNextCheckAt}>{new Date(data.effectiveNextCheckAt).toLocaleString("zh-CN")}</time></p>
+      )}
       {error && <div className="text-[var(--brick)] bg-[var(--brick-pale)] p-2 rounded text-xs">{error}</div>}
 
       {isStaleConflict && (

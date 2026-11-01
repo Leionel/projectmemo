@@ -8,7 +8,8 @@ test("UX2 在旧库副本增量升级，保留原记录且不猜测回填授权"
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "projectmemo-ux2-upgrade-"));
   const oldFile = path.join(dir, "old.db"), copy = path.join(dir, "copy.db");
   const migrations = fs.readdirSync("prisma/migrations").sort().filter(name => fs.existsSync(path.join("prisma/migrations", name, "migration.sql")));
-  const additions = migrations.filter(name => name.includes("ux2_"));
+  // 旧基线 = UX2 之前的全部迁移；增量 = UX2 与其后的功能迁移（PM-1 账户范围重建依赖 UX2 的 AgentClaim）。
+  const additions = migrations.filter(name => name.includes("ux2_") || name.includes("pm1_"));
   expect(additions.length).toBeGreaterThanOrEqual(2);
   const old = new Database(oldFile);
   try {

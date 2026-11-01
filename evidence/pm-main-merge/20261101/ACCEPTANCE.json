@@ -1,0 +1,38 @@
+{
+  "base": "7ba1c62",
+  "personalMemoryTip": "da92ba1fb996e6ce18787de984a19215385b6393",
+  "backend": {
+    "files": 187,
+    "passed": 1449
+  },
+  "e2eStats": {
+    "startTime": "2026-11-01T14:54:11.333Z",
+    "duration": 196399.551,
+    "expected": 33,
+    "skipped": 2,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "harmonyPassed": 90,
+  "hapUnsignedSha256": "50c922f53fae2a724a3f685cb2f4f29b5861f083d76b8761d73e50167a27674b",
+  "parserPaths": {
+    "pdfinfo": "C:/texlive/2024/bin/windows/pdfinfo.exe",
+    "pdftotext": "C:/texlive/2024/bin/windows/pdftotext.exe"
+  },
+  "isolation": "Independent test and E2E databases; scripted/mock only; no production changes",
+  "checks": {
+    "full": 0,
+    "lint": 0,
+    "types": 0,
+    "e2e-final": 0,
+    "harmony-test": 0,
+    "hap-final": 0
+  },
+  "limitations": [
+    "no fresh installed-device acceptance",
+    "no live-model quality proof",
+    "existing security findings not fixed by integration"
+  ],
+  "uiMerge": "Keep new settings layout/device/account handling; memory shortcut and SettingsNavRow route both open original PersonalMemoryPage",
+  "initialE2EFailure": "Old readiness text assertion; now asserts title, formed count and not-overall-progress disclaimer; no skip added"
+}

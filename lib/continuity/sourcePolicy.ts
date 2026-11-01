@@ -14,7 +14,7 @@ export async function sourceLineage(projectId: string, id: string, tx: Tx = db, 
   let known = true, derived = false, blocked = false;
   let blockedReason:string|undefined;
   if (id.startsWith("claim:")) {
-    const claim = await tx.agentClaim.findFirst({ where: { id: id.slice(6), projectId } });
+    const claim = await tx.agentClaim.findFirst({ where: { id: id.slice(6), projectId, scopeType: "PROJECT" } });
     const origin = record(claim?.originJson);
     const prefixes: Record<string, string> = { CLAIM: "claim:", CAPTURE: "capture:", CARD: "card:", ARTIFACT: "artifact:", EPISODE: "episode:", MESSAGE: "message:", MISSION_OUTPUT: "mission-output:" };
     if (claim?.kind === "HYPOTHESIS") {
@@ -29,7 +29,7 @@ export async function sourceLineage(projectId: string, id: string, tx: Tx = db, 
     else known = false;
     derived = true;
   } else if (id.startsWith("claim-origin:")) {
-    const claim = await tx.agentClaim.findFirst({ where: { id: id.slice(13), projectId } });
+    const claim = await tx.agentClaim.findFirst({ where: { id: id.slice(13), projectId, scopeType: "PROJECT" } });
     const origin = record(claim?.originJson);
     if (origin.kind === "MISSION_OUTPUT") known = !!await tx.agentMissionOutput.findFirst({ where: { id: String(origin.id), mission: { projectId, ownerUserId: claim?.ownerUserId,
       project: { memberships: { some: { userId: claim?.ownerUserId, role: "OWNER" } } } } } });

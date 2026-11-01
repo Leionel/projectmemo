@@ -1,0 +1,23 @@
+
+> projectmemo@0.1.0 lint
+> eslint .
+
+
+D:\Projects\hongmen-ct7-main-integration\app\api\me\memory\route.ts
+  8:10  warning  'db' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-ct7-main-integration\lib\memory\personalMemoryService.ts
+  6:48  warning  'buildPersonalMemoryReadSet' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-ct7-main-integration\tests\pm1PersonalMemoryScope.test.ts
+  11:51  warning  'policyInTx' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-ct7-main-integration\tests\pm3LongTermRecall.test.ts
+  12:10  warning  'jsonHash' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-ct7-main-integration\tests\ux2CorrectionControls.test.ts
+  31:9  warning  'second' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  46:9  warning  'view' is assigned a value but never used    @typescript-eslint/no-unused-vars
+
+✖ 6 problems (0 errors, 6 warnings)
+

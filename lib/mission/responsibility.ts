@@ -77,6 +77,9 @@ export async function readMissionResponsibility(userId: string, id: string, exte
       expired,
     });
 
+    // PM-4：个人记忆依赖与最早边界进入原责任视图；只暴露身份/状态/边界，不回显个人原话。
+    const personalDependency = await readPersonalMemoryDependency(tx, userId, id);
+
     const presence = readWorkerPresence();
 
     const pendingOriginalRefs = {
@@ -123,6 +126,16 @@ export async function readMissionResponsibility(userId: string, id: string, exte
       pendingOriginalRefs,
       // A schedule is not worker liveness or a promise of successful observation.
       nextCheckAt: active && policy.mode === "BOUNDED_INVESTIGATION" && state.phase === "WAITING_OBSERVATION" ? state.nextCheckAt : null,
+      // 个人依赖的最早有效边界参与下次核验：跨时界不需要用户重新打开页面。
+      personalMemory: {
+        dependencyCount: personalDependency.items.length,
+        items: personalDependency.items,
+        nextBoundary: personalDependency.nextBoundary,
+        nextBoundarySource: personalDependency.nextBoundary ? "PERSONAL_MEMORY" as const : null,
+        authority: "OWNER_ONLY_METADATA_NO_QUOTES" as const,
+      },
+      effectiveNextCheckAt: earliest(personalDependency.nextBoundary,
+        active && policy.mode === "BOUNDED_INVESTIGATION" && state.phase === "WAITING_OBSERVATION" ? state.nextCheckAt : null),
       workerPresence: presence.status,
       workerPresenceDetail: presence.status !== "UNOBSERVED" ? {
         workerId: presence.workerId,
@@ -320,4 +333,35 @@ export async function reviseMissionResponsibility(userId: string, id: string, ra
 
     return readMissionResponsibility(userId, id, tx);
   });
+}
+
+function earliest(a: string | null, b: string | null): string | null {
+  if (!a) return b;
+  if (!b) return a;
+  return Date.parse(a) <= Date.parse(b) ? a : b;
+}
+
+/**
+ * 该委托实际引用过的个人条目（来自原 Step protocolReadSet）与当前状态。
+ * 未引用任何个人条目的委托返回空列表——不做推测性依赖。
+ */
+async function readPersonalMemoryDependency(tx: Tx, userId: string, missionId: string) {
+  const steps = await tx.agentMissionStep.findMany({ where: { missionId }, select: { protocolJson: true } });
+  const ids = new Set<string>();
+  for (const step of steps) {
+    const readSet = record(step.protocolJson).personalMemoryReadSet as { items?: Array<{ claimId?: string }> } | undefined;
+    for (const item of readSet?.items ?? []) if (typeof item.claimId === "string") ids.add(item.claimId);
+  }
+  if (!ids.size) return { items: [] as Array<{ claimId: string; status: string; revision: number; expiresAt: string | null; inUse: boolean }>, nextBoundary: null as string | null };
+  const claims = await tx.agentClaim.findMany({ where: { ownerUserId: userId, scopeType: "ACCOUNT", id: { in: [...ids] } },
+    select: { id: true, statusProjection: true, currentRevision: true, conditionsJson: true } });
+  let nextBoundary: string | null = null;
+  const items = claims.map(claim => {
+    const conditions = record(claim.conditionsJson);
+    const expiresAt = typeof conditions.expiresAt === "string" ? conditions.expiresAt : null;
+    if (expiresAt && (!nextBoundary || Date.parse(expiresAt) < Date.parse(nextBoundary))) nextBoundary = expiresAt;
+    return { claimId: claim.id, status: claim.statusProjection, revision: claim.currentRevision, expiresAt,
+      inUse: claim.statusProjection === "ACTIVE" };
+  });
+  return { items, nextBoundary };
 }

@@ -22,6 +22,8 @@ import { researchCoverageSchema, type ResearchCoverage } from "@/lib/types/conve
 import { readSourceObservation } from "./sourceObservation";
 import { bindResearchCoverage } from "./researchCoverage";
 import { admitDirective } from "@/lib/continuity/admission";
+import { resolvePersonalContext } from "@/lib/memory/personalContext";
+import { isLocalModelProvider } from "@/lib/memory/personalContext";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { readConversationRepositoryTool } from "./repositoryTools";
 import { readConversationDeploymentTool } from "./deploymentTools";
@@ -192,6 +194,11 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
   const fittedFacets = (await import("@/lib/memory/facetBudget")).fitFacetGroups([...hypotheses, ...effectiveMemory], 6000).groups;
   const keptHypotheses = fittedFacets.slice(0, hypotheses.length) as typeof hypotheses, keptMemory = fittedFacets.slice(hypotheses.length) as typeof effectiveMemory;
   await mutateTurn(actor, id, turnId, manifest => ({...manifest, cognitiveReadSet:keptHypotheses.flatMap(v=>v.readSet)}));
+  // PM-1: account personal context joins the original composer; eligibility, budget and
+  // processing permission are decided server-side, and the read set binds every item version.
+  const personal = await resolvePersonalContext(actor.userId, { purpose: "CONVERSATION", projectIds: route.projectIds,
+    conversationId: id, query: input.message, remoteProcessing: !isLocalModelProvider(provider), audience: "PRIVATE_CHAT" });
+  await mutateTurn(actor, id, turnId, manifest => ({ ...manifest, personalMemoryReadSet: personal.readSet }));
   const calendarAllowed = isFeatureEnabled("CALENDAR_CONNECTIONS_ENABLED", false) && await db.calendarConnection.count({ where: { projectId: { in: route.projectIds }, ownerUserId: actor.userId, status: "ACTIVE", revokedAt: null } }) > 0;
   const allowedTools = [...(researchAllowed ? [...workspaceReadTools, ...(grant.scope.enabled ? ["web_search",...(grant.scope.academicMetadata&&isFeatureEnabled("ACADEMIC_RESEARCH_ENABLED",false)?["read_paper_metadata"]:[])] : []), "web_fetch", ...(researchAllowed&&browserReadAvailable()?["browser_read"]:[])] : workspaceReadTools), ...(calendarAllowed ? ["calendar_read"] : []), ...(deploymentAllowed ? ["inspect_deployment",...(state.pointers.some(p=>p.deployment?.logsApproved)?["read_deployment_logs"]:[])] : []), ...(ciAllowed ? ["read_repository_ci", "read_ci_jobs", "read_ci_log"] : []),...(isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false)?["inspect_document","read_document_page","read_document_section","read_document_table"]:[]),...(isFeatureEnabled("EXPERIMENT_OBSERVER_ENABLED",false)?["inspect_experiment_metrics","compare_experiment_metrics"]:[])];
   // CT-8：Conversation/Focus 用同一条件匹配器，但数据/划分等缺失保持 UNKNOWN，不冒用 Mission 条件。
@@ -215,6 +222,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
   for (const group of experienceGroups) await recordConversationExperience({ projectId: group.projectId, conversationId: id, turnId }, group.decisions, experienceContextHash);
   const corrections = cognitiveControls.flatMap(c => c.corrections);
   const context = () => ({ hypotheses: keptHypotheses, effectiveMemory: keptMemory, experienceAdvisories,
+    personalContext: { items: personal.items, coverage: personal.coverage, processingAllowed: personal.processingAllowed, usagePolicy: personal.usagePolicy },
     userInterpretationCorrections: { items: corrections.slice(-16), total: corrections.length, complete: corrections.length <= 16, policy: "仅适用原定位的用户解释，不是工作指令、授权或独立实证；覆盖不足须读原记录" }, message: input.message, intent: route.intent, pinnedConstraints: input.constraints,
     interpretationCandidate: candidate ? { ...candidate, authority: "UNCONFIRMED_MODEL_INTERPRETATION" } : undefined,
     projects: scopeDirectory.summaries.map(p => ({ id: p.id, title: p.title, goal: p.goal.slice(0, 1500), workingObjective: p.workingObjective, deadline: p.deadline, priority: p.priority })),

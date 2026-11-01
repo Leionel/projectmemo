@@ -38,7 +38,7 @@
 
 ## 更新发布（已部署机器）
 
-1. 在正确 ECS 的 root 终端执行。目标分支为 `codex/r3-runtime-research`，`TARGET` 必须填写已经验证并推送的完整 40 位提交号；下方留空时命令会停止。
+1. 在正确 ECS 的 root 终端执行。目标分支为 `master`，`TARGET` 必须填写已经验证并推送的完整 40 位提交号；下方留空时命令会停止。
 
    当前脚本固定核对以下部署配置。不一致时先检查实际 unit 和目标提交中的脚本，不要直接改服务路径来绕过检查。
 
@@ -63,7 +63,7 @@ TARGET='' # 填入本次已验证并推送的完整 40 位 commit
 UPDATE_SCRIPT=$(mktemp /tmp/projectmemo-safe-update.XXXXXX.sh)
 trap 'rm -f "$UPDATE_SCRIPT"' EXIT
 
-sudo -H -u projectmemo git -C "$APP" fetch origin codex/r3-runtime-research
+sudo -H -u projectmemo git -C "$APP" fetch origin master
 
 sudo -H -u projectmemo git -C "$APP" show \
   "$TARGET:deploy/alibaba-cloud-linux/safe-update.sh" > "$UPDATE_SCRIPT"

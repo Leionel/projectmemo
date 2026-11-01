@@ -1,0 +1,35 @@
+(node:35628) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+WAIT 0 log=
+PASS  A 账号登录成功  — status=200
+PASS  /memory 可访问且含个人记忆/项目记忆两个范围
+PASS  /settings/memory 可访问且可返回项目记忆
+PASS  浏览器点击用户菜单后可见“我的记忆”入口
+HIST after /focus: 2 /focus
+HIST after menu: 3 /settings/memory
+PASS  从用户菜单直达个人记忆页（无隐藏 URL）
+PASS  390px 窄屏下范围导航仍可见且有 2 个入口  — links=2
+HIST before scope click: 3 /settings/memory
+HIST after scope click: 4 /memory
+PASS  从个人页可返回项目记忆页  — http://127.0.0.1:5312/memory
+PASS  浏览器返回回到个人记忆页  — url=http://127.0.0.1:5312/settings/memory history=4->4
+PASS  范围导航可用键盘聚焦
+PASS  空状态返回空数组而非错误
+PASS  添加明确偏好返回 ACTIVE  — status=ACTIVE
+PASS  列表读回同一条持久条目  — revision=1
+PASS  返回冻结操作用内容 hash
+PASS  详情返回来源说明与版本历史
+PASS  使用记录字段真实（未使用为空数组）
+PASS  修改已生效条目成功并推进 revision
+PASS  读回修改后表述且历史保留旧版本
+PASS  旧 revision 修改返回 409 且不覆盖新版本  — status=409
+PASS  暂停后状态为 PAUSED
+PASS  导出标注为用户自述且含当前表述
+PASS  未开启推断时候选为空
+PASS  删除返回停止使用与正文清除状态
+PASS  删除后列表不再返回正文
+PASS  另一账号读不到前一个账号的条目
+PASS  另一账号按 id 读取返回 404  — status=404
+PASS  未登录访问返回 401  — status=401
+
+SUMMARY {"passed":26,"failed":0}

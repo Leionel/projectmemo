@@ -67,3 +67,38 @@
 - **J19**：同根多份综合无"支持次数"累计——摘要选择有界、候选身份按 `statement+rootIds` 归一，同根同表述重复归纳不再提议。
 - **语义召回边界（记录遗漏原因）**：主题匹配为子串/词元级，纯语义相关的旧条目召回（如同义改写）属 hybridSearch/向量加速（PM-3 后续，B.6——个人条目不进向量库，J29 的 embedding 许可约束不涉及）；未做，不冒称已具备。
 - **测试**：`tests/pm3LongTermRecall.test.ts` 5/5（J06/J03/J25/J19 + 指纹）；回归 PM-1/PM-2 全部 34 用例通过。真实模型质量与相似度召回未测，另列 Gate。
+
+## PM-4 增补：演化、失效分级与持续责任（同日，同工作树）
+
+- **分级失效（修正 PM-1 的过宽行为）**：`invalidatePersonalMemoryConsumers` 改为按依赖 readSet 扇出 ——
+  `NONE`（ADD 表达默认，不打扰在途任务）、`CLAIM`（条目级变化，只影响引用该条目的轮次/委托）、
+  `ALL_DEPENDENT`（DELETE_ALL 与账户策略变化，覆盖所有带个人依赖的消费者）。
+  `privacyRevision` 只在 DELETE/DELETE_ALL/策略变化时推进；条目级变化依赖读集条目 hash 精确失效。
+- **依赖证据**：Step `protocolJson.personalMemoryReadSet` + （新增）AgentRun `trace.contextManifest.personalClaimIds`，
+  覆盖"上下文已构建但尚未产生步骤"的委托；无依赖记录的任务不受波及。
+- **责任投影**：`readMissionResponsibility` 新增 `personalMemory{ dependencyCount, items, nextBoundary, nextBoundarySource }`
+  与 `effectiveNextCheckAt`（原下次检查与个人最早边界取早）；只暴露身份/状态/边界，不回显个人原话。
+  Web `MissionResponsibilityPanel` 渲染依赖数量、失效提示与提前的核对时间。
+- **测试**：`tests/pm4EvolutionResponsibility.test.ts` 5/5 —— J27 分级扇出（ADD 不暂停、条目级只影响引用者、预算不清零）、
+  J15 无事件跨边界守卫 + 责任视图边界 + 过期遗漏、J07 在途暂停与恢复、J12 删除不伪造外部撤销、
+  D1→D3 工程旅程（个人偏好→原批准→Action→resultCardId→停用后不再消费）。全量 1447/1449（2 条 CT4 poppler 环境失败）。
+- **未做（如实记录）**：夜间/独立 Dream 服务（整理仍只在原输出调用内）；跨项目方法候选（Experience 迁移未实现，
+  `AgentExperience.projectId` 未改动）；观察类"无变化 vs 失败"新增测试（沿用原 delegation 实现，未新增用例）；
+  真实自然日观察与真实模型收益未测。
+
+## 可见性与用户控制修复（同日，独立审查后）
+
+**对账结论**：个人记忆服务与页面（`/settings/memory` + `PersonalMemoryManager`）已实现，但
+`/settings/memory` **没有任何入口**（B 类）；`/memory` 只有项目范围、两页之间无切换（B 类）；
+已生效条目缺"修改"（C 类：服务支持 UPDATE，页面只有候选编辑）；缺清空全部与清除状态展示（C 类）；
+用户菜单只有退出登录（B 类）；鸿蒙「记忆」页无个人记忆入口（B 类）。
+
+**修复**：
+- 新增 `components/MemoryScopeNav.tsx`：`个人记忆 ↔ 项目记忆` 唯一切换；接在 `/settings/memory` 顶部与 `/memory`（仅 memory 模式）顶部。
+- `UserNav` 菜单新增"我的记忆"（桌面与移动共用同一菜单；不加第五个全局一级导航）。
+- `PersonalMemoryManager`：已生效条目就地"修改"（复用 UPDATE + expectedRevision）；"清空全部个人记忆"（DELETE_ALL）；
+  删除后按服务真实 `purge` 显示停止使用/正文清除/提取边界；补一句"使用中不等于每次任务都会使用"的真实语义说明。
+- 鸿蒙 `GlobalMemoryTab` 顶部加"项目记忆 | 我的记忆 ›"范围入口，跳转既有 `PersonalMemoryPage`（未新建页面）。
+- 真实服务验收 `evidence/personal-memory-visibility/20261101/`：`prepare-db.mjs` + `acceptance.mjs`，26 项全部 PASS
+  （登录→用户菜单点击→个人页→390px 范围导航→返回项目记忆→浏览器后退→键盘聚焦→空状态→添加→读回→详情/来源/使用
+  →修改→409→暂停→导出→候选空→删除清除→换账号隔离→未登录 401）。数据为合成账号与合成文本，独立临时库，未接触开发/生产库。

@@ -1333,6 +1333,32 @@ struct Index {
   @Builder
   private GlobalMemoryTab() {
     Column() {
+      // 范围入口：项目记忆（本页）与个人记忆（独立页面，复用设置里的同一实现）
+      Row() {
+        Text('项目记忆')
+          .fontSize(PMFontSize.CAPTION)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.BRAND)
+          .padding({ left: 10, right: 10, top: 6, bottom: 6 })
+          .backgroundColor(PMColors.BRAND_LIGHT)
+          .borderRadius(PMRadius.SM)
+        Blank()
+        Text('我的记忆 ›')
+          .fontSize(PMFontSize.CAPTION)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.INK_SECONDARY)
+          .padding({ left: 10, right: 10, top: 6, bottom: 6 })
+          .constraintSize({ minHeight: 32 })
+          .clickEffect(PMInteraction.PRESS_EFFECT)
+          .accessibilityText('打开我的记忆，管理个人协作偏好与背景')
+          .onClick(() => {
+            router.pushUrl({ url: 'pages/PersonalMemoryPage' });
+          })
+      }
+      .width('100%')
+      .alignItems(VerticalAlign.Center)
+      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: 2 })
+
       // 搜索框与筛选
       Column() {
         if (!this.searchOpen && this.globalSearchQuery.trim() !== '') {

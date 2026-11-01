@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { LogIn, LogOut, User, LoaderCircle } from "lucide-react";
+import { BookOpen, LogIn, LogOut, User, LoaderCircle } from "lucide-react";
 import { bindConversationDraftOwner, clearConversationDrafts } from "@/lib/client/conversationDrafts";
 
 interface UserState {
@@ -139,6 +139,14 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
               <p className="text-xs font-bold text-[var(--ink)]">{user.displayName}</p>
               <p className="font-mono text-xs text-[var(--ink-soft)]">@{user.username}</p>
             </div>
+            <Link
+              href="/settings/memory"
+              prefetch={false}
+              onClick={() => setMenuOpen(false)}
+              className="focus-ring mt-1 flex w-full items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-[var(--ink-soft)] transition hover:bg-[var(--paper-strong)] hover:text-[var(--teal-strong)]"
+            >
+              <BookOpen size={14} /> 我的记忆
+            </Link>
             <button
               onClick={handleLogout}
               disabled={loggingOut}

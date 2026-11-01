@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { LoaderCircle, Plus, ShieldCheck, Trash2 } from "lucide-react";
+import { MemoryScopeNav } from "@/components/MemoryScopeNav";
 
 type PersonalEntry = {
   claimId: string; kind: string; statement: string; status: string;
@@ -55,6 +56,8 @@ export function PersonalMemoryManager({ displayName }: { displayName: string }) 
   const [candidateBusyId, setCandidateBusyId] = useState("");
   const [editingId, setEditingId] = useState("");
   const [editDraft, setEditDraft] = useState("");
+  const [entryEditId, setEntryEditId] = useState("");
+  const [entryEditDraft, setEntryEditDraft] = useState("");
 
   const reload = useCallback(async () => {
     try {
@@ -105,6 +108,23 @@ export function PersonalMemoryManager({ displayName }: { displayName: string }) 
     } finally { setCandidateBusyId(""); }
   }
 
+  async function runDelete(commandInput: Record<string, unknown>) {
+    setBusy(true); setError(""); setNotice("");
+    try {
+      const result = await callApi<{ purge?: { clearedCount?: number; canonicalStatementPurged?: boolean; extractionNotBeforeSet?: boolean } }>(
+        "/api/me/memory", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(commandInput) });
+      const purge = result.purge ?? {};
+      const parts = ["已停止使用"];
+      if (purge.canonicalStatementPurged) parts.push("正文已清除");
+      if (typeof purge.clearedCount === "number") parts.push(`共清除 ${purge.clearedCount} 条`);
+      if (purge.extractionNotBeforeSet) parts.push("旧记录不会自动重新提取");
+      setNotice(parts.join("；") + "。此前已进入外部系统的内容不会因删除记忆自动撤回。");
+      await reload();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "删除未完成，请稍后重试");
+    } finally { setBusy(false); }
+  }
+
   async function command(input: Record<string, unknown>, successNotice: string) {
     setBusy(true); setError(""); setNotice("");
     try {
@@ -152,6 +172,8 @@ export function PersonalMemoryManager({ displayName }: { displayName: string }) 
         </span>
       </header>
 
+      <MemoryScopeNav />
+
       <section className="card-surface mt-5 rounded-xl p-4 sm:p-5">
         <h2 className="text-sm font-bold text-[var(--ink)]">添加记忆</h2>
         <textarea value={quote} onChange={(event) => setQuote(event.target.value)} rows={2}
@@ -198,7 +220,12 @@ export function PersonalMemoryManager({ displayName }: { displayName: string }) 
               <li key={entry.claimId} className="card-surface rounded-xl p-4">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold leading-6 text-[var(--ink)]">{entry.statement || "（正文已删除）"}</p>
+                    {entryEditId === entry.claimId ? (
+                      <textarea value={entryEditDraft} onChange={(event) => setEntryEditDraft(event.target.value)} rows={2}
+                        className="editorial-input w-full text-sm" aria-label="修改这条记忆" />
+                    ) : (
+                      <p className="text-sm font-bold leading-6 text-[var(--ink)]">{entry.statement || "（正文已删除）"}</p>
+                    )}
                     <p className="mt-1 text-xs font-semibold text-[var(--muted)]">
                       {KIND_LABEL[entry.kind] ?? entry.kind} · {STATUS_LABEL[entry.status] ?? entry.status}
                       {entry.conditions.topics.length > 0 && ` · 适用：${entry.conditions.topics.join("、")}`}
@@ -207,6 +234,20 @@ export function PersonalMemoryManager({ displayName }: { displayName: string }) 
                   </div>
                   <div className="flex shrink-0 flex-wrap gap-1.5">
                     <button type="button" onClick={() => void openDetail(entry.claimId)} className="focus-ring rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--navy)] hover:bg-[var(--paper)]">来源与使用</button>
+                    {entry.status === "ACTIVE" && entryEditId !== entry.claimId && (
+                      <button type="button" disabled={busy} onClick={() => { setEntryEditId(entry.claimId); setEntryEditDraft(entry.statement); }}
+                        className="focus-ring rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--navy)] hover:bg-[var(--paper)]">修改</button>)}
+                    {entryEditId === entry.claimId && (
+                      <>
+                        <button type="button" disabled={busy || entryEditDraft.trim().length === 0}
+                          onClick={() => void command({ requestId: newRequestId("pm-edit-" + entry.claimId + "-" + entry.revision), operation: "UPDATE",
+                            claimId: entry.claimId, expectedRevision: entry.revision, quote: entryEditDraft.trim() }, "已保存新版本；旧版本保留在修订记录中。")
+                            .then(() => setEntryEditId(""))}
+                          className="focus-ring rounded-lg bg-[var(--teal-pale)] px-2.5 py-1.5 text-xs font-bold text-[var(--teal-strong)] disabled:opacity-50">保存修改</button>
+                        <button type="button" onClick={() => setEntryEditId("")}
+                          className="focus-ring rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--ink-soft)] hover:bg-[var(--paper-strong)]">取消</button>
+                      </>
+                    )}
                     {entry.status === "ACTIVE" && (
                       <button type="button" disabled={busy} onClick={() => void command({ requestId: newRequestId("pm-pause-" + entry.claimId + "-" + entry.revision), operation: "PAUSE", claimId: entry.claimId, expectedRevision: entry.revision }, "已暂停使用；内容保留，模型上下文不再使用。")}
                         className="focus-ring rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--ink-soft)] hover:bg-[var(--paper-strong)]">暂停</button>)}
@@ -214,7 +255,7 @@ export function PersonalMemoryManager({ displayName }: { displayName: string }) 
                       <button type="button" disabled={busy} onClick={() => void command({ requestId: newRequestId("pm-resume-" + entry.claimId + "-" + entry.revision), operation: "RESUME", claimId: entry.claimId, expectedRevision: entry.revision }, "已恢复使用。")}
                         className="focus-ring rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--teal-strong)] hover:bg-[var(--teal-pale)]">恢复</button>)}
                     {entry.status !== "DELETED" && (
-                      <button type="button" disabled={busy} onClick={() => { if (confirm("删除这条记忆？正文会被清除，正在进行中的使用会立即停止。")) void command({ requestId: newRequestId("pm-del-" + entry.claimId + "-" + entry.revision), operation: "DELETE", claimId: entry.claimId, expectedRevision: entry.revision }, "已删除：先停止使用，正文清除完成前会在详情中标示。"); }}
+                      <button type="button" disabled={busy} onClick={() => { if (confirm("删除这条记忆？正文会被清除，正在进行中的使用会立即停止。")) void runDelete({ requestId: newRequestId("pm-del-" + entry.claimId + "-" + entry.revision), operation: "DELETE", claimId: entry.claimId, expectedRevision: entry.revision }); }}
                         className="focus-ring inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--brick)] hover:bg-[var(--brick-pale)]"><Trash2 size={12} />删除</button>)}
                   </div>
                 </div>
@@ -305,6 +346,12 @@ export function PersonalMemoryManager({ displayName }: { displayName: string }) 
             </label>
             <p className="border-t border-[var(--rule)]/60 pt-3 text-xs leading-5 text-[var(--muted)]">候选归纳：{policy.candidateInferenceEnabled ? "已开启" : "默认关闭（首批）"}；删除全部条目后不会自动从旧聊天重建。</p>
             <p className="text-xs leading-5 text-[var(--muted)]"><a className="focus-ring font-bold text-[var(--teal-strong)] underline" href="/api/me/memory/export">导出我的记忆</a>（区分自述、候选与失效历史；不能用于导入恢复）</p>
+            <p className="text-xs leading-5 text-[var(--muted)]">「使用中」表示条目有效且当前允许使用；是否进入某次任务还取决于该任务的用途、处理许可与预算，不会逐条重复声明。</p>
+            <div className="border-t border-[var(--rule)]/60 pt-3">
+              <button type="button" disabled={busy || entries.length === 0}
+                onClick={() => { if (confirm("清空全部个人记忆？将立即停止使用并清除正文，此前已进入外部系统的内容不会自动撤回。")) void runDelete({ requestId: newRequestId("pm-clear-all"), operation: "DELETE_ALL" }); }}
+                className="focus-ring rounded-lg px-3 py-1.5 text-xs font-bold text-[var(--brick)] hover:bg-[var(--brick-pale)] disabled:opacity-50">清空全部个人记忆</button>
+            </div>
           </div>
         ) : <p className="mt-3 text-xs text-[var(--muted)]">首次保存后生成策略。</p>}
       </section>

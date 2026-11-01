@@ -71,3 +71,7 @@
 - `Index.ets` 的通知路由改动（仅带 projectId 时打开 ProjectHome）已随 `bec5515` 入库；其记忆页 WIP 的中间状态备份在 `.zcode/Index.ets.user-wip-backup.ets`（含损坏尾部，仅作对照，勿直接覆盖）。
 - 工作树中仍有意未提交：`AGENTS.md`、`harmonyos/build-profile.json5`（review flavor）与 `Constants.ets`（评审包地址）、`next-env.d.ts`、`tsconfig.json`、`docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md`、`components/ProjectHealthCard.tsx`——属评审打包与另一条线内容，提交前需与所有者确认。
 - 截图证据：`evidence/agent-conversation-ux/`（对话、焦点、委托四视图、资料/行动、任务全部轮次）。
+
+## 待办：我的项目空间 UI/UX 专项（未开始，2026-11-01 排队）
+
+完整任务书已下达（见会话记录），核心范围：`Index.ets` `projectItem()` 卡片信息层级重排（身份→简况→准备项→下一步四层）、准备项指标语义纠正（`4/6 项已形成` 为主、百分比降级、进度条仅代表清单比例，不称项目完成度）、`nextAction.href` 到鸿蒙路由的显式映射与降级、统计摘要精简、分类筛选与截止状态视觉、按 `attentionScore` 排序需先验证跨类型可比性。注意先行修复本文件顶部的 `Index.ets` 编译阻塞点，且工作树有未提交的 review flavor 配置需与所有者确认。服务器接口 `buildCompetitionReadiness()` 六项竞赛模板是否适用于课程设计/科研训练需独立评估，本轮不强行改服务端协议。

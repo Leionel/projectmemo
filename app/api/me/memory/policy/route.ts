@@ -49,7 +49,8 @@ export async function PATCH(request: Request) {
         ...(input.candidateInferenceEnabled !== undefined ? { candidateInferenceEnabled: input.candidateInferenceEnabled } : {}),
         settingsVersion: { increment: 1 }, privacyRevision: { increment: 1 } } });
       // 策略变化也是三类变更之一：同步推进 privacyRevision，并让所有活跃消费者重协调。
-      await invalidatePersonalMemoryConsumers(tx, user.id, ["policy:" + policy.settingsVersion]);
+      // 账户策略变化（关闭使用、云处理开关）：所有带个人依赖的消费者一起重协调，未使用者不受影响。
+      await invalidatePersonalMemoryConsumers(tx, user.id, ["policy:" + policy.settingsVersion], { scope: "ALL_DEPENDENT" });
       await tx.userMemoryControlReceipt.create({ data: { ownerUserId: user.id, requestId: input.requestId, operation: "POLICY_UPDATE",
         payloadHash, resultVersionJson: { policyVersion: policy.settingsVersion, privacyRevision: policy.privacyRevision }, purgeJson: {} } });
       return { replayed: false, policy };

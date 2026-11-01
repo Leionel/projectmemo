@@ -25,6 +25,8 @@ export type MissionContextManifest = {
   includedStepIds: string[];
   excludedStepIds: string[];
   sourcePointers: Array<{ id: string; hash: string; revision: string }>;
+  /** PM-4: account personal claim ids actually composed into this context (dependency evidence, no quotes). */
+  personalClaimIds?: string[];
   promptVersion?: string;
   notLoadedStepCount?: number;
 };
@@ -42,6 +44,7 @@ export function missionContextManifest(context: string, versions: {
     sourceIndex?: Array<{ id?: string; hash?: string; revision?: string }>;
     manifest?: { excludedStepIds?: unknown[]; notLoadedStepCount?: number };
     observations?: Array<{ stepId?: string; observation?: { sources?: Array<{ id?: string; hash?: string; revision?: string }> } }>;
+    personalMemoryReadSet?: { items?: Array<{ claimId?: string }> };
   };
   const observations = parsed.observations ?? [];
   const pointers = [...observations.flatMap(item => item.observation?.sources ?? []), ...(parsed.sourceIndex ?? [])]
@@ -61,6 +64,7 @@ export function missionContextManifest(context: string, versions: {
     includedStepIds: observations.map(item => item.stepId).filter(safeId).slice(-32),
     excludedStepIds: (parsed.manifest?.excludedStepIds ?? []).filter(safeId).slice(0, 128),
     sourcePointers: [...new Map(pointers.map(source => [source.id, { id: source.id, hash: source.hash, revision: source.revision }])).values()].slice(0, 128),
+    personalClaimIds: (parsed.personalMemoryReadSet?.items ?? []).map(item => item.claimId).filter(safeId).slice(0, 32),
   };
 }
 

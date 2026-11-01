@@ -223,13 +223,19 @@ export async function commandPersonalMemory(userId: string, raw: PersonalCommand
           targetHash: contentHash(nextStatement, nextConditions), evidenceManifestJson: [], assessmentJson: {} } });
       }
     }
-    // 三类变更的统一同步水位：privacyRevision 先挡旧内容的新派发与新发布，失效扇出进入原重协调。
-    const privacyBump = ["ADD_EXPLICIT", "ADD_FROM_EXPRESSION", "UPDATE", "PAUSE", "RESUME", "WITHDRAW", "DELETE", "DELETE_ALL"].includes(raw.operation);
+    // 三类变更分级（MEMORY_AGENT_INTEGRATION §6.2）：
+    // - 仅表达默认（ADD）与条目级修订：不推进全局 privacyRevision，靠读集条目 hash 精确失效；
+    // - 隐私/删除/清空：推进 privacyRevision，同步守卫先挡住旧内容的新派发与新发布。
+    const hardPrivacy = ["DELETE", "DELETE_ALL"].includes(raw.operation);
     const updatedPolicy = await tx.userMemoryPolicy.update({ where: { ownerUserId: userId },
-      data: { ...(raw.operation === "DELETE_ALL" ? { extractionNotBefore: new Date() } : {}), privacyRevision: { increment: privacyBump ? 1 : 0 } } });
+      data: { ...(raw.operation === "DELETE_ALL" ? { extractionNotBefore: new Date() } : {}), privacyRevision: { increment: hardPrivacy ? 1 : 0 } } });
     const eventIds = await tx.agentClaimEvent.findMany({ where: { ownerUserId: userId, requestId }, select: { id: true } }).then(rows => rows.map(r => r.id));
     const { invalidatePersonalMemoryConsumers } = await import("./personalInvalidation");
-    await invalidatePersonalMemoryConsumers(tx, userId, eventIds);
+    // 扇出按依赖 readSet：ADD 不打扰在途任务；条目级变化只影响引用它的消费者；清空影响全部带依赖者。
+    const scope: import("./personalInvalidation").PersonalInvalidationScope =
+      raw.operation === "ADD_EXPLICIT" || raw.operation === "ADD_FROM_EXPRESSION" ? "NONE"
+        : raw.operation === "DELETE_ALL" ? "ALL_DEPENDENT" : "CLAIM";
+    await invalidatePersonalMemoryConsumers(tx, userId, eventIds, { scope, ...(claimId ? { claimIds: [claimId] } : {}) });
     const receipt = await tx.userMemoryControlReceipt.create({ data: { ownerUserId: userId, requestId, operation: raw.operation,
       targetClaimId: claimId, payloadHash, resultVersionJson: json({ claimId, revision, status, policyVersion: updatedPolicy.settingsVersion,
         privacyRevision: updatedPolicy.privacyRevision }), purgeJson: json(purge) } });

@@ -1,0 +1,653 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mD:/Projects/hongmen-personal-memory[39m
+
+ [31m❯[39m tests/documentReader.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 1537[2mms[22m[39m
+   [33m[2m✓[22m[39m CT4 catalog/page/section/table preserve physical locators, dates and untrusted content [33m 317[2mms[22m[39m
+   [32m✓[39m CT4 supports an addressed page past the initial catalog without claiming whole-document coverage[32m 52[2mms[22m[39m
+   [32m✓[39m CT4 correction during extraction invalidates late content; original bytes cannot be substituted[32m 62[2mms[22m[39m
+   [32m✓[39m CT4 cross-project and forged section identities fail before source publication[32m 69[2mms[22m[39m
+   [32m✓[39m CT4 Mission source route retains PR6 web snapshots and enforces original owner[32m 77[2mms[22m[39m
+   [32m✓[39m CT4 original Mission publishes doc locators and correction blocks both a derived Artifact and pending Action[32m 286[2mms[22m[39m
+[31m   [31m×[31m CT4 original Conversation investigates the real PDF and publishes a bound dual-client citation[39m[33m 493[2mms[22m[39m
+[31m   [31m×[31m CT4 actual Poppler locates two physical PDF pages and records parser version[39m[32m 158[2mms[22m[39m
+ [32m✓[39m tests/r4Investigation.test.ts [2m([22m[2m17 tests[22m[2m)[22m[33m 19528[2mms[22m[39m
+     [33m[2m✓[22m[39m runs PROMPT_ONLY ablation on the original loop without UI calls or client-visible switches [33m 969[2mms[22m[39m
+     [33m[2m✓[22m[39m runs INVESTIGATION_ONLY ablation on the original loop without UI calls or client-visible switches [33m 1147[2mms[22m[39m
+     [33m[2m✓[22m[39m changes the next decision using a real 'RESEARCH' source and preserves one original Action [33m 1736[2mms[22m[39m
+     [33m[2m✓[22m[39m changes the next decision using a real 'COMPETITION' source and preserves one original Action [33m 1384[2mms[22m[39m
+     [33m[2m✓[22m[39m changes the next decision using a real 'COURSE' source and preserves one original Action [33m 1451[2mms[22m[39m
+     [33m[2m✓[22m[39m stops duplicate reads and replays the same request without extra HTTP [33m 1298[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps network-unknown reservations and never auto-retries them [33m 421[2mms[22m[39m
+     [33m[2m✓[22m[39m falls back to actual state after a received protocol failure without repair calls [33m 601[2mms[22m[39m
+     [33m[2m✓[22m[39m reads actual in-flight progress and replays an active request without a second driver [33m 1330[2mms[22m[39m
+     [33m[2m✓[22m[39m does not hand off to another owner's private Mission in a shared project [33m 572[2mms[22m[39m
+     [33m[2m✓[22m[39m discards revoked and revised late responses before any proposal is published [33m 2560[2mms[22m[39m
+     [33m[2m✓[22m[39m confirms only published bindings and replays the same UI request as one effect [33m 1640[2mms[22m[39m
+     [33m[2m✓[22m[39m expires R4 proposals on the original confirmation path and preserves readable history [33m 1310[2mms[22m[39m
+     [33m[2m✓[22m[39m stops focus.investigate.v1 without subsequent reads or published effects [33m 542[2mms[22m[39m
+     [33m[2m✓[22m[39m stops focus.ui_plan.v1 without subsequent reads or published effects [33m 1180[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps a known answer and original proposal if UI generation is unknown, without replaying the model [33m 1311[2mms[22m[39m
+ [32m✓[39m tests/browserReader.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 30922[2mms[22m[39m
+     [33m[2m✓[22m[39m 受控 JS 页面在渲染后取得动态正文与截图出处 [33m 3194[2mms[22m[39m
+     [33m[2m✓[22m[39m 空页面不冒充读取成功 [33m 2092[2mms[22m[39m
+     [33m[2m✓[22m[39m 异步正文未完成时标记 PARTIAL 并保留已见片段 [33m 7868[2mms[22m[39m
+     [33m[2m✓[22m[39m 页面注入只作内容，弹窗/表单/WebSocket/私网 iframe 与图片被拦截 [33m 2378[2mms[22m[39m
+     [33m[2m✓[22m[39m 重定向到私网地址时阻断导航 [33m 2343[2mms[22m[39m
+     [33m[2m✓[22m[39m 只展开原生 details，不读取闭合隐藏正文 [33m 4157[2mms[22m[39m
+     [33m[2m✓[22m[39m 页面子请求预算在本次观察内生效 [33m 1792[2mms[22m[39m
+   [33m[2m✓[22m[39m 分块正文没有Content-Length也计入硬上限，不能报告完整读取 [33m 855[2mms[22m[39m
+   [33m[2m✓[22m[39m 重定向每跳都重新进入受控传输，页面元数据只保留可见标题 [33m 4191[2mms[22m[39m
+   [33m[2m✓[22m[39m 每个HTTP子请求都通过原运行授权守卫，停止后不再派发子资源 [33m 2040[2mms[22m[39m
+ [32m✓[39m tests/r4ResearchRecovery.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 19277[2mms[22m[39m
+     [33m[2m✓[22m[39m 重启复用已完成网页检查点，不再次发送请求 [33m 10512[2mms[22m[39m
+     [33m[2m✓[22m[39m 发送意图后中断，重启保留未知且不重发 [33m 8762[2mms[22m[39m
+ [32m✓[39m tests/continuityRecoordination.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 18955[2mms[22m[39m
+   [33m[2m✓[22m[39m two OS directive writers with distinct commands and the same expected sequence have one winner [33m 5035[2mms[22m[39m
+   [33m[2m✓[22m[39m real OS worker competition: revise during dispatched model [33m 7884[2mms[22m[39m
+   [33m[2m✓[22m[39m real OS worker competition: takeover during dispatched model [33m 6033[2mms[22m[39m
+ [32m✓[39m tests/missionRuntime.test.ts [2m([22m[2m31 tests[22m[2m)[22m[33m 11941[2mms[22m[39m
+     [33m[2m✓[22m[39m 观察→草稿→完成，来源版本与步骤保留 [33m 729[2mms[22m[39m
+     [33m[2m✓[22m[39m 批准前零写入，20次并发重复批准只创建同一行动 [33m 485[2mms[22m[39m
+     [33m[2m✓[22m[39m 来源改变后旧批准409，未创建行动 [33m 455[2mms[22m[39m
+     [33m[2m✓[22m[39m 批准后提交前再查来源，改变或取消都不写 [33m 524[2mms[22m[39m
+     [33m[2m✓[22m[39m 约束可修改/撤销，旧批准失效，模型不能覆盖 [33m 401[2mms[22m[39m
+     [33m[2m✓[22m[39m 同输入无新观察时停止，终态不能继续 [33m 324[2mms[22m[39m
+     [33m[2m✓[22m[39m 重启后不重做成功步骤，事件序号单调 [33m 572[2mms[22m[39m
+     [33m[2m✓[22m[39m 子进程提交后未回包即退出，恢复后只保留一个Action [33m 2534[2mms[22m[39m
+     [33m[2m✓[22m[39m 事务中断10次均不遗留Action或消费回执，修复后仅提交一次 [33m 769[2mms[22m[39m
+     [33m[2m✓[22m[39m 连续无进展调用达到上限后停止 [33m 507[2mms[22m[39m
+     [33m[2m✓[22m[39m 等待批准暂停恢复保留等待状态，随后故障恢复不会跳回旧等待 [33m 303[2mms[22m[39m
+     [33m[2m✓[22m[39m 成功进展和人工继续后各允许一次纠错，不重做已有步骤 [33m 494[2mms[22m[39m
+ [32m✓[39m tests/missionAutomaticContinuation.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 7720[2mms[22m[39m
+     [33m[2m✓[22m[39m 16个等待任务共享到达/接续批次，不被updatedAt双扫描饿死 [33m 1979[2mms[22m[39m
+     [33m[2m✓[22m[39m 未授权、普通语义问题或含额外指令的记录均回到人审 [33m 421[2mms[22m[39m
+     [33m[2m✓[22m[39m 单位/时间/主体/项目不符与非结构化普通文字不误恢复 [33m 905[2mms[22m[39m
+     [33m[2m✓[22m[39m 相同指标出现两个不同值或来源已纠正则不恢复 [33m 361[2mms[22m[39m
+     [33m[2m✓[22m[39m 预算耗尽、云许可撤销、取消、暂停和成员撤权均不恢复 [33m 1545[2mms[22m[39m
+     [33m[2m✓[22m[39m 自动片段可保存私有草稿，遇到新问题后重新等待 [33m 474[2mms[22m[39m
+     [33m[2m✓[22m[39m 自动提案停在用户批准边界，批准后仅创建一次TODO [33m 476[2mms[22m[39m
+     [33m[2m✓[22m[39m 执行中撤销自动许可，旧片段不能保存草稿 [33m 409[2mms[22m[39m
+     [33m[2m✓[22m[39m 自动开关关闭后已入队的自动片段也不调用模型 [33m 322[2mms[22m[39m
+ [32m✓[39m tests/copilotPersistence.test.ts [2m([22m[2m14 tests[22m[2m)[22m[33m 14547[2mms[22m[39m
+     [33m[2m✓[22m[39m freezes generation-time sources and atomically replays one action for identical confirmations [33m 329[2mms[22m[39m
+     [33m[2m✓[22m[39m uses two OS processes without duplicate create_action effects [33m 2516[2mms[22m[39m
+     [33m[2m✓[22m[39m uses two OS processes without duplicate generate_artifact effects [33m 2149[2mms[22m[39m
+     [33m[2m✓[22m[39m recovers an OS exit before receipt commit for create_action atomically [33m 2134[2mms[22m[39m
+     [33m[2m✓[22m[39m recovers an OS exit before receipt commit for generate_artifact atomically [33m 2055[2mms[22m[39m
+     [33m[2m✓[22m[39m replays an artifact committed by a child that exits before returning a response [33m 2026[2mms[22m[39m
+     [33m[2m✓[22m[39m replays the additive migration on an old-schema copy without changing legacy data [33m 2502[2mms[22m[39m
+ [32m✓[39m tests/conversationAnchor.test.ts [2m([22m[2m21 tests[22m[2m)[22m[33m 12035[2mms[22m[39m
+   [33m[2m✓[22m[39m reopens one reminder topic, appends a changed origin once, and preserves the old explanation [33m 344[2mms[22m[39m
+   [33m[2m✓[22m[39m binds an actual relevant SOURCE_ARRIVED event to a current goal and an inert follow-up action [33m 1076[2mms[22m[39m
+   [33m[2m✓[22m[39m retires event interactions when original material changes, without rewriting the old notice [33m 505[2mms[22m[39m
+   [33m[2m✓[22m[39m repairs a missing chat projection without repeating the source mutation or original effect [33m 455[2mms[22m[39m
+   [33m[2m✓[22m[39m reuses one Mission topic across a different question and refuses reused entry request payloads [33m 460[2mms[22m[39m
+   [33m[2m✓[22m[39m filters unrelated and stale materials; one relevant source revision yields one qualified snapshot [33m 503[2mms[22m[39m
+   [33m[2m✓[22m[39m keeps LATER quiet until its persisted expiry, and STOP survives the new origin revision [33m 326[2mms[22m[39m
+   [33m[2m✓[22m[39m delegates Mission STOP to the original preference and will not bypass it with FOLLOW [33m 370[2mms[22m[39m
+   [33m[2m✓[22m[39m honors a STOP from the original UI before projecting any later event [33m 433[2mms[22m[39m
+   [33m[2m✓[22m[39m closes a terminal Mission topic after its actual output and status projection [33m 834[2mms[22m[39m
+   [33m[2m✓[22m[39m targets original LATER at the anchored Mission even when another Mission is selected [33m 491[2mms[22m[39m
+   [33m[2m✓[22m[39m does not let an old resolved question's LATER suppress the next question [33m 513[2mms[22m[39m
+   [33m[2m✓[22m[39m rotates workspace synchronization past the first eight conversations [33m 1452[2mms[22m[39m
+   [33m[2m✓[22m[39m does not discard valid output revisions behind the per-sync event limit [33m 833[2mms[22m[39m
+   [33m[2m✓[22m[39m drains existing action snapshots before closing a cancelled topic [33m 587[2mms[22m[39m
+   [33m[2m✓[22m[39m follows completion of an older existing Action beyond the initial eight [33m 667[2mms[22m[39m
+   [33m[2m✓[22m[39m rechecks access before feedback replays, projection repair, and inbox reads [33m 326[2mms[22m[39m
+   [33m[2m✓[22m[39m keeps sync off under its feature flag and GET never manufactures unread work [33m 344[2mms[22m[39m
+   [33m[2m✓[22m[39m does not repeat a result already committed by the same conversation [33m 1098[2mms[22m[39m
+ [32m✓[39m tests/focusCollaboration.test.ts [2m([22m[2m25 tests[22m[2m)[22m[33m 16533[2mms[22m[39m
+     [33m[2m✓[22m[39m completes the same Action, persists one reflection and reads it after repeated confirmation [33m 847[2mms[22m[39m
+     [33m[2m✓[22m[39m rolls back the effect if persisting its conversation receipt fails [33m 518[2mms[22m[39m
+     [33m[2m✓[22m[39m preserves the target across continuous result references and asks before writing [33m 1208[2mms[22m[39m
+     [33m[2m✓[22m[39m binds an answer to the exact original question, and never substitutes a second Mission [33m 1332[2mms[22m[39m
+     [33m[2m✓[22m[39m confirms APPROVED against the original approval; approval alone is not Action completion [33m 1128[2mms[22m[39m
+     [33m[2m✓[22m[39m confirms REJECTED against the original approval; approval alone is not Action completion [33m 3126[2mms[22m[39m
+     [33m[2m✓[22m[39m uses real materials, preserves unmet gaps and refuses changed sources [33m 724[2mms[22m[39m
+     [33m[2m✓[22m[39m commits selected materials to the same Mission once and reads a READY receipt [33m 853[2mms[22m[39m
+     [33m[2m✓[22m[39m freezes option order, resolves first choice to the original proposal and keeps a user veto [33m 709[2mms[22m[39m
+     [33m[2m✓[22m[39m adopts the existing scenario without creating another proposal or Mission [33m 613[2mms[22m[39m
+     [33m[2m✓[22m[39m lets a vetoed first option remain unadopted while previewing a different frozen option [33m 765[2mms[22m[39m
+     [33m[2m✓[22m[39m resolves first-choice replies against their original project and refuses a contradictory project parameter [33m 959[2mms[22m[39m
+     [33m[2m✓[22m[39m adopts one exact Output revision and reads the original artifact receipt [33m 725[2mms[22m[39m
+     [33m[2m✓[22m[39m resumes a PAUSED Mission, rejects tampering, expiry, changed constraints and revoked access [33m 584[2mms[22m[39m
+     [33m[2m✓[22m[39m runs the ArkTS adapter through authenticated work, preview, confirm and receipt reconciliation APIs [33m 531[2mms[22m[39m
+ [32m✓[39m tests/r4ExperienceContract.test.ts [2m([22m[2m44 tests[22m[2m)[22m[33m 11460[2mms[22m[39m
+   [33m[2m✓[22m[39m keeps native DTO fields aligned with shared contracts and old Conversation messages optional [33m 11407[2mms[22m[39m
+ [32m✓[39m tests/missionResearch.test.ts [2m([22m[2m35 tests[22m[2m)[22m[33m 11654[2mms[22m[39m
+     [33m[2m✓[22m[39m 公开查询生成失败仍结算服务端用量，不发送搜索请求 [33m 504[2mms[22m[39m
+     [33m[2m✓[22m[39m 公开查询视图没有私有目标、消息或项目字段，范围内自主增加方法词 [33m 303[2mms[22m[39m
+     [33m[2m✓[22m[39m 检索→读取→研究Output→完成，外部来源不产生项目事实 [33m 986[2mms[22m[39m
+     [33m[2m✓[22m[39m 只找到搜索摘要，不能作为已读取正文引用 [33m 506[2mms[22m[39m
+     [33m[2m✓[22m[39m 错误摘录hash、外部指标冒充本项目实测被拒绝 [33m 752[2mms[22m[39m
+     [33m[2m✓[22m[39m 同URL更新保留旧观察并使旧源不可继续验收 [33m 698[2mms[22m[39m
+     [33m[2m✓[22m[39m 其他Mission来源不可读取或抓取 [33m 673[2mms[22m[39m
+     [33m[2m✓[22m[39m 缺少私有实验指标时等待，用户回答后保留原输出与约束 [33m 889[2mms[22m[39m
+     [33m[2m✓[22m[39m 拒绝查询只记hash和原因，不记录敏感原文 [33m 436[2mms[22m[39m
+     [33m[2m✓[22m[39m 搜索失败最多重试两次，计入预算；零结果可等待不伪造 [33m 1085[2mms[22m[39m
+     [33m[2m✓[22m[39m 关闭Web不影响内部工具 [33m 308[2mms[22m[39m
+     [33m[2m✓[22m[39m 研究后可以提案，长网页引用片段与hash完整进入模型上下文 [33m 867[2mms[22m[39m
+     [33m[2m✓[22m[39m 同URL新观察替代当前读集，旧观察仍保留且不会永久阻断新提案 [33m 912[2mms[22m[39m
+     [33m[2m✓[22m[39m 外部块不能通过顶层kind=NOTE绕过研究守卫 [33m 692[2mms[22m[39m
+     [33m[2m✓[22m[39m 外部块不能通过顶层kind=undefined绕过研究守卫 [33m 650[2mms[22m[39m
+     [33m[2m✓[22m[39m NOTE的外部引用仍需精确摘录 [33m 689[2mms[22m[39m
+ [32m✓[39m tests/pageAuth.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 5409[2mms[22m[39m
+     [33m[2m✓[22m[39m 匿名访问项目列表页被重定向到登录页 [33m 997[2mms[22m[39m
+     [33m[2m✓[22m[39m 匿名访问全局focus需登录，不能返回聚合内容 [33m 1253[2mms[22m[39m
+     [33m[2m✓[22m[39m 无关用户访问项目详情页按 404 处理，而不是 403 [33m 463[2mms[22m[39m
+     [33m[2m✓[22m[39m 无关用户访问成果生成页按 404 处理 [33m 1622[2mms[22m[39m
+ [32m✓[39m tests/decisionEvolution.test.ts [2m([22m[2m26 tests[22m[2m)[22m[33m 9609[2mms[22m[39m
+     [33m[2m✓[22m[39m one root traverses typed two-layer requirements, one exact block and original Mission [33m 618[2mms[22m[39m
+     [33m[2m✓[22m[39m relation confirmation writes one intent in the mutation transaction; duplicate workers bump once and preserve old successes [33m 316[2mms[22m[39m
+     [33m[2m✓[22m[39m adopted plan uses fresh observations while prior successful steps remain labelled history [33m 427[2mms[22m[39m
+     [33m[2m✓[22m[39m a process dying after durable intent leaves work for two replacement OS consumers; effect is once [33m 3124[2mms[22m[39m
+   [33m[2m✓[22m[39m actual ArkTS ↔ Next routes round-trip the same proposal, Mission and receipt, with revoked and cross-user boundaries [33m 702[2mms[22m[39m
+   [33m[2m✓[22m[39m 影响补偿保留原等待问题；撤销支持环后不再把它当作当前证据环 [33m 371[2mms[22m[39m
+ [32m✓[39m tests/missionContinuation.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 10476[2mms[22m[39m
+     [33m[2m✓[22m[39m 材料到达不调用模型、不恢复；确认后同Mission继续且旧成果逐字保留 [33m 829[2mms[22m[39m
+     [33m[2m✓[22m[39m 缺单位/时间、无关内容和冲突均继续等待 [33m 2682[2mms[22m[39m
+     [33m[2m✓[22m[39m 解析失败附件只记到达，修订成功后才有可读新候选 [33m 742[2mms[22m[39m
+     [33m[2m✓[22m[39m 重复扫描与重启补查不重复事件，迟提交较早ID在下轮发现 [33m 1613[2mms[22m[39m
+     [33m[2m✓[22m[39m 十次并发确认同回执，异载荷409，之后来源变化不破坏已提交重放 [33m 758[2mms[22m[39m
+     [33m[2m✓[22m[39m 跨项目、撤权、取消、旧问题及预览后材料变化都拒绝 [33m 1115[2mms[22m[39m
+     [33m[2m✓[22m[39m 上下文或约束改变使评估失效；预算和云许可不足保留等待 [33m 636[2mms[22m[39m
+     [33m[2m✓[22m[39m 结构化成功条件不因有草稿或已恢复而跳过，足量来源和答复才通过 [33m 950[2mms[22m[39m
+     [33m[2m✓[22m[39m 行动创建和批准消费分别验收，伪造消费行不能冒充实际行动 [33m 401[2mms[22m[39m
+     [33m[2m✓[22m[39m 开关关闭不扫描也不能确认，原补充问题接口仍可使用 [33m 622[2mms[22m[39m
+ [32m✓[39m tests/focusConversation.test.ts [2m([22m[2m22 tests[22m[2m)[22m[33m 8287[2mms[22m[39m
+     [33m[2m✓[22m[39m names a discussion from its first question, keeps it across follow-ups and preserves explicit titles [33m 1724[2mms[22m[39m
+     [33m[2m✓[22m[39m routes beyond the six Focus candidates and does not invent priority preference [33m 661[2mms[22m[39m
+     [33m[2m✓[22m[39m continues one private conversation through project/Mission links and never exports it as old project chat [33m 311[2mms[22m[39m
+     [33m[2m✓[22m[39m creates exactly one actual Action using the shared confirmation transaction and reads current state [33m 435[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects stale source, modified hash, denied proposal, foreign actor and revoked project [33m 583[2mms[22m[39m
+     [33m[2m✓[22m[39m pins a user veto and never turns a negative instruction into an action [33m 529[2mms[22m[39m
+     [33m[2m✓[22m[39m uses a frozen request, rejects changed payload, and clarifies ambiguous references [33m 565[2mms[22m[39m
+     [33m[2m✓[22m[39m settles truncated/empty received responses as FAILED with real usage and never auto-replays HTTP [33m 462[2mms[22m[39m
+     [33m[2m✓[22m[39m uses structured model routing, keeps private audit outside project runs, and bills the current user once per request stage [33m 530[2mms[22m[39m
+     [33m[2m✓[22m[39m runs the real ArkTS ConversationService against authenticated Next handlers and reads the same Action back on Web [33m 484[2mms[22m[39m
+ [32m✓[39m tests/ux2CorrectionRecoordination.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 8880[2mms[22m[39m
+   [33m[2m✓[22m[39m 双进程原执行链在途纠正（合成模型响应）：新 generation 实际消费纠正，旧结果不发布且费用保留 [33m 8878[2mms[22m[39m
+ [32m✓[39m tests/goalChangeReview.test.ts [2m([22m[2m16 tests[22m[2m)[22m[33m 7288[2mms[22m[39m
+     [33m[2m✓[22m[39m deduplicates a stable source batch across request IDs and keeps V1 separate [33m 711[2mms[22m[39m
+     [33m[2m✓[22m[39m rejects fabricated quotes, foreign sources and unsupported goal premises [33m 318[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps incomplete project observations, requirements and applicable methods eligible [33m 831[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps malformed/truncated dynamic responses FAILED, retains usage, and replays without resending (R1) [33m 673[2mms[22m[39m
+     [33m[2m✓[22m[39m records a received provider rejection as FAILED and holds its unknown usage [33m 347[2mms[22m[39m
+     [33m[2m✓[22m[39m accepts null root annotations from the observed M2 response, but refuses extra facts or nested commands [33m 749[2mms[22m[39m
+     [33m[2m✓[22m[39m retains interrupted call reservations and never resends on GET or new aliases [33m 330[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps unrelated uploads outside the local guard and executes a directed read without extra models [33m 699[2mms[22m[39m
+     [33m[2m✓[22m[39m KEEP_PLAN has no plan, pause, approval or Mission version effects [33m 301[2mms[22m[39m
+     [33m[2m✓[22m[39m blocks related source changes before adoption and during an actual tool call [33m 478[2mms[22m[39m
+     [33m[2m✓[22m[39m reads an existing review back into the same discussion and confirms the exact candidate once [33m 831[2mms[22m[39m
+ [32m✓[39m tests/p3ReviewBoundaries.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 5648[2mms[22m[39m
+   [33m[2m✓[22m[39m 两个独立 OS 进程同时采纳，持久回执仍只生成一条资料 [33m 1982[2mms[22m[39m
+   [33m[2m✓[22m[39m 同项目两位用户的同模式提炼、真实接口、详情和模型上下文都隔离 [33m 570[2mms[22m[39m
+   [33m[2m✓[22m[39m 旧库增量升级清除混入的异主样本，保留历史使用与旧仓库信号 [33m 1761[2mms[22m[39m
+ [32m✓[39m tests/r4Research.test.ts [2m([22m[2m18 tests[22m[2m)[22m[33m 4472[2mms[22m[39m
+     [33m[2m✓[22m[39m 服务端登记用户原链接，不需要搜索或额外 Mission [33m 387[2mms[22m[39m
+     [33m[2m✓[22m[39m HTTP 接受与原 turn 推进分离，重试不会重复用户消息 [33m 309[2mms[22m[39m
+     [33m[2m✓[22m[39m 原授权仓库入口复用同会话，关注去重、忽略不误报、撤销限制历史 [33m 465[2mms[22m[39m
+     [33m[2m✓[22m[39m 原 HTTP 适配器与 Focus 完成用户 URL→读取→引用→确认归入→重放 [33m 1647[2mms[22m[39m
+ [32m✓[39m tests/missionArtifactAdoption.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 4062[2mms[22m[39m
+     [33m[2m✓[22m[39m 直接归入也遵守只读和停止；撤回后旧预览不复活，原回执仍可重放 [33m 960[2mms[22m[39m
+     [33m[2m✓[22m[39m 真实完成状态读回保留resultCardId并记录USER_REPORTED，不把创建当完成 [33m 342[2mms[22m[39m
+     [33m[2m✓[22m[39m 重复归入的新请求别名持久绑定，不能被另一Output复用 [33m 580[2mms[22m[39m
+     [33m[2m✓[22m[39m 预览不发布，十次并发只写一个Artifact/Receipt；后续可检索并保留未核验语义 [33m 385[2mms[22m[39m
+     [33m[2m✓[22m[39m 来源变化定位原块但不改正文，原请求重放仍返回原成果 [33m 302[2mms[22m[39m
+     [33m[2m✓[22m[39m 跨用户/项目、旧版本、篡改Hash、旧上下文与取消都拒绝 [33m 450[2mms[22m[39m
+     [33m[2m✓[22m[39m Receipt故障与Artifact原子回滚，已归入Mission/Output不可单独删除，整体项目删除兼容 [33m 363[2mms[22m[39m
+ [32m✓[39m tests/calendarEventExtensions.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 3998[2mms[22m[39m
+     [33m[2m✓[22m[39m 参与人通过独立接口添加并回读核对，附件随创建写入并回读 [33m 691[2mms[22m[39m
+     [33m[2m✓[22m[39m 参与人与冻结提案不一致时删除已创建日程作为补偿 [33m 359[2mms[22m[39m
+     [33m[2m✓[22m[39m 批量创建 2 个日程，逐项回读并计入外部写入预算 [33m 371[2mms[22m[39m
+   [33m[2m✓[22m[39m 长描述含服务端标记仍完整回读，取消的外部对象不算创建成功 [33m 532[2mms[22m[39m
+   [33m[2m✓[22m[39m 十项批次经原预算复核后纵向完成，每个HTTP和外部创建累计计量 [33m 620[2mms[22m[39m
+ [32m✓[39m tests/missionRuntimeDiagnostics.test.ts [2m([22m[2m21 tests[22m[2m)[22m[33m 3972[2mms[22m[39m
+     [33m[2m✓[22m[39m 重复观察无进展归TOOL阶段，不被模型格式纠错重新排队 [33m 473[2mms[22m[39m
+     [33m[2m✓[22m[39m 研究临时失败按原步骤退避至三次，恢复信息不重置预算或重做决策 [33m 369[2mms[22m[39m
+     [33m[2m✓[22m[39m Judge超时仍保留待审草稿，VERIFY失败trace与未知usage各记一次 [33m 344[2mms[22m[39m
+ [32m✓[39m tests/missionPanel.test.ts [2m([22m[2m17 tests[22m[2m)[22m[33m 3125[2mms[22m[39m
+     [33m[2m✓[22m[39m 选择的核算、论文和行动结果完成条件进入真实创建请求，不扩大研究许可 [33m 691[2mms[22m[39m
+     [33m[2m✓[22m[39m 多行约束和多个公开概念完整提交，不在逐键编辑时丢分隔符 [33m 364[2mms[22m[39m
+ [32m✓[39m tests/calendarWrite.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 3652[2mms[22m[39m
+     [33m[2m✓[22m[39m 提案不写，批准后才派发并完成原对象回读 [33m 701[2mms[22m[39m
+     [33m[2m✓[22m[39m 超时或5xx保持UNKNOWN，第二次只查询原标记不重发 [33m 387[2mms[22m[39m
+     [33m[2m✓[22m[39m 明确拒绝是已知失败，不产生 UNKNOWN 重试 [33m 1023[2mms[22m[39m
+ [32m✓[39m tests/conversationAnchorContract.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 3157[2mms[22m[39m
+   [33m[2m✓[22m[39m upgrades populated F1 GoalQuestion/Intervention anchors while preserving original messages and manual policy [33m 2110[2mms[22m[39m
+   [33m[2m✓[22m[39m executes the real ArkTS entry/follow/sync/ACK/reconcile contract and respects STOP from the original UI [33m 749[2mms[22m[39m
+ [32m✓[39m tests/ct8OutcomeExperience.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 2839[2mms[22m[39m
+     [33m[2m✓[22m[39m 工程成功、采用、行动回执分开；未采用不是反例，明确负结果才计反例 [33m 305[2mms[22m[39m
+     [33m[2m✓[22m[39m Mission ContextBuilder 只注入条件 MATCH + ACTIVE 经验，记录模型决策与原结果链 [33m 871[2mms[22m[39m
+     [33m[2m✓[22m[39m 来源抑制、时间边界、撤销和条件不匹配都停止新注入 [33m 363[2mms[22m[39m
+ [32m✓[39m tests/missionNativeContract.test.ts [2m([22m[2m15 tests[22m[2m)[22m[33m 3493[2mms[22m[39m
+     [33m[2m✓[22m[39m 原生预览确认材料保持Mission，固定Output归入回执可重试 [33m 402[2mms[22m[39m
+     [33m[2m✓[22m[39m 原生补料确认后同Mission读回材料使用，Web服务读到同一对象与事实 [33m 340[2mms[22m[39m
+     [33m[2m✓[22m[39m 原生读回指定草稿修订与归入回执，和Web读同一outputId/revision/receiptId [33m 488[2mms[22m[39m
+     [33m[2m✓[22m[39m 旧问题定向读取409且历史读回只读；会话失效在发请求前拦截 [33m 490[2mms[22m[39m
+     [33m[2m✓[22m[39m P2实际原生DTO→路由核对：旧端明确拒绝，核对后同对象读回 [33m 438[2mms[22m[39m
+[90mstderr[2m | tests/r4Specialists.test.ts[2m > [22m[2mR4 PR5 original-result and specialist integration[2m > [22m[2mkeeps received Capture usage and task identity on invalid output fallback
+[22m[39mLLM structure failed; falling back to deterministic mock agent: 记录整理未完成，原文已保留
+
+ [32m✓[39m tests/r4Specialists.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 4172[2mms[22m[39m
+     [33m[2m✓[22m[39m research: original completion receipt changes D1 and invalidates the old review [33m 518[2mms[22m[39m
+     [33m[2m✓[22m[39m competition: original completion receipt changes D1 and invalidates the old review [33m 532[2mms[22m[39m
+     [33m[2m✓[22m[39m course: original completion receipt changes D1 and invalidates the old review [33m 523[2mms[22m[39m
+     [33m[2m✓[22m[39m uses the actual chat comparison binding to preview/confirm the frozen original Mission once [33m 1759[2mms[22m[39m
+ [32m✓[39m tests/browserMission.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 3826[2mms[22m[39m
+     [33m[2m✓[22m[39m 已检索来源可渲染读取，原来源/预算/上下文同账 [33m 849[2mms[22m[39m
+     [33m[2m✓[22m[39m 部分渲染保留片段并标记覆盖不完整 [33m 595[2mms[22m[39m
+     [33m[2m✓[22m[39m 策略阻断不写入外部来源，原预算按实际请求结算 [33m 512[2mms[22m[39m
+     [33m[2m✓[22m[39m 其他Mission来源、过期scope版本不读取 [33m 726[2mms[22m[39m
+     [33m[2m✓[22m[39m 浏览器请求预算在派发前生效，不打开页面 [33m 492[2mms[22m[39m
+     [33m[2m✓[22m[39m 并发切片只有一个执行派发，浏览器只启动一次 [33m 516[2mms[22m[39m
+ [32m✓[39m tests/trustReceipt.integration.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 1937[2mms[22m[39m
+     [33m[2m✓[22m[39m abstains without evidence and blocks a forged write [33m 917[2mms[22m[39m
+ [32m✓[39m tests/missionClaimVerification.integration.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 2500[2mms[22m[39m
+     [33m[2m✓[22m[39m Judge计入同一模型预算，Output保存判断与来源hash，归入不改变事实 [33m 378[2mms[22m[39m
+     [33m[2m✓[22m[39m Judge预算不足不调用、不扩预算，草稿保留未核验 [33m 438[2mms[22m[39m
+     [33m[2m✓[22m[39m 核验期间来源变化或用户取消，旧片段不能提交Output [33m 861[2mms[22m[39m
+     [33m[2m✓[22m[39m 语义开关关闭，不调用Judge且不显示支持 [33m 409[2mms[22m[39m
+ [32m✓[39m tests/browserConversation.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 3461[2mms[22m[39m
+     [33m[2m✓[22m[39m 真实浏览器观察写入原来源与原操作账本，重复步骤回放不再启动 [33m 947[2mms[22m[39m
+     [33m[2m✓[22m[39m 模型不能对未定位链接启动浏览器，Fetch 已足够时零浏览器调用 [33m 305[2mms[22m[39m
+     [33m[2m✓[22m[39m 本轮最多两次不同输入的浏览器读取，重复步骤回放不计新派发 [33m 490[2mms[22m[39m
+     [33m[2m✓[22m[39m 撤权后原浏览器来源立即不可再消费 [33m 331[2mms[22m[39m
+ [32m✓[39m tests/missionEvidenceFitIntegration.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 3103[2mms[22m[39m
+     [33m[2m✓[22m[39m 预览纯读；同义有效负结果绕开字面缺词，确认原子落审阅与绑定，重试不重复 [33m 308[2mms[22m[39m
+     [33m[2m✓[22m[39m 错位材料可仅作背景，或保留未知继续分析；不能当直接作答 [33m 355[2mms[22m[39m
+     [33m[2m✓[22m[39m 文字答复和后续提问不能清除未决项；关开关不把V2降成V1 [33m 404[2mms[22m[39m
+     [33m[2m✓[22m[39m V2不走自动标量恢复；用户粘贴论文的身份保留，不能冒充本人实验 [33m 305[2mms[22m[39m
+     [33m[2m✓[22m[39m 源修改/跨项目、前提版本变化均拒绝旧预览，不写半条审阅 [33m 403[2mms[22m[39m
+ [32m✓[39m tests/deployUpdate.test.ts [2m([22m[2m14 tests[22m[2m)[22m[33m 2927[2mms[22m[39m
+     [33m[2m✓[22m[39m sizes the heap from post-stop memory before building: avail=3072 swapfree=+0 -> '1536' [33m 323[2mms[22m[39m
+     [33m[2m✓[22m[39m sizes the heap from post-stop memory before building: avail=1800 swapfree=+0 -> '1416' [33m 301[2mms[22m[39m
+     [33m[2m✓[22m[39m failure trap restores only after services were stopped: STOPPED=1 [33m 662[2mms[22m[39m
+ [32m✓[39m tests/copilotContinuation.test.ts [2m([22m[2m16 tests[22m[2m)[22m[33m 3367[2mms[22m[39m
+     [33m[2m✓[22m[39m links the existing task and blocks a stale new-task preview after another task is created [33m 435[2mms[22m[39m
+     [33m[2m✓[22m[39m bounded recent history excludes legacy unowned and foreign messages [33m 319[2mms[22m[39m
+     [33m[2m✓[22m[39m HTTP chat → preview → confirmation → readback returns the same ids and no-store responses [32m 300[2mms[22m[39m
+   [33m[2m✓[22m[39m Web dialogue → actual ArkTS preview/confirm/readback → Web preserves source run, Mission and pinned output [33m 507[2mms[22m[39m
+ [32m✓[39m tests/missionMaterialUseProjection.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 2455[2mms[22m[39m
+     [33m[2m✓[22m[39m 绑定、真实fixture上下文指针、草稿摘录和指定归入回执分开读回；重放不重复推进 [33m 619[2mms[22m[39m
+     [33m[2m✓[22m[39m 源修订保留旧指针/摘录，旧问题不改指新问题，终态不恢复 [33m 446[2mms[22m[39m
+     [33m[2m✓[22m[39m 跨项目、异Owner与无认证读取拒绝，不把解析失败文件当可读 [33m 449[2mms[22m[39m
+     [33m[2m✓[22m[39m 历史读取截断明确，不宣称未找到就从未使用 [33m 313[2mms[22m[39m
+ [32m✓[39m tests/conversationCalendarProposal.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 3256[2mms[22m[39m
+     [33m[2m✓[22m[39m 只冻结提案并显示账号与时间，不直接写入；同一 requestId 不重复生成消息 [33m 387[2mms[22m[39m
+     [33m[2m✓[22m[39m 批准后只创建一次并回读；重复确认返回原结果，否决后不能再确认 [33m 325[2mms[22m[39m
+     [33m[2m✓[22m[39m 全天与重复日程按冻结字段创建并回读 [33m 309[2mms[22m[39m
+     [33m[2m✓[22m[39m 项目 Copilot 只引用已授权连接提出日程，确认后写入一次 [33m 422[2mms[22m[39m
+   [33m[2m✓[22m[39m 创建成功后回读中断，UNKNOWN跨时段只读核对，不重发POST [33m 388[2mms[22m[39m
+   [33m[2m✓[22m[39m 创建成功后回读中断，DISPATCHING跨时段只读核对，不重发POST [33m 387[2mms[22m[39m
+   [33m[2m✓[22m[39m 两次同时确认只能派发一笔创建 [33m 326[2mms[22m[39m
+   [33m[2m✓[22m[39m 只读核对遇到过期token不认领刷新、不消耗原旋转凭据 [33m 319[2mms[22m[39m
+ [32m✓[39m tests/metricSandbox.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 1533[2mms[22m[39m
+   [33m[2m✓[22m[39m lost start reply keeps original reservation; user resume reconciles same job with zero second create/start [33m 502[2mms[22m[39m
+   [33m[2m✓[22m[39m lost create reply reconciles an existing never-started job, while an absent UNKNOWN job is never recreated [33m 381[2mms[22m[39m
+ [32m✓[39m tests/globalWorkspace.integration.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 2133[2mms[22m[39m
+   [33m[2m✓[22m[39m 全局检索只读取成员项目，保留归档筛选、稳定分页和提醒实际状态 [33m 983[2mms[22m[39m
+   [33m[2m✓[22m[39m 焦点分别投影真实状态，Mission双重归属、关闭开关和API身份均有效 [33m 350[2mms[22m[39m
+ [32m✓[39m tests/experienceReuse.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 3509[2mms[22m[39m
+     [33m[2m✓[22m[39m 未采用保持 UNKNOWN，不成为反例；明确负结果才计反例 [33m 304[2mms[22m[39m
+     [33m[2m✓[22m[39m 只有用户激活后、条件匹配且来源有效的经验进入模型上下文，使用记录不重复 [33m 885[2mms[22m[39m
+     [33m[2m✓[22m[39m SHADOW 不进入模型上下文，但在委托详情可见 [33m 696[2mms[22m[39m
+     [33m[2m✓[22m[39m GET 纯读不整理；显式整理幂等；CANDIDATE 不可激活；他人项目不可访问 [33m 379[2mms[22m[39m
+ [32m✓[39m tests/database.integration.test.ts [2m([22m[2m13 tests[22m[2m)[22m[33m 3141[2mms[22m[39m
+     [33m[2m✓[22m[39m creates project, card, relation and artifact through services [33m 951[2mms[22m[39m
+     [33m[2m✓[22m[39m persists proactive intervention, action completion and reflection trace [33m 407[2mms[22m[39m
+ [32m✓[39m tests/temporalLedger.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 1878[2mms[22m[39m
+     [33m[2m✓[22m[39m runs propose, confirm, search, timeline and revoke without silent activation [33m 993[2mms[22m[39m
+ [32m✓[39m tests/r4ResearchMigration.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 1193[2mms[22m[39m
+   [33m[2m✓[22m[39m PR6 增量迁移保留旧会话/回执，空库也可完整重放 [33m 1191[2mms[22m[39m
+[90mstderr[2m | tests/registration.test.ts[2m > [22m[2mPublic account lifecycle[2m > [22m[2mverifies once, logs in through existing cookie/session and logs out server-side
+[22m[39mPromise returned by `expect(actual).resolves.toMatchObject(expected)` was not awaited. Vitest currently auto-awaits hanging assertions at the end of the test, but this will cause the test to fail in the next Vitest major. Please remember to await the assertion.
+    at D:/Projects/hongmen-personal-memory/tests/registration.test.ts:172:6
+
+[90mstderr[2m | tests/registration.test.ts[2m > [22m[2mPublic account lifecycle[2m > [22m[2mblocks all paid chat/embedding calls by default and atomically enforces a provisioned daily limit
+[22m[39mLLM structure failed; falling back to deterministic mock agent: 当前账号未开通云模型额度，可继续使用记录和规则模式
+
+ [32m✓[39m tests/registration.test.ts [2m([22m[2m14 tests[22m[2m)[22m[33m 1679[2mms[22m[39m
+     [33m[2m✓[22m[39m requires verified email, stores only hashes and grants no projects or cloud budget [33m 341[2mms[22m[39m
+ [32m✓[39m tests/calendarFeishu.test.ts [2m([22m[2m14 tests[22m[2m)[22m[33m 2262[2mms[22m[39m
+     [33m[2m✓[22m[39m 会话工具写回原 operation 与带内外部来源，重复输入回放 [33m 466[2mms[22m[39m
+     [33m[2m✓[22m[39m Mission 工具接入原步骤、预算与上下文 [33m 431[2mms[22m[39m
+ [32m✓[39m tests/xiaoyi.adapter.test.ts [2m([22m[2m13 tests[22m[2m)[22m[33m 2198[2mms[22m[39m
+ [32m✓[39m tests/continuityStages23.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 1999[2mms[22m[39m
+   [33m[2m✓[22m[39m CT2 original Mission dynamically reads pinned CI, jobs and redacted log; revoke blocks derived Artifact reuse [33m 548[2mms[22m[39m
+   [33m[2m✓[22m[39m CT3 original Runner polls declared fixed SHA; stable CI uses zero models, changed CI resumes reasoning [33m 486[2mms[22m[39m
+ [32m✓[39m tests/continuityMigration.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 943[2mms[22m[39m
+   [33m[2m✓[22m[39m additive upgrade preserves legacy user/conversation bytes and foreign keys; empty replay is covered by integration databases [33m 941[2mms[22m[39m
+ [32m✓[39m tests/pm1PersonalMemoryScope.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 1581[2mms[22m[39m
+     [33m[2m✓[22m[39m 旧库副本升级：先建旧 schema 插入遗留行，再应用新迁移完成回填且数据保留 [33m 1226[2mms[22m[39m
+ [32m✓[39m tests/auth.test.ts [2m([22m[2m19 tests[22m[2m)[22m[33m 1795[2mms[22m[39m
+ [32m✓[39m tests/missionProtocolRecovery.integration.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 1185[2mms[22m[39m
+     [33m[2m✓[22m[39m two invalid decisions pause; explicit resume keeps Mission, successful reads and cumulative budget [33m 1174[2mms[22m[39m
+ [32m✓[39m tests/p0bEvidence.integration.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 1500[2mms[22m[39m
+     [33m[2m✓[22m[39m 301+ cards retain an old targeted record; pagination and archived lookup stay project scoped [33m 429[2mms[22m[39m
+     [33m[2m✓[22m[39m eighth historical source and old material/question/rejection survive observation compaction [33m 489[2mms[22m[39m
+ [32m✓[39m tests/pm2PersonalCandidates.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 1488[2mms[22m[39m
+   [33m[2m✓[22m[39m J05：设备限制只形成带条件的候选，不自动激活；关闭开关时不产生候选 [33m 695[2mms[22m[39m
+   [33m[2m✓[22m[39m J08/J23：两端竞争只激活一次；拒绝后同根同表述不再提议；编辑后确认按用户表述激活 [33m 651[2mms[22m[39m
+ [32m✓[39m tests/ux2HypothesisRuntime.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 2417[2mms[22m[39m
+   [33m[2m✓[22m[39m D1提出、D3同一推测反证、D5新任务接续，原批准→真实Action→resultCardId读回 [33m 2001[2mms[22m[39m
+ [32m✓[39m tests/ux2MigrationUpgrade.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 1378[2mms[22m[39m
+   [33m[2m✓[22m[39m UX2 在旧库副本增量升级，保留原记录且不猜测回填授权 [33m 1377[2mms[22m[39m
+ [32m✓[39m tests/actionReminder.test.ts [2m([22m[2m20 tests[22m[2m)[22m[33m 1675[2mms[22m[39m
+     [33m[2m✓[22m[39m saves the in-app plan time first and only reports synced after a real event id exists [33m 538[2mms[22m[39m
+ [32m✓[39m tests/deploymentRuntime.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 1330[2mms[22m[39m
+ [32m✓[39m tests/missionCompletion.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 656[2mms[22m[39m
+     [33m[2m✓[22m[39m 形式条件通过、草稿待审、用户归入、现实未推断各自来自原持久记录 [33m 357[2mms[22m[39m
+ [32m✓[39m tests/pm4EvolutionResponsibility.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 871[2mms[22m[39m
+   [33m[2m✓[22m[39m J27/分级扇出：新增表达默认不暂停在途委托；条目级变化只影响引用它的委托 [33m 394[2mms[22m[39m
+ [32m✓[39m tests/schedule.test.ts [2m([22m[2m13 tests[22m[2m)[22m[33m 1122[2mms[22m[39m
+     [33m[2m✓[22m[39m places READY actions in stable order with no overlap; blocked and estimateless actions are reported [33m 498[2mms[22m[39m
+ [32m✓[39m tests/missionContinuationPanel.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 629[2mms[22m[39m
+     [33m[2m✓[22m[39m 新版普通答复保留未知用途；问题条件换版必须重新勾选 [33m 319[2mms[22m[39m
+ [32m✓[39m tests/continuityJourney.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 999[2mms[22m[39m
+   [33m[2m✓[22m[39m D1 → D3 correction → original Mission resume → Action/resultCardId → D5 new session; stale proposal stays rejected [33m 984[2mms[22m[39m
+ [32m✓[39m tests/missionContinuation.review.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 479[2mms[22m[39m
+   [33m[2m✓[22m[39m 已被取代的Capture即便使用最新hash，也不能补当前实验缺口并恢复 [33m 474[2mms[22m[39m
+ [32m✓[39m tests/calendarSync.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 792[2mms[22m[39m
+     [33m[2m✓[22m[39m records external eventId and sync status without touching the in-app schedule [33m 480[2mms[22m[39m
+ [32m✓[39m tests/pm3LongTermRecall.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 725[2mms[22m[39m
+ [32m✓[39m tests/projectLifecycle.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 815[2mms[22m[39m
+ [32m✓[39m tests/r4PresentationClient.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 875[2mms[22m[39m
+ [32m✓[39m tests/projectReentry.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 542[2mms[22m[39m
+ [32m✓[39m tests/continuityCandidate.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 840[2mms[22m[39m
+   [33m[2m✓[22m[39m model interpretation is a candidate only, authenticated quote and exact user control are separate: true [33m 615[2mms[22m[39m
+ [32m✓[39m tests/settingsAuth.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 741[2mms[22m[39m
+ [32m✓[39m tests/pm1PersonalConsumption.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 601[2mms[22m[39m
+   [33m[2m✓[22m[39m Mission 上下文注入符合条件的个人条目；PROJECT_ONLY 与账户关闭都排除；readSet 绑定策略与条目版本 [33m 304[2mms[22m[39m
+ [32m✓[39m tests/projectsPageArchive.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 619[2mms[22m[39m
+     [33m[2m✓[22m[39m 在册项目进主列表，已归档项目进已归档分区且不在主列表 [33m 480[2mms[22m[39m
+ [32m✓[39m tests/projectEpisodeStaleness.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 629[2mms[22m[39m
+ [32m✓[39m tests/projectState.integration.test.ts [2m([22m[2m13 tests[22m[2m)[22m[33m 829[2mms[22m[39m
+ [32m✓[39m tests/continuityIntent.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 578[2mms[22m[39m
+ [32m✓[39m tests/continuitySuppression.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 613[2mms[22m[39m
+   [33m[2m✓[22m[39m one root suppression closes memory, Investigation sources, dialogue, Artifact, Mission context and ACTIVE experience consumers [33m 540[2mms[22m[39m
+ [32m✓[39m tests/academicIntegration.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 694[2mms[22m[39m
+   [33m[2m✓[22m[39m original Turn persists metadata, reuses same HTTP reply, and parent suppression taints metadata and Artifact [33m 357[2mms[22m[39m
+[90mstderr[2m | tests/projectHealth.test.ts[2m > [22m[2mproject health (只读确定性项目体检)[2m > [22m[2mkeeps other results and names the section when one sub-check fails
+[22m[39m[project-health] section "state" failed {
+  code: [32m'PROJECT_STATE_DISABLED'[39m,
+  error: AppError: 项目状态功能当前已关闭
+      at stateDetector (D:/Projects/hongmen-personal-memory/lib/services/projectHealthService.ts:245:11)
+      at runDetector (D:/Projects/hongmen-personal-memory/lib/services/projectHealthService.ts:121:11)
+      at buildProjectHealthReport (D:/Projects/hongmen-personal-memory/lib/services/projectHealthService.ts:643:11)
+  [90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+      at D:/Projects/hongmen-personal-memory/tests/projectHealth.test.ts:379:22
+      at [90mfile:///D:/Projects/hongmen-personal-memory/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:20 {
+    code: [32m'PROJECT_STATE_DISABLED'[39m,
+    status: [33m503[39m,
+    details: [90mundefined[39m
+  }
+}
+
+[90mstderr[2m | tests/projectHealth.test.ts[2m > [22m[2mproject health isolation (体检的用户隔离与错误清洗)[2m > [22m[2mreturns a stable Chinese classification instead of raw internal error text
+[22m[39m[project-health] section "episodes" failed {
+  code: [32m'SECTION_UNAVAILABLE'[39m,
+  error: TypeError: claims is not iterable
+      at evaluateEpisodeFreshness (D:/Projects/hongmen-personal-memory/lib/services/projectEpisodeService.ts:940:23)
+      at episodeDetector (D:/Projects/hongmen-personal-memory/lib/services/projectHealthService.ts:182:27)
+  [90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+      at runDetector (D:/Projects/hongmen-personal-memory/lib/services/projectHealthService.ts:121:5)
+      at buildProjectHealthReport (D:/Projects/hongmen-personal-memory/lib/services/projectHealthService.ts:643:5)
+      at D:/Projects/hongmen-personal-memory/tests/projectHealth.test.ts:606:20
+      at [90mfile:///D:/Projects/hongmen-personal-memory/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:20
+}
+
+[90mstderr[2m | tests/projectHealth.test.ts[2m > [22m[2mproject health isolation (体检的用户隔离与错误清洗)[2m > [22m[2monly reports a known disabled section as disabled, not as an internal failure
+[22m[39m[project-health] section "state" failed {
+  code: [32m'PROJECT_STATE_DISABLED'[39m,
+  error: AppError: 项目状态功能当前已关闭
+      at stateDetector (D:/Projects/hongmen-personal-memory/lib/services/projectHealthService.ts:245:11)
+      at runDetector (D:/Projects/hongmen-personal-memory/lib/services/projectHealthService.ts:121:11)
+      at buildProjectHealthReport (D:/Projects/hongmen-personal-memory/lib/services/projectHealthService.ts:643:11)
+  [90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+      at D:/Projects/hongmen-personal-memory/tests/projectHealth.test.ts:624:22
+      at [90mfile:///D:/Projects/hongmen-personal-memory/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:20 {
+    code: [32m'PROJECT_STATE_DISABLED'[39m,
+    status: [33m503[39m,
+    details: [90mundefined[39m
+  }
+}
+
+[90mstderr[2m | tests/projectHealth.test.ts[2m > [22m[2mproject health isolation (体检的用户隔离与错误清洗)[2m > [22m[2mfolds SQLITE-style error codes into the stable unavailable classification
+[22m[39m[project-health] section "episodes" failed {
+  code: [32m'SQLITE_BUSY'[39m,
+  error: Error: SQLITE raw detail should stay server-side
+      at D:/Projects/hongmen-personal-memory/tests/projectHealth.test.ts:638:35
+  [90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+      at [90mfile:///D:/Projects/hongmen-personal-memory/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:20 {
+    code: [32m'SQLITE_BUSY'[39m
+  }
+}
+
+ [32m✓[39m tests/projectHealth.test.ts [2m([22m[2m15 tests[22m[2m)[22m[33m 660[2mms[22m[39m
+ [32m✓[39m tests/missionWorkspaceSummary.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 331[2mms[22m[39m
+ [32m✓[39m tests/ux3ResponsibilityRevision.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 628[2mms[22m[39m
+ [32m✓[39m tests/decisionEvolutionUi.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 443[2mms[22m[39m
+ [32m✓[39m tests/projectAgentContext.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 556[2mms[22m[39m
+ [32m✓[39m tests/phase1Reliability.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 511[2mms[22m[39m
+ [32m✓[39m tests/projectEpisode.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 441[2mms[22m[39m
+ [32m✓[39m tests/r3Baseline.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 465[2mms[22m[39m
+ [32m✓[39m tests/meetingStateDiff.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 466[2mms[22m[39m
+ [32m✓[39m tests/repoSignalNativeContract.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 285[2mms[22m[39m
+ [32m✓[39m tests/memoryLifecycle.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 446[2mms[22m[39m
+ [32m✓[39m tests/changeImpact.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 1083[2mms[22m[39m
+ [32m✓[39m tests/actionFeasibility.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 574[2mms[22m[39m
+ [32m✓[39m tests/interventionPolicy.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 527[2mms[22m[39m
+ [32m✓[39m tests/ux2ConversationDigest.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 694[2mms[22m[39m
+   [33m[2m✓[22m[39m 原讨论答案内发布综合与推测，新讨论实际消费；撤权、抑制与新增输入分别使其失效 [33m 543[2mms[22m[39m
+ [32m✓[39m tests/artifactAudit.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 439[2mms[22m[39m
+ [32m✓[39m tests/memoryConsolidation.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 399[2mms[22m[39m
+ [32m✓[39m tests/ux3ProactiveDiscovery.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 529[2mms[22m[39m
+   [33m[2m✓[22m[39m A-J03: 同状态CI、普通刷新版本或条目换序零新增模型调用、零重复提醒 [33m 306[2mms[22m[39m
+ [32m✓[39m tests/phase2Acceptance.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 427[2mms[22m[39m
+ [32m✓[39m tests/episodeAction.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 563[2mms[22m[39m
+ [32m✓[39m tests/webProjectState.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 380[2mms[22m[39m
+ [32m✓[39m tests/ux3ThreeDayContinuity.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 514[2mms[22m[39m
+   [33m[2m✓[22m[39m UX-3D: 三日纵向完整旅程 (D1交代->D2动态调查与重启保持->D3手机纠正与Web读回) 及跨天预算不变量 [33m 477[2mms[22m[39m
+ [32m✓[39m tests/r2ClosedLoop.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 519[2mms[22m[39m
+     [33m[2m✓[22m[39m walks capture → checkpoint → drift → schedule → reentry → artifact [33m 501[2mms[22m[39m
+ [32m✓[39m tests/ux2DigestRuntime.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 542[2mms[22m[39m
+   [33m[2m✓[22m[39m 原 Mission 调查输出内生成综合，后续上下文使用；只读不额外调用或写库，来源变化立即失效 [33m 533[2mms[22m[39m
+ [32m✓[39m tests/ux3BranchRuntime.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 709[2mms[22m[39m
+   [33m[2m✓[22m[39m 真实HTTP账本派发期间数据库可写；撤权后迟到head不产生候选 [33m 578[2mms[22m[39m
+ [32m✓[39m tests/experienceNativeContract.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 637[2mms[22m[39m
+ [32m✓[39m tests/ux3AttentionContinuity.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 429[2mms[22m[39m
+ [32m✓[39m tests/repoSensing.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 591[2mms[22m[39m
+ [32m✓[39m tests/ux3CumulativeBudget.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 631[2mms[22m[39m
+   [33m[2m✓[22m[39m 调查许可不能提高原预算；显式复核累计上限不清空UNKNOWN或偷偷恢复 [33m 405[2mms[22m[39m
+[90mstderr[2m | tests/demoUser.test.ts[2m > [22m[2m演示账号初始化[2m > [22m[2m生产环境显式开启但缺少口令时拒绝使用内置默认密码
+[22m[39m[auth] 演示账号已启用但缺少 DEMO_PASSWORD 或 DEMO_PASSWORD_HASH，跳过初始化。
+
+ [32m✓[39m tests/demoUser.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 508[2mms[22m[39m
+ [32m✓[39m tests/ux2InputVersion.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 500[2mms[22m[39m
+ [32m✓[39m tests/experimentMetrics.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 501[2mms[22m[39m
+   [33m[2m✓[22m[39m original Mission reads captures, stores comparison and invalidates an old proposal after source revision [33m 474[2mms[22m[39m
+ [32m✓[39m tests/continuityRuntime.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 433[2mms[22m[39m
+   [33m[2m✓[22m[39m UNKNOWN canonical target cannot be resent through generation, alias or scope revision [33m 317[2mms[22m[39m
+ [32m✓[39m tests/ux2ClaimSourceRights.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 435[2mms[22m[39m
+ [32m✓[39m tests/repoCi.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 483[2mms[22m[39m
+ [32m✓[39m tests/projectNavigation.test.ts [2m([22m[2m13 tests[22m[2m)[22m[33m 839[2mms[22m[39m
+     [33m[2m✓[22m[39m 真实链接带项目范围，当前页标明，功能页可直接访问 [33m 568[2mms[22m[39m
+ [32m✓[39m tests/agentUxJourney.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 426[2mms[22m[39m
+   [33m[2m✓[22m[39m 超过六项目普通失败不挤掉原问题；详情/接续共享责任方，读取无派发 [33m 415[2mms[22m[39m
+ [32m✓[39m tests/ux2CorrectionControls.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 417[2mms[22m[39m
+   [33m[2m✓[22m[39m 精确原文选择与丢回包后的重挂载，重放同一请求和原版本 [33m 305[2mms[22m[39m
+ [32m✓[39m tests/experimentIntegration.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 365[2mms[22m[39m
+ [32m✓[39m tests/ux2ClaimCorrection.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 313[2mms[22m[39m
+ [32m✓[39m tests/attachment.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 339[2mms[22m[39m
+     [33m[2m✓[22m[39m stores an unreadable PDF truthfully and deduplicates before writing another file [33m 327[2mms[22m[39m
+ [32m✓[39m tests/ux2SourceBinding.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 300[2mms[22m[39m
+ [32m✓[39m tests/ux3ResponsibilityControls.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 245[2mms[22m[39m
+ [32m✓[39m tests/copilotConcurrency.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 238[2mms[22m[39m
+ [32m✓[39m tests/attachmentCorrection.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 262[2mms[22m[39m
+ [32m✓[39m tests/copilotContinuationPanel.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 258[2mms[22m[39m
+ [32m✓[39m tests/deliverableGap.test.ts [2m([22m[2m32 tests[22m[2m)[22m[32m 287[2mms[22m[39m
+ [32m✓[39m tests/focusUiQuality.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 241[2mms[22m[39m
+ [32m✓[39m tests/ux3Responsibility.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 236[2mms[22m[39m
+ [32m✓[39m tests/hybridSearch.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 199[2mms[22m[39m
+ [32m✓[39m tests/projectDecisionTimeline.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 216[2mms[22m[39m
+ [32m✓[39m tests/userNav.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 236[2mms[22m[39m
+ [32m✓[39m tests/agentUxControls.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 215[2mms[22m[39m
+ [32m✓[39m tests/pm1PersonalAdmission.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 185[2mms[22m[39m
+ [32m✓[39m tests/missionArtifactAdoptionPanel.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 188[2mms[22m[39m
+ [32m✓[39m tests/projectEvolutionSummary.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 189[2mms[22m[39m
+ [32m✓[39m tests/missionTargetPanels.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 194[2mms[22m[39m
+ [32m✓[39m tests/harmonyAttachmentAuth.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 179[2mms[22m[39m
+ [32m✓[39m tests/projectStartGuide.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 147[2mms[22m[39m
+ [32m✓[39m tests/deploymentMigration.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 141[2mms[22m[39m
+ [32m✓[39m tests/projectOverviewToolbar.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 134[2mms[22m[39m
+ [32m✓[39m tests/missionEvaluationBudget.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 136[2mms[22m[39m
+ [32m✓[39m tests/missionReadbackPanel.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 74[2mms[22m[39m
+ [32m✓[39m tests/deploymentTransport.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 79[2mms[22m[39m
+ [32m✓[39m tests/harmonyEntryIsolation.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 77[2mms[22m[39m
+ [32m✓[39m tests/agentUxWorkState.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 70[2mms[22m[39m
+ [32m✓[39m tests/browserTransport.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 66[2mms[22m[39m
+ [32m✓[39m tests/captureDraftReady.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 70[2mms[22m[39m
+ [32m✓[39m tests/calendarApprovalUi.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 52[2mms[22m[39m
+ [32m✓[39m tests/missionProtocolRepair.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 62[2mms[22m[39m
+ [32m✓[39m tests/missionModelProtocol.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 54[2mms[22m[39m
+ [32m✓[39m tests/researchEvaluationBudget.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+ [32m✓[39m tests/calendarProviderContract.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 37[2mms[22m[39m
+ [32m✓[39m tests/missionClaimVerifier.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 38[2mms[22m[39m
+ [32m✓[39m tests/missionEvaluationRetry.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m tests/health.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32m✓[39m tests/missionClaimSegments.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m tests/browserPolicy.test.ts [2m([22m[2m38 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m tests/missionEvidenceFit.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+[90mstderr[2m | tests/llm.fallback.test.ts[2m > [22m[2mS03: LLM Capture and Deterministic Fallback Audit[2m > [22m[2mshould gracefully fallback to mock and log reason when LLM call fails or times out
+[22m[39mLLM structure failed; falling back to deterministic mock agent: fetch failed
+
+ [32m✓[39m tests/llm.fallback.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m tests/evidenceAssessment.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m tests/reminderClientContract.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+ [32m✓[39m tests/projectState.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m tests/projectOverviewContext.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m tests/crossrefMetadata.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m tests/p0cEvidence.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m tests/validation.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m tests/focusRunning.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m tests/accountMail.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m tests/projectChangeBrief.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m tests/provider-config.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m tests/ux3WorkerCycle.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m tests/globalFocusPresentation.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m tests/suggestions.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m tests/researchQueryCompilation.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m tests/projectWorkspaceAuth.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m tests/trustReceipt.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m tests/webClientContract.test.ts [2m([22m[2m32 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m tests/conversationPriorityPresentation.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m tests/projectDashboard.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m tests/harmonySettingsEditable.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m tests/projectWorkspaceOverview.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m tests/deploymentEvidence.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m tests/mockAgent.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m tests/sessionCookie.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m tests/artifacts.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m tests/projectAttention.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m tests/linker.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m tests/recordPresentation.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 3[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/documentReader.test.ts[2m > [22mCT4 original Conversation investigates the real PDF and publishes a bound dual-client citation
+[41m[1m FAIL [22m[49m tests/documentReader.test.ts[2m > [22mCT4 actual Poppler locates two physical PDF pages and records parser version
+[31m[1mError[22m: 原文件无法可靠提取；加密、扫描件或损坏文件需要补充原文[39m
+[36m [2m❯[22m ChildProcess.<anonymous> lib/documents/reader.ts:[2m26:99[22m[39m
+
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m186 passed[39m[22m[90m (187)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m1447 passed[39m[22m[90m (1449)[39m
+[2m   Start at [22m 20:53:10
+[2m   Duration [22m 666.36s[2m (transform 16.07s, setup 0ms, import 197.77s, tests 373.51s, environment 37.91s)[22m
+
+；401则清空观察 [33m 323[2mms[22m[39m
+ [32m✓[39m tests/missionTargetPanels.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 449[2mms[22m[39m
+     [33m[2m✓[22m[39m 实验数值走已有Capture接口，结构字段不要求用户输入JSON [33m 417[2mms[22m[39m
+ [32m✓[39m tests/harmonyAttachmentAuth.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 213[2mms[22m[39m
+ [32m✓[39m tests/projectStartGuide.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 352[2mms[22m[39m
+   [33m[2m✓[22m[39m 空项目与资料尚未沉淀的情况不同，不将已有Capture误当卡片 [33m 301[2mms[22m[39m
+ [32m✓[39m tests/deploymentMigration.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 150[2mms[22m[39m
+ [32m✓[39m tests/projectOverviewToolbar.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 301[2mms[22m[39m
+ [32m✓[39m tests/missionEvaluationBudget.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 155[2mms[22m[39m
+ [32m✓[39m tests/missionReadbackPanel.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 132[2mms[22m[39m
+ [32m✓[39m tests/deploymentTransport.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 83[2mms[22m[39m
+ [32m✓[39m tests/harmonyEntryIsolation.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 48[2mms[22m[39m
+ [32m✓[39m tests/agentUxWorkState.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 83[2mms[22m[39m
+ [32m✓[39m tests/browserTransport.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 76[2mms[22m[39m
+ [32m✓[39m tests/captureDraftReady.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 116[2mms[22m[39m
+ [32m✓[39m tests/calendarApprovalUi.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 129[2mms[22m[39m
+ [32m✓[39m tests/missionProtocolRepair.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 63[2mms[22m[39m
+ [32m✓[39m tests/missionModelProtocol.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 56[2mms[22m[39m
+ [32m✓[39m tests/researchEvaluationBudget.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+ [32m✓[39m tests/calendarProviderContract.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 41[2mms[22m[39m
+ [32m✓[39m tests/missionClaimVerifier.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 41[2mms[22m[39m
+ [32m✓[39m tests/missionEvaluationRetry.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+ [32m✓[39m tests/health.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32m✓[39m tests/missionClaimSegments.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m tests/browserPolicy.test.ts [2m([22m[2m38 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m tests/missionEvidenceFit.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+[90mstderr[2m | tests/llm.fallback.test.ts[2m > [22m[2mS03: LLM Capture and Deterministic Fallback Audit[2m > [22m[2mshould gracefully fallback to mock and log reason when LLM call fails or times out
+[22m[39mLLM structure failed; falling back to deterministic mock agent: fetch failed
+
+ [32m✓[39m tests/llm.fallback.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32m✓[39m tests/evidenceAssessment.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32m✓[39m tests/reminderClientContract.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m tests/projectState.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m tests/projectOverviewContext.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m tests/crossrefMetadata.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m tests/p0cEvidence.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m tests/validation.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m tests/focusRunning.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m tests/accountMail.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m tests/projectChangeBrief.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m tests/provider-config.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m tests/ux3WorkerCycle.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m tests/globalFocusPresentation.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m tests/suggestions.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m tests/researchQueryCompilation.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m tests/projectWorkspaceAuth.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m tests/trustReceipt.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m tests/webClientContract.test.ts [2m([22m[2m32 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m tests/conversationPriorityPresentation.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m tests/projectDashboard.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m tests/harmonySettingsEditable.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m tests/projectWorkspaceOverview.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m tests/deploymentEvidence.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m tests/mockAgent.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m tests/sessionCookie.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m tests/artifacts.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m tests/projectAttention.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m tests/linker.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m tests/recordPresentation.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 4[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/documentReader.test.ts[2m > [22mCT4 original Conversation investigates the real PDF and publishes a bound dual-client citation
+[41m[1m FAIL [22m[49m tests/documentReader.test.ts[2m > [22mCT4 actual Poppler locates two physical PDF pages and records parser version
+[31m[1mError[22m: 原文件无法可靠提取；加密、扫描件或损坏文件需要补充原文[39m
+[36m [2m❯[22m ChildProcess.<anonymous> lib/documents/reader.ts:[2m26:99[22m[39m
+
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m186 passed[39m[22m[90m (187)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m1447 passed[39m[22m[90m (1449)[39m
+[2m   Start at [22m 20:45:21
+[2m   Duration [22m 724.46s[2m (transform 15.59s, setup 0ms, import 211.19s, tests 401.54s, environment 46.53s)[22m
+
+EXIT:1
+EXIT:1

@@ -13,7 +13,45 @@ afterEach(() => {
   delete process.env.PROJECTMEMO_BUILD_SKIP_TYPECHECK;
 });
 
-describe("ECS update script controlled rollback (no ECS, sudo, git, database or service operations)", () => {
+describe("ECS update script controlled rollback (no ECS, sudo, database or service operations)", () => {
+  it("validates the release against master even after a legacy-branch fetch, rejecting unrelated commits", () => {
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), "pm-deploy-ref-")); temporary.push(directory);
+    const origin = path.join(directory, "origin"), app = path.join(directory, "app");
+    fs.mkdirSync(origin);
+    const git = (cwd: string, ...args: string[]) => {
+      const result = spawnSync("git", args, { cwd, encoding: "utf8" });
+      expect(result.status, result.stderr).toBe(0);
+      return result.stdout.trim();
+    };
+    git(origin, "init", "--initial-branch=master");
+    git(origin, "config", "user.name", "Release fixture");
+    git(origin, "config", "user.email", "release@example.invalid");
+    const commit = (text: string) => {
+      fs.writeFileSync(path.join(origin, "marker"), text);
+      git(origin, "add", "marker"); git(origin, "commit", "-m", text);
+      return git(origin, "rev-parse", "HEAD");
+    };
+    const old = commit("old release");
+    git(origin, "branch", "codex/r3-runtime-research");
+    const target = commit("master release");
+    git(origin, "checkout", "-b", "unrelated", old);
+    const unrelated = commit("not a master release");
+    git(origin, "checkout", "master");
+    git(directory, "clone", origin, app);
+    git(app, "checkout", "--detach", old);
+    git(app, "fetch", "origin", "codex/r3-runtime-research");
+    const start = script.indexOf('as_app git -C "$APP" fetch');
+    const end = script.indexOf("PREVIOUS=", start);
+    expect(start).toBeGreaterThan(0); expect(end).toBeGreaterThan(start);
+    const preflight = script.slice(start, end);
+    for (const [sha, expected] of [[target, 0], [unrelated, 1]] as const) {
+      const result = spawnSync(bash, ["--noprofile", "--norc", "-c", `set -e\nas_app() { "$@"; }\n${preflight}`], {
+        encoding: "utf8", env: { ...process.env, APP: app.replaceAll("\\", "/"), TARGET: sha },
+      });
+      expect(result.status, result.stderr).toBe(expected);
+      expect(git(app, "rev-parse", "HEAD")).toBe(old);
+    }
+  });
   it("both scripts pass bash syntax and build precedes migration, health precedes Worker", () => {
     for (const file of ["safe-update.sh", "verify-p0a.sh"]) {
       expect(spawnSync(bash, ["-n", `deploy/alibaba-cloud-linux/${file}`], { encoding: "utf8" }).status).toBe(0);

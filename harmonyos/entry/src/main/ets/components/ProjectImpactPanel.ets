@@ -23,7 +23,7 @@ export struct ProjectImpactPanel {
  private label(kind: string): string { return kind === 'PLAN_STALE' ? '计划需重评' : kind === 'HARD_PREREQUISITE_UNMET' ? '硬前提未满足' : kind === 'SUPPORT_CHANGED' ? '支持变化' : '需要复核'; }
  build() {
   Column({ space: 10 }) {
-   Button(this.open ? '收起资料影响路径' : '新资料影响了哪些计划与成果').height(44).fontSize(13).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).onClick(() => { this.open = !this.open; if (this.open && this.data === null) this.load(); })
+   Button(this.open ? '收起资料影响路径 ↑' : '新资料影响了哪些计划与成果 ↓', { type: ButtonType.Normal }).height(36).fontSize(13).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_SECONDARY).backgroundColor(PMColors.SURFACE).border({ width: 1, color: PMColors.BORDER_SUBTLE }).borderRadius(PMRadius.SM).padding({ left: 12, right: 12 }).onClick(() => { this.open = !this.open; if (this.open && this.data === null) this.load(); })
    if (this.open) {
     if (this.error !== '') { Text(`${this.error}${this.data !== null ? '；以下为上次读取的历史结果' : ''}`).fontSize(12).fontColor(PMColors.RISK) }
     Button(this.busy ? '正在读取影响路径…' : '重新读取影响').height(44).enabled(!this.busy).onClick(() => { this.load(); }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })

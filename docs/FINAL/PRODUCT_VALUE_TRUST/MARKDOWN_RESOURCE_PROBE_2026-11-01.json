@@ -1,0 +1,9 @@
+{
+  "date": "2026-11-01",
+  "method": "pure SSR renderToStaticMarkup; no browser and no HTTP requests",
+  "data": "synthetic marker only",
+  "html": "<link rel=\"preload\" as=\"image\" href=\"https://audit.invalid/pixel?marker=SYNTHETIC_ONLY\"/><p><img src=\"https://audit.invalid/pixel?marker=SYNTHETIC_ONLY\" alt=\"合成探针\"/></p>",
+  "remoteImageTag": true,
+  "remotePreload": true,
+  "actualNetworkExfiltrationTested": false
+}

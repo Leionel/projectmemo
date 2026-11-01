@@ -1,5 +1,7 @@
 # ProjectMemo Agent 增量演进路线图
 
+> 2026-10-25 14:10最终收口：本文保留为前序研究/历史设计。当前结论见[决策摘要](NEXT_PHASE_DECISION_BRIEF.md)，开发只按[实施计划](NEXT_PHASE_IMPLEMENTATION_PLAN.md)，验收按[C0–C3协议](NEXT_PHASE_EVALUATION_PROTOCOL.md)。旧S3/Q–C–D、N6对象/API等不作为默认开发授权；取舍见[对照说明](NEXT_PHASE_RESEARCH_RECONCILIATION.md)。
+
 审查基线：`c93da467`。日期：2026-10-23。本文是实施建议，没有领取或执行新的业务开发包；不替代现有 R3/R4 的发布放行记录。
 
 ## 1. 先做什么

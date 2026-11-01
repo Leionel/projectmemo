@@ -55,4 +55,6 @@ Node.js 24；Windows PowerShell 使用 `npm.cmd`。依赖安装用 `npm.cmd inst
 - 复赛封包、安装或提交：查 [放行清单](REMATCH_SUBMISSION_GATE_2026-09-14.md)。构建成功、设备安装、平台联调、提交成功分别提供证据；unsigned HAP 不等于最终交付。
 - 缺陷复查：按任务查相关审查报告和 `evidence/` 回执；历史 PASS、测试数量和截图不是当前版本状态。
 
+遇到不熟悉的功能，不要立即从零实现。先检索 GitHub 上维护活跃、许可证明确的同类开源项目（至少大于500star且是最好近两三年有更新），比较实现思路、依赖和已知问题。优先借鉴经过验证的设计，不要直接复制不兼容或来源不明的代码。
 实现收尾说明实际改变、执行过的验证及剩余限制。按计划执行时更新相应实施记录；不为每个小改强制生成新报告，也不把阶段进度累积进本文件。
+实现ui时 Avoid unnecessary secondary labels and descriptions and let the layouts do the explaining.

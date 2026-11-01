@@ -92,40 +92,13 @@ export struct MemoryTypeBadge {
     return TextFormatters.memoryTypeToChinese(this.type);
   }
 
+  // 记忆类型是分类信息，不是告警状态：统一中性低强调，避免类型标签显示红色。
   private getBgColor(): ResourceColor {
-    switch (this.type) {
-      case 'reflection':
-        return PMColors.SUCCESS_LIGHT;
-      case 'risk':
-      case 'risk_alert':
-        return PMColors.RISK_LIGHT;
-      case 'paper_note':
-      case 'experiment_log':
-        return PMColors.MEMORY_LIGHT;
-      case 'requirement':
-      case 'material_requirement':
-        return PMColors.EVIDENCE_LIGHT;
-      default:
-        return PMColors.SURFACE_SUBTLE;
-    }
+    return PMColors.SURFACE_SUBTLE;
   }
 
   private getTextColor(): ResourceColor {
-    switch (this.type) {
-      case 'reflection':
-        return PMColors.SUCCESS;
-      case 'risk':
-      case 'risk_alert':
-        return PMColors.RISK;
-      case 'paper_note':
-      case 'experiment_log':
-        return PMColors.MEMORY;
-      case 'requirement':
-      case 'material_requirement':
-        return PMColors.EVIDENCE;
-      default:
-        return PMColors.INK_SECONDARY;
-    }
+    return PMColors.INK_SECONDARY;
   }
 
   build() {
@@ -256,7 +229,7 @@ export struct TemporalBadge {
   private getLabel(): string {
     switch (this.status) {
       case 'CURRENT':
-        return '当前时态';
+        return '当前有效';
       case 'SUPERSEDED':
         return '已被替代';
       case 'CONTESTED':

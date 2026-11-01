@@ -72,6 +72,43 @@
 - 工作树中仍有意未提交：`AGENTS.md`、`harmonyos/build-profile.json5`（review flavor）与 `Constants.ets`（评审包地址）、`next-env.d.ts`、`tsconfig.json`、`docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md`、`components/ProjectHealthCard.tsx`——属评审打包与另一条线内容，提交前需与所有者确认。
 - 截图证据：`evidence/agent-conversation-ux/`（对话、焦点、委托四视图、资料/行动、任务全部轮次）。
 
-## 待办：我的项目空间 UI/UX 专项（未开始，2026-11-01 排队）
+## 专项完成：我的项目空间 UI/UX 精修（2026-11-01 下午）
 
-完整任务书已下达（见会话记录），核心范围：`Index.ets` `projectItem()` 卡片信息层级重排（身份→简况→准备项→下一步四层）、准备项指标语义纠正（`4/6 项已形成` 为主、百分比降级、进度条仅代表清单比例，不称项目完成度）、`nextAction.href` 到鸿蒙路由的显式映射与降级、统计摘要精简、分类筛选与截止状态视觉、按 `attentionScore` 排序需先验证跨类型可比性。注意先行修复本文件顶部的 `Index.ets` 编译阻塞点，且工作树有未提交的 review flavor 配置需与所有者确认。服务器接口 `buildCompetitionReadiness()` 六项竞赛模板是否适用于课程设计/科研训练需独立评估，本轮不强行改服务端协议。
+- **卡片四层结构**：身份（类别+截止日）→ 一行简况 → 关键进展（参赛准备项仅竞赛场景 + 紧凑统计）→ 「下一步」行动区。`projectItem()` 全部区域独立绑定 onClick（见下方坑 1）。`readinessSummary` 只输出 `4/6 项已形成`（百分比从卡片主文案移除，进度条只代表清单比例）；`getProjectMetricSummary` 压缩为 `16 记忆　3 提醒　4 行动　6 草稿`（全角空格分隔、零值不展示）。
+- **非竞赛场景**：不展示六项竞赛准备清单（避免误读为通用进度）；`nextAction` 的 gap 分支（detail 以「参赛准备度」开头）按 Web 同规则改写为「记录最新进展 → 资料页」。
+- **下一步导航映射**（`openNextAction`）：`#action-board`→`tab=actions`；`#capture-box`/`?cardType=`→`tab=memory`；`/generate?type=`→`tab=artifacts`（ProjectHome 新增 `tab=artifacts` 深链）；`#interventions` 与未知锚点降级进概览。真机验证：查看清单弹层不再冒泡导航、下一步准确进概览、长按管理菜单正常。
+- **排序与筛选**：筛选胶囊选中态去 2px 描边；新增「最近更新 / 需要关注」排序切换。`attentionScore` 含 `(100-readiness%)` 项对非竞赛项目是结构性 +100 偏置（六项竞赛清单对课程/科研永远 ~0%），故「需要关注」用本地可比评分（结构同服务端，准备项缺口只计入 COMPETITION，`projectAttentionScore`）。
+- **项目管理入口**：ProjectHome 设置弹层「基本信息」尾部新增「项目归档」行（长按不再是唯一入口）；删除仍在列表长按（二次确认）。
+- **Web 同步**：`ProjectCard.tsx` 准备项改 `4/6 项已形成` 主 + % 辅；tsc 通过。
+
+## 专项完成：个人设置与功能指南重构（2026-11-01 傍晚）
+
+- **设置首页信息架构**：账号卡（头像+名称+会话状态，点进账号详情）+ 四组核心入口：AI 与服务（模型与连接 / 设备与小艺）、提醒与偏好（提醒策略合并 4 项旧入口）、数据与安全（数据同步与连接 / 证据与记忆原则）、帮助与关于（使用指南 / 关于忆程）。原 16 行逐项分类：可编辑保留/合并、固定规则移入「证据与记忆原则」二级页、小艺两条「暂未接入」合并、AppInfoCard 大卡与版本行移入「关于忆程」。`AppInfoCard` builder 已删除。
+- **提醒策略作用域核查结论**：服务端 `InterventionPolicy.scope = USER:${userId}`（`interventionPolicyScopeForUser`），预算账本 `USER:x:GLOBAL`——**策略是账号级共享**；API 路径中的 projectId 仅用于 `authorizeProjectAccess` 与项目级降频偏好，不影响策略本体。鸿蒙 `SettingsSheet` 用 `policyAnchorProjectId()`（主列表优先、归档项目兜底）消除对 `projects[0]` 的隐式依赖；UI 文案统一为「按账号生效，全部项目共享」。未改任何服务端协议。
+- **ReminderSettingsView 重构**：每日上限改 0–50 步进器；免打扰时段改系统 TimePickerDialog（跨午夜由服务端支持，UI 说明）；时区只读展示；读取失败/保存成功/保存失败三类反馈区分颜色；无可访问项目时显示诚实的定位限制说明，不展示表单。真机验证：读取、选择时间、保存（「已保存到服务端，对你的全部项目生效」）全链路通过。
+- **二级页**：账号（会话状态+服务端地址+退出登录，保留原确认对话框）、设备与小艺（「尚未接入」+ 无模拟授权入口）、数据同步与连接（项目数据/模型引擎/设备通知三段，明确 dataSyncState 只反映项目数据读取）、证据与记忆原则（五条固定机制说明）、关于忆程（版本/平台/产品说明）。`ProjectHome` 设置弹层策略文案同步为账号级。
+- **FeatureGuide → 使用指南**：品牌简介（让项目进展有迹可循）+ 一行核心流程（记录→理解→确认→行动→回执，无横向滚动）+ 四组任务式功能卡（记录与整理/理解变化/推进项目/整理成果，图标+标题+一行说明+可展开详情）+「忆程如何处理你的信息」五条 +「功能支持情况」（已可用/需要配置/暂不支持/演示数据，逐条对照代码核对：桌面卡片=真实数据、行动依赖三态=已实现、小艺语音=未接入）+「前往功能」跳转（AppStorage `pm.pendingMainTab` → `Index.onPageShow` 消费切 tab；委托/问忆程需项目上下文，仅引导先打开项目）。
+- **Web**：`GlobalSettings` 核查为运行模式弹窗，可执行性说明与安全规则语义已准确，未改。
+
+### 本轮关键技术坑（复用价值高）
+
+1. **ArkUI onClick 会向父级冒泡**：`HitTestMode.Block` 不能阻断（真机验证），`ClickEvent.stopPropagation` 在本 SDK stub 不存在（编译报 property not exist）。可靠方案是**结构上避免嵌套 onClick**——项目卡片整卡不绑 onClick，身份区/准备项/统计/下一步各自独立绑定。
+2. **@Builder 参数传函数（`() => void` 回调）在真机上点击不生效**：设置页 `SettingsNavRow` 曾用函数参数分发，真机点击无响应；改为传 `targetMode` 字符串在 builder 内部分发后正常。
+3. **bindSheet FIT_CONTENT 内 Scroll 的 `constraintSize({ maxHeight: '72%' })` 会导致内容高度塌陷为 0**：表现为遮罩出现但弹层空白（提醒策略「打不开」的根因）。去掉百分比 maxHeight 后正常。
+4. **`width('100%') + margin({ left: N })` 会向右溢出 N**：使用指南展开详情曾溢出卡片右缘；去掉 `width('100%')` 用 margin 自适应。
+5. 复验管道退出码：`npm run harmony:build | tail` 会吞掉 hvigor 失败（exit 0 假阳性），必须以日志中 `BUILD SUCCESSFUL` 为准。
+
+### 验证记录
+
+- `harmony:build` 成功（最终 sha256 `79bc18ec…`，versionCode 临时 +1 至 1000001 便于确认安装生效——提交前可按需还原）。
+- `harmony:test` 90/90；`tsc --noEmit` 通过。
+- 模拟器截图证据：`evidence/settings-ux-20261101/`（00-22：焦点页、项目卡四层、准备项弹层、长按菜单、下一步导航、设置首页×2、提醒策略（读取/时间选择器/保存反馈）、账号、设备、数据、原则、关于、使用指南展开）。
+- 模拟器运行环境：生产演示后端（contest-demo 账号），非本地 4400；`harmony:backend` 当时已启动但未被 App 使用。
+
+### 未完成与遗留
+
+- 「需要关注」排序的展示顺序为本地可比评分，与服务端 `attentionScore` 的差异已在代码注释说明；未做跨场景排序效果的独立量化验证。
+- 小艺真实接入后需按权限范围补「设备与小艺」页的授权状态与操作。
+- 归档项目再次进入 ProjectHome 时设置弹层的归档按钮仍可点（服务端幂等，无副作用），未加已归档态展示。
+- InfoSheetHeader 的 ✕ 关闭按钮字形在部分 sheet 中渲染异常（显示为 ›），点击仍可关闭；后续可换成统一图标组件。
+- 全部改动**未提交**（用户要求改完暂不提交）；工作树另有评审 flavor 等他人未提交内容，勿混入。

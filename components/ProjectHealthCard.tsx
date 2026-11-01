@@ -1,5 +1,5 @@
 "use client";
-import {projectHref} from "@/lib/projectNavigation";
+import { projectHref } from "@/lib/projectNavigation";
 
 import { useCallback, useEffect, useState } from "react";
 import { AlertTriangle, ClipboardCheck, Info, LoaderCircle, RefreshCw, ShieldAlert } from "lucide-react";
@@ -53,7 +53,13 @@ const targetHref: Record<string, string> = {
 
 function hrefFor(finding: HealthFinding, stateEnabled: boolean): string {
   if (finding.suggestedTarget.kind === "state" && !stateEnabled) return "#capture-box";
-  return targetHref[finding.suggestedTarget.kind] ?? "#main-content";
+  const target = finding.suggestedTarget;
+  if (target.id) {
+    if (target.kind === "card" || target.kind === "memory") return `#card-${target.id}`;
+    if (target.kind === "action") return `#action-${target.id}`;
+    if (target.kind === "reminder") return `#intervention-${target.id}`;
+  }
+  return targetHref[target.kind] ?? "#main-content";
 }
 
 function actionLabelFor(finding: HealthFinding, stateEnabled: boolean): string {
@@ -129,10 +135,10 @@ export function ProjectHealthCard({ projectId, enabled, stateEnabled }: { projec
       <p className="mt-2 text-sm font-black text-[var(--navy)]">{primary.title}</p>
       <p className="mt-1 text-xs leading-5 text-[var(--ink-soft)]">{primary.explanation}</p>
       <div className="mt-3 flex flex-wrap gap-2">
-        <a href={projectHref(projectId,hrefFor(primary, stateEnabled))} className="focus-ring editorial-button text-xs">{actionLabelFor(primary, stateEnabled)}</a>
-        <button type="button" onClick={() => setShowAll((previous) => !previous)} className="focus-ring editorial-button-secondary text-xs">
-          {showAll ? "收起检查结果" : "查看全部检查结果"}
-        </button>
+        <a href={projectHref(projectId, hrefFor(primary, stateEnabled))} className="focus-ring editorial-button text-xs">{actionLabelFor(primary, stateEnabled)} →</a>
+        {total > 1 && <button type="button" onClick={() => setShowAll((previous) => !previous)} className="focus-ring editorial-button-secondary text-xs">
+          {showAll ? "收起检查结果" : `查看全部检查结果 (${total})`}
+        </button>}
       </div>
 
       {showAll && <ul className="mt-3 space-y-2">
@@ -148,7 +154,7 @@ export function ProjectHealthCard({ projectId, enabled, stateEnabled }: { projec
             </div>
             <p className="mt-1 text-xs leading-5 text-[var(--ink-soft)]">{finding.explanation}</p>
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
-              <a href={projectHref(projectId,hrefFor(finding, stateEnabled))} className="focus-ring rounded-md bg-[var(--paper-strong)] px-2 py-1 text-xs font-bold text-[var(--teal-strong)]">{actionLabelFor(finding, stateEnabled)}</a>
+              <a href={projectHref(projectId, hrefFor(finding, stateEnabled))} className="focus-ring rounded-md bg-[var(--paper-strong)] px-2 py-1 text-xs font-bold text-[var(--teal-strong)]">{actionLabelFor(finding, stateEnabled)} →</a>
               <span className="text-xs text-[var(--muted)]">发现于 {new Date(finding.observedAt).toLocaleString("zh-CN", { hour12: false })}</span>
             </div>
           </li>;
@@ -156,9 +162,14 @@ export function ProjectHealthCard({ projectId, enabled, stateEnabled }: { projec
       </ul>}
     </div>}
 
-    {!loading && report && report.unavailable.length > 0 && <div className="mt-3 rounded-lg bg-[var(--amber)]/10 px-3 py-2">
-      {report.unavailable.map((item) => <p key={item.section} className="text-xs font-semibold text-[var(--amber)]">{item.message}</p>)}
-      <p className="mt-1 text-xs text-[var(--muted)]">其余检查结果仍然有效，以上部分暂不可用。</p>
-    </div>}
+    {!loading && report && report.unavailable.length > 0 && <details className="mt-3 rounded-lg bg-[var(--amber)]/10 px-3 py-2 text-xs">
+      <summary className="focus-ring cursor-pointer font-semibold text-[var(--amber)]">
+        {report.unavailable.length} 项检查暂不可用（点击展开详情）
+      </summary>
+      <div className="mt-2 space-y-1">
+        {report.unavailable.map((item) => <p key={item.section} className="text-[var(--amber)]">{item.message}</p>)}
+        <p className="mt-1 text-[var(--muted)]">其余检查结果仍然有效，以上部分暂不可用。</p>
+      </div>
+    </details>}
   </section>;
 }

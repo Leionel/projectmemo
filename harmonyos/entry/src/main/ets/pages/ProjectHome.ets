@@ -190,6 +190,7 @@ struct ProjectHome {
   @State showAttachmentCorrection: boolean = false;
   @State correctingAttachment: Attachment = new Attachment();
   @State showSettingsDialog: boolean = false;
+  @State isArchivingProject: boolean = false;
   @State editTitle: string = '';
   @State editGoal: string = '';
   @State editDescription: string = '';
@@ -322,6 +323,9 @@ struct ProjectHome {
     } else if (params['tab'] === 'actions') {
       this.currentTabIndex = 2;
       this.focusedActionId = params['actionId'] ?? '';
+    } else if (params['tab'] === 'artifacts') {
+      // 项目空间「下一步」会把成果生成入口深链到成果页
+      this.currentTabIndex = 4;
     }
     if (this.projectId === '') {
       this.routeError = '页面参数缺失，项目ID无效';
@@ -2215,6 +2219,28 @@ struct ProjectHome {
         this.editDeadline = DateOnly.format(value);
       },
     });
+  }
+
+  /**
+   * 项目详情内可发现的管理入口：归档不依赖列表页长按手势。
+   * 归档只让项目离开主列表，记忆、行动与成果保持有效；恢复在项目空间「管理与恢复」，
+   * 删除仍留在列表长按菜单（需二次确认）。
+   */
+  private async archiveCurrentProject(): Promise<void> {
+    if (this.isArchivingProject || this.projectId === '') {
+      return;
+    }
+    this.isArchivingProject = true;
+    try {
+      await this.projectService.archiveProject(this.projectId);
+      this.showSettingsDialog = false;
+      promptAction.showToast({ message: '已归档，保留全部记忆与成果，可在项目空间恢复' });
+      router.back();
+    } catch (e) {
+      promptAction.showToast({ message: e instanceof ApiError ? e.message : '归档失败，请稍后重试' });
+    } finally {
+      this.isArchivingProject = false;
+    }
   }
 
   private async saveSettings(): Promise<void> {
@@ -6076,9 +6102,42 @@ if (this.attachmentSearchOpen) {
                   .width('100%')
                   .alignItems(HorizontalAlign.Start)
 
+                  // 项目管理入口：归档操作不再只依赖项目空间的长按手势
+                  Divider().color(PMColors.BORDER_SUBTLE).width('100%')
+
+                  Row() {
+                    Column({ space: 2 }) {
+                      Text('项目归档')
+                        .fontSize(PMFontSize.SECONDARY)
+                        .fontWeight(FontWeight.Medium)
+                        .fontColor(PMColors.INK_PRIMARY)
+                      Text('让项目离开主列表，但保留全部记忆、行动与成果；可在项目空间的「管理与恢复」中随时恢复。')
+                        .fontSize(PMFontSize.CAPTION)
+                        .fontColor(PMColors.INK_TERTIARY)
+                        .lineHeight(18)
+                    }
+                    .layoutWeight(1)
+                    .alignItems(HorizontalAlign.Start)
+
+                    Button(this.isArchivingProject ? '归档中…' : '归档项目', { type: ButtonType.Normal })
+                      .fontSize(PMFontSize.CAPTION)
+                      .fontWeight(FontWeight.Medium)
+                      .fontColor(PMColors.INK_SECONDARY)
+                      .backgroundColor(PMColors.SURFACE_SUBTLE)
+                      .border({ width: 1, color: PMColors.BORDER })
+                      .borderRadius(PMRadius.SM)
+                      .height(32)
+                      .padding({ left: 12, right: 12 })
+                      .enabled(!this.isArchivingProject)
+                      .accessibilityText(`归档项目 ${this.project.title}，可在项目空间恢复`)
+                      .onClick(() => { this.archiveCurrentProject(); })
+                  }
+                  .width('100%')
+                  .alignItems(VerticalAlign.Center)
+
                 } else {
                   // --- Tab 2: 提醒策略 ---
-                  Text('当前为服务端共享策略，修改会影响该服务上的项目，不会改变系统通知权限。')
+                  Text('策略按账号生效：你的全部项目共享同一份提醒预算与静默时段；不会改变系统通知权限。')
                     .fontSize(PMFontSize.BODY)
                     .fontColor(PMColors.INK_SECONDARY)
                     .lineHeight(20)

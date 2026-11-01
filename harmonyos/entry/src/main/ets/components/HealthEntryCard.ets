@@ -6,9 +6,12 @@ import { PMColors, PMSpacing, PMFontSize, PMRadius, PMButtonSize } from '../comm
 /**
  * 项目体检入口卡（工作台，不新增一级 Tab）。
  *
- * - 没有问题：明确显示「当前没有需要立即处理的问题」；
- * - 有问题：显示最重要的问题与总数，主按钮「处理最重要的问题」；
- * - 次级入口「查看全部检查结果」在同一张卡内展开，不再开新页面。
+ * 遵循 oil-ui 与 frontend-design 减法原则：
+ * - 紧凑头部：显示标题与「重新检查」操作；
+ * - 核心指示：总待处理项大字指示与严重度分级；
+ * - 主要问题内嵌操作：「去...：... →」直接承载动作，不再展示并列双大按钮；
+ * - 次级展开：当存在多个问题时提供单一下拉折叠入口；
+ * - 不可用说明折叠：默认单行折叠提示，点击展开受影响范围。
  *
  * 只读展示：卡内不提供任何写操作，避免把「看了一眼」当成已经处理。
  */
@@ -24,6 +27,7 @@ export struct HealthEntryCard {
   @State report: ProjectHealthReport | null = null;
   @State errorMessage: string = '';
   @State showAll: boolean = false;
+  @State showUnavailableDetails: boolean = false;
   /** 功能开关关闭时整卡隐藏：不让用户点下去才看到模糊错误 */
   @State hidden: boolean = false;
 
@@ -63,7 +67,7 @@ export struct HealthEntryCard {
   }
 
   @Builder
-  private findingRow(finding: HealthFinding) {
+  private findingRow(finding: HealthFinding, isPrimary: boolean = false) {
     Column() {
       Row() {
         Text(HealthSeverityCopy.label(finding.severity))
@@ -91,8 +95,9 @@ export struct HealthEntryCard {
         .margin({ top: 4 })
 
       Row() {
-        Text(`去${HealthSeverityCopy.targetLabel(finding.suggestedTarget.kind)}：${finding.suggestedAction}`)
+        Text(`去${HealthSeverityCopy.targetLabel(finding.suggestedTarget.kind)}：${finding.suggestedAction} →`)
           .fontSize(PMFontSize.CAPTION)
+          .fontWeight(FontWeight.Medium)
           .fontColor(PMColors.BRAND)
           .layoutWeight(1)
           .onClick(() => {
@@ -100,13 +105,14 @@ export struct HealthEntryCard {
           })
       }
       .width('100%')
-      .margin({ top: 4 })
+      .margin({ top: 6 })
     }
     .width('100%')
     .alignItems(HorizontalAlign.Start)
     .padding(PMSpacing.SM)
-    .backgroundColor(PMColors.SURFACE_SUBTLE)
+    .backgroundColor(isPrimary ? PMColors.BRAND_LIGHT : PMColors.SURFACE_SUBTLE)
     .borderRadius(PMRadius.SM)
+    .border(isPrimary ? { width: 1, color: PMColors.BORDER } : { width: 0, color: Color.Transparent })
     .margin({ top: PMSpacing.SM })
   }
 
@@ -126,6 +132,7 @@ export struct HealthEntryCard {
           }
           .alignItems(HorizontalAlign.Start)
           .layoutWeight(1)
+
           Button('重新检查')
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_SECONDARY)
@@ -157,7 +164,12 @@ export struct HealthEntryCard {
               .margin({ top: PMSpacing.SM })
               .onClick(() => {
                 this.load();
-              }).type(ButtonType.Normal).borderRadius(PMRadius.BUTTON).fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT).constraintSize({ minHeight: 44 })
+              })
+              .type(ButtonType.Normal)
+              .borderRadius(PMRadius.BUTTON)
+              .fontColor(PMColors.BRAND)
+              .backgroundColor(PMColors.BRAND_LIGHT)
+              .constraintSize({ minHeight: 44 })
           }
           .width('100%')
           .alignItems(HorizontalAlign.Start)
@@ -171,6 +183,7 @@ export struct HealthEntryCard {
               .fontColor(PMColors.WARNING)
               .margin({ top: PMSpacing.SM })
           }
+
           if (this.total() === 0) {
             Text(this.isLoading || this.errorMessage !== '' ? '上次体检未发现需立即处理的问题' : '当前没有需要立即处理的问题')
               .fontSize(PMFontSize.BODY)
@@ -178,11 +191,13 @@ export struct HealthEntryCard {
               .margin({ top: PMSpacing.SM })
           } else {
             Row() {
-              Text(`共 ${this.total()} 个待处理问题`)
-                .fontSize(PMFontSize.SECONDARY)
-                .fontWeight(FontWeight.Medium)
+              Text(`${this.total()} 项待处理`)
+                .fontSize(PMFontSize.SECTION_TITLE)
+                .fontWeight(FontWeight.Bold)
                 .fontColor(PMColors.INK_PRIMARY)
-                .layoutWeight(1)
+
+              Blank()
+
               ForEach(this.report.groups, (group: HealthGroup) => {
                 Text(`${HealthSeverityCopy.label(group.severity)} ${group.count}`)
                   .fontSize(10)
@@ -194,60 +209,69 @@ export struct HealthEntryCard {
               }, (group: HealthGroup) => group.severity)
             }
             .width('100%')
+            .alignItems(VerticalAlign.Center)
             .margin({ top: PMSpacing.SM })
 
             if (this.report.primaryAction !== null) {
-              this.findingRow(this.report.primaryAction)
-
-              Row() {
-                Button('处理最重要的问题')
-                  .fontSize(PMFontSize.BUTTON)
-                  .fontWeight(FontWeight.Medium)
-                  .fontColor(PMColors.SURFACE)
-                  .backgroundColor(PMColors.BRAND)
-                  .borderRadius(PMRadius.SM)
-                  .height(48)
-                  .layoutWeight(1)
-                  .onClick(() => {
-                    const target = this.report!.primaryAction!.suggestedTarget;
-                    this.onGoTarget(target.kind, target.id !== null ? target.id : '', this.report!.primaryAction!.suggestedAction);
-                  })
-                Button(this.showAll ? '收起检查结果' : '查看全部检查结果')
-                  .fontSize(PMFontSize.BUTTON)
-                  .fontColor(PMColors.INK_PRIMARY)
-                  .backgroundColor(PMColors.SURFACE_SUBTLE)
-                  .border({ width: 1, color: PMColors.BORDER })
-                  .borderRadius(PMRadius.SM)
-                  .height(48)
-                  .margin({ left: PMSpacing.SM })
-                  .onClick(() => {
-                    this.showAll = !this.showAll;
-                  })
-              }
-              .width('100%')
-              .margin({ top: PMSpacing.SM })
+              this.findingRow(this.report.primaryAction, true)
             }
 
-            // 其余问题只在这个次级入口里展开，首页仍然只有一个主操作
-            if (this.showAll) {
-              ForEach(this.otherFindings(), (finding: HealthFinding) => {
-                this.findingRow(finding)
-              }, (finding: HealthFinding) => `${finding.findingCode}-${finding.objectId}`)
+            if (this.otherFindings().length > 0) {
+              Button(this.showAll ? '收起检查结果 ↑' : `查看全部检查结果 (${this.total()}) ↓`)
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.BRAND)
+                .backgroundColor(PMColors.SURFACE_SUBTLE)
+                .border({ width: 1, color: PMColors.BORDER })
+                .borderRadius(PMRadius.SM)
+                .height(36)
+                .width('100%')
+                .margin({ top: PMSpacing.SM })
+                .onClick(() => {
+                  this.showAll = !this.showAll;
+                })
+
+              if (this.showAll) {
+                ForEach(this.otherFindings(), (finding: HealthFinding) => {
+                  this.findingRow(finding, false)
+                }, (finding: HealthFinding) => `${finding.findingCode}-${finding.objectId}`)
+              }
             }
           }
 
           if (this.report.unavailable.length > 0) {
             Column() {
-              ForEach(this.report.unavailable, (item: HealthUnavailableSection) => {
-                Text(item.message)
+              Row() {
+                Text(`${this.report.unavailable.length} 项检查暂不可用`)
                   .fontSize(PMFontSize.CAPTION)
                   .fontColor(PMColors.WARNING)
-                  .lineHeight(18)
-              }, (item: HealthUnavailableSection) => item.section)
-              Text('其余检查结果仍然有效，以上部分暂不可用。')
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.INK_TERTIARY)
-                .margin({ top: 2 })
+                  .layoutWeight(1)
+
+                Text(this.showUnavailableDetails ? '收起详情 ↑' : '查看详情 ↓')
+                  .fontSize(PMFontSize.CAPTION)
+                  .fontColor(PMColors.BRAND)
+                  .onClick(() => {
+                    this.showUnavailableDetails = !this.showUnavailableDetails;
+                  })
+              }
+              .width('100%')
+
+              if (this.showUnavailableDetails) {
+                Column() {
+                  ForEach(this.report.unavailable, (item: HealthUnavailableSection) => {
+                    Text(item.message)
+                      .fontSize(PMFontSize.CAPTION)
+                      .fontColor(PMColors.WARNING)
+                      .lineHeight(18)
+                  }, (item: HealthUnavailableSection) => item.section)
+                  Text('其余检查结果仍然有效，以上部分暂不可用。')
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.INK_TERTIARY)
+                    .margin({ top: 2 })
+                }
+                .width('100%')
+                .margin({ top: 6 })
+                .alignItems(HorizontalAlign.Start)
+              }
             }
             .width('100%')
             .alignItems(HorizontalAlign.Start)

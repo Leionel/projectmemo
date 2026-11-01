@@ -330,7 +330,7 @@ export struct ProjectStatePanel {
               .fontColor(PMColors.INK_TERTIARY)
           }
           Row({ space: PMSpacing.MD }) {
-            Text('查看全部变化与依据')
+            Text('查看全部变化与依据 →')
               .fontSize(PMFontSize.CAPTION)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.BRAND)
@@ -339,7 +339,7 @@ export struct ProjectStatePanel {
                 this.onOpenDiffSheet(this.diff);
               })
 
-            Text('查看简报（变化/影响/建议）')
+            Text('查看简报 →')
               .fontSize(PMFontSize.CAPTION)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.BRAND)
@@ -388,32 +388,42 @@ export struct ProjectStatePanel {
         .alignItems(HorizontalAlign.Start)
 
         Row({ space: PMSpacing.SM }) {
-          Button(this.isMarkingRead ? '标记中…' : (this.hasUnreadChange() ? '已了解' : '已读至最新'))
-            .height(40)
-            .fontSize(PMFontSize.CAPTION)
-            .fontColor(PMColors.SURFACE)
-            .backgroundColor(PMColors.BRAND)
-            .borderRadius(PMRadius.SM)
+          if (this.hasUnreadChange()) {
+            Button(this.isMarkingRead ? '标记中…' : '已了解')
+              .height(36)
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.SURFACE)
+              .backgroundColor(PMColors.BRAND)
+              .borderRadius(PMRadius.SM)
+              .layoutWeight(1)
+              .enabled(!this.isMarkingRead)
+              .onClick(() => {
+                this.markRead();
+              })
+          } else {
+            Row() {
+              Text('✓ 已同步至最新评估')
+                .fontSize(PMFontSize.CAPTION)
+                .fontColor(PMColors.SUCCESS)
+            }
             .layoutWeight(1)
-            .enabled(!this.isMarkingRead && this.hasUnreadChange())
-            .onClick(() => {
-              this.markRead();
-            })
+            .height(36)
+            .alignItems(VerticalAlign.Center)
+          }
 
           Button(this.isRefreshing ? '刷新中…' : '刷新')
-            .height(40)
+            .height(36)
             .fontSize(PMFontSize.CAPTION)
-            .fontColor(PMColors.BRAND)
+            .fontColor(PMColors.INK_SECONDARY)
             .backgroundColor(PMColors.SURFACE_SUBTLE)
             .borderRadius(PMRadius.SM)
-            .layoutWeight(1)
             .enabled(!this.isRefreshing)
             .onClick(() => {
               this.refreshState();
             })
 
           Button('待办')
-            .height(40)
+            .height(36)
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_SECONDARY)
             .backgroundColor(PMColors.SURFACE_SUBTLE)

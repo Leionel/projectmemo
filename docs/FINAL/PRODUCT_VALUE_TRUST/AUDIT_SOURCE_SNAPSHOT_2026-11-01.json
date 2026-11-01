@@ -1,0 +1,1132 @@
+{
+  "date": "2026-11-01",
+  "capturedAtUtc": "2026-11-01T10:11:43.141314+00:00",
+  "purpose": "Independent final product/trust audit; CT7 integration separately authorized; PM2-4 prompt extension only",
+  "main": {
+    "head": "1ee89f38852afa6a29518bb409da0d9210af2751",
+    "branch": "master",
+    "parents": [
+      "1c3b6a5428d0fc01405b4474fc27441703f16fc3",
+      "cb5fec8c3d516f4ff62fdf24850229e08e958a79"
+    ],
+    "trackedDirtyStatus": [
+      "M AGENTS.md",
+      " M components/ProjectCard.tsx",
+      " M components/ProjectHealthCard.tsx",
+      " D components/RepositorySources.tsx",
+      " M docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md",
+      " M docs/UI_UX_HANDOVER_2026-11-01.md",
+      " M evidence/r4-agent-ux/20261030-ux2/web-correction.png",
+      " M evidence/r4-agent-ux/20261030-ux2/web-memory-panel.png",
+      " M harmonyos/AppScope/app.json5",
+      " M harmonyos/build-profile.json5",
+      " M harmonyos/entry/src/main/ets/components/HealthEntryCard.ets",
+      " M harmonyos/entry/src/main/ets/components/MetricBadge.ets",
+      " M harmonyos/entry/src/main/ets/components/ProjectImpactPanel.ets",
+      " M harmonyos/entry/src/main/ets/components/ProjectStatePanel.ets",
+      " M harmonyos/entry/src/main/ets/components/ReminderSettingsView.ets",
+      " M harmonyos/entry/src/main/ets/pages/FeatureGuide.ets",
+      " M harmonyos/entry/src/main/ets/pages/Index.ets",
+      " M harmonyos/entry/src/main/ets/pages/ProjectHome.ets",
+      " M next-env.d.ts",
+      " M tsconfig.json"
+    ],
+    "indexEmpty": true
+  },
+  "worktrees": [
+    {
+      "worktree": "D:/Projects/hongmen",
+      "HEAD": "1ee89f38852afa6a29518bb409da0d9210af2751",
+      "branch": "refs/heads/master"
+    },
+    {
+      "worktree": "C:/Users/Administrator/.codex/worktrees/web-ecs/hongmen",
+      "HEAD": "a7e36760788f4ae26aae92b90b8c5dac4a37b2d6",
+      "branch": "refs/heads/codex/web-ecs"
+    },
+    {
+      "worktree": "D:/Projects/hongmen-ct7",
+      "HEAD": "cb5fec8c3d516f4ff62fdf24850229e08e958a79",
+      "branch": "refs/heads/codex/ct7-deployment-observer"
+    },
+    {
+      "worktree": "D:/Projects/hongmen-ct7-main-integration",
+      "HEAD": "1ee89f38852afa6a29518bb409da0d9210af2751",
+      "branch": "refs/heads/codex/ct7-main-integration"
+    },
+    {
+      "worktree": "D:/Projects/hongmen-ct8",
+      "HEAD": "bc74e97c62604467930be37073f7ebb9353e32c6",
+      "branch": "refs/heads/codex/ct9-browser-read"
+    },
+    {
+      "worktree": "D:/Projects/hongmen-ct8-10-audit",
+      "HEAD": "2b0067da03bc59b0c74d8c86c42cc74dcdc936a2",
+      "branch": "refs/heads/codex/ct8-ct10-integration-audit"
+    },
+    {
+      "worktree": "D:/Projects/hongmen-personal-memory",
+      "HEAD": "1c3b6a5428d0fc01405b4474fc27441703f16fc3",
+      "branch": "refs/heads/codex/personal-memory-explicit"
+    },
+    {
+      "worktree": "D:/Projects/hongmen-pr6-closeout-20261028",
+      "HEAD": "1132f30ee149e42d5f9fce79219ba1d9ecf02ea3",
+      "prunable": "gitdir file points to non-existent location"
+    },
+    {
+      "worktree": "D:/Projects/hongmen-r3-release-merge",
+      "HEAD": "21d8bf178fec2e570aba18064cd0fc7f0595c6ba",
+      "branch": "refs/heads/codex/pre-r4-ux",
+      "prunable": "gitdir file points to non-existent location"
+    },
+    {
+      "worktree": "D:/Projects/hongmen-ui-quality",
+      "HEAD": "f4f41744036c7ff49b88a1706f3b00cffa543a62",
+      "branch": "refs/heads/codex/r4-ui-quality"
+    }
+  ],
+  "integration": {
+    "commit": "1ee89f38852afa6a29518bb409da0d9210af2751",
+    "validationFile": "evidence/r4-ct7-main-integration/20261101/INTEGRATION_VALIDATION.json",
+    "validationBlob": "28f0fb85ff1e74930797c3230538aa0dc6552d44",
+    "validationRawTestWorktreeSha256": "48e40317a240a3fa68e3a87fe0e715c293eaf5ed5b498c0e17d0367d00437060",
+    "freshChecks": {
+      "unit-full-ready": {
+        "exit": 0,
+        "log": "unit-full-ready.log"
+      },
+      "types-final": {
+        "exit": 0,
+        "log": "types-final.log"
+      },
+      "lint-final": {
+        "exit": 0,
+        "log": "lint-final.log"
+      },
+      "web-build": {
+        "exit": 0,
+        "log": "web-build.log"
+      },
+      "web-e2e-final": {
+        "exit": 0,
+        "log": "web-e2e-final.log"
+      },
+      "harmony-unit": {
+        "exit": 0,
+        "log": "harmony-unit.log"
+      },
+      "harmony-build-final": {
+        "exit": 0,
+        "log": "harmony-build-final.log"
+      },
+      "test-database-init": {
+        "exit": 0,
+        "log": "test-database-init.log"
+      }
+    },
+    "counts": {
+      "backend": {
+        "files": 181,
+        "passed": 1411
+      },
+      "web": {
+        "startTime": "2026-11-01T09:55:32.211Z",
+        "duration": 213077.996,
+        "expected": 33,
+        "skipped": 2,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "harmony": {
+        "unitPassed": 90,
+        "hap": "unsigned, build only",
+        "sha256": "86924a3a86b14aed7a22dbb03d90753f95c4e03c23f75ba86e0d5775d135e600"
+      }
+    },
+    "initialFailures": {
+      "unit-full": "empty isolated test DB, migrated only isolated DB then rerun",
+      "harmony-build": "MissionSource deployment metadata declaration missing; fixed and rebuilt",
+      "web-e2e": "nested locator repeated outer region; fixed without weakening original-task continuation assertions"
+    },
+    "lintWarnings": {
+      "count": 2,
+      "files": [
+        "tests/ux2CorrectionControls.test.ts"
+      ],
+      "origin": "pre-existing unused variables"
+    },
+    "pendingAcceptance": [
+      "independent deployment/pipeline/artifact receipt",
+      "real TLS and live target transport",
+      "target physical device",
+      "three real natural days",
+      "independent live-model quality"
+    ]
+  },
+  "userWorkProtection": {
+    "overlap": [
+      "harmonyos/entry/src/main/ets/pages/ProjectHome.ets"
+    ],
+    "beforeHead": "1c3b6a5428d0fc01405b4474fc27441703f16fc3",
+    "afterHead": "1ee89f38852afa6a29518bb409da0d9210af2751",
+    "nonOverlappingTrackedDirtyCount": 18,
+    "nonOverlappingHashChanges": [],
+    "originalUserPatchReverseCheckExit": 0,
+    "indexEmpty": true,
+    "trackedDirtyBeforeSha256": {
+      "AGENTS.md": "dbff8a9d83193830b2fd06c5c131b9324c0a8e472be2c8aa2f66deff990e2750",
+      "components/ProjectCard.tsx": "253afb64a75c316c0406e90e22a94a0b0ffd8d7b12591348d7a54dcb3630f363",
+      "components/ProjectHealthCard.tsx": "79b8b332330f2e9c9e9a564df6534859d5d8e5a23d7ffb1f8128f20ba5e716fe",
+      "components/RepositorySources.tsx": null,
+      "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md": "7328e70a94cbd17f400c23ef418d0a62f396a408ea9a1926c9d1f057f211f631",
+      "docs/UI_UX_HANDOVER_2026-11-01.md": "ed27b171e758cda572d35fddfe02b6510d84693c610637e9dbff4702644bfbbf",
+      "evidence/r4-agent-ux/20261030-ux2/web-correction.png": "f273bc0c2cea85febe8dfbdb8953c875b8963db8c38d37b43a3460ca9f4da657",
+      "evidence/r4-agent-ux/20261030-ux2/web-memory-panel.png": "6decb083f0dc0d1a8da5e9b6a6baaf532bd1e442c868c0a10ccb46ce86e82913",
+      "harmonyos/AppScope/app.json5": "5a8bae4ea88b58de670140f29e52fa50288453ff445861e8d0491d6a4ec8a71e",
+      "harmonyos/build-profile.json5": "442618a372bd9a74d204e7162ffe6844b6fc49dbf4c09b8cc5bc58c6709a1924",
+      "harmonyos/entry/src/main/ets/components/HealthEntryCard.ets": "302e993efb19fd468664d2bc3cc3d7a86458b7a852973a978a4c1b403d86b7ab",
+      "harmonyos/entry/src/main/ets/components/MetricBadge.ets": "c6ab46386e7f3459b3b2350ae6fb7f9ddbbbbb6017d2633cf24dde2a7f85d9d2",
+      "harmonyos/entry/src/main/ets/components/ProjectImpactPanel.ets": "809afc4893b9f2c8606cc38e3e2aee0ea0f547063cb53033e851ffd984a76177",
+      "harmonyos/entry/src/main/ets/components/ProjectStatePanel.ets": "4a4bda4843547ab417f986e388b6d52b3e04b074a8b25a46d102d4f435cabb37",
+      "harmonyos/entry/src/main/ets/components/ReminderSettingsView.ets": "88a8574364f17954a7c6cd5ddb093eb9e49e2c3c16627234551a9e5b55d0e748",
+      "harmonyos/entry/src/main/ets/pages/FeatureGuide.ets": "371f50b59860477f103902e0073fb6309dd65c595bf22ac7a9359ca745153bdd",
+      "harmonyos/entry/src/main/ets/pages/Index.ets": "c7b93aa352adaa8bdd9f51230a03eb2b11e12ffd6cf6586324d640e226dcd03b",
+      "harmonyos/entry/src/main/ets/pages/ProjectHome.ets": "8990a65b8eab8463ce0d50028bedb5b625c8cd959284d6cef766101ac4f76868",
+      "tsconfig.json": "af1b4fbd345a0d2b7e23394aca3540b524a3d4826fca6a51169b13b2a325ee4a"
+    },
+    "trackedDirtyAfterSha256": {
+      "AGENTS.md": "dbff8a9d83193830b2fd06c5c131b9324c0a8e472be2c8aa2f66deff990e2750",
+      "components/ProjectCard.tsx": "253afb64a75c316c0406e90e22a94a0b0ffd8d7b12591348d7a54dcb3630f363",
+      "components/ProjectHealthCard.tsx": "79b8b332330f2e9c9e9a564df6534859d5d8e5a23d7ffb1f8128f20ba5e716fe",
+      "components/RepositorySources.tsx": null,
+      "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md": "7328e70a94cbd17f400c23ef418d0a62f396a408ea9a1926c9d1f057f211f631",
+      "docs/UI_UX_HANDOVER_2026-11-01.md": "ed27b171e758cda572d35fddfe02b6510d84693c610637e9dbff4702644bfbbf",
+      "evidence/r4-agent-ux/20261030-ux2/web-correction.png": "f273bc0c2cea85febe8dfbdb8953c875b8963db8c38d37b43a3460ca9f4da657",
+      "evidence/r4-agent-ux/20261030-ux2/web-memory-panel.png": "6decb083f0dc0d1a8da5e9b6a6baaf532bd1e442c868c0a10ccb46ce86e82913",
+      "harmonyos/AppScope/app.json5": "5a8bae4ea88b58de670140f29e52fa50288453ff445861e8d0491d6a4ec8a71e",
+      "harmonyos/build-profile.json5": "442618a372bd9a74d204e7162ffe6844b6fc49dbf4c09b8cc5bc58c6709a1924",
+      "harmonyos/entry/src/main/ets/components/HealthEntryCard.ets": "302e993efb19fd468664d2bc3cc3d7a86458b7a852973a978a4c1b403d86b7ab",
+      "harmonyos/entry/src/main/ets/components/MetricBadge.ets": "c6ab46386e7f3459b3b2350ae6fb7f9ddbbbbb6017d2633cf24dde2a7f85d9d2",
+      "harmonyos/entry/src/main/ets/components/ProjectImpactPanel.ets": "809afc4893b9f2c8606cc38e3e2aee0ea0f547063cb53033e851ffd984a76177",
+      "harmonyos/entry/src/main/ets/components/ProjectStatePanel.ets": "4a4bda4843547ab417f986e388b6d52b3e04b074a8b25a46d102d4f435cabb37",
+      "harmonyos/entry/src/main/ets/components/ReminderSettingsView.ets": "88a8574364f17954a7c6cd5ddb093eb9e49e2c3c16627234551a9e5b55d0e748",
+      "harmonyos/entry/src/main/ets/pages/FeatureGuide.ets": "371f50b59860477f103902e0073fb6309dd65c595bf22ac7a9359ca745153bdd",
+      "harmonyos/entry/src/main/ets/pages/Index.ets": "c7b93aa352adaa8bdd9f51230a03eb2b11e12ffd6cf6586324d640e226dcd03b",
+      "harmonyos/entry/src/main/ets/pages/ProjectHome.ets": "dd9bbe483ed7a3b318f219a7210029d430ddfab39e5f3728b1b470372c0f4a77",
+      "tsconfig.json": "af1b4fbd345a0d2b7e23394aca3540b524a3d4826fca6a51169b13b2a325ee4a"
+    },
+    "recovery": "Exact overlap file, binary patches and scoped stash retained under private .git/ct7-main-integration; no secret configuration contents exported"
+  },
+  "personalMemoryPrompt": {
+    "path": "D:\\Projects\\hongmen\\docs\\FINAL\\Memory\\PERSONAL_MEMORY_IMPLEMENTATION_PROMPT.md",
+    "sha256": "5f38d6787424b853560df08863304801fd98b284be3a3b15daeb09652d405413",
+    "originalPM1PrefixTextSha256": "96c2a25ece923ae015b6e26269295aa60e683ee9f9ad04017abbb1698e99f50c",
+    "extension": "PM2 candidate/control/management; PM3 long recall/Composer; PM4 evolution/Dream/Experience/responsibility",
+    "existingWorktree": "D:/Projects/hongmen-personal-memory",
+    "businessImplementationTouched": false
+  },
+  "probes": {
+    "markdownResource": "MARKDOWN_RESOURCE_PROBE_2026-11-01.json",
+    "markdownRawSha256": "34a6fbba42dce290aa886c95598c9ddcc7d3ae715f7368e8d3aef0c0d2b273cc",
+    "initialMainTargetedTests": {
+      "files": 4,
+      "passed": 8,
+      "exit": 0,
+      "evidence": "tool transcript, before CT7 integration; not a new merged-worktree device test"
+    },
+    "hdc": {
+      "target": "127.0.0.1:5555",
+      "api": 24,
+      "system": "OpenHarmony-6.1.1.125",
+      "method": "read-only target/version query; no install or UI journey"
+    },
+    "sdk": "Installed DevEco default SDK declarations inspected for ShareExtensionAbility, InsightIntent, SpeechRecognizer, continueManager and FormProvider; availability is not platform acceptance"
+  },
+  "dependencyAudit": {
+    "exit": 1,
+    "counts": {
+      "info": 0,
+      "low": 0,
+      "moderate": 5,
+      "high": 10,
+      "critical": 1,
+      "total": 16
+    },
+    "businessFixesApplied": false,
+    "productionReleaseGate": "Assess reachability and apply a separate compatible security patch; not a fresh CT7 regression"
+  },
+  "sourceReferences": {
+    "components/NewProjectForm.tsx": {
+      "sha256RawWorktree": "52b923c3306c74eb49e6d0202dcd28fa1d3ee8cd511b413516b1185a745df588",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 9,
+          "label": "NewProjectForm"
+        }
+      ],
+      "headBlob": "cfbcb66be279cccd9de7c97594516e19945532ad"
+    },
+    "app/api/projects/route.ts": {
+      "sha256RawWorktree": "14a79b4d826816547f70f4dd40b1d2d4b49ee58dfe0ec4631270bd8aab1dd7aa",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 33,
+          "label": "项目创建 API"
+        },
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 33,
+          "label": "POST projects"
+        }
+      ],
+      "headBlob": "cb699c1f41fe5dc896af08bb33844b87d98d382b"
+    },
+    "components/CaptureBox.tsx": {
+      "sha256RawWorktree": "fce4031fb6c438441c90b9e92e0c679d3c808d922424b3b610db42086244a33b",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 26,
+          "label": "CaptureBox"
+        },
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 29,
+          "label": "CaptureBox"
+        }
+      ],
+      "headBlob": "cd3b11aed45702a2f1d52ab5d8a311b9c634db6d"
+    },
+    "lib/services/captureService.ts": {
+      "sha256RawWorktree": "a89e766d7ec00c2157fd4461ef64fd2d4968fa542de51d696eaf6b1a92d51a72",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 34,
+          "label": "captureService"
+        }
+      ],
+      "headBlob": "627b6dc5296ee8c5d77da47e56d4b8abbc9c5f55"
+    },
+    "lib/services/attachmentService.ts": {
+      "sha256RawWorktree": "0c95eea7187a3e10bd08a5099dc7e6152de06aa038ce06b0afe2d53bedfb600f",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 165,
+          "label": "attachmentService"
+        },
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 123,
+          "label": "附件支持"
+        }
+      ],
+      "headBlob": "5b81859bed21c0d1c7f3b38c496f4d445bb69bcf"
+    },
+    "lib/mission/resultVerifier.ts": {
+      "sha256RawWorktree": "08e6bcec0733129cd2f1ebc0945110a1f06cd497bd0b2b6ca2c6896f843dbad0",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 9,
+          "label": "resultVerifier"
+        },
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 19,
+          "label": "resultVerifier"
+        }
+      ],
+      "headBlob": "c490530aa8a43870c18627b7f9594f5092aa6d97"
+    },
+    "lib/mission/completionSummary.ts": {
+      "sha256RawWorktree": "956fd64088d02a1b5d1c93702c07c14770e580a1a482f32d386c30727c1c26d0",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 5,
+          "label": "completionSummary"
+        }
+      ],
+      "headBlob": "61c67e845fcabe755d6464365691f1fd97ae5689"
+    },
+    "lib/services/actionService.ts": {
+      "sha256RawWorktree": "a738389f90ea78efc51f4157c7820b018e29d22aeee8b5a1492fa24df60e0770",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 46,
+          "label": "actionService"
+        },
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 99,
+          "label": "actionService"
+        }
+      ],
+      "headBlob": "c27266bc7e6d7e9247cb0366eaa5d3891951b17e"
+    },
+    "lib/experience/trajectoryIndex.ts": {
+      "sha256RawWorktree": "8c6d61d888e59521e25473a03c7d25f20c23a0fc4b56644fced25c22d16e42a3",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 37,
+          "label": "trajectoryIndex"
+        }
+      ],
+      "headBlob": "b1a7a3d037a52e04cda7fba80bd8be101868bc13"
+    },
+    "lib/continuity/admission.ts": {
+      "sha256RawWorktree": "b44ac3504647119796d107b5dcfe411e43a2f11a88978d461c6c3450e898d8e5",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 27,
+          "label": "Admission"
+        }
+      ],
+      "headBlob": "026480dc1922b81197308352f2ad7cc397133fd6"
+    },
+    "lib/continuity/turnCoordination.ts": {
+      "sha256RawWorktree": "af8056e2baf5946eb7915995e538d40ba8f6c7a588c0ff24aefaf1a31e1b1898",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 24,
+          "label": "Turn 协调"
+        }
+      ],
+      "headBlob": "0dcf7fa43012bbe6f8ee554e683e8a1e679b707c"
+    },
+    "app/health/route.ts": {
+      "sha256RawWorktree": "65eb21a5144d46e4442a29dbddd0d76e2ac05e76b97ce83217f8498cc303016b",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 3,
+          "label": "health"
+        },
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 3,
+          "label": "health"
+        }
+      ],
+      "headBlob": "45513b2b1db2d7b1a2d8ab67ef1594878922de18"
+    },
+    "lib/mission/workerPresence.ts": {
+      "sha256RawWorktree": "bf8b5597a232cd0fd92ff26976ba0947dd71b527ce37d58850c445fb68e57fbd",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 63,
+          "label": "WorkerPresence"
+        },
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 18,
+          "label": "workerPresence"
+        }
+      ],
+      "headBlob": "f1a11fd3a38222e192d0fda11020b03e09de8972"
+    },
+    "app/api/conversations/capabilities/route.ts": {
+      "sha256RawWorktree": "b090786c84e1167a5478fe468cd7432b0cebe305f27ebe8862f5e1b5f56b7962",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 4,
+          "label": "Conversation capabilities"
+        },
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 4,
+          "label": "Conversation capabilities"
+        }
+      ],
+      "headBlob": "2bad1450d24f1ac1adab86e2723b2bf2e1af38a3"
+    },
+    "docs/FINAL/AGENT_REVIEW/AGENT_END_TO_END_EVALUATION_SPEC.md": {
+      "sha256RawWorktree": "dd15f823a2d2c900bed59a9585e488eea3ffecb9df07fa9040ca712d7a8069d8",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 1,
+          "label": "原评测规范"
+        }
+      ],
+      "headBlob": null
+    },
+    "lib/mission/tools.ts": {
+      "sha256RawWorktree": "71841b261db20ba1da400962666422ea4ba97adf9c48e0e75743aa591cf0bb6d",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 11,
+          "label": "Tool 合同"
+        },
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 11,
+          "label": "Tool.version"
+        }
+      ],
+      "headBlob": "ed5f69a1a959ef8f5076b5bf87641d47cd967285"
+    },
+    "lib/experience/injection.ts": {
+      "sha256RawWorktree": "5c55d83190f85bbf980ce3fc7d15ffeb7c09d3429fa0345be2cfae5d311dd213",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 75,
+          "label": "Experience 匹配"
+        },
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 75,
+          "label": "Experience version checks"
+        }
+      ],
+      "headBlob": "e9c335f3fc9a13d50dbb7a50560bcdf6d9889aed"
+    },
+    "lib/auth/cloudQuota.ts": {
+      "sha256RawWorktree": "32e1371a35e642b47e072a1dd3a4d91d0ab9559af13549bde41ef20d02dd857d",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 119,
+          "label": "quota"
+        },
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 159,
+          "label": "cloudQuota"
+        }
+      ],
+      "headBlob": "a151ce67dc38f5052beb48d8035d5022279b8de9"
+    },
+    "lib/storage/attachmentStorage.ts": {
+      "sha256RawWorktree": "c1e5780d48c8241658cf698d0757fce516c4d617b3c4deb63abcfbb12df5c062",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 30,
+          "label": "附件存储"
+        },
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 30,
+          "label": "storage"
+        }
+      ],
+      "headBlob": "4d1f5106e1a37ee1542edb4ded0ee414b2fb3b97"
+    },
+    "harmonyos/entry/src/main/module.json5": {
+      "sha256RawWorktree": "c2b62a9c9cf3c25ab177b4b3d4ccd31cbc4bff1723a1276351e814343e2354ac",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 7,
+          "label": "module.json5"
+        },
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 25,
+          "label": "module skills"
+        }
+      ],
+      "headBlob": "8db179678475c1d5a404662e5463d478ab07ce7c"
+    },
+    "harmonyos/entry/src/main/ets/entryability/EntryAbility.ets": {
+      "sha256RawWorktree": "9be16055aacd221cea04953da833ea450600caee90c26e603ac7c4742006db6f",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 10,
+          "label": "EntryAbility"
+        }
+      ],
+      "headBlob": "2e7da4b9cecdc0ab1c7d015b9621a3706bd5df68"
+    },
+    "lib/repositories/projects.ts": {
+      "sha256RawWorktree": "daefaf251b0fd5e32b3a4a16305c90b023e7316dfbc56143c64127fbfacd9b1b",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 53,
+          "label": "createProject"
+        },
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 81,
+          "label": "deleteProject"
+        }
+      ],
+      "headBlob": "bc55c2fe300ee4cbcf770f9cb98481894c22b937"
+    },
+    "lib/agent/index.ts": {
+      "sha256RawWorktree": "ca5d175e80a551e2c531eb1504e0226f35129ea91837a0df18d9ea5da3b81bb7",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 18,
+          "label": "agent/index"
+        }
+      ],
+      "headBlob": "90050f9d523a9551df38ec21a9017f1c53d023f6"
+    },
+    "app/api/projects/[id]/captures/route.ts": {
+      "sha256RawWorktree": "b616f1bd23d136c2814ecd90c66b544b8a121137a6e1154ad67a66d3ff9f1795",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 10,
+          "label": "capture API"
+        }
+      ],
+      "headBlob": "6788f99f423350e5e7e27dc31431033178d26fe4"
+    },
+    "harmonyos/entry/src/main/ets/services/MemoryService.ets": {
+      "sha256RawWorktree": "885788ac0202ee3e2b748366b6133dc60015491ee5fc69a1164af0c53310283a",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 27,
+          "label": "MemoryService"
+        }
+      ],
+      "headBlob": "6990a1c0ce18acd8b26f8f7d123c89d401d25f53"
+    },
+    "tests/health.test.ts": {
+      "sha256RawWorktree": "1394522c54591dba0ca7d19db50a75885d47f313b1cd3fbbaa7b84d05ff6c577",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 4,
+          "label": "health tests"
+        }
+      ],
+      "headBlob": "474d7ea38ad6b443d9361c015b330894bfc57a1e"
+    },
+    "scripts/mission-worker.ts": {
+      "sha256RawWorktree": "fc789fa23167d31f2176a2bc3cd487111decb05c4e168fad867513f724e825e0",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 19,
+          "label": "worker entry"
+        }
+      ],
+      "headBlob": "c09935002253949768586ed103b13e54afd87989"
+    },
+    "lib/mission/responsibility.ts": {
+      "sha256RawWorktree": "b1506589d8d6b9359251355346baf63818db781710b8bceff3513e6af43fea35",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 119,
+          "label": "responsibility"
+        }
+      ],
+      "headBlob": "a581d194710940cee1c6afa984fda62d426305f2"
+    },
+    "lib/agent/llmAgent.ts": {
+      "sha256RawWorktree": "f9c43641539dbd34aedf5b9c79d0c91aa90f4cf358ca266d86ae1ade611a039d",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 53,
+          "label": "LLM usage"
+        }
+      ],
+      "headBlob": "e3f038160f821fa0fb30f6347f198a109ff925b7"
+    },
+    "lib/mission/presentation.ts": {
+      "sha256RawWorktree": "923db73330f90526acf6cf10724d1a07f5f5739725021202531fa74843cd30aa",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 50,
+          "label": "presentation"
+        }
+      ],
+      "headBlob": "129a56fe799dd92e6f3ee56b678471fcab6c92dc"
+    },
+    "lib/decision/goalState.ts": {
+      "sha256RawWorktree": "3ad9ba05181068962b8c960db4014c7682c12861c95744fe0255e86ad8aa9407",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 8,
+          "label": "goalState"
+        },
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 8,
+          "label": "goalState"
+        }
+      ],
+      "headBlob": "c685a7be63870d9e58d471dab315ea208f9d096d"
+    },
+    "components/UserNav.tsx": {
+      "sha256RawWorktree": "6406214773c1c7d6b19f67f7f19cab88cfc0f53df66465542604249a931f58aa",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 55,
+          "label": "UserNav"
+        }
+      ],
+      "headBlob": "7a44f92b93394ec140959d41809ae48bb8597f1a"
+    },
+    "app/api/projects/[id]/route.ts": {
+      "sha256RawWorktree": "0e1782f6446195b8eedc0f34d97085a999e343c9740ba0beec8b44052d914636",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 25,
+          "label": "DELETE project"
+        }
+      ],
+      "headBlob": "66a795421da7e9289f169eb05b9e10751a34dc76"
+    },
+    "lib/auth/guard.ts": {
+      "sha256RawWorktree": "a564a50d9723636fd4d665752b378e05ccf1530533b5fdc019a82e3849236158",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 74,
+          "label": "guard"
+        }
+      ],
+      "headBlob": "d97fcc1437a66e6b2d38e5bb115d260494ae488a"
+    },
+    "harmonyos/entry/src/main/ets/common/ExportFormatter.ets": {
+      "sha256RawWorktree": "dfaa609d017b9b6a24c1a49c03f48a706f8120d27a791a47ef2e4d78c6c2d654",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 4,
+          "label": "ExportFormatter"
+        }
+      ],
+      "headBlob": "1f14e4e06086c9c42946dabe0d5fb52234e8813b"
+    },
+    "components/MarkdownRenderer.tsx": {
+      "sha256RawWorktree": "eb8f011abcff1b52a8b3fe58977c5ec00b94559dd1d95b098db3c9a68a306708",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 4,
+          "label": "MarkdownRenderer"
+        }
+      ],
+      "headBlob": "04fe90a1b97ec67f44afda497591e103321dc155"
+    },
+    "components/ArtifactGenerator.tsx": {
+      "sha256RawWorktree": "d898c274743c53db3616a9508d73c58a05bc9b736492d82a7ea82f68423fe104",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 148,
+          "label": "ArtifactGenerator"
+        }
+      ],
+      "headBlob": "0f897cbb6371dbd668e0991f4eef3081b2566955"
+    },
+    "lib/agent/promptSpec.ts": {
+      "sha256RawWorktree": "f4126bd2058a5f84671a6aff29d6398b86d3c7cf371f86f14bcd973eb6b90034",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 13,
+          "label": "promptSpec"
+        }
+      ],
+      "headBlob": "1cb2f4d314700e8151c9a745ced2507dffabae26"
+    },
+    "R4_AGENT_UX_IMPLEMENTATION_NOTES.md": {
+      "sha256RawWorktree": "77245ce1a074f35bd390110e4afad6450981363eb5a036fb3b9d1d9ddc1b3447",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 252,
+          "label": "UX-3 最终复审"
+        }
+      ],
+      "headBlob": "8f5b9172b69613b193b12d7a0888092375306140"
+    },
+    "planning/r4-post-ux2-implementation/R4_CT8_TO_CT10_INDEPENDENT_AUDIT_2026-10-31.md": {
+      "sha256RawWorktree": "c0def24d3b72c4a38c3e340e079612fb8049c0dbc0bca39b76c8533b95608037",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 85,
+          "label": "CT-8～10 审计"
+        }
+      ],
+      "headBlob": "8753f988aec68d441734b11e6a6513c5c6f37d85"
+    },
+    "docs/FINAL/Memory/PERSONAL_MEMORY_ROADMAP.md": {
+      "sha256RawWorktree": "353df28558e12a4d20edef2ae9cf8f0808f600abd6efb20938dac6f0dd62e38a",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 1,
+          "label": "Personal Memory 路线"
+        }
+      ],
+      "headBlob": null
+    },
+    "lib/xiaoyi/inspectMissionService.ts": {
+      "sha256RawWorktree": "da92238c7500dfb9f080b71e3c485f7dd4169d9cf7367a17c6179b70bd17f563",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 5,
+          "label": "inspectMission"
+        }
+      ],
+      "headBlob": "02dd5a48b916007116612c972d544a378e97fa7a"
+    },
+    "lib/xiaoyi/resumeMissionService.ts": {
+      "sha256RawWorktree": "8b738f11e05d965f58a0b2770f8f316f8300a5f619504e9f1f507dcc87ee0124",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 8,
+          "label": "resumeMission"
+        }
+      ],
+      "headBlob": "2385af515bc779a3e35b868836f4019cba92e192"
+    },
+    "harmonyos/entry/src/main/ets/entryformability/EntryFormAbility.ets": {
+      "sha256RawWorktree": "dc4f7f8629d25d0f8718e4c507004fe28093823dbf2f360b5badbdd4e60cc82c",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 135,
+          "label": "FormExtension"
+        }
+      ],
+      "headBlob": "2c1dc3b83bcc439b5d6ccbb51b95f3ba19b69c77"
+    },
+    "harmonyos/entry/src/main/ets/services/WidgetDataService.ets": {
+      "sha256RawWorktree": "e2dd5c00983534925de292fca92fc4b316295edb7cbdd47c5181904693ca3c5f",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 248,
+          "label": "WidgetDataService"
+        }
+      ],
+      "headBlob": "09acc5286dcd0835fd4b9972be4f60f626ba3ec2"
+    },
+    "package.json": {
+      "sha256RawWorktree": "9aa7e133182cbc5b23f0653671abab62b244cc964927da865b220ec7b0d132bb",
+      "references": [
+        {
+          "document": "CODE_GAP_MATRIX_2026-11-01.md",
+          "line": 49,
+          "label": "package.json"
+        }
+      ],
+      "headBlob": "dfe826760dfc35cf9278f63b4ca8999e41e1a407"
+    },
+    "R4_DEPLOYMENT_IMPLEMENTATION_NOTES.md": {
+      "sha256RawWorktree": "844359a1139bb8bdb7b158464011fc9595c9c5a099cdb1e9ee30dd6da744d9d0",
+      "references": [
+        {
+          "document": "PROJECTMEMO_FINAL_VALUE_TRUST_RESEARCH_2026-11-01.md",
+          "line": 86,
+          "label": "CT-7 实施记录"
+        }
+      ],
+      "headBlob": "e79652571b0acfae07296e84c316761cbf868384"
+    }
+  },
+  "primarySourceUrls": [
+    "https://developer.huawei.com/consumer/cn/doc/doccenter-references/api/js-apis-app-ability-shareextensionability",
+    "https://developer.huawei.com/consumer/cn/sdk/core-speech-kit/",
+    "https://developer.huawei.com/consumer/cn/sdk/intents-kit",
+    "https://docs.langchain.com/oss/python/langgraph/persistence",
+    "https://genai.owasp.org/2026/09/01/owasp-genai-security-project-unveils-2026-top-10-for-llm-applications-new-agent-control-standard-and-sponsors-as-community-tops-30000-members/",
+    "https://genai.owasp.org/initiatives/agentic-security-initiative/",
+    "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+    "https://github.com/advisories/GHSA-2xp9-vwfh-vxw4",
+    "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5",
+    "https://github.com/advisories/GHSA-p293-qw3h-jr36",
+    "https://github.com/langchain-ai/langgraph",
+    "https://github.com/langfuse/langfuse",
+    "https://github.com/promptfoo/promptfoo",
+    "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/",
+    "https://langfuse.com/docs/evaluation/overview",
+    "https://modelcontextprotocol.io/specification/2026-07-28/server/tools",
+    "https://opentelemetry.io/docs/specs/semconv/registry/attributes/gen-ai/",
+    "https://www.anthropic.com/research/building-effective-agents",
+    "https://www.anthropic.com/research/demystifying-evals-for-ai-agents",
+    "https://www.notion.com/help/export-your-content",
+    "https://www.notion.com/help/web-clipper",
+    "https://www.promptfoo.dev/docs/intro/",
+    "https://www.swebench.com/SWE-bench/guides/evaluation/"
+  ],
+  "documents": {
+    "CODE_GAP_MATRIX_2026-11-01.md": {
+      "sha256": "9a2bcc5857105fd1a2da6907c1b111be55c60608d42e0cec4e66ca51c1e71b83",
+      "lines": 110
+    },
+    "FINAL_VERTICAL_ACCEPTANCE_JOURNEY_2026-11-01.md": {
+      "sha256": "821d535b0b4f57d817d5dd2ec7130d19a1174ca467a3ba966fffd2d581891e8d",
+      "lines": 176
+    },
+    "PRIORITY_ROADMAP_2026-11-01.md": {
+      "sha256": "172b93668d4b7ee60c7287f1e7a96e775340813b0f5296878556bccf62adc053",
+      "lines": 163
+    },
+    "PROJECTMEMO_FINAL_VALUE_TRUST_RESEARCH_2026-11-01.md": {
+      "sha256": "33eaff3ece5f1843dcb79fe3d1f9f66ca39ab9baec37e85116464a990dfc97eb",
+      "lines": 287
+    }
+  },
+  "notPerformed": [
+    "production deployment or push",
+    "real development/production DB migration",
+    "paid model calls",
+    "fresh device installation/GUI acceptance",
+    "new autonomous worker",
+    "edits to concurrent Personal Memory implementation"
+  ],
+  "hashNote": "Raw hashes identify the inspected Windows worktree bytes; git blob IDs identify committed content independent of checkout newline conversion. Dirty UI and unmerged personal implementation are not claimed covered by the clean integration regression.",
+  "snapshotSemantics": "Original top-level fields, documents hashes and worktree states remain the initial audit snapshot. incrementalReviews contains later observations and current revised document hashes; do not treat the initial PM/worktree/acceptance state as current. Snapshot file itself is excluded from documentHashes to avoid self-reference.",
+  "incrementalReviews": [
+    {
+      "id": "FVT-PRODUCT-DEEPENING-20261101",
+      "capturedAtUtc": "2026-11-01T13:28:32.536192+00:00",
+      "scope": "Incremental planning only, same Roadmap and journey; no ten-direction re-research",
+      "worktrees": {
+        "D:\\Projects\\hongmen": {
+          "head": "1ee89f38852afa6a29518bb409da0d9210af2751",
+          "files": {
+            "AGENTS.md": "dbff8a9d83193830b2fd06c5c131b9324c0a8e472be2c8aa2f66deff990e2750",
+            "components/ProjectCard.tsx": "253afb64a75c316c0406e90e22a94a0b0ffd8d7b12591348d7a54dcb3630f363",
+            "components/ProjectHealthCard.tsx": "79b8b332330f2e9c9e9a564df6534859d5d8e5a23d7ffb1f8128f20ba5e716fe",
+            "components/RepositorySources.tsx": null,
+            "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md": "7328e70a94cbd17f400c23ef418d0a62f396a408ea9a1926c9d1f057f211f631",
+            "docs/UI_UX_HANDOVER_2026-11-01.md": "ed27b171e758cda572d35fddfe02b6510d84693c610637e9dbff4702644bfbbf",
+            "evidence/r4-agent-ux/20261030-ux2/web-correction.png": "f273bc0c2cea85febe8dfbdb8953c875b8963db8c38d37b43a3460ca9f4da657",
+            "evidence/r4-agent-ux/20261030-ux2/web-memory-panel.png": "6decb083f0dc0d1a8da5e9b6a6baaf532bd1e442c868c0a10ccb46ce86e82913",
+            "harmonyos/AppScope/app.json5": "5a8bae4ea88b58de670140f29e52fa50288453ff445861e8d0491d6a4ec8a71e",
+            "harmonyos/build-profile.json5": "442618a372bd9a74d204e7162ffe6844b6fc49dbf4c09b8cc5bc58c6709a1924",
+            "harmonyos/entry/src/main/ets/components/HealthEntryCard.ets": "302e993efb19fd468664d2bc3cc3d7a86458b7a852973a978a4c1b403d86b7ab",
+            "harmonyos/entry/src/main/ets/components/MetricBadge.ets": "c6ab46386e7f3459b3b2350ae6fb7f9ddbbbbb6017d2633cf24dde2a7f85d9d2",
+            "harmonyos/entry/src/main/ets/components/ProjectImpactPanel.ets": "809afc4893b9f2c8606cc38e3e2aee0ea0f547063cb53033e851ffd984a76177",
+            "harmonyos/entry/src/main/ets/components/ProjectStatePanel.ets": "4a4bda4843547ab417f986e388b6d52b3e04b074a8b25a46d102d4f435cabb37",
+            "harmonyos/entry/src/main/ets/components/ReminderSettingsView.ets": "88a8574364f17954a7c6cd5ddb093eb9e49e2c3c16627234551a9e5b55d0e748",
+            "harmonyos/entry/src/main/ets/pages/FeatureGuide.ets": "371f50b59860477f103902e0073fb6309dd65c595bf22ac7a9359ca745153bdd",
+            "harmonyos/entry/src/main/ets/pages/Index.ets": "c7b93aa352adaa8bdd9f51230a03eb2b11e12ffd6cf6586324d640e226dcd03b",
+            "harmonyos/entry/src/main/ets/pages/ProjectHome.ets": "dd9bbe483ed7a3b318f219a7210029d430ddfab39e5f3728b1b470372c0f4a77",
+            "tsconfig.json": "af1b4fbd345a0d2b7e23394aca3540b524a3d4826fca6a51169b13b2a325ee4a"
+          }
+        },
+        "D:\\Projects\\hongmen-personal-memory": {
+          "head": "cf1bbb012f07d7fe84143b2fdc4befec54eedf59",
+          "files": {
+            "app/api/me/memory/policy/route.ts": "3e800563504b5b4b8d879271c84ccac25ecadd64fa8a8907f1ef46b54b2c3e03",
+            "components/GlobalWorkspacePage.tsx": "fb561470853675505159bd17030a7c6eea8832062d822647f9b28eb060e371bd",
+            "components/MissionResponsibilityPanel.tsx": "b6edd5a0dc71267319fc2d0fe4dedd168024465a0367db5ad4d4c98840c8a53b",
+            "components/PersonalMemoryManager.tsx": "482b4cf2aac238423c9e0a97796a73881013907cac6ea0619f550543f9fef166",
+            "components/UserNav.tsx": "59c5ea7986f611d070b14b8049d53f91ca837b2c5cd1220c724c4c0384b1f91a",
+            "harmonyos/entry/src/main/ets/pages/Index.ets": "90228805d018e30529c8ba32edda48d36408159ae5ae9461c39ebda4b203659d",
+            "lib/memory/personalInvalidation.ts": "90d3d758d3f2301de31b6affbcb5d26af82c6518c7ac3ad8a7a2c9b3e61bb9d2",
+            "lib/memory/personalMemoryService.ts": "590c034521eb7fa5e8e26b8e73efcaffc4bcb4ca74bc55c46d14e29ceb820ced",
+            "lib/mission/modelProtocol.ts": "468b82fa7c66bc962d03f832550101f8ffeff61c1aa8c09af3ddd126097a0778",
+            "lib/mission/responsibility.ts": "5d9d97e559b290ba98f4ede6d0efafc1211769054f092d36c329afdec2e74b66"
+          }
+        }
+      },
+      "protectionBefore": {
+        "D:\\Projects\\hongmen": {
+          "head": "1ee89f38852afa6a29518bb409da0d9210af2751",
+          "files": {
+            "AGENTS.md": "dbff8a9d83193830b2fd06c5c131b9324c0a8e472be2c8aa2f66deff990e2750",
+            "components/ProjectCard.tsx": "253afb64a75c316c0406e90e22a94a0b0ffd8d7b12591348d7a54dcb3630f363",
+            "components/ProjectHealthCard.tsx": "79b8b332330f2e9c9e9a564df6534859d5d8e5a23d7ffb1f8128f20ba5e716fe",
+            "components/RepositorySources.tsx": null,
+            "docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md": "7328e70a94cbd17f400c23ef418d0a62f396a408ea9a1926c9d1f057f211f631",
+            "docs/UI_UX_HANDOVER_2026-11-01.md": "ed27b171e758cda572d35fddfe02b6510d84693c610637e9dbff4702644bfbbf",
+            "evidence/r4-agent-ux/20261030-ux2/web-correction.png": "f273bc0c2cea85febe8dfbdb8953c875b8963db8c38d37b43a3460ca9f4da657",
+            "evidence/r4-agent-ux/20261030-ux2/web-memory-panel.png": "6decb083f0dc0d1a8da5e9b6a6baaf532bd1e442c868c0a10ccb46ce86e82913",
+            "harmonyos/AppScope/app.json5": "5a8bae4ea88b58de670140f29e52fa50288453ff445861e8d0491d6a4ec8a71e",
+            "harmonyos/build-profile.json5": "442618a372bd9a74d204e7162ffe6844b6fc49dbf4c09b8cc5bc58c6709a1924",
+            "harmonyos/entry/src/main/ets/components/HealthEntryCard.ets": "302e993efb19fd468664d2bc3cc3d7a86458b7a852973a978a4c1b403d86b7ab",
+            "harmonyos/entry/src/main/ets/components/MetricBadge.ets": "c6ab46386e7f3459b3b2350ae6fb7f9ddbbbbb6017d2633cf24dde2a7f85d9d2",
+            "harmonyos/entry/src/main/ets/components/ProjectImpactPanel.ets": "809afc4893b9f2c8606cc38e3e2aee0ea0f547063cb53033e851ffd984a76177",
+            "harmonyos/entry/src/main/ets/components/ProjectStatePanel.ets": "4a4bda4843547ab417f986e388b6d52b3e04b074a8b25a46d102d4f435cabb37",
+            "harmonyos/entry/src/main/ets/components/ReminderSettingsView.ets": "88a8574364f17954a7c6cd5ddb093eb9e49e2c3c16627234551a9e5b55d0e748",
+            "harmonyos/entry/src/main/ets/pages/FeatureGuide.ets": "371f50b59860477f103902e0073fb6309dd65c595bf22ac7a9359ca745153bdd",
+            "harmonyos/entry/src/main/ets/pages/Index.ets": "c7b93aa352adaa8bdd9f51230a03eb2b11e12ffd6cf6586324d640e226dcd03b",
+            "harmonyos/entry/src/main/ets/pages/ProjectHome.ets": "dd9bbe483ed7a3b318f219a7210029d430ddfab39e5f3728b1b470372c0f4a77",
+            "tsconfig.json": "af1b4fbd345a0d2b7e23394aca3540b524a3d4826fca6a51169b13b2a325ee4a"
+          }
+        },
+        "D:\\Projects\\hongmen-personal-memory": {
+          "head": "cf1bbb012f07d7fe84143b2fdc4befec54eedf59",
+          "files": {
+            "app/api/me/memory/policy/route.ts": "3e800563504b5b4b8d879271c84ccac25ecadd64fa8a8907f1ef46b54b2c3e03",
+            "components/GlobalWorkspacePage.tsx": "fb561470853675505159bd17030a7c6eea8832062d822647f9b28eb060e371bd",
+            "components/MissionResponsibilityPanel.tsx": "b6edd5a0dc71267319fc2d0fe4dedd168024465a0367db5ad4d4c98840c8a53b",
+            "components/PersonalMemoryManager.tsx": "482b4cf2aac238423c9e0a97796a73881013907cac6ea0619f550543f9fef166",
+            "components/UserNav.tsx": "59c5ea7986f611d070b14b8049d53f91ca837b2c5cd1220c724c4c0384b1f91a",
+            "harmonyos/entry/src/main/ets/pages/Index.ets": "90228805d018e30529c8ba32edda48d36408159ae5ae9461c39ebda4b203659d",
+            "lib/memory/personalInvalidation.ts": "90d3d758d3f2301de31b6affbcb5d26af82c6518c7ac3ad8a7a2c9b3e61bb9d2",
+            "lib/memory/personalMemoryService.ts": "590c034521eb7fa5e8e26b8e73efcaffc4bcb4ca74bc55c46d14e29ceb820ced",
+            "lib/mission/modelProtocol.ts": "468b82fa7c66bc962d03f832550101f8ffeff61c1aa8c09af3ddd126097a0778",
+            "lib/mission/responsibility.ts": "5d9d97e559b290ba98f4ede6d0efafc1211769054f092d36c329afdec2e74b66"
+          }
+        }
+      },
+      "observedConcurrentChanges": {
+        "D:\\Projects\\hongmen": {
+          "headChanged": false,
+          "dirtyHashChanges": [],
+          "newDirtyPaths": []
+        },
+        "D:\\Projects\\hongmen-personal-memory": {
+          "headChanged": false,
+          "dirtyHashChanges": [],
+          "newDirtyPaths": []
+        }
+      },
+      "businessWritesByThisTask": false,
+      "testsRunByThisTask": false,
+      "paidCallsOrDeploymentOrRealDbMigration": false,
+      "documentsChanged": [
+        "CODE_GAP_MATRIX_2026-11-01.md",
+        "FINAL_VERTICAL_ACCEPTANCE_JOURNEY_2026-11-01.md",
+        "PRIORITY_ROADMAP_2026-11-01.md",
+        "PROJECTMEMO_FINAL_VALUE_TRUST_RESEARCH_2026-11-01.md",
+        "AUDIT_SOURCE_SNAPSHOT_2026-11-01.json"
+      ],
+      "documentHashes": {
+        "CODE_GAP_MATRIX_2026-11-01.md": "e9316f01f117bcad79002bd57a992b746c60bfbb5136241e11f7f603ba24a9ed",
+        "FINAL_VERTICAL_ACCEPTANCE_JOURNEY_2026-11-01.md": "0d5c5cc8567e92ef02db18993a89b58996b376c8a925fcd2a1073ddd19d23bc4",
+        "PRIORITY_ROADMAP_2026-11-01.md": "4f6ed1796edc0a97265ff13d3980c489b18f297ceb1c5024bf44c116cb5326f0",
+        "PROJECTMEMO_FINAL_VALUE_TRUST_RESEARCH_2026-11-01.md": "84e571fcc589d5a70157c2e94b7ba902d3c131f83597421a9f31dd684a68ebda"
+      },
+      "sourcesSha256": {
+        "D:\\Projects\\hongmen\\prisma\\schema.prisma": "82185bbe7130724e2fd74ee34f4ffcea0638d330d9eda16266916f69403a17c3",
+        "D:\\Projects\\hongmen\\lib\\decision\\goalState.ts": "3ad9ba05181068962b8c960db4014c7682c12861c95744fe0255e86ad8aa9407",
+        "D:\\Projects\\hongmen\\lib\\conversation\\entry.ts": "9f928d408f081cd653fab464eb7e26068202e688a4fd325ab9db4e0400d033c5",
+        "D:\\Projects\\hongmen\\lib\\continuity\\handoff.ts": "070aef01deac5b29151e9bc603c3f14a2931ea5bc5d8671abba2ae1324d8937c",
+        "D:\\Projects\\hongmen\\lib\\decision\\questions.ts": "0b87a673e98098605cb364da7854f149e3b002945ededcee24d6e7c96f0e7631",
+        "D:\\Projects\\hongmen\\lib\\decision\\dynamicCandidates.ts": "8355d2a08442325a904cb4c3dddfd6a7aaf2524b83db43c0d5d26d922972e828",
+        "D:\\Projects\\hongmen\\lib\\mission\\runner.ts": "cc77e37caae11ee496ab4b7fe195328767ddad6cc49f828bfdc77286921851dd",
+        "D:\\Projects\\hongmen\\lib\\xiaoyi\\resumeMissionService.ts": "8b738f11e05d965f58a0b2770f8f316f8300a5f619504e9f1f507dcc87ee0124",
+        "D:\\Projects\\hongmen\\playwright.config.ts": "acc4f70e29f57f7f3ce5d77570ca956edc590b853d252dd1cc20829baebfba95",
+        "D:\\Projects\\hongmen\\scripts\\run-e2e.ts": "56071eb8e32c134e47e5b6d61011dfae26dd9cc674857b2d04f81bc27a1a2c0c",
+        "D:\\Projects\\hongmen\\e2e\\focus-agent.spec.ts": "1cffefcd52e988f1ff257b0324c1c98fe60a229c589225ff3f98bcb0867c3b3b",
+        "D:\\Projects\\hongmen-personal-memory\\lib\\memory\\personalInvalidation.ts": "90d3d758d3f2301de31b6affbcb5d26af82c6518c7ac3ad8a7a2c9b3e61bb9d2",
+        "D:\\Projects\\hongmen-personal-memory\\lib\\memory\\personalContext.ts": "ebbea4e251ae84a14847209d362b113155c8a30204bebfa7edf0163204fb46b9",
+        "D:\\Projects\\hongmen-personal-memory\\lib\\mission\\responsibility.ts": "5d9d97e559b290ba98f4ede6d0efafc1211769054f092d36c329afdec2e74b66",
+        "D:\\Projects\\hongmen-personal-memory\\lib\\mission\\modelProtocol.ts": "468b82fa7c66bc962d03f832550101f8ffeff61c1aa8c09af3ddd126097a0778",
+        "D:\\Projects\\hongmen-personal-memory\\tests\\pm4EvolutionResponsibility.test.ts": "f9fe014f2213776e77abe6a0fe573d14a4267588f5e325d93a47f890bc8a6156",
+        "D:\\Projects\\hongmen-personal-memory\\components\\PersonalMemoryManager.tsx": "482b4cf2aac238423c9e0a97796a73881013907cac6ea0619f550543f9fef166",
+        "D:\\Projects\\hongmen-personal-memory\\components\\GlobalWorkspacePage.tsx": "fb561470853675505159bd17030a7c6eea8832062d822647f9b28eb060e371bd",
+        "D:\\Projects\\hongmen-personal-memory\\components\\UserNav.tsx": "59c5ea7986f611d070b14b8049d53f91ca837b2c5cd1220c724c4c0384b1f91a",
+        "D:\\Projects\\hongmen-personal-memory\\harmonyos\\entry\\src\\main\\ets\\pages\\Index.ets": "90228805d018e30529c8ba32edda48d36408159ae5ae9461c39ebda4b203659d",
+        "D:\\Projects\\hongmen-personal-memory\\harmonyos\\entry\\src\\main\\ets\\entryability\\EntryAbility.ets": "e9113b4b878c8fd90f393bc63b03229dbbb2148e529639627b403023849df05b",
+        "D:\\Projects\\hongmen-personal-memory\\evidence\\personal-memory-pm1\\20261101\\full-regression-pm4.log": "c0f805731b64febeba74c765dc0c6d39a429bdda0ac5e33a41f9b5f8258a01f8",
+        "D:\\Projects\\hongmen-personal-memory\\evidence\\personal-memory-pm1\\20261101\\validation.json": "a2b5e5a31fc0195b752818fa9f802c726010b04875aee5eb8dd135ed89b2c703"
+      },
+      "e2eReconciliation": {
+        "source": "D:/Projects/hongmen-ct7-main-integration/test-results/e2e-results.json",
+        "sourceSha256": "93d780cf2b2f88f4a35d00305eae247e92427339d6cc07131a0d2db9542715ab",
+        "stats": {
+          "startTime": "2026-11-01T09:55:32.211Z",
+          "duration": 213077.996,
+          "expected": 33,
+          "skipped": 2,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "byProjectAndStatus": {
+          "setup:expected": 1,
+          "chromium:expected": 32,
+          "chromium:skipped": 2
+        },
+        "skipped": [
+          {
+            "title": "Focus reads a D1/D2 proposal, confirms a directed read and returns its original result",
+            "project": "chromium"
+          },
+          {
+            "title": "F3 follows one original question, reads new evidence, retains unread across reload and stops",
+            "project": "chromium"
+          }
+        ],
+        "businessPassed": 32,
+        "businessSkipped": 2,
+        "setupPassed": 1,
+        "businessTotal": 34,
+        "reportTotal": 35,
+        "newTestRun": false
+      },
+      "pmStatus": {
+        "pm1Commit": "092fc4f",
+        "pm2Commit": "e0407ee",
+        "pm3Commit": "cf1bbb0",
+        "pm4": "Implementation present in dirty worktree at inspected snapshot; user reported complete; independent commit/acceptance not inferred",
+        "latestFullLog": "1447 passed / 2 failed; 186 files passed / 1 failed; EXIT 1 (Poppler/documentReader)",
+        "legacyValidation": "Older per-slice pass claims and targeted parser rerun do not replace latest full log",
+        "pendingRisk": "PM-R01: bounded latest 12 CHAT Run lookup vs in-flight/no-Step dependency and synchronous readSet guards; runtime probe not run"
+      },
+      "gates": {
+        "security": "Existing P0 G10/G12/G13/G15/G21 and original execution invariants retained; open until fixes/proofs",
+        "functional": "G02/G03/G04 retained; PM regression fail unresolved in inspected evidence",
+        "evidence": "Separate first user, real model, simulator, physical device, natural-day, outcome tracks; no new acceptance claims"
+      },
+      "planCoverage": {
+        "enhancements": [
+          "FVT-01",
+          "FVT-02",
+          "FVT-03",
+          "FVT-04",
+          "FVT-05",
+          "FVT-06",
+          "FVT-07",
+          "FVT-08"
+        ],
+        "journeyNegatives": 40,
+        "threeCoreCognitions": [
+          "one current focus",
+          "important change",
+          "ongoing delegation"
+        ],
+        "existingStagesPreserved": true
+      },
+      "documentValidation": {
+        "markdownLocalTargetsAndAnchors": "PASS",
+        "sourceLineBounds": "PASS",
+        "codeFencesAndConflictMarkers": "PASS",
+        "revisedDocumentHashes": "PASS",
+        "existingGapIdsTracked": 21,
+        "enhancementContracts": 8,
+        "negativeJourneyCases": 40,
+        "e2eActualResultsVerified": {
+          "setupPassed": 1,
+          "businessPassed": 32,
+          "businessSkipped": 2,
+          "unexpected": 0,
+          "flaky": 0,
+          "knownExpectedFailureCount": 0
+        },
+        "businessTestsExecutedThisRevision": false
+      }
+    }
+  ]
+}

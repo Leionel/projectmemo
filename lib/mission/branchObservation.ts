@@ -15,7 +15,8 @@ export async function runBranchObservation(lease: Lease, onStep: (id: string) =>
     const m = await fenced(tx, lease), state = record(record(m.planJson).delegation), poll = record(state.poll);
     if (poll.kind !== "BRANCH_HEAD" || typeof poll.cycle !== "string") return null;
     if (!boundedPolicy(m)?.trackBranchHead) throw new AppError("DELEGATION_CHANGED", "分支跟踪许可已变化", 409);
-    const targets = Array.isArray(poll.targets) ? poll.targets.map(record) : [];
+    const allTargets = Array.isArray(poll.targets) ? poll.targets.map(record) : [];
+    const targets=allTargets.filter(t=>t.kind!=="DEPLOYMENT");
     if (!targets.length || targets.length > 3) throw new AppError("DELEGATION_CHANGED", "分支观察范围需要重新核对", 409);
     const steps = await tx.agentMissionStep.findMany({where:{missionId:m.id,planRevision:m.planRevision},orderBy:{ordinal:"asc"}});
     const observed = steps.filter(s => record(s.protocolJson).branchCycle === poll.cycle && s.status === "SUCCEEDED");
@@ -23,7 +24,7 @@ export async function runBranchObservation(lease: Lease, onStep: (id: string) =>
     if (!next) {
       const heads = observed.map(s => record(record(s.resultJson).data));
       const fresh = await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...record(m.planJson),delegation:{...state,
-        poll:{...poll,kind:"CI",targets:heads.map(h=>({connectionId:h.connectionId,sha:h.sha,revision:h.connectionRevision}))}}})}});
+        poll:{...poll,kind:"CI",targets:[...heads.map(h=>({connectionId:h.connectionId,sha:h.sha,revision:h.connectionRevision})),...allTargets.filter(t=>t.kind==="DEPLOYMENT")]}}})}});
       await release(tx,fresh,"READY"); return {done:true} as const;
     }
     const existing = steps.find(s => record(s.protocolJson).branchCycle === poll.cycle && record(s.canonicalInputJson).connectionId === next.connectionId && s.status === "RUNNING");

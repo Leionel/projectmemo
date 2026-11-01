@@ -1482,8 +1482,11 @@ model SourceConnection {
  id String @id @default(cuid())
  projectId String
  ownerUserId String
- repo String
- ref String
+ provider String @default("GITHUB")
+ environmentKey String?
+ deploymentConfigJson Json?
+ repo String?
+ ref String?
  signalKind String @default("COMMITS")
  status String @default("ACTIVE")
  revokedAt DateTime?
@@ -1504,6 +1507,7 @@ model SourceConnection {
  signals ExternalSignal[]
  @@unique([projectId,repo,ref])
  @@index([projectId,status])
+ @@unique([projectId,provider,environmentKey])
 }
 
 model ExternalSignal {

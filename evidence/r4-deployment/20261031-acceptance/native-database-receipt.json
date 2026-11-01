@@ -1,0 +1,45 @@
+{
+  "fixture": "ISOLATED_DATABASE_SYNTHETIC_MODEL_HTTP_REAL_ARKUI",
+  "connection": {
+    "id": "cmvvrla3q0003a48ous19bhfk",
+    "provider": "DEPLOYMENT",
+    "revision": 4,
+    "status": "REVOKED",
+    "revokedAt": "2026-10-31T02:39:35.569+00:00"
+  },
+  "controls": [
+    {
+      "provider": "USER_CONFIRMED_CONNECTION_CONTROL",
+      "kind": "DEPLOYMENT_READ_GRANT"
+    },
+    {
+      "provider": "USER_CONFIRMED_CONNECTION_CONTROL",
+      "kind": "DEPLOYMENT_READ_REVISED"
+    },
+    {
+      "provider": "USER_CONFIRMED_CONNECTION_CONTROL",
+      "kind": "DEPLOYMENT_READ_REVISED"
+    },
+    {
+      "provider": "USER_CONFIRMED_CONNECTION_CONTROL",
+      "kind": "DEPLOYMENT_READ_REVOKED"
+    }
+  ],
+  "conversations": [
+    {
+      "id": "cmvvscno500043s8oeg8026s1",
+      "status": "ACTIVE"
+    }
+  ],
+  "steps": [
+    {
+      "status": "SUCCEEDED"
+    }
+  ],
+  "assertions": {
+    "revoked": true,
+    "revisionAdvanced": true,
+    "originalDiscussionCreated": true,
+    "productionTouched": false
+  }
+}

@@ -13,7 +13,7 @@ import type { ConversationActor, ConversationSource } from "@/lib/types/conversa
 import type { z } from "zod";
 import { readSourceObservation } from "./sourceObservation";
 
-export type MaterialPointer = { projectId: string; sourceId: string; revision: string; title: string; documentCatalog?:import("@/lib/types/document").DocumentCatalog;commitShas?: string[]; ciAccess?: string; repository?: import("@/lib/types/repositoryCi").RepositorySourceMeta };
+export type MaterialPointer = { projectId: string; sourceId: string; revision: string; title: string; deployment?:{connectionId:string;environment:string;expectedRelease:string;logsApproved:boolean}; documentCatalog?:import("@/lib/types/document").DocumentCatalog;commitShas?: string[]; ciAccess?: string; repository?: import("@/lib/types/repositoryCi").RepositorySourceMeta };
 export const workspaceReadTools = ["inspect_project", "search_memory", "read_project_material", "inspect_action"];
 export function experienceSourceRef(s: ConversationSource) {
   return { kind: "SOURCE" as const, id: s.id, projectId: s.projectId, revision: s.revision };
@@ -22,8 +22,15 @@ export async function discoverMaterialPointers(actor: ConversationActor, project
   const pointers: MaterialPointer[] = sources.map(s => ({ projectId: s.projectId, sourceId: s.sourceId, revision: s.revision, title: s.title }));
   for (const projectId of projectIds) {
     await assertProject(actor, projectId);
+    if(isFeatureEnabled("DEPLOYMENT_OBSERVER_ENABLED",false)){
+      const rows=await db.sourceConnection.findMany({where:{projectId,ownerUserId:actor.userId,provider:"DEPLOYMENT",status:"ACTIVE",revokedAt:null,project:{memberships:{some:{userId:actor.userId,role:"OWNER"}}}},take:3});
+      for(const row of rows){
+        const raw=await(await import("@/lib/sensing/deploymentConnections")).deploymentConnection(actor.userId,projectId,row.id).catch(error=>{if(error instanceof AppError&&error.code==="DEPLOYMENT_GRANT_EXPIRED")return null;throw error;});
+        if(raw)pointers.push({projectId,sourceId:"connection:"+row.id,revision:raw.revision,title:raw.config.environment+" · 获准的只读环境",deployment:{connectionId:row.id,environment:raw.config.environment,expectedRelease:raw.config.expectedRelease,logsApproved:Boolean(raw.config.logPath)}});
+      }
+    }
     if(isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false))for(const a of await db.attachment.findMany({where:{projectId,type:"PDF"},orderBy:{createdAt:"desc"},take:8})){const sourceId="attachment:"+a.id,revision=await sourceHash(projectId,sourceId);if(revision)pointers.push({projectId,sourceId,revision,title:a.fileName});}
-    const connections = await db.sourceConnection.findMany({ where: { projectId, ownerUserId: actor.userId, status: "ACTIVE", revokedAt: null, project: { memberships: { some: { userId: actor.userId, role: "OWNER" } } } }, take: 3 });
+    const connections = await db.sourceConnection.findMany({ where: { projectId, ownerUserId: actor.userId, provider:"GITHUB", status: "ACTIVE", revokedAt: null, project: { memberships: { some: { userId: actor.userId, role: "OWNER" } } } }, take: 3 });
     for (const c of connections) {
       const source = await readSourceObservation(actor, projectId, c.id);
       pointers.push({ projectId, sourceId: "repo:" + c.id, revision: source.revision, title: source.ref.title, commitShas: source.signalIds.slice(0, 5), ciAccess: source.access });
@@ -65,6 +72,7 @@ export async function discoverMaterialPointers(actor: ConversationActor, project
 export async function readWorkspaceTool(actor: ConversationActor, raw: z.infer<typeof investigationToolCallSchema>,
   projectIds: string[], pointers: MaterialPointer[], priorSources: ConversationSource[]) {
   const call = investigationToolCallSchema.parse(raw);
+  if(call.tool==="inspect_deployment"||call.tool==="read_deployment_logs")throw new AppError("INVALID_TOOL_ACTOR","环境观察需要原Turn的HTTP账本",409);
   if(call.tool==="inspect_document"||call.tool==="read_document_page"||call.tool==="read_document_section"||call.tool==="read_document_table")throw new AppError("INVALID_TOOL_ACTOR","文档观察需要原 Turn 的读取记录",409);
   if (call.tool === "read_repository_ci" || call.tool === "read_ci_jobs" || call.tool === "read_ci_log") throw new AppError("INVALID_TOOL_ACTOR", "CI 观察需要原 Turn 请求账本", 409);
   if (call.tool === "web_search" || call.tool === "web_fetch" || call.tool === "read_paper_metadata" || call.tool === "browser_read") throw new AppError("INVALID_TOOL_ACTOR", "公开研究需要原会话授权入口", 409);

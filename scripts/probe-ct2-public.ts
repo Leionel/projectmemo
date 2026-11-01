@@ -18,7 +18,7 @@ try{
   const sha=(first.body as Array<{sha:string}>)[0]?.sha;if(first.status!==200||!sha)throw new Error("PUBLIC_COMMIT_NOT_OBSERVED");
   const status=await readRepositoryCi(actor,p.id,c.id,sha,undefined,dispatch);report.statusObservation=status;save();
   const run=status.runs.find(r=>r.conclusion==="failure")??status.runs[0];
-  if(run){const parent={connectionId:c.id,connectionRevision:c.revision,repo:c.repo,sha,observedAt:status.observedAt,kind:"STATUS" as const,runs:status.runs};const jobs=await readRepositoryCiDetail(actor,p.id,parent,{runId:run.id,attempt:run.attempt},undefined,dispatch);report.jobObservation=jobs;save();
+  if(run){const parent={connectionId:c.id,connectionRevision:c.revision,repo:status.repo,sha,observedAt:status.observedAt,kind:"STATUS" as const,runs:status.runs};const jobs=await readRepositoryCiDetail(actor,p.id,parent,{runId:run.id,attempt:run.attempt},undefined,dispatch);report.jobObservation=jobs;save();
     const failed=jobs.repository.jobs?.find(j=>["failure","timed_out","cancelled"].includes(j.conclusion??""));
     if(failed){try{const log=await readRepositoryCiDetail(actor,p.id,jobs.repository,{jobId:failed.id},undefined,dispatch);report.logCoverage=log.coverage;}catch(error){report.errors.push(String((error as {code?:string}).code??"LOG_UNAVAILABLE"));}}
   }

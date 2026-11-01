@@ -12,7 +12,7 @@ export async function readConversationEntry(actor: ConversationActor, entry: Con
   let missionId: string | null = null;
   if (entry.kind === "SOURCE_OBSERVATION") {
     const source = await readSourceObservation(actor, entry.projectId, entry.id, tx);
-    if (entry.revision && entry.revision !== source.revision) throw new AppError("ENTRY_CHANGED", "仓库观察已有修订，请刷新", 409);
+    if (entry.revision && entry.revision !== source.revision) throw new AppError("ENTRY_CHANGED", "来源观察或许可已有修订，请刷新", 409);
     return { ...source, missionId: null };
   } else if (entry.kind === "INTERVENTION") {
     const row = await tx.agentIntervention.findFirst({ where: {

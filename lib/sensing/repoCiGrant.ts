@@ -13,7 +13,7 @@ export async function grantRepositoryCiAccess(userId: string, projectId: string,
   return writeTransaction("repo-ci-grant:" + connectionId, async tx => {
     await tx.user.updateMany({ where: { id: userId }, data: { continuitySeq: { increment: 0 } } });
     if (!await tx.projectMembership.findFirst({ where: { userId, projectId, role: "OWNER" } })) throw new AppError("CONNECTION_NOT_FOUND", "仓库连接不可访问", 404);
-    const c = await tx.sourceConnection.findFirst({ where: { id: connectionId, ownerUserId: userId, projectId } });
+    const c = await tx.sourceConnection.findFirst({ where: { id: connectionId, ownerUserId: userId, projectId, provider:"GITHUB" } });
     if (!c) throw new AppError("CONNECTION_NOT_FOUND", "仓库连接不可访问", 404);
     const receiptId = "repo-ci-grant:" + jsonHash({ userId, requestId: input.requestId });
     const prior = await tx.agentRun.findUnique({ where: { id: receiptId } });

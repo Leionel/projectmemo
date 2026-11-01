@@ -26,6 +26,7 @@ import { resolvePersonalContext } from "@/lib/memory/personalContext";
 import { isLocalModelProvider } from "@/lib/memory/personalContext";
 import { isFeatureEnabled } from "@/lib/config/features";
 import { readConversationRepositoryTool } from "./repositoryTools";
+import { readConversationDeploymentTool } from "./deploymentTools";
 import type { RepositoryCiCall } from "@/lib/types/repositoryCi";
 import { readConversationDocumentTool } from "./documentTools";
 import type { DocumentCall } from "@/lib/types/document";
@@ -183,6 +184,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
   }
   state.pointers = await discoverMaterialPointers(actor, route.projectIds, observations.sources);
   const ciAllowed = isFeatureEnabled("REPO_CI_OBSERVER_ENABLED", false) && state.pointers.some(p => p.ciAccess && p.ciAccess !== "COMMITS");
+  const deploymentAllowed=isFeatureEnabled("DEPLOYMENT_OBSERVER_ENABLED",false)&&state.pointers.some(p=>p.deployment);
   let provider = routed.provider;
   const scopeDirectory = { ...directory, summaries: directory.summaries.filter(p => route.projectIds.includes(p.id)) };
   await mutateTurn(actor, id, turnId, manifest => ({ ...manifest, sourceRevisionReadSet: scopeDirectory.summaries.map(p => ({ projectId: p.id, revision: p.sourceRevision, role: p.scopeRole })) }));
@@ -198,7 +200,7 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
     conversationId: id, query: input.message, remoteProcessing: !isLocalModelProvider(provider), audience: "PRIVATE_CHAT" });
   await mutateTurn(actor, id, turnId, manifest => ({ ...manifest, personalMemoryReadSet: personal.readSet }));
   const calendarAllowed = isFeatureEnabled("CALENDAR_CONNECTIONS_ENABLED", false) && await db.calendarConnection.count({ where: { projectId: { in: route.projectIds }, ownerUserId: actor.userId, status: "ACTIVE", revokedAt: null } }) > 0;
-  const allowedTools = [...(researchAllowed ? [...workspaceReadTools, ...(grant.scope.enabled ? ["web_search",...(grant.scope.academicMetadata&&isFeatureEnabled("ACADEMIC_RESEARCH_ENABLED",false)?["read_paper_metadata"]:[])] : []), "web_fetch", ...(researchAllowed&&browserReadAvailable()?["browser_read"]:[])] : workspaceReadTools), ...(calendarAllowed ? ["calendar_read"] : []), ...(ciAllowed ? ["read_repository_ci", "read_ci_jobs", "read_ci_log"] : []),...(isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false)?["inspect_document","read_document_page","read_document_section","read_document_table"]:[]),...(isFeatureEnabled("EXPERIMENT_OBSERVER_ENABLED",false)?["inspect_experiment_metrics","compare_experiment_metrics"]:[])];
+  const allowedTools = [...(researchAllowed ? [...workspaceReadTools, ...(grant.scope.enabled ? ["web_search",...(grant.scope.academicMetadata&&isFeatureEnabled("ACADEMIC_RESEARCH_ENABLED",false)?["read_paper_metadata"]:[])] : []), "web_fetch", ...(researchAllowed&&browserReadAvailable()?["browser_read"]:[])] : workspaceReadTools), ...(calendarAllowed ? ["calendar_read"] : []), ...(deploymentAllowed ? ["inspect_deployment",...(state.pointers.some(p=>p.deployment?.logsApproved)?["read_deployment_logs"]:[])] : []), ...(ciAllowed ? ["read_repository_ci", "read_ci_jobs", "read_ci_log"] : []),...(isFeatureEnabled("DOCUMENT_DEEP_READ_ENABLED",false)?["inspect_document","read_document_page","read_document_section","read_document_table"]:[]),...(isFeatureEnabled("EXPERIMENT_OBSERVER_ENABLED",false)?["inspect_experiment_metrics","compare_experiment_metrics"]:[])];
   // CT-8：Conversation/Focus 用同一条件匹配器，但数据/划分等缺失保持 UNKNOWN，不冒用 Mission 条件。
   const experienceProjects = await db.project.findMany({ where: { id: { in: route.projectIds } }, select: { id: true, goal: true, scenario: true } });
   const experienceGroups = await Promise.all(route.projectIds.map(async projectId => {
@@ -298,11 +300,13 @@ async function executeInvestigation(actor: ConversationActor, id: string, turnId
       const web = decision.call.tool === "web_search" || decision.call.tool === "web_fetch" || decision.call.tool === "read_paper_metadata" || decision.call.tool === "browser_read";
       const calendar = decision.call.tool === "calendar_read";
       const ci = ["read_repository_ci", "read_ci_jobs", "read_ci_log"].includes(decision.call.tool);
+      const deploy=decision.call.tool==="inspect_deployment"||decision.call.tool==="read_deployment_logs";
+      if(deploy&&!deploymentAllowed)throw new AppError("DEPLOYMENT_NOT_APPROVED","本轮没有可用的环境读取许可",409);
       const doc=["inspect_document","read_document_page","read_document_section","read_document_table"].includes(decision.call.tool);
       if (ci && !ciAllowed) throw new AppError("CI_NOT_AUTHORIZED", "本轮没有获准的 CI 连接", 409);
       if (calendar && !calendarAllowed) throw new AppError("CALENDAR_NOT_AUTHORIZED", "本轮没有已连接的日历", 409);
       if (web && !researchAllowed) throw new AppError("RESEARCH_NOT_ALLOWED", "本轮未授权联网调查", 409);
-      const result = await turnOperation<{data:unknown;sources:ConversationSource[];coverage:Record<string,unknown>;discovered:MaterialPointer[]}>(actor, id, turnId, "read-" + step.seq, "READ", decision.call, () => doc?readConversationDocumentTool(actor,id,turnId,decision.call as DocumentCall,state.pointers):ci
+      const result = await turnOperation<{data:unknown;sources:ConversationSource[];coverage:Record<string,unknown>;discovered:MaterialPointer[]}>(actor, id, turnId, "read-" + step.seq, "READ", decision.call, () => deploy?readConversationDeploymentTool(actor,id,turnId,decision.call as import("@/lib/types/deployment").DeploymentCall,state.pointers):doc?readConversationDocumentTool(actor,id,turnId,decision.call as DocumentCall,state.pointers):ci
         ? readConversationRepositoryTool(actor, id, turnId, decision.call as RepositoryCiCall, state.pointers, observations.sources)
         : calendar
         ? readConversationCalendarTool(actor, id, turnId, "calendar-" + step.seq, decision.call)

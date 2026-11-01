@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-ct7-main-integration
+
+
+ Test Files  181 passed (181)
+      Tests  1411 passed (1411)
+   Start at  17:35:56
+   Duration  752.77s (transform 18.22s, setup 0ms, import 217.38s, tests 436.70s, environment 39.95s)
+

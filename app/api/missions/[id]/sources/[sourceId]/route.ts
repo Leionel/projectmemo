@@ -18,6 +18,12 @@ export async function GET(request:Request,c:{params:Promise<{id:string;sourceId:
   return Response.json({source:{id:p.sourceId,sourceId:p.sourceId,projectId:m.projectId,revision:observation.revision,title:observation.title,
     excerpt:String(payload.excerpt??""),observedAt:observation.observedAt.toISOString(),temporalState:"UNKNOWN",knowledgeClass:"EXTERNAL_REFERENCE",readScope:"STRUCTURED",calendar}});
  }
+ if(p.sourceId.startsWith("deploy:")){
+  const m=await ownedMission(user.id,p.id),observations=await import("@/lib/sensing/deploymentObservations"),found=await observations.findDeploymentObservation(m.projectId,p.sourceId,undefined,user.id);
+  if(!found?.deployment||found.deployment.missionId!==m.id)throw new AppError("SOURCE_NOT_FOUND","观察不属于原委托",404);
+  await observations.validateDeploymentObservation(user.id,m.projectId,p.sourceId,found.hash??found.revision);await assertSourceUse(user.id,m.projectId,p.sourceId,undefined,{missionId:m.id});
+  return Response.json({source:{...found,sourceId:p.sourceId,projectId:m.projectId,title:found.deployment.environment+" 环境观察",excerpt:found.text??found.excerpt??""}},{headers:{"cache-control":"no-store"}});
+ }
  if(!p.sourceId.startsWith("doc:")){
   const mission=await ownedMission(user.id,p.id),raw=await readSource(user.id,p.id,p.sourceId);await assertSourceUse(user.id,mission.projectId,p.sourceId,undefined,{missionId:p.id});
   const excerpt=raw.excerptJson as {text?:string;browser?:unknown};

@@ -13,7 +13,7 @@ import { assertInvestigationDelegation } from "./investigationDelegation";
 
 type Operation = { state: "DISPATCH_COMMITTED" | "SUCCEEDED" | "FAILED" | "UNKNOWN"; units: number; response?: CiHttpResult };
 /** Per-HTTP records live in the original step; request accounting lives in the original Mission. */
-export function missionCiDispatch(lease: Lease,namespace:"ciOperations"|"academicOperations"="ciOperations"): CiDispatch {
+export function missionCiDispatch(lease: Lease,namespace:"ciOperations"|"academicOperations"|"deploymentOperations"="ciOperations"): CiDispatch {
   return async (url, units, run) => {
     const key = jsonHash({ url, units }); let replay: Operation | undefined, stepId = "";
     await db.$transaction(async tx => {
@@ -39,7 +39,7 @@ export function missionCiDispatch(lease: Lease,namespace:"ciOperations"|"academi
     } catch (error) {
       await db.$transaction(async tx => { await fenced(tx, lease, false); const step = await tx.agentMissionStep.findUniqueOrThrow({ where: { id: stepId } }), p = record(step.protocolJson);
         await tx.agentMissionStep.update({ where: { id: stepId }, data: { protocolJson: json({ ...p, [namespace]: { ...record(p[namespace]), [key]: { state: error instanceof AppError ? "FAILED" : "UNKNOWN", units } } }) } }); }).catch(() => undefined);
-      if(namespace==="academicOperations"&&!(error instanceof AppError))throw new AppError("EXTERNAL_RESULT_UNKNOWN","论文元数据请求结果未知，保留原请求额度，不会换步骤重发",409);
+      if(namespace!=="ciOperations"&&!(error instanceof AppError))throw new AppError("EXTERNAL_RESULT_UNKNOWN","外部观察请求结果未知，保留原请求额度，不会换步骤重发",409);
       throw error;
     }
   };

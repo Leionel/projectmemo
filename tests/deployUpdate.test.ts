@@ -101,16 +101,18 @@ describe("ECS update script controlled rollback (no ECS, sudo, database or servi
     expect(run.stdout).not.toContain("\nunsafe");
   });
   it.each([
-    { ram: 3072, swap: 0, heap: "1536" },
-    { ram: 1800, swap: 0, heap: "1416" },
-    { ram: 1300, swap: 4096, heap: "1280" },
+    { ram: 4096, swap: 0, heap: "3072" },
+    { ram: 1800, swap: 0, heap: "" },
+    { ram: 1300, swap: 4096, heap: "3072" },
+    { ram: 1505, swap: 6001, heap: "3072" },
+    { ram: 500, swap: 3072, heap: "" },
     { ram: 1300, swap: 1024, heap: "" },
-  ])("sizes the heap from post-stop memory before building: avail=$ram swapfree=$swap -> $heap", ({ ram, swap, heap }) => {
+  ])("preserves the heap with sufficient RAM/swap and rejects insufficient resources: avail=$ram swapfree=$swap -> $heap", ({ ram, swap, heap }) => {
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), "pm-deploy-size-")); temporary.push(directory);
     const info = path.join(directory, "meminfo");
     fs.writeFileSync(info, `MemAvailable: ${ram * 1024} kB\nSwapFree: ${swap * 1024} kB\n`);
     const run = spawnSync(bash, ["--noprofile", "--norc", "-c", `${functions}
-BUILD_HEAP_MB=1536
+BUILD_HEAP_MB=3072
 size_build_memory "$MEMORY_INFO" && printf 'heap=%s\\n' "$BUILD_HEAP_MB"`], {
       encoding: "utf8", env: { ...process.env, MEMORY_INFO: info.replaceAll("\\", "/") },
     });

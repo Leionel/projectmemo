@@ -20,7 +20,7 @@ GENERATED_MOVED=0
 BUILD_SWITCHED=0
 as_app() { sudo -H -u projectmemo env PATH="$NODE_BIN:/usr/local/bin:/usr/bin:/bin" "$@"; }
 check_build_memory() {
-  BUILD_HEAP_MB=${PROJECTMEMO_BUILD_HEAP_MB:-1536}
+  BUILD_HEAP_MB=${PROJECTMEMO_BUILD_HEAP_MB:-3072}
   if [[ ! "$BUILD_HEAP_MB" =~ ^[1-9][0-9]{3,4}$ ]] || (( BUILD_HEAP_MB < 1024 || BUILD_HEAP_MB > 16384 )); then
     echo 'PROJECTMEMO_BUILD_HEAP_MB 必须为1024至16384的整数（MiB）'; return 1
   fi
@@ -28,36 +28,32 @@ check_build_memory() {
   available_kb=$(awk '/^MemAvailable:/{m=$2} /^SwapFree:/{s=$2} END {if (m=="") exit 1; printf "%.0f", m+s}' "$1") || { echo '无法读取可用内存，更新停止'; return 1; }
   available_mb=$(( available_kb / 1024 ))
   required_mb=$(( BUILD_HEAP_MB + 1024 ))
-  printf '构建堆上限：%s MiB；当前可用内存与空闲swap：%s MiB；要求至少：%s MiB；停服后会按实际可用内存收紧上限。\n' "$BUILD_HEAP_MB" "$available_mb" "$required_mb"
+  printf '构建堆上限：%s MiB；当前可用内存与空闲swap：%s MiB；要求至少：%s MiB；停服后再次检查，不自动降低堆上限。\n' "$BUILD_HEAP_MB" "$available_mb" "$required_mb"
   if (( available_mb < required_mb )); then
     echo '构建内存余量不足；尚未停服。请核对free -h、增加内存或swap后再更新。'; return 1
   fi
 }
 size_build_memory() {
-  # 该检查只把堆上限压到停服后可用内存可容纳的范围（384 MiB 预留 swc 等原生内存与内核占用），
-  # 构建期间不再并行 TypeScript 子进程。2026-10-24 P3-A 代码量增长后独立 tsc 实测需要约
-  # 1280 MiB 堆上限（1024 会 Ineffective mark-compacts），低于 1280 时依赖空闲swap兜底。
-  local available_kb swapfree_kb available_mb swapfree_mb derived_mb
+  # 2026-11-01 ECS 的独立 tsc 在 1280 MiB 堆上限下 OOM。
+  # swap 可承载构建进程内存，但不能扩大 V8 堆上限，因此不能按物理内存缩小堆。
+  # 保留调用方配置；资源不足则恢复旧版本，不绕过类型检查。
+  local available_kb swapfree_kb available_mb swapfree_mb required_mb
   available_kb=$(awk '/^MemAvailable:/{print $2; exit}' "$1")
   swapfree_kb=$(awk '/^SwapFree:/{print $2; exit}' "$1")
   if [[ -z "$available_kb" || -z "$swapfree_kb" ]]; then echo '无法读取停服后可用内存，更新停止'; return 1; fi
   available_mb=$(( available_kb / 1024 ))
   swapfree_mb=$(( swapfree_kb / 1024 ))
-  derived_mb=$(( available_mb - 384 ))
-  if (( derived_mb < 1280 )); then
-    if (( swapfree_mb >= 3072 )); then
-      derived_mb=1280
-      printf '停服后可用内存仅 %s MiB，依赖 %s MiB 空闲swap兜底。\n' "$available_mb" "$swapfree_mb"
-    else
-      echo "停服后可用内存 ${available_mb} MiB 不足以支撑 1280 MiB 构建堆（独立类型检查实测下限）且空闲swap不足；更新停止，旧版本即将恢复。"; return 1
+  required_mb=$(( BUILD_HEAP_MB + 1024 ))
+  if (( available_mb + swapfree_mb < required_mb )); then
+    echo "停服后可用内存与空闲swap不足 ${required_mb} MiB；更新停止，旧版本即将恢复。"; return 1
+  fi
+  if (( available_mb < required_mb )); then
+    if (( swapfree_mb < 3072 )); then
+      echo '物理内存不足且空闲swap不足3072 MiB；更新停止，旧版本即将恢复。'; return 1
     fi
+    printf '停服后可用内存 %s MiB，依赖 %s MiB 空闲swap；构建可能较慢。\n' "$available_mb" "$swapfree_mb"
   fi
-  if (( derived_mb < BUILD_HEAP_MB )); then
-    printf '停服后可用内存 %s MiB；构建堆上限由 %s 调整为 %s MiB。\n' "$available_mb" "$BUILD_HEAP_MB" "$derived_mb"
-    BUILD_HEAP_MB=$derived_mb
-  else
-    printf '停服后可用内存 %s MiB；构建堆上限保持 %s MiB。\n' "$available_mb" "$BUILD_HEAP_MB"
-  fi
+  printf '构建堆上限保持 %s MiB。\n' "$BUILD_HEAP_MB"
 }
 health() {
   local release=$1 response

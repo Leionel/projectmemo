@@ -77,7 +77,7 @@ UPDATE
 
 脚本先检查版本祖先关系、工作区、服务与内存，再停止 Web 和 Worker 并备份。随后切换目标提交、安装依赖、验证 SQLite 原生模块、生成 Prisma Client，执行 `next typegen` 和独立 `tsc --noEmit`，再用单 worker 构建到独立目录。构建通过后才对 `file:/opt/projectmemo/data/projectmemo.db` 执行增量迁移与完整性检查，切换构建、设置 `PROJECTMEMO_RELEASE`、启动 Web 并核对健康版本，最后启动 Worker。
 
-默认构建堆上限为 1536 MiB。停服前要求 `MemAvailable + SwapFree` 至少为上限加 1024 MiB，停服后按实际内存收紧；独立类型检查所需下限为 1280 MiB，低内存时要求至少 3 GiB 空闲 swap 兜底。脚本不会自动增加 swap。需要调整上限时，在 `bash "$UPDATE_SCRIPT" "$TARGET"` 前加 `PROJECTMEMO_BUILD_HEAP_MB=3072`，先核对 `free -h`。
+默认构建堆上限为 3072 MiB。停服前后都要求 `MemAvailable + SwapFree` 至少为上限加 1024 MiB；物理内存不足该余量时，还要求至少 3 GiB 空闲 swap。脚本保留配置的堆上限，不再按物理内存自动调低：2026-11-01 ECS 在 1280 MiB 上限下发生了独立 TypeScript 检查 OOM，即使当时还有约 6 GiB 空闲 swap。swap 不会扩大 V8 堆上限，低内存构建也可能较慢。脚本不会自动增加 swap。需要调整上限时，在 `bash "$UPDATE_SCRIPT" "$TARGET"` 前加 `PROJECTMEMO_BUILD_HEAP_MB=4096`，先核对 `free -h`。
 
 备份位于 `/opt/projectmemo/backups/web-update-<UTC时间>/`：环境文件、前一提交、数据库与附件备份，以及被替换的依赖、Prisma Client 和构建。停服后失败会尝试恢复旧代码、依赖、构建和环境，保留数据库已执行的增量迁移；查看脚本最后输出确认恢复是否成功。不要用 `db:setup`、seed 或 reset 修复生产库。
 

@@ -64,7 +64,7 @@ async function loadCardById(projectId: string, cardId: string): Promise<SavedCap
   return { ...card, relations: [] as CardLink[], processing: (card.capture?.processingJson ?? unknownCaptureProcessing) as CaptureProcessing } as SavedCapture;
 }
 
-async function runPostProcessing(saved: SavedCapture): Promise<boolean> {
+async function runPostProcessing(saved: SavedCapture, allowCloud = true): Promise<boolean> {
   let pending = false;
   try {
     await vectorStore.index({
@@ -77,7 +77,7 @@ async function runPostProcessing(saved: SavedCapture): Promise<boolean> {
     console.warn("Capture saved; vector index refresh is pending", error);
   }
 
-  if (isFeatureEnabled("SEMANTIC_MEMORY_ENABLED", false)) {
+  if (allowCloud && isFeatureEnabled("SEMANTIC_MEMORY_ENABLED", false)) {
     try {
       await ensureCardEmbedding({
         id: saved.id,
@@ -108,16 +108,16 @@ async function refreshStateAfterCapture(projectId: string): Promise<boolean> {
  * 兼容旧调用方的记录流程：没有 requestId 时保持原有返回类型和写入行为。
  * 需要重试/恢复语义的 API 调用请使用 processCaptureWithRequest。
  */
-export async function processCapture(projectId: string, rawText: string, sourceType?: string | null) {
+export async function processCapture(projectId: string, rawText: string, sourceType?: string | null, options: { allowCloud?: boolean } = {}) {
   const project = await requireProject(projectId);
   const existingCards = await loadRecentCards(projectId);
   const historyKeywords = [...new Set(existingCards.flatMap((card) => card.keywords))].slice(0, 30);
 
-  const execResult = await structureCaptureWithMeta({ project, rawText, historyKeywords });
+  const execResult = await structureCaptureWithMeta({ project, rawText, historyKeywords, allowCloud: options.allowCloud });
   const draft = execResult.data;
   const links = await vectorStore.search(draft, existingCards, 3);
   const saved = await saveCaptureResult({ projectId, rawText, sourceType, draft, links, processing: captureProcessing(execResult) });
-  await runPostProcessing(saved);
+  await runPostProcessing(saved, options.allowCloud);
   await refreshStateAfterCapture(projectId);
 
   await saveAgentRun({
@@ -148,6 +148,8 @@ export async function processCapture(projectId: string, rawText: string, sourceT
 interface CaptureRequestOptions {
   requestId: string;
   provider?: string;
+  allowCloud?: boolean;
+  beforeSave?: (tx: Prisma.TransactionClient) => Promise<void>;
 }
 
 async function waitForExistingCaptureRun(projectId: string, runId: string, requestHash: string) {
@@ -231,13 +233,14 @@ export async function processCaptureWithRequest(
   try {
     const existingCards = await loadRecentCards(projectId);
     const historyKeywords = [...new Set(existingCards.flatMap((card) => card.keywords))].slice(0, 30);
-    const execResult = await structureCaptureWithMeta({ project, rawText, historyKeywords });
+    const execResult = await structureCaptureWithMeta({ project, rawText, historyKeywords, allowCloud: options.allowCloud });
     const draft = execResult.data;
     const links = await vectorStore.search(draft, existingCards, 3);
 
     let saved: SavedCapture;
     try {
       saved = await db.$transaction(async (tx) => {
+        await options.beforeSave?.(tx);
         const card = await saveCaptureResult({
           projectId,
           rawText,
@@ -296,7 +299,7 @@ export async function processCaptureWithRequest(
       throw error;
     }
 
-    const postProcessingPending = await runPostProcessing(saved);
+    const postProcessingPending = await runPostProcessing(saved, options.allowCloud);
     const stateRefreshPending = await refreshStateAfterCapture(projectId);
     if (postProcessingPending) {
       try {

@@ -27,7 +27,8 @@ describe("S1-C 结果分类投影", () => {
       { id: "o1", revision: 1, claimChecksJson: [
         { status: "ENTAILS" }, { status: "CONTRADICTS" }, { status: "NOT_ENOUGH_INFORMATION" }, { status: "NOT_CHECKED" }] },
     ] });
-    expect(progress.counts.independentlySupported.claims).toBe(1);
+    expect(progress.counts.independentlySupported.claims).toBe(0);
+    expect(progress.counts.textuallySupported.claims).toBe(1);
     expect(progress.counts.counterExamples.claims).toBe(1);
     expect(progress.counts.unknown.claims).toBe(2);
   });

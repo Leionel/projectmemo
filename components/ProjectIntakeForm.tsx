@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { bindCaptureDraftOwner, captureGeneration, captureOwner, onCaptureOwnerChange } from "@/lib/client/captureDrafts";
 import { ArrowRight, FileText, LoaderCircle, Paperclip, ShieldCheck } from "lucide-react";
 import { scenarioOptions } from "@/lib/types";
 import type { IntakePreview } from "@/lib/intake/contracts";
@@ -18,7 +19,7 @@ type DraftSummary = { id: string; status: string; revision: number; understandin
 
 const fieldClass = "focus-ring editorial-input mt-2 w-full px-4 py-3 placeholder:text-[var(--placeholder)]";
 
-async function postJson(url: string, body?: unknown, headers: Record<string, string> = {}) {
+async function sendJson(url: string, body?: unknown, headers: Record<string, string> = {}) {
   const response = await fetch(url, { method: "POST",
     headers: { "Content-Type": "application/json", ...headers },
     body: body === undefined ? undefined : JSON.stringify(body) });
@@ -28,13 +29,13 @@ async function postJson(url: string, body?: unknown, headers: Record<string, str
 }
 
 function statusText(preview: IntakePreview) {
-  if (preview.understandingState === "READY") return "Agent 已读懂，请整体核对";
+  if (preview.understandingState === "READY") return "已形成理解，请整体核对";
   if (preview.understandingState === "FAILED") return preview.model.reason === "UNSUPPORTED_QUOTE" ? "引文没通过原文核对，需要重新生成" : "这次没能形成理解，材料仍然保留";
   if (preview.understandingState === "MATERIAL_ONLY") return "文件还没有可读文本，只能先看原文";
   return "材料已保存，等你让它读懂";
 }
 
-export function ProjectIntakeForm({ initialDraftId, openDrafts }: { initialDraftId?: string; openDrafts: DraftSummary[] }) {
+export function ProjectIntakeForm({ ownerId, initialDraftId, openDrafts }: { ownerId: string; initialDraftId?: string; openDrafts: DraftSummary[] }) {
   const [draftId, setDraftId] = useState(initialDraftId ?? "");
   const [material, setMaterial] = useState("");
   const [preview, setPreview] = useState<IntakePreview | null>(null);
@@ -46,6 +47,55 @@ export function ProjectIntakeForm({ initialDraftId, openDrafts }: { initialDraft
   const [notice, setNotice] = useState("");
   const [sync, setSync] = useState<{ projectId: string; pending: number; materials: Array<{ materialId: string; state: string; error?: string }> } | null>(null);
   const [projectId, setProjectId] = useState("");
+  const [authRevision, setAuthRevision] = useState(0);
+  const mounted = useRef(true);
+  const identities = useRef(new Map<string, string>());
+  const acceptedDirty = useRef(false);
+  function editAccepted(next: typeof accepted) { acceptedDirty.current = true; setAccepted(next); }
+  function requestId(key: string) {
+    if (!identities.current.has(key)) identities.current.set(key, crypto.randomUUID());
+    return identities.current.get(key)!;
+  }
+  function assertCurrent(epoch: number) {
+    if (!mounted.current || epoch !== captureGeneration() || captureOwner() && captureOwner() !== ownerId)
+      throw new Error("登录状态已变化，请重新进入原任务");
+  }
+  useEffect(() => {
+    mounted.current = true;
+    if (!captureOwner()) bindCaptureDraftOwner(ownerId);
+    const off = onCaptureOwnerChange(() => {
+      if (!captureOwner() || captureOwner() !== ownerId) {
+        setMaterial(""); setCorrection(""); setPreview(null); setDraftId(""); setProjectId(""); setSync(null);
+        setConsent(false);
+        setAccepted({ title: "", description: "", goal: "", scenario: "COURSE_DESIGN", deadline: "" });
+        identities.current.clear();
+        acceptedDirty.current = false;
+      } else setAuthRevision(n => n+1);
+    });
+    return () => { mounted.current = false; off(); };
+  }, [ownerId]);
+  useEffect(() => {
+    if (!initialDraftId) return;
+    const controller = new AbortController(), epoch = captureGeneration();
+    void fetch(`/api/intake/${initialDraftId}`, { cache: "no-store", signal: controller.signal,
+      headers: { "X-Expected-Owner-Id": ownerId } }).then(async response => {
+      const data = await response.json();
+      if (controller.signal.aborted || epoch !== captureGeneration() || captureOwner() && captureOwner() !== ownerId) return;
+      if (!response.ok) throw new Error(data?.error?.message ?? "无法读取预览");
+      const value = data.preview as IntakePreview, fields = value.accepted ?? value.suggested;
+      setDraftId(initialDraftId); setPreview(value); setProjectId(data.confirmedProjectId ?? "");
+      setConsent(data.processingConsent === true);
+      if (fields && !acceptedDirty.current) setAccepted({ ...fields, deadline: fields.deadline ?? "" });
+    }).catch(error => { if (!controller.signal.aborted) setError(error.message); });
+    return () => controller.abort();
+  }, [initialDraftId, ownerId, authRevision]);
+  async function postJson(url: string, body?: unknown, headers: Record<string, string> = {}) {
+    const epoch = captureGeneration();
+    assertCurrent(epoch);
+    const result = await sendJson(url, body, { "X-Expected-Owner-Id": ownerId, ...headers });
+    assertCurrent(epoch);
+    return result;
+  }
 
   const canUnderstand = useMemo(() => Boolean(draftId) && (preview?.materials.length ?? 0) > 0, [draftId, preview]);
   const pendingCount = preview?.materials.filter(m => m.sync.state !== "SYNCED").length ?? 0;
@@ -53,24 +103,28 @@ export function ProjectIntakeForm({ initialDraftId, openDrafts }: { initialDraft
   function adopt(previewValue: IntakePreview) {
     setPreview(previewValue);
     const next = previewValue.accepted ?? previewValue.suggested;
-    if (next) setAccepted({ title: next.title, description: next.description, goal: previewValue.suggested && previewValue.accepted ? previewValue.accepted.goal : next.goal,
+    if (next && !acceptedDirty.current) setAccepted({ title: next.title, description: next.description, goal: previewValue.suggested && previewValue.accepted ? previewValue.accepted.goal : next.goal,
       scenario: next.scenario, deadline: next.deadline ?? "" });
-    if (previewValue.correction.appliedObjective) setAccepted(current => ({ ...current, goal: current.goal }));
   }
 
   async function ensureDraft() {
     if (draftId) return draftId;
-    const created = await postJson("/api/intake", { requestId: `intake-${crypto.randomUUID()}` });
+    const created = await postJson("/api/intake", { requestId: requestId("draft") });
     setDraftId(created.draftId);
     window.history.replaceState(null, "", `/projects/new?draft=${created.draftId}`);
     return created.draftId as string;
   }
 
   async function reload(id: string) {
-    const data = await (await fetch(`/api/intake/${id}`, { cache: "no-store" })).json();
+    if (id !== draftId) acceptedDirty.current = false;
+    const epoch = captureGeneration(); assertCurrent(epoch);
+    const data = await (await fetch(`/api/intake/${id}`, { cache: "no-store", headers: { "X-Expected-Owner-Id": ownerId } })).json();
+    assertCurrent(epoch);
     if (data?.error) throw new Error(data.error.message ?? "无法读取这份材料");
     adopt(data.preview as IntakePreview);
-    return data as { preview: IntakePreview; confirmedProjectId: string | null };
+    setConsent(data.processingConsent === true);
+    if (data.confirmedProjectId) setProjectId(data.confirmedProjectId);
+    return data as { preview: IntakePreview; confirmedProjectId: string | null; processingConsent: boolean };
   }
 
   async function addMaterial() {
@@ -78,8 +132,9 @@ export function ProjectIntakeForm({ initialDraftId, openDrafts }: { initialDraft
     setBusy("material"); setError(""); setNotice("");
     try {
       const id = await ensureDraft();
-      await postJson(`/api/intake/${id}/materials`, { requestId: `material-${crypto.randomUUID()}`, text: material.trim() });
-      setMaterial("");
+      const text = material.trim();
+      await postJson(`/api/intake/${id}/materials`, { requestId: requestId(`text:${id}:${text}`), text });
+      setMaterial(current => current.trim() === text ? "" : current);
       await reload(id);
       setNotice("材料已加入。它现在只是预览材料，不是项目目标或授权。");
     } catch (reason) { setError(reason instanceof Error ? reason.message : "材料保存失败"); }
@@ -92,9 +147,11 @@ export function ProjectIntakeForm({ initialDraftId, openDrafts }: { initialDraft
       const id = await ensureDraft();
       const form = new FormData();
       form.set("file", file);
-      form.set("requestId", `file-${crypto.randomUUID()}`);
-      const response = await fetch(`/api/intake/${id}/materials/file`, { method: "POST", body: form });
+      form.set("requestId", requestId(`file:${id}:${file.name}:${file.size}:${file.lastModified}`));
+      const epoch = captureGeneration(); assertCurrent(epoch);
+      const response = await fetch(`/api/intake/${id}/materials/file`, { method: "POST", body: form, headers: { "X-Expected-Owner-Id": ownerId } });
       const data = await response.json().catch(() => null);
+      assertCurrent(epoch);
       if (!response.ok) throw new Error(data?.error?.message ?? "文件保存失败");
       await reload(id);
       setNotice(data?.extractionStatus === "NEEDS_OCR"
@@ -106,20 +163,24 @@ export function ProjectIntakeForm({ initialDraftId, openDrafts }: { initialDraft
 
   /** 云处理同意是独立动作：勾选才允许图片识别和生成理解，且只覆盖这份预览。 */
   async function grantConsent(next: boolean) {
-    if (!next) { setConsent(false); return; }
     // 先反映用户的选择，再把同意持久化；失败时回退，不让按钮停在假状态。
-    setConsent(true); setError("");
+    setConsent(next); setError("");
     try {
       const id = await ensureDraft();
-      await postJson(`/api/intake/${id}/consent`);
-    } catch (reason) { setConsent(false); setError(reason instanceof Error ? reason.message : "同意记录失败"); }
+      await postJson(`/api/intake/${id}/consent`, { consent: next });
+      if (!next) await reload(id);
+    } catch (reason) {
+      setConsent(false);
+      if (draftId) await reload(draftId).catch(() => undefined);
+      setError(reason instanceof Error ? reason.message : "处理许可状态未确认，请刷新核对");
+    }
   }
 
   async function understand() {
     if (!draftId) return;
     setBusy("understand"); setError(""); setNotice("");
     try {
-      await postJson(`/api/intake/${draftId}/understand`, { requestId: `understand-${crypto.randomUUID()}`, processingConsent: true });
+      await postJson(`/api/intake/${draftId}/understand`, { requestId: requestId(`understand:${draftId}:${preview?.previewHash ?? ""}`), processingConsent: true });
       const data = await reload(draftId);
       adopt(data.preview as IntakePreview);
     } catch (reason) { setError(reason instanceof Error ? reason.message : "这次没能形成理解"); await reload(draftId).catch(() => undefined); }
@@ -144,13 +205,13 @@ export function ProjectIntakeForm({ initialDraftId, openDrafts }: { initialDraft
   async function confirm() {
     if (!draftId || !preview) return;
     setBusy("confirm"); setError(""); setNotice(""); setSync(null);
-    const requestId = `confirm-${crypto.randomUUID()}`;
+    const confirmationId = requestId(`confirm:${draftId}:${preview.revision}:${preview.previewHash}:${JSON.stringify(accepted)}`);
     try {
-      const payload = { requestId, expectedRevision: preview.revision, previewHash: preview.previewHash,
+      const payload = { requestId: confirmationId, expectedRevision: preview.revision, previewHash: preview.previewHash,
         accepted: { title: accepted.title.trim(), description: accepted.description.trim(), goal: accepted.goal.trim(),
           scenario: accepted.scenario as typeof scenarioOptions[number]["value"],
           ...(accepted.deadline ? { deadline: accepted.deadline } : {}) } };
-      const data = await postJson(`/api/intake/${draftId}/confirm`, payload, { "Idempotency-Key": requestId });
+      const data = await postJson(`/api/intake/${draftId}/confirm`, payload, { "Idempotency-Key": confirmationId });
       setProjectId(data.projectId as string);
       // 建项与材料同步是两个阶段；同步失败不改变项目身份。
       const syncData = await postJson(`/api/intake/${draftId}/sync`);
@@ -207,7 +268,7 @@ export function ProjectIntakeForm({ initialDraftId, openDrafts }: { initialDraft
         {preview.materials.map(item => <li key={item.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-[var(--rule)] px-3 py-2 text-sm">
           <span>{item.label}{item.type ? ` · ${item.type}` : ""}</span>
           <span className="text-xs text-[var(--muted)]">
-            {item.extractionStatus === "NEEDS_OCR" ? "没有可读文本" : item.extractionStatus === "FAILED" ? "抽取失败" : "已保存"}
+            {item.extractionStatus === "PENDING" ? "原件已保存，解析中" : item.extractionStatus === "NEEDS_OCR" ? "没有可读文本" : item.extractionStatus === "FAILED" ? "抽取失败" : "已保存"}
             {item.sync.state === "SYNCED" ? " · 已进入项目" : ""}
           </span>
         </li>)}
@@ -305,18 +366,18 @@ export function ProjectIntakeForm({ initialDraftId, openDrafts }: { initialDraft
       <p className="mt-3 text-sm leading-6 text-[var(--ink-soft)]">下面是写进项目的字段。改过再确认也来得及，确认前不会创建项目。</p>
       <div className="mt-5 grid gap-5">
         <div><label htmlFor="intake-title" className="text-sm font-bold">项目名称</label>
-          <input id="intake-title" value={accepted.title} onChange={event => setAccepted({ ...accepted, title: event.target.value })} className={fieldClass} /></div>
+          <input id="intake-title" value={accepted.title} onChange={event => editAccepted({ ...accepted, title: event.target.value })} className={fieldClass} /></div>
         <div><label htmlFor="intake-description" className="text-sm font-bold">项目描述</label>
-          <textarea id="intake-description" value={accepted.description} onChange={event => setAccepted({ ...accepted, description: event.target.value })} rows={3} className={fieldClass} /></div>
+          <textarea id="intake-description" value={accepted.description} onChange={event => editAccepted({ ...accepted, description: event.target.value })} rows={3} className={fieldClass} /></div>
         <div><label htmlFor="intake-goal" className="text-sm font-bold">项目目标</label>
-          <textarea id="intake-goal" value={accepted.goal} onChange={event => setAccepted({ ...accepted, goal: event.target.value })} rows={3} className={fieldClass} /></div>
+          <textarea id="intake-goal" value={accepted.goal} onChange={event => editAccepted({ ...accepted, goal: event.target.value })} rows={3} className={fieldClass} /></div>
         <div className="grid gap-5 sm:grid-cols-2">
           <div><label htmlFor="intake-scenario" className="text-sm font-bold">场景</label>
-            <select id="intake-scenario" value={accepted.scenario} onChange={event => setAccepted({ ...accepted, scenario: event.target.value })} className={fieldClass}>
+            <select id="intake-scenario" value={accepted.scenario} onChange={event => editAccepted({ ...accepted, scenario: event.target.value })} className={fieldClass}>
               {scenarioOptions.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}
             </select></div>
           <div><label htmlFor="intake-deadline" className="text-sm font-bold">截止日期<span className="font-normal text-[var(--muted)]">（可选）</span></label>
-            <input id="intake-deadline" type="date" value={accepted.deadline} onChange={event => setAccepted({ ...accepted, deadline: event.target.value })} className={fieldClass} /></div>
+            <input id="intake-deadline" type="date" value={accepted.deadline} onChange={event => editAccepted({ ...accepted, deadline: event.target.value })} className={fieldClass} /></div>
         </div>
       </div>
       <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">

@@ -59,6 +59,38 @@ test("S1-A 从材料建立项目：理解状态如实、整体纠正生效、确
   await expect(page.getByText("S1 材料理解验收").first()).toBeVisible();
 });
 
+test("S1 修复：URL 恢复原草稿，确认回包丢失后原身份重试", async ({ page }) => {
+  const token = (await page.context().cookies()).find(c => c.name === "pm_session")!.value;
+  const headers = { Authorization: `Bearer ${token}` };
+  const draft = await page.request.post("/api/intake", { headers, data: { requestId: `review-${crypto.randomUUID()}` } });
+  expect(draft.ok()).toBe(true);
+  const { draftId } = await draft.json();
+  expect((await page.request.post(`/api/intake/${draftId}/materials`, { headers, data: { requestId: "m", text: "这是独立的合成重试验收材料，只核对一次建项与原回执。" } })).ok()).toBe(true);
+  await page.goto(`/projects/new?draft=${draftId}`);
+  const region = page.getByRole("region", { name: "确认项目" });
+  await expect(region).toBeVisible();
+  const title = `审查重放-${Date.now()}`;
+  await region.getByLabel("项目名称").fill(title);
+  await region.getByLabel("项目描述").fill("独立隔离测试，仅验证已提交请求重试行为。");
+  await region.getByLabel("项目目标").fill("保留一次建项结果与原始材料");
+  const identities: string[] = [];
+  await page.route("**/api/intake/*/confirm", async route => {
+    identities.push(route.request().postDataJSON().requestId);
+    const response = await route.fetch();
+    expect(response.ok()).toBe(true);
+    if (identities.length === 1) await route.abort("failed");
+    else await route.fulfill({ response });
+  });
+  const button = region.getByRole("button", { name: "确认理解，建立项目" });
+  await button.click(); await expect(button).toBeEnabled();
+  expect(identities).toHaveLength(1);
+  await button.click();
+  await expect(page.getByText("项目已建立，材料已同步 1/1 份。", { exact: false })).toBeVisible();
+  expect(identities).toHaveLength(2); expect(identities[0]).toBe(identities[1]);
+  const projects = await page.request.get("/api/projects", { headers });
+  expect((await projects.json()).projects.filter((p: { title: string }) => p.title === title)).toHaveLength(1);
+});
+
 
 
 

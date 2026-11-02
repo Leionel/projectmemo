@@ -23,7 +23,7 @@ export default async function NewProjectPage({ searchParams }: { searchParams: P
     <Link href="/projects" className="focus-ring inline-flex items-center gap-2 rounded-lg text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--navy)]"><ArrowLeft size={16} /> 返回项目列表</Link>
     <h1 className="mt-8 text-3xl font-black tracking-tight sm:text-4xl">从材料开始</h1>
     <p className="mt-3 leading-7 text-[var(--ink-soft)]">先放真实材料，核对 Agent 的理解，再建立项目。目标可以在这里改。</p>
-    <ProjectIntakeForm initialDraftId={draft} openDrafts={drafts.map(item => ({ ...item, expiresAt: item.expiresAt.toISOString() }))} />
+    <ProjectIntakeForm key={user.id} ownerId={user.id} initialDraftId={draft} openDrafts={drafts.map(item => ({ ...item, expiresAt: item.expiresAt.toISOString() }))} />
     <details className="mt-10 rounded-lg border border-[var(--rule)] px-5 py-4">
       <summary className="focus-ring cursor-pointer text-sm font-semibold text-[var(--ink-soft)]">已经有明确目标，直接填写</summary>
       <NewProjectForm />

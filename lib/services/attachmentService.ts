@@ -164,7 +164,9 @@ export function inferAndValidateFileType(fileName: string, mimeType: string, buf
   return "IMAGE";
 }
 
-export async function processAttachmentUpload(input: UploadAttachmentInput, dependencies: { extractPdf?: typeof extractPdfText } = {}) {
+export async function processAttachmentUpload(input: UploadAttachmentInput, dependencies: { extractPdf?: typeof extractPdfText;
+  beforeWrite?: (tx: import("@/lib/generated/prisma/client").Prisma.TransactionClient) => Promise<void>;
+  allowCloud?: boolean; extractedText?: string | null } = {}) {
   const { projectId, fileName, mimeType, buffer } = input;
   if (!isFeatureEnabled("PROJECT_INBOX_ENABLED", true)) {
     throw new AppError("PROJECT_INBOX_DISABLED", "项目附件入口当前已关闭", 503);
@@ -195,6 +197,9 @@ export async function processAttachmentUpload(input: UploadAttachmentInput, depe
   const prepared = await db.$transaction(async tx => {
     const locked = await tx.project.updateMany({ where: { id: projectId, deletionRequestedAt: null }, data: { contextRevision: { increment: 0 } } });
     if (!locked.count) throw new AppError("PROJECT_NOT_FOUND", "项目已停用，未保存新附件", 404);
+    await dependencies.beforeWrite?.(tx);
+    const duplicate = await tx.attachment.findFirst({ where: { projectId, sha256 } });
+    if (duplicate) return { stored: null, attachment: duplicate };
     const stored = await saveFileToStorage(projectId, fileName, buffer);
     try {
       const attachment = await tx.attachment.create({ data: { projectId, type: fileType, storageKey: stored.storageKey,
@@ -202,6 +207,7 @@ export async function processAttachmentUpload(input: UploadAttachmentInput, depe
       return { stored, attachment };
     } catch (error) { await deleteAttachmentFile(stored.storageKey); throw error; }
   });
+  if (!prepared.stored) return { attachment: prepared.attachment, isDuplicate: true, card: null };
   const stored = prepared.stored;
 
   // 4. 提取文本内容
@@ -210,11 +216,13 @@ export async function processAttachmentUpload(input: UploadAttachmentInput, depe
   let extractionError: string | null = null;
 
   try {
-    if (fileType === "PDF") {
+    if (dependencies.extractedText !== undefined) {
+      extractedText = dependencies.extractedText ?? "";
+    } else if (fileType === "PDF") {
       extractedText = await (dependencies.extractPdf ?? extractPdfText)(buffer) ?? "";
     } else if(fileType==="CSV"||fileType==="JSON"){extractedText=new TextDecoder("utf-8",{fatal:true}).decode(buffer);
     } else {
-      extractedText = await extractImageText(safeMimeType, buffer, () => reserveCloudCall(projectId)) ?? "";
+      extractedText = dependencies.allowCloud === false ? "" : await extractImageText(safeMimeType, buffer, () => reserveCloudCall(projectId)) ?? "";
     }
     if (!extractedText) {
       extractionStatus = "NEEDS_OCR";
@@ -264,7 +272,7 @@ export async function processAttachmentUpload(input: UploadAttachmentInput, depe
   if (extractedText && extractionStatus === "SUCCESS" && fileType!=="CSV" && fileType!=="JSON") {
     try {
       const sourceType = fileType === "IMAGE" ? "图片附件" : fileType === "PDF" ? "PDF文档" : "文件附件";
-      card = await processCapture(projectId, `【附件导入：${fileName}】\n${extractedText}`, sourceType);
+      card = await processCapture(projectId, `【附件导入：${fileName}】\n${extractedText}`, sourceType, { allowCloud: dependencies.allowCloud });
 
       // 更新卡片关联 attachmentId
       await db.knowledgeCard.update({

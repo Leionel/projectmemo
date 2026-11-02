@@ -11,11 +11,12 @@ export interface StructureCaptureInput {
   rawText: string;
   historyKeywords: string[];
   preferredType?: KnowledgeTypeValue;
+  allowCloud?: boolean;
 }
 
 export async function structureCaptureWithMeta(input: StructureCaptureInput): Promise<AgentExecutionResult<CardDraft>> {
   const startTime = Date.now();
-  const isLlmMode = process.env.LLM_MODE === "openai-compatible" && Boolean(process.env.LLM_API_KEY);
+  const isLlmMode = input.allowCloud !== false && process.env.LLM_MODE === "openai-compatible" && Boolean(process.env.LLM_API_KEY);
   const chatDefaults = getChatProviderDefaults();
 
   if (isLlmMode) {

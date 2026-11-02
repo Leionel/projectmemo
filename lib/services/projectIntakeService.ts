@@ -23,6 +23,8 @@ import {
 import { extractImageText, extractPdfText, inferAndValidateFileType, processAttachmentUpload } from "./attachmentService";
 import { processCaptureWithRequest } from "./captureService";
 import { createOwnedProjectInTx } from "@/lib/repositories/projects";
+import { createConversationInTx } from "@/lib/conversation/service";
+import { admitDirectiveInTx, effectiveContinuity } from "@/lib/continuity/directiveService";
 
 /**
  * 项目前材料 → 可纠正理解 → 确认建项 → 材料同步。
@@ -85,6 +87,14 @@ async function withDraftLock<T>(actor: ConversationActor, draftId: string, run: 
 
 function nextRevision(draft: { revision: number }) { return draft.revision + 1; }
 
+async function publishUnderstanding(actor: ConversationActor, draftId: string, revision: number, data: Prisma.ProjectIntakeDraftUpdateInput, advance = false) {
+  return withDraftLock(actor, draftId, async (tx, current) => {
+    assertOpen(current);
+    if (current.revision !== revision) throw new AppError("INTAKE_CHANGED", "材料或用户要求已变化，未发布旧模型结果", 409);
+    await tx.projectIntakeDraft.update({ where: { id: draftId }, data: { ...data, ...(advance ? { revision: nextRevision(current) } : {}) } });
+  });
+}
+
 export async function addTextMaterial(actor: ConversationActor, draftId: string, raw: unknown) {
   const input = textMaterialSchema.parse(raw);
   return withDraftLock(actor, draftId, async (tx, draft) => {
@@ -104,72 +114,67 @@ export async function addTextMaterial(actor: ConversationActor, draftId: string,
     const revision = nextRevision(draft);
     await tx.projectIntakeDraft.update({ where: { id: draft.id }, data: { revision, status: "DRAFT",
       understandingState: "NONE", understandingJson: Prisma.DbNull, understandingHash: null,
-      userRevisionJson: json({}), userRevisionHash: null, acceptedJson: Prisma.DbNull } });
+      acceptedJson: Prisma.DbNull } });
     return { materialId: material.id, revision, replayed: false };
   });
 }
 
 /** 图片抽取会用视觉模型：项目前同样必须已有处理同意，并按当前账号计量。 */
 export async function addFileMaterial(actor: ConversationActor, draftId: string,
-  file: { fileName: string; mimeType: string; buffer: Buffer }, meta: { requestId: string }) {
-  if (!meta.requestId.trim()) throw new AppError("INVALID_REQUEST_ID", "缺少材料请求身份", 422);
-  if (file.buffer.length === 0) throw new AppError("ATTACHMENT_INVALID", "文件为空", 400);
-  if (file.buffer.length > MAX_FILE_BYTES) throw new AppError("ATTACHMENT_TOO_LARGE", "附件不能超过 20MB", 400);
+  file: { fileName: string; mimeType: string; buffer: Buffer }, meta: { requestId: string },
+  dependencies: { extractPdf?: typeof extractPdfText } = {}) {
+  if (!meta.requestId.trim() || meta.requestId.length > 128) throw new AppError("INVALID_REQUEST_ID", "缺少或过长的材料请求身份", 422);
+  if (!file.buffer.length || file.buffer.length > MAX_FILE_BYTES) throw new AppError("ATTACHMENT_INVALID", "文件为空或超过 20MB", 400);
   const type = inferAndValidateFileType(file.fileName, file.mimeType, file.buffer);
-  if (type === "CSV" || type === "JSON") throw new AppError("INTAKE_FORMAT_UNSUPPORTED", "项目前材料暂支持文本、PDF 和图片；表格请在项目内作为指标资料上传", 422);
-
-  const draft = await loadDraft(actor, draftId);
-  assertOpen(draft);
-  if (type === "IMAGE" && record(draft.processingJson).consent !== true)
-    throw new AppError("INTAKE_CONSENT_REQUIRED", "图片需要云模型识别；请先同意把材料交给云模型处理", 403);
-
+  if (type === "CSV" || type === "JSON") throw new AppError("INTAKE_FORMAT_UNSUPPORTED", "项目前材料暂支持文本、PDF 和图片", 422);
   const hash = jsonHash({ name: file.fileName, sha: computeFileSha256(file.buffer) });
-  const previous = await db.projectIntakeMaterial.findUnique({ where: { draftId_requestId: { draftId: draft.id, requestId: meta.requestId } } });
-  if (previous) {
-    if (previous.requestHash !== hash) throw new AppError("REQUEST_ID_REUSED", "这次材料请求已用于另一份文件", 409);
-    return { materialId: previous.id, revision: draft.revision, replayed: true };
-  }
-
-  // 临时原件只进草稿命名空间，不进项目附件目录；到期由原 Worker 清理。
-  const stored = await saveFileToStorage(`intake-${draft.id}`, file.fileName, file.buffer);
-  let extracted = ""; let status = "SUCCESS"; let error: string | null = null;
-  try {
-    if (type === "PDF") extracted = await extractPdfText(file.buffer) ?? "";
-    else extracted = await extractImageText(file.mimeType, file.buffer, () => reserveIntakeCloudCall({
-      userId: actor.userId, sessionId: actor.sessionId, draftId: draft.id, revision: draft.revision,
-      requestHash: `intake:vision:${meta.requestId}` })) ?? "";
-    if (!extracted) { status = "NEEDS_OCR"; error = type === "PDF" ? "PDF 没有可靠可抽取文本，请提供文本或可识别版本" : "图片需要配置视觉模型后才能识别"; }
-  } catch (e) {
-    status = "FAILED"; error = e instanceof AppError ? e.message : "抽取失败";
-  }
-
-  return withDraftLock(actor, draft.id, async (tx, current) => {
-    assertOpen(current);
-    const count = await tx.projectIntakeMaterial.count({ where: { draftId: current.id } });
-    if (count >= INTAKE_MATERIAL_LIMIT) {
-      await deleteAttachmentFile(stored.storageKey).catch(() => undefined);
-      throw new AppError("INTAKE_MATERIAL_LIMIT", `一份预览最多 ${INTAKE_MATERIAL_LIMIT} 份材料，请先整理`, 422);
+  // 在抽取/云调用前持久登记；撤回、清理和重复请求都能看到同一身份。
+  const prepared = await withDraftLock(actor, draftId, async (tx, draft) => {
+    assertOpen(draft);
+    const existing = await tx.projectIntakeMaterial.findUnique({ where: { draftId_requestId: { draftId, requestId: meta.requestId } } });
+    if (existing) {
+      if (existing.requestHash !== hash) throw new AppError("REQUEST_ID_REUSED", "请求已用于另一份文件", 409);
+      return { material: existing, revision: draft.revision, replayed: true };
     }
-    const material = await tx.projectIntakeMaterial.create({ data: { draftId: current.id, ownerUserId: actor.userId, kind: "FILE",
-      ordinal: count + 1, requestId: meta.requestId, requestHash: hash, fileName: file.fileName.slice(0, 200),
-      mimeType: file.mimeType.slice(0, 120) || "application/octet-stream", type, size: stored.size, storageKey: stored.storageKey,
-      sha256: stored.sha256, rawText: extracted || null, extractionStatus: status, extractionError: error,
-      contentHash: jsonHash({ sha: stored.sha256, text: extracted }) } });
+    if (type === "IMAGE" && record(draft.processingJson).consent !== true) throw new AppError("INTAKE_CONSENT_REQUIRED", "图片识别需要云处理同意", 403);
+    const count = await tx.projectIntakeMaterial.count({ where: { draftId } });
+    if (count >= INTAKE_MATERIAL_LIMIT) throw new AppError("INTAKE_MATERIAL_LIMIT", "材料数量已达上限", 422);
+    const stored = await saveFileToStorage(`intake-${draftId}`, file.fileName, file.buffer);
+    const material = await tx.projectIntakeMaterial.create({ data: { draftId, ownerUserId: actor.userId, kind: "FILE", ordinal: count+1,
+      requestId: meta.requestId, requestHash: hash, fileName: file.fileName.slice(0,200), mimeType: file.mimeType.slice(0,120), type,
+      size: stored.size, storageKey: stored.storageKey, sha256: stored.sha256, extractionStatus: "PENDING", contentHash: jsonHash({ sha: stored.sha256, text: "" }) } });
+    const revision = nextRevision(draft);
+    await tx.projectIntakeDraft.update({ where: { id: draftId }, data: { revision, status: "DRAFT", understandingState: "NONE",
+      understandingJson: Prisma.DbNull, understandingHash: null, acceptedJson: Prisma.DbNull } });
+    return { material, revision, replayed: false };
+  });
+  if (prepared.replayed) return { materialId: prepared.material.id, revision: prepared.revision, replayed: true, extractionStatus: prepared.material.extractionStatus };
+  let extracted = "", status = "SUCCESS", error: string | null = null;
+  try {
+    extracted = type === "PDF" ? await (dependencies.extractPdf ?? extractPdfText)(file.buffer) ?? ""
+      : await extractImageText(file.mimeType, file.buffer, () => reserveIntakeCloudCall({ userId: actor.userId, sessionId: actor.sessionId,
+          draftId, revision: prepared.revision, requestHash: `intake:vision:${meta.requestId}` })) ?? "";
+    if (!extracted) { status = "NEEDS_OCR"; error = "原件已保存，但目前没有可靠的可读文本"; }
+  } catch (e) { status = "FAILED"; error = e instanceof AppError ? e.message : "抽取失败"; }
+  return withDraftLock(actor, draftId, async (tx, current) => {
+    assertOpen(current);
     const revision = nextRevision(current);
-    await tx.projectIntakeDraft.update({ where: { id: current.id }, data: { revision, status: "DRAFT",
-      understandingState: "NONE", understandingJson: Prisma.DbNull, understandingHash: null,
-      userRevisionJson: json({}), userRevisionHash: null, acceptedJson: Prisma.DbNull } });
-    return { materialId: material.id, revision, replayed: false, extractionStatus: status };
+    await tx.projectIntakeMaterial.update({ where: { id: prepared.material.id }, data: { rawText: extracted || null,
+      extractionStatus: status, extractionError: error, revision: { increment: 1 }, contentHash: jsonHash({ sha: prepared.material.sha256, text: extracted }) } });
+    await tx.projectIntakeDraft.update({ where: { id: draftId }, data: { revision, status: "DRAFT", understandingState: "NONE",
+      understandingJson: Prisma.DbNull, understandingHash: null, acceptedJson: Prisma.DbNull } });
+    return { materialId: prepared.material.id, revision, replayed: false, extractionStatus: status };
   });
 }
 
-export async function recordProcessingConsent(actor: ConversationActor, draftId: string) {
+export async function recordProcessingConsent(actor: ConversationActor, draftId: string, consent = true) {
   return withDraftLock(actor, draftId, async (tx, draft) => {
     assertOpen(draft);
     const processing = record(draft.processingJson);
     await tx.projectIntakeDraft.update({ where: { id: draft.id }, data: { processingJson: json({ ...processing,
-      consent: true, consentedAt: processing.consentedAt ?? new Date().toISOString(), consentScope: "INTAKE_PREVIEW_REMOTE_UNDERSTANDING" }) } });
-    return { consent: true as const };
+      consent, consentedAt: consent ? processing.consentedAt ?? new Date().toISOString() : null, consentScope: "INTAKE_PREVIEW_REMOTE_UNDERSTANDING" }),
+      ...(!consent ? { revision: nextRevision(draft) } : {}) } });
+    return { consent };
   });
 }
 
@@ -199,22 +204,27 @@ function quoteIsVerbatim(quote: string, material: { rawText: string | null }) {
 export async function understandIntake(actor: ConversationActor, draftId: string, raw: unknown,
   dependencies: { runModel?: (messages: ReturnType<typeof buildPromptMessages>) => Promise<AgentExecutionResult<string>> } = {}) {
   const input = understandSchema.parse(raw);
+  await assertSession(actor);
   const draft = await loadDraft(actor, draftId);
   assertOpen(draft);
   if (record(draft.processingJson).consent !== true)
     throw new AppError("INTAKE_CONSENT_REQUIRED", "需要先同意把材料交给云模型处理", 403);
   const materials = await db.projectIntakeMaterial.findMany({ where: { draftId: draft.id }, orderBy: { ordinal: "asc" } });
   if (!materials.length) throw new AppError("INTAKE_MATERIALS_REQUIRED", "请先加入至少一份材料", 422);
-  if (draft.understandingState === "READY" && draft.understandingJson) return readIntake(actor, draft.id);
+  const requestHash = jsonHash({ draftId: draft.id, requestId: input.requestId });
+  const dispatches = record(draft.processingJson).dispatches;
+  if (Array.isArray(dispatches) && dispatches.some(d => record(d).requestHash === requestHash)) {
+    if (draft.understandingState === "READY" && record(draft.previewJson).requestHash === requestHash) return readIntake(actor, draft.id);
+    throw new AppError("CALL_ALREADY_RESERVED", "原理解请求已经派发，请核对原结果，未知请求不重复发送", 409);
+  }
 
   const usable = materials.filter(m => (m.rawText ?? "").trim().length > 0);
   if (!usable.length) {
-    await db.projectIntakeDraft.update({ where: { id: draft.id }, data: { understandingState: "MATERIAL_ONLY", status: "DRAFT",
-      previewJson: json({ note: "文件尚无可读文本，保持原文状态" }) } });
+    await publishUnderstanding(actor, draft.id, draft.revision, { understandingState: "MATERIAL_ONLY", status: "DRAFT",
+      previewJson: json({ note: "文件尚无可读文本，保持原文状态" }) });
     return readIntake(actor, draft.id);
   }
 
-  const requestHash = jsonHash({ draftId: draft.id, revision: draft.revision, requestId: input.requestId });
   // 先看资格，再预占：没有配置或没有额度时不应该先扣一次额度。
   // 注入模型替身时跳过（测试夹具不是真实云端资格）。
   if (!dependencies.runModel) {
@@ -226,9 +236,16 @@ export async function understandIntake(actor: ConversationActor, draftId: string
   let result: AgentExecutionResult<string> | null = null;
   let understanding: IntakeUnderstanding;
   try {
-    await reserveIntakeCloudCall({ userId: actor.userId, sessionId: actor.sessionId, draftId: draft.id,
+    // 实际 provider 适配器负责紧邻 HTTP 派发的唯一预占；注入替身也走同一守卫。
+    if (dependencies.runModel) await reserveIntakeCloudCall({ userId: actor.userId, sessionId: actor.sessionId, draftId: draft.id,
       revision: draft.revision, requestHash });
-    const messages = buildPromptMessages(intakeUnderstandingV1, { draftId: draft.id, materials: materialTextFor(draft.id, usable) });
+    const controls = record(draft.userRevisionJson);
+    const admitted = Array.isArray(controls.admittedDirectives) ? controls.admittedDirectives.map(record)
+      .filter(d => !d.validUntil || Date.parse(String(d.validUntil)) > Date.now()) : [];
+    const candidates = Array.isArray(controls.candidates) ? controls.candidates.map(record) : [];
+    const messages = buildPromptMessages(intakeUnderstandingV1, { draftId: draft.id, materials: materialTextFor(draft.id, usable),
+      userReview: [...admitted.map(d => ({ quote: String(d.quote), kind: "ADMITTED_GUIDANCE" as const })),
+        ...candidates.map(d => ({ quote: String(d.quote), kind: "INTERPRETATION_CANDIDATE" as const }))] });
     result = await (dependencies.runModel ?? ((prompt: ReturnType<typeof buildPromptMessages>) =>
       chatWithLLMWithMeta(prompt, undefined, undefined, undefined,
         { outputTokens: intakeUnderstandingV1.maxOutputTokens, jsonOutput: true },
@@ -236,11 +253,11 @@ export async function understandIntake(actor: ConversationActor, draftId: string
     understanding = understandingSchema.parse(JSON.parse(result.data));
   } catch (error) {
     const code = error instanceof AppError ? error.code : "MODEL_OUTPUT_INVALID";
-    await settleIntakeCloudCall({ draftId: draft.id, requestHash, state: code === "CALL_ALREADY_RESERVED" ? "UNKNOWN" : "FAILED",
-      usage: undefined, provider: result?.provider ?? null }).catch(() => undefined);
-    await db.projectIntakeDraft.update({ where: { id: draft.id }, data: { understandingState: "FAILED", status: "DRAFT",
+    if (code !== "CALL_ALREADY_RESERVED") await settleIntakeCloudCall({ draftId: draft.id, requestHash, state: result ? "SETTLED" : "UNKNOWN",
+      usage: result?.usage, provider: result?.provider ?? null }).catch(() => undefined);
+    if (code !== "CALL_ALREADY_RESERVED") await publishUnderstanding(actor, draft.id, draft.revision, { understandingState: "FAILED", status: "DRAFT",
       previewJson: json({ failureCode: code, failureAt: new Date().toISOString(),
-        note: "这一版没有形成模型理解；原件仍是用户材料，不是项目事实" }) } }).catch(() => undefined);
+        note: "这一版没有形成模型理解；原件仍是用户材料，不是项目事实" }) }).catch(() => undefined);
     throw error;
   }
   await settleIntakeCloudCall({ draftId: draft.id, requestHash, state: "SETTLED",
@@ -251,15 +268,16 @@ export async function understandIntake(actor: ConversationActor, draftId: string
   for (const quote of understanding.quotes) {
     const material = byId.get(quote.materialId);
     if (!material || !quoteIsVerbatim(quote.quote, material)) {
-      await db.projectIntakeDraft.update({ where: { id: draft.id }, data: { understandingState: "FAILED", status: "DRAFT",
+      await publishUnderstanding(actor, draft.id, draft.revision, { understandingState: "FAILED", status: "DRAFT",
         previewJson: json({ failureCode: "UNSUPPORTED_QUOTE", failureAt: new Date().toISOString(),
-          note: "模型引用的原文摘录未通过核对，这一版没有保存；材料本身未变" }) } }).catch(() => undefined);
+          note: "模型引用的原文摘录未通过核对，这一版没有保存；材料本身未变" }) }).catch(() => undefined);
       throw new AppError("UNSUPPORTED_QUOTE", "模型引用的原文摘录未通过核对，这一版没有保存", 409);
     }
   }
-  await db.projectIntakeDraft.update({ where: { id: draft.id }, data: {
+  await publishUnderstanding(actor, draft.id, draft.revision, {
     understandingJson: json(understanding), understandingHash: jsonHash(understanding),
-    understandingState: "READY", status: "PREVIEW_READY", understoodAt: new Date() } });
+    previewJson: json({ requestHash, provider: result.provider, usageUnknown: result.usageUnknown ?? (result.usage?.inputTokens == null || result.usage?.outputTokens == null) }),
+    understandingState: "READY", status: "PREVIEW_READY", understoodAt: new Date() }, true);
   await db.agentRun.create({ data: { provider: result.provider, runType: "ACTION", status: "SUCCESS",
     externalRequestId: `intake-understanding:${draft.id}:${draft.revision}:${input.requestId}`.slice(0, 180),
     trace: json({ purpose: "INTAKE_UNDERSTANDING", draftId: draft.id, revision: draft.revision,
@@ -280,6 +298,7 @@ export async function reviseIntake(actor: ConversationActor, draftId: string, ra
     const admission = admitDirective({ commandId: input.requestId, expectedSeq: 0, operation: "SET",
       scope: intakeScope(draft.id), quote: input.text, admission: "LITERAL", timezone: INTAKE_SCOPE_TIMEZONE });
     const previous = record(draft.userRevisionJson);
+    let admittedDirectives = Array.isArray(previous.admittedDirectives) ? previous.admittedDirectives.map(record) : [];
     const candidates = Array.isArray(previous.candidates) ? previous.candidates as Array<Record<string, unknown>> : [];
     let appliedObjective = typeof previous.appliedObjective === "string" ? previous.appliedObjective : null;
     let constraints = Array.isArray(previous.constraints) ? previous.constraints as string[] : [];
@@ -300,8 +319,13 @@ export async function reviseIntake(actor: ConversationActor, draftId: string, ra
       candidates.push({ quote: input.text, interpretation: input.text,
         reason: admission.reason, status: "INTERPRETATION_CANDIDATE", at: new Date().toISOString() });
     }
+    if (admission.status === "DIRECT_APPLIED" && ["WORKING_OBJECTIVE", "CONSTRAINT"].includes(admission.kind ?? "")) {
+      admittedDirectives = admittedDirectives.filter(d => admission.kind === "WORKING_OBJECTIVE" ? d.kind !== "WORKING_OBJECTIVE" : d.quote !== input.text);
+      admittedDirectives.push({ quote: input.text, kind: admission.kind, validUntil: admission.until ?? null,
+        constraints: admission.constraints ?? [], admittedAt: new Date().toISOString(), commandId: input.requestId });
+    }
     const revisionJson = { appliedObjective, constraints, until, candidates: candidates.slice(-8), clarify,
-      admittedAt: new Date().toISOString(), admissionStatus: admission.status, admissionReason: admission.reason };
+      admittedDirectives, admittedAt: new Date().toISOString(), admissionStatus: admission.status, admissionReason: admission.reason };
     const revision = nextRevision(draft);
     await tx.projectIntakeDraft.update({ where: { id: draft.id }, data: { revision, userRevisionJson: json(revisionJson),
       userRevisionHash: jsonHash(revisionJson), status: draft.understandingState === "READY" ? "PREVIEW_READY" : draft.status } });
@@ -316,7 +340,7 @@ export async function acceptIntakeFields(actor: ConversationActor, draftId: stri
   return withDraftLock(actor, draftId, async (tx, draft) => {
     assertOpen(draft);
     if (draft.revision !== parsed.expectedRevision) throw new AppError("INTAKE_CHANGED", "预览已变化，请按当前版本重新核对", 409);
-    await tx.projectIntakeDraft.update({ where: { id: draft.id }, data: { acceptedJson: json(parsed.accepted) } });
+    await tx.projectIntakeDraft.update({ where: { id: draft.id }, data: { acceptedJson: json(parsed.accepted), revision: nextRevision(draft) } });
     return { accepted: parsed.accepted, preview: await buildPreviewFrom(draft.id, tx) };
   });
 }
@@ -327,9 +351,15 @@ async function buildPreviewFrom(draftId: string, tx: Tx = db): Promise<IntakePre
   const understanding = draft.understandingJson ? understandingSchema.safeParse(draft.understandingJson) : null;
   const ready = draft.understandingState === "READY" && understanding?.success === true;
   const revision = record(draft.userRevisionJson);
+  const admitted = Array.isArray(revision.admittedDirectives) ? revision.admittedDirectives.map(record) : null;
+  const active = admitted?.filter(d => !d.validUntil || Date.parse(String(d.validUntil)) > Date.now());
+  const activeObjective = active?.filter(d => d.kind === "WORKING_OBJECTIVE").at(-1);
+  const activeConstraints = active?.flatMap(d => d.kind === "CONSTRAINT" ? [String(d.quote)] : Array.isArray(d.constraints) ? d.constraints.map(String) : []);
+  const correctionActive = typeof revision.until !== "string" || Date.parse(revision.until) > Date.now();
   const accepted = draft.acceptedJson ? { ...record(draft.acceptedJson) } as unknown as IntakeAcceptedFields : null;
   const understandingHash = typeof draft.understandingHash === "string" ? draft.understandingHash : null;
-  const userRevisionHash = typeof draft.userRevisionHash === "string" ? draft.userRevisionHash : null;
+  const userRevisionHash = typeof draft.userRevisionHash === "string" ? jsonHash({ hash: draft.userRevisionHash,
+    effective: admitted ? admitted.map(d => ({ commandId: d.commandId, active: !d.validUntil || Date.parse(String(d.validUntil)) > Date.now() })) : correctionActive }) : null;
   const acceptedHash = accepted ? acceptedHashOf(accepted) : null;
   const materialsHash = materialsHashOf(materials.map(m => ({ id: m.id, revision: m.revision, contentHash: m.contentHash })));
   const previewHash = previewHashOf({ draftId: draft.id, revision: draft.revision, materialsHash, understandingHash, userRevisionHash, acceptedHash });
@@ -342,21 +372,21 @@ async function buildPreviewFrom(draftId: string, tx: Tx = db): Promise<IntakePre
     schemaVersion: 1, draftId: draft.id, revision: draft.revision,
     status: draft.status as IntakePreview["status"], materialsHash,
     understandingState: draft.understandingState as IntakePreview["understandingState"],
-    model: { used: ready, provider: ready ? "configured" : null,
+    model: { used: ready, provider: ready ? String(record(draft.previewJson).provider ?? "UNKNOWN") : null,
       reason: ready ? null : typeof record(draft.previewJson).failureCode === "string" ? String(record(draft.previewJson).failureCode) : draft.understandingState === "NONE" ? "NOT_RUN" : null,
-      usageUnknown: ready ? true : true },
+      usageUnknown: ready ? record(draft.previewJson).usageUnknown !== false : true },
     summary: ready ? understanding!.data.summary : null,
     statements,
     suggested: ready ? { ...understanding!.data.suggested } as IntakeAcceptedFields : null,
     constraints: ready ? understanding!.data.constraints.map(c => ({ text: c.text, basis: c.basis, materialId: c.materialId ?? null }))
-      : (Array.isArray(revision.constraints) ? revision.constraints as string[] : []).map(text => ({ text, basis: "STATED" as const, materialId: null })),
+      : (correctionActive && Array.isArray(revision.constraints) ? revision.constraints as string[] : []).map(text => ({ text, basis: "STATED" as const, materialId: null })),
     unknowns: ready ? understanding!.data.unknowns : [],
     successCriteria: ready ? understanding!.data.successCriteria : [],
     nextQuestion: ready ? understanding!.data.nextQuestion : null,
     correction: {
-      appliedObjective: typeof revision.appliedObjective === "string" ? revision.appliedObjective : null,
-      constraints: Array.isArray(revision.constraints) ? revision.constraints as string[] : [],
-      until: typeof revision.until === "string" ? revision.until : null,
+      appliedObjective: active ? activeObjective ? String(activeObjective.quote) : null : correctionActive && typeof revision.appliedObjective === "string" ? revision.appliedObjective : null,
+      constraints: activeConstraints ?? (correctionActive && Array.isArray(revision.constraints) ? revision.constraints as string[] : []),
+      until: active ? activeObjective?.validUntil ? String(activeObjective.validUntil) : null : typeof revision.until === "string" ? revision.until : null,
       candidates: Array.isArray(revision.candidates) ? (revision.candidates as Array<Record<string, unknown>>)
         .filter(c => c.status === "INTERPRETATION_CANDIDATE")
         .map(c => ({ quote: String(c.quote ?? ""), interpretation: String(c.interpretation ?? ""), reason: String(c.reason ?? "") })) : [],
@@ -379,10 +409,12 @@ async function buildPreviewFrom(draftId: string, tx: Tx = db): Promise<IntakePre
 export async function readIntake(actor: ConversationActor, draftId: string) {
   await assertSession(actor);
   const draft = await loadDraft(actor, draftId);
+  if (draft.status === "CONFIRMED" && (!draft.projectId || !await db.project.findFirst({ where: { id: draft.projectId, deletionRequestedAt: null, memberships: { some: { userId: actor.userId } } } })))
+    throw new AppError("PROJECT_NOT_FOUND", "原项目已不可访问，不能读取其临时材料副本", 404);
   if (draft.status === "WITHDRAWN" || draft.withdrawnAt) throw new AppError("INTAKE_WITHDRAWN", "这份材料预览已撤回", 410);
-  if (draft.status === "EXPIRED" || (draft.status !== "CONFIRMED" && +draft.expiresAt <= Date.now()))
+  if (draft.status === "EXPIRED" || +draft.expiresAt <= Date.now())
     throw new AppError("INTAKE_EXPIRED", "材料预览已到期，原件已进入清理", 410);
-  return { preview: await buildPreviewFrom(draft.id), confirmedProjectId: draft.projectId,
+  return { preview: await buildPreviewFrom(draft.id), confirmedProjectId: draft.projectId, processingConsent: record(draft.processingJson).consent === true,
     expiresAt: draft.expiresAt.toISOString(), canConfirm: ["DRAFT", "PREVIEW_READY", "FAILED", "UNDERSTANDING"].includes(draft.status) && +draft.expiresAt > Date.now() };
 }
 
@@ -392,54 +424,48 @@ export async function readIntake(actor: ConversationActor, draftId: string) {
  */
 export async function confirmIntake(actor: ConversationActor, draftId: string, raw: unknown) {
   const input = confirmSchema.parse(raw);
-  const draft = await loadDraft(actor, draftId);
-  // 已建项的同请求重放返回原项目；换请求再确认拒绝，不制造第二个项目。
-  if (draft.status === "CONFIRMED") {
-    const saved = record(draft.confirmRequestJson);
-    if (draft.projectId && saved.requestId === input.requestId) {
-      if (saved.acceptedHash !== acceptedHashOf(input.accepted))
-        throw new AppError("IDEMPOTENCY_CONFLICT", "同一建项请求的内容已变化，请重新提交", 409);
-      return { projectId: draft.projectId, replayed: true, preview: await buildPreviewFrom(draft.id) };
+  return withDraftLock(actor, draftId, async (tx, draft) => {
+    const acceptedHash = acceptedHashOf(input.accepted);
+    if (+draft.expiresAt <= Date.now()) throw new AppError("INTAKE_EXPIRED", "临时材料已到期，请从原项目继续", 410);
+    if (draft.status === "CONFIRMED") {
+      const saved = record(draft.confirmRequestJson);
+      if (saved.requestId !== input.requestId || saved.acceptedHash !== acceptedHash || saved.previewHash !== input.previewHash || saved.revision !== input.expectedRevision)
+        throw new AppError("IDEMPOTENCY_CONFLICT", "原确认已绑定另一版内容，请读取原项目", 409);
+      const project = draft.projectId && await tx.project.findFirst({ where: { id: draft.projectId, deletionRequestedAt: null,
+        memberships: { some: { userId: actor.userId, role: "OWNER" } } } });
+      if (!project) throw new AppError("PROJECT_NOT_FOUND", "原项目已不可访问，不会重新创建", 404);
+      return { projectId: project.id, replayed: true, preview: await buildPreviewFrom(draft.id, tx) };
     }
-    throw new AppError("INTAKE_CONFIRMED", "这份预览已建项，请到项目继续", 409);
-  }
-  assertOpen(draft);
-  const preview = await buildPreviewFrom(draft.id);
-  if (preview.revision !== input.expectedRevision)
-    throw new AppError("INTAKE_CHANGED", "预览已更新，请按当前版本重新核对", 409);
-  if (preview.previewHash !== input.previewHash)
-    throw new AppError("INTAKE_PREVIEW_STALE", "你确认的理解与当前材料不一致，请重新核对这一版", 409);
-  if (!preview.materials.length) throw new AppError("INTAKE_MATERIALS_REQUIRED", "确认建项前至少要有一份材料", 422);
-  const acceptedHash = acceptedHashOf(input.accepted);
-  const intakeHash = jsonHash({ draftId: draft.id, revision: preview.revision, materialsHash: preview.materialsHash,
-    previewHash: preview.previewHash, acceptedHash });
-  const result = await db.$transaction(async tx => {
-    const locked = await tx.projectIntakeDraft.updateMany({ where: { id: draft.id, ownerUserId: actor.userId }, data: { revision: { increment: 0 } } });
-    if (!locked.count) throw new AppError("INTAKE_NOT_FOUND", "材料预览不存在或不可访问", 404);
-    const current = await tx.projectIntakeDraft.findUniqueOrThrow({ where: { id: draft.id } });
-    if (current.status === "CONFIRMED") {
-      // 并发确认：输的一方不建第二个项目，读回原回执。
-      const saved = record(current.confirmRequestJson);
-      if (saved.requestId === input.requestId && saved.acceptedHash === acceptedHash && current.projectId)
-        return { projectId: current.projectId, replayed: true };
-      throw new AppError("INTAKE_CONFIRMED", "这份预览已建项，请到项目继续", 409);
-    }
-    assertOpen(current);
-    if (current.revision !== input.expectedRevision) throw new AppError("INTAKE_CHANGED", "预览已更新，请按当前版本重新核对", 409);
+    assertOpen(draft);
+    const preview = await buildPreviewFrom(draft.id, tx);
+    if (draft.revision !== input.expectedRevision) throw new AppError("INTAKE_CHANGED", "预览已更新，请重新核对", 409);
+    if (preview.previewHash !== input.previewHash) throw new AppError("INTAKE_PREVIEW_STALE", "理解或接受字段已变化，请重新核对", 409);
+    if (!preview.materials.length) throw new AppError("INTAKE_MATERIALS_REQUIRED", "确认前至少要有一份材料", 422);
     const created = await createOwnedProjectInTx(tx, { ...input.accepted, deadline: input.accepted.deadline ?? null,
       requestId: input.requestId }, actor.userId, input.requestId, {
       sessionId: actor.sessionId, provider: "project-intake-confirm-v1",
-      hashExtra: { draftId: current.id, revision: preview.revision, materialsHash: preview.materialsHash,
-        previewHash: preview.previewHash, acceptedHash },
-      resultExtra: { draftId: current.id }, traceExtra: { purpose: "INTAKE_CONFIRM", draftId: current.id,
-        materialsHash: preview.materialsHash, previewHash: preview.previewHash, acceptedHash } });
-    await tx.projectIntakeDraft.update({ where: { id: current.id }, data: { status: "CONFIRMED", projectId: created.project.id,
-      acceptedJson: json(input.accepted), confirmedAt: current.confirmedAt ?? new Date(),
-      confirmRequestJson: json({ requestId: input.requestId, intakeHash, acceptedHash, previewHash: preview.previewHash,
-        revision: preview.revision, materialsHash: preview.materialsHash }) } });
-    return { projectId: created.project.id, replayed: created.replayed };
+      hashExtra: { draftId, revision: preview.revision, materialsHash: preview.materialsHash, previewHash: preview.previewHash, acceptedHash },
+      resultExtra: { draftId }, traceExtra: { purpose: "INTAKE_CONFIRM", draftId, materialsHash: preview.materialsHash, previewHash: preview.previewHash, acceptedHash },
+    });
+    // 只接续用户亲自说出的、仍有效的 literal 指引；模型建议与解释候选不成为指令。
+    const controls = record(draft.userRevisionJson);
+    const pendingDirectives = Array.isArray(controls.admittedDirectives) ? controls.admittedDirectives.map(record) : [];
+    const applicable = pendingDirectives.filter(d => ["WORKING_OBJECTIVE", "CONSTRAINT"].includes(String(d.kind)) &&
+      typeof d.quote === "string" && (!d.validUntil || Date.parse(String(d.validUntil)) > Date.now()));
+    if (applicable.length) {
+      const conversation = await createConversationInTx(actor, { requestId: `intake:${draft.id}`, scope: "PROJECT", projectId: created.project.id, title: "项目材料核对" }, tx);
+      for (const d of applicable) {
+        const view = await effectiveContinuity(actor.userId, { projectId: created.project.id }, tx);
+        await admitDirectiveInTx(actor, { commandId: `intake:${jsonHash({ draftId: draft.id, command: d.commandId })}`, expectedSeq: view.seq,
+          scope: { projectId: created.project.id }, operation: "SET", quote: d.quote, admission: "LITERAL", timezone: INTAKE_SCOPE_TIMEZONE,
+          ...(d.validUntil ? { validUntil: d.validUntil } : {}) }, tx, { conversationId: conversation.id, requestId: input.requestId });
+      }
+    }
+    await tx.projectIntakeDraft.update({ where: { id: draftId }, data: { status: "CONFIRMED", projectId: created.project.id,
+      acceptedJson: json(input.accepted), confirmedAt: new Date(), confirmRequestJson: json({ requestId: input.requestId,
+        acceptedHash, previewHash: preview.previewHash, revision: preview.revision, materialsHash: preview.materialsHash }) } });
+    return { projectId: created.project.id, replayed: created.replayed, preview: await buildPreviewFrom(draftId, tx) };
   });
-  return { ...result, preview: await buildPreviewFrom(draft.id) };
 }
 
 /**
@@ -449,46 +475,78 @@ export async function confirmIntake(actor: ConversationActor, draftId: string, r
  * 所以失败时保留已建项目、已同步部分和可恢复入口——绝不重复建项。
  */
 export async function syncIntakeMaterials(actor: ConversationActor, draftId: string) {
+  await assertSession(actor);
   const draft = await loadDraft(actor, draftId);
-  if (draft.status !== "CONFIRMED" || !draft.projectId)
-    throw new AppError("INTAKE_NOT_CONFIRMED", "材料还没有对应的项目", 409);
-  const member = await db.projectMembership.findUnique({ where: { userId_projectId: { userId: actor.userId, projectId: draft.projectId } } });
-  if (member?.role !== "OWNER") throw new AppError("PROJECT_NOT_FOUND", "项目权限已变化", 404);
-  const materials = await db.projectIntakeMaterial.findMany({ where: { draftId: draft.id }, orderBy: { ordinal: "asc" } });
+  if (draft.status !== "CONFIRMED" || !draft.projectId) throw new AppError("INTAKE_NOT_CONFIRMED", "材料还没有对应的项目", 409);
+  const projectId = draft.projectId;
+  async function guard(tx: Tx, materialId?: string, token?: string) {
+    await assertSession(actor, tx);
+    const current = await loadDraft(actor, draftId, tx);
+    if (current.status !== "CONFIRMED" || +current.expiresAt <= Date.now()) throw new AppError("INTAKE_CLOSED", "临时材料已失效", 410);
+    if (!await tx.project.findFirst({ where: { id: projectId, deletionRequestedAt: null, memberships: { some: { userId: actor.userId, role: "OWNER" } } } }))
+      throw new AppError("PROJECT_NOT_FOUND", "项目权限已变化", 404);
+    if (materialId) {
+      const material = await tx.projectIntakeMaterial.findUniqueOrThrow({ where: { id: materialId } });
+      if (record(material.syncJson).token !== token) throw new AppError("INTAKE_SYNC_SUPERSEDED", "同步责任已变化，未继续旧请求", 409);
+    }
+  }
+  await guard(db);
+  const materials = await db.projectIntakeMaterial.findMany({ where: { draftId }, orderBy: { ordinal: "asc" } });
   const results: Array<{ materialId: string; state: string; captureId?: string; attachmentId?: string; error?: string }> = [];
-  for (const m of materials) {
-    const sync = record(m.syncJson);
-    if (sync.state === "SYNCED") { results.push({ materialId: m.id, state: "SYNCED", ...(typeof sync.captureId === "string" ? { captureId: sync.captureId } : {}),
+  for (const original of materials) {
+    const token = crypto.randomUUID();
+    const claim = await withDraftLock(actor, draftId, async (tx) => {
+      await guard(tx);
+      const m = await tx.projectIntakeMaterial.findUniqueOrThrow({ where: { id: original.id } }), sync = record(m.syncJson);
+      if (sync.state === "SYNCED" || sync.state === "PROCESSING" && Number(sync.leaseUntil) > Date.now()) return { m, claimed: false };
+      let attempt = Number(sync.attempt ?? 0);
+      if (m.kind === "TEXT" && sync.state === "FAILED") {
+        const prior = await tx.agentRun.findUnique({ where: { provider_externalRequestId: { provider: "intake-local-import-v1",
+          externalRequestId: `${projectId}:intake:${draftId}:${m.id}:${m.revision}:${attempt}` } } });
+        if (prior?.status === "FAILED") attempt++;
+      }
+      await tx.projectIntakeMaterial.update({ where: { id: m.id }, data: { syncJson: json({ ...sync, state: "PROCESSING", token, attempt, leaseUntil: Date.now()+60000 }) } });
+      return { m: { ...m, syncJson: { ...sync, state: "PROCESSING", token, attempt } }, claimed: true };
+    });
+    const m = claim.m, sync = record(m.syncJson);
+    if (!claim.claimed) { results.push({ materialId: m.id, state: String(sync.state), ...(typeof sync.captureId === "string" ? { captureId: sync.captureId } : {}),
       ...(typeof sync.attachmentId === "string" ? { attachmentId: sync.attachmentId } : {}) }); continue; }
     try {
+      const beforeWrite = (tx: Prisma.TransactionClient) => guard(tx, m.id, token);
+      let captureId: string | undefined, attachmentId: string | undefined;
       if (m.kind === "TEXT") {
-        if (!m.rawText) throw new AppError("INTAKE_MATERIAL_LOST", "这份文本材料已清理，无法再同步", 410);
-        const capture = await processCaptureWithRequest(draft.projectId, m.rawText, "项目材料",
-          { requestId: `intake:${draft.id}:${m.id}:${m.revision}` });
-        await db.projectIntakeMaterial.update({ where: { id: m.id }, data: { syncJson: json({ state: "SYNCED",
-          captureId: capture.card?.id ?? null, at: new Date().toISOString() }), rawText: null, cleanupState: "PURGED", cleanedAt: new Date() } });
-        results.push({ materialId: m.id, state: "SYNCED", ...(capture.card?.id ? { captureId: capture.card.id } : {}) });
+        if (!m.rawText) throw new AppError("INTAKE_MATERIAL_LOST", "文本已清理，无法再同步", 410);
+        const capture = await processCaptureWithRequest(projectId, m.rawText, "项目材料", {
+          requestId: `intake:${draftId}:${m.id}:${m.revision}:${Number(sync.attempt ?? 0)}`, provider: "intake-local-import-v1", allowCloud: false, beforeSave: beforeWrite });
+        captureId = capture.card.captureId ?? undefined;
       } else {
         if (!m.storageKey) throw new AppError("INTAKE_MATERIAL_LOST", "原件已清理，无法再同步", 410);
         const buffer = await readAttachmentFile(m.storageKey);
-        const uploaded = await processAttachmentUpload({ projectId: draft.projectId, fileName: m.fileName ?? "材料",
-          mimeType: m.mimeType ?? "application/octet-stream", buffer });
-        await deleteAttachmentFile(m.storageKey).catch(() => undefined);
-        await db.projectIntakeMaterial.update({ where: { id: m.id }, data: { syncJson: json({ state: "SYNCED",
-          attachmentId: uploaded.attachment.id, at: new Date().toISOString() }), rawText: null, storageKey: null,
-          cleanupState: "DELETED", cleanedAt: new Date() } });
-        results.push({ materialId: m.id, state: "SYNCED", attachmentId: uploaded.attachment.id });
+        const uploaded = await processAttachmentUpload({ projectId, fileName: m.fileName ?? "材料", mimeType: m.mimeType ?? "application/octet-stream", buffer },
+          { beforeWrite, allowCloud: false, extractedText: m.rawText });
+        attachmentId = uploaded.attachment.id;
       }
+      let cleanupFailed = false;
+      if (m.storageKey) { try { await deleteAttachmentFile(m.storageKey); } catch { cleanupFailed = true; } }
+      await withDraftLock(actor, draftId, async tx => {
+        await guard(tx, m.id, token);
+        await tx.projectIntakeMaterial.update({ where: { id: m.id }, data: { rawText: null,
+          storageKey: cleanupFailed ? m.storageKey : null, cleanupState: cleanupFailed ? "FAILED" : m.kind === "TEXT" ? "PURGED" : "DELETED", cleanedAt: cleanupFailed ? null : new Date(),
+          syncJson: json({ state: "SYNCED", captureId: captureId ?? null, attachmentId: attachmentId ?? null,
+            at: new Date().toISOString(), ...(cleanupFailed ? { error: "材料已接入项目，临时原件仍待清理" } : {}) }) } });
+      });
+      results.push({ materialId: m.id, state: "SYNCED", ...(captureId ? { captureId } : {}), ...(attachmentId ? { attachmentId } : {}) });
     } catch (error) {
       const message = error instanceof AppError ? error.message : "材料同步中断";
-      const code = error instanceof AppError ? error.code : "SYNC_FAILED";
-      await db.projectIntakeMaterial.update({ where: { id: m.id }, data: { syncJson: json({ state: "FAILED", error: message,
-        code, attempts: (Number(record(m.syncJson).attempts) || 0) + 1, at: new Date().toISOString() }) } }).catch(() => undefined);
+      await withDraftLock(actor, draftId, async tx => {
+        await guard(tx, m.id, token);
+        await tx.projectIntakeMaterial.update({ where: { id: m.id }, data: { syncJson: json({ state: "FAILED", token, attempt: Number(sync.attempt ?? 0),
+          error: message, code: error instanceof AppError ? error.code : "SYNC_FAILED", at: new Date().toISOString() }) } });
+      }).catch(() => undefined);
       results.push({ materialId: m.id, state: "FAILED", error: message });
     }
   }
-  return { projectId: draft.projectId, materials: results,
-    pending: results.filter(r => r.state !== "SYNCED").length, preview: await buildPreviewFrom(draft.id) };
+  return { projectId, materials: results, pending: results.filter(r => r.state !== "SYNCED").length, preview: await buildPreviewFrom(draftId) };
 }
 
 export async function withdrawIntake(actor: ConversationActor, draftId: string) {
@@ -502,47 +560,65 @@ export async function withdrawIntake(actor: ConversationActor, draftId: string) 
 }
 
 /** 清理一稿的临时原件；失败保留原清理身份，由原 Worker 重试。 */
-export async function cleanupIntakeDraftFiles(draftId: string, ownerUserId: string) {
+export async function cleanupIntakeDraftFiles(draftId: string, ownerUserId: string, now = new Date()) {
   const draft = await db.projectIntakeDraft.findFirst({ where: { id: draftId, ownerUserId } });
   if (!draft) return { cleaned: 0, failed: 0 };
+  if (!["EXPIRED", "WITHDRAWN"].includes(draft.status)) throw new AppError("INTAKE_CLEANUP_NOT_CLOSED", "材料仍在使用，未执行清理", 409);
   let cleaned = 0, failed = 0;
-  const files = await listProjectAttachmentFiles(`intake-${draft.id}`).catch(() => [] as string[]);
-  for (const key of files) {
-    try { await deleteAttachmentFile(key); cleaned++; } catch { failed++; }
+  let files: string[] = [];
+  try { files = await listProjectAttachmentFiles(`intake-${draft.id}`); } catch { failed++; }
+  const materials = await db.projectIntakeMaterial.findMany({ where: { draftId: draft.id } });
+  const keys = [...new Set([...files, ...materials.flatMap(m => m.storageKey ? [m.storageKey] : [])])];
+  const removed = new Set<string>();
+  for (const key of keys) {
+    try { await deleteAttachmentFile(key); removed.add(key); cleaned++; } catch { failed++; }
   }
-  for (const m of await db.projectIntakeMaterial.findMany({ where: { draftId: draft.id, cleanupState: { in: ["PENDING", "FAILED"] } } })) {
-    if (m.cleanupState === "PENDING" && m.storageKey && files.includes(m.storageKey)) {
-      await db.projectIntakeMaterial.update({ where: { id: m.id }, data: { cleanupState: "DELETED", cleanedAt: new Date(), storageKey: null } }).catch(() => undefined);
+  await db.$transaction(async tx => {
+    await tx.projectIntakeDraft.updateMany({ where: { id: draftId }, data: { revision: { increment: 0 } } });
+    const current = await tx.projectIntakeDraft.findUniqueOrThrow({ where: { id: draftId } });
+    for (const m of materials) {
+      const deleted = !m.storageKey || removed.has(m.storageKey);
+      await tx.projectIntakeMaterial.update({ where: { id: m.id }, data: { rawText: null,
+        ...(deleted ? { storageKey: null, fileName: null, extractionError: null } : {}),
+        cleanupState: deleted ? "DELETED" : "FAILED", cleanedAt: deleted ? now : null } });
     }
-    await db.projectIntakeMaterial.update({ where: { id: m.id }, data: { rawText: null,
-      cleanupState: files.length || m.kind === "TEXT" ? "DELETED" : m.cleanupState, cleanedAt: new Date() } }).catch(() => undefined);
-  }
-  await db.projectIntakeDraft.update({ where: { id: draft.id }, data: { processingJson: json({ ...record(draft.processingJson),
-    cleanup: { at: new Date().toISOString(), files: files.length, cleaned, failed } }) } });
+    const attempts = current.cleanupAttempts + 1;
+    await tx.projectIntakeDraft.update({ where: { id: draftId }, data: {
+      understandingJson: Prisma.DbNull, understandingHash: null, understandingState: "NONE",
+      previewJson: json({}), userRevisionJson: json({}), userRevisionHash: null, acceptedJson: Prisma.DbNull,
+      cleanupAttempts: attempts,
+      processingJson: json({ ...record(current.processingJson), cleanup: { at: now.toISOString(), files: keys.length,
+        cleaned, failed, complete: failed === 0, nextAttemptAt: failed ? +now + Math.min(3600000, 60000 * 2 ** Math.min(attempts - 1, 6)) : null } }),
+    } });
+  });
   return { cleaned, failed };
 }
 
-/**
- * 到期清理：没有新事件也会发生。批处理保留失败身份，不删掉本应重试的清理责任。
- */
+/** 原 Worker 有界重试；EXPIRED 不丢责任，失败退避，成功退出队列。 */
 export async function expireIntakeDrafts(now = new Date(), limit = 5) {
-  const expired = await db.projectIntakeDraft.findMany({
-    where: { OR: [{ status: { in: ["DRAFT", "PREVIEW_READY", "FAILED", "UNDERSTANDING"] }, expiresAt: { lte: now } },
-      { status: "WITHDRAWN" }],
-      cleanupAttempts: { lt: 5 } },
-    orderBy: { expiresAt: "asc" }, take: limit,
-  });
+  const ids = await db.$queryRaw<Array<{ id: string }>>`SELECT d.id FROM "ProjectIntakeDraft" d
+    LEFT JOIN "Project" p ON p.id=d."projectId"
+    WHERE (d.status IN ('EXPIRED','WITHDRAWN') OR
+      (CASE WHEN typeof(d."expiresAt")='integer' THEN d."expiresAt"<=${+now} ELSE julianday(d."expiresAt")<=julianday(${now.toISOString()}) END) OR
+      (d.status='CONFIRMED' AND (p.id IS NULL OR p."deletionRequestedAt" IS NOT NULL)))
+    AND COALESCE(json_extract(d."processingJson", '$.cleanup.complete'),0) != 1
+    AND COALESCE(json_extract(d."processingJson", '$.cleanup.nextAttemptAt'),0)<=${+now}
+    ORDER BY d."updatedAt" ASC LIMIT ${Math.max(1, Math.min(20, limit))}`;
   const results: Array<{ draftId: string; state: string; error?: string }> = [];
-  for (const draft of expired) {
+  for (const { id } of ids) {
     try {
-      if (draft.status !== "WITHDRAWN") await db.projectIntakeDraft.update({ where: { id: draft.id }, data: { status: "EXPIRED" } });
-      const { failed } = await cleanupIntakeDraftFiles(draft.id, draft.ownerUserId);
-      await db.projectIntakeDraft.update({ where: { id: draft.id }, data: { cleanupAttempts: { increment: 1 } } });
-      results.push({ draftId: draft.id, state: failed ? "PARTIAL" : "CLEANED" });
+      const draft = await db.$transaction(async tx => {
+        await tx.projectIntakeDraft.updateMany({ where: { id }, data: { revision: { increment: 0 } } });
+        const current = await tx.projectIntakeDraft.findUniqueOrThrow({ where: { id } });
+        // 先封闭消费，再做文件 I/O；迟到发布必须被同一草稿锁挡住。
+        if (current.status !== "WITHDRAWN") await tx.projectIntakeDraft.update({ where: { id }, data: { status: "EXPIRED" } });
+        return current;
+      });
+      const { failed } = await cleanupIntakeDraftFiles(id, draft.ownerUserId, now);
+      results.push({ draftId: id, state: failed ? "PARTIAL" : "CLEANED" });
     } catch (error) {
       const message = error instanceof Error ? error.message : "清理失败";
-      await db.projectIntakeDraft.update({ where: { id: draft.id }, data: { cleanupAttempts: { increment: 1 } } }).catch(() => undefined);
-      results.push({ draftId: draft.id, state: "FAILED", error: message });
+      results.push({ draftId: id, state: "FAILED", error: message });
     }
   }
   return results;

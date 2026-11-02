@@ -32,7 +32,9 @@ export function reviewProgressOf(input: ReviewProgressInput) {
   const counts = {
     executed: { steps: input.steps.length, actions: realActions.filter(a => a.status === "DONE").length },
     observed: { steps: input.steps.filter(step => sourcesOf(step.resultJson).length > 0).length },
-    independentlySupported: { claims: claimChecks.filter(c => c.status === "ENTAILS").length },
+    // 原逐句判定只证明文本蕴含；没有独立核验回执，不能升级成独立支持。
+    independentlySupported: { claims: 0 },
+    textuallySupported: { claims: claimChecks.filter(c => c.status === "ENTAILS").length },
     userReported: { actionReceipts: realActions.filter(a => !!a.resultCardId).length },
     counterExamples: { claims: claimChecks.filter(c => c.status === "CONTRADICTS").length },
     unknown: { claims: claimChecks.filter(c => c.status === "NOT_ENOUGH_INFORMATION" || c.status === "NOT_CHECKED").length,
@@ -41,7 +43,7 @@ export function reviewProgressOf(input: ReviewProgressInput) {
   const classes: ReviewProgressClass[] = [
     { key: "executed", label: "已执行", count: counts.executed.steps, note: "工具步骤确实运行过；不等于结论成立或目标达成" },
     { key: "observed", label: "已观察", count: counts.observed.steps, note: "执行时带回了可引用来源" },
-    { key: "independentlySupported", label: "已独立支持", count: counts.independentlySupported.claims, note: "草稿主张通过逐句核对" },
+    { key: "independentlySupported", label: "已独立支持", count: counts.independentlySupported.claims, note: `逐句核对支持 ${counts.textuallySupported.claims} 条；当前未提供独立核验回执` },
     { key: "userReported", label: "用户报告", count: counts.userReported.actionReceipts, note: "行动已完成并留下复盘回执；仍是用户报告" },
     { key: "counterExamples", label: "反例", count: counts.counterExamples.claims, note: "原文与主张冲突，保留冲突" },
     { key: "unknown", label: "未知", count: counts.unknown.claims + counts.unknown.steps, note: "未核验或信息不足，不当作失败或没有" },

@@ -11,6 +11,7 @@ import { assertTurnLease, turnElapsedMs, currentGeneration } from "@/lib/convers
 import { validateWebSource } from "@/lib/conversation/researchScope";
 import type { ConversationSource } from "@/lib/types/conversation";
 import { readSourceObservation } from "@/lib/conversation/sourceObservation";
+import { assertDirectiveEffect } from "@/lib/continuity/directiveService";
 
 export type WorkspaceBilling = { userId: string; turnId: string; purpose: ModelPurpose; sessionId?: string; inputTokens?: number; outputTokens?: number; provider?: string; requestHash?: string;
   callId?: string; promptId?: string; promptVersion?: string; outputSchemaVersion?: number };
@@ -39,6 +40,12 @@ export async function reserveIntakeCloudCall(billing: IntakeBilling): Promise<vo
     const processing = processingState(draft.processingJson);
     if (processing.consent !== true)
       throw new AppError("INTAKE_CONSENT_REQUIRED", "需要先同意把材料交给云模型处理，才能生成理解", 403);
+    const review = processingState(draft.userRevisionJson);
+    const admitted = Array.isArray(review.admittedDirectives) ? review.admittedDirectives.map(processingState)
+      .filter(d => !d.validUntil || Date.parse(String(d.validUntil)) > Date.now()) : null;
+    const constraints = admitted ? admitted.flatMap(d => d.kind === "CONSTRAINT" ? [String(d.quote)] : Array.isArray(d.constraints) ? d.constraints.map(String) : [])
+      : Array.isArray(review.constraints) ? review.constraints.map(String) : [];
+    assertDirectiveEffect({ constraints }, "MODEL");
     const dispatches = Array.isArray(processing.dispatches) ? processing.dispatches as Array<Record<string, unknown>> : [];
     if (dispatches.some(d => d.requestHash === billing.requestHash))
       throw new AppError("CALL_ALREADY_RESERVED", "原理解请求已发出，请读取原回执", 409);
@@ -56,22 +63,27 @@ export async function reserveIntakeCloudCall(billing: IntakeBilling): Promise<vo
     await tx.projectIntakeDraft.update({ where: { id: draft.id }, data: { processingJson: json({ ...processing,
       cloudState: "DISPATCH_COMMITTED", provider: billing.provider ?? null, revision: billing.revision,
       dispatches: [...dispatches, { requestHash: billing.requestHash, revision: billing.revision, provider: billing.provider ?? null,
-        reservedAt: new Date().toISOString(), settlement: "UNKNOWN" }].slice(-8) }) } });
+        reservedAt: new Date().toISOString(), settlement: "UNKNOWN" }] }) } });
   });
 }
 
 /** 结算一次草稿云调用：未知用量保持未知，不填 0，也不自动重发。 */
 export async function settleIntakeCloudCall(input: { draftId: string; requestHash: string; state: "SETTLED" | "FAILED" | "UNKNOWN";
   usage?: { inputTokens: number | null; outputTokens: number | null }; provider?: string | null }) {
-  const draft = await db.projectIntakeDraft.findUnique({ where: { id: input.draftId } });
+  return db.$transaction(async tx => {
+  await tx.projectIntakeDraft.updateMany({ where: { id: input.draftId }, data: { revision: { increment: 0 } } });
+  const draft = await tx.projectIntakeDraft.findUnique({ where: { id: input.draftId } });
   if (!draft) return;
   const processing = processingState(draft.processingJson);
   const dispatches = Array.isArray(processing.dispatches) ? processing.dispatches as Array<Record<string, unknown>> : [];
+  const entry = dispatches.find(d => d.requestHash === input.requestHash);
+  if (!entry || entry.settlement === "SETTLED") return;
   const next = dispatches.map(d => d.requestHash === input.requestHash ? { ...d, settlement: input.state,
     usage: input.usage ?? { inputTokens: null, outputTokens: null }, usageUnknown: !input.usage || input.usage.inputTokens === null || input.usage.outputTokens === null,
     provider: input.provider ?? d.provider ?? null, settledAt: new Date().toISOString() } : d);
-  await db.projectIntakeDraft.update({ where: { id: input.draftId }, data: { processingJson: json({ ...processing,
+  await tx.projectIntakeDraft.update({ where: { id: input.draftId }, data: { processingJson: json({ ...processing,
     cloudState: input.state === "SETTLED" ? "SETTLED" : input.state === "FAILED" ? "FAILED" : "UNKNOWN", dispatches: next }) } });
+  });
 }
 /** One actor and one durable proposal reservation; never charges every project owner. */
 export async function reserveReviewCloudCall(billing: ReviewBilling): Promise<void> {

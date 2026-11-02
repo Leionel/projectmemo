@@ -5,6 +5,7 @@ import { PMButton, PMStatusPill } from '../components/PMReferencePrimitives';
 import { PMColors, PMFontSize, PMRadius, PMSpacing } from '../common/DesignTokens';
 import { ApiError } from '../models/Project';
 import { IntakeService } from '../services/IntakeService';
+import { SessionStore } from '../services/SessionStore';
 import {
   intakeCanConfirm, intakeEditableFields, intakeSyncSummary, intakeUnderstandingLabel,
   IntakeAcceptedFields, IntakeCandidate, IntakeMaterialView, IntakePreview, IntakeStatement, IntakeSyncReply, IntakeUnknown
@@ -32,9 +33,40 @@ struct ProjectIntake {
   @State private loaded: boolean = false;
   private service: IntakeService = new IntakeService();
   private confirmRequestId: string = '';
-  private materialRequestIds: string[] = [];
+  private requestKeys: Map<string, string> = new Map<string, string>();
+  private confirmPayload: string = '';
+  private acceptedDirty: boolean = false;
+  private pageGeneration: number = 0;
+  private active: boolean = true;
+  private ownerToken: string = '';
+  private sessionListener: () => void = () => {
+    this.pageGeneration++;
+    this.material = ''; this.correction = ''; this.preview = new IntakePreview(); this.accepted = new IntakeAcceptedFields();
+    this.draftId = ''; this.projectId = ''; this.sync = null; this.requestKeys.clear(); this.confirmRequestId = ''; this.acceptedDirty = false;
+    this.notice = ''; this.error = ''; this.busy = false; this.confirmPayload = '';
+  };
+  private stableId(key: string): string {
+    if (!this.requestKeys.has(key)) this.requestKeys.set(key, this.requestId('intake'));
+    return this.requestKeys.get(key) ?? '';
+  }
+  private async own<T>(operation: () => Promise<T>): Promise<T> {
+    const generation = this.pageGeneration, token = SessionStore.getToken();
+    if (!this.active || token === '') throw new ApiError('SESSION_CHANGED', '请重新进入原任务', 409);
+    const value = await operation();
+    if (!this.active || generation !== this.pageGeneration || token !== SessionStore.getToken())
+      throw new ApiError('SESSION_CHANGED', '页面或账号已变化，请重新核对原结果', 409);
+    return value;
+  }
+  aboutToDisappear(): void {
+    this.active = false; this.pageGeneration++;
+    SessionStore.offSessionExpired(this.sessionListener);
+  }
 
   aboutToAppear(): void {
+    if (this.ownerToken !== '' && this.ownerToken !== SessionStore.getToken()) this.sessionListener();
+    this.ownerToken = SessionStore.getToken();
+    this.active = true; this.pageGeneration++;
+    SessionStore.offSessionExpired(this.sessionListener); SessionStore.onSessionExpired(this.sessionListener);
     const params: Record<string, string> | undefined = router.getParams() as Record<string, string>;
     const existing = params === undefined || params === null ? '' : (params['draftId'] ?? '');
     if (existing !== '') {
@@ -52,9 +84,9 @@ struct ProjectIntake {
   private async refresh(): Promise<void> {
     if (this.draftId === '') return;
     try {
-      const reply = await this.service.read(this.draftId);
+      const reply = await this.own(() => this.service.read(this.draftId));
       this.preview = reply.preview;
-      this.accepted = intakeEditableFields(reply.preview);
+      if (!this.acceptedDirty) this.accepted = intakeEditableFields(reply.preview);
       this.loaded = true;
     } catch (e) {
       this.error = e instanceof ApiError ? e.message : '无法读取这份材料';
@@ -63,7 +95,7 @@ struct ProjectIntake {
 
   private async ensureDraft(): Promise<string> {
     if (this.draftId !== '') return this.draftId;
-    const created = await this.service.createDraft(this.requestId('intake'));
+    const created = await this.own(() => this.service.createDraft(this.stableId('draft')));
     this.draftId = created.draftId;
     return this.draftId;
   }
@@ -74,10 +106,9 @@ struct ProjectIntake {
     this.busy = true; this.error = ''; this.notice = '';
     try {
       const id = await this.ensureDraft();
-      const requestId = this.requestId('material');
-      this.materialRequestIds.push(requestId);
-      await this.service.addText(id, requestId, text);
-      this.material = '';
+      const requestId = this.stableId(`text:${id}:${text}`);
+      await this.own(() => this.service.addText(id, requestId, text));
+      if (this.material.trim() === text) this.material = '';
       await this.refresh();
       this.notice = '材料已保存为预览材料，还不是项目目标或授权。';
     } catch (e) {
@@ -91,10 +122,10 @@ struct ProjectIntake {
     this.busy = true; this.error = ''; this.notice = '';
     try {
       const id = await this.ensureDraft();
-      await this.service.consent(id);
-      const reply = await this.service.understand(id, this.requestId('understand'));
+      await this.own(() => this.service.consent(id));
+      const reply = await this.own(() => this.service.understand(id, this.stableId(`understand:${id}:${this.preview.previewHash}`)));
       this.preview = reply.preview;
-      this.accepted = intakeEditableFields(reply.preview);
+      if (!this.acceptedDirty) this.accepted = intakeEditableFields(reply.preview);
       this.notice = reply.preview.understandingState === 'READY' ? 'Agent 已给出理解，请整体核对。' : intakeUnderstandingLabel(reply.preview.understandingState);
     } catch (e) {
       this.error = e instanceof ApiError ? e.message : '这次没能形成理解';
@@ -109,10 +140,10 @@ struct ProjectIntake {
     if (text.length === 0 || this.preview.revision === 0) return;
     this.busy = true; this.error = ''; this.notice = '';
     try {
-      const reply = await this.service.revise(this.draftId, this.requestId('revise'), text, this.preview.revision);
+      const reply = await this.own(() => this.service.revise(this.draftId, this.requestId('revise'), text, this.preview.revision));
       this.correction = '';
       this.preview = reply.preview;
-      this.accepted = intakeEditableFields(reply.preview);
+      if (!this.acceptedDirty) this.accepted = intakeEditableFields(reply.preview);
       if (reply.clarify !== null) this.notice = `需要先确认：${reply.clarify.question}`;
       else if (reply.appliedObjective !== '') this.notice = `已按你的话调整当前范围：${reply.appliedObjective}`;
       else this.notice = '这句话还只是解释候选，没有改变范围。';
@@ -128,11 +159,14 @@ struct ProjectIntake {
     this.busy = true; this.error = ''; this.notice = '';
     try {
       // 同一份确认的请求身份在本地保持稳定：回包丢失后重试仍是同一次建项。
-      if (this.confirmRequestId === '') this.confirmRequestId = this.requestId('confirm');
-      const reply = await this.service.confirm(this.draftId, this.confirmRequestId, this.preview.revision,
-        this.preview.previewHash, this.accepted);
+      const payload = JSON.stringify({ draftId: this.draftId, revision: this.preview.revision, hash: this.preview.previewHash, accepted: this.accepted });
+      if (this.confirmRequestId === '' || this.confirmPayload !== payload) {
+        this.confirmPayload = payload; this.confirmRequestId = this.requestId('confirm');
+      }
+      const reply = await this.own(() => this.service.confirm(this.draftId, this.confirmRequestId, this.preview.revision,
+        this.preview.previewHash, this.accepted));
       this.projectId = reply.projectId;
-      const synced = await this.service.sync(this.draftId);
+      const synced = await this.own(() => this.service.sync(this.draftId));
       this.sync = synced;
       await this.refresh();
       this.notice = intakeSyncSummary(this.preview.materials);
@@ -147,7 +181,7 @@ struct ProjectIntake {
     if (this.draftId === '' || this.busy) return;
     this.busy = true; this.error = '';
     try {
-      this.sync = await this.service.sync(this.draftId);
+      this.sync = await this.own(() => this.service.sync(this.draftId));
       await this.refresh();
       this.notice = intakeSyncSummary(this.preview.materials);
     } catch (e) {
@@ -239,11 +273,11 @@ struct ProjectIntake {
     Column({ space: 10 }) {
       Text('写进项目的字段（可以直接改）').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
       TextInput({ text: this.accepted.title, placeholder: '项目名称' })
-        .onChange((value: string) => { this.accepted.title = value; }).height(44)
+        .onChange((value: string) => { this.acceptedDirty = true; this.accepted.title = value; }).height(44)
       TextArea({ text: this.accepted.description, placeholder: '项目描述' })
-        .onChange((value: string) => { this.accepted.description = value; }).height(76)
+        .onChange((value: string) => { this.acceptedDirty = true; this.accepted.description = value; }).height(76)
       TextArea({ text: this.accepted.goal, placeholder: '项目目标' })
-        .onChange((value: string) => { this.accepted.goal = value; }).height(76)
+        .onChange((value: string) => { this.acceptedDirty = true; this.accepted.goal = value; }).height(76)
     }.width('100%').alignItems(HorizontalAlign.Start)
   }
 

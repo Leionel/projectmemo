@@ -1,0 +1,22 @@
+S1 全量单元/集成首轮失败记录（从命令输出原样摘录）
+
+运行命令：npm.cmd test
+时间：2026-11-02 13:59（UTC+8）
+结果：Test Files 33 failed | 164 passed (197)
+      Tests 178 failed | 1234 passed | 92 skipped (1504)
+退出码：1
+
+代表性错误：
+  FAIL tests/webProjectState.test.ts > GET /api/projects/[id]/state 的已读游标 > 未登录时仍然 401…
+  PrismaClientKnownRequestError:
+  Invalid `db.project.create()` invocation in tests/webProjectState.test.ts:132:38
+  The table `main.Project` does not exist in the current database.
+
+原因（环境，不是代码缺陷）：
+  这是新的 S1 工作树。vitest.config.ts 指向独立库 prisma/test-vitest.db，
+  但该库尚未初始化；按 AGENTS.md 的说明先运行独立的 migrate deploy：
+    $env:DATABASE_URL="file:./prisma/test-vitest.db"; npm.cmd exec prisma -- migrate deploy
+  迁移（含本任务新增的 20261102140000_project_intake_draft）在空库上全部应用成功。
+
+没有做：不使用 db:setup / db:demo-reset / reset 修复真实环境；没有动开发库或真实库。
+修复后重跑全量，结果见 checks/s1-full-tests-final.log 与 ACCEPTANCE.json。

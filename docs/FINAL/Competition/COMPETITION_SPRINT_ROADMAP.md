@@ -8,6 +8,18 @@ S0 已获用户启动实施授权。历史表中的 `PMcf1bbb0/PM4 未提交`、
 
 依赖提交 `5d3ad3f`，核心修复提交 `784d99a`，后续会话/Worker/原生及存储收尾到 `8da4f05`。完整回归 1486 项通过，后续存储定向 36 项通过；Web E2E 为 33 业务＋1 setup 通过、2 原有跳过、0 失败/flaky；鸿蒙 92 项及 unsigned HAP 构建通过。工程、真实模型、设备、Linux、自然日和独立复核分别签收。生产 audit 为 0 不等于所有开发依赖告警已关闭，S0-B 的剩余 minimatch 风险在实施记录中单列。S0 尚未并入 master、推送或部署。
 
+## 2026-11-02 S1 实施更新
+
+S1 从 S0 候选 `4b2cbd3` 开独立树 `D:/Projects/hongmen-s1`、分支 `codex/s1-verified-project-journey`，分三个内部阶段提交：`42d934e`（A：材料→可纠正理解→确认建项→原 Capture 接回）、`05ea5c3`（B：历史条件/来源资格探针 + 原 Worker 持续责任真实进程证据）、`5f736c2`（C：手机接回原问题 + Web 同版本结果核查）。细节、Gate、失败与回滚见 [S1 实施记录](S1_IMPLEMENTATION_2026-11-02.md) 与 `evidence/s1-project-journey/20261102/ACCEPTANCE.json`。
+
+本节对第 4 节三块的进度更新：
+
+- **S1-A**：项目前材料走受控临时草稿（新增 `ProjectIntakeDraft`/`ProjectIntakeMaterial` 迁移），预览把原文/建议/未知/成功标准候选/下一问题分开；整体纠正沿原 `admitDirective`；确认复用 `createOwnedProjectInTx` 的 Project + OWNER + AgentRun 事务；材料随后经原 Capture/Attachment 同步。Web `/projects/new` 与鸿蒙新“先放材料”入口都可用；材料中的指令不会被当作用户命令。**未签收**：真实模型理解质量、真机交互。
+- **S1-B**：探针确认到期跨越、派生来源、来源链未知、局部/账户范围分离已由原 `effectiveContinuity`/`sourceUse`/`contextBuilder` 覆盖，因此没有重写 Composer，只补证据；原 Worker 真实进程探针验证“未到期不领取、缺云批准显式暂停、用户暂停不复活、无成功模型回执、清理幂等”。**未签收**：Linux/systemd、自然日、真实模型判断。
+- **S1-C**：卡片与入口携带 project/mission/question/approval/source/版本/期限意图，过期意图回到当前委托；Web 与手机用同一 `readback` 读同一问题与结果版本；进展区新增“已执行/已观察/已独立支持/用户报告/反例/未知”只读投影。**未签收**：真机冷/热启动、卡片系统刷新、离线 TTL。
+
+工程检查：全量单元/集成 197 文件 1504 项通过；`tsc`/`lint`/`build` 退出 0（lint 仍为 S0 的 9 条既有 warning，build 6 条路径追踪 warning）；Web E2E 35 业务＋1 setup 通过、2 原有跳过、0 失败/flaky；鸿蒙 100 项通过、unsigned HAP 构建通过（未签名、未安装）。真实模型、设备、自然日、第二类真实项目与独立复核保持 NOT_RUN，且不因工程通过而签收。
+
 ## 1. 外部期限与内部冻结
 
 外部时间来自用户通知，未取得原始赛方文件的逐项核验；材料负责人需保存通知原文和收件回执，不据此编造评分权重。

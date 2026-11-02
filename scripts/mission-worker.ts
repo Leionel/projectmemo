@@ -10,6 +10,7 @@ import { processInvestigationDelegations } from "../lib/mission/investigationDel
 import { runWorkerCycle, type WorkerCycleState } from "../lib/mission/workerCycle";
 import { recordWorkerPresence } from "../lib/mission/workerPresence";
 import { processProjectDeletions } from "../lib/services/projectDeletionService";
+import { expireIntakeDrafts } from "../lib/services/projectIntakeService";
 import { isFeatureEnabled } from "../lib/config/features";
 
 const workerId = randomUUID();
@@ -27,6 +28,7 @@ try {
     const result = await runWorkerCycle(state, {
       scan: [
         { name: "PROJECT_CLEANUP", run: () => scanned(() => processProjectDeletions()) },
+        { name: "INTAKE_CLEANUP", run: () => scanned(() => expireIntakeDrafts()) },
         { name: "IMPACT", run: () => scanned(()=>consumeImpactJobs()) },
         { name: "MATERIAL", run: () => scanned(()=>processMaterialContinuationBatch()) },
         { name: "DELEGATION", run: () => scanned(()=>processInvestigationDelegations()) },
@@ -36,7 +38,7 @@ try {
         ? runMissionSlice({ workerId,onClaim:()=>recordWorkerPresence({workerId,claim:true}) })
         : Promise.resolve(false),
       onError: (name) => {
-        if (["PROJECT_CLEANUP", "IMPACT", "MATERIAL", "DELEGATION"].includes(name)) recordWorkerPresence({ workerId, failedScan: name });
+        if (["PROJECT_CLEANUP", "INTAKE_CLEANUP", "IMPACT", "MATERIAL", "DELEGATION"].includes(name)) recordWorkerPresence({ workerId, failedScan: name });
         console.error(`委托 Worker ${name} 本次处理失败，请核对功能开关、迁移和原任务记录`);
       },
     });

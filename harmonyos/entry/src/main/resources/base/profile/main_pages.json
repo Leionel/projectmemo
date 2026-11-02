@@ -12,6 +12,7 @@
     "pages/FocusConversation",
     "pages/ConversationHistory",
     "pages/ConversationWebSource",
-    "pages/PersonalMemoryPage"
+    "pages/PersonalMemoryPage",
+    "pages/ProjectIntake"
   ]
 }

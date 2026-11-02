@@ -28,8 +28,10 @@ export interface UploadAttachmentInput {
 }
 /**
  * 提取 PDF 文本（支持标准 ASCII 文本块与简单中文流提取）
+ *
+ * 项目前材料预览复用同一个解析器：不因为还没有 projectId 就换一套实现。
  */
-async function extractPdfText(buffer: Buffer): Promise<string | null> {
+export async function extractPdfText(buffer: Buffer): Promise<string | null> {
   const executable = process.env.PDFTOTEXT_PATH || "pdftotext";
   return new Promise((resolve, reject) => {
     const child = spawn(executable, ["-layout", "-", "-"], {
@@ -66,7 +68,7 @@ const VISION_MAX_BYTES = 5 * 1024 * 1024;
  * 未配置视觉 provider 时返回 null（调用方记为 NEEDS_OCR）；
  * 已配置但调用失败时抛出，调用方记为 FAILED 并保留真实原因。
  */
-async function extractImageText(mimeType: string, buffer: Buffer, projectId: string): Promise<string | null> {
+export async function extractImageText(mimeType: string, buffer: Buffer, charge: () => Promise<void>): Promise<string | null> {
   const config = getVisionProviderConfig();
   if (!config) {
     return null;
@@ -82,7 +84,7 @@ async function extractImageText(mimeType: string, buffer: Buffer, projectId: str
     const base64 = buffer.toString("base64");
     const dataUri = `data:${mimeType};base64,${base64}`;
 
-    await reserveCloudCall(projectId);
+    await charge();
     const response = await fetch(`${baseUrl}/chat/completions`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
@@ -120,7 +122,7 @@ async function extractImageText(mimeType: string, buffer: Buffer, projectId: str
   }
 }
 
-function inferAndValidateFileType(fileName: string, mimeType: string, buffer: Buffer): "IMAGE" | "PDF" | "CSV" | "JSON" {
+export function inferAndValidateFileType(fileName: string, mimeType: string, buffer: Buffer): "IMAGE" | "PDF" | "CSV" | "JSON" {
   if (buffer.length === 0) {
     throw new Error("Attachment is empty");
   }
@@ -212,7 +214,7 @@ export async function processAttachmentUpload(input: UploadAttachmentInput, depe
       extractedText = await (dependencies.extractPdf ?? extractPdfText)(buffer) ?? "";
     } else if(fileType==="CSV"||fileType==="JSON"){extractedText=new TextDecoder("utf-8",{fatal:true}).decode(buffer);
     } else {
-      extractedText = await extractImageText(safeMimeType, buffer, projectId) ?? "";
+      extractedText = await extractImageText(safeMimeType, buffer, () => reserveCloudCall(projectId)) ?? "";
     }
     if (!extractedText) {
       extractionStatus = "NEEDS_OCR";
@@ -307,7 +309,7 @@ export async function retryAttachmentExtraction(projectId: string, attachmentId:
   const fileType = inferAndValidateFileType(attachment.fileName, attachment.mimeType, buffer);
   let extractedText: string | null = null;
   try {
-    extractedText = fileType === "PDF" ? await extractPdfText(buffer) : fileType==="CSV"||fileType==="JSON" ? new TextDecoder("utf-8",{fatal:true}).decode(buffer) : await extractImageText(attachment.mimeType, buffer, projectId);
+    extractedText = fileType === "PDF" ? await extractPdfText(buffer) : fileType==="CSV"||fileType==="JSON" ? new TextDecoder("utf-8",{fatal:true}).decode(buffer) : await extractImageText(attachment.mimeType, buffer, () => reserveCloudCall(projectId));
   } catch (error) {
     const failed = await db.attachment.update({
       where: { id: attachment.id, project: { deletionRequestedAt: null } },

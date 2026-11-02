@@ -3216,6 +3216,26 @@ struct Index {
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.INK_PRIMARY)
 
+            // 材料优先是主入口：目标可以由 Agent 读懂材料后和用户一起核对，不必先自己想清楚。
+            Button('先放材料，让 Agent 读懂')
+              .type(ButtonType.Normal)
+              .fontSize(PMFontSize.BODY)
+              .fontColor(PMColors.BRAND)
+              .backgroundColor(PMColors.BRAND_LIGHT)
+              .borderRadius(PMRadius.SM)
+              .height(48)
+              .width('100%')
+              .margin({ top: PMSpacing.MD })
+              .onClick(() => {
+                this.closeCreateDialog();
+                router.pushUrl({ url: 'pages/ProjectIntake' });
+              })
+
+            Text('已经有明确目标，直接填写')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+              .margin({ top: PMSpacing.MD })
+
             Text('项目名称（至少 2 字）')
               .fontSize(PMFontSize.SECONDARY)
               .fontWeight(FontWeight.Medium)

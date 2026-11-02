@@ -1,0 +1,323 @@
+import router from '@ohos.router';
+import promptAction from '@ohos.promptAction';
+import { PMAppBar } from '../components/PMAppBar';
+import { PMButton, PMStatusPill } from '../components/PMReferencePrimitives';
+import { PMColors, PMFontSize, PMRadius, PMSpacing } from '../common/DesignTokens';
+import { ApiError } from '../models/Project';
+import { IntakeService } from '../services/IntakeService';
+import {
+  intakeCanConfirm, intakeEditableFields, intakeSyncSummary, intakeUnderstandingLabel,
+  IntakeAcceptedFields, IntakeCandidate, IntakeMaterialView, IntakePreview, IntakeStatement, IntakeSyncReply, IntakeUnknown
+} from '../models/ProjectIntake';
+
+/**
+ * 手机端的项目前材料核对：贴一段材料 → 看短预览 → 一句话纠正 → 确认。
+ *
+ * 与 Web 是同一份草稿与同一版预览；手机上不做“另一套理解”。
+ * 文件材料在 Web 入口加入，手机先把文本材料这条链路走通。
+ */
+@Entry
+@Component
+struct ProjectIntake {
+  @State private draftId: string = '';
+  @State private preview: IntakePreview = new IntakePreview();
+  @State private material: string = '';
+  @State private correction: string = '';
+  @State private accepted: IntakeAcceptedFields = new IntakeAcceptedFields();
+  @State private busy: boolean = false;
+  @State private error: string = '';
+  @State private notice: string = '';
+  @State private projectId: string = '';
+  @State private sync: IntakeSyncReply | null = null;
+  @State private loaded: boolean = false;
+  private service: IntakeService = new IntakeService();
+  private confirmRequestId: string = '';
+  private materialRequestIds: string[] = [];
+
+  aboutToAppear(): void {
+    const params: Record<string, string> | undefined = router.getParams() as Record<string, string>;
+    const existing = params === undefined || params === null ? '' : (params['draftId'] ?? '');
+    if (existing !== '') {
+      this.draftId = existing;
+      this.refresh();
+    } else {
+      this.loaded = true;
+    }
+  }
+
+  private requestId(prefix: string): string {
+    return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+  }
+
+  private async refresh(): Promise<void> {
+    if (this.draftId === '') return;
+    try {
+      const reply = await this.service.read(this.draftId);
+      this.preview = reply.preview;
+      this.accepted = intakeEditableFields(reply.preview);
+      this.loaded = true;
+    } catch (e) {
+      this.error = e instanceof ApiError ? e.message : '无法读取这份材料';
+    }
+  }
+
+  private async ensureDraft(): Promise<string> {
+    if (this.draftId !== '') return this.draftId;
+    const created = await this.service.createDraft(this.requestId('intake'));
+    this.draftId = created.draftId;
+    return this.draftId;
+  }
+
+  private async addMaterial(): Promise<void> {
+    const text = this.material.trim();
+    if (text.length === 0) return;
+    this.busy = true; this.error = ''; this.notice = '';
+    try {
+      const id = await this.ensureDraft();
+      const requestId = this.requestId('material');
+      this.materialRequestIds.push(requestId);
+      await this.service.addText(id, requestId, text);
+      this.material = '';
+      await this.refresh();
+      this.notice = '材料已保存为预览材料，还不是项目目标或授权。';
+    } catch (e) {
+      this.error = e instanceof ApiError ? e.message : '材料保存失败';
+    } finally {
+      this.busy = false;
+    }
+  }
+
+  private async understand(): Promise<void> {
+    this.busy = true; this.error = ''; this.notice = '';
+    try {
+      const id = await this.ensureDraft();
+      await this.service.consent(id);
+      const reply = await this.service.understand(id, this.requestId('understand'));
+      this.preview = reply.preview;
+      this.accepted = intakeEditableFields(reply.preview);
+      this.notice = reply.preview.understandingState === 'READY' ? 'Agent 已给出理解，请整体核对。' : intakeUnderstandingLabel(reply.preview.understandingState);
+    } catch (e) {
+      this.error = e instanceof ApiError ? e.message : '这次没能形成理解';
+      await this.refresh();
+    } finally {
+      this.busy = false;
+    }
+  }
+
+  private async revise(): Promise<void> {
+    const text = this.correction.trim();
+    if (text.length === 0 || this.preview.revision === 0) return;
+    this.busy = true; this.error = ''; this.notice = '';
+    try {
+      const reply = await this.service.revise(this.draftId, this.requestId('revise'), text, this.preview.revision);
+      this.correction = '';
+      this.preview = reply.preview;
+      this.accepted = intakeEditableFields(reply.preview);
+      if (reply.clarify !== null) this.notice = `需要先确认：${reply.clarify.question}`;
+      else if (reply.appliedObjective !== '') this.notice = `已按你的话调整当前范围：${reply.appliedObjective}`;
+      else this.notice = '这句话还只是解释候选，没有改变范围。';
+    } catch (e) {
+      this.error = e instanceof ApiError ? e.message : '纠正失败';
+    } finally {
+      this.busy = false;
+    }
+  }
+
+  private async confirm(): Promise<void> {
+    if (this.preview.previewHash === '' || this.busy) return;
+    this.busy = true; this.error = ''; this.notice = '';
+    try {
+      // 同一份确认的请求身份在本地保持稳定：回包丢失后重试仍是同一次建项。
+      if (this.confirmRequestId === '') this.confirmRequestId = this.requestId('confirm');
+      const reply = await this.service.confirm(this.draftId, this.confirmRequestId, this.preview.revision,
+        this.preview.previewHash, this.accepted);
+      this.projectId = reply.projectId;
+      const synced = await this.service.sync(this.draftId);
+      this.sync = synced;
+      await this.refresh();
+      this.notice = intakeSyncSummary(this.preview.materials);
+    } catch (e) {
+      this.error = e instanceof ApiError ? e.message : '确认建项失败';
+    } finally {
+      this.busy = false;
+    }
+  }
+
+  private async retrySync(): Promise<void> {
+    if (this.draftId === '' || this.busy) return;
+    this.busy = true; this.error = '';
+    try {
+      this.sync = await this.service.sync(this.draftId);
+      await this.refresh();
+      this.notice = intakeSyncSummary(this.preview.materials);
+    } catch (e) {
+      this.error = e instanceof ApiError ? e.message : '重新同步失败';
+    } finally {
+      this.busy = false;
+    }
+  }
+
+  private openProject(): void {
+    if (this.projectId === '') return;
+    router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: this.projectId } });
+  }
+
+  @Builder private MaterialList() {
+    Column({ space: 6 }) {
+      ForEach(this.preview.materials, (item: IntakeMaterialView) => {
+        Row({ space: 8 }) {
+          Text(item.label).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY).layoutWeight(1)
+            .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
+          Text(item.extractionStatus === 'NEEDS_OCR' ? '无可读文本' :
+            item.sync.state === 'SYNCED' ? '已进入项目' : item.sync.state === 'FAILED' ? '同步待重试' : '已保存')
+            .fontSize(PMFontSize.CAPTION).fontColor(item.sync.state === 'FAILED' ? PMColors.RISK : PMColors.INK_TERTIARY)
+        }.width('100%')
+      }, (item: IntakeMaterialView) => item.id)
+    }.width('100%').alignItems(HorizontalAlign.Start)
+  }
+
+  @Builder private Statements() {
+    Column({ space: 8 }) {
+      Text('材料明确说了').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+      ForEach(this.preview.statements, (statement: IntakeStatement) => {
+        Column({ space: 4 }) {
+          Text(`“${statement.quote}”`).fontSize(PMFontSize.BODY).fontColor(PMColors.INK_PRIMARY)
+          Text(`${statement.materialLabel} · ${statement.meaning}`).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+        }.width('100%').alignItems(HorizontalAlign.Start)
+        .padding(PMSpacing.SM).borderRadius(PMRadius.SM).backgroundColor(PMColors.SURFACE_SUBTLE)
+      }, (statement: IntakeStatement, index: number) => `${statement.materialId}-${index}`)
+    }.width('100%').alignItems(HorizontalAlign.Start)
+  }
+
+  @Builder private PreviewBody() {
+    Column({ space: 12 }) {
+      Row({ space: 8 }) {
+        PMStatusPill({ label: intakeUnderstandingLabel(this.preview.understandingState), tone: this.preview.understandingState === 'READY' ? 'brand' : 'neutral' })
+        Text(`第 ${this.preview.revision} 版`).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+      }.width('100%')
+      if (this.preview.summary !== '') Text(this.preview.summary).fontSize(PMFontSize.BODY).fontColor(PMColors.INK_PRIMARY)
+      if (this.preview.statements.length > 0) this.Statements()
+      if (this.preview.suggested !== null) {
+        Column({ space: 4 }) {
+          Text('Agent 的建议（还不是目标）').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+          Text(this.preview.suggested.title).fontSize(PMFontSize.BODY).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
+          Text(this.preview.suggested.goal).fontSize(PMFontSize.BODY).fontColor(PMColors.INK_SECONDARY)
+        }.width('100%').alignItems(HorizontalAlign.Start)
+      }
+      if (this.preview.unknowns.length > 0) {
+        Column({ space: 4 }) {
+          Text('还不知道').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+          ForEach(this.preview.unknowns, (item: IntakeUnknown) => {
+            Text(item.text).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
+          }, (item: IntakeUnknown, index: number) => `unknown-${index}`)
+        }.width('100%').alignItems(HorizontalAlign.Start)
+      }
+      if (this.preview.nextQuestion !== null) {
+        Column({ space: 4 }) {
+          Text('下一步最值得查清').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+          Text(this.preview.nextQuestion.text).fontSize(PMFontSize.BODY).fontColor(PMColors.INK_PRIMARY)
+          Text(this.preview.nextQuestion.why).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+        }.width('100%').alignItems(HorizontalAlign.Start)
+      }
+      if (this.preview.correction.appliedObjective !== '') {
+        Text(`当前范围：${this.preview.correction.appliedObjective}`).fontSize(PMFontSize.CAPTION).fontColor(PMColors.BRAND)
+      }
+      ForEach(this.preview.correction.candidates, (candidate: IntakeCandidate) => {
+        Text(`还没有生效的解释：“${candidate.quote}”`).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+      }, (candidate: IntakeCandidate, index: number) => `candidate-${index}`)
+      if (this.preview.correction.clarify !== null) {
+        Text(this.preview.correction.clarify.question).fontSize(PMFontSize.BODY).fontColor(PMColors.RISK)
+      }
+      if (this.preview.materials.length > 0) {
+        Text(intakeSyncSummary(this.preview.materials)).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+      }
+    }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.MD)
+    .backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.MD).border({ width: 1, color: PMColors.BORDER_SUBTLE })
+  }
+
+  @Builder private ConfirmFields() {
+    Column({ space: 10 }) {
+      Text('写进项目的字段（可以直接改）').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+      TextInput({ text: this.accepted.title, placeholder: '项目名称' })
+        .onChange((value: string) => { this.accepted.title = value; }).height(44)
+      TextArea({ text: this.accepted.description, placeholder: '项目描述' })
+        .onChange((value: string) => { this.accepted.description = value; }).height(76)
+      TextArea({ text: this.accepted.goal, placeholder: '项目目标' })
+        .onChange((value: string) => { this.accepted.goal = value; }).height(76)
+    }.width('100%').alignItems(HorizontalAlign.Start)
+  }
+
+  build() {
+    Column() {
+      PMAppBar({ title: '从材料开始', backLabel: '项目', rightActionText: this.draftId === '' ? '' : '刷新',
+        onRightTextAction: (): void => { this.error = ''; this.refresh(); } })
+      Scroll() {
+        Column({ space: 14 }) {
+          if (this.error !== '') Text(this.error).fontSize(PMFontSize.CAPTION).fontColor(PMColors.RISK)
+          if (this.notice !== '') Text(this.notice).fontSize(PMFontSize.CAPTION).fontColor(PMColors.BRAND)
+          if (this.busy) Text('正在处理，请等待服务端回执').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+
+          if (this.projectId === '') {
+            Column({ space: 8 }) {
+              Text('第一步 · 放材料').fontSize(PMFontSize.BODY).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
+              Text('粘贴要求、记录或计划，先不用整理成完整目标。')
+                .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
+              TextArea({ text: this.material, placeholder: '例如课程要求、实验记录、群里的通知' })
+                .onChange((value: string) => { this.material = value; }).height(120)
+              Row({ space: 8 }) {
+                PMButton({ label: '加入材料', disabled: this.busy || this.material.trim().length === 0,
+                  onAction: (): void => { this.addMaterial(); } })
+                PMButton({ label: '读懂材料', secondary: true, disabled: this.busy || this.preview.materials.length === 0,
+                  onAction: (): void => { this.understand(); } })
+              }
+              if (this.preview.materials.length > 0) this.MaterialList()
+            }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.MD)
+            .backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.MD).border({ width: 1, color: PMColors.BORDER_SUBTLE })
+
+            if (this.preview.draftId !== '') this.PreviewBody()
+
+            if (this.preview.draftId !== '' && this.preview.materials.length > 0) {
+              Column({ space: 8 }) {
+                Text('用一句话纠正').fontSize(PMFontSize.BODY).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
+                Text('明确、在范围内的要求会直接生效；含糊的会留成待确认的解释。')
+                  .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
+                TextArea({ text: this.correction, placeholder: '例如：本周先确认设备可用性' })
+                  .onChange((value: string) => { this.correction = value; }).height(76)
+                PMButton({ label: '按这句话调整', secondary: true,
+                  disabled: this.busy || this.correction.trim().length === 0 || this.preview.revision === 0,
+                  onAction: (): void => { this.revise(); } })
+              }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.MD)
+              .backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.MD).border({ width: 1, color: PMColors.BORDER_SUBTLE })
+            }
+
+            if (this.preview.draftId !== '' && this.preview.materials.length > 0) {
+              Column({ space: 10 }) {
+                this.ConfirmFields()
+                PMButton({ label: '确认理解，建立项目', disabled: this.busy ||
+                  !intakeCanConfirm(this.preview.status, this.preview.expiresAt, Date.now()) || this.accepted.goal.trim().length === 0,
+                  onAction: (): void => { this.confirm(); } })
+              }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.MD)
+              .backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.MD).border({ width: 1, color: PMColors.BORDER_SUBTLE })
+            }
+          } else {
+            Column({ space: 10 }) {
+              Text('项目已建立').fontSize(PMFontSize.TITLE).fontColor(PMColors.INK_PRIMARY)
+              Text(intakeSyncSummary(this.preview.materials)).fontSize(PMFontSize.BODY).fontColor(PMColors.INK_SECONDARY)
+              if (this.sync !== null && this.sync.pending > 0) {
+                Text('还有材料没同步完成；项目已经存在，重试不会重复建项。')
+                  .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+                PMButton({ label: '重新同步材料', secondary: true, disabled: this.busy,
+                  onAction: (): void => { this.retrySync(); } })
+              }
+              PMButton({ label: '进入项目', onAction: (): void => { this.openProject(); } })
+            }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.MD)
+            .backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.MD).border({ width: 1, color: PMColors.BORDER_SUBTLE })
+          }
+        }.width('100%').padding(PMSpacing.LG).alignItems(HorizontalAlign.Start)
+      }.layoutWeight(1).width('100%').align(Alignment.TopStart).scrollBar(BarState.Off)
+    }.width('100%').height('100%').backgroundColor(PMColors.BACKGROUND)
+  }
+}
+
+
+

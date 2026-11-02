@@ -15,6 +15,64 @@ import { readSourceObservation } from "@/lib/conversation/sourceObservation";
 export type WorkspaceBilling = { userId: string; turnId: string; purpose: ModelPurpose; sessionId?: string; inputTokens?: number; outputTokens?: number; provider?: string; requestHash?: string;
   callId?: string; promptId?: string; promptVersion?: string; outputSchemaVersion?: number };
 export type ReviewBilling = { userId: string; sessionId: string; reviewProposalId: string };
+/**
+ * 项目前材料理解只按当前账户计费。
+ *
+ * `reserveCloudCall(projectId?)` 在没有项目时会直接返回——项目前调用不能走这条无项目
+ * 捷径，否则预览会绕过用户额度与处理许可。这里复用同一张 AccountCloudUsage，
+ * 但绑定草稿身份、修订、会话与「曾经派发」回执：请求结果未知时不会自动重发。
+ */
+export type IntakeBilling = { userId: string; sessionId: string; draftId: string; revision: number; requestHash: string; provider?: string };
+const processingState = (value: unknown) => value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
+export async function reserveIntakeCloudCall(billing: IntakeBilling): Promise<void> {
+  await db.$transaction(async tx => {
+    // 用户行与草稿行都先取写锁，令确认、修订和派发互斥。
+    await tx.projectIntakeDraft.updateMany({ where: { id: billing.draftId }, data: { revision: { increment: 0 } } });
+    const draft = await tx.projectIntakeDraft.findFirst({ where: { id: billing.draftId, ownerUserId: billing.userId } });
+    if (!draft) throw new AppError("INTAKE_NOT_FOUND", "材料预览不存在或不可访问", 404);
+    if (["CONFIRMED", "WITHDRAWN", "EXPIRED"].includes(draft.status))
+      throw new AppError("INTAKE_CLOSED", "这份材料预览已结束，请重新开始", 409);
+    if (+draft.expiresAt <= Date.now()) throw new AppError("INTAKE_EXPIRED", "材料预览已到期，原件已进入清理", 410);
+    if (draft.revision !== billing.revision) throw new AppError("INTAKE_CHANGED", "材料或理解已变化，请重新核对这一版", 409);
+    if (!await tx.authSession.findFirst({ where: { id: billing.sessionId, userId: billing.userId, revokedAt: null, expiresAt: { gt: new Date() } } }))
+      throw new AppError("UNAUTHORIZED", "登录状态已变化，未继续处理材料", 401);
+    const processing = processingState(draft.processingJson);
+    if (processing.consent !== true)
+      throw new AppError("INTAKE_CONSENT_REQUIRED", "需要先同意把材料交给云模型处理，才能生成理解", 403);
+    const dispatches = Array.isArray(processing.dispatches) ? processing.dispatches as Array<Record<string, unknown>> : [];
+    if (dispatches.some(d => d.requestHash === billing.requestHash))
+      throw new AppError("CALL_ALREADY_RESERVED", "原理解请求已发出，请读取原回执", 409);
+    const account = await tx.accountSecurity.findUnique({ where: { userId: billing.userId } });
+    if (account) {
+      if (!account.emailVerifiedAt || account.dailyCloudLimit <= 0)
+        throw new AppError("CLOUD_ACCESS_DISABLED", "当前账号未开通云模型额度，可先保存材料", 403);
+      const day = new Date().toISOString().slice(0, 10);
+      await tx.accountCloudUsage.upsert({ where: { userId_day: { userId: billing.userId, day } }, create: { userId: billing.userId, day, used: 0 }, update: {} });
+      const consumed = await tx.accountCloudUsage.updateMany({
+        where: { userId: billing.userId, day, used: { lt: account.dailyCloudLimit } }, data: { used: { increment: 1 } },
+      });
+      if (!consumed.count) throw new AppError("CLOUD_QUOTA_EXHAUSTED", "今日云模型调用额度已用完", 429);
+    }
+    await tx.projectIntakeDraft.update({ where: { id: draft.id }, data: { processingJson: json({ ...processing,
+      cloudState: "DISPATCH_COMMITTED", provider: billing.provider ?? null, revision: billing.revision,
+      dispatches: [...dispatches, { requestHash: billing.requestHash, revision: billing.revision, provider: billing.provider ?? null,
+        reservedAt: new Date().toISOString(), settlement: "UNKNOWN" }].slice(-8) }) } });
+  });
+}
+
+/** 结算一次草稿云调用：未知用量保持未知，不填 0，也不自动重发。 */
+export async function settleIntakeCloudCall(input: { draftId: string; requestHash: string; state: "SETTLED" | "FAILED" | "UNKNOWN";
+  usage?: { inputTokens: number | null; outputTokens: number | null }; provider?: string | null }) {
+  const draft = await db.projectIntakeDraft.findUnique({ where: { id: input.draftId } });
+  if (!draft) return;
+  const processing = processingState(draft.processingJson);
+  const dispatches = Array.isArray(processing.dispatches) ? processing.dispatches as Array<Record<string, unknown>> : [];
+  const next = dispatches.map(d => d.requestHash === input.requestHash ? { ...d, settlement: input.state,
+    usage: input.usage ?? { inputTokens: null, outputTokens: null }, usageUnknown: !input.usage || input.usage.inputTokens === null || input.usage.outputTokens === null,
+    provider: input.provider ?? d.provider ?? null, settledAt: new Date().toISOString() } : d);
+  await db.projectIntakeDraft.update({ where: { id: input.draftId }, data: { processingJson: json({ ...processing,
+    cloudState: input.state === "SETTLED" ? "SETTLED" : input.state === "FAILED" ? "FAILED" : "UNKNOWN", dispatches: next }) } });
+}
 /** One actor and one durable proposal reservation; never charges every project owner. */
 export async function reserveReviewCloudCall(billing: ReviewBilling): Promise<void> {
   await db.$transaction(async tx => {

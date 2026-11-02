@@ -62,29 +62,46 @@ export async function createProject(input: ProjectCreateInput) {
   });
 }
 
-export async function createOwnedProject(input: ProjectCreateInput, userId: string, requestId: string, sessionId?: string) {
+/**
+ * 建项事务的唯一实现：Project + OWNER + AgentRun 回执在同一次提交里。
+ *
+ * 项目前材料确认复用这一个函数，而不是另写一套建项：`hashExtra` 只把
+ * 草稿身份、修订与预览 hash 并入去重 hash，让「同一请求改内容」仍然被拒；
+ * 存进 Project 的永远只有用户接受的那几个业务字段。
+ */
+export async function createOwnedProjectInTx(tx: import("@/lib/generated/prisma/client").Prisma.TransactionClient,
+  input: ProjectCreateInput, userId: string, requestId: string, options: {
+    sessionId?: string; provider?: string; hashExtra?: Record<string, unknown>; resultExtra?: Record<string, unknown>;
+    traceExtra?: Record<string, unknown>;
+  } = {}) {
   const { requestId: _request, ...fields } = input;
   void _request;
-  const hash = jsonHash(fields), provider = "project-create-v1", externalRequestId = `${userId}:${requestId}`;
-  return db.$transaction(async tx => {
-    await tx.user.update({ where: { id: userId }, data: { continuitySeq: { increment: 0 } } });
-    if (sessionId && !await tx.authSession.findFirst({ where: { id: sessionId, userId, revokedAt: null, expiresAt: { gt: new Date() } } }))
-      throw new AppError("UNAUTHORIZED", "登录状态已变化，未创建项目", 401);
-    const previous = await tx.agentRun.findUnique({ where: { provider_externalRequestId: { provider, externalRequestId } } });
-    if (previous) {
-      if (record(previous.trace).payloadHash !== hash) throw new AppError("IDEMPOTENCY_CONFLICT", "同一建项请求的内容已变化，请重新提交", 409);
-      const project = await tx.project.findFirst({ where: { id: String(record(previous.resultJson).projectId), deletionRequestedAt: null,
-        memberships: { some: { userId, role: "OWNER" } } } });
-      if (!project) throw new AppError("PROJECT_NOT_FOUND", "原请求的项目已不可用，不会重新创建", 404);
-      return { project, replayed: true };
-    }
-    const project = await tx.project.create({ data: { ...fields, scenario: fields.scenario as ProjectScenario,
-      deadline: fields.deadline ? new Date(`${fields.deadline}T23:59:59`) : null,
-      memberships: { create: { userId, role: "OWNER" } } } });
-    await tx.agentRun.create({ data: { provider, externalRequestId, runType: "ACTION", status: "SUCCESS",
-      trace: { ownerId: userId, payloadHash: hash }, resultJson: { projectId: project.id } } });
-    return { project, replayed: false };
-  });
+  const hash = jsonHash(options.hashExtra ? { ...fields, intake: options.hashExtra } : fields);
+  const provider = options.provider ?? "project-create-v1", externalRequestId = `${userId}:${requestId}`;
+  await tx.user.update({ where: { id: userId }, data: { continuitySeq: { increment: 0 } } });
+  if (options.sessionId && !await tx.authSession.findFirst({ where: { id: options.sessionId, userId, revokedAt: null, expiresAt: { gt: new Date() } } }))
+    throw new AppError("UNAUTHORIZED", "登录状态已变化，未创建项目", 401);
+  const previous = await tx.agentRun.findUnique({ where: { provider_externalRequestId: { provider, externalRequestId } } });
+  if (previous) {
+    if (record(previous.trace).payloadHash !== hash) throw new AppError("IDEMPOTENCY_CONFLICT", "同一建项请求的内容已变化，请重新提交", 409);
+    if (options.hashExtra && record(previous.trace).intakeHash !== jsonHash(options.hashExtra))
+      throw new AppError("IDEMPOTENCY_CONFLICT", "同一建项请求已绑定另一份材料预览", 409);
+    const project = await tx.project.findFirst({ where: { id: String(record(previous.resultJson).projectId), deletionRequestedAt: null,
+      memberships: { some: { userId, role: "OWNER" } } } });
+    if (!project) throw new AppError("PROJECT_NOT_FOUND", "原请求的项目已不可用，不会重新创建", 404);
+    return { project, replayed: true };
+  }
+  const project = await tx.project.create({ data: { ...fields, scenario: fields.scenario as ProjectScenario,
+    deadline: fields.deadline ? new Date(`${fields.deadline}T23:59:59`) : null,
+    memberships: { create: { userId, role: "OWNER" } } } });
+  await tx.agentRun.create({ data: { provider, externalRequestId, runType: "ACTION", status: "SUCCESS",
+    trace: { ownerId: userId, payloadHash: hash, ...(options.hashExtra ? { intakeHash: jsonHash(options.hashExtra) } : {}), ...options.traceExtra },
+    resultJson: { projectId: project.id, ...options.resultExtra } } });
+  return { project, replayed: false };
+}
+
+export async function createOwnedProject(input: ProjectCreateInput, userId: string, requestId: string, sessionId?: string) {
+  return db.$transaction(tx => createOwnedProjectInTx(tx, input, userId, requestId, { sessionId }));
 }
 
 export async function updateProject(projectId: string, input: ProjectUpdateInput) {

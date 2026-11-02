@@ -12,6 +12,7 @@ import { validateWebSource } from "@/lib/conversation/researchScope";
 import type { ConversationSource } from "@/lib/types/conversation";
 import { readSourceObservation } from "@/lib/conversation/sourceObservation";
 import { assertDirectiveEffect } from "@/lib/continuity/directiveService";
+import { intakeDirectiveEpoch } from "@/lib/intake/contracts";
 
 export type WorkspaceBilling = { userId: string; turnId: string; purpose: ModelPurpose; sessionId?: string; inputTokens?: number; outputTokens?: number; provider?: string; requestHash?: string;
   callId?: string; promptId?: string; promptVersion?: string; outputSchemaVersion?: number };
@@ -23,7 +24,7 @@ export type ReviewBilling = { userId: string; sessionId: string; reviewProposalI
  * 捷径，否则预览会绕过用户额度与处理许可。这里复用同一张 AccountCloudUsage，
  * 但绑定草稿身份、修订、会话与「曾经派发」回执：请求结果未知时不会自动重发。
  */
-export type IntakeBilling = { userId: string; sessionId: string; draftId: string; revision: number; requestHash: string; provider?: string };
+export type IntakeBilling = { userId: string; sessionId: string; draftId: string; revision: number; requestHash: string; provider?: string; guidanceEpoch?: string };
 const processingState = (value: unknown) => value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
 export async function reserveIntakeCloudCall(billing: IntakeBilling): Promise<void> {
   await db.$transaction(async tx => {
@@ -35,6 +36,8 @@ export async function reserveIntakeCloudCall(billing: IntakeBilling): Promise<vo
       throw new AppError("INTAKE_CLOSED", "这份材料预览已结束，请重新开始", 409);
     if (+draft.expiresAt <= Date.now()) throw new AppError("INTAKE_EXPIRED", "材料预览已到期，原件已进入清理", 410);
     if (draft.revision !== billing.revision) throw new AppError("INTAKE_CHANGED", "材料或理解已变化，请重新核对这一版", 409);
+    if (billing.guidanceEpoch && billing.guidanceEpoch !== intakeDirectiveEpoch(draft.userRevisionJson))
+      throw new AppError("INTAKE_SCOPE_CHANGED", "工作指引已到期或变化，请重新核对后再理解", 409);
     if (!await tx.authSession.findFirst({ where: { id: billing.sessionId, userId: billing.userId, revokedAt: null, expiresAt: { gt: new Date() } } }))
       throw new AppError("UNAUTHORIZED", "登录状态已变化，未继续处理材料", 401);
     const processing = processingState(draft.processingJson);

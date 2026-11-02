@@ -12,7 +12,7 @@ import { buildPromptMessages } from "@/lib/agent/promptSpec";
 import { chatWithLLMWithMeta } from "@/lib/agent/llmAgent";
 import {
   INTAKE_MATERIAL_LIMIT, INTAKE_TTL_MS, INTAKE_TEXT_LIMIT,
-  acceptedHashOf, createDraftSchema, materialLabel, materialsHashOf, previewHashOf, textMaterialSchema,
+  acceptedHashOf, createDraftSchema, intakeDirectiveEpoch, materialLabel, materialsHashOf, previewHashOf, textMaterialSchema,
   understandingSchema, type IntakeAcceptedFields, type IntakePreview, type IntakeUnderstanding,
   understandSchema, reviseSchema, confirmSchema,
 } from "@/lib/intake/contracts";
@@ -87,10 +87,12 @@ async function withDraftLock<T>(actor: ConversationActor, draftId: string, run: 
 
 function nextRevision(draft: { revision: number }) { return draft.revision + 1; }
 
-async function publishUnderstanding(actor: ConversationActor, draftId: string, revision: number, data: Prisma.ProjectIntakeDraftUpdateInput, advance = false) {
+async function publishUnderstanding(actor: ConversationActor, draftId: string, revision: number, data: Prisma.ProjectIntakeDraftUpdateInput, advance = false, guidanceEpoch?: string) {
   return withDraftLock(actor, draftId, async (tx, current) => {
     assertOpen(current);
     if (current.revision !== revision) throw new AppError("INTAKE_CHANGED", "材料或用户要求已变化，未发布旧模型结果", 409);
+    if (guidanceEpoch && intakeDirectiveEpoch(current.userRevisionJson) !== guidanceEpoch)
+      throw new AppError("INTAKE_SCOPE_CHANGED", "工作指引已到期或变化，未发布旧模型结果", 409);
     await tx.projectIntakeDraft.update({ where: { id: draftId }, data: { ...data, ...(advance ? { revision: nextRevision(current) } : {}) } });
   });
 }
@@ -193,8 +195,9 @@ function materialTextFor(draftId: string, materials: Array<{ id: string; rawText
 }
 
 function quoteIsVerbatim(quote: string, material: { rawText: string | null }) {
-  const text = (material.rawText ?? "").replace(/\s+/g, "");
-  return text.includes(quote.replace(/\s+/g, ""));
+  const normalize = (value: string) => value.replace(/\s+/g, " ").trim();
+  const text = normalize(material.rawText ?? "");
+  return normalize(quote).length > 0 && text.includes(normalize(quote));
 }
 
 /**
@@ -207,6 +210,7 @@ export async function understandIntake(actor: ConversationActor, draftId: string
   await assertSession(actor);
   const draft = await loadDraft(actor, draftId);
   assertOpen(draft);
+  const guidanceEpoch = intakeDirectiveEpoch(draft.userRevisionJson);
   if (record(draft.processingJson).consent !== true)
     throw new AppError("INTAKE_CONSENT_REQUIRED", "需要先同意把材料交给云模型处理", 403);
   const materials = await db.projectIntakeMaterial.findMany({ where: { draftId: draft.id }, orderBy: { ordinal: "asc" } });
@@ -214,14 +218,14 @@ export async function understandIntake(actor: ConversationActor, draftId: string
   const requestHash = jsonHash({ draftId: draft.id, requestId: input.requestId });
   const dispatches = record(draft.processingJson).dispatches;
   if (Array.isArray(dispatches) && dispatches.some(d => record(d).requestHash === requestHash)) {
-    if (draft.understandingState === "READY" && record(draft.previewJson).requestHash === requestHash) return readIntake(actor, draft.id);
+    if (draft.understandingState === "READY" && record(draft.previewJson).requestHash === requestHash && record(draft.previewJson).guidanceEpoch === guidanceEpoch) return readIntake(actor, draft.id);
     throw new AppError("CALL_ALREADY_RESERVED", "原理解请求已经派发，请核对原结果，未知请求不重复发送", 409);
   }
 
   const usable = materials.filter(m => (m.rawText ?? "").trim().length > 0);
   if (!usable.length) {
     await publishUnderstanding(actor, draft.id, draft.revision, { understandingState: "MATERIAL_ONLY", status: "DRAFT",
-      previewJson: json({ note: "文件尚无可读文本，保持原文状态" }) });
+      previewJson: json({ note: "文件尚无可读文本，保持原文状态" }) }, false, guidanceEpoch);
     return readIntake(actor, draft.id);
   }
 
@@ -238,7 +242,7 @@ export async function understandIntake(actor: ConversationActor, draftId: string
   try {
     // 实际 provider 适配器负责紧邻 HTTP 派发的唯一预占；注入替身也走同一守卫。
     if (dependencies.runModel) await reserveIntakeCloudCall({ userId: actor.userId, sessionId: actor.sessionId, draftId: draft.id,
-      revision: draft.revision, requestHash });
+      revision: draft.revision, requestHash, guidanceEpoch });
     const controls = record(draft.userRevisionJson);
     const admitted = Array.isArray(controls.admittedDirectives) ? controls.admittedDirectives.map(record)
       .filter(d => !d.validUntil || Date.parse(String(d.validUntil)) > Date.now()) : [];
@@ -249,7 +253,7 @@ export async function understandIntake(actor: ConversationActor, draftId: string
     result = await (dependencies.runModel ?? ((prompt: ReturnType<typeof buildPromptMessages>) =>
       chatWithLLMWithMeta(prompt, undefined, undefined, undefined,
         { outputTokens: intakeUnderstandingV1.maxOutputTokens, jsonOutput: true },
-        { userId: actor.userId, sessionId: actor.sessionId, draftId: draft.id, revision: draft.revision, requestHash })))(messages);
+        { userId: actor.userId, sessionId: actor.sessionId, draftId: draft.id, revision: draft.revision, requestHash, guidanceEpoch })))(messages);
     understanding = understandingSchema.parse(JSON.parse(result.data));
   } catch (error) {
     const code = error instanceof AppError ? error.code : "MODEL_OUTPUT_INVALID";
@@ -257,7 +261,7 @@ export async function understandIntake(actor: ConversationActor, draftId: string
       usage: result?.usage, provider: result?.provider ?? null }).catch(() => undefined);
     if (code !== "CALL_ALREADY_RESERVED") await publishUnderstanding(actor, draft.id, draft.revision, { understandingState: "FAILED", status: "DRAFT",
       previewJson: json({ failureCode: code, failureAt: new Date().toISOString(),
-        note: "这一版没有形成模型理解；原件仍是用户材料，不是项目事实" }) }).catch(() => undefined);
+        note: "这一版没有形成模型理解；原件仍是用户材料，不是项目事实" }) }, false, guidanceEpoch).catch(() => undefined);
     throw error;
   }
   await settleIntakeCloudCall({ draftId: draft.id, requestHash, state: "SETTLED",
@@ -270,14 +274,14 @@ export async function understandIntake(actor: ConversationActor, draftId: string
     if (!material || !quoteIsVerbatim(quote.quote, material)) {
       await publishUnderstanding(actor, draft.id, draft.revision, { understandingState: "FAILED", status: "DRAFT",
         previewJson: json({ failureCode: "UNSUPPORTED_QUOTE", failureAt: new Date().toISOString(),
-          note: "模型引用的原文摘录未通过核对，这一版没有保存；材料本身未变" }) }).catch(() => undefined);
+          note: "模型引用的原文摘录未通过核对，这一版没有保存；材料本身未变" }) }, false, guidanceEpoch).catch(() => undefined);
       throw new AppError("UNSUPPORTED_QUOTE", "模型引用的原文摘录未通过核对，这一版没有保存", 409);
     }
   }
   await publishUnderstanding(actor, draft.id, draft.revision, {
     understandingJson: json(understanding), understandingHash: jsonHash(understanding),
-    previewJson: json({ requestHash, provider: result.provider, usageUnknown: result.usageUnknown ?? (result.usage?.inputTokens == null || result.usage?.outputTokens == null) }),
-    understandingState: "READY", status: "PREVIEW_READY", understoodAt: new Date() }, true);
+    previewJson: json({ requestHash, guidanceEpoch, provider: result.provider, usageUnknown: result.usageUnknown ?? (result.usage?.inputTokens == null || result.usage?.outputTokens == null) }),
+    understandingState: "READY", status: "PREVIEW_READY", understoodAt: new Date() }, true, guidanceEpoch);
   await db.agentRun.create({ data: { provider: result.provider, runType: "ACTION", status: "SUCCESS",
     externalRequestId: `intake-understanding:${draft.id}:${draft.revision}:${input.requestId}`.slice(0, 180),
     trace: json({ purpose: "INTAKE_UNDERSTANDING", draftId: draft.id, revision: draft.revision,
@@ -349,7 +353,9 @@ async function buildPreviewFrom(draftId: string, tx: Tx = db): Promise<IntakePre
   const draft = await tx.projectIntakeDraft.findUniqueOrThrow({ where: { id: draftId } });
   const materials = await tx.projectIntakeMaterial.findMany({ where: { draftId }, orderBy: { ordinal: "asc" } });
   const understanding = draft.understandingJson ? understandingSchema.safeParse(draft.understandingJson) : null;
-  const ready = draft.understandingState === "READY" && understanding?.success === true;
+  const guidanceChanged = record(draft.previewJson).guidanceEpoch !== intakeDirectiveEpoch(draft.userRevisionJson);
+  const stale = draft.understandingState === "READY" && guidanceChanged;
+  const ready = draft.understandingState === "READY" && !guidanceChanged && understanding?.success === true;
   const revision = record(draft.userRevisionJson);
   const admitted = Array.isArray(revision.admittedDirectives) ? revision.admittedDirectives.map(record) : null;
   const active = admitted?.filter(d => !d.validUntil || Date.parse(String(d.validUntil)) > Date.now());
@@ -357,7 +363,7 @@ async function buildPreviewFrom(draftId: string, tx: Tx = db): Promise<IntakePre
   const activeConstraints = active?.flatMap(d => d.kind === "CONSTRAINT" ? [String(d.quote)] : Array.isArray(d.constraints) ? d.constraints.map(String) : []);
   const correctionActive = typeof revision.until !== "string" || Date.parse(revision.until) > Date.now();
   const accepted = draft.acceptedJson ? { ...record(draft.acceptedJson) } as unknown as IntakeAcceptedFields : null;
-  const understandingHash = typeof draft.understandingHash === "string" ? draft.understandingHash : null;
+  const understandingHash = ready && typeof draft.understandingHash === "string" ? draft.understandingHash : null;
   const userRevisionHash = typeof draft.userRevisionHash === "string" ? jsonHash({ hash: draft.userRevisionHash,
     effective: admitted ? admitted.map(d => ({ commandId: d.commandId, active: !d.validUntil || Date.parse(String(d.validUntil)) > Date.now() })) : correctionActive }) : null;
   const acceptedHash = accepted ? acceptedHashOf(accepted) : null;
@@ -370,16 +376,16 @@ async function buildPreviewFrom(draftId: string, tx: Tx = db): Promise<IntakePre
       meaning: "尚未生成模型理解；这是材料原文片段。" }));
   return {
     schemaVersion: 1, draftId: draft.id, revision: draft.revision,
-    status: draft.status as IntakePreview["status"], materialsHash,
-    understandingState: draft.understandingState as IntakePreview["understandingState"],
+    status: stale && draft.status === "PREVIEW_READY" ? "DRAFT" : draft.status as IntakePreview["status"], materialsHash,
+    understandingState: stale ? "NONE" : draft.understandingState as IntakePreview["understandingState"],
     model: { used: ready, provider: ready ? String(record(draft.previewJson).provider ?? "UNKNOWN") : null,
-      reason: ready ? null : typeof record(draft.previewJson).failureCode === "string" ? String(record(draft.previewJson).failureCode) : draft.understandingState === "NONE" ? "NOT_RUN" : null,
+      reason: ready ? null : stale ? "INTAKE_SCOPE_CHANGED" : typeof record(draft.previewJson).failureCode === "string" ? String(record(draft.previewJson).failureCode) : draft.understandingState === "NONE" ? "NOT_RUN" : null,
       usageUnknown: ready ? record(draft.previewJson).usageUnknown !== false : true },
     summary: ready ? understanding!.data.summary : null,
     statements,
     suggested: ready ? { ...understanding!.data.suggested } as IntakeAcceptedFields : null,
     constraints: ready ? understanding!.data.constraints.map(c => ({ text: c.text, basis: c.basis, materialId: c.materialId ?? null }))
-      : (correctionActive && Array.isArray(revision.constraints) ? revision.constraints as string[] : []).map(text => ({ text, basis: "STATED" as const, materialId: null })),
+      : (activeConstraints ?? (correctionActive && Array.isArray(revision.constraints) ? revision.constraints as string[] : [])).map(text => ({ text, basis: "STATED" as const, materialId: null })),
     unknowns: ready ? understanding!.data.unknowns : [],
     successCriteria: ready ? understanding!.data.successCriteria : [],
     nextQuestion: ready ? understanding!.data.nextQuestion : null,

@@ -50,7 +50,7 @@ export const acceptedFieldsSchema = z.object({
   description: z.string().trim().min(10).max(500),
   goal: z.string().trim().min(2).max(300),
   scenario: z.enum(["COURSE_DESIGN", "RESEARCH", "COMPETITION", "INNOVATION", "LAB_TASK"]),
-  deadline: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  deadline: z.iso.date().optional(),
 }).strict();
 
 export const confirmSchema = z.object({
@@ -155,6 +155,16 @@ export function previewHashOf(input: {
 
 export function acceptedHashOf(accepted: IntakeAcceptedFields) {
   return jsonHash(accepted);
+}
+
+/** 同一份指引跨过期限也产生新有效视图，不依赖用户再发一条事件。 */
+export function intakeDirectiveEpoch(value: unknown, now = Date.now()) {
+  const review = value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
+  const effective = Array.isArray(review.admittedDirectives) ? review.admittedDirectives.map(value => {
+    const directive = value as Record<string, unknown>;
+    return !directive.validUntil || Date.parse(String(directive.validUntil)) > now;
+  }) : typeof review.until !== "string" || Date.parse(review.until) > now;
+  return jsonHash({ review, effective });
 }
 
 /** 材料标签只用于用户区分来源，不使用原始文件名全文。 */

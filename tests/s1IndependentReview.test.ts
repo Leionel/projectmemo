@@ -7,6 +7,7 @@ import { createSession } from "@/lib/auth/session";
 import * as intake from "@/lib/services/projectIntakeService";
 import { saveFileToStorage } from "@/lib/storage/attachmentStorage";
 import type { ConversationActor } from "@/lib/types/conversation";
+import { acceptedFieldsSchema, intakeDirectiveEpoch } from "@/lib/intake/contracts";
 
 beforeAll(() => { process.env.ATTACHMENT_DIR = path.join(isolated.dir, "attachments"); });
 afterAll(async () => { vi.restoreAllMocks(); vi.unstubAllEnvs(); await db.$disconnect(); });
@@ -215,4 +216,68 @@ it("新增材料不会撤销用户的模型禁令，预览同意也不能绕过�
   const modelCall = vi.fn(async () => model(f.material.materialId));
   await expect(intake.understandIntake(f.actor, f.draftId, { requestId: "u", processingConsent: true }, { runModel: modelCall })).rejects.toMatchObject({ code: "DIRECTIVE_EFFECT_DENIED" });
   expect(modelCall).not.toHaveBeenCalled();
+});
+
+it("原文核对保留英文词边界，日期校验拒绝不存在的日历日期", () => {
+  expect(intake.intakeTesting.quoteIsVerbatim("notable", { rawText: "The agent is not able to complete this task." })).toBe(false);
+  expect(intake.intakeTesting.quoteIsVerbatim("not able", { rawText: "The agent is not\nable to complete this task." })).toBe(true);
+  expect(acceptedFieldsSchema.safeParse({ ...accepted, deadline: "2026-02-31" }).success).toBe(false);
+  expect(acceptedFieldsSchema.safeParse({ ...accepted, deadline: "2026-02-28" }).success).toBe(true);
+});
+
+it("读取后派发前越过期限，不消耗新额度也不登记旧范围请求", async () => {
+  const f = await fixture();
+  const revised = await intake.reviseIntake(f.actor, f.draftId, { requestId: "r", expectedRevision: f.material.revision, text: "今天先核对论文方法" });
+  const draft = await db.projectIntakeDraft.findUniqueOrThrow({ where: { id: f.draftId } });
+  const epoch = intakeDirectiveEpoch(draft.userRevisionJson);
+  const clock = vi.spyOn(Date, "now").mockReturnValue(Date.parse(revised.until!)+1);
+  try {
+    const { reserveIntakeCloudCall } = await import("@/lib/auth/cloudQuota");
+    await expect(reserveIntakeCloudCall({ ...f.actor, draftId: f.draftId, revision: draft.revision, requestHash: "late", guidanceEpoch: epoch }))
+      .rejects.toMatchObject({ code: "INTAKE_SCOPE_CHANGED" });
+    const current = await db.projectIntakeDraft.findUniqueOrThrow({ where: { id: f.draftId } });
+    expect((current.processingJson as { dispatches?: unknown[] }).dispatches ?? []).toHaveLength(0);
+  } finally { clock.mockRestore(); }
+});
+
+it.each([false, true])("模型在途跨过工作指引期限，旧成功/失败不发布但保留结算（失败=%s）", async failed => {
+  const f = await fixture();
+  const revised = await intake.reviseIntake(f.actor, f.draftId, { requestId: "r", expectedRevision: f.material.revision, text: "今天先核对论文方法" });
+  let enter!: () => void, release!: () => void;
+  const ready = new Promise<void>(r => { enter = r; }), gate = new Promise<void>(r => { release = r; });
+  const pending = intake.understandIntake(f.actor, f.draftId, { requestId: "u", processingConsent: true }, { runModel: async () => {
+    enter(); await gate;
+    if (failed) throw new Error("synthetic lost response");
+    return model(f.material.materialId);
+  } });
+  const outcome = pending.catch(e => e); await ready;
+  const clock = vi.spyOn(Date, "now").mockReturnValue(Date.parse(revised.until!)+1);
+  try {
+    release();
+    const result = await outcome;
+    if (!failed) expect(result).toMatchObject({ code: "INTAKE_SCOPE_CHANGED" });
+    const current = await db.projectIntakeDraft.findUniqueOrThrow({ where: { id: f.draftId } });
+    expect(current.understandingState).toBe("NONE"); expect(current.understandingJson).toBeNull();
+    const dispatches = (current.processingJson as { dispatches: Array<{ settlement: string; usage?: { inputTokens: number | null } }> }).dispatches;
+    expect(dispatches).toHaveLength(1); expect(dispatches[0].settlement).toBe(failed ? "UNKNOWN" : "SETTLED");
+    if (!failed) expect(dispatches[0].usage?.inputTokens).toBe(30);
+    const retry = vi.fn(async () => model(f.material.materialId));
+    await expect(intake.understandIntake(f.actor, f.draftId, { requestId: "u", processingConsent: true }, { runModel: retry }))
+      .rejects.toMatchObject({ code: "CALL_ALREADY_RESERVED" });
+    expect(retry).not.toHaveBeenCalled();
+  } finally { release(); clock.mockRestore(); }
+});
+
+it("已形成的理解在指引到期后立即退出有效视图，旧 hash 不能确认", async () => {
+  const f = await fixture();
+  const revised = await intake.reviseIntake(f.actor, f.draftId, { requestId: "r", expectedRevision: f.material.revision, text: "今天先核对论文方法" });
+  const before = await intake.understandIntake(f.actor, f.draftId, { requestId: "u", processingConsent: true }, { runModel: async () => model(f.material.materialId) });
+  const clock = vi.spyOn(Date, "now").mockReturnValue(Date.parse(revised.until!)+1);
+  try {
+    const current = (await intake.readIntake(f.actor, f.draftId)).preview;
+    expect(current.understandingState).toBe("NONE"); expect(current.model.reason).toBe("INTAKE_SCOPE_CHANGED");
+    expect(current.suggested).toBeNull(); expect(current.previewHash).not.toBe(before.preview.previewHash);
+    await expect(intake.confirmIntake(f.actor, f.draftId, { requestId: "c", expectedRevision: before.preview.revision, previewHash: before.preview.previewHash, accepted }))
+      .rejects.toMatchObject({ code: "INTAKE_PREVIEW_STALE" });
+  } finally { clock.mockRestore(); }
 });

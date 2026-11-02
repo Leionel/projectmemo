@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { AppError } from "@/lib/api";
 import { record } from "@/lib/conversation/repository";
 import { invalidateContinuityConsumers } from "@/lib/continuity/invalidation";
-import { deleteAttachmentFile } from "@/lib/storage/attachmentStorage";
+import { deleteAttachmentFile, listProjectAttachmentFiles } from "@/lib/storage/attachmentStorage";
 
 // 清理责任复用 AgentRun 的原幂等回执，projectId=null 使无正文回执在项目级联后仍可查询。
 const provider = "project-deletion-v1";
@@ -41,13 +41,14 @@ export async function requestProjectDeletion(ownerId: string, projectId: string,
     if (expectedVersion !== project.updatedAt.toISOString()) throw new AppError("PROJECT_CHANGED", "项目已变化，请刷新后重新确认删除", 409);
     const members = await tx.projectMembership.findMany({ where: { projectId }, select: { userId: true } });
     const files = await tx.attachment.findMany({ where: { projectId }, select: { storageKey: true } });
+    const storageFiles = [...new Set([...files.map(f => f.storageKey), ...await listProjectAttachmentFiles(projectId)])];
     for (const member of members) await invalidateContinuityConsumers(tx, member.userId, { projectId }, ["PROJECT_DELETION"], true);
     await tx.project.update({ where: { id: projectId }, data: { deletionRequestedAt: new Date(), contextRevision: { increment: 1 } } });
     // 立即撤销项目消费资格，清理失败也不能恢复旧权限或继续模型/外部派发。
     await tx.projectMembership.deleteMany({ where: { projectId } });
     const run = await tx.agentRun.create({ data: { ...key, runType: "ACTION", status: "PARTIAL", projectId: null,
-      trace: { ownerId, deletedProjectId: projectId, files: [...new Set(files.map(f => f.storageKey))] },
-      resultJson: { status: "PENDING", filesRemaining: files.length, attempts: 0 } } });
+      trace: { ownerId, deletedProjectId: projectId, files: storageFiles },
+      resultJson: { status: "PENDING", filesRemaining: storageFiles.length, attempts: 0 } } });
     return view(run);
   });
 }

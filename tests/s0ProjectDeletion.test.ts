@@ -118,4 +118,17 @@ describe("项目销毁的服务端权限", () => {
     expect(await db.knowledgeCard.count({ where: { projectId: f.project.id } })).toBe(0);
     expect(fs.readdirSync(process.env.ATTACHMENT_DIR!).filter(file => file.startsWith(f.project.id + "_"))).toEqual([]);
   });
+  it("文件已落盘但登记事务未提交的遗留文件也清除，其他项目文件保留", async () => {
+    const f = await owned(), other = await owned();
+    const { saveFileToStorage } = await import("@/lib/storage/attachmentStorage");
+    const orphan = await saveFileToStorage(f.project.id, "orphan.txt", Buffer.from("synthetic interrupted registration"));
+    const unrelated = await saveFileToStorage(other.project.id, "keep.txt", Buffer.from("synthetic unrelated project"));
+    expect(await db.attachment.count({ where: { projectId: f.project.id } })).toBe(0);
+    const response = await f.request(); expect(response.status).toBe(202);
+    expect((await response.json()).deletion.filesRemaining).toBe(1);
+    const { processProjectDeletions } = await import("@/lib/services/projectDeletionService");
+    await processProjectDeletions();
+    expect(fs.existsSync(orphan.absolutePath)).toBe(false);
+    expect(fs.existsSync(unrelated.absolutePath)).toBe(true);
+  });
 });

@@ -94,6 +94,7 @@ struct Index {
   @State gcText: string = '';
   @State gcSubmitting: boolean = false;
   private gcGeneration: number = 0;
+  private dataLoadGeneration: number = 0;
   private gcRequestId: string = '';
   private gcRequestPayload: string = '';
   @State gcError: string = '';
@@ -210,6 +211,9 @@ struct Index {
     this.projects = [];
     this.projectDeletionNotice = '';
     this.gcGeneration += 1;
+    this.dataLoadGeneration += 1;
+    this.isLoading = false;
+    this.globalCardStates = [];
     this.showGlobalCapture = false;
     this.gcText = '';
     this.gcError = '';
@@ -395,13 +399,18 @@ struct Index {
   }
 
   private async loadAllData(silent: boolean = false): Promise<void> {
+    const token: string = SessionStore.getToken();
+    if (!this.isAuthenticated || token === '') return;
+    const generation: number = ++this.dataLoadGeneration;
     if (!silent) {
       this.isLoading = true;
     }
     this.errorMessage = '';
     this.dataSyncState = '同步中...';
     try {
-      this.projects = await this.projectService.listProjects();
+      const projects = await this.projectService.listProjects();
+      if (!this.isCurrentDataLoad(token, generation)) return;
+      this.projects = projects;
       this.projectDeletionNotice = this.projectService.deletionNotice;
       if (this.projects.length > 0) {
         WidgetDataService.updateWidgetWithProject(getContext(this), this.projects[0]).catch(() => {});
@@ -410,8 +419,11 @@ struct Index {
       // 归档项目单独取。主列表与跨项目聚合都不该包含它们，
       // 但归档必须可恢复，所以归档列表本身要拉回来放在管理入口里。
       try {
-        this.archivedProjects = await this.projectService.listArchivedProjects();
+        const archived = await this.projectService.listArchivedProjects();
+        if (!this.isCurrentDataLoad(token, generation)) return;
+        this.archivedProjects = archived;
       } catch (_e) {
+        if (!this.isCurrentDataLoad(token, generation)) return;
         // 归档列表拉取失败不影响主流程呈现
         this.archivedProjects = [];
       }
@@ -422,23 +434,27 @@ struct Index {
       const cards: KnowledgeCard[] = [];
       let failedCount = 0;
 
-      for (const p of this.projects) {
+      for (const p of projects) {
         try {
           const detail = await this.projectService.getProjectDetail(p.id);
+          if (!this.isCurrentDataLoad(token, generation)) return;
           for (const c of detail.cards) {
             c.projectId = p.id;
             c.projectTitle = p.title;
             cards.push(c);
           }
           const pIntervs = await this.interventionService.list(p.id);
+          if (!this.isCurrentDataLoad(token, generation)) return;
           for (const i of pIntervs) {
             intervs.push(i);
           }
           const pActs = await this.actionService.list(p.id);
+          if (!this.isCurrentDataLoad(token, generation)) return;
           for (const a of pActs) {
             acts.push(a);
           }
         } catch (err) {
+          if (!this.isCurrentDataLoad(token, generation)) return;
           failedCount++;
         }
       }
@@ -448,9 +464,10 @@ struct Index {
       this.allCards = cards;
       // 时态状态：区分 当前有效 / 已取代 / 存在冲突 / 待确认，不删除历史
       const statuses: CardTemporalStatus[] = [];
-      for (const p of this.projects) {
+      for (const p of projects) {
         try {
           const timeline = await this.memoryService.getDecisionTimeline(p.id);
+          if (!this.isCurrentDataLoad(token, generation)) return;
           for (const item of timeline.items) {
             const st = new CardTemporalStatus();
             st.cardId = item.card.id;
@@ -463,6 +480,7 @@ struct Index {
             statuses.push(st);
           }
         } catch (_e) {
+          if (!this.isCurrentDataLoad(token, generation)) return;
           // 单项目时态状态拉取失败不影响列表
         }
       }
@@ -473,6 +491,7 @@ struct Index {
         this.dataSyncState = '已同步';
       }
     } catch (e) {
+      if (!this.isCurrentDataLoad(token, generation)) return;
       if (e instanceof ApiError) {
         this.errorMessage = e.message;
       } else {
@@ -480,8 +499,12 @@ struct Index {
       }
       this.dataSyncState = '同步失败';
     } finally {
-      this.isLoading = false;
+      if (this.isCurrentDataLoad(token, generation)) this.isLoading = false;
     }
+  }
+
+  private isCurrentDataLoad(token: string, generation: number): boolean {
+    return this.isAuthenticated && token === SessionStore.getToken() && generation === this.dataLoadGeneration;
   }
 
   private openCreateDialog(): void {

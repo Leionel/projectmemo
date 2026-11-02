@@ -2,6 +2,10 @@ import { expect, test } from "@playwright/test";
 import { E2E_BASE_URL, E2E_PASSWORD, E2E_USERNAME } from "../scripts/e2e-env";
 
 test("同一浏览器从 OWNER 切换为共享项目 MEMBER：草稿不串号，直接销毁被拒绝", async ({ page, playwright }) => {
+  // 退出会撤销服务端会话：必须先创建本用例的会话，不能撤销 auth.setup 供后续用例共用的身份。
+  const sharedSetupToken = (await page.context().cookies()).find(cookie => cookie.name === "pm_session")!.value;
+  const ownerLogin = await page.request.post("/api/auth/login", { data: { username: E2E_USERNAME, password: E2E_PASSWORD, client: "web" } });
+  expect(ownerLogin.ok()).toBe(true);
   // 从真实成员资格确定共享项目，不误选其他旅程刚创建的 OWNER 私有项目。
   const memberProbe = await playwright.request.newContext({ baseURL: E2E_BASE_URL });
   const signed = await memberProbe.post("/api/auth/login", { data: { username: `${E2E_USERNAME}-member`, password: E2E_PASSWORD, client: "web" } });
@@ -12,6 +16,7 @@ test("同一浏览器从 OWNER 切换为共享项目 MEMBER：草稿不串号，
   const sharedIds = (await shared.json()).projects.map((p: { id: string }) => p.id);
   await memberProbe.dispose();
   const ownerToken = (await page.context().cookies()).find(cookie => cookie.name === "pm_session")!.value;
+  expect(ownerToken).not.toBe(sharedSetupToken);
   const initial = await page.request.get("/api/projects", { headers: { Authorization: `Bearer ${ownerToken}` } });
   expect(initial.ok(), await initial.text()).toBe(true);
   const project = (await initial.json()).projects.find((p: { id: string }) => sharedIds.includes(p.id));
@@ -40,4 +45,5 @@ test("同一浏览器从 OWNER 切换为共享项目 MEMBER：草稿不串号，
   await page.goto("/projects");
   await page.getByText("项目操作", { exact: true }).click();
   await expect(page.getByRole("button", { name: "删除项目", exact: true })).toHaveCount(0);
+  expect((await page.request.get("/api/auth/me", { headers: { Authorization: `Bearer ${sharedSetupToken}` } })).ok()).toBe(true);
 });

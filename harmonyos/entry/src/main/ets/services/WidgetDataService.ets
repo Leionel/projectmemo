@@ -15,6 +15,7 @@ const DOMAIN = 0x0000;
 const PREFS_NAME = 'projectmemo_widget_data';
 
 const KEY_PROJECT_ID = 'projectId';
+const KEY_OWNER_ID = 'projectOwnerId';
 const KEY_TITLE = 'projectTitle';
 const KEY_DAYS_LEFT = 'daysLeft';
 const KEY_HAS_DEADLINE = 'hasDeadline';
@@ -44,6 +45,11 @@ export interface WidgetPayload {
   status: string;
   statusTone: string; // 'brand' | 'warning' | 'risk' | 'neutral' | 'success'
   checkpointInfo: string;
+}
+
+export function visibleProjectWidget(cacheOwnerId: string, ownerId: string, token: string, expiresAt: string, now: number): boolean {
+  const expiry = Date.parse(expiresAt);
+  return ownerId !== '' && cacheOwnerId === ownerId && token !== '' && Number.isFinite(expiry) && expiry > now;
 }
 
 /** 检查点状态 → 卡片展示标签；与 EpisodeCheckpointCard 的语义保持一致 */
@@ -213,6 +219,7 @@ export class WidgetDataService {
       // 退出时同样清除旧项目摘要；卡片保留已注册formId，等待下一次认证同步。
       const auth = preferences.getPreferencesSync(context, { name: 'projectmemo_auth_store' });
       if ((auth.getSync('access_token', '') as string) === '') {
+        await store.put(KEY_OWNER_ID, '');
         await store.put(KEY_PROJECT_ID, '');
         await store.put(KEY_TITLE, '忆程项目看板');
         await store.put(KEY_NEXT_ACTION_TITLE, '请登录后同步项目');
@@ -424,6 +431,10 @@ export class WidgetDataService {
   static getCachedWidgetDataSync(context: common.Context): Record<string, string | number | boolean> {
     try {
       const store = preferences.getPreferencesSync(context, { name: PREFS_NAME });
+      const auth = preferences.getPreferencesSync(context, { name: 'projectmemo_auth_store' });
+      const user = JSON.parse(auth.getSync('user_info', '{}') as string) as Record<string, string>;
+      const visible = visibleProjectWidget(store.getSync(KEY_OWNER_ID, '') as string, user['id'] ?? '',
+        auth.getSync('access_token', '') as string, auth.getSync('expires_at', '') as string, Date.now());
       const projectId = (store.getSync(KEY_PROJECT_ID, '') as string).trim();
       const title = (store.getSync(KEY_TITLE, '') as string).trim();
       const daysLeft = store.getSync(KEY_DAYS_LEFT, 0) as number;
@@ -438,7 +449,7 @@ export class WidgetDataService {
       const statusTone = (store.getSync(KEY_STATUS_TONE, 'neutral') as string).trim();
       const checkpointInfo = (store.getSync(KEY_CHECKPOINT_INFO, '') as string).trim();
 
-      if (title.length > 0) {
+      if (visible && title.length > 0) {
         return {
           'projectId': projectId,
           'projectTitle': title,
@@ -580,9 +591,23 @@ export class WidgetDataService {
   /**
    * 持久化到 Preferences 并批量更新所有桌面卡片实例
    */
-  private static async persistAndPushToForms(context: common.Context, payload: WidgetPayload): Promise<void> {
+  private static persistAndPushToForms(context: common.Context, payload: WidgetPayload): Promise<void> {
+    const generation = WidgetDataService.missionGeneration;
+    const auth = preferences.getPreferencesSync(context, { name: 'projectmemo_auth_store' });
+    const token = auth.getSync('access_token', '') as string;
+    return WidgetDataService.serializeMission(() => WidgetDataService.persistCurrentPayload(context, payload, generation, token));
+  }
+
+  private static async persistCurrentPayload(context: common.Context, payload: WidgetPayload, generation: number, token: string): Promise<void> {
     try {
+      if (generation !== WidgetDataService.missionGeneration) return;
+      const auth = preferences.getPreferencesSync(context, { name: 'projectmemo_auth_store' });
+      if (token === '' || auth.getSync('access_token', '') !== token) return;
+      const user = JSON.parse(auth.getSync('user_info', '{}') as string) as Record<string, string>;
+      if (!visibleProjectWidget(user['id'] ?? '', user['id'] ?? '', token, auth.getSync('expires_at', '') as string, Date.now())) return;
       const store = await preferences.getPreferences(context, PREFS_NAME);
+      if (generation !== WidgetDataService.missionGeneration || auth.getSync('access_token', '') !== token) return;
+      await store.put(KEY_OWNER_ID, user['id']);
       await store.put(KEY_PROJECT_ID, payload.projectId);
       await store.put(KEY_TITLE, payload.projectTitle);
       await store.put(KEY_DAYS_LEFT, payload.daysLeft);
@@ -598,6 +623,7 @@ export class WidgetDataService {
       await store.put(KEY_CHECKPOINT_INFO, payload.checkpointInfo);
       await store.flush();
 
+      if (generation !== WidgetDataService.missionGeneration || auth.getSync('access_token', '') !== token) return;
       // 获取当前已在桌面展示的所有卡片实例
       const raw = (await store.get(KEY_FORM_IDS, '[]')) as string;
       let ids: string[] = [];
@@ -637,6 +663,7 @@ export class WidgetDataService {
       }
 
       for (const formId of ids) {
+        if (generation !== WidgetDataService.missionGeneration || auth.getSync('access_token', '') !== token) return;
         try {
           const dim = typeof dims[formId] === 'number' ? dims[formId] : 3;
           const cardData: Record<string, string | number | boolean> = {};

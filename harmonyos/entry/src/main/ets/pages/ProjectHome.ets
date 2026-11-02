@@ -59,11 +59,13 @@ import {
   SpineNodeIcon,
   PaperclipIcon,
   SearchIcon,
-  PlusIcon
+  PlusIcon,
+  BookOpenIcon,
+  CloseIcon
 } from '../components/PMIcons';
 import { PMAppBar } from '../components/PMAppBar';
 import { ConversationService } from '../services/ConversationService';
-import { PMButton, PMPageIntro, PMStatusPill, PMListRow } from '../components/PMReferencePrimitives';
+import { PMButton, PMPageIntro, PMStatusPill, PMListRow, PMCloseButton, PMSheetHeader } from '../components/PMReferencePrimitives';
 import { TextFormatters } from '../common/TextFormatters';
 import { MarkdownView } from '../components/MarkdownView';
 import { DeadlineBadge } from '../components/DeadlineBadge';
@@ -3726,21 +3728,12 @@ struct ProjectHome {
         .alignItems(HorizontalAlign.Start)
         .layoutWeight(1)
 
-        Button('✕').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-          .fontSize(PMFontSize.BODY)
-          .fontColor(PMColors.INK_TERTIARY)
-          .backgroundColor('transparent')
-          .width(32)
-          .height(32)
-          .padding(0)
-          .margin({ right: -PMSpacing.XS })
-          .onClick(() => {
-            this.showEntrySheet = false;
-          })
-          .accessibilityText('关闭记录面板')
+        PMCloseButton({
+          accessibilityLabel: '关闭记录面板',
+          onAction: (): void => { this.showEntrySheet = false; }
+        })
       }
       .width('100%')
-      .justifyContent(FlexAlign.SpaceBetween)
       .alignItems(VerticalAlign.Top)
 
       this.MaterialReturn()
@@ -4140,7 +4133,8 @@ if (this.attachmentSearchOpen) {
               TextInput({ text: this.attachmentSearch, placeholder: '搜索附件文件名' })
         .height(44).margin({ left: 16, right: 16, bottom: 10 }).backgroundColor(PMColors.SURFACE)
         .onChange((value: string) => { this.attachmentSearch = value; })
-          Text('✕').fontSize(15).fontColor(PMColors.INK_TERTIARY).width(36).height(44).textAlign(TextAlign.Center)
+          Button({ type: ButtonType.Circle }) { CloseIcon({ iconSize: 16, iconColor: PMColors.INK_TERTIARY }) }
+            .width(36).height(44).backgroundColor(Color.Transparent)
             .accessibilityText('关闭附件搜索并清空关键词')
             .onClick(() => { this.attachmentSearchOpen = false; this.attachmentSearch = ''; })
         }.width('100%').padding({ left: 16, right: 16 })
@@ -4148,7 +4142,7 @@ if (this.attachmentSearchOpen) {
         Row({ space: 8 }) {
           Text('搜索：' + this.attachmentSearch).fontSize(12).fontColor(PMColors.BRAND)
             .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
-          Text('清除 ✕').fontSize(12).fontColor(PMColors.INK_TERTIARY).height(36)
+          Text('清除').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY).height(36)
             .accessibilityText('清除附件搜索关键词')
             .onClick(() => { this.attachmentSearch = ''; })
         }.width('100%').padding({ left: 28, right: 28 }).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(10)
@@ -4184,77 +4178,95 @@ if (this.attachmentSearchOpen) {
   @Builder
   private MemoryView() {
     Column() {
-      Column() {
-        Row({ space: 10 }) {
+      // 材料工具区：范围切换（项目记忆/附件原件）、搜索、新建与类型筛选收在同一个头部，
+      // 「当前理解与工程观察」是次要入口，贴在筛选行右侧，不再单独占一条整宽横幅。
+      Column({ space: 6 }) {
+        Row({ space: 8 }) {
           Row({ space: 2 }) {
-          Button(`项目记忆 ${this.project.cards.length}`, { type: ButtonType.Normal }).layoutWeight(1).constraintSize({ minHeight: 44 }).fontSize(14)
-            .fontColor(this.materialsMode === 'memory' ? PMColors.BRAND : PMColors.INK_SECONDARY)
-            .fontWeight(this.materialsMode === 'memory' ? FontWeight.Medium : FontWeight.Regular)
-            .backgroundColor(this.materialsMode === 'memory' ? PMColors.SURFACE : Color.Transparent).borderRadius(9)
-            .accessibilitySelected(this.materialsMode === 'memory').onClick(() => { this.materialsMode = 'memory'; })
-          Button(this.attachmentLoadError === '' ? `附件原件 ${this.attachments.length}` : '附件 · 未同步', { type: ButtonType.Normal }).layoutWeight(1).constraintSize({ minHeight: 44 }).fontSize(14)
-            .fontColor(this.materialsMode === 'attachments' ? PMColors.BRAND : PMColors.INK_SECONDARY)
-            .fontWeight(this.materialsMode === 'attachments' ? FontWeight.Medium : FontWeight.Regular)
-            .backgroundColor(this.materialsMode === 'attachments' ? PMColors.SURFACE : Color.Transparent).borderRadius(9)
-            .accessibilitySelected(this.materialsMode === 'attachments').onClick(() => { this.materialsMode = 'attachments'; })
+            Button(`项目记忆 ${this.project.cards.length}`, { type: ButtonType.Normal }).layoutWeight(1).constraintSize({ minHeight: 44 }).fontSize(14)
+              .fontColor(this.materialsMode === 'memory' ? PMColors.BRAND : PMColors.INK_SECONDARY)
+              .fontWeight(this.materialsMode === 'memory' ? FontWeight.Medium : FontWeight.Regular)
+              .backgroundColor(this.materialsMode === 'memory' ? PMColors.SURFACE : Color.Transparent).borderRadius(9)
+              .accessibilitySelected(this.materialsMode === 'memory').onClick(() => { this.materialsMode = 'memory'; })
+            Button(this.attachmentLoadError === '' ? `附件原件 ${this.attachments.length}` : '附件 · 未同步', { type: ButtonType.Normal }).layoutWeight(1).constraintSize({ minHeight: 44 }).fontSize(14)
+              .fontColor(this.materialsMode === 'attachments' ? PMColors.BRAND : PMColors.INK_SECONDARY)
+              .fontWeight(this.materialsMode === 'attachments' ? FontWeight.Medium : FontWeight.Regular)
+              .backgroundColor(this.materialsMode === 'attachments' ? PMColors.SURFACE : Color.Transparent).borderRadius(9)
+              .accessibilitySelected(this.materialsMode === 'attachments').onClick(() => { this.materialsMode = 'attachments'; })
           }.layoutWeight(1).padding(3).borderRadius(12).backgroundColor(PMColors.SURFACE_SUBTLE)
           Button({ type: ButtonType.Circle }) { SearchIcon({ iconSize: 18 }) }
-            .width(40).height(40).backgroundColor(Color.Transparent)
+            .width(44).height(44).backgroundColor(Color.Transparent)
             .accessibilityText(this.materialsMode === 'memory' ? '搜索项目记忆' : '搜索附件文件名')
             .onClick(() => {
               if (this.materialsMode === 'memory') { this.memorySearchOpen = !this.memorySearchOpen; }
               else { this.attachmentSearchOpen = !this.attachmentSearchOpen; }
             })
           Button({ type: ButtonType.Circle }) { PlusIcon({ iconSize: 18 }) }
-            .width(40).height(40).backgroundColor(Color.Transparent)
+            .width(44).height(44).backgroundColor(Color.Transparent)
             .accessibilityText('记录或上传附件').onClick(() => { this.openCaptureEntry(); })
         }.width('100%')
-      }.padding({ left: 16, right: 16, top: 12, bottom: 10 }).width('100%')
-      Button('当前理解与工程观察 →', { type: ButtonType.Normal })
-        .constraintSize({ minHeight: 44 }).width('100%').fontSize(14)
-        .fontColor(PMColors.BRAND).backgroundColor(PMColors.BRAND_LIGHT)
-        .accessibilityDescription('打开已有的 Agent 记忆、仓库连接与环境观察')
-        .onClick(() => {
-          router.pushUrl({ url: 'pages/MemoryTimeline', params: { projectId: this.projectId, openContext: '1' } });
-        })
-      if (this.materialsMode === 'attachments') {
-        this.AttachmentLibrary()
-      } else {
-      Column({ space: 6 }) {
-        if (this.memorySearchOpen) {
+
+        if (this.materialsMode === 'memory' && this.memorySearchOpen) {
           Row({ space: 8 }) {
             TextInput({ text: this.memorySearchQuery, placeholder: '搜索标题、摘要或关键词' })
               .onChange((value: string) => { this.onMemoryQueryChange(value); })
-              .fontSize(14).height(44).backgroundColor(PMColors.SURFACE).borderRadius(11)
+              .fontSize(14).height(44).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(11)
               .border({ width: 1, color: PMColors.BORDER_SUBTLE }).layoutWeight(1)
-            Text('✕').fontSize(15).fontColor(PMColors.INK_TERTIARY).width(36).height(44).textAlign(TextAlign.Center)
+            Button({ type: ButtonType.Circle }) { CloseIcon({ iconSize: 16, iconColor: PMColors.INK_TERTIARY }) }
+              .width(36).height(44).backgroundColor(Color.Transparent)
               .accessibilityText('关闭搜索并清空关键词')
               .onClick(() => { this.memorySearchOpen = false; this.onMemoryQueryChange(''); })
           }.width('100%')
-        } else if (this.memorySearchQuery.trim() !== '') {
+        } else if (this.materialsMode === 'memory' && this.memorySearchQuery.trim() !== '') {
           Row({ space: 8 }) {
             Text('搜索：' + this.memorySearchQuery).fontSize(12).fontColor(PMColors.BRAND)
               .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
-            Text('清除 ✕').fontSize(12).fontColor(PMColors.INK_TERTIARY).height(36)
+            Text('清除').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY).height(36)
               .accessibilityText('清除搜索关键词')
               .onClick(() => { this.onMemoryQueryChange(''); })
           }.width('100%').padding({ left: 12, right: 12 }).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(10)
         }
-        Scroll() {
-          Row({ space: 8 }) {
-            ForEach(['all', 'paper_note', 'experiment_log', 'reflection', 'code_issue'], (type: string) => {
-              Button(type === 'all' ? '全部' : type === 'paper_note' ? '论文笔记' : type === 'experiment_log' ? '实验记录' : type === 'reflection' ? '阶段复盘' : '代码问题', { type: ButtonType.Normal })
-                .fontSize(13).fontColor(this.selectedMemoryType === type ? PMColors.BRAND : PMColors.INK_SECONDARY)
-                .fontWeight(this.selectedMemoryType === type ? FontWeight.Medium : FontWeight.Regular)
-                .backgroundColor(Color.Transparent)
-                .borderRadius(0).constraintSize({ minHeight: 44 }).padding({ left: 10, right: 10 })
-                .border({ width: { bottom: this.selectedMemoryType === type ? 2 : 0 }, color: PMColors.BRAND })
-                .accessibilitySelected(this.selectedMemoryType === type).onClick(() => { this.selectMemoryType(type); })
-            })
-          }
-        }.width('100%').scrollable(ScrollDirection.Horizontal).align(Alignment.TopStart).scrollBar(BarState.Off)
-      }.width('100%').padding({ left: 16, right: 16, bottom: 10 })
 
+        if (this.materialsMode === 'memory') {
+          Row({ space: PMSpacing.SM }) {
+            Scroll() {
+              Row({ space: 8 }) {
+                ForEach(['all', 'paper_note', 'experiment_log', 'reflection', 'code_issue'], (type: string) => {
+                  Button(type === 'all' ? '全部' : type === 'paper_note' ? '论文笔记' : type === 'experiment_log' ? '实验记录' : type === 'reflection' ? '阶段复盘' : '代码问题', { type: ButtonType.Normal })
+                    .fontSize(13).fontColor(this.selectedMemoryType === type ? PMColors.BRAND : PMColors.INK_SECONDARY)
+                    .fontWeight(this.selectedMemoryType === type ? FontWeight.Medium : FontWeight.Regular)
+                    .backgroundColor(Color.Transparent)
+                    .borderRadius(0).constraintSize({ minHeight: 44 }).padding({ left: 10, right: 10 })
+                    .border({ width: { bottom: this.selectedMemoryType === type ? 2 : 0 }, color: PMColors.BRAND })
+                    .accessibilitySelected(this.selectedMemoryType === type).onClick(() => { this.selectMemoryType(type); })
+                })
+              }
+            }.layoutWeight(1).scrollable(ScrollDirection.Horizontal).align(Alignment.TopStart).scrollBar(BarState.Off)
+
+            // 次要入口：不占整条横幅，与筛选同一行，保留 MemoryTimeline 的 openContext 参数。
+            Row({ space: 2 }) {
+              BookOpenIcon({ iconSize: 16, color: PMColors.INK_TERTIARY })
+              Text('当前理解').fontSize(PMFontSize.CAPTION).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_SECONDARY)
+              Text('›').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_TERTIARY)
+            }
+            .height(44)
+            .padding({ left: PMSpacing.SM })
+            .clickEffect(PMInteraction.PRESS_EFFECT)
+            .accessibilityText('当前理解与工程观察')
+            .accessibilityDescription('打开 Agent 记忆、仓库连接与环境观察')
+            .onClick(() => {
+              router.pushUrl({ url: 'pages/MemoryTimeline', params: { projectId: this.projectId, openContext: '1' } });
+            })
+          }.width('100%')
+        }
+      }
+      .width('100%')
+      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: PMSpacing.SM })
+      .backgroundColor(PMColors.SURFACE)
+      .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
+      if (this.materialsMode === 'attachments') {
+        this.AttachmentLibrary()
+      } else {
       if (this.memorySearchQuery.trim() !== '' && this.isSearchingMemory) {
         Text('正在检索项目记忆…')
           .fontSize(PMFontSize.CAPTION)
@@ -4563,7 +4575,8 @@ if (this.attachmentSearchOpen) {
               .border({ width: 1, color: PMColors.BORDER_SUBTLE }).layoutWeight(1)
               .accessibilityText('搜索行动')
               .onChange((value: string) => { this.actionSearchQuery = value; })
-            Text('✕').fontSize(15).fontColor(PMColors.INK_TERTIARY).width(36).height(44).textAlign(TextAlign.Center)
+            Button({ type: ButtonType.Circle }) { CloseIcon({ iconSize: 16, iconColor: PMColors.INK_TERTIARY }) }
+              .width(36).height(44).backgroundColor(Color.Transparent)
               .accessibilityText('关闭行动搜索并清空关键词')
               .onClick(() => { this.actionSearchOpen = false; this.actionSearchQuery = ''; })
           }.width('100%')
@@ -4571,7 +4584,7 @@ if (this.attachmentSearchOpen) {
           Row({ space: 8 }) {
             Text('搜索：' + this.actionSearchQuery).fontSize(12).fontColor(PMColors.BRAND)
               .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
-            Text('清除 ✕').fontSize(12).fontColor(PMColors.INK_TERTIARY).height(36)
+            Text('清除').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY).height(36)
               .accessibilityText('清除行动搜索关键词')
               .onClick(() => { this.actionSearchQuery = ''; })
           }.width('100%').padding({ left: 12, right: 12 }).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(10)
@@ -5779,23 +5792,12 @@ if (this.attachmentSearchOpen) {
       if (this.showCreateAction) {
         Column() {
           Column() {
-            Row() {
-              Text('新增待办')
-                .fontSize(PMFontSize.PAGE_TITLE)
-                .fontWeight(FontWeight.Medium)
-                .fontColor(PMColors.INK_PRIMARY)
-              Button('✕').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-                .fontSize(PMFontSize.BODY)
-                .fontColor(PMColors.INK_TERTIARY)
-                .backgroundColor('transparent')
-                .enabled(!this.isCreatingAction)
-                .onClick(() => {
-                  this.showCreateAction = false;
-                })
-                .accessibilityText('关闭新增待办')
-            }
-            .width('100%')
-            .justifyContent(FlexAlign.SpaceBetween)
+            PMSheetHeader({
+              title: '新增待办',
+              closeLabel: '关闭新增待办',
+              closeDisabled: this.isCreatingAction,
+              onClose: (): void => { this.showCreateAction = false; }
+            })
 
             Text('要做什么？')
               .fontSize(PMFontSize.BODY)
@@ -5975,17 +5977,10 @@ if (this.attachmentSearchOpen) {
                 .fontWeight(FontWeight.Bold)
                 .fontColor(PMColors.INK_PRIMARY)
               Blank()
-              Button('✕', { type: ButtonType.Normal })
-                .fontSize(16)
-                .fontColor(PMColors.INK_TERTIARY)
-                .backgroundColor(Color.Transparent)
-                .width(36)
-                .height(36)
-                .borderRadius(PMRadius.SM)
-                .accessibilityText('关闭项目设置')
-                .onClick(() => {
-                  this.showSettingsDialog = false;
-                })
+              PMCloseButton({
+                accessibilityLabel: '关闭项目设置',
+                onAction: (): void => { this.showSettingsDialog = false; }
+              })
             }
             .width('100%')
             .alignItems(VerticalAlign.Center)

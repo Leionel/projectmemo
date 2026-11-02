@@ -701,14 +701,30 @@ struct MemoryTimeline {
           }
         })
       } else if (this.repoMode) {
+        // 项目理解与工具：层 1/层 2 由 AgentMemoryPanel 呈现，层 3 是已连接的工程工具。
         Scroll() {
-          Column({ space: 12 }) {
+          Column({ space: PMSpacing.MD }) {
             AgentMemoryPanel({ projectId: this.projectId })
-            if (!this.contextMode) { Text('连接公开仓库，查看提交，再选择哪些记录加入项目资料。').fontSize(14).fontColor(PMColors.INK_SECONDARY) }
-            RepoSignalPanel({ projectId: this.projectId, initialOpen: !this.contextMode })
-            DeploymentConnectionsPanel({ projectId: this.projectId, initialOpen: this.contextMode })
-          }.width('100%').padding(16).alignItems(HorizontalAlign.Start)
-        }.layoutWeight(1).width('100%').align(Alignment.TopStart)
+
+            Column({ space: PMSpacing.SM }) {
+              Text('已连接的工程工具')
+                .fontSize(PMFontSize.SECTION_TITLE)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+                .width('100%')
+              RepoSignalPanel({ projectId: this.projectId, initialOpen: false })
+              DeploymentConnectionsPanel({ projectId: this.projectId, initialOpen: this.contextMode })
+            }
+            .width('100%')
+            .alignItems(HorizontalAlign.Start)
+          }
+          .width('100%')
+          .padding(PMSpacing.LG)
+          .alignItems(HorizontalAlign.Start)
+        }
+        .layoutWeight(1)
+        .width('100%')
+        .align(Alignment.TopStart)
       } else if (this.isLoading) {
         LoadingStateView({ message: '加载记忆脉络...' })
       } else if (this.errorMessage !== '') {
@@ -720,15 +736,28 @@ struct MemoryTimeline {
         })
       } else {
         List({ space: PMSpacing.MD }) {
+          // 层 1「项目当前理解」与层 2「方法经验与适用条件」由 AgentMemoryPanel 组织。
           ListItem() { AgentMemoryPanel({ projectId: this.projectId }) }
+          // 层 3「已连接的工程工具」：仓库连接与只读环境观察放在同一组，工具只作资料线索。
+          ListItem() {
+            Column({ space: PMSpacing.SM }) {
+              Text('已连接的工程工具')
+                .fontSize(PMFontSize.SECTION_TITLE)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(PMColors.INK_PRIMARY)
+                .width('100%')
+              RepoSignalPanel({ projectId: this.projectId, initialOpen: false })
+              DeploymentConnectionsPanel({ projectId: this.projectId, initialOpen: false })
+            }
+            .width('100%')
+            .alignItems(HorizontalAlign.Start)
+          }
           if (this.cards.length === 0 && this.archivedCards.length === 0) {
             ListItem() {
               EmptyStateView({ title: '暂无原始记忆档案', description: '原始记录与调查综合分开保存，可返回工作台记录进展。',
                 actionText: '返回工作台', onAction: () => { router.back(); } })
             }
           }
-          ListItem() { RepoSignalPanel({ projectId: this.projectId }) }
-          ListItem() { DeploymentConnectionsPanel({ projectId: this.projectId }) }
           if (this.consolidationVisible) {
             ListItem() {
               Column() {

@@ -2,6 +2,7 @@ import router from '@ohos.router';
 import { promptAction } from '@kit.ArkUI';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMCardStyle, PMInteraction, PMTransition } from '../common/DesignTokens';
 import { PMAppBar } from '../components/PMAppBar';
+import { PMSheetHeader } from '../components/PMReferencePrimitives';
 import { LoadingStateView, ErrorStateView, EmptyStateView } from '../components/AsyncStateView';
 import { TextFormatters } from '../common/TextFormatters';
 import { PersonalMemoryService, PersonalEntry, PersonalMemoryCommandInput, PersonalMemoryPolicyInput,
@@ -49,7 +50,8 @@ struct PersonalMemoryPage {
       this.entries = result.items;
       this.candidates = await this.service.listCandidates();
       this.projects = await new ProjectService().listProjects();
-      if (result.policy !== undefined) {
+      // 后端在账号还没有任何策略时会返回 policy: null；null 不能当成"有策略"去读字段。
+      if (result.policy !== undefined && result.policy !== null) {
         this.hasPolicy = true;
         this.policyUseEnabled = result.policy.useInContextEnabled;
         this.policyCloudEnabled = result.policy.cloudProcessingEnabled;
@@ -503,82 +505,79 @@ struct PersonalMemoryPage {
               .layoutWeight(1)
 
             Column({ space: PMSpacing.MD }) {
-              Row() {
-                Text('添加记忆')
-                  .fontSize(PMFontSize.SECTION_TITLE)
-                  .fontWeight(FontWeight.Medium)
-                  .fontColor(PMColors.INK_PRIMARY)
-                  .layoutWeight(1)
-                Button('✕', { type: ButtonType.Normal })
-                  .fontSize(PMFontSize.BODY)
-                  .fontColor(PMColors.INK_TERTIARY)
-                  .backgroundColor(Color.Transparent)
-                  .width(36)
-                  .height(36)
-                  .accessibilityText('关闭添加面板，草稿保留')
-                  .onClick(() => {
-                    this.showAddSheet = false;
-                  })
+              PMSheetHeader({
+                title: '添加记忆',
+                closeLabel: '关闭添加面板，草稿保留',
+                onClose: (): void => { this.showAddSheet = false; }
+              })
+
+              // 表单可滚动：大字体或键盘弹出时不会把底部说明挤出屏幕。
+              Scroll() {
+                Column({ space: PMSpacing.MD }) {
+                  TextArea({ text: this.addQuote, placeholder: '例如：以后技术讨论先给结论，再按需要展开。' })
+                    .fontSize(PMFontSize.BODY)
+                    .height(88)
+                    .backgroundColor(PMColors.SURFACE_SUBTLE)
+                    .borderRadius(PMRadius.SM)
+                    .border({ width: 1, color: PMColors.BORDER })
+                    .onChange((value: string) => {
+                      this.addQuote = value;
+                    })
+
+                  Row({ space: PMSpacing.SM }) {
+                    Select(this.kindNames.map((name: string): SelectOption => ({ value: name } as SelectOption)))
+                      .selected(this.addKindIndex)
+                      .value(this.kindNames[this.addKindIndex])
+                      .fontColor(PMColors.INK_PRIMARY)
+                      .font({ size: PMFontSize.SECONDARY, weight: FontWeight.Regular })
+                      .onSelect((index: number) => {
+                        this.addKindIndex = index;
+                      })
+                      .layoutWeight(1)
+                    TextInput({ text: this.addTopic, placeholder: '适用主题（可选）' })
+                      .fontSize(PMFontSize.SECONDARY)
+                      .height(40)
+                      .backgroundColor(PMColors.SURFACE_SUBTLE)
+                      .borderRadius(PMRadius.SM)
+                      .border({ width: 1, color: PMColors.BORDER })
+                      .layoutWeight(2)
+                      .onChange((value: string) => {
+                        this.addTopic = value;
+                      })
+                  }
+                  .width('100%')
+
+                  Button(this.busy ? '保存中…' : '保存', { type: ButtonType.Normal })
+                    .fontSize(PMFontSize.BUTTON)
+                    .fontWeight(FontWeight.Medium)
+                    .fontColor(PMColors.SURFACE)
+                    .backgroundColor(PMColors.BRAND)
+                    .borderRadius(PMRadius.SM)
+                    .height(44)
+                    .width('100%')
+                    .enabled(!this.busy && this.addQuote.trim().length > 0)
+                    .accessibilityText('保存这条个人记忆')
+                    .onClick(() => {
+                      const input = new PersonalMemoryCommandInput();
+                      input.requestId = `pm-add-${Date.now()}`;
+                      input.operation = 'ADD_EXPLICIT';
+                      input.quote = this.addQuote.trim();
+                      input.kind = this.kindValues[this.addKindIndex];
+                      input.topics = this.addTopic.trim() !== '' ? [this.addTopic.trim()] : undefined;
+                      this.runCommand(input, '已保存，之后的对话与委托会按当前版本使用。');
+                    })
+                  Text('凭据、健康、财务等敏感内容不会保存；保存后可随时暂停或删除。')
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.INK_TERTIARY)
+                    .width('100%')
+                    .lineHeight(18)
+                }
+                .width('100%')
+                .alignItems(HorizontalAlign.Start)
               }
               .width('100%')
-
-              TextArea({ text: this.addQuote, placeholder: '例如：以后技术讨论先给结论，再按需要展开。' })
-                .fontSize(PMFontSize.BODY)
-                .height(88)
-                .backgroundColor(PMColors.SURFACE_SUBTLE)
-                .borderRadius(PMRadius.SM)
-                .border({ width: 1, color: PMColors.BORDER })
-                .onChange((value: string) => {
-                  this.addQuote = value;
-                })
-
-              Row({ space: PMSpacing.SM }) {
-                Select(this.kindNames.map((name: string): SelectOption => ({ value: name } as SelectOption)))
-                  .selected(this.addKindIndex)
-                  .value(this.kindNames[this.addKindIndex])
-                  .fontColor(PMColors.INK_PRIMARY)
-                  .font({ size: PMFontSize.SECONDARY, weight: FontWeight.Regular })
-                  .onSelect((index: number) => {
-                    this.addKindIndex = index;
-                  })
-                  .layoutWeight(1)
-                TextInput({ text: this.addTopic, placeholder: '适用主题（可选）' })
-                  .fontSize(PMFontSize.SECONDARY)
-                  .height(40)
-                  .backgroundColor(PMColors.SURFACE_SUBTLE)
-                  .borderRadius(PMRadius.SM)
-                  .border({ width: 1, color: PMColors.BORDER })
-                  .layoutWeight(2)
-                  .onChange((value: string) => {
-                    this.addTopic = value;
-                  })
-              }
-              .width('100%')
-
-              Button(this.busy ? '保存中…' : '保存', { type: ButtonType.Normal })
-                .fontSize(PMFontSize.BUTTON)
-                .fontWeight(FontWeight.Medium)
-                .fontColor(PMColors.SURFACE)
-                .backgroundColor(PMColors.BRAND)
-                .borderRadius(PMRadius.SM)
-                .height(44)
-                .width('100%')
-                .enabled(!this.busy && this.addQuote.trim().length > 0)
-                .accessibilityText('保存这条个人记忆')
-                .onClick(() => {
-                  const input = new PersonalMemoryCommandInput();
-                  input.requestId = `pm-add-${Date.now()}`;
-                  input.operation = 'ADD_EXPLICIT';
-                  input.quote = this.addQuote.trim();
-                  input.kind = this.kindValues[this.addKindIndex];
-                  input.topics = this.addTopic.trim() !== '' ? [this.addTopic.trim()] : undefined;
-                  this.runCommand(input, '已保存，之后的对话与委托会按当前版本使用。');
-                })
-              Text('凭据、健康、财务等敏感内容不会保存；保存后可随时暂停或删除。')
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.INK_TERTIARY)
-                .width('100%')
-                .lineHeight(18)
+              .scrollBar(BarState.Off)
+              .constraintSize({ maxHeight: '58%' })
             }
             .width('100%')
             .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.XL })
@@ -592,7 +591,7 @@ struct PersonalMemoryPage {
           .justifyContent(FlexAlign.End)
           .backgroundColor(PMColors.SCRIM)
           .onClick(() => {
-            // 遮罩点击不关闭，避免误触丢草稿；右上角 ✕ 明确关闭
+            // 遮罩点击不关闭，避免误触丢草稿；右上角关闭按钮是明确关闭入口
           })
         }
 
@@ -606,43 +605,39 @@ struct PersonalMemoryPage {
               .layoutWeight(1)
 
             Column({ space: PMSpacing.SM }) {
-              Row() {
-                Text('条目详情')
-                  .fontSize(PMFontSize.SECTION_TITLE)
-                  .fontWeight(FontWeight.Medium)
-                  .fontColor(PMColors.INK_PRIMARY)
-                  .layoutWeight(1)
-                Button('✕', { type: ButtonType.Normal })
-                  .fontSize(PMFontSize.BODY)
-                  .fontColor(PMColors.INK_TERTIARY)
-                  .backgroundColor(Color.Transparent)
-                  .width(36)
-                  .height(36)
-                  .accessibilityText('关闭详情')
-                  .onClick(() => {
-                    this.detail = null;
-                  })
+              PMSheetHeader({
+                title: '条目详情',
+                closeLabel: '关闭详情',
+                onClose: (): void => { this.detail = null; }
+              })
+
+              Scroll() {
+                Column({ space: PMSpacing.SM }) {
+                  Text(this.detail.entry.quote !== '' ? this.detail.entry.quote : this.detail.entry.statement)
+                    .fontSize(PMFontSize.BODY)
+                    .fontWeight(FontWeight.Medium)
+                    .fontColor(PMColors.INK_PRIMARY)
+                    .width('100%')
+                  Text(`来源：${this.detail.sourceDescription} 形成于 ${TextFormatters.readableText(this.detail.formedAt, '时间未读取')}`)
+                    .fontSize(PMFontSize.CAPTION)
+                    .fontColor(PMColors.INK_SECONDARY)
+                    .width('100%')
+                    .lineHeight(18)
+
+                  ForEach(this.detail.history, (item: import('../services/PersonalMemoryService').PersonalHistoryItem) => {
+                    Text(`#${item.revision} ${item.eventKind} · ${TextFormatters.readableText(item.at, '')}${item.quote !== undefined && item.quote !== null ? ' · ' + item.quote : ''}`)
+                      .fontSize(PMFontSize.CAPTION)
+                      .fontColor(PMColors.INK_SECONDARY)
+                      .width('100%')
+                      .lineHeight(18)
+                  }, (item: import('../services/PersonalMemoryService').PersonalHistoryItem) => item.revision.toString() + item.at)
+                }
+                .width('100%')
+                .alignItems(HorizontalAlign.Start)
               }
               .width('100%')
-
-              Text(this.detail.entry.quote !== '' ? this.detail.entry.quote : this.detail.entry.statement)
-                .fontSize(PMFontSize.BODY)
-                .fontWeight(FontWeight.Medium)
-                .fontColor(PMColors.INK_PRIMARY)
-                .width('100%')
-              Text(`来源：${this.detail.sourceDescription} 形成于 ${TextFormatters.readableText(this.detail.formedAt, '时间未读取')}`)
-                .fontSize(PMFontSize.CAPTION)
-                .fontColor(PMColors.INK_SECONDARY)
-                .width('100%')
-                .lineHeight(18)
-
-              ForEach(this.detail.history, (item: import('../services/PersonalMemoryService').PersonalHistoryItem) => {
-                Text(`#${item.revision} ${item.eventKind} · ${TextFormatters.readableText(item.at, '')}${item.quote !== undefined && item.quote !== null ? ' · ' + item.quote : ''}`)
-                  .fontSize(PMFontSize.CAPTION)
-                  .fontColor(PMColors.INK_SECONDARY)
-                  .width('100%')
-                  .lineHeight(18)
-              }, (item: import('../services/PersonalMemoryService').PersonalHistoryItem) => item.revision.toString() + item.at)
+              .scrollBar(BarState.Off)
+              .constraintSize({ maxHeight: '46%' })
 
               Button('关闭', { type: ButtonType.Normal })
                 .fontSize(PMFontSize.BUTTON)

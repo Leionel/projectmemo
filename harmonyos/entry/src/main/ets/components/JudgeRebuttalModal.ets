@@ -1,5 +1,6 @@
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMInteraction, PMMotion, PMMaterial } from '../common/DesignTokens';
 import { AlertIcon, PaperclipIcon } from './PMIcons';
+import { PMCloseButton } from './PMReferencePrimitives';
 
 export class JudgeQuestionItem {
   id: string = '';
@@ -86,13 +87,7 @@ export struct JudgeRebuttalModal {
           }
           .alignItems(VerticalAlign.Center)
 
-          Button('✕')
-            .fontSize(PMFontSize.BODY)
-            .fontColor(PMColors.INK_TERTIARY)
-            .backgroundColor('transparent')
-            .onClick(() => {
-              this.onClose();
-            })
+          PMCloseButton({ accessibilityLabel: '关闭评委答辩质询透视镜', onAction: (): void => { this.onClose(); } })
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)

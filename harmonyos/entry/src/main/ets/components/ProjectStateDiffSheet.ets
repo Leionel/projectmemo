@@ -1,6 +1,7 @@
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMotion } from '../common/DesignTokens';
 import { StateDiff, StateDiffItem } from '../models/ProjectState';
 import { TextFormatters } from '../common/TextFormatters';
+import { PMCloseButton } from './PMReferencePrimitives';
 
 @Component
 export struct ProjectStateDiffSheet {
@@ -38,13 +39,7 @@ export struct ProjectStateDiffSheet {
             .fontSize(PMFontSize.TITLE)
             .fontWeight(FontWeight.Bold)
             .fontColor(PMColors.INK_PRIMARY)
-          Button('✕').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-            .fontSize(PMFontSize.BODY)
-            .fontColor(PMColors.INK_TERTIARY)
-            .backgroundColor('transparent')
-            .onClick(() => {
-              this.onClose();
-            })
+          PMCloseButton({ accessibilityLabel: '关闭状态变化详情', onAction: (): void => { this.onClose(); } })
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)

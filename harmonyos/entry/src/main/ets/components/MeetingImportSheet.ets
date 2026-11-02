@@ -3,6 +3,7 @@ import { MeetingAppliedChange, MeetingConfirmBody, MeetingConfirmResult, Meeting
 import { ApiError } from '../models/Project';
 import { MeetingService } from '../services/MeetingService';
 import { CheckboxIcon, PaperclipIcon } from './PMIcons';
+import { PMSheetHeader } from './PMReferencePrimitives';
 import { DateOnly } from '../common/DateOnly';
 
 // E5：会议文本导入。粘贴 → 预览（逐项勾选，待澄清项禁确认）→ 原子确认 → 会后 Diff。
@@ -237,23 +238,13 @@ export struct MeetingImportSheet {
 
   build() {
     Column() {
-        Row() {
-          Text('记录这次会议')
-            .fontSize(PMFontSize.SECTION_TITLE)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.INK_PRIMARY)
-          Button('✕')
-            .fontSize(PMFontSize.BODY)
-            .fontColor(PMColors.INK_TERTIARY)
-            .backgroundColor('transparent')
-            .onClick(() => {
-              if (!this.isConfirming) {
-                this.onClose();
-              }
-            })
-        }
-        .width('100%')
-        .justifyContent(FlexAlign.SpaceBetween)
+        // 头部：统一标题行 + 关闭入口；确认提交中关闭入口置灰，避免误以为没有写入
+        PMSheetHeader({
+          title: '记录这次会议',
+          closeLabel: '关闭会议记录面板',
+          closeDisabled: this.isConfirming,
+          onClose: (): void => { this.onClose(); }
+        })
 
         if (this.stage === 'done') {
           Column() {

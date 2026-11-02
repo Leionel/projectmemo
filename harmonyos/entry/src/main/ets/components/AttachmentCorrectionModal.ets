@@ -4,6 +4,7 @@ import { AttachmentRevisionItem } from '../models/Artifact';
 import { AttachmentService } from '../services/AttachmentService';
 import { ApiError } from '../models/Project';
 import { PaperclipIcon } from './PMIcons';
+import { PMSheetHeader } from './PMReferencePrimitives';
 
 @Component
 export struct AttachmentCorrectionModal {
@@ -87,26 +88,14 @@ export struct AttachmentCorrectionModal {
 
       // 弹窗本体
       Column() {
-        // 头部
-        Row() {
-          Text('附件证据校对')
-            .fontSize(PMFontSize.SECTION_TITLE)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.INK_PRIMARY)
-
-          Text('✕')
-            .fontSize(PMFontSize.BODY)
-            .fontColor(PMColors.INK_TERTIARY)
-            .padding(PMSpacing.XS)
-            .onClick(() => {
-              if (!this.isSubmitting) {
-                this.onClose();
-              }
-            })
-        }
-        .width('100%')
-        .justifyContent(FlexAlign.SpaceBetween)
-        .margin({ bottom: PMSpacing.MD })
+        // 头部：统一标题行 + 关闭入口；提交中关闭入口置灰，避免打断已发出的校对请求
+        PMSheetHeader({
+          title: '附件证据校对',
+          closeLabel: '关闭附件证据校对',
+          closeDisabled: this.isSubmitting,
+          onClose: (): void => { this.onClose(); }
+        })
+          .margin({ bottom: PMSpacing.MD })
 
         // 提示信息
         Text('当自动 OCR 或多模态提取存在偏差时，请人工录入真实数据。校对后的内容将作为项目事实存证。')

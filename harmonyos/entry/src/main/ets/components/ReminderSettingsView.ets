@@ -2,6 +2,7 @@ import { InterventionPolicyService } from '../services/InterventionPolicyService
 import { PolicyUpdateBody } from '../models/Intervention';
 import { ApiError } from '../models/Project';
 import { PMColors, PMSpacing, PMFontSize, PMRadius } from '../common/DesignTokens';
+import { PMSheetHeader } from './PMReferencePrimitives';
 
 /**
  * 提醒策略（账号级）：
@@ -139,23 +140,11 @@ export struct ReminderSettingsView {
   build() {
     Scroll() {
       Column({ space: PMSpacing.MD }) {
-        Row() {
-          Text('提醒策略')
-            .fontSize(PMFontSize.SECTION_TITLE)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(PMColors.INK_PRIMARY)
-            .layoutWeight(1)
-          Button('✕', { type: ButtonType.Normal })
-            .fontSize(PMFontSize.BODY)
-            .fontColor(PMColors.INK_TERTIARY)
-            .backgroundColor(Color.Transparent)
-            .width(36)
-            .height(36)
-            .borderRadius(PMRadius.SM)
-            .onClick(() => this.onClose())
-            .accessibilityText('关闭提醒策略')
-        }
-        .width('100%')
+        PMSheetHeader({
+          title: '提醒策略',
+          closeLabel: '关闭提醒策略',
+          onClose: (): void => { this.onClose(); }
+        })
 
         Text('策略按账号生效：你的全部项目共享同一份每日预算与静默时段，修改立即影响所有项目。系统通知权限由系统设置管理，不在这里改变。')
           .fontSize(PMFontSize.SECONDARY)

@@ -512,6 +512,36 @@ export struct SearchIcon {
   }
 }
 
+/**
+ * 统一关闭图标：两根等宽短棒交叉成 ✕，不依赖字体字形。
+ * 文字 '✕' 在不同字体/字号/深色模式下粗细与基线会漂移，弹层统一使用本图标。
+ */
+@Component
+export struct CloseIcon {
+  @Prop iconSize: number = 20;
+  @Prop iconColor: ResourceColor = PMColors.INK_SECONDARY;
+
+  build() {
+    Stack() {
+      Row()
+        .width(this.iconSize * 0.7)
+        .height(1.8)
+        .backgroundColor(this.iconColor)
+        .borderRadius(1)
+        .rotate({ angle: 45 })
+      Row()
+        .width(this.iconSize * 0.7)
+        .height(1.8)
+        .backgroundColor(this.iconColor)
+        .borderRadius(1)
+        .rotate({ angle: -45 })
+    }
+    .width(this.iconSize)
+    .height(this.iconSize)
+    .alignContent(Alignment.Center)
+  }
+}
+
 @Component
 export struct PlusIcon {
   @Prop iconSize: number = 20;

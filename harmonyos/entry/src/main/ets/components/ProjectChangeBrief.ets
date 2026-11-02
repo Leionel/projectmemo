@@ -1,6 +1,7 @@
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMotion, PMInteraction } from '../common/DesignTokens';
 import { BriefEvidence, ChangeBrief, BriefSentence } from '../models/ProjectState';
 import { PaperclipIcon } from './PMIcons';
+import { PMCloseButton } from './PMReferencePrimitives';
 
 // C1 变化简报：变化 → 影响 → 建议，逐句可追溯（依据数量）。
 // 简报内容来自服务端确定性模板；读简报不创建行动；“已了解”复用状态面板的游标逻辑。
@@ -107,13 +108,7 @@ export struct ProjectChangeBrief {
             .fontSize(PMFontSize.TITLE)
             .fontWeight(FontWeight.Bold)
             .fontColor(PMColors.INK_PRIMARY)
-          Button('✕').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-            .fontSize(PMFontSize.BODY)
-            .fontColor(PMColors.INK_TERTIARY)
-            .backgroundColor('transparent')
-            .onClick(() => {
-              this.onClose();
-            })
+          PMCloseButton({ accessibilityLabel: '关闭变化简报', onAction: (): void => { this.onClose(); } })
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)

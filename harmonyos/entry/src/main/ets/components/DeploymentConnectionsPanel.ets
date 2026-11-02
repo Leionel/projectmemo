@@ -7,7 +7,7 @@ import { ConversationCreateInput } from '../models/Conversation';
 import { ConversationDraftStore } from '../services/ConversationDraftStore';
 import { SessionStore } from '../services/SessionStore';
 import { ApiError } from '../models/Project';
-import { PMColors, PMRadius } from '../common/DesignTokens';
+import { PMColors, PMRadius, PMFontSize, PMSpacing, PMInteraction } from '../common/DesignTokens';
 interface DeploymentConversationParams { conversationId: string; projectId: string; }
 @Component
 export struct DeploymentConnectionsPanel {
@@ -92,7 +92,11 @@ export struct DeploymentConnectionsPanel {
   build() {
     if(this.observerEnabled||this.connections.length>0||this.error){
       Column({space:12}){
-        Button(this.open?'工程验收与环境观察  −':'工程验收与环境观察  ＋').width('100%').constraintSize({minHeight:44}).height('auto').padding(12).fontColor(PMColors.INK_PRIMARY).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(PMRadius.SM).onClick(()=>{this.open=!this.open;if(this.open)this.load();})
+        Row({space:PMSpacing.SM}){
+          Text('工程验收与环境观察').fontSize(PMFontSize.MD).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY).layoutWeight(1)
+          Text(this.connections.length>0?`${this.connections.length} 个环境`:(this.observerEnabled?'未连接':'未开启')).fontSize(11).fontColor(PMColors.INK_TERTIARY)
+          Text(this.open?'收起':'详情 ›').fontSize(PMFontSize.CAPTION).fontColor(PMColors.BRAND).constraintSize({minHeight:32}).padding({left:PMSpacing.SM}).clickEffect(PMInteraction.PRESS_EFFECT).accessibilityText(this.open?'收起环境观察详情':'展开环境观察详情').onClick(()=>{this.open=!this.open;if(this.open)this.load();})
+        }.width('100%').alignItems(VerticalAlign.Center)
         if(this.open){
           ForEach(this.connections,(c:DeploymentConnection)=>{
             Column({space:8}){
@@ -144,7 +148,7 @@ export struct DeploymentConnectionsPanel {
           if(this.busy){Text('正在核对，请稍候…').fontSize(13).fontColor(PMColors.INK_SECONDARY)}
         }
         if(this.error){Text(this.error).fontSize(13).fontColor(PMColors.RISK);Button('重新读取环境许可').onClick(()=>{this.load();})}
-      }.width('100%').padding(12).alignItems(HorizontalAlign.Start).backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.MD)
+      }.width('100%').padding(PMSpacing.LG).alignItems(HorizontalAlign.Start).backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.LG).border({width:1,color:PMColors.BORDER_SUBTLE})
     }
   }
 }

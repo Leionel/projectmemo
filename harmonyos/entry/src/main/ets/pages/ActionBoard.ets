@@ -13,8 +13,10 @@ import { ActionReminderBlock } from '../components/ActionReminderBlock';
 import { DeviceCalendarReadCard } from '../components/DeviceCalendarReadCard';
 import { DeviceIdentity } from '../common/DeviceIdentity';
 import { common } from '@kit.AbilityKit';
-import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMaterial } from '../common/DesignTokens';
+import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMaterial, PMInteraction } from '../common/DesignTokens';
 import { PMAppBar } from '../components/PMAppBar';
+import { MoreIcon } from '../components/PMIcons';
+import { PMCloseButton } from '../components/PMReferencePrimitives';
 import { StatusBadge } from '../components/MetricBadge';
 import { LoadingStateView, ErrorStateView, EmptyStateView } from '../components/AsyncStateView';
 import { TextFormatters } from '../common/TextFormatters';
@@ -44,6 +46,8 @@ struct ActionBoard {
   // ---- R2 可执行安排：只安排当前 READY 的行动 ----
   private reentryService: ReentryService = new ReentryService();
   @State showSchedulePlanner: boolean = false;
+  // 排程与设备日历默认收起：先让行动列表出现在屏幕上，需要时再展开工具区。
+  @State showCalendarTools: boolean = false;
   @State schedulePlan: SchedulePlan | null = null;
   @State schedulePreview: SchedulePlan | null = null;
   @State scheduleStartTime: string = '19:00';
@@ -330,6 +334,28 @@ struct ActionBoard {
       return false;
     }
     return plan.blocks.some((block: ScheduleBlock) => block.calendar.status !== 'SYNCED');
+  }
+
+  /** 工具区入口摘要：只说明排程与日历的当前状态，操作留给展开后的工具区。 */
+  private calendarToolSummary(): string {
+    const blocks = this.schedulePlan !== null ? this.schedulePlan.blocks.length : 0;
+    const parts: string[] = [];
+    parts.push(blocks > 0 ? `已安排 ${blocks} 段时间` : '还没有保存的排程');
+    parts.push(this.hasSyncedBlocks() ? '部分时段已写入手机日历' : '设备日历只读');
+    return parts.join(' · ');
+  }
+
+  /** 卡片次要操作收进更多菜单，卡片上只保留一个主操作，避免一排等权按钮。 */
+  private actionMenuItems(action: ActionItem): MenuElement[] {
+    const items: MenuElement[] = [];
+    if (action.status === 'TODO') {
+      items.push({ value: this.startingActionId === action.id ? '启动中…' : '开始行动', action: (): void => { this.startAction(action.id); } } as MenuElement);
+    }
+    items.push({ value: this.isLoadingFeasibility ? '检查中…' : '看看能否安排', action: (): void => { this.openFeasibility(action.id); } } as MenuElement);
+    if (this.reminderAvailable) {
+      items.push({ value: this.reminderForActionId === action.id ? '收起提醒设置' : '日历提醒', action: (): void => { this.reminderForActionId = this.reminderForActionId === action.id ? '' : action.id; } } as MenuElement);
+    }
+    return items;
   }
 
   @Builder
@@ -1024,65 +1050,29 @@ struct ActionBoard {
         .padding({ top: PMSpacing.SM })
       }
 
-      // 主操作独占一行，避免窄屏上回执入口被压缩。
+      // 一张卡片只保留一个主操作；开始行动、可行性检查、日历提醒收进更多菜单。
       if (action.status === 'TODO' || action.status === 'DOING') {
-        Column({ space: PMSpacing.SM }) {
-          Button('填写完成回执').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
+        Row({ space: PMSpacing.SM }) {
+          Button('填写完成回执', { type: ButtonType.Normal })
             .fontSize(PMFontSize.BUTTON)
             .fontWeight(FontWeight.Medium)
             .fontColor(PMColors.SURFACE)
             .backgroundColor(PMColors.BRAND)
-            .borderRadius(PMRadius.MD)
-            .height(48)
-            .width('100%')
-            .onClick(() => { this.openCompleteDialog(action.id); })
-          Row({ space: PMSpacing.SM }) {
-          if (action.status === 'TODO') {
-            Button(this.startingActionId === action.id ? '启动中...' : '开始行动').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-              .fontSize(PMFontSize.BUTTON)
-              .fontColor(PMColors.INK_PRIMARY)
-              .backgroundColor(PMColors.SURFACE_SUBTLE)
-              .border({ width: 1, color: PMColors.BORDER })
-              .borderRadius(PMRadius.SM)
-              .height(44)
-              .layoutWeight(1)
-              .enabled(this.startingActionId === '')
-              .onClick(() => {
-                this.startAction(action.id);
-              })
-          }
-
-          Button(this.isLoadingFeasibility ? '检查中…' : '看看能否安排').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-            .fontSize(PMFontSize.BUTTON)
-            .fontColor(PMColors.INK_PRIMARY)
-            .backgroundColor(PMColors.SURFACE_SUBTLE)
-            .border({ width: 1, color: PMColors.BORDER })
             .borderRadius(PMRadius.SM)
             .height(44)
             .layoutWeight(1)
-            .enabled(!this.isLoadingFeasibility)
-            .onClick(() => {
-              this.openFeasibility(action.id);
-            })
-
-          }.width('100%')
-        }.width('100%')
+            .onClick(() => { this.openCompleteDialog(action.id); })
+          Button({ type: ButtonType.Normal }) { MoreIcon({ iconSize: 18 }) }
+            .width(44)
+            .height(44)
+            .backgroundColor(PMColors.SURFACE_SUBTLE)
+            .border({ width: 1, color: PMColors.BORDER })
+            .borderRadius(PMRadius.SM)
+            .accessibilityText('更多操作：开始行动、可行性检查、日历提醒')
+            .bindMenu(this.actionMenuItems(action))
+        }
+        .width('100%')
         .margin({ top: PMSpacing.MD })
-      }
-
-      // 日历提醒：入口只在功能开启时出现，状态区分「计划时间」与「设备日历事件」
-      if (this.reminderAvailable && (action.status === 'TODO' || action.status === 'DOING')) {
-        Button(this.reminderForActionId === action.id ? '收起提醒设置' : '日历提醒').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-          .fontSize(PMFontSize.BUTTON)
-          .fontColor(PMColors.INK_PRIMARY)
-          .backgroundColor(PMColors.SURFACE_SUBTLE)
-          .border({ width: 1, color: PMColors.BORDER })
-          .borderRadius(PMRadius.SM)
-          .height(48)
-          .margin({ top: PMSpacing.SM })
-          .onClick(() => {
-            this.reminderForActionId = this.reminderForActionId === action.id ? '' : action.id;
-          })
       }
 
       if (this.reminderAvailable && this.reminderForActionId === action.id) {
@@ -1149,48 +1139,84 @@ struct ActionBoard {
             }
           })
         } else {
-          // 轻量概览状态条
-          Row() {
+          // 紧凑头部：状态统计 + 排程/日历入口合成一个区块，行动列表尽量先出现在屏幕上。
+          Column() {
             Row() {
-              Text('进行中')
-                .fontSize(PMFontSize.SECONDARY)
-                .fontColor(PMColors.INK_TERTIARY)
-              Text(` ${this.doingActions.length}`)
-                .fontSize(PMFontSize.BODY)
+              Row() {
+                Text('进行中')
+                  .fontSize(PMFontSize.SECONDARY)
+                  .fontColor(PMColors.INK_TERTIARY)
+                Text(` ${this.doingActions.length}`)
+                  .fontSize(PMFontSize.BODY)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.BRAND)
+              }
+              .margin({ right: PMSpacing.LG })
+
+              Row() {
+                Text('待开始')
+                  .fontSize(PMFontSize.SECONDARY)
+                  .fontColor(PMColors.INK_TERTIARY)
+                Text(` ${this.todoActions.length}`)
+                  .fontSize(PMFontSize.BODY)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.INK_PRIMARY)
+              }
+              .margin({ right: PMSpacing.LG })
+
+              Row() {
+                Text('已完成')
+                  .fontSize(PMFontSize.SECONDARY)
+                  .fontColor(PMColors.INK_TERTIARY)
+                Text(` ${this.doneActions.length}`)
+                  .fontSize(PMFontSize.BODY)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.SUCCESS)
+              }
+            }
+            .width('100%')
+            .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.XS })
+
+            // 工具区入口：默认收起，只占一行；排程与设备日历在展开后才出现。
+            Row({ space: PMSpacing.SM }) {
+              Column({ space: 2 }) {
+                Text('排程与日历')
+                  .fontSize(PMFontSize.SECONDARY)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(PMColors.INK_PRIMARY)
+                Text(this.calendarToolSummary())
+                  .fontSize(11)
+                  .fontColor(PMColors.INK_TERTIARY)
+                  .maxLines(1)
+                  .textOverflow({ overflow: TextOverflow.Ellipsis })
+              }
+              .layoutWeight(1)
+              .alignItems(HorizontalAlign.Start)
+
+              Text(this.showCalendarTools ? '收起' : '展开')
+                .fontSize(PMFontSize.CAPTION)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.BRAND)
+                .constraintSize({ minHeight: 44 })
+                .padding({ left: PMSpacing.SM, right: 2 })
+                .clickEffect(PMInteraction.PRESS_EFFECT)
+                .accessibilityText(this.showCalendarTools ? '收起排程与设备日历' : '展开排程与设备日历')
+                .onClick(() => { this.showCalendarTools = !this.showCalendarTools; })
             }
-            .margin({ right: PMSpacing.LG })
-
-            Row() {
-              Text('待开始')
-                .fontSize(PMFontSize.SECONDARY)
-                .fontColor(PMColors.INK_TERTIARY)
-              Text(` ${this.todoActions.length}`)
-                .fontSize(PMFontSize.BODY)
-                .fontWeight(FontWeight.Medium)
-                .fontColor(PMColors.INK_PRIMARY)
-            }
-            .margin({ right: PMSpacing.LG })
-
-            Row() {
-              Text('已完成')
-                .fontSize(PMFontSize.SECONDARY)
-                .fontColor(PMColors.INK_TERTIARY)
-              Text(` ${this.doneActions.length}`)
-                .fontSize(PMFontSize.BODY)
-                .fontWeight(FontWeight.Medium)
-                .fontColor(PMColors.SUCCESS)
-            }
+            .width('100%')
+            .alignItems(VerticalAlign.Center)
+            .padding({ left: PMSpacing.LG, right: PMSpacing.LG, bottom: PMSpacing.XS })
           }
           .width('100%')
-          .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.SM })
           .backgroundColor(PMColors.SURFACE)
           .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
 
-          // R2 可执行安排：预览并确认未来 7 天的应用内时段
-          this.ScheduleSection()
-          DeviceCalendarReadCard()
+          if (this.showCalendarTools) {
+            // R2 可执行安排：预览并确认未来 7 天的应用内时段
+            this.ScheduleSection()
+            // 设备日历只读读取：权限、预览与写入确认仍是两套独立语义
+            DeviceCalendarReadCard()
+          }
 
           List({ space: PMSpacing.MD }) {
             // 进行中
@@ -1256,16 +1282,14 @@ struct ActionBoard {
                 .fontSize(PMFontSize.PAGE_TITLE)
                 .fontWeight(FontWeight.Medium)
                 .fontColor(PMColors.INK_PRIMARY)
-              Button('✕').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-                .fontSize(PMFontSize.BODY)
-                .fontColor(PMColors.INK_TERTIARY)
-                .backgroundColor('transparent')
-                .onClick(() => {
-                  this.showFeasibility = false;
-                })
+                .layoutWeight(1)
+              PMCloseButton({
+                accessibilityLabel: '关闭可行性评估',
+                onAction: (): void => { this.showFeasibility = false; }
+              })
             }
             .width('100%')
-            .justifyContent(FlexAlign.SpaceBetween)
+            .alignItems(VerticalAlign.Center)
 
             Text(this.feasibilityTitle())
               .fontSize(PMFontSize.SECTION_TITLE)

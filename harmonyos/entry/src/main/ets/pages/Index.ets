@@ -1,4 +1,4 @@
-import { PMPageIntro, PMListRow } from '../components/PMReferencePrimitives';
+import { PMPageIntro, PMListRow, PMCloseButton } from '../components/PMReferencePrimitives';
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
 import { handoffIntentExpired } from '../common/MissionWidgetContract';
@@ -1566,31 +1566,70 @@ struct Index {
   @Builder
   private GlobalMemoryTab() {
     Column() {
-      // 范围入口：项目记忆（本页）与个人记忆（独立页面，复用设置里的同一实现）
-      Row() {
-        Text('项目记忆')
-          .fontSize(PMFontSize.CAPTION)
-          .fontWeight(FontWeight.Medium)
-          .fontColor(PMColors.BRAND)
-          .padding({ left: 10, right: 10, top: 6, bottom: 6 })
-          .backgroundColor(PMColors.BRAND_LIGHT)
-          .borderRadius(PMRadius.SM)
-        Blank()
-        Text('我的记忆 ›')
-          .fontSize(PMFontSize.CAPTION)
-          .fontWeight(FontWeight.Medium)
-          .fontColor(PMColors.INK_SECONDARY)
-          .padding({ left: 10, right: 10, top: 6, bottom: 6 })
-          .constraintSize({ minHeight: 32 })
+      // 记忆范围：同一分段控件内切换"项目记忆（本页跨项目材料）"与"我的记忆（账户级页面）"。
+      // 两段字号、触控高度、排版一致，选中态统一；我的记忆进入独立页面，返回后仍停留在项目记忆。
+      Column({ space: PMSpacing.XS }) {
+        Row({ space: 2 }) {
+          Row() {
+            Text('项目记忆')
+              .fontSize(PMFontSize.SECONDARY)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.BRAND)
+          }
+          .layoutWeight(1)
+          .height(44)
+          .justifyContent(FlexAlign.Center)
+          .backgroundColor(PMColors.SURFACE)
+          .borderRadius(9)
+          .accessibilityText('项目记忆，跨项目汇总的记忆材料，当前范围')
+          .accessibilitySelected(true)
+
+          Row() {
+            Text('我的记忆')
+              .fontSize(PMFontSize.SECONDARY)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(PMColors.INK_SECONDARY)
+          }
+          .layoutWeight(1)
+          .height(44)
+          .justifyContent(FlexAlign.Center)
+          .borderRadius(9)
           .clickEffect(PMInteraction.PRESS_EFFECT)
-          .accessibilityText('打开我的记忆，管理个人协作偏好与背景')
+          .accessibilityText('我的记忆，账户级偏好与协作上下文，打开管理页')
+          .accessibilitySelected(false)
           .onClick(() => {
             router.pushUrl({ url: 'pages/PersonalMemoryPage' });
           })
+        }
+        .width('100%')
+        .padding(3)
+        .backgroundColor(PMColors.SURFACE_SUBTLE)
+        .borderRadius(12)
+
+        if (!this.globalMemoryNoteHidden) {
+          Row({ space: PMSpacing.SM }) {
+            Text('项目记忆汇总跨项目材料，点开项目可回看原始记录；我的记忆是账户级偏好与协作上下文。')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+              .lineHeight(17)
+              .layoutWeight(1)
+              .accessibilityText('范围说明：项目记忆汇总跨项目记忆材料，进入项目后才能看到时态关系与原始来源；我的记忆保存账户级偏好与协作上下文')
+            Text('不再显示')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_MUTED)
+              .constraintSize({ minHeight: 32 })
+              .accessibilityText('不再显示记忆范围说明')
+              .onClick(() => {
+                void this.hideGlobalMemoryNote();
+              })
+          }
+          .width('100%')
+          .alignItems(VerticalAlign.Center)
+        }
       }
       .width('100%')
-      .alignItems(VerticalAlign.Center)
-      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM, bottom: 2 })
+      .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.XS })
+      .alignItems(HorizontalAlign.Start)
 
       // 搜索框与筛选
       Column() {
@@ -1613,7 +1652,7 @@ struct Index {
               // 下划线挂在 Text 自身边框上，避免百分比宽度把整列撑满视口。
               Text(filter.label)
                 .fontSize(PMFontSize.SECONDARY)
-                .fontWeight(this.selectedGlobalType === filter.value ? FontWeight.Bold : FontWeight.Regular)
+                .fontWeight(this.selectedGlobalType === filter.value ? FontWeight.Medium : FontWeight.Regular)
                 .fontColor(this.selectedGlobalType === filter.value ? PMColors.BRAND : PMColors.INK_SECONDARY)
                 .padding({ left: 12, right: 12, top: 10, bottom: 10 }).constraintSize({ minHeight: 44 })
                 .border({ width: { bottom: 2 }, color: this.selectedGlobalType === filter.value ? PMColors.BRAND : Color.Transparent })
@@ -1637,32 +1676,6 @@ struct Index {
       .padding({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD, bottom: PMSpacing.SM })
       .backgroundColor(PMColors.SURFACE)
       .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
-
-      // 全局与项目内的导航语义必须说清：这里只有跨项目记录，时态关系在项目里
-      if (!this.globalMemoryNoteHidden) {
-        Row() {
-          Text('点开所属项目，可回看原始记录与附件。')
-            .fontSize(PMFontSize.CAPTION)
-            .fontColor(PMColors.INK_SECONDARY)
-            .lineHeight(18)
-            .layoutWeight(1)
-            .accessibilityText('范围说明：这里只展示跨项目记忆，进入项目后才能看到该项目的时态关系与原始来源')
-          Text('不再显示')
-            .fontSize(PMFontSize.CAPTION)
-            .fontColor(PMColors.INK_TERTIARY)
-            .margin({ left: PMSpacing.SM })
-            .accessibilityText('不再显示跨项目记忆范围说明')
-            .onClick(() => {
-              void this.hideGlobalMemoryNote();
-            })
-        }
-        .width('100%')
-        .alignItems(VerticalAlign.Top)
-        .padding(PMSpacing.MD)
-        .backgroundColor(PMColors.BRAND_LIGHT)
-        .borderRadius(PMRadius.SM)
-        .margin({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.MD })
-      }
 
       List({ space: 10 }) {
         if (this.getFilteredGlobalCards().length === 0) {
@@ -2013,20 +2026,13 @@ struct Index {
         .fontWeight(FontWeight.Medium)
         .fontColor(PMColors.INK_PRIMARY)
         .layoutWeight(1)
-      Button('✕', { type: ButtonType.Normal })
-        .fontSize(PMFontSize.BODY)
-        .fontColor(PMColors.INK_TERTIARY)
-        .backgroundColor(Color.Transparent)
-        .width(36)
-        .height(36)
-        .borderRadius(PMRadius.SM)
-        .onClick(() => {
-          this.showSettingsSheet = false;
-        })
-        .accessibilityText(`关闭${title}`)
+      PMCloseButton({
+        accessibilityLabel: `关闭${title}`,
+        onAction: (): void => { this.showSettingsSheet = false; }
+      })
     }
     .width('100%')
-    .justifyContent(FlexAlign.SpaceBetween)
+    .alignItems(VerticalAlign.Center)
   }
 
   /** 信息说明页里的一组「标签 + 值」行 */
@@ -2504,17 +2510,14 @@ struct Index {
           .fontSize(PMFontSize.SECTION_TITLE)
           .fontWeight(FontWeight.Medium)
           .fontColor(PMColors.INK_PRIMARY)
-        Button('✕').type(ButtonType.Normal).borderRadius(PMRadius.BUTTON)
-          .fontSize(PMFontSize.BODY)
-          .fontColor(PMColors.INK_TERTIARY)
-          .backgroundColor('transparent')
-          .onClick(() => {
-            this.showSettingsSheet = false;
-          })
-          .accessibilityText('关闭 API 配置')
+          .layoutWeight(1)
+        PMCloseButton({
+          accessibilityLabel: '关闭 API 配置',
+          onAction: (): void => { this.showSettingsSheet = false; }
+        })
       }
       .width('100%')
-      .justifyContent(FlexAlign.SpaceBetween)
+      .alignItems(VerticalAlign.Center)
 
       Scroll() {
         Column() {

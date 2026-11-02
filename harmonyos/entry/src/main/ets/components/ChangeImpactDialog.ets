@@ -8,6 +8,7 @@ import {
 import { DecisionService } from '../services/DecisionService';
 import { ApiError } from '../models/Project';
 import { AlertIcon } from './PMIcons';
+import { PMCloseButton } from './PMReferencePrimitives';
 
 @Component
 export struct ChangeImpactDialog {
@@ -129,13 +130,7 @@ export struct ChangeImpactDialog {
           }
           .alignItems(VerticalAlign.Center)
 
-          Button('✕')
-            .fontSize(PMFontSize.BODY)
-            .fontColor(PMColors.INK_TERTIARY)
-            .backgroundColor('transparent')
-            .onClick(() => {
-              this.onClose();
-            })
+          PMCloseButton({ accessibilityLabel: '关闭决策变更影响评估', onAction: (): void => { this.onClose(); } })
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)

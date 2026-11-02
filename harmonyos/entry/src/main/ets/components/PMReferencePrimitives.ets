@@ -1,5 +1,5 @@
 import { PMColors, PMFontSize, PMSpacing, PMRadius, PMInteraction } from '../common/DesignTokens';
-import { AlertIcon, MemoryIcon, TaskIcon, ClockIcon } from './PMIcons';
+import { AlertIcon, CloseIcon, MemoryIcon, TaskIcon, ClockIcon } from './PMIcons';
 
 @Component
 export struct PMButton {
@@ -15,6 +15,72 @@ export struct PMButton {
       .backgroundColor(this.secondary ? PMColors.BRAND_LIGHT : PMColors.BRAND)
       .borderRadius(PMRadius.BUTTON).enabled(!this.disabled)
       .onClick(() => { this.onAction(); })
+  }
+}
+
+/**
+ * 统一关闭按钮：真实图标 + 44×44 触控区 + 浅色底。
+ * 所有底部弹层/浮层的右上角关闭都使用本组件，避免各自用文字 '✕' 导致
+ * 字号、粗细、触控区与背景不一致。
+ */
+@Component
+export struct PMCloseButton {
+  @Prop accessibilityLabel: string = '关闭';
+  @Prop closeDisabled: boolean = false;
+  onAction: () => void = (): void => {};
+
+  build() {
+    Button({ type: ButtonType.Normal }) {
+      CloseIcon({ iconSize: 20, iconColor: PMColors.INK_SECONDARY })
+    }
+    .width(44)
+    .height(44)
+    .borderRadius(PMRadius.FULL)
+    .backgroundColor(PMColors.SURFACE_SUBTLE)
+    .enabled(!this.closeDisabled)
+    .opacity(this.closeDisabled ? 0.4 : 1)
+    .clickEffect(PMInteraction.PRESS_EFFECT)
+    .accessibilityText(this.accessibilityLabel)
+    .onClick(() => { this.onAction(); })
+  }
+}
+
+/**
+ * 统一弹层标题行：左侧标题（可带副标题），右侧统一关闭按钮。
+ * 弹层容器使用统一内边距，标题与关闭按钮基线一致。
+ */
+@Component
+export struct PMSheetHeader {
+  @Prop title: string = '';
+  @Prop subtitle: string = '';
+  @Prop closeLabel: string = '关闭';
+  @Prop closeDisabled: boolean = false;
+  onClose: () => void = (): void => {};
+
+  build() {
+    Row({ space: PMSpacing.SM }) {
+      Column({ space: 2 }) {
+        Text(this.title)
+          .fontSize(PMFontSize.SECTION_TITLE)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(PMColors.INK_PRIMARY)
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+        if (this.subtitle !== '') {
+          Text(this.subtitle)
+            .fontSize(PMFontSize.CAPTION)
+            .fontColor(PMColors.INK_TERTIARY)
+            .maxLines(2)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+        }
+      }
+      .layoutWeight(1)
+      .alignItems(HorizontalAlign.Start)
+
+      PMCloseButton({ accessibilityLabel: this.closeLabel, closeDisabled: this.closeDisabled, onAction: () => { this.onClose(); } })
+    }
+    .width('100%')
+    .alignItems(VerticalAlign.Center)
   }
 }
 

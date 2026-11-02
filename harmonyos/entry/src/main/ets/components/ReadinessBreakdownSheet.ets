@@ -1,6 +1,7 @@
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMMotion, PMInteraction } from '../common/DesignTokens';
 import { CompetitionReadiness, ReadinessItem } from '../models/Project';
 import { TextFormatters } from '../common/TextFormatters';
+import { PMCloseButton } from './PMReferencePrimitives';
 
 /**
  * 项目内准备项逐项说明。
@@ -54,16 +55,10 @@ export struct ReadinessBreakdownSheet {
             .layoutWeight(1)
             .maxLines(2)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
-          Button('✕')
-            .fontSize(PMFontSize.BODY)
-            .fontColor(PMColors.INK_TERTIARY)
-            .backgroundColor('transparent')
-            .width(44)
-            .height(44)
-            .onClick(() => {
-              this.onClose();
-            })
-            .accessibilityText('关闭项目内准备项说明')
+          PMCloseButton({
+            accessibilityLabel: '关闭项目内准备项说明',
+            onAction: (): void => { this.onClose(); }
+          })
         }
         .width('100%')
         .alignItems(VerticalAlign.Top)

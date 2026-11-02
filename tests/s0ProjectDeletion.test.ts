@@ -82,7 +82,16 @@ describe("项目销毁的服务端权限", () => {
     expect(await projectDeletionStatus(f.auth.user.id, f.project.id)).toMatchObject({ status: "PENDING", filesRemaining: 1 });
     expect(fs.existsSync(file.absolutePath)).toBe(true);
     expect((await (await f.request()).json()).deletion.receiptId).toBe(receipt);
-    await processProjectDeletions(5, deleteAttachmentFile);
+    const retry = vi.fn(deleteAttachmentFile);
+    await processProjectDeletions(1, retry);
+    expect(retry).not.toHaveBeenCalled();
+    // 一个永久文件故障不能占满后续每轮的首个处理位置。
+    const other = await owned();
+    expect((await other.request()).status).toBe(202);
+    await processProjectDeletions(1, retry);
+    expect(await projectDeletionStatus(other.auth.user.id, other.project.id)).toMatchObject({ status: "COMPLETED" });
+    expect(await projectDeletionStatus(f.auth.user.id, f.project.id)).toMatchObject({ status: "PENDING" });
+    await processProjectDeletions(5, deleteAttachmentFile, Date.now() + 300_001);
     expect(fs.existsSync(file.absolutePath)).toBe(false);
     expect(await db.project.findUnique({ where: { id: f.project.id } })).toBeNull();
     expect(await projectDeletionStatus(f.auth.user.id, f.project.id)).toMatchObject({ status: "COMPLETED", filesRemaining: 0 });

@@ -53,19 +53,20 @@ export async function requestProjectDeletion(ownerId: string, projectId: string,
 }
 
 /** 有界清理加入原 Worker；文件移除幂等，失败保留清单及原回执，不先丢失清理身份。 */
-export async function processProjectDeletions(limit = 5, removeFile = deleteAttachmentFile) {
+export async function processProjectDeletions(limit = 5, removeFile = deleteAttachmentFile, now = Date.now()) {
   const runs = await db.agentRun.findMany({ where: { provider, status: "PARTIAL", OR: [
-    { confirmedAt: null }, { confirmedAt: { lt: new Date(Date.now() - 300_000) } },
+    { confirmedAt: null }, { confirmedAt: { lt: new Date(now - 300_000) } },
   ] }, orderBy: { createdAt: "asc" }, take: limit });
   for (const run of runs) {
-    const lease = new Date();
+    const lease = new Date(now);
     const acquired = await db.agentRun.updateMany({ where: { id: run.id, status: "PARTIAL", confirmedAt: run.confirmedAt }, data: { confirmedAt: lease } });
     if (!acquired.count) continue;
     const trace = record(run.trace), result = record(run.resultJson);
     const files = Array.isArray(trace.files) ? trace.files.filter((key): key is string => typeof key === "string") : [];
     const remaining: string[] = files.slice(50);
+    let failedFiles = 0;
     for (const file of files.slice(0, 50)) {
-      try { await removeFile(file); } catch { remaining.push(file); }
+      try { await removeFile(file); } catch { remaining.push(file); failedFiles++; }
     }
     await db.$transaction(async tx => {
       const current = await tx.agentRun.findUnique({ where: { id: run.id } });
@@ -78,7 +79,8 @@ export async function processProjectDeletions(limit = 5, removeFile = deleteAtta
         await tx.conversation.deleteMany({ where: { projects: { some: { projectId }, every: { projectId } } } });
         await tx.project.deleteMany({ where: { id: projectId, deletionRequestedAt: { not: null } } });
       }
-      await tx.agentRun.update({ where: { id: run.id }, data: { status: remaining.length ? "PARTIAL" : "SUCCESS", confirmedAt: null,
+      // 文件故障沿原五分钟过期租约退避，避免最早的失败项目占满每一轮清理批次。
+      await tx.agentRun.update({ where: { id: run.id }, data: { status: remaining.length ? "PARTIAL" : "SUCCESS", confirmedAt: failedFiles ? lease : null,
         trace: { ...trace, files: remaining },
         resultJson: { status: remaining.length ? "PENDING" : "COMPLETED", filesRemaining: remaining.length,
           attempts: Number(result.attempts ?? 0) + 1, ...(remaining.length ? { reason: "FILE_CLEANUP_PENDING" } : { completedAt: new Date().toISOString() }) } } });

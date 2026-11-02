@@ -13,8 +13,16 @@ it("新鲜心跳不能掩盖 release、数据库或关键开关不匹配", () =>
   expect(readWorkerPresence(now)).toMatchObject({ status: "STALE", isProcessAlive: true, isActivelyInspecting: false, mismatchReason: "RELEASE_MISMATCH" });
   vi.stubEnv("PROJECTMEMO_RELEASE", "release-a"); vi.stubEnv("DATABASE_URL", "file:" + path.join(dir, "other.db"));
   expect(readWorkerPresence(now)).toMatchObject({ mismatchReason: "DATABASE_MISMATCH" });
+  const asyncFlag = process.env.FOCUS_ASYNC_ENABLED;
   vi.stubEnv("DATABASE_URL", "file:" + path.join(dir, "test.db")); vi.stubEnv("FOCUS_ASYNC_ENABLED", "true");
   expect(readWorkerPresence(now)).toMatchObject({ mismatchReason: "CONFIG_MISMATCH" });
+  vi.stubEnv("FOCUS_ASYNC_ENABLED", asyncFlag);
+  for (const key of ["MISSION_INVESTIGATION_DELEGATION_ENABLED", "MISSION_AUTO_CONTINUATION_ENABLED", "REPO_CI_OBSERVER_ENABLED", "CALENDAR_EVENT_WRITE_ENABLED"]) {
+    const original = process.env[key];
+    vi.stubEnv(key, original === "true" ? "false" : "true");
+    expect(readWorkerPresence(now)).toMatchObject({ mismatchReason: "CONFIG_MISMATCH", isActivelyInspecting: false });
+    vi.stubEnv(key, original);
+  }
 });
 it("已失去心跳或巡检失败时不能继续显示正在成功巡检", () => {
   setup(); const now = Date.now(); recordWorkerPresence({ workerId: "worker", scan: true, now });

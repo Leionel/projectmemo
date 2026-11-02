@@ -1,0 +1,21 @@
+{
+  "outcome": "PASS",
+  "data": "synthetic; isolated OS-temp database and attachments",
+  "worker": "original scripts/mission-worker.ts --once; three actual child processes",
+  "model": "mock; execution features disabled",
+  "assertions": [
+    "actual scanner failure exits 1",
+    "failure never displays successful scan",
+    "new worker identity after restart",
+    "pending deletion completes with original receipt and actual unlink",
+    "repeat worker remains idempotent",
+    "stale heartbeat is not active",
+    "mismatched release is rejected"
+  ],
+  "limits": [
+    "Windows process probe",
+    "no Linux/systemd",
+    "no device or natural-day acceptance",
+    "no model task claim asserted"
+  ]
+}

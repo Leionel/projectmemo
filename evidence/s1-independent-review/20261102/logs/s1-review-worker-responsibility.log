@@ -1,0 +1,22 @@
+{
+  "outcome": "PASS",
+  "data": "synthetic; isolated OS-temp database, attachments and presence file",
+  "worker": "original scripts/mission-worker.ts --once; two actual child processes",
+  "model": "mock; no API key; mission queue enabled only for claim/guard assertions",
+  "assertions": [
+    "到期临时原件被真实删除，草稿 EXPIRED、材料清理身份保留",
+    "未到检查时间的委托保持 READY 且无 CLAIMED 事件",
+    "缺云上下文批准的到期委托 PAUSED 且错误码明确",
+    "用户暂停的委托不被后台复活",
+    "没有成功模型回执，不把未调用显示成已检查",
+    "第二轮进程不重复领取、清理幂等",
+    "项目 AgentRun 行数：首次前 0，两轮后 1"
+  ],
+  "limits": [
+    "Windows 进程探针",
+    "非 Linux/systemd",
+    "无设备或自然日验收",
+    "未调用真实模型",
+    "下一检查时间由夹具设置，非自然日积累"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "source": "63e19bb",
+  "data": "synthetic; pure helper/schema checks; no business writes or model calls",
+  "quote": {
+    "source": "The agent is not able to complete this task.",
+    "candidate": "notable",
+    "accepted": true,
+    "expected": false
+  },
+  "calendarDate": {
+    "value": "2026-02-31",
+    "accepted": true,
+    "expected": false
+  }
+}

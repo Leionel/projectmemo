@@ -95,7 +95,7 @@ Owner：当前 Codex。Worktree：`D:/Projects/hongmen-s1`。独立复核：未�
 
 1. 代码回滚：`git revert` 本任务的三个提交（`42d934e`、`05ea5c3`、`5f736c2`）即可；迁移只新增两张表，回退时保留表与其中数据，不执行 `DROP`/`reset`。
 2. 功能降级：关闭入口只影响新建流程——`/projects/new` 保留“直接填写”的手工建项，手机保留原“新建项目档案”对话框；已建项目、原 Conversation/Mission、Action 与回执不受影响。
-3. 材料清理：把 `INTAKE_CLEANUP` 从 Worker 扫描中移除即可停止自动过期清理，但**不要**同时移除草稿到期判定；否则临时原件会无限期保留。
+3. 材料清理：关闭新增入口时仍保留 `INTAKE_CLEANUP`、到期读取拒绝与失败重试责任。清理异常应修复或转为明确的受控清理交接，不能只移除扫描；单独保留到期判定并不能清除磁盘上的私人原件。
 4. 卡片定位：回退 `WidgetCard`/`EntryAbility` 的新参数会导致卡片只打开 Mission 而不定位问题——这是能力回退，不是安全回退；`handoffIntentExpired` 与读回时的服务端校验必须保留。
 5. 隐私/撤权守卫（处理许可、额度、幂等、预览 hash、来源版本、owner/session/generation）不得随功能一起回滚。
 

@@ -1,0 +1,90 @@
+import { afterAll, beforeAll, expect, it, vi } from "vitest";
+const isolated = await vi.hoisted(async () => (await import("./helpers/continuityDatabase")).continuityDatabase("s1-independent-review"));
+import fs from "node:fs";
+import path from "node:path";
+import { db } from "@/lib/db";
+import { createSession } from "@/lib/auth/session";
+import * as intake from "@/lib/services/projectIntakeService";
+import { saveFileToStorage } from "@/lib/storage/attachmentStorage";
+import type { ConversationActor } from "@/lib/types/conversation";
+
+beforeAll(() => { process.env.ATTACHMENT_DIR = path.join(isolated.dir, "attachments"); });
+afterAll(async () => { vi.restoreAllMocks(); vi.unstubAllEnvs(); await db.$disconnect(); });
+async function fixture() {
+  const user = await db.user.create({ data: { username: crypto.randomUUID(), displayName: "独立合成审查", passwordHash: "unused" } });
+  const { session } = await createSession(user.id);
+  const actor: ConversationActor = { userId: user.id, sessionId: session.id };
+  const { draftId } = await intake.createIntakeDraft(actor, { requestId: crypto.randomUUID() });
+  const material = await intake.addTextMaterial(actor, draftId, { requestId: "m", text: "先读论文，不运行付费实验。" });
+  await intake.recordProcessingConsent(actor, draftId);
+  return { actor, user, session, draftId, material };
+}
+function model(materialId: string) {
+  return { data: JSON.stringify({ summary: "原文只要求阅读。", quotes: [{ materialId, quote: "先读论文，不运行付费实验。", meaning: "只读任务" }],
+    suggested: { title: "论文阅读", description: "核查论文的方法和实验条件，不直接执行付费实验。", goal: "先阅读论文", scenario: "RESEARCH" },
+    constraints: [], unknowns: [], successCriteria: [], nextQuestion: { text: "哪些条件仍需核查？", why: "先核对原文" } }),
+    provider: "SYNTHETIC", status: "SUCCESS" as const, durationMs: 1, usageUnknown: false, usage: { inputTokens: 30, outputTokens: 80 }, requestIdentity: null };
+}
+const accepted = { title: "论文阅读", description: "阅读论文并核查方法条件，形成真实的阅读笔记。", goal: "完成阅读笔记", scenario: "RESEARCH" as const };
+
+it("实际 provider 适配链只预占一次并确实派发一次", async () => {
+  const f = await fixture();
+  vi.stubEnv("LLM_MODE", "openai-compatible"); vi.stubEnv("LLM_API_KEY", "synthetic-no-real-key");
+  vi.stubEnv("LLM_PROVIDER", "deepseek"); vi.stubEnv("LLM_MODEL_NAME", "deepseek-flash");
+  const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({ choices: [{ message: { content: model(f.material.materialId).data } }], usage: { prompt_tokens: 30, completion_tokens: 80 } }), { status: 200 }));
+  try {
+    const result = await intake.understandIntake(f.actor, f.draftId, { requestId: "u", processingConsent: true });
+    expect(result.preview.understandingState).toBe("READY"); expect(fetch).toHaveBeenCalledTimes(1);
+  } finally { fetch.mockRestore(); vi.unstubAllEnvs(); }
+});
+
+it("模型在途期间新增材料，旧模型结果不能绑定到新材料版本", async () => {
+  const f = await fixture(); let enter!: () => void, release!: () => void;
+  const ready = new Promise<void>(r => { enter = r; }), gate = new Promise<void>(r => { release = r; });
+  const pending = intake.understandIntake(f.actor, f.draftId, { requestId: "u", processingConsent: true }, { runModel: async () => { enter(); await gate; return model(f.material.materialId); } });
+  const outcome = pending.catch(e => e);
+  await ready;
+  await intake.addTextMaterial(f.actor, f.draftId, { requestId: "m2", text: "纠正：先核查这篇论文的适用条件，暂不采用原计划。" });
+  release(); await outcome;
+  const current = await db.projectIntakeDraft.findUniqueOrThrow({ where: { id: f.draftId } });
+  expect(current.understandingState).not.toBe("READY"); expect(current.understandingJson).toBeNull();
+});
+
+it("撤回清理后迟到模型结果不能重新写回私人理解", async () => {
+  const f = await fixture(); let enter!: () => void, release!: () => void;
+  const ready = new Promise<void>(r => { enter = r; }), gate = new Promise<void>(r => { release = r; });
+  const pending = intake.understandIntake(f.actor, f.draftId, { requestId: "u", processingConsent: true }, { runModel: async () => { enter(); await gate; return model(f.material.materialId); } });
+  const outcome = pending.catch(e => e);
+  await ready; await intake.withdrawIntake(f.actor, f.draftId); release(); await outcome;
+  const current = await db.projectIntakeDraft.findUniqueOrThrow({ where: { id: f.draftId } });
+  expect(current.status).toBe("WITHDRAWN"); expect(current.understandingJson).toBeNull();
+});
+
+it("到期 unlink 失败保留文件身份，下一轮仍可清理 EXPIRED 草稿", async () => {
+  const f = await fixture();
+  const file = await saveFileToStorage(`intake-${f.draftId}`, "synthetic.txt", Buffer.from("private synthetic original"));
+  const material = await db.projectIntakeMaterial.create({ data: { draftId: f.draftId, ownerUserId: f.actor.userId, kind: "FILE", ordinal: 2,
+    contentHash: "synthetic", storageKey: file.storageKey, rawText: "private synthetic original" } });
+  await db.projectIntakeDraft.update({ where: { id: f.draftId }, data: { expiresAt: new Date(Date.now()-1000) } });
+  const rm = fs.promises.rm.bind(fs.promises);
+  const spy = vi.spyOn(fs.promises, "rm").mockImplementation(async (target, options) => { if (String(target) === file.absolutePath) throw new Error("synthetic unlink failure"); return rm(target, options); });
+  try { await intake.expireIntakeDrafts(); } finally { spy.mockRestore(); }
+  const after = await db.projectIntakeMaterial.findUniqueOrThrow({ where: { id: material.id } });
+  expect(fs.existsSync(file.absolutePath)).toBe(true);
+  expect(after.cleanupState).toBe("FAILED"); expect(after.storageKey).toBe(file.storageKey);
+  await intake.expireIntakeDrafts(new Date(Date.now()+86_400_000));
+  expect(fs.existsSync(file.absolutePath)).toBe(false);
+});
+
+it("项目清除后 Intake 不能继续暴露已清除项目材料副本", async () => {
+  const f = await fixture(), preview = (await intake.readIntake(f.actor, f.draftId)).preview;
+  const confirmed = await intake.confirmIntake(f.actor, f.draftId, { requestId: "c", expectedRevision: preview.revision, previewHash: preview.previewHash, accepted });
+  const { requestProjectDeletion, processProjectDeletions } = await import("@/lib/services/projectDeletionService");
+  const project = await db.project.findUniqueOrThrow({ where: { id: confirmed.projectId } });
+  await requestProjectDeletion(f.actor.userId, project.id, project.id, project.updatedAt.toISOString(), f.session.id);
+  await processProjectDeletions();
+  await expect(intake.readIntake(f.actor, f.draftId)).rejects.toBeDefined();
+  await intake.expireIntakeDrafts(new Date(Date.now()+86_400_000*4));
+  expect((await db.projectIntakeMaterial.findMany({ where: { draftId: f.draftId } })).every(m => m.rawText === null)).toBe(true);
+});
+

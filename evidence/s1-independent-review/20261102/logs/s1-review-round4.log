@@ -1,0 +1,85 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/s1IndependentReview.test.ts tests/projectIntake.test.ts tests/s1ResultProgress.test.ts tests/attachment.test.ts tests/s0ProjectDeletion.test.ts
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-s1-review
+
+ ❯ tests/projectIntake.test.ts (8 tests | 1 failed) 1383ms
+     × 材料 → 模型理解（原文可核对）→ 用户整体纠正 → 确认建项 → 原 Capture 接回 523ms
+ ❯ tests/attachment.test.ts (2 tests | 2 failed) 125ms
+     × stores an unreadable PDF truthfully and deduplicates before writing another file 120ms
+     × rejects executable content instead of archiving it as a generic file 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/attachment.test.ts > S05: Project Inbox Attachment Upload and Memory Ingestion > stores an unreadable PDF truthfully and deduplicates before writing another file
+PrismaClientKnownRequestError: 
+Invalid `db.project.create()` invocation in
+D:/Projects/hongmen-s1-review/tests/attachment.test.ts:24:42
+
+  21 const attachmentDir = fs.mkdtempSync(path.join(os.tmpdir(), "projectmemo-attachments-"));
+  22 temporaryDirs.push(attachmentDir);
+  23 process.env.ATTACHMENT_DIR = attachmentDir;
+→ 24 const testProject = await db.project.create(
+The table `main.Project` does not exist in the current database.
+ ❯ vn.handleRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:238:12
+ ❯ vn.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:184:11
+ ❯ vn.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:153:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:1012:23
+ ❯ tests/attachment.test.ts:24:25
+     22|     temporaryDirs.push(attachmentDir);
+     23|     process.env.ATTACHMENT_DIR = attachmentDir;
+     24|     const testProject = await db.project.create({
+       |                         ^
+     25|       data: {
+     26|         title: "Attachment Inbox Test Project",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/attachment.test.ts > S05: Project Inbox Attachment Upload and Memory Ingestion > rejects executable content instead of archiving it as a generic file
+PrismaClientKnownRequestError: 
+Invalid `db.project.create()` invocation in
+D:/Projects/hongmen-s1-review/tests/attachment.test.ts:70:42
+
+  67 });
+  68 
+  69 it("rejects executable content instead of archiving it as a generic file", async () => {
+→ 70   const testProject = await db.project.create(
+The table `main.Project` does not exist in the current database.
+ ❯ vn.handleRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:238:12
+ ❯ vn.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:184:11
+ ❯ vn.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:153:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:1012:23
+ ❯ tests/attachment.test.ts:70:25
+     68|
+     69|   it("rejects executable content instead of archiving it as a generic …
+     70|     const testProject = await db.project.create({
+       |                         ^
+     71|       data: {
+     72|         title: "Attachment Validation Project",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/projectIntake.test.ts > S1-A 项目前材料与确认建项 > 材料 → 模型理解（原文可核对）→ 用户整体纠正 → 确认建项 → 原 Capture 接回
+AssertionError: expected 'DELETED' to be 'PURGED' // Object.is equality
+
+Expected: "PURGED"
+Received: "DELETED"
+
+ ❯ tests/projectIntake.test.ts:135:35
+    133|     const material = await db.projectIntakeMaterial.findUniqueOrThrow(…
+    134|     expect(material.rawText).toBeNull();
+    135|     expect(material.cleanupState).toBe("PURGED");
+       |                                   ^
+    136|   });
+    137|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  2 failed | 3 passed (5)
+      Tests  3 failed | 27 passed (30)
+   Start at  16:00:14
+   Duration  9.63s (transform 1.87s, setup 0ms, import 4.47s, tests 3.35s, environment 0ms)
+

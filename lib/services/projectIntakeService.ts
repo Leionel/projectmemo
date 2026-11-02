@@ -18,6 +18,7 @@ import {
 } from "@/lib/intake/contracts";
 import { buildIntakeCoverage, sliceMaterialsForModel, type IntakeCoverageRound } from "@/lib/intake/coverage";
 import { intakeUnderstandingV1 } from "@/lib/intake/prompt";
+import { originalTextPage } from "@/lib/intake/textRange";
 import {
   computeFileSha256, deleteAttachmentFile, listProjectAttachmentFiles, readAttachmentFile, saveFileToStorage,
 } from "@/lib/storage/attachmentStorage";
@@ -689,11 +690,9 @@ export async function readIntakeMaterialText(actor: ConversationActor, draftId: 
   if (!material) throw new AppError("INTAKE_MATERIAL_NOT_FOUND", "这份材料不存在或不可访问", 404);
   const text = material.rawText ?? "";
   if (!text) throw new AppError("INTAKE_MATERIAL_NO_TEXT", "这份材料没有可读文本，无法核对原文", 422);
-  const limit = Math.min(4000, Math.max(200, Math.trunc(query.limit ?? 4000)));
-  const offset = Math.min(Math.max(0, text.length - 1), Math.max(0, Math.trunc(query.offset ?? 0)));
   return { materialId: material.id, label: materialLabel({ kind: material.kind, fileName: material.fileName, ordinal: material.ordinal }),
-    extractionStatus: material.extractionStatus, totalChars: text.length, offset, limit,
-    text: text.slice(offset, offset + limit), hasMore: offset + limit < text.length };
+    extractionStatus: material.extractionStatus, revision: material.revision, contentHash: material.contentHash,
+    ...originalTextPage(text, query.offset, query.limit) };
 }
 
 export const intakeTesting = { intakeScope, quoteIsVerbatim, sliceMaterialsForModel };

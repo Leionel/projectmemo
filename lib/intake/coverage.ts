@@ -1,4 +1,5 @@
 import { INTAKE_TEXT_LIMIT, materialLabel } from "./contracts";
+import { intactPrefix } from "./textRange";
 
 /**
  * 项目前材料“实际送入模型”的覆盖投影。
@@ -97,7 +98,11 @@ export function sliceMaterialsForModel(materials: IntakeCoverageMaterial[]) {
       continue;
     }
     const take = Math.min(room, INTAKE_TEXT_LIMIT, availableChars);
-    const textSlice = text.slice(0, take);
+    const textSlice = intactPrefix(text, take);
+    if (!textSlice) {
+      items.push({ materialId: material.id, availableChars, sentChars: 0, truncated: true, reason: "OVER_BUDGET" });
+      continue;
+    }
     used += textSlice.length;
     slices.push({ materialId: material.id, label: materialLabel({ kind: material.kind, fileName: material.fileName, ordinal: material.ordinal }),
       type: material.type ?? "TEXT", text: textSlice });

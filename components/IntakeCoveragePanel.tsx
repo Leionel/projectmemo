@@ -22,7 +22,8 @@ function itemState(item: IntakeCoverageItem): string {
   return `已送入 ${numberText(item.lastSentChars)} 字`;
 }
 
-export function IntakeCoveragePanel({ draftId, coverage }: { draftId: string; coverage: IntakeCoverage }) {
+export function IntakeCoveragePanel({ draftId, coverage, materials }: { draftId: string; coverage: IntakeCoverage;
+  materials: Array<{ id: string; revision: number; contentHash: string }> }) {
   const [openMaterial, setOpenMaterial] = useState("");
   const [pages, setPages] = useState<Record<string, { text: string; offset: number; total: number; hasMore: boolean }>>({});
   const [loading, setLoading] = useState("");
@@ -32,15 +33,21 @@ export function IntakeCoveragePanel({ draftId, coverage }: { draftId: string; co
     setLoading(`${materialId}:${offset}`); setError("");
     try {
       const response = await fetch(`/api/intake/${encodeURIComponent(draftId)}/materials/${encodeURIComponent(materialId)}?offset=${offset}&limit=4000`,
-        { cache: "no-store" });
+        { cache: "no-store", signal: AbortSignal.timeout(10000) });
       const body = await response.json().catch(() => null);
       if (!response.ok) throw new Error(body?.error?.message ?? "读取原文失败");
+      const expected = materials.find(material => material.id === materialId);
+      if (!expected || body.materialId !== materialId || body.revision !== expected.revision || body.contentHash !== expected.contentHash)
+        throw new Error("原文版本已变化或无法核对，请刷新材料预览后重新打开原文");
       setPages(current => {
         const previous = offset > 0 ? current[materialId] : undefined;
         return { ...current, [materialId]: { text: (previous ? previous.text : "") + body.text,
           offset: body.offset + body.text.length, total: body.totalChars, hasMore: body.hasMore } };
       });
-    } catch (reason) { setError(reason instanceof Error ? reason.message : "读取原文失败"); }
+    } catch (reason) {
+      setPages(current => { const next = { ...current }; delete next[materialId]; return next; });
+      setError(reason instanceof Error ? reason.message : "读取原文失败");
+    }
     finally { setLoading(""); }
   }
 

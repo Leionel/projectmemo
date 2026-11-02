@@ -45,6 +45,9 @@ export class ReadbackCallCounts {
   total: number = 0;
   succeeded: number = 0;
   failed: number = 0;
+  partial: number = 0;
+  fallback: number = 0;
+  unknown: number = 0;
   usageRecorded: number = 0;
   usageUnknown: number = 0;
 }

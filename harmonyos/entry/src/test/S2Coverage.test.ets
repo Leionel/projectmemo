@@ -1,11 +1,40 @@
 import { describe, it, expect } from '@ohos/hypium';
 import {
-  IntakeCoverage, IntakeCoverageCurrent, IntakeCoverageItem, IntakeCoverageLastSent,
-  intakeCoverageItemLabel, intakeCoverageSummary
+  IntakeCoverage, IntakeCoverageCurrent, IntakeCoverageItem, IntakeCoverageLastSent, IntakePreview, IntakeMaterialTextReply,
+  intakeCoverageItemLabel, intakeCoverageSummary, intakeOriginalViewKey, intakeOriginalPageMatches
 } from '../main/ets/models/ProjectIntake';
 
 export default function s2CoverageContractTest() {
   describe('s2CoverageContract', () => {
+    it('wire_null_and_missing_last_sent_are_not_a_dispatch', 0, () => {
+      const never = JSON.parse('{"availableChars":5000,"plannedChars":5000,"lastSentChars":null,"reason":"INCLUDED"}') as IntakeCoverageItem;
+      expect(intakeCoverageItemLabel(never)).assertEqual('待送入 5000 字 / 共 5000 字');
+      const missing = JSON.parse('{"availableChars":5000,"plannedChars":5000,"reason":"INCLUDED"}') as IntakeCoverageItem;
+      expect(intakeCoverageItemLabel(missing)).assertEqual('待送入 5000 字 / 共 5000 字');
+      const zero = JSON.parse('{"availableChars":5000,"plannedChars":0,"lastSentChars":0,"reason":"INCLUDED"}') as IntakeCoverageItem;
+      expect(intakeCoverageItemLabel(zero)).assertEqual('未送入（共 5000 字）');
+    });
+    it('old_wire_without_coverage_has_no_fabricated_reading_fact', 0, () => {
+      const old = JSON.parse('{"draftId":"d1","materials":[],"status":"DRAFT"}') as IntakePreview;
+      expect(old.coverage === undefined).assertTrue();
+      expect(intakeCoverageSummary(old.coverage)).assertEqual('当前服务未提供材料覆盖记录');
+    });
+    it('same_material_id_new_revision_invalidates_original_pages', 0, () => {
+      const old = JSON.parse('{"draftId":"d1","status":"DRAFT","materialsHash":"v1","materials":[{"id":"m1","revision":1,"contentHash":"a"}]}') as IntakePreview;
+      const revised = JSON.parse('{"draftId":"d1","status":"DRAFT","materialsHash":"v2","materials":[{"id":"m1","revision":2,"contentHash":"b"}]}') as IntakePreview;
+      expect(intakeOriginalViewKey(old) === intakeOriginalViewKey(revised)).assertFalse();
+      const confirmed = JSON.parse('{"draftId":"d1","status":"CONFIRMED","materialsHash":"v1","materials":[{"id":"m1","revision":1,"contentHash":"a"}]}') as IntakePreview;
+      expect(intakeOriginalViewKey(old) === intakeOriginalViewKey(confirmed)).assertFalse();
+    });
+    it('pagination_must_match_the_material_version_not_only_its_id', 0, () => {
+      const preview = JSON.parse('{"materials":[{"id":"m1","revision":1,"contentHash":"a"}]}') as IntakePreview;
+      const first = JSON.parse('{"materialId":"m1","revision":1,"contentHash":"a","text":"原文"}') as IntakeMaterialTextReply;
+      expect(intakeOriginalPageMatches(preview, 'm1', first)).assertTrue();
+      const newer = JSON.parse('{"materialId":"m1","revision":2,"contentHash":"b","text":"新原文"}') as IntakeMaterialTextReply;
+      expect(intakeOriginalPageMatches(preview, 'm1', newer)).assertFalse();
+      const oldServer = JSON.parse('{"materialId":"m1","text":"缺版本"}') as IntakeMaterialTextReply;
+      expect(intakeOriginalPageMatches(preview, 'm1', oldServer)).assertFalse();
+    });
     it('coverage_item_states_are_not_collapsed', 0, () => {
       const neverSent = new IntakeCoverageItem();
       neverSent.label = '文本 1'; neverSent.availableChars = 5000; neverSent.plannedChars = 5000; neverSent.lastSentChars = -1;

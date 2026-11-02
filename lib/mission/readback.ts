@@ -135,14 +135,20 @@ export async function readMissionBack(
     const reviewProgress = reviewProgressOf({ steps, outputs: progressOutputs, actions, unknownSteps: unknownStepCount });
     // 调用覆盖：只读原 AgentRun/Step，说明哪些调用有回执、哪些用量未知；不是账单。
     const callRunLimit = 20;
+    // 先按委托归属筛选，再取窗口；同项目其他讨论不能挤掉本委托的回执。
+    const callRunIds = await tx.$queryRaw<Array<{ id: string }>>`
+      SELECT id FROM "AgentRun" WHERE "projectId"=${m.projectId} AND "runType"='CHAT'
+        AND json_extract(trace, '$.missionId')=${id}
+      ORDER BY "createdAt" DESC, id DESC LIMIT ${callRunLimit + 1}`;
     const [callRuns, callSteps] = await Promise.all([
-      tx.agentRun.findMany({ where: { projectId: m.projectId, runType: "CHAT" }, orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-        take: callRunLimit, select: { id: true, status: true, provider: true, fallbackReason: true, runType: true, trace: true, createdAt: true } }),
-      tx.agentMissionStep.findMany({ where: { missionId: id }, orderBy: { ordinal: "desc" }, take: callRunLimit,
+      tx.agentRun.findMany({ where: { id: { in: callRunIds.map(run => run.id) }, projectId: m.projectId, runType: "CHAT" }, orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        select: { id: true, status: true, provider: true, fallbackReason: true, runType: true, trace: true, createdAt: true } }),
+      tx.agentMissionStep.findMany({ where: { missionId: id }, orderBy: { ordinal: "desc" }, take: callRunLimit + 1,
         select: { id: true, status: true, toolName: true, toolVersion: true, agentRunId: true } }),
     ]);
     const callCoverage = missionCallCoverageOf({ missionId: id,
-      agentRuns: callRuns.map(run => ({ ...run, createdAt: run.createdAt.toISOString() })), steps: callSteps, limit: callRunLimit });
+      agentRuns: callRuns.map(run => ({ ...run, createdAt: run.createdAt.toISOString() })), steps: callSteps, limit: callRunLimit,
+      truncated: callRuns.length > callRunLimit || callSteps.length > callRunLimit });
     const wait = m.waitStateJson as { questionId?: string } | null;
     const materialUses = await materialUseProjection(tx, {
       missionId: id, projectId: m.projectId,

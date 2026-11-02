@@ -35,7 +35,7 @@ test("same Mission survives reload, receives metric, auto continues, waits for a
  await expect(readback.getByText('费用尚不能核算：这些记录未绑定费率与账单。',{exact:true})).toBeVisible();
  await expect(readback.getByText(/已记录输入 .* token · 输出 .* token/)).toBeVisible();
  // S2 第二批：调用覆盖说明哪些调用有回执、哪些用量未知，仍不是账单。
- await expect(readback.getByText(/^可核对调用：模型 \d+ 次/)).toBeVisible();
+ await expect(readback.getByText(/^可核对调用：模型已检查 \d+ 次/)).toBeVisible();
  await expect(readback.getByText(/费用与估算保持未知/)).toBeVisible();
  await readback.screenshot({path:'evidence/s2-usage-coverage/20261102/web-1280.png',animations:'disabled'});
  await page.setViewportSize({width:390,height:844});

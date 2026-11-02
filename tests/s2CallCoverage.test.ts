@@ -34,7 +34,7 @@ it("模型与工具分别按原身份计数，不把 step 数量加进模型次�
     { id: "r2", status: "FAILED", provider: "p", fallbackReason: "MODEL_PROTOCOL_INVALID", runType: "CHAT", trace: trace("m1"), createdAt: "2026-11-02T00:00:01.000Z" },
     { id: "r3", status: "SUCCESS", provider: "p", fallbackReason: null, runType: "CHAT", trace: trace("other"), createdAt: "2026-11-02T00:00:02.000Z" },
   ] });
-  expect(coverage.models).toEqual({ total: 2, succeeded: 1, failed: 1, usageRecorded: 1, usageUnknown: 1 });
+  expect(coverage.models).toEqual({ total: 2, succeeded: 1, failed: 1, partial: 0, fallback: 0, unknown: 0, usageRecorded: 1, usageUnknown: 1 });
   expect(coverage.tools).toEqual({ total: 4, succeeded: 1, failed: 1, unknown: 1, pending: 1 });
   expect(coverage.failedCodes).toEqual(["MODEL_PROTOCOL_INVALID"]);
   expect(coverage.pricing.state).toBe("UNPRICED");

@@ -7,7 +7,7 @@ import { ApiError } from '../models/Project';
 import { IntakeService } from '../services/IntakeService';
 import { SessionStore } from '../services/SessionStore';
 import {
-  intakeCanConfirm, intakeCoverageItemLabel, intakeCoverageSummary, intakeEditableFields, intakeSyncSummary, intakeUnderstandingLabel,
+  intakeCanConfirm, intakeCoverageItemLabel, intakeCoverageSummary, intakeEditableFields, intakeOriginalPageMatches, intakeOriginalViewKey, intakeSyncSummary, intakeUnderstandingLabel,
   IntakeAcceptedFields, IntakeCandidate, IntakeCoverageItem, IntakeMaterialTextReply, IntakeMaterialView,
   IntakePreview, IntakeStatement, IntakeSyncReply, IntakeUnknown
 } from '../models/ProjectIntake';
@@ -47,11 +47,13 @@ struct ProjectIntake {
   private pageGeneration: number = 0;
   private active: boolean = true;
   private ownerToken: string = '';
+  private materialTextGeneration: number = 0;
   private sessionListener: () => void = () => {
     this.pageGeneration++;
     this.material = ''; this.correction = ''; this.preview = new IntakePreview(); this.accepted = new IntakeAcceptedFields();
     this.draftId = ''; this.projectId = ''; this.sync = null; this.requestKeys.clear(); this.confirmRequestId = ''; this.acceptedDirty = false;
     this.notice = ''; this.error = ''; this.busy = false; this.confirmPayload = '';
+    this.materialTextGeneration++;
     this.openTextMaterialId = ''; this.materialText = ''; this.materialTextOffset = 0; this.materialTextTotal = 0; this.materialTextHasMore = false; this.materialTextLoading = false;
   };
   private stableId(key: string): string {
@@ -68,6 +70,7 @@ struct ProjectIntake {
   }
   aboutToDisappear(): void {
     this.active = false; this.pageGeneration++;
+    this.closeMaterialText();
     SessionStore.offSessionExpired(this.sessionListener);
   }
 
@@ -94,10 +97,9 @@ struct ProjectIntake {
     if (this.draftId === '') return;
     try {
       const reply = await this.own(() => this.service.read(this.draftId));
+      if (intakeOriginalViewKey(this.preview) !== intakeOriginalViewKey(reply.preview)) this.closeMaterialText();
       this.preview = reply.preview;
       if (!this.acceptedDirty) this.accepted = intakeEditableFields(reply.preview);
-      // 草稿内容已变（修订前移）时放弃旧的原文页，避免把上一版正文当成当前。
-      if (this.openTextMaterialId !== '' && !reply.preview.materials.some(item => item.id === this.openTextMaterialId)) this.closeMaterialText();
       this.loaded = true;
     } catch (e) {
       this.error = e instanceof ApiError ? e.message : '无法读取这份材料';
@@ -105,6 +107,7 @@ struct ProjectIntake {
   }
 
   private closeMaterialText(): void {
+    this.materialTextGeneration++;
     this.openTextMaterialId = ''; this.materialText = ''; this.materialTextOffset = 0;
     this.materialTextTotal = 0; this.materialTextHasMore = false; this.materialTextLoading = false;
   }
@@ -112,6 +115,7 @@ struct ProjectIntake {
   /** 原文核对：打开一份材料并读第一页；再次点击同一份则收起。 */
   private async toggleMaterialText(materialId: string): Promise<void> {
     if (this.openTextMaterialId === materialId) { this.closeMaterialText(); return; }
+    this.closeMaterialText();
     this.openTextMaterialId = materialId;
     this.materialText = ''; this.materialTextOffset = 0; this.materialTextTotal = 0;
     this.materialTextHasMore = false; this.materialTextLoading = false;
@@ -122,13 +126,22 @@ struct ProjectIntake {
     if (this.draftId === '' || this.openTextMaterialId === '' || this.materialTextLoading) return;
     this.materialTextLoading = true; this.error = '';
     const materialId = this.openTextMaterialId;
+    const generation = this.materialTextGeneration, viewKey = intakeOriginalViewKey(this.preview);
     try {
       const reply = await this.own(() => this.service.materialText(this.draftId, materialId, this.materialTextOffset));
-      if (this.openTextMaterialId !== materialId) return;
+      if (generation !== this.materialTextGeneration || viewKey !== intakeOriginalViewKey(this.preview) || this.openTextMaterialId !== materialId) return;
+      if (!intakeOriginalPageMatches(this.preview, materialId, reply)) {
+        this.closeMaterialText();
+        this.error = '原文版本已变化或无法核对，请刷新材料预览后重新打开原文';
+        return;
+      }
       this.appendMaterialText(reply);
     } catch (e) {
-      this.error = e instanceof ApiError ? e.message : '读取原文失败';
-    } finally { this.materialTextLoading = false; }
+      if (generation === this.materialTextGeneration) {
+        this.closeMaterialText();
+        this.error = e instanceof ApiError ? e.message : '读取原文失败';
+      }
+    } finally { if (generation === this.materialTextGeneration) this.materialTextLoading = false; }
   }
 
   private appendMaterialText(reply: IntakeMaterialTextReply): void {
@@ -269,6 +282,7 @@ struct ProjectIntake {
   }
 
   @Builder private CoverageBlock() {
+    if (this.preview.coverage !== undefined) {
     Column({ space: 8 }) {
       Row({ space: 8 }) {
         Text('模型实际读到的范围').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY).layoutWeight(1)
@@ -315,6 +329,7 @@ struct ProjectIntake {
       }
     }.width('100%').alignItems(HorizontalAlign.Start).padding(10)
     .backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(PMRadius.SM)
+    }
   }
 
   @Builder private PreviewBody() {
@@ -356,7 +371,11 @@ struct ProjectIntake {
       if (this.preview.correction.clarify !== null) {
         Text(this.preview.correction.clarify.question).fontSize(PMFontSize.BODY).fontColor(PMColors.RISK)
       }
-      if (this.preview.materials.length > 0) this.CoverageBlock()
+      if (this.preview.coverage !== undefined && this.preview.materials.length > 0) this.CoverageBlock()
+      if (this.preview.coverage === undefined && this.preview.materials.length > 0) {
+        Text('当前服务未提供材料覆盖记录，请核对后端版本；已保存不代表模型已读全文。')
+          .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
+      }
       if (this.preview.materials.length > 0) {
         Text(intakeSyncSummary(this.preview.materials)).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
       }

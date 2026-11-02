@@ -30,13 +30,18 @@ export function missionCallCoverageOf(input: {
   agentRuns: CallCoverageRun[];
   steps: CallCoverageStep[];
   limit: number;
+  truncated?: boolean;
 }) {
   // 原 AgentRun 没有 mission 列；沿用 materialUseProjection 的做法，从 trace.missionId 归属。
-  const runs = input.agentRuns.filter(run => record(run.trace).missionId === input.missionId);
+  const runs = [...new Map(input.agentRuns.filter(run => record(run.trace).missionId === input.missionId).map(run => [run.id, run])).values()].slice(0, input.limit);
   // 模型调用与工具调用是不同身份：各自按原 ID 计数，不把 step 数量加进模型次数。
-  const steps = input.steps;
+  const steps = [...new Map(input.steps.map(step => [step.id, step])).values()].slice(0, input.limit);
+  const truncated = input.truncated ?? (input.agentRuns.length >= input.limit || input.steps.length >= input.limit);
   const modelSuccess = runs.filter(run => run.status === "SUCCESS").length;
-  const modelFailed = runs.filter(run => run.status !== "SUCCESS").length;
+  const modelFailed = runs.filter(run => run.status === "FAILED").length;
+  const modelPartial = runs.filter(run => run.status === "PARTIAL").length;
+  const modelFallback = runs.filter(run => run.status === "FALLBACK").length;
+  const modelUnknown = runs.length - modelSuccess - modelFailed - modelPartial - modelFallback;
   const usageRecorded = runs.filter(run => usageRecordedOf(record(run.trace).usage)).length;
   const usageUnknown = runs.length - usageRecorded;
   const toolSuccess = steps.filter(step => step.status === "SUCCEEDED").length;
@@ -47,19 +52,20 @@ export function missionCallCoverageOf(input: {
   return {
     schemaVersion: 1 as const,
     scope: "MISSION_AGENTRUN_AND_STEP_RECEIPTS" as const,
-    /** 读取上限；达到上限时 count 只是“已检查到”的下界。 */
-    inspected: { agentRuns: input.agentRuns.length, steps: input.steps.length, limit: input.limit,
-      truncated: input.agentRuns.length >= input.limit || input.steps.length >= input.limit },
-    models: { total: runs.length, succeeded: modelSuccess, failed: modelFailed, usageRecorded, usageUnknown },
+    /** 本委托的已检查窗口；服务层多取一条判定是否确有剩余。 */
+    inspected: { agentRuns: runs.length, steps: steps.length, limit: input.limit, truncated },
+    models: { total: runs.length, succeeded: modelSuccess, failed: modelFailed, partial: modelPartial, fallback: modelFallback, unknown: modelUnknown, usageRecorded, usageUnknown },
     tools: { total: steps.length, succeeded: toolSuccess, failed: toolFailed, unknown: toolUnknown, pending: toolPending },
     failedCodes,
     dedupe: "AGENTRUN_ID_AND_STEP_ID" as const,
     pricing: { state: "UNPRICED" as const, estimate: null, billedAmount: null, currency: null,
       rateSource: null, applicableFrom: null,
       reason: "没有绑定费率来源、适用时间、模型/工具版本与币种；只能给出已记录的调用与 token，不能估价或声称完整账单。" },
-    summary: `可核对调用：模型 ${runs.length} 次（成功 ${modelSuccess} / 失败 ${modelFailed}）· 工具 ${steps.length} 次（成功 ${toolSuccess} / 失败 ${toolFailed}${toolUnknown ? ` / 未知 ${toolUnknown}` : ""}）`,
+    summary: `可核对调用：模型${runs.length === 0 ? "尚未找到回执" : `已检查 ${runs.length} 次（成功 ${modelSuccess} / 失败 ${modelFailed}${modelPartial ? ` / 部分 ${modelPartial}` : ""}${modelFallback ? ` / 降级 ${modelFallback}` : ""}${modelUnknown ? ` / 未知 ${modelUnknown}` : ""}）`}· 工具已检查 ${steps.length} 次（成功 ${toolSuccess} / 失败 ${toolFailed}${toolUnknown ? ` / 未知 ${toolUnknown}` : ""}）`,
     notes: [
-      usageUnknown > 0 ? `${usageUnknown} 次模型调用没有完整用量记录，已记录 token 不代表完整用量。` : "模型调用的用量记录与调用次数一致。",
+      runs.length === 0 ? "尚未找到本委托的模型调用回执，不能据此判断没有调用。"
+        : usageUnknown > 0 ? `${usageUnknown} 次模型调用没有完整用量记录，已记录 token 不代表完整用量。`
+          : `已检查的 ${runs.length} 条模型回执均记录了输入和输出 token；这不代表完整任务用量。`,
       "费用与估算保持未知：未绑定费率、币种与账单，不把次数换算成金额。",
       "范围仅当前委托的原回执；不含建项预览、其他独立讨论或跨项目用量。",
     ],

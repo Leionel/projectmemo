@@ -292,7 +292,7 @@ export function ProjectIntakeForm({ ownerId, initialDraftId, openDrafts }: { own
         <span>允许把这次的材料交给云模型处理一次。它只用于这份预览：不建立项目、不获得工具权限，也不写入长期记忆。</span>
       </label>
 
-      {preview && preview.materials.length > 0 && <IntakeCoveragePanel draftId={draftId} coverage={preview.coverage} />}
+      {preview && preview.materials.length > 0 && <IntakeCoveragePanel key={`${draftId}:${preview.materialsHash}:${preview.status}`} draftId={draftId} coverage={preview.coverage} materials={preview.materials} />}
 
       {preview && preview.understandingState === "READY" && <>
         {preview.summary && <p className="mt-5 leading-7">{preview.summary}</p>}

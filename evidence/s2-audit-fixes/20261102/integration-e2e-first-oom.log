@@ -1,0 +1,213 @@
+
+> projectmemo@0.1.0 test:e2e
+> tsx scripts/setup-e2e.ts && tsx scripts/run-e2e.ts
+
+
+[e2e setup] generate Prisma Client
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+┌─────────────────────────────────────────────────────────┐
+│  Update available 7.10.1 -> 8.0.0-rc.29                 │
+│                                                         │
+│  This is a major update - please follow the guide at    │
+│  https://pris.ly/d/major-version-upgrade                │
+│                                                         │
+│  Run the following to update                            │
+│    npm i --save-dev prisma@latest                       │
+│    npm i @prisma/client@latest                          │
+└─────────────────────────────────────────────────────────┘
+
+✔ Generated Prisma Client (7.10.1) to .\lib\generated\prisma in 617ms
+
+
+[e2e setup] apply migrations to projectmemo-e2e.db
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+Datasource "db": SQLite database "projectmemo-e2e.db" at "file:D:/Projects/hongmen-s2-merge/prisma/projectmemo-e2e.db"
+
+51 migrations found in prisma/migrations
+
+Applying migration `20260711000000_init`
+Applying migration `20260713000000_agent_loop`
+Applying migration `20260715000000_projectmemo_v2`
+Applying migration `20260826000000_xiaoyi_adapter_receipts`
+Applying migration `20260830000000_temporal_evidence_ledger`
+Applying migration `20260912000000_artifact_source_refs`
+Applying migration `20260912010000_memory_lifecycle`
+Applying migration `20260912020000_project_state_snapshots`
+Applying migration `20260912030000_intervention_policy`
+Applying migration `20260912040000_action_feasibility`
+Applying migration `20260912210000_project_state_recurrence_key`
+Applying migration `20260912220000_project_state_sequence`
+Applying migration `20260912230000_artifact_claims`
+Applying migration `20260914080000_phase1_reliability`
+Applying migration `20260915080000_phase2_consistency`
+Applying migration `20260915084500_notification_delivery_receipt`
+Applying migration `20260915120000_auth_and_project_membership`
+Applying migration `20260917120000_project_archive`
+Applying migration `20260920100000_project_episode_schedule`
+Applying migration `20260920140000_r2_correctness_and_sync`
+Applying migration `20260921110000_memory_merge_idempotency`
+Applying migration `20260921160000_action_reminder_receipts`
+Applying migration `20260921220000_action_reminder_request_receipts`
+Applying migration `20261020080000_mission_runtime`
+Applying migration `20261020120000_mission_external_sources`
+Applying migration `20261021080000_mission_artifact_receipts`
+Applying migration `20261023090000_self_registration`
+Applying migration `20261023140000_copilot_confirmation_receipts`
+Applying migration `20261023160000_project_agent_focus`
+Applying migration `20261024010000_copilot_turn_identity`
+Applying migration `20261024020000_goal_decision_impact`
+Applying migration `20261024090000_experience`
+Applying migration `20261024100000_repo_sensing`
+Applying migration `20261024120000_p3_review_boundaries`
+Applying migration `20261026010000_focus_conversations`
+Applying migration `20261026020000_focus_anchor_projection`
+Applying migration `20261026120000_goal_change_reviews`
+Applying migration `20261028010000_conversation_research`
+Applying migration `20261028140000_continuity_directives`
+Applying migration `20261030103000_ux2_signal_source_binding`
+Applying migration `20261030110000_ux2_claim_history`
+Applying migration `20261030120000_ux2_context_digest`
+Applying migration `20261030123000_ux2_project_input_version`
+Applying migration `20261030190000_ct8_conditional_experience`
+Applying migration `20261030220000_ct9b_calendar_connection`
+Applying migration `20261030233000_ct7_deployment_connections`
+Applying migration `20261031090000_ct10_calendar_write`
+Applying migration `20261101170000_pm1_account_memory_scope`
+Applying migration `20261102010000_project_deletion_fence`
+Applying migration `20261102011000_capture_processing_receipt`
+Applying migration `20261102140000_project_intake_draft`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260711000000_init/
+    └─ migration.sql
+  └─ 20260713000000_agent_loop/
+    └─ migration.sql
+  └─ 20260715000000_projectmemo_v2/
+    └─ migration.sql
+  └─ 20260826000000_xiaoyi_adapter_receipts/
+    └─ migration.sql
+  └─ 20260830000000_temporal_evidence_ledger/
+    └─ migration.sql
+  └─ 20260912000000_artifact_source_refs/
+    └─ migration.sql
+  └─ 20260912010000_memory_lifecycle/
+    └─ migration.sql
+  └─ 20260912020000_project_state_snapshots/
+    └─ migration.sql
+  └─ 20260912030000_intervention_policy/
+    └─ migration.sql
+  └─ 20260912040000_action_feasibility/
+    └─ migration.sql
+  └─ 20260912210000_project_state_recurrence_key/
+    └─ migration.sql
+  └─ 20260912220000_project_state_sequence/
+    └─ migration.sql
+  └─ 20260912230000_artifact_claims/
+    └─ migration.sql
+  └─ 20260914080000_phase1_reliability/
+    └─ migration.sql
+  └─ 20260915080000_phase2_consistency/
+    └─ migration.sql
+  └─ 20260915084500_notification_delivery_receipt/
+    └─ migration.sql
+  └─ 20260915120000_auth_and_project_membership/
+    └─ migration.sql
+  └─ 20260917120000_project_archive/
+    └─ migration.sql
+  └─ 20260920100000_project_episode_schedule/
+    └─ migration.sql
+  └─ 20260920140000_r2_correctness_and_sync/
+    └─ migration.sql
+  └─ 20260921110000_memory_merge_idempotency/
+    └─ migration.sql
+  └─ 20260921160000_action_reminder_receipts/
+    └─ migration.sql
+  └─ 20260921220000_action_reminder_request_receipts/
+    └─ migration.sql
+  └─ 20261020080000_mission_runtime/
+    └─ migration.sql
+  └─ 20261020120000_mission_external_sources/
+    └─ migration.sql
+  └─ 20261021080000_mission_artifact_receipts/
+    └─ migration.sql
+  └─ 20261023090000_self_registration/
+    └─ migration.sql
+  └─ 20261023140000_copilot_confirmation_receipts/
+    └─ migration.sql
+  └─ 20261023160000_project_agent_focus/
+    └─ migration.sql
+  └─ 20261024010000_copilot_turn_identity/
+    └─ migration.sql
+  └─ 20261024020000_goal_decision_impact/
+    └─ migration.sql
+  └─ 20261024090000_experience/
+    └─ migration.sql
+  └─ 20261024100000_repo_sensing/
+    └─ migration.sql
+  └─ 20261024120000_p3_review_boundaries/
+    └─ migration.sql
+  └─ 20261026010000_focus_conversations/
+    └─ migration.sql
+  └─ 20261026020000_focus_anchor_projection/
+    └─ migration.sql
+  └─ 20261026120000_goal_change_reviews/
+    └─ migration.sql
+  └─ 20261028010000_conversation_research/
+    └─ migration.sql
+  └─ 20261028140000_continuity_directives/
+    └─ migration.sql
+  └─ 20261030103000_ux2_signal_source_binding/
+    └─ migration.sql
+  └─ 20261030110000_ux2_claim_history/
+    └─ migration.sql
+  └─ 20261030120000_ux2_context_digest/
+    └─ migration.sql
+  └─ 20261030123000_ux2_project_input_version/
+    └─ migration.sql
+  └─ 20261030190000_ct8_conditional_experience/
+    └─ migration.sql
+  └─ 20261030220000_ct9b_calendar_connection/
+    └─ migration.sql
+  └─ 20261030233000_ct7_deployment_connections/
+    └─ migration.sql
+  └─ 20261031090000_ct10_calendar_write/
+    └─ migration.sql
+  └─ 20261101170000_pm1_account_memory_scope/
+    └─ migration.sql
+  └─ 20261102010000_project_deletion_fence/
+    └─ migration.sql
+  └─ 20261102011000_capture_processing_receipt/
+    └─ migration.sql
+  └─ 20261102140000_project_intake_draft/
+    └─ migration.sql
+
+All migrations have been successfully applied.
+
+[e2e setup] seed the isolated database
+Seed complete: 人工智能创意赛 忆程 ProjectMemo 作品开发 (cmvz9pdwp0000lg8o32bpvhwz), 8 captures
+
+[e2e setup] create the E2E auth identity
+[e2e setup] auth identity ready: e2e-reviewer -> 人工智能创意赛 忆程 ProjectMemo 作品开发 (cmvz9pdwp0000lg8o32bpvhwz)
+
+[e2e setup] Ready: D:\Projects\hongmen-s2-merge\prisma\projectmemo-e2e.db
+
+[e2e] build isolated production server
+▲ Next.js 16.4.3 (Turbopack)
+✓ Running next.config.ts took 128ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 15.2s
+  Running TypeScript ...
+  Finished TypeScript in 43s ...
+  Collecting page data using 27 workers ...
+
+<--- Last few GCs --->
+
+[68512:0000018D86EFE000]     6676 ms: Mark-Compact 55.2 (109.5) -> 49.0 (115.4) MB, pooled: 0 MB, 9.94 / 0.00 ms  (+ 0.3 ms in 5 steps since start of marking, biggest step 0.1 ms, walltime since start of marking 64 ms) (average mu = 0.998, current mu = 0.[68512:0000018D86EFE000]     7650 ms: Scavenge 71.7 (130.3) -> 60.6 (120.9) MB, pooled: 4 MB, 6.67 / 0.00 ms  (average mu = 0.998, current mu = 0.995) allocation failure; 
+

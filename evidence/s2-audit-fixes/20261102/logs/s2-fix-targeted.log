@@ -1,0 +1,49 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/auditS2CallCoverageWindow.test.ts tests/s2AuditFixes.test.ts tests/s2CallCoverage.test.ts tests/s2IntakeCoverage.test.ts tests/s1IndependentReview.test.ts tests/projectIntake.test.ts
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-s2-fixes
+
+ ❯ tests/s2AuditFixes.test.ts (4 tests | 1 failed) 208ms
+   × 真实材料 API 文末不重读最后一字，调用窗口恰好二十条不伪报截断 194ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/s2AuditFixes.test.ts > 真实材料 API 文末不重读最后一字，调用窗口恰好二十条不伪报截断
+PrismaClientValidationError: 
+Invalid `db.agentRun.create()` invocation in
+D:/Projects/hongmen-s2-fixes/tests/s2AuditFixes.test.ts:58:58
+
+  55 const project = await db.project.create({ data: { title: "窗口边界", description: "合成隔离", scenario: "RESEARCH", goal: "核对调用" } });
+  56 await db.projectMembership.create({ data: { userId: user.id, projectId: project.id, role: "OWNER" } });
+  57 const m = await db.agentMission.create({ data: { projectId: project.id, ownerUserId: user.id, createRequestId: "mission", createPayloadHash: "synthetic", goal: "核对调用", successCriteriaJson: [], constraintsJson: {}, budgetJson: {} } });
+→ 58 for (let index=0; index<20; index++) await db.agentRun.create({
+       data: {
+         projectId: "cmvz8ujme0004sc8o9zw53gs2",
+         runType: "CHAT",
+         status: "SUCCESS",
+         trace: {
+           missionId: "cmvz8ujmh0006sc8oli3925hc"
+         },
+     +   provider: String
+       }
+     })
+
+Argument `provider` is missing.
+ ❯ Fr node_modules/@prisma/client/src/runtime/core/errorRendering/throwValidationException.ts:46:8
+ ❯ throwValidationException node_modules/@prisma/client/src/runtime/RequestHandler.ts:212:6
+ ❯ vn.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:184:11
+ ❯ vn.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:153:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:1012:23
+ ❯ tests/s2AuditFixes.test.ts:58:40
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 5 passed (6)
+      Tests  1 failed | 46 passed (47)
+   Start at  20:37:08
+   Duration  14.30s (transform 2.83s, setup 0ms, import 8.68s, tests 3.59s, environment 1ms)
+

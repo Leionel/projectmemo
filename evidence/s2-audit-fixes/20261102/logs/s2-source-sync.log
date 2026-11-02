@@ -1,0 +1,23 @@
+Updating d51adb7..c4f8cc0
+Fast-forward
+ components/IntakeCoveragePanel.tsx                 | 13 ++++-
+ components/ProjectIntakeForm.tsx                   |  2 +-
+ e2e/missions.spec.ts                               |  2 +-
+ .../entry/src/main/ets/models/MissionReadback.ets  |  3 +
+ .../entry/src/main/ets/models/ProjectIntake.ets    | 26 +++++++--
+ .../entry/src/main/ets/pages/ProjectIntake.ets     | 33 ++++++++---
+ harmonyos/entry/src/test/S2Coverage.test.ets       | 33 ++++++++++-
+ lib/intake/coverage.ts                             |  7 ++-
+ lib/intake/textRange.ts                            | 19 +++++++
+ lib/mission/callCoverage.ts                        | 24 +++++---
+ lib/mission/readback.ts                            | 14 +++--
+ lib/services/projectIntakeService.ts               |  7 +--
+ tests/auditS2CallCoverageWindow.test.ts            | 62 +++++++++++++++++++++
+ tests/intakeOriginalPages.test.ts                  | 25 +++++++++
+ tests/s2AuditFixes.test.ts                         | 64 ++++++++++++++++++++++
+ tests/s2CallCoverage.test.ts                       |  2 +-
+ 16 files changed, 297 insertions(+), 39 deletions(-)
+ create mode 100644 lib/intake/textRange.ts
+ create mode 100644 tests/auditS2CallCoverageWindow.test.ts
+ create mode 100644 tests/intakeOriginalPages.test.ts
+ create mode 100644 tests/s2AuditFixes.test.ts

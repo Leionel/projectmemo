@@ -1,0 +1,629 @@
+Updating aea257c..c4f8cc0
+Fast-forward
+ app/api/conversations/capabilities/route.ts        |    3 +-
+ app/api/intake/[draftId]/confirm/route.ts          |   21 +
+ app/api/intake/[draftId]/consent/route.ts          |   19 +
+ .../[draftId]/materials/[materialId]/route.ts      |   25 +
+ app/api/intake/[draftId]/materials/file/route.ts   |   22 +
+ app/api/intake/[draftId]/materials/route.ts        |   15 +
+ app/api/intake/[draftId]/revise/route.ts           |   15 +
+ app/api/intake/[draftId]/route.ts                  |   26 +
+ app/api/intake/[draftId]/sync/route.ts             |   16 +
+ app/api/intake/[draftId]/understand/route.ts       |   15 +
+ app/api/intake/route.ts                            |   31 +
+ app/api/project-deletions/[id]/route.ts            |   10 +
+ app/api/project-deletions/route.ts                 |    8 +
+ app/api/projects/[id]/route.ts                     |   11 +-
+ app/api/projects/route.ts                          |   28 +-
+ app/projects/[id]/[section]/page.tsx               |    2 +-
+ app/projects/[id]/layout.tsx                       |    2 +-
+ app/projects/new/page.tsx                          |   26 +-
+ app/projects/page.tsx                              |    2 +
+ components/ArtifactGenerator.tsx                   |    2 +-
+ components/CaptureBox.tsx                          |   59 +-
+ components/ConversationPanel.tsx                   |    6 +-
+ components/IntakeCoveragePanel.tsx                 |  108 ++
+ components/KnowledgeCardView.tsx                   |    5 +-
+ components/MarkdownRenderer.tsx                    |   15 +-
+ components/MissionMaterialIntake.tsx               |    2 +-
+ components/MissionReadback.tsx                     |   31 +
+ components/MissionResponsibilityPanel.tsx          |    5 +-
+ components/NewProjectForm.tsx                      |    7 +-
+ components/ProjectCard.tsx                         |    3 +-
+ components/ProjectCardActions.tsx                  |   12 +-
+ components/ProjectDeletionProgress.tsx             |   23 +
+ components/ProjectIntakeForm.tsx                   |  414 ++++
+ components/ProjectSettings.tsx                     |    9 +-
+ components/UserNav.tsx                             |   18 +-
+ deploy/alibaba-cloud-linux/README.md               |    8 +
+ .../alibaba-cloud-linux/safe-update-with-swap.sh   |   53 +
+ deploy/alibaba-cloud-linux/safe-update.sh          |   15 +
+ .../Competition/COMPETITION_SPRINT_ROADMAP.md      |   28 +
+ .../Competition/S0_IMPLEMENTATION_2026-11-02.md    |   81 +
+ .../S1_FINALS_ACCEPTANCE_GUIDE_2026-11-02.md       |  223 +++
+ .../Competition/S1_IMPLEMENTATION_2026-11-02.md    |  123 ++
+ .../S1_INDEPENDENT_REVIEW_2026-11-02.md            |   79 +
+ .../S2_CONTINUATION_PROMPT_2026-11-02.md           |  137 ++
+ .../Competition/S2_IMPLEMENTATION_2026-11-02.md    |  104 +
+ .../S2_IMPLEMENTATION_HANDOFF_2026-11-02.md        |   72 +
+ e2e/demo.spec.ts                                   |   14 +-
+ e2e/focus-agent.spec.ts                            |    7 +-
+ e2e/missions.spec.ts                               |   24 +-
+ e2e/pre-r4-ux.spec.ts                              |   13 +-
+ e2e/project-intake.spec.ts                         |  108 ++
+ e2e/projectMenu.ts                                 |   13 +
+ e2e/s0-trust.spec.ts                               |   49 +
+ e2e/s1-cross-device.spec.ts                        |   99 +
+ evidence/s0-trust/20261102/.gitattributes          |    2 +
+ evidence/s0-trust/20261102/ACCEPTANCE.json         |  229 +++
+ evidence/s0-trust/20261102/FILE_MANIFEST.json      |  515 +++++
+ .../20261102/audit/npm-audit-s0-after.json         |  380 ++++
+ .../20261102/audit/npm-audit-s0-baseline.json      | 1874 ++++++++++++++++++
+ .../20261102/audit/npm-audit-s0-production.json    |   22 +
+ evidence/s0-trust/20261102/checks/e2e-results.json | 1656 ++++++++++++++++
+ evidence/s0-trust/20261102/checks/e2e-summary.json |  369 ++++
+ .../s0-trust/20261102/checks/s0-affected-final.log |   13 +
+ .../20261102/checks/s0-all-targeted-final.log      |   13 +
+ .../20261102/checks/s0-calendar-relative-time.log  |   13 +
+ .../20261102/checks/s0-calendar-time-diagnosis.log |   37 +
+ .../s0-trust/20261102/checks/s0-critical-final.log |   13 +
+ .../20261102/checks/s0-dependencies-final.json     |  156 ++
+ .../20261102/checks/s0-e2e-focus-isolated.log      |  590 ++++++
+ .../s0-trust/20261102/checks/s0-e2e-full-final.log |  647 +++++++
+ .../20261102/checks/s0-e2e-owner-member-final.log  |  405 ++++
+ .../20261102/checks/s0-followup-acceptance.log     |   13 +
+ .../s0-trust/20261102/checks/s0-full-final.log     |   13 +
+ .../s0-trust/20261102/checks/s0-hap-full-final.log |  932 +++++++++
+ .../20261102/checks/s0-harmony-full-final.log      |   70 +
+ .../20261102/checks/s0-last-runtime-guards.log     |   13 +
+ .../20261102/checks/s0-lint-release-final.log      |   32 +
+ .../s0-trust/20261102/checks/s0-migrate-final.log  |   19 +
+ .../20261102/checks/s0-storage-all-final.log       |   13 +
+ .../20261102/checks/s0-types-release-final.log     |    1 +
+ .../20261102/checks/s0-web-build-full-final.log    |  413 ++++
+ evidence/s0-trust/20261102/checks/s0-web-build.log |  413 ++++
+ .../20261102/checks/s0-worker-process-final.log    |   21 +
+ .../checks/s0-worker-process-release-final.log     |   21 +
+ .../failures/e2e-shared-session-revoked.json       | 1734 +++++++++++++++++
+ .../20261102/failures/s0-delete-before.log         |   37 +
+ .../20261102/failures/s0-e2e-acceptance.log        |  702 +++++++
+ .../s0-trust/20261102/failures/s0-e2e-final.log    |  688 +++++++
+ .../20261102/failures/s0-e2e-owner-member.log      |  447 +++++
+ .../failures/s0-e2e-shared-session-revoked.log     |  688 +++++++
+ evidence/s0-trust/20261102/failures/s0-e2e.log     |  688 +++++++
+ .../20261102/failures/s0-followup-final.log        |   40 +
+ .../20261102/failures/s0-full-acceptance.log       |  420 ++++
+ .../20261102/failures/s0-full-regression.log       |   52 +
+ .../s0-trust/20261102/failures/s0-harmony-test.log |  174 ++
+ .../20261102/failures/s0-markdown-before.log       |   58 +
+ .../20261102/failures/s0-worker-process-before.log |   20 +
+ .../s0-trust/20261102/history/npm-install-s0.log   |   15 +
+ .../20261102/history/s0-contracts-after.log        |   13 +
+ .../20261102/history/s0-deletion-after.log         |   13 +
+ .../20261102/history/s0-dependency-install.log     |   15 +
+ .../20261102/history/s0-dev-dependency-install.log |   15 +
+ .../s0-trust/20261102/history/s0-diff-check.log    |    1 +
+ .../20261102/history/s0-e2e-full-release.log       |  688 +++++++
+ .../s0-trust/20261102/history/s0-entry-after.log   |   37 +
+ evidence/s0-trust/20261102/history/s0-generate.log |   16 +
+ .../s0-trust/20261102/history/s0-guards-final.log  |   13 +
+ .../20261102/history/s0-hap-acceptance.log         |  926 +++++++++
+ .../s0-trust/20261102/history/s0-hap-build.log     |  926 +++++++++
+ .../s0-trust/20261102/history/s0-hap-final.log     |  926 +++++++++
+ .../20261102/history/s0-hap-session-guards.log     |  926 +++++++++
+ .../20261102/history/s0-harmony-test-final.log     |   64 +
+ .../s0-trust/20261102/history/s0-lint-final.log    |   32 +
+ .../20261102/history/s0-lint-full-final.log        |   32 +
+ evidence/s0-trust/20261102/history/s0-lint.log     |   32 +
+ .../s0-trust/20261102/history/s0-ohpm-install.log  |    1 +
+ .../s0-trust/20261102/history/s0-pm-window.log     |   13 +
+ .../20261102/history/s0-storage-closure-final.log  |   13 +
+ .../20261102/history/s0-targeted-round2.log        |   13 +
+ .../s0-trust/20261102/history/s0-test-migrate.log  |  157 ++
+ .../20261102/history/s0-transitive-update.log      |   15 +
+ .../20261102/history/s0-types-acceptance.log       |    0
+ .../s0-trust/20261102/history/s0-types-final.log   |    0
+ .../s0-trust/20261102/history/s0-types-first.log   |    0
+ .../20261102/history/s0-types-full-final.log       |    1 +
+ .../s0-trust/20261102/history/s0-types-round2.log  |    0
+ .../20261102/history/s0-worker-process.log         |   20 +
+ .../20261102/history/s0-working-snapshot.txt       |  125 ++
+ .../browser-1793584935519/ct1-direction-1280.png   |  Bin 0 -> 161366 bytes
+ .../browser-1793584935519/ct1-direction-390.png    |  Bin 0 -> 43384 bytes
+ .../browser-1793585055984/pr6-preview-1280.png     |  Bin 0 -> 205496 bytes
+ .../browser-1793585056133/pr6-preview-390.png      |  Bin 0 -> 44599 bytes
+ .../browser-1793585723371/ct1-direction-1280.png   |  Bin 0 -> 161003 bytes
+ .../browser-1793585723371/ct1-direction-390.png    |  Bin 0 -> 43384 bytes
+ .../browser-1793585838127/pr6-preview-1280.png     |  Bin 0 -> 204597 bytes
+ .../browser-1793585838314/pr6-preview-390.png      |  Bin 0 -> 44254 bytes
+ .../browser-1793586076847/ct1-direction-1280.png   |  Bin 0 -> 161760 bytes
+ .../browser-1793586076847/ct1-direction-390.png    |  Bin 0 -> 44044 bytes
+ .../browser-1793590181265/ct1-direction-1280.png   |  Bin 0 -> 163979 bytes
+ .../browser-1793590181265/ct1-direction-390.png    |  Bin 0 -> 44044 bytes
+ .../browser-1793590314433/pr6-preview-1280.png     |  Bin 0 -> 205275 bytes
+ .../browser-1793590314713/pr6-preview-390.png      |  Bin 0 -> 44599 bytes
+ .../browser-1793590473394/ct1-direction-1280.png   |  Bin 0 -> 161168 bytes
+ .../browser-1793590473394/ct1-direction-390.png    |  Bin 0 -> 43384 bytes
+ .../browser-1793590608405/pr6-preview-1280.png     |  Bin 0 -> 205346 bytes
+ .../browser-1793590608565/pr6-preview-390.png      |  Bin 0 -> 44599 bytes
+ .../continuity/stages23-1793584930946.png          |  Bin 0 -> 177387 bytes
+ .../continuity/stages23-1793585718870.png          |  Bin 0 -> 177782 bytes
+ .../continuity/stages23-1793586072439.png          |  Bin 0 -> 175250 bytes
+ .../continuity/stages23-1793590176025.png          |  Bin 0 -> 177927 bytes
+ .../continuity/stages23-1793590467840.png          |  Bin 0 -> 177506 bytes
+ .../20261102/screenshots/ux1-web-continuity.png    |  Bin 0 -> 152364 bytes
+ .../20261102/screenshots/ux1-web-focus-390.png     |  Bin 0 -> 90393 bytes
+ .../20261102/screenshots/ux2-web-correction.png    |  Bin 0 -> 276982 bytes
+ .../20261102/screenshots/ux2-web-memory-panel.png  |  Bin 0 -> 98217 bytes
+ .../screenshots/ux3-web-responsibility-edit.png    |  Bin 0 -> 107314 bytes
+ .../s0-trust/20261102/worker-process-probe.mjs     |   85 +
+ .../s1-independent-review/20261102/.gitattributes  |    2 +
+ .../s1-independent-review/20261102/ACCEPTANCE.json |   43 +
+ .../20261102/FILE_MANIFEST.json                    |  360 ++++
+ evidence/s1-independent-review/20261102/README.md  |   13 +
+ .../20261102/failures/initial-five-before.log      |  Bin 0 -> 6995 bytes
+ .../failures/negative-baseline.test.ts.txt         |   90 +
+ .../20261102/failures/validation-before.json       |   15 +
+ .../20261102/logs/s1-review-before.log             |  Bin 0 -> 6995 bytes
+ .../20261102/logs/s1-review-e2e-final.log          |  Bin 0 -> 28696 bytes
+ .../20261102/logs/s1-review-e2e-freeze.log         |  Bin 0 -> 34418 bytes
+ .../20261102/logs/s1-review-e2e-recheck.log        |  Bin 0 -> 28694 bytes
+ .../20261102/logs/s1-review-full-regression.log    |  Bin 0 -> 287 bytes
+ .../20261102/logs/s1-review-generate.log           |  Bin 0 -> 229 bytes
+ .../20261102/logs/s1-review-hap-final.log          |  Bin 0 -> 51322 bytes
+ .../20261102/logs/s1-review-harmony-final.log      |  Bin 0 -> 4442 bytes
+ .../20261102/logs/s1-review-install.log            |  Bin 0 -> 493 bytes
+ .../20261102/logs/s1-review-lint-final.log         |  Bin 0 -> 2169 bytes
+ .../20261102/logs/s1-review-ohpm.log               |  Bin 0 -> 41 bytes
+ .../20261102/logs/s1-review-round1.log             |  Bin 0 -> 331 bytes
+ .../20261102/logs/s1-review-round2.log             |  Bin 0 -> 331 bytes
+ .../20261102/logs/s1-review-round3.log             |  Bin 0 -> 331 bytes
+ .../20261102/logs/s1-review-round4.log             |  Bin 0 -> 4284 bytes
+ .../20261102/logs/s1-review-round5.log             |  Bin 0 -> 419 bytes
+ .../20261102/logs/s1-review-round6.log             |  Bin 0 -> 420 bytes
+ .../20261102/logs/s1-review-round7.log             |  Bin 0 -> 419 bytes
+ .../20261102/logs/s1-review-s0-worker.log          |  Bin 0 -> 732 bytes
+ .../20261102/logs/s1-review-tail-lint.log          |  Bin 0 -> 2169 bytes
+ .../20261102/logs/s1-review-tail-related.log       |  Bin 0 -> 420 bytes
+ .../20261102/logs/s1-review-tail-targeted.log      |  Bin 0 -> 438 bytes
+ .../20261102/logs/s1-review-tail-types.log         |  Bin
+ .../20261102/logs/s1-review-targeted-final.log     |  Bin 0 -> 419 bytes
+ .../20261102/logs/s1-review-targeted-final2.log    |  Bin 0 -> 420 bytes
+ .../20261102/logs/s1-review-targeted-freeze.log    |  Bin 0 -> 419 bytes
+ .../20261102/logs/s1-review-test-init.log          |  Bin
+ .../20261102/logs/s1-review-test-migrate.log       |  Bin 0 -> 7974 bytes
+ .../20261102/logs/s1-review-types-final.log        |  Bin
+ .../20261102/logs/s1-review-types-final2.log       |  Bin
+ .../20261102/logs/s1-review-types-round2.log       |  Bin
+ .../20261102/logs/s1-review-types.log              |  Bin
+ .../20261102/logs/s1-review-validation-before.json |   15 +
+ .../logs/s1-review-worker-responsibility.log       |  Bin 0 -> 967 bytes
+ .../r4-agent-ux/20261030-ux1/web-continuity.png    |  Bin 0 -> 152224 bytes
+ .../r4-agent-ux/20261030-ux1/web-focus-390.png     |  Bin 0 -> 90300 bytes
+ .../r4-agent-ux/20261030-ux2/web-correction.png    |  Bin 0 -> 281011 bytes
+ .../r4-agent-ux/20261030-ux2/web-memory-panel.png  |  Bin 0 -> 98161 bytes
+ .../browser-1793608092135/ct1-direction-1280.png   |  Bin 0 -> 161278 bytes
+ .../browser-1793608092135/ct1-direction-390.png    |  Bin 0 -> 43384 bytes
+ .../browser-1793608221588/pr6-preview-1280.png     |  Bin 0 -> 205457 bytes
+ .../browser-1793608221846/pr6-preview-390.png      |  Bin 0 -> 44599 bytes
+ .../browser-1793609697579/ct1-direction-1280.png   |  Bin 0 -> 161987 bytes
+ .../browser-1793609697579/ct1-direction-390.png    |  Bin 0 -> 44044 bytes
+ .../browser-1793610722617/ct1-direction-1280.png   |  Bin 0 -> 161061 bytes
+ .../browser-1793610722617/ct1-direction-390.png    |  Bin 0 -> 43374 bytes
+ .../browser-1793610830588/pr6-preview-1280.png     |  Bin 0 -> 204818 bytes
+ .../browser-1793610830741/pr6-preview-390.png      |  Bin 0 -> 44599 bytes
+ .../r4-continuity/stages23-1793608086388.png       |  Bin 0 -> 181234 bytes
+ .../r4-continuity/stages23-1793609692505.png       |  Bin 0 -> 176755 bytes
+ .../r4-continuity/stages23-1793610718112.png       |  Bin 0 -> 180886 bytes
+ .../20261031/after/web-responsibility-edit.png     |  Bin 0 -> 110422 bytes
+ .../20261102/web-e2e-results.json                  | 1781 +++++++++++++++++
+ .../s1-project-journey/20261102/ACCEPTANCE.json    |  163 ++
+ .../20261102/checks/e2e-results-final.json         | 1747 +++++++++++++++++
+ .../20261102/checks/s1-build-final.log             |  416 ++++
+ .../20261102/checks/s1-e2e-full-final.log          |  631 ++++++
+ .../20261102/checks/s1-empty-db-migrate.log        |  171 ++
+ .../20261102/checks/s1-full-tests-final.log        |  625 ++++++
+ .../20261102/checks/s1-hap-final.log               |  956 ++++++++++
+ .../20261102/checks/s1-harmony-test-final.log      |   70 +
+ .../20261102/checks/s1-lint-final.log              |   32 +
+ .../20261102/checks/s1-s0-worker-regression.log    |   21 +
+ .../checks/s1-worker-responsibility-final.log      |   22 +
+ .../20261102/failures/e2e-first-failures.log       |   28 +
+ .../full-tests-first-run-uninitialized-db.log      |   22 +
+ .../20261102/worker-responsibility-probe.mjs       |  139 ++
+ .../s2-platform-probe/20261102/logs/hap-build.log  |  956 ++++++++++
+ .../20261102/logs/unsigned-install-attempt.log     |    2 +
+ .../s2-platform-probe/20261102/platform-probe.json |   57 +
+ .../s2-resource-readback/20261102/.gitattributes   |    2 +
+ .../s2-resource-readback/20261102/ACCEPTANCE.json  |   37 +
+ .../20261102/CONTINUATION_ACCEPTANCE.json          |   86 +
+ .../20261102/failures/s2-build-oom-20261102.log    |  Bin 0 -> 9805 bytes
+ .../20261102/logs/s2-build-final.log               |  Bin 0 -> 17492 bytes
+ .../20261102/logs/s2-e2e-full-final.log            |  Bin 0 -> 28567 bytes
+ .../20261102/logs/s2-e2e-results-final.json        | 1781 +++++++++++++++++
+ .../20261102/logs/s2-full-tests-final.log          |  Bin 0 -> 43118 bytes
+ .../20261102/logs/s2-generate.log                  |  Bin 0 -> 229 bytes
+ .../20261102/logs/s2-hap-final.log                 |  Bin 0 -> 49138 bytes
+ .../s2-resource-readback/20261102/logs/s2-hap.log  |  Bin 0 -> 49174 bytes
+ .../20261102/logs/s2-harmony-final.log             |  Bin 0 -> 4279 bytes
+ .../20261102/logs/s2-harmony-tests.log             |  Bin 0 -> 4349 bytes
+ .../20261102/logs/s2-install.log                   |  Bin 0 -> 494 bytes
+ .../20261102/logs/s2-lint-final.log                |  Bin 0 -> 2113 bytes
+ .../s2-resource-readback/20261102/logs/s2-lint.log |  Bin 0 -> 2113 bytes
+ .../s2-resource-readback/20261102/logs/s2-ohpm.log |  Bin 0 -> 41 bytes
+ .../20261102/logs/s2-readback-tests.log            |  Bin 0 -> 398 bytes
+ .../20261102/logs/s2-types.log                     |  Bin
+ .../20261102/logs/s2-web-journey.log               |  Bin 0 -> 26252 bytes
+ .../s2-resource-readback/20261102/web-1280.png     |  Bin 0 -> 35635 bytes
+ evidence/s2-resource-readback/20261102/web-390.png |  Bin 0 -> 29488 bytes
+ .../20261102/web-e2e-results.json                  |  220 +++
+ evidence/s2-usage-coverage/20261102/web-1280.png   |  Bin 0 -> 51542 bytes
+ evidence/s2-usage-coverage/20261102/web-390.png    |  Bin 0 -> 45281 bytes
+ .../entry/src/main/ets/common/ApiContract.ets      |    3 +
+ .../src/main/ets/common/MissionWidgetContract.ets  |   73 +-
+ .../main/ets/components/MissionReadbackView.ets    |   39 +-
+ .../components/MissionResponsibilitySection.ets    |    2 +-
+ .../src/main/ets/entryability/EntryAbility.ets     |   11 +
+ .../entry/src/main/ets/models/Conversation.ets     |    3 +-
+ harmonyos/entry/src/main/ets/models/Memory.ets     |    7 +
+ harmonyos/entry/src/main/ets/models/Mission.ets    |    9 +-
+ .../entry/src/main/ets/models/MissionReadback.ets  |   80 +-
+ harmonyos/entry/src/main/ets/models/Project.ets    |    7 +
+ .../entry/src/main/ets/models/ProjectIntake.ets    |  333 ++++
+ .../entry/src/main/ets/pages/FocusConversation.ets |    5 +-
+ harmonyos/entry/src/main/ets/pages/Index.ets       |  134 +-
+ harmonyos/entry/src/main/ets/pages/ProjectHome.ets |   26 +-
+ .../entry/src/main/ets/pages/ProjectIntake.ets     |  473 +++++
+ .../entry/src/main/ets/services/ApiClient.ets      |   14 +-
+ .../entry/src/main/ets/services/IntakeService.ets  |   77 +
+ .../entry/src/main/ets/services/MemoryService.ets  |    8 +
+ .../entry/src/main/ets/services/ProjectService.ets |   22 +-
+ .../src/main/ets/services/WidgetDataService.ets    |   60 +-
+ .../entry/src/main/ets/widget/pages/WidgetCard.ets |   17 +-
+ .../main/resources/base/profile/main_pages.json    |    3 +-
+ harmonyos/entry/src/test/List.test.ets             |   11 +
+ harmonyos/entry/src/test/ProjectIntake.test.ets    |   76 +
+ harmonyos/entry/src/test/ReentryMapping.test.ets   |   16 +-
+ harmonyos/entry/src/test/S1Handoff.test.ets        |   60 +
+ harmonyos/entry/src/test/S2Coverage.test.ets       |   82 +
+ harmonyos/entry/src/test/S2Readback.test.ets       |   24 +
+ lib/agent/index.ts                                 |    3 +-
+ lib/agent/llmAgent.ts                              |   11 +-
+ lib/auth/cloudCapability.ts                        |   15 +
+ lib/auth/cloudQuota.ts                             |   82 +-
+ lib/auth/guard.ts                                  |    5 +-
+ lib/auth/serverSession.ts                          |    4 +-
+ lib/captureProcessing.ts                           |    8 +
+ lib/client/captureDrafts.ts                        |   41 +
+ lib/client/projectLifecycle.ts                     |    7 +-
+ lib/continuity/directiveService.ts                 |    2 +-
+ lib/continuity/sourcePolicy.ts                     |    2 +
+ lib/conversation/service.ts                        |   30 +-
+ lib/conversation/turnWorker.ts                     |    3 +-
+ lib/intake/contracts.ts                            |  180 ++
+ lib/intake/coverage.ts                             |  179 ++
+ lib/intake/prompt.ts                               |   43 +
+ lib/intake/textRange.ts                            |   19 +
+ lib/memory/personalInvalidation.ts                 |   15 +-
+ lib/mission/callCoverage.ts                        |   74 +
+ lib/mission/readback.ts                            |   32 +
+ lib/mission/resourceUsage.ts                       |   21 +
+ lib/mission/responsibility.ts                      |    3 +
+ lib/mission/reviewProgress.ts                      |   55 +
+ lib/mission/runner.ts                              |    6 +
+ lib/mission/workerPresence.ts                      |   47 +-
+ lib/repositories/cards.ts                          |    7 +-
+ lib/repositories/projects.ts                       |   53 +-
+ lib/services/attachmentService.ts                  |   71 +-
+ lib/services/captureService.ts                     |   25 +-
+ lib/services/projectDeletionService.ts             |   91 +
+ lib/services/projectIntakeService.ts               |  698 +++++++
+ lib/storage/attachmentStorage.ts                   |    5 +
+ lib/validation/schemas.ts                          |    2 +-
+ package-lock.json                                  | 2006 +++++++++++++++-----
+ package.json                                       |   16 +-
+ .../migration.sql                                  |    1 +
+ .../migration.sql                                  |    1 +
+ .../migration.sql                                  |   64 +
+ prisma/schema.prisma                               |   70 +
+ scripts/mission-worker.ts                          |   20 +-
+ scripts/probe-platform-capabilities.ts             |   80 +
+ scripts/seed-e2e-auth.ts                           |    4 +
+ tests/auditS2CallCoverageWindow.test.ts            |   62 +
+ tests/calendarEventExtensions.test.ts              |   17 +-
+ tests/calendarWrite.test.ts                        |   21 +-
+ tests/captureDraftReady.test.ts                    |    9 +-
+ tests/database.integration.test.ts                 |    6 +-
+ tests/deployUpdate.test.ts                         |   31 +-
+ tests/intakeOriginalPages.test.ts                  |   25 +
+ tests/missionReadbackPanel.test.ts                 |   12 +
+ tests/projectIntake.test.ts                        |  332 ++++
+ tests/projectLifecycle.test.ts                     |   11 +-
+ tests/s0CapabilityAndCreation.test.ts              |   49 +
+ tests/s0CaptureIsolation.test.ts                   |   79 +
+ tests/s0MarkdownNetwork.test.ts                    |   45 +
+ tests/s0MigrationReplay.test.ts                    |   29 +
+ tests/s0PersonalInFlight.test.ts                   |   56 +
+ tests/s0ProjectDeletion.test.ts                    |  134 ++
+ tests/s0WorkerIdentity.test.ts                     |   38 +
+ tests/s1IndependentReview.test.ts                  |  283 +++
+ tests/s1MemoryInfluence.test.ts                    |  117 ++
+ tests/s1ResultProgress.test.ts                     |   52 +
+ tests/s2AdaptivePreference.test.ts                 |  113 ++
+ tests/s2AuditFixes.test.ts                         |   64 +
+ tests/s2CallCoverage.test.ts                       |   84 +
+ tests/s2IntakeCoverage.test.ts                     |  264 +++
+ tests/s2ResourceReadback.test.ts                   |   35 +
+ 354 files changed, 39560 insertions(+), 742 deletions(-)
+ create mode 100644 app/api/intake/[draftId]/confirm/route.ts
+ create mode 100644 app/api/intake/[draftId]/consent/route.ts
+ create mode 100644 app/api/intake/[draftId]/materials/[materialId]/route.ts
+ create mode 100644 app/api/intake/[draftId]/materials/file/route.ts
+ create mode 100644 app/api/intake/[draftId]/materials/route.ts
+ create mode 100644 app/api/intake/[draftId]/revise/route.ts
+ create mode 100644 app/api/intake/[draftId]/route.ts
+ create mode 100644 app/api/intake/[draftId]/sync/route.ts
+ create mode 100644 app/api/intake/[draftId]/understand/route.ts
+ create mode 100644 app/api/intake/route.ts
+ create mode 100644 app/api/project-deletions/[id]/route.ts
+ create mode 100644 app/api/project-deletions/route.ts
+ create mode 100644 components/IntakeCoveragePanel.tsx
+ create mode 100644 components/ProjectDeletionProgress.tsx
+ create mode 100644 components/ProjectIntakeForm.tsx
+ create mode 100644 deploy/alibaba-cloud-linux/safe-update-with-swap.sh
+ create mode 100644 docs/FINAL/Competition/S0_IMPLEMENTATION_2026-11-02.md
+ create mode 100644 docs/FINAL/Competition/S1_FINALS_ACCEPTANCE_GUIDE_2026-11-02.md
+ create mode 100644 docs/FINAL/Competition/S1_IMPLEMENTATION_2026-11-02.md
+ create mode 100644 docs/FINAL/Competition/S1_INDEPENDENT_REVIEW_2026-11-02.md
+ create mode 100644 docs/FINAL/Competition/S2_CONTINUATION_PROMPT_2026-11-02.md
+ create mode 100644 docs/FINAL/Competition/S2_IMPLEMENTATION_2026-11-02.md
+ create mode 100644 docs/FINAL/Competition/S2_IMPLEMENTATION_HANDOFF_2026-11-02.md
+ create mode 100644 e2e/project-intake.spec.ts
+ create mode 100644 e2e/s0-trust.spec.ts
+ create mode 100644 e2e/s1-cross-device.spec.ts
+ create mode 100644 evidence/s0-trust/20261102/.gitattributes
+ create mode 100644 evidence/s0-trust/20261102/ACCEPTANCE.json
+ create mode 100644 evidence/s0-trust/20261102/FILE_MANIFEST.json
+ create mode 100644 evidence/s0-trust/20261102/audit/npm-audit-s0-after.json
+ create mode 100644 evidence/s0-trust/20261102/audit/npm-audit-s0-baseline.json
+ create mode 100644 evidence/s0-trust/20261102/audit/npm-audit-s0-production.json
+ create mode 100644 evidence/s0-trust/20261102/checks/e2e-results.json
+ create mode 100644 evidence/s0-trust/20261102/checks/e2e-summary.json
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-affected-final.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-all-targeted-final.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-calendar-relative-time.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-calendar-time-diagnosis.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-critical-final.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-dependencies-final.json
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-e2e-focus-isolated.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-e2e-full-final.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-e2e-owner-member-final.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-followup-acceptance.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-full-final.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-hap-full-final.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-harmony-full-final.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-last-runtime-guards.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-lint-release-final.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-migrate-final.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-storage-all-final.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-types-release-final.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-web-build-full-final.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-web-build.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-worker-process-final.log
+ create mode 100644 evidence/s0-trust/20261102/checks/s0-worker-process-release-final.log
+ create mode 100644 evidence/s0-trust/20261102/failures/e2e-shared-session-revoked.json
+ create mode 100644 evidence/s0-trust/20261102/failures/s0-delete-before.log
+ create mode 100644 evidence/s0-trust/20261102/failures/s0-e2e-acceptance.log
+ create mode 100644 evidence/s0-trust/20261102/failures/s0-e2e-final.log
+ create mode 100644 evidence/s0-trust/20261102/failures/s0-e2e-owner-member.log
+ create mode 100644 evidence/s0-trust/20261102/failures/s0-e2e-shared-session-revoked.log
+ create mode 100644 evidence/s0-trust/20261102/failures/s0-e2e.log
+ create mode 100644 evidence/s0-trust/20261102/failures/s0-followup-final.log
+ create mode 100644 evidence/s0-trust/20261102/failures/s0-full-acceptance.log
+ create mode 100644 evidence/s0-trust/20261102/failures/s0-full-regression.log
+ create mode 100644 evidence/s0-trust/20261102/failures/s0-harmony-test.log
+ create mode 100644 evidence/s0-trust/20261102/failures/s0-markdown-before.log
+ create mode 100644 evidence/s0-trust/20261102/failures/s0-worker-process-before.log
+ create mode 100644 evidence/s0-trust/20261102/history/npm-install-s0.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-contracts-after.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-deletion-after.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-dependency-install.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-dev-dependency-install.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-diff-check.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-e2e-full-release.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-entry-after.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-generate.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-guards-final.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-hap-acceptance.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-hap-build.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-hap-final.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-hap-session-guards.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-harmony-test-final.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-lint-final.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-lint-full-final.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-lint.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-ohpm-install.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-pm-window.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-storage-closure-final.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-targeted-round2.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-test-migrate.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-transitive-update.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-types-acceptance.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-types-final.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-types-first.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-types-full-final.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-types-round2.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-worker-process.log
+ create mode 100644 evidence/s0-trust/20261102/history/s0-working-snapshot.txt
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/browser-1793584935519/ct1-direction-1280.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/browser-1793584935519/ct1-direction-390.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/browser-1793585055984/pr6-preview-1280.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/browser-1793585056133/pr6-preview-390.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/browser-1793585723371/ct1-direction-1280.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/browser-1793585723371/ct1-direction-390.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/browser-1793585838127/pr6-preview-1280.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/browser-1793585838314/pr6-preview-390.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/browser-1793586076847/ct1-direction-1280.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/browser-1793586076847/ct1-direction-390.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/browser-1793590181265/ct1-direction-1280.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/browser-1793590181265/ct1-direction-390.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/browser-1793590314433/pr6-preview-1280.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/browser-1793590314713/pr6-preview-390.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/browser-1793590473394/ct1-direction-1280.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/browser-1793590473394/ct1-direction-390.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/browser-1793590608405/pr6-preview-1280.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/browser-1793590608565/pr6-preview-390.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/stages23-1793584930946.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/stages23-1793585718870.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/stages23-1793586072439.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/stages23-1793590176025.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/continuity/stages23-1793590467840.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/ux1-web-continuity.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/ux1-web-focus-390.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/ux2-web-correction.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/ux2-web-memory-panel.png
+ create mode 100644 evidence/s0-trust/20261102/screenshots/ux3-web-responsibility-edit.png
+ create mode 100644 evidence/s0-trust/20261102/worker-process-probe.mjs
+ create mode 100644 evidence/s1-independent-review/20261102/.gitattributes
+ create mode 100644 evidence/s1-independent-review/20261102/ACCEPTANCE.json
+ create mode 100644 evidence/s1-independent-review/20261102/FILE_MANIFEST.json
+ create mode 100644 evidence/s1-independent-review/20261102/README.md
+ create mode 100644 evidence/s1-independent-review/20261102/failures/initial-five-before.log
+ create mode 100644 evidence/s1-independent-review/20261102/failures/negative-baseline.test.ts.txt
+ create mode 100644 evidence/s1-independent-review/20261102/failures/validation-before.json
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-before.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-e2e-final.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-e2e-freeze.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-e2e-recheck.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-full-regression.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-generate.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-hap-final.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-harmony-final.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-install.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-lint-final.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-ohpm.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-round1.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-round2.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-round3.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-round4.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-round5.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-round6.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-round7.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-s0-worker.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-tail-lint.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-tail-related.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-tail-targeted.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-tail-types.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-targeted-final.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-targeted-final2.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-targeted-freeze.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-test-init.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-test-migrate.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-types-final.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-types-final2.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-types-round2.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-types.log
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-validation-before.json
+ create mode 100644 evidence/s1-independent-review/20261102/logs/s1-review-worker-responsibility.log
+ create mode 100644 evidence/s1-independent-review/20261102/screenshots/evidence/r4-agent-ux/20261030-ux1/web-continuity.png
+ create mode 100644 evidence/s1-independent-review/20261102/screenshots/evidence/r4-agent-ux/20261030-ux1/web-focus-390.png
+ create mode 100644 evidence/s1-independent-review/20261102/screenshots/evidence/r4-agent-ux/20261030-ux2/web-correction.png
+ create mode 100644 evidence/s1-independent-review/20261102/screenshots/evidence/r4-agent-ux/20261030-ux2/web-memory-panel.png
+ create mode 100644 evidence/s1-independent-review/20261102/screenshots/evidence/r4-continuity/browser-1793608092135/ct1-direction-1280.png
+ create mode 100644 evidence/s1-independent-review/20261102/screenshots/evidence/r4-continuity/browser-1793608092135/ct1-direction-390.png
+ create mode 100644 evidence/s1-independent-review/20261102/screenshots/evidence/r4-continuity/browser-1793608221588/pr6-preview-1280.png
+ create mode 100644 evidence/s1-independent-review/20261102/screenshots/evidence/r4-continuity/browser-1793608221846/pr6-preview-390.png
+ create mode 100644 evidence/s1-independent-review/20261102/screenshots/evidence/r4-continuity/browser-1793609697579/ct1-direction-1280.png
+ create mode 100644 evidence/s1-independent-review/20261102/screenshots/evidence/r4-continuity/browser-1793609697579/ct1-direction-390.png
+ create mode 100644 evidence/s1-independent-review/20261102/screenshots/evidence/r4-continuity/browser-1793610722617/ct1-direction-1280.png
+ create mode 100644 evidence/s1-independent-review/20261102/screenshots/evidence/r4-continuity/browser-1793610722617/ct1-direction-390.png
+ create mode 100644 evidence/s1-independent-review/20261102/screenshots/evidence/r4-continuity/browser-1793610830588/pr6-preview-1280.png
+ create mode 100644 evidence/s1-independent-review/20261102/screenshots/evidence/r4-continuity/browser-1793610830741/pr6-preview-390.png
+ create mode 100644 evidence/s1-independent-review/20261102/screenshots/evidence/r4-continuity/stages23-1793608086388.png
+ create mode 100644 evidence/s1-independent-review/20261102/screenshots/evidence/r4-continuity/stages23-1793609692505.png
+ create mode 100644 evidence/s1-independent-review/20261102/screenshots/evidence/r4-continuity/stages23-1793610718112.png
+ create mode 100644 evidence/s1-independent-review/20261102/screenshots/evidence/r4-ui-quality/20261031/after/web-responsibility-edit.png
+ create mode 100644 evidence/s1-independent-review/20261102/web-e2e-results.json
+ create mode 100644 evidence/s1-project-journey/20261102/ACCEPTANCE.json
+ create mode 100644 evidence/s1-project-journey/20261102/checks/e2e-results-final.json
+ create mode 100644 evidence/s1-project-journey/20261102/checks/s1-build-final.log
+ create mode 100644 evidence/s1-project-journey/20261102/checks/s1-e2e-full-final.log
+ create mode 100644 evidence/s1-project-journey/20261102/checks/s1-empty-db-migrate.log
+ create mode 100644 evidence/s1-project-journey/20261102/checks/s1-full-tests-final.log
+ create mode 100644 evidence/s1-project-journey/20261102/checks/s1-hap-final.log
+ create mode 100644 evidence/s1-project-journey/20261102/checks/s1-harmony-test-final.log
+ create mode 100644 evidence/s1-project-journey/20261102/checks/s1-lint-final.log
+ create mode 100644 evidence/s1-project-journey/20261102/checks/s1-s0-worker-regression.log
+ create mode 100644 evidence/s1-project-journey/20261102/checks/s1-worker-responsibility-final.log
+ create mode 100644 evidence/s1-project-journey/20261102/failures/e2e-first-failures.log
+ create mode 100644 evidence/s1-project-journey/20261102/failures/full-tests-first-run-uninitialized-db.log
+ create mode 100644 evidence/s1-project-journey/20261102/worker-responsibility-probe.mjs
+ create mode 100644 evidence/s2-platform-probe/20261102/logs/hap-build.log
+ create mode 100644 evidence/s2-platform-probe/20261102/logs/unsigned-install-attempt.log
+ create mode 100644 evidence/s2-platform-probe/20261102/platform-probe.json
+ create mode 100644 evidence/s2-resource-readback/20261102/.gitattributes
+ create mode 100644 evidence/s2-resource-readback/20261102/ACCEPTANCE.json
+ create mode 100644 evidence/s2-resource-readback/20261102/CONTINUATION_ACCEPTANCE.json
+ create mode 100644 evidence/s2-resource-readback/20261102/failures/s2-build-oom-20261102.log
+ create mode 100644 evidence/s2-resource-readback/20261102/logs/s2-build-final.log
+ create mode 100644 evidence/s2-resource-readback/20261102/logs/s2-e2e-full-final.log
+ create mode 100644 evidence/s2-resource-readback/20261102/logs/s2-e2e-results-final.json
+ create mode 100644 evidence/s2-resource-readback/20261102/logs/s2-full-tests-final.log
+ create mode 100644 evidence/s2-resource-readback/20261102/logs/s2-generate.log
+ create mode 100644 evidence/s2-resource-readback/20261102/logs/s2-hap-final.log
+ create mode 100644 evidence/s2-resource-readback/20261102/logs/s2-hap.log
+ create mode 100644 evidence/s2-resource-readback/20261102/logs/s2-harmony-final.log
+ create mode 100644 evidence/s2-resource-readback/20261102/logs/s2-harmony-tests.log
+ create mode 100644 evidence/s2-resource-readback/20261102/logs/s2-install.log
+ create mode 100644 evidence/s2-resource-readback/20261102/logs/s2-lint-final.log
+ create mode 100644 evidence/s2-resource-readback/20261102/logs/s2-lint.log
+ create mode 100644 evidence/s2-resource-readback/20261102/logs/s2-ohpm.log
+ create mode 100644 evidence/s2-resource-readback/20261102/logs/s2-readback-tests.log
+ create mode 100644 evidence/s2-resource-readback/20261102/logs/s2-types.log
+ create mode 100644 evidence/s2-resource-readback/20261102/logs/s2-web-journey.log
+ create mode 100644 evidence/s2-resource-readback/20261102/web-1280.png
+ create mode 100644 evidence/s2-resource-readback/20261102/web-390.png
+ create mode 100644 evidence/s2-resource-readback/20261102/web-e2e-results.json
+ create mode 100644 evidence/s2-usage-coverage/20261102/web-1280.png
+ create mode 100644 evidence/s2-usage-coverage/20261102/web-390.png
+ create mode 100644 harmonyos/entry/src/main/ets/models/ProjectIntake.ets
+ create mode 100644 harmonyos/entry/src/main/ets/pages/ProjectIntake.ets
+ create mode 100644 harmonyos/entry/src/main/ets/services/IntakeService.ets
+ create mode 100644 harmonyos/entry/src/test/ProjectIntake.test.ets
+ create mode 100644 harmonyos/entry/src/test/S1Handoff.test.ets
+ create mode 100644 harmonyos/entry/src/test/S2Coverage.test.ets
+ create mode 100644 harmonyos/entry/src/test/S2Readback.test.ets
+ create mode 100644 lib/auth/cloudCapability.ts
+ create mode 100644 lib/captureProcessing.ts
+ create mode 100644 lib/client/captureDrafts.ts
+ create mode 100644 lib/intake/contracts.ts
+ create mode 100644 lib/intake/coverage.ts
+ create mode 100644 lib/intake/prompt.ts
+ create mode 100644 lib/intake/textRange.ts
+ create mode 100644 lib/mission/callCoverage.ts
+ create mode 100644 lib/mission/resourceUsage.ts
+ create mode 100644 lib/mission/reviewProgress.ts
+ create mode 100644 lib/services/projectDeletionService.ts
+ create mode 100644 lib/services/projectIntakeService.ts
+ create mode 100644 prisma/migrations/20261102010000_project_deletion_fence/migration.sql
+ create mode 100644 prisma/migrations/20261102011000_capture_processing_receipt/migration.sql
+ create mode 100644 prisma/migrations/20261102140000_project_intake_draft/migration.sql
+ create mode 100644 scripts/probe-platform-capabilities.ts
+ create mode 100644 tests/auditS2CallCoverageWindow.test.ts
+ create mode 100644 tests/intakeOriginalPages.test.ts
+ create mode 100644 tests/projectIntake.test.ts
+ create mode 100644 tests/s0CapabilityAndCreation.test.ts
+ create mode 100644 tests/s0CaptureIsolation.test.ts
+ create mode 100644 tests/s0MarkdownNetwork.test.ts
+ create mode 100644 tests/s0MigrationReplay.test.ts
+ create mode 100644 tests/s0PersonalInFlight.test.ts
+ create mode 100644 tests/s0ProjectDeletion.test.ts
+ create mode 100644 tests/s0WorkerIdentity.test.ts
+ create mode 100644 tests/s1IndependentReview.test.ts
+ create mode 100644 tests/s1MemoryInfluence.test.ts
+ create mode 100644 tests/s1ResultProgress.test.ts
+ create mode 100644 tests/s2AdaptivePreference.test.ts
+ create mode 100644 tests/s2AuditFixes.test.ts
+ create mode 100644 tests/s2CallCoverage.test.ts
+ create mode 100644 tests/s2IntakeCoverage.test.ts
+ create mode 100644 tests/s2ResourceReadback.test.ts

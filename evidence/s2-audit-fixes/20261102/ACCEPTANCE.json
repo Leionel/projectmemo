@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-02",
+  "timezone": "UTC+08:00",
+  "reviewedCandidate": "d51adb7c0fc670ece8cb0e6652485cf512463b9b",
+  "independentAudit": "ef15cc3",
+  "fixSource": "2a976227a9fd1cc09511e78a6df595b38f29d830",
+  "sourceMergeCommit": "c4f8cc0",
+  "integrationTree": "7453a23732280364d16f48d55293db049ad5dd88",
+  "integrationMatchesFixTree": true,
+  "closedFindings": ["P1-1", "P1-2", "P2-1", "P2-2", "P2-3", "P2-4", "P2-5"],
+  "checks": {
+    "targeted": { "exitCode": 0, "files": 7, "passed": 48, "receipt": "logs/s2-fix-targeted-complete.log" },
+    "fullVitest": { "source": "2a976227", "exitCode": 0, "files": 205, "passed": 1551, "durationSeconds": 893.20, "receipt": "logs/s2-fix-full.log" },
+    "types": { "exitCode": 0, "receipt": "logs/s2-fix-types-complete.log" },
+    "lint": { "exitCode": 0, "existingWarnings": 9, "receipt": "logs/s2-fix-lint-complete.log" },
+    "harmonyUnit": { "exitCode": 0, "passed": 109, "failed": 0, "errors": 0, "ignored": 0, "receipt": "logs/s2-fix-harmony-complete.log" },
+    "hap": { "exitCode": 0, "signed": false, "installed": false, "bytes": 7965642, "sha256": "d462831d94a6eb2315fdfb8f02bdb1cda9f3cc240b4fdc16a1051efec99bd347", "receipt": "logs/s2-fix-hap-complete.log" },
+    "integrationE2E": { "source": "c4f8cc0", "exitCode": 0, "productionBuild": "PASS", "buildTypeCheck": "ENABLED", "setupPassed": 1, "businessPassed": 36, "skipped": 2, "unexpected": 0, "flaky": 0, "retries": 0, "startTime": "2026-11-02T13:05:43.141Z", "durationMs": 220768.253, "environment": { "CIRCLE_NODE_TOTAL": "3", "observedNextPageWorkers": 2 }, "receipt": "logs/s2-integration-e2e-bounded.log", "report": "web-e2e-results.json" },
+    "productionAudit": { "exitCode": 0, "vulnerabilities": 0, "receipt": "logs/s2-fix-audit-production.json" },
+    "allDependencyAudit": { "exitCode": 1, "moderate": 16, "high": 0, "critical": 0, "existingDevelopmentToolchainRisk": true, "receipt": "logs/s2-fix-audit-all.json" }
+  },
+  "merge": {
+    "main": "master",
+    "previousMain": "aea257c46df4656958198f903c18868bf7a819dc",
+    "containsSourceMerge": true,
+    "s2BranchSynchronized": true,
+    "protectedFileCount": 4,
+    "allProtectedWorkingFileBytesUnchanged": true,
+    "signatureMaterialCopiedOrSecretsPrintedOrCommitted": false,
+    "codeMergeReady": "YES",
+    "harmonyDeviceReady": "NO - not signed off in this run; current user installation not inferred",
+    "productionReady": "NO",
+    "laterEvidenceCommitsChangeBusinessSource": false
+  },
+  "retainedFailures": [
+    { "receipt": "window-before.log", "scope": "Original independent audit probe failed before the fix; this run keeps its two-target-receipt assertion and proves it green" },
+    { "receipt": "logs/s2-fix-targeted.log", "scope": "Initial new synthetic fixture omitted required provider; corrected fixture, not a new product defect" },
+    { "receipt": "logs/s2-fix-types.log", "scope": "Type failure from that same fixture, followed by a passing final check" },
+    { "receipt": "integration-e2e-first-oom.log", "scope": "First integration build used 27 workers and exhausted memory; shell exit -532462766, no final E2E result; no existing test was skipped or relaxed" }
+  ],
+  "boundaries": {
+    "data": "isolated synthetic test databases and attachments",
+    "paidModelCalls": 0,
+    "pushed": false,
+    "deployed": false,
+    "realDatabaseMigratedOrDeleted": false,
+    "deviceAndNaturalDaySignedOff": false,
+    "fullTaskPricingImplemented": false,
+    "shareAndIntentsImplemented": false,
+    "notes": "Local source merge only; existing backend dependencies/database and signed device runtime were not upgraded by this task"
+  }
+}

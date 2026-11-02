@@ -102,3 +102,9 @@ Web 入口：长期委托 → 执行详情与回执 → 本次用量。鸿蒙沿
 
 
 本批设计采用 product-design 的 shape，Web 采用 ui-design 的既有样式增量实现，鸿蒙采用 harmonyos-design 的现有工程实现模式。读取了产品规则/判断/表面状态、Web aesthetic-direction/design-guidelines/general/typography/section-layout/colors；沿原 Token，无主题或动效重绘。
+
+## 独立审查收尾与主干整合（11/02）
+
+独立审查 `ef15cc3` 提出的 2 项 P1 和 5 项 P2 已在 `2a976227` 修复；新增回归覆盖调用窗口挤压、真实 JSON null/旧服务、页边界、状态分类与原文版本绑定。当前完整回归为 205 文件 / 1551 项通过，鸿蒙 109 项通过；集成树受限构建并发下完成完整 Web E2E（36 业务＋1 setup，2 旧跳过，0 失败/flaky）。原构建 OOM 与失败夹具日志继续保留。
+
+master 和用户使用的 S2 分支已同步集成提交 `c4f8cc0`，签名及原主目录配置修改保持字节一致；未 push、部署或迁移已有库。详细修复、验证与三个裁决见 `S2_AUDIT_FIX_AND_MERGE_2026-11-02.md` 和 `evidence/s2-audit-fixes/20261102/ACCEPTANCE.json`。本节更新此前的“未合并”历史状态，不把原五包的待办或真实验收改成完成。

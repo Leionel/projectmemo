@@ -1,0 +1,169 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/s1IndependentReview.test.ts
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-s1-review
+
+ ❯ tests/s1IndependentReview.test.ts (5 tests | 5 failed) 492ms
+   × 实际 provider 适配链只预占一次并确实派发一次 209ms
+   × 模型在途期间新增材料，旧模型结果不能绑定到新材料版本 38ms
+   × 撤回清理后迟到模型结果不能重新写回私人理解 27ms
+   × 到期 unlink 失败保留文件身份，下一轮仍可清理 EXPIRED 草稿 26ms
+   × 项目清除后 Intake 不能继续暴露已清除项目材料副本 178ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/s1IndependentReview.test.ts > 实际 provider 适配链只预占一次并确实派发一次
+Error: 原理解请求已发出，请读取原回执
+ ❯ lib/auth/cloudQuota.ts:44:13
+     42|     const dispatches = Array.isArray(processing.dispatches) ? processi…
+     43|     if (dispatches.some(d => d.requestHash === billing.requestHash))
+     44|       throw new AppError("CALL_ALREADY_RESERVED", "原理解请求已发出，请读取原回执", 4…
+       |             ^
+     45|     const account = await tx.accountSecurity.findUnique({ where: { use…
+     46|     if (account) {
+ ❯ Proxy._transactionWithCallback node_modules/@prisma/client/src/runtime/getPrismaClient.ts:859:17
+ ❯ reserveIntakeCloudCall lib/auth/cloudQuota.ts:28:3
+ ❯ chatWithLLMWithMeta lib/agent/llmAgent.ts:27:20
+ ❯ Module.understandIntake lib/services/projectIntakeService.ts:232:14
+ ❯ tests/s1IndependentReview.test.ts:36:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/s1IndependentReview.test.ts > 模型在途期间新增材料，旧模型结果不能绑定到新材料版本
+AssertionError: expected 'READY' not to be 'READY' // Object.is equality
+ ❯ tests/s1IndependentReview.test.ts:50:42
+     48|   release(); await outcome;
+     49|   const current = await db.projectIntakeDraft.findUniqueOrThrow({ wher…
+     50|   expect(current.understandingState).not.toBe("READY"); expect(current…
+       |                                          ^
+     51| });
+     52|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/s1IndependentReview.test.ts > 撤回清理后迟到模型结果不能重新写回私人理解
+AssertionError: expected 'PREVIEW_READY' to be 'WITHDRAWN' // Object.is equality
+
+Expected: "WITHDRAWN"
+Received: "PREVIEW_READY"
+
+ ❯ tests/s1IndependentReview.test.ts:60:26
+     58|   await ready; await intake.withdrawIntake(f.actor, f.draftId); releas…
+     59|   const current = await db.projectIntakeDraft.findUniqueOrThrow({ wher…
+     60|   expect(current.status).toBe("WITHDRAWN"); expect(current.understandi…
+       |                          ^
+     61| });
+     62|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/s1IndependentReview.test.ts > 到期 unlink 失败保留文件身份，下一轮仍可清理 EXPIRED 草稿
+AssertionError: expected 'DELETED' to be 'FAILED' // Object.is equality
+
+Expected: "FAILED"
+Received: "DELETED"
+
+ ❯ tests/s1IndependentReview.test.ts:74:30
+     72|   const after = await db.projectIntakeMaterial.findUniqueOrThrow({ whe…
+     73|   expect(fs.existsSync(file.absolutePath)).toBe(true);
+     74|   expect(after.cleanupState).toBe("FAILED"); expect(after.storageKey).…
+       |                              ^
+     75|   await intake.expireIntakeDrafts(new Date(Date.now()+86_400_000));
+     76|   expect(fs.existsSync(file.absolutePath)).toBe(false);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/s1IndependentReview.test.ts > 项目清除后 Intake 不能继续暴露已清除项目材料副本
+AssertionError: promise resolved "{ preview: { …(19) }, …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "canConfirm": false,
++   "confirmedProjectId": "cmvyyejte000o1s8ovuewv1os",
++   "expiresAt": "2026-11-05T07:44:58.301Z",
++   "preview": {
++     "accepted": {
++       "description": "阅读论文并核查方法条件，形成真实的阅读笔记。",
++       "goal": "完成阅读笔记",
++       "scenario": "RESEARCH",
++       "title": "论文阅读",
++     },
++     "constraints": [],
++     "correction": {
++       "admittedAt": null,
++       "appliedObjective": null,
++       "candidates": [],
++       "clarify": null,
++       "constraints": [],
++       "until": null,
++     },
++     "draftId": "cmvyyejst000m1s8o8g23s2l2",
++     "expiresAt": "2026-11-05T07:44:58.301Z",
++     "materials": [
++       {
++         "contentHash": "4a8f466ea509aa81f7fd47fba19a544c52318f7659b1c8cc49015714107aff0a",
++         "extractionError": null,
++         "extractionStatus": "SUCCESS",
++         "fileName": null,
++         "id": "cmvyyejsv000n1s8odt10xn87",
++         "kind": "TEXT",
++         "label": "文本 1",
++         "revision": 1,
++         "sha256": "efb9f906d6e1ae668ed008211d2a2089e01c0c6f81cb391ed280635f6695f721",
++         "size": 13,
++         "sync": {
++           "state": "PENDING",
++         },
++         "type": "TEXT",
++       },
++     ],
++     "materialsHash": "152d9afd4f3394f5e1e0a29b80fbbf9685c36faa74ac6b64ba5df0c6137f5f00",
++     "model": {
++       "provider": null,
++       "reason": "NOT_RUN",
++       "usageUnknown": true,
++       "used": false,
++     },
++     "nextQuestion": null,
++     "previewHash": "004e99642c1a9c6b484f25c898da96ca06ede978a2105fc1aff62883febc11fc",
++     "revision": 1,
++     "schemaVersion": 1,
++     "statements": [
++       {
++         "materialId": "cmvyyejsv000n1s8odt10xn87",
++         "materialLabel": "文本 1",
++         "meaning": "尚未生成模型理解；这是材料原文片段。",
++         "quote": "先读论文，不运行付费实验。",
++       },
++     ],
++     "status": "CONFIRMED",
++     "successCriteria": [],
++     "suggested": null,
++     "summary": null,
++     "understandingState": "NONE",
++     "unknowns": [],
++   },
+  }
+
+ ❯ tests/s1IndependentReview.test.ts:86:54
+     84|   await requestProjectDeletion(f.actor.userId, project.id, project.id,…
+     85|   await processProjectDeletions();
+     86|   await expect(intake.readIntake(f.actor, f.draftId)).rejects.toBeDefi…
+       |                                                      ^
+     87|   await intake.expireIntakeDrafts(new Date(Date.now()+86_400_000*4));
+     88|   expect((await db.projectIntakeMaterial.findMany({ where: { draftId: …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed (5)
+   Start at  15:44:55
+   Duration  3.05s (transform 1.22s, setup 0ms, import 2.06s, tests 492ms, environment 0ms)
+

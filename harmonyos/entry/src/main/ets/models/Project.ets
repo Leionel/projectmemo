@@ -45,6 +45,7 @@ export class ProjectCount {
 }
 
 export class Project {
+  canDelete: boolean = false;
   id: string = '';
   title: string = '';
   description: string = '';
@@ -61,9 +62,15 @@ export class Project {
 
 export class ProjectsResponse {
   projects: Project[] = [];
+  deletions: ProjectDeletionInfo[] = [];
+}
+export class ProjectDeletionInfo {
+  status: string = 'PENDING';
+  message: string = '项目已停用，附件清理待完成';
 }
 
 export class ProjectCreateInput {
+  requestId: string = '';
   title: string = '';
   description: string = '';
   goal: string = '';

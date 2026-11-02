@@ -1,0 +1,28 @@
+S1 E2E 首轮失败记录（从命令输出原样摘录；Playwright 的 HTML/trace 报告已被最终通过的运行重新生成，
+因此这里保留的是当次终端输出，而不是事后重放的文件）
+
+运行命令：npm.cmd run test:e2e -- project-intake.spec.ts s1-cross-device.spec.ts
+时间：2026-11-02 13:5x（UTC+8），源码时点：S1-A 提交 42d934e + 未提交的 C 阶段改动
+结果：1 passed（auth.setup）、2 failed
+
+失败 1：project-intake.spec.ts
+  Error: expect(locator).toBeVisible() failed
+  Locator: getByText('当前范围：本周先确认设备可用性')
+  Error: strict mode violation: getByText(...) resolved to 2 elements:
+    1) <p ...>当前范围：本周先确认设备可用性（到 11/9/2026, 12:00:00 AM）</p>
+    2) <p role="status" ...>已按你的话调整当前范围：本周先确认设备可用性</p>
+  原因：选择器同时命中范围面板与状态提示；产品行为正确（纠正已生效）。
+  修复：e2e/project-intake.spec.ts 改为 /^当前范围：本周先确认设备可用性/ 的 .first()。
+
+失败 2：s1-cross-device.spec.ts
+  Error: locator.fill: Error: strict mode violation: getByLabel('项目名称') resolved to 2 elements:
+    1) <input id="intake-title" .../>
+    2) <input id="title" .../>
+  原因：页面同时存在材料优先表单与“直接填写”手工表单，标签重名。
+  修复：手工表单先展开 details，并把字段限定在它自己的表单内。
+
+后续同一文件还出现过两次真实失败（同一原因链，逐次修复）：
+  - accessToken 字段名写成 token → 手机会话未建立，GET /api/missions 返回错误结构。
+  - replay 状态断言写死 200，实际服务端如实返回 202（已接受）；改为 [200,202]。
+  - readback 不带 questionId 时 selected.question 为 null；改为先读 /api/missions/:id 取原问题 id。
+以上都不是“跳过断言”，而是断言与真实合同对齐；最终同一命令退出码 0。

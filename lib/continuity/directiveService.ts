@@ -13,7 +13,7 @@ export function actorDirectiveScope(actor: ConversationActor, projectId: string)
   return { projectId, ...(actor.conversationId ? { conversationId: actor.conversationId } : {}),
     ...(actor.missionId && actor.missionProjectId === projectId ? { missionId: actor.missionId } : {}) };
 }
-export function assertDirectiveEffect(view: ContinuityView, effect: "BUSINESS_WRITE" | "EXTERNAL_READ" | "MODEL") {
+export function assertDirectiveEffect(view: Pick<ContinuityView, "constraints">, effect: "BUSINESS_WRITE" | "EXTERNAL_READ" | "MODEL") {
   const rules = view.constraints.join("\n");
   const denied = effect === "BUSINESS_WRITE" ? /只读|不创建行动|(?:不要|禁止|不得|不允许)(?:创建行动|新增行动|外部写入|写入业务)/.test(rules)
     : effect === "EXTERNAL_READ" ? /不联网|(?:不要|禁止|不得|不允许)(?:联网|调用外部工具|付费调用)/.test(rules)

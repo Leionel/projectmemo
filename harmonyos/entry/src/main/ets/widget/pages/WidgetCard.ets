@@ -23,6 +23,11 @@ struct WidgetCard {
   @LocalStorageProp('missionProjectId') missionProjectId: string = '';
   @LocalStorageProp('missionSummary') missionSummary: string = '';
   @LocalStorageProp('missionUpdatedAt') missionUpdatedAt: string = '';
+  @LocalStorageProp('missionQuestionId') missionQuestionId: string = '';
+  @LocalStorageProp('missionApprovalId') missionApprovalId: string = '';
+  @LocalStorageProp('missionAttention') missionAttention: string = '';
+  @LocalStorageProp('missionSync') missionSync: string = '';
+  @LocalStorageProp('missionExpiresAt') missionExpiresAt: number = 0;
 
   private getStatusColor(): Resource {
     if (this.statusTone === 'risk' || this.status === '需要重整' || this.status === '已逾期') {
@@ -61,6 +66,9 @@ struct WidgetCard {
   }
 
   private getDisplayActionTitle(): string {
+    if (this.missionId !== '' && this.missionAttention !== '') {
+      return this.missionAttention;
+    }
     if (this.missionId !== '' && this.missionSummary !== '') {
       return this.missionSummary;
     }
@@ -308,7 +316,7 @@ struct WidgetCard {
       // 3. 底部关键提示条
       Row() {
         if (this.missionId !== '') {
-          Text('待处理委托')
+          Text(this.missionSync !== '' ? this.missionSync : '待处理委托')
             .fontSize(10)
             .fontColor($r('app.color.pm_warning'))
             .layoutWeight(1)
@@ -367,7 +375,11 @@ struct WidgetCard {
           params: {
             targetTab: 2,
             missionId: this.missionId,
-            projectId: this.missionProjectId
+            projectId: this.missionProjectId,
+            // 只带定位身份与期限；执行批准仍要回到 App 重新鉴权。
+            questionId: this.missionQuestionId,
+            approvalId: this.missionApprovalId,
+            handoffExpiresAt: String(this.missionExpiresAt > 0 ? this.missionExpiresAt : Date.now())
           }
         });
       } else {
@@ -383,3 +395,4 @@ struct WidgetCard {
     })
   }
 }
+

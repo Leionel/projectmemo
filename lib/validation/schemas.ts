@@ -23,7 +23,7 @@ const projectFields = {
   deadline: deadlineSchema,
 };
 
-export const projectCreateSchema = z.object(projectFields);
+export const projectCreateSchema = z.object({ ...projectFields, requestId: z.string().trim().min(1).max(128).optional() });
 
 export const projectUpdateSchema = z
   .object(projectFields)

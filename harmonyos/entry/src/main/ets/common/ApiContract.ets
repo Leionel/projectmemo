@@ -102,6 +102,9 @@ export function isSuccessCode(method: string, code: number): boolean {
   if (code === 200) {
     return true;
   }
+  if (code === 202 && method === 'DELETE') {
+    return true;
+  }
   if ((code === 201 || code === 202) && (method === 'POST' || method === 'PATCH')) {
     return true;
   }

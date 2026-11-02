@@ -28,8 +28,10 @@ export interface UploadAttachmentInput {
 }
 /**
  * 提取 PDF 文本（支持标准 ASCII 文本块与简单中文流提取）
+ *
+ * 项目前材料预览复用同一个解析器：不因为还没有 projectId 就换一套实现。
  */
-async function extractPdfText(buffer: Buffer): Promise<string | null> {
+export async function extractPdfText(buffer: Buffer): Promise<string | null> {
   const executable = process.env.PDFTOTEXT_PATH || "pdftotext";
   return new Promise((resolve, reject) => {
     const child = spawn(executable, ["-layout", "-", "-"], {
@@ -66,7 +68,7 @@ const VISION_MAX_BYTES = 5 * 1024 * 1024;
  * 未配置视觉 provider 时返回 null（调用方记为 NEEDS_OCR）；
  * 已配置但调用失败时抛出，调用方记为 FAILED 并保留真实原因。
  */
-async function extractImageText(mimeType: string, buffer: Buffer, projectId: string): Promise<string | null> {
+export async function extractImageText(mimeType: string, buffer: Buffer, charge: () => Promise<void>): Promise<string | null> {
   const config = getVisionProviderConfig();
   if (!config) {
     return null;
@@ -82,7 +84,7 @@ async function extractImageText(mimeType: string, buffer: Buffer, projectId: str
     const base64 = buffer.toString("base64");
     const dataUri = `data:${mimeType};base64,${base64}`;
 
-    await reserveCloudCall(projectId);
+    await charge();
     const response = await fetch(`${baseUrl}/chat/completions`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
@@ -120,7 +122,7 @@ async function extractImageText(mimeType: string, buffer: Buffer, projectId: str
   }
 }
 
-function inferAndValidateFileType(fileName: string, mimeType: string, buffer: Buffer): "IMAGE" | "PDF" | "CSV" | "JSON" {
+export function inferAndValidateFileType(fileName: string, mimeType: string, buffer: Buffer): "IMAGE" | "PDF" | "CSV" | "JSON" {
   if (buffer.length === 0) {
     throw new Error("Attachment is empty");
   }
@@ -162,7 +164,9 @@ function inferAndValidateFileType(fileName: string, mimeType: string, buffer: Bu
   return "IMAGE";
 }
 
-export async function processAttachmentUpload(input: UploadAttachmentInput) {
+export async function processAttachmentUpload(input: UploadAttachmentInput, dependencies: { extractPdf?: typeof extractPdfText;
+  beforeWrite?: (tx: import("@/lib/generated/prisma/client").Prisma.TransactionClient) => Promise<void>;
+  allowCloud?: boolean; extractedText?: string | null } = {}) {
   const { projectId, fileName, mimeType, buffer } = input;
   if (!isFeatureEnabled("PROJECT_INBOX_ENABLED", true)) {
     throw new AppError("PROJECT_INBOX_DISABLED", "项目附件入口当前已关闭", 503);
@@ -189,7 +193,22 @@ export async function processAttachmentUpload(input: UploadAttachmentInput) {
   }
 
   // 3. 仅在确认不是重复文件后写入持久化目录。
-  const stored = await saveFileToStorage(projectId, fileName, buffer);
+  // 短事务把文件与初始清理身份串在同一个项目写锁下；OCR/模型仍在事务外。
+  const prepared = await db.$transaction(async tx => {
+    const locked = await tx.project.updateMany({ where: { id: projectId, deletionRequestedAt: null }, data: { contextRevision: { increment: 0 } } });
+    if (!locked.count) throw new AppError("PROJECT_NOT_FOUND", "项目已停用，未保存新附件", 404);
+    await dependencies.beforeWrite?.(tx);
+    const duplicate = await tx.attachment.findFirst({ where: { projectId, sha256 } });
+    if (duplicate) return { stored: null, attachment: duplicate };
+    const stored = await saveFileToStorage(projectId, fileName, buffer);
+    try {
+      const attachment = await tx.attachment.create({ data: { projectId, type: fileType, storageKey: stored.storageKey,
+        fileName, mimeType: safeMimeType, size: stored.size, sha256: stored.sha256, extractionStatus: "PENDING" } });
+      return { stored, attachment };
+    } catch (error) { await deleteAttachmentFile(stored.storageKey); throw error; }
+  });
+  if (!prepared.stored) return { attachment: prepared.attachment, isDuplicate: true, card: null };
+  const stored = prepared.stored;
 
   // 4. 提取文本内容
   let extractedText = "";
@@ -197,11 +216,13 @@ export async function processAttachmentUpload(input: UploadAttachmentInput) {
   let extractionError: string | null = null;
 
   try {
-    if (fileType === "PDF") {
-      extractedText = await extractPdfText(buffer) ?? "";
+    if (dependencies.extractedText !== undefined) {
+      extractedText = dependencies.extractedText ?? "";
+    } else if (fileType === "PDF") {
+      extractedText = await (dependencies.extractPdf ?? extractPdfText)(buffer) ?? "";
     } else if(fileType==="CSV"||fileType==="JSON"){extractedText=new TextDecoder("utf-8",{fatal:true}).decode(buffer);
     } else {
-      extractedText = await extractImageText(safeMimeType, buffer, projectId) ?? "";
+      extractedText = dependencies.allowCloud === false ? "" : await extractImageText(safeMimeType, buffer, () => reserveCloudCall(projectId)) ?? "";
     }
     if (!extractedText) {
       extractionStatus = "NEEDS_OCR";
@@ -218,31 +239,29 @@ export async function processAttachmentUpload(input: UploadAttachmentInput) {
   // 5. 保存 Attachment 实体
   let attachment;
   try {
-    attachment = await db.attachment.create({
+    attachment = await db.$transaction(async tx => {
+      const locked = await tx.project.updateMany({ where: { id: projectId, deletionRequestedAt: null }, data: { contextRevision: { increment: 0 } } });
+      if (!locked.count) throw new AppError("PROJECT_NOT_FOUND", "项目已停用，未发布附件解析结果", 404);
+      const saved = await tx.attachment.update({ where: { id: prepared.attachment.id },
       data: {
-        projectId,
-        type: fileType,
-        storageKey: stored.storageKey,
-        fileName,
-        mimeType:safeMimeType,
-        size: stored.size,
-        sha256: stored.sha256,
         extractedText: extractedText || null,
         extractionStatus,
         extractionError,
       },
-    });
+      });
     // 修订链起点：原始机器提取文本作为 revision 0 保留
     if (extractedText) {
-      await db.attachmentRevision.create({
+      await tx.attachmentRevision.create({
         data: {
-          attachmentId: attachment.id,
+          attachmentId: saved.id,
           revisionIndex: 0,
           text: extractedText,
           source: "EXTRACTION",
         },
       });
     }
+      return saved;
+    });
   } catch (error) {
     await deleteAttachmentFile(stored.storageKey);
     throw error;
@@ -253,7 +272,7 @@ export async function processAttachmentUpload(input: UploadAttachmentInput) {
   if (extractedText && extractionStatus === "SUCCESS" && fileType!=="CSV" && fileType!=="JSON") {
     try {
       const sourceType = fileType === "IMAGE" ? "图片附件" : fileType === "PDF" ? "PDF文档" : "文件附件";
-      card = await processCapture(projectId, `【附件导入：${fileName}】\n${extractedText}`, sourceType);
+      card = await processCapture(projectId, `【附件导入：${fileName}】\n${extractedText}`, sourceType, { allowCloud: dependencies.allowCloud });
 
       // 更新卡片关联 attachmentId
       await db.knowledgeCard.update({
@@ -263,7 +282,7 @@ export async function processAttachmentUpload(input: UploadAttachmentInput) {
     } catch (e) {
       console.warn("Failed to create knowledge card for attachment:", e);
       attachment = await db.attachment.update({
-        where: { id: attachment.id },
+        where: { id: attachment.id, project: { deletionRequestedAt: null } },
         data: {
           extractionStatus: "FAILED",
           extractionError: e instanceof Error ? `Memory ingestion failed: ${e.message}` : "Memory ingestion failed",
@@ -298,10 +317,10 @@ export async function retryAttachmentExtraction(projectId: string, attachmentId:
   const fileType = inferAndValidateFileType(attachment.fileName, attachment.mimeType, buffer);
   let extractedText: string | null = null;
   try {
-    extractedText = fileType === "PDF" ? await extractPdfText(buffer) : fileType==="CSV"||fileType==="JSON" ? new TextDecoder("utf-8",{fatal:true}).decode(buffer) : await extractImageText(attachment.mimeType, buffer, projectId);
+    extractedText = fileType === "PDF" ? await extractPdfText(buffer) : fileType==="CSV"||fileType==="JSON" ? new TextDecoder("utf-8",{fatal:true}).decode(buffer) : await extractImageText(attachment.mimeType, buffer, () => reserveCloudCall(projectId));
   } catch (error) {
     const failed = await db.attachment.update({
-      where: { id: attachment.id },
+      where: { id: attachment.id, project: { deletionRequestedAt: null } },
       data: {
         extractedText: null,
         extractionStatus: "FAILED",
@@ -313,7 +332,7 @@ export async function retryAttachmentExtraction(projectId: string, attachmentId:
 
   if (!extractedText) {
     const pending = await db.attachment.update({
-      where: { id: attachment.id },
+      where: { id: attachment.id, project: { deletionRequestedAt: null } },
       data: {
         extractedText: null,
         extractionStatus: "NEEDS_OCR",
@@ -335,7 +354,7 @@ export async function retryAttachmentExtraction(projectId: string, attachmentId:
     await db.knowledgeCard.update({ where: { id: card.id }, data: { attachmentId: attachment.id } });
   }
   const updated = await db.attachment.update({
-    where: { id: attachment.id },
+    where: { id: attachment.id, project: { deletionRequestedAt: null } },
     data: { extractedText, extractionStatus: "SUCCESS", extractionError: null },
   });
   // 重试提取的文本同样进入修订链，保证历史可追溯

@@ -102,10 +102,12 @@ describe.sequential("SQLite integration", () => {
     await expect(patchResponse.json()).resolves.toMatchObject({ project: { title: "接口已更新项目" } });
     const deleteResponse = await DELETE(new Request(`http://localhost/api/projects/${project.id}`, {
       method: "DELETE",
-      headers: auth.headers,
+      headers: { ...auth.headers, "X-Project-Delete-Confirmation": project.id, "If-Match": (await requireProject(project.id)).updatedAt.toISOString() },
     }), context);
-    expect(deleteResponse.status).toBe(204);
+    expect(deleteResponse.status).toBe(202);
     await expect(requireProject(project.id)).rejects.toMatchObject({ code: "PROJECT_NOT_FOUND" });
+    const { processProjectDeletions } = await import("@/lib/services/projectDeletionService");
+    await processProjectDeletions();
   });
 
   it("touches project activity and returns the complete artifact history", async () => {

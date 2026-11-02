@@ -1,4 +1,4 @@
-import { reserveCloudCall, reserveWorkspaceCloudCall, reserveReviewCloudCall, settleWorkspaceCloudCall, commitWorkspaceDispatch, type WorkspaceBilling, type ReviewBilling } from "@/lib/auth/cloudQuota";
+import { reserveCloudCall, reserveWorkspaceCloudCall, reserveReviewCloudCall, reserveIntakeCloudCall, settleWorkspaceCloudCall, commitWorkspaceDispatch, type WorkspaceBilling, type ReviewBilling, type IntakeBilling } from "@/lib/auth/cloudQuota";
 import { inputTokenBound, stageOutputLimit } from "@/lib/conversation/tokenBudget";
 import { AppError } from "@/lib/api";
 import { artifactCoverageV2, captureFidelityV2 } from "@/lib/agent/specialistPrompts";
@@ -14,7 +14,7 @@ function config() {
 }
 
 export async function chatWithLLMWithMeta(prompt: string | ModelMessage[], projectId?: string, workspace?: WorkspaceBilling, review?: ReviewBilling,
-  task?: { outputTokens: number; jsonOutput: boolean }): Promise<AgentExecutionResult<string>> {
+  task?: { outputTokens: number; jsonOutput: boolean }, intake?: IntakeBilling): Promise<AgentExecutionResult<string>> {
   const startedAt = Date.now();
   const { provider, baseUrl, apiKey, model, timeoutMs } = config();
   const messages = typeof prompt === "string" ? [{ role: "user", content: prompt }] : modelMessagesSchema.parse(prompt);
@@ -24,6 +24,7 @@ export async function chatWithLLMWithMeta(prompt: string | ModelMessage[], proje
     outputTokens: workspace.outputTokens ?? stageOutputLimit(workspace.purpose), provider: `llm:${provider}:${model}` } : undefined;
   if (review) await reserveReviewCloudCall(review);
   else if (billing) await reserveWorkspaceCloudCall(billing);
+  else if (intake) await reserveIntakeCloudCall({ ...intake, provider: intake.provider ?? `llm:${provider}:${model}` });
   else await reserveCloudCall(projectId);
   const requestBody: Record<string, unknown> = {
     max_tokens: billing?.outputTokens ?? task?.outputTokens ?? 2048,
@@ -36,7 +37,7 @@ export async function chatWithLLMWithMeta(prompt: string | ModelMessage[], proje
   if (provider === "deepseek") {
     requestBody.thinking = { type: "disabled" };
   }
-  if (supportsJson && (workspace || review || task?.jsonOutput)) requestBody.response_format = { type: "json_object" };
+  if (supportsJson && (workspace || review || intake || task?.jsonOutput)) requestBody.response_format = { type: "json_object" };
   if (billing) await commitWorkspaceDispatch(billing);
   const response = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
@@ -60,7 +61,7 @@ export async function chatWithLLMWithMeta(prompt: string | ModelMessage[], proje
   const result: AgentExecutionResult<string> = {
     data: content?.trim() ?? "",
     provider: `llm:${provider}:${model}`,
-    status: failure && (workspace || review) ? "FAILED" : "SUCCESS",
+    status: failure && (workspace || review || intake) ? "FAILED" : "SUCCESS",
     fallbackReason: failure,
     finishReason,
     durationMs: Date.now() - startedAt,
@@ -69,7 +70,7 @@ export async function chatWithLLMWithMeta(prompt: string | ModelMessage[], proje
     usageUnknown: usage.inputTokens === null || usage.outputTokens === null,
   };
   if (billing) await settleWorkspaceCloudCall(billing, result);
-  if (!content && !workspace && !review) throw new Error("LLM returned empty content");
+  if (!content && !workspace && !review && !intake) throw new Error("LLM returned empty content");
   return result;
 }
 

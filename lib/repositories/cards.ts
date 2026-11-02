@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import type { CardDraft, CardLink, LinkableCard } from "@/lib/types";
 import { Prisma, type KnowledgeType } from "@/lib/generated/prisma/client";
 import { AppError } from "@/lib/api";
+import { unknownCaptureProcessing, type CaptureProcessing } from "@/lib/captureProcessing";
 import type { KnowledgeCardUpdateInput } from "@/lib/validation/schemas";
 import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateService";
 
@@ -44,6 +45,7 @@ export async function saveCaptureResult(
   input: {
     projectId: string;
     rawText: string;
+    processing?: CaptureProcessing;
     sourceType?: string | null;
     /** 客户端幂等身份；NULL 保持旧调用方可写入。 */
     requestId?: string | null;
@@ -60,11 +62,14 @@ export async function saveCaptureResult(
   const captureId = randomUUID();
   const cardId = randomUUID();
   const save = async (tx: Prisma.TransactionClient) => {
+    const active = await tx.project.updateMany({ where: { id: input.projectId, deletionRequestedAt: null }, data: { contextRevision: { increment: 0 } } });
+    if (!active.count) throw new AppError("PROJECT_NOT_FOUND", "项目已停用，未发布迟到的整理结果", 404);
     await tx.capture.create({
       data: {
         id: captureId,
         projectId: input.projectId,
         rawText: input.rawText,
+        processingJson: input.processing ?? unknownCaptureProcessing,
         sourceType: input.sourceType,
         requestId: input.requestId ?? null,
         requestHash: input.requestHash ?? null,
@@ -97,7 +102,7 @@ export async function saveCaptureResult(
     }
     await tx.project.update({ where: { id: input.projectId }, data: { updatedAt: new Date() } });
     await enqueueImpact(tx,input.projectId,`capture:${captureId}`,[`capture:${captureId}`,`card:${cardId}`]);
-    return { ...card, relations: input.links };
+    return { ...card, relations: input.links, processing: input.processing ?? unknownCaptureProcessing };
   };
   if (client === (db as unknown as Prisma.TransactionClient)) {
     // 默认路径保持原有的独立事务语义

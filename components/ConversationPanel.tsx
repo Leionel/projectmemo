@@ -56,6 +56,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
   const [cloud, setCloud] = useState(false), [reply, setReply] = useState<ConversationMessage | null>(null);
   const [showCloudHelp, setShowCloudHelp] = useState(false);
   const [cloudAvailable, setCloudAvailable] = useState(false), [analysisReady, setAnalysisReady] = useState(false);
+  const [cloudReason, setCloudReason] = useState("未确认云模型资格，当前仅整理项目记录");
   const [r4Available, setR4Available] = useState(false), [investigationMode, setInvestigationMode] = useState<"QUICK" | "STANDARD" | "DEEP">("STANDARD");
   const [calendarWriteAvailable, setCalendarWriteAvailable] = useState(false);
   const [target, setTarget] = useState(selection?.projectId ?? projectId ?? ""), [showPreference, setShowPreference] = useState(false);
@@ -72,7 +73,8 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
   const uiKeys = useRef(new Map<string, { requestId: string; version: number }>());
   useEffect(() => {
     let live = true;
-    void api<{ cloudAvailable: boolean; r4Available?: boolean; calendarWriteAvailable?: boolean }>("/api/conversations/capabilities").then(caps => {
+    void api<{ cloudAvailable: boolean; r4Available?: boolean; calendarWriteAvailable?: boolean; cloud?: { reason: string } }>("/api/conversations/capabilities").then(caps => {
+      if (live) setCloudReason(({ RULE_MODE: "当前使用规则整理，不调用云模型", NOT_CONFIGURED: "云模型配置未完成，当前仅整理项目记录", ACCOUNT_NOT_ELIGIBLE: "当前账号未开通云模型额度", DAILY_QUOTA_EXHAUSTED: "今日云模型额度已用完，当前仅整理项目记录" } as Record<string, string>)[caps.cloud?.reason ?? ""] ?? "当前未确认云模型可用性，仅整理项目记录");
       if (live) { setCloudAvailable(caps.cloudAvailable); setCloud(caps.cloudAvailable); setR4Available(caps.r4Available === true); setCalendarWriteAvailable(caps.calendarWriteAvailable === true); setAnalysisReady(true); }
     }).catch(e => { if (live) setError(e.message); });
     return () => { live = false; };
@@ -364,7 +366,7 @@ function ConversationContent({ projectId, entry, initialConversationId, onUpdate
         </div>}
       </div>
       <button type="submit" className={styles.send + " focus-ring"} disabled={working || !analysisReady || !text.trim()} aria-label="发送"><ArrowUp size={17}/></button></div>
-      <p data-visible={showCloudHelp} className={styles.analysisHint}>{!analysisReady ? "正在确认分析方式…" : !cloudAvailable ? "未配置云模型，当前仅整理项目记录" : cloud ? "发送即允许云模型分析本次授权项目资料，可关闭" : "仅整理项目记录，不调用云模型"}</p>
+      <p data-visible={showCloudHelp} className={styles.analysisHint}>{!analysisReady ? "正在确认分析方式…" : !cloudAvailable ? cloudReason : cloud ? "发送即允许云模型分析本次授权项目资料，可关闭；服务连通性以实际调用为准" : "仅整理项目记录，不调用云模型"}</p>
     </form>}
     {view && showPreference && target && <OverlayPanel label="项目偏好" title="项目偏好" onClose={() => setShowPreference(false)}>
       <FocusPreference key={target} projectId={target} onError={setError}/>

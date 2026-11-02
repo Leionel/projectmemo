@@ -14,6 +14,7 @@ import fs from "node:fs";
 import { db } from "@/lib/db";
 import { createMission, missionDetail, commandMission } from "@/lib/mission/missionService";
 import { runMissionSlice } from "@/lib/mission/runner";
+import { calendarEventProposalSchema } from "@/lib/calendar/contracts";
 import type { Choice } from "@/lib/mission/contracts";
 import { completeCalendarConnection, startCalendarConnection } from "@/lib/services/calendarConnectionService";
 import type { CalendarFetch } from "@/lib/calendar/feishuOAuth";
@@ -26,7 +27,9 @@ const tokenBody = { code: 0, msg: "success", access_token: "w-test-access", expi
 const identityBody = { code: 0, msg: "success", data: { open_id: "ou_write", name: "写入测试", email: "write@example.com" } };
 const calendarBody = { code: 0, msg: "success", data: { has_more: false, calendar_list: [{ calendar_id: "primary_cal", summary: "主日历", type: "primary",
   role: "owner", permissions: "private", is_deleted: false, is_third_party: false }] } };
-const startAt = "2026-11-02T02:00:00Z", endAt = "2026-11-02T02:30:00Z";
+// 正向夹具相对当前时钟，避免自然日推进把成功旅程变成过期日程；负例单独构造过去时间。
+const startMs = Math.floor(Date.now() / 3_600_000) * 3_600_000 + 2 * 86_400_000;
+const startAt = new Date(startMs).toISOString(), endAt = new Date(startMs + 1_800_000).toISOString();
 const ok = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 type WriteConfig = { create?: "ok" | "timeout" | "rate" | "forbidden" | "server" | "missing-id" | "wrong-object"; readback?: "ok" | "missing" | "wrong"; token?: typeof tokenBody };
 function fetcher(config: WriteConfig = {}) {
@@ -85,6 +88,22 @@ async function approve(userId: string, missionId: string, fetchImpl: ReturnType<
 }
 
 describe("CT-10 飞书日历事件写入", () => {
+  it("明确的过去日程仍被拒绝，不产生批准或外部创建", async () => {
+    const { user, project, connection } = await fixture(), f = fetcher();
+    const mission = await createMission(user.id, { projectId: project.id, requestId: crypto.randomUUID(), goal: "核对过期时间边界",
+      missionConstraints: { executionBoundary: "PROPOSE_ACTION", externalWriteProposal: true } });
+    const args = { connectionId: connection.id, title: "不应创建", description: "合成负例", startAt: new Date(Date.now() - 86400000).toISOString(), endAt: new Date(Date.now() - 84600000).toISOString(), timeZone: "Asia/Shanghai" };
+    const parsed = calendarEventProposalSchema.safeParse(args);
+    expect(parsed.success).toBe(false);
+    if (!parsed.success) expect(parsed.error.issues.some(issue => issue.message.includes("过去"))).toBe(true);
+    await runMissionSlice({ id: mission.id, provider: async () => ({ choice: { kind: "tool", tool: "propose_calendar_event", summary: "合成过期负例",
+      args },
+      provider: "TEST_FIXTURE", model: "fixture", protocol: "JSON_CHOICE", usage: { inputTokens: 10, outputTokens: 5 } }), calendar: { fetcher: f as unknown as typeof fetch } });
+    const detail = await missionDetail(user.id, mission.id);
+    expect(detail.error).toMatchObject({ code: "MODEL_PROTOCOL_ERROR" });
+    expect(detail.approvals).toHaveLength(0);
+    expect(f.createCalls()).toBe(0);
+  });
   it("提案不写，批准后才派发并完成原对象回读", async () => {
     const { user, project, connection } = await fixture(), f = fetcher();
     const mission = await proposed(user.id, project.id, connection.id, f);

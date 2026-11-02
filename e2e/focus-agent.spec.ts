@@ -102,13 +102,14 @@ test("Focus defaults to available cloud analysis, explains scope and preserves m
   await expect(cloud).not.toBeChecked();
 });
 
-test("Focus explains local mode when the backend has no cloud model", async ({ page }) => {
+test("Focus explains rule mode without claiming cloud model health", async ({ page }) => {
   const session = (await page.context().cookies()).find(c => c.name === "pm_session")!;
   const caps = await page.request.get("/api/conversations/capabilities", { headers: { Authorization: "Bearer " + session.value } });
   expect(caps.ok()).toBe(true);
   const capabilities = await caps.json();
   test.skip(!capabilities.enabled, "Focus is off in legacy regression");
-  await page.route("**/api/conversations/capabilities", route => route.fulfill({ json: { ...capabilities, cloudAvailable: false } }));
+  expect(capabilities.cloudAvailable).toBe(false);
+  expect(capabilities.cloud).toMatchObject({ reason: "RULE_MODE", networkHealth: "UNTESTED" });
   await page.goto("/focus");
   const panel = page.getByRole("region", { name: "问忆程", exact: true });
   await panel.getByRole("button", { name: "新讨论", exact: true }).click();
@@ -116,7 +117,7 @@ test("Focus explains local mode when the backend has no cloud model", async ({ p
   await expect(cloud).not.toBeChecked();
   await expect(cloud).toBeDisabled();
   await cloud.hover();
-  await expect(panel.getByText("未配置云模型，当前仅整理项目记录")).toBeVisible();
+  await expect(panel.getByText("当前使用规则整理，不调用云模型")).toBeVisible();
 });
 test("Focus discussion creates a real Action, reads it back, and survives project navigation", async ({ page }) => {
   const session = (await page.context().cookies()).find(c => c.name === "pm_session");

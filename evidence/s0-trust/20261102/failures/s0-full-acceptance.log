@@ -1,0 +1,420 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-s0
+
+ ❯ tests/calendarEventExtensions.test.ts (10 tests | 10 failed) 22852ms
+     × 参与人通过独立接口添加并回读核对，附件随创建写入并回读 692ms
+     × 参与人与冻结提案不一致时删除已创建日程作为补偿 172ms
+     × 批量创建 2 个日程，逐项回读并计入外部写入预算 169ms
+     × 第二个日程被拒绝时删除已创建日程，并记录补偿 160ms
+     × 第二个结果未知时保持 UNKNOWN，但删除已确认创建的第一个日程 166ms
+   × 首个日程已创建后撤权，不再派发第二次创建或补偿删除 161ms
+   × 补偿前用户已修改日程，保留对象且不发送DELETE 168ms
+   × 创建请求await中用户暂停，迟到创建身份保留但不再添加参与人/继续批次 20011ms
+   × 长描述含服务端标记仍完整回读，取消的外部对象不算创建成功 438ms
+   × 十项批次经原预算复核后纵向完成，每个HTTP和外部创建累计计量 695ms
+ ❯ tests/calendarWrite.test.ts (10 tests | 9 failed) 2072ms
+     × 提案不写，批准后才派发并完成原对象回读 599ms
+     × 未批准不入队；批准后重复确认不能产生第二次派发 191ms
+     × 只读连接不能提出写入，缺提案批准也不写 170ms
+     × 批准前撤权/目标变化不派发；时间过期拒绝 164ms
+     × 超时或5xx保持UNKNOWN，第二次只查询原标记不重发 156ms
+     × 2xx但对象身份/内容不匹配不确认成功 152ms
+     × 明确拒绝是已知失败，不产生 UNKNOWN 重试 145ms
+     × 创建后回读缺失仍保持 UNKNOWN，不自动重发 175ms
+     × 取消委托不伪造外部撤销，也不再派发 156ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 19 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/calendarEventExtensions.test.ts > 单日程参与人与附件 > 参与人通过独立接口添加并回读核对，附件随创建写入并回读
+AssertionError: expected undefined to be truthy
+
+- Expected:
+true
+
++ Received:
+undefined
+
+ ❯ approve tests/calendarEventExtensions.test.ts:99:20
+     98|   return mission;
+     99| }
+    100| async function approve(userId: string, missionId: string, fetchImpl: R…
+       |                 ^
+    101|   const detail = await missionDetail(userId, missionId), approval = de…
+    102|   expect(approval).toBeTruthy();
+ ❯ tests/calendarEventExtensions.test.ts:113:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/19]⎯
+
+ FAIL  tests/calendarEventExtensions.test.ts > 单日程参与人与附件 > 参与人与冻结提案不一致时删除已创建日程作为补偿
+AssertionError: expected undefined to be truthy
+
+- Expected:
+true
+
++ Received:
+undefined
+
+ ❯ approve tests/calendarEventExtensions.test.ts:99:20
+     98|   return mission;
+     99| }
+    100| async function approve(userId: string, missionId: string, fetchImpl: R…
+       |                 ^
+    101|   const detail = await missionDetail(userId, missionId), approval = de…
+    102|   expect(approval).toBeTruthy();
+ ❯ tests/calendarEventExtensions.test.ts:129:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/19]⎯
+
+ FAIL  tests/calendarEventExtensions.test.ts > 批量日程与补偿 > 批量创建 2 个日程，逐项回读并计入外部写入预算
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ tests/calendarEventExtensions.test.ts:147:66
+    145|
+    146|     const mission = await proposed(user.id, project.id, connection.id,…
+    147|       { title: "第一次讨论", description: "", startAt, endAt, timeZone: "As…
+       |                                                                  ^
+    148|       { title: "第二次讨论", description: "", startAt: secondStart, endAt: …
+    149|     ] }, "propose_calendar_events");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/19]⎯
+
+ FAIL  tests/calendarEventExtensions.test.ts > 批量日程与补偿 > 第二个日程被拒绝时删除已创建日程，并记录补偿
+AssertionError: expected undefined to be truthy
+
+- Expected:
+true
+
++ Received:
+undefined
+
+ ❯ approve tests/calendarEventExtensions.test.ts:99:20
+     98|   return mission;
+     99| }
+    100| async function approve(userId: string, missionId: string, fetchImpl: R…
+       |                 ^
+    101|   const detail = await missionDetail(userId, missionId), approval = de…
+    102|   expect(approval).toBeTruthy();
+ ❯ tests/calendarEventExtensions.test.ts:163:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/19]⎯
+
+ FAIL  tests/calendarEventExtensions.test.ts > 批量日程与补偿 > 第二个结果未知时保持 UNKNOWN，但删除已确认创建的第一个日程
+AssertionError: expected undefined to be truthy
+
+- Expected:
+true
+
++ Received:
+undefined
+
+ ❯ approve tests/calendarEventExtensions.test.ts:99:20
+     98|   return mission;
+     99| }
+    100| async function approve(userId: string, missionId: string, fetchImpl: R…
+       |                 ^
+    101|   const detail = await missionDetail(userId, missionId), approval = de…
+    102|   expect(approval).toBeTruthy();
+ ❯ tests/calendarEventExtensions.test.ts:176:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/19]⎯
+
+ FAIL  tests/calendarEventExtensions.test.ts > 首个日程已创建后撤权，不再派发第二次创建或补偿删除
+AssertionError: expected undefined to be truthy
+
+- Expected:
+true
+
++ Received:
+undefined
+
+ ❯ approve tests/calendarEventExtensions.test.ts:99:20
+     98|   return mission;
+     99| }
+    100| async function approve(userId: string, missionId: string, fetchImpl: R…
+       |                 ^
+    101|   const detail = await missionDetail(userId, missionId), approval = de…
+    102|   expect(approval).toBeTruthy();
+ ❯ tests/calendarEventExtensions.test.ts:193:2
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/19]⎯
+
+ FAIL  tests/calendarEventExtensions.test.ts > 补偿前用户已修改日程，保留对象且不发送DELETE
+AssertionError: expected undefined to be truthy
+
+- Expected:
+true
+
++ Received:
+undefined
+
+ ❯ approve tests/calendarEventExtensions.test.ts:99:20
+     98|   return mission;
+     99| }
+    100| async function approve(userId: string, missionId: string, fetchImpl: R…
+       |                 ^
+    101|   const detail = await missionDetail(userId, missionId), approval = de…
+    102|   expect(approval).toBeTruthy();
+ ❯ tests/calendarEventExtensions.test.ts:206:2
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/19]⎯
+
+ FAIL  tests/calendarEventExtensions.test.ts > 创建请求await中用户暂停，迟到创建身份保留但不再添加参与人/继续批次
+Error: Test timed out in 20000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/calendarEventExtensions.test.ts:209:1
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/19]⎯
+
+ FAIL  tests/calendarEventExtensions.test.ts > 长描述含服务端标记仍完整回读，取消的外部对象不算创建成功
+AssertionError: expected undefined to be truthy
+
+- Expected:
+true
+
++ Received:
+undefined
+
+ ❯ approve tests/calendarEventExtensions.test.ts:99:20
+     98|   return mission;
+     99| }
+    100| async function approve(userId: string, missionId: string, fetchImpl: R…
+       |                 ^
+    101|   const detail = await missionDetail(userId, missionId), approval = de…
+    102|   expect(approval).toBeTruthy();
+ ❯ tests/calendarEventExtensions.test.ts:226:176
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/19]⎯
+
+ FAIL  tests/calendarEventExtensions.test.ts > 十项批次经原预算复核后纵向完成，每个HTTP和外部创建累计计量
+AssertionError: expected undefined to be truthy
+
+- Expected:
+true
+
++ Received:
+undefined
+
+ ❯ approve tests/calendarEventExtensions.test.ts:99:20
+     98|   return mission;
+     99| }
+    100| async function approve(userId: string, missionId: string, fetchImpl: R…
+       |                 ^
+    101|   const detail = await missionDetail(userId, missionId), approval = de…
+    102|   expect(approval).toBeTruthy();
+ ❯ tests/calendarEventExtensions.test.ts:240:2
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/19]⎯
+
+ FAIL  tests/calendarWrite.test.ts > CT-10 飞书日历事件写入 > 提案不写，批准后才派发并完成原对象回读
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ tests/calendarWrite.test.ts:92:66
+     90|   it("提案不写，批准后才派发并完成原对象回读", async () => {
+     91|     const { user, project, connection } = await fixture(), f = fetcher…
+     92|     const mission = await proposed(user.id, project.id, connection.id,…
+       |                                                                  ^
+     93|     expect(f.createCalls()).toBe(0);
+     94|     expect((await missionDetail(user.id, mission.id)).approvals).toHav…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/19]⎯
+
+ FAIL  tests/calendarWrite.test.ts > CT-10 飞书日历事件写入 > 未批准不入队；批准后重复确认不能产生第二次派发
+AssertionError: expected undefined to be truthy
+
+- Expected:
+true
+
++ Received:
+undefined
+
+ ❯ approve tests/calendarWrite.test.ts:81:20
+     79| }
+     80| const approvalBody = (proposalHash: string) => ({ requestId: "approve-…
+     81| async function approve(userId: string, missionId: string, fetchImpl: R…
+       |                    ^
+     82|   const detail = await missionDetail(userId, missionId), approval = de…
+     83|   expect(approval).toBeTruthy();
+ ❯ tests/calendarWrite.test.ts:108:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/19]⎯
+
+ FAIL  tests/calendarWrite.test.ts > CT-10 飞书日历事件写入 > 只读连接不能提出写入，缺提案批准也不写
+AssertionError: expected { code: 'MODEL_PROTOCOL_ERROR', …(5) } to match object { Object (code) }
+(15 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "code": "CALENDAR_WRITE_SCOPE_MISSING",
++   "code": "MODEL_PROTOCOL_ERROR",
+  }
+
+ ❯ tests/calendarWrite.test.ts:129:26
+    127|     const decision = (choice: Choice) => ({ choice, provider: "TEST_FI…
+    128|     await runMissionSlice({ id: mission.id, provider: async () => deci…
+    129|       args: { connectionId: read.id, title: "不应写入", description: "", s…
+       |                          ^
+    130|     const detail = await missionDetail(user.id, mission.id);
+    131|     expect(detail.error).toMatchObject({ code: "CALENDAR_WRITE_SCOPE_M…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/19]⎯
+
+ FAIL  tests/calendarWrite.test.ts > CT-10 飞书日历事件写入 > 批准前撤权/目标变化不派发；时间过期拒绝
+AssertionError: expected undefined to be truthy
+
+- Expected:
+true
+
++ Received:
+undefined
+
+ ❯ approve tests/calendarWrite.test.ts:81:20
+     79| }
+     80| const approvalBody = (proposalHash: string) => ({ requestId: "approve-…
+     81| async function approve(userId: string, missionId: string, fetchImpl: R…
+       |                    ^
+     82|   const detail = await missionDetail(userId, missionId), approval = de…
+     83|   expect(approval).toBeTruthy();
+ ❯ tests/calendarWrite.test.ts:137:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/19]⎯
+
+ FAIL  tests/calendarWrite.test.ts > CT-10 飞书日历事件写入 > 超时或5xx保持UNKNOWN，第二次只查询原标记不重发
+AssertionError: expected undefined to be truthy
+
+- Expected:
+true
+
++ Received:
+undefined
+
+ ❯ approve tests/calendarWrite.test.ts:81:20
+     79| }
+     80| const approvalBody = (proposalHash: string) => ({ requestId: "approve-…
+     81| async function approve(userId: string, missionId: string, fetchImpl: R…
+       |                    ^
+     82|   const detail = await missionDetail(userId, missionId), approval = de…
+     83|   expect(approval).toBeTruthy();
+ ❯ tests/calendarWrite.test.ts:145:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/19]⎯
+
+ FAIL  tests/calendarWrite.test.ts > CT-10 飞书日历事件写入 > 2xx但对象身份/内容不匹配不确认成功
+AssertionError: expected undefined to be truthy
+
+- Expected:
+true
+
++ Received:
+undefined
+
+ ❯ approve tests/calendarWrite.test.ts:81:20
+     79| }
+     80| const approvalBody = (proposalHash: string) => ({ requestId: "approve-…
+     81| async function approve(userId: string, missionId: string, fetchImpl: R…
+       |                    ^
+     82|   const detail = await missionDetail(userId, missionId), approval = de…
+     83|   expect(approval).toBeTruthy();
+ ❯ tests/calendarWrite.test.ts:160:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/19]⎯
+
+ FAIL  tests/calendarWrite.test.ts > CT-10 飞书日历事件写入 > 明确拒绝是已知失败，不产生 UNKNOWN 重试
+AssertionError: expected undefined to be truthy
+
+- Expected:
+true
+
++ Received:
+undefined
+
+ ❯ approve tests/calendarWrite.test.ts:81:20
+     79| }
+     80| const approvalBody = (proposalHash: string) => ({ requestId: "approve-…
+     81| async function approve(userId: string, missionId: string, fetchImpl: R…
+       |                    ^
+     82|   const detail = await missionDetail(userId, missionId), approval = de…
+     83|   expect(approval).toBeTruthy();
+ ❯ tests/calendarWrite.test.ts:169:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/19]⎯
+
+ FAIL  tests/calendarWrite.test.ts > CT-10 飞书日历事件写入 > 创建后回读缺失仍保持 UNKNOWN，不自动重发
+AssertionError: expected undefined to be truthy
+
+- Expected:
+true
+
++ Received:
+undefined
+
+ ❯ approve tests/calendarWrite.test.ts:81:20
+     79| }
+     80| const approvalBody = (proposalHash: string) => ({ requestId: "approve-…
+     81| async function approve(userId: string, missionId: string, fetchImpl: R…
+       |                    ^
+     82|   const detail = await missionDetail(userId, missionId), approval = de…
+     83|   expect(approval).toBeTruthy();
+ ❯ tests/calendarWrite.test.ts:179:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/19]⎯
+
+ FAIL  tests/calendarWrite.test.ts > CT-10 飞书日历事件写入 > 取消委托不伪造外部撤销，也不再派发
+TypeError: Cannot read properties of undefined (reading 'proposalHash')
+ ❯ tests/calendarWrite.test.ts:190:86
+    188|     const { user, project, connection } = await fixture(), f = fetcher…
+    189|     const mission = await proposed(user.id, project.id, connection.id,…
+    190|     const detail = await missionDetail(user.id, mission.id), approval …
+       |                                                                                      ^
+    191|     const current = await db.agentMission.findUniqueOrThrow({ where: {…
+    192|     await commandMission(user.id, mission.id, "approval", { ...approva…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/19]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+AssertionError: expected undefined to be truthy
+ ❯ approve tests/calendarEventExtensions.test.ts:99:20
+     98|   return mission;
+     99| }
+    100| async function approve(userId: string, missionId: string, fetchImpl: R…
+       |                 ^
+    101|   const detail = await missionDetail(userId, missionId), approval = de…
+    102|   expect(approval).toBeTruthy();
+ ❯ process.processTicksAndRejections node:internal/process/task_queues:104:5
+
+This error originated in "tests/calendarEventExtensions.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "创建请求await中用户暂停，迟到创建身份保留但不再添加参与人/继续批次". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  2 failed | 192 passed (194)
+      Tests  19 failed | 1466 passed (1485)
+     Errors  1 error
+   Start at  10:47:56
+   Duration  883.73s (transform 19.17s, setup 0ms, import 236.96s, tests 551.25s, environment 35.60s)
+

@@ -1,0 +1,64 @@
+
+> projectmemo@0.1.0 harmony:test
+> node scripts/harmony-test.ts
+
+> hvigor [32mUP-TO-DATE :entry:default@PreBuild...  [39m
+> hvigor [32mFinished :entry:default@CreateModuleInfo... after 2 ms [39m
+> hvigor [32mFinished :entry:default@CreateBuildProfile... after 8 ms [39m
+> hvigor [32mFinished :entry:default@PreCheckSyscap... after 1 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@GenerateUnitTestTemplate...  [39m
+> hvigor [32mFinished :entry:default@GeneratePkgContextInfo... after 22 ms [39m
+> hvigor [32mFinished :entry:default@MergeProfile... after 15 ms [39m
+> hvigor [32mFinished :entry:default@ProcessRouterMap... after 11 ms [39m
+> hvigor [32mFinished :entry:default@ProcessShareConfig... after 8 ms [39m
+> hvigor [32mFinished :entry:default@ProcessStartupConfig... after 6 ms [39m
+> hvigor [32mFinished :entry:default@ProcessProfile... after 213 ms [39m
+> hvigor [32mFinished :entry:default@GenerateLoaderJson... after 64 ms [39m
+> hvigor [32mFinished :entry:default@UnitTestProcessProfile... after 8 ms [39m
+> hvigor [32mFinished :entry:default@ProcessResource... after 15 ms [39m
+> hvigor [32mFinished :entry:default@CompileResource... after 468 ms [39m
+> hvigor [32mFinished :entry:default@ReplaceUnitTestIndexFile... after 8 ms [39m
+> hvigor [32mFinished :entry:default@BuildUnitTestHook... after 1 ms [39m
+> hvigor WARN: WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/entryability/EntryAbility.ets:35:12
+ 'registerFont' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:276:25
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:277:34
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:278:28
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:29:25
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:15
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:57
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:78
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:111
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:67:38
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:67:59
+ Function may throw exceptions. Special handling is required.
+
+
+> hvigor [32mFinished :entry:default@UnitTestArkTS... after 15 s 686 ms [39m
+> hvigor [32mWindows_NT[39m
+[32m[2026-11-02T09:54:39.754] [INFO] default - [39mFinished write html report
+> hvigor [32mFinished :entry:default@GenerateUnitTestResult... after 5 s 204 ms [39m
+> hvigor [32mFinished :entry:test... after 1 ms [39m
+> hvigor [32mBUILD SUCCESSFUL in 36 s 9 ms [39m
+[32m[2026-11-02T09:54:39.979] [INFO] default - [39mFinished file written successfully
+
+[harmony-test] Tests run: 90, Failure: 0, Error: 0, Pass: 90, Ignore: 0

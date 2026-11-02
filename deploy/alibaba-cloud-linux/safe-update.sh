@@ -55,6 +55,20 @@ size_build_memory() {
   fi
   printf '构建堆上限保持 %s MiB。\n' "$BUILD_HEAP_MB"
 }
+check_build_swap_policy() {
+  local available_mb relative policy_file
+  available_mb=$(awk '/^MemAvailable:/{printf "%.0f", $2/1024; exit}' "$1")
+  [[ "$available_mb" =~ ^[0-9]+$ ]] || { echo '无法核验构建物理内存，尚未停服'; return 1; }
+  if (( available_mb >= BUILD_HEAP_MB + 1024 )); then return 0; fi
+  relative=$(awk -F: '$2=="memory" {print $3}' "$3")
+  policy_file="$4${relative}/memory.swappiness"
+  if [[ -z "$relative" || ! -r "$2" || ! -r "$policy_file" ]]; then
+    echo '本次构建依赖swap，但无法核验当前换页策略；尚未停服。'; return 1
+  fi
+  if [[ $(cat "$2") == 0 || $(cat "$policy_file") == 0 ]]; then
+    echo '本次构建依赖swap，但系统或当前内存组的swappiness为0；尚未停服。请使用临时调整并在结束后恢复策略的更新命令。'; return 1
+  fi
+}
 health() {
   local release=$1 response
   for attempt in {1..60}; do
@@ -123,6 +137,7 @@ PREVIOUS=$(as_app git -C "$APP" rev-parse HEAD)
 as_app git -C "$APP" merge-base --is-ancestor "$PREVIOUS" "$TARGET"
 if [[ "$PREVIOUS" == "$TARGET" ]]; then health "$TARGET"; echo '已经是目标版本'; exit 0; fi
 check_build_memory /proc/meminfo
+check_build_swap_policy /proc/meminfo /proc/sys/vm/swappiness <(as_app cat /proc/self/cgroup) /sys/fs/cgroup/memory
 PREVIOUS_HEALTH=$(curl -fsS --max-time 5 http://127.0.0.1:4400/health | "$NODE_BIN/node" -e 'let s="";process.stdin.on("data",x=>s+=x);process.stdin.on("end",()=>{const h=JSON.parse(s);if(h.status!=="ok"||!h.release)process.exit(1);console.log(h.release)})')
 test ! -e "$BACKUP"
 install -d -o projectmemo -g projectmemo -m 700 "$BACKUP"

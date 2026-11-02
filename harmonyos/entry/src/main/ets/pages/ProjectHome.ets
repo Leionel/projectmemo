@@ -7,6 +7,7 @@ import { EvidenceAssessment, evidenceAssessmentText } from '../models/Copilot';
 import router from '@ohos.router';
 import { FocusAgentLauncher } from '../components/FocusAgentLauncher';
 import promptAction from '@ohos.promptAction';
+import { handoffIntentExpired } from '../common/MissionWidgetContract';
 import pasteboard from '@ohos.pasteboard';
 import { photoAccessHelper } from '@kit.MediaLibraryKit';
 import { picker } from '@kit.CoreFileKit';
@@ -410,8 +411,26 @@ struct ProjectHome {
     const missionId = AppStorage.get<string>('pendingMissionId') ?? '';
     const missionProjectId = AppStorage.get<string>('pendingMissionProjectId') ?? '';
     if (missionId !== '' && missionProjectId !== '') {
+      const questionId = AppStorage.get<string>('pendingQuestionId') ?? '';
+      const approvalId = AppStorage.get<string>('pendingApprovalId') ?? '';
+      const sourceId = AppStorage.get<string>('pendingSourceId') ?? '';
+      const handoffExpiresAt = AppStorage.get<string>('pendingHandoffExpiresAt') ?? '';
       AppStorage.setOrCreate<string>('pendingMissionId', ''); AppStorage.setOrCreate<string>('pendingMissionProjectId', '');
-      router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: missionProjectId, missionId } }); return;
+      AppStorage.setOrCreate<string>('pendingQuestionId', ''); AppStorage.setOrCreate<string>('pendingApprovalId', '');
+      AppStorage.setOrCreate<string>('pendingSourceId', ''); AppStorage.setOrCreate<string>('pendingMissionVersion', '');
+      AppStorage.setOrCreate<string>('pendingHandoffExpiresAt', '');
+      const expiry = handoffExpiresAt === '' ? 0 : Number(handoffExpiresAt);
+      // 过期定位意图不打开旧问题；用户回到当前原委托重新核对。
+      const expired = handoffIntentExpired(expiry, Date.now());
+      if (expired) {
+        promptAction.showToast({ message: '原卡片已过期，已回到当前委托；旧问题不会被当成新问题' });
+      }
+      router.pushUrl({ url: 'pages/MissionDetail', params: {
+        projectId: missionProjectId, missionId,
+        questionId: expired ? '' : questionId,
+        approvalId: expired ? '' : approvalId,
+        sourceId: expired ? '' : sourceId
+      } }); return;
     }
     const targetProjectId = AppStorage.get<string>('notificationProjectId') ?? '';
     const targetInterventionId = AppStorage.get<string>('notificationInterventionId') ?? '';
@@ -2027,7 +2046,7 @@ struct ProjectHome {
       this.rawText = '';
       this.captureRequestId = '';
       await DeviceIdentity.clearCaptureDraft(this.captureDraftScope());
-      promptAction.showToast({ message: '已归档并生成记忆卡片' });
+      promptAction.showToast({ message: this.memoryService.captureModeLabel(saved) });
       await this.loadAllData();
     } catch (e) {
       if (e instanceof ApiError) {
@@ -4392,6 +4411,7 @@ if (this.attachmentSearchOpen) {
                     .fontSize(PMFontSize.BODY)
                     .fontColor(PMColors.INK_PRIMARY)
                   Text(`来源: ${card.capture.sourceType ?? '随手记录'}`)
+                  Text(this.memoryService.captureModeLabel(card)).fontSize(12).fontColor(PMColors.INK_SECONDARY)
                     .fontSize(PMFontSize.CAPTION)
                     .fontColor(PMColors.INK_TERTIARY)
                     .margin({ top: PMSpacing.XS })
@@ -6485,3 +6505,5 @@ if (this.attachmentSearchOpen) {
     })
   }
 }
+
+

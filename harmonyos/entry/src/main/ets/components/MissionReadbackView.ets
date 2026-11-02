@@ -1,7 +1,7 @@
 import { EvidenceReviewReceipt } from '../models/EvidenceFit';
 import { materialUseSummary } from '../common/MaterialUseContract';
 import router from '@ohos.router';
-import { MissionReadback, MissionReadTarget, ReadbackAdoption, ReadbackAction, ReadbackMaterial, ReadbackMaterialFact } from '../models/MissionReadback';
+import { MissionReadback, MissionReadTarget, ReadbackAdoption, ReadbackAction, ReadbackMaterial, ReadbackMaterialFact, ReadbackProgressClass } from '../models/MissionReadback';
 import { MissionBlock } from '../models/Mission';
 import { MissionService } from '../services/MissionService';
 import { SessionStore } from '../services/SessionStore';
@@ -55,11 +55,11 @@ export struct MissionReadbackView {
     Row({ space: 8 }) {
       Text(label).fontSize(13).fontColor(PMColors.INK_SECONDARY).layoutWeight(1)
       if (open) { Text('收起 ⌃').fontSize(12).fontColor(PMColors.BRAND) }
-      else { Text(`${value} 条 ›`).fontSize(12).fontColor(PMColors.BRAND) }
+      else { Text(value === '' ? '展开 ›' : `${value} 条 ›`).fontSize(12).fontColor(PMColors.BRAND) }
     }.width('100%').height(44).alignItems(VerticalAlign.Center)
       .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
       .onClick(() => { onToggle(); })
-      .accessibilityText(`${label} ${value} 条，展开查看`)
+      .accessibilityText(`${label}${value === '' ? '' : ` ${value} 条`}，${open ? '收起' : '展开查看'}`)
   }
   build() {
     Column({ space: 8 }) {
@@ -109,6 +109,37 @@ export struct MissionReadbackView {
             }, (a: ReadbackAction) => a.id)
           }
         }
+        if (this.data.reviewProgress !== undefined && this.data.reviewProgress.classes.length > 0) {
+          this.SummaryRow('进展依据', `${this.data.reviewProgress.classes.length}`, (): void => { this.showSection = this.showSection === 'progress' ? '' : 'progress'; }, this.showSection === 'progress')
+          if (this.showSection === 'progress') {
+            ForEach(this.data.reviewProgress.classes, (item: ReadbackProgressClass) => {
+              Column({ space: 2 }) {
+                Text(`${item.label}：${item.count}`).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_PRIMARY)
+                Text(item.note).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+              }.width('100%').alignItems(HorizontalAlign.Start).padding(8)
+            }, (item: ReadbackProgressClass) => item.key)
+            Text('这是原步骤、草稿核对、行动与回执的投影；工具成功或用户说完成都不等于现实目标已达成。')
+              .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+          }
+        }
+        if (this.data.resourceUsage !== undefined) {
+          this.SummaryRow('本次用量', '', (): void => { this.showSection = this.showSection === 'usage' ? '' : 'usage'; }, this.showSection === 'usage')
+          if (this.showSection === 'usage') {
+            Text(this.data.resourceUsage.summary).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_PRIMARY)
+            Text(`已记录输入 ${this.data.resourceUsage.inputTokens ?? '待核对'} token · 输出 ${this.data.resourceUsage.outputTokens ?? '待核对'} token`).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
+            Text(this.data.resourceUsage.coverageNote).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
+            Text(this.data.resourceUsage.costNote).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_PRIMARY)
+            if (this.data.callCoverage !== undefined) {
+              Text(this.data.callCoverage.summary).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_PRIMARY)
+              ForEach(this.data.callCoverage.notes, (note: string) => {
+                Text(note).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+              }, (note: string, index: number) => `call-note-${index}`)
+              Text(this.data.callCoverage.inspected.truncated
+                ? `已检查最近 ${this.data.callCoverage.inspected.limit} 条回执，计数是下界，不是完整账单。`
+                : '已核对当前委托已返回的调用回执；费用仍未知。').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+            }
+          }
+        }
         if (this.data.evidenceReviews && this.data.evidenceReviews!.items.length > 0) {
           ForEach(this.data.evidenceReviews!.items, (review: EvidenceReviewReceipt) => {
             Column({ space: PMSpacing.SM }) {
@@ -153,3 +184,5 @@ export struct MissionReadbackView {
     }.width('100%').alignItems(HorizontalAlign.Start).padding(12).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(12)
   }
 }
+
+

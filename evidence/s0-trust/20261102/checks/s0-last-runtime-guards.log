@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/s0ProjectDeletion.test.ts tests/s0WorkerIdentity.test.ts tests/ux3WorkerCycle.test.ts
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-s0
+
+
+ Test Files  3 passed (3)
+      Tests  11 passed (11)
+   Start at  11:27:47
+   Duration  5.68s (transform 2.21s, setup 0ms, import 438ms, tests 4.28s, environment 0ms)
+

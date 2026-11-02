@@ -49,19 +49,10 @@ export async function bindRefs(tx: Tx, conversationId: string, refs: Conversatio
   }
   return output;
 }
-export async function createConversation(actor: ConversationActor, raw: unknown) {
-  await assertSession(actor);
+export async function createConversationInTx(actor: ConversationActor, raw: unknown, tx: Tx) {
   const input = conversationCreateSchema.parse(raw), hash = jsonHash(input);
-  if (input.entry) return openConversationEntry(actor, input);
-  if (input.projectId) await assertProject(actor, input.projectId);
-  const old = await db.conversation.findUnique({ where: { ownerUserId_createRequestId: { ownerUserId: actor.userId, createRequestId: input.requestId } } });
-  if (old) {
-    if (old.createInputHash !== hash) throw new AppError("REQUEST_ID_REUSED", "请求编号已用于另一段讨论", 409);
-    await ownedConversation(actor, old.id);
-    return { id: old.id };
-  }
-  try {
-    return await db.$transaction(async tx => {
+  if (input.entry) throw new AppError("INVALID_ENTRY", "入口接续请使用原入口服务", 422);
+
       await tx.authSession.updateMany({ where: { id: actor.sessionId, userId: actor.userId }, data: { id: actor.sessionId } });
       await assertSession(actor, tx);
       if (await tx.conversationEntryRequest.findUnique({ where: { ownerUserId_requestId: { ownerUserId: actor.userId, requestId: input.requestId } } }))
@@ -78,7 +69,20 @@ export async function createConversation(actor: ConversationActor, raw: unknown)
         focusJson: json({ projectId: input.projectId ?? null }) } });
       if (input.projectId) await tx.conversationProject.create({ data: { conversationId: c.id, projectId: input.projectId } });
       return { id: c.id };
-    });
+}
+export async function createConversation(actor: ConversationActor, raw: unknown) {
+  await assertSession(actor);
+  const input = conversationCreateSchema.parse(raw), hash = jsonHash(input);
+  if (input.entry) return openConversationEntry(actor, input);
+  if (input.projectId) await assertProject(actor, input.projectId);
+  const old = await db.conversation.findUnique({ where: { ownerUserId_createRequestId: { ownerUserId: actor.userId, createRequestId: input.requestId } } });
+  if (old) {
+    if (old.createInputHash !== hash) throw new AppError("REQUEST_ID_REUSED", "请求编号已用于另一段讨论", 409);
+    await ownedConversation(actor, old.id);
+    return { id: old.id };
+  }
+  try {
+    return await db.$transaction(tx => createConversationInTx(actor, input, tx));
   } catch (error) {
     if ((error as { code?: string }).code !== "P2002") throw error;
     const existing = await db.conversation.findUniqueOrThrow({ where: { ownerUserId_createRequestId: {

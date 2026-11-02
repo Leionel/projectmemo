@@ -53,13 +53,28 @@ describe("ECS update script controlled rollback (no ECS, sudo, database or servi
     }
   });
   it("both scripts pass bash syntax and build precedes migration, health precedes Worker", () => {
-    for (const file of ["safe-update.sh", "verify-p0a.sh"]) {
+    for (const file of ["safe-update.sh", "safe-update-with-swap.sh", "verify-p0a.sh"]) {
       expect(spawnSync(bash, ["-n", `deploy/alibaba-cloud-linux/${file}`], { encoding: "utf8" }).status).toBe(0);
     }
     expect(script.indexOf('npm run build -- --webpack')).toBeLessThan(script.indexOf('npm exec prisma -- migrate deploy'));
     expect(script.lastIndexOf('health "$TARGET"')).toBeLessThan(script.lastIndexOf('systemctl start projectmemo-mission-worker'));
     expect(script.indexOf('check_build_memory /proc/meminfo')).toBeLessThan(script.indexOf('STOPPED=1'));
     expect(script).toContain('NODE_OPTIONS="--max-old-space-size=$BUILD_HEAP_MB"');
+  });
+  it.each([["exit 0", 0], ["exit 43", 43], ["kill -TERM $$", 143]])("临时换页策略包装器在 %s 后恢复原值并保留退出码", (command, expected) => {
+    const wrapper = fs.readFileSync("deploy/alibaba-cloud-linux/safe-update-with-swap.sh", "utf8");
+    const cleanup = wrapper.slice(wrapper.indexOf("cleanup() {"), wrapper.indexOf('sudo -H -u projectmemo git'));
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), "pm-swap-restore-")); temporary.push(directory);
+    const group = path.join(directory, "group"), vm = path.join(directory, "vm"), update = path.join(directory, "update.sh");
+    fs.writeFileSync(group, "60"); fs.writeFileSync(vm, "60"); fs.writeFileSync(update, "fixture");
+    const mock = 'sysctl() { if [[ "$1" == -q ]]; then printf "0\\n" > "$VM_FILE"; else cat "$VM_FILE"; fi; }';
+    const result = spawnSync(bash, ["--noprofile", "--norc", "-c", `set -Eeuo pipefail\n${mock}\n${cleanup}\n${command}`], {
+      encoding: "utf8", env: { ...process.env, OLD_CG: "0", OLD_VM: "0", CG_FILE: group.replaceAll("\\", "/"), VM_FILE: vm.replaceAll("\\", "/"), UPDATE_SCRIPT: update.replaceAll("\\", "/") },
+    });
+    expect(result.status, result.stderr).toBe(Number(expected));
+    expect(fs.readFileSync(group, "utf8").trim()).toBe("0");
+    expect(fs.readFileSync(vm, "utf8").trim()).toBe("0");
+    expect(fs.existsSync(update)).toBe(false);
   });
   it("type check runs standalone before the build and only the build skips in-build checking", () => {
     const typegen = script.indexOf('npm exec next -- typegen');
@@ -122,6 +137,20 @@ size_build_memory "$MEMORY_INFO" && printf 'heap=%s\\n' "$BUILD_HEAP_MB"`], {
     }
     expect(run.status, run.stderr).toBe(0);
     expect(run.stdout.trimEnd().endsWith(`heap=${heap}`)).toBe(true);
+  });
+  it.each([[0, 0, 1], [60, 0, 1], [0, 60, 1], [60, 60, 0]])("依赖 swap 时，停服前核验系统和实际内存组换页策略：%d/%d", (global, group, status) => {
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), "pm-swap-policy-")); temporary.push(directory);
+    fs.mkdirSync(path.join(directory, "fixture"));
+    fs.writeFileSync(path.join(directory, "meminfo"), "MemAvailable: 1541120 kB\nSwapFree: 6145024 kB\n");
+    fs.writeFileSync(path.join(directory, "global"), String(global));
+    fs.writeFileSync(path.join(directory, "cgroup"), "9:memory:/fixture\n");
+    fs.writeFileSync(path.join(directory, "fixture", "memory.swappiness"), String(group));
+    const root = directory.replaceAll("\\", "/");
+    const run = spawnSync(bash, ["--noprofile", "--norc", "-c", `${functions}\nBUILD_HEAP_MB=3072\ncheck_build_swap_policy "$ROOT/meminfo" "$ROOT/global" "$ROOT/cgroup" "$ROOT"`], {
+      encoding: "utf8", env: { ...process.env, ROOT: root },
+    });
+    expect(run.status, run.stderr).toBe(status);
+    expect(script.indexOf("check_build_swap_policy /proc/meminfo")).toBeLessThan(script.indexOf("STOPPED=1"));
   });
   it.each([0, 1])("failure trap restores only after services were stopped: STOPPED=%d", stopped => {
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), "pm-deploy-fault-")); temporary.push(directory);

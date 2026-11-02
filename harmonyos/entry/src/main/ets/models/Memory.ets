@@ -28,6 +28,12 @@ export class CardTemporalStatus {
 export class CaptureSummary {
   rawText: string = '';
   sourceType: string | undefined = undefined;
+  processingJson: CaptureProcessing | undefined = undefined;
+}
+export class CaptureProcessing {
+  mode: string = 'UNKNOWN';
+  provider: string = '';
+  reason: string = '';
 }
 
 export class CardSummary {
@@ -63,6 +69,7 @@ export class AttachmentSummary {
 }
 
 export class KnowledgeCard {
+  processing: CaptureProcessing = new CaptureProcessing();
   captureId: string = '';
   id: string = '';
   // Global Memory 聚合时注入，项目内 Memory 不依赖这些字段。

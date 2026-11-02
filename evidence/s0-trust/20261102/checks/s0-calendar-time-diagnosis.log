@@ -1,0 +1,37 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/calendarWrite.test.ts -t 提案不写
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-s0
+
+ ❯ tests/calendarWrite.test.ts (10 tests | 1 failed | 9 skipped) 1418ms
+     × 提案不写，批准后才派发并完成原对象回读 1406ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/calendarWrite.test.ts > CT-10 飞书日历事件写入 > 提案不写，批准后才派发并完成原对象回读
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ tests/calendarWrite.test.ts:92:66
+     90|     const mission = await proposed(user.id, project.id, connection.id,…
+     91|     expect(f.createCalls()).toBe(0);
+     92|     expect((await missionDetail(user.id, mission.id)).approvals).toHav…
+       |                                                                  ^
+     93|     await approve(user.id, mission.id, f);
+     94|     const detail = await missionDetail(user.id, mission.id), step = de…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 skipped (10)
+   Start at  10:57:53
+   Duration  10.07s (transform 4.23s, setup 0ms, import 8.28s, tests 1.42s, environment 0ms)
+

@@ -110,6 +110,7 @@ model Project {
   /// 归档是「不占主列表」的可恢复展示偏好，与事实有效性正交：
   /// 归档不改变记忆的时态状态、不删除快照与行动历史，也不能当作删除使用。
   archivedAt  DateTime?
+  deletionRequestedAt DateTime?
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
   captures    Capture[]
@@ -139,6 +140,7 @@ model Project {
 }
 
 model Capture {
+  processingJson Json?
   id         String        @id @default(cuid())
   projectId  String
   rawText    String
@@ -1029,6 +1031,7 @@ model User {
   cloudUsage   AccountCloudUsage[]
   memoryPolicy UserMemoryPolicy?
   memoryControlReceipts UserMemoryControlReceipt[]
+  intakeDrafts ProjectIntakeDraft[]
 
   @@index([username])
 }
@@ -1744,4 +1747,71 @@ model CalendarObservation {
   @@index([connectionId, startAt])
   @@index([projectId, calendarId, startAt])
   @@index([missionId])
+}
+
+/// 项目前材料草稿：受控的临时预览身份，不是项目、目标、记忆或工具授权。
+/// 到期、撤回、确认后都进入清理；原件正文不进入 AgentRun JSON。
+model ProjectIntakeDraft {
+  id                  String    @id @default(cuid())
+  ownerUserId         String
+  createRequestId     String
+  createInputHash     String
+  /// 材料或理解每变化一次就递增；旧确认凭据不再匹配。
+  revision            Int       @default(0)
+  status              String    @default("DRAFT") // DRAFT | UNDERSTANDING | PREVIEW_READY | CONFIRMED | WITHDRAWN | EXPIRED | FAILED
+  materialsHash       String    @default("")
+  understandingJson   Json?
+  understandingHash   String?
+  understandingState  String    @default("NONE") // NONE | READY | FAILED | UNKNOWN | MATERIAL_ONLY
+  previewJson         Json      @default("{}")
+  userRevisionJson    Json      @default("{}")
+  userRevisionHash    String?
+  acceptedJson        Json?
+  processingJson      Json      @default("{}")
+  confirmRequestJson  Json      @default("{}")
+  cleanupAttempts     Int       @default(0)
+  projectId           String?
+  expiresAt           DateTime
+  understoodAt        DateTime?
+  confirmedAt         DateTime?
+  withdrawnAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  owner               User      @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  materials           ProjectIntakeMaterial[]
+  @@unique([ownerUserId, createRequestId])
+  @@index([ownerUserId, updatedAt])
+  @@index([status, expiresAt])
+}
+
+/// 项目前材料：owner、内容 hash、草稿身份、期限、处理状态与清理责任齐备。
+/// 只服务于一次受控预览；不进 Capture/Attachment，也不被任何工具当作有效事实。
+model ProjectIntakeMaterial {
+  id               String    @id @default(cuid())
+  draftId          String
+  ownerUserId      String
+  kind             String    // TEXT | FILE
+  ordinal          Int
+  requestId        String?
+  requestHash      String?
+  fileName         String?
+  mimeType         String?
+  type             String?   // TEXT | PDF | IMAGE | CSV | JSON
+  size             Int       @default(0)
+  storageKey       String?
+  sha256           String?
+  rawText          String?
+  extractionStatus String    @default("PENDING") // PENDING | SUCCESS | NEEDS_OCR | FAILED
+  extractionError  String?
+  revision         Int       @default(1)
+  contentHash      String    @default("")
+  cleanupState     String    @default("PENDING") // PENDING | DELETED | FAILED | KEPT
+  cleanedAt        DateTime?
+  syncJson         Json      @default("{}")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  draft            ProjectIntakeDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  @@unique([draftId, requestId])
+  @@index([draftId, ordinal])
+  @@index([draftId, cleanupState])
 }

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "kind": "platform-capability-probe",
+  "readOnly": true,
+  "generatedAt": "2026-11-02T10:50:26.828Z",
+  "sdk": {
+    "devecoHome": "D:\\Program Files\\Huawei\\DevEco Studio",
+    "sdkHome": "D:\\Program Files\\Huawei\\DevEco Studio\\sdk",
+    "apiVersion": "24",
+    "version": "6.1.1.125",
+    "shareExtensionDeclaration": true,
+    "insightIntentDeclaration": true
+  },
+  "module": {
+    "file": "harmonyos\\entry\\src\\main\\module.json5",
+    "extensionTypes": [
+      "entry",
+      "backup",
+      "form"
+    ],
+    "shareExtensionRegistered": false,
+    "shareSkillRegistered": false,
+    "intentsRegistered": false
+  },
+  "signing": {
+    "signingConfiguredInBuildProfile": false,
+    "note": "本树没有签名配置；不得复制主目录私钥"
+  },
+  "devices": {
+    "hdcAvailable": true,
+    "targets": [
+      "127.0.0.1:5555"
+    ],
+    "probed": [
+      {
+        "target": "127.0.0.1:5555",
+        "model": "emulator",
+        "apiVersion": "24",
+        "shellReachable": true
+      }
+    ]
+  },
+  "verdict": {
+    "share": {
+      "sdkAvailable": true,
+      "registered": false,
+      "deviceVerified": false,
+      "status": "SDK_AVAILABLE_NOT_REGISTERED"
+    },
+    "intents": {
+      "sdkAvailable": true,
+      "registered": false,
+      "deviceVerified": false,
+      "status": "SDK_AVAILABLE_NOT_REGISTERED"
+    }
+  }
+}

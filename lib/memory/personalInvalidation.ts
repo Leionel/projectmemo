@@ -58,16 +58,17 @@ export async function invalidatePersonalMemoryConsumers(tx: Tx, userId: string, 
     // 2) 委托的模型调用 trace.contextManifest 记录了 personalClaimIds（上下文已构建但尚无步骤时）。
     const steps = await tx.agentMissionStep.findMany({ where: { missionId: m.id }, select: { protocolJson: true } });
     const stepDependent = steps.some(step => references(record(step.protocolJson).personalMemoryReadSet as ReadSetLike, claimIds));
-    // 受限查询该项目的最近模型调用（SQLite 无 JSON 路径过滤）；按 missionId 在应用层匹配。
-    const runs = stepDependent ? [] : await tx.agentRun.findMany({ where: { projectId: m.projectId, runType: "CHAT" },
-      select: { trace: true }, orderBy: { createdAt: "desc" }, take: 12 });
-    const runsForMission = runs.filter(run => record(run.trace).missionId === m.id);
-    const manifestDependent = runsForMission.some(run => {
-      const ids = record(record(run.trace).contextManifest).personalClaimIds;
+    const inFlightDependent = references(record(m.planJson).personalMemoryReadSet as ReadSetLike, claimIds);
+    // 原回执按确切 Mission 查询，不以其他任务的最近 N 条日志作为隐私守卫窗口。
+    const runs = stepDependent || inFlightDependent ? [] : await tx.$queryRaw<Array<{ trace: string }>>`
+      SELECT json(trace) AS trace FROM AgentRun
+      WHERE projectId = ${m.projectId} AND runType = 'CHAT' AND json_extract(trace, '$.missionId') = ${m.id}`;
+    const manifestDependent = runs.some(run => {
+      const ids = record(record(JSON.parse(run.trace)).contextManifest).personalClaimIds;
       if (!Array.isArray(ids)) return false;
       return claimIds === null ? ids.length > 0 : ids.some(id => typeof id === "string" && claimIds.has(id));
     });
-    if (!stepDependent && !manifestDependent) continue;
+    if (!stepDependent && !inFlightDependent && !manifestDependent) continue;
     missions++;
     const pause = ["RUNNING", "READY", "WAITING_APPROVAL"].includes(m.status);
     await tx.agentMissionApproval.updateMany({ where: { missionId: m.id, status: { in: ["PENDING", "APPROVED"] } }, data: { status: "OBSOLETE" } });

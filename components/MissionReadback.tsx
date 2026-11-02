@@ -162,6 +162,36 @@ export function MissionReadback({
               )}
             </p>
           ))}
+          {data.reviewProgress && (
+            <details className="mt-3 border-t border-[var(--rule)] pt-3">
+              <summary className="cursor-pointer font-semibold">执行、观察、支持、报告、反例与未知</summary>
+              <dl className="mt-2 space-y-1">
+                {data.reviewProgress.classes.map(item => (
+                  <div key={item.key} className="flex gap-2">
+                    <dt className="w-24 shrink-0 font-semibold">{item.label}：{item.count}</dt>
+                    <dd className="text-[var(--muted)]">{item.note}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-2 text-[var(--muted)]">这是原步骤、草稿核对、行动与回执的投影；工具成功或用户说完成都不等于现实目标已达成。</p>
+            </details>
+          )}
+          {data.resourceUsage && (
+            <details className="mt-3 border-t border-[var(--rule)] pt-3">
+              <summary className="cursor-pointer font-semibold focus-ring">本次用量 · {data.resourceUsage.summary}</summary>
+              <p className="mt-2">已记录输入 {data.resourceUsage.inputTokens ?? "待核对"} token · 输出 {data.resourceUsage.outputTokens ?? "待核对"} token</p>
+              <p className="mt-1 text-[var(--muted)]">{data.resourceUsage.coverageNote}</p>
+              <p className="mt-1">{data.resourceUsage.costNote}</p>
+              {data.callCoverage && <div className="mt-2 border-t border-[var(--rule)] pt-2">
+                <p className="font-semibold">{data.callCoverage.summary}</p>
+                <ul className="mt-1 space-y-1">{data.callCoverage.notes.map((note, index) => <li key={index}>{note}</li>)}</ul>
+                <p className="mt-1 text-[var(--muted)]">{data.callCoverage.inspected.truncated
+                  ? `已检查最近 ${data.callCoverage.inspected.limit} 条回执，计数是下界，不是完整账单。`
+                  : "已核对当前委托已返回的调用回执；费用仍未知。"}</p>
+                {data.callCoverage.failedCodes.length > 0 && <p className="mt-1 text-[var(--muted)]">失败码：{data.callCoverage.failedCodes.join("、")}</p>}
+              </div>}
+            </details>
+          )}
           {data.materialUses && data.materialUses.items.length > 0 && <details className="mt-3 border-t border-[var(--rule)] pt-3">
             <summary className="cursor-pointer font-semibold">这份资料用在哪里 · {data.materialUses.items.length}</summary>
             <ul className="mt-3 space-y-3">
@@ -186,3 +216,4 @@ export function MissionReadback({
     </section>
   );
 }
+

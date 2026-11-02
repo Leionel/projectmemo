@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/s1IndependentReview.test.ts tests/projectIntake.test.ts tests/s1ResultProgress.test.ts tests/attachment.test.ts tests/s0ProjectDeletion.test.ts
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-s1-review
+
+
+ Test Files  5 passed (5)
+      Tests  43 passed (43)
+   Start at  16:52:38
+   Duration  12.31s (transform 2.83s, setup 0ms, import 6.23s, tests 4.27s, environment 1ms)
+

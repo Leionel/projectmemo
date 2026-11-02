@@ -55,6 +55,9 @@ export async function authenticateUser(request: Request): Promise<AuthenticatedC
   if (!result) {
     throw new AppError("UNAUTHORIZED", "登录状态已失效，请重新登录", 401);
   }
+  const expectedOwner = request.headers.get("x-expected-owner-id");
+  if (expectedOwner && expectedOwner !== result.user.id)
+    throw new AppError("SESSION_CHANGED", "登录账号已变化，请重新进入原任务", 409);
 
   return {
     user: result.user,
@@ -85,7 +88,7 @@ export async function authorizeProjectAccess(
     where: { id: projectId },
   });
 
-  if (!project) {
+  if (!project || project.deletionRequestedAt) {
     throw new AppError("PROJECT_NOT_FOUND", "项目不存在", 404);
   }
 

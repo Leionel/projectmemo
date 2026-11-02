@@ -61,3 +61,8 @@ export async function deleteAttachmentFile(storageKey: string): Promise<void> {
   const absolutePath = path.join(storageDir, path.basename(storageKey));
   await fs.promises.rm(absolutePath, { force: true });
 }
+
+// 上传进程在文件落盘后、数据库提交前崩溃时，文件仍属于原项目的存储命名空间。
+export async function listProjectAttachmentFiles(projectId: string): Promise<string[]> {
+  return (await fs.promises.readdir(getAttachmentStorageDir())).filter(name => name.startsWith(`${projectId}_`));
+}

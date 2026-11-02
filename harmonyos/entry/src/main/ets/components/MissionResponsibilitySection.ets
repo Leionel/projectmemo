@@ -192,7 +192,7 @@ export struct MissionResponsibilitySection {
       Row() {
         Text('运行与接续').fontSize(16).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY).layoutWeight(1)
         if (this.data !== null) {
-          Text(this.data.workerPresence === 'RECENT' ? '近期收到后台心跳' : this.data.workerPresence === 'STALE' ? '心跳超时' : '尚未观测到后台')
+          Text(this.data.workerPresenceDetail?.mismatchReason ? '后台版本或配置与当前服务不一致' : this.data.workerPresenceDetail?.failedPhase ? '最近巡检失败，等待重试' : this.data.workerPresence === 'RECENT' ? '近期收到后台心跳' : this.data.workerPresence === 'STALE' ? '心跳超时' : '尚未观测到后台')
             .fontSize(12)
             .fontColor(this.data.workerPresence === 'RECENT' ? PMColors.SUCCESS : PMColors.INK_SECONDARY)
             .backgroundColor(PMColors.SURFACE)

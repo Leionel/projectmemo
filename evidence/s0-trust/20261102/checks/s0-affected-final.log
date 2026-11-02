@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/browserReader.test.ts tests/database.integration.test.ts tests/projectLifecycle.test.ts tests/s0CaptureIsolation.test.ts tests/s0PersonalInFlight.test.ts
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-s0
+
+
+ Test Files  5 passed (5)
+      Tests  45 passed (45)
+   Start at  09:59:11
+   Duration  42.83s (transform 2.31s, setup 0ms, import 4.34s, tests 35.13s, environment 1.94s)
+

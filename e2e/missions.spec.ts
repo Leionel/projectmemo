@@ -1,4 +1,4 @@
-import {openProjectDirectory} from "./projectMenu";
+import {openProjectDirectory,fillManualProjectForm} from "./projectMenu";
 import {test,expect} from "@playwright/test";
 import {E2E_ENV} from "../scripts/e2e-env";
 import {execFileSync} from "node:child_process";
@@ -11,7 +11,12 @@ async function slice(id:string,choice:import("../lib/mission/contracts").Choice)
 async function scan(id:string){return fixture("scan",id);}
 test("same Mission survives reload, receives metric, auto continues, waits for approval and adopts a reusable draft",async({page})=>{
  test.setTimeout(120000);
- await page.goto("/projects/new");await page.getByLabel("项目名称").fill(`E2E Mission ${Date.now()}`);await page.getByLabel("项目描述").fill("独立的Mission接续测试项目");await page.getByLabel("项目目标").fill("验证接续、批准和成果归入");await page.getByRole("button",{name:"创建项目并开始沉淀"}).click();await expect(page).toHaveURL(/\/projects\/(?!new)[^/?#]+$/);
+ await page.goto("/projects/new");
+  await fillManualProjectForm(page, {
+    title: `E2E Mission ${Date.now()}`,
+    description: "独立的Mission接续测试项目",
+    goal: "验证接续、批准和成果归入",
+  });await expect(page).toHaveURL(/\/projects\/(?!new)[^/?#]+$/);
  await openProjectDirectory(page);await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link",{name:"长期委托"}).click();
  const panel=page.locator("#mission-agent"),goal="跨时间准备10月实验汇报";await panel.getByRole("textbox",{name:"想推进什么"}).fill(goal);await panel.getByRole("checkbox",{name:/允许配置的云模型/}).check();
  const created=page.waitForResponse(r=>r.url().endsWith("/api/missions")&&r.request().method()==="POST");await panel.getByRole("button",{name:"创建委托",exact:true}).click();const{id}=((await(await created).json()) as {mission:{id:string}}).mission;
@@ -25,6 +30,18 @@ test("same Mission survives reload, receives metric, auto continues, waits for a
  await panel.getByRole("button",{name:"批准创建行动",exact:true}).click();await expect.poll(()=>fixture("state",id).approvals.filter(a=>a.status==="APPROVED").length).toBe(1);await slice(id,{kind:"ask",question:"不应在创建片段额外调用模型",missing:"PRIVATE"});await expect(panel.getByRole("link",{name:"已创建行动：核对实验条件后确认汇报"})).toBeVisible();expect(fixture("state",id).actions.filter(a=>a.title==="核对实验条件后确认汇报"&&a.status==="TODO")).toHaveLength(1);
  await panel.getByRole("button",{name:"预览归入项目周报",exact:true}).click();await expect(panel.getByText("归入只保存成果，不确认项目事实。",{exact:true})).toBeVisible();await panel.getByRole("button",{name:"确认保存并向项目成员共享",exact:true}).click();await expect(panel.getByText(/已归入项目周报，成果编号/)).toBeVisible();const receipt=fixture("state",id).receipt!;
  await slice(id,{kind:"finish",outputId:receipt.outputId});await expect(panel.getByText("委托条件已验收",{exact:true}).first()).toBeVisible();
+ const readback=panel.getByRole('region',{name:'原任务与完成回执'});
+ await readback.getByText(/^本次用量 · 模型/).click();
+ await expect(readback.getByText('费用尚不能核算：这些记录未绑定费率与账单。',{exact:true})).toBeVisible();
+ await expect(readback.getByText(/已记录输入 .* token · 输出 .* token/)).toBeVisible();
+ // S2 第二批：调用覆盖说明哪些调用有回执、哪些用量未知，仍不是账单。
+ await expect(readback.getByText(/^可核对调用：模型已检查 \d+ 次/)).toBeVisible();
+ await expect(readback.getByText(/费用与估算保持未知/)).toBeVisible();
+ await readback.screenshot({path:'evidence/s2-usage-coverage/20261102/web-1280.png',animations:'disabled'});
+ await page.setViewportSize({width:390,height:844});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+ await readback.screenshot({path:'evidence/s2-usage-coverage/20261102/web-390.png',animations:'disabled'});
+ await page.setViewportSize({width:1280,height:900});
  await page.screenshot({path:"test-results/pre-r4-mission-continuation-adoption.png",fullPage:true,animations:"disabled"});
  const missionPath=new URL(page.url()).pathname;
  await panel.getByRole("link",{name:"打开已归入的成果版本"}).click();
@@ -44,3 +61,6 @@ test("same Mission survives reload, receives metric, auto continues, waits for a
  await expect(panel.getByRole("heading",{name:"引用已归入成果准备后续汇报",exact:true})).toBeInViewport();
  await page.screenshot({path:"test-results/pre-r4-mission-mobile.png",fullPage:true,animations:"disabled"});
 });
+
+
+

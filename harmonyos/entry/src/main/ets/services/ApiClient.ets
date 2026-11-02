@@ -52,6 +52,7 @@ export class ApiClient {
 
   async get<T>(path: string): Promise<T> {
     const httpRequest = http.createHttp();
+    const requestToken: string = SessionStore.getToken();
     try {
       const response: http.HttpResponse = await httpRequest.request(
         `${this.baseUrl}${path}`,
@@ -63,6 +64,7 @@ export class ApiClient {
           readTimeout: 30000,
         }
       );
+      if (requestToken !== SessionStore.getToken()) throw new ApiError('SESSION_CHANGED', '登录状态已变化，请重新进入原任务核对处理结果', 409);
       if (isSuccessCode('GET', response.responseCode)) {
         const result: string = response.result as string;
         return JSON.parse(result) as T;
@@ -86,6 +88,7 @@ export class ApiClient {
 
   async post<T>(path: string, body: Object | undefined, readTimeoutMs: number = 30000): Promise<T> {
     const httpRequest = http.createHttp();
+    const requestToken: string = SessionStore.getToken();
     try {
       const options: http.HttpRequestOptions = {
         method: http.RequestMethod.POST,
@@ -101,6 +104,7 @@ export class ApiClient {
         `${this.baseUrl}${path}`,
         options
       );
+      if (requestToken !== SessionStore.getToken()) throw new ApiError('SESSION_CHANGED', '登录状态已变化，请重新进入原任务核对处理结果', 409);
       if (isSuccessCode('POST', response.responseCode)) {
         const result: string = response.result as string;
         return JSON.parse(result) as T;
@@ -124,6 +128,7 @@ export class ApiClient {
 
   async patch<T>(path: string, body: Object | undefined): Promise<T> {
     const httpRequest = http.createHttp();
+    const requestToken: string = SessionStore.getToken();
     try {
       const options: http.HttpRequestOptions = {
         customMethod: 'PATCH',
@@ -139,6 +144,7 @@ export class ApiClient {
         `${this.baseUrl}${path}`,
         options
       );
+      if (requestToken !== SessionStore.getToken()) throw new ApiError('SESSION_CHANGED', '登录状态已变化，请重新进入原任务核对处理结果', 409);
       if (isSuccessCode('PATCH', response.responseCode)) {
         const result: string = response.result as string;
         return JSON.parse(result) as T;
@@ -164,19 +170,23 @@ export class ApiClient {
 
   // @ohos.net.http 的 RequestMethod 没有 DELETE，与 PATCH 一样用 customMethod；
   // 删除成功返回 204 无正文，不能按 JSON 解析，由 isNoContent 单独判定。
-  async delete<T>(path: string): Promise<T> {
+  async delete<T>(path: string, confirmationId: string = '', expectedVersion: string = ''): Promise<T> {
     const httpRequest = http.createHttp();
+    const requestToken: string = SessionStore.getToken();
+    const headers: Record<string, string> = this.buildHeaders(path);
+    if (confirmationId !== '') { headers['X-Project-Delete-Confirmation'] = confirmationId; headers['If-Match'] = expectedVersion; }
     try {
       const response: http.HttpResponse = await httpRequest.request(
         `${this.baseUrl}${path}`,
         {
           customMethod: 'DELETE',
-          header: this.buildHeaders(path),
+          header: headers,
           expectDataType: http.HttpDataType.STRING,
           connectTimeout: 10000,
           readTimeout: 30000,
         }
       );
+      if (requestToken !== SessionStore.getToken()) throw new ApiError('SESSION_CHANGED', '登录状态已变化，请重新进入原任务核对处理结果', 409);
       if (isSuccessCode('DELETE', response.responseCode)) {
         const result: string = response.result as string;
         return JSON.parse(result) as T;

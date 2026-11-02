@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@ohos/hypium';
-import { episodeStatusLabel, episodeStatusTone, formatDeadlineState, mapReentryToWidget } from '../main/ets/services/WidgetDataService';
+import { episodeStatusLabel, episodeStatusTone, formatDeadlineState, mapReentryToWidget, visibleProjectWidget } from '../main/ets/services/WidgetDataService';
 import { ReentryData, ReentryEpisodePart, ReentryRiskPart, ReentrySchedulePart, ReentrySectionMeta } from '../main/ets/models/Reentry';
 import { ProjectAgentContext, AgentNextStep, AgentGoalRef, AgentEntityRef } from '../main/ets/models/ProjectAgentContext';
 
@@ -26,6 +26,20 @@ function publishedEpisodePart(): ReentryEpisodePart {
 
 export default function reentryMappingTest() {
   describe('reentryMappingTest', () => {
+    it('project widget rejects another owner and unowned legacy cache', 0, () => {
+      const expiry = new Date(2000).toISOString();
+      expect(visibleProjectWidget('a', 'a', 'token', expiry, 1000)).assertTrue();
+      expect(visibleProjectWidget('a', 'b', 'token', expiry, 1000)).assertFalse();
+      expect(visibleProjectWidget('', 'b', 'token', expiry, 1000)).assertFalse();
+      expect(visibleProjectWidget('', '', 'token', expiry, 1000)).assertFalse();
+    });
+    it('project widget rejects logout and expired or unknown session lifetime', 0, () => {
+      const expiry = new Date(2000).toISOString();
+      expect(visibleProjectWidget('a', 'a', '', expiry, 1000)).assertFalse();
+      expect(visibleProjectWidget('a', 'a', 'token', expiry, 2000)).assertFalse();
+      expect(visibleProjectWidget('a', 'a', 'token', '', 1000)).assertFalse();
+      expect(visibleProjectWidget('a', 'a', 'token', 'unknown', 1000)).assertFalse();
+    });
     it('maps checkpoint status to widget labels and tones', 0, () => {
       expect(episodeStatusLabel('PUBLISHED')).assertEqual('结论有效');
       expect(episodeStatusTone('PUBLISHED')).assertEqual('brand');

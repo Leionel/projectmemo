@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-02",
+  "timezone": "UTC+08:00",
+  "worktree": "D:/Projects/hongmen-s1-review",
+  "branch": "codex/s1-review-fixes",
+  "reviewedCandidate": "24e58e9225ac2708679909038b6767f6c44f5542",
+  "coreFixSource": "63e19bb7e002428e5f2fe847dfe90206dcf55134",
+  "finalBusinessSource": "fd4f754a1ca7f7bbcd96511c0f7cb799fc472c60",
+  "data": "isolated synthetic databases and attachments; mock or fake HTTP; no real model calls",
+  "checks": {
+    "originalNegativeBaseline": { "failed": 5, "expectedFailure": true, "receipt": "failures/initial-five-before.log" },
+    "fullVitest": { "source": "63e19bb", "exitCode": 0, "filesPassed": 198, "testsPassed": 1520, "durationSeconds": 775.21, "receipt": "logs/s1-review-full-regression.log" },
+    "tailRelatedVitest": { "source": "fd4f754", "exitCode": 0, "filesPassed": 5, "testsPassed": 43, "independentReviewTests": 21, "receipt": "logs/s1-review-tail-related.log" },
+    "tailTypes": { "source": "fd4f754", "exitCode": 0, "receipt": "logs/s1-review-tail-types.log" },
+    "tailLint": { "source": "fd4f754", "exitCode": 0, "errors": 0, "existingWarnings": 9, "receipt": "logs/s1-review-tail-lint.log" },
+    "finalWebE2E": { "source": "fd4f754", "status": "PASS_ON_RECHECK", "exitCode": 0, "productionBuild": "PASS", "expectedIncludingSetup": 37, "businessPassed": 36, "setupPassed": 1, "skipped": 2, "unexpected": 0, "flaky": 0, "retries": 0, "startTime": "2026-11-02T09:11:43.357Z", "durationMs": 177453.491, "receipt": "logs/s1-review-e2e-recheck.log", "report": "web-e2e-results.json", "firstAttemptExitCode": 1, "firstAttemptReason": "600-second runner watchdog; no final structured report", "failureReceipt": "logs/s1-review-e2e-freeze.log" },
+    "harmonyUnit": { "exitCode": 0, "passed": 100, "failed": 0, "errors": 0, "ignored": 0, "receipt": "logs/s1-review-harmony-final.log" },
+    "harmonyBuild": { "exitCode": 0, "signed": false, "installed": false, "bytes": 7907358, "sha256": "c857825ccdbc2cb29fafe47ec4e25688de183bd496b031b17e1a28a5d3fa91fd", "receipt": "logs/s1-review-hap-final.log", "scope": "native source unchanged between core and tail fixes; backend-only tail did not rebuild HAP" },
+    "s1WorkerProcesses": { "exitCode": 0, "childProcesses": 2, "receipt": "logs/s1-review-worker-responsibility.log", "scope": "Windows isolated process probe, not natural-day or model quality" },
+    "s0WorkerProcesses": { "exitCode": 0, "childProcesses": 3, "receipt": "logs/s1-review-s0-worker.log", "scope": "Windows isolated process probe, not Linux/systemd" }
+  },
+  "separateEvidenceTracks": {
+    "realModelQuality": "NOT_RUN",
+    "paidModelCalls": 0,
+    "firstRealUserJourney": "NOT_RUN",
+    "emulatorAcceptance": "NOT_RUN; hdc returned Empty at inspection",
+    "physicalDeviceAcceptance": "NOT_RUN",
+    "naturalDayThreeDayResponsibility": "NOT_RUN; no real D1 started",
+    "secondRealProject": "Reflexion, NeurIPS 2023; official sources verified; actual reading journey not run",
+    "linuxSystemd": "NOT_RUN",
+    "productionDeployment": "NOT_RUN"
+  },
+  "limits": [
+    "Full Vitest belongs to core source; final source has related tests plus types/lint and separately recorded Web E2E, not a second full Vitest run",
+    "S0 minimatch development dependency advisories remain open",
+    "Intake model input is limited to 20000 characters per material and 24000 overall; coverage UI remains a follow-up",
+    "Small paid evaluation protocol limits need metering and stop controls before real calls; no global token cap is claimed from the current UI",
+    "Unsigned HAP does not establish device installation or system card acceptance",
+    "No master merge, push, production deploy, or real database migration was performed"
+  ],
+  "s2": { "status": "LOCAL_DEVELOPMENT_GATE_READY", "businessImplementationStarted": false, "releaseApproval": false }
+}

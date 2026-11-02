@@ -6,6 +6,7 @@ import { ProjectList } from "@/components/ProjectList";
 import { ProjectCard } from "@/components/ProjectCard";
 import { listProjects } from "@/lib/repositories/projects";
 import { getSessionUser } from "@/lib/auth/serverSession";
+import { ProjectDeletionProgress } from "@/components/ProjectDeletionProgress";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -29,5 +30,6 @@ export default async function ProjectsPage() {
         {archivedProjects.map((project) => <ProjectCard key={project.id} project={project} />)}
       </div>
     </details>}
+    <ProjectDeletionProgress key={user.id} />
   </main>;
 }

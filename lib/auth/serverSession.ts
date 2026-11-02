@@ -32,7 +32,7 @@ export async function getSessionUser(): Promise<User | null> {
 export async function hasProjectAccess(userId: string, projectId: string): Promise<boolean> {
   const membership = await db.projectMembership.findUnique({
     where: { userId_projectId: { userId, projectId } },
-    select: { id: true },
+    select: { id: true, project: { select: { deletionRequestedAt: true } } },
   });
-  return membership !== null;
+  return membership !== null && !membership.project.deletionRequestedAt;
 }

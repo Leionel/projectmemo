@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-02",
+  "source": "6a9042396f3cbfaa2b2b5e83b977cf2720012d51",
+  "baseline": "24004cf91800635e179c651a0599a16e586019f8",
+  "worktree": "D:/Projects/hongmen-s2",
+  "branch": "codex/s2-product-enhancements",
+  "data": "isolated synthetic databases; scripted model fixtures; no paid calls",
+  "functional": {
+    "targetedVitest": { "exitCode": 0, "files": 4, "testsPassed": 28, "receipt": "logs/s2-readback-tests.log" },
+    "types": { "exitCode": 0, "receipt": "logs/s2-types.log" },
+    "lint": { "exitCode": 0, "existingWarnings": 9, "receipt": "logs/s2-lint.log" },
+    "webProductionBuild": "PASS",
+    "webTargetedJourney": { "exitCode": 0, "setupPassed": 1, "businessPassed": 1, "skipped": 0, "unexpected": 0, "flaky": 0, "retries": 0, "startTime": "2026-11-02T09:24:00.976Z", "durationMs": 37940.907, "receipt": "logs/s2-web-journey.log", "report": "web-e2e-results.json" },
+    "harmonyUnit": { "exitCode": 0, "passed": 103, "failed": 0, "errors": 0, "ignored": 0, "receipt": "logs/s2-harmony-tests.log" },
+    "harmonyBuild": { "exitCode": 0, "signed": false, "installed": false, "bytes": 7914013, "sha256": "31b69c6a4f11307d4abc083b401c0bad448e8d10e7bf7f838f3a51748a132e20", "receipt": "logs/s2-hap.log" }
+  },
+  "visual": {
+    "web390": "captured and inspected; no horizontal overflow in journey",
+    "web1280": "usage content captured and inspected; original fixed navigation overlaps top edge of element screenshot; not full desktop page acceptance",
+    "harmonyDevice": "NOT_RUN"
+  },
+  "scope": {
+    "api": "additive resourceUsage on original owner-only readback",
+    "monetaryPricing": "UNPRICED; no rate/bill binding; missing counters remain null",
+    "crossEntryTaskCost": "NOT_IMPLEMENTED; current Mission recorded counters only",
+    "fullS2": "IN_PROGRESS; first result/usage increment only",
+    "fullS2VitestAndE2E": "NOT_RUN; targeted validation only",
+    "realModel": "NOT_RUN",
+    "paidCalls": 0,
+    "deviceAndNaturalDay": "NOT_RUN",
+    "masterMerge": false,
+    "pushed": false,
+    "productionDeployment": false,
+    "realDatabaseMigration": false
+  }
+}

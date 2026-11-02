@@ -6,7 +6,7 @@ import { record } from "./repository";
 import { json } from "@/lib/mission/contracts";
 
 /** Schedules the original ConversationTurn executor; no second research task or business Runner. */
-export async function runConversationTurn() {
+export async function runConversationTurn(options: { onClaim?: () => void } = {}) {
   if (!isFeatureEnabled("FOCUS_ASYNC_ENABLED", isFeatureEnabled("FOCUS_WEB_ENABLED", false))) return false;
   const pending = await db.conversationTurn.findMany({ where: { status: { in: ["OBSERVING", "GENERATING"] }, sessionId: { not: null },
     OR: [{ leaseUntil: null }, { leaseUntil: { lt: new Date() } }] }, orderBy: { createdAt: "asc" }, take: 30, include: { conversation: true } });
@@ -24,6 +24,7 @@ export async function runConversationTurn() {
     return claimed;
   });
   if (!claim.count) return true;
+  options.onClaim?.();
   const heartbeat = setInterval(() => { void withTurnLease(next.id, token, () => heartbeatTurn(next.id)).catch(() => undefined); }, 5000);
   try {
     const turn = await db.conversationTurn.findUniqueOrThrow({ where: { id: next.id } });

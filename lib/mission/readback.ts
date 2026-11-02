@@ -7,6 +7,9 @@ import { artifactTypeLabels } from "@/lib/types";
 import { ownedMission } from "./repository";
 import { materialUseProjection } from "./materialUseProjection";
 import { fitContextSummary, type assessEvidenceFit } from "./evidenceFitService";
+import { reviewProgressOf } from "./reviewProgress";
+import { missionCallCoverageOf } from "./callCoverage";
+import { missionResourceUsageOf } from "./resourceUsage";
 export const readTargetSchema = z
   .object({
     questionId: z.string().min(1).optional(),
@@ -124,6 +127,28 @@ export async function readMissionBack(
       ?.sourceRunId;
     const latestEvents=await tx.agentMissionEvent.findMany({where:{missionId:id,type:{in:["QUESTION","INVESTIGATION_NO_NEW_INFORMATION"]}},orderBy:{seq:"desc"},take:1});
     const workState=missionWorkState({...m,delegationEnabled:isFeatureEnabled("MISSION_INVESTIGATION_DELEGATION_ENABLED",false),events:latestEvents,approvals:await tx.agentMissionApproval.findMany({where:{missionId:id,status:"PENDING"}})});
+    // 进展分类只是既有 Step/Output/Action/回执的只读投影：它不新增完成真值，
+    // 也不把工具成功、CI 通过或用户说“完成”换算成现实目标达成。
+    const progressOutputs = await tx.agentMissionOutput.findMany({ where: { missionId: id }, orderBy: { revision: "desc" }, take: 4,
+      select: { id: true, revision: true, claimChecksJson: true } });
+    const unknownStepCount = await tx.agentMissionStep.count({ where: { missionId: id, status: "UNKNOWN" } });
+    const reviewProgress = reviewProgressOf({ steps, outputs: progressOutputs, actions, unknownSteps: unknownStepCount });
+    // 调用覆盖：只读原 AgentRun/Step，说明哪些调用有回执、哪些用量未知；不是账单。
+    const callRunLimit = 20;
+    // 先按委托归属筛选，再取窗口；同项目其他讨论不能挤掉本委托的回执。
+    const callRunIds = await tx.$queryRaw<Array<{ id: string }>>`
+      SELECT id FROM "AgentRun" WHERE "projectId"=${m.projectId} AND "runType"='CHAT'
+        AND json_extract(trace, '$.missionId')=${id}
+      ORDER BY "createdAt" DESC, id DESC LIMIT ${callRunLimit + 1}`;
+    const [callRuns, callSteps] = await Promise.all([
+      tx.agentRun.findMany({ where: { id: { in: callRunIds.map(run => run.id) }, projectId: m.projectId, runType: "CHAT" }, orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        select: { id: true, status: true, provider: true, fallbackReason: true, runType: true, trace: true, createdAt: true } }),
+      tx.agentMissionStep.findMany({ where: { missionId: id }, orderBy: { ordinal: "desc" }, take: callRunLimit + 1,
+        select: { id: true, status: true, toolName: true, toolVersion: true, agentRunId: true } }),
+    ]);
+    const callCoverage = missionCallCoverageOf({ missionId: id,
+      agentRuns: callRuns.map(run => ({ ...run, createdAt: run.createdAt.toISOString() })), steps: callSteps, limit: callRunLimit,
+      truncated: callRuns.length > callRunLimit || callSteps.length > callRunLimit });
     const wait = m.waitStateJson as { questionId?: string } | null;
     const materialUses = await materialUseProjection(tx, {
       missionId: id, projectId: m.projectId,
@@ -139,6 +164,9 @@ export async function readMissionBack(
       missionUpdatedAt: m.updatedAt.toISOString(),
       materialUses,
       evidenceReviews,
+      reviewProgress,
+      callCoverage,
+      resourceUsage: missionResourceUsageOf(m.budgetUsedJson),
       sourceConversation: sourceRunId
         ? {
             sourceRunId,
@@ -200,3 +228,7 @@ export async function readMissionBack(
   });
 }
 export type MissionReadback = Awaited<ReturnType<typeof readMissionBack>>;
+
+
+
+

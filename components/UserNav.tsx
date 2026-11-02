@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { BookOpen, LogIn, LogOut, User, LoaderCircle } from "lucide-react";
 import { bindConversationDraftOwner, clearConversationDrafts } from "@/lib/client/conversationDrafts";
+import { bindCaptureDraftOwner, clearCaptureDrafts, captureGeneration } from "@/lib/client/captureDrafts";
 
 interface UserState {
   id: string;
@@ -23,38 +24,47 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
     let generation = 0;
     async function checkAuth() {
       const read = ++generation;
+      const draftGeneration = captureGeneration();
       try {
         const res = await fetch("/api/auth/me", { cache: "no-store" });
+        if (active && read === generation && draftGeneration !== captureGeneration()) { void checkAuth(); return; }
         if (res.ok) {
           const data = await res.json();
-          if (active && read === generation) {
-            if (data.user?.id) bindConversationDraftOwner(data.user.id);
+          if (active && read === generation && draftGeneration !== captureGeneration()) { void checkAuth(); return; }
+          if (active && read === generation && draftGeneration === captureGeneration()) {
+            if (data.user?.id) { bindConversationDraftOwner(data.user.id); bindCaptureDraftOwner(data.user.id); }
             setUser(data.user ?? null);
           }
         } else {
-          if (active && read === generation) { if (res.status === 401) clearConversationDrafts(); setUser(null); }
+          if (active && read === generation && draftGeneration === captureGeneration()) { if (res.status === 401) { clearConversationDrafts(); clearCaptureDrafts(); } setUser(null); }
         }
       } catch {
-        if (active && read === generation) setUser(null);
+        if (active && read === generation && draftGeneration === captureGeneration()) setUser(null);
       } finally {
         if (active && read === generation) setLoading(false);
       }
     }
     checkAuth();
     window.addEventListener("projectmemo:session-changed", checkAuth);
+    const storageAuth = (event: StorageEvent) => { if (event.key === null || event.key === "projectmemo:capture-owner") void checkAuth(); };
+    window.addEventListener("storage", storageAuth);
     return () => {
       active = false;
       window.removeEventListener("projectmemo:session-changed", checkAuth);
+      window.removeEventListener("storage", storageAuth);
     };
   }, []);
 
   const handleLogout = async () => {
     setLoggingOut(true);
     setError("");
+    const logoutGeneration = captureGeneration();
     try {
       const response = await fetch("/api/auth/logout", { method: "POST" });
+      if (logoutGeneration !== captureGeneration()) return;
       if (!response.ok) throw new Error("logout failed");
       clearConversationDrafts();
+      clearCaptureDrafts();
       setUser(null);
       window.location.assign("/login");
     } catch {

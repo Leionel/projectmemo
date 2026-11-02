@@ -15,6 +15,17 @@ export default class EntryAbility extends UIAbility {
     if (typeof missionId === 'string' && missionId !== '' && typeof projectId === 'string' && projectId !== '') {
       AppStorage.setOrCreate<string>('pendingMissionId', missionId);
       AppStorage.setOrCreate<string>('pendingMissionProjectId', projectId);
+      // 只解析“打开哪个原对象”：不携带批准令牌、私人原话或任意跳转 URL。
+      const questionId = want.parameters?.['questionId'];
+      const approvalId = want.parameters?.['approvalId'];
+      const sourceId = want.parameters?.['sourceId'];
+      const missionVersion = want.parameters?.['missionVersion'];
+      const handoffExpiresAt = want.parameters?.['handoffExpiresAt'];
+      AppStorage.setOrCreate<string>('pendingQuestionId', typeof questionId === 'string' ? questionId : '');
+      AppStorage.setOrCreate<string>('pendingApprovalId', typeof approvalId === 'string' ? approvalId : '');
+      AppStorage.setOrCreate<string>('pendingSourceId', typeof sourceId === 'string' ? sourceId : '');
+      AppStorage.setOrCreate<string>('pendingMissionVersion', typeof missionVersion === 'string' ? missionVersion : '');
+      AppStorage.setOrCreate<string>('pendingHandoffExpiresAt', typeof handoffExpiresAt === 'string' ? handoffExpiresAt : '');
     }
     if (typeof projectId === 'string') {
       AppStorage.setOrCreate<string>('notificationProjectId', projectId);

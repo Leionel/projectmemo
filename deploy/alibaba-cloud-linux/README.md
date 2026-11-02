@@ -92,6 +92,14 @@ curl -fsS --max-time 10 http://127.0.0.1:4400/health
 
 两个服务都应输出 `active`，`health.release` 应等于本次 `TARGET`。从公网检查 `/login` 可用、未登录业务 API 返回 401、`/api/settings` 返回 404，并用自己的账号登录验证业务。
 
+## 低内存构建的换页策略
+
+2026-11-01 的 ECS 在约 2 GiB RAM、6 GiB 空闲 swap 下仍触发全局 OOM；系统与当前内存组 swappiness 均为 0。新预检在依赖 swap 而策略为 0 或不可核验时拒绝更新，发生在停服前，不自动修改内核配置。
+
+该机器使用 `safe-update-with-swap.sh <已验证并推送的40位SHA>` 包装原发布脚本：读取并保存实际执行账号的 cgroup v1 策略，临时将系统及该内存组设为 60，核验后调用同一 `safe-update.sh`；正常退出、报错和可捕捉中断时恢复原值。它不写 sysctl.conf、不改 overcommit、不创建新 swap，也不绕过备份、类型检查、迁移及回滚。不可捕捉的进程终止仍需人工核对策略。
+
+从目标提交同时提取该包装器执行；不要执行旧 checkout 中的脚本冒充新版本。构建成功只证明工程发布，不证明真实模型、Worker 连续运行或设备交互已经验收。
+
 ## 环境开关与 Focus 验收
 
 代码更新和功能启用是两个步骤。`safe-update.sh` 保留服务器环境配置，只更新发布指纹；它不会把仓库 `.env.example` 合并到 `/etc/projectmemo/projectmemo.env`。systemd 的环境文件只对服务进程生效，开发机 `.env` 和仅在终端 `export` 的值不改变线上服务。

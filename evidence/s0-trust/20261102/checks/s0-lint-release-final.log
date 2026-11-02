@@ -1,0 +1,32 @@
+
+> projectmemo@0.1.0 lint
+> eslint .
+
+
+D:\Projects\hongmen-s0\app\api\me\memory\route.ts
+  8:10  warning  'db' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-s0\components\NewProjectForm.tsx
+  44:7  warning  Do not use `window.location.assign()` to navigate to internal Next.js pages. Use `redirect()` in the render phase, or `useRouter().push()` in Client Components' event handlers instead. See: https://nextjs.org/docs/messages/no-location-assign-relative-destination  @next/next/no-location-assign-relative-destination
+
+D:\Projects\hongmen-s0\components\RepoSignalsCard.tsx
+  107:253  warning  Do not use `window.location.href` to navigate to internal Next.js pages. Use `redirect()` in the render phase, or `useRouter().push()` in Client Components' event handlers instead. See: https://nextjs.org/docs/messages/no-location-assign-relative-destination  @next/next/no-location-assign-relative-destination
+
+D:\Projects\hongmen-s0\components\UserNav.tsx
+  69:7  warning  Do not use `window.location.assign()` to navigate to internal Next.js pages. Use `redirect()` in the render phase, or `useRouter().push()` in Client Components' event handlers instead. See: https://nextjs.org/docs/messages/no-location-assign-relative-destination  @next/next/no-location-assign-relative-destination
+
+D:\Projects\hongmen-s0\lib\memory\personalMemoryService.ts
+  6:48  warning  'buildPersonalMemoryReadSet' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-s0\tests\pm1PersonalMemoryScope.test.ts
+  11:51  warning  'policyInTx' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-s0\tests\pm3LongTermRecall.test.ts
+  12:10  warning  'jsonHash' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-s0\tests\ux2CorrectionControls.test.ts
+  31:9  warning  'second' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  46:9  warning  'view' is assigned a value but never used    @typescript-eslint/no-unused-vars
+
+✖ 9 problems (0 errors, 9 warnings)
+

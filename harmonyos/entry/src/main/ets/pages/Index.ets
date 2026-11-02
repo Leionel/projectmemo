@@ -1,6 +1,7 @@
 import { PMPageIntro, PMListRow } from '../components/PMReferencePrimitives';
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
+import { handoffIntentExpired } from '../common/MissionWidgetContract';
 import preferences from '@ohos.data.preferences';
 import { Project, ApiError, ProjectCreateInput, CompetitionReadiness, ReadinessItem } from '../models/Project';
 import { ProjectDetail, KnowledgeCard, CardTemporalStatus } from '../models/Memory';
@@ -61,6 +62,7 @@ struct Index {
 
   // 数据主状态
   @State projects: Project[] = [];
+  @State projectDeletionNotice: string = '';
   // 已归档项目单独一份：主列表与跨项目聚合都不含它们，但必须仍能在这里恢复
   @State archivedProjects: Project[] = [];
   @State showArchivedProjects: boolean = false;
@@ -92,6 +94,10 @@ struct Index {
   @State gcSourceType: string = '随手记录';
   @State gcText: string = '';
   @State gcSubmitting: boolean = false;
+  private gcGeneration: number = 0;
+  private dataLoadGeneration: number = 0;
+  private gcRequestId: string = '';
+  private gcRequestPayload: string = '';
   @State gcError: string = '';
   @State showGlobalTodo: boolean = false;
   @State gtProjectIndex: number = 0;
@@ -204,6 +210,17 @@ struct Index {
     this.currentMainTabIndex = 4;
     this.currentUser = new UserInfo();
     this.projects = [];
+    this.projectDeletionNotice = '';
+    this.gcGeneration += 1;
+    this.dataLoadGeneration += 1;
+    this.isLoading = false;
+    this.globalCardStates = [];
+    this.showGlobalCapture = false;
+    this.gcText = '';
+    this.gcError = '';
+    this.gcSubmitting = false;
+    this.gcRequestId = '';
+    this.gcRequestPayload = '';
     this.archivedProjects = [];
     this.showArchivedProjects = false;
     this.projectLifecycleBusyId = '';
@@ -283,8 +300,26 @@ struct Index {
     const missionId = AppStorage.get<string>('pendingMissionId') ?? '';
     const missionProjectId = AppStorage.get<string>('pendingMissionProjectId') ?? '';
     if (missionId !== '' && missionProjectId !== '') {
+      const questionId = AppStorage.get<string>('pendingQuestionId') ?? '';
+      const approvalId = AppStorage.get<string>('pendingApprovalId') ?? '';
+      const sourceId = AppStorage.get<string>('pendingSourceId') ?? '';
+      const handoffExpiresAt = AppStorage.get<string>('pendingHandoffExpiresAt') ?? '';
       AppStorage.setOrCreate<string>('pendingMissionId', ''); AppStorage.setOrCreate<string>('pendingMissionProjectId', '');
-      router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: missionProjectId, missionId } }); return;
+      AppStorage.setOrCreate<string>('pendingQuestionId', ''); AppStorage.setOrCreate<string>('pendingApprovalId', '');
+      AppStorage.setOrCreate<string>('pendingSourceId', ''); AppStorage.setOrCreate<string>('pendingMissionVersion', '');
+      AppStorage.setOrCreate<string>('pendingHandoffExpiresAt', '');
+      const expiry = handoffExpiresAt === '' ? 0 : Number(handoffExpiresAt);
+      // 排队或冷启动后过期的定位意图不再指向旧问题，回到当前原委托。
+      const expired = handoffIntentExpired(expiry, Date.now());
+      if (expired) {
+        promptAction.showToast({ message: '原卡片已过期，已回到当前委托；旧问题不会被当成新问题' });
+      }
+      router.pushUrl({ url: 'pages/MissionDetail', params: {
+        projectId: missionProjectId, missionId,
+        questionId: expired ? '' : questionId,
+        approvalId: expired ? '' : approvalId,
+        sourceId: expired ? '' : sourceId
+      } }); return;
     }
     const projectId = AppStorage.get<string>('notificationProjectId') ?? '';
     const interventionId = AppStorage.get<string>('notificationInterventionId') ?? '';
@@ -383,13 +418,19 @@ struct Index {
   }
 
   private async loadAllData(silent: boolean = false): Promise<void> {
+    const token: string = SessionStore.getToken();
+    if (!this.isAuthenticated || token === '') return;
+    const generation: number = ++this.dataLoadGeneration;
     if (!silent) {
       this.isLoading = true;
     }
     this.errorMessage = '';
     this.dataSyncState = '同步中...';
     try {
-      this.projects = await this.projectService.listProjects();
+      const projects = await this.projectService.listProjects();
+      if (!this.isCurrentDataLoad(token, generation)) return;
+      this.projects = projects;
+      this.projectDeletionNotice = this.projectService.deletionNotice;
       if (this.projects.length > 0) {
         WidgetDataService.updateWidgetWithProject(getContext(this), this.projects[0]).catch(() => {});
       }
@@ -397,8 +438,11 @@ struct Index {
       // 归档项目单独取。主列表与跨项目聚合都不该包含它们，
       // 但归档必须可恢复，所以归档列表本身要拉回来放在管理入口里。
       try {
-        this.archivedProjects = await this.projectService.listArchivedProjects();
+        const archived = await this.projectService.listArchivedProjects();
+        if (!this.isCurrentDataLoad(token, generation)) return;
+        this.archivedProjects = archived;
       } catch (_e) {
+        if (!this.isCurrentDataLoad(token, generation)) return;
         // 归档列表拉取失败不影响主流程呈现
         this.archivedProjects = [];
       }
@@ -409,23 +453,27 @@ struct Index {
       const cards: KnowledgeCard[] = [];
       let failedCount = 0;
 
-      for (const p of this.projects) {
+      for (const p of projects) {
         try {
           const detail = await this.projectService.getProjectDetail(p.id);
+          if (!this.isCurrentDataLoad(token, generation)) return;
           for (const c of detail.cards) {
             c.projectId = p.id;
             c.projectTitle = p.title;
             cards.push(c);
           }
           const pIntervs = await this.interventionService.list(p.id);
+          if (!this.isCurrentDataLoad(token, generation)) return;
           for (const i of pIntervs) {
             intervs.push(i);
           }
           const pActs = await this.actionService.list(p.id);
+          if (!this.isCurrentDataLoad(token, generation)) return;
           for (const a of pActs) {
             acts.push(a);
           }
         } catch (err) {
+          if (!this.isCurrentDataLoad(token, generation)) return;
           failedCount++;
         }
       }
@@ -435,9 +483,10 @@ struct Index {
       this.allCards = cards;
       // 时态状态：区分 当前有效 / 已取代 / 存在冲突 / 待确认，不删除历史
       const statuses: CardTemporalStatus[] = [];
-      for (const p of this.projects) {
+      for (const p of projects) {
         try {
           const timeline = await this.memoryService.getDecisionTimeline(p.id);
+          if (!this.isCurrentDataLoad(token, generation)) return;
           for (const item of timeline.items) {
             const st = new CardTemporalStatus();
             st.cardId = item.card.id;
@@ -450,6 +499,7 @@ struct Index {
             statuses.push(st);
           }
         } catch (_e) {
+          if (!this.isCurrentDataLoad(token, generation)) return;
           // 单项目时态状态拉取失败不影响列表
         }
       }
@@ -460,6 +510,7 @@ struct Index {
         this.dataSyncState = '已同步';
       }
     } catch (e) {
+      if (!this.isCurrentDataLoad(token, generation)) return;
       if (e instanceof ApiError) {
         this.errorMessage = e.message;
       } else {
@@ -467,8 +518,12 @@ struct Index {
       }
       this.dataSyncState = '同步失败';
     } finally {
-      this.isLoading = false;
+      if (this.isCurrentDataLoad(token, generation)) this.isLoading = false;
     }
+  }
+
+  private isCurrentDataLoad(token: string, generation: number): boolean {
+    return this.isAuthenticated && token === SessionStore.getToken() && generation === this.dataLoadGeneration;
   }
 
   private openCreateDialog(): void {
@@ -589,14 +644,14 @@ struct Index {
     try {
       const menu = await promptAction.showActionMenu({
         title: TextFormatters.readableText(project.title, '项目管理'),
-        buttons: [
+        buttons: project.canDelete === true ? [
           { text: isArchived ? '恢复项目' : '归档项目', color: '#0A7EA4' },
           { text: '删除项目', color: '#FA5151' }
-        ]
+        ] : [{ text: isArchived ? '恢复项目' : '归档项目', color: '#0A7EA4' }]
       });
       if (menu.index === 0) {
         await this.toggleProjectArchive(project);
-      } else if (menu.index === 1) {
+      } else if (menu.index === 1 && project.canDelete === true) {
         this.projectDeleteConfirmId = project.id;
       }
     } catch (_e) {
@@ -614,8 +669,8 @@ struct Index {
     }
     this.projectLifecycleBusyId = project.id;
     try {
-      await this.projectService.deleteProject(project.id);
-      promptAction.showToast({ message: '项目及其记忆、行动与成果已删除' });
+      const message: string = await this.projectService.deleteProject(project.id, project.updatedAt);
+      promptAction.showToast({ message: message });
       this.projectDeleteConfirmId = '';
       await this.loadAllData(true);
     } catch (e) {
@@ -942,6 +997,10 @@ struct Index {
       return '搜索项目名称、描述或目标...';
     }
     if (this.currentMainTabIndex === 1) {
+      this.gcGeneration += 1;
+      this.gcSubmitting = false;
+      this.gcRequestId = '';
+      this.gcRequestPayload = '';
       return '搜索记忆标题、摘要或关键词...';
     }
     return '搜索提醒或行动标题...';
@@ -1031,17 +1090,31 @@ struct Index {
     }
     this.gcSubmitting = true;
     this.gcError = '';
+    const token: string = SessionStore.getToken();
+    const generation: number = this.gcGeneration;
+    const sourceType: string = this.gcSourceType;
+    const payload: string = JSON.stringify([projectId, trimmed, sourceType]);
+    if (this.gcRequestPayload !== payload || this.gcRequestId === '') {
+      this.gcRequestPayload = payload;
+      this.gcRequestId = `harmony-capture-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+    }
+    const requestId: string = this.gcRequestId;
     try {
-      const requestId: string = `harmony-capture-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
-      await this.memoryService.capture(projectId, trimmed, this.gcSourceType, requestId);
-      this.showGlobalCapture = false;
-      this.gcText = '';
-      promptAction.showToast({ message: '已沉淀为项目记忆' });
+      const saved = await this.memoryService.capture(projectId, trimmed, sourceType, requestId);
+      if (token !== SessionStore.getToken() || generation !== this.gcGeneration) return;
+      if (projectId === this.globalProjectId(this.gcProjectIndex) && trimmed === this.gcText.trim() && sourceType === this.gcSourceType) {
+        this.showGlobalCapture = false;
+        this.gcText = '';
+        this.gcRequestId = '';
+        this.gcRequestPayload = '';
+      }
+      promptAction.showToast({ message: this.memoryService.captureModeLabel(saved) });
       this.loadAllData();
     } catch (e) {
+      if (token !== SessionStore.getToken() || generation !== this.gcGeneration) return;
       this.gcError = e instanceof ApiError ? e.message : '记录失败，请稍后重试';
     } finally {
-      this.gcSubmitting = false;
+      if (token === SessionStore.getToken() && generation === this.gcGeneration) this.gcSubmitting = false;
     }
   }
 
@@ -2805,6 +2878,11 @@ struct Index {
             .constraintSize({ minHeight: 58 })
             .padding({ left: 14, right: 6, top: 7, bottom: 7 })
 
+            if (this.currentMainTabIndex === 0 && this.projectDeletionNotice !== '') {
+              Text(this.projectDeletionNotice).fontSize(12).fontColor(PMColors.INK_SECONDARY)
+                .padding(12).onClick(() => { this.loadAllData(true); })
+                .accessibilityText(`项目清除进度：${this.projectDeletionNotice}，点击刷新`)
+            }
             if (this.searchOpen && this.currentMainTabIndex < 3) {
               Row() {
                 TextInput({ text: this.globalSearchQuery, placeholder: this.searchPlaceholder() })
@@ -3157,6 +3235,26 @@ struct Index {
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.INK_PRIMARY)
 
+            // 材料优先是主入口：目标可以由 Agent 读懂材料后和用户一起核对，不必先自己想清楚。
+            Button('先放材料，让 Agent 读懂')
+              .type(ButtonType.Normal)
+              .fontSize(PMFontSize.BODY)
+              .fontColor(PMColors.BRAND)
+              .backgroundColor(PMColors.BRAND_LIGHT)
+              .borderRadius(PMRadius.SM)
+              .height(48)
+              .width('100%')
+              .margin({ top: PMSpacing.MD })
+              .onClick(() => {
+                this.closeCreateDialog();
+                router.pushUrl({ url: 'pages/ProjectIntake' });
+              })
+
+            Text('已经有明确目标，直接填写')
+              .fontSize(PMFontSize.CAPTION)
+              .fontColor(PMColors.INK_TERTIARY)
+              .margin({ top: PMSpacing.MD })
+
             Text('项目名称（至少 2 字）')
               .fontSize(PMFontSize.SECONDARY)
               .fontWeight(FontWeight.Medium)
@@ -3336,3 +3434,5 @@ struct Index {
     .backgroundColor(PMColors.BACKGROUND)
   }
 }
+
+

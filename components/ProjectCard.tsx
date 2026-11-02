@@ -13,6 +13,7 @@ export type ProjectCardData = {
   /** 非空表示该项目已归档：仍然可打开、可恢复，只是不再占用主列表。 */
   archivedAt: Date | string | null;
   updatedAt: Date | string;
+  canDelete?: boolean;
   _count: { cards: number; artifacts: number };
   dashboard: ProjectDashboard;
 };
@@ -29,6 +30,6 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
     {project.scenario === "COMPETITION" && <div className="relative mt-4 rounded-lg border border-[var(--rule)] bg-[var(--card-bg)] p-3.5"><div className="flex items-center justify-between gap-2 text-xs font-bold"><span className="inline-flex items-center gap-1.5 text-[var(--ink-soft)]"><Gauge size={14} className="text-[var(--teal-strong)]" />参赛准备项</span><span className="text-[var(--navy)] font-extrabold text-sm">{dashboard.readiness.completed}/{dashboard.readiness.total} 项已形成<span className="ml-1.5 font-semibold text-[var(--muted)]">{dashboard.readiness.percentage}%</span></span></div><div className="mt-2.5 h-2 overflow-hidden rounded-full bg-[var(--rule)]"><div className="h-full rounded-full bg-[var(--teal)] transition-all" style={{ width: `${dashboard.readiness.percentage}%` }} /></div><p className="mt-2 text-xs font-semibold text-[var(--muted)] leading-5">进度条与百分比只是这份清单的完成比例，不代表项目整体完成率{dashboard.readiness.blockingRiskCount > 0 ? `；${dashboard.readiness.blockingRiskCount} 条高风险提醒待处理` : ""}</p></div>}
     <div className="relative mt-5 flex flex-wrap gap-4 border-t archive-rule pt-4 text-xs font-semibold text-[var(--ink-soft)]"><span className="flex items-center gap-1.5"><Layers3 aria-hidden="true" size={14} className="text-[var(--teal)]" /> {project._count.cards} 张卡片</span><span className="flex items-center gap-1.5"><FileText aria-hidden="true" size={14} className="text-[var(--teal)]" /> {project._count.artifacts} 份成果</span></div>
     <div className="relative mt-auto flex flex-wrap items-center justify-between gap-2 pt-5"><Link prefetch={false} href={`/projects/${project.id}`} className="focus-ring rounded-lg px-2.5 py-1.5 text-xs font-bold text-[var(--navy)] hover:bg-[var(--paper)]">打开项目 <ArrowRight size={14} className="ml-1 inline" /></Link><Link href={project.scenario!=="COMPETITION" && dashboard.nextAction.detail.startsWith("参赛准备度") ? `/projects/${project.id}/records` : dashboard.nextAction.href} className={"focus-ring rounded-lg px-3.5 py-2 text-xs font-bold transition " + (dashboard.nextAction.tone === "critical" ? "bg-[var(--brick)] text-white hover:bg-[var(--brick)]/90" : "bg-[var(--teal-pale)] text-[var(--teal-strong)] hover:bg-[var(--teal)] hover:text-white")}>{project.scenario!=="COMPETITION" && dashboard.nextAction.detail.startsWith("参赛准备度") ? "记录最新进展" : dashboard.nextAction.label} →</Link></div>
-    <ProjectCardActions projectId={project.id} projectTitle={project.title} archived={project.archivedAt !== null} />
+    <ProjectCardActions projectId={project.id} projectTitle={project.title} canDelete={project.canDelete} expectedVersion={new Date(project.updatedAt).toISOString()} archived={project.archivedAt !== null} />
   </article>;
 }

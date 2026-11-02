@@ -2,6 +2,24 @@
 
 日期：2026-11-01。北京时间 UTC+8。[审查基线](COMPETITION_AGENT_PRODUCT_AUDIT.md)；[真实旅程](COMPETITION_REAL_USER_JOURNEY.md)；[开发交接](COMPETITION_IMPLEMENTATION_HANDOFF.md)。本表只调度原 G/FVT/UX/CT/PM 工作，不创建比赛业务模式或另一套长期路线。本轮所有实施、实验、安装和部署均未启动。
 
+## 2026-11-02 实施更新
+
+S0 已获用户启动实施授权。历史表中的 `PMcf1bbb0/PM4 未提交`、旧主分支及线上版本描述保留为 11/01 截点，不能作为当前状态。PM1～4 与入口已合并到基线 `aea257c`；S0 在独立树 `D:/Projects/hongmen-s0`、`codex/s0-trust-fixes` 实施，修复与各类 Gate 见 [S0 实施记录](S0_IMPLEMENTATION_2026-11-02.md)。主目录未提交签名/生成配置继续保留。
+
+依赖提交 `5d3ad3f`，核心修复提交 `784d99a`，后续会话/Worker/原生及存储收尾到 `8da4f05`。完整回归 1486 项通过，后续存储定向 36 项通过；Web E2E 为 33 业务＋1 setup 通过、2 原有跳过、0 失败/flaky；鸿蒙 92 项及 unsigned HAP 构建通过。工程、真实模型、设备、Linux、自然日和独立复核分别签收。生产 audit 为 0 不等于所有开发依赖告警已关闭，S0-B 的剩余 minimatch 风险在实施记录中单列。S0 尚未并入 master、推送或部署。
+
+## 2026-11-02 S1 实施更新
+
+S1 从 S0 候选 `4b2cbd3` 开独立树 `D:/Projects/hongmen-s1`、分支 `codex/s1-verified-project-journey`，分三个内部阶段提交：`42d934e`（A：材料→可纠正理解→确认建项→原 Capture 接回）、`05ea5c3`（B：历史条件/来源资格探针 + 原 Worker 持续责任真实进程证据）、`5f736c2`（C：手机接回原问题 + Web 同版本结果核查）。细节、Gate、失败与回滚见 [S1 实施记录](S1_IMPLEMENTATION_2026-11-02.md) 与 `evidence/s1-project-journey/20261102/ACCEPTANCE.json`。
+
+本节对第 4 节三块的进度更新：
+
+- **S1-A**：项目前材料走受控临时草稿（新增 `ProjectIntakeDraft`/`ProjectIntakeMaterial` 迁移），预览把原文/建议/未知/成功标准候选/下一问题分开；整体纠正沿原 `admitDirective`；确认复用 `createOwnedProjectInTx` 的 Project + OWNER + AgentRun 事务；材料随后经原 Capture/Attachment 同步。Web `/projects/new` 与鸿蒙新“先放材料”入口都可用；材料中的指令不会被当作用户命令。**未签收**：真实模型理解质量、真机交互。
+- **S1-B**：探针确认到期跨越、派生来源、来源链未知、局部/账户范围分离已由原 `effectiveContinuity`/`sourceUse`/`contextBuilder` 覆盖，因此没有重写 Composer，只补证据；原 Worker 真实进程探针验证“未到期不领取、缺云批准显式暂停、用户暂停不复活、无成功模型回执、清理幂等”。**未签收**：Linux/systemd、自然日、真实模型判断。
+- **S1-C**：卡片与入口携带 project/mission/question/approval/source/版本/期限意图，过期意图回到当前委托；Web 与手机用同一 `readback` 读同一问题与结果版本；进展区新增“已执行/已观察/已独立支持/用户报告/反例/未知”只读投影。**未签收**：真机冷/热启动、卡片系统刷新、离线 TTL。
+
+工程检查：全量单元/集成 197 文件 1504 项通过；`tsc`/`lint`/`build` 退出 0（lint 仍为 S0 的 9 条既有 warning，build 6 条路径追踪 warning）；Web E2E 35 业务＋1 setup 通过、2 原有跳过、0 失败/flaky；鸿蒙 100 项通过、unsigned HAP 构建通过（未签名、未安装）。真实模型、设备、自然日、第二类真实项目与独立复核保持 NOT_RUN，且不因工程通过而签收。
+
 ## 1. 外部期限与内部冻结
 
 外部时间来自用户通知，未取得原始赛方文件的逐项核验；材料负责人需保存通知原文和收件回执，不据此编造评分权重。
@@ -119,3 +137,13 @@ S2不是对既有PM能力降级，而是把尚需新增/外部开通的范围与
 优先保护：安全与真实数据、原目标/授权/预算和结果身份、已有动态调查/原文核对、停止纠正和接续、手机原问题与Web证据、完整可运行源工程。保留真实失败和UNKNOWN，不为了完整叙事加一轮假Dream或强制联网。
 
 暂停顺序：新穿戴/系统迁移 → 未开通Intents → 多文件/音频分享 → 新工具/provider → 非必要视觉重绘/独立仪表盘。核心分享如已稳定可保留，不因为列表顺序机械删除。S0无法关闭时只发布可被证明安全的范围；若核心也不安全，应报告交付风险而非伪造通过。
+
+## 9. 2026-11-02 S1 独立复核增量
+
+原候选 `24e58e9` 不能直接作为 S2 的审查通过基线：独立库实际复现五项失败，修复沿原服务完成。`63e19bb` 全量 198 文件 / 1520 项通过；`fd4f754` 再补指引跨期限、引文与日期校验，受影响 5 文件 / 43 项通过，最终 Web 构建/E2E 和证据身份以 `S1_INDEPENDENT_REVIEW_2026-11-02.md` 与 `evidence/s1-independent-review/20261102/ACCEPTANCE.json` 为准。
+
+当前是独立树的本地工程进展，尚未合并、推送或部署；原第 7 节历史 Gate 快照不被这些测试自动改成生产放行。真实模型、首次用户、模拟器、真机与自然日仍分别验收。用户负责的 Reflexion 阅读项目按 `S1_FINALS_ACCEPTANCE_GUIDE_2026-11-02.md` 留证据；S2 使用 `S2_IMPLEMENTATION_HANDOFF_2026-11-02.md`，保留第 5 节原五包及全部原 Agent 能力。
+
+S2 已于 11/02 从修复证据提交 `24004cf` 建独立树开始。首批 `6a90423` 在原回执补累计用量/未知费用，并修复鸿蒙进展字段错配；4 文件 / 28 项、类型/lint、定向任务 E2E 与 103 项鸿蒙单测及 unsigned HAP 通过。该批不等于完整计价、平台分享/Intents 或整个 S2 已完成；详见 `S2_IMPLEMENTATION_2026-11-02.md`。
+
+S2 后续批次（同一分支 `codex/s2-product-enhancements`）：`601f486` 项目前材料实际送入范围（预览 DTO + Web/鸿蒙覆盖提示 + 按页原文核对；8 项新测试、intake E2E、105 项鸿蒙）；`cc958be` 可核对的调用覆盖（原 AgentRun/Step 只读投影，UNPRICED 与 unknown 保留；4 项新测试、missions E2E）；`88383e1` 偏好边界回归（3 项）与平台能力只读探针。偏好边界由既有 PM/Continuity/Attention 覆盖，未新增偏好系统；系统分享/Intents 因本树无签名配置、模拟器 unsigned 安装返回 `9568332` 而保持 NOT_RUN；失败改进因缺样本同意保持 NOT_RUN。全量与 E2E 结果见该批实施记录与 `evidence/`，不得据此签收设备、实模或自然日。

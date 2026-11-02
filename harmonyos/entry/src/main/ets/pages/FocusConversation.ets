@@ -36,6 +36,7 @@ struct FocusConversation {
   @State private error: string = '';
   @State private cloud: boolean = false;
   @State private cloudAvailable: boolean = false;
+  @State private cloudReason: string = '未确认云模型资格，当前仅整理项目记录';
   @State private analysisReady: boolean = false;
   @State private r4Available: boolean = false;
   @State private investigationMode: string = 'STANDARD';
@@ -103,6 +104,8 @@ struct FocusConversation {
       const caps = await this.service.capabilities();
       if (epoch !== this.generation) { return; }
       this.cloudAvailable = caps.cloudAvailable;
+      const reason: string = caps.cloud?.reason ?? '';
+      this.cloudReason = reason === 'RULE_MODE' ? '当前使用规则整理，不调用云模型' : reason === 'NOT_CONFIGURED' ? '云模型配置未完成，当前仅整理项目记录' : reason === 'ACCOUNT_NOT_ELIGIBLE' ? '当前账号未开通云模型额度' : reason === 'DAILY_QUOTA_EXHAUSTED' ? '今日云模型额度已用完，当前仅整理项目记录' : '当前未确认云模型可用性，仅整理项目记录';
       this.cloud = caps.cloudAvailable; this.analysisReady = true; this.r4Available = caps.r4Available === true;
       if (!caps.enabled) { this.error = '全局协作尚未开启'; return; }
       await this.service.syncWorkspace();
@@ -257,7 +260,7 @@ struct FocusConversation {
     return ['最近哪个项目最值得先处理？', '这周有哪些待回应的事？'];
   }
   private cloudExplanation(): string {
-    return !this.analysisReady ? '正在确认分析方式…' : !this.cloudAvailable ? '未配置云模型，当前仅整理项目记录' : this.cloud ? '发送即允许云模型分析本次授权项目资料，可关闭' : '仅整理项目记录，不调用云模型';
+    return !this.analysisReady ? '正在确认分析方式…' : !this.cloudAvailable ? this.cloudReason : this.cloud ? '发送即允许云模型分析本次授权项目资料，可关闭；连通性以实际调用为准' : '仅整理项目记录，不调用云模型';
   }
   private hasPresentation(message: ConversationMessage): boolean { return supportsAgentPresentation(message.presentation); }
   private saveComposer(): void { if (this.view.id === '') { return; } const draft = new ConversationDraft(); draft.answer = this.text; ConversationDraftStore.save(this.view.id + ':composer', draft); }

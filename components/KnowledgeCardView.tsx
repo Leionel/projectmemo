@@ -15,7 +15,7 @@ export type KnowledgeCardTemporalData = {
   displayReason: string;
   evidenceRefs: TemporalEvidenceRef[];
 };
-export type KnowledgeCardData = { id: string; type: string; title: string; summary: string; keywords: unknown; relatedTasks: unknown; nextActions: unknown; importance: number; createdAt: Date | string; attachmentId?: string | null; capture: { rawText: string; sourceType: string | null }; outgoingLinks: Array<{ reason: string; score: number; relatedCard: { id: string; title: string } }>; incomingLinks: Array<{ reason: string; score: number; currentCard: { id: string; title: string } }>; temporal?: KnowledgeCardTemporalData };
+export type KnowledgeCardData = { id: string; type: string; title: string; summary: string; keywords: unknown; relatedTasks: unknown; nextActions: unknown; importance: number; createdAt: Date | string; attachmentId?: string | null; capture: { rawText: string; sourceType: string | null; processingJson?: unknown }; outgoingLinks: Array<{ reason: string; score: number; relatedCard: { id: string; title: string } }>; incomingLinks: Array<{ reason: string; score: number; currentCard: { id: string; title: string } }>; temporal?: KnowledgeCardTemporalData };
 
 
 const temporalStyles: Record<TemporalTopLevelState, string> = {
@@ -81,6 +81,8 @@ export function KnowledgeCardView({ card, projectId, compact = false, forcedOpen
     }
   }
 
+  const processing = card.capture.processingJson as { mode?: string } | null | undefined;
+  const processingLabel = processing?.mode === "MODEL" ? "云模型整理 · 待核对" : processing?.mode === "RULE" ? "规则整理 · 未调用云模型" : processing?.mode === "FALLBACK" ? "云端未完成 · 已按规则整理" : "整理方式未记录";
   return <article id={`card-${card.id}`} tabIndex={-1} className="timeline-entry card-surface min-w-0 scroll-mt-24 rounded-lg p-5 break-words focus:outline-none focus:ring-4 focus:ring-[rgba(45,139,116,.18)] sm:p-6">
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div className="flex flex-wrap items-center gap-2"><span className={`rounded-md px-2.5 py-1.5 text-xs font-bold ${getKnowledgeTypeColor(type)}`}>{knowledgeTypeLabels[type]}</span>{card.capture.sourceType && <span className="paper-tab px-2 py-1 text-xs text-[var(--ink-soft)]">{card.capture.sourceType}</span>}<span className="text-xs text-[var(--muted)]">{new Date(card.createdAt).toLocaleString("zh-CN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span></div>
@@ -93,6 +95,7 @@ export function KnowledgeCardView({ card, projectId, compact = false, forcedOpen
       <a href={`/api/projects/${projectId}/attachments/${card.attachmentId}/file`} target="_blank" rel="noopener noreferrer" className="font-semibold hover:underline">查看关联材料原件</a>
     </div>}
 
+    {showFull && <p className="mt-2 text-xs text-[var(--muted)]">{processingLabel}</p>}
     <p className={(showFull ? "mt-2.5 leading-7 " : "mt-2 line-clamp-2 text-sm leading-6 ") + "text-[var(--ink-soft)] [overflow-wrap:anywhere]"}>{card.summary}</p>
     <div className="mt-4 flex flex-wrap gap-2">{keywords.slice(0, showFull ? keywords.length : 4).map((keyword, index) => <span key={`${keyword}-${index}`} className="paper-tab px-2.5 py-1 text-xs font-medium text-[var(--ink-soft)]">#{keyword}</span>)}{!showFull && keywords.length > 4 && <span className="px-2 py-1 text-xs font-bold text-[var(--muted)]">+{keywords.length - 4}</span>}</div>
 

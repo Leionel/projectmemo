@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-02T07:30:00.000Z",
+  "scope": "S1 vertical slice (materials → corrected understanding → confirmed project → dynamic investigation → bounded responsibility → phone/Web continuation); local engineering candidate only, not a production release",
+  "baseline": "4b2cbd36882b505613be6960b51d9fc33b8deedc",
+  "sourceCommits": {
+    "s1a": "42d934e",
+    "s1b": "05ea5c3",
+    "s1c": "5f736c2"
+  },
+  "branch": "codex/s1-verified-project-journey",
+  "worktree": "D:/Projects/hongmen-s1",
+  "owner": "Codex",
+  "independentReviewer": null,
+  "gates": {
+    "security": "PARTIAL: intake consent/quota/idempotency/preview-binding/source-suppression negative tests pass; independent review and production release not performed",
+    "functional": "LOCAL_ENGINEERING_PASS_WITH_DECLARED_SKIPS",
+    "evidence": "PARTIAL: real model, device/simulator, natural-day, second real project and independent review NOT_RUN"
+  },
+  "userFacingCapabilities": [
+    "从真实材料开始建项，不必先写好完整目标（Web /projects/new，鸿蒙“先放材料，让 Agent 读懂”）",
+    "看懂原文/推断/未知/成功标准候选/下一问题的分离预览，并整体纠正（literal 生效、解释候选保留、必要时只问一个问题）",
+    "确认后才建立 Project + OWNER + AgentRun 回执；同请求重放返回同一项目，旧预览/换账号/到期/并发都拒绝",
+    "材料在建项后第二阶段进入原 Capture/Attachment，失败可重试且不重复建项",
+    "卡片/入口打开同一个 Mission 与 question/approval，过期意图回到当前委托",
+    "Web 与手机读回同一结果版本，并用“已执行/已观察/已独立支持/用户报告/反例/未知”分类呈现"
+  ],
+  "reusedOriginalPaths": [
+    "lib/repositories/projects.ts createOwnedProjectInTx (Project + OWNER + AgentRun)",
+    "lib/services/captureService.ts processCaptureWithRequest",
+    "lib/services/attachmentService.ts processAttachmentUpload + extractPdfText/inferAndValidateFileType/extractImageText",
+    "lib/continuity/admission.ts admitDirective",
+    "lib/auth/cloudQuota.ts AccountCloudUsage + new reserveIntakeCloudCall",
+    "lib/auth/cloudCapability.ts",
+    "lib/mission/readback.ts readMissionBack",
+    "scripts/mission-worker.ts scan loop (new INTAKE_CLEANUP)",
+    "AgentMission runner/continuation/attention, Action + resultCardId chain",
+    "HarmonyOS FormExtension/WidgetDataService/EntryAbility/MissionDetail/FocusConversation"
+  ],
+  "newContracts": [
+    { "name": "ProjectIntakeDraft / ProjectIntakeMaterial", "migration": "20261102140000_project_intake_draft",
+      "why": "Capture/Attachment 都要求 projectId；假项目会污染业务事实，临时材料需要 owner/hash/修订/期限/处理状态/清理责任" },
+    { "name": "reserveIntakeCloudCall / settleIntakeCloudCall", "why": "reserveCloudCall 在无项目时直接返回，会绕过账户额度与处理许可" },
+    { "name": "lib/intake/contracts.ts + lib/intake/prompt.ts", "why": "冻结材料/理解/接受字段/预览 hash 的绑定，并要求引文逐字核对" },
+    { "name": "lib/mission/reviewProgress.ts", "why": "把既有 Step/Output/Action/回执投影成六类事实，禁止用它们推断现实目标达成" },
+    { "name": "MissionWidgetSnapshot 扩展 + MissionHandoffParams", "why": "卡片要打开同一个原问题，但不能携带批准令牌或私人正文" }
+  ],
+  "environment": {
+    "platform": "win32",
+    "node": "v24.16.0",
+    "database": "synthetic isolated Vitest/E2E/OS-temp databases; vitest 独立库先执行 prisma migrate deploy；未复制真实数据库",
+    "model": "LLM_MODE=mock; intake understanding 用注入契约替身验证，未调用真实模型",
+    "paidModelCallsInitiated": 0,
+    "harmony": "DevEco Studio local SDK; ohpm install in this worktree; unsigned HAP only"
+  },
+  "checks": {
+    "fullUnit": {
+      "command": "npm.cmd test",
+      "exitCode": 0,
+      "log": "checks/s1-full-tests-final.log",
+      "files": 197,
+      "passed": 1504,
+      "failed": 0,
+      "durationSeconds": 672.51,
+      "sourceState": "final working tree of 5f736c2 (before docs commit)"
+    },
+    "newUnitTests": [
+      "tests/projectIntake.test.ts (8) — 材料/理解/纠正/确认/幂等/并发/旧预览/额度/注入/引文/部分失败/到期清理",
+      "tests/s1MemoryInfluence.test.ts (4) — 到期跨越、派生来源、来源链未知、局部范围",
+      "tests/s1ResultProgress.test.ts (5) — 六类投影边界",
+      "tests/s0WorkerIdentity.test.ts + tests/ux3WorkerCycle.test.ts (5) — 巡检失败不被同轮成功掩盖"
+    ],
+    "types": { "command": "npm.cmd exec tsc -- --noEmit", "exitCode": 0, "log": "checks/s1-types-final.log" },
+    "lint": { "command": "npm.cmd run lint", "exitCode": 0, "log": "checks/s1-lint-final.log", "errors": 0, "warnings": 9,
+      "note": "与 S0 相同的 9 条既有 warning；本任务新增的两条已修掉" },
+    "webBuild": { "command": "npm.cmd run build", "exitCode": 0, "log": "checks/s1-build-final.log", "tracingWarnings": 6,
+      "note": "6 条路径追踪 warning 与 S0 基线相同" },
+    "webE2e": {
+      "command": "npm.cmd run test:e2e",
+      "exitCode": 0,
+      "log": "checks/s1-e2e-full-final.log",
+      "report": "checks/e2e-results-final.json",
+      "setupPassed": 1,
+      "businessPassed": 35,
+      "skipped": 2,
+      "failed": 0,
+      "flaky": 0,
+      "retries": 0,
+      "stats": { "expected": 36, "skipped": 2, "unexpected": 0, "flaky": 0, "durationMs": 207034 },
+      "skippedCases": [
+        "Focus reads a D1/D2 proposal, confirms a directed read and returns its original result",
+        "F3 follows one original question, reads new evidence, retains unread across reload and stops"
+      ],
+      "newCases": ["project-intake.spec.ts", "s1-cross-device.spec.ts"]
+    },
+    "harmonyTests": { "command": "npm.cmd run harmony:test", "exitCode": 0, "log": "checks/s1-harmony-test-final.log",
+      "passed": 100, "failed": 0, "errors": 0, "ignored": 0, "note": "含新增 ProjectIntake 与 S1Handoff 合同测试" },
+    "hap": { "command": "npm.cmd run harmony:build", "exitCode": 0, "log": "checks/s1-hap-final.log",
+      "size": 7898859, "sha256": "88d6280905c2584373cf969a3f743b8b0628c378ca2dbda9d0e192d9c4b4867f",
+      "signed": false, "installed": false },
+    "workerResponsibilityProbe": {
+      "command": "node --env-file=.env --import tsx evidence/s1-project-journey/20261102/worker-responsibility-probe.mjs",
+      "exitCode": 0, "log": "checks/s1-worker-responsibility-final.log",
+      "realOriginalWorkerProcesses": 2,
+      "assertions": [
+        "到期临时原件被真实删除，草稿 EXPIRED、材料清理身份保留",
+        "未到检查时间的委托保持 READY 且无 CLAIMED 事件",
+        "缺云上下文批准的到期委托 PAUSED 且错误码明确",
+        "用户暂停的委托不被后台复活",
+        "没有成功模型回执",
+        "第二轮进程不重复领取、清理幂等"
+      ],
+      "limits": ["Windows 进程探针", "非 Linux/systemd", "无设备或自然日验收", "未调用真实模型"]
+    },
+    "s0WorkerRegression": {
+      "command": "node --env-file=.env --import tsx evidence/s0-trust/20261102/worker-process-probe.mjs",
+      "exitCode": 0, "log": "checks/s1-s0-worker-regression.log",
+      "note": "同一 release 下复跑 S0 探针；发现并修复“同轮其它扫描成功会掩盖一处持续失败”的缺陷后通过。需要 --env-file 是因为本工作树有本地 .env，S0 探针要求两侧环境一致"
+    },
+    "migrations": {
+      "outcome": "PASS",
+      "evidence": ["prisma/migrations/20261102140000_project_intake_draft/migration.sql", "checks/s1-full-tests-final.log"],
+      "coverage": ["空库全量重放（独立 vitest 库 migrate deploy）", "旧库副本升级由既有 tests/continuityMigration.test.ts 与 tests/database.integration.test.ts 覆盖并在全量中通过"],
+      "notPerformed": ["真实库迁移", "reset / db:setup 修复现有环境"]
+    }
+  },
+  "retainedFailures": [
+    { "path": "failures/e2e-first-failures.log", "reason": "首轮 S1 E2E 选择器 strict-mode 冲突、accessToken 字段名、202/200 断言与 readback 需显式 questionId；逐项修正后同一命令退出 0" },
+    { "path": "failures/full-tests-first-run-uninitialized-db.log", "reason": "新工作树的独立 vitest 库未初始化；按 AGENTS 先 migrate deploy，未用 db:setup/reset 修复" },
+    { "path": "checks/s1-s0-worker-regression.log", "reason": "S0 worker 探针在本工作树先失败两次（env 不一致、同轮成功掩盖失败），修复 presence 语义并统一 env 后通过" }
+  ],
+  "notPerformed": [
+    "生产部署",
+    "真实数据库迁移/清空",
+    "push 或合并 master",
+    "HAP 签名/安装到模拟器或真机",
+    "Linux/systemd 验收",
+    "真实模型理解/调查质量与付费调用",
+    "自然日三天责任轨",
+    "第二类真实项目（科研/课程）材料与使用同意",
+    "独立复核"
+  ],
+  "remainingRisks": [
+    "项目前理解只有合同验证；真实模型的理解质量、追问必要性与成本未测",
+    "鸿蒙新旧入口、卡片刷新、冷/热启动与换账号没有设备证据；HAP 未签名未安装",
+    "自然日责任、App 退出后的持续观察与预算累计没有真实日期证据",
+    "S0 开发依赖 minimatch 告警仍未关闭，未添加 audit ignore",
+    "第二类真实项目（科研/课程）仍未提供材料与同意"
+  ],
+  "rollback": [
+    "git revert 5f736c2 / 05ea5c3 / 42d934e；迁移只新增两张表，回退保留数据不 DROP",
+    "关闭材料入口时保留手工建项与原 Mission/Conversation/Action 路径",
+    "移除 INTAKE_CLEANUP 扫描即可停止自动过期清理，但不得同时移除草稿到期判定",
+    "卡片定位能力回退可以退回“只打开 Mission”，但 handoffIntentExpired 与 readback 的服务端校验必须保留"
+  ],
+  "handoffIdentity": {
+    "project": "S1-A 正常入口建立；与 AgentRun(provider=project-intake-confirm-v1) 回执绑定",
+    "material": "ProjectIntakeMaterial.id + sha256 + revision；同步后对应原 Capture.id 或 Attachment.id",
+    "responsibility": "AgentMission.id（planRevision/contextVersion/budgetUsedJson）+ QUESTION 事件 id",
+    "result": "AgentMissionOutput(id,revision) + ActionItem.resultCardId",
+    "cardTarget": "MissionWidgetSnapshot.{questionId,approvalId,sourceId,missionVersion,expiresAt}"
+  }
+}

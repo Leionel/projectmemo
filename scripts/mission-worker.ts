@@ -9,6 +9,9 @@ import { runConversationTurn } from "../lib/conversation/turnWorker";
 import { processInvestigationDelegations } from "../lib/mission/investigationDelegation";
 import { runWorkerCycle, type WorkerCycleState } from "../lib/mission/workerCycle";
 import { recordWorkerPresence } from "../lib/mission/workerPresence";
+import { processProjectDeletions } from "../lib/services/projectDeletionService";
+import { expireIntakeDrafts } from "../lib/services/projectIntakeService";
+import { isFeatureEnabled } from "../lib/config/features";
 
 const workerId = randomUUID();
 let stopping = false;
@@ -21,20 +24,29 @@ const heartbeat=setInterval(()=>recordWorkerPresence({workerId,version:"r4-ux3-w
 try {
   do {
     let successfulScans=0;
-    const scanned=async(run:()=>Promise<unknown>)=>{const result=await run();if(++successfulScans===3)recordWorkerPresence({workerId,scan:true});return result;};
+    const scanned=async(run:()=>Promise<unknown>)=>{const result=await run();if(++successfulScans===4)recordWorkerPresence({workerId,scan:true});return result;};
     const result = await runWorkerCycle(state, {
       scan: [
+        { name: "PROJECT_CLEANUP", run: () => scanned(() => processProjectDeletions()) },
+        { name: "INTAKE_CLEANUP", run: () => scanned(() => expireIntakeDrafts()) },
         { name: "IMPACT", run: () => scanned(()=>consumeImpactJobs()) },
         { name: "MATERIAL", run: () => scanned(()=>processMaterialContinuationBatch()) },
         { name: "DELEGATION", run: () => scanned(()=>processInvestigationDelegations()) },
       ],
-      conversation: () => runConversationTurn(),
-      mission: () => runMissionSlice({ workerId,onClaim:()=>recordWorkerPresence({workerId,claim:true}) }),
-      onError: (name) => console.error(`委托 Worker ${name} 本次处理失败，请核对功能开关、迁移和原任务记录`),
+      conversation: () => runConversationTurn({ onClaim: () => recordWorkerPresence({ workerId, claim: true }) }),
+      mission: () => isFeatureEnabled("MISSION_ENABLED", false)
+        ? runMissionSlice({ workerId,onClaim:()=>recordWorkerPresence({workerId,claim:true}) })
+        : Promise.resolve(false),
+      onError: (name) => {
+        if (["PROJECT_CLEANUP", "INTAKE_CLEANUP", "IMPACT", "MATERIAL", "DELEGATION"].includes(name)) recordWorkerPresence({ workerId, failedScan: name });
+        console.error(`委托 Worker ${name} 本次处理失败，请核对功能开关、迁移和原任务记录`);
+      },
     });
 
 
     if (process.argv.includes("--once") && result.failures) process.exitCode = 1;
+    // 只有整轮无失败才清除失败信号；任何一处持续失败都不会被其它成功扫描掩盖。
+    if (!result.failures) recordWorkerPresence({ workerId, cleanCycle: true });
     if (!result.ran && !process.argv.includes("--once")) await setTimeout(result.failures ? 2000 : 1000);
   } while (!stopping && !process.argv.includes("--once"));
 } finally {

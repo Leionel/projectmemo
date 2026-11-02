@@ -1,6 +1,7 @@
 import { ApiClient } from './ApiClient';
 import {
   ProjectsResponse,
+  ProjectDeletionInfo,
   Project,
   ProjectCreateInput,
   ProjectUpdateInput,
@@ -13,6 +14,8 @@ import { EvaluateResponse, EvaluateProjectInput } from '../models/Intervention';
 
 export class ProjectService {
   private client: ApiClient = new ApiClient();
+  deletionNotice: string = '';
+  private createRequestIds: Map<string, string> = new Map<string, string>();
 
   /**
    * 主列表默认不含已归档项目。
@@ -20,12 +23,16 @@ export class ProjectService {
    */
   async listProjects(): Promise<Project[]> {
     const response: ProjectsResponse = await this.client.get<ProjectsResponse>('/api/projects');
+    const pending: number = (response.deletions ?? []).filter(item => item.status !== 'COMPLETED').length;
+    this.deletionNotice = pending > 0 ? `${pending} 个项目已停用，附件清理待完成；刷新查看进度` : (response.deletions ?? []).length > 0 ? response.deletions[0].message : '';
     return this.validateProjects(response);
   }
 
   /** 已归档项目单独取，供归档管理入口使用。 */
   async listArchivedProjects(): Promise<Project[]> {
     const response: ProjectsResponse = await this.client.get<ProjectsResponse>('/api/projects?archived=true');
+    const pending: number = (response.deletions ?? []).filter(item => item.status !== 'COMPLETED').length;
+    this.deletionNotice = pending > 0 ? `${pending} 个项目已停用，附件清理待完成；刷新查看进度` : (response.deletions ?? []).length > 0 ? response.deletions[0].message : '';
     return this.validateProjects(response);
   }
 
@@ -48,10 +55,16 @@ export class ProjectService {
   }
 
   async createProject(input: ProjectCreateInput): Promise<Project> {
+    const payload: string = JSON.stringify([input.title, input.description, input.goal, input.scenario, input.deadline]);
+    if (input.requestId === '') {
+      input.requestId = this.createRequestIds.get(payload) ?? `project-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    }
+    this.createRequestIds.set(payload, input.requestId);
     const response: ProjectCreateResponse = await this.client.post<ProjectCreateResponse>(
       '/api/projects',
       input
     );
+    this.createRequestIds.delete(payload);
     return response.project;
   }
 
@@ -88,8 +101,9 @@ export class ProjectService {
    * 删除项目：服务端级联清空该项目的记忆卡片、行动与成果，不可恢复。
    * 与归档性质不同，界面上必须明确区分并二次确认。
    */
-  async deleteProject(id: string): Promise<void> {
-    await this.client.delete<void>(`/api/projects/${id}`);
+  async deleteProject(id: string, expectedVersion: string): Promise<string> {
+    const result: ProjectDeletionResponse = await this.client.delete<ProjectDeletionResponse>(`/api/projects/${id}`, id, expectedVersion);
+    return result.deletion.message;
   }
 
   async evaluateProject(id: string, scenario?: string, clearSimulation: boolean = false): Promise<EvaluateResponse> {
@@ -102,4 +116,8 @@ export class ProjectService {
     }
     return this.client.post<EvaluateResponse>(`/api/projects/${id}/agent/evaluate`, body);
   }
+}
+
+class ProjectDeletionResponse {
+  deletion: ProjectDeletionInfo = new ProjectDeletionInfo();
 }

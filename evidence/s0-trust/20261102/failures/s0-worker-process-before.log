@@ -1,0 +1,20 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: 委托 Worker MISSION 本次处理失败，请核对功能开关、迁移和原任务记录
+
+
+1 !== 0
+
+    at <anonymous> (D:\Projects\hongmen-s0\evidence\s0-trust\20261102\worker-process-probe.mjs:56:10)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 1,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.16.0

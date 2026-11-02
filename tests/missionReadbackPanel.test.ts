@@ -3,6 +3,7 @@ import { createElement } from "react";
 import { render, screen, cleanup } from "@testing-library/react";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { MissionReadback } from "@/components/MissionReadback";
+import { missionResourceUsageOf } from "@/lib/mission/resourceUsage";
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 function readback(missionVersion: number) {
   return {
@@ -24,6 +25,17 @@ function readback(missionVersion: number) {
   };
 }
 describe("原任务读回面板", () => {
+  it("用量在原任务内展开，未知不显示为零费用", async () => {
+    const result = { ...readback(7), resourceUsage: missionResourceUsageOf({ models: 2, tools: 1, inputTokens: 120, outputTokens: 30, unknownCalls: 1 }) };
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, json: async () => ({ readback: result }) })));
+    render(createElement(MissionReadback, { missionId: "m" }));
+    const summary = await screen.findByText("本次用量 · 模型 2 次 · 工具 1 次");
+    summary.click();
+    expect(screen.getByText(/已记录输入 120 token/)).toBeTruthy();
+    expect(screen.getByText(/不代表完整用量/)).toBeTruthy();
+    expect(screen.getByText(/费用尚不能核算/)).toBeTruthy();
+    expect(screen.queryByText(/总费用.*0/)).toBeNull();
+  });
   it("定向材料读回展示使用事实，区分绑定与未核验", async () => {
     const urls: string[] = [];
     vi.stubGlobal("fetch", vi.fn(async (url: string) => { urls.push(url); return { ok: true, json: async () => ({ readback: readback(7) }) }; }));

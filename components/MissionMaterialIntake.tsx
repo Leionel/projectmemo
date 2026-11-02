@@ -20,6 +20,6 @@ export function MissionMaterialIntake({ projectId, missionId, questionId, ownerI
       {error && <p role="status" className="text-sm text-[var(--brick)]">{error}</p>}
       <a className="workspace-link focus-ring" href={missionNavigationHref(projectId, missionId, { questionId, ...(sourceId ? { sourceId } : {}) })}>{sourceId ? "回到原问题，核对这份资料 →" : "返回原委托 →"}</a>
     </section>
-    <CaptureBox key={`${ownerId}:${missionId}:${questionId}`} projectId={projectId} inboxEnabled={inboxEnabled} draftScope={`${ownerId}:${missionId}:${questionId}`} onMaterialSaved={setSourceId}/>
+    <CaptureBox key={`${ownerId}:${missionId}:${questionId}`} ownerId={ownerId} projectId={projectId} inboxEnabled={inboxEnabled} draftScope={`${missionId}:${questionId}`} onMaterialSaved={setSourceId}/>
   </>;
 }

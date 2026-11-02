@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/s2ResourceReadback.test.ts tests/missionReadbackPanel.test.ts tests/s1ResultProgress.test.ts tests/copilotContinuation.test.ts
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-s2
+
+
+ Test Files  4 passed (4)
+      Tests  28 passed (28)
+   Start at  17:21:10
+   Duration  12.61s (transform 1.96s, setup 0ms, import 6.24s, tests 3.38s, environment 1.85s)
+

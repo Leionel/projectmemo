@@ -13,6 +13,9 @@ type WorkerPresenceDetail = {
   isProcessAlive?: boolean;
   isActivelyInspecting?: boolean;
   hasClaimedWork?: boolean;
+  identityMatches?: boolean;
+  mismatchReason?: string | null;
+  failedPhase?: string | null;
 };
 
 type Responsibility = {
@@ -381,7 +384,7 @@ export function MissionResponsibilityPanel({
           </span>
           {workerPresenceDetail && (
             <span className="text-xs text-[var(--muted)]">
-              {workerPresenceDetail.isActivelyInspecting ? "近期有成功巡检" : "尚无近期巡检回执"}
+              {workerPresenceDetail.mismatchReason ? "后台版本或配置与当前服务不一致" : workerPresenceDetail.failedPhase ? "最近巡检失败，等待重试" : workerPresenceDetail.isActivelyInspecting ? "近期有成功巡检" : "尚无近期巡检回执"}
               {workerPresenceDetail.hasClaimedWork ? " · 有领取记录" : ""}
             </span>
           )}

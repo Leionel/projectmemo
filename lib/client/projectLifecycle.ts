@@ -28,11 +28,12 @@ const ACTION_LABEL: Record<ProjectLifecycleAction, string> = {
 export async function runProjectLifecycleAction(
   projectId: string,
   action: ProjectLifecycleAction,
+  expectedVersion?: string,
 ): Promise<ProjectLifecycleResult> {
   let response: Response;
   try {
     response = action === "delete"
-      ? await fetch(`/api/projects/${projectId}`, { method: "DELETE" })
+      ? await fetch(`/api/projects/${projectId}`, { method: "DELETE", headers: { "X-Project-Delete-Confirmation": projectId, "If-Match": expectedVersion ?? "" } })
       : await fetch(`/api/projects/${projectId}/${action}`, { method: "POST" });
   } catch {
     return { ok: false, message: `网络异常，${ACTION_LABEL[action]}未完成，请重试` };
@@ -40,7 +41,7 @@ export async function runProjectLifecycleAction(
 
   const data = response.status === 204
     ? null
-    : await response.json().catch(() => null) as { error?: { message?: string }; project?: { archivedAt?: string | null } } | null;
+    : await response.json().catch(() => null) as { error?: { message?: string }; deletion?: { message: string; status: string }; project?: { archivedAt?: string | null } } | null;
 
   if (!response.ok) {
     return { ok: false, message: data?.error?.message ?? `${ACTION_LABEL[action]}失败，请稍后重试` };
@@ -48,7 +49,7 @@ export async function runProjectLifecycleAction(
 
   return {
     ok: true,
-    message: `${ACTION_LABEL[action]}成功`,
+    message: data?.deletion?.message ?? `${ACTION_LABEL[action]}成功`,
     archivedAt: data?.project?.archivedAt ?? null,
   };
 }

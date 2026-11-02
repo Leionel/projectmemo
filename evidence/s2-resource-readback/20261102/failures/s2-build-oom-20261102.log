@@ -1,0 +1,221 @@
+
+> projectmemo@0.1.0 build
+> next build
+
+▲ Next.js 16.4.3 (Turbopack)
+✓ Running next.config.ts took 95ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 9.3s
+  Running TypeScript ...
+  Finished TypeScript in 10.3s ...
+  Collecting page data using 27 workers ...
+
+<--- Last few GCs --->
+
+[12704:0000025941541000]     7776 ms: Scavenge 67.9 (101.4) -> 52.2 (108.7) MB, pooled: 0 MB, 40.19 / 0.00 ms  (average mu = 0.996, current mu = 0.996) allocation failure; 
+
+FATAL ERROR: MarkCompactCollector: young object promotion failed Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+
+<--- Last few GCs --->
+
+[65860:0000018A2308B000]     7751 ms: Mark-Compact 42.7 (94.2) -> 38.8 (106.3) MB, pooled: 0 MB, 42.25 / 0.01 ms  (+ 11.2 ms in 58 steps since start of marking, biggest step 10.1 ms, walltime since start of marking 76 ms) (average mu = 0.993, current mu =[65860:0000018A2308B000]     9608 ms: Scavenge 106.1 (140.2) -> 73.2 (185.0) MB, pooled: 0 MB, 44.73 / 0.00 ms  (average mu = 0.993, current mu = 0.993) allocation failure; 
+
+FATAL ERROR: NewSpace::EnsureCurrentCapacity Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+⨯ Next.js build worker exited with code: 3221226505 and signal: null
+Turbopack build encountered 6 warnings:
+./lib/mission/workerPresence.ts:64:9
+Warning: Dynamic filesystem access causes tracing of the whole project
+  62 |   let existing: Partial<WorkerPresenceInfo> = inMemoryPresence ?? {};
+  63 |   try {
+> 64 |     if (fs.existsSync(filePath)) {
+     |         ^^^^^^^^^^^^^^^^^^^^^^^
+  65 |       existing = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  66 |     }
+  67 |   } catch {}
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: fs.existsSync(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  #1 [App Route]:
+    ./lib/mission/workerPresence.ts
+    ./lib/services/attachmentService.ts
+    ./app/api/projects/[id]/attachments/[attachmentId]/retry/route.ts
+
+  #2 [App Route]:
+    ./lib/mission/workerPresence.ts
+    ./lib/mission/responsibility.ts
+    ./app/api/missions/[id]/responsibility/route.ts
+
+
+./lib/mission/workerPresence.ts:100:9
+Warning: Dynamic filesystem access causes tracing of the whole project
+   98 |   let data: WorkerPresenceInfo | null = null;
+   99 |   try {
+> 100 |     if (fs.existsSync(filePath)) {
+      |         ^^^^^^^^^^^^^^^^^^^^^^^
+  101 |       data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  102 |     }
+  103 |   } catch {}
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: fs.existsSync(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  #1 [App Route]:
+    ./lib/mission/workerPresence.ts
+    ./lib/services/attachmentService.ts
+    ./app/api/projects/[id]/attachments/[attachmentId]/retry/route.ts
+
+  #2 [App Route]:
+    ./lib/mission/workerPresence.ts
+    ./lib/mission/responsibility.ts
+    ./app/api/missions/[id]/responsibility/route.ts
+
+
+./lib/mission/workerPresence.ts:145:9
+Warning: Dynamic filesystem access causes tracing of the whole project
+  143 |   const filePath = getPresencePath();
+  144 |   try {
+> 145 |     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      |         ^^^^^^^^^^^^^^^^^^^^^^^
+  146 |   } catch {}
+  147 | }
+  148 |
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: fs.existsSync(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  #1 [App Route]:
+    ./lib/mission/workerPresence.ts
+    ./lib/services/attachmentService.ts
+    ./app/api/projects/[id]/attachments/[attachmentId]/retry/route.ts
+
+  #2 [App Route]:
+    ./lib/mission/workerPresence.ts
+    ./lib/mission/responsibility.ts
+    ./app/api/missions/[id]/responsibility/route.ts
+
+
+./lib/mission/workerPresence.ts:65:29
+Warning: Dynamic filesystem access causes tracing of the whole project
+  63 |   try {
+  64 |     if (fs.existsSync(filePath)) {
+> 65 |       existing = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+     |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  66 |     }
+  67 |   } catch {}
+  68 |
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: fs.readFileSync(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  #1 [App Route]:
+    ./lib/mission/workerPresence.ts
+    ./lib/services/attachmentService.ts
+    ./app/api/projects/[id]/attachments/[attachmentId]/retry/route.ts
+
+  #2 [App Route]:
+    ./lib/mission/workerPresence.ts
+    ./lib/mission/responsibility.ts
+    ./app/api/missions/[id]/responsibility/route.ts
+
+
+./lib/mission/workerPresence.ts:101:25
+Warning: Dynamic filesystem access causes tracing of the whole project
+   99 |   try {
+  100 |     if (fs.existsSync(filePath)) {
+> 101 |       data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+      |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  102 |     }
+  103 |   } catch {}
+  104 |
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: fs.readFileSync(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  #1 [App Route]:
+    ./lib/mission/workerPresence.ts
+    ./lib/services/attachmentService.ts
+    ./app/api/projects/[id]/attachments/[attachmentId]/retry/route.ts
+
+  #2 [App Route]:
+    ./lib/mission/workerPresence.ts
+    ./lib/mission/responsibility.ts
+    ./app/api/missions/[id]/responsibility/route.ts
+
+
+./lib/services/attachmentService.ts:37:19
+Warning: Dynamic filesystem access causes tracing of the whole project
+  35 |   const executable = process.env.PDFTOTEXT_PATH || "pdftotext";
+  36 |   return new Promise((resolve, reject) => {
+> 37 |     const child = spawn(executable, ["-layout", "-", "-"], {
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 38 |       windowsHide: true,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+> 39 |       stdio: ["pipe", "pipe", "pipe"],
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 40 |     });
+     | ^^^^^^
+  41 |     const stdout: Buffer[] = [];
+  42 |     const stderr: Buffer[] = [];
+  43 |     const timeout = setTimeout(() => child.kill(), 15_000);
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: child_process.spawn(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  #1 [App Route]:
+    ./lib/services/attachmentService.ts
+    ./app/api/projects/[id]/attachments/[attachmentId]/correct/route.ts
+
+  #2 [App Route]:
+    ./lib/services/attachmentService.ts
+    ./lib/services/attachmentService.ts
+    ./app/api/projects/[id]/attachments/[attachmentId]/retry/route.ts
+
+

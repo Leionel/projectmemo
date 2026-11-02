@@ -9,7 +9,8 @@
   "sourceCommits": {
     "intakeCoverage": "601f486",
     "callCoverage": "cc958be",
-    "adaptiveAndPlatformProbe": "88383e1"
+    "adaptiveAndPlatformProbe": "88383e1",
+    "withdrawalNoteFix": "aaf85f6"
   },
   "data": "isolated synthetic databases; injected model fixtures; no paid model calls; emulator probing read-only",
   "functional": {
@@ -28,7 +29,9 @@
       "report": "logs/s2-e2e-results-final.json", "expected": 37, "setupPassed": 1, "businessPassed": 36,
       "skipped": 2, "unexpected": 0, "flaky": 0, "retries": 0, "durationMs": 210429,
       "startTime": "2026-11-02T11:05:30.377Z",
-      "firstAttempt": { "exitCode": 1, "reason": "E2E production build 崩溃（0xC0000409，长全量回归后内存压力）；同一源码空闲后重跑通过，未调整超时/跳过/断言" } },
+      "firstAttempt": { "exitCode": 1, "reason": "E2E production build 崩溃（0xC0000409，长全量回归后内存压力）；同一源码空闲后重跑通过，未调整超时/跳过/断言" },
+      "followUpSource": { "commit": "aaf85f6", "command": "npm.cmd run test:e2e -- e2e/project-intake.spec.ts", "exitCode": 0,
+        "note": "撤回同意 note 修复后的定向 E2E；全量 E2E 记录在 a0d1bf1 前源码" } },
     "harmonyUnit": { "command": "npm.cmd run harmony:test", "exitCode": 0, "passed": 105, "failed": 0, "errors": 0, "ignored": 0,
       "note": "新增 S2Coverage 合同测试（逐份覆盖状态与汇总）" },
     "harmonyBuild": { "command": "npm.cmd run harmony:build", "exitCode": 0, "signed": false, "installed": false,
@@ -61,7 +64,12 @@
     "reason": "跨用户失败样本与独立标签需要用户明确同意与人工脱敏；本轮未获得",
     "notClaimed": ["真实用户价值", "Experience 因果效果", "留出集质量"]
   },
-  "notPerformed": [
+  "retainedFailures": [
+    { "path": "failures/s2-build-oom-20261102.log",
+      "reason": "紧随 10 分钟全量回归与流式 E2E 之后，Next 生产构建在完成编译后的追踪阶段两次 OOM（Zone Allocation / MarkCompactCollector，退出 134 与 0xC0000409）；同一源码空闲后重跑退出 0。未改构建配置、未跳过类型检查。" },
+    { "path": "logs/s2-e2e-full-final.log",
+      "reason": "E2E 第一次运行在 production build 阶段同样因内存压力崩溃（0xC0000409）；同一源码重跑通过，未调整超时/跳过/断言" }
+  ],  "notPerformed": [
     "生产部署", "真实库迁移/清空", "push 或合并 master", "HAP 签名/安装到模拟器或真机",
     "真实模型调用与质量评估", "自然日责任轨", "第二类真实项目阅读执行", "独立复核"
   ],
@@ -72,4 +80,7 @@
     "模拟器可连接但 unsigned HAP 安装被签名校验拒绝"
   ]
 }
+
+
+
 

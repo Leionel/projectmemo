@@ -55,11 +55,11 @@ export struct MissionReadbackView {
     Row({ space: 8 }) {
       Text(label).fontSize(13).fontColor(PMColors.INK_SECONDARY).layoutWeight(1)
       if (open) { Text('收起 ⌃').fontSize(12).fontColor(PMColors.BRAND) }
-      else { Text(`${value} 条 ›`).fontSize(12).fontColor(PMColors.BRAND) }
+      else { Text(value === '' ? '展开 ›' : `${value} 条 ›`).fontSize(12).fontColor(PMColors.BRAND) }
     }.width('100%').height(44).alignItems(VerticalAlign.Center)
       .border({ width: { bottom: 1 }, color: PMColors.BORDER_SUBTLE })
       .onClick(() => { onToggle(); })
-      .accessibilityText(`${label} ${value} 条，展开查看`)
+      .accessibilityText(`${label}${value === '' ? '' : ` ${value} 条`}，${open ? '收起' : '展开查看'}`)
   }
   build() {
     Column({ space: 8 }) {
@@ -109,10 +109,10 @@ export struct MissionReadbackView {
             }, (a: ReadbackAction) => a.id)
           }
         }
-        if (this.data.reviewProgress !== undefined && this.data.reviewProgress.divisions.length > 0) {
-          this.SummaryRow('执行 / 观察 / 支持 / 报告 / 反例 / 未知', `${this.data.reviewProgress.divisions.length}`, (): void => { this.showSection = this.showSection === 'progress' ? '' : 'progress'; }, this.showSection === 'progress')
+        if (this.data.reviewProgress !== undefined && this.data.reviewProgress.classes.length > 0) {
+          this.SummaryRow('进展依据', `${this.data.reviewProgress.classes.length}`, (): void => { this.showSection = this.showSection === 'progress' ? '' : 'progress'; }, this.showSection === 'progress')
           if (this.showSection === 'progress') {
-            ForEach(this.data.reviewProgress.divisions, (item: ReadbackProgressClass) => {
+            ForEach(this.data.reviewProgress.classes, (item: ReadbackProgressClass) => {
               Column({ space: 2 }) {
                 Text(`${item.label}：${item.count}`).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_PRIMARY)
                 Text(item.note).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
@@ -120,6 +120,15 @@ export struct MissionReadbackView {
             }, (item: ReadbackProgressClass) => item.key)
             Text('这是原步骤、草稿核对、行动与回执的投影；工具成功或用户说完成都不等于现实目标已达成。')
               .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+          }
+        }
+        if (this.data.resourceUsage !== undefined) {
+          this.SummaryRow('本次用量', '', (): void => { this.showSection = this.showSection === 'usage' ? '' : 'usage'; }, this.showSection === 'usage')
+          if (this.showSection === 'usage') {
+            Text(this.data.resourceUsage.summary).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_PRIMARY)
+            Text(`已记录输入 ${this.data.resourceUsage.inputTokens ?? '待核对'} token · 输出 ${this.data.resourceUsage.outputTokens ?? '待核对'} token`).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
+            Text(this.data.resourceUsage.coverageNote).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
+            Text(this.data.resourceUsage.costNote).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_PRIMARY)
           }
         }
         if (this.data.evidenceReviews && this.data.evidenceReviews!.items.length > 0) {

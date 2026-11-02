@@ -14,7 +14,7 @@ export class ReadbackMaterialPointer { id: string = ''; hash: string = ''; }
 export class ReadbackMaterialCoverage { truncated: boolean = false; extractionStatus: string = ''; }
 export class ReadbackMaterial { sourcePointer: ReadbackMaterialPointer = new ReadbackMaterialPointer(); title: string = ''; availability: string = ''; facts: ReadbackMaterialFact[] = []; excerpt: string | null = null; coverage: ReadbackMaterialCoverage | null = null; }
 export class ReadbackMaterialUses { schemaVersion: number = 1; questionId: string | null = null; items: ReadbackMaterial[] = []; }
-export class MissionReadback {workState?:WorkState; evidenceReviews?: EvidenceReviewHistory; materialUses?: ReadbackMaterialUses; reviewProgress?: ReadbackReviewProgress; missionId: string = ''; projectId: string = ''; missionVersion: number = 0; observedAt: string = ''; sourceConversation: ReadbackConversation | null = null; selected: ReadbackSelected = new ReadbackSelected(); adoptions: ReadbackAdoption[] = []; actionReceipts: ReadbackAction[] = []; }
+export class MissionReadback {workState?:WorkState; evidenceReviews?: EvidenceReviewHistory; materialUses?: ReadbackMaterialUses; reviewProgress?: ReadbackReviewProgress; resourceUsage?: ReadbackResourceUsage; missionId: string = ''; projectId: string = ''; missionVersion: number = 0; observedAt: string = ''; sourceConversation: ReadbackConversation | null = null; selected: ReadbackSelected = new ReadbackSelected(); adoptions: ReadbackAdoption[] = []; actionReceipts: ReadbackAction[] = []; }
 export class MissionReadbackReply { readback: MissionReadback = new MissionReadback(); }
 export function missionReadbackQuery(target: MissionReadTarget): string {
   const values: string[] = [];
@@ -37,7 +37,22 @@ export class ReadbackProgressClass {
 
 export class ReadbackReviewProgress {
   schemaVersion: number = 1;
-  divisions: ReadbackProgressClass[] = [];
+  classes: ReadbackProgressClass[] = [];
   policy: string = '';
+}
+
+export class ReadbackResourceUsage {
+  schemaVersion: number = 1;
+  scope: string = '';
+  models: number | null = null;
+  tools: number | null = null;
+  inputTokens: number | null = null;
+  outputTokens: number | null = null;
+  unknownCalls: number | null = null;
+  monetaryCost: string | null = null;
+  pricingState: string = 'UNPRICED';
+  summary: string = '';
+  coverageNote: string = '';
+  costNote: string = '';
 }
 

@@ -11,6 +11,7 @@ import repoSignalContractTest from './RepoSignalContract.test';
 import agentPresentationContractTest from './AgentPresentationContract.test';
 import projectIntakeContractTest from './ProjectIntake.test';
 import s1HandoffContractTest from './S1Handoff.test';
+import s2ReadbackContractTest from './S2Readback.test';
 
 export default function testsuite() {
   localUnitTest();
@@ -26,6 +27,7 @@ export default function testsuite() {
   agentPresentationContractTest();
   projectIntakeContractTest();
   s1HandoffContractTest();
+  s2ReadbackContractTest();
 }
 
 

@@ -8,6 +8,7 @@ import { ownedMission } from "./repository";
 import { materialUseProjection } from "./materialUseProjection";
 import { fitContextSummary, type assessEvidenceFit } from "./evidenceFitService";
 import { reviewProgressOf } from "./reviewProgress";
+import { missionResourceUsageOf } from "./resourceUsage";
 export const readTargetSchema = z
   .object({
     questionId: z.string().min(1).optional(),
@@ -146,6 +147,7 @@ export async function readMissionBack(
       materialUses,
       evidenceReviews,
       reviewProgress,
+      resourceUsage: missionResourceUsageOf(m.budgetUsedJson),
       sourceConversation: sourceRunId
         ? {
             sourceRunId,

@@ -176,6 +176,14 @@ export function MissionReadback({
               <p className="mt-2 text-[var(--muted)]">这是原步骤、草稿核对、行动与回执的投影；工具成功或用户说完成都不等于现实目标已达成。</p>
             </details>
           )}
+          {data.resourceUsage && (
+            <details className="mt-3 border-t border-[var(--rule)] pt-3">
+              <summary className="cursor-pointer font-semibold focus-ring">本次用量 · {data.resourceUsage.summary}</summary>
+              <p className="mt-2">已记录输入 {data.resourceUsage.inputTokens ?? "待核对"} token · 输出 {data.resourceUsage.outputTokens ?? "待核对"} token</p>
+              <p className="mt-1 text-[var(--muted)]">{data.resourceUsage.coverageNote}</p>
+              <p className="mt-1">{data.resourceUsage.costNote}</p>
+            </details>
+          )}
           {data.materialUses && data.materialUses.items.length > 0 && <details className="mt-3 border-t border-[var(--rule)] pt-3">
             <summary className="cursor-pointer font-semibold">这份资料用在哪里 · {data.materialUses.items.length}</summary>
             <ul className="mt-3 space-y-3">

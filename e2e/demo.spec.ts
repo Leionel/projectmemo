@@ -1,4 +1,4 @@
-import {openProjectDirectory} from "./projectMenu";
+import {openProjectDirectory,fillManualProjectForm} from "./projectMenu";
 import { test, expect } from "@playwright/test";
 
 async function openSeedProject(page: import("@playwright/test").Page, section = "actions") {
@@ -89,10 +89,11 @@ test("seed project completes the core demo loop", async ({ page }) => {
 
 test("creates a project and captures a fragment", async ({ page }) => {
   await page.goto("/projects/new");
-  await page.getByLabel("项目名称").fill(`E2E 项目 ${Date.now()}`);
-  await page.getByLabel("项目描述").fill("这是一个验证项目创建和碎片沉淀流程的自动化测试项目。");
-  await page.getByLabel("项目目标").fill("完成项目创建和知识卡片生成");
-  await page.getByRole("button", { name: "创建项目并开始沉淀" }).click();
+  await fillManualProjectForm(page, {
+    title: `E2E 项目 ${Date.now()}`,
+    description: "这是一个验证项目创建和碎片沉淀流程的自动化测试项目。",
+    goal: "完成项目创建和知识卡片生成",
+  });
   await openProjectDirectory(page);await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link", {name:"记录与资料"}).click();
   await page.getByLabel("碎片内容").fill("老师建议先完成 Demo 闭环，再准备比赛演示文档。");
   await page.getByRole("button", { name: "保存记录并生成知识卡" }).click();
@@ -253,3 +254,6 @@ test("mobile workspace keeps project status and overview near the top", async ({
   await openProjectDirectory(page);await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link",{name:"记录与资料"}).click();
   await expect(page.locator("#capture-box")).toBeVisible();
 });
+
+
+

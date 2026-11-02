@@ -45,6 +45,8 @@ try {
 
 
     if (process.argv.includes("--once") && result.failures) process.exitCode = 1;
+    // 只有整轮无失败才清除失败信号；任何一处持续失败都不会被其它成功扫描掩盖。
+    if (!result.failures) recordWorkerPresence({ workerId, cleanCycle: true });
     if (!result.ran && !process.argv.includes("--once")) await setTimeout(result.failures ? 2000 : 1000);
   } while (!stopping && !process.argv.includes("--once"));
 } finally {

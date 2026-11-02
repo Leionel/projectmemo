@@ -1,7 +1,7 @@
 import { EvidenceReviewReceipt } from '../models/EvidenceFit';
 import { materialUseSummary } from '../common/MaterialUseContract';
 import router from '@ohos.router';
-import { MissionReadback, MissionReadTarget, ReadbackAdoption, ReadbackAction, ReadbackMaterial, ReadbackMaterialFact } from '../models/MissionReadback';
+import { MissionReadback, MissionReadTarget, ReadbackAdoption, ReadbackAction, ReadbackMaterial, ReadbackMaterialFact, ReadbackProgressClass } from '../models/MissionReadback';
 import { MissionBlock } from '../models/Mission';
 import { MissionService } from '../services/MissionService';
 import { SessionStore } from '../services/SessionStore';
@@ -109,6 +109,19 @@ export struct MissionReadbackView {
             }, (a: ReadbackAction) => a.id)
           }
         }
+        if (this.data.reviewProgress !== undefined && this.data.reviewProgress.divisions.length > 0) {
+          this.SummaryRow('执行 / 观察 / 支持 / 报告 / 反例 / 未知', `${this.data.reviewProgress.divisions.length}`, (): void => { this.showSection = this.showSection === 'progress' ? '' : 'progress'; }, this.showSection === 'progress')
+          if (this.showSection === 'progress') {
+            ForEach(this.data.reviewProgress.divisions, (item: ReadbackProgressClass) => {
+              Column({ space: 2 }) {
+                Text(`${item.label}：${item.count}`).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_PRIMARY)
+                Text(item.note).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+              }.width('100%').alignItems(HorizontalAlign.Start).padding(8)
+            }, (item: ReadbackProgressClass) => item.key)
+            Text('这是原步骤、草稿核对、行动与回执的投影；工具成功或用户说完成都不等于现实目标已达成。')
+              .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+          }
+        }
         if (this.data.evidenceReviews && this.data.evidenceReviews!.items.length > 0) {
           ForEach(this.data.evidenceReviews!.items, (review: EvidenceReviewReceipt) => {
             Column({ space: PMSpacing.SM }) {
@@ -153,3 +166,4 @@ export struct MissionReadbackView {
     }.width('100%').alignItems(HorizontalAlign.Start).padding(12).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(12)
   }
 }
+

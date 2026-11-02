@@ -1,6 +1,7 @@
 import { PMPageIntro, PMListRow } from '../components/PMReferencePrimitives';
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
+import { handoffIntentExpired } from '../common/MissionWidgetContract';
 import preferences from '@ohos.data.preferences';
 import { Project, ApiError, ProjectCreateInput, CompetitionReadiness, ReadinessItem } from '../models/Project';
 import { ProjectDetail, KnowledgeCard, CardTemporalStatus } from '../models/Memory';
@@ -299,8 +300,26 @@ struct Index {
     const missionId = AppStorage.get<string>('pendingMissionId') ?? '';
     const missionProjectId = AppStorage.get<string>('pendingMissionProjectId') ?? '';
     if (missionId !== '' && missionProjectId !== '') {
+      const questionId = AppStorage.get<string>('pendingQuestionId') ?? '';
+      const approvalId = AppStorage.get<string>('pendingApprovalId') ?? '';
+      const sourceId = AppStorage.get<string>('pendingSourceId') ?? '';
+      const handoffExpiresAt = AppStorage.get<string>('pendingHandoffExpiresAt') ?? '';
       AppStorage.setOrCreate<string>('pendingMissionId', ''); AppStorage.setOrCreate<string>('pendingMissionProjectId', '');
-      router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: missionProjectId, missionId } }); return;
+      AppStorage.setOrCreate<string>('pendingQuestionId', ''); AppStorage.setOrCreate<string>('pendingApprovalId', '');
+      AppStorage.setOrCreate<string>('pendingSourceId', ''); AppStorage.setOrCreate<string>('pendingMissionVersion', '');
+      AppStorage.setOrCreate<string>('pendingHandoffExpiresAt', '');
+      const expiry = handoffExpiresAt === '' ? 0 : Number(handoffExpiresAt);
+      // 排队或冷启动后过期的定位意图不再指向旧问题，回到当前原委托。
+      const expired = handoffIntentExpired(expiry, Date.now());
+      if (expired) {
+        promptAction.showToast({ message: '原卡片已过期，已回到当前委托；旧问题不会被当成新问题' });
+      }
+      router.pushUrl({ url: 'pages/MissionDetail', params: {
+        projectId: missionProjectId, missionId,
+        questionId: expired ? '' : questionId,
+        approvalId: expired ? '' : approvalId,
+        sourceId: expired ? '' : sourceId
+      } }); return;
     }
     const projectId = AppStorage.get<string>('notificationProjectId') ?? '';
     const interventionId = AppStorage.get<string>('notificationInterventionId') ?? '';
@@ -3415,3 +3434,5 @@ struct Index {
     .backgroundColor(PMColors.BACKGROUND)
   }
 }
+
+

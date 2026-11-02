@@ -218,3 +218,24 @@ export class IntakeConfirmPayload {
 }
 
 
+
+// 手机端提交载荷：显式类而不是匿名对象字面量（ArkTS 合同）。
+export class IntakeCreatePayload {
+  requestId: string = '';
+}
+
+export class IntakeTextPayload {
+  requestId: string = '';
+  text: string = '';
+}
+
+export class IntakeUnderstandPayload {
+  requestId: string = '';
+  processingConsent: boolean = true;
+}
+
+export class IntakeRevisePayload {
+  requestId: string = '';
+  text: string = '';
+  expectedRevision: number = 0;
+}

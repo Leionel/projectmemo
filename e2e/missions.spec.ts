@@ -1,4 +1,4 @@
-import {openProjectDirectory} from "./projectMenu";
+import {openProjectDirectory,fillManualProjectForm} from "./projectMenu";
 import {test,expect} from "@playwright/test";
 import {E2E_ENV} from "../scripts/e2e-env";
 import {execFileSync} from "node:child_process";
@@ -11,7 +11,12 @@ async function slice(id:string,choice:import("../lib/mission/contracts").Choice)
 async function scan(id:string){return fixture("scan",id);}
 test("same Mission survives reload, receives metric, auto continues, waits for approval and adopts a reusable draft",async({page})=>{
  test.setTimeout(120000);
- await page.goto("/projects/new");await page.getByLabel("项目名称").fill(`E2E Mission ${Date.now()}`);await page.getByLabel("项目描述").fill("独立的Mission接续测试项目");await page.getByLabel("项目目标").fill("验证接续、批准和成果归入");await page.getByRole("button",{name:"创建项目并开始沉淀"}).click();await expect(page).toHaveURL(/\/projects\/(?!new)[^/?#]+$/);
+ await page.goto("/projects/new");
+  await fillManualProjectForm(page, {
+    title: `E2E Mission ${Date.now()}`,
+    description: "独立的Mission接续测试项目",
+    goal: "验证接续、批准和成果归入",
+  });await expect(page).toHaveURL(/\/projects\/(?!new)[^/?#]+$/);
  await openProjectDirectory(page);await page.getByRole("navigation",{name:"项目功能导航"}).getByRole("link",{name:"长期委托"}).click();
  const panel=page.locator("#mission-agent"),goal="跨时间准备10月实验汇报";await panel.getByRole("textbox",{name:"想推进什么"}).fill(goal);await panel.getByRole("checkbox",{name:/允许配置的云模型/}).check();
  const created=page.waitForResponse(r=>r.url().endsWith("/api/missions")&&r.request().method()==="POST");await panel.getByRole("button",{name:"创建委托",exact:true}).click();const{id}=((await(await created).json()) as {mission:{id:string}}).mission;
@@ -44,3 +49,5 @@ test("same Mission survives reload, receives metric, auto continues, waits for a
  await expect(panel.getByRole("heading",{name:"引用已归入成果准备后续汇报",exact:true})).toBeInViewport();
  await page.screenshot({path:"test-results/pre-r4-mission-mobile.png",fullPage:true,animations:"disabled"});
 });
+
+

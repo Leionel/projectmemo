@@ -2,16 +2,18 @@ import {test,expect} from "@playwright/test";
 import {execFileSync} from "node:child_process";
 import path from "node:path";
 import {E2E_ENV} from "../scripts/e2e-env";
+import {fillManualProjectForm} from "./projectMenu";
 function ask(id:string,question:string){
  execFileSync(process.execPath,[path.resolve("node_modules/tsx/dist/cli.mjs"),"scripts/e2e-mission-fixture.ts","slice",id,JSON.stringify({kind:"ask",question,missing:"PRIVATE"})],{env:{...process.env,...E2E_ENV},timeout:30000,stdio:"pipe"});
 }
 test("first material leads to an explicitly authorized Mission; multiple waiting tasks remain reachable",async({page})=>{
  test.setTimeout(150000);
  await page.goto("/projects/new");
- await page.getByLabel("项目名称").fill("端侧视觉实验：长标题与跨天委托接续验证项目");
- await page.getByLabel("项目描述").fill("验证真实资料、证据边界和持续委托的隔离测试项目。");
- await page.getByLabel("项目目标").fill("核对性能实验口径，准备阶段汇报");
- await page.getByRole("button",{name:"创建项目并开始沉淀"}).click();
+  await fillManualProjectForm(page, {
+    title: "端侧视觉实验：长标题与跨天委托接续验证项目",
+    description: "验证真实资料、证据边界和持续委托的隔离测试项目。",
+    goal: "核对性能实验口径，准备阶段汇报",
+  });
  await expect(page).toHaveURL(/\/projects\/(?!new)[^/?#]+$/);const base=new URL(page.url()).pathname;
  const focus=page.getByRole("region",{name:"当前最重要的事项"});
  await expect(focus.getByRole("link",{name:"记录第一条资料"})).toBeVisible();
@@ -84,3 +86,6 @@ test("first material leads to an explicitly authorized Mission; multiple waiting
  await page.screenshot({path:"test-results/projectmemo-focus-mobile.png",fullPage:true,animations:"disabled"});
 
 });
+
+
+

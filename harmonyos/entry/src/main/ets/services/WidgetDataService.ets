@@ -7,7 +7,7 @@ import { Project, ProjectDashboard } from '../models/Project';
 import { ProjectDetail } from '../models/Memory';
 import { ReentryData } from '../models/Reentry';
 import { Mission } from '../models/Mission';
-import { MissionWidgetSnapshot, visibleMissionWidget } from '../common/MissionWidgetContract';
+import { MissionWidgetSnapshot, visibleMissionWidget, widgetAttentionLabel, widgetSyncLabel } from '../common/MissionWidgetContract';
 import { missionStatusLabel } from '../common/MissionContract';
 
 const TAG = 'WidgetDataService';
@@ -182,13 +182,17 @@ export class WidgetDataService {
     return next;
   }
 
-  // 只缓存状态，不缓存目标、私有问题、审批载荷或来源正文。
+  // 只缓存状态与定位身份，不缓存目标、私有问题正文、审批载荷或来源正文。
   static missionData(context: common.Context): Record<string, string | number> {
     const empty: Record<string, string | number> = {
       'missionId': '',
       'missionProjectId': '',
       'missionSummary': '',
-      'missionUpdatedAt': ''
+      'missionUpdatedAt': '',
+      'missionQuestionId': '',
+      'missionApprovalId': '',
+      'missionAttention': '',
+      'missionSync': ''
     };
     try {
       const store = preferences.getPreferencesSync(context, { name: PREFS_NAME });
@@ -203,8 +207,13 @@ export class WidgetDataService {
       return {
         'missionId': snapshot.missionId,
         'missionProjectId': snapshot.projectId,
-        'missionSummary': `${missionStatusLabel(snapshot.status)} · ${snapshot.pendingCount} 项待确认`,
-        'missionUpdatedAt': snapshot.updatedAt
+        'missionSummary': widgetAttentionLabel(snapshot, Date.now()),
+        'missionUpdatedAt': snapshot.updatedAt,
+        'missionQuestionId': snapshot.questionId,
+        'missionApprovalId': snapshot.approvalId,
+        'missionAttention': widgetAttentionLabel(snapshot, Date.now()),
+        'missionSync': widgetSyncLabel(snapshot),
+        'missionExpiresAt': snapshot.expiresAt
       };
     } catch {
       return empty;
@@ -271,7 +280,15 @@ export class WidgetDataService {
       snapshot.missionId = mission.id;
       snapshot.status = mission.status;
       snapshot.pendingCount = mission.approvals.length + (mission.question ? 1 : 0);
+      // 精确定位原问题/提案：卡片点开的是同一个对象与同一版，不是相似的新任务。
+      snapshot.questionId = mission.question?.id ?? '';
+      snapshot.approvalId = mission.approvals.length > 0 ? mission.approvals[0].id : '';
+      snapshot.missionVersion = mission.version;
+      snapshot.waitingFor = mission.workState?.nextActor ?? '';
+      snapshot.observedAt = mission.workState?.observedAt ?? '';
+      snapshot.nextCheckAt = mission.workState?.nextCheckAt ?? '';
       snapshot.updatedAt = new Date().toLocaleString();
+      // 同时受会话期限与 5 分钟缓存期限约束。
       snapshot.expiresAt = Math.min(Date.now() + 300000, Date.parse(expiresAt));
       await store.put('mission_snapshot', JSON.stringify(snapshot));
       await store.flush();
@@ -683,3 +700,5 @@ export class WidgetDataService {
     }
   }
 }
+
+

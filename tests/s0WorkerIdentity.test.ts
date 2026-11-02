@@ -29,6 +29,10 @@ it("已失去心跳或巡检失败时不能继续显示正在成功巡检", () =
   expect(readWorkerPresence(now + 61000)).toMatchObject({ status: "STALE", isActivelyInspecting: false });
   recordWorkerPresence({ workerId: "worker", failedScan: "MATERIAL", now: now + 1000 });
   expect(readWorkerPresence(now + 1000)).toMatchObject({ status: "RECENT", isActivelyInspecting: false, failedPhase: "MATERIAL" });
+  // 一处持续失败不能被别的扫描成功掩盖：单纯 scan 成功不清理失败信号。
   recordWorkerPresence({ workerId: "worker", scan: true, now: now + 2000 });
-  expect(readWorkerPresence(now + 2000)).toMatchObject({ isActivelyInspecting: true, failedPhase: null });
+  expect(readWorkerPresence(now + 2000)).toMatchObject({ status: "RECENT", failedPhase: "MATERIAL" });
+  recordWorkerPresence({ workerId: "worker", scan: true, cleanCycle: true, now: now + 3000 });
+  expect(readWorkerPresence(now + 3000)).toMatchObject({ isActivelyInspecting: true, failedPhase: null });
 });
+

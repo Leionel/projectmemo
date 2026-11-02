@@ -1,7 +1,8 @@
 import { ApiClient } from './ApiClient';
 import {
-  IntakeAcceptedFields, IntakeConfirmPayload, IntakeConfirmReply, IntakeConsentReply, IntakeDraftCreated, IntakeMaterialAdded,
-  IntakeReadReply, IntakeReviseReply, IntakeSyncReply
+  IntakeAcceptedFields, IntakeConfirmPayload, IntakeConfirmReply, IntakeConsentReply, IntakeCreatePayload,
+  IntakeDraftCreated, IntakeMaterialAdded, IntakeReadReply, IntakeRevisePayload, IntakeReviseReply,
+  IntakeSyncReply, IntakeTextPayload, IntakeUnderstandPayload
 } from '../models/ProjectIntake';
 
 /**
@@ -14,7 +15,9 @@ export class IntakeService {
   private client: ApiClient = new ApiClient();
 
   async createDraft(requestId: string): Promise<IntakeDraftCreated> {
-    return this.client.post<IntakeDraftCreated>('/api/intake', { requestId: requestId });
+    const payload = new IntakeCreatePayload();
+    payload.requestId = requestId;
+    return this.client.post<IntakeDraftCreated>('/api/intake', payload);
   }
 
   async read(draftId: string): Promise<IntakeReadReply> {
@@ -22,8 +25,10 @@ export class IntakeService {
   }
 
   async addText(draftId: string, requestId: string, text: string): Promise<IntakeMaterialAdded> {
-    return this.client.post<IntakeMaterialAdded>(`/api/intake/${encodeURIComponent(draftId)}/materials`,
-      { requestId: requestId, text: text });
+    const payload = new IntakeTextPayload();
+    payload.requestId = requestId;
+    payload.text = text;
+    return this.client.post<IntakeMaterialAdded>(`/api/intake/${encodeURIComponent(draftId)}/materials`, payload);
   }
 
   async consent(draftId: string): Promise<boolean> {
@@ -32,13 +37,17 @@ export class IntakeService {
   }
 
   async understand(draftId: string, requestId: string): Promise<IntakeReadReply> {
-    return this.client.post<IntakeReadReply>(`/api/intake/${encodeURIComponent(draftId)}/understand`,
-      { requestId: requestId, processingConsent: true }, 60000);
+    const payload = new IntakeUnderstandPayload();
+    payload.requestId = requestId;
+    return this.client.post<IntakeReadReply>(`/api/intake/${encodeURIComponent(draftId)}/understand`, payload, 60000);
   }
 
   async revise(draftId: string, requestId: string, text: string, expectedRevision: number): Promise<IntakeReviseReply> {
-    return this.client.post<IntakeReviseReply>(`/api/intake/${encodeURIComponent(draftId)}/revise`,
-      { requestId: requestId, text: text, expectedRevision: expectedRevision });
+    const payload = new IntakeRevisePayload();
+    payload.requestId = requestId;
+    payload.text = text;
+    payload.expectedRevision = expectedRevision;
+    return this.client.post<IntakeReviseReply>(`/api/intake/${encodeURIComponent(draftId)}/revise`, payload);
   }
 
   async confirm(draftId: string, requestId: string, expectedRevision: number, previewHash: string,
@@ -56,7 +65,6 @@ export class IntakeService {
   }
 
   async withdraw(draftId: string): Promise<void> {
-    await this.client.delete<Record<string, string>>(`/api/intake/${encodeURIComponent(draftId)}`);
+    await this.client.delete<IntakeConsentReply>(`/api/intake/${encodeURIComponent(draftId)}`);
   }
 }
-

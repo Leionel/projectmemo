@@ -104,22 +104,24 @@ export function ProjectIntakeForm({ initialDraftId, openDrafts }: { initialDraft
     finally { setBusy(""); }
   }
 
-  async function grantConsent() {
-    if (!draftId) return;
-    setBusy("understand"); setError("");
-    try { await postJson(`/api/intake/${draftId}/consent`); setConsent(true); setNotice("已记录这次预览的云处理同意。"); }
-    catch (reason) { setError(reason instanceof Error ? reason.message : "同意记录失败"); }
-    finally { setBusy(""); }
+  /** 云处理同意是独立动作：勾选才允许图片识别和生成理解，且只覆盖这份预览。 */
+  async function grantConsent(next: boolean) {
+    if (!next) { setConsent(false); return; }
+    // 先反映用户的选择，再把同意持久化；失败时回退，不让按钮停在假状态。
+    setConsent(true); setError("");
+    try {
+      const id = await ensureDraft();
+      await postJson(`/api/intake/${id}/consent`);
+    } catch (reason) { setConsent(false); setError(reason instanceof Error ? reason.message : "同意记录失败"); }
   }
 
   async function understand() {
     if (!draftId) return;
     setBusy("understand"); setError(""); setNotice("");
     try {
-      if (!consent) await postJson(`/api/intake/${draftId}/consent`);
-      const data = await postJson(`/api/intake/${draftId}/understand`, { requestId: `understand-${crypto.randomUUID()}`, processingConsent: true });
+      await postJson(`/api/intake/${draftId}/understand`, { requestId: `understand-${crypto.randomUUID()}`, processingConsent: true });
+      const data = await reload(draftId);
       adopt(data.preview as IntakePreview);
-      setConsent(true);
     } catch (reason) { setError(reason instanceof Error ? reason.message : "这次没能形成理解"); await reload(draftId).catch(() => undefined); }
     finally { setBusy(""); }
   }
@@ -218,12 +220,15 @@ export function ProjectIntakeForm({ initialDraftId, openDrafts }: { initialDraft
           <p className="archive-label">第二步 · 看它读懂了什么</p>
           <p className="mt-3 text-sm leading-6 text-[var(--ink-soft)]">{preview ? statusText(preview) : "加入材料后，让 Agent 说出它对项目的理解。"}</p>
         </div>
-        <button onClick={understand} disabled={!canUnderstand || busy === "understand"} className="focus-ring editorial-button disabled:opacity-60">
+        <button onClick={understand} disabled={!canUnderstand || !consent || busy === "understand"} className="focus-ring editorial-button disabled:opacity-60">
           {busy === "understand" ? <LoaderCircle className="animate-spin" size={16} /> : <ShieldCheck size={16} />}
           {preview?.understandingState === "READY" ? "重新读懂材料" : "读懂这些材料"}
         </button>
       </div>
-      {!consent && <p className="mt-4 text-xs leading-5 text-[var(--muted)]">点“读懂这些材料”会把材料交给云模型处理一次；它只用于这份预览，不自动建立项目、不获得工具权限。</p>}
+      <label className="mt-4 flex items-start gap-2 text-xs leading-5 text-[var(--muted)]">
+        <input type="checkbox" checked={consent} onChange={event => { void grantConsent(event.target.checked); }} className="focus-ring mt-0.5" />
+        <span>允许把这次的材料交给云模型处理一次。它只用于这份预览：不建立项目、不获得工具权限，也不写入长期记忆。</span>
+      </label>
 
       {preview && preview.understandingState === "READY" && <>
         {preview.summary && <p className="mt-5 leading-7">{preview.summary}</p>}
@@ -340,3 +345,4 @@ export function ProjectIntakeForm({ initialDraftId, openDrafts }: { initialDraft
     {notice && <p role="status" className="rounded-md bg-[var(--surface)] px-4 py-3 text-sm">{notice}</p>}
   </div>;
 }
+

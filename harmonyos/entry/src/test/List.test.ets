@@ -10,6 +10,7 @@ import experienceContractTest from './ExperienceContract.test';
 import repoSignalContractTest from './RepoSignalContract.test';
 import agentPresentationContractTest from './AgentPresentationContract.test';
 import projectIntakeContractTest from './ProjectIntake.test';
+import s1HandoffContractTest from './S1Handoff.test';
 
 export default function testsuite() {
   localUnitTest();
@@ -24,5 +25,7 @@ export default function testsuite() {
   repoSignalContractTest();
   agentPresentationContractTest();
   projectIntakeContractTest();
+  s1HandoffContractTest();
 }
+
 

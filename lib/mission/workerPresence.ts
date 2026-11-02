@@ -54,6 +54,8 @@ export function recordWorkerPresence(data: {
   version?: string;
   now?: number;
   failedScan?: string;
+  /** 一整轮扫描没有任何失败时才允许清掉失败信号。 */
+  cleanCycle?: boolean;
 }): void {
   const ts = new Date(data.now ?? Date.now()).toISOString();
   const filePath = getPresencePath();
@@ -78,8 +80,10 @@ export function recordWorkerPresence(data: {
     isActivelyInspecting: Boolean(lastScanAt && (Date.now() - Date.parse(lastScanAt) <= 120000)),
     hasClaimedWork: Boolean(lastClaimAt),
     ...identity(),
-    lastScanFailedAt: data.scan ? null : data.failedScan ? ts : existing.lastScanFailedAt ?? null,
-    failedPhase: data.scan ? null : data.failedScan ?? existing.failedPhase ?? null,
+    // 成功扫描只更新“最近扫描时间”，不再顺手抹掉失败：一处持续失败会在一轮里
+    // 被其它扫描的成功掩盖。只有干净的一整轮才清除失败信号。
+    lastScanFailedAt: data.cleanCycle ? null : data.failedScan ? ts : existing.lastScanFailedAt ?? null,
+    failedPhase: data.cleanCycle ? null : data.failedScan ?? existing.failedPhase ?? null,
   };
   inMemoryPresence = updated;
   try {
@@ -118,7 +122,9 @@ export function readWorkerPresence(now = Date.now()): WorkerPresenceInfo {
   const expected = identity();
   const mismatchReason = data.release !== expected.release ? "RELEASE_MISMATCH" : data.databaseHash !== expected.databaseHash ? "DATABASE_MISMATCH" : data.configHash !== expected.configHash ? "CONFIG_MISMATCH" : null;
   const identityMatches = !mismatchReason;
-  const scanSucceeded = !data.lastScanFailedAt || (data.lastScanAt && Date.parse(data.lastScanAt) > Date.parse(data.lastScanFailedAt));
+  // 失败信号只由“干净的一整轮”清除。同一轮里其它扫描成功不再把时间戳推后
+  // 就当作恢复——否则一处持续失败会被同轮的成功掩盖。
+  const scanSucceeded = !data.failedPhase && !data.lastScanFailedAt;
   const isActivelyInspecting = Boolean(isProcessAlive && identityMatches && scanSucceeded && elapsedScan >= -5000 && elapsedScan <= 120000);
   const hasClaimedWork = Boolean(data.lastClaimAt);
   const status: WorkerPresenceStatus = isProcessAlive && identityMatches ? "RECENT" : "STALE";
@@ -139,3 +145,4 @@ export function clearWorkerPresenceForTest(): void {
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
   } catch {}
 }
+

@@ -7,6 +7,7 @@ import { artifactTypeLabels } from "@/lib/types";
 import { ownedMission } from "./repository";
 import { materialUseProjection } from "./materialUseProjection";
 import { fitContextSummary, type assessEvidenceFit } from "./evidenceFitService";
+import { reviewProgressOf } from "./reviewProgress";
 export const readTargetSchema = z
   .object({
     questionId: z.string().min(1).optional(),
@@ -124,7 +125,12 @@ export async function readMissionBack(
       ?.sourceRunId;
     const latestEvents=await tx.agentMissionEvent.findMany({where:{missionId:id,type:{in:["QUESTION","INVESTIGATION_NO_NEW_INFORMATION"]}},orderBy:{seq:"desc"},take:1});
     const workState=missionWorkState({...m,delegationEnabled:isFeatureEnabled("MISSION_INVESTIGATION_DELEGATION_ENABLED",false),events:latestEvents,approvals:await tx.agentMissionApproval.findMany({where:{missionId:id,status:"PENDING"}})});
-    const wait = m.waitStateJson as { questionId?: string } | null;
+    // 进展分类只是既有 Step/Output/Action/回执的只读投影：它不新增完成真值，
+    // 也不把工具成功、CI 通过或用户说“完成”换算成现实目标达成。
+    const progressOutputs = await tx.agentMissionOutput.findMany({ where: { missionId: id }, orderBy: { revision: "desc" }, take: 4,
+      select: { id: true, revision: true, claimChecksJson: true } });
+    const unknownStepCount = await tx.agentMissionStep.count({ where: { missionId: id, status: "UNKNOWN" } });
+    const reviewProgress = reviewProgressOf({ steps, outputs: progressOutputs, actions, unknownSteps: unknownStepCount });    const wait = m.waitStateJson as { questionId?: string } | null;
     const materialUses = await materialUseProjection(tx, {
       missionId: id, projectId: m.projectId,
       questionId: input.questionId ?? wait?.questionId ?? null, sourceId: input.sourceId,
@@ -139,6 +145,7 @@ export async function readMissionBack(
       missionUpdatedAt: m.updatedAt.toISOString(),
       materialUses,
       evidenceReviews,
+      reviewProgress,
       sourceConversation: sourceRunId
         ? {
             sourceRunId,
@@ -200,3 +207,5 @@ export async function readMissionBack(
   });
 }
 export type MissionReadback = Awaited<ReturnType<typeof readMissionBack>>;
+
+

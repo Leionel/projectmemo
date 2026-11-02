@@ -36,7 +36,9 @@ afterAll(async () => {
   if (originalAttachmentDir === undefined) delete process.env.ATTACHMENT_DIR;
   else process.env.ATTACHMENT_DIR = originalAttachmentDir;
   for (const dir of temporaryDirs.splice(0)) fs.rmSync(dir, { recursive: true, force: true });
+  // Windows 上 SQLite 句柄释放前删除临时库目录会 EPERM；先断开再清。
   await db.$disconnect();
+  fs.rmSync(isolated.dir, { recursive: true, force: true });
 });
 
 const MATERIAL = `课程要求在 11 月 20 日前交付一个可演示的原型。
@@ -323,6 +325,7 @@ describe("S1-A 项目前材料与确认建项", () => {
     await expect(readIntake(actor, other.draftId)).rejects.toMatchObject({ code: "INTAKE_WITHDRAWN" });
   });
 });
+
 
 
 

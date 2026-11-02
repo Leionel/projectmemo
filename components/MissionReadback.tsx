@@ -162,6 +162,20 @@ export function MissionReadback({
               )}
             </p>
           ))}
+          {data.reviewProgress && (
+            <details className="mt-3 border-t border-[var(--rule)] pt-3">
+              <summary className="cursor-pointer font-semibold">执行、观察、支持、报告、反例与未知</summary>
+              <dl className="mt-2 space-y-1">
+                {data.reviewProgress.classes.map(item => (
+                  <div key={item.key} className="flex gap-2">
+                    <dt className="w-24 shrink-0 font-semibold">{item.label}：{item.count}</dt>
+                    <dd className="text-[var(--muted)]">{item.note}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-2 text-[var(--muted)]">这是原步骤、草稿核对、行动与回执的投影；工具成功或用户说完成都不等于现实目标已达成。</p>
+            </details>
+          )}
           {data.materialUses && data.materialUses.items.length > 0 && <details className="mt-3 border-t border-[var(--rule)] pt-3">
             <summary className="cursor-pointer font-semibold">这份资料用在哪里 · {data.materialUses.items.length}</summary>
             <ul className="mt-3 space-y-3">

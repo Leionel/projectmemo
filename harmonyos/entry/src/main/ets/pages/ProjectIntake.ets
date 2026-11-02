@@ -7,8 +7,9 @@ import { ApiError } from '../models/Project';
 import { IntakeService } from '../services/IntakeService';
 import { SessionStore } from '../services/SessionStore';
 import {
-  intakeCanConfirm, intakeEditableFields, intakeSyncSummary, intakeUnderstandingLabel,
-  IntakeAcceptedFields, IntakeCandidate, IntakeMaterialView, IntakePreview, IntakeStatement, IntakeSyncReply, IntakeUnknown
+  intakeCanConfirm, intakeCoverageItemLabel, intakeCoverageSummary, intakeEditableFields, intakeSyncSummary, intakeUnderstandingLabel,
+  IntakeAcceptedFields, IntakeCandidate, IntakeCoverageItem, IntakeMaterialTextReply, IntakeMaterialView,
+  IntakePreview, IntakeStatement, IntakeSyncReply, IntakeUnknown
 } from '../models/ProjectIntake';
 
 /**
@@ -31,6 +32,13 @@ struct ProjectIntake {
   @State private projectId: string = '';
   @State private sync: IntakeSyncReply | null = null;
   @State private loaded: boolean = false;
+  // 原文核对：只展开一份材料，分页追加；关闭后不保留旧页，避免换草稿时串内容。
+  @State private openTextMaterialId: string = '';
+  @State private materialText: string = '';
+  @State private materialTextOffset: number = 0;
+  @State private materialTextTotal: number = 0;
+  @State private materialTextHasMore: boolean = false;
+  @State private materialTextLoading: boolean = false;
   private service: IntakeService = new IntakeService();
   private confirmRequestId: string = '';
   private requestKeys: Map<string, string> = new Map<string, string>();
@@ -44,6 +52,7 @@ struct ProjectIntake {
     this.material = ''; this.correction = ''; this.preview = new IntakePreview(); this.accepted = new IntakeAcceptedFields();
     this.draftId = ''; this.projectId = ''; this.sync = null; this.requestKeys.clear(); this.confirmRequestId = ''; this.acceptedDirty = false;
     this.notice = ''; this.error = ''; this.busy = false; this.confirmPayload = '';
+    this.openTextMaterialId = ''; this.materialText = ''; this.materialTextOffset = 0; this.materialTextTotal = 0; this.materialTextHasMore = false; this.materialTextLoading = false;
   };
   private stableId(key: string): string {
     if (!this.requestKeys.has(key)) this.requestKeys.set(key, this.requestId('intake'));
@@ -87,10 +96,46 @@ struct ProjectIntake {
       const reply = await this.own(() => this.service.read(this.draftId));
       this.preview = reply.preview;
       if (!this.acceptedDirty) this.accepted = intakeEditableFields(reply.preview);
+      // 草稿内容已变（修订前移）时放弃旧的原文页，避免把上一版正文当成当前。
+      if (this.openTextMaterialId !== '' && !reply.preview.materials.some(item => item.id === this.openTextMaterialId)) this.closeMaterialText();
       this.loaded = true;
     } catch (e) {
       this.error = e instanceof ApiError ? e.message : '无法读取这份材料';
     }
+  }
+
+  private closeMaterialText(): void {
+    this.openTextMaterialId = ''; this.materialText = ''; this.materialTextOffset = 0;
+    this.materialTextTotal = 0; this.materialTextHasMore = false; this.materialTextLoading = false;
+  }
+
+  /** 原文核对：打开一份材料并读第一页；再次点击同一份则收起。 */
+  private async toggleMaterialText(materialId: string): Promise<void> {
+    if (this.openTextMaterialId === materialId) { this.closeMaterialText(); return; }
+    this.openTextMaterialId = materialId;
+    this.materialText = ''; this.materialTextOffset = 0; this.materialTextTotal = 0;
+    this.materialTextHasMore = false; this.materialTextLoading = false;
+    await this.loadMaterialTextPage();
+  }
+
+  private async loadMaterialTextPage(): Promise<void> {
+    if (this.draftId === '' || this.openTextMaterialId === '' || this.materialTextLoading) return;
+    this.materialTextLoading = true; this.error = '';
+    const materialId = this.openTextMaterialId;
+    try {
+      const reply = await this.own(() => this.service.materialText(this.draftId, materialId, this.materialTextOffset));
+      if (this.openTextMaterialId !== materialId) return;
+      this.appendMaterialText(reply);
+    } catch (e) {
+      this.error = e instanceof ApiError ? e.message : '读取原文失败';
+    } finally { this.materialTextLoading = false; }
+  }
+
+  private appendMaterialText(reply: IntakeMaterialTextReply): void {
+    this.materialText = this.materialText + reply.text;
+    this.materialTextOffset = reply.offset + reply.text.length;
+    this.materialTextTotal = reply.totalChars;
+    this.materialTextHasMore = reply.hasMore;
   }
 
   private async ensureDraft(): Promise<string> {
@@ -223,6 +268,55 @@ struct ProjectIntake {
     }.width('100%').alignItems(HorizontalAlign.Start)
   }
 
+  @Builder private CoverageBlock() {
+    Column({ space: 8 }) {
+      Row({ space: 8 }) {
+        Text('模型实际读到的范围').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY).layoutWeight(1)
+        Text(intakeCoverageSummary(this.preview.coverage)).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
+      }.width('100%')
+      ForEach(this.preview.coverage.current.items, (item: IntakeCoverageItem) => {
+        Column({ space: 2 }) {
+          Row({ space: 8 }) {
+            Text(`${item.label}${item.type !== '' ? ' · ' + item.type : ''}`)
+              .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY).layoutWeight(1)
+              .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
+            Text(intakeCoverageItemLabel(item)).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+          }.width('100%')
+          if (item.availableChars > 0) {
+            Text(this.openTextMaterialId === item.materialId ? '收起原文' : '核对原文')
+              .fontSize(PMFontSize.CAPTION).fontColor(PMColors.BRAND).height(36)
+              .onClick(() => { void this.toggleMaterialText(item.materialId); })
+              .accessibilityText(`${item.label} 核对原文`)
+          }
+          if (this.openTextMaterialId === item.materialId) {
+            Column({ space: 6 }) {
+              Text(this.materialText !== '' ? this.materialText : (this.materialTextLoading ? '正在读取原文…' : '暂无原文页'))
+                .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_PRIMARY).lineHeight(20)
+              Text(`已显示 ${this.materialText.length} / ${this.materialTextTotal} 字`)
+                .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+              if (this.materialTextHasMore) {
+                Text(this.materialTextLoading ? '加载中…' : '继续读')
+                  .fontSize(PMFontSize.CAPTION).fontColor(PMColors.BRAND).height(36)
+                  .onClick(() => { void this.loadMaterialTextPage(); })
+              }
+            }.width('100%').alignItems(HorizontalAlign.Start).padding(8)
+            .backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(PMRadius.SM)
+          }
+        }.width('100%').alignItems(HorizontalAlign.Start)
+      }, (item: IntakeCoverageItem) => item.materialId)
+      Text(this.preview.coverage.note).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+      if (!this.preview.coverage.consentGranted) {
+        Text('同意云处理后才会送入材料；撤回同意不会再次送入。')
+          .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+      }
+      if (this.preview.coverage.current.stale) {
+        Text('之后新增的材料还没有送入；建立项目后可在项目中继续深读全文。')
+          .fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+      }
+    }.width('100%').alignItems(HorizontalAlign.Start).padding(10)
+    .backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(PMRadius.SM)
+  }
+
   @Builder private PreviewBody() {
     Column({ space: 12 }) {
       Row({ space: 8 }) {
@@ -262,6 +356,7 @@ struct ProjectIntake {
       if (this.preview.correction.clarify !== null) {
         Text(this.preview.correction.clarify.question).fontSize(PMFontSize.BODY).fontColor(PMColors.RISK)
       }
+      if (this.preview.materials.length > 0) this.CoverageBlock()
       if (this.preview.materials.length > 0) {
         Text(intakeSyncSummary(this.preview.materials)).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
       }
@@ -352,6 +447,8 @@ struct ProjectIntake {
     }.width('100%').height('100%').backgroundColor(PMColors.BACKGROUND)
   }
 }
+
+
 
 
 

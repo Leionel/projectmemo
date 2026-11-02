@@ -92,6 +92,57 @@ export class IntakeModelState {
   usageUnknown: boolean = true;
 }
 
+export class IntakeCoverageItem {
+  materialId: string = '';
+  label: string = '';
+  kind: string = '';
+  type: string = '';
+  extractionStatus: string = '';
+  availableChars: number = 0;
+  plannedChars: number = 0;
+  /** -1 表示从未派发过；0 表示派发过但这轮没有送入 */
+  lastSentChars: number = -1;
+  lastSentTruncated: boolean = false;
+  reason: string = '';
+}
+
+export class IntakeCoverageLastSent {
+  computedAt: string = '';
+  revision: number = 0;
+  materialsHash: string = '';
+  understandingPublished: boolean = false;
+  totalAvailableChars: number = 0;
+  totalSentChars: number = 0;
+}
+
+export class IntakeCoverageCurrent {
+  materialsHash: string = '';
+  stale: boolean = false;
+  totalAvailableChars: number = 0;
+  totalSentChars: number = 0;
+  items: IntakeCoverageItem[] = [];
+}
+
+export class IntakeCoverage {
+  schemaVersion: number = 1;
+  perMaterialLimit: number = 20000;
+  totalLimit: number = 24000;
+  consentGranted: boolean = false;
+  lastSent: IntakeCoverageLastSent | null = null;
+  current: IntakeCoverageCurrent = new IntakeCoverageCurrent();
+  note: string = '';
+}
+
+export class IntakeMaterialTextReply {
+  materialId: string = '';
+  label: string = '';
+  totalChars: number = 0;
+  offset: number = 0;
+  limit: number = 4000;
+  text: string = '';
+  hasMore: boolean = false;
+}
+
 export class IntakePreview {
   schemaVersion: number = 1;
   draftId: string = '';
@@ -109,6 +160,7 @@ export class IntakePreview {
   nextQuestion: IntakeNextQuestion | null = null;
   correction: IntakeCorrection = new IntakeCorrection();
   accepted: IntakeAcceptedFields | null = null;
+  coverage: IntakeCoverage = new IntakeCoverage();
   materials: IntakeMaterialView[] = [];
   expiresAt: string = '';
   previewHash: string = '';
@@ -238,4 +290,30 @@ export class IntakeRevisePayload {
   requestId: string = '';
   text: string = '';
   expectedRevision: number = 0;
+}
+
+
+
+
+/**
+ * 覆盖提示的用户可读文案：区分“已送入/截取/未送入/没有可读文本/之后新增”。
+ * lastSentChars = -1 表示从未派发；0 表示派发过但这一份没有被送入。
+ */
+export function intakeCoverageItemLabel(item: IntakeCoverageItem): string {
+  if (item.reason === 'NO_READABLE_TEXT') return '没有可读文本';
+  if (item.reason === 'ADDED_AFTER_UNDERSTANDING') return `之后新增，还没送入（计划 ${item.plannedChars} 字）`;
+  if (item.reason === 'OVER_BUDGET') return `超出本轮总量，未送入（共 ${item.availableChars} 字）`;
+  if (item.lastSentChars < 0) return `待送入 ${item.plannedChars} 字 / 共 ${item.availableChars} 字`;
+  if (item.lastSentChars === 0) return `未送入（共 ${item.availableChars} 字）`;
+  if (item.lastSentTruncated) return `送入 ${item.lastSentChars} 字 / 共 ${item.availableChars} 字（截取）`;
+  return `已送入 ${item.lastSentChars} 字`;
+}
+
+/** 汇总行：上一版实际送入 vs 当前材料规模。 */
+export function intakeCoverageSummary(coverage: IntakeCoverage): string {
+  if (coverage.lastSent !== null) {
+    const prefix = coverage.lastSent.understandingPublished ? '上一版送入' : '上一版送过但未形成理解';
+    return `${prefix} ${coverage.lastSent.totalSentChars} 字 / 材料共 ${coverage.lastSent.totalAvailableChars} 字`;
+  }
+  return `尚未送入 · 下次会送入 ${coverage.current.totalSentChars} 字 / 共 ${coverage.current.totalAvailableChars} 字`;
 }

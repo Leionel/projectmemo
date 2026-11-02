@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { bindCaptureDraftOwner, captureGeneration, captureOwner, onCaptureOwnerChange } from "@/lib/client/captureDrafts";
 import { ArrowRight, FileText, LoaderCircle, Paperclip, ShieldCheck } from "lucide-react";
 import { scenarioOptions } from "@/lib/types";
+import { IntakeCoveragePanel } from "./IntakeCoveragePanel";
 import type { IntakePreview } from "@/lib/intake/contracts";
 
 /**
@@ -291,6 +292,8 @@ export function ProjectIntakeForm({ ownerId, initialDraftId, openDrafts }: { own
         <span>允许把这次的材料交给云模型处理一次。它只用于这份预览：不建立项目、不获得工具权限，也不写入长期记忆。</span>
       </label>
 
+      {preview && preview.materials.length > 0 && <IntakeCoveragePanel draftId={draftId} coverage={preview.coverage} />}
+
       {preview && preview.understandingState === "READY" && <>
         {preview.summary && <p className="mt-5 leading-7">{preview.summary}</p>}
         <div className="mt-6 space-y-4">
@@ -406,4 +409,6 @@ export function ProjectIntakeForm({ ownerId, initialDraftId, openDrafts }: { own
     {notice && <p role="status" className="rounded-md bg-[var(--surface)] px-4 py-3 text-sm">{notice}</p>}
   </div>;
 }
+
+
 

@@ -10,6 +10,7 @@ import experienceContractTest from './ExperienceContract.test';
 import repoSignalContractTest from './RepoSignalContract.test';
 import agentPresentationContractTest from './AgentPresentationContract.test';
 import projectIntakeContractTest from './ProjectIntake.test';
+import s2CoverageContractTest from './S2Coverage.test';
 import s1HandoffContractTest from './S1Handoff.test';
 import s2ReadbackContractTest from './S2Readback.test';
 
@@ -26,8 +27,10 @@ export default function testsuite() {
   repoSignalContractTest();
   agentPresentationContractTest();
   projectIntakeContractTest();
+  s2CoverageContractTest();
   s1HandoffContractTest();
   s2ReadbackContractTest();
 }
+
 
 

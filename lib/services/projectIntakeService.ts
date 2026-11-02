@@ -11,11 +11,12 @@ import { cloudCapability } from "@/lib/auth/cloudCapability";
 import { buildPromptMessages } from "@/lib/agent/promptSpec";
 import { chatWithLLMWithMeta } from "@/lib/agent/llmAgent";
 import {
-  INTAKE_MATERIAL_LIMIT, INTAKE_TTL_MS, INTAKE_TEXT_LIMIT,
+  INTAKE_MATERIAL_LIMIT, INTAKE_TTL_MS,
   acceptedHashOf, createDraftSchema, intakeDirectiveEpoch, materialLabel, materialsHashOf, previewHashOf, textMaterialSchema,
   understandingSchema, type IntakeAcceptedFields, type IntakePreview, type IntakeUnderstanding,
   understandSchema, reviseSchema, confirmSchema,
 } from "@/lib/intake/contracts";
+import { buildIntakeCoverage, sliceMaterialsForModel, type IntakeCoverageRound } from "@/lib/intake/coverage";
 import { intakeUnderstandingV1 } from "@/lib/intake/prompt";
 import {
   computeFileSha256, deleteAttachmentFile, listProjectAttachmentFiles, readAttachmentFile, saveFileToStorage,
@@ -180,19 +181,21 @@ export async function recordProcessingConsent(actor: ConversationActor, draftId:
   });
 }
 
-/** 材料正文只用于这一版预览；超过容量按顺序截取，并在草稿里保持完整原件供用户核对。 */
-function materialTextFor(draftId: string, materials: Array<{ id: string; rawText: string | null; kind: string; type: string | null }>) {
-  const budget = 24000; let used = 0;
-  return materials.flatMap(m => {
-    const text = (m.rawText ?? "").trim();
-    if (!text) return [];
-    const room = Math.max(0, budget - used);
-    if (room <= 0) return [];
-    const slice = text.slice(0, Math.min(room, INTAKE_TEXT_LIMIT));
-    used += slice.length;
-    return [{ materialId: m.id, label: materialLabel({ kind: m.kind, fileName: null, ordinal: 0 }), type: m.type ?? "TEXT", text: slice }];
-  });
+/**
+ * 覆盖轮次：只记录这一轮“实际送了什么”，随理解一起持久，不被后续材料改写。
+ * `understandingPublished=false` 表示送过但没有保存可核对的理解（模型失败/引文核对失败）。
+ */
+function coverageRoundOf(input: { payload: ReturnType<typeof sliceMaterialsForModel>; requestHash: string | null;
+  guidanceEpoch: string; revision: number; materialsHash: string; understandingPublished: boolean }) {
+  const round: IntakeCoverageRound = {
+    computedAt: new Date().toISOString(), requestHash: input.requestHash, guidanceEpoch: input.guidanceEpoch,
+    revision: input.revision, materialsHash: input.materialsHash,
+    totalAvailableChars: input.payload.totalAvailableChars, totalSentChars: input.payload.totalSentChars,
+    understandingPublished: input.understandingPublished, items: input.payload.items,
+  };
+  return round;
 }
+
 
 function quoteIsVerbatim(quote: string, material: { rawText: string | null }) {
   const normalize = (value: string) => value.replace(/\s+/g, " ").trim();
@@ -223,9 +226,14 @@ export async function understandIntake(actor: ConversationActor, draftId: string
   }
 
   const usable = materials.filter(m => (m.rawText ?? "").trim().length > 0);
+  const materialsHash = materialsHashOf(materials.map(m => ({ id: m.id, revision: m.revision, contentHash: m.contentHash })));
+  const payload = sliceMaterialsForModel(materials);
+  // 没有任何可读正文时也要把“为什么没有送入”记录清楚，而不是留空让人误以为读过了。
   if (!usable.length) {
     await publishUnderstanding(actor, draft.id, draft.revision, { understandingState: "MATERIAL_ONLY", status: "DRAFT",
-      previewJson: json({ note: "文件尚无可读文本，保持原文状态" }) }, false, guidanceEpoch);
+      previewJson: json({ note: "文件尚无可读文本，保持原文状态", materialsHash,
+        coverage: coverageRoundOf({ payload, requestHash: null, guidanceEpoch, revision: draft.revision,
+          materialsHash, understandingPublished: false }) }) }, false, guidanceEpoch);
     return readIntake(actor, draft.id);
   }
 
@@ -247,7 +255,7 @@ export async function understandIntake(actor: ConversationActor, draftId: string
     const admitted = Array.isArray(controls.admittedDirectives) ? controls.admittedDirectives.map(record)
       .filter(d => !d.validUntil || Date.parse(String(d.validUntil)) > Date.now()) : [];
     const candidates = Array.isArray(controls.candidates) ? controls.candidates.map(record) : [];
-    const messages = buildPromptMessages(intakeUnderstandingV1, { draftId: draft.id, materials: materialTextFor(draft.id, usable),
+    const messages = buildPromptMessages(intakeUnderstandingV1, { draftId: draft.id, materials: payload.slices,
       userReview: [...admitted.map(d => ({ quote: String(d.quote), kind: "ADMITTED_GUIDANCE" as const })),
         ...candidates.map(d => ({ quote: String(d.quote), kind: "INTERPRETATION_CANDIDATE" as const }))] });
     result = await (dependencies.runModel ?? ((prompt: ReturnType<typeof buildPromptMessages>) =>
@@ -260,7 +268,8 @@ export async function understandIntake(actor: ConversationActor, draftId: string
     if (code !== "CALL_ALREADY_RESERVED") await settleIntakeCloudCall({ draftId: draft.id, requestHash, state: result ? "SETTLED" : "UNKNOWN",
       usage: result?.usage, provider: result?.provider ?? null }).catch(() => undefined);
     if (code !== "CALL_ALREADY_RESERVED") await publishUnderstanding(actor, draft.id, draft.revision, { understandingState: "FAILED", status: "DRAFT",
-      previewJson: json({ failureCode: code, failureAt: new Date().toISOString(),
+      previewJson: json({ failureCode: code, failureAt: new Date().toISOString(), materialsHash,
+        coverage: coverageRoundOf({ payload, requestHash, guidanceEpoch, revision: draft.revision, materialsHash, understandingPublished: false }),
         note: "这一版没有形成模型理解；原件仍是用户材料，不是项目事实" }) }, false, guidanceEpoch).catch(() => undefined);
     throw error;
   }
@@ -273,14 +282,17 @@ export async function understandIntake(actor: ConversationActor, draftId: string
     const material = byId.get(quote.materialId);
     if (!material || !quoteIsVerbatim(quote.quote, material)) {
       await publishUnderstanding(actor, draft.id, draft.revision, { understandingState: "FAILED", status: "DRAFT",
-        previewJson: json({ failureCode: "UNSUPPORTED_QUOTE", failureAt: new Date().toISOString(),
+        previewJson: json({ failureCode: "UNSUPPORTED_QUOTE", failureAt: new Date().toISOString(), materialsHash,
+          coverage: coverageRoundOf({ payload, requestHash, guidanceEpoch, revision: draft.revision, materialsHash, understandingPublished: false }),
           note: "模型引用的原文摘录未通过核对，这一版没有保存；材料本身未变" }) }, false, guidanceEpoch).catch(() => undefined);
       throw new AppError("UNSUPPORTED_QUOTE", "模型引用的原文摘录未通过核对，这一版没有保存", 409);
     }
   }
   await publishUnderstanding(actor, draft.id, draft.revision, {
     understandingJson: json(understanding), understandingHash: jsonHash(understanding),
-    previewJson: json({ requestHash, guidanceEpoch, provider: result.provider, usageUnknown: result.usageUnknown ?? (result.usage?.inputTokens == null || result.usage?.outputTokens == null) }),
+    previewJson: json({ requestHash, guidanceEpoch, provider: result.provider, materialsHash,
+      usageUnknown: result.usageUnknown ?? (result.usage?.inputTokens == null || result.usage?.outputTokens == null),
+      coverage: coverageRoundOf({ payload, requestHash, guidanceEpoch, revision: draft.revision, materialsHash, understandingPublished: true }) }),
     understandingState: "READY", status: "PREVIEW_READY", understoodAt: new Date() }, true, guidanceEpoch);
   await db.agentRun.create({ data: { provider: result.provider, runType: "ACTION", status: "SUCCESS",
     externalRequestId: `intake-understanding:${draft.id}:${draft.revision}:${input.requestId}`.slice(0, 180),
@@ -288,7 +300,9 @@ export async function understandIntake(actor: ConversationActor, draftId: string
       promptId: intakeUnderstandingV1.id, promptVersion: intakeUnderstandingV1.version,
       outputSchemaVersion: intakeUnderstandingV1.outputSchemaVersion, usage: result.usage, usageUnknown: result.usageUnknown,
       requestIdentity: result.requestIdentity, quoteCount: understanding.quotes.length,
-      materialsHash: materialsHashOf(materials) }) } }).catch(() => undefined);
+      coverage: { sentChars: payload.totalSentChars, availableChars: payload.totalAvailableChars,
+        materials: payload.items.map(item => ({ materialId: item.materialId, sentChars: item.sentChars, reason: item.reason })) },
+      materialsHash }) } }).catch(() => undefined);
   return readIntake(actor, draft.id);
 }
 
@@ -370,6 +384,28 @@ async function buildPreviewFrom(draftId: string, tx: Tx = db): Promise<IntakePre
   const materialsHash = materialsHashOf(materials.map(m => ({ id: m.id, revision: m.revision, contentHash: m.contentHash })));
   const previewHash = previewHashOf({ draftId: draft.id, revision: draft.revision, materialsHash, understandingHash, userRevisionHash, acceptedHash });
   const labels = new Map(materials.map(m => [m.id, materialLabel({ kind: m.kind, fileName: m.fileName, ordinal: m.ordinal })]));
+  // 覆盖提示：上一轮真正送了什么（历史事实）＋ 当前材料下次会送什么（计划值）。
+  const storedRound = record(record(draft.previewJson).coverage);
+  const roundValid = Object.keys(storedRound).length > 0 && typeof storedRound.computedAt === "string"
+    && Array.isArray(storedRound.items) && typeof storedRound.materialsHash === "string";
+  const coverage = buildIntakeCoverage({
+    materials: materials.map(m => ({ id: m.id, kind: m.kind, fileName: m.fileName, ordinal: m.ordinal, type: m.type,
+      rawText: m.rawText, extractionStatus: m.extractionStatus })),
+    materialsHash,
+    consentGranted: record(draft.processingJson).consent === true,
+    round: roundValid ? {
+      computedAt: String(storedRound.computedAt),
+      requestHash: typeof storedRound.requestHash === "string" ? storedRound.requestHash : null,
+      guidanceEpoch: typeof storedRound.guidanceEpoch === "string" ? storedRound.guidanceEpoch : null,
+      revision: Number(storedRound.revision ?? 0), materialsHash: String(storedRound.materialsHash),
+      totalAvailableChars: Number(storedRound.totalAvailableChars ?? 0), totalSentChars: Number(storedRound.totalSentChars ?? 0),
+      understandingPublished: storedRound.understandingPublished === true,
+      items: (storedRound.items as unknown[]).map(item => record(item)).filter(item => typeof item.materialId === "string")
+        .map(item => ({ materialId: String(item.materialId), availableChars: Number(item.availableChars ?? 0),
+          sentChars: Number(item.sentChars ?? 0), truncated: item.truncated === true,
+          reason: String(item.reason ?? "INCLUDED") as IntakeCoverageRound["items"][number]["reason"] })),
+    } : null,
+  });
   const statements = ready ? understanding!.data.quotes.map(q => ({ materialId: q.materialId, materialLabel: labels.get(q.materialId) ?? "材料",
     quote: q.quote, meaning: q.meaning })) : materials.filter(m => (m.rawText ?? "").trim()).slice(0, 3).map(m => ({
       materialId: m.id, materialLabel: labels.get(m.id) ?? "材料", quote: (m.rawText ?? "").trim().slice(0, 240),
@@ -401,6 +437,7 @@ async function buildPreviewFrom(draftId: string, tx: Tx = db): Promise<IntakePre
       admittedAt: typeof revision.admittedAt === "string" ? revision.admittedAt : null,
     },
     accepted,
+    coverage,
     materials: materials.map(m => ({ id: m.id, label: labels.get(m.id) ?? "材料", kind: m.kind as "TEXT" | "FILE",
       type: m.type, fileName: m.fileName, size: m.size, sha256: m.sha256, extractionStatus: m.extractionStatus,
       extractionError: m.extractionError, revision: m.revision, contentHash: m.contentHash,
@@ -635,9 +672,28 @@ export async function readIntakeForClient(actor: ConversationActor, draftId: str
   return readIntake(actor, draftId);
 }
 
-export const intakeTesting = { intakeScope, materialTextFor, quoteIsVerbatim };
+/**
+ * 项目前原文核对：按页读取草稿里的原始正文。
+ *
+ * 只对 owner、只对仍然开放的草稿可见；确认后材料已进入项目（含深读入口），
+ * 撤回、到期、项目删除后不再从这里重新暴露原文。分页上限固定，避免一次拉全量私料。
+ */
+export async function readIntakeMaterialText(actor: ConversationActor, draftId: string, materialId: string,
+  query: { offset?: number; limit?: number } = {}) {
+  await assertSession(actor);
+  const draft = await loadDraft(actor, draftId);
+  if (draft.status === "CONFIRMED")
+    throw new AppError("INTAKE_CONFIRMED", "材料已进入项目，请在项目内继续深读", 409);
+  assertOpen(draft);
+  const material = await db.projectIntakeMaterial.findFirst({ where: { id: materialId, draftId: draft.id } });
+  if (!material) throw new AppError("INTAKE_MATERIAL_NOT_FOUND", "这份材料不存在或不可访问", 404);
+  const text = material.rawText ?? "";
+  if (!text) throw new AppError("INTAKE_MATERIAL_NO_TEXT", "这份材料没有可读文本，无法核对原文", 422);
+  const limit = Math.min(4000, Math.max(200, Math.trunc(query.limit ?? 4000)));
+  const offset = Math.min(Math.max(0, text.length - 1), Math.max(0, Math.trunc(query.offset ?? 0)));
+  return { materialId: material.id, label: materialLabel({ kind: material.kind, fileName: material.fileName, ordinal: material.ordinal }),
+    extractionStatus: material.extractionStatus, totalChars: text.length, offset, limit,
+    text: text.slice(offset, offset + limit), hasMore: offset + limit < text.length };
+}
 
-
-
-
-
+export const intakeTesting = { intakeScope, quoteIsVerbatim, sliceMaterialsForModel };

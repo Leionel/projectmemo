@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { jsonHash } from "@/lib/mission/contracts";
+import type { IntakeCoverage } from "./coverage";
 
 /**
  * 项目前材料草稿的最小合同。
@@ -129,6 +130,8 @@ export type IntakePreview = {
     admittedAt: string | null;
   };
   accepted: IntakeAcceptedFields | null;
+  /** 实际送入模型的正文字符范围；上传总量不等于已读量。 */
+  coverage: IntakeCoverage;
   materials: Array<{
     id: string; label: string; kind: IntakeMaterialKind; type: string | null; fileName: string | null;
     size: number; sha256: string | null; extractionStatus: string; extractionError: string | null;

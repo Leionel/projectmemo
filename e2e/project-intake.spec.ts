@@ -21,6 +21,15 @@ test("S1-A 从材料建立项目：理解状态如实、整体纠正生效、确
   await page.getByRole("button", { name: "加入材料" }).click();
   await expect(page.getByText("材料已加入。它现在只是预览材料，不是项目目标或授权。")).toBeVisible();
 
+  // S2：上传量不等于模型已读量。未派发前明确显示“尚未送入”和下次会送入的范围。
+  const coverage = page.getByRole("group", { name: "材料覆盖与原文核对" });
+  await expect(coverage.getByText("模型实际读到的范围")).toBeVisible();
+  await expect(coverage.getByText(/尚未送入 · 下次会送入 \d+ 字/)).toBeVisible();
+  await coverage.getByRole("button", { name: /核对原文/ }).first().click();
+  await expect(coverage.getByText(/已显示 \d+ \/ \d+ 字/)).toBeVisible();
+  await expect(coverage.getByText(material, { exact: false })).toBeVisible();
+  await coverage.getByRole("button", { name: "收起原文" }).click();
+
   // 云处理同意是独立动作；未同意前“读懂”不可用。
   await expect(page.getByRole("button", { name: "读懂这些材料" })).toBeDisabled();
   await page.getByRole("checkbox").check();
@@ -28,6 +37,8 @@ test("S1-A 从材料建立项目：理解状态如实、整体纠正生效、确
   await page.getByRole("button", { name: "读懂这些材料" }).click();
   await expect(page.getByText("规则模式", { exact: false })).toBeVisible();
   await expect(page.getByText("材料原文片段")).toBeVisible();
+  // 没有派发成功时覆盖仍显示“尚未送入”，不把计划范围写成已读。
+  await expect(coverage.getByText(/尚未送入 · 下次会送入 \d+ 字/)).toBeVisible();
 
   await page.getByPlaceholder("例如：本周先确认设备可用性").fill("本周先确认设备可用性");
   await page.getByRole("button", { name: "按这句话调整" }).click();
@@ -90,6 +101,7 @@ test("S1 修复：URL 恢复原草稿，确认回包丢失后原身份重试", a
   const projects = await page.request.get("/api/projects", { headers });
   expect((await projects.json()).projects.filter((p: { title: string }) => p.title === title)).toHaveLength(1);
 });
+
 
 
 

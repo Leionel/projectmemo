@@ -1,7 +1,7 @@
 import { ApiClient } from './ApiClient';
 import {
   IntakeAcceptedFields, IntakeConfirmPayload, IntakeConfirmReply, IntakeConsentReply, IntakeCreatePayload,
-  IntakeDraftCreated, IntakeMaterialAdded, IntakeReadReply, IntakeRevisePayload, IntakeReviseReply,
+  IntakeDraftCreated, IntakeMaterialAdded, IntakeMaterialTextReply, IntakeReadReply, IntakeRevisePayload, IntakeReviseReply,
   IntakeSyncReply, IntakeTextPayload, IntakeUnderstandPayload
 } from '../models/ProjectIntake';
 
@@ -22,6 +22,12 @@ export class IntakeService {
 
   async read(draftId: string): Promise<IntakeReadReply> {
     return this.client.get<IntakeReadReply>(`/api/intake/${encodeURIComponent(draftId)}`);
+  }
+
+  /** 原文核对：按页读取草稿正文；确认后由项目内深读承接。 */
+  async materialText(draftId: string, materialId: string, offset: number): Promise<IntakeMaterialTextReply> {
+    return this.client.get<IntakeMaterialTextReply>(
+      `/api/intake/${encodeURIComponent(draftId)}/materials/${encodeURIComponent(materialId)}?offset=${offset}&limit=4000`);
   }
 
   async addText(draftId: string, requestId: string, text: string): Promise<IntakeMaterialAdded> {
@@ -68,3 +74,4 @@ export class IntakeService {
     await this.client.delete<IntakeConsentReply>(`/api/intake/${encodeURIComponent(draftId)}`);
   }
 }
+

@@ -144,15 +144,17 @@ export function buildIntakeCoverage(input: {
     };
   });
   const truncatedLastSent = (input.round?.items ?? []).some(item => item.truncated && item.sentChars > 0);
-  const note = input.round === null
-    ? input.consentGranted
-      ? "还没有把材料交给云模型；下面是下一次理解会送入的范围。"
-      : "尚未同意云处理，材料不会被送入模型。"
-    : stale
-      ? "材料在上一版理解之后有变化；标为“之后新增”的材料还没有送入模型。"
-      : truncatedLastSent
-        ? "模型只读到上述字符；未送入的原文仍完整保留，可在项目中继续深读。"
-        : "模型已读到的范围与上述字符一致。";
+  const note = !input.consentGranted && input.round !== null
+    ? "已撤回云处理同意；上一轮的送入事实保留，但不会再次送入。"
+    : input.round === null
+      ? input.consentGranted
+        ? "还没有把材料交给云模型；下面是下一次理解会送入的范围。"
+        : "尚未同意云处理，材料不会被送入模型。"
+      : stale
+        ? "材料在上一版理解之后有变化；标为“之后新增”的材料还没有送入模型。"
+        : truncatedLastSent
+          ? "模型只读到上述字符；未送入的原文仍完整保留，可在项目中继续深读。"
+          : "模型已读到的范围与上述字符一致。";
   return {
     schemaVersion: 1,
     perMaterialLimit: INTAKE_TEXT_LIMIT,
@@ -169,3 +171,4 @@ export function buildIntakeCoverage(input: {
     note,
   };
 }
+

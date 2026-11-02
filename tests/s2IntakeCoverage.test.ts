@@ -205,6 +205,18 @@ describe("S2 批次一 · Intake 实际材料覆盖", () => {
     void materials;
   });
 
+  test("理解后撤回同意：保留上一轮送入事实，但明说不会再次送入", async () => {
+    const { actor } = await newActor("coverage-revoke");
+    const { draftId, materials } = await newDraft(actor, ["撤回同意前的材料。"]);
+    const model = capturingModel(materials[0].materialId, "撤回同意前的材料。");
+    await understandIntake(actor, draftId, { requestId: "u", processingConsent: true }, { runModel: model.runModel });
+    await recordProcessingConsent(actor, draftId, false);
+    const { preview } = await readIntake(actor, draftId);
+    expect(preview.coverage.consentGranted).toBe(false);
+    expect(preview.coverage.lastSent?.totalSentChars).toBe("撤回同意前的材料。".length);
+    expect(preview.coverage.note).toContain("撤回云处理同意");
+    expect(preview.coverage.note).toContain("不会再次送入");
+  });
   test("原文核对按页读取：owner 可读、他人 404、无文本 422、撤回后 410", async () => {
     const { actor } = await newActor("coverage-read");
     const other = await newActor("coverage-other");
@@ -248,4 +260,5 @@ describe("S2 批次一 · Intake 实际材料覆盖", () => {
     await expect(readIntakeMaterialText(actor, draftId, materials[0].materialId)).rejects.toMatchObject({ code: "INTAKE_CONFIRMED" });
   });
 });
+
 

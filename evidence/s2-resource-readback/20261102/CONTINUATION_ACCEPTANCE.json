@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-02",
+  "timezone": "UTC+08:00",
+  "scope": "S2 continuation batches 2-5 on top of the first resource-readback batch; local engineering candidate only",
+  "worktree": "D:/Projects/hongmen-s2",
+  "branch": "codex/s2-product-enhancements",
+  "baseline": "b4b92c63a1ec43305e52df1d5677b9b34d5f3a9a",
+  "sourceCommits": {
+    "intakeCoverage": "601f486",
+    "callCoverage": "cc958be",
+    "adaptiveAndPlatformProbe": "88383e1"
+  },
+  "data": "isolated synthetic databases; injected model fixtures; no paid model calls; emulator probing read-only",
+  "functional": {
+    "targetedVitest": {
+      "command": "npm.cmd test -- tests/s2ResourceReadback.test.ts tests/missionReadbackPanel.test.ts tests/s1ResultProgress.test.ts tests/copilotContinuation.test.ts tests/s2IntakeCoverage.test.ts tests/s2CallCoverage.test.ts tests/projectIntake.test.ts tests/s1IndependentReview.test.ts",
+      "exitCode": 0, "files": 8, "testsPassed": 69
+    },
+    "newTests": {
+      "s2IntakeCoverage": { "tests": 8, "focus": "覆盖与模型真实收到字符对齐；长 PDF 截取；总量超限；无可读文本；未同意；材料变化；失败轮次；原文分页与确认后拒绝副本" },
+      "s2CallCoverage": { "tests": 4, "focus": "调用身份去重；失败/未知不丢失；读取上限标下界；只读不改预算/版本" },
+      "s2AdaptivePreference": { "tests": 3, "focus": "少打扰类表达不成为生效指令；不生成约束/不改预算；静默时段不影响必答问题与约束" }
+    },
+    "fullVitest": { "command": "npm.cmd test", "exitCode": 0, "files": 202, "testsPassed": 1544, "durationSeconds": 638.21,
+      "receipt": "logs/s2-full-tests-final.log" },
+    "webE2e": { "command": "npm.cmd run test:e2e", "exitCode": 0, "receipt": "logs/s2-e2e-full-final.log",
+      "report": "logs/s2-e2e-results-final.json", "expected": 37, "setupPassed": 1, "businessPassed": 36,
+      "skipped": 2, "unexpected": 0, "flaky": 0, "retries": 0, "durationMs": 210429,
+      "startTime": "2026-11-02T11:05:30.377Z",
+      "firstAttempt": { "exitCode": 1, "reason": "E2E production build 崩溃（0xC0000409，长全量回归后内存压力）；同一源码空闲后重跑通过，未调整超时/跳过/断言" } },
+    "harmonyUnit": { "command": "npm.cmd run harmony:test", "exitCode": 0, "passed": 105, "failed": 0, "errors": 0, "ignored": 0,
+      "note": "新增 S2Coverage 合同测试（逐份覆盖状态与汇总）" },
+    "harmonyBuild": { "command": "npm.cmd run harmony:build", "exitCode": 0, "signed": false, "installed": false,
+      "bytes": 7958933, "sha256": "fc30da498c20f52481d58b128db3b13738582447dd342b20cb71eab691037f44",
+      "receipt": "evidence/s2-platform-probe/20261102/logs/hap-build.log" }
+  },
+  "platform": {
+    "probe": "scripts/probe-platform-capabilities.ts",
+    "receipt": "evidence/s2-platform-probe/20261102/platform-probe.json",
+    "findings": {
+      "sdk": { "apiVersion": "24", "toolchain": "6.1.1.125", "shareExtensionDeclaration": true, "insightIntentDeclaration": true },
+      "module": { "shareExtensionRegistered": false, "shareSkillRegistered": false, "intentsRegistered": false },
+      "signing": { "signingConfiguredInBuildProfile": false, "note": "未复制主目录签名私钥" },
+      "device": { "target": "127.0.0.1:5555", "model": "emulator", "apiVersion": "24", "shellReachable": true }
+    },
+    "installAttempt": { "command": "hdc -t 127.0.0.1:5555 install -r entry-default-unsigned.hap", "result": "FAILED",
+      "error": "9568332 install sign info inconsistent", "receipt": "evidence/s2-platform-probe/20261102/logs/unsigned-install-attempt.log" },
+    "verdict": {
+      "systemShare": "NOT_RUN: SDK 声明可用但未注册；unsigned HAP 无法安装；无签名配置",
+      "intentsXiaoyi": "NOT_RUN: 未注册、未做平台登记与真机投递",
+      "recoveryCondition": "提供受权签名配置/调试签名，完成平台登记后先跑设备探针，再实现入口；不构造假入口"
+    }
+  },
+  "adaptivePreference": {
+    "finding": "明确偏好的保存/局部覆盖/暂停/纠正/删除/到期与跨项目作用域已由 PM-1～4、Continuity、Attention 覆盖；未新增偏好系统",
+    "evidence": "tests/s2AdaptivePreference.test.ts; 既有 tests/pm1*, pm3*, pm4*, ux3AttentionContinuity"
+  },
+  "failureImprovement": {
+    "status": "NOT_RUN",
+    "reason": "跨用户失败样本与独立标签需要用户明确同意与人工脱敏；本轮未获得",
+    "notClaimed": ["真实用户价值", "Experience 因果效果", "留出集质量"]
+  },
+  "notPerformed": [
+    "生产部署", "真实库迁移/清空", "push 或合并 master", "HAP 签名/安装到模拟器或真机",
+    "真实模型调用与质量评估", "自然日责任轨", "第二类真实项目阅读执行", "独立复核"
+  ],
+  "limits": [
+    "全量与 E2E 属本地隔离工程，不替代设备、实模、自然日与独立质量",
+    "费用只交付已记录 token 与调用覆盖；无费率、币种或账单，故 estimate/billedAmount 为 null",
+    "S0 minimatch 开发依赖告警仍未关闭",
+    "模拟器可连接但 unsigned HAP 安装被签名校验拒绝"
+  ]
+}
+

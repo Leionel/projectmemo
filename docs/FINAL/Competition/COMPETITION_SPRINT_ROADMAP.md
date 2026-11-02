@@ -145,3 +145,5 @@ S2不是对既有PM能力降级，而是把尚需新增/外部开通的范围与
 当前是独立树的本地工程进展，尚未合并、推送或部署；原第 7 节历史 Gate 快照不被这些测试自动改成生产放行。真实模型、首次用户、模拟器、真机与自然日仍分别验收。用户负责的 Reflexion 阅读项目按 `S1_FINALS_ACCEPTANCE_GUIDE_2026-11-02.md` 留证据；S2 使用 `S2_IMPLEMENTATION_HANDOFF_2026-11-02.md`，保留第 5 节原五包及全部原 Agent 能力。
 
 S2 已于 11/02 从修复证据提交 `24004cf` 建独立树开始。首批 `6a90423` 在原回执补累计用量/未知费用，并修复鸿蒙进展字段错配；4 文件 / 28 项、类型/lint、定向任务 E2E 与 103 项鸿蒙单测及 unsigned HAP 通过。该批不等于完整计价、平台分享/Intents 或整个 S2 已完成；详见 `S2_IMPLEMENTATION_2026-11-02.md`。
+
+S2 后续批次（同一分支 `codex/s2-product-enhancements`）：`601f486` 项目前材料实际送入范围（预览 DTO + Web/鸿蒙覆盖提示 + 按页原文核对；8 项新测试、intake E2E、105 项鸿蒙）；`cc958be` 可核对的调用覆盖（原 AgentRun/Step 只读投影，UNPRICED 与 unknown 保留；4 项新测试、missions E2E）；`88383e1` 偏好边界回归（3 项）与平台能力只读探针。偏好边界由既有 PM/Continuity/Attention 覆盖，未新增偏好系统；系统分享/Intents 因本树无签名配置、模拟器 unsigned 安装返回 `9568332` 而保持 NOT_RUN；失败改进因缺样本同意保持 NOT_RUN。全量与 E2E 结果见该批实施记录与 `evidence/`，不得据此签收设备、实模或自然日。

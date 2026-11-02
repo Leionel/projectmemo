@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-02T03:47:30.578Z",
+  "scope": "S0 local repair candidate; not a production release",
+  "baseline": "aea257c46df4656958198f903c18868bf7a819dc",
+  "sourceCommit": "8da4f05232987efe39d1590d8aecd5584cfba53e",
+  "branch": "codex/s0-trust-fixes",
+  "worktree": "D:/Projects/hongmen-s0",
+  "owner": "Codex",
+  "independentReviewer": null,
+  "gates": {
+    "security": "PARTIAL: production dependencies clear; development advisory and independent review open",
+    "functional": "LOCAL_ENGINEERING_PASS_WITH_DECLARED_SKIPS",
+    "evidence": "PARTIAL: Linux, device, real-model, natural-day and independent review pending"
+  },
+  "sourceBoundaries": [
+    "Full unit run began at 6f559e8 with the then-uncommitted 29c243a session/calendar fixes. Worker fingerprint/backoff changes landed during the run; their final state was separately retested.",
+    "Final E2E ran with b9c82da plus the independent-login E2E fix and native followups. The later project-storage namespace cleanup is covered by the final 36-test storage/API suite and final production build.",
+    "Final native source blobs match 8da4f05; backend-only storage edits after the HAP build do not change the HAP inputs."
+  ],
+  "environment": {
+    "platform": "win32",
+    "node": "v24.16.0",
+    "database": "synthetic isolated Vitest/E2E/OS-temp databases; no real database copies",
+    "model": "mock or explicitly mocked synthetic provider",
+    "paidModelCallsInitiated": 0
+  },
+  "checks": {
+    "fullUnit": {
+      "command": "npm.cmd test",
+      "exitCode": 0,
+      "log": "checks/s0-full-final.log",
+      "files": 194,
+      "passed": 1486,
+      "failed": 0,
+      "durationSeconds": 913.68
+    },
+    "runtimeFollowup": {
+      "command": "npm.cmd test -- tests/s0ProjectDeletion.test.ts tests/s0WorkerIdentity.test.ts tests/ux3WorkerCycle.test.ts",
+      "exitCode": 0,
+      "log": "checks/s0-last-runtime-guards.log",
+      "files": 3,
+      "passed": 11
+    },
+    "finalStorage": {
+      "command": "npm.cmd test -- tests/s0ProjectDeletion.test.ts tests/attachment.test.ts tests/attachmentCorrection.test.ts tests/database.integration.test.ts tests/projectLifecycle.test.ts",
+      "exitCode": 0,
+      "log": "checks/s0-storage-all-final.log",
+      "files": 5,
+      "passed": 36,
+      "includesNewInterruptedRegistrationCase": true
+    },
+    "webE2e": {
+      "command": "npm.cmd run test:e2e",
+      "exitCode": 0,
+      "log": "checks/s0-e2e-full-final.log",
+      "setupPassed": 1,
+      "businessPassed": 33,
+      "skipped": 2,
+      "failed": 0,
+      "flaky": 0,
+      "retries": 0,
+      "stats": {
+        "startTime": "2026-11-02T03:34:11.227Z",
+        "duration": 204515.448,
+        "expected": 34,
+        "skipped": 2,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "report": "checks/e2e-results.json",
+      "summary": "checks/e2e-summary.json"
+    },
+    "types": {
+      "command": "npm.cmd exec tsc -- --noEmit",
+      "exitCode": 0,
+      "log": "checks/s0-types-release-final.log",
+      "generatedNextFilesRestoredBeforeCheck": true
+    },
+    "lint": {
+      "command": "npm.cmd run lint",
+      "exitCode": 0,
+      "log": "checks/s0-lint-release-final.log",
+      "errors": 0,
+      "warnings": 9
+    },
+    "webBuild": {
+      "command": "NEXT_DIST_DIR=.next-s0 npm.cmd run build",
+      "exitCode": 0,
+      "log": "checks/s0-web-build-full-final.log",
+      "includesTypeCheck": true,
+      "tracingWarnings": 6
+    },
+    "harmonyTests": {
+      "command": "npm.cmd run harmony:test",
+      "exitCode": 0,
+      "log": "checks/s0-harmony-full-final.log",
+      "passed": 92,
+      "failed": 0,
+      "errors": 0,
+      "ignored": 0
+    },
+    "hap": {
+      "command": "npm.cmd run harmony:build",
+      "exitCode": 0,
+      "log": "checks/s0-hap-full-final.log",
+      "size": 7736608,
+      "sha256": "702ffbe10fd72943260bb9ad4ea4e1a1adabc084a83f2e7aae3e8c0879e9f739",
+      "signed": false,
+      "installed": false
+    },
+    "workerProcess": {
+      "command": "node --import tsx evidence/s0-trust/20261102/worker-process-probe.mjs",
+      "exitCode": 0,
+      "log": "checks/s0-worker-process-release-final.log",
+      "realOriginalWorkerProcesses": 3,
+      "modelExecutionEnabled": false,
+      "actualAttachmentUnlink": true,
+      "originalReceiptPreserved": true,
+      "linux": false
+    },
+    "dependencyTree": {
+      "command": "npm.cmd ls --depth=0 --json",
+      "exitCode": 0,
+      "log": "checks/s0-dependencies-final.json"
+    },
+    "migrations": {
+      "outcome": "PASS",
+      "evidence": [
+        "tests/s0MigrationReplay.test.ts",
+        "tests/helpers/continuityDatabase.ts",
+        "checks/s0-migrate-final.log"
+      ],
+      "coverage": [
+        "empty database replay",
+        "old synthetic database backup-copy upgrade",
+        "original rows and original source database preserved",
+        "integrity_check and foreign_key_check"
+      ]
+    }
+  },
+  "security": {
+    "productionAudit": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "allDependencyAudit": {
+      "info": 0,
+      "low": 0,
+      "moderate": 16,
+      "high": 0,
+      "critical": 0,
+      "total": 16
+    },
+    "unresolvedAdvisory": "GHSA-g3hv-75wg-m249",
+    "notes": "16 moderate development dependency nodes trace to one minimatch advisory; no forced incompatible override or audit ignore",
+    "reports": [
+      "audit/npm-audit-s0-baseline.json",
+      "audit/npm-audit-s0-after.json",
+      "audit/npm-audit-s0-production.json"
+    ]
+  },
+  "retainedFailures": [
+    {
+      "path": "failures/s0-delete-before.log",
+      "reason": "unauthorized destructive API reproduction"
+    },
+    {
+      "path": "failures/s0-markdown-before.log",
+      "reason": "implicit remote image/preload reproduction"
+    },
+    {
+      "path": "failures/s0-full-regression.log",
+      "reason": "old immediate-delete expectation plus browser read timeout under parallel engineering load"
+    },
+    {
+      "path": "failures/s0-full-acceptance.log",
+      "reason": "hardcoded same-day calendar fixtures expired; 19 failures and one rejection"
+    },
+    {
+      "path": "failures/s0-e2e-acceptance.log",
+      "reason": "600-second watchdog; incomplete result, not a pass"
+    },
+    {
+      "path": "failures/s0-e2e-shared-session-revoked.log",
+      "report": "failures/e2e-shared-session-revoked.json",
+      "reason": "new logout test revoked the shared setup session; subsequent UX2/UX3 cases got 401"
+    },
+    {
+      "path": "failures/s0-worker-process-before.log",
+      "reason": "disabled Mission queue was still claimed and counted as failure"
+    },
+    {
+      "path": "failures/s0-harmony-test.log",
+      "reason": "fresh worktree lacked Hypium dependency before ohpm install"
+    }
+  ],
+  "notPerformed": [
+    "production deployment",
+    "real database migration/reset",
+    "push or master merge",
+    "HAP signing/installation",
+    "Linux/systemd acceptance",
+    "real-model quality or paid calls",
+    "natural-day followup",
+    "independent review"
+  ],
+  "protectedMain": {
+    "path": "D:/Projects/hongmen",
+    "head": "aea257c46df4656958198f903c18868bf7a819dc",
+    "trackedChangesPreserved": [
+      "harmonyos/build-profile.json5",
+      "next-env.d.ts",
+      "tsconfig.json"
+    ],
+    "untrackedFiles": "preserved and not staged"
+  },
+  "remainingRisks": [
+    "development minimatch advisory needs compatible upstream fix or independent risk decision",
+    "fresh native guards need installation/device account-switch and widget acceptance",
+    "Linux native SQLite/systemd worker identity and restart acceptance",
+    "real-model quality, long-term value, natural-day behavior and independent mixed-project privacy review"
+  ],
+  "historicalEvidence": "Five tracked screenshot outputs were copied into this new evidence directory, then restored to their original repository versions. New generated continuity screenshots were moved here. Auth state, private traces, databases, storage originals, signing keys and HAP binaries were excluded."
+}

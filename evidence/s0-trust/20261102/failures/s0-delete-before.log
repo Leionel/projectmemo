@@ -1,0 +1,37 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/s0ProjectDeletion.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-s0
+
+ ❯ tests/s0ProjectDeletion.test.ts (1 test | 1 failed) 1856ms
+     × 普通 MEMBER 不能通过直接 DELETE 销毁共享项目 221ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/s0ProjectDeletion.test.ts > 项目销毁的服务端权限 > 普通 MEMBER 不能通过直接 DELETE 销毁共享项目
+AssertionError: expected 204 to be 403 // Object.is equality
+
+- Expected
++ Received
+
+- 403
++ 204
+
+ ❯ tests/s0ProjectDeletion.test.ts:15:27
+     13|     await db.projectMembership.update({ where: { userId_projectId: { u…
+     14|     const result = await remove(new Request(`http://localhost/api/proj…
+     15|     expect(result.status).toBe(403);
+       |                           ^
+     16|     expect(await db.project.findUnique({ where: { id: project.id } }))…
+     17|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  09:24:30
+   Duration  2.46s (transform 1.03s, setup 0ms, import 325ms, tests 1.86s, environment 0ms)
+

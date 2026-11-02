@@ -1,0 +1,19 @@
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+Datasource "db": SQLite database "test-vitest.db" at "file:./prisma/test-vitest.db"
+
+50 migrations found in prisma/migrations
+
+Applying migration `20261102010000_project_deletion_fence`
+Applying migration `20261102011000_capture_processing_receipt`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20261102010000_project_deletion_fence/
+    └─ migration.sql
+  └─ 20261102011000_capture_processing_receipt/
+    └─ migration.sql
+
+All migrations have been successfully applied.

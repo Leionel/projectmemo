@@ -1,0 +1,52 @@
+
+> projectmemo@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-s0
+
+ ❯ tests/database.integration.test.ts (13 tests | 1 failed) 2989ms
+     × exposes project update and delete through the detail API 102ms
+ ❯ tests/browserReader.test.ts (10 tests | 1 failed) 43140ms
+     × 页面注入只作内容，弹窗/表单/WebSocket/私网 iframe 与图片被拦截 15005ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/browserReader.test.ts > 真实隔离 Chromium 只读 > 页面注入只作内容，弹窗/表单/WebSocket/私网 iframe 与图片被拦截
+Error: 隔离浏览器未取得结果
+ ❯ IsolatedChromiumReader.read lib/browser/reader.ts:193:13
+    191|     } catch (error) {
+    192|       if (error instanceof AppError) throw error;
+    193|       throw new AppError("BROWSER_FAILED", safeMessage("BROWSER_FAILED…
+       |             ^
+    194|     } finally {
+    195|       signal.removeEventListener("abort", abort);
+ ❯ tests/browserReader.test.ts:84:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/database.integration.test.ts > SQLite integration > exposes project update and delete through the detail API
+AssertionError: expected 428 to be 204 // Object.is equality
+
+- Expected
++ Received
+
+- 204
++ 428
+
+ ❯ tests/database.integration.test.ts:107:35
+    105|       headers: { ...auth.headers, "X-Project-Delete-Confirmation": pro…
+    106|     }), context);
+    107|     expect(deleteResponse.status).toBe(202);
+       |                                   ^
+    108|     await expect(requireProject(project.id)).rejects.toMatchObject({ c…
+    109|     const { processProjectDeletions } = await import("@/lib/services/p…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 190 passed (192)
+      Tests  2 failed | 1467 passed (1469)
+   Start at  09:44:59
+   Duration  762.09s (transform 16.62s, setup 0ms, import 205.04s, tests 465.90s, environment 34.63s)
+

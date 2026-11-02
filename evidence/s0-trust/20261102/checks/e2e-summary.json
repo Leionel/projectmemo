@@ -1,0 +1,369 @@
+{
+  "stats": {
+    "startTime": "2026-11-02T03:34:11.227Z",
+    "duration": 204515.448,
+    "expected": 34,
+    "skipped": 2,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "setup": [
+    {
+      "file": "auth.setup.ts",
+      "title": "authenticate as the E2E reviewer",
+      "project": "setup",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    }
+  ],
+  "business": [
+    {
+      "file": "agent-ux-integration.spec.ts",
+      "title": "UX1: focus opens the exact question, then an inline direction survives reload",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "continuity-stages23.spec.ts",
+      "title": "CT2 explicit CI/log grant and CT3 bounded delegation can be understood and withdrawn",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "continuity.spec.ts",
+      "title": "CT1 direction correction, stale confirmation, original Mission resume, withdrawal and draft continuity",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "demo.spec.ts",
+      "title": "accepts a proactive reminder and asks the memory copilot",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "demo.spec.ts",
+      "title": "seed project completes the core demo loop",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "demo.spec.ts",
+      "title": "creates a project and captures a fragment",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "demo.spec.ts",
+      "title": "project home separates features and preserves old bookmarks",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "demo.spec.ts",
+      "title": "project feature pages reload independently and enforce sign-in",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "demo.spec.ts",
+      "title": "project dashboard surfaces attention state and snoozed reminder history",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "demo.spec.ts",
+      "title": "creates, edits, sorts and safely cancels a detailed action",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "demo.spec.ts",
+      "title": "updates card importance and reuses a card-sourced action",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "demo.spec.ts",
+      "title": "mobile workspace keeps project status and overview near the top",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "deployment.spec.ts",
+      "title": "环境许可原页面创建、刷新读回、讨论接续和撤销；不发真实环境请求",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "deployment.spec.ts",
+      "title": "许可写入后的强制读回优先于更早的在途轮询，后续撤销使用新版本",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "deployment.spec.ts",
+      "title": "跨端修订冲突保留用户输入，明确核对新版本后才重提许可",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "documents.spec.ts",
+      "title": "document citation opens original physical page and becomes unavailable after correction",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "experiments.spec.ts",
+      "title": "fixed metric job uses its own approval and receipt; correction makes it historical",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "focus-agent.spec.ts",
+      "title": "Focus keeps file guidance inside its answer and names discussions from the question",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "focus-agent.spec.ts",
+      "title": "Focus reads a D1/D2 proposal, confirms a directed read and returns its original result",
+      "project": "chromium",
+      "outcome": "skipped",
+      "expected": "skipped",
+      "attempts": 1,
+      "annotations": [
+        {
+          "type": "skip",
+          "description": "Review flag is off",
+          "location": {
+            "file": "D:\\Projects\\hongmen-s0\\e2e\\focus-agent.spec.ts",
+            "line": 44,
+            "column": 93
+          }
+        }
+      ]
+    },
+    {
+      "file": "focus-agent.spec.ts",
+      "title": "Focus defaults to available cloud analysis, explains scope and preserves manual opt-out",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "focus-agent.spec.ts",
+      "title": "Focus explains rule mode without claiming cloud model health",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "focus-agent.spec.ts",
+      "title": "Focus discussion creates a real Action, reads it back, and survives project navigation",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "focus-agent.spec.ts",
+      "title": "F3 follows one original question, reads new evidence, retains unread across reload and stops",
+      "project": "chromium",
+      "outcome": "skipped",
+      "expected": "skipped",
+      "attempts": 1,
+      "annotations": [
+        {
+          "type": "skip",
+          "description": "Focus follow is off in legacy regression",
+          "location": {
+            "file": "D:\\Projects\\hongmen-s0\\e2e\\focus-agent.spec.ts",
+            "line": 179,
+            "column": 8
+          }
+        }
+      ]
+    },
+    {
+      "file": "focus-agent.spec.ts",
+      "title": "Focus compares frozen options and resumes the same original Mission inside the conversation",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "global-workspace.spec.ts",
+      "title": "global memory and inbox retain project context, filtering and mobile access",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "login.spec.ts",
+      "title": "公开登录页不展示预置凭据，登录后拒绝外域回跳",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "missions.spec.ts",
+      "title": "same Mission survives reload, receives metric, auto continues, waits for approval and adopts a reusable draft",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "pr6-research.spec.ts",
+      "title": "PR6 原回答来源回读、研究总结确认及撤权，桌面手机同一会话",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "pre-r4-ux.spec.ts",
+      "title": "first material leads to an explicitly authorized Mission; multiple waiting tasks remain reachable",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "r4-experience.spec.ts",
+      "title": "R4 native Web blocks keep drafts and confirm one original Action on desktop and phones",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "r4-experience.spec.ts",
+      "title": "R4 original D1/D2 comparison exposes branches and previews without executing",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "s0-trust.spec.ts",
+      "title": "同一浏览器从 OWNER 切换为共享项目 MEMBER：草稿不串号，直接销毁被拒绝",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "ux2-memory-correction.spec.ts",
+      "title": "UX2: 原文纠正跨刷新保留，旧批准拒绝，撤回保留历史",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "ux2-memory-correction.spec.ts",
+      "title": "UX2: 记忆页显示带来源综合与待核实，并回原讨论接续",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    },
+    {
+      "file": "ux3-responsibility.spec.ts",
+      "title": "UX3责任：原页面保存目标与重点、刷新读回；另一端旧版本拒绝",
+      "project": "chromium",
+      "outcome": "expected",
+      "expected": "passed",
+      "attempts": 1,
+      "annotations": []
+    }
+  ],
+  "retries": [
+    {
+      "name": "setup",
+      "retries": 0
+    },
+    {
+      "name": "chromium",
+      "retries": 0
+    }
+  ],
+  "model": "mock; isolated E2E database"
+}

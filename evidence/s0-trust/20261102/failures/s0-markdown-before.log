@@ -1,0 +1,58 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/s0MarkdownNetwork.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-s0
+
+ ❯ tests/s0MarkdownNetwork.test.ts (2 tests | 2 failed) 29ms
+     × 不为远程、协议相对、data 图片生成 img 或 preload 20ms
+     × 保留鉴权附件图片和用户主动打开的普通链接 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/s0MarkdownNetwork.test.ts > G15 Markdown 预览的隐式联网 > 不为远程、协议相对、data 图片生成 img 或 preload
+AssertionError: expected '<link rel="preload" as="image" href="…' not to match /<img|<link[^>]*rel="preload"/
+
+- Expected:
+/<img|<link[^>]*rel="preload"/
+
++ Received:
+"<link rel=\"preload\" as=\"image\" href=\"https://audit.invalid/pixel?private=synthetic\"/><article aria-label=\"Markdown 渲染预览\" class=\"prose-output min-w-0 \"><p><img src=\"https://audit.invalid/pixel?private=synthetic\" alt=\"示例\"/></p></article>"
+
+ ❯ tests/s0MarkdownNetwork.test.ts:10:24
+      8|     for (const url of ["https://audit.invalid/pixel?private=synthetic"…
+      9|       const html = renderToStaticMarkup(createElement(MarkdownRenderer…
+     10|       expect(html).not.toMatch(/<img|<link[^>]*rel="preload"/);
+       |                        ^
+     11|     }
+     12|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/s0MarkdownNetwork.test.ts > G15 Markdown 预览的隐式联网 > 保留鉴权附件图片和用户主动打开的普通链接
+AssertionError: expected '<link rel="preload" as="image" href="…' to contain 'rel="noopener noreferrer"'
+
+- Expected
++ Received
+
+- rel="noopener noreferrer"
++ <link rel="preload" as="image" href="/api/projects/p/attachments/a/file"/><article aria-label="Markdown 渲染预览" class="prose-output min-w-0 "><p><img src="/api/projects/p/attachments/a/file" alt="附件"/></p>
++ <p><a href="https://example.org/doc">资料</a></p></article>
+
+ ❯ tests/s0MarkdownNetwork.test.ts:19:18
+     17|     expect(html).toContain('src="/api/projects/p/attachments/a/file"');
+     18|     expect(html).toContain('href="https://example.org/doc"');
+     19|     expect(html).toContain('rel="noopener noreferrer"');
+       |                  ^
+     20|   });
+     21| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  09:18:48
+   Duration  951ms (transform 46ms, setup 0ms, import 606ms, tests 29ms, environment 0ms)
+

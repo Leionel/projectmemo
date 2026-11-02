@@ -1,0 +1,174 @@
+
+> projectmemo@0.1.0 harmony:test
+> node scripts/harmony-test.ts
+
+> hvigor [32mFinished :entry:clean... after 5 ms [39m
+> hvigor [32mFinished :entry:default@PreBuild... after 352 ms [39m
+> hvigor [32mFinished :entry:default@CreateModuleInfo... after 2 ms [39m
+> hvigor [32mFinished :entry:default@CreateBuildProfile... after 9 ms [39m
+> hvigor [32mFinished :entry:default@PreCheckSyscap... after 1 ms [39m
+> hvigor [32mFinished :entry:default@GenerateUnitTestTemplate... after 9 ms [39m
+> hvigor [32mFinished :entry:default@GeneratePkgContextInfo... after 19 ms [39m
+> hvigor [32mFinished :entry:default@MergeProfile... after 8 ms [39m
+> hvigor [32mFinished :entry:default@ProcessRouterMap... after 10 ms [39m
+> hvigor [32mFinished :entry:default@ProcessShareConfig... after 7 ms [39m
+> hvigor [32mFinished :entry:default@ProcessStartupConfig... after 5 ms [39m
+> hvigor [32mFinished :entry:default@ProcessProfile... after 689 ms [39m
+> hvigor [32mFinished :entry:default@GenerateLoaderJson... after 49 ms [39m
+> hvigor [32mFinished :entry:default@UnitTestProcessProfile... after 8 ms [39m
+> hvigor [32mFinished :entry:default@ProcessResource... after 11 ms [39m
+> hvigor [32mFinished :entry:default@CompileResource... after 1 s 661 ms [39m
+> hvigor [32mFinished :entry:default@ReplaceUnitTestIndexFile... after 10 ms [39m
+> hvigor [32mFinished :entry:default@BuildUnitTestHook... after 1 ms [39m
+ "@ohos/hypium" is imported by "entry/.test/testability/pages/Index.ets", but could not be resolved – treating it as an external dependency. 
+ "@ohos/hypium" is imported by "entry/src/test/LocalUnit.test.ets", but could not be resolved – treating it as an external dependency. 
+ "@ohos/hypium" is imported by "entry/src/test/AttachmentPresentation.test.ets", but could not be resolved – treating it as an external dependency. 
+ "@ohos/hypium" is imported by "entry/src/test/AuthContract.test.ets", but could not be resolved – treating it as an external dependency. 
+ "@ohos/hypium" is imported by "entry/src/test/ApiContract.test.ets", but could not be resolved – treating it as an external dependency. 
+ "@ohos/hypium" is imported by "entry/src/test/ReentryMapping.test.ets", but could not be resolved – treating it as an external dependency. 
+ "@ohos/hypium" is imported by "entry/src/test/ReminderRules.test.ets", but could not be resolved – treating it as an external dependency. 
+ "@ohos/hypium" is imported by "entry/src/test/GlobalFocusPresentation.test.ets", but could not be resolved – treating it as an external dependency. 
+ "@ohos/hypium" is imported by "entry/src/test/ExperienceContract.test.ets", but could not be resolved – treating it as an external dependency. 
+ "@ohos/hypium" is imported by "entry/src/test/MissionContract.test.ets", but could not be resolved – treating it as an external dependency. 
+ "@ohos/hypium" is imported by "entry/src/test/RepoSignalContract.test.ets", but could not be resolved – treating it as an external dependency. 
+ "@ohos/hypium" is imported by "entry/src/test/AgentPresentationContract.test.ets", but could not be resolved – treating it as an external dependency. 
+> hvigor ERROR: Failed :entry:default@UnitTestArkTS... 
+> hvigor WARN: 
+1 WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/entryability/EntryAbility.ets:35:12
+ 'registerFont' has been deprecated.
+
+2 WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:276:25
+ Function may throw exceptions. Special handling is required.
+
+3 WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:277:34
+ Function may throw exceptions. Special handling is required.
+
+4 WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:278:28
+ Function may throw exceptions. Special handling is required.
+
+5 WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:29:25
+ Function may throw exceptions. Special handling is required.
+
+6 WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:15
+ Function may throw exceptions. Special handling is required.
+
+7 WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:57
+ Function may throw exceptions. Special handling is required.
+
+8 WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:78
+ Function may throw exceptions. Special handling is required.
+
+9 WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:111
+ Function may throw exceptions. Special handling is required.
+
+10 WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:67:38
+ Function may throw exceptions. Special handling is required.
+
+11 WARN: ArkTS:WARN File: D:/Projects/hongmen-s0/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:67:59
+ Function may throw exceptions. Special handling is required.
+
+> hvigor ERROR: ArkTS Compiler Error
+1 ERROR: 10311002 ArkTS: ERROR
+Error Message: Failed to resolve OhmUrl. Failed to get a resolved OhmUrl for "@ohos/hypium" imported by "D:\Projects\hongmen-s0\harmonyos\entry\.test\testability\pages\Index.ets".
+
+* Try the following:
+  > Check whether the "undefined" module which @ohos/hypium belongs to is correctly configured.
+  > Check if the corresponding file name "@ohos/hypium" is correct(including case-sensitivity).
+
+
+2 ERROR: 10311002 ArkTS: ERROR
+Error Message: Failed to resolve OhmUrl. Failed to get a resolved OhmUrl for "@ohos/hypium" imported by "D:\Projects\hongmen-s0\harmonyos\entry\src\test\AgentPresentationContract.test.ets".
+
+* Try the following:
+  > Check whether the "undefined" module which @ohos/hypium belongs to is correctly configured.
+  > Check if the corresponding file name "@ohos/hypium" is correct(including case-sensitivity).
+
+
+3 ERROR: 10311002 ArkTS: ERROR
+Error Message: Failed to resolve OhmUrl. Failed to get a resolved OhmUrl for "@ohos/hypium" imported by "D:\Projects\hongmen-s0\harmonyos\entry\src\test\ApiContract.test.ets".
+
+* Try the following:
+  > Check whether the "undefined" module which @ohos/hypium belongs to is correctly configured.
+  > Check if the corresponding file name "@ohos/hypium" is correct(including case-sensitivity).
+
+
+4 ERROR: 10311002 ArkTS: ERROR
+Error Message: Failed to resolve OhmUrl. Failed to get a resolved OhmUrl for "@ohos/hypium" imported by "D:\Projects\hongmen-s0\harmonyos\entry\src\test\AttachmentPresentation.test.ets".
+
+* Try the following:
+  > Check whether the "undefined" module which @ohos/hypium belongs to is correctly configured.
+  > Check if the corresponding file name "@ohos/hypium" is correct(including case-sensitivity).
+
+
+5 ERROR: 10311002 ArkTS: ERROR
+Error Message: Failed to resolve OhmUrl. Failed to get a resolved OhmUrl for "@ohos/hypium" imported by "D:\Projects\hongmen-s0\harmonyos\entry\src\test\AuthContract.test.ets".
+
+* Try the following:
+  > Check whether the "undefined" module which @ohos/hypium belongs to is correctly configured.
+  > Check if the corresponding file name "@ohos/hypium" is correct(including case-sensitivity).
+
+
+6 ERROR: 10311002 ArkTS: ERROR
+Error Message: Failed to resolve OhmUrl. Failed to get a resolved OhmUrl for "@ohos/hypium" imported by "D:\Projects\hongmen-s0\harmonyos\entry\src\test\ExperienceContract.test.ets".
+
+* Try the following:
+  > Check whether the "undefined" module which @ohos/hypium belongs to is correctly configured.
+  > Check if the corresponding file name "@ohos/hypium" is correct(including case-sensitivity).
+
+
+7 ERROR: 10311002 ArkTS: ERROR
+Error Message: Failed to resolve OhmUrl. Failed to get a resolved OhmUrl for "@ohos/hypium" imported by "D:\Projects\hongmen-s0\harmonyos\entry\src\test\GlobalFocusPresentation.test.ets".
+
+* Try the following:
+  > Check whether the "undefined" module which @ohos/hypium belongs to is correctly configured.
+  > Check if the corresponding file name "@ohos/hypium" is correct(including case-sensitivity).
+
+
+8 ERROR: 10311002 ArkTS: ERROR
+Error Message: Failed to resolve OhmUrl. Failed to get a resolved OhmUrl for "@ohos/hypium" imported by "D:\Projects\hongmen-s0\harmonyos\entry\src\test\LocalUnit.test.ets".
+
+* Try the following:
+  > Check whether the "undefined" module which @ohos/hypium belongs to is correctly configured.
+  > Check if the corresponding file name "@ohos/hypium" is correct(including case-sensitivity).
+
+
+9 ERROR: 10311002 ArkTS: ERROR
+Error Message: Failed to resolve OhmUrl. Failed to get a resolved OhmUrl for "@ohos/hypium" imported by "D:\Projects\hongmen-s0\harmonyos\entry\src\test\MissionContract.test.ets".
+
+* Try the following:
+  > Check whether the "undefined" module which @ohos/hypium belongs to is correctly configured.
+  > Check if the corresponding file name "@ohos/hypium" is correct(including case-sensitivity).
+
+
+10 ERROR: 10311002 ArkTS: ERROR
+Error Message: Failed to resolve OhmUrl. Failed to get a resolved OhmUrl for "@ohos/hypium" imported by "D:\Projects\hongmen-s0\harmonyos\entry\src\test\ReentryMapping.test.ets".
+
+* Try the following:
+  > Check whether the "undefined" module which @ohos/hypium belongs to is correctly configured.
+  > Check if the corresponding file name "@ohos/hypium" is correct(including case-sensitivity).
+
+
+11 ERROR: 10311002 ArkTS: ERROR
+Error Message: Failed to resolve OhmUrl. Failed to get a resolved OhmUrl for "@ohos/hypium" imported by "D:\Projects\hongmen-s0\harmonyos\entry\src\test\ReminderRules.test.ets".
+
+* Try the following:
+  > Check whether the "undefined" module which @ohos/hypium belongs to is correctly configured.
+  > Check if the corresponding file name "@ohos/hypium" is correct(including case-sensitivity).
+
+
+12 ERROR: 10311002 ArkTS: ERROR
+Error Message: Failed to resolve OhmUrl. Failed to get a resolved OhmUrl for "@ohos/hypium" imported by "D:\Projects\hongmen-s0\harmonyos\entry\src\test\RepoSignalContract.test.ets".
+
+* Try the following:
+  > Check whether the "undefined" module which @ohos/hypium belongs to is correctly configured.
+  > Check if the corresponding file name "@ohos/hypium" is correct(including case-sensitivity).
+
+
+COMPILE RESULT:FAIL {ERROR:13 WARN:11}
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --debug option to get more log output.
+
+> hvigor ERROR: BUILD FAILED in 45 s 326 ms 
+[harmony-test] hvigor test 失败，退出码 4294967295

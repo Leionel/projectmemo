@@ -1,0 +1,156 @@
+{
+  "version": "0.1.0",
+  "name": "projectmemo",
+  "dependencies": {
+    "@playwright/test": {
+      "version": "1.61.1",
+      "resolved": "https://registry.npmjs.org/@playwright/test/-/test-1.61.1.tgz",
+      "overridden": false
+    },
+    "@prisma/adapter-better-sqlite3": {
+      "version": "7.10.1",
+      "resolved": "https://registry.npmjs.org/@prisma/adapter-better-sqlite3/-/adapter-better-sqlite3-7.10.1.tgz",
+      "overridden": false
+    },
+    "@prisma/client": {
+      "version": "7.10.1",
+      "resolved": "https://registry.npmjs.org/@prisma/client/-/client-7.10.1.tgz",
+      "overridden": false
+    },
+    "@tailwindcss/postcss": {
+      "version": "4.3.2",
+      "resolved": "https://registry.npmjs.org/@tailwindcss/postcss/-/postcss-4.3.2.tgz",
+      "overridden": false
+    },
+    "@testing-library/jest-dom": {
+      "version": "6.9.1",
+      "resolved": "https://registry.npmjs.org/@testing-library/jest-dom/-/jest-dom-6.9.1.tgz",
+      "overridden": false
+    },
+    "@testing-library/react": {
+      "version": "16.3.2",
+      "resolved": "https://registry.npmjs.org/@testing-library/react/-/react-16.3.2.tgz",
+      "overridden": false
+    },
+    "@types/better-sqlite3": {
+      "version": "7.6.13",
+      "resolved": "https://registry.npmjs.org/@types/better-sqlite3/-/better-sqlite3-7.6.13.tgz",
+      "overridden": false
+    },
+    "@types/node": {
+      "version": "24.13.3",
+      "resolved": "https://registry.npmjs.org/@types/node/-/node-24.13.3.tgz",
+      "overridden": false
+    },
+    "@types/nodemailer": {
+      "version": "8.0.2",
+      "resolved": "https://registry.npmjs.org/@types/nodemailer/-/nodemailer-8.0.2.tgz",
+      "overridden": false
+    },
+    "@types/react-dom": {
+      "version": "19.2.3",
+      "overridden": false
+    },
+    "@types/react": {
+      "version": "19.2.17",
+      "overridden": false
+    },
+    "better-sqlite3": {
+      "version": "12.11.1",
+      "resolved": "https://registry.npmjs.org/better-sqlite3/-/better-sqlite3-12.11.1.tgz",
+      "overridden": false
+    },
+    "csv-parse": {
+      "version": "7.0.3",
+      "resolved": "https://registry.npmjs.org/csv-parse/-/csv-parse-7.0.3.tgz",
+      "overridden": false
+    },
+    "eslint-config-next": {
+      "version": "16.4.3",
+      "resolved": "https://registry.npmjs.org/eslint-config-next/-/eslint-config-next-16.4.3.tgz",
+      "overridden": false
+    },
+    "eslint": {
+      "version": "9.39.5",
+      "resolved": "https://registry.npmjs.org/eslint/-/eslint-9.39.5.tgz",
+      "overridden": false
+    },
+    "jsdom": {
+      "version": "27.4.0",
+      "resolved": "https://registry.npmjs.org/jsdom/-/jsdom-27.4.0.tgz",
+      "overridden": false
+    },
+    "lucide-react": {
+      "version": "0.552.0",
+      "resolved": "https://registry.npmjs.org/lucide-react/-/lucide-react-0.552.0.tgz",
+      "overridden": false
+    },
+    "next-themes": {
+      "version": "0.4.6",
+      "resolved": "https://registry.npmjs.org/next-themes/-/next-themes-0.4.6.tgz",
+      "overridden": false
+    },
+    "next": {
+      "version": "16.4.3",
+      "resolved": "https://registry.npmjs.org/next/-/next-16.4.3.tgz",
+      "overridden": false
+    },
+    "nodemailer": {
+      "version": "10.2.1",
+      "resolved": "https://registry.npmjs.org/nodemailer/-/nodemailer-10.2.1.tgz",
+      "overridden": false
+    },
+    "playwright-core": {
+      "version": "1.61.1",
+      "overridden": false
+    },
+    "prisma": {
+      "version": "7.10.1",
+      "resolved": "https://registry.npmjs.org/prisma/-/prisma-7.10.1.tgz",
+      "overridden": false
+    },
+    "react-dom": {
+      "version": "19.2.7",
+      "resolved": "https://registry.npmjs.org/react-dom/-/react-dom-19.2.7.tgz",
+      "overridden": false
+    },
+    "react-markdown": {
+      "version": "10.1.0",
+      "resolved": "https://registry.npmjs.org/react-markdown/-/react-markdown-10.1.0.tgz",
+      "overridden": false
+    },
+    "react": {
+      "version": "19.2.7",
+      "resolved": "https://registry.npmjs.org/react/-/react-19.2.7.tgz",
+      "overridden": false
+    },
+    "remark-gfm": {
+      "version": "4.0.1",
+      "resolved": "https://registry.npmjs.org/remark-gfm/-/remark-gfm-4.0.1.tgz",
+      "overridden": false
+    },
+    "tailwindcss": {
+      "version": "4.3.2",
+      "overridden": false
+    },
+    "tsx": {
+      "version": "4.23.0",
+      "overridden": false
+    },
+    "typescript": {
+      "version": "5.9.3",
+      "resolved": "https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz",
+      "overridden": false
+    },
+    "vitest": {
+      "version": "4.1.12",
+      "resolved": "https://registry.npmjs.org/vitest/-/vitest-4.1.12.tgz",
+      "overridden": false
+    },
+    "zod": {
+      "version": "4.6.7",
+      "resolved": "https://registry.npmjs.org/zod/-/zod-4.6.7.tgz",
+      "overridden": false
+    }
+  }
+}

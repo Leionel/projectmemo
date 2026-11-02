@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/s0CapabilityAndCreation.test.ts tests/s0WorkerIdentity.test.ts
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-s0
+
+
+ Test Files  2 passed (2)
+      Tests  5 passed (5)
+   Start at  09:42:31
+   Duration  2.75s (transform 997ms, setup 0ms, import 356ms, tests 1.82s, environment 0ms)
+

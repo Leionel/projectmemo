@@ -1,0 +1,37 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/s0CaptureIsolation.test.ts tests/captureDraftReady.test.ts tests/s0MarkdownNetwork.test.ts
+
+
+ RUN  v4.1.10 D:/Projects/hongmen-s0
+
+ ❯ tests/s0MarkdownNetwork.test.ts (3 tests | 1 failed) 3445ms
+     × 真实 Chromium 渲染与 preload 不向 canary 发起请求 3421ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/s0MarkdownNetwork.test.ts > G15 Markdown 预览的隐式联网 > 真实 Chromium 渲染与 preload 不向 canary 发起请求
+AssertionError: expected +0 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 0
+
+ ❯ tests/s0MarkdownNetwork.test.ts:35:53
+     33|       });
+     34|       await page.goto("http://127.0.0.1:41789/s0", { waitUntil: "netwo…
+     35|       expect(await page.getByText(/未自动加载/).count()).toBe(2);
+       |                                                     ^
+     36|       expect(requests).toEqual([]);
+     37|     } finally { await browser.close(); }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 8 passed (9)
+   Start at  09:23:43
+   Duration  9.85s (transform 132ms, setup 0ms, import 2.04s, tests 3.69s, environment 3.29s)
+

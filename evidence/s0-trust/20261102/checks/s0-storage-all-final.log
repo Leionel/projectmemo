@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/s0ProjectDeletion.test.ts tests/attachment.test.ts tests/attachmentCorrection.test.ts tests/database.integration.test.ts tests/projectLifecycle.test.ts
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-s0
+
+
+ Test Files  5 passed (5)
+      Tests  36 passed (36)
+   Start at  11:42:22
+   Duration  14.69s (transform 2.82s, setup 0ms, import 2.58s, tests 10.73s, environment 0ms)
+

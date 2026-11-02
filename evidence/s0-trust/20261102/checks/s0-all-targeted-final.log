@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/deployUpdate.test.ts tests/s0ProjectDeletion.test.ts tests/s0CaptureIsolation.test.ts tests/s0MarkdownNetwork.test.ts tests/s0PersonalInFlight.test.ts tests/s0CapabilityAndCreation.test.ts tests/s0MigrationReplay.test.ts tests/s0WorkerIdentity.test.ts
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-s0
+
+
+ Test Files  8 passed (8)
+      Tests  49 passed (49)
+   Start at  10:19:09
+   Duration  27.00s (transform 2.25s, setup 0ms, import 4.37s, tests 18.82s, environment 1.58s)
+

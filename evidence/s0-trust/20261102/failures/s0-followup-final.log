@@ -1,0 +1,40 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/calendarWrite.test.ts tests/calendarEventExtensions.test.ts tests/s0ProjectDeletion.test.ts tests/s0CaptureIsolation.test.ts tests/s0CapabilityAndCreation.test.ts
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-s0
+
+ ❯ tests/calendarWrite.test.ts (11 tests | 1 failed) 9863ms
+     × 明确的过去日程仍被拒绝，不产生批准或外部创建 806ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/calendarWrite.test.ts > CT-10 飞书日历事件写入 > 明确的过去日程仍被拒绝，不产生批准或外部创建
+AssertionError: expected { code: 'MODEL_PROTOCOL_ERROR', …(5) } to match object { code: 'CALENDAR_WINDOW_INVALID' }
+(15 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "code": "CALENDAR_WINDOW_INVALID",
++   "code": "MODEL_PROTOCOL_ERROR",
+  }
+
+ ❯ tests/calendarWrite.test.ts:98:26
+     96|       provider: "TEST_FIXTURE", model: "fixture", protocol: "JSON_CHOI…
+     97|     const detail = await missionDetail(user.id, mission.id);
+     98|     expect(detail.error).toMatchObject({ code: "CALENDAR_WINDOW_INVALI…
+       |                          ^
+     99|     expect(detail.approvals).toHaveLength(0);
+    100|     expect(f.createCalls()).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  1 failed | 35 passed (36)
+   Start at  11:06:42
+   Duration  43.30s (transform 5.32s, setup 0ms, import 17.07s, tests 22.99s, environment 1.70s)
+

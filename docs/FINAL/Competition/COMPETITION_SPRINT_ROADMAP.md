@@ -2,6 +2,12 @@
 
 日期：2026-11-01。北京时间 UTC+8。[审查基线](COMPETITION_AGENT_PRODUCT_AUDIT.md)；[真实旅程](COMPETITION_REAL_USER_JOURNEY.md)；[开发交接](COMPETITION_IMPLEMENTATION_HANDOFF.md)。本表只调度原 G/FVT/UX/CT/PM 工作，不创建比赛业务模式或另一套长期路线。本轮所有实施、实验、安装和部署均未启动。
 
+## 2026-11-02 实施更新
+
+S0 已获用户启动实施授权。历史表中的 `PMcf1bbb0/PM4 未提交`、旧主分支及线上版本描述保留为 11/01 截点，不能作为当前状态。PM1～4 与入口已合并到基线 `aea257c`；S0 在独立树 `D:/Projects/hongmen-s0`、`codex/s0-trust-fixes` 实施，修复与各类 Gate 见 [S0 实施记录](S0_IMPLEMENTATION_2026-11-02.md)。主目录未提交签名/生成配置继续保留。
+
+依赖提交 `5d3ad3f`，核心修复提交 `784d99a`，后续会话/Worker/原生及存储收尾到 `8da4f05`。完整回归 1486 项通过，后续存储定向 36 项通过；Web E2E 为 33 业务＋1 setup 通过、2 原有跳过、0 失败/flaky；鸿蒙 92 项及 unsigned HAP 构建通过。工程、真实模型、设备、Linux、自然日和独立复核分别签收。生产 audit 为 0 不等于所有开发依赖告警已关闭，S0-B 的剩余 minimatch 风险在实施记录中单列。S0 尚未并入 master、推送或部署。
+
 ## 1. 外部期限与内部冻结
 
 外部时间来自用户通知，未取得原始赛方文件的逐项核验；材料负责人需保存通知原文和收件回执，不据此编造评分权重。

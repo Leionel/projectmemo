@@ -1,0 +1,125 @@
+ M app/api/conversations/capabilities/route.ts
+ M app/api/projects/[id]/route.ts
+ M app/api/projects/route.ts
+ M app/projects/[id]/[section]/page.tsx
+ M app/projects/[id]/layout.tsx
+ M app/projects/page.tsx
+ M components/ArtifactGenerator.tsx
+ M components/CaptureBox.tsx
+ M components/ConversationPanel.tsx
+ M components/KnowledgeCardView.tsx
+ M components/MarkdownRenderer.tsx
+ M components/MissionMaterialIntake.tsx
+ M components/MissionResponsibilityPanel.tsx
+ M components/NewProjectForm.tsx
+ M components/ProjectCard.tsx
+ M components/ProjectCardActions.tsx
+ M components/ProjectSettings.tsx
+ M components/UserNav.tsx
+ M deploy/alibaba-cloud-linux/README.md
+ M deploy/alibaba-cloud-linux/safe-update.sh
+ M e2e/focus-agent.spec.ts
+ M evidence/r4-agent-ux/20261030-ux1/web-continuity.png
+ M evidence/r4-agent-ux/20261030-ux1/web-focus-390.png
+ M evidence/r4-agent-ux/20261030-ux2/web-correction.png
+ M evidence/r4-agent-ux/20261030-ux2/web-memory-panel.png
+ M evidence/r4-ui-quality/20261031/after/web-responsibility-edit.png
+ M harmonyos/entry/src/main/ets/common/ApiContract.ets
+ M harmonyos/entry/src/main/ets/components/MissionResponsibilitySection.ets
+ M harmonyos/entry/src/main/ets/models/Conversation.ets
+ M harmonyos/entry/src/main/ets/models/Memory.ets
+ M harmonyos/entry/src/main/ets/models/Mission.ets
+ M harmonyos/entry/src/main/ets/models/Project.ets
+ M harmonyos/entry/src/main/ets/pages/FocusConversation.ets
+ M harmonyos/entry/src/main/ets/pages/Index.ets
+ M harmonyos/entry/src/main/ets/pages/ProjectHome.ets
+ M harmonyos/entry/src/main/ets/services/ApiClient.ets
+ M harmonyos/entry/src/main/ets/services/MemoryService.ets
+ M harmonyos/entry/src/main/ets/services/ProjectService.ets
+ M lib/auth/cloudQuota.ts
+ M lib/auth/guard.ts
+ M lib/auth/serverSession.ts
+ M lib/client/projectLifecycle.ts
+ M lib/continuity/sourcePolicy.ts
+ M lib/conversation/turnWorker.ts
+ M lib/memory/personalInvalidation.ts
+ M lib/mission/responsibility.ts
+ M lib/mission/runner.ts
+ M lib/mission/workerPresence.ts
+ M lib/repositories/cards.ts
+ M lib/repositories/projects.ts
+ M lib/services/attachmentService.ts
+ M lib/services/captureService.ts
+ M lib/validation/schemas.ts
+ M next-env.d.ts
+ M package-lock.json
+ M package.json
+ M prisma/schema.prisma
+ M scripts/mission-worker.ts
+ M scripts/seed-e2e-auth.ts
+ M tests/captureDraftReady.test.ts
+ M tests/database.integration.test.ts
+ M tests/deployUpdate.test.ts
+ M tests/projectLifecycle.test.ts
+ M tsconfig.json
+?? app/api/project-deletions/
+?? components/ProjectDeletionProgress.tsx
+?? deploy/alibaba-cloud-linux/safe-update-with-swap.sh
+?? e2e/s0-trust.spec.ts
+?? evidence/r4-continuity/browser-1793584935519/
+?? evidence/r4-continuity/browser-1793585055984/
+?? evidence/r4-continuity/browser-1793585056133/
+?? evidence/r4-continuity/browser-1793585723371/
+?? evidence/r4-continuity/browser-1793585838127/
+?? evidence/r4-continuity/browser-1793585838314/
+?? evidence/r4-continuity/stages23-1793584930946.png
+?? evidence/r4-continuity/stages23-1793585718870.png
+?? lib/auth/cloudCapability.ts
+?? lib/captureProcessing.ts
+?? lib/client/captureDrafts.ts
+?? lib/services/projectDeletionService.ts
+?? npm-audit-s0-after.json
+?? npm-audit-s0-baseline.json
+?? npm-audit-s0-production.json
+?? npm-install-s0.log
+?? prisma/migrations/20261102010000_project_deletion_fence/
+?? prisma/migrations/20261102011000_capture_processing_receipt/
+?? s0-affected-final.log
+?? s0-contracts-after.log
+?? s0-critical-final.log
+?? s0-delete-before.log
+?? s0-deletion-after.log
+?? s0-dependency-install.log
+?? s0-dev-dependency-install.log
+?? s0-diff-check.log
+?? s0-e2e-final.log
+?? s0-e2e.log
+?? s0-entry-after.log
+?? s0-full-regression.log
+?? s0-generate.log
+?? s0-guards-final.log
+?? s0-hap-build.log
+?? s0-hap-final.log
+?? s0-harmony-test-final.log
+?? s0-harmony-test.log
+?? s0-lint-final.log
+?? s0-lint.log
+?? s0-markdown-before.log
+?? s0-migrate-final.log
+?? s0-ohpm-install.log
+?? s0-pm-window.log
+?? s0-targeted-round2.log
+?? s0-test-migrate.log
+?? s0-transitive-update.log
+?? s0-types-final.log
+?? s0-types-first.log
+?? s0-types-round2.log
+?? s0-web-build.log
+?? s0-working-snapshot.txt
+?? tests/s0CapabilityAndCreation.test.ts
+?? tests/s0CaptureIsolation.test.ts
+?? tests/s0MarkdownNetwork.test.ts
+?? tests/s0MigrationReplay.test.ts
+?? tests/s0PersonalInFlight.test.ts
+?? tests/s0ProjectDeletion.test.ts
+?? tests/s0WorkerIdentity.test.ts

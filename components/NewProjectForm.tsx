@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ArrowRight, LoaderCircle } from "lucide-react";
 import { scenarioOptions } from "@/lib/types";
 
@@ -22,6 +22,7 @@ export function NewProjectForm() {
   const [touched, setTouched] = useState<Partial<Record<Field, boolean>>>({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const request = useRef({ payload: "", id: "" });
   const errors = validate(values);
 
   function update(field: Field, value: string) { setValues((current) => ({ ...current, [field]: value })); setError(""); }
@@ -32,8 +33,10 @@ export function NewProjectForm() {
     setTouched({ title: true, description: true, goal: true, scenario: true, deadline: true });
     if (Object.keys(errors).length) return;
     setLoading(true); setError("");
+    const payload = JSON.stringify(values);
+    if (request.current.payload !== payload) request.current = { payload, id: crypto.randomUUID() };
     try {
-      const response = await fetch("/api/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(values) });
+      const response = await fetch("/api/projects", { method: "POST", headers: { "Content-Type": "application/json", "Idempotency-Key": request.current.id }, body: payload });
       const data = await response.json().catch(() => null);
       if (!response.ok) throw new Error(data?.error?.message ?? "创建失败，请稍后重试");
       // A new project changes the whole workspace context. A full navigation

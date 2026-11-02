@@ -102,6 +102,12 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
    await assertExperienceReadSet(m.ownerUserId,experienceReadSet);
    const personalMemoryReadSet=built.personalMemoryReadSet??null;
    await assertPersonalMemoryReadSet(m.ownerUserId,personalMemoryReadSet);
+   // 在原模型派发前持久绑定依赖；尚无 Step 或日志窗口拥挤也能同步处理隐私纠正。
+   await db.$transaction(async tx=>{
+    const live=await fenced(tx,lease);
+    await assertPersonalMemoryReadSet(m.ownerUserId,personalMemoryReadSet,tx);
+    await tx.agentMission.update({where:{id:m.id},data:{planJson:json({...record(live.planJson),personalMemoryReadSet})}});
+   });
    phase="DECISION";await reserve(lease,"models",undefined,decisionTokenLimit(m.lastErrorJson));const started=Date.now();
    const decision=await (async()=>{try{if(!options.provider)await reserveCloudCall(m.projectId);return await (options.provider??chooseNext)(context,tools);}catch(error){
     await settleFailed("models",started,error instanceof ModelProtocolError?error.metadata.usage:undefined);

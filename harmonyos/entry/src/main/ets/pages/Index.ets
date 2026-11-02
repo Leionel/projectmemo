@@ -61,6 +61,7 @@ struct Index {
 
   // 数据主状态
   @State projects: Project[] = [];
+  @State projectDeletionNotice: string = '';
   // 已归档项目单独一份：主列表与跨项目聚合都不含它们，但必须仍能在这里恢复
   @State archivedProjects: Project[] = [];
   @State showArchivedProjects: boolean = false;
@@ -204,6 +205,7 @@ struct Index {
     this.currentMainTabIndex = 4;
     this.currentUser = new UserInfo();
     this.projects = [];
+    this.projectDeletionNotice = '';
     this.archivedProjects = [];
     this.showArchivedProjects = false;
     this.projectLifecycleBusyId = '';
@@ -390,6 +392,7 @@ struct Index {
     this.dataSyncState = '同步中...';
     try {
       this.projects = await this.projectService.listProjects();
+      this.projectDeletionNotice = this.projectService.deletionNotice;
       if (this.projects.length > 0) {
         WidgetDataService.updateWidgetWithProject(getContext(this), this.projects[0]).catch(() => {});
       }
@@ -589,14 +592,14 @@ struct Index {
     try {
       const menu = await promptAction.showActionMenu({
         title: TextFormatters.readableText(project.title, '项目管理'),
-        buttons: [
+        buttons: project.canDelete === true ? [
           { text: isArchived ? '恢复项目' : '归档项目', color: '#0A7EA4' },
           { text: '删除项目', color: '#FA5151' }
-        ]
+        ] : [{ text: isArchived ? '恢复项目' : '归档项目', color: '#0A7EA4' }]
       });
       if (menu.index === 0) {
         await this.toggleProjectArchive(project);
-      } else if (menu.index === 1) {
+      } else if (menu.index === 1 && project.canDelete === true) {
         this.projectDeleteConfirmId = project.id;
       }
     } catch (_e) {
@@ -614,8 +617,8 @@ struct Index {
     }
     this.projectLifecycleBusyId = project.id;
     try {
-      await this.projectService.deleteProject(project.id);
-      promptAction.showToast({ message: '项目及其记忆、行动与成果已删除' });
+      const message: string = await this.projectService.deleteProject(project.id, project.updatedAt);
+      promptAction.showToast({ message: message });
       this.projectDeleteConfirmId = '';
       await this.loadAllData(true);
     } catch (e) {
@@ -1033,10 +1036,10 @@ struct Index {
     this.gcError = '';
     try {
       const requestId: string = `harmony-capture-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
-      await this.memoryService.capture(projectId, trimmed, this.gcSourceType, requestId);
+      const saved = await this.memoryService.capture(projectId, trimmed, this.gcSourceType, requestId);
       this.showGlobalCapture = false;
       this.gcText = '';
-      promptAction.showToast({ message: '已沉淀为项目记忆' });
+      promptAction.showToast({ message: this.memoryService.captureModeLabel(saved) });
       this.loadAllData();
     } catch (e) {
       this.gcError = e instanceof ApiError ? e.message : '记录失败，请稍后重试';
@@ -2805,6 +2808,11 @@ struct Index {
             .constraintSize({ minHeight: 58 })
             .padding({ left: 14, right: 6, top: 7, bottom: 7 })
 
+            if (this.currentMainTabIndex === 0 && this.projectDeletionNotice !== '') {
+              Text(this.projectDeletionNotice).fontSize(12).fontColor(PMColors.INK_SECONDARY)
+                .padding(12).onClick(() => { this.loadAllData(true); })
+                .accessibilityText(`项目清除进度：${this.projectDeletionNotice}，点击刷新`)
+            }
             if (this.searchOpen && this.currentMainTabIndex < 3) {
               Row() {
                 TextInput({ text: this.globalSearchQuery, placeholder: this.searchPlaceholder() })

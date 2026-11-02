@@ -23,6 +23,14 @@ export class MemoryService {
     return response.project.cards;
   }
 
+  captureModeLabel(card: KnowledgeCard): string {
+    const info = card.processing ?? card.capture?.processingJson;
+    if (info?.mode === 'MODEL') return '已用云模型整理，请核对内容';
+    if (info?.mode === 'RULE') return '已按规则整理，未调用云模型';
+    if (info?.mode === 'FALLBACK') return '云端整理未完成，已按规则整理';
+    return '整理方式未确认，请核对原文';
+  }
+
   async capture(projectId: string, rawText: string, sourceType?: string, requestId?: string): Promise<KnowledgeCard> {
     const input: CaptureInput = new CaptureInput();
     input.rawText = rawText;

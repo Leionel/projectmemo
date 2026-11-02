@@ -2027,7 +2027,7 @@ struct ProjectHome {
       this.rawText = '';
       this.captureRequestId = '';
       await DeviceIdentity.clearCaptureDraft(this.captureDraftScope());
-      promptAction.showToast({ message: '已归档并生成记忆卡片' });
+      promptAction.showToast({ message: this.memoryService.captureModeLabel(saved) });
       await this.loadAllData();
     } catch (e) {
       if (e instanceof ApiError) {
@@ -4392,6 +4392,7 @@ if (this.attachmentSearchOpen) {
                     .fontSize(PMFontSize.BODY)
                     .fontColor(PMColors.INK_PRIMARY)
                   Text(`来源: ${card.capture.sourceType ?? '随手记录'}`)
+                  Text(this.memoryService.captureModeLabel(card)).fontSize(12).fontColor(PMColors.INK_SECONDARY)
                     .fontSize(PMFontSize.CAPTION)
                     .fontColor(PMColors.INK_TERTIARY)
                     .margin({ top: PMSpacing.XS })

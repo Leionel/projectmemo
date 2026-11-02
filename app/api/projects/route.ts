@@ -1,7 +1,9 @@
 import { apiError } from "@/lib/api";
 import { authenticateUser } from "@/lib/auth/guard";
-import { db } from "@/lib/db";
-import { createProject, listProjects } from "@/lib/repositories/projects";
+import { createOwnedProject, listProjects } from "@/lib/repositories/projects";
+import { AppError } from "@/lib/api";
+import { randomUUID } from "node:crypto";
+import { listProjectDeletions } from "@/lib/services/projectDeletionService";
 import { projectCreateSchema } from "@/lib/validation/schemas";
 
 export const runtime = "nodejs";
@@ -21,7 +23,7 @@ export async function GET(request?: Request) {
     const archived = archivedParam === "true" ? "only" : archivedParam === "include" ? "include" : "exclude";
 
     const projects = await listProjects(user.id, { archived });
-    return Response.json({ projects });
+    return Response.json({ projects, deletions: await listProjectDeletions(user.id) });
   } catch (error) {
     return apiError(error);
   }
@@ -31,18 +33,12 @@ export async function POST(request: Request) {
   try {
     const { user } = await authenticateUser(request);
     const input = projectCreateSchema.parse(await request.json());
-    const project = await createProject(input);
-
-    // 自动将当前用户作为 OWNER 建立项目归属
-    await db.projectMembership.create({
-      data: {
-        userId: user.id,
-        projectId: project.id,
-        role: "OWNER",
-      },
-    });
-
-    return Response.json({ project }, { status: 201 });
+    const header = request.headers.get("Idempotency-Key")?.trim();
+    if (header && input.requestId && header !== input.requestId) throw new AppError("IDEMPOTENCY_KEY_MISMATCH", "建项请求身份不一致", 422);
+    const requestId = header || input.requestId || randomUUID();
+    if (requestId.length > 128) throw new AppError("INVALID_REQUEST_ID", "建项请求身份过长", 422);
+    const result = await createOwnedProject(input, user.id, requestId);
+    return Response.json(result, { status: result.replayed ? 200 : 201 });
   } catch (error) {
     return apiError(error);
   }

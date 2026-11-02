@@ -164,14 +164,16 @@ export class ApiClient {
 
   // @ohos.net.http 的 RequestMethod 没有 DELETE，与 PATCH 一样用 customMethod；
   // 删除成功返回 204 无正文，不能按 JSON 解析，由 isNoContent 单独判定。
-  async delete<T>(path: string): Promise<T> {
+  async delete<T>(path: string, confirmationId: string = '', expectedVersion: string = ''): Promise<T> {
     const httpRequest = http.createHttp();
+    const headers: Record<string, string> = this.buildHeaders(path);
+    if (confirmationId !== '') { headers['X-Project-Delete-Confirmation'] = confirmationId; headers['If-Match'] = expectedVersion; }
     try {
       const response: http.HttpResponse = await httpRequest.request(
         `${this.baseUrl}${path}`,
         {
           customMethod: 'DELETE',
-          header: this.buildHeaders(path),
+          header: headers,
           expectDataType: http.HttpDataType.STRING,
           connectTimeout: 10000,
           readTimeout: 30000,

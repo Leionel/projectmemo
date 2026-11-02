@@ -158,16 +158,19 @@ export async function settleWorkspaceCloudCall(billing: WorkspaceBilling, result
  */
 export async function reserveCloudCall(projectId?: string): Promise<void> {
   if (!projectId) return; // Existing trusted CLI/provider probes do not act for a project.
-  const owners = await db.projectMembership.findMany({
+  const day = new Date().toISOString().slice(0, 10);
+  await db.$transaction(async (tx) => {
+  const project = await tx.project.findUnique({ where: { id: projectId }, select: { deletionRequestedAt: true } });
+  if (!project || project.deletionRequestedAt) throw new AppError("PROJECT_NOT_FOUND", "项目已不可用，未继续派发云请求", 404);
+  const owners = await tx.projectMembership.findMany({
     where: { projectId, role: "OWNER" },
     select: { user: { select: { security: true } } },
   });
+  if (!owners.length) throw new AppError("PROJECT_NOT_FOUND", "项目没有有效所有者，未继续派发云请求", 404);
   const accounts = owners.flatMap((owner) =>
     owner.user.security ? [owner.user.security] : [],
   );
   if (!accounts.length) return;
-  const day = new Date().toISOString().slice(0, 10);
-  await db.$transaction(async (tx) => {
     for (const account of accounts) {
       if (!account.emailVerifiedAt || account.dailyCloudLimit <= 0)
         throw new AppError(

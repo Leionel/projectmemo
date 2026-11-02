@@ -1,10 +1,11 @@
 "use client";
 import {projectHref} from "@/lib/projectNavigation";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { emitWorkspaceChange } from "@/lib/client/workspaceEvents";
 import { AttachmentInbox } from "@/components/AttachmentInbox";
+import { captureDraftKey, captureOwner, captureGeneration, onCaptureOwnerChange, writeCaptureDraft, clearCaptureDrafts } from "@/lib/client/captureDrafts";
 import { CheckCircle2, LoaderCircle, Save, Sparkles } from "lucide-react";
 
 const sources = [
@@ -24,9 +25,13 @@ function newRequestId() {
   return `capture-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-export function CaptureBox({ projectId, inboxEnabled = true, onMaterialSaved, draftScope }: { projectId: string; inboxEnabled?: boolean; onMaterialSaved?: (sourceId: string) => void; draftScope?: string }) {
+type CaptureBoxProps = { projectId: string; ownerId: string; inboxEnabled?: boolean; onMaterialSaved?: (sourceId: string) => void; draftScope?: string };
+export function CaptureBox(props: CaptureBoxProps) {
+  return <CaptureForm key={captureDraftKey(props.ownerId, props.projectId, props.draftScope)} {...props} />;
+}
+function CaptureForm({ projectId, ownerId, inboxEnabled = true, onMaterialSaved, draftScope }: CaptureBoxProps) {
   const router = useRouter();
-  const draftKey = `projectmemo:capture:${projectId}${draftScope ? `:${draftScope}` : ""}`;
+  const draftKey = captureDraftKey(ownerId, projectId, draftScope);
   const [text, setText] = useState("");
   const [sourceType, setSourceType] = useState(sources[0]);
   const [requestId, setRequestId] = useState("");
@@ -36,9 +41,16 @@ export function CaptureBox({ projectId, inboxEnabled = true, onMaterialSaved, dr
     null,
   );
   const [newCardId, setNewCardId] = useState("");
+  const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
+    let timer: number;
+    const restore = () => {
+      window.clearTimeout(timer);
+      if (captureOwner() !== ownerId) { setText(""); setRequestId(""); setMessage(null); setNewCardId(""); setDraftReady(false); return; }
+      timer = window.setTimeout(() => {
+      if (!mounted.current || captureOwner() !== ownerId) return;
       try {
         const saved = window.localStorage.getItem(draftKey);
         if (saved) {
@@ -53,34 +65,32 @@ export function CaptureBox({ projectId, inboxEnabled = true, onMaterialSaved, dr
             setSourceType(draft.sourceType!);
         }
       } catch {
-        window.localStorage.removeItem(draftKey);
+        writeCaptureDraft(draftKey, ownerId, null);
       }
       setDraftReady(true);
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, [draftKey]);
+      }, 0);
+    };
+    const unsubscribe = onCaptureOwnerChange(restore);
+    restore();
+    return () => { window.clearTimeout(timer); unsubscribe(); };
+  }, [draftKey, ownerId]);
 
   useEffect(() => {
     if (!draftReady) return;
-    if (text)
-      window.localStorage.setItem(
-        draftKey,
-        JSON.stringify({ text, sourceType, requestId }),
-      );
-    else window.localStorage.removeItem(draftKey);
-  }, [draftKey, draftReady, requestId, sourceType, text]);
+    writeCaptureDraft(draftKey, ownerId, text ? { text, sourceType, requestId } : null);
+  }, [draftKey, ownerId, draftReady, requestId, sourceType, text]);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
+    if (!draftReady || captureOwner() !== ownerId || loading) return;
+    const submittedGeneration = captureGeneration();
+    const current = () => mounted.current && captureOwner() === ownerId && captureGeneration() === submittedGeneration;
     setLoading(true);
     setMessage(null);
     setNewCardId("");
     const activeRequestId = requestId || newRequestId();
     setRequestId(activeRequestId);
-    window.localStorage.setItem(
-      draftKey,
-      JSON.stringify({ text, sourceType, requestId: activeRequestId }),
-    );
+    writeCaptureDraft(draftKey, ownerId, { text, sourceType, requestId: activeRequestId });
     try {
       const response = await fetch(`/api/projects/${projectId}/captures`, {
         method: "POST",
@@ -91,16 +101,22 @@ export function CaptureBox({ projectId, inboxEnabled = true, onMaterialSaved, dr
         body: JSON.stringify({ rawText: text, sourceType, requestId: activeRequestId }),
       });
       const data = await response.json().catch(() => null);
+      if (!current()) return;
+      if (response.status === 401) { clearCaptureDrafts(); window.dispatchEvent(new Event("projectmemo:session-changed")); return; }
+      if (response.status === 403 || response.status === 404) {
+        writeCaptureDraft(draftKey, ownerId, null); setText(""); setRequestId(""); setDraftReady(false);
+        setMessage({ ok: false, text: "项目已不可访问，已停止使用本机草稿" }); return;
+      }
       if (!response.ok)
         throw new Error(data?.error?.message ?? "沉淀失败，请稍后重试");
       setText("");
       setRequestId("");
-      window.localStorage.removeItem(draftKey);
+      writeCaptureDraft(draftKey, ownerId, null);
       setNewCardId(data.card.id);
       if (data.card.captureId) onMaterialSaved?.(`capture:${data.card.captureId}`);
       setMessage({
         ok: true,
-        text: data.replayed ? `已恢复《${data.card.title}》知识卡片` : `已生成《${data.card.title}》知识卡片`,
+        text: `${data.replayed ? "已恢复" : "已保存"}《${data.card.title}》；${data.card.processing?.mode === "MODEL" ? "已用云模型整理，请核对内容" : data.card.processing?.reason ?? "整理方式未确认，请核对原文"}`,
       });
       emitWorkspaceChange(projectId, [
         "cards",
@@ -110,6 +126,7 @@ export function CaptureBox({ projectId, inboxEnabled = true, onMaterialSaved, dr
       ]);
       router.refresh();
     } catch (reason) {
+      if (!current()) return;
       setMessage({
         ok: false,
         text: reason instanceof Error ? reason.message : "沉淀失败，请稍后重试",

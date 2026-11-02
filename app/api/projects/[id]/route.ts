@@ -1,6 +1,7 @@
 import { apiError } from "@/lib/api";
-import { authorizeProjectAccess } from "@/lib/auth/guard";
-import { deleteProject, getProjectDetail, updateProject } from "@/lib/repositories/projects";
+import { authenticateUser, authorizeProjectAccess } from "@/lib/auth/guard";
+import { getProjectDetail, updateProject } from "@/lib/repositories/projects";
+import { requestProjectDeletion } from "@/lib/services/projectDeletionService";
 import { projectUpdateSchema } from "@/lib/validation/schemas";
 
 export const runtime = "nodejs";
@@ -25,8 +26,8 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
-    await authorizeProjectAccess(request, id);
-    await deleteProject(id);
-    return new Response(null, { status: 204 });
+    const { user } = await authenticateUser(request);
+    const deletion = await requestProjectDeletion(user.id, id, request.headers.get("x-project-delete-confirmation") ?? "", request.headers.get("if-match") ?? "");
+    return Response.json({ deletion }, { status: deletion.status === "COMPLETED" ? 200 : 202 });
   } catch (error) { return apiError(error); }
 }

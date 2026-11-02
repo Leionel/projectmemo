@@ -34,7 +34,8 @@ export class ConversationView {
   activeTurn: ConversationActiveTurn | null = null; hasMore: boolean = false; beforeSeq: number | null = null;
   latestTurn?: ConversationTurnState | null;
 }
-export interface ConversationCapabilities { schemaVersion: number; enabled: boolean; cloudAvailable: boolean; intents: string[]; r4Available?: boolean; continuityAvailable?: boolean; }
+export interface CloudCapability { available: boolean; reason: string; networkHealth: string; remainingToday: number | null; }
+export interface ConversationCapabilities { schemaVersion: number; enabled: boolean; cloudAvailable: boolean; cloud?: CloudCapability; intents: string[]; r4Available?: boolean; continuityAvailable?: boolean; }
 export class ConversationCreateInput { requestId: string = ''; scope: string = 'WORKSPACE'; projectId?: string; entry?: ConversationEntry; }
 export class ConversationEntityInput { kind: string = 'MISSION'; id: string = ''; projectId: string = ''; }
 export class ConversationTurnInput {

@@ -190,6 +190,8 @@ export async function sourceLineage(projectId: string, id: string, tx: Tx = db, 
   return { roots: [...new Set(roots)], known, derived, blocked,blockedReason };
 }
 export async function sourceUse(userId: string, projectId: string, sourceId: string, tx: Tx = db, scope?: { conversationId?: string; missionId?: string }): Promise<SourceUse> {
+  const project = await tx.project.findUnique({ where: { id: projectId }, select: { deletionRequestedAt: true } });
+  if (!project || project.deletionRequestedAt) return { state: "SUPPRESSED", roots: [], independentEvidence: false, reason: "项目已停用，来源不再允许消费" };
   const view = await effectiveContinuity(userId, { projectId, ...scope }, tx);
   const suppressed = new Set(view.directives.filter(d => d.kind === "USE_SUPPRESSION").flatMap(d => d.sourceIds));
   const line = await sourceLineage(projectId, sourceId, tx);

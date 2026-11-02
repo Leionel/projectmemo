@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { createHash } from "node:crypto";
 
 export type WorkerPresenceStatus = "UNOBSERVED" | "RECENT" | "STALE";
 
@@ -13,7 +14,22 @@ export type WorkerPresenceInfo = {
   isProcessAlive: boolean;
   isActivelyInspecting: boolean;
   hasClaimedWork: boolean;
+  release?: string | null;
+  databaseHash?: string;
+  configHash?: string;
+  identityMatches?: boolean;
+  mismatchReason?: string | null;
+  lastScanFailedAt?: string | null;
+  failedPhase?: string | null;
 };
+
+function identity() {
+  const hash = (text: string) => createHash("sha256").update(text).digest("hex");
+  const url = process.env.DATABASE_URL ?? "file:./prisma/dev.db";
+  const database = url.startsWith("file:") ? path.resolve(url.slice(5)) : url;
+  const flags = ["MISSION_ENABLED", "MISSION_WRITES_ENABLED", "FOCUS_AGENT_ENABLED", "FOCUS_AGENT_R4_ENABLED", "FOCUS_WEB_ENABLED", "FOCUS_ASYNC_ENABLED", "FOCUS_CONTINUITY_ENABLED", "DEPLOYMENT_OBSERVER_ENABLED", "BROWSER_READ_ENABLED", "ACADEMIC_RESEARCH_ENABLED", "LLM_MODE", "LLM_PROVIDER", "LLM_MODEL_NAME"];
+  return { release: process.env.PROJECTMEMO_RELEASE?.trim() || "unversioned", databaseHash: hash(database), configHash: hash(JSON.stringify(flags.map(k => [k, process.env[k] ?? null]))) };
+}
 
 function getPresencePath(): string {
   if (process.env.WORKER_PRESENCE_FILE) return process.env.WORKER_PRESENCE_FILE;
@@ -28,6 +44,7 @@ export function recordWorkerPresence(data: {
   claim?: boolean;
   version?: string;
   now?: number;
+  failedScan?: string;
 }): void {
   const ts = new Date(data.now ?? Date.now()).toISOString();
   const filePath = getPresencePath();
@@ -51,13 +68,16 @@ export function recordWorkerPresence(data: {
     isProcessAlive: true,
     isActivelyInspecting: Boolean(lastScanAt && (Date.now() - Date.parse(lastScanAt) <= 120000)),
     hasClaimedWork: Boolean(lastClaimAt),
+    ...identity(),
+    lastScanFailedAt: data.scan ? null : data.failedScan ? ts : existing.lastScanFailedAt ?? null,
+    failedPhase: data.scan ? null : data.failedScan ?? existing.failedPhase ?? null,
   };
   inMemoryPresence = updated;
   try {
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
     const temporary=filePath+"."+process.pid+".tmp";
     fs.writeFileSync(temporary, JSON.stringify(updated), "utf-8");fs.renameSync(temporary,filePath);
-  } catch {}
+  } catch { console.error("Worker 状态未能持久化，Web 端不能据此确认后台在线"); }
 }
 
 export function readWorkerPresence(now = Date.now()): WorkerPresenceInfo {
@@ -86,15 +106,20 @@ export function readWorkerPresence(now = Date.now()): WorkerPresenceInfo {
   const elapsedHeartbeat = now - Date.parse(data.lastHeartbeatAt);
   const elapsedScan = data.lastScanAt ? now - Date.parse(data.lastScanAt) : Infinity;
   const isProcessAlive = elapsedHeartbeat >= -5000 && elapsedHeartbeat <= 60000;
-  const isActivelyInspecting = elapsedScan <= 120000;
+  const expected = identity();
+  const mismatchReason = data.release !== expected.release ? "RELEASE_MISMATCH" : data.databaseHash !== expected.databaseHash ? "DATABASE_MISMATCH" : data.configHash !== expected.configHash ? "CONFIG_MISMATCH" : null;
+  const identityMatches = !mismatchReason;
+  const scanSucceeded = !data.lastScanFailedAt || (data.lastScanAt && Date.parse(data.lastScanAt) > Date.parse(data.lastScanFailedAt));
+  const isActivelyInspecting = Boolean(isProcessAlive && identityMatches && scanSucceeded && elapsedScan >= -5000 && elapsedScan <= 120000);
   const hasClaimedWork = Boolean(data.lastClaimAt);
-  const status: WorkerPresenceStatus = isProcessAlive ? "RECENT" : "STALE";
+  const status: WorkerPresenceStatus = isProcessAlive && identityMatches ? "RECENT" : "STALE";
   return {
     ...data,
     status,
     isProcessAlive,
     isActivelyInspecting,
     hasClaimedWork,
+    identityMatches, mismatchReason,
   };
 }
 

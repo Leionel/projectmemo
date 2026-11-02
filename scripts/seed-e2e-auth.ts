@@ -37,6 +37,10 @@ async function main() {
     create: { userId: user.id, projectId: project.id, role: "OWNER" },
     update: {},
   });
+  const member = await db.user.upsert({ where: { username: `${E2E_USERNAME}-member` },
+    create: { username: `${E2E_USERNAME}-member`, displayName: "E2E 普通成员", passwordHash }, update: { passwordHash } });
+  await db.projectMembership.upsert({ where: { userId_projectId: { userId: member.id, projectId: project.id } },
+    create: { userId: member.id, projectId: project.id, role: "MEMBER" }, update: { role: "MEMBER" } });
 
   console.log(`[e2e setup] auth identity ready: ${E2E_USERNAME} -> ${project.title} (${project.id})`);
 }

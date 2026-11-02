@@ -9,6 +9,7 @@ import { runConversationTurn } from "../lib/conversation/turnWorker";
 import { processInvestigationDelegations } from "../lib/mission/investigationDelegation";
 import { runWorkerCycle, type WorkerCycleState } from "../lib/mission/workerCycle";
 import { recordWorkerPresence } from "../lib/mission/workerPresence";
+import { processProjectDeletions } from "../lib/services/projectDeletionService";
 
 const workerId = randomUUID();
 let stopping = false;
@@ -21,16 +22,20 @@ const heartbeat=setInterval(()=>recordWorkerPresence({workerId,version:"r4-ux3-w
 try {
   do {
     let successfulScans=0;
-    const scanned=async(run:()=>Promise<unknown>)=>{const result=await run();if(++successfulScans===3)recordWorkerPresence({workerId,scan:true});return result;};
+    const scanned=async(run:()=>Promise<unknown>)=>{const result=await run();if(++successfulScans===4)recordWorkerPresence({workerId,scan:true});return result;};
     const result = await runWorkerCycle(state, {
       scan: [
+        { name: "PROJECT_CLEANUP", run: () => scanned(() => processProjectDeletions()) },
         { name: "IMPACT", run: () => scanned(()=>consumeImpactJobs()) },
         { name: "MATERIAL", run: () => scanned(()=>processMaterialContinuationBatch()) },
         { name: "DELEGATION", run: () => scanned(()=>processInvestigationDelegations()) },
       ],
-      conversation: () => runConversationTurn(),
+      conversation: () => runConversationTurn({ onClaim: () => recordWorkerPresence({ workerId, claim: true }) }),
       mission: () => runMissionSlice({ workerId,onClaim:()=>recordWorkerPresence({workerId,claim:true}) }),
-      onError: (name) => console.error(`委托 Worker ${name} 本次处理失败，请核对功能开关、迁移和原任务记录`),
+      onError: (name) => {
+        if (["PROJECT_CLEANUP", "IMPACT", "MATERIAL", "DELEGATION"].includes(name)) recordWorkerPresence({ workerId, failedScan: name });
+        console.error(`委托 Worker ${name} 本次处理失败，请核对功能开关、迁移和原任务记录`);
+      },
     });
 
 

@@ -1,4 +1,5 @@
 import { stableStringify, sha256Hex } from "@/lib/projectState/buildSnapshot";
+import { captureProcessing, unknownCaptureProcessing, type CaptureProcessing } from "@/lib/captureProcessing";
 import { requireProject } from "@/lib/repositories/projects";
 import { loadRecentCards, saveCaptureResult } from "@/lib/repositories/cards";
 import { structureCaptureWithMeta } from "@/lib/agent";
@@ -56,11 +57,11 @@ function safeError(error: unknown) {
 }
 
 async function loadCardById(projectId: string, cardId: string): Promise<SavedCapture> {
-  const card = await db.knowledgeCard.findFirst({ where: { id: cardId, projectId } });
+  const card = await db.knowledgeCard.findFirst({ where: { id: cardId, projectId }, include: { capture: { select: { processingJson: true } } } });
   if (!card) {
     throw new AppError("CAPTURE_RESULT_MISSING", "记录已保存但结果回执暂不可用，请稍后重试查看", 503);
   }
-  return { ...card, relations: [] as CardLink[] } as SavedCapture;
+  return { ...card, relations: [] as CardLink[], processing: (card.capture?.processingJson ?? unknownCaptureProcessing) as CaptureProcessing } as SavedCapture;
 }
 
 async function runPostProcessing(saved: SavedCapture): Promise<boolean> {
@@ -115,7 +116,7 @@ export async function processCapture(projectId: string, rawText: string, sourceT
   const execResult = await structureCaptureWithMeta({ project, rawText, historyKeywords });
   const draft = execResult.data;
   const links = await vectorStore.search(draft, existingCards, 3);
-  const saved = await saveCaptureResult({ projectId, rawText, sourceType, draft, links });
+  const saved = await saveCaptureResult({ projectId, rawText, sourceType, draft, links, processing: captureProcessing(execResult) });
   await runPostProcessing(saved);
   await refreshStateAfterCapture(projectId);
 
@@ -243,6 +244,7 @@ export async function processCaptureWithRequest(
           sourceType,
           requestId: options.requestId,
           requestHash: payloadHash,
+          processing: captureProcessing(execResult),
           draft,
           links,
         }, tx);

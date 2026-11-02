@@ -8,6 +8,8 @@ import { runProjectLifecycleAction } from "@/lib/client/projectLifecycle";
 type ProjectCardActionsProps = {
   projectId: string;
   projectTitle: string;
+  expectedVersion: string;
+  canDelete?: boolean;
   /** 已归档项目只能「恢复」或「删除」；再「归档」一次没有意义。 */
   archived: boolean;
   onDone?: () => void;
@@ -21,7 +23,7 @@ type ProjectCardActionsProps = {
  * 明确写出会失去什么。确认区用 role="alert" 而不是模态框：卡片里再套一层模态框
  * 会打断列表浏览。
  */
-export function ProjectCardActions({ projectId, projectTitle, archived, onDone }: ProjectCardActionsProps) {
+export function ProjectCardActions({ projectId, projectTitle, archived, onDone, expectedVersion, canDelete = false }: ProjectCardActionsProps) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -35,7 +37,7 @@ export function ProjectCardActions({ projectId, projectTitle, archived, onDone }
     setBusy(true);
     setError("");
 
-    const result = await runProjectLifecycleAction(projectId, action);
+    const result = await runProjectLifecycleAction(projectId, action, expectedVersion);
 
     if (!result.ok) {
       setError(result.message);
@@ -56,7 +58,7 @@ export function ProjectCardActions({ projectId, projectTitle, archived, onDone }
       {confirming ? (
         <div role="alert" className="w-full rounded-md bg-[var(--brick-pale)] p-3">
           <p className="text-xs font-bold text-[var(--brick)]">
-            删除「{projectTitle}」会同时删除它的全部卡片、行动与成果，且无法恢复。确认删除？
+            删除「{projectTitle}」会立即停用项目，随后清理全部记录与应用附件，且无法恢复。独立备份和外部副本不在此次清除范围。确认删除？
           </p>
           <div className="mt-2.5 flex flex-wrap gap-2">
             <button
@@ -97,7 +99,7 @@ export function ProjectCardActions({ projectId, projectTitle, archived, onDone }
                   : <Archive size={13} aria-hidden="true" />}
               {archived ? "恢复项目" : "归档项目"}
             </button>
-            <button
+            {canDelete && <button
               type="button"
               onClick={() => { menuRef.current?.removeAttribute("open"); setConfirming(true); setError(""); }}
               disabled={busy}
@@ -105,7 +107,7 @@ export function ProjectCardActions({ projectId, projectTitle, archived, onDone }
             >
               <Trash2 size={13} aria-hidden="true" />
               删除项目
-            </button>
+            </button>}
           </div>
         </details>
       )}

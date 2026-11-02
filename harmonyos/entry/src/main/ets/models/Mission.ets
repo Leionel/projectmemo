@@ -213,9 +213,16 @@ export interface MissionResponsibilityView {
   pendingOriginalRefs?: Object;
   nextCheckAt: string | null;
   workerPresence: string;
-  workerPresenceDetail?: Object | null;
+  workerPresenceDetail?: MissionWorkerPresenceDetail | null;
   activity: MissionResponsibilityActivity[];
   authority: string;
+}
+export interface MissionWorkerPresenceDetail {
+  identityMatches?: boolean;
+  mismatchReason?: string | null;
+  failedPhase?: string | null;
+  isActivelyInspecting?: boolean;
+  isProcessAlive?: boolean;
 }
 
 export interface MissionResponsibilityReply {

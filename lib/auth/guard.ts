@@ -85,7 +85,7 @@ export async function authorizeProjectAccess(
     where: { id: projectId },
   });
 
-  if (!project) {
+  if (!project || project.deletionRequestedAt) {
     throw new AppError("PROJECT_NOT_FOUND", "项目不存在", 404);
   }
 

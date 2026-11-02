@@ -8,10 +8,11 @@ import { emitWorkspaceChange } from "@/lib/client/workspaceEvents";
 import { runProjectLifecycleAction } from "@/lib/client/projectLifecycle";
 
 type ProjectSettingsProps = {
-  project: { id: string; title: string; description: string; goal: string; scenario: string; deadline: string; archivedAt: string | null };
+  canDelete?: boolean;
+  project: { id: string; title: string; description: string; goal: string; scenario: string; deadline: string; archivedAt: string | null; updatedAt: string };
 };
 
-export function ProjectSettings({ project }: ProjectSettingsProps) {
+export function ProjectSettings({ project, canDelete = false }: ProjectSettingsProps) {
   const router = useRouter();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLElement>(null);
@@ -60,7 +61,7 @@ export function ProjectSettings({ project }: ProjectSettingsProps) {
 
   async function remove() {
     setDeleting(true); setError("");
-    const result = await runProjectLifecycleAction(project.id, "delete");
+    const result = await runProjectLifecycleAction(project.id, "delete", project.updatedAt);
     if (!result.ok) { setError(result.message); setDeleting(false); return; }
     router.push("/projects"); router.refresh();
   }
@@ -96,7 +97,7 @@ export function ProjectSettings({ project }: ProjectSettingsProps) {
                 {archiving ? <LoaderCircle className="animate-spin" size={16} /> : project.archivedAt ? <ArchiveRestore size={16} /> : <Archive size={16} />}
                 {archiving ? "正在处理…" : project.archivedAt ? "恢复项目" : "归档项目"}
               </button>
-              {!confirmDelete ? <button type="button" onClick={() => setConfirmDelete(true)} disabled={busy} className="focus-ring inline-flex items-center justify-center gap-2 rounded-md px-3 py-2.5 text-sm font-bold text-[var(--brick)] hover:bg-[var(--brick-pale)] disabled:opacity-60"><Trash2 size={16} /> 删除项目</button> : <div role="alert" className="rounded-md bg-[var(--brick-pale)] p-3 text-sm"><p className="font-bold text-[var(--brick)]">会同时删除所有卡片与成果，且无法恢复。</p><div className="mt-2 flex gap-2"><button type="button" onClick={() => void remove()} disabled={deleting} className="focus-ring rounded-lg bg-[var(--brick)] px-3 py-2 font-bold text-white disabled:opacity-70">{deleting ? "正在删除…" : "确认删除"}</button><button type="button" onClick={() => setConfirmDelete(false)} disabled={deleting} className="focus-ring rounded-lg px-3 py-2 font-bold text-[var(--ink-soft)]">取消</button></div></div>}
+              {canDelete && (!confirmDelete ? <button type="button" onClick={() => setConfirmDelete(true)} disabled={busy} className="focus-ring inline-flex items-center justify-center gap-2 rounded-md px-3 py-2.5 text-sm font-bold text-[var(--brick)] hover:bg-[var(--brick-pale)] disabled:opacity-60"><Trash2 size={16} /> 删除项目</button> : <div role="alert" className="rounded-md bg-[var(--brick-pale)] p-3 text-sm"><p className="font-bold text-[var(--brick)]">会停用项目并清理记录与应用附件，且无法恢复；独立备份和外部副本不在此次清除范围。</p><div className="mt-2 flex gap-2"><button type="button" onClick={() => void remove()} disabled={deleting} className="focus-ring rounded-lg bg-[var(--brick)] px-3 py-2 font-bold text-white disabled:opacity-70">{deleting ? "正在删除…" : "确认删除"}</button><button type="button" onClick={() => setConfirmDelete(false)} disabled={deleting} className="focus-ring rounded-lg px-3 py-2 font-bold text-[var(--ink-soft)]">取消</button></div></div>)}
             </div>
             <button disabled={busy} className="focus-ring editorial-button sm:self-end">{saving ? <LoaderCircle className="animate-spin" size={17} /> : <Save size={17} />}{saving ? "正在保存…" : "保存修改"}</button>
           </div>

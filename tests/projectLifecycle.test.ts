@@ -219,14 +219,17 @@ describe("项目归档与删除", () => {
     it("归档项目仍可经 DELETE 删除", async () => {
       const project = await newProject("接口删除归档项目");
       const auth = await newOwner(project.id);
-      await archiveProject(project.id);
+      const archived = await archiveProject(project.id);
 
       const response = await deleteRoute(
-        new Request(`http://localhost/api/projects/${project.id}`, { method: "DELETE", headers: auth.headers }),
+        new Request(`http://localhost/api/projects/${project.id}`, { method: "DELETE", headers: { ...auth.headers, "X-Project-Delete-Confirmation": project.id, "If-Match": archived.updatedAt.toISOString() } }),
         { params: Promise.resolve({ id: project.id }) },
       );
 
-      expect(response.status).toBe(204);
+      expect(response.status).toBe(202);
+      const { processProjectDeletions } = await import("@/lib/services/projectDeletionService");
+      await processProjectDeletions();
+      expect(await db.project.findUnique({ where: { id: project.id } })).toBeNull();
       createdProjectIds.splice(createdProjectIds.indexOf(project.id), 1);
       await expect(requireProject(project.id)).rejects.toMatchObject({ code: "PROJECT_NOT_FOUND" });
     });

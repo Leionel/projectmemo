@@ -162,7 +162,7 @@ function inferAndValidateFileType(fileName: string, mimeType: string, buffer: Bu
   return "IMAGE";
 }
 
-export async function processAttachmentUpload(input: UploadAttachmentInput) {
+export async function processAttachmentUpload(input: UploadAttachmentInput, dependencies: { extractPdf?: typeof extractPdfText } = {}) {
   const { projectId, fileName, mimeType, buffer } = input;
   if (!isFeatureEnabled("PROJECT_INBOX_ENABLED", true)) {
     throw new AppError("PROJECT_INBOX_DISABLED", "项目附件入口当前已关闭", 503);
@@ -189,7 +189,18 @@ export async function processAttachmentUpload(input: UploadAttachmentInput) {
   }
 
   // 3. 仅在确认不是重复文件后写入持久化目录。
-  const stored = await saveFileToStorage(projectId, fileName, buffer);
+  // 短事务把文件与初始清理身份串在同一个项目写锁下；OCR/模型仍在事务外。
+  const prepared = await db.$transaction(async tx => {
+    const locked = await tx.project.updateMany({ where: { id: projectId, deletionRequestedAt: null }, data: { contextRevision: { increment: 0 } } });
+    if (!locked.count) throw new AppError("PROJECT_NOT_FOUND", "项目已停用，未保存新附件", 404);
+    const stored = await saveFileToStorage(projectId, fileName, buffer);
+    try {
+      const attachment = await tx.attachment.create({ data: { projectId, type: fileType, storageKey: stored.storageKey,
+        fileName, mimeType: safeMimeType, size: stored.size, sha256: stored.sha256, extractionStatus: "PENDING" } });
+      return { stored, attachment };
+    } catch (error) { await deleteAttachmentFile(stored.storageKey); throw error; }
+  });
+  const stored = prepared.stored;
 
   // 4. 提取文本内容
   let extractedText = "";
@@ -198,7 +209,7 @@ export async function processAttachmentUpload(input: UploadAttachmentInput) {
 
   try {
     if (fileType === "PDF") {
-      extractedText = await extractPdfText(buffer) ?? "";
+      extractedText = await (dependencies.extractPdf ?? extractPdfText)(buffer) ?? "";
     } else if(fileType==="CSV"||fileType==="JSON"){extractedText=new TextDecoder("utf-8",{fatal:true}).decode(buffer);
     } else {
       extractedText = await extractImageText(safeMimeType, buffer, projectId) ?? "";
@@ -218,31 +229,29 @@ export async function processAttachmentUpload(input: UploadAttachmentInput) {
   // 5. 保存 Attachment 实体
   let attachment;
   try {
-    attachment = await db.attachment.create({
+    attachment = await db.$transaction(async tx => {
+      const locked = await tx.project.updateMany({ where: { id: projectId, deletionRequestedAt: null }, data: { contextRevision: { increment: 0 } } });
+      if (!locked.count) throw new AppError("PROJECT_NOT_FOUND", "项目已停用，未发布附件解析结果", 404);
+      const saved = await tx.attachment.update({ where: { id: prepared.attachment.id },
       data: {
-        projectId,
-        type: fileType,
-        storageKey: stored.storageKey,
-        fileName,
-        mimeType:safeMimeType,
-        size: stored.size,
-        sha256: stored.sha256,
         extractedText: extractedText || null,
         extractionStatus,
         extractionError,
       },
-    });
+      });
     // 修订链起点：原始机器提取文本作为 revision 0 保留
     if (extractedText) {
-      await db.attachmentRevision.create({
+      await tx.attachmentRevision.create({
         data: {
-          attachmentId: attachment.id,
+          attachmentId: saved.id,
           revisionIndex: 0,
           text: extractedText,
           source: "EXTRACTION",
         },
       });
     }
+      return saved;
+    });
   } catch (error) {
     await deleteAttachmentFile(stored.storageKey);
     throw error;
@@ -263,7 +272,7 @@ export async function processAttachmentUpload(input: UploadAttachmentInput) {
     } catch (e) {
       console.warn("Failed to create knowledge card for attachment:", e);
       attachment = await db.attachment.update({
-        where: { id: attachment.id },
+        where: { id: attachment.id, project: { deletionRequestedAt: null } },
         data: {
           extractionStatus: "FAILED",
           extractionError: e instanceof Error ? `Memory ingestion failed: ${e.message}` : "Memory ingestion failed",
@@ -301,7 +310,7 @@ export async function retryAttachmentExtraction(projectId: string, attachmentId:
     extractedText = fileType === "PDF" ? await extractPdfText(buffer) : fileType==="CSV"||fileType==="JSON" ? new TextDecoder("utf-8",{fatal:true}).decode(buffer) : await extractImageText(attachment.mimeType, buffer, projectId);
   } catch (error) {
     const failed = await db.attachment.update({
-      where: { id: attachment.id },
+      where: { id: attachment.id, project: { deletionRequestedAt: null } },
       data: {
         extractedText: null,
         extractionStatus: "FAILED",
@@ -313,7 +322,7 @@ export async function retryAttachmentExtraction(projectId: string, attachmentId:
 
   if (!extractedText) {
     const pending = await db.attachment.update({
-      where: { id: attachment.id },
+      where: { id: attachment.id, project: { deletionRequestedAt: null } },
       data: {
         extractedText: null,
         extractionStatus: "NEEDS_OCR",
@@ -335,7 +344,7 @@ export async function retryAttachmentExtraction(projectId: string, attachmentId:
     await db.knowledgeCard.update({ where: { id: card.id }, data: { attachmentId: attachment.id } });
   }
   const updated = await db.attachment.update({
-    where: { id: attachment.id },
+    where: { id: attachment.id, project: { deletionRequestedAt: null } },
     data: { extractedText, extractionStatus: "SUCCESS", extractionError: null },
   });
   // 重试提取的文本同样进入修订链，保证历史可追溯

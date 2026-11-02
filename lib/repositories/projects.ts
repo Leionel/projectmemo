@@ -4,6 +4,8 @@ import type { ProjectScenario } from "@/lib/generated/prisma/client";
 import { AppError } from "@/lib/api";
 import { buildProjectDashboard } from "@/lib/projectDashboard";
 import { refreshProjectStateAfterMutation } from "@/lib/services/projectStateService";
+import { jsonHash } from "@/lib/mission/contracts";
+import { record } from "@/lib/conversation/repository";
 
 export interface ListProjectsOptions {
   /**
@@ -21,10 +23,12 @@ export async function listProjects(userId?: string, options: ListProjectsOptions
   const projects = await db.project.findMany({
     where: {
       ...archivedFilter,
+      deletionRequestedAt: null,
       ...(userId ? { memberships: { some: { userId } } } : {}),
     },
     orderBy: { updatedAt: "desc" },
     include: {
+      memberships: { where: userId ? { userId } : {}, select: { role: true } },
       _count: { select: { cards: true, artifacts: true } },
       cards: { select: { type: true } },
       artifacts: { select: { artifactType: true } },
@@ -32,8 +36,9 @@ export async function listProjects(userId?: string, options: ListProjectsOptions
       interventions: { where: { NOT: { dedupeKey: { startsWith: "goal:" } } }, select: { status: true, severity: true, snoozedUntil: true, isSimulated: true, triggerType: true } },
     },
   });
-  return projects.map(({ cards, artifacts, actions, interventions, ...project }) => ({
+  return projects.map(({ memberships, cards, artifacts, actions, interventions, ...project }) => ({
     ...project,
+    canDelete: Boolean(userId && memberships.some(m => m.role === "OWNER")),
     dashboard: buildProjectDashboard({
       projectId: project.id,
       deadline: project.deadline,
@@ -54,6 +59,29 @@ export async function createProject(input: ProjectCreateInput) {
       scenario: input.scenario as ProjectScenario,
       deadline: input.deadline ? new Date(`${input.deadline}T23:59:59`) : null,
     },
+  });
+}
+
+export async function createOwnedProject(input: ProjectCreateInput, userId: string, requestId: string) {
+  const { requestId: _request, ...fields } = input;
+  void _request;
+  const hash = jsonHash(fields), provider = "project-create-v1", externalRequestId = `${userId}:${requestId}`;
+  return db.$transaction(async tx => {
+    await tx.user.update({ where: { id: userId }, data: { continuitySeq: { increment: 0 } } });
+    const previous = await tx.agentRun.findUnique({ where: { provider_externalRequestId: { provider, externalRequestId } } });
+    if (previous) {
+      if (record(previous.trace).payloadHash !== hash) throw new AppError("IDEMPOTENCY_CONFLICT", "同一建项请求的内容已变化，请重新提交", 409);
+      const project = await tx.project.findFirst({ where: { id: String(record(previous.resultJson).projectId), deletionRequestedAt: null,
+        memberships: { some: { userId, role: "OWNER" } } } });
+      if (!project) throw new AppError("PROJECT_NOT_FOUND", "原请求的项目已不可用，不会重新创建", 404);
+      return { project, replayed: true };
+    }
+    const project = await tx.project.create({ data: { ...fields, scenario: fields.scenario as ProjectScenario,
+      deadline: fields.deadline ? new Date(`${fields.deadline}T23:59:59`) : null,
+      memberships: { create: { userId, role: "OWNER" } } } });
+    await tx.agentRun.create({ data: { provider, externalRequestId, runType: "ACTION", status: "SUCCESS",
+      trace: { ownerId: userId, payloadHash: hash }, resultJson: { projectId: project.id } } });
+    return { project, replayed: false };
   });
 }
 
@@ -102,7 +130,7 @@ export async function restoreProject(projectId: string) {
 
 export async function requireProject(projectId: string) {
   const project = await db.project.findUnique({ where: { id: projectId } });
-  if (!project) throw new AppError("PROJECT_NOT_FOUND", "没有找到这个项目", 404);
+  if (!project || project.deletionRequestedAt) throw new AppError("PROJECT_NOT_FOUND", "没有可访问的项目", 404);
   return project;
 }
 
@@ -114,7 +142,7 @@ export async function getProjectDetail(projectId: string) {
         where: { archivedAt: null },
         orderBy: { createdAt: "desc" },
         include: {
-          capture: { select: { rawText: true, sourceType: true } },
+          capture: { select: { rawText: true, sourceType: true, processingJson: true } },
           attachment: { select: { id: true, fileName: true, type: true, extractionStatus: true } },
           outgoingLinks: { include: { relatedCard: true }, orderBy: { score: "desc" } },
           incomingLinks: { include: { currentCard: true }, orderBy: { score: "desc" } },

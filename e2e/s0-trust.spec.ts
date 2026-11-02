@@ -1,0 +1,33 @@
+import { expect, test } from "@playwright/test";
+import { E2E_PASSWORD, E2E_USERNAME } from "../scripts/e2e-env";
+
+test("同一浏览器从 OWNER 切换为共享项目 MEMBER：草稿不串号，直接销毁被拒绝", async ({ page }) => {
+  const ownerToken = (await page.context().cookies()).find(cookie => cookie.name === "pm_session")!.value;
+  const initial = await page.request.get("/api/projects", { headers: { Authorization: `Bearer ${ownerToken}` } });
+  expect(initial.ok(), await initial.text()).toBe(true);
+  const project = (await initial.json()).projects[0];
+  expect(project.canDelete).toBe(true);
+  await page.goto(`/projects/${project.id}/records`);
+  const field = page.getByRole("textbox", { name: "碎片内容" });
+  await expect(field).toBeEnabled();
+  const quote = "S0 合成 OWNER 私有草稿，不应交给普通成员";
+  await field.fill(quote);
+  await page.waitForFunction(text => Object.entries(localStorage).some(([key, value]) => key.startsWith("projectmemo:capture:v2:") && value.includes(text)), quote);
+  await page.getByRole("button", { name: "E2E 评审身份", exact: true }).click();
+  await page.getByRole("button", { name: "退出登录", exact: true }).click();
+  await expect(page).toHaveURL(/\/login/);
+  const login = await page.request.post("/api/auth/login", { data: { username: `${E2E_USERNAME}-member`, password: E2E_PASSWORD, client: "web" } });
+  expect(login.ok()).toBe(true);
+  await page.goto(`/projects/${project.id}/records`);
+  await expect(field).toBeEnabled();
+  await expect(field).toHaveValue("");
+  expect(await page.evaluate(text => Object.entries(localStorage).some(([key, value]) => key.startsWith("projectmemo:capture:") && value.includes(text)), quote)).toBe(false);
+  const memberToken = (await page.context().cookies()).find(cookie => cookie.name === "pm_session")!.value;
+  const list = await page.request.get("/api/projects", { headers: { Authorization: `Bearer ${memberToken}` } });
+  expect((await list.json()).projects.find((p: { id: string }) => p.id === project.id).canDelete).toBe(false);
+  const denied = await page.request.delete(`/api/projects/${project.id}`, { headers: { Authorization: `Bearer ${memberToken}`, "X-Project-Delete-Confirmation": project.id, "If-Match": project.updatedAt } });
+  expect(denied.status()).toBe(403);
+  await page.goto("/projects");
+  await page.getByText("项目操作", { exact: true }).click();
+  await expect(page.getByRole("button", { name: "删除项目", exact: true })).toHaveCount(0);
+});

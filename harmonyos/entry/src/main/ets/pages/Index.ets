@@ -93,6 +93,9 @@ struct Index {
   @State gcSourceType: string = '随手记录';
   @State gcText: string = '';
   @State gcSubmitting: boolean = false;
+  private gcGeneration: number = 0;
+  private gcRequestId: string = '';
+  private gcRequestPayload: string = '';
   @State gcError: string = '';
   @State showGlobalTodo: boolean = false;
   @State gtProjectIndex: number = 0;
@@ -206,6 +209,13 @@ struct Index {
     this.currentUser = new UserInfo();
     this.projects = [];
     this.projectDeletionNotice = '';
+    this.gcGeneration += 1;
+    this.showGlobalCapture = false;
+    this.gcText = '';
+    this.gcError = '';
+    this.gcSubmitting = false;
+    this.gcRequestId = '';
+    this.gcRequestPayload = '';
     this.archivedProjects = [];
     this.showArchivedProjects = false;
     this.projectLifecycleBusyId = '';
@@ -945,6 +955,10 @@ struct Index {
       return '搜索项目名称、描述或目标...';
     }
     if (this.currentMainTabIndex === 1) {
+      this.gcGeneration += 1;
+      this.gcSubmitting = false;
+      this.gcRequestId = '';
+      this.gcRequestPayload = '';
       return '搜索记忆标题、摘要或关键词...';
     }
     return '搜索提醒或行动标题...';
@@ -1034,17 +1048,31 @@ struct Index {
     }
     this.gcSubmitting = true;
     this.gcError = '';
+    const token: string = SessionStore.getToken();
+    const generation: number = this.gcGeneration;
+    const sourceType: string = this.gcSourceType;
+    const payload: string = JSON.stringify([projectId, trimmed, sourceType]);
+    if (this.gcRequestPayload !== payload || this.gcRequestId === '') {
+      this.gcRequestPayload = payload;
+      this.gcRequestId = `harmony-capture-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+    }
+    const requestId: string = this.gcRequestId;
     try {
-      const requestId: string = `harmony-capture-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
-      const saved = await this.memoryService.capture(projectId, trimmed, this.gcSourceType, requestId);
-      this.showGlobalCapture = false;
-      this.gcText = '';
+      const saved = await this.memoryService.capture(projectId, trimmed, sourceType, requestId);
+      if (token !== SessionStore.getToken() || generation !== this.gcGeneration) return;
+      if (projectId === this.globalProjectId(this.gcProjectIndex) && trimmed === this.gcText.trim() && sourceType === this.gcSourceType) {
+        this.showGlobalCapture = false;
+        this.gcText = '';
+        this.gcRequestId = '';
+        this.gcRequestPayload = '';
+      }
       promptAction.showToast({ message: this.memoryService.captureModeLabel(saved) });
       this.loadAllData();
     } catch (e) {
+      if (token !== SessionStore.getToken() || generation !== this.gcGeneration) return;
       this.gcError = e instanceof ApiError ? e.message : '记录失败，请稍后重试';
     } finally {
-      this.gcSubmitting = false;
+      if (token === SessionStore.getToken() && generation === this.gcGeneration) this.gcSubmitting = false;
     }
   }
 

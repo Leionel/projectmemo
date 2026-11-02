@@ -58,8 +58,10 @@ export function UserNav({ isMenuItem = false }: { isMenuItem?: boolean }) {
   const handleLogout = async () => {
     setLoggingOut(true);
     setError("");
+    const logoutGeneration = captureGeneration();
     try {
       const response = await fetch("/api/auth/logout", { method: "POST" });
+      if (logoutGeneration !== captureGeneration()) return;
       if (!response.ok) throw new Error("logout failed");
       clearConversationDrafts();
       clearCaptureDrafts();

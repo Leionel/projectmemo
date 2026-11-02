@@ -62,12 +62,14 @@ export async function createProject(input: ProjectCreateInput) {
   });
 }
 
-export async function createOwnedProject(input: ProjectCreateInput, userId: string, requestId: string) {
+export async function createOwnedProject(input: ProjectCreateInput, userId: string, requestId: string, sessionId?: string) {
   const { requestId: _request, ...fields } = input;
   void _request;
   const hash = jsonHash(fields), provider = "project-create-v1", externalRequestId = `${userId}:${requestId}`;
   return db.$transaction(async tx => {
     await tx.user.update({ where: { id: userId }, data: { continuitySeq: { increment: 0 } } });
+    if (sessionId && !await tx.authSession.findFirst({ where: { id: sessionId, userId, revokedAt: null, expiresAt: { gt: new Date() } } }))
+      throw new AppError("UNAUTHORIZED", "登录状态已变化，未创建项目", 401);
     const previous = await tx.agentRun.findUnique({ where: { provider_externalRequestId: { provider, externalRequestId } } });
     if (previous) {
       if (record(previous.trace).payloadHash !== hash) throw new AppError("IDEMPOTENCY_CONFLICT", "同一建项请求的内容已变化，请重新提交", 409);

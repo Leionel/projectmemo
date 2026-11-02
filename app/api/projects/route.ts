@@ -31,13 +31,13 @@ export async function GET(request?: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { user } = await authenticateUser(request);
+    const { user, session } = await authenticateUser(request);
     const input = projectCreateSchema.parse(await request.json());
     const header = request.headers.get("Idempotency-Key")?.trim();
     if (header && input.requestId && header !== input.requestId) throw new AppError("IDEMPOTENCY_KEY_MISMATCH", "建项请求身份不一致", 422);
     const requestId = header || input.requestId || randomUUID();
     if (requestId.length > 128) throw new AppError("INVALID_REQUEST_ID", "建项请求身份过长", 422);
-    const result = await createOwnedProject(input, user.id, requestId);
+    const result = await createOwnedProject(input, user.id, requestId, session.id);
     return Response.json(result, { status: result.replayed ? 200 : 201 });
   } catch (error) {
     return apiError(error);

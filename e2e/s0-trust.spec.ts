@@ -1,11 +1,21 @@
 import { expect, test } from "@playwright/test";
-import { E2E_PASSWORD, E2E_USERNAME } from "../scripts/e2e-env";
+import { E2E_BASE_URL, E2E_PASSWORD, E2E_USERNAME } from "../scripts/e2e-env";
 
-test("同一浏览器从 OWNER 切换为共享项目 MEMBER：草稿不串号，直接销毁被拒绝", async ({ page }) => {
+test("同一浏览器从 OWNER 切换为共享项目 MEMBER：草稿不串号，直接销毁被拒绝", async ({ page, playwright }) => {
+  // 从真实成员资格确定共享项目，不误选其他旅程刚创建的 OWNER 私有项目。
+  const memberProbe = await playwright.request.newContext({ baseURL: E2E_BASE_URL });
+  const signed = await memberProbe.post("/api/auth/login", { data: { username: `${E2E_USERNAME}-member`, password: E2E_PASSWORD, client: "web" } });
+  expect(signed.ok()).toBe(true);
+  const memberAccess = (await signed.json()).accessToken;
+  const shared = await memberProbe.get("/api/projects", { headers: { Authorization: `Bearer ${memberAccess}` } });
+  expect(shared.ok()).toBe(true);
+  const sharedIds = (await shared.json()).projects.map((p: { id: string }) => p.id);
+  await memberProbe.dispose();
   const ownerToken = (await page.context().cookies()).find(cookie => cookie.name === "pm_session")!.value;
   const initial = await page.request.get("/api/projects", { headers: { Authorization: `Bearer ${ownerToken}` } });
   expect(initial.ok(), await initial.text()).toBe(true);
-  const project = (await initial.json()).projects[0];
+  const project = (await initial.json()).projects.find((p: { id: string }) => sharedIds.includes(p.id));
+  expect(project).toBeTruthy();
   expect(project.canDelete).toBe(true);
   await page.goto(`/projects/${project.id}/records`);
   const field = page.getByRole("textbox", { name: "碎片内容" });

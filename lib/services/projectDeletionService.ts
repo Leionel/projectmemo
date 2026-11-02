@@ -24,9 +24,11 @@ export async function listProjectDeletions(ownerId: string) {
     orderBy: [{ status: "asc" }, { createdAt: "desc" }], take: 20 });
   return rows.map(run => ({ ...view(run), projectId: String(record(run.trace).deletedProjectId) }));
 }
-export async function requestProjectDeletion(ownerId: string, projectId: string, confirmation: string, expectedVersion: string) {
+export async function requestProjectDeletion(ownerId: string, projectId: string, confirmation: string, expectedVersion: string, sessionId: string) {
   return db.$transaction(async tx => {
     await tx.user.updateMany({ where: { id: ownerId }, data: { continuitySeq: { increment: 0 } } });
+    if (!await tx.authSession.findFirst({ where: { id: sessionId, userId: ownerId, revokedAt: null, expiresAt: { gt: new Date() } } }))
+      throw new AppError("UNAUTHORIZED", "登录状态已变化，未继续删除", 401);
     const key = { provider, externalRequestId: identity(ownerId, projectId) };
     const previous = await tx.agentRun.findUnique({ where: { provider_externalRequestId: key } });
     if (previous) return view(previous);

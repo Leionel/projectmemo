@@ -49,6 +49,19 @@ describe("项目销毁的服务端权限", () => {
     expect(response.status).toBe(403);
     expect((await db.project.findUniqueOrThrow({ where: { id: f.project.id } })).deletionRequestedAt).toBeNull();
   });
+  it("认证后撤销会话，保留 OWNER 也不能消费旧认证结果", async () => {
+    const f = await owned();
+    const guard = await import("@/lib/auth/guard"), authenticate = guard.authenticateUser;
+    let entered!: (sessionId: string) => void, resume!: () => void;
+    const ready = new Promise<string>(resolve => { entered = resolve; });
+    const barrier = new Promise<void>(resolve => { resume = resolve; });
+    const spy = vi.spyOn(guard, "authenticateUser").mockImplementationOnce(async request => { const actor = await authenticate(request); entered(actor.session.id); await barrier; return actor; });
+    const pending = f.request(); const sessionId = await ready;
+    await db.authSession.update({ where: { id: sessionId }, data: { revokedAt: new Date() } });
+    resume(); const response = await pending; spy.mockRestore();
+    expect(response.status).toBe(401);
+    expect((await db.project.findUniqueOrThrow({ where: { id: f.project.id } })).deletionRequestedAt).toBeNull();
+  });
   it("清理失败后项目保持停用、文件清单和回执可重试；成功才报告完成", async () => {
     const f = await owned();
     const { saveFileToStorage, deleteAttachmentFile } = await import("@/lib/storage/attachmentStorage");

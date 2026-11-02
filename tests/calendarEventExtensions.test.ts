@@ -22,7 +22,10 @@ import type { CalendarFetch } from "@/lib/calendar/feishuOAuth";
 afterEach(() => vi.unstubAllEnvs());
 afterAll(async () => { await db.$disconnect(); fs.rmSync(isolation.dir, { recursive: true, force: true }); });
 
-const startAt = "2026-11-02T02:00:00Z", endAt = "2026-11-02T02:30:00Z";
+// 正向夹具相对当前时钟，避免自然日推进把成功旅程变成过期日程；负例单独构造过去时间。
+const startMs = Math.floor(Date.now() / 3_600_000) * 3_600_000 + 2 * 86_400_000;
+const startAt = new Date(startMs).toISOString(), endAt = new Date(startMs + 1_800_000).toISOString();
+const secondStart = new Date(startMs + 86_400_000).toISOString(), secondEnd = new Date(startMs + 86_400_000 + 1_800_000).toISOString();
 const tokenBody = { code: 0, msg: "success", access_token: "e-test-access", expires_in: 7200, refresh_token: "e-test-refresh",
   refresh_token_expires_in: 604800, scope: "calendar:calendar offline_access", token_type: "Bearer" };
 const identityBody = { code: 0, msg: "success", data: { open_id: "ou_ext", name: "扩展测试", email: "ext@example.com" } };
@@ -139,7 +142,7 @@ describe.sequential("单日程参与人与附件", () => {
 describe.sequential("批量日程与补偿", () => {
   it("批量创建 2 个日程，逐项回读并计入外部写入预算", async () => {
     const { user, project, connection } = await fixture(), f = provider();
-    const secondStart = "2026-11-03T02:00:00Z", secondEnd = "2026-11-03T02:30:00Z";
+
     const mission = await proposed(user.id, project.id, connection.id, f, { connectionId: connection.id, events: [
       { title: "第一次讨论", description: "", startAt, endAt, timeZone: "Asia/Shanghai", allDay: false, recurrence: null, attendees: [], attachments: [] },
       { title: "第二次讨论", description: "", startAt: secondStart, endAt: secondEnd, timeZone: "Asia/Shanghai", allDay: false, recurrence: null, attendees: [], attachments: [] },
@@ -158,7 +161,7 @@ describe.sequential("批量日程与补偿", () => {
     const { user, project, connection } = await fixture(), f = provider({ second: "reject" });
     const mission = await proposed(user.id, project.id, connection.id, f, { connectionId: connection.id, events: [
       { title: "第一个", description: "", startAt, endAt, timeZone: "Asia/Shanghai", allDay: false, recurrence: null, attendees: [], attachments: [] },
-      { title: "第二个", description: "", startAt: "2026-11-03T02:00:00Z", endAt: "2026-11-03T02:30:00Z", timeZone: "Asia/Shanghai", allDay: false, recurrence: null, attendees: [], attachments: [] },
+      { title: "第二个", description: "", startAt: secondStart, endAt: secondEnd, timeZone: "Asia/Shanghai", allDay: false, recurrence: null, attendees: [], attachments: [] },
     ] }, "propose_calendar_events");
     await approve(user.id, mission.id, f);
     const detail = await missionDetail(user.id, mission.id), step = detail.steps.find(s => s.toolName === "propose_calendar_events")!;
@@ -171,7 +174,7 @@ describe.sequential("批量日程与补偿", () => {
     const { user, project, connection } = await fixture(), f = provider({ second: "timeout" });
     const mission = await proposed(user.id, project.id, connection.id, f, { connectionId: connection.id, events: [
       { title: "第一个", description: "", startAt, endAt, timeZone: "Asia/Shanghai", allDay: false, recurrence: null, attendees: [], attachments: [] },
-      { title: "第二个", description: "", startAt: "2026-11-03T02:00:00Z", endAt: "2026-11-03T02:30:00Z", timeZone: "Asia/Shanghai", allDay: false, recurrence: null, attendees: [], attachments: [] },
+      { title: "第二个", description: "", startAt: secondStart, endAt: secondEnd, timeZone: "Asia/Shanghai", allDay: false, recurrence: null, attendees: [], attachments: [] },
     ] }, "propose_calendar_events");
     await approve(user.id, mission.id, f);
     const detail = await missionDetail(user.id, mission.id), step = detail.steps.find(s => s.toolName === "propose_calendar_events")!;
@@ -189,7 +192,7 @@ it("首个日程已创建后撤权，不再派发第二次创建或补偿删除"
   if(new URL(url).pathname.endsWith("/events")&&init.method==="POST"&&++writes===1)await db.calendarConnection.update({where:{id:connection.id},data:{status:"REVOKED",revokedAt:new Date(),authGeneration:{increment:1},revision:{increment:1}}});
   return response;
  }) as unknown as ReturnType<typeof provider>;
- const mission=await proposed(user.id,project.id,connection.id,f,{connectionId:connection.id,events:[{title:"撤权前日程",description:"",startAt,endAt,timeZone:"Asia/Shanghai"},{title:"不应派发",description:"",startAt:"2026-11-03T02:00:00Z",endAt:"2026-11-03T02:30:00Z",timeZone:"Asia/Shanghai"}]},"propose_calendar_events");
+ const mission=await proposed(user.id,project.id,connection.id,f,{connectionId:connection.id,events:[{title:"撤权前日程",description:"",startAt,endAt,timeZone:"Asia/Shanghai"},{title:"不应派发",description:"",startAt:secondStart,endAt:secondEnd,timeZone:"Asia/Shanghai"}]},"propose_calendar_events");
  await approve(user.id,mission.id,f);
  expect(writes).toBe(1);expect(base.deletes()).toBe(0);
  const step=await db.agentMissionStep.findFirstOrThrow({where:{missionId:mission.id,toolName:"propose_calendar_events"}});expect(step.status).toBe("UNKNOWN");
@@ -202,7 +205,7 @@ it("补偿前用户已修改日程，保留对象且不发送DELETE",async()=>{
   if(new URL(url).pathname.endsWith("/events")&&init.method==="POST"&&base.creates()===2){const first=[...base.events().values()][0];first.summary="用户已修改";}
   return result;
  }) as unknown as ReturnType<typeof provider>;
- const mission=await proposed(user.id,project.id,connection.id,f,{connectionId:connection.id,events:[{title:"第一个",description:"",startAt,endAt,timeZone:"Asia/Shanghai"},{title:"第二个",description:"",startAt:"2026-11-03T02:00:00Z",endAt:"2026-11-03T02:30:00Z",timeZone:"Asia/Shanghai"}]},"propose_calendar_events");
+ const mission=await proposed(user.id,project.id,connection.id,f,{connectionId:connection.id,events:[{title:"第一个",description:"",startAt,endAt,timeZone:"Asia/Shanghai"},{title:"第二个",description:"",startAt:secondStart,endAt:secondEnd,timeZone:"Asia/Shanghai"}]},"propose_calendar_events");
  await approve(user.id,mission.id,f);expect(base.deletes()).toBe(0);expect(base.events().size).toBe(1);
  const step=await db.agentMissionStep.findFirstOrThrow({where:{missionId:mission.id,toolName:"propose_calendar_events"}});expect(step.status).toBe("UNKNOWN");expect(step.resultJson).toMatchObject({data:{compensation:{remaining:["evt-ext-1"]}}});
 });
@@ -230,7 +233,7 @@ it("长描述含服务端标记仍完整回读，取消的外部对象不算创�
 
 it("十项批次经原预算复核后纵向完成，每个HTTP和外部创建累计计量",async()=>{
  const {user,project,connection}=await fixture(),f=provider();
- const events=Array.from({length:10},(_,i)=>({title:`第${i+1}次讨论`,description:"",startAt:`2026-11-${String(i+2).padStart(2,"0")}T02:00:00Z`,endAt:`2026-11-${String(i+2).padStart(2,"0")}T02:30:00Z`,timeZone:"Asia/Shanghai"}));
+ const events=Array.from({length:10},(_,i)=>({title:`第${i+1}次讨论`,description:"",startAt:new Date(startMs + i * 86_400_000).toISOString(),endAt:new Date(startMs + i * 86_400_000 + 1_800_000).toISOString(),timeZone:"Asia/Shanghai"}));
  const mission=await proposed(user.id,project.id,connection.id,f,{connectionId:connection.id,events},"propose_calendar_events");
  let current=await db.agentMission.findUniqueOrThrow({where:{id:mission.id}});
  await commandMission(user.id,mission.id,"pause",{requestId:"pause-budget",expectedVersion:current.version});

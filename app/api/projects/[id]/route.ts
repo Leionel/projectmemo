@@ -26,8 +26,8 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
-    const { user } = await authenticateUser(request);
-    const deletion = await requestProjectDeletion(user.id, id, request.headers.get("x-project-delete-confirmation") ?? "", request.headers.get("if-match") ?? "");
+    const { user, session } = await authenticateUser(request);
+    const deletion = await requestProjectDeletion(user.id, id, request.headers.get("x-project-delete-confirmation") ?? "", request.headers.get("if-match") ?? "", session.id);
     return Response.json({ deletion }, { status: deletion.status === "COMPLETED" ? 200 : 202 });
   } catch (error) { return apiError(error); }
 }

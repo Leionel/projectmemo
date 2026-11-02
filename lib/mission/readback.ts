@@ -8,6 +8,7 @@ import { ownedMission } from "./repository";
 import { materialUseProjection } from "./materialUseProjection";
 import { fitContextSummary, type assessEvidenceFit } from "./evidenceFitService";
 import { reviewProgressOf } from "./reviewProgress";
+import { missionCallCoverageOf } from "./callCoverage";
 import { missionResourceUsageOf } from "./resourceUsage";
 export const readTargetSchema = z
   .object({
@@ -131,7 +132,18 @@ export async function readMissionBack(
     const progressOutputs = await tx.agentMissionOutput.findMany({ where: { missionId: id }, orderBy: { revision: "desc" }, take: 4,
       select: { id: true, revision: true, claimChecksJson: true } });
     const unknownStepCount = await tx.agentMissionStep.count({ where: { missionId: id, status: "UNKNOWN" } });
-    const reviewProgress = reviewProgressOf({ steps, outputs: progressOutputs, actions, unknownSteps: unknownStepCount });    const wait = m.waitStateJson as { questionId?: string } | null;
+    const reviewProgress = reviewProgressOf({ steps, outputs: progressOutputs, actions, unknownSteps: unknownStepCount });
+    // 调用覆盖：只读原 AgentRun/Step，说明哪些调用有回执、哪些用量未知；不是账单。
+    const callRunLimit = 20;
+    const [callRuns, callSteps] = await Promise.all([
+      tx.agentRun.findMany({ where: { projectId: m.projectId, runType: "CHAT" }, orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: callRunLimit, select: { id: true, status: true, provider: true, fallbackReason: true, runType: true, trace: true, createdAt: true } }),
+      tx.agentMissionStep.findMany({ where: { missionId: id }, orderBy: { ordinal: "desc" }, take: callRunLimit,
+        select: { id: true, status: true, toolName: true, toolVersion: true, agentRunId: true } }),
+    ]);
+    const callCoverage = missionCallCoverageOf({ missionId: id,
+      agentRuns: callRuns.map(run => ({ ...run, createdAt: run.createdAt.toISOString() })), steps: callSteps, limit: callRunLimit });
+    const wait = m.waitStateJson as { questionId?: string } | null;
     const materialUses = await materialUseProjection(tx, {
       missionId: id, projectId: m.projectId,
       questionId: input.questionId ?? wait?.questionId ?? null, sourceId: input.sourceId,
@@ -147,6 +159,7 @@ export async function readMissionBack(
       materialUses,
       evidenceReviews,
       reviewProgress,
+      callCoverage,
       resourceUsage: missionResourceUsageOf(m.budgetUsedJson),
       sourceConversation: sourceRunId
         ? {
@@ -209,5 +222,7 @@ export async function readMissionBack(
   });
 }
 export type MissionReadback = Awaited<ReturnType<typeof readMissionBack>>;
+
+
 
 

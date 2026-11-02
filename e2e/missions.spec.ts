@@ -34,10 +34,13 @@ test("same Mission survives reload, receives metric, auto continues, waits for a
  await readback.getByText(/^本次用量 · 模型/).click();
  await expect(readback.getByText('费用尚不能核算：这些记录未绑定费率与账单。',{exact:true})).toBeVisible();
  await expect(readback.getByText(/已记录输入 .* token · 输出 .* token/)).toBeVisible();
- await readback.screenshot({path:'evidence/s2-resource-readback/20261102/web-1280.png',animations:'disabled'});
+ // S2 第二批：调用覆盖说明哪些调用有回执、哪些用量未知，仍不是账单。
+ await expect(readback.getByText(/^可核对调用：模型 \d+ 次/)).toBeVisible();
+ await expect(readback.getByText(/费用与估算保持未知/)).toBeVisible();
+ await readback.screenshot({path:'evidence/s2-usage-coverage/20261102/web-1280.png',animations:'disabled'});
  await page.setViewportSize({width:390,height:844});
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
- await readback.screenshot({path:'evidence/s2-resource-readback/20261102/web-390.png',animations:'disabled'});
+ await readback.screenshot({path:'evidence/s2-usage-coverage/20261102/web-390.png',animations:'disabled'});
  await page.setViewportSize({width:1280,height:900});
  await page.screenshot({path:"test-results/pre-r4-mission-continuation-adoption.png",fullPage:true,animations:"disabled"});
  const missionPath=new URL(page.url()).pathname;
@@ -58,5 +61,6 @@ test("same Mission survives reload, receives metric, auto continues, waits for a
  await expect(panel.getByRole("heading",{name:"引用已归入成果准备后续汇报",exact:true})).toBeInViewport();
  await page.screenshot({path:"test-results/pre-r4-mission-mobile.png",fullPage:true,animations:"disabled"});
 });
+
 
 

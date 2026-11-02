@@ -129,6 +129,15 @@ export struct MissionReadbackView {
             Text(`已记录输入 ${this.data.resourceUsage.inputTokens ?? '待核对'} token · 输出 ${this.data.resourceUsage.outputTokens ?? '待核对'} token`).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
             Text(this.data.resourceUsage.coverageNote).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_SECONDARY)
             Text(this.data.resourceUsage.costNote).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_PRIMARY)
+            if (this.data.callCoverage !== undefined) {
+              Text(this.data.callCoverage.summary).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_PRIMARY)
+              ForEach(this.data.callCoverage.notes, (note: string) => {
+                Text(note).fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+              }, (note: string, index: number) => `call-note-${index}`)
+              Text(this.data.callCoverage.inspected.truncated
+                ? `已检查最近 ${this.data.callCoverage.inspected.limit} 条回执，计数是下界，不是完整账单。`
+                : '已核对当前委托已返回的调用回执；费用仍未知。').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY)
+            }
           }
         }
         if (this.data.evidenceReviews && this.data.evidenceReviews!.items.length > 0) {
@@ -175,4 +184,5 @@ export struct MissionReadbackView {
     }.width('100%').alignItems(HorizontalAlign.Start).padding(12).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(12)
   }
 }
+
 

@@ -9,12 +9,13 @@
  *
  * 选择唯一主操作的顺序（Lead 裁决）：
  * a. 终态 + 未结算 UNKNOWN 效果 → CHECK_UNKNOWN_EFFECT
- * b. 权限/许可/期限边界已过或 STOPPED → RECHECK_AUTHORITY
+ * b. 权限/许可/期限边界已过、个人记忆边界越过或 STOPPED → RECHECK_AUTHORITY
  * c. 停止请求在途 → CHECK_STOP_SETTLEMENT
- * d. 当前有效原问题 / 待批准提案 → ANSWER_QUESTION / REVIEW_APPROVAL（过期批准改重核）
- * e. 额度等待 / 租约等待 / 观察等待 → WAIT_FOR_OBSERVATION
- * f. FAILED / 未知执行 → REVIEW_FAILURE / RECHECK_AUTHORITY
- * g. 终态无未结算效果 → VIEW_RESULT（取消与成功文案区分）
+ * d. RUNNING 执行中（无停止在途，lease 有效）→ WAIT_FOR_OBSERVATION（查看委托进展（执行中））
+ * e. 当前有效原问题 / 待批准提案 → ANSWER_QUESTION / REVIEW_APPROVAL（过期批准改重核）
+ * f. 额度等待 / 租约等待 / 观察等待 → WAIT_FOR_OBSERVATION（租约过期不标为许可重核）
+ * g. FAILED / 未知执行 → REVIEW_FAILURE / RECHECK_AUTHORITY
+ * h. 终态无未结算效果 → VIEW_RESULT（取消与成功文案区分）
  * 其余阻断全部进入 blockers[]，不因选择主操作而丢失。
  */
 import {
@@ -296,8 +297,11 @@ export function buildMissionWorkPacket(input: WorkPacketInput, now: Date = new D
   const permissionStopped = permissionState === "STOPPED";
   const deadlinePassed = deadline !== null && (at(deadline) as number) <= nowMs;
   const projectionAuthorityLost = workState.reasonCode === "DELEGATION_EXPIRED" || workState.reasonCode === "PERMISSION_EXPIRED";
-  const boundaryPassed = workState.nextBoundary !== null && (at(workState.nextBoundary) as number) <= nowMs;
-  const authorityRecheck = !terminalStatus && (permissionExpired || permissionStopped || deadlinePassed || projectionAuthorityLost || boundaryPassed);
+  // 租约过期由 LEASE blocker/等待处理，不标为许可边界失效；个人记忆边界越界必须重新核对。
+  const boundaryPassed = workState.reasonCode !== "LEASE_UNCONFIRMED"
+    && workState.nextBoundary !== null && (at(workState.nextBoundary) as number) <= nowMs;
+  const personalBoundaryPassed = personalMemoryNextBoundary !== null && (at(personalMemoryNextBoundary) as number) <= nowMs;
+  const authorityRecheck = !terminalStatus && (permissionExpired || permissionStopped || deadlinePassed || projectionAuthorityLost || boundaryPassed || personalBoundaryPassed);
 
   // ---- 旧问题/旧批准：只有当前有效 ref 才能生成回答/审阅动作 ----
   const approvalRefs = input.pendingOriginalRefs?.approvals ?? [];
@@ -357,6 +361,10 @@ export function buildMissionWorkPacket(input: WorkPacketInput, now: Date = new D
   } else if (stopInFlight) {
     draft = { kind: "CHECK_STOP_SETTLEMENT", label: "核对停止结算", target: missionTarget };
     waitingOn = "SYSTEM_SETTLEMENT";
+  } else if (workState.phase === "RUNNING") {
+    // 正在执行且没有停止在途：等待原 Worker 的进展/观察，不伪造“继续”动作。
+    draft = { kind: "WAIT_FOR_OBSERVATION", label: "查看委托进展（执行中）", target: missionTarget };
+    waitingOn = "SYSTEM_WORKER";
   } else if (workState.phase === "WAITING_USER" && workState.exactQuestionRef) {
     draft = { kind: "ANSWER_QUESTION", label: "回答原问题", target: { kind: "QUESTION", id: workState.exactQuestionRef, version: null } };
     waitingOn = "USER_INPUT";
@@ -399,6 +407,7 @@ export function buildMissionWorkPacket(input: WorkPacketInput, now: Date = new D
     if (permissionStopped) blockers.push(blocker("AUTHORITY", "PERMISSION_STOPPED", "原许可已停止；恢复前需重新核对授权与来源，不会自动继续", null, true, { kind: "MISSION", id: mission.missionId }));
     else if (permissionExpired) blockers.push(blocker("AUTHORITY", "PERMISSION_EXPIRED", "原许可已到期；越界后旧操作资格不再有效，需要重新核对", permissionExpiresAt ?? workState.nextBoundary, true, { kind: "MISSION", id: mission.missionId }));
     if (deadlinePassed) blockers.push(blocker("TIME_BOUNDARY", "DEADLINE_PASSED", "原期限已过；需要重新核对范围与依据", deadline, true, { kind: "MISSION", id: mission.missionId }));
+    if (personalBoundaryPassed) blockers.push(blocker("TIME_BOUNDARY", "PERSONAL_MEMORY_BOUNDARY_PASSED", "个人记忆依赖的有效边界已过；依赖该偏好的判断需重新核对，不能沿用旧依据", personalMemoryNextBoundary, true, { kind: "MISSION", id: mission.missionId }));
     if (boundaryPassed && workState.nextBoundary !== permissionExpiresAt) blockers.push(blocker("TIME_BOUNDARY", "BOUNDARY_PASSED", "原相关有效边界已过；需要重新读取后核对，旧操作资格不再有效", workState.nextBoundary, true, { kind: "MISSION", id: mission.missionId }));
     if (workState.phase === "UNKNOWN" && workState.reasonCode !== "QUESTION_PENDING" && workState.reasonCode !== "APPROVAL_PENDING")
       blockers.push(blocker("WORK_STATE", workState.reasonCode, "原状态需核对；已保存进度保留，读取不会自动推进", null, true, { kind: "MISSION", id: mission.missionId }));

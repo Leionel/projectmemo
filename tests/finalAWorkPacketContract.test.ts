@@ -327,6 +327,43 @@ describe("停止请求在途：主操作不是继续派发", () => {
   });
 });
 
+describe("执行中与租约等待：不产生继续/恢复建议", () => {
+  it("RUNNING + LEASE_ACTIVE：主操作是等待执行中进展，不是重核也不是继续", () => {
+    const workState = project({ status: "RUNNING", leaseUntil: new Date(+NOW + 60_000) });
+    const packet = buildMissionWorkPacket({
+      mission: { ...missionFacts, missionStatus: "RUNNING" }, workState,
+      responsibility: { controlVersion: "c", permissionState: "WITHIN_TIME_BOUNDARY", workerPresence: "RECENT" },
+    }, NOW);
+    expect(packet.stopped.workState.phase).toBe("RUNNING");
+    expect(packet.stopped.workState.reasonCode).toBe("LEASE_ACTIVE");
+    expect(packet.next.primaryAction).toMatchObject({
+      kind: "WAIT_FOR_OBSERVATION", label: "查看委托进展（执行中）",
+      target: { kind: "MISSION", id: "m-1", version: 9 },
+    });
+    expect(packet.next.waitingOn).toBe("SYSTEM_WORKER");
+    expect(packet.next.primaryAction?.kind).not.toBe("RECHECK_AUTHORITY");
+    expect(packet.next.primaryAction?.label).not.toContain("继续");
+    expect(packet.next.primaryAction?.label).not.toContain("恢复");
+  });
+
+  it("UNAVAILABLE + LEASE_UNCONFIRMED：租约过期按等待处理，不误标许可重核", () => {
+    const workState = project({
+      status: "RUNNING", leaseUntil: NOW,
+      continuationPolicyJson: { mode: "BOUNDED_INVESTIGATION", expiresAt: "2026-11-02T00:00:00.000Z" },
+    });
+    const packet = buildMissionWorkPacket({
+      mission: { ...missionFacts, missionStatus: "RUNNING" }, workState,
+      responsibility: { controlVersion: "c", permissionState: "WITHIN_TIME_BOUNDARY" },
+    }, NOW);
+    expect(packet.stopped.workState.phase).toBe("UNAVAILABLE");
+    expect(packet.stopped.workState.reasonCode).toBe("LEASE_UNCONFIRMED");
+    expect(packet.next.primaryAction).toMatchObject({ kind: "WAIT_FOR_OBSERVATION", label: "等待租约重新确认" });
+    expect(packet.next.waitingOn).toBe("SYSTEM_LEASE");
+    expect(packet.blockers.map(blocker => blocker.kind)).toContain("LEASE");
+    expect(packet.blockers.map(blocker => blocker.kind)).not.toContain("AUTHORITY");
+  });
+});
+
 describe("问题与批准只指向当前有效 ref", () => {
   it("过期批准不给批准动作：改重核并保留 APPROVAL 阻断", () => {
     const workState = project({ status: "WAITING_APPROVAL", approvals: [] });
@@ -525,6 +562,30 @@ describe("时间跨界：主操作变重核，并保留全量版本要求", () =
     expect(packet.next.primaryAction?.kind).toBe("RECHECK_AUTHORITY");
     expect(packet.blockers.map(blocker => blocker.kind)).toEqual(expect.arrayContaining(["AUTHORITY", "LEASE"]));
     expect(packet.next.primaryAction?.label).not.toContain("继续");
+  });
+
+  it("个人记忆依赖边界越过后主操作变重核，并保留 TIME_BOUNDARY 阻断", () => {
+    const personalInput = (personalBoundary: string): WorkPacketInput => baseInput({
+      mission: { ...missionFacts },
+      workState: questionState,
+      responsibility: {
+        controlVersion: "c", permissionState: "WITHIN_TIME_BOUNDARY",
+        permissionExpiresAt: "2026-11-05T00:00:00.000Z",
+        personalMemoryNextBoundary: personalBoundary, workerPresence: "RECENT",
+      },
+      observations: null, work: null, basis: null, coverage: null,
+    });
+    const before = buildMissionWorkPacket(personalInput("2026-11-03T12:00:00.000Z"), NOW);
+    const after = buildMissionWorkPacket(personalInput("2026-11-03T00:00:00.000Z"), NOW);
+    expect(before.next.primaryAction?.kind).toBe("ANSWER_QUESTION");
+    expect(after.next.primaryAction?.kind).toBe("RECHECK_AUTHORITY");
+    expect(after.blockers).toContainEqual(expect.objectContaining({
+      kind: "TIME_BOUNDARY", code: "PERSONAL_MEMORY_BOUNDARY_PASSED",
+      at: "2026-11-03T00:00:00.000Z", blocksActions: true,
+    }));
+    expect(after.blockers.find(blocker => blocker.code === "PERSONAL_MEMORY_BOUNDARY_PASSED")?.text).toContain("个人记忆依赖");
+    expect(after.stopped.primaryBlock?.kind).toBe("TIME_BOUNDARY");
+    expect(after.next.primaryAction?.requires.boundaryAt).toBe("2026-11-03T00:00:00.000Z");
   });
 });
 

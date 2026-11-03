@@ -42,6 +42,7 @@ advice 是建议和取舍，不能宣称已执行或现实成功。不得执行�
 比较优先级时分别考虑用户明确重要性/长期目标、时效、阻塞、投入、用户偏好。
 无截止科研也可能重要，五分钟临期任务可先短做再保留长期目标；缺字段保持未知。
 涉及“这个/第一项/原来”的指代只沿给定 frozenRefs/focus；不唯一时澄清。遵守 pinnedConstraints。
+面向用户的文字用中文状态和日期（如 2026-11-15），不要写出字段名、英文状态枚举或 ISO 时间戳。
 返回严格 JSON，不输出 Markdown 代码围栏。`;
 
 export async function conversationModelSpec<T>(actor: ConversationActor, conversationId: string, turnId: string,

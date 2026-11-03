@@ -99,7 +99,7 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
      </fieldset>
      <fieldset className={styles.step}>
       <legend>03 · 资料授权</legend>
-      <label className={styles.consent}><input type="checkbox" disabled={!clientReady||busy} checked={cloud} onChange={e=>setCloud(e.target.checked)}/><span>允许配置的云模型使用本委托目标、选入的项目资料和任务历史（与公开网络研究分开，未勾选时仅本地整理）</span></label>
+      <label className={styles.consent}><input type="checkbox" disabled={!clientReady||busy} checked={cloud} onChange={e=>setCloud(e.target.checked)}/><span>允许配置的云模型使用本委托目标、选入的项目资料和任务历史（与公开网络研究分开；委托的每一步都需要它）</span></label>
       <p className={styles.stepHint}>高级约束（费用、研究范围、接续许可）在创建后于「委托设置」中调整。</p>
      </fieldset>
      <fieldset className={styles.step}>
@@ -109,8 +109,8 @@ function MissionWorkspace({projectId,initialMissionId,readTarget}:{projectId:str
        <p className={styles.stepHint}>不选择时按默认流程判定完成，不会人为补充完成条件。</p>
       </details>
      </fieldset>
-     <p className={styles.stepHint}>提交前确认：{readOnly?"仅读取与分析":"可提议行动（创建或修改行动仍需批准）"} · {cloud?"已授权云模型使用本任务资料":"未授权云模型资料，仅本地整理"} · {requireMetric||requirePaper||requireResult?"已设置额外完成要求":"未额外设置完成要求"}</p>
-     <button className={styles.primary} disabled={!clientReady||busy||goal.trim().length<3}>创建委托</button>
+     <p className={styles.stepHint}>提交前确认：{readOnly?"仅读取与分析":"可提议行动（创建或修改行动仍需批准）"} · {cloud?"已授权云模型使用本任务资料":"未授权云模型资料，委托无法开始执行"} · {requireMetric||requirePaper||requireResult?"已设置额外完成要求":"未额外设置完成要求"}</p>
+     <button className={styles.primary} disabled={!clientReady||busy||goal.trim().length<3||!cloud}>创建委托</button>
     </form></details>
     <nav className={styles.missionList} aria-label="已有委托">
      <h3>已有委托</h3>

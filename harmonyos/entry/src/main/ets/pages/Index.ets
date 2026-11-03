@@ -47,6 +47,14 @@ class MemoryTypeFilter {
   }
 }
 
+class ProjectAggregate {
+  cards: KnowledgeCard[] = [];
+  interventions: Intervention[] = [];
+  actions: ActionItem[] = [];
+  statuses: CardTemporalStatus[] = [];
+  failed: boolean = false;
+}
+
 @Entry
 @Component
 struct Index {
@@ -485,56 +493,36 @@ struct Index {
       const cards: KnowledgeCard[] = [];
       let failedCount = 0;
 
-      for (const p of projects) {
-        try {
-          const detail = await this.projectService.getProjectDetail(p.id);
-          if (!this.isCurrentDataLoad(token, generation)) return;
-          for (const c of detail.cards) {
-            c.projectId = p.id;
-            c.projectTitle = p.title;
+      // 各项目的详情、提醒、行动、时态互不依赖：项目内四个请求并发，项目之间限 4 个一批，
+      // 避免启动时间随项目数线性叠加；结果仍按项目原顺序合并，单项目失败只计入部分同步。
+      const statuses: CardTemporalStatus[] = [];
+      const batchSize = 4;
+      for (let start = 0; start < projects.length; start += batchSize) {
+        const batch = projects.slice(start, start + batchSize);
+        const loaded = await Promise.all(batch.map((p: Project) => this.loadProjectAggregate(p)));
+        if (!this.isCurrentDataLoad(token, generation)) return;
+        for (const item of loaded) {
+          for (const c of item.cards) {
             cards.push(c);
           }
-          const pIntervs = await this.interventionService.list(p.id);
-          if (!this.isCurrentDataLoad(token, generation)) return;
-          for (const i of pIntervs) {
+          for (const i of item.interventions) {
             intervs.push(i);
           }
-          const pActs = await this.actionService.list(p.id);
-          if (!this.isCurrentDataLoad(token, generation)) return;
-          for (const a of pActs) {
+          for (const a of item.actions) {
             acts.push(a);
           }
-        } catch (err) {
-          if (!this.isCurrentDataLoad(token, generation)) return;
-          failedCount++;
+          for (const st of item.statuses) {
+            statuses.push(st);
+          }
+          if (item.failed) {
+            failedCount++;
+          }
         }
       }
 
       this.allInterventions = intervs;
       this.allActions = acts;
       this.allCards = cards;
-      // 时态状态：区分 当前有效 / 已取代 / 存在冲突 / 待确认，不删除历史
-      const statuses: CardTemporalStatus[] = [];
-      for (const p of projects) {
-        try {
-          const timeline = await this.memoryService.getDecisionTimeline(p.id);
-          if (!this.isCurrentDataLoad(token, generation)) return;
-          for (const item of timeline.items) {
-            const st = new CardTemporalStatus();
-            st.cardId = item.card.id;
-            st.supportState = item.supportState;
-            st.topLevelState = item.topLevelState;
-            st.reasonCode = item.reasonCode;
-            st.displayReason = item.displayReason;
-            st.statusLabel = item.statusLabel;
-            st.supersededByTitle = item.supersededBy !== null ? item.supersededBy.title : '';
-            statuses.push(st);
-          }
-        } catch (_e) {
-          if (!this.isCurrentDataLoad(token, generation)) return;
-          // 单项目时态状态拉取失败不影响列表
-        }
-      }
       this.globalCardStates = statuses;
       if (failedCount > 0) {
         this.dataSyncState = `部分同步 (${this.projects.length - failedCount}/${this.projects.length})`;
@@ -552,6 +540,37 @@ struct Index {
     } finally {
       if (this.isCurrentDataLoad(token, generation)) this.isLoading = false;
     }
+  }
+
+  private async loadProjectAggregate(p: Project): Promise<ProjectAggregate> {
+    const result = new ProjectAggregate();
+    const detailP = this.projectService.getProjectDetail(p.id).then((detail) => {
+      for (const c of detail.cards) {
+        c.projectId = p.id;
+        c.projectTitle = p.title;
+        result.cards.push(c);
+      }
+    }).catch(() => { result.failed = true; });
+    const intervP = this.interventionService.list(p.id).then((items: Intervention[]) => { result.interventions = items; })
+      .catch(() => { result.failed = true; });
+    const actionP = this.actionService.list(p.id).then((items: ActionItem[]) => { result.actions = items; })
+      .catch(() => { result.failed = true; });
+    // 时态状态：区分 当前有效 / 已取代 / 存在冲突 / 待确认，不删除历史；单项目拉取失败不影响列表
+    const timelineP = this.memoryService.getDecisionTimeline(p.id).then((timeline) => {
+      for (const item of timeline.items) {
+        const st = new CardTemporalStatus();
+        st.cardId = item.card.id;
+        st.supportState = item.supportState;
+        st.topLevelState = item.topLevelState;
+        st.reasonCode = item.reasonCode;
+        st.displayReason = item.displayReason;
+        st.statusLabel = item.statusLabel;
+        st.supersededByTitle = item.supersededBy !== null ? item.supersededBy.title : '';
+        result.statuses.push(st);
+      }
+    }).catch(() => {});
+    await Promise.all([detailP, intervP, actionP, timelineP]);
+    return result;
   }
 
   private isCurrentDataLoad(token: string, generation: number): boolean {
@@ -1177,10 +1196,21 @@ struct Index {
     }
   }
 
+  /** 与焦点页服务端计数同一口径：待处理或延后已到期、非演示、非项目目标提问。 */
+  private isActiveReminder(i: Intervention): boolean {
+    if (i.isSimulated || (i.dedupeKey ?? '').startsWith('goal:')) {
+      return false;
+    }
+    if (i.status === 'OPEN') {
+      return true;
+    }
+    return i.status === 'SNOOZED' && i.snoozedUntil !== undefined && i.snoozedUntil !== null && Date.parse(i.snoozedUntil) <= Date.now();
+  }
+
   private visibleOpenInterventions(): Intervention[] {
     const q = this.globalSearchQuery.trim().toLowerCase();
     return this.allInterventions.filter((i) => {
-      if (i.status !== 'OPEN' || i.isSimulated) {
+      if (!this.isActiveReminder(i)) {
         return false;
       }
       return q === '' || i.title.toLowerCase().includes(q) || i.content.toLowerCase().includes(q);
@@ -1537,7 +1567,7 @@ struct Index {
     Column() {
       Column() {
         Row({ space: 8 }) {
-          Button(`主动提醒 ${this.allInterventions.filter((i: Intervention) => i.status === 'OPEN' && !i.isSimulated).length}`, { type: ButtonType.Normal })
+          Button(`主动提醒 ${this.allInterventions.filter((i: Intervention) => this.isActiveReminder(i)).length}`, { type: ButtonType.Normal })
             .layoutWeight(1).constraintSize({ minHeight: 44 }).borderRadius(11).fontSize(14)
             .backgroundColor(this.taskTabFilter === 'REMINDERS' ? PMColors.BRAND_LIGHT : PMColors.SURFACE)
             .fontColor(this.taskTabFilter === 'REMINDERS' ? PMColors.BRAND : PMColors.INK_SECONDARY)

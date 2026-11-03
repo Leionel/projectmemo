@@ -17,8 +17,8 @@ function fixture(action=false){
 describe("Mission 面板调用方",()=>{
  it("选择的核算、论文和行动结果完成条件进入真实创建请求，不扩大研究许可",async()=>{
   const f=fixture();render(createElement(MissionPanel,{projectId:"p"}));await screen.findByRole("button",{name:"整理阶段汇报 · 等待执行"});fireEvent.change(screen.getByRole("textbox",{name:"想推进什么"}),{target:{value:"核对论文与原指标并记录结果"}});
-  fireEvent.click(screen.getByRole("checkbox",{name:/完成时必须有固定核算回执/}));fireEvent.click(screen.getByRole("checkbox",{name:/完成时必须读到论文元数据/}));fireEvent.click(screen.getByRole("checkbox",{name:/完成时必须记录真实行动/}));fireEvent.click(screen.getByRole("button",{name:"创建委托"}));
-  await waitFor(()=>expect(f.requests.find(r=>r.url==="/api/missions")?.body).toMatchObject({successCriteria:["DRAFT_EXISTS","FIXED_METRIC_JOB_RECORDED","PAPER_METADATA_READ","ACTION_CREATED","ACTION_RESULT_RECORDED"],llmContextApproved:false}));
+  fireEvent.click(screen.getByRole("checkbox",{name:/完成时必须有固定核算回执/}));fireEvent.click(screen.getByRole("checkbox",{name:/完成时必须读到论文元数据/}));fireEvent.click(screen.getByRole("checkbox",{name:/完成时必须记录真实行动/}));fireEvent.click(screen.getByRole("checkbox",{name:/允许配置的云模型/}));fireEvent.click(screen.getByRole("button",{name:"创建委托"}));
+  await waitFor(()=>expect(f.requests.find(r=>r.url==="/api/missions")?.body).toMatchObject({successCriteria:["DRAFT_EXISTS","FIXED_METRIC_JOB_RECORDED","PAPER_METADATA_READ","ACTION_CREATED","ACTION_RESULT_RECORDED"],llmContextApproved:true}));
   expect(f.requests.some(r=>r.url.includes("research-scope")||r.url.includes("approval"))).toBe(false);
  });
  it("预算复核明确累计上限，提交原版本且不会自动继续或消费批准",async()=>{
@@ -42,10 +42,12 @@ describe("Mission 面板调用方",()=>{
   render(createElement(MissionPanel,{projectId:"p"}));await screen.findByRole("button",{name:"整理阶段汇报 · 等待执行"});fireEvent.click(screen.getByRole("button",{name:"使用阶段汇报模板"}));
   expect((screen.getByRole("checkbox",{name:/允许配置的云模型/}) as HTMLInputElement).checked).toBe(false);
  expect((screen.getByRole("checkbox",{name:/仅允许读取、分析和保存草稿/}) as HTMLInputElement).checked).toBe(true);
+ expect((screen.getByRole("button",{name:"创建委托"}) as HTMLButtonElement).disabled).toBe(true);
+ fireEvent.click(screen.getByRole("checkbox",{name:/允许配置的云模型/}));
  fireEvent.click(screen.getByRole("button",{name:"创建委托"}));expect(await screen.findByText(/已读取最新状态/)).toBeTruthy();
  expect((screen.getByRole("textbox",{name:"想推进什么"}) as HTMLTextAreaElement).value).toContain("本次只读取");
   fireEvent.click(screen.getByRole("button",{name:"创建委托"}));await waitFor(()=>expect(requests).toHaveLength(2));
-  expect(requests[0].requestId).toBe(requests[1].requestId);expect(requests[0].missionConstraints).toEqual({executionBoundary:"READ_ANALYZE"});expect(requests[0].llmContextApproved).toBe(false);
+  expect(requests[0].requestId).toBe(requests[1].requestId);expect(requests[0].missionConstraints).toEqual({executionBoundary:"READ_ANALYZE"});expect(requests[0].llmContextApproved).toBe(true);
  });
  it("过期批准保留内容但不允许再次提交，提示重新预览",async()=>{
   const f=fixture(true);f.mission.approvals[0].expiresAt="2020-01-01T00:00:00Z";

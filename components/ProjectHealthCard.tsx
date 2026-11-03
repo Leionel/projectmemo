@@ -98,6 +98,8 @@ export function ProjectHealthCard({ projectId, enabled, stateEnabled }: { projec
 
   const total = report?.findings.length ?? 0;
   const primary = report?.primaryAction ?? null;
+  // 部署时有意关闭的功能不是“检查失败”，用户也无法处理；只展示真正读取失败的部分。
+  const unavailable = report?.unavailable.filter((item) => !item.errorCode.endsWith("_DISABLED")) ?? [];
 
   return <section id="project-health" aria-labelledby="project-health-title" className="card-surface scroll-mt-24 rounded-lg p-5 sm:p-6">
     <div className="flex flex-wrap items-end justify-between gap-3 border-b archive-rule pb-4">
@@ -162,12 +164,12 @@ export function ProjectHealthCard({ projectId, enabled, stateEnabled }: { projec
       </ul>}
     </div>}
 
-    {!loading && report && report.unavailable.length > 0 && <details className="mt-3 rounded-lg bg-[var(--amber)]/10 px-3 py-2 text-xs">
+    {!loading && unavailable.length > 0 && <details className="mt-3 rounded-lg bg-[var(--amber)]/10 px-3 py-2 text-xs">
       <summary className="focus-ring cursor-pointer font-semibold text-[var(--amber)]">
-        {report.unavailable.length} 项检查暂不可用（点击展开详情）
+        {unavailable.length} 项检查暂不可用（点击展开详情）
       </summary>
       <div className="mt-2 space-y-1">
-        {report.unavailable.map((item) => <p key={item.section} className="text-[var(--amber)]">{item.message}</p>)}
+        {unavailable.map((item) => <p key={item.section} className="text-[var(--amber)]">{item.message}</p>)}
         <p className="mt-1 text-[var(--muted)]">其余检查结果仍然有效，以上部分暂不可用。</p>
       </div>
     </details>}

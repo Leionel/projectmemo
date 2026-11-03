@@ -9,6 +9,8 @@ import { sourceHash } from "@/lib/mission/repository";
 import { searchMissionMemory } from "@/lib/mission/memorySearch";
 import { assertProject, assertSession } from "@/lib/conversation/repository";
 import { explainPriority } from "@/lib/conversation/priority";
+import { missionStatusLabels } from "@/lib/mission/presentation";
+import { actionStatusLabels } from "@/lib/types";
 import type { ConversationActor, ConversationRef, ConversationSource } from "@/lib/types/conversation";
 
 export async function workspaceDirectory(actor: ConversationActor, scope: string, homeProjectId: string | null, targeted?: string) {
@@ -62,6 +64,15 @@ export async function workspaceDirectory(actor: ConversationActor, scope: string
 }
 export type WorkspaceDirectory = Awaited<ReturnType<typeof workspaceDirectory>>;
 
+// 来源摘录既进入模型上下文，也会作为引用原文展示给用户；这里只放人能读懂的中文状态和本地日期，
+// 内部枚举与 ISO 时间留在结构化字段里，避免模型在回答中原样复述。
+const pauseReasonLabels: Record<string, string> = { USER: "用户手动暂停", REVIEW_REQUIRED: "需要你核对后再继续" };
+const missionEventLabels: Record<string, string> = { QUESTION: "忆程提问", INPUT: "用户补充", PAUSE: "暂停",
+  CONSTRAINTS_CHANGED: "约束已修改", IMPACT_REASSESSMENT_REQUIRED: "需要重新评估影响" };
+const localDate = (iso: string) => new Date(iso).toLocaleDateString("sv-SE", { timeZone: "Asia/Shanghai" });
+const missionLabel = (status: string) => missionStatusLabels[status] ?? "状态待确认";
+const actionLabel = (status: string) => actionStatusLabels[status as keyof typeof actionStatusLabels] ?? "状态待确认";
+
 export async function observeProjects(actor: ConversationActor, directory: WorkspaceDirectory, projectIds: string[], query: string,
   entityRef?: { kind: "MISSION" | "ACTION"; id: string; projectId: string }) {
   const sources: ConversationSource[] = [], refs: ConversationRef[] = [];
@@ -80,7 +91,8 @@ export async function observeProjects(actor: ConversationActor, directory: Works
         orderBy: { seq: "desc" }, take: 4, select: { id: true, seq: true, type: true, payloadJson: true } });
       if (!refs.some(r => r.id === m.id)) refs.push({ kind: "MISSION", id: m.id, projectId: p.id, title: m.goal,
         status: m.status, version: m.version, href: "/projects/" + p.id + "/missions?mission=" + m.id });
-      const text = JSON.stringify({ goal: m.goal, status: m.status, pauseReason: m.pauseReason, events }).slice(0, 1800);
+      const text = ["委托：" + m.goal, "状态：" + missionLabel(m.status), ...(m.pauseReason ? ["暂停原因：" + (pauseReasonLabels[m.pauseReason] ?? "需要你核对后再继续")] : []),
+        ...events.map(e => "事件：" + (missionEventLabels[e.type] ?? "其他记录") + " " + JSON.stringify(e.payloadJson))].join("\n").slice(0, 1800);
       sources.push({ id: p.id + "/mission:" + m.id, projectId: p.id, sourceId: "mission:" + m.id, revision: String(m.version),
         title: "原委托状态与最近事件", excerpt: text, observedAt, temporalState: "CURRENT", knowledgeClass: "PROJECT_OBSERVATION",
         start: 0, end: text.length, excerptHash: jsonHash(text) });
@@ -91,15 +103,15 @@ export async function observeProjects(actor: ConversationActor, directory: Works
       refs.push({ kind: "ACTION", id: action.id, projectId: p.id, title: action.title, status: action.status,
         href: "/projects/" + p.id + "/actions#action-" + action.id });
       const revision = await sourceHash(p.id, "action:" + action.id);
-      const result = JSON.stringify({ title: action.title, status: action.status, resultText: action.resultText, resultCardId: action.resultCardId,
-        verification: "USER_REPORTED_NOT_INDEPENDENTLY_VERIFIED" }).slice(0, 2500);
+      const result = ["行动：" + action.title, "状态：" + actionLabel(action.status), "结果记录：" + (action.resultText ?? "尚未记录"), ...(action.resultCardId ? ["结果已沉淀为项目记忆"] : []),
+        "核实情况：用户自行报告，尚未独立核实"].join("\n").slice(0, 2500);
       sources.push({ id: p.id + "/action:" + action.id, projectId: p.id, sourceId: "action:" + action.id, revision: revision!, title: action.title,
         excerpt: result, start: 0, end: result.length, excerptHash: jsonHash(result), observedAt,
         temporalState: "CURRENT", knowledgeClass: "PROJECT_OBSERVATION", readScope: "STRUCTURED" });
     }
     const hash = await sourceHash(p.id, "project:" + p.id);
-    const excerpt = [p.title, "项目目标：" + p.goal, "截止日期：" + (p.deadline ?? "未知"), "未完成行动：" + p.actionCount + " 项", "待回应委托：" + p.waiting + " 项", "阻塞项：" + p.blocked + " 项",
-      ...p.missions.map(m => "委托：" + m.goal + "；状态：" + m.status), ...p.actions.map(a => "行动：" + a.title + "；状态：" + a.status)].join("\n").slice(0, 1800);
+    const excerpt = [p.title, "项目目标：" + p.goal, "截止日期：" + (p.deadline ? localDate(p.deadline) : "未知"), "未完成行动：" + p.actionCount + " 项", "待回应委托：" + p.waiting + " 项", "阻塞项：" + p.blocked + " 项",
+      ...p.missions.map(m => "委托：" + m.goal + "；状态：" + missionLabel(m.status)), ...p.actions.map(a => "行动：" + a.title + "；状态：" + actionLabel(a.status))].join("\n").slice(0, 1800);
     sources.push({ id: p.id + "/project:" + p.id, projectId: p.id, sourceId: "project:" + p.id,
       revision: hash!, title: p.title + " 当前状态", excerpt, observedAt,
       temporalState: "CURRENT", knowledgeClass: "PROJECT_OBSERVATION", start: 0, end: excerpt.length, excerptHash: jsonHash(excerpt) });

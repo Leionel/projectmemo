@@ -14,7 +14,7 @@ import { photoAccessHelper } from '@kit.MediaLibraryKit';
 import { picker } from '@kit.CoreFileKit';
 import { common } from '@kit.AbilityKit';
 import { Project, ProjectDashboard, ApiError, ReadinessItem, ProjectUpdateInput } from '../models/Project';
-import { ProjectDetail, KnowledgeCard, CardLink, IncomingCardLink } from '../models/Memory';
+import { ProjectDetail, KnowledgeCard, CardLink, IncomingCardLink, TemporalTimelineResponse, TemporalDecisionItem } from '../models/Memory';
 import { Milestone, Deliverable, DeliverableEvidence } from '../models/Milestone';
 import { Intervention, ProposedAction } from '../models/Intervention';
 import { ActionCreateInput, ActionItem } from '../models/Action';
@@ -100,6 +100,22 @@ interface HomeRecentActivity {
   title: string;
   meta: string;
   timestamp: number;
+}
+
+/** 逐卡写入 timeline 时态；未出现在投影中的卡保持 UNKNOWN，由列表决定不显示。 */
+function applyTemporalStates(cards: KnowledgeCard[], timeline: TemporalTimelineResponse | null): void {
+  const byId = new Map<string, TemporalDecisionItem>();
+  if (timeline !== null) {
+    for (const item of timeline.items) {
+      byId.set(item.card.id, item);
+    }
+  }
+  for (const card of cards) {
+    const item = byId.get(card.id);
+    card.topLevelState = item !== undefined ? item.topLevelState : 'UNKNOWN';
+    card.reasonCode = item !== undefined ? item.reasonCode : 'NO_SUPPORTING_EVIDENCE';
+    card.displayReason = item !== undefined ? item.displayReason : '';
+  }
 }
 
 @Entry
@@ -672,7 +688,10 @@ struct ProjectHome {
         return [] as Milestone[];
       });
 
+      // 项目详情不含时态；与 Web 资料页一致，用 decisions/timeline 投影补齐，读取失败时不显示时态而不是默认“当前有效”。
+      const timelineP = this.memoryService.getDecisionTimeline(this.projectId).catch(() => null);
       const res = await Promise.all([detailP, listP, intervP, actionP, artifactP, chatP, milestoneP, attachmentP]);
+      applyTemporalStates(res[0].cards, await timelineP);
       const missionSummary = await missionP;
       const contextReply = await contextP;
       if (contextGeneration !== this.agentContextGeneration || contextToken !== SessionStore.getToken() || contextProject !== this.projectId) return;
@@ -4470,7 +4489,9 @@ if (this.attachmentSearchOpen) {
                 Row() {
                   Row({ space: PMSpacing.XS }) {
                     MemoryTypeBadge({ type: card.type })
-                    TemporalBadge({ status: card.topLevelState })
+                    if (card.topLevelState !== undefined && card.reasonCode !== 'NO_SUPPORTING_EVIDENCE') {
+                      TemporalBadge({ status: card.topLevelState })
+                    }
                   }
                   Text(card.createdAt.length >= 10 ? card.createdAt.substring(0, 10) : card.createdAt)
                     .fontSize(PMFontSize.CAPTION)

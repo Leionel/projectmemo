@@ -65,19 +65,25 @@ export struct GlobalFocusPanel {
   private visible(title: string, items: FocusEntry[], kind: string): FocusEntry[] {
     const remaining = this.remaining(items);
     if (this.expandedGroups.includes(title)) return remaining;
+    // 同一项目、同一停止状态、同一目标的委托只是错误文案不同，折叠后只留一条；首屏主卡已展示的同类也不再重复。
     const seen: string[] = [];
+    const primary = this.primary();
+    if (primary !== null && kind === 'mission' && (primary.status === 'PAUSED' || primary.status === 'FAILED')) {
+      seen.push(this.stoppedMissionKey(primary));
+    }
     return remaining.filter((item: FocusEntry) => {
       if (kind !== 'mission' || item.status !== 'PAUSED' && item.status !== 'FAILED') return true;
-      const key = `${item.projectId}|${item.status}|${item.detail || item.title}`;
+      const key = this.stoppedMissionKey(item);
       if (seen.includes(key)) return false;
       seen.push(key); return true;
     }).slice(0, 3);
   }
   private duplicateCount(item: FocusEntry, items: FocusEntry[]): number {
     if (item.status !== 'PAUSED' && item.status !== 'FAILED') return 1;
-    return items.filter((other: FocusEntry) => other.projectId === item.projectId && other.status === item.status &&
-      (other.detail || other.title) === (item.detail || item.title)).length;
+    const key = this.stoppedMissionKey(item);
+    return items.filter((other: FocusEntry) => this.stoppedMissionKey(other) === key).length;
   }
+  private stoppedMissionKey(item: FocusEntry): string { return `${item.projectId}|${item.status}|${item.title}`; }
   private rowTitle(item: FocusEntry, kind: string): string {
     if (kind === 'reminder' && focusDeadlineConflict(item, Date.now())) return '核对提醒与当前截止日';
     if (kind === 'mission' && item.status === 'PAUSED') return '委托已暂停，需要检查后继续';

@@ -59,6 +59,8 @@ export struct MissionSettingsForm {
     if (this.requireResult) value.successCriteria.push('ACTION_CREATED', 'ACTION_RESULT_RECORDED');
     value.goal = this.goal.trim();
     if (this.mode === 'create' && value.goal.length < 3) { this.error = '请先填写委托目标，至少三个字'; return; }
+    // 委托的每一步都由模型决定；未授权时创建出来也只会在第一步停住，所以创建时就要求授权。
+    if (this.mode === 'create' && !this.llmApproved) { this.error = '委托需要模型读取本任务资料才能执行，请先打开「允许模型使用本任务资料」'; return; }
     const c = editableMissionConstraints(this.initialConstraints);
     if (this.mode !== 'scope') {
       const minutes = this.minutes.trim() === '' ? null : Number(this.minutes);
@@ -255,7 +257,7 @@ export struct MissionSettingsForm {
         Column({ space: 6 }) {
           Text('提交前确认').fontSize(13).fontWeight(FontWeight.Medium).fontColor(PMColors.INK_PRIMARY)
           Text('执行方式：' + (this.readOnly ? '仅读取与分析' : '可提出行动建议；创建或修改行动仍需逐项批准')).fontSize(12).fontColor(PMColors.INK_SECONDARY).lineHeight(18)
-          Text('模型资料授权：' + (this.llmApproved ? '已允许云模型使用本任务资料' : '未授权；仅本地整理项目记录')).fontSize(12).fontColor(PMColors.INK_SECONDARY).lineHeight(18)
+          Text('模型资料授权：' + (this.llmApproved ? '已允许云模型使用本任务资料' : '未授权，委托无法开始执行')).fontSize(12).fontColor(PMColors.INK_SECONDARY).lineHeight(18)
           Text('公开网络研究：' + (this.researchEnabled ? '已开启 · 主题「' + this.topic.trim() + '」' : '未开启')).fontSize(12).fontColor(PMColors.INK_SECONDARY).lineHeight(18)
           Text('完成要求：' + (this.requireMetric || this.requirePaper || this.requireResult ? '已设置额外完成条件' : '未额外设置，按默认流程判定')).fontSize(12).fontColor(PMColors.INK_SECONDARY).lineHeight(18)
           Text('时间与限制：' + (this.minutes.trim() !== '' || this.deadline.trim() !== '' || this.cost.trim() !== '' ? '已设置' : '未额外设置')).fontSize(12).fontColor(PMColors.INK_SECONDARY).lineHeight(18)

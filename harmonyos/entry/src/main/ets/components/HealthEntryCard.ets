@@ -60,6 +60,12 @@ export struct HealthEntryCard {
     return this.report !== null ? this.report.findings.length : 0;
   }
 
+  /** 部署时有意关闭的功能不算检查失败，用户也无法处理；只展示真正读取失败的部分。 */
+  private failedSections(): HealthUnavailableSection[] {
+    if (this.report === null) return [];
+    return this.report.unavailable.filter((item: HealthUnavailableSection) => !(item.errorCode ?? '').endsWith('_DISABLED'));
+  }
+
   private severityColor(severity: string): ResourceColor {
     if (severity === 'ACTION_REQUIRED') return PMColors.RISK;
     if (severity === 'ATTENTION') return PMColors.WARNING;
@@ -238,10 +244,10 @@ export struct HealthEntryCard {
             }
           }
 
-          if (this.report.unavailable.length > 0) {
+          if (this.failedSections().length > 0) {
             Column() {
               Row() {
-                Text(`${this.report.unavailable.length} 项检查暂不可用`)
+                Text(`${this.failedSections().length} 项检查暂不可用`)
                   .fontSize(PMFontSize.CAPTION)
                   .fontColor(PMColors.WARNING)
                   .layoutWeight(1)
@@ -257,7 +263,7 @@ export struct HealthEntryCard {
 
               if (this.showUnavailableDetails) {
                 Column() {
-                  ForEach(this.report.unavailable, (item: HealthUnavailableSection) => {
+                  ForEach(this.failedSections(), (item: HealthUnavailableSection) => {
                     Text(item.message)
                       .fontSize(PMFontSize.CAPTION)
                       .fontColor(PMColors.WARNING)

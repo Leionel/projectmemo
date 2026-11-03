@@ -224,7 +224,7 @@ export struct CategoryBadge {
  */
 @Component
 export struct TemporalBadge {
-  @Prop status: string = 'CURRENT';
+  @Prop status: string = 'UNKNOWN';
 
   private getLabel(): string {
     switch (this.status) {

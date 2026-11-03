@@ -26,6 +26,8 @@ test("first material leads to an explicitly authorized Mission; multiple waiting
  await page.getByRole("button",{name:"使用阶段汇报模板"}).click();
  await expect(page.getByRole("checkbox",{name:/仅允许读取、分析和保存草稿/})).toBeChecked();
  await expect(page.getByRole("checkbox",{name:/允许配置的云模型/})).not.toBeChecked();
+ await expect(page.getByRole("button",{name:"创建委托",exact:true})).toBeDisabled();
+ await page.getByRole("checkbox",{name:/允许配置的云模型/}).check();
  const created=page.waitForResponse(r=>r.url().endsWith("/api/missions")&&r.request().method()==="POST");
  await page.getByRole("button",{name:"创建委托",exact:true}).click();const first=(await(await created).json()).mission.id;
  ask(first,"请补充实验设备与统计口径");

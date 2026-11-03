@@ -5,7 +5,14 @@ export type FocusEntry = {
   status: string; activity: string; activityAt: string; recordedAt: string; dueAt: string; projectDeadline: string; recordFields: Array<{label: string; value: string}>;
 };
 export type GlobalFocus = {
-  coverage?:{complete:boolean;consideredProjectIds:string[];countsAreBounded:boolean};
+  coverage?:{
+    complete:boolean;consideredProjectIds:string[];countsAreBounded:boolean;
+    /**
+     * 可选增量：终态 + 未结算 UNKNOWN 的有界窗口覆盖说明（旧客户端忽略）。
+     * 非终态 waiting 窗口与终态 unsettled 窗口分别有界；窗口内未找到 ≠ 全库没有。
+     */
+    terminalUnsettled?:{inspected:number;limit:number;truncated:boolean;note:string};
+  };
   discussions?: Array<{ conversationId: string; title: string; unread: number }>;
   primaryContext?: import("./projectAgentContext").ProjectAgentContext | null;
   counts: {waiting: number; running: number; actions: number; reminders: number};

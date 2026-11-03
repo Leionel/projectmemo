@@ -38,10 +38,12 @@ async function main() {
     update: {},
   });
   // 同一账号绑定已验证邮箱：E2E 既要覆盖原用户名登录，也要覆盖“用户名或邮箱”中的邮箱路径。
+  // 仅隔离 E2E 评审身份具有有界的合成调用额度，保持原有研究/接续旅程可执行。
+  // E2E_ENV 的 LLM_MODE=mock；真实注册账号及下方待验证账号仍保持默认0。
   await db.accountSecurity.upsert({
     where: { userId: user.id },
-    create: { userId: user.id, email: E2E_EMAIL, emailVerifiedAt: new Date() },
-    update: { email: E2E_EMAIL, emailVerifiedAt: new Date() },
+    create: { userId: user.id, email: E2E_EMAIL, emailVerifiedAt: new Date(), dailyCloudLimit: 100 },
+    update: { email: E2E_EMAIL, emailVerifiedAt: new Date(), dailyCloudLimit: 100 },
   });
   // 未验证邮箱账号：用于浏览器旅程验证“提示重新发信”而不是误报密码错误。
   const pending = await db.user.upsert({

@@ -59,8 +59,8 @@
   font-weight: 550;
 }
 .homeHeader .headerCta {
-  height: 40px;
-  min-height: 40px;
+  height: 44px;
+  min-height: 44px;
   padding: 8px 14px;
   border-color: var(--teal);
   background: var(--teal);
@@ -107,7 +107,7 @@
   .homeNav .headerCta {
     gap: 0.3rem;
     padding-inline: 0.65rem;
-    font-size: 0.7rem;
+    font-size: 0.8rem;
   }
   .homeHeader .siteHeaderInner {
     height: 56px;

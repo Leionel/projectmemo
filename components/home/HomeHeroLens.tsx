@@ -137,7 +137,11 @@ export function HomeHeroLens() {
   }
 
   return (
-    <div className={styles.lens} aria-label="公开示例：委托当前工作包">
+    <div
+      className={styles.lens}
+      data-hero-lens
+      aria-label="公开示例：委托当前工作包"
+    >
       <header className={styles.lensHead}>
         <div className={styles.lensIdentity}>
           <p className={styles.lensKicker}>

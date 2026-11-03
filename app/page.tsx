@@ -12,6 +12,7 @@ import {
 import { getSessionUser } from "@/lib/auth/serverSession";
 import { HomeJourney } from "@/components/HomeJourney";
 import { HomeHeroLens } from "@/components/home/HomeHeroLens";
+import { HomeMotion } from "@/components/home/HomeMotion";
 import styles from "./home.module.css";
 
 export const metadata: Metadata = {
@@ -71,14 +72,16 @@ export default async function Home() {
   const workspaceLabel = user ? "回到我的工作台" : "进入工作台";
 
   return (
-    <main id="main-content" className={styles.home}>
+    <main id="main-content" className={styles.home} tabIndex={-1}>
+      <div className={styles.scrollProgress} data-scroll-progress aria-hidden="true" />
       <section
         id="home-heading"
         className={styles.hero}
         aria-labelledby="hero-title"
+        data-hero
       >
         <div className={styles.heroInner}>
-          <div className={styles.heroCopy}>
+          <div className={styles.heroCopy} data-hero-copy>
             <p className={styles.positioning}>
               <span>面向大学生的</span>
               <strong>个人项目 Agent</strong>
@@ -115,7 +118,7 @@ export default async function Home() {
       >
         <div className={styles.shell}>
           <header className={styles.sectionHead}>
-            <p className={styles.kicker}>
+            <p className={styles.kicker} data-draw>
               <span>01</span>
               离开以后
             </p>
@@ -129,20 +132,24 @@ export default async function Home() {
             </p>
           </header>
 
-          <ol className={styles.rail}>
-            {continuitySteps.map((step) => (
-              <li
-                className={styles.railStep}
-                key={step.label}
-                data-state={step.state}
-                data-emphasis={step.emphasis ? "true" : undefined}
-              >
-                <p className={styles.railLabel}>{step.label}</p>
-                <h3>{step.title}</h3>
-                <p className={styles.railText}>{step.text}</p>
-              </li>
-            ))}
-          </ol>
+          <div className={styles.railFrame} data-rail>
+            <ol className={styles.rail}>
+              {continuitySteps.map((step) => (
+                <li
+                  className={styles.railStep}
+                  key={step.label}
+                  data-rail-step
+                  data-state={step.state}
+                  data-emphasis={step.emphasis ? "true" : undefined}
+                >
+                  <p className={styles.railLabel}>{step.label}</p>
+                  <h3>{step.title}</h3>
+                  <p className={styles.railText}>{step.text}</p>
+                </li>
+              ))}
+            </ol>
+            <span className={styles.railProgress} aria-hidden="true" />
+          </div>
 
           <div className={styles.railFoot}>
             <details className={styles.conditions}>
@@ -169,7 +176,7 @@ export default async function Home() {
       >
         <div className={styles.shell}>
           <header className={`${styles.sectionHead} ${styles.experienceHead}`}>
-            <p className={styles.kicker}>
+            <p className={styles.kicker} data-draw>
               <span>02</span>
               公开交互示例
             </p>
@@ -189,7 +196,7 @@ export default async function Home() {
       <section className={styles.section} aria-labelledby="platform-title">
         <div className={`${styles.shell} ${styles.split}`}>
           <header className={styles.splitHead}>
-            <p className={styles.kicker}>
+            <p className={styles.kicker} data-draw>
               <span>03</span>
               同一个任务
             </p>
@@ -206,6 +213,12 @@ export default async function Home() {
             </p>
           </header>
           <div className={styles.pathList}>
+            <p className={styles.taskIdentity}>
+              <span>同一任务</span>
+              整理阶段汇报
+              <span aria-hidden="true">·</span>
+              公开示例
+            </p>
             <div className={styles.pathGroup}>
               <div className={styles.pathTitle}>
                 <Laptop size={18} aria-hidden="true" />
@@ -249,7 +262,7 @@ export default async function Home() {
       >
         <div className={styles.shell}>
           <header className={styles.sectionHead}>
-            <p className={styles.kicker}>
+            <p className={styles.kicker} data-draw>
               <span>04</span>
               用在什么项目上
             </p>
@@ -273,14 +286,12 @@ export default async function Home() {
       >
         <div className={`${styles.shell} ${styles.demoSplit}`}>
           <header className={styles.splitHead}>
-            <p className={styles.kicker}>
+            <p className={styles.kicker} data-draw>
               <span>05</span>
               决赛演示
             </p>
             <h2 id="demo-title">
-              在比赛里，
-              <br className={styles.mobileBreak} />
-              完整讲一遍。
+              看一遍决赛演示。
             </h2>
             <p className={styles.sectionIntro}>
               2026 C4-AI 决赛演示视频。视频托管在 Bilibili，点击后在新窗口打开外部站点。
@@ -311,7 +322,9 @@ export default async function Home() {
       <section className={styles.closing} aria-labelledby="closing-title">
         <div className={`${styles.shell} ${styles.closingInner}`}>
           <div>
-            <h2 id="closing-title">让你的下一段长期项目，接得上。</h2>
+            <h2 id="closing-title">
+              让你的下一段长期项目，接得上。
+            </h2>
             <p>从自己的项目开始。已有账号可以直接进入工作台。</p>
           </div>
           <div className={styles.closingActions}>
@@ -344,6 +357,7 @@ export default async function Home() {
               href={DEMO_VIDEO_URL}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="决赛演示（Bilibili，在新窗口打开）"
             >
               决赛演示
               <ArrowUpRight size={12} aria-hidden="true" />
@@ -353,6 +367,7 @@ export default async function Home() {
           <p className={styles.footerMeta}>竞赛 · 科研 · 课程项目</p>
         </div>
       </footer>
+      <HomeMotion />
     </main>
   );
 }

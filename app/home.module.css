@@ -25,6 +25,10 @@
   color: var(--ink);
   font-family: var(--landing-sans);
   font-feature-settings: "tnum" 1;
+  scroll-margin-top: 5rem;
+}
+.home:focus {
+  outline: none;
 }
 .home *,
 .home *::before,
@@ -52,6 +56,13 @@
 
 .hero {
   border-bottom: 1px solid var(--rule);
+}
+/* 滚动深度：卡片与文案以不同速度离场，仅 transform，减少动画时停用。 */
+.home[data-motion="on"] [data-hero-copy] {
+  translate: 0 calc(var(--hero-shift, 0) * 10px);
+}
+.home[data-motion="on"] [data-hero-lens] {
+  translate: 0 calc(var(--hero-shift, 0) * -18px);
 }
 .heroInner {
   display: grid;
@@ -225,7 +236,7 @@
   border-radius: 999px;
   background: color-mix(in srgb, var(--amber) 8%, var(--paper-strong));
   color: var(--amber);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 550;
   line-height: 1.5;
   white-space: nowrap;
@@ -511,6 +522,14 @@
   height: 1px;
   margin-left: 0.75rem;
   background: var(--rule);
+  transform-origin: left center;
+}
+.home[data-motion="on"] .kicker::after {
+  transform: scaleX(0);
+}
+.home[data-motion="on"] .kicker[data-drawn="true"]::after {
+  transform: scaleX(1);
+  transition: transform 720ms var(--ease-out);
 }
 .sectionHead h2 {
   font-family: var(--editorial-font);
@@ -532,6 +551,9 @@
   display: none;
 }
 
+.railFrame {
+  position: relative;
+}
 .rail {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -539,6 +561,18 @@
   padding: 0;
   border-top: 1px solid var(--rule);
   list-style: none;
+}
+/* 滚动进度线：把“来源 → 变化 → 判断 → 等你”的先后顺序画出来。 */
+.railProgress {
+  position: absolute;
+  top: -1px;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: var(--teal);
+  transform: scaleX(var(--rail-progress, 1));
+  transform-origin: left center;
+  pointer-events: none;
 }
 .railStep {
   position: relative;
@@ -557,6 +591,7 @@
   position: absolute;
   top: -4px;
   left: 1.5rem;
+  z-index: 1;
   width: 7px;
   height: 7px;
   border: 1px solid var(--rule-strong);
@@ -567,6 +602,22 @@
   left: 0;
 }
 .railStep[data-state="waiting"]::before {
+  border-color: var(--amber);
+  background: var(--amber);
+}
+.home[data-motion="on"] .railStep::before {
+  transition:
+    background-color 260ms ease,
+    border-color 260ms ease,
+    transform 260ms var(--ease-out);
+}
+.home[data-motion="on"] .railStep[data-active]::before {
+  transform: scale(1.2);
+  border-color: var(--teal);
+  background: var(--teal);
+}
+.home[data-motion="on"]
+  .railStep[data-state="waiting"][data-active]::before {
   border-color: var(--amber);
   background: var(--amber);
 }
@@ -683,6 +734,21 @@
 }
 .pathList {
   border-top: 1px solid var(--rule);
+}
+.taskIdentity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.taskIdentity > span:first-child {
+  color: var(--ink-soft);
+  font-weight: 600;
 }
 .pathGroup {
   padding: 1.45rem 0;
@@ -818,6 +884,20 @@
 .closing {
   background: var(--ink);
   color: var(--paper);
+}
+/* 阅读进度：位置固定、只做合成层缩放，不隐藏任何内容。 */
+.scrollProgress {
+  position: fixed;
+  top: 56px;
+  right: 0;
+  left: 0;
+  z-index: 39;
+  height: 2px;
+  background: var(--teal);
+  transform: scaleX(0);
+  transform-origin: left center;
+  pointer-events: none;
+  opacity: 0.85;
 }
 .closingInner {
   display: flex;
@@ -1066,6 +1146,16 @@
   .boundary {
     width: calc(100% - 36px);
   }
+  .railProgress {
+    top: 0;
+    right: auto;
+    bottom: 0;
+    left: 0;
+    width: 2px;
+    height: auto;
+    transform: scaleY(var(--rail-progress, 1));
+    transform-origin: center top;
+  }
   .heroInner {
     gap: 1.5rem;
     padding-block: 1.25rem 2.5rem;
@@ -1118,7 +1208,7 @@
   }
   .lensStatus {
     padding: 0.25rem 0.5rem;
-    font-size: 0.74rem;
+    font-size: 0.8rem;
   }
   .stageTabs {
     padding: 0.35rem 0.35rem 0.25rem;

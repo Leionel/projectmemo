@@ -1,0 +1,29 @@
+=== public/fonts/pm-serif-brand.ttf bytes=3012 glyphs=13 tables=GlyphOrder,OS/2,cmap,gasp,glyf,head,hhea,hmtx,loca,maxp,name,post
+  nameID 0: \xa9 2017-2023 Adobe (http://www.adobe.com/).
+  nameID 1: Noto Serif SC
+  nameID 2: Regular
+  nameID 3: 2.002;GOOG;NotoSerifSC-ExtraLight;ADOBE
+  nameID 4: Noto Serif SC
+  nameID 5: Version 2.02;241114204558;non-release
+  nameID 6: NotoSerifSC-ExtraLight
+=== public/fonts/pm-editorial-serif.ttf bytes=162052 glyphs=528 tables=BASE,GPOS,GSUB,GlyphOrder,OS/2,STAT,cmap,gasp,glyf,head,hhea,hmtx,loca,maxp,name,post,vhea,vmtx
+  nameID 0: \xa9 2017-2023 Adobe (http://www.adobe.com/).
+  nameID 1: PM Editorial
+  nameID 2: Medium
+  nameID 3: PMEditorial-Medium-20261023
+  nameID 4: PM Editorial Medium
+  nameID 5: Version 2.02;241114204558;non-release
+  nameID 6: PMEditorial-Medium
+  nameID 13: This Font Software is licensed under the SIL Open Font License, Version 1.1. This Font Software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the SIL Open Font License for the specific language, permissions and limitations governing 
+  nameID 14: http://scripts.sil.org/OFL
+=== public/fonts/manrope-variable.ttf bytes=164700 glyphs=742 tables=GDEF,GPOS,GSUB,GlyphOrder,HVAR,OS/2,STAT,cmap,fvar,gasp,glyf,gvar,head,hhea,hmtx,loca,maxp,name,post,prep
+  nameID 0: Copyright 2019 The Manrope Project Authors (https://github.com/googlefonts/manrope)
+  nameID 1: Manrope ExtraLight
+  nameID 2: Regular
+  nameID 3: 4.505;SHMI;Manrope-ExtraLight
+  nameID 4: Manrope ExtraLight
+  nameID 5: Version 4.505
+  nameID 6: Manrope-ExtraLight
+  nameID 13: This Font Software is licensed under the SIL Open Font License, Version 1.1. This license is available with a FAQ at: https://openfontlicense.org
+  nameID 14: https://openfontlicense.org
+wrote D:\Projects\hongmen-final-b-brand-home\evidence\final-sprint\20261103\b-brand-home\audit\claims\json\font-metadata.json

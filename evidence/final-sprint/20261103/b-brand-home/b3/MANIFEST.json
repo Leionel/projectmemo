@@ -1,0 +1,1887 @@
+{
+  "task": "task-4",
+  "track": "B",
+  "phase": 2,
+  "part": "2-B 断点/缩放、异常与交互状态、rail 中段（桌面/390）、15–20 秒动效录屏",
+  "capturedAt": "2026-11-03T04:36:49.006Z",
+  "sourceSha": "9bae926e9475cedef118deedf5e002ec8365a23b",
+  "worktree": "D:\\Projects\\hongmen-final-b-brand-home",
+  "branch": "codex/final-b-brand-home",
+  "baseURL": "http://127.0.0.1:34111",
+  "environment": {
+    "os": "win32 10.0.26300 (Windows 11 Home China)",
+    "arch": "x64",
+    "cpu": "Intel(R) Core(TM) i7-14700HX ×28",
+    "totalMemoryGiB": 15.78,
+    "node": "v24.16.0",
+    "browser": "chromium via @playwright/test 1.61.1 (headless)",
+    "deviceScaleFactor": 1,
+    "network": "localhost loopback（Next dev，同一台机器）",
+    "timezoneId": "Asia/Shanghai",
+    "locale": "zh-CN",
+    "mode": "Next dev（非生产构建）；LLM_MODE=mock、空 SQLite、无 Worker（由 Lead 提供）",
+    "caveat": "性能/体积数字仅代表本机本地 dev 环境，不宣称代表所有用户体验或生产构建。"
+  },
+  "sourceIntegrity": {
+    "headAtCapture": "9bae926e9475cedef118deedf5e002ec8365a23b",
+    "headVerified": true,
+    "treeCleanExceptEvidence": true,
+    "note": "最终候选 9bae926（cc7c19f + 终验 a11y/字号作用域修复）；截图/录屏采集于 cc7c19f（12:31–12:40），9bae926 仅改 .judgmentPane 字号作用域与 role 属性，不改变已采状态。",
+    "postCaptureEdits": {
+      "capturedAt": "2026-11-03T12:31–12:40+08:00（截图/录屏均在此窗口内）",
+      "treeAtCapture": "HEAD=cc7c19f；git status 仅证据目录未跟踪（干净）",
+      "editsAfterCapture": [
+        {
+          "file": "components/home/HomeHeroLens.tsx",
+          "mtimeLocal": "2026-11-03T12:40:44+08:00",
+          "diff": "+ role=\"group\"（aria 语义，无视觉变化）"
+        },
+        {
+          "file": "components/HomeJourney.module.css",
+          "mtimeLocal": "2026-11-03T12:40:45+08:00",
+          "diff": "+ 五步示例 judgmentPane 内 text-xs/text-[11px] 元数据提升到 12.8px（仅影响第 3 步“查看判断”的 StateDiffView 文本）"
+        },
+        {
+          "file": "next-env.d.ts",
+          "mtimeLocal": "2026-11-03T12:38:00+08:00",
+          "diff": "Next 自动生成"
+        }
+      ],
+      "impact": "已提交为 9bae926；证据绑定 9bae926，第 3 步判断页另行定向补拍验证。"
+    },
+    "finalCandidateSha": "9bae926e9475cedef118deedf5e002ec8365a23b"
+  },
+  "protocol": "断点：1024×768、768×1024、360×780、320×720 浅色；200% 缩放用 720×450 与 640×360 CSS viewport 模拟（1440/2×900/2、1280/2×720/2）。状态：reduced-motion（context reducedMotion:'reduce'；含 rail 满线/无动画断言）、字体失败（abort /fonts/* 与 *.ttf）、五步 Demo dialog 打开态、回执门槛、已保存模拟回执、#experience 锚点。滚动动效：rail-1440-mid（after 目录）与 rail-390-mid（本目录）。录屏：1440×900 context recordVideo，加载→Hero 三阶段→依据展开/关闭→滚动到 01 节 rail→滚动到五步 Demo→打开/关闭 dialog。",
+  "breakpoints": [
+    {
+      "label": "1024x768",
+      "width": 1024,
+      "height": 768,
+      "zoomSimulation": false,
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/breakpoints/1024x768.png",
+      "fileBytes": 97327,
+      "fileSha256": "4edb0a94baf573d955b7888de709b8c220bebb1733eb6e0d54d7c4f4e7a193aa",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 1024,
+        "innerWidth": 1024,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 828.86,
+            "y": 189.23,
+            "width": 153.33,
+            "height": 44,
+            "bottom": 233.23,
+            "right": 982.19,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": 95.91,
+        "ctaVisibleInFirstScreen": true
+      },
+      "extra": {
+        "horizontalOverflow": false,
+        "scrollWidth": 1024,
+        "innerWidth": 1024,
+        "overflowers": [],
+        "cta": {
+          "bbox": {
+            "x": 32,
+            "y": 392.39,
+            "width": 188.39,
+            "height": 48,
+            "bottom": 440.39,
+            "right": 220.39,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          },
+          "clippedRight": false,
+          "clippedLeft": false,
+          "inFirstScreen": true
+        },
+        "h1": {
+          "bbox": {
+            "x": 32,
+            "y": 150.3,
+            "width": 432.39,
+            "height": 116.72,
+            "bottom": 267.02,
+            "right": 464.39,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          "clippedRight": false,
+          "clippedLeft": false,
+          "inFirstScreen": true
+        },
+        "heroCopyTop": 95.91,
+        "lensBBox": {
+          "x": 504.39,
+          "y": 95.91,
+          "width": 487.59,
+          "height": 543.27,
+          "bottom": 639.17,
+          "right": 991.98,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "block",
+          "visibility": "visible"
+        },
+        "headingClipped": false,
+        "ctaClipped": false,
+        "ctaVisibleInFirstScreen": true,
+        "bodyFontSize": 51.2
+      }
+    },
+    {
+      "label": "768x1024",
+      "width": 768,
+      "height": 1024,
+      "zoomSimulation": false,
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/breakpoints/768x1024.png",
+      "fileBytes": 86322,
+      "fileSha256": "9df8570e0ecb0028954db3db49819ce0a8eb06540c91f93f2e1929ead97f5ead",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 768,
+        "innerWidth": 768,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 503.41,
+            "y": 609.77,
+            "width": 230.8,
+            "height": 44,
+            "bottom": 653.77,
+            "right": 734.2,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": 85,
+        "ctaVisibleInFirstScreen": true
+      },
+      "extra": {
+        "horizontalOverflow": false,
+        "scrollWidth": 768,
+        "innerWidth": 768,
+        "overflowers": [],
+        "cta": {
+          "bbox": {
+            "x": 24,
+            "y": 388.8,
+            "width": 188.39,
+            "height": 48,
+            "bottom": 436.8,
+            "right": 212.39,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          },
+          "clippedRight": false,
+          "clippedLeft": false,
+          "inFirstScreen": true
+        },
+        "h1": {
+          "bbox": {
+            "x": 24,
+            "y": 139.39,
+            "width": 720,
+            "height": 124.03,
+            "bottom": 263.42,
+            "right": 744,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          "clippedRight": false,
+          "clippedLeft": false,
+          "inFirstScreen": true
+        },
+        "heroCopyTop": 85,
+        "lensBBox": {
+          "x": 24,
+          "y": 516.44,
+          "width": 720,
+          "height": 543.27,
+          "bottom": 1059.7,
+          "right": 744,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": true,
+          "display": "block",
+          "visibility": "visible"
+        },
+        "headingClipped": false,
+        "ctaClipped": false,
+        "ctaVisibleInFirstScreen": true,
+        "bodyFontSize": 54.4
+      }
+    },
+    {
+      "label": "360x780",
+      "width": 360,
+      "height": 780,
+      "zoomSimulation": false,
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/breakpoints/360x780.png",
+      "fileBytes": 59508,
+      "fileSha256": "90d4c8fd10e462b095db5592c14f4dc422504baaa675bbcbfffb189bd5bd7b21",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 360,
+        "innerWidth": 360,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 234.47,
+            "y": 494.64,
+            "width": 100.94,
+            "height": 44,
+            "bottom": 538.64,
+            "right": 335.41,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": 77,
+        "ctaVisibleInFirstScreen": true
+      },
+      "extra": {
+        "horizontalOverflow": false,
+        "scrollWidth": 360,
+        "innerWidth": 360,
+        "overflowers": [],
+        "cta": {
+          "bbox": {
+            "x": 18,
+            "y": 309.56,
+            "width": 157.59,
+            "height": 46,
+            "bottom": 355.56,
+            "right": 175.59,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          },
+          "clippedRight": false,
+          "clippedLeft": false,
+          "inFirstScreen": true
+        },
+        "h1": {
+          "bbox": {
+            "x": 18,
+            "y": 112.19,
+            "width": 324,
+            "height": 81.19,
+            "bottom": 193.38,
+            "right": 342,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          "clippedRight": false,
+          "clippedLeft": false,
+          "inFirstScreen": true
+        },
+        "heroCopyTop": 77,
+        "lensBBox": {
+          "x": 18,
+          "y": 414.11,
+          "width": 324,
+          "height": 556.53,
+          "bottom": 970.64,
+          "right": 342,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": true,
+          "display": "block",
+          "visibility": "visible"
+        },
+        "headingClipped": false,
+        "ctaClipped": false,
+        "ctaVisibleInFirstScreen": true,
+        "bodyFontSize": 34.4
+      }
+    },
+    {
+      "label": "320x720",
+      "width": 320,
+      "height": 720,
+      "zoomSimulation": false,
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/breakpoints/320x720.png",
+      "fileBytes": 46177,
+      "fileSha256": "86853c536e42a4178c4cff5164a282cc112d652013ea4cec06ef037150c2efb2",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 320,
+        "innerWidth": 320,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 207.8,
+            "y": 568.63,
+            "width": 87.61,
+            "height": 44,
+            "bottom": 612.63,
+            "right": 295.41,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": 77,
+        "ctaVisibleInFirstScreen": true
+      },
+      "extra": {
+        "horizontalOverflow": false,
+        "scrollWidth": 320,
+        "innerWidth": 320,
+        "overflowers": [],
+        "cta": {
+          "bbox": {
+            "x": 18,
+            "y": 309.56,
+            "width": 284,
+            "height": 46,
+            "bottom": 355.56,
+            "right": 302,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          },
+          "clippedRight": false,
+          "clippedLeft": false,
+          "inFirstScreen": true
+        },
+        "h1": {
+          "bbox": {
+            "x": 18,
+            "y": 112.19,
+            "width": 284,
+            "height": 81.19,
+            "bottom": 193.38,
+            "right": 302,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          "clippedRight": false,
+          "clippedLeft": false,
+          "inFirstScreen": true
+        },
+        "heroCopyTop": 77,
+        "lensBBox": {
+          "x": 18,
+          "y": 468.91,
+          "width": 284,
+          "height": 664.19,
+          "bottom": 1133.09,
+          "right": 302,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": true,
+          "display": "block",
+          "visibility": "visible"
+        },
+        "headingClipped": false,
+        "ctaClipped": false,
+        "ctaVisibleInFirstScreen": true,
+        "bodyFontSize": 34.4
+      }
+    },
+    {
+      "label": "zoom200-720x450",
+      "width": 720,
+      "height": 450,
+      "zoomSimulation": true,
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/breakpoints/zoom200-720x450.png",
+      "fileBytes": 42438,
+      "fileSha256": "39d0f6f6bc5c04e49f0234901676881c6147a08b37424274d06a0f9e5e98360b",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 720,
+        "innerWidth": 720,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 474.47,
+            "y": 488.39,
+            "width": 220.94,
+            "height": 44,
+            "bottom": 532.39,
+            "right": 695.41,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": 77,
+        "ctaVisibleInFirstScreen": true
+      },
+      "extra": {
+        "horizontalOverflow": false,
+        "scrollWidth": 720,
+        "innerWidth": 720,
+        "overflowers": [],
+        "cta": {
+          "bbox": {
+            "x": 18,
+            "y": 303.31,
+            "width": 337.59,
+            "height": 46,
+            "bottom": 349.31,
+            "right": 355.59,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          },
+          "clippedRight": false,
+          "clippedLeft": false,
+          "inFirstScreen": true
+        },
+        "h1": {
+          "bbox": {
+            "x": 18,
+            "y": 112.19,
+            "width": 684,
+            "height": 101.94,
+            "bottom": 214.13,
+            "right": 702,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          "clippedRight": false,
+          "clippedLeft": false,
+          "inFirstScreen": true
+        },
+        "heroCopyTop": 77,
+        "lensBBox": {
+          "x": 18,
+          "y": 407.86,
+          "width": 684,
+          "height": 505.91,
+          "bottom": 913.77,
+          "right": 702,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": true,
+          "display": "block",
+          "visibility": "visible"
+        },
+        "headingClipped": false,
+        "ctaClipped": false,
+        "ctaVisibleInFirstScreen": true,
+        "bodyFontSize": 43.2
+      }
+    },
+    {
+      "label": "zoom200-640x360",
+      "width": 640,
+      "height": 360,
+      "zoomSimulation": true,
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/breakpoints/zoom200-640x360.png",
+      "fileBytes": 34238,
+      "fileSha256": "b9b6fac7c0dc2187626896c933186de028ede6c56e6d8ccbafcc8d8b059a3dfa",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 640,
+        "innerWidth": 640,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 421.14,
+            "y": 488.39,
+            "width": 194.27,
+            "height": 44,
+            "bottom": 532.39,
+            "right": 615.41,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": true,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": 77,
+        "ctaVisibleInFirstScreen": true
+      },
+      "extra": {
+        "horizontalOverflow": false,
+        "scrollWidth": 640,
+        "innerWidth": 640,
+        "overflowers": [],
+        "cta": {
+          "bbox": {
+            "x": 18,
+            "y": 303.31,
+            "width": 297.59,
+            "height": 46,
+            "bottom": 349.31,
+            "right": 315.59,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          },
+          "clippedRight": false,
+          "clippedLeft": false,
+          "inFirstScreen": true
+        },
+        "h1": {
+          "bbox": {
+            "x": 18,
+            "y": 112.19,
+            "width": 604,
+            "height": 101.94,
+            "bottom": 214.13,
+            "right": 622,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          "clippedRight": false,
+          "clippedLeft": false,
+          "inFirstScreen": true
+        },
+        "heroCopyTop": 77,
+        "lensBBox": {
+          "x": 18,
+          "y": 407.86,
+          "width": 604,
+          "height": 505.91,
+          "bottom": 913.77,
+          "right": 622,
+          "inFirstScreen": false,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": true,
+          "display": "block",
+          "visibility": "visible"
+        },
+        "headingClipped": false,
+        "ctaClipped": false,
+        "ctaVisibleInFirstScreen": true,
+        "bodyFontSize": 43.2
+      }
+    }
+  ],
+  "rail390": {
+    "file": "evidence/final-sprint/20261103/b-brand-home/b3/rail-390-mid.png",
+    "fileBytes": 49040,
+    "fileSha256": "0cac761e108f328a5178a832cadf667183daeade5207cfdcb80424d47c0e8fda",
+    "extra": {
+      "railAfterCapture": {
+        "scrollY": 881,
+        "progress": 0.5,
+        "activeCount": 2,
+        "activeLabels": [
+          "来源 3 条来源保留原文 比赛材料、任务",
+          "变化 发现一处没有回执 演示流程是否跑通"
+        ],
+        "railBBox": {
+          "x": 18,
+          "y": 361,
+          "width": 354,
+          "height": 536.4
+        },
+        "railProgressTransform": "matrix(1, 0, 0, 0.5, 0, 0)",
+        "railProgressBBox": {
+          "x": 18,
+          "y": 361,
+          "width": 2,
+          "height": 268.2
+        },
+        "scrollProgressTransform": "matrix(0.195, 0, 0, 1, 0, 0)"
+      }
+    },
+    "key": {
+      "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+      "h1Text": "人可以下线， 项目别掉线。",
+      "htmlClass": "light",
+      "scrollWidth": 390,
+      "innerWidth": 390,
+      "horizontalOverflow": false,
+      "fontStatus": "loaded",
+      "minVisibleFontSizePx": 12.8,
+      "selectedTab": {
+        "id": "stage-tab-back",
+        "label": "03 回来后",
+        "ariaSelected": "true",
+        "tabIndex": 0,
+        "bbox": {
+          "x": 254.47,
+          "y": -429.73,
+          "width": 110.94,
+          "height": 44,
+          "bottom": -385.73,
+          "right": 365.41,
+          "inFirstScreen": false,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "flex",
+          "visibility": "visible"
+        }
+      },
+      "evidenceOpen": false,
+      "imageCount": 1,
+      "heroCopyTop": -794,
+      "ctaVisibleInFirstScreen": false
+    }
+  },
+  "states": [
+    {
+      "name": "reduced-motion-during",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/states/reduced-motion-during.png",
+      "fileBytes": 117775,
+      "fileSha256": "32f7e4b43675862dc7f5400cbb32d3b14ebe93cb06361a7f44a8e22524c6f7e7",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-during",
+          "label": "02 期间",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 924.88,
+            "y": 205.05,
+            "width": 195.66,
+            "height": 44,
+            "bottom": 249.05,
+            "right": 1120.53,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": 111.72,
+        "ctaVisibleInFirstScreen": true
+      },
+      "extra": {
+        "reducedMotionMatches": true,
+        "stageSwitch": {
+          "latencyMs": 81,
+          "before": {
+            "panelText": "原委托 用已有材料整理一份阶段汇报 原任务与草稿都留在原处 依据 比赛材料、任务安排、老师建议 3 条来源可回看原文 变化 演示流程缺少完成回执 原判断“先写汇报草稿”需要你重新确认 等你 补充演示结果，或确认先按现有材料写汇报草稿 确认后",
+            "panelLength": 144,
+            "selectedId": "stage-tab-back"
+          },
+          "after": {
+            "panelText": "原委托 用已有材料整理一份阶段汇报 任务身份与范围不变 依据 已读 3 条来源 冻结示例，不连接服务器 变化 发现缺口：演示流程还没有完成回执 缺口不会被自动当成已完成 等你 回来后处理，期间不改变项目 示例不模拟正在执行的 Worker ",
+            "panelLength": 130,
+            "selectedId": "stage-tab-during",
+            "selectedAria": "true",
+            "animationStyles": {
+              "rowsAnimationName": "none",
+              "rowsAnimationDuration": "0s",
+              "rowsTransitionDuration": "0s",
+              "heroInnerAnimationName": "none",
+              "heroInnerAnimationDuration": "0s",
+              "activeAnimations": 0
+            }
+          },
+          "contentChanged": true,
+          "tabSwitched": true
+        }
+      }
+    },
+    {
+      "name": "reduced-motion-evidence",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/states/reduced-motion-evidence.png",
+      "fileBytes": 123211,
+      "fileSha256": "3368d3b9a9ac8ec5a139d9c7a537e7632895fa1624d71618230a80698cc4a2a0",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-during",
+          "label": "02 期间",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 924.88,
+            "y": 205.05,
+            "width": 195.66,
+            "height": 44,
+            "bottom": 249.05,
+            "right": 1120.53,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": true,
+        "imageCount": 1,
+        "heroCopyTop": 111.72,
+        "ctaVisibleInFirstScreen": true
+      },
+      "extra": {
+        "evidenceOpenLatencyMs": 102
+      }
+    },
+    {
+      "name": "reduced-motion-rail",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/states/reduced-motion-rail.png",
+      "fileBytes": 106729,
+      "fileSha256": "4a6cc8eac403298ae496178e36c74004098a3a801ef2e50ad0176539f75b34b3",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-during",
+          "label": "02 期间",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 924.88,
+            "y": -925.95,
+            "width": 195.66,
+            "height": 44,
+            "bottom": -881.95,
+            "right": 1120.53,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": true,
+        "imageCount": 1,
+        "heroCopyTop": -1019.28,
+        "ctaVisibleInFirstScreen": false
+      },
+      "extra": {
+        "rail": {
+          "scrollY": 1131,
+          "dataMotion": "reduced",
+          "railBBox": {
+            "x": 110,
+            "y": 161.7,
+            "width": 1220,
+            "height": 178.2
+          },
+          "railProgressBBox": {
+            "x": 110,
+            "y": 160.7,
+            "width": 1220,
+            "height": 2
+          },
+          "railProgressTransform": "matrix(1, 0, 0, 1, 0, 0)",
+          "railProgressVar": null,
+          "activeCount": 0,
+          "scrollProgressTransform": "matrix(0, 0, 0, 1, 0, 0)",
+          "runningAnimations": 0,
+          "mainTextLength": 1807
+        }
+      }
+    },
+    {
+      "name": "font-failure",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/states/font-failure.png",
+      "fileBytes": 119532,
+      "fileSha256": "d7edf3985d92e24d1442c262cb8373360ecbe7df733ef3ab065a1e50d3daea5d",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 1124.53,
+            "y": 205.05,
+            "width": 195.66,
+            "height": 44,
+            "bottom": 249.05,
+            "right": 1320.19,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": 111.72,
+        "ctaVisibleInFirstScreen": true
+      },
+      "extra": {
+        "abortedFontUrls": [
+          "http://127.0.0.1:34111/fonts/pm-serif-brand.ttf",
+          "http://127.0.0.1:34111/fonts/pm-editorial-serif.ttf",
+          "http://127.0.0.1:34111/fonts/manrope-variable.ttf"
+        ],
+        "h1Visible": true,
+        "h1Text": "人可以下线， 项目别掉线。",
+        "ctaVisible": true,
+        "heroNoteVisible": true,
+        "mockNoteText": "公开示例 · 不调用模型 · 不写入你的项目。",
+        "mainTextLength": 1640,
+        "noAriaBusy": true,
+        "fontStatus": "loaded",
+        "pmBrandAvailable": false,
+        "h1FontFamily": "\"PM Editorial\", \"Noto Serif SC\", \"Songti SC\", STSong, SimSun, serif",
+        "loadMs": 5239
+      }
+    },
+    {
+      "name": "dialog-open",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/states/dialog-open.png",
+      "fileBytes": 119181,
+      "fileSha256": "732047dff14ee4667ae809eb11e38cebad04c0ad1b0605f690fc5302f251ce66",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 1124.53,
+            "y": -1199.95,
+            "width": 195.66,
+            "height": 44,
+            "bottom": -1155.95,
+            "right": 1320.19,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": -1265.28,
+        "ctaVisibleInFirstScreen": false
+      },
+      "extra": {
+        "dialog": {
+          "open": true,
+          "ariaLabelledby": "source-title",
+          "title": "任务安排",
+          "textFirst120": "示例原始记录 任务安排 目前还没有完整 Demo，需要先完成项目创建、碎片捕获和成果生成闭环。 原文取自项目自带的演示素材，不是在线用户的个人记录。",
+          "bbox": {
+            "x": 416,
+            "y": 319.97,
+            "width": 608,
+            "height": 260.05,
+            "bottom": 580.02,
+            "right": 1024,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        },
+        "focusAfterClose": {
+          "tag": "button",
+          "ariaLabel": "查看原文：任务安排",
+          "text": "任务安排 查看原文"
+        }
+      }
+    },
+    {
+      "name": "receipt-gate",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/states/receipt-gate.png",
+      "fileBytes": 87899,
+      "fileSha256": "c8bfa5330a6039fc82132af753c6be0bc172ffdc16470e85c98f4deca6ce3923",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 1124.53,
+            "y": -1199.95,
+            "width": 195.66,
+            "height": 44,
+            "bottom": -1155.95,
+            "right": 1320.19,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": -1265.28,
+        "ctaVisibleInFirstScreen": false
+      },
+      "extra": {
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 1124.53,
+            "y": -1199.95,
+            "width": 195.66,
+            "height": 44,
+            "bottom": -1155.95,
+            "right": 1320.19,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        }
+      }
+    },
+    {
+      "name": "receipt-saved",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/states/receipt-saved.png",
+      "fileBytes": 90140,
+      "fileSha256": "77bbb5e219d1036128d943a7e4e091c5cefe352be6402a44ef4b5900b56328f4",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 1124.53,
+            "y": -1199.95,
+            "width": 195.66,
+            "height": 44,
+            "bottom": -1155.95,
+            "right": 1320.19,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": -1265.28,
+        "ctaVisibleInFirstScreen": false
+      },
+      "extra": {
+        "notice": "模拟回执已保存在本页，刷新页面后不会保留。"
+      }
+    },
+    {
+      "name": "anchor-experience",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/states/anchor-experience.png",
+      "fileBytes": 92029,
+      "fileSha256": "ff97e8dbc2350d228cbe7cb7a5430af3f980f24916a88e74dc9105f9caa0347a",
+      "key": {
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "h1Text": "人可以下线， 项目别掉线。",
+        "htmlClass": "light",
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "horizontalOverflow": false,
+        "fontStatus": "loaded",
+        "minVisibleFontSizePx": 12.8,
+        "selectedTab": {
+          "id": "stage-tab-back",
+          "label": "03 回来后",
+          "ariaSelected": "true",
+          "tabIndex": 0,
+          "bbox": {
+            "x": 1124.53,
+            "y": -1086.95,
+            "width": 195.66,
+            "height": 44,
+            "bottom": -1042.95,
+            "right": 1320.19,
+            "inFirstScreen": false,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          }
+        },
+        "evidenceOpen": false,
+        "imageCount": 1,
+        "heroCopyTop": -1152.28,
+        "ctaVisibleInFirstScreen": false
+      },
+      "extra": {
+        "anchor": {
+          "scrollY": 1274,
+          "headerHeight": 57,
+          "headerBottom": 57,
+          "experienceTitleTop": 202.640625,
+          "experienceTitleBottom": 266,
+          "titleHiddenBehindHeader": false,
+          "experienceSectionTop": 79.5625
+        }
+      }
+    },
+    {
+      "name": "judgment-step-1440-light",
+      "file": "evidence/final-sprint/20261103/b-brand-home/b3/states/judgment-step-1440-light.png",
+      "fileBytes": 102073,
+      "fileSha256": "9a903ef5d6d40296a30287c33dc5f17449086d451d238e7c3c2b3771582dc5e0",
+      "metricsFile": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/judgment-step-1440-light.json",
+      "key": null,
+      "extra": {
+        "state": "judgment-step-1440-light",
+        "candidateSha": "9bae926e9475cedef118deedf5e002ec8365a23b",
+        "selectedStoryTab": "story-tab-2",
+        "judgmentFonts": {
+          "paneBBox": {
+            "x": 585,
+            "y": 378.3,
+            "width": 711,
+            "height": 456
+          },
+          "baseline": {
+            "text": "比较基线：已有记录 → 本页核对",
+            "fontSize": "12.8px",
+            "fontSizePx": 12.8,
+            "lineHeight": "21.12px",
+            "fontWeight": "400",
+            "color": "rgb(83, 100, 94)",
+            "width": 671,
+            "height": 21.1,
+            "className": "mb-2 break-all text-xs text-[var(--ink-soft)]"
+          },
+          "pending": {
+            "text": "待确认",
+            "fontSize": "12.8px",
+            "fontSizePx": 12.8,
+            "lineHeight": "20.48px",
+            "fontWeight": "700",
+            "color": "rgb(83, 100, 94)",
+            "width": 50.4,
+            "height": 24.5,
+            "className": "rounded-md bg-[var(--paper-strong)] px-1.5 py-0.5 text-[11px] font-bold text-[var(--ink-soft)]"
+          },
+          "evidenceCount": {
+            "text": "依据 2 项",
+            "fontSize": "12.8px",
+            "fontSizePx": 12.8,
+            "lineHeight": "21.12px",
+            "fontWeight": "700",
+            "color": "rgb(97, 114, 104)",
+            "width": 51.5,
+            "height": 21.1,
+            "className": "text-xs font-bold text-[var(--muted)]"
+          },
+          "summary": {
+            "text": "演示流程的当前完成情况还需要核对",
+            "fontSize": "12.8px",
+            "fontSizePx": 12.8,
+            "lineHeight": "21.12px",
+            "fontWeight": "600",
+            "color": "rgb(28, 46, 44)",
+            "width": 645,
+            "height": 21.1,
+            "className": "mt-1.5 text-xs font-semibold leading-5 text-[var(--navy)]"
+          },
+          "evidenceChips": [
+            {
+              "text": "记忆 · 原文",
+              "fontSize": "12.8px",
+              "fontSizePx": 12.8,
+              "lineHeight": "20.48px",
+              "fontWeight": "700",
+              "color": "rgb(39, 104, 93)",
+              "width": 71.8,
+              "height": 24.5,
+              "className": "rounded bg-[var(--paper-strong)] px-1.5 py-0.5 text-[11px] font-bold text-[var(--teal-strong)]"
+            },
+            {
+              "text": "记忆 · 原文",
+              "fontSize": "12.8px",
+              "fontSizePx": 12.8,
+              "lineHeight": "20.48px",
+              "fontWeight": "700",
+              "color": "rgb(39, 104, 93)",
+              "width": 71.8,
+              "height": 24.5,
+              "className": "rounded bg-[var(--paper-strong)] px-1.5 py-0.5 text-[11px] font-bold text-[var(--teal-strong)]"
+            }
+          ],
+          "minVisibleFontSizePx": 12.8,
+          "smallestTexts": [
+            {
+              "fontSizePx": 12.8,
+              "text": "预设示例"
+            },
+            {
+              "fontSizePx": 12.8,
+              "text": "比较基线：已有记录 → 本页核对"
+            },
+            {
+              "fontSizePx": 12.8,
+              "text": "待确认"
+            },
+            {
+              "fontSizePx": 12.8,
+              "text": "依据 2 项"
+            },
+            {
+              "fontSizePx": 12.8,
+              "text": "演示流程的当前完成情况还需要核对"
+            },
+            {
+              "fontSizePx": 12.8,
+              "text": "已有任务记录，但没有新的完成回执；当前状态待确认"
+            },
+            {
+              "fontSizePx": 12.8,
+              "text": "记忆 · 原文"
+            },
+            {
+              "fontSizePx": 12.8,
+              "text": "记忆 · 原文"
+            }
+          ]
+        },
+        "lensRole": {
+          "heroLensRole": "group",
+          "heroLensAriaLabel": "公开示例：委托当前工作包",
+          "heroSectionRole": null,
+          "lensGroupCount": 1
+        },
+        "assertions": {
+          "baselineFontSize": 12.8,
+          "pendingFontSize": 12.8,
+          "evidenceCountFontSize": 12.8,
+          "summaryFontSize": 12.8,
+          "allKeyTextsAtLeast12_8": true,
+          "paneMinVisibleFontSizePx": 12.8,
+          "heroLensRoleGroup": true
+        }
+      }
+    }
+  ],
+  "assertions": {
+    "reducedMotion": {
+      "mediaMatches": true,
+      "dataMotionAttribute": "reduced",
+      "contentChangedAfterSwitch": true,
+      "tabSwitched": true,
+      "stageSwitchLatencyMs": 81,
+      "noEntranceAnimation": true,
+      "rowsAnimationNone": true,
+      "evidenceOpenLatencyMs": 102,
+      "runningAnimationsAtRest": 0,
+      "heroParallaxDisabled": true,
+      "kickerLineFull": true,
+      "railLineFullAtRest": true,
+      "railLineFullAfterScroll": true,
+      "railProgressFillsRail": true,
+      "railActiveDots": 0,
+      "scrollProgressLineHidden": true,
+      "contentComplete": true,
+      "noAnimationWait": true
+    },
+    "fontFailure": {
+      "abortedFontUrls": [
+        "http://127.0.0.1:34111/fonts/pm-serif-brand.ttf",
+        "http://127.0.0.1:34111/fonts/pm-editorial-serif.ttf",
+        "http://127.0.0.1:34111/fonts/manrope-variable.ttf"
+      ],
+      "h1Visible": true,
+      "h1Text": "人可以下线， 项目别掉线。",
+      "ctaVisible": true,
+      "heroNoteVisible": true,
+      "mockNoteText": "公开示例 · 不调用模型 · 不写入你的项目。",
+      "mainTextLength": 1640,
+      "noAriaBusy": true,
+      "fontStatus": "loaded",
+      "pmBrandAvailable": false,
+      "h1FontFamily": "\"PM Editorial\", \"Noto Serif SC\", \"Songti SC\", STSong, SimSun, serif",
+      "loadMs": 5239
+    },
+    "dialog": {
+      "open": true,
+      "ariaLabelledby": "source-title",
+      "title": "任务安排",
+      "bbox": {
+        "x": 416,
+        "y": 319.97,
+        "width": 608,
+        "height": 260.05,
+        "bottom": 580.02,
+        "right": 1024,
+        "inFirstScreen": true,
+        "clippedRight": false,
+        "clippedLeft": false,
+        "clippedBottom": false,
+        "display": "block",
+        "visibility": "visible"
+      },
+      "focusReturnAfterEsc": {
+        "tag": "button",
+        "ariaLabel": "查看原文：任务安排",
+        "text": "任务安排 查看原文"
+      },
+      "focusReturnedToTrigger": true
+    },
+    "anchor": {
+      "scrollY": 1274,
+      "headerHeight": 57,
+      "headerBottom": 57,
+      "experienceTitleTop": 202.640625,
+      "experienceTitleBottom": 266,
+      "titleHiddenBehindHeader": false,
+      "experienceSectionTop": 79.5625
+    },
+    "video": {
+      "fileExists": true,
+      "fileBytes": 2155752,
+      "durationSeconds": 20.52,
+      "videoWidth": 1440,
+      "videoHeight": 900,
+      "railProgressShown": true,
+      "railActiveDotsShown": 2,
+      "dialogOpened": true,
+      "framesReviewed": 6
+    },
+    "judgmentStep": {
+      "candidateSha": "9bae926e9475cedef118deedf5e002ec8365a23b",
+      "selectedStoryTab": "story-tab-2",
+      "baselineFontSizePx": 12.8,
+      "pendingFontSizePx": 12.8,
+      "evidenceCountFontSizePx": 12.8,
+      "summaryFontSizePx": 12.8,
+      "paneMinVisibleFontSizePx": 12.8,
+      "heroLensRole": "group",
+      "network": {
+        "totals": {
+          "requestRecords": 52,
+          "uniqueRequestUrls": 26,
+          "externalOriginRequests": 0,
+          "apiWriteRequests": 0,
+          "bilibiliRequests": 0,
+          "failures": 0,
+          "imageFontFailures": 0,
+          "consoleErrors": 0,
+          "pageErrors": 0,
+          "userAbortedRequests": 0
+        },
+        "assertions": {
+          "noBilibiliRequestDuringLoad": true,
+          "noApiWrites": true,
+          "noExternalOrigins": true,
+          "noPageErrors": true
+        }
+      }
+    }
+  },
+  "video": {
+    "file": "evidence/final-sprint/20261103/b-brand-home/b3/interaction-20s.webm",
+    "fileBytes": 2155752,
+    "durationSeconds": 20.52,
+    "videoWidth": 1440,
+    "videoHeight": 900,
+    "wallClockMs": 20310,
+    "loadMs": 4664,
+    "targetSeconds": 20,
+    "steps": [
+      {
+        "label": "load-settled",
+        "atMs": 5078,
+        "waitMs": 410
+      },
+      {
+        "label": "stage-during",
+        "atMs": 6458,
+        "waitMs": 1334
+      },
+      {
+        "label": "stage-away",
+        "atMs": 7883,
+        "waitMs": 1334
+      },
+      {
+        "label": "stage-back",
+        "atMs": 9302,
+        "waitMs": 1334
+      },
+      {
+        "label": "evidence-open",
+        "atMs": 11226,
+        "waitMs": 1847
+      },
+      {
+        "label": "evidence-close",
+        "atMs": 12183,
+        "waitMs": 923
+      },
+      {
+        "label": "scroll-to-rail",
+        "atMs": 14048,
+        "waitMs": 1847
+      },
+      {
+        "label": "rail-hold",
+        "atMs": 14977,
+        "waitMs": 923
+      },
+      {
+        "label": "scroll-to-experience",
+        "atMs": 17033,
+        "waitMs": 2052
+      },
+      {
+        "label": "open-source-dialog",
+        "atMs": 18746,
+        "waitMs": 1642
+      },
+      {
+        "label": "close-dialog",
+        "atMs": 19692,
+        "waitMs": 923
+      },
+      {
+        "label": "final-hold",
+        "atMs": 20310,
+        "waitMs": 616
+      }
+    ],
+    "railAtVideo": {
+      "scrollY": 472,
+      "progress": 0.5,
+      "activeCount": 2,
+      "railProgressTransform": "matrix(0.5, 0, 0, 1, 0, 0)",
+      "scrollProgressTransform": "matrix(0.141, 0, 0, 1, 0, 0)"
+    },
+    "dialogOpenInVideo": true,
+    "note": "context recordVideo 1440×900；路径：加载→Hero 三阶段→展开/收起依据→平滑滚动到 01 节看 rail 进度与圆点点亮→继续滚动到五步 Demo→打开原文 dialog→Esc 关闭。目标 20s（Lead 允许 15–20s），实际时长见 durationSeconds。",
+    "durationNote": "实际 20.52s（含页面加载约 2.5s）；Lead 允许 15–20s 并注明，未剪辑。",
+    "frames": [
+      {
+        "file": "evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-1_5s.png",
+        "bytes": 8442
+      },
+      {
+        "file": "evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-5_5s.png",
+        "bytes": 340583
+      },
+      {
+        "file": "evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-10_5s.png",
+        "bytes": 420270
+      },
+      {
+        "file": "evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-13_8s.png",
+        "bytes": 336918
+      },
+      {
+        "file": "evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-15_5s.png",
+        "bytes": 228703
+      },
+      {
+        "file": "evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-19_5s.png",
+        "bytes": 321455
+      }
+    ],
+    "framesNote": "Chromium 播放 webm 截帧并逐帧查看：1.5s 加载态、5.5s “02 期间”、10.5s 依据展开、13.8s 01 节 rail 进度≈50%（圆点点亮）、15.5s 滚动到五步 Demo、19.5s dialog 打开后 Esc 关闭（焦点回触发按钮）。"
+  },
+  "network": {
+    "file": "evidence/final-sprint/20261103/b-brand-home/b3/network-b3.json",
+    "totals": {
+      "requestRecords": 636,
+      "uniqueRequestUrls": 27,
+      "externalOriginRequests": 0,
+      "apiWriteRequests": 0,
+      "bilibiliRequests": 0,
+      "failures": 83,
+      "imageFontFailures": 16,
+      "consoleErrors": 6,
+      "pageErrors": 0,
+      "userAbortedRequests": 0
+    },
+    "assertions": {
+      "noBilibiliRequestDuringLoad": true,
+      "noApiWrites": true,
+      "noExternalOrigins": true,
+      "noPageErrors": true
+    }
+  },
+  "files": [
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/breakpoints/1024x768.png",
+      "bytes": 97327,
+      "sha256": "4edb0a94baf573d955b7888de709b8c220bebb1733eb6e0d54d7c4f4e7a193aa",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/breakpoints/768x1024.png",
+      "bytes": 86322,
+      "sha256": "9df8570e0ecb0028954db3db49819ce0a8eb06540c91f93f2e1929ead97f5ead",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/breakpoints/360x780.png",
+      "bytes": 59508,
+      "sha256": "90d4c8fd10e462b095db5592c14f4dc422504baaa675bbcbfffb189bd5bd7b21",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/breakpoints/320x720.png",
+      "bytes": 46177,
+      "sha256": "86853c536e42a4178c4cff5164a282cc112d652013ea4cec06ef037150c2efb2",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/breakpoints/zoom200-720x450.png",
+      "bytes": 42438,
+      "sha256": "39d0f6f6bc5c04e49f0234901676881c6147a08b37424274d06a0f9e5e98360b",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/breakpoints/zoom200-640x360.png",
+      "bytes": 34238,
+      "sha256": "b9b6fac7c0dc2187626896c933186de028ede6c56e6d8ccbafcc8d8b059a3dfa",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/rail-390-mid.png",
+      "bytes": 49040,
+      "sha256": "0cac761e108f328a5178a832cadf667183daeade5207cfdcb80424d47c0e8fda",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/states/reduced-motion-during.png",
+      "bytes": 117775,
+      "sha256": "32f7e4b43675862dc7f5400cbb32d3b14ebe93cb06361a7f44a8e22524c6f7e7",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/states/reduced-motion-evidence.png",
+      "bytes": 123211,
+      "sha256": "3368d3b9a9ac8ec5a139d9c7a537e7632895fa1624d71618230a80698cc4a2a0",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/states/reduced-motion-rail.png",
+      "bytes": 106729,
+      "sha256": "4a6cc8eac403298ae496178e36c74004098a3a801ef2e50ad0176539f75b34b3",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/states/font-failure.png",
+      "bytes": 119532,
+      "sha256": "d7edf3985d92e24d1442c262cb8373360ecbe7df733ef3ab065a1e50d3daea5d",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/states/dialog-open.png",
+      "bytes": 119181,
+      "sha256": "732047dff14ee4667ae809eb11e38cebad04c0ad1b0605f690fc5302f251ce66",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/states/receipt-gate.png",
+      "bytes": 87899,
+      "sha256": "c8bfa5330a6039fc82132af753c6be0bc172ffdc16470e85c98f4deca6ce3923",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/states/receipt-saved.png",
+      "bytes": 90140,
+      "sha256": "77bbb5e219d1036128d943a7e4e091c5cefe352be6402a44ef4b5900b56328f4",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/states/anchor-experience.png",
+      "bytes": 92029,
+      "sha256": "ff97e8dbc2350d228cbe7cb7a5430af3f980f24916a88e74dc9105f9caa0347a",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/1024x768.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/768x1024.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/360x780.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/320x720.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/zoom200-720x450.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/zoom200-640x360.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/rail-390-mid.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/reduced-motion-during.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/reduced-motion-evidence.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/reduced-motion-rail.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/font-failure.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/dialog-open.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/receipt-gate.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/receipt-saved.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/anchor-experience.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/network-b3.json",
+      "kind": "network-audit"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/interaction-20s.webm",
+      "bytes": 2155752,
+      "kind": "video"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-1_5s.png",
+      "bytes": 8442,
+      "kind": "video-frame"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-5_5s.png",
+      "bytes": 340583,
+      "kind": "video-frame"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-10_5s.png",
+      "bytes": 420270,
+      "kind": "video-frame"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-13_8s.png",
+      "bytes": 336918,
+      "kind": "video-frame"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-15_5s.png",
+      "bytes": 228703,
+      "kind": "video-frame"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-19_5s.png",
+      "bytes": 321455,
+      "kind": "video-frame"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/video-meta.json",
+      "kind": "video-metadata"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/states/judgment-step-1440-light.png",
+      "bytes": 102073,
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/metrics/judgment-step-1440-light.json",
+      "kind": "metrics"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b3/network-judgment.json",
+      "kind": "network-audit"
+    }
+  ],
+  "anomalies": {
+    "captureErrors": [],
+    "horizontalOverflowBreakpoints": [],
+    "clipped": [],
+    "externalOrigins": [],
+    "bilibiliRequests": 0,
+    "apiWrites": 0,
+    "consoleErrors": [
+      {
+        "capture": "font-failure-goto",
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_FAILED"
+      },
+      {
+        "capture": "font-failure",
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_FAILED"
+      },
+      {
+        "capture": "font-failure",
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_FAILED"
+      },
+      {
+        "capture": "font-failure",
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_FAILED"
+      },
+      {
+        "capture": "font-failure",
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_FAILED"
+      },
+      {
+        "capture": "font-failure",
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_FAILED"
+      }
+    ],
+    "pageErrors": [],
+    "networkExplanation": {
+      "totalFailures": 83,
+      "breakdown": [
+        "多数为 goto+reload 导航打断的 dev 脚本/font ERR_ABORTED（每次页面加载都会发生，非缺失）",
+        "font-failure 状态按设计 abort /fonts/* 与 *.ttf：6 条 net::ERR_FAILED + 6 条 console error 为预期失败注入",
+        "1 条 image ERR_ABORTED 为 reload 打断 logo 请求"
+      ],
+      "no4xxBusinessErrors": true,
+      "consoleErrors": "6 条全部来自 font-failure 的失败注入（net::ERR_FAILED），非产品错误。"
+    }
+  },
+  "caveats": [
+    "200% 缩放以 CSS viewport 720×450 / 640×360 模拟，非浏览器 zoom 设置；用于检查布局在等效视口下的溢出与裁切。",
+    "本机 dev 环境、本地回环网络；性能与体积数字不代表线上或所有用户体验。",
+    "深色主题状态由 after/ 的 1440/1280/390 dark 六图覆盖（本目录不重复）。",
+    "Bilibili 仅为外链（href/target=_blank/rel=noopener noreferrer），本轮未点击，未产生 bilibili 网络请求（见 network-b3.json assertions）。"
+  ],
+  "fontFindings": {
+    "finalFix": "cc7c19f 将移动端关键可见文本统一到 ≥0.8rem=12.8px（stageIndex、storyTabs 序号、heroNote、lensKicker、lensRow dt、rowMeta、videoMeta、footerMeta、contextPosition 等），并给 closingLink 增加 44px 最小触控高度。",
+    "minVisibleFontSizePx": {
+      "1440-light": 12.8,
+      "1440-dark": 12.8,
+      "1280-light": 12.8,
+      "1280-dark": 12.8,
+      "390-light": 12.8,
+      "390-dark": 12.8,
+      "360x780": 12.8,
+      "320x720": 12.8,
+      "rail-390-mid": 12.8
+    },
+    "minVisibleFontSample": "公开示例 · 不调用模型 · 不写入你的项目。（12.8px）"
+  },
+  "finalCandidateSha": "9bae926e9475cedef118deedf5e002ec8365a23b",
+  "capturedOnSha": "cc7c19fed573c79a55f727eaa338ab84fd80cc3b",
+  "shaBinding": {
+    "finalCandidateSha": "9bae926e9475cedef118deedf5e002ec8365a23b",
+    "finalCandidateSubject": "官网：B3 终验修复（共享差异组件字号作用域 + 分组语义）",
+    "capturedOnSha": "cc7c19fed573c79a55f727eaa338ab84fd80cc3b",
+    "delta": "9bae926 相对 cc7c19f 仅：① components/HomeJourney.module.css 新增 .judgmentPane 作用域字号覆盖（共享 StateDiffView 的 text-xs / text-[11px] → 0.8rem=12.8px，仅影响五步第 3 步“查看判断”）；② components/HomeJourney.tsx / components/home/HomeHeroLens.tsx 补 role=\"group\"（无视觉变化）。不影响已采的 after 六图、断点、Hero 状态、rail/进度线/kicker/深度离场、reduced-motion、字体失败、dialog、回执、锚点与录屏路径。",
+    "targetedRecapture": "b3/states/judgment-step-1440-light.png 于 9bae926 直接补拍：比较基线 / 待确认 / 依据 2 项 / 主判断摘要 计算字号均 = 12.8px，pane 最小可见字号 12.8px；Hero lens role=group 已生效。"
+  }
+}

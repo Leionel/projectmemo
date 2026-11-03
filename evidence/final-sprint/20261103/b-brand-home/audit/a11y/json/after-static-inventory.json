@@ -1,0 +1,2411 @@
+{
+  "meta": {
+    "sha": "",
+    "gitHead": "9bae926e9475cedef118deedf5e002ec8365a23b",
+    "branch": "codex/final-b-brand-home",
+    "generatedAt": "2026-11-03T04:48:14.530Z",
+    "files": [
+      "app/home.module.css",
+      "components/HomeJourney.module.css",
+      "components/SiteHeader.module.css",
+      "app/globals.css",
+      "app/auth.module.css"
+    ],
+    "note": "候选工作树 CSS 静态清点；动态实测见 probe-after.json。"
+  },
+  "mediaQueries": [
+    {
+      "file": "app/home.module.css",
+      "line": 1059,
+      "query": "(max-width: 1120px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1071,
+      "query": "(max-width: 980px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1146,
+      "query": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1378,
+      "query": "(prefers-reduced-motion: reduce)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1390,
+      "query": "(prefers-contrast: more)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1400,
+      "query": "(prefers-reduced-transparency: reduce)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 641,
+      "query": "(max-width: 1000px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 651,
+      "query": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 814,
+      "query": "(max-width: 380px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 825,
+      "query": "(prefers-reduced-motion: reduce)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 833,
+      "query": "(prefers-contrast: more)"
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 87,
+      "query": "(max-width: 1000px)"
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 98,
+      "query": "(max-width: 720px)"
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 126,
+      "query": "(prefers-reduced-transparency: reduce)"
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 133,
+      "query": "(prefers-contrast: more)"
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 296,
+      "query": "(max-width: 1000px)"
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 304,
+      "query": "(max-width: 700px)"
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 347,
+      "query": "(prefers-reduced-motion: reduce)"
+    }
+  ],
+  "duplicateBreakpoints": [
+    {
+      "query": "(max-width: 720px)",
+      "occurrences": [
+        {
+          "file": "app/home.module.css",
+          "line": 1146
+        },
+        {
+          "file": "components/HomeJourney.module.css",
+          "line": 651
+        },
+        {
+          "file": "components/SiteHeader.module.css",
+          "line": 98
+        }
+      ],
+      "count": 3
+    },
+    {
+      "query": "(prefers-reduced-motion: reduce)",
+      "occurrences": [
+        {
+          "file": "app/home.module.css",
+          "line": 1378
+        },
+        {
+          "file": "components/HomeJourney.module.css",
+          "line": 825
+        },
+        {
+          "file": "app/auth.module.css",
+          "line": 347
+        }
+      ],
+      "count": 3
+    },
+    {
+      "query": "(prefers-contrast: more)",
+      "occurrences": [
+        {
+          "file": "app/home.module.css",
+          "line": 1390
+        },
+        {
+          "file": "components/HomeJourney.module.css",
+          "line": 833
+        },
+        {
+          "file": "components/SiteHeader.module.css",
+          "line": 133
+        }
+      ],
+      "count": 3
+    },
+    {
+      "query": "(prefers-reduced-transparency: reduce)",
+      "occurrences": [
+        {
+          "file": "app/home.module.css",
+          "line": 1400
+        },
+        {
+          "file": "components/SiteHeader.module.css",
+          "line": 126
+        }
+      ],
+      "count": 2
+    },
+    {
+      "query": "(max-width: 1000px)",
+      "occurrences": [
+        {
+          "file": "components/HomeJourney.module.css",
+          "line": 641
+        },
+        {
+          "file": "components/SiteHeader.module.css",
+          "line": 87
+        },
+        {
+          "file": "app/auth.module.css",
+          "line": 296
+        }
+      ],
+      "count": 3
+    }
+  ],
+  "perFileDuplicates": {
+    "app/home.module.css": [],
+    "components/HomeJourney.module.css": [],
+    "components/SiteHeader.module.css": [],
+    "app/globals.css": [],
+    "app/auth.module.css": []
+  },
+  "smallFontDeclarations": [
+    {
+      "file": "app/globals.css",
+      "line": 116,
+      "selector": ".card-surface",
+      "value": ".75rem",
+      "px": 12,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 306,
+      "selector": ".dark .editorial-input:focus",
+      "value": "10px",
+      "px": 10,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 71,
+      "selector": ".projectNote span",
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 134,
+      "selector": ".field > p",
+      "value": "0.72rem",
+      "px": 11.52,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 152,
+      "selector": ".passwordToggle",
+      "value": "0.73rem",
+      "px": 11.68,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 201,
+      "selector": ".resendLink",
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 205,
+      "selector": ".resendLink",
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 218,
+      "selector": ".serviceNotice",
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 245,
+      "selector": ".help",
+      "value": "0.72rem",
+      "px": 11.52,
+      "media": null
+    }
+  ],
+  "fontDeclarations": [
+    {
+      "file": "app/home.module.css",
+      "line": 87,
+      "selector": ".positioning",
+      "value": "0.9375rem",
+      "px": 15,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 93,
+      "selector": ".positioning strong",
+      "value": "1rem",
+      "px": 16,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 99,
+      "selector": ".headline",
+      "value": "clamp(3rem, 5.05vw, 4.85rem)",
+      "px": null,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 113,
+      "selector": ".heroSub",
+      "value": "1.0625rem",
+      "px": 17,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 132,
+      "selector": ".ctaSecondary",
+      "value": "0.9375rem",
+      "px": 15,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 168,
+      "selector": ".heroNote",
+      "value": "0.84rem",
+      "px": 13.44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 214,
+      "selector": ".lensKicker",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 224,
+      "selector": ".lensMission",
+      "value": "1.4rem",
+      "px": 22.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 239,
+      "selector": ".lensStatus",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 267,
+      "selector": ".stageTab",
+      "value": "0.84rem",
+      "px": 13.44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 275,
+      "selector": ".stageIndex",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 318,
+      "selector": ".lensRow dt",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 328,
+      "selector": ".lensRow dd",
+      "value": "0.9375rem",
+      "px": 15,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 340,
+      "selector": ".rowMeta",
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 371,
+      "selector": ".lensButton",
+      "value": "0.84rem",
+      "px": 13.44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 392,
+      "selector": ".lensLink",
+      "value": "0.84rem",
+      "px": 13.44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 433,
+      "selector": ".evidenceIntro",
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 453,
+      "selector": ".evidenceName",
+      "value": "0.84rem",
+      "px": 13.44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 459,
+      "selector": ".evidenceName span",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 466,
+      "selector": ".evidenceList q",
+      "value": "0.86rem",
+      "px": 13.76,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 479,
+      "selector": ".lensFoot",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 510,
+      "selector": ".kicker",
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 536,
+      "selector": ".sectionHead h2",
+      "value": "clamp(2rem, 3.4vw, 3rem)",
+      "px": null,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 546,
+      "selector": ".sectionIntro",
+      "value": "1rem",
+      "px": 16,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 632,
+      "selector": ".railLabel",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 642,
+      "selector": ".railStep h3",
+      "value": "1.0625rem",
+      "px": 17,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 650,
+      "selector": ".railText",
+      "value": "0.9375rem",
+      "px": 15,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 669,
+      "selector": ".conditions summary",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 683,
+      "selector": ".conditions p",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 694,
+      "selector": ".demoNote",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 718,
+      "selector": ".splitHead h2",
+      "value": "clamp(2rem, 3.4vw, 3rem)",
+      "px": null,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 732,
+      "selector": ".caption",
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 746,
+      "selector": ".taskIdentity",
+      "value": "0.85rem",
+      "px": 13.6,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 766,
+      "selector": ".pathTitle h3",
+      "value": "1.0625rem",
+      "px": 17,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 777,
+      "selector": ".pathLine",
+      "value": "0.9375rem",
+      "px": 15,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 786,
+      "selector": ".pathNote",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 813,
+      "selector": ".scenarioList h3",
+      "value": "1.3rem",
+      "px": 20.8,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 820,
+      "selector": ".scenarioList p",
+      "value": "0.9375rem",
+      "px": 15,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 869,
+      "selector": ".videoTitle",
+      "value": "1.0625rem",
+      "px": 17,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 878,
+      "selector": ".videoMeta",
+      "value": "0.84rem",
+      "px": 13.44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 912,
+      "selector": ".closing h2",
+      "value": "clamp(2rem, 3.6vw, 3.2rem)",
+      "px": null,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 922,
+      "selector": ".closing p",
+      "value": "1rem",
+      "px": 16,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 941,
+      "selector": ".closingCta",
+      "value": "0.95rem",
+      "px": 15.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 954,
+      "selector": ".closingLink",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 971,
+      "selector": ".boundary p",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 995,
+      "selector": ".footerBrand",
+      "value": "1.0625rem",
+      "px": 17,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1012,
+      "selector": ".footerNav a",
+      "value": "0.86rem",
+      "px": 13.76,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1020,
+      "selector": ".footerMeta",
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1064,
+      "selector": ".headline",
+      "value": "clamp(2.8rem, 5vw, 3.6rem)",
+      "px": null,
+      "media": "(max-width: 1120px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1068,
+      "selector": ".splitHead h2",
+      "value": "clamp(1.9rem, 3.4vw, 2.5rem)",
+      "px": null,
+      "media": "(max-width: 1120px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1083,
+      "selector": ".headline",
+      "value": "clamp(2.6rem, 7.4vw, 3.4rem)",
+      "px": null,
+      "media": "(max-width: 980px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1170,
+      "selector": ".positioning",
+      "value": "0.875rem",
+      "px": 14,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1173,
+      "selector": ".positioning strong",
+      "value": "0.9375rem",
+      "px": 15,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1177,
+      "selector": ".headline",
+      "value": "clamp(2.15rem, 9vw, 2.7rem)",
+      "px": null,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1182,
+      "selector": ".heroSub",
+      "value": "0.9375rem",
+      "px": 15,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1194,
+      "selector": ".ctaSecondary",
+      "value": "0.875rem",
+      "px": 14,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1198,
+      "selector": ".heroNote",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1207,
+      "selector": ".lensKicker",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1210,
+      "selector": ".lensMission",
+      "value": "1.15rem",
+      "px": 18.4,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1214,
+      "selector": ".lensStatus",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1221,
+      "selector": ".stageTab",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1232,
+      "selector": ".lensRow dt",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1235,
+      "selector": ".lensRow dd",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1239,
+      "selector": ".rowMeta",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1252,
+      "selector": ".lensLink",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1258,
+      "selector": ".evidenceList q",
+      "value": "0.84rem",
+      "px": 13.44,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1262,
+      "selector": ".lensFoot",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1272,
+      "selector": ".splitHead h2",
+      "value": "clamp(1.75rem, 7vw, 2.2rem)",
+      "px": null,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1279,
+      "selector": ".sectionIntro",
+      "value": "0.9375rem",
+      "px": 15,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1308,
+      "selector": ".railStep h3",
+      "value": "1rem",
+      "px": 16,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1311,
+      "selector": ".railText",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1329,
+      "selector": ".scenarioList h3",
+      "value": "1.2rem",
+      "px": 19.2,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1341,
+      "selector": ".videoTitle",
+      "value": "0.98rem",
+      "px": 15.68,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1344,
+      "selector": ".videoMeta",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1350,
+      "selector": ".closing h2",
+      "value": "clamp(1.8rem, 7vw, 2.3rem)",
+      "px": null,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1354,
+      "selector": ".closingCta",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1360,
+      "selector": ".boundary p",
+      "value": "0.84rem",
+      "px": 13.44,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1371,
+      "selector": ".footerNav a",
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1374,
+      "selector": ".footerMeta",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 43,
+      "selector": ".projectKicker",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 48,
+      "selector": ".projectIdentity h3",
+      "value": "1rem",
+      "px": 16,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 55,
+      "selector": ".projectMission",
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 67,
+      "selector": ".resetButton",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 94,
+      "selector": ".storyTabs > button",
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 102,
+      "selector": ".storyTabs > button > span",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 134,
+      "selector": ".contextLabel",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 142,
+      "selector": ".storyContext h4",
+      "value": "1.5rem",
+      "px": 24,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 152,
+      "selector": ".storyContext > p:not(.contextLabel)",
+      "value": "0.9375rem",
+      "px": 15,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 159,
+      "selector": ".contextPosition",
+      "value": "1.35rem",
+      "px": 21.6,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 165,
+      "selector": ".contextPosition > span",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 186,
+      "selector": ".paneHeading h4",
+      "value": "0.95rem",
+      "px": 15.2,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 192,
+      "selector": ".paneHeading > span",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 211,
+      "selector": ".record h5",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 218,
+      "selector": ".record > p",
+      "value": "0.9375rem",
+      "px": 15,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 229,
+      "selector": ".sourceButton",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 237,
+      "selector": ".sourceButton > span",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 251,
+      "selector": ".factMark",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 256,
+      "selector": ".factRow > p",
+      "value": "0.9375rem",
+      "px": 15,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 267,
+      "selector": ".unknownRow > p",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 278,
+      "selector": ".confirmedBadge",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 303,
+      "selector": ".receiptEvidence > p",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 321,
+      "selector": ".suggestion h5",
+      "value": "1rem",
+      "px": 16,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 328,
+      "selector": ".suggestion > p",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 340,
+      "selector": ".evidenceDetails summary",
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 347,
+      "selector": ".evidenceDetails summary::before",
+      "value": "0.95rem",
+      "px": 15.2,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 358,
+      "selector": ".evidenceDetails > div > p",
+      "value": "0.85rem",
+      "px": 13.6,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 364,
+      "selector": ".detailNote",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 370,
+      "selector": ".actionProposal > h5",
+      "value": "1.1rem",
+      "px": 17.6,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 384,
+      "selector": ".proposalFields > div",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 389,
+      "selector": ".proposalFields dt",
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 410,
+      "selector": ".secondary",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 455,
+      "selector": ".confirmationResult > p",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 471,
+      "selector": ".receiptGate > p",
+      "value": "0.9375rem",
+      "px": 15,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 477,
+      "selector": ".receiptPane label",
+      "value": "0.95rem",
+      "px": 15.2,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 484,
+      "selector": ".receiptPane form > p",
+      "value": "0.84rem",
+      "px": 13.44,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 497,
+      "selector": ".receiptPane textarea",
+      "value": "0.9375rem",
+      "px": 15,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 510,
+      "selector": ".receiptSavedTitle",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 518,
+      "selector": ".savedReceipt blockquote",
+      "value": "0.9375rem",
+      "px": 15,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 526,
+      "selector": ".savedReceipt > p:not(.receiptSavedTitle)",
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 535,
+      "selector": ".storyNotice",
+      "value": "0.84rem",
+      "px": 13.44,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 550,
+      "selector": ".storyFooter > p",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 604,
+      "selector": ".dialogHeader > p",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 621,
+      "selector": ".sourceDialog h3",
+      "value": "1.3rem",
+      "px": 20.8,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 630,
+      "selector": ".sourceDialog blockquote",
+      "value": "0.9375rem",
+      "px": 15,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 637,
+      "selector": ".dialogProvenance",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 648,
+      "selector": ".storyContext h4",
+      "value": "1.35rem",
+      "px": 21.6,
+      "media": "(max-width: 1000px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 667,
+      "selector": ".projectKicker",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 670,
+      "selector": ".projectIdentity h3",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 673,
+      "selector": ".projectMission",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 676,
+      "selector": ".resetButton",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 686,
+      "selector": ".storyTabs > button",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 689,
+      "selector": ".storyTabs > button > span",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 701,
+      "selector": ".contextLabel",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 705,
+      "selector": ".storyContext h4",
+      "value": "1.25rem",
+      "px": 20,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 711,
+      "selector": ".storyContext > p:not(.contextLabel)",
+      "value": "0.875rem",
+      "px": 14,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 721,
+      "selector": ".paneHeading h4",
+      "value": "0.88rem",
+      "px": 14.08,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 724,
+      "selector": ".paneHeading > span",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 730,
+      "selector": ".record h5",
+      "value": "0.88rem",
+      "px": 14.08,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 733,
+      "selector": ".record > p",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 739,
+      "selector": ".factRow > p",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 750,
+      "selector": ".suggestion h5",
+      "value": "0.95rem",
+      "px": 15.2,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 757,
+      "selector": ".actionProposal > h5",
+      "value": "1rem",
+      "px": 16,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 765,
+      "selector": ".proposalFields > div",
+      "value": "0.88rem",
+      "px": 14.08,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 768,
+      "selector": ".proposalFields dt",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 784,
+      "selector": ".storyFooter > p",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 795,
+      "selector": ".storyNotice",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 802,
+      "selector": ".sourceDialog h3",
+      "value": "1.15rem",
+      "px": 18.4,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 806,
+      "selector": ".sourceDialog blockquote",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 811,
+      "selector": ".secondary",
+      "value": "0.86rem",
+      "px": 13.76,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 822,
+      "selector": ".storyTabs > button",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 380px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 845,
+      "selector": ".judgmentPane [class~=\"text-xs\"]",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 849,
+      "selector": ".judgmentPane [class~=\"text-[11px]\"]",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 35,
+      "selector": ".homeNav",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 58,
+      "selector": ".homeHeader .homeNav",
+      "value": "14px",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 68,
+      "selector": ".homeHeader .headerCta",
+      "value": "14px",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 110,
+      "selector": ".homeNav .headerCta",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 123,
+      "selector": ".homeHeader .headerCta",
+      "value": "14px",
+      "px": 14,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/globals.css",
+      "line": 71,
+      "selector": "body",
+      "value": "14px",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 116,
+      "selector": ".card-surface",
+      "value": ".75rem",
+      "px": 12,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 122,
+      "selector": ".editorial-button, .editorial-button-secondary",
+      "value": ".875rem",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 192,
+      "selector": ".dark .editorial-input:focus",
+      "value": ".95rem",
+      "px": 15.2,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 196,
+      "selector": ".dark .editorial-input:focus",
+      "value": "clamp(1.65rem, 3vw, 2.1rem)",
+      "px": null,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 197,
+      "selector": ".dark .editorial-input:focus",
+      "value": "1.35rem",
+      "px": 21.6,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 198,
+      "selector": ".dark .editorial-input:focus",
+      "value": "1.12rem",
+      "px": 17.92,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 199,
+      "selector": ".dark .editorial-input:focus",
+      "value": "1rem",
+      "px": 16,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 209,
+      "selector": ".dark .editorial-input:focus",
+      "value": ".88em",
+      "px": null,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 211,
+      "selector": ".dark .editorial-input:focus",
+      "value": ".86rem",
+      "px": 13.76,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 246,
+      "selector": ".dark .editorial-input:focus",
+      "value": ".875rem",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 250,
+      "selector": ".dark .editorial-input:focus",
+      "value": ".84375rem",
+      "px": 13.5,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 255,
+      "selector": ".dark .editorial-input:focus",
+      "value": ".875rem",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 260,
+      "selector": ".dark .editorial-input:focus",
+      "value": ".84375rem",
+      "px": 13.5,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 263,
+      "selector": ".dark .editorial-input:focus",
+      "value": ".875rem",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 266,
+      "selector": ".dark .editorial-input:focus",
+      "value": "1.0625rem",
+      "px": 17,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 267,
+      "selector": ".dark .editorial-input:focus",
+      "value": ".8125rem",
+      "px": 13,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 270,
+      "selector": ".dark .editorial-input:focus",
+      "value": "1rem",
+      "px": 16,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 271,
+      "selector": ".dark .editorial-input:focus",
+      "value": ".875rem",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 273,
+      "selector": ".dark .editorial-input:focus",
+      "value": ".8125rem",
+      "px": 13,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 279,
+      "selector": ".dark .editorial-input:focus",
+      "value": ".9375rem",
+      "px": 15,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 280,
+      "selector": ".dark .editorial-input:focus",
+      "value": ".875rem",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 281,
+      "selector": ".dark .editorial-input:focus",
+      "value": ".8125rem",
+      "px": 13,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 293,
+      "selector": ".dark .editorial-input:focus",
+      "value": ".8125rem",
+      "px": 13,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 297,
+      "selector": ".dark .editorial-input:focus",
+      "value": ".875rem",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 304,
+      "selector": ".dark .editorial-input:focus",
+      "value": "16px",
+      "px": 16,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 306,
+      "selector": ".dark .editorial-input:focus",
+      "value": "10px",
+      "px": 10,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 28,
+      "selector": ".eyebrow",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 39,
+      "selector": ".introduction h2",
+      "value": "clamp(2.5rem, 4vw, 3.5rem)",
+      "px": null,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 43,
+      "selector": ".introduction > p:last-of-type",
+      "value": "0.95rem",
+      "px": 15.2,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 65,
+      "selector": ".projectNote strong",
+      "value": "0.85rem",
+      "px": 13.6,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 71,
+      "selector": ".projectNote span",
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 87,
+      "selector": ".panel h1",
+      "value": "1.9rem",
+      "px": 30.4,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 91,
+      "selector": ".panel header p",
+      "value": "0.85rem",
+      "px": 13.6,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 101,
+      "selector": ".field label",
+      "value": "0.83rem",
+      "px": 13.28,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 115,
+      "selector": ".field input",
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 134,
+      "selector": ".field > p",
+      "value": "0.72rem",
+      "px": 11.52,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 152,
+      "selector": ".passwordToggle",
+      "value": "0.73rem",
+      "px": 11.68,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 167,
+      "selector": ".submit",
+      "value": "0.88rem",
+      "px": 14.08,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 201,
+      "selector": ".resendLink",
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 205,
+      "selector": ".resendLink",
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 218,
+      "selector": ".serviceNotice",
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 245,
+      "selector": ".help",
+      "value": "0.72rem",
+      "px": 11.52,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 263,
+      "selector": ".success h2",
+      "value": "1rem",
+      "px": 16,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 267,
+      "selector": ".success p",
+      "value": "0.85rem",
+      "px": 13.6,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 276,
+      "selector": ".success > a:not(.submit)",
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 324,
+      "selector": ".introduction h2",
+      "value": "1.9rem",
+      "px": 30.4,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 338,
+      "selector": ".panel h1",
+      "value": "1.65rem",
+      "px": 26.4,
+      "media": "(max-width: 700px)"
+    }
+  ],
+  "targetDeclarations": [
+    {
+      "file": "app/home.module.css",
+      "line": 129,
+      "selector": ".ctaSecondary",
+      "property": "min-height",
+      "value": "48px",
+      "px": 48,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 263,
+      "selector": ".stageTab",
+      "property": "min-height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 367,
+      "selector": ".lensButton",
+      "property": "min-height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 425,
+      "selector": ".evidenceInner",
+      "property": "min-height",
+      "value": "0",
+      "px": null,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 667,
+      "selector": ".conditions summary",
+      "property": "min-height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 836,
+      "selector": ".videoLink",
+      "property": "min-height",
+      "value": "96px",
+      "px": 96,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1010,
+      "selector": ".footerNav a",
+      "property": "min-height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1192,
+      "selector": ".ctaSecondary",
+      "property": "min-height",
+      "value": "46px",
+      "px": 46,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1332,
+      "selector": ".videoLink",
+      "property": "min-height",
+      "value": "84px",
+      "px": 84,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 63,
+      "selector": ".resetButton",
+      "property": "min-height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 89,
+      "selector": ".storyTabs > button",
+      "property": "min-width",
+      "value": "0",
+      "px": null,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 90,
+      "selector": ".storyTabs > button",
+      "property": "min-height",
+      "value": "56px",
+      "px": 56,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 225,
+      "selector": ".sourceButton",
+      "property": "min-height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 338,
+      "selector": ".evidenceDetails summary",
+      "property": "min-height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 407,
+      "selector": ".secondary",
+      "property": "min-height",
+      "value": "46px",
+      "px": 46,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 560,
+      "selector": ".storyFooter button",
+      "property": "width",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 561,
+      "selector": ".storyFooter button",
+      "property": "height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 609,
+      "selector": ".dialogHeader > button",
+      "property": "width",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 610,
+      "selector": ".dialogHeader > button",
+      "property": "height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 684,
+      "selector": ".storyTabs > button",
+      "property": "min-height",
+      "value": "56px",
+      "px": 56,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 790,
+      "selector": ".storyFooter button",
+      "property": "width",
+      "value": "44px",
+      "px": 44,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 791,
+      "selector": ".storyFooter button",
+      "property": "height",
+      "value": "44px",
+      "px": 44,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 810,
+      "selector": ".secondary",
+      "property": "min-height",
+      "value": "46px",
+      "px": 46,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 40,
+      "selector": ".homeNav > a",
+      "property": "min-height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 62,
+      "selector": ".homeHeader .headerCta",
+      "property": "height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 63,
+      "selector": ".homeHeader .headerCta",
+      "property": "min-height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 120,
+      "selector": ".homeHeader .headerCta",
+      "property": "min-height",
+      "value": "44px",
+      "px": 44,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 121,
+      "selector": ".homeHeader .headerCta",
+      "property": "height",
+      "value": "44px",
+      "px": 44,
+      "media": "(max-width: 720px)"
+    },
+    {
+      "file": "app/globals.css",
+      "line": 122,
+      "selector": ".editorial-button, .editorial-button-secondary",
+      "property": "min-height",
+      "value": "2.5rem",
+      "px": 40,
+      "media": null
+    }
+  ],
+  "focusRules": [
+    {
+      "file": "app/home.module.css",
+      "line": 43,
+      "selector": ".home [tabindex]:focus-visible",
+      "declaration": "outline: 2px solid var(--teal);"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 44,
+      "selector": ".home [tabindex]:focus-visible",
+      "declaration": "outline-offset: 3px;"
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 14,
+      "selector": ".siteHeader a:focus-visible",
+      "declaration": "outline: 2px solid var(--teal);"
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 15,
+      "selector": ".siteHeader a:focus-visible",
+      "declaration": "outline-offset: 4px;"
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 288,
+      "selector": ".auth button:focus-visible",
+      "declaration": "outline: 2px solid var(--teal);"
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 289,
+      "selector": ".auth button:focus-visible",
+      "declaration": "outline-offset: 4px;"
+    }
+  ],
+  "preferenceRules": [
+    {
+      "file": "app/home.module.css",
+      "line": 1379,
+      "media": "(prefers-reduced-motion: reduce)",
+      "selector": ".footerMeta",
+      "declaration": ".home *,"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1380,
+      "media": "(prefers-reduced-motion: reduce)",
+      "selector": ".footerMeta",
+      "declaration": ".home *::before,"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1382,
+      "media": "(prefers-reduced-motion: reduce)",
+      "selector": ".home *::after",
+      "declaration": "animation: none !important;"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1383,
+      "media": "(prefers-reduced-motion: reduce)",
+      "selector": ".home *::after",
+      "declaration": "transition: none !important;"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1384,
+      "media": "(prefers-reduced-motion: reduce)",
+      "selector": ".home *::after",
+      "declaration": "scroll-behavior: auto;"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1387,
+      "media": "(prefers-reduced-motion: reduce)",
+      "selector": ".evidenceWrap .evidenceInner",
+      "declaration": "transition: none;"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1391,
+      "media": "(prefers-contrast: more)",
+      "selector": ".evidenceWrap .evidenceInner",
+      "declaration": ".lens,"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1392,
+      "media": "(prefers-contrast: more)",
+      "selector": ".evidenceWrap .evidenceInner",
+      "declaration": ".videoLink,"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1394,
+      "media": "(prefers-contrast: more)",
+      "selector": ".railStep[data-emphasis=\"true\"]",
+      "declaration": "border-color: var(--ink-soft);"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1397,
+      "media": "(prefers-contrast: more)",
+      "selector": ".lens",
+      "declaration": "box-shadow: none;"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1402,
+      "media": "(prefers-reduced-transparency: reduce)",
+      "selector": ".home .evidenceList li",
+      "declaration": "background: var(--paper);"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 826,
+      "media": "(prefers-reduced-motion: reduce)",
+      "selector": ".storyTabs > button",
+      "declaration": ".storyFrame *,"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 827,
+      "media": "(prefers-reduced-motion: reduce)",
+      "selector": ".storyTabs > button",
+      "declaration": ".storyFrame *::before,"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 829,
+      "media": "(prefers-reduced-motion: reduce)",
+      "selector": ".storyFrame *::after",
+      "declaration": "transition: none !important;"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 830,
+      "media": "(prefers-reduced-motion: reduce)",
+      "selector": ".storyFrame *::after",
+      "declaration": "animation: none !important;"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 834,
+      "media": "(prefers-contrast: more)",
+      "selector": ".storyFrame *::after",
+      "declaration": ".storyFrame,"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 835,
+      "media": "(prefers-contrast: more)",
+      "selector": ".storyFrame *::after",
+      "declaration": ".storyContent,"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 836,
+      "media": "(prefers-contrast: more)",
+      "selector": ".storyFrame *::after",
+      "declaration": ".sourceDialog,"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 838,
+      "media": "(prefers-contrast: more)",
+      "selector": ".suggestion",
+      "declaration": "border-color: var(--ink-soft);"
+    },
+    {
+      "file": "components/HomeJourney.module.css",
+      "line": 839,
+      "media": "(prefers-contrast: more)",
+      "selector": ".suggestion",
+      "declaration": "box-shadow: none;"
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 128,
+      "media": "(prefers-reduced-transparency: reduce)",
+      "selector": ".homeHeader",
+      "declaration": "background: var(--paper);"
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 129,
+      "media": "(prefers-reduced-transparency: reduce)",
+      "selector": ".homeHeader",
+      "declaration": "-webkit-backdrop-filter: none;"
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 130,
+      "media": "(prefers-reduced-transparency: reduce)",
+      "selector": ".homeHeader",
+      "declaration": "backdrop-filter: none;"
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 135,
+      "media": "(prefers-contrast: more)",
+      "selector": ".homeHeader",
+      "declaration": "background: var(--paper);"
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "line": 136,
+      "media": "(prefers-contrast: more)",
+      "selector": ".homeHeader",
+      "declaration": "backdrop-filter: none;"
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 349,
+      "media": "(prefers-reduced-motion: reduce)",
+      "selector": ".auth *",
+      "declaration": "transition: none;"
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 350,
+      "media": "(prefers-reduced-motion: reduce)",
+      "selector": ".auth *",
+      "declaration": "animation: none;"
+    }
+  ]
+}

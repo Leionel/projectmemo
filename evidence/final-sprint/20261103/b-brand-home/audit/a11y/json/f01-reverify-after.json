@@ -1,0 +1,475 @@
+{
+  "meta": {
+    "label": "after",
+    "sha": "9bae926e9475cedef118deedf5e002ec8365a23b",
+    "base": "http://127.0.0.1:34111",
+    "startedAt": "2026-11-03T04:47:34.197Z",
+    "note": "F-01 复验；非真实用户测试/认证。",
+    "finishedAt": "2026-11-03T04:47:43.894Z"
+  },
+  "sections": {
+    "judgment_1440x900": {
+      "found": true,
+      "smallCount": 0,
+      "small": [],
+      "keyTexts": [
+        {
+          "text": "比较基线：已有记录 → 本页核对",
+          "fontSize": 12.8,
+          "color": "rgb(83, 100, 94)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 6.26,
+          "rect": {
+            "x": 605,
+            "y": 584,
+            "w": 671,
+            "h": 21
+          },
+          "path": "div.HomeJourney-module__yeKYWG__storyContent > div.HomeJourney-module__yeKYWG__judgmentPane > div > p.mb-2.break-all"
+        },
+        {
+          "text": "待确认",
+          "fontSize": 12.8,
+          "color": "rgb(83, 100, 94)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 6.26,
+          "rect": {
+            "x": 634,
+            "y": 626,
+            "w": 50,
+            "h": 24
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > div.flex.flex-wrap > span.rounded-md.bg-[var(--paper-strong)]"
+        },
+        {
+          "text": "依据 2 项",
+          "fontSize": 12.8,
+          "color": "rgb(97, 114, 104)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 5.1,
+          "rect": {
+            "x": 692,
+            "y": 628,
+            "w": 51,
+            "h": 21
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > div.flex.flex-wrap > span.text-xs.font-bold"
+        },
+        {
+          "text": "演示流程的当前完成情况还需要核对",
+          "fontSize": 12.8,
+          "color": "rgb(28, 46, 44)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 14.22,
+          "rect": {
+            "x": 618,
+            "y": 657,
+            "w": 645,
+            "h": 21
+          },
+          "path": "div > ul.space-y-2 > li.rounded-md.border > p.mt-1.5.text-xs"
+        },
+        {
+          "text": "已有任务记录，但没有新的完成回执；当前状态待确认",
+          "fontSize": 12.8,
+          "color": "rgb(83, 100, 94)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 6.26,
+          "rect": {
+            "x": 618,
+            "y": 683,
+            "w": 307,
+            "h": 18
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > p.mt-1.text-xs > span.font-bold"
+        },
+        {
+          "text": "记忆 · 原文",
+          "fontSize": 12.8,
+          "color": "rgb(39, 104, 93)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 6.51,
+          "rect": {
+            "x": 618,
+            "y": 709,
+            "w": 72,
+            "h": 24
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > p.mt-1.5.flex > span.rounded.bg-[var(--paper-strong)]"
+        },
+        {
+          "text": "记忆 · 原文",
+          "fontSize": 12.8,
+          "color": "rgb(39, 104, 93)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 6.51,
+          "rect": {
+            "x": 696,
+            "y": 709,
+            "w": 72,
+            "h": 24
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > p.mt-1.5.flex > span.rounded.bg-[var(--paper-strong)]"
+        }
+      ],
+      "judgmentPane": {
+        "overflow": false,
+        "paneWidth": 711
+      },
+      "documentOverflow": false,
+      "shotFile": "shots/after-f01-judgment-1440x900.png"
+    },
+    "judgment_390x844": {
+      "found": true,
+      "smallCount": 0,
+      "small": [],
+      "keyTexts": [
+        {
+          "text": "比较基线：已有记录 → 本页核对",
+          "fontSize": 12.8,
+          "color": "rgb(83, 100, 94)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 6.26,
+          "rect": {
+            "x": 50,
+            "y": 692,
+            "w": 291,
+            "h": 21
+          },
+          "path": "div.HomeJourney-module__yeKYWG__storyContent > div.HomeJourney-module__yeKYWG__judgmentPane > div > p.mb-2.break-all"
+        },
+        {
+          "text": "待确认",
+          "fontSize": 12.8,
+          "color": "rgb(83, 100, 94)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 6.26,
+          "rect": {
+            "x": 78,
+            "y": 735,
+            "w": 50,
+            "h": 24
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > div.flex.flex-wrap > span.rounded-md.bg-[var(--paper-strong)]"
+        },
+        {
+          "text": "依据 2 项",
+          "fontSize": 12.8,
+          "color": "rgb(97, 114, 104)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 5.1,
+          "rect": {
+            "x": 137,
+            "y": 736,
+            "w": 51,
+            "h": 21
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > div.flex.flex-wrap > span.text-xs.font-bold"
+        },
+        {
+          "text": "演示流程的当前完成情况还需要核对",
+          "fontSize": 12.8,
+          "color": "rgb(28, 46, 44)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 14.22,
+          "rect": {
+            "x": 63,
+            "y": 765,
+            "w": 265,
+            "h": 21
+          },
+          "path": "div > ul.space-y-2 > li.rounded-md.border > p.mt-1.5.text-xs"
+        },
+        {
+          "text": "已有任务记录，但没有新的完成回执；当前状态待确认",
+          "fontSize": 12.8,
+          "color": "rgb(83, 100, 94)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 6.26,
+          "rect": {
+            "x": 63,
+            "y": 791,
+            "w": 256,
+            "h": 39
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > p.mt-1.text-xs > span.font-bold"
+        },
+        {
+          "text": "记忆 · 原文",
+          "fontSize": 12.8,
+          "color": "rgb(39, 104, 93)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 6.51,
+          "rect": {
+            "x": 63,
+            "y": 838,
+            "w": 72,
+            "h": 24
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > p.mt-1.5.flex > span.rounded.bg-[var(--paper-strong)]"
+        },
+        {
+          "text": "记忆 · 原文",
+          "fontSize": 12.8,
+          "color": "rgb(39, 104, 93)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 6.51,
+          "rect": {
+            "x": 140,
+            "y": 838,
+            "w": 72,
+            "h": 24
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > p.mt-1.5.flex > span.rounded.bg-[var(--paper-strong)]"
+        }
+      ],
+      "judgmentPane": {
+        "overflow": false,
+        "paneWidth": 323
+      },
+      "documentOverflow": false,
+      "shotFile": "shots/after-f01-judgment-390x844.png"
+    },
+    "judgment_320x640": {
+      "found": true,
+      "smallCount": 0,
+      "small": [],
+      "keyTexts": [
+        {
+          "text": "比较基线：已有记录 → 本页核对",
+          "fontSize": 12.8,
+          "color": "rgb(83, 100, 94)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 6.26,
+          "rect": {
+            "x": 50,
+            "y": 591,
+            "w": 221,
+            "h": 21
+          },
+          "path": "div.HomeJourney-module__yeKYWG__storyContent > div.HomeJourney-module__yeKYWG__judgmentPane > div > p.mb-2.break-all"
+        },
+        {
+          "text": "待确认",
+          "fontSize": 12.8,
+          "color": "rgb(83, 100, 94)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 6.26,
+          "rect": {
+            "x": 78,
+            "y": 633,
+            "w": 50,
+            "h": 24
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > div.flex.flex-wrap > span.rounded-md.bg-[var(--paper-strong)]"
+        },
+        {
+          "text": "依据 2 项",
+          "fontSize": 12.8,
+          "color": "rgb(97, 114, 104)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 5.1,
+          "rect": {
+            "x": 137,
+            "y": 635,
+            "w": 51,
+            "h": 21
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > div.flex.flex-wrap > span.text-xs.font-bold"
+        },
+        {
+          "text": "演示流程的当前完成情况还需要核对",
+          "fontSize": 12.8,
+          "color": "rgb(28, 46, 44)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 14.22,
+          "rect": {
+            "x": 63,
+            "y": 664,
+            "w": 195,
+            "h": 42
+          },
+          "path": "div > ul.space-y-2 > li.rounded-md.border > p.mt-1.5.text-xs"
+        },
+        {
+          "text": "已有任务记录，但没有新的完成回执；当前状态待确认",
+          "fontSize": 12.8,
+          "color": "rgb(83, 100, 94)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 6.26,
+          "rect": {
+            "x": 63,
+            "y": 711,
+            "w": 192,
+            "h": 39
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > p.mt-1.text-xs > span.font-bold"
+        },
+        {
+          "text": "记忆 · 原文",
+          "fontSize": 12.8,
+          "color": "rgb(39, 104, 93)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 6.51,
+          "rect": {
+            "x": 63,
+            "y": 758,
+            "w": 72,
+            "h": 24
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > p.mt-1.5.flex > span.rounded.bg-[var(--paper-strong)]"
+        },
+        {
+          "text": "记忆 · 原文",
+          "fontSize": 12.8,
+          "color": "rgb(39, 104, 93)",
+          "bg": "rgb(255, 255, 255)",
+          "contrast": 6.51,
+          "rect": {
+            "x": 140,
+            "y": 758,
+            "w": 72,
+            "h": 24
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > p.mt-1.5.flex > span.rounded.bg-[var(--paper-strong)]"
+        }
+      ],
+      "judgmentPane": {
+        "overflow": false,
+        "paneWidth": 253
+      },
+      "documentOverflow": false,
+      "shotFile": "shots/after-f01-judgment-320x640.png"
+    },
+    "judgment_dark_1440": {
+      "htmlClass": "dark",
+      "found": true,
+      "smallCount": 0,
+      "small": [],
+      "keyTexts": [
+        {
+          "text": "比较基线：已有记录 → 本页核对",
+          "fontSize": 12.8,
+          "color": "rgb(179, 196, 187)",
+          "bg": "rgb(29, 41, 38)",
+          "contrast": 8.25,
+          "rect": {
+            "x": 605,
+            "y": 584,
+            "w": 671,
+            "h": 21
+          },
+          "path": "div.HomeJourney-module__yeKYWG__storyContent > div.HomeJourney-module__yeKYWG__judgmentPane > div > p.mb-2.break-all"
+        },
+        {
+          "text": "待确认",
+          "fontSize": 12.8,
+          "color": "rgb(179, 196, 187)",
+          "bg": "rgb(29, 41, 38)",
+          "contrast": 8.25,
+          "rect": {
+            "x": 634,
+            "y": 626,
+            "w": 50,
+            "h": 24
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > div.flex.flex-wrap > span.rounded-md.bg-[var(--paper-strong)]"
+        },
+        {
+          "text": "依据 2 项",
+          "fontSize": 12.8,
+          "color": "rgb(160, 179, 168)",
+          "bg": "rgb(29, 41, 38)",
+          "contrast": 6.8,
+          "rect": {
+            "x": 692,
+            "y": 628,
+            "w": 51,
+            "h": 21
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > div.flex.flex-wrap > span.text-xs.font-bold"
+        },
+        {
+          "text": "演示流程的当前完成情况还需要核对",
+          "fontSize": 12.8,
+          "color": "rgb(232, 238, 233)",
+          "bg": "rgb(29, 41, 38)",
+          "contrast": 12.76,
+          "rect": {
+            "x": 618,
+            "y": 657,
+            "w": 645,
+            "h": 21
+          },
+          "path": "div > ul.space-y-2 > li.rounded-md.border > p.mt-1.5.text-xs"
+        },
+        {
+          "text": "已有任务记录，但没有新的完成回执；当前状态待确认",
+          "fontSize": 12.8,
+          "color": "rgb(179, 196, 187)",
+          "bg": "rgb(29, 41, 38)",
+          "contrast": 8.25,
+          "rect": {
+            "x": 618,
+            "y": 683,
+            "w": 307,
+            "h": 18
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > p.mt-1.text-xs > span.font-bold"
+        },
+        {
+          "text": "记忆 · 原文",
+          "fontSize": 12.8,
+          "color": "rgb(145, 198, 181)",
+          "bg": "rgb(29, 41, 38)",
+          "contrast": 7.84,
+          "rect": {
+            "x": 618,
+            "y": 709,
+            "w": 72,
+            "h": 24
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > p.mt-1.5.flex > span.rounded.bg-[var(--paper-strong)]"
+        },
+        {
+          "text": "记忆 · 原文",
+          "fontSize": 12.8,
+          "color": "rgb(145, 198, 181)",
+          "bg": "rgb(29, 41, 38)",
+          "contrast": 7.84,
+          "rect": {
+            "x": 696,
+            "y": 709,
+            "w": 72,
+            "h": 24
+          },
+          "path": "ul.space-y-2 > li.rounded-md.border > p.mt-1.5.flex > span.rounded.bg-[var(--paper-strong)]"
+        }
+      ],
+      "judgmentPane": {
+        "overflow": false,
+        "paneWidth": 711
+      },
+      "documentOverflow": false,
+      "shotFile": "shots/after-f01-judgment-dark-1440.png"
+    },
+    "groupRoles": {
+      "groups": [
+        {
+          "tag": "div",
+          "label": "公开示例：委托当前工作包",
+          "path": "main#main-content.home-module__txgM7a__home > section#home-heading.home-module__txgM7a__hero > div.home-module__txgM7a__heroInner > div.home-module__txgM7a__lens"
+        },
+        {
+          "tag": "div",
+          "label": "参赛项目交互示例",
+          "path": "main#main-content.home-module__txgM7a__home > section#experience.home-module__txgM7a__section.home-module__txgM7a__sectionTint > div.home-module__txgM7a__shell > div.HomeJourney-module__yeKYWG__storyFrame"
+        }
+      ],
+      "ariaLabelOnGeneric": [],
+      "lensAria": "- group \"公开示例：委托当前工作包\":\n  - paragraph: 公开示例忆程参赛作品开发\n  - heading \"整理阶段汇报\" [level=2]\n  - text: 等你确认\n  - tablist \"委托阶段：离开时、期间、回来后\":\n    - tab \"离开时\"\n    - tab \"期间\"\n    - tab \"回来后\" [selected]\n  - tabpanel \"回来后\":\n    - term: 原委托\n    - definition: 用已有材料整理一份阶段汇报 原任务与草稿都留在原处\n    - term: 依据\n    - definition: ",
+      "storyAria": "- group \"参赛项目交互示例\":\n  - text: 内置公开示例\n  - heading \"忆程参赛作品开发\" [level=3]\n  - paragraph: 当前委托 · 整理阶段汇报\n  - button \"重置示例\"\n  - tablist \"项目故事步骤\":\n    - tab \"查看记录\" [selected]\n    - tab \"核对依据\"\n    - tab \"查看判断\"\n    - tab \"确认行动\"\n    - tab \"填写回执\"\n  - tabpanel \"查看记录\":\n    - paragraph: 已有示例素材\n    - heading \"先看看上次"
+    }
+  },
+  "errors": []
+}

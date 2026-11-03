@@ -1,0 +1,242 @@
+{
+  "1440x900": {
+    "viewportHeight": 900,
+    "heroNote": {
+      "text": "下方示例无需登录。个人项目在工作台中管理。",
+      "top": 306.4,
+      "bottom": 326.5,
+      "visibleInFirstView": true
+    },
+    "heroCaption": {
+      "text": "实际工作区界面，使用内置示例数据。",
+      "top": 973,
+      "bottom": 1011.2,
+      "visibleInFirstView": false
+    },
+    "imageToolbar": {
+      "text": "忆程工作区内置示例项目",
+      "top": 376.3,
+      "bottom": 410.8,
+      "visibleInFirstView": true
+    },
+    "demoFooterNote": {
+      "text": "已有记录取自内置素材；建议与回执为本页演示。不会调用模型或修改个人项目。",
+      "top": 1910.6,
+      "bottom": 1931.3,
+      "visibleInFirstView": false
+    },
+    "simulationBoundaryLeaves": [
+      {
+        "text": "下方示例无需登录。个人项目在工作台中管理。",
+        "top": 306.4,
+        "visibleInFirstView": true
+      },
+      {
+        "text": "内置示例项目",
+        "top": 381.9,
+        "visibleInFirstView": true
+      },
+      {
+        "text": "实际工作区界面，使用内置示例数据。",
+        "top": 973,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "内置示例项目",
+        "top": 1257.4,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "已有示例素材",
+        "top": 1417.4,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "这份示例项目保留了任务安排、参赛要求和老师建议。先读原文，再判断现在该做什么。",
+        "top": 1510.3,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "3 条内置素材",
+        "top": 1427.9,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "已有记录取自内置素材；建议与回执为本页演示。不会调用模型或修改个人项目。",
+        "top": 1910.6,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "示例原始记录",
+        "top": 0,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "界面示例",
+        "top": 2105.5,
+        "visibleInFirstView": false
+      }
+    ],
+    "externalAnchors": []
+  },
+  "1280x720": {
+    "viewportHeight": 720,
+    "heroNote": {
+      "text": "下方示例无需登录。个人项目在工作台中管理。",
+      "top": 306.4,
+      "bottom": 326.5,
+      "visibleInFirstView": true
+    },
+    "heroCaption": {
+      "text": "实际工作区界面，使用内置示例数据。",
+      "top": 973,
+      "bottom": 1011.2,
+      "visibleInFirstView": false
+    },
+    "imageToolbar": {
+      "text": "忆程工作区内置示例项目",
+      "top": 376.3,
+      "bottom": 410.8,
+      "visibleInFirstView": true
+    },
+    "demoFooterNote": {
+      "text": "已有记录取自内置素材；建议与回执为本页演示。不会调用模型或修改个人项目。",
+      "top": 1904.2,
+      "bottom": 1924.9,
+      "visibleInFirstView": false
+    },
+    "simulationBoundaryLeaves": [
+      {
+        "text": "下方示例无需登录。个人项目在工作台中管理。",
+        "top": 306.4,
+        "visibleInFirstView": true
+      },
+      {
+        "text": "内置示例项目",
+        "top": 381.9,
+        "visibleInFirstView": true
+      },
+      {
+        "text": "实际工作区界面，使用内置示例数据。",
+        "top": 973,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "内置示例项目",
+        "top": 1250.9,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "已有示例素材",
+        "top": 1410.9,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "这份示例项目保留了任务安排、参赛要求和老师建议。先读原文，再判断现在该做什么。",
+        "top": 1503.9,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "3 条内置素材",
+        "top": 1421.4,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "已有记录取自内置素材；建议与回执为本页演示。不会调用模型或修改个人项目。",
+        "top": 1904.2,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "示例原始记录",
+        "top": 0,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "界面示例",
+        "top": 2099,
+        "visibleInFirstView": false
+      }
+    ],
+    "externalAnchors": []
+  },
+  "390x844": {
+    "viewportHeight": 844,
+    "heroNote": {
+      "text": "下方示例无需登录。个人项目在工作台中管理。",
+      "top": 372,
+      "bottom": 391,
+      "visibleInFirstView": true
+    },
+    "heroCaption": {
+      "text": "实际工作区界面，使用内置示例数据。",
+      "top": 878.6,
+      "bottom": 916.5,
+      "visibleInFirstView": false
+    },
+    "imageToolbar": {
+      "text": "忆程工作区内置示例项目",
+      "top": 428,
+      "bottom": 462.6,
+      "visibleInFirstView": true
+    },
+    "demoFooterNote": {
+      "text": "已有记录取自内置素材；建议与回执为本页演示。不会调用模型或修改个人项目。",
+      "top": 1978.3,
+      "bottom": 2016.2,
+      "visibleInFirstView": false
+    },
+    "simulationBoundaryLeaves": [
+      {
+        "text": "下方示例无需登录。个人项目在工作台中管理。",
+        "top": 372,
+        "visibleInFirstView": true
+      },
+      {
+        "text": "内置示例项目",
+        "top": 433.6,
+        "visibleInFirstView": true
+      },
+      {
+        "text": "实际工作区界面，使用内置示例数据。",
+        "top": 878.6,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "内置示例项目",
+        "top": 1206.4,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "已有示例素材",
+        "top": 1332.4,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "这份示例项目保留了任务安排、参赛要求和老师建议。先读原文，再判断现在该做什么。",
+        "top": 1397.8,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "3 条内置素材",
+        "top": 1481.6,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "已有记录取自内置素材；建议与回执为本页演示。不会调用模型或修改个人项目。",
+        "top": 1978.3,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "示例原始记录",
+        "top": 0,
+        "visibleInFirstView": false
+      },
+      {
+        "text": "界面示例",
+        "top": 2469.5,
+        "visibleInFirstView": false
+      }
+    ],
+    "externalAnchors": []
+  }
+}

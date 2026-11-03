@@ -168,8 +168,137 @@ viewport 固定 1440×900 / 1280×720 / 390×844；每宽 light+dark（含 1280 
 
 ---
 
-## Phase 2 — after 六图、断点/缩放、状态图、15s 录屏、性能取证（PENDING）
+## Phase 2 — after 六图、断点/缩放、滚动动效、状态图、录屏、性能取证（已完成，最终候选 9bae926）
 
-状态：**NOT_STARTED**（等待 Lead 通知“B2 候选 SHA”）。
+状态：**DONE**（最终候选 SHA `9bae926e9475cedef118deedf5e002ec8365a23b`，`git status --porcelain -- app components` 为空；dev server 服务该状态）
 
-已预登记 Lead 的新要求：B2 预计新增“决赛演示视频”外链区块与更精细动效，届时网络审计须确认**页面加载不会自动请求 bilibili/外部视频域**（仅用户点击外链才离开），并把外部域名清单写入 `b3/` 下 JSON。
+**SHA 绑定说明**：全部截图/录屏采集于 `cc7c19f`（12:31–12:40，当时树干净）；Lead 确认最终候选为 `9bae926`（= cc7c19f + 终验修复：`.judgmentPane` 作用域字号覆盖 + 两个 `role="group"`，均不改变已采状态）。第 3 步判断页已按 `9bae926` 定向补拍验证。
+说明：对 `0a09a2e` 与 `216cf05` 及中间态的采集**一律作废**，本目录 after/ 与 b3/ 已全部在 `cc7c19f` 下重跑覆盖，不混用。
+**采集后源码变动（证据边界，已由 Lead 收口）**：全部截图/录屏在 12:31–12:40 完成，采集时 `git status` 仅证据目录未跟踪（干净，HEAD=cc7c19f）。12:40:44 之后出现的改动——`components/home/HomeHeroLens.tsx`（+`role="group"`）、`components/HomeJourney.module.css`（第 3 步“查看判断”StateDiffView 的 11–12px 元数据提升到 12.8px）、`components/HomeJourney.tsx`——已由 Lead 提交为 **9bae926「B3 终验修复」**。本目录证据采集于 `cc7c19f`，经 Lead 确认绑定到 `9bae926`（上述改动不影响已采状态）；第 3 步判断页已按 `9bae926` 定向补拍 `b3/states/judgment-step-1440-light.png` 直接验证 12.8px。详见 `after/integrity-at-capture.json` 的 `binding` 字段。
+脚本：`tools/capture-phase2-after.mjs`（after 六图 + Hero 状态 + 滚动动效 + 性能/资源）、`tools/capture-phase2-b3.mjs`（断点/缩放、rail-390、状态、录屏）、`tools/finalize-phase2.mjs`（汇总收口）、`tools/phase2-lib.mjs`；日志 `after/capture-run.log`、`b3/capture-run.log`。
+
+### after 六图（1440/1280/390 × light/dark，页顶 scrollY=0）
+
+| 文件（`after/`） | 字节 | class | scrollWidth/innerWidth | 水平溢出 | heroCopy top | 最小可见字号 | <img> |
+|---|---|---|---|---|---|---|---|
+| `homepage-1440-light-after.png` | 119,851 | light | 1440/1440 | 否 | 111.72 | 12.8px | 1（logo） |
+| `homepage-1440-dark-after.png` | 115,298 | dark | 1440/1440 | 否 | 111.72 | 12.8px | 1（logo） |
+| `homepage-1280-light-after.png` | 101,268 | light | 1280/1280 | 否 | 105.63 | 12.8px | 1（logo） |
+| `homepage-1280-dark-after.png` | 97,113 | dark | 1280/1280 | 否 | 105.63 | 12.8px | 1（logo） |
+| `homepage-390-light-after.png` | 65,248 | light | 390/390 | 否 | 77.00 | 12.8px | 1（logo） |
+| `homepage-390-dark-after.png` | 64,880 | dark | 390/390 | 否 | 77.00 | 12.8px | 1（logo） |
+
+- 六图均无水平溢出、无破图；页面唯一 `<img>` 是 header 品牌 logo `/logo.png`（无产品截图/内容图，B2 已移除整幅工作区大图）。
+- 字体：`document.fonts.status=loaded`，本地 PM Brand / PM Editorial 均加载，无外部字体域。
+
+### 字号取证（回应 B3 字号要求，1440 light 计算值）
+
+| 元素 | 计算字号 | 元素 | 计算字号 |
+|---|---|---|---|
+| lensKicker | 12.8px | lensFoot | 12.8px |
+| rowMeta | 13.12px | heroNote | 13.44px |
+| storyFooter | 12.8px | paneHeading | 15.2px |
+| railLabel | 12.8px | railText | 15px |
+| sectionKicker | 13.12px | boundary | 14.4px |
+| videoMeta | 13.44px | footerMeta | 13.12px |
+
+- **最小可见字号 = 12.8px（六图与全部断点一致，含 390/360/320）**；12.8px 样本为“公开示例 · 不调用模型 · 不写入你的项目。”等说明文字。原 0.65rem/0.7rem/0.72rem 元数据在 `cc7c19f` 已全部消除；`closingLink` 另加 44px 最小触控高度。
+
+### Hero 状态（1440 light，同页面状态链）
+
+| 状态 | 文件 | 关键指标 |
+|---|---|---|
+| 默认“03 回来后” | `after/homepage-1440-light-after.png` | 选中 tab `stage-tab-back`，panel 144 字 |
+| 切“02 期间” | `b3/hero-states/hero-during.png`（117,615B） | `aria-selected` 切到 `stage-tab-during` 且唯一选中；panel 144→130 字且内容变化（任务身份不变 / 冻结示例不连接服务器 / 发现缺口）；焦点留在 Tab |
+| 回“回来后”+ 展开依据 | `b3/hero-states/hero-evidence.png`（125,826B） | 按钮 `aria-expanded=true`；`#hero-evidence` 可见，panel 144→325 字；依据面板 bottom=868.27，**完整在 900 视口内**；焦点留在触发按钮 |
+
+- **左栏 top 不变**：默认与展开依据时 `heroCopy.y` 均为 **111.72**，delta=0.00（与 Lead 要求“应恒为 112 左右”一致；216cf05 起不再像 B1 那样随右栏拉高而下移）。
+
+### 216cf05/cc7c19f 新增滚动动效（已入镜 + 运行时数值）
+
+| 动效 | 证据 | 运行时指标 |
+|---|---|---|
+| 顶部阅读进度线（固定页头下 56px） | `b3/hero-states/scroll-progress-mid.png`（89,390B） | `[data-scroll-progress]` bbox y=56、高 2px；scrollY=1506 时 `transform: matrix(0.45,0,0,1,0,0)`（=页面滚动进度 45%），`data-visible=true`；scrollY=0 时 scaleX=0 |
+| 01 节 rail 进度（桌面横向） | `b3/rail-1440-mid.png`（102,568B） | `--rail-progress=0.5`；进度线 `matrix(0.5,0,0,1,0,0)`；active 圆点 **2 个**（来源、变化）；滚动进度线 scaleX≈0.14 |
+| 01 节 rail 进度（390 竖排，左侧纵向） | `b3/rail-390-mid.png`（49,040B） | `--rail-progress=0.5`；纵向进度线 `matrix(1,0,0,0.5,0,0)`，bbox 高 268.2 / rail 高 536.4；active 圆点 **2 个**（来源、变化） |
+| 章节 kicker 细线首次入视口展开 | `b3/hero-states/kicker-draw.png`（91,576B） | 01 kicker `data-drawn=true`、`::after transform: matrix(1,0,0,1,0,0)`；02–05 kicker 仍为 scaleX=0（首次进入才展开） |
+| Hero 轻微深度离场 | `b3/hero-states/hero-depth-exit.png`（117,090B） | scrollY=180 时 `--hero-shift=0.320`；copy `translate: 0px 3.2px`、lens `translate: 0px -5.76px`；copy/lens 的 `offsetTop` 与 scrollY=0 时一致 → **布局不变，仅合成层位移** |
+
+### 断点 / 200% 缩放巡检（浅色）
+
+| 视口 | 文件（`b3/breakpoints/`） | 字节 | 水平溢出 | 标题裁切 | CTA 裁切 | CTA 首屏可见 |
+|---|---|---|---|---|---|---|
+| 1024×768 | `1024x768.png` | 97,327 | 否 | 否 | 否 | 是 |
+| 768×1024 | `768x1024.png` | 86,322 | 否 | 否 | 否 | 是 |
+| 360×780 | `360x780.png` | 59,508 | 否 | 否 | 否 | 是 |
+| 320×720 | `320x720.png` | 46,177 | 否 | 否 | 否 | 是 |
+| 720×450（200% 等效） | `zoom200-720x450.png` | 42,438 | 否 | 否 | 否 | 是 |
+| 640×360（200% 等效） | `zoom200-640x360.png` | 34,238 | 否 | 否 | 否 | 是 |
+
+- 6 个断点均无水平溢出、标题与主 CTA 均未被裁切；200% 缩放用 CSS viewport 720×450 / 640×360 模拟（1440/2×900/2、1280/2×720/2），非浏览器 zoom 设置；该视口下首屏只到 Hero 文案与 CTA，工作包卡在首屏下。
+- 肉眼小问题：360×780 主 CTA 文案折成两行（按钮内，未裁切、无溢出，略拥挤）；320×720 双 CTA 改为上下堆叠单行；左下 Next dev “N” 为 dev-only 覆盖物（before/after 一致）。
+
+### 状态图（异常、无障碍与关键流程）
+
+| 状态 | 文件（`b3/states/`） | 关键断言 |
+|---|---|---|
+| reduced-motion 切“期间” | `reduced-motion-during.png`（117,775B） | `prefers-reduced-motion:reduce=true`；`data-motion="reduced"`；内容变化且 tab 切换；点击→内容更新 **81ms**、展开依据 **102ms**（无动画等待）；running animations=0 |
+| reduced-motion 展开依据 | `reduced-motion-evidence.png`（123,211B） | 依据完整可读；无动画 |
+| reduced-motion rail | `reduced-motion-rail.png`（106,729B） | **rail 进度线为满**（`--rail-progress` 未设置=默认 1；进度线 bbox 宽=rail 宽）；active 圆点 0（无动画状态）；顶部进度线隐藏（scaleX=0）；主内容文字完整（>1000 字） |
+| 字体失败（替代图片失败） | `font-failure.png`（119,532B） | abort `/fonts/*` 与 `*.ttf`（3 个字体 URL，ERR_FAILED）：h1 可见、主 CTA 可见、模拟边界说明可见、正文 1,640 字、无 `aria-busy`/无限 loading；字体回退 `"PM Editorial","Noto Serif SC",…`；`document.fonts.status=loaded`、PM Brand 不可用（预期） |
+| 五步 Demo 原文 dialog | `dialog-open.png`（119,181B） | `dialog[open]`、`aria-labelledby=source-title`、标题“任务安排”；Esc 关闭后焦点**回到触发按钮**（`aria-label=查看原文：任务安排`） |
+| 未确认回执门槛 | `receipt-gate.png`（87,899B） | 第 5 步未确认时显示“先确认行动，再填写模拟回执”，无 textarea |
+| 已保存模拟回执 | `receipt-saved.png`（90,140B） | “模拟回执已加入本页示例”+ 用户填写原文 + “结果由你在本页填写，未经实际操作核验”；`role=status` 提示“刷新页面后不会保留” |
+| #experience 锚点 | `anchor-experience.png`（92,029B） | 点击主 CTA 后 scrollY=1274；header 高 57px；`#experience-title` top=202.6 > header bottom=57 → **标题未被 sticky header 遮挡** |
+| 五步第 3 步「查看判断」字号（9bae926 定向补拍） | `judgment-step-1440-light.png`（102,073B） | 选中 `story-tab-2`；比较基线 12.8px / 待确认 12.8px / 依据 2 项 12.8px / 主判断摘要 12.8px；pane 最小可见字号 12.8px；Hero lens `role="group"` 生效 |
+
+### 15–20 秒动效录屏
+
+- 文件：`b3/interaction-20s.webm`（2,155,752B，1440×900，**实际 20.52s**，wall-clock 20,310ms；Lead 允许 15–20s 并注明，未剪辑）。
+- 路径：加载 → Hero 三阶段（期间→离开时→回来后）→ 展开依据 → 收起 → 平滑滚动到 01 节（rail 进度≈50%，前两个圆点点亮）→ 继续滚动到五步 Demo → 打开“查看原文：任务安排” dialog → Esc 关闭。
+- 关键帧（`b3/video-frames/`，Chromium 播放截帧并逐帧查看）：1.5s 加载态、5.5s “02 期间”、10.5s 依据展开、13.8s rail 进度≈50%（圆点点亮）、15.5s 五步 Demo、19.5s dialog 关闭后焦点回触发按钮。
+- 录屏期间网络：`b3/network-b3.json` 内 video 捕获 0 外域、0 bilibili、0 `/api` 写。
+
+### 资源与性能（本机 dev + 本地回环，不代表线上/所有用户）
+
+- Navigation Timing（1440 light，`b3/performance-after.json`）：TTFB 220.7ms、DOMContentLoaded 235.8ms、loadEventEnd 304.5ms、document transferSize 18,507B / decodedBodySize 74,480B。**dev 环境波动大（同脚本多次运行 TTFB 131–581ms），仅作本机参考。**
+- 资源（`b3/resources-after.json`）：26 条 resource，transferSize 合计 6,600B、decodedBodySize 358,120B（含字体）；字体 resource 4 条（pm-serif-brand、pm-editorial-serif、manrope-variable、geist-latin.woff2，后两者 decodedBodySize=0 表示未实际使用/命中缓存）；**外域资源 0、bilibili 资源 0**。
+- 口径：Next dev（非生产构建）含 HMR/dev chunk，缓存使 transferSize 常为 0；**不得据此宣称生产性能**。
+
+### 网络审计与断言
+
+- after 运行：431 请求 / 27 唯一 URL；**外域 0、bilibili 0、`/api` 写请求 0、console error 0、page error 0**；4 条失败均为 goto+reload 打断的 dev 脚本 ERR_ABORTED（良性）。B2 首页未出现 `/api/auth/me`（与 B1 原型页不同）。
+- b3 运行：636 请求 / 27 唯一 URL；**外域 0、bilibili 0、`/api` 写请求 0、page error 0**；83 条 failures 主要为导航打断的 dev 脚本/字体 ERR_ABORTED + font-failure 状态按设计注入的 6 条 ERR_FAILED（对应 6 条 console error），非产品错误。
+- **Bilibili 断言成立**：页面加载全程无 bilibili 请求（`network-after.json` / `network-b3.json` 的 `assertions.noBilibiliRequestDuringLoad=true`，bilibiliRequests=0）；该链接为 `href=https://www.bilibili.com/video/BV1Qaxb6PE7G…`、`target=_blank`、`rel="noopener noreferrer"` 的外链，本轮未点击外链（未做外部网络访问）。
+- `/api` 写请求 = 0、外域 = 0 在两个运行中均成立。
+
+### 逐张人工查看记录（read_image 实看）
+
+- 已查看：after 六图、Hero 三阶段 2 图、滚动动效 4 图、断点 6 图、rail-390、9 张状态图（含第 3 步判断页）、录屏 6 关键帧，共 **28 张截图 + 6 帧**。
+- 观感：新 Hero 首屏为“左文案+右工作包卡”，CTA 与“等你确认”状态在首屏；浅/深主题均正常，无低对比或串色；390 首屏可见标题/说明/双 CTA/工作包卡顶部（卡自 y≈388 起）。
+- 新动效：顶部进度线在滚动后可见且按页高比例增长；01 节 rail 中线在桌面横向、390 纵向，均随滚动填充且圆点按顺序点亮；kicker 细线首次入视口展开；Hero 滚动有轻微深度差（copy 下移/lens 上移）但布局不跳。
+- 肉眼问题：① 左下 Next dev “N” 覆盖物（dev-only，390 时覆盖面板左下文字）；② 360 主 CTA 折两行（未裁切）；③ 200% 等效视口首屏只到 CTA、工作包在首屏下；④ 深色主题由 after 的 1440/1280/390 dark 六图覆盖（b3 不重复）。
+
+### 本阶段文件清单
+
+| 路径 | 说明 |
+|---|---|
+| `after/homepage-{1440,1280,390}-{light,dark}-after.png` | 6 张 after 截图 |
+| `after/metrics/*.json` | 6 张截图完整指标（主题、h1、scrollWidth/innerWidth、溢出、Hero/lens/copy bbox、字号、motion 状态、图片、字体） |
+| `after/MANIFEST.json` | after 汇总（矩阵、Hero 状态、滚动动效断言、字号、性能/资源/网络、异常） |
+| `after/integrity-at-capture.json` | 最终候选 SHA 与干净树快照（含作废说明） |
+| `b3/hero-states/{hero-during,hero-evidence,hero-depth-exit,kicker-draw,scroll-progress-mid}.png` | Hero 状态与滚动动效（1440 light） |
+| `b3/rail-1440-mid.png`、`b3/rail-390-mid.png` | 01 节 rail 中段（桌面横向 / 390 纵向） |
+| `b3/breakpoints/*.png` | 1024/768/360/320 与 200% 等效 720×450、640×360 |
+| `b3/states/*.png` | reduced-motion（3）、字体失败、dialog、回执门槛、已保存回执、锚点、第 3 步判断页（9bae926 定向补拍） |
+| `b3/metrics/*.json` | 各状态指标 |
+| `b3/interaction-20s.webm` + `b3/video-frames/*.png` | 20.52s 动效录屏与 6 关键帧 |
+| `b3/performance-after.json`、`b3/resources-after.json`、`b3/network-after.json`、`b3/network-b3.json`、`b3/network-judgment.json` | 性能、资源、网络审计 |
+| `b3/MANIFEST.json`、`b3/video-meta.json` | b3 汇总与录屏元数据 |
+| `tools/phase2-lib.mjs`、`tools/capture-phase2-after.mjs`、`tools/capture-phase2-b3.mjs`、`tools/capture-judgment-step.mjs`、`tools/extract-video-frames.mjs`、`tools/finalize-phase2.mjs`、`tools/finalize-9bae926.mjs` | 采集/截帧/收口/最终绑定脚本 |
+
+### 未验 / NOT_RUN（不在本轮证据范围）
+
+- 真人 10 秒理解测试：**NOT_RUN**（属 Lead/E 的用户理解 Gate，未用开发代理冒充受试者）。
+- 生产构建（`npm run build`）与线上性能：**NOT_RUN**（本轮为 Next dev 本机取证，不代表生产）。
+- 真机/手机安装与跨端联调：**NOT_RUN**（属 D/E 设备轨道）。

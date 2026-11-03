@@ -1,0 +1,33 @@
+{
+  "capturedAt": "2026-11-03T12:26:47+08:00",
+  "head": "216cf055b61d061dade81c38abeaf3f2821458bd",
+  "branch": "codex/final-b-brand-home",
+  "trackedStatus": [
+    " M app/home.module.css",
+    " M components/HomeJourney.module.css"
+  ],
+  "untrackedEvidence": [
+    "?? evidence/final-sprint/20261103/b-brand-home/after/",
+    "?? evidence/final-sprint/20261103/b-brand-home/audit/",
+    "?? evidence/final-sprint/20261103/b-brand-home/b3/",
+    "?? evidence/final-sprint/20261103/b-brand-home/tools/capture-phase2-after.mjs",
+    "?? evidence/final-sprint/20261103/b-brand-home/tools/capture-phase2-b3.mjs",
+    "?? evidence/final-sprint/20261103/b-brand-home/tools/extract-video-frames.mjs",
+    "?? evidence/final-sprint/20261103/b-brand-home/tools/patch-phase2-drift.mjs",
+    "?? evidence/final-sprint/20261103/b-brand-home/tools/patch-phase2-video-frames.mjs",
+    "?? evidence/final-sprint/20261103/b-brand-home/tools/patch-phase2.mjs",
+    "?? evidence/final-sprint/20261103/b-brand-home/tools/phase2-lib.mjs",
+    "?? evidence/final-sprint/20261103/b-brand-home/tools/record-hero-video.mjs"
+  ],
+  "sourceHashes": {
+    "app\\page.tsx": "9471F81CCC96332A505A89CB8CB32C8A082A5F1F6813EB422F53A2FE6D70A305",
+    "components\\SiteHeader.tsx": "201338F0279ADBDBF75CD7E9571E8FD037BF96FCA7A356DA76334BCC9E9E4E28",
+    "components\\HomeJourney.module.css": "D1DA17297C14367D56B45BCFBC401E39C566B5E95CEE11C4C90481F40800536A",
+    "components\\home\\HomeMotion.tsx": "04B396070BDF769AFD4F482801FC842FD16025EE8711A721939D873A28C6AF14",
+    "components\\home\\HomeHeroLens.tsx": "FDE65501C8464FA2A732B4A2A26F90D7FAA8E63827542C5A320A51D0DF1362A8",
+    "components\\home\\homeExample.ts": "263043BD543F9B552F35FDFA6981EC6479335BDCFD3A49ED5811728F1D491002",
+    "components\\SiteHeader.module.css": "A7AE1B92DE1303C9BB6980BD0DC51B3030E2083B7A09DBFAFCA1C8E1785B6598",
+    "components\\HomeJourney.tsx": "6FE0B6EE4269AC35B41A56FDE7FDC884DC55A2DC108751E5330EB9A35098A30B",
+    "app\\home.module.css": "3610B2C846C772010219123C6C142FBE79F0CC0C3023F61620970672329DF57F"
+  }
+}

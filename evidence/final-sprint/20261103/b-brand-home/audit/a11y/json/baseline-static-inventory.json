@@ -1,0 +1,3703 @@
+{
+  "meta": {
+    "source": "git show 485d485378637e1da3280ed092739d441c8cf749:<file>",
+    "baselineSha": "485d485378637e1da3280ed092739d441c8cf749",
+    "extractedTo": "audit/a11y/baseline-src/",
+    "note": "工作树在 2026-11-03 11:51 后已被 B2 修改；本清点只读 git 固定 SHA 提取副本，不读当前工作树实现。",
+    "remBasePx": 16,
+    "generatedAt": "2026-11-03T04:12:35.028Z"
+  },
+  "files": [
+    {
+      "file": "app/page.tsx",
+      "lines": 276,
+      "gitBlob": "见 MANIFEST"
+    },
+    {
+      "file": "app/home.module.css",
+      "lines": 1496,
+      "gitBlob": "见 MANIFEST"
+    },
+    {
+      "file": "components/HomeJourney.tsx",
+      "lines": 488,
+      "gitBlob": "见 MANIFEST"
+    },
+    {
+      "file": "components/SiteHeader.tsx",
+      "lines": 54,
+      "gitBlob": "见 MANIFEST"
+    },
+    {
+      "file": "app/layout.tsx",
+      "lines": 70,
+      "gitBlob": "见 MANIFEST"
+    },
+    {
+      "file": "app/globals.css",
+      "lines": 308,
+      "gitBlob": "见 MANIFEST"
+    },
+    {
+      "file": "components/StateDiffView.tsx",
+      "lines": 50,
+      "gitBlob": "见 MANIFEST"
+    },
+    {
+      "file": "app/auth.module.css",
+      "lines": 352,
+      "gitBlob": "见 MANIFEST"
+    }
+  ],
+  "smallFontDeclarations": [
+    {
+      "file": "app/home.module.css",
+      "line": 216,
+      "selector": ".heroNote",
+      "selectorLine": 214,
+      "value": "0.72rem",
+      "px": 11.52,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 236,
+      "selector": ".imageToolbar",
+      "selectorLine": 230,
+      "value": "0.65rem",
+      "px": 10.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 263,
+      "selector": ".heroProduct figcaption",
+      "selectorLine": 261,
+      "value": "0.66rem",
+      "px": 10.56,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 268,
+      "selector": ".sectionLabel",
+      "selectorLine": 267,
+      "value": "0.75rem",
+      "px": 12,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 336,
+      "selector": ".projectIdentity > div > span",
+      "selectorLine": 335,
+      "value": "0.65rem",
+      "px": 10.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 349,
+      "selector": ".resetButton",
+      "selectorLine": 344,
+      "value": "0.72rem",
+      "px": 11.52,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 384,
+      "selector": ".storyTabs > button > span",
+      "selectorLine": 382,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 409,
+      "selector": ".contextLabel",
+      "selectorLine": 408,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 438,
+      "selector": ".contextPosition > span",
+      "selectorLine": 436,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 462,
+      "selector": ".paneHeading > span",
+      "selectorLine": 461,
+      "value": "0.65rem",
+      "px": 10.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 493,
+      "selector": ".sourceButton",
+      "selectorLine": 489,
+      "value": "0.72rem",
+      "px": 11.52,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 503,
+      "selector": ".sourceButton > span",
+      "selectorLine": 501,
+      "value": "0.65rem",
+      "px": 10.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 517,
+      "selector": ".factMark",
+      "selectorLine": 515,
+      "value": "0.68rem",
+      "px": 10.88,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 541,
+      "selector": ".confirmedBadge",
+      "selectorLine": 537,
+      "value": "0.66rem",
+      "px": 10.56,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 599,
+      "selector": ".evidenceDetails summary",
+      "selectorLine": 595,
+      "value": "0.75rem",
+      "px": 12,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 616,
+      "selector": ".evidenceDetails > div > p",
+      "selectorLine": 615,
+      "value": "0.76rem",
+      "px": 12.16,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 621,
+      "selector": ".detailNote",
+      "selectorLine": 620,
+      "value": "0.72rem",
+      "px": 11.52,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 691,
+      "selector": ".receiptPane form > p",
+      "selectorLine": 690,
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 732,
+      "selector": ".savedReceipt > p:not(.receiptSavedTitle)",
+      "selectorLine": 731,
+      "value": "0.75rem",
+      "px": 12,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 742,
+      "selector": ".storyNotice",
+      "selectorLine": 737,
+      "value": "0.77rem",
+      "px": 12.32,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 755,
+      "selector": ".storyFooter > p",
+      "selectorLine": 754,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 803,
+      "selector": ".dialogHeader > p",
+      "selectorLine": 801,
+      "value": "0.75rem",
+      "px": 12,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 830,
+      "selector": ".dialogProvenance",
+      "selectorLine": 829,
+      "value": "0.75rem",
+      "px": 12,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 859,
+      "selector": ".conditions summary",
+      "selectorLine": 853,
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 870,
+      "selector": ".conditions > p",
+      "selectorLine": 868,
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 887,
+      "selector": ".previewLabel",
+      "selectorLine": 881,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 930,
+      "selector": ".executionList > li > div > span",
+      "selectorLine": 927,
+      "value": "0.72rem",
+      "px": 11.52,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 943,
+      "selector": ".pendingNode",
+      "selectorLine": 936,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 961,
+      "selector": ".previewFootnote",
+      "selectorLine": 958,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1088,
+      "selector": ".footer",
+      "selectorLine": 1080,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1152,
+      "selector": ".homeNav .headerCta",
+      "selectorLine": 1151,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1182,
+      "selector": ".secondary",
+      "selectorLine": 1181,
+      "value": "0.77rem",
+      "px": 12.32,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1186,
+      "selector": ".heroNote",
+      "selectorLine": 1185,
+      "value": "0.68rem",
+      "px": 10.88,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1203,
+      "selector": ".heroProduct figcaption",
+      "selectorLine": 1202,
+      "value": "0.65rem",
+      "px": 10.4,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1231,
+      "selector": ".sectionHeading > p",
+      "selectorLine": 1230,
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1252,
+      "selector": ".projectIdentity > div > span",
+      "selectorLine": 1251,
+      "value": "0.6rem",
+      "px": 9.6,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1255,
+      "selector": ".resetButton",
+      "selectorLine": 1254,
+      "value": "0.65rem",
+      "px": 10.4,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1265,
+      "selector": ".storyTabs > button",
+      "selectorLine": 1261,
+      "value": "0.67rem",
+      "px": 10.72,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1269,
+      "selector": ".storyTabs > button > span",
+      "selectorLine": 1268,
+      "value": "0.6rem",
+      "px": 9.6,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1280,
+      "selector": ".contextLabel",
+      "selectorLine": 1279,
+      "value": "0.65rem",
+      "px": 10.4,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1290,
+      "selector": ".storyContext > p:not(.contextLabel)",
+      "selectorLine": 1288,
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1338,
+      "selector": ".proposalFields > div",
+      "selectorLine": 1335,
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1341,
+      "selector": ".proposalFields dt",
+      "selectorLine": 1340,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1352,
+      "selector": ".storyFooter > p",
+      "selectorLine": 1351,
+      "value": "0.64rem",
+      "px": 10.24,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1363,
+      "selector": ".storyNotice",
+      "selectorLine": 1361,
+      "value": "0.73rem",
+      "px": 11.68,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1408,
+      "selector": ".boundaryNote p",
+      "selectorLine": 1407,
+      "value": "0.75rem",
+      "px": 12,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1421,
+      "selector": ".footer",
+      "selectorLine": 1419,
+      "value": "0.65rem",
+      "px": 10.4,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/globals.css",
+      "line": 116,
+      "selector": ".card-surface",
+      "selectorLine": 102,
+      "value": ".75rem",
+      "px": 12,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 306,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": "10px",
+      "px": 10,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 71,
+      "selector": ".projectNote span",
+      "selectorLine": 68,
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 134,
+      "selector": ".field > p",
+      "selectorLine": 133,
+      "value": "0.72rem",
+      "px": 11.52,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 152,
+      "selector": ".passwordToggle",
+      "selectorLine": 145,
+      "value": "0.73rem",
+      "px": 11.68,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 201,
+      "selector": ".resendLink",
+      "selectorLine": 196,
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 205,
+      "selector": ".resendLink",
+      "selectorLine": 203,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 218,
+      "selector": ".serviceNotice",
+      "selectorLine": 214,
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 245,
+      "selector": ".help",
+      "selectorLine": 244,
+      "value": "0.72rem",
+      "px": 11.52,
+      "media": null
+    }
+  ],
+  "allFontDeclarations": [
+    {
+      "file": "app/home.module.css",
+      "line": 51,
+      "selector": ".homeNav",
+      "selectorLine": 47,
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 74,
+      "selector": ".homeHeader .homeNav",
+      "selectorLine": 73,
+      "value": "14px",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 81,
+      "selector": ".homeHeader .headerCta",
+      "selectorLine": 78,
+      "value": "14px",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 130,
+      "selector": ".positioning",
+      "selectorLine": 123,
+      "value": "1rem",
+      "px": 16,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 137,
+      "selector": ".positioning strong",
+      "selectorLine": 134,
+      "value": "1.125rem",
+      "px": 18,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 141,
+      "selector": ".hero h1",
+      "selectorLine": 139,
+      "value": "clamp(2.5rem, 4.5vw, 4.25rem)",
+      "px": null,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 154,
+      "selector": ".heroDescription",
+      "selectorLine": 150,
+      "value": "1rem",
+      "px": 16,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 168,
+      "selector": ".heroActions .secondary",
+      "selectorLine": 166,
+      "value": "0.9375rem",
+      "px": 15,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 180,
+      "selector": ".secondary",
+      "selectorLine": 172,
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 216,
+      "selector": ".heroNote",
+      "selectorLine": 214,
+      "value": "0.72rem",
+      "px": 11.52,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 236,
+      "selector": ".imageToolbar",
+      "selectorLine": 230,
+      "value": "0.65rem",
+      "px": 10.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 263,
+      "selector": ".heroProduct figcaption",
+      "selectorLine": 261,
+      "value": "0.66rem",
+      "px": 10.56,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 268,
+      "selector": ".sectionLabel",
+      "selectorLine": 267,
+      "value": "0.75rem",
+      "px": 12,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 285,
+      "selector": ".platformSection h2",
+      "selectorLine": 283,
+      "value": "clamp(1.75rem, 2.8vw, 2.5rem)",
+      "px": null,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 292,
+      "selector": ".sectionHeading > p",
+      "selectorLine": 290,
+      "value": "0.85rem",
+      "px": 13.6,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 336,
+      "selector": ".projectIdentity > div > span",
+      "selectorLine": 335,
+      "value": "0.65rem",
+      "px": 10.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 341,
+      "selector": ".projectIdentity h3",
+      "selectorLine": 339,
+      "value": "0.95rem",
+      "px": 15.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 349,
+      "selector": ".resetButton",
+      "selectorLine": 344,
+      "value": "0.72rem",
+      "px": 11.52,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 375,
+      "selector": ".storyTabs > button",
+      "selectorLine": 365,
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 384,
+      "selector": ".storyTabs > button > span",
+      "selectorLine": 382,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 409,
+      "selector": ".contextLabel",
+      "selectorLine": 408,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 416,
+      "selector": ".storyContext h4",
+      "selectorLine": 414,
+      "value": "1.65rem",
+      "px": 26.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 424,
+      "selector": ".storyContext > p:not(.contextLabel)",
+      "selectorLine": 422,
+      "value": "0.85rem",
+      "px": 13.6,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 432,
+      "selector": ".contextPosition",
+      "selectorLine": 429,
+      "value": "1.4rem",
+      "px": 22.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 438,
+      "selector": ".contextPosition > span",
+      "selectorLine": 436,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 458,
+      "selector": ".paneHeading h4",
+      "selectorLine": 457,
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 462,
+      "selector": ".paneHeading > span",
+      "selectorLine": 461,
+      "value": "0.65rem",
+      "px": 10.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 479,
+      "selector": ".record h5",
+      "selectorLine": 478,
+      "value": "0.84rem",
+      "px": 13.44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 484,
+      "selector": ".record > p",
+      "selectorLine": 483,
+      "value": "0.85rem",
+      "px": 13.6,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 493,
+      "selector": ".sourceButton",
+      "selectorLine": 489,
+      "value": "0.72rem",
+      "px": 11.52,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 503,
+      "selector": ".sourceButton > span",
+      "selectorLine": 501,
+      "value": "0.65rem",
+      "px": 10.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 517,
+      "selector": ".factMark",
+      "selectorLine": 515,
+      "value": "0.68rem",
+      "px": 10.88,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 520,
+      "selector": ".factRow > p",
+      "selectorLine": 519,
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 530,
+      "selector": ".unknownRow > p",
+      "selectorLine": 529,
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 541,
+      "selector": ".confirmedBadge",
+      "selectorLine": 537,
+      "value": "0.66rem",
+      "px": 10.56,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 563,
+      "selector": ".receiptEvidence > p",
+      "selectorLine": 562,
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 580,
+      "selector": ".suggestion h5",
+      "selectorLine": 579,
+      "value": "0.95rem",
+      "px": 15.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 586,
+      "selector": ".suggestion > p",
+      "selectorLine": 585,
+      "value": "0.81rem",
+      "px": 12.96,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 599,
+      "selector": ".evidenceDetails summary",
+      "selectorLine": 595,
+      "value": "0.75rem",
+      "px": 12,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 606,
+      "selector": ".evidenceDetails summary::before",
+      "selectorLine": 603,
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 616,
+      "selector": ".evidenceDetails > div > p",
+      "selectorLine": 615,
+      "value": "0.76rem",
+      "px": 12.16,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 621,
+      "selector": ".detailNote",
+      "selectorLine": 620,
+      "value": "0.72rem",
+      "px": 11.52,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 628,
+      "selector": ".actionProposal > h5",
+      "selectorLine": 626,
+      "value": "1.15rem",
+      "px": 18.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 642,
+      "selector": ".proposalFields > div",
+      "selectorLine": 636,
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 664,
+      "selector": ".confirmationResult > p",
+      "selectorLine": 660,
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 679,
+      "selector": ".receiptGate > p",
+      "selectorLine": 678,
+      "value": "0.85rem",
+      "px": 13.6,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 686,
+      "selector": ".receiptPane label",
+      "selectorLine": 684,
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 691,
+      "selector": ".receiptPane form > p",
+      "selectorLine": 690,
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 705,
+      "selector": ".receiptPane textarea",
+      "selectorLine": 696,
+      "value": "0.85rem",
+      "px": 13.6,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 718,
+      "selector": ".receiptSavedTitle",
+      "selectorLine": 714,
+      "value": "0.87rem",
+      "px": 13.92,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 725,
+      "selector": ".savedReceipt blockquote",
+      "selectorLine": 721,
+      "value": "0.85rem",
+      "px": 13.6,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 732,
+      "selector": ".savedReceipt > p:not(.receiptSavedTitle)",
+      "selectorLine": 731,
+      "value": "0.75rem",
+      "px": 12,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 742,
+      "selector": ".storyNotice",
+      "selectorLine": 737,
+      "value": "0.77rem",
+      "px": 12.32,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 755,
+      "selector": ".storyFooter > p",
+      "selectorLine": 754,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 803,
+      "selector": ".dialogHeader > p",
+      "selectorLine": 801,
+      "value": "0.75rem",
+      "px": 12,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 815,
+      "selector": ".sourceDialog h3",
+      "selectorLine": 814,
+      "value": "1.3rem",
+      "px": 20.8,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 824,
+      "selector": ".sourceDialog blockquote",
+      "selectorLine": 819,
+      "value": "0.95rem",
+      "px": 15.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 830,
+      "selector": ".dialogProvenance",
+      "selectorLine": 829,
+      "value": "0.75rem",
+      "px": 12,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 844,
+      "selector": ".missionCopy > p:not(.sectionLabel)",
+      "selectorLine": 843,
+      "value": "0.88rem",
+      "px": 14.08,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 859,
+      "selector": ".conditions summary",
+      "selectorLine": 853,
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 870,
+      "selector": ".conditions > p",
+      "selectorLine": 868,
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 887,
+      "selector": ".previewLabel",
+      "selectorLine": 881,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 891,
+      "selector": ".missionPreview h3",
+      "selectorLine": 890,
+      "value": "1.12rem",
+      "px": 17.92,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 897,
+      "selector": ".previewDescription",
+      "selectorLine": 895,
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 923,
+      "selector": ".executionList strong",
+      "selectorLine": 921,
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 930,
+      "selector": ".executionList > li > div > span",
+      "selectorLine": 927,
+      "value": "0.72rem",
+      "px": 11.52,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 943,
+      "selector": ".pendingNode",
+      "selectorLine": 936,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 961,
+      "selector": ".previewFootnote",
+      "selectorLine": 958,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 982,
+      "selector": ".scenarios dl > div",
+      "selectorLine": 976,
+      "value": "0.85rem",
+      "px": 13.6,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1005,
+      "selector": ".platformSection > div:first-child > p:last-child",
+      "selectorLine": 1003,
+      "value": "0.85rem",
+      "px": 13.6,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1027,
+      "selector": ".platformPaths h3",
+      "selectorLine": 1026,
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1036,
+      "selector": ".platformPaths p",
+      "selectorLine": 1030,
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1057,
+      "selector": ".boundaryNote p",
+      "selectorLine": 1056,
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1070,
+      "selector": ".closing h2",
+      "selectorLine": 1068,
+      "value": "2rem",
+      "px": 32,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1078,
+      "selector": ".closing p",
+      "selectorLine": 1075,
+      "value": "0.85rem",
+      "px": 13.6,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1088,
+      "selector": ".footer",
+      "selectorLine": 1080,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1092,
+      "selector": ".footer > a:first-child",
+      "selectorLine": 1090,
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1104,
+      "selector": ".hero h1",
+      "selectorLine": 1103,
+      "value": "3.25rem",
+      "px": 52,
+      "media": "(max-width: 1000px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1107,
+      "selector": ".heroDescription",
+      "selectorLine": 1106,
+      "value": "0.95rem",
+      "px": 15.2,
+      "media": "(max-width: 1000px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1115,
+      "selector": ".storyContext h4",
+      "selectorLine": 1114,
+      "value": "1.4rem",
+      "px": 22.4,
+      "media": "(max-width: 1000px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1152,
+      "selector": ".homeNav .headerCta",
+      "selectorLine": 1151,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1162,
+      "selector": ".positioning",
+      "selectorLine": 1161,
+      "value": "0.875rem",
+      "px": 14,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1166,
+      "selector": ".hero h1",
+      "selectorLine": 1165,
+      "value": "clamp(2rem, 8.3vw, 2.6rem)",
+      "px": null,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1170,
+      "selector": ".heroDescription",
+      "selectorLine": 1169,
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1182,
+      "selector": ".secondary",
+      "selectorLine": 1181,
+      "value": "0.77rem",
+      "px": 12.32,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1186,
+      "selector": ".heroNote",
+      "selectorLine": 1185,
+      "value": "0.68rem",
+      "px": 10.88,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1203,
+      "selector": ".heroProduct figcaption",
+      "selectorLine": 1202,
+      "value": "0.65rem",
+      "px": 10.4,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1213,
+      "selector": ".homeHeader .headerCta",
+      "selectorLine": 1212,
+      "value": "14px",
+      "px": 14,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1227,
+      "selector": ".platformSection h2",
+      "selectorLine": 1226,
+      "value": "1.65rem",
+      "px": 26.4,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1231,
+      "selector": ".sectionHeading > p",
+      "selectorLine": 1230,
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1244,
+      "selector": ".projectIdentity h3",
+      "selectorLine": 1243,
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1252,
+      "selector": ".projectIdentity > div > span",
+      "selectorLine": 1251,
+      "value": "0.6rem",
+      "px": 9.6,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1255,
+      "selector": ".resetButton",
+      "selectorLine": 1254,
+      "value": "0.65rem",
+      "px": 10.4,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1265,
+      "selector": ".storyTabs > button",
+      "selectorLine": 1261,
+      "value": "0.67rem",
+      "px": 10.72,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1269,
+      "selector": ".storyTabs > button > span",
+      "selectorLine": 1268,
+      "value": "0.6rem",
+      "px": 9.6,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1280,
+      "selector": ".contextLabel",
+      "selectorLine": 1279,
+      "value": "0.65rem",
+      "px": 10.4,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1284,
+      "selector": ".storyContext h4",
+      "selectorLine": 1283,
+      "value": "1.3rem",
+      "px": 20.8,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1290,
+      "selector": ".storyContext > p:not(.contextLabel)",
+      "selectorLine": 1288,
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1300,
+      "selector": ".paneHeading h4",
+      "selectorLine": 1299,
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1306,
+      "selector": ".record > p",
+      "selectorLine": 1305,
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1309,
+      "selector": ".record h5",
+      "selectorLine": 1308,
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1315,
+      "selector": ".factRow > p",
+      "selectorLine": 1314,
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1329,
+      "selector": ".actionProposal > h5",
+      "selectorLine": 1328,
+      "value": "1rem",
+      "px": 16,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1338,
+      "selector": ".proposalFields > div",
+      "selectorLine": 1335,
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1341,
+      "selector": ".proposalFields dt",
+      "selectorLine": 1340,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1352,
+      "selector": ".storyFooter > p",
+      "selectorLine": 1351,
+      "value": "0.64rem",
+      "px": 10.24,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1363,
+      "selector": ".storyNotice",
+      "selectorLine": 1361,
+      "value": "0.73rem",
+      "px": 11.68,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1370,
+      "selector": ".sourceDialog h3",
+      "selectorLine": 1369,
+      "value": "1.15rem",
+      "px": 18.4,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1374,
+      "selector": ".sourceDialog blockquote",
+      "selectorLine": 1372,
+      "value": "0.88rem",
+      "px": 14.08,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1384,
+      "selector": ".missionCopy > p:not(.sectionLabel)",
+      "selectorLine": 1383,
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1390,
+      "selector": ".missionPreview h3",
+      "selectorLine": 1389,
+      "value": "1rem",
+      "px": 16,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1395,
+      "selector": ".scenarios dl > div",
+      "selectorLine": 1392,
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1401,
+      "selector": ".platformSection > div:first-child > p:last-child",
+      "selectorLine": 1400,
+      "value": "0.82rem",
+      "px": 13.12,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1408,
+      "selector": ".boundaryNote p",
+      "selectorLine": 1407,
+      "value": "0.75rem",
+      "px": 12,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1417,
+      "selector": ".closing h2",
+      "selectorLine": 1416,
+      "value": "1.75rem",
+      "px": 28,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1421,
+      "selector": ".footer",
+      "selectorLine": 1419,
+      "value": "0.65rem",
+      "px": 10.4,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1457,
+      "selector": ".hero h1",
+      "selectorLine": 1456,
+      "value": "clamp(2.5rem, 4.5vw, 3.25rem)",
+      "px": null,
+      "media": "(max-width: 1040px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1481,
+      "selector": ".positioning",
+      "selectorLine": 1480,
+      "value": "0.875rem",
+      "px": 14,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1485,
+      "selector": ".positioning strong",
+      "selectorLine": 1484,
+      "value": "1rem",
+      "px": 16,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1488,
+      "selector": ".hero h1",
+      "selectorLine": 1487,
+      "value": "clamp(2rem, 8.3vw, 2.6rem)",
+      "px": null,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/globals.css",
+      "line": 71,
+      "selector": "body",
+      "selectorLine": 65,
+      "value": "14px",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 116,
+      "selector": ".card-surface",
+      "selectorLine": 102,
+      "value": ".75rem",
+      "px": 12,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 122,
+      "selector": ".editorial-button, .editorial-button-secondary",
+      "selectorLine": 120,
+      "value": ".875rem",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 192,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": ".95rem",
+      "px": 15.2,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 196,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": "clamp(1.65rem, 3vw, 2.1rem)",
+      "px": null,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 197,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": "1.35rem",
+      "px": 21.6,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 198,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": "1.12rem",
+      "px": 17.92,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 199,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": "1rem",
+      "px": 16,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 209,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": ".88em",
+      "px": null,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 211,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": ".86rem",
+      "px": 13.76,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 246,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": ".875rem",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 250,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": ".84375rem",
+      "px": 13.5,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 255,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": ".875rem",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 260,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": ".84375rem",
+      "px": 13.5,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 263,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": ".875rem",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 266,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": "1.0625rem",
+      "px": 17,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 267,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": ".8125rem",
+      "px": 13,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 270,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": "1rem",
+      "px": 16,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 271,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": ".875rem",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 273,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": ".8125rem",
+      "px": 13,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 279,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": ".9375rem",
+      "px": 15,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 280,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": ".875rem",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 281,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": ".8125rem",
+      "px": 13,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 293,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": ".8125rem",
+      "px": 13,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 297,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": ".875rem",
+      "px": 14,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 304,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": "16px",
+      "px": 16,
+      "media": null
+    },
+    {
+      "file": "app/globals.css",
+      "line": 306,
+      "selector": ".dark .editorial-input:focus",
+      "selectorLine": 175,
+      "value": "10px",
+      "px": 10,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 28,
+      "selector": ".eyebrow",
+      "selectorLine": 27,
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 39,
+      "selector": ".introduction h2",
+      "selectorLine": 38,
+      "value": "clamp(2.5rem, 4vw, 3.5rem)",
+      "px": null,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 43,
+      "selector": ".introduction > p:last-of-type",
+      "selectorLine": 42,
+      "value": "0.95rem",
+      "px": 15.2,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 65,
+      "selector": ".projectNote strong",
+      "selectorLine": 62,
+      "value": "0.85rem",
+      "px": 13.6,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 71,
+      "selector": ".projectNote span",
+      "selectorLine": 68,
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 87,
+      "selector": ".panel h1",
+      "selectorLine": 86,
+      "value": "1.9rem",
+      "px": 30.4,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 91,
+      "selector": ".panel header p",
+      "selectorLine": 90,
+      "value": "0.85rem",
+      "px": 13.6,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 101,
+      "selector": ".field label",
+      "selectorLine": 99,
+      "value": "0.83rem",
+      "px": 13.28,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 115,
+      "selector": ".field input",
+      "selectorLine": 105,
+      "value": "0.9rem",
+      "px": 14.4,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 134,
+      "selector": ".field > p",
+      "selectorLine": 133,
+      "value": "0.72rem",
+      "px": 11.52,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 152,
+      "selector": ".passwordToggle",
+      "selectorLine": 145,
+      "value": "0.73rem",
+      "px": 11.68,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 167,
+      "selector": ".submit",
+      "selectorLine": 155,
+      "value": "0.88rem",
+      "px": 14.08,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 201,
+      "selector": ".resendLink",
+      "selectorLine": 196,
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 205,
+      "selector": ".resendLink",
+      "selectorLine": 203,
+      "value": "0.7rem",
+      "px": 11.2,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 218,
+      "selector": ".serviceNotice",
+      "selectorLine": 214,
+      "value": "0.78rem",
+      "px": 12.48,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 245,
+      "selector": ".help",
+      "selectorLine": 244,
+      "value": "0.72rem",
+      "px": 11.52,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 263,
+      "selector": ".success h2",
+      "selectorLine": 262,
+      "value": "1rem",
+      "px": 16,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 267,
+      "selector": ".success p",
+      "selectorLine": 266,
+      "value": "0.85rem",
+      "px": 13.6,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 276,
+      "selector": ".success > a:not(.submit)",
+      "selectorLine": 272,
+      "value": "0.8rem",
+      "px": 12.8,
+      "media": null
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 324,
+      "selector": ".introduction h2",
+      "selectorLine": 323,
+      "value": "1.9rem",
+      "px": 30.4,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 338,
+      "selector": ".panel h1",
+      "selectorLine": 337,
+      "value": "1.65rem",
+      "px": 26.4,
+      "media": "(max-width: 700px)"
+    }
+  ],
+  "duplicateBreakpoints": [
+    {
+      "query": "(max-width: 1000px)",
+      "occurrences": [
+        {
+          "file": "app/home.module.css",
+          "line": 1095
+        },
+        {
+          "file": "app/auth.module.css",
+          "line": 296
+        }
+      ],
+      "count": 2
+    },
+    {
+      "query": "(max-width: 700px)",
+      "occurrences": [
+        {
+          "file": "app/home.module.css",
+          "line": 1132
+        },
+        {
+          "file": "app/home.module.css",
+          "line": 1472
+        },
+        {
+          "file": "app/auth.module.css",
+          "line": 304
+        }
+      ],
+      "count": 3
+    },
+    {
+      "query": "(prefers-reduced-motion: reduce)",
+      "occurrences": [
+        {
+          "file": "app/home.module.css",
+          "line": 1424
+        },
+        {
+          "file": "app/auth.module.css",
+          "line": 347
+        }
+      ],
+      "count": 2
+    }
+  ],
+  "mediaQueries": [
+    {
+      "file": "app/home.module.css",
+      "line": 1095,
+      "query": "(max-width: 1000px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1132,
+      "query": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1424,
+      "query": "(prefers-reduced-motion: reduce)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1432,
+      "query": "(max-width: 380px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1440,
+      "query": "(prefers-contrast: more)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1451,
+      "query": "(max-width: 1040px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1460,
+      "query": "(max-width: 900px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1472,
+      "query": "(max-width: 700px)"
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 296,
+      "query": "(max-width: 1000px)"
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 304,
+      "query": "(max-width: 700px)"
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 347,
+      "query": "(prefers-reduced-motion: reduce)"
+    }
+  ],
+  "focusRules": [
+    {
+      "file": "app/home.module.css",
+      "line": 24,
+      "selector": ".siteHeader a:focus-visible",
+      "declaration": "outline: 2px solid var(--teal);"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 25,
+      "selector": ".siteHeader a:focus-visible",
+      "declaration": "outline-offset: 4px;"
+    },
+    {
+      "file": "app/globals.css",
+      "line": 248,
+      "selector": ".dark .editorial-input:focus",
+      "declaration": ".workspace-tool:focus-visible { outline:2px solid var(--teal); outline-offset:3px; }"
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 127,
+      "selector": ".field input:focus",
+      "declaration": "outline: 2px solid var(--teal-pale);"
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 128,
+      "selector": ".field input:focus",
+      "declaration": "outline-offset: 2px;"
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 288,
+      "selector": ".auth button:focus-visible",
+      "declaration": "outline: 2px solid var(--teal);"
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 289,
+      "selector": ".auth button:focus-visible",
+      "declaration": "outline-offset: 4px;"
+    }
+  ],
+  "motionRules": [
+    {
+      "file": "app/home.module.css",
+      "line": 1425,
+      "media": "(prefers-reduced-motion: reduce)",
+      "selector": ".footer",
+      "declaration": ".home *,"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1427,
+      "media": "(prefers-reduced-motion: reduce)",
+      "selector": ".siteHeader *",
+      "declaration": "transition: none !important;"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1428,
+      "media": "(prefers-reduced-motion: reduce)",
+      "selector": ".siteHeader *",
+      "declaration": "scroll-behavior: auto;"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1429,
+      "media": "(prefers-reduced-motion: reduce)",
+      "selector": ".siteHeader *",
+      "declaration": "animation: none !important;"
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 349,
+      "media": "(prefers-reduced-motion: reduce)",
+      "selector": ".auth *",
+      "declaration": "transition: none;"
+    },
+    {
+      "file": "app/auth.module.css",
+      "line": 350,
+      "media": "(prefers-reduced-motion: reduce)",
+      "selector": ".auth *",
+      "declaration": "animation: none;"
+    }
+  ],
+  "contrastRules": [
+    {
+      "file": "app/home.module.css",
+      "line": 1441,
+      "media": "(prefers-contrast: more)",
+      "selector": ".projectIcon",
+      "declaration": ".storyFrame,"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1442,
+      "media": "(prefers-contrast: more)",
+      "selector": ".projectIcon",
+      "declaration": ".storyContent,"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1443,
+      "media": "(prefers-contrast: more)",
+      "selector": ".projectIcon",
+      "declaration": ".missionPreview,"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1444,
+      "media": "(prefers-contrast: more)",
+      "selector": ".projectIcon",
+      "declaration": ".heroProduct,"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1446,
+      "media": "(prefers-contrast: more)",
+      "selector": ".sourceDialog",
+      "declaration": "border-color: var(--ink-soft);"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1447,
+      "media": "(prefers-contrast: more)",
+      "selector": ".sourceDialog",
+      "declaration": "box-shadow: none;"
+    }
+  ],
+  "scrollMargins": [
+    {
+      "file": "app/home.module.css",
+      "line": 302,
+      "selector": ".storySection",
+      "value": "5.5rem",
+      "px": 88
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 841,
+      "selector": ".missionSection",
+      "value": "5.5rem",
+      "px": 88
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 971,
+      "selector": ".scenarios",
+      "value": "5.5rem",
+      "px": 88
+    }
+  ],
+  "targetDeclarations": [
+    {
+      "file": "app/home.module.css",
+      "line": 55,
+      "selector": ".homeNav > a",
+      "property": "min-height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 79,
+      "selector": ".homeHeader .headerCta",
+      "property": "height",
+      "value": "40px",
+      "px": 40,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 80,
+      "selector": ".homeHeader .headerCta",
+      "property": "min-height",
+      "value": "40px",
+      "px": 40,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 167,
+      "selector": ".heroActions .secondary",
+      "property": "min-height",
+      "value": "48px",
+      "px": 48,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 177,
+      "selector": ".secondary",
+      "property": "min-height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 348,
+      "selector": ".resetButton",
+      "property": "min-height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 366,
+      "selector": ".storyTabs > button",
+      "property": "min-width",
+      "value": "0",
+      "px": null,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 373,
+      "selector": ".storyTabs > button",
+      "property": "min-height",
+      "value": "52px",
+      "px": 52,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 495,
+      "selector": ".sourceButton",
+      "property": "min-height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 598,
+      "selector": ".evidenceDetails summary",
+      "property": "min-height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 767,
+      "selector": ".storyFooter button",
+      "property": "width",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 768,
+      "selector": ".storyFooter button",
+      "property": "height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 808,
+      "selector": ".dialogHeader > button",
+      "property": "width",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 809,
+      "selector": ".dialogHeader > button",
+      "property": "height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 854,
+      "selector": ".conditions summary",
+      "property": "min-height",
+      "value": "44px",
+      "px": 44,
+      "media": null
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1358,
+      "selector": ".storyFooter button",
+      "property": "width",
+      "value": "40px",
+      "px": 40,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1359,
+      "selector": ".storyFooter button",
+      "property": "height",
+      "value": "44px",
+      "px": 44,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1477,
+      "selector": ".homeHeader .headerCta",
+      "property": "min-height",
+      "value": "44px",
+      "px": 44,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/home.module.css",
+      "line": 1478,
+      "selector": ".homeHeader .headerCta",
+      "property": "height",
+      "value": "44px",
+      "px": 44,
+      "media": "(max-width: 700px)"
+    },
+    {
+      "file": "app/globals.css",
+      "line": 122,
+      "selector": ".editorial-button, .editorial-button-secondary",
+      "property": "min-height",
+      "value": "2.5rem",
+      "px": 40,
+      "media": null
+    }
+  ],
+  "tokenContrast": {
+    "light": {
+      "ink/paper": 13.15,
+      "ink/paperStrong": 14.22,
+      "inkSoft/paper": 5.79,
+      "inkSoft/paperStrong": 6.26,
+      "muted/paper": 4.72,
+      "muted/paperStrong": 5.1,
+      "teal/paper": 6.02,
+      "teal/tealPale": 5.6,
+      "amber/paperStrong": 6.1,
+      "inkSoft/tealPale": 5.39,
+      "ruleStrong/paper": 3.76
+    },
+    "dark": {
+      "ink/paper": 14.45,
+      "ink/paperStrong": 12.76,
+      "inkSoft/paper": 9.34,
+      "inkSoft/paperStrong": 8.25,
+      "muted/paper": 7.7,
+      "muted/paperStrong": 6.8,
+      "teal/paper": 8.87,
+      "teal/tealPale": 5.93,
+      "amber/paperStrong": 9.48,
+      "inkSoft/tealPale": 6.25,
+      "ruleStrong/paper": 5.73
+    }
+  },
+  "keyTextDeclarations": [
+    {
+      "key": "heroNote",
+      "file": "app/home.module.css",
+      "selector": ".heroNote",
+      "declarations": [
+        {
+          "line": 216,
+          "value": "0.72rem",
+          "px": 11.52,
+          "media": null
+        },
+        {
+          "line": 1186,
+          "value": "0.68rem",
+          "px": 10.88,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "heroFigcaption",
+      "file": "app/home.module.css",
+      "selector": ".heroProduct figcaption",
+      "declarations": [
+        {
+          "line": 263,
+          "value": "0.66rem",
+          "px": 10.56,
+          "media": null
+        },
+        {
+          "line": 1203,
+          "value": "0.65rem",
+          "px": 10.4,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "imageToolbar",
+      "file": "app/home.module.css",
+      "selector": ".imageToolbar",
+      "declarations": [
+        {
+          "line": 236,
+          "value": "0.65rem",
+          "px": 10.4,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "sectionHeadingIntro",
+      "file": "app/home.module.css",
+      "selector": ".sectionHeading > p",
+      "declarations": [
+        {
+          "line": 292,
+          "value": "0.85rem",
+          "px": 13.6,
+          "media": null
+        },
+        {
+          "line": 1231,
+          "value": "0.78rem",
+          "px": 12.48,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "projectIdentityDemo",
+      "file": "app/home.module.css",
+      "selector": ".projectIdentity > div > span",
+      "declarations": [
+        {
+          "line": 336,
+          "value": "0.65rem",
+          "px": 10.4,
+          "media": null
+        },
+        {
+          "line": 1252,
+          "value": "0.6rem",
+          "px": 9.6,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "resetButton",
+      "file": "app/home.module.css",
+      "selector": ".resetButton",
+      "declarations": [
+        {
+          "line": 349,
+          "value": "0.72rem",
+          "px": 11.52,
+          "media": null
+        },
+        {
+          "line": 1255,
+          "value": "0.65rem",
+          "px": 10.4,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "tabLabel",
+      "file": "app/home.module.css",
+      "selector": ".storyTabs > button",
+      "declarations": [
+        {
+          "line": 375,
+          "value": "0.8rem",
+          "px": 12.8,
+          "media": null
+        },
+        {
+          "line": 1265,
+          "value": "0.67rem",
+          "px": 10.72,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "contextLabel",
+      "file": "app/home.module.css",
+      "selector": ".contextLabel",
+      "declarations": [
+        {
+          "line": 409,
+          "value": "0.7rem",
+          "px": 11.2,
+          "media": null
+        },
+        {
+          "line": 1280,
+          "value": "0.65rem",
+          "px": 10.4,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "contextPositionSuffix",
+      "file": "app/home.module.css",
+      "selector": ".contextPosition > span",
+      "declarations": [
+        {
+          "line": 438,
+          "value": "0.7rem",
+          "px": 11.2,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "paneHeadingMeta",
+      "file": "app/home.module.css",
+      "selector": ".paneHeading > span",
+      "declarations": [
+        {
+          "line": 462,
+          "value": "0.65rem",
+          "px": 10.4,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "sourceButton",
+      "file": "app/home.module.css",
+      "selector": ".sourceButton",
+      "declarations": [
+        {
+          "line": 493,
+          "value": "0.72rem",
+          "px": 11.52,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "sourceButtonHint",
+      "file": "app/home.module.css",
+      "selector": ".sourceButton > span",
+      "declarations": [
+        {
+          "line": 503,
+          "value": "0.65rem",
+          "px": 10.4,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "factMark",
+      "file": "app/home.module.css",
+      "selector": ".factMark",
+      "declarations": [
+        {
+          "line": 517,
+          "value": "0.68rem",
+          "px": 10.88,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "badges",
+      "file": "app/home.module.css",
+      "selector": ".waitingBadge, .exampleBadge, .confirmedBadge",
+      "declarations": []
+    },
+    {
+      "key": "suggestionBody",
+      "file": "app/home.module.css",
+      "selector": ".suggestion > p",
+      "declarations": [
+        {
+          "line": 586,
+          "value": "0.81rem",
+          "px": 12.96,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "evidenceSummary",
+      "file": "app/home.module.css",
+      "selector": ".evidenceDetails summary",
+      "declarations": [
+        {
+          "line": 599,
+          "value": "0.75rem",
+          "px": 12,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "evidenceBody",
+      "file": "app/home.module.css",
+      "selector": ".evidenceDetails > div > p",
+      "declarations": [
+        {
+          "line": 616,
+          "value": "0.76rem",
+          "px": 12.16,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "detailNote",
+      "file": "app/home.module.css",
+      "selector": ".detailNote",
+      "declarations": [
+        {
+          "line": 621,
+          "value": "0.72rem",
+          "px": 11.52,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "proposalFields",
+      "file": "app/home.module.css",
+      "selector": ".proposalFields > div",
+      "declarations": [
+        {
+          "line": 642,
+          "value": "0.8rem",
+          "px": 12.8,
+          "media": null
+        },
+        {
+          "line": 1338,
+          "value": "0.78rem",
+          "px": 12.48,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "receiptHelp",
+      "file": "app/home.module.css",
+      "selector": ".receiptPane form > p",
+      "declarations": [
+        {
+          "line": 691,
+          "value": "0.78rem",
+          "px": 12.48,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "savedReceiptNote",
+      "file": "app/home.module.css",
+      "selector": ".savedReceipt > p:not(.receiptSavedTitle)",
+      "declarations": [
+        {
+          "line": 732,
+          "value": "0.75rem",
+          "px": 12,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "storyNotice",
+      "file": "app/home.module.css",
+      "selector": ".storyNotice",
+      "declarations": [
+        {
+          "line": 742,
+          "value": "0.77rem",
+          "px": 12.32,
+          "media": null
+        },
+        {
+          "line": 1363,
+          "value": "0.73rem",
+          "px": 11.68,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "storyFooterBoundary",
+      "file": "app/home.module.css",
+      "selector": ".storyFooter > p",
+      "declarations": [
+        {
+          "line": 755,
+          "value": "0.7rem",
+          "px": 11.2,
+          "media": null
+        },
+        {
+          "line": 1352,
+          "value": "0.64rem",
+          "px": 10.24,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "dialogHeaderMeta",
+      "file": "app/home.module.css",
+      "selector": ".dialogHeader > p",
+      "declarations": [
+        {
+          "line": 803,
+          "value": "0.75rem",
+          "px": 12,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "dialogProvenance",
+      "file": "app/home.module.css",
+      "selector": ".dialogProvenance",
+      "declarations": [
+        {
+          "line": 830,
+          "value": "0.75rem",
+          "px": 12,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "conditionsSummary",
+      "file": "app/home.module.css",
+      "selector": ".conditions summary",
+      "declarations": [
+        {
+          "line": 859,
+          "value": "0.78rem",
+          "px": 12.48,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "conditionsBody",
+      "file": "app/home.module.css",
+      "selector": ".conditions > p",
+      "declarations": [
+        {
+          "line": 870,
+          "value": "0.78rem",
+          "px": 12.48,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "previewLabel",
+      "file": "app/home.module.css",
+      "selector": ".previewLabel",
+      "declarations": [
+        {
+          "line": 887,
+          "value": "0.7rem",
+          "px": 11.2,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "previewDescription",
+      "file": "app/home.module.css",
+      "selector": ".previewDescription",
+      "declarations": [
+        {
+          "line": 897,
+          "value": "0.8rem",
+          "px": 12.8,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "executionListDetail",
+      "file": "app/home.module.css",
+      "selector": ".executionList > li > div > span",
+      "declarations": [
+        {
+          "line": 930,
+          "value": "0.72rem",
+          "px": 11.52,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "previewFootnote",
+      "file": "app/home.module.css",
+      "selector": ".previewFootnote",
+      "declarations": [
+        {
+          "line": 961,
+          "value": "0.7rem",
+          "px": 11.2,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "boundaryNote",
+      "file": "app/home.module.css",
+      "selector": ".boundaryNote p",
+      "declarations": [
+        {
+          "line": 1057,
+          "value": "0.8rem",
+          "px": 12.8,
+          "media": null
+        },
+        {
+          "line": 1408,
+          "value": "0.75rem",
+          "px": 12,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "footer",
+      "file": "app/home.module.css",
+      "selector": ".footer",
+      "declarations": [
+        {
+          "line": 1088,
+          "value": "0.7rem",
+          "px": 11.2,
+          "media": null
+        },
+        {
+          "line": 1421,
+          "value": "0.65rem",
+          "px": 10.4,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "sectionLabel",
+      "file": "app/home.module.css",
+      "selector": ".sectionLabel",
+      "declarations": [
+        {
+          "line": 268,
+          "value": "0.75rem",
+          "px": 12,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "homeNav",
+      "file": "app/home.module.css",
+      "selector": ".homeNav",
+      "declarations": [
+        {
+          "line": 51,
+          "value": "0.8rem",
+          "px": 12.8,
+          "media": null
+        }
+      ]
+    },
+    {
+      "key": "homeHeaderCta",
+      "file": "app/home.module.css",
+      "selector": ".homeHeader .headerCta",
+      "declarations": [
+        {
+          "line": 81,
+          "value": "14px",
+          "px": 14,
+          "media": null
+        },
+        {
+          "line": 1213,
+          "value": "14px",
+          "px": 14,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "mobileHeroNote",
+      "file": "app/home.module.css",
+      "selector": ".heroNote",
+      "declarations": [
+        {
+          "line": 216,
+          "value": "0.72rem",
+          "px": 11.52,
+          "media": null
+        },
+        {
+          "line": 1186,
+          "value": "0.68rem",
+          "px": 10.88,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "mobileTabLabel",
+      "file": "app/home.module.css",
+      "selector": ".storyTabs > button",
+      "declarations": [
+        {
+          "line": 375,
+          "value": "0.8rem",
+          "px": 12.8,
+          "media": null
+        },
+        {
+          "line": 1265,
+          "value": "0.67rem",
+          "px": 10.72,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "mobileStoryFooter",
+      "file": "app/home.module.css",
+      "selector": ".storyFooter > p",
+      "declarations": [
+        {
+          "line": 755,
+          "value": "0.7rem",
+          "px": 11.2,
+          "media": null
+        },
+        {
+          "line": 1352,
+          "value": "0.64rem",
+          "px": 10.24,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "mobileFooter",
+      "file": "app/home.module.css",
+      "selector": ".footer",
+      "declarations": [
+        {
+          "line": 1088,
+          "value": "0.7rem",
+          "px": 11.2,
+          "media": null
+        },
+        {
+          "line": 1421,
+          "value": "0.65rem",
+          "px": 10.4,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "mobileProjectIdentity",
+      "file": "app/home.module.css",
+      "selector": ".projectIdentity > div > span",
+      "declarations": [
+        {
+          "line": 336,
+          "value": "0.65rem",
+          "px": 10.4,
+          "media": null
+        },
+        {
+          "line": 1252,
+          "value": "0.6rem",
+          "px": 9.6,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "mobileResetButton",
+      "file": "app/home.module.css",
+      "selector": ".resetButton",
+      "declarations": [
+        {
+          "line": 349,
+          "value": "0.72rem",
+          "px": 11.52,
+          "media": null
+        },
+        {
+          "line": 1255,
+          "value": "0.65rem",
+          "px": 10.4,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "accountCtaMobile",
+      "file": "app/home.module.css",
+      "selector": ".homeNav .headerCta",
+      "declarations": [
+        {
+          "line": 1152,
+          "value": "0.7rem",
+          "px": 11.2,
+          "media": "(max-width: 700px)"
+        }
+      ]
+    },
+    {
+      "key": "bodyBase",
+      "file": "app/globals.css",
+      "selector": "body",
+      "declarations": [
+        {
+          "line": 71,
+          "value": "14px",
+          "px": 14,
+          "media": null
+        }
+      ]
+    }
+  ],
+  "tsxFindings": [
+    {
+      "key": "homeJourney.tablist",
+      "file": "components/HomeJourney.tsx",
+      "hits": [
+        {
+          "line": 158,
+          "code": "role=\"tablist\""
+        }
+      ]
+    },
+    {
+      "key": "homeJourney.tab",
+      "file": "components/HomeJourney.tsx",
+      "hits": [
+        {
+          "line": 164,
+          "code": "role=\"tab\""
+        }
+      ]
+    },
+    {
+      "key": "homeJourney.ariaSelected",
+      "file": "components/HomeJourney.tsx",
+      "hits": [
+        {
+          "line": 166,
+          "code": "aria-selected={active === index}"
+        }
+      ]
+    },
+    {
+      "key": "homeJourney.tabIndex",
+      "file": "components/HomeJourney.tsx",
+      "hits": [
+        {
+          "line": 168,
+          "code": "tabIndex={active === index ? 0 : -1}"
+        },
+        {
+          "line": 201,
+          "code": "tabIndex={0}"
+        }
+      ]
+    },
+    {
+      "key": "homeJourney.tabKeydown",
+      "file": "components/HomeJourney.tsx",
+      "hits": [
+        {
+          "line": 174,
+          "code": "onKeyDown={(event) => {"
+        }
+      ]
+    },
+    {
+      "key": "homeJourney.tabpanel",
+      "file": "components/HomeJourney.tsx",
+      "hits": [
+        {
+          "line": 198,
+          "code": "role=\"tabpanel\""
+        }
+      ]
+    },
+    {
+      "key": "homeJourney.dialog",
+      "file": "components/HomeJourney.tsx",
+      "hits": [
+        {
+          "line": 458,
+          "code": "<dialog"
+        }
+      ]
+    },
+    {
+      "key": "homeJourney.dialogLabelledby",
+      "file": "components/HomeJourney.tsx",
+      "hits": [
+        {
+          "line": 461,
+          "code": "aria-labelledby=\"source-title\""
+        }
+      ]
+    },
+    {
+      "key": "homeJourney.dialogCancel",
+      "file": "components/HomeJourney.tsx",
+      "hits": [
+        {
+          "line": 462,
+          "code": "onCancel={() => setSourceId(null)}"
+        }
+      ]
+    },
+    {
+      "key": "homeJourney.dialogBackdrop",
+      "file": "components/HomeJourney.tsx",
+      "hits": [
+        {
+          "line": 465,
+          "code": "if (event.target === event.currentTarget) setSourceId(null);"
+        }
+      ]
+    },
+    {
+      "key": "homeJourney.showModal",
+      "file": "components/HomeJourney.tsx",
+      "hits": [
+        {
+          "line": 113,
+          "code": "if (sourceId && element && !element.open) element.showModal();"
+        }
+      ]
+    },
+    {
+      "key": "homeJourney.dialogClose",
+      "file": "components/HomeJourney.tsx",
+      "hits": [
+        {
+          "line": 114,
+          "code": "if (!sourceId && element?.open) element.close();"
+        }
+      ]
+    },
+    {
+      "key": "homeJourney.status",
+      "file": "components/HomeJourney.tsx",
+      "hits": [
+        {
+          "line": 431,
+          "code": "<p role=\"status\" className={styles.storyNotice}>"
+        }
+      ]
+    },
+    {
+      "key": "homeJourney.sourceButtonLabel",
+      "file": "components/HomeJourney.tsx",
+      "hits": [
+        {
+          "line": 131,
+          "code": "aria-label={\"查看原文：\" + title}"
+        }
+      ]
+    },
+    {
+      "key": "homeJourney.storyFrameAriaLabel",
+      "file": "components/HomeJourney.tsx",
+      "hits": [
+        {
+          "line": 140,
+          "code": "<div className={styles.storyFrame} aria-label=\"参赛项目交互示例\">"
+        }
+      ]
+    },
+    {
+      "key": "homeJourney.prevNext",
+      "file": "components/HomeJourney.tsx",
+      "hits": [
+        {
+          "line": 442,
+          "code": "aria-label=\"上一步\""
+        },
+        {
+          "line": 450,
+          "code": "aria-label=\"下一步\""
+        }
+      ]
+    },
+    {
+      "key": "homeJourney.textareaHelp",
+      "file": "components/HomeJourney.tsx",
+      "hits": [
+        {
+          "line": 408,
+          "code": "aria-describedby=\"receipt-help\""
+        }
+      ]
+    },
+    {
+      "key": "page.mainHome",
+      "file": "app/page.tsx",
+      "hits": [
+        {
+          "line": 27,
+          "code": "<main id=\"main-content\" className={styles.home}>"
+        }
+      ]
+    },
+    {
+      "key": "page.heroCta",
+      "file": "app/page.tsx",
+      "hits": [
+        {
+          "line": 44,
+          "code": "<a className={styles.primary} href=\"#experience\">"
+        }
+      ]
+    },
+    {
+      "key": "page.heroFigure",
+      "file": "app/page.tsx",
+      "hits": [
+        {
+          "line": 58,
+          "code": "<figure className={styles.heroProduct}>"
+        }
+      ]
+    },
+    {
+      "key": "page.heroImgAlt",
+      "file": "app/page.tsx",
+      "hits": [
+        {
+          "line": 70,
+          "code": "alt=\"忆程实际工作区：项目风险状态、记录依据与下一步入口\""
+        }
+      ]
+    },
+    {
+      "key": "page.heroMobileSource",
+      "file": "app/page.tsx",
+      "hits": [
+        {
+          "line": 66,
+          "code": "srcSet=\"/home/workspace-mobile.jpg\""
+        }
+      ]
+    },
+    {
+      "key": "page.figcaption",
+      "file": "app/page.tsx",
+      "hits": [
+        {
+          "line": 78,
+          "code": "<figcaption>实际工作区界面，使用内置示例数据。</figcaption>"
+        }
+      ]
+    },
+    {
+      "key": "page.experienceSection",
+      "file": "app/page.tsx",
+      "hits": [
+        {
+          "line": 83,
+          "code": "id=\"experience\""
+        }
+      ]
+    },
+    {
+      "key": "page.conditions",
+      "file": "app/page.tsx",
+      "hits": [
+        {
+          "line": 123,
+          "code": "<details className={styles.conditions}>"
+        }
+      ]
+    },
+    {
+      "key": "page.missionPreviewLabel",
+      "file": "app/page.tsx",
+      "hits": [
+        {
+          "line": 133,
+          "code": "aria-label=\"长期委托等待补充材料的界面示例\""
+        }
+      ]
+    },
+    {
+      "key": "page.executionGlyphs",
+      "file": "app/page.tsx",
+      "hits": [
+        {
+          "line": 145,
+          "code": "<span className={styles.completedNode}>✓</span>"
+        },
+        {
+          "line": 152,
+          "code": "<span className={styles.currentNode}>?</span>"
+        },
+        {
+          "line": 159,
+          "code": "<span className={styles.pendingNode} />"
+        }
+      ]
+    },
+    {
+      "key": "page.footerTopLink",
+      "file": "app/page.tsx",
+      "hits": [
+        {
+          "line": 272,
+          "code": "<a href=\"#home-heading\">回到顶部 ↑</a>"
+        }
+      ]
+    },
+    {
+      "key": "siteHeader.accountPages",
+      "file": "components/SiteHeader.tsx",
+      "hits": [
+        {
+          "line": 19,
+          "code": "\"/login\","
+        }
+      ]
+    },
+    {
+      "key": "siteHeader.returnChildren",
+      "file": "components/SiteHeader.tsx",
+      "hits": [
+        {
+          "line": 26,
+          "code": "if (pathname !== \"/\" && !accountPage) return children;"
+        }
+      ]
+    },
+    {
+      "key": "siteHeader.homeHeaderClass",
+      "file": "components/SiteHeader.tsx",
+      "hits": [
+        {
+          "line": 29,
+          "code": "className={`${styles.siteHeader} ${pathname === \"/\" ? styles.homeHeader : \"\"}`}"
+        }
+      ]
+    },
+    {
+      "key": "siteHeader.navLabel",
+      "file": "components/SiteHeader.tsx",
+      "hits": [
+        {
+          "line": 33,
+          "code": "<nav aria-label=\"首页导航\" className={styles.homeNav}>"
+        }
+      ]
+    },
+    {
+      "key": "siteHeader.accountCta",
+      "file": "components/SiteHeader.tsx",
+      "hits": [
+        {
+          "line": 36,
+          "code": "返回官网"
+        }
+      ]
+    },
+    {
+      "key": "siteHeader.registrationFlag",
+      "file": "components/SiteHeader.tsx",
+      "hits": [
+        {
+          "line": 12,
+          "code": "registrationEnabled = false,"
+        },
+        {
+          "line": 15,
+          "code": "registrationEnabled?: boolean;"
+        },
+        {
+          "line": 43,
+          "code": "{registrationEnabled && <Link href=\"/register\">注册</Link>}"
+        }
+      ]
+    },
+    {
+      "key": "layout.skipLink",
+      "file": "app/layout.tsx",
+      "hits": [
+        {
+          "line": 29,
+          "code": "<a href=\"#main-content\" className=\"skip-link\">跳到主要内容</a>"
+        }
+      ]
+    },
+    {
+      "key": "layout.themeProvider",
+      "file": "app/layout.tsx",
+      "hits": [
+        {
+          "line": 25,
+          "code": "defaultTheme=\"light\""
+        }
+      ]
+    },
+    {
+      "key": "layout.htmlLang",
+      "file": "app/layout.tsx",
+      "hits": [
+        {
+          "line": 21,
+          "code": "<html lang=\"zh-CN\" data-scroll-behavior=\"smooth\" suppressHydrationWarning>"
+        }
+      ]
+    },
+    {
+      "key": "globals.skipLinkCss",
+      "file": "app/globals.css",
+      "hits": [
+        {
+          "line": 113,
+          "code": ".skip-link { position: fixed; z-index: 100; top: .6rem; left: .6rem; transform: translateY(-160%); border-radius: .65rem; background: var(--navy-deep); padding:"
+        },
+        {
+          "line": 114,
+          "code": ".skip-link:focus { transform: translateY(0); }"
+        }
+      ]
+    },
+    {
+      "key": "globals.focusRing",
+      "file": "app/globals.css",
+      "hits": [
+        {
+          "line": 112,
+          "code": ".focus-ring:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }"
+        }
+      ]
+    },
+    {
+      "key": "globals.reducedMotion",
+      "file": "app/globals.css",
+      "hits": [
+        {
+          "line": 232,
+          "code": "@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration:"
+        },
+        {
+          "line": 242,
+          "code": "@media(prefers-reduced-motion:reduce) { .hover-lift:hover,.editorial-button:hover { transform:none; } }"
+        },
+        {
+          "line": 285,
+          "code": "@media(prefers-reduced-motion:reduce) { .workspace-link svg { transition:none; transform:none!important; } }"
+        }
+      ]
+    },
+    {
+      "key": "stateDiffView.smallText",
+      "file": "components/StateDiffView.tsx",
+      "hits": [
+        {
+          "line": 23,
+          "code": "return <p className=\"rounded-lg bg-[var(--paper-strong)] px-3 py-2.5 text-xs leading-5 text-[var(--muted)]\">{emptyText}</p>;"
+        },
+        {
+          "line": 25,
+          "code": "return <div><p className=\"mb-2 break-all text-xs text-[var(--ink-soft)]\">比较基线：{diff.fromSnapshotId} → {diff.toSnapshotId}</p><ul className=\"space-y-2\">"
+        },
+        {
+          "line": 31,
+          "code": "<span className=\"rounded-md bg-[var(--paper-strong)] px-1.5 py-0.5 text-[11px] font-bold text-[var(--ink-soft)]\">{meta.label}</span>"
+        },
+        {
+          "line": 32,
+          "code": "<span className=\"text-xs font-bold text-[var(--muted)]\">依据 {item.evidenceRefs.length} 项</span>"
+        },
+        {
+          "line": 34,
+          "code": "<p className=\"mt-1.5 text-xs font-semibold leading-5 text-[var(--navy)]\">{item.summary}</p>"
+        },
+        {
+          "line": 35,
+          "code": "{(item.before !== null || item.after !== null) && <p className=\"mt-1 text-xs leading-5 text-[var(--ink-soft)]\">"
+        },
+        {
+          "line": 41,
+          "code": "{item.evidenceRefs.slice(0, 4).map((ref, index) => <span key={`${ref.entityKind}-${ref.entityId}-${index}`} className=\"rounded bg-[var(--paper-strong)] px-1.5 p"
+        },
+        {
+          "line": 44,
+          "code": "{item.evidenceRefs.length > 4 && <span className=\"px-1 py-0.5 text-[11px] text-[var(--muted)]\">+{item.evidenceRefs.length - 4}</span>}"
+        },
+        {
+          "line": 48,
+          "code": "{limit && diff.items.length > limit && <li className=\"px-1 text-xs font-semibold text-[var(--muted)]\">还有 {diff.items.length - limit} 项变化</li>}"
+        }
+      ]
+    }
+  ]
+}

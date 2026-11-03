@@ -1,0 +1,14 @@
+=== PHASE 2-A SUMMARY ===
+OK  after-1440-light    119851B class=light overflow=false h1=人可以下线， 项目别掉线。 heroCopyTop=111.72 minFont=12.8px imgs=1
+OK  after-1440-dark     115298B class=dark overflow=false h1=人可以下线， 项目别掉线。 heroCopyTop=111.72 minFont=12.8px imgs=1
+OK  after-1280-light    101268B class=light overflow=false h1=人可以下线， 项目别掉线。 heroCopyTop=105.63 minFont=12.8px imgs=1
+OK  after-1280-dark      97113B class=dark overflow=false h1=人可以下线， 项目别掉线。 heroCopyTop=105.63 minFont=12.8px imgs=1
+OK  after-390-light      65248B class=light overflow=false h1=人可以下线， 项目别掉线。 heroCopyTop=77 minFont=12.8px imgs=1
+OK  after-390-dark       64880B class=dark overflow=false h1=人可以下线， 项目别掉线。 heroCopyTop=77 minFont=12.8px imgs=1
+OK  hero-during        117615B selTab=02 期间 evidence=false heroCopyTop=111.72
+OK  hero-evidence-open  125826B selTab=03 回来后 evidence=true heroCopyTop=111.72
+network: {"requestRecords":431,"uniqueRequestUrls":27,"externalOriginRequests":0,"apiWriteRequests":0,"bilibiliRequests":0,"failures":4,"imageFontFailures":0,"consoleErrors":0,"pageErrors":0,"userAbortedRequests":0}
+assertions: {"noBilibiliRequestDuringLoad":true,"noApiWrites":true,"noExternalOrigins":true,"noPageErrors":true}
+perf: nav={"ttfbMs":220.7,"domContentLoadedMs":235.8,"loadEventEndMs":304.5,"domCompleteMs":304.5,"documentTransferSize":18507,"documentDecodedBodySize":74480}
+resources: {"resourceCount":26,"transferSize":6600,"decodedBodySize":358120,"byInitiatorType":{"link":{"count":4,"transferSize":1200,"decodedBodySize":0},"script":{"count":18,"transferSize":5400,"decodedBodySize":0},"css":{"count":4,"transferSize":0,"decodedBodySize":358120}},"fontResourceCount":4,"externalResourceCount":0,"bilibiliResourceCount":0}
+output: evidence/final-sprint/20261103/b-brand-home/after + evidence/final-sprint/20261103/b-brand-home/b3

@@ -1,0 +1,31 @@
+{
+  "capturedAt": "2026-11-03T12:45:20+08:00",
+  "head": "9bae926e9475cedef118deedf5e002ec8365a23b",
+  "branch": "codex/final-b-brand-home",
+  "trackedStatusNonEvidence": [
+    " M next-env.d.ts"
+  ],
+  "deltaBase": "cc7c19fed573c79a55f727eaa338ab84fd80cc3b",
+  "deltaFiles": [
+    "components/HomeJourney.module.css",
+    "components/HomeJourney.tsx",
+    "components/home/HomeHeroLens.tsx"
+  ],
+  "deltaStat": [
+    " components/HomeJourney.module.css | 10 ++++++++++",
+    " components/HomeJourney.tsx        |  6 +++++-",
+    " components/home/HomeHeroLens.tsx  |  1 +",
+    " 3 files changed, 16 insertions(+), 1 deletion(-)"
+  ],
+  "sourceHashes": {
+    "components\\home\\HomeMotion.tsx": "04B396070BDF769AFD4F482801FC842FD16025EE8711A721939D873A28C6AF14",
+    "components\\SiteHeader.tsx": "201338F0279ADBDBF75CD7E9571E8FD037BF96FCA7A356DA76334BCC9E9E4E28",
+    "components\\SiteHeader.module.css": "A7AE1B92DE1303C9BB6980BD0DC51B3030E2083B7A09DBFAFCA1C8E1785B6598",
+    "components\\HomeJourney.module.css": "748D738608E9F9962CBD0004D1C83412A3E9C9091FC6C5F552162F1E36C8FE98",
+    "app\\page.tsx": "9471F81CCC96332A505A89CB8CB32C8A082A5F1F6813EB422F53A2FE6D70A305",
+    "app\\home.module.css": "974B58824B9542C50208694706845D6AE9CDE967C0B98B805B60E8890F5F795D",
+    "components\\home\\HomeHeroLens.tsx": "F181E83FB3F9EB94453A023C8E4EA8F5D7EE1DC06019EF38DA2C5C61F736638F",
+    "components\\home\\homeExample.ts": "263043BD543F9B552F35FDFA6981EC6479335BDCFD3A49ED5811728F1D491002",
+    "components\\HomeJourney.tsx": "E9E88EFF3DB299D2C8528CBF946843362F36DC1D71BBA55467E3DABC15016826"
+  }
+}

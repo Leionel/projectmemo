@@ -1,0 +1,77 @@
+{
+  "generatedAt": "2026-11-03T03:40:53.156Z",
+  "base": "http://127.0.0.1:34111",
+  "mode": "anonymous-no-cookie-read-only",
+  "results": [
+    {
+      "ok": true,
+      "input": "/",
+      "hops": 1,
+      "chain": [
+        {
+          "requestUrl": "http://127.0.0.1:34111/",
+          "status": 200,
+          "location": null,
+          "contentType": "text/html; charset=utf-8"
+        }
+      ],
+      "finalUrl": "http://127.0.0.1:34111/"
+    },
+    {
+      "ok": true,
+      "input": "/focus",
+      "hops": 1,
+      "chain": [
+        {
+          "requestUrl": "http://127.0.0.1:34111/focus",
+          "status": 200,
+          "location": null,
+          "contentType": "text/html; charset=utf-8"
+        }
+      ],
+      "finalUrl": "http://127.0.0.1:34111/focus"
+    },
+    {
+      "ok": true,
+      "input": "/focus?from=%2Fhome",
+      "hops": 1,
+      "chain": [
+        {
+          "requestUrl": "http://127.0.0.1:34111/focus?from=%2Fhome",
+          "status": 200,
+          "location": null,
+          "contentType": "text/html; charset=utf-8"
+        }
+      ],
+      "finalUrl": "http://127.0.0.1:34111/focus?from=%2Fhome"
+    },
+    {
+      "ok": true,
+      "input": "/login?from=%2Ffocus",
+      "hops": 1,
+      "chain": [
+        {
+          "requestUrl": "http://127.0.0.1:34111/login?from=%2Ffocus",
+          "status": 200,
+          "location": null,
+          "contentType": "text/html; charset=utf-8"
+        }
+      ],
+      "finalUrl": "http://127.0.0.1:34111/login?from=%2Ffocus"
+    },
+    {
+      "ok": true,
+      "input": "/login",
+      "hops": 1,
+      "chain": [
+        {
+          "requestUrl": "http://127.0.0.1:34111/login",
+          "status": 200,
+          "location": null,
+          "contentType": "text/html; charset=utf-8"
+        }
+      ],
+      "finalUrl": "http://127.0.0.1:34111/login"
+    }
+  ]
+}

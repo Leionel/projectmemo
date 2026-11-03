@@ -1,0 +1,737 @@
+{
+  "generatedAt": "2026-11-03T04:33:16.649Z",
+  "base": "http://127.0.0.1:34111",
+  "candidateSha": "cc7c19fed573c79a55f727eaa338ab84fd80cc3b",
+  "checks": [
+    {
+      "id": "C-01-hero-boundary-note",
+      "pass": true,
+      "detail": {
+        "heroNote": "公开示例 · 不调用模型 · 不写入你的项目。"
+      }
+    },
+    {
+      "id": "C-02-hero-lens-kicker",
+      "pass": true,
+      "detail": {
+        "occurrences": 2
+      }
+    },
+    {
+      "id": "C-03-lens-foot-boundary",
+      "pass": true,
+      "detail": {
+        "foot": "冻结示例·不调用模型·与下方五步示例使用同一份素材"
+      }
+    },
+    {
+      "id": "C-04-demo-boundary-deferred",
+      "pass": true,
+      "detail": {
+        "note": "authoritative check C-04b after demo step-5 interaction"
+      }
+    },
+    {
+      "id": "C-05-identity-same-project",
+      "pass": true,
+      "detail": {
+        "occurrences": 2
+      }
+    },
+    {
+      "id": "C-06-identity-same-mission",
+      "pass": true,
+      "detail": {
+        "occurrences": 3
+      }
+    },
+    {
+      "id": "C-07-same-sources",
+      "pass": true,
+      "detail": {
+        "found": [
+          "比赛材料",
+          "任务安排",
+          "老师建议"
+        ]
+      }
+    },
+    {
+      "id": "C-08-same-gap",
+      "pass": true,
+      "detail": {
+        "occurrences": 2
+      }
+    },
+    {
+      "id": "C-09-old-hero-images-absent",
+      "pass": true,
+      "detail": {
+        "imgs": [
+          {
+            "src": "http://127.0.0.1:34111/logo.png",
+            "alt": "",
+            "w": 1254,
+            "h": 1254
+          }
+        ]
+      }
+    },
+    {
+      "id": "C-10-no-iframe-media-autoplay",
+      "pass": true,
+      "detail": {
+        "iframes": 0,
+        "media": 0,
+        "autoplay": 0
+      }
+    },
+    {
+      "id": "C-11a-video-link-attributes",
+      "pass": true,
+      "detail": {
+        "videoLinks": [
+          {
+            "text": "2026 C4-AI 决赛演示视频忆程 ProjectMemo · Bilibili · 新窗口打开",
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "ariaLabel": null
+          },
+          {
+            "text": "决赛演示",
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "ariaLabel": "决赛演示（Bilibili，在新窗口打开）"
+          }
+        ]
+      }
+    },
+    {
+      "id": "C-11b-main-video-cue",
+      "pass": true,
+      "detail": {
+        "mainText": "2026 C4-AI 决赛演示视频忆程 ProjectMemo · Bilibili · 新窗口打开"
+      }
+    },
+    {
+      "id": "C-11c-footer-video-cue",
+      "pass": true,
+      "detail": {
+        "footerText": "决赛演示",
+        "footerAria": "决赛演示（Bilibili，在新窗口打开）"
+      }
+    },
+    {
+      "id": "C-14-video-copy-no-metrics",
+      "pass": true,
+      "detail": {
+        "videoSection": "05\n决赛演示\n\n看一遍决赛演示。\n\n2026 C4-AI 决赛演示视频。视频托管在 Bilibili，点击后在新窗口打开外部站点。\n\n2026 C4-AI 决赛演示视频\n忆程 ProjectMemo · Bilibili · 新窗口打开"
+      }
+    },
+    {
+      "id": "C-15-video-copy-scope",
+      "pass": true,
+      "detail": {
+        "videoSection": "05\n决赛演示\n\n看一遍决赛演示。\n\n2026 C4-AI 决赛演示视频。视频托管在 Bilibili，点击后在新窗口打开外部站点。\n\n2026 C4-AI 决赛演示视频\n忆程 ProjectMemo · Bilibili · 新窗口打开"
+      }
+    },
+    {
+      "id": "C-16-fake-realtime-only-negated",
+      "pass": true,
+      "detail": [
+        {
+          "pattern": "正在执行",
+          "context": "务。 什么情况下才会自动接续？ 这一段是冻结的示例状态：不连接服务器，也不代表任务此刻正在执行。 02 公开交互示例 同一份素材，走一遍接续。 从原始记录到模拟回执：先看依据，再确认行动。所"
+        },
+        {
+          "pattern": "自动接续",
+          "context": " 补充结果，或确认原计划 原任务、来源和草稿都保留，不另建一个新任务。 什么情况下才会自动接续？ 这一段是冻结的示例状态：不连接服务器，也不代表任务此刻正在执行。 02 公开交互示例 同一份"
+        }
+      ]
+    },
+    {
+      "id": "C-17-no-fake-numbers",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "id": "C-18-anti-slop",
+      "pass": true,
+      "detail": {
+        "slopHits": []
+      }
+    },
+    {
+      "id": "C-19-no-fake-timestamps",
+      "pass": true,
+      "detail": {
+        "hits": []
+      }
+    },
+    {
+      "id": "C-20-aria-tabs",
+      "pass": true,
+      "detail": {
+        "heroTabs": [
+          {
+            "text": "01离开时",
+            "selected": "false"
+          },
+          {
+            "text": "02期间",
+            "selected": "false"
+          },
+          {
+            "text": "03回来后",
+            "selected": "true"
+          }
+        ],
+        "demoTabs": [
+          {
+            "text": "1查看记录",
+            "selected": "true"
+          },
+          {
+            "text": "2核对依据",
+            "selected": "false"
+          },
+          {
+            "text": "3查看判断",
+            "selected": "false"
+          },
+          {
+            "text": "4确认行动",
+            "selected": "false"
+          },
+          {
+            "text": "5填写回执",
+            "selected": "false"
+          }
+        ],
+        "heroPanels": 1,
+        "demoPanels": 1,
+        "heroTablist": 1,
+        "demoTablist": 1
+      }
+    },
+    {
+      "id": "C-21-anchor-targets",
+      "pass": true,
+      "detail": {
+        "experience": 5,
+        "hasMissions": true,
+        "hasMoments": true,
+        "hasDemo": true,
+        "login": 2,
+        "focus": 1
+      }
+    },
+    {
+      "id": "C-22-keyboard-tabs",
+      "pass": true,
+      "detail": {
+        "afterRight": "02 期间",
+        "afterEnd": "03 回来后",
+        "demoAfterEnd": "5 填写回执"
+      }
+    },
+    {
+      "id": "C-23-hero-evidence-sources",
+      "pass": true,
+      "detail": {
+        "heroEvidence": "原文来自内置公开素材，不读取你的项目。\n\n比赛材料\n示例素材 · 比赛要求摘录\n\n初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。\n\n任务安排\n示例素材 · 项目任务记录\n\n目前还没有完整 Demo，需要先完成项目创建、碎片捕获和成果生成闭环。\n\n老师建议\n示例素材 · 指导意见摘录\n\n老师建议作品不要叫普通学习助手，要突出项目制学习和知识资产复用。"
+      }
+    },
+    {
+      "id": "C-24-demo-step1-sources",
+      "pass": true,
+      "detail": {
+        "step1": "已有示例素材\n\n先看看上次留下了什么\n\n这份示例项目保留了任务安排、比赛材料和老师建议。先读原文，再判断现在该做什么。\n\n1 / 5\n原始记录\n3 条内置素材\n任务安排\n\n目前还没有完整 Demo，需要先完成项目创建、碎片捕获和成果生成闭环。\n\n任务安排\n查看原文\n比赛材料\n\n初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。\n\n比赛材料\n查看原文\n老师建议\n\n老师建议作品不要叫普通学习助手，要突出项目制学习和知识资产复用。\n\n老师建议\n查看原文"
+      }
+    },
+    {
+      "id": "C-25-demo-step1-label-consistency",
+      "pass": true,
+      "detail": {
+        "note": "'参赛要求' 与来源标题 '比赛材料' 不一致（minor）",
+        "line": null
+      }
+    },
+    {
+      "id": "C-30-demo-receipt-gate",
+      "pass": true,
+      "detail": {
+        "gatePanel": "本页模拟操作\n\n完成了什么，由实际结果来说明\n\n确认示例行动后，试着填写一段模拟回执。保存后回到依据页，可以看到这段结果和原记录放在一起。\n\n5 / 5\n完成回执\n模拟数据\n\n先确认行动，再填写模拟回执。单纯切换到这一步，不会把行动标为完成。\n\n返回确认行动"
+      }
+    },
+    {
+      "id": "C-31-demo-confirm-boundary",
+      "pass": true,
+      "detail": {
+        "confirmPanel": "等待你的确认\n\n先核对提案，再决定是否创建\n\n建议还不是待办。查看行动要做什么、怎样记录结果，再由你确认。这里的操作只影响本页示例。\n\n4 / 5\n行动提案\n本页示例已确认\n验证一次资料录入到成果草稿的流程\n要做什么\n录入一条项目记录，查看生成的记忆，再整理一份成果草稿。\n完成后记录\n实际操作结果、失败位置，以及是否需要补充材料。\n来源\n任务安排\n查看原文\n比赛材料\n查看原文\n\n示例行动已确认，尚未填写完成结果。\n\n去填写模拟回执"
+      }
+    },
+    {
+      "id": "C-04b-demo-boundary-labels-visible",
+      "pass": true,
+      "detail": {
+        "step5Saved": "本页模拟操作\n\n完成了什么，由实际结果来说明\n\n确认示例行动后，试着填写一段模拟回执。保存后回到依据页，可以看到这段结果和原记录放在一起。\n\n5 / 5\n完成回执\n模拟数据\n\n模拟回执已加入本页示例\n\n审计示例：假设已录入一条记录并生成草稿，来源还需要逐项核对。\n\n结果由你在本页填写，未经过实际操作核验。\n\n回到依据页查看",
+        "demoFooterNote": "已有记录取自内置素材；建议与回执为本页演示。不会调用模型或修改个人项目。",
+        "noticeText": "模拟回执已保存在本页，刷新页面后不会保留。",
+        "demoLabels": [
+          "模拟数据",
+          "本页模拟操作",
+          "未经过实际操作核验",
+          "不会调用模型或修改个人项目",
+          "模拟回执",
+          "刷新页面后不会保留"
+        ]
+      }
+    },
+    {
+      "id": "C-32-receipt-reflected-in-evidence",
+      "pass": true,
+      "detail": {
+        "backEvidence": "已知与待确认\n\n记录说了什么，哪些还不知道\n\n历史记录和当前状态分别看。没有找到新的完成结果，不能据此断言功能现在仍未完成。\n\n2 / 5\n已有依据\n示例整理\n记录中提到\n\n初赛需要作品说明文档和演示材料。\n\n比赛材料\n查看原文\n已有任务安排\n\n先完成项目创建、资料录入和成果生成流程。\n\n任务安排\n查看原文\n当前状态待确认\n\n下方是你填写的模拟结果，真实完成情况仍需实际回执。\n\n新增模拟回执\n\n审计示例：假设已录入一条记录并生成草稿，来源还需要逐项核对。\n\n模拟回执\n查看原文"
+      }
+    },
+    {
+      "id": "C-33-reset-boundary",
+      "pass": true,
+      "detail": {
+        "resetNotice": "示例已重置，未修改任何个人项目。"
+      }
+    },
+    {
+      "id": "C-34-no-legacy-hero-image",
+      "pass": true,
+      "detail": {
+        "figure": 0,
+        "figcaption": 0,
+        "workspaceImgs": 0
+      }
+    },
+    {
+      "id": "C-35-video-intro-copy",
+      "pass": true,
+      "detail": {
+        "videoSection": "05\n决赛演示\n\n看一遍决赛演示。\n\n2026 C4-AI 决赛演示视频。视频托管在 Bilibili，点击后在新窗口打开外部站点。\n\n2026 C4-AI 决赛演示视频\n忆程 ProjectMemo · Bilibili · 新窗口打开"
+      }
+    },
+    {
+      "id": "C-36-video-heading-scope",
+      "pass": true,
+      "detail": {
+        "videoSection": "05\n决赛演示\n\n看一遍决赛演示。\n\n2026 C4-AI 决赛演示视频。视频托管在 Bilibili，点击后在新窗口打开外部站点。\n\n2026 C4-AI 决赛演示视频\n忆程 ProjectMemo · Bilibili · 新窗口打开"
+      }
+    },
+    {
+      "id": "C-37-scroll-motion-decorative",
+      "pass": true,
+      "detail": {
+        "motionBefore": {
+          "dataMotion": "on",
+          "progressExists": true,
+          "progressAriaHidden": "true",
+          "railProgress": "0.000",
+          "sectionsVisible": [
+            {
+              "id": "home-heading",
+              "opacity": "1",
+              "display": "block",
+              "visibility": "visible",
+              "height": 662
+            },
+            {
+              "id": "missions",
+              "opacity": "1",
+              "display": "block",
+              "visibility": "visible",
+              "height": 634
+            },
+            {
+              "id": "experience",
+              "opacity": "1",
+              "display": "block",
+              "visibility": "visible",
+              "height": 1047
+            },
+            {
+              "id": null,
+              "opacity": "1",
+              "display": "block",
+              "visibility": "visible",
+              "height": 496
+            },
+            {
+              "id": "moments",
+              "opacity": "1",
+              "display": "block",
+              "visibility": "visible",
+              "height": 475
+            },
+            {
+              "id": "demo",
+              "opacity": "1",
+              "display": "block",
+              "visibility": "visible",
+              "height": 354
+            },
+            {
+              "id": null,
+              "opacity": "1",
+              "display": "block",
+              "visibility": "visible",
+              "height": 353
+            }
+          ]
+        },
+        "motionAfter": {
+          "railProgress": "1.000",
+          "progressTransform": "matrix(0.9728, 0, 0, 1, 0, 0)",
+          "activeRailSteps": 4,
+          "progressAriaHidden": "true"
+        }
+      }
+    },
+    {
+      "id": "C-26-reduced-motion",
+      "pass": true,
+      "detail": {
+        "reduced": {
+          "dataMotion": "reduced",
+          "lensRows": {
+            "animationName": "none",
+            "animationDuration": "0s",
+            "transitionDuration": "0s"
+          },
+          "heroCopy": {
+            "animationName": "none",
+            "animationDuration": "0s",
+            "transitionDuration": "0s"
+          },
+          "lens": {
+            "animationName": "none",
+            "animationDuration": "0s",
+            "transitionDuration": "0s"
+          },
+          "railStepCount": 4,
+          "railStepsVisible": true,
+          "heroNoteVisible": true
+        },
+        "reduceAfterScroll": {
+          "progressTransform": "matrix(0, 0, 0, 1, 0, 0)",
+          "activeRailSteps": 0
+        },
+        "selected": "01 离开时",
+        "panelSnippet": "原委托\n用已有材料整理一份阶段汇报\n目标与结束条件已经确认\n依据\n比赛材料、任务安排、老师建议\n3 条来源已保存\n变化\n还没有开始核对\n离开期间不改变项目内容\n等你\n暂时不需要你操作\n关掉页面不会丢掉这条委托\n查看依据\n回到原委托"
+      }
+    },
+    {
+      "id": "C-38-no-js-content-visible",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "hasH1": true,
+        "hasBoundary": true,
+        "hasDemo": true,
+        "hasClose": true,
+        "hasRail": true,
+        "bytes": 68783
+      }
+    },
+    {
+      "id": "C-39-continuation-conditions",
+      "pass": true,
+      "detail": {
+        "detailsSummary": "什么情况下才会自动接续？",
+        "detailsText": "什么情况下才会自动接续？\n\n实际执行需要启用委托功能、配置模型并授权使用相关资料。默认由你确认继续；后台自动接续还需要运行 Worker、单独授权，并满足结构化材料等条件。自动接续只做读取与分析，创建行动仍由你确认。\n\n暂停后不会从头另建任务；继续前，服务端会重新检查授权、预算和材料是否仍然适用。",
+        "liveHits": [
+          "新检查授权、预算和材料是否仍然适用。这一段是冻结的示例状态：不连接服务器，也不代表任务此刻正在执行。02公开交互示例同一份素材，走一遍接续。从原始记录到模拟回执：先看依据，再确认行",
+          "\\\",\\\"children\\\":\\\"这一段是冻结的示例状态：不连接服务器，也不代表任务此刻正在执行。\\\"},\\\"$aa\\\",\\\"$144\\\",1]]},\\\"$aa\\\",\\\"$13f"
+        ]
+      }
+    },
+    {
+      "id": "C-40-no-hidden-fake-numbers",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "id": "C-27-first-screen-public-label",
+      "pass": true,
+      "detail": {
+        "1440x900": {
+          "viewportHeight": 900,
+          "heroNote": {
+            "text": "公开示例 · 不调用模型 · 不写入你的项目。",
+            "top": 526.1,
+            "bottom": 548.9,
+            "visible": true
+          },
+          "heroKicker": {
+            "text": "公开示例·忆程参赛作品开发",
+            "top": 128.7,
+            "bottom": 147.9,
+            "visible": true
+          },
+          "lensFoot": {
+            "text": "与下方五步示例使用同一份素材",
+            "top": 623.9,
+            "bottom": 644.4,
+            "visible": true
+          },
+          "scrollWidth": 1440,
+          "innerWidth": 1440
+        },
+        "1280x720": {
+          "viewportHeight": 720,
+          "heroNote": {
+            "text": "公开示例 · 不调用模型 · 不写入你的项目。",
+            "top": 501.6,
+            "bottom": 524.4,
+            "visible": true
+          },
+          "heroKicker": {
+            "text": "公开示例·忆程参赛作品开发",
+            "top": 122.6,
+            "bottom": 141.8,
+            "visible": true
+          },
+          "lensFoot": {
+            "text": "与下方五步示例使用同一份素材",
+            "top": 617.8,
+            "bottom": 638.3,
+            "visible": true
+          },
+          "scrollWidth": 1280,
+          "innerWidth": 1280
+        },
+        "390x844": {
+          "viewportHeight": 844,
+          "heroNote": {
+            "text": "公开示例 · 不调用模型 · 不写入你的项目。",
+            "top": 343,
+            "bottom": 364.7,
+            "visible": true
+          },
+          "heroKicker": {
+            "text": "公开示例·忆程参赛作品开发",
+            "top": 402.5,
+            "bottom": 421.7,
+            "visible": true
+          },
+          "lensFoot": {
+            "text": "与下方五步示例使用同一份素材",
+            "top": 914.2,
+            "bottom": 934.7,
+            "visible": false
+          },
+          "scrollWidth": 390,
+          "innerWidth": 390
+        }
+      }
+    },
+    {
+      "id": "C-28-lens-foot-visible",
+      "pass": true,
+      "detail": {
+        "text": "与下方五步示例使用同一份素材",
+        "top": 623.9,
+        "bottom": 644.4,
+        "visible": true
+      }
+    },
+    {
+      "id": "C-29-console-clean",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "firstScreen": {
+    "1440x900": {
+      "viewportHeight": 900,
+      "heroNote": {
+        "text": "公开示例 · 不调用模型 · 不写入你的项目。",
+        "top": 526.1,
+        "bottom": 548.9,
+        "visible": true
+      },
+      "heroKicker": {
+        "text": "公开示例·忆程参赛作品开发",
+        "top": 128.7,
+        "bottom": 147.9,
+        "visible": true
+      },
+      "lensFoot": {
+        "text": "与下方五步示例使用同一份素材",
+        "top": 623.9,
+        "bottom": 644.4,
+        "visible": true
+      },
+      "scrollWidth": 1440,
+      "innerWidth": 1440
+    },
+    "1280x720": {
+      "viewportHeight": 720,
+      "heroNote": {
+        "text": "公开示例 · 不调用模型 · 不写入你的项目。",
+        "top": 501.6,
+        "bottom": 524.4,
+        "visible": true
+      },
+      "heroKicker": {
+        "text": "公开示例·忆程参赛作品开发",
+        "top": 122.6,
+        "bottom": 141.8,
+        "visible": true
+      },
+      "lensFoot": {
+        "text": "与下方五步示例使用同一份素材",
+        "top": 617.8,
+        "bottom": 638.3,
+        "visible": true
+      },
+      "scrollWidth": 1280,
+      "innerWidth": 1280
+    },
+    "390x844": {
+      "viewportHeight": 844,
+      "heroNote": {
+        "text": "公开示例 · 不调用模型 · 不写入你的项目。",
+        "top": 343,
+        "bottom": 364.7,
+        "visible": true
+      },
+      "heroKicker": {
+        "text": "公开示例·忆程参赛作品开发",
+        "top": 402.5,
+        "bottom": 421.7,
+        "visible": true
+      },
+      "lensFoot": {
+        "text": "与下方五步示例使用同一份素材",
+        "top": 914.2,
+        "bottom": 934.7,
+        "visible": false
+      },
+      "scrollWidth": 390,
+      "innerWidth": 390
+    }
+  },
+  "snapshot": {
+    "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+    "lang": "zh-CN",
+    "imgs": [
+      {
+        "src": "http://127.0.0.1:34111/logo.png",
+        "alt": "",
+        "w": 1254,
+        "h": 1254
+      }
+    ],
+    "iframes": 0,
+    "media": 0,
+    "autoplay": 0,
+    "headings": [
+      {
+        "tag": "H1",
+        "id": "hero-title",
+        "text": "人可以下线，项目别掉线。"
+      },
+      {
+        "tag": "H2",
+        "id": "",
+        "text": "整理阶段汇报"
+      },
+      {
+        "tag": "H2",
+        "id": "continuity-title",
+        "text": "新情况出现时，它带着出处回来。"
+      },
+      {
+        "tag": "H3",
+        "id": "",
+        "text": "3 条来源保留原文"
+      },
+      {
+        "tag": "H3",
+        "id": "",
+        "text": "发现一处没有回执"
+      },
+      {
+        "tag": "H3",
+        "id": "",
+        "text": "先补演示结果，再写汇报"
+      },
+      {
+        "tag": "H3",
+        "id": "",
+        "text": "补充结果，或确认原计划"
+      },
+      {
+        "tag": "H2",
+        "id": "experience-title",
+        "text": "同一份素材，走一遍接续。"
+      },
+      {
+        "tag": "H3",
+        "id": "",
+        "text": "忆程参赛作品开发"
+      },
+      {
+        "tag": "H3",
+        "id": "source-title",
+        "text": ""
+      },
+      {
+        "tag": "H2",
+        "id": "platform-title",
+        "text": "电脑上看依据，手机上回应。"
+      },
+      {
+        "tag": "H3",
+        "id": "",
+        "text": "Web 工作台"
+      },
+      {
+        "tag": "H3",
+        "id": "",
+        "text": "鸿蒙客户端"
+      },
+      {
+        "tag": "H2",
+        "id": "moments-title",
+        "text": "竞赛、科研、课程设计。"
+      },
+      {
+        "tag": "H3",
+        "id": "",
+        "text": "竞赛备赛"
+      },
+      {
+        "tag": "H3",
+        "id": "",
+        "text": "科研训练"
+      },
+      {
+        "tag": "H3",
+        "id": "",
+        "text": "课程设计"
+      },
+      {
+        "tag": "H2",
+        "id": "demo-title",
+        "text": "看一遍决赛演示。"
+      },
+      {
+        "tag": "H2",
+        "id": "closing-title",
+        "text": "让你的下一段长期项目，接得上。"
+      }
+    ]
+  },
+  "consoleMessages": []
+}

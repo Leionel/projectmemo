@@ -1,0 +1,110 @@
+{
+  "file": "evidence/final-sprint/20261103/b-brand-home/b3/states/judgment-step-1440-light.png",
+  "fileBytes": 102073,
+  "candidateSha": "9bae926e9475cedef118deedf5e002ec8365a23b",
+  "judgmentAssertions": {
+    "baseline": {
+      "text": "比较基线：已有记录 → 本页核对",
+      "fontSize": "12.8px",
+      "fontSizePx": 12.8,
+      "lineHeight": "21.12px",
+      "fontWeight": "400",
+      "color": "rgb(83, 100, 94)",
+      "width": 671,
+      "height": 21.1,
+      "className": "mb-2 break-all text-xs text-[var(--ink-soft)]"
+    },
+    "pending": {
+      "text": "待确认",
+      "fontSize": "12.8px",
+      "fontSizePx": 12.8,
+      "lineHeight": "20.48px",
+      "fontWeight": "700",
+      "color": "rgb(83, 100, 94)",
+      "width": 50.4,
+      "height": 24.5,
+      "className": "rounded-md bg-[var(--paper-strong)] px-1.5 py-0.5 text-[11px] font-bold text-[var(--ink-soft)]"
+    },
+    "evidenceCount": {
+      "text": "依据 2 项",
+      "fontSize": "12.8px",
+      "fontSizePx": 12.8,
+      "lineHeight": "21.12px",
+      "fontWeight": "700",
+      "color": "rgb(97, 114, 104)",
+      "width": 51.5,
+      "height": 21.1,
+      "className": "text-xs font-bold text-[var(--muted)]"
+    },
+    "summary": {
+      "text": "演示流程的当前完成情况还需要核对",
+      "fontSize": "12.8px",
+      "fontSizePx": 12.8,
+      "lineHeight": "21.12px",
+      "fontWeight": "600",
+      "color": "rgb(28, 46, 44)",
+      "width": 645,
+      "height": 21.1,
+      "className": "mt-1.5 text-xs font-semibold leading-5 text-[var(--navy)]"
+    },
+    "minVisibleFontSizePx": 12.8,
+    "smallestTexts": [
+      {
+        "fontSizePx": 12.8,
+        "text": "预设示例"
+      },
+      {
+        "fontSizePx": 12.8,
+        "text": "比较基线：已有记录 → 本页核对"
+      },
+      {
+        "fontSizePx": 12.8,
+        "text": "待确认"
+      },
+      {
+        "fontSizePx": 12.8,
+        "text": "依据 2 项"
+      },
+      {
+        "fontSizePx": 12.8,
+        "text": "演示流程的当前完成情况还需要核对"
+      },
+      {
+        "fontSizePx": 12.8,
+        "text": "已有任务记录，但没有新的完成回执；当前状态待确认"
+      },
+      {
+        "fontSizePx": 12.8,
+        "text": "记忆 · 原文"
+      },
+      {
+        "fontSizePx": 12.8,
+        "text": "记忆 · 原文"
+      }
+    ]
+  },
+  "lensRole": {
+    "heroLensRole": "group",
+    "heroLensAriaLabel": "公开示例：委托当前工作包",
+    "heroSectionRole": null,
+    "lensGroupCount": 1
+  },
+  "network": {
+    "requestRecords": 52,
+    "uniqueRequestUrls": 26,
+    "externalOriginRequests": 0,
+    "apiWriteRequests": 0,
+    "bilibiliRequests": 0,
+    "failures": 0,
+    "imageFontFailures": 0,
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "userAbortedRequests": 0
+  },
+  "netAssertions": {
+    "noBilibiliRequestDuringLoad": true,
+    "noApiWrites": true,
+    "noExternalOrigins": true,
+    "noPageErrors": true
+  }
+}

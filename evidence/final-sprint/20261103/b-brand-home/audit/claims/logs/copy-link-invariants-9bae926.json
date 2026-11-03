@@ -1,0 +1,21 @@
+{
+  "capturedAt": "2026-11-03T12:46:36+08:00",
+  "candidate": "9bae926e9475cedef118deedf5e002ec8365a23b",
+  "comparedWith": "cc7c19fed573c79a55f727eaa338ab84fd80cc3b",
+  "blobIdentical": {
+    "components/SiteHeader.tsx": true,
+    "components/home/homeExample.ts": true,
+    "app/page.tsx": true
+  },
+  "bilibiliUrlConstantInPage": 1,
+  "homepageScopedExternalUrls": 1,
+  "footerAriaLabel": 1,
+  "hoverH2": 1,
+  "oldH2Complete": 0,
+  "heroBoundary": 1,
+  "loginCtaHref": 1,
+  "focusHref": 1,
+  "demoStep1Fixed": 1,
+  "canSaiYaoQiuAnywhere": 0,
+  "roleGroupCount": 2
+}

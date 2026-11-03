@@ -1,0 +1,6 @@
+/: 200  FINAL=http://127.0.0.1:34111/
+/focus: 200  FINAL=http://127.0.0.1:34111/focus
+/focus?from=%2Fhome: 200  FINAL=http://127.0.0.1:34111/focus?from=%2Fhome
+/login?from=%2Ffocus: 200  FINAL=http://127.0.0.1:34111/login?from=%2Ffocus
+/login: 200  FINAL=http://127.0.0.1:34111/login
+wrote /D:/Projects/hongmen-final-b-brand-home/evidence/final-sprint/20261103/b-brand-home/audit/claims/json/routes-baseline.json

@@ -1,0 +1,176 @@
+{
+  "meta": {
+    "label": "after",
+    "sha": "9bae926e9475cedef118deedf5e002ec8365a23b",
+    "base": "http://127.0.0.1:34111",
+    "startedAt": "2026-11-03T04:47:24.226Z",
+    "note": "补充探针；非真实用户测试/认证。",
+    "finishedAt": "2026-11-03T04:47:33.551Z"
+  },
+  "sections": {
+    "judgmentStep": {
+      "small": [],
+      "measured": {
+        "stateDiffSummary": {
+          "text": "演示流程的当前完成情况还需要核对",
+          "fontSize": 12.8,
+          "color": "rgb(28, 46, 44)",
+          "bg": "rgb(255, 255, 255)",
+          "path": "div > ul.space-y-2 > li.rounded-md.border > p.mt-1.5.text-xs"
+        },
+        "stateDiffAfter": {
+          "text": "已有任务记录，但没有新的完成回执；当前状态待确认",
+          "fontSize": 12.8,
+          "color": "rgb(83, 100, 94)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "path": "ul.space-y-2 > li.rounded-md.border > p.mt-1.text-xs > span.font-bold"
+        },
+        "stateDiffBaseline": {
+          "text": "比较基线：已有记录 → 本页核对",
+          "fontSize": 12.8,
+          "color": "rgb(83, 100, 94)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "path": "div.HomeJourney-module__yeKYWG__storyContent > div.HomeJourney-module__yeKYWG__judgmentPane > div > p.mb-2.break-all"
+        },
+        "evidenceChip": {
+          "text": "记忆 · 原文",
+          "fontSize": 12.8,
+          "color": "rgb(39, 104, 93)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "path": "ul.space-y-2 > li.rounded-md.border > p.mt-1.5.flex > span.rounded.bg-[var(--paper-strong)]"
+        },
+        "suggestionText": {
+          "text": "参赛材料需要演示，任务记录也提到流程待完成。可以先验证一条记录能否整理为记忆，再生成一份草稿，并记录实际结果。",
+          "fontSize": 14.4,
+          "color": "rgb(83, 100, 94)",
+          "bg": "color(srgb 0.982196 0.983608 0.983451)",
+          "path": "div.HomeJourney-module__yeKYWG__storyContent > div.HomeJourney-module__yeKYWG__judgmentPane > div.HomeJourney-module__yeKYWG__suggestion > p"
+        }
+      },
+      "shotFile": "shots/after-judgment-step.png"
+    },
+    "evidenceExpanded": {
+      "rows": [
+        {
+          "text": "原文来自内置公开素材，不读取你的项目。",
+          "fontSize": 13.12,
+          "path": "div#hero-evidence.home-module__txgM7a__evidenceWrap > div.home-module__txgM7a__evidenceInner > div.home-module__txgM7a__evidencePanel > p.home-module__txgM7a__evidenceIntro"
+        },
+        {
+          "text": "比赛材料示例素材 · 比赛要求摘录",
+          "fontSize": 13.44,
+          "path": "div.home-module__txgM7a__evidencePanel > ul.home-module__txgM7a__evidenceList > li > p.home-module__txgM7a__evidenceName"
+        },
+        {
+          "text": "示例素材 · 比赛要求摘录",
+          "fontSize": 12.8,
+          "path": "ul.home-module__txgM7a__evidenceList > li > p.home-module__txgM7a__evidenceName > span"
+        },
+        {
+          "text": "初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。",
+          "fontSize": 13.76,
+          "path": "div.home-module__txgM7a__evidencePanel > ul.home-module__txgM7a__evidenceList > li > q"
+        },
+        {
+          "text": "任务安排示例素材 · 项目任务记录",
+          "fontSize": 13.44,
+          "path": "div.home-module__txgM7a__evidencePanel > ul.home-module__txgM7a__evidenceList > li > p.home-module__txgM7a__evidenceName"
+        },
+        {
+          "text": "示例素材 · 项目任务记录",
+          "fontSize": 12.8,
+          "path": "ul.home-module__txgM7a__evidenceList > li > p.home-module__txgM7a__evidenceName > span"
+        },
+        {
+          "text": "目前还没有完整 Demo，需要先完成项目创建、碎片捕获和成果生成闭环。",
+          "fontSize": 13.76,
+          "path": "div.home-module__txgM7a__evidencePanel > ul.home-module__txgM7a__evidenceList > li > q"
+        },
+        {
+          "text": "老师建议示例素材 · 指导意见摘录",
+          "fontSize": 13.44,
+          "path": "div.home-module__txgM7a__evidencePanel > ul.home-module__txgM7a__evidenceList > li > p.home-module__txgM7a__evidenceName"
+        },
+        {
+          "text": "示例素材 · 指导意见摘录",
+          "fontSize": 12.8,
+          "path": "ul.home-module__txgM7a__evidenceList > li > p.home-module__txgM7a__evidenceName > span"
+        },
+        {
+          "text": "老师建议作品不要叫普通学习助手，要突出项目制学习和知识资产复用。",
+          "fontSize": 13.76,
+          "path": "div.home-module__txgM7a__evidencePanel > ul.home-module__txgM7a__evidenceList > li > q"
+        }
+      ],
+      "small": [],
+      "shotFile": "shots/after-evidence-expanded-fonts.png"
+    },
+    "fontZoom200": {
+      "before": {
+        "sw": 1440,
+        "cw": 1440
+      },
+      "after": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "horizontalOverflow": false,
+        "clipped": [],
+        "heroNoteFont": 26.88,
+        "storyTabFont": 26.24
+      },
+      "shotFile": "shots/after-font-zoom-200.png"
+    },
+    "heroScroll320": {
+      "data": {
+        "translate": {
+          "copy": "0px 1.9px",
+          "lens": "0px -3.42px"
+        },
+        "heroShift": "",
+        "overflow": false,
+        "cta": {
+          "rect": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "inViewport": true,
+          "clipped": false,
+          "outline": "none 3px",
+          "focusVisible": false
+        },
+        "stageTab": {
+          "rect": {
+            "top": 385,
+            "bottom": 429,
+            "left": 208,
+            "right": 295
+          },
+          "inViewport": true,
+          "clipped": false,
+          "outline": "solid 2px",
+          "focusVisible": true
+        }
+      },
+      "shotFile": "shots/after-hero-scroll-320.png"
+    },
+    "finalTargets": {
+      "closingLink": {
+        "text": "先看一段示例",
+        "fontSize": 14.4,
+        "w": 86.4,
+        "h": 44
+      },
+      "badge": {
+        "text": "等你确认",
+        "fontSize": 12.8,
+        "w": 84.8,
+        "h": 30.8
+      }
+    }
+  },
+  "errors": [],
+  "consoleErrors": []
+}

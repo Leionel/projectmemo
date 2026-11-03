@@ -1,14 +1,15 @@
-# audit/a11y MANIFEST（Phase 0 + Phase 1 最终）
+# audit/a11y MANIFEST（Phase 0 + Phase 1 最终，9bae926）
 
-生成时间：2026-11-03T12:39:41+08:00
+生成时间：2026-11-03T12:52:33+08:00
 基线 SHA：485d485378637e1da3280ed092739d441c8cf749
-最终候选 SHA：cc7c19fed573c79a55f727eaa338ab84fd80cc3b
+最终冻结候选 SHA：9bae926e9475cedef118deedf5e002ec8365a23b
+说明：源码绑定 9bae926；644f33a 仅追加证据/回执，app/components 与 9bae926 完全一致（git diff 为空）。
 证据源码副本统一 .txt 后缀（避免 tsconfig **/*.tsx 收进 tsc）。
 
 ```
 sha256  bytes  path
 47e6d16e448fa995a42e1a93b454d3c9c980d7a40ae191e450e9b4468372d44d  17445  A11Y_CHECKLIST.md
-5401e9dda825d72fc537ab33414721138dac50c224e850bbf54491fa176bbdfa  22793  A11Y_FINDINGS.md
+e7b0b7e647fd2beb0a9b8b4b607cf4186bdfc856a9b7b77d0f6b7a576074dbed  24928  A11Y_FINDINGS.md
 7bd10d9871934e47bb993a89743b8680528ee51f3f36d128497dbdff5312546c  31528  BASELINE_INVENTORY.md
 9b4d95135e5362ebcf932d240d5a238667ef1d20098db016b84dc050c1a0831e  6647  baseline-src\app\auth.module.css
 5eeed9738fe7debfe04f967313c2303d8b6891a6584db9966f383a392aad041d  18256  baseline-src\app\globals.css
@@ -48,57 +49,63 @@ f427a9893e4f31800088ba44fdd1b211174f266162c5009b8c25b2ebe1a23622  76619  invalid
 03b8b715406070f37617495f2388d80b56b80a0d3fc177996994c90f8f04060c  43930  invalidated\baseline-viewport-720x450(200% zoom).png
 98e0178f42d9371d82ff6bee5b62c6da250ad10832aea6696f1caf3e039538fb  303615  invalidated\probe-baseline-contaminated.json
 95b8c1bcbb1d7f32a94de90b346f0948cb493095695702782e8c788e9b5a2e43  1335  invalidated\README.md
-c4c562cf1afb68bf4400653d6156114973402e5a6dc6ee1cf84a68795af53098  55816  json\after-static-inventory.json
+5ea036b1e8ea5eaeed2cb6c2af8e3ed08147da9b0df3d6aa00c28e591b23fd73  56224  json\after-static-inventory.json
 d678ae4b34187542b8b17635309d055b726dddab35f14be24197c13918a5cf2d  84700  json\baseline-static-inventory.json
-f5d9e4e3de4fa756fa6cfeac02285a59e4fc81c2d5588a7bf8328c0864125443  714758  json\probe-after.json
-5e10f134498e4d410bb99a7aa41fee39af018decd978cb9f3de2c6ea76784e64  8683  json\supplement-after.json
+d19e4043bff5e638b457bb172cc68560cb3bb1db1e695fdf0c5cd9d7b789e6b0  15386  json\f01-reverify-after.json
+3232f307bb9f019b6d3b14277b8a6aa4fa93bccd322e22afff972e4c2680200d  713978  json\probe-after.json
+ffb2852ff4b21ca2dcc06d8059642438af55e0e7acfeec023191bcb5109a658f  6402  json\supplement-after.json
 5f1eb470a6061e4a85215702e76eba3e0c827bfd41efad3c392123ce3da06963  1112  scripts\check-footer-top.mjs
 b7330dfbd33d02d9ab1b93e707cc26d0a691a00d0292a3dcc587f240ce06740f  1527  scripts\check-hero-cta-320.mjs
 d8845d2c22798c84363217d8ed5cd33e9d0afb9400467a9e99a377ed6ff0dd27  5508  scripts\inventory-after.mjs
 babc24bf8f38d4e41233f970bd589d48c9be733febe4110e3bf7b60c302f4342  15742  scripts\inventory-baseline.mjs
 d1ca2b560df6470281451bab226347c49f2423c7014d9570bc590de48d0fbd55  103150  scripts\probe-a11y.mjs
+713858b0122c9df0801562e03f05eebd4dc0d4e91442946eb596108809bc6d6f  10137  scripts\probe-f01-reverify.mjs
 7ff54dabe5f51f5a0371c246fc72534520ed9b60e764f4f08f3db398b5b9159a  11838  scripts\probe-supplement.mjs
-748d5624a4accaaec87aa69bac8754b99436a93cd7350ab0f2f0cb55c9eff76f  64653  shots\after-account-forgot-password-1440.png
-36a30174e3430a4de3c2aabf593ccde8b5013b1e8a371d39f87afd5861c8a2b1  38303  shots\after-account-forgot-password-390.png
-5d9d643b90802aa4413613b59dc606b68f9a028514abd356dfbb5aebf6c1374e  61317  shots\after-account-login-1440.png
+4fe5760a8284313fd7264fa399f5cbcf596c1f23dc4f3bb79d34e576e17061d0  62853  shots\after-account-forgot-password-1440.png
+80c8d256fdba28d00fd71dd75235720ebce9e3a9f40bd7f083a9585b088e937a  36687  shots\after-account-forgot-password-390.png
+07441ae41b81f4db0b6481643dbd8592de18a9c126ac118085f9db8619e65f51  61145  shots\after-account-login-1440.png
 f606b34be4267cb83a71399fc508004f4023f5de3a3deb79f6cf7b4648eb39e1  34891  shots\after-account-login-390.png
-6936214024377843a39fbc0c83279c3aaf015792bf28d1ae553779adc28adbc2  74975  shots\after-account-register-1440.png
-33ed917659b20ef4fcba760340b3374e395486e83fac01f66607cc2a3674446e  43597  shots\after-account-register-390.png
-ec2bdda8ca5946540b1d9e8bc2a7b5be6db9d890939360bed765587dce4942cb  41804  shots\after-anchor-experience-320.png
-ec2bdda8ca5946540b1d9e8bc2a7b5be6db9d890939360bed765587dce4942cb  41804  shots\after-anchor-experience.png
-3b5fd79f3566f511cbec3b7850dc5428056f7d1a3d75556d8c4ce3889d959efa  119416  shots\after-assets-failed.png
+7aed14f8c1eaaf8757c35313d9bd3bfbce38257c508c6622cde544a1f473130c  73242  shots\after-account-register-1440.png
+b49e22d84adf2d0940d83b8e65eb420093e8338ec8b4e7acee6dd0637b8e3e70  42283  shots\after-account-register-390.png
+f3a371dfef2004482fd2b8026c9472e6bed3e81623746eb3f2f2161613ea8ed9  43118  shots\after-anchor-experience-320.png
+9fc660cad6a5758bbeeb33b718ccd5652c213016aaa7fc04c5ccdc917f648964  43113  shots\after-anchor-experience.png
+9abcbcdb5572d6070c949347ac6f91d93308177128174a3184f2cb0bceb2dcc0  120763  shots\after-assets-failed.png
 b393c14549cb0747eeb8901e3bdf0e697930f8d2d32a16e6f61342b45f30aa45  427622  shots\after-dark-1440.png
 d600c656a977e469df5524f3d349f310843b2fc8ae6de4e051ce3d7b9d2bdd61  64876  shots\after-dark-390.png
-986d633e223b1f3be09162aa9ee6790ae69e4be74d930096f45fdc86cfbb11b3  127706  shots\after-dialog-long-1440x900.png
+e3eff28fc5f769f42c521c962e85c45d14d29849f0849ab27abf7a146a952459  127706  shots\after-dialog-long-1440x900.png
 dc3cc5d277d319a17bc65f8508e6428eedbc6880da9d763679e2744624c79636  71133  shots\after-dialog-long-720x450.png
 863f029ed75d3f28468f50b7d23360f2e10f0e3e8e47385ff6656257c3c6a6a2  107889  shots\after-dialog-open.png
 73cfa0cd586fdc3613d68850069cc3d96745d8521fa1aa4025012c3104155603  119851  shots\after-evidence-collapsed.png
 9b27cdd9868083d6ff6b89abbb7e75b94105237dd8da4605bef3a88ae781f107  125826  shots\after-evidence-expanded-fonts.png
 9b27cdd9868083d6ff6b89abbb7e75b94105237dd8da4605bef3a88ae781f107  125826  shots\after-evidence-expanded.png
+635a62844986e245937639b4c5fa015489cc7cc40064208ec21053b3dbef30b1  99511  shots\after-f01-judgment-1440x900.png
+041f33e132bc8f4211381c4401bb8d8796c63995a85b1b6bad396e3f703a8fc6  45410  shots\after-f01-judgment-320x640.png
+39cef5fbd73aeaabd37bc690eb0cfa5fc74d598de05c91e41e60104ddbd65700  60203  shots\after-f01-judgment-390x844.png
+8fc62c54d83be63ac6519d331c852937613f2916b9338c2af3836203b475a3b1  99414  shots\after-f01-judgment-dark-1440.png
 26bbfd9d64e525be2216c94311a7477989e4cda76122c65138100775e331e61c  120702  shots\after-focus-hero-cta.png
 8ff018e58c6923000e69987c8311321ec0b08a7a7541de33f7798b7110d52a67  122223  shots\after-focus-skip-link.png
 83dff5ea3ea1e024c3ca391f41655f1edef63ae0f98888b4ca66e87d4005ada5  120300  shots\after-focus-stage-tab.png
 f6301a6053542e8bd632dad4d0e5470d77cdb5bf9a02e381a74556379cdd66f7  179674  shots\after-font-zoom-200.png
 74737deaa858cc75734ee39f22981a1aa4b5ab06e6fba1d0d7e0ec5a0ac449ca  130275  shots\after-footer-top.png
 b76c0e987b10c22c3bbe9db3a5be3c663d266dfc6b6450b101d643aa4871af01  43547  shots\after-hero-cta-320.png
-b048b2d65c15df9c9d0ec6d6b84915b87368958959427339635617d59549fe8d  121213  shots\after-hero-entrance-normal.png
-6440289aa1e594311dd2ef7e58fba36a62801b5a369b94818bc2966bb5530a0f  119805  shots\after-hero-entrance-reduced.png
-720a3d503d26e6b4d54e57ddea4edf4b1f594adde93dd23ca1bc196688da73aa  41073  shots\after-hero-scroll-320.png
-d86db01c478b63d990f87e5075bfea621af572638ddebdec3296c0cb17a04e8c  79610  shots\after-hero-stage-normal.png
-a048ce3934b80de65b9c33670876868d16c9c03b49a34b98a952ada945079e09  117332  shots\after-hero-stage-reduced.png
-63202fe3e4d94b6c3d2911b51ca3ebcb57dec8c075ae30ec2146eef45d53cc56  97832  shots\after-judgment-step.png
+098007619e20e95442ff54f59a68ca804eb1c35bdc36ec36c59c818814232793  119857  shots\after-hero-entrance-normal.png
+5505d7ea060fb0b1c3e323a2baa0d5de31e758858bd8bdcdae713443186c375a  121149  shots\after-hero-entrance-reduced.png
+c27e496a1c4ac3da64da3f5941597f6f0a8cd319a7755760719ee26cacc0126f  39729  shots\after-hero-scroll-320.png
+4c19d4a08a9ef54db8dcd46dea59a8443207516bdc644132d4d155c201ce4869  81465  shots\after-hero-stage-normal.png
+f3e28b06a714db67e1d9327aeba62c89d498b013c29dea537dd8db1c9e56c2fa  118658  shots\after-hero-stage-reduced.png
+45f93a1bf4a07c15e8eff95559325744abbc621e9c34e24647955d2b5af4b5f5  99511  shots\after-judgment-step.png
 5bce562bb380cffbce057701d908fa46b0bfc8f68526067d429836e3bfb0f1a1  41764  shots\after-mobile-tabs-320x640.png
 279471573457685522af812e14ee96d05e216a11ae4fc9d134372c545bd52dbe  55882  shots\after-mobile-tabs-360x740.png
-0cc004001612847298fc19553784097de119965aff7cbaa417ffe812238b80c0  16852  shots\after-no-js.png
+d3a0ee786e49e0653122e980bd7e208dfdfa798ec5f5c6e0fc341193e2813c8f  16849  shots\after-no-js.png
 80ed651253962cc9e1ce2fe556fbd3e60aacde42403155d8f7056fc373a13841  110882  shots\after-prefers-contrast-more.png
-a86262e5ed82a8b42314f975ae05bec2e35f3a82451b7d6282549b340e76130a  31743  shots\after-rail-320x640.png
-e8f8300f7acbeb130c14c9f490e8c1cc49be3c8d02414b7a2ddffd581f8528aa  32330  shots\after-rail-720x450(200% zoom).png
-a634b292268ae9eda1f8b409cd46c48a4fd0eefba72bac9adc30677a21418cf6  81147  shots\after-reduced-motion.png
-0efca4dadfcaa001d25cb8869434b5805dfe17ff0771f28dddee9bb3cc8c5cb8  100973  shots\after-scroll-motion-normal.png
+9164f6ebfc0bb4eb1fd5af7e3570e6f1fd5c3015d78c11bb9b1a5f3d954dfa9f  33570  shots\after-rail-320x640.png
+f5fc65b33ae1b0760e386c64fd6b01db3f8c955530d5b84c5a4102018386028f  34064  shots\after-rail-720x450(200% zoom).png
+69c560c998c0fd9cb4f8f139602232e1891bd84d9b0e2f4916cd582f6f35180d  81855  shots\after-reduced-motion.png
+1adbda7e9cb91c64922e5f7aac1c8c940cec891a5a67ea2f0da9173d7022b60b  99233  shots\after-scroll-motion-normal.png
 93265f3f6046de3173ce2d425818c9f1a8cc44a1c109bbebac3241feab080f5d  132166  shots\after-scroll-motion-reduced.png
 2957dba578a83d7fddcf1aad735ecd44986afb562c11fe22455b231eff49a98a  103838  shots\after-scroll-reveal-normal.png
 cdd7cac77e0658ac847cc5c966df5501b81cf4150b88230392b1c8d93d256f31  108936  shots\after-scroll-reveal-reduced.png
-7df58de09618f2582b0b804090c4516089000e0acffc0918bb09113ae6569235  43499  shots\after-tabs-320.png
+a204eb8c5fd7797e41a0652e6b3c787fffdd1ff4a740d3d4324e05e876f5a6f0  37971  shots\after-tabs-320.png
 c42d31e0041df911b3226ddfae657930d2147d34e08beb00d7cecc5469421502  65248  shots\after-targets-390.png
 5bce562bb380cffbce057701d908fa46b0bfc8f68526067d429836e3bfb0f1a1  41764  shots\after-text-320.png
 ec2bdda8ca5946540b1d9e8bc2a7b5be6db9d890939360bed765587dce4942cb  41804  shots\after-viewport-320x640.png

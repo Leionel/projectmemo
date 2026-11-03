@@ -37,7 +37,7 @@
 | # | 修复内容 | 结果 | 实测证据（[json/f01-reverify-after.json](json/f01-reverify-after.json)） |
 |---|---|---|---|
 | F-01 | `components/HomeJourney.module.css` 新增首页作用域覆盖：`.judgmentPane [class~="text-xs"]`、`.judgmentPane [class~="text-[11px]"]` → `font-size:0.8rem`（共享 `StateDiffView.tsx` 未改） | **PASS（已清零）** | 第 3 步 `#story-panel` 内 <12.8px 文本：**1440=0、390=0、320=0、深色 1440=0**；6 类关键文本全部 **12.80px**：比较基线（contrast 6.26/深色 8.25）、待确认（6.26/8.25）、依据 2 项（5.10/6.80）、主判断摘要（14.22/12.76）、变化文本（6.26/8.25）、记忆·原文（6.51/7.84）；judgment 区无水平溢出 |
-| ARIA | 两个普通 div 补 `role="group"`（Hero 工作包、五步示例框） | **PASS** | `[role=group]` 2 个：`group "公开示例：委托当前工作包"`、`group "参赛项目交互示例"`；aria 快照显示组名并对读屏生效（组内 tablist/tabpanel/heading 结构完整）；`aria-label` 用于无 role 普通元素的扫描结果 = **0** |
+| ARIA | 两个普通 div 补 `role="group"`（Hero 工作包、五步示例框；`components/home/HomeHeroLens.tsx:143`、`components/HomeJourney.tsx:132`） | **PASS** | `[role=group]` 2 个：`group "公开示例：委托当前工作包"`、`group "参赛项目交互示例"`；aria 快照显示组名并对读屏生效（组内 tablist/tabpanel/heading 结构完整）；`aria-label` 用于无 role 普通元素的扫描结果 = **0** |
 
 ### 2.1 上轮 provisional FAIL 候选的复验
 
@@ -116,12 +116,12 @@
 
 ---
 
-## 4. 需要实现者决定的残余问题（合并清单，仅此 1 项）
+## 4. 已关闭问题：F-01（MINOR，`cc7c19f` 发现 → `9bae926` 修复 → 复验 PASS）
 
-### F-01（MINOR）五步第 3 步“判断与建议”内 11–12px 文本
+### F-01 五步第 3 步“判断与建议”内 11–12px 文本
 
-- **位置**：共享组件 [components/StateDiffView.tsx](../../../../../../components/StateDiffView.tsx)（Tailwind `text-xs`=12px / `text-[11px]`=11px），渲染在首页五步 Demo 第 3 步 `#story-panel` 的 `.judgmentPane` 内。
-- **实测（1440，第 3 步）**：
+- **位置（发现时）**：共享组件 [components/StateDiffView.tsx](../../../../../../components/StateDiffView.tsx)（Tailwind `text-xs`=12px / `text-[11px]`=11px），渲染在首页五步 Demo 第 3 步 `#story-panel` 的 `.judgmentPane` 内。
+- **`cc7c19f` 实测（1440，第 3 步）**：
 
 | 文本 | 计算字号 | 选择器（实测路径） | 行 |
 |---|---|---|---|
@@ -132,10 +132,9 @@
 | 已有任务记录，但没有新的完成回执；当前状态待确认 | **12.00px** | `.judgmentPane ul li p.mt-1.text-xs > span.font-bold` | :35 |
 | 记忆 · 原文（证据类型标签） | **11.00px** | `.judgmentPane ul li p.mt-1.5.flex span.rounded` | :41 |
 
-- **复现**：`goto http://127.0.0.1:34111/` → 点击 `#story-tab-2` → 读上表选择器的 `getComputedStyle().fontSize`；或运行 [scripts/probe-supplement.mjs](scripts/probe-supplement.mjs) 的 `judgmentStep` 段。
-- **期望**：任务书要求“关键说明计算字号下限 12.8px”。当前主判断摘要 12px（满足 B3 的“不低于 12px”硬底线，但低于本审计 12.8px 目标）；11px 的 `待确认`/`记忆 · 原文` 属状态/元数据标签。
-- **影响面**：`StateDiffView` 是共享组件（工作台状态卡、会议导入等也在用），直接改会影响 C 轨页面；建议**首页作用域内覆盖**（例如在 `HomeJourney.module.css` 内用 `:global(.judgmentPane .text-xs)` / `:global(.judgmentPane .text-\[11px\])` 提升到 `0.8rem`），或由 Lead 明确按“元数据/共享组件”豁免并记录 WAIVER。
-- **裁决选项**：A) 修复（推荐首页作用域覆盖，避免跨轨影响）→ 我做复验；B) 记录 `WAIVED_WITH_SCOPE`（仅限该共享组件的 11–12px 元数据/摘要，说明理由）→ 我在最终报告中改判。
+- **修复（`9bae926`，`components/HomeJourney.module.css:844-851`）**：首页作用域覆盖 `.judgmentPane [class~="text-xs"]`、`.judgmentPane [class~="text-[11px]"]` → `font-size:0.8rem`；共享 `StateDiffView.tsx` 未改，C 轨页面不受影响。
+- **复验（PASS）**：1440/390/320/深色 1440 第 3 步 `#story-panel` 内 <12.8px 文本 **0**；上述 6 类文本字号全部 **12.80px**；对比度 5.10–14.22（浅）/ 6.80–12.76（深）；judgment 区无水平溢出。证据 [json/f01-reverify-after.json](json/f01-reverify-after.json) 与截图 `shots/after-f01-judgment-1440x900.png`、`after-f01-judgment-390x844.png`、`after-f01-judgment-320x640.png`、`after-f01-judgment-dark-1440.png`。
+- **状态**：**CLOSED（修复并复验通过）**。
 
 ---
 
@@ -146,7 +145,7 @@
 3. **skip link 焦点环**：使用 UA 默认 `auto 1px`，未套项目 2px teal 规则；截图可见但视觉一致性弱（MINOR 观察）。
 4. **dialog 单一可聚焦元素**：仅有关闭按钮时，Tab 会在 dialog 与浏览器 chrome 间循环（原生 modal 行为，背景 inert，未进入页面内容）；如需完整焦点陷阱需额外实现（当前不违反 WCAG）。
 5. **账号页既有小字**：`auth.module.css` 的 `.field > p`(11.52px)/`.help`(11.52px)/`.passwordToggle`(11.68px)/`.resendLink`(11.2–12.48px) 仍 <12.8px；属账号页既有样式（主控/公共入口），非本轮 B3 改动，未纳入 FAIL。
-6. **ARIA MINOR**：2 个普通 div 的 `aria-label`（无 role）；装饰符号“✓/?”已由相邻文本覆盖（本轮未再核对，属既有）。
+6. **ARIA 观察（已部分关闭）**：`9bae926` 已为 2 个普通 div 补 `role="group"`（A11Y-43 复验 PASS，`aria-label` 误用扫描为 0）；装饰符号“✓/?”由相邻文本覆盖（既有，低风险）。
 7. 本审计为自动化 DOM/计算样式取证：**未**做 NVDA/JAWS/VoiceOver 人工验证、未做真实用户测试、未做无障碍认证；dev server 为 mock/隔离空库/无 Worker 环境。
 
 ---
@@ -155,24 +154,28 @@
 
 ```powershell
 cd D:\Projects\hongmen-final-b-brand-home
-# 确认冻结候选
-git rev-parse HEAD          # cc7c19fed573c79a55f727eaa338ab84fd80cc3b
+# 确认最终冻结候选
+git rev-parse HEAD          # 9bae926e9475cedef118deedf5e002ec8365a23b
 git status --porcelain -- app components   # 空
 # 主探针（约 2.5 分钟）
 node evidence/final-sprint/20261103/b-brand-home/audit/a11y/scripts/probe-a11y.mjs `
-  --base http://127.0.0.1:34111 --label after --sha cc7c19fed573c79a55f727eaa338ab84fd80cc3b
+  --base http://127.0.0.1:34111 --label after --sha 9bae926e9475cedef118deedf5e002ec8365a23b
 # 补充探针（判断页小字/展开依据/字体放大/320 滚动/尺寸）
 node evidence/final-sprint/20261103/b-brand-home/audit/a11y/scripts/probe-supplement.mjs `
-  --base http://127.0.0.1:34111 --label after --sha cc7c19fed573c79a55f727eaa338ab84fd80cc3b
+  --base http://127.0.0.1:34111 --label after --sha 9bae926e9475cedef118deedf5e002ec8365a23b
+# F-01 复验（第 3 步 judgment 字号 × 1440/390/320/深色 + role=group）
+node evidence/final-sprint/20261103/b-brand-home/audit/a11y/scripts/probe-f01-reverify.mjs `
+  --base http://127.0.0.1:34111 --label after --sha 9bae926e9475cedef118deedf5e002ec8365a23b
 # 候选 CSS 静态扫描（断点重复/小字号/焦点/偏好媒体/触控声明）
 node evidence/final-sprint/20261103/b-brand-home/audit/a11y/scripts/inventory-after.mjs `
-  --sha cc7c19fed573c79a55f727eaa338ab84fd80cc3b
+  --sha 9bae926e9475cedef118deedf5e002ec8365a23b
 ```
 
 ## 7. 证据文件
 
-- 主探针 JSON：[json/probe-after.json](json/probe-after.json)（`meta.sha=cc7c19f`）
+- 主探针 JSON：[json/probe-after.json](json/probe-after.json)（`meta.sha=9bae926`，0 error）
 - 补充探针 JSON：[json/supplement-after.json](json/supplement-after.json)
+- F-01 复验 JSON：[json/f01-reverify-after.json](json/f01-reverify-after.json)（judgment 字号 × 1440/390/320/深色 + `role=group` 可访问名）
 - 候选 CSS 静态扫描：[json/after-static-inventory.json](json/after-static-inventory.json)
-- 截图：[shots/](shots/)（`after-*` 前缀，含 `after-judgment-step.png` 对应 F-01、`after-scroll-motion-normal/reduced.png`、`after-rail-320x640.png`、`after-hero-scroll-320.png`、`after-font-zoom-200.png`、`after-account-*-1440/390.png`、`after-dark-1440/390.png`、`after-dialog-*`、`after-no-js.png` 等）
+- 截图：[shots/](shots/)（`after-*` 前缀；F-01 对应 `after-f01-judgment-*.png`、`after-judgment-step.png`；另含 `after-scroll-motion-normal/reduced.png`、`after-rail-320x640.png`、`after-hero-scroll-320.png`、`after-font-zoom-200.png`、`after-account-*-1440/390.png`、`after-dark-1440/390.png`、`after-dialog-*`、`after-no-js.png` 等）
 - 哈希清单：[MANIFEST.sha256](MANIFEST.sha256)

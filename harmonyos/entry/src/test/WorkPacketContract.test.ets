@@ -2,8 +2,10 @@ import { describe, it, expect } from '@ohos/hypium';
 import {
   ReadbackDeltaView, WorkPacketView,
   authorityLine, basisSummary, blockerLabel, currentUseLabel, doneSummary, materialBodyNote, nextSummary,
-  observationLine, parseWorkPacket, readbackDelta, snapshotLine, stopSummary
+  observationLine, parseWorkPacket, readbackDelta, snapshotLine, stopSummary,
+  captureSourceTarget, captureSourceCardId
 } from '../main/ets/models/WorkPacket';
+import { KnowledgeCard } from '../main/ets/models/Memory';
 import {
   CANCELLED_READBACK, LEGACY_READBACK, OBSERVATION_NO_CHANGE_READBACK, STOP_REQUESTED_READBACK,
   SUPPRESSED_SOURCE_PACKET, UNKNOWN_READBACK, VERSION_ADVANCED_PACKET, WAITING_APPROVAL_READBACK
@@ -24,6 +26,34 @@ function packet(json: string): WorkPacketView | null {
  */
 export default function workPacketContractTest() {
   describe('workPacketContract', () => {
+    it('original_capture_lineage_is_not_independently_supported_outcome', 0, () => {
+      const delta = readback('{"materialUses":{"items":[{"sourcePointer":{"id":"capture:original","hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},"availability":"CURRENT","currentUse":{"state":"ALLOWED","independentEvidence":true,"reason":"ORIGINAL_OBSERVATION","policy":"SOURCE_POLICY_V1"},"facts":[{"kind":"SAVED","refId":"capture:original"}]}],"coverage":{}}}');
+      expect(delta.materials.length).assertEqual(1);
+      const item = delta.materials[0];
+      expect(currentUseLabel(item).includes('原始来源')).assertTrue();
+      expect(currentUseLabel(item).includes('仍需核验')).assertTrue();
+      expect(currentUseLabel(item).includes('独立支持回执')).assertFalse();
+      const view = packet('{"schemaVersion":1,"contractVersion":"final-a-workpacket-v1","basis":{"materialUses":{"items":[{"sourcePointer":{"id":"capture:original","hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},"currentUse":{"state":"ALLOWED","independentEvidence":true,"reason":"ORIGINAL_OBSERVATION"}}],"coverage":{}}}}');
+      expect(view !== null).assertTrue();
+      if (view === null) { return; }
+      expect(basisSummary(view.materials, false).includes('原始来源 1')).assertTrue();
+      expect(basisSummary(view.materials, false).includes('独立支持')).assertFalse();
+    });
+    it('capture_source_routes_to_same_project_original_card_not_external_source', 0, () => {
+      const target = captureSourceTarget('project-original', 'capture:capture-original');
+      expect(target !== null).assertTrue();
+      if (target === null) { return; }
+      expect(target.projectId).assertEqual('project-original');
+      expect(target.tab).assertEqual('memory');
+      expect(target.captureId).assertEqual('capture-original');
+      const cards = JSON.parse('[{"id":"card-unrelated","captureId":"capture-other"},{"id":"card-original","captureId":"capture-original"}]') as KnowledgeCard[];
+      expect(captureSourceCardId(target.captureId, cards)).assertEqual('card-original');
+      expect(captureSourceCardId('missing-capture', cards)).assertEqual('');
+      expect(captureSourceCardId('', cards)).assertEqual('');
+      expect(captureSourceTarget('', 'capture:capture-original') === null).assertTrue();
+      expect(captureSourceTarget('project-original', 'capture:') === null).assertTrue();
+      expect(captureSourceTarget('project-original', 'attachment:attachment-original') === null).assertTrue();
+    });
     it('waiting_approval_packet_keeps_single_primary_action_and_blockers', 0, () => {
       const delta = readback(WAITING_APPROVAL_READBACK);
       expect(delta.legacyServer).assertFalse();

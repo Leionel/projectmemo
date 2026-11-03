@@ -197,6 +197,7 @@ function basePacket(overrides: Partial<WorkPacket> = {}): WorkPacket {
           sourceLimit: 8,
           sourceLimitReached: false,
           mapping: "DIRECT_SOURCE_POINTERS_ONLY",
+          sourcePolicyChecks: 0,
         },
       },
       evidenceReviews: { items: [], truncated: false },
@@ -306,7 +307,7 @@ function renderPacket(
     ? createElement(
         "div",
         null,
-        createElement("section", { id: "mission-question" }, createElement("button", { type: "button" }, "补充信息")),
+        createElement("section", { id: "mission-question", "data-mission-question-id": "q-sample-user" }, createElement("button", { type: "button" }, "补充信息")),
         createElement(
           "section",
           { "data-mission-approval-id": APPROVAL_ID },
@@ -595,7 +596,7 @@ describe("C1 四问工作包：快照与旧后端", () => {
     fireEvent.click(primary);
     expect(view.onReload).toHaveBeenCalledTimes(1);
     expect(scrollSpy).not.toHaveBeenCalled();
-    expect(view.container.textContent).toContain("已重新读取当前状态");
+    expect(view.container.textContent).toContain("正在重新读取当前状态");
     expect(view.container.querySelectorAll("[data-mission-primary-action]")).toHaveLength(1);
   });
 
@@ -710,7 +711,7 @@ describe("C1 唯一主动作：页面内定位或重新读取", () => {
       const view = renderPacket(packet, { targets: true });
       fireEvent.click(screen.getByRole("button", { name: "核对当前状态" }));
       expect(view.onReload).toHaveBeenCalledTimes(1);
-      expect(view.container.textContent).toContain("已重新读取当前状态");
+      expect(view.container.textContent).toContain("正在重新读取当前状态");
       expect(scrollSpy).not.toHaveBeenCalled();
       cleanup();
     }
@@ -721,7 +722,7 @@ describe("C1 唯一主动作：页面内定位或重新读取", () => {
     const view = renderPacket(packet, { targets: false });
     fireEvent.click(screen.getByRole("button", { name: "回答原问题" }));
     expect(view.onReload).toHaveBeenCalledTimes(1);
-    expect(view.container.textContent).toContain("原入口暂不可见，已重新读取");
+    expect(view.container.textContent).toContain("原入口暂不可见，正在重新读取");
   });
 
   it("NONE 不渲染主操作，组件不发起任何 fetch 或写请求", () => {

@@ -24,7 +24,7 @@ const isolated = await vi.hoisted(async () => {
 import fs from "node:fs";
 import path from "node:path";
 import { db } from "@/lib/db";
-import type { Prisma } from "@/lib/generated/prisma/client";
+import { Prisma } from "@/lib/generated/prisma/client";
 import { createSession } from "@/lib/auth/session";
 import { createMission } from "@/lib/mission/missionService";
 import { readMissionBack, type MissionReadback } from "@/lib/mission/readback";
@@ -651,6 +651,39 @@ describe("Action 完成回执端点 → 不受 mission 版本栅栏约束", () =
 //     已解决旧问题、跨问题、非等待状态仍拒绝。
 // ---------------------------------------------------------------------------
 describe("requires.questionId 与原问题事件的身份一致性（最小修补）", () => {
+  it.each(["resolved-user", "resolved-observation", "missing-sql", "missing-json"])("已解决或丢失等待绑定必须拒绝且无写入：%s", async mode => {
+    const o = await owner(`input-invalid-${mode}`);
+    const f = await waitingInput(o);
+    // 没有追加新事件：旧 QUESTION 仍是最新事件，不能靠碰巧出现更新事件才拒绝。
+    const invalidWait = mode === "missing-sql" ? Prisma.DbNull : mode === "missing-json" ? Prisma.JsonNull : json({
+      waitingFor: mode === "resolved-user" ? "USER" : "OBSERVATION", questionId: f.question.id,
+      question: "已经解决的原问题", missing: "PRIVATE", requirements: {}, resolved: true,
+    });
+    await db.agentMission.update({ where: { id: f.mission.id }, data: { waitStateJson: invalidWait } });
+    const before = await db.agentMission.findUniqueOrThrow({ where: { id: f.mission.id } });
+    const eventsBefore = await db.agentMissionEvent.count({ where: { missionId: f.mission.id } });
+    const result = await callInput(f.mission.id, {
+      requestId: `invalid-input-${mode}`, expectedVersion: before.version, questionId: f.question.id, answer: "不应再次处理的答复",
+    });
+    expectRejected(result, 409, "INPUT_CHANGED");
+    expect(await db.agentMission.findUniqueOrThrow({ where: { id: f.mission.id } })).toEqual(before);
+    expect(await db.agentMissionEvent.count({ where: { missionId: f.mission.id } })).toBe(eventsBefore);
+  });
+
+  it("观察事件不能冒充待回答QUESTION，拒绝时保留全部原事实", async () => {
+    const o = await owner("observation-is-not-question");
+    const f = await waitingInput(o);
+    const observation = await addEvent(f.mission.id, "INVESTIGATION_NO_NEW_INFORMATION", { changed: false });
+    await db.agentMission.update({ where: { id: f.mission.id }, data: { waitStateJson: json({
+      questionId: observation.id, waitingFor: "USER", requirements: {}, resolved: false,
+    }) } });
+    const before = await db.agentMission.findUniqueOrThrow({ where: { id: f.mission.id } });
+    const eventsBefore = await db.agentMissionEvent.count({ where: { missionId: f.mission.id } });
+    expectRejected(await callInput(f.mission.id, { requestId: "observation-answer", expectedVersion: before.version, questionId: observation.id, answer: "不是原问题的答复" }), 409, "INPUT_CHANGED");
+    expect(await db.agentMission.findUniqueOrThrow({ where: { id: f.mission.id } })).toEqual(before);
+    expect(await db.agentMissionEvent.count({ where: { missionId: f.mission.id } })).toBe(eventsBefore);
+  });
+
   it("等待回答期间追加原观察事件后，readback requires.questionId 可原样提交（202，状态 READY）", async () => {
     const o = await owner("question-mismatch");
     const f = await waitingInput(o);

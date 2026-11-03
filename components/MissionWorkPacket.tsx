@@ -287,15 +287,17 @@ export function MissionWorkPacket({ readback, packet, missionId, onReload, disab
   /** 唯一主动作：只做页面内定位或重新读取；不发起任何业务写入。 */
   function runAction() {
     if (versionAdvanced) {
-      reloadWithMessage("已重新读取当前状态");
+      reloadWithMessage("正在重新读取当前状态");
       return;
     }
     if (!action || action.kind === "NONE") return;
     switch (action.kind) {
       case "ANSWER_QUESTION": {
-        const container = document.getElementById("mission-question");
+        const questionId = action.target?.kind === "QUESTION" ? action.target.id : null;
+        const container = questionId ? Array.from(document.querySelectorAll<HTMLElement>("[data-mission-question-id]"))
+          .find((node) => node.dataset.missionQuestionId === questionId) : null;
         if (!container || !focusFirstControl(container)) {
-          reloadWithMessage("原入口暂不可见，已重新读取");
+          reloadWithMessage("原入口暂不可见，正在重新读取");
         }
         return;
       }
@@ -303,7 +305,7 @@ export function MissionWorkPacket({ readback, packet, missionId, onReload, disab
         const approvalId = action.target?.kind === "APPROVAL" ? action.target.id : null;
         const container = approvalId ? approvalContainer(approvalId) : null;
         if (!container || !focusFirstControl(container)) {
-          reloadWithMessage("原入口暂不可见，已重新读取");
+          reloadWithMessage("原入口暂不可见，正在重新读取");
         }
         return;
       }
@@ -311,7 +313,7 @@ export function MissionWorkPacket({ readback, packet, missionId, onReload, disab
         const container = document.getElementById("mission-error-block");
         const button = container?.querySelector<HTMLButtonElement>("button:not([disabled])") ?? null;
         if (!container || !button) {
-          reloadWithMessage("原入口暂不可见，已重新读取");
+          reloadWithMessage("原入口暂不可见，正在重新读取");
           return;
         }
         scrollIntoViewIfPossible(container);
@@ -323,7 +325,7 @@ export function MissionWorkPacket({ readback, packet, missionId, onReload, disab
       case "CHECK_UNKNOWN_EFFECT": {
         const container = document.getElementById("mission-results");
         if (!container) {
-          reloadWithMessage("原入口暂不可见，已重新读取");
+          reloadWithMessage("原入口暂不可见，正在重新读取");
           return;
         }
         focusRegion(container);
@@ -333,7 +335,7 @@ export function MissionWorkPacket({ readback, packet, missionId, onReload, disab
       case "WAIT_FOR_OBSERVATION":
       case "RECHECK_AUTHORITY":
       case "REVIEW_FAILURE": {
-        reloadWithMessage("已重新读取当前状态");
+        reloadWithMessage("正在重新读取当前状态");
         return;
       }
     }

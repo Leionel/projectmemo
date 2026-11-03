@@ -21,6 +21,8 @@ export function MissionReadback({
     [error, setError] = useState("");
   const [reload, setReload] = useState(0);
   const [observedKey, setObservedKey] = useState("");
+  const [completedKey, setCompletedKey] = useState("");
+  const [clock, setClock] = useState(() => Date.now());
   const generation = useRef(0),
     hasData = useRef(false);
   const query = Object.entries(target)
@@ -29,6 +31,8 @@ export function MissionReadback({
       ([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`,
     )
     .join("&");
+  const requestKey = JSON.stringify([missionId, query, reload, missionVersion, refreshKey]);
+  const loading = completedKey !== requestKey;
   useEffect(() => {
     const request = ++generation.current;
     let cancelled = false;
@@ -50,11 +54,15 @@ export function MissionReadback({
         hasData.current = true;
         setObservedKey(`${missionId}?${query}`);
         setData(readback);
+        setCompletedKey(requestKey);
+        setClock(Date.now());
         setState("fresh");
         setError("");
       })
       .catch((e) => {
         if (cancelled || request !== generation.current) return;
+        setCompletedKey(requestKey);
+        setClock(Date.now());
         const status = e.status ?? 0;
         setState(failedReadState(hasData.current, status));
         if ([401, 403, 404].includes(status)) {
@@ -71,7 +79,7 @@ export function MissionReadback({
     return () => {
       cancelled = true;
     };
-  }, [missionId, query, reload, missionVersion, refreshKey]);
+  }, [missionId, query, reload, missionVersion, refreshKey, requestKey]);
   useEffect(() => {
     const refresh = () => {
       if (!document.hidden) setReload((v) => v + 1);
@@ -83,6 +91,27 @@ export function MissionReadback({
       document.removeEventListener("visibilitychange", refresh);
     };
   }, []);
+  const boundaries = [data?.workPacket?.next.nextBoundary,
+    data?.workPacket?.authority.nextBoundary, data?.workPacket?.authority.deadline,
+    data?.workPacket?.authority.permissionExpiresAt,
+    data?.workPacket?.next.primaryAction?.requires.boundaryAt]
+    .map((value) => value ? Date.parse(value) : NaN).filter(Number.isFinite);
+  const boundary = boundaries.length ? Math.min(...boundaries) : null;
+  const expired = boundary !== null && boundary <= clock;
+  useEffect(() => {
+    // An already-expired response stays disabled. Only a future boundary arms a refresh.
+    if (boundary === null || boundary <= Date.now()) return;
+    let timer: ReturnType<typeof setTimeout>;
+    const arm = () => {
+      const remaining = boundary - Date.now();
+      if (remaining <= 0) {
+        setClock(Date.now());
+        setReload((value) => value + 1);
+      } else timer = setTimeout(arm, Math.min(remaining, 2147483647));
+    };
+    arm();
+    return () => clearTimeout(timer);
+  }, [boundary, missionId, query]);
   const current = data !== null && observedKey === `${missionId}?${query}`;
   return (
     <section
@@ -103,6 +132,7 @@ export function MissionReadback({
             委托版本已变化，正在重新读取回执；以下为上次结果。
           </p>
         )}
+      {expired && <p role="status">有效边界已越过，正在核对当前资格；旧包操作已停用。</p>}
       {error && (
         <p role="status">
           {error}
@@ -117,7 +147,7 @@ export function MissionReadback({
           packet={data.workPacket}
           missionId={missionId}
           onReload={() => setReload((v) => v + 1)}
-          disabled={state !== "fresh"}
+          disabled={state !== "fresh" || loading || expired || (missionVersion !== undefined && data.missionVersion < missionVersion)}
         />
       )}
       {current && <MissionResultReceipts data={data} />}

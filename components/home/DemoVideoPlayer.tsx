@@ -25,15 +25,11 @@ export function DemoVideoPlayer() {
     facadeRef.current?.focus();
   }, [active]);
 
-  // 播放器是跨域 iframe：按钮卸载后焦点会落回 body，这里在 iframe 挂载并加载后把焦点送进播放器框架。
+  // 只在用户打开播放器时交接一次焦点；后续加载不能抢走用户焦点。
   useEffect(() => {
-    if (!active) return;
-    const timers = [180, 900, 1800].map((delay) =>
-      window.setTimeout(() => {
-        iframeRef.current?.focus({ preventScroll: true });
-      }, delay),
-    );
-    return () => timers.forEach((timer) => window.clearTimeout(timer));
+    if (active && document.activeElement === document.body) {
+      iframeRef.current?.focus({ preventScroll: true });
+    }
   }, [active]);
 
   return (
@@ -49,7 +45,6 @@ export function DemoVideoPlayer() {
             allowFullScreen
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            onLoad={(event) => event.currentTarget.focus()}
           />
         ) : (
           <button

@@ -74,13 +74,14 @@ export async function commandMission(userId:string,id:string,action:string,raw:u
     if(m.version!==body.expectedVersion||terminal.includes(m.status))throw new AppError("MISSION_CHANGED","委托状态已变化，请刷新",409);
     let status=m.status;
     if(action==="input"){
-      const q=await tx.agentMissionEvent.findFirst({where:{missionId:id,type:{in:["QUESTION","INVESTIGATION_NO_NEW_INFORMATION","INVESTIGATION_OBSERVATION_CHANGED"]}},orderBy:{seq:"desc"}});
-      const wait=m.waitStateJson as unknown as WaitState;
-      // 原问题身份以 waitState 的未解决原问题为准（与工作包 requires.questionId 同源）：
-      // 等待回答期间原委托可能先写入观察事件，最新事件 id 不等于用户正在回答的原问题 id。
-      // resolved===true 的旧问题不接受；没有 wait 记录的旧数据回退到最新问题/观察事件，保持原兼容。
-      const expectedQuestionId=wait?.resolved!==true&&typeof wait.questionId==="string"?wait.questionId:q?.id;
-      if(m.status!=="WAITING_INPUT"||!body.answer||expectedQuestionId==null||expectedQuestionId!==body.questionId)throw new AppError("INPUT_CHANGED","问题已变化，请刷新后补充",409);status="READY";
+      const wait=m.waitStateJson as unknown as WaitState|null;
+      // 必须是仍未解决的原问题绑定。缺失绑定不能从最近观察事件推断，也不把 null 传入证据核对。
+      if(m.status!=="WAITING_INPUT"||!body.answer||!wait||typeof wait!=="object"||Array.isArray(wait)
+        ||wait.resolved===true||typeof wait.questionId!=="string"||wait.questionId!==body.questionId)
+        throw new AppError("INPUT_CHANGED","问题已变化或等待记录不完整，请刷新原委托后核对",409);
+      // 等待期间追加观察事件不影响同一 QUESTION；观察本身不能成为可回答的问题。
+      const q=await tx.agentMissionEvent.findFirst({where:{id:wait.questionId,missionId:id,type:"QUESTION"}});
+      if(!q)throw new AppError("INPUT_CHANGED","原问题已不可用，请刷新原委托后核对",409);status="READY";
       const fit=await assessEvidenceFit(tx,m,wait,[],body.evidenceReview);
       if(fit){
         requireFitReview(fit,body.evidenceReview);

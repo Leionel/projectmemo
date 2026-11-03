@@ -14,6 +14,8 @@
  * primaryAction.requires 只是服务端提交时重查的版本要求，不是客户端凭据。
  */
 
+import { KnowledgeCard } from './Memory';
+
 export const WORK_PACKET_CONTRACT_VERSION: string = 'final-a-workpacket-v1';
 export const WORK_PACKET_SCHEMA_VERSION: number = 1;
 
@@ -954,7 +956,7 @@ export function basisSummary(materials: WorkPacketMaterialUsesView, legacyServer
   if (allowed > 0) { parts.push(`当前可用 ${allowed}`); }
   if (suppressed > 0) { parts.push(`当前停用 ${suppressed}`); }
   if (unknown > 0) { parts.push(`当前许可未知 ${unknown}`); }
-  if (independent > 0) { parts.push(`独立支持 ${independent}`); }
+  if (independent > 0) { parts.push(`原始来源 ${independent}（结论仍需核验）`); }
   if (legacyServer) { parts.push('旧服务未提供当前许可，只能按历史留痕展示'); }
   return '依据：' + parts.join(' · ');
 }
@@ -969,7 +971,7 @@ export function currentUseLabel(item: WorkPacketMaterialView): string {
   if (use.explicitNull) { return '当前许可未知（未提供用户上下文）'; }
   if (!use.stateKnown) { return `当前许可未知（${use.rawState}）`; }
   if (use.state === 'ALLOWED') {
-    return use.independentEvidence ? '当前可作为依据 · 有独立支持回执' : '当前可作为依据 · 不因此成为独立支持';
+    return use.independentEvidence ? '当前可作为依据 · 原始来源，结论仍需核验' : '当前可作为依据 · 结论仍需核验';
   }
   if (use.state === 'SUPPRESSED') { return '当前不可作为依据（来源许可已抑制）'; }
   return '当前许可未知（来源策略未判定）';
@@ -985,6 +987,28 @@ export function materialBodyNote(item: WorkPacketMaterialView): string {
     return '正文暂不可访问；有界窗口未返回历史关联，不能据此认为从未使用';
   }
   return '正文未提供；不能据此认为记录不存在';
+}
+
+/** 项目原记录沿现有记忆卡的 captureId 定位，不送往只接受 ExternalSource 的读取器。 */
+export class CaptureSourceTarget {
+  projectId: string = '';
+  tab: string = 'memory';
+  captureId: string = '';
+}
+
+export function captureSourceTarget(projectId: string, sourceId: string): CaptureSourceTarget | null {
+  if (projectId === '' || !sourceId.startsWith('capture:') || sourceId.length <= 8) { return null; }
+  const target = new CaptureSourceTarget();
+  target.projectId = projectId;
+  target.captureId = sourceId.substring(8);
+  return target;
+}
+
+/** 仅从已通过原项目接口鉴权的卡片中精确匹配，不将 Capture ID 当作 KnowledgeCard ID。 */
+export function captureSourceCardId(captureId: string, cards: KnowledgeCard[]): string {
+  if (captureId === '') { return ''; }
+  const card = cards.find((item: KnowledgeCard) => item.captureId === captureId);
+  return card !== undefined ? card.id : '';
 }
 
 export function nextSummary(view: WorkPacketNextView): string {

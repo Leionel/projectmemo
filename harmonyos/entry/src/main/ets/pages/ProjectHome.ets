@@ -8,6 +8,7 @@ import router from '@ohos.router';
 import { FocusAgentLauncher } from '../components/FocusAgentLauncher';
 import promptAction from '@ohos.promptAction';
 import { missionHandoffRoute } from '../common/MissionWidgetContract';
+import { captureSourceCardId } from '../models/WorkPacket';
 import pasteboard from '@ohos.pasteboard';
 import { photoAccessHelper } from '@kit.MediaLibraryKit';
 import { picker } from '@kit.CoreFileKit';
@@ -213,6 +214,8 @@ struct ProjectHome {
   @State memorySearchQuery: string = '';
   @State selectedMemoryType: string = 'all';
   @State expandedCardId: string = '';
+  @State requestedCaptureId: string = '';
+  @State captureSourceNotice: string = '';
   @State memorySearchResults: KnowledgeCard[] = [];
   @State isSearchingMemory: boolean = false;
   @State memorySearchError: string = '';
@@ -312,6 +315,7 @@ struct ProjectHome {
     this.project = new ProjectDetail(); this.dashboard = new ProjectDashboard();
     this.interventions = []; this.actions = []; this.artifacts = []; this.attachments = []; this.milestones = [];
     this.memorySearchResults = []; this.reentry = null; this.episodeDetail = null; this.checkpointPreview = null;
+    this.requestedCaptureId = ''; this.captureSourceNotice = ''; this.expandedCardId = '';
     this.rawText = ''; this.captureRequestId = ''; this.attachmentFeedback = '';
     this.hasLoadedProjectSnapshot = false;
     void DeviceIdentity.clearCaptureDraft(this.captureDraftScope());
@@ -344,6 +348,11 @@ struct ProjectHome {
     if (params['tab'] === 'memory') {
       this.currentTabIndex = 1;
       this.expandedCardId = params['cardId'] ?? '';
+      this.requestedCaptureId = params['captureId'] ?? '';
+      if (this.requestedCaptureId !== '') {
+        this.materialsMode = 'memory'; this.memorySearchQuery = ''; this.selectedMemoryType = 'all';
+        this.captureSourceNotice = '正在核对原记录';
+      }
     } else if (params['tab'] === 'actions') {
       this.currentTabIndex = 2;
       this.focusedActionId = params['actionId'] ?? '';
@@ -673,6 +682,12 @@ struct ProjectHome {
       if (missionSummary !== null) this.homeMission = missionSummary.enabled ? missionSummary.items[0] ?? null : null;
       else if (missionDenied) this.homeMission = null;
       this.project = res[0];
+      if (this.requestedCaptureId !== '') {
+        this.expandedCardId = captureSourceCardId(this.requestedCaptureId, this.project.cards);
+        this.captureSourceNotice = this.expandedCardId !== ''
+          ? '原始记录；查看不改变委托当前的使用许可。'
+          : '当前项目返回的记忆中未找到这条原记录；未替换为其他记录，也不表示原记录已删除。请返回委托核对来源。';
+      }
       this.dashboard = this.findDashboard(res[1]);
       // R2 再入场：检查点/风险/下一安排聚合；失败保留上次缓存，不推送假空态
       const reentryP = this.reentryService.getReentry(this.projectId).catch(() => null);
@@ -4366,10 +4381,17 @@ if (this.attachmentSearchOpen) {
           .margin({ left: PMSpacing.LG, right: PMSpacing.LG, top: PMSpacing.SM })
       }
 
+      if (this.requestedCaptureId !== '') {
+        Column({ space: PMSpacing.SM }) {
+          Text(this.captureSourceNotice).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY)
+          Text('查看全部项目记忆').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.BRAND)
+            .constraintSize({ minHeight: 44 }).onClick(() => { this.requestedCaptureId = ''; this.captureSourceNotice = ''; })
+        }.width('100%').alignItems(HorizontalAlign.Start).padding({ left: PMSpacing.LG, right: PMSpacing.LG })
+      }
       // 卡片流
       List({ space: PMSpacing.MD }) {
         // 空态不能用空白代替：区分「还没有记忆」和「当前筛选下没有记忆」
-        if (this.getFilteredCards().length === 0 && this.memorySearchQuery.trim() === '') {
+        if (this.requestedCaptureId === '' && this.getFilteredCards().length === 0 && this.memorySearchQuery.trim() === '') {
           ListItem() {
             Column() {
               Text(this.project.cards.length === 0 ? '这个项目还没有记忆' : '当前类型下没有记忆')
@@ -4568,6 +4590,9 @@ if (this.attachmentSearchOpen) {
   }
 
   private getFilteredCards(): KnowledgeCard[] {
+    if (this.requestedCaptureId !== '') {
+      return this.project.cards.filter((card: KnowledgeCard) => card.captureId === this.requestedCaptureId);
+    }
     if (this.memorySearchQuery.trim() !== '') {
       return this.memorySearchResults;
     }

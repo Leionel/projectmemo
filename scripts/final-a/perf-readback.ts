@@ -928,11 +928,23 @@ async function runPhase(phase: string): Promise<number> {
 
 /* ================================ 7. 合并对照 ================================ */
 
+type PerfStats = { p50: number; p95: number };
+type PerfEvidence = {
+  status: string;
+  stable: Record<string, unknown> & {
+    queryStats: PerfStats; transactionStats: PerfStats;
+    sourcePolicyCheckStats: PerfStats; jsonBytesStats: PerfStats; latencyMsStats: PerfStats;
+  };
+  windowCorrectness: { hits: number; status: string };
+  retried: unknown; versionAdvanced: unknown; environment: unknown; checks: unknown;
+  method: Record<string, unknown>; remaining: unknown;
+};
+
 function readRun(phase: string) {
   const rel = RUNS_REL(phase);
   const abs = evidenceAbs(rel);
   if (!fs.existsSync(abs)) throw new Error(`缺少 ${phase} 运行证据：${rel}`);
-  return JSON.parse(fs.readFileSync(abs, "utf8")) as Record<string, any>;
+  return JSON.parse(fs.readFileSync(abs, "utf8")) as PerfEvidence;
 }
 
 function mergePhases(): number {
@@ -945,7 +957,7 @@ function mergePhases(): number {
     if (before.status !== "PROBE_COMPLETED" || after.status !== "PROBE_COMPLETED" || (after2 && after2.status !== "PROBE_COMPLETED")) {
       throw new Error(`存在失败检查：before=${before.status} after=${after.status} after2=${after2?.status ?? "MISSING"}`);
     }
-    const pick = (payload: Record<string, any>) => ({
+    const pick = (payload: PerfEvidence) => ({
       stable: {
         runs: payload.stable.runs,
         queriesPerRead: payload.stable.queriesPerRead,
@@ -1014,7 +1026,7 @@ function mergePhases(): number {
     const optionalRun = (phase: string) => {
       const abs = evidenceAbs(`${EVIDENCE_BASE}/runs/readback-perf-${phase}-run1.json`);
       if (!fs.existsSync(abs)) return null;
-      const payload = JSON.parse(fs.readFileSync(abs, "utf8")) as Record<string, any>;
+      const payload = JSON.parse(fs.readFileSync(abs, "utf8")) as PerfEvidence;
       return {
         path: `${EVIDENCE_BASE}/runs/readback-perf-${phase}-run1.json`,
         stableQueries: payload.stable?.queryStats?.p50 ?? null,

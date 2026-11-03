@@ -47,7 +47,7 @@ const writer = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: env.da
 
 type WriterMode = "MISSION" | "SOURCE" | "SUPPRESSION";
 const writerCounts: Record<WriterMode, number> = { MISSION: 0, SOURCE: 0, SUPPRESSION: 0 };
-let writerErrors: unknown[] = [];
+const writerErrors: unknown[] = [];
 
 async function withWriterRetry<T>(label: string, run: () => Promise<T>): Promise<T> {
   for (let attempt = 0; ; attempt++) {

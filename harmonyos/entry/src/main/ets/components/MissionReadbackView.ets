@@ -9,7 +9,7 @@ import { failedReadState } from '../common/ReadState';
 import { PMColors, PMSpacing, PMRadius, PMFontSize } from '../common/DesignTokens';
 import {
   ReadbackDeltaView, WorkPacketActionView, WorkPacketMaterialFactView, WorkPacketMaterialView, WorkPacketView,
-  currentUseLabel, materialBodyNote, observationLine, readbackDelta, shortPacketTime
+  currentUseLabel, materialBodyNote, observationLine, readbackDelta, shortPacketTime, captureSourceTarget
 } from '../models/WorkPacket';
 import { MissionWorkPacketView } from './MissionWorkPacketView';
 
@@ -109,6 +109,12 @@ export struct MissionReadbackView {
   private excerptText(item: WorkPacketMaterialView): string { return item.excerpt !== null ? item.excerpt : ''; }
   private sourcePointerId(item: WorkPacketMaterialView): string { return item.sourceId; }
   private async openSource(item: WorkPacketMaterialView): Promise<void> {
+    if (item.sourceId.startsWith('capture:')) {
+      const target = captureSourceTarget(this.data?.projectId ?? '', item.sourceId);
+      if (target === null) { this.error = '原记录定位信息不完整，请重新读取委托'; return; }
+      router.pushUrl({ url: 'pages/ProjectHome', params: target });
+      return;
+    }
     if (item.sourceId.startsWith('attachment:')) {
       router.pushUrl({ url: 'pages/AttachmentViewer', params: { projectId: this.data?.projectId ?? '', attachmentId: item.sourceId.substring(11) } });
       return;

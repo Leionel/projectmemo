@@ -1,0 +1,36 @@
+{
+  "schema": "d3-isolated-db-state/v1",
+  "capturedAtUtc8": "2026-11-03T15:06:21.178+08:00",
+  "database": "D:/Projects/hongmen-final-d-harmony-native/prisma/final-preparation.db",
+  "mode": "readonly",
+  "migrations": 51,
+  "counts": {
+    "User": 0,
+    "Project": 0,
+    "ProjectMembership": 0,
+    "AuthSession": 0,
+    "AgentMission": 0,
+    "AgentMissionEvent": 0,
+    "AgentMissionApproval": 0,
+    "AgentMissionStep": 0,
+    "AgentMissionOutput": 0,
+    "MissionArtifactReceipt": 0,
+    "GeneratedArtifact": 0,
+    "Capture": 0,
+    "ActionItem": 0
+  },
+  "syntheticLeftovers": {
+    "users_like_d3_prefix": 0,
+    "projects_title_d3_prefix": 0,
+    "missions_goal_d3_prefix": 0
+  },
+  "file": {
+    "size": 1503232,
+    "mtimeUtc8": "2026-11-03T15:06:00.867+08:00"
+  },
+  "sidecar": {
+    "wal_exists": false,
+    "wal_size": null,
+    "shm_exists": false
+  }
+}

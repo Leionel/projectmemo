@@ -1,0 +1,80 @@
+{
+  "result": "PASS",
+  "runTag": "d3-20261103070558-7093f2",
+  "reportPath": "D:\\Projects\\hongmen-final-d-harmony-native\\evidence\\final-d\\20261103\\d3\\BACKEND_READBACK_PROBE_RESULT.json",
+  "assertions": 19,
+  "failures": [],
+  "steps": [
+    {
+      "name": "identity.created",
+      "at": "2026-11-03T07:06:00.385Z",
+      "ok": true,
+      "ownerUserId": "cmw0cgafx0000508oib0rkb4l",
+      "ownerProjectId": "cmw0cgaho0001508oz591ccdb",
+      "otherUserId": "cmw0cgai50004508ov5oiek7r"
+    },
+    {
+      "name": "mission.created",
+      "at": "2026-11-03T07:06:00.452Z",
+      "ok": true,
+      "missionId": "cmw0cgajl0008508ojthxskwy",
+      "status": "READY",
+      "version": 1
+    },
+    {
+      "name": "mission.waiting_input",
+      "at": "2026-11-03T07:06:00.576Z",
+      "ok": true,
+      "questionId": "cmw0cganr000c508oxy6h03re",
+      "questionMode": "RUNNER_SCRIPTED",
+      "version": 3
+    },
+    {
+      "name": "input.executed",
+      "at": "2026-11-03T07:06:00.644Z",
+      "ok": true,
+      "questionId": "cmw0cganr000c508oxy6h03re",
+      "newVersion": 4
+    },
+    {
+      "name": "approval.executed",
+      "at": "2026-11-03T07:06:00.705Z",
+      "ok": true,
+      "approvalId": "cmw0cgaq7000f508of9dd6v31",
+      "newVersion": 5
+    },
+    {
+      "name": "output.readback",
+      "at": "2026-11-03T07:06:00.722Z",
+      "ok": true,
+      "outputId": "cmw0cgarm000h508owia5cm1c",
+      "revision": 1
+    },
+    {
+      "name": "receipt.readback",
+      "at": "2026-11-03T07:06:00.763Z",
+      "ok": true,
+      "receiptId": "cmw0cgas9000j508o6itb92qh",
+      "artifactId": "cmw0cgas2000i508ozsq43sc9",
+      "outputId": "cmw0cgarm000h508owia5cm1c"
+    },
+    {
+      "name": "negative_identity_checks",
+      "at": "2026-11-03T07:06:00.791Z",
+      "ok": true,
+      "sameOwnerOtherMission": "cmw0cgata000k508o5mhwsagm"
+    },
+    {
+      "name": "cleanup.done",
+      "at": "2026-11-03T07:06:00.868Z",
+      "ok": true,
+      "errors": 0
+    },
+    {
+      "name": "report.written",
+      "at": "2026-11-03T07:06:00.872Z",
+      "ok": true,
+      "reportPath": "D:\\Projects\\hongmen-final-d-harmony-native\\evidence\\final-d\\20261103\\d3\\BACKEND_READBACK_PROBE_RESULT.json"
+    }
+  ]
+}

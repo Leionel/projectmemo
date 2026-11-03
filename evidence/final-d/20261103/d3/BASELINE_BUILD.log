@@ -1,0 +1,1007 @@
+
+> projectmemo@0.1.0 harmony:build
+> tsx scripts/harmony-build.ts
+
+[harmony-build] DEVECO_SDK_HOME=D:\Program Files\Huawei\DevEco Studio\sdk
+[harmony-build] JAVA_HOME=D:\Program Files\Huawei\DevEco Studio\jbr
+> hvigor [32mUP-TO-DATE :entry:default@PreBuild...  [39m
+> hvigor [32mFinished :entry:default@CreateModuleInfo... after 4 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@GenerateMetadata...  [39m
+> hvigor [32mFinished :entry:default@ConfigureCmake... after 1 ms [39m
+> hvigor [32mFinished :entry:default@MergeProfile... after 27 ms [39m
+> hvigor [32mFinished :entry:default@CreateBuildProfile... after 10 ms [39m
+> hvigor [32mFinished :entry:default@PreCheckSyscap... after 2 ms [39m
+> hvigor [32mFinished :entry:default@GeneratePkgContextInfo... after 23 ms [39m
+> hvigor [32mFinished :entry:default@GeneratePkgSdkInfo... after 11 ms [39m
+> hvigor [32mFinished :entry:default@ProcessIntegratedHsp... after 3 ms [39m
+> hvigor [32mFinished :entry:default@BuildNativeWithCmake... after 1 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@MakePackInfo...  [39m
+> hvigor [32mFinished :entry:default@SyscapTransform... after 45 ms [39m
+> hvigor [32mFinished :entry:default@ProcessProfile... after 1 s 154 ms [39m
+> hvigor [32mFinished :entry:default@ProcessRouterMap... after 13 ms [39m
+> hvigor [32mFinished :entry:default@ProcessShareConfig... after 14 ms [39m
+> hvigor [32mFinished :entry:default@ProcessStartupConfig... after 10 ms [39m
+> hvigor [32mFinished :entry:default@BuildNativeWithNinja... after 3 ms [39m
+> hvigor [32mFinished :entry:default@ProcessResource... after 18 ms [39m
+> hvigor [32mFinished :entry:default@GenerateLoaderJson... after 60 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessLibs...  [39m
+> hvigor [32mFinished :entry:default@CompileResource... after 1 s 85 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@DoNativeStrip...  [39m
+> hvigor [32mFinished :entry:default@BuildJS... after 12 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@CacheNativeLibs...  [39m
+> hvigor [33mWARN: [33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/entryability/EntryAbility.ets:80:12
+ 'registerFont' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:278:22
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:279:23
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:280:27
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:322:25
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:323:34
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:324:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:635:18
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:636:19
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:29:25
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:15
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:57
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:78
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:111
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:67:38
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:67:59
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/GoalQuestionPanel.ets:54:14
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/GoalQuestionPanel.ets:57:143
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:130:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:130:12
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:150:31
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:150:38
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:152:35
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:152:42
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:153:10
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:153:17
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:157:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:157:12
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:284:59
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/ReminderSettingsView.ets:80:22
+ 'show' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:172:54
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:182:54
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:193:60
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:236:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:236:18
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:248:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:248:18
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:252:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:252:18
+ 'showDialog' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:266:26
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:341:9
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:341:22
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:343:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:343:14
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:359:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:359:14
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:365:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:365:14
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:409:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:467:51
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:572:22
+ 'show' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:625:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:657:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:661:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:661:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:677:39
+ 'showActionMenu' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:705:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:709:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:709:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1078:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1078:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1143:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1171:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1267:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1267:14
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1272:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1272:14
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1277:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1277:14
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1281:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1281:14
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1285:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1285:12
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1331:16
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1395:18
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1574:46
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1586:46
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1633:20
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:1868:26
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:2005:16
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:2009:16
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:2176:26
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:2832:28
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/Index.ets:3285:24
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/CopilotContinuationCard.ets:25:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/CopilotContinuationCard.ets:25:12
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/MeetingImportSheet.ets:74:22
+ 'show' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/NotificationService.ets:52:33
+ 'requestEnableNotification' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/NotificationService.ets:93:18
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/PMAppBar.ets:41:18
+ 'back' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/ActionReminderBlock.ets:115:22
+ 'show' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/ActionReminderBlock.ets:129:22
+ 'show' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/ActionReminderBlock.ets:206:23
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/ActionReminderBlock.ets:235:23
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/ActionReminderBlock.ets:262:23
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/ActionReminderBlock.ets:293:23
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/MissionPanel.ets:55:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/MissionPanel.ets:55:12
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/MissionPanel.ets:60:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/MissionPanel.ets:60:12
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:120:36
+ 'replaceUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:322:63
+ 'getParams' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:343:64
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:459:9
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:459:22
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:461:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:461:14
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:476:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:476:14
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:482:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:482:14
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:501:39
+ 'showActionMenu' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:553:39
+ 'showActionMenu' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:682:51
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:692:57
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:735:40
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:819:49
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:928:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:928:18
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1061:32
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1131:22
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1159:24
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1164:22
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1654:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1654:12
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1679:48
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1679:55
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1686:30
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1686:37
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1795:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1795:14
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1818:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2043:12
+ 'back' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2095:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2131:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2213:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2216:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2216:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2269:22
+ 'show' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2290:22
+ 'show' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2315:22
+ 'show' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2338:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2339:14
+ 'back' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2341:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2341:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2353:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2353:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2365:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2368:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2368:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2404:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2420:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2423:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2423:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2450:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2450:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2461:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2461:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2473:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2475:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2475:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2488:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2491:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2491:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2512:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2590:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2593:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2593:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2608:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2629:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2630:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2630:18
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2653:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2655:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2655:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2676:16
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:3008:20
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:4200:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:4200:12
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:4338:22
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:4648:44
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:4941:20
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:5810:22
+ 'back' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:5869:59
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/InterventionDetail.ets:35:63
+ 'getParams' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/InterventionDetail.ets:103:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/InterventionDetail.ets:104:14
+ 'back' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/InterventionDetail.ets:142:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/InterventionDetail.ets:143:14
+ 'back' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/InterventionDetail.ets:164:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/InterventionDetail.ets:165:14
+ 'back' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/InterventionDetail.ets:190:20
+ 'back' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/InterventionDetail.ets:201:20
+ 'back' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/DeviceCalendarReadCard.ets:25:23
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:219:23
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:251:23
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:269:21
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:307:23
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:675:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:675:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:705:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:705:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:757:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:757:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:767:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:771:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:771:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:778:63
+ 'getParams' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:832:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:832:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:905:27
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:934:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:955:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:959:9
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:959:22
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:961:9
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:961:22
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:1120:22
+ 'back' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:1138:22
+ 'back' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/DeploymentConnectionsPanel.ets:36:96
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/DeploymentConnectionsPanel.ets:87:199
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/ClaimCorrection.ets:44:57
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/AgentMemoryPanel.ets:164:30
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/AgentMemoryPanel.ets:169:30
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/AgentMemoryPanel.ets:278:32
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/AgentMemoryPanel.ets:283:32
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/AgentMemoryPanel.ets:375:32
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/RepoSignalPanel.ets:32:80
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:49:63
+ 'getParams' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:191:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:200:9
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:200:22
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:202:9
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:202:22
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:217:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:224:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:224:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:700:20
+ 'back' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:758:63
+ 'back' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/FeatureGuide.ets:133:12
+ 'back' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/LoginPage.ets:11:18
+ 'replaceUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/ExperiencePanel.ets:75:41
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/MissionReadbackView.ets:113:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/MissionReadbackView.ets:113:14
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/MissionReadbackView.ets:116:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/MissionReadbackView.ets:116:12
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/MissionReadbackView.ets:157:35
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/MissionReadbackView.ets:202:45
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/MissionReadbackView.ets:217:47
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/MissionReadbackView.ets:279:39
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/MissionSettingsForm.ets:101:22
+ 'show' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/MissionSettingsForm.ets:108:22
+ 'show' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/MissionResponsibilitySection.ets:37:51
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/MissionResponsibilitySection.ets:169:22
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/MissionResponsibilitySection.ets:178:24
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:104:30
+ 'replaceUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:109:27
+ 'getParams' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:122:27
+ 'getParams' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:147:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:147:14
+ 'replaceUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:154:38
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:201:77
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:202:51
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:363:26
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:363:39
+ 'showDialog' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:371:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:371:41
+ 'showDialog' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:469:85
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:699:88
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:714:37
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:717:37
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:721:37
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:889:123
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:898:151
+ 'back' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:38:27
+ 'getParams' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:77:25
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:95:23
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:99:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:99:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:107:23
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:112:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:113:19
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:113:32
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:166:50
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:167:51
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/ConversationFileGuides.ets:9:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/ConversationFileGuides.ets:9:12
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/ConversationFileGuides.ets:11:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/ConversationFileGuides.ets:11:12
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/ConversationFileGuides.ets:13:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/ConversationFileGuides.ets:13:12
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/ConversationFileGuides.ets:15:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/components/ConversationFileGuides.ets:15:12
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:84:29
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:84:36
+ 'replaceUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:90:27
+ 'getParams' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:104:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:104:12
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:116:41
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:126:29
+ 'getParams' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:158:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:158:14
+ 'replaceUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:225:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:225:14
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:229:12
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:229:19
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:484:74
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:485:136
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:612:10
+ 'onScroll' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ConversationHistory.ets:28:39
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ConversationHistory.ets:29:27
+ 'getParams' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ConversationHistory.ets:35:12
+ 'back' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ConversationHistory.ets:53:14
+ 'back' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ConversationWebSource.ets:23:26
+ 'getParams' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ConversationWebSource.ets:35:55
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ConversationWebSource.ets:35:62
+ 'pushUrl' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ConversationWebSource.ets:37:27
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectIntake.ets:82:63
+ 'getParams' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectIntake.ets:254:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectIntake.ets:254:12
+ 'pushUrl' has been deprecated.
+[39m[39m
+[39m
+> hvigor [32mFinished :entry:default@CompileArkTS... after 3 min 39 s 805 ms [39m
+> hvigor [32mFinished :entry:default@GeneratePkgModuleJson... after 55 ms [39m
+> hvigor [32mFinished :entry:default@ProcessCompiledResources... after 3 ms [39m
+> hvigor [32mFinished :entry:default@PackageHap... after 1 s 540 ms [39m
+> hvigor [32mFinished :entry:default@PackingCheck... after 59 ms [39m
+> hvigor [33mWARN: Will skip sign 'hos_hap'. No signingConfigs profile is configured in current project.
+             If needed, configure the signingConfigs in D:\Projects\hongmen-final-d-harmony-native\harmonyos\build-profile.json5.[39m
+> hvigor [32mFinished :entry:default@SignHap... after 7 ms [39m
+> hvigor [32mFinished :entry:default@CollectDebugSymbol... after 4 ms [39m
+> hvigor [32mFinished :entry:assembleHap... after 1 ms [39m
+> hvigor [32mBUILD SUCCESSFUL in 4 min 32 s 737 ms [39m
+
+[harmony-build] HAP: harmonyos\entry\build\default\outputs\default\entry-default-unsigned.hap
+[harmony-build] size: 8273912 bytes
+[harmony-build] sha256: 9c935302a720a34c2cf845f9a0528806d502f23364f07788650d0e9020164629

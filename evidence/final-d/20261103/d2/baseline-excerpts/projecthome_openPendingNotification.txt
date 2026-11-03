@@ -1,0 +1,41 @@
+# baseline 4b69614 harmonyos/entry/src/main/ets/pages/ProjectHome.ets :: 与 Index 重复的卡片意图消费
+pattern: private openPendingNotification  first-match-line: 412
+  412:   private openPendingNotification(): void {
+  413:     const missionId = AppStorage.get<string>('pendingMissionId') ?? '';
+  414:     const missionProjectId = AppStorage.get<string>('pendingMissionProjectId') ?? '';
+  415:     if (missionId !== '' && missionProjectId !== '') {
+  416:       const questionId = AppStorage.get<string>('pendingQuestionId') ?? '';
+  417:       const approvalId = AppStorage.get<string>('pendingApprovalId') ?? '';
+  418:       const sourceId = AppStorage.get<string>('pendingSourceId') ?? '';
+  419:       const handoffExpiresAt = AppStorage.get<string>('pendingHandoffExpiresAt') ?? '';
+  420:       AppStorage.setOrCreate<string>('pendingMissionId', ''); AppStorage.setOrCreate<string>('pendingMissionProjectId', '');
+  421:       AppStorage.setOrCreate<string>('pendingQuestionId', ''); AppStorage.setOrCreate<string>('pendingApprovalId', '');
+  422:       AppStorage.setOrCreate<string>('pendingSourceId', ''); AppStorage.setOrCreate<string>('pendingMissionVersion', '');
+  423:       AppStorage.setOrCreate<string>('pendingHandoffExpiresAt', '');
+  424:       const expiry = handoffExpiresAt === '' ? 0 : Number(handoffExpiresAt);
+  425:       // 过期定位意图不打开旧问题；用户回到当前原委托重新核对。
+  426:       const expired = handoffIntentExpired(expiry, Date.now());
+  427:       if (expired) {
+  428:         promptAction.showToast({ message: '原卡片已过期，已回到当前委托；旧问题不会被当成新问题' });
+  429:       }
+  430:       router.pushUrl({ url: 'pages/MissionDetail', params: {
+  431:         projectId: missionProjectId, missionId,
+  432:         questionId: expired ? '' : questionId,
+  433:         approvalId: expired ? '' : approvalId,
+  434:         sourceId: expired ? '' : sourceId
+  435:       } }); return;
+  436:     }
+  437:     const targetProjectId = AppStorage.get<string>('notificationProjectId') ?? '';
+  438:     const targetInterventionId = AppStorage.get<string>('notificationInterventionId') ?? '';
+  439:     if (targetProjectId !== '' && targetInterventionId !== '') {
+  440:       AppStorage.setOrCreate<string>('notificationProjectId', '');
+  441:       AppStorage.setOrCreate<string>('notificationInterventionId', '');
+  442:       router.pushUrl({
+  443:         url: 'pages/InterventionDetail',
+  444:         params: { projectId: targetProjectId, interventionId: targetInterventionId }
+  445:       });
+  446:     }
+  447:   }
+  448: 
+  449:   // 上传入口统一为回形针：二级菜单分开“相册图片”与“文件（PDF 等）”两条路径
+  450:   private async openUploadMenu(): Promise<void> {

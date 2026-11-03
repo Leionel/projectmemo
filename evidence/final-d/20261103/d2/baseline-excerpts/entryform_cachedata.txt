@@ -1,0 +1,23 @@
+# baseline 4b69614 harmonyos/entry/src/main/ets/entryformability/EntryFormAbility.ets :: 卡片刷新只回填 4 个 mission 字段，missionVersion/ExpiresAt/Attention/Sync 等未下发
+pattern: WidgetDataService.missionData(this.context)  first-match-line: 72
+   72:     const mission = WidgetDataService.missionData(this.context);
+   73:     return {
+   74:       'missionId': mission['missionId'],
+   75:       'missionProjectId': mission['missionProjectId'],
+   76:       'missionSummary': mission['missionSummary'],
+   77:       'missionUpdatedAt': mission['missionUpdatedAt'],
+   78:       'formDimension': dimension,
+   79:       'projectId': projectId,
+   80:       'projectTitle': title,
+   81:       'daysLeft': daysLeft,
+   82:       'hasDeadline': hasDeadline,
+   83:       'deadlineKind': deadlineKind,
+   84:       'deadlineText': deadlineText,
+   85:       'readiness': readiness,
+   86:       'nextActionTitle': nextActionTitle || nextAction,
+   87:       'nextActionReason': nextActionReason,
+   88:       'nextAction': nextAction || nextActionTitle,
+   89:       'status': status,
+   90:       'statusTone': statusTone,
+   91:       'checkpointInfo': cachedData['checkpointInfo']
+   92:     };

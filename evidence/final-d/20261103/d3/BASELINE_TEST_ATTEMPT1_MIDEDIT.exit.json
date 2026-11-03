@@ -1,0 +1,30 @@
+{
+  "command": "npm.cmd run harmony:test",
+  "cwd": "D:/Projects/hongmen-final-d-harmony-native",
+  "head": "4b696141435825a3582816e8e449c0e0cf013f29",
+  "start_utc8": "2026-11-03T14:46:20.580+08:00",
+  "end_utc8": "2026-11-03T14:47:57.798+08:00",
+  "duration_sec": 97.2,
+  "exit_code": -1,
+  "dirty_tree_before": true,
+  "dirty_tree_after": true,
+  "dirty_files_before": [
+    " M harmonyos/entry/src/main/ets/components/MissionReadbackView.ets",
+    " M harmonyos/entry/src/main/ets/pages/MissionDetail.ets",
+    " M harmonyos/entry/src/test/List.test.ets",
+    "?? harmonyos/entry/src/main/ets/components/MissionWorkPacketView.ets",
+    "?? harmonyos/entry/src/main/ets/models/WorkPacket.ets",
+    "?? harmonyos/entry/src/test/WorkPacketContract.test.ets",
+    "?? harmonyos/entry/src/test/WorkPacketFixtures.ets"
+  ],
+  "dirty_files_after": [
+    " M harmonyos/entry/src/main/ets/components/MissionReadbackView.ets",
+    " M harmonyos/entry/src/main/ets/pages/MissionDetail.ets",
+    " M harmonyos/entry/src/test/List.test.ets",
+    "?? evidence/final-d/",
+    "?? harmonyos/entry/src/main/ets/components/MissionWorkPacketView.ets",
+    "?? harmonyos/entry/src/main/ets/models/WorkPacket.ets",
+    "?? harmonyos/entry/src/test/WorkPacketContract.test.ets",
+    "?? harmonyos/entry/src/test/WorkPacketFixtures.ets"
+  ]
+}

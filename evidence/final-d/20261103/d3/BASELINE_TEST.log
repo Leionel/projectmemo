@@ -1,0 +1,79 @@
+
+> projectmemo@0.1.0 harmony:test
+> node scripts/harmony-test.ts
+
+> hvigor [32mUP-TO-DATE :entry:default@PreBuild...  [39m
+> hvigor [32mFinished :entry:default@CreateModuleInfo... after 3 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@CreateBuildProfile...  [39m
+> hvigor [32mFinished :entry:default@PreCheckSyscap... after 1 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@GenerateUnitTestTemplate...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@GeneratePkgContextInfo...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@MergeProfile...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessRouterMap...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessShareConfig...  [39m
+> hvigor [32mFinished :entry:default@ProcessStartupConfig... after 7 ms [39m
+> hvigor [32mFinished :entry:default@ProcessProfile... after 966 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@GenerateLoaderJson...  [39m
+> hvigor [32mFinished :entry:default@UnitTestProcessProfile... after 10 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessResource...  [39m
+> hvigor [32mFinished :entry:default@CompileResource... after 876 ms [39m
+> hvigor [32mFinished :entry:default@ReplaceUnitTestIndexFile... after 10 ms [39m
+> hvigor [32mFinished :entry:default@BuildUnitTestHook... after 1 ms [39m
+> hvigor [33mWARN: [33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/entryability/EntryAbility.ets:80:12
+ 'registerFont' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:278:22
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:279:23
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:280:27
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:322:25
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:323:34
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:324:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:635:18
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:636:19
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:29:25
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:15
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:57
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:78
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:111
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:67:38
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:67:59
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[39m
+> hvigor [32mFinished :entry:default@UnitTestArkTS... after 17 s 910 ms [39m
+> hvigor [32mWindows_NT[39m
+[32m[2026-11-03T15:15:39.581] [INFO] default - [39mFinished write html report
+> hvigor [32mFinished :entry:default@GenerateUnitTestResult... after 5 s 858 ms [39m
+> hvigor [32mFinished :entry:test... after 1 ms [39m
+> hvigor [32mBUILD SUCCESSFUL in 53 s 982 ms [39m
+[32m[2026-11-03T15:15:40.000] [INFO] default - [39mFinished file written successfully
+
+[harmony-test] Tests run: 133, Failure: 0, Error: 0, Pass: 133, Ignore: 0

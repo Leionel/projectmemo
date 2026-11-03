@@ -1,0 +1,90 @@
+probe_time_utc8=2026-11-03T14:40:57.126+08:00
+--- emulator processes ---
+ProcessId       : 33288
+ParentProcessId : 42556
+Name            : Emulator.exe
+CreationDate    : 2026/11/3 14:40:41
+ExecutablePath  : D:\Program Files\Huawei\DevEco Studio\tools\emulator\Emulator.exe
+CommandLine     : "D:\Program Files\Huawei\DevEco Studio\tools\emulator\Emulator.exe" -hvd "Pura 90" -path D:/Huawei/Emulator/deployed -t trace_96037_commandPipe -imageRoot C:\Users\Administrator\AppData\Local\Huawei\Sdk
+
+ProcessId       : 22464
+ParentProcessId : 33288
+Name            : emulator-crash-service.exe
+CreationDate    : 2026/11/3 14:40:45
+ExecutablePath  : D:\Program Files\Huawei\DevEco Studio\tools\emulator\emulator-crash-service.exe
+CommandLine     : "D:\Program Files\Huawei\DevEco Studio\tools\emulator\emulator-crash-service.exe"  -socket "Pura 90_crash" -data-dir "D:/Huawei/Emulator/deployed/Pura 90" -ppid 33288 -trace-params trace_96037_commandPipe,phone,6.1.0.126,x86_64,24,PHEMU-FD00
+
+ProcessId       : 62840
+ParentProcessId : 42556
+Name            : Emulator.exe
+CreationDate    : 2026/11/3 14:40:56
+ExecutablePath  : 
+CommandLine     : "D:\Program Files\Huawei\DevEco Studio\tools\emulator\Emulator.exe" -list -details
+--- D:/Huawei/Emulator ---
+--- C:/Users/Administrator/AppData/Local/Huawei/Emulator ---
+path C:\Users\Administrator\AppData\Local\Huawei\Emulator exists=True
+
+Name     Mode  LastWriteTime
+----     ----  -------------
+deployed d---- 2026/10/29 14:43:50
+
+
+path C:\Users\Administrator\AppData\Local\Huawei\Sdk exists=True
+
+Name               Mode  LastWriteTime
+----               ----  -------------
+.temp              d---- 2026/8/27 12:30:54
+licenses           d---- 2026/8/19 16:08:52
+system-image       d---- 2026/8/19 17:29:28
+productConfig.json -a--- 2026/8/19 10:17:02
+
+
+path C:\Users\Administrator\AppData\Local\Huawei\DevEcoStudio6.1 exists=True
+
+Name             Mode  LastWriteTime
+----             ----  -------------
+.insight         d---- 2026/9/27 19:03:35
+c-header-cache   d---- 2026/8/19 10:33:59
+caches           d---- 2026/11/3 14:40:18
+codegenie        d---- 2026/8/19 10:45:24
+conversion       d---- 2026/11/2 21:18:23
+documentation    d---- 2026/8/19 10:33:57
+editor           d---- 2026/8/19 10:34:00
+extResources     d---- 2026/8/19 10:33:56
+fileHistory      d---- 2026/8/20 14:44:12
+httpFileSystem   d---- 2026/11/3 14:40:16
+index            d---- 2026/11/3 14:40:12
+jcef_cache       d---- 2026/11/3 14:40:20
+LocalHistory     d---- 2026/8/19 10:17:00
+log              d---- 2026/11/3 14:40:11
+plugins          d---- 2026/8/19 10:54:27
+projects         d---- 2026/11/2 19:29:10
+splash           d---- 2026/8/19 10:16:58
+terminal         d---- 2026/8/19 10:49:56
+tmp              d---- 2026/11/3 14:40:19
+TraceLogData     d---- 2026/8/19 10:18:30
+vcs-log          d---- 2026/11/2 19:29:13
+vcs-users        d---- 2026/11/2 19:29:14
+.appinfo         -a--- 2026/11/3 14:40:11
+.home            -a--- 2026/11/3 14:40:11
+.pid             -a--- 2026/11/3 14:40:11
+.port            la--- 2026/11/3 14:40:11
+icon-cache-v1.db -a--- 2026/11/2 23:38:47
+
+
+--- Pura 90 AVD dir ---
+--- recent emulator logs ---
+
+FullName                                                                                                      Length Las
+                                                                                                                     tWr
+                                                                                                                     ite
+                                                                                                                     Tim
+                                                                                                                     e
+--------                                                                                                      ------ ---
+C:\Users\Administrator\AppData\Local\Huawei\DevEcoStudio6.1\log\idea.log                                     2949272 20…
+C:\Users\Administrator\AppData\Local\Huawei\DevEcoStudio6.1\log\lsp-server\1787106973944\idea-lsp-server.log 1979543 20…
+C:\Users\Administrator\AppData\Local\Huawei\DevEcoStudio6.1\log\lsp-server\1787106973944\idea-lsp-event.log  3162295 20…
+C:\Users\Administrator\AppData\Local\Huawei\DevEcoStudio6.1\log\codegenie\CodeGenie.log                         8108 20…
+C:\Users\Administrator\AppData\Local\Huawei\DevEcoStudio6.1\log\MetricLog\metric_memory.log                  9993477 20…
+
+

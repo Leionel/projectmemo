@@ -1,0 +1,245 @@
+{
+  "schema": "d3-same-identity-readback-probe/v1",
+  "track": "D3",
+  "runTag": "d3-20261103070558-7093f2",
+  "startedAt": "2026-11-03T07:05:58.346Z",
+  "isolatedDatabase": "D:\\Projects\\hongmen-final-d-harmony-native\\prisma\\final-preparation.db",
+  "mode": "IN_PROCESS",
+  "envPlan": {
+    "DATABASE_URL": "file:D:/Projects/hongmen-final-d-harmony-native/prisma/final-preparation.db",
+    "ATTACHMENT_DIR": "D:\\Projects\\hongmen-final-d-harmony-native\\tmp\\d-final\\20261103\\d3\\attachments",
+    "LLM_MODE": "mock",
+    "MISSION_ENABLED": "true",
+    "MISSION_WRITES_ENABLED": "true",
+    "MISSION_UI_ENABLED": "true",
+    "MISSION_WEB_ENABLED": "false",
+    "MISSION_AUTO_CONTINUATION_ENABLED": "false",
+    "MISSION_INVESTIGATION_DELEGATION_ENABLED": "false",
+    "FOCUS_AGENT_ENABLED": "false",
+    "FOCUS_AGENT_R4_ENABLED": "false",
+    "FOCUS_ASYNC_ENABLED": "false",
+    "FOCUS_WEB_ENABLED": "false"
+  },
+  "steps": [
+    {
+      "name": "identity.created",
+      "at": "2026-11-03T07:06:00.385Z",
+      "ok": true,
+      "ownerUserId": "cmw0cgafx0000508oib0rkb4l",
+      "ownerProjectId": "cmw0cgaho0001508oz591ccdb",
+      "otherUserId": "cmw0cgai50004508ov5oiek7r"
+    },
+    {
+      "name": "mission.created",
+      "at": "2026-11-03T07:06:00.452Z",
+      "ok": true,
+      "missionId": "cmw0cgajl0008508ojthxskwy",
+      "status": "READY",
+      "version": 1
+    },
+    {
+      "name": "mission.waiting_input",
+      "at": "2026-11-03T07:06:00.576Z",
+      "ok": true,
+      "questionId": "cmw0cganr000c508oxy6h03re",
+      "questionMode": "RUNNER_SCRIPTED",
+      "version": 3
+    },
+    {
+      "name": "input.executed",
+      "at": "2026-11-03T07:06:00.644Z",
+      "ok": true,
+      "questionId": "cmw0cganr000c508oxy6h03re",
+      "newVersion": 4
+    },
+    {
+      "name": "approval.executed",
+      "at": "2026-11-03T07:06:00.705Z",
+      "ok": true,
+      "approvalId": "cmw0cgaq7000f508of9dd6v31",
+      "newVersion": 5
+    },
+    {
+      "name": "output.readback",
+      "at": "2026-11-03T07:06:00.722Z",
+      "ok": true,
+      "outputId": "cmw0cgarm000h508owia5cm1c",
+      "revision": 1
+    },
+    {
+      "name": "receipt.readback",
+      "at": "2026-11-03T07:06:00.763Z",
+      "ok": true,
+      "receiptId": "cmw0cgas9000j508o6itb92qh",
+      "artifactId": "cmw0cgas2000i508ozsq43sc9",
+      "outputId": "cmw0cgarm000h508owia5cm1c"
+    },
+    {
+      "name": "negative_identity_checks",
+      "at": "2026-11-03T07:06:00.791Z",
+      "ok": true,
+      "sameOwnerOtherMission": "cmw0cgata000k508o5mhwsagm"
+    },
+    {
+      "name": "cleanup.done",
+      "at": "2026-11-03T07:06:00.868Z",
+      "ok": true,
+      "errors": 0
+    }
+  ],
+  "assertions": [
+    {
+      "name": "created mission owner is owner",
+      "pass": true,
+      "missionId": "cmw0cgajl0008508ojthxskwy",
+      "ownerUserId": "cmw0cgafx0000508oib0rkb4l"
+    },
+    {
+      "name": "created mission project matches",
+      "pass": true,
+      "projectId": "cmw0cgaho0001508oz591ccdb"
+    },
+    {
+      "name": "mission reached WAITING_INPUT",
+      "pass": true,
+      "status": "WAITING_INPUT",
+      "questionMode": "RUNNER_SCRIPTED"
+    },
+    {
+      "name": "question belongs to mission",
+      "pass": true,
+      "questionId": "cmw0cganr000c508oxy6h03re"
+    },
+    {
+      "name": "readback missionId equals mission",
+      "pass": true,
+      "readbackMissionId": "cmw0cgajl0008508ojthxskwy"
+    },
+    {
+      "name": "readback questionId equals question",
+      "pass": true,
+      "readbackQuestionId": "cmw0cganr000c508oxy6h03re"
+    },
+    {
+      "name": "readback projectId equals project",
+      "pass": true,
+      "readbackProjectId": "cmw0cgaho0001508oz591ccdb"
+    },
+    {
+      "name": "input advances mission version",
+      "pass": true,
+      "beforeVersion": 3,
+      "afterVersion": 4
+    },
+    {
+      "name": "readback after input keeps same mission/question",
+      "pass": true,
+      "missionId": "cmw0cgajl0008508ojthxskwy",
+      "questionId": "cmw0cganr000c508oxy6h03re"
+    },
+    {
+      "name": "readback approvalId equals approval",
+      "pass": true,
+      "readbackApprovalId": "cmw0cgaq7000f508of9dd6v31"
+    },
+    {
+      "name": "approval advances mission version",
+      "pass": true,
+      "beforeVersion": 4,
+      "afterVersion": 5
+    },
+    {
+      "name": "readback after approval keeps same approval",
+      "pass": true,
+      "readbackApprovalId": "cmw0cgaq7000f508of9dd6v31",
+      "status": "APPROVED"
+    },
+    {
+      "name": "readback outputId equals output",
+      "pass": true,
+      "readbackOutputId": "cmw0cgarm000h508owia5cm1c"
+    },
+    {
+      "name": "readback receiptId equals receipt",
+      "pass": true,
+      "readbackReceiptId": "cmw0cgas9000j508o6itb92qh"
+    },
+    {
+      "name": "readback receipt outputId equals output",
+      "pass": true,
+      "receiptOutputId": "cmw0cgarm000h508owia5cm1c"
+    },
+    {
+      "name": "plain readback lists same receipt/output",
+      "pass": true,
+      "receiptId": "cmw0cgas9000j508o6itb92qh",
+      "outputId": "cmw0cgarm000h508owia5cm1c"
+    },
+    {
+      "name": "other identity cannot read mission",
+      "pass": true,
+      "error": {
+        "code": "MISSION_NOT_FOUND",
+        "status": 404,
+        "message": "没有可访问的委托"
+      }
+    },
+    {
+      "name": "cross-mission question target rejected",
+      "pass": true,
+      "error": {
+        "code": "MISSION_TARGET_NOT_FOUND",
+        "status": 404,
+        "message": "原问题、提案或成果版本已不可用，请查看当前委托；不会改为另一项结果"
+      }
+    },
+    {
+      "name": "cross-mission output target rejected",
+      "pass": true,
+      "error": {
+        "code": "MISSION_TARGET_NOT_FOUND",
+        "status": 404,
+        "message": "原问题、提案或成果版本已不可用，请查看当前委托；不会改为另一项结果"
+      }
+    }
+  ],
+  "failures": [],
+  "created": {
+    "userIds": [
+      "cmw0cgafx0000508oib0rkb4l",
+      "cmw0cgai50004508ov5oiek7r"
+    ],
+    "sessionIds": [
+      "cmw0cgahy0003508o2598msj7",
+      "cmw0cgaik0007508o8sssf13y"
+    ],
+    "projectIds": [
+      "cmw0cgaho0001508oz591ccdb",
+      "cmw0cgaic0005508oujh4eksz"
+    ],
+    "missionIds": [
+      "cmw0cgajl0008508ojthxskwy",
+      "cmw0cgata000k508o5mhwsagm"
+    ],
+    "questionIds": [
+      "cmw0cgatn000m508o0cpeknpm"
+    ],
+    "approvalIds": [
+      "cmw0cgaq7000f508of9dd6v31"
+    ],
+    "stepIds": [
+      "cmw0cgapx000e508o2xp3y8m5"
+    ],
+    "outputIds": [
+      "cmw0cgarm000h508owia5cm1c"
+    ],
+    "artifactIds": [
+      "cmw0cgas2000i508ozsq43sc9"
+    ],
+    "receiptIds": [
+      "cmw0cgas9000j508o6itb92qh"
+    ]
+  },
+  "result": "PASS",
+  "finishedAt": "2026-11-03T07:06:00.872Z"
+}

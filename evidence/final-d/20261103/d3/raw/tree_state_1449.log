@@ -1,0 +1,15 @@
+probe_time_utc8=2026-11-03T14:49:01.779+08:00
+HEAD=4b696141435825a3582816e8e449c0e0cf013f29
+branch=codex/final-d-harmony-native
+--- status ---
+--- per-file sha256 and mtime ---
+harmonyos/entry/src/main/ets/common/MissionWidgetContract.ets	fd40d714f332c3e0663f0230a9ab0ccdf1b893158353ffb34f7143e4abbada9a	7433	2026-11-03T14:48:40.803
+harmonyos/entry/src/main/ets/components/MissionReadbackView.ets	23565f67793e74ae87dbe09142ea60fc8e9df219666a016174601ec9fe550e87	21218	2026-11-03T14:45:40.745
+harmonyos/entry/src/main/ets/pages/MissionDetail.ets	e4fabd321d5801c38e280dc18ff6a6dd4c1d31a17c2010aca14a3f08c67a8bd8	72777	2026-11-03T14:43:54.976
+harmonyos/entry/src/test/List.test.ets	ab2d0adfb30dc5df962344040af794f21d4757f406632f17b3ca45167b7706e3	1474	2026-11-03T14:45:03.932
+evidence/final-d/	ab2d0adfb30dc5df962344040af794f21d4757f406632f17b3ca45167b7706e3	1	2026-11-03T14:38:30.604
+harmonyos/entry/src/main/ets/components/MissionWorkPacketView.ets	ec0fd3241eb54941207e7bdc7d1e25fa72f239ba0ef7fcccf1ede53a6625c288	11074	2026-11-03T14:45:59.616
+harmonyos/entry/src/main/ets/models/WorkPacket.ets	4bdb426643162f45d2fa69e48e0dc799196806d9c5b6d1e7fd2166a0df3dcaf3	46203	2026-11-03T14:40:46.385
+harmonyos/entry/src/test/WorkPacketContract.test.ets	83300459190889f5723aacd4bec8339d1b2972392ce270e7a85f630ada30b15e	13519	2026-11-03T14:44:58.943
+harmonyos/entry/src/test/WorkPacketFixtures.ets	8d01950f7cfa162252a225bc9eba4cad39cb1cf2c53b4ba339b7221f370d8eaa	81298	2026-11-03T14:44:27.411
+--- diff stat ---

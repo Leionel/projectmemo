@@ -1,0 +1,22 @@
+probe_time_utc8=2026-11-03T14:39:28.587+08:00
+hdc_exists=True
+--- hdc -v ---
+Ver: 3.2.0d
+--- hdc list targets -v (t=14:39) ---
+127.0.0.1:5555		TCP	Offline	localhost	hdc
+COM3		UART	Ready	unknown...	hdc
+COM4		UART	Ready	unknown...	hdc
+--- netstat 5555/18710/8710 ---
+LocalAddress LocalPort RemoteAddress RemotePort       State OwningProcess
+------------ --------- ------------- ----------       ----- -------------
+127.0.0.1        18710 127.0.0.1           8845 Established         58400
+127.0.0.1        18710 127.0.0.1           4156    TimeWait             0
+127.0.0.1        18710 0.0.0.0                0                     58400
+127.0.0.1         8845 127.0.0.1          18710 Established         59604
+127.0.0.1         5555 0.0.0.0                0                     56172
+--- tconn attempt ---
+Connect OK
+--- list targets after tconn (t=+2s) ---
+127.0.0.1:5555		TCP	Connected	localhost	hdc
+COM3		UART	Ready	unknown...	hdc
+COM4		UART	Ready	unknown...	hdc

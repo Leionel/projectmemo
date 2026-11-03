@@ -1,0 +1,37 @@
+probe_time_utc8=2026-11-03T14:49:54.298+08:00
+--- HAP inventory (pre-baseline-build) ---
+D:\Projects\hongmen-final-d-harmony-native\harmonyos\entry\build\default\outputs\default\entry-default-unsigned.hap|8047574|2026-11-03T11:18:09.914|2d64b3da8a803022e500f9ec51d423fdf8fd869fb8841db54a96b4acc455ed2f
+D:\Projects\hongmen-final-d-harmony-native\harmonyos\entry\build\default\outputs\default\pack.info|853|2026-11-03T11:17:34.447|35140df8e6d56595e3f7a9f7c1850ffa212a19c613c63e7a7b25ad501f1366f4
+--- tracked signing-material patterns ---
+NONE
+--- tracked files matching signing config in harmonyos ---
+tracked-harmonyos: harmonyos/AppScope/resources/base/profile/configuration.json
+tracked-harmonyos: harmonyos/build-profile.json5
+tracked-harmonyos: harmonyos/entry/build-profile.json5
+tracked-harmonyos: harmonyos/entry/src/main/ets/common/DesignTokens.ets
+tracked-harmonyos: harmonyos/entry/src/main/ets/components/MissionEvidenceReview.ets
+tracked-harmonyos: harmonyos/entry/src/main/ets/components/RepoSignalPanel.ets
+tracked-harmonyos: harmonyos/entry/src/main/ets/models/RepoSignal.ets
+tracked-harmonyos: harmonyos/entry/src/main/ets/services/RepoSignalService.ets
+tracked-harmonyos: harmonyos/entry/src/main/resources/base/profile/backup_config.json
+tracked-harmonyos: harmonyos/entry/src/main/resources/base/profile/form_config.json
+tracked-harmonyos: harmonyos/entry/src/main/resources/base/profile/main_pages.json
+tracked-harmonyos: harmonyos/entry/src/test/RepoSignalContract.test.ets
+--- .env candidates (top-level, git tree) ---
+env: .env.example
+on-disk .env* count: 1
+--- user signing materials in DevEco home (existence only) ---
+path C:\Users\Administrator\.ohos\config exists=True
+  default_harmonyos_6Dy1LjX936KpQPlMWx7-DmFiWtDvjunL72eg7mcsMJU=.cer | 2914 | 2026-09-28T19:53:22
+  default_harmonyos_6Dy1LjX936KpQPlMWx7-DmFiWtDvjunL72eg7mcsMJU=.csr | 514 | 2026-09-28T19:53:21
+  default_harmonyos_6Dy1LjX936KpQPlMWx7-DmFiWtDvjunL72eg7mcsMJU=.p12 | 1128 | 2026-09-28T19:53:21
+  default_harmonyos_6Dy1LjX936KpQPlMWx7-DmFiWtDvjunL72eg7mcsMJU=.p7b | 4085 | 2026-09-28T19:53:23
+  default_harmonyos_Huqy1piQ6aiSRgDip6_pk4DXnBMyVknQYyyOx1rtsU8=.cer | 2914 | 2026-11-02T19:47:23
+  default_harmonyos_Huqy1piQ6aiSRgDip6_pk4DXnBMyVknQYyyOx1rtsU8=.csr | 514 | 2026-11-02T19:47:16
+  default_harmonyos_Huqy1piQ6aiSRgDip6_pk4DXnBMyVknQYyyOx1rtsU8=.p12 | 1128 | 2026-11-02T19:47:16
+  default_harmonyos_Huqy1piQ6aiSRgDip6_pk4DXnBMyVknQYyyOx1rtsU8=.p7b | 4151 | 2026-11-02T19:47:30
+path C:\Users\Administrator\.ohos exists=True
+path C:\Users\Administrator\AppData\Roaming\Huawei\DevEcoStudio6.1\signing exists=False
+--- hvigor skip-sign evidence ---
+report_file: report-202611031446305420.json mtime=2026-11-03T14:47:57
+  L1348: "name": "No signingConfig found, initRemoteHspCache failed.",

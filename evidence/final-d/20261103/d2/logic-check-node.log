@@ -1,0 +1,8 @@
+# D2 纯函数逻辑镜像校验（Node/tsx，验证用临时副本，不是构建脚本，不参与提交产物）
+date: 2026-11-03T15:0x+08:00
+source: harmonyos/entry/src/main/ets/common/MissionWidgetContract.ets (working tree, sha256 below)
+contract sha256: FD40D714F332C3E0663F0230A9AB0CCDF1B893158353FFB34F7143E4ABBADA9A
+command: npm.cmd exec -- tsx $env:TEMP/d2check/check.ts   (temp copy of contract + assertion mirror of WidgetHandoff.test.ets)
+
+PASS 37, FAIL 0
+exit: 0

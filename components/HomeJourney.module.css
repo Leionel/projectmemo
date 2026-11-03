@@ -99,7 +99,7 @@
     background-color 140ms ease;
 }
 .storyTabs > button > span {
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
   opacity: 0.7;
 }
@@ -162,7 +162,7 @@
 }
 .contextPosition > span {
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 400;
 }
 
@@ -686,7 +686,7 @@
     font-size: 0.8rem;
   }
   .storyTabs > button > span {
-    font-size: 0.72rem;
+    font-size: 0.8rem;
   }
   .storyBody {
     display: block;
@@ -819,7 +819,7 @@
     gap: 0.5rem;
   }
   .storyTabs > button {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
   }
 }
 @media (prefers-reduced-motion: reduce) {

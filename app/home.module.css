@@ -272,7 +272,7 @@
     background-color 140ms ease;
 }
 .stageIndex {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
   opacity: 0.7;
 }
@@ -947,6 +947,9 @@
   filter: brightness(0.96);
 }
 .closingLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: color-mix(in srgb, var(--paper) 68%, var(--ink));
   font-size: 0.9rem;
   line-height: 1.5;
@@ -1192,7 +1195,7 @@
   }
   .heroNote {
     margin-top: 0.8rem;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
   }
   .lens {
     border-radius: 1rem;
@@ -1201,7 +1204,7 @@
     padding: 0.8rem 0.95rem 0.7rem;
   }
   .lensKicker {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
   }
   .lensMission {
     font-size: 1.15rem;
@@ -1226,14 +1229,14 @@
     padding: 0.45rem 0;
   }
   .lensRow dt {
-    font-size: 0.76rem;
+    font-size: 0.8rem;
   }
   .lensRow dd {
     font-size: 0.9rem;
     line-height: 1.65;
   }
   .rowMeta {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     line-height: 1.6;
   }
   .lensRow[data-tone="waiting"] {
@@ -1338,7 +1341,7 @@
     font-size: 0.98rem;
   }
   .videoMeta {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
   }
   .closingInner {
     padding-block: 3rem;
@@ -1368,7 +1371,7 @@
     font-size: 0.82rem;
   }
   .footerMeta {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
   }
 }
 

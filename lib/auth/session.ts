@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { db } from "@/lib/db";
+import { AppError } from "@/lib/api";
 import type { AuthSession, User } from "@/lib/generated/prisma/client";
 
 const DEFAULT_SESSION_TTL_DAYS = 7;
@@ -22,7 +23,11 @@ export function hashToken(token: string): string {
  * 为用户创建新会话。
  * 仅返回原始 Token 给客户端，数据库仅保存哈希值。
  */
-export async function createSession(userId: string, ttlDays = DEFAULT_SESSION_TTL_DAYS): Promise<{
+export async function createSession(
+  userId: string,
+  ttlDays = DEFAULT_SESSION_TTL_DAYS,
+  credentials?: { passwordHash: string },
+): Promise<{
   token: string;
   session: AuthSession;
   expiresAt: Date;
@@ -31,13 +36,20 @@ export async function createSession(userId: string, ttlDays = DEFAULT_SESSION_TT
   const tokenHash = hashToken(token);
   const expiresAt = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
 
-  const session = await db.authSession.create({
-    data: {
-      userId,
-      tokenHash,
-      expiresAt,
-    },
-  });
+  const data = { userId, tokenHash, expiresAt };
+  // 登录校验在事务外完成；提交会话时复核同一凭据与邮箱资格。
+  // 与密码重置的撤销事务串行：重置先提交则拒绝旧凭据，登录先提交则由重置撤销。
+  const session = credentials
+    ? await db.$transaction(async (tx) => {
+        const current = await tx.user.findUnique({ where: { id: userId } });
+        if (!current || current.passwordHash !== credentials.passwordHash)
+          throw new AppError("AUTH_FAILED", "账号或密码错误", 401);
+        const security = await tx.accountSecurity.findUnique({ where: { userId } });
+        if (security && !security.emailVerifiedAt)
+          throw new AppError("EMAIL_NOT_VERIFIED", "请先验证注册邮箱；未收到邮件可以重新发送", 403);
+        return tx.authSession.create({ data });
+      })
+    : await db.authSession.create({ data });
 
   return { token, session, expiresAt };
 }

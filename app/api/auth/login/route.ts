@@ -83,10 +83,12 @@ export async function POST(request: Request) {
       throw new AppError("EMAIL_NOT_VERIFIED", "请先验证注册邮箱；未收到邮件可以重新发送", 403);
     }
 
-    clearLoginFailures([identifierKey, `${clientIp}:user:${user.id}`]);
-
     // 创建会话
-    const { token, expiresAt } = await createSession(user.id);
+    const matched = candidates.find((candidate) => candidate.user.id === user.id)!;
+    const { token, expiresAt } = await createSession(user.id, undefined, {
+      passwordHash: matched.user.passwordHash,
+    });
+    clearLoginFailures([identifierKey, `${clientIp}:user:${user.id}`]);
 
     // 获取该用户授权的项目列表
     const memberships = await db.projectMembership.findMany({

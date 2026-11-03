@@ -1,0 +1,293 @@
+{
+  "generatedAt": "2026-11-03T07:30:49.794Z",
+  "purpose": "BEFORE 数字可复现性对照（同一脚本在 4b69614 干净 shadow 重跑）",
+  "checks": [
+    {
+      "id": "RCP-TERM-01",
+      "question": "BEFORE 终态基线可复现：summary/focus 均找不到，detail/readback 可表达 terminal+unsettled",
+      "verdict": "PASS",
+      "observed": {
+        "before": {
+          "summaryCanFindSucceeded": false,
+          "summaryCanFindCancelled": false,
+          "focusCanFindSucceeded": false,
+          "focusCanFindCancelled": false,
+          "detailExpressesSucceededTerminal": true,
+          "detailExpressesCancelledTerminal": true,
+          "detailExpressesUnsettledSucceeded": true,
+          "detailExpressesUnsettledCancelled": true,
+          "readbackExpressesSucceededTerminal": true,
+          "readbackExpressesCancelledTerminal": true,
+          "readbackExpressesUnsettledSucceeded": true,
+          "readbackExpressesUnsettledCancelled": true,
+          "readbackPrimaryActionKinds": {
+            "succeeded": "CHECK_UNKNOWN_EFFECT",
+            "cancelled": "CHECK_UNKNOWN_EFFECT"
+          },
+          "readOnlyZeroChange": true,
+          "nonOwner404": true,
+          "conclusion": "入口缺口：missionWorkspaceSummary/GlobalFocus 只查非终态状态集，终态+未结算UNKNOWN任务完全不在摘要/Focus 结果中；但同一 workState 投影在 detail/readback 已能并列表达 terminal+unsettledEffect，故不是“状态不可表达”。"
+        },
+        "recompute": {
+          "summaryCanFindSucceeded": false,
+          "summaryCanFindCancelled": false,
+          "focusCanFindSucceeded": false,
+          "focusCanFindCancelled": false,
+          "detailExpressesSucceededTerminal": true,
+          "detailExpressesCancelledTerminal": true,
+          "detailExpressesUnsettledSucceeded": true,
+          "detailExpressesUnsettledCancelled": true,
+          "readbackExpressesSucceededTerminal": true,
+          "readbackExpressesCancelledTerminal": true,
+          "readbackExpressesUnsettledSucceeded": true,
+          "readbackExpressesUnsettledCancelled": true,
+          "readbackPrimaryActionKinds": {
+            "succeeded": "CHECK_UNKNOWN_EFFECT",
+            "cancelled": "CHECK_UNKNOWN_EFFECT"
+          },
+          "readOnlyZeroChange": true,
+          "nonOwner404": true,
+          "conclusion": "入口缺口：missionWorkspaceSummary/GlobalFocus 只查非终态状态集，终态+未结算UNKNOWN任务完全不在摘要/Focus 结果中；但同一 workState 投影在 detail/readback 已能并列表达 terminal+unsettledEffect，故不是“状态不可表达”。"
+        }
+      }
+    },
+    {
+      "id": "RCP-WIN-01",
+      "question": "BEFORE 证据窗口基线可复现：目标审查在库但被挤出（items=0/truncated=true），对照命中",
+      "verdict": "PASS",
+      "observed": {
+        "before": {
+          "targetReviewExistsInDb": true,
+          "evictedScenarioHit": false,
+          "evictedScenarioItemCount": 0,
+          "evictedScenarioTruncated": true,
+          "controlScenarioHit": true,
+          "boundary21ScenarioHit": false,
+          "readOnlyZeroChange": true
+        },
+        "recompute": {
+          "targetReviewExistsInDb": true,
+          "evictedScenarioHit": false,
+          "evictedScenarioItemCount": 0,
+          "evictedScenarioTruncated": true,
+          "controlScenarioHit": true,
+          "boundary21ScenarioHit": false,
+          "readOnlyZeroChange": true
+        }
+      }
+    },
+    {
+      "id": "RCP-REQ-01",
+      "question": "BEFORE requires 矩阵基线可复现：132 单元/119 入口拒绝、整包盲发 12/12 422、15 项 fence 错误码一致",
+      "verdict": "PASS",
+      "observed": {
+        "before": {
+          "matrixCells": 132,
+          "entryRejectedCells": 119,
+          "blindForwardAll422": true,
+          "fences": [
+            [
+              "input 旧 expectedVersion（missionVersion 等价字段）",
+              409,
+              "MISSION_CHANGED"
+            ],
+            [
+              "input 错误 questionId",
+              409,
+              "INPUT_CHANGED"
+            ],
+            [
+              "approvals 错误 proposalHash",
+              409,
+              "APPROVAL_CHANGED"
+            ],
+            [
+              "approvals 错误 approvalId（路径）",
+              409,
+              "APPROVAL_CHANGED"
+            ],
+            [
+              "pause 旧 expectedVersion",
+              409,
+              "MISSION_CHANGED"
+            ],
+            [
+              "cancel 旧 expectedVersion",
+              409,
+              "MISSION_CHANGED"
+            ],
+            [
+              "resume 旧 expectedVersion",
+              409,
+              "MISSION_CHANGED"
+            ],
+            [
+              "resume 在非 PAUSED 状态",
+              409,
+              "MISSION_NOT_PAUSED"
+            ],
+            [
+              "replan 在非 WAITING_APPROVAL 状态",
+              409,
+              "INVALID_TRANSITION"
+            ],
+            [
+              "constraints 旧 expectedConstraintsVersion",
+              409,
+              "MISSION_CHANGED"
+            ],
+            [
+              "research-scope 旧 expectedScopeVersion",
+              409,
+              "MISSION_CHANGED"
+            ],
+            [
+              "continuation-policy 旧 expectedVersion",
+              409,
+              "MISSION_CHANGED"
+            ],
+            [
+              "responsibility 错误 expectedControlVersion（controlVersion 等价字段）",
+              409,
+              "MISSION_CHANGED"
+            ],
+            [
+              "continations-confirm 旧 expectedContextVersion",
+              409,
+              "ASSESSMENT_CHANGED"
+            ],
+            [
+              "artifact-confirm 旧 expectedContextVersion",
+              409,
+              "OUTPUT_CHANGED"
+            ]
+          ]
+        },
+        "recompute": {
+          "matrixCells": 132,
+          "entryRejectedCells": 119,
+          "blindForwardAll422": true,
+          "fences": [
+            [
+              "input 旧 expectedVersion（missionVersion 等价字段）",
+              409,
+              "MISSION_CHANGED"
+            ],
+            [
+              "input 错误 questionId",
+              409,
+              "INPUT_CHANGED"
+            ],
+            [
+              "approvals 错误 proposalHash",
+              409,
+              "APPROVAL_CHANGED"
+            ],
+            [
+              "approvals 错误 approvalId（路径）",
+              409,
+              "APPROVAL_CHANGED"
+            ],
+            [
+              "pause 旧 expectedVersion",
+              409,
+              "MISSION_CHANGED"
+            ],
+            [
+              "cancel 旧 expectedVersion",
+              409,
+              "MISSION_CHANGED"
+            ],
+            [
+              "resume 旧 expectedVersion",
+              409,
+              "MISSION_CHANGED"
+            ],
+            [
+              "resume 在非 PAUSED 状态",
+              409,
+              "MISSION_NOT_PAUSED"
+            ],
+            [
+              "replan 在非 WAITING_APPROVAL 状态",
+              409,
+              "INVALID_TRANSITION"
+            ],
+            [
+              "constraints 旧 expectedConstraintsVersion",
+              409,
+              "MISSION_CHANGED"
+            ],
+            [
+              "research-scope 旧 expectedScopeVersion",
+              409,
+              "MISSION_CHANGED"
+            ],
+            [
+              "continuation-policy 旧 expectedVersion",
+              409,
+              "MISSION_CHANGED"
+            ],
+            [
+              "responsibility 错误 expectedControlVersion（controlVersion 等价字段）",
+              409,
+              "MISSION_CHANGED"
+            ],
+            [
+              "continations-confirm 旧 expectedContextVersion",
+              409,
+              "ASSESSMENT_CHANGED"
+            ],
+            [
+              "artifact-confirm 旧 expectedContextVersion",
+              409,
+              "OUTPUT_CHANGED"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "RCP-PERF-01",
+      "question": "BEFORE 性能基线可复现：事务[2]/查询[118]/retry 4-6/零副作用/无跨请求缓存一致",
+      "verdict": "PASS",
+      "observed": {
+        "before": {
+          "stableTransactions": [
+            2
+          ],
+          "stableQueries": [
+            118
+          ],
+          "retryOnceTransactions": 4,
+          "retryOnceConsistency": "RETRIED",
+          "continuousTransactions": 6,
+          "continuousRetries": 2,
+          "materialUseItemsAtMost8": true,
+          "readbackZeroSideEffect": true,
+          "crossRequestCacheAbsent": true
+        },
+        "recompute": {
+          "stableTransactions": [
+            2
+          ],
+          "stableQueries": [
+            118
+          ],
+          "retryOnceTransactions": 4,
+          "retryOnceConsistency": "RETRIED",
+          "continuousTransactions": 6,
+          "continuousRetries": 2,
+          "materialUseItemsAtMost8": true,
+          "readbackZeroSideEffect": true,
+          "crossRequestCacheAbsent": true
+        }
+      }
+    }
+  ],
+  "summary": {
+    "total": 4,
+    "pass": 4,
+    "fail": 0
+  }
+}

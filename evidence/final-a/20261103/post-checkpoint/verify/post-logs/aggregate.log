@@ -1,0 +1,72 @@
+{
+  "ok": true,
+  "outPath": "evidence\\final-a\\20261103\\post-checkpoint\\verify\\a-post-checkpoint-verification.json",
+  "overallVerdict": "PASS",
+  "notRunSections": [],
+  "failures": [],
+  "sections": [
+    {
+      "id": "terminal-entry",
+      "verdict": "PASS",
+      "totals": {
+        "total": 23,
+        "pass": 23,
+        "fail": 0
+      }
+    },
+    {
+      "id": "evidence-window",
+      "verdict": "PASS",
+      "totals": {
+        "total": 14,
+        "pass": 14,
+        "fail": 0
+      }
+    },
+    {
+      "id": "requires",
+      "verdict": "PASS",
+      "totals": {
+        "total": 15,
+        "pass": 15,
+        "fail": 0
+      }
+    },
+    {
+      "id": "performance",
+      "verdict": "PASS",
+      "totals": {
+        "total": 8,
+        "pass": 8,
+        "fail": 0
+      }
+    },
+    {
+      "id": "before-reproducibility",
+      "verdict": "PASS",
+      "totals": {
+        "total": 4,
+        "pass": 4,
+        "fail": 0
+      }
+    },
+    {
+      "id": "git-boundary",
+      "verdict": "PASS",
+      "totals": {
+        "total": 16,
+        "pass": 16,
+        "fail": 0
+      }
+    },
+    {
+      "id": "aux-scripts",
+      "verdict": "PASS",
+      "totals": {
+        "total": 6,
+        "pass": 6,
+        "fail": 0
+      }
+    }
+  ]
+}

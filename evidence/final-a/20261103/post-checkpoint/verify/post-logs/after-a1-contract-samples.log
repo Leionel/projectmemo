@@ -1,0 +1,4 @@
+fatal: ambiguous argument 'HEAD': unknown revision or path not in the working tree.
+Use '--' to separate paths from revisions, like this:
+'git <command> [<revision>...] -- [<file>...]'
+[a1-contract-samples] 写入 14 个文件到 evidence/final-a/20261103/samples/a1-pure/

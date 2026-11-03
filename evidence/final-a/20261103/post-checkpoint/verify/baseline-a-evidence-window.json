@@ -1,0 +1,226 @@
+{
+  "generatedAt": "2026-11-03T06:52:30.709Z",
+  "purpose": "BEFORE_FIX 证据审查有界窗口：目标 question 审查是否被更新事件挤出",
+  "sourceTree": "checkpoint 4b69614 clean shadow via git archive (HEAD tree; untracked excluded)",
+  "db": {
+    "kind": "temporary sqlite (mkdtemp) + prisma migrations replayed",
+    "path": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-post-base-window-pCSuPF\\verify.db"
+  },
+  "scenarios": {
+    "evictedByNewerReviews": {
+      "missionId": "cmw0byxzq00037k8o2c30sf6e",
+      "targetQuestionId": "cmw0byy1700057k8ot72u0v54",
+      "dbFacts": {
+        "totalFitReviews": 22,
+        "targetReviewPresent": true,
+        "targetReviewSeq": 3
+      },
+      "readback": {
+        "legacyEvidenceReviews": {
+          "itemCount": 0,
+          "truncated": true,
+          "itemQuestionIds": [],
+          "itemEventIds": []
+        },
+        "packetEvidenceReviews": {
+          "itemCount": 0,
+          "truncated": true,
+          "items": []
+        },
+        "coverageEvidenceWindow": {
+          "name": "EVIDENCE_REVIEWS",
+          "limit": 3,
+          "returned": 0,
+          "truncated": true,
+          "note": "有界窗口已截断：仅包含最近记录，未包含的记录不等于从未发生。"
+        },
+        "basisQuestionId": "cmw0byy1700057k8ot72u0v54",
+        "missionVersion": 1
+      },
+      "readbackAgain": {
+        "legacyEvidenceReviews": {
+          "itemCount": 0,
+          "truncated": true,
+          "itemQuestionIds": [],
+          "itemEventIds": []
+        },
+        "packetEvidenceReviews": {
+          "itemCount": 0,
+          "truncated": true,
+          "items": []
+        },
+        "coverageEvidenceWindow": {
+          "name": "EVIDENCE_REVIEWS",
+          "limit": 3,
+          "returned": 0,
+          "truncated": true,
+          "note": "有界窗口已截断：仅包含最近记录，未包含的记录不等于从未发生。"
+        },
+        "basisQuestionId": "cmw0byy1700057k8ot72u0v54",
+        "missionVersion": 1
+      },
+      "detailEvidencePremise": null,
+      "readOnly": {
+        "countsBefore": 22,
+        "countsAfter": 22,
+        "readbackOnly": {
+          "before": {
+            "version": 1,
+            "updatedAt": "2026-11-03T06:52:31.345Z",
+            "nextEventSeq": 24
+          },
+          "after": {
+            "version": 1,
+            "updatedAt": "2026-11-03T06:52:31.345Z",
+            "nextEventSeq": 24
+          },
+          "identical": true
+        },
+        "missionDetail": {
+          "identical": true
+        },
+        "secondReadback": {
+          "identical": true
+        },
+        "identical": true
+      }
+    },
+    "controlSmallWindow": {
+      "missionId": "cmw0byykz000v7k8osu8gvk45",
+      "targetQuestionId": "cmw0byylt000x7k8olovk6gg3",
+      "dbFacts": {
+        "fitAll": 2,
+        "fitQuestionIds": [
+          "cmw0byylt000x7k8olovk6gg3",
+          "question-control-other-6e3be8bc-a72e-4b93-a1dd-c5d99c205254"
+        ],
+        "seqs": [
+          3,
+          4
+        ]
+      },
+      "readback": {
+        "legacyEvidenceReviews": {
+          "itemCount": 1,
+          "truncated": false,
+          "itemQuestionIds": [
+            "cmw0byylt000x7k8olovk6gg3"
+          ],
+          "itemEventIds": [
+            "cmw0byym2000y7k8o10afi15p"
+          ]
+        },
+        "packetEvidenceReviews": {
+          "itemCount": 1,
+          "truncated": false,
+          "items": [
+            {
+              "eventId": "cmw0byym2000y7k8o10afi15p",
+              "observedAt": "2026-11-03T06:52:31.802Z",
+              "fitHash": "e27e2f1431dd463091d77a6acc334b3900000000000000000000000000000000",
+              "fitStatus": "UNKNOWN",
+              "ruleVersion": "post-verify-r1",
+              "truthVerified": false
+            }
+          ]
+        },
+        "coverageEvidenceWindow": {
+          "name": "EVIDENCE_REVIEWS",
+          "limit": 3,
+          "returned": 1,
+          "truncated": false,
+          "note": "有界窗口内未找到记录只表示覆盖不足，不等于从未发生。"
+        },
+        "basisQuestionId": "cmw0byylt000x7k8olovk6gg3",
+        "missionVersion": 1
+      }
+    },
+    "boundary21": {
+      "missionId": "cmw0byyqh00137k8oh9ne2cem",
+      "targetQuestionId": "cmw0byyqx00157k8oy0cwcpx8",
+      "dbFacts": {
+        "fitAll": 21,
+        "fitQuestionIds": [
+          "cmw0byyqx00157k8oy0cwcpx8",
+          "question-boundary-other-0-1657dca6-973b-413d-8a71-038c961be007",
+          "question-boundary-other-1-51159d9d-3087-4a2e-b151-7a9974028604",
+          "question-boundary-other-2-4c76f766-f96b-4801-a790-b1290ffad1e0",
+          "question-boundary-other-3-7e44b416-84cf-46fb-9c75-09a811e4c13c",
+          "question-boundary-other-4-19fea146-d860-4489-842d-e9290b41e6d6",
+          "question-boundary-other-5-14afae29-e965-40bc-9838-d2954f497ac7",
+          "question-boundary-other-6-4ff4eb65-f56c-4a60-8ec1-7ecd7273fb82",
+          "question-boundary-other-7-ec8b0fa5-4cb1-448b-961a-6febce55e6cf",
+          "question-boundary-other-8-cb13ad36-56a9-4059-b590-f6d5adfb488b",
+          "question-boundary-other-9-c92be866-97b6-4150-b3cd-6e227c53ea42",
+          "question-boundary-other-10-9564d96a-a80e-4958-ac24-e0ced3e1d1a7",
+          "question-boundary-other-11-cbea9a75-7c40-43fb-97f7-5f77099016a9",
+          "question-boundary-other-12-d067594b-9cac-4578-8348-020d9c7c929c",
+          "question-boundary-other-13-94b74209-9c19-4f89-a992-67105550a9b4",
+          "question-boundary-other-14-652e354e-10e6-459c-8cd8-2fe7c1b405be",
+          "question-boundary-other-15-8e1dded9-f449-438b-ba09-e8a421ed1fa0",
+          "question-boundary-other-16-00bae37e-f917-40e8-9cb8-2daf8117655a",
+          "question-boundary-other-17-30c84777-5949-418d-aa47-b898c100ff5c",
+          "question-boundary-other-18-531283a1-8879-483f-a68e-6a6abb3f686d",
+          "question-boundary-other-19-a0d6e88d-4488-471e-b414-a99705dbaf28"
+        ],
+        "seqs": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23
+        ]
+      },
+      "readback": {
+        "legacyEvidenceReviews": {
+          "itemCount": 0,
+          "truncated": true,
+          "itemQuestionIds": [],
+          "itemEventIds": []
+        },
+        "packetEvidenceReviews": {
+          "itemCount": 0,
+          "truncated": true,
+          "items": []
+        },
+        "coverageEvidenceWindow": {
+          "name": "EVIDENCE_REVIEWS",
+          "limit": 3,
+          "returned": 0,
+          "truncated": true,
+          "note": "有界窗口已截断：仅包含最近记录，未包含的记录不等于从未发生。"
+        },
+        "basisQuestionId": "cmw0byyqx00157k8oy0cwcpx8",
+        "missionVersion": 1
+      }
+    }
+  },
+  "verdict": {
+    "targetReviewExistsInDb": true,
+    "evictedScenarioHit": false,
+    "evictedScenarioItemCount": 0,
+    "evictedScenarioTruncated": true,
+    "controlScenarioHit": true,
+    "boundary21ScenarioHit": false,
+    "boundary21ItemCount": 0,
+    "boundary21Truncated": true,
+    "readOnlyZeroChange": true,
+    "conclusion": "BEFORE_FIX 复现：目标 question 的审查事件确实在库中（seq 可查），但当前 readback 先 take 21 再 filter/slice(0,20)，更新的其他 question 审查把目标挤出窗口，legacy evidenceReviews.items 为空；truncated 位虽为 true，但目标问题自己的审查未命中。"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "outPath": "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\post-checkpoint\\verify\\post-runs\\after-post-perf-run1.json",
+  "verdict": {
+    "stableTransactions": [
+      2
+    ],
+    "stableQueries": [
+      88
+    ],
+    "retryOnceTransactions": 4,
+    "retryOnceConsistency": "RETRIED",
+    "retryOnceRetries": 1,
+    "continuousTransactions": 6,
+    "continuousConsistency": "VERSION_ADVANCED",
+    "continuousRetries": 2,
+    "maxTwoRetriesRespected": true,
+    "materialUseItemsAtMost8": true,
+    "sourcePolicyChecks": 8,
+    "sourcePolicyChecksAtMostItems": true,
+    "readbackZeroSideEffect": true,
+    "crossRequestCacheAbsent": true,
+    "noStoreHeader": true
+  }
+}

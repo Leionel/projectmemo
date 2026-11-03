@@ -1,0 +1,469 @@
+{
+  "generatedAt": "2026-11-03T06:56:58.765Z",
+  "purpose": "POST 独立复验：终态+未结算 UNKNOWN 现有摘要找回入口（identity/version、旧客户端、非 Owner、零变更、截断诚实）",
+  "sourceTree": "BEFORE_FIX 4b69614 clean shadow",
+  "commit": "4b696141435825a3582816e8e449c0e0cf013f29",
+  "db": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-post-final-terminal-mps4xH\\verify.db",
+  "scenarios": {
+    "main": {
+      "missions": {
+        "succeededUnknown": "cmw0c4ort0004ig8oautvxbfg",
+        "cancelledUnknown": "cmw0c4osu0006ig8ozmf7xglh",
+        "plainSucceeded": "cmw0c4ot80008ig8oq490tov2"
+      },
+      "summaryService": {
+        "keys": [
+          "enabled",
+          "totalActive",
+          "items"
+        ],
+        "enabled": true,
+        "totalActive": 1,
+        "itemsIds": [
+          "cmw0c4oti000aig8ok3d5rgsz"
+        ],
+        "terminalUnsettled": null
+      },
+      "summaryRoute": {
+        "status": 200,
+        "hasTerminalUnsettled": false,
+        "keys": [
+          "enabled",
+          "totalActive",
+          "items"
+        ],
+        "foundSucceeded": false,
+        "foundCancelled": false
+      },
+      "detail": {
+        "succeeded": {
+          "status": "SUCCEEDED",
+          "version": 1,
+          "workState": {
+            "terminal": {
+              "status": "SUCCEEDED",
+              "at": "2026-11-03T06:56:59.028Z",
+              "atSource": "FINISHED_AT",
+              "reasonCode": "SUCCEEDED"
+            },
+            "unsettledEffect": {
+              "present": true,
+              "code": "EXTERNAL_UNKNOWN",
+              "source": "LAST_ERROR",
+              "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+              "resolvedByRead": false
+            }
+          }
+        },
+        "cancelled": {
+          "status": "CANCELLED",
+          "version": 1
+        }
+      },
+      "readback": {
+        "succeeded": {
+          "missionVersion": 1,
+          "terminal": {
+            "status": "SUCCEEDED",
+            "at": "2026-11-03T06:56:59.028Z",
+            "atSource": "FINISHED_AT",
+            "reasonCode": "SUCCEEDED"
+          },
+          "unsettledEffect": {
+            "present": true,
+            "code": "EXTERNAL_UNKNOWN",
+            "source": "LAST_ERROR",
+            "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+            "resolvedByRead": false
+          },
+          "requiresUser": true,
+          "primaryAction": "CHECK_UNKNOWN_EFFECT"
+        },
+        "cancelled": {
+          "missionVersion": 1,
+          "terminal": {
+            "status": "CANCELLED",
+            "at": "2026-11-03T06:56:59.030Z",
+            "atSource": "FINISHED_AT",
+            "reasonCode": "CANCELLED"
+          },
+          "unsettledEffect": {
+            "present": true,
+            "code": "EXTERNAL_UNKNOWN",
+            "source": "LAST_ERROR",
+            "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+            "resolvedByRead": false
+          },
+          "requiresUser": true
+        }
+      },
+      "readOnly": {
+        "before": [
+          {
+            "id": "cmw0c4ort0004ig8oautvxbfg",
+            "status": "SUCCEEDED",
+            "version": 1,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "updatedAt": "2026-11-03T06:56:59.029Z",
+            "nextEventSeq": 1,
+            "finishedAt": "2026-11-03T06:56:59.028Z",
+            "cancelRequestedAt": null,
+            "lastErrorJson": {
+              "code": "EXTERNAL_UNKNOWN",
+              "message": "外部调用结果未知，读取不会自动核销",
+              "phase": "TOOL"
+            }
+          },
+          {
+            "id": "cmw0c4osu0006ig8ozmf7xglh",
+            "status": "CANCELLED",
+            "version": 1,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "updatedAt": "2026-11-03T06:56:59.031Z",
+            "nextEventSeq": 1,
+            "finishedAt": "2026-11-03T06:56:59.030Z",
+            "cancelRequestedAt": "2026-11-03T06:56:59.030Z",
+            "lastErrorJson": {
+              "code": "EXTERNAL_UNKNOWN",
+              "message": "外部调用结果未知，读取不会自动核销",
+              "phase": "TOOL"
+            }
+          },
+          {
+            "id": "cmw0c4ot80008ig8oq490tov2",
+            "status": "SUCCEEDED",
+            "version": 1,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "updatedAt": "2026-11-03T06:56:59.042Z",
+            "nextEventSeq": 1,
+            "finishedAt": "2026-11-03T06:56:59.041Z",
+            "cancelRequestedAt": null,
+            "lastErrorJson": null
+          },
+          {
+            "id": "cmw0c4oti000aig8ok3d5rgsz",
+            "status": "READY",
+            "version": 1,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "updatedAt": "2026-11-03T06:56:59.050Z",
+            "nextEventSeq": 1,
+            "finishedAt": null,
+            "cancelRequestedAt": null,
+            "lastErrorJson": null
+          }
+        ],
+        "after": [
+          {
+            "id": "cmw0c4ort0004ig8oautvxbfg",
+            "status": "SUCCEEDED",
+            "version": 1,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "updatedAt": "2026-11-03T06:56:59.029Z",
+            "nextEventSeq": 1,
+            "finishedAt": "2026-11-03T06:56:59.028Z",
+            "cancelRequestedAt": null,
+            "lastErrorJson": {
+              "code": "EXTERNAL_UNKNOWN",
+              "message": "外部调用结果未知，读取不会自动核销",
+              "phase": "TOOL"
+            }
+          },
+          {
+            "id": "cmw0c4osu0006ig8ozmf7xglh",
+            "status": "CANCELLED",
+            "version": 1,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "updatedAt": "2026-11-03T06:56:59.031Z",
+            "nextEventSeq": 1,
+            "finishedAt": "2026-11-03T06:56:59.030Z",
+            "cancelRequestedAt": "2026-11-03T06:56:59.030Z",
+            "lastErrorJson": {
+              "code": "EXTERNAL_UNKNOWN",
+              "message": "外部调用结果未知，读取不会自动核销",
+              "phase": "TOOL"
+            }
+          },
+          {
+            "id": "cmw0c4ot80008ig8oq490tov2",
+            "status": "SUCCEEDED",
+            "version": 1,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "updatedAt": "2026-11-03T06:56:59.042Z",
+            "nextEventSeq": 1,
+            "finishedAt": "2026-11-03T06:56:59.041Z",
+            "cancelRequestedAt": null,
+            "lastErrorJson": null
+          },
+          {
+            "id": "cmw0c4oti000aig8ok3d5rgsz",
+            "status": "READY",
+            "version": 1,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "updatedAt": "2026-11-03T06:56:59.050Z",
+            "nextEventSeq": 1,
+            "finishedAt": null,
+            "cancelRequestedAt": null,
+            "lastErrorJson": null
+          }
+        ],
+        "identical": true
+      },
+      "accessControl": {
+        "serviceCode": "MISSION_NOT_FOUND",
+        "serviceStatus": 404,
+        "routeStatus": 404,
+        "routeCode": "MISSION_NOT_FOUND",
+        "readbackStatus": 404,
+        "readbackCode": "MISSION_NOT_FOUND"
+      },
+      "globalFocus": {
+        "serviceFound": false,
+        "routeFound": false,
+        "counts": {
+          "waiting": 0,
+          "running": 1,
+          "actions": 0,
+          "reminders": 0
+        }
+      }
+    },
+    "truncation": {
+      "createdTerminalUnsettled": 8,
+      "window": null,
+      "foundCount": 0,
+      "readOnly": {
+        "missionCount": 8,
+        "statuses": [
+          "SUCCEEDED",
+          "CANCELLED",
+          "SUCCEEDED",
+          "CANCELLED",
+          "SUCCEEDED",
+          "CANCELLED",
+          "SUCCEEDED",
+          "CANCELLED"
+        ]
+      }
+    },
+    "stepUnknown": {
+      "summaryWindow": null,
+      "readbackUnsettled": {
+        "present": true,
+        "code": null,
+        "source": "STEP",
+        "reasonText": "原 1 个步骤结果尚未结算，读取不会自动核销",
+        "resolvedByRead": false
+      }
+    },
+    "disabled": {
+      "summary": {
+        "enabled": false,
+        "totalActive": 0,
+        "items": []
+      }
+    }
+  },
+  "checks": [
+    {
+      "id": "PST-TERM-01",
+      "question": "missionWorkspaceSummary 暴露 terminalUnsettled 窗口字段",
+      "verdict": "FAIL",
+      "observed": {
+        "keys": [
+          "enabled",
+          "totalActive",
+          "items"
+        ],
+        "windowKeys": null
+      }
+    },
+    {
+      "id": "PST-TERM-02",
+      "question": "SUCCEEDED+EXTERNAL_UNKNOWN 能在现有摘要找回",
+      "verdict": "FAIL",
+      "observed": null
+    },
+    {
+      "id": "PST-TERM-03",
+      "question": "CANCELLED+EXTERNAL_UNKNOWN 能在现有摘要找回",
+      "verdict": "FAIL",
+      "observed": null
+    },
+    {
+      "id": "PST-TERM-04",
+      "question": "普通终态（无未结算 UNKNOWN）不误入 terminalUnsettled",
+      "verdict": "PASS",
+      "observed": {
+        "found": false
+      }
+    },
+    {
+      "id": "PST-TERM-05",
+      "question": "摘要条目与 detail/readback 同 id/version/status",
+      "verdict": "FAIL",
+      "observed": {
+        "summaryItem": null,
+        "readback": {
+          "version": 1,
+          "status": "SUCCEEDED"
+        },
+        "detail": {
+          "version": 1,
+          "status": "SUCCEEDED"
+        }
+      }
+    },
+    {
+      "id": "PST-TERM-06",
+      "question": "摘要 workState 并列 terminal+unsettledEffect 且 requiresUser=true（与 readback 一致）",
+      "verdict": "FAIL",
+      "observed": null
+    },
+    {
+      "id": "PST-TERM-07",
+      "question": "摘要 route 与 service 一致（同窗口、能找回）",
+      "verdict": "FAIL",
+      "observed": {
+        "status": 200,
+        "seats": false
+      }
+    },
+    {
+      "id": "PST-TERM-08",
+      "question": "旧客户端字段仍存在且语义不变（enabled/totalActive/items 及旧 item 键）",
+      "verdict": "PASS",
+      "observed": {
+        "keys": [
+          "enabled",
+          "totalActive",
+          "items"
+        ],
+        "itemKeys": [
+          "id",
+          "goal",
+          "status",
+          "version",
+          "attention",
+          "workState",
+          "activity",
+          "activityAt",
+          "outputRevision"
+        ]
+      }
+    },
+    {
+      "id": "PST-TERM-09",
+      "question": "totalActive 只计活跃任务、不计终态（与 BEFORE 语义一致）",
+      "verdict": "PASS",
+      "observed": {
+        "totalActive": 1,
+        "itemsIds": [
+          "cmw0c4oti000aig8ok3d5rgsz"
+        ]
+      }
+    },
+    {
+      "id": "PST-TERM-10",
+      "question": "读摘要/详情/读回前后数据库零变更（含终态 version/updatedAt/生命周期）",
+      "verdict": "PASS",
+      "observed": {
+        "identical": true
+      }
+    },
+    {
+      "id": "PST-TERM-11",
+      "question": "非 Owner 读摘要服务/路由 404，读回 404",
+      "verdict": "PASS",
+      "observed": {
+        "serviceCode": "MISSION_NOT_FOUND",
+        "serviceStatus": 404,
+        "routeStatus": 404,
+        "routeCode": "MISSION_NOT_FOUND",
+        "readbackStatus": 404,
+        "readbackCode": "MISSION_NOT_FOUND"
+      }
+    },
+    {
+      "id": "PST-TERM-12",
+      "question": "有界窗口：items ≤ limit 且 truncated 诚实",
+      "verdict": "FAIL",
+      "observed": null
+    },
+    {
+      "id": "PST-TERM-13",
+      "question": "截断说明明确“窗口内未找到≠全库没有”",
+      "verdict": "FAIL",
+      "observed": null
+    },
+    {
+      "id": "PST-TERM-14",
+      "question": "终态生命周期不被读取改变（仍为 SUCCEEDED/CANCELLED，无新增状态）",
+      "verdict": "PASS",
+      "observed": [
+        "SUCCEEDED",
+        "CANCELLED",
+        "SUCCEEDED",
+        "CANCELLED",
+        "SUCCEEDED",
+        "CANCELLED",
+        "SUCCEEDED",
+        "CANCELLED"
+      ]
+    },
+    {
+      "id": "PST-TERM-15",
+      "question": "终态 + 原 Step UNKNOWN（无 lastErrorJson）也能从摘要找回",
+      "verdict": "FAIL",
+      "observed": {
+        "item": null,
+        "readback": {
+          "present": true,
+          "code": null,
+          "source": "STEP",
+          "reasonText": "原 1 个步骤结果尚未结算，读取不会自动核销",
+          "resolvedByRead": false
+        }
+      }
+    },
+    {
+      "id": "PST-TERM-16",
+      "question": "feature 关闭时保持 enabled=false（与旧行为一致）",
+      "verdict": "PASS",
+      "observed": {
+        "enabled": false,
+        "totalActive": 0,
+        "items": []
+      }
+    }
+  ],
+  "summary": {
+    "total": 16,
+    "pass": 7,
+    "fail": 9,
+    "notRun": 0
+  }
+}

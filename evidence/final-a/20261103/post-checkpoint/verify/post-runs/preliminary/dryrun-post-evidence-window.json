@@ -1,0 +1,467 @@
+{
+  "generatedAt": "2026-11-03T07:16:37.614Z",
+  "purpose": "POST 独立复验：证据审查有界窗口（目标问题命中 ≤3、截断真、无 question 不回退、读零写入）",
+  "sourceTree": "dry-run: worktree state overlay on 4b69614",
+  "commit": "UNCOMMITTED-WORKTREE-DRYRUN",
+  "db": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-post-final-window-YWg49T\\verify.db",
+  "scenarios": {
+    "evicted": {
+      "missionId": "cmw0ctynx0003do8otbf8gi6s",
+      "targetQuestionId": "cmw0ctyqi0005do8odaz21zfh",
+      "targetReviewEventId": "cmw0ctyr50006do8o8rteunif",
+      "evidence": {
+        "legacy": {
+          "itemCount": 1,
+          "truncated": false,
+          "itemQuestionIds": [
+            "cmw0ctyqi0005do8odaz21zfh"
+          ],
+          "itemEventIds": [
+            "cmw0ctyr50006do8o8rteunif"
+          ],
+          "questionFiltered": true,
+          "questionId": "cmw0ctyqi0005do8odaz21zfh",
+          "windowLimit": 20,
+          "displayLimit": 3,
+          "inspected": 1,
+          "note": "已按选中原问题先过滤 EVIDENCE_FIT_REVIEWED 再取最近 20 条窗口（最多展示 3 条）；truncated 只表示该问题窗口溢出，未命中只表示该问题在窗口内没有审查记录。"
+        },
+        "packet": {
+          "itemCount": 1,
+          "truncated": false,
+          "itemEventIds": [
+            "cmw0ctyr50006do8o8rteunif"
+          ]
+        },
+        "coverageWindow": {
+          "name": "EVIDENCE_REVIEWS",
+          "limit": 3,
+          "returned": 1,
+          "truncated": false,
+          "note": "窗口先按选中原问题的 premise.questionId 过滤再取最近 20 条；truncated 只表示该问题窗口溢出。"
+        },
+        "basisQuestionId": "cmw0ctyqi0005do8odaz21zfh",
+        "missionVersion": 1
+      },
+      "readOnly": {
+        "before": {
+          "version": 1,
+          "updatedAt": "2026-11-03T07:16:38.541Z",
+          "nextEventSeq": 24,
+          "counts": {
+            "events": 24,
+            "steps": 0,
+            "outputs": 0
+          }
+        },
+        "after": {
+          "version": 1,
+          "updatedAt": "2026-11-03T07:16:38.541Z",
+          "nextEventSeq": 24,
+          "counts": {
+            "events": 24,
+            "steps": 0,
+            "outputs": 0
+          }
+        },
+        "identical": true
+      }
+    },
+    "boundary21": {
+      "missionId": "cmw0ctz3x000vdo8o202gdukj",
+      "targetQuestionId": "cmw0ctz4g000xdo8o5pcod9ak",
+      "evidence": {
+        "legacy": {
+          "itemCount": 1,
+          "truncated": false,
+          "itemQuestionIds": [
+            "cmw0ctz4g000xdo8o5pcod9ak"
+          ],
+          "itemEventIds": [
+            "cmw0ctz4o000ydo8onc1jbhcj"
+          ],
+          "questionFiltered": true,
+          "questionId": "cmw0ctz4g000xdo8o5pcod9ak",
+          "windowLimit": 20,
+          "displayLimit": 3,
+          "inspected": 1,
+          "note": "已按选中原问题先过滤 EVIDENCE_FIT_REVIEWED 再取最近 20 条窗口（最多展示 3 条）；truncated 只表示该问题窗口溢出，未命中只表示该问题在窗口内没有审查记录。"
+        },
+        "packet": {
+          "itemCount": 1,
+          "truncated": false,
+          "itemEventIds": [
+            "cmw0ctz4o000ydo8onc1jbhcj"
+          ]
+        },
+        "coverageWindow": {
+          "name": "EVIDENCE_REVIEWS",
+          "limit": 3,
+          "returned": 1,
+          "truncated": false,
+          "note": "窗口先按选中原问题的 premise.questionId 过滤再取最近 20 条；truncated 只表示该问题窗口溢出。"
+        },
+        "basisQuestionId": "cmw0ctz4g000xdo8o5pcod9ak",
+        "missionVersion": 1
+      }
+    },
+    "targetOverflow": {
+      "missionId": "cmw0ctzcc001mdo8odtnwozbd",
+      "targetQuestionId": "cmw0ctzct001odo8oh4ugu0cl",
+      "authoredReviews": 22,
+      "newestThreeIds": [
+        "cmw0ctzi3002ado8oux4o54hh",
+        "cmw0ctzhz0029do8oj7uf7u0x",
+        "cmw0ctzhq0028do8ogy5x6ii0"
+      ],
+      "evidence": {
+        "legacy": {
+          "itemCount": 3,
+          "truncated": true,
+          "itemQuestionIds": [
+            "cmw0ctzct001odo8oh4ugu0cl",
+            "cmw0ctzct001odo8oh4ugu0cl",
+            "cmw0ctzct001odo8oh4ugu0cl"
+          ],
+          "itemEventIds": [
+            "cmw0ctzi3002ado8oux4o54hh",
+            "cmw0ctzhz0029do8oj7uf7u0x",
+            "cmw0ctzhq0028do8ogy5x6ii0"
+          ],
+          "questionFiltered": true,
+          "questionId": "cmw0ctzct001odo8oh4ugu0cl",
+          "windowLimit": 20,
+          "displayLimit": 3,
+          "inspected": 21,
+          "note": "已按选中原问题先过滤 EVIDENCE_FIT_REVIEWED 再取最近 20 条窗口（最多展示 3 条）；truncated 只表示该问题窗口溢出，未命中只表示该问题在窗口内没有审查记录。"
+        },
+        "packet": {
+          "itemCount": 3,
+          "truncated": true,
+          "itemEventIds": [
+            "cmw0ctzi3002ado8oux4o54hh",
+            "cmw0ctzhz0029do8oj7uf7u0x",
+            "cmw0ctzhq0028do8ogy5x6ii0"
+          ]
+        },
+        "coverageWindow": {
+          "name": "EVIDENCE_REVIEWS",
+          "limit": 3,
+          "returned": 3,
+          "truncated": true,
+          "note": "窗口先按选中原问题的 premise.questionId 过滤再取最近 20 条；truncated 只表示该问题窗口溢出。"
+        },
+        "basisQuestionId": "cmw0ctzct001odo8oh4ugu0cl",
+        "missionVersion": 1
+      }
+    },
+    "noQuestion": {
+      "missionId": "cmw0ctzj2002edo8o0x1v47j9",
+      "authoredReviews": 25,
+      "expectedLatest3": [
+        "cmw0ctznb0034do8ohsjxveck",
+        "cmw0ctzn30033do8ojybrm4sl",
+        "cmw0ctzmw0032do8oiaa4tago"
+      ],
+      "evidence": {
+        "legacy": {
+          "itemCount": 0,
+          "truncated": true,
+          "itemQuestionIds": [],
+          "itemEventIds": [],
+          "questionFiltered": false,
+          "questionId": null,
+          "windowLimit": 20,
+          "displayLimit": 3,
+          "inspected": 21,
+          "note": "未选中原问题，未按问题过滤；窗口只取最近 20 条 EVIDENCE_FIT_REVIEWED，未找到不代表从未发生。"
+        },
+        "packet": {
+          "itemCount": 0,
+          "truncated": true,
+          "itemEventIds": []
+        },
+        "coverageWindow": {
+          "name": "EVIDENCE_REVIEWS",
+          "limit": 3,
+          "returned": 0,
+          "truncated": true,
+          "note": "未选中原问题时保留旧窗口（最近 20 条审查事件）；未命中不代表从未发生。"
+        },
+        "basisQuestionId": null,
+        "missionVersion": 1
+      },
+      "readOnly": {
+        "before": {
+          "version": 1,
+          "updatedAt": "2026-11-03T07:16:39.476Z",
+          "nextEventSeq": 26,
+          "counts": {
+            "events": 26,
+            "steps": 0,
+            "outputs": 0
+          }
+        },
+        "after": {
+          "version": 1,
+          "updatedAt": "2026-11-03T07:16:39.476Z",
+          "nextEventSeq": 26,
+          "counts": {
+            "events": 26,
+            "steps": 0,
+            "outputs": 0
+          }
+        },
+        "identical": true
+      }
+    },
+    "waitStateSelection": {
+      "missionId": "cmw0ctzoz0038do8osbgr4x3i",
+      "targetQuestionId": "cmw0ctzp8003ado8od87b04uc",
+      "evidence": {
+        "legacy": {
+          "itemCount": 1,
+          "truncated": false,
+          "itemQuestionIds": [
+            "cmw0ctzp8003ado8od87b04uc"
+          ],
+          "itemEventIds": [
+            "cmw0ctzpa003bdo8o1idcmfj4"
+          ],
+          "questionFiltered": true,
+          "questionId": "cmw0ctzp8003ado8od87b04uc",
+          "windowLimit": 20,
+          "displayLimit": 3,
+          "inspected": 1,
+          "note": "已按选中原问题先过滤 EVIDENCE_FIT_REVIEWED 再取最近 20 条窗口（最多展示 3 条）；truncated 只表示该问题窗口溢出，未命中只表示该问题在窗口内没有审查记录。"
+        },
+        "packet": {
+          "itemCount": 1,
+          "truncated": false,
+          "itemEventIds": [
+            "cmw0ctzpa003bdo8o1idcmfj4"
+          ]
+        },
+        "coverageWindow": {
+          "name": "EVIDENCE_REVIEWS",
+          "limit": 3,
+          "returned": 1,
+          "truncated": false,
+          "note": "窗口先按选中原问题的 premise.questionId 过滤再取最近 20 条；truncated 只表示该问题窗口溢出。"
+        },
+        "basisQuestionId": "cmw0ctzp8003ado8od87b04uc",
+        "missionVersion": 1
+      }
+    },
+    "control": {
+      "missionId": "cmw0ctzux0040do8oso9bfwpq",
+      "targetQuestionId": "cmw0ctzvh0042do8orrfnubac",
+      "evidence": {
+        "legacy": {
+          "itemCount": 1,
+          "truncated": false,
+          "itemQuestionIds": [
+            "cmw0ctzvh0042do8orrfnubac"
+          ],
+          "itemEventIds": [
+            "cmw0ctzvp0043do8ok2hahm3j"
+          ],
+          "questionFiltered": true,
+          "questionId": "cmw0ctzvh0042do8orrfnubac",
+          "windowLimit": 20,
+          "displayLimit": 3,
+          "inspected": 1,
+          "note": "已按选中原问题先过滤 EVIDENCE_FIT_REVIEWED 再取最近 20 条窗口（最多展示 3 条）；truncated 只表示该问题窗口溢出，未命中只表示该问题在窗口内没有审查记录。"
+        },
+        "packet": {
+          "itemCount": 1,
+          "truncated": false,
+          "itemEventIds": [
+            "cmw0ctzvp0043do8ok2hahm3j"
+          ]
+        },
+        "coverageWindow": {
+          "name": "EVIDENCE_REVIEWS",
+          "limit": 3,
+          "returned": 1,
+          "truncated": false,
+          "note": "窗口先按选中原问题的 premise.questionId 过滤再取最近 20 条；truncated 只表示该问题窗口溢出。"
+        },
+        "basisQuestionId": "cmw0ctzvh0042do8orrfnubac",
+        "missionVersion": 1
+      }
+    }
+  },
+  "checks": [
+    {
+      "id": "PST-EVW-01",
+      "question": "21 条更新其他问题审查后，目标问题审查仍被命中",
+      "verdict": "PASS",
+      "observed": {
+        "itemQuestionIds": [
+          "cmw0ctyqi0005do8odaz21zfh"
+        ],
+        "targetQuestionId": "cmw0ctyqi0005do8odaz21zfh"
+      }
+    },
+    {
+      "id": "PST-EVW-02",
+      "question": "命中事件就是目标审查事件（身份可核）",
+      "verdict": "PASS",
+      "observed": {
+        "itemEventIds": [
+          "cmw0ctyr50006do8o8rteunif"
+        ],
+        "targetEventId": "cmw0ctyr50006do8o8rteunif"
+      }
+    },
+    {
+      "id": "PST-EVW-03",
+      "question": "返回条数 ≤3",
+      "verdict": "PASS",
+      "observed": {
+        "itemCount": 1
+      }
+    },
+    {
+      "id": "PST-EVW-04",
+      "question": "packet.basis.evidenceReviews 与 legacy 同命中",
+      "verdict": "PASS",
+      "observed": {
+        "itemCount": 1,
+        "truncated": false,
+        "itemEventIds": [
+          "cmw0ctyr50006do8o8rteunif"
+        ]
+      }
+    },
+    {
+      "id": "PST-EVW-05",
+      "question": "该问题自身窗口未溢出时 truncated=false（不虚报截断）",
+      "verdict": "PASS",
+      "observed": {
+        "truncated": false,
+        "itemCount": 1
+      }
+    },
+    {
+      "id": "PST-EVW-06",
+      "question": "读回零写入",
+      "verdict": "PASS",
+      "observed": {
+        "identical": true
+      }
+    },
+    {
+      "id": "PST-EVW-07",
+      "question": "21 条边界场景目标审查仍被命中且 ≤3",
+      "verdict": "PASS",
+      "observed": {
+        "itemEventIds": [
+          "cmw0ctz4o000ydo8onc1jbhcj"
+        ],
+        "itemCount": 1
+      }
+    },
+    {
+      "id": "PST-EVW-08",
+      "question": "同问题 22 条审查：只返回最近 3 条且 truncated=true",
+      "verdict": "PASS",
+      "observed": {
+        "itemEventIds": [
+          "cmw0ctzi3002ado8oux4o54hh",
+          "cmw0ctzhz0029do8oj7uf7u0x",
+          "cmw0ctzhq0028do8ogy5x6ii0"
+        ],
+        "newestThreeIds": [
+          "cmw0ctzi3002ado8oux4o54hh",
+          "cmw0ctzhz0029do8oj7uf7u0x",
+          "cmw0ctzhq0028do8ogy5x6ii0"
+        ],
+        "truncated": true
+      }
+    },
+    {
+      "id": "PST-EVW-09",
+      "question": "窗口/展示上限与 inspected 计数可核（windowLimit=20, displayLimit=3, inspected≥21）",
+      "verdict": "PASS",
+      "observed": {
+        "windowLimit": 20,
+        "displayLimit": 3,
+        "inspected": 21
+      }
+    },
+    {
+      "id": "PST-EVW-10",
+      "question": "未选中问题时不无中生有按问题过滤（questionFiltered=false / questionId=null）",
+      "verdict": "PASS",
+      "observed": {
+        "questionFiltered": false,
+        "questionId": null,
+        "note": "未选中原问题，未按问题过滤；窗口只取最近 20 条 EVIDENCE_FIT_REVIEWED，未找到不代表从未发生。"
+      }
+    },
+    {
+      "id": "PST-EVW-11",
+      "question": "未选中问题不回退：保持旧窗口语义（items 为空、truncated 按 21 条窗口诚实=true），不伪造问题命中",
+      "verdict": "PASS",
+      "observed": {
+        "itemCount": 0,
+        "truncated": true,
+        "packetItemCount": 0,
+        "expectedLatest3": [
+          "cmw0ctznb0034do8ohsjxveck",
+          "cmw0ctzn30033do8ojybrm4sl",
+          "cmw0ctzmw0032do8oiaa4tago"
+        ]
+      }
+    },
+    {
+      "id": "PST-EVW-12",
+      "question": "未选中问题的读取零写入",
+      "verdict": "PASS",
+      "observed": {
+        "identical": true
+      }
+    },
+    {
+      "id": "PST-EVW-13",
+      "question": "无显式 questionId 时按 waitStateJson.questionId 先筛后限并命中目标审查",
+      "verdict": "PASS",
+      "observed": {
+        "itemEventIds": [
+          "cmw0ctzpa003bdo8o1idcmfj4"
+        ],
+        "questionId": "cmw0ctzp8003ado8od87b04uc",
+        "itemCount": 1
+      }
+    },
+    {
+      "id": "PST-EVW-14",
+      "question": "对照：单条目标审查命中且 truncated=false",
+      "verdict": "PASS",
+      "observed": {
+        "itemCount": 1,
+        "truncated": false,
+        "itemQuestionIds": [
+          "cmw0ctzvh0042do8orrfnubac"
+        ],
+        "itemEventIds": [
+          "cmw0ctzvp0043do8ok2hahm3j"
+        ],
+        "questionFiltered": true,
+        "questionId": "cmw0ctzvh0042do8orrfnubac",
+        "windowLimit": 20,
+        "displayLimit": 3,
+        "inspected": 1,
+        "note": "已按选中原问题先过滤 EVIDENCE_FIT_REVIEWED 再取最近 20 条窗口（最多展示 3 条）；truncated 只表示该问题窗口溢出，未命中只表示该问题在窗口内没有审查记录。"
+      }
+    }
+  ],
+  "summary": {
+    "total": 14,
+    "pass": 14,
+    "fail": 0,
+    "notRun": 0
+  }
+}

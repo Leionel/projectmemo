@@ -1,0 +1,11 @@
+{
+  "generatedAt": "2026-11-03T14:50:35.3846907+08:00",
+  "workingTreeDirtyAtBaselineStart": false,
+  "note": "BEFORE_FIX baseline 全部在 4b69614 干净 shadow 内运行；主工作树同时有其他 teammate 的未提交 lib/tests 修改，baseline 未使用主工作树 lib（避免污染）。",
+  "nodeVersion": "v24.16.0",
+  "shadowMethod": "git -C repo archive --format=tar HEAD -- lib app components prisma public tests scripts package.json package-lock.json tsconfig.json next-env.d.ts next.config.ts prisma.config.ts vitest.config.ts playwright.config.ts .gitattributes eslint.config.mjs postcss.config.mjs; tar -xf; copy lib/generated/prisma; junction node_modules to repo node_modules",
+  "checkpointSha": "4b696141435825a3582816e8e449c0e0cf013f29",
+  "branch": "codex/final-a-mission-packet",
+  "npmVersion": "11.15.0",
+  "shadowPath": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-post-verify-base"
+}

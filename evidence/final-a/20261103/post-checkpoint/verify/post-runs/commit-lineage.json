@@ -1,0 +1,79 @@
+{
+  "generatedAt": "2026-11-03T15:44:17.7775437+08:00",
+  "purpose": "三个提交的祖先链/顺序/工作树一致性",
+  "checkpoint": "4b696141435825a3582816e8e449c0e0cf013f29",
+  "finalSha": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+  "commits": {
+    "requires": "479326131bedb385b0d89f710d960708ae7e9461",
+    "terminal": "e7c1da88c15e1516032e2514dd60b7e0b006fb9d",
+    "evidenceWindow": "3ec63e62470d0033f3cd6404c047ad720ecae72c"
+  },
+  "checks": [
+    {
+      "id": "GIT-LIN-01",
+      "question": "三个提交均为固定检查点 4b69614 的后代，且 requires/terminal 是最终 SHA 的祖先",
+      "verdict": "PASS",
+      "observed": {
+        "isDescendantOfCheckpoint": {
+          "479326131bedb385b0d89f710d960708ae7e9461": true,
+          "3ec63e62470d0033f3cd6404c047ad720ecae72c": true,
+          "e7c1da88c15e1516032e2514dd60b7e0b006fb9d": true
+        },
+        "isAncestorOfFinal": {
+          "479326131bedb385b0d89f710d960708ae7e9461": true,
+          "e7c1da88c15e1516032e2514dd60b7e0b006fb9d": true
+        }
+      }
+    },
+    {
+      "id": "GIT-LIN-02",
+      "question": "提交顺序为 requires→terminal→perf，且每个提交恰有 1 个父提交（无 merge）",
+      "verdict": "PASS",
+      "observed": {
+        "revListOrder": [
+          "479326131bedb385b0d89f710d960708ae7e9461",
+          "e7c1da88c15e1516032e2514dd60b7e0b006fb9d",
+          "3ec63e62470d0033f3cd6404c047ad720ecae72c"
+        ],
+        "expectedOrder": [
+          "479326131bedb385b0d89f710d960708ae7e9461",
+          "e7c1da88c15e1516032e2514dd60b7e0b006fb9d",
+          "3ec63e62470d0033f3cd6404c047ad720ecae72c"
+        ],
+        "parents": [
+          "479326131bedb385b0d89f710d960708ae7e9461 4b696141435825a3582816e8e449c0e0cf013f29",
+          "e7c1da88c15e1516032e2514dd60b7e0b006fb9d 479326131bedb385b0d89f710d960708ae7e9461",
+          "3ec63e62470d0033f3cd6404c047ad720ecae72c e7c1da88c15e1516032e2514dd60b7e0b006fb9d"
+        ]
+      }
+    },
+    {
+      "id": "GIT-LIN-03",
+      "question": "最终 SHA == 当前 HEAD；工作树除 evidence/ 交付物外零改动（无未提交实现文件；未 push/未 merge）",
+      "verdict": "PASS",
+      "observed": {
+        "head": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+        "finalSha": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+        "nonEvidenceChanges": [],
+        "pendingEvidence": [
+          "?? evidence/final-a/20261103/post-checkpoint/A_SECOND_BATCH_RECEIPT.md",
+          "?? evidence/final-a/20261103/post-checkpoint/verify/baseline-a-evidence-window.json",
+          "?? evidence/final-a/20261103/post-checkpoint/verify/baseline-a-readback-instrument.json",
+          "?? evidence/final-a/20261103/post-checkpoint/verify/baseline-a-requires.json",
+          "?? evidence/final-a/20261103/post-checkpoint/verify/baseline-a-terminal.json",
+          "?? evidence/final-a/20261103/post-checkpoint/verify/baseline-provenance.json",
+          "?? evidence/final-a/20261103/post-checkpoint/verify/baseline-summary.md",
+          "?? evidence/final-a/20261103/post-checkpoint/verify/fixtures/baseline-evidence-window.ts"
+        ],
+        "evidencePendingCount": 99,
+        "branch": "codex/final-a-mission-packet",
+        "pushed": "NOT_PUSHED（仅本地提交，无 remote 更新）"
+      }
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "pass": 3,
+    "fail": 0
+  }
+}

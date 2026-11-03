@@ -28,6 +28,7 @@ struct WidgetCard {
   @LocalStorageProp('missionAttention') missionAttention: string = '';
   @LocalStorageProp('missionSync') missionSync: string = '';
   @LocalStorageProp('missionExpiresAt') missionExpiresAt: number = 0;
+  @LocalStorageProp('missionVersion') missionVersion: number = 0;
 
   private getStatusColor(): Resource {
     if (this.statusTone === 'risk' || this.status === '需要重整' || this.status === '已逾期') {
@@ -379,7 +380,9 @@ struct WidgetCard {
             // 只带定位身份与期限；执行批准仍要回到 App 重新鉴权。
             questionId: this.missionQuestionId,
             approvalId: this.missionApprovalId,
-            handoffExpiresAt: String(this.missionExpiresAt > 0 ? this.missionExpiresAt : Date.now())
+            handoffExpiresAt: String(this.missionExpiresAt > 0 ? this.missionExpiresAt : Date.now()),
+            // 卡片记录的委托版本只作历史定位线索；详情会以服务端当前版本重新核对，不自动选中旧提案。
+            missionVersion: String(this.missionVersion > 0 ? this.missionVersion : '')
           }
         });
       } else {

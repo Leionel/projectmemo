@@ -7,34 +7,68 @@ import { DeviceIdentity } from '../common/DeviceIdentity';
 const DOMAIN = 0x0000;
 
 export default class EntryAbility extends UIAbility {
+  private clearMissionIntent(): void {
+    AppStorage.setOrCreate<string>('pendingMissionId', '');
+    AppStorage.setOrCreate<string>('pendingMissionProjectId', '');
+    AppStorage.setOrCreate<string>('pendingQuestionId', '');
+    AppStorage.setOrCreate<string>('pendingApprovalId', '');
+    AppStorage.setOrCreate<string>('pendingSourceId', '');
+    AppStorage.setOrCreate<string>('pendingOutputId', '');
+    AppStorage.setOrCreate<string>('pendingReceiptId', '');
+    AppStorage.setOrCreate<string>('pendingMissionVersion', '');
+    AppStorage.setOrCreate<string>('pendingHandoffExpiresAt', '');
+  }
+
+  private clearNotificationIntent(): void {
+    AppStorage.setOrCreate<string>('notificationProjectId', '');
+    AppStorage.setOrCreate<string>('notificationInterventionId', '');
+  }
+
   private captureNotificationRoute(want: Want): void {
-    const projectId = want.parameters?.['notificationProjectId'] ?? want.parameters?.['projectId'];
-    const interventionId = want.parameters?.['notificationInterventionId'];
-    const targetTab = want.parameters?.['targetTab'];
-    const missionId = want.parameters?.['missionId'];
-    if (typeof missionId === 'string' && missionId !== '' && typeof projectId === 'string' && projectId !== '') {
-      AppStorage.setOrCreate<string>('pendingMissionId', missionId);
-      AppStorage.setOrCreate<string>('pendingMissionProjectId', projectId);
+    const params = want.parameters;
+    const projectId = params?.['notificationProjectId'] ?? params?.['projectId'];
+    const interventionId = params?.['notificationInterventionId'];
+    const targetTab = params?.['targetTab'];
+    const missionId = params?.['missionId'];
+    const missionIntent = typeof missionId === 'string' && missionId !== '' && typeof projectId === 'string' && projectId !== '';
+    // 一次新的 Want 会替换旧意图：先把上一轮未消费的定位参数清空，避免旧问题/旧提醒被重新打开。
+    if (missionIntent) {
+      this.clearNotificationIntent();
+    } else {
+      this.clearMissionIntent();
+      this.clearNotificationIntent();
+    }
+    if (missionIntent) {
+      AppStorage.setOrCreate<string>('pendingMissionId', missionId as string);
+      AppStorage.setOrCreate<string>('pendingMissionProjectId', projectId as string);
       // 只解析“打开哪个原对象”：不携带批准令牌、私人原话或任意跳转 URL。
-      const questionId = want.parameters?.['questionId'];
-      const approvalId = want.parameters?.['approvalId'];
-      const sourceId = want.parameters?.['sourceId'];
-      const missionVersion = want.parameters?.['missionVersion'];
-      const handoffExpiresAt = want.parameters?.['handoffExpiresAt'];
+      const questionId = params?.['questionId'];
+      const approvalId = params?.['approvalId'];
+      const sourceId = params?.['sourceId'];
+      const outputId = params?.['outputId'];
+      const receiptId = params?.['receiptId'];
+      const missionVersion = params?.['missionVersion'];
+      const handoffExpiresAt = params?.['handoffExpiresAt'];
       AppStorage.setOrCreate<string>('pendingQuestionId', typeof questionId === 'string' ? questionId : '');
       AppStorage.setOrCreate<string>('pendingApprovalId', typeof approvalId === 'string' ? approvalId : '');
       AppStorage.setOrCreate<string>('pendingSourceId', typeof sourceId === 'string' ? sourceId : '');
+      AppStorage.setOrCreate<string>('pendingOutputId', typeof outputId === 'string' ? outputId : '');
+      AppStorage.setOrCreate<string>('pendingReceiptId', typeof receiptId === 'string' ? receiptId : '');
       AppStorage.setOrCreate<string>('pendingMissionVersion', typeof missionVersion === 'string' ? missionVersion : '');
       AppStorage.setOrCreate<string>('pendingHandoffExpiresAt', typeof handoffExpiresAt === 'string' ? handoffExpiresAt : '');
-    }
-    if (typeof projectId === 'string') {
+    } else if (typeof projectId === 'string' && projectId !== '') {
       AppStorage.setOrCreate<string>('notificationProjectId', projectId);
-      if (typeof interventionId === 'string') {
+      if (typeof interventionId === 'string' && interventionId !== '') {
         AppStorage.setOrCreate<string>('notificationInterventionId', interventionId);
       }
     }
     if (typeof targetTab === 'number') {
       AppStorage.setOrCreate<number>('targetTab', targetTab);
+    }
+    // 通知/卡片在 App 已在前台时由 onNewWant 投递：递增序号让可见页面消费一次新意图。
+    if (missionIntent || (typeof projectId === 'string' && projectId !== '')) {
+      const seq = (AppStorage.get<number>('pm.handoffSeq') ?? 0) + 1;
+      AppStorage.setOrCreate<number>('pm.handoffSeq', seq);
     }
   }
 

@@ -7,7 +7,7 @@ import { EvidenceAssessment, evidenceAssessmentText } from '../models/Copilot';
 import router from '@ohos.router';
 import { FocusAgentLauncher } from '../components/FocusAgentLauncher';
 import promptAction from '@ohos.promptAction';
-import { handoffIntentExpired } from '../common/MissionWidgetContract';
+import { missionHandoffRoute } from '../common/MissionWidgetContract';
 import pasteboard from '@ohos.pasteboard';
 import { photoAccessHelper } from '@kit.MediaLibraryKit';
 import { picker } from '@kit.CoreFileKit';
@@ -29,7 +29,7 @@ import { MemoryLifecycleService } from '../services/MemoryLifecycleService';
 import { InterventionPolicyService } from '../services/InterventionPolicyService';
 import { ProjectStateService } from '../services/ProjectStateService';
 import { MeetingImportSheet } from '../components/MeetingImportSheet';
-import { deadlineReminderConflict } from '../common/GlobalFocusPresentation';
+import { deadlineReminderConflict, workPhaseLabel } from '../common/GlobalFocusPresentation';
 import { DateOnly } from '../common/DateOnly';
 import { PolicyResponse, PolicySuggestion, PolicyUpdateBody } from '../models/Intervention';
 import { ActionService } from '../services/ActionService';
@@ -114,10 +114,17 @@ struct ProjectHome {
   @State private agentContext: ProjectAgentContext | null = null;
   @State private agentContextError: string = '';
   private agentContextGeneration: number = 0;
-  private agentContextExpired: () => void = () => { this.agentContextGeneration++; this.agentContext = null; this.homeMission = null; this.chatMessages = []; this.copilotTurnId = ''; this.copilotTurnText = ''; this.copilotQuestion = ''; this.agentContextError = '登录已失效，请重新登录。'; };
+  // 401 会话失效时清掉本项目私有内容与未提交草稿，旧账号内容不能留在页面或本地草稿里。
+  private agentContextExpired: () => void = () => {
+    this.clearPrivateState('登录已失效，请重新登录。');
+    if (this.pageVisible) { router.replaceUrl({ url: 'pages/LoginPage' }); }
+  };
   @State homeMission: MissionWorkspaceItem | null = null;
   @State showEvolution: boolean = false;
   @StorageProp(PMStorageKey.WIDTH_BP) widthBp: string = PMWidthBp.SM;
+  // 卡片/通知在 App 已在前台时由 onNewWant 投递；页面可见时用序号驱动消费一次。
+  @StorageProp('pm.handoffSeq') @Watch('onHandoffIntent') handoffSeq: number = 0;
+  private pageVisible: boolean = false;
 
   // 数据主状态
   @State project: ProjectDetail = new ProjectDetail();
@@ -294,7 +301,21 @@ struct ProjectHome {
     '随手记录', '论文笔记', '代码报错', '实验记录', '会议纪要', '老师建议', '参赛材料'
   ];
 
-  aboutToDisappear(): void { this.agentContextGeneration++; SessionStore.offSessionExpired(this.agentContextExpired); }
+  aboutToDisappear(): void { this.pageVisible = false; this.agentContextGeneration++; SessionStore.offSessionExpired(this.agentContextExpired); }
+
+  /** 权限被服务端拒绝后清掉本项目私有内容、表单草稿与卡片私有快照，旧内容不能继续可操作。 */
+  private clearPrivateState(message: string): void {
+    this.agentContextGeneration++;
+    this.agentContext = null; this.homeMission = null; this.chatMessages = [];
+    this.copilotTurnId = ''; this.copilotTurnText = ''; this.copilotQuestion = ''; this.copilotFeedback = '';
+    this.expandedCopilotReceiptId = ''; this.agentContextError = message;
+    this.project = new ProjectDetail(); this.dashboard = new ProjectDashboard();
+    this.interventions = []; this.actions = []; this.artifacts = []; this.attachments = []; this.milestones = [];
+    this.memorySearchResults = []; this.reentry = null; this.episodeDetail = null; this.checkpointPreview = null;
+    this.rawText = ''; this.captureRequestId = ''; this.attachmentFeedback = '';
+    this.hasLoadedProjectSnapshot = false;
+    void DeviceIdentity.clearCaptureDraft(this.captureDraftScope());
+  }
 
   aboutToAppear(): void {
     SessionStore.onSessionExpired(this.agentContextExpired);
@@ -340,13 +361,26 @@ struct ProjectHome {
   }
 
   onPageShow(): void {
+    this.pageVisible = true;
     this.missionRefreshKey++;
-    // NAV-02: 消费可能在热启动时通过通知写入的参数
+    // NAV-02: 消费可能在热启动时通过通知/卡片写入的参数
     this.openPendingNotification();
     // NAV-01: 页面返回时静默刷新数据，保留用户当前 tab
     if (this.projectId !== '' && !this.isLoading) {
       this.loadAllData(true);
     }
+  }
+
+  onPageHide(): void {
+    this.pageVisible = false;
+  }
+
+  /** 卡片/通知在前台投递时由 handoffSeq 变化驱动消费；只有当前可见页消费，避免重复跳转。 */
+  private onHandoffIntent(): void {
+    if (!this.pageVisible) {
+      return;
+    }
+    this.openPendingNotification();
   }
 
   onBackPress(): boolean {
@@ -413,37 +447,49 @@ struct ProjectHome {
     const missionId = AppStorage.get<string>('pendingMissionId') ?? '';
     const missionProjectId = AppStorage.get<string>('pendingMissionProjectId') ?? '';
     if (missionId !== '' && missionProjectId !== '') {
-      const questionId = AppStorage.get<string>('pendingQuestionId') ?? '';
-      const approvalId = AppStorage.get<string>('pendingApprovalId') ?? '';
-      const sourceId = AppStorage.get<string>('pendingSourceId') ?? '';
-      const handoffExpiresAt = AppStorage.get<string>('pendingHandoffExpiresAt') ?? '';
-      AppStorage.setOrCreate<string>('pendingMissionId', ''); AppStorage.setOrCreate<string>('pendingMissionProjectId', '');
-      AppStorage.setOrCreate<string>('pendingQuestionId', ''); AppStorage.setOrCreate<string>('pendingApprovalId', '');
-      AppStorage.setOrCreate<string>('pendingSourceId', ''); AppStorage.setOrCreate<string>('pendingMissionVersion', '');
-      AppStorage.setOrCreate<string>('pendingHandoffExpiresAt', '');
-      const expiry = handoffExpiresAt === '' ? 0 : Number(handoffExpiresAt);
+      const route = missionHandoffRoute(missionProjectId, missionId,
+        AppStorage.get<string>('pendingQuestionId') ?? '', AppStorage.get<string>('pendingApprovalId') ?? '',
+        AppStorage.get<string>('pendingSourceId') ?? '', AppStorage.get<string>('pendingOutputId') ?? '',
+        AppStorage.get<string>('pendingReceiptId') ?? '', AppStorage.get<string>('pendingMissionVersion') ?? '',
+        AppStorage.get<string>('pendingHandoffExpiresAt') ?? '', Date.now());
+      // 先消费再跳转：同一次意图不会被重复打开。
+      this.clearHandoffIntents();
       // 过期定位意图不打开旧问题；用户回到当前原委托重新核对。
-      const expired = handoffIntentExpired(expiry, Date.now());
-      if (expired) {
+      if (route.expired) {
         promptAction.showToast({ message: '原卡片已过期，已回到当前委托；旧问题不会被当成新问题' });
       }
       router.pushUrl({ url: 'pages/MissionDetail', params: {
-        projectId: missionProjectId, missionId,
-        questionId: expired ? '' : questionId,
-        approvalId: expired ? '' : approvalId,
-        sourceId: expired ? '' : sourceId
+        projectId: route.projectId, missionId: route.missionId,
+        questionId: route.questionId, approvalId: route.approvalId, sourceId: route.sourceId,
+        outputId: route.outputId, receiptId: route.receiptId,
+        handoffMissionVersion: route.missionVersion, handoffExpired: route.expired ? '1' : ''
       } }); return;
     }
     const targetProjectId = AppStorage.get<string>('notificationProjectId') ?? '';
     const targetInterventionId = AppStorage.get<string>('notificationInterventionId') ?? '';
-    if (targetProjectId !== '' && targetInterventionId !== '') {
-      AppStorage.setOrCreate<string>('notificationProjectId', '');
-      AppStorage.setOrCreate<string>('notificationInterventionId', '');
+    if (targetProjectId === '') {
+      return;
+    }
+    AppStorage.setOrCreate<string>('notificationProjectId', '');
+    AppStorage.setOrCreate<string>('notificationInterventionId', '');
+    if (targetInterventionId !== '') {
       router.pushUrl({
         url: 'pages/InterventionDetail',
         params: { projectId: targetProjectId, interventionId: targetInterventionId }
       });
+    } else if (targetProjectId !== this.projectId) {
+      // 项目卡片指向另一个项目时回到那个原项目工作台；同项目已在当前页，不重复压栈。
+      router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: targetProjectId } });
     }
+  }
+
+  private clearHandoffIntents(): void {
+    AppStorage.setOrCreate<string>('pendingMissionId', ''); AppStorage.setOrCreate<string>('pendingMissionProjectId', '');
+    AppStorage.setOrCreate<string>('pendingQuestionId', ''); AppStorage.setOrCreate<string>('pendingApprovalId', '');
+    AppStorage.setOrCreate<string>('pendingSourceId', ''); AppStorage.setOrCreate<string>('pendingOutputId', '');
+    AppStorage.setOrCreate<string>('pendingReceiptId', ''); AppStorage.setOrCreate<string>('pendingMissionVersion', '');
+    AppStorage.setOrCreate<string>('pendingHandoffExpiresAt', '');
+    AppStorage.setOrCreate<string>('notificationProjectId', ''); AppStorage.setOrCreate<string>('notificationInterventionId', '');
   }
 
   // 上传入口统一为回形针：二级菜单分开“相册图片”与“文件（PDF 等）”两条路径
@@ -682,7 +728,12 @@ struct ProjectHome {
       }
       this.hasLoadedProjectSnapshot = true;
     } catch (e) {
-      if (e instanceof ApiError) {
+      if (e instanceof ApiError && [403, 404].includes(e.status)) {
+        // 服务端明确拒绝该项目：清掉项目私有内容与卡片私有快照，旧内容不能继续可操作。
+        this.clearPrivateState(e.message);
+        this.errorMessage = e.message;
+        WidgetDataService.clearMission(getContext(this), true).catch(() => {});
+      } else if (e instanceof ApiError) {
         this.errorMessage = e.message;
       } else {
         this.errorMessage = '无法同步项目数据，请检查网络';
@@ -1598,11 +1649,33 @@ struct ProjectHome {
     if (kind === 'deadline' || kind === 'action') return '查看行动';
     return this.project.cards.length === 0 ? '记录第一条资料' : '记录项目进展';
   }
+  /** 打开原委托：带上当前原问题/提案/输出修订与版本线索；详情读回后仍以服务端当前对象为准。 */
+  private openMission(missionId: string, questionId: string, approvalId: string, revision: string, version: string): void {
+    router.pushUrl({ url: 'pages/MissionDetail', params: {
+      projectId: this.projectId, missionId, questionId, approvalId, revision,
+      handoffMissionVersion: version
+    } });
+  }
+
+  /** 焦点卡状态标签：停止请求在途/额度等待/UNKNOWN 用事实措辞，不写成已停止或已完成。 */
+  private homeMissionStatusLabel(): string {
+    const state = this.homeMission?.workState;
+    if (state !== undefined) {
+      if (state.reasonCode === 'STOP_REQUESTED_IN_FLIGHT') { return '停止请求待结算'; }
+      if (state.reasonCode === 'DAILY_BUDGET_WAITING') { return '等待额度恢复'; }
+      return workPhaseLabel(state.phase);
+    }
+    return missionStatusLabel(this.homeMission?.status ?? '');
+  }
   private openHomeFocus(): void {
     if (this.agentContextError !== '') { this.loadAllData(true); return; }
     if (this.agentContext !== null) {
       const target = this.agentContext.nextStep.entityRef;
-      if (target.kind === 'MISSION') router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.projectId, missionId: target.id } });
+      if (target.kind === 'MISSION') {
+        this.openMission(target.id, target.questionId ?? '', target.approvalId ?? '',
+          target.outputRevision !== null ? String(target.outputRevision) : '',
+          target.version !== null ? String(target.version) : '');
+      }
       else if (target.kind === 'INTERVENTION') router.pushUrl({ url: 'pages/InterventionDetail', params: { projectId: this.projectId, interventionId: target.id } });
       else if (target.kind === 'ACTION') { this.currentTabIndex = 2; this.focusedActionId = target.id; }
       else if (this.agentContext.freshness === 'UNAVAILABLE') this.loadAllData(true);
@@ -1611,7 +1684,14 @@ struct ProjectHome {
     }
     const kind = this.homeFocusKind();
     if (kind === 'reminder') router.pushUrl({ url: 'pages/InterventionDetail', params: { projectId: this.projectId, interventionId: this.getTopOpenIntervention()!.id } });
-    else if (kind === 'mission' && this.homeMission !== null) router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.projectId, missionId: this.homeMission.id } });
+    else if (kind === 'mission' && this.homeMission !== null) {
+      const mission = this.homeMission;
+      const state = mission.workState;
+      this.openMission(mission.id,
+        state !== undefined ? (state.exactQuestionRef ?? '') : '',
+        state !== undefined ? (state.exactApprovalRef ?? '') : '',
+        '', state !== undefined ? String(state.originalRef.version) : '');
+    }
     else if (kind === 'deadline' || kind === 'action') this.currentTabIndex = 2;
     else this.openCaptureEntry();
   }
@@ -1620,7 +1700,7 @@ struct ProjectHome {
   private HomeFocusView() {
     Column({ space: 10 }) {
       Row() {
-        Text(this.agentContext !== null ? '当前下一步' : this.homeFocusKind() === 'mission' ? missionStatusLabel(this.homeMission?.status ?? '') : '当前先处理')
+        Text(this.agentContext !== null ? '当前下一步' : this.homeFocusKind() === 'mission' ? this.homeMissionStatusLabel() : '当前先处理')
           .fontSize(12)
           .fontWeight(FontWeight.Medium)
           .fontColor(PMColors.BRAND)

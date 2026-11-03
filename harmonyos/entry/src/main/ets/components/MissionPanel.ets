@@ -54,6 +54,16 @@ export struct MissionPanel {
   private open(id: string = ''): void {
     router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.projectId, missionId: id } });
   }
+  /** 行入口带原问题/提案身份与卡片版本线索；详情读回后仍以服务端当前对象为准。 */
+  private openItem(item: MissionWorkspaceItem): void {
+    const state = item.workState;
+    router.pushUrl({ url: 'pages/MissionDetail', params: {
+      projectId: this.projectId, missionId: item.id,
+      questionId: state !== undefined ? (state.exactQuestionRef ?? '') : '',
+      approvalId: state !== undefined ? (state.exactApprovalRef ?? '') : '',
+      handoffMissionVersion: state !== undefined ? String(state.originalRef.version) : ''
+    } });
+  }
   private groups(): MissionGroupView[] {
     return [
       { title: '需要回应', statuses: ['WAITING_INPUT', 'WAITING_APPROVAL'] },
@@ -119,7 +129,7 @@ export struct MissionPanel {
           .accessibilityText('把这条委托设为当前关注')
         Blank()
         Text(this.actionLabel(item)).fontSize(13).fontWeight(FontWeight.Medium).fontColor(PMColors.BRAND).height(36)
-          .onClick(() => { this.open(item.id); })
+          .onClick(() => { this.openItem(item); })
           .accessibilityText(this.actionLabel(item))
       }.width('100%')
     }.width('100%').alignItems(HorizontalAlign.Start).padding(14).backgroundColor(PMColors.SURFACE)

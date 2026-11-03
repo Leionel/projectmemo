@@ -19,9 +19,12 @@ export struct CopilotContinuationCard {
   aboutToAppear(): void { this.goal = this.suggestion.goal; }
   aboutToDisappear(): void { this.generation++; }
   private open(id: string): void {
+    // 没有可定位的原委托时不打开空的委托页，也不把“继续”静默变成新建任务。
+    if (id === '') return;
     const m = this.suggestion.mission;
     router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.suggestion.projectId, missionId: id,
-      questionId: m?.questionId ?? '', approvalId: m?.approvalId ?? '', outputId: m?.outputId ?? '', revision: m?.outputRevision?.toString() ?? '' } });
+      questionId: m?.questionId ?? '', approvalId: m?.approvalId ?? '', outputId: m?.outputId ?? '', revision: m?.outputRevision?.toString() ?? '',
+      handoffMissionVersion: m !== null && m.version > 0 ? String(m.version) : '' } });
   }
   private async submit(confirm: boolean): Promise<void> {
     if (this.busy) return;

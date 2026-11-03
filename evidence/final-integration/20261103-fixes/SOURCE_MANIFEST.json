@@ -1,0 +1,98 @@
+{
+  "candidate": "b8028e3ddb84c5b4ab7e11502a1abf042c4b4cf2",
+  "capturedAt": "2026-11-03T09:53:49.460552+00:00",
+  "files": [
+    {
+      "path": "components/MissionPanel.tsx",
+      "sha256": "ee7552f5ffc4db6632a6a79320cafdbd189fdb21231dbe90ffd46d91b7ee619a"
+    },
+    {
+      "path": "components/MissionReadback.tsx",
+      "sha256": "11871dbff1348a8010a7ba6d1de45474855a11d346845a10b35022ab1767faaa"
+    },
+    {
+      "path": "components/MissionWorkPacket.tsx",
+      "sha256": "952caa283b9d59cb82893765efac75565584e2a62b5348928752b41bd40b0ad9"
+    },
+    {
+      "path": "components/home/DemoVideoPlayer.tsx",
+      "sha256": "629f42865d523f0fbcd908e0989c3a0c57db59a0c6b8fb3ad12d12de86ee7e1d"
+    },
+    {
+      "path": "e2e/missions.spec.ts",
+      "sha256": "0ceea4da77032fc296bbec18e51ab418c62f6a972a1c82d9f0dfebfb9aedf4b2"
+    },
+    {
+      "path": "harmonyos/entry/src/main/ets/components/MissionReadbackView.ets",
+      "sha256": "fd6cb2885d41f481388143e29636f13ced9dcb593fa103ed8ada4ddba614d6a2"
+    },
+    {
+      "path": "harmonyos/entry/src/main/ets/models/WorkPacket.ets",
+      "sha256": "d5189d5d5206db66038dec84dfaf7ded55365135dfa5988f17e004d7096970f0"
+    },
+    {
+      "path": "harmonyos/entry/src/main/ets/pages/ProjectHome.ets",
+      "sha256": "9880f2d1ab60fa9d44d9f9cf4acdb0eefe0da746af810be9d2e5d687b8600636"
+    },
+    {
+      "path": "harmonyos/entry/src/test/WorkPacketContract.test.ets",
+      "sha256": "a30d7f930061ec3d70e6d3cb3b1e04b7bdd21d8c0484cada2b8e45c2369a2de9"
+    },
+    {
+      "path": "lib/mission/missionService.ts",
+      "sha256": "b8dc5fb8443b9a180ccd80460fb9087f09d7443d78501c3d4f7cf9338262a15d"
+    },
+    {
+      "path": "scripts/final-a/perf-readback.ts",
+      "sha256": "9158a16a1d67b678a5148b75cdffced3a9a170f2ea34e892f3be4b3d22910882"
+    },
+    {
+      "path": "scripts/final-a/probe-fs-a07-concurrency.ts",
+      "sha256": "254cc89dc3aaf4d8f079d94c91f075415b3569f241e2f19f6f8a8147494b1599"
+    },
+    {
+      "path": "tests/final-e/controlAuthority.test.ts",
+      "sha256": "9eda3a79f45eb9079c682019e8468da563c398a8c2c4b2a014740d9d64437544"
+    },
+    {
+      "path": "tests/final-e/isolationAndSource.test.ts",
+      "sha256": "334b8ffb0ccce514f4a93f17b5c26822578e2ef4b462366b124415ce15497324"
+    },
+    {
+      "path": "tests/final-e/missionCommandsIsolation.test.ts",
+      "sha256": "732cf3cfab3d254964ffec52946e714ced3ae1ed5712f9c4c84297ede776c637"
+    },
+    {
+      "path": "tests/final-e/observationAndSourceUse.test.ts",
+      "sha256": "a0a408b5396dced8a493f7dcb71abe442db8cf43d50128982141543409f10c76"
+    },
+    {
+      "path": "tests/final-e/projectionBoundaries.test.ts",
+      "sha256": "6b150fdcb029255e70906d7b1098450c0391f0e3750868bac699e12832e65dcd"
+    },
+    {
+      "path": "tests/final-e/stopAndLease.test.ts",
+      "sha256": "782b635c9ca5c3c4e48a1a295e3dc3d51e6b37e34f87e83e96d6f84941164737"
+    },
+    {
+      "path": "tests/finalARequiresGuards.test.ts",
+      "sha256": "e7188702dae8c4955f163a31175d9d8903df284823656f679bd470b208c9bdf8"
+    },
+    {
+      "path": "tests/finalBVideoFocus.test.ts",
+      "sha256": "c1f96531489761eb788e75adfb6659a2fea0db22f03447c9dd976351f5498ec4"
+    },
+    {
+      "path": "tests/finalCFreshnessGuard.test.ts",
+      "sha256": "316c7441fa5035fec17679e2ccfac1d7f3f6ee2fa79d65bd098cdac0895f1891"
+    },
+    {
+      "path": "tests/finalCWorkPacket.test.ts",
+      "sha256": "5fc3e8e70eae350245a761eb5cf6e924ea05197ac003f691b365b1dd16f0848f"
+    },
+    {
+      "path": "tests/registration.test.ts",
+      "sha256": "3212fe0f7e0886f4e53eb8aaec8a82b7732dccb5c0699245a2515f7b1b5517ca"
+    }
+  ]
+}

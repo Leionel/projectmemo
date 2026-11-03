@@ -1,0 +1,1013 @@
+
+> projectmemo@0.1.0 harmony:build
+> tsx scripts/harmony-build.ts
+
+[harmony-build] DEVECO_SDK_HOME=D:\Program Files\Huawei\DevEco Studio\sdk
+[harmony-build] JAVA_HOME=D:\Program Files\Huawei\DevEco Studio\jbr
+> hvigor [32mUP-TO-DATE :entry:default@PreBuild...  [39m
+> hvigor [32mFinished :entry:default@CreateModuleInfo... after 2 ms [39m
+> hvigor [32mFinished :entry:default@GenerateMetadata... after 10 ms [39m
+> hvigor [32mFinished :entry:default@ConfigureCmake... after 1 ms [39m
+> hvigor [32mFinished :entry:default@MergeProfile... after 13 ms [39m
+> hvigor [32mFinished :entry:default@CreateBuildProfile... after 7 ms [39m
+> hvigor [32mFinished :entry:default@PreCheckSyscap... after 1 ms [39m
+> hvigor [32mFinished :entry:default@GeneratePkgContextInfo... after 15 ms [39m
+> hvigor [32mFinished :entry:default@GeneratePkgSdkInfo... after 8 ms [39m
+> hvigor [32mFinished :entry:default@ProcessIntegratedHsp... after 1 ms [39m
+> hvigor [32mFinished :entry:default@BuildNativeWithCmake... after 1 ms [39m
+> hvigor [32mFinished :entry:default@MakePackInfo... after 13 ms [39m
+> hvigor [32mFinished :entry:default@SyscapTransform... after 3 ms [39m
+> hvigor [32mFinished :entry:default@ProcessProfile... after 180 ms [39m
+> hvigor [32mFinished :entry:default@ProcessRouterMap... after 14 ms [39m
+> hvigor [32mFinished :entry:default@ProcessShareConfig... after 10 ms [39m
+> hvigor [32mFinished :entry:default@ProcessStartupConfig... after 6 ms [39m
+> hvigor [32mFinished :entry:default@BuildNativeWithNinja... after 9 ms [39m
+> hvigor [32mFinished :entry:default@ProcessResource... after 10 ms [39m
+> hvigor [32mFinished :entry:default@GenerateLoaderJson... after 50 ms [39m
+> hvigor [32mFinished :entry:default@ProcessLibs... after 14 ms [39m
+> hvigor [32mFinished :entry:default@CompileResource... after 393 ms [39m
+> hvigor [32mFinished :entry:default@DoNativeStrip... after 6 ms [39m
+> hvigor [32mFinished :entry:default@BuildJS... after 9 ms [39m
+> hvigor [32mFinished :entry:default@CacheNativeLibs... after 18 ms [39m
+> hvigor WARN: WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/entryability/EntryAbility.ets:80:12
+ 'registerFont' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:278:22
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:279:23
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:280:27
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:322:25
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:323:34
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:324:28
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:635:18
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/services/WidgetDataService.ets:636:19
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:29:25
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:15
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:57
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:78
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:32:111
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:67:38
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/services/ConversationDraftStore.ets:67:59
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/GoalQuestionPanel.ets:54:14
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/GoalQuestionPanel.ets:57:143
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:130:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:130:12
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:150:31
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:150:38
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:152:35
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:152:42
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:153:10
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:153:17
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:157:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:157:12
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:284:59
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/ReminderSettingsView.ets:80:22
+ 'show' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:172:54
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:182:54
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:193:60
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:236:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:236:18
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:248:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:248:18
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:252:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:252:18
+ 'showDialog' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:266:26
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:341:9
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:341:22
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:343:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:343:14
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:359:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:359:14
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:365:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:365:14
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:409:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:467:51
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:572:22
+ 'show' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:625:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:657:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:661:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:661:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:677:39
+ 'showActionMenu' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:705:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:709:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:709:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1078:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1078:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1143:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1171:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1267:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1267:14
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1272:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1272:14
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1277:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1277:14
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1281:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1281:14
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1285:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1285:12
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1331:16
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1395:18
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1574:46
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1586:46
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1633:20
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:1868:26
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:2005:16
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:2009:16
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:2176:26
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:2832:28
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/Index.ets:3285:24
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/CopilotContinuationCard.ets:25:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/CopilotContinuationCard.ets:25:12
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MeetingImportSheet.ets:74:22
+ 'show' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/services/NotificationService.ets:52:33
+ 'requestEnableNotification' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/services/NotificationService.ets:93:18
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/PMAppBar.ets:41:18
+ 'back' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/ActionReminderBlock.ets:115:22
+ 'show' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/ActionReminderBlock.ets:129:22
+ 'show' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/ActionReminderBlock.ets:206:23
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/ActionReminderBlock.ets:235:23
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/ActionReminderBlock.ets:262:23
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/ActionReminderBlock.ets:293:23
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MissionPanel.ets:55:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MissionPanel.ets:55:12
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MissionPanel.ets:60:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MissionPanel.ets:60:12
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:121:36
+ 'replaceUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:326:63
+ 'getParams' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:347:64
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:468:9
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:468:22
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:470:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:470:14
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:485:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:485:14
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:491:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:491:14
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:510:39
+ 'showActionMenu' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:562:39
+ 'showActionMenu' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:697:51
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:707:57
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:750:40
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:834:49
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:943:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:943:18
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1076:32
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1146:22
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1174:24
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1179:22
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1669:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1669:12
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1694:48
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1694:55
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1701:30
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1701:37
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1810:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1810:14
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1833:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2058:12
+ 'back' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2110:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2146:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2228:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2231:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2231:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2284:22
+ 'show' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2305:22
+ 'show' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2330:22
+ 'show' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2353:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2354:14
+ 'back' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2356:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2356:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2368:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2368:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2380:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2383:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2383:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2419:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2435:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2438:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2438:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2465:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2465:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2476:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2476:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2488:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2490:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2490:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2503:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2506:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2506:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2527:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2605:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2608:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2608:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2623:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2644:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2645:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2645:18
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2668:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2670:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2670:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:2691:16
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:3023:20
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:4215:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:4215:12
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:4353:22
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:4673:44
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:4966:20
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:5835:22
+ 'back' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectHome.ets:5894:59
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/InterventionDetail.ets:35:63
+ 'getParams' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/InterventionDetail.ets:103:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/InterventionDetail.ets:104:14
+ 'back' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/InterventionDetail.ets:142:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/InterventionDetail.ets:143:14
+ 'back' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/InterventionDetail.ets:164:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/InterventionDetail.ets:165:14
+ 'back' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/InterventionDetail.ets:190:20
+ 'back' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/InterventionDetail.ets:201:20
+ 'back' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/DeviceCalendarReadCard.ets:25:23
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:219:23
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:251:23
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:269:21
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:307:23
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:675:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:675:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:705:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:705:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:757:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:757:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:767:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:771:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:771:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:778:63
+ 'getParams' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:832:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:832:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:905:27
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:934:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:955:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:959:9
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:959:22
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:961:9
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:961:22
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:1120:22
+ 'back' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ActionBoard.ets:1138:22
+ 'back' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/DeploymentConnectionsPanel.ets:36:96
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/DeploymentConnectionsPanel.ets:87:199
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/ClaimCorrection.ets:44:57
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/AgentMemoryPanel.ets:164:30
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/AgentMemoryPanel.ets:169:30
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/AgentMemoryPanel.ets:278:32
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/AgentMemoryPanel.ets:283:32
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/AgentMemoryPanel.ets:375:32
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/RepoSignalPanel.ets:32:80
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:49:63
+ 'getParams' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:191:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:200:9
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:200:22
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:202:9
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:202:22
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:217:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:224:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:224:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:700:20
+ 'back' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MemoryTimeline.ets:758:63
+ 'back' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/FeatureGuide.ets:133:12
+ 'back' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/LoginPage.ets:11:18
+ 'replaceUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/ExperiencePanel.ets:75:41
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MissionReadbackView.ets:115:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MissionReadbackView.ets:115:14
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MissionReadbackView.ets:119:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MissionReadbackView.ets:119:14
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MissionReadbackView.ets:122:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MissionReadbackView.ets:122:12
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MissionReadbackView.ets:163:35
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MissionReadbackView.ets:208:45
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MissionReadbackView.ets:223:47
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MissionReadbackView.ets:285:39
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MissionSettingsForm.ets:101:22
+ 'show' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MissionSettingsForm.ets:108:22
+ 'show' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MissionResponsibilitySection.ets:37:51
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MissionResponsibilitySection.ets:169:22
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/MissionResponsibilitySection.ets:178:24
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:104:30
+ 'replaceUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:109:27
+ 'getParams' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:122:27
+ 'getParams' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:147:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:147:14
+ 'replaceUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:154:38
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:201:77
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:202:51
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:363:26
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:363:39
+ 'showDialog' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:371:28
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:371:41
+ 'showDialog' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:469:85
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:699:88
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:714:37
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:717:37
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:721:37
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:889:123
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/MissionDetail.ets:898:151
+ 'back' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:38:27
+ 'getParams' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:77:25
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:95:23
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:99:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:99:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:107:23
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:112:20
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:113:19
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:113:32
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:166:50
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/AttachmentViewer.ets:167:51
+ 'showToast' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/ConversationFileGuides.ets:9:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/ConversationFileGuides.ets:9:12
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/ConversationFileGuides.ets:11:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/ConversationFileGuides.ets:11:12
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/ConversationFileGuides.ets:13:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/ConversationFileGuides.ets:13:12
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/ConversationFileGuides.ets:15:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/components/ConversationFileGuides.ets:15:12
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:84:29
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:84:36
+ 'replaceUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:90:27
+ 'getParams' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:104:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:104:12
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:116:41
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:126:29
+ 'getParams' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:158:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:158:14
+ 'replaceUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:225:7
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:225:14
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:229:12
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:229:19
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:484:74
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:485:136
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/FocusConversation.ets:612:10
+ 'onScroll' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ConversationHistory.ets:28:39
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ConversationHistory.ets:29:27
+ 'getParams' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ConversationHistory.ets:35:12
+ 'back' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ConversationHistory.ets:53:14
+ 'back' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ConversationWebSource.ets:23:26
+ 'getParams' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ConversationWebSource.ets:35:55
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ConversationWebSource.ets:35:62
+ 'pushUrl' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ConversationWebSource.ets:37:27
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectIntake.ets:82:63
+ 'getParams' has been deprecated.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectIntake.ets:254:5
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: D:/Projects/hongmen-final-integration/harmonyos/entry/src/main/ets/pages/ProjectIntake.ets:254:12
+ 'pushUrl' has been deprecated.
+
+
+> hvigor [32mFinished :entry:default@CompileArkTS... after 1 min 7 s 60 ms [39m
+> hvigor [32mFinished :entry:default@GeneratePkgModuleJson... after 3 ms [39m
+> hvigor [32mFinished :entry:default@ProcessCompiledResources... after 1 ms [39m
+> hvigor [32mFinished :entry:default@PackageHap... after 673 ms [39m
+> hvigor [32mFinished :entry:default@PackingCheck... after 7 ms [39m
+> hvigor WARN: Will skip sign 'hos_hap'. No signingConfigs profile is configured in current project.
+             If needed, configure the signingConfigs in D:\Projects\hongmen-final-integration\harmonyos\build-profile.json5.
+> hvigor [32mFinished :entry:default@SignHap... after 2 ms [39m
+> hvigor [32mFinished :entry:default@CollectDebugSymbol... after 1 ms [39m
+> hvigor [32mFinished :entry:assembleHap... after 1 ms [39m
+> hvigor [32mBUILD SUCCESSFUL in 1 min 23 s 817 ms [39m
+
+[harmony-build] HAP: harmonyos\entry\build\default\outputs\default\entry-default-unsigned.hap
+[harmony-build] size: 8284254 bytes
+[harmony-build] sha256: 5a713c26d213fce90ce45932177817e1f3e97152c82578eb2aa9e74222f89029

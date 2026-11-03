@@ -1,0 +1,77 @@
+[
+  {
+    "original": "evidence/r4-agent-ux/20261030-ux1/web-continuity.png",
+    "archive": "D:\\Projects\\hongmen-final-integration\\tmp\\final-integration-artifacts\\20261103-fixes\\evidence\\r4-agent-ux\\20261030-ux1\\web-continuity.png",
+    "kind": "copy then restore tracked original"
+  },
+  {
+    "original": "evidence/r4-agent-ux/20261030-ux1/web-focus-390.png",
+    "archive": "D:\\Projects\\hongmen-final-integration\\tmp\\final-integration-artifacts\\20261103-fixes\\evidence\\r4-agent-ux\\20261030-ux1\\web-focus-390.png",
+    "kind": "copy then restore tracked original"
+  },
+  {
+    "original": "evidence/r4-agent-ux/20261030-ux2/web-correction.png",
+    "archive": "D:\\Projects\\hongmen-final-integration\\tmp\\final-integration-artifacts\\20261103-fixes\\evidence\\r4-agent-ux\\20261030-ux2\\web-correction.png",
+    "kind": "copy then restore tracked original"
+  },
+  {
+    "original": "evidence/r4-agent-ux/20261030-ux2/web-memory-panel.png",
+    "archive": "D:\\Projects\\hongmen-final-integration\\tmp\\final-integration-artifacts\\20261103-fixes\\evidence\\r4-agent-ux\\20261030-ux2\\web-memory-panel.png",
+    "kind": "copy then restore tracked original"
+  },
+  {
+    "original": "evidence/r4-ui-quality/20261031/after/web-responsibility-edit.png",
+    "archive": "D:\\Projects\\hongmen-final-integration\\tmp\\final-integration-artifacts\\20261103-fixes\\evidence\\r4-ui-quality\\20261031\\after\\web-responsibility-edit.png",
+    "kind": "copy then restore tracked original"
+  },
+  {
+    "original": "evidence/s2-usage-coverage/20261102/web-1280.png",
+    "archive": "D:\\Projects\\hongmen-final-integration\\tmp\\final-integration-artifacts\\20261103-fixes\\evidence\\s2-usage-coverage\\20261102\\web-1280.png",
+    "kind": "copy then restore tracked original"
+  },
+  {
+    "original": "evidence/s2-usage-coverage/20261102/web-390.png",
+    "archive": "D:\\Projects\\hongmen-final-integration\\tmp\\final-integration-artifacts\\20261103-fixes\\evidence\\s2-usage-coverage\\20261102\\web-390.png",
+    "kind": "copy then restore tracked original"
+  },
+  {
+    "original": "evidence/r4-continuity/browser-1793698768022/",
+    "archive": "D:\\Projects\\hongmen-final-integration\\tmp\\final-integration-artifacts\\20261103-fixes\\evidence\\r4-continuity\\browser-1793698768022",
+    "kind": "move generated untracked output"
+  },
+  {
+    "original": "evidence/r4-continuity/browser-1793699026434/",
+    "archive": "D:\\Projects\\hongmen-final-integration\\tmp\\final-integration-artifacts\\20261103-fixes\\evidence\\r4-continuity\\browser-1793699026434",
+    "kind": "move generated untracked output"
+  },
+  {
+    "original": "evidence/r4-continuity/browser-1793699026677/",
+    "archive": "D:\\Projects\\hongmen-final-integration\\tmp\\final-integration-artifacts\\20261103-fixes\\evidence\\r4-continuity\\browser-1793699026677",
+    "kind": "move generated untracked output"
+  },
+  {
+    "original": "evidence/r4-continuity/browser-1793699197484/",
+    "archive": "D:\\Projects\\hongmen-final-integration\\tmp\\final-integration-artifacts\\20261103-fixes\\evidence\\r4-continuity\\browser-1793699197484",
+    "kind": "move generated untracked output"
+  },
+  {
+    "original": "evidence/r4-continuity/browser-1793699331727/",
+    "archive": "D:\\Projects\\hongmen-final-integration\\tmp\\final-integration-artifacts\\20261103-fixes\\evidence\\r4-continuity\\browser-1793699331727",
+    "kind": "move generated untracked output"
+  },
+  {
+    "original": "evidence/r4-continuity/browser-1793699331872/",
+    "archive": "D:\\Projects\\hongmen-final-integration\\tmp\\final-integration-artifacts\\20261103-fixes\\evidence\\r4-continuity\\browser-1793699331872",
+    "kind": "move generated untracked output"
+  },
+  {
+    "original": "evidence/r4-continuity/stages23-1793698764565.png",
+    "archive": "D:\\Projects\\hongmen-final-integration\\tmp\\final-integration-artifacts\\20261103-fixes\\evidence\\r4-continuity\\stages23-1793698764565.png",
+    "kind": "move generated untracked output"
+  },
+  {
+    "original": "evidence/r4-continuity/stages23-1793699193116.png",
+    "archive": "D:\\Projects\\hongmen-final-integration\\tmp\\final-integration-artifacts\\20261103-fixes\\evidence\\r4-continuity\\stages23-1793699193116.png",
+    "kind": "move generated untracked output"
+  }
+]

@@ -1,0 +1,13 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/registration.test.ts tests/accountMail.test.ts tests/missionReadbackPanel.test.ts tests/finalCResultsReceipts.test.ts tests/finalCFreshnessGuard.test.ts
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-final-integration
+
+
+ Test Files  5 passed (5)
+      Tests  40 passed (40)
+   Start at  17:48:44
+   Duration  12.21s (transform 1.52s, setup 0ms, import 4.46s, tests 1.78s, environment 4.58s)
+

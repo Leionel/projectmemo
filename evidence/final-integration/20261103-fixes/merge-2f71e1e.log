@@ -1,0 +1,233 @@
+Merge made by the 'ort' strategy.
+ components/MissionBasisEvidence.module.css         |  263 ++
+ components/MissionBasisEvidence.tsx                |  310 ++
+ components/MissionPanel.tsx                        |   10 +-
+ components/MissionReadback.tsx                     |  191 +-
+ components/MissionResultReceipts.tsx               |  340 +++
+ components/MissionWorkPacket.module.css            |  258 ++
+ components/MissionWorkPacket.tsx                   |  635 ++++
+ components/ProjectIntakeForm.tsx                   |   47 +-
+ evidence/final-c/20261103/TRACK_C_FINAL_RECEIPT.md |  101 +
+ evidence/final-c/20261103/fixture-identity.json    |  513 ++++
+ .../final-c/20261103/fixture-readback-audit.json   | 2537 ++++++++++++++++
+ evidence/final-c/20261103/logs/browser-probe.log   |    9 +
+ .../final-c/20261103/logs/capture-normal-trial.log |  110 +
+ .../final-c/20261103/logs/capture-web-final.log    |   12 +
+ .../20261103/logs/capture-web-iteration2.log       |   31 +
+ .../20261103/logs/capture-web-iteration3-crash.log |    3 +
+ evidence/final-c/20261103/logs/capture-web.log     |    3 +
+ evidence/final-c/20261103/logs/dev-server.err.log  |    0
+ evidence/final-c/20261103/logs/dev-server.log      |   21 +
+ .../final-c/20261103/logs/ev2-candidate-sha.txt    |    1 +
+ .../final-c/20261103/logs/ev2-candidate-status.txt |    3 +
+ .../final-c/20261103/logs/ev2-dev-server.err.log   |    0
+ evidence/final-c/20261103/logs/ev2-dev-server.log  |  674 +++++
+ evidence/final-c/20261103/logs/ev2-inspect.log     |   10 +
+ evidence/final-c/20261103/logs/ev2-seed.log        |  121 +
+ .../20261103/logs/final-attempt1-manifest.json     | 3021 +++++++++++++++++++
+ .../final-c/20261103/logs/final-attempt1-notes.md  |  126 +
+ evidence/final-c/20261103/logs/final-attempt1.log  |   31 +
+ .../20261103/logs/final-attempt2-manifest.json     | 3012 +++++++++++++++++++
+ evidence/final-c/20261103/logs/final-attempt2.log  |   40 +
+ .../20261103/logs/final-attempt3-manifest.json     | 3078 +++++++++++++++++++
+ .../final-c/20261103/logs/final-attempt3-notes.md  |  125 +
+ evidence/final-c/20261103/logs/final-attempt3.log  |   12 +
+ .../final-c/20261103/logs/final-candidate-sha.txt  |    1 +
+ .../20261103/logs/final-candidate-status.txt       |    3 +
+ .../final-c/20261103/logs/final-dev-server.err.log |    0
+ .../final-c/20261103/logs/final-dev-server.log     |  690 +++++
+ evidence/final-c/20261103/logs/final-inspect.log   |   10 +
+ evidence/final-c/20261103/logs/final-seed.log      |  121 +
+ evidence/final-c/20261103/logs/inspect-fixture.log |   10 +
+ .../20261103/logs/iteration-2-manifest.json        | 2896 ++++++++++++++++++
+ .../final-c/20261103/logs/iteration-2-notes.md     |  108 +
+ evidence/final-c/20261103/logs/next-build.log      |  416 +++
+ .../final-c/20261103/logs/patch-final-manifest.mjs |   42 +
+ .../final-c/20261103/logs/requests-001-focus.json  |  751 +++++
+ .../logs/requests-002-waiting-user-detail.json     | 1339 +++++++++
+ .../20261103/logs/requests-003-basis-evidence.json | 1689 +++++++++++
+ .../logs/requests-004-results-receipts.json        | 1584 ++++++++++
+ .../logs/requests-005-keyboard-motion.json         |  387 +++
+ .../requests-006-legacy-missing-workpacket.json    |  387 +++
+ .../logs/requests-007-version-advanced.json        |  394 +++
+ .../logs/requests-008-409-authority-changed.json   |  387 +++
+ .../20261103/logs/requests-009-http-401.json       |  562 ++++
+ .../20261103/logs/requests-010-http-403.json       |  569 ++++
+ .../20261103/logs/requests-011-http-404.json       |  583 ++++
+ .../20261103/logs/requests-012-stopped.json        |  394 +++
+ .../20261103/logs/requests-013-cancelled.json      |  387 +++
+ .../logs/requests-014-terminal-unknown.json        |  387 +++
+ .../final-c/20261103/logs/requests-015-failed.json |  387 +++
+ .../20261103/logs/requests-016-old-question.json   |  394 +++
+ .../20261103/logs/requests-017-old-approval.json   |  387 +++
+ .../20261103/logs/requests-018-long-copy.json      |  408 +++
+ evidence/final-c/20261103/logs/seed.log            |  121 +
+ .../logs/separate-iteration-screenshots.mjs        |   27 +
+ evidence/final-c/20261103/logs/tsc-all.log         |    0
+ evidence/final-c/20261103/logs/web-smoke-ev1.json  |  112 +
+ evidence/final-c/20261103/manifest.json            | 3091 ++++++++++++++++++++
+ evidence/final-c/20261103/notes.md                 |  139 +
+ .../abnormal/409-authority-changed-1280-light.png  |  Bin 0 -> 143648 bytes
+ .../screenshots/abnormal/cancelled-1280-light.png  |  Bin 0 -> 287686 bytes
+ .../screenshots/abnormal/failed-1280-light.png     |  Bin 0 -> 292574 bytes
+ .../abnormal/http-401-cache-cleared-1280-light.png |  Bin 0 -> 167317 bytes
+ .../abnormal/http-403-cache-cleared-1280-light.png |  Bin 0 -> 168066 bytes
+ .../abnormal/http-404-cache-cleared-1280-light.png |  Bin 0 -> 167275 bytes
+ .../legacy-missing-workpacket-1280-light.png       |  Bin 0 -> 197978 bytes
+ .../screenshots/abnormal/long-copy-1280-light.png  |  Bin 0 -> 332196 bytes
+ .../screenshots/abnormal/long-copy-390-light.png   |  Bin 0 -> 271470 bytes
+ .../abnormal/old-approval-1280-light.png           |  Bin 0 -> 300415 bytes
+ .../abnormal/old-question-1280-light.png           |  Bin 0 -> 277893 bytes
+ .../screenshots/abnormal/stopped-1280-light.png    |  Bin 0 -> 280493 bytes
+ .../abnormal/terminal-unknown-1280-light.png       |  Bin 0 -> 315287 bytes
+ .../abnormal/terminal-unknown-390-light.png        |  Bin 0 -> 250040 bytes
+ .../abnormal/version-advanced-1280-light.png       |  Bin 0 -> 286685 bytes
+ .../abnormal/version-advanced-390-light.png        |  Bin 0 -> 226291 bytes
+ .../history/normal-results-1280-dark.png           |  Bin 0 -> 70369 bytes
+ .../history/normal-results-1280-light.png          |  Bin 0 -> 403925 bytes
+ .../history/normal-results-390-dark.png            |  Bin 0 -> 49043 bytes
+ .../history/normal-results-390-light.png           |  Bin 0 -> 49025 bytes
+ .../normal/basis-expanded-1280-dark.png            |  Bin 0 -> 422396 bytes
+ .../normal/basis-expanded-1280-light.png           |  Bin 0 -> 421894 bytes
+ .../screenshots/normal/basis-expanded-390-dark.png |  Bin 0 -> 348466 bytes
+ .../normal/basis-expanded-390-light.png            |  Bin 0 -> 347932 bytes
+ .../normal/basis-suppressed-item-1280-light.png    |  Bin 0 -> 19631 bytes
+ .../screenshots/normal/focus-1280-dark.png         |  Bin 0 -> 197237 bytes
+ .../screenshots/normal/focus-1280-light.png        |  Bin 0 -> 195254 bytes
+ .../20261103/screenshots/normal/focus-390-dark.png |  Bin 0 -> 143677 bytes
+ .../screenshots/normal/focus-390-light.png         |  Bin 0 -> 142463 bytes
+ .../normal/keyboard-motion-1280-light.png          |  Bin 0 -> 283451 bytes
+ .../mission-question-navigation-1280-light.png     |  Bin 0 -> 308761 bytes
+ .../normal/mission-question-receipt-1280-light.png |  Bin 0 -> 280675 bytes
+ .../normal/mission-waiting-user-1280-dark.png      |  Bin 0 -> 315611 bytes
+ .../normal/mission-waiting-user-1280-light.png     |  Bin 0 -> 312586 bytes
+ .../normal/mission-waiting-user-390-dark.png       |  Bin 0 -> 253548 bytes
+ .../normal/mission-waiting-user-390-light.png      |  Bin 0 -> 252890 bytes
+ .../normal/results-receipts-1280-dark.png          |  Bin 0 -> 396181 bytes
+ .../normal/results-receipts-1280-light.png         |  Bin 0 -> 396513 bytes
+ .../normal/results-receipts-390-dark.png           |  Bin 0 -> 332759 bytes
+ .../normal/results-receipts-390-light.png          |  Bin 0 -> 332074 bytes
+ scripts/final-c/capture-web-evidence.mjs           | 1942 ++++++++++++
+ scripts/final-c/fixturePaths.ts                    |  117 +
+ scripts/final-c/inspect-fixture.ts                 |  451 +++
+ scripts/final-c/seed-web-fixture.ts                | 1484 ++++++++++
+ tests/finalCBasisEvidence.test.ts                  |  405 +++
+ tests/finalCIntakeNextStep.test.ts                 |  238 ++
+ tests/finalCReadbackRecovery.test.ts               |  112 +
+ tests/finalCResultsReceipts.test.ts                |  460 +++
+ tests/finalCWorkPacket.test.ts                     |  735 +++++
+ 117 files changed, 40595 insertions(+), 160 deletions(-)
+ create mode 100644 components/MissionBasisEvidence.module.css
+ create mode 100644 components/MissionBasisEvidence.tsx
+ create mode 100644 components/MissionResultReceipts.tsx
+ create mode 100644 components/MissionWorkPacket.module.css
+ create mode 100644 components/MissionWorkPacket.tsx
+ create mode 100644 evidence/final-c/20261103/TRACK_C_FINAL_RECEIPT.md
+ create mode 100644 evidence/final-c/20261103/fixture-identity.json
+ create mode 100644 evidence/final-c/20261103/fixture-readback-audit.json
+ create mode 100644 evidence/final-c/20261103/logs/browser-probe.log
+ create mode 100644 evidence/final-c/20261103/logs/capture-normal-trial.log
+ create mode 100644 evidence/final-c/20261103/logs/capture-web-final.log
+ create mode 100644 evidence/final-c/20261103/logs/capture-web-iteration2.log
+ create mode 100644 evidence/final-c/20261103/logs/capture-web-iteration3-crash.log
+ create mode 100644 evidence/final-c/20261103/logs/capture-web.log
+ create mode 100644 evidence/final-c/20261103/logs/dev-server.err.log
+ create mode 100644 evidence/final-c/20261103/logs/dev-server.log
+ create mode 100644 evidence/final-c/20261103/logs/ev2-candidate-sha.txt
+ create mode 100644 evidence/final-c/20261103/logs/ev2-candidate-status.txt
+ create mode 100644 evidence/final-c/20261103/logs/ev2-dev-server.err.log
+ create mode 100644 evidence/final-c/20261103/logs/ev2-dev-server.log
+ create mode 100644 evidence/final-c/20261103/logs/ev2-inspect.log
+ create mode 100644 evidence/final-c/20261103/logs/ev2-seed.log
+ create mode 100644 evidence/final-c/20261103/logs/final-attempt1-manifest.json
+ create mode 100644 evidence/final-c/20261103/logs/final-attempt1-notes.md
+ create mode 100644 evidence/final-c/20261103/logs/final-attempt1.log
+ create mode 100644 evidence/final-c/20261103/logs/final-attempt2-manifest.json
+ create mode 100644 evidence/final-c/20261103/logs/final-attempt2.log
+ create mode 100644 evidence/final-c/20261103/logs/final-attempt3-manifest.json
+ create mode 100644 evidence/final-c/20261103/logs/final-attempt3-notes.md
+ create mode 100644 evidence/final-c/20261103/logs/final-attempt3.log
+ create mode 100644 evidence/final-c/20261103/logs/final-candidate-sha.txt
+ create mode 100644 evidence/final-c/20261103/logs/final-candidate-status.txt
+ create mode 100644 evidence/final-c/20261103/logs/final-dev-server.err.log
+ create mode 100644 evidence/final-c/20261103/logs/final-dev-server.log
+ create mode 100644 evidence/final-c/20261103/logs/final-inspect.log
+ create mode 100644 evidence/final-c/20261103/logs/final-seed.log
+ create mode 100644 evidence/final-c/20261103/logs/inspect-fixture.log
+ create mode 100644 evidence/final-c/20261103/logs/iteration-2-manifest.json
+ create mode 100644 evidence/final-c/20261103/logs/iteration-2-notes.md
+ create mode 100644 evidence/final-c/20261103/logs/next-build.log
+ create mode 100644 evidence/final-c/20261103/logs/patch-final-manifest.mjs
+ create mode 100644 evidence/final-c/20261103/logs/requests-001-focus.json
+ create mode 100644 evidence/final-c/20261103/logs/requests-002-waiting-user-detail.json
+ create mode 100644 evidence/final-c/20261103/logs/requests-003-basis-evidence.json
+ create mode 100644 evidence/final-c/20261103/logs/requests-004-results-receipts.json
+ create mode 100644 evidence/final-c/20261103/logs/requests-005-keyboard-motion.json
+ create mode 100644 evidence/final-c/20261103/logs/requests-006-legacy-missing-workpacket.json
+ create mode 100644 evidence/final-c/20261103/logs/requests-007-version-advanced.json
+ create mode 100644 evidence/final-c/20261103/logs/requests-008-409-authority-changed.json
+ create mode 100644 evidence/final-c/20261103/logs/requests-009-http-401.json
+ create mode 100644 evidence/final-c/20261103/logs/requests-010-http-403.json
+ create mode 100644 evidence/final-c/20261103/logs/requests-011-http-404.json
+ create mode 100644 evidence/final-c/20261103/logs/requests-012-stopped.json
+ create mode 100644 evidence/final-c/20261103/logs/requests-013-cancelled.json
+ create mode 100644 evidence/final-c/20261103/logs/requests-014-terminal-unknown.json
+ create mode 100644 evidence/final-c/20261103/logs/requests-015-failed.json
+ create mode 100644 evidence/final-c/20261103/logs/requests-016-old-question.json
+ create mode 100644 evidence/final-c/20261103/logs/requests-017-old-approval.json
+ create mode 100644 evidence/final-c/20261103/logs/requests-018-long-copy.json
+ create mode 100644 evidence/final-c/20261103/logs/seed.log
+ create mode 100644 evidence/final-c/20261103/logs/separate-iteration-screenshots.mjs
+ create mode 100644 evidence/final-c/20261103/logs/tsc-all.log
+ create mode 100644 evidence/final-c/20261103/logs/web-smoke-ev1.json
+ create mode 100644 evidence/final-c/20261103/manifest.json
+ create mode 100644 evidence/final-c/20261103/notes.md
+ create mode 100644 evidence/final-c/20261103/screenshots/abnormal/409-authority-changed-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/abnormal/cancelled-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/abnormal/failed-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/abnormal/http-401-cache-cleared-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/abnormal/http-403-cache-cleared-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/abnormal/http-404-cache-cleared-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/abnormal/legacy-missing-workpacket-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/abnormal/long-copy-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/abnormal/long-copy-390-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/abnormal/old-approval-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/abnormal/old-question-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/abnormal/stopped-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/abnormal/terminal-unknown-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/abnormal/terminal-unknown-390-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/abnormal/version-advanced-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/abnormal/version-advanced-390-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/history/normal-results-1280-dark.png
+ create mode 100644 evidence/final-c/20261103/screenshots/history/normal-results-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/history/normal-results-390-dark.png
+ create mode 100644 evidence/final-c/20261103/screenshots/history/normal-results-390-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/basis-expanded-1280-dark.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/basis-expanded-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/basis-expanded-390-dark.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/basis-expanded-390-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/basis-suppressed-item-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/focus-1280-dark.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/focus-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/focus-390-dark.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/focus-390-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/keyboard-motion-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/mission-question-navigation-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/mission-question-receipt-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/mission-waiting-user-1280-dark.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/mission-waiting-user-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/mission-waiting-user-390-dark.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/mission-waiting-user-390-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/results-receipts-1280-dark.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/results-receipts-1280-light.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/results-receipts-390-dark.png
+ create mode 100644 evidence/final-c/20261103/screenshots/normal/results-receipts-390-light.png
+ create mode 100644 scripts/final-c/capture-web-evidence.mjs
+ create mode 100644 scripts/final-c/fixturePaths.ts
+ create mode 100644 scripts/final-c/inspect-fixture.ts
+ create mode 100644 scripts/final-c/seed-web-fixture.ts
+ create mode 100644 tests/finalCBasisEvidence.test.ts
+ create mode 100644 tests/finalCIntakeNextStep.test.ts
+ create mode 100644 tests/finalCReadbackRecovery.test.ts
+ create mode 100644 tests/finalCResultsReceipts.test.ts
+ create mode 100644 tests/finalCWorkPacket.test.ts

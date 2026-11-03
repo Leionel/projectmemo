@@ -1,0 +1,962 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/registration.test.ts tests/accountMail.test.ts tests/missionReadbackPanel.test.ts tests/finalCResultsReceipts.test.ts
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-final-integration
+
+stderr | tests/finalCResultsReceipts.test.ts > C3 与旧读回、工作包与行动板的接线 > 新后端依据区已覆盖资料时不重复渲染旧资料块，证据核对指向依据区当前许可
+An error occurred in the <MissionReadback> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+
+ ❯ tests/finalCResultsReceipts.test.ts (9 tests | 1 failed) 1391ms
+     × 新后端依据区已覆盖资料时不重复渲染旧资料块，证据核对指向依据区当前许可 1006ms
+stderr | tests/registration.test.ts > Public account lifecycle > requires verified email, stores only hashes and grants no projects or cloud budget
+Unhandled API error PrismaClientKnownRequestError: 
+Invalid `tx.authRequestLimit.deleteMany()` invocation in
+D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:31
+
+  38 const key = hashToken(scope + ":" + identifier);
+  39 const now = new Date();
+  40 const result = await db.$transaction(async (tx) => {
+→ 41   await tx.authRequestLimit.deleteMany(
+The table `main.AuthRequestLimit` does not exist in the current database.
+    at vn.handleRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:8640)
+    at vn.handleAndLogRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7929)
+    at vn.request (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7636)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:6921)
+    at D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:5
+    at async Proxy._transactionWithCallback (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:4854)
+    at enforceAccountRateLimit (D:/Projects/hongmen-final-integration/lib/auth/registration.ts:40:18)
+    at accountRequestBody (D:/Projects/hongmen-final-integration/lib/auth/accountRequest.ts:25:3)
+    at Module.POST (D:/Projects/hongmen-final-integration/app/api/auth/register/route.ts:18:7) {
+  code: 'P2021',
+  meta: {
+    modelName: 'AuthRequestLimit',
+    driverAdapterError: DriverAdapterError: TableDoesNotExist
+        at BetterSQLite3Transaction.onError (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:554:11)
+        at BetterSQLite3Transaction.executeIO (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:521:12)
+        at BetterSQLite3Transaction.executeRaw (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:507:24)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70249
+        at Wr (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:27324)
+        at #d (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:76666)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70218
+        at #u (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:75883)
+        at e.interpretNode (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70129)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:69159 {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.10.1'
+}
+
+stderr | tests/registration.test.ts > Public account lifecycle > verifies once, logs in through existing cookie/session and logs out server-side
+Unhandled API error PrismaClientKnownRequestError: 
+Invalid `tx.authRequestLimit.deleteMany()` invocation in
+D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:31
+
+  38 const key = hashToken(scope + ":" + identifier);
+  39 const now = new Date();
+  40 const result = await db.$transaction(async (tx) => {
+→ 41   await tx.authRequestLimit.deleteMany(
+The table `main.AuthRequestLimit` does not exist in the current database.
+    at vn.handleRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:8640)
+    at vn.handleAndLogRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7929)
+    at vn.request (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7636)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:6921)
+    at D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:5
+    at async Proxy._transactionWithCallback (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:4854)
+    at enforceAccountRateLimit (D:/Projects/hongmen-final-integration/lib/auth/registration.ts:40:18)
+    at accountRequestBody (D:/Projects/hongmen-final-integration/lib/auth/accountRequest.ts:25:3)
+    at Module.POST (D:/Projects/hongmen-final-integration/app/api/auth/register/route.ts:18:7) {
+  code: 'P2021',
+  meta: {
+    modelName: 'AuthRequestLimit',
+    driverAdapterError: DriverAdapterError: TableDoesNotExist
+        at BetterSQLite3Transaction.onError (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:554:11)
+        at BetterSQLite3Transaction.executeIO (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:521:12)
+        at BetterSQLite3Transaction.executeRaw (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:507:24)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70249
+        at Wr (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:27324)
+        at #d (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:76666)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70218
+        at #u (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:75883)
+        at e.interpretNode (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70129)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:69159 {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.10.1'
+}
+
+stderr | tests/registration.test.ts > Public account lifecycle > enforces password confirmation, account syntax, email validation and rejects injected roles
+Unhandled API error PrismaClientKnownRequestError: 
+Invalid `tx.authRequestLimit.deleteMany()` invocation in
+D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:31
+
+  38 const key = hashToken(scope + ":" + identifier);
+  39 const now = new Date();
+  40 const result = await db.$transaction(async (tx) => {
+→ 41   await tx.authRequestLimit.deleteMany(
+The table `main.AuthRequestLimit` does not exist in the current database.
+    at vn.handleRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:8640)
+    at vn.handleAndLogRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7929)
+    at vn.request (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7636)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:6921)
+    at D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:5
+    at async Proxy._transactionWithCallback (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:4854)
+    at enforceAccountRateLimit (D:/Projects/hongmen-final-integration/lib/auth/registration.ts:40:18)
+    at accountRequestBody (D:/Projects/hongmen-final-integration/lib/auth/accountRequest.ts:25:3)
+    at Module.POST (D:/Projects/hongmen-final-integration/app/api/auth/register/route.ts:18:7) {
+  code: 'P2021',
+  meta: {
+    modelName: 'AuthRequestLimit',
+    driverAdapterError: DriverAdapterError: TableDoesNotExist
+        at BetterSQLite3Transaction.onError (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:554:11)
+        at BetterSQLite3Transaction.executeIO (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:521:12)
+        at BetterSQLite3Transaction.executeRaw (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:507:24)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70249
+        at Wr (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:27324)
+        at #d (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:76666)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70218
+        at #u (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:75883)
+        at e.interpretNode (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70129)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:69159 {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.10.1'
+}
+
+stderr | tests/registration.test.ts > Public account lifecycle > handles duplicate account races and email reuse without extra sessions or memberships
+Unhandled API error PrismaClientKnownRequestError: 
+Invalid `tx.authRequestLimit.deleteMany()` invocation in
+D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:31
+
+  38 const key = hashToken(scope + ":" + identifier);
+  39 const now = new Date();
+  40 const result = await db.$transaction(async (tx) => {
+→ 41   await tx.authRequestLimit.deleteMany(
+The table `main.AuthRequestLimit` does not exist in the current database.
+    at vn.handleRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:8640)
+    at vn.handleAndLogRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7929)
+    at vn.request (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7636)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:6921)
+    at D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:5
+    at async Proxy._transactionWithCallback (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:4854)
+    at enforceAccountRateLimit (D:/Projects/hongmen-final-integration/lib/auth/registration.ts:40:18)
+    at accountRequestBody (D:/Projects/hongmen-final-integration/lib/auth/accountRequest.ts:25:3)
+    at Module.POST (D:/Projects/hongmen-final-integration/app/api/auth/register/route.ts:18:7) {
+  code: 'P2021',
+  meta: {
+    modelName: 'AuthRequestLimit',
+    driverAdapterError: DriverAdapterError: TableDoesNotExist
+        at BetterSQLite3Transaction.onError (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:554:11)
+        at BetterSQLite3Transaction.executeIO (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:521:12)
+        at BetterSQLite3Transaction.executeRaw (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:507:24)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70249
+        at Wr (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:27324)
+        at #d (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:76666)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70218
+        at #u (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:75883)
+        at e.interpretNode (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70129)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:69159 {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.10.1'
+}
+
+stderr | tests/registration.test.ts > Public account lifecycle > handles duplicate account races and email reuse without extra sessions or memberships
+Unhandled API error PrismaClientKnownRequestError: 
+Invalid `tx.authRequestLimit.deleteMany()` invocation in
+D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:31
+
+  38 const key = hashToken(scope + ":" + identifier);
+  39 const now = new Date();
+  40 const result = await db.$transaction(async (tx) => {
+→ 41   await tx.authRequestLimit.deleteMany(
+The table `main.AuthRequestLimit` does not exist in the current database.
+    at vn.handleRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:8640)
+    at vn.handleAndLogRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7929)
+    at vn.request (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7636)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:6921)
+    at D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:5
+    at async Proxy._transactionWithCallback (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:4854)
+    at enforceAccountRateLimit (D:/Projects/hongmen-final-integration/lib/auth/registration.ts:40:18)
+    at accountRequestBody (D:/Projects/hongmen-final-integration/lib/auth/accountRequest.ts:25:3)
+    at Module.POST (D:/Projects/hongmen-final-integration/app/api/auth/register/route.ts:18:7) {
+  code: 'P2021',
+  meta: {
+    modelName: 'AuthRequestLimit',
+    driverAdapterError: DriverAdapterError: TableDoesNotExist
+        at BetterSQLite3Transaction.onError (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:554:11)
+        at BetterSQLite3Transaction.executeIO (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:521:12)
+        at BetterSQLite3Transaction.executeRaw (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:507:24)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70249
+        at Wr (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:27324)
+        at #d (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:76666)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70218
+        at #u (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:75883)
+        at e.interpretNode (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70129)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:69159 {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.10.1'
+}
+
+stderr | tests/registration.test.ts > Public account lifecycle > keeps configured and default demo account names reserved
+Unhandled API error PrismaClientKnownRequestError: 
+Invalid `tx.authRequestLimit.deleteMany()` invocation in
+D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:31
+
+  38 const key = hashToken(scope + ":" + identifier);
+  39 const now = new Date();
+  40 const result = await db.$transaction(async (tx) => {
+→ 41   await tx.authRequestLimit.deleteMany(
+The table `main.AuthRequestLimit` does not exist in the current database.
+    at vn.handleRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:8640)
+    at vn.handleAndLogRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7929)
+    at vn.request (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7636)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:6921)
+    at D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:5
+    at async Proxy._transactionWithCallback (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:4854)
+    at enforceAccountRateLimit (D:/Projects/hongmen-final-integration/lib/auth/registration.ts:40:18)
+    at accountRequestBody (D:/Projects/hongmen-final-integration/lib/auth/accountRequest.ts:25:3)
+    at Module.POST (D:/Projects/hongmen-final-integration/app/api/auth/register/route.ts:18:7) {
+  code: 'P2021',
+  meta: {
+    modelName: 'AuthRequestLimit',
+    driverAdapterError: DriverAdapterError: TableDoesNotExist
+        at BetterSQLite3Transaction.onError (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:554:11)
+        at BetterSQLite3Transaction.executeIO (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:521:12)
+        at BetterSQLite3Transaction.executeRaw (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:507:24)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70249
+        at Wr (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:27324)
+        at #d (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:76666)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70218
+        at #u (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:75883)
+        at e.interpretNode (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70129)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:69159 {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.10.1'
+}
+
+stderr | tests/registration.test.ts > Public account lifecycle > expires verification links and invalidates the previous link when resending
+Unhandled API error PrismaClientKnownRequestError: 
+Invalid `tx.authRequestLimit.deleteMany()` invocation in
+D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:31
+
+  38 const key = hashToken(scope + ":" + identifier);
+  39 const now = new Date();
+  40 const result = await db.$transaction(async (tx) => {
+→ 41   await tx.authRequestLimit.deleteMany(
+The table `main.AuthRequestLimit` does not exist in the current database.
+    at vn.handleRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:8640)
+    at vn.handleAndLogRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7929)
+    at vn.request (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7636)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:6921)
+    at D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:5
+    at async Proxy._transactionWithCallback (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:4854)
+    at enforceAccountRateLimit (D:/Projects/hongmen-final-integration/lib/auth/registration.ts:40:18)
+    at accountRequestBody (D:/Projects/hongmen-final-integration/lib/auth/accountRequest.ts:25:3)
+    at Module.POST (D:/Projects/hongmen-final-integration/app/api/auth/register/route.ts:18:7) {
+  code: 'P2021',
+  meta: {
+    modelName: 'AuthRequestLimit',
+    driverAdapterError: DriverAdapterError: TableDoesNotExist
+        at BetterSQLite3Transaction.onError (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:554:11)
+        at BetterSQLite3Transaction.executeIO (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:521:12)
+        at BetterSQLite3Transaction.executeRaw (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:507:24)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70249
+        at Wr (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:27324)
+        at #d (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:76666)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70218
+        at #u (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:75883)
+        at e.interpretNode (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70129)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:69159 {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.10.1'
+}
+
+stderr | tests/registration.test.ts > Public account lifecycle > resets password with a single-use purpose-bound token and revokes every old session
+Unhandled API error PrismaClientKnownRequestError: 
+Invalid `tx.authRequestLimit.deleteMany()` invocation in
+D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:31
+
+  38 const key = hashToken(scope + ":" + identifier);
+  39 const now = new Date();
+  40 const result = await db.$transaction(async (tx) => {
+→ 41   await tx.authRequestLimit.deleteMany(
+The table `main.AuthRequestLimit` does not exist in the current database.
+    at vn.handleRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:8640)
+    at vn.handleAndLogRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7929)
+    at vn.request (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7636)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:6921)
+    at D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:5
+    at async Proxy._transactionWithCallback (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:4854)
+    at enforceAccountRateLimit (D:/Projects/hongmen-final-integration/lib/auth/registration.ts:40:18)
+    at accountRequestBody (D:/Projects/hongmen-final-integration/lib/auth/accountRequest.ts:25:3)
+    at Module.POST (D:/Projects/hongmen-final-integration/app/api/auth/register/route.ts:18:7) {
+  code: 'P2021',
+  meta: {
+    modelName: 'AuthRequestLimit',
+    driverAdapterError: DriverAdapterError: TableDoesNotExist
+        at BetterSQLite3Transaction.onError (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:554:11)
+        at BetterSQLite3Transaction.executeIO (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:521:12)
+        at BetterSQLite3Transaction.executeRaw (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:507:24)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70249
+        at Wr (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:27324)
+        at #d (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:76666)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70218
+        at #u (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:75883)
+        at e.interpretNode (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70129)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:69159 {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.10.1'
+}
+
+stderr | tests/registration.test.ts > Public account lifecycle > does not disclose whether a recovery email exists and does not send to unknown addresses
+Unhandled API error PrismaClientKnownRequestError: 
+Invalid `tx.authRequestLimit.deleteMany()` invocation in
+D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:31
+
+  38 const key = hashToken(scope + ":" + identifier);
+  39 const now = new Date();
+  40 const result = await db.$transaction(async (tx) => {
+→ 41   await tx.authRequestLimit.deleteMany(
+The table `main.AuthRequestLimit` does not exist in the current database.
+    at vn.handleRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:8640)
+    at vn.handleAndLogRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7929)
+    at vn.request (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7636)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:6921)
+    at D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:5
+    at async Proxy._transactionWithCallback (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:4854)
+    at enforceAccountRateLimit (D:/Projects/hongmen-final-integration/lib/auth/registration.ts:40:18)
+    at accountRequestBody (D:/Projects/hongmen-final-integration/lib/auth/accountRequest.ts:25:3)
+    at Module.POST (D:/Projects/hongmen-final-integration/app/api/auth/register/route.ts:18:7) {
+  code: 'P2021',
+  meta: {
+    modelName: 'AuthRequestLimit',
+    driverAdapterError: DriverAdapterError: TableDoesNotExist
+        at BetterSQLite3Transaction.onError (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:554:11)
+        at BetterSQLite3Transaction.executeIO (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:521:12)
+        at BetterSQLite3Transaction.executeRaw (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:507:24)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70249
+        at Wr (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:27324)
+        at #d (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:76666)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70218
+        at #u (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:75883)
+        at e.interpretNode (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70129)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:69159 {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.10.1'
+}
+
+stderr | tests/registration.test.ts > Public account lifecycle > reports delivery failure and leaves a retryable account with no usable verification token or session
+Unhandled API error PrismaClientKnownRequestError: 
+Invalid `tx.authRequestLimit.deleteMany()` invocation in
+D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:31
+
+  38 const key = hashToken(scope + ":" + identifier);
+  39 const now = new Date();
+  40 const result = await db.$transaction(async (tx) => {
+→ 41   await tx.authRequestLimit.deleteMany(
+The table `main.AuthRequestLimit` does not exist in the current database.
+    at vn.handleRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:8640)
+    at vn.handleAndLogRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7929)
+    at vn.request (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7636)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:6921)
+    at D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:5
+    at async Proxy._transactionWithCallback (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:4854)
+    at enforceAccountRateLimit (D:/Projects/hongmen-final-integration/lib/auth/registration.ts:40:18)
+    at accountRequestBody (D:/Projects/hongmen-final-integration/lib/auth/accountRequest.ts:25:3)
+    at Module.POST (D:/Projects/hongmen-final-integration/app/api/auth/register/route.ts:18:7) {
+  code: 'P2021',
+  meta: {
+    modelName: 'AuthRequestLimit',
+    driverAdapterError: DriverAdapterError: TableDoesNotExist
+        at BetterSQLite3Transaction.onError (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:554:11)
+        at BetterSQLite3Transaction.executeIO (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:521:12)
+        at BetterSQLite3Transaction.executeRaw (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:507:24)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70249
+        at Wr (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:27324)
+        at #d (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:76666)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70218
+        at #u (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:75883)
+        at e.interpretNode (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70129)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:69159 {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.10.1'
+}
+
+stderr | tests/registration.test.ts > Public account lifecycle > limits rotating usernames by source, including malformed requests, and sets Retry-After
+Unhandled API error PrismaClientKnownRequestError: 
+Invalid `tx.authRequestLimit.deleteMany()` invocation in
+D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:31
+
+  38 const key = hashToken(scope + ":" + identifier);
+  39 const now = new Date();
+  40 const result = await db.$transaction(async (tx) => {
+→ 41   await tx.authRequestLimit.deleteMany(
+The table `main.AuthRequestLimit` does not exist in the current database.
+    at vn.handleRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:8640)
+    at vn.handleAndLogRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7929)
+    at vn.request (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7636)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:6921)
+    at D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:5
+    at async Proxy._transactionWithCallback (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:4854)
+    at enforceAccountRateLimit (D:/Projects/hongmen-final-integration/lib/auth/registration.ts:40:18)
+    at accountRequestBody (D:/Projects/hongmen-final-integration/lib/auth/accountRequest.ts:25:3)
+    at Module.POST (D:/Projects/hongmen-final-integration/app/api/auth/register/route.ts:18:7) {
+  code: 'P2021',
+  meta: {
+    modelName: 'AuthRequestLimit',
+    driverAdapterError: DriverAdapterError: TableDoesNotExist
+        at BetterSQLite3Transaction.onError (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:554:11)
+        at BetterSQLite3Transaction.executeIO (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:521:12)
+        at BetterSQLite3Transaction.executeRaw (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:507:24)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70249
+        at Wr (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:27324)
+        at #d (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:76666)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70218
+        at #u (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:75883)
+        at e.interpretNode (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70129)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:69159 {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.10.1'
+}
+
+stderr | tests/registration.test.ts > Public account lifecycle > rejects cross-origin and oversized bodies before creating users
+Unhandled API error PrismaClientKnownRequestError: 
+Invalid `tx.authRequestLimit.deleteMany()` invocation in
+D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:31
+
+  38 const key = hashToken(scope + ":" + identifier);
+  39 const now = new Date();
+  40 const result = await db.$transaction(async (tx) => {
+→ 41   await tx.authRequestLimit.deleteMany(
+The table `main.AuthRequestLimit` does not exist in the current database.
+    at vn.handleRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:8640)
+    at vn.handleAndLogRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7929)
+    at vn.request (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7636)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:6921)
+    at D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:5
+    at async Proxy._transactionWithCallback (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:4854)
+    at enforceAccountRateLimit (D:/Projects/hongmen-final-integration/lib/auth/registration.ts:40:18)
+    at accountRequestBody (D:/Projects/hongmen-final-integration/lib/auth/accountRequest.ts:25:3)
+    at Module.POST (D:/Projects/hongmen-final-integration/app/api/auth/register/route.ts:18:7) {
+  code: 'P2021',
+  meta: {
+    modelName: 'AuthRequestLimit',
+    driverAdapterError: DriverAdapterError: TableDoesNotExist
+        at BetterSQLite3Transaction.onError (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:554:11)
+        at BetterSQLite3Transaction.executeIO (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:521:12)
+        at BetterSQLite3Transaction.executeRaw (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:507:24)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70249
+        at Wr (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:27324)
+        at #d (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:76666)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70218
+        at #u (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:75883)
+        at e.interpretNode (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70129)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:69159 {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.10.1'
+}
+
+stderr | tests/registration.test.ts > Public account lifecycle > prevents cross-user project, memory, action, mission and artifact reads and writes
+Unhandled API error PrismaClientKnownRequestError: 
+Invalid `tx.authRequestLimit.deleteMany()` invocation in
+D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:31
+
+  38 const key = hashToken(scope + ":" + identifier);
+  39 const now = new Date();
+  40 const result = await db.$transaction(async (tx) => {
+→ 41   await tx.authRequestLimit.deleteMany(
+The table `main.AuthRequestLimit` does not exist in the current database.
+    at vn.handleRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:8640)
+    at vn.handleAndLogRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7929)
+    at vn.request (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7636)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:6921)
+    at D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:5
+    at async Proxy._transactionWithCallback (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:4854)
+    at enforceAccountRateLimit (D:/Projects/hongmen-final-integration/lib/auth/registration.ts:40:18)
+    at accountRequestBody (D:/Projects/hongmen-final-integration/lib/auth/accountRequest.ts:25:3)
+    at Module.POST (D:/Projects/hongmen-final-integration/app/api/auth/register/route.ts:18:7) {
+  code: 'P2021',
+  meta: {
+    modelName: 'AuthRequestLimit',
+    driverAdapterError: DriverAdapterError: TableDoesNotExist
+        at BetterSQLite3Transaction.onError (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:554:11)
+        at BetterSQLite3Transaction.executeIO (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:521:12)
+        at BetterSQLite3Transaction.executeRaw (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:507:24)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70249
+        at Wr (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:27324)
+        at #d (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:76666)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70218
+        at #u (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:75883)
+        at e.interpretNode (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70129)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:69159 {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.10.1'
+}
+
+stderr | tests/registration.test.ts > Public account lifecycle > blocks all paid chat/embedding calls by default and atomically enforces a provisioned daily limit
+Unhandled API error PrismaClientKnownRequestError: 
+Invalid `tx.authRequestLimit.deleteMany()` invocation in
+D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:31
+
+  38 const key = hashToken(scope + ":" + identifier);
+  39 const now = new Date();
+  40 const result = await db.$transaction(async (tx) => {
+→ 41   await tx.authRequestLimit.deleteMany(
+The table `main.AuthRequestLimit` does not exist in the current database.
+    at vn.handleRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:8640)
+    at vn.handleAndLogRequestError (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7929)
+    at vn.request (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:65:7636)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:6921)
+    at D:/Projects/hongmen-final-integration/lib/auth/registration.ts:41:5
+    at async Proxy._transactionWithCallback (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:99:4854)
+    at enforceAccountRateLimit (D:/Projects/hongmen-final-integration/lib/auth/registration.ts:40:18)
+    at accountRequestBody (D:/Projects/hongmen-final-integration/lib/auth/accountRequest.ts:25:3)
+    at Module.POST (D:/Projects/hongmen-final-integration/app/api/auth/register/route.ts:18:7) {
+  code: 'P2021',
+  meta: {
+    modelName: 'AuthRequestLimit',
+    driverAdapterError: DriverAdapterError: TableDoesNotExist
+        at BetterSQLite3Transaction.onError (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:554:11)
+        at BetterSQLite3Transaction.executeIO (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:521:12)
+        at BetterSQLite3Transaction.executeRaw (file:///D:/Projects/hongmen-final-integration/node_modules/@prisma/adapter-better-sqlite3/dist/index.mjs:507:24)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70249
+        at Wr (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:27324)
+        at #d (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:76666)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70218
+        at #u (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:75883)
+        at e.interpretNode (D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:70129)
+        at D:\Projects\hongmen-final-integration\node_modules\@prisma\client\runtime\client.js:11:69159 {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.10.1'
+}
+
+ ❯ tests/registration.test.ts (14 tests | 14 failed) 427ms
+     × requires verified email, stores only hashes and grants no projects or cloud budget 263ms
+     × verifies once, logs in through existing cookie/session and logs out server-side 13ms
+     × enforces password confirmation, account syntax, email validation and rejects injected roles 12ms
+     × handles duplicate account races and email reuse without extra sessions or memberships 19ms
+     × keeps configured and default demo account names reserved 13ms
+     × expires verification links and invalidates the previous link when resending 11ms
+     × resets password with a single-use purpose-bound token and revokes every old session 9ms
+     × does not disclose whether a recovery email exists and does not send to unknown addresses 14ms
+     × fails closed without SMTP in production and never creates an unverified session 23ms
+     × reports delivery failure and leaves a retryable account with no usable verification token or session 9ms
+     × limits rotating usernames by source, including malformed requests, and sets Retry-After 9ms
+     × rejects cross-origin and oversized bodies before creating users 9ms
+     × prevents cross-user project, memory, action, mission and artifact reads and writes 11ms
+     × blocks all paid chat/embedding calls by default and atomically enforces a provisioned daily limit 10ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 15 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/finalCResultsReceipts.test.ts > C3 与旧读回、工作包与行动板的接线 > 新后端依据区已覆盖资料时不重复渲染旧资料块，证据核对指向依据区当前许可
+TestingLibraryElementError: Unable to find an element with the text: 这次资料核对. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+<body>
+  <div />
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div />
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ tests/finalCResultsReceipts.test.ts:372:35
+    370|     );
+    371|     render(createElement(MissionReadback, { missionId: "m", missionVer…
+    372|     const evidence = await screen.findByText("这次资料核对");
+       |                                   ^
+    373|     // 新后端由四问“依据是什么”逐项给当前许可，旧兼容块整体不出现。
+    374|     expect(screen.queryByText(/这份资料用在哪里/)).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/29]⎯
+
+ FAIL  tests/registration.test.ts > Public account lifecycle > requires verified email, stores only hashes and grants no projects or cloud budget
+AssertionError: expected 500 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 500
+
+ ❯ tests/registration.test.ts:121:29
+    119|       email: email.toUpperCase(),
+    120|     });
+    121|     expect(response.status).toBe(201);
+       |                             ^
+    122|     expect(await response.json()).toMatchObject({ verificationRequired…
+    123|     expect(response.headers.get("set-cookie")).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/29]⎯
+
+ FAIL  tests/registration.test.ts > Public account lifecycle > requires verified email, stores only hashes and grants no projects or cloud budget
+ FAIL  tests/registration.test.ts > Public account lifecycle > verifies once, logs in through existing cookie/session and logs out server-side
+ FAIL  tests/registration.test.ts > Public account lifecycle > enforces password confirmation, account syntax, email validation and rejects injected roles
+ FAIL  tests/registration.test.ts > Public account lifecycle > handles duplicate account races and email reuse without extra sessions or memberships
+ FAIL  tests/registration.test.ts > Public account lifecycle > keeps configured and default demo account names reserved
+ FAIL  tests/registration.test.ts > Public account lifecycle > expires verification links and invalidates the previous link when resending
+ FAIL  tests/registration.test.ts > Public account lifecycle > resets password with a single-use purpose-bound token and revokes every old session
+ FAIL  tests/registration.test.ts > Public account lifecycle > does not disclose whether a recovery email exists and does not send to unknown addresses
+ FAIL  tests/registration.test.ts > Public account lifecycle > fails closed without SMTP in production and never creates an unverified session
+ FAIL  tests/registration.test.ts > Public account lifecycle > reports delivery failure and leaves a retryable account with no usable verification token or session
+ FAIL  tests/registration.test.ts > Public account lifecycle > limits rotating usernames by source, including malformed requests, and sets Retry-After
+ FAIL  tests/registration.test.ts > Public account lifecycle > rejects cross-origin and oversized bodies before creating users
+ FAIL  tests/registration.test.ts > Public account lifecycle > prevents cross-user project, memory, action, mission and artifact reads and writes
+ FAIL  tests/registration.test.ts > Public account lifecycle > blocks all paid chat/embedding calls by default and atomically enforces a provisioned daily limit
+PrismaClientKnownRequestError: 
+Invalid `db.project.deleteMany()` invocation in
+D:/Projects/hongmen-final-integration/tests/registration.test.ts:107:20
+
+  104 afterEach(async () => {
+  105   vi.unstubAllEnvs();
+  106   vi.restoreAllMocks();
+→ 107   await db.project.deleteMany(
+The table `main.Project` does not exist in the current database.
+ ❯ vn.handleRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:238:12
+ ❯ vn.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:184:11
+ ❯ vn.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:153:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:1012:23
+ ❯ tests/registration.test.ts:107:3
+    105|   vi.unstubAllEnvs();
+    106|   vi.restoreAllMocks();
+    107|   await db.project.deleteMany({
+       |   ^
+    108|     where: {
+    109|       memberships: { some: { user: { username: { startsWith: prefix } …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/29]⎯
+
+ FAIL  tests/registration.test.ts > Public account lifecycle > verifies once, logs in through existing cookie/session and logs out server-side
+AssertionError: expected 500 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 500
+
+ ❯ activated tests/registration.test.ts:80:35
+     78| }
+     79| async function activated() {
+     80|   expect((await signup()).status).toBe(201);
+       |                                   ^
+     81|   expect(
+     82|     (await verify(req("/api/auth/verify-email", { token: mailToken() }…
+ ❯ tests/registration.test.ts:154:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/29]⎯
+
+ FAIL  tests/registration.test.ts > Public account lifecycle > enforces password confirmation, account syntax, email validation and rejects injected roles
+AssertionError: expected 500 to be 422 // Object.is equality
+
+- Expected
++ Received
+
+- 422
++ 500
+
+ ❯ tests/registration.test.ts:198:44
+    196|       { role: "OWNER" },
+    197|     ])
+    198|       expect((await signup(value)).status).toBe(422);
+       |                                            ^
+    199|     expect(await db.user.count({ where: { username: name } })).toBe(0);
+    200|     expect(mockMail).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/29]⎯
+
+ FAIL  tests/registration.test.ts > Public account lifecycle > handles duplicate account races and email reuse without extra sessions or memberships
+AssertionError: expected [ 500, 500 ] to deeply equal [ 201, 409 ]
+
+- Expected
++ Received
+
+  [
+-   201,
+-   409,
++   500,
++   500,
+  ]
+
+ ❯ tests/registration.test.ts:204:49
+    202|   it("handles duplicate account races and email reuse without extra se…
+    203|     const results = await Promise.all([signup(), signup()]);
+    204|     expect(results.map((r) => r.status).sort()).toEqual([201, 409]);
+       |                                                 ^
+    205|     expect(mockMail).toHaveBeenCalledTimes(1);
+    206|     expect((await signup({ username: name + "x" })).status).toBe(409);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/29]⎯
+
+ FAIL  tests/registration.test.ts > Public account lifecycle > keeps configured and default demo account names reserved
+AssertionError: expected 500 to be 409 // Object.is equality
+
+- Expected
++ Received
+
+- 409
++ 500
+
+ ❯ tests/registration.test.ts:213:65
+    211|   it("keeps configured and default demo account names reserved", async…
+    212|     vi.stubEnv("DEMO_USERNAME", "special-demo");
+    213|     expect((await signup({ username: "contest-demo" })).status).toBe(4…
+       |                                                                 ^
+    214|     expect((await signup({ username: "special-demo" })).status).toBe(4…
+    215|     expect(mockMail).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/29]⎯
+
+ FAIL  tests/registration.test.ts > Public account lifecycle > expires verification links and invalidates the previous link when resending
+TypeError: Cannot read properties of undefined (reading 'text')
+ ❯ mailToken tests/registration.test.ts:76:13
+     74|   const message = mockMail.mock.calls.at(index)?.[0] as AccountMail;
+     75|   return new URL(
+     76|     message.text.match(/http[^\s]+\?token=[a-f0-9]{64}/)![0],
+       |             ^
+     77|   ).searchParams.get("token")!;
+     78| }
+ ❯ tests/registration.test.ts:219:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/29]⎯
+
+ FAIL  tests/registration.test.ts > Public account lifecycle > resets password with a single-use purpose-bound token and revokes every old session
+AssertionError: expected 500 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 500
+
+ ❯ activated tests/registration.test.ts:80:35
+     78| }
+     79| async function activated() {
+     80|   expect((await signup()).status).toBe(201);
+       |                                   ^
+     81|   expect(
+     82|     (await verify(req("/api/auth/verify-email", { token: mailToken() }…
+ ❯ tests/registration.test.ts:237:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/29]⎯
+
+ FAIL  tests/registration.test.ts > Public account lifecycle > does not disclose whether a recovery email exists and does not send to unknown addresses
+AssertionError: expected 500 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 500
+
+ ❯ activated tests/registration.test.ts:80:35
+     78| }
+     79| async function activated() {
+     80|   expect((await signup()).status).toBe(201);
+       |                                   ^
+     81|   expect(
+     82|     (await verify(req("/api/auth/verify-email", { token: mailToken() }…
+ ❯ tests/registration.test.ts:277:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/29]⎯
+
+ FAIL  tests/registration.test.ts > Public account lifecycle > fails closed without SMTP in production and never creates an unverified session
+PrismaClientKnownRequestError: 
+Invalid `prisma.user.count()` invocation:
+
+
+The table `main.User` does not exist in the current database.
+ ❯ vn.handleRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:238:12
+ ❯ vn.handleAndLogRequestError node_modules/@prisma/client/src/runtime/RequestHandler.ts:184:11
+ ❯ vn.request node_modules/@prisma/client/src/runtime/RequestHandler.ts:153:11
+ ❯ a node_modules/@prisma/client/src/runtime/getPrismaClient.ts:1012:23
+ ❯ tests/registration.test.ts:293:12
+    291|       (await forgot(req("/api/auth/forgot-password", { email }))).stat…
+    292|     ).toBe(503);
+    293|     expect(await db.user.count({ where: { username: name } })).toBe(0);
+       |            ^
+    294|     expect(mockMail).not.toHaveBeenCalled();
+    295|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/29]⎯
+
+ FAIL  tests/registration.test.ts > Public account lifecycle > reports delivery failure and leaves a retryable account with no usable verification token or session
+AssertionError: expected 500 to be 503 // Object.is equality
+
+- Expected
++ Received
+
+- 503
++ 500
+
+ ❯ tests/registration.test.ts:300:37
+    298|       new AppError("ACCOUNT_MAIL_FAILED", "验证邮件暂时无法发出", 503),
+    299|     );
+    300|     expect((await signup()).status).toBe(503);
+       |                                     ^
+    301|     const user = await db.user.findUniqueOrThrow({
+    302|       where: { username: name },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/29]⎯
+
+ FAIL  tests/registration.test.ts > Public account lifecycle > limits rotating usernames by source, including malformed requests, and sets Retry-After
+AssertionError: expected 500 to be 422 // Object.is equality
+
+- Expected
++ Received
+
+- 422
++ 500
+
+ ❯ tests/registration.test.ts:317:72
+    315|   it("limits rotating usernames by source, including malformed request…
+    316|     for (let i = 0; i < 5; i++)
+    317|       expect((await signup({ username: "invalid/name-" + i })).status)…
+       |                                                                        ^
+    318|         422,
+    319|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/29]⎯
+
+ FAIL  tests/registration.test.ts > Public account lifecycle > rejects cross-origin and oversized bodies before creating users
+AssertionError: expected 500 to be 413 // Object.is equality
+
+- Expected
++ Received
+
+- 413
++ 500
+
+ ❯ tests/registration.test.ts:335:7
+    333|       (await register(req("/api/auth/register", { blob: "x".repeat(500…
+    334|         .status,
+    335|     ).toBe(413);
+       |       ^
+    336|     expect(mockMail).not.toHaveBeenCalled();
+    337|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/29]⎯
+
+ FAIL  tests/registration.test.ts > Public account lifecycle > prevents cross-user project, memory, action, mission and artifact reads and writes
+AssertionError: expected 500 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 500
+
+ ❯ activated tests/registration.test.ts:80:35
+     78| }
+     79| async function activated() {
+     80|   expect((await signup()).status).toBe(201);
+       |                                   ^
+     81|   expect(
+     82|     (await verify(req("/api/auth/verify-email", { token: mailToken() }…
+ ❯ tests/registration.test.ts:339:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/29]⎯
+
+ FAIL  tests/registration.test.ts > Public account lifecycle > blocks all paid chat/embedding calls by default and atomically enforces a provisioned daily limit
+AssertionError: expected 500 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 500
+
+ ❯ activated tests/registration.test.ts:80:35
+     78| }
+     79| async function activated() {
+     80|   expect((await signup()).status).toBe(201);
+       |                                   ^
+     81|   expect(
+     82|     (await verify(req("/api/auth/verify-email", { token: mailToken() }…
+ ❯ tests/registration.test.ts:421:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/29]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯ Uncaught Exception ⎯⎯⎯⎯⎯
+TypeError: Cannot read properties of undefined (reading 'nextBoundary')
+ ❯ MissionReadback components/MissionReadback.tsx:94:41
+     92|     };
+     93|   }, []);
+     94|   const boundaries = [data?.workPacket?.next.nextBoundary,
+       |                                         ^
+     95|     data?.workPacket?.authority.nextBoundary, data?.workPacket?.author…
+     96|     data?.workPacket?.authority.permissionExpiresAt,
+ ❯ Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:20
+ ❯ renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:22
+ ❯ updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:19
+ ❯ beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:18
+ ❯ runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:874:13
+ ❯ performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:17641:22
+ ❯ workLoopSync node_modules/react-dom/cjs/react-dom-client.development.js:17469:41
+ ❯ renderRootSync node_modules/react-dom/cjs/react-dom-client.development.js:17450:11
+ ❯ performWorkOnRoot node_modules/react-dom/cjs/react-dom-client.development.js:16583:35
+
+This error originated in "tests/finalCResultsReceipts.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "新后端依据区已覆盖资料时不重复渲染旧资料块，证据核对指向依据区当前许可". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  2 failed | 2 passed (4)
+      Tests  15 failed | 20 passed (35)
+     Errors  1 error
+   Start at  17:46:43
+   Duration  13.18s (transform 3.34s, setup 0ms, import 5.57s, tests 1.91s, environment 2.67s)
+

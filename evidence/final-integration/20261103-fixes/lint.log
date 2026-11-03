@@ -1,0 +1,102 @@
+
+> projectmemo@0.1.0 lint
+> eslint .
+
+
+D:\Projects\hongmen-final-integration\app\api\me\memory\route.ts
+  8:10  warning  'db' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-integration\components\MissionReadback.tsx
+  36:5   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Projects\hongmen-final-integration\components\MissionReadback.tsx:36:5
+  34 |     const request = ++generation.current;
+  35 |     let cancelled = false;
+> 36 |     setLoading(true);
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  37 |     void fetch(`/api/missions/${missionId}/readback?${query}`, {
+  38 |       cache: "no-store",
+  39 |       signal: AbortSignal.timeout(10000),  react-hooks/set-state-in-effect
+  97:68  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+D:\Projects\hongmen-final-integration\components\MissionReadback.tsx:97:68
+   95 |   const boundary = boundaries.length ? Math.min(...boundaries) : null;
+   96 |   const [clock, setClock] = useState(() => Date.now());
+>  97 |   const expired = boundary !== null && boundary <= Math.max(clock, Date.now());
+      |                                                                    ^^^^^^^^^^ Cannot call impure function
+   98 |   useEffect(() => {
+   99 |     // An already-expired response stays disabled. Only a future boundary arms a refresh.
+  100 |     if (boundary === null || boundary <= Date.now()) return;                                                                                                                                                                           react-hooks/purity
+
+D:\Projects\hongmen-final-integration\components\NewProjectForm.tsx
+  44:7  warning  Do not use `window.location.assign()` to navigate to internal Next.js pages. Use `redirect()` in the render phase, or `useRouter().push()` in Client Components' event handlers instead. See: https://nextjs.org/docs/messages/no-location-assign-relative-destination  @next/next/no-location-assign-relative-destination
+
+D:\Projects\hongmen-final-integration\components\RepoSignalsCard.tsx
+  107:253  warning  Do not use `window.location.href` to navigate to internal Next.js pages. Use `redirect()` in the render phase, or `useRouter().push()` in Client Components' event handlers instead. See: https://nextjs.org/docs/messages/no-location-assign-relative-destination  @next/next/no-location-assign-relative-destination
+
+D:\Projects\hongmen-final-integration\components\UserNav.tsx
+  69:7  warning  Do not use `window.location.assign()` to navigate to internal Next.js pages. Use `redirect()` in the render phase, or `useRouter().push()` in Client Components' event handlers instead. See: https://nextjs.org/docs/messages/no-location-assign-relative-destination  @next/next/no-location-assign-relative-destination
+
+D:\Projects\hongmen-final-integration\lib\memory\personalMemoryService.ts
+  6:48  warning  'buildPersonalMemoryReadSet' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-integration\lib\types\workPacket.ts
+  16:48  warning  'WorkStateTerminal' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-integration\scripts\final-a\generate-samples.ts
+  59:6  warning  'PrismaLike' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-integration\scripts\final-a\perf-readback.ts
+   935:69  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   948:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1017:82  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\Projects\hongmen-final-integration\scripts\final-a\probe-fs-a.ts
+  514:9  warning  'step' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-integration\scripts\final-a\probe-fs-a07-concurrency.ts
+  24:3  warning  'writeEvidence' is defined but never used                @typescript-eslint/no-unused-vars
+  50:5  error    'writerErrors' is never reassigned. Use 'const' instead  prefer-const
+
+D:\Projects\hongmen-final-integration\scripts\final-c\capture-web-evidence.mjs
+   144:10  warning  'notRun' is defined but never used                       @typescript-eslint/no-unused-vars
+   688:15  warning  'readback' is assigned a value but never used            @typescript-eslint/no-unused-vars
+   734:13  warning  'questionNavigation' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   965:15  warning  'readback' is assigned a value but never used            @typescript-eslint/no-unused-vars
+  1419:13  warning  'readback' is assigned a value but never used            @typescript-eslint/no-unused-vars
+  1528:15  warning  'readback' is assigned a value but never used            @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-integration\tests\finalARequiresGuards.test.ts
+  30:10  warning  'readMissionBack' is defined but never used  @typescript-eslint/no-unused-vars
+  32:10  warning  'event' is defined but never used            @typescript-eslint/no-unused-vars
+  41:18  warning  'postReplan' is defined but never used       @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-integration\tests\finalAWorkPacketContract.test.ts
+  536:21  warning  'at' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-integration\tests\finalAWorkPacketService.test.ts
+  244:25  warning  '_packet' is assigned a value but never used       @typescript-eslint/no-unused-vars
+  244:42  warning  '_readAt' is assigned a value but never used       @typescript-eslint/no-unused-vars
+  244:64  warning  '_observation' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-integration\tests\pm1PersonalMemoryScope.test.ts
+  11:51  warning  'policyInTx' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-integration\tests\pm3LongTermRecall.test.ts
+  12:10  warning  'jsonHash' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Projects\hongmen-final-integration\tests\ux2CorrectionControls.test.ts
+  31:9  warning  'second' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  46:9  warning  'view' is assigned a value but never used    @typescript-eslint/no-unused-vars
+
+✖ 32 problems (6 errors, 26 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

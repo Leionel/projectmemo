@@ -1,0 +1,487 @@
+Merge made by the 'ort' strategy.
+ app/home.module.css                                |   155 +-
+ app/page.tsx                                       |    25 +-
+ components/home/DemoVideoPlayer.tsx                |   109 +
+ .../final-sprint/20261103/b-brand-home/RECEIPT.md  |    10 +
+ .../b-brand-home/b3/video-frames/frame-10_5s.png   |   Bin 0 -> 420270 bytes
+ .../b-brand-home/b3/video-frames/frame-13_8s.png   |   Bin 0 -> 336918 bytes
+ .../b-brand-home/b3/video-frames/frame-15_5s.png   |   Bin 0 -> 228703 bytes
+ .../b-brand-home/b3/video-frames/frame-19_5s.png   |   Bin 0 -> 321455 bytes
+ .../b-brand-home/b3/video-frames/frame-1_5s.png    |   Bin 0 -> 8442 bytes
+ .../b-brand-home/b3/video-frames/frame-5_5s.png    |   Bin 0 -> 340583 bytes
+ .../20261103/b-brand-home/round2/EMBED_DECISION.md |    42 +
+ .../round2/HUMAN_UNDERSTANDING_PROTOCOL.md         |    67 +
+ .../b-brand-home/round2/LEAD_VERIFICATION.md       |    66 +
+ .../20261103/b-brand-home/round2/RECEIPT_ROUND2.md |    66 +
+ .../b-brand-home/round2/a11y/A11Y_ROUND2.md        |   182 +
+ .../b-brand-home/round2/a11y/MANIFEST.sha256       |    63 +
+ .../round2/a11y/json/accounts-round2.json          |   431 +
+ .../round2/a11y/json/breakpoints-round2.json       |   435 +
+ .../round2/a11y/json/divergence-4b69614.json       |    73 +
+ .../round2/a11y/json/probe-round2.json             |  1870 +
+ .../round2/a11y/json/video-round2-provisional.json |   189 +
+ .../round2/a11y/json/video-round2.json             |   400 +
+ .../round2/a11y/scripts/check-collapse-network.mjs |    20 +
+ .../round2/a11y/scripts/check-video-contrast.mjs   |    47 +
+ .../round2/a11y/scripts/probe-round2-accounts.mjs  |   114 +
+ .../a11y/scripts/probe-round2-breakpoints.mjs      |   102 +
+ .../round2/a11y/scripts/probe-round2-video.mjs     |   298 +
+ .../round2/a11y/scripts/probe-round2.mjs           |   863 +
+ .../round2-account-dark-forgot-password-1440.png   |   Bin 0 -> 62853 bytes
+ .../round2-account-dark-forgot-password-390.png    |   Bin 0 -> 36687 bytes
+ .../a11y/shots/round2-account-dark-login-1440.png  |   Bin 0 -> 61150 bytes
+ .../a11y/shots/round2-account-dark-login-390.png   |   Bin 0 -> 34891 bytes
+ .../shots/round2-account-dark-register-1440.png    |   Bin 0 -> 73242 bytes
+ .../shots/round2-account-dark-register-390.png     |   Bin 0 -> 42283 bytes
+ .../round2-account-light-forgot-password-1440.png  |   Bin 0 -> 64353 bytes
+ .../round2-account-light-forgot-password-390.png   |   Bin 0 -> 37805 bytes
+ .../a11y/shots/round2-account-light-login-1440.png |   Bin 0 -> 62454 bytes
+ .../a11y/shots/round2-account-light-login-390.png  |   Bin 0 -> 36043 bytes
+ .../shots/round2-account-light-register-1440.png   |   Bin 0 -> 73817 bytes
+ .../shots/round2-account-light-register-390.png    |   Bin 0 -> 42234 bytes
+ .../round2/a11y/shots/round2-anchor-experience.png |   Bin 0 -> 88655 bytes
+ .../a11y/shots/round2-breakpoint-320x640.png       |   Bin 0 -> 41778 bytes
+ .../a11y/shots/round2-breakpoint-360x740.png       |   Bin 0 -> 55879 bytes
+ .../a11y/shots/round2-breakpoint-720x450_200__.png |   Bin 0 -> 42440 bytes
+ .../round2/a11y/shots/round2-dark-1440.png         |   Bin 0 -> 64876 bytes
+ .../round2/a11y/shots/round2-dark-390.png          |   Bin 0 -> 64876 bytes
+ .../a11y/shots/round2-dark-video-dark-1440x900.png |   Bin 0 -> 115268 bytes
+ .../a11y/shots/round2-dark-video-dark-320x640.png  |   Bin 0 -> 41548 bytes
+ .../a11y/shots/round2-dark-video-dark-390x844.png  |   Bin 0 -> 64876 bytes
+ .../shots/round2-dark-video-light-1440x900.png     |   Bin 0 -> 121203 bytes
+ .../a11y/shots/round2-dark-video-light-320x640.png |   Bin 0 -> 41778 bytes
+ .../a11y/shots/round2-dark-video-light-390x844.png |   Bin 0 -> 65248 bytes
+ .../round2/a11y/shots/round2-evidence-toggle.png   |   Bin 0 -> 121978 bytes
+ .../round2/a11y/shots/round2-font-zoom-200.png     |   Bin 0 -> 179674 bytes
+ .../round2/a11y/shots/round2-fonts-1440x900.png    |   Bin 0 -> 99508 bytes
+ .../round2/a11y/shots/round2-fonts-320x640.png     |   Bin 0 -> 45393 bytes
+ .../round2/a11y/shots/round2-fonts-390x844.png     |   Bin 0 -> 60203 bytes
+ .../a11y/shots/round2-hero-entrance-normal.png     |   Bin 0 -> 119857 bytes
+ .../a11y/shots/round2-hero-entrance-reduced.png    |   Bin 0 -> 119805 bytes
+ .../round2/a11y/shots/round2-hot-final-normal.png  |   Bin 0 -> 115802 bytes
+ .../shots/round2-hot-normal-restored-cycle1.png    |   Bin 0 -> 114118 bytes
+ .../shots/round2-hot-normal-restored-cycle2.png    |   Bin 0 -> 92145 bytes
+ .../shots/round2-hot-normal-restored-cycle3.png    |   Bin 0 -> 93374 bytes
+ .../a11y/shots/round2-hot-normal-scroll800.png     |   Bin 0 -> 110427 bytes
+ .../round2/a11y/shots/round2-hot-reduce-cycle1.png |   Bin 0 -> 109375 bytes
+ .../round2/a11y/shots/round2-hot-reduce-cycle2.png |   Bin 0 -> 113172 bytes
+ .../round2/a11y/shots/round2-hot-reduce-cycle3.png |   Bin 0 -> 92024 bytes
+ .../round2/a11y/shots/round2-initial-reduced.png   |   Bin 0 -> 117281 bytes
+ .../a11y/shots/round2-keyboard-skip-link.png       |   Bin 0 -> 121136 bytes
+ .../shots/round2-provisional-video-after-click.png |   Bin 0 -> 77188 bytes
+ .../round2-provisional-video-before-click.png      |   Bin 0 -> 119851 bytes
+ ...round2-provisional-video-keyboard-activated.png |   Bin 0 -> 77188 bytes
+ .../a11y/shots/round2-provisional-video-no-js.png  |   Bin 0 -> 16773 bytes
+ .../round2/a11y/shots/round2-stage-away.png        |   Bin 0 -> 114550 bytes
+ .../round2/a11y/shots/round2-stage-back.png        |   Bin 0 -> 119939 bytes
+ .../round2/a11y/shots/round2-stage-during.png      |   Bin 0 -> 117289 bytes
+ .../round2/a11y/shots/round2-video-after-click.png |   Bin 0 -> 217909 bytes
+ .../a11y/shots/round2-video-after-collapse.png     |   Bin 0 -> 85540 bytes
+ .../shots/round2-video-autoplay-observation.png    |   Bin 0 -> 226485 bytes
+ .../a11y/shots/round2-video-before-click.png       |   Bin 0 -> 119857 bytes
+ .../round2/a11y/shots/round2-video-keyboard.png    |   Bin 0 -> 83640 bytes
+ .../round2/a11y/shots/round2-video-no-js.png       |   Bin 0 -> 16817 bytes
+ .../round2/a11y/shots/round2-viewport-320x640.png  |   Bin 0 -> 41764 bytes
+ .../a11y/shots/round2-viewport-720x450(200%).png   |   Bin 0 -> 42438 bytes
+ .../round2/after/homepage-1280-dark-after.png      |   Bin 0 -> 95213 bytes
+ .../round2/after/homepage-1280-light-after.png     |   Bin 0 -> 98437 bytes
+ .../round2/after/homepage-1440-dark-after.png      |   Bin 0 -> 113474 bytes
+ .../round2/after/homepage-1440-light-after.png     |   Bin 0 -> 117575 bytes
+ .../round2/after/homepage-390-dark-after.png       |   Bin 0 -> 63043 bytes
+ .../round2/after/homepage-390-light-after.png      |   Bin 0 -> 63095 bytes
+ .../b-brand-home/round2/breakpoints/1024x768.png   |   Bin 0 -> 95004 bytes
+ .../b-brand-home/round2/breakpoints/320x720.png    |   Bin 0 -> 44232 bytes
+ .../b-brand-home/round2/breakpoints/360x780.png    |   Bin 0 -> 57349 bytes
+ .../b-brand-home/round2/breakpoints/768x1024.png   |   Bin 0 -> 84238 bytes
+ .../round2/breakpoints/zoom200-640x360.png         |   Bin 0 -> 32082 bytes
+ .../round2/breakpoints/zoom200-720x450.png         |   Bin 0 -> 40291 bytes
+ .../b-brand-home/round2/build/build-meta.json      |    42 +
+ .../20261103/b-brand-home/round2/build/build.exit  |     1 +
+ .../20261103/b-brand-home/round2/build/build.log   |   423 +
+ .../round2/claims/json/asset-inventory.json        |   345 +
+ .../claims/json/bilibili-link-verification.json    |   107 +
+ .../round2/claims/json/claims-check.json           |   815 +
+ .../b-brand-home/round2/claims/json/cta-audit.json |   314 +
+ .../round2/claims/json/network-audit.json          |  2999 ++
+ .../json/worktree-mixed-state-integrity.json       |    42 +
+ .../round2/claims/logs/claims-dom-1440.json        |   246 +
+ .../round2/claims/logs/claims-text-1440.txt        |   209 +
+ .../round2/claims/logs/debug-cta-motion.log        |    74 +
+ .../round2/claims/logs/debug-embed-motion2.log     |    31 +
+ .../round2/claims/logs/debug-hero-cta.log          |    48 +
+ .../round2/claims/logs/debug-motion-scenarios.log  |   158 +
+ .../round2/claims/logs/debug-mq-events.log         |    79 +
+ .../b-brand-home/round2/claims/logs/dev-34114.log  |    19 +
+ .../round2/claims/logs/diag-dev-34113.log          |    19 +
+ .../round2/claims/logs/round2-asset-inventory.log  |   185 +
+ .../round2/claims/logs/round2-bilibili-probe.log   |   107 +
+ .../round2/claims/logs/round2-claims-f06685d.log   |    75 +
+ .../round2/claims/logs/round2-claims.log           |    85 +
+ .../round2/claims/logs/round2-cta-f06685d.log      |    72 +
+ .../b-brand-home/round2/claims/logs/round2-cta.log |    72 +
+ .../round2/claims/logs/round2-lint-directed.log    |    13 +
+ .../round2/claims/logs/round2-network-f06685d.log  |    58 +
+ .../round2/claims/logs/round2-network.log          |    53 +
+ .../b-brand-home/round2/claims/logs/round2-tsc.log |     1 +
+ .../logs/worktree-uncommitted-diff-4b69614.patch   |   267 +
+ ...libili-api-view-status200-1793688665022.raw.txt |     1 +
+ ...bili-video-page-status200-1793688665516.raw.txt |   258 +
+ .../round2/claims/scripts/debug-cta-motion.mjs     |    59 +
+ .../round2/claims/scripts/debug-embed-motion2.mjs  |    64 +
+ .../round2/claims/scripts/debug-hero-cta.mjs       |    29 +
+ .../claims/scripts/debug-motion-scenarios.mjs      |    39 +
+ .../round2/claims/scripts/debug-mq-events.mjs      |    36 +
+ .../round2/claims/scripts/debug-scroll-reduce.mjs  |    34 +
+ .../claims/scripts/round2-asset-inventory.mjs      |   159 +
+ .../claims/scripts/round2-bilibili-probe.mjs       |   173 +
+ .../round2/claims/scripts/round2-claims.mjs        |   430 +
+ .../round2/claims/scripts/round2-cta.mjs           |   200 +
+ .../round2/claims/scripts/round2-network.mjs       |   475 +
+ .../phase1-demo-evidence-with-receipt-1440x900.png |   Bin 0 -> 103900 bytes
+ .../claims/shots/phase1-demo-receipt-1440x900.png  |   Bin 0 -> 86743 bytes
+ .../shots/phase1-demo-receipt-panel-1440x900.png   |   Bin 0 -> 91108 bytes
+ .../claims/shots/phase1-first-screen-1280x720.png  |   Bin 0 -> 101268 bytes
+ .../claims/shots/phase1-first-screen-1440x900.png  |   Bin 0 -> 119851 bytes
+ .../claims/shots/phase1-first-screen-390x844.png   |   Bin 0 -> 65256 bytes
+ .../round2/claims/shots/phase1-home-1440x900.png   |   Bin 0 -> 451222 bytes
+ .../round2/claims/shots/phase1-nojs-1440x900.png   |   Bin 0 -> 16852 bytes
+ .../shots/phase1-reduced-motion-1440x900.png       |   Bin 0 -> 114541 bytes
+ .../claims/shots/round2-video-embed-clicked.png    |   Bin 0 -> 42314 bytes
+ .../round2/closing/closing-footer-1440-dark.png    |   Bin 0 -> 97641 bytes
+ .../round2/closing/closing-footer-1440-light.png   |   Bin 0 -> 99601 bytes
+ .../round2/closing/closing-footer-390-light.png    |   Bin 0 -> 49447 bytes
+ .../b-brand-home/round2/e2e-demo-spec-results.json |   452 +
+ .../b-brand-home/round2/hero/hero-stage-away.png   |   Bin 0 -> 112276 bytes
+ .../b-brand-home/round2/hero/hero-stage-back.png   |   Bin 0 -> 117658 bytes
+ .../b-brand-home/round2/hero/hero-stage-during.png |   Bin 0 -> 115004 bytes
+ .../b-brand-home/round2/media/MEDIA_MANIFEST.json  |   162 +
+ .../b-brand-home/round2/media/capture-run.log      |    30 +
+ .../round2/media/frames/frame-10_5s.png            |   Bin 0 -> 186191 bytes
+ .../round2/media/frames/frame-13_5s.png            |   Bin 0 -> 237935 bytes
+ .../b-brand-home/round2/media/frames/frame-16s.png |   Bin 0 -> 247276 bytes
+ .../round2/media/frames/frame-1_5s.png             |   Bin 0 -> 385591 bytes
+ .../round2/media/frames/frame-4_5s.png             |   Bin 0 -> 435142 bytes
+ .../round2/media/frames/frame-7_5s.png             |   Bin 0 -> 430118 bytes
+ .../round2/media/interaction-round2.webm           |   Bin 0 -> 1784017 bytes
+ .../round2/media/media-final-state.png             |   Bin 0 -> 86063 bytes
+ .../round2/media/media-video-player-state.png      |   Bin 0 -> 75566 bytes
+ .../b-brand-home/round2/media/network-media.json   |  1082 +
+ .../round2/metrics/after-homepage-1280-dark.json   |  1432 +
+ .../round2/metrics/after-homepage-1280-light.json  |  1450 +
+ .../round2/metrics/after-homepage-1440-dark.json   |  1432 +
+ .../round2/metrics/after-homepage-1440-light.json  |  1426 +
+ .../round2/metrics/after-homepage-390-dark.json    |  1462 +
+ .../round2/metrics/after-homepage-390-light.json   |  1426 +
+ .../b-brand-home/round2/metrics/bp-1024x768.json   |  1422 +
+ .../b-brand-home/round2/metrics/bp-320x720.json    |  1441 +
+ .../b-brand-home/round2/metrics/bp-360x780.json    |  1422 +
+ .../b-brand-home/round2/metrics/bp-768x1024.json   |  1441 +
+ .../round2/metrics/bp-zoom200-640x360.json         |  1429 +
+ .../round2/metrics/bp-zoom200-720x450.json         |  1429 +
+ .../round2/metrics/closing-footer-1440-dark.json   |  1426 +
+ .../round2/metrics/closing-footer-1440-light.json  |  1444 +
+ .../round2/metrics/closing-footer-390-light.json   |  1426 +
+ .../round2/metrics/hero-stage-away.json            |  1418 +
+ .../round2/metrics/hero-stage-back.json            |  1418 +
+ .../round2/metrics/hero-stage-during.json          |  1418 +
+ .../round2/metrics/media-final-state.json          |  1429 +
+ .../round2/metrics/media-video-player-state.json   |  1463 +
+ .../b-brand-home/round2/metrics/rail-1440-mid.json |  1463 +
+ .../b-brand-home/round2/metrics/rail-390-mid.json  |  1463 +
+ .../round2/metrics/reduced-motion-hot-reduce.json  |  1430 +
+ .../round2/metrics/reduced-motion-hot-restore.json |  1430 +
+ .../metrics/reduced-motion-normal-before.json      |  1430 +
+ .../round2/metrics/video-collapsed-1440-light.json |  1423 +
+ .../round2/metrics/video-collapsed-390-light.json  |  1423 +
+ .../round2/metrics/video-facade-1440-dark.json     |  1425 +
+ .../round2/metrics/video-facade-1440-light.json    |  1418 +
+ .../round2/metrics/video-facade-390-dark.json      |  1425 +
+ .../round2/metrics/video-facade-390-light.json     |  1437 +
+ .../metrics/video-player-loaded-1440-light.json    |  1453 +
+ .../metrics/video-player-loaded-390-light.json     |  1453 +
+ .../round2/perf/1440-dark-run1-cold.png            |   Bin 0 -> 113475 bytes
+ .../round2/perf/1440-dark-run2-warm.png            |   Bin 0 -> 113474 bytes
+ .../round2/perf/1440-dark-run3-warm.png            |   Bin 0 -> 113474 bytes
+ .../round2/perf/1440-light-run1-cold.png           |   Bin 0 -> 117581 bytes
+ .../round2/perf/1440-light-run2-warm.png           |   Bin 0 -> 117575 bytes
+ .../round2/perf/1440-light-run3-warm.png           |   Bin 0 -> 117575 bytes
+ .../round2/perf/390-light-run1-cold.png            |   Bin 0 -> 63088 bytes
+ .../round2/perf/390-light-run2-warm.png            |   Bin 0 -> 63088 bytes
+ .../round2/perf/390-light-run3-warm.png            |   Bin 0 -> 63088 bytes
+ .../b-brand-home/round2/perf/capture-run.log       |     6 +
+ .../b-brand-home/round2/perf/network-prod.json     |  3256 ++
+ .../b-brand-home/round2/perf/prod-perf.json        |  3995 +++
+ .../b-brand-home/round2/rail/rail-1440-mid.png     |   Bin 0 -> 100380 bytes
+ .../b-brand-home/round2/rail/rail-390-mid.png      |   Bin 0 -> 46660 bytes
+ .../round2/reduced-motion/hot-reduce.png           |   Bin 0 -> 100359 bytes
+ .../round2/reduced-motion/hot-restore.png          |   Bin 0 -> 90782 bytes
+ .../round2/reduced-motion/normal-before.png        |   Bin 0 -> 100188 bytes
+ .../b-brand-home/round2/server/server-meta.json    |    25 +
+ .../b-brand-home/round2/server/server.err.log      |     0
+ .../20261103/b-brand-home/round2/server/server.log |     5 +
+ .../20261103/b-brand-home/round2/server/server.pid |     1 +
+ .../b-brand-home/round2/states/capture-run.log     |    28 +
+ .../b-brand-home/round2/states/network-states.json | 11189 ++++++
+ .../b-brand-home/round2/states/states-summary.json | 33920 +++++++++++++++++++
+ .../b-brand-home/round2/video/capture-run.log      |     9 +
+ .../round2/video/collapsed-1440-light.png          |   Bin 0 -> 86063 bytes
+ .../round2/video/collapsed-390-light.png           |   Bin 0 -> 54796 bytes
+ .../b-brand-home/round2/video/facade-1440-dark.png |   Bin 0 -> 84002 bytes
+ .../round2/video/facade-1440-light.png             |   Bin 0 -> 86034 bytes
+ .../b-brand-home/round2/video/facade-390-dark.png  |   Bin 0 -> 53872 bytes
+ .../b-brand-home/round2/video/facade-390-light.png |   Bin 0 -> 54800 bytes
+ .../round2/video/network-video-area.json           |  3920 +++
+ .../round2/video/player-loaded-1440-light.png      |   Bin 0 -> 80226 bytes
+ .../round2/video/player-loaded-390-light.png       |   Bin 0 -> 51356 bytes
+ .../round2/video/video-area-summary.json           |  1347 +
+ .../b-brand-home/tools/build-round2-manifest.mjs   |   249 +
+ .../b-brand-home/tools/capture-round2-media.mjs    |   254 +
+ .../b-brand-home/tools/capture-round2-perf.mjs     |   239 +
+ .../b-brand-home/tools/capture-round2-states.mjs   |   434 +
+ .../tools/capture-round2-video-area.mjs            |   273 +
+ .../b-brand-home/tools/patch-round2-manifest.mjs   |    63 +
+ .../20261103/b-brand-home/tools/round2-build.ps1   |    86 +
+ .../20261103/b-brand-home/tools/round2-lib.mjs     |   739 +
+ .../20261103/b-brand-home/tools/round2-server.ps1  |   119 +
+ 244 files changed, 123693 insertions(+), 60 deletions(-)
+ create mode 100644 components/home/DemoVideoPlayer.tsx
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-10_5s.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-13_8s.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-15_5s.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-19_5s.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-1_5s.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/b3/video-frames/frame-5_5s.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/EMBED_DECISION.md
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/HUMAN_UNDERSTANDING_PROTOCOL.md
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/LEAD_VERIFICATION.md
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/RECEIPT_ROUND2.md
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/A11Y_ROUND2.md
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/MANIFEST.sha256
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/json/accounts-round2.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/json/breakpoints-round2.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/json/divergence-4b69614.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/json/probe-round2.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/json/video-round2-provisional.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/json/video-round2.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/scripts/check-collapse-network.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/scripts/check-video-contrast.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/scripts/probe-round2-accounts.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/scripts/probe-round2-breakpoints.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/scripts/probe-round2-video.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/scripts/probe-round2.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-account-dark-forgot-password-1440.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-account-dark-forgot-password-390.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-account-dark-login-1440.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-account-dark-login-390.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-account-dark-register-1440.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-account-dark-register-390.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-account-light-forgot-password-1440.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-account-light-forgot-password-390.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-account-light-login-1440.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-account-light-login-390.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-account-light-register-1440.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-account-light-register-390.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-anchor-experience.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-breakpoint-320x640.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-breakpoint-360x740.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-breakpoint-720x450_200__.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-dark-1440.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-dark-390.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-dark-video-dark-1440x900.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-dark-video-dark-320x640.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-dark-video-dark-390x844.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-dark-video-light-1440x900.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-dark-video-light-320x640.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-dark-video-light-390x844.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-evidence-toggle.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-font-zoom-200.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-fonts-1440x900.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-fonts-320x640.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-fonts-390x844.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-hero-entrance-normal.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-hero-entrance-reduced.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-hot-final-normal.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-hot-normal-restored-cycle1.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-hot-normal-restored-cycle2.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-hot-normal-restored-cycle3.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-hot-normal-scroll800.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-hot-reduce-cycle1.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-hot-reduce-cycle2.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-hot-reduce-cycle3.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-initial-reduced.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-keyboard-skip-link.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-provisional-video-after-click.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-provisional-video-before-click.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-provisional-video-keyboard-activated.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-provisional-video-no-js.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-stage-away.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-stage-back.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-stage-during.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-video-after-click.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-video-after-collapse.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-video-autoplay-observation.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-video-before-click.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-video-keyboard.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-video-no-js.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-viewport-320x640.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/a11y/shots/round2-viewport-720x450(200%).png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/after/homepage-1280-dark-after.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/after/homepage-1280-light-after.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/after/homepage-1440-dark-after.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/after/homepage-1440-light-after.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/after/homepage-390-dark-after.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/after/homepage-390-light-after.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/breakpoints/1024x768.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/breakpoints/320x720.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/breakpoints/360x780.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/breakpoints/768x1024.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/breakpoints/zoom200-640x360.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/breakpoints/zoom200-720x450.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/build/build-meta.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/build/build.exit
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/build/build.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/json/asset-inventory.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/json/bilibili-link-verification.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/json/claims-check.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/json/cta-audit.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/json/network-audit.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/json/worktree-mixed-state-integrity.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/claims-dom-1440.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/claims-text-1440.txt
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/debug-cta-motion.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/debug-embed-motion2.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/debug-hero-cta.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/debug-motion-scenarios.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/debug-mq-events.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/dev-34114.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/diag-dev-34113.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/round2-asset-inventory.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/round2-bilibili-probe.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/round2-claims-f06685d.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/round2-claims.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/round2-cta-f06685d.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/round2-cta.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/round2-lint-directed.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/round2-network-f06685d.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/round2-network.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/round2-tsc.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/logs/worktree-uncommitted-diff-4b69614.patch
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/raw/bilibili-api-view-status200-1793688665022.raw.txt
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/raw/bilibili-video-page-status200-1793688665516.raw.txt
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/scripts/debug-cta-motion.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/scripts/debug-embed-motion2.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/scripts/debug-hero-cta.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/scripts/debug-motion-scenarios.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/scripts/debug-mq-events.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/scripts/debug-scroll-reduce.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/scripts/round2-asset-inventory.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/scripts/round2-bilibili-probe.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/scripts/round2-claims.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/scripts/round2-cta.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/scripts/round2-network.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/shots/phase1-demo-evidence-with-receipt-1440x900.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/shots/phase1-demo-receipt-1440x900.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/shots/phase1-demo-receipt-panel-1440x900.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/shots/phase1-first-screen-1280x720.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/shots/phase1-first-screen-1440x900.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/shots/phase1-first-screen-390x844.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/shots/phase1-home-1440x900.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/shots/phase1-nojs-1440x900.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/shots/phase1-reduced-motion-1440x900.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/claims/shots/round2-video-embed-clicked.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/closing/closing-footer-1440-dark.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/closing/closing-footer-1440-light.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/closing/closing-footer-390-light.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/e2e-demo-spec-results.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/hero/hero-stage-away.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/hero/hero-stage-back.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/hero/hero-stage-during.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/media/MEDIA_MANIFEST.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/media/capture-run.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/media/frames/frame-10_5s.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/media/frames/frame-13_5s.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/media/frames/frame-16s.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/media/frames/frame-1_5s.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/media/frames/frame-4_5s.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/media/frames/frame-7_5s.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/media/interaction-round2.webm
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/media/media-final-state.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/media/media-video-player-state.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/media/network-media.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/after-homepage-1280-dark.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/after-homepage-1280-light.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/after-homepage-1440-dark.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/after-homepage-1440-light.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/after-homepage-390-dark.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/after-homepage-390-light.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/bp-1024x768.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/bp-320x720.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/bp-360x780.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/bp-768x1024.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/bp-zoom200-640x360.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/bp-zoom200-720x450.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/closing-footer-1440-dark.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/closing-footer-1440-light.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/closing-footer-390-light.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/hero-stage-away.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/hero-stage-back.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/hero-stage-during.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/media-final-state.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/media-video-player-state.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/rail-1440-mid.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/rail-390-mid.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/reduced-motion-hot-reduce.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/reduced-motion-hot-restore.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/reduced-motion-normal-before.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/video-collapsed-1440-light.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/video-collapsed-390-light.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/video-facade-1440-dark.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/video-facade-1440-light.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/video-facade-390-dark.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/video-facade-390-light.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/video-player-loaded-1440-light.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/metrics/video-player-loaded-390-light.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/perf/1440-dark-run1-cold.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/perf/1440-dark-run2-warm.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/perf/1440-dark-run3-warm.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/perf/1440-light-run1-cold.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/perf/1440-light-run2-warm.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/perf/1440-light-run3-warm.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/perf/390-light-run1-cold.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/perf/390-light-run2-warm.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/perf/390-light-run3-warm.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/perf/capture-run.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/perf/network-prod.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/perf/prod-perf.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/rail/rail-1440-mid.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/rail/rail-390-mid.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/reduced-motion/hot-reduce.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/reduced-motion/hot-restore.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/reduced-motion/normal-before.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/server/server-meta.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/server/server.err.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/server/server.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/server/server.pid
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/states/capture-run.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/states/network-states.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/states/states-summary.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/video/capture-run.log
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/video/collapsed-1440-light.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/video/collapsed-390-light.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/video/facade-1440-dark.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/video/facade-1440-light.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/video/facade-390-dark.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/video/facade-390-light.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/video/network-video-area.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/video/player-loaded-1440-light.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/video/player-loaded-390-light.png
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/round2/video/video-area-summary.json
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/tools/build-round2-manifest.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/tools/capture-round2-media.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/tools/capture-round2-perf.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/tools/capture-round2-states.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/tools/capture-round2-video-area.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/tools/patch-round2-manifest.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/tools/round2-build.ps1
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/tools/round2-lib.mjs
+ create mode 100644 evidence/final-sprint/20261103/b-brand-home/tools/round2-server.ps1

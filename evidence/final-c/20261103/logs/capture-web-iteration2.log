@@ -1,0 +1,31 @@
+{
+  "ok": false,
+  "manifestPath": "D:\\Projects\\hongmen-final-c-workspace-ux\\evidence\\final-c\\20261103\\manifest.json",
+  "notesPath": "D:\\Projects\\hongmen-final-c-workspace-ux\\evidence\\final-c\\20261103\\notes.md",
+  "totals": {
+    "checks": 64,
+    "pass": 62,
+    "fail": 2,
+    "notRun": 0
+  },
+  "failures": [
+    {
+      "case": "006-legacy-missing-workpacket",
+      "id": "abnormal.legacy.noFakeSuccess",
+      "status": "FAIL",
+      "detail": {
+        "message": "旧后端缺工作包时读回区域出现成功语义：/已独立支持/"
+      },
+      "at": "2026-11-03T07:48:36.674Z"
+    },
+    {
+      "case": "009-http-401",
+      "id": "abnormal.401.privateLoaded",
+      "status": "FAIL",
+      "detail": {
+        "message": "首次读取没有拿到私有回执内容"
+      },
+      "at": "2026-11-03T07:49:01.471Z"
+    }
+  ]
+}

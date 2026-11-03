@@ -1,0 +1,40 @@
+{
+  "ok": false,
+  "manifestPath": "D:\\Projects\\hongmen-final-c-workspace-ux\\evidence\\final-c\\20261103\\manifest.json",
+  "notesPath": "D:\\Projects\\hongmen-final-c-workspace-ux\\evidence\\final-c\\20261103\\notes.md",
+  "totals": {
+    "checks": 68,
+    "pass": 65,
+    "fail": 3,
+    "notRun": 0
+  },
+  "failures": [
+    {
+      "case": "001-focus",
+      "id": "login.viaUI",
+      "status": "FAIL",
+      "detail": {
+        "message": "page.waitForURL: Timeout 30000ms exceeded. =========================== logs =========================== waiting for navigation until \"load\" ============================================================"
+      },
+      "at": "2026-11-03T08:07:46.448Z"
+    },
+    {
+      "case": "001-focus",
+      "id": "focus.headingVisible",
+      "status": "FAIL",
+      "detail": {
+        "message": "locator.waitFor: Timeout 30000ms exceeded. Call log: \u001b[2m - waiting for getByRole('heading', { name: '今日项目焦点', exact: true }) to be visible\u001b[22m \u001b[2m - waiting for\" http://127.0.0.1:34112/login?from=%2Ffocus\" navigation to finish...\u001b[22m \u001b[2m - navigated to \"http://127.0.0.1:34112/login?from=%2Ffocus\"\u001b[22m"
+      },
+      "at": "2026-11-03T08:08:17.553Z"
+    },
+    {
+      "case": "001-focus",
+      "id": "focus.waitingMissionLinks",
+      "status": "FAIL",
+      "detail": {
+        "message": "焦点页没有指向原 Mission 的链接"
+      },
+      "at": "2026-11-03T08:08:19.097Z"
+    }
+  ]
+}

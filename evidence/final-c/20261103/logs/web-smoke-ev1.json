@@ -1,0 +1,112 @@
+{
+  "login": {
+    "projects": 2,
+    "user": "final-c-reviewer",
+    "status": "OK"
+  },
+  "me": {
+    "username": "final-c-reviewer"
+  },
+  "missionList": {
+    "count": 9,
+    "statuses": [
+      "WAITING_INPUT",
+      "WAITING_APPROVAL",
+      "RUNNING",
+      "SUCCEEDED",
+      "FAILED",
+      "PAUSED",
+      "WAITING_INPUT",
+      "CANCELLED",
+      "SUCCEEDED"
+    ]
+  },
+  "waitingUser": {
+    "missionStatus": "WAITING_INPUT",
+    "materialUses": [
+      {
+        "availability": "CURRENT",
+        "revisionAvailability": "CURRENT",
+        "currentUse": "ALLOWED",
+        "sourceId": "capture:cmw0c9jyi0009688o281v8yni"
+      }
+    ],
+    "hasWorkPacket": true,
+    "blockerCodes": [
+      "WORKER_PRESENCE_UNOBSERVED",
+      "QUESTION_PENDING"
+    ],
+    "phase": "WAITING_USER",
+    "waitingOn": "USER_INPUT",
+    "httpStatus": 200,
+    "primaryAction": "ANSWER_QUESTION"
+  },
+  "sourceStates": {
+    "missionStatus": "WAITING_INPUT",
+    "materialUses": [
+      {
+        "availability": "CURRENT",
+        "revisionAvailability": "CURRENT",
+        "currentUse": "ALLOWED",
+        "sourceId": "capture:cmw0c9k9q0016688ojkd7waue"
+      },
+      {
+        "availability": "CHANGED",
+        "revisionAvailability": "CHANGED",
+        "currentUse": "ALLOWED",
+        "sourceId": "capture:cmw0c9k9y0017688o4lnc7b1s"
+      },
+      {
+        "availability": "UNAVAILABLE",
+        "revisionAvailability": "CURRENT",
+        "currentUse": "SUPPRESSED",
+        "sourceId": "capture:cmw0c9kaj0018688ocn6oxtkc"
+      },
+      {
+        "availability": "UNAVAILABLE",
+        "revisionAvailability": "UNAVAILABLE",
+        "currentUse": "UNKNOWN",
+        "sourceId": "capture:cmw0c9kar0019688o1klw3xop"
+      }
+    ],
+    "hasWorkPacket": true,
+    "blockerCodes": [
+      "WORKER_PRESENCE_UNOBSERVED",
+      "CURRENT_USE_SUPPRESSED",
+      "CURRENT_USE_UNKNOWN",
+      "SOURCE_CHANGED",
+      "SOURCE_UNAVAILABLE",
+      "SOURCE_UNAVAILABLE",
+      "QUESTION_PENDING"
+    ],
+    "phase": "WAITING_USER",
+    "waitingOn": "USER_INPUT",
+    "httpStatus": 200,
+    "primaryAction": "ANSWER_QUESTION"
+  },
+  "succeededDetail": {
+    "steps": 3,
+    "outputs": 1,
+    "status": "SUCCEEDED"
+  },
+  "succeededReadback": {
+    "adoptions": [
+      {
+        "artifactId": "cmw0c9k60000v688ob5zyl69b",
+        "receiptId": "cmw0c9k67000w688oyi4fin2x"
+      }
+    ],
+    "selectedReceipt": "cmw0c9k67000w688oyi4fin2x",
+    "selectedOutput": "cmw0c9k52000r688o9rywpxam",
+    "actionReceipts": [
+      {
+        "actionId": "cmw0c9k4r000q688on4ict4as",
+        "status": "DONE",
+        "resultCardId": "cmw0c9k4f000p688ohhhm1d2o"
+      }
+    ]
+  },
+  "port": 34112,
+  "candidate": "7897156d19a1f0fce552cef28a45c232f2b30880",
+  "note": "EV1 只读 HTTP 冒烟：登录 POST（认证）+ GET 列表/详情/readback；不提交业务写。"
+}

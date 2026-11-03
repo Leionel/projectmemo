@@ -1,0 +1,21 @@
+½öÆô¶¯±¾µØÔ¤ÀÀ£ºhttp://127.0.0.1:34112£¬mock£»²»Æô¶¯ Worker¡£
+
+> projectmemo@0.1.0 dev
+> next dev --hostname 127.0.0.1 --port 34112
+
+â–² Next.js 16.4.3 (Turbopack)
+- Local:         http://127.0.0.1:34112
+- Network:       http://127.0.0.1:34112
+âœ“ Ready in 2.5s
+âœ“ Running next.config.ts took 273ms
+
+ GET /health 200 in 491ms (next.js: 362ms, application-code: 129ms)
+ GET /health 200 in 45ms (next.js: 10ms, application-code: 35ms)
+ POST /api/auth/login 200 in 1361ms (next.js: 289ms, application-code: 1072ms)
+ GET /api/auth/me 200 in 302ms (next.js: 206ms, application-code: 96ms)
+ GET /api/missions?projectId=cmw0c9jvg0001688ovtg603ni 200 in 332ms (next.js: 223ms, application-code: 109ms)
+ GET /api/missions/cmw0c9jwl0005688oxrzvmjfa/readback?questionId=cmw0c9jy90008688otxax13j9 200 in 3.3s (next.js: 3.0s, application-code: 275ms)
+ GET /api/missions/cmw0c9k8o0013688o69uh3s1v/readback?questionId=cmw0c9k9k0015688o1f3u6n1l 200 in 277ms (next.js: 50ms, application-code: 228ms)
+ GET /api/missions/cmw0c9k37000l688o9sg5ppzt 200 in 4.7s (next.js: 4.6s, application-code: 162ms)
+ GET /api/missions/cmw0c9k37000l688o9sg5ppzt/readback?outputId=cmw0c9k52000r688o9rywpxam&revision=1&receiptId=cmw0c9k67000w688oyi4fin2x 200 in 307ms (next.js: 87ms, application-code: 220ms)
+ GET /health 200 in 71ms (next.js: 10ms, application-code: 61ms)

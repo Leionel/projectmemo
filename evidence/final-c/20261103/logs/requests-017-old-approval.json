@@ -1,0 +1,387 @@
+[
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/projects/cmw0f3qg90001rk8ovncx1f99/missions?mission=cmw0f3qhr000brk8ookvzjodt&approvalId=cmw0f3qi2000erk8ot0udhtzq",
+    "resourceType": "document",
+    "isNavigation": true,
+    "at": "2026-11-03T08:24:42.951Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/logo.png",
+    "resourceType": "image",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.193Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_1m_kv2t8hd7hd._.css",
+    "resourceType": "stylesheet",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.193Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_15ftpp-zbgbs4._.css",
+    "resourceType": "stylesheet",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.194Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0qva5cupmdgep._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.194Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.194Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/1q96_modules_next_dist_compiled_react-dom_cjs_react-dom_development_1sqry0_53krp4.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.194Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_compiled_react-dom_0grqycjrj6mju._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.194Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.194Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jmam7qwg.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.194Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_compiled_1amofcmz--cdp._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.194Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.194Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.194Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqwj2323d._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.194Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_1anvha4rlo79g._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.195Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/turbopack-_06rkbud3pyrlm._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.195Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_0buf45idvz5c3._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.195Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_0_duo-exf6bfz._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.195Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_0y6xgmo32juxh._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.195Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_17f25dzi-5r2x._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.195Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_06_dgbeibkgoa._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.195Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_0fawmv8iqrcop._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.195Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_0v6q6i3hv09-g._.css",
+    "resourceType": "stylesheet",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.195Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_MissionPanel_tsx_0hb9g6rvj9-zu._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.195Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_ActionBoard_tsx_1co4_y7_7tkrl._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.195Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_0e2iurxkh2uu8._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.195Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/lib_0ybt3mgznv7h9._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.195Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_zod_v4_classic_045ja72g65zww._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.195Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_zod_v4_core_14qn2mg1f8pkp._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.195Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_zod_v4_locales_1-ided7izgr--._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.196Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_08-ko0-s5ycw4._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.196Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/fonts/pm-serif-brand.ttf",
+    "resourceType": "font",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.239Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.579Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.733Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.733Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.733Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.733Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions?projectId=cmw0f3qg90001rk8ovncx1f99",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.847Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions?projectId=cmw0f3qg90001rk8ovncx1f99",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.848Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions?projectId=cmw0f3qg90001rk8ovncx1f99",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.848Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:43.901Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qhr000brk8ookvzjodt",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:44.156Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qhr000brk8ookvzjodt/sources",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:44.156Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qhr000brk8ookvzjodt/readback?approvalId=cmw0f3qi2000erk8ot0udhtzq",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:44.480Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qhr000brk8ookvzjodt/responsibility",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:44.480Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/conversations/capabilities",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:44.481Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/projects/cmw0f3qg90001rk8ovncx1f99/goal-question",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:44.484Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/projects/cmw0f3qg90001rk8ovncx1f99/deployment-connections",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:44.484Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qhr000brk8ookvzjodt/readback?approvalId=cmw0f3qi2000erk8ot0udhtzq",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:44.484Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qhr000brk8ookvzjodt/responsibility",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:44.484Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/conversations/capabilities",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:44.486Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/projects/cmw0f3qg90001rk8ovncx1f99/goal-question",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:44.486Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/projects/cmw0f3qg90001rk8ovncx1f99/deployment-connections",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:44.486Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qhr000brk8ookvzjodt",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:46.473Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qhr000brk8ookvzjodt/sources",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:24:46.473Z"
+  }
+]

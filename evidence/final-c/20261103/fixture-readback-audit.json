@@ -1,0 +1,2537 @@
+{
+  "schemaVersion": 1,
+  "track": "C",
+  "mode": "EV1_FAILURE_FIXTURE_READBACK_AUDIT",
+  "generatedAt": "2026-11-03T08:20:17.492Z",
+  "command": "npm.cmd exec -- tsx scripts/final-c/inspect-fixture.ts",
+  "exitCode": 0,
+  "git": {
+    "headSha": "2d61578dd001cd6c3f556f546ca4bd6c5d24ae83",
+    "shortSha": "2d61578",
+    "branch": "codex/final-c-workspace-ux",
+    "dirty": true,
+    "dirtyPaths": [
+      "M next-env.d.ts",
+      "?? evidence/final-c/",
+      "?? scripts/final-c/"
+    ]
+  },
+  "worktree": "D:\\Projects\\hongmen-final-c-workspace-ux",
+  "databasePath": "D:\\Projects\\hongmen-final-c-workspace-ux\\prisma\\final-preparation.db",
+  "provider": "mock",
+  "modelProviderCalls": 0,
+  "dataSource": "REAL_ISOLATED_DATABASE（本工作树 prisma/final-preparation.db，合成数据）",
+  "identityPath": "D:\\Projects\\hongmen-final-c-workspace-ux\\evidence\\final-c\\20261103\\fixture-identity.json",
+  "totals": {
+    "checks": 148,
+    "pass": 148,
+    "fail": 0
+  },
+  "checks": [
+    {
+      "missionKey": "waitingUser",
+      "check": "readSideEffectsUnchanged",
+      "expected": {
+        "version": 1,
+        "status": "WAITING_INPUT",
+        "updatedAt": "2026-11-03T08:20:13.404Z",
+        "budgetUsedJson": "{\"models\":1,\"tools\":2}"
+      },
+      "observed": {
+        "version": 1,
+        "status": "WAITING_INPUT",
+        "updatedAt": "2026-11-03T08:20:13.404Z",
+        "budgetUsedJson": "{\"models\":1,\"tools\":2}"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingUser",
+      "check": "hasWorkPacket",
+      "expected": true,
+      "observed": true,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingUser",
+      "check": "status",
+      "expected": "WAITING_INPUT",
+      "observed": "WAITING_INPUT",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingUser",
+      "check": "phase",
+      "expected": "WAITING_USER",
+      "observed": "WAITING_USER",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingUser",
+      "check": "nextActor",
+      "expected": "USER",
+      "observed": "USER",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingUser",
+      "check": "requiresUser",
+      "expected": true,
+      "observed": true,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingUser",
+      "check": "reasonCode",
+      "expected": "QUESTION_PENDING",
+      "observed": "QUESTION_PENDING",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingUser",
+      "check": "primaryActionKind",
+      "expected": "ANSWER_QUESTION",
+      "observed": "ANSWER_QUESTION",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingUser",
+      "check": "waitingOn",
+      "expected": "USER_INPUT",
+      "observed": "USER_INPUT",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingUser",
+      "check": "observationState",
+      "expected": "NOT_OBSERVED",
+      "observed": "NOT_OBSERVED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingUser",
+      "check": "blockerCodes",
+      "expected": [
+        "WORKER_PRESENCE_UNOBSERVED",
+        "QUESTION_PENDING"
+      ],
+      "observed": [
+        "WORKER_PRESENCE_UNOBSERVED",
+        "QUESTION_PENDING"
+      ],
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingUser",
+      "check": "materialUse:capture:cmw0f3qhd0009rk8op9oce64d",
+      "expected": {
+        "currentUse": "ALLOWED",
+        "revisionAvailability": "CURRENT",
+        "availability": "CURRENT"
+      },
+      "observed": {
+        "currentUse": "ALLOWED",
+        "revisionAvailability": "CURRENT",
+        "availability": "CURRENT"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingUser",
+      "check": "reviewProgress:executed",
+      "expected": 1,
+      "observed": 1,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingUser",
+      "check": "reviewProgress:observed",
+      "expected": 1,
+      "observed": 1,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingUser",
+      "check": "oldQuestion.historical",
+      "expected": true,
+      "observed": true,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingUser",
+      "check": "oldQuestion.id",
+      "expected": "cmw0f3qh50007rk8our758md2",
+      "observed": "cmw0f3qh50007rk8our758md2",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingUser",
+      "check": "oldQuestion.readSideEffectsUnchanged",
+      "expected": {
+        "version": 1,
+        "status": "WAITING_INPUT",
+        "updatedAt": "2026-11-03T08:20:13.404Z",
+        "budgetUsedJson": "{\"models\":1,\"tools\":2}"
+      },
+      "observed": {
+        "version": 1,
+        "status": "WAITING_INPUT",
+        "updatedAt": "2026-11-03T08:20:13.404Z",
+        "budgetUsedJson": "{\"models\":1,\"tools\":2}"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingApproval",
+      "check": "readSideEffectsUnchanged",
+      "expected": {
+        "version": 1,
+        "status": "WAITING_APPROVAL",
+        "updatedAt": "2026-11-03T08:20:13.409Z",
+        "budgetUsedJson": "{}"
+      },
+      "observed": {
+        "version": 1,
+        "status": "WAITING_APPROVAL",
+        "updatedAt": "2026-11-03T08:20:13.409Z",
+        "budgetUsedJson": "{}"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingApproval",
+      "check": "hasWorkPacket",
+      "expected": true,
+      "observed": true,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingApproval",
+      "check": "status",
+      "expected": "WAITING_APPROVAL",
+      "observed": "WAITING_APPROVAL",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingApproval",
+      "check": "phase",
+      "expected": "WAITING_APPROVAL",
+      "observed": "WAITING_APPROVAL",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingApproval",
+      "check": "nextActor",
+      "expected": "USER",
+      "observed": "USER",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingApproval",
+      "check": "requiresUser",
+      "expected": true,
+      "observed": true,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingApproval",
+      "check": "reasonCode",
+      "expected": "APPROVAL_PENDING",
+      "observed": "APPROVAL_PENDING",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingApproval",
+      "check": "primaryActionKind",
+      "expected": "REVIEW_APPROVAL",
+      "observed": "REVIEW_APPROVAL",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingApproval",
+      "check": "waitingOn",
+      "expected": "USER_APPROVAL",
+      "observed": "USER_APPROVAL",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingApproval",
+      "check": "observationState",
+      "expected": "NOT_OBSERVED",
+      "observed": "NOT_OBSERVED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingApproval",
+      "check": "blockerCodes",
+      "expected": [
+        "WORKER_PRESENCE_UNOBSERVED",
+        "APPROVAL_PENDING"
+      ],
+      "observed": [
+        "WORKER_PRESENCE_UNOBSERVED",
+        "APPROVAL_PENDING"
+      ],
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingApproval",
+      "check": "primaryActionTarget",
+      "expected": {
+        "kind": "APPROVAL",
+        "id": "cmw0f3qi7000grk8oycjd1f87",
+        "version": null
+      },
+      "observed": {
+        "kind": "APPROVAL",
+        "id": "cmw0f3qi7000grk8oycjd1f87",
+        "version": null
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingApproval",
+      "check": "selectedApprovalStatus",
+      "expected": "PENDING",
+      "observed": "PENDING",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingApproval",
+      "check": "oldApproval.status",
+      "expected": "EXPIRED",
+      "observed": "EXPIRED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingApproval",
+      "check": "oldApproval.id",
+      "expected": "cmw0f3qi2000erk8ot0udhtzq",
+      "observed": "cmw0f3qi2000erk8ot0udhtzq",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "waitingApproval",
+      "check": "oldApproval.readSideEffectsUnchanged",
+      "expected": {
+        "version": 1,
+        "status": "WAITING_APPROVAL",
+        "updatedAt": "2026-11-03T08:20:13.409Z",
+        "budgetUsedJson": "{}"
+      },
+      "observed": {
+        "version": 1,
+        "status": "WAITING_APPROVAL",
+        "updatedAt": "2026-11-03T08:20:13.409Z",
+        "budgetUsedJson": "{}"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "stopRequested",
+      "check": "readSideEffectsUnchanged",
+      "expected": {
+        "version": 1,
+        "status": "RUNNING",
+        "updatedAt": "2026-11-03T08:20:13.432Z",
+        "budgetUsedJson": "{\"models\":1,\"tools\":1}"
+      },
+      "observed": {
+        "version": 1,
+        "status": "RUNNING",
+        "updatedAt": "2026-11-03T08:20:13.432Z",
+        "budgetUsedJson": "{\"models\":1,\"tools\":1}"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "stopRequested",
+      "check": "hasWorkPacket",
+      "expected": true,
+      "observed": true,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "stopRequested",
+      "check": "status",
+      "expected": "RUNNING",
+      "observed": "RUNNING",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "stopRequested",
+      "check": "phase",
+      "expected": "RUNNING",
+      "observed": "RUNNING",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "stopRequested",
+      "check": "nextActor",
+      "expected": "SYSTEM",
+      "observed": "SYSTEM",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "stopRequested",
+      "check": "requiresUser",
+      "expected": false,
+      "observed": false,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "stopRequested",
+      "check": "reasonCode",
+      "expected": "STOP_REQUESTED_IN_FLIGHT",
+      "observed": "STOP_REQUESTED_IN_FLIGHT",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "stopRequested",
+      "check": "primaryActionKind",
+      "expected": "CHECK_STOP_SETTLEMENT",
+      "observed": "CHECK_STOP_SETTLEMENT",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "stopRequested",
+      "check": "waitingOn",
+      "expected": "SYSTEM_SETTLEMENT",
+      "observed": "SYSTEM_SETTLEMENT",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "stopRequested",
+      "check": "observationState",
+      "expected": "NOT_OBSERVED",
+      "observed": "NOT_OBSERVED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "stopRequested",
+      "check": "blockerCodes",
+      "expected": [
+        "WORKER_PRESENCE_UNOBSERVED",
+        "PAUSE_REQUESTED"
+      ],
+      "observed": [
+        "WORKER_PRESENCE_UNOBSERVED",
+        "PAUSE_REQUESTED"
+      ],
+      "status": "PASS"
+    },
+    {
+      "missionKey": "stopRequested",
+      "check": "stopRequestState",
+      "expected": "PAUSE_REQUESTED",
+      "observed": "PAUSE_REQUESTED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "stopRequested",
+      "check": "stopRequestSettled",
+      "expected": false,
+      "observed": false,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "succeeded",
+      "check": "readSideEffectsUnchanged",
+      "expected": {
+        "version": 1,
+        "status": "SUCCEEDED",
+        "updatedAt": "2026-11-03T08:20:13.442Z",
+        "budgetUsedJson": "{\"models\":2,\"tools\":3,\"inputTokens\":120,\"outputTokens\":80}"
+      },
+      "observed": {
+        "version": 1,
+        "status": "SUCCEEDED",
+        "updatedAt": "2026-11-03T08:20:13.442Z",
+        "budgetUsedJson": "{\"models\":2,\"tools\":3,\"inputTokens\":120,\"outputTokens\":80}"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "succeeded",
+      "check": "hasWorkPacket",
+      "expected": true,
+      "observed": true,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "succeeded",
+      "check": "status",
+      "expected": "SUCCEEDED",
+      "observed": "SUCCEEDED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "succeeded",
+      "check": "phase",
+      "expected": "COMPLETED",
+      "observed": "COMPLETED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "succeeded",
+      "check": "nextActor",
+      "expected": "NONE",
+      "observed": "NONE",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "succeeded",
+      "check": "requiresUser",
+      "expected": false,
+      "observed": false,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "succeeded",
+      "check": "reasonCode",
+      "expected": "SUCCEEDED",
+      "observed": "SUCCEEDED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "succeeded",
+      "check": "primaryActionKind",
+      "expected": "VIEW_RESULT",
+      "observed": "VIEW_RESULT",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "succeeded",
+      "check": "waitingOn",
+      "expected": "NONE",
+      "observed": "NONE",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "succeeded",
+      "check": "observationState",
+      "expected": "OBSERVED",
+      "observed": "OBSERVED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "succeeded",
+      "check": "blockerCodes",
+      "expected": [],
+      "observed": [],
+      "status": "PASS"
+    },
+    {
+      "missionKey": "succeeded",
+      "check": "materialUse:capture:cmw0f3qiy000prk8oli9wtx03",
+      "expected": {
+        "currentUse": "ALLOWED",
+        "revisionAvailability": "CURRENT",
+        "availability": "CURRENT"
+      },
+      "observed": {
+        "currentUse": "ALLOWED",
+        "revisionAvailability": "CURRENT",
+        "availability": "CURRENT"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "succeeded",
+      "check": "materialUseCount",
+      "expected": 1,
+      "observed": 1,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "succeeded",
+      "check": "latestOutput",
+      "expected": {
+        "id": "cmw0f3qj7000srk8oacp6tqxb",
+        "revision": 1
+      },
+      "observed": {
+        "id": "cmw0f3qj7000srk8oacp6tqxb",
+        "revision": 1
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "succeeded",
+      "check": "actionReceipt:cmw0f3qj4000rrk8ond429bwc",
+      "expected": [
+        {
+          "actionId": "cmw0f3qj4000rrk8ond429bwc",
+          "status": "DONE",
+          "resultCardId": "cmw0f3qj1000qrk8o39vb8plu",
+          "isSimulated": false
+        }
+      ],
+      "observed": [
+        {
+          "actionId": "cmw0f3qj4000rrk8ond429bwc",
+          "status": "DONE",
+          "resultCardId": "cmw0f3qj1000qrk8o39vb8plu",
+          "isSimulated": false
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "missionKey": "succeeded",
+      "check": "adoption:cmw0f3qjl000yrk8o7wa57pet",
+      "expected": [
+        {
+          "receiptId": "cmw0f3qjl000yrk8o7wa57pet",
+          "artifactId": "cmw0f3qjj000xrk8o3rahnqhs"
+        }
+      ],
+      "observed": [
+        {
+          "receiptId": "cmw0f3qjl000yrk8o7wa57pet",
+          "artifactId": "cmw0f3qjj000xrk8o3rahnqhs"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "missionKey": "succeeded",
+      "check": "reviewProgress:executed",
+      "expected": 4,
+      "observed": 4,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "succeeded",
+      "check": "reviewProgress:observed",
+      "expected": 2,
+      "observed": 2,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "succeeded",
+      "check": "reviewProgress:userReported",
+      "expected": 1,
+      "observed": 1,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "failed",
+      "check": "readSideEffectsUnchanged",
+      "expected": {
+        "version": 1,
+        "status": "FAILED",
+        "updatedAt": "2026-11-03T08:20:13.483Z",
+        "budgetUsedJson": "{\"tools\":1}"
+      },
+      "observed": {
+        "version": 1,
+        "status": "FAILED",
+        "updatedAt": "2026-11-03T08:20:13.483Z",
+        "budgetUsedJson": "{\"tools\":1}"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "failed",
+      "check": "hasWorkPacket",
+      "expected": true,
+      "observed": true,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "failed",
+      "check": "status",
+      "expected": "FAILED",
+      "observed": "FAILED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "failed",
+      "check": "phase",
+      "expected": "FAILED",
+      "observed": "FAILED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "failed",
+      "check": "nextActor",
+      "expected": "SYSTEM",
+      "observed": "SYSTEM",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "failed",
+      "check": "requiresUser",
+      "expected": false,
+      "observed": false,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "failed",
+      "check": "reasonCode",
+      "expected": "TOOL_FAILED",
+      "observed": "TOOL_FAILED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "failed",
+      "check": "primaryActionKind",
+      "expected": "REVIEW_FAILURE",
+      "observed": "REVIEW_FAILURE",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "failed",
+      "check": "waitingOn",
+      "expected": "SYSTEM_RECHECK",
+      "observed": "SYSTEM_RECHECK",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "failed",
+      "check": "observationState",
+      "expected": "NOT_OBSERVED",
+      "observed": "NOT_OBSERVED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "failed",
+      "check": "blockerCodes",
+      "expected": [
+        "WORKER_PRESENCE_UNOBSERVED",
+        "TOOL_FAILED"
+      ],
+      "observed": [
+        "WORKER_PRESENCE_UNOBSERVED",
+        "TOOL_FAILED"
+      ],
+      "status": "PASS"
+    },
+    {
+      "missionKey": "unknown",
+      "check": "readSideEffectsUnchanged",
+      "expected": {
+        "version": 1,
+        "status": "PAUSED",
+        "updatedAt": "2026-11-03T08:20:13.493Z",
+        "budgetUsedJson": "{\"models\":1,\"tools\":1,\"unknownCalls\":1}"
+      },
+      "observed": {
+        "version": 1,
+        "status": "PAUSED",
+        "updatedAt": "2026-11-03T08:20:13.493Z",
+        "budgetUsedJson": "{\"models\":1,\"tools\":1,\"unknownCalls\":1}"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "unknown",
+      "check": "hasWorkPacket",
+      "expected": true,
+      "observed": true,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "unknown",
+      "check": "status",
+      "expected": "PAUSED",
+      "observed": "PAUSED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "unknown",
+      "check": "phase",
+      "expected": "UNKNOWN",
+      "observed": "UNKNOWN",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "unknown",
+      "check": "nextActor",
+      "expected": "SYSTEM",
+      "observed": "SYSTEM",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "unknown",
+      "check": "requiresUser",
+      "expected": false,
+      "observed": false,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "unknown",
+      "check": "reasonCode",
+      "expected": "TOOL_UNKNOWN",
+      "observed": "TOOL_UNKNOWN",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "unknown",
+      "check": "primaryActionKind",
+      "expected": "RECHECK_AUTHORITY",
+      "observed": "RECHECK_AUTHORITY",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "unknown",
+      "check": "waitingOn",
+      "expected": "SYSTEM_RECHECK",
+      "observed": "SYSTEM_RECHECK",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "unknown",
+      "check": "observationState",
+      "expected": "NOT_OBSERVED",
+      "observed": "NOT_OBSERVED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "unknown",
+      "check": "blockerCodes",
+      "expected": [
+        "WORKER_PRESENCE_UNOBSERVED",
+        "TOOL_UNKNOWN"
+      ],
+      "observed": [
+        "TOOL_UNKNOWN",
+        "WORKER_PRESENCE_UNOBSERVED",
+        "TOOL_UNKNOWN"
+      ],
+      "status": "PASS"
+    },
+    {
+      "missionKey": "unknown",
+      "check": "unsettledEffect",
+      "expected": {
+        "present": true,
+        "code": "TOOL_UNKNOWN",
+        "source": "LAST_ERROR"
+      },
+      "observed": {
+        "present": true,
+        "code": "TOOL_UNKNOWN",
+        "source": "LAST_ERROR"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "unknown",
+      "check": "stopRequestState",
+      "expected": "PAUSE_SETTLED",
+      "observed": "PAUSE_SETTLED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "unknown",
+      "check": "stopRequestSettled",
+      "expected": true,
+      "observed": true,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "sourceStates",
+      "check": "readSideEffectsUnchanged",
+      "expected": {
+        "version": 1,
+        "status": "WAITING_INPUT",
+        "updatedAt": "2026-11-03T08:20:13.532Z",
+        "budgetUsedJson": "{}"
+      },
+      "observed": {
+        "version": 1,
+        "status": "WAITING_INPUT",
+        "updatedAt": "2026-11-03T08:20:13.532Z",
+        "budgetUsedJson": "{}"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "sourceStates",
+      "check": "hasWorkPacket",
+      "expected": true,
+      "observed": true,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "sourceStates",
+      "check": "status",
+      "expected": "WAITING_INPUT",
+      "observed": "WAITING_INPUT",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "sourceStates",
+      "check": "phase",
+      "expected": "WAITING_USER",
+      "observed": "WAITING_USER",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "sourceStates",
+      "check": "nextActor",
+      "expected": "USER",
+      "observed": "USER",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "sourceStates",
+      "check": "requiresUser",
+      "expected": true,
+      "observed": true,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "sourceStates",
+      "check": "reasonCode",
+      "expected": "QUESTION_PENDING",
+      "observed": "QUESTION_PENDING",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "sourceStates",
+      "check": "primaryActionKind",
+      "expected": "ANSWER_QUESTION",
+      "observed": "ANSWER_QUESTION",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "sourceStates",
+      "check": "waitingOn",
+      "expected": "USER_INPUT",
+      "observed": "USER_INPUT",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "sourceStates",
+      "check": "observationState",
+      "expected": "NOT_OBSERVED",
+      "observed": "NOT_OBSERVED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "sourceStates",
+      "check": "blockerCodes",
+      "expected": [
+        "WORKER_PRESENCE_UNOBSERVED",
+        "QUESTION_PENDING",
+        "SOURCE_CHANGED",
+        "SOURCE_UNAVAILABLE",
+        "CURRENT_USE_SUPPRESSED",
+        "CURRENT_USE_UNKNOWN"
+      ],
+      "observed": [
+        "WORKER_PRESENCE_UNOBSERVED",
+        "CURRENT_USE_SUPPRESSED",
+        "CURRENT_USE_UNKNOWN",
+        "SOURCE_CHANGED",
+        "SOURCE_UNAVAILABLE",
+        "SOURCE_UNAVAILABLE",
+        "QUESTION_PENDING"
+      ],
+      "status": "PASS"
+    },
+    {
+      "missionKey": "sourceStates",
+      "check": "materialUse:capture:cmw0f3qkp0018rk8ouva90drx",
+      "expected": {
+        "currentUse": "ALLOWED",
+        "revisionAvailability": "CURRENT",
+        "availability": "CURRENT"
+      },
+      "observed": {
+        "currentUse": "ALLOWED",
+        "revisionAvailability": "CURRENT",
+        "availability": "CURRENT"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "sourceStates",
+      "check": "materialUse:capture:cmw0f3qkr0019rk8oq0fxssn7",
+      "expected": {
+        "currentUse": "ALLOWED",
+        "revisionAvailability": "CHANGED",
+        "availability": "CHANGED"
+      },
+      "observed": {
+        "currentUse": "ALLOWED",
+        "revisionAvailability": "CHANGED",
+        "availability": "CHANGED"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "sourceStates",
+      "check": "materialUse:capture:cmw0f3qkv001ark8ofup9n00d",
+      "expected": {
+        "currentUse": "SUPPRESSED",
+        "revisionAvailability": "CURRENT",
+        "availability": "UNAVAILABLE"
+      },
+      "observed": {
+        "currentUse": "SUPPRESSED",
+        "revisionAvailability": "CURRENT",
+        "availability": "UNAVAILABLE"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "sourceStates",
+      "check": "materialUse:capture:cmw0f3qky001brk8oy8u4gf0f",
+      "expected": {
+        "currentUse": "UNKNOWN",
+        "revisionAvailability": "UNAVAILABLE",
+        "availability": "UNAVAILABLE"
+      },
+      "observed": {
+        "currentUse": "UNKNOWN",
+        "revisionAvailability": "UNAVAILABLE",
+        "availability": "UNAVAILABLE"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "sourceStates",
+      "check": "materialUseCount",
+      "expected": 4,
+      "observed": 4,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "cancelled",
+      "check": "readSideEffectsUnchanged",
+      "expected": {
+        "version": 1,
+        "status": "CANCELLED",
+        "updatedAt": "2026-11-03T08:20:13.538Z",
+        "budgetUsedJson": "{}"
+      },
+      "observed": {
+        "version": 1,
+        "status": "CANCELLED",
+        "updatedAt": "2026-11-03T08:20:13.538Z",
+        "budgetUsedJson": "{}"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "cancelled",
+      "check": "hasWorkPacket",
+      "expected": true,
+      "observed": true,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "cancelled",
+      "check": "status",
+      "expected": "CANCELLED",
+      "observed": "CANCELLED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "cancelled",
+      "check": "phase",
+      "expected": "COMPLETED",
+      "observed": "COMPLETED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "cancelled",
+      "check": "nextActor",
+      "expected": "NONE",
+      "observed": "NONE",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "cancelled",
+      "check": "requiresUser",
+      "expected": false,
+      "observed": false,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "cancelled",
+      "check": "reasonCode",
+      "expected": "CANCELLED",
+      "observed": "CANCELLED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "cancelled",
+      "check": "primaryActionKind",
+      "expected": "VIEW_RESULT",
+      "observed": "VIEW_RESULT",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "cancelled",
+      "check": "waitingOn",
+      "expected": "NONE",
+      "observed": "NONE",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "cancelled",
+      "check": "observationState",
+      "expected": "NOT_OBSERVED",
+      "observed": "NOT_OBSERVED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "cancelled",
+      "check": "blockerCodes",
+      "expected": [],
+      "observed": [],
+      "status": "PASS"
+    },
+    {
+      "missionKey": "cancelled",
+      "check": "stopRequestState",
+      "expected": "CANCEL_SETTLED",
+      "observed": "CANCEL_SETTLED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "cancelled",
+      "check": "stopRequestSettled",
+      "expected": true,
+      "observed": true,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "cancelled",
+      "check": "latestOutput",
+      "expected": {
+        "id": "cmw0f3qli001frk8o853vcjhj",
+        "revision": 1
+      },
+      "observed": {
+        "id": "cmw0f3qli001frk8o853vcjhj",
+        "revision": 1
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "longCopy",
+      "check": "readSideEffectsUnchanged",
+      "expected": {
+        "version": 1,
+        "status": "WAITING_INPUT",
+        "updatedAt": "2026-11-03T08:20:13.555Z",
+        "budgetUsedJson": "{}"
+      },
+      "observed": {
+        "version": 1,
+        "status": "WAITING_INPUT",
+        "updatedAt": "2026-11-03T08:20:13.555Z",
+        "budgetUsedJson": "{}"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "longCopy",
+      "check": "hasWorkPacket",
+      "expected": true,
+      "observed": true,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "longCopy",
+      "check": "status",
+      "expected": "WAITING_INPUT",
+      "observed": "WAITING_INPUT",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "longCopy",
+      "check": "phase",
+      "expected": "WAITING_USER",
+      "observed": "WAITING_USER",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "longCopy",
+      "check": "nextActor",
+      "expected": "USER",
+      "observed": "USER",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "longCopy",
+      "check": "requiresUser",
+      "expected": true,
+      "observed": true,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "longCopy",
+      "check": "reasonCode",
+      "expected": "QUESTION_PENDING",
+      "observed": "QUESTION_PENDING",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "longCopy",
+      "check": "primaryActionKind",
+      "expected": "ANSWER_QUESTION",
+      "observed": "ANSWER_QUESTION",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "longCopy",
+      "check": "waitingOn",
+      "expected": "USER_INPUT",
+      "observed": "USER_INPUT",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "longCopy",
+      "check": "observationState",
+      "expected": "NOT_OBSERVED",
+      "observed": "NOT_OBSERVED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "longCopy",
+      "check": "blockerCodes",
+      "expected": [
+        "WORKER_PRESENCE_UNOBSERVED",
+        "QUESTION_PENDING"
+      ],
+      "observed": [
+        "WORKER_PRESENCE_UNOBSERVED",
+        "QUESTION_PENDING"
+      ],
+      "status": "PASS"
+    },
+    {
+      "missionKey": "terminalUnknown",
+      "check": "readSideEffectsUnchanged",
+      "expected": {
+        "version": 1,
+        "status": "SUCCEEDED",
+        "updatedAt": "2026-11-03T08:20:13.560Z",
+        "budgetUsedJson": "{\"tools\":1,\"unknownCalls\":1}"
+      },
+      "observed": {
+        "version": 1,
+        "status": "SUCCEEDED",
+        "updatedAt": "2026-11-03T08:20:13.560Z",
+        "budgetUsedJson": "{\"tools\":1,\"unknownCalls\":1}"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "terminalUnknown",
+      "check": "hasWorkPacket",
+      "expected": true,
+      "observed": true,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "terminalUnknown",
+      "check": "status",
+      "expected": "SUCCEEDED",
+      "observed": "SUCCEEDED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "terminalUnknown",
+      "check": "phase",
+      "expected": "COMPLETED",
+      "observed": "COMPLETED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "terminalUnknown",
+      "check": "nextActor",
+      "expected": "USER",
+      "observed": "USER",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "terminalUnknown",
+      "check": "requiresUser",
+      "expected": true,
+      "observed": true,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "terminalUnknown",
+      "check": "reasonCode",
+      "expected": "SUCCEEDED",
+      "observed": "SUCCEEDED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "terminalUnknown",
+      "check": "primaryActionKind",
+      "expected": "CHECK_UNKNOWN_EFFECT",
+      "observed": "CHECK_UNKNOWN_EFFECT",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "terminalUnknown",
+      "check": "waitingOn",
+      "expected": "NONE",
+      "observed": "NONE",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "terminalUnknown",
+      "check": "observationState",
+      "expected": "NOT_OBSERVED",
+      "observed": "NOT_OBSERVED",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "terminalUnknown",
+      "check": "blockerCodes",
+      "expected": [
+        "TOOL_UNKNOWN"
+      ],
+      "observed": [
+        "TOOL_UNKNOWN"
+      ],
+      "status": "PASS"
+    },
+    {
+      "missionKey": "terminalUnknown",
+      "check": "unsettledEffect",
+      "expected": {
+        "present": true,
+        "code": "TOOL_UNKNOWN",
+        "source": "LAST_ERROR"
+      },
+      "observed": {
+        "present": true,
+        "code": "TOOL_UNKNOWN",
+        "source": "LAST_ERROR"
+      },
+      "status": "PASS"
+    },
+    {
+      "missionKey": "environment",
+      "check": "fixtureProjectCount",
+      "expected": 2,
+      "observed": 2,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "environment",
+      "check": "fixtureUserCount",
+      "expected": 1,
+      "observed": 1,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "environment",
+      "check": "agentRunCount(expect 0 for seed)",
+      "expected": 0,
+      "observed": 0,
+      "status": "PASS"
+    },
+    {
+      "missionKey": "environment",
+      "check": "databasePath",
+      "expected": "D:\\Projects\\hongmen-final-c-workspace-ux\\prisma\\final-preparation.db",
+      "observed": "D:\\Projects\\hongmen-final-c-workspace-ux\\prisma\\final-preparation.db",
+      "status": "PASS"
+    },
+    {
+      "missionKey": "environment",
+      "check": "modelProviderCalls",
+      "expected": 0,
+      "observed": 0,
+      "status": "PASS"
+    }
+  ],
+  "readings": {
+    "waitingUser": {
+      "detail": {
+        "status": "WAITING_INPUT",
+        "version": 1,
+        "questionId": "cmw0f3qha0008rk8ox90vydxu",
+        "approvals": [],
+        "steps": [
+          {
+            "ordinal": 1,
+            "toolName": "bind_project_sources",
+            "status": "SUCCEEDED"
+          }
+        ],
+        "outputs": []
+      },
+      "readback": {
+        "missionVersion": 1,
+        "missionStatus": "WAITING_INPUT",
+        "phase": "WAITING_USER",
+        "nextActor": "USER",
+        "requiresUser": true,
+        "reasonCode": "QUESTION_PENDING",
+        "workStateTerminal": null,
+        "unsettledEffect": {
+          "present": false,
+          "code": null,
+          "source": "NONE",
+          "reasonText": null,
+          "resolvedByRead": false
+        },
+        "stopRequest": {
+          "state": "NONE",
+          "requestedAt": null,
+          "settled": true,
+          "note": null
+        },
+        "observationState": "NOT_OBSERVED",
+        "snapshotConsistency": "VERSION_STABLE",
+        "hasWorkPacket": true,
+        "primaryActionKind": "ANSWER_QUESTION",
+        "primaryActionTarget": {
+          "kind": "QUESTION",
+          "id": "cmw0f3qha0008rk8ox90vydxu",
+          "version": null
+        },
+        "waitingOn": "USER_INPUT",
+        "blockerCodes": [
+          "WORKER_PRESENCE_UNOBSERVED",
+          "QUESTION_PENDING"
+        ],
+        "materialUses": {
+          "capture:cmw0f3qhd0009rk8op9oce64d": {
+            "currentUse": "ALLOWED",
+            "revisionAvailability": "CURRENT",
+            "availability": "CURRENT",
+            "facts": [
+              "SAVED",
+              "BOUND"
+            ]
+          }
+        },
+        "materialUseCount": 1,
+        "latestOutput": null,
+        "actionReceipts": [],
+        "adoptions": [],
+        "reviewProgressCounts": {
+          "executed": {
+            "steps": 1,
+            "actions": 0
+          },
+          "observed": {
+            "steps": 1
+          },
+          "independentlySupported": {
+            "claims": 0
+          },
+          "textuallySupported": {
+            "claims": 0
+          },
+          "userReported": {
+            "actionReceipts": 0
+          },
+          "counterExamples": {
+            "claims": 0
+          },
+          "unknown": {
+            "claims": 0,
+            "steps": 0
+          }
+        },
+        "selectedQuestion": {
+          "id": "cmw0f3qha0008rk8ox90vydxu",
+          "text": "请补充设备 D 在 2026-10 的真实显存峰值（GB），以及 batch、序列长度和是否启用 KV cache。缺少这些条件时不会外推预算结论。",
+          "historical": false
+        },
+        "selectedApproval": null,
+        "selectedOutput": null,
+        "selectedReceipt": null,
+        "realityOutcome": "NOT_INFERRED"
+      }
+    },
+    "waitingUser.oldQuestion": {
+      "missionVersion": 1,
+      "missionStatus": "WAITING_INPUT",
+      "phase": "WAITING_USER",
+      "nextActor": "USER",
+      "requiresUser": true,
+      "reasonCode": "QUESTION_PENDING",
+      "workStateTerminal": null,
+      "unsettledEffect": {
+        "present": false,
+        "code": null,
+        "source": "NONE",
+        "reasonText": null,
+        "resolvedByRead": false
+      },
+      "stopRequest": {
+        "state": "NONE",
+        "requestedAt": null,
+        "settled": true,
+        "note": null
+      },
+      "observationState": "NOT_OBSERVED",
+      "snapshotConsistency": "VERSION_STABLE",
+      "hasWorkPacket": true,
+      "primaryActionKind": "ANSWER_QUESTION",
+      "primaryActionTarget": {
+        "kind": "QUESTION",
+        "id": "cmw0f3qha0008rk8ox90vydxu",
+        "version": null
+      },
+      "waitingOn": "USER_INPUT",
+      "blockerCodes": [
+        "WORKER_PRESENCE_UNOBSERVED",
+        "QUESTION_PENDING"
+      ],
+      "materialUses": {},
+      "materialUseCount": 0,
+      "latestOutput": null,
+      "actionReceipts": [],
+      "adoptions": [],
+      "reviewProgressCounts": {
+        "executed": {
+          "steps": 1,
+          "actions": 0
+        },
+        "observed": {
+          "steps": 1
+        },
+        "independentlySupported": {
+          "claims": 0
+        },
+        "textuallySupported": {
+          "claims": 0
+        },
+        "userReported": {
+          "actionReceipts": 0
+        },
+        "counterExamples": {
+          "claims": 0
+        },
+        "unknown": {
+          "claims": 0,
+          "steps": 0
+        }
+      },
+      "selectedQuestion": {
+        "id": "cmw0f3qh50007rk8our758md2",
+        "text": "旧问题：请补充设备 D 的历史预算结论（已被新问题取代，只读）。",
+        "historical": true
+      },
+      "selectedApproval": null,
+      "selectedOutput": null,
+      "selectedReceipt": null,
+      "realityOutcome": "NOT_INFERRED"
+    },
+    "waitingApproval": {
+      "detail": {
+        "status": "WAITING_APPROVAL",
+        "version": 1,
+        "questionId": null,
+        "approvals": [
+          {
+            "id": "cmw0f3qi7000grk8oycjd1f87",
+            "expiresAt": "2026-11-03T14:20:13.422Z"
+          }
+        ],
+        "steps": [
+          {
+            "ordinal": 1,
+            "toolName": "propose_action",
+            "status": "WAITING_APPROVAL"
+          },
+          {
+            "ordinal": 2,
+            "toolName": "propose_action",
+            "status": "OBSOLETE"
+          }
+        ],
+        "outputs": []
+      },
+      "readback": {
+        "missionVersion": 1,
+        "missionStatus": "WAITING_APPROVAL",
+        "phase": "WAITING_APPROVAL",
+        "nextActor": "USER",
+        "requiresUser": true,
+        "reasonCode": "APPROVAL_PENDING",
+        "workStateTerminal": null,
+        "unsettledEffect": {
+          "present": false,
+          "code": null,
+          "source": "NONE",
+          "reasonText": null,
+          "resolvedByRead": false
+        },
+        "stopRequest": {
+          "state": "NONE",
+          "requestedAt": null,
+          "settled": true,
+          "note": null
+        },
+        "observationState": "NOT_OBSERVED",
+        "snapshotConsistency": "VERSION_STABLE",
+        "hasWorkPacket": true,
+        "primaryActionKind": "REVIEW_APPROVAL",
+        "primaryActionTarget": {
+          "kind": "APPROVAL",
+          "id": "cmw0f3qi7000grk8oycjd1f87",
+          "version": null
+        },
+        "waitingOn": "USER_APPROVAL",
+        "blockerCodes": [
+          "WORKER_PRESENCE_UNOBSERVED",
+          "APPROVAL_PENDING"
+        ],
+        "materialUses": {},
+        "materialUseCount": 0,
+        "latestOutput": null,
+        "actionReceipts": [],
+        "adoptions": [],
+        "reviewProgressCounts": {
+          "executed": {
+            "steps": 0,
+            "actions": 0
+          },
+          "observed": {
+            "steps": 0
+          },
+          "independentlySupported": {
+            "claims": 0
+          },
+          "textuallySupported": {
+            "claims": 0
+          },
+          "userReported": {
+            "actionReceipts": 0
+          },
+          "counterExamples": {
+            "claims": 0
+          },
+          "unknown": {
+            "claims": 0,
+            "steps": 0
+          }
+        },
+        "selectedQuestion": null,
+        "selectedApproval": {
+          "id": "cmw0f3qi7000grk8oycjd1f87",
+          "status": "PENDING",
+          "proposal": {
+            "tool": "create_action",
+            "args": {
+              "title": "核对设备 D 显存预算并记录复测条件",
+              "description": "批准后只创建本项目 1 项待办；创建行动不代表实验完成，执行仍需在原行动中记录真实结果。",
+              "priority": 2,
+              "dueAt": "2026-11-06T08:20:13.420Z"
+            }
+          },
+          "expiresAt": "2026-11-03T14:20:13.422Z"
+        },
+        "selectedOutput": null,
+        "selectedReceipt": null,
+        "realityOutcome": "NOT_INFERRED"
+      }
+    },
+    "waitingApproval.oldApproval": {
+      "missionVersion": 1,
+      "missionStatus": "WAITING_APPROVAL",
+      "phase": "WAITING_APPROVAL",
+      "nextActor": "USER",
+      "requiresUser": true,
+      "reasonCode": "APPROVAL_PENDING",
+      "workStateTerminal": null,
+      "unsettledEffect": {
+        "present": false,
+        "code": null,
+        "source": "NONE",
+        "reasonText": null,
+        "resolvedByRead": false
+      },
+      "stopRequest": {
+        "state": "NONE",
+        "requestedAt": null,
+        "settled": true,
+        "note": null
+      },
+      "observationState": "NOT_OBSERVED",
+      "snapshotConsistency": "VERSION_STABLE",
+      "hasWorkPacket": true,
+      "primaryActionKind": "REVIEW_APPROVAL",
+      "primaryActionTarget": {
+        "kind": "APPROVAL",
+        "id": "cmw0f3qi7000grk8oycjd1f87",
+        "version": null
+      },
+      "waitingOn": "USER_APPROVAL",
+      "blockerCodes": [
+        "WORKER_PRESENCE_UNOBSERVED",
+        "APPROVAL_PENDING"
+      ],
+      "materialUses": {},
+      "materialUseCount": 0,
+      "latestOutput": null,
+      "actionReceipts": [],
+      "adoptions": [],
+      "reviewProgressCounts": {
+        "executed": {
+          "steps": 0,
+          "actions": 0
+        },
+        "observed": {
+          "steps": 0
+        },
+        "independentlySupported": {
+          "claims": 0
+        },
+        "textuallySupported": {
+          "claims": 0
+        },
+        "userReported": {
+          "actionReceipts": 0
+        },
+        "counterExamples": {
+          "claims": 0
+        },
+        "unknown": {
+          "claims": 0,
+          "steps": 0
+        }
+      },
+      "selectedQuestion": null,
+      "selectedApproval": {
+        "id": "cmw0f3qi2000erk8ot0udhtzq",
+        "status": "EXPIRED",
+        "proposal": {
+          "tool": "create_action",
+          "args": {
+            "title": "旧提案：核对设备 D 显存预算（已过期，只读）",
+            "description": "历史提案，不得作为当前批准依据。",
+            "priority": 3
+          }
+        },
+        "expiresAt": "2026-11-03T07:50:13.417Z"
+      },
+      "selectedOutput": null,
+      "selectedReceipt": null,
+      "realityOutcome": "NOT_INFERRED"
+    },
+    "stopRequested": {
+      "detail": {
+        "status": "RUNNING",
+        "version": 1,
+        "questionId": null,
+        "approvals": [],
+        "steps": [
+          {
+            "ordinal": 1,
+            "toolName": "inspect_project",
+            "status": "RUNNING"
+          }
+        ],
+        "outputs": []
+      },
+      "readback": {
+        "missionVersion": 1,
+        "missionStatus": "RUNNING",
+        "phase": "RUNNING",
+        "nextActor": "SYSTEM",
+        "requiresUser": false,
+        "reasonCode": "STOP_REQUESTED_IN_FLIGHT",
+        "workStateTerminal": null,
+        "unsettledEffect": {
+          "present": false,
+          "code": null,
+          "source": "NONE",
+          "reasonText": null,
+          "resolvedByRead": false
+        },
+        "stopRequest": {
+          "state": "PAUSE_REQUESTED",
+          "requestedAt": "2026-11-03T08:20:08.425Z",
+          "settled": false,
+          "note": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤"
+        },
+        "observationState": "NOT_OBSERVED",
+        "snapshotConsistency": "VERSION_STABLE",
+        "hasWorkPacket": true,
+        "primaryActionKind": "CHECK_STOP_SETTLEMENT",
+        "primaryActionTarget": {
+          "kind": "MISSION",
+          "id": "cmw0f3qi9000hrk8oyr8fey9w",
+          "version": 1
+        },
+        "waitingOn": "SYSTEM_SETTLEMENT",
+        "blockerCodes": [
+          "WORKER_PRESENCE_UNOBSERVED",
+          "PAUSE_REQUESTED"
+        ],
+        "materialUses": {},
+        "materialUseCount": 0,
+        "latestOutput": null,
+        "actionReceipts": [],
+        "adoptions": [],
+        "reviewProgressCounts": {
+          "executed": {
+            "steps": 0,
+            "actions": 0
+          },
+          "observed": {
+            "steps": 0
+          },
+          "independentlySupported": {
+            "claims": 0
+          },
+          "textuallySupported": {
+            "claims": 0
+          },
+          "userReported": {
+            "actionReceipts": 0
+          },
+          "counterExamples": {
+            "claims": 0
+          },
+          "unknown": {
+            "claims": 0,
+            "steps": 0
+          }
+        },
+        "selectedQuestion": null,
+        "selectedApproval": null,
+        "selectedOutput": null,
+        "selectedReceipt": null,
+        "realityOutcome": "NOT_INFERRED"
+      }
+    },
+    "succeeded": {
+      "detail": {
+        "status": "SUCCEEDED",
+        "version": 1,
+        "questionId": null,
+        "approvals": [],
+        "steps": [
+          {
+            "ordinal": 1,
+            "toolName": "search_memory",
+            "status": "SUCCEEDED"
+          },
+          {
+            "ordinal": 2,
+            "toolName": "save_mission_output",
+            "status": "SUCCEEDED"
+          },
+          {
+            "ordinal": 3,
+            "toolName": "create_action",
+            "status": "SUCCEEDED"
+          },
+          {
+            "ordinal": 4,
+            "toolName": "bind_project_sources",
+            "status": "SUCCEEDED"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "cmw0f3qj7000srk8oacp6tqxb",
+            "revision": 1,
+            "verificationStatus": "NEEDS_REVIEW"
+          }
+        ]
+      },
+      "readback": {
+        "missionVersion": 1,
+        "missionStatus": "SUCCEEDED",
+        "phase": "COMPLETED",
+        "nextActor": "NONE",
+        "requiresUser": false,
+        "reasonCode": "SUCCEEDED",
+        "workStateTerminal": {
+          "status": "SUCCEEDED",
+          "at": "2026-11-03T07:20:13.438Z",
+          "atSource": "FINISHED_AT",
+          "reasonCode": "SUCCEEDED"
+        },
+        "unsettledEffect": {
+          "present": false,
+          "code": null,
+          "source": "NONE",
+          "reasonText": null,
+          "resolvedByRead": false
+        },
+        "stopRequest": {
+          "state": "NONE",
+          "requestedAt": null,
+          "settled": true,
+          "note": "原委托已完成；停止请求不再具有执行含义"
+        },
+        "observationState": "OBSERVED",
+        "snapshotConsistency": "VERSION_STABLE",
+        "hasWorkPacket": true,
+        "primaryActionKind": "VIEW_RESULT",
+        "primaryActionTarget": {
+          "kind": "OUTPUT",
+          "id": "cmw0f3qj7000srk8oacp6tqxb",
+          "version": 1
+        },
+        "waitingOn": "NONE",
+        "blockerCodes": [],
+        "materialUses": {
+          "capture:cmw0f3qiy000prk8oli9wtx03": {
+            "currentUse": "ALLOWED",
+            "revisionAvailability": "CURRENT",
+            "availability": "CURRENT",
+            "facts": [
+              "SAVED",
+              "BOUND",
+              "OUTPUT_REFERENCE",
+              "EXACT_QUOTE",
+              "ARTIFACT_ADOPTION"
+            ]
+          }
+        },
+        "materialUseCount": 1,
+        "latestOutput": {
+          "id": "cmw0f3qj7000srk8oacp6tqxb",
+          "revision": 1,
+          "createdAt": "2026-11-03T05:50:13.458Z"
+        },
+        "actionReceipts": [
+          {
+            "actionId": "cmw0f3qj4000rrk8ond429bwc",
+            "title": "核对设备 D 显存预算并记录复测条件",
+            "status": "DONE",
+            "resultCardId": "cmw0f3qj1000qrk8o39vb8plu",
+            "completedAt": "2026-11-03T06:20:13.455Z",
+            "isSimulated": false
+          }
+        ],
+        "adoptions": [
+          {
+            "receiptId": "cmw0f3qjl000yrk8o7wa57pet",
+            "outputId": "cmw0f3qj7000srk8oacp6tqxb",
+            "outputRevision": 1,
+            "artifactId": "cmw0f3qjj000xrk8o3rahnqhs",
+            "artifactType": "weekly_report",
+            "artifactCreatedAt": "2026-11-03T06:00:13.470Z",
+            "title": "项目周报"
+          }
+        ],
+        "reviewProgressCounts": {
+          "executed": {
+            "steps": 4,
+            "actions": 1
+          },
+          "observed": {
+            "steps": 2
+          },
+          "independentlySupported": {
+            "claims": 0
+          },
+          "textuallySupported": {
+            "claims": 0
+          },
+          "userReported": {
+            "actionReceipts": 1
+          },
+          "counterExamples": {
+            "claims": 0
+          },
+          "unknown": {
+            "claims": 0,
+            "steps": 0
+          }
+        },
+        "selectedQuestion": null,
+        "selectedApproval": null,
+        "selectedOutput": {
+          "id": "cmw0f3qj7000srk8oacp6tqxb",
+          "revision": 1
+        },
+        "selectedReceipt": {
+          "id": "cmw0f3qjl000yrk8o7wa57pet",
+          "outputId": "cmw0f3qj7000srk8oacp6tqxb",
+          "outputRevision": 1,
+          "artifactId": "cmw0f3qjj000xrk8o3rahnqhs"
+        },
+        "realityOutcome": "NOT_INFERRED"
+      }
+    },
+    "failed": {
+      "detail": {
+        "status": "FAILED",
+        "version": 1,
+        "questionId": null,
+        "approvals": [],
+        "steps": [
+          {
+            "ordinal": 1,
+            "toolName": "inspect_project",
+            "status": "FAILED"
+          }
+        ],
+        "outputs": []
+      },
+      "readback": {
+        "missionVersion": 1,
+        "missionStatus": "FAILED",
+        "phase": "FAILED",
+        "nextActor": "SYSTEM",
+        "requiresUser": false,
+        "reasonCode": "TOOL_FAILED",
+        "workStateTerminal": null,
+        "unsettledEffect": {
+          "present": false,
+          "code": null,
+          "source": "NONE",
+          "reasonText": null,
+          "resolvedByRead": false
+        },
+        "stopRequest": {
+          "state": "NONE",
+          "requestedAt": null,
+          "settled": true,
+          "note": null
+        },
+        "observationState": "NOT_OBSERVED",
+        "snapshotConsistency": "VERSION_STABLE",
+        "hasWorkPacket": true,
+        "primaryActionKind": "REVIEW_FAILURE",
+        "primaryActionTarget": {
+          "kind": "MISSION",
+          "id": "cmw0f3qjr000zrk8oz4xdoiq3",
+          "version": 1
+        },
+        "waitingOn": "SYSTEM_RECHECK",
+        "blockerCodes": [
+          "WORKER_PRESENCE_UNOBSERVED",
+          "TOOL_FAILED"
+        ],
+        "materialUses": {},
+        "materialUseCount": 0,
+        "latestOutput": null,
+        "actionReceipts": [],
+        "adoptions": [],
+        "reviewProgressCounts": {
+          "executed": {
+            "steps": 0,
+            "actions": 0
+          },
+          "observed": {
+            "steps": 0
+          },
+          "independentlySupported": {
+            "claims": 0
+          },
+          "textuallySupported": {
+            "claims": 0
+          },
+          "userReported": {
+            "actionReceipts": 0
+          },
+          "counterExamples": {
+            "claims": 0
+          },
+          "unknown": {
+            "claims": 0,
+            "steps": 0
+          }
+        },
+        "selectedQuestion": null,
+        "selectedApproval": null,
+        "selectedOutput": null,
+        "selectedReceipt": null,
+        "realityOutcome": "NOT_INFERRED"
+      }
+    },
+    "unknown": {
+      "detail": {
+        "status": "PAUSED",
+        "version": 1,
+        "questionId": null,
+        "approvals": [],
+        "steps": [
+          {
+            "ordinal": 1,
+            "toolName": "inspect_project",
+            "status": "UNKNOWN"
+          }
+        ],
+        "outputs": []
+      },
+      "readback": {
+        "missionVersion": 1,
+        "missionStatus": "PAUSED",
+        "phase": "UNKNOWN",
+        "nextActor": "SYSTEM",
+        "requiresUser": false,
+        "reasonCode": "TOOL_UNKNOWN",
+        "workStateTerminal": null,
+        "unsettledEffect": {
+          "present": true,
+          "code": "TOOL_UNKNOWN",
+          "source": "LAST_ERROR",
+          "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+          "resolvedByRead": false
+        },
+        "stopRequest": {
+          "state": "PAUSE_SETTLED",
+          "requestedAt": "2026-11-03T07:40:13.490Z",
+          "settled": true,
+          "note": "暂停请求已结算：原委托已暂停，不会继续派发新步骤"
+        },
+        "observationState": "NOT_OBSERVED",
+        "snapshotConsistency": "VERSION_STABLE",
+        "hasWorkPacket": true,
+        "primaryActionKind": "RECHECK_AUTHORITY",
+        "primaryActionTarget": {
+          "kind": "MISSION",
+          "id": "cmw0f3qk30012rk8oz7auug9m",
+          "version": 1
+        },
+        "waitingOn": "SYSTEM_RECHECK",
+        "blockerCodes": [
+          "TOOL_UNKNOWN",
+          "WORKER_PRESENCE_UNOBSERVED",
+          "TOOL_UNKNOWN"
+        ],
+        "materialUses": {},
+        "materialUseCount": 0,
+        "latestOutput": null,
+        "actionReceipts": [],
+        "adoptions": [],
+        "reviewProgressCounts": {
+          "executed": {
+            "steps": 0,
+            "actions": 0
+          },
+          "observed": {
+            "steps": 0
+          },
+          "independentlySupported": {
+            "claims": 0
+          },
+          "textuallySupported": {
+            "claims": 0
+          },
+          "userReported": {
+            "actionReceipts": 0
+          },
+          "counterExamples": {
+            "claims": 0
+          },
+          "unknown": {
+            "claims": 0,
+            "steps": 1
+          }
+        },
+        "selectedQuestion": null,
+        "selectedApproval": null,
+        "selectedOutput": null,
+        "selectedReceipt": null,
+        "realityOutcome": "NOT_INFERRED"
+      }
+    },
+    "sourceStates": {
+      "detail": {
+        "status": "WAITING_INPUT",
+        "version": 1,
+        "questionId": "cmw0f3qkn0017rk8orzhxsqwn",
+        "approvals": [],
+        "steps": [
+          {
+            "ordinal": 1,
+            "toolName": "bind_project_sources",
+            "status": "SUCCEEDED"
+          }
+        ],
+        "outputs": []
+      },
+      "readback": {
+        "missionVersion": 1,
+        "missionStatus": "WAITING_INPUT",
+        "phase": "WAITING_USER",
+        "nextActor": "USER",
+        "requiresUser": true,
+        "reasonCode": "QUESTION_PENDING",
+        "workStateTerminal": null,
+        "unsettledEffect": {
+          "present": false,
+          "code": null,
+          "source": "NONE",
+          "reasonText": null,
+          "resolvedByRead": false
+        },
+        "stopRequest": {
+          "state": "NONE",
+          "requestedAt": null,
+          "settled": true,
+          "note": null
+        },
+        "observationState": "NOT_OBSERVED",
+        "snapshotConsistency": "VERSION_STABLE",
+        "hasWorkPacket": true,
+        "primaryActionKind": "ANSWER_QUESTION",
+        "primaryActionTarget": {
+          "kind": "QUESTION",
+          "id": "cmw0f3qkn0017rk8orzhxsqwn",
+          "version": null
+        },
+        "waitingOn": "USER_INPUT",
+        "blockerCodes": [
+          "WORKER_PRESENCE_UNOBSERVED",
+          "CURRENT_USE_SUPPRESSED",
+          "CURRENT_USE_UNKNOWN",
+          "SOURCE_CHANGED",
+          "SOURCE_UNAVAILABLE",
+          "SOURCE_UNAVAILABLE",
+          "QUESTION_PENDING"
+        ],
+        "materialUses": {
+          "capture:cmw0f3qkp0018rk8ouva90drx": {
+            "currentUse": "ALLOWED",
+            "revisionAvailability": "CURRENT",
+            "availability": "CURRENT",
+            "facts": [
+              "SAVED",
+              "BOUND"
+            ]
+          },
+          "capture:cmw0f3qkr0019rk8oq0fxssn7": {
+            "currentUse": "ALLOWED",
+            "revisionAvailability": "CHANGED",
+            "availability": "CHANGED",
+            "facts": [
+              "BOUND"
+            ]
+          },
+          "capture:cmw0f3qkv001ark8ofup9n00d": {
+            "currentUse": "SUPPRESSED",
+            "revisionAvailability": "CURRENT",
+            "availability": "UNAVAILABLE",
+            "facts": [
+              "SAVED",
+              "BOUND"
+            ]
+          },
+          "capture:cmw0f3qky001brk8oy8u4gf0f": {
+            "currentUse": "UNKNOWN",
+            "revisionAvailability": "UNAVAILABLE",
+            "availability": "UNAVAILABLE",
+            "facts": [
+              "BOUND"
+            ]
+          }
+        },
+        "materialUseCount": 4,
+        "latestOutput": null,
+        "actionReceipts": [],
+        "adoptions": [],
+        "reviewProgressCounts": {
+          "executed": {
+            "steps": 1,
+            "actions": 0
+          },
+          "observed": {
+            "steps": 1
+          },
+          "independentlySupported": {
+            "claims": 0
+          },
+          "textuallySupported": {
+            "claims": 0
+          },
+          "userReported": {
+            "actionReceipts": 0
+          },
+          "counterExamples": {
+            "claims": 0
+          },
+          "unknown": {
+            "claims": 0,
+            "steps": 0
+          }
+        },
+        "selectedQuestion": {
+          "id": "cmw0f3qkn0017rk8orzhxsqwn",
+          "text": "请核对资料状态：哪一条被当前许可抑制、哪一条修订已变化、哪一条来源链未知；历史留痕保留但不得当作当前依据。",
+          "historical": false
+        },
+        "selectedApproval": null,
+        "selectedOutput": null,
+        "selectedReceipt": null,
+        "realityOutcome": "NOT_INFERRED"
+      }
+    },
+    "cancelled": {
+      "detail": {
+        "status": "CANCELLED",
+        "version": 1,
+        "questionId": null,
+        "approvals": [],
+        "steps": [],
+        "outputs": [
+          {
+            "id": "cmw0f3qli001frk8o853vcjhj",
+            "revision": 1,
+            "verificationStatus": "NEEDS_REVIEW"
+          }
+        ]
+      },
+      "readback": {
+        "missionVersion": 1,
+        "missionStatus": "CANCELLED",
+        "phase": "COMPLETED",
+        "nextActor": "NONE",
+        "requiresUser": false,
+        "reasonCode": "CANCELLED",
+        "workStateTerminal": {
+          "status": "CANCELLED",
+          "at": "2026-11-03T07:45:13.534Z",
+          "atSource": "FINISHED_AT",
+          "reasonCode": "CANCELLED"
+        },
+        "unsettledEffect": {
+          "present": false,
+          "code": null,
+          "source": "NONE",
+          "reasonText": null,
+          "resolvedByRead": false
+        },
+        "stopRequest": {
+          "state": "CANCEL_SETTLED",
+          "requestedAt": "2026-11-03T07:45:13.534Z",
+          "settled": true,
+          "note": "取消请求已结算：原委托已取消，历史结果保留，不能视为成功完成"
+        },
+        "observationState": "NOT_OBSERVED",
+        "snapshotConsistency": "VERSION_STABLE",
+        "hasWorkPacket": true,
+        "primaryActionKind": "VIEW_RESULT",
+        "primaryActionTarget": {
+          "kind": "OUTPUT",
+          "id": "cmw0f3qli001frk8o853vcjhj",
+          "version": 1
+        },
+        "waitingOn": "NONE",
+        "blockerCodes": [],
+        "materialUses": {},
+        "materialUseCount": 0,
+        "latestOutput": {
+          "id": "cmw0f3qli001frk8o853vcjhj",
+          "revision": 1,
+          "createdAt": "2026-11-03T07:30:13.542Z"
+        },
+        "actionReceipts": [],
+        "adoptions": [],
+        "reviewProgressCounts": {
+          "executed": {
+            "steps": 0,
+            "actions": 0
+          },
+          "observed": {
+            "steps": 0
+          },
+          "independentlySupported": {
+            "claims": 0
+          },
+          "textuallySupported": {
+            "claims": 0
+          },
+          "userReported": {
+            "actionReceipts": 0
+          },
+          "counterExamples": {
+            "claims": 0
+          },
+          "unknown": {
+            "claims": 0,
+            "steps": 0
+          }
+        },
+        "selectedQuestion": null,
+        "selectedApproval": null,
+        "selectedOutput": {
+          "id": "cmw0f3qli001frk8o853vcjhj",
+          "revision": 1
+        },
+        "selectedReceipt": null,
+        "realityOutcome": "NOT_INFERRED"
+      }
+    },
+    "longCopy": {
+      "detail": {
+        "status": "WAITING_INPUT",
+        "version": 1,
+        "questionId": "cmw0f3qlt001irk8o0j6fy31x",
+        "approvals": [],
+        "steps": [],
+        "outputs": []
+      },
+      "readback": {
+        "missionVersion": 1,
+        "missionStatus": "WAITING_INPUT",
+        "phase": "WAITING_USER",
+        "nextActor": "USER",
+        "requiresUser": true,
+        "reasonCode": "QUESTION_PENDING",
+        "workStateTerminal": null,
+        "unsettledEffect": {
+          "present": false,
+          "code": null,
+          "source": "NONE",
+          "reasonText": null,
+          "resolvedByRead": false
+        },
+        "stopRequest": {
+          "state": "NONE",
+          "requestedAt": null,
+          "settled": true,
+          "note": null
+        },
+        "observationState": "NOT_OBSERVED",
+        "snapshotConsistency": "VERSION_STABLE",
+        "hasWorkPacket": true,
+        "primaryActionKind": "ANSWER_QUESTION",
+        "primaryActionTarget": {
+          "kind": "QUESTION",
+          "id": "cmw0f3qlt001irk8o0j6fy31x",
+          "version": null
+        },
+        "waitingOn": "USER_INPUT",
+        "blockerCodes": [
+          "WORKER_PRESENCE_UNOBSERVED",
+          "QUESTION_PENDING"
+        ],
+        "materialUses": {},
+        "materialUseCount": 0,
+        "latestOutput": null,
+        "actionReceipts": [],
+        "adoptions": [],
+        "reviewProgressCounts": {
+          "executed": {
+            "steps": 0,
+            "actions": 0
+          },
+          "observed": {
+            "steps": 0
+          },
+          "independentlySupported": {
+            "claims": 0
+          },
+          "textuallySupported": {
+            "claims": 0
+          },
+          "userReported": {
+            "actionReceipts": 0
+          },
+          "counterExamples": {
+            "claims": 0
+          },
+          "unknown": {
+            "claims": 0,
+            "steps": 0
+          }
+        },
+        "selectedQuestion": {
+          "id": "cmw0f3qlt001irk8o0j6fy31x",
+          "text": "请补充以下长问题的答案：SYNTHETIC_LONG_UNBROKEN_TOKEN_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX；并说明测试条件、设备编号、批次、序列长度、是否启用缓存，以及你认为还缺少哪些信息。",
+          "historical": false
+        },
+        "selectedApproval": null,
+        "selectedOutput": null,
+        "selectedReceipt": null,
+        "realityOutcome": "NOT_INFERRED"
+      }
+    },
+    "terminalUnknown": {
+      "detail": {
+        "status": "SUCCEEDED",
+        "version": 1,
+        "questionId": null,
+        "approvals": [],
+        "steps": [],
+        "outputs": []
+      },
+      "readback": {
+        "missionVersion": 1,
+        "missionStatus": "SUCCEEDED",
+        "phase": "COMPLETED",
+        "nextActor": "USER",
+        "requiresUser": true,
+        "reasonCode": "SUCCEEDED",
+        "workStateTerminal": {
+          "status": "SUCCEEDED",
+          "at": "2026-11-03T07:10:13.557Z",
+          "atSource": "FINISHED_AT",
+          "reasonCode": "SUCCEEDED"
+        },
+        "unsettledEffect": {
+          "present": true,
+          "code": "TOOL_UNKNOWN",
+          "source": "LAST_ERROR",
+          "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+          "resolvedByRead": false
+        },
+        "stopRequest": {
+          "state": "NONE",
+          "requestedAt": null,
+          "settled": true,
+          "note": "原委托已完成；停止请求不再具有执行含义"
+        },
+        "observationState": "NOT_OBSERVED",
+        "snapshotConsistency": "VERSION_STABLE",
+        "hasWorkPacket": true,
+        "primaryActionKind": "CHECK_UNKNOWN_EFFECT",
+        "primaryActionTarget": {
+          "kind": "MISSION",
+          "id": "cmw0f3qly001jrk8ofepwm6k3",
+          "version": 1
+        },
+        "waitingOn": "NONE",
+        "blockerCodes": [
+          "TOOL_UNKNOWN"
+        ],
+        "materialUses": {},
+        "materialUseCount": 0,
+        "latestOutput": null,
+        "actionReceipts": [],
+        "adoptions": [],
+        "reviewProgressCounts": {
+          "executed": {
+            "steps": 0,
+            "actions": 0
+          },
+          "observed": {
+            "steps": 0
+          },
+          "independentlySupported": {
+            "claims": 0
+          },
+          "textuallySupported": {
+            "claims": 0
+          },
+          "userReported": {
+            "actionReceipts": 0
+          },
+          "counterExamples": {
+            "claims": 0
+          },
+          "unknown": {
+            "claims": 0,
+            "steps": 0
+          }
+        },
+        "selectedQuestion": null,
+        "selectedApproval": null,
+        "selectedOutput": null,
+        "selectedReceipt": null,
+        "realityOutcome": "NOT_INFERRED"
+      }
+    }
+  },
+  "note": "本文件验证 fixture 与真实服务层读回；不代表 Web UI 已验收。Web 截图/异常态证据见 EV2 manifest。"
+}

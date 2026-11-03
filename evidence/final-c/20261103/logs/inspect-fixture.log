@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "auditPath": "D:\\Projects\\hongmen-final-c-workspace-ux\\evidence\\final-c\\20261103\\fixture-readback-audit.json",
+  "totals": {
+    "checks": 146,
+    "pass": 146,
+    "fail": 0
+  },
+  "failures": []
+}

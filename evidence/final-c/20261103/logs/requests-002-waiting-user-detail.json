@@ -1,0 +1,1339 @@
+[
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_18kd641k-6e40._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:46.903Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_0m5y1ob39-74k._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:46.904Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/projects/cmw0f3qg90001rk8ovncx1f99/missions?mission=cmw0f3qgq0005rk8oxiheeivm&questionId=cmw0f3qha0008rk8ox90vydxu",
+    "resourceType": "document",
+    "isNavigation": true,
+    "at": "2026-11-03T08:20:46.910Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:46.922Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:46.923Z"
+  },
+  {
+    "method": "POST",
+    "url": "http://127.0.0.1:34112/api/conversations/sync",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:46.924Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:46.924Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:46.924Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/conversations/capabilities",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.369Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/conversations",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.370Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/conversations/capabilities",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.370Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/conversations",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.370Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.412Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/logo.png",
+    "resourceType": "image",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.427Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_1m_kv2t8hd7hd._.css",
+    "resourceType": "stylesheet",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.430Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_15ftpp-zbgbs4._.css",
+    "resourceType": "stylesheet",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.430Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0qva5cupmdgep._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.432Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.432Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/1q96_modules_next_dist_compiled_react-dom_cjs_react-dom_development_1sqry0_53krp4.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.433Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_compiled_react-dom_0grqycjrj6mju._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.433Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.433Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jmam7qwg.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.433Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_compiled_1amofcmz--cdp._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.433Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.433Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.433Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqwj2323d._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.433Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_1anvha4rlo79g._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.433Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/turbopack-_06rkbud3pyrlm._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.433Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_0buf45idvz5c3._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.433Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_0_duo-exf6bfz._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.433Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_0y6xgmo32juxh._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.433Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_17f25dzi-5r2x._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.433Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_06_dgbeibkgoa._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.433Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_0fawmv8iqrcop._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.433Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_0v6q6i3hv09-g._.css",
+    "resourceType": "stylesheet",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.433Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_MissionPanel_tsx_0hb9g6rvj9-zu._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.457Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_ActionBoard_tsx_1co4_y7_7tkrl._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.457Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_0e2iurxkh2uu8._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.457Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/lib_0ybt3mgznv7h9._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.458Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_zod_v4_classic_045ja72g65zww._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.458Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_zod_v4_core_14qn2mg1f8pkp._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.458Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_zod_v4_locales_1-ided7izgr--._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.458Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_08-ko0-s5ycw4._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.458Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/fonts/pm-serif-brand.ttf",
+    "resourceType": "font",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.551Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.579Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/__nextjs_font/geist-latin.woff2",
+    "resourceType": "font",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.617Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.693Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.695Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.695Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.695Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions?projectId=cmw0f3qg90001rk8ovncx1f99",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.923Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions?projectId=cmw0f3qg90001rk8ovncx1f99",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.923Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions?projectId=cmw0f3qg90001rk8ovncx1f99",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:47.924Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:50.367Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/sources",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:50.368Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/readback?questionId=cmw0f3qha0008rk8ox90vydxu",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:52.030Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/continuations",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:52.033Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/responsibility",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:52.033Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/conversations/capabilities",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:52.035Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/projects/cmw0f3qg90001rk8ovncx1f99/goal-question",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:52.035Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/projects/cmw0f3qg90001rk8ovncx1f99/deployment-connections",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:52.037Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/readback?questionId=cmw0f3qha0008rk8ox90vydxu",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:52.037Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/continuations",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:52.040Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/responsibility",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:52.040Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/conversations/capabilities",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:52.040Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/projects/cmw0f3qg90001rk8ovncx1f99/goal-question",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:52.040Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/projects/cmw0f3qg90001rk8ovncx1f99/deployment-connections",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:52.040Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.076Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/sources",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.077Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/projects/cmw0f3qg90001rk8ovncx1f99/missions?mission=cmw0f3qgq0005rk8oxiheeivm&questionId=cmw0f3qha0008rk8ox90vydxu",
+    "resourceType": "document",
+    "isNavigation": true,
+    "at": "2026-11-03T08:20:54.445Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/logo.png",
+    "resourceType": "image",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.912Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_1m_kv2t8hd7hd._.css",
+    "resourceType": "stylesheet",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.912Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_15ftpp-zbgbs4._.css",
+    "resourceType": "stylesheet",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.912Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0qva5cupmdgep._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.919Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.919Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/1q96_modules_next_dist_compiled_react-dom_cjs_react-dom_development_1sqry0_53krp4.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.919Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_compiled_react-dom_0grqycjrj6mju._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.919Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.920Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jmam7qwg.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.920Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_compiled_1amofcmz--cdp._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.920Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.920Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.920Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqwj2323d._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.920Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_1anvha4rlo79g._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.920Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/turbopack-_06rkbud3pyrlm._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.920Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_0buf45idvz5c3._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.920Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_0_duo-exf6bfz._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.920Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_0y6xgmo32juxh._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.921Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_17f25dzi-5r2x._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.921Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_06_dgbeibkgoa._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.921Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_0fawmv8iqrcop._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.921Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_0v6q6i3hv09-g._.css",
+    "resourceType": "stylesheet",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.921Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_MissionPanel_tsx_0hb9g6rvj9-zu._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.921Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_ActionBoard_tsx_1co4_y7_7tkrl._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.921Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_0e2iurxkh2uu8._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.921Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/lib_0ybt3mgznv7h9._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.923Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_zod_v4_classic_045ja72g65zww._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.923Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_zod_v4_core_14qn2mg1f8pkp._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.923Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_zod_v4_locales_1-ided7izgr--._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.923Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_08-ko0-s5ycw4._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.923Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/fonts/pm-serif-brand.ttf",
+    "resourceType": "font",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:54.936Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:55.119Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/__nextjs_font/geist-latin.woff2",
+    "resourceType": "font",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:55.185Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:55.395Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:55.395Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:55.396Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:55.396Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions?projectId=cmw0f3qg90001rk8ovncx1f99",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:55.569Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions?projectId=cmw0f3qg90001rk8ovncx1f99",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:55.570Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions?projectId=cmw0f3qg90001rk8ovncx1f99",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:55.570Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:58.262Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/sources",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:58.262Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/readback?questionId=cmw0f3qha0008rk8ox90vydxu",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:58.505Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/continuations",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:58.505Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/responsibility",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:58.506Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/conversations/capabilities",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:58.506Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/projects/cmw0f3qg90001rk8ovncx1f99/goal-question",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:58.506Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/projects/cmw0f3qg90001rk8ovncx1f99/deployment-connections",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:58.507Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/readback?questionId=cmw0f3qha0008rk8ox90vydxu",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:58.508Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/continuations",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:58.508Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/responsibility",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:58.508Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/conversations/capabilities",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:58.508Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/projects/cmw0f3qg90001rk8ovncx1f99/goal-question",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:58.508Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/projects/cmw0f3qg90001rk8ovncx1f99/deployment-connections",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:20:58.509Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:00.504Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/sources",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:00.504Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/projects/cmw0f3qg90001rk8ovncx1f99/missions?mission=cmw0f3qgq0005rk8oxiheeivm&questionId=cmw0f3qha0008rk8ox90vydxu",
+    "resourceType": "document",
+    "isNavigation": true,
+    "at": "2026-11-03T08:21:01.081Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/logo.png",
+    "resourceType": "image",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.391Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_1m_kv2t8hd7hd._.css",
+    "resourceType": "stylesheet",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.391Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_15ftpp-zbgbs4._.css",
+    "resourceType": "stylesheet",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.394Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0qva5cupmdgep._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.395Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.395Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/1q96_modules_next_dist_compiled_react-dom_cjs_react-dom_development_1sqry0_53krp4.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.395Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_compiled_react-dom_0grqycjrj6mju._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.395Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.395Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jmam7qwg.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.395Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_compiled_1amofcmz--cdp._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.395Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.395Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.395Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqwj2323d._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.395Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_1anvha4rlo79g._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.395Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/turbopack-_06rkbud3pyrlm._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.395Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_0buf45idvz5c3._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.395Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_0_duo-exf6bfz._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.395Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_0y6xgmo32juxh._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.395Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_17f25dzi-5r2x._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.395Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/_06_dgbeibkgoa._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.396Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_0fawmv8iqrcop._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.396Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_0v6q6i3hv09-g._.css",
+    "resourceType": "stylesheet",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.397Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_MissionPanel_tsx_0hb9g6rvj9-zu._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.397Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_ActionBoard_tsx_1co4_y7_7tkrl._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.397Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/components_0e2iurxkh2uu8._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.397Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/lib_0ybt3mgznv7h9._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.397Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_zod_v4_classic_045ja72g65zww._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.397Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_zod_v4_core_14qn2mg1f8pkp._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.397Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_zod_v4_locales_1-ided7izgr--._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.397Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_08-ko0-s5ycw4._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.397Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/fonts/pm-serif-brand.ttf",
+    "resourceType": "font",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.402Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
+    "resourceType": "script",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.479Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/__nextjs_font/geist-latin.woff2",
+    "resourceType": "font",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.530Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.643Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.643Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.644Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/auth/me",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.644Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions?projectId=cmw0f3qg90001rk8ovncx1f99",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.760Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions?projectId=cmw0f3qg90001rk8ovncx1f99",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.763Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions?projectId=cmw0f3qg90001rk8ovncx1f99",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:01.763Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:02.038Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/sources",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:02.038Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/readback?questionId=cmw0f3qha0008rk8ox90vydxu",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:02.233Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/continuations",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:02.233Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/responsibility",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:02.233Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/conversations/capabilities",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:02.234Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/projects/cmw0f3qg90001rk8ovncx1f99/goal-question",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:02.234Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/projects/cmw0f3qg90001rk8ovncx1f99/deployment-connections",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:02.234Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/readback?questionId=cmw0f3qha0008rk8ox90vydxu",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:02.235Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/continuations",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:02.235Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/responsibility",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:02.235Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/conversations/capabilities",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:02.236Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/projects/cmw0f3qg90001rk8ovncx1f99/goal-question",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:02.236Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/projects/cmw0f3qg90001rk8ovncx1f99/deployment-connections",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:02.238Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:04.230Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/sources",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:04.230Z"
+  },
+  {
+    "method": "POST",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/input",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:05.343Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions?projectId=cmw0f3qg90001rk8ovncx1f99",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:07.020Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/responsibility",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:07.229Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:08.049Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/sources",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:08.049Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/readback?questionId=cmw0f3qha0008rk8ox90vydxu",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:08.277Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:08.278Z"
+  },
+  {
+    "method": "GET",
+    "url": "http://127.0.0.1:34112/api/missions/cmw0f3qgq0005rk8oxiheeivm/sources",
+    "resourceType": "fetch",
+    "isNavigation": false,
+    "at": "2026-11-03T08:21:08.278Z"
+  }
+]

@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "mode": "BROWSER_PROBE_ONLY",
+  "playwright": "available",
+  "chromiumVersion": "149.0.7827.55",
+  "executablePath": "C:\\Users\\Administrator\\AppData\\Local\\ms-playwright\\chromium-1228\\chrome-win64\\chrome.exe",
+  "launchHeadless": true,
+  "checkedAt": "2026-11-03T07:12:01.642Z"
+}

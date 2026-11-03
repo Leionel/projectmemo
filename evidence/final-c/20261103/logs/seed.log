@@ -1,0 +1,121 @@
+{
+  "ok": true,
+  "identityPath": "D:\\Projects\\hongmen-final-c-workspace-ux\\evidence\\final-c\\20261103\\fixture-identity.json",
+  "databasePath": "D:\\Projects\\hongmen-final-c-workspace-ux\\prisma\\final-preparation.db",
+  "migrationAction": "NONE",
+  "migrationExitCode": null,
+  "user": "final-c-reviewer",
+  "projects": {
+    "primary": "cmw0c9jvg0001688ovtg603ni",
+    "long": "cmw0c9jvr0003688op1zd2avv"
+  },
+  "missions": {
+    "waitingUser": {
+      "id": "cmw0c9jwl0005688oxrzvmjfa",
+      "projectId": "cmw0c9jvg0001688ovtg603ni",
+      "status": "WAITING_INPUT",
+      "expectedPhase": "WAITING_USER",
+      "expectedPrimaryAction": "ANSWER_QUESTION",
+      "readTarget": {
+        "questionId": "cmw0c9jy90008688otxax13j9"
+      }
+    },
+    "waitingApproval": {
+      "id": "cmw0c9jzr000b688ol6fnyhhu",
+      "projectId": "cmw0c9jvg0001688ovtg603ni",
+      "status": "WAITING_APPROVAL",
+      "expectedPhase": "WAITING_APPROVAL",
+      "expectedPrimaryAction": "REVIEW_APPROVAL",
+      "readTarget": {
+        "approvalId": "cmw0c9k1g000g688o02y4927w"
+      }
+    },
+    "stopRequested": {
+      "id": "cmw0c9k1o000h688o6fz4u6c4",
+      "projectId": "cmw0c9jvg0001688ovtg603ni",
+      "status": "RUNNING",
+      "expectedPhase": "RUNNING",
+      "expectedPrimaryAction": "CHECK_STOP_SETTLEMENT",
+      "readTarget": {}
+    },
+    "succeeded": {
+      "id": "cmw0c9k37000l688o9sg5ppzt",
+      "projectId": "cmw0c9jvg0001688ovtg603ni",
+      "status": "SUCCEEDED",
+      "expectedPhase": "COMPLETED",
+      "expectedPrimaryAction": "VIEW_RESULT",
+      "readTarget": {
+        "outputId": "cmw0c9k52000r688o9rywpxam",
+        "revision": 1,
+        "receiptId": "cmw0c9k67000w688oyi4fin2x"
+      }
+    },
+    "failed": {
+      "id": "cmw0c9k6n000x688o8i5tkysp",
+      "projectId": "cmw0c9jvg0001688ovtg603ni",
+      "status": "FAILED",
+      "expectedPhase": "FAILED",
+      "expectedPrimaryAction": "REVIEW_FAILURE",
+      "readTarget": {}
+    },
+    "unknown": {
+      "id": "cmw0c9k7o0010688ouvp4dfjr",
+      "projectId": "cmw0c9jvg0001688ovtg603ni",
+      "status": "PAUSED",
+      "expectedPhase": "UNKNOWN",
+      "expectedPrimaryAction": "RECHECK_AUTHORITY",
+      "readTarget": {}
+    },
+    "sourceStates": {
+      "id": "cmw0c9k8o0013688o69uh3s1v",
+      "projectId": "cmw0c9jvg0001688ovtg603ni",
+      "status": "WAITING_INPUT",
+      "expectedPhase": "WAITING_USER",
+      "expectedPrimaryAction": "ANSWER_QUESTION",
+      "readTarget": {
+        "questionId": "cmw0c9k9k0015688o1f3u6n1l"
+      }
+    },
+    "cancelled": {
+      "id": "cmw0c9kc7001b688o4pdhljc1",
+      "projectId": "cmw0c9jvg0001688ovtg603ni",
+      "status": "CANCELLED",
+      "expectedPhase": "COMPLETED",
+      "expectedPrimaryAction": "VIEW_RESULT",
+      "readTarget": {
+        "outputId": "cmw0c9kd1001d688ozng4k924",
+        "revision": 1
+      }
+    },
+    "longCopy": {
+      "id": "cmw0c9kda001e688o3l9s8vag",
+      "projectId": "cmw0c9jvr0003688op1zd2avv",
+      "status": "WAITING_INPUT",
+      "expectedPhase": "WAITING_USER",
+      "expectedPrimaryAction": "ANSWER_QUESTION",
+      "readTarget": {
+        "questionId": "cmw0c9ke8001g688o0joh8s1e"
+      }
+    },
+    "terminalUnknown": {
+      "id": "cmw0c9keq001h688o148qctty",
+      "projectId": "cmw0c9jvg0001688ovtg603ni",
+      "status": "SUCCEEDED",
+      "expectedPhase": "COMPLETED",
+      "expectedPrimaryAction": "CHECK_UNKNOWN_EFFECT",
+      "readTarget": {}
+    }
+  },
+  "counts": {
+    "users": 1,
+    "projects": 2,
+    "missions": 10,
+    "events": 15,
+    "steps": 10,
+    "approvals": 2,
+    "outputs": 2,
+    "receipts": 1,
+    "actions": 1,
+    "captures": 6
+  }
+}

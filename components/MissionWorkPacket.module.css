@@ -1,0 +1,258 @@
+/* 四问工作包样式：只用现有 CSS 变量，390px 下不产生横向溢出。 */
+.root {
+  display: grid;
+  gap: 0.875rem;
+  min-width: 0;
+  margin-top: 0.75rem;
+  padding: 0.875rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.root h4 {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.actionRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.875rem;
+  min-width: 0;
+}
+
+.primary {
+  min-height: 2.5rem;
+  border: 1px solid var(--teal);
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  background: var(--teal);
+  color: var(--paper-strong);
+  font-size: 0.8125rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.primary:hover:enabled {
+  background: var(--teal-strong);
+  border-color: var(--teal-strong);
+}
+
+.primary:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.primary:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 3px;
+}
+
+.actionNote,
+.note,
+.muted {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.alert {
+  margin: 0;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--brick);
+  border-left: 3px solid var(--brick);
+  border-radius: 0.375rem;
+  background: var(--brick-pale);
+  color: var(--brick);
+  font-size: 0.8125rem;
+  font-weight: 650;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.status {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.questions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.question {
+  display: grid;
+  gap: 0.375rem;
+  align-content: start;
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  background: var(--paper-strong);
+}
+
+.question p,
+.question li {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.steps,
+.blockers,
+.coverage {
+  display: grid;
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.steps > li,
+.blockers > li,
+.coverage > li {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.steps > li > span,
+.blockers > li > span,
+.coverage > li > span {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.code {
+  color: var(--muted);
+  font-size: 0.6875rem;
+  overflow-wrap: anywhere;
+}
+
+.observations {
+  display: grid;
+  gap: 0.375rem;
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  background: var(--paper-strong);
+}
+
+.facts {
+  display: grid;
+  gap: 0.375rem;
+  margin: 0;
+}
+
+.facts > div {
+  display: grid;
+  grid-template-columns: minmax(6rem, auto) minmax(0, 1fr);
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.facts dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.7;
+}
+
+.facts dd {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.details {
+  min-width: 0;
+  border-top: 1px solid var(--rule);
+  padding-top: 0.5rem;
+}
+
+.details summary {
+  cursor: pointer;
+  min-height: 2rem;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  font-weight: 650;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.details summary:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.subheading {
+  margin: 0.5rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.budget {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.375rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.budget > li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+  min-width: 0;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  line-height: 1.7;
+}
+
+.budget > li > span {
+  overflow-wrap: anywhere;
+}
+
+.legacyTitle {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .questions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .primary {
+    width: 100%;
+  }
+
+  .facts > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.125rem;
+  }
+}

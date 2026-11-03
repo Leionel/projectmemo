@@ -1,0 +1,507 @@
+{
+  "generatedAt": "2026-11-03T04:22:45.7741444Z",
+  "role": "independent-verifier",
+  "stage": "A1_EVIDENCE_INTEGRITY",
+  "headSha": "304adfee664689d67c6c836dc8f711ca0bc2e10b",
+  "baseSha": "485d485378637e1da3280ed092739d441c8cf749",
+  "summary": {
+    "total": 13,
+    "pass": 13,
+    "fail": 0
+  },
+  "checks": [
+    {
+      "id": "A1-EVID-01",
+      "question": "A1 已提交三份探针证据 + PROVENANCE 存在、可解析且 baseSha=485d485",
+      "verdict": "PASS",
+      "observed": {
+        "probeMode": "BEFORE_FIX",
+        "probeSourceTree": "pristine baseline snapshot @485d485 via git archive (working-tree A2 edits excluded; BEFORE_FIX)",
+        "concurrencyMode": "BEFORE_FIX",
+        "pureMode": "PURE_PROJECTION_REFERENCE",
+        "provenanceBase": "485d485378637e1da3280ed092739d441c8cf749",
+        "receiptExists": true
+      },
+      "note": ""
+    },
+    {
+      "id": "A1-EVID-02",
+      "question": "已提交证据的逐项 verdict 与 PROVENANCE 声明一致",
+      "verdict": "PASS",
+      "observed": {
+        "verdictsInProbe": {
+          "FS-A01": "REPRODUCED",
+          "FS-A02": "REPRODUCED",
+          "FS-A03": "REPRODUCED",
+          "FS-A04": "NOT_REPRODUCED",
+          "FS-A05": "REPRODUCED",
+          "FS-A06": "REPRODUCED"
+        },
+        "declaredInProvenance": {
+          "FS-A01": "REPRODUCED",
+          "FS-A02": "REPRODUCED",
+          "FS-A03": "REPRODUCED",
+          "FS-A04": "NOT_REPRODUCED",
+          "FS-A05": "REPRODUCED",
+          "FS-A06": "REPRODUCED",
+          "FS-A07": "REPRODUCED（跨接口修订不一致 13/40；许可变化不升 version 26/40；同一 readback 响应内 0；readback 与后续 responsibility 版本不一致 13/40）"
+        }
+      },
+      "note": ""
+    },
+    {
+      "id": "A1-EVID-03",
+      "question": "A1 真实 JSON 样本文件齐全且均可解析",
+      "verdict": "PASS",
+      "observed": {
+        "pureSampleFiles": 14,
+        "serviceSampleFiles": 8,
+        "parseErrors": [],
+        "indexCaseCount": 12
+      },
+      "note": ""
+    },
+    {
+      "id": "A1-EVID-04",
+      "question": "提交的 A1 纯函数样本抽查与合同语义一致（终态+UNKNOWN 并存 / 取消不成功 / 停止在途）",
+      "verdict": "PASS",
+      "observed": {
+        "succeededUnknown": {
+          "phase": "COMPLETED",
+          "reasonCode": "SUCCEEDED",
+          "terminal": {
+            "status": "SUCCEEDED",
+            "at": "2026-11-02T12:00:00Z",
+            "atSource": "FINISHED_AT",
+            "reasonCode": "SUCCEEDED"
+          },
+          "unsettledEffect": {
+            "present": true,
+            "code": "EXTERNAL_UNKNOWN",
+            "source": "LAST_ERROR",
+            "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+            "resolvedByRead": false
+          }
+        },
+        "cancelledUnknown": {
+          "phase": "COMPLETED",
+          "reasonCode": "CANCELLED",
+          "actionLabel": "查看取消前原结果并核对未知调用",
+          "terminal": {
+            "status": "CANCELLED",
+            "at": "2026-11-02T12:00:00Z",
+            "atSource": "FINISHED_AT",
+            "reasonCode": "CANCELLED"
+          }
+        },
+        "pauseInFlight": {
+          "phase": "RUNNING",
+          "reasonCode": "STOP_REQUESTED_IN_FLIGHT",
+          "actionLabel": "核对停止结算",
+          "stopRequest": {
+            "state": "PAUSE_REQUESTED",
+            "requestedAt": "2026-11-03T02:59:00Z",
+            "settled": false,
+            "note": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤"
+          }
+        }
+      },
+      "note": ""
+    },
+    {
+      "id": "A1-EVID-05a",
+      "question": "A1 最终 HEAD 合同版本 final-a-workpacket-v1；HEAD 用例数 31+30 与干净 shadow 实跑 61 passed 一致",
+      "verdict": "PASS",
+      "observed": {
+        "contractVersion": "final-a-workpacket-v1",
+        "workStateContractTestsAtHead": 31,
+        "workPacketContractTestsAtHead": 30,
+        "shadowVitest": "tests/finalAWorkStateContract.test.ts 31 + tests/finalAWorkPacketContract.test.ts 30 = 61 passed",
+        "vitestCountsMatched": true
+      },
+      "note": ""
+    },
+    {
+      "id": "A1-EVID-05b",
+      "question": "A1 合同回执（304adfe）的用例数与最终 HEAD 实跑一致",
+      "verdict": "PASS",
+      "observed": {
+        "receiptCorrectedAt304adfe": true,
+        "mentions61Tests": true,
+        "mentions72Tests": true,
+        "stale27Gone": true,
+        "headActual": "30 项 workPacket + 31 项 workState = 61；加既有锚点 7+4 共 72"
+      },
+      "note": "Lead 已在 304adfe 更正回执；复核通过。"
+    },
+    {
+      "id": "A1-EVID-12",
+      "question": "回执修复提交 304adfe 仅含回执文档（A1 合同代码与 3a62dce 完全相同）",
+      "verdict": "PASS",
+      "observed": {
+        "deltaFiles": [
+          "evidence/final-a/20261103/A1_CONTRACT_RECEIPT.md"
+        ],
+        "codeIdenticalTo3a62dce": true
+      },
+      "note": ""
+    },
+    {
+      "id": "A1-EVID-06",
+      "question": "A1 已提交证据文件未被工作树改写（tracked 内容与 HEAD 一致；忽略他人未跟踪的新文件）",
+      "verdict": "PASS",
+      "observed": {
+        "dirtyTrackedPaths": [],
+        "trackedA1EvidenceDiffs": []
+      },
+      "note": ""
+    },
+    {
+      "id": "A1-EVID-07",
+      "question": "A1-HEAD 重跑：A03/A04/A05/A06 服务级观测与 BEFORE_FIX 完全一致（A1 未越界改服务）；变化只落在 A01/A02 合同字段",
+      "verdict": "PASS",
+      "observed": {
+        "unchanged": [
+          "FS-A03",
+          "FS-A04",
+          "FS-A05",
+          "FS-A06"
+        ],
+        "changed": [
+          "FS-A01",
+          "FS-A02"
+        ],
+        "deltas": {
+          "FS-A01": {
+            "before": [
+              {
+                "status": "SUCCEEDED",
+                "observations": {
+                  "terminalKeptInWorkState": false,
+                  "terminalKeptInReadbackEnvelope": true,
+                  "unknownKeptInWorkState": true,
+                  "cancelledPresentedAsSuccess": null,
+                  "recoverableFromWorkState": false,
+                  "terminalMissionDroppedFromWorkspaceSummary": true
+                }
+              },
+              {
+                "status": "CANCELLED",
+                "observations": {
+                  "terminalKeptInWorkState": false,
+                  "terminalKeptInReadbackEnvelope": true,
+                  "unknownKeptInWorkState": true,
+                  "cancelledPresentedAsSuccess": false,
+                  "recoverableFromWorkState": false,
+                  "terminalMissionDroppedFromWorkspaceSummary": true
+                }
+              }
+            ],
+            "after": [
+              {
+                "status": "SUCCEEDED",
+                "observations": {
+                  "terminalKeptInWorkState": true,
+                  "terminalKeptInReadbackEnvelope": true,
+                  "unknownKeptInWorkState": false,
+                  "cancelledPresentedAsSuccess": null,
+                  "recoverableFromWorkState": true,
+                  "terminalMissionDroppedFromWorkspaceSummary": true
+                }
+              },
+              {
+                "status": "CANCELLED",
+                "observations": {
+                  "terminalKeptInWorkState": true,
+                  "terminalKeptInReadbackEnvelope": true,
+                  "unknownKeptInWorkState": false,
+                  "cancelledPresentedAsSuccess": true,
+                  "recoverableFromWorkState": true,
+                  "terminalMissionDroppedFromWorkspaceSummary": true
+                }
+              }
+            ],
+            "changed": true
+          },
+          "FS-A02": {
+            "before": [
+              {
+                "kind": "PAUSE",
+                "observations": {
+                  "readbackShowsRequestReceivedButUnsettled": false,
+                  "workStatePhase": "RUNNING",
+                  "workStateReasonCode": "LEASE_ACTIVE",
+                  "workStateActionLabel": "查看委托进展",
+                  "summaryShowsStopRequest": false,
+                  "detailKeepsRawRequestTimestamp": true
+                }
+              },
+              {
+                "kind": "CANCEL",
+                "observations": {
+                  "readbackShowsRequestReceivedButUnsettled": false,
+                  "workStatePhase": "RUNNING",
+                  "workStateReasonCode": "LEASE_ACTIVE",
+                  "workStateActionLabel": "查看委托进展",
+                  "summaryShowsStopRequest": false,
+                  "detailKeepsRawRequestTimestamp": true
+                }
+              }
+            ],
+            "after": [
+              {
+                "kind": "PAUSE",
+                "observations": {
+                  "readbackShowsRequestReceivedButUnsettled": true,
+                  "workStatePhase": "RUNNING",
+                  "workStateReasonCode": "STOP_REQUESTED_IN_FLIGHT",
+                  "workStateActionLabel": "核对停止结算",
+                  "summaryShowsStopRequest": false,
+                  "detailKeepsRawRequestTimestamp": true
+                }
+              },
+              {
+                "kind": "CANCEL",
+                "observations": {
+                  "readbackShowsRequestReceivedButUnsettled": true,
+                  "workStatePhase": "RUNNING",
+                  "workStateReasonCode": "STOP_REQUESTED_IN_FLIGHT",
+                  "workStateActionLabel": "核对停止结算",
+                  "summaryShowsStopRequest": false,
+                  "detailKeepsRawRequestTimestamp": true
+                }
+              }
+            ],
+            "changed": true
+          },
+          "FS-A03": {
+            "before": {
+              "reasonCodes": {
+                "missionDetail": "READY",
+                "workspaceSummary": "READY",
+                "readMissionBack": "READY"
+              },
+              "threeReasonCodesEqual": true,
+              "anyExplainsDailyBudgetWaiting": false,
+              "anyMentionsDailyBudgetInText": false,
+              "budgetNotReset": true
+            },
+            "after": {
+              "reasonCodes": {
+                "missionDetail": "READY",
+                "workspaceSummary": "READY",
+                "readMissionBack": "READY"
+              },
+              "threeReasonCodesEqual": true,
+              "anyExplainsDailyBudgetWaiting": false,
+              "anyMentionsDailyBudgetInText": false,
+              "budgetNotReset": true
+            },
+            "changed": false
+          },
+          "FS-A04": {
+            "before": {
+              "success": {
+                "workStateObservedAtFixed": true,
+                "workStateCheckedAtAdvanced": true,
+                "readbackObservedAtAdvanced": true
+              },
+              "failure": {
+                "phase": "FAILED",
+                "reasonCode": "TOOL_FAILED",
+                "workStateObservedAtStillFixed": true,
+                "showsNoChange": false
+              }
+            },
+            "after": {
+              "success": {
+                "workStateObservedAtFixed": true,
+                "workStateCheckedAtAdvanced": true,
+                "readbackObservedAtAdvanced": true
+              },
+              "failure": {
+                "phase": "FAILED",
+                "reasonCode": "TOOL_FAILED",
+                "workStateObservedAtStillFixed": true,
+                "showsNoChange": false
+              }
+            },
+            "changed": false
+          },
+          "FS-A05": {
+            "before": {
+              "suppression": {
+                "contradiction": true,
+                "historicalFactsPreserved": true
+              },
+              "revoked": {
+                "contradiction": true,
+                "historicalFactsPreserved": true
+              },
+              "unknown": {
+                "contradiction": true,
+                "historicalFactsPreserved": true
+              },
+              "guard": {
+                "rejected": true,
+                "name": "Error",
+                "message": "你已要求停止使用这条资料及其派生结论，请重新调查",
+                "code": "SOURCE_USE_SUPPRESSED",
+                "status": 409
+              }
+            },
+            "after": {
+              "suppression": {
+                "contradiction": true,
+                "historicalFactsPreserved": true
+              },
+              "revoked": {
+                "contradiction": true,
+                "historicalFactsPreserved": true
+              },
+              "unknown": {
+                "contradiction": true,
+                "historicalFactsPreserved": true
+              },
+              "guard": {
+                "rejected": true,
+                "name": "Error",
+                "message": "你已要求停止使用这条资料及其派生结论，请重新调查",
+                "code": "SOURCE_USE_SUPPRESSED",
+                "status": 409
+              }
+            },
+            "changed": false
+          },
+          "FS-A06": {
+            "before": {
+              "beforeFacts": [
+                "SAVED",
+                "ASSOCIATED",
+                "CANDIDATE",
+                "BOUND",
+                "CONTEXT_POINTER"
+              ],
+              "afterFacts": [
+                "SAVED",
+                "ASSOCIATED",
+                "CANDIDATE",
+                "BOUND"
+              ],
+              "observations": {
+                "contextPointerBefore": true,
+                "contextPointerAfter": false,
+                "missionRunEvictedFromMaterialWindow": true,
+                "missionRunStillExistsInDb": true,
+                "coverageOnlyReportsTruncation": true,
+                "callCoverageStillFindsMissionRun": true
+              },
+              "coverageAfter": true
+            },
+            "after": {
+              "beforeFacts": [
+                "SAVED",
+                "ASSOCIATED",
+                "CANDIDATE",
+                "BOUND",
+                "CONTEXT_POINTER"
+              ],
+              "afterFacts": [
+                "SAVED",
+                "ASSOCIATED",
+                "CANDIDATE",
+                "BOUND"
+              ],
+              "observations": {
+                "contextPointerBefore": true,
+                "contextPointerAfter": false,
+                "missionRunEvictedFromMaterialWindow": true,
+                "missionRunStillExistsInDb": true,
+                "coverageOnlyReportsTruncation": true,
+                "callCoverageStillFindsMissionRun": true
+              },
+              "coverageAfter": true
+            },
+            "changed": false
+          }
+        }
+      },
+      "note": ""
+    },
+    {
+      "id": "A1-EVID-08",
+      "question": "A1-HEAD 并发探针 counters 与 BEFORE_FIX 一致（FS-A07 缺口未变，待 A2）",
+      "verdict": "PASS",
+      "observed": {
+        "beforeFix": {
+          "iterations": 40,
+          "crossInterfaceVersionMismatch": 13,
+          "crossInterfaceConstraintsMismatch": 13,
+          "licenseChangedWithoutMissionVersionChange": 26,
+          "sameResponseInternalViolations": 0,
+          "readbackVsResponsibilityVersionMismatch": 13
+        },
+        "a1Head": {
+          "iterations": 40,
+          "crossInterfaceVersionMismatch": 13,
+          "crossInterfaceConstraintsMismatch": 13,
+          "licenseChangedWithoutMissionVersionChange": 26,
+          "sameResponseInternalViolations": 0,
+          "readbackVsResponsibilityVersionMismatch": 13
+        },
+        "sameResponseInternalViolations": 0
+      },
+      "note": ""
+    },
+    {
+      "id": "A1-EVID-09",
+      "question": "A1 收尾补丁范围（543162f..3a62dce）只含 workPacket 构造器/合同测试/回执，不影响已跑的探针与 readback 服务路径",
+      "verdict": "PASS",
+      "observed": {
+        "finalDeltaFiles": [
+          "evidence/final-a/20261103/A1_CONTRACT_RECEIPT.md",
+          "lib/mission/workPacket.ts",
+          "tests/finalAWorkPacketContract.test.ts"
+        ],
+        "expected": [
+          "lib/mission/workPacket.ts",
+          "tests/finalAWorkPacketContract.test.ts",
+          "evidence/final-a/20261103/A1_CONTRACT_RECEIPT.md"
+        ]
+      },
+      "note": ""
+    },
+    {
+      "id": "A1-EVID-10",
+      "question": "候选 SHA 演进（543162f → b243f62 → 3a62dce）两阶段证据均保留，未覆盖未删除",
+      "verdict": "PASS",
+      "observed": {
+        "firstStageEvidence": [
+          "probes/runs/a1-head-543162f/probe-fs-a01-a07.json",
+          "probes/runs/a1-head-543162f/probe-concurrency.json",
+          "fixtures/runs/a1-service-fixture.json",
+          "fixtures/runs/a1-dto-probe.json"
+        ],
+        "missing": [],
+        "finalHead": "304adfee664689d67c6c836dc8f711ca0bc2e10b",
+        "note": "第一阶段证据在 543162f 干净 shadow 生成；最终 HEAD 变更只影响 workPacket 构造器，已按 Lead 要求补跑两个纯合同测试 + 3 项新语义 fixture + DTO/服务 fixture。"
+      },
+      "note": ""
+    },
+    {
+      "id": "A1-EVID-11",
+      "question": "独立验收只写 verify/ 证据，未修改实现/测试文件（工作树 tracked 修改均为他人 A2 在途）",
+      "verdict": "PASS",
+      "observed": {
+        "trackedModifications": [
+          " M lib/mission/materialUseProjection.ts",
+          " M lib/mission/missionService.ts",
+          " M lib/mission/readback.ts",
+          " M lib/mission/workspaceSummary.ts"
+        ],
+        "verifierViolations": []
+      },
+      "note": ""
+    }
+  ]
+}

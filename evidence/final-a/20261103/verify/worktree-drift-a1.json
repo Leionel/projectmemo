@@ -1,0 +1,26 @@
+{
+  "generatedAt": "2026-11-03T04:22:58.5052424Z",
+  "role": "independent-verifier",
+  "headSha": "304adfee664689d67c6c836dc8f711ca0bc2e10b",
+  "event": "A1 验证期间工作树从 543162f 推进：b243f62（收尾语义补丁）→ 3a62dce（回执补记）→ 304adfe（更正回执用例数+记录摘要残余，仅文档）。我的最终结论按 304adfe 干净 shadow 补跑；304adfe 合同代码与 3a62dce 相同（A1-EVID-12）。另修复 verify fixture TS2367（仅 evidence/ 写作用域），tsc --noEmit exit 0。",
+  "commitTimeline": [
+    "304adfe 2026-11-03T12:15:11+08:00 docs(a1): correct contract test counts and record summary stop-request residual",
+    "3a62dce 2026-11-03T12:11:19+08:00 docs(a1): record running-mission and personal-memory-boundary semantics from A1 fix",
+    "b243f62 2026-11-03T12:11:03+08:00 fix(a1): make running mission primary action explicit and include personal-memory boundary in recheck",
+    "543162f 2026-11-03T12:03:50+08:00 docs(a1): record frozen work packet contract, state conflict table and FS-A01~07 probe verdicts",
+    "f267aec 2026-11-03T12:03:08+08:00 feat(a1): freeze four-question work packet contract and settle FS-A01/02/04 projection semantics",
+    "485d485 2026-11-02T22:54:03+08:00 鸿蒙：统一弹层关闭入口，重构记忆/理解/行动的信息层级"
+  ],
+  "currentWorktreeStatus": [
+    " M lib/mission/materialUseProjection.ts",
+    " M lib/mission/missionService.ts",
+    " M lib/mission/readback.ts",
+    " M lib/mission/workspaceSummary.ts",
+    "?? evidence/final-a/20261103/samples/a2/",
+    "?? evidence/final-a/20261103/verify/",
+    "?? scripts/final-a/generate-samples.ts",
+    "?? tests/finalAConcurrencyService.test.ts",
+    "?? tests/finalAWorkPacketService.test.ts"
+  ],
+  "note": "时间线记录，不是缺陷；工作树 tracked 修改均为 A2 在途（service-impl/Lead 负责）。"
+}

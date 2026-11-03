@@ -1,0 +1,172 @@
+{
+  "generatedAt": "2026-11-03T04:21:48.123Z",
+  "mode": "INDEPENDENT_CONTRACT_PROBE_A1_FINAL_HEAD",
+  "runner": "evidence/final-a/20261103/verify/fixtures/a1-final-head-probe.ts",
+  "sourceTree": "A1 final HEAD 304adfe via git archive (A1-only clean tree; A2 WIP excluded; code identical to 3a62dce, 304adfe docs-only)",
+  "env": {
+    "database": "none (pure functions)",
+    "modelProviderCalls": 0,
+    "network": 0
+  },
+  "summary": {
+    "total": 3,
+    "pass": 3,
+    "fail": 0
+  },
+  "checks": [
+    {
+      "id": "A1-FINAL-01",
+      "question": "RUNNING+有效 lease：主操作=查看委托进展（执行中），waitingOn=SYSTEM_WORKER，不再是 RECHECK_AUTHORITY",
+      "verdict": "PASS",
+      "observed": {
+        "workState": {
+          "phase": "RUNNING",
+          "reasonCode": "LEASE_ACTIVE",
+          "actionLabel": "查看委托进展"
+        },
+        "primaryAction": {
+          "kind": "WAIT_FOR_OBSERVATION",
+          "label": "查看委托进展（执行中）",
+          "target": {
+            "kind": "MISSION",
+            "id": "final-head-m-1",
+            "version": 6
+          },
+          "requires": {
+            "missionVersion": 6,
+            "planRevision": 3,
+            "contextVersion": 4,
+            "constraintsVersion": 2,
+            "researchScopeVersion": 2,
+            "controlVersion": "c-final",
+            "questionId": null,
+            "approvalId": null,
+            "proposalHash": null,
+            "requiredSourceRevisions": [],
+            "boundaryAt": "2026-11-03T04:01:00.000Z"
+          },
+          "submissionGuard": "SERVER_RECHECKS_OWNER_PROJECT_VERSION_SOURCE_PERMISSION_LEASE_BUDGET_IDEMPOTENCY",
+          "readOnly": true
+        },
+        "waitingOn": "SYSTEM_WORKER",
+        "blockers": []
+      }
+    },
+    {
+      "id": "A1-FINAL-02",
+      "question": "UNAVAILABLE+LEASE_UNCONFIRMED：等待租约重新确认，不误标 AUTHORITY 重核",
+      "verdict": "PASS",
+      "observed": {
+        "workState": {
+          "phase": "UNAVAILABLE",
+          "reasonCode": "LEASE_UNCONFIRMED",
+          "freshness": "UNAVAILABLE"
+        },
+        "primaryAction": {
+          "kind": "WAIT_FOR_OBSERVATION",
+          "label": "等待租约重新确认",
+          "target": {
+            "kind": "MISSION",
+            "id": "final-head-m-1",
+            "version": 6
+          },
+          "requires": {
+            "missionVersion": 6,
+            "planRevision": 3,
+            "contextVersion": 4,
+            "constraintsVersion": 2,
+            "researchScopeVersion": 2,
+            "controlVersion": "c-final",
+            "questionId": null,
+            "approvalId": null,
+            "proposalHash": null,
+            "requiredSourceRevisions": [],
+            "boundaryAt": null
+          },
+          "submissionGuard": "SERVER_RECHECKS_OWNER_PROJECT_VERSION_SOURCE_PERMISSION_LEASE_BUDGET_IDEMPOTENCY",
+          "readOnly": true
+        },
+        "waitingOn": "SYSTEM_LEASE",
+        "blockerKinds": [
+          "WORK_STATE",
+          "LEASE"
+        ],
+        "blockers": [
+          {
+            "kind": "WORK_STATE",
+            "code": "WORKER_PRESENCE_STALE"
+          },
+          {
+            "kind": "LEASE",
+            "code": "LEASE_UNCONFIRMED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "A1-FINAL-03",
+      "question": "个人记忆边界越过：RECHECK_AUTHORITY + TIME_BOUNDARY/PERSONAL_MEMORY_BOUNDARY_PASSED + requires.boundaryAt=最早边界",
+      "verdict": "PASS",
+      "observed": {
+        "primaryAction": {
+          "kind": "RECHECK_AUTHORITY",
+          "label": "重新核对许可与期限",
+          "target": {
+            "kind": "MISSION",
+            "id": "final-head-m-1",
+            "version": 6
+          },
+          "requires": {
+            "missionVersion": 6,
+            "planRevision": 3,
+            "contextVersion": 4,
+            "constraintsVersion": 2,
+            "researchScopeVersion": 2,
+            "controlVersion": "c-final",
+            "questionId": "q-final",
+            "approvalId": null,
+            "proposalHash": null,
+            "requiredSourceRevisions": [],
+            "boundaryAt": "2026-11-03T00:00:00.000Z"
+          },
+          "submissionGuard": "SERVER_RECHECKS_OWNER_PROJECT_VERSION_SOURCE_PERMISSION_LEASE_BUDGET_IDEMPOTENCY",
+          "readOnly": true
+        },
+        "personalBlocker": {
+          "kind": "TIME_BOUNDARY",
+          "code": "PERSONAL_MEMORY_BOUNDARY_PASSED",
+          "text": "个人记忆依赖的有效边界已过；依赖该偏好的判断需重新核对，不能沿用旧依据",
+          "at": "2026-11-03T00:00:00.000Z",
+          "blocksActions": true,
+          "originalRef": {
+            "kind": "MISSION",
+            "id": "final-head-m-1"
+          }
+        },
+        "primaryBlock": {
+          "kind": "TIME_BOUNDARY",
+          "code": "PERSONAL_MEMORY_BOUNDARY_PASSED",
+          "text": "个人记忆依赖的有效边界已过；依赖该偏好的判断需重新核对，不能沿用旧依据",
+          "at": "2026-11-03T00:00:00.000Z",
+          "blocksActions": true,
+          "originalRef": {
+            "kind": "MISSION",
+            "id": "final-head-m-1"
+          }
+        },
+        "blockerKinds": [
+          {
+            "kind": "QUESTION",
+            "code": "QUESTION_PENDING",
+            "at": null
+          },
+          {
+            "kind": "TIME_BOUNDARY",
+            "code": "PERSONAL_MEMORY_BOUNDARY_PASSED",
+            "at": "2026-11-03T00:00:00.000Z"
+          }
+        ]
+      }
+    }
+  ]
+}

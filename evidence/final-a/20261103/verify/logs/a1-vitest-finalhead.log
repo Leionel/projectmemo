@@ -1,0 +1,11 @@
+
+ RUN  v4.1.12 C:/Users/Administrator/AppData/Local/Temp/pm-a1-clean-verify
+
+ ✓ tests/finalAWorkPacketContract.test.ts (30 tests) 28ms
+ ✓ tests/finalAWorkStateContract.test.ts (31 tests) 10ms
+
+ Test Files  2 passed (2)
+      Tests  61 passed (61)
+   Start at  12:21:41
+   Duration  852ms (transform 128ms, setup 0ms, import 194ms, tests 37ms, environment 0ms)
+

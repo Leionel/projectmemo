@@ -1,0 +1,40 @@
+{
+  "generatedAt": "2026-11-03T04:11:07.015Z",
+  "stage": "A1_HEAD_OBSERVATION_NOT_ACCEPTANCE",
+  "headCommit": "543162f9424659c00f3f2abdee4a43fe2189aabc",
+  "input": {
+    "status": "RUNNING",
+    "leaseActive": true,
+    "stopRequest": "NONE"
+  },
+  "workState": {
+    "phase": "RUNNING",
+    "reasonCode": "LEASE_ACTIVE",
+    "actionLabel": "查看委托进展",
+    "stopRequest": {
+      "state": "NONE",
+      "requestedAt": null,
+      "settled": true,
+      "note": null
+    },
+    "unsettledEffect": {
+      "present": false,
+      "code": null,
+      "source": "NONE",
+      "reasonText": null,
+      "resolvedByRead": false
+    }
+  },
+  "packet": {
+    "primaryActionKind": "RECHECK_AUTHORITY",
+    "primaryActionLabel": "核对当前状态",
+    "waitingOn": "SYSTEM_RECHECK",
+    "target": {
+      "kind": "MISSION",
+      "id": "obs-running",
+      "version": 5
+    },
+    "isContinueOrResume": false
+  },
+  "note": "A1 task-1 未要求 RUNNING 非停止态主操作；HEAD 返回 RECHECK_AUTHORITY（不含继续/恢复）。验证期间工作树已出现未提交修订改为 WAIT_FOR_OBSERVATION（未提交、不在 A1 HEAD），需按最终 A1 修订复核。"
+}

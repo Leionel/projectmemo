@@ -1,0 +1,891 @@
+{
+  "mode": "BEFORE_FIX",
+  "probe": "probe-fs-a",
+  "status": "PROBE_COMPLETED",
+  "durationMs": 502,
+  "generatedAt": "2026-11-03T04:06:09.022Z",
+  "baseSha": "543162f9424659c00f3f2abdee4a43fe2189aabc",
+  "sourceTree": "A1-HEAD 543162f via git archive (A1-only clean tree; A2 WIP excluded)",
+  "branch": "codex/final-a-mission-packet",
+  "environment": {
+    "database": "temp-independent",
+    "databaseUrl": "file:C:/Users/ADMINI~1/AppData/Local/Temp/pm-final-a-fs-a01-a06-WwR9Hr/probe.db",
+    "databaseFile": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-final-a-fs-a01-a06-WwR9Hr\\probe.db",
+    "temporaryDir": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-final-a-fs-a01-a06-WwR9Hr",
+    "migrationsApplied": 52,
+    "schemaTables": 79,
+    "llmMode": "mock",
+    "modelProviderCalls": 0,
+    "missionEnabled": "true",
+    "missionWritesEnabled": "true",
+    "workerPresenceFile": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-final-a-fs-a01-a06-WwR9Hr\\worker-presence.json",
+    "seededFrom": "prisma/migrations/*/migration.sql replayed with better-sqlite3 + WAL"
+  },
+  "evidenceNote": "BEFORE_FIX 特征化：只记录当前服务行为与失败判据是否命中，不代表已修复；证据 JSON 由真实临时库上的服务调用生成，未修改产品代码。",
+  "implementation": {
+    "script": "scripts/final-a/probe-fs-a.ts",
+    "command": "npx.cmd tsx scripts/final-a/probe-fs-a.ts",
+    "samplesDir": "evidence/final-a/20261103/samples"
+  },
+  "summary": {
+    "total": 6,
+    "reproduced": 5,
+    "notReproduced": 1,
+    "inconclusive": 0,
+    "verdicts": {
+      "FS-A01": "REPRODUCED",
+      "FS-A02": "REPRODUCED",
+      "FS-A03": "REPRODUCED",
+      "FS-A04": "NOT_REPRODUCED",
+      "FS-A05": "REPRODUCED",
+      "FS-A06": "REPRODUCED"
+    }
+  },
+  "cases": [
+    {
+      "id": "FS-A01",
+      "verdict": "REPRODUCED",
+      "criterion": "终态(SUCCEEDED/CANCELLED)叠加 lastErrorJson.code=EXTERNAL_UNKNOWN 时，共享 WorkState 投影应在 phase/reasonCode/actionLabel 中同时保留终态与未结算 UNKNOWN；取消不得显示成成功或可恢复；workspace 摘要不应因此丢失需核查的任务。",
+      "observed": {
+        "cases": [
+          {
+            "originalStatus": "SUCCEEDED",
+            "samplePath": "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\verify\\probes\\runs\\a1-head-543162f\\samples\\FS-A01-SUCCEEDED.json",
+            "readbackEnvelope": {
+              "missionStatus": "SUCCEEDED",
+              "missionVersion": 3,
+              "observedAt": "2026-11-03T04:06:10.480Z",
+              "realityOutcome": "NOT_INFERRED"
+            },
+            "workState": {
+              "phase": "COMPLETED",
+              "nextActor": "USER",
+              "reasonCode": "SUCCEEDED",
+              "reasonText": "原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准",
+              "actionLabel": "查看原结果并核对未知调用",
+              "checkedAt": "2026-11-03T04:06:10.472Z",
+              "observedAt": null,
+              "nextCheckAt": null,
+              "nextBoundary": null,
+              "freshness": "FRESH"
+            },
+            "missionDetail": {
+              "status": "SUCCEEDED",
+              "version": 3,
+              "error": {
+                "code": "EXTERNAL_UNKNOWN",
+                "message": "外部写入结果未确认，需查询原请求后再判断是否重试",
+                "phase": "EXTERNAL_WRITE"
+              },
+              "pauseRequestedAt": null,
+              "cancelRequestedAt": null,
+              "workState": {
+                "phase": "COMPLETED",
+                "nextActor": "USER",
+                "reasonCode": "SUCCEEDED",
+                "reasonText": "原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准",
+                "actionLabel": "查看原结果并核对未知调用",
+                "checkedAt": "2026-11-03T04:06:10.496Z",
+                "observedAt": null,
+                "nextCheckAt": null,
+                "nextBoundary": null,
+                "freshness": "FRESH"
+              }
+            },
+            "workspaceSummary": {
+              "enabled": true,
+              "totalActive": 0,
+              "containsThisTerminalMission": false,
+              "item": null
+            },
+            "observations": {
+              "terminalKeptInWorkState": true,
+              "terminalKeptInReadbackEnvelope": true,
+              "unknownKeptInWorkState": false,
+              "cancelledPresentedAsSuccess": null,
+              "recoverableFromWorkState": true,
+              "terminalMissionDroppedFromWorkspaceSummary": true
+            }
+          },
+          {
+            "originalStatus": "CANCELLED",
+            "samplePath": "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\verify\\probes\\runs\\a1-head-543162f\\samples\\FS-A01-CANCELLED.json",
+            "readbackEnvelope": {
+              "missionStatus": "CANCELLED",
+              "missionVersion": 3,
+              "observedAt": "2026-11-03T04:06:10.521Z",
+              "realityOutcome": "NOT_INFERRED"
+            },
+            "workState": {
+              "phase": "COMPLETED",
+              "nextActor": "USER",
+              "reasonCode": "CANCELLED",
+              "reasonText": "原委托已取消，历史结果保留；仍有未知调用结果未结算，不能视为成功完成",
+              "actionLabel": "查看取消前原结果并核对未知调用",
+              "checkedAt": "2026-11-03T04:06:10.518Z",
+              "observedAt": null,
+              "nextCheckAt": null,
+              "nextBoundary": null,
+              "freshness": "FRESH"
+            },
+            "missionDetail": {
+              "status": "CANCELLED",
+              "version": 3,
+              "error": {
+                "code": "EXTERNAL_UNKNOWN",
+                "message": "外部写入结果未确认，需查询原请求后再判断是否重试",
+                "phase": "EXTERNAL_WRITE"
+              },
+              "pauseRequestedAt": null,
+              "cancelRequestedAt": null,
+              "workState": {
+                "phase": "COMPLETED",
+                "nextActor": "USER",
+                "reasonCode": "CANCELLED",
+                "reasonText": "原委托已取消，历史结果保留；仍有未知调用结果未结算，不能视为成功完成",
+                "actionLabel": "查看取消前原结果并核对未知调用",
+                "checkedAt": "2026-11-03T04:06:10.525Z",
+                "observedAt": null,
+                "nextCheckAt": null,
+                "nextBoundary": null,
+                "freshness": "FRESH"
+              }
+            },
+            "workspaceSummary": {
+              "enabled": true,
+              "totalActive": 0,
+              "containsThisTerminalMission": false,
+              "item": null
+            },
+            "observations": {
+              "terminalKeptInWorkState": true,
+              "terminalKeptInReadbackEnvelope": true,
+              "unknownKeptInWorkState": false,
+              "cancelledPresentedAsSuccess": true,
+              "recoverableFromWorkState": true,
+              "terminalMissionDroppedFromWorkspaceSummary": true
+            }
+          }
+        ],
+        "judgment": {
+          "workState 两层事实": "只保留 UNKNOWN（phase=UNKNOWN、nextActor=SYSTEM、actionLabel=查询原请求）；终态维度不在 workState 内（phase 没有 COMPLETED），取消也不算成功/可恢复。",
+          "readback 外层": "missionStatus 仍保留原终态（SUCCEEDED/CANCELLED），所以 readback 响应级的两个事实可同时读到。",
+          "取消是否显示成功": "否：phase=UNKNOWN、nextActor=SYSTEM、actionLabel=查询原请求。",
+          "可恢复性": "否：nextActor=SYSTEM，未出现继续派发主动作。",
+          "workspace摘要": "终态任务被 where 过滤（status notIn SUCCEEDED/CANCELLED）整体丢弃；终态+UNKNOWN 的“查询原请求”核查入口不在摘要出现。"
+        }
+      },
+      "notes": [
+        "失败判据“只保留一个而隐去另一事实则失败”命中的是共享 WorkState 投影层：workState 内终态维度被 UNKNOWN 覆盖；readback 顶层 missionStatus 仍保留，属“合同层丢失、响应级残留”。",
+        "workspaceSummary 候选集排除终态，导致终态+UNKNOWN 需要 SYSTEM 核查的任务在摘要完全不可见（服务级观察，非纯投影）。",
+        "本用例是服务级真实调用 readMissionBack / missionDetail / missionWorkspaceSummary，不是纯函数快照。"
+      ],
+      "samplePaths": [
+        "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\verify\\probes\\runs\\a1-head-543162f\\samples\\FS-A01-SUCCEEDED.json",
+        "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\verify\\probes\\runs\\a1-head-543162f\\samples\\FS-A01-CANCELLED.json"
+      ]
+    },
+    {
+      "id": "FS-A02",
+      "verdict": "REPRODUCED",
+      "criterion": "RUNNING 且 lease 有效、用户已 pause/cancel 但尚未结算时，读取 readback/summary 必须显示“请求已收到、尚未完成、不要继续派发”；只显示 RUNNING/LEASE_ACTIVE 即失败。",
+      "observed": {
+        "cases": [
+          {
+            "stopRequestKind": "PAUSE",
+            "samplePath": "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\verify\\probes\\runs\\a1-head-543162f\\samples\\FS-A02-PAUSE.json",
+            "readback": {
+              "missionStatus": "RUNNING",
+              "workState": {
+                "phase": "RUNNING",
+                "nextActor": "SYSTEM",
+                "reasonCode": "STOP_REQUESTED_IN_FLIGHT",
+                "reasonText": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤",
+                "actionLabel": "核对停止结算",
+                "checkedAt": "2026-11-03T04:06:10.536Z",
+                "observedAt": null,
+                "nextCheckAt": "2026-11-03T04:16:10.532Z",
+                "nextBoundary": "2026-11-03T04:16:10.532Z",
+                "freshness": "FRESH"
+              },
+              "exposesPauseRequestedAt": false,
+              "exposesCancelRequestedAt": false,
+              "workStateMentionsStopRequest": true
+            },
+            "missionDetail": {
+              "status": "RUNNING",
+              "pauseRequestedAt": "2026-11-03T04:06:10.532Z",
+              "cancelRequestedAt": null,
+              "workState": {
+                "phase": "RUNNING",
+                "nextActor": "SYSTEM",
+                "reasonCode": "STOP_REQUESTED_IN_FLIGHT",
+                "reasonText": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤",
+                "actionLabel": "核对停止结算",
+                "checkedAt": "2026-11-03T04:06:10.542Z",
+                "observedAt": null,
+                "nextCheckAt": "2026-11-03T04:16:10.532Z",
+                "nextBoundary": "2026-11-03T04:16:10.532Z",
+                "freshness": "FRESH"
+              }
+            },
+            "workspaceSummary": {
+              "status": "RUNNING",
+              "attention": "正在调查，进展来自已保存步骤",
+              "workState": {
+                "phase": "RUNNING",
+                "nextActor": "AGENT",
+                "reasonCode": "LEASE_ACTIVE",
+                "reasonText": "正在调查，进展来自已保存步骤",
+                "actionLabel": "查看委托进展",
+                "checkedAt": "2026-11-03T04:06:10.546Z",
+                "observedAt": null,
+                "nextCheckAt": "2026-11-03T04:16:10.532Z",
+                "nextBoundary": "2026-11-03T04:16:10.532Z",
+                "freshness": "FRESH"
+              },
+              "mentionsStopRequest": false
+            },
+            "observations": {
+              "readbackShowsRequestReceivedButUnsettled": true,
+              "workStatePhase": "RUNNING",
+              "workStateReasonCode": "STOP_REQUESTED_IN_FLIGHT",
+              "workStateActionLabel": "核对停止结算",
+              "summaryShowsStopRequest": false,
+              "detailKeepsRawRequestTimestamp": true
+            }
+          },
+          {
+            "stopRequestKind": "CANCEL",
+            "samplePath": "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\verify\\probes\\runs\\a1-head-543162f\\samples\\FS-A02-CANCEL.json",
+            "readback": {
+              "missionStatus": "RUNNING",
+              "workState": {
+                "phase": "RUNNING",
+                "nextActor": "SYSTEM",
+                "reasonCode": "STOP_REQUESTED_IN_FLIGHT",
+                "reasonText": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤",
+                "actionLabel": "核对停止结算",
+                "checkedAt": "2026-11-03T04:06:10.552Z",
+                "observedAt": null,
+                "nextCheckAt": "2026-11-03T04:16:10.532Z",
+                "nextBoundary": "2026-11-03T04:16:10.532Z",
+                "freshness": "FRESH"
+              },
+              "exposesPauseRequestedAt": false,
+              "exposesCancelRequestedAt": false,
+              "workStateMentionsStopRequest": true
+            },
+            "missionDetail": {
+              "status": "RUNNING",
+              "pauseRequestedAt": null,
+              "cancelRequestedAt": "2026-11-03T04:06:10.532Z",
+              "workState": {
+                "phase": "RUNNING",
+                "nextActor": "SYSTEM",
+                "reasonCode": "STOP_REQUESTED_IN_FLIGHT",
+                "reasonText": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤",
+                "actionLabel": "核对停止结算",
+                "checkedAt": "2026-11-03T04:06:10.557Z",
+                "observedAt": null,
+                "nextCheckAt": "2026-11-03T04:16:10.532Z",
+                "nextBoundary": "2026-11-03T04:16:10.532Z",
+                "freshness": "FRESH"
+              }
+            },
+            "workspaceSummary": {
+              "status": "RUNNING",
+              "attention": "正在调查，进展来自已保存步骤",
+              "workState": {
+                "phase": "RUNNING",
+                "nextActor": "AGENT",
+                "reasonCode": "LEASE_ACTIVE",
+                "reasonText": "正在调查，进展来自已保存步骤",
+                "actionLabel": "查看委托进展",
+                "checkedAt": "2026-11-03T04:06:10.561Z",
+                "observedAt": null,
+                "nextCheckAt": "2026-11-03T04:16:10.532Z",
+                "nextBoundary": "2026-11-03T04:16:10.532Z",
+                "freshness": "FRESH"
+              },
+              "mentionsStopRequest": false
+            },
+            "observations": {
+              "readbackShowsRequestReceivedButUnsettled": true,
+              "workStatePhase": "RUNNING",
+              "workStateReasonCode": "STOP_REQUESTED_IN_FLIGHT",
+              "workStateActionLabel": "核对停止结算",
+              "summaryShowsStopRequest": false,
+              "detailKeepsRawRequestTimestamp": true
+            }
+          }
+        ],
+        "judgment": {
+          "readback": "workState 仍为 RUNNING / LEASE_ACTIVE / “正在调查，进展来自已保存步骤” / actionLabel=查看委托进展；没有任何“停止请求已收到、未结算”的字段或文案。",
+          "summary": "workspaceSummary 的 select 不包含 pauseRequestedAt/cancelRequestedAt，attention 仍是“正在调查…”。",
+          "missionDetail 原始字段": "只保留原 pauseRequestedAt/cancelRequestedAt 时间戳（服务原字段），没有进入共享 WorkState，也没有“未结算”解释。",
+          "input 类型缺口": "lib/mission/workState.ts 的 MissionStateInput 不含 pauseRequestedAt/cancelRequestedAt，纯投影无法表达请求在途。"
+        }
+      },
+      "notes": [
+        "RUNNING + pause/cancel 时 commandMission 仍保留 RUNNING（lib/mission/missionService.ts:106-107），本探针直接以 fixture 复现该持久语义，未经过命令路径。",
+        "失败判据“必须展示请求已收到、尚未完成”明确未命中。"
+      ],
+      "samplePaths": [
+        "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\verify\\probes\\runs\\a1-head-543162f\\samples\\FS-A02-PAUSE.json",
+        "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\verify\\probes\\runs\\a1-head-543162f\\samples\\FS-A02-CANCEL.json"
+      ]
+    },
+    {
+      "id": "FS-A03",
+      "verdict": "REPRODUCED",
+      "criterion": "READY + 未来 nextAttemptAt + DAILY_BUDGET_WAITING(budgetRetained:true) 时，missionDetail / missionWorkspaceSummary / readMissionBack 三者应一致解释“今日额度已用完、等待下次检查”，累计预算不得清零。",
+      "observed": {
+        "samplePath": "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\verify\\probes\\runs\\a1-head-543162f\\samples\\FS-A03-DAILY_BUDGET_WAITING.json",
+        "dbFacts": {
+          "status": "READY",
+          "nextAttemptAt": "2026-11-03T06:06:10.564Z",
+          "latestEventType": "DAILY_BUDGET_WAITING",
+          "latestEventPayload": {
+            "budgetRetained": true,
+            "nextAttemptAt": "2026-11-03T06:06:10.564Z",
+            "reason": "今日模型调用额度已用完，等待许可时区次日"
+          },
+          "budgetUsedJson": {
+            "models": 5,
+            "tools": 2,
+            "inputTokens": 900,
+            "outputTokens": 120,
+            "unknownCalls": 1
+          }
+        },
+        "missionDetail": {
+          "status": "READY",
+          "workState": {
+            "phase": "QUEUED",
+            "nextActor": "AGENT",
+            "reasonCode": "READY",
+            "reasonText": "委托已保存，等待执行",
+            "actionLabel": "查看委托进展",
+            "checkedAt": "2026-11-03T04:06:10.578Z",
+            "observedAt": null,
+            "nextCheckAt": "2026-11-03T06:06:10.564Z",
+            "nextBoundary": null,
+            "freshness": "FRESH"
+          },
+          "used": {
+            "models": 5,
+            "tools": 2,
+            "inputTokens": 900,
+            "outputTokens": 120,
+            "unknownCalls": 1
+          },
+          "exposesNextAttemptAtField": false
+        },
+        "missionWorkspaceSummary": {
+          "status": "READY",
+          "attention": "委托已保存，等待执行",
+          "workState": {
+            "phase": "QUEUED",
+            "nextActor": "AGENT",
+            "reasonCode": "READY",
+            "reasonText": "委托已保存，等待执行",
+            "actionLabel": "查看委托进展",
+            "checkedAt": "2026-11-03T04:06:10.583Z",
+            "observedAt": null,
+            "nextCheckAt": "2026-11-03T06:06:10.564Z",
+            "nextBoundary": null,
+            "freshness": "FRESH"
+          }
+        },
+        "readMissionBack": {
+          "missionStatus": "READY",
+          "workState": {
+            "phase": "QUEUED",
+            "nextActor": "AGENT",
+            "reasonCode": "READY",
+            "reasonText": "委托已保存，等待执行",
+            "actionLabel": "查看委托进展",
+            "checkedAt": "2026-11-03T04:06:10.572Z",
+            "observedAt": null,
+            "nextCheckAt": "2026-11-03T06:06:10.564Z",
+            "nextBoundary": null,
+            "freshness": "FRESH"
+          },
+          "resourceUsage": {
+            "schemaVersion": 1,
+            "scope": "MISSION_RECORDED_COUNTERS_ONLY",
+            "models": 5,
+            "tools": 2,
+            "inputTokens": 900,
+            "outputTokens": 120,
+            "unknownCalls": 1,
+            "monetaryCost": null,
+            "pricingState": "UNPRICED",
+            "summary": "模型 5 次 · 工具 2 次",
+            "coverageNote": "有 1 次请求结果或用量未知，已记录 token 不代表完整用量。",
+            "costNote": "费用尚不能核算：这些记录未绑定费率与账单。"
+          }
+        },
+        "pureProjectionReference": {
+          "withRealDailyBudgetWaitingEvent": {
+            "phase": "QUEUED",
+            "nextActor": "AGENT",
+            "reasonCode": "DAILY_BUDGET_WAITING",
+            "reasonText": "今日调用额度已用完，等待许可时区的次日；累计用量保留",
+            "actionLabel": "查看下次检查时间",
+            "checkedAt": "2026-11-03T04:06:10.585Z",
+            "observedAt": null,
+            "nextCheckAt": "2026-11-03T06:06:10.564Z",
+            "nextBoundary": null,
+            "freshness": "FRESH"
+          },
+          "withoutEvent": {
+            "phase": "QUEUED",
+            "nextActor": "AGENT",
+            "reasonCode": "READY",
+            "reasonText": "委托已保存，等待执行",
+            "actionLabel": "查看委托进展",
+            "checkedAt": "2026-11-03T04:06:10.585Z",
+            "observedAt": null,
+            "nextCheckAt": "2026-11-03T06:06:10.564Z",
+            "nextBoundary": null,
+            "freshness": "FRESH"
+          }
+        },
+        "observations": {
+          "reasonCodes": {
+            "missionDetail": "READY",
+            "workspaceSummary": "READY",
+            "readMissionBack": "READY"
+          },
+          "threeReasonCodesEqual": true,
+          "anyExplainsDailyBudgetWaiting": false,
+          "anyMentionsDailyBudgetInText": false,
+          "nextAttemptAtVisibleThrough": {
+            "missionDetailField": false,
+            "workStateNextCheckAt": {
+              "detail": "2026-11-03T06:06:10.564Z",
+              "readback": "2026-11-03T06:06:10.564Z",
+              "summary": "2026-11-03T06:06:10.564Z"
+            }
+          },
+          "cumulativeBudgetPreserved": {
+            "dbModels": 5,
+            "detailUsedModels": 5,
+            "readbackUsageModels": 5,
+            "notReset": true
+          }
+        },
+        "judgment": {
+          "三者一致性": "三者彼此一致（都是 QUEUED/READY，“委托已保存，等待执行”），但一致地没有解释 DAILY_BUDGET_WAITING。",
+          "事件是否被服务路径读到": "missionDetail / workspaceSummary / readback 的事件查询只筛 QUESTION、INVESTIGATION_NO_NEW_INFORMATION 等类型，DAILY_BUDGET_WAITING 不在 where 中。",
+          "纯投影对照": "把真实 DAILY_BUDGET_WAITING 事件直接传给 missionWorkState 时，phase=QUEUED、reasonCode=DAILY_BUDGET_WAITING、nextCheckAt 存在；说明缺口在服务层事件筛选，不在纯投影规则。",
+          "预算清零": "未清零：DB budgetUsedJson、detail.used、readback.resourceUsage 都保留 models=5/tools=2 等累计值。",
+          "下次时间": "仅 workState.nextCheckAt（=nextAttemptAt）可见；missionDetail 无 nextAttemptAt 字段。"
+        }
+      },
+      "notes": [
+        "失败判据“三者应一致解释等待”命中的是“一致地错误”：三者都不识别额度等待事件，也不出现“今日额度已用完/已保留累计用量”的文案。",
+        "预算不清零这一子项通过；nextAttemptAt 经 workState.nextCheckAt 暴露。"
+      ],
+      "samplePaths": [
+        "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\verify\\probes\\runs\\a1-head-543162f\\samples\\FS-A03-DAILY_BUDGET_WAITING.json"
+      ]
+    },
+    {
+      "id": "FS-A04",
+      "verdict": "NOT_REPRODUCED",
+      "criterion": "固定 delegation.lastObservedAt 后反复 GET：readback.observedAt（读取时刻）可以前进，但 workState.observedAt（成功观察时刻）不得前进；最近失败/无 Worker 时不得显示“刚检查成功/没有变化”。",
+      "observed": {
+        "samplePath": "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\verify\\probes\\runs\\a1-head-543162f\\samples\\FS-A04-observedAt-vs-checkedAt.json",
+        "successObservation": {
+          "fixtureLastObservedAt": "2026-10-01T00:00:00.000Z",
+          "firstRead": {
+            "readAt": "2026-11-03T04:06:10.595Z",
+            "readbackObservedAt": "2026-11-03T04:06:10.595Z",
+            "missionUpdatedAt": "2026-11-03T04:06:10.591Z",
+            "workState": {
+              "phase": "QUEUED",
+              "nextActor": "AGENT",
+              "reasonCode": "READY",
+              "reasonText": "委托已保存，等待执行",
+              "actionLabel": "查看委托进展",
+              "checkedAt": "2026-11-03T04:06:10.594Z",
+              "observedAt": "2026-10-01T00:00:00.000Z",
+              "nextCheckAt": null,
+              "nextBoundary": null,
+              "freshness": "FRESH"
+            }
+          },
+          "secondRead": {
+            "readAt": "2026-11-03T04:06:10.640Z",
+            "readbackObservedAt": "2026-11-03T04:06:10.640Z",
+            "missionUpdatedAt": "2026-11-03T04:06:10.591Z",
+            "workState": {
+              "phase": "QUEUED",
+              "nextActor": "AGENT",
+              "reasonCode": "READY",
+              "reasonText": "委托已保存，等待执行",
+              "actionLabel": "查看委托进展",
+              "checkedAt": "2026-11-03T04:06:10.638Z",
+              "observedAt": "2026-10-01T00:00:00.000Z",
+              "nextCheckAt": null,
+              "nextBoundary": null,
+              "freshness": "FRESH"
+            }
+          },
+          "readbackObservedAtAdvanced": true,
+          "workStateObservedAtFixed": true,
+          "workStateCheckedAtAdvanced": true
+        },
+        "afterFailure": {
+          "reads": [
+            {
+              "readAt": "2026-11-03T04:06:10.645Z",
+              "readbackObservedAt": "2026-11-03T04:06:10.645Z",
+              "workState": {
+                "phase": "FAILED",
+                "nextActor": "SYSTEM",
+                "reasonCode": "TOOL_FAILED",
+                "reasonText": "工具执行失败，已保存进度",
+                "actionLabel": "查看原因与恢复条件",
+                "checkedAt": "2026-11-03T04:06:10.643Z",
+                "observedAt": "2026-10-01T00:00:00.000Z",
+                "nextCheckAt": null,
+                "nextBoundary": null,
+                "freshness": "FRESH"
+              }
+            },
+            {
+              "readAt": "2026-11-03T04:06:10.688Z",
+              "readbackObservedAt": "2026-11-03T04:06:10.688Z",
+              "workState": {
+                "phase": "FAILED",
+                "nextActor": "SYSTEM",
+                "reasonCode": "TOOL_FAILED",
+                "reasonText": "工具执行失败，已保存进度",
+                "actionLabel": "查看原因与恢复条件",
+                "checkedAt": "2026-11-03T04:06:10.686Z",
+                "observedAt": "2026-10-01T00:00:00.000Z",
+                "nextCheckAt": null,
+                "nextBoundary": null,
+                "freshness": "FRESH"
+              }
+            }
+          ],
+          "workStateObservedAtStillFixed": true,
+          "phase": "FAILED",
+          "reasonCode": "TOOL_FAILED",
+          "freshness": "FRESH",
+          "showsNoChange": false
+        },
+        "missionDetailAfterFailure": {
+          "status": "FAILED",
+          "error": {
+            "code": "TOOL_FAILED",
+            "message": "工具执行失败，已保存进度",
+            "phase": "TOOL"
+          },
+          "workState": {
+            "phase": "FAILED",
+            "nextActor": "SYSTEM",
+            "reasonCode": "TOOL_FAILED",
+            "reasonText": "工具执行失败，已保存进度",
+            "actionLabel": "查看原因与恢复条件",
+            "checkedAt": "2026-11-03T04:06:10.690Z",
+            "observedAt": "2026-10-01T00:00:00.000Z",
+            "nextCheckAt": null,
+            "nextBoundary": null,
+            "freshness": "FRESH"
+          }
+        },
+        "judgment": {
+          "服务层字段分工": "readback.observedAt 是本次读取时间（每次 GET 前进）；workState.checkedAt 也是读取时刻；workState.observedAt 来自 planJson.delegation.lastObservedAt，固定不动。",
+          "失败后": "phase=FAILED、reasonCode=TOOL_FAILED，成功观察时间仍为 2026-10-01T00:00:00.000Z，未显示“没有变化/刚检查成功”。",
+          "Web 展示": "components/MissionReadback.tsx 把 readback.observedAt 标为“读取于”，不是“检查成功”；误读风险在调用方文案，不在服务字段语义。"
+        }
+      },
+      "notes": [
+        "服务级字段语义当前是分离的：读取时间与成功观察时间没有互相覆盖。判据未命中（服务层 NOT_REPRODUCED）。",
+        "风险仍在客户端：任何消费方把 readback.observedAt 或 workState.checkedAt 当作“刚刚核查成功”都会误报；本探针不替客户端签收。",
+        "未启动真实 Worker：workerPresence 文件指向临时目录且不存在，责任视图为 UNOBSERVED；“无 Worker”情形由固定观察时间 + 反复 GET 表达。"
+      ],
+      "samplePaths": [
+        "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\verify\\probes\\runs\\a1-head-543162f\\samples\\FS-A04-observedAt-vs-checkedAt.json"
+      ]
+    },
+    {
+      "id": "FS-A05",
+      "verdict": "REPRODUCED",
+      "criterion": "材料先绑定/引用，再 SUPPRESS_USE、连接撤销或来源链未知时：历史审计事实保留；当前依据不得继续标为可用/独立支持（availability 不能仍是 CURRENT）；原写入守卫必须拒绝。",
+      "observed": {
+        "samplePath": "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\verify\\probes\\runs\\a1-head-543162f\\samples\\FS-A05-material-use-vs-source-policy.json",
+        "hashSemantics": {
+          "taskHintPointerHash": "sha256(text)",
+          "realProjectMaterialHash": "0808afbded82c6d5f762d35306657212bf01cd5728ed35e37ca16a6f727c2400",
+          "realHashIsRawTextSha256": false,
+          "note": "真实 source.hash 是 jsonHash({rawText,sourceType,cardHash})，不是 sha256(text)；按任务书示例的 sha256(text) 绑定只会得到 availability=CHANGED，无法命中“版本匹配但策略抑制”的矛盾。本探针改用 readProjectMaterial().hash 作为绑定指针，并保留原始 sha256 供复核。",
+          "rawTextSha256": "46b5167b92d6254288c965eba862e08d302f49f660c1408a78cbb10e9b83db4b"
+        },
+        "baseline": {
+          "sourceUse": {
+            "state": "ALLOWED",
+            "roots": [
+              "capture:cmw061153000maw8ohd8mbg4t"
+            ],
+            "independentEvidence": true,
+            "reason": "ORIGINAL_OBSERVATION"
+          },
+          "materialUsesItem": {
+            "availability": "CURRENT",
+            "facts": [
+              "SAVED",
+              "ASSOCIATED",
+              "CANDIDATE",
+              "BOUND"
+            ],
+            "excerptPresent": true
+          }
+        },
+        "suppressionCase": {
+          "directiveAdmission": {
+            "status": "DIRECT_APPLIED",
+            "kind": "USE_SUPPRESSION",
+            "reason": "EXPLICIT_SUPPRESSION"
+          },
+          "sourceUse": {
+            "state": "SUPPRESSED",
+            "roots": [
+              "capture:cmw061153000maw8ohd8mbg4t"
+            ],
+            "independentEvidence": false,
+            "reason": "ROOT_SUPPRESSED"
+          },
+          "materialUsesItem": {
+            "availability": "CURRENT",
+            "facts": [
+              "SAVED",
+              "ASSOCIATED",
+              "CANDIDATE",
+              "BOUND"
+            ],
+            "excerpt": "2026-10-30 normal 原始记录：演示环境启动日志需现场核对，安装自报不等于启动成功。"
+          },
+          "writeGuard": {
+            "rejected": true,
+            "name": "Error",
+            "message": "你已要求停止使用这条资料及其派生结论，请重新调查",
+            "code": "SOURCE_USE_SUPPRESSED",
+            "status": 409
+          },
+          "observations": {
+            "contradiction": true,
+            "historicalFactsPreserved": true
+          }
+        },
+        "revokedConnectionCase": {
+          "sourceUseBefore": {
+            "state": "ALLOWED",
+            "roots": [
+              "capture:cmw06116m000xaw8ouartl9ts",
+              "signal:cmw0611710014aw8oza8m8wsp",
+              "repo:cmw0611700013aw8o7hq90zjq"
+            ],
+            "independentEvidence": false,
+            "reason": "DERIVED_REFERENCE"
+          },
+          "sourceUseAfter": {
+            "state": "SUPPRESSED",
+            "roots": [
+              "capture:cmw06116m000xaw8ouartl9ts",
+              "signal:cmw0611710014aw8oza8m8wsp",
+              "repo:cmw0611700013aw8o7hq90zjq"
+            ],
+            "independentEvidence": false,
+            "reason": "SOURCE_PERMISSION_REVOKED"
+          },
+          "materialUsesItem": {
+            "availability": "CURRENT",
+            "facts": [
+              "SAVED",
+              "ASSOCIATED",
+              "CANDIDATE",
+              "BOUND"
+            ],
+            "excerpt": "2026-10-30 revoked 原始记录：演示环境启动日志需现场核对，安装自报不等于启动成功。"
+          },
+          "observations": {
+            "contradiction": true,
+            "historicalFactsPreserved": true
+          }
+        },
+        "unknownLineageCase": {
+          "sourceUse": {
+            "state": "UNKNOWN",
+            "roots": [
+              "capture:cmw06117b0018aw8ofvqjuwzj"
+            ],
+            "independentEvidence": false,
+            "reason": "LINEAGE_UNKNOWN"
+          },
+          "materialUsesItem": {
+            "availability": "CURRENT",
+            "facts": [
+              "SAVED",
+              "ASSOCIATED",
+              "CANDIDATE",
+              "BOUND"
+            ],
+            "excerpt": "2026-10-30 unknown 原始记录：演示环境启动日志需现场核对，安装自报不等于启动成功。"
+          },
+          "observations": {
+            "contradiction": true,
+            "historicalFactsPreserved": true
+          }
+        },
+        "judgment": {
+          "当前可用性": "三种情形下 materialUses.items[0].availability 仍是 CURRENT（materialUseProjection 只比较 readProjectMaterial 版本 hash，不调用 SourcePolicy）。",
+          "SourcePolicy 结果": "SUPPRESS_USE → SUPPRESSED/ROOT_SUPPRESSED；连接撤销 → SUPPRESSED/SOURCE_PERMISSION_REVOKED；来源链未知 → UNKNOWN/LINEAGE_UNKNOWN。",
+          "历史事实": "BOUND/ASSOCIATED/CANDIDATE 等历史 facts 与摘录都保留，未因抑制被删除。",
+          "写入守卫": "validateSources → assertSourceUse 拒绝（SOURCE_USE_SUPPRESSED），原写路径仍被守卫。"
+        }
+      },
+      "notes": [
+        "失败判据“当前依据不继续使用/不称独立支持”命中：availability=CURRENT 与 SourcePolicy=SUPPRESSED/UNKNOWN 冲突；若客户端照搬 CURRENT 就会绕过抑制。",
+        "历史保留与写入守卫这两个子项通过。",
+        "探针使用真实 submitDirective（项目级 scope，conversationId/missionId 为 null 才能作用于 mission 读取）；连接撤销通过原 SourceConnection/ExternalSignal 行与 sourceLineage 真实路径触发。"
+      ],
+      "samplePaths": [
+        "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\verify\\probes\\runs\\a1-head-543162f\\samples\\FS-A05-material-use-vs-source-policy.json"
+      ]
+    },
+    {
+      "id": "FS-A06",
+      "verdict": "REPRODUCED",
+      "criterion": "项目内 45 条更新的无关 AgentRun + 1 条本 Mission 的 AgentRun（trace.contextManifest.sourcePointers 指向已绑定 source）时，materialUseProjection 不得因项目窗口截断而丢失 CONTEXT_POINTER；若丢失，“未找到”只能表示覆盖不足，不能解释为从未使用。",
+      "observed": {
+        "samplePath": "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\verify\\probes\\runs\\a1-head-543162f\\samples\\FS-A06-agentrun-window-eviction.json",
+        "fixture": {
+          "projectRunCount": 46,
+          "missionRunId": "cmw06117x001naw8o9epu271z",
+          "missionRunCreatedAt": "2026-11-03T04:06:10.796Z",
+          "unrelatedRunCount": 45,
+          "materialUseProjection": {
+            "projectRunLimit": 40,
+            "take": 41
+          }
+        },
+        "beforeUnrelatedRuns": {
+          "facts": [
+            "SAVED",
+            "ASSOCIATED",
+            "CANDIDATE",
+            "BOUND",
+            "CONTEXT_POINTER"
+          ],
+          "availability": "CURRENT",
+          "coverage": {
+            "eventLimit": 80,
+            "eventsTruncated": false,
+            "stepLimit": 40,
+            "stepsTruncated": false,
+            "outputLimit": 20,
+            "outputsTruncated": false,
+            "receiptsTruncated": false,
+            "projectRunLimit": 40,
+            "runsTruncated": false,
+            "sourceLimit": 8,
+            "sourceLimitReached": false,
+            "mapping": "DIRECT_SOURCE_POINTERS_ONLY"
+          },
+          "callCoverage": {
+            "inspected": {
+              "agentRuns": 1,
+              "steps": 1,
+              "limit": 20,
+              "truncated": false
+            },
+            "models": {
+              "total": 1,
+              "succeeded": 1,
+              "failed": 0,
+              "partial": 0,
+              "fallback": 0,
+              "unknown": 0,
+              "usageRecorded": 1,
+              "usageUnknown": 0
+            },
+            "summary": "可核对调用：模型已检查 1 次（成功 1 / 失败 0）· 工具已检查 1 次（成功 1 / 失败 0）"
+          }
+        },
+        "afterUnrelatedRuns": {
+          "facts": [
+            "SAVED",
+            "ASSOCIATED",
+            "CANDIDATE",
+            "BOUND"
+          ],
+          "availability": "CURRENT",
+          "coverage": {
+            "eventLimit": 80,
+            "eventsTruncated": false,
+            "stepLimit": 40,
+            "stepsTruncated": false,
+            "outputLimit": 20,
+            "outputsTruncated": false,
+            "receiptsTruncated": false,
+            "projectRunLimit": 40,
+            "runsTruncated": true,
+            "sourceLimit": 8,
+            "sourceLimitReached": false,
+            "mapping": "DIRECT_SOURCE_POINTERS_ONLY"
+          },
+          "callCoverage": {
+            "inspected": {
+              "agentRuns": 1,
+              "steps": 1,
+              "limit": 20,
+              "truncated": false
+            },
+            "models": {
+              "total": 1,
+              "succeeded": 1,
+              "failed": 0,
+              "partial": 0,
+              "fallback": 0,
+              "unknown": 0,
+              "usageRecorded": 1,
+              "usageUnknown": 0
+            },
+            "summary": "可核对调用：模型已检查 1 次（成功 1 / 失败 0）· 工具已检查 1 次（成功 1 / 失败 0）"
+          }
+        },
+        "observations": {
+          "contextPointerBefore": true,
+          "contextPointerAfter": false,
+          "missionRunEvictedFromMaterialWindow": true,
+          "missionRunStillExistsInDb": true,
+          "coverageOnlyReportsTruncation": true,
+          "callCoverageStillFindsMissionRun": true
+        },
+        "judgment": {
+          "材料使用投影": "先按项目取 41 条 AgentRun 再按 trace.missionId 过滤；45 条更新的无关运行把本 Mission 运行挤出窗口，CONTEXT_POINTER 事实消失。",
+          "覆盖说明": "coverage 只有 projectRunLimit=40、runsTruncated=true，没有“未找到≠从未发生”或“需按 mission 过滤/扩大窗口”的语义字段。",
+          "同响应内对照": "readMissionBack.callCoverage 先用 SQL 按 trace.missionId 过滤再取窗口，仍能找到该 Mission 的 1 条运行；说明 callCoverage 已修，而 materialUseProjection 仍受项目窗口挤压。"
+        }
+      },
+      "notes": [
+        "判据命中：同一 SQLite 库中本 Mission 的 AgentRun 确实存在，但 materialUses 中 CONTEXT_POINTER 消失，覆盖说明只说明截断。",
+        "本用例没有修改任何产品代码；对照的 callCoverage 过滤逻辑见 lib/mission/readback.ts:137-151。"
+      ],
+      "samplePaths": [
+        "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\verify\\probes\\runs\\a1-head-543162f\\samples\\FS-A06-agentrun-window-eviction.json"
+      ]
+    }
+  ],
+  "remaining": {
+    "FS-A07": "真实双连接并发探针单独输出 evidence/final-a/20261103/probe-concurrency.json",
+    "纯投影": "evidence/final-a/20261103/probe-work-state-pure.json（纯投影 ≠ 服务缺陷已确认）"
+  }
+}

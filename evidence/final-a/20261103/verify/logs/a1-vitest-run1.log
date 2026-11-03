@@ -1,0 +1,17 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/finalAWorkStateContract.test.ts tests/finalAWorkPacketContract.test.ts tests/agentUxWorkState.test.ts tests/missionWorkspaceSummary.test.ts
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-final-a-mission-packet
+
+ ✓ tests/missionWorkspaceSummary.test.ts (4 tests) 243ms
+ ✓ tests/agentUxWorkState.test.ts (7 tests) 58ms
+ ✓ tests/finalAWorkPacketContract.test.ts (27 tests) 14ms
+ ✓ tests/finalAWorkStateContract.test.ts (31 tests) 9ms
+
+ Test Files  4 passed (4)
+      Tests  69 passed (69)
+   Start at  12:05:06
+   Duration  3.86s (transform 884ms, setup 0ms, import 2.62s, tests 324ms, environment 0ms)
+

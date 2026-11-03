@@ -24,7 +24,10 @@ export async function missionWorkspaceSummary(userId: string, projectId: string)
 
 export const missionSummarySelect = {
     id: true,planRevision:true,updatedAt:true, projectId:true, goal: true, status: true, version: true, lastErrorJson: true, waitStateJson:true, planJson:true, continuationPolicyJson:true, leaseUntil:true, nextAttemptAt:true,
-    events: {where: {type: {in:["QUESTION","INVESTIGATION_NO_NEW_INFORMATION","INVESTIGATION_OBSERVATION_CHANGED"] as string[]}}, orderBy: {seq: "desc" as const}, take: 1, select: {id: true, type:true, payloadJson: true}},
+    // 停止请求在途与暂停原因进入摘要投影：已请求停止不等于已经停止，摘要不能显示“可继续”。
+    pauseRequestedAt:true, cancelRequestedAt:true, pauseReason:true,
+    // FS-A03：额度等待事件进入同一白名单，摘要与详情/读回对 QUEUED 的解释保持一致。
+    events: {where: {type: {in:["QUESTION","INVESTIGATION_NO_NEW_INFORMATION","INVESTIGATION_OBSERVATION_CHANGED","DAILY_BUDGET_WAITING"] as string[]}}, orderBy: {seq: "desc" as const}, take: 1, select: {id: true, type:true, payloadJson: true}},
     approvals: {where: {status: "PENDING"}, orderBy: {expiresAt: "asc" as const}, take: 1, select: {id: true, expiresAt:true, proposalJson: true}},
     steps: {where: {status: "SUCCEEDED"}, orderBy: {ordinal: "desc" as const}, take: 1, select: {toolName: true, finishedAt: true}},
     outputs: {orderBy: {revision: "desc" as const}, take: 1, select: {revision: true, createdAt: true}},

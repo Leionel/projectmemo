@@ -1,0 +1,15 @@
+{
+  "fixture": "PURE_FUNCTION_NO_DATABASE_NO_MODEL",
+  "note": "readAt 与 workState.checkedAt 前进，lastSuccessfulAt 与 workState.observedAt 不变；读取不推进成功观察。",
+  "fixedLastSuccessfulAt": "2026-11-01T08:00:00.000Z",
+  "earlier": {
+    "readAt": "2026-11-03T03:00:00.000Z",
+    "workStateObservedAt": "2026-11-01T08:00:00.000Z",
+    "workStateCheckedAt": "2026-11-03T03:00:00.000Z"
+  },
+  "later": {
+    "readAt": "2026-11-03T04:00:00.000Z",
+    "workStateObservedAt": "2026-11-01T08:00:00.000Z",
+    "workStateCheckedAt": "2026-11-03T04:00:00.000Z"
+  }
+}

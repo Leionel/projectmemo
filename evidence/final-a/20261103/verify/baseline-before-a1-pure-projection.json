@@ -1,0 +1,238 @@
+{
+  "generatedAt": "2026-11-03T03:39:10.445Z",
+  "stage": "BEFORE_A1",
+  "role": "independent-verifier",
+  "mode": "pure-projection-no-database-no-model",
+  "sourceSha": "485d485378637e1da3280ed092739d441c8cf749",
+  "branch": "codex/final-a-mission-packet",
+  "note": "基线显示行为对照，不是修复测试，也不是 PASS/FAIL 验收；A1 落地后由独立 fixture 复测。",
+  "fixtureTime": "2026-11-03T03:00:00.000Z",
+  "cases": [
+    {
+      "id": "FS-A01-SUCCEEDED-PLAIN",
+      "note": "基线：无 UNKNOWN 错误",
+      "input": {
+        "id": "evidence-baseline-mission",
+        "version": 3,
+        "status": "SUCCEEDED"
+      },
+      "output": {
+        "phase": "COMPLETED",
+        "nextActor": "NONE",
+        "requiresUser": false,
+        "reasonCode": "SUCCEEDED",
+        "reasonText": "委托完成条件已通过，现实效果以原结果为准",
+        "actionLabel": "查看原结果",
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "evidence-baseline-mission",
+          "version": 3
+        },
+        "exactQuestionRef": null,
+        "exactApprovalRef": null,
+        "checkedAt": "2026-11-03T03:00:00.000Z",
+        "observedAt": null,
+        "nextCheckAt": null,
+        "nextBoundary": null,
+        "freshness": "FRESH"
+      }
+    },
+    {
+      "id": "FS-A01-SUCCEEDED-UNKNOWN",
+      "note": "基线：SUCCEEDED 与未结算 UNKNOWN 同时存在（FS-A01 反例）",
+      "input": {
+        "id": "evidence-baseline-mission",
+        "version": 3,
+        "status": "SUCCEEDED",
+        "lastErrorJson": {
+          "code": "EXTERNAL_UNKNOWN",
+          "message": "外部效果未结算"
+        }
+      },
+      "output": {
+        "phase": "UNKNOWN",
+        "nextActor": "SYSTEM",
+        "requiresUser": false,
+        "reasonCode": "EXTERNAL_UNKNOWN",
+        "reasonText": "原请求状态待核对，已用预算保留",
+        "actionLabel": "查询原请求",
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "evidence-baseline-mission",
+          "version": 3
+        },
+        "exactQuestionRef": null,
+        "exactApprovalRef": null,
+        "checkedAt": "2026-11-03T03:00:00.000Z",
+        "observedAt": null,
+        "nextCheckAt": null,
+        "nextBoundary": null,
+        "freshness": "FRESH"
+      }
+    },
+    {
+      "id": "FS-A01-CANCELLED-PLAIN",
+      "note": "基线：取消无 UNKNOWN",
+      "input": {
+        "id": "evidence-baseline-mission",
+        "version": 3,
+        "status": "CANCELLED"
+      },
+      "output": {
+        "phase": "COMPLETED",
+        "nextActor": "NONE",
+        "requiresUser": false,
+        "reasonCode": "CANCELLED",
+        "reasonText": "委托已取消，历史结果保留",
+        "actionLabel": "查看原结果",
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "evidence-baseline-mission",
+          "version": 3
+        },
+        "exactQuestionRef": null,
+        "exactApprovalRef": null,
+        "checkedAt": "2026-11-03T03:00:00.000Z",
+        "observedAt": null,
+        "nextCheckAt": null,
+        "nextBoundary": null,
+        "freshness": "FRESH"
+      }
+    },
+    {
+      "id": "FS-A01-CANCELLED-UNKNOWN",
+      "note": "基线：CANCELLED 与未结算 UNKNOWN 同时存在（FS-A01 反例）",
+      "input": {
+        "id": "evidence-baseline-mission",
+        "version": 3,
+        "status": "CANCELLED",
+        "lastErrorJson": {
+          "code": "EXTERNAL_UNKNOWN"
+        }
+      },
+      "output": {
+        "phase": "UNKNOWN",
+        "nextActor": "SYSTEM",
+        "requiresUser": false,
+        "reasonCode": "EXTERNAL_UNKNOWN",
+        "reasonText": "原请求状态待核对，已用预算保留",
+        "actionLabel": "查询原请求",
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "evidence-baseline-mission",
+          "version": 3
+        },
+        "exactQuestionRef": null,
+        "exactApprovalRef": null,
+        "checkedAt": "2026-11-03T03:00:00.000Z",
+        "observedAt": null,
+        "nextCheckAt": null,
+        "nextBoundary": null,
+        "freshness": "FRESH"
+      }
+    },
+    {
+      "id": "FS-A02-RUNNING-PAUSE-IN-FLIGHT",
+      "note": "基线：RUNNING+有效 lease+pauseRequestedAt（FS-A02 反例；基线输入类型无该字段，运行时传入验证是否被忽略）",
+      "input": {
+        "id": "evidence-baseline-mission",
+        "version": 3,
+        "status": "RUNNING",
+        "leaseUntil": "2026-11-03T03:01:00.000Z",
+        "pauseRequestedAt": "2026-11-03T03:00:00.000Z"
+      },
+      "output": {
+        "phase": "RUNNING",
+        "nextActor": "AGENT",
+        "requiresUser": false,
+        "reasonCode": "LEASE_ACTIVE",
+        "reasonText": "正在调查，进展来自已保存步骤",
+        "actionLabel": "查看委托进展",
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "evidence-baseline-mission",
+          "version": 3
+        },
+        "exactQuestionRef": null,
+        "exactApprovalRef": null,
+        "checkedAt": "2026-11-03T03:00:00.000Z",
+        "observedAt": null,
+        "nextCheckAt": null,
+        "nextBoundary": "2026-11-03T03:01:00.000Z",
+        "freshness": "FRESH"
+      }
+    },
+    {
+      "id": "FS-A02-RUNNING-CANCEL-IN-FLIGHT",
+      "note": "基线：RUNNING+有效 lease+cancelRequestedAt",
+      "input": {
+        "id": "evidence-baseline-mission",
+        "version": 3,
+        "status": "RUNNING",
+        "leaseUntil": "2026-11-03T03:01:00.000Z",
+        "cancelRequestedAt": "2026-11-03T03:00:00.000Z"
+      },
+      "output": {
+        "phase": "RUNNING",
+        "nextActor": "AGENT",
+        "requiresUser": false,
+        "reasonCode": "LEASE_ACTIVE",
+        "reasonText": "正在调查，进展来自已保存步骤",
+        "actionLabel": "查看委托进展",
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "evidence-baseline-mission",
+          "version": 3
+        },
+        "exactQuestionRef": null,
+        "exactApprovalRef": null,
+        "checkedAt": "2026-11-03T03:00:00.000Z",
+        "observedAt": null,
+        "nextCheckAt": null,
+        "nextBoundary": "2026-11-03T03:01:00.000Z",
+        "freshness": "FRESH"
+      }
+    },
+    {
+      "id": "FS-A04-OBSERVED-AT",
+      "note": "基线：delegation.lastObservedAt 固定，checkedAt 来自 now",
+      "input": {
+        "id": "evidence-baseline-mission",
+        "version": 3,
+        "status": "WAITING_INPUT",
+        "waitStateJson": {
+          "waitingFor": "OBSERVATION"
+        },
+        "planJson": {
+          "delegation": {
+            "lastObservedAt": "2026-11-01T00:00:00.000Z"
+          }
+        },
+        "continuationPolicyJson": {
+          "mode": "BOUNDED_INVESTIGATION",
+          "expiresAt": "2026-11-10T00:00:00.000Z"
+        }
+      },
+      "output": {
+        "phase": "WAITING_OBSERVATION",
+        "nextActor": "AGENT",
+        "requiresUser": false,
+        "reasonCode": "OBSERVATION_PENDING",
+        "reasonText": "等待新变化，将按已授权条件检查",
+        "actionLabel": "查看跟进条件",
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "evidence-baseline-mission",
+          "version": 3
+        },
+        "exactQuestionRef": null,
+        "exactApprovalRef": null,
+        "checkedAt": "2026-11-03T03:00:00.000Z",
+        "observedAt": "2026-11-01T00:00:00.000Z",
+        "nextCheckAt": null,
+        "nextBoundary": "2026-11-10T00:00:00.000Z",
+        "freshness": "FRESH"
+      }
+    }
+  ]
+}

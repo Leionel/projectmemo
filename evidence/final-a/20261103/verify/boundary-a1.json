@@ -1,0 +1,158 @@
+{
+  "generatedAt": "2026-11-03T04:22:44.1260845Z",
+  "role": "independent-verifier",
+  "stage": "A1_BOUNDARY",
+  "headSha": "304adfee664689d67c6c836dc8f711ca0bc2e10b",
+  "baseSha": "485d485378637e1da3280ed092739d441c8cf749",
+  "a1CodeCommit": "f267aec674dbb9c28f6fa79bf428816016d2bee5",
+  "summary": {
+    "total": 8,
+    "pass": 8,
+    "fail": 0
+  },
+  "checks": [
+    {
+      "id": "A1-BOUND-01",
+      "question": "当前 HEAD 等于 Lead 给定的 A1 最终 HEAD（304adfe）",
+      "verdict": "PASS",
+      "observed": {
+        "expected": "304adfee664689d67c6c836dc8f711ca0bc2e10b",
+        "actual": "304adfee664689d67c6c836dc8f711ca0bc2e10b",
+        "branch": "codex/final-a-mission-packet",
+        "baseSha": "485d485378637e1da3280ed092739d441c8cf749",
+        "a1CommitChain": [
+          "f267aec674dbb9c28f6fa79bf428816016d2bee5",
+          "543162f9424659c00f3f2abdee4a43fe2189aabc",
+          "b243f62a2970ffc1bd070ba6c2933690c230d72f",
+          "3a62dcefa0a5ff357ae5afbb301598cd4b672d0c",
+          "304adfee664689d67c6c836dc8f711ca0bc2e10b"
+        ]
+      },
+      "note": ""
+    },
+    {
+      "id": "A1-BOUND-02",
+      "question": "A1 提交范围（485d485..304adfe）的代码文件全部在 A1 合同/探针/测试清单内",
+      "verdict": "PASS",
+      "observed": {
+        "a1CommitChain": [
+          "f267aec674dbb9c28f6fa79bf428816016d2bee5",
+          "543162f9424659c00f3f2abdee4a43fe2189aabc",
+          "b243f62a2970ffc1bd070ba6c2933690c230d72f",
+          "3a62dcefa0a5ff357ae5afbb301598cd4b672d0c",
+          "304adfee664689d67c6c836dc8f711ca0bc2e10b"
+        ],
+        "codeFiles": [
+          "lib/mission/workPacket.ts",
+          "lib/mission/workState.ts",
+          "lib/types/workPacket.ts",
+          "lib/types/workState.ts",
+          "scripts/final-a/README.md",
+          "scripts/final-a/a1-contract-samples.ts",
+          "scripts/final-a/lib/probeFixtures.ts",
+          "scripts/final-a/lib/probeSupport.ts",
+          "scripts/final-a/probe-fs-a.ts",
+          "scripts/final-a/probe-fs-a07-concurrency.ts",
+          "scripts/final-a/probe-work-state-pure.ts",
+          "scripts/final-a/smoke-db.ts",
+          "tests/finalAWorkPacketContract.test.ts",
+          "tests/finalAWorkStateContract.test.ts"
+        ],
+        "outsideAllowed": [],
+        "evidenceFilesCount": 27
+      },
+      "note": ""
+    },
+    {
+      "id": "A1-BOUND-03",
+      "question": "无 prisma/schema.prisma 或 prisma/migrations 变更",
+      "verdict": "PASS",
+      "observed": {
+        "prismaChangedFiles": [],
+        "schemaShaBase": "8e93d88ecc6fd90cad42302f7d41b7861c4d054a",
+        "schemaShaHead": "8e93d88ecc6fd90cad42302f7d41b7861c4d054a"
+      },
+      "note": ""
+    },
+    {
+      "id": "A1-BOUND-04",
+      "question": "无 app/components/harmonyos/官网布局或依赖改动",
+      "verdict": "PASS",
+      "observed": {
+        "changed": []
+      },
+      "note": ""
+    },
+    {
+      "id": "A1-BOUND-05",
+      "question": "产品代码无新状态表/Runner/Planner/新 PrismaClient；探针脚本内第二连接属 task-2 明确要求",
+      "verdict": "PASS",
+      "observed": {
+        "suspiciousNewFiles": [],
+        "modelAdds": [],
+        "prodPrismaClientSitesBase": 1,
+        "prodPrismaClientSitesHead": 1,
+        "allowedProbeSecondConnections": [
+          "+      \"scope\": \"FS-A07 真实双连接并发（主连接 lib/db + writer new PrismaClient({adapter: PrismaBetterSqlite3})）\",",
+          "+      \"writer\": \"new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: 同一 DATABASE_URL }) })\",",
+          "+| `probe-fs-a07-concurrency.ts` | FS-A07 真实双连接并发：主连接 `lib/db` 读取，第二连接 `new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: 同一 DATABASE_URL }) })` 循环执行真实 update/insert；40 轮交替读，统计跨接口/跨调用/同一响应内修订不一致。输出 `probe-concurrency.json`。 |",
+          "+ * - 写连接：new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: 同一 DATABASE_URL }) })；",
+          "+const writer = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: env.databaseUrl }) });",
+          "+        writer: \"new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: 同一 DATABASE_URL }) })\","
+        ]
+      },
+      "note": "scripts/final-a/probe-fs-a07-concurrency.ts 的第二个 PrismaClient 只连临时库，是 task-2 验收要求的真实并发证据，不算产品新执行器。"
+    },
+    {
+      "id": "A1-BOUND-06",
+      "question": "无密钥/签名/证书/真实库文件进入 A1 提交",
+      "verdict": "PASS",
+      "observed": {
+        "binaryOrSecretFiles": [],
+        "patternHitCount": 0,
+        "patternHitSamples": []
+      },
+      "note": ""
+    },
+    {
+      "id": "A1-BOUND-07",
+      "question": "docs 未被误加入 git（A1 范围无 docs；tracked docs 数量=基线 41）",
+      "verdict": "PASS",
+      "observed": {
+        "docsChangedInA1": [],
+        "trackedDocsCount": 41,
+        "planningDocsTracked": 0
+      },
+      "note": ""
+    },
+    {
+      "id": "A1-BOUND-08",
+      "question": "工作树内 A2 未提交改动被识别并与 A1 提交范围区分（不记作 A1 越界）",
+      "verdict": "PASS",
+      "observed": {
+        "worktreeStatus": [
+          " M lib/mission/materialUseProjection.ts",
+          " M lib/mission/missionService.ts",
+          " M lib/mission/readback.ts",
+          " M lib/mission/workspaceSummary.ts",
+          "?? evidence/final-a/20261103/samples/a2/",
+          "?? evidence/final-a/20261103/verify/",
+          "?? scripts/final-a/generate-samples.ts",
+          "?? tests/finalAConcurrencyService.test.ts",
+          "?? tests/finalAWorkPacketService.test.ts"
+        ],
+        "a2InFlightFiles": [
+          " M lib/mission/materialUseProjection.ts",
+          " M lib/mission/missionService.ts",
+          " M lib/mission/readback.ts",
+          " M lib/mission/workspaceSummary.ts",
+          "?? evidence/final-a/20261103/samples/a2/",
+          "?? scripts/final-a/generate-samples.ts",
+          "?? tests/finalAConcurrencyService.test.ts",
+          "?? tests/finalAWorkPacketService.test.ts"
+        ]
+      },
+      "note": ""
+    }
+  ]
+}

@@ -1,0 +1,238 @@
+{
+  "generatedAt": "2026-11-03T04:21:45.215Z",
+  "mode": "INDEPENDENT_CONTRACT_PROBE_A1",
+  "runner": "evidence/final-a/20261103/verify/fixtures/a1-dto-probe.ts",
+  "sourceTree": "A1 final HEAD 304adfe via git archive (A1-only clean tree; A2 WIP excluded; code identical to 3a62dce, 304adfe docs-only)",
+  "env": {
+    "database": "none (pure functions)",
+    "modelProviderCalls": 0,
+    "network": 0
+  },
+  "summary": {
+    "total": 5,
+    "pass": 5,
+    "fail": 0
+  },
+  "checks": [
+    {
+      "id": "A1-DTO-01",
+      "question": "四问 DTO 全部有值且可追溯到原事实字段",
+      "verdict": "PASS",
+      "observed": {
+        "questionKeys": {
+          "done 已做了什么": [
+            "recentSteps",
+            "latestOutput",
+            "progress",
+            "actionReceipts",
+            "note",
+            "coverage"
+          ],
+          "basis 依据是什么": [
+            "questionId",
+            "materialUses",
+            "evidenceReviews",
+            "currentUsePolicy",
+            "note"
+          ],
+          "stopped 为何停下": [
+            "workState",
+            "missionStatus",
+            "primaryBlock",
+            "blockers",
+            "unknownEffect",
+            "stopRequest",
+            "note"
+          ],
+          "next 现在由谁做哪一步": [
+            "nextActor",
+            "primaryAction",
+            "nextCheckAt",
+            "nextBoundary",
+            "waitingOn",
+            "note"
+          ]
+        },
+        "identity": {
+          "missionId": "verify-m-1",
+          "projectId": "verify-p-1",
+          "missionVersion": 9,
+          "missionStatus": "WAITING_INPUT",
+          "planRevision": 4,
+          "contextVersion": 5,
+          "constraintsVersion": 2,
+          "researchScopeVersion": 3,
+          "controlVersion": "control-verify-1",
+          "originalRef": {
+            "kind": "MISSION",
+            "id": "verify-m-1",
+            "version": 9
+          }
+        },
+        "snapshot": {
+          "mode": "SINGLE_READ_TRANSACTION",
+          "consistency": "VERSION_STABLE",
+          "retries": 0,
+          "checkedAt": "2026-11-03T04:00:00.000Z",
+          "note": "同一只读事务内读取；身份与版本来自同一快照。"
+        },
+        "contractVersion": "final-a-workpacket-v1"
+      }
+    },
+    {
+      "id": "A1-DTO-02",
+      "question": "真实 null 显式存在、可选增量缺失不伪造默认成功、旧 WorkState 可降级",
+      "verdict": "PASS",
+      "observed": {
+        "observationsJson": {
+          "readAt": "2026-11-03T04:00:00.000Z",
+          "state": "NOT_OBSERVED",
+          "lastSuccessfulAt": null,
+          "lastFailedAt": null,
+          "lastNoNewInformationAt": null,
+          "nextCheckAt": null,
+          "authority": "ORIGINAL_DELEGATION_RECORDS_ONLY"
+        },
+        "minimalDone": {
+          "recentSteps": [],
+          "latestOutput": null,
+          "progress": null,
+          "actionReceipts": [],
+          "note": "最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 窗口内没有工作记录，只表示覆盖不足，不等于从未发生。",
+          "coverage": {
+            "limit": 5,
+            "truncated": false
+          }
+        },
+        "legacyPacket": {
+          "unknownEffect": {
+            "present": true,
+            "code": "EXTERNAL_UNKNOWN",
+            "source": "LAST_ERROR",
+            "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+            "resolvedByRead": false
+          },
+          "primaryActionKind": "CHECK_UNKNOWN_EFFECT"
+        }
+      }
+    },
+    {
+      "id": "A1-DTO-03",
+      "question": "primaryAction 指向原对象、携带全量版本要求与 readOnly、提交由服务端重查",
+      "verdict": "PASS",
+      "observed": {
+        "questionAction": {
+          "kind": "ANSWER_QUESTION",
+          "label": "回答原问题",
+          "target": {
+            "kind": "QUESTION",
+            "id": "q-verify",
+            "version": null
+          },
+          "requires": {
+            "missionVersion": 9,
+            "planRevision": 4,
+            "contextVersion": 5,
+            "constraintsVersion": 2,
+            "researchScopeVersion": 3,
+            "controlVersion": "control-verify-1",
+            "questionId": "q-verify",
+            "approvalId": null,
+            "proposalHash": null,
+            "requiredSourceRevisions": [
+              "capture:verify-1@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+            ],
+            "boundaryAt": "2026-11-03T12:00:00.000Z"
+          },
+          "submissionGuard": "SERVER_RECHECKS_OWNER_PROJECT_VERSION_SOURCE_PERMISSION_LEASE_BUDGET_IDEMPOTENCY",
+          "readOnly": true
+        },
+        "stopAction": {
+          "kind": "CHECK_STOP_SETTLEMENT",
+          "label": "核对停止结算",
+          "target": {
+            "kind": "MISSION",
+            "id": "verify-m-1",
+            "version": 9
+          },
+          "requires": {
+            "missionVersion": 9,
+            "planRevision": 4,
+            "contextVersion": 5,
+            "constraintsVersion": 2,
+            "researchScopeVersion": 3,
+            "controlVersion": "control-verify-1",
+            "questionId": null,
+            "approvalId": null,
+            "proposalHash": null,
+            "requiredSourceRevisions": [],
+            "boundaryAt": "2026-11-03T04:01:00.000Z"
+          },
+          "submissionGuard": "SERVER_RECHECKS_OWNER_PROJECT_VERSION_SOURCE_PERMISSION_LEASE_BUDGET_IDEMPOTENCY",
+          "readOnly": true
+        }
+      }
+    },
+    {
+      "id": "A1-DTO-04",
+      "question": "所有状态的 realityOutcome 都是 NOT_INFERRED（不推断现实完成）",
+      "verdict": "PASS",
+      "observed": {
+        "outcomes": [
+          {
+            "name": "SUCCEEDED+UNKNOWN",
+            "realityOutcome": "NOT_INFERRED"
+          },
+          {
+            "name": "CANCELLED",
+            "realityOutcome": "NOT_INFERRED"
+          },
+          {
+            "name": "WAITING_USER",
+            "realityOutcome": "NOT_INFERRED"
+          },
+          {
+            "name": "RUNNING_STOP",
+            "realityOutcome": "NOT_INFERRED"
+          },
+          {
+            "name": "FAILED",
+            "realityOutcome": "NOT_INFERRED"
+          },
+          {
+            "name": "QUEUED_BUDGET",
+            "realityOutcome": "NOT_INFERRED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "A1-DTO-05",
+      "question": "NO_CHANGE 仅是成功观察结论，不是生命周期；失败/未观察不显示无变化",
+      "verdict": "PASS",
+      "observed": {
+        "noChangeObservations": {
+          "readAt": "2026-11-03T04:00:00.000Z",
+          "state": "OBSERVED",
+          "lastSuccessfulAt": "2026-11-02T00:00:00.000Z",
+          "lastFailedAt": null,
+          "lastNoNewInformationAt": "2026-11-02T00:00:00.000Z",
+          "nextCheckAt": "2026-11-04T00:00:00.000Z",
+          "authority": "ORIGINAL_DELEGATION_RECORDS_ONLY"
+        },
+        "noChangeWorkStatePhase": "WAITING_OBSERVATION",
+        "noChangeDoneNote": "最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 最近一次成功观察结论是无新变化；这只是观察结论，不是委托生命周期。",
+        "failedLastObservations": {
+          "readAt": "2026-11-03T04:00:00.000Z",
+          "state": "FAILED_LAST",
+          "lastSuccessfulAt": "2026-11-02T00:00:00.000Z",
+          "lastFailedAt": "2026-11-03T00:00:00.000Z",
+          "lastNoNewInformationAt": "2026-11-02T00:00:00.000Z",
+          "nextCheckAt": "2026-11-04T00:00:00.000Z",
+          "authority": "ORIGINAL_DELEGATION_RECORDS_ONLY"
+        },
+        "failedLastNote": "回答绑定原问题；旧问题不能替换成新问题，提交后由服务端重查版本与来源。 最近一次观察失败，不能显示为无变化。"
+      }
+    }
+  ]
+}

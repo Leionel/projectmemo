@@ -1,0 +1,226 @@
+{
+  "contractVersion": "final-a-workpacket-v1",
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-03T04:02:06.568Z",
+  "baseSha": "485d485378637e1da3280ed092739d441c8cf749",
+  "command": "npx.cmd tsx scripts/final-a/a1-contract-samples.ts",
+  "fixture": "PURE_FUNCTION_NO_DATABASE_NO_MODEL",
+  "note": "A1 纯函数真实序列化样本；不是服务层修复回执，服务级修复与并发证据见 A2/探针。",
+  "cases": [
+    {
+      "caseId": "FS-A01-SUCCEEDED-UNKNOWN",
+      "question": "成功终态与未知调用结果同时可见，取消不显示成功、不提供恢复",
+      "file": "evidence/final-a/20261103/samples/a1-pure/FS-A01-SUCCEEDED-UNKNOWN.json",
+      "phase": "COMPLETED",
+      "reasonCode": "SUCCEEDED",
+      "terminal": {
+        "status": "SUCCEEDED",
+        "at": "2026-11-02T12:00:00.000Z",
+        "atSource": "FINISHED_AT",
+        "reasonCode": "SUCCEEDED"
+      },
+      "unsettledEffectPresent": true,
+      "stopRequestState": "NONE",
+      "primaryActionKind": "CHECK_UNKNOWN_EFFECT",
+      "blockerKinds": [
+        "UNKNOWN_EFFECT"
+      ],
+      "snapshotConsistency": "VERSION_STABLE",
+      "observationState": "OBSERVED"
+    },
+    {
+      "caseId": "FS-A01-CANCELLED-UNKNOWN",
+      "question": "取消终态不被未知效果擦掉，也不显示成功完成",
+      "file": "evidence/final-a/20261103/samples/a1-pure/FS-A01-CANCELLED-UNKNOWN.json",
+      "phase": "COMPLETED",
+      "reasonCode": "CANCELLED",
+      "terminal": {
+        "status": "CANCELLED",
+        "at": "2026-11-02T12:00:00.000Z",
+        "atSource": "FINISHED_AT",
+        "reasonCode": "CANCELLED"
+      },
+      "unsettledEffectPresent": true,
+      "stopRequestState": "CANCEL_SETTLED",
+      "primaryActionKind": "CHECK_UNKNOWN_EFFECT",
+      "blockerKinds": [
+        "UNKNOWN_EFFECT"
+      ],
+      "snapshotConsistency": "VERSION_STABLE",
+      "observationState": "OBSERVED"
+    },
+    {
+      "caseId": "FS-A02-RUNNING-PAUSE-IN-FLIGHT",
+      "question": "RUNNING 收到暂停请求但未结算：显示请求在途，不出现继续派发建议",
+      "file": "evidence/final-a/20261103/samples/a1-pure/FS-A02-RUNNING-PAUSE-IN-FLIGHT.json",
+      "phase": "RUNNING",
+      "reasonCode": "STOP_REQUESTED_IN_FLIGHT",
+      "terminal": null,
+      "unsettledEffectPresent": true,
+      "stopRequestState": "PAUSE_REQUESTED",
+      "primaryActionKind": "CHECK_STOP_SETTLEMENT",
+      "blockerKinds": [
+        "STOP_REQUEST",
+        "UNKNOWN_EFFECT"
+      ],
+      "snapshotConsistency": "VERSION_STABLE",
+      "observationState": "OBSERVED"
+    },
+    {
+      "caseId": "FS-A02-RUNNING-CANCEL-IN-FLIGHT",
+      "question": "取消请求已收到但尚未结算，不得显示已取消或可恢复",
+      "file": "evidence/final-a/20261103/samples/a1-pure/FS-A02-RUNNING-CANCEL-IN-FLIGHT.json",
+      "phase": "RUNNING",
+      "reasonCode": "STOP_REQUESTED_IN_FLIGHT",
+      "terminal": null,
+      "unsettledEffectPresent": false,
+      "stopRequestState": "CANCEL_REQUESTED",
+      "primaryActionKind": "CHECK_STOP_SETTLEMENT",
+      "blockerKinds": [
+        "STOP_REQUEST"
+      ],
+      "snapshotConsistency": "VERSION_STABLE",
+      "observationState": "OBSERVED"
+    },
+    {
+      "caseId": "FS-A02-PAUSED-SETTLED",
+      "question": "暂停已结算：历史结果保留，恢复需重新核对条件",
+      "file": "evidence/final-a/20261103/samples/a1-pure/FS-A02-PAUSED-SETTLED.json",
+      "phase": "PAUSED",
+      "reasonCode": "PAUSED",
+      "terminal": null,
+      "unsettledEffectPresent": false,
+      "stopRequestState": "PAUSE_SETTLED",
+      "primaryActionKind": "RESUME_DELEGATION",
+      "blockerKinds": [],
+      "snapshotConsistency": "VERSION_STABLE",
+      "observationState": "OBSERVED"
+    },
+    {
+      "caseId": "FS-A03-DAILY-BUDGET-WAITING",
+      "question": "额度等待进入工作包：累计用量不清零，凭日期不放宽许可",
+      "file": "evidence/final-a/20261103/samples/a1-pure/FS-A03-DAILY-BUDGET-WAITING.json",
+      "phase": "QUEUED",
+      "reasonCode": "DAILY_BUDGET_WAITING",
+      "terminal": null,
+      "unsettledEffectPresent": false,
+      "stopRequestState": "NONE",
+      "primaryActionKind": "WAIT_FOR_OBSERVATION",
+      "blockerKinds": [
+        "BUDGET"
+      ],
+      "snapshotConsistency": "VERSION_STABLE",
+      "observationState": "OBSERVED"
+    },
+    {
+      "caseId": "FS-A04-OBSERVATION-TIME-SEPARATED",
+      "question": "反复读取只推进 readAt/checkedAt，不推进 lastSuccessfulAt",
+      "file": "evidence/final-a/20261103/samples/a1-pure/FS-A04-OBSERVATION-TIME-SEPARATED.json",
+      "phase": "WAITING_OBSERVATION",
+      "reasonCode": "OBSERVATION_PENDING",
+      "terminal": null,
+      "unsettledEffectPresent": false,
+      "stopRequestState": "NONE",
+      "primaryActionKind": "WAIT_FOR_OBSERVATION",
+      "blockerKinds": [],
+      "snapshotConsistency": "VERSION_STABLE",
+      "observationState": "OBSERVED"
+    },
+    {
+      "caseId": "FS-A04-OBSERVATION-TIME-SEPARATED-COMPARE",
+      "question": "同一成功观察在两次读取中的时间对照",
+      "file": "evidence/final-a/20261103/samples/a1-pure/FS-A04-OBSERVATION-TIME-SEPARATED-COMPARE.json",
+      "phase": "WAITING_OBSERVATION",
+      "reasonCode": "OBSERVATION_PENDING",
+      "terminal": null,
+      "unsettledEffectPresent": false,
+      "stopRequestState": "NONE",
+      "primaryActionKind": "WAIT_FOR_OBSERVATION",
+      "blockerKinds": [],
+      "snapshotConsistency": "VERSION_STABLE",
+      "observationState": "OBSERVED"
+    },
+    {
+      "caseId": "FS-A05-SOURCE-CURRENT-USE-SUPPRESSED",
+      "question": "availability=CURRENT 只表示版本匹配；当前许可被抑制时不得作为当前依据",
+      "file": "evidence/final-a/20261103/samples/a1-pure/FS-A05-SOURCE-CURRENT-USE-SUPPRESSED.json",
+      "phase": "QUEUED",
+      "reasonCode": "READY",
+      "terminal": null,
+      "unsettledEffectPresent": false,
+      "stopRequestState": "NONE",
+      "primaryActionKind": "WAIT_FOR_OBSERVATION",
+      "blockerKinds": [
+        "SOURCE"
+      ],
+      "snapshotConsistency": "VERSION_STABLE",
+      "observationState": "OBSERVED"
+    },
+    {
+      "caseId": "FS-A07-SNAPSHOT-VERSION-ADVANCED",
+      "question": "版本推进未收敛时明确标记 VERSION_ADVANCED，提交前必须重新核对全版本",
+      "file": "evidence/final-a/20261103/samples/a1-pure/FS-A07-SNAPSHOT-VERSION-ADVANCED.json",
+      "phase": "QUEUED",
+      "reasonCode": "READY",
+      "terminal": null,
+      "unsettledEffectPresent": false,
+      "stopRequestState": "NONE",
+      "primaryActionKind": "WAIT_FOR_OBSERVATION",
+      "blockerKinds": [
+        "WORK_STATE"
+      ],
+      "snapshotConsistency": "VERSION_ADVANCED",
+      "observationState": "OBSERVED"
+    },
+    {
+      "caseId": "FS-A07-TIME-BOUNDARY-CROSSED",
+      "question": "没有新事件但越过许可边界：权限过期，主操作变重核",
+      "file": "evidence/final-a/20261103/samples/a1-pure/FS-A07-TIME-BOUNDARY-CROSSED.json",
+      "phase": "QUEUED",
+      "reasonCode": "READY",
+      "terminal": null,
+      "unsettledEffectPresent": false,
+      "stopRequestState": "NONE",
+      "primaryActionKind": "RECHECK_AUTHORITY",
+      "blockerKinds": [
+        "AUTHORITY"
+      ],
+      "snapshotConsistency": "VERSION_STABLE",
+      "observationState": "OBSERVED"
+    },
+    {
+      "caseId": "FS-A01-TERMINAL-NO-TIME",
+      "question": "终态无任何可用时间时 atSource=NO_TIME，不伪造时间",
+      "file": "evidence/final-a/20261103/samples/a1-pure/FS-A01-TERMINAL-NO-TIME.json",
+      "phase": "COMPLETED",
+      "reasonCode": "SUCCEEDED",
+      "terminal": {
+        "status": "SUCCEEDED",
+        "at": null,
+        "atSource": "NO_TIME",
+        "reasonCode": "SUCCEEDED"
+      },
+      "unsettledEffectPresent": false,
+      "stopRequestState": "NONE",
+      "primaryActionKind": "VIEW_RESULT",
+      "blockerKinds": [],
+      "snapshotConsistency": "VERSION_STABLE",
+      "observationState": "OBSERVED"
+    }
+  ],
+  "files": [
+    "evidence/final-a/20261103/samples/a1-pure/FS-A01-SUCCEEDED-UNKNOWN.json",
+    "evidence/final-a/20261103/samples/a1-pure/FS-A01-CANCELLED-UNKNOWN.json",
+    "evidence/final-a/20261103/samples/a1-pure/FS-A02-RUNNING-PAUSE-IN-FLIGHT.json",
+    "evidence/final-a/20261103/samples/a1-pure/FS-A02-RUNNING-CANCEL-IN-FLIGHT.json",
+    "evidence/final-a/20261103/samples/a1-pure/FS-A02-PAUSED-SETTLED.json",
+    "evidence/final-a/20261103/samples/a1-pure/FS-A03-DAILY-BUDGET-WAITING.json",
+    "evidence/final-a/20261103/samples/a1-pure/FS-A04-OBSERVATION-TIME-SEPARATED.json",
+    "evidence/final-a/20261103/samples/a1-pure/FS-A04-OBSERVATION-TIME-SEPARATED-COMPARE.json",
+    "evidence/final-a/20261103/samples/a1-pure/FS-A05-SOURCE-CURRENT-USE-SUPPRESSED.json",
+    "evidence/final-a/20261103/samples/a1-pure/FS-A07-SNAPSHOT-VERSION-ADVANCED.json",
+    "evidence/final-a/20261103/samples/a1-pure/FS-A07-TIME-BOUNDARY-CROSSED.json",
+    "evidence/final-a/20261103/samples/a1-pure/FS-A01-TERMINAL-NO-TIME.json",
+    "evidence/final-a/20261103/samples/a1-pure/FS-A04-OBSERVATION-TIME-COMPARE.json"
+  ]
+}

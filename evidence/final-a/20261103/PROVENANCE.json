@@ -1,0 +1,110 @@
+{
+  "artifact": "A1 探针执行来源与复核说明",
+  "mode": "BEFORE_FIX",
+  "generatedAt": "2026-11-03T03:51:34.000Z",
+  "generatedAtLocal": "2026-11-03T11:51:34+08:00",
+  "baseSha": "485d485378637e1da3280ed092739d441c8cf749",
+  "branch": "codex/final-a-mission-packet",
+  "sourceTree": "pristine baseline snapshot @485d485 via git archive (working-tree A2 edits excluded; BEFORE_FIX)",
+  "task": "task-2 / A1 探针：FS-A01～A07 服务级 + 真实并发特征化",
+  "whyBaselineSnapshot": "探针执行期间当前工作树出现了他人未提交改动（lib/mission/workState.ts、lib/types/workState.ts、lib/types/workPacket.ts，A2 修复进行中）。为保持 BEFORE_FIX 特征化语义，最终证据在 git archive 导出的 485d485 干净快照上生成；没有改动、没有还原他人的工作树改动。",
+  "snapshotMethod": [
+    "git -C <repo> archive --format=tar -o <tmp>.tar 485d485 -- lib prisma package.json tsconfig.json next-env.d.ts package-lock.json prisma.config.ts vitest.config.ts .gitattributes",
+    "tar -xf <tmp>.tar -C <shadow>（证据目录未进入快照，避免受历史大文件影响）",
+    "从当前树复制 gitignored 的 lib/generated/prisma（schema 未变）",
+    "复制 scripts/final-a（本任务新建探针）到 <shadow>/scripts/final-a",
+    "New-Item -ItemType Junction <shadow>/node_modules -> <repo>/node_modules",
+    "在 <shadow> 内设置 PROBE_BASE_SHA=485d485378637e1da3280ed092739d441c8cf749、PROBE_SOURCE_TREE=... 后运行三个脚本",
+    "运行完删除 junction 与 shadow；仓库 node_modules 未被改动"
+  ],
+  "commands": [
+    {
+      "script": "scripts/final-a/probe-fs-a.ts",
+      "scope": "FS-A01～A06 服务级（readMissionBack / missionDetail / missionWorkspaceSummary / materialUseProjection / SourcePolicy 对照）",
+      "command": "npx.cmd tsx scripts/final-a/probe-fs-a.ts",
+      "exitCode": 0,
+      "evidenceGeneratedAt": "2026-11-03T03:51:26.000Z",
+      "output": "evidence/final-a/20261103/probe-fs-a01-a07.json"
+    },
+    {
+      "script": "scripts/final-a/probe-fs-a07-concurrency.ts",
+      "scope": "FS-A07 真实双连接并发（主连接 lib/db + writer new PrismaClient({adapter: PrismaBetterSqlite3})）",
+      "command": "npx.cmd tsx scripts/final-a/probe-fs-a07-concurrency.ts",
+      "exitCode": 0,
+      "evidenceGeneratedAt": "2026-11-03T03:51:30.000Z",
+      "output": "evidence/final-a/20261103/probe-concurrency.json"
+    },
+    {
+      "script": "scripts/final-a/probe-work-state-pure.ts",
+      "scope": "参考纯投影 probe（复刻 preparation WORK_STATE_PROBE 思路；纯投影 ≠ 服务缺陷已确认）",
+      "command": "npx.cmd tsx scripts/final-a/probe-work-state-pure.ts",
+      "exitCode": 0,
+      "evidenceGeneratedAt": "2026-11-03T03:51:34.000Z",
+      "output": "evidence/final-a/20261103/probe-work-state-pure.json"
+    }
+  ],
+  "idempotency": {
+    "verified": true,
+    "note": "同一基线快照内连续跑两轮（含首轮与最终脚本版本），三脚本均退出码 0，且计数器/verdict 稳定：FS-A01..A07 verdict 不变、A07 40 轮计数一致；每次运行都新建 mkdtemp 临时 SQLite，不使用 .env、不依赖 prisma/final-preparation.db、不调用模型/网络。"
+  },
+  "environment": {
+    "database": "temp-independent",
+    "databaseMechanism": "mkdtemp 目录内 better-sqlite3 新建文件 + WAL + 按序重放 prisma/migrations/*/migration.sql（52 个条目 / 51 个迁移目录 + migration_lock）",
+    "llmMode": "mock",
+    "modelProviderCalls": 0,
+    "missionEnabled": true,
+    "missionWritesEnabled": true,
+    "workerPresenceFile": "临时目录内文件（不存在，责任视图为 UNOBSERVED），不写工作树 .runtime/",
+    "finalRunDatabaseDirs": {
+      "probe-fs-a01-a07": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-final-a-fs-a01-a06-4sZvdj",
+      "probe-concurrency": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-final-a-fs-a07-vcoW8M"
+    },
+    "note": "临时目录为本次机器路径；每次重跑都会新建不同目录，证据 JSON 内 environment.temporaryDir 记录当次真实位置。"
+  },
+  "evidenceFiles": [
+    "evidence/final-a/20261103/probe-fs-a01-a07.json",
+    "evidence/final-a/20261103/probe-concurrency.json",
+    "evidence/final-a/20261103/probe-work-state-pure.json",
+    "evidence/final-a/20261103/samples/FS-A01-SUCCEEDED.json",
+    "evidence/final-a/20261103/samples/FS-A01-CANCELLED.json",
+    "evidence/final-a/20261103/samples/FS-A02-PAUSE.json",
+    "evidence/final-a/20261103/samples/FS-A02-CANCEL.json",
+    "evidence/final-a/20261103/samples/FS-A03-DAILY_BUDGET_WAITING.json",
+    "evidence/final-a/20261103/samples/FS-A04-observedAt-vs-checkedAt.json",
+    "evidence/final-a/20261103/samples/FS-A05-material-use-vs-source-policy.json",
+    "evidence/final-a/20261103/samples/FS-A06-agentrun-window-eviction.json"
+  ],
+  "scripts": [
+    "scripts/final-a/lib/probeSupport.ts",
+    "scripts/final-a/lib/probeFixtures.ts",
+    "scripts/final-a/probe-fs-a.ts",
+    "scripts/final-a/probe-fs-a07-concurrency.ts",
+    "scripts/final-a/probe-work-state-pure.ts",
+    "scripts/final-a/smoke-db.ts"
+  ],
+  "verdicts": {
+    "FS-A01": "REPRODUCED",
+    "FS-A02": "REPRODUCED",
+    "FS-A03": "REPRODUCED",
+    "FS-A04": "NOT_REPRODUCED",
+    "FS-A05": "REPRODUCED",
+    "FS-A06": "REPRODUCED",
+    "FS-A07": "REPRODUCED（跨接口修订不一致 13/40；许可变化不升 version 26/40；同一 readback 响应内 0；readback 与后续 responsibility 版本不一致 13/40）"
+  },
+  "deliberateAdaptations": {
+    "FS-A05 pointer hash": "任务书示例写 sourcePointer.hash=sha256(text)；真实 readProjectMaterial 的 source.hash 是 jsonHash({rawText,sourceType,cardHash})。按 sha256(text) 绑定只会得到 availability=CHANGED，无法命中“版本匹配但策略抑制”的矛盾。探针改用 readProjectMaterial().hash 作为绑定指针，并在证据中同时保留 rawTextSha256 与说明。",
+    "FS-A05 suppression scope": "USE_SUPPRESSION 通过真实 submitDirective 提交，scope 只用 projectId（事件 conversationId/missionId 为 null），这样 mission 读回的 sourceUse 才会应用该抑制；若带 conversationId，只有同会话读取才生效。",
+    "FS-A07 concurrency semantics": "两个独立 PrismaClient 指向同一 SQLite 文件，写连接在两次读取之间真实提交 update/insert；并发是事件循环 await 边界的交错提交，不是 OS 线程级并行。未使用 mock，未使用前端 stale 标签。",
+    "pure projection": "probe-work-state-pure.ts 只调用 missionWorkState 纯函数，显式声明“纯投影 ≠ 服务缺陷已确认”；其结论不能替代服务级证据。"
+  },
+  "checks": {
+    "selfTypecheck": "npm.cmd exec tsc -- --noEmit：scripts/final-a 无类型错误。全量命令当前 exit 2 仅因他人临时文件 tmp/contract-core/smoke.ts 的 TS5097（不在本任务写作用域），未由本任务修改。",
+    "noFullSuite": "按要求未运行全量 vitest / next build / hvigor / E2E。",
+    "unmodifiedProductFiles": "未修改 lib/、tests/、app/、components/、harmonyos/、prisma/、docs/、package.json；工作树中他人未提交改动（lib/mission/workState.ts、lib/types/workState.ts、lib/types/workPacket.ts）保持原样。",
+    "otherEvidencePreserved": "evidence/final-a/20261103/verify/ 为其他成员（independent-verifier）证据，未读取改写、未删除。"
+  },
+  "rerun": {
+    "workingTreeAfterA2Fix": "npx.cmd tsx scripts/final-a/probe-fs-a.ts && npx.cmd tsx scripts/final-a/probe-fs-a07-concurrency.ts && npx.cmd tsx scripts/final-a/probe-work-state-pure.ts（会覆盖同名 BEFORE_FIX 证据；只想对照时设置 PROBE_EVIDENCE_DIR=<其他目录> 重定向，避免覆盖）",
+    "baselineSnapshot": "按 snapshotMethod 在 git archive 导出的 485d485 快照上运行，并设置 PROBE_BASE_SHA/PROBE_SOURCE_TREE；运行结束删除 node_modules junction 与 shadow。"
+  }
+}

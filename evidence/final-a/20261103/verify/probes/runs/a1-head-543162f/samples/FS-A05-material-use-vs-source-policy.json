@@ -1,0 +1,191 @@
+{
+  "normal": {
+    "fixture": {
+      "sourcePointer": {
+        "id": "capture:cmw061153000maw8ohd8mbg4t",
+        "hash": "0808afbded82c6d5f762d35306657212bf01cd5728ed35e37ca16a6f727c2400"
+      },
+      "text": "2026-10-30 normal 原始记录：演示环境启动日志需现场核对，安装自报不等于启动成功。",
+      "rawTextSha256": "46b5167b92d6254288c965eba862e08d302f49f660c1408a78cbb10e9b83db4b"
+    },
+    "baselineSourceUse": {
+      "state": "ALLOWED",
+      "roots": [
+        "capture:cmw061153000maw8ohd8mbg4t"
+      ],
+      "independentEvidence": true,
+      "reason": "ORIGINAL_OBSERVATION"
+    },
+    "afterSuppressionDirective": {
+      "directive": {
+        "operation": "SUPPRESS_USE",
+        "admitted": {
+          "status": "DIRECT_APPLIED",
+          "kind": "USE_SUPPRESSION",
+          "reason": "EXPLICIT_SUPPRESSION"
+        }
+      },
+      "sourceUse": {
+        "state": "SUPPRESSED",
+        "roots": [
+          "capture:cmw061153000maw8ohd8mbg4t"
+        ],
+        "independentEvidence": false,
+        "reason": "ROOT_SUPPRESSED"
+      },
+      "materialUsesItem": {
+        "sourcePointer": {
+          "id": "capture:cmw061153000maw8ohd8mbg4t",
+          "hash": "0808afbded82c6d5f762d35306657212bf01cd5728ed35e37ca16a6f727c2400"
+        },
+        "title": "2026-10-30 normal 原始记录：演示环境启动日志需现场核对，安装自报不等于启动成功。",
+        "availability": "CURRENT",
+        "facts": [
+          {
+            "kind": "SAVED",
+            "refId": "capture:cmw061153000maw8ohd8mbg4t"
+          },
+          {
+            "kind": "ASSOCIATED",
+            "refId": "cmw06115a000raw8oak93ox02"
+          },
+          {
+            "kind": "CANDIDATE",
+            "refId": "cmw061159000qaw8ojhud75im"
+          },
+          {
+            "kind": "BOUND",
+            "refId": "cmw061158000paw8oilkrcp7n"
+          }
+        ],
+        "coverage": {
+          "loadedCharacters": 49,
+          "totalCharacters": 49,
+          "truncated": false,
+          "extractionStatus": "SUCCESS"
+        },
+        "bodyCoverage": "NOT_RECORDED",
+        "excerpt": "2026-10-30 normal 原始记录：演示环境启动日志需现场核对，安装自报不等于启动成功。"
+      },
+      "validateSources": {
+        "rejected": true,
+        "name": "Error",
+        "message": "你已要求停止使用这条资料及其派生结论，请重新调查",
+        "code": "SOURCE_USE_SUPPRESSED",
+        "status": 409
+      }
+    }
+  },
+  "revoked": {
+    "connectionBefore": {
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "sourceUseBefore": {
+      "state": "ALLOWED",
+      "roots": [
+        "capture:cmw06116m000xaw8ouartl9ts",
+        "signal:cmw0611710014aw8oza8m8wsp",
+        "repo:cmw0611700013aw8o7hq90zjq"
+      ],
+      "independentEvidence": false,
+      "reason": "DERIVED_REFERENCE"
+    },
+    "connectionAfter": {
+      "status": "REVOKED",
+      "revokedAt": "2026-11-03T04:06:10.789Z"
+    },
+    "sourceUseAfter": {
+      "state": "SUPPRESSED",
+      "roots": [
+        "capture:cmw06116m000xaw8ouartl9ts",
+        "signal:cmw0611710014aw8oza8m8wsp",
+        "repo:cmw0611700013aw8o7hq90zjq"
+      ],
+      "independentEvidence": false,
+      "reason": "SOURCE_PERMISSION_REVOKED"
+    },
+    "materialUsesItem": {
+      "sourcePointer": {
+        "id": "capture:cmw06116m000xaw8ouartl9ts",
+        "hash": "78654a81a52724bd70f173334ce7839872fd14bd3ab180494d343762a0c375d7"
+      },
+      "title": "2026-10-30 revoked 原始记录：演示环境启动日志需现场核对，安装自报不等于启动成功。",
+      "availability": "CURRENT",
+      "facts": [
+        {
+          "kind": "SAVED",
+          "refId": "capture:cmw06116m000xaw8ouartl9ts"
+        },
+        {
+          "kind": "ASSOCIATED",
+          "refId": "cmw06116u0012aw8ozd4vl4hx"
+        },
+        {
+          "kind": "CANDIDATE",
+          "refId": "cmw06116t0011aw8oix58lcup"
+        },
+        {
+          "kind": "BOUND",
+          "refId": "cmw06116p0010aw8oi3iyc6xl"
+        }
+      ],
+      "coverage": {
+        "loadedCharacters": 50,
+        "totalCharacters": 50,
+        "truncated": false,
+        "extractionStatus": "SUCCESS"
+      },
+      "bodyCoverage": "NOT_RECORDED",
+      "excerpt": "2026-10-30 revoked 原始记录：演示环境启动日志需现场核对，安装自报不等于启动成功。"
+    }
+  },
+  "unknownLineage": {
+    "fixture": {
+      "sourceType": "仓库信号",
+      "externalSignalCount": 0
+    },
+    "sourceUse": {
+      "state": "UNKNOWN",
+      "roots": [
+        "capture:cmw06117b0018aw8ofvqjuwzj"
+      ],
+      "independentEvidence": false,
+      "reason": "LINEAGE_UNKNOWN"
+    },
+    "materialUsesItem": {
+      "sourcePointer": {
+        "id": "capture:cmw06117b0018aw8ofvqjuwzj",
+        "hash": "dea904b3546f02bec61a3b6fcb7bd25d98a6550ffee370ce5f0113ee62b1f1c2"
+      },
+      "title": "2026-10-30 unknown 原始记录：演示环境启动日志需现场核对，安装自报不等于启动成功。",
+      "availability": "CURRENT",
+      "facts": [
+        {
+          "kind": "SAVED",
+          "refId": "capture:cmw06117b0018aw8ofvqjuwzj"
+        },
+        {
+          "kind": "ASSOCIATED",
+          "refId": "cmw06117e001daw8oq8uplica"
+        },
+        {
+          "kind": "CANDIDATE",
+          "refId": "cmw06117e001caw8ome5za7va"
+        },
+        {
+          "kind": "BOUND",
+          "refId": "cmw06117d001baw8olw2rxayx"
+        }
+      ],
+      "coverage": {
+        "loadedCharacters": 50,
+        "totalCharacters": 50,
+        "truncated": false,
+        "extractionStatus": "SUCCESS"
+      },
+      "bodyCoverage": "NOT_RECORDED",
+      "excerpt": "2026-10-30 unknown 原始记录：演示环境启动日志需现场核对，安装自报不等于启动成功。"
+    }
+  }
+}

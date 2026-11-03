@@ -1,0 +1,296 @@
+{
+  "contractVersion": "final-a-workpacket-v1",
+  "schemaVersion": 1,
+  "fixture": "PURE_FUNCTION_NO_DATABASE_NO_MODEL",
+  "generatedAt": "2026-11-03T04:02:06.505Z",
+  "caseId": "FS-A02-RUNNING-PAUSE-IN-FLIGHT",
+  "question": "RUNNING 收到暂停请求但未结算：显示请求在途，不出现继续派发建议",
+  "workState": {
+    "phase": "RUNNING",
+    "nextActor": "SYSTEM",
+    "requiresUser": false,
+    "reasonCode": "STOP_REQUESTED_IN_FLIGHT",
+    "reasonText": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤",
+    "actionLabel": "核对停止结算",
+    "originalRef": {
+      "kind": "MISSION",
+      "id": "synthetic-final-a-mission",
+      "version": 7
+    },
+    "exactQuestionRef": null,
+    "exactApprovalRef": null,
+    "checkedAt": "2026-11-03T03:00:00.000Z",
+    "observedAt": "2026-11-01T08:00:00.000Z",
+    "nextCheckAt": null,
+    "nextBoundary": "2026-11-03T03:01:00.000Z",
+    "freshness": "FRESH",
+    "terminal": null,
+    "unsettledEffect": {
+      "present": true,
+      "code": "TOOL_UNKNOWN",
+      "source": "LAST_ERROR",
+      "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+      "resolvedByRead": false
+    },
+    "stopRequest": {
+      "state": "PAUSE_REQUESTED",
+      "requestedAt": "2026-11-03T02:59:00.000Z",
+      "settled": false,
+      "note": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤"
+    }
+  },
+  "workPacket": {
+    "schemaVersion": 1,
+    "contractVersion": "final-a-workpacket-v1",
+    "readAt": "2026-11-03T03:00:00.000Z",
+    "identity": {
+      "missionId": "synthetic-final-a-mission",
+      "projectId": "synthetic-project",
+      "missionVersion": 7,
+      "missionStatus": "RUNNING",
+      "planRevision": 4,
+      "contextVersion": 3,
+      "constraintsVersion": 2,
+      "researchScopeVersion": 1,
+      "controlVersion": "control-v7",
+      "originalRef": {
+        "kind": "MISSION",
+        "id": "synthetic-final-a-mission",
+        "version": 7
+      }
+    },
+    "snapshot": {
+      "mode": "SINGLE_READ_TRANSACTION",
+      "consistency": "VERSION_STABLE",
+      "retries": 0,
+      "checkedAt": "2026-11-03T03:00:00.000Z",
+      "note": "同一只读事务内读取；身份与版本来自同一快照。"
+    },
+    "authority": {
+      "controlVersion": "control-v7",
+      "permissionState": "WITHIN_TIME_BOUNDARY",
+      "permissionExpiresAt": null,
+      "deadline": null,
+      "nextBoundary": "2026-11-03T03:01:00.000Z",
+      "effectiveNextCheckAt": null,
+      "workerPresence": "RECENT",
+      "budget": {
+        "limits": {
+          "models": 12,
+          "tools": 16
+        },
+        "cumulativeUsed": {
+          "models": 5,
+          "tools": 2,
+          "inputTokens": 900,
+          "outputTokens": 120,
+          "unknownCalls": 1
+        },
+        "policy": "CUMULATIVE_NOT_RESET_ON_RESTART_OR_DATE",
+        "monetaryCost": null
+      },
+      "note": "VIEW_ONLY_NO_EXECUTION_PERMISSION"
+    },
+    "observations": {
+      "readAt": "2026-11-03T03:00:00.000Z",
+      "state": "OBSERVED",
+      "lastSuccessfulAt": "2026-11-01T08:00:00.000Z",
+      "lastFailedAt": null,
+      "lastNoNewInformationAt": null,
+      "nextCheckAt": null,
+      "authority": "ORIGINAL_DELEGATION_RECORDS_ONLY"
+    },
+    "done": {
+      "recentSteps": [
+        {
+          "id": "step-2",
+          "ordinal": 2,
+          "toolName": "inspect_project",
+          "status": "SUCCEEDED",
+          "at": "2026-11-02T10:00:00.000Z",
+          "note": "读取项目"
+        }
+      ],
+      "latestOutput": {
+        "id": "output-3",
+        "revision": 3,
+        "createdAt": "2026-11-02T11:00:00.000Z"
+      },
+      "progress": null,
+      "actionReceipts": [],
+      "note": "最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。",
+      "coverage": {
+        "limit": 5,
+        "truncated": false
+      }
+    },
+    "basis": {
+      "questionId": null,
+      "materialUses": null,
+      "evidenceReviews": null,
+      "currentUsePolicy": "SOURCE_POLICY_APPLIED",
+      "note": "依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 本次没有读取资料使用窗口，未找到记录不等于从未使用。 本次没有读取证据审查窗口，未找到记录不等于从未发生。"
+    },
+    "stopped": {
+      "workState": {
+        "phase": "RUNNING",
+        "nextActor": "SYSTEM",
+        "requiresUser": false,
+        "reasonCode": "STOP_REQUESTED_IN_FLIGHT",
+        "reasonText": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤",
+        "actionLabel": "核对停止结算",
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "synthetic-final-a-mission",
+          "version": 7
+        },
+        "exactQuestionRef": null,
+        "exactApprovalRef": null,
+        "checkedAt": "2026-11-03T03:00:00.000Z",
+        "observedAt": "2026-11-01T08:00:00.000Z",
+        "nextCheckAt": null,
+        "nextBoundary": "2026-11-03T03:01:00.000Z",
+        "freshness": "FRESH",
+        "terminal": null,
+        "unsettledEffect": {
+          "present": true,
+          "code": "TOOL_UNKNOWN",
+          "source": "LAST_ERROR",
+          "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+          "resolvedByRead": false
+        },
+        "stopRequest": {
+          "state": "PAUSE_REQUESTED",
+          "requestedAt": "2026-11-03T02:59:00.000Z",
+          "settled": false,
+          "note": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤"
+        }
+      },
+      "missionStatus": "RUNNING",
+      "primaryBlock": {
+        "kind": "STOP_REQUEST",
+        "code": "PAUSE_REQUESTED",
+        "text": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤",
+        "at": "2026-11-03T02:59:00.000Z",
+        "blocksActions": true,
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "synthetic-final-a-mission"
+        }
+      },
+      "blockers": [
+        {
+          "kind": "STOP_REQUEST",
+          "code": "PAUSE_REQUESTED",
+          "text": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤",
+          "at": "2026-11-03T02:59:00.000Z",
+          "blocksActions": true,
+          "originalRef": {
+            "kind": "MISSION",
+            "id": "synthetic-final-a-mission"
+          }
+        },
+        {
+          "kind": "UNKNOWN_EFFECT",
+          "code": "TOOL_UNKNOWN",
+          "text": "原请求或外部效果尚未结算，读取不会自动核销",
+          "at": null,
+          "blocksActions": true,
+          "originalRef": {
+            "kind": "OUTPUT",
+            "id": "output-3"
+          }
+        }
+      ],
+      "unknownEffect": {
+        "present": true,
+        "code": "TOOL_UNKNOWN",
+        "source": "LAST_ERROR",
+        "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+        "resolvedByRead": false
+      },
+      "stopRequest": {
+        "state": "PAUSE_REQUESTED",
+        "requestedAt": "2026-11-03T02:59:00.000Z",
+        "settled": false,
+        "note": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤"
+      },
+      "note": "原生命周期 RUNNING；显示阶段 RUNNING；停止请求 PAUSE_REQUESTED（未结算）；未结算效果存在。工作包不改变原生命周期，也不构成执行授权。"
+    },
+    "next": {
+      "nextActor": "SYSTEM",
+      "primaryAction": {
+        "kind": "CHECK_STOP_SETTLEMENT",
+        "label": "核对停止结算",
+        "target": {
+          "kind": "MISSION",
+          "id": "synthetic-final-a-mission",
+          "version": 7
+        },
+        "requires": {
+          "missionVersion": 7,
+          "planRevision": 4,
+          "contextVersion": 3,
+          "constraintsVersion": 2,
+          "researchScopeVersion": 1,
+          "controlVersion": "control-v7",
+          "questionId": null,
+          "approvalId": null,
+          "proposalHash": null,
+          "requiredSourceRevisions": [],
+          "boundaryAt": "2026-11-03T03:01:00.000Z"
+        },
+        "submissionGuard": "SERVER_RECHECKS_OWNER_PROJECT_VERSION_SOURCE_PERMISSION_LEASE_BUDGET_IDEMPOTENCY",
+        "readOnly": true
+      },
+      "nextCheckAt": null,
+      "nextBoundary": "2026-11-03T03:01:00.000Z",
+      "waitingOn": "SYSTEM_SETTLEMENT",
+      "note": "停止请求已收到但尚未结算；等待本轮调用结算后重新读取，不建议继续派发。"
+    },
+    "blockers": [
+      {
+        "kind": "STOP_REQUEST",
+        "code": "PAUSE_REQUESTED",
+        "text": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤",
+        "at": "2026-11-03T02:59:00.000Z",
+        "blocksActions": true,
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "synthetic-final-a-mission"
+        }
+      },
+      {
+        "kind": "UNKNOWN_EFFECT",
+        "code": "TOOL_UNKNOWN",
+        "text": "原请求或外部效果尚未结算，读取不会自动核销",
+        "at": null,
+        "blocksActions": true,
+        "originalRef": {
+          "kind": "OUTPUT",
+          "id": "output-3"
+        }
+      }
+    ],
+    "coverage": {
+      "windows": [
+        {
+          "name": "RECENT_STEPS",
+          "limit": 5,
+          "returned": 1,
+          "truncated": false,
+          "note": "有界窗口内未找到记录只表示覆盖不足，不等于从未发生。"
+        },
+        {
+          "name": "ACTION_RECEIPTS",
+          "limit": 5,
+          "returned": 0,
+          "truncated": false,
+          "note": "有界窗口内未找到记录只表示覆盖不足，不等于从未发生。"
+        }
+      ],
+      "policy": "NOT_FOUND_IS_NOT_NEVER"
+    },
+    "realityOutcome": "NOT_INFERRED"
+  }
+}

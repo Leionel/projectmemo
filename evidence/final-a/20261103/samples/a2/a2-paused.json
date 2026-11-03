@@ -1,0 +1,632 @@
+{
+  "sample": "a2-paused",
+  "label": "已暂停",
+  "generatedAt": "2026-11-03T04:13:17.882Z",
+  "command": "npm.cmd exec -- tsx scripts/final-a/generate-samples.ts",
+  "baseSha": "3a62dcefa0a5ff357ae5afbb301598cd4b672d0c",
+  "headSha": "3a62dcefa0a5ff357ae5afbb301598cd4b672d0c",
+  "a1ContractCommit": "f267aec674dbb9c28f6fa79bf428816016d2bee5",
+  "a1FixCommit": "b243f62a2970ffc1bd070ba6c2933690c230d72f",
+  "contract": {
+    "contractVersion": "final-a-workpacket-v1",
+    "schemaVersion": 1
+  },
+  "environment": {
+    "database": "EPHEMERAL_TEMP_SQLITE（prisma/migrations 顺序重放，脚本结束删除）",
+    "modelCalls": "none（LLM_MODE=mock；readback 不调用模型）",
+    "workerPresence": "UNOBSERVED",
+    "data": "SYNTHETIC_ONLY（合成用户/合成项目，无真实用户数据）"
+  },
+  "fixture": {
+    "missionStatus": "PAUSED",
+    "expectedPhase": "PAUSED",
+    "note": "暂停请求已结算；恢复会重新核对条件"
+  },
+  "observed": {
+    "missionVersion": 1,
+    "missionStatus": "PAUSED",
+    "phase": "PAUSED",
+    "observationState": "NOT_OBSERVED",
+    "primaryAction": {
+      "kind": "RESUME_DELEGATION",
+      "label": "恢复原委托（重新核对条件）",
+      "waitingOn": "USER_RECHECK"
+    },
+    "snapshotConsistency": "VERSION_STABLE",
+    "readSideEffects": {
+      "missionVersionUnchanged": true,
+      "missionStatusUnchanged": true,
+      "budgetUsedJsonUnchanged": true,
+      "updatedAtUnchanged": true
+    }
+  },
+  "readback": {
+    "workState": {
+      "phase": "PAUSED",
+      "nextActor": "USER",
+      "requiresUser": true,
+      "reasonCode": "PAUSED",
+      "reasonText": "调查已暂停，恢复前需核对原条件",
+      "actionLabel": "查看原因与恢复条件",
+      "originalRef": {
+        "kind": "MISSION",
+        "id": "cmw06a7ow000zis8oqwlj8byu",
+        "version": 1
+      },
+      "exactQuestionRef": null,
+      "exactApprovalRef": null,
+      "checkedAt": "2026-11-03T04:13:19.089Z",
+      "observedAt": null,
+      "nextCheckAt": null,
+      "nextBoundary": null,
+      "freshness": "FRESH",
+      "terminal": null,
+      "unsettledEffect": {
+        "present": false,
+        "code": null,
+        "source": "NONE",
+        "reasonText": null,
+        "resolvedByRead": false
+      },
+      "stopRequest": {
+        "state": "PAUSE_SETTLED",
+        "requestedAt": "2026-11-03T04:12:19.087Z",
+        "settled": true,
+        "note": "暂停请求已结算：原委托已暂停，不会继续派发新步骤"
+      }
+    },
+    "schemaVersion": 1,
+    "missionId": "cmw06a7ow000zis8oqwlj8byu",
+    "projectId": "cmw06a7ou000xis8oqn4o8047",
+    "missionVersion": 1,
+    "missionStatus": "PAUSED",
+    "observedAt": "2026-11-03T04:13:19.089Z",
+    "missionUpdatedAt": "2026-11-03T04:13:19.088Z",
+    "materialUses": {
+      "schemaVersion": 1,
+      "questionId": null,
+      "items": [],
+      "coverage": {
+        "eventLimit": 80,
+        "eventsInspected": 0,
+        "eventsTruncated": false,
+        "stepLimit": 40,
+        "stepsInspected": 0,
+        "stepsTruncated": false,
+        "outputLimit": 20,
+        "outputsInspected": 0,
+        "outputsTruncated": false,
+        "receiptsInspected": 0,
+        "receiptsTruncated": false,
+        "runLimit": 40,
+        "projectRunLimit": 40,
+        "runsInspected": 0,
+        "runsTruncated": false,
+        "runScope": "MISSION_FILTERED",
+        "sourceLimit": 8,
+        "sourceLimitReached": false,
+        "mapping": "DIRECT_SOURCE_POINTERS_ONLY"
+      }
+    },
+    "evidenceReviews": {
+      "items": [],
+      "truncated": false
+    },
+    "reviewProgress": {
+      "schemaVersion": 1,
+      "classes": [
+        {
+          "key": "executed",
+          "label": "已执行",
+          "count": 0,
+          "note": "工具步骤确实运行过；不等于结论成立或目标达成"
+        },
+        {
+          "key": "observed",
+          "label": "已观察",
+          "count": 0,
+          "note": "执行时带回了可引用来源"
+        },
+        {
+          "key": "independentlySupported",
+          "label": "已独立支持",
+          "count": 0,
+          "note": "逐句核对支持 0 条；当前未提供独立核验回执"
+        },
+        {
+          "key": "userReported",
+          "label": "用户报告",
+          "count": 0,
+          "note": "行动已完成并留下复盘回执；仍是用户报告"
+        },
+        {
+          "key": "counterExamples",
+          "label": "反例",
+          "count": 0,
+          "note": "原文与主张冲突，保留冲突"
+        },
+        {
+          "key": "unknown",
+          "label": "未知",
+          "count": 0,
+          "note": "未核验或信息不足，不当作失败或没有"
+        }
+      ],
+      "counts": {
+        "executed": {
+          "steps": 0,
+          "actions": 0
+        },
+        "observed": {
+          "steps": 0
+        },
+        "independentlySupported": {
+          "claims": 0
+        },
+        "textuallySupported": {
+          "claims": 0
+        },
+        "userReported": {
+          "actionReceipts": 0
+        },
+        "counterExamples": {
+          "claims": 0
+        },
+        "unknown": {
+          "claims": 0,
+          "steps": 0
+        }
+      },
+      "policy": "PROJECTION_FROM_EXISTING_STEPS_OUTPUTS_ACTIONS_RECEIPTS_NOT_REALITY_COMPLETION",
+      "coverage": {
+        "outputsInspected": 0,
+        "stepsInspected": 0,
+        "actionsInspected": 0
+      }
+    },
+    "callCoverage": {
+      "schemaVersion": 1,
+      "scope": "MISSION_AGENTRUN_AND_STEP_RECEIPTS",
+      "inspected": {
+        "agentRuns": 0,
+        "steps": 0,
+        "limit": 20,
+        "truncated": false
+      },
+      "models": {
+        "total": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "partial": 0,
+        "fallback": 0,
+        "unknown": 0,
+        "usageRecorded": 0,
+        "usageUnknown": 0
+      },
+      "tools": {
+        "total": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "failedCodes": [],
+      "dedupe": "AGENTRUN_ID_AND_STEP_ID",
+      "pricing": {
+        "state": "UNPRICED",
+        "estimate": null,
+        "billedAmount": null,
+        "currency": null,
+        "rateSource": null,
+        "applicableFrom": null,
+        "reason": "没有绑定费率来源、适用时间、模型/工具版本与币种；只能给出已记录的调用与 token，不能估价或声称完整账单。"
+      },
+      "summary": "可核对调用：模型尚未找到回执· 工具已检查 0 次（成功 0 / 失败 0）",
+      "notes": [
+        "尚未找到本委托的模型调用回执，不能据此判断没有调用。",
+        "费用与估算保持未知：未绑定费率、币种与账单，不把次数换算成金额。",
+        "范围仅当前委托的原回执；不含建项预览、其他独立讨论或跨项目用量。"
+      ],
+      "runScope": "MISSION_FILTERED"
+    },
+    "resourceUsage": {
+      "schemaVersion": 1,
+      "scope": "MISSION_RECORDED_COUNTERS_ONLY",
+      "models": null,
+      "tools": null,
+      "inputTokens": null,
+      "outputTokens": null,
+      "unknownCalls": null,
+      "monetaryCost": null,
+      "pricingState": "UNPRICED",
+      "summary": "模型 待核对 次 · 工具 待核对 次",
+      "coverageNote": "未知请求数量尚未记录，当前用量覆盖不明。",
+      "costNote": "费用尚不能核算：这些记录未绑定费率与账单。"
+    },
+    "sourceConversation": null,
+    "selected": {
+      "question": null,
+      "approval": null,
+      "output": null,
+      "receipt": null
+    },
+    "adoptions": [],
+    "actionReceipts": [],
+    "realityOutcome": "NOT_INFERRED",
+    "readAt": "2026-11-03T04:13:19.089Z",
+    "observation": {
+      "readAt": "2026-11-03T04:13:19.089Z",
+      "state": "NOT_OBSERVED",
+      "lastSuccessfulAt": null,
+      "lastFailedAt": null,
+      "lastNoNewInformationAt": null,
+      "nextCheckAt": null,
+      "authority": "ORIGINAL_DELEGATION_RECORDS_ONLY"
+    },
+    "workPacket": {
+      "schemaVersion": 1,
+      "contractVersion": "final-a-workpacket-v1",
+      "readAt": "2026-11-03T04:13:19.089Z",
+      "identity": {
+        "missionId": "cmw06a7ow000zis8oqwlj8byu",
+        "projectId": "cmw06a7ou000xis8oqn4o8047",
+        "missionVersion": 1,
+        "missionStatus": "PAUSED",
+        "planRevision": 1,
+        "contextVersion": 1,
+        "constraintsVersion": 1,
+        "researchScopeVersion": 1,
+        "controlVersion": "fa283c381873b826abea47a8646bf5668bf70393aaece929cc4cb9ca02425222",
+        "originalRef": {
+          "kind": "MISSION",
+          "id": "cmw06a7ow000zis8oqwlj8byu",
+          "version": 1
+        }
+      },
+      "snapshot": {
+        "mode": "SINGLE_READ_TRANSACTION",
+        "consistency": "VERSION_STABLE",
+        "retries": 0,
+        "checkedAt": "2026-11-03T04:13:19.089Z",
+        "note": "同一只读事务内读取；身份与版本来自同一快照。"
+      },
+      "authority": {
+        "controlVersion": "fa283c381873b826abea47a8646bf5668bf70393aaece929cc4cb9ca02425222",
+        "permissionState": "WITHIN_TIME_BOUNDARY",
+        "permissionExpiresAt": null,
+        "deadline": null,
+        "nextBoundary": null,
+        "effectiveNextCheckAt": null,
+        "workerPresence": "UNOBSERVED",
+        "budget": {
+          "limits": {
+            "models": 12,
+            "tools": 16,
+            "searches": 3,
+            "fetches": 4,
+            "browserRequests": 40,
+            "browserBytes": 4000000,
+            "calendarRequests": 8,
+            "externalWrites": 2,
+            "activeMs": 180000,
+            "reservedOutputTokens": 12000,
+            "metadataRequests": 24
+          },
+          "cumulativeUsed": {
+            "models": null,
+            "tools": null,
+            "searches": null,
+            "fetches": null,
+            "browserRequests": null,
+            "browserBytes": null,
+            "calendarRequests": null,
+            "externalWrites": null,
+            "metadataRequests": null,
+            "activeMs": null,
+            "reservedOutputTokens": null,
+            "inputTokens": null,
+            "outputTokens": null,
+            "unknownCalls": null
+          },
+          "policy": "CUMULATIVE_NOT_RESET_ON_RESTART_OR_DATE",
+          "monetaryCost": null
+        },
+        "note": "VIEW_ONLY_NO_EXECUTION_PERMISSION"
+      },
+      "observations": {
+        "readAt": "2026-11-03T04:13:19.089Z",
+        "state": "NOT_OBSERVED",
+        "lastSuccessfulAt": null,
+        "lastFailedAt": null,
+        "lastNoNewInformationAt": null,
+        "nextCheckAt": null,
+        "authority": "ORIGINAL_DELEGATION_RECORDS_ONLY"
+      },
+      "done": {
+        "recentSteps": [],
+        "latestOutput": null,
+        "progress": {
+          "schemaVersion": 1,
+          "classes": [
+            {
+              "key": "executed",
+              "label": "已执行",
+              "count": 0,
+              "note": "工具步骤确实运行过；不等于结论成立或目标达成"
+            },
+            {
+              "key": "observed",
+              "label": "已观察",
+              "count": 0,
+              "note": "执行时带回了可引用来源"
+            },
+            {
+              "key": "independentlySupported",
+              "label": "已独立支持",
+              "count": 0,
+              "note": "逐句核对支持 0 条；当前未提供独立核验回执"
+            },
+            {
+              "key": "userReported",
+              "label": "用户报告",
+              "count": 0,
+              "note": "行动已完成并留下复盘回执；仍是用户报告"
+            },
+            {
+              "key": "counterExamples",
+              "label": "反例",
+              "count": 0,
+              "note": "原文与主张冲突，保留冲突"
+            },
+            {
+              "key": "unknown",
+              "label": "未知",
+              "count": 0,
+              "note": "未核验或信息不足，不当作失败或没有"
+            }
+          ],
+          "counts": {
+            "executed": {
+              "steps": 0,
+              "actions": 0
+            },
+            "observed": {
+              "steps": 0
+            },
+            "independentlySupported": {
+              "claims": 0
+            },
+            "textuallySupported": {
+              "claims": 0
+            },
+            "userReported": {
+              "actionReceipts": 0
+            },
+            "counterExamples": {
+              "claims": 0
+            },
+            "unknown": {
+              "claims": 0,
+              "steps": 0
+            }
+          },
+          "policy": "PROJECTION_FROM_EXISTING_STEPS_OUTPUTS_ACTIONS_RECEIPTS_NOT_REALITY_COMPLETION",
+          "coverage": {
+            "outputsInspected": 0,
+            "stepsInspected": 0,
+            "actionsInspected": 0
+          }
+        },
+        "actionReceipts": [],
+        "note": "最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 窗口内没有工作记录，只表示覆盖不足，不等于从未发生。",
+        "coverage": {
+          "limit": 5,
+          "truncated": false
+        }
+      },
+      "basis": {
+        "questionId": null,
+        "materialUses": {
+          "schemaVersion": 1,
+          "questionId": null,
+          "items": [],
+          "coverage": {
+            "eventLimit": 80,
+            "eventsInspected": 0,
+            "eventsTruncated": false,
+            "stepLimit": 40,
+            "stepsInspected": 0,
+            "stepsTruncated": false,
+            "outputLimit": 20,
+            "outputsInspected": 0,
+            "outputsTruncated": false,
+            "receiptsInspected": 0,
+            "receiptsTruncated": false,
+            "runLimit": 40,
+            "projectRunLimit": 40,
+            "runsInspected": 0,
+            "runsTruncated": false,
+            "runScope": "MISSION_FILTERED",
+            "sourceLimit": 8,
+            "sourceLimitReached": false,
+            "mapping": "DIRECT_SOURCE_POINTERS_ONLY"
+          }
+        },
+        "evidenceReviews": {
+          "items": [],
+          "truncated": false
+        },
+        "currentUsePolicy": "SOURCE_POLICY_APPLIED",
+        "note": "依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。"
+      },
+      "stopped": {
+        "workState": {
+          "phase": "PAUSED",
+          "nextActor": "USER",
+          "requiresUser": true,
+          "reasonCode": "PAUSED",
+          "reasonText": "调查已暂停，恢复前需核对原条件",
+          "actionLabel": "查看原因与恢复条件",
+          "originalRef": {
+            "kind": "MISSION",
+            "id": "cmw06a7ow000zis8oqwlj8byu",
+            "version": 1
+          },
+          "exactQuestionRef": null,
+          "exactApprovalRef": null,
+          "checkedAt": "2026-11-03T04:13:19.089Z",
+          "observedAt": null,
+          "nextCheckAt": null,
+          "nextBoundary": null,
+          "freshness": "FRESH",
+          "terminal": null,
+          "unsettledEffect": {
+            "present": false,
+            "code": null,
+            "source": "NONE",
+            "reasonText": null,
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "PAUSE_SETTLED",
+            "requestedAt": "2026-11-03T04:12:19.087Z",
+            "settled": true,
+            "note": "暂停请求已结算：原委托已暂停，不会继续派发新步骤"
+          }
+        },
+        "missionStatus": "PAUSED",
+        "primaryBlock": {
+          "kind": "WORK_STATE",
+          "code": "WORKER_PRESENCE_UNOBSERVED",
+          "text": "后台 Worker 心跳不可靠，尚未核实近期执行；心跳不等于成功观察",
+          "at": null,
+          "blocksActions": true,
+          "originalRef": {
+            "kind": "MISSION",
+            "id": "cmw06a7ow000zis8oqwlj8byu"
+          }
+        },
+        "blockers": [
+          {
+            "kind": "WORK_STATE",
+            "code": "WORKER_PRESENCE_UNOBSERVED",
+            "text": "后台 Worker 心跳不可靠，尚未核实近期执行；心跳不等于成功观察",
+            "at": null,
+            "blocksActions": true,
+            "originalRef": {
+              "kind": "MISSION",
+              "id": "cmw06a7ow000zis8oqwlj8byu"
+            }
+          }
+        ],
+        "unknownEffect": null,
+        "stopRequest": {
+          "state": "PAUSE_SETTLED",
+          "requestedAt": "2026-11-03T04:12:19.087Z",
+          "settled": true,
+          "note": "暂停请求已结算：原委托已暂停，不会继续派发新步骤"
+        },
+        "note": "原生命周期 PAUSED；显示阶段 PAUSED；停止请求 PAUSE_SETTLED（已结算/无请求）；未结算效果不存在。工作包不改变原生命周期，也不构成执行授权。"
+      },
+      "next": {
+        "nextActor": "USER",
+        "primaryAction": {
+          "kind": "RESUME_DELEGATION",
+          "label": "恢复原委托（重新核对条件）",
+          "target": {
+            "kind": "MISSION",
+            "id": "cmw06a7ow000zis8oqwlj8byu",
+            "version": 1
+          },
+          "requires": {
+            "missionVersion": 1,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "controlVersion": "fa283c381873b826abea47a8646bf5668bf70393aaece929cc4cb9ca02425222",
+            "questionId": null,
+            "approvalId": null,
+            "proposalHash": null,
+            "requiredSourceRevisions": [],
+            "boundaryAt": null
+          },
+          "submissionGuard": "SERVER_RECHECKS_OWNER_PROJECT_VERSION_SOURCE_PERMISSION_LEASE_BUDGET_IDEMPOTENCY",
+          "readOnly": true
+        },
+        "nextCheckAt": null,
+        "nextBoundary": null,
+        "waitingOn": "USER_RECHECK",
+        "note": "暂停请求已结算；恢复会重新核对许可、预算与来源，不会跳过原守卫。"
+      },
+      "blockers": [
+        {
+          "kind": "WORK_STATE",
+          "code": "WORKER_PRESENCE_UNOBSERVED",
+          "text": "后台 Worker 心跳不可靠，尚未核实近期执行；心跳不等于成功观察",
+          "at": null,
+          "blocksActions": true,
+          "originalRef": {
+            "kind": "MISSION",
+            "id": "cmw06a7ow000zis8oqwlj8byu"
+          }
+        }
+      ],
+      "coverage": {
+        "windows": [
+          {
+            "name": "RECENT_STEPS",
+            "limit": 5,
+            "returned": 0,
+            "truncated": false,
+            "note": "有界窗口内未找到记录只表示覆盖不足，不等于从未发生。"
+          },
+          {
+            "name": "ACTION_RECEIPTS",
+            "limit": 5,
+            "returned": 0,
+            "truncated": false,
+            "note": "有界窗口内未找到记录只表示覆盖不足，不等于从未发生。"
+          },
+          {
+            "name": "MATERIAL_USES",
+            "limit": 8,
+            "returned": 0,
+            "truncated": false,
+            "note": "有界窗口内未找到记录只表示覆盖不足，不等于从未发生。"
+          },
+          {
+            "name": "MATERIAL_SOURCE_EVENTS",
+            "limit": 80,
+            "returned": 0,
+            "truncated": false,
+            "note": "有界窗口内未找到记录只表示覆盖不足，不等于从未发生。"
+          },
+          {
+            "name": "MATERIAL_MISSION_RUNS",
+            "limit": 40,
+            "returned": 0,
+            "truncated": false,
+            "note": "窗口先按 trace.missionId 过滤再取最近本委托的 CHAT 运行；未找到不等于从未使用。"
+          },
+          {
+            "name": "MISSION_MODEL_RUNS",
+            "limit": 20,
+            "returned": 0,
+            "truncated": false,
+            "note": "调用覆盖窗口先按 trace.missionId 过滤；未找到回执不等于从未发生。"
+          },
+          {
+            "name": "EVIDENCE_REVIEWS",
+            "limit": 3,
+            "returned": 0,
+            "truncated": false,
+            "note": "有界窗口内未找到记录只表示覆盖不足，不等于从未发生。"
+          }
+        ],
+        "policy": "NOT_FOUND_IS_NOT_NEVER"
+      },
+      "realityOutcome": "NOT_INFERRED"
+    }
+  }
+}

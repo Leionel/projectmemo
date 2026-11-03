@@ -1,0 +1,211 @@
+{
+  "generatedAt": "2026-11-03T04:35:07.8877681Z",
+  "role": "independent-verifier",
+  "stage": "A2_EVIDENCE_INTEGRITY",
+  "headSha": "d42831468de0595304382a6021b1171a3cdd6f60",
+  "summary": {
+    "total": 7,
+    "pass": 7,
+    "fail": 0
+  },
+  "checks": [
+    {
+      "id": "A2-EVID-01",
+      "question": "A2 样本文件齐全（12 状态 + legacy + index + service-verification = 15）且全部可解析",
+      "verdict": "PASS",
+      "observed": {
+        "fileCount": 15,
+        "names": [
+          "a2-cancelled.json",
+          "a2-daily-budget-waiting.json",
+          "a2-failed.json",
+          "a2-index.json",
+          "a2-legacy-server-without-workpacket.json",
+          "a2-observation-no-change.json",
+          "a2-paused.json",
+          "a2-queued.json",
+          "a2-running.json",
+          "a2-service-verification.json",
+          "a2-stop-requested.json",
+          "a2-succeeded.json",
+          "a2-unknown.json",
+          "a2-waiting-approval.json",
+          "a2-waiting-user.json"
+        ],
+        "parseErrors": []
+      },
+      "note": ""
+    },
+    {
+      "id": "A2-EVID-02",
+      "question": "a2-index 清单与实际样本文件一一对应；base/head SHA 记录一致（A2 生成时为 3a62dce）",
+      "verdict": "PASS",
+      "observed": {
+        "indexCount": 13,
+        "dirSampleCount": 13,
+        "indexOnly": [],
+        "dirOnly": [],
+        "baseSha": "3a62dcefa0a5ff357ae5afbb301598cd4b672d0c",
+        "headSha": "3a62dcefa0a5ff357ae5afbb301598cd4b672d0c",
+        "a1FixCommit": "b243f62a2970ffc1bd070ba6c2933690c230d72f"
+      },
+      "note": ""
+    },
+    {
+      "id": "A2-EVID-03",
+      "question": "12 状态样本的 workPacket 身份/版本/快照/requires/realityOutcome 内部自洽",
+      "verdict": "PASS",
+      "observed": {
+        "sampleCount": 12,
+        "badSamples": []
+      },
+      "note": ""
+    },
+    {
+      "id": "A2-EVID-04",
+      "question": "关键状态样本与独立验收结论一致：RUNNING→WAIT_FOR_OBSERVATION、停止在途→CHECK_STOP_SETTLEMENT、额度→QUEUED+DAILY_BUDGET_WAITING、取消≠成功",
+      "verdict": "PASS",
+      "observed": {
+        "running": {
+          "phase": "RUNNING",
+          "primaryAction": "WAIT_FOR_OBSERVATION"
+        },
+        "stopRequested": {
+          "reasonCode": "STOP_REQUESTED_IN_FLIGHT",
+          "primaryAction": "CHECK_STOP_SETTLEMENT",
+          "stopRequest": {
+            "state": "PAUSE_REQUESTED",
+            "requestedAt": "2026-11-03T04:13:14.076Z",
+            "settled": false,
+            "note": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤"
+          }
+        },
+        "budget": {
+          "phase": "QUEUED",
+          "reasonCode": "DAILY_BUDGET_WAITING"
+        },
+        "cancelled": {
+          "reasonCode": "CANCELLED",
+          "terminal": {
+            "status": "CANCELLED",
+            "at": "2026-11-03T04:12:49.108Z",
+            "atSource": "FINISHED_AT",
+            "reasonCode": "CANCELLED"
+          },
+          "primaryAction": "查看取消前的原结果"
+        }
+      },
+      "note": ""
+    },
+    {
+      "id": "A2-EVID-05",
+      "question": "旧服务变体：缺 workPacket/readAt/observation 时保留原详情字段，缺字段为 undefined 而非伪造成功",
+      "verdict": "PASS",
+      "observed": {
+        "variant": "LEGACY_SERVER_WITHOUT_WORKPACKET",
+        "removedPaths": [
+          "workPacket",
+          "readAt",
+          "observation",
+          "workState.terminal",
+          "workState.unsettledEffect",
+          "workState.stopRequest",
+          "materialUses.items[].currentUse",
+          "materialUses.items[].availabilityMeaning",
+          "materialUses.coverage.eventsInspected",
+          "materialUses.coverage.stepsInspected",
+          "materialUses.coverage.outputsInspected",
+          "materialUses.coverage.receiptsInspected",
+          "materialUses.coverage.runLimit",
+          "materialUses.coverage.runsInspected",
+          "materialUses.coverage.runScope",
+          "callCoverage.runScope"
+        ],
+        "readbackKeys": [
+          "workState",
+          "schemaVersion",
+          "missionId",
+          "projectId",
+          "missionVersion",
+          "missionStatus",
+          "observedAt",
+          "missionUpdatedAt",
+          "materialUses",
+          "evidenceReviews",
+          "reviewProgress",
+          "callCoverage",
+          "resourceUsage",
+          "sourceConversation",
+          "selected",
+          "adoptions",
+          "actionReceipts",
+          "realityOutcome"
+        ],
+        "hasWorkState": true,
+        "realityOutcome": "NOT_INFERRED"
+      },
+      "note": ""
+    },
+    {
+      "id": "A2-EVID-06",
+      "question": "a2-service-verification 记录的命令/测试数可复核（18+1=19 tests、12 files/84 regression、样本 13）",
+      "verdict": "PASS",
+      "observed": {
+        "commands": [
+          {
+            "command": "npm.cmd test -- tests/finalAWorkPacketService.test.ts tests/finalAConcurrencyService.test.ts",
+            "exitCode": 0,
+            "files": 2,
+            "tests": 19
+          },
+          {
+            "command": "npm.cmd test -- tests/missionContinuation.test.ts tests/missionMaterialUseProjection.test.ts tests/s2ResourceReadback.test.ts tests/s2CallCoverage.test.ts tests/s2AuditFixes.test.ts tests/auditS2CallCoverageWindow.test.ts tests/missionNativeContract.test.ts tests/missionWorkspaceSummary.test.ts tests/agentUxWorkState.test.ts tests/copilotContinuation.test.ts tests/missionReadbackPanel.test.ts tests/missionEvidenceFitIntegration.test.ts",
+            "exitCode": 0,
+            "files": 12,
+            "tests": 84
+          },
+          {
+            "command": "npm.cmd exec -- tsx scripts/final-a/generate-samples.ts",
+            "exitCode": 0,
+            "files": null,
+            "tests": null
+          },
+          {
+            "command": "npm.cmd exec tsc -- --noEmit",
+            "exitCode": 1,
+            "files": null,
+            "tests": null
+          },
+          {
+            "command": "tsc -p <系统临时 tsconfig（继承仓库 tsconfig，仅 exclude evidence/final-a/20261103/verify）> --noEmit",
+            "exitCode": 0,
+            "files": null,
+            "tests": null
+          }
+        ],
+        "modified": [
+          "lib/mission/readback.ts",
+          "lib/mission/materialUseProjection.ts",
+          "lib/mission/missionService.ts",
+          "lib/mission/workspaceSummary.ts"
+        ],
+        "added": [
+          "tests/finalAWorkPacketService.test.ts",
+          "tests/finalAConcurrencyService.test.ts",
+          "scripts/final-a/generate-samples.ts",
+          "evidence/final-a/20261103/samples/a2/"
+        ]
+      },
+      "note": ""
+    },
+    {
+      "id": "A2-EVID-07",
+      "question": "A2 提交的样本文件在工作树中未被改写（tracked 内容与 HEAD 一致）",
+      "verdict": "PASS",
+      "observed": {
+        "dirtyPaths": []
+      },
+      "note": ""
+    }
+  ]
+}

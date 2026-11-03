@@ -1,0 +1,1528 @@
+{
+  "generatedAt": "2026-11-03T04:33:49.440Z",
+  "mode": "INDEPENDENT_FIXTURE_A2",
+  "runner": "evidence/final-a/20261103/verify/fixtures/a2-service-fixture.ts",
+  "sourceTree": "A2 final HEAD d428314 via git archive (source tree; untracked verify/ excluded)",
+  "database": {
+    "mechanism": "mkdtemp + better-sqlite3 replay prisma/migrations",
+    "temporaryDir": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-a2-verify-DS9XsG",
+    "migrationCount": 52,
+    "schemaTables": 79
+  },
+  "env": {
+    "llmMode": "mock",
+    "modelProviderCalls": 0,
+    "externalWrites": 0
+  },
+  "summary": {
+    "total": 27,
+    "pass": 27,
+    "fail": 0,
+    "notRun": 0
+  },
+  "checks": [
+    {
+      "id": "A2-IND-WP-01",
+      "question": "四问工作包存在且契约字段完整（final-a-workpacket-v1）",
+      "verdict": "PASS",
+      "observed": {
+        "packet": {
+          "contractVersion": "final-a-workpacket-v1",
+          "schemaVersion": 1,
+          "readAt": "2026-11-03T04:33:48.849Z",
+          "identity": {
+            "missionId": "cmw070kkc0004sc8ouh3t6o9o",
+            "projectId": "cmw070kjm0001sc8o72b77ezw",
+            "missionVersion": 2,
+            "missionStatus": "WAITING_INPUT",
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "controlVersion": "ba9dd23b4e000d2b4450f08739e71751e2f5ba569b8755293b4c20d366813b0c",
+            "originalRef": {
+              "kind": "MISSION",
+              "id": "cmw070kkc0004sc8ouh3t6o9o",
+              "version": 2
+            }
+          },
+          "snapshot": {
+            "mode": "SINGLE_READ_TRANSACTION",
+            "consistency": "VERSION_STABLE",
+            "retries": 0,
+            "checkedAt": "2026-11-03T04:33:48.849Z",
+            "note": "同一只读事务内读取；身份与版本来自同一快照。"
+          },
+          "realityOutcome": "NOT_INFERRED",
+          "observationsState": "OBSERVED",
+          "primaryAction": {
+            "kind": "ANSWER_QUESTION",
+            "label": "回答原问题",
+            "target": {
+              "kind": "QUESTION",
+              "id": "cmw070kkk0005sc8oeb2b68bj",
+              "version": null
+            },
+            "requires": {
+              "missionVersion": 2,
+              "planRevision": 1,
+              "contextVersion": 1,
+              "constraintsVersion": 1,
+              "researchScopeVersion": 1,
+              "controlVersion": "ba9dd23b4e000d2b4450f08739e71751e2f5ba569b8755293b4c20d366813b0c",
+              "questionId": "cmw070kkk0005sc8oeb2b68bj",
+              "approvalId": null,
+              "proposalHash": null,
+              "requiredSourceRevisions": [
+                "capture:cmw070kjr0003sc8okbzsgo5g@557dee450a5ae9efbecf08aeee34772f2a5bcfeb37fc514715830d5e0d71a563"
+              ],
+              "boundaryAt": null
+            },
+            "submissionGuard": "SERVER_RECHECKS_OWNER_PROJECT_VERSION_SOURCE_PERMISSION_LEASE_BUDGET_IDEMPOTENCY",
+            "readOnly": true
+          },
+          "coveragePolicy": "NOT_FOUND_IS_NOT_NEVER",
+          "blockerCodes": [
+            "WORK_STATE:WORKER_PRESENCE_UNOBSERVED",
+            "QUESTION:QUESTION_PENDING"
+          ]
+        },
+        "doneRecentSteps": [
+          "cmw070kko0006sc8o18cgyikm"
+        ],
+        "latestOutput": {
+          "id": "cmw070kks0009sc8ofdafufng",
+          "revision": 1,
+          "createdAt": "2026-11-03T04:33:48.844Z"
+        }
+      }
+    },
+    {
+      "id": "A2-IND-WP-02",
+      "question": "身份与版本同快照：readback/workPacket/identity/requires 的 missionVersion 全部一致",
+      "verdict": "PASS",
+      "observed": {
+        "identity": {
+          "missionId": "cmw070kkc0004sc8ouh3t6o9o",
+          "projectId": "cmw070kjm0001sc8o72b77ezw",
+          "missionVersion": 2,
+          "missionStatus": "WAITING_INPUT",
+          "planRevision": 1,
+          "contextVersion": 1,
+          "constraintsVersion": 1,
+          "researchScopeVersion": 1,
+          "controlVersion": "ba9dd23b4e000d2b4450f08739e71751e2f5ba569b8755293b4c20d366813b0c",
+          "originalRef": {
+            "kind": "MISSION",
+            "id": "cmw070kkc0004sc8ouh3t6o9o",
+            "version": 2
+          }
+        },
+        "readbackVersion": 2,
+        "dbVersion": 2
+      }
+    },
+    {
+      "id": "A2-IND-WP-03",
+      "question": "四问内容指向原对象：done 有原步骤/草稿，basis 指向原问题+材料，next 是回答原问题",
+      "verdict": "PASS",
+      "observed": {
+        "done": {
+          "recentSteps": [
+            {
+              "id": "cmw070kko0006sc8o18cgyikm",
+              "ordinal": 1,
+              "toolName": "bind_project_sources",
+              "status": "SUCCEEDED",
+              "at": "2026-11-03T04:33:48.838Z",
+              "note": "选入补充材料"
+            }
+          ],
+          "latestOutput": {
+            "id": "cmw070kks0009sc8ofdafufng",
+            "revision": 1,
+            "createdAt": "2026-11-03T04:33:48.844Z"
+          },
+          "progress": {
+            "schemaVersion": 1,
+            "classes": [
+              {
+                "key": "executed",
+                "label": "已执行",
+                "count": 1,
+                "note": "工具步骤确实运行过；不等于结论成立或目标达成"
+              },
+              {
+                "key": "observed",
+                "label": "已观察",
+                "count": 1,
+                "note": "执行时带回了可引用来源"
+              },
+              {
+                "key": "independentlySupported",
+                "label": "已独立支持",
+                "count": 0,
+                "note": "逐句核对支持 1 条；当前未提供独立核验回执"
+              },
+              {
+                "key": "userReported",
+                "label": "用户报告",
+                "count": 0,
+                "note": "行动已完成并留下复盘回执；仍是用户报告"
+              },
+              {
+                "key": "counterExamples",
+                "label": "反例",
+                "count": 0,
+                "note": "原文与主张冲突，保留冲突"
+              },
+              {
+                "key": "unknown",
+                "label": "未知",
+                "count": 0,
+                "note": "未核验或信息不足，不当作失败或没有"
+              }
+            ],
+            "counts": {
+              "executed": {
+                "steps": 1,
+                "actions": 0
+              },
+              "observed": {
+                "steps": 1
+              },
+              "independentlySupported": {
+                "claims": 0
+              },
+              "textuallySupported": {
+                "claims": 1
+              },
+              "userReported": {
+                "actionReceipts": 0
+              },
+              "counterExamples": {
+                "claims": 0
+              },
+              "unknown": {
+                "claims": 0,
+                "steps": 0
+              }
+            },
+            "policy": "PROJECTION_FROM_EXISTING_STEPS_OUTPUTS_ACTIONS_RECEIPTS_NOT_REALITY_COMPLETION",
+            "coverage": {
+              "outputsInspected": 1,
+              "stepsInspected": 1,
+              "actionsInspected": 0
+            }
+          },
+          "actionReceipts": [],
+          "note": "最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。",
+          "coverage": {
+            "limit": 5,
+            "truncated": false
+          }
+        },
+        "basisQuestionId": "cmw070kkk0005sc8oeb2b68bj",
+        "next": {
+          "nextActor": "USER",
+          "primaryAction": {
+            "kind": "ANSWER_QUESTION",
+            "label": "回答原问题",
+            "target": {
+              "kind": "QUESTION",
+              "id": "cmw070kkk0005sc8oeb2b68bj",
+              "version": null
+            },
+            "requires": {
+              "missionVersion": 2,
+              "planRevision": 1,
+              "contextVersion": 1,
+              "constraintsVersion": 1,
+              "researchScopeVersion": 1,
+              "controlVersion": "ba9dd23b4e000d2b4450f08739e71751e2f5ba569b8755293b4c20d366813b0c",
+              "questionId": "cmw070kkk0005sc8oeb2b68bj",
+              "approvalId": null,
+              "proposalHash": null,
+              "requiredSourceRevisions": [
+                "capture:cmw070kjr0003sc8okbzsgo5g@557dee450a5ae9efbecf08aeee34772f2a5bcfeb37fc514715830d5e0d71a563"
+              ],
+              "boundaryAt": null
+            },
+            "submissionGuard": "SERVER_RECHECKS_OWNER_PROJECT_VERSION_SOURCE_PERMISSION_LEASE_BUDGET_IDEMPOTENCY",
+            "readOnly": true
+          },
+          "nextCheckAt": null,
+          "nextBoundary": null,
+          "waitingOn": "USER_INPUT",
+          "note": "回答绑定原问题；旧问题不能替换成新问题，提交后由服务端重查版本与来源。"
+        },
+        "materialUsesCoverage": {
+          "eventLimit": 80,
+          "eventsInspected": 2,
+          "eventsTruncated": false,
+          "stepLimit": 40,
+          "stepsInspected": 1,
+          "stepsTruncated": false,
+          "outputLimit": 20,
+          "outputsInspected": 1,
+          "outputsTruncated": false,
+          "receiptsInspected": 0,
+          "receiptsTruncated": false,
+          "runLimit": 40,
+          "projectRunLimit": 40,
+          "runsInspected": 0,
+          "runsTruncated": false,
+          "runScope": "MISSION_FILTERED",
+          "sourceLimit": 8,
+          "sourceLimitReached": false,
+          "mapping": "DIRECT_SOURCE_POINTERS_ONLY"
+        }
+      }
+    },
+    {
+      "id": "A2-IND-WP-04",
+      "question": "primaryAction 只读 + 全量版本要求 + 服务端重查守卫；controlVersion/边界同源",
+      "verdict": "PASS",
+      "observed": {
+        "primaryAction": {
+          "kind": "ANSWER_QUESTION",
+          "label": "回答原问题",
+          "target": {
+            "kind": "QUESTION",
+            "id": "cmw070kkk0005sc8oeb2b68bj",
+            "version": null
+          },
+          "requires": {
+            "missionVersion": 2,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "controlVersion": "ba9dd23b4e000d2b4450f08739e71751e2f5ba569b8755293b4c20d366813b0c",
+            "questionId": "cmw070kkk0005sc8oeb2b68bj",
+            "approvalId": null,
+            "proposalHash": null,
+            "requiredSourceRevisions": [
+              "capture:cmw070kjr0003sc8okbzsgo5g@557dee450a5ae9efbecf08aeee34772f2a5bcfeb37fc514715830d5e0d71a563"
+            ],
+            "boundaryAt": null
+          },
+          "submissionGuard": "SERVER_RECHECKS_OWNER_PROJECT_VERSION_SOURCE_PERMISSION_LEASE_BUDGET_IDEMPOTENCY",
+          "readOnly": true
+        },
+        "requires": {
+          "missionVersion": 2,
+          "planRevision": 1,
+          "contextVersion": 1,
+          "constraintsVersion": 1,
+          "researchScopeVersion": 1,
+          "controlVersion": "ba9dd23b4e000d2b4450f08739e71751e2f5ba569b8755293b4c20d366813b0c",
+          "questionId": "cmw070kkk0005sc8oeb2b68bj",
+          "approvalId": null,
+          "proposalHash": null,
+          "requiredSourceRevisions": [
+            "capture:cmw070kjr0003sc8okbzsgo5g@557dee450a5ae9efbecf08aeee34772f2a5bcfeb37fc514715830d5e0d71a563"
+          ],
+          "boundaryAt": null
+        },
+        "controlVersionIdentity": "ba9dd23b4e000d2b4450f08739e71751e2f5ba569b8755293b4c20d366813b0c",
+        "authority": {
+          "controlVersion": "ba9dd23b4e000d2b4450f08739e71751e2f5ba569b8755293b4c20d366813b0c",
+          "permissionState": "WITHIN_TIME_BOUNDARY",
+          "permissionExpiresAt": null,
+          "deadline": null,
+          "nextBoundary": null,
+          "effectiveNextCheckAt": null,
+          "workerPresence": "UNOBSERVED",
+          "budget": {
+            "limits": {
+              "models": 12,
+              "tools": 16,
+              "searches": 3,
+              "fetches": 4,
+              "browserRequests": 40,
+              "browserBytes": 4000000,
+              "calendarRequests": 8,
+              "externalWrites": 2,
+              "activeMs": 180000,
+              "reservedOutputTokens": 12000,
+              "metadataRequests": 24
+            },
+            "cumulativeUsed": {
+              "models": 5,
+              "tools": 2,
+              "searches": null,
+              "fetches": null,
+              "browserRequests": null,
+              "browserBytes": null,
+              "calendarRequests": null,
+              "externalWrites": null,
+              "metadataRequests": null,
+              "activeMs": null,
+              "reservedOutputTokens": null,
+              "inputTokens": 900,
+              "outputTokens": 120,
+              "unknownCalls": 1
+            },
+            "policy": "CUMULATIVE_NOT_RESET_ON_RESTART_OR_DATE",
+            "monetaryCost": null
+          },
+          "note": "VIEW_ONLY_NO_EXECUTION_PERMISSION"
+        }
+      }
+    },
+    {
+      "id": "A2-IND-WP-05",
+      "question": "读取时间语义：readAt=observedAt=readback.observedAt=工作包 readAt=observation.readAt；快照单事务",
+      "verdict": "PASS",
+      "observed": {
+        "readAt": "2026-11-03T04:33:48.849Z",
+        "readbackObservedAt": "2026-11-03T04:33:48.849Z",
+        "packetReadAt": "2026-11-03T04:33:48.849Z",
+        "observations": {
+          "missionId": "cmw070kkc0004sc8ouh3t6o9o",
+          "projectId": "cmw070kjm0001sc8o72b77ezw",
+          "missionVersion": 2,
+          "missionStatus": "WAITING_INPUT",
+          "planRevision": 1,
+          "contextVersion": 1,
+          "constraintsVersion": 1,
+          "researchScopeVersion": 1,
+          "controlVersion": "ba9dd23b4e000d2b4450f08739e71751e2f5ba569b8755293b4c20d366813b0c",
+          "originalRef": {
+            "kind": "MISSION",
+            "id": "cmw070kkc0004sc8ouh3t6o9o",
+            "version": 2
+          }
+        },
+        "snapshot": {
+          "mode": "SINGLE_READ_TRANSACTION",
+          "consistency": "VERSION_STABLE",
+          "retries": 0,
+          "checkedAt": "2026-11-03T04:33:48.849Z",
+          "note": "同一只读事务内读取；身份与版本来自同一快照。"
+        }
+      }
+    },
+    {
+      "id": "A2-IND-WP-06",
+      "question": "观察分离：lastSuccessfulAt 来自原委托观察记录，lastFailedAt/lastNoNewInformationAt 为真实 null",
+      "verdict": "PASS",
+      "observed": {
+        "observations": {
+          "readAt": "2026-11-03T04:33:48.849Z",
+          "state": "OBSERVED",
+          "lastSuccessfulAt": "2026-11-01T04:33:48.825Z",
+          "lastFailedAt": null,
+          "lastNoNewInformationAt": null,
+          "nextCheckAt": null,
+          "authority": "ORIGINAL_DELEGATION_RECORDS_ONLY"
+        }
+      }
+    },
+    {
+      "id": "A2-IND-WP-07",
+      "question": "覆盖窗口齐全且注明有界；材料使用窗口为 Mission-first（runScope=MISSION_FILTERED）",
+      "verdict": "PASS",
+      "observed": {
+        "coverage": {
+          "windows": [
+            {
+              "name": "RECENT_STEPS",
+              "limit": 5,
+              "returned": 1,
+              "truncated": false,
+              "note": "有界窗口内未找到记录只表示覆盖不足，不等于从未发生。"
+            },
+            {
+              "name": "ACTION_RECEIPTS",
+              "limit": 5,
+              "returned": 0,
+              "truncated": false,
+              "note": "有界窗口内未找到记录只表示覆盖不足，不等于从未发生。"
+            },
+            {
+              "name": "MATERIAL_USES",
+              "limit": 8,
+              "returned": 1,
+              "truncated": false,
+              "note": "有界窗口内未找到记录只表示覆盖不足，不等于从未发生。"
+            },
+            {
+              "name": "MATERIAL_SOURCE_EVENTS",
+              "limit": 80,
+              "returned": 2,
+              "truncated": false,
+              "note": "有界窗口内未找到记录只表示覆盖不足，不等于从未发生。"
+            },
+            {
+              "name": "MATERIAL_MISSION_RUNS",
+              "limit": 40,
+              "returned": 0,
+              "truncated": false,
+              "note": "窗口先按 trace.missionId 过滤再取最近本委托的 CHAT 运行；未找到不等于从未使用。"
+            },
+            {
+              "name": "MISSION_MODEL_RUNS",
+              "limit": 20,
+              "returned": 0,
+              "truncated": false,
+              "note": "调用覆盖窗口先按 trace.missionId 过滤；未找到回执不等于从未发生。"
+            },
+            {
+              "name": "EVIDENCE_REVIEWS",
+              "limit": 3,
+              "returned": 0,
+              "truncated": false,
+              "note": "有界窗口内未找到记录只表示覆盖不足，不等于从未发生。"
+            }
+          ],
+          "policy": "NOT_FOUND_IS_NOT_NEVER"
+        },
+        "materialUsesCoverage": {
+          "eventLimit": 80,
+          "eventsInspected": 2,
+          "eventsTruncated": false,
+          "stepLimit": 40,
+          "stepsInspected": 1,
+          "stepsTruncated": false,
+          "outputLimit": 20,
+          "outputsInspected": 1,
+          "outputsTruncated": false,
+          "receiptsInspected": 0,
+          "receiptsTruncated": false,
+          "runLimit": 40,
+          "projectRunLimit": 40,
+          "runsInspected": 0,
+          "runsTruncated": false,
+          "runScope": "MISSION_FILTERED",
+          "sourceLimit": 8,
+          "sourceLimitReached": false,
+          "mapping": "DIRECT_SOURCE_POINTERS_ONLY"
+        }
+      }
+    },
+    {
+      "id": "A2-IND-NEG-01",
+      "question": "异 Owner / 非 OWNER 成员读取拒绝（404，不泄漏委托内容）",
+      "verdict": "PASS",
+      "observed": {
+        "otherOwner": {
+          "rejected": true,
+          "code": "MISSION_NOT_FOUND",
+          "status": 404,
+          "message": "没有可访问的委托"
+        },
+        "member": {
+          "rejected": true,
+          "code": "MISSION_NOT_FOUND",
+          "status": 404,
+          "message": "没有可访问的委托"
+        }
+      }
+    },
+    {
+      "id": "A2-IND-NEG-02",
+      "question": "跨项目/不存在的原问题或成果 target 返回 404，不改为另一对象",
+      "verdict": "PASS",
+      "observed": {
+        "crossProjectQuestion": {
+          "rejected": true,
+          "code": "MISSION_TARGET_NOT_FOUND",
+          "status": 404,
+          "message": "原问题、提案或成果版本已不可用，请查看当前委托；不会改为另一项结果"
+        },
+        "crossProjectOutput": {
+          "rejected": true,
+          "code": "MISSION_TARGET_NOT_FOUND",
+          "status": 404,
+          "message": "原问题、提案或成果版本已不可用，请查看当前委托；不会改为另一项结果"
+        },
+        "missingApproval": {
+          "rejected": true,
+          "code": "MISSION_TARGET_NOT_FOUND",
+          "status": 404,
+          "message": "原问题、提案或成果版本已不可用，请查看当前委托；不会改为另一项结果"
+        },
+        "missingReceipt": {
+          "rejected": true,
+          "code": "MISSION_TARGET_NOT_FOUND",
+          "status": 404,
+          "message": "原问题、提案或成果版本已不可用，请查看当前委托；不会改为另一项结果"
+        }
+      }
+    },
+    {
+      "id": "A2-IND-NEG-03",
+      "question": "回执与指定成果版本不一致 → 409 MISSION_TARGET_MISMATCH（旧 target 保护不回归）",
+      "verdict": "PASS",
+      "observed": {
+        "mismatch": {
+          "rejected": true,
+          "code": "MISSION_TARGET_MISMATCH",
+          "status": 409,
+          "message": "回执与指定草稿版本不一致，请从原成果重新进入"
+        },
+        "receiptId": "cmw070knx000ksc8ojgqcge00",
+        "requestedOutputId": "cmw070kks0009sc8ofdafufng"
+      }
+    },
+    {
+      "id": "A2-IND-NEG-04",
+      "question": "匿名读回 401；已认证 200 且响应含 workPacket（API 路由未回归）",
+      "verdict": "PASS",
+      "observed": {
+        "anonymousStatus": 401,
+        "authedStatus": 200,
+        "authedHasWorkPacket": true,
+        "authedReadAt": "2026-11-03T04:33:48.974Z"
+      }
+    },
+    {
+      "id": "A2-IND-SIDE-01",
+      "question": "GET/读回前后：事件/AgentRun/Step/Output/Receipt/预算/版本状态/updatedAt/continuitySeq 零变化",
+      "verdict": "PASS",
+      "observed": {
+        "before": {
+          "counts": {
+            "events": 4,
+            "agentRuns": 0,
+            "steps": 1,
+            "outputs": 3,
+            "receipts": 1,
+            "directiveEvents": 0,
+            "missions": 2
+          },
+          "mission": {
+            "id": "cmw070kkc0004sc8ouh3t6o9o",
+            "version": 2,
+            "status": "WAITING_INPUT",
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "budgetUsedJson": {
+              "models": 5,
+              "tools": 2,
+              "inputTokens": 900,
+              "outputTokens": 120,
+              "unknownCalls": 1
+            },
+            "lastErrorJson": null,
+            "waitStateJson": {
+              "questionId": "cmw070kkk0005sc8oeb2b68bj",
+              "question": "请补充同条件下的对照组指标",
+              "waitingFor": "USER"
+            },
+            "updatedAt": "2026-11-03T04:33:48.842Z",
+            "pauseRequestedAt": null,
+            "cancelRequestedAt": null
+          },
+          "user": {
+            "continuitySeq": 0
+          }
+        },
+        "after": {
+          "counts": {
+            "events": 4,
+            "agentRuns": 0,
+            "steps": 1,
+            "outputs": 3,
+            "receipts": 1,
+            "directiveEvents": 0,
+            "missions": 2
+          },
+          "mission": {
+            "id": "cmw070kkc0004sc8ouh3t6o9o",
+            "version": 2,
+            "status": "WAITING_INPUT",
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "budgetUsedJson": {
+              "models": 5,
+              "tools": 2,
+              "inputTokens": 900,
+              "outputTokens": 120,
+              "unknownCalls": 1
+            },
+            "lastErrorJson": null,
+            "waitStateJson": {
+              "questionId": "cmw070kkk0005sc8oeb2b68bj",
+              "question": "请补充同条件下的对照组指标",
+              "waitingFor": "USER"
+            },
+            "updatedAt": "2026-11-03T04:33:48.842Z",
+            "pauseRequestedAt": null,
+            "cancelRequestedAt": null
+          },
+          "user": {
+            "continuitySeq": 0
+          }
+        },
+        "secondReadVersion": 2
+      }
+    },
+    {
+      "id": "A2-IND-LEGACY-01",
+      "question": "旧服务缺 workPacket/readAt/observation：旧字段与原详情仍在，缺字段为 undefined 而非伪造成功",
+      "verdict": "PASS",
+      "observed": {
+        "legacyKeys": [
+          "actionReceipts",
+          "adoptions",
+          "callCoverage",
+          "evidenceReviews",
+          "materialUses",
+          "missionId",
+          "missionStatus",
+          "missionUpdatedAt",
+          "missionVersion",
+          "observedAt",
+          "projectId",
+          "realityOutcome",
+          "resourceUsage",
+          "reviewProgress",
+          "schemaVersion",
+          "selected",
+          "sourceConversation",
+          "workState"
+        ],
+        "workStatePresent": true
+      }
+    },
+    {
+      "id": "A2-IND-NULL-01",
+      "question": "真实 null：无观察/无错误/无额度时为 null 且字段显式存在（不补 0、不写成发生）",
+      "verdict": "PASS",
+      "observed": {
+        "observations": {
+          "readAt": "2026-11-03T04:33:49.055Z",
+          "state": "NOT_OBSERVED",
+          "lastSuccessfulAt": null,
+          "lastFailedAt": null,
+          "lastNoNewInformationAt": null,
+          "nextCheckAt": null,
+          "authority": "ORIGINAL_DELEGATION_RECORDS_ONLY"
+        },
+        "authorityBudgetCumulativeUsed": {
+          "models": null,
+          "tools": null,
+          "searches": null,
+          "fetches": null,
+          "browserRequests": null,
+          "browserBytes": null,
+          "calendarRequests": null,
+          "externalWrites": null,
+          "metadataRequests": null,
+          "activeMs": null,
+          "reservedOutputTokens": null,
+          "inputTokens": null,
+          "outputTokens": null,
+          "unknownCalls": null
+        },
+        "unknownEffect": null,
+        "latestOutput": null,
+        "materialUsesItems": []
+      }
+    },
+    {
+      "id": "A2-IND-FS-A03-01",
+      "question": "FS-A03：DAILY_BUDGET_WAITING 三处一致解释 QUEUED + nextCheckAt，累计预算不清零",
+      "verdict": "PASS",
+      "observed": {
+        "workStates": {
+          "detail": {
+            "phase": "QUEUED",
+            "nextActor": "AGENT",
+            "requiresUser": false,
+            "reasonCode": "DAILY_BUDGET_WAITING",
+            "reasonText": "今日调用额度已用完，等待许可时区的次日；累计用量保留",
+            "actionLabel": "查看下次检查时间",
+            "originalRef": {
+              "kind": "MISSION",
+              "id": "cmw070kqy000nsc8ocdjjactq",
+              "version": 2
+            },
+            "exactQuestionRef": null,
+            "exactApprovalRef": null,
+            "checkedAt": "2026-11-03T04:33:49.070Z",
+            "observedAt": null,
+            "nextCheckAt": "2026-11-03T10:33:49.065Z",
+            "nextBoundary": null,
+            "freshness": "FRESH",
+            "terminal": null,
+            "unsettledEffect": {
+              "present": false,
+              "code": null,
+              "source": "NONE",
+              "reasonText": null,
+              "resolvedByRead": false
+            },
+            "stopRequest": {
+              "state": "NONE",
+              "requestedAt": null,
+              "settled": true,
+              "note": null
+            }
+          },
+          "summary": {
+            "phase": "QUEUED",
+            "nextActor": "AGENT",
+            "requiresUser": false,
+            "reasonCode": "DAILY_BUDGET_WAITING",
+            "reasonText": "今日调用额度已用完，等待许可时区的次日；累计用量保留",
+            "actionLabel": "查看下次检查时间",
+            "originalRef": {
+              "kind": "MISSION",
+              "id": "cmw070kqy000nsc8ocdjjactq",
+              "version": 2
+            },
+            "exactQuestionRef": null,
+            "exactApprovalRef": null,
+            "checkedAt": "2026-11-03T04:33:49.075Z",
+            "observedAt": null,
+            "nextCheckAt": "2026-11-03T10:33:49.065Z",
+            "nextBoundary": null,
+            "freshness": "FRESH",
+            "terminal": null,
+            "unsettledEffect": {
+              "present": false,
+              "code": null,
+              "source": "NONE",
+              "reasonText": null,
+              "resolvedByRead": false
+            },
+            "stopRequest": {
+              "state": "NONE",
+              "requestedAt": null,
+              "settled": true,
+              "note": null
+            }
+          },
+          "readback": {
+            "phase": "QUEUED",
+            "nextActor": "AGENT",
+            "requiresUser": false,
+            "reasonCode": "DAILY_BUDGET_WAITING",
+            "reasonText": "今日调用额度已用完，等待许可时区的次日；累计用量保留",
+            "actionLabel": "查看下次检查时间",
+            "originalRef": {
+              "kind": "MISSION",
+              "id": "cmw070kqy000nsc8ocdjjactq",
+              "version": 2
+            },
+            "exactQuestionRef": null,
+            "exactApprovalRef": null,
+            "checkedAt": "2026-11-03T04:33:49.075Z",
+            "observedAt": null,
+            "nextCheckAt": "2026-11-03T10:33:49.065Z",
+            "nextBoundary": null,
+            "freshness": "FRESH",
+            "terminal": null,
+            "unsettledEffect": {
+              "present": false,
+              "code": null,
+              "source": "NONE",
+              "reasonText": null,
+              "resolvedByRead": false
+            },
+            "stopRequest": {
+              "state": "NONE",
+              "requestedAt": null,
+              "settled": true,
+              "note": null
+            }
+          }
+        },
+        "detailUsed": {
+          "models": 5,
+          "tools": 2,
+          "inputTokens": 900,
+          "outputTokens": 120,
+          "unknownCalls": 1
+        },
+        "readbackUsage": {
+          "schemaVersion": 1,
+          "scope": "MISSION_RECORDED_COUNTERS_ONLY",
+          "models": 5,
+          "tools": 2,
+          "inputTokens": 900,
+          "outputTokens": 120,
+          "unknownCalls": 1,
+          "monetaryCost": null,
+          "pricingState": "UNPRICED",
+          "summary": "模型 5 次 · 工具 2 次",
+          "coverageNote": "有 1 次请求结果或用量未知，已记录 token 不代表完整用量。",
+          "costNote": "费用尚不能核算：这些记录未绑定费率与账单。"
+        },
+        "packetCumulativeUsed": {
+          "models": 5,
+          "tools": 2,
+          "searches": null,
+          "fetches": null,
+          "browserRequests": null,
+          "browserBytes": null,
+          "calendarRequests": null,
+          "externalWrites": null,
+          "metadataRequests": null,
+          "activeMs": null,
+          "reservedOutputTokens": null,
+          "inputTokens": 900,
+          "outputTokens": 120,
+          "unknownCalls": 1
+        }
+      }
+    },
+    {
+      "id": "A2-IND-FS-A04-01",
+      "question": "FS-A04：反复 GET 不推进成功观察时间；checkedAt/readAt 前进；无变化是观察结论",
+      "verdict": "PASS",
+      "observed": {
+        "first": {
+          "checkedAt": "2026-11-03T04:33:49.087Z",
+          "observedAt": "2026-10-31T04:33:49.085Z",
+          "readAt": "2026-11-03T04:33:49.087Z"
+        },
+        "second": {
+          "checkedAt": "2026-11-03T04:33:49.133Z",
+          "observedAt": "2026-10-31T04:33:49.085Z",
+          "readAt": "2026-11-03T04:33:49.133Z"
+        },
+        "observations": {
+          "readAt": "2026-11-03T04:33:49.133Z",
+          "state": "OBSERVED",
+          "lastSuccessfulAt": "2026-10-31T04:33:49.085Z",
+          "lastFailedAt": null,
+          "lastNoNewInformationAt": "2026-11-03T04:33:49.087Z",
+          "nextCheckAt": null,
+          "authority": "ORIGINAL_DELEGATION_RECORDS_ONLY"
+        },
+        "doneNote": "最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 窗口内没有工作记录，只表示覆盖不足，不等于从未发生。 最近一次成功观察结论是无新变化；这只是观察结论，不是委托生命周期。"
+      }
+    },
+    {
+      "id": "A2-IND-FS-A04-02",
+      "question": "FS-A04：最近观察失败后 state=FAILED_LAST、lastFailedAt 真实，不显示“无新变化”",
+      "verdict": "PASS",
+      "observed": {
+        "observations": {
+          "readAt": "2026-11-03T04:33:49.157Z",
+          "state": "FAILED_LAST",
+          "lastSuccessfulAt": "2026-10-31T04:33:49.085Z",
+          "lastFailedAt": "2026-11-03T04:33:49.141Z",
+          "lastNoNewInformationAt": "2026-11-03T04:33:49.087Z",
+          "nextCheckAt": null,
+          "authority": "ORIGINAL_DELEGATION_RECORDS_ONLY"
+        },
+        "nextNote": "等待原委托继续处理；原许可与进度保留。 最近一次观察失败，不能显示为无变化。",
+        "doneNote": "最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 窗口内没有工作记录，只表示覆盖不足，不等于从未发生。"
+      }
+    },
+    {
+      "id": "A2-IND-FS-A05-01",
+      "question": "FS-A05 基线：正常来源 currentUse=ALLOWED、availability=CURRENT、有历史 facts 与摘录",
+      "verdict": "PASS",
+      "observed": {
+        "item": {
+          "sourcePointer": {
+            "id": "capture:cmw070kts000vsc8ork8lf3zp",
+            "hash": "0808afbded82c6d5f762d35306657212bf01cd5728ed35e37ca16a6f727c2400"
+          },
+          "title": "2026-10-30 normal 原始记录：演示环境启动日志需现场核对，安装自报不等于启动成功。",
+          "availability": "CURRENT",
+          "availabilityMeaning": "REVISION_MATCH_ONLY_NOT_CURRENT_PERMISSION",
+          "currentUse": {
+            "state": "ALLOWED",
+            "independentEvidence": true,
+            "reason": "ORIGINAL_OBSERVATION",
+            "policy": "SOURCE_POLICY_V1",
+            "checkedAt": "2026-11-03T04:33:49.176Z",
+            "appliesTo": "CURRENT_USE_ONLY"
+          },
+          "facts": [
+            {
+              "kind": "SAVED",
+              "refId": "capture:cmw070kts000vsc8ork8lf3zp"
+            },
+            {
+              "kind": "ASSOCIATED",
+              "refId": "cmw070ktw0010sc8o7bq3mpl0"
+            },
+            {
+              "kind": "CANDIDATE",
+              "refId": "cmw070ktw000zsc8o00n5qvhg"
+            },
+            {
+              "kind": "BOUND",
+              "refId": "cmw070ktv000ysc8ozgyq1o4s"
+            }
+          ],
+          "coverage": {
+            "loadedCharacters": 49,
+            "totalCharacters": 49,
+            "truncated": false,
+            "extractionStatus": "SUCCESS"
+          },
+          "bodyCoverage": "NOT_RECORDED",
+          "excerpt": "2026-10-30 normal 原始记录：演示环境启动日志需现场核对，安装自报不等于启动成功。"
+        }
+      }
+    },
+    {
+      "id": "A2-IND-FS-A05-02",
+      "question": "FS-A05 抑制：currentUse=SUPPRESSED、independentEvidence=false、历史 facts/摘录保留、写守卫仍拒绝",
+      "verdict": "PASS",
+      "observed": {
+        "directiveAdmission": {
+          "status": "DIRECT_APPLIED",
+          "kind": "USE_SUPPRESSION",
+          "reason": "EXPLICIT_SUPPRESSION"
+        },
+        "sourceUse": {
+          "state": "SUPPRESSED",
+          "roots": [
+            "capture:cmw070kts000vsc8ork8lf3zp"
+          ],
+          "independentEvidence": false,
+          "reason": "ROOT_SUPPRESSED"
+        },
+        "item": {
+          "sourcePointer": {
+            "id": "capture:cmw070kts000vsc8ork8lf3zp",
+            "hash": "0808afbded82c6d5f762d35306657212bf01cd5728ed35e37ca16a6f727c2400"
+          },
+          "title": "2026-10-30 normal 原始记录：演示环境启动日志需现场核对，安装自报不等于启动成功。",
+          "availability": "CURRENT",
+          "availabilityMeaning": "REVISION_MATCH_ONLY_NOT_CURRENT_PERMISSION",
+          "currentUse": {
+            "state": "SUPPRESSED",
+            "independentEvidence": false,
+            "reason": "ROOT_SUPPRESSED",
+            "policy": "SOURCE_POLICY_V1",
+            "checkedAt": "2026-11-03T04:33:49.227Z",
+            "appliesTo": "CURRENT_USE_ONLY"
+          },
+          "facts": [
+            {
+              "kind": "SAVED",
+              "refId": "capture:cmw070kts000vsc8ork8lf3zp"
+            },
+            {
+              "kind": "ASSOCIATED",
+              "refId": "cmw070ktw0010sc8o7bq3mpl0"
+            },
+            {
+              "kind": "CANDIDATE",
+              "refId": "cmw070ktw000zsc8o00n5qvhg"
+            },
+            {
+              "kind": "BOUND",
+              "refId": "cmw070ktv000ysc8ozgyq1o4s"
+            }
+          ],
+          "coverage": {
+            "loadedCharacters": 49,
+            "totalCharacters": 49,
+            "truncated": false,
+            "extractionStatus": "SUCCESS"
+          },
+          "bodyCoverage": "NOT_RECORDED",
+          "excerpt": "2026-10-30 normal 原始记录：演示环境启动日志需现场核对，安装自报不等于启动成功。"
+        },
+        "writeGuard": {
+          "rejected": true,
+          "code": "SOURCE_USE_SUPPRESSED",
+          "status": 409,
+          "message": "你已要求停止使用这条资料及其派生结论，请重新调查"
+        },
+        "packetBlockers": [
+          "WORKER_PRESENCE_UNOBSERVED",
+          "CURRENT_USE_SUPPRESSED",
+          "QUESTION_PENDING"
+        ]
+      }
+    },
+    {
+      "id": "A2-IND-FS-A05-03",
+      "question": "FS-A05 撤权：连接撤销后 currentUse=SUPPRESSED（SOURCE_PERMISSION_REVOKED），历史 facts 保留",
+      "verdict": "PASS",
+      "observed": {
+        "before": {
+          "sourceUse": {
+            "state": "ALLOWED",
+            "independentEvidence": false,
+            "reason": "DERIVED_REFERENCE",
+            "policy": "SOURCE_POLICY_V1",
+            "checkedAt": "2026-11-03T04:33:49.248Z",
+            "appliesTo": "CURRENT_USE_ONLY"
+          },
+          "facts": [
+            "SAVED",
+            "ASSOCIATED",
+            "CANDIDATE",
+            "BOUND"
+          ]
+        },
+        "after": {
+          "sourceUse": {
+            "state": "SUPPRESSED",
+            "roots": [
+              "capture:cmw070kvq0016sc8opsbzmvpc",
+              "signal:cmw070kvv001dsc8oxrzlrh0t",
+              "repo:cmw070kvu001csc8oyjx5bhgb"
+            ],
+            "independentEvidence": false,
+            "reason": "SOURCE_PERMISSION_REVOKED"
+          },
+          "itemCurrentUse": {
+            "state": "SUPPRESSED",
+            "independentEvidence": false,
+            "reason": "SOURCE_PERMISSION_REVOKED",
+            "policy": "SOURCE_POLICY_V1",
+            "checkedAt": "2026-11-03T04:33:49.266Z",
+            "appliesTo": "CURRENT_USE_ONLY"
+          },
+          "facts": [
+            "SAVED",
+            "ASSOCIATED",
+            "CANDIDATE",
+            "BOUND"
+          ]
+        }
+      }
+    },
+    {
+      "id": "A2-IND-FS-A05-04",
+      "question": "FS-A05 未知：来源链未知时 currentUse=UNKNOWN、不称独立证据；历史 facts 保留",
+      "verdict": "PASS",
+      "observed": {
+        "sourceUse": {
+          "state": "UNKNOWN",
+          "roots": [
+            "capture:cmw070kwp001hsc8o5s2ehwtf"
+          ],
+          "independentEvidence": false,
+          "reason": "LINEAGE_UNKNOWN"
+        },
+        "item": {
+          "sourcePointer": {
+            "id": "capture:cmw070kwp001hsc8o5s2ehwtf",
+            "hash": "dea904b3546f02bec61a3b6fcb7bd25d98a6550ffee370ce5f0113ee62b1f1c2"
+          },
+          "title": "2026-10-30 unknown 原始记录：演示环境启动日志需现场核对，安装自报不等于启动成功。",
+          "availability": "CURRENT",
+          "availabilityMeaning": "REVISION_MATCH_ONLY_NOT_CURRENT_PERMISSION",
+          "currentUse": {
+            "state": "UNKNOWN",
+            "independentEvidence": false,
+            "reason": "LINEAGE_UNKNOWN",
+            "policy": "SOURCE_POLICY_V1",
+            "checkedAt": "2026-11-03T04:33:49.280Z",
+            "appliesTo": "CURRENT_USE_ONLY"
+          },
+          "facts": [
+            {
+              "kind": "SAVED",
+              "refId": "capture:cmw070kwp001hsc8o5s2ehwtf"
+            },
+            {
+              "kind": "ASSOCIATED",
+              "refId": "cmw070kws001msc8oqfw831ti"
+            },
+            {
+              "kind": "CANDIDATE",
+              "refId": "cmw070kws001lsc8ocq5sodx0"
+            },
+            {
+              "kind": "BOUND",
+              "refId": "cmw070kwr001ksc8omxtflv50"
+            }
+          ],
+          "coverage": {
+            "loadedCharacters": 50,
+            "totalCharacters": 50,
+            "truncated": false,
+            "extractionStatus": "SUCCESS"
+          },
+          "bodyCoverage": "NOT_RECORDED",
+          "excerpt": "2026-10-30 unknown 原始记录：演示环境启动日志需现场核对，安装自报不等于启动成功。"
+        },
+        "packetBlockers": [
+          "WORKER_PRESENCE_UNOBSERVED",
+          "CURRENT_USE_UNKNOWN",
+          "QUESTION_PENDING"
+        ]
+      }
+    },
+    {
+      "id": "A2-IND-FS-A06-01",
+      "question": "FS-A06：45 条更新的无关 AgentRun 不能把本委托运行挤出窗口（runScope=MISSION_FILTERED、CONTEXT_POINTER 保留）",
+      "verdict": "PASS",
+      "observed": {
+        "coverage": {
+          "eventLimit": 80,
+          "eventsInspected": 1,
+          "eventsTruncated": false,
+          "stepLimit": 40,
+          "stepsInspected": 1,
+          "stepsTruncated": false,
+          "outputLimit": 20,
+          "outputsInspected": 0,
+          "outputsTruncated": false,
+          "receiptsInspected": 0,
+          "receiptsTruncated": false,
+          "runLimit": 40,
+          "projectRunLimit": 40,
+          "runsInspected": 1,
+          "runsTruncated": false,
+          "runScope": "MISSION_FILTERED",
+          "sourceLimit": 8,
+          "sourceLimitReached": false,
+          "mapping": "DIRECT_SOURCE_POINTERS_ONLY"
+        },
+        "facts": [
+          "SAVED",
+          "CANDIDATE",
+          "BOUND",
+          "CONTEXT_POINTER"
+        ],
+        "callCoverage": {
+          "schemaVersion": 1,
+          "scope": "MISSION_AGENTRUN_AND_STEP_RECEIPTS",
+          "inspected": {
+            "agentRuns": 1,
+            "steps": 1,
+            "limit": 20,
+            "truncated": false
+          },
+          "models": {
+            "total": 1,
+            "succeeded": 1,
+            "failed": 0,
+            "partial": 0,
+            "fallback": 0,
+            "unknown": 0,
+            "usageRecorded": 0,
+            "usageUnknown": 1
+          },
+          "tools": {
+            "total": 1,
+            "succeeded": 1,
+            "failed": 0,
+            "unknown": 0,
+            "pending": 0
+          },
+          "failedCodes": [],
+          "dedupe": "AGENTRUN_ID_AND_STEP_ID",
+          "pricing": {
+            "state": "UNPRICED",
+            "estimate": null,
+            "billedAmount": null,
+            "currency": null,
+            "rateSource": null,
+            "applicableFrom": null,
+            "reason": "没有绑定费率来源、适用时间、模型/工具版本与币种；只能给出已记录的调用与 token，不能估价或声称完整账单。"
+          },
+          "summary": "可核对调用：模型已检查 1 次（成功 1 / 失败 0）· 工具已检查 1 次（成功 1 / 失败 0）",
+          "notes": [
+            "1 次模型调用没有完整用量记录，已记录 token 不代表完整用量。",
+            "费用与估算保持未知：未绑定费率、币种与账单，不把次数换算成金额。",
+            "范围仅当前委托的原回执；不含建项预览、其他独立讨论或跨项目用量。"
+          ],
+          "runScope": "MISSION_FILTERED"
+        },
+        "missionRunId": "cmw070kxb001vsc8o8eyzcvev",
+        "unrelatedRunCount": 45
+      }
+    },
+    {
+      "id": "A2-IND-FS-A06-02",
+      "question": "FS-A06 未找到≠从未发生：空运行窗口 coverage 明示有界，MATERIAL_MISSION_RUNS 窗口写明“未找到不等于从未使用”",
+      "verdict": "PASS",
+      "observed": {
+        "coverage": {
+          "eventLimit": 80,
+          "eventsInspected": 0,
+          "eventsTruncated": false,
+          "stepLimit": 40,
+          "stepsInspected": 1,
+          "stepsTruncated": false,
+          "outputLimit": 20,
+          "outputsInspected": 0,
+          "outputsTruncated": false,
+          "receiptsInspected": 0,
+          "receiptsTruncated": false,
+          "runLimit": 40,
+          "projectRunLimit": 40,
+          "runsInspected": 0,
+          "runsTruncated": false,
+          "runScope": "MISSION_FILTERED",
+          "sourceLimit": 8,
+          "sourceLimitReached": false,
+          "mapping": "DIRECT_SOURCE_POINTERS_ONLY"
+        },
+        "missionRunsWindow": {
+          "name": "MATERIAL_MISSION_RUNS",
+          "limit": 40,
+          "returned": 0,
+          "truncated": false,
+          "note": "窗口先按 trace.missionId 过滤再取最近本委托的 CHAT 运行；未找到不等于从未使用。"
+        },
+        "basisNote": "依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。"
+      }
+    },
+    {
+      "id": "A2-IND-FS-A07-01",
+      "question": "FS-A07 时间跨界无新事件：permissionState=EXPIRED、主操作重核、boundaryAt=最早边界、事件数不变",
+      "verdict": "PASS",
+      "observed": {
+        "authority": {
+          "controlVersion": "75ae5a8b1b783b12346c7de827cb1ffe3b6c040d703714590575854f32658916",
+          "permissionState": "EXPIRED",
+          "permissionExpiresAt": "2026-11-02T04:33:49.341Z",
+          "deadline": "2026-11-13T04:33:49.341Z",
+          "nextBoundary": "2026-11-02T04:33:49.341Z",
+          "effectiveNextCheckAt": null,
+          "workerPresence": "UNOBSERVED",
+          "budget": {
+            "limits": {
+              "searches": 3,
+              "fetches": 4,
+              "browserRequests": 40,
+              "browserBytes": 4000000,
+              "calendarRequests": 8,
+              "externalWrites": 2,
+              "activeMs": 180000,
+              "reservedOutputTokens": 12000
+            },
+            "cumulativeUsed": {
+              "models": null,
+              "tools": null,
+              "searches": null,
+              "fetches": null,
+              "browserRequests": null,
+              "browserBytes": null,
+              "calendarRequests": null,
+              "externalWrites": null,
+              "metadataRequests": null,
+              "activeMs": null,
+              "reservedOutputTokens": null,
+              "inputTokens": null,
+              "outputTokens": null,
+              "unknownCalls": null
+            },
+            "policy": "CUMULATIVE_NOT_RESET_ON_RESTART_OR_DATE",
+            "monetaryCost": null
+          },
+          "note": "VIEW_ONLY_NO_EXECUTION_PERMISSION"
+        },
+        "primaryAction": {
+          "kind": "RECHECK_AUTHORITY",
+          "label": "重新核对许可与期限",
+          "target": {
+            "kind": "MISSION",
+            "id": "cmw070kym003csc8o00y4kh05",
+            "version": 2
+          },
+          "requires": {
+            "missionVersion": 2,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "controlVersion": "75ae5a8b1b783b12346c7de827cb1ffe3b6c040d703714590575854f32658916",
+            "questionId": "cmw070kyn003dsc8odl9lwauk",
+            "approvalId": null,
+            "proposalHash": null,
+            "requiredSourceRevisions": [],
+            "boundaryAt": "2026-11-02T04:33:49.341Z"
+          },
+          "submissionGuard": "SERVER_RECHECKS_OWNER_PROJECT_VERSION_SOURCE_PERMISSION_LEASE_BUDGET_IDEMPOTENCY",
+          "readOnly": true
+        },
+        "blockers": [
+          "PERMISSION_EXPIRED",
+          "WORKER_PRESENCE_UNOBSERVED",
+          "QUESTION_PENDING"
+        ],
+        "eventsBefore": 1,
+        "eventsAfter": 1
+      }
+    },
+    {
+      "id": "A2-IND-FS-A07-02",
+      "question": "FS-A07 公开抑制路径：快照一致、requires.controlVersion 携带责任视图版本、被抑制来源不作当前依据",
+      "verdict": "PASS",
+      "observed": {
+        "missionVersionBefore": 2,
+        "missionVersionAfter": 3,
+        "controlVersionBefore": "cf88d9690a8c5dab1a2fbe998438c87e1a49ba04783726202b812bb451cf1297",
+        "controlVersionAfter": "6926feb364c68043449af446616525dc9458e2542bc29aa78a7d2281cbea5e28",
+        "requires": {
+          "missionVersion": 3,
+          "planRevision": 2,
+          "contextVersion": 2,
+          "constraintsVersion": 1,
+          "researchScopeVersion": 1,
+          "controlVersion": "6926feb364c68043449af446616525dc9458e2542bc29aa78a7d2281cbea5e28",
+          "questionId": "cmw070kz3003jsc8ohf3f661r",
+          "approvalId": null,
+          "proposalHash": null,
+          "requiredSourceRevisions": [],
+          "boundaryAt": null
+        },
+        "snapshot": {
+          "mode": "SINGLE_READ_TRANSACTION",
+          "consistency": "VERSION_STABLE",
+          "retries": 0,
+          "checkedAt": "2026-11-03T04:33:49.381Z",
+          "note": "同一只读事务内读取；身份与版本来自同一快照。"
+        }
+      },
+      "note": "公开 submitDirective 会经连续性失效联动推进 Mission version（本 fixture 观测到版本前进），因此“许可变化但 mission.version 未变”的读取窗口由下一项受控持久化复现。"
+    },
+    {
+      "id": "A2-IND-FS-A07-03",
+      "question": "FS-A07 许可变化但 Mission version 未变（受控持久化窗口）：快照仍 VERSION_STABLE、requires.controlVersion 已更新、被抑制来源不作当前依据",
+      "verdict": "PASS",
+      "observed": {
+        "missionVersionBefore": 2,
+        "missionVersionAfter": 2,
+        "controlVersionBefore": "53010e4dd53b1ba1e25d3279883ca7d5f16ebff13221061d065a52fd8d190017",
+        "controlVersionAfter": "ef4f2de900145d952f6d66d0e1c1f3789cc3018824f760de0932fe578dd94bc5",
+        "requires": {
+          "missionVersion": 2,
+          "planRevision": 1,
+          "contextVersion": 1,
+          "constraintsVersion": 1,
+          "researchScopeVersion": 1,
+          "controlVersion": "ef4f2de900145d952f6d66d0e1c1f3789cc3018824f760de0932fe578dd94bc5",
+          "questionId": "cmw070l02003usc8ojztrcfon",
+          "approvalId": null,
+          "proposalHash": null,
+          "requiredSourceRevisions": [],
+          "boundaryAt": null
+        },
+        "snapshot": {
+          "mode": "SINGLE_READ_TRANSACTION",
+          "consistency": "VERSION_STABLE",
+          "retries": 0,
+          "checkedAt": "2026-11-03T04:33:49.410Z",
+          "note": "同一只读事务内读取；身份与版本来自同一快照。"
+        }
+      }
+    },
+    {
+      "id": "A2-IND-RESIDUAL-01",
+      "question": "A1-RESIDUAL-01：workspaceSummary 对 RUNNING+停止请求在途显示 STOP_REQUESTED_IN_FLIGHT（pause/cancel 两例）",
+      "verdict": "PASS",
+      "observed": {
+        "summaryEnabled": true,
+        "totalActive": 2,
+        "pauseItem": {
+          "status": "RUNNING",
+          "attention": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤",
+          "workState": {
+            "phase": "RUNNING",
+            "nextActor": "SYSTEM",
+            "requiresUser": false,
+            "reasonCode": "STOP_REQUESTED_IN_FLIGHT",
+            "reasonText": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤",
+            "actionLabel": "核对停止结算",
+            "originalRef": {
+              "kind": "MISSION",
+              "id": "cmw070l0z0042sc8ogl0in69b",
+              "version": 2
+            },
+            "exactQuestionRef": null,
+            "exactApprovalRef": null,
+            "checkedAt": "2026-11-03T04:33:49.430Z",
+            "observedAt": null,
+            "nextCheckAt": null,
+            "nextBoundary": "2026-11-03T04:43:49.426Z",
+            "freshness": "FRESH",
+            "terminal": null,
+            "unsettledEffect": {
+              "present": false,
+              "code": null,
+              "source": "NONE",
+              "reasonText": null,
+              "resolvedByRead": false
+            },
+            "stopRequest": {
+              "state": "PAUSE_REQUESTED",
+              "requestedAt": "2026-11-03T04:33:49.426Z",
+              "settled": false,
+              "note": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤"
+            }
+          }
+        },
+        "cancelItem": {
+          "status": "RUNNING",
+          "workState": {
+            "phase": "RUNNING",
+            "nextActor": "SYSTEM",
+            "requiresUser": false,
+            "reasonCode": "STOP_REQUESTED_IN_FLIGHT",
+            "reasonText": "已收到停止请求，等待本轮调用结算，不会继续派发新步骤",
+            "actionLabel": "核对停止结算",
+            "originalRef": {
+              "kind": "MISSION",
+              "id": "cmw070l100043sc8oz4oqn49t",
+              "version": 2
+            },
+            "exactQuestionRef": null,
+            "exactApprovalRef": null,
+            "checkedAt": "2026-11-03T04:33:49.430Z",
+            "observedAt": null,
+            "nextCheckAt": null,
+            "nextBoundary": "2026-11-03T04:43:49.426Z",
+            "freshness": "FRESH",
+            "terminal": null,
+            "unsettledEffect": {
+              "present": false,
+              "code": null,
+              "source": "NONE",
+              "reasonText": null,
+              "resolvedByRead": false
+            },
+            "stopRequest": {
+              "state": "CANCEL_REQUESTED",
+              "requestedAt": "2026-11-03T04:33:49.427Z",
+              "settled": false,
+              "note": "已收到取消请求，等待本轮调用结算，不会继续派发新步骤"
+            }
+          }
+        },
+        "detailReasonCode": "STOP_REQUESTED_IN_FLIGHT",
+        "readbackReasonCode": "STOP_REQUESTED_IN_FLIGHT",
+        "packetPrimaryAction": {
+          "kind": "CHECK_STOP_SETTLEMENT",
+          "label": "核对停止结算",
+          "target": {
+            "kind": "MISSION",
+            "id": "cmw070l0z0042sc8ogl0in69b",
+            "version": 2
+          },
+          "requires": {
+            "missionVersion": 2,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "controlVersion": "4b65af916f56a68c0518ad4412933ef3d2c1144a4e913298671ce6a010b36074",
+            "questionId": null,
+            "approvalId": null,
+            "proposalHash": null,
+            "requiredSourceRevisions": [],
+            "boundaryAt": "2026-11-03T04:43:49.426Z"
+          },
+          "submissionGuard": "SERVER_RECHECKS_OWNER_PROJECT_VERSION_SOURCE_PERMISSION_LEASE_BUDGET_IDEMPOTENCY",
+          "readOnly": true
+        }
+      }
+    }
+  ]
+}

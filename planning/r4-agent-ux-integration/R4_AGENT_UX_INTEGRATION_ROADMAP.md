@@ -261,7 +261,7 @@ Web 改 FocusAgentWorkspace、ConversationContinuity、MissionPanel/Readback 和
 
 UX-1 复用现有持久结构，API 加可选投影字段与版本化 wait 原因。R2 的 UX-2 则在原数据库增加必要 Claim/Event/Digest 和来源绑定，需空库及旧库副本迁移验证；不能因为只读页面就跳过持久合同，也不操作真实库。JSON 写 schemaVersion 和旧记录 fallback。原 feature flags 管能力；若需要 UI 灰度只增加双端可读的 projection capability，不另设授权体系。
 
-回滚可退呈现层，原 guard、有效指令和回执保持；新 JSON 旧客户端可忽略，但必须有自然文本入口。不能退回会放行旧源或忽略停止限制的写路径。每阶段继续维护已有 `R4_AGENT_UX_IMPLEMENTATION_NOTES.md`，记录真实验证、Deviations 与未关闭 Gate。
+回滚可退呈现层，原 guard、有效指令和回执保持；新 JSON 旧客户端可忽略，但必须有自然文本入口。不能退回会放行旧源或忽略停止限制的写路径。每阶段继续维护已有 `docs/project/implementation/R4_AGENT_UX_IMPLEMENTATION_NOTES.md`，记录真实验证、Deviations 与未关闭 Gate。
 
 ## 9. 裁决、延期与实施探针
 

@@ -6,15 +6,15 @@
 
 | 审查项 | 计划落点 | 必须证明的行为 |
 |---|---|---|
-| P0-1 多查询研究 | 原 INVESTIGATE + ResearchCoverage；[方案](R4_PR6_WEB_RESEARCH_PLAN.md) §4–5 | 新观察改变查询/读取/停止；五条结果不自动表示充分。 |
+| P0-1 多查询研究 | 原 INVESTIGATE + ResearchCoverage；[方案](../planning/R4_PR6_WEB_RESEARCH_PLAN.md) §4–5 | 新观察改变查询/读取/停止；五条结果不自动表示充分。 |
 | P0-2 用户 URL | 服务端登记原用户消息 URL，原 sourceId Fetch | 不先搜索、不接模型伪造网址、读不全明确范围。 |
 | P0-3 时效 | 公开查询规划 + 来源适用版本/生效片段 | 发布时间、抓取时间、适用届次与生效状态分开，冲突保留。 |
 | P0-4 阅读层级 | 共享来源 readLevel / retrievalMethod / 范围 | 摘要不冒充正文，网页片段不冒充论文/PDF/仓库全文。 |
 | P0-5 长研究 | 原 turn 接收/推进分离、checkpoint、lease/fencing、外部 operation 预占 | 断线/重启复用原结果；UNKNOWN 不无意重放；取消后不发布迟到结果。 |
-| P1-6 检索覆盖 | 原 12 开发题 + 24 独立覆盖题；[评测合同](R4_EVALUATION_PROTOCOL.md) | 六场景实测、原始来源/时效/冲突与用户成本；Provider 选择不只看价格。 |
-| 生成式研究 UI | 原 investigation/evidence/comparison 等可信 catalog；[UI 协议](R4_UI_PROTOCOL.md) | 真实进展、引用回读、条件建议、继续/验证/保存的原绑定。 |
+| P1-6 检索覆盖 | 原 12 开发题 + 24 独立覆盖题；[评测合同](../protocols/R4_EVALUATION_PROTOCOL.md) | 六场景实测、原始来源/时效/冲突与用户成本；Provider 选择不只看价格。 |
+| 生成式研究 UI | 原 investigation/evidence/comparison 等可信 catalog；[UI 协议](../protocols/R4_UI_PROTOCOL.md) | 真实进展、引用回读、条件建议、继续/验证/保存的原绑定。 |
 | 研究长期沉淀 | 原会话研究草稿 → 原确认 → Artifact + manifest/版本/回执 | 不是把回答全文直接当公共知识；不伪造 Mission 输出。 |
-| Prompt V2 | [研究职责合同](R4_PROMPT_CONTRACTS.md) | 六项逻辑职责可合并调用，公开查询输入仍隔离，根预算仍唯一。 |
+| Prompt V2 | [研究职责合同](../protocols/R4_PROMPT_CONTRACTS.md) | 六项逻辑职责可合并调用，公开查询输入仍隔离，根预算仍唯一。 |
 | 独立审查基线 | 本地 bf7ca1a / 远端 c8c7072 已实查 | 提供可解析提交或审查包后再签收独立代码审查；本轮未 push。 |
 
 PR-5 更新：六项专责策略已接原调用方；原行动完成回执进入 D1/D2 Goal State 与同会话重评，聊天比较可直接预览原冻结候选，确认/幂等/源版本保持原链。Capture 收窄仅原文、Artifact 旧检查点冻结范围、Legacy 私聊隔离有回归。44 次实模的协议、内容、归属失败与后续修正分别保留。独立质量、真机和生产门槛未因测试通过关闭。
@@ -32,7 +32,7 @@ PR-4 更新：ArkTS 十种原生语义块、原绑定、调查模式/进展/停�
 | 审查要求 | PR-0 落点 / 当前事实 | 实际能力接入与验收 |
 |---|---|---|
 | 消息角色与完整预算 | `lib/agent/promptSpec.ts`：角色、数据、能力、预占合同 | PR-1 接原 Provider/持久配额；旧单 user 尚在 |
-| Route/Investigate/Goal/Answer/UI 分工 | `R4_PROMPT_CONTRACTS.md` 十一项登记 | PR-1/2 实际 Prompt、schema 与配对比较 |
+| Route/Investigate/Goal/Answer/UI 分工 | `docs/project/protocols/R4_PROMPT_CONTRACTS.md` 十一项登记 | PR-1/2 实际 Prompt、schema 与配对比较 |
 | 动态调查 | `investigationDecisionSchema`、`InvestigationStep`、预算校验；三领域分支 fixture | PR-1 实际中途观察→下一决定；非固定两步 |
 | Project Evidence Explorer | `ExperienceEntityRef`、EvidenceLink 和 read scope | PR-1 workspace actor adapter；不得虚构 mission actor |
 | Goal Progress/Gap | `goalGapSchema` 条件/状态/适用证据/未知 | PR-1 实际参与工具选择和推荐；不延至 PR-5 首次实现 |
@@ -51,6 +51,6 @@ PR-4 更新：ArkTS 十种原生语义块、原绑定、调查模式/进展/停�
 | 旧 Copilot 兼容 | 原 DTO 仅加可选 presentation；旧服务未切换 | PR-5/6 旧历史/API、私有范围与风格回归 |
 | 主动发现 | fixture 的 Event/Review 引用；没有后台扫描 | PR-3 合法事件→发现→追问；PR-6 扩覆盖/降噪 |
 | 双端与跨领域 | 同一合成 JSON，ArkTS 镜像与类型一致性检查 | PR-3/4 实际渲染、业务/设备旅程；三领域独立质量 |
-| 质量、效果与费用 | `R4_EVALUATION_PROTOCOL.md` C0–C3/硬失败/留出规则 | 后续独立样本与人工评审，原失败不覆盖 |
+| 质量、效果与费用 | `docs/project/protocols/R4_EVALUATION_PROTOCOL.md` C0–C3/硬失败/留出规则 | 后续独立样本与人工评审，原失败不覆盖 |
 
 冻结的是跨批次接口，未交付行不得因表中出现而改为完成。当前原 Focus 和 F3 的质量、设备、ECS 门槛继续按原记录保留。

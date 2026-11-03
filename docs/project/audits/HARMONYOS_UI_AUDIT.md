@@ -2,7 +2,7 @@
 
 ## 当前状态（2026-10-22，B1–B4 续做）
 
-当前实施和验证以 `HARMONYOS_UI_CHANGELOG.md` 的“B1–B4 续做记录”及 `evidence/pre-r4/20261022-harmony-b2-b4/ACCEPTANCE.md` 为准。下方早期截图、60 项测试、unsigned HAP 和签名阻塞均为历史记录。
+当前实施和验证以 `docs/project/implementation/HARMONYOS_UI_CHANGELOG.md` 的“B1–B4 续做记录”及 `evidence/pre-r4/20261022-harmony-b2-b4/ACCEPTANCE.md` 为准。下方早期截图、60 项测试、unsigned HAP 和签名阻塞均为历史记录。
 
 这次重点修复：附件成功上传后没有原件入口、列表错误伪装成空列表、PDFKit 缺失导致原件页空白、成果操作在放大字体下越界，以及概览重复展示准备项/主事项/委托/提醒。概览默认只保留三段内容，更多数据从展开区查看。
 

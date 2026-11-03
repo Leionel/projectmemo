@@ -39,7 +39,7 @@ npm.cmd run dev
 
 打开 [本地工作台](http://127.0.0.1:3000)。开发模式默认账号 `contest-demo`，默认口令 `contest-demo-2026`，用于本机体验；生产环境须自行配置账号。登录后创建自己的项目，记录第一条资料。
 
-`db:setup` 会应用迁移并导入演示素材。已有数据库的升级方式、鸿蒙后端地址与部署说明见 [开发与运行说明](DEVELOPMENT.md)。默认 mock 可体验资料整理和页面流程；长期委托的自主执行需要另行配置模型与 Worker。
+`db:setup` 会应用迁移并导入演示素材。已有数据库的升级方式、鸿蒙后端地址与部署说明见 [开发与运行说明](docs/project/development/DEVELOPMENT.md)。默认 mock 可体验资料整理和页面流程；长期委托的自主执行需要另行配置模型与 Worker。
 
 ## 从四个入口开始
 
@@ -74,3 +74,5 @@ Project Twin、Decision Lab、GitHub Sensing 和 Experience Learning 属于后�
 ## License
 
 仓库目前未提供项目开源许可证；字体等第三方资产遵循各自随附许可。
+
+项目文档见 [文档索引](docs/project/README.md)。

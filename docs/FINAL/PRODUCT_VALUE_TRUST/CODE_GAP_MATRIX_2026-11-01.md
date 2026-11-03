@@ -2,7 +2,7 @@
 
 日期：2026-11-01。配套阅读：[研究报告](PROJECTMEMO_FINAL_VALUE_TRUST_RESEARCH_2026-11-01.md)、[优先级路线](PRIORITY_ROADMAP_2026-11-01.md)、[最终纵向旅程](FINAL_VERTICAL_ACCEPTANCE_JOURNEY_2026-11-01.md)。
 
-本轮先审计、后形成规划。审计中发现 CT-7 未进入主目录，用户随后明确授权合并；该项业务代码修改只用于 CT-7 整合及必要的冲突适配，下面其他缺口没有顺带实施。整合结果与验证记录另见主目录 `R4_DEPLOYMENT_IMPLEMENTATION_NOTES.md` 的本次追加段。
+本轮先审计、后形成规划。审计中发现 CT-7 未进入主目录，用户随后明确授权合并；该项业务代码修改只用于 CT-7 整合及必要的冲突适配，下面其他缺口没有顺带实施。整合结果与验证记录另见主目录 `docs/project/implementation/R4_DEPLOYMENT_IMPLEMENTATION_NOTES.md` 的本次追加段。
 
 ## 1. 如何读这张矩阵
 

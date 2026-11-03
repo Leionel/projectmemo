@@ -152,8 +152,8 @@ PM 使用统一 AgentClaim/Event 的 ACCOUNT/PROJECT 范围及 UserMemoryPolicy�
 | ID | 文件/来源 | 使用边界 |
 |---|---|---|
 | A01 | [原 Roadmap](../PRODUCT_VALUE_TRUST/PRIORITY_ROADMAP_2026-11-01.md)、[代码矩阵](../PRODUCT_VALUE_TRUST/CODE_GAP_MATRIX_2026-11-01.md)及其快照 | 八项 FVT、G01～21 与三类 Gate 继续为权威，不重新编号替代 |
-| A02 | [UX Roadmap](../../../planning/r4-agent-ux-integration/R4_AGENT_UX_INTEGRATION_ROADMAP.md)、[UX实施](../../../R4_AGENT_UX_IMPLEMENTATION_NOTES.md) | UX1～3、旧模拟器/可控时钟证据；旧HEAD不覆盖当前分支 |
-| A03 | [CT7实施](../../../R4_DEPLOYMENT_IMPLEMENTATION_NOTES.md)、[CT8～10审计](../../../planning/r4-post-ux2-implementation/R4_CT8_TO_CT10_INDEPENDENT_AUDIT_2026-10-31.md) | 以追加记录/当前祖先关系解释历史矛盾 |
+| A02 | [UX Roadmap](../../../planning/r4-agent-ux-integration/R4_AGENT_UX_INTEGRATION_ROADMAP.md)、[UX实施](../../project/implementation/R4_AGENT_UX_IMPLEMENTATION_NOTES.md) | UX1～3、旧模拟器/可控时钟证据；旧HEAD不覆盖当前分支 |
+| A03 | [CT7实施](../../project/implementation/R4_DEPLOYMENT_IMPLEMENTATION_NOTES.md)、[CT8～10审计](../../../planning/r4-post-ux2-implementation/R4_CT8_TO_CT10_INDEPENDENT_AUDIT_2026-10-31.md) | 以追加记录/当前祖先关系解释历史矛盾 |
 | A04 | [PM实施](D:/Projects/hongmen-personal-memory/docs/FINAL/Memory/PERSONAL_MEMORY_PM1_IMPLEMENTATION_NOTES.md)、[PM4日志](D:/Projects/hongmen-personal-memory/evidence/personal-memory-pm1/20261101/full-regression-pm4.log) | 分支已实现、阶段验证与最新失败分开；不替该 Agent 写 PASS |
 | A05 | [PM入口日志](D:/Projects/hongmen-personal-memory/evidence/personal-memory-visibility/20261101/acceptance-run.log) | 早先返回失败；末次复核26项脚本断言通过、0失败，待提交/整合与跨端独立验收 |
 | A06 | [Web focus](../../../evidence/r4-ui-quality/20261031/after/web-focus-desktop.png)、[原生focus](../../../evidence/r4-ui-quality/20261031/after/native-focus.jpg) | 本轮确实查看；历史隔离数据/截图，非当前 dirty UI 的全量视觉签收 |

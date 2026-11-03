@@ -10,13 +10,13 @@
 
 | 能力 | 当前事实 | PR-6 的工作 |
 |---|---|---|
-| 搜索与正文读取 | [searchProvider.ts](lib/research/searchProvider.ts) 已调用官方 `/v1/tools/search`、`/v1/tools/fetch`，请求限时 20 秒、响应限长，禁止认证重定向。 | 复用 HTTP 适配器，增加取消、调用元数据、费用与明确错误分类。 |
-| 搜索返回值 | [contracts.ts](lib/research/contracts.ts) 目前保留 URL、标题、短摘要、日期、站点；长摘要和排序元数据被解析层舍弃。 | 保留有界 `summary`、`rerank_score`、`authority`；供应商评分只参与候选排序，不代表结论已证实。 |
-| 原长期委托 | [researchTools.ts](lib/mission/tools/researchTools.ts) 已有 `web_search`、`web_fetch`，受 `MISSION_WEB_ENABLED`、版本化研究范围和原 Runner 控制。 | 提取可共用的查询/来源处理函数，保留原 Mission 调用与预算，不直接把 Mission 工具挂到聊天。 |
-| 查询隔离 | 查询生成只收到批准的公开主题、概念和公开来源；[queryPolicy.ts](lib/research/queryPolicy.ts) 校验主题、排除词和公开 HTTPS URL。 | 保留隔离；私有聊天、附件、内部实验数值不进入搜索请求。关键词校验只是辅助，不能取代隔离输入。 |
-| 网页快照 | [sourceRepository.ts](lib/research/sourceRepository.ts) 保存短摘要/托管正文、片段 hash、修订、抓取时间，旧观察保留。 | 复用归一化语义；普通聊天使用自己的原会话快照，不能借用他人或虚构 Mission。 |
-| 普通 Focus 调查 | [toolAdapter.ts](lib/conversation/toolAdapter.ts) 仅提供项目检查、记忆检索、原资料读取、行动检查四项内部工具。 | 扩展 [调查合同](lib/types/agentExperience.ts) 和 [原循环](lib/conversation/investigationService.ts)，允许选择有界公开检索与来源读取。 |
-| 来源展示 | [fileGuides.ts](lib/conversation/fileGuides.ts) 支持内部记录、附件和成果；[会话 DTO](lib/types/conversation.ts) 尚无网页来源元数据。 | Web/ArkTS 同步支持外部来源，旧文件指引保留。 |
+| 搜索与正文读取 | [searchProvider.ts](../../../lib/research/searchProvider.ts) 已调用官方 `/v1/tools/search`、`/v1/tools/fetch`，请求限时 20 秒、响应限长，禁止认证重定向。 | 复用 HTTP 适配器，增加取消、调用元数据、费用与明确错误分类。 |
+| 搜索返回值 | [contracts.ts](../../../lib/research/contracts.ts) 目前保留 URL、标题、短摘要、日期、站点；长摘要和排序元数据被解析层舍弃。 | 保留有界 `summary`、`rerank_score`、`authority`；供应商评分只参与候选排序，不代表结论已证实。 |
+| 原长期委托 | [researchTools.ts](../../../lib/mission/tools/researchTools.ts) 已有 `web_search`、`web_fetch`，受 `MISSION_WEB_ENABLED`、版本化研究范围和原 Runner 控制。 | 提取可共用的查询/来源处理函数，保留原 Mission 调用与预算，不直接把 Mission 工具挂到聊天。 |
+| 查询隔离 | 查询生成只收到批准的公开主题、概念和公开来源；[queryPolicy.ts](../../../lib/research/queryPolicy.ts) 校验主题、排除词和公开 HTTPS URL。 | 保留隔离；私有聊天、附件、内部实验数值不进入搜索请求。关键词校验只是辅助，不能取代隔离输入。 |
+| 网页快照 | [sourceRepository.ts](../../../lib/research/sourceRepository.ts) 保存短摘要/托管正文、片段 hash、修订、抓取时间，旧观察保留。 | 复用归一化语义；普通聊天使用自己的原会话快照，不能借用他人或虚构 Mission。 |
+| 普通 Focus 调查 | [toolAdapter.ts](../../../lib/conversation/toolAdapter.ts) 仅提供项目检查、记忆检索、原资料读取、行动检查四项内部工具。 | 扩展 [调查合同](../../../lib/types/agentExperience.ts) 和 [原循环](../../../lib/conversation/investigationService.ts)，允许选择有界公开检索与来源读取。 |
+| 来源展示 | [fileGuides.ts](../../../lib/conversation/fileGuides.ts) 支持内部记录、附件和成果；[会话 DTO](../../../lib/types/conversation.ts) 尚无网页来源元数据。 | Web/ArkTS 同步支持外部来源，旧文件指引保留。 |
 
 官方现行文档确认已有两个独立 JSON 接口，因此“DeepSeek API 只能聊天、无法独立搜索”的旧经验不适用于当前版本。使用同一个官方密钥可以认证，不意味着普通聊天已经自动联网。[官方接口指南](https://api-docs.deepseek.com/guides/search/)
 
@@ -159,7 +159,7 @@ flowchart TD
 
 ### 长研究的持久推进与恢复
 
-现有 [POST turns](app/api/conversations/[id]/turns/route.ts) 等待 `submitConversationTurn` 执行；原 [turnService](lib/conversation/turnService.ts) 已保存 turn、幂等键、预占、停止标志与读回，超时中断标记 UNKNOWN/FAILED 并拒绝自动重发。这些机制不等于可在进程重启后从任意研究步骤续跑，PR-6A 必须补齐再扩大调查深度。
+现有 [POST turns](../../../app/api/conversations/[id]/turns/route.ts) 等待 `submitConversationTurn` 执行；原 [turnService](../../../lib/conversation/turnService.ts) 已保存 turn、幂等键、预占、停止标志与读回，超时中断标记 UNKNOWN/FAILED 并拒绝自动重发。这些机制不等于可在进程重启后从任意研究步骤续跑，PR-6A 必须补齐再扩大调查深度。
 
 - 接收输入与推进原 turn 分开：短请求持久接受并返回原 turnId；原执行器按 checkpoint 推进。调度层只领取/唤醒原 turn，不新建 Research Runner；Next.js 请求内未等待的 Promise 不能作为持久调度。
 - 使用数据库 lease / fencing / CAS 保证同 turn 同一推进者；消息发布、预算结算、步骤提交均校验执行代次、scopeRevision 和取消标记。部署时必须提供实际可用的推进服务与重启策略。
@@ -185,9 +185,9 @@ Web 与 ArkTS 使用同一来源 DTO 和可信绑定；正文内轻量编号，�
 
 “继续调查”绑定原 coverage/turn/scope 和新的有界预算选择；“为什么推荐”绑定原结论与证据；“进入项目验证”通过原 Mission/Action 预览与确认。外链 OPEN 从服务端原来源绑定读取地址，模型和客户端不上传任意跳转 URL。旧/撤权/已停止状态移除不适用操作，保留可读说明。
 
-研究总结先保存在原私有会话为有界草稿，保留结论、适用条件、冲突/未知、来源 manifest、读取级别和修订。用户预览确认后复用 [Artifact repository](lib/repositories/artifacts.ts) 写入原项目成果并原子保存回执；增加面向 Conversation 的归入适配器，绑定 owner、目标项目、草稿 hash、原读集、授权版本和幂等键。不能调用仅接受 Mission 的归入服务并伪造 outputId。
+研究总结先保存在原私有会话为有界草稿，保留结论、适用条件、冲突/未知、来源 manifest、读取级别和修订。用户预览确认后复用 [Artifact repository](../../../lib/repositories/artifacts.ts) 写入原项目成果并原子保存回执；增加面向 Conversation 的归入适配器，绑定 owner、目标项目、草稿 hash、原读集、授权版本和幂等键。不能调用仅接受 Mission 的归入服务并伪造 outputId。
 
-已有 Mission 研究输出继续使用 [原 Artifact 归入流程](lib/mission/artifactAdoptionService.ts)。两条入口共享原成果与确认语义；私有来源的公开可见范围在预览中明确，失去权限的源不得通过旧总结重新公开。后续修订创建原 Artifact 新版本，不覆盖旧研究依据。
+已有 Mission 研究输出继续使用 [原 Artifact 归入流程](../../../lib/mission/artifactAdoptionService.ts)。两条入口共享原成果与确认语义；私有来源的公开可见范围在预览中明确，失去权限的源不得通过旧总结重新公开。后续修订创建原 Artifact 新版本，不覆盖旧研究依据。
 
 ### Prompt V2 的研究职责
 

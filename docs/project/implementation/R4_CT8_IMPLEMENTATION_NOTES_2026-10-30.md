@@ -71,4 +71,4 @@
 
 ## 2026-10-31 独立整合审计补充
 
-状态与命令回执已改为同一原写事务，补充事件插入失败的回滚负例；保留条件化经验及真实结果资格规则。最终工程验证、UX3 整合与未完成外部 gate 见 [独立审计](planning/r4-post-ux2-implementation/R4_CT8_TO_CT10_INDEPENDENT_AUDIT_2026-10-31.md)。原实施计数是历史结果。
+状态与命令回执已改为同一原写事务，补充事件插入失败的回滚负例；保留条件化经验及真实结果资格规则。最终工程验证、UX3 整合与未完成外部 gate 见 [独立审计](../../../planning/r4-post-ux2-implementation/R4_CT8_TO_CT10_INDEPENDENT_AUDIT_2026-10-31.md)。原实施计数是历史结果。

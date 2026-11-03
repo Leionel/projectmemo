@@ -6,7 +6,7 @@
 - 项目委托页提供直接新建入口；创建页按目标、执行方式、可选时间与限制、可选公开研究分组。字段补充固定标题、单位和示例；日期/时间、优先级改为原生选择控件。沿用原约束、授权、版本校验和幂等提交。
 - 按后续要求，扩大全局记忆搜索框下分类文字的间距及点击区域。
 - 构建通过，鸿蒙测试 70/70。新签名包已增量安装，具体项目行动、资料、委托入口/表单和全局分类均已截图核对；没有创建有效委托或调用模型。
-- 证据：[本轮验收记录](evidence/pre-r4/20261022-action-mission-form/ACCEPTANCE.md)。签名包 SHA256：`57da83374ae712ed464c9e4f4b09d892709f82b7d04e775108fc22c15c09e1dc`。
+- 证据：[本轮验收记录](../../../evidence/pre-r4/20261022-action-mission-form/ACCEPTANCE.md)。签名包 SHA256：`57da83374ae712ed464c9e4f4b09d892709f82b7d04e775108fc22c15c09e1dc`。
 
 
 ## B1–B4 续做记录（2026-10-22，阶段基线）
@@ -42,7 +42,7 @@
 
 复用 `DesignTokens.ets` 的语义色、间距、字级和圆角，以及 `PMAppBar`、`AsyncStateView`、`MetricBadge`。早期语义修复没有新增按钮、卡片组件，也没有改动底层原生交互。
 
-页面路径：全局 `Index` 的焦点、项目、记忆、行动入口进入 `ProjectHome` 的对应项目页；焦点委托进入 `MissionDetail`，提醒进入 `InterventionDetail`；跨项目记忆带 `cardId` 进入项目资料卡，行动带 `actionId` 进入项目行动。17 视图的完整映射见 [审查文档](HARMONYOS_UI_AUDIT.md)。
+页面路径：全局 `Index` 的焦点、项目、记忆、行动入口进入 `ProjectHome` 的对应项目页；焦点委托进入 `MissionDetail`，提醒进入 `InterventionDetail`；跨项目记忆带 `cardId` 进入项目资料卡，行动带 `actionId` 进入项目行动。17 视图的完整映射见 [审查文档](../audits/HARMONYOS_UI_AUDIT.md)。
 
 ## 验证
 

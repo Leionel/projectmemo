@@ -81,7 +81,7 @@
 
 - 360/390/430vp，默认和至少一种放大字体；页面回退、筛选、搜索、键盘顶起、滚动、弹层和禁用状态。
 - 每个实际入口有截图或明确未验证记录；截图注明设备、vp、字号、主题和所装 HAP 哈希。
-- 各实现批次运行 `npm.cmd run harmony:build`；共用控件完成后运行 `npm.cmd run harmony:test`。最后核对差异并更新 `HARMONYOS_UI_AUDIT.md`、`HARMONYOS_UI_CHANGELOG.md`。
+- 各实现批次运行 `npm.cmd run harmony:build`；共用控件完成后运行 `npm.cmd run harmony:test`。最后核对差异并更新 `docs/project/audits/HARMONYOS_UI_AUDIT.md`、`docs/project/implementation/HARMONYOS_UI_CHANGELOG.md`。
 - 代码构建通过与参考视觉通过分别记录。网页参考在当前浏览器中打开本地文件曾被安全策略阻止，不绕过策略；目前依据 HTML 源码和自带预览图对照。
 
 ## 5. 当前执行记录
@@ -89,6 +89,6 @@
 - B1 顶栏、卡片、焦点和委托画面已得到用户“我觉得挺好”的反馈，作为后续风格基线。
 - B2/B3 已实现列表、资料、行动、成果、阅读、证据及设置调整；后续反馈要求撤回大标题、收紧层级，概览再次去重并将详细状态集中到展开区。
 - 附件增量任务已纳入：资料页常驻原件库，原件查看、图片预览、系统打开/保存和提取文本入口。失败、鉴权与缺失文件状态可分辨。
-- 70 项鸿蒙测试、6 项独立库 Web 回归和 HAP 构建通过。正常签名包与临时尺寸测试包分别留存，详见 `HARMONYOS_UI_CHANGELOG.md`。
+- 70 项鸿蒙测试、6 项独立库 Web 回归和 HAP 构建通过。正常签名包与临时尺寸测试包分别留存，详见 `docs/project/implementation/HARMONYOS_UI_CHANGELOG.md`。
 - B4 每项实际覆盖、截图与剩余设备边界见 `evidence/pre-r4/20261022-harmony-b2-b4/ACCEPTANCE.md`。PDF 实际阅读器、物理真机与平台验收单独记录。
 - 原工作区修改、签名配置和历史证据继续保留；本轮没有提交、推送或部署。

@@ -1,6 +1,6 @@
 # Focus Agent：长期项目协作的统一交互架构
 
-日期：2026-10-26 修订。面向产品负责人及开发者。实施顺序与验收见 [路线图](FOCUS_AGENT_ROADMAP.md)，实际交付见 [实施记录](FOCUS_AGENT_IMPLEMENTATION_NOTES.md)。
+日期：2026-10-26 修订。面向产品负责人及开发者。实施顺序与验收见 [路线图](../planning/FOCUS_AGENT_ROADMAP.md)，实际交付见 [实施记录](../implementation/FOCUS_AGENT_IMPLEMENTATION_NOTES.md)。
 
 > 2026-10-26：已实现首个 F1 + 协作窄切片及两端入口；真实模型质量和设备旅程尚未验收。下面代码能力矩阵保留初次规划快照，当前实现和实际差异以实施记录为准。
 
@@ -33,10 +33,10 @@
 
 | 依据 | 当前用途与判断 |
 | --- | --- |
-| [下一阶段实施计划](docs/FINAL/AGENT_REVIEW/NEXT_PHASE_IMPLEMENTATION_PLAN.md)及[实施记录](docs/FINAL/AGENT_REVIEW/NEXT_PHASE_IMPLEMENTATION_NOTES.md) | 前者保留旧设计并在页首指向最新实施记录；当前 P1-A 与 P2-A/B 窄域 E0 已有工程实现，真实效果和设备 Gate 尚有未完成项 |
-| [D1/D2 技术附录](docs/FINAL/AGENT_REVIEW/NEXT_PHASE_AGENT_DEEPENING_DESIGN.md) | D1/D2、E1、N6 仍为设计；复用其 purpose、局部 read-set、预算及 KEEP_PLAN 约束 |
-| [决策摘要](docs/FINAL/AGENT_REVIEW/NEXT_PHASE_DECISION_BRIEF.md)、[研究对照](docs/FINAL/AGENT_REVIEW/NEXT_PHASE_RESEARCH_RECONCILIATION.md)、[评测协议](docs/FINAL/AGENT_REVIEW/NEXT_PHASE_EVALUATION_PROTOCOL.md) | 明确 A/E 是保障，D1/D2 是能力深化；摘要开头“Phase 1–3 均未开发”已落后于最新实施记录，不据此重领 P1-A |
-| [旧演进路线](docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md) | 已标为历史研究，其中“Copilot 不含历史/Mission”等旧事实不能用于当前设计 |
+| [下一阶段实施计划](../../FINAL/AGENT_REVIEW/NEXT_PHASE_IMPLEMENTATION_PLAN.md)及[实施记录](../../FINAL/AGENT_REVIEW/NEXT_PHASE_IMPLEMENTATION_NOTES.md) | 前者保留旧设计并在页首指向最新实施记录；当前 P1-A 与 P2-A/B 窄域 E0 已有工程实现，真实效果和设备 Gate 尚有未完成项 |
+| [D1/D2 技术附录](../../FINAL/AGENT_REVIEW/NEXT_PHASE_AGENT_DEEPENING_DESIGN.md) | D1/D2、E1、N6 仍为设计；复用其 purpose、局部 read-set、预算及 KEEP_PLAN 约束 |
+| [决策摘要](../../FINAL/AGENT_REVIEW/NEXT_PHASE_DECISION_BRIEF.md)、[研究对照](../../FINAL/AGENT_REVIEW/NEXT_PHASE_RESEARCH_RECONCILIATION.md)、[评测协议](../../FINAL/AGENT_REVIEW/NEXT_PHASE_EVALUATION_PROTOCOL.md) | 明确 A/E 是保障，D1/D2 是能力深化；摘要开头“Phase 1–3 均未开发”已落后于最新实施记录，不据此重领 P1-A |
+| [旧演进路线](../../FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md) | 已标为历史研究，其中“Copilot 不含历史/Mission”等旧事实不能用于当前设计 |
 | 本文及路线图 | 新的统一交互层候选；不覆盖上述底层能力计划，也不将全部旧路线视为本轮开发授权 |
 
 本次现有隔离回归：`npm.cmd test -- tests/copilotPersistence.test.ts tests/copilotContinuation.test.ts tests/projectAgentContext.test.ts tests/globalFocusPresentation.test.ts`，4 文件、47 项通过。此结果验证当前复用基础，不构成拟议 Focus Agent 的实现或模型效果证据。
@@ -47,22 +47,22 @@
 
 | 能力 | 已有实现与代码依据 | Focus Agent 的实际缺口 |
 | --- | --- | --- |
-| 全局焦点 | [globalFocus.ts](lib/server/globalFocus.ts):11–53；每类查 7 条展示 6 条，记录查 4 展示 3；另查全量计数 | UI 摘要无问题路由、跨项目材料调查、长期会话 |
+| 全局焦点 | [globalFocus.ts](../../../lib/server/globalFocus.ts):11–53；每类查 7 条展示 6 条，记录查 4 展示 3；另查全量计数 | UI 摘要无问题路由、跨项目材料调查、长期会话 |
 | primaryContext | 同文件:37–39；按 waiting/running/reminders/actions 顺序去重，先截 6 个项目，再取项目 Context，以 priority、observedAt、ID 排序 | 未进入列表的项目不能参加比较；没有事项的项目也可能被漏掉。观察时间用于并列排序，不能解释为项目重要性 |
-| 项目下一步 | [projectAgentContextService.ts](lib/services/projectAgentContextService.ts):7 起；每生命周期一条、用户关注 Mission、提醒和行动；[选择器](lib/projectAgentContext.ts)稳定归并 | 是生命周期注意力投影，不是完整目标理解、资料覆盖或全局排名 |
-| 对话历史与上下文 | [copilotService.ts](lib/services/copilotService.ts):139–168、[agent.ts](lib/repositories/agent.ts):379–403；GET 最近 20 消息；模型取最近 12 个 ANSWERED 消息中的 6 条，每条最多 1000 字，另从这 12 条抽显式否决 | 已有有限多轮，缺会话 ID、长期约束、结构化指代、独立主题和跨项目历史 |
-| 消息/调用归属 | [schema.prisma](prisma/schema.prisma):300–372；AgentMessage、AgentRun 的 projectId 均必填；消息 ownerUserId 可空 | 不能用某个项目承载整个工作区；旧无 owner 消息不能猜归属或直接并入用户私聊 |
-| 来源与 Claim | Copilot 复用 hybridSearch、Temporal Ledger、TrustReceipt 及可选语义核验；[prompts.ts](lib/agent/prompts.ts):20 起；[claimVerifier.ts](lib/mission/claimVerifier.ts)按原文范围核验 Mission 输出 | 不能把卡 ID 换成任意项目 ID 就获得跨项目核验；需统一带 projectId 的来源信封及类型分派 |
-| 操作预览/确认 | [confirmation.ts](lib/copilot/confirmation.ts)冻结 CopilotToolExecution、来源 manifest、载荷 hash，事务消费/重放；成果生成在事务外 | 新会话需冻结目标对象和选项次序；不能只沿用 title 作为自然语言方案身份 |
-| 行动与成果 | Copilot 主要提出 create_action / generate_artifact；[actionService.ts](lib/services/actionService.ts)完成行动并原子保存 resultCardId；[artifactService.ts](lib/services/artifactService.ts)生成成果 | 缺会话到原对象的结果链接；Action 完成服务还需适配 actor、局部版本与确认载荷的事务校验，不能认为所有写服务已经满足新入口要求 |
-| 转 Mission | [continuation.ts](lib/copilot/continuation.ts):26–105、214 起；关键词识别明确任务；有活动 Mission 就建议打开，创建需 preview/confirm | 不是基于目标语义的任务匹配，不能准确执行“继续刚才那个”“第一种方案” |
-| Mission Runtime | [runner.ts](lib/mission/runner.ts)、[runtimeStore.ts](lib/mission/runtimeStore.ts)、[missionService.ts](lib/mission/missionService.ts)具备逐步选工具、租约、预算、命令、步骤/事件/输出 | 复用执行核心；增加适配器，不新增会话任务引擎 |
-| 资料接续/E0/读回 | [continuationService.ts](lib/mission/continuationService.ts)、[evidenceFitService.ts](lib/mission/evidenceFitService.ts)、[materialUseProjection.ts](lib/mission/materialUseProjection.ts)、[readback.ts](lib/mission/readback.ts) | 已支持关联/核对及同对象阅读；Focus 需要在对话内呈现原表单/回执；E0 默认开关关闭，窄域实现不是通用适用性推理 |
-| 主动发现 | [questions.ts](lib/decision/questions.ts):36 起：WAITING_INPUT 或显式受影响 PAUSED；有 UNKNOWN/LATER/STOP、个人偏好和打扰预算；[impactJobs.ts](lib/decision/impactJobs.ts)消费显式依赖变化 | 当前 GoalQuestion 不是任意新未知发现器；全局焦点还排除 goal: 提醒。需结构化入口，不能抓提醒文本作新聊天事实 |
-| 方案选择 | [scenarios.ts](lib/decision/scenarios.ts):20–50、90 起；BASELINE/VERIFY_FIRST/DELIVER_FIRST、冻结快照、同 Mission 采用/拒绝 | 当前不是项目特定动态规划；D2 将扩 purpose 和 V2 schema，Focus 只引用其提案 |
-| 经验/感知 | [experience](lib/experience/service.ts)、[trajectoryIndex.ts](lib/experience/trajectoryIndex.ts)、[repoSource.ts](lib/sensing/repoSource.ts) | 经验为建议，采纳仓库信号生成 Capture，不自动完成行动、建立支持关系或产生新结论 |
-| Web/鸿蒙 | [FocusPage](app/focus/page.tsx)、[样式](components/FocusDashboard.module.css)、[GlobalFocusPanel](harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets)、[CopilotService](harmonyos/entry/src/main/ets/services/CopilotService.ets) | 两端已有同后端和业务 DTO；缺会话/事件/提案的共享协议，不能复用 TSX 到 ArkTS |
-| 模型额度 | [cloudQuota.ts](lib/auth/cloudQuota.ts):10 起和[llmAgent.ts](lib/agent/llmAgent.ts):13 起；按项目 Owner 扣次，projectId 为空直接返回 | 用户级对话须新增明确 billing actor；不能省略 projectId 绕额度，也不能随意选一个项目给其他 Owner 计费 |
+| 项目下一步 | [projectAgentContextService.ts](../../../lib/services/projectAgentContextService.ts):7 起；每生命周期一条、用户关注 Mission、提醒和行动；[选择器](../../../lib/projectAgentContext.ts)稳定归并 | 是生命周期注意力投影，不是完整目标理解、资料覆盖或全局排名 |
+| 对话历史与上下文 | [copilotService.ts](../../../lib/services/copilotService.ts):139–168、[agent.ts](../../../lib/repositories/agent.ts):379–403；GET 最近 20 消息；模型取最近 12 个 ANSWERED 消息中的 6 条，每条最多 1000 字，另从这 12 条抽显式否决 | 已有有限多轮，缺会话 ID、长期约束、结构化指代、独立主题和跨项目历史 |
+| 消息/调用归属 | [schema.prisma](../../../prisma/schema.prisma):300–372；AgentMessage、AgentRun 的 projectId 均必填；消息 ownerUserId 可空 | 不能用某个项目承载整个工作区；旧无 owner 消息不能猜归属或直接并入用户私聊 |
+| 来源与 Claim | Copilot 复用 hybridSearch、Temporal Ledger、TrustReceipt 及可选语义核验；[prompts.ts](../../../lib/agent/prompts.ts):20 起；[claimVerifier.ts](../../../lib/mission/claimVerifier.ts)按原文范围核验 Mission 输出 | 不能把卡 ID 换成任意项目 ID 就获得跨项目核验；需统一带 projectId 的来源信封及类型分派 |
+| 操作预览/确认 | [confirmation.ts](../../../lib/copilot/confirmation.ts)冻结 CopilotToolExecution、来源 manifest、载荷 hash，事务消费/重放；成果生成在事务外 | 新会话需冻结目标对象和选项次序；不能只沿用 title 作为自然语言方案身份 |
+| 行动与成果 | Copilot 主要提出 create_action / generate_artifact；[actionService.ts](../../../lib/services/actionService.ts)完成行动并原子保存 resultCardId；[artifactService.ts](../../../lib/services/artifactService.ts)生成成果 | 缺会话到原对象的结果链接；Action 完成服务还需适配 actor、局部版本与确认载荷的事务校验，不能认为所有写服务已经满足新入口要求 |
+| 转 Mission | [continuation.ts](../../../lib/copilot/continuation.ts):26–105、214 起；关键词识别明确任务；有活动 Mission 就建议打开，创建需 preview/confirm | 不是基于目标语义的任务匹配，不能准确执行“继续刚才那个”“第一种方案” |
+| Mission Runtime | [runner.ts](../../../lib/mission/runner.ts)、[runtimeStore.ts](../../../lib/mission/runtimeStore.ts)、[missionService.ts](../../../lib/mission/missionService.ts)具备逐步选工具、租约、预算、命令、步骤/事件/输出 | 复用执行核心；增加适配器，不新增会话任务引擎 |
+| 资料接续/E0/读回 | [continuationService.ts](../../../lib/mission/continuationService.ts)、[evidenceFitService.ts](../../../lib/mission/evidenceFitService.ts)、[materialUseProjection.ts](../../../lib/mission/materialUseProjection.ts)、[readback.ts](../../../lib/mission/readback.ts) | 已支持关联/核对及同对象阅读；Focus 需要在对话内呈现原表单/回执；E0 默认开关关闭，窄域实现不是通用适用性推理 |
+| 主动发现 | [questions.ts](../../../lib/decision/questions.ts):36 起：WAITING_INPUT 或显式受影响 PAUSED；有 UNKNOWN/LATER/STOP、个人偏好和打扰预算；[impactJobs.ts](../../../lib/decision/impactJobs.ts)消费显式依赖变化 | 当前 GoalQuestion 不是任意新未知发现器；全局焦点还排除 goal: 提醒。需结构化入口，不能抓提醒文本作新聊天事实 |
+| 方案选择 | [scenarios.ts](../../../lib/decision/scenarios.ts):20–50、90 起；BASELINE/VERIFY_FIRST/DELIVER_FIRST、冻结快照、同 Mission 采用/拒绝 | 当前不是项目特定动态规划；D2 将扩 purpose 和 V2 schema，Focus 只引用其提案 |
+| 经验/感知 | [experience](../../../lib/experience/service.ts)、[trajectoryIndex.ts](../../../lib/experience/trajectoryIndex.ts)、[repoSource.ts](../../../lib/sensing/repoSource.ts) | 经验为建议，采纳仓库信号生成 Capture，不自动完成行动、建立支持关系或产生新结论 |
+| Web/鸿蒙 | [FocusPage](../../../app/focus/page.tsx)、[样式](../../../components/FocusDashboard.module.css)、[GlobalFocusPanel](../../../harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets)、[CopilotService](../../../harmonyos/entry/src/main/ets/services/CopilotService.ets) | 两端已有同后端和业务 DTO；缺会话/事件/提案的共享协议，不能复用 TSX 到 ArkTS |
+| 模型额度 | [cloudQuota.ts](../../../lib/auth/cloudQuota.ts):10 起和[llmAgent.ts](../../../lib/agent/llmAgent.ts):13 起；按项目 Owner 扣次，projectId 为空直接返回 | 用户级对话须新增明确 billing actor；不能省略 projectId 绕额度，也不能随意选一个项目给其他 Owner 计费 |
 
 核心差距是会话身份、问题驱动观察、对象绑定、事件接入和结果连续性。新增 Prompt 无法补齐这五个持久化和权限边界。
 
@@ -159,7 +159,7 @@ flowchart LR
 
 **L2 定向深入**：路由模型最多提出 3 个项目和各自读取目的，服务器校验并执行最多 6 次本地读取、总计最多 12 个来源片段。状态问题用结构化 SQL；为什么暂停用指定 Mission events/错误及相关修订；历史决定按时间、原决定 ID 定向读取；证据问题用项目记忆检索并按需读取 Capture/附件/成果。
 
-复用 [searchMissionMemory](lib/mission/memorySearch.ts)、[readProjectMaterial](lib/mission/sourceSignals.ts)、Mission detail/events/readback 及 Ledger。必须保留现标题/摘要匹配、归档定向读取、分页及成果附带上限；中文同义匹配失败要记录，不把它当完整语义检索。原工具的 Actor.projectId 由服务器逐项目构造，不接客户端伪造的 actor。
+复用 [searchMissionMemory](../../../lib/mission/memorySearch.ts)、[readProjectMaterial](../../../lib/mission/sourceSignals.ts)、Mission detail/events/readback 及 Ledger。必须保留现标题/摘要匹配、归档定向读取、分页及成果附带上限；中文同义匹配失败要记录，不把它当完整语义检索。原工具的 Actor.projectId 由服务器逐项目构造，不接客户端伪造的 actor。
 
 只读工具入口的复用方式是调用同一实现及 effects/schema/来源校验，不直接暴露 projectTools 整个注册表：save_mission_output 等即便 effects 标为 readEffects，仍属于任务成果流程，不能进入 workspace 只读白名单。外部网络读取也有 disclosure 和费用边界，不因“只读”自动获准。
 
@@ -304,7 +304,7 @@ UNKNOWN 代表请求是否完成或计费尚未确定，不能因刷新自动重
 
 ## 9. Web、移动端与 HarmonyOS 信息架构
 
-已检查当前 Focus/Copilot 源码，并视觉查看 2026-10-22 的 [Web 桌面存档](evidence/pre-r4/20261022-focus-final/projectmemo-focus-desktop.png)、[移动存档](evidence/pre-r4/20261022-focus-final/projectmemo-focus-mobile.png)、[鸿蒙存档](evidence/pre-r4/20261022-harmony-reference-v2/user-b1-focus.png)。截图用于理解既有密度与视觉，不作为当前 HEAD 的运行验收。
+已检查当前 Focus/Copilot 源码，并视觉查看 2026-10-22 的 [Web 桌面存档](../../../evidence/pre-r4/20261022-focus-final/projectmemo-focus-desktop.png)、[移动存档](../../../evidence/pre-r4/20261022-focus-final/projectmemo-focus-mobile.png)、[鸿蒙存档](../../../evidence/pre-r4/20261022-harmony-reference-v2/user-b1-focus.png)。截图用于理解既有密度与视觉，不作为当前 HEAD 的运行验收。
 
 ### 9.1 桌面 Web
 
@@ -326,7 +326,7 @@ UNKNOWN 代表请求是否完成或计费尚未确定，不能因刷新自动重
 
 顶部显示当前项目/跨项目范围；切换范围通过可回退选择器，不静默覆盖旧会话。长方案每屏一项，可横向/逐项切换，确认前展开目标对象、影响和来源；底部动作避开系统安全区。来源用阅读页/面板，关闭回同消息。离线显示最后观察时间和未同步草稿，写确认必须联网重验。
 
-鸿蒙拟 `FocusConversation.ets` 页面、`FocusAgentEntry.ets` 组件、`ConversationService.ets` 与 `models/Conversation.ets`；沿用 [DesignTokens](harmonyos/entry/src/main/ets/common/DesignTokens.ets)、PMButton/PMStatusPill、ApiClient、会话过期广播、generation 防迟到模式。注册 pages 路由，ProjectHome/MissionDetail 增返回锚。共享服务端 DTO 的语义与测试夹具，ArkTS 使用具名 class/interface，模型调用、方案判断和权限不落客户端。
+鸿蒙拟 `FocusConversation.ets` 页面、`FocusAgentEntry.ets` 组件、`ConversationService.ets` 与 `models/Conversation.ets`；沿用 [DesignTokens](../../../harmonyos/entry/src/main/ets/common/DesignTokens.ets)、PMButton/PMStatusPill、ApiClient、会话过期广播、generation 防迟到模式。注册 pages 路由，ProjectHome/MissionDetail 增返回锚。共享服务端 DTO 的语义与测试夹具，ArkTS 使用具名 class/interface，模型调用、方案判断和权限不落客户端。
 
 360/390/768 宽度、130% 字体、软键盘、深色、读屏和冷启动需独立验收；构建、模拟器、真实设备及生产后端可达分别记录。
 

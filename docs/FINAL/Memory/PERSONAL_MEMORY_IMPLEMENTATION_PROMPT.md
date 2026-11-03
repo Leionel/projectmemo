@@ -19,7 +19,7 @@
    - `docs/FINAL/Memory/MEMORY_AGENT_INTEGRATION.md`
    - `docs/FINAL/Memory/MEMORY_PRODUCT_UX_DESIGN.md`
    - `docs/FINAL/Memory/PERSONAL_MEMORY_ROADMAP.md`
-3. 核对 `R4_AGENT_UX_IMPLEMENTATION_NOTES.md` 的 UX-2/3 完整实施段、CT-8～10 独立审计、最新 UI 交接文档与当前验收证据。
+3. 核对 `docs/project/implementation/R4_AGENT_UX_IMPLEMENTATION_NOTES.md` 的 UX-2/3 完整实施段、CT-8～10 独立审计、最新 UI 交接文档与当前验收证据。
 4. 当前可能有其他会话正在修改 ProjectHome、Health/Impact/State 组件或文档。不要 reset、stash、清空或顺手提交它们。
 5. 推荐从当前核对过的已提交基线创建独立 worktree，分支前缀 `codex/`，如 `codex/personal-memory-explicit`。路径已存在时先检查归属；不要覆盖。规划若被 docs 忽略规则排除，显式读取本工作树提供的文件，不为拿到它们批量复制未提交内容。
 

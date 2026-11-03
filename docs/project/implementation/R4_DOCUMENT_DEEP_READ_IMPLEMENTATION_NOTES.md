@@ -33,4 +33,4 @@ CT-5/6 尚未交付：CT-5 先完成 CSV/JSON 条件比较及原来源回读，�
 
 ## CT-5/6 接续更新（2026-10-29）
 
-上述CT-5/6未交付和Docker不可用是本检查点历史状态。后续原工具集、获批真实容器、论文元数据及双端接入见 `R4_EXPERIMENT_ACADEMIC_IMPLEMENTATION_NOTES.md`。新的Conversation回合已缩小可用工具schema并保留动态调查，QUICK新回合输入预算48k、耗尽保留已读来源；旧Turn预算与UNKNOWN没有改写。旧QUICK完整答案质量失败记录保留，尚不将工程修复视为该质量用例PASS。
+上述CT-5/6未交付和Docker不可用是本检查点历史状态。后续原工具集、获批真实容器、论文元数据及双端接入见 `docs/project/implementation/R4_EXPERIMENT_ACADEMIC_IMPLEMENTATION_NOTES.md`。新的Conversation回合已缩小可用工具schema并保留动态调查，QUICK新回合输入预算48k、耗尽保留已读来源；旧Turn预算与UNKNOWN没有改写。旧QUICK完整答案质量失败记录保留，尚不将工程修复视为该质量用例PASS。

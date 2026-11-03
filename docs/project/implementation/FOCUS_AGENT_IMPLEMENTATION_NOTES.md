@@ -103,7 +103,7 @@ D1/D2由默认关闭的 `GOAL_CHANGE_REVIEW_ENABLED` 控制。迁移扩展原Dec
 
 原定下一步是先关闭精确 token 预算和真实模型/设备门槛。用户随后明确继续 F2，故本轮在保留这些门槛的同时实现下述本地协作适配；不将工程回归等同于阶段签收。
 
-[本轮验收回执](evidence/focus-agent/F1/20261026-local/ACCEPTANCE.json)记录检查、截图与HAP哈希；旧未提交文件最终哈希均保持不变。业务功能未部署，提交/推送未执行。
+[本轮验收回执](../../../evidence/focus-agent/F1/20261026-local/ACCEPTANCE.json)记录检查、截图与HAP哈希；旧未提交文件最终哈希均保持不变。业务功能未部署，提交/推送未执行。
 
 ## F2 本地协作与 Demo UI · 2026-10-26
 

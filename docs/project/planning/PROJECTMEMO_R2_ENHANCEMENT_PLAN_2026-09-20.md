@@ -2,7 +2,7 @@
 
 版本：V1.0｜日期：2026-09-20｜状态：实施方案，不代表对应代码、设备或外部平台验收已经完成。
 
-关联总方案：[ProjectMemo 九项能力完善方案](PROJECTMEMO_IMPROVEMENT_PLAN_2026-09-14.md)。实际完成情况继续记录到 [ProjectMemo 完善实施记录](PROJECTMEMO_IMPROVEMENT_NOTES_2026-09-14.md)。
+关联总方案：[ProjectMemo 九项能力完善方案](../../../PROJECTMEMO_IMPROVEMENT_PLAN_2026-09-14.md)。实际完成情况继续记录到 [ProjectMemo 完善实施记录](../../../PROJECTMEMO_IMPROVEMENT_NOTES_2026-09-14.md)。
 
 ## 1. 结论先行
 

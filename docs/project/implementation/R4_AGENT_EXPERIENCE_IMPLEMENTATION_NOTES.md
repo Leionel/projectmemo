@@ -14,7 +14,7 @@
 
 ## 2026-10-27 PR-6 范围补充 · 问忆程联网研究 v2
 
-用户在 PR-5 提交 `bf7ca1a` 后要求调研联网搜索，并明确“加入 PR-6”。已核对现有 DeepSeek Search/Fetch、原 Mission 研究工具、Focus 动态调查与官方接口/价格，方案见 [PR-6 联网搜索接入调研与范围](R4_PR6_WEB_RESEARCH_PLAN.md)。首选复用原 Provider，在原 Conversation 增加公开范围授权、按需搜索/原文读取、回答内引用与同会话来源回读；与原主动事件筛选、授权观察和双端验收一起交付。
+用户在 PR-5 提交 `bf7ca1a` 后要求调研联网搜索，并明确“加入 PR-6”。已核对现有 DeepSeek Search/Fetch、原 Mission 研究工具、Focus 动态调查与官方接口/价格，方案见 [PR-6 联网搜索接入调研与范围](../planning/R4_PR6_WEB_RESEARCH_PLAN.md)。首选复用原 Provider，在原 Conversation 增加公开范围授权、按需搜索/原文读取、回答内引用与同会话来源回读；与原主动事件筛选、授权观察和双端验收一起交付。
 
 收到用户提供的联网搜索审查后，补充 ResearchCoverage 与多查询迭代、用户 URL 登记读取、阅读层级与生效时态、原 turn 持久推进/断线重启/UNKNOWN 预占、原研究 UI 和确认归入 Artifact、六项逻辑 Prompt 职责，以及原 12 开发题之外至少 24 道独立覆盖题。四次外部请求是总预算，不固定为两搜索两 Fetch；后续 PDF 深读/论文与代码专用检索/第二 Provider 由覆盖实测决定。Prompt、UI、评测及追踪文档已同步为待实施合同。
 
@@ -65,7 +65,7 @@ ArkTS 原生渲染十种共享语义块：有限富文本、目标差距、依�
 
 鸿蒙 **86/86 测试通过**，最终原配置的 HAP 主编译通过；开发地址签名 HAP 已覆盖安装到用户打开的模拟器。模拟器连接专用临时 SQLite 与本机 4400 后端：真实模型的三领域历史来自 PR-3 合成库副本，额外 UI 数据明确为 HTTP stub，手机验收新增模型调用 0。个人数据库和签名配置未提交。
 
-已实际操作：确认原位转回执、查看原行动、结果草稿关闭重开/新消息到达/页面返回、合法资料变化调查入口、系统深色模式与放大字。首次陈旧 UI 和截图工具未覆盖旧文件的原记录保留，最终有效截图另命名。键盘弹出、全套读屏、所有十种块的目标真机交互和生产 ECS 尚未签收。详情见 [PR-4 验收回执](evidence/r4-agent-experience/20261026-pr3-pr4/pr4-validation.json)。
+已实际操作：确认原位转回执、查看原行动、结果草稿关闭重开/新消息到达/页面返回、合法资料变化调查入口、系统深色模式与放大字。首次陈旧 UI 和截图工具未覆盖旧文件的原记录保留，最终有效截图另命名。键盘弹出、全套读屏、所有十种块的目标真机交互和生产 ECS 尚未签收。详情见 [PR-4 验收回执](../../../evidence/r4-agent-experience/20261026-pr3-pr4/pr4-validation.json)。
 
 下一步 PR-5：D1/D2、Mission、Capture、Artifact、旧 Copilot 的专责 Prompt 与对应真实业务覆盖；随后 PR-6 做独立留出集、用户决策成本和目标设备/生产验收。
 
@@ -77,7 +77,7 @@ ArkTS 原生渲染十种共享语义块：有限富文本、目标差距、依�
 
 ### 本轮真实模型结果
 
-DeepSeek / deepseek-flash，冻结三条新合成开发输入，独立临时 SQLite，**48/48 次实际 HTTP**。原响应、哈希、调用序号、失败和效果保存在 [本轮实模证据](evidence/r4-agent-experience/20261026-pr3-pr4/real-model/summary.json)。这是开发闭环，不是独立质量评分。
+DeepSeek / deepseek-flash，冻结三条新合成开发输入，独立临时 SQLite，**48/48 次实际 HTTP**。原响应、哈希、调用序号、失败和效果保存在 [本轮实模证据](../../../evidence/r4-agent-experience/20261026-pr3-pr4/real-model/summary.json)。这是开发闭环，不是独立质量评分。
 
 | 领域 | 本轮结果 |
 |---|---|

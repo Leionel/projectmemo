@@ -6,7 +6,7 @@
 
 输入为 `docs/FINAL/tool&function/` 下三份指定基线，已阅读全文。另发现 `docs/FINAL/AGENT_REVIEW/projectmemo_r4/` 下同名 R4 v1.2：后者增加 PR-6 Search/Fetch 和覆盖/恢复补充，主体相同。此补充及根目录最新 PR-6 文档共同纳入，没有覆盖任何原文。两个同名文件 SHA256 分别为 `5dae8fad4476f371b17682e46c21183f08396e2352659209b3ac15b46f2f4f04` 和 `b8668949ed7bd15c0848bf394dea45140d83e29ae55f04b1d39507b6dd682b02`。
 
-已读根目录 `AGENTS.md`、`R4_AGENT_EXPERIENCE_IMPLEMENTATION_NOTES.md`、`R4_PR6_WEB_RESEARCH_PLAN.md`、Prompt/UI/评测合同、PR-6 checkpoint、相关 Prisma/服务/API/双端类型及测试源码。原工作树有四个已跟踪修改：`AGENTS.md`、`docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md`、`harmonyos/build-profile.json5`、`tsconfig.json`；另有大量历史证据和未跟踪文件。均保留。
+已读根目录 `AGENTS.md`、`docs/project/implementation/R4_AGENT_EXPERIENCE_IMPLEMENTATION_NOTES.md`、`docs/project/planning/R4_PR6_WEB_RESEARCH_PLAN.md`、Prompt/UI/评测合同、PR-6 checkpoint、相关 Prisma/服务/API/双端类型及测试源码。原工作树有四个已跟踪修改：`AGENTS.md`、`docs/FINAL/AGENT_REVIEW/AGENT_EVOLUTION_ROADMAP.md`、`harmonyos/build-profile.json5`、`tsconfig.json`；另有大量历史证据和未跟踪文件。均保留。
 
 本文 `CODE_VERIFIED` 指静态源码与调用链已核对；`RECORDED_TEST` 指旧回执记录；`INFERENCE` 指由代码推导但尚未运行的风险；`PROPOSED` 指本方案增量。**没有把测试文件存在称为本轮测试通过。**
 

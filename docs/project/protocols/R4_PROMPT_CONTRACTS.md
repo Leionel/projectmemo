@@ -2,7 +2,7 @@
 
 ## PR-6 研究职责补充（已接入，质量待验收，2026-10-27）
 
-联网研究按 [PR-6 方案 v2](R4_PR6_WEB_RESEARCH_PLAN.md) 接入原调查。以下名称是逻辑职责；查询隔离由 `focus.public_query.v1` 执行，其余复用 `focus.route.v2` / `focus.investigate.v1` / `focus.answer.v2` / `focus.ui_plan.v1`。不为每项职责增加一次调用。实际验收进展见实施记录的 PR-6 检查点。
+联网研究按 [PR-6 方案 v2](../planning/R4_PR6_WEB_RESEARCH_PLAN.md) 接入原调查。以下名称是逻辑职责；查询隔离由 `focus.public_query.v1` 执行，其余复用 `focus.route.v2` / `focus.investigate.v1` / `focus.answer.v2` / `focus.ui_plan.v1`。不为每项职责增加一次调用。实际验收进展见实施记录的 PR-6 检查点。
 
 | 职责 | 合同与原落点 |
 |---|---|

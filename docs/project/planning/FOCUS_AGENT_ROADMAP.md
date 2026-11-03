@@ -1,6 +1,6 @@
 # Focus Agent 实施路线：从跨项目对话到原任务闭环
 
-日期：2026-10-26 修订。面向开发者与验收负责人。架构合同见 [FOCUS_AGENT_ARCHITECTURE.md](FOCUS_AGENT_ARCHITECTURE.md)，实际状态见 [实施记录](FOCUS_AGENT_IMPLEMENTATION_NOTES.md)。
+日期：2026-10-26 修订。面向开发者与验收负责人。架构合同见 [FOCUS_AGENT_ARCHITECTURE.md](../architecture/FOCUS_AGENT_ARCHITECTURE.md)，实际状态见 [实施记录](../implementation/FOCUS_AGENT_IMPLEMENTATION_NOTES.md)。
 
 当前处于 **F3（第三阶段）收尾验收**。F1全局会话、F2原对象协作和F3有界D1/D2已有实现；真实模型提案经确认后由原Runner读取资料、同会话投影及Web/实际ArkTS服务同对象读回已完成隔离旅程。独立质量评审、5名目标用户、实际设备跨端旅程及供应商精确输入分词预算仍未签收，不能据此标完整F3完成。以下初始裁决与阶段基线保留用于追溯，不能按旧表重复开发。
 
@@ -18,7 +18,7 @@
 | --- | --- |
 | 分支/HEAD | `codex/r3-runtime-research` / `7f7582ad6cb92b328f18b72b3d26759a824f72f9` |
 | 既存修改 | AGENTS、旧演进路线、鸿蒙签名配置、Next/TS 生成配置等保留；不纳入本方案代码包 |
-| 有效底层进度 | [实施计划](docs/FINAL/AGENT_REVIEW/NEXT_PHASE_IMPLEMENTATION_PLAN.md)及[实施记录](docs/FINAL/AGENT_REVIEW/NEXT_PHASE_IMPLEMENTATION_NOTES.md)：P1-A、P2-A/B 窄域 E0 有实现，D1/D2/E1/N6 未实施 |
+| 有效底层进度 | [实施计划](../../FINAL/AGENT_REVIEW/NEXT_PHASE_IMPLEMENTATION_PLAN.md)及[实施记录](../../FINAL/AGENT_REVIEW/NEXT_PHASE_IMPLEMENTATION_NOTES.md)：P1-A、P2-A/B 窄域 E0 有实现，D1/D2/E1/N6 未实施 |
 | 初次规划验证 | 2026-10-25 的47项现有隔离回归；本次实施结果见实施记录 |
 | 前序文档处理 | 保留原计划/研究；Focus 作为统一交互层增量。旧决策摘要的“先做 P1-A”需按现进度理解，不能重复开发 |
 
@@ -163,7 +163,7 @@ F2 完成门槛是“在同会话推进原对象并看到实际结果”，不�
 
 原方案次序冻结在会话消息的 `options` 与 `ConversationBinding`，自然语言“选第一种”只生成明确提案。新命令复用 `CopilotToolExecution.proposalJson` 保存版本化信封，冻结原对象、命令载荷、局部版本、会话限制及15分钟有效期；本批没有增加重复的业务状态表，也没有新增 Prisma 列。后续需要按信封字段检索时再提升为可空列。
 
-F2 工程进度与阶段签收分开记录。真实模型12段协作、必要新任务的语义匹配、精确累计 token 预占及设备冷启动旅程仍按原门槛验收；本批规则/脚本测试不能关闭这些门槛。具体代码、验证结果与 UI 截图见 [实施记录](FOCUS_AGENT_IMPLEMENTATION_NOTES.md)。
+F2 工程进度与阶段签收分开记录。真实模型12段协作、必要新任务的语义匹配、精确累计 token 预占及设备冷启动旅程仍按原门槛验收；本批规则/脚本测试不能关闭这些门槛。具体代码、验证结果与 UI 截图见 [实施记录](../implementation/FOCUS_AGENT_IMPLEMENTATION_NOTES.md)。
 
 ## 5. Phase F3：主动发现、D2 反馈与对话闭环
 
@@ -186,7 +186,7 @@ F2 工程进度与阶段签收分开记录。真实模型12段协作、必要新
 
 ### 5.3 模型、预算和权限
 
-D1 单相关事件批≤1 次模型决策；D2≤2 次决策+2 次只读工具，最多两轮前提分析/反馈，沿 [D1/D2 附录](docs/FINAL/AGENT_REVIEW/NEXT_PHASE_AGENT_DEEPENING_DESIGN.md)的根 reviewKey、预占、未知调用和停止约束。会话显示这些已有结果不额外生成模型复述。
+D1 单相关事件批≤1 次模型决策；D2≤2 次决策+2 次只读工具，最多两轮前提分析/反馈，沿 [D1/D2 附录](../../FINAL/AGENT_REVIEW/NEXT_PHASE_AGENT_DEEPENING_DESIGN.md)的根 reviewKey、预占、未知调用和停止约束。会话显示这些已有结果不额外生成模型复述。
 
 同一个用户追问若可读取现有分析就直接引用，不再创建同 read-set 的分析；确需新增 Focus 合成调用则消费根协作预算，不能分别用满 turn、D1、D2 上限。后台分析必须有项目/目标、资料范围、期限与次数/费用策略；llmContextApproved 不是无限后台授权。
 
@@ -279,7 +279,7 @@ D1 单相关事件批≤1 次模型决策；D2≤2 次决策+2 次只读工具�
 
 建议代码领取顺序：F1-A 单纵向 → F1 边界补齐与真实验收 → F2-A/B/C 原 Mission 接续 → F2-D/E 结果回流 → F3 Anchor + D1 → D2/N6 反馈闭环。D1/D2 的服务深化可独立推进，但接口需共同采用 qualified ref、proposal purpose/candidate、局部版本和预算合同。
 
-实施记录已建立于 [FOCUS_AGENT_IMPLEMENTATION_NOTES.md](FOCUS_AGENT_IMPLEMENTATION_NOTES.md)，保存实际 diff、命令结果、模型/设备证据和 Deviations。当前未改变 A/E/D1/D2 判断逻辑；只为原 Mission 命令提取同事务入口。
+实施记录已建立于 [FOCUS_AGENT_IMPLEMENTATION_NOTES.md](../implementation/FOCUS_AGENT_IMPLEMENTATION_NOTES.md)，保存实际 diff、命令结果、模型/设备证据和 Deviations。当前未改变 A/E/D1/D2 判断逻辑；只为原 Mission 命令提取同事务入口。
 
 ## 8. 验证命令与证据交接
 

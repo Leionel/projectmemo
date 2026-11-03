@@ -1,6 +1,6 @@
 # ProjectMemo 开发与运行说明
 
-产品体验入口见 [README](README.md)，开发约定见 [AGENTS.md](AGENTS.md)。环境变量以 [.env.example](.env.example) 为准。改版前 README 保留在 [原文留档](docs/development/README_ARCHIVE_2026-10-22.md)，旧能力状态不作为当前验收结果。
+产品体验入口见 [README](../../../README.md)，开发约定见 [AGENTS.md](../../../AGENTS.md)。环境变量以 [.env.example](../../../.env.example) 为准。改版前 README 保留在 [原文留档](../../development/README_ARCHIVE_2026-10-22.md)，旧能力状态不作为当前验收结果。
 
 ## 本地数据与账号
 
@@ -46,11 +46,11 @@ unsigned HAP、本地 Hypium、模拟器交互、真机安装与系统通知分�
 
 ## 部署与专项说明
 
-- [ECS 日常更新命令与失败恢复](deploy/alibaba-cloud-linux/README.md#更新发布已部署机器)：使用 root heredoc、`mktemp` 和目标提交中的 `safe-update.sh`。
-- [Focus Agent 开关与功能验收](deploy/alibaba-cloud-linux/FOCUS_UPDATE.md)：代码更新后另行启用两个开关、重启并核对；鸿蒙还需安装新版 HAP。
-- [ECS、后端、小艺与 HAP 执行手册](docs/competition/projectmemo-ecs-backend-xiaoyi-hap-runbook.md)
-- [复赛放行清单](REMATCH_SUBMISSION_GATE_2026-09-14.md)
-- [Pre-R4 UX 实施记录](docs/FINAL/实施规划/PRE_R4_UX_IMPLEMENTATION_NOTES.md)
-- [本轮 Web、导航与卡片核查](docs/FINAL/实施规划/WEB_UI_REFINEMENT_2026-10-22.md)
+- [ECS 日常更新命令与失败恢复](../../../deploy/alibaba-cloud-linux/README.md#更新发布已部署机器)：使用 root heredoc、`mktemp` 和目标提交中的 `safe-update.sh`。
+- [Focus Agent 开关与功能验收](../../../deploy/alibaba-cloud-linux/FOCUS_UPDATE.md)：代码更新后另行启用两个开关、重启并核对；鸿蒙还需安装新版 HAP。
+- [ECS、后端、小艺与 HAP 执行手册](../../competition/projectmemo-ecs-backend-xiaoyi-hap-runbook.md)
+- [复赛放行清单](../../../REMATCH_SUBMISSION_GATE_2026-09-14.md)
+- [Pre-R4 UX 实施记录](../../FINAL/实施规划/PRE_R4_UX_IMPLEMENTATION_NOTES.md)
+- [本轮 Web、导航与卡片核查](../../FINAL/实施规划/WEB_UI_REFINEMENT_2026-10-22.md)
 
 部署使用现有持久数据路径、独立 Worker、备份与发布指纹。每次发布核对实际代码和健康响应；本地构建通过不代表线上已更新。

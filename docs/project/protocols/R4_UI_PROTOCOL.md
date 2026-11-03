@@ -2,7 +2,7 @@
 
 ## PR-6 Research View 补充（双端代码已接入，交互验收待完成，2026-10-27）
 
-[PR-6 方案 v2](R4_PR6_WEB_RESEARCH_PLAN.md) 的 Research Result / Investigation View 沿原 Conversation，复用既有语义块。模型选布局，服务端从原 turn / coverage / source snapshot / proposal 生成可信 catalog；本次未新增 semanticType 或切换生产 DTO。
+[PR-6 方案 v2](../planning/R4_PR6_WEB_RESEARCH_PLAN.md) 的 Research Result / Investigation View 沿原 Conversation，复用既有语义块。模型选布局，服务端从原 turn / coverage / source snapshot / proposal 生成可信 catalog；本次未新增 semanticType 或切换生产 DTO。
 
 - 简单查找允许正文和引用；复杂研究可组合 investigation / evidence / comparison / question / approval / receipt，显示已核对什么、仍缺什么，以及为什么继续或停止。
 - 进度来自持久阶段事件与序号；离开/断线后读取原 turn，无分母不显示百分比。UNKNOWN、来源不可读、部分完成、用户停止和服务失败分别显示；停止后迟到结果不变成当前有效结论。

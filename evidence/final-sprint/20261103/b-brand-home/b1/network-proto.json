@@ -1,54 +1,70 @@
 {
   "phase": 1,
   "kind": "prototype-network-audit",
-  "capturedAt": "2026-11-03T03:48:30.383Z",
+  "capturedAt": "2026-11-03T03:51:07.353Z",
   "baseURL": "http://127.0.0.1:34111",
   "sourceSha": "485d485378637e1da3280ed092739d441c8cf749",
   "note": "原型页与首页同一 dev server；原型页为隔离对照，不进入生产导航。",
   "totals": {
-    "requestRecords": 593,
+    "requestRecords": 590,
     "uniqueRequestUrls": 29,
     "externalOriginRequests": 0,
     "apiWriteRequests": 0,
-    "failures": 95,
-    "imageFontFailures": 0,
-    "consoleErrors": 70,
+    "failures": 99,
+    "imageFontFailures": 1,
+    "consoleErrors": 78,
     "pageErrors": 0
   },
   "externalOrigins": [],
   "apiWrites": [],
   "failures": [
     {
-      "capture": "capture-a-1440-light",
-      "url": "http://127.0.0.1:34111/api/auth/me",
+      "capture": "load-a-1440-light",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
       "method": "GET",
       "status": null,
       "failure": "net::ERR_ABORTED",
-      "resourceType": "fetch"
+      "resourceType": "script"
+    },
+    {
+      "capture": "load-a-1440-light",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jmam7qwg.js",
+      "method": "GET",
+      "status": null,
+      "failure": "net::ERR_ABORTED",
+      "resourceType": "script"
+    },
+    {
+      "capture": "load-a-1440-light",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js",
+      "method": "GET",
+      "status": null,
+      "failure": "net::ERR_ABORTED",
+      "resourceType": "script"
+    },
+    {
+      "capture": "load-a-1440-light",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_0y6xgmo32juxh._.js",
+      "method": "GET",
+      "status": null,
+      "failure": "net::ERR_ABORTED",
+      "resourceType": "script"
+    },
+    {
+      "capture": "load-a-1440-light",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_11lsdof2c64yx._.js",
+      "method": "GET",
+      "status": null,
+      "failure": "net::ERR_ABORTED",
+      "resourceType": "script"
     },
     {
       "capture": "capture-a-1440-light",
-      "url": "http://127.0.0.1:34111/api/auth/me",
+      "url": "http://127.0.0.1:34111/fonts/pm-editorial-serif.ttf",
       "method": "GET",
       "status": null,
       "failure": "net::ERR_ABORTED",
-      "resourceType": "fetch"
-    },
-    {
-      "capture": "capture-a-1440-light",
-      "url": "http://127.0.0.1:34111/api/auth/me",
-      "method": "GET",
-      "status": null,
-      "failure": "net::ERR_ABORTED",
-      "resourceType": "fetch"
-    },
-    {
-      "capture": "capture-a-1440-light",
-      "url": "http://127.0.0.1:34111/api/auth/me",
-      "method": "GET",
-      "status": null,
-      "failure": "net::ERR_ABORTED",
-      "resourceType": "fetch"
+      "resourceType": "font"
     },
     {
       "capture": "capture-a-1440-light",
@@ -174,24 +190,32 @@
       "capture": "capture-a-390-light",
       "url": "http://127.0.0.1:34111/api/auth/me",
       "method": "GET",
-      "status": null,
-      "failure": "net::ERR_ABORTED",
+      "status": 401,
+      "failure": null,
       "resourceType": "fetch"
     },
     {
       "capture": "capture-a-390-light",
       "url": "http://127.0.0.1:34111/api/auth/me",
       "method": "GET",
-      "status": null,
-      "failure": "net::ERR_ABORTED",
+      "status": 401,
+      "failure": null,
       "resourceType": "fetch"
     },
     {
       "capture": "capture-a-390-light",
       "url": "http://127.0.0.1:34111/api/auth/me",
       "method": "GET",
-      "status": null,
-      "failure": "net::ERR_ABORTED",
+      "status": 401,
+      "failure": null,
+      "resourceType": "fetch"
+    },
+    {
+      "capture": "capture-a-390-light",
+      "url": "http://127.0.0.1:34111/api/auth/me",
+      "method": "GET",
+      "status": 401,
+      "failure": null,
       "resourceType": "fetch"
     },
     {
@@ -246,23 +270,31 @@
       "capture": "capture-a-390-dark",
       "url": "http://127.0.0.1:34111/api/auth/me",
       "method": "GET",
-      "status": null,
-      "failure": "net::ERR_ABORTED",
+      "status": 401,
+      "failure": null,
       "resourceType": "fetch"
     },
     {
       "capture": "capture-a-390-dark",
       "url": "http://127.0.0.1:34111/api/auth/me",
       "method": "GET",
-      "status": null,
-      "failure": "net::ERR_ABORTED",
+      "status": 401,
+      "failure": null,
       "resourceType": "fetch"
     },
     {
       "capture": "capture-a-390-dark",
       "url": "http://127.0.0.1:34111/api/auth/me",
       "method": "GET",
-      "status": null,
+      "status": 401,
+      "failure": null,
+      "resourceType": "fetch"
+    },
+    {
+      "capture": "capture-a-390-dark",
+      "url": "http://127.0.0.1:34111/api/auth/me",
+      "method": "GET",
+      "status": 401,
       "failure": "net::ERR_ABORTED",
       "resourceType": "fetch"
     },
@@ -470,23 +502,31 @@
       "capture": "capture-b-390-light",
       "url": "http://127.0.0.1:34111/api/auth/me",
       "method": "GET",
-      "status": null,
-      "failure": "net::ERR_ABORTED",
+      "status": 401,
+      "failure": null,
       "resourceType": "fetch"
     },
     {
       "capture": "capture-b-390-light",
       "url": "http://127.0.0.1:34111/api/auth/me",
       "method": "GET",
-      "status": null,
-      "failure": "net::ERR_ABORTED",
+      "status": 401,
+      "failure": null,
       "resourceType": "fetch"
     },
     {
       "capture": "capture-b-390-light",
       "url": "http://127.0.0.1:34111/api/auth/me",
       "method": "GET",
-      "status": null,
+      "status": 401,
+      "failure": null,
+      "resourceType": "fetch"
+    },
+    {
+      "capture": "capture-b-390-light",
+      "url": "http://127.0.0.1:34111/api/auth/me",
+      "method": "GET",
+      "status": 401,
       "failure": "net::ERR_ABORTED",
       "resourceType": "fetch"
     },
@@ -567,7 +607,7 @@
       "url": "http://127.0.0.1:34111/api/auth/me",
       "method": "GET",
       "status": 401,
-      "failure": null,
+      "failure": "net::ERR_ABORTED",
       "resourceType": "fetch"
     },
     {
@@ -647,7 +687,7 @@
       "url": "http://127.0.0.1:34111/api/auth/me",
       "method": "GET",
       "status": 401,
-      "failure": "net::ERR_ABORTED",
+      "failure": null,
       "resourceType": "fetch"
     },
     {
@@ -702,32 +742,24 @@
       "capture": "capture-b-1440-light",
       "url": "http://127.0.0.1:34111/api/auth/me",
       "method": "GET",
-      "status": 401,
-      "failure": null,
+      "status": null,
+      "failure": "net::ERR_ABORTED",
       "resourceType": "fetch"
     },
     {
       "capture": "capture-b-1440-light",
       "url": "http://127.0.0.1:34111/api/auth/me",
       "method": "GET",
-      "status": 401,
-      "failure": null,
+      "status": null,
+      "failure": "net::ERR_ABORTED",
       "resourceType": "fetch"
     },
     {
       "capture": "capture-b-1440-light",
       "url": "http://127.0.0.1:34111/api/auth/me",
       "method": "GET",
-      "status": 401,
-      "failure": null,
-      "resourceType": "fetch"
-    },
-    {
-      "capture": "capture-b-1440-light",
-      "url": "http://127.0.0.1:34111/api/auth/me",
-      "method": "GET",
-      "status": 401,
-      "failure": null,
+      "status": null,
+      "failure": "net::ERR_ABORTED",
       "resourceType": "fetch"
     },
     {
@@ -876,6 +908,46 @@
       "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
     },
     {
+      "capture": "capture-a-390-light",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "capture": "capture-a-390-light",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "capture": "capture-a-390-light",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "capture": "capture-a-390-light",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "capture": "capture-a-390-dark",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "capture": "capture-a-390-dark",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "capture": "capture-a-390-dark",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "capture": "capture-a-390-dark",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
       "capture": "capture-a-390-dark",
       "type": "error",
       "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
@@ -996,6 +1068,26 @@
       "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
     },
     {
+      "capture": "capture-b-390-light",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "capture": "capture-b-390-light",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "capture": "capture-b-390-light",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "capture": "capture-b-390-light",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
       "capture": "capture-b-390-dark",
       "type": "error",
       "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
@@ -1082,26 +1174,6 @@
     },
     {
       "capture": "capture-a-1440-light",
-      "type": "error",
-      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
-    },
-    {
-      "capture": "capture-b-1440-light",
-      "type": "error",
-      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
-    },
-    {
-      "capture": "capture-b-1440-light",
-      "type": "error",
-      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
-    },
-    {
-      "capture": "capture-b-1440-light",
-      "type": "error",
-      "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
-    },
-    {
-      "capture": "capture-b-1440-light",
       "type": "error",
       "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
     },
@@ -1219,7 +1291,9 @@
         200,
         304
       ],
-      "failures": [],
+      "failures": [
+        "net::ERR_ABORTED"
+      ],
       "count": 20
     },
     {
@@ -1279,7 +1353,9 @@
         200,
         304
       ],
-      "failures": [],
+      "failures": [
+        "net::ERR_ABORTED"
+      ],
       "count": 20
     },
     {
@@ -1309,7 +1385,9 @@
         200,
         304
       ],
-      "failures": [],
+      "failures": [
+        "net::ERR_ABORTED"
+      ],
       "count": 20
     },
     {
@@ -1414,7 +1492,9 @@
         200,
         304
       ],
-      "failures": [],
+      "failures": [
+        "net::ERR_ABORTED"
+      ],
       "count": 20
     },
     {
@@ -1444,7 +1524,9 @@
         200,
         304
       ],
-      "failures": [],
+      "failures": [
+        "net::ERR_ABORTED"
+      ],
       "count": 10
     },
     {
@@ -1456,7 +1538,8 @@
       "local": true,
       "isApiWrite": false,
       "statuses": [
-        200
+        200,
+        304
       ],
       "failures": [],
       "count": 20
@@ -1472,7 +1555,9 @@
       "statuses": [
         200
       ],
-      "failures": [],
+      "failures": [
+        "net::ERR_ABORTED"
+      ],
       "count": 20
     },
     {
@@ -1488,7 +1573,7 @@
         304
       ],
       "failures": [],
-      "count": 20
+      "count": 19
     },
     {
       "method": "GET",
@@ -1504,7 +1589,7 @@
       "failures": [
         "net::ERR_ABORTED"
       ],
-      "count": 95
+      "count": 93
     },
     {
       "method": "GET",
@@ -1627,8 +1712,8 @@
       "url": "http://127.0.0.1:34111/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "script",
-      "status": 200,
-      "failure": null,
+      "status": null,
+      "failure": "net::ERR_ABORTED",
       "local": true,
       "isApiWrite": false
     },
@@ -1671,8 +1756,8 @@
       "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jmam7qwg.js",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "script",
-      "status": 200,
-      "failure": null,
+      "status": null,
+      "failure": "net::ERR_ABORTED",
       "local": true,
       "isApiWrite": false
     },
@@ -1693,8 +1778,8 @@
       "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "script",
-      "status": 200,
-      "failure": null,
+      "status": null,
+      "failure": "net::ERR_ABORTED",
       "local": true,
       "isApiWrite": false
     },
@@ -1770,8 +1855,8 @@
       "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_0y6xgmo32juxh._.js",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "script",
-      "status": 200,
-      "failure": null,
+      "status": null,
+      "failure": "net::ERR_ABORTED",
       "local": true,
       "isApiWrite": false
     },
@@ -1792,8 +1877,8 @@
       "url": "http://127.0.0.1:34111/_next/static/chunks/_11lsdof2c64yx._.js",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "script",
-      "status": 200,
-      "failure": null,
+      "status": null,
+      "failure": "net::ERR_ABORTED",
       "local": true,
       "isApiWrite": false
     },
@@ -1803,28 +1888,6 @@
       "url": "http://127.0.0.1:34111/fonts/pm-serif-brand.ttf",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "font",
-      "status": 200,
-      "failure": null,
-      "local": true,
-      "isApiWrite": false
-    },
-    {
-      "capture": "load-a-1440-light",
-      "method": "GET",
-      "url": "http://127.0.0.1:34111/fonts/pm-editorial-serif.ttf",
-      "origin": "http://127.0.0.1:34111",
-      "resourceType": "font",
-      "status": 200,
-      "failure": null,
-      "local": true,
-      "isApiWrite": false
-    },
-    {
-      "capture": "load-a-1440-light",
-      "method": "GET",
-      "url": "http://127.0.0.1:34111/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
-      "origin": "http://127.0.0.1:34111",
-      "resourceType": "script",
       "status": 200,
       "failure": null,
       "local": true,
@@ -1844,42 +1907,9 @@
     {
       "capture": "capture-a-1440-light",
       "method": "GET",
-      "url": "http://127.0.0.1:34111/api/auth/me",
+      "url": "http://127.0.0.1:34111/fonts/pm-editorial-serif.ttf",
       "origin": "http://127.0.0.1:34111",
-      "resourceType": "fetch",
-      "status": null,
-      "failure": "net::ERR_ABORTED",
-      "local": true,
-      "isApiWrite": false
-    },
-    {
-      "capture": "capture-a-1440-light",
-      "method": "GET",
-      "url": "http://127.0.0.1:34111/api/auth/me",
-      "origin": "http://127.0.0.1:34111",
-      "resourceType": "fetch",
-      "status": null,
-      "failure": "net::ERR_ABORTED",
-      "local": true,
-      "isApiWrite": false
-    },
-    {
-      "capture": "capture-a-1440-light",
-      "method": "GET",
-      "url": "http://127.0.0.1:34111/api/auth/me",
-      "origin": "http://127.0.0.1:34111",
-      "resourceType": "fetch",
-      "status": null,
-      "failure": "net::ERR_ABORTED",
-      "local": true,
-      "isApiWrite": false
-    },
-    {
-      "capture": "capture-a-1440-light",
-      "method": "GET",
-      "url": "http://127.0.0.1:34111/api/auth/me",
-      "origin": "http://127.0.0.1:34111",
-      "resourceType": "fetch",
+      "resourceType": "font",
       "status": null,
       "failure": "net::ERR_ABORTED",
       "local": true,
@@ -1935,7 +1965,7 @@
       "url": "http://127.0.0.1:34111/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "script",
-      "status": 304,
+      "status": 200,
       "failure": null,
       "local": true,
       "isApiWrite": false
@@ -1979,7 +2009,7 @@
       "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jmam7qwg.js",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "script",
-      "status": 304,
+      "status": 200,
       "failure": null,
       "local": true,
       "isApiWrite": false
@@ -2001,7 +2031,7 @@
       "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "script",
-      "status": 304,
+      "status": 200,
       "failure": null,
       "local": true,
       "isApiWrite": false
@@ -2078,7 +2108,7 @@
       "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_0y6xgmo32juxh._.js",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "script",
-      "status": 304,
+      "status": 200,
       "failure": null,
       "local": true,
       "isApiWrite": false
@@ -2100,6 +2130,17 @@
       "url": "http://127.0.0.1:34111/_next/static/chunks/_11lsdof2c64yx._.js",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "script",
+      "status": 200,
+      "failure": null,
+      "local": true,
+      "isApiWrite": false
+    },
+    {
+      "capture": "capture-a-1440-light",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/fonts/pm-serif-brand.ttf",
+      "origin": "http://127.0.0.1:34111",
+      "resourceType": "font",
       "status": 304,
       "failure": null,
       "local": true,
@@ -2119,21 +2160,10 @@
     {
       "capture": "capture-a-1440-light",
       "method": "GET",
-      "url": "http://127.0.0.1:34111/fonts/pm-serif-brand.ttf",
-      "origin": "http://127.0.0.1:34111",
-      "resourceType": "font",
-      "status": 200,
-      "failure": null,
-      "local": true,
-      "isApiWrite": false
-    },
-    {
-      "capture": "capture-a-1440-light",
-      "method": "GET",
       "url": "http://127.0.0.1:34111/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "script",
-      "status": 304,
+      "status": 200,
       "failure": null,
       "local": true,
       "isApiWrite": false
@@ -3145,8 +3175,8 @@
       "url": "http://127.0.0.1:34111/api/auth/me",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "fetch",
-      "status": null,
-      "failure": "net::ERR_ABORTED",
+      "status": 401,
+      "failure": null,
       "local": true,
       "isApiWrite": false
     },
@@ -3156,8 +3186,8 @@
       "url": "http://127.0.0.1:34111/api/auth/me",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "fetch",
-      "status": null,
-      "failure": "net::ERR_ABORTED",
+      "status": 401,
+      "failure": null,
       "local": true,
       "isApiWrite": false
     },
@@ -3167,8 +3197,19 @@
       "url": "http://127.0.0.1:34111/api/auth/me",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "fetch",
-      "status": null,
-      "failure": "net::ERR_ABORTED",
+      "status": 401,
+      "failure": null,
+      "local": true,
+      "isApiWrite": false
+    },
+    {
+      "capture": "capture-a-390-light",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/api/auth/me",
+      "origin": "http://127.0.0.1:34111",
+      "resourceType": "fetch",
+      "status": 401,
+      "failure": null,
       "local": true,
       "isApiWrite": false
     },
@@ -3794,8 +3835,8 @@
       "url": "http://127.0.0.1:34111/api/auth/me",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "fetch",
-      "status": null,
-      "failure": "net::ERR_ABORTED",
+      "status": 401,
+      "failure": null,
       "local": true,
       "isApiWrite": false
     },
@@ -3805,8 +3846,8 @@
       "url": "http://127.0.0.1:34111/api/auth/me",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "fetch",
-      "status": null,
-      "failure": "net::ERR_ABORTED",
+      "status": 401,
+      "failure": null,
       "local": true,
       "isApiWrite": false
     },
@@ -3816,7 +3857,18 @@
       "url": "http://127.0.0.1:34111/api/auth/me",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "fetch",
-      "status": null,
+      "status": 401,
+      "failure": null,
+      "local": true,
+      "isApiWrite": false
+    },
+    {
+      "capture": "capture-a-390-dark",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/api/auth/me",
+      "origin": "http://127.0.0.1:34111",
+      "resourceType": "fetch",
+      "status": 401,
       "failure": "net::ERR_ABORTED",
       "local": true,
       "isApiWrite": false
@@ -4405,12 +4457,12 @@
       "isApiWrite": false
     },
     {
-      "capture": "load-b-1440-light",
+      "capture": "capture-b-1440-light",
       "method": "GET",
-      "url": "http://127.0.0.1:34111/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
+      "url": "http://127.0.0.1:34111/prototype/hero-b",
       "origin": "http://127.0.0.1:34111",
-      "resourceType": "script",
-      "status": 304,
+      "resourceType": "document",
+      "status": 200,
       "failure": null,
       "local": true,
       "isApiWrite": false
@@ -4418,10 +4470,10 @@
     {
       "capture": "capture-b-1440-light",
       "method": "GET",
-      "url": "http://127.0.0.1:34111/prototype/hero-b",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
       "origin": "http://127.0.0.1:34111",
-      "resourceType": "document",
-      "status": 200,
+      "resourceType": "script",
+      "status": 304,
       "failure": null,
       "local": true,
       "isApiWrite": false
@@ -5054,12 +5106,12 @@
       "isApiWrite": false
     },
     {
-      "capture": "capture-b-1440-dark",
+      "capture": "load-b-1440-dark",
       "method": "GET",
-      "url": "http://127.0.0.1:34111/prototype/hero-b",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
       "origin": "http://127.0.0.1:34111",
-      "resourceType": "document",
-      "status": 200,
+      "resourceType": "script",
+      "status": 304,
       "failure": null,
       "local": true,
       "isApiWrite": false
@@ -5067,10 +5119,10 @@
     {
       "capture": "capture-b-1440-dark",
       "method": "GET",
-      "url": "http://127.0.0.1:34111/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
+      "url": "http://127.0.0.1:34111/prototype/hero-b",
       "origin": "http://127.0.0.1:34111",
-      "resourceType": "script",
-      "status": 304,
+      "resourceType": "document",
+      "status": 200,
       "failure": null,
       "local": true,
       "isApiWrite": false
@@ -5714,12 +5766,12 @@
       "isApiWrite": false
     },
     {
-      "capture": "capture-b-390-light",
+      "capture": "load-b-390-light",
       "method": "GET",
-      "url": "http://127.0.0.1:34111/prototype/hero-b",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
       "origin": "http://127.0.0.1:34111",
-      "resourceType": "document",
-      "status": 200,
+      "resourceType": "script",
+      "status": 304,
       "failure": null,
       "local": true,
       "isApiWrite": false
@@ -5727,10 +5779,10 @@
     {
       "capture": "capture-b-390-light",
       "method": "GET",
-      "url": "http://127.0.0.1:34111/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
+      "url": "http://127.0.0.1:34111/prototype/hero-b",
       "origin": "http://127.0.0.1:34111",
-      "resourceType": "script",
-      "status": 304,
+      "resourceType": "document",
+      "status": 200,
       "failure": null,
       "local": true,
       "isApiWrite": false
@@ -5752,8 +5804,8 @@
       "url": "http://127.0.0.1:34111/api/auth/me",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "fetch",
-      "status": null,
-      "failure": "net::ERR_ABORTED",
+      "status": 401,
+      "failure": null,
       "local": true,
       "isApiWrite": false
     },
@@ -5763,8 +5815,8 @@
       "url": "http://127.0.0.1:34111/api/auth/me",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "fetch",
-      "status": null,
-      "failure": "net::ERR_ABORTED",
+      "status": 401,
+      "failure": null,
       "local": true,
       "isApiWrite": false
     },
@@ -5774,7 +5826,18 @@
       "url": "http://127.0.0.1:34111/api/auth/me",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "fetch",
-      "status": null,
+      "status": 401,
+      "failure": null,
+      "local": true,
+      "isApiWrite": false
+    },
+    {
+      "capture": "capture-b-390-light",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/api/auth/me",
+      "origin": "http://127.0.0.1:34111",
+      "resourceType": "fetch",
+      "status": 401,
       "failure": "net::ERR_ABORTED",
       "local": true,
       "isApiWrite": false
@@ -6435,7 +6498,7 @@
       "origin": "http://127.0.0.1:34111",
       "resourceType": "fetch",
       "status": 401,
-      "failure": null,
+      "failure": "net::ERR_ABORTED",
       "local": true,
       "isApiWrite": false
     },
@@ -7095,7 +7158,7 @@
       "origin": "http://127.0.0.1:34111",
       "resourceType": "fetch",
       "status": 401,
-      "failure": "net::ERR_ABORTED",
+      "failure": null,
       "local": true,
       "isApiWrite": false
     },
@@ -7721,8 +7784,8 @@
       "url": "http://127.0.0.1:34111/api/auth/me",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "fetch",
-      "status": 401,
-      "failure": null,
+      "status": null,
+      "failure": "net::ERR_ABORTED",
       "local": true,
       "isApiWrite": false
     },
@@ -7732,8 +7795,8 @@
       "url": "http://127.0.0.1:34111/api/auth/me",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "fetch",
-      "status": 401,
-      "failure": null,
+      "status": null,
+      "failure": "net::ERR_ABORTED",
       "local": true,
       "isApiWrite": false
     },
@@ -7743,19 +7806,8 @@
       "url": "http://127.0.0.1:34111/api/auth/me",
       "origin": "http://127.0.0.1:34111",
       "resourceType": "fetch",
-      "status": 401,
-      "failure": null,
-      "local": true,
-      "isApiWrite": false
-    },
-    {
-      "capture": "capture-b-1440-light",
-      "method": "GET",
-      "url": "http://127.0.0.1:34111/api/auth/me",
-      "origin": "http://127.0.0.1:34111",
-      "resourceType": "fetch",
-      "status": 401,
-      "failure": null,
+      "status": null,
+      "failure": "net::ERR_ABORTED",
       "local": true,
       "isApiWrite": false
     },

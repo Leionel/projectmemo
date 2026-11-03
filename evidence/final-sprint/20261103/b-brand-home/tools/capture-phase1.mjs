@@ -259,7 +259,24 @@ async function settleAnimations(page) {
   });
 }
 
+/** Next dev 的 “Compiling…” 提示是 dev-only 覆盖物；截图前等它消失，避免污染证据图。 */
+async function waitForDevOverlayClear(page, timeoutMs = 45_000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const busy = await page.evaluate(() => {
+      const text = [...document.querySelectorAll("nextjs-portal")]
+        .map((p) => p.shadowRoot?.textContent ?? "")
+        .join(" ");
+      return /Compiling|Building|Rendering|hmr/i.test(text);
+    });
+    if (!busy) return true;
+    await page.waitForTimeout(250);
+  }
+  return false;
+}
+
 async function capture(page, route, label, stateLabel, screenshotName, extra = {}) {
+  await waitForDevOverlayClear(page);
   const file = path.join(SCREENS, screenshotName);
   await page.screenshot({ path: file, fullPage: false });
   const buf = await stat(file);
@@ -455,6 +472,20 @@ async function main() {
       },
     });
     interactionCaptures.push({ route: "a", state: "evidence-open", ...evidenceResult });
+
+    // 辅助视图：滚动到依据面板完整可见，核对长依据是否可完整阅读/内部滚动（主对照仍是 scrollY=0 的 -evidence.png）
+    net.current = "interaction-a-evidence-full";
+    const panelBBox = evidenceMetrics.elements.evidencePanel;
+    const viewportH = await page.evaluate(() => window.innerHeight);
+    const scrollTarget = Math.max(0, Math.ceil((panelBBox?.bottom ?? viewportH) - viewportH + 24));
+    await page.evaluate((y) => window.scrollTo({ top: y, behavior: "instant" }), scrollTarget);
+    await page.waitForTimeout(150);
+    const fullResult = await capture(page, route, "proto-a-1440-light-evidence-full", "evidence-open-scrolled", "proto-a-1440-light-evidence-full.png", {
+      scrollYAtScreenshot: scrollTarget,
+      note: "辅助视图：滚动使依据面板完整可见；主对照以 scrollY=0 的 proto-a-1440-light-evidence.png 为准。",
+    });
+    interactionCaptures.push({ route: "a", state: "evidence-open-scrolled", ...fullResult });
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
   } catch (error) {
     errors.push({ label: "interaction-a", error: String(error?.stack ?? error).slice(0, 2000) });
   }

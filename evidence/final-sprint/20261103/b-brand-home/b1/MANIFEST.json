@@ -3,7 +3,7 @@
   "track": "B",
   "phase": 1,
   "kind": "prototype-comparison",
-  "capturedAt": "2026-11-03T03:48:30.387Z",
+  "capturedAt": "2026-11-03T03:51:07.356Z",
   "sourceSha": "485d485378637e1da3280ed092739d441c8cf749",
   "worktree": "D:\\Projects\\hongmen-final-b-brand-home",
   "branch": "codex/final-b-brand-home",
@@ -352,8 +352,17 @@
         "route": "a",
         "state": "evidence-open",
         "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-light-evidence.png",
-        "fileBytes": 119793,
-        "fileSha256": "bc154ba53e1117a1c0ebdbbfad3a917f13447a4175d1f4ab2339239ba0432c2f",
+        "fileBytes": 117762,
+        "fileSha256": "2969a0025d58bf3a6d65086ae92fc499f75789a5b15f3017e479da2a1a2b6996",
+        "ok": true
+      },
+      {
+        "label": "proto-a-1440-light-evidence-full",
+        "route": "a",
+        "state": "evidence-open-scrolled",
+        "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-light-evidence-full.png",
+        "fileBytes": 119408,
+        "fileSha256": "920bd7ec3f03cd74de81bea62267d720a33132af7792267f5852dbf7840f4d60",
         "ok": true
       },
       {
@@ -370,8 +379,8 @@
         "route": "b",
         "state": "source-task-arrangement",
         "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-light-evidence-task.png",
-        "fileBytes": 123552,
-        "fileSha256": "744763109ae5ce4e0bc1454cfcb10b72e2ed950a23c1fbda1501102291861dea",
+        "fileBytes": 121601,
+        "fileSha256": "9170602ed4db5c5a336841af47b053293d47435fffb026f1c964d73447d0a3b4",
         "ok": true
       }
     ]
@@ -475,8 +484,14 @@
     },
     {
       "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-light-evidence.png",
-      "bytes": 119793,
-      "sha256": "bc154ba53e1117a1c0ebdbbfad3a917f13447a4175d1f4ab2339239ba0432c2f",
+      "bytes": 117762,
+      "sha256": "2969a0025d58bf3a6d65086ae92fc499f75789a5b15f3017e479da2a1a2b6996",
+      "kind": "screenshot"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-light-evidence-full.png",
+      "bytes": 119408,
+      "sha256": "920bd7ec3f03cd74de81bea62267d720a33132af7792267f5852dbf7840f4d60",
       "kind": "screenshot"
     },
     {
@@ -487,25 +502,25 @@
     },
     {
       "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-light-evidence-task.png",
-      "bytes": 123552,
-      "sha256": "744763109ae5ce4e0bc1454cfcb10b72e2ed950a23c1fbda1501102291861dea",
+      "bytes": 121601,
+      "sha256": "9170602ed4db5c5a336841af47b053293d47435fffb026f1c964d73447d0a3b4",
       "kind": "screenshot"
     }
   ],
   "fileCount": {
-    "screenshots": 12,
-    "metrics": 12
+    "screenshots": 13,
+    "metrics": 13
   },
   "network": {
     "file": "evidence/final-sprint/20261103/b-brand-home/b1/network-proto.json",
     "totals": {
-      "requestRecords": 593,
+      "requestRecords": 590,
       "uniqueRequestUrls": 29,
       "externalOriginRequests": 0,
       "apiWriteRequests": 0,
-      "failures": 95,
-      "imageFontFailures": 0,
-      "consoleErrors": 70,
+      "failures": 99,
+      "imageFontFailures": 1,
+      "consoleErrors": 78,
       "pageErrors": 0
     }
   },
@@ -514,7 +529,7 @@
     "horizontalOverflowCaptures": [],
     "externalOrigins": [],
     "apiWrites": 0,
-    "imageFontFailures": 0,
+    "imageFontFailures": 1,
     "consoleErrors": [
       {
         "capture": "capture-a-1440-light",
@@ -612,6 +627,46 @@
         "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
       },
       {
+        "capture": "capture-a-390-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-390-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-390-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-390-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-390-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-390-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-390-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-a-390-dark",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
         "capture": "capture-a-390-dark",
         "type": "error",
         "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
@@ -732,6 +787,26 @@
         "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
       },
       {
+        "capture": "capture-b-390-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-390-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-390-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
+        "capture": "capture-b-390-light",
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      },
+      {
         "capture": "capture-b-390-dark",
         "type": "error",
         "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
@@ -818,26 +893,6 @@
       },
       {
         "capture": "capture-a-1440-light",
-        "type": "error",
-        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
-      },
-      {
-        "capture": "capture-b-1440-light",
-        "type": "error",
-        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
-      },
-      {
-        "capture": "capture-b-1440-light",
-        "type": "error",
-        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
-      },
-      {
-        "capture": "capture-b-1440-light",
-        "type": "error",
-        "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
-      },
-      {
-        "capture": "capture-b-1440-light",
         "type": "error",
         "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
       },
@@ -868,5 +923,44 @@
       }
     ],
     "pageErrors": []
+  },
+  "interactionProtocol": "主图 8 张 = 2 路由 × 1440×900/390×844 × light/dark，scrollY=0 整视口；交互图 5 张 = A during / A evidence / A evidence 辅助全览（scrollY=60）/ B 比赛材料 / B 任务安排，均 1440 light。截图前等待 dev 覆盖物消失。",
+  "interpretation": {
+    "horizontalOverflow": "13 个状态均无水平溢出（scrollWidth == innerWidth），无元素越界。",
+    "theme": "light/dark 均正确应用（html class、body 背景 rgb(247,246,242)/rgb(21,30,28)），两主题布局一致。",
+    "fonts": "document.fonts.status=loaded；PM Brand / PM Editorial 本地字体均 loaded；无外部字体域。",
+    "header": "两原型页使用同一 app 全局 header（非首页 SiteHeader）：1440 可见“演示模式”徽标，390 移动端折叠后不可见（badge=null 属预期）。",
+    "networkFailures": "99 条 failures 全部为 fetch：74 条 GET /api/auth/me 401（匿名访客预期，非写请求）+ 21 条导航打断的 RSC/静态资源 ERR_ABORTED + 4 条 401 且被中断；console error 78 条均为该 401 的资源加载提示。另有 1 条 font ERR_ABORTED（pm-editorial-serif.ttf，reload 打断旧页面字体请求，重载后 loaded）。无图片失败、无外域、无 /api 写请求、无 page error。",
+    "anonymousAuthProbes": "每次页面加载约 4–5 次 GET /api/auth/me（401），存在重复探测现象；仅为观测记录，不影响匿名页可读性与 CTA。",
+    "fairness": "同一 h1/副标题/CTA/mock 说明；可见文字量 B 比 A 多：heroSectionTextLength 393 vs 330（+63），右卡 lensTextLength 271 vs 208（+63），主内容 panelTextLength 207 vs 131（+76）。差异来自信息组织（A 四问紧凑、B 四步因果链），非文案量刻意拉大；比较时需连同信息结构一起看。",
+    "targets": "A：Tab 44px、查看依据/回到原委托 44px、CTA 48px（390 时 CTA 46px）；B：桌面 chips 高 40px（低于项目 44×44 目标），390 时 44px；两页 CTA 均 46–48px。",
+    "layoutShift": "展开依据/原文会拉高右栏，左栏文案在网格中垂直居中随之位移：A 依据展开 h1 +139.9px，B 原文展开 h1 +57.2px；属用户触发重排，非自动动画，但视觉上有明显跳动，建议 B2 选型时评估。",
+    "evidenceClipping": "A 依据面板 bottom=935 > 900 视口（scrollY=0 时被裁 35px），已补拍 scrollY=60 的完整视图；B 原文面板 bottom=466 完整可见，展开后卡片 bottom=900.3 基本贴视口下缘。"
+  },
+  "visualReview": {
+    "reviewedAll": true,
+    "reviewedCount": 13,
+    "method": "逐张 read_image 实看（非仅生成）",
+    "notes": [
+      "两页首屏结构一致：左文案 + 右工作包卡；默认态 A=“回来后”四问，B=完整四步因果链，均含“等你确认”状态徽标与“公开示例·不调用模型·不写入你的项目”边界说明。",
+      "A 四问卡：Tab 01/02/03 + 四问行（变化/等你两行有暖色强调底），底部“查看依据/回到原委托”；期间态文案明确写“冻结的示例状态，不连接服务器”。",
+      "B 因果链：01 来源（3 个 chip）→ 02 变化（强调节点）→ 03 判断改变（原来/现在对照）→ 04 等你；原文 chip 展开后行内出现引用面板。",
+      "深色主题下卡片、分隔线、强调底与 chip 均正常，未见低对比或串色。",
+      "移动端 390：两页工作包卡内容均延伸到首屏以下（卡自 y=439 起），首屏只能看到卡片顶部；CTA 与标题完整可见。",
+      "dev 覆盖物：左下“N”按钮在 390 截图覆盖面板左下文字（dev-only）；已移除 “Compiling…” 提示。"
+    ]
+  },
+  "sourceState": {
+    "baselineSha": "485d485378637e1da3280ed092739d441c8cf749",
+    "prototypeCommit": "4be7a4b9465e9ed922d7028b969df1dcf164ec1b",
+    "prototypeCommitSubject": "官网：B1 两款 Hero 原型与信息结构裁决",
+    "prototypeCommitTimeLocal": "2026-11-03T11:50:05+08:00",
+    "note": "B1 原型源码在该提交中；原型文件 mtime 11:40:35–11:41:59，Phase 1 两轮采集（约 11:48:30 与 11:50:49–11:51:07）期间原型文件未再改动，两轮截图对同一源码内容。",
+    "concurrentB2EditsAfterCapture": [
+      "components/SiteHeader.tsx mtime 11:51:38",
+      "components/HomeJourney.tsx mtime 11:52:30"
+    ],
+    "concurrentEditImpact": "B2 首页改动发生在原型采集之后；原型页 pathname 非 / 时 SiteHeader 透传 layout header，两原型页不受首页营销页头改动影响。",
+    "evidenceCommitNote": "Lead 于 4be7a4b 提交了 Phase 1 第一轮快照；第二轮（含去除 dev “Compiling…” 覆盖物、新增 evidence-full 辅助视图、补解释字段）发生在提交之后，当前工作树证据需重新暂存。"
   }
 }

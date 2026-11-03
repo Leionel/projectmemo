@@ -8,8 +8,9 @@ OK  proto-b-1440-dark       115108B class=dark overflow=false h1=人可以下线
 OK  proto-b-390-light        57113B class=light overflow=false h1=人可以下线， 项目别掉线。 lensText=271 panelText=207 heroText=393 selTab=- badge=null
 OK  proto-b-390-dark         56333B class=dark overflow=false h1=人可以下线， 项目别掉线。 lensText=271 panelText=207 heroText=393 selTab=- badge=null
 OK  proto-a-1440-light-during                 110235B state=during evidenceVisible=false panelText=129
-OK  proto-a-1440-light-evidence               119793B state=evidence-open evidenceVisible=true panelText=314
+OK  proto-a-1440-light-evidence               117762B state=evidence-open evidenceVisible=true panelText=314
+OK  proto-a-1440-light-evidence-full          119408B state=evidence-open-scrolled evidenceVisible=true panelText=314
 OK  proto-b-1440-light-evidence-materials     121150B state=source-competition-materials evidenceVisible=true panelText=273
-OK  proto-b-1440-light-evidence-task          123552B state=source-task-arrangement evidenceVisible=true panelText=281
-network: records=593 unique=29 external=0 apiWrites=0 failures=95 consoleErrors=70 pageErrors=0
+OK  proto-b-1440-light-evidence-task          121601B state=source-task-arrangement evidenceVisible=true panelText=281
+network: records=590 unique=29 external=0 apiWrites=0 failures=99 consoleErrors=78 pageErrors=0
 output: evidence/final-sprint/20261103/b-brand-home/b1

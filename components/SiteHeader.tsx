@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { BrandLink } from "./BrandLink";
-import styles from "@/app/home.module.css";
+import styles from "./SiteHeader.module.css";
 
 export function SiteHeader({
   children,
@@ -40,6 +40,7 @@ export function SiteHeader({
               <a href="#experience">产品体验</a>
               <a href="#missions">长期委托</a>
               <a href="#moments">使用场景</a>
+              <a href="#demo">决赛演示</a>
               {registrationEnabled && <Link href="/register">注册</Link>}
               <Link href="/focus" className={styles.headerCta}>
                 进入工作台

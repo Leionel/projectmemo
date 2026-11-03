@@ -1,0 +1,138 @@
+/* 站点页头：同时服务官网首页与账号页，账户页沿用同一视觉，只由 SiteHeader 选择渲染。 */
+
+.siteHeader {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+}
+.siteHeader * {
+  box-sizing: border-box;
+}
+.siteHeader a:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 4px;
+}
+.siteHeader a,
+.siteHeader button {
+  touch-action: manipulation;
+}
+.siteHeaderInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  width: min(1240px, calc(100% - 40px));
+  height: 56px;
+  margin-inline: auto;
+}
+.homeNav {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+}
+.homeNav > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.homeNav > a:hover {
+  color: var(--teal);
+}
+.homeNav .headerCta {
+  gap: 0.5rem;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 0.5rem;
+  color: var(--ink);
+  font-weight: 600;
+}
+.homeHeader .siteHeaderInner {
+  height: 56px;
+}
+.homeHeader .homeNav {
+  gap: 24px;
+  font-size: 14px;
+  font-weight: 550;
+}
+.homeHeader .headerCta {
+  height: 40px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border-color: var(--teal);
+  background: var(--teal);
+  color: var(--paper-strong);
+  font-size: 14px;
+  font-weight: 500;
+}
+.homeHeader .headerCta:hover {
+  color: var(--paper-strong);
+  filter: brightness(0.94);
+}
+/* 首页页头允许轻微半透明，页面内容从其下方穿过；账号页不受影响。 */
+.homeHeader {
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.12);
+  backdrop-filter: blur(14px) saturate(1.12);
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .homeHeader {
+    background: var(--paper);
+  }
+}
+
+@media (max-width: 1000px) {
+  .homeNav {
+    gap: 1rem;
+  }
+  .homeHeader .homeNav {
+    gap: 18px;
+  }
+  .homeHeader .siteHeaderInner {
+    gap: 16px;
+  }
+}
+@media (max-width: 720px) {
+  .siteHeaderInner {
+    width: calc(100% - 40px);
+    height: 56px;
+    gap: 0.75rem;
+  }
+  .homeNav > a:not(.headerCta) {
+    display: none;
+  }
+  .homeNav .headerCta {
+    gap: 0.3rem;
+    padding-inline: 0.65rem;
+    font-size: 0.7rem;
+  }
+  .homeHeader .siteHeaderInner {
+    height: 56px;
+    gap: 12px;
+  }
+  .homeHeader .homeNav {
+    gap: 0;
+  }
+  .homeHeader .headerCta {
+    min-height: 44px;
+    height: 44px;
+    padding-inline: 10px;
+    font-size: 14px;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .homeHeader {
+    background: var(--paper);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+@media (prefers-contrast: more) {
+  .homeHeader {
+    background: var(--paper);
+    backdrop-filter: none;
+  }
+}

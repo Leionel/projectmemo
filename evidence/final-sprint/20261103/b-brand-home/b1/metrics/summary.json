@@ -1,0 +1,222 @@
+{
+  "phase": 1,
+  "kind": "prototype-text-volume-and-key-diffs",
+  "generatedAt": "2026-11-03T03:55:25.813Z",
+  "sourceState": {
+    "baselineSha": "485d485378637e1da3280ed092739d441c8cf749",
+    "prototypeCommit": "4be7a4b9465e9ed922d7028b969df1dcf164ec1b",
+    "prototypeCommitSubject": "官网：B1 两款 Hero 原型与信息结构裁决",
+    "prototypeCommitTimeLocal": "2026-11-03T11:50:05+08:00",
+    "note": "B1 原型源码在该提交中；原型文件 mtime 11:40:35–11:41:59，Phase 1 两轮采集（约 11:48:30 与 11:50:49–11:51:07）期间原型文件未再改动，两轮截图对同一源码内容。",
+    "concurrentB2EditsAfterCapture": [
+      "components/SiteHeader.tsx mtime 11:51:38",
+      "components/HomeJourney.tsx mtime 11:52:30"
+    ],
+    "concurrentEditImpact": "B2 首页改动发生在原型采集之后；原型页 pathname 非 / 时 SiteHeader 透传 layout header，两原型页不受首页营销页头改动影响。",
+    "evidenceCommitNote": "Lead 于 4be7a4b 提交了 Phase 1 第一轮快照；第二轮（含去除 dev “Compiling…” 覆盖物、新增 evidence-full 辅助视图、补解释字段）发生在提交之后，当前工作树证据需重新暂存。"
+  },
+  "note": "B1_COMPARISON.md 引用的汇总文件；数据取自 phase1-metrics.json / metrics/*.json，截图与指标同一次采集。",
+  "textVolume": {
+    "metricDefinitions": {
+      "heroSectionTextLength": "整个 hero 区（左文案 + 右工作包卡）可见文字总量，A/B 最可比",
+      "lensTextLength": "右侧工作包卡片可见文字总量",
+      "panelTextLength": "A=#proto-a-panel（四问+操作+依据）；B=主链 ol（四步因果链）；语义不同，不直接等同"
+    },
+    "a": {
+      "heroSectionTextLength": 330,
+      "lensTextLength": 208,
+      "panelTextLength": 131
+    },
+    "b": {
+      "heroSectionTextLength": 393,
+      "lensTextLength": 271,
+      "panelTextLength": 207
+    },
+    "delta": {
+      "heroSectionTextLength": 63,
+      "lensTextLength": 63,
+      "panelTextLength": 76
+    },
+    "deltaPercent": {
+      "heroSectionTextLength": "19.1%",
+      "lensTextLength": "30.3%",
+      "panelTextLength": "58.0%"
+    },
+    "sameCopy": [
+      "h1「人可以下线，项目别掉线。」",
+      "同一副标题",
+      "同一 CTA（体验一段项目接续 / 进入工作台）",
+      "同一模拟边界说明"
+    ]
+  },
+  "defaults": {
+    "a": {
+      "selectedTab": "03 回来后",
+      "structure": "四问工作包（原委托/依据/变化/等你）",
+      "tabs": 3
+    },
+    "b": {
+      "selectedTab": null,
+      "structure": "四步因果链（来源/变化/判断改变/等你）",
+      "chips": 3
+    }
+  },
+  "interactions": {
+    "aDefaultToDuring": {
+      "ariaSelectedChanged": true,
+      "selectedTab": "02 期间",
+      "panelTextChanged": true,
+      "panelTextLength": {
+        "from": 131,
+        "to": 129
+      },
+      "activeElementAfterClick": "button: 02 期间（焦点留在被点 Tab）",
+      "scrollHeight": 930
+    },
+    "aEvidenceOpen": {
+      "evidenceButtonAriaExpanded": "true",
+      "evidencePanelVisible": true,
+      "panelTextLength": {
+        "from": 131,
+        "to": 314
+      },
+      "panelTextFirst80UnchangedByDesign": true,
+      "evidencePanelBBox": {
+        "y": 669.89,
+        "bottom": 935.33,
+        "height": 265.44,
+        "clippedByViewport": true
+      },
+      "leftColumnShiftY": 139.92,
+      "activeElementAfterClick": "button: 收起依据（焦点留在触发按钮）",
+      "auxiliaryFullView": "proto-a-1440-light-evidence-full.png（scrollY=60，依据面板完整可见）"
+    },
+    "bDefaultToMaterials": {
+      "sourcePanelVisible": true,
+      "sourcePanelId": "proto-b-source-requirements",
+      "sourcePanelTextLength": 63,
+      "panelTextLength": {
+        "from": 207,
+        "to": 273
+      },
+      "chipAriaExpanded": "比赛材料=true",
+      "leftColumnShiftY": 57.16,
+      "activeElementAfterClick": "button: 比赛材料（焦点留在触发 chip）",
+      "cardBottom": 900.3
+    },
+    "bMaterialsToTask": {
+      "sourcePanelVisible": true,
+      "sourcePanelId": "proto-b-source-task",
+      "sourcePanelTextLength": 71,
+      "panelTextLength": {
+        "from": 273,
+        "to": 281
+      },
+      "chipAriaExpanded": "任务安排=true",
+      "activeElementAfterClick": "button: 任务安排（焦点留在触发 chip）"
+    },
+    "mobileFirstScreen": {
+      "390x844": "A/B 的右栏工作包卡片自 y=439 开始，A 卡 bottom=1107、B 卡 bottom=1215，均越过 844 视口；首屏只见标题/说明/CTA/卡片顶部（A 见 Tab 与四问开头，B 见 01 来源与 chips 顶部）。"
+    },
+    "devOnlyArtifacts": {
+      "devIndicator": "左下角 Next dev 工具按钮“N”在全部截图中可见（dev-only），390 宽时会覆盖面板左下文字；before/after 同环境保持一致。",
+      "compilingToast": "首次交互截图曾出现 “Compiling…” dev 提示，已通过等待 nextjs-portal 阴影 DOM 不再含 Compiling/Building 后重拍；最终 13 张均无该提示。"
+    }
+  },
+  "layout": {
+    "desktop1440": {
+      "aCard": "y=148.8–719.8",
+      "bCard": "y=148.8–786.0",
+      "viewport": "900"
+    },
+    "mobile390": {
+      "cardStartY": 439.02,
+      "aCardBottom": 1107.33,
+      "bCardBottom": 1214.52,
+      "viewport": "844"
+    },
+    "horizontalOverflow": "13/13 状态均无"
+  },
+  "targets": {
+    "aTabs": 44,
+    "aEvidenceButton": 44,
+    "aCtaDesktop": 48,
+    "bChipsDesktop": 40,
+    "bChipsMobile": 44,
+    "ctaMobile": 46
+  },
+  "network": {
+    "file": "b1/network-proto.json",
+    "externalOrigins": 0,
+    "apiWrites": 0,
+    "imageFontFailures": 1,
+    "note": "1 条字体请求为 reload 打断；console 401 为匿名探测"
+  },
+  "screenshots": [
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-light.png",
+      "bytes": 111190,
+      "sha256": "359808cfe7d3eb752bdf0a1e20f78b87278e5b2172ac9989fd0787e183ca3ca5"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-dark.png",
+      "bytes": 106453,
+      "sha256": "a63e09a7fcb929574ccd399168a967088937f64759d0132b122f0b6d1a088d1e"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-390-light.png",
+      "bytes": 51746,
+      "sha256": "fee4064291f0bef9ca506fc10844956ea2310439dee9959a27ce1042cfc72ac4"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-390-dark.png",
+      "bytes": 51234,
+      "sha256": "7f765d2687855cf71983f8111ba07388091d592b5e03718c9d196a401b27f6dd"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-light.png",
+      "bytes": 120162,
+      "sha256": "98a492653f87ba77a9f105baf8ede3254e3213e97505e3465cfbd1cca5f63696"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-dark.png",
+      "bytes": 115108,
+      "sha256": "1377b614357fc6346fd69c6ff4ac75c46465a6239abaf844702239d9f0cf1f16"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-390-light.png",
+      "bytes": 57113,
+      "sha256": "d37186065a43e21be7883d6ce5331421e8426899716dfba330b2aafe3bf1caf2"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-390-dark.png",
+      "bytes": 56333,
+      "sha256": "aa7f80365aff59f57f27f97890dfae07c52207fed5cfd6d2b0c1a2231db814b3"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-light-during.png",
+      "bytes": 110235,
+      "sha256": "474c8b964bd864562bff4dff81ac0d70c5951157e8a7cd6c2356ddcb55a3754f"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-light-evidence.png",
+      "bytes": 117762,
+      "sha256": "2969a0025d58bf3a6d65086ae92fc499f75789a5b15f3017e479da2a1a2b6996"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-a-1440-light-evidence-full.png",
+      "bytes": 119408,
+      "sha256": "920bd7ec3f03cd74de81bea62267d720a33132af7792267f5852dbf7840f4d60"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-light-evidence-materials.png",
+      "bytes": 121150,
+      "sha256": "d897a8c2c534654b1cb583bd6c09dc448e362bc5f70e2f09fd6749b8b1ba315f"
+    },
+    {
+      "path": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-light-evidence-task.png",
+      "bytes": 121601,
+      "sha256": "9170602ed4db5c5a336841af47b053293d47435fffb026f1c964d73447d0a3b4"
+    }
+  ]
+}

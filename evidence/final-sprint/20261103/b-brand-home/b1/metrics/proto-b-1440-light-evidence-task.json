@@ -5,7 +5,7 @@
   "routeKey": "b",
   "state": "source-task-arrangement",
   "label": "proto-b-1440-light-evidence-task",
-  "capturedAt": "2026-11-03T03:48:30.202Z",
+  "capturedAt": "2026-11-03T03:51:07.189Z",
   "sourceSha": "485d485378637e1da3280ed092739d441c8cf749",
   "viewport": {
     "width": 1440,
@@ -13,8 +13,8 @@
   },
   "themeRequested": "light",
   "file": "evidence/final-sprint/20261103/b-brand-home/b1/screens/proto-b-1440-light-evidence-task.png",
-  "fileBytes": 123552,
-  "fileSha256": "744763109ae5ce4e0bc1454cfcb10b72e2ed950a23c1fbda1501102291861dea",
+  "fileBytes": 121601,
+  "fileSha256": "9170602ed4db5c5a336841af47b053293d47435fffb026f1c964d73447d0a3b4",
   "metrics": {
     "url": "http://127.0.0.1:34111/prototype/hero-b",
     "title": "B1 原型 B｜来源变化因果镜头",

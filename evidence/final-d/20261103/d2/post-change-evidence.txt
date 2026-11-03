@@ -1,0 +1,93 @@
+# D2 post-change evidence grep (file:line) — working tree on baseline 4b69614
+generated: 2026-11-03T15:22+08:00 Asia/Shanghai (final refresh)
+
+## harmonyos/entry/src/main/ets/common/MissionWidgetContract.ets
+harmonyos/entry/src/main/ets/common/MissionWidgetContract.ets:42: if (snapshot.reasonCode === 'STOP_REQUESTED_IN_FLIGHT') return '停止请求待结算，不会继续执行';
+harmonyos/entry/src/main/ets/common/MissionWidgetContract.ets:46: if (snapshot.reasonCode === 'DAILY_BUDGET_WAITING') return '额度已用完，等待下次检查';
+harmonyos/entry/src/main/ets/common/MissionWidgetContract.ets:68: export function widgetTimeText(raw: string): string {
+harmonyos/entry/src/main/ets/common/MissionWidgetContract.ets:82: export function widgetSnapshotExpiry(now: number, sessionExpiresAt: string): number {
+harmonyos/entry/src/main/ets/common/MissionWidgetContract.ets:125: export class MissionHandoffRoute {
+harmonyos/entry/src/main/ets/common/MissionWidgetContract.ets:137: export function missionHandoffRoute(projectId: string, missionId: string, questionId: string, approvalId: string,
+harmonyos/entry/src/main/ets/common/MissionWidgetContract.ets:138: sourceId: string, outputId: string, receiptId: string, missionVersion: string, handoffExpiresAt: string, now: number): MissionHandoffRoute {
+harmonyos/entry/src/main/ets/common/MissionWidgetContract.ets:139: const route = new MissionHandoffRoute();
+
+## harmonyos/entry/src/main/ets/pages/Index.ets
+harmonyos/entry/src/main/ets/pages/Index.ets:4: import { missionHandoffRoute } from '../common/MissionWidgetContract';
+harmonyos/entry/src/main/ets/pages/Index.ets:135: @StorageProp('pm.handoffSeq') @Watch('onHandoffIntent') handoffSeq: number = 0;
+harmonyos/entry/src/main/ets/pages/Index.ets:215: this.clearHandoffIntents();
+harmonyos/entry/src/main/ets/pages/Index.ets:312: private onHandoffIntent(): void {
+harmonyos/entry/src/main/ets/pages/Index.ets:319: private clearHandoffIntents(): void {
+harmonyos/entry/src/main/ets/pages/Index.ets:322: AppStorage.setOrCreate<string>('pendingSourceId', ''); AppStorage.setOrCreate<string>('pendingOutputId', '');
+harmonyos/entry/src/main/ets/pages/Index.ets:323: AppStorage.setOrCreate<string>('pendingReceiptId', ''); AppStorage.setOrCreate<string>('pendingMissionVersion', '');
+harmonyos/entry/src/main/ets/pages/Index.ets:332: const route = missionHandoffRoute(missionProjectId, missionId,
+harmonyos/entry/src/main/ets/pages/Index.ets:334: AppStorage.get<string>('pendingSourceId') ?? '', AppStorage.get<string>('pendingOutputId') ?? '',
+harmonyos/entry/src/main/ets/pages/Index.ets:335: AppStorage.get<string>('pendingReceiptId') ?? '', AppStorage.get<string>('pendingMissionVersion') ?? '',
+harmonyos/entry/src/main/ets/pages/Index.ets:338: this.clearHandoffIntents();
+harmonyos/entry/src/main/ets/pages/Index.ets:348: handoffMissionVersion: route.missionVersion, handoffExpired: route.expired ? '1' : ''
+
+## harmonyos/entry/src/main/ets/pages/ProjectHome.ets
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:10: import { missionHandoffRoute } from '../common/MissionWidgetContract';
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:119: this.clearPrivateState('登录已失效，请重新登录。');
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:126: @StorageProp('pm.handoffSeq') @Watch('onHandoffIntent') handoffSeq: number = 0;
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:307: private clearPrivateState(message: string): void {
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:379: private onHandoffIntent(): void {
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:450: const route = missionHandoffRoute(missionProjectId, missionId,
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:452: AppStorage.get<string>('pendingSourceId') ?? '', AppStorage.get<string>('pendingOutputId') ?? '',
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:453: AppStorage.get<string>('pendingReceiptId') ?? '', AppStorage.get<string>('pendingMissionVersion') ?? '',
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:456: this.clearHandoffIntents();
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:465: handoffMissionVersion: route.missionVersion, handoffExpired: route.expired ? '1' : ''
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:486: private clearHandoffIntents(): void {
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:489: AppStorage.setOrCreate<string>('pendingSourceId', ''); AppStorage.setOrCreate<string>('pendingOutputId', '');
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:490: AppStorage.setOrCreate<string>('pendingReceiptId', ''); AppStorage.setOrCreate<string>('pendingMissionVersion', '');
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:733: this.clearPrivateState(e.message);
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1653: private openMission(missionId: string, questionId: string, approvalId: string, revision: string, version: string): void {
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1656: handoffMissionVersion: version
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1661: private homeMissionStatusLabel(): string {
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1664: if (state.reasonCode === 'STOP_REQUESTED_IN_FLIGHT') { return '停止请求待结算'; }
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1665: if (state.reasonCode === 'DAILY_BUDGET_WAITING') { return '等待额度恢复'; }
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1675: this.openMission(target.id, target.questionId ?? '', target.approvalId ?? '',
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1690: this.openMission(mission.id,
+harmonyos/entry/src/main/ets/pages/ProjectHome.ets:1703: Text(this.agentContext !== null ? '当前下一步' : this.homeFocusKind() === 'mission' ? this.homeMissionStatusLabel() : '当前先处理')
+
+## harmonyos/entry/src/main/ets/pages/FocusConversation.ets
+harmonyos/entry/src/main/ets/pages/FocusConversation.ets:72: private expired: () => void = (): void => { this.expireSession(); };
+harmonyos/entry/src/main/ets/pages/FocusConversation.ets:73: private clearConversationState(message: string): void {
+harmonyos/entry/src/main/ets/pages/FocusConversation.ets:80: private expireSession(): void {
+harmonyos/entry/src/main/ets/pages/FocusConversation.ets:81: this.clearConversationState('登录已失效，请重新登录');
+harmonyos/entry/src/main/ets/pages/FocusConversation.ets:154: if (e instanceof ApiError && (e.status === 401 || e.code === 'SESSION_CHANGED')) { this.expireSession(); return; }
+harmonyos/entry/src/main/ets/pages/FocusConversation.ets:157: this.clearConversationState(e.message || '当前讨论已不可访问');
+harmonyos/entry/src/main/ets/pages/FocusConversation.ets:227: handoffMissionVersion: ref.version !== undefined ? String(ref.version) : '' } });
+
+## harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets
+harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:128: private openMission(item: FocusEntry): void {
+harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:136: handoffMissionVersion: state !== undefined ? String(state.originalRef.version) : ''
+harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:140: private focusStatusText(item: FocusEntry): string {
+harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:143: if (state.reasonCode === 'STOP_REQUESTED_IN_FLIGHT') { return '停止请求待结算'; }
+harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:144: if (state.reasonCode === 'DAILY_BUDGET_WAITING') { return '等待额度恢复'; }
+harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:151: if (kind === 'mission') this.openMission(item);
+harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets:170: PMStatusPill({ label: this.view.primaryContext !== undefined && this.view.primaryContext !== null && this.view.primaryContext.freshness !== 'FRESH' ? '部分摘要暂不可用' : this.kind(item) === 'reminder' ? '待你核对' : this.kind(item) === 'record' ? '最近记录' : this.focusStatusText(item),
+
+## harmonyos/entry/src/main/ets/components/CopilotContinuationCard.ets
+harmonyos/entry/src/main/ets/components/CopilotContinuationCard.ets:27: handoffMissionVersion: m !== null && m.version > 0 ? String(m.version) : '' } });
+
+## harmonyos/entry/src/main/ets/services/WidgetDataService.ets
+harmonyos/entry/src/main/ets/services/WidgetDataService.ets:10: import { MissionWidgetSnapshot, visibleMissionWidget, widgetAttentionLabel, widgetSyncLabel, widgetSnapshotExpiry, widgetTimeText } from '../common/MissionWidgetContract';
+harmonyos/entry/src/main/ets/services/WidgetDataService.ets:186: static missionData(context: common.Context): Record<string, string | number> {
+harmonyos/entry/src/main/ets/services/WidgetDataService.ets:234: static clearMission(context: common.Context, clearProjectSummary: boolean = false): Promise<void> {
+harmonyos/entry/src/main/ets/services/WidgetDataService.ets:275: static updateMission(context: common.Context, mission: Mission, ownerId: string, expiresAt: string): Promise<void> {
+harmonyos/entry/src/main/ets/services/WidgetDataService.ets:279: const callToken = callAuth.getSync('access_token', '') as string;
+harmonyos/entry/src/main/ets/services/WidgetDataService.ets:292: auth.getSync('expires_at', '') !== expiresAt || auth.getSync('access_token', '') !== callToken ||
+harmonyos/entry/src/main/ets/services/WidgetDataService.ets:293: callToken === '') {
+harmonyos/entry/src/main/ets/services/WidgetDataService.ets:310: snapshot.observedAt = widgetTimeText(mission.workState?.observedAt ?? '');
+harmonyos/entry/src/main/ets/services/WidgetDataService.ets:312: snapshot.updatedAt = widgetTimeText(new Date().toISOString());
+harmonyos/entry/src/main/ets/services/WidgetDataService.ets:314: snapshot.expiresAt = widgetSnapshotExpiry(Date.now(), expiresAt !== '' ? expiresAt : callExpiresAt);
+
+## harmonyos/entry/src/main/ets/widget/pages/WidgetCard.ets
+
+## harmonyos/entry/src/main/ets/entryformability/EntryFormAbility.ets
+
+## harmonyos/entry/src/main/ets/entryability/EntryAbility.ets
+harmonyos/entry/src/main/ets/entryability/EntryAbility.ets:16: AppStorage.setOrCreate<string>('pendingOutputId', '');
+harmonyos/entry/src/main/ets/entryability/EntryAbility.ets:17: AppStorage.setOrCreate<string>('pendingReceiptId', '');
+harmonyos/entry/src/main/ets/entryability/EntryAbility.ets:55: AppStorage.setOrCreate<string>('pendingOutputId', typeof outputId === 'string' ? outputId : '');
+harmonyos/entry/src/main/ets/entryability/EntryAbility.ets:56: AppStorage.setOrCreate<string>('pendingReceiptId', typeof receiptId === 'string' ? receiptId : '');

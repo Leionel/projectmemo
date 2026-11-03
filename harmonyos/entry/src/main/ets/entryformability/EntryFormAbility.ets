@@ -70,11 +70,7 @@ export default class EntryFormAbility extends FormExtensionAbility {
       : (cachedData['statusTone'] as string);
 
     const mission = WidgetDataService.missionData(this.context);
-    return {
-      'missionId': mission['missionId'],
-      'missionProjectId': mission['missionProjectId'],
-      'missionSummary': mission['missionSummary'],
-      'missionUpdatedAt': mission['missionUpdatedAt'],
+    const formData: Record<string, string | number | boolean> = {
       'formDimension': dimension,
       'projectId': projectId,
       'projectTitle': title,
@@ -90,6 +86,11 @@ export default class EntryFormAbility extends FormExtensionAbility {
       'statusTone': statusTone,
       'checkpointInfo': cachedData['checkpointInfo']
     };
+    // missionData 已核对 owner/会话/期限：过期或换号后这里返回空身份，卡片不会再显示旧委托。
+    Object.keys(mission).forEach((key: string) => {
+      formData[key] = mission[key];
+    });
+    return formData;
   }
 
   onAddForm(want: Want): formBindingData.FormBindingData {

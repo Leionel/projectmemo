@@ -1,0 +1,156 @@
+{
+  "schema": "d3-frozen-snapshot/v1",
+  "captured_at_utc8": "2026-11-03T15:14:38.151+08:00",
+  "head": "4b696141435825a3582816e8e449c0e0cf013f29",
+  "branch": "codex/final-d-harmony-native",
+  "dirty_count": 20,
+  "dirty_files": [
+    {
+      "status": " M",
+      "path": "harmonyos/entry/src/main/ets/common/MissionWidgetContract.ets",
+      "size": 7433,
+      "mtime_utc8": "2026-11-03T14:48:40.803+08:00",
+      "sha256": "fd40d714f332c3e0663f0230a9ab0ccdf1b893158353ffb34f7143e4abbada9a"
+    },
+    {
+      "status": " M",
+      "path": "harmonyos/entry/src/main/ets/components/CopilotContinuationCard.ets",
+      "size": 6168,
+      "mtime_utc8": "2026-11-03T14:53:03.295+08:00",
+      "sha256": "68e4a877131903acce07a45f49b22110f940bcd1a8055868cd2e102677eefb39"
+    },
+    {
+      "status": " M",
+      "path": "harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets",
+      "size": 19883,
+      "mtime_utc8": "2026-11-03T14:52:55.869+08:00",
+      "sha256": "d42542ee53c6029c5ea27b5aacfcc2a291bf72d240c2068cab86404e2a09b090"
+    },
+    {
+      "status": " M",
+      "path": "harmonyos/entry/src/main/ets/components/MissionPanel.ets",
+      "size": 10995,
+      "mtime_utc8": "2026-11-03T15:12:05.214+08:00",
+      "sha256": "d02d1fb9715285cdcd19d70f2780ab1fcf58ac5f5889a953370f9dc986376497"
+    },
+    {
+      "status": " M",
+      "path": "harmonyos/entry/src/main/ets/components/MissionReadbackView.ets",
+      "size": 21218,
+      "mtime_utc8": "2026-11-03T14:45:40.745+08:00",
+      "sha256": "23565f67793e74ae87dbe09142ea60fc8e9df219666a016174601ec9fe550e87"
+    },
+    {
+      "status": " M",
+      "path": "harmonyos/entry/src/main/ets/entryability/EntryAbility.ets",
+      "size": 6422,
+      "mtime_utc8": "2026-11-03T14:50:07.200+08:00",
+      "sha256": "43b33e9ca430dd57af02265a3d7ca3a21e3094b0ec9313cab622ad474e948c82"
+    },
+    {
+      "status": " M",
+      "path": "harmonyos/entry/src/main/ets/entryformability/EntryFormAbility.ets",
+      "size": 7952,
+      "mtime_utc8": "2026-11-03T14:49:44.554+08:00",
+      "sha256": "dc3c114eeb0f8c0d43419f74da216436e0f15a7b3cbbbc454dd53c9726e75e54"
+    },
+    {
+      "status": " M",
+      "path": "harmonyos/entry/src/main/ets/pages/FocusConversation.ets",
+      "size": 51829,
+      "mtime_utc8": "2026-11-03T15:05:44.314+08:00",
+      "sha256": "b236f725a7930a0de1db1ca2ad15d90de2f8d3ce5d27ace25c84478acecbf668"
+    },
+    {
+      "status": " M",
+      "path": "harmonyos/entry/src/main/ets/pages/Index.ets",
+      "size": 149102,
+      "mtime_utc8": "2026-11-03T14:50:59.492+08:00",
+      "sha256": "132c8a95a8a55ee1bee5a0cb9ac5470674d078a3f492062a2cf60a1eff767696"
+    },
+    {
+      "status": " M",
+      "path": "harmonyos/entry/src/main/ets/pages/MissionDetail.ets",
+      "size": 74354,
+      "mtime_utc8": "2026-11-03T15:12:19.272+08:00",
+      "sha256": "f675104043b6da0d13f93f6c3bd0960e9a8b28ff4eceb03f5701f0c8ef4a3fe7"
+    },
+    {
+      "status": " M",
+      "path": "harmonyos/entry/src/main/ets/pages/ProjectHome.ets",
+      "size": 301182,
+      "mtime_utc8": "2026-11-03T15:11:36.622+08:00",
+      "sha256": "cb52477c81b4c33bc9e98bd890404aef71fd599547258cbc0baba5a530b0606c"
+    },
+    {
+      "status": " M",
+      "path": "harmonyos/entry/src/main/ets/services/WidgetDataService.ets",
+      "size": 32301,
+      "mtime_utc8": "2026-11-03T14:49:26.296+08:00",
+      "sha256": "417f4f445aaf865f147452792e8b74dfa16b44461a05e7ba9ccb02bfb2829f8f"
+    },
+    {
+      "status": " M",
+      "path": "harmonyos/entry/src/main/ets/widget/pages/WidgetCard.ets",
+      "size": 15096,
+      "mtime_utc8": "2026-11-03T14:49:35.295+08:00",
+      "sha256": "b848e57ff1dc052d510fa32859fa7cad1a9803e6ad06187582271f85ba44dc14"
+    },
+    {
+      "status": " M",
+      "path": "harmonyos/entry/src/test/List.test.ets",
+      "size": 1553,
+      "mtime_utc8": "2026-11-03T15:05:24.155+08:00",
+      "sha256": "7413a8affba4dd8d68b45ed4d5f70e8a8ce185216189b17e3efa1c4c79719f9d"
+    },
+    {
+      "status": "??",
+      "path": "evidence/final-d/",
+      "size": null,
+      "mtime_utc8": null,
+      "sha256": null,
+      "note": "not-a-file (deleted/dir)"
+    },
+    {
+      "status": "??",
+      "path": "harmonyos/entry/src/main/ets/components/MissionWorkPacketView.ets",
+      "size": 11074,
+      "mtime_utc8": "2026-11-03T14:45:59.616+08:00",
+      "sha256": "ec0fd3241eb54941207e7bdc7d1e25fa72f239ba0ef7fcccf1ede53a6625c288"
+    },
+    {
+      "status": "??",
+      "path": "harmonyos/entry/src/main/ets/models/WorkPacket.ets",
+      "size": 46203,
+      "mtime_utc8": "2026-11-03T14:40:46.385+08:00",
+      "sha256": "4bdb426643162f45d2fa69e48e0dc799196806d9c5b6d1e7fd2166a0df3dcaf3"
+    },
+    {
+      "status": "??",
+      "path": "harmonyos/entry/src/test/WidgetHandoff.test.ets",
+      "size": 6453,
+      "mtime_utc8": "2026-11-03T14:53:58.177+08:00",
+      "sha256": "0e35d40ce2fc8e4313abceea2ea7352136ddfd3a5e8bbb124ba86c2d4049de78"
+    },
+    {
+      "status": "??",
+      "path": "harmonyos/entry/src/test/WorkPacketContract.test.ets",
+      "size": 13673,
+      "mtime_utc8": "2026-11-03T14:57:46.623+08:00",
+      "sha256": "0b08fde61b907e86d02345b3fbdecc21070f1075c2ed48bb0b1ca1195db4f080"
+    },
+    {
+      "status": "??",
+      "path": "harmonyos/entry/src/test/WorkPacketFixtures.ets",
+      "size": 81298,
+      "mtime_utc8": "2026-11-03T14:44:27.411+08:00",
+      "sha256": "8d01950f7cfa162252a225bc9eba4cad39cb1cf2c53b4ba339b7221f370d8eaa"
+    }
+  ],
+  "source_tree_digest": {
+    "algorithm": "sha256(sorted \"relpath|sha256\" lines, LF)",
+    "file_count": 221,
+    "sha256": "39646e8f6eeb0bd633b02b69b299329c4d9248431544654e0e15a76cbc375e68"
+  },
+  "note": "Lead 明确 FROZEN 后的候选源码快照；不是 4b69614 纯净基线。source_tree_digest 覆盖 harmonyos/entry/src + build-profile/AppScope/oh-package，不含 build/.test/oh_modules。"
+}

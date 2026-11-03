@@ -1,0 +1,41 @@
+# baseline 4b69614 harmonyos/entry/src/main/ets/pages/Index.ets :: 卡片意图消费（过期只清 question/approval/source，未传 output/receipt/version；登录成功后不消费）
+pattern: private openPendingNotification  first-match-line: 299
+  299:   private openPendingNotification(): void {
+  300:     const missionId = AppStorage.get<string>('pendingMissionId') ?? '';
+  301:     const missionProjectId = AppStorage.get<string>('pendingMissionProjectId') ?? '';
+  302:     if (missionId !== '' && missionProjectId !== '') {
+  303:       const questionId = AppStorage.get<string>('pendingQuestionId') ?? '';
+  304:       const approvalId = AppStorage.get<string>('pendingApprovalId') ?? '';
+  305:       const sourceId = AppStorage.get<string>('pendingSourceId') ?? '';
+  306:       const handoffExpiresAt = AppStorage.get<string>('pendingHandoffExpiresAt') ?? '';
+  307:       AppStorage.setOrCreate<string>('pendingMissionId', ''); AppStorage.setOrCreate<string>('pendingMissionProjectId', '');
+  308:       AppStorage.setOrCreate<string>('pendingQuestionId', ''); AppStorage.setOrCreate<string>('pendingApprovalId', '');
+  309:       AppStorage.setOrCreate<string>('pendingSourceId', ''); AppStorage.setOrCreate<string>('pendingMissionVersion', '');
+  310:       AppStorage.setOrCreate<string>('pendingHandoffExpiresAt', '');
+  311:       const expiry = handoffExpiresAt === '' ? 0 : Number(handoffExpiresAt);
+  312:       // 排队或冷启动后过期的定位意图不再指向旧问题，回到当前原委托。
+  313:       const expired = handoffIntentExpired(expiry, Date.now());
+  314:       if (expired) {
+  315:         promptAction.showToast({ message: '原卡片已过期，已回到当前委托；旧问题不会被当成新问题' });
+  316:       }
+  317:       router.pushUrl({ url: 'pages/MissionDetail', params: {
+  318:         projectId: missionProjectId, missionId,
+  319:         questionId: expired ? '' : questionId,
+  320:         approvalId: expired ? '' : approvalId,
+  321:         sourceId: expired ? '' : sourceId
+  322:       } }); return;
+  323:     }
+  324:     const projectId = AppStorage.get<string>('notificationProjectId') ?? '';
+  325:     const interventionId = AppStorage.get<string>('notificationInterventionId') ?? '';
+  326:     if (projectId === '' || interventionId === '') {
+  327:       return;
+  328:     }
+  329:     AppStorage.setOrCreate<string>('notificationProjectId', '');
+  330:     AppStorage.setOrCreate<string>('notificationInterventionId', '');
+  331:     router.pushUrl({
+  332:       url: 'pages/InterventionDetail',
+  333:       params: { projectId, interventionId }
+  334:     });
+  335:   }
+  336: 
+  337:   private async loadLlmSettings(): Promise<void> {

@@ -125,9 +125,30 @@ export struct GlobalFocusPanel {
     parts.push(item.projectTitle);
     return parts.join(' · ');
   }
+  private openMission(item: FocusEntry): void {
+    const state = item.workState;
+    router.pushUrl({ url: 'pages/MissionDetail', params: {
+      projectId: item.projectId,
+      missionId: item.id,
+      // 有原问题/提案时带上精确身份；没有时空字符串表示由详情读回当前对象，不另建任务。
+      questionId: state !== undefined ? (state.exactQuestionRef ?? '') : '',
+      approvalId: state !== undefined ? (state.exactApprovalRef ?? '') : '',
+      handoffMissionVersion: state !== undefined ? String(state.originalRef.version) : ''
+    } });
+  }
+  /** 焦点状态标签：停止请求在途/额度等待/UNKNOWN 不写成已停止或成功。 */
+  private focusStatusText(item: FocusEntry): string {
+    const state = item.workState;
+    if (state !== undefined) {
+      if (state.reasonCode === 'STOP_REQUESTED_IN_FLIGHT') { return '停止请求待结算'; }
+      if (state.reasonCode === 'DAILY_BUDGET_WAITING') { return '等待额度恢复'; }
+      return workPhaseLabel(state.phase);
+    }
+    return focusStatusLabel(item.status);
+  }
   private open(item: FocusEntry, kind: string): void {
     if (kind === 'project') { router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: item.projectId } }); return; }
-    if (kind === 'mission') router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: item.projectId, missionId: item.id } });
+    if (kind === 'mission') this.openMission(item);
     else if (kind === 'reminder') router.pushUrl({ url: 'pages/InterventionDetail', params: { projectId: item.projectId, interventionId: item.id } });
     else router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: item.projectId,
       tab: kind === 'action' ? 'actions' : 'memory', actionId: kind === 'action' ? item.id : '', cardId: kind === 'record' ? item.id : '' } });
@@ -146,7 +167,7 @@ export struct GlobalFocusPanel {
   @Builder private Primary(item: FocusEntry) {
     Column({ space: 12 }) {
       Row({ space: 8 }) {
-        PMStatusPill({ label: this.view.primaryContext !== undefined && this.view.primaryContext !== null && this.view.primaryContext.freshness !== 'FRESH' ? '部分摘要暂不可用' : this.kind(item) === 'reminder' ? '待你核对' : this.kind(item) === 'record' ? '最近记录' : item.workState ? workPhaseLabel(item.workState!.phase) : focusStatusLabel(item.status),
+        PMStatusPill({ label: this.view.primaryContext !== undefined && this.view.primaryContext !== null && this.view.primaryContext.freshness !== 'FRESH' ? '部分摘要暂不可用' : this.kind(item) === 'reminder' ? '待你核对' : this.kind(item) === 'record' ? '最近记录' : this.focusStatusText(item),
           tone: item.status === 'PAUSED' || item.status === 'FAILED' ? 'risk' : 'warning' })
         Text(item.projectTitle).fontSize(12).fontColor(PMColors.INK_TERTIARY).layoutWeight(1)
           .textAlign(TextAlign.End).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })

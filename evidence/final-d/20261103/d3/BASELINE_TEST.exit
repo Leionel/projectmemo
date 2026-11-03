@@ -1,0 +1,50 @@
+{
+  "schema": "d3-frozen-test/v1",
+  "command": "npm.cmd run harmony:test",
+  "cwd": "D:/Projects/hongmen-final-d-harmony-native",
+  "head": "4b696141435825a3582816e8e449c0e0cf013f29",
+  "branch": "codex/final-d-harmony-native",
+  "dirty_count_at_start": 20,
+  "source_tree_digest": {
+    "algorithm": "sha256(sorted \"relpath|sha256\" lines, LF)",
+    "file_count": 221,
+    "sha256": "39646e8f6eeb0bd633b02b69b299329c4d9248431544654e0e15a76cbc375e68"
+  },
+  "start_utc8": "2026-11-03T15:14:38.151+08:00",
+  "end_utc8": "2026-11-03T15:15:40.401+08:00",
+  "duration_sec": 62.2,
+  "exit_code": 0,
+  "test_result_summary": "Tests run: 133, Failure: 0, Error: 0, Pass: 133, Ignore: 0",
+  "counts": {
+    "tests_run": 133,
+    "failure": 0,
+    "error": 0,
+    "pass": 133,
+    "ignore": 0
+  },
+  "hypium_log_result_failure_lines": 0,
+  "hypium_log_result_success_lines": 0,
+  "test_result_file": {
+    "path": "/harmonyos/entry/.test/default/intermediates/test/coverage_data/test_result.txt",
+    "size": 8922,
+    "mtime_utc8": "2026-11-03T15:15:39.034+08:00"
+  },
+  "log": "evidence/final-d/20261103/d3/BASELINE_TEST.log",
+  "snapshot": "evidence/final-d/20261103/d3/FROZEN_SNAPSHOT.json",
+  "result_status": "PASS",
+  "note": "Lead FROZEN 后候选快照；真实分母取 test_result.txt。hvigor exit 0 但 hypium 有失败时按 FAIL_HYPIUM_COUNTS 记，不把 exit 0 当 PASS；缺汇总行记刻意 UNKNOWN，不沿用旧 109。",
+  "log_tail": [
+    " Function may throw exceptions. Special handling is required.",
+    "\u001b[39m\u001b[39m",
+    "\u001b[39m",
+    "> hvigor \u001b[32mFinished :entry:default@UnitTestArkTS... after 17 s 910 ms \u001b[39m",
+    "> hvigor \u001b[32mWindows_NT\u001b[39m",
+    "\u001b[32m[2026-11-03T15:15:39.581] [INFO] default - \u001b[39mFinished write html report",
+    "> hvigor \u001b[32mFinished :entry:default@GenerateUnitTestResult... after 5 s 858 ms \u001b[39m",
+    "> hvigor \u001b[32mFinished :entry:test... after 1 ms \u001b[39m",
+    "> hvigor \u001b[32mBUILD SUCCESSFUL in 53 s 982 ms \u001b[39m",
+    "\u001b[32m[2026-11-03T15:15:40.000] [INFO] default - \u001b[39mFinished file written successfully",
+    "",
+    "[harmony-test] Tests run: 133, Failure: 0, Error: 0, Pass: 133, Ignore: 0"
+  ]
+}

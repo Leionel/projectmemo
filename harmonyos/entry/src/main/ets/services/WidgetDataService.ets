@@ -7,7 +7,7 @@ import { Project, ProjectDashboard } from '../models/Project';
 import { ProjectDetail } from '../models/Memory';
 import { ReentryData } from '../models/Reentry';
 import { Mission } from '../models/Mission';
-import { MissionWidgetSnapshot, visibleMissionWidget, widgetAttentionLabel, widgetSyncLabel } from '../common/MissionWidgetContract';
+import { MissionWidgetSnapshot, visibleMissionWidget, widgetAttentionLabel, widgetSyncLabel, widgetSnapshotExpiry, widgetTimeText } from '../common/MissionWidgetContract';
 import { missionStatusLabel } from '../common/MissionContract';
 
 const TAG = 'WidgetDataService';
@@ -192,27 +192,34 @@ export class WidgetDataService {
       'missionQuestionId': '',
       'missionApprovalId': '',
       'missionAttention': '',
-      'missionSync': ''
+      'missionSync': '',
+      'missionVersion': 0,
+      'missionExpiresAt': 0
     };
     try {
+      const now = Date.now();
       const store = preferences.getPreferencesSync(context, { name: PREFS_NAME });
       const auth = preferences.getPreferencesSync(context, { name: 'projectmemo_auth_store' });
+      const token = auth.getSync('access_token', '') as string;
       const expiresAt = Date.parse(auth.getSync('expires_at', '') as string);
       const user = JSON.parse(auth.getSync('user_info', '{}') as string) as Record<string, string>;
       const snapshot = JSON.parse(store.getSync('mission_snapshot', '{}') as string) as MissionWidgetSnapshot;
       const projectId = store.getSync('active_project_id', '') as string;
-      if (!Number.isFinite(expiresAt) || expiresAt <= Date.now() || !visibleMissionWidget(snapshot, user['id'] ?? '', projectId, Date.now())) {
+      if (token === '' || !Number.isFinite(expiresAt) || expiresAt <= now ||
+        !visibleMissionWidget(snapshot, user['id'] ?? '', projectId, now)) {
         return empty;
       }
+      const attention = widgetAttentionLabel(snapshot, now);
       return {
         'missionId': snapshot.missionId,
         'missionProjectId': snapshot.projectId,
-        'missionSummary': widgetAttentionLabel(snapshot, Date.now()),
+        'missionSummary': attention,
         'missionUpdatedAt': snapshot.updatedAt,
         'missionQuestionId': snapshot.questionId,
         'missionApprovalId': snapshot.approvalId,
-        'missionAttention': widgetAttentionLabel(snapshot, Date.now()),
+        'missionAttention': attention,
         'missionSync': widgetSyncLabel(snapshot),
+        'missionVersion': snapshot.missionVersion,
         'missionExpiresAt': snapshot.expiresAt
       };
     } catch {
@@ -220,14 +227,18 @@ export class WidgetDataService {
     }
   }
 
-  static clearMission(context: common.Context): Promise<void> {
+  /**
+   * 清除卡片上的私有快照。退出登录/会话失效后调用；403/404 明确失去项目权限时传入
+   * clearProjectSummary=true，连项目摘要一起清掉，卡片不能继续展示可操作的旧内容。
+   */
+  static clearMission(context: common.Context, clearProjectSummary: boolean = false): Promise<void> {
     WidgetDataService.missionGeneration++;
     return WidgetDataService.serializeMission(async () => {
       const store = await preferences.getPreferences(context, PREFS_NAME);
       await store.put('mission_snapshot', '{}');
       // 退出时同样清除旧项目摘要；卡片保留已注册formId，等待下一次认证同步。
       const auth = preferences.getPreferencesSync(context, { name: 'projectmemo_auth_store' });
-      if ((auth.getSync('access_token', '') as string) === '') {
+      if (clearProjectSummary || (auth.getSync('access_token', '') as string) === '') {
         await store.put(KEY_OWNER_ID, '');
         await store.put(KEY_PROJECT_ID, '');
         await store.put(KEY_TITLE, '忆程项目看板');
@@ -263,7 +274,14 @@ export class WidgetDataService {
 
   static updateMission(context: common.Context, mission: Mission, ownerId: string, expiresAt: string): Promise<void> {
     const generation = WidgetDataService.missionGeneration;
+    // 写入前捕获调用时会话；串行队列真正执行时再核对，迟到响应不能写进换号后的卡片。
+    const callAuth = preferences.getPreferencesSync(context, { name: 'projectmemo_auth_store' });
+    const callToken = callAuth.getSync('access_token', '') as string;
+    const callExpiresAt = callAuth.getSync('expires_at', '') as string;
     return WidgetDataService.serializeMission(async () => {
+      if (mission.id === '') {
+        return;
+      }
       const store = await preferences.getPreferences(context, PREFS_NAME);
       if (ownerId === '' || (await store.get('active_project_id', '')) !== mission.projectId) {
         return;
@@ -271,7 +289,8 @@ export class WidgetDataService {
       const auth = preferences.getPreferencesSync(context, { name: 'projectmemo_auth_store' });
       const user = JSON.parse(auth.getSync('user_info', '{}') as string) as Record<string, string>;
       if (generation !== WidgetDataService.missionGeneration || user['id'] !== ownerId ||
-        auth.getSync('expires_at', '') !== expiresAt || (auth.getSync('access_token', '') as string) === '') {
+        auth.getSync('expires_at', '') !== expiresAt || auth.getSync('access_token', '') !== callToken ||
+        callToken === '') {
         return;
       }
       const snapshot = new MissionWidgetSnapshot();
@@ -279,17 +298,20 @@ export class WidgetDataService {
       snapshot.projectId = mission.projectId;
       snapshot.missionId = mission.id;
       snapshot.status = mission.status;
+      snapshot.phase = mission.workState?.phase ?? '';
+      snapshot.reasonCode = mission.workState?.reasonCode ?? '';
       snapshot.pendingCount = mission.approvals.length + (mission.question ? 1 : 0);
       // 精确定位原问题/提案：卡片点开的是同一个对象与同一版，不是相似的新任务。
       snapshot.questionId = mission.question?.id ?? '';
       snapshot.approvalId = mission.approvals.length > 0 ? mission.approvals[0].id : '';
       snapshot.missionVersion = mission.version;
       snapshot.waitingFor = mission.workState?.nextActor ?? '';
-      snapshot.observedAt = mission.workState?.observedAt ?? '';
+      // observedAt 只放 Worker 成功观察时间；同步时刻单独记在 updatedAt，两者不互相冒充。
+      snapshot.observedAt = widgetTimeText(mission.workState?.observedAt ?? '');
       snapshot.nextCheckAt = mission.workState?.nextCheckAt ?? '';
-      snapshot.updatedAt = new Date().toLocaleString();
-      // 同时受会话期限与 5 分钟缓存期限约束。
-      snapshot.expiresAt = Math.min(Date.now() + 300000, Date.parse(expiresAt));
+      snapshot.updatedAt = widgetTimeText(new Date().toISOString());
+      // 同时受会话期限与 5 分钟缓存期限约束，取较早值；会话期限不可解析时不给卡片延长缓存。
+      snapshot.expiresAt = widgetSnapshotExpiry(Date.now(), expiresAt !== '' ? expiresAt : callExpiresAt);
       await store.put('mission_snapshot', JSON.stringify(snapshot));
       await store.flush();
       await WidgetDataService.pushMission(context);

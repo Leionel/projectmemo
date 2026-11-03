@@ -1,0 +1,9 @@
+# baseline 4b69614 harmonyos/entry/src/main/ets/pages/FocusConversation.ets :: 401/403/404 一律按登录失效清空，无 SESSION_CHANGED/403 页面退出处理
+pattern: private fail(e: Error)  first-match-line: 139
+  139:   private fail(e: Error): void {
+  140:     this.error = e.message || '讨论暂不可用';
+  141:     if (e instanceof ApiError && [401, 403, 404].includes(e.status)) { this.expired(); }
+  142:   }
+  143:   private async create(project: boolean = false): Promise<void> {
+  144:     if (this.busy) { return; }
+  145:     const epoch = ++this.generation; this.busy = true; this.error = '';

@@ -1,0 +1,11 @@
+# baseline 4b69614 harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets :: 焦点打开 mission 不携带 exactQuestionRef/exactApprovalRef/version
+pattern: private open(item  first-match-line: 128
+  128:   private open(item: FocusEntry, kind: string): void {
+  129:     if (kind === 'project') { router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: item.projectId } }); return; }
+  130:     if (kind === 'mission') router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: item.projectId, missionId: item.id } });
+  131:     else if (kind === 'reminder') router.pushUrl({ url: 'pages/InterventionDetail', params: { projectId: item.projectId, interventionId: item.id } });
+  132:     else router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: item.projectId,
+  133:       tab: kind === 'action' ? 'actions' : 'memory', actionId: kind === 'action' ? item.id : '', cardId: kind === 'record' ? item.id : '' } });
+  134:   }
+  135:   private askReason(item: FocusEntry): void {
+  136:     router.pushUrl({ url: 'pages/FocusConversation', params: { projectId: item.projectId, originKind: 'INTERVENTION', originId: item.id } });

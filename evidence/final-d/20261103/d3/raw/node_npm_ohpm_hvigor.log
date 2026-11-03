@@ -1,0 +1,24 @@
+probe_time_utc8=2026-11-03T14:38:56.676+08:00
+--- system node/npm ---
+node --version => v24.16.0
+npm.cmd --version => 11.15.0
+node path => C:\Program Files\nodejs\node.exe
+npm path => C:\Program Files\nodejs\npm.cmd
+--- DevEco bundled node ---
+deveco node => v18.20.1
+--- hvigor ---
+hvigorw.js exists=True
+hvigor package version=6.24.4 name=@ohos/hvigor
+hvigor-ohos-plugin version=6.24.4
+--- ohpm ---
+ohpm_candidate D:\Program Files\Huawei\DevEco Studio\tools\ohpm\bin\ohpm.bat exists=True
+ohpm_candidate D:\Program Files\Huawei\DevEco Studio\tools\ohpm\bin\ohpm exists=True
+ohpm_candidate D:\Program Files\Huawei\DevEco Studio\sdk\default\openharmony\toolchains\ohpm.bat exists=False
+ohpm --version => 6.1.2.285
+--- java ---
+jbr java => openjdk version "21.0.8" 2025-07-15
+OpenJDK Runtime Environment JBR-21.0.8+1-1038.71-jcef (build 21.0.8+1-b1038.71)
+OpenJDK 64-Bit Server VM JBR-21.0.8+1-1038.71-jcef (build 21.0.8+1-b1038.71, mixed mode, sharing)
+JAVA_HOME env=
+DEVECO_HOME env=D:\Program Files\Huawei\DevEco Studio
+DEVECO_SDK_HOME env=

@@ -1,0 +1,71 @@
+probe_time_utc8=2026-11-03T14:39:26.460+08:00
+--- sdk/default tree depth3 ---
+L1: D:\Program Files\Huawei\DevEco Studio\sdk\default\hms
+L1: D:\Program Files\Huawei\DevEco Studio\sdk\default\openharmony
+L1: D:\Program Files\Huawei\DevEco Studio\sdk\default\sdk-pkg.json
+PKG D:\Program Files\Huawei\DevEco Studio\sdk\default\openharmony\ets\oh-uni-package.json
+{
+  "apiVersion": "24",
+  "displayName": "Ets",
+  "meta": {
+    "metaVersion": "3.0.0"
+  },
+  "path": "ets",
+  "releaseType": "Release",
+  "version": "6.1.1.125"
+}
+PKG D:\Program Files\Huawei\DevEco Studio\sdk\default\openharmony\js\oh-uni-package.json
+{
+  "apiVersion": "24",
+  "displayName": "Js",
+  "meta": {
+    "metaVersion": "3.0.0"
+  },
+  "path": "js",
+  "releaseType": "Release",
+  "version": "6.1.1.125"
+}
+PKG D:\Program Files\Huawei\DevEco Studio\sdk\default\openharmony\native\oh-uni-package.json
+{
+  "apiVersion": "24",
+  "displayName": "Native",
+  "meta": {
+    "metaVersion": "3.0.0"
+  },
+  "path": "native",
+  "releaseType": "Release",
+  "version": "6.1.1.125"
+}
+PKG D:\Program Files\Huawei\DevEco Studio\sdk\default\openharmony\previewer\oh-uni-package.json
+{
+  "apiVersion": "24",
+  "displayName": "Previewer",
+  "meta": {
+    "metaVersion": "3.0.0"
+  },
+  "path": "previewer",
+  "releaseType": "Release",
+  "version": "6.1.1.125"
+}
+PKG D:\Program Files\Huawei\DevEco Studio\sdk\default\openharmony\toolchains\oh-uni-package.json
+{
+  "apiVersion": "24",
+  "displayName": "Toolchains",
+  "meta": {
+    "metaVersion": "3.0.0"
+  },
+  "path": "toolchains",
+  "releaseType": "Release",
+  "version": "6.1.1.125"
+}
+--- sdk/default/openharmony children ---
+OH: ets d----
+OH: js d----
+OH: native d----
+OH: previewer d----
+OH: toolchains d----
+--- local.properties in D tree ---
+harmonyos/local.properties ABSENT
+--- oh_modules / hypium presence ---
+harmonyos/oh_modules exists
+lock: D:\Projects\hongmen-final-d-harmony-native\harmonyos\oh-package-lock.json5

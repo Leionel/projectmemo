@@ -1,0 +1,9 @@
+# baseline 4b69614 harmonyos/entry/src/main/ets/components/CopilotContinuationCard.ets :: 打开原委托未带版本线索；空 mission id 仍会打开详情列表
+pattern: private open(id  first-match-line: 21
+   21:   private open(id: string): void {
+   22:     const m = this.suggestion.mission;
+   23:     router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: this.suggestion.projectId, missionId: id,
+   24:       questionId: m?.questionId ?? '', approvalId: m?.approvalId ?? '', outputId: m?.outputId ?? '', revision: m?.outputRevision?.toString() ?? '' } });
+   25:   }
+   26:   private async submit(confirm: boolean): Promise<void> {
+   27:     if (this.busy) return;

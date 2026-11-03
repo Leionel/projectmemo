@@ -10,6 +10,7 @@ import { GoalQuestionPanel } from '../components/GoalQuestionPanel';
 import { ProjectImpactPanel } from '../components/ProjectImpactPanel';
 import { MissionReadTarget } from '../models/MissionReadback';
 import { MissionReadbackView } from '../components/MissionReadbackView';
+import { WorkPacketActionView } from '../models/WorkPacket';
 import { failedReadState } from '../common/ReadState';
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
@@ -82,6 +83,10 @@ struct MissionDetail {
   private missionId: string = '';
   private createRequested: boolean = false;
   private directCreate: boolean = false;
+  // 卡片/通知带来的历史定位线索：只提示不授权，当前对象仍以服务端读回为准。
+  private handoffVersion: string = '';
+  private handoffExpired: boolean = false;
+  private handoffNoticeShown: boolean = false;
   private afterSeq: number = 0;
   private timer: number = -1;
   private visible: boolean = false;
@@ -109,6 +114,8 @@ struct MissionDetail {
     this.readTarget.outputId = params?.['outputId'] ?? ''; this.readTarget.revision = params?.['revision'] ?? ''; this.readTarget.receiptId = params?.['receiptId'] ?? ''; this.readTarget.sourceId = params?.['sourceId'] ?? '';
     this.createRequested = params?.['mode'] === 'create';
     this.directCreate = this.createRequested;
+    this.handoffVersion = params?.['handoffMissionVersion'] ?? '';
+    this.handoffExpired = params?.['handoffExpired'] === '1';
   }
   onPageShow(): void {
     this.visible = true;
@@ -143,6 +150,8 @@ struct MissionDetail {
       this.stop(); this.missionUiEnabled = false; this.mission = new Mission(); this.events = []; this.missions = [];
       this.candidates = []; this.approval = null; this.adoption = null; this.preview = null; this.form = ''; this.answer = '';
       this.editSnapshot = new Mission();
+      // 明确失去项目/委托权限时同时清掉系统卡片上的私有快照，旧内容不能继续可操作。
+      WidgetDataService.clearMission(getContext(this), true).catch(() => {});
     }
 
   }
@@ -175,6 +184,20 @@ struct MissionDetail {
         if (this.mission.question?.id !== detail.question?.id) { this.answer = ''; this.selectedSources = []; this.preview = null; }
         if (this.mission.version !== detail.version) { this.preview = null; this.approval = null; this.adoption = null; }
         this.mission = detail; this.events = mergeMissionEvents(this.events, batch.events); this.afterSeq = batch.nextAfterSeq;
+        if (!this.handoffNoticeShown) {
+          if (this.handoffExpired) {
+            // 过期卡片的旧问题/提案不会作为执行入口：清空定位目标，回到当前委托重新核对。
+            this.handoffNoticeShown = true;
+            this.readTarget = new MissionReadTarget();
+            this.notice = '原卡片已过期，已回到当前委托；旧问题/提案需重新核对，不会被自动选中或批准。';
+          } else if (this.handoffVersion !== '') {
+            const recorded = Number(this.handoffVersion);
+            if (!Number.isNaN(recorded) && detail.version > recorded) {
+              this.handoffNoticeShown = true;
+              this.notice = `卡片记录的是 v${this.handoffVersion}，当前已是 v${detail.version}：已按当前对象重新核对，不会自动选中或批准旧提案。`;
+            }
+          }
+        }
         if (capability.widgetEnabled) await WidgetDataService.updateMission(getContext(this), detail, SessionStore.getUser().id, SessionStore.getExpiresAt());
         else await WidgetDataService.clearMission(getContext(this));
         if (detail.status === 'WAITING_INPUT') {
@@ -212,6 +235,7 @@ struct MissionDetail {
     this.stop(); this.missionId = id; this.mission = new Mission(); this.events = []; this.afterSeq = 0;
     this.candidates = []; this.preview = null; this.adoption = null; this.approval = null; this.form = '';
     this.answer = ''; this.error = ''; this.notice = ''; this.stablePolls = 0;
+    this.handoffVersion = ''; this.handoffExpired = false; this.handoffNoticeShown = false;
     this.showGoal = false; this.showExecution = false; this.showSettings = false; this.showOlderOutputs = false; this.detailView = 'overview';
     this.refresh();
   }
@@ -275,8 +299,65 @@ struct MissionDetail {
       this.approval = null; this.notice = '请求已受理，请查看服务端状态与执行回执';
       // 补料/答复等结果未必推进 missionVersion（如关联被保留），回执区需主动重读。
       this.readbackRefreshKey++;
-    } catch (e) { this.fail(e); this.approval = null; }
+    } catch (e) {
+      // 409（含 WORK_PACKET_AUTHORITY_CHANGED）：服务端拒绝旧版本/旧授权。
+      // 保留答复与已选资料草稿，重新读取当前状态后再提交；不当作已成功，也不重复执行。
+      const status = e instanceof ApiError ? e.status : 0;
+      if (status === 409) {
+        this.notice = '当前版本或授权已变化，草稿与所选资料已保留；请按最新状态重新核对后再提交。';
+        if (action === 'approval') this.approval = null;
+        this.readbackRefreshKey++;
+      } else {
+        this.fail(e); this.approval = null;
+      }
+    }
     finally { this.busy = false; this.refresh(); }
+  }
+  /**
+   * 工作包主动作只路由到原对象：原问题/原提案/原结果/原委托。
+   * 旧问题或已替代的提案回到当前委托重新核对，不生成另一条任务，
+   * 也不新增客户端批准端点；版本与幂等仍由原服务端命令校验。
+   */
+  private packetAction(action: WorkPacketActionView): void {
+    if (this.busy) return;
+    if (action.kind === 'ANSWER_QUESTION') {
+      const currentQuestion = this.mission.question !== null ? this.mission.question.id : '';
+      if (this.mission.status === 'WAITING_INPUT' && action.targetId !== '' && action.targetId === currentQuestion) {
+        this.detailView = 'overview';
+        this.notice = '已定位到当前待补料问题；请在下方原问题处补充。';
+      } else {
+        this.notice = '原问题已变化或已结束，已回到当前委托；旧问题不会被当成新问题，也不会自动提交。';
+      }
+      this.readbackRefreshKey++; this.refresh(); return;
+    }
+    if (action.kind === 'REVIEW_APPROVAL') {
+      const pending = this.mission.approvals.find((item: MissionApproval) => item.id === action.targetId);
+      if (pending !== undefined && this.mission.status === 'WAITING_APPROVAL') {
+        this.approval = pending; this.reviewedVersion = this.mission.version;
+      } else {
+        this.notice = '原提案已失效或被替代，已回到当前委托；请重新核对服务端当前提案，不会生成新的批准请求。';
+        this.readbackRefreshKey++; this.refresh();
+      }
+      return;
+    }
+    if (action.kind === 'RESUME_DELEGATION') {
+      if (this.mission.status === 'PAUSED') { this.command('resume'); }
+      else { this.notice = '当前状态不需要继续委托；已重新读取服务端状态。'; this.readbackRefreshKey++; this.refresh(); }
+      return;
+    }
+    if (action.kind === 'VIEW_RESULT' || action.kind === 'REVIEW_FAILURE') {
+      this.detailView = 'progress';
+      this.notice = action.kind === 'VIEW_RESULT' ? '已定位到原结果与回执；完成状态仍以原回执为准。' : '已定位到执行记录；失败原因与已执行结果分别保留。';
+      return;
+    }
+    // RECHECK_AUTHORITY / CHECK_UNKNOWN_EFFECT / CHECK_STOP_SETTLEMENT：只重新读取，不用读取核销 UNKNOWN。
+    this.notice = action.kind === 'CHECK_STOP_SETTLEMENT'
+      ? '已重新读取服务端状态；停止请求在结算前仍显示为未完成。'
+      : action.kind === 'CHECK_UNKNOWN_EFFECT'
+        ? '已重新读取服务端状态；读取不会核销未结算效果，仍以原请求/回执为准。'
+        : '已重新读取服务端状态；请按当前版本与许可再次核对。';
+    this.readbackRefreshKey++;
+    this.refresh();
   }
   private async cancel(): Promise<void> {
     const result = await promptAction.showDialog({ title: '取消长期委托', message: '停止后续执行，保留已有成果与审批历史。', buttons: [{ text: '返回', color: '#64748B' }, { text: '确认取消', color: '#B91C1C' }] });
@@ -535,10 +616,16 @@ struct MissionDetail {
       }.width('100%').alignItems(HorizontalAlign.Start).padding(PMSpacing.LG)
         .backgroundColor(PMColors.SURFACE).borderRadius(PMRadius.CARD)
         .border({ width: 1, color: PMColors.BORDER_SUBTLE })
+      MissionReadbackView({
+        missionId: this.missionId, target: this.readTarget, missionVersion: this.mission.version,
+        refreshKey: this.readbackRefreshKey, targetKey: JSON.stringify(this.readTarget),
+        mode: 'packet', inlinePrimaryAction: true,
+        onPrimaryAction: (action: WorkPacketActionView): void => { this.packetAction(action); }
+      })
       Column({ space: 6 }) {
         if (this.mission.workState) { Text(this.mission.workState.reasonText).fontSize(14).fontColor(PMColors.INK_SECONDARY).lineHeight(21) }
         if (this.mission.workingObjective) { Text('当前重点：' + this.mission.workingObjective).fontSize(14).fontColor(PMColors.INK_SECONDARY).lineHeight(21) }
-        if (this.mission.status === 'RUNNING' && (this.mission.cancelRequestedAt || this.mission.pauseRequestedAt)) { Text(this.mission.cancelRequestedAt ? '取消请求已受理，等待当前步骤停止' : '暂停请求已受理，等待当前步骤停止').fontColor(PMColors.WARNING) }
+        if (this.mission.status === 'RUNNING' && (this.mission.cancelRequestedAt || this.mission.pauseRequestedAt)) { Text(this.mission.cancelRequestedAt ? '已收到取消请求，当前在途步骤尚未结算；不会继续派发新步骤' : '已收到暂停请求，当前在途步骤尚未结算；不会继续派发新步骤').fontColor(PMColors.WARNING) }
         if (this.readState === 'lastKnown') { Text(`上次读取于 ${this.updatedAt}；当前为历史状态，刷新成功后可操作。`).fontSize(12).fontColor(PMColors.RISK) }
       }.width('100%').alignItems(HorizontalAlign.Start)
       if (this.mission.status === 'WAITING_INPUT' && this.mission.question !== null) { this.WaitingInput() }
@@ -732,7 +819,12 @@ struct MissionDetail {
           }.width('100%').alignItems(HorizontalAlign.Start)
         }, (output: MissionOutput) => output.id)
       }.width('100%').alignItems(HorizontalAlign.Start)
-      MissionReadbackView({ missionId: this.missionId, target: this.readTarget, missionVersion: this.mission.version, refreshKey: this.readbackRefreshKey, targetKey: JSON.stringify(this.readTarget) })
+      MissionReadbackView({
+        missionId: this.missionId, target: this.readTarget, missionVersion: this.mission.version,
+        refreshKey: this.readbackRefreshKey, targetKey: JSON.stringify(this.readTarget),
+        mode: 'full', inlinePrimaryAction: false,
+        onPrimaryAction: (action: WorkPacketActionView): void => { this.packetAction(action); }
+      })
       GoalQuestionPanel({ projectId: this.projectId, missionId: this.missionId, compact: true })
       ProjectImpactPanel({ projectId: this.projectId })
     }.width('100%').alignItems(HorizontalAlign.Start)

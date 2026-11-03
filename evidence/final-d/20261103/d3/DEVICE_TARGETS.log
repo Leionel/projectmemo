@@ -1,0 +1,14 @@
+# DEVICE_TARGETS passive sample
+sample_utc8=2026-11-03T14:53:50.051+08:00
+cmd: hdc list targets -v
+COM3		UART	Ready	unknown...	hdc
+COM4		UART	Ready	unknown...	hdc
+emulator_processes: 0
+port5555_listen: 0
+# DEVICE_TARGETS passive sample
+sample_utc8=2026-11-03T15:07:42.400+08:00
+cmd: hdc list targets -v
+COM3		UART	Ready	unknown...	hdc
+COM4		UART	Ready	unknown...	hdc
+emulator_processes: 0
+port5555_listen: 0

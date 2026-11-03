@@ -1,0 +1,37 @@
+# baseline 4b69614 harmonyos/entry/src/main/ets/services/WidgetDataService.ets :: owner/session 重检与 expiresAt=Math.min(now+5min, session)；observedAt 原样写入 ISO
+pattern: static updateMission  first-match-line: 264
+  264:   static updateMission(context: common.Context, mission: Mission, ownerId: string, expiresAt: string): Promise<void> {
+  265:     const generation = WidgetDataService.missionGeneration;
+  266:     return WidgetDataService.serializeMission(async () => {
+  267:       const store = await preferences.getPreferences(context, PREFS_NAME);
+  268:       if (ownerId === '' || (await store.get('active_project_id', '')) !== mission.projectId) {
+  269:         return;
+  270:       }
+  271:       const auth = preferences.getPreferencesSync(context, { name: 'projectmemo_auth_store' });
+  272:       const user = JSON.parse(auth.getSync('user_info', '{}') as string) as Record<string, string>;
+  273:       if (generation !== WidgetDataService.missionGeneration || user['id'] !== ownerId ||
+  274:         auth.getSync('expires_at', '') !== expiresAt || (auth.getSync('access_token', '') as string) === '') {
+  275:         return;
+  276:       }
+  277:       const snapshot = new MissionWidgetSnapshot();
+  278:       snapshot.ownerId = ownerId;
+  279:       snapshot.projectId = mission.projectId;
+  280:       snapshot.missionId = mission.id;
+  281:       snapshot.status = mission.status;
+  282:       snapshot.pendingCount = mission.approvals.length + (mission.question ? 1 : 0);
+  283:       // 精确定位原问题/提案：卡片点开的是同一个对象与同一版，不是相似的新任务。
+  284:       snapshot.questionId = mission.question?.id ?? '';
+  285:       snapshot.approvalId = mission.approvals.length > 0 ? mission.approvals[0].id : '';
+  286:       snapshot.missionVersion = mission.version;
+  287:       snapshot.waitingFor = mission.workState?.nextActor ?? '';
+  288:       snapshot.observedAt = mission.workState?.observedAt ?? '';
+  289:       snapshot.nextCheckAt = mission.workState?.nextCheckAt ?? '';
+  290:       snapshot.updatedAt = new Date().toLocaleString();
+  291:       // 同时受会话期限与 5 分钟缓存期限约束。
+  292:       snapshot.expiresAt = Math.min(Date.now() + 300000, Date.parse(expiresAt));
+  293:       await store.put('mission_snapshot', JSON.stringify(snapshot));
+  294:       await store.flush();
+  295:       await WidgetDataService.pushMission(context);
+  296:     });
+  297:   }
+  298: 

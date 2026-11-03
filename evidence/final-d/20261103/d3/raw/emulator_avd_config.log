@@ -1,0 +1,271 @@
+probe_time_utc8=2026-11-03T14:41:30.260+08:00
+--- Pura 90 config.ini ---
+name=Pura 90
+deviceType=phone
+deviceModel=PHEMU-FD00
+productModel=Pura 90
+vendorCountry=CN
+uuid=4612606f-891a-4c01-b1c5-a08076d014f2
+configPath=C:/Users/Administrator/AppData/Roaming/Huawei/DevEcoStudio6.1
+logPath=C:/Users/Administrator/AppData/Local/Huawei/DevEcoStudio6.1/log
+sdkPath=D:/Program Files/Huawei/DevEco Studio/sdk
+imageSubPath=system-image/HarmonyOS-6.1.1/phone_all_x86/
+instancePath=D:/Huawei/Emulator/deployed/Pura 90
+os.osVersion=HarmonyOS 6.1.1(24)
+os.apiVersion=24
+os.softwareVersion=6.1.0.126
+os.isPublic=true
+hw.cpu.arch=x86_64
+hw.cpu.ncore=4
+hw.lcd.density=560
+hw.lcd.phy.height=156
+hw.lcd.phy.width=72
+hw.lcd.single.diagonalSize=6.8
+hw.lcd.single.height=2856
+hw.lcd.single.width=1320
+hw.lcd.number=1
+hw.ramSize=4096
+hw.dataPartitionSize=6144
+isCustomize=false
+hw.hdc.port=notset
+hiviewxPort=16556
+isHotBoot=false
+hw.lcd.single.CutoutPath=M517 45 L802 45 v 103 h -285 Z
+isUseWhitelist=false
+
+--- hardware-qemu.ini ---
+[General]
+hw.cpu.arch=x86_64
+hw.cpu.ncore=4
+hw.ramSize=4096
+disk.systemPartition.initPath=C:/Users/Administrator/AppData/Local/Huawei/Sdk/system-image/HarmonyOS-6.1.1/phone_all_x86/system.img
+disk.vendorPartition.initPath=C:/Users/Administrator/AppData/Local/Huawei/Sdk/system-image/HarmonyOS-6.1.1/phone_all_x86/vendor.img
+disk.dataPartition.path=C:/Users/Administrator/AppData/Local/Huawei/Sdk/system-image/HarmonyOS-6.1.1/phone_all_x86/userdata.img
+disk.dataPartition.size=6g
+disk.cachePartition.size=66m
+hvd.name=Pura 90
+hvd.id=Pura 90
+harmonyos.sdk.root=D:/Program Files/Huawei/DevEco Studio/sdk
+hmVersion=6.1.0.126
+
+--- Pura 90.ini ---
+hvd.ini.encoding=UTF-8
+path=D:/Huawei/Emulator/deployed/Pura 90
+
+--- lists.json ---
+[
+	{
+		"name":"Pura 90",
+		"apiVersion":"24",
+		"cpuNumber":"4",
+		"diagonalSize":"6.8",
+		"resolutionHeight":"2856",
+		"resolutionWidth":"1320",
+		"density":"560",
+		"memoryRamSize":"4096",
+		"dataDiskSize":"6144",
+		"path":"D:/Huawei/Emulator/deployed/Pura 90",
+		"type":"phone",
+		"uuid":"4612606f-891a-4c01-b1c5-a08076d014f2",
+		"version":"6.1.0.126",
+		"imageDir":"system-image/HarmonyOS-6.1.1/phone_all_x86/",
+		"showVersion":"HarmonyOS 6.1.1(24)",
+		"harmonyos.sdk.path":"D:/Program Files/Huawei/DevEco Studio/sdk",
+		"harmonyos.config.path":"C:/Users/Administrator/AppData/Roaming/Huawei/DevEcoStudio6.1",
+		"harmonyos.log.path":"C:/Users/Administrator/AppData/Local/Huawei/DevEcoStudio6.1/log",
+		"devModel":"PHEMU-FD00",
+		"model":"Pura 90",
+		"hw.apiName":"6.1.1",
+		"abi":"x86",
+		"lastStartTime":1793688041505,
+		"guestVersion":"HarmonyOS 6.1.0.126(SP1)"
+	}
+]
+--- huawei-settings.cfg ---
+[Id]
+uniqueId=ca82637e-3f5f-4f07-be96-8bfb35076f3e
+
+[Setting]
+image.language.name=0
+screenshot.savelocation=C:/Users/Administrator/Pictures
+
+[Sensor]
+hall.level=1
+posture.level=180
+hallAb.level=1
+postureAb.level=180
+newHall.level=0
+accel.x.level=0
+accel.y.level=9.8100004196167
+accel.z.level=0
+
+[Motion]
+rotation.x.level=0.092627
+rotation.y.level=-0.700992
+rotation.z.level=-0.700985
+rotation.w.level=0.092997
+rotation.status=0
+
+--- Emulator.log tail 80 ---
+2026-11-03 14:37:00.598 59048 [Info] [Skin.cpp(SetDefaultDisplayCutoutPath:1151)]DefaultDisplayCutoutPath =  "M517 45 L802 45 v 103 h -285 Z"
+2026-11-03 14:37:00.599 59048 [Info] [Skin.cpp(InitPhone:678)]Init Phone dpi =  560
+2026-11-03 14:37:00.686 41196 [Info] [CheckImage.cpp(CheckSign:127)]finish check image  "ramdisk.img"  result  0  cost  89
+2026-11-03 14:37:00.883 41196 [Info] [CheckImage.cpp(CheckSign:127)]finish check image  "bzImage"  result  0  cost  197
+2026-11-03 14:37:00.922 59048 [Info] [WidgetSettings.cpp(InitImageLanguageComboBox:247)]Init imge language to Index  0
+2026-11-03 14:37:02.337 648 [Info] [CheckImage.cpp(CheckSign:127)]finish check image  "vendor.img"  result  0  cost  1738
+2026-11-03 14:37:03.177 59048 [Warning] [(:0)]Cannot open file ':/light/charging-off.svg', because: No such file or directory
+2026-11-03 14:37:03.178 59048 [Warning] [(:0)]Cannot open file ':/light/charging-off.svg', because: No such file or directory
+2026-11-03 14:37:03.179 59048 [Warning] [(:0)]Cannot open file ':/light/charging-on.svg', because: No such file or directory
+2026-11-03 14:37:03.181 59048 [Warning] [(:0)]Cannot open file ':/light/charging-on.svg', because: No such file or directory
+2026-11-03 14:37:03.513 59048 [Warning] [LogUtil.cpp(OutputPath:246)]can not find file :  "$USER_HOME$/AppData/Roaming/Huawei/DevEcoStudio6.1/emulator/proxy.settings.pwd"
+2026-11-03 14:37:03.547 59048 [Info] [PlayerApiToolBar.cpp(UpdateOverflowButtonIcon:109)]":/light/overflow-default"
+2026-11-03 14:37:03.552 59048 [Info] [PlayerApiToolBar.cpp(UpdateOverflowButtonIcon:109)]":/light/overflow-hover"
+2026-11-03 14:37:03.614 59048 [Info] [ToolBarController.cpp(StackedActionAdder:231)]enable multi display
+2026-11-03 14:37:04.253 59048 [Info] [EmulatorWindowEvent.cpp(ShowBootAnimation:1306)]ShowBootAnimation.
+2026-11-03 14:37:04.340 59048 [Info] [CrashClient.cpp(StartCrashDetect:148)]StartCrash Detect.
+2026-11-03 14:37:04.356 59048 [Info] [CrashClient.cpp(StartCrashServer:404)]start crash server.
+2026-11-03 14:37:04.394 59048 [Warning] [QemuManager.cpp(HostFreeMemMonitor:797)]The host computer's memory is �� 1676  ,which is less than  3
+2026-11-03 14:37:05.053 648 [Info] [CheckImage.cpp(CheckSign:127)]finish check image  "userdata.img"  result  0  cost  2716
+2026-11-03 14:37:05.891 52644 [Info] [QemuManager.cpp(OnSystemReset:640)]System is reset
+2026-11-03 14:37:05.894 52644 [Info] [HdcClient.cpp(HdcDisConnect:555)]dicconnect hdc server
+2026-11-03 14:37:28.367 648 [Info] [CheckImage.cpp(CheckSign:127)]finish check image  "sys_prod.img"  result  0  cost  23313
+2026-11-03 14:38:47.313 41196 [Info] [CheckImage.cpp(CheckSign:127)]finish check image  "system.img"  result  0  cost  106429
+2026-11-03 14:39:04.416 9144 [Warning] [QemuManager.cpp(HostFreeMemMonitor:797)]The host computer's memory is �� 733  ,which is less than  3
+2026-11-03 14:39:59.718 59048 [Info] [EmulatorManager.cpp(void __cdecl StopMultiScreen:153)]Stop multiscreen before quit
+2026-11-03 14:39:59.719 59048 [Info] [EmulatorManager.cpp(void __cdecl RecordHardwareInfo:120)]record hardware info
+2026-11-03 14:39:59.721 59048 [Info] [HdcClient.cpp(IsHdcConnected:103)]wait for guest os boot completed
+2026-11-03 14:39:59.722 59048 [Critical] [EmulatorManager.cpp(void __cdecl RecordHardwareInfo:126)]df command return error data.
+2026-11-03 14:39:59.731 59048 [Info] [EmulatorManager.cpp(void __cdecl QuitEmulator:59)]quit emulator
+2026-11-03 14:39:59.732 59048 [Info] [CrashClient.cpp(StopCrashLog:522)]stop crash log dumper
+2026-11-03 14:39:59.733 59048 [Info] [CrashClient.cpp(DeleteDirectoryIfUnoccupied:697)]Directory deleted successfully: "D:/Huawei/Emulator/deployed/Pura 90/Log\\hilog_tmp_2026-11-03T143704"
+2026-11-03 14:39:59.734 59048 [Info] [HdcClient.cpp(StopKeepHdcAlive:75)]stop hdc keep-alive thread
+2026-11-03 14:39:59.741 59048 [Info] [HdcClient.cpp(HdcDisConnect:555)]dicconnect hdc server
+2026-11-03 14:39:59.869 59048 [Info] [CheckImage.cpp(StopAllCheckThread:153)]Check and stop all image check thread
+2026-11-03 14:39:59.946 59048 [Info] [CrashClient.cpp(~CrashClient:65)]delete pCrashHandel,crash-service normal quit
+2026-11-03 14:39:59.948 59048 [Info] [HdcClient.cpp(StopKeepHdcAlive:75)]stop hdc keep-alive thread
+2026-11-03 14:39:59.952 59048 [Info] [QemuManager.cpp(StopCheckGuestMem:410)]StopCheckGuestMem
+2026-11-03 14:39:59.953 59048 [Info] [QemuManager.cpp(StopCheckGuestStatus:562)]StopCheckGuestStatus
+2026-11-03 14:39:59.954 59048 [Info] [TraceTool.cpp(DisConnTracePipe:77)][TraceTool] trace pipe closed
+2026-11-03 14:39:59.954 59048 [Info] [TraceTool.cpp(DisConnTracePipe:79)][TraceTool] delete socket
+2026-11-03 14:40:41.848 42016 [Info] [TraceTool.cpp(InitPipe:27)][TraceTool] trace pipe name is: "\\\\.\\pipe\\trace_96037_commandPipe"
+2026-11-03 14:40:41.850 42016 [Info] [TraceTool.cpp(InitPipe:36)][TraceTool] connect successed
+2026-11-03 14:40:42.075 42016 [Warning] [SnUtil.cpp(CheckLogin:179)]User not logged in
+2026-11-03 14:40:42.075 42016 [Info] [SnUtil.cpp(CheckWhitelist:187)]isUseWhitelist is false. The user is not restricted.
+2026-11-03 14:40:42.077 50064 [Info] [HiviewxClient.cpp(GetPortFromConfig:128)]HiviewxClient read port:  16556
+2026-11-03 14:40:42.080 42016 [Info] [CheckRuntimeEnv.cpp(CheckWindowsCpu:430)]"sysInfo.currentCpuArchitecture: x86_64"
+2026-11-03 14:40:42.081 42016 [Info] [CheckRuntimeEnv.cpp(CheckAES:442)]"CPU brand: Intel(R) Core(TM) i7-14700HX"
+2026-11-03 14:40:42.081 42016 [Info] [CheckRuntimeEnv.cpp(CheckWindowsVersion:463)]"Windows Version: 10.0.26300"
+2026-11-03 14:40:42.092 42016 [Info] [CheckRuntimeEnv.cpp(CheckCommitCharge:502)]Emulator allocated virtual memory :  4
+2026-11-03 14:40:42.093 42016 [Warning] [CheckRuntimeEnv.cpp(CheckFreeDisk:534)]no 'freedisk' in config.
+2026-11-03 14:40:42.095 42016 [Info] [UiMain.cpp(void __cdecl InitFeatureConfig:88)]Enable Camera.
+2026-11-03 14:40:42.095 42016 [Info] [UiMain.cpp(void __cdecl InitFeatureConfig:92)]Enable front and back cameras.
+2026-11-03 14:40:42.096 42016 [Info] [UiMain.cpp(void __cdecl InitFeatureConfig:97)]Enable MultiDisplay Kernel Feature.
+2026-11-03 14:40:42.097 42016 [Info] [UiMain.cpp(void __cdecl InitFeatureConfig:106)]Enable Express Multi Touch.
+2026-11-03 14:40:42.097 42016 [Info] [UiMain.cpp(void __cdecl InitFeatureConfig:111)]Enable Sensor Configuration.
+2026-11-03 14:40:42.097 42016 [Info] [UiMain.cpp(void __cdecl InitFeatureConfig:116)]Enable Bgra Configuration.
+2026-11-03 14:40:42.109 42016 [Info] [CheckImage.cpp(CheckAllSign:88)]start check image
+2026-11-03 14:40:42.112 42016 [Info] [Skin.cpp(InitByDeviceType:620)]Emulator screen  "notCustomize"
+2026-11-03 14:40:42.112 42016 [Info] [Skin.cpp(SetDefaultDisplayCutoutPath:1151)]DefaultDisplayCutoutPath =  "M517 45 L802 45 v 103 h -285 Z"
+2026-11-03 14:40:42.116 42016 [Info] [Skin.cpp(InitPhone:678)]Init Phone dpi =  560
+2026-11-03 14:40:42.222 46744 [Info] [CheckImage.cpp(CheckSign:127)]finish check image  "ramdisk.img"  result  0  cost  112
+2026-11-03 14:40:42.383 42016 [Info] [WidgetSettings.cpp(InitImageLanguageComboBox:247)]Init imge language to Index  0
+2026-11-03 14:40:42.464 46744 [Info] [CheckImage.cpp(CheckSign:127)]finish check image  "bzImage"  result  0  cost  242
+2026-11-03 14:40:44.042 40692 [Info] [CheckImage.cpp(CheckSign:127)]finish check image  "vendor.img"  result  0  cost  1931
+2026-11-03 14:40:44.394 42016 [Warning] [(:0)]Cannot open file ':/light/charging-off.svg', because: No such file or directory
+2026-11-03 14:40:44.395 42016 [Warning] [(:0)]Cannot open file ':/light/charging-off.svg', because: No such file or directory
+2026-11-03 14:40:44.395 42016 [Warning] [(:0)]Cannot open file ':/light/charging-on.svg', because: No such file or directory
+2026-11-03 14:40:44.396 42016 [Warning] [(:0)]Cannot open file ':/light/charging-on.svg', because: No such file or directory
+2026-11-03 14:40:44.618 42016 [Warning] [LogUtil.cpp(OutputPath:246)]can not find file :  "$USER_HOME$/AppData/Roaming/Huawei/DevEcoStudio6.1/emulator/proxy.settings.pwd"
+2026-11-03 14:40:44.642 42016 [Info] [PlayerApiToolBar.cpp(UpdateOverflowButtonIcon:109)]":/light/overflow-default"
+2026-11-03 14:40:44.644 42016 [Info] [PlayerApiToolBar.cpp(UpdateOverflowButtonIcon:109)]":/light/overflow-hover"
+2026-11-03 14:40:44.690 42016 [Info] [ToolBarController.cpp(StackedActionAdder:231)]enable multi display
+2026-11-03 14:40:45.220 42016 [Info] [EmulatorWindowEvent.cpp(ShowBootAnimation:1306)]ShowBootAnimation.
+2026-11-03 14:40:45.303 42016 [Info] [CrashClient.cpp(StartCrashDetect:148)]StartCrash Detect.
+2026-11-03 14:40:45.313 42016 [Info] [CrashClient.cpp(StartCrashServer:404)]start crash server.
+2026-11-03 14:40:45.339 42016 [Warning] [QemuManager.cpp(HostFreeMemMonitor:797)]The host computer's memory is �� 2442  ,which is less than  3
+2026-11-03 14:40:46.370 40692 [Info] [CheckImage.cpp(CheckSign:127)]finish check image  "userdata.img"  result  0  cost  2327
+2026-11-03 14:40:46.602 36288 [Info] [QemuManager.cpp(OnSystemReset:640)]System is reset
+2026-11-03 14:40:46.603 36288 [Info] [HdcClient.cpp(HdcDisConnect:555)]dicconnect hdc server
+2026-11-03 14:41:11.826 40692 [Info] [CheckImage.cpp(CheckSign:127)]finish check image  "sys_prod.img"  result  0  cost  25434
+--- crash_server.log tail 40 ---
+2026-11-03 14:39:40.219 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 433 ,mCurHostTotalMemory: 16159
+2026-11-03 14:39:41.207 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 387 ,mCurHostTotalMemory: 16159
+2026-11-03 14:39:42.210 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 198 ,mCurHostTotalMemory: 16159
+2026-11-03 14:39:43.206 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 336 ,mCurHostTotalMemory: 16159
+2026-11-03 14:39:44.210 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 810 ,mCurHostTotalMemory: 16159
+2026-11-03 14:39:45.209 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 909 ,mCurHostTotalMemory: 16159
+2026-11-03 14:39:46.232 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 849 ,mCurHostTotalMemory: 16159
+2026-11-03 14:39:47.224 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 796 ,mCurHostTotalMemory: 16159
+2026-11-03 14:39:48.230 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 678 ,mCurHostTotalMemory: 16159
+2026-11-03 14:39:49.220 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 579 ,mCurHostTotalMemory: 16159
+2026-11-03 14:39:50.243 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 535 ,mCurHostTotalMemory: 16159
+2026-11-03 14:39:51.238 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 454 ,mCurHostTotalMemory: 16159
+2026-11-03 14:39:52.240 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 416 ,mCurHostTotalMemory: 16159
+2026-11-03 14:39:53.237 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 390 ,mCurHostTotalMemory: 16159
+2026-11-03 14:39:54.247 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 378 ,mCurHostTotalMemory: 16159
+2026-11-03 14:39:55.241 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 664 ,mCurHostTotalMemory: 16159
+2026-11-03 14:39:56.242 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 617 ,mCurHostTotalMemory: 16159
+2026-11-03 14:39:57.246 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 539 ,mCurHostTotalMemory: 16159
+2026-11-03 14:39:58.232 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 426 ,mCurHostTotalMemory: 16159
+2026-11-03 14:39:59.246 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 518 ,mCurHostTotalMemory: 16159
+2026-11-03 14:40:00.258 42100 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 599 ,mCurHostTotalMemory: 16159
+2026-11-03 14:40:00.880 38652 [Info] [TraceTool.cpp(DisConnTracePipe:77)][TraceTool] trace pipe closed
+2026-11-03 14:40:00.881 38652 [Info] [TraceTool.cpp(DisConnTracePipe:79)][TraceTool] delete socket
+2026-11-03 14:40:45.791 59768 [Info] [TraceTool.cpp(InitPipe:27)][TraceTool] trace pipe name is: "\\\\.\\pipe\\trace_96037_commandPipe"
+2026-11-03 14:40:45.793 59768 [Info] [TraceTool.cpp(InitPipe:36)][TraceTool] connect successed
+2026-11-03 14:41:12.833 38624 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 1609 ,mCurHostTotalMemory: 16159
+2026-11-03 14:41:13.836 38624 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 1459 ,mCurHostTotalMemory: 16159
+2026-11-03 14:41:14.839 38624 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 1329 ,mCurHostTotalMemory: 16159
+2026-11-03 14:41:17.828 38624 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 1566 ,mCurHostTotalMemory: 16159
+2026-11-03 14:41:19.831 38624 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 1522 ,mCurHostTotalMemory: 16159
+2026-11-03 14:41:20.843 38624 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 1350 ,mCurHostTotalMemory: 16159
+2026-11-03 14:41:21.837 38624 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 1184 ,mCurHostTotalMemory: 16159
+2026-11-03 14:41:22.831 38624 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 1212 ,mCurHostTotalMemory: 16159
+2026-11-03 14:41:23.829 38624 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 1181 ,mCurHostTotalMemory: 16159
+2026-11-03 14:41:24.839 38624 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 1082 ,mCurHostTotalMemory: 16159
+2026-11-03 14:41:25.837 38624 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 946 ,mCurHostTotalMemory: 16159
+2026-11-03 14:41:26.843 38624 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 938 ,mCurHostTotalMemory: 16159
+2026-11-03 14:41:27.852 38624 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 875 ,mCurHostTotalMemory: 16159
+2026-11-03 14:41:28.849 38624 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 859 ,mCurHostTotalMemory: 16159
+2026-11-03 14:41:29.851 38624 [Warning] [CrashReportServer.cpp(GetProcessInfo:593)]memory is low, freeMem: 762 ,mCurHostTotalMemory: 16159
+--- qemu.log tail 40 ---
+2026-11-03 14:40:46.609 36288 E [HvdInfo.c(GetQemuSubCutoutPath:143)] Get subDisplayCutoutPath before initialization.
+2026-11-03 14:40:46.609 36288 E [BootParams.cpp(QemuBootParamsAdd:89)] param value null
+2026-11-03 14:40:46.609 36288 E [HvdInfo.c(GetMainDisplayMode:152)] Get mainDisplayMode before initialization.
+2026-11-03 14:40:46.609 36288 E [BootParams.cpp(QemuBootParamsAdd:89)] param value null
+2026-11-03 14:40:46.609 36288 E [HvdInfo.c(GetFullDisplayMode:161)] Get fullDisplayMode before initialization.
+2026-11-03 14:40:46.609 36288 E [BootParams.cpp(QemuBootParamsAdd:89)] param value null
+2026-11-03 14:40:46.609 36288 I [vl.c(RunQemuMain:4080)] Qemu Init end
+2026-11-03 14:40:47.661 50272 I [express_gpu_render.c(native_window_create_full:801)] native create window Trinity 0000021D00A1D420
+2026-11-03 14:40:47.661 50272 I [express_gpu_render.c(native_window_thread:1055)] Create glfw main windows.
+2026-11-03 14:40:47.661 50272 I [express_gpu_render.c(native_window_thread:1081)] window_width:952, window_height:2058, index:0
+2026-11-03 14:40:47.700 50272 I [express_gpu_render.c(init_global_gbuffer_data:856)] register shutdown_notify_callback.
+2026-11-03 14:40:47.710 50272 I [texture_utils.cpp(check_texture_support_status:257)] GL_COMPRESSED_TEXTURE_FORMATS: etc2 [all support]
+2026-11-03 14:40:47.710 50272 I [texture_utils.cpp(check_texture_support_status:268)] GL_COMPRESSED_TEXTURE_FORMATS: astc [not all support: 0 vs 28]
+2026-11-03 14:40:47.711 50272 E [express_gpu_render.c(static_value_prepare:533)] when creating static vaules 500
+2026-11-03 14:40:47.711 50272 I [express_gpu_render.c(static_value_prepare:589)] gl vendor:NVIDIA Corporation
+2026-11-03 14:40:47.711 50272 I [express_gpu_render.c(static_value_prepare:616)] gl version:OpenGL ES 3.2 (4.1.0 NVIDIA 616.56)
+2026-11-03 14:40:47.711 50272 I [express_gpu_render.c(static_value_prepare:626)] gl renderer:NVIDIA GeForce RTX 4060 Laptop GPU/PCIe/SSE2
+2026-11-03 14:40:47.711 50272 I [express_gpu_render.c(static_value_prepare:646)] gl shading_language_version:OpenGL ES GLSL ES 3.10
+2026-11-03 14:40:47.711 50272 I [express_gpu_render.c(static_value_prepare:663)] host gl 41 DSA_enable 0
+2026-11-03 14:40:47.713 50272 I [express_gpu_render.c(native_window_thread:1132)] native windows inited!
+2026-11-03 14:40:47.716 50272 I [express_gpu_render.c(native_window_thread:1165)] window render start 0
+2026-11-03 14:40:51.189 50184 I [express_pipe.c(dev_read:751)] Clean up all existing stale pipes.
+2026-11-03 14:40:51.405 32920 I [teleport_express_call.c(guest_null_ptr_init:678)] null ptr 2327544605624
+2026-11-03 14:40:51.431 32920 I [teleport_express.c(teleport_express_output_handle:54)] start handle thread
+2026-11-03 14:40:51.458 32920 I [express_touchscreen.c(touchscreen_buffer_register:365)] touch register buffer
+2026-11-03 14:40:51.468 50184 I [express_keyboard.c(keyboard_buffer_register:206)] keyboard register buffer
+2026-11-03 14:40:51.477 50184 I [express_battery.c(battery_buffer_register:210)] battery register buffer
+2026-11-03 14:40:51.477 50184 I [express_sync.c(sync_buffer_register:207)] sync register buffer
+2026-11-03 14:40:52.143 50184 I [express_camera.c(load_avdevice_camera_props:680)] discovered camera id 0: Integrated Camera
+2026-11-03 14:40:52.143 50184 I [express_camera.c(load_avdevice_camera_props:670)] skip camera device_info
+2026-11-03 14:40:52.143 50184 I [express_camera.c(load_camera_device_props:753)] list_cameras: found 3 cameras.
+2026-11-03 14:40:52.143 50184 E [express_camera.c(load_camera_device_props:762)] load camera thread context not ok
+2026-11-03 14:40:52.143 50184 I [express_camera.c(get_camera_thread_context:962)] context is null, before thread_context create
+2026-11-03 14:40:52.143 50184 I [teleport_express_distribute.c(thread_context_create:54)] thread_context_create device_id: 80
+2026-11-03 14:40:52.157 50184 I [express_camera.c(get_camera_thread_context:962)] context is null, before thread_context create
+2026-11-03 14:40:52.157 50184 I [teleport_express_distribute.c(thread_context_create:54)] thread_context_create device_id: 80
+2026-11-03 14:40:52.173 50184 I [express_camera.c(get_camera_thread_context:962)] context is null, before thread_context create
+2026-11-03 14:40:52.173 50184 I [teleport_express_distribute.c(thread_context_create:54)] thread_context_create device_id: 80
+2026-11-03 14:40:52.178 50184 I [express_camera.c(get_camera_thread_context:962)] context is null, before thread_context create
+2026-11-03 14:40:52.178 50184 I [teleport_express_distribute.c(thread_context_create:54)] thread_context_create device_id: 80

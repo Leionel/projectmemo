@@ -1,0 +1,30 @@
+[14:43:40] targets: COM3		UART	Ready	unknown...	hdc
+COM4		UART	Ready	unknown...	hdc
+[14:43:40] boot_completed=[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info
+[14:43:52] targets: COM3		UART	Ready	unknown...	hdc
+COM4		UART	Ready	unknown...	hdc
+[14:43:52] boot_completed=[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info
+[14:44:05] targets: COM3		UART	Ready	unknown...	hdc
+COM4		UART	Ready	unknown...	hdc
+[14:44:05] boot_completed=[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info
+[14:44:17] targets: COM3		UART	Ready	unknown...	hdc
+COM4		UART	Ready	unknown...	hdc
+[14:44:17] boot_completed=[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info
+[14:44:29] targets: COM3		UART	Ready	unknown...	hdc
+COM4		UART	Ready	unknown...	hdc
+[14:44:29] boot_completed=[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info
+[14:44:43] targets: COM3		UART	Ready	unknown...	hdc
+COM4		UART	Ready	unknown...	hdc
+[14:44:43] boot_completed=[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info

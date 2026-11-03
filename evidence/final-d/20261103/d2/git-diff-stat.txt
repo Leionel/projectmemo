@@ -1,0 +1,36 @@
+# D2 changed files (baseline 4b696141435825a3582816e8e449c0e0cf013f29)
+git rev-parse HEAD: 4b696141435825a3582816e8e449c0e0cf013f29
+generated: 2026-11-03T15:22+08:00 Asia/Shanghai (final refresh)
+
+ .../src/main/ets/common/MissionWidgetContract.ets  |  86 ++++++++++++-
+ .../ets/components/CopilotContinuationCard.ets     |   5 +-
+ .../src/main/ets/components/GlobalFocusPanel.ets   |  25 +++-
+ .../src/main/ets/entryability/EntryAbility.ets     |  64 +++++++---
+ .../main/ets/entryformability/EntryFormAbility.ets |  11 +-
+ .../entry/src/main/ets/pages/FocusConversation.ets |  29 ++++-
+ harmonyos/entry/src/main/ets/pages/Index.ets       |  76 ++++++++----
+ harmonyos/entry/src/main/ets/pages/ProjectHome.ets | 134 ++++++++++++++++-----
+ .../src/main/ets/services/WidgetDataService.ets    |  46 +++++--
+ .../entry/src/main/ets/widget/pages/WidgetCard.ets |   5 +-
+ 10 files changed, 388 insertions(+), 93 deletions(-)
+
+# full working tree status (includes Lead-owned files; D2 did not modify them)
+ M harmonyos/entry/src/main/ets/common/MissionWidgetContract.ets
+ M harmonyos/entry/src/main/ets/components/CopilotContinuationCard.ets
+ M harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets
+ M harmonyos/entry/src/main/ets/components/MissionReadbackView.ets
+ M harmonyos/entry/src/main/ets/entryability/EntryAbility.ets
+ M harmonyos/entry/src/main/ets/entryformability/EntryFormAbility.ets
+ M harmonyos/entry/src/main/ets/pages/FocusConversation.ets
+ M harmonyos/entry/src/main/ets/pages/Index.ets
+ M harmonyos/entry/src/main/ets/pages/MissionDetail.ets
+ M harmonyos/entry/src/main/ets/pages/ProjectHome.ets
+ M harmonyos/entry/src/main/ets/services/WidgetDataService.ets
+ M harmonyos/entry/src/main/ets/widget/pages/WidgetCard.ets
+ M harmonyos/entry/src/test/List.test.ets
+?? evidence/final-d/
+?? harmonyos/entry/src/main/ets/components/MissionWorkPacketView.ets
+?? harmonyos/entry/src/main/ets/models/WorkPacket.ets
+?? harmonyos/entry/src/test/WidgetHandoff.test.ets
+?? harmonyos/entry/src/test/WorkPacketContract.test.ets
+?? harmonyos/entry/src/test/WorkPacketFixtures.ets

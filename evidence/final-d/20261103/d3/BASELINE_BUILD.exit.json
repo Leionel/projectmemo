@@ -1,0 +1,26 @@
+{
+  "schema": "d3-frozen-build/v1",
+  "command": "npm.cmd run harmony:build",
+  "head": "4b696141435825a3582816e8e449c0e0cf013f29",
+  "source_tree_digest": {
+    "algorithm": "sha256(sorted \"relpath|sha256\" lines, LF)",
+    "file_count": 221,
+    "sha256": "39646e8f6eeb0bd633b02b69b299329c4d9248431544654e0e15a76cbc375e68"
+  },
+  "start_utc8": "2026-11-03T15:15:56.388+08:00",
+  "end_utc8": "2026-11-03T15:20:42.745+08:00",
+  "duration_sec": 286.4,
+  "exit_code": 0,
+  "haps": [
+    {
+      "path": "D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/build/default/outputs/default/entry-default-unsigned.hap",
+      "name": "entry-default-unsigned.hap",
+      "kind": "UNSIGNED",
+      "size_bytes": 8273912,
+      "mtime_utc8": "2026-11-03T15:20:40.808+08:00",
+      "sha256": "9c935302a720a34c2cf845f9a0528806d502f23364f07788650d0e9020164629"
+    }
+  ],
+  "log": "evidence/final-d/20261103/d3/BASELINE_BUILD.log",
+  "note": "unsigned 构建只是工程证据；本树无 signingConfig，signed 安装/系统交互 NOT_RUN。"
+}

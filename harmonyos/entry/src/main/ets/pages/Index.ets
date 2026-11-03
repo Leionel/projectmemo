@@ -1,7 +1,7 @@
 import { PMPageIntro, PMListRow, PMCloseButton } from '../components/PMReferencePrimitives';
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
-import { handoffIntentExpired } from '../common/MissionWidgetContract';
+import { missionHandoffRoute } from '../common/MissionWidgetContract';
 import preferences from '@ohos.data.preferences';
 import { Project, ApiError, ProjectCreateInput, CompetitionReadiness, ReadinessItem } from '../models/Project';
 import { ProjectDetail, KnowledgeCard, CardTemporalStatus } from '../models/Memory';
@@ -131,6 +131,9 @@ struct Index {
   @State readinessForSheet: CompetitionReadiness = new CompetitionReadiness();
   @State globalMemoryNoteHidden: boolean = false;
   @State expandedEvidenceCardId: string = '';
+  // 卡片/通知在 App 已在前台时通过 onNewWant 投递；页面存活但不会触发 onPageShow，用序号驱动消费。
+  @StorageProp('pm.handoffSeq') @Watch('onHandoffIntent') handoffSeq: number = 0;
+  private indexVisible: boolean = true;
 
   // 新建项目弹窗状态
   @State showCreateDialog: boolean = false;
@@ -208,6 +211,8 @@ struct Index {
   private handleSessionExpired(message: string = '登录已失效，请重新登录'): void {
     this.isAuthenticated = false;
     this.currentMainTabIndex = 4;
+    // 旧账号的卡片/通知定位意图不能跨账号保留，否则 B 登录后会被带到 A 的原对象。
+    this.clearHandoffIntents();
     this.currentUser = new UserInfo();
     this.projects = [];
     this.projectDeletionNotice = '';
@@ -238,6 +243,8 @@ struct Index {
     this.sessionExpiresAt = SessionStore.getExpiresAt();
     this.loadAllData();
     this.loadLlmSettings();
+    // 登录等待期间保留的卡片定位意图，在登录完成后立即按当前时间重新核对期限后消费。
+    this.openPendingNotification();
     promptAction.showToast({ message: '登录成功' });
   }
 
@@ -264,6 +271,7 @@ struct Index {
   }
 
   onPageShow(): void {
+    this.indexVisible = true;
     if (!this.isAuthenticated) {
       return;
     }
@@ -278,6 +286,10 @@ struct Index {
     if (!this.isLoading) {
       this.loadAllData(true);
     }
+  }
+
+  onPageHide(): void {
+    this.indexVisible = false;
   }
 
   onBackPress(): boolean {
@@ -296,42 +308,62 @@ struct Index {
     return false;
   }
 
+  /** 卡片/通知在前台投递时（onNewWant 不触发 onPageShow）由 handoffSeq 变化驱动消费一次。 */
+  private onHandoffIntent(): void {
+    if (!this.indexVisible || !this.isAuthenticated) {
+      return;
+    }
+    this.openPendingNotification();
+  }
+
+  private clearHandoffIntents(): void {
+    AppStorage.setOrCreate<string>('pendingMissionId', ''); AppStorage.setOrCreate<string>('pendingMissionProjectId', '');
+    AppStorage.setOrCreate<string>('pendingQuestionId', ''); AppStorage.setOrCreate<string>('pendingApprovalId', '');
+    AppStorage.setOrCreate<string>('pendingSourceId', ''); AppStorage.setOrCreate<string>('pendingOutputId', '');
+    AppStorage.setOrCreate<string>('pendingReceiptId', ''); AppStorage.setOrCreate<string>('pendingMissionVersion', '');
+    AppStorage.setOrCreate<string>('pendingHandoffExpiresAt', '');
+    AppStorage.setOrCreate<string>('notificationProjectId', ''); AppStorage.setOrCreate<string>('notificationInterventionId', '');
+  }
+
   private openPendingNotification(): void {
     const missionId = AppStorage.get<string>('pendingMissionId') ?? '';
     const missionProjectId = AppStorage.get<string>('pendingMissionProjectId') ?? '';
     if (missionId !== '' && missionProjectId !== '') {
-      const questionId = AppStorage.get<string>('pendingQuestionId') ?? '';
-      const approvalId = AppStorage.get<string>('pendingApprovalId') ?? '';
-      const sourceId = AppStorage.get<string>('pendingSourceId') ?? '';
-      const handoffExpiresAt = AppStorage.get<string>('pendingHandoffExpiresAt') ?? '';
-      AppStorage.setOrCreate<string>('pendingMissionId', ''); AppStorage.setOrCreate<string>('pendingMissionProjectId', '');
-      AppStorage.setOrCreate<string>('pendingQuestionId', ''); AppStorage.setOrCreate<string>('pendingApprovalId', '');
-      AppStorage.setOrCreate<string>('pendingSourceId', ''); AppStorage.setOrCreate<string>('pendingMissionVersion', '');
-      AppStorage.setOrCreate<string>('pendingHandoffExpiresAt', '');
-      const expiry = handoffExpiresAt === '' ? 0 : Number(handoffExpiresAt);
-      // 排队或冷启动后过期的定位意图不再指向旧问题，回到当前原委托。
-      const expired = handoffIntentExpired(expiry, Date.now());
-      if (expired) {
+      const route = missionHandoffRoute(missionProjectId, missionId,
+        AppStorage.get<string>('pendingQuestionId') ?? '', AppStorage.get<string>('pendingApprovalId') ?? '',
+        AppStorage.get<string>('pendingSourceId') ?? '', AppStorage.get<string>('pendingOutputId') ?? '',
+        AppStorage.get<string>('pendingReceiptId') ?? '', AppStorage.get<string>('pendingMissionVersion') ?? '',
+        AppStorage.get<string>('pendingHandoffExpiresAt') ?? '', Date.now());
+      // 先消费再跳转：同一次意图不会被页面返回或前后台切换重复打开。
+      this.clearHandoffIntents();
+      // 排队或冷启动后过期的定位意图不再指向旧问题，回到当前原委托重新核对。
+      if (route.expired) {
         promptAction.showToast({ message: '原卡片已过期，已回到当前委托；旧问题不会被当成新问题' });
       }
       router.pushUrl({ url: 'pages/MissionDetail', params: {
-        projectId: missionProjectId, missionId,
-        questionId: expired ? '' : questionId,
-        approvalId: expired ? '' : approvalId,
-        sourceId: expired ? '' : sourceId
+        projectId: route.projectId, missionId: route.missionId,
+        questionId: route.questionId, approvalId: route.approvalId, sourceId: route.sourceId,
+        outputId: route.outputId, receiptId: route.receiptId,
+        // 卡片记录的版本只是历史定位线索，详情仍以服务端当前版本重新核对；不用于自动选中/批准旧对象。
+        handoffMissionVersion: route.missionVersion, handoffExpired: route.expired ? '1' : ''
       } }); return;
     }
     const projectId = AppStorage.get<string>('notificationProjectId') ?? '';
     const interventionId = AppStorage.get<string>('notificationInterventionId') ?? '';
-    if (projectId === '' || interventionId === '') {
+    if (projectId === '') {
       return;
     }
     AppStorage.setOrCreate<string>('notificationProjectId', '');
     AppStorage.setOrCreate<string>('notificationInterventionId', '');
-    router.pushUrl({
-      url: 'pages/InterventionDetail',
-      params: { projectId, interventionId }
-    });
+    if (interventionId !== '') {
+      router.pushUrl({
+        url: 'pages/InterventionDetail',
+        params: { projectId, interventionId }
+      });
+    } else {
+      // 项目卡片只带 projectId：回到原项目工作台，不留下“点了没反应”的入口。
+      router.pushUrl({ url: 'pages/ProjectHome', params: { projectId } });
+    }
   }
 
   private async loadLlmSettings(): Promise<void> {

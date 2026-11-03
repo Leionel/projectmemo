@@ -1,0 +1,33 @@
+# baseline 4b69614 harmonyos/entry/src/main/ets/entryability/EntryAbility.ets :: 只捕获 question/approval/source/version/expiry；notification 分支用通用 projectId；无前台热启动序号
+pattern: private captureNotificationRoute  first-match-line: 10
+   10:   private captureNotificationRoute(want: Want): void {
+   11:     const projectId = want.parameters?.['notificationProjectId'] ?? want.parameters?.['projectId'];
+   12:     const interventionId = want.parameters?.['notificationInterventionId'];
+   13:     const targetTab = want.parameters?.['targetTab'];
+   14:     const missionId = want.parameters?.['missionId'];
+   15:     if (typeof missionId === 'string' && missionId !== '' && typeof projectId === 'string' && projectId !== '') {
+   16:       AppStorage.setOrCreate<string>('pendingMissionId', missionId);
+   17:       AppStorage.setOrCreate<string>('pendingMissionProjectId', projectId);
+   18:       // 只解析“打开哪个原对象”：不携带批准令牌、私人原话或任意跳转 URL。
+   19:       const questionId = want.parameters?.['questionId'];
+   20:       const approvalId = want.parameters?.['approvalId'];
+   21:       const sourceId = want.parameters?.['sourceId'];
+   22:       const missionVersion = want.parameters?.['missionVersion'];
+   23:       const handoffExpiresAt = want.parameters?.['handoffExpiresAt'];
+   24:       AppStorage.setOrCreate<string>('pendingQuestionId', typeof questionId === 'string' ? questionId : '');
+   25:       AppStorage.setOrCreate<string>('pendingApprovalId', typeof approvalId === 'string' ? approvalId : '');
+   26:       AppStorage.setOrCreate<string>('pendingSourceId', typeof sourceId === 'string' ? sourceId : '');
+   27:       AppStorage.setOrCreate<string>('pendingMissionVersion', typeof missionVersion === 'string' ? missionVersion : '');
+   28:       AppStorage.setOrCreate<string>('pendingHandoffExpiresAt', typeof handoffExpiresAt === 'string' ? handoffExpiresAt : '');
+   29:     }
+   30:     if (typeof projectId === 'string') {
+   31:       AppStorage.setOrCreate<string>('notificationProjectId', projectId);
+   32:       if (typeof interventionId === 'string') {
+   33:         AppStorage.setOrCreate<string>('notificationInterventionId', interventionId);
+   34:       }
+   35:     }
+   36:     if (typeof targetTab === 'number') {
+   37:       AppStorage.setOrCreate<number>('targetTab', targetTab);
+   38:     }
+   39:   }
+   40: 

@@ -1,0 +1,31 @@
+# baseline 4b69614 harmonyos/entry/src/main/ets/services/WidgetDataService.ets :: missionData 无 token 校验；attention 重复计算
+pattern: static missionData(context  first-match-line: 186
+  186:   static missionData(context: common.Context): Record<string, string | number> {
+  187:     const empty: Record<string, string | number> = {
+  188:       'missionId': '',
+  189:       'missionProjectId': '',
+  190:       'missionSummary': '',
+  191:       'missionUpdatedAt': '',
+  192:       'missionQuestionId': '',
+  193:       'missionApprovalId': '',
+  194:       'missionAttention': '',
+  195:       'missionSync': ''
+  196:     };
+  197:     try {
+  198:       const store = preferences.getPreferencesSync(context, { name: PREFS_NAME });
+  199:       const auth = preferences.getPreferencesSync(context, { name: 'projectmemo_auth_store' });
+  200:       const expiresAt = Date.parse(auth.getSync('expires_at', '') as string);
+  201:       const user = JSON.parse(auth.getSync('user_info', '{}') as string) as Record<string, string>;
+  202:       const snapshot = JSON.parse(store.getSync('mission_snapshot', '{}') as string) as MissionWidgetSnapshot;
+  203:       const projectId = store.getSync('active_project_id', '') as string;
+  204:       if (!Number.isFinite(expiresAt) || expiresAt <= Date.now() || !visibleMissionWidget(snapshot, user['id'] ?? '', projectId, Date.now())) {
+  205:         return empty;
+  206:       }
+  207:       return {
+  208:         'missionId': snapshot.missionId,
+  209:         'missionProjectId': snapshot.projectId,
+  210:         'missionSummary': widgetAttentionLabel(snapshot, Date.now()),
+  211:         'missionUpdatedAt': snapshot.updatedAt,
+  212:         'missionQuestionId': snapshot.questionId,
+  213:         'missionApprovalId': snapshot.approvalId,
+  214:         'missionAttention': widgetAttentionLabel(snapshot, Date.now()),

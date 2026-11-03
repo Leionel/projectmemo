@@ -1,0 +1,18 @@
+# D2 ArkTS syntax structure self-check (TypeScript parser; struct->class preprocess only for parser; NOT ArkTS compiler, NOT hvigor)
+generated: 2026-11-03T15:18+08:00 Asia/Shanghai
+method: parse baseline 4b69614 copy and current working copy for each changed file; compare syntax diagnostic counts.
+note: @Builder/struct etc. produce same-class diagnostics on both sides; check is "no new syntax diagnostics vs baseline", not "zero".
+pure-logic/infrastructure files (contract, WidgetDataService, EntryFormAbility, EntryAbility) are required to be 0.
+OK(0) harmonyos/entry/src/main/ets/common/MissionWidgetContract.ets
+SAME_AS_BASELINE(233) harmonyos/entry/src/main/ets/pages/Index.ets
+SAME_AS_BASELINE(465) harmonyos/entry/src/main/ets/pages/ProjectHome.ets
+SAME_AS_BASELINE(75) harmonyos/entry/src/main/ets/pages/FocusConversation.ets
+SAME_AS_BASELINE(28) harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets
+SAME_AS_BASELINE(3) harmonyos/entry/src/main/ets/components/CopilotContinuationCard.ets
+OK(0) harmonyos/entry/src/main/ets/services/WidgetDataService.ets
+SAME_AS_BASELINE(24) harmonyos/entry/src/main/ets/widget/pages/WidgetCard.ets
+OK(0) harmonyos/entry/src/main/ets/entryformability/EntryFormAbility.ets
+OK(0) harmonyos/entry/src/main/ets/entryability/EntryAbility.ets
+exit: 0
+OK(0) harmonyos/entry/src/test/WidgetHandoff.test.ets
+test-file parse exit: 0

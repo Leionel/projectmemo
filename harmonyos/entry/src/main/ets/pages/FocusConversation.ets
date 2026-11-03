@@ -69,7 +69,20 @@ struct FocusConversation {
   private confirmationKeys: Map<string, string> = new Map<string, string>();
   private uiKeys: Map<string, ConversationUIActionInput> = new Map<string, ConversationUIActionInput>();
   private progressTimer: number = -1;
-  private expired: () => void = (): void => { this.generation++; this.view = new ConversationView(); this.workRef = null; this.text = ''; this.pending = null; this.sessions = []; this.error = '登录已失效，请重新登录'; this.busy = false; this.cloud = false; this.analysisReady = false; };
+  private expired: () => void = (): void => { this.expireSession(); };
+  private clearConversationState(message: string): void {
+    this.generation++;
+    this.view = new ConversationView(); this.workRef = null; this.pending = null; this.sessions = [];
+    this.text = ''; this.busy = false; this.analysisReady = false; this.error = message;
+    this.target = ''; this.originProjectId = ''; this.entity = undefined; this.replyId = '';
+    this.correctionMessageId = ''; this.correctionProjects = []; this.expandedRefs = '';
+  }
+  private expireSession(): void {
+    this.clearConversationState('登录已失效，请重新登录');
+    this.cloud = false;
+    // 401/SESSION_CHANGED 后页面不能继续展示旧讨论或旧原对象入口。
+    if (this.pageVisible) { router.replaceUrl({ url: 'pages/LoginPage' }); }
+  }
   aboutToAppear(): void { SessionStore.onSessionExpired(this.expired); this.initialize(); this.progressTimer = setInterval(() => { this.pollProgress(); }, 1500); }
   aboutToDisappear(): void { this.saveComposer(); ConversationDraftStore.flush(); this.generation++; if (this.progressTimer >= 0) { clearInterval(this.progressTimer); } SessionStore.offSessionExpired(this.expired); }
   onPageShow(): void {
@@ -138,7 +151,12 @@ struct FocusConversation {
   }
   private fail(e: Error): void {
     this.error = e.message || '讨论暂不可用';
-    if (e instanceof ApiError && [401, 403, 404].includes(e.status)) { this.expired(); }
+    if (e instanceof ApiError && (e.status === 401 || e.code === 'SESSION_CHANGED')) { this.expireSession(); return; }
+    if (e instanceof ApiError && [403, 404].includes(e.status)) {
+      // 原讨论/项目已不可访问：清掉私有内容，不保留可继续操作的旧对象。
+      this.clearConversationState(e.message || '当前讨论已不可访问');
+      router.replaceUrl({ url: 'pages/Index' });
+    }
   }
   private async create(project: boolean = false): Promise<void> {
     if (this.busy) { return; }
@@ -156,6 +174,7 @@ struct FocusConversation {
     finally { if (epoch === this.generation) { this.busy = false; } }
   }
   private async refresh(): Promise<void> {
+    if (this.view.id === '') { return; }
     const epoch = this.generation, owned = !this.busy; if (owned) { this.busy = true; }
     try { const v = await this.service.read(this.view.id); if (epoch === this.generation) { this.view = v; if (v.latestTurn?.canRetry) { this.pending = null; this.error = ''; } } }
     catch (e) { if (epoch === this.generation) { this.fail(e); } }
@@ -202,7 +221,11 @@ struct FocusConversation {
     finally { if (epoch === this.generation) { this.busy = false; } }
   }
   private open(ref: ConversationRef, messageId: string): void {
-    if (ref.kind === 'MISSION') { router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: ref.projectId, missionId: ref.id, conversationId: this.view.id, originMessageId: messageId } }); }
+    if (ref.kind === 'MISSION') {
+      router.pushUrl({ url: 'pages/MissionDetail', params: { projectId: ref.projectId, missionId: ref.id, conversationId: this.view.id, originMessageId: messageId,
+        // 关联委托身份 + 记录时的版本线索；详情以服务端当前版本重新核对，不自动批准旧提案。
+        handoffMissionVersion: ref.version !== undefined ? String(ref.version) : '' } });
+    }
     else { router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: ref.projectId, tab: ref.kind === 'ACTION' ? 'actions' : 'memory', actionId: ref.kind === 'ACTION' ? ref.id : '', conversationId: this.view.id, originMessageId: messageId } }); }
   }
   private async loadPreference(): Promise<void> {

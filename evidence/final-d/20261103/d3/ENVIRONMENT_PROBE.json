@@ -1,0 +1,213 @@
+{
+  "schema": "d3-environment-probe/v1",
+  "track": "D3",
+  "owner": "d3-device",
+  "task": "task-3",
+  "probe_window_utc8": {
+    "first_probe": "2026-11-03T14:38:53.288+08:00",
+    "last_probe": "2026-11-03T14:53:50.051+08:00",
+    "method": "read-only PowerShell/Get-Content/git/version commands; no user process killed, no source file written"
+  },
+  "worktree": {
+    "path": "D:/Projects/hongmen-final-d-harmony-native",
+    "branch": "codex/final-d-harmony-native",
+    "head": "4b696141435825a3582816e8e449c0e0cf013f29",
+    "head_note": "HEAD stable during probe; working tree clean at 14:38, became dirty at 14:40:46 due to in-flight D1/D2 source edits by other members (see BASELINE_TREE_STATE.md). No reset/stash/clean/worktree used by D3."
+  },
+  "tools": {
+    "deveco_studio": {
+      "home": "D:\\Program Files\\Huawei\\DevEco Studio",
+      "version": "6.1.1.300",
+      "build_number": "DS-243.24978.46.36.611300",
+      "product_info": "product-info.json",
+      "build_txt": "DS-243.24978.46.36.611300",
+      "data_directory": "C:\\Users\\Administrator\\AppData\\Local\\Huawei\\DevEcoStudio6.1",
+      "jbr_java": "openjdk version \"21.0.8\" 2025-07-15 / JBR-21.0.8+1-1038.71-jcef",
+      "bundled_node": "v18.20.1",
+      "tools_dir": ["dumpParser", "emulator", "hvigor", "llvm", "node", "ohpm", "profiler", "UxTestService"]
+    },
+    "sdk": {
+      "root": "D:\\Program Files\\Huawei\\DevEco Studio\\sdk",
+      "default": ["hms", "openharmony", "sdk-pkg.json"],
+      "openharmony_components": ["ets", "js", "native", "previewer", "toolchains"],
+      "api_version": "24",
+      "sdk_version": "6.1.1.125",
+      "release_type": "Release",
+      "evidence": ["sdk/default/openharmony/*/oh-uni-package.json"],
+      "local_properties": "ABSENT (harmonyos/local.properties not present)"
+    },
+    "hvigor": {
+      "entry": "D:\\Program Files\\Huawei\\DevEco Studio\\tools\\hvigor\\bin\\hvigorw.js",
+      "version": "6.24.4",
+      "ohos_plugin_version": "6.24.4",
+      "daemon_observed": "idle daemons restarted by DevEco Studio around 14:32/14:40; no assembleHap/hvigorw build process was running at probe time"
+    },
+    "ohpm": {
+      "path": "D:\\Program Files\\Huawei\\DevEco Studio\\tools\\ohpm\\bin\\ohpm.bat",
+      "version": "6.1.2.285"
+    },
+    "node_npm": {
+      "system_node": "v24.16.0",
+      "system_node_path": "C:\\Program Files\\nodejs\\node.exe",
+      "npm": "11.15.0",
+      "npm_path": "C:\\Program Files\\nodejs\\npm.cmd",
+      "env_DEVECO_HOME": "D:\\Program Files\\Huawei\\DevEco Studio",
+      "env_DEVECO_SDK_HOME": "unset",
+      "env_JAVA_HOME": "unset"
+    },
+    "harmony_project_deps": {
+      "oh_modules_present": true,
+      "hypium": "1.0.25",
+      "hamock": "1.0.0",
+      "oh-package-lock": "harmonyos/oh-package-lock.json5"
+    }
+  },
+  "hdc": {
+    "path": "D:\\Program Files\\Huawei\\DevEco Studio\\sdk\\default\\openharmony\\toolchains\\hdc.exe",
+    "version": "Ver: 3.2.0d",
+    "server": {
+      "process": "hdc.exe",
+      "command": "dummy -l 3 -s ::ffff:127.0.0.1:18710 -m",
+      "started_by": "DevEco Studio (started 2026-11-03 14:08:51)",
+      "listen": "127.0.0.1:18710"
+    },
+    "targets": [
+      {
+        "sample_utc8": "2026-11-03T14:39:28.587+08:00",
+        "raw": [
+          "127.0.0.1:5555\t\tTCP\tOffline\tlocalhost\thdc",
+          "COM3\t\tUART\tReady\tunknown...\thdc",
+          "COM4\t\tUART\tReady\tunknown...\thdc"
+        ]
+      },
+      {
+        "sample_utc8": "2026-11-03T14:53:50.051+08:00",
+        "raw": [
+          "COM3\t\tUART\tReady\tunknown...\thdc",
+          "COM4\t\tUART\tReady\tunknown...\thdc"
+        ],
+        "emulator_processes": 0,
+        "port_5555_listen": 0
+      }
+    ],
+    "uart_note": "COM3/COM4 are UART entries reported Ready/unknown by hdc; they are not proven physical HarmonyOS devices and were not used for install or claims.",
+    "tconn_attempts": [
+      {
+        "utc8": "~2026-11-03T14:39:30+08:00",
+        "command": "hdc tconn 127.0.0.1:5555",
+        "result": "Connect OK",
+        "list_targets_after": "127.0.0.1:5555\t\tTCP\tConnected\tlocalhost\thdc"
+      },
+      {
+        "utc8": "~2026-11-03T14:46:33+08:00",
+        "command": "hdc tconn 127.0.0.1:5555",
+        "result": "Connect OK",
+        "list_targets_after": "127.0.0.1:5555\t\tTCP\tConnected\tlocalhost\thdc",
+        "then": "emulator quit at 14:46:37 (Emulator.log), target disappeared"
+      }
+    ],
+    "shell_verification": "NOT ACHIEVED. hdc shell param get attempts at 14:40:47 and 14:47:39 failed with '[Fail]Not match target founded' because the emulator instance exited / target was unavailable. Device identity below comes from AVD config + emulator launch arguments, not from guest shell."
+  },
+  "emulator": {
+    "type": "HarmonyOS emulator (NOT a physical device)",
+    "avd_name": "Pura 90",
+    "device_type": "phone",
+    "device_model_mark": "PHEMU-FD00",
+    "os_version": "HarmonyOS 6.1.1(24)",
+    "api_version": 24,
+    "software_version": "6.1.0.126",
+    "guest_version": "HarmonyOS 6.1.0.126(SP1)",
+    "cpu_arch": "x86_64",
+    "abi_reported_by_lists": "x86",
+    "cpu_ncore": 4,
+    "ram_size_mb": 4096,
+    "resolution": "1320x2856 @560dpi, 6.8in",
+    "emulator_binary": "D:\\Program Files\\Huawei\\DevEco Studio\\tools\\emulator\\Emulator.exe",
+    "avd_deploy_dir": "D:/Huawei/Emulator/deployed/Pura 90",
+    "image_root": "C:\\Users\\Administrator\\AppData\\Local\\Huawei\\Sdk",
+    "system_image": "C:/Users/Administrator/AppData/Local/Huawei/Sdk/system-image/HarmonyOS-6.1.1/phone_all_x86/",
+    "evidence_files": [
+      "D:/Huawei/Emulator/deployed/lists.json",
+      "D:/Huawei/Emulator/deployed/Pura 90/config.ini",
+      "D:/Huawei/Emulator/deployed/Pura 90/hardware-qemu.ini",
+      "D:/Huawei/Emulator/deployed/Pura 90/Log/Emulator.log",
+      "D:/Huawei/Emulator/deployed/Pura 90/Log/qemu.log",
+      "D:/Huawei/Emulator/deployed/Pura 90/Log/crash_server.log"
+    ],
+    "instance_timeline_utc8": [
+      {"time": "2026-11-03T14:37:00", "event": "Emulator.exe started (PID 56172), trace_88490_commandPipe, emulator-crash-service PID 47976"},
+      {"time": "2026-11-03T14:39:59", "event": "first instance quit: Emulator.log 'QuitEmulator', 'df command return error data.'; hdc target dropped"},
+      {"time": "2026-11-03T14:40:41", "event": "second instance started (PID 33288), trace_96037_commandPipe, crash-service PID 22464, trace params phone,6.1.0.126,x86_64,24,PHEMU-FD00"},
+      {"time": "2026-11-03T14:40:47", "event": "hdc shell param get failed ('Not match target founded')"},
+      {"time": "2026-11-03T14:44:14", "event": "boot animation shown for restarted instance"},
+      {"time": "2026-11-03T14:46:37", "event": "second instance quit (normal QuitEmulator path); target disappeared"},
+      {"time": "2026-11-03T14:53:50", "event": "passive sample: no emulator process, no port 5555 listener"}
+    ],
+    "host_resource_warning": "crash_server.log repeated 'memory is low, freeMem: ... mCurHostTotalMemory: 16159'; Emulator.log 'The host computer's memory is ... less than 3'; host physical memory 16160MB, free ~4471MB at 14:44. Host resource limitation, not product behavior.",
+    "install_attempts": "NONE. No install/uninstall/clear-data was attempted (no signed HAP and no stable device).",
+    "screenshots": "NONE. No device operation happened, so no device screenshots are provided."
+  },
+  "signing": {
+    "summary": "NO authorized signing configuration in the D worktree; only unsigned HAP exists. Signed install / system interaction / system delivery = NOT_RUN.",
+    "d_tree_signingConfigs": [],
+    "d_tree_signing_material_files": "NONE (no p12/cer/keystore/jks/p7b/pem outside node_modules/oh_modules/build/.hvigor)",
+    "d_tree_tracked_signing_files": "NONE",
+    "hvigor_skip_sign_evidence": "harmonyos/.hvigor/report/report-202611031117314110.json: \"Will skip sign 'hos_hap'. No signingConfigs profile is configured in current project.\"",
+    "existing_hap": {
+      "path": "harmonyos/entry/build/default/outputs/default/entry-default-unsigned.hap",
+      "kind": "unsigned-debug-legacy",
+      "size_bytes": 8047574,
+      "mtime_utc8": "2026-11-03T11:18:09.914+08:00",
+      "sha256": "2d64b3da8a803022e500f9ec51d423fdf8fd869fb8841db54a96b4acc455ed2f",
+      "ownership": "legacy artifact of earlier baseline (485d485 preparation), NOT evidence for 4b69614 or any candidate",
+      "annotation": "该文件是 14:53 探针时点的状态；FROZEN 候选构建（2026-11-03 15:20:40）已用同名文件覆盖，候选 unsigned 为 8,273,912 bytes / SHA-256 9c935302a720a34c2cf845f9a0528806d502f23364f07788650d0e9020164629。见 BASELINE_UNSIGNED_HAP.json。"
+    },
+    "user_home_signing_materials": "Two sets of DevEco default signing materials exist under %USERPROFILE%\\.ohos\\config (mtime 2026-09-28 and 2026-11-02; .p12/.cer/.csr/.p7b). They were NOT copied into the D worktree, NOT used, and their authorization/validity is not assumed. See SIGNING_INVENTORY.md.",
+    "detail_file": "SIGNING_INVENTORY.md"
+  },
+  "isolated_database": {
+    "path": "D:/Projects/hongmen-final-d-harmony-native/prisma/final-preparation.db",
+    "size_bytes": 1503232,
+    "mtime_utc8": "2026-11-03T11:03:07",
+    "migrations_applied": 51,
+    "migrations_all_finished": true,
+    "latest_migration": "20261102140000_project_intake_draft",
+    "row_counts_readonly": {
+      "User": 0,
+      "Project": 0,
+      "ProjectMembership": 0,
+      "AgentMission": 0,
+      "AgentMissionEvent": 0,
+      "AgentMissionApproval": 0,
+      "AgentMissionOutput": 0,
+      "MissionArtifactReceipt": 0,
+      "AuthSession": 0
+    },
+    "mode": "read-only sqlite open (better-sqlite3, readonly:true); no write, no seed, no migration run",
+    "log": "tmp/d-final/20261103/d3/raw/isolated_db_state.log"
+  },
+  "ports_at_probe_utc8": {
+    "checked_at": "2026-11-03T14:52:08+08:00",
+    "listening_relevant": {"34111": "in use by another track (B) process, not touched"},
+    "free": [34114, 4400, 5555, 33321],
+    "note": "D planned local preview port 34114 free at check time; harmony:backend script default is 4400. Port checks are a snapshot, re-check before any start."
+  },
+  "evidence_raw_logs": [
+    "tmp/d-final/20261103/d3/raw/env_versions.log",
+    "tmp/d-final/20261103/d3/raw/node_npm_ohpm_hvigor.log",
+    "tmp/d-final/20261103/d3/raw/sdk_metadata.log",
+    "tmp/d-final/20261103/d3/raw/hdc_probe.log",
+    "tmp/d-final/20261103/d3/raw/hdc_shell_probe.log",
+    "tmp/d-final/20261103/d3/raw/hdc_shell_probe2.log",
+    "tmp/d-final/20261103/d3/raw/emulator_inventory.log",
+    "tmp/d-final/20261103/d3/raw/emulator_avd_config.log",
+    "tmp/d-final/20261103/d3/raw/emulator_boot_wait.log",
+    "tmp/d-final/20261103/d3/raw/isolated_db_state.log"
+  ],
+  "environment_verdict": {
+    "toolchain": "OK - DevEco/SDK/hvigor/ohpm/node present and versioned; hvigor could compile ArkTS (a mid-edit compile error was produced from source, not from missing tooling)",
+    "device": "BLOCKED - emulator connected transiently (127.0.0.1:5555 TCP Connected) then exited twice; no stable device; no guest shell verification; no real device",
+    "signing": "NOT_RUN - no authorized signing configuration, unsigned artifact only",
+    "baseline_build": "DEFERRED - source was being edited by Lead/D1-D2 during the assigned baseline window; formal test/build must run on the FROZEN snapshot per Lead instruction"
+  }
+}

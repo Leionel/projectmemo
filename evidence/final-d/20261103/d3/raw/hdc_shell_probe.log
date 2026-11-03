@@ -1,0 +1,76 @@
+probe_time_utc8=2026-11-03T14:40:47.094+08:00
+param const.ohos.apiversion => [[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info]
+param const.ohos.fullname => [[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info]
+param const.product.model => [[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info]
+param const.product.brand => [[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info]
+param const.product.name => [[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info]
+param const.product.manufacturer => [[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info]
+param const.product.software.version => [[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info]
+param const.product.hardwaremodel => [[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info]
+param const.product.cpu.abilist => [[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info]
+param const.build.characteristics => [[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info]
+param const.build.product => [[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info]
+param const.build.os.fullname => [[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info]
+param persist.sys.locale => [[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info]
+param persist.sys.timezone => [[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info]
+param const.product.devicetype => [[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info]
+param const.product.os.dist.version => [[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info]
+param sys.boot_completed => [[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info]
+--- shell uname -a ---
+[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info
+--- shell hostname ---
+[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info
+--- shell getprop (first 60) ---
+[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info
+--- shell uptime ---
+[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info
+--- shell df -h /data (summary) ---
+[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info
+--- shell bm dump installed? (device type) ---
+[Fail]Not match target founded, check connect-key please
+
+[Fail]ExecuteCommand need connect-key? please confirm a device by help info

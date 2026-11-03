@@ -1,0 +1,110 @@
+{
+  "schema": "d3-baseline-unsigned-hap/v1",
+  "is_signature_evidence": false,
+  "explicit_note": "unsigned HAP 只证明候选在冻结快照上可构建，不是签名证据，也不是安装/设备 PASS；signed 判定见 SIGNING_INVENTORY.md（本树 signingConfigs 为空）。",
+  "candidate_source": {
+    "head": "4b696141435825a3582816e8e449c0e0cf013f29",
+    "branch": "codex/final-d-harmony-native",
+    "frozen_snapshot": "evidence/final-d/20261103/d3/FROZEN_SNAPSHOT.json",
+    "dirty_count_at_build_start": 20,
+    "source_tree_digest": {
+      "algorithm": "sha256(sorted \"relpath|sha256\" lines, LF)",
+      "file_count": 221,
+      "sha256": "39646e8f6eeb0bd633b02b69b299329c4d9248431544654e0e15a76cbc375e68"
+    },
+    "dirty_files": [
+      " M harmonyos/entry/src/main/ets/common/MissionWidgetContract.ets",
+      " M harmonyos/entry/src/main/ets/components/CopilotContinuationCard.ets",
+      " M harmonyos/entry/src/main/ets/components/GlobalFocusPanel.ets",
+      " M harmonyos/entry/src/main/ets/components/MissionPanel.ets",
+      " M harmonyos/entry/src/main/ets/components/MissionReadbackView.ets",
+      " M harmonyos/entry/src/main/ets/entryability/EntryAbility.ets",
+      " M harmonyos/entry/src/main/ets/entryformability/EntryFormAbility.ets",
+      " M harmonyos/entry/src/main/ets/pages/FocusConversation.ets",
+      " M harmonyos/entry/src/main/ets/pages/Index.ets",
+      " M harmonyos/entry/src/main/ets/pages/MissionDetail.ets",
+      " M harmonyos/entry/src/main/ets/pages/ProjectHome.ets",
+      " M harmonyos/entry/src/main/ets/services/WidgetDataService.ets",
+      " M harmonyos/entry/src/main/ets/widget/pages/WidgetCard.ets",
+      " M harmonyos/entry/src/test/List.test.ets",
+      "?? evidence/final-d/",
+      "?? harmonyos/entry/src/main/ets/components/MissionWorkPacketView.ets",
+      "?? harmonyos/entry/src/main/ets/models/WorkPacket.ets",
+      "?? harmonyos/entry/src/test/WidgetHandoff.test.ets",
+      "?? harmonyos/entry/src/test/WorkPacketContract.test.ets",
+      "?? harmonyos/entry/src/test/WorkPacketFixtures.ets"
+    ]
+  },
+  "build": {
+    "command": "npm.cmd run harmony:build",
+    "start_utc8": "2026-11-03T15:15:56.388+08:00",
+    "end_utc8": "2026-11-03T15:20:42.745+08:00",
+    "duration_sec": 286.4,
+    "exit_code": 0,
+    "log": "evidence/final-d/20261103/d3/BASELINE_BUILD.log"
+  },
+  "unsigned_hap": {
+    "path": "D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/build/default/outputs/default/entry-default-unsigned.hap",
+    "name": "entry-default-unsigned.hap",
+    "kind": "UNSIGNED",
+    "size_bytes": 8273912,
+    "mtime_utc8": "2026-11-03T15:20:40.808+08:00",
+    "sha256": "9c935302a720a34c2cf845f9a0528806d502f23364f07788650d0e9020164629"
+  },
+  "all_hap_outputs": [
+    {
+      "path": "D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/build/default/outputs/default/entry-default-unsigned.hap",
+      "name": "entry-default-unsigned.hap",
+      "kind": "UNSIGNED",
+      "size_bytes": 8273912,
+      "mtime_utc8": "2026-11-03T15:20:40.808+08:00",
+      "sha256": "9c935302a720a34c2cf845f9a0528806d502f23364f07788650d0e9020164629"
+    }
+  ],
+  "signed_present": false,
+  "signed_note": "本候选 outputs/default 只有 entry-default-unsigned.hap；无 signed 产物 ⇒ signed 安装/系统交互 NOT_RUN + 恢复条件见 SIGNING_INVENTORY.md。即使将来出现 signed 文件，也必须显式核对路径/mtime/SHA-256/签名身份（FS-E01），不得用构建脚本默认打印推断。",
+  "snapshot_consistency_warning": null,
+  "snapshot_consistency": {
+    "dirty_count_snapshot": 20,
+    "dirty_count_now": 20,
+    "source_tree_digest_snapshot": "39646e8f6eeb0bd633b02b69b299329c4d9248431544654e0e15a76cbc375e68",
+    "source_tree_digest_now": "39646e8f6eeb0bd633b02b69b299329c4d9248431544654e0e15a76cbc375e68",
+    "verdict": "IDENTICAL"
+  },
+  "result_status": "BUILD_OK_UNSIGNED_PRESENT",
+  "log_tail": [
+    "\u001b[39m\u001b[39m",
+    "\u001b[33mWARN: \u001b[33m\u001b[33mArkTS:WARN File: D:/Projects/hongmen-final-d-harmony-native/harmonyos/entry/src/main/ets/pages/ProjectIntake.ets:254:12",
+    " 'pushUrl' has been deprecated.",
+    "\u001b[39m\u001b[39m",
+    "\u001b[39m",
+    "> hvigor \u001b[32mFinished :entry:default@CompileArkTS... after 3 min 39 s 805 ms \u001b[39m",
+    "> hvigor \u001b[32mFinished :entry:default@GeneratePkgModuleJson... after 55 ms \u001b[39m",
+    "> hvigor \u001b[32mFinished :entry:default@ProcessCompiledResources... after 3 ms \u001b[39m",
+    "> hvigor \u001b[32mFinished :entry:default@PackageHap... after 1 s 540 ms \u001b[39m",
+    "> hvigor \u001b[32mFinished :entry:default@PackingCheck... after 59 ms \u001b[39m",
+    "> hvigor \u001b[33mWARN: Will skip sign 'hos_hap'. No signingConfigs profile is configured in current project.",
+    "             If needed, configure the signingConfigs in D:\\Projects\\hongmen-final-d-harmony-native\\harmonyos\\build-profile.json5.\u001b[39m",
+    "> hvigor \u001b[32mFinished :entry:default@SignHap... after 7 ms \u001b[39m",
+    "> hvigor \u001b[32mFinished :entry:default@CollectDebugSymbol... after 4 ms \u001b[39m",
+    "> hvigor \u001b[32mFinished :entry:assembleHap... after 1 ms \u001b[39m",
+    "> hvigor \u001b[32mBUILD SUCCESSFUL in 4 min 32 s 737 ms \u001b[39m",
+    "",
+    "[harmony-build] HAP: harmonyos\\entry\\build\\default\\outputs\\default\\entry-default-unsigned.hap",
+    "[harmony-build] size: 8273912 bytes",
+    "[harmony-build] sha256: 9c935302a720a34c2cf845f9a0528806d502f23364f07788650d0e9020164629"
+  ],
+  "signed_detection": {
+    "corrected_at_utc8": "2026-11-03T15:21:29.850+08:00",
+    "issue": "构建脚本首版用 -match \"signed\" 判断 signed 文件名，会误命中 \"unsigned\" 子串，导致 signed_present 初值为 true（误解）；实际产物清单 all_hap_outputs 正确。",
+    "correction": "已改为匹配 (?<!un)signed，并按磁盘实测重算 signed_present=false；未重跑构建，HAP 文件/hash/mtime 与首次构建一致。",
+    "hap_files_on_disk": {
+      "name": "entry-default-unsigned.hap",
+      "size_bytes": 8273912,
+      "mtime_utc8": "2026-11-03T15:20:40.808+08:00",
+      "sha256": "9c935302a720a34c2cf845f9a0528806d502f23364f07788650d0e9020164629"
+    },
+    "unsigned_count": 1,
+    "signed_count": 0
+  }
+}

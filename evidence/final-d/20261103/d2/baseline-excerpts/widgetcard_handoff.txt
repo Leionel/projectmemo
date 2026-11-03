@@ -1,0 +1,11 @@
+# baseline 4b69614 harmonyos/entry/src/main/ets/widget/pages/WidgetCard.ets :: 卡片点击意图未携带 missionVersion
+pattern: missionExpiresAt > 0  first-match-line: 382
+  382:             handoffExpiresAt: String(this.missionExpiresAt > 0 ? this.missionExpiresAt : Date.now())
+  383:           }
+  384:         });
+  385:       } else {
+  386:         postCardAction(this, {
+  387:           action: ACTION_ROUTER,
+  388:           abilityName: ABILITY_NAME,
+  389:           params: {
+  390:             targetTab: 0,

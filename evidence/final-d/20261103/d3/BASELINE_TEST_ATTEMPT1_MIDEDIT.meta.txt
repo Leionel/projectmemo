@@ -1,0 +1,7 @@
+# BASELINE_TEST run (D3)
+cmd: npm.cmd run harmony:test
+cwd: D:/Projects/hongmen-final-d-harmony-native
+HEAD: 4b696141435825a3582816e8e449c0e0cf013f29
+dirty_tree_before: True
+start_utc8: 2026-11-03T14:46:20.580+08:00
+note: tree was NOT pristine 4b69614 at run time; see BASELINE_TREE_STATE.json

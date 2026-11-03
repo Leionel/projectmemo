@@ -1,6 +1,10 @@
-import { db } from "../lib/db";
 import { hashPassword } from "../lib/auth/password";
-import { E2E_EMAIL, E2E_PASSWORD, E2E_UNVERIFIED_EMAIL, E2E_USERNAME } from "./e2e-env";
+import { E2E_DATABASE_URL, E2E_EMAIL, E2E_PASSWORD, E2E_UNVERIFIED_EMAIL, E2E_USERNAME } from "./e2e-env";
+
+if (process.env.DATABASE_URL !== E2E_DATABASE_URL || process.env.LLM_MODE !== "mock") {
+  throw new Error("仅允许在隔离 E2E 数据库和 mock 模式创建测试身份");
+}
+const { db } = await import("../lib/db");
 
 const SEED_PROJECT_TITLES = [
   "人工智能创意赛 忆程 ProjectMemo 作品开发",

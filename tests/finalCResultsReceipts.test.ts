@@ -247,6 +247,52 @@ describe("C3 行动回执与真实行为边界", () => {
 });
 
 describe("C3 与旧读回、工作包与行动板的接线", () => {
+  function materialUseItem(overrides: Record<string, unknown> = {}) {
+    return {
+      sourcePointer: { id: "capture:s1", hash: "a".repeat(64) },
+      title: "显存记录",
+      availability: "CURRENT",
+      facts: [
+        { kind: "SAVED", refId: "capture:s1" },
+        { kind: "BOUND", refId: "step-1" },
+      ],
+      bodyCoverage: "NOT_RECORDED",
+      excerpt: "10月显存6.2GB",
+      coverage: {
+        loadedCharacters: 9,
+        totalCharacters: 9,
+        truncated: false,
+        extractionStatus: "SUCCESS",
+      },
+      ...overrides,
+    };
+  }
+  function materialUsesOf(items: unknown[]) {
+    return {
+      schemaVersion: 1,
+      questionId: "q1",
+      items,
+      coverage: { eventsTruncated: false },
+    };
+  }
+  function evidenceReviewsOf() {
+    return {
+      items: [
+        {
+          eventId: "ev1",
+          observedAt: "2026-10-25T08:00:00.000Z",
+          fitStatus: "NOT_FIT",
+          review: {
+            mode: "CONDITIONAL_ANALYSIS",
+            note: "观察条件不符，保留未知作条件分析",
+          },
+          unresolvedChecks: [],
+        },
+      ],
+      truncated: false,
+    };
+  }
+
   it("旧读回文案不回归；结果分类排在工作包之后、技术细节之前", async () => {
     const legacy = baseReadback({
       materialUses: {
@@ -305,6 +351,65 @@ describe("C3 与旧读回、工作包与行动板的接线", () => {
     expect(workPacket.compareDocumentPosition(results) & FOLLOWING).toBe(FOLLOWING);
     expect(results.compareDocumentPosition(usage) & FOLLOWING).toBe(FOLLOWING);
     expect(screen.getByText("这份资料用在哪里 · 1")).toBeTruthy();
+  });
+
+  it("新后端依据区已覆盖资料时不重复渲染旧资料块，证据核对指向依据区当前许可", async () => {
+    const readback = baseReadback({
+      materialUses: materialUsesOf([
+        materialUseItem({ availability: "UNAVAILABLE", excerpt: null }),
+      ]),
+      evidenceReviews: evidenceReviewsOf(),
+      workPacket: { basis: { questionId: "q1" } } as unknown as ReadbackData["workPacket"],
+    } as unknown as Partial<ReadbackData>);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        json: async () => ({ readback }),
+      })),
+    );
+    render(createElement(MissionReadback, { missionId: "m", missionVersion: 7 }));
+    const evidence = await screen.findByText("这次资料核对");
+    // 新后端由四问“依据是什么”逐项给当前许可，旧兼容块整体不出现。
+    expect(screen.queryByText(/这份资料用在哪里/)).toBeNull();
+    expect(
+      screen.queryByText("仅展示直接来源与有限历史；引用不表示结论已核验。"),
+    ).toBeNull();
+    expect(screen.queryByText(/原资料暂不可访问/)).toBeNull();
+    evidence.click();
+    expect(
+      screen.getByText("当前依据资格以「依据是什么」中的当前许可为准。"),
+    ).toBeTruthy();
+    // 顺序仍为 工作包 → 结果分类 → 技术细节。
+    const workPacket = screen.getByTestId("work-packet");
+    const results = screen.getByRole("region", { name: "结果分类与支持上限" });
+    const usage = screen.getByText("本次用量 · 模型 2 次 · 工具 1 次");
+    expect(workPacket.compareDocumentPosition(results) & FOLLOWING).toBe(FOLLOWING);
+    expect(results.compareDocumentPosition(usage) & FOLLOWING).toBe(FOLLOWING);
+  });
+
+  it("旧后端 UNAVAILABLE 只说明兼容可用性，不误述为资料不可访问", async () => {
+    const legacy = baseReadback({
+      materialUses: materialUsesOf([
+        materialUseItem({ availability: "UNAVAILABLE", excerpt: null }),
+      ]),
+    } as unknown as Partial<ReadbackData>);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        json: async () => ({ readback: legacy }),
+      })),
+    );
+    render(createElement(MissionReadback, { missionId: "m", missionVersion: 7 }));
+    expect(await screen.findByText("这份资料用在哪里 · 1")).toBeTruthy();
+    expect(
+      screen.getByText(
+        "旧服务只返回兼容可用性；历史关联保留，不能据此推断当前许可或版本变化。",
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText(/原资料暂不可访问/)).toBeNull();
+    expect(screen.getByText("已绑定原委托，尚未找到后续引用")).toBeTruthy();
   });
 
   it("ActionBoard 只保留原复盘回链，不给已完成行动第二个确认", () => {

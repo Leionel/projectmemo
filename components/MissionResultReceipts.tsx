@@ -36,6 +36,11 @@ function actionOutcomeText(action: {
 
 export function MissionResultReceipts({ data }: MissionResultReceiptsProps) {
   const reviewProgress = data.reviewProgress;
+  /**
+   * 新后端工作包已含 basis（四问里的“依据是什么”逐项给出当前许可与修订事实）；
+   * 旧“这份资料用在哪里”块只服务没有 workPacket 的旧后端，避免两个口径同时出现。
+   */
+  const basisCoveredByWorkPacket = Boolean(data.workPacket?.basis);
   const adoptions = Array.isArray(data.adoptions) ? data.adoptions : [];
   const actionReceipts = Array.isArray(data.actionReceipts)
     ? data.actionReceipts
@@ -237,7 +242,9 @@ export function MissionResultReceipts({ data }: MissionResultReceiptsProps) {
           )}
         </details>
       )}
-      {data.materialUses && data.materialUses.items.length > 0 && (
+      {!basisCoveredByWorkPacket &&
+        data.materialUses &&
+        data.materialUses.items.length > 0 && (
         <details className="mt-3 border-t border-[var(--rule)] pt-3">
           <summary className="cursor-pointer font-semibold">
             这份资料用在哪里 · {data.materialUses.items.length}
@@ -254,7 +261,9 @@ export function MissionResultReceipts({ data }: MissionResultReceiptsProps) {
                   {materialUseSummary(item.facts)}
                 </p>
                 {item.availability === "UNAVAILABLE" && (
-                  <p>原资料暂不可访问，历史关联仍保留。</p>
+                  <p>
+                    旧服务只返回兼容可用性；历史关联保留，不能据此推断当前许可或版本变化。
+                  </p>
                 )}
                 {item.excerpt && (
                   <details>
@@ -299,6 +308,11 @@ export function MissionResultReceipts({ data }: MissionResultReceiptsProps) {
       {data.evidenceReviews?.items.length > 0 && (
         <details className="mt-3 border-t border-[var(--rule)] pt-3">
           <summary>这次资料核对</summary>
+          {basisCoveredByWorkPacket && (
+            <p className="mt-2 text-[var(--muted)]">
+              当前依据资格以「依据是什么」中的当前许可为准。
+            </p>
+          )}
           {data.evidenceReviews.items.map((r) => (
             <div className="mt-3 space-y-2" key={r.eventId}>
               <strong>{fitStatusLabel[r.fitStatus]}</strong>

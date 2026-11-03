@@ -19,7 +19,7 @@
 | `lib/types/workPacket.ts` | 冻结四问 DTO：identity / snapshot / authority / observations / done / basis / stopped / next / blockers / coverage / realityOutcome |
 | `lib/mission/workPacket.ts` | 纯构造器 `buildMissionWorkPacket(input, now?)`：确定性组合、主操作选择、阻断展开、版本要求 |
 | `tests/finalAWorkStateContract.test.ts` | 31 项纯合同用例（冲突组合） |
-| `tests/finalAWorkPacketContract.test.ts` | 27 项纯合同用例（四问/主操作/阻断/旧后端降级） |
+| `tests/finalAWorkPacketContract.test.ts` | 30 项纯合同用例（四问/主操作/阻断/旧后端降级；含 RUNNING 执行中、个人记忆边界、租约过期不误标 AUTHORITY） |
 | `scripts/final-a/` | FS-A01～A07 特征化探针（服务级）、真实双连接并发探针、A1 纯函数样本生成器、README |
 | `evidence/final-a/20261103/probe-*.json` | BEFORE_FIX 探针回执（baseSha=485d485） |
 | `evidence/final-a/20261103/samples/FS-A0*.json` | BEFORE_FIX 服务级真实 JSON 样本 |
@@ -35,7 +35,7 @@ npx.cmd tsx scripts/final-a/a1-contract-samples.ts      # A1 纯函数样本
 npm.cmd test -- tests/finalAWorkStateContract.test.ts tests/finalAWorkPacketContract.test.ts tests/agentUxWorkState.test.ts tests/missionWorkspaceSummary.test.ts
 ```
 
-A1 实测：4 files / 69 tests passed；`tsc --noEmit` exit 0。
+A1 实测（最终 HEAD `3a62dce`）：两个纯合同文件 61 tests passed（31+30）；含既有锚点 `agentUxWorkState`（7）+`missionWorkspaceSummary`（4）共 4 files / 72 tests passed；`tsc --noEmit` exit 0。独立验收在 `git archive 3a62dce` 干净快照复核 61/61 passed（见 `verify/a1-verification.json`）。
 
 ## 2. 实际 JSON 样本（节选，完整文件见 `samples/a1-pure/`）
 
@@ -221,5 +221,6 @@ A2（服务实现）待完成并单独提交：
 - 基线 `readback.observedAt` 仍存在被旧客户端当作“成功观察”的用法风险，合同已冻结词义但客户端需 C/D 接线修正。
 - `materialUses.availability = CURRENT` 只代表版本匹配，不代表当前许可；A2 接线前旧客户端仍可能照搬。
 - `workspaceSummary` 仍只列活跃任务，终态+未结算 UNKNOWN 不会出现在摘要；该入口是否增加终态提醒需 C/D/E 与主控裁决，不属 A1 合同层。
+- A1 HEAD 的 Focus 摘要（`missionSummarySelect`）尚未包含 `pauseRequestedAt/cancelRequestedAt`，停止请求在途时摘要仍显示 `LEASE_ACTIVE`；A2 已补该 select 字段，待 A2 提交后由独立验收复核。
 - FS-A04 在服务层基线为 NOT_REPRODUCED（时间已分离），但仍需 A2 增加显式字段防止误用。
 - 真实模型、Worker 自然日、设备与签名安装、独立用户试用均 NOT_RUN，不能由本回执并入通过。

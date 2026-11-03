@@ -159,7 +159,8 @@
       "size_bytes": 8047574,
       "mtime_utc8": "2026-11-03T11:18:09.914+08:00",
       "sha256": "2d64b3da8a803022e500f9ec51d423fdf8fd869fb8841db54a96b4acc455ed2f",
-      "ownership": "legacy artifact of earlier baseline (485d485 preparation), NOT evidence for 4b69614 or any candidate"
+      "ownership": "legacy artifact of earlier baseline (485d485 preparation), NOT evidence for 4b69614 or any candidate",
+      "annotation": "该文件是 14:53 探针时点的状态；FROZEN 候选构建（2026-11-03 15:20:40）已用同名文件覆盖，候选 unsigned 为 8,273,912 bytes / SHA-256 9c935302a720a34c2cf845f9a0528806d502f23364f07788650d0e9020164629。见 BASELINE_UNSIGNED_HAP.json。"
     },
     "user_home_signing_materials": "Two sets of DevEco default signing materials exist under %USERPROFILE%\\.ohos\\config (mtime 2026-09-28 and 2026-11-02; .p12/.cer/.csr/.p7b). They were NOT copied into the D worktree, NOT used, and their authorization/validity is not assumed. See SIGNING_INVENTORY.md.",
     "detail_file": "SIGNING_INVENTORY.md"

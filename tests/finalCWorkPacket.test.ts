@@ -357,7 +357,7 @@ describe("C1 四问工作包：正常状态", () => {
     expect(primary.type).toBe("button");
     expect(view.container.textContent).toContain(STEP_NOTE);
     expect(view.container.textContent).toContain("原资料使用 0 项 · 证据审查 0 条");
-    expect(view.container.textContent).toContain("当前阶段：正在调查 · 原状态：RUNNING");
+    expect(view.container.textContent).toContain("当前阶段：正在调查 · 原状态：正在执行");
     expect(view.container.textContent).toContain("读取于");
     expect(view.container.textContent).toContain("尚未有成功观察记录");
     expect(view.container.textContent).toContain("心跳不代表成功观察");
@@ -464,7 +464,7 @@ describe("C1 四问工作包：正常状态", () => {
         onReload: view.onReload,
       }),
     );
-    expect(view.container.textContent).toContain("当前阶段：状态待核对 · 原状态：PAUSED");
+    expect(view.container.textContent).toContain("当前阶段：状态待核对 · 原状态：已暂停");
     expect(view.container.textContent).toContain("未结算效果：TOOL_UNKNOWN");
     expect(view.container.textContent).toContain("读取不会核销，需要重新核对原请求");
   });
@@ -532,6 +532,53 @@ describe("C1 四问工作包：正常状态", () => {
     expect(text).not.toContain("费用 0");
     expect(text).not.toContain("费用未知，未估算（0）");
   });
+  it("原状态与行动回执枚举中文化；原投影说明默认收起但仍可查", () => {
+    const base = basePacket();
+    const packet: WorkPacket = {
+      ...base,
+      identity: { ...base.identity, missionStatus: "WAITING_INPUT" },
+      stopped: {
+        ...base.stopped,
+        missionStatus: "WAITING_INPUT",
+        workState: workState({
+          phase: "WAITING_USER",
+          nextActor: "USER",
+          requiresUser: true,
+          reasonCode: "QUESTION_PENDING",
+          reasonText: "需要你补充信息",
+          actionLabel: "回答原问题",
+        }),
+        note: "原生命周期 WAITING_INPUT；显示阶段 WAITING_USER；停止请求 NONE（已结算/无请求）；未结算效果不存在。",
+      },
+      done: {
+        ...base.done,
+        actionReceipts: [
+          { actionId: "action-1", title: "核对实验条件", status: "DONE", resultCardId: "card-1", completedAt: null, isSimulated: false },
+        ],
+      },
+    };
+    const view = renderPacket(packet);
+    const text = view.container.textContent ?? "";
+    expect(text).toContain("原状态：等待补充信息");
+    expect(text).toContain("已完成");
+    expect(text).toContain("已填写复盘回执");
+    expect(screen.queryByText("DONE")).toBeNull();
+    // 主视图（四问正文，不含默认收起的 details）不出现裸枚举
+    const stoppedSection = screen
+      .getByRole("region", { name: "原任务四问工作包" })
+      .querySelector('section[aria-label="为何停下"]') as HTMLElement;
+    const visible = Array.from(stoppedSection.children)
+      .filter((node) => node.tagName !== "DETAILS")
+      .map((node) => node.textContent)
+      .join(" ");
+    expect(visible).not.toContain("WAITING_INPUT");
+    expect(visible).not.toContain("WAITING_USER");
+    expect(visible).not.toContain("PAUSE_REQUESTED");
+    // 原投影说明保留可查，默认收起
+    const technical = screen.getByText("技术说明（原投影）").closest("details") as HTMLDetailsElement;
+    expect(technical.open).toBe(false);
+    expect(technical.textContent).toContain("原生命周期 WAITING_INPUT");
+  });
 });
 
 describe("C1 四问工作包：快照与旧后端", () => {
@@ -563,9 +610,10 @@ describe("C1 四问工作包：快照与旧后端", () => {
     const text = view.container.textContent ?? "";
     expect(text).toContain("当前摘要暂未提供");
     expect(text).toContain("不据此推断成功或无变化");
-    expect(text).toContain("READY");
+    expect(text).toContain("等待执行");
     expect(text).toContain("今日调用额度已用完");
     expect(text).toContain("查看下次检查时间");
+    expect(text).not.toContain("READY");
     expect(text).not.toContain("做到哪");
     expect(text).not.toContain("依据是什么");
     expect(text).not.toContain("为何停下");
@@ -582,8 +630,9 @@ describe("C1 四问工作包：快照与旧后端", () => {
     const text = view?.container.textContent ?? "";
     expect(text).toContain("当前摘要暂未提供");
     expect(text).toContain("不据此推断成功或无变化");
-    expect(text).toContain("READY");
+    expect(text).toContain("等待执行");
     expect(text).toContain("原状态未提供");
+    expect(text).not.toContain("READY");
     expect(text).not.toContain("做到哪");
     expect(text).not.toContain("依据是什么");
     expect(text).not.toContain("为何停下");

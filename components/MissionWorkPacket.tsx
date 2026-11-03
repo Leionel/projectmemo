@@ -12,6 +12,7 @@
  */
 import { useState } from "react";
 import { workPhaseLabel } from "@/lib/client/focusPresentation";
+import { missionStatusLabels } from "@/lib/mission/presentation";
 import { MissionBasisEvidence } from "./MissionBasisEvidence";
 import type { MissionReadback as ReadbackData } from "@/lib/mission/readback";
 import type { WorkState } from "@/lib/types/workState";
@@ -148,6 +149,25 @@ function formatTime(value: string | null | undefined, fallback = "未记录"): s
   return new Date(time).toLocaleString("zh-CN");
 }
 
+/** 原 Mission 生命周期枚举中文化；未知值保留原值并标“状态待确认”。 */
+function missionStatusText(status: string | null | undefined): string {
+  if (!status) return "未记录";
+  return missionStatusLabels[status] ?? `状态待确认：${status}`;
+}
+
+/** 原行动回执状态枚举中文化；未知值保留原值并标“状态待确认”。 */
+const ACTION_RECEIPT_STATUS_LABELS: Record<string, string> = {
+  DONE: "已完成",
+  DOING: "进行中",
+  IN_PROGRESS: "进行中",
+  TODO: "待处理",
+  CANCELLED: "已取消",
+};
+
+function actionReceiptStatusText(status: string): string {
+  return ACTION_RECEIPT_STATUS_LABELS[status] ?? `状态待确认：${status}`;
+}
+
 function scrollIntoViewIfPossible(element: HTMLElement) {
   if (typeof element.scrollIntoView === "function") {
     element.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -216,7 +236,7 @@ function LegacyPacketNotice({ readback }: { readback: ReadbackData }) {
       <dl className={styles.facts}>
         <div>
           <dt>原状态</dt>
-          <dd>{readback.missionStatus || "未记录"}</dd>
+          <dd>{missionStatusText(readback.missionStatus)}</dd>
         </div>
         {workState ? (
           <>
@@ -399,7 +419,7 @@ export function MissionWorkPacket({ readback, packet, missionId, onReload, disab
                   <span>{receipt.title ?? receipt.actionId}</span>
                   <span className={styles.muted}>
                     {receipt.isSimulated ? "演示情境 · " : ""}
-                    {receipt.status}
+                    {actionReceiptStatusText(receipt.status)}
                     {receipt.resultCardId ? " · 已填写复盘回执" : " · 尚未填写复盘回执"}
                   </span>
                 </li>
@@ -447,7 +467,7 @@ export function MissionWorkPacket({ readback, packet, missionId, onReload, disab
         <section aria-label="为何停下" className={styles.question}>
           <h4>为何停下</h4>
           <p>
-            当前阶段：{workPhaseLabel(stopped.workState.phase)} · 原状态：{stopped.missionStatus}
+            当前阶段：{workPhaseLabel(stopped.workState.phase)} · 原状态：{missionStatusText(stopped.missionStatus)}
           </p>
           <p>
             {stopped.workState.reasonText || "原因未记录"}
@@ -477,7 +497,12 @@ export function MissionWorkPacket({ readback, packet, missionId, onReload, disab
               </ul>
             </details>
           )}
-          <p className={styles.note}>{stopped.note}</p>
+          {stopped.note && (
+            <details className={styles.details}>
+              <summary>技术说明（原投影）</summary>
+              <p className={styles.note}>{stopped.note}</p>
+            </details>
+          )}
         </section>
 
         <section aria-label="现在等谁" className={styles.question}>
@@ -559,7 +584,7 @@ export function MissionWorkPacket({ readback, packet, missionId, onReload, disab
           <div>
             <dt>原委托版本</dt>
             <dd>
-              {packet.identity.missionVersion} · 原状态 {packet.identity.missionStatus} · 快照{" "}
+              {packet.identity.missionVersion} · 原状态 {missionStatusText(packet.identity.missionStatus)} · 快照{" "}
               {packet.snapshot.consistency}
             </dd>
           </div>

@@ -83,7 +83,7 @@ describe("读回并发与权限变化恢复", () => {
     expect(screen.getByText("WAITING_INPUT")).toBeTruthy();
 
     mode = "conflict";
-    fireEvent.click(screen.getByRole("button", { name: "重新读取回执" }));
+    fireEvent.click(screen.getByRole("button", { name: "重新读取状态与回执" }));
     const notice = await screen.findByText(/已保留上次读取结果/);
     expect(notice.textContent).toContain("重新读取原委托后核对");
     expect(notice.textContent).toContain("不会自动沿用旧资格");
@@ -104,7 +104,7 @@ describe("读回并发与权限变化恢复", () => {
     render(createElement(MissionReadback, { missionId: "m", missionVersion: 3 }));
     expect(await screen.findByText(/当前摘要暂未提供/)).toBeTruthy();
     mode = "unauthorized";
-    fireEvent.click(screen.getByRole("button", { name: "重新读取回执" }));
+    fireEvent.click(screen.getByRole("button", { name: "重新读取状态与回执" }));
     expect(await screen.findByText(/登录已过期/)).toBeTruthy();
     expect(screen.queryByText(/当前摘要暂未提供/)).toBeNull();
   });

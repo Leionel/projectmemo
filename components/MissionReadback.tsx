@@ -94,7 +94,7 @@ export function MissionReadback({
         className="workspace-tool focus-ring"
         onClick={() => setReload((v) => v + 1)}
       >
-        重新读取回执
+        重新读取状态与回执
       </button>
       {data &&
         missionVersion !== undefined &&

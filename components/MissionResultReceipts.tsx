@@ -48,8 +48,9 @@ export function MissionResultReceipts({ data }: MissionResultReceiptsProps) {
   return (
     <>
       <p>
-        读取于 {new Date(data.observedAt).toLocaleString("zh-CN")} · 委托版本{" "}
-        {data.missionVersion}
+        读取于{" "}
+        {new Date(data.readAt ?? data.observedAt).toLocaleString("zh-CN")} ·
+        委托版本 {data.missionVersion}
       </p>
       {data.sourceConversation && (
         <a

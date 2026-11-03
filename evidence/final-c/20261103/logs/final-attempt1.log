@@ -1,0 +1,31 @@
+{
+  "ok": false,
+  "manifestPath": "D:\\Projects\\hongmen-final-c-workspace-ux\\evidence\\final-c\\20261103\\manifest.json",
+  "notesPath": "D:\\Projects\\hongmen-final-c-workspace-ux\\evidence\\final-c\\20261103\\notes.md",
+  "totals": {
+    "checks": 68,
+    "pass": 66,
+    "fail": 2,
+    "notRun": 0
+  },
+  "failures": [
+    {
+      "case": "006-legacy-missing-workpacket",
+      "id": "abnormal.legacy.noFakeSuccess",
+      "status": "FAIL",
+      "detail": {
+        "message": "旧后端缺工作包时读回区域出现成功语义：/费用 0/"
+      },
+      "at": "2026-11-03T08:02:37.501Z"
+    },
+    {
+      "case": "008-409-authority-changed",
+      "id": "abnormal.409.visible",
+      "status": "FAIL",
+      "detail": {
+        "message": "409 没有在页面上显示提示"
+      },
+      "at": "2026-11-03T08:02:52.659Z"
+    }
+  ]
+}

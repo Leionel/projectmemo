@@ -1,0 +1,513 @@
+{
+  "schemaVersion": 1,
+  "track": "C",
+  "mode": "EV1_ISOLATED_WEB_FIXTURE",
+  "generatedAt": "2026-11-03T08:20:13.564Z",
+  "command": "npm.cmd exec -- tsx scripts/final-c/seed-web-fixture.ts",
+  "exitCode": 0,
+  "git": {
+    "headSha": "2d61578dd001cd6c3f556f546ca4bd6c5d24ae83",
+    "shortSha": "2d61578",
+    "branch": "codex/final-c-workspace-ux",
+    "dirty": true,
+    "dirtyPaths": [
+      "M next-env.d.ts",
+      "?? evidence/final-c/",
+      "?? scripts/final-c/"
+    ]
+  },
+  "environment": {
+    "worktree": "D:\\Projects\\hongmen-final-c-workspace-ux",
+    "workingDirectory": "D:\\Projects\\hongmen-final-c-workspace-ux",
+    "databasePath": "D:\\Projects\\hongmen-final-c-workspace-ux\\prisma\\final-preparation.db",
+    "databaseUrl": "file:D:/Projects/hongmen-final-c-workspace-ux/prisma/final-preparation.db",
+    "attachmentDir": "D:\\Projects\\hongmen-final-c-workspace-ux\\tmp\\final-preparation\\attachments",
+    "workerPresenceFile": "D:\\Projects\\hongmen-final-c-workspace-ux\\tmp\\final-preparation\\worker-presence.json",
+    "llmMode": "mock",
+    "modelProviderCalls": 0,
+    "workerStarted": false,
+    "env": {
+      "DATABASE_URL": "file:D:/Projects/hongmen-final-c-workspace-ux/prisma/final-preparation.db",
+      "ATTACHMENT_DIR": "D:\\Projects\\hongmen-final-c-workspace-ux\\tmp\\final-preparation\\attachments",
+      "LLM_MODE": "mock",
+      "FOCUS_AGENT_ENABLED": "true",
+      "FOCUS_AGENT_R4_ENABLED": "true",
+      "FOCUS_CONTINUITY_ENABLED": "true",
+      "FOCUS_ASYNC_ENABLED": "false",
+      "FOCUS_WEB_ENABLED": "true",
+      "MISSION_ENABLED": "true",
+      "MISSION_UI_ENABLED": "true",
+      "MISSION_WRITES_ENABLED": "true",
+      "MISSION_WEB_ENABLED": "false",
+      "MISSION_AUTO_CONTINUATION_ENABLED": "false",
+      "WORKER_PRESENCE_FILE": "D:\\Projects\\hongmen-final-c-workspace-ux\\tmp\\final-preparation\\worker-presence.json"
+    },
+    "note": "隔离 SQLite；LLM_MODE=mock；未启动 Worker；未读取 .env；未写真实库/其他 worktree；未调用模型。"
+  },
+  "schemaMigration": {
+    "databasePath": "D:\\Projects\\hongmen-final-c-workspace-ux\\prisma\\final-preparation.db",
+    "databaseUrl": "file:D:/Projects/hongmen-final-c-workspace-ux/prisma/final-preparation.db",
+    "existedBeforeRun": true,
+    "tableCount": 80,
+    "appliedMigrationCount": 51,
+    "expectedMigrationCount": 51,
+    "missingMigrations": [],
+    "action": "NONE",
+    "command": null,
+    "exitCode": null,
+    "stdoutTail": null,
+    "stderrTail": null
+  },
+  "account": {
+    "username": "final-c-reviewer",
+    "password": "final-c-local-only-2026",
+    "email": "final-c-reviewer@local.invalid",
+    "displayName": "C 证据评审身份（本地隔离库）",
+    "note": "固定本地测试账号，只存在于本工作树隔离库 prisma/final-preparation.db；密码为合成值，不得在真实环境复用。",
+    "emailNote": "邮箱使用 .invalid 顶级域，仅用于满足已验证邮箱字段，不会收信。",
+    "loginEndpoint": "POST /api/auth/login {username,password}"
+  },
+  "projects": {
+    "primary": {
+      "id": "cmw0f3qg90001rk8ovncx1f99",
+      "title": "C 证据项目：多状态长期委托核对",
+      "goal": "在隔离库里核对四问工作包、依据与来源许可、结果回执的 Web 呈现"
+    },
+    "long": {
+      "id": "cmw0f3qgd0003rk8ohqxquzgu",
+      "title": "超长标题项目：用于核对 390 像素宽度下项目标题、项目目标与委托长文案换行是否产生横向滚动（合成数据）SYNTHETIC_LONG_UNBROKEN_",
+      "goal": "核对长文案在 390 宽度下的换行、截断与可读性；不可断行标识 SYNTHETIC_LONG_UNBROKEN_TOKEN_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    }
+  },
+  "routes": {
+    "focus": "/focus",
+    "missionDetailPattern": "/projects/{projectId}/missions?mission={missionId}",
+    "readback": "/api/missions/{missionId}/readback",
+    "missionDetailApi": "/api/missions/{missionId}",
+    "login": "/login"
+  },
+  "missions": [
+    {
+      "key": "waitingUser",
+      "id": "cmw0f3qgq0005rk8oxiheeivm",
+      "projectKey": "primary",
+      "projectId": "cmw0f3qg90001rk8ovncx1f99",
+      "status": "WAITING_INPUT",
+      "goal": "核对设备 D 在 2026-10 的真实显存峰值与测试条件",
+      "expected": {
+        "status": "WAITING_INPUT",
+        "phase": "WAITING_USER",
+        "nextActor": "USER",
+        "requiresUser": true,
+        "reasonCode": "QUESTION_PENDING",
+        "primaryActionKind": "ANSWER_QUESTION",
+        "waitingOn": "USER_INPUT",
+        "observationState": "NOT_OBSERVED",
+        "blockerCodes": [
+          "WORKER_PRESENCE_UNOBSERVED",
+          "QUESTION_PENDING"
+        ],
+        "materialUses": {
+          "capture:cmw0f3qhd0009rk8op9oce64d": {
+            "currentUse": "ALLOWED",
+            "revisionAvailability": "CURRENT",
+            "availability": "CURRENT"
+          }
+        },
+        "reviewProgress": {
+          "executed": 1,
+          "observed": 1
+        }
+      },
+      "targets": {
+        "questionId": "cmw0f3qha0008rk8ox90vydxu",
+        "oldQuestionId": "cmw0f3qh50007rk8our758md2",
+        "captureId": "cmw0f3qhd0009rk8op9oce64d",
+        "sourceId": "capture:cmw0f3qhd0009rk8op9oce64d"
+      },
+      "readTarget": {
+        "questionId": "cmw0f3qha0008rk8ox90vydxu"
+      },
+      "siblingReadTargets": {
+        "oldQuestion": {
+          "questionId": "cmw0f3qh50007rk8our758md2"
+        }
+      }
+    },
+    {
+      "key": "waitingApproval",
+      "id": "cmw0f3qhr000brk8ookvzjodt",
+      "projectKey": "primary",
+      "projectId": "cmw0f3qg90001rk8ovncx1f99",
+      "status": "WAITING_APPROVAL",
+      "goal": "准备一次同条件复测，先审阅要创建的行动提案",
+      "expected": {
+        "status": "WAITING_APPROVAL",
+        "phase": "WAITING_APPROVAL",
+        "nextActor": "USER",
+        "requiresUser": true,
+        "reasonCode": "APPROVAL_PENDING",
+        "primaryActionKind": "REVIEW_APPROVAL",
+        "waitingOn": "USER_APPROVAL",
+        "observationState": "NOT_OBSERVED",
+        "blockerCodes": [
+          "WORKER_PRESENCE_UNOBSERVED",
+          "APPROVAL_PENDING"
+        ],
+        "primaryActionTarget": {
+          "kind": "APPROVAL",
+          "id": "cmw0f3qi7000grk8oycjd1f87",
+          "version": null
+        },
+        "selectedApprovalStatus": "PENDING",
+        "oldSelectedApprovalStatus": "EXPIRED"
+      },
+      "targets": {
+        "approvalId": "cmw0f3qi7000grk8oycjd1f87",
+        "oldApprovalId": "cmw0f3qi2000erk8ot0udhtzq",
+        "approvalStepId": "cmw0f3qi4000frk8o5b3dvmb2",
+        "proposalHash": "7567867a142db27e99dc0b8fad6ff4bd93230f6932a9baa950069ed76bcf7711",
+        "oldProposalHash": "1320e0c3a069609ba8c1ec6a2d4ce194993eb944f7d4d9cffc884292c21796ff"
+      },
+      "readTarget": {
+        "approvalId": "cmw0f3qi7000grk8oycjd1f87"
+      },
+      "siblingReadTargets": {
+        "oldApproval": {
+          "approvalId": "cmw0f3qi2000erk8ot0udhtzq"
+        }
+      }
+    },
+    {
+      "key": "stopRequested",
+      "id": "cmw0f3qi9000hrk8oyr8fey9w",
+      "projectKey": "primary",
+      "projectId": "cmw0f3qg90001rk8ovncx1f99",
+      "status": "RUNNING",
+      "goal": "持续核对部署日志与显存预算（停止请求已受理，等待结算）",
+      "expected": {
+        "status": "RUNNING",
+        "phase": "RUNNING",
+        "nextActor": "SYSTEM",
+        "requiresUser": false,
+        "reasonCode": "STOP_REQUESTED_IN_FLIGHT",
+        "primaryActionKind": "CHECK_STOP_SETTLEMENT",
+        "waitingOn": "SYSTEM_SETTLEMENT",
+        "observationState": "NOT_OBSERVED",
+        "blockerCodes": [
+          "WORKER_PRESENCE_UNOBSERVED",
+          "PAUSE_REQUESTED"
+        ],
+        "stopRequestState": "PAUSE_REQUESTED",
+        "stopRequestSettled": false
+      },
+      "targets": {}
+    },
+    {
+      "key": "succeeded",
+      "id": "cmw0f3qin000lrk8o7a4kapx1",
+      "projectKey": "primary",
+      "projectId": "cmw0f3qg90001rk8ovncx1f99",
+      "status": "SUCCEEDED",
+      "goal": "整理阶段汇报草稿，并记录一次真实行动结果回执",
+      "expected": {
+        "status": "SUCCEEDED",
+        "phase": "COMPLETED",
+        "nextActor": "NONE",
+        "requiresUser": false,
+        "reasonCode": "SUCCEEDED",
+        "primaryActionKind": "VIEW_RESULT",
+        "waitingOn": "NONE",
+        "observationState": "OBSERVED",
+        "blockerCodes": [],
+        "latestOutput": {
+          "id": "cmw0f3qj7000srk8oacp6tqxb",
+          "revision": 1
+        },
+        "actionReceipts": [
+          {
+            "actionId": "cmw0f3qj4000rrk8ond429bwc",
+            "status": "DONE",
+            "resultCardId": "cmw0f3qj1000qrk8o39vb8plu",
+            "isSimulated": false
+          }
+        ],
+        "adoptions": [
+          {
+            "receiptId": "cmw0f3qjl000yrk8o7wa57pet",
+            "artifactId": "cmw0f3qjj000xrk8o3rahnqhs"
+          }
+        ],
+        "reviewProgress": {
+          "executed": 4,
+          "observed": 2,
+          "userReported": 1
+        },
+        "materialUses": {
+          "capture:cmw0f3qiy000prk8oli9wtx03": {
+            "currentUse": "ALLOWED",
+            "revisionAvailability": "CURRENT",
+            "availability": "CURRENT"
+          }
+        },
+        "materialUseCount": 1,
+        "correctionTargetAvailable": true
+      },
+      "targets": {
+        "outputId": "cmw0f3qj7000srk8oacp6tqxb",
+        "outputRevision": 1,
+        "receiptId": "cmw0f3qjl000yrk8o7wa57pet",
+        "artifactId": "cmw0f3qjj000xrk8o3rahnqhs",
+        "actionId": "cmw0f3qj4000rrk8ond429bwc",
+        "resultCardId": "cmw0f3qj1000qrk8o39vb8plu",
+        "resultCardCaptureId": "cmw0f3qiw000ork8o6fd61pnq",
+        "contentCaptureId": "cmw0f3qiu000nrk8ozd6ggynq",
+        "outputMaterialSourceId": "capture:cmw0f3qiy000prk8oli9wtx03",
+        "outputMaterialHash": "b1e89cf22fff5a1df9b63a4e87926226cb349e4bfe0262a83cc4808a31af4900",
+        "exactQuote": "2026-10-20 复测条件记录：设备 D，模型 A v2，batch=1，序列长度 2048",
+        "stepIds": [
+          {
+            "id": "cmw0f3qj9000trk8o1vh9ovc4",
+            "ordinal": 1,
+            "toolName": "search_memory"
+          },
+          {
+            "id": "cmw0f3qjc000urk8o2tln4gvb",
+            "ordinal": 2,
+            "toolName": "save_mission_output"
+          },
+          {
+            "id": "cmw0f3qje000vrk8o8a3pnwfn",
+            "ordinal": 3,
+            "toolName": "create_action"
+          },
+          {
+            "id": "cmw0f3qjg000wrk8o8z84lap9",
+            "ordinal": 4,
+            "toolName": "bind_project_sources"
+          }
+        ]
+      },
+      "readTarget": {
+        "outputId": "cmw0f3qj7000srk8oacp6tqxb",
+        "revision": 1,
+        "receiptId": "cmw0f3qjl000yrk8o7wa57pet"
+      }
+    },
+    {
+      "key": "failed",
+      "id": "cmw0f3qjr000zrk8oz4xdoiq3",
+      "projectKey": "primary",
+      "projectId": "cmw0f3qg90001rk8ovncx1f99",
+      "status": "FAILED",
+      "goal": "读取项目资料并核对失败原因",
+      "expected": {
+        "status": "FAILED",
+        "phase": "FAILED",
+        "nextActor": "SYSTEM",
+        "requiresUser": false,
+        "reasonCode": "TOOL_FAILED",
+        "primaryActionKind": "REVIEW_FAILURE",
+        "waitingOn": "SYSTEM_RECHECK",
+        "observationState": "NOT_OBSERVED",
+        "blockerCodes": [
+          "WORKER_PRESENCE_UNOBSERVED",
+          "TOOL_FAILED"
+        ]
+      },
+      "targets": {}
+    },
+    {
+      "key": "unknown",
+      "id": "cmw0f3qk30012rk8oz7auug9m",
+      "projectKey": "primary",
+      "projectId": "cmw0f3qg90001rk8ovncx1f99",
+      "status": "PAUSED",
+      "goal": "核对一次外部调用结果尚未结算的委托",
+      "expected": {
+        "status": "PAUSED",
+        "phase": "UNKNOWN",
+        "nextActor": "SYSTEM",
+        "requiresUser": false,
+        "reasonCode": "TOOL_UNKNOWN",
+        "primaryActionKind": "RECHECK_AUTHORITY",
+        "waitingOn": "SYSTEM_RECHECK",
+        "observationState": "NOT_OBSERVED",
+        "blockerCodes": [
+          "WORKER_PRESENCE_UNOBSERVED",
+          "TOOL_UNKNOWN"
+        ],
+        "unsettledEffect": {
+          "present": true,
+          "code": "TOOL_UNKNOWN",
+          "source": "LAST_ERROR"
+        },
+        "stopRequestState": "PAUSE_SETTLED",
+        "stopRequestSettled": true
+      },
+      "targets": {}
+    },
+    {
+      "key": "sourceStates",
+      "id": "cmw0f3qke0015rk8osmasvxg7",
+      "projectKey": "primary",
+      "projectId": "cmw0f3qg90001rk8ovncx1f99",
+      "status": "WAITING_INPUT",
+      "goal": "核对三条项目资料的当前可用性与修订状态",
+      "expected": {
+        "status": "WAITING_INPUT",
+        "phase": "WAITING_USER",
+        "nextActor": "USER",
+        "requiresUser": true,
+        "reasonCode": "QUESTION_PENDING",
+        "primaryActionKind": "ANSWER_QUESTION",
+        "waitingOn": "USER_INPUT",
+        "observationState": "NOT_OBSERVED",
+        "blockerCodes": [
+          "WORKER_PRESENCE_UNOBSERVED",
+          "QUESTION_PENDING",
+          "SOURCE_CHANGED",
+          "SOURCE_UNAVAILABLE",
+          "CURRENT_USE_SUPPRESSED",
+          "CURRENT_USE_UNKNOWN"
+        ],
+        "materialUses": {
+          "capture:cmw0f3qkp0018rk8ouva90drx": {
+            "currentUse": "ALLOWED",
+            "revisionAvailability": "CURRENT",
+            "availability": "CURRENT"
+          },
+          "capture:cmw0f3qkr0019rk8oq0fxssn7": {
+            "currentUse": "ALLOWED",
+            "revisionAvailability": "CHANGED",
+            "availability": "CHANGED"
+          },
+          "capture:cmw0f3qkv001ark8ofup9n00d": {
+            "currentUse": "SUPPRESSED",
+            "revisionAvailability": "CURRENT",
+            "availability": "UNAVAILABLE"
+          },
+          "capture:cmw0f3qky001brk8oy8u4gf0f": {
+            "currentUse": "UNKNOWN",
+            "revisionAvailability": "UNAVAILABLE",
+            "availability": "UNAVAILABLE"
+          }
+        },
+        "materialUseCount": 4
+      },
+      "targets": {
+        "questionId": "cmw0f3qkn0017rk8orzhxsqwn",
+        "allowedSourceId": "capture:cmw0f3qkp0018rk8ouva90drx",
+        "changedSourceId": "capture:cmw0f3qkr0019rk8oq0fxssn7",
+        "changedHashBefore": "d82ab110eaf6382d316285846bc328a5169496d1e1aa8220e2133d43017026fe",
+        "changedHashAfter": "a5226067b95bf73a1cae4bc8ec2f7bf9fe7809fb7411539aa2dfc908fa041241",
+        "suppressedSourceId": "capture:cmw0f3qkv001ark8ofup9n00d",
+        "unknownSourceId": "capture:cmw0f3qky001brk8oy8u4gf0f",
+        "suppressionDirectiveId": "final-c-source-suppression"
+      },
+      "readTarget": {
+        "questionId": "cmw0f3qkn0017rk8orzhxsqwn"
+      }
+    },
+    {
+      "key": "cancelled",
+      "id": "cmw0f3qlb001drk8oxohuj3nv",
+      "projectKey": "primary",
+      "projectId": "cmw0f3qg90001rk8ovncx1f99",
+      "status": "CANCELLED",
+      "goal": "取消前保留的委托示例：核对部署日志",
+      "expected": {
+        "status": "CANCELLED",
+        "phase": "COMPLETED",
+        "nextActor": "NONE",
+        "requiresUser": false,
+        "reasonCode": "CANCELLED",
+        "primaryActionKind": "VIEW_RESULT",
+        "waitingOn": "NONE",
+        "observationState": "NOT_OBSERVED",
+        "blockerCodes": [],
+        "stopRequestState": "CANCEL_SETTLED",
+        "stopRequestSettled": true,
+        "latestOutput": {
+          "id": "cmw0f3qli001frk8o853vcjhj",
+          "revision": 1
+        }
+      },
+      "targets": {
+        "outputId": "cmw0f3qli001frk8o853vcjhj",
+        "outputRevision": 1
+      },
+      "readTarget": {
+        "outputId": "cmw0f3qli001frk8o853vcjhj",
+        "revision": 1
+      }
+    },
+    {
+      "key": "longCopy",
+      "id": "cmw0f3qlk001grk8okowgf0ag",
+      "projectKey": "long",
+      "projectId": "cmw0f3qgd0003rk8ohqxquzgu",
+      "status": "WAITING_INPUT",
+      "goal": "核对长文案：SYNTHETIC_LONG_UNBROKEN_TOKEN_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 以及一段很长的中文说明，用于确认 390 像素宽度下顶部四问、依据摘录与结果回执不会产生横向滚动；这段文字重复出现以模拟真实长文案。",
+      "expected": {
+        "status": "WAITING_INPUT",
+        "phase": "WAITING_USER",
+        "nextActor": "USER",
+        "requiresUser": true,
+        "reasonCode": "QUESTION_PENDING",
+        "primaryActionKind": "ANSWER_QUESTION",
+        "waitingOn": "USER_INPUT",
+        "observationState": "NOT_OBSERVED",
+        "blockerCodes": [
+          "WORKER_PRESENCE_UNOBSERVED",
+          "QUESTION_PENDING"
+        ]
+      },
+      "targets": {
+        "questionId": "cmw0f3qlt001irk8o0j6fy31x",
+        "longToken": "SYNTHETIC_LONG_UNBROKEN_TOKEN_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      },
+      "readTarget": {
+        "questionId": "cmw0f3qlt001irk8o0j6fy31x"
+      }
+    },
+    {
+      "key": "terminalUnknown",
+      "id": "cmw0f3qly001jrk8ofepwm6k3",
+      "projectKey": "primary",
+      "projectId": "cmw0f3qg90001rk8ovncx1f99",
+      "status": "SUCCEEDED",
+      "goal": "完成条件已通过，但有一次外部调用结果尚未结算",
+      "expected": {
+        "status": "SUCCEEDED",
+        "phase": "COMPLETED",
+        "nextActor": "USER",
+        "requiresUser": true,
+        "reasonCode": "SUCCEEDED",
+        "primaryActionKind": "CHECK_UNKNOWN_EFFECT",
+        "waitingOn": "NONE",
+        "observationState": "NOT_OBSERVED",
+        "blockerCodes": [
+          "TOOL_UNKNOWN"
+        ],
+        "unsettledEffect": {
+          "present": true,
+          "code": "TOOL_UNKNOWN",
+          "source": "LAST_ERROR"
+        }
+      },
+      "targets": {}
+    }
+  ],
+  "dataProvenance": {
+    "kind": "SYNTHETIC_ONLY",
+    "marker": "SYNTHETIC_FINAL_C_FIXTURE_ONLY",
+    "statement": "合成用户、合成项目与合成委托；不含真实用户数据、凭据或个人信息。所有时间戳相对种子运行时刻生成。"
+  },
+  "webPreview": {
+    "command": "tmp/final-preparation/Start-Track.ps1",
+    "baseUrl": "http://127.0.0.1:34112",
+    "port": 34112,
+    "note": "EV2 开始前由 Lead 通知 code green 后启动单一 dev 实例；本文件不启动任何服务。"
+  }
+}

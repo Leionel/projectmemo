@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "manifestPath": "D:\\Projects\\hongmen-final-c-workspace-ux\\evidence\\final-c\\20261103\\manifest.json",
+  "notesPath": "D:\\Projects\\hongmen-final-c-workspace-ux\\evidence\\final-c\\20261103\\notes.md",
+  "totals": {
+    "checks": 68,
+    "pass": 68,
+    "fail": 0,
+    "notRun": 0
+  },
+  "failures": []
+}

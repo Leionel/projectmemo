@@ -1,0 +1,3078 @@
+{
+  "schemaVersion": 1,
+  "track": "C",
+  "mode": "EV2_WEB_USER_FLOW_EVIDENCE",
+  "runLabel": "final",
+  "startedAt": "2026-11-03T08:14:25.787Z",
+  "finishedAt": "2026-11-03T08:19:08.297Z",
+  "command": "node scripts/final-c/capture-web-evidence.mjs --base-url http://127.0.0.1:34112",
+  "candidate": {
+    "headSha": "2d61578dd001cd6c3f556f546ca4bd6c5d24ae83",
+    "shortSha": "2d61578",
+    "branch": "codex/final-c-workspace-ux",
+    "dirty": true,
+    "dirtyPaths": [
+      "M next-env.d.ts",
+      "?? evidence/final-c/",
+      "?? scripts/final-c/"
+    ],
+    "capturedAt": "2026-11-03T08:14:26.014Z"
+  },
+  "environment": {
+    "worktree": "D:\\Projects\\hongmen-final-c-workspace-ux",
+    "baseUrl": "http://127.0.0.1:34112",
+    "port": 34112,
+    "databasePath": "D:\\Projects\\hongmen-final-c-workspace-ux\\prisma\\final-preparation.db",
+    "databaseUrl": "file:D:/Projects/hongmen-final-c-workspace-ux/prisma/final-preparation.db",
+    "llmMode": "mock",
+    "provider": "mock",
+    "workerStarted": false,
+    "themeImplementation": "next-themes attribute=class（html.dark），通过 localStorage.theme 切换并校验 html.dark",
+    "dataSources": {
+      "REAL_ISOLATED_DATABASE": "本工作树隔离 SQLite prisma/final-preparation.db 的真实种子状态",
+      "INTERCEPTED_A2_SAMPLE": "evidence/final-a/20261103/samples/a2/a2-legacy-server-without-workpacket.json 的 readback（截获真实 A 样本，非真实旧后端）",
+      "REAL_RESPONSE_MUTATED": "真实隔离库响应 + Playwright route 注入字段（标注为截获变体）",
+      "INTERCEPTED_RESPONSE": "Playwright route 截获的异常状态响应"
+    }
+  },
+  "fixtureIdentity": {
+    "path": "evidence/final-c/20261103/fixture-identity.json",
+    "account": "final-c-reviewer",
+    "projects": {
+      "primary": {
+        "id": "cmw0evu760001f08obusvfrgj",
+        "title": "C 证据项目：多状态长期委托核对",
+        "goal": "在隔离库里核对四问工作包、依据与来源许可、结果回执的 Web 呈现"
+      },
+      "long": {
+        "id": "cmw0evu7a0003f08o08g9arv4",
+        "title": "超长标题项目：用于核对 390 像素宽度下项目标题、项目目标与委托长文案换行是否产生横向滚动（合成数据）SYNTHETIC_LONG_UNBROKEN_",
+        "goal": "核对长文案在 390 宽度下的换行、截断与可读性；不可断行标识 SYNTHETIC_LONG_UNBROKEN_TOKEN_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      }
+    },
+    "missions": {
+      "waitingUser": {
+        "id": "cmw0evu7p0005f08o178ka7rn",
+        "projectId": "cmw0evu760001f08obusvfrgj",
+        "status": "WAITING_INPUT"
+      },
+      "waitingApproval": {
+        "id": "cmw0evu8w000bf08oqetxch3h",
+        "projectId": "cmw0evu760001f08obusvfrgj",
+        "status": "WAITING_APPROVAL"
+      },
+      "stopRequested": {
+        "id": "cmw0evu9i000hf08o6oufe69u",
+        "projectId": "cmw0evu760001f08obusvfrgj",
+        "status": "RUNNING"
+      },
+      "succeeded": {
+        "id": "cmw0evu9z000lf08o2q5jesre",
+        "projectId": "cmw0evu760001f08obusvfrgj",
+        "status": "SUCCEEDED"
+      },
+      "failed": {
+        "id": "cmw0evub9000zf08og5kn2nl7",
+        "projectId": "cmw0evu760001f08obusvfrgj",
+        "status": "FAILED"
+      },
+      "unknown": {
+        "id": "cmw0evubm0012f08o3ow1ithc",
+        "projectId": "cmw0evu760001f08obusvfrgj",
+        "status": "PAUSED"
+      },
+      "sourceStates": {
+        "id": "cmw0evubx0015f08owtwcpyje",
+        "projectId": "cmw0evu760001f08obusvfrgj",
+        "status": "WAITING_INPUT"
+      },
+      "cancelled": {
+        "id": "cmw0evud7001df08oojl3hbkx",
+        "projectId": "cmw0evu760001f08obusvfrgj",
+        "status": "CANCELLED"
+      },
+      "longCopy": {
+        "id": "cmw0evudm001gf08og7odiwr4",
+        "projectId": "cmw0evu7a0003f08o08g9arv4",
+        "status": "WAITING_INPUT"
+      },
+      "terminalUnknown": {
+        "id": "cmw0evue4001jf08og02vh6rg",
+        "projectId": "cmw0evu760001f08obusvfrgj",
+        "status": "SUCCEEDED"
+      }
+    },
+    "receiptIdentity": {
+      "outputId": "cmw0evuan000sf08om7wcq7i4",
+      "receiptId": "cmw0evub4000yf08okaitr07s",
+      "artifactId": "cmw0evub1000xf08o800w2rt6",
+      "actionId": "cmw0evuaj000rf08ooi089pkc",
+      "resultCardId": "cmw0evuag000qf08ofcfowu9z"
+    },
+    "actualReceiptHrefs": {
+      "resultCardHrefs": [
+        "/projects/cmw0evu760001f08obusvfrgj/knowledge#card-cmw0evuag000qf08ofcfowu9z",
+        "/projects/cmw0evu760001f08obusvfrgj/knowledge#card-cmw0evuag000qf08ofcfowu9z"
+      ],
+      "actionHrefs": [
+        "/projects/cmw0evu760001f08obusvfrgj/actions#action-cmw0evuaj000rf08ooi089pkc",
+        "/projects/cmw0evu760001f08obusvfrgj/actions#action-cmw0evuaj000rf08ooi089pkc"
+      ],
+      "artifactHrefs": [
+        "/projects/cmw0evu760001f08obusvfrgj/generate?artifact=cmw0evub1000xf08o800w2rt6&type=weekly_report"
+      ]
+    },
+    "answeredQuestion": {
+      "requestId": "8b52cc06-9f21-4e6e-ab1c-c1f52b43f5e4",
+      "questionId": "cmw0evu8d0008f08o85t6q6k2",
+      "expectedVersion": 1,
+      "httpStatus": 202,
+      "responseMission": {
+        "id": "cmw0evu7p0005f08o178ka7rn",
+        "status": "READY",
+        "version": 2
+      },
+      "answerChars": 68
+    }
+  },
+  "requestAudit": {
+    "policy": "读取页自身不得因 C1/C2/C3 功能交互产生业务写；既有页面自动 POST 与主线测试写分开归类，不混算。",
+    "expectedTestWrites": {
+      "count": 1,
+      "entries": [
+        {
+          "case": "002-waiting-user-detail",
+          "entry": "POST http://127.0.0.1:34112/api/missions/cmw0evu7p0005f08o178ka7rn/input",
+          "classification": "EXPECTED_TEST_WRITE",
+          "reason": "主线“执行一项原操作（回答原问题）”的真实提交，只写本工作树隔离库；不属于读取页违规写。",
+          "codeRef": "components/MissionPanel.tsx command('input') → app/api/missions/[id]/input/route.ts"
+        }
+      ],
+      "note": "主线执行一项原操作的真实提交；只写隔离库，保留回执身份（requestId/questionId/expectedVersion）。"
+    },
+    "cInteractionBusinessWrites": {
+      "count": 0,
+      "entries": [],
+      "assertion": "必须为 0"
+    },
+    "preExistingPageBehavior": {
+      "classification": "PRE_EXISTING_PAGE_BEHAVIOR",
+      "count": 10,
+      "pageComponentPosts": {
+        "endpoints": [
+          {
+            "endpoint": "POST http://127.0.0.1:34112/api/projects/{id}/goal-question",
+            "count": 5
+          }
+        ],
+        "entries": [
+          {
+            "case": "003-basis-evidence",
+            "entry": "POST http://127.0.0.1:34112/api/projects/cmw0evu760001f08obusvfrgj/goal-question"
+          },
+          {
+            "case": "003-basis-evidence",
+            "entry": "POST http://127.0.0.1:34112/api/projects/cmw0evu760001f08obusvfrgj/goal-question"
+          },
+          {
+            "case": "003-basis-evidence",
+            "entry": "POST http://127.0.0.1:34112/api/projects/cmw0evu760001f08obusvfrgj/goal-question"
+          },
+          {
+            "case": "003-basis-evidence",
+            "entry": "POST http://127.0.0.1:34112/api/projects/cmw0evu760001f08obusvfrgj/goal-question"
+          },
+          {
+            "case": "018-long-copy",
+            "entry": "POST http://127.0.0.1:34112/api/projects/cmw0evu7a0003f08o08g9arv4/goal-question"
+          }
+        ],
+        "codeRefs": [
+          "components/GoalQuestion.tsx：挂载 useEffect 先 GET /api/projects/{id}/goal-question，再 POST PRESENT；曝光的 IntersectionObserver 再 POST EXPOSED（既有遥测回执，非 Mission 业务命令）。"
+        ]
+      },
+      "pageInternalPosts": {
+        "endpoints": [
+          {
+            "endpoint": "POST http://127.0.0.1:34112/api/conversations/sync",
+            "count": 5
+          }
+        ],
+        "entries": [
+          {
+            "case": "001-focus",
+            "entry": "POST http://127.0.0.1:34112/api/conversations/sync"
+          },
+          {
+            "case": "001-focus",
+            "entry": "POST http://127.0.0.1:34112/api/conversations/sync"
+          },
+          {
+            "case": "001-focus",
+            "entry": "POST http://127.0.0.1:34112/api/conversations/sync"
+          },
+          {
+            "case": "001-focus",
+            "entry": "POST http://127.0.0.1:34112/api/conversations/sync"
+          },
+          {
+            "case": "002-waiting-user-detail",
+            "entry": "POST http://127.0.0.1:34112/api/conversations/sync"
+          }
+        ],
+        "codeRefs": [
+          "components/FocusAgentWorkspace.tsx：/focus 挂载 useEffect POST /api/conversations/sync 同步锚点投影（既有页面行为）。"
+        ]
+      }
+    },
+    "externalRequests": {
+      "count": 0,
+      "entries": [],
+      "assertion": "必须为 0"
+    }
+  },
+  "login": {
+    "method": "UI_LOGIN",
+    "landing": "http://127.0.0.1:34112/focus",
+    "at": "2026-11-03T08:14:38.838Z"
+  },
+  "findings": [
+    {
+      "id": "F-EV2-PAGE-COMPONENT-POSTS",
+      "severity": "INFO_RISK",
+      "title": "读取页仍会触发既有 GoalQuestion 组件与焦点页锚点同步的写请求",
+      "observed": "pageComponentPosts=5 次（POST /api/projects/{id}/goal-question 的 PRESENT/EXPOSED 回执）；pageInternalPosts=5 次（POST /api/conversations/sync）。",
+      "expected": "合同严格要求读取页只 GET；这些写不是 Mission 业务命令、也不改委托状态，但严格口径下仍是写请求。",
+      "classification": "PRE_EXISTING_PAGE_BEHAVIOR：GoalQuestion 与 FocusAgentWorkspace 挂载行为，不属于 C1/C2/C3 本轮新增；未在本次修复（不改产品源码），由 Lead 裁决例外或后续修复。",
+      "evidence": "logs/requests-*.json 的 pageComponentPosts/pageInternalPosts；components/GoalQuestion.tsx、components/FocusAgentWorkspace.tsx"
+    }
+  ],
+  "modelCalls": {
+    "measuredFromBrowser": false,
+    "declaredProvider": "mock",
+    "reason": "浏览器网络只能证明前端请求；服务端到模型 provider 的流量未单独仪表化。本环境 LLM_MODE=mock、未配置真实模型密钥，且浏览器请求中无外部域，故不宣称实模调用；如需服务端证据请参见 server 日志与 AgentRun 记录。"
+  },
+  "cases": [
+    {
+      "id": "001-focus",
+      "kind": "normal",
+      "title": "登录后进入 /focus（今日项目焦点，原 primaryContext 入口）",
+      "dataSource": "REAL_ISOLATED_DATABASE",
+      "interception": null,
+      "viewport": "1280x900",
+      "theme": "light+dark",
+      "startedAt": "2026-11-03T08:14:26.672Z",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshots": [
+        "evidence/final-c/20261103/screenshots/normal/focus-1280-light.png",
+        "evidence/final-c/20261103/screenshots/normal/focus-1280-dark.png",
+        "evidence/final-c/20261103/screenshots/normal/focus-390-dark.png",
+        "evidence/final-c/20261103/screenshots/normal/focus-390-light.png"
+      ],
+      "checks": [
+        {
+          "case": "001-focus",
+          "id": "login.viaUI",
+          "status": "PASS",
+          "detail": {
+            "label": "login",
+            "value": "http://127.0.0.1:34112/focus"
+          },
+          "at": "2026-11-03T08:14:28.924Z"
+        },
+        {
+          "case": "001-focus",
+          "id": "focus.headingVisible",
+          "status": "PASS",
+          "detail": "今日项目焦点",
+          "at": "2026-11-03T08:14:29.595Z"
+        },
+        {
+          "case": "001-focus",
+          "id": "focus.waitingMissionLinks",
+          "status": "PASS",
+          "detail": 7,
+          "at": "2026-11-03T08:14:31.134Z"
+        },
+        {
+          "case": "001-focus",
+          "id": "focus.overflow1280",
+          "status": "PASS",
+          "detail": {
+            "innerWidth": 1280,
+            "documentScrollWidth": 1280,
+            "bodyScrollWidth": 1280,
+            "horizontalOverflow": false,
+            "offenders": []
+          },
+          "at": "2026-11-03T08:14:31.138Z"
+        },
+        {
+          "case": "001-focus",
+          "id": "focus.overflow390",
+          "status": "PASS",
+          "detail": {
+            "innerWidth": 390,
+            "documentScrollWidth": 390,
+            "bodyScrollWidth": 390,
+            "horizontalOverflow": false,
+            "offenders": []
+          },
+          "at": "2026-11-03T08:14:33.027Z"
+        },
+        {
+          "case": "001-focus",
+          "id": "focus.requestAudit",
+          "status": "PASS",
+          "detail": {
+            "total": 110,
+            "apiRequests": 33,
+            "nonReadRequests": 4,
+            "businessWrites": [],
+            "pageInternalPosts": [
+              "POST http://127.0.0.1:34112/api/conversations/sync",
+              "POST http://127.0.0.1:34112/api/conversations/sync",
+              "POST http://127.0.0.1:34112/api/conversations/sync",
+              "POST http://127.0.0.1:34112/api/conversations/sync"
+            ],
+            "pageComponentPosts": [],
+            "externalRequests": [],
+            "methods": {
+              "GET": 106,
+              "POST": 4
+            }
+          },
+          "at": "2026-11-03T08:14:34.334Z"
+        }
+      ],
+      "authRequests": [
+        {
+          "method": "POST",
+          "url": "http://127.0.0.1:34112/api/auth/login",
+          "resourceType": "fetch",
+          "isNavigation": false,
+          "at": "2026-11-03T08:14:28.127Z"
+        }
+      ],
+      "finishedAt": "2026-11-03T08:14:34.342Z",
+      "requestAudit": {
+        "total": 110,
+        "apiRequests": 33,
+        "nonReadRequests": 4,
+        "businessWrites": [],
+        "pageInternalPosts": [
+          "POST http://127.0.0.1:34112/api/conversations/sync",
+          "POST http://127.0.0.1:34112/api/conversations/sync",
+          "POST http://127.0.0.1:34112/api/conversations/sync",
+          "POST http://127.0.0.1:34112/api/conversations/sync"
+        ],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 106,
+          "POST": 4
+        }
+      },
+      "requestLogPath": "evidence/final-c/20261103/logs/requests-001-focus.json"
+    },
+    {
+      "id": "002-waiting-user-detail",
+      "kind": "normal",
+      "title": "原 Mission 详情：顶部四问可见 + 原问题主操作导航",
+      "dataSource": "REAL_ISOLATED_DATABASE",
+      "interception": null,
+      "viewport": "1280x900",
+      "theme": "light+dark",
+      "startedAt": "2026-11-03T08:14:34.344Z",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshots": [
+        "evidence/final-c/20261103/screenshots/normal/mission-waiting-user-1280-light.png",
+        "evidence/final-c/20261103/screenshots/normal/mission-waiting-user-1280-dark.png",
+        "evidence/final-c/20261103/screenshots/normal/mission-waiting-user-390-dark.png",
+        "evidence/final-c/20261103/screenshots/normal/mission-waiting-user-390-light.png",
+        "evidence/final-c/20261103/screenshots/normal/mission-question-navigation-1280-light.png",
+        "evidence/final-c/20261103/screenshots/normal/mission-question-receipt-1280-light.png"
+      ],
+      "checks": [
+        {
+          "case": "002-waiting-user-detail",
+          "id": "mission.panelVisible",
+          "status": "PASS",
+          "detail": "mission-agent",
+          "at": "2026-11-03T08:14:43.346Z"
+        },
+        {
+          "case": "002-waiting-user-detail",
+          "id": "mission.fourQuestions",
+          "status": "PASS",
+          "detail": [
+            {},
+            {},
+            {},
+            {}
+          ],
+          "at": "2026-11-03T08:14:43.362Z"
+        },
+        {
+          "case": "002-waiting-user-detail",
+          "id": "mission.primaryAction",
+          "status": "PASS",
+          "detail": {
+            "kind": "button",
+            "text": "回答原问题"
+          },
+          "at": "2026-11-03T08:14:43.433Z"
+        },
+        {
+          "case": "002-waiting-user-detail",
+          "id": "mission.overflow390",
+          "status": "PASS",
+          "detail": {
+            "innerWidth": 390,
+            "documentScrollWidth": 390,
+            "bodyScrollWidth": 390,
+            "horizontalOverflow": false,
+            "offenders": []
+          },
+          "at": "2026-11-03T08:14:50.315Z"
+        },
+        {
+          "case": "002-waiting-user-detail",
+          "id": "mission.primaryActionNavigation",
+          "status": "PASS",
+          "detail": {
+            "urlChanged": false,
+            "questionVisible": true,
+            "textareaVisible": true,
+            "hash": "",
+            "primaryActionNavigated": true
+          },
+          "at": "2026-11-03T08:14:54.701Z"
+        },
+        {
+          "case": "002-waiting-user-detail",
+          "id": "mission.primaryActionIsNavigationOnly",
+          "status": "PASS",
+          "detail": "点击主操作后仍无业务写 POST",
+          "at": "2026-11-03T08:14:54.702Z"
+        },
+        {
+          "case": "002-waiting-user-detail",
+          "id": "mission.questionAnchor",
+          "status": "PASS",
+          "detail": {
+            "visible": true,
+            "text": "需要你补充 请补充设备 D 在 2026-10 的真实显存峰值（GB），以及 batch、序列长度和是否启用 KV cache。缺少这些条件时不会外推预算结论。 从项目资料选取 保存新记录或附件 → 填写明确的实验指标 补充实验记录：显存峰值 · 2026-10 实验指标数值（GB）保存本项目实验记录 补充信息 补充并继续"
+          },
+          "at": "2026-11-03T08:14:54.714Z"
+        },
+        {
+          "case": "002-waiting-user-detail",
+          "id": "mission.answerQuestionReceipt",
+          "status": "PASS",
+          "detail": {
+            "requestId": "8b52cc06-9f21-4e6e-ab1c-c1f52b43f5e4",
+            "questionId": "cmw0evu8d0008f08o85t6q6k2",
+            "expectedVersion": 1,
+            "httpStatus": 202,
+            "responseMission": {
+              "id": "cmw0evu7p0005f08o178ka7rn",
+              "status": "READY",
+              "version": 2
+            },
+            "answerChars": 68
+          },
+          "at": "2026-11-03T08:14:59.593Z"
+        },
+        {
+          "case": "002-waiting-user-detail",
+          "id": "mission.answerOnlyIsolatedWrite",
+          "status": "PASS",
+          "detail": {
+            "businessWrites": [
+              "POST http://127.0.0.1:34112/api/missions/cmw0evu7p0005f08o178ka7rn/input"
+            ],
+            "note": "只提交原问题答复到隔离库"
+          },
+          "at": "2026-11-03T08:14:59.594Z"
+        },
+        {
+          "case": "002-waiting-user-detail",
+          "id": "mission.overflowAfterAnswer",
+          "status": "PASS",
+          "detail": {
+            "innerWidth": 1280,
+            "documentScrollWidth": 1280,
+            "bodyScrollWidth": 1280,
+            "horizontalOverflow": false,
+            "offenders": []
+          },
+          "at": "2026-11-03T08:14:59.598Z"
+        }
+      ],
+      "authRequests": [
+        {
+          "method": "POST",
+          "url": "http://127.0.0.1:34112/api/auth/login",
+          "resourceType": "fetch",
+          "isNavigation": false,
+          "at": "2026-11-03T08:14:37.746Z"
+        }
+      ],
+      "finishedAt": "2026-11-03T08:14:59.603Z",
+      "requestAudit": {
+        "total": 185,
+        "apiRequests": 81,
+        "nonReadRequests": 2,
+        "businessWrites": [
+          "POST http://127.0.0.1:34112/api/missions/cmw0evu7p0005f08o178ka7rn/input"
+        ],
+        "pageInternalPosts": [
+          "POST http://127.0.0.1:34112/api/conversations/sync"
+        ],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 183,
+          "POST": 2
+        }
+      },
+      "requestLogPath": "evidence/final-c/20261103/logs/requests-002-waiting-user-detail.json"
+    },
+    {
+      "id": "003-basis-evidence",
+      "kind": "normal",
+      "title": "依据 / 原文 / 纠正入口：来源 SUPPRESSED / CHANGED / UNKNOWN",
+      "dataSource": "REAL_ISOLATED_DATABASE",
+      "interception": null,
+      "viewport": "1280x900",
+      "theme": "light+dark",
+      "startedAt": "2026-11-03T08:14:59.607Z",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshots": [
+        "evidence/final-c/20261103/screenshots/normal/basis-suppressed-item-1280-light.png",
+        "evidence/final-c/20261103/screenshots/normal/basis-expanded-1280-light.png",
+        "evidence/final-c/20261103/screenshots/normal/basis-expanded-1280-dark.png",
+        "evidence/final-c/20261103/screenshots/normal/basis-expanded-390-dark.png",
+        "evidence/final-c/20261103/screenshots/normal/basis-expanded-390-light.png"
+      ],
+      "checks": [
+        {
+          "case": "003-basis-evidence",
+          "id": "basis.sectionVisible",
+          "status": "PASS",
+          "detail": [
+            "/逐项依据与原文/",
+            "/依据/",
+            "/原文/",
+            "/纠正/"
+          ],
+          "at": "2026-11-03T08:15:11.025Z"
+        },
+        {
+          "case": "003-basis-evidence",
+          "id": "basis.currentVsRevisionSeparated",
+          "status": "PASS",
+          "detail": {
+            "currentUseLabel": 1,
+            "revisionLabel": 1
+          },
+          "at": "2026-11-03T08:15:11.025Z"
+        },
+        {
+          "case": "003-basis-evidence",
+          "id": "basis.suppressedNotRecommended",
+          "status": "PASS",
+          "detail": [
+            "/当前许可已被撤回/",
+            "/不作为当前推荐或默认引用/"
+          ],
+          "at": "2026-11-03T08:15:11.025Z"
+        },
+        {
+          "case": "003-basis-evidence",
+          "id": "basis.changed",
+          "status": "PASS",
+          "detail": [
+            "/原修订已变化/",
+            "/历史留痕保留/"
+          ],
+          "at": "2026-11-03T08:15:11.025Z"
+        },
+        {
+          "case": "003-basis-evidence",
+          "id": "basis.unknown",
+          "status": "PASS",
+          "detail": [
+            "/当前来源链未知/",
+            "/不用于当前推荐/"
+          ],
+          "at": "2026-11-03T08:15:11.025Z"
+        },
+        {
+          "case": "003-basis-evidence",
+          "id": "basis.correctionEntry",
+          "status": "PASS",
+          "detail": [
+            "/暂不提供纠正入口/",
+            "/纠正/"
+          ],
+          "at": "2026-11-03T08:15:11.025Z"
+        },
+        {
+          "case": "003-basis-evidence",
+          "id": "basis.suppressedItemBothRows",
+          "status": "PASS",
+          "detail": {
+            "hasCurrent": true,
+            "hasRevision": true,
+            "text": "项目资料 C（当前许可被用户撤回）：仅在历史留痕中保留身份，不作为当前依据。 capture:cmw0evuci001af08o2p240e49 当前使用资格 当前许可已被撤回，不作为当前推荐或默认引用 修订状态 原修订匹配 历史留痕 已绑定原委托，尚未找到后续引用 回原任务定位该来源 仅定位到原文件/记录，未记录页码或段落，不编造精确位置。"
+          },
+          "at": "2026-11-03T08:15:11.412Z"
+        },
+        {
+          "case": "003-basis-evidence",
+          "id": "basis.overflow390",
+          "status": "PASS",
+          "detail": {
+            "innerWidth": 390,
+            "documentScrollWidth": 390,
+            "bodyScrollWidth": 390,
+            "horizontalOverflow": false,
+            "offenders": []
+          },
+          "at": "2026-11-03T08:15:24.777Z"
+        },
+        {
+          "case": "003-basis-evidence",
+          "id": "basis.requestAudit",
+          "status": "PASS",
+          "detail": {
+            "total": 242,
+            "apiRequests": 106,
+            "nonReadRequests": 4,
+            "businessWrites": [],
+            "pageInternalPosts": [],
+            "pageComponentPosts": [
+              "POST http://127.0.0.1:34112/api/projects/cmw0evu760001f08obusvfrgj/goal-question",
+              "POST http://127.0.0.1:34112/api/projects/cmw0evu760001f08obusvfrgj/goal-question",
+              "POST http://127.0.0.1:34112/api/projects/cmw0evu760001f08obusvfrgj/goal-question",
+              "POST http://127.0.0.1:34112/api/projects/cmw0evu760001f08obusvfrgj/goal-question"
+            ],
+            "externalRequests": [],
+            "methods": {
+              "GET": 238,
+              "POST": 4
+            }
+          },
+          "at": "2026-11-03T08:15:30.137Z"
+        }
+      ],
+      "finishedAt": "2026-11-03T08:15:30.144Z",
+      "requestAudit": {
+        "total": 242,
+        "apiRequests": 106,
+        "nonReadRequests": 4,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [
+          "POST http://127.0.0.1:34112/api/projects/cmw0evu760001f08obusvfrgj/goal-question",
+          "POST http://127.0.0.1:34112/api/projects/cmw0evu760001f08obusvfrgj/goal-question",
+          "POST http://127.0.0.1:34112/api/projects/cmw0evu760001f08obusvfrgj/goal-question",
+          "POST http://127.0.0.1:34112/api/projects/cmw0evu760001f08obusvfrgj/goal-question"
+        ],
+        "externalRequests": [],
+        "methods": {
+          "GET": 238,
+          "POST": 4
+        }
+      },
+      "requestLogPath": "evidence/final-c/20261103/logs/requests-003-basis-evidence.json"
+    },
+    {
+      "id": "004-results-receipts",
+      "kind": "normal",
+      "title": "结果与 Action/resultCardId 回执：显示身份与 fixture-identity.json 一致",
+      "dataSource": "REAL_ISOLATED_DATABASE",
+      "interception": null,
+      "viewport": "1280x900",
+      "theme": "light+dark",
+      "startedAt": "2026-11-03T08:15:30.147Z",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshots": [
+        "evidence/final-c/20261103/screenshots/normal/results-receipts-1280-light.png",
+        "evidence/final-c/20261103/screenshots/normal/results-receipts-1280-dark.png",
+        "evidence/final-c/20261103/screenshots/normal/results-receipts-390-dark.png",
+        "evidence/final-c/20261103/screenshots/normal/results-receipts-390-light.png"
+      ],
+      "checks": [
+        {
+          "case": "004-results-receipts",
+          "id": "results.classification",
+          "status": "PASS",
+          "detail": [
+            "/结果分类与支持上限/",
+            "/已执行：4/",
+            "/用户报告：1/",
+            "/已独立支持：0/"
+          ],
+          "at": "2026-11-03T08:15:38.585Z"
+        },
+        {
+          "case": "004-results-receipts",
+          "id": "results.correctionEntry",
+          "status": "PASS",
+          "detail": [
+            "/纠正影响后续理解/",
+            "/纠正/"
+          ],
+          "at": "2026-11-03T08:15:38.585Z"
+        },
+        {
+          "case": "004-results-receipts",
+          "id": "results.outputReference",
+          "status": "PASS",
+          "detail": [
+            "/查看草稿版本 1/"
+          ],
+          "at": "2026-11-03T08:15:38.585Z"
+        },
+        {
+          "case": "004-results-receipts",
+          "id": "results.actionReceiptIdentity",
+          "status": "PASS",
+          "detail": {
+            "resultCardId": "cmw0evuag000qf08ofcfowu9z",
+            "hrefs": [
+              "/projects/cmw0evu760001f08obusvfrgj/knowledge#card-cmw0evuag000qf08ofcfowu9z",
+              "/projects/cmw0evu760001f08obusvfrgj/knowledge#card-cmw0evuag000qf08ofcfowu9z"
+            ]
+          },
+          "at": "2026-11-03T08:15:38.585Z"
+        },
+        {
+          "case": "004-results-receipts",
+          "id": "results.actionIdentity",
+          "status": "PASS",
+          "detail": {
+            "actionId": "cmw0evuaj000rf08ooi089pkc",
+            "hrefs": [
+              "/projects/cmw0evu760001f08obusvfrgj/actions#action-cmw0evuaj000rf08ooi089pkc",
+              "/projects/cmw0evu760001f08obusvfrgj/actions#action-cmw0evuaj000rf08ooi089pkc"
+            ]
+          },
+          "at": "2026-11-03T08:15:38.585Z"
+        },
+        {
+          "case": "004-results-receipts",
+          "id": "results.adoptionIdentity",
+          "status": "PASS",
+          "detail": {
+            "artifactId": "cmw0evub1000xf08o800w2rt6",
+            "hrefs": [
+              "/projects/cmw0evu760001f08obusvfrgj/generate?artifact=cmw0evub1000xf08o800w2rt6&type=weekly_report"
+            ]
+          },
+          "at": "2026-11-03T08:15:38.585Z"
+        },
+        {
+          "case": "004-results-receipts",
+          "id": "results.overflow390",
+          "status": "PASS",
+          "detail": {
+            "innerWidth": 390,
+            "documentScrollWidth": 390,
+            "bodyScrollWidth": 390,
+            "horizontalOverflow": false,
+            "offenders": []
+          },
+          "at": "2026-11-03T08:15:51.423Z"
+        },
+        {
+          "case": "004-results-receipts",
+          "id": "results.requestAudit",
+          "status": "PASS",
+          "detail": {
+            "total": 224,
+            "apiRequests": 88,
+            "nonReadRequests": 0,
+            "businessWrites": [],
+            "pageInternalPosts": [],
+            "pageComponentPosts": [],
+            "externalRequests": [],
+            "methods": {
+              "GET": 224
+            }
+          },
+          "at": "2026-11-03T08:15:56.288Z"
+        }
+      ],
+      "finishedAt": "2026-11-03T08:15:56.293Z",
+      "requestAudit": {
+        "total": 224,
+        "apiRequests": 88,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 224
+        }
+      },
+      "requestLogPath": "evidence/final-c/20261103/logs/requests-004-results-receipts.json"
+    },
+    {
+      "id": "005-keyboard-motion",
+      "kind": "normal",
+      "title": "键盘 Tab 顺序、焦点返回与 prefers-reduced-motion",
+      "dataSource": "REAL_ISOLATED_DATABASE",
+      "interception": null,
+      "viewport": null,
+      "theme": null,
+      "startedAt": "2026-11-03T08:15:56.296Z",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshots": [
+        "evidence/final-c/20261103/screenshots/normal/keyboard-motion-1280-light.png"
+      ],
+      "checks": [
+        {
+          "case": "005-keyboard-motion",
+          "id": "a11y.keyboardTab",
+          "status": "PASS",
+          "detail": {
+            "distinct": 14,
+            "visibleFocus": 14,
+            "returned": "概览",
+            "sequence": [
+              {
+                "reached": true,
+                "tag": "a",
+                "text": "跳到主要内容",
+                "href": "#main-content",
+                "outlineWidth": "1px",
+                "outlineStyle": "auto",
+                "boxShadow": "none"
+              },
+              {
+                "reached": true,
+                "tag": "a",
+                "text": "忆程 ProjectMemo 首页",
+                "href": "/",
+                "outlineWidth": "2px",
+                "outlineStyle": "solid",
+                "boxShadow": "none"
+              },
+              {
+                "reached": true,
+                "tag": "a",
+                "text": "焦点",
+                "href": "/focus",
+                "outlineWidth": "2px",
+                "outlineStyle": "solid",
+                "boxShadow": "none"
+              },
+              {
+                "reached": true,
+                "tag": "a",
+                "text": "项目",
+                "href": "/projects",
+                "outlineWidth": "2px",
+                "outlineStyle": "solid",
+                "boxShadow": "rgba(28, 46, 44, 0.05) 0px 1px 2px 0px"
+              },
+              {
+                "reached": true,
+                "tag": "a",
+                "text": "记忆",
+                "href": "/memory",
+                "outlineWidth": "2px",
+                "outlineStyle": "solid",
+                "boxShadow": "none"
+              },
+              {
+                "reached": true,
+                "tag": "a",
+                "text": "行动",
+                "href": "/actions",
+                "outlineWidth": "2px",
+                "outlineStyle": "solid",
+                "boxShadow": "none"
+              },
+              {
+                "reached": true,
+                "tag": "button",
+                "text": "全局设置",
+                "href": null,
+                "outlineWidth": "2px",
+                "outlineStyle": "solid",
+                "boxShadow": "none"
+              },
+              {
+                "reached": true,
+                "tag": "button",
+                "text": "切换深浅色主题",
+                "href": null,
+                "outlineWidth": "2px",
+                "outlineStyle": "solid",
+                "boxShadow": "none"
+              }
+            ]
+          },
+          "at": "2026-11-03T08:15:59.877Z"
+        },
+        {
+          "case": "005-keyboard-motion",
+          "id": "a11y.reducedMotion",
+          "status": "PASS",
+          "detail": {
+            "prefersReducedMotion": true,
+            "body": {
+              "animationDuration": "1e-05s",
+              "transitionDuration": "1e-05s",
+              "scrollBehavior": "auto"
+            },
+            "sample": {
+              "animationDuration": "1e-05s",
+              "transitionDuration": "1e-05s",
+              "scrollBehavior": "auto"
+            },
+            "mediaRulesApplied": true
+          },
+          "at": "2026-11-03T08:16:00.042Z"
+        }
+      ],
+      "finishedAt": "2026-11-03T08:16:00.685Z",
+      "requestAudit": {
+        "total": 56,
+        "apiRequests": 22,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 56
+        }
+      },
+      "requestLogPath": "evidence/final-c/20261103/logs/requests-005-keyboard-motion.json"
+    },
+    {
+      "id": "006-legacy-missing-workpacket",
+      "kind": "abnormal",
+      "title": "旧后端缺 workPacket：退回原详情、不构造默认成功事实",
+      "dataSource": "INTERCEPTED_A2_SAMPLE（截获真实 A 样本 readback，非真实旧后端）",
+      "interception": {
+        "route": "**/api/missions/*/readback*",
+        "source": "D:\\Projects\\hongmen-final-c-workspace-ux\\evidence\\final-a\\20261103\\samples\\a2\\a2-legacy-server-without-workpacket.json",
+        "change": "用 a2-legacy-server-without-workpacket.json 的 readback 替换响应体（status 200）"
+      },
+      "viewport": "1280x900",
+      "theme": "light",
+      "startedAt": "2026-11-03T08:16:00.692Z",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshots": [
+        "evidence/final-c/20261103/screenshots/abnormal/legacy-missing-workpacket-1280-light.png"
+      ],
+      "checks": [
+        {
+          "case": "006-legacy-missing-workpacket",
+          "id": "abnormal.legacy.detailPreserved",
+          "status": "PASS",
+          "detail": "原委托详情可见",
+          "at": "2026-11-03T08:16:06.859Z"
+        },
+        {
+          "case": "006-legacy-missing-workpacket",
+          "id": "abnormal.legacy.noFakeSuccess",
+          "status": "PASS",
+          "detail": {
+            "hint": [
+              "/摘要暂未提供/",
+              "/旧服务/",
+              "/不据此推断成功/"
+            ],
+            "fourQuestions": 0,
+            "fakeSemantics": 0,
+            "explanation": "页面其它区域仍显示未截获的 /api/missions/:id 原详情真实事实（含既有“成果核验与现实结果”块）；本次仅替换 readback 响应，不据此推断工作包成功。",
+            "readbackText": "重新读取状态与回执 委托版本已变化，正在重新读取回执；以下为上次结果。 当前摘要暂未提供（旧服务或构建失败）；以下保留原委托详情，不据此推断成功或无变化。 原状态 等待执行 显示阶段 待执行 原因 今日调用额度已用完，等待许可时区的次日；累计用量保留 原动作 查看下次检查时间 不显示默认四问、成功结论或费用 0；重新读取只读取原委托状态，不会推进成功观察。 读取于 2026/11/3 12:13:19 · 委托版本 1 结果分类与支持上限 已执行：0 工具步骤确实运行过；不等于结论成立或目标达成 已观察：0 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 3 次 · 工具 2 次"
+          },
+          "at": "2026-11-03T08:16:06.859Z"
+        },
+        {
+          "case": "006-legacy-missing-workpacket",
+          "id": "abnormal.legacy.requestAudit",
+          "status": "PASS",
+          "detail": {
+            "total": 54,
+            "apiRequests": 20,
+            "nonReadRequests": 0,
+            "businessWrites": [],
+            "pageInternalPosts": [],
+            "pageComponentPosts": [],
+            "externalRequests": [],
+            "methods": {
+              "GET": 54
+            }
+          },
+          "at": "2026-11-03T08:16:07.166Z"
+        }
+      ],
+      "finishedAt": "2026-11-03T08:16:07.171Z",
+      "requestAudit": {
+        "total": 54,
+        "apiRequests": 20,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 54
+        }
+      },
+      "requestLogPath": "evidence/final-c/20261103/logs/requests-006-legacy-missing-workpacket.json"
+    },
+    {
+      "id": "007-version-advanced",
+      "kind": "abnormal",
+      "title": "VERSION_ADVANCED：读回快照版本推进提示",
+      "dataSource": "REAL_RESPONSE_MUTATED（真实隔离库响应 + 注入 snapshot.consistency=VERSION_ADVANCED，非真实并发推进）",
+      "interception": {
+        "route": "**/api/missions/*/readback*",
+        "change": "fetch 真实响应后把 workPacket.snapshot.consistency 改为 VERSION_ADVANCED 并追加 SNAPSHOT_VERSION_ADVANCED 阻断"
+      },
+      "viewport": "1280x900",
+      "theme": "light",
+      "startedAt": "2026-11-03T08:16:07.173Z",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshots": [
+        "evidence/final-c/20261103/screenshots/abnormal/version-advanced-1280-light.png",
+        "evidence/final-c/20261103/screenshots/abnormal/version-advanced-390-light.png"
+      ],
+      "checks": [
+        {
+          "case": "007-version-advanced",
+          "id": "abnormal.versionAdvanced.interceptionApplied",
+          "status": "PASS",
+          "detail": {
+            "responses": 2,
+            "mutated": 2
+          },
+          "at": "2026-11-03T08:16:19.974Z"
+        },
+        {
+          "case": "007-version-advanced",
+          "id": "abnormal.versionAdvanced.noticeVisible",
+          "status": "PASS",
+          "detail": {
+            "found": [
+              "/版本/",
+              "/重新核对/"
+            ],
+            "alertWaited": true,
+            "responses": 2
+          },
+          "at": "2026-11-03T08:16:19.974Z"
+        },
+        {
+          "case": "007-version-advanced",
+          "id": "abnormal.versionAdvanced.overflow390",
+          "status": "PASS",
+          "detail": {
+            "innerWidth": 390,
+            "documentScrollWidth": 390,
+            "bodyScrollWidth": 390,
+            "horizontalOverflow": false,
+            "offenders": []
+          },
+          "at": "2026-11-03T08:16:20.865Z"
+        }
+      ],
+      "finishedAt": "2026-11-03T08:16:21.181Z",
+      "requestAudit": {
+        "total": 57,
+        "apiRequests": 22,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 57
+        }
+      },
+      "requestLogPath": "evidence/final-c/20261103/logs/requests-007-version-advanced.json"
+    },
+    {
+      "id": "008-409-authority-changed",
+      "kind": "abnormal",
+      "title": "409 WORK_PACKET_AUTHORITY_CHANGED：读回失败提示且不自动沿用旧资格",
+      "dataSource": "INTERCEPTED_RESPONSE（截获 409 + error.code=WORK_PACKET_AUTHORITY_CHANGED）",
+      "interception": {
+        "route": "**/api/missions/*/readback*",
+        "change": "返回 409 {error:{code:WORK_PACKET_AUTHORITY_CHANGED,message}}"
+      },
+      "viewport": "1280x900",
+      "theme": "light",
+      "startedAt": "2026-11-03T08:16:21.183Z",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 409 (Conflict)",
+        "Failed to load resource: the server responded with a status of 409 (Conflict)"
+      ],
+      "pageErrors": [],
+      "screenshots": [
+        "evidence/final-c/20261103/screenshots/abnormal/409-authority-changed-1280-light.png"
+      ],
+      "checks": [
+        {
+          "case": "008-409-authority-changed",
+          "id": "abnormal.409.visible",
+          "status": "PASS",
+          "detail": {
+            "found": [
+              "/读取期间来源或权限/",
+              "/重新读取/"
+            ],
+            "noticeWaited": true,
+            "readbackResponses": [
+              {
+                "at": "2026-11-03T08:16:31.592Z",
+                "status": 409
+              },
+              {
+                "at": "2026-11-03T08:16:31.595Z",
+                "status": 409
+              }
+            ]
+          },
+          "at": "2026-11-03T08:16:32.256Z"
+        },
+        {
+          "case": "008-409-authority-changed",
+          "id": "abnormal.409.noAutoContinue",
+          "status": "PASS",
+          "detail": "未发现自动沿用旧资格",
+          "at": "2026-11-03T08:16:32.256Z"
+        }
+      ],
+      "finishedAt": "2026-11-03T08:16:32.507Z",
+      "requestAudit": {
+        "total": 55,
+        "apiRequests": 20,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 55
+        }
+      },
+      "requestLogPath": "evidence/final-c/20261103/logs/requests-008-409-authority-changed.json"
+    },
+    {
+      "id": "009-http-401",
+      "kind": "abnormal",
+      "title": "401 读回失败：确认私有缓存清空、不保留上一次结果",
+      "dataSource": "INTERCEPTED_RESPONSE（先显示真实隔离库结果，再截获 401）",
+      "interception": {
+        "route": "**/api/missions/*/readback*",
+        "change": "首次放行真实响应，触发重读时返回 401"
+      },
+      "viewport": "1280x900",
+      "theme": "light",
+      "startedAt": "2026-11-03T08:16:32.510Z",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+      ],
+      "pageErrors": [],
+      "screenshots": [
+        "evidence/final-c/20261103/screenshots/abnormal/http-401-cache-cleared-1280-light.png"
+      ],
+      "checks": [
+        {
+          "case": "009-http-401",
+          "id": "abnormal.401.privateLoaded",
+          "status": "PASS",
+          "detail": "重新读取状态与回执 查看原结果 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 选入补充材料 已执行 · 2026/11/3 13:40:05 create_action 已执行 · 2026/11/3 13:55:05 保存草稿 已执行 · 2026/11/3 13:35:05 检索项目记忆 已执行 · 2026/11/3 13:25:05 最近草稿：修订 1 · 2026/11/3 13:44:05 已执行 4 · 已观察 2 · 已独立支持 0 · 用户报告 1 · 反例 0 · 未知 0 核对设备 D 显存预算并记录复测条件 已完成 · 已填写复盘回执 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_",
+          "at": "2026-11-03T08:17:00.659Z"
+        },
+        {
+          "case": "009-http-401",
+          "id": "abnormal.401.privateCacheCleared",
+          "status": "PASS",
+          "detail": {
+            "after": "重新读取状态与回执 请先登录",
+            "leaked": []
+          },
+          "at": "2026-11-03T08:17:02.165Z"
+        }
+      ],
+      "finishedAt": "2026-11-03T08:17:02.494Z",
+      "requestAudit": {
+        "total": 80,
+        "apiRequests": 46,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 80
+        }
+      },
+      "requestLogPath": "evidence/final-c/20261103/logs/requests-009-http-401.json"
+    },
+    {
+      "id": "010-http-403",
+      "kind": "abnormal",
+      "title": "403 读回失败：确认私有缓存清空、不保留上一次结果",
+      "dataSource": "INTERCEPTED_RESPONSE（先显示真实隔离库结果，再截获 403）",
+      "interception": {
+        "route": "**/api/missions/*/readback*",
+        "change": "首次放行真实响应，触发重读时返回 403"
+      },
+      "viewport": "1280x900",
+      "theme": "light",
+      "startedAt": "2026-11-03T08:17:02.496Z",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+      ],
+      "pageErrors": [],
+      "screenshots": [
+        "evidence/final-c/20261103/screenshots/abnormal/http-403-cache-cleared-1280-light.png"
+      ],
+      "checks": [
+        {
+          "case": "010-http-403",
+          "id": "abnormal.403.privateLoaded",
+          "status": "PASS",
+          "detail": "重新读取状态与回执 查看原结果 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 选入补充材料 已执行 · 2026/11/3 13:40:05 create_action 已执行 · 2026/11/3 13:55:05 保存草稿 已执行 · 2026/11/3 13:35:05 检索项目记忆 已执行 · 2026/11/3 13:25:05 最近草稿：修订 1 · 2026/11/3 13:44:05 已执行 4 · 已观察 2 · 已独立支持 0 · 用户报告 1 · 反例 0 · 未知 0 核对设备 D 显存预算并记录复测条件 已完成 · 已填写复盘回执 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_",
+          "at": "2026-11-03T08:17:33.635Z"
+        },
+        {
+          "case": "010-http-403",
+          "id": "abnormal.403.privateCacheCleared",
+          "status": "PASS",
+          "detail": {
+            "after": "重新读取状态与回执 没有权限访问该委托",
+            "leaked": []
+          },
+          "at": "2026-11-03T08:17:34.987Z"
+        }
+      ],
+      "finishedAt": "2026-11-03T08:17:35.238Z",
+      "requestAudit": {
+        "total": 83,
+        "apiRequests": 49,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 83
+        }
+      },
+      "requestLogPath": "evidence/final-c/20261103/logs/requests-010-http-403.json"
+    },
+    {
+      "id": "011-http-404",
+      "kind": "abnormal",
+      "title": "404 读回失败：确认私有缓存清空、不保留上一次结果",
+      "dataSource": "INTERCEPTED_RESPONSE（先显示真实隔离库结果，再截获 404）",
+      "interception": {
+        "route": "**/api/missions/*/readback*",
+        "change": "首次放行真实响应，触发重读时返回 404"
+      },
+      "viewport": "1280x900",
+      "theme": "light",
+      "startedAt": "2026-11-03T08:17:35.240Z",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "pageErrors": [],
+      "screenshots": [
+        "evidence/final-c/20261103/screenshots/abnormal/http-404-cache-cleared-1280-light.png"
+      ],
+      "checks": [
+        {
+          "case": "011-http-404",
+          "id": "abnormal.404.privateLoaded",
+          "status": "PASS",
+          "detail": "重新读取状态与回执 查看原结果 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 选入补充材料 已执行 · 2026/11/3 13:40:05 create_action 已执行 · 2026/11/3 13:55:05 保存草稿 已执行 · 2026/11/3 13:35:05 检索项目记忆 已执行 · 2026/11/3 13:25:05 最近草稿：修订 1 · 2026/11/3 13:44:05 已执行 4 · 已观察 2 · 已独立支持 0 · 用户报告 1 · 反例 0 · 未知 0 核对设备 D 显存预算并记录复测条件 已完成 · 已填写复盘回执 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_",
+          "at": "2026-11-03T08:18:02.220Z"
+        },
+        {
+          "case": "011-http-404",
+          "id": "abnormal.404.privateCacheCleared",
+          "status": "PASS",
+          "detail": {
+            "after": "重新读取状态与回执 委托不存在",
+            "leaked": []
+          },
+          "at": "2026-11-03T08:18:03.765Z"
+        }
+      ],
+      "finishedAt": "2026-11-03T08:18:04.205Z",
+      "requestAudit": {
+        "total": 83,
+        "apiRequests": 49,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 83
+        }
+      },
+      "requestLogPath": "evidence/final-c/20261103/logs/requests-011-http-404.json"
+    },
+    {
+      "id": "012-stopped",
+      "kind": "abnormal",
+      "title": "停止在途（真实种子）：RUNNING + pauseRequestedAt",
+      "dataSource": "REAL_ISOLATED_DATABASE",
+      "interception": null,
+      "viewport": "1280x900",
+      "theme": "light",
+      "startedAt": "2026-11-03T08:18:04.229Z",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshots": [
+        "evidence/final-c/20261103/screenshots/abnormal/stopped-1280-light.png"
+      ],
+      "checks": [
+        {
+          "case": "012-stopped",
+          "id": "abnormal.stopped.visible",
+          "status": "PASS",
+          "detail": [
+            "/停止/",
+            "/结算/"
+          ],
+          "at": "2026-11-03T08:18:19.664Z"
+        },
+        {
+          "case": "012-stopped",
+          "id": "abnormal.stopped.requestAudit",
+          "status": "PASS",
+          "detail": {
+            "total": 56,
+            "apiRequests": 22,
+            "nonReadRequests": 0,
+            "businessWrites": [],
+            "pageInternalPosts": [],
+            "pageComponentPosts": [],
+            "externalRequests": [],
+            "methods": {
+              "GET": 56
+            }
+          },
+          "at": "2026-11-03T08:18:20.288Z"
+        }
+      ],
+      "finishedAt": "2026-11-03T08:18:20.509Z",
+      "requestAudit": {
+        "total": 56,
+        "apiRequests": 22,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 56
+        }
+      },
+      "requestLogPath": "evidence/final-c/20261103/logs/requests-012-stopped.json"
+    },
+    {
+      "id": "013-cancelled",
+      "kind": "abnormal",
+      "title": "取消（真实种子）：CANCELLED，不显示成功完成",
+      "dataSource": "REAL_ISOLATED_DATABASE",
+      "interception": null,
+      "viewport": "1280x900",
+      "theme": "light",
+      "startedAt": "2026-11-03T08:18:20.512Z",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshots": [
+        "evidence/final-c/20261103/screenshots/abnormal/cancelled-1280-light.png"
+      ],
+      "checks": [
+        {
+          "case": "013-cancelled",
+          "id": "abnormal.cancelled.visible",
+          "status": "PASS",
+          "detail": [
+            "/取消/",
+            "/保留/"
+          ],
+          "at": "2026-11-03T08:18:30.347Z"
+        },
+        {
+          "case": "013-cancelled",
+          "id": "abnormal.cancelled.requestAudit",
+          "status": "PASS",
+          "detail": {
+            "total": 56,
+            "apiRequests": 22,
+            "nonReadRequests": 0,
+            "businessWrites": [],
+            "pageInternalPosts": [],
+            "pageComponentPosts": [],
+            "externalRequests": [],
+            "methods": {
+              "GET": 56
+            }
+          },
+          "at": "2026-11-03T08:18:30.814Z"
+        }
+      ],
+      "finishedAt": "2026-11-03T08:18:31.032Z",
+      "requestAudit": {
+        "total": 56,
+        "apiRequests": 22,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 56
+        }
+      },
+      "requestLogPath": "evidence/final-c/20261103/logs/requests-013-cancelled.json"
+    },
+    {
+      "id": "014-terminal-unknown",
+      "kind": "abnormal",
+      "title": "UNKNOWN + 终态（真实种子）：终态与未结算效果并列",
+      "dataSource": "REAL_ISOLATED_DATABASE",
+      "interception": null,
+      "viewport": "1280x900",
+      "theme": "light",
+      "startedAt": "2026-11-03T08:18:31.037Z",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshots": [
+        "evidence/final-c/20261103/screenshots/abnormal/terminal-unknown-1280-light.png",
+        "evidence/final-c/20261103/screenshots/abnormal/terminal-unknown-390-light.png"
+      ],
+      "checks": [
+        {
+          "case": "014-terminal-unknown",
+          "id": "abnormal.terminal-unknown.visible",
+          "status": "PASS",
+          "detail": [
+            "/未知/",
+            "/未结算|核对/"
+          ],
+          "at": "2026-11-03T08:18:37.336Z"
+        },
+        {
+          "case": "014-terminal-unknown",
+          "id": "abnormal.terminal-unknown.overflow390",
+          "status": "PASS",
+          "detail": {
+            "innerWidth": 390,
+            "documentScrollWidth": 390,
+            "bodyScrollWidth": 390,
+            "horizontalOverflow": false,
+            "offenders": []
+          },
+          "at": "2026-11-03T08:18:38.167Z"
+        },
+        {
+          "case": "014-terminal-unknown",
+          "id": "abnormal.terminal-unknown.requestAudit",
+          "status": "PASS",
+          "detail": {
+            "total": 56,
+            "apiRequests": 22,
+            "nonReadRequests": 0,
+            "businessWrites": [],
+            "pageInternalPosts": [],
+            "pageComponentPosts": [],
+            "externalRequests": [],
+            "methods": {
+              "GET": 56
+            }
+          },
+          "at": "2026-11-03T08:18:38.413Z"
+        }
+      ],
+      "finishedAt": "2026-11-03T08:18:38.668Z",
+      "requestAudit": {
+        "total": 56,
+        "apiRequests": 22,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 56
+        }
+      },
+      "requestLogPath": "evidence/final-c/20261103/logs/requests-014-terminal-unknown.json"
+    },
+    {
+      "id": "015-failed",
+      "kind": "abnormal",
+      "title": "失败（真实种子）：为何停 / 复核原因",
+      "dataSource": "REAL_ISOLATED_DATABASE",
+      "interception": null,
+      "viewport": "1280x900",
+      "theme": "light",
+      "startedAt": "2026-11-03T08:18:38.671Z",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshots": [
+        "evidence/final-c/20261103/screenshots/abnormal/failed-1280-light.png"
+      ],
+      "checks": [
+        {
+          "case": "015-failed",
+          "id": "abnormal.failed.visible",
+          "status": "PASS",
+          "detail": [
+            "/失败/",
+            "/原因|恢复/"
+          ],
+          "at": "2026-11-03T08:18:45.055Z"
+        },
+        {
+          "case": "015-failed",
+          "id": "abnormal.failed.requestAudit",
+          "status": "PASS",
+          "detail": {
+            "total": 56,
+            "apiRequests": 22,
+            "nonReadRequests": 0,
+            "businessWrites": [],
+            "pageInternalPosts": [],
+            "pageComponentPosts": [],
+            "externalRequests": [],
+            "methods": {
+              "GET": 56
+            }
+          },
+          "at": "2026-11-03T08:18:45.545Z"
+        }
+      ],
+      "finishedAt": "2026-11-03T08:18:45.766Z",
+      "requestAudit": {
+        "total": 56,
+        "apiRequests": 22,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 56
+        }
+      },
+      "requestLogPath": "evidence/final-c/20261103/logs/requests-015-failed.json"
+    },
+    {
+      "id": "016-old-question",
+      "kind": "abnormal",
+      "title": "旧问题（真实种子）：历史问题只读，不替换当前问题",
+      "dataSource": "REAL_ISOLATED_DATABASE",
+      "interception": null,
+      "viewport": "1280x900",
+      "theme": "light",
+      "startedAt": "2026-11-03T08:18:45.771Z",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshots": [
+        "evidence/final-c/20261103/screenshots/abnormal/old-question-1280-light.png"
+      ],
+      "checks": [
+        {
+          "case": "016-old-question",
+          "id": "abnormal.old-question.visible",
+          "status": "PASS",
+          "detail": [
+            "/历史问题/",
+            "/只读|旧/"
+          ],
+          "at": "2026-11-03T08:18:53.420Z"
+        },
+        {
+          "case": "016-old-question",
+          "id": "abnormal.old-question.requestAudit",
+          "status": "PASS",
+          "detail": {
+            "total": 56,
+            "apiRequests": 22,
+            "nonReadRequests": 0,
+            "businessWrites": [],
+            "pageInternalPosts": [],
+            "pageComponentPosts": [],
+            "externalRequests": [],
+            "methods": {
+              "GET": 56
+            }
+          },
+          "at": "2026-11-03T08:18:53.974Z"
+        }
+      ],
+      "finishedAt": "2026-11-03T08:18:54.185Z",
+      "requestAudit": {
+        "total": 58,
+        "apiRequests": 24,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 58
+        }
+      },
+      "requestLogPath": "evidence/final-c/20261103/logs/requests-016-old-question.json"
+    },
+    {
+      "id": "017-old-approval",
+      "kind": "abnormal",
+      "title": "旧审批（真实种子）：过期提案不能作为当前批准依据",
+      "dataSource": "REAL_ISOLATED_DATABASE",
+      "interception": null,
+      "viewport": "1280x900",
+      "theme": "light",
+      "startedAt": "2026-11-03T08:18:54.187Z",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshots": [
+        "evidence/final-c/20261103/screenshots/abnormal/old-approval-1280-light.png"
+      ],
+      "checks": [
+        {
+          "case": "017-old-approval",
+          "id": "abnormal.old-approval.visible",
+          "status": "PASS",
+          "detail": [
+            "/EXPIRED|过期/",
+            "/提案/"
+          ],
+          "at": "2026-11-03T08:18:59.117Z"
+        },
+        {
+          "case": "017-old-approval",
+          "id": "abnormal.old-approval.requestAudit",
+          "status": "PASS",
+          "detail": {
+            "total": 55,
+            "apiRequests": 22,
+            "nonReadRequests": 0,
+            "businessWrites": [],
+            "pageInternalPosts": [],
+            "pageComponentPosts": [],
+            "externalRequests": [],
+            "methods": {
+              "GET": 55
+            }
+          },
+          "at": "2026-11-03T08:18:59.554Z"
+        }
+      ],
+      "finishedAt": "2026-11-03T08:18:59.763Z",
+      "requestAudit": {
+        "total": 55,
+        "apiRequests": 22,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 55
+        }
+      },
+      "requestLogPath": "evidence/final-c/20261103/logs/requests-017-old-approval.json"
+    },
+    {
+      "id": "018-long-copy",
+      "kind": "abnormal",
+      "title": "长文案 390（真实种子）：长标题项目 + 长问题",
+      "dataSource": "REAL_ISOLATED_DATABASE",
+      "interception": null,
+      "viewport": "1280x900",
+      "theme": "light",
+      "startedAt": "2026-11-03T08:18:59.766Z",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshots": [
+        "evidence/final-c/20261103/screenshots/abnormal/long-copy-1280-light.png",
+        "evidence/final-c/20261103/screenshots/abnormal/long-copy-390-light.png"
+      ],
+      "checks": [
+        {
+          "case": "018-long-copy",
+          "id": "abnormal.long-copy.visible",
+          "status": "PASS",
+          "detail": [
+            "/长文案|SYNTHETIC_LONG/"
+          ],
+          "at": "2026-11-03T08:19:06.262Z"
+        },
+        {
+          "case": "018-long-copy",
+          "id": "abnormal.long-copy.overflow390",
+          "status": "PASS",
+          "detail": {
+            "innerWidth": 390,
+            "documentScrollWidth": 390,
+            "bodyScrollWidth": 390,
+            "horizontalOverflow": false,
+            "offenders": []
+          },
+          "at": "2026-11-03T08:19:07.083Z"
+        },
+        {
+          "case": "018-long-copy",
+          "id": "abnormal.long-copy.requestAudit",
+          "status": "PASS",
+          "detail": {
+            "total": 58,
+            "apiRequests": 25,
+            "nonReadRequests": 1,
+            "businessWrites": [],
+            "pageInternalPosts": [],
+            "pageComponentPosts": [
+              "POST http://127.0.0.1:34112/api/projects/cmw0evu7a0003f08o08g9arv4/goal-question"
+            ],
+            "externalRequests": [],
+            "methods": {
+              "GET": 57,
+              "POST": 1
+            }
+          },
+          "at": "2026-11-03T08:19:07.315Z"
+        }
+      ],
+      "finishedAt": "2026-11-03T08:19:07.577Z",
+      "requestAudit": {
+        "total": 58,
+        "apiRequests": 25,
+        "nonReadRequests": 1,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [
+          "POST http://127.0.0.1:34112/api/projects/cmw0evu7a0003f08o08g9arv4/goal-question"
+        ],
+        "externalRequests": [],
+        "methods": {
+          "GET": 57,
+          "POST": 1
+        }
+      },
+      "requestLogPath": "evidence/final-c/20261103/logs/requests-018-long-copy.json"
+    }
+  ],
+  "checks": [
+    {
+      "case": "001-focus",
+      "id": "login.viaUI",
+      "status": "PASS",
+      "detail": {
+        "label": "login",
+        "value": "http://127.0.0.1:34112/focus"
+      },
+      "at": "2026-11-03T08:14:28.924Z"
+    },
+    {
+      "case": "001-focus",
+      "id": "focus.headingVisible",
+      "status": "PASS",
+      "detail": "今日项目焦点",
+      "at": "2026-11-03T08:14:29.595Z"
+    },
+    {
+      "case": "001-focus",
+      "id": "focus.waitingMissionLinks",
+      "status": "PASS",
+      "detail": 7,
+      "at": "2026-11-03T08:14:31.134Z"
+    },
+    {
+      "case": "001-focus",
+      "id": "focus.overflow1280",
+      "status": "PASS",
+      "detail": {
+        "innerWidth": 1280,
+        "documentScrollWidth": 1280,
+        "bodyScrollWidth": 1280,
+        "horizontalOverflow": false,
+        "offenders": []
+      },
+      "at": "2026-11-03T08:14:31.138Z"
+    },
+    {
+      "case": "001-focus",
+      "id": "focus.overflow390",
+      "status": "PASS",
+      "detail": {
+        "innerWidth": 390,
+        "documentScrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "horizontalOverflow": false,
+        "offenders": []
+      },
+      "at": "2026-11-03T08:14:33.027Z"
+    },
+    {
+      "case": "001-focus",
+      "id": "focus.requestAudit",
+      "status": "PASS",
+      "detail": {
+        "total": 110,
+        "apiRequests": 33,
+        "nonReadRequests": 4,
+        "businessWrites": [],
+        "pageInternalPosts": [
+          "POST http://127.0.0.1:34112/api/conversations/sync",
+          "POST http://127.0.0.1:34112/api/conversations/sync",
+          "POST http://127.0.0.1:34112/api/conversations/sync",
+          "POST http://127.0.0.1:34112/api/conversations/sync"
+        ],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 106,
+          "POST": 4
+        }
+      },
+      "at": "2026-11-03T08:14:34.334Z"
+    },
+    {
+      "case": "002-waiting-user-detail",
+      "id": "mission.panelVisible",
+      "status": "PASS",
+      "detail": "mission-agent",
+      "at": "2026-11-03T08:14:43.346Z"
+    },
+    {
+      "case": "002-waiting-user-detail",
+      "id": "mission.fourQuestions",
+      "status": "PASS",
+      "detail": [
+        {},
+        {},
+        {},
+        {}
+      ],
+      "at": "2026-11-03T08:14:43.362Z"
+    },
+    {
+      "case": "002-waiting-user-detail",
+      "id": "mission.primaryAction",
+      "status": "PASS",
+      "detail": {
+        "kind": "button",
+        "text": "回答原问题"
+      },
+      "at": "2026-11-03T08:14:43.433Z"
+    },
+    {
+      "case": "002-waiting-user-detail",
+      "id": "mission.overflow390",
+      "status": "PASS",
+      "detail": {
+        "innerWidth": 390,
+        "documentScrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "horizontalOverflow": false,
+        "offenders": []
+      },
+      "at": "2026-11-03T08:14:50.315Z"
+    },
+    {
+      "case": "002-waiting-user-detail",
+      "id": "mission.primaryActionNavigation",
+      "status": "PASS",
+      "detail": {
+        "urlChanged": false,
+        "questionVisible": true,
+        "textareaVisible": true,
+        "hash": "",
+        "primaryActionNavigated": true
+      },
+      "at": "2026-11-03T08:14:54.701Z"
+    },
+    {
+      "case": "002-waiting-user-detail",
+      "id": "mission.primaryActionIsNavigationOnly",
+      "status": "PASS",
+      "detail": "点击主操作后仍无业务写 POST",
+      "at": "2026-11-03T08:14:54.702Z"
+    },
+    {
+      "case": "002-waiting-user-detail",
+      "id": "mission.questionAnchor",
+      "status": "PASS",
+      "detail": {
+        "visible": true,
+        "text": "需要你补充 请补充设备 D 在 2026-10 的真实显存峰值（GB），以及 batch、序列长度和是否启用 KV cache。缺少这些条件时不会外推预算结论。 从项目资料选取 保存新记录或附件 → 填写明确的实验指标 补充实验记录：显存峰值 · 2026-10 实验指标数值（GB）保存本项目实验记录 补充信息 补充并继续"
+      },
+      "at": "2026-11-03T08:14:54.714Z"
+    },
+    {
+      "case": "002-waiting-user-detail",
+      "id": "mission.answerQuestionReceipt",
+      "status": "PASS",
+      "detail": {
+        "requestId": "8b52cc06-9f21-4e6e-ab1c-c1f52b43f5e4",
+        "questionId": "cmw0evu8d0008f08o85t6q6k2",
+        "expectedVersion": 1,
+        "httpStatus": 202,
+        "responseMission": {
+          "id": "cmw0evu7p0005f08o178ka7rn",
+          "status": "READY",
+          "version": 2
+        },
+        "answerChars": 68
+      },
+      "at": "2026-11-03T08:14:59.593Z"
+    },
+    {
+      "case": "002-waiting-user-detail",
+      "id": "mission.answerOnlyIsolatedWrite",
+      "status": "PASS",
+      "detail": {
+        "businessWrites": [
+          "POST http://127.0.0.1:34112/api/missions/cmw0evu7p0005f08o178ka7rn/input"
+        ],
+        "note": "只提交原问题答复到隔离库"
+      },
+      "at": "2026-11-03T08:14:59.594Z"
+    },
+    {
+      "case": "002-waiting-user-detail",
+      "id": "mission.overflowAfterAnswer",
+      "status": "PASS",
+      "detail": {
+        "innerWidth": 1280,
+        "documentScrollWidth": 1280,
+        "bodyScrollWidth": 1280,
+        "horizontalOverflow": false,
+        "offenders": []
+      },
+      "at": "2026-11-03T08:14:59.598Z"
+    },
+    {
+      "case": "003-basis-evidence",
+      "id": "basis.sectionVisible",
+      "status": "PASS",
+      "detail": [
+        "/逐项依据与原文/",
+        "/依据/",
+        "/原文/",
+        "/纠正/"
+      ],
+      "at": "2026-11-03T08:15:11.025Z"
+    },
+    {
+      "case": "003-basis-evidence",
+      "id": "basis.currentVsRevisionSeparated",
+      "status": "PASS",
+      "detail": {
+        "currentUseLabel": 1,
+        "revisionLabel": 1
+      },
+      "at": "2026-11-03T08:15:11.025Z"
+    },
+    {
+      "case": "003-basis-evidence",
+      "id": "basis.suppressedNotRecommended",
+      "status": "PASS",
+      "detail": [
+        "/当前许可已被撤回/",
+        "/不作为当前推荐或默认引用/"
+      ],
+      "at": "2026-11-03T08:15:11.025Z"
+    },
+    {
+      "case": "003-basis-evidence",
+      "id": "basis.changed",
+      "status": "PASS",
+      "detail": [
+        "/原修订已变化/",
+        "/历史留痕保留/"
+      ],
+      "at": "2026-11-03T08:15:11.025Z"
+    },
+    {
+      "case": "003-basis-evidence",
+      "id": "basis.unknown",
+      "status": "PASS",
+      "detail": [
+        "/当前来源链未知/",
+        "/不用于当前推荐/"
+      ],
+      "at": "2026-11-03T08:15:11.025Z"
+    },
+    {
+      "case": "003-basis-evidence",
+      "id": "basis.correctionEntry",
+      "status": "PASS",
+      "detail": [
+        "/暂不提供纠正入口/",
+        "/纠正/"
+      ],
+      "at": "2026-11-03T08:15:11.025Z"
+    },
+    {
+      "case": "003-basis-evidence",
+      "id": "basis.suppressedItemBothRows",
+      "status": "PASS",
+      "detail": {
+        "hasCurrent": true,
+        "hasRevision": true,
+        "text": "项目资料 C（当前许可被用户撤回）：仅在历史留痕中保留身份，不作为当前依据。 capture:cmw0evuci001af08o2p240e49 当前使用资格 当前许可已被撤回，不作为当前推荐或默认引用 修订状态 原修订匹配 历史留痕 已绑定原委托，尚未找到后续引用 回原任务定位该来源 仅定位到原文件/记录，未记录页码或段落，不编造精确位置。"
+      },
+      "at": "2026-11-03T08:15:11.412Z"
+    },
+    {
+      "case": "003-basis-evidence",
+      "id": "basis.overflow390",
+      "status": "PASS",
+      "detail": {
+        "innerWidth": 390,
+        "documentScrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "horizontalOverflow": false,
+        "offenders": []
+      },
+      "at": "2026-11-03T08:15:24.777Z"
+    },
+    {
+      "case": "003-basis-evidence",
+      "id": "basis.requestAudit",
+      "status": "PASS",
+      "detail": {
+        "total": 242,
+        "apiRequests": 106,
+        "nonReadRequests": 4,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [
+          "POST http://127.0.0.1:34112/api/projects/cmw0evu760001f08obusvfrgj/goal-question",
+          "POST http://127.0.0.1:34112/api/projects/cmw0evu760001f08obusvfrgj/goal-question",
+          "POST http://127.0.0.1:34112/api/projects/cmw0evu760001f08obusvfrgj/goal-question",
+          "POST http://127.0.0.1:34112/api/projects/cmw0evu760001f08obusvfrgj/goal-question"
+        ],
+        "externalRequests": [],
+        "methods": {
+          "GET": 238,
+          "POST": 4
+        }
+      },
+      "at": "2026-11-03T08:15:30.137Z"
+    },
+    {
+      "case": "004-results-receipts",
+      "id": "results.classification",
+      "status": "PASS",
+      "detail": [
+        "/结果分类与支持上限/",
+        "/已执行：4/",
+        "/用户报告：1/",
+        "/已独立支持：0/"
+      ],
+      "at": "2026-11-03T08:15:38.585Z"
+    },
+    {
+      "case": "004-results-receipts",
+      "id": "results.correctionEntry",
+      "status": "PASS",
+      "detail": [
+        "/纠正影响后续理解/",
+        "/纠正/"
+      ],
+      "at": "2026-11-03T08:15:38.585Z"
+    },
+    {
+      "case": "004-results-receipts",
+      "id": "results.outputReference",
+      "status": "PASS",
+      "detail": [
+        "/查看草稿版本 1/"
+      ],
+      "at": "2026-11-03T08:15:38.585Z"
+    },
+    {
+      "case": "004-results-receipts",
+      "id": "results.actionReceiptIdentity",
+      "status": "PASS",
+      "detail": {
+        "resultCardId": "cmw0evuag000qf08ofcfowu9z",
+        "hrefs": [
+          "/projects/cmw0evu760001f08obusvfrgj/knowledge#card-cmw0evuag000qf08ofcfowu9z",
+          "/projects/cmw0evu760001f08obusvfrgj/knowledge#card-cmw0evuag000qf08ofcfowu9z"
+        ]
+      },
+      "at": "2026-11-03T08:15:38.585Z"
+    },
+    {
+      "case": "004-results-receipts",
+      "id": "results.actionIdentity",
+      "status": "PASS",
+      "detail": {
+        "actionId": "cmw0evuaj000rf08ooi089pkc",
+        "hrefs": [
+          "/projects/cmw0evu760001f08obusvfrgj/actions#action-cmw0evuaj000rf08ooi089pkc",
+          "/projects/cmw0evu760001f08obusvfrgj/actions#action-cmw0evuaj000rf08ooi089pkc"
+        ]
+      },
+      "at": "2026-11-03T08:15:38.585Z"
+    },
+    {
+      "case": "004-results-receipts",
+      "id": "results.adoptionIdentity",
+      "status": "PASS",
+      "detail": {
+        "artifactId": "cmw0evub1000xf08o800w2rt6",
+        "hrefs": [
+          "/projects/cmw0evu760001f08obusvfrgj/generate?artifact=cmw0evub1000xf08o800w2rt6&type=weekly_report"
+        ]
+      },
+      "at": "2026-11-03T08:15:38.585Z"
+    },
+    {
+      "case": "004-results-receipts",
+      "id": "results.overflow390",
+      "status": "PASS",
+      "detail": {
+        "innerWidth": 390,
+        "documentScrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "horizontalOverflow": false,
+        "offenders": []
+      },
+      "at": "2026-11-03T08:15:51.423Z"
+    },
+    {
+      "case": "004-results-receipts",
+      "id": "results.requestAudit",
+      "status": "PASS",
+      "detail": {
+        "total": 224,
+        "apiRequests": 88,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 224
+        }
+      },
+      "at": "2026-11-03T08:15:56.288Z"
+    },
+    {
+      "case": "005-keyboard-motion",
+      "id": "a11y.keyboardTab",
+      "status": "PASS",
+      "detail": {
+        "distinct": 14,
+        "visibleFocus": 14,
+        "returned": "概览",
+        "sequence": [
+          {
+            "reached": true,
+            "tag": "a",
+            "text": "跳到主要内容",
+            "href": "#main-content",
+            "outlineWidth": "1px",
+            "outlineStyle": "auto",
+            "boxShadow": "none"
+          },
+          {
+            "reached": true,
+            "tag": "a",
+            "text": "忆程 ProjectMemo 首页",
+            "href": "/",
+            "outlineWidth": "2px",
+            "outlineStyle": "solid",
+            "boxShadow": "none"
+          },
+          {
+            "reached": true,
+            "tag": "a",
+            "text": "焦点",
+            "href": "/focus",
+            "outlineWidth": "2px",
+            "outlineStyle": "solid",
+            "boxShadow": "none"
+          },
+          {
+            "reached": true,
+            "tag": "a",
+            "text": "项目",
+            "href": "/projects",
+            "outlineWidth": "2px",
+            "outlineStyle": "solid",
+            "boxShadow": "rgba(28, 46, 44, 0.05) 0px 1px 2px 0px"
+          },
+          {
+            "reached": true,
+            "tag": "a",
+            "text": "记忆",
+            "href": "/memory",
+            "outlineWidth": "2px",
+            "outlineStyle": "solid",
+            "boxShadow": "none"
+          },
+          {
+            "reached": true,
+            "tag": "a",
+            "text": "行动",
+            "href": "/actions",
+            "outlineWidth": "2px",
+            "outlineStyle": "solid",
+            "boxShadow": "none"
+          },
+          {
+            "reached": true,
+            "tag": "button",
+            "text": "全局设置",
+            "href": null,
+            "outlineWidth": "2px",
+            "outlineStyle": "solid",
+            "boxShadow": "none"
+          },
+          {
+            "reached": true,
+            "tag": "button",
+            "text": "切换深浅色主题",
+            "href": null,
+            "outlineWidth": "2px",
+            "outlineStyle": "solid",
+            "boxShadow": "none"
+          }
+        ]
+      },
+      "at": "2026-11-03T08:15:59.877Z"
+    },
+    {
+      "case": "005-keyboard-motion",
+      "id": "a11y.reducedMotion",
+      "status": "PASS",
+      "detail": {
+        "prefersReducedMotion": true,
+        "body": {
+          "animationDuration": "1e-05s",
+          "transitionDuration": "1e-05s",
+          "scrollBehavior": "auto"
+        },
+        "sample": {
+          "animationDuration": "1e-05s",
+          "transitionDuration": "1e-05s",
+          "scrollBehavior": "auto"
+        },
+        "mediaRulesApplied": true
+      },
+      "at": "2026-11-03T08:16:00.042Z"
+    },
+    {
+      "case": "006-legacy-missing-workpacket",
+      "id": "abnormal.legacy.detailPreserved",
+      "status": "PASS",
+      "detail": "原委托详情可见",
+      "at": "2026-11-03T08:16:06.859Z"
+    },
+    {
+      "case": "006-legacy-missing-workpacket",
+      "id": "abnormal.legacy.noFakeSuccess",
+      "status": "PASS",
+      "detail": {
+        "hint": [
+          "/摘要暂未提供/",
+          "/旧服务/",
+          "/不据此推断成功/"
+        ],
+        "fourQuestions": 0,
+        "fakeSemantics": 0,
+        "explanation": "页面其它区域仍显示未截获的 /api/missions/:id 原详情真实事实（含既有“成果核验与现实结果”块）；本次仅替换 readback 响应，不据此推断工作包成功。",
+        "readbackText": "重新读取状态与回执 委托版本已变化，正在重新读取回执；以下为上次结果。 当前摘要暂未提供（旧服务或构建失败）；以下保留原委托详情，不据此推断成功或无变化。 原状态 等待执行 显示阶段 待执行 原因 今日调用额度已用完，等待许可时区的次日；累计用量保留 原动作 查看下次检查时间 不显示默认四问、成功结论或费用 0；重新读取只读取原委托状态，不会推进成功观察。 读取于 2026/11/3 12:13:19 · 委托版本 1 结果分类与支持上限 已执行：0 工具步骤确实运行过；不等于结论成立或目标达成 已观察：0 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 3 次 · 工具 2 次"
+      },
+      "at": "2026-11-03T08:16:06.859Z"
+    },
+    {
+      "case": "006-legacy-missing-workpacket",
+      "id": "abnormal.legacy.requestAudit",
+      "status": "PASS",
+      "detail": {
+        "total": 54,
+        "apiRequests": 20,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 54
+        }
+      },
+      "at": "2026-11-03T08:16:07.166Z"
+    },
+    {
+      "case": "007-version-advanced",
+      "id": "abnormal.versionAdvanced.interceptionApplied",
+      "status": "PASS",
+      "detail": {
+        "responses": 2,
+        "mutated": 2
+      },
+      "at": "2026-11-03T08:16:19.974Z"
+    },
+    {
+      "case": "007-version-advanced",
+      "id": "abnormal.versionAdvanced.noticeVisible",
+      "status": "PASS",
+      "detail": {
+        "found": [
+          "/版本/",
+          "/重新核对/"
+        ],
+        "alertWaited": true,
+        "responses": 2
+      },
+      "at": "2026-11-03T08:16:19.974Z"
+    },
+    {
+      "case": "007-version-advanced",
+      "id": "abnormal.versionAdvanced.overflow390",
+      "status": "PASS",
+      "detail": {
+        "innerWidth": 390,
+        "documentScrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "horizontalOverflow": false,
+        "offenders": []
+      },
+      "at": "2026-11-03T08:16:20.865Z"
+    },
+    {
+      "case": "008-409-authority-changed",
+      "id": "abnormal.409.visible",
+      "status": "PASS",
+      "detail": {
+        "found": [
+          "/读取期间来源或权限/",
+          "/重新读取/"
+        ],
+        "noticeWaited": true,
+        "readbackResponses": [
+          {
+            "at": "2026-11-03T08:16:31.592Z",
+            "status": 409
+          },
+          {
+            "at": "2026-11-03T08:16:31.595Z",
+            "status": 409
+          }
+        ]
+      },
+      "at": "2026-11-03T08:16:32.256Z"
+    },
+    {
+      "case": "008-409-authority-changed",
+      "id": "abnormal.409.noAutoContinue",
+      "status": "PASS",
+      "detail": "未发现自动沿用旧资格",
+      "at": "2026-11-03T08:16:32.256Z"
+    },
+    {
+      "case": "009-http-401",
+      "id": "abnormal.401.privateLoaded",
+      "status": "PASS",
+      "detail": "重新读取状态与回执 查看原结果 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 选入补充材料 已执行 · 2026/11/3 13:40:05 create_action 已执行 · 2026/11/3 13:55:05 保存草稿 已执行 · 2026/11/3 13:35:05 检索项目记忆 已执行 · 2026/11/3 13:25:05 最近草稿：修订 1 · 2026/11/3 13:44:05 已执行 4 · 已观察 2 · 已独立支持 0 · 用户报告 1 · 反例 0 · 未知 0 核对设备 D 显存预算并记录复测条件 已完成 · 已填写复盘回执 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_",
+      "at": "2026-11-03T08:17:00.659Z"
+    },
+    {
+      "case": "009-http-401",
+      "id": "abnormal.401.privateCacheCleared",
+      "status": "PASS",
+      "detail": {
+        "after": "重新读取状态与回执 请先登录",
+        "leaked": []
+      },
+      "at": "2026-11-03T08:17:02.165Z"
+    },
+    {
+      "case": "010-http-403",
+      "id": "abnormal.403.privateLoaded",
+      "status": "PASS",
+      "detail": "重新读取状态与回执 查看原结果 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 选入补充材料 已执行 · 2026/11/3 13:40:05 create_action 已执行 · 2026/11/3 13:55:05 保存草稿 已执行 · 2026/11/3 13:35:05 检索项目记忆 已执行 · 2026/11/3 13:25:05 最近草稿：修订 1 · 2026/11/3 13:44:05 已执行 4 · 已观察 2 · 已独立支持 0 · 用户报告 1 · 反例 0 · 未知 0 核对设备 D 显存预算并记录复测条件 已完成 · 已填写复盘回执 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_",
+      "at": "2026-11-03T08:17:33.635Z"
+    },
+    {
+      "case": "010-http-403",
+      "id": "abnormal.403.privateCacheCleared",
+      "status": "PASS",
+      "detail": {
+        "after": "重新读取状态与回执 没有权限访问该委托",
+        "leaked": []
+      },
+      "at": "2026-11-03T08:17:34.987Z"
+    },
+    {
+      "case": "011-http-404",
+      "id": "abnormal.404.privateLoaded",
+      "status": "PASS",
+      "detail": "重新读取状态与回执 查看原结果 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 选入补充材料 已执行 · 2026/11/3 13:40:05 create_action 已执行 · 2026/11/3 13:55:05 保存草稿 已执行 · 2026/11/3 13:35:05 检索项目记忆 已执行 · 2026/11/3 13:25:05 最近草稿：修订 1 · 2026/11/3 13:44:05 已执行 4 · 已观察 2 · 已独立支持 0 · 用户报告 1 · 反例 0 · 未知 0 核对设备 D 显存预算并记录复测条件 已完成 · 已填写复盘回执 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_",
+      "at": "2026-11-03T08:18:02.220Z"
+    },
+    {
+      "case": "011-http-404",
+      "id": "abnormal.404.privateCacheCleared",
+      "status": "PASS",
+      "detail": {
+        "after": "重新读取状态与回执 委托不存在",
+        "leaked": []
+      },
+      "at": "2026-11-03T08:18:03.765Z"
+    },
+    {
+      "case": "012-stopped",
+      "id": "abnormal.stopped.visible",
+      "status": "PASS",
+      "detail": [
+        "/停止/",
+        "/结算/"
+      ],
+      "at": "2026-11-03T08:18:19.664Z"
+    },
+    {
+      "case": "012-stopped",
+      "id": "abnormal.stopped.requestAudit",
+      "status": "PASS",
+      "detail": {
+        "total": 56,
+        "apiRequests": 22,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 56
+        }
+      },
+      "at": "2026-11-03T08:18:20.288Z"
+    },
+    {
+      "case": "013-cancelled",
+      "id": "abnormal.cancelled.visible",
+      "status": "PASS",
+      "detail": [
+        "/取消/",
+        "/保留/"
+      ],
+      "at": "2026-11-03T08:18:30.347Z"
+    },
+    {
+      "case": "013-cancelled",
+      "id": "abnormal.cancelled.requestAudit",
+      "status": "PASS",
+      "detail": {
+        "total": 56,
+        "apiRequests": 22,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 56
+        }
+      },
+      "at": "2026-11-03T08:18:30.814Z"
+    },
+    {
+      "case": "014-terminal-unknown",
+      "id": "abnormal.terminal-unknown.visible",
+      "status": "PASS",
+      "detail": [
+        "/未知/",
+        "/未结算|核对/"
+      ],
+      "at": "2026-11-03T08:18:37.336Z"
+    },
+    {
+      "case": "014-terminal-unknown",
+      "id": "abnormal.terminal-unknown.overflow390",
+      "status": "PASS",
+      "detail": {
+        "innerWidth": 390,
+        "documentScrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "horizontalOverflow": false,
+        "offenders": []
+      },
+      "at": "2026-11-03T08:18:38.167Z"
+    },
+    {
+      "case": "014-terminal-unknown",
+      "id": "abnormal.terminal-unknown.requestAudit",
+      "status": "PASS",
+      "detail": {
+        "total": 56,
+        "apiRequests": 22,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 56
+        }
+      },
+      "at": "2026-11-03T08:18:38.413Z"
+    },
+    {
+      "case": "015-failed",
+      "id": "abnormal.failed.visible",
+      "status": "PASS",
+      "detail": [
+        "/失败/",
+        "/原因|恢复/"
+      ],
+      "at": "2026-11-03T08:18:45.055Z"
+    },
+    {
+      "case": "015-failed",
+      "id": "abnormal.failed.requestAudit",
+      "status": "PASS",
+      "detail": {
+        "total": 56,
+        "apiRequests": 22,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 56
+        }
+      },
+      "at": "2026-11-03T08:18:45.545Z"
+    },
+    {
+      "case": "016-old-question",
+      "id": "abnormal.old-question.visible",
+      "status": "PASS",
+      "detail": [
+        "/历史问题/",
+        "/只读|旧/"
+      ],
+      "at": "2026-11-03T08:18:53.420Z"
+    },
+    {
+      "case": "016-old-question",
+      "id": "abnormal.old-question.requestAudit",
+      "status": "PASS",
+      "detail": {
+        "total": 56,
+        "apiRequests": 22,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 56
+        }
+      },
+      "at": "2026-11-03T08:18:53.974Z"
+    },
+    {
+      "case": "017-old-approval",
+      "id": "abnormal.old-approval.visible",
+      "status": "PASS",
+      "detail": [
+        "/EXPIRED|过期/",
+        "/提案/"
+      ],
+      "at": "2026-11-03T08:18:59.117Z"
+    },
+    {
+      "case": "017-old-approval",
+      "id": "abnormal.old-approval.requestAudit",
+      "status": "PASS",
+      "detail": {
+        "total": 55,
+        "apiRequests": 22,
+        "nonReadRequests": 0,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [],
+        "externalRequests": [],
+        "methods": {
+          "GET": 55
+        }
+      },
+      "at": "2026-11-03T08:18:59.554Z"
+    },
+    {
+      "case": "018-long-copy",
+      "id": "abnormal.long-copy.visible",
+      "status": "PASS",
+      "detail": [
+        "/长文案|SYNTHETIC_LONG/"
+      ],
+      "at": "2026-11-03T08:19:06.262Z"
+    },
+    {
+      "case": "018-long-copy",
+      "id": "abnormal.long-copy.overflow390",
+      "status": "PASS",
+      "detail": {
+        "innerWidth": 390,
+        "documentScrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "horizontalOverflow": false,
+        "offenders": []
+      },
+      "at": "2026-11-03T08:19:07.083Z"
+    },
+    {
+      "case": "018-long-copy",
+      "id": "abnormal.long-copy.requestAudit",
+      "status": "PASS",
+      "detail": {
+        "total": 58,
+        "apiRequests": 25,
+        "nonReadRequests": 1,
+        "businessWrites": [],
+        "pageInternalPosts": [],
+        "pageComponentPosts": [
+          "POST http://127.0.0.1:34112/api/projects/cmw0evu7a0003f08o08g9arv4/goal-question"
+        ],
+        "externalRequests": [],
+        "methods": {
+          "GET": 57,
+          "POST": 1
+        }
+      },
+      "at": "2026-11-03T08:19:07.315Z"
+    },
+    {
+      "case": "global",
+      "id": "audit.cInteractionBusinessWritesZero",
+      "status": "PASS",
+      "detail": {
+        "expected": 0,
+        "observed": 0,
+        "entries": []
+      },
+      "at": "2026-11-03T08:19:08.302Z"
+    },
+    {
+      "case": "global",
+      "id": "audit.externalRequestsZero",
+      "status": "PASS",
+      "detail": {
+        "count": 0,
+        "entries": [],
+        "assertion": "必须为 0"
+      },
+      "at": "2026-11-03T08:19:08.302Z"
+    },
+    {
+      "case": "global",
+      "id": "audit.preExistingPageBehaviorClassified",
+      "status": "PASS",
+      "detail": {
+        "classification": "PRE_EXISTING_PAGE_BEHAVIOR",
+        "count": 10,
+        "note": "既有 GoalQuestion / FocusAgentWorkspace 挂载写请求，单列并在 notes 说明；不计入 C 功能交互业务写。"
+      },
+      "at": "2026-11-03T08:19:08.302Z"
+    }
+  ],
+  "totals": {
+    "checks": 68,
+    "pass": 68,
+    "fail": 0,
+    "notRun": 0
+  },
+  "screenshots": [
+    "evidence/final-c/20261103/screenshots/normal/focus-1280-light.png",
+    "evidence/final-c/20261103/screenshots/normal/focus-1280-dark.png",
+    "evidence/final-c/20261103/screenshots/normal/focus-390-dark.png",
+    "evidence/final-c/20261103/screenshots/normal/focus-390-light.png",
+    "evidence/final-c/20261103/screenshots/normal/mission-waiting-user-1280-light.png",
+    "evidence/final-c/20261103/screenshots/normal/mission-waiting-user-1280-dark.png",
+    "evidence/final-c/20261103/screenshots/normal/mission-waiting-user-390-dark.png",
+    "evidence/final-c/20261103/screenshots/normal/mission-waiting-user-390-light.png",
+    "evidence/final-c/20261103/screenshots/normal/mission-question-navigation-1280-light.png",
+    "evidence/final-c/20261103/screenshots/normal/mission-question-receipt-1280-light.png",
+    "evidence/final-c/20261103/screenshots/normal/basis-suppressed-item-1280-light.png",
+    "evidence/final-c/20261103/screenshots/normal/basis-expanded-1280-light.png",
+    "evidence/final-c/20261103/screenshots/normal/basis-expanded-1280-dark.png",
+    "evidence/final-c/20261103/screenshots/normal/basis-expanded-390-dark.png",
+    "evidence/final-c/20261103/screenshots/normal/basis-expanded-390-light.png",
+    "evidence/final-c/20261103/screenshots/normal/results-receipts-1280-light.png",
+    "evidence/final-c/20261103/screenshots/normal/results-receipts-1280-dark.png",
+    "evidence/final-c/20261103/screenshots/normal/results-receipts-390-dark.png",
+    "evidence/final-c/20261103/screenshots/normal/results-receipts-390-light.png",
+    "evidence/final-c/20261103/screenshots/normal/keyboard-motion-1280-light.png",
+    "evidence/final-c/20261103/screenshots/abnormal/legacy-missing-workpacket-1280-light.png",
+    "evidence/final-c/20261103/screenshots/abnormal/version-advanced-1280-light.png",
+    "evidence/final-c/20261103/screenshots/abnormal/version-advanced-390-light.png",
+    "evidence/final-c/20261103/screenshots/abnormal/409-authority-changed-1280-light.png",
+    "evidence/final-c/20261103/screenshots/abnormal/http-401-cache-cleared-1280-light.png",
+    "evidence/final-c/20261103/screenshots/abnormal/http-403-cache-cleared-1280-light.png",
+    "evidence/final-c/20261103/screenshots/abnormal/http-404-cache-cleared-1280-light.png",
+    "evidence/final-c/20261103/screenshots/abnormal/stopped-1280-light.png",
+    "evidence/final-c/20261103/screenshots/abnormal/cancelled-1280-light.png",
+    "evidence/final-c/20261103/screenshots/abnormal/terminal-unknown-1280-light.png",
+    "evidence/final-c/20261103/screenshots/abnormal/terminal-unknown-390-light.png",
+    "evidence/final-c/20261103/screenshots/abnormal/failed-1280-light.png",
+    "evidence/final-c/20261103/screenshots/abnormal/old-question-1280-light.png",
+    "evidence/final-c/20261103/screenshots/abnormal/old-approval-1280-light.png",
+    "evidence/final-c/20261103/screenshots/abnormal/long-copy-1280-light.png",
+    "evidence/final-c/20261103/screenshots/abnormal/long-copy-390-light.png"
+  ],
+  "observations": {
+    "focus": {
+      "textSample": "今日项目焦点 全部项目 等你补充 超长标题项目：用于核对 390 像素宽度下项目标题、项目目标与委托长文案换行是否产生横向滚动（合成数据）SYNTHETIC_LONG_UNBROKEN_ 核对长文案：SYNTHETIC_LONG_UNBROKEN_TOKEN_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 以及一段很长的中文说明，用于确认 390 像素宽度下顶部四问、依据摘录与结果回执不会产生横向滚动；这段文字重复出现以模拟真实长文案。 请补充以下长问题的答案：SYNTHETIC_LONG_UNBROKEN_TOKEN_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX；并说明测试条件、设备编号、批次、序列长度、是否启用缓存，以及你认为还缺少哪些信息。 回答原问题 和忆程讨论 项目焦点 全部 待回应 4 推进中 1 C 证据项目：多状态长期委托核对 等你补充 核对三条项目资料的当前可用性与修订状态 请核对资料状态：哪一条被当前许可抑制、哪一条修订已变化、哪一条来源链未知；历史留痕保留但不得当作当前依据。 回答原问题 与忆程讨论 C 证据项目：多状态长期委托核对 等你补充 核对设备 D 在 2026-10 的真实显存峰值与测试条件 请补充设备 D 在 2026-10 的真实显存峰值（GB），以及 batch、序列长度和是否启用 KV cache。缺少这些条件时不会外推预算结论。 回答原问题 与忆程讨论 C 证据项目：多状态长期委托核对 等你确认 准备一次同条件复测，先审阅要创建的行动提案 请审阅原执行提案，确认后才会执行 审阅待批准提案 与忆程讨论 C 证据项目：多状态长期委托核对 正在调查 持续核对部署日志与显存预算（停止请求已受理，等待结算） 已收到停止请求，等待本轮调用结算，不会继续派发新步骤 核对停止结算 与忆程讨论 C 证据项目：多状态长期委托核对 状态待核对 核对一次外部调用结果尚未结算的委托 原请求状态待核对，已用预算保留 查询原请求 与忆程讨论 C 证据项目：多状态长期委托核对 这一步未完成 读取项目资料并核对失败原因 委托执行中断，进入详情查看原因与恢复方式。 查看原因与恢复条件 与忆程讨论 与忆程协作 项目记忆 · 对话与接续 历史讨论 忆 从今天最重要的事开始 忆程会带上项目记忆，和你一起往下走。 开始讨论",
+      "missionLinks": [
+        {
+          "href": "/projects/cmw0evu7a0003f08o08g9arv4/missions?mission=cmw0evudm001gf08og7odiwr4",
+          "text": "回答原问题"
+        },
+        {
+          "href": "/projects/cmw0evu760001f08obusvfrgj/missions?mission=cmw0evubx0015f08owtwcpyje",
+          "text": "回答原问题"
+        },
+        {
+          "href": "/projects/cmw0evu760001f08obusvfrgj/missions?mission=cmw0evu7p0005f08o178ka7rn",
+          "text": "回答原问题"
+        },
+        {
+          "href": "/projects/cmw0evu760001f08obusvfrgj/missions?mission=cmw0evu8w000bf08oqetxch3h",
+          "text": "审阅待批准提案"
+        },
+        {
+          "href": "/projects/cmw0evu760001f08obusvfrgj/missions?mission=cmw0evu9i000hf08o6oufe69u",
+          "text": "核对停止结算"
+        },
+        {
+          "href": "/projects/cmw0evu760001f08obusvfrgj/missions?mission=cmw0evubm0012f08o3ow1ithc",
+          "text": "查询原请求"
+        },
+        {
+          "href": "/projects/cmw0evu760001f08obusvfrgj/missions?mission=cmw0evub9000zf08og5kn2nl7",
+          "text": "查看原因与恢复条件"
+        }
+      ],
+      "hasPrimaryContext": false
+    },
+    "waitingUser": {
+      "panelText": "返回项目列表 科研训练 更新于 2026/11/3 C 证据项目：多状态长期委托核对 项目目标与简介 编辑项目 概览 委托 资料 行动 成果 项目功能 打开项目讨论 长期委托 委托目标、执行进度和成果草稿 长期项目委托 交给 Agent 一个目标，在同一委托中持续推进、补充材料和审阅成果。 已加载 9 项委托 委托新目标 已有委托 核对设备 D 在 2026-10 的真实显存峰值与测试条件 等待补充信息 准备一次同条件复测，先审阅要创建的行动提案 等待你的批准 持续核对部署日志与显存预算（停止请求已受理，等待结算） 正在执行 整理阶段汇报草稿，并记录一次真实行动结果回执 委托条件已验收 读取项目资料并核对失败原因 执行失败 核对一次外部调用结果尚未结算的委托 已暂停 核对三条项目资料的当前可用性与修订状态 等待补充信息 取消前保留的委托示例：核对部署日志 已取消 完成条件已通过，但有一次外部调用结果尚未结算 委托条件已验收 设为当前关注 等你补充 1 个步骤已执行 · 0 份草稿 调整当前重点／继续讨论 核对设备 D 在 2026-10 的真实显存峰值与测试条件 等待你回答下方原问题 成果核验与现实结果 暂停 取消委托 重新读取状态与回执 回答原问题 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 选入补充材料 已执行 · 2026/11/3 16:03:05 最近草稿：窗口内未记录 已执行 1 · 已观察 1 · 已独立支持 0 · 用户报告 0 · 反例 0 · 未知 0 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：cmw0evu8d0008f08o85t6q6k2 原资料使用 1 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：等你补充 · 原状态：等待补充信息 请补充设备 D 在 2026-10 的真实显存峰值（GB），以及 batch、序列长度和是否启用 KV cache。缺少这些条件时不会外推预算结论。（QUESTION_PENDING） 首要阻断：原问题等待你的补充；回答绑定原问题，旧问题不能替换成新问题 QUESTION_PENDING 无停止请求。 未结算效果：未记录。 全部阻断（2 项） 技术说明（原投影） 现在等谁 等待：等你补充信息 下一步由谁：你 下次检查时间：未记录 有效边界：未记录 回答绑定原问题；旧问题不能替换成新问题，提交后由服务端重查版本与来源。 观察时间 读取于 2026/11/3 16:14:42 最近成功观察 尚未有成功观察记录 最近失败观察 未记录 观察状态 尚未有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:14:42 · 委托版本 1 链接指向的问题：请补充设备 D 在 2026-10 的真实显存峰值（GB），以及 batch、序列长度和是否启用 KV cache。缺少这些条件时不会外推预算结论。 结果分类与支持上限 已执行：1 工具步骤确实运行过；不等于结论成立或目标达成 已观察：1 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 1 次 · 工具 2 次 需要你补充 请补充设备 D 在 2026-10 的真实显存峰值（GB），以及 batch、序列长度和是否启用 KV cache。缺少这些条件时不会外推预算结论。 从项目资料选取 保存新记录或附件 → 填写明确的实验指标 补充实验记录：显存峰值 · 2026-10 实验指标数值（GB）保存本项目实验记录 补充信息 补充并继续 正在读取责任合同... 最近进展 对比本轮推进方案 执行详情与回执（1 个步骤已执行） 委托设置与来源 材料到达后的接续许可 查看或修改个人约束 公开研究范围 公开资料与获取记录（0） 项目经验历史",
+      "readbackText": "重新读取状态与回执 回答原问题 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 选入补充材料 已执行 · 2026/11/3 16:03:05 最近草稿：窗口内未记录 已执行 1 · 已观察 1 · 已独立支持 0 · 用户报告 0 · 反例 0 · 未知 0 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：cmw0evu8d0008f08o85t6q6k2 原资料使用 1 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：等你补充 · 原状态：等待补充信息 请补充设备 D 在 2026-10 的真实显存峰值（GB），以及 batch、序列长度和是否启用 KV cache。缺少这些条件时不会外推预算结论。（QUESTION_PENDING） 首要阻断：原问题等待你的补充；回答绑定原问题，旧问题不能替换成新问题 QUESTION_PENDING 无停止请求。 未结算效果：未记录。 全部阻断（2 项） 技术说明（原投影） 现在等谁 等待：等你补充信息 下一步由谁：你 下次检查时间：未记录 有效边界：未记录 回答绑定原问题；旧问题不能替换成新问题，提交后由服务端重查版本与来源。 观察时间 读取于 2026/11/3 16:14:42 最近成功观察 尚未有成功观察记录 最近失败观察 未记录 观察状态 尚未有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:14:42 · 委托版本 1 链接指向的问题：请补充设备 D 在 2026-10 的真实显存峰值（GB），以及 batch、序列长度和是否启用 KV cache。缺少这些条件时不会外推预算结论。 结果分类与支持上限 已执行：1 工具步骤确实运行过；不等于结论成立或目标达成 已观察：1 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 1 次 · 工具 2 次",
+      "questionAnchorText": "需要你补充 请补充设备 D 在 2026-10 的真实显存峰值（GB），以及 batch、序列长度和是否启用 KV cache。缺少这些条件时不会外推预算结论。 从项目资料选取 保存新记录或附件 → 填写明确的实验指标 补充实验记录：显存峰值 · 2026-10 实验指标数值（GB）保存本项目实验记录 补充信息 补充并继续"
+    },
+    "answeredQuestion": {
+      "requestId": "8b52cc06-9f21-4e6e-ab1c-c1f52b43f5e4",
+      "questionId": "cmw0evu8d0008f08o85t6q6k2",
+      "expectedVersion": 1,
+      "httpStatus": 202,
+      "responseMission": {
+        "id": "cmw0evu7p0005f08o178ka7rn",
+        "status": "READY",
+        "version": 2
+      },
+      "answerChars": 68
+    },
+    "basis": {
+      "preparations": [
+        {
+          "theme": "light",
+          "width": 1280
+        },
+        {
+          "theme": "dark",
+          "width": 1280
+        },
+        {
+          "theme": "dark",
+          "width": 390
+        },
+        {
+          "theme": "light",
+          "width": 390
+        }
+      ],
+      "readbackText": "重新读取状态与回执 回答原问题 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 选入补充材料 已执行 · 2026/11/3 15:55:05 最近草稿：窗口内未记录 已执行 1 · 已观察 1 · 已独立支持 0 · 用户报告 0 · 反例 0 · 未知 0 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：cmw0evuc70017f08oi4xr5n3g 原资料使用 4 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 逐项依据与原文 当前可用只表示此刻能作为依据；历史留痕保留原身份，不等于独立支持。 项目资料 A（允许使用）：2026-10-18 设备 D 显存峰值 6.8GB，条件 batch=1。 capture:cmw0evuc90018f08odnbtaqgu 当前使用资格 当前允许作为依据（仅当前使用，不代表独立证据） 修订状态 原修订匹配 历史留痕 已绑定原委托，尚未找到后续引用 查看原记录摘录 项目资料 A（允许使用）：2026-10-18 设备 D 显存峰值 6.8GB，条件 batch=1。 正文读取范围未记录；摘录不代表全文，也不代表精确位置。 回原任务定位该来源 仅定位到原文件/记录，未记录页码或段落，不编造精确位置。 项目资料 B（2026-11-02 修订）：预算口径改为峰值显存 + 缓存占用，需要重新核对原结论。 capture:cmw0evucc0019f08oy6srwpvx 当前使用资格 当前允许作为依据（仅当前使用，不代表独立证据） 修订状态 原修订已变化（历史留痕保留） 历史留痕 已绑定原委托，尚未找到后续引用 查看原记录摘录 回原任务定位该来源 仅定位到原文件/记录，未记录页码或段落，不编造精确位置。 项目资料 C（当前许可被用户撤回）：仅在历史留痕中保留身份，不作为当前依据。 capture:cmw0evuci001af08o2p240e49 当前使用资格 当前许可已被撤回，不作为当前推荐或默认引用 修订状态 原修订匹配 历史留痕 已绑定原委托，尚未找到后续引用 回原任务定位该来源 仅定位到原文件/记录，未记录页码或段落，不编造精确位置。 项目记录 capture:cmw0evucm001bf08ofi8zlpvq 当前使用资格 当前来源链未知，不用于当前推荐 修订状态 原资料当前不可访问 历史留痕 已绑定原委托，尚未找到后续引用 回原任务定位该来源 仅定位到原文件/记录，未记录页码或段落，不编造精确位置。 未找到可定位的原草稿版本，暂不提供纠正入口；请回原任务核对原记录。 回原任务核对原记录 支持范围 本次未读取证据审查窗口；未找到记录不等于从未发生。 为何停下 当前阶段：等你补充 · 原状态：等待补充信息 请核对资料状态：哪一条被当前许可抑制、哪一条修订已变化、哪一条来源链未知；历史留痕保留但不得当作当前依据。（QUESTION_PENDING） 首要阻断：原问题等待你的补充；回答绑定原问题，旧问题不能替换成新问题 QUESTION_PENDING 无停止请求。 未结算效果：未记录。 全部阻断（7 项） 技术说明（原投影） 现在等谁 等待：等你补充信息 下一步由谁：你 下次检查时间：未记录 有效边界：未记录 回答绑定原问题；旧问题不能替换成新问题，提交后由服务端重查版本与来源。 观察时间 读取于 2026/11/3 16:15:05 最近成功观察 尚未有成功观察记录 最近失败观察 未记录 观察状态 尚未有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:15:05 · 委托版本 1 链接指向的问题：请核对资料状态：哪一条被当前许可抑制、哪一条修订已变化、哪一条来源链未知；历史留痕保留但不得当作当前依据。 结果分类与支持上限 已执行：1 工具步骤确实运行过；不等于结论成立或目标达成 已观察：1 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 待核对 次 · 工具 待核对 次",
+      "panelText": "返回项目列表 科研训练 更新于 2026/11/3 C 证据项目：多状态长期委托核对 项目目标与简介 编辑项目 概览 委托 资料 行动 成果 项目功能 打开项目讨论 长期委托 委托目标、执行进度和成果草稿 长期项目委托 交给 Agent 一个目标，在同一委托中持续推进、补充材料和审阅成果。 已加载 9 项委托 委托新目标 已有委托 核对设备 D 在 2026-10 的真实显存峰值与测试条件 等待执行 准备一次同条件复测，先审阅要创建的行动提案 等待你的批准 持续核对部署日志与显存预算（停止请求已受理，等待结算） 正在执行 整理阶段汇报草稿，并记录一次真实行动结果回执 委托条件已验收 读取项目资料并核对失败原因 执行失败 核对一次外部调用结果尚未结算的委托 已暂停 核对三条项目资料的当前可用性与修订状态 等待补充信息 取消前保留的委托示例：核对部署日志 已取消 完成条件已通过，但有一次外部调用结果尚未结算 委托条件已验收 设为当前关注 等你补充 1 个步骤已执行 · 0 份草稿 调整当前重点／继续讨论 核对三条项目资料的当前可用性与修订状态 等待你回答下方原问题 成果核验与现实结果 暂停 取消委托 重新读取状态与回执 回答原问题 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 选入补充材料 已执行 · 2026/11/3 15:55:05 最近草稿：窗口内未记录 已执行 1 · 已观察 1 · 已独立支持 0 · 用户报告 0 · 反例 0 · 未知 0 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：cmw0evuc70017f08oi4xr5n3g 原资料使用 4 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 逐项依据与原文 当前可用只表示此刻能作为依据；历史留痕保留原身份，不等于独立支持。 项目资料 A（允许使用）：2026-10-18 设备 D 显存峰值 6.8GB，条件 batch=1。 capture:cmw0evuc90018f08odnbtaqgu 当前使用资格 当前允许作为依据（仅当前使用，不代表独立证据） 修订状态 原修订匹配 历史留痕 已绑定原委托，尚未找到后续引用 查看原记录摘录 项目资料 A（允许使用）：2026-10-18 设备 D 显存峰值 6.8GB，条件 batch=1。 正文读取范围未记录；摘录不代表全文，也不代表精确位置。 回原任务定位该来源 仅定位到原文件/记录，未记录页码或段落，不编造精确位置。 项目资料 B（2026-11-02 修订）：预算口径改为峰值显存 + 缓存占用，需要重新核对原结论。 capture:cmw0evucc0019f08oy6srwpvx 当前使用资格 当前允许作为依据（仅当前使用，不代表独立证据） 修订状态 原修订已变化（历史留痕保留） 历史留痕 已绑定原委托，尚未找到后续引用 查看原记录摘录 回原任务定位该来源 仅定位到原文件/记录，未记录页码或段落，不编造精确位置。 项目资料 C（当前许可被用户撤回）：仅在历史留痕中保留身份，不作为当前依据。 capture:cmw0evuci001af08o2p240e49 当前使用资格 当前许可已被撤回，不作为当前推荐或默认引用 修订状态 原修订匹配 历史留痕 已绑定原委托，尚未找到后续引用 回原任务定位该来源 仅定位到原文件/记录，未记录页码或段落，不编造精确位置。 项目记录 capture:cmw0evucm001bf08ofi8zlpvq 当前使用资格 当前来源链未知，不用于当前推荐 修订状态 原资料当前不可访问 历史留痕 已绑定原委托，尚未找到后续引用 回原任务定位该来源 仅定位到原文件/记录，未记录页码或段落，不编造精确位置。 未找到可定位的原草稿版本，暂不提供纠正入口；请回原任务核对原记录。 回原任务核对原记录 支持范围 本次未读取证据审查窗口；未找到记录不等于从未发生。 为何停下 当前阶段：等你补充 · 原状态：等待补充信息 请核对资料状态：哪一条被当前许可抑制、哪一条修订已变化、哪一条来源链未知；历史留痕保留但不得当作当前依据。（QUESTION_PENDING） 首要阻断：原问题等待你的补充；回答绑定原问题，旧问题不能替换成新问题 QUESTION_PENDING 无停止请求。 未结算效果：未记录。 全部阻断（7 项） 技术说明（原投影） 现在等谁 等待：等你补充信息 下一步由谁：你 下次检查时间：未记录 有效边界：未记录 回答绑定原问题；旧问题不能替换成新问题，提交后由服务端重查版本与来源。 观察时间 读取于 2026/11/3 16:15:05 最近成功观察 尚未有成功观察记录 最近失败观察 未记录 观察状态 尚未有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:15:05 · 委托版本 1 链接指向的问题：请核对资料状态：哪一条被当前许可抑制、哪一条修订已变化、哪一条来源链未知；历史留痕保留但不得当作当前依据。 结果分类与支持上限 已执行：1 工具步骤确实运行过；不等于结论成立或目标达成 已观察：1 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 待核对 次 · 工具 待核对 次 需要你补充 请核对资料状态：哪一条被当前许可抑制、哪一条修订已变化、哪一条来源链未知；历史留痕保留但不得当作当前依据。 从项目资料选取 保存新记录或附件 → 补充信息 补充并继续 运行与接续 尚未观测到后台 委托范围与累计用量 最近进展 对比本轮推进方案 执行详情与回执（1 个步骤已执行） 委托设置与来源 材料到达后的接续许可 查看或修改个人约束 公开研究范围 公开资料与获取记录（0） 项目经验历史",
+      "stateText": [
+        "/当前许可已被撤回/",
+        "/原修订已变化/",
+        "/当前来源链未知/",
+        "/当前允许作为依据/"
+      ],
+      "suppressedItem": {
+        "hasCurrent": true,
+        "hasRevision": true,
+        "text": "项目资料 C（当前许可被用户撤回）：仅在历史留痕中保留身份，不作为当前依据。 capture:cmw0evuci001af08o2p240e49 当前使用资格 当前许可已被撤回，不作为当前推荐或默认引用 修订状态 原修订匹配 历史留痕 已绑定原委托，尚未找到后续引用 回原任务定位该来源 仅定位到原文件/记录，未记录页码或段落，不编造精确位置。"
+      }
+    },
+    "results": {
+      "readbackText": "重新读取状态与回执 查看原结果 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 选入补充材料 已执行 · 2026/11/3 13:40:05 create_action 已执行 · 2026/11/3 13:55:05 保存草稿 已执行 · 2026/11/3 13:35:05 检索项目记忆 已执行 · 2026/11/3 13:25:05 最近草稿：修订 1 · 2026/11/3 13:44:05 已执行 4 · 已观察 2 · 已独立支持 0 · 用户报告 1 · 反例 0 · 未知 0 核对设备 D 显存预算并记录复测条件 已完成 · 已填写复盘回执 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：未记录 原资料使用 1 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：已结束 · 原状态：委托条件已验收 委托完成条件已通过，现实效果以原结果为准（SUCCEEDED） 无停止请求（原委托已完成；停止请求不再具有执行含义）。 未结算效果：未记录。 技术说明（原投影） 现在等谁 等待：不再等待谁 下一步由谁：无 下次检查时间：未记录 有效边界：未记录 完成条件已通过；现实效果仍以原结果为准。 观察时间 读取于 2026/11/3 16:15:34 最近成功观察 2026/11/3 15:44:05 最近失败观察 未记录 观察状态 最近有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:15:34 · 委托版本 1 结果分类与支持上限 已执行：4 工具步骤确实运行过；不等于结论成立或目标达成 已观察：2 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：1 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 核对设备 D 显存预算并记录复测条件 用户报告完成（已留复盘回执） · 2026/11/3 14:14:05 回到原行动 → 查看原复盘回执 → 草稿与已采纳成果 指定草稿版本 1 · 只读 项目记录显示设备 D 显存峰值 6.8GB，超过 6GB 预算；条件为 batch=1、序列长度 2048。 建议把复测条件与预算口径写入阶段汇报；缺少 KV cache 开关记录仍是信息缺口。 行动回执：用户报告已完成核对，但现实效果仍以原行动回执为准。 指定归入回执：cmw0evub4000yf08okaitr07s · 草稿版本 1 已归入成果：项目周报 · 2026/11/3 13:54:05（来自草稿 1；回执 cmw0evub4000yf08okaitr07s） 本次用量 · 模型 2 次 · 工具 3 次",
+      "panelText": "返回项目列表 科研训练 更新于 2026/11/3 C 证据项目：多状态长期委托核对 项目目标与简介 编辑项目 概览 委托 资料 行动 成果 项目功能 打开项目讨论 长期委托 委托目标、执行进度和成果草稿 长期项目委托 交给 Agent 一个目标，在同一委托中持续推进、补充材料和审阅成果。 已加载 9 项委托 委托新目标 已有委托 核对设备 D 在 2026-10 的真实显存峰值与测试条件 等待执行 准备一次同条件复测，先审阅要创建的行动提案 等待你的批准 持续核对部署日志与显存预算（停止请求已受理，等待结算） 正在执行 整理阶段汇报草稿，并记录一次真实行动结果回执 委托条件已验收 读取项目资料并核对失败原因 执行失败 核对一次外部调用结果尚未结算的委托 已暂停 核对三条项目资料的当前可用性与修订状态 等待补充信息 取消前保留的委托示例：核对部署日志 已取消 完成条件已通过，但有一次外部调用结果尚未结算 委托条件已验收 已结束 4 个步骤已执行 · 1 份草稿 调整当前重点／继续讨论 整理阶段汇报草稿，并记录一次真实行动结果回执 委托完成条件已通过，现实效果以原结果为准 成果核验与现实结果 执行条件 已验收，明细待读取 草稿核验 待审阅，尚未整体核验 用户采纳 已确认归入 1 份项目成果 现实完成 未从委托状态推断，以实际行动回执为准 重新读取状态与回执 查看原结果 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 选入补充材料 已执行 · 2026/11/3 13:40:05 create_action 已执行 · 2026/11/3 13:55:05 保存草稿 已执行 · 2026/11/3 13:35:05 检索项目记忆 已执行 · 2026/11/3 13:25:05 最近草稿：修订 1 · 2026/11/3 13:44:05 已执行 4 · 已观察 2 · 已独立支持 0 · 用户报告 1 · 反例 0 · 未知 0 核对设备 D 显存预算并记录复测条件 已完成 · 已填写复盘回执 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：未记录 原资料使用 1 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：已结束 · 原状态：委托条件已验收 委托完成条件已通过，现实效果以原结果为准（SUCCEEDED） 无停止请求（原委托已完成；停止请求不再具有执行含义）。 未结算效果：未记录。 技术说明（原投影） 现在等谁 等待：不再等待谁 下一步由谁：无 下次检查时间：未记录 有效边界：未记录 完成条件已通过；现实效果仍以原结果为准。 观察时间 读取于 2026/11/3 16:15:34 最近成功观察 2026/11/3 15:44:05 最近失败观察 未记录 观察状态 最近有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:15:34 · 委托版本 1 结果分类与支持上限 已执行：4 工具步骤确实运行过；不等于结论成立或目标达成 已观察：2 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：1 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 核对设备 D 显存预算并记录复测条件 用户报告完成（已留复盘回执） · 2026/11/3 14:14:05 回到原行动 → 查看原复盘回执 → 草稿与已采纳成果 指定草稿版本 1 · 只读 项目记录显示设备 D 显存峰值 6.8GB，超过 6GB 预算；条件为 batch=1、序列长度 2048。 建议把复测条件与预算口径写入阶段汇报；缺少 KV cache 开关记录仍是信息缺口。 行动回执：用户报告已完成核对，但现实效果仍以原行动回执为准。 指定归入回执：cmw0evub4000yf08okaitr07s · 草稿版本 1 已归入成果：项目周报 · 2026/11/3 13:54:05（来自草稿 1；回执 cmw0evub4000yf08okaitr07s） 本次用量 · 模型 2 次 · 工具 3 次 运行与接续 尚未观测到后台 委托范围与累计用量 最近进展 对比本轮推进方案 成果草稿 草稿版本 1 · 内容待审核 项目记录显示设备 D 显存峰值 6.8GB，超过 6GB 预算；条件为 batch=1、序列长度 2048。 项目观察 · capture:cmw0evuac000pf08o68koszh3 建议把复测条件与预算口径写入阶段汇报；缺少 KV cache 开关记录仍是信息缺口。 推断或建议 行动回执：用户报告已完成核对，但现实效果仍以原行动回执为准。 外部参考 执行详情与回执（4 个步骤已执行） 委托设置与来源 材料到达后的接续许可 查看或修改个人约束 公开研究范围 公开资料与获取记录（0） 项目经验历史",
+      "identity": {
+        "outputId": "cmw0evuan000sf08om7wcq7i4",
+        "receiptId": "cmw0evub4000yf08okaitr07s",
+        "artifactId": "cmw0evub1000xf08o800w2rt6",
+        "actionId": "cmw0evuaj000rf08ooi089pkc",
+        "resultCardId": "cmw0evuag000qf08ofcfowu9z"
+      },
+      "preparations": [
+        {
+          "theme": "light",
+          "width": 1280
+        },
+        {
+          "theme": "dark",
+          "width": 1280
+        },
+        {
+          "theme": "dark",
+          "width": 390
+        },
+        {
+          "theme": "light",
+          "width": 390
+        }
+      ],
+      "expandedBasisText": "重新读取状态与回执 查看原结果 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 选入补充材料 已执行 · 2026/11/3 13:40:05 create_action 已执行 · 2026/11/3 13:55:05 保存草稿 已执行 · 2026/11/3 13:35:05 检索项目记忆 已执行 · 2026/11/3 13:25:05 最近草稿：修订 1 · 2026/11/3 13:44:05 已执行 4 · 已观察 2 · 已独立支持 0 · 用户报告 1 · 反例 0 · 未知 0 核对设备 D 显存预算并记录复测条件 已完成 · 已填写复盘回执 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：未记录 原资料使用 1 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 逐项依据与原文 当前可用只表示此刻能作为依据；历史留痕保留原身份，不等于独立支持。 2026-10-20 复测条件记录：设备 D，模型 A v2，batch=1，序列长度 2048，显存峰值 6.8GB，预算上限 6GB。 capture:cmw0evuac000pf08o68koszh3 当前使用资格 当前允许作为依据（仅当前使用，不代表独立证据） 修订状态 原修订匹配 历史留痕 已归入成果 · 草稿版本 1 查看原记录摘录 2026-10-20 复测条件记录：设备 D，模型 A v2，batch=1，序列长度 2048，显存峰值 6.8GB，预算上限 6GB。 正文读取范围未记录；摘录不代表全文，也不代表精确位置。 查看草稿版本 1 回原任务定位该来源 仅定位到原文件/记录，未记录页码或段落，不编造精确位置。 原文精确摘录只表示引用范围，不等于独立证实。 纠正理解 纠正影响后续理解，原记录与原提案需重新核对。 支持范围 本次未读取证据审查窗口；未找到记录不等于从未发生。 为何停下 当前阶段：已结束 · 原状态：委托条件已验收 委托完成条件已通过，现实效果以原结果为准（SUCCEEDED） 无停止请求（原委托已完成；停止请求不再具有执行含义）。 未结算效果：未记录。 技术说明（原投影） 现在等谁 等待：不再等待谁 下一步由谁：无 下次检查时间：未记录 有效边界：未记录 完成条件已通过；现实效果仍以原结果为准。 观察时间 读取于 2026/11/3 16:15:34 最近成功观察 2026/11/3 15:44:05 最近失败观察 未记录 观察状态 最近有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:15:34 · 委托版本 1 结果分类与支持上限 已执行：4 工具步骤确实运行过；不等于结论成立或目标达成 已观察：2 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：1 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 核对设备 D 显存预算并记录复测条件 用户报告完成（已留复盘回执） · 2026/11/3 14:14:05 回到原行动 → 查看原复盘回执 → 草稿与已采纳成果 指定草稿版本 1 · 只读 项目记录显示设备 D 显存峰值 6.8GB，超过 6GB 预算；条件为 batch=1、序列长度 2048。 建议把复测条件与预算口径写入阶段汇报；缺少 KV cache 开关记录仍是信息缺口。 行动回执：用户报告已完成核对，但现实效果仍以原行动回执为准。 指定归入回执：cmw0evub4000yf08okaitr07s · 草稿版本 1 已归入成果：项目周报 · 2026/11/3 13:54:05（来自草稿 1；回执 cmw0evub4000yf08okaitr07s） 本次用量 · 模型 2 次 · 工具 3 次",
+      "actualHrefs": {
+        "resultCardHrefs": [
+          "/projects/cmw0evu760001f08obusvfrgj/knowledge#card-cmw0evuag000qf08ofcfowu9z",
+          "/projects/cmw0evu760001f08obusvfrgj/knowledge#card-cmw0evuag000qf08ofcfowu9z"
+        ],
+        "actionHrefs": [
+          "/projects/cmw0evu760001f08obusvfrgj/actions#action-cmw0evuaj000rf08ooi089pkc",
+          "/projects/cmw0evu760001f08obusvfrgj/actions#action-cmw0evuaj000rf08ooi089pkc"
+        ],
+        "artifactHrefs": [
+          "/projects/cmw0evu760001f08obusvfrgj/generate?artifact=cmw0evub1000xf08o800w2rt6&type=weekly_report"
+        ]
+      }
+    },
+    "keyboard": {
+      "distinct": 14,
+      "visibleFocus": 14,
+      "returned": "概览",
+      "sequence": [
+        {
+          "reached": true,
+          "tag": "a",
+          "text": "跳到主要内容",
+          "href": "#main-content",
+          "outlineWidth": "1px",
+          "outlineStyle": "auto",
+          "boxShadow": "none"
+        },
+        {
+          "reached": true,
+          "tag": "a",
+          "text": "忆程 ProjectMemo 首页",
+          "href": "/",
+          "outlineWidth": "2px",
+          "outlineStyle": "solid",
+          "boxShadow": "none"
+        },
+        {
+          "reached": true,
+          "tag": "a",
+          "text": "焦点",
+          "href": "/focus",
+          "outlineWidth": "2px",
+          "outlineStyle": "solid",
+          "boxShadow": "none"
+        },
+        {
+          "reached": true,
+          "tag": "a",
+          "text": "项目",
+          "href": "/projects",
+          "outlineWidth": "2px",
+          "outlineStyle": "solid",
+          "boxShadow": "rgba(28, 46, 44, 0.05) 0px 1px 2px 0px"
+        },
+        {
+          "reached": true,
+          "tag": "a",
+          "text": "记忆",
+          "href": "/memory",
+          "outlineWidth": "2px",
+          "outlineStyle": "solid",
+          "boxShadow": "none"
+        },
+        {
+          "reached": true,
+          "tag": "a",
+          "text": "行动",
+          "href": "/actions",
+          "outlineWidth": "2px",
+          "outlineStyle": "solid",
+          "boxShadow": "none"
+        },
+        {
+          "reached": true,
+          "tag": "button",
+          "text": "全局设置",
+          "href": null,
+          "outlineWidth": "2px",
+          "outlineStyle": "solid",
+          "boxShadow": "none"
+        },
+        {
+          "reached": true,
+          "tag": "button",
+          "text": "切换深浅色主题",
+          "href": null,
+          "outlineWidth": "2px",
+          "outlineStyle": "solid",
+          "boxShadow": "none"
+        }
+      ]
+    },
+    "reducedMotion": {
+      "prefersReducedMotion": true,
+      "body": {
+        "animationDuration": "1e-05s",
+        "transitionDuration": "1e-05s",
+        "scrollBehavior": "auto"
+      },
+      "sample": {
+        "animationDuration": "1e-05s",
+        "transitionDuration": "1e-05s",
+        "scrollBehavior": "auto"
+      },
+      "mediaRulesApplied": true
+    },
+    "legacyMissingWorkpacket": {
+      "mainText": "返回项目列表 科研训练 更新于 2026/11/3 C 证据项目：多状态长期委托核对 项目目标与简介 编辑项目 概览 委托 资料 行动 成果 项目功能 打开项目讨论 长期委托 委托目标、执行进度和成果草稿 长期项目委托 交给 Agent 一个目标，在同一委托中持续推进、补充材料和审阅成果。 已加载 9 项委托 委托新目标 已有委托 核对设备 D 在 2026-10 的真实显存峰值与测试条件 等待执行 准备一次同条件复测，先审阅要创建的行动提案 等待你的批准 持续核对部署日志与显存预算（停止请求已受理，等待结算） 正在执行 整理阶段汇报草稿，并记录一次真实行动结果回执 委托条件已验收 读取项目资料并核对失败原因 执行失败 核对一次外部调用结果尚未结算的委托 已暂停 核对三条项目资料的当前可用性与修订状态 等待补充信息 取消前保留的委托示例：核对部署日志 已取消 完成条件已通过，但有一次外部调用结果尚未结算 委托条件已验收 设为当前关注 待执行 1 个步骤已执行 · 0 份草稿 调整当前重点／继续讨论 核对设备 D 在 2026-10 的真实显存峰值与测试条件 委托已保存，等待执行 成果核验与现实结果 暂停 取消委托 重新读取状态与回执 委托版本已变化，正在重新读取回执；以下为上次结果。 当前摘要暂未提供（旧服务或构建失败）；以下保留原委托详情，不据此推断成功或无变化。 原状态 等待执行 显示阶段 待执行 原因 今日调用额度已用完，等待许可时区的次日；累计用量保留 原动作 查看下次检查时间 不显示默认四问、成功结论或费用 0；重新读取只读取原委托状态，不会推进成功观察。 读取于 2026/11/3 12:13:19 · 委托版本 1 结果分类与支持上限 已执行：0 工具步骤确实运行过；不等于结论成立或目标达成 已观察：0 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 3 次 · 工具 2 次 返回链接中的原问题已变化。新资料仍保留；下方可读取历史问题，不会把旧答复提交给当前问题。 运行与接续 尚未观测到后台 委托范围与累计用量 最近进展 对比本轮推进方案 执行详情与回执（1 个步骤已执行） 委托设置与来源 材料到达后的接续许可 查看或修改个人约束 公开研究范围 公开资料与获取记录（0） 项目经验历史",
+      "readbackText": "重新读取状态与回执 委托版本已变化，正在重新读取回执；以下为上次结果。 当前摘要暂未提供（旧服务或构建失败）；以下保留原委托详情，不据此推断成功或无变化。 原状态 等待执行 显示阶段 待执行 原因 今日调用额度已用完，等待许可时区的次日；累计用量保留 原动作 查看下次检查时间 不显示默认四问、成功结论或费用 0；重新读取只读取原委托状态，不会推进成功观察。 读取于 2026/11/3 12:13:19 · 委托版本 1 结果分类与支持上限 已执行：0 工具步骤确实运行过；不等于结论成立或目标达成 已观察：0 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 3 次 · 工具 2 次"
+    },
+    "versionAdvanced": {
+      "readbackText": "重新读取状态与回执 读取期间版本已推进，提交前必须重新核对。 重新读取 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 选入补充材料 已执行 · 2026/11/3 16:03:05 最近草稿：窗口内未记录 已执行 1 · 已观察 1 · 已独立支持 0 · 用户报告 0 · 反例 0 · 未知 0 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：cmw0evu8d0008f08o85t6q6k2 原资料使用 1 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：待执行 · 原状态：等待执行 委托已保存，等待执行（READY） 首要阻断：后台 Worker 心跳不可靠，尚未核实近期执行；心跳不等于成功观察 WORKER_PRESENCE_UNOBSERVED 无停止请求。 未结算效果：未记录。 全部阻断（2 项） 技术说明（原投影） 现在等谁 等待：等后台继续执行 下一步由谁：Agent 下次检查时间：未记录 有效边界：未记录 等待原委托继续处理；原许可与进度保留。 观察时间 读取于 2026/11/3 16:16:17 最近成功观察 尚未有成功观察记录 最近失败观察 未记录 观察状态 尚未有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:16:17 · 委托版本 2 历史问题（只读）：请补充设备 D 在 2026-10 的真实显存峰值（GB），以及 batch、序列长度和是否启用 KV cache。缺少这些条件时不会外推预算结论。 结果分类与支持上限 已执行：1 工具步骤确实运行过；不等于结论成立或目标达成 已观察：1 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 1 次 · 工具 2 次",
+      "alertWaited": true,
+      "interceptedReadbacks": [
+        {
+          "at": "2026-11-03T08:16:17.647Z",
+          "method": "GET",
+          "url": "http://127.0.0.1:34112/api/missions/cmw0evu7p0005f08o178ka7rn/readback?questionId=cmw0evu8d0008f08o85t6q6k2",
+          "httpStatus": 200,
+          "hadWorkPacket": true,
+          "consistency": "VERSION_ADVANCED"
+        },
+        {
+          "at": "2026-11-03T08:16:17.962Z",
+          "method": "GET",
+          "url": "http://127.0.0.1:34112/api/missions/cmw0evu7p0005f08o178ka7rn/readback?questionId=cmw0evu8d0008f08o85t6q6k2",
+          "httpStatus": 200,
+          "hadWorkPacket": true,
+          "consistency": "VERSION_ADVANCED"
+        }
+      ]
+    },
+    "authorityChanged409": {
+      "readbackText": "重新读取状态与回执 读取期间来源或权限持续变化，请重新读取原委托后核对；已保留上次读取结果，请重新核对后再操作，不会自动沿用旧资格。",
+      "mainText": "返回项目列表 科研训练 更新于 2026/11/3 C 证据项目：多状态长期委托核对 项目目标与简介 编辑项目 概览 委托 资料 行动 成果 项目功能 打开项目讨论 长期委托 委托目标、执行进度和成果草稿 长期项目委托 交给 Agent 一个目标，在同一委托中持续推进、补充材料和审阅成果。 已加载 9 项委托 委托新目标 已有委托 核对设备 D 在 2026-10 的真实显存峰值与测试条件 等待执行 准备一次同条件复测，先审阅要创建的行动提案 等待你的批准 持续核对部署日志与显存预算（停止请求已受理，等待结算） 正在执行 整理阶段汇报草稿，并记录一次真实行动结果回执 委托条件已验收 读取项目资料并核对失败原因 执行失败 核对一次外部调用结果尚未结算的委托 已暂停 核对三条项目资料的当前可用性与修订状态 等待补充信息 取消前保留的委托示例：核对部署日志 已取消 完成条件已通过，但有一次外部调用结果尚未结算 委托条件已验收 设为当前关注 待执行 1 个步骤已执行 · 0 份草稿 调整当前重点／继续讨论 核对设备 D 在 2026-10 的真实显存峰值与测试条件 委托已保存，等待执行 成果核验与现实结果 暂停 取消委托 重新读取状态与回执 读取期间来源或权限持续变化，请重新读取原委托后核对；已保留上次读取结果，请重新核对后再操作，不会自动沿用旧资格。 返回链接中的原问题已变化。新资料仍保留；下方可读取历史问题，不会把旧答复提交给当前问题。 正在读取责任合同... 最近进展 对比本轮推进方案 执行详情与回执（1 个步骤已执行） 委托设置与来源 材料到达后的接续许可 查看或修改个人约束 公开研究范围 公开资料与获取记录（0） 项目经验历史",
+      "noticeWaited": true,
+      "readbackResponses": [
+        {
+          "at": "2026-11-03T08:16:31.592Z",
+          "status": 409
+        },
+        {
+          "at": "2026-11-03T08:16:31.595Z",
+          "status": 409
+        }
+      ]
+    },
+    "http401": {
+      "before": "重新读取状态与回执 查看原结果 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 选入补充材料 已执行 · 2026/11/3 13:40:05 create_action 已执行 · 2026/11/3 13:55:05 保存草稿 已执行 · 2026/11/3 13:35:05 检索项目记忆 已执行 · 2026/11/3 13:25:05 最近草稿：修订 1 · 2026/11/3 13:44:05 已执行 4 · 已观察 2 · 已独立支持 0 · 用户报告 1 · 反例 0 · 未知 0 核对设备 D 显存预算并记录复测条件 已完成 · 已填写复盘回执 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：未记录 原资料使用 1 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：已结束 · 原状态：委托条件已验收 委托完成条件已通过，现实效果以原结果为准（SUCCEEDED） 无停止请求（原委托已完成；停止请求不再具有执行含义）。 未结算效果：未记录。 技术说明（原投影） 现在等谁 等待：不再等待谁 下一步由谁：无 下次检查时间：未记录 有效边界：未记录 完成条件已通过；现实效果仍以原结果为准。 观察时间 读取于 2026/11/3 16:16:38 最近成功观察 2026/11/3 15:44:05 最近失败观察 未记录 观察状态 最近有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:16:38 · 委托版本 1 结果分类与支持上限 已执行：4 工具步骤确实运行过；不等于结论成立或目标达成 已观察：2 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：1 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 核对设备 D 显存预算并记录复测条件 用户报告完成（已留复盘回执） · 2026/11/3 14:14:05 回到原行动 → 查看原复盘回执 → 草稿与已采纳成果 指定草稿版本 1 · 只读 项目记录显示设备 D 显存峰值 6.8GB，超过 6GB 预算；条件为 batch=1、序列长度 2048。 建议把复测条件与预算口径写入阶段汇报；缺少 KV cache 开关记录仍是信息缺口。 行动回执：用户报告已完成核对，但现实效果仍以原行动回执为准。 指定归入回执：cmw0evub4000yf08okaitr07s · 草稿版本 1 已归入成果：项目周报 · 2026/11/3 13:54:05（来自草稿 1；回执 cmw0evub4000yf08okaitr07s） 本次用量 · 模型 2 次 · 工具 3 次",
+      "after": "重新读取状态与回执 请先登录",
+      "intercepted": true
+    },
+    "http403": {
+      "before": "重新读取状态与回执 查看原结果 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 选入补充材料 已执行 · 2026/11/3 13:40:05 create_action 已执行 · 2026/11/3 13:55:05 保存草稿 已执行 · 2026/11/3 13:35:05 检索项目记忆 已执行 · 2026/11/3 13:25:05 最近草稿：修订 1 · 2026/11/3 13:44:05 已执行 4 · 已观察 2 · 已独立支持 0 · 用户报告 1 · 反例 0 · 未知 0 核对设备 D 显存预算并记录复测条件 已完成 · 已填写复盘回执 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：未记录 原资料使用 1 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：已结束 · 原状态：委托条件已验收 委托完成条件已通过，现实效果以原结果为准（SUCCEEDED） 无停止请求（原委托已完成；停止请求不再具有执行含义）。 未结算效果：未记录。 技术说明（原投影） 现在等谁 等待：不再等待谁 下一步由谁：无 下次检查时间：未记录 有效边界：未记录 完成条件已通过；现实效果仍以原结果为准。 观察时间 读取于 2026/11/3 16:17:11 最近成功观察 2026/11/3 15:44:05 最近失败观察 未记录 观察状态 最近有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:17:11 · 委托版本 1 结果分类与支持上限 已执行：4 工具步骤确实运行过；不等于结论成立或目标达成 已观察：2 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：1 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 核对设备 D 显存预算并记录复测条件 用户报告完成（已留复盘回执） · 2026/11/3 14:14:05 回到原行动 → 查看原复盘回执 → 草稿与已采纳成果 指定草稿版本 1 · 只读 项目记录显示设备 D 显存峰值 6.8GB，超过 6GB 预算；条件为 batch=1、序列长度 2048。 建议把复测条件与预算口径写入阶段汇报；缺少 KV cache 开关记录仍是信息缺口。 行动回执：用户报告已完成核对，但现实效果仍以原行动回执为准。 指定归入回执：cmw0evub4000yf08okaitr07s · 草稿版本 1 已归入成果：项目周报 · 2026/11/3 13:54:05（来自草稿 1；回执 cmw0evub4000yf08okaitr07s） 本次用量 · 模型 2 次 · 工具 3 次",
+      "after": "重新读取状态与回执 没有权限访问该委托",
+      "intercepted": true
+    },
+    "http404": {
+      "before": "重新读取状态与回执 查看原结果 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 选入补充材料 已执行 · 2026/11/3 13:40:05 create_action 已执行 · 2026/11/3 13:55:05 保存草稿 已执行 · 2026/11/3 13:35:05 检索项目记忆 已执行 · 2026/11/3 13:25:05 最近草稿：修订 1 · 2026/11/3 13:44:05 已执行 4 · 已观察 2 · 已独立支持 0 · 用户报告 1 · 反例 0 · 未知 0 核对设备 D 显存预算并记录复测条件 已完成 · 已填写复盘回执 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：未记录 原资料使用 1 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：已结束 · 原状态：委托条件已验收 委托完成条件已通过，现实效果以原结果为准（SUCCEEDED） 无停止请求（原委托已完成；停止请求不再具有执行含义）。 未结算效果：未记录。 技术说明（原投影） 现在等谁 等待：不再等待谁 下一步由谁：无 下次检查时间：未记录 有效边界：未记录 完成条件已通过；现实效果仍以原结果为准。 观察时间 读取于 2026/11/3 16:17:40 最近成功观察 2026/11/3 15:44:05 最近失败观察 未记录 观察状态 最近有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:17:40 · 委托版本 1 结果分类与支持上限 已执行：4 工具步骤确实运行过；不等于结论成立或目标达成 已观察：2 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：1 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 核对设备 D 显存预算并记录复测条件 用户报告完成（已留复盘回执） · 2026/11/3 14:14:05 回到原行动 → 查看原复盘回执 → 草稿与已采纳成果 指定草稿版本 1 · 只读 项目记录显示设备 D 显存峰值 6.8GB，超过 6GB 预算；条件为 batch=1、序列长度 2048。 建议把复测条件与预算口径写入阶段汇报；缺少 KV cache 开关记录仍是信息缺口。 行动回执：用户报告已完成核对，但现实效果仍以原行动回执为准。 指定归入回执：cmw0evub4000yf08okaitr07s · 草稿版本 1 已归入成果：项目周报 · 2026/11/3 13:54:05（来自草稿 1；回执 cmw0evub4000yf08okaitr07s） 本次用量 · 模型 2 次 · 工具 3 次",
+      "after": "重新读取状态与回执 委托不存在",
+      "intercepted": true
+    },
+    "stopped": {
+      "readbackText": "重新读取状态与回执 核对停止结算 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 读取项目 正在执行 · 时间未记录 最近草稿：窗口内未记录 已执行 0 · 已观察 0 · 已独立支持 0 · 用户报告 0 · 反例 0 · 未知 0 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：未记录 原资料使用 0 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：正在调查 · 原状态：正在执行 已收到停止请求，等待本轮调用结算，不会继续派发新步骤（STOP_REQUESTED_IN_FLIGHT） 首要阻断：已收到停止请求，等待本轮调用结算，不会继续派发新步骤 PAUSE_REQUESTED 已请求暂停，尚未结算（请求于 2026/11/3 16:14:00）；等待本轮调用结算，不会继续派发新步骤。 未结算效果：未记录。 全部阻断（2 项） 技术说明（原投影） 现在等谁 等待：等本轮调用结算 下一步由谁：系统 下次检查时间：未记录 有效边界：2026/11/3 22:14:05 停止请求已收到但尚未结算；等待本轮调用结算后重新读取，不建议继续派发。 观察时间 读取于 2026/11/3 16:18:18 最近成功观察 尚未有成功观察记录 最近失败观察 未记录 观察状态 尚未有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:18:18 · 委托版本 1 结果分类与支持上限 已执行：0 工具步骤确实运行过；不等于结论成立或目标达成 已观察：0 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 1 次 · 工具 1 次",
+      "mainText": "返回项目列表 科研训练 更新于 2026/11/3 C 证据项目：多状态长期委托核对 项目目标与简介 编辑项目 概览 委托 资料 行动 成果 项目功能 打开项目讨论 长期委托 委托目标、执行进度和成果草稿 长期项目委托 交给 Agent 一个目标，在同一委托中持续推进、补充材料和审阅成果。 已加载 9 项委托 委托新目标 已有委托 核对设备 D 在 2026-10 的真实显存峰值与测试条件 等待执行 准备一次同条件复测，先审阅要创建的行动提案 等待你的批准 持续核对部署日志与显存预算（停止请求已受理，等待结算） 正在执行 整理阶段汇报草稿，并记录一次真实行动结果回执 委托条件已验收 读取项目资料并核对失败原因 执行失败 核对一次外部调用结果尚未结算的委托 已暂停 核对三条项目资料的当前可用性与修订状态 等待补充信息 取消前保留的委托示例：核对部署日志 已取消 完成条件已通过，但有一次外部调用结果尚未结算 委托条件已验收 设为当前关注 正在调查 0 个步骤已执行 · 0 份草稿 调整当前重点／继续讨论 持续核对部署日志与显存预算（停止请求已受理，等待结算） 已收到停止请求，等待本轮调用结算，不会继续派发新步骤 成果核验与现实结果 暂停请求已受理，等待当前执行安全停止。 暂停 取消委托 重新读取状态与回执 核对停止结算 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 读取项目 正在执行 · 时间未记录 最近草稿：窗口内未记录 已执行 0 · 已观察 0 · 已独立支持 0 · 用户报告 0 · 反例 0 · 未知 0 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：未记录 原资料使用 0 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：正在调查 · 原状态：正在执行 已收到停止请求，等待本轮调用结算，不会继续派发新步骤（STOP_REQUESTED_IN_FLIGHT） 首要阻断：已收到停止请求，等待本轮调用结算，不会继续派发新步骤 PAUSE_REQUESTED 已请求暂停，尚未结算（请求于 2026/11/3 16:14:00）；等待本轮调用结算，不会继续派发新步骤。 未结算效果：未记录。 全部阻断（2 项） 技术说明（原投影） 现在等谁 等待：等本轮调用结算 下一步由谁：系统 下次检查时间：未记录 有效边界：2026/11/3 22:14:05 停止请求已收到但尚未结算；等待本轮调用结算后重新读取，不建议继续派发。 观察时间 读取于 2026/11/3 16:18:18 最近成功观察 尚未有成功观察记录 最近失败观察 未记录 观察状态 尚未有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:18:18 · 委托版本 1 结果分类与支持上限 已执行：0 工具步骤确实运行过；不等于结论成立或目标达成 已观察：0 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 1 次 · 工具 1 次 运行与接续 尚未观测到后台 委托范围与累计用量 最近进展 对比本轮推进方案 执行详情与回执（0 个步骤已执行） 委托设置与来源 材料到达后的接续许可 查看或修改个人约束 公开研究范围 公开资料与获取记录（0） 项目经验历史"
+    },
+    "cancelled": {
+      "readbackText": "重新读取状态与回执 查看取消前的原结果 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 最近工作窗口内没有已完成步骤记录；未找到记录不等于从未发生。 最近草稿：修订 1 · 2026/11/3 15:24:05 已执行 0 · 已观察 0 · 已独立支持 0 · 用户报告 0 · 反例 0 · 未知 0 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：未记录 原资料使用 0 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：已结束 · 原状态：已取消 原委托已取消，历史结果与草稿保留，不能视为成功完成（CANCELLED） 取消请求已结算（请求于 2026/11/3 15:39:05）。取消请求已结算：原委托已取消，历史结果保留，不能视为成功完成 未结算效果：未记录。 技术说明（原投影） 现在等谁 等待：不再等待谁 下一步由谁：无 下次检查时间：未记录 有效边界：未记录 原委托已取消；历史结果保留，不能视为成功完成。 观察时间 读取于 2026/11/3 16:18:28 最近成功观察 尚未有成功观察记录 最近失败观察 未记录 观察状态 尚未有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:18:28 · 委托版本 1 结果分类与支持上限 已执行：0 工具步骤确实运行过；不等于结论成立或目标达成 已观察：0 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 草稿与已采纳成果 指定草稿版本 1 · 只读 取消前草稿：已核对部署日志中的显存峰值，但尚未完成条件核对。 本次用量 · 模型 待核对 次 · 工具 待核对 次",
+      "mainText": "返回项目列表 科研训练 更新于 2026/11/3 C 证据项目：多状态长期委托核对 项目目标与简介 编辑项目 概览 委托 资料 行动 成果 项目功能 打开项目讨论 长期委托 委托目标、执行进度和成果草稿 长期项目委托 交给 Agent 一个目标，在同一委托中持续推进、补充材料和审阅成果。 已加载 9 项委托 委托新目标 已有委托 核对设备 D 在 2026-10 的真实显存峰值与测试条件 等待执行 准备一次同条件复测，先审阅要创建的行动提案 等待你的批准 持续核对部署日志与显存预算（停止请求已受理，等待结算） 正在执行 整理阶段汇报草稿，并记录一次真实行动结果回执 委托条件已验收 读取项目资料并核对失败原因 执行失败 核对一次外部调用结果尚未结算的委托 已暂停 核对三条项目资料的当前可用性与修订状态 等待补充信息 取消前保留的委托示例：核对部署日志 已取消 完成条件已通过，但有一次外部调用结果尚未结算 委托条件已验收 已结束 0 个步骤已执行 · 1 份草稿 调整当前重点／继续讨论 取消前保留的委托示例：核对部署日志 原委托已取消，历史结果与草稿保留，不能视为成功完成 成果核验与现实结果 执行条件 尚未完成条件验收 草稿核验 待审阅，尚未整体核验 用户采纳 尚未归入项目成果 现实完成 未从委托状态推断，以实际行动回执为准 重新读取状态与回执 查看取消前的原结果 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 最近工作窗口内没有已完成步骤记录；未找到记录不等于从未发生。 最近草稿：修订 1 · 2026/11/3 15:24:05 已执行 0 · 已观察 0 · 已独立支持 0 · 用户报告 0 · 反例 0 · 未知 0 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：未记录 原资料使用 0 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：已结束 · 原状态：已取消 原委托已取消，历史结果与草稿保留，不能视为成功完成（CANCELLED） 取消请求已结算（请求于 2026/11/3 15:39:05）。取消请求已结算：原委托已取消，历史结果保留，不能视为成功完成 未结算效果：未记录。 技术说明（原投影） 现在等谁 等待：不再等待谁 下一步由谁：无 下次检查时间：未记录 有效边界：未记录 原委托已取消；历史结果保留，不能视为成功完成。 观察时间 读取于 2026/11/3 16:18:28 最近成功观察 尚未有成功观察记录 最近失败观察 未记录 观察状态 尚未有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:18:28 · 委托版本 1 结果分类与支持上限 已执行：0 工具步骤确实运行过；不等于结论成立或目标达成 已观察：0 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 草稿与已采纳成果 指定草稿版本 1 · 只读 取消前草稿：已核对部署日志中的显存峰值，但尚未完成条件核对。 本次用量 · 模型 待核对 次 · 工具 待核对 次 运行与接续 尚未观测到后台 委托范围与累计用量 最近进展 对比本轮推进方案 成果草稿 草稿版本 1 · 内容待审核 取消前草稿：已核对部署日志中的显存峰值，但尚未完成条件核对。 项目观察 执行详情与回执（0 个步骤已执行） 委托设置与来源 材料到达后的接续许可 查看或修改个人约束 公开研究范围 公开资料与获取记录（0） 项目经验历史"
+    },
+    "terminal-unknown": {
+      "readbackText": "重新读取状态与回执 查看原结果并核对未知调用 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 最近工作窗口内没有已完成步骤记录；未找到记录不等于从未发生。 最近草稿：窗口内未记录 已执行 0 · 已观察 0 · 已独立支持 0 · 用户报告 0 · 反例 0 · 未知 0 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 窗口内没有工作记录，只表示覆盖不足，不等于从未发生。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：未记录 原资料使用 0 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：已结束 · 原状态：委托条件已验收 原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准（SUCCEEDED） 首要阻断：原请求或外部效果尚未结算，读取不会自动核销 TOOL_UNKNOWN 无停止请求（原委托已完成；停止请求不再具有执行含义）。 未结算效果：TOOL_UNKNOWN · 原请求或外部效果尚未结算，读取不会自动核销；读取不会核销，需要重新核对原请求。 全部阻断（1 项） 技术说明（原投影） 现在等谁 等待：不再等待谁 下一步由谁：你 下次检查时间：未记录 有效边界：未记录 终态与未结算效果并列保留：先核对原结果与未知调用，读取工作包不会自动结算，也不能重新派发。 观察时间 读取于 2026/11/3 16:18:36 最近成功观察 尚未有成功观察记录 最近失败观察 未记录 观察状态 尚未有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:18:36 · 委托版本 1 结果分类与支持上限 已执行：0 工具步骤确实运行过；不等于结论成立或目标达成 已观察：0 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 待核对 次 · 工具 1 次",
+      "mainText": "返回项目列表 科研训练 更新于 2026/11/3 C 证据项目：多状态长期委托核对 项目目标与简介 编辑项目 概览 委托 资料 行动 成果 项目功能 打开项目讨论 长期委托 委托目标、执行进度和成果草稿 长期项目委托 交给 Agent 一个目标，在同一委托中持续推进、补充材料和审阅成果。 已加载 9 项委托 委托新目标 已有委托 核对设备 D 在 2026-10 的真实显存峰值与测试条件 等待执行 准备一次同条件复测，先审阅要创建的行动提案 等待你的批准 持续核对部署日志与显存预算（停止请求已受理，等待结算） 正在执行 整理阶段汇报草稿，并记录一次真实行动结果回执 委托条件已验收 读取项目资料并核对失败原因 执行失败 核对一次外部调用结果尚未结算的委托 已暂停 核对三条项目资料的当前可用性与修订状态 等待补充信息 取消前保留的委托示例：核对部署日志 已取消 完成条件已通过，但有一次外部调用结果尚未结算 委托条件已验收 已结束 0 个步骤已执行 · 0 份草稿 调整当前重点／继续讨论 完成条件已通过，但有一次外部调用结果尚未结算 原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准 成果核验与现实结果 执行条件 已验收，明细待读取 草稿核验 尚无已保存草稿 用户采纳 尚未归入项目成果 现实完成 未从委托状态推断，以实际行动回执为准 重新读取状态与回执 查看原结果并核对未知调用 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 最近工作窗口内没有已完成步骤记录；未找到记录不等于从未发生。 最近草稿：窗口内未记录 已执行 0 · 已观察 0 · 已独立支持 0 · 用户报告 0 · 反例 0 · 未知 0 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 窗口内没有工作记录，只表示覆盖不足，不等于从未发生。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：未记录 原资料使用 0 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：已结束 · 原状态：委托条件已验收 原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准（SUCCEEDED） 首要阻断：原请求或外部效果尚未结算，读取不会自动核销 TOOL_UNKNOWN 无停止请求（原委托已完成；停止请求不再具有执行含义）。 未结算效果：TOOL_UNKNOWN · 原请求或外部效果尚未结算，读取不会自动核销；读取不会核销，需要重新核对原请求。 全部阻断（1 项） 技术说明（原投影） 现在等谁 等待：不再等待谁 下一步由谁：你 下次检查时间：未记录 有效边界：未记录 终态与未结算效果并列保留：先核对原结果与未知调用，读取工作包不会自动结算，也不能重新派发。 观察时间 读取于 2026/11/3 16:18:36 最近成功观察 尚未有成功观察记录 最近失败观察 未记录 观察状态 尚未有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:18:36 · 委托版本 1 结果分类与支持上限 已执行：0 工具步骤确实运行过；不等于结论成立或目标达成 已观察：0 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 待核对 次 · 工具 1 次 本次执行需要恢复，已有进度已保留 完成条件已通过，但有一次外部调用结果尚未结算；读取不会自动核销 继续前请核对： 模型服务可用且协议校验通过——「已配置」不代表本次能执行成功； 重复重试不会创建重复草稿或行动（同一请求会保留原请求编号）； 你对该项目的所有权和授权范围仍然有效。 查看执行轨迹 技术诊断（错误码与协议详情） 运行与接续 尚未观测到后台 委托范围与累计用量 最近进展 对比本轮推进方案 执行详情与回执（0 个步骤已执行） 委托设置与来源 材料到达后的接续许可 查看或修改个人约束 公开研究范围 公开资料与获取记录（0） 项目经验历史"
+    },
+    "failed": {
+      "readbackText": "重新读取状态与回执 查看失败原因与恢复条件 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 读取项目 执行失败 · 2026/11/3 14:45:05 最近草稿：窗口内未记录 已执行 0 · 已观察 0 · 已独立支持 0 · 用户报告 0 · 反例 0 · 未知 0 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：未记录 原资料使用 0 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：这一步未完成 · 原状态：执行失败 读取项目资料步骤未完成，已保存进度（TOOL_FAILED） 首要阻断：原步骤失败；原进度保留，恢复前需核对原因，不会自动重试 TOOL_FAILED 无停止请求。 未结算效果：未记录。 全部阻断（2 项） 技术说明（原投影） 现在等谁 等待：等后台重新核对 下一步由谁：系统 下次检查时间：未记录 有效边界：未记录 失败原因与原进度保留；恢复前需核对原条件，不自动重试。 观察时间 读取于 2026/11/3 16:18:43 最近成功观察 尚未有成功观察记录 最近失败观察 未记录 观察状态 尚未有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:18:43 · 委托版本 1 结果分类与支持上限 已执行：0 工具步骤确实运行过；不等于结论成立或目标达成 已观察：0 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 待核对 次 · 工具 1 次",
+      "mainText": "返回项目列表 科研训练 更新于 2026/11/3 C 证据项目：多状态长期委托核对 项目目标与简介 编辑项目 概览 委托 资料 行动 成果 项目功能 打开项目讨论 长期委托 委托目标、执行进度和成果草稿 长期项目委托 交给 Agent 一个目标，在同一委托中持续推进、补充材料和审阅成果。 已加载 9 项委托 委托新目标 已有委托 核对设备 D 在 2026-10 的真实显存峰值与测试条件 等待执行 准备一次同条件复测，先审阅要创建的行动提案 等待你的批准 持续核对部署日志与显存预算（停止请求已受理，等待结算） 正在执行 整理阶段汇报草稿，并记录一次真实行动结果回执 委托条件已验收 读取项目资料并核对失败原因 执行失败 核对一次外部调用结果尚未结算的委托 已暂停 核对三条项目资料的当前可用性与修订状态 等待补充信息 取消前保留的委托示例：核对部署日志 已取消 完成条件已通过，但有一次外部调用结果尚未结算 委托条件已验收 设为当前关注 这一步未完成 0 个步骤已执行 · 0 份草稿 调整当前重点／继续讨论 读取项目资料并核对失败原因 读取项目资料步骤未完成，已保存进度 成果核验与现实结果 取消委托 重新读取状态与回执 查看失败原因与恢复条件 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 读取项目 执行失败 · 2026/11/3 14:45:05 最近草稿：窗口内未记录 已执行 0 · 已观察 0 · 已独立支持 0 · 用户报告 0 · 反例 0 · 未知 0 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：未记录 原资料使用 0 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：这一步未完成 · 原状态：执行失败 读取项目资料步骤未完成，已保存进度（TOOL_FAILED） 首要阻断：原步骤失败；原进度保留，恢复前需核对原因，不会自动重试 TOOL_FAILED 无停止请求。 未结算效果：未记录。 全部阻断（2 项） 技术说明（原投影） 现在等谁 等待：等后台重新核对 下一步由谁：系统 下次检查时间：未记录 有效边界：未记录 失败原因与原进度保留；恢复前需核对原条件，不自动重试。 观察时间 读取于 2026/11/3 16:18:43 最近成功观察 尚未有成功观察记录 最近失败观察 未记录 观察状态 尚未有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:18:43 · 委托版本 1 结果分类与支持上限 已执行：0 工具步骤确实运行过；不等于结论成立或目标达成 已观察：0 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 待核对 次 · 工具 1 次 执行失败，已执行的结果保留 读取项目资料步骤未完成，已保存进度 发生阶段：工具执行 · 错误类别：TOOL_FAILED 继续前请核对： 模型服务可用且协议校验通过——「已配置」不代表本次能执行成功； 重复重试不会创建重复草稿或行动（同一请求会保留原请求编号）； 你对该项目的所有权和授权范围仍然有效。 查看执行轨迹 技术诊断（错误码与协议详情） 运行与接续 尚未观测到后台 委托范围与累计用量 最近进展 对比本轮推进方案 执行详情与回执（0 个步骤已执行） 委托设置与来源 材料到达后的接续许可 查看或修改个人约束 公开研究范围 公开资料与获取记录（0） 项目经验历史"
+    },
+    "old-question": {
+      "readbackText": "重新读取状态与回执 等待原委托执行 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 选入补充材料 已执行 · 2026/11/3 16:03:05 最近草稿：窗口内未记录 已执行 1 · 已观察 1 · 已独立支持 0 · 用户报告 0 · 反例 0 · 未知 0 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：cmw0evu880007f08ozyxak66a 原资料使用 0 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：待执行 · 原状态：等待执行 委托已保存，等待执行（READY） 首要阻断：后台 Worker 心跳不可靠，尚未核实近期执行；心跳不等于成功观察 WORKER_PRESENCE_UNOBSERVED 无停止请求。 未结算效果：未记录。 全部阻断（1 项） 技术说明（原投影） 现在等谁 等待：等后台继续执行 下一步由谁：Agent 下次检查时间：未记录 有效边界：未记录 等待原委托继续处理；原许可与进度保留。 观察时间 读取于 2026/11/3 16:18:52 最近成功观察 尚未有成功观察记录 最近失败观察 未记录 观察状态 尚未有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:18:52 · 委托版本 2 历史问题（只读）：旧问题：请补充设备 D 的历史预算结论（已被新问题取代，只读）。 结果分类与支持上限 已执行：1 工具步骤确实运行过；不等于结论成立或目标达成 已观察：1 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 1 次 · 工具 2 次",
+      "mainText": "返回项目列表 科研训练 更新于 2026/11/3 C 证据项目：多状态长期委托核对 项目目标与简介 编辑项目 概览 委托 资料 行动 成果 项目功能 打开项目讨论 长期委托 委托目标、执行进度和成果草稿 长期项目委托 交给 Agent 一个目标，在同一委托中持续推进、补充材料和审阅成果。 已加载 9 项委托 委托新目标 已有委托 核对设备 D 在 2026-10 的真实显存峰值与测试条件 等待执行 准备一次同条件复测，先审阅要创建的行动提案 等待你的批准 持续核对部署日志与显存预算（停止请求已受理，等待结算） 正在执行 整理阶段汇报草稿，并记录一次真实行动结果回执 委托条件已验收 读取项目资料并核对失败原因 执行失败 核对一次外部调用结果尚未结算的委托 已暂停 核对三条项目资料的当前可用性与修订状态 等待补充信息 取消前保留的委托示例：核对部署日志 已取消 完成条件已通过，但有一次外部调用结果尚未结算 委托条件已验收 设为当前关注 待执行 1 个步骤已执行 · 0 份草稿 调整当前重点／继续讨论 核对设备 D 在 2026-10 的真实显存峰值与测试条件 委托已保存，等待执行 成果核验与现实结果 暂停 取消委托 重新读取状态与回执 等待原委托执行 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 选入补充材料 已执行 · 2026/11/3 16:03:05 最近草稿：窗口内未记录 已执行 1 · 已观察 1 · 已独立支持 0 · 用户报告 0 · 反例 0 · 未知 0 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：cmw0evu880007f08ozyxak66a 原资料使用 0 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：待执行 · 原状态：等待执行 委托已保存，等待执行（READY） 首要阻断：后台 Worker 心跳不可靠，尚未核实近期执行；心跳不等于成功观察 WORKER_PRESENCE_UNOBSERVED 无停止请求。 未结算效果：未记录。 全部阻断（1 项） 技术说明（原投影） 现在等谁 等待：等后台继续执行 下一步由谁：Agent 下次检查时间：未记录 有效边界：未记录 等待原委托继续处理；原许可与进度保留。 观察时间 读取于 2026/11/3 16:18:52 最近成功观察 尚未有成功观察记录 最近失败观察 未记录 观察状态 尚未有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:18:52 · 委托版本 2 历史问题（只读）：旧问题：请补充设备 D 的历史预算结论（已被新问题取代，只读）。 结果分类与支持上限 已执行：1 工具步骤确实运行过；不等于结论成立或目标达成 已观察：1 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 1 次 · 工具 2 次 返回链接中的原问题已变化。新资料仍保留；下方可读取历史问题，不会把旧答复提交给当前问题。 运行与接续 尚未观测到后台 委托范围与累计用量 最近进展 对比本轮推进方案 执行详情与回执（1 个步骤已执行） 委托设置与来源 材料到达后的接续许可 查看或修改个人约束 公开研究范围 公开资料与获取记录（0） 项目经验历史"
+    },
+    "old-approval": {
+      "readbackText": "重新读取状态与回执 审阅待批准提案 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 提议行动 依据已变化 · 时间未记录 提议行动 待批准 · 时间未记录 最近草稿：窗口内未记录 已执行 0 · 已观察 0 · 已独立支持 0 · 用户报告 0 · 反例 0 · 未知 0 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：未记录 原资料使用 0 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：等你确认 · 原状态：等待你的批准 请审阅原执行提案，确认后才会执行（APPROVAL_PENDING） 首要阻断：原提案等待你的批准；旧批准不能替代当前版本 APPROVAL_PENDING 无停止请求。 未结算效果：未记录。 全部阻断（2 项） 技术说明（原投影） 现在等谁 等待：等你确认提案 下一步由谁：你 下次检查时间：未记录 有效边界：2026/11/3 22:14:05 只审阅当前有效提案；过期批准不能继续作为依据。 观察时间 读取于 2026/11/3 16:18:57 最近成功观察 尚未有成功观察记录 最近失败观察 未记录 观察状态 尚未有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:18:57 · 委托版本 1 链接指向的提案：EXPIRED，批准仍需在当前有效预览中操作。 结果分类与支持上限 已执行：0 工具步骤确实运行过；不等于结论成立或目标达成 已观察：0 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 待核对 次 · 工具 待核对 次",
+      "mainText": "返回项目列表 科研训练 更新于 2026/11/3 C 证据项目：多状态长期委托核对 项目目标与简介 编辑项目 概览 委托 资料 行动 成果 项目功能 打开项目讨论 长期委托 委托目标、执行进度和成果草稿 长期项目委托 交给 Agent 一个目标，在同一委托中持续推进、补充材料和审阅成果。 已加载 9 项委托 委托新目标 已有委托 核对设备 D 在 2026-10 的真实显存峰值与测试条件 等待执行 准备一次同条件复测，先审阅要创建的行动提案 等待你的批准 持续核对部署日志与显存预算（停止请求已受理，等待结算） 正在执行 整理阶段汇报草稿，并记录一次真实行动结果回执 委托条件已验收 读取项目资料并核对失败原因 执行失败 核对一次外部调用结果尚未结算的委托 已暂停 核对三条项目资料的当前可用性与修订状态 等待补充信息 取消前保留的委托示例：核对部署日志 已取消 完成条件已通过，但有一次外部调用结果尚未结算 委托条件已验收 设为当前关注 等你确认 0 个步骤已执行 · 0 份草稿 调整当前重点／继续讨论 准备一次同条件复测，先审阅要创建的行动提案 请审阅原执行提案，确认后才会执行 成果核验与现实结果 更新依据并重新预览 暂停 取消委托 重新读取状态与回执 审阅待批准提案 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 提议行动 依据已变化 · 时间未记录 提议行动 待批准 · 时间未记录 最近草稿：窗口内未记录 已执行 0 · 已观察 0 · 已独立支持 0 · 用户报告 0 · 反例 0 · 未知 0 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：未记录 原资料使用 0 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：等你确认 · 原状态：等待你的批准 请审阅原执行提案，确认后才会执行（APPROVAL_PENDING） 首要阻断：原提案等待你的批准；旧批准不能替代当前版本 APPROVAL_PENDING 无停止请求。 未结算效果：未记录。 全部阻断（2 项） 技术说明（原投影） 现在等谁 等待：等你确认提案 下一步由谁：你 下次检查时间：未记录 有效边界：2026/11/3 22:14:05 只审阅当前有效提案；过期批准不能继续作为依据。 观察时间 读取于 2026/11/3 16:18:57 最近成功观察 尚未有成功观察记录 最近失败观察 未记录 观察状态 尚未有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:18:57 · 委托版本 1 链接指向的提案：EXPIRED，批准仍需在当前有效预览中操作。 结果分类与支持上限 已执行：0 工具步骤确实运行过；不等于结论成立或目标达成 已观察：0 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 待核对 次 · 工具 待核对 次 等待你的批准 将创建本项目 1 项待办：核对设备 D 显存预算并记录复测条件 批准记录与实际执行分开；创建待办不表示现实行动完成。 批准后只创建本项目 1 项待办；创建行动不代表实验完成，执行仍需在原行动中记录真实结果。 优先级：2 · 截止时间：2026/11/6 16:14:05 批准有效至：2026/11/3 22:14:05 批准创建行动 拒绝 运行与接续 尚未观测到后台 委托范围与累计用量 最近进展 对比本轮推进方案 执行详情与回执（0 个步骤已执行） 委托设置与来源 材料到达后的接续许可 查看或修改个人约束 公开研究范围 公开资料与获取记录（0） 项目经验历史"
+    },
+    "long-copy": {
+      "readbackText": "重新读取状态与回执 回答原问题 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 最近工作窗口内没有已完成步骤记录；未找到记录不等于从未发生。 最近草稿：窗口内未记录 已执行 0 · 已观察 0 · 已独立支持 0 · 用户报告 0 · 反例 0 · 未知 0 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 窗口内没有工作记录，只表示覆盖不足，不等于从未发生。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：cmw0evudy001if08ohz2d1h05 原资料使用 0 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：等你补充 · 原状态：等待补充信息 请补充以下长问题的答案：SYNTHETIC_LONG_UNBROKEN_TOKEN_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX；并说明测试条件、设备编号、批次、序列长度、是否启用缓存，以及你认为还缺少哪些信息。（QUESTION_PENDING） 首要阻断：原问题等待你的补充；回答绑定原问题，旧问题不能替换成新问题 QUESTION_PENDING 无停止请求。 未结算效果：未记录。 全部阻断（2 项） 技术说明（原投影） 现在等谁 等待：等你补充信息 下一步由谁：你 下次检查时间：未记录 有效边界：未记录 回答绑定原问题；旧问题不能替换成新问题，提交后由服务端重查版本与来源。 观察时间 读取于 2026/11/3 16:19:05 最近成功观察 尚未有成功观察记录 最近失败观察 未记录 观察状态 尚未有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:19:05 · 委托版本 1 链接指向的问题：请补充以下长问题的答案：SYNTHETIC_LONG_UNBROKEN_TOKEN_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX；并说明测试条件、设备编号、批次、序列长度、是否启用缓存，以及你认为还缺少哪些信息。 结果分类与支持上限 已执行：0 工具步骤确实运行过；不等于结论成立或目标达成 已观察：0 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 待核对 次 · 工具 待核对 次",
+      "mainText": "返回项目列表 科研训练 更新于 2026/11/3 超长标题项目：用于核对 390 像素宽度下项目标题、项目目标与委托长文案换行是否产生横向滚动（合成数据）SYNTHETIC_LONG_UNBROKEN_ 项目目标与简介 编辑项目 概览 委托 资料 行动 成果 项目功能 打开项目讨论 长期委托 委托目标、执行进度和成果草稿 长期项目委托 交给 Agent 一个目标，在同一委托中持续推进、补充材料和审阅成果。 已加载 1 项委托 委托新目标 已有委托 核对长文案：SYNTHETIC_LONG_UNBROKEN_TOKEN_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 以及一段很长的中文说明，用于确认 390 像素宽度下顶部四问、依据摘录与结果回执不会产生横向滚动；这段文字重复出现以模拟真实长文案。 等待补充信息 设为当前关注 等你补充 0 个步骤已执行 · 0 份草稿 调整当前重点／继续讨论 核对长文案：SYNTHETIC_LONG_UNBROKEN_TOKEN_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX… 查看完整委托目标 等待你回答下方原问题 成果核验与现实结果 暂停 取消委托 重新读取状态与回执 回答原问题 只做页面内定位或重新读取；不提交批准、执行或创建替代任务。 做到哪 最近工作窗口内没有已完成步骤记录；未找到记录不等于从未发生。 最近草稿：窗口内未记录 已执行 0 · 已观察 0 · 已独立支持 0 · 用户报告 0 · 反例 0 · 未知 0 最近工作只取原 Step/Output/Action/回执的有界窗口；执行成功、草稿存在与行动创建都不等于现实目标达成。 窗口内没有工作记录，只表示覆盖不足，不等于从未发生。 步骤窗口上限 5 条；窗口内没有记录只表示覆盖不足。 现实结果：未从委托状态推断（NOT_INFERRED），以原行动回执为准。 依据是什么 关联原问题：cmw0evudy001if08ohz2d1h05 原资料使用 0 项 · 证据审查 0 条 当前依据可用性已按来源策略判定；历史留痕不等于当前可用。 依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。 展开依据、原文与纠正入口 为何停下 当前阶段：等你补充 · 原状态：等待补充信息 请补充以下长问题的答案：SYNTHETIC_LONG_UNBROKEN_TOKEN_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX；并说明测试条件、设备编号、批次、序列长度、是否启用缓存，以及你认为还缺少哪些信息。（QUESTION_PENDING） 首要阻断：原问题等待你的补充；回答绑定原问题，旧问题不能替换成新问题 QUESTION_PENDING 无停止请求。 未结算效果：未记录。 全部阻断（2 项） 技术说明（原投影） 现在等谁 等待：等你补充信息 下一步由谁：你 下次检查时间：未记录 有效边界：未记录 回答绑定原问题；旧问题不能替换成新问题，提交后由服务端重查版本与来源。 观察时间 读取于 2026/11/3 16:19:05 最近成功观察 尚未有成功观察记录 最近失败观察 未记录 观察状态 尚未有成功观察记录 下次计划观察 未记录 读取时间只表示本次读取；刷新页面不会推进成功观察，也不表示刚刚核查或资料没有变化。 责任边界、权限与累计预算 查询覆盖与“未找到”说明 读取于 2026/11/3 16:19:05 · 委托版本 1 链接指向的问题：请补充以下长问题的答案：SYNTHETIC_LONG_UNBROKEN_TOKEN_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX；并说明测试条件、设备编号、批次、序列长度、是否启用缓存，以及你认为还缺少哪些信息。 结果分类与支持上限 已执行：0 工具步骤确实运行过；不等于结论成立或目标达成 已观察：0 执行时带回了可引用来源 已独立支持：0 逐句核对支持 0 条；当前未提供独立核验回执 用户报告：0 行动已完成并留下复盘回执；仍是用户报告 反例：0 原文与主张冲突，保留冲突 未知：0 未核验或信息不足，不当作失败或没有 草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠ 现实目标达成。 行动与回执 这次读回没有行动回执记录。到项目行动板处理行动 → 本次用量 · 模型 待核对 次 · 工具 待核对 次 需要你补充 请补充以下长问题的答案：SYNTHETIC_LONG_UNBROKEN_TOKEN_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX；并说明测试条件、设备编号、批次、序列长度、是否启用缓存，以及你认为还缺少哪些信息。 从项目资料选取 保存新记录或附件 → 补充信息 补充并继续 运行与接续 尚未观测到后台 委托范围与累计用量 最近进展 对比本轮推进方案 执行详情与回执（0 个步骤已执行） 委托设置与来源 材料到达后的接续许可 查看或修改个人约束 公开研究范围 公开资料与获取记录（0） 项目经验历史"
+    }
+  },
+  "limitations": [
+    "旧后端缺 workPacket 是 A2 真实序列化样本的截获响应，不是真实旧后端实例。",
+    "VERSION_ADVANCED 与 409/401/403/404 是 Playwright route 截获变体，不是真实并发/真实权限变化。",
+    "浏览器无法证明服务端到 provider 的模型调用数；本环境为 mock。",
+    "未测试 Worker 执行、真实模型质量、真实用户数据与生产部署。"
+  ],
+  "evidenceMethod": {
+    "screenshots": "所有应当展示工作包的截图前，显式等待 [data-mission-primary-action] 与“做到哪”可见；主题切换 reload 后重新等待，再重开依据 details 并等待“逐项依据与原文”；不以 reload 后立即截图。",
+    "basisScope": "依据截图在“逐项依据与原文”区域展开后拍摄；被抑制来源另拍元素级截图，要求“当前使用资格=当前许可已被撤回”和“修订状态=原修订匹配”两行同时可见。",
+    "readbackVariants": "VERSION_ADVANCED 用 Playwright route 对本会话所有 readback 响应生效并记录每次拦截体；409/401/403/404 为截获响应；旧后端缺 workPacket 使用 A2 真实序列化样本回填 readback，页面其它区域仍显示未截获的 /api/missions/:id 原详情真实事实。",
+    "requestClassification": "EXPECTED_TEST_WRITE（主线回答原问题，只写隔离库）/ PRE_EXISTING_PAGE_BEHAVIOR（GoalQuestion、FocusAgentWorkspace 挂载写）/ UNEXPECTED_C_INTERACTION_WRITE（应当为 0）/ externalRequests（应当为 0）。",
+    "iterations": [
+      "iteration-1（候选 5b89ecf/e9f8be1 期间）：64 检查 / 60 PASS / 4 FAIL；失败为 goal-question 既有 POST 归类、legacy 断言跨区域、VERSION_ADVANCED 读取时机。日志保留 logs/capture-web-iteration1.log。",
+      "iteration-2（候选 21cb961 期间）：64 检查 / 62 PASS / 2 FAIL；legacy 误把“已独立支持”分类标签当成功语义、401 首次读取未等工作包渲染。日志保留 logs/capture-web-iteration2.log。",
+      "本次（final，候选 2d61578）：命令与退出码见 manifest.exitCode；fail=0。"
+    ]
+  },
+  "exitCode": 0
+}

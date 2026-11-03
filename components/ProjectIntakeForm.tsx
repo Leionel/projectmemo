@@ -47,6 +47,8 @@ export function ProjectIntakeForm({ ownerId, initialDraftId, openDrafts }: { own
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [sync, setSync] = useState<{ projectId: string; pending: number; materials: Array<{ materialId: string; state: string; error?: string }> } | null>(null);
+  /** 建项成功但材料同步失败：项目身份保留，只重试原同步，不再次建项。 */
+  const [syncError, setSyncError] = useState("");
   const [projectId, setProjectId] = useState("");
   const [authRevision, setAuthRevision] = useState(0);
   const mounted = useRef(true);
@@ -205,7 +207,7 @@ export function ProjectIntakeForm({ ownerId, initialDraftId, openDrafts }: { own
 
   async function confirm() {
     if (!draftId || !preview) return;
-    setBusy("confirm"); setError(""); setNotice(""); setSync(null);
+    setBusy("confirm"); setError(""); setNotice(""); setSync(null); setSyncError("");
     const confirmationId = requestId(`confirm:${draftId}:${preview.revision}:${preview.previewHash}:${JSON.stringify(accepted)}`);
     try {
       const payload = { requestId: confirmationId, expectedRevision: preview.revision, previewHash: preview.previewHash,
@@ -214,19 +216,23 @@ export function ProjectIntakeForm({ ownerId, initialDraftId, openDrafts }: { own
           ...(accepted.deadline ? { deadline: accepted.deadline } : {}) } };
       const data = await postJson(`/api/intake/${draftId}/confirm`, payload, { "Idempotency-Key": confirmationId });
       setProjectId(data.projectId as string);
-      // 建项与材料同步是两个阶段；同步失败不改变项目身份。
-      const syncData = await postJson(`/api/intake/${draftId}/sync`);
-      setSync(syncData);
-      adopt(syncData.preview as IntakePreview);
+      // 建项与材料同步是两个阶段：同步失败不清空 projectId，也不重新提交确认。
+      try {
+        const syncData = await postJson(`/api/intake/${draftId}/sync`);
+        setSync(syncData);
+        adopt(syncData.preview as IntakePreview);
+      } catch (reason) {
+        setSyncError(reason instanceof Error ? reason.message : "材料同步失败");
+      }
     } catch (reason) { setError(reason instanceof Error ? reason.message : "确认建项失败"); }
     finally { setBusy(""); }
   }
 
   async function retrySync() {
     if (!draftId) return;
-    setBusy("sync"); setError("");
+    setBusy("sync"); setError(""); setSyncError("");
     try { const data = await postJson(`/api/intake/${draftId}/sync`); setSync(data); adopt(data.preview as IntakePreview); }
-    catch (reason) { setError(reason instanceof Error ? reason.message : "重新同步失败"); }
+    catch (reason) { setSyncError(reason instanceof Error ? reason.message : "重新同步失败"); }
     finally { setBusy(""); }
   }
 
@@ -389,16 +395,31 @@ export function ProjectIntakeForm({ ownerId, initialDraftId, openDrafts }: { own
           {busy === "confirm" ? <LoaderCircle className="animate-spin" size={18} /> : <ArrowRight size={18} />}
           {busy === "confirm" ? "正在建立项目…" : "确认理解，建立项目"}
         </button>}
-        {projectId && sync && <div className="w-full">
-          <p className="rounded-md bg-[var(--teal-pale)] px-4 py-3 text-sm">
-            项目已建立，材料已同步 {sync.materials.filter(m => m.state === "SYNCED").length}/{sync.materials.length} 份。
-            {sync.pending > 0 ? "还有材料没同步完成；项目已经存在，可以稍后重试，不会重复建项。" : ""}
-          </p>
+        {projectId && <div className="w-full">
+          {sync ? <>
+            <p className="rounded-md bg-[var(--teal-pale)] px-4 py-3 text-sm">
+              项目已建立，材料已同步 {sync.materials.filter(m => m.state === "SYNCED").length}/{sync.materials.length} 份。
+              {sync.pending > 0 ? "还有材料没同步完成；项目已经存在，可以稍后重试，不会重复建项。" : ""}
+            </p>
+            {syncError && <p role="alert" className="mt-2 rounded-md bg-[var(--brick-pale)] px-4 py-3 text-sm text-[var(--brick)]">重新同步失败：{syncError}；项目身份不变，可继续重试原同步。</p>}
+          </> : <p role="alert" className="rounded-md bg-[var(--brick-pale)] px-4 py-3 text-sm text-[var(--brick)]">
+            项目已建立，{syncError ? `但材料同步失败：${syncError}` : "材料同步结果尚未确认"}。项目身份已保留，重试只同步原材料，不会重复建项。
+          </p>}
           <div className="mt-3 flex flex-wrap gap-3">
-            {sync.pending > 0 && <button onClick={retrySync} disabled={busy === "sync"} className="focus-ring editorial-button-secondary">
+            {(!sync || sync.pending > 0) && <button onClick={retrySync} disabled={busy === "sync"} className="focus-ring editorial-button-secondary">
               {busy === "sync" ? <LoaderCircle className="animate-spin" size={16} /> : null} 重新同步材料
             </button>}
             <a href={`/projects/${projectId}`} className="focus-ring editorial-button">进入项目<ArrowRight size={16} /></a>
+          </div>
+          {/* 建项后才出现下一步；只链到现有项目页/委托入口，不再建项目或重建确认步骤。 */}
+          <div className="mt-4 border-t border-[var(--rule)] pt-3">
+            <p className="text-sm font-bold">下一步</p>
+            <ul className="mt-2 space-y-1 text-sm">
+              <li><a className="workspace-link focus-ring" href={`/projects/${projectId}`}>核对目标与范围 →</a></li>
+              <li><a className="workspace-link focus-ring" href={`/projects/${projectId}/records`}>查看材料与未知 →</a></li>
+              <li><a className="workspace-link focus-ring" href={`/projects/${projectId}/missions`}>开始原调查 →</a></li>
+            </ul>
+            {preview?.model.used !== true && <p className="mt-2 text-xs text-[var(--muted)]">材料已保存；这次没有启用真实模型，只做了规则整理，未声称已理解全文。</p>}
           </div>
         </div>}
       </div>

@@ -1,0 +1,110 @@
+Exception in PromiseRejectCallback:
+file:///D:/Projects/hongmen-final-c-workspace-ux/scripts/final-c/capture-web-evidence.mjs:467
+  return loginEvidence;
+
+RangeError: Maximum call stack size exceeded
+
+Exception in PromiseRejectCallback:
+file:///D:/Projects/hongmen-final-c-workspace-ux/scripts/final-c/capture-web-evidence.mjs:450
+    const landing = await ensureSignedIn(page, identity, record);
+                          ^
+
+RangeError: Maximum call stack size exceeded
+
+Exception in PromiseRejectCallback:
+file:///D:/Projects/hongmen-final-c-workspace-ux/scripts/final-c/capture-web-evidence.mjs:467
+  return loginEvidence;
+
+RangeError: Maximum call stack size exceeded
+
+Exception in PromiseRejectCallback:
+file:///D:/Projects/hongmen-final-c-workspace-ux/scripts/final-c/capture-web-evidence.mjs:450
+    const landing = await ensureSignedIn(page, identity, record);
+                          ^
+
+RangeError: Maximum call stack size exceeded
+
+Exception in PromiseRejectCallback:
+file:///D:/Projects/hongmen-final-c-workspace-ux/scripts/final-c/capture-web-evidence.mjs:467
+  return loginEvidence;
+
+RangeError: Maximum call stack size exceeded
+
+Exception in PromiseRejectCallback:
+file:///D:/Projects/hongmen-final-c-workspace-ux/scripts/final-c/capture-web-evidence.mjs:450
+    const landing = await ensureSignedIn(page, identity, record);
+                          ^
+
+RangeError: Maximum call stack size exceeded
+
+Exception in PromiseRejectCallback:
+file:///D:/Projects/hongmen-final-c-workspace-ux/scripts/final-c/capture-web-evidence.mjs:467
+  return loginEvidence;
+
+RangeError: Maximum call stack size exceeded
+
+Exception in PromiseRejectCallback:
+file:///D:/Projects/hongmen-final-c-workspace-ux/scripts/final-c/capture-web-evidence.mjs:450
+    const landing = await ensureSignedIn(page, identity, record);
+                          ^
+
+RangeError: Maximum call stack size exceeded
+
+{
+  "ok": false,
+  "manifestPath": "D:\\Projects\\hongmen-final-c-workspace-ux\\evidence\\final-c\\20261103\\manifest.json",
+  "notesPath": "D:\\Projects\\hongmen-final-c-workspace-ux\\evidence\\final-c\\20261103\\notes.md",
+  "totals": {
+    "checks": 6,
+    "pass": 1,
+    "fail": 5,
+    "notRun": 0
+  },
+  "failures": [
+    {
+      "case": "001-focus",
+      "id": "case.unexpectedError",
+      "status": "FAIL",
+      "detail": {
+        "message": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:34112/focus Call log: \u001b[2m - navigating to \"http://127.0.0.1:34112/focus\", waiting until \"domcontentloaded\"\u001b[22m"
+      },
+      "at": "2026-11-03T07:35:45.809Z"
+    },
+    {
+      "case": "002-waiting-user-detail",
+      "id": "case.unexpectedError",
+      "status": "FAIL",
+      "detail": {
+        "message": "Maximum call stack size exceeded"
+      },
+      "at": "2026-11-03T07:35:45.914Z"
+    },
+    {
+      "case": "003-basis-evidence",
+      "id": "case.unexpectedError",
+      "status": "FAIL",
+      "detail": {
+        "message": "Maximum call stack size exceeded"
+      },
+      "at": "2026-11-03T07:35:46.007Z"
+    },
+    {
+      "case": "004-results-receipts",
+      "id": "case.unexpectedError",
+      "status": "FAIL",
+      "detail": {
+        "message": "Maximum call stack size exceeded"
+      },
+      "at": "2026-11-03T07:35:46.096Z"
+    },
+    {
+      "case": "005-keyboard-motion",
+      "id": "case.unexpectedError",
+      "status": "FAIL",
+      "detail": {
+        "message": "Maximum call stack size exceeded"
+      },
+      "at": "2026-11-03T07:35:46.205Z"
+    }
+  ]
+}

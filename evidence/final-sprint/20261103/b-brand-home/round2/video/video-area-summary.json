@@ -1,0 +1,1347 @@
+{
+  "phase": "round2",
+  "kind": "video-area-states",
+  "capturedAt": "2026-11-03T07:31:14.674Z",
+  "candidateSha": "f06685d84b85c523595f2950b07b07dcdbf4271d",
+  "baseUrl": "http://127.0.0.1:34212",
+  "environment": {
+    "os": "win32 10.0.26300 (Windows 11 Home China)",
+    "arch": "x64",
+    "cpu": "Intel(R) Core(TM) i7-14700HX ×28",
+    "totalMemoryGiB": 15.78,
+    "node": "v24.16.0",
+    "browser": "chromium via @playwright/test 1.61.1 (headless)",
+    "deviceScaleFactor": 1,
+    "network": "localhost loopback（next start 与浏览器同机）",
+    "timezoneId": "Asia/Shanghai",
+    "locale": "zh-CN",
+    "mode": "production（next build + next start）；LLM_MODE=mock；DATABASE_URL=prisma/final-preparation.db；公开匿名示例",
+    "caveat": "性能/体积数字仅代表本机、本地回环、单次测量，不宣称代表线上或所有用户体验。"
+  },
+  "protocol": "生产 next start + 本地回环；05 决赛演示区滚动到视口后截图；门面 1440/390 × light/dark；点击门面加载 Bilibili 官方 iframe（用户主动）后截图并加证据标注；点击“收起播放器”后恢复门面并检查焦点回归。",
+  "results": [
+    {
+      "name": "facade-1440-light",
+      "file": "evidence/final-sprint/20261103/b-brand-home/round2/video/facade-1440-light.png",
+      "fileBytes": 86034,
+      "fileSha256": "11187b25e249049b3c40773a9e04894424b23fb04eda55184f36c4879a21953c",
+      "videoArea": {
+        "player": {
+          "x": 756,
+          "y": 157.31,
+          "width": 574,
+          "height": 409.17,
+          "bottom": 566.48,
+          "right": 1330,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "block",
+          "visibility": "visible"
+        },
+        "stage": {
+          "x": 756,
+          "y": 157.31,
+          "width": 574,
+          "height": 322.88,
+          "bottom": 480.19,
+          "right": 1330,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "block",
+          "visibility": "visible"
+        },
+        "stageAspectRatio": "16 / 9",
+        "stageActive": "false",
+        "facade": {
+          "bbox": {
+            "x": 757,
+            "y": 158.31,
+            "width": 572,
+            "height": 320.88,
+            "bottom": 479.19,
+            "right": 1329,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          },
+          "ariaLabel": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器",
+          "text": "公开视频 · Bilibili 2026 C4-AI 决赛演示视频 点击加载播放器 · 在播放器内播放",
+          "corner": "公开视频 · Bilibili",
+          "title": "2026 C4-AI 决赛演示视频",
+          "meta": "点击加载播放器 · 在播放器内播放",
+          "titleLineCount": 1,
+          "metaLineCount": 1,
+          "titleClientHeight": 25,
+          "titleScrollHeight": 25,
+          "metaClientHeight": 22,
+          "metaScrollHeight": 22
+        },
+        "iframe": null,
+        "below": {
+          "bbox": {
+            "x": 756,
+            "y": 492.98,
+            "width": 574,
+            "height": 73.5,
+            "bottom": 566.48,
+            "right": 1330,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          },
+          "text": "视频托管在 Bilibili；点击后在本页加载其官方播放器，加载前不请求外部站点。 在 Bilibili 打开（新窗口）",
+          "links": [
+            {
+              "tag": "a",
+              "text": "在 Bilibili 打开（新窗口）",
+              "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+              "bbox": {
+                "x": 756,
+                "y": 522.48,
+                "width": 164.72,
+                "height": 44,
+                "bottom": 566.48,
+                "right": 920.72,
+                "inFirstScreen": true,
+                "clippedRight": false,
+                "clippedLeft": false,
+                "clippedBottom": false,
+                "display": "flex",
+                "visibility": "visible"
+              }
+            }
+          ]
+        },
+        "openLinks": [
+          {
+            "tag": "a",
+            "text": "在 Bilibili 打开（新窗口）",
+            "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+            "bbox": {
+              "x": 756,
+              "y": 522.48,
+              "width": 164.72,
+              "height": 44,
+              "bottom": 566.48,
+              "right": 920.72,
+              "inFirstScreen": true,
+              "clippedRight": false,
+              "clippedLeft": false,
+              "clippedBottom": false,
+              "display": "flex",
+              "visibility": "visible"
+            }
+          }
+        ],
+        "bilibiliAnchors": [
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "text": "在 Bilibili 打开（新窗口）"
+          },
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "text": "决赛演示"
+          }
+        ],
+        "bilibiliAnchorCount": 2
+      },
+      "requestAudit": {
+        "requestCount": 24,
+        "externalCount": 0,
+        "bilibiliCount": 0,
+        "apiWriteCount": 0
+      }
+    },
+    {
+      "name": "facade-1440-dark",
+      "file": "evidence/final-sprint/20261103/b-brand-home/round2/video/facade-1440-dark.png",
+      "fileBytes": 84002,
+      "fileSha256": "61e03c8ba578586fc0b6d6bc4b96223846088441415a8e7d8343a7e8aff06c77",
+      "videoArea": {
+        "player": {
+          "x": 756,
+          "y": 157.31,
+          "width": 574,
+          "height": 409.17,
+          "bottom": 566.48,
+          "right": 1330,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "block",
+          "visibility": "visible"
+        },
+        "stage": {
+          "x": 756,
+          "y": 157.31,
+          "width": 574,
+          "height": 322.88,
+          "bottom": 480.19,
+          "right": 1330,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "block",
+          "visibility": "visible"
+        },
+        "stageAspectRatio": "16 / 9",
+        "stageActive": "false",
+        "facade": {
+          "bbox": {
+            "x": 757,
+            "y": 158.31,
+            "width": 572,
+            "height": 320.88,
+            "bottom": 479.19,
+            "right": 1329,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          },
+          "ariaLabel": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器",
+          "text": "公开视频 · Bilibili 2026 C4-AI 决赛演示视频 点击加载播放器 · 在播放器内播放",
+          "corner": "公开视频 · Bilibili",
+          "title": "2026 C4-AI 决赛演示视频",
+          "meta": "点击加载播放器 · 在播放器内播放",
+          "titleLineCount": 1,
+          "metaLineCount": 1,
+          "titleClientHeight": 25,
+          "titleScrollHeight": 25,
+          "metaClientHeight": 22,
+          "metaScrollHeight": 22
+        },
+        "iframe": null,
+        "below": {
+          "bbox": {
+            "x": 756,
+            "y": 492.98,
+            "width": 574,
+            "height": 73.5,
+            "bottom": 566.48,
+            "right": 1330,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          },
+          "text": "视频托管在 Bilibili；点击后在本页加载其官方播放器，加载前不请求外部站点。 在 Bilibili 打开（新窗口）",
+          "links": [
+            {
+              "tag": "a",
+              "text": "在 Bilibili 打开（新窗口）",
+              "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+              "bbox": {
+                "x": 756,
+                "y": 522.48,
+                "width": 164.72,
+                "height": 44,
+                "bottom": 566.48,
+                "right": 920.72,
+                "inFirstScreen": true,
+                "clippedRight": false,
+                "clippedLeft": false,
+                "clippedBottom": false,
+                "display": "flex",
+                "visibility": "visible"
+              }
+            }
+          ]
+        },
+        "openLinks": [
+          {
+            "tag": "a",
+            "text": "在 Bilibili 打开（新窗口）",
+            "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+            "bbox": {
+              "x": 756,
+              "y": 522.48,
+              "width": 164.72,
+              "height": 44,
+              "bottom": 566.48,
+              "right": 920.72,
+              "inFirstScreen": true,
+              "clippedRight": false,
+              "clippedLeft": false,
+              "clippedBottom": false,
+              "display": "flex",
+              "visibility": "visible"
+            }
+          }
+        ],
+        "bilibiliAnchors": [
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "text": "在 Bilibili 打开（新窗口）"
+          },
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "text": "决赛演示"
+          }
+        ],
+        "bilibiliAnchorCount": 2
+      },
+      "requestAudit": {
+        "requestCount": 24,
+        "externalCount": 0,
+        "bilibiliCount": 0,
+        "apiWriteCount": 0
+      }
+    },
+    {
+      "name": "facade-390-light",
+      "file": "evidence/final-sprint/20261103/b-brand-home/round2/video/facade-390-light.png",
+      "fileBytes": 54800,
+      "fileSha256": "372ba4c0c61296342c31a8a343a3c947321b6a012bbb31d757f791517c68a59e",
+      "videoArea": {
+        "player": {
+          "x": 18,
+          "y": 314.53,
+          "width": 354,
+          "height": 304.86,
+          "bottom": 619.39,
+          "right": 372,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "block",
+          "visibility": "visible"
+        },
+        "stage": {
+          "x": 18,
+          "y": 314.53,
+          "width": 354,
+          "height": 199.13,
+          "bottom": 513.66,
+          "right": 372,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "block",
+          "visibility": "visible"
+        },
+        "stageAspectRatio": "16 / 9",
+        "stageActive": "false",
+        "facade": {
+          "bbox": {
+            "x": 19,
+            "y": 315.53,
+            "width": 352,
+            "height": 197.13,
+            "bottom": 512.66,
+            "right": 371,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          },
+          "ariaLabel": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器",
+          "text": "公开视频 · Bilibili 2026 C4-AI 决赛演示视频 点击加载播放器 · 在播放器内播放",
+          "corner": "公开视频 · Bilibili",
+          "title": "2026 C4-AI 决赛演示视频",
+          "meta": "点击加载播放器 · 在播放器内播放",
+          "titleLineCount": 1,
+          "metaLineCount": 1,
+          "titleClientHeight": 23,
+          "titleScrollHeight": 23,
+          "metaClientHeight": 20,
+          "metaScrollHeight": 20
+        },
+        "iframe": null,
+        "below": {
+          "bbox": {
+            "x": 18,
+            "y": 526.45,
+            "width": 354,
+            "height": 92.94,
+            "bottom": 619.39,
+            "right": 372,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          },
+          "text": "视频托管在 Bilibili；点击后在本页加载其官方播放器，加载前不请求外部站点。 在 Bilibili 打开（新窗口）",
+          "links": [
+            {
+              "tag": "a",
+              "text": "在 Bilibili 打开（新窗口）",
+              "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+              "bbox": {
+                "x": 18,
+                "y": 575.39,
+                "width": 157.69,
+                "height": 44,
+                "bottom": 619.39,
+                "right": 175.69,
+                "inFirstScreen": true,
+                "clippedRight": false,
+                "clippedLeft": false,
+                "clippedBottom": false,
+                "display": "flex",
+                "visibility": "visible"
+              }
+            }
+          ]
+        },
+        "openLinks": [
+          {
+            "tag": "a",
+            "text": "在 Bilibili 打开（新窗口）",
+            "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+            "bbox": {
+              "x": 18,
+              "y": 575.39,
+              "width": 157.69,
+              "height": 44,
+              "bottom": 619.39,
+              "right": 175.69,
+              "inFirstScreen": true,
+              "clippedRight": false,
+              "clippedLeft": false,
+              "clippedBottom": false,
+              "display": "flex",
+              "visibility": "visible"
+            }
+          }
+        ],
+        "bilibiliAnchors": [
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "text": "在 Bilibili 打开（新窗口）"
+          },
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "text": "决赛演示"
+          }
+        ],
+        "bilibiliAnchorCount": 2
+      },
+      "requestAudit": {
+        "requestCount": 27,
+        "externalCount": 0,
+        "bilibiliCount": 0,
+        "apiWriteCount": 0
+      }
+    },
+    {
+      "name": "facade-390-dark",
+      "file": "evidence/final-sprint/20261103/b-brand-home/round2/video/facade-390-dark.png",
+      "fileBytes": 53872,
+      "fileSha256": "a546735a2f92b6c42315755c20f2843674ea096807d0546c1d0277adb5d8ec8f",
+      "videoArea": {
+        "player": {
+          "x": 18,
+          "y": 314.53,
+          "width": 354,
+          "height": 304.86,
+          "bottom": 619.39,
+          "right": 372,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "block",
+          "visibility": "visible"
+        },
+        "stage": {
+          "x": 18,
+          "y": 314.53,
+          "width": 354,
+          "height": 199.13,
+          "bottom": 513.66,
+          "right": 372,
+          "inFirstScreen": true,
+          "clippedRight": false,
+          "clippedLeft": false,
+          "clippedBottom": false,
+          "display": "block",
+          "visibility": "visible"
+        },
+        "stageAspectRatio": "16 / 9",
+        "stageActive": "false",
+        "facade": {
+          "bbox": {
+            "x": 19,
+            "y": 315.53,
+            "width": 352,
+            "height": 197.13,
+            "bottom": 512.66,
+            "right": 371,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          },
+          "ariaLabel": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器",
+          "text": "公开视频 · Bilibili 2026 C4-AI 决赛演示视频 点击加载播放器 · 在播放器内播放",
+          "corner": "公开视频 · Bilibili",
+          "title": "2026 C4-AI 决赛演示视频",
+          "meta": "点击加载播放器 · 在播放器内播放",
+          "titleLineCount": 1,
+          "metaLineCount": 1,
+          "titleClientHeight": 23,
+          "titleScrollHeight": 23,
+          "metaClientHeight": 20,
+          "metaScrollHeight": 20
+        },
+        "iframe": null,
+        "below": {
+          "bbox": {
+            "x": 18,
+            "y": 526.45,
+            "width": 354,
+            "height": 92.94,
+            "bottom": 619.39,
+            "right": 372,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "flex",
+            "visibility": "visible"
+          },
+          "text": "视频托管在 Bilibili；点击后在本页加载其官方播放器，加载前不请求外部站点。 在 Bilibili 打开（新窗口）",
+          "links": [
+            {
+              "tag": "a",
+              "text": "在 Bilibili 打开（新窗口）",
+              "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+              "bbox": {
+                "x": 18,
+                "y": 575.39,
+                "width": 157.69,
+                "height": 44,
+                "bottom": 619.39,
+                "right": 175.69,
+                "inFirstScreen": true,
+                "clippedRight": false,
+                "clippedLeft": false,
+                "clippedBottom": false,
+                "display": "flex",
+                "visibility": "visible"
+              }
+            }
+          ]
+        },
+        "openLinks": [
+          {
+            "tag": "a",
+            "text": "在 Bilibili 打开（新窗口）",
+            "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+            "bbox": {
+              "x": 18,
+              "y": 575.39,
+              "width": 157.69,
+              "height": 44,
+              "bottom": 619.39,
+              "right": 175.69,
+              "inFirstScreen": true,
+              "clippedRight": false,
+              "clippedLeft": false,
+              "clippedBottom": false,
+              "display": "flex",
+              "visibility": "visible"
+            }
+          }
+        ],
+        "bilibiliAnchors": [
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "text": "在 Bilibili 打开（新窗口）"
+          },
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "text": "决赛演示"
+          }
+        ],
+        "bilibiliAnchorCount": 2
+      },
+      "requestAudit": {
+        "requestCount": 24,
+        "externalCount": 0,
+        "bilibiliCount": 0,
+        "apiWriteCount": 0
+      }
+    },
+    {
+      "name": "player-1440",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "facadeBefore": {
+        "facadePresent": true,
+        "iframePresent": false,
+        "facadeAriaLabel": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器"
+      },
+      "loaded": {
+        "file": "evidence/final-sprint/20261103/b-brand-home/round2/video/player-loaded-1440-light.png",
+        "fileBytes": 80226,
+        "fileSha256": "f7cc8d7564b0a07a467cf9d28fba7ec34aaf41be0293d5cb943602b3b8e4e994",
+        "iframeWaitMs": 107,
+        "videoArea": {
+          "player": {
+            "x": 756,
+            "y": 157.31,
+            "width": 574,
+            "height": 409.17,
+            "bottom": 566.48,
+            "right": 1330,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          "stage": {
+            "x": 756,
+            "y": 157.31,
+            "width": 574,
+            "height": 322.88,
+            "bottom": 480.19,
+            "right": 1330,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          "stageAspectRatio": "16 / 9",
+          "stageActive": "true",
+          "facade": null,
+          "iframe": {
+            "src": "https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1",
+            "title": "2026 C4-AI 决赛演示视频（Bilibili 官方播放器）",
+            "loading": "lazy",
+            "allow": "autoplay; fullscreen; picture-in-picture; encrypted-media",
+            "bbox": {
+              "x": 757,
+              "y": 158.31,
+              "width": 572,
+              "height": 320.88,
+              "bottom": 479.19,
+              "right": 1329,
+              "inFirstScreen": true,
+              "clippedRight": false,
+              "clippedLeft": false,
+              "clippedBottom": false,
+              "display": "block",
+              "visibility": "visible"
+            },
+            "clientHeight": 321,
+            "scrollHeight": 321
+          },
+          "below": {
+            "bbox": {
+              "x": 756,
+              "y": 492.98,
+              "width": 574,
+              "height": 73.5,
+              "bottom": 566.48,
+              "right": 1330,
+              "inFirstScreen": true,
+              "clippedRight": false,
+              "clippedLeft": false,
+              "clippedBottom": false,
+              "display": "flex",
+              "visibility": "visible"
+            },
+            "text": "视频托管在 Bilibili；点击后在本页加载其官方播放器，加载前不请求外部站点。 收起播放器 在 Bilibili 打开（新窗口）",
+            "links": [
+              {
+                "tag": "button",
+                "text": "收起播放器",
+                "ariaLabel": null,
+                "bbox": {
+                  "x": 756,
+                  "y": 522.48,
+                  "width": 84,
+                  "height": 44,
+                  "bottom": 566.48,
+                  "right": 840,
+                  "inFirstScreen": true,
+                  "clippedRight": false,
+                  "clippedLeft": false,
+                  "clippedBottom": false,
+                  "display": "flex",
+                  "visibility": "visible"
+                }
+              },
+              {
+                "tag": "a",
+                "text": "在 Bilibili 打开（新窗口）",
+                "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+                "bbox": {
+                  "x": 856,
+                  "y": 522.48,
+                  "width": 164.72,
+                  "height": 44,
+                  "bottom": 566.48,
+                  "right": 1020.72,
+                  "inFirstScreen": true,
+                  "clippedRight": false,
+                  "clippedLeft": false,
+                  "clippedBottom": false,
+                  "display": "flex",
+                  "visibility": "visible"
+                }
+              }
+            ]
+          },
+          "openLinks": [
+            {
+              "tag": "button",
+              "text": "收起播放器",
+              "ariaLabel": null,
+              "bbox": {
+                "x": 756,
+                "y": 522.48,
+                "width": 84,
+                "height": 44,
+                "bottom": 566.48,
+                "right": 840,
+                "inFirstScreen": true,
+                "clippedRight": false,
+                "clippedLeft": false,
+                "clippedBottom": false,
+                "display": "flex",
+                "visibility": "visible"
+              }
+            },
+            {
+              "tag": "a",
+              "text": "在 Bilibili 打开（新窗口）",
+              "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+              "bbox": {
+                "x": 856,
+                "y": 522.48,
+                "width": 164.72,
+                "height": 44,
+                "bottom": 566.48,
+                "right": 1020.72,
+                "inFirstScreen": true,
+                "clippedRight": false,
+                "clippedLeft": false,
+                "clippedBottom": false,
+                "display": "flex",
+                "visibility": "visible"
+              }
+            }
+          ],
+          "bilibiliAnchors": [
+            {
+              "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+              "target": "_blank",
+              "rel": "noopener noreferrer",
+              "text": "在 Bilibili 打开（新窗口）"
+            },
+            {
+              "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+              "target": "_blank",
+              "rel": "noopener noreferrer",
+              "text": "决赛演示"
+            }
+          ],
+          "bilibiliAnchorCount": 2
+        }
+      },
+      "userInitiatedNetwork": {
+        "requestCount": 3,
+        "externalCount": 3,
+        "bilibiliCount": 1,
+        "bilibiliUrls": [
+          {
+            "url": "https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1",
+            "status": 200,
+            "resourceType": "document"
+          }
+        ],
+        "note": "仅用户点击后出现；不计入加载期外域/自动播放。"
+      },
+      "loadPhaseNetwork": {
+        "requestCount": 27,
+        "externalCount": 0,
+        "bilibiliCount": 0
+      },
+      "collapsed": {
+        "file": "evidence/final-sprint/20261103/b-brand-home/round2/video/collapsed-1440-light.png",
+        "fileBytes": 86063,
+        "fileSha256": "f476fafcbf4b9b6760b550fa1aac08afc10ac191c1c9649e6cc82dbcf39c1f5e",
+        "state": {
+          "facadePresent": true,
+          "iframePresent": false,
+          "activeElementAriaLabel": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器",
+          "activeElementText": "公开视频 · Bilibili 2026 C4-AI 决赛演示视频 点击加载播放器 · 在播放器内播放"
+        },
+        "videoArea": {
+          "player": {
+            "x": 756,
+            "y": 157.31,
+            "width": 574,
+            "height": 409.17,
+            "bottom": 566.48,
+            "right": 1330,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          "stage": {
+            "x": 756,
+            "y": 157.31,
+            "width": 574,
+            "height": 322.88,
+            "bottom": 480.19,
+            "right": 1330,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          "stageAspectRatio": "16 / 9",
+          "stageActive": "false",
+          "facade": {
+            "bbox": {
+              "x": 757,
+              "y": 158.31,
+              "width": 572,
+              "height": 320.88,
+              "bottom": 479.19,
+              "right": 1329,
+              "inFirstScreen": true,
+              "clippedRight": false,
+              "clippedLeft": false,
+              "clippedBottom": false,
+              "display": "flex",
+              "visibility": "visible"
+            },
+            "ariaLabel": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器",
+            "text": "公开视频 · Bilibili 2026 C4-AI 决赛演示视频 点击加载播放器 · 在播放器内播放",
+            "corner": "公开视频 · Bilibili",
+            "title": "2026 C4-AI 决赛演示视频",
+            "meta": "点击加载播放器 · 在播放器内播放",
+            "titleLineCount": 1,
+            "metaLineCount": 1,
+            "titleClientHeight": 25,
+            "titleScrollHeight": 25,
+            "metaClientHeight": 22,
+            "metaScrollHeight": 22
+          },
+          "iframe": null,
+          "below": {
+            "bbox": {
+              "x": 756,
+              "y": 492.98,
+              "width": 574,
+              "height": 73.5,
+              "bottom": 566.48,
+              "right": 1330,
+              "inFirstScreen": true,
+              "clippedRight": false,
+              "clippedLeft": false,
+              "clippedBottom": false,
+              "display": "flex",
+              "visibility": "visible"
+            },
+            "text": "视频托管在 Bilibili；点击后在本页加载其官方播放器，加载前不请求外部站点。 在 Bilibili 打开（新窗口）",
+            "links": [
+              {
+                "tag": "a",
+                "text": "在 Bilibili 打开（新窗口）",
+                "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+                "bbox": {
+                  "x": 756,
+                  "y": 522.48,
+                  "width": 164.72,
+                  "height": 44,
+                  "bottom": 566.48,
+                  "right": 920.72,
+                  "inFirstScreen": true,
+                  "clippedRight": false,
+                  "clippedLeft": false,
+                  "clippedBottom": false,
+                  "display": "flex",
+                  "visibility": "visible"
+                }
+              }
+            ]
+          },
+          "openLinks": [
+            {
+              "tag": "a",
+              "text": "在 Bilibili 打开（新窗口）",
+              "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+              "bbox": {
+                "x": 756,
+                "y": 522.48,
+                "width": 164.72,
+                "height": 44,
+                "bottom": 566.48,
+                "right": 920.72,
+                "inFirstScreen": true,
+                "clippedRight": false,
+                "clippedLeft": false,
+                "clippedBottom": false,
+                "display": "flex",
+                "visibility": "visible"
+              }
+            }
+          ],
+          "bilibiliAnchors": [
+            {
+              "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+              "target": "_blank",
+              "rel": "noopener noreferrer",
+              "text": "在 Bilibili 打开（新窗口）"
+            },
+            {
+              "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+              "target": "_blank",
+              "rel": "noopener noreferrer",
+              "text": "决赛演示"
+            }
+          ],
+          "bilibiliAnchorCount": 2
+        }
+      }
+    },
+    {
+      "name": "player-390",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "facadeBefore": {
+        "facadePresent": true,
+        "iframePresent": false,
+        "facadeAriaLabel": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器"
+      },
+      "loaded": {
+        "file": "evidence/final-sprint/20261103/b-brand-home/round2/video/player-loaded-390-light.png",
+        "fileBytes": 51356,
+        "fileSha256": "ab3cdfbca4bdcd7385f37086764de062f946667d7d09daf49217e4c19a46895b",
+        "iframeWaitMs": 94,
+        "videoArea": {
+          "player": {
+            "x": 18,
+            "y": 314.53,
+            "width": 354,
+            "height": 304.86,
+            "bottom": 619.39,
+            "right": 372,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          "stage": {
+            "x": 18,
+            "y": 314.53,
+            "width": 354,
+            "height": 199.13,
+            "bottom": 513.66,
+            "right": 372,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          "stageAspectRatio": "16 / 9",
+          "stageActive": "true",
+          "facade": null,
+          "iframe": {
+            "src": "https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1",
+            "title": "2026 C4-AI 决赛演示视频（Bilibili 官方播放器）",
+            "loading": "lazy",
+            "allow": "autoplay; fullscreen; picture-in-picture; encrypted-media",
+            "bbox": {
+              "x": 19,
+              "y": 315.53,
+              "width": 352,
+              "height": 197.13,
+              "bottom": 512.66,
+              "right": 371,
+              "inFirstScreen": true,
+              "clippedRight": false,
+              "clippedLeft": false,
+              "clippedBottom": false,
+              "display": "block",
+              "visibility": "visible"
+            },
+            "clientHeight": 197,
+            "scrollHeight": 197
+          },
+          "below": {
+            "bbox": {
+              "x": 18,
+              "y": 526.45,
+              "width": 354,
+              "height": 92.94,
+              "bottom": 619.39,
+              "right": 372,
+              "inFirstScreen": true,
+              "clippedRight": false,
+              "clippedLeft": false,
+              "clippedBottom": false,
+              "display": "flex",
+              "visibility": "visible"
+            },
+            "text": "视频托管在 Bilibili；点击后在本页加载其官方播放器，加载前不请求外部站点。 收起播放器 在 Bilibili 打开（新窗口）",
+            "links": [
+              {
+                "tag": "button",
+                "text": "收起播放器",
+                "ariaLabel": null,
+                "bbox": {
+                  "x": 18,
+                  "y": 575.39,
+                  "width": 80.8,
+                  "height": 44,
+                  "bottom": 619.39,
+                  "right": 98.8,
+                  "inFirstScreen": true,
+                  "clippedRight": false,
+                  "clippedLeft": false,
+                  "clippedBottom": false,
+                  "display": "flex",
+                  "visibility": "visible"
+                }
+              },
+              {
+                "tag": "a",
+                "text": "在 Bilibili 打开（新窗口）",
+                "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+                "bbox": {
+                  "x": 114.8,
+                  "y": 575.39,
+                  "width": 157.69,
+                  "height": 44,
+                  "bottom": 619.39,
+                  "right": 272.48,
+                  "inFirstScreen": true,
+                  "clippedRight": false,
+                  "clippedLeft": false,
+                  "clippedBottom": false,
+                  "display": "flex",
+                  "visibility": "visible"
+                }
+              }
+            ]
+          },
+          "openLinks": [
+            {
+              "tag": "button",
+              "text": "收起播放器",
+              "ariaLabel": null,
+              "bbox": {
+                "x": 18,
+                "y": 575.39,
+                "width": 80.8,
+                "height": 44,
+                "bottom": 619.39,
+                "right": 98.8,
+                "inFirstScreen": true,
+                "clippedRight": false,
+                "clippedLeft": false,
+                "clippedBottom": false,
+                "display": "flex",
+                "visibility": "visible"
+              }
+            },
+            {
+              "tag": "a",
+              "text": "在 Bilibili 打开（新窗口）",
+              "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+              "bbox": {
+                "x": 114.8,
+                "y": 575.39,
+                "width": 157.69,
+                "height": 44,
+                "bottom": 619.39,
+                "right": 272.48,
+                "inFirstScreen": true,
+                "clippedRight": false,
+                "clippedLeft": false,
+                "clippedBottom": false,
+                "display": "flex",
+                "visibility": "visible"
+              }
+            }
+          ],
+          "bilibiliAnchors": [
+            {
+              "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+              "target": "_blank",
+              "rel": "noopener noreferrer",
+              "text": "在 Bilibili 打开（新窗口）"
+            },
+            {
+              "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+              "target": "_blank",
+              "rel": "noopener noreferrer",
+              "text": "决赛演示"
+            }
+          ],
+          "bilibiliAnchorCount": 2
+        }
+      },
+      "userInitiatedNetwork": {
+        "requestCount": 3,
+        "externalCount": 3,
+        "bilibiliCount": 1,
+        "bilibiliUrls": [
+          {
+            "url": "https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1",
+            "status": 200,
+            "resourceType": "document"
+          }
+        ],
+        "note": "仅用户点击后出现；不计入加载期外域/自动播放。"
+      },
+      "loadPhaseNetwork": {
+        "requestCount": 24,
+        "externalCount": 0,
+        "bilibiliCount": 0
+      },
+      "collapsed": {
+        "file": "evidence/final-sprint/20261103/b-brand-home/round2/video/collapsed-390-light.png",
+        "fileBytes": 54796,
+        "fileSha256": "024f91496e49e352fd648fcd191439f1fd366bef93bc62b06cdeef825dbc53ed",
+        "state": {
+          "facadePresent": true,
+          "iframePresent": false,
+          "activeElementAriaLabel": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器",
+          "activeElementText": "公开视频 · Bilibili 2026 C4-AI 决赛演示视频 点击加载播放器 · 在播放器内播放"
+        },
+        "videoArea": {
+          "player": {
+            "x": 18,
+            "y": 314.53,
+            "width": 354,
+            "height": 304.86,
+            "bottom": 619.39,
+            "right": 372,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          "stage": {
+            "x": 18,
+            "y": 314.53,
+            "width": 354,
+            "height": 199.13,
+            "bottom": 513.66,
+            "right": 372,
+            "inFirstScreen": true,
+            "clippedRight": false,
+            "clippedLeft": false,
+            "clippedBottom": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          "stageAspectRatio": "16 / 9",
+          "stageActive": "false",
+          "facade": {
+            "bbox": {
+              "x": 19,
+              "y": 315.53,
+              "width": 352,
+              "height": 197.13,
+              "bottom": 512.66,
+              "right": 371,
+              "inFirstScreen": true,
+              "clippedRight": false,
+              "clippedLeft": false,
+              "clippedBottom": false,
+              "display": "flex",
+              "visibility": "visible"
+            },
+            "ariaLabel": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器",
+            "text": "公开视频 · Bilibili 2026 C4-AI 决赛演示视频 点击加载播放器 · 在播放器内播放",
+            "corner": "公开视频 · Bilibili",
+            "title": "2026 C4-AI 决赛演示视频",
+            "meta": "点击加载播放器 · 在播放器内播放",
+            "titleLineCount": 1,
+            "metaLineCount": 1,
+            "titleClientHeight": 23,
+            "titleScrollHeight": 23,
+            "metaClientHeight": 20,
+            "metaScrollHeight": 20
+          },
+          "iframe": null,
+          "below": {
+            "bbox": {
+              "x": 18,
+              "y": 526.45,
+              "width": 354,
+              "height": 92.94,
+              "bottom": 619.39,
+              "right": 372,
+              "inFirstScreen": true,
+              "clippedRight": false,
+              "clippedLeft": false,
+              "clippedBottom": false,
+              "display": "flex",
+              "visibility": "visible"
+            },
+            "text": "视频托管在 Bilibili；点击后在本页加载其官方播放器，加载前不请求外部站点。 在 Bilibili 打开（新窗口）",
+            "links": [
+              {
+                "tag": "a",
+                "text": "在 Bilibili 打开（新窗口）",
+                "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+                "bbox": {
+                  "x": 18,
+                  "y": 575.39,
+                  "width": 157.69,
+                  "height": 44,
+                  "bottom": 619.39,
+                  "right": 175.69,
+                  "inFirstScreen": true,
+                  "clippedRight": false,
+                  "clippedLeft": false,
+                  "clippedBottom": false,
+                  "display": "flex",
+                  "visibility": "visible"
+                }
+              }
+            ]
+          },
+          "openLinks": [
+            {
+              "tag": "a",
+              "text": "在 Bilibili 打开（新窗口）",
+              "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+              "bbox": {
+                "x": 18,
+                "y": 575.39,
+                "width": 157.69,
+                "height": 44,
+                "bottom": 619.39,
+                "right": 175.69,
+                "inFirstScreen": true,
+                "clippedRight": false,
+                "clippedLeft": false,
+                "clippedBottom": false,
+                "display": "flex",
+                "visibility": "visible"
+              }
+            }
+          ],
+          "bilibiliAnchors": [
+            {
+              "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+              "target": "_blank",
+              "rel": "noopener noreferrer",
+              "text": "在 Bilibili 打开（新窗口）"
+            },
+            {
+              "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+              "target": "_blank",
+              "rel": "noopener noreferrer",
+              "text": "决赛演示"
+            }
+          ],
+          "bilibiliAnchorCount": 2
+        }
+      }
+    }
+  ],
+  "assertions": {
+    "loadPhaseNoExternal": true,
+    "loadPhaseNoBilibili": true,
+    "userInitiatedBilibiliRequests": [
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "count": 1
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "count": 1
+      }
+    ],
+    "iframeRemovedAfterCollapse": true,
+    "focusReturnedToFacade": true
+  },
+  "network": {
+    "file": "evidence/final-sprint/20261103/b-brand-home/round2/video/network-video-area.json",
+    "totals": {
+      "requestRecords": 252,
+      "uniqueRequestUrls": 27,
+      "externalOriginRequests": 3,
+      "apiWriteRequests": 0,
+      "bilibiliRequests": 2,
+      "failures": 16,
+      "imageFontFailures": 5,
+      "consoleErrors": 4,
+      "pageErrors": 0
+    },
+    "assertions": {
+      "noBilibiliRequestDuringLoad": false,
+      "noApiWrites": true,
+      "noExternalOrigins": false,
+      "noPageErrors": true
+    }
+  },
+  "errors": []
+}

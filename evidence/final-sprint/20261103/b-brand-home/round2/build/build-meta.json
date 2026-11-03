@@ -1,0 +1,42 @@
+{
+  "command": "npm.cmd run build",
+  "logFile": "evidence/final-sprint/20261103/b-brand-home/round2/build/build.log",
+  "notes": [
+    "tsconfig.json / next-env.d.ts 由 Next build 自动改写（生成文件），不属于业务源码改动。",
+    "构建期间不启动 Worker；mock 模式；DATABASE_URL 指向隔离准备库。"
+  ],
+  "candidateSha": "f06685d84b85c523595f2950b07b07dcdbf4271d",
+  "distDir": ".next-build",
+  "gitStatusBefore": [],
+  "durationSec": 93.4,
+  "env": {
+    "DATABASE_URL": "file:D:/Projects/hongmen-final-b-brand-home/prisma/final-preparation.db",
+    "NEXT_DIST_DIR": ".next-build",
+    "MISSION_WEB_ENABLED": "false",
+    "MISSION_UI_ENABLED": "true",
+    "FOCUS_AGENT_ENABLED": "true",
+    "MISSION_WRITES_ENABLED": "true",
+    "ATTACHMENT_DIR": "D:\\Projects\\hongmen-final-b-brand-home\\tmp\\final-preparation\\attachments",
+    "FOCUS_CONTINUITY_ENABLED": "true",
+    "MISSION_ENABLED": "true",
+    "FOCUS_AGENT_R4_ENABLED": "true",
+    "LLM_MODE": "mock",
+    "FOCUS_WEB_ENABLED": "true",
+    "MISSION_AUTO_CONTINUATION_ENABLED": "false",
+    "FOCUS_ASYNC_ENABLED": "false"
+  },
+  "round": 2,
+  "exitFile": "evidence/final-sprint/20261103/b-brand-home/round2/build/build.exit",
+  "endedAt": "2026-11-03T15:23:09.0041448+08:00",
+  "startedAt": "2026-11-03T15:21:35.5991945+08:00",
+  "task": "task-4",
+  "artifacts": {
+    "sizeMB": 267.05,
+    "files": 3761,
+    "buildId": "AzlQzfffD09oqqqb1BZDm"
+  },
+  "gitStatusAfter": [],
+  "node": "v24.16.0",
+  "exitCode": 0,
+  "npm": "11.15.0"
+}

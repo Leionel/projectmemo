@@ -1,0 +1,1870 @@
+{
+  "meta": {
+    "label": "round2",
+    "sha": "f06685d84b85c523595f2950b07b07dcdbf4271d",
+    "base": "http://127.0.0.1:34111",
+    "startedAt": "2026-11-03T07:16:48.178Z",
+    "node": "v24.16.0",
+    "playwright": "1.61.1",
+    "note": "Round 2 自动化 DOM/计算样式取证；非真实用户测试、非无障碍认证。",
+    "gitHead": "f06685d84b85c523595f2950b07b07dcdbf4271d",
+    "gitStatusAppComponents": "",
+    "diffSince9bae926": [
+      "app/home.module.css",
+      "app/page.tsx",
+      "components/home/DemoVideoPlayer.tsx",
+      "components/home/HomeHeroLens.tsx",
+      "components/home/HomeMotion.tsx"
+    ],
+    "localToolingChanges": [
+      "M next-env.d.ts",
+      " M tsconfig.json"
+    ],
+    "finishedAt": "2026-11-03T07:21:52.837Z"
+  },
+  "sections": {
+    "stageStatus": {
+      "initial": {
+        "chipText": "等你确认",
+        "chipTag": "span",
+        "chipRole": null,
+        "chipTabIndex": -1,
+        "selected": [
+          "stage-tab-back"
+        ],
+        "tabIndexes": [
+          "stage-tab-away:-1",
+          "stage-tab-during:-1",
+          "stage-tab-back:0"
+        ],
+        "panelLabelledBy": "stage-tab-back",
+        "panelTabIndex": "0",
+        "tablistLabel": "委托阶段：离开时、期间、回来后",
+        "tablistOrientation": null,
+        "statusNodes": [],
+        "panelKeyText": "原委托用已有材料整理一份阶段汇报原任务与草稿都留在原处依据比赛材料、任务安排、老师建议3 条来源可回看原文变化演示流程缺少完成回执原判断“先写汇报草稿”需要你重新确认等你补充演示结果，或确认先按现有材料写汇报草稿确认后从原委托继续，不会另建",
+        "active": {
+          "tag": "body",
+          "id": ""
+        },
+        "scrollY": 0
+      },
+      "perStage": {
+        "away": {
+          "chipText": "无需操作",
+          "chipTag": "span",
+          "chipRole": null,
+          "chipTabIndex": -1,
+          "selected": [
+            "stage-tab-away"
+          ],
+          "tabIndexes": [
+            "stage-tab-away:0",
+            "stage-tab-during:-1",
+            "stage-tab-back:-1"
+          ],
+          "panelLabelledBy": "stage-tab-away",
+          "panelTabIndex": "0",
+          "tablistLabel": "委托阶段：离开时、期间、回来后",
+          "tablistOrientation": null,
+          "statusNodes": [],
+          "panelKeyText": "原委托用已有材料整理一份阶段汇报目标与结束条件已经确认依据比赛材料、任务安排、老师建议3 条来源已保存变化还没有开始核对离开期间不改变项目内容等你暂时不需要你操作关掉页面不会丢掉这条委托查看依据回到原委托",
+          "active": {
+            "tag": "button",
+            "id": "stage-tab-away"
+          },
+          "scrollY": 0
+        },
+        "during": {
+          "chipText": "核对示例",
+          "chipTag": "span",
+          "chipRole": null,
+          "chipTabIndex": -1,
+          "selected": [
+            "stage-tab-during"
+          ],
+          "tabIndexes": [
+            "stage-tab-away:-1",
+            "stage-tab-during:0",
+            "stage-tab-back:-1"
+          ],
+          "panelLabelledBy": "stage-tab-during",
+          "panelTabIndex": "0",
+          "tablistLabel": "委托阶段：离开时、期间、回来后",
+          "tablistOrientation": null,
+          "statusNodes": [],
+          "panelKeyText": "原委托用已有材料整理一份阶段汇报任务身份与范围不变依据已读 3 条来源冻结示例，不连接服务器变化发现缺口：演示流程还没有完成回执缺口不会被自动当成已完成等你回来后处理，期间不改变项目示例不模拟正在执行的 Worker查看依据回到原委托",
+          "active": {
+            "tag": "button",
+            "id": "stage-tab-during"
+          },
+          "scrollY": 0
+        },
+        "back": {
+          "chipText": "等你确认",
+          "chipTag": "span",
+          "chipRole": null,
+          "chipTabIndex": -1,
+          "selected": [
+            "stage-tab-back"
+          ],
+          "tabIndexes": [
+            "stage-tab-away:-1",
+            "stage-tab-during:-1",
+            "stage-tab-back:0"
+          ],
+          "panelLabelledBy": "stage-tab-back",
+          "panelTabIndex": "0",
+          "tablistLabel": "委托阶段：离开时、期间、回来后",
+          "tablistOrientation": null,
+          "statusNodes": [],
+          "panelKeyText": "原委托用已有材料整理一份阶段汇报原任务与草稿都留在原处依据比赛材料、任务安排、老师建议3 条来源可回看原文变化演示流程缺少完成回执原判断“先写汇报草稿”需要你重新确认等你补充演示结果，或确认先按现有材料写汇报草稿确认后从原委托继续，不会另建",
+          "active": {
+            "tag": "button",
+            "id": "stage-tab-back"
+          },
+          "scrollY": 0
+        }
+      },
+      "expected": {
+        "away": "无需操作",
+        "during": "核对示例",
+        "back": "等你确认"
+      },
+      "statusMatch": {
+        "away": true,
+        "during": true,
+        "back": true
+      },
+      "keyboard": [
+        {
+          "key": "ArrowLeft",
+          "selected": [
+            "stage-tab-during"
+          ],
+          "chipText": "核对示例",
+          "activeId": "stage-tab-during",
+          "panelLabelledBy": "stage-tab-during"
+        },
+        {
+          "key": "ArrowLeft",
+          "selected": [
+            "stage-tab-away"
+          ],
+          "chipText": "无需操作",
+          "activeId": "stage-tab-away",
+          "panelLabelledBy": "stage-tab-away"
+        },
+        {
+          "key": "ArrowRight",
+          "selected": [
+            "stage-tab-during"
+          ],
+          "chipText": "核对示例",
+          "activeId": "stage-tab-during",
+          "panelLabelledBy": "stage-tab-during"
+        },
+        {
+          "key": "End",
+          "selected": [
+            "stage-tab-back"
+          ],
+          "chipText": "等你确认",
+          "activeId": "stage-tab-back",
+          "panelLabelledBy": "stage-tab-back"
+        },
+        {
+          "key": "Home",
+          "selected": [
+            "stage-tab-away"
+          ],
+          "chipText": "无需操作",
+          "activeId": "stage-tab-away",
+          "panelLabelledBy": "stage-tab-away"
+        }
+      ],
+      "chipAria": "<span class=\"home-module__txgM7a__lensStatus\"><span class=\"home-module__txgM7a__statusDot\" aria-hidden=\"true\"></span>无需操作</span>"
+    },
+    "reducedHotSwitch": {
+      "steps": [
+        {
+          "label": "normal@scroll800",
+          "dataMotion": "on",
+          "heroShift": "1.000",
+          "heroShiftInline": "1.000",
+          "heroCopy": {
+            "translate": "0px 10px",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)"
+          },
+          "heroLens": {
+            "translate": "0px -18px",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)"
+          },
+          "progressTransform": "matrix(0.1767, 0, 0, 1, 0, 0)",
+          "progressInline": "scaleX(0.1767)",
+          "progressDataVisible": true,
+          "railProgressValue": "0.856",
+          "railProgressInline": "0.856",
+          "railProgressTransform": "matrix(0.856, 0, 0, 1, 0, 0)",
+          "activeSteps": [
+            true,
+            true,
+            true,
+            false
+          ],
+          "activeCount": 3,
+          "scrollY": 632,
+          "mainTextLength": 1649,
+          "h1Visible": true,
+          "heroCtaVisible": true,
+          "storyTabVisible": true,
+          "stepPanelVisible": true,
+          "runningAnimations": 7
+        },
+        {
+          "label": "cycle1:reduce",
+          "dataMotion": "reduced",
+          "heroShift": "0",
+          "heroShiftInline": "0",
+          "heroCopy": {
+            "translate": "none",
+            "transform": "none"
+          },
+          "heroLens": {
+            "translate": "none",
+            "transform": "none"
+          },
+          "progressTransform": "matrix(0, 0, 0, 0, 0, 0)",
+          "progressInline": "scaleX(0)",
+          "progressDataVisible": false,
+          "railProgressValue": "0",
+          "railProgressInline": "0",
+          "railProgressTransform": "matrix(0, 0, 0, 0, 0, 0)",
+          "activeSteps": [
+            false,
+            false,
+            false,
+            false
+          ],
+          "activeCount": 0,
+          "scrollY": 800,
+          "mainTextLength": 1649,
+          "h1Visible": true,
+          "heroCtaVisible": true,
+          "storyTabVisible": true,
+          "stepPanelVisible": true,
+          "runningAnimations": 0
+        },
+        {
+          "label": "cycle1:reduce-after-scroll",
+          "dataMotion": "reduced",
+          "heroShift": "0",
+          "heroShiftInline": "0",
+          "heroCopy": {
+            "translate": "none",
+            "transform": "none"
+          },
+          "heroLens": {
+            "translate": "none",
+            "transform": "none"
+          },
+          "progressTransform": "matrix(0, 0, 0, 0, 0, 0)",
+          "progressInline": "scaleX(0)",
+          "progressDataVisible": false,
+          "railProgressValue": "0",
+          "railProgressInline": "0",
+          "railProgressTransform": "matrix(0, 0, 0, 0, 0, 0)",
+          "activeSteps": [
+            false,
+            false,
+            false,
+            false
+          ],
+          "activeCount": 0,
+          "scrollY": 1400,
+          "mainTextLength": 1649,
+          "h1Visible": true,
+          "heroCtaVisible": true,
+          "storyTabVisible": true,
+          "stepPanelVisible": true,
+          "runningAnimations": 0
+        },
+        {
+          "label": "cycle1:normal-restored",
+          "dataMotion": "on",
+          "heroShift": "1.000",
+          "heroShiftInline": "1.000",
+          "heroCopy": {
+            "translate": "0px 10px",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)"
+          },
+          "heroLens": {
+            "translate": "0px -18px",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)"
+          },
+          "progressTransform": "matrix(0.2852, 0, 0, 1, 0, 0)",
+          "progressInline": "scaleX(0.2852)",
+          "progressDataVisible": true,
+          "railProgressValue": "1.000",
+          "railProgressInline": "1.000",
+          "railProgressTransform": "matrix(1, 0, 0, 1, 0, 0)",
+          "activeSteps": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "activeCount": 4,
+          "scrollY": 1020,
+          "mainTextLength": 1649,
+          "h1Visible": true,
+          "heroCtaVisible": true,
+          "storyTabVisible": true,
+          "stepPanelVisible": true,
+          "runningAnimations": 3
+        },
+        {
+          "label": "cycle2:reduce",
+          "dataMotion": "reduced",
+          "heroShift": "0",
+          "heroShiftInline": "0",
+          "heroCopy": {
+            "translate": "none",
+            "transform": "none"
+          },
+          "heroLens": {
+            "translate": "none",
+            "transform": "none"
+          },
+          "progressTransform": "matrix(0, 0, 0, 0, 0, 0)",
+          "progressInline": "scaleX(0)",
+          "progressDataVisible": false,
+          "railProgressValue": "0",
+          "railProgressInline": "0",
+          "railProgressTransform": "matrix(0, 0, 0, 0, 0, 0)",
+          "activeSteps": [
+            false,
+            false,
+            false,
+            false
+          ],
+          "activeCount": 0,
+          "scrollY": 1020,
+          "mainTextLength": 1649,
+          "h1Visible": true,
+          "heroCtaVisible": true,
+          "storyTabVisible": true,
+          "stepPanelVisible": true,
+          "runningAnimations": 0
+        },
+        {
+          "label": "cycle2:reduce-after-scroll",
+          "dataMotion": "reduced",
+          "heroShift": "0",
+          "heroShiftInline": "0",
+          "heroCopy": {
+            "translate": "none",
+            "transform": "none"
+          },
+          "heroLens": {
+            "translate": "none",
+            "transform": "none"
+          },
+          "progressTransform": "matrix(0, 0, 0, 0, 0, 0)",
+          "progressInline": "scaleX(0)",
+          "progressDataVisible": false,
+          "railProgressValue": "0",
+          "railProgressInline": "0",
+          "railProgressTransform": "matrix(0, 0, 0, 0, 0, 0)",
+          "activeSteps": [
+            false,
+            false,
+            false,
+            false
+          ],
+          "activeCount": 0,
+          "scrollY": 1400,
+          "mainTextLength": 1649,
+          "h1Visible": true,
+          "heroCtaVisible": true,
+          "storyTabVisible": true,
+          "stepPanelVisible": true,
+          "runningAnimations": 0
+        },
+        {
+          "label": "cycle2:normal-restored",
+          "dataMotion": "on",
+          "heroShift": "1.000",
+          "heroShiftInline": "1.000",
+          "heroCopy": {
+            "translate": "0px 10px",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)"
+          },
+          "heroLens": {
+            "translate": "0px -18px",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)"
+          },
+          "progressTransform": "matrix(0.3188, 0, 0, 1, 0, 0)",
+          "progressInline": "scaleX(0.3188)",
+          "progressDataVisible": true,
+          "railProgressValue": "1.000",
+          "railProgressInline": "1.000",
+          "railProgressTransform": "matrix(1, 0, 0, 1, 0, 0)",
+          "activeSteps": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "activeCount": 4,
+          "scrollY": 1140,
+          "mainTextLength": 1649,
+          "h1Visible": true,
+          "heroCtaVisible": true,
+          "storyTabVisible": true,
+          "stepPanelVisible": true,
+          "runningAnimations": 4
+        },
+        {
+          "label": "cycle3:reduce",
+          "dataMotion": "reduced",
+          "heroShift": "0",
+          "heroShiftInline": "0",
+          "heroCopy": {
+            "translate": "none",
+            "transform": "none"
+          },
+          "heroLens": {
+            "translate": "none",
+            "transform": "none"
+          },
+          "progressTransform": "matrix(0, 0, 0, 0, 0, 0)",
+          "progressInline": "scaleX(0)",
+          "progressDataVisible": false,
+          "railProgressValue": "0",
+          "railProgressInline": "0",
+          "railProgressTransform": "matrix(0, 0, 0, 0, 0, 0)",
+          "activeSteps": [
+            false,
+            false,
+            false,
+            false
+          ],
+          "activeCount": 0,
+          "scrollY": 1140,
+          "mainTextLength": 1649,
+          "h1Visible": true,
+          "heroCtaVisible": true,
+          "storyTabVisible": true,
+          "stepPanelVisible": true,
+          "runningAnimations": 0
+        },
+        {
+          "label": "cycle3:reduce-after-scroll",
+          "dataMotion": "reduced",
+          "heroShift": "0",
+          "heroShiftInline": "0",
+          "heroCopy": {
+            "translate": "none",
+            "transform": "none"
+          },
+          "heroLens": {
+            "translate": "none",
+            "transform": "none"
+          },
+          "progressTransform": "matrix(0, 0, 0, 0, 0, 0)",
+          "progressInline": "scaleX(0)",
+          "progressDataVisible": false,
+          "railProgressValue": "0",
+          "railProgressInline": "0",
+          "railProgressTransform": "matrix(0, 0, 0, 0, 0, 0)",
+          "activeSteps": [
+            false,
+            false,
+            false,
+            false
+          ],
+          "activeCount": 0,
+          "scrollY": 1400,
+          "mainTextLength": 1649,
+          "h1Visible": true,
+          "heroCtaVisible": true,
+          "storyTabVisible": true,
+          "stepPanelVisible": true,
+          "runningAnimations": 0
+        },
+        {
+          "label": "cycle3:normal-restored",
+          "dataMotion": "on",
+          "heroShift": "1.000",
+          "heroShiftInline": "1.000",
+          "heroCopy": {
+            "translate": "0px 10px",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)"
+          },
+          "heroLens": {
+            "translate": "0px -18px",
+            "transform": "matrix(1, 0, 0, 1, 0, 0.000143832)"
+          },
+          "progressTransform": "matrix(0.3523, 0, 0, 1, 0, 0)",
+          "progressInline": "scaleX(0.3523)",
+          "progressDataVisible": true,
+          "railProgressValue": "1.000",
+          "railProgressInline": "1.000",
+          "railProgressTransform": "matrix(1, 0, 0, 1, 0, 0)",
+          "activeSteps": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "activeCount": 4,
+          "scrollY": 1260,
+          "mainTextLength": 1649,
+          "h1Visible": true,
+          "heroCtaVisible": true,
+          "storyTabVisible": true,
+          "stepPanelVisible": true,
+          "runningAnimations": 4
+        },
+        {
+          "label": "normal:scroll400",
+          "dataMotion": "on",
+          "heroShift": "0.778",
+          "heroShiftInline": "0.778",
+          "heroCopy": {
+            "translate": "0px 7.78px",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)"
+          },
+          "heroLens": {
+            "translate": "0px -14.004px",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)"
+          },
+          "progressTransform": "matrix(0.1225, 0, 0, 1, 0, 0)",
+          "progressInline": "scaleX(0.1225)",
+          "progressDataVisible": true,
+          "railProgressValue": "0.425",
+          "railProgressInline": "0.425",
+          "railProgressTransform": "matrix(0.425, 0, 0, 1, 0, 0)",
+          "activeSteps": [
+            true,
+            true,
+            false,
+            false
+          ],
+          "activeCount": 2,
+          "scrollY": 438,
+          "mainTextLength": 1649,
+          "h1Visible": true,
+          "heroCtaVisible": true,
+          "storyTabVisible": true,
+          "stepPanelVisible": true,
+          "runningAnimations": 5
+        },
+        {
+          "label": "normal:scroll1200",
+          "dataMotion": "on",
+          "heroShift": "1.000",
+          "heroShiftInline": "1.000",
+          "heroCopy": {
+            "translate": "0px 10px",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)"
+          },
+          "heroLens": {
+            "translate": "0px -18px",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)"
+          },
+          "progressTransform": "matrix(0.3261, 0, 0, 1, 0, 0)",
+          "progressInline": "scaleX(0.3261)",
+          "progressDataVisible": true,
+          "railProgressValue": "1.000",
+          "railProgressInline": "1.000",
+          "railProgressTransform": "matrix(1, 0, 0, 1, 0, 0)",
+          "activeSteps": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "activeCount": 4,
+          "scrollY": 1166,
+          "mainTextLength": 1649,
+          "h1Visible": true,
+          "heroCtaVisible": true,
+          "storyTabVisible": true,
+          "stepPanelVisible": true,
+          "runningAnimations": 5
+        }
+      ],
+      "shiftA": "0.778",
+      "shiftB": "1.000",
+      "content": {
+        "mainTextLength": 1649,
+        "missing": [],
+        "storyTabs": 5,
+        "stageTabs": 3
+      },
+      "demoAfterSwitch": {
+        "panelTitle": "下一步建议，要能说清依据",
+        "selected": [
+          "story-tab-2"
+        ]
+      },
+      "stageAfterSwitch": {
+        "chipText": "无需操作",
+        "selected": [
+          "stage-tab-away"
+        ]
+      },
+      "evidence": {
+        "expanded": "true",
+        "items": 3,
+        "activeTag": "button"
+      },
+      "shotFile": "shots/round2-hot-final-normal.png"
+    },
+    "initialReduced": {
+      "initial": {
+        "dataMotion": "reduced",
+        "heroShift": "0",
+        "heroShiftInline": "0",
+        "heroCopy": {
+          "translate": "none",
+          "transform": "none"
+        },
+        "heroLens": {
+          "translate": "none",
+          "transform": "none"
+        },
+        "progressTransform": "matrix(0, 0, 0, 0, 0, 0)",
+        "progressInline": "scaleX(0)",
+        "progressDataVisible": false,
+        "railProgressValue": "0",
+        "railProgressInline": "0",
+        "railProgressTransform": "matrix(0, 0, 0, 0, 0, 0)",
+        "activeSteps": [
+          false,
+          false,
+          false,
+          false
+        ],
+        "activeCount": 0,
+        "scrollY": 0,
+        "mainTextLength": 1649,
+        "h1Visible": true,
+        "heroCtaVisible": true,
+        "storyTabVisible": true,
+        "stepPanelVisible": true,
+        "runningAnimations": 0
+      },
+      "afterScroll": {
+        "dataMotion": "reduced",
+        "heroShift": "0",
+        "heroShiftInline": "0",
+        "heroCopy": {
+          "translate": "none",
+          "transform": "none"
+        },
+        "heroLens": {
+          "translate": "none",
+          "transform": "none"
+        },
+        "progressTransform": "matrix(0, 0, 0, 0, 0, 0)",
+        "progressInline": "scaleX(0)",
+        "progressDataVisible": false,
+        "railProgressValue": "0",
+        "railProgressInline": "0",
+        "railProgressTransform": "matrix(0, 0, 0, 0, 0, 0)",
+        "activeSteps": [
+          false,
+          false,
+          false,
+          false
+        ],
+        "activeCount": 0,
+        "scrollY": 1200,
+        "mainTextLength": 1649,
+        "h1Visible": true,
+        "heroCtaVisible": true,
+        "storyTabVisible": true,
+        "stepPanelVisible": true,
+        "runningAnimations": 0
+      },
+      "content": {
+        "mainTextLength": 1649,
+        "missing": []
+      },
+      "stage": {
+        "chipText": "核对示例",
+        "selected": [
+          "stage-tab-during"
+        ]
+      },
+      "shotFile": "shots/round2-initial-reduced.png"
+    },
+    "keyboardPath": {
+      "sequence": [
+        {
+          "tag": "a",
+          "id": "",
+          "name": "跳到主要内容",
+          "href": "#main-content",
+          "outline": "auto 1px",
+          "focusVisible": true,
+          "rect": {
+            "x": 10,
+            "y": -1,
+            "w": 116,
+            "h": 44
+          }
+        },
+        {
+          "tag": "a",
+          "id": "",
+          "name": "忆程 ProjectMemo 首页",
+          "href": "/",
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 100,
+            "y": 14,
+            "w": 179,
+            "h": 28
+          }
+        },
+        {
+          "tag": "a",
+          "id": "",
+          "name": "产品体验",
+          "href": "#experience",
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 897,
+            "y": 6,
+            "w": 56,
+            "h": 44
+          }
+        },
+        {
+          "tag": "a",
+          "id": "",
+          "name": "长期委托",
+          "href": "#missions",
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 977,
+            "y": 6,
+            "w": 56,
+            "h": 44
+          }
+        },
+        {
+          "tag": "a",
+          "id": "",
+          "name": "使用场景",
+          "href": "#moments",
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 1057,
+            "y": 6,
+            "w": 56,
+            "h": 44
+          }
+        },
+        {
+          "tag": "a",
+          "id": "",
+          "name": "决赛演示",
+          "href": "#demo",
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 1137,
+            "y": 6,
+            "w": 56,
+            "h": 44
+          }
+        },
+        {
+          "tag": "a",
+          "id": "",
+          "name": "进入工作台",
+          "href": "/focus",
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 1217,
+            "y": 6,
+            "w": 123,
+            "h": 44
+          }
+        },
+        {
+          "tag": "a",
+          "id": "",
+          "name": "体验一段项目接续",
+          "href": "#experience",
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 110,
+            "y": 457,
+            "w": 188,
+            "h": 48
+          }
+        },
+        {
+          "tag": "a",
+          "id": "",
+          "name": "进入工作台",
+          "href": "/login?from=%2Ffocus",
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 310,
+            "y": 457,
+            "w": 143,
+            "h": 48
+          }
+        },
+        {
+          "tag": "button",
+          "id": "stage-tab-back",
+          "name": "03回来后",
+          "href": null,
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 1125,
+            "y": 205,
+            "w": 196,
+            "h": 44
+          }
+        },
+        {
+          "tag": "div",
+          "id": "stage-panel",
+          "name": "原委托用已有材料整理一份阶段汇报原任务与草稿都留在原处依据比赛材料、任务安排、老师建议3 条来源可回",
+          "href": null,
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 716,
+            "y": 255,
+            "w": 613,
+            "h": 358
+          }
+        },
+        {
+          "tag": "button",
+          "id": "",
+          "name": "查看依据",
+          "href": null,
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 738,
+            "y": 553,
+            "w": 106,
+            "h": 44
+          }
+        },
+        {
+          "tag": "a",
+          "id": "",
+          "name": "回到原委托",
+          "href": "#experience",
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 1220,
+            "y": 553,
+            "w": 88,
+            "h": 44
+          }
+        },
+        {
+          "tag": "summary",
+          "id": "",
+          "name": "什么情况下才会自动接续？",
+          "href": null,
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 110,
+            "y": 1166,
+            "w": 581,
+            "h": 44
+          }
+        },
+        {
+          "tag": "button",
+          "id": "",
+          "name": "重置示例",
+          "href": null,
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 1222,
+            "y": 1390,
+            "w": 83,
+            "h": 44
+          }
+        },
+        {
+          "tag": "button",
+          "id": "story-tab-0",
+          "name": "1查看记录",
+          "href": null,
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 131,
+            "y": 1420,
+            "w": 236,
+            "h": 56
+          }
+        },
+        {
+          "tag": "div",
+          "id": "story-panel",
+          "name": "已有示例素材先看看上次留下了什么这份示例项目保留了任务安排、比赛材料和老师建议。先读原文，再判断现在",
+          "href": null,
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 111,
+            "y": 1443,
+            "w": 1218,
+            "h": 510
+          }
+        },
+        {
+          "tag": "button",
+          "id": "",
+          "name": "查看原文：任务安排",
+          "href": null,
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 605,
+            "y": 1566,
+            "w": 136,
+            "h": 44
+          }
+        },
+        {
+          "tag": "button",
+          "id": "",
+          "name": "查看原文：比赛材料",
+          "href": null,
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 605,
+            "y": 1539,
+            "w": 136,
+            "h": 44
+          }
+        },
+        {
+          "tag": "button",
+          "id": "",
+          "name": "查看原文：老师建议",
+          "href": null,
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 605,
+            "y": 1618,
+            "w": 136,
+            "h": 44
+          }
+        },
+        {
+          "tag": "button",
+          "id": "",
+          "name": "下一步",
+          "href": null,
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 1261,
+            "y": 1581,
+            "w": 44,
+            "h": 44
+          }
+        },
+        {
+          "tag": "button",
+          "id": "",
+          "name": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器",
+          "href": null,
+          "outline": "solid 2px",
+          "focusVisible": true,
+          "rect": {
+            "x": 757,
+            "y": 2721,
+            "w": 572,
+            "h": 321
+          }
+        }
+      ]
+    },
+    "skipLink": [
+      {
+        "viewport": "1440x900",
+        "focused": {
+          "tag": "a",
+          "text": "跳到主要内容",
+          "rect": {
+            "x": 10,
+            "y": 7,
+            "w": 116,
+            "h": 44
+          },
+          "outline": "auto 1px"
+        },
+        "after": {
+          "hash": "#main-content",
+          "activeTag": "main",
+          "mainHasFocus": true,
+          "mainTabIndex": "-1",
+          "headerBottom": 57,
+          "firstTextTop": 120,
+          "h1Top": 166,
+          "covered": false,
+          "scrollY": 0
+        }
+      },
+      {
+        "viewport": "390x844",
+        "focused": {
+          "tag": "a",
+          "text": "跳到主要内容",
+          "rect": {
+            "x": 10,
+            "y": 9,
+            "w": 116,
+            "h": 44
+          },
+          "outline": "auto 1px"
+        },
+        "after": {
+          "hash": "#main-content",
+          "activeTag": "main",
+          "mainHasFocus": true,
+          "mainTabIndex": "-1",
+          "headerBottom": 57,
+          "firstTextTop": 77,
+          "h1Top": 112,
+          "covered": false,
+          "scrollY": 0
+        }
+      },
+      {
+        "viewport": "720x450(200%)",
+        "focused": {
+          "tag": "a",
+          "text": "跳到主要内容",
+          "rect": {
+            "x": 10,
+            "y": 10,
+            "w": 116,
+            "h": 44
+          },
+          "outline": "auto 1px"
+        },
+        "after": {
+          "hash": "#main-content",
+          "activeTag": "main",
+          "mainHasFocus": true,
+          "mainTabIndex": "-1",
+          "headerBottom": 57,
+          "firstTextTop": 77,
+          "h1Top": 112,
+          "covered": false,
+          "scrollY": 0
+        }
+      }
+    ],
+    "storyTabs": {
+      "initial": {
+        "selected": [
+          "story-tab-0"
+        ],
+        "tabIndexes": [
+          "story-tab-0:0",
+          "story-tab-1:-1",
+          "story-tab-2:-1",
+          "story-tab-3:-1",
+          "story-tab-4:-1"
+        ],
+        "panelLabelledBy": "story-tab-0",
+        "panelTitle": "先看看上次留下了什么",
+        "activeId": null
+      },
+      "keys": [
+        {
+          "key": "ArrowRight",
+          "selected": [
+            "story-tab-1"
+          ],
+          "tabIndexes": [
+            "story-tab-0:-1",
+            "story-tab-1:0",
+            "story-tab-2:-1",
+            "story-tab-3:-1",
+            "story-tab-4:-1"
+          ],
+          "panelLabelledBy": "story-tab-1",
+          "panelTitle": "记录说了什么，哪些还不知道",
+          "activeId": "story-tab-1"
+        },
+        {
+          "key": "ArrowRight",
+          "selected": [
+            "story-tab-2"
+          ],
+          "tabIndexes": [
+            "story-tab-0:-1",
+            "story-tab-1:-1",
+            "story-tab-2:0",
+            "story-tab-3:-1",
+            "story-tab-4:-1"
+          ],
+          "panelLabelledBy": "story-tab-2",
+          "panelTitle": "下一步建议，要能说清依据",
+          "activeId": "story-tab-2"
+        },
+        {
+          "key": "End",
+          "selected": [
+            "story-tab-4"
+          ],
+          "tabIndexes": [
+            "story-tab-0:-1",
+            "story-tab-1:-1",
+            "story-tab-2:-1",
+            "story-tab-3:-1",
+            "story-tab-4:0"
+          ],
+          "panelLabelledBy": "story-tab-4",
+          "panelTitle": "完成了什么，由实际结果来说明",
+          "activeId": "story-tab-4"
+        },
+        {
+          "key": "Home",
+          "selected": [
+            "story-tab-0"
+          ],
+          "tabIndexes": [
+            "story-tab-0:0",
+            "story-tab-1:-1",
+            "story-tab-2:-1",
+            "story-tab-3:-1",
+            "story-tab-4:-1"
+          ],
+          "panelLabelledBy": "story-tab-0",
+          "panelTitle": "先看看上次留下了什么",
+          "activeId": "story-tab-0"
+        },
+        {
+          "key": "ArrowLeft",
+          "selected": [
+            "story-tab-4"
+          ],
+          "tabIndexes": [
+            "story-tab-0:-1",
+            "story-tab-1:-1",
+            "story-tab-2:-1",
+            "story-tab-3:-1",
+            "story-tab-4:0"
+          ],
+          "panelLabelledBy": "story-tab-4",
+          "panelTitle": "完成了什么，由实际结果来说明",
+          "activeId": "story-tab-4"
+        }
+      ]
+    },
+    "dialog": {
+      "opened": {
+        "open": true,
+        "modal": true,
+        "labelledby": "source-title",
+        "labelText": "任务安排",
+        "overflowY": "auto",
+        "active": {
+          "tag": "button",
+          "label": "关闭原始记录"
+        }
+      },
+      "aria": "- dialog \"任务安排\":\n  - paragraph: 示例原始记录\n  - button \"关闭原始记录\"\n  - heading \"任务安排\" [level=3]\n  - blockquote: 目前还没有完整 Demo，需要先完成项目创建、碎片捕获和成果生成闭环。\n  - paragraph: 原文取自项目自带的演示素材，不是在线用户的个人记录。",
+      "afterEsc": {
+        "open": false,
+        "label": "查看原文：任务安排"
+      },
+      "afterBackdrop": {
+        "open": false,
+        "label": "查看原文：任务安排"
+      },
+      "afterClose": {
+        "open": false,
+        "label": "查看原文：任务安排"
+      },
+      "long": {
+        "clientHeight": 400,
+        "scrollHeight": 479,
+        "scrollable": true,
+        "rect": {
+          "top": 24,
+          "bottom": 426
+        },
+        "viewport": {
+          "w": 720,
+          "h": 450
+        }
+      },
+      "longScroll": {
+        "scrollTop": 79,
+        "canScroll": true
+      }
+    },
+    "anchors": {
+      "direct": {
+        "headerBottom": 57,
+        "experienceTop": 80
+      },
+      "viaCta": {
+        "headerBottom": 57,
+        "experienceTop": 80
+      },
+      "nav": {
+        "长期委托": {
+          "headerBottom": 57,
+          "targetTop": 80
+        },
+        "使用场景": {
+          "headerBottom": 57,
+          "targetTop": 80
+        },
+        "决赛演示": {
+          "headerBottom": 57,
+          "targetTop": 80
+        }
+      },
+      "margins": [
+        {
+          "id": "experience",
+          "scrollMarginTop": "80px"
+        },
+        {
+          "id": "missions",
+          "scrollMarginTop": "80px"
+        },
+        {
+          "id": "moments",
+          "scrollMarginTop": "80px"
+        },
+        {
+          "id": "demo",
+          "scrollMarginTop": "80px"
+        }
+      ],
+      "shotFile": "shots/round2-anchor-experience.png"
+    },
+    "overflow": [
+      {
+        "name": "320x640",
+        "width": 320,
+        "height": 640,
+        "innerWidth": 320,
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "overflow": false,
+        "offenders": []
+      },
+      {
+        "name": "360x740",
+        "width": 360,
+        "height": 740,
+        "innerWidth": 360,
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "overflow": false,
+        "offenders": []
+      },
+      {
+        "name": "390x844",
+        "width": 390,
+        "height": 844,
+        "innerWidth": 390,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "overflow": false,
+        "offenders": []
+      },
+      {
+        "name": "768x1024",
+        "width": 768,
+        "height": 1024,
+        "innerWidth": 768,
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "overflow": false,
+        "offenders": []
+      },
+      {
+        "name": "1024x768",
+        "width": 1024,
+        "height": 768,
+        "innerWidth": 1024,
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "overflow": false,
+        "offenders": []
+      },
+      {
+        "name": "1280x800",
+        "width": 1280,
+        "height": 800,
+        "innerWidth": 1280,
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "overflow": false,
+        "offenders": []
+      },
+      {
+        "name": "1440x900",
+        "width": 1440,
+        "height": 900,
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "overflow": false,
+        "offenders": []
+      },
+      {
+        "name": "720x450(200%)",
+        "width": 720,
+        "height": 450,
+        "innerWidth": 720,
+        "scrollWidth": 720,
+        "clientWidth": 720,
+        "overflow": false,
+        "offenders": []
+      }
+    ],
+    "fontsContrast": {
+      "light_1440x900": {
+        "smallCount": 0,
+        "small": [],
+        "lowCount": 0,
+        "low": []
+      },
+      "light_judgment_1440x900": {
+        "smallCount": 0,
+        "small": []
+      },
+      "light_390x844": {
+        "smallCount": 0,
+        "small": [],
+        "lowCount": 0,
+        "low": []
+      },
+      "light_judgment_390x844": {
+        "smallCount": 0,
+        "small": []
+      },
+      "light_320x640": {
+        "smallCount": 0,
+        "small": [],
+        "lowCount": 0,
+        "low": []
+      },
+      "light_judgment_320x640": {
+        "smallCount": 0,
+        "small": []
+      }
+    },
+    "darkTheme": {
+      "state": {
+        "htmlClass": "dark",
+        "bodyBg": "rgb(21, 30, 28)",
+        "toggleCount": 0
+      },
+      "desktop": {
+        "smallCount": 0,
+        "small": [],
+        "lowCount": 1,
+        "low": [
+          {
+            "text": "公开视频 · Bilibili",
+            "fontSize": 12.8,
+            "contrast": 4.03,
+            "path": "div.home-module__txgM7a__videoPlayer > div.home-module__txgM7a__videoStage > button.home-module__txgM7a__videoFacade > span.home-module__txgM7a__videoFacadeCorner"
+          }
+        ]
+      },
+      "mobile": {
+        "smallCount": 0,
+        "small": [],
+        "lowCount": 1,
+        "low": [
+          {
+            "text": "公开视频 · Bilibili",
+            "fontSize": 12.16,
+            "contrast": 4.03,
+            "path": "div.home-module__txgM7a__videoPlayer > div.home-module__txgM7a__videoStage > button.home-module__txgM7a__videoFacade > span.home-module__txgM7a__videoFacadeCorner"
+          }
+        ]
+      },
+      "shotFile": "shots/round2-dark-1440.png",
+      "shotMobile": "shots/round2-dark-390.png"
+    },
+    "accountPages": {
+      "light:/login": {
+        "desktop": {
+          "title": "登录忆程｜忆程 ProjectMemo",
+          "htmlClass": "light",
+          "header": {
+            "height": 57,
+            "position": "sticky"
+          },
+          "main": {
+            "top": 57,
+            "width": 1040
+          },
+          "navLabel": "首页导航",
+          "cta": {
+            "text": "返回官网",
+            "fontSize": 12.8,
+            "h": 44,
+            "w": 82
+          },
+          "leak": {
+            "homeMain": false,
+            "hero": false,
+            "storyFrame": false
+          },
+          "overflow": false,
+          "formFields": 2,
+          "skipTarget": true
+        },
+        "mobile": {
+          "headerHeight": 57,
+          "cta": {
+            "text": "返回官网",
+            "fontSize": 12.8,
+            "h": 44,
+            "w": 74
+          },
+          "overflow": false,
+          "formFields": 2
+        },
+        "shotDesktop": "shots/round2-account-light-login-1440.png",
+        "shotMobile": "shots/round2-account-light-login-390.png"
+      },
+      "light:/register": {
+        "desktop": {
+          "title": "创建账号｜忆程 ProjectMemo",
+          "htmlClass": "light",
+          "header": {
+            "height": 57,
+            "position": "sticky"
+          },
+          "main": {
+            "top": 57,
+            "width": 1040
+          },
+          "navLabel": "首页导航",
+          "cta": {
+            "text": "返回官网",
+            "fontSize": 12.8,
+            "h": 44,
+            "w": 82
+          },
+          "leak": {
+            "homeMain": false,
+            "hero": false,
+            "storyFrame": false
+          },
+          "overflow": false,
+          "formFields": 4,
+          "skipTarget": true
+        },
+        "mobile": {
+          "headerHeight": 57,
+          "cta": {
+            "text": "返回官网",
+            "fontSize": 12.8,
+            "h": 44,
+            "w": 74
+          },
+          "overflow": false,
+          "formFields": 4
+        },
+        "shotDesktop": "shots/round2-account-light-register-1440.png",
+        "shotMobile": "shots/round2-account-light-register-390.png"
+      },
+      "light:/forgot-password": {
+        "desktop": {
+          "title": "找回密码｜忆程 ProjectMemo",
+          "htmlClass": "light",
+          "header": {
+            "height": 57,
+            "position": "sticky"
+          },
+          "main": {
+            "top": 57,
+            "width": 1040
+          },
+          "navLabel": "首页导航",
+          "cta": {
+            "text": "返回官网",
+            "fontSize": 12.8,
+            "h": 44,
+            "w": 82
+          },
+          "leak": {
+            "homeMain": false,
+            "hero": false,
+            "storyFrame": false
+          },
+          "overflow": false,
+          "formFields": 1,
+          "skipTarget": true
+        },
+        "mobile": {
+          "headerHeight": 57,
+          "cta": {
+            "text": "返回官网",
+            "fontSize": 12.8,
+            "h": 44,
+            "w": 74
+          },
+          "overflow": false,
+          "formFields": 1
+        },
+        "shotDesktop": "shots/round2-account-light-forgot-password-1440.png",
+        "shotMobile": "shots/round2-account-light-forgot-password-390.png"
+      },
+      "dark:/login": {
+        "desktop": {
+          "title": "登录忆程｜忆程 ProjectMemo",
+          "htmlClass": "light",
+          "header": {
+            "height": 57,
+            "position": "sticky"
+          },
+          "main": {
+            "top": 57,
+            "width": 1040
+          },
+          "navLabel": "首页导航",
+          "cta": {
+            "text": "返回官网",
+            "fontSize": 12.8,
+            "h": 44,
+            "w": 82
+          },
+          "leak": {
+            "homeMain": false,
+            "hero": false,
+            "storyFrame": false
+          },
+          "overflow": false,
+          "formFields": 2,
+          "skipTarget": true
+        },
+        "mobile": {
+          "headerHeight": 57,
+          "cta": {
+            "text": "返回官网",
+            "fontSize": 12.8,
+            "h": 44,
+            "w": 74
+          },
+          "overflow": false,
+          "formFields": 2
+        },
+        "shotDesktop": "shots/round2-account-dark-login-1440.png",
+        "shotMobile": "shots/round2-account-dark-login-390.png"
+      },
+      "dark:/register": {
+        "desktop": {
+          "title": "创建账号｜忆程 ProjectMemo",
+          "htmlClass": "light",
+          "header": {
+            "height": 57,
+            "position": "sticky"
+          },
+          "main": {
+            "top": 57,
+            "width": 1040
+          },
+          "navLabel": "首页导航",
+          "cta": {
+            "text": "返回官网",
+            "fontSize": 12.8,
+            "h": 44,
+            "w": 82
+          },
+          "leak": {
+            "homeMain": false,
+            "hero": false,
+            "storyFrame": false
+          },
+          "overflow": false,
+          "formFields": 4,
+          "skipTarget": true
+        },
+        "mobile": {
+          "headerHeight": 57,
+          "cta": {
+            "text": "返回官网",
+            "fontSize": 12.8,
+            "h": 44,
+            "w": 74
+          },
+          "overflow": false,
+          "formFields": 4
+        },
+        "shotDesktop": "shots/round2-account-dark-register-1440.png",
+        "shotMobile": "shots/round2-account-dark-register-390.png"
+      },
+      "dark:/forgot-password": {
+        "desktop": {
+          "title": "找回密码｜忆程 ProjectMemo",
+          "htmlClass": "light",
+          "header": {
+            "height": 57,
+            "position": "sticky"
+          },
+          "main": {
+            "top": 57,
+            "width": 1040
+          },
+          "navLabel": "首页导航",
+          "cta": {
+            "text": "返回官网",
+            "fontSize": 12.8,
+            "h": 44,
+            "w": 82
+          },
+          "leak": {
+            "homeMain": false,
+            "hero": false,
+            "storyFrame": false
+          },
+          "overflow": false,
+          "formFields": 1,
+          "skipTarget": true
+        },
+        "mobile": {
+          "headerHeight": 57,
+          "cta": {
+            "text": "返回官网",
+            "fontSize": 12.8,
+            "h": 44,
+            "w": 74
+          },
+          "overflow": false,
+          "formFields": 1
+        },
+        "shotDesktop": "shots/round2-account-dark-forgot-password-1440.png",
+        "shotMobile": "shots/round2-account-dark-forgot-password-390.png"
+      }
+    },
+    "externalLinks": {
+      "links": [
+        {
+          "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+          "target": "_blank",
+          "rel": "noopener noreferrer",
+          "name": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+          "mentionsExternal": true,
+          "mentionsNewWindow": true,
+          "hasNoopener": true,
+          "hasNoreferrer": true,
+          "w": 165,
+          "h": 44,
+          "path": "div.home-module__txgM7a__videoPlayer > div.home-module__txgM7a__videoBelow > div.home-module__txgM7a__videoBelowLinks > a.home-module__txgM7a__videoOpenLink"
+        },
+        {
+          "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+          "target": "_blank",
+          "rel": "noopener noreferrer",
+          "name": "决赛演示（Bilibili，在新窗口打开）",
+          "mentionsExternal": true,
+          "mentionsNewWindow": true,
+          "hasNoopener": true,
+          "hasNoreferrer": true,
+          "w": 72,
+          "h": 44,
+          "path": "footer.home-module__txgM7a__footer > div.home-module__txgM7a__shell.home-module__txgM7a__footerInner > nav.home-module__txgM7a__footerNav > a"
+        }
+      ],
+      "tabStops": [
+        {
+          "name": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+          "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+          "outline": "solid 2px",
+          "focusVisible": true
+        },
+        {
+          "name": "决赛演示（Bilibili，在新窗口打开）",
+          "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+          "outline": "solid 2px",
+          "focusVisible": true
+        }
+      ],
+      "media": {
+        "video": 0,
+        "iframe": 0,
+        "autoplay": false
+      }
+    },
+    "networkOnLoad": {
+      "total": 27,
+      "externalCount": 0,
+      "external": [],
+      "bilibiliRequests": 0
+    },
+    "heroEntranceNormal": {
+      "reduced": false,
+      "early": {
+        "copy": {
+          "opacity": "0.996544",
+          "translate": "none",
+          "animationName": "home-module__txgM7a__heroRise",
+          "animationDuration": "0.62s",
+          "animationDelay": "0.04s"
+        },
+        "lens": {
+          "opacity": "0.980523",
+          "translate": "none",
+          "animationName": "home-module__txgM7a__heroRise",
+          "animationDuration": "0.62s",
+          "animationDelay": "0.14s"
+        },
+        "running": [
+          {
+            "name": "home-module__txgM7a__heroRise",
+            "duration": 620
+          },
+          {
+            "name": "home-module__txgM7a__heroRise",
+            "duration": 620
+          },
+          {
+            "name": "home-module__txgM7a__lensRowsNext",
+            "duration": 240
+          }
+        ]
+      },
+      "settled": {
+        "copy": {
+          "opacity": "1",
+          "translate": "0px"
+        },
+        "lens": {
+          "opacity": "1",
+          "translate": "0px"
+        },
+        "hidden": [],
+        "running": 3
+      },
+      "shotFile": "shots/round2-hero-entrance-normal.png"
+    },
+    "heroEntranceReduced": {
+      "reduced": true,
+      "early": {
+        "copy": {
+          "opacity": "1",
+          "translate": "none",
+          "animationName": "none",
+          "animationDuration": "0s",
+          "animationDelay": "0s"
+        },
+        "lens": {
+          "opacity": "1",
+          "translate": "none",
+          "animationName": "none",
+          "animationDuration": "0s",
+          "animationDelay": "0s"
+        },
+        "running": []
+      },
+      "settled": {
+        "copy": {
+          "opacity": "1",
+          "translate": "none"
+        },
+        "lens": {
+          "opacity": "1",
+          "translate": "none"
+        },
+        "hidden": [],
+        "running": 0
+      },
+      "shotFile": "shots/round2-hero-entrance-reduced.png"
+    },
+    "evidenceToggle": {
+      "collapsed": {
+        "expanded": "false",
+        "btnText": "查看依据",
+        "wrapTextLength": 0,
+        "panelPresent": false,
+        "items": 0,
+        "heroCopyTop": 112,
+        "active": {
+          "tag": "body",
+          "ariaExpanded": null
+        }
+      },
+      "collapsedAria": "",
+      "expanded": {
+        "expanded": "true",
+        "btnText": "收起依据",
+        "wrapTextLength": 179,
+        "panelPresent": true,
+        "items": 3,
+        "heroCopyTop": 112,
+        "active": {
+          "tag": "button",
+          "ariaExpanded": "true"
+        }
+      },
+      "expandedAria": "- paragraph: 原文来自内置公开素材，不读取你的项目。\n- list:\n  - listitem:\n    - paragraph: 比赛材料 示例素材 · 比赛要求摘录\n    - text: 初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。\n  - listitem:\n    - paragraph: 任务安排 示例素材 · 项目任务记录\n    - text: 目前还没有完整 Demo，需要先完成项目创建、碎片捕获和成果生成闭环。\n  - listitem:\n    - paragraph: 老师建议 示例素材 · 指导意见摘录\n    - text: 老师建议作品不要叫普通学习助手，要突出项目制学习和知识资产复用。",
+      "afterSpace": {
+        "expanded": "false",
+        "btnText": "查看依据",
+        "wrapTextLength": 0,
+        "panelPresent": false,
+        "items": 0,
+        "heroCopyTop": 112,
+        "active": {
+          "tag": "button",
+          "ariaExpanded": "false"
+        }
+      },
+      "heroCopyTopDelta": 0,
+      "shotFile": "shots/round2-evidence-toggle.png"
+    },
+    "fontZoom": {
+      "data": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "overflow": false,
+        "clipped": []
+      },
+      "shotFile": "shots/round2-font-zoom-200.png"
+    }
+  },
+  "errors": [],
+  "consoleErrors": []
+}

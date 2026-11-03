@@ -1,0 +1,79 @@
+[
+  {
+    "label": "start",
+    "dataMotion": "on",
+    "matches": false,
+    "events": []
+  },
+  {
+    "label": "after-reduce-1",
+    "dataMotion": "reduced",
+    "matches": true,
+    "events": [
+      {
+        "matches": true,
+        "at": 1793689953120
+      }
+    ]
+  },
+  {
+    "label": "after-nopref",
+    "dataMotion": "on",
+    "matches": false,
+    "events": [
+      {
+        "matches": true,
+        "at": 1793689953120
+      },
+      {
+        "matches": false,
+        "at": 1793689954372
+      }
+    ]
+  },
+  {
+    "label": "after-reduce-2",
+    "dataMotion": "reduced",
+    "matches": true,
+    "events": [
+      {
+        "matches": true,
+        "at": 1793689953120
+      },
+      {
+        "matches": false,
+        "at": 1793689954372
+      },
+      {
+        "matches": true,
+        "at": 1793689955557
+      }
+    ]
+  },
+  {
+    "label": "after-nopref-2",
+    "dataMotion": "on",
+    "matches": false,
+    "events": [
+      {
+        "matches": true,
+        "at": 1793689953120
+      },
+      {
+        "matches": false,
+        "at": 1793689954372
+      },
+      {
+        "matches": true,
+        "at": 1793689955557
+      },
+      {
+        "matches": false,
+        "at": 1793689956763
+      }
+    ]
+  }
+]
+facade count 1
+iframe1 1
+iframe2 1 src https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1

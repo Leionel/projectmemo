@@ -1,0 +1,85 @@
+[PASS] C-01-hero-boundary-note: {"heroNote":"公开示例 · 不调用模型 · 不写入你的项目。"}
+[PASS] C-02-hero-lens-kicker: {"occurrences":2}
+[PASS] C-03-lens-foot-boundary: {"foot":"冻结示例·不调用模型·与下方五步示例使用同一份素材"}
+[PASS] C-04-demo-boundary-deferred: {"note":"authoritative check C-04b after demo step-5 interaction"}
+[PASS] C-05-identity-same-project: {"occurrences":2}
+[PASS] C-06-identity-same-mission: {"occurrences":3}
+[PASS] C-07-same-sources: {"found":["比赛材料","任务安排","老师建议"]}
+[PASS] C-08-same-gap: {"occurrences":2}
+[PASS] C-09-old-hero-images-absent: {"imgs":[{"src":"http://127.0.0.1:34111/logo.png","alt":"","w":1254,"h":1254}]}
+[PASS] C-10-no-iframe-media-autoplay: {"iframes":0,"media":0,"autoplay":0}
+[PASS] C-11a-video-link-attributes: {"videoLinks":[{"text":"在 Bilibili 打开（新窗口）","href":"https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b","target":"_blank","rel":"noopener noreferrer","ariaLabel":"在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）"},{"text":"决赛演示","href":"https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b
+[PASS] C-11b-main-video-cue: {"mainText":"在 Bilibili 打开（新窗口）","note":"当前链接文案『在 Bilibili 打开』可感知外部站；『新窗口』字样在区块说明中，链接本身无 aria/文字新窗口提示，见 C-43。"}
+[PASS] C-11c-footer-video-cue: {"footerText":"决赛演示","footerAria":"决赛演示（Bilibili，在新窗口打开）"}
+[PASS] C-43-main-video-external-window-cue: {"cue":"在 Bilibili 打开（新窗口） 在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）","externalSiteCue":true,"newWindowCue":true}
+[PASS] C-14-video-copy-no-metrics: {"videoSection":"05\n决赛演示\n\n看一遍决赛演示。\n\n2026 C4-AI 决赛演示视频。默认只显示本地画面；点击后在本页加载 Bilibili 官方播放器，也可以在新窗口打开。\n\n公开视频 · Bilibili\n2026 C4-AI 决赛演示视频\n点击加载播放器 · 在播放器内播放\n\n视频托管在 Bilibili；点击后在本页加载其官方播放器，加载前不请求外部站点。\n\n在 Bilibili 打开（新窗口）"}
+[PASS] C-15-video-copy-scope: {"videoSection":"05\n决赛演示\n\n看一遍决赛演示。\n\n2026 C4-AI 决赛演示视频。默认只显示本地画面；点击后在本页加载 Bilibili 官方播放器，也可以在新窗口打开。\n\n公开视频 · Bilibili\n2026 C4-AI 决赛演示视频\n点击加载播放器 · 在播放器内播放\n\n视频托管在 Bilibili；点击后在本页加载其官方播放器，加载前不请求外部站点。\n\n在 Bilibili 打开（新窗口）"}
+[PASS] C-16-fake-realtime-only-negated: [{"pattern":"正在执行","context":"务。 什么情况下才会自动接续？ 这一段是冻结的示例状态：不连接服务器，也不代表任务此刻正在执行。 02 公开交互示例 同一份素材，走一遍接续。 从原始记录到模拟回执：先看依据，再确认行动。所"},{"pattern":"自动接续","context":" 补充结果，或确认原计划 原任务、来源和草稿都保留，不另建一个新任务。 什么情况下才会自动接续？ 这一段是冻结的示例状态：不连接服务器，也不代表任务此刻正在执行。 02 公开交互示例 同一份"}]
+[PASS] C-17-no-fake-numbers: []
+[PASS] C-18-anti-slop: {"slopHits":[]}
+[PASS] C-19-no-fake-timestamps: {"hits":[]}
+[PASS] C-20-aria-tabs: {"heroTabs":[{"text":"01离开时","selected":"false"},{"text":"02期间","selected":"false"},{"text":"03回来后","selected":"true"}],"demoTabs":[{"text":"1查看记录","selected":"true"},{"text":"2核对依据","selected":"false"},{"text":"3查看判断","selected":"false"},{"text":"4确认行动","selected":"false"},{"text":"5填写回执","selected":"false"}],"heroPan
+[PASS] C-21-anchor-targets: {"experience":5,"hasMissions":true,"hasMoments":true,"hasDemo":true,"login":2,"focus":1}
+[PASS] C-22-keyboard-tabs: {"afterRight":"02 期间","afterEnd":"03 回来后","demoAfterEnd":"5 填写回执"}
+[PASS] C-20b-hero-stage-status-labels: {"stageStatuses":[{"index":0,"status":"无需操作","hasFrozenNote":true,"panelSnippet":"原委托\n用已有材料整理一份阶段汇报\n目标与结束条件已经确认\n依据\n比赛材料、任务安排、老师建议\n3 条来源已保存\n变化\n还没有开始核对\n离开期间不改变项目内容\n等你\n暂时不需要你操作\n关掉页面不会丢掉这条委托\n查看依据\n回到原委托"},{"index":1,"status":"核对示例","hasFrozenNote":true,"panelSnippet":"原委托\n用已有材料整理一份阶段汇报\n任务身份与范围不变\n依据\n已读 3 条来源
+[PASS] C-23-hero-evidence-sources: {"heroEvidence":"原文来自内置公开素材，不读取你的项目。\n\n比赛材料\n示例素材 · 比赛要求摘录\n\n初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。\n\n任务安排\n示例素材 · 项目任务记录\n\n目前还没有完整 Demo，需要先完成项目创建、碎片捕获和成果生成闭环。\n\n老师建议\n示例素材 · 指导意见摘录\n\n老师建议作品不要叫普通学习助手，要突出项目制学习和知识资产复用。"}
+[PASS] C-24-demo-step1-sources: {"step1":"已有示例素材\n\n先看看上次留下了什么\n\n这份示例项目保留了任务安排、比赛材料和老师建议。先读原文，再判断现在该做什么。\n\n1 / 5\n原始记录\n3 条内置素材\n任务安排\n\n目前还没有完整 Demo，需要先完成项目创建、碎片捕获和成果生成闭环。\n\n任务安排\n查看原文\n比赛材料\n\n初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。\n\n比赛材料\n查看原文\n老师建议\n\n老师建议作品不要叫普通学习助手，要突出项目制学习和知识资产复用。\n\n老师建议\n查看原文"}
+[PASS] C-25-demo-step1-label-consistency: {"note":"'参赛要求' 与来源标题 '比赛材料' 不一致（minor）","line":null}
+[PASS] C-30-demo-receipt-gate: {"gatePanel":"本页模拟操作\n\n完成了什么，由实际结果来说明\n\n确认示例行动后，试着填写一段模拟回执。保存后回到依据页，可以看到这段结果和原记录放在一起。\n\n5 / 5\n完成回执\n模拟数据\n\n先确认行动，再填写模拟回执。单纯切换到这一步，不会把行动标为完成。\n\n返回确认行动"}
+[PASS] C-31-demo-confirm-boundary: {"confirmPanel":"等待你的确认\n\n先核对提案，再决定是否创建\n\n建议还不是待办。查看行动要做什么、怎样记录结果，再由你确认。这里的操作只影响本页示例。\n\n4 / 5\n行动提案\n本页示例已确认\n验证一次资料录入到成果草稿的流程\n要做什么\n录入一条项目记录，查看生成的记忆，再整理一份成果草稿。\n完成后记录\n实际操作结果、失败位置，以及是否需要补充材料。\n来源\n任务安排\n查看原文\n比赛材料\n查看原文\n\n示例行动已确认，尚未填写完成结果。\n\n去填写模拟回执"}
+[PASS] C-04b-demo-boundary-labels-visible: {"step5Saved":"本页模拟操作\n\n完成了什么，由实际结果来说明\n\n确认示例行动后，试着填写一段模拟回执。保存后回到依据页，可以看到这段结果和原记录放在一起。\n\n5 / 5\n完成回执\n模拟数据\n\n模拟回执已加入本页示例\n\n审计示例：假设已录入一条记录并生成草稿，来源还需要逐项核对。\n\n结果由你在本页填写，未经过实际操作核验。\n\n回到依据页查看","demoFooterNote":"已有记录取自内置素材；建议与回执为本页演示。不会调用模型或修改个人项目。","noticeText":"模拟回执已保存在本页，刷新页面后不会保留。","demoLabels":["模拟数据","本页模拟操作","未
+[PASS] C-32-receipt-reflected-in-evidence: {"backEvidence":"已知与待确认\n\n记录说了什么，哪些还不知道\n\n历史记录和当前状态分别看。没有找到新的完成结果，不能据此断言功能现在仍未完成。\n\n2 / 5\n已有依据\n示例整理\n记录中提到\n\n初赛需要作品说明文档和演示材料。\n\n比赛材料\n查看原文\n已有任务安排\n\n先完成项目创建、资料录入和成果生成流程。\n\n任务安排\n查看原文\n当前状态待确认\n\n下方是你填写的模拟结果，真实完成情况仍需实际回执。\n\n新增模拟回执\n\n审计示例：假设已录入一条记录并生成草稿，来源还需要逐项核对。\n\n模拟回执\n查看原文"}
+[PASS] C-33-reset-boundary: {"resetNotice":"示例已重置，未修改任何个人项目。"}
+[PASS] C-34-no-legacy-hero-image: {"figure":0,"figcaption":0,"workspaceImgs":0}
+[PASS] C-35-video-intro-copy: {"videoSection":"05\n决赛演示\n\n看一遍决赛演示。\n\n2026 C4-AI 决赛演示视频。默认只显示本地画面；点击后在本页加载 Bilibili 官方播放器，也可以在新窗口打开。\n\n公开视频 · Bilibili\n2026 C4-AI 决赛演示视频\n点击加载播放器 · 在播放器内播放\n\n视频托管在 Bilibili；点击后在本页加载其官方播放器，加载前不请求外部站点。\n\n在 Bilibili 打开（新窗口）"}
+[FAIL] C-42-video-on-demand-embed-static: {"iframes":0,"media":0,"autoplay":0,"videoSection":"05\n决赛演示\n\n看一遍决赛演示。\n\n2026 C4-AI 决赛演示视频。默认只显示本地画面；点击后在本页加载 Bilibili 官方播放器，也可以在新窗口打开。\n\n公开视频 · Bilibili\n2026 C4-AI 决赛演示视频\n点击加载播放器 · 在播放器内播放\n\n视频托管在 Bilibili；点击后在本页加载其官方播放器，加载前不请求外部站点。\n\n在 Bilibili 打开（新窗口）"}
+[PASS] C-36-video-heading-scope: {"videoSection":"05\n决赛演示\n\n看一遍决赛演示。\n\n2026 C4-AI 决赛演示视频。默认只显示本地画面；点击后在本页加载 Bilibili 官方播放器，也可以在新窗口打开。\n\n公开视频 · Bilibili\n2026 C4-AI 决赛演示视频\n点击加载播放器 · 在播放器内播放\n\n视频托管在 Bilibili；点击后在本页加载其官方播放器，加载前不请求外部站点。\n\n在 Bilibili 打开（新窗口）"}
+[PASS] C-37-scroll-motion-decorative: {"motionBefore":{"dataMotion":"on","progressExists":true,"progressAriaHidden":"true","railProgress":"0.000","sectionsVisible":[{"id":"home-heading","opacity":"1","display":"block","visibility":"visible","height":662},{"id":"missions","opacity":"1","display":"block","visibility":"visible","height":634},{"id":"experience
+[PASS] C-26-reduced-motion: {"reduced":{"dataMotion":"reduced","lensRows":{"animationName":"none","animationDuration":"0s","transitionDuration":"0s"},"heroCopy":{"animationName":"none","animationDuration":"0s","transitionDuration":"0s"},"lens":{"animationName":"none","animationDuration":"0s","transitionDuration":"0s"},"railStepCount":4,"railSteps
+[FAIL] C-41-reduced-motion-hot-switch: {"hotStart":{"dataMotion":"on","matches":false,"activeRailSteps":4,"heroTranslate":"0px 10px","contentStillVisible":true},"hotReduced":{"dataMotion":"on","matches":true,"activeRailSteps":4,"heroTranslate":"none","contentStillVisible":true},"hotRestored":{"dataMotion":"on","matches":false,"activeRailSteps":4,"heroTransl
+[PASS] C-38-no-js-content-visible: {"status":200,"hasH1":true,"hasBoundary":true,"hasDemo":true,"hasClose":true,"hasRail":true,"bytes":67633}
+[PASS] C-39-continuation-conditions: {"detailsSummary":"什么情况下才会自动接续？","detailsText":"什么情况下才会自动接续？\n\n实际执行需要启用委托功能、配置模型并授权使用相关资料。默认由你确认继续；后台自动接续还需要运行 Worker、单独授权，并满足结构化材料等条件。自动接续只做读取与分析，创建行动仍由你确认。\n\n暂停后不会从头另建任务；继续前，服务端会重新检查授权、预算和材料是否仍然适用。","liveHits":["新检查授权、预算和材料是否仍然适用。这一段是冻结的示例状态：不连接服务器，也不代表任务此刻正在执行。02公开交互示例同一份素材，走一遍接续。从原始记录到模拟回执：先看依据，再确认行","\\\",\\\"ch
+[PASS] C-40-no-hidden-fake-numbers: []
+[PASS] C-27-first-screen-public-label: {"1440x900":{"viewportHeight":900,"heroNote":{"text":"公开示例 · 不调用模型 · 不写入你的项目。","top":526.1,"bottom":548.9,"visible":true},"heroKicker":{"text":"公开示例·忆程参赛作品开发","top":128.7,"bottom":147.9,"visible":true},"lensFoot":{"text":"与下方五步示例使用同一份素材","top":623.9,"bottom":644.4,"visible":true},"scrollWidth":1440,"innerWidth":1440},"
+[PASS] C-28-lens-foot-visible: {"text":"与下方五步示例使用同一份素材","top":623.9,"bottom":644.4,"visible":true}
+[PASS] C-29-console-clean: []
+checks: 45, failed: 2
+FAILED [
+  {
+    "id": "C-42-video-on-demand-embed-static",
+    "pass": false,
+    "detail": {
+      "iframes": 0,
+      "media": 0,
+      "autoplay": 0,
+      "videoSection": "05\n决赛演示\n\n看一遍决赛演示。\n\n2026 C4-AI 决赛演示视频。默认只显示本地画面；点击后在本页加载 Bilibili 官方播放器，也可以在新窗口打开。\n\n公开视频 · Bilibili\n2026 C4-AI 决赛演示视频\n点击加载播放器 · 在播放器内播放\n\n视频托管在 Bilibili；点击后在本页加载其官方播放器，加载前不请求外部站点。\n\n在 Bilibili 打开（新窗口）"
+    }
+  },
+  {
+    "id": "C-41-reduced-motion-hot-switch",
+    "pass": false,
+    "detail": {
+      "hotStart": {
+        "dataMotion": "on",
+        "matches": false,
+        "activeRailSteps": 4,
+        "heroTranslate": "0px 10px",
+        "contentStillVisible": true
+      },
+      "hotReduced": {
+        "dataMotion": "on",
+        "matches": true,
+        "activeRailSteps": 4,
+        "heroTranslate": "none",
+        "contentStillVisible": true
+      },
+      "hotRestored": {
+        "dataMotion": "on",
+        "matches": false,
+        "activeRailSteps": 4,
+        "heroTranslate": "0px 10px",
+        "contentStillVisible": true
+      }
+    }
+  }
+]

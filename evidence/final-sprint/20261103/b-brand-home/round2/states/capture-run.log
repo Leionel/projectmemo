@@ -1,0 +1,28 @@
+=== ROUND2 STATES ===
+OK after         homepage-1440-light-after.png  117575B overflow=false chip=等你确认 minFont=12.8
+OK after         homepage-1440-dark-after.png  113474B overflow=false chip=等你确认 minFont=12.8
+OK after         homepage-1280-light-after.png   98437B overflow=false chip=等你确认 minFont=12.8
+OK after         homepage-1280-dark-after.png   95213B overflow=false chip=等你确认 minFont=12.8
+OK after         homepage-390-light-after.png   63095B overflow=false chip=等你确认 minFont=12.16
+OK after         homepage-390-dark-after.png    63043B overflow=false chip=等你确认 minFont=12.16
+OK hero          hero-stage-away.png           112276B overflow=false chip=无需操作 minFont=12.8
+OK hero          hero-stage-during.png         115004B overflow=false chip=核对示例 minFont=12.8
+OK hero          hero-stage-back.png           117658B overflow=false chip=等你确认 minFont=12.8
+OK reduced-motion normal-before.png             100188B overflow=false chip=等你确认 minFont=12.8
+OK reduced-motion hot-reduce.png                100359B overflow=false chip=等你确认 minFont=12.8
+OK reduced-motion hot-restore.png                90782B overflow=false chip=等你确认 minFont=12.8
+OK rail          rail-1440-mid.png             100380B overflow=false chip=等你确认 minFont=12.8
+OK rail          rail-390-mid.png               46660B overflow=false chip=等你确认 minFont=12.16
+OK breakpoints   1024x768.png                   95004B overflow=false chip=等你确认 minFont=12.8
+OK breakpoints   768x1024.png                   84238B overflow=false chip=等你确认 minFont=12.8
+OK breakpoints   360x780.png                    57349B overflow=false chip=等你确认 minFont=12.16
+OK breakpoints   320x720.png                    44232B overflow=false chip=等你确认 minFont=12.16
+OK breakpoints   zoom200-720x450.png            40291B overflow=false chip=等你确认 minFont=12.16
+OK breakpoints   zoom200-640x360.png            32082B overflow=false chip=等你确认 minFont=12.16
+OK closing       closing-footer-1440-light.png   99601B overflow=false chip=等你确认 minFont=12.8
+OK closing       closing-footer-390-light.png   49447B overflow=false chip=等你确认 minFont=12.16
+OK closing       closing-footer-1440-dark.png   97641B overflow=false chip=等你确认 minFont=12.8
+ASSERT hero-chip-three-states: true
+ASSERT reduced-motion-hot-switch: {"normalOn":true,"normalProgressVisible":true,"reduceApplied":true,"reduceStopsParallax":true,"reduceHidesProgress":false,"reduceClearsActiveDots":true,"reduceNoRunningAnimations":true,"contentCompleteInReduce":true,"restoreReenables":true,"restoreShowsProgress":true,"noReloadNeeded":true}
+network: {"requestRecords":790,"uniqueRequestUrls":24,"externalOriginRequests":0,"apiWriteRequests":0,"bilibiliRequests":0,"failures":62,"imageFontFailures":18,"consoleErrors":2,"pageErrors":0}
+assertions-net: {"noBilibiliRequestDuringLoad":true,"noApiWrites":true,"noExternalOrigins":true,"noPageErrors":true}

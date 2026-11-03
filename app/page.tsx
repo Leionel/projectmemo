@@ -6,11 +6,11 @@ import {
   ArrowUpRight,
   ChevronRight,
   Laptop,
-  Play,
   Smartphone,
 } from "lucide-react";
 import { getSessionUser } from "@/lib/auth/serverSession";
 import { HomeJourney } from "@/components/HomeJourney";
+import { DemoVideoPlayer } from "@/components/home/DemoVideoPlayer";
 import { HomeHeroLens } from "@/components/home/HomeHeroLens";
 import { HomeMotion } from "@/components/home/HomeMotion";
 import styles from "./home.module.css";
@@ -294,28 +294,11 @@ export default async function Home() {
               看一遍决赛演示。
             </h2>
             <p className={styles.sectionIntro}>
-              2026 C4-AI 决赛演示视频。视频托管在 Bilibili，点击后在新窗口打开外部站点。
+              2026 C4-AI 决赛演示视频。默认只显示本地画面；点击后在本页加载
+              Bilibili 官方播放器，也可以在新窗口打开。
             </p>
           </header>
-          <a
-            className={styles.videoLink}
-            href={DEMO_VIDEO_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <span className={styles.videoPlay} aria-hidden="true">
-              <Play size={18} fill="currentColor" />
-            </span>
-            <span className={styles.videoText}>
-              <span className={styles.videoTitle}>
-                2026 C4-AI 决赛演示视频
-              </span>
-              <span className={styles.videoMeta}>
-                忆程 ProjectMemo · Bilibili · 新窗口打开
-                <ArrowUpRight size={13} aria-hidden="true" />
-              </span>
-            </span>
-          </a>
+          <DemoVideoPlayer />
         </div>
       </section>
 

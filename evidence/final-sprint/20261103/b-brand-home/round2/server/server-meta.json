@@ -1,0 +1,25 @@
+{
+  "readyMs": 7948.7,
+  "round": 2,
+  "pid": 51908,
+  "task": "task-4",
+  "distDir": ".next-build",
+  "errLog": "evidence/final-sprint/20261103/b-brand-home/round2/server/server.err.log",
+  "startedAt": "2026-11-03T15:24:31.6817819+08:00",
+  "command": "node node_modules/next/dist/bin/next start -H 127.0.0.1 -p 34212",
+  "mode": "next start（production build）",
+  "note": "本地回环；mock；不启动 Worker；仅用于生产构建预览与取证。",
+  "baseUrl": "http://127.0.0.1:34212",
+  "firstRequestLatencyMs": 1658.9,
+  "env": {
+    "LLM_MODE": "mock",
+    "FOCUS_ASYNC_ENABLED": "false",
+    "NEXT_DIST_DIR": ".next-build",
+    "ATTACHMENT_DIR": "D:\\Projects\\hongmen-final-b-brand-home\\tmp\\final-preparation\\attachments",
+    "DATABASE_URL": "file:D:/Projects/hongmen-final-b-brand-home/prisma/final-preparation.db",
+    "MISSION_WEB_ENABLED": "false"
+  },
+  "log": "evidence/final-sprint/20261103/b-brand-home/round2/server/server.log",
+  "port": 34212,
+  "node": "v24.16.0"
+}

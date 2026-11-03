@@ -1,0 +1,162 @@
+{
+  "task": "task-4",
+  "round": 2,
+  "kind": "replayable-clip-asset-manifest",
+  "candidateSha": "f06685d84b85c523595f2950b07b07dcdbf4271d",
+  "capturedAt": "2026-11-03T07:34:51.858Z",
+  "recipient": "F（视频/素材接收角色）",
+  "baseUrl": "http://127.0.0.1:34212",
+  "mode": "production next start（.next-build）",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "theme": "light",
+  "publicIdentity": {
+    "label": "内置公开示例",
+    "project": "忆程参赛作品开发",
+    "mission": "整理阶段汇报",
+    "boundary": "公开示例 · 不调用模型 · 不写入你的项目",
+    "source": "components/home/homeExample.ts"
+  },
+  "file": "evidence/final-sprint/20261103/b-brand-home/round2/media/interaction-round2.webm",
+  "bytes": 1784017,
+  "sha256": "fdec71ec1a77c4d383a753165a07ee99b91a78a7af3e56b6e26a1473020bee07",
+  "durationSeconds": 16.4,
+  "videoWidth": 1440,
+  "videoHeight": 900,
+  "wallClockMs": 15688,
+  "loadMs": 2754,
+  "targetSeconds": "15–20",
+  "sequence": [
+    "load-settled @3.1s",
+    "stage-away @4.3s",
+    "stage-during @5.4s",
+    "stage-back @6.5s",
+    "evidence-open @7.8s",
+    "evidence-close @8.5s",
+    "scroll-to-rail @9.8s",
+    "rail-hold @10.5s",
+    "scroll-to-demo @11.6s",
+    "click-video-facade @12.1s",
+    "player-loading-hold @14.1s",
+    "collapse-player @15.1s",
+    "final-hold @15.6s"
+  ],
+  "railAtMedia": {
+    "scrollY": 472,
+    "progress": 0.5,
+    "activeCount": 2,
+    "railProgressTransform": "matrix(0.5, 0, 0, 1, 0, 0)",
+    "scrollProgressTransform": "matrix(0.132, 0, 0, 1, 0, 0)"
+  },
+  "videoSegment": {
+    "facadeBefore": {
+      "facadePresent": true,
+      "iframePresent": false,
+      "facadeAriaLabel": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器"
+    },
+    "playerState": {
+      "file": "evidence/final-sprint/20261103/b-brand-home/round2/media/media-video-player-state.png",
+      "bytes": 75566,
+      "sha256": "f338ab15409681d63ac7f4f9e5eacb5257cd6b23cf14e3142ff7eaf3020936e3",
+      "metricsFile": "evidence/final-sprint/20261103/b-brand-home/round2/metrics/media-video-player-state.json",
+      "userInitiated": true
+    },
+    "collapsedFacadeRestored": true,
+    "note": "门面 → 用户点击 → Bilibili 官方播放器 iframe 出现 → 收起恢复门面；外部请求仅在点击后发生。"
+  },
+  "loadPhaseNetwork": {
+    "requestCount": 24,
+    "externalCount": 0,
+    "bilibiliCount": 0,
+    "apiWriteCount": 0,
+    "note": "加载 + Hero 阶段 + rail + 滚动到 05 门面（点击前）的请求：0 外域、0 bilibili。"
+  },
+  "userInitiatedNetwork": {
+    "requestCount": 3,
+    "externalCount": 3,
+    "bilibiliCount": 1,
+    "bilibiliUrls": [
+      {
+        "url": "https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1",
+        "status": 200,
+        "resourceType": "document"
+      }
+    ],
+    "note": "用户点击门面后才出现的 Bilibili 播放器请求；单独列出，不计入加载期外域/自动播放。"
+  },
+  "frames": [
+    {
+      "atSecond": 1.5,
+      "file": "evidence/final-sprint/20261103/b-brand-home/round2/media/frames/frame-1_5s.png",
+      "bytes": 385591,
+      "sha256": "bac3537c2dca4af24749ddc0af64e587e03ef4b1fe91c4294e124b1867bc2d1f"
+    },
+    {
+      "atSecond": 4.5,
+      "file": "evidence/final-sprint/20261103/b-brand-home/round2/media/frames/frame-4_5s.png",
+      "bytes": 435142,
+      "sha256": "2f7b4928fc1ba80ee62d012c7c2a5bdd22e29043e3e03b69472d5c715dd319bc"
+    },
+    {
+      "atSecond": 7.5,
+      "file": "evidence/final-sprint/20261103/b-brand-home/round2/media/frames/frame-7_5s.png",
+      "bytes": 430118,
+      "sha256": "6b85e86a42b96aa0bcade93de3041bc5372824f342e6dfb1f13283498e931e36"
+    },
+    {
+      "atSecond": 10.5,
+      "file": "evidence/final-sprint/20261103/b-brand-home/round2/media/frames/frame-10_5s.png",
+      "bytes": 186191,
+      "sha256": "540f8e1b7f9c1b55fe892d72847ef3693b8fc3942576ecf997279115eebc4538"
+    },
+    {
+      "atSecond": 13.5,
+      "file": "evidence/final-sprint/20261103/b-brand-home/round2/media/frames/frame-13_5s.png",
+      "bytes": 237935,
+      "sha256": "ed6e76501a4c3bbc1b8b58087a91099b35881791956a4b08ec49a2f3cedeaa6e"
+    },
+    {
+      "atSecond": 16,
+      "file": "evidence/final-sprint/20261103/b-brand-home/round2/media/frames/frame-16s.png",
+      "bytes": 247276,
+      "sha256": "7472abd515083de4829b2ac22842d3a6aeec7140d16c75e4aab311722e3f4590"
+    }
+  ],
+  "finalState": {
+    "file": "evidence/final-sprint/20261103/b-brand-home/round2/media/media-final-state.png",
+    "bytes": 86063,
+    "sha256": "f476fafcbf4b9b6760b550fa1aac08afc10ac191c1c9649e6cc82dbcf39c1f5e",
+    "metricsFile": "evidence/final-sprint/20261103/b-brand-home/round2/metrics/media-final-state.json"
+  },
+  "network": {
+    "file": "evidence/final-sprint/20261103/b-brand-home/round2/media/network-media.json",
+    "totals": {
+      "requestRecords": 43,
+      "uniqueRequestUrls": 27,
+      "externalOriginRequests": 3,
+      "apiWriteRequests": 0,
+      "bilibiliRequests": 1,
+      "failures": 4,
+      "imageFontFailures": 2,
+      "consoleErrors": 2,
+      "pageErrors": 0
+    },
+    "assertions": {
+      "noBilibiliRequestDuringLoad": false,
+      "noApiWrites": true,
+      "noExternalOrigins": false,
+      "noPageErrors": true
+    }
+  },
+  "policy": {
+    "uploaded": false,
+    "published": false,
+    "embeddedAutoplay": false,
+    "externalNetworkWrite": false,
+    "userInitiatedExternalPlayer": true,
+    "note": "本地生成、本地保存；未上传、未发布、未嵌入自动播放；Bilibili 官方播放器仅在用户主动点击后加载（该段外部请求单独列出），未点击外链打开新窗口。"
+  },
+  "caveat": "本机生产构建预览录屏，公开合成示例；不代表线上 CDN/网络或所有用户体验。"
+}

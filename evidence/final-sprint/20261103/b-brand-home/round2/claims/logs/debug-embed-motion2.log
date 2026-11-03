@@ -1,0 +1,31 @@
+{
+  "iframeResponses": [],
+  "frameUrl": null,
+  "frameBody": null
+}
+{
+  "s0": {
+    "dataMotion": "on",
+    "matches": false,
+    "active": 0,
+    "heroTranslate": "0px"
+  },
+  "s1": {
+    "dataMotion": "reduced",
+    "matches": true,
+    "active": 0,
+    "heroTranslate": "none"
+  },
+  "s2": {
+    "dataMotion": "on",
+    "matches": false,
+    "active": 4,
+    "heroTranslate": "0px 10px"
+  },
+  "s3": {
+    "dataMotion": "on",
+    "matches": true,
+    "active": 4,
+    "heroTranslate": "none"
+  }
+}

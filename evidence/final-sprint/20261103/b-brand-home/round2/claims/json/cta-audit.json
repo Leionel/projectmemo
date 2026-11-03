@@ -1,0 +1,314 @@
+{
+  "generatedAt": "2026-11-03T07:31:37.538Z",
+  "base": "http://127.0.0.1:34111",
+  "anchors": [
+    {
+      "width": 1440,
+      "height": 900,
+      "label": "1440x900",
+      "homeStatus": 200,
+      "clickFromTop": {
+        "target": "experience",
+        "hash": "#experience",
+        "scrollY": 1274,
+        "sectionTop": 79.6,
+        "headerBottom": 57,
+        "headingTop": 202.6,
+        "headingOccluded": false,
+        "sectionClearance": 22.6,
+        "headerPosition": "sticky",
+        "horizontalOverflow": false
+      },
+      "directHash": {
+        "hash": "#experience",
+        "sectionTop": 79.6,
+        "headerBottom": 57,
+        "headingTop": 202.6,
+        "headingOccluded": false
+      },
+      "directHashStatus": null,
+      "ok": true
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "label": "1280x720",
+      "homeStatus": 200,
+      "clickFromTop": {
+        "target": "experience",
+        "hash": "#experience",
+        "scrollY": 654,
+        "sectionTop": 649.6,
+        "headerBottom": 57,
+        "headingTop": 763.1,
+        "headingOccluded": false,
+        "sectionClearance": 592.6,
+        "headerPosition": "sticky",
+        "horizontalOverflow": false
+      },
+      "directHash": {
+        "hash": "#experience",
+        "sectionTop": 79.6,
+        "headerBottom": 57,
+        "headingTop": 193.1,
+        "headingOccluded": false
+      },
+      "directHashStatus": null,
+      "ok": true
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "label": "1024x768",
+      "homeStatus": 200,
+      "clickFromTop": {
+        "target": "experience",
+        "hash": "#experience",
+        "scrollY": 931,
+        "sectionTop": 298,
+        "headerBottom": 57,
+        "headingTop": 411,
+        "headingOccluded": false,
+        "sectionClearance": 241,
+        "headerPosition": "sticky",
+        "horizontalOverflow": false
+      },
+      "directHash": {
+        "hash": "#experience",
+        "sectionTop": 80,
+        "headerBottom": 57,
+        "headingTop": 193,
+        "headingOccluded": false
+      },
+      "directHashStatus": null,
+      "ok": true
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "label": "390x844",
+      "homeStatus": 200,
+      "clickFromTop": {
+        "target": "experience",
+        "hash": "#experience",
+        "scrollY": 1880,
+        "sectionTop": 79.7,
+        "headerBottom": 57,
+        "headingTop": 160.4,
+        "headingOccluded": false,
+        "sectionClearance": 22.7,
+        "headerPosition": "sticky",
+        "horizontalOverflow": false
+      },
+      "directHash": {
+        "hash": "#experience",
+        "sectionTop": 79.7,
+        "headerBottom": 57,
+        "headingTop": 160.4,
+        "headingOccluded": false
+      },
+      "directHashStatus": null,
+      "ok": true
+    },
+    {
+      "width": 360,
+      "height": 780,
+      "label": "360x780",
+      "homeStatus": 200,
+      "clickFromTop": {
+        "target": "experience",
+        "hash": "#experience",
+        "scrollY": 1931,
+        "sectionTop": 80,
+        "headerBottom": 57,
+        "headingTop": 160.7,
+        "headingOccluded": false,
+        "sectionClearance": 23,
+        "headerPosition": "sticky",
+        "horizontalOverflow": false
+      },
+      "directHash": {
+        "hash": "#experience",
+        "sectionTop": 80,
+        "headerBottom": 57,
+        "headingTop": 160.7,
+        "headingOccluded": false
+      },
+      "directHashStatus": null,
+      "ok": true
+    },
+    {
+      "width": 320,
+      "height": 780,
+      "label": "320x780",
+      "homeStatus": 200,
+      "clickFromTop": {
+        "target": "experience",
+        "hash": "#experience",
+        "scrollY": 2093,
+        "sectionTop": 80.5,
+        "headerBottom": 57,
+        "headingTop": 161.1,
+        "headingOccluded": false,
+        "sectionClearance": 23.5,
+        "headerPosition": "sticky",
+        "horizontalOverflow": false
+      },
+      "directHash": {
+        "hash": "#experience",
+        "sectionTop": 80.5,
+        "headerBottom": 57,
+        "headingTop": 161.1,
+        "headingOccluded": false
+      },
+      "directHashStatus": null,
+      "ok": true
+    },
+    {
+      "width": 720,
+      "height": 450,
+      "label": "1440@200%等效720x450",
+      "homeStatus": 200,
+      "clickFromTop": {
+        "target": "experience",
+        "hash": "#experience",
+        "scrollY": 1787,
+        "sectionTop": 80.3,
+        "headerBottom": 57,
+        "headingTop": 161,
+        "headingOccluded": false,
+        "sectionClearance": 23.3,
+        "headerPosition": "sticky",
+        "horizontalOverflow": false
+      },
+      "directHash": {
+        "hash": "#experience",
+        "sectionTop": 80.3,
+        "headerBottom": 57,
+        "headingTop": 161,
+        "headingOccluded": false
+      },
+      "directHashStatus": null,
+      "ok": true
+    },
+    {
+      "width": 640,
+      "height": 360,
+      "label": "1280@200%等效640x360",
+      "homeStatus": 200,
+      "clickFromTop": {
+        "target": "experience",
+        "hash": "#experience",
+        "scrollY": 1787,
+        "sectionTop": 80.3,
+        "headerBottom": 57,
+        "headingTop": 161,
+        "headingOccluded": false,
+        "sectionClearance": 23.3,
+        "headerPosition": "sticky",
+        "horizontalOverflow": false
+      },
+      "directHash": {
+        "hash": "#experience",
+        "sectionTop": 80.3,
+        "headerBottom": 57,
+        "headingTop": 161,
+        "headingOccluded": false
+      },
+      "directHashStatus": null,
+      "ok": true
+    }
+  ],
+  "ctaResults": [
+    {
+      "name": "header-cta",
+      "matched": 1,
+      "attempts": 1,
+      "finalUrl": "http://127.0.0.1:34111/login?from=%2Ffocus",
+      "title": "登录忆程｜忆程 ProjectMemo",
+      "loginFormVisible": true,
+      "docs": [],
+      "ok": true
+    },
+    {
+      "name": "hero-secondary-cta",
+      "matched": 2,
+      "attempts": 1,
+      "finalUrl": "http://127.0.0.1:34111/login?from=%2Ffocus",
+      "title": "登录忆程｜忆程 ProjectMemo",
+      "loginFormVisible": true,
+      "docs": [],
+      "ok": true
+    },
+    {
+      "name": "closing-cta",
+      "matched": 1,
+      "attempts": 1,
+      "finalUrl": "http://127.0.0.1:34111/login?from=%2Ffocus",
+      "title": "登录忆程｜忆程 ProjectMemo",
+      "loginFormVisible": true,
+      "ok": true
+    }
+  ],
+  "inventory": {
+    "headerRect": {
+      "height": 57,
+      "position": "sticky",
+      "top": "0px"
+    },
+    "navAnchors": [
+      {
+        "text": "产品体验",
+        "href": "#experience",
+        "target": null
+      },
+      {
+        "text": "长期委托",
+        "href": "#missions",
+        "target": null
+      },
+      {
+        "text": "使用场景",
+        "href": "#moments",
+        "target": null
+      },
+      {
+        "text": "决赛演示",
+        "href": "#demo",
+        "target": null
+      },
+      {
+        "text": "进入工作台",
+        "href": "/focus",
+        "target": null
+      }
+    ],
+    "mainCtas": [
+      {
+        "text": "进入工作台",
+        "href": "/login?from=%2Ffocus"
+      },
+      {
+        "text": "在 Bilibili 打开（新窗口）",
+        "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b"
+      },
+      {
+        "text": "进入工作台",
+        "href": "/login?from=%2Ffocus"
+      },
+      {
+        "text": "忆程 ProjectMemo",
+        "href": "/"
+      },
+      {
+        "text": "决赛演示",
+        "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b"
+      }
+    ],
+    "boundaries": [
+      "公开示例 · 不调用模型 · 不写入你的项目。",
+      "公开示例·忆程参赛作品开发",
+      "同一任务整理阶段汇报·公开示例"
+    ]
+  }
+}

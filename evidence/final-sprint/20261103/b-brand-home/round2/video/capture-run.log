@@ -1,0 +1,9 @@
+=== ROUND2 VIDEO AREA ===
+FACADE facade-1440-light 86034B facadeLines(title/meta)=1/1 external=0 bilibili=0
+FACADE facade-1440-dark 84002B facadeLines(title/meta)=1/1 external=0 bilibili=0
+FACADE facade-390-light 54800B facadeLines(title/meta)=1/1 external=0 bilibili=0
+FACADE facade-390-dark 53872B facadeLines(title/meta)=1/1 external=0 bilibili=0
+PLAYER player-1440 loaded=80226B iframe=572x320.88 wait=107ms bilibili(user)=1 loadExt=0 collapsedIframe=false focusBack=在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器
+PLAYER player-390 loaded=51356B iframe=352x197.13 wait=94ms bilibili(user)=1 loadExt=0 collapsedIframe=false focusBack=在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器
+assertions: {"loadPhaseNoExternal":true,"loadPhaseNoBilibili":true,"userInitiatedBilibiliRequests":[{"viewport":{"width":1440,"height":900},"count":1},{"viewport":{"width":390,"height":844},"count":1}],"iframeRemovedAfterCollapse":true,"focusReturnedToFacade":true}
+network: {"requestRecords":252,"uniqueRequestUrls":27,"externalOriginRequests":3,"apiWriteRequests":0,"bilibiliRequests":2,"failures":16,"imageFontFailures":5,"consoleErrors":4,"pageErrors":0}

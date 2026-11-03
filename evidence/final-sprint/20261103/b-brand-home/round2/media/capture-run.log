@@ -1,0 +1,30 @@
+{
+  "file": "evidence/final-sprint/20261103/b-brand-home/round2/media/interaction-round2.webm",
+  "bytes": 2048884,
+  "durationSeconds": 21.28,
+  "frames": 6,
+  "railAtMedia": {
+    "scrollY": 472,
+    "progress": 0.5,
+    "activeCount": 2,
+    "railProgressTransform": "matrix(0.5, 0, 0, 1, 0, 0)",
+    "scrollProgressTransform": "matrix(0.132, 0, 0, 1, 0, 0)"
+  },
+  "network": {
+    "requestRecords": 44,
+    "uniqueRequestUrls": 27,
+    "externalOriginRequests": 3,
+    "apiWriteRequests": 0,
+    "bilibiliRequests": 1,
+    "failures": 5,
+    "imageFontFailures": 2,
+    "consoleErrors": 2,
+    "pageErrors": 0
+  },
+  "assertions": {
+    "noBilibiliRequestDuringLoad": false,
+    "noApiWrites": true,
+    "noExternalOrigins": false,
+    "noPageErrors": true
+  }
+}

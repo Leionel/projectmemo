@@ -1,0 +1,42 @@
+{
+  "capturedAt": "2026-11-03T15:05:03+08:00",
+  "head": "4b696141435825a3582816e8e449c0e0cf013f29",
+  "branch": "codex/final-b-brand-home",
+  "status": [
+    " M app/home.module.css",
+    " M app/page.tsx",
+    " M next-env.d.ts",
+    " M tsconfig.json",
+    "?? components/home/DemoVideoPlayer.tsx",
+    "?? evidence/final-sprint/20261103/b-brand-home/b3/video-frames/",
+    "?? evidence/final-sprint/20261103/b-brand-home/round2/",
+    "?? evidence/final-sprint/20261103/b-brand-home/tools/build-round2-manifest.mjs",
+    "?? evidence/final-sprint/20261103/b-brand-home/tools/capture-round2-media.mjs",
+    "?? evidence/final-sprint/20261103/b-brand-home/tools/capture-round2-perf.mjs",
+    "?? evidence/final-sprint/20261103/b-brand-home/tools/capture-round2-states.mjs",
+    "?? evidence/final-sprint/20261103/b-brand-home/tools/round2-build.ps1",
+    "?? evidence/final-sprint/20261103/b-brand-home/tools/round2-lib.mjs",
+    "?? evidence/final-sprint/20261103/b-brand-home/tools/round2-server.ps1"
+  ],
+  "diffStat": [
+    " app/home.module.css | 149 ++++++++++++++++++++++++++++++++++++++--------------",
+    " app/page.tsx        |  25 ++-------",
+    " next-env.d.ts       |   3 +-",
+    " tsconfig.json       |   4 +-",
+    " 4 files changed, 119 insertions(+), 62 deletions(-)"
+  ],
+  "dirtySourceHashes": {
+    "tsconfig.json": "7A2696F3AE937BEC09DFFF1136D714DD185B670A79089AD1C672067970616C8A",
+    "app\\page.tsx": "68942F4EE95A9F530B6216A9D0DEE830926666C36339C2EA654FEDD3FE8E75CF",
+    "app\\home.module.css": "20CB51567FE0FDFC162C4BF611356230D5866D5C8A8C7868DFEB5D5836A6C47D",
+    "components\\home\\DemoVideoPlayer.tsx": "499252774D7FAE2D533DB60B5CFBF976610E253153A2F533316879D4B04253D5",
+    "next-env.d.ts": "73096B003FEDBA8491CFDACA71CBCCB0246F765971C2935FFA1117E20DFB523D"
+  },
+  "mtimes": {
+    "DemoVideoPlayer.tsx": "2026-11-03 14:56:05.136",
+    "tsconfig.json": "2026-11-03 14:50:53.709",
+    "page.tsx": "2026-11-03 14:56:29.269",
+    "home.module.css": "2026-11-03 14:57:22.893",
+    "next-env.d.ts": "2026-11-03 14:50:53.718"
+  }
+}

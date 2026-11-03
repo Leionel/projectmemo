@@ -1,0 +1,107 @@
+{
+  "generatedAt": "2026-11-03T06:51:05.528Z",
+  "purpose": "Bilibili external link content verification (read-only; no login, no writes)",
+  "videoUrl": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+  "apiUrl": "https://api.bilibili.com/x/web-interface/view?bvid=BV1Qaxb6PE7G",
+  "attempts": [
+    {
+      "name": "bilibili-api-view",
+      "status": 200,
+      "ok": true,
+      "error": null,
+      "contentType": "application/json; charset=utf-8",
+      "bodyBytes": 1993,
+      "bodySha256": "66a49203f738a16fcfd14e3f2e714d638a42b46a2cfb2e383495e727a3bf312b",
+      "capturedAtLocal": "2026-11-03T14:51:04+08:00",
+      "rawFile": "raw/bilibili-api-view-status200-1793688665022.raw.txt",
+      "bodyPrefix": "{\"code\":0,\"message\":\"OK\",\"ttl\":1,\"data\":{\"bvid\":\"BV1Qaxb6PE7G\",\"aid\":117541628287845,\"videos\":1,\"tid\":21,\"tid_v2\":2096,\"tname\":\"\",\"tname_v2\":\"\",\"copyright\":1,\"pic\":\"http://i2.hdslb.com/bfs/archive/5c4788f9cb1100115009d7c2f8ccee69f26273b1.jpg\",\"title\":\"2026 C4-AI 决赛演示视频 万卷siu 忆程ProjectMemo 演示视频\",\"pubdate\":1793543090,\"ctime\":1793543090,\"desc\":\"-\",\"desc_v2\":[{\"raw_text\":\"-\",\"type\":1,\"biz_id\":0}],\"state\":0,\"duration\":277,\"rights\":{\"bp\":0,\"elec\":0,\"download\":1,\"movie\":0,\"pay\":0,\"hd5\":0,\"no_reprint\":1"
+    },
+    {
+      "name": "bilibili-video-page",
+      "status": 200,
+      "ok": true,
+      "error": null,
+      "contentType": "text/html; charset=utf-8",
+      "bodyBytes": 159884,
+      "bodySha256": "3c46c38150fb5b9a70ddea85bdfc3e5c9c31e431530561fdd16df157c00188db",
+      "capturedAtLocal": "2026-11-03T14:51:05+08:00",
+      "rawFile": "raw/bilibili-video-page-status200-1793688665516.raw.txt",
+      "bodyPrefix": "<!DOCTYPE html><html lang=\"zh-Hans\"><head><meta name=\"format-detection\" content=\"telephone=no, email=no\"><meta http-equiv=\"Content-Type\" content=\"text/html\" charset=\"utf-8\"><meta name=\"spm_prefix\" content=\"333.788\"><meta name=\"referrer\" content=\"no-referrer-when-downgrade\"><meta name=\"applicable-device\" content=\"pc\"><meta http-equiv=\"Cache-Control\" content=\"no-transform\"><meta http-equiv=\"Cache-Control\" content=\"no-siteapp\"><link rel=\"shortcut icon\" href=\"https://i0.hdslb.com/bfs/static/jinkela/"
+    }
+  ],
+  "parsedApiFields": {
+    "apiCode": 0,
+    "apiMessage": "OK",
+    "bvid": "BV1Qaxb6PE7G",
+    "aid": 117541628287845,
+    "cid": 43242685663,
+    "title": "2026 C4-AI 决赛演示视频 万卷siu 忆程ProjectMemo 演示视频",
+    "owner": {
+      "mid": 214676899,
+      "name": "鲁昂萘尔"
+    },
+    "pages": [
+      {
+        "cid": 43242685663,
+        "page": 1,
+        "part": "2026 C4-AI 决赛演示视频——万卷siu——忆程ProjectMemo 演示视频",
+        "duration": 277,
+        "width": 1920,
+        "height": 1080
+      }
+    ],
+    "videos": 1,
+    "durationSeconds": 277,
+    "durationText": "4:37",
+    "pubdate": "2026-11-01T14:24:50.000Z",
+    "pubdateEpoch": 1793543090,
+    "pubdateLocal": "2026-11-01T22:24:50+08:00",
+    "stat": {
+      "aid": 117541628287845,
+      "view": 12,
+      "danmaku": 0,
+      "reply": 0,
+      "favorite": 0,
+      "coin": 0,
+      "share": 1,
+      "now_rank": 0,
+      "his_rank": 0,
+      "like": 1,
+      "dislike": 0,
+      "evaluation": "",
+      "vt": 0
+    },
+    "tname": "",
+    "descSnippet": "-"
+  },
+  "comparison": {
+    "titleMatch": true,
+    "titleActual": "2026 C4-AI 决赛演示视频 万卷siu 忆程ProjectMemo 演示视频",
+    "ownerNameMatch": true,
+    "ownerNameActual": "鲁昂萘尔",
+    "durationMatch": true,
+    "durationActualSeconds": 277,
+    "videosMatch": true,
+    "videosActual": 1,
+    "pubdateEpochMatch": true,
+    "pubdateEpochActual": 1793543090,
+    "pubdateLocalActual": "2026-11-01T22:24:50+08:00",
+    "pagesPartActual": "2026 C4-AI 决赛演示视频——万卷siu——忆程ProjectMemo 演示视频"
+  },
+  "pageMeta": {
+    "titleTag": "2026 C4-AI 决赛演示视频 万卷siu 忆程ProjectMemo 演示视频_哔哩哔哩_bilibili",
+    "ogTitle": "2026 C4-AI 决赛演示视频 万卷siu 忆程ProjectMemo 演示视频_哔哩哔哩_bilibili",
+    "ogDescription": null,
+    "hasRiskPageMarker": false
+  },
+  "verdict": "CAPTURED",
+  "limits": [
+    "若 Bilibili 风控返回 412/验证码/空 JSON，本审计只记 NOT_RUN，不根据链接猜测时长、播放量或视频内容。",
+    "本轮只在本地发起只读 GET；未登录、未使用 Cookie、未写任何外部数据。"
+  ],
+  "fieldsNotClaimed": [
+    "视频内容是否完整展示产品能力（无法由链接或标题证明）",
+    "页面不新增时长/播放量展示；如报告引用时长，必须标注为“平台 API 元数据，核验时间/方法”"
+  ],
+  "citationRule": "若 CLAIMS_ROUND2 引用 title/owner/duration，须同时给出 API URL、HTTP 200、code:0、核验时间（UTC+8）与 body sha256。"
+}

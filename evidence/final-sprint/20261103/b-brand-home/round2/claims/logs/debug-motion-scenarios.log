@@ -1,0 +1,158 @@
+[
+  {
+    "name": "A-no-scroll-direct-reduce#0",
+    "states": [
+      {
+        "step": "start",
+        "dataMotion": "on",
+        "matches": false,
+        "active": 0,
+        "translate": "0px"
+      },
+      {
+        "step": "reduce",
+        "dataMotion": "reduced",
+        "matches": true,
+        "active": 0,
+        "translate": "none"
+      }
+    ]
+  },
+  {
+    "name": "B-scroll-then-reduce#0",
+    "states": [
+      {
+        "step": "start",
+        "dataMotion": "on",
+        "matches": false,
+        "active": 4,
+        "translate": "0px 10px"
+      },
+      {
+        "step": "reduce",
+        "dataMotion": "on",
+        "matches": true,
+        "active": 4,
+        "translate": "none"
+      }
+    ]
+  },
+  {
+    "name": "C-reduce-nopref-scroll-reduce#0",
+    "states": [
+      {
+        "step": "start",
+        "dataMotion": "on",
+        "matches": false,
+        "active": 0,
+        "translate": "0px"
+      },
+      {
+        "step": "reduce",
+        "dataMotion": "reduced",
+        "matches": true,
+        "active": 0,
+        "translate": "none"
+      },
+      {
+        "step": "no-pref",
+        "dataMotion": "on",
+        "matches": false,
+        "active": 0,
+        "translate": "0px"
+      },
+      {
+        "step": "scroll",
+        "dataMotion": "on",
+        "matches": false,
+        "active": 4,
+        "translate": "0px 10px"
+      },
+      {
+        "step": "reduce",
+        "dataMotion": "reduced",
+        "matches": true,
+        "active": 0,
+        "translate": "none"
+      }
+    ]
+  },
+  {
+    "name": "A-no-scroll-direct-reduce#1",
+    "states": [
+      {
+        "step": "start",
+        "dataMotion": "on",
+        "matches": false,
+        "active": 0,
+        "translate": "0px"
+      },
+      {
+        "step": "reduce",
+        "dataMotion": "reduced",
+        "matches": true,
+        "active": 0,
+        "translate": "none"
+      }
+    ]
+  },
+  {
+    "name": "B-scroll-then-reduce#1",
+    "states": [
+      {
+        "step": "start",
+        "dataMotion": "on",
+        "matches": false,
+        "active": 4,
+        "translate": "0px 10px"
+      },
+      {
+        "step": "reduce",
+        "dataMotion": "on",
+        "matches": true,
+        "active": 4,
+        "translate": "none"
+      }
+    ]
+  },
+  {
+    "name": "C-reduce-nopref-scroll-reduce#1",
+    "states": [
+      {
+        "step": "start",
+        "dataMotion": "on",
+        "matches": false,
+        "active": 0,
+        "translate": "0px"
+      },
+      {
+        "step": "reduce",
+        "dataMotion": "reduced",
+        "matches": true,
+        "active": 0,
+        "translate": "none"
+      },
+      {
+        "step": "no-pref",
+        "dataMotion": "on",
+        "matches": false,
+        "active": 0,
+        "translate": "0px"
+      },
+      {
+        "step": "scroll",
+        "dataMotion": "on",
+        "matches": false,
+        "active": 4,
+        "translate": "0px 10px"
+      },
+      {
+        "step": "reduce",
+        "dataMotion": "reduced",
+        "matches": true,
+        "active": 0,
+        "translate": "none"
+      }
+    ]
+  }
+]

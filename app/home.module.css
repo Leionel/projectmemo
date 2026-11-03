@@ -829,54 +829,118 @@
   gap: clamp(2.5rem, 5vw, 5rem);
   align-items: center;
 }
-.videoLink {
-  display: flex;
-  align-items: center;
-  gap: 1.1rem;
-  min-height: 96px;
-  padding: 1.25rem 1.35rem;
-  border: 1px solid var(--rule);
-  border-radius: 0.9rem;
-  background: var(--paper-strong);
-  transition:
-    border-color 180ms ease,
-    background-color 180ms ease;
-}
-.videoLink:hover {
-  border-color: var(--teal);
-  background: color-mix(in srgb, var(--teal) 4%, var(--paper-strong));
-}
-.videoPlay {
-  display: grid;
-  flex-shrink: 0;
-  width: 52px;
-  height: 52px;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--teal);
-  color: var(--paper-strong);
-  transition: transform 180ms var(--ease-out);
-}
-.videoLink:hover .videoPlay {
-  transform: scale(1.06);
-}
-.videoText {
-  display: grid;
-  gap: 0.2rem;
+/* 决赛演示播放器：默认只显示本地门面，点击后才加载 Bilibili 官方播放器。 */
+.videoPlayer {
   min-width: 0;
 }
-.videoTitle {
-  font-size: 1.0625rem;
+.videoStage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--ink) 94%, #000);
+  box-shadow: 0 30px 64px -48px rgb(28 46 44 / 55%);
+}
+:global(.dark) .videoStage {
+  box-shadow: 0 30px 64px -48px rgb(0 0 0 / 82%);
+}
+.videoStage[data-active="true"] {
+  background: #000;
+}
+.videoFacade {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 1.5rem;
+  color: var(--paper);
+  text-align: center;
+  cursor: pointer;
+}
+.videoFacade:focus-visible {
+  outline: 2px solid var(--paper);
+  outline-offset: -5px;
+}
+.videoFacadeCorner {
+  position: absolute;
+  top: 1rem;
+  left: 1.1rem;
+  color: color-mix(in srgb, var(--paper) 82%, transparent);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+}
+.videoFacadePlay {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 0.35rem;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--paper) 36%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--paper) 12%, transparent);
+  color: var(--paper);
+  transition:
+    transform 180ms var(--ease-out),
+    background-color 180ms ease;
+}
+.videoFacade:hover .videoFacadePlay {
+  transform: scale(1.06);
+  background: color-mix(in srgb, var(--paper) 22%, transparent);
+}
+.videoFacadeTitle {
+  font-size: 1.05rem;
   font-weight: 620;
   line-height: 1.5;
 }
-.videoMeta {
+.videoFacadeMeta {
+  color: color-mix(in srgb, var(--paper) 70%, transparent);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+.videoIframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.videoBelow {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-top: 0.8rem;
+}
+.videoBelowLinks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1rem;
+}
+.videoBelow p {
   color: var(--muted);
   font-size: 0.84rem;
+  line-height: 1.6;
+}
+.videoOpenLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 44px;
+  color: var(--ink-soft);
+  font-size: 0.84rem;
   line-height: 1.5;
+}
+.videoOpenLink:hover {
+  color: var(--teal);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 /* ----------------------------------------------------------- S7 终局 */
@@ -1328,19 +1392,32 @@
   .scenarioList h3 {
     font-size: 1.2rem;
   }
-  .videoLink {
-    min-height: 84px;
-    gap: 0.85rem;
+  .videoStage {
+    border-radius: 0.75rem;
+  }
+  .videoFacade {
+    gap: 0.4rem;
     padding: 1rem;
   }
-  .videoPlay {
-    width: 44px;
-    height: 44px;
+  .videoFacadeCorner {
+    top: 0.7rem;
+    left: 0.8rem;
+    font-size: 0.8rem;
   }
-  .videoTitle {
-    font-size: 0.98rem;
+  .videoFacadePlay {
+    width: 52px;
+    height: 52px;
   }
-  .videoMeta {
+  .videoFacadeTitle {
+    font-size: 0.95rem;
+  }
+  .videoFacadeMeta {
+    font-size: 0.8rem;
+  }
+  .videoBelow p {
+    font-size: 0.8rem;
+  }
+  .videoOpenLink {
     font-size: 0.8rem;
   }
   .closingInner {

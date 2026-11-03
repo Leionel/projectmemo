@@ -1,0 +1,63 @@
+# round2/a11y MANIFEST
+
+生成时间：2026-11-03T15:14:51+08:00
+审计基线 SHA：4b696141435825a3582816e8e449c0e0cf013f29（主探针/账号页补充运行时代码干净）
+状态：报告待 Lead 冻结裁决；breakpoints-round2.json 已作废；video-round2-provisional.json 为未提交工作树临时观察。
+
+```
+sha256  bytes  path
+636ed28f6e0f5820ccb179129eabd87d43c769e9b4e5d30ff3f0b6c8ba4d60a9  15590  A11Y_ROUND2.md
+85f9849a4c436d09b1208e2ebb85fb029fc70891a3e4926c4fce10df99f96edb  10461  json\accounts-round2.json
+93ec6c3151d1842a2e38b097a736ba64dcc9146a584b79931da0878ab4c9349b  10410  json\breakpoints-round2.json
+d4a366b76c2844e98ef74e73d6a8a64b09f72aba116b9739b07ff847315c038b  2254  json\divergence-4b69614.json
+1c3dde112baec1ee9e4b40216b363033789a9154045002a8264a62a97bd58e4d  51780  json\probe-round2.json
+d794c3ee4886a50a576eecd2f6c57ae533786ff355bc6aefcfaac47276337814  6110  json\video-round2-provisional.json
+6479168574d0ba6a213f3ec79f7a446d3a142f1bbf88291fc5562f4f300d0654  6258  scripts\probe-round2-accounts.mjs
+c04717785befa533d1ed1e263ad0b17232b42c9afc91b0d60fd6aa5131bce176  5535  scripts\probe-round2-breakpoints.mjs
+cb108b84da9aebb0b1f86d3fde4be74de0f4341a91d430066196b9537bd62954  8647  scripts\probe-round2-video.mjs
+b6b89725a22081eec13acbb53df8f6e53d9ed9f230b04f4155ef70e47b359017  45938  scripts\probe-round2.mjs
+4fe5760a8284313fd7264fa399f5cbcf596c1f23dc4f3bb79d34e576e17061d0  62853  shots\round2-account-dark-forgot-password-1440.png
+80c8d256fdba28d00fd71dd75235720ebce9e3a9f40bd7f083a9585b088e937a  36687  shots\round2-account-dark-forgot-password-390.png
+07441ae41b81f4db0b6481643dbd8592de18a9c126ac118085f9db8619e65f51  61145  shots\round2-account-dark-login-1440.png
+f606b34be4267cb83a71399fc508004f4023f5de3a3deb79f6cf7b4648eb39e1  34891  shots\round2-account-dark-login-390.png
+7aed14f8c1eaaf8757c35313d9bd3bfbce38257c508c6622cde544a1f473130c  73242  shots\round2-account-dark-register-1440.png
+b49e22d84adf2d0940d83b8e65eb420093e8338ec8b4e7acee6dd0637b8e3e70  42283  shots\round2-account-dark-register-390.png
+9bb6e2104953c9b04656b556c7fc2594724a3401c2714c94fcf9bb6934dbde04  66239  shots\round2-account-light-forgot-password-1440.png
+21d6a4eb89dfca2946a6c4142f9d845da049baa831a90175ae00d6a6d06a08b8  39565  shots\round2-account-light-forgot-password-390.png
+c3d248ddb82b3021faa2838a42729fab54df4a0446f09af23f11be912e17ed5d  62454  shots\round2-account-light-login-1440.png
+0d7789586e76c54fd871479d573b91714c3aa03e9f2d65135dfc6ed8d2142b64  36043  shots\round2-account-light-login-390.png
+ca2135678ef6280fc7f447e463f37029e68e6f2dbf4da276a1f902b5f46639fc  73817  shots\round2-account-light-register-1440.png
+9424544aeb7eec729cfce19009925fbf280f9980c71e5523d25abc62cf671a3b  42234  shots\round2-account-light-register-390.png
+cfcff191e9237f1da41a9a0f76ecb64fe9ceb5d627fbc1f97ebeeb9f45d0cded  82865  shots\round2-anchor-experience.png
+65f3421f9045eefab621457ad03e8facf24d236d2699f01ee21c5cbacd569e75  43101  shots\round2-breakpoint-320x640.png
+99281e065c08943bd78546fcb209fb1a92b4cd102cb3ddff17667795e5e50c09  55879  shots\round2-breakpoint-360x740.png
+a1a4f8653974f7680ab4a0a6dad5d85ffee095fa64d4f79d2c3e751e6a2c75c5  42440  shots\round2-breakpoint-720x450_200__.png
+d600c656a977e469df5524f3d349f310843b2fc8ae6de4e051ce3d7b9d2bdd61  64876  shots\round2-dark-1440.png
+d600c656a977e469df5524f3d349f310843b2fc8ae6de4e051ce3d7b9d2bdd61  64876  shots\round2-dark-390.png
+6dc9fda8d2409a42a46d08a94626a0405b00a3735934c93d79b680869c73e188  120669  shots\round2-evidence-toggle.png
+f6301a6053542e8bd632dad4d0e5470d77cdb5bf9a02e381a74556379cdd66f7  179674  shots\round2-font-zoom-200.png
+1cab799fb290d3c7679717ff3e24f888e3038aeb63ef0c075bab9c3a2babd970  99510  shots\round2-fonts-1440x900.png
+041f33e132bc8f4211381c4401bb8d8796c63995a85b1b6bad396e3f703a8fc6  45410  shots\round2-fonts-320x640.png
+89a44ba9ee1881129023cf8455f61a336dccdcd1a0530c2e59486b963dbec460  60959  shots\round2-fonts-390x844.png
+73cfa0cd586fdc3613d68850069cc3d96745d8521fa1aa4025012c3104155603  119851  shots\round2-hero-entrance-normal.png
+adbfde85876abbe439172b1e4c017987538b0d4a79e1a5f7400ffa02d4daeda9  121116  shots\round2-hero-entrance-reduced.png
+f0509f9ae8976faf9465bb6f9a6bde6042122e958c8026e5f816225db062d0dd  114483  shots\round2-hot-final-normal.png
+073b91382a3b0797329ec7915a9e8dcc1c1c5f21406f766df752595eff050d07  114066  shots\round2-hot-normal-restored-cycle1.png
+0384d3e7e5036f08303cb57108700d736a7f9a3ef89647f76f028184cceb692b  92275  shots\round2-hot-normal-restored-cycle2.png
+aca191441d6586252f5c13996eb37dfd71e804f3f52fad8aa847e381c1142314  91443  shots\round2-hot-normal-restored-cycle3.png
+25dd0446db932cf6235f9ff014dac5b535a82d74dcb9837fcc1543e30c800633  108568  shots\round2-hot-normal-scroll800.png
+92dd53a83d1762040e9d6ffab1b88b3fb2f8a2ffb356631f051b1f34a3de1263  109375  shots\round2-hot-reduce-cycle1.png
+7d27392447a6e9f40d2c5c225aa3fa0f5a6fc9f92faabcc30c05c4f139f687f0  113172  shots\round2-hot-reduce-cycle2.png
+a6fa34d4049d9770c60721e18d1b3e726787c88f0c1967640da15a94f0bf013c  92024  shots\round2-hot-reduce-cycle3.png
+363071dda41f1ad1e4b1a7604126c816c5f2f0fc00318f41dc9e99bc5b7cb580  117281  shots\round2-initial-reduced.png
+1fc347d9d773f8edd0124a8c754fcb7d7a4386aa4ef7e207d3010861e6bf1d94  122147  shots\round2-keyboard-skip-link.png
+a98e0f70d9b75a15f2a3a7ef7d98feb85c43fa6b3607fc3cb5ca285da3048cb8  77188  shots\round2-provisional-video-after-click.png
+73cfa0cd586fdc3613d68850069cc3d96745d8521fa1aa4025012c3104155603  119851  shots\round2-provisional-video-before-click.png
+a98e0f70d9b75a15f2a3a7ef7d98feb85c43fa6b3607fc3cb5ca285da3048cb8  77188  shots\round2-provisional-video-keyboard-activated.png
+e7ded0e812a4de8986d46e3d8c56a1083c048b6aa6b6a6e14bd0c5f14adc89d6  16773  shots\round2-provisional-video-no-js.png
+4625800814d3cb423d671702dcb4f06742efb8dbc19b0d5667b790b82c5f433e  112276  shots\round2-stage-away.png
+f0eb57a72afe9cab2246a0f65687277b9cbd6d8d574661b59abe0cc967d4c05d  117658  shots\round2-stage-back.png
+f074aeb5c2e7168ba95f6037df15dbc0fa0c55adc62545a9884ea52cf4d96d3a  115004  shots\round2-stage-during.png
+5bce562bb380cffbce057701d908fa46b0bfc8f68526067d429836e3bfb0f1a1  41764  shots\round2-viewport-320x640.png
+39d0f6f6bc5c04e49f0234901676881c6147a08b37424274d06a0f9e5e98360b  42438  shots\round2-viewport-720x450(200%).png
+```

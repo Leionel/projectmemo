@@ -1,12 +1,14 @@
 "use client";
 /**
- * 原任务回执、成果分类、用量与依据历史（C3 接线骨架）。
+ * 结果分类、现实行动、回执与草稿（C3 接线）。
  *
- * 数据来自同一份 `readback` 快照：原 selected/adoptions/actionReceipts/reviewProgress/
- * resourceUsage/materialUses/evidenceReviews。这里不是第二份结果账本：已执行、用户报告、
- * 独立支持与未知全部沿用服务端原分类与对象 ID；Action/resultCardId 只链接到原对象。
+ * 全部事实来自同一份 `readback` 快照：原 selected/adoptions/actionReceipts/reviewProgress/
+ * resourceUsage/materialUses/evidenceReviews。这里不是第二份结果账本：草稿、已执行、
+ * 用户报告、独立支持与未知沿用服务端原分类与对象 ID；Action/resultCardId 只链接原对象，
+ * 不自动写入，也不把工具成功或用户自报完成升级成独立支持或现实目标达成。
  */
 import { missionNavigationHref } from "@/lib/mission/navigation";
+import { projectHref } from "@/lib/projectNavigation";
 import { materialUseSummary } from "@/lib/client/materialUseLabels";
 import { fitReasonLabel } from "@/lib/client/evidenceFitLabels";
 import { fitStatusLabel } from "./MissionEvidenceReview";
@@ -14,12 +16,35 @@ import type { MissionReadback as Data } from "@/lib/mission/readback";
 
 export type MissionResultReceiptsProps = { data: Data };
 
+/**
+ * 原行动状态如实分开：完成标记、用户报告回执与演示数据不是同一件事。
+ * 未完成行动的入口是原行动板，由用户在那里决定是否执行，不在读回里代写。
+ */
+function actionOutcomeText(action: {
+  status: string;
+  resultCardId: string | null;
+}) {
+  if (action.status === "DONE")
+    return action.resultCardId
+      ? "用户报告完成（已留复盘回执）"
+      : "已标记完成，但无复盘回执";
+  if (action.status === "DOING") return "进行中，尚未完成";
+  if (action.status === "CANCELLED") return "已取消，未完成";
+  if (action.status === "TODO") return "尚未开始，未完成";
+  return `状态待确认：${action.status}`;
+}
+
 export function MissionResultReceipts({ data }: MissionResultReceiptsProps) {
+  const reviewProgress = data.reviewProgress;
+  const adoptions = Array.isArray(data.adoptions) ? data.adoptions : [];
+  const actionReceipts = Array.isArray(data.actionReceipts)
+    ? data.actionReceipts
+    : [];
   return (
     <>
       <p>
-        读取于 {new Date(data.observedAt).toLocaleString("zh-CN")} ·
-        委托版本 {data.missionVersion}
+        读取于 {new Date(data.observedAt).toLocaleString("zh-CN")} · 委托版本{" "}
+        {data.missionVersion}
       </p>
       {data.sourceConversation && (
         <a
@@ -43,65 +68,15 @@ export function MissionResultReceipts({ data }: MissionResultReceiptsProps) {
           ，批准仍需在当前有效预览中操作。
         </p>
       )}
-      {data.selected.output && (
-        <div>
-          <strong>
-            指定草稿版本 {data.selected.output.revision} · 只读
-          </strong>
-          {(
-            data.selected.output.contentJson as {
-              blocks?: Array<{ blockId: string; text: string }>;
-            }
-          ).blocks?.map((b) => (
-            <p className="whitespace-pre-wrap" key={b.blockId}>
-              {b.text}
-            </p>
-          ))}
-        </div>
-      )}
-      {data.selected.receipt && (
-        <p>
-          指定归入回执：{data.selected.receipt.id} · 草稿版本{" "}
-          {data.selected.receipt.outputRevision}
-        </p>
-      )}
-      {data.adoptions.map((r) => (
-        <p key={r.receiptId}>
-          已归入成果：
-          <a
-            className="workspace-link focus-ring"
-            href={`/projects/${data.projectId}/generate?artifact=${r.artifactId}&type=${r.artifactType}`}
-          >
-            {r.title} · {new Date(r.artifactCreatedAt).toLocaleString("zh-CN")}
-          </a>
-          （来自草稿 {r.outputRevision}；回执 {r.receiptId}）
-        </p>
-      ))}
-      {data.actionReceipts.map((a) => (
-        <p key={a.id}>
-          {a.title}：{a.isSimulated ? "演示情境 · " : ""}
-          {a.status === "DONE" && a.resultCardId
-            ? "已填写行动完成回执"
-            : a.status === "DONE"
-              ? "已标记完成，未找到复盘回执"
-              : "尚未填写完成回执"}
-          {a.resultCardId && (
-            <a
-              className="workspace-link focus-ring"
-              href={`/projects/${data.projectId}/knowledge#card-${a.resultCardId}`}
-            >
-              查看复盘记录 →
-            </a>
-          )}
-        </p>
-      ))}
-      {data.reviewProgress && (
-        <details className="mt-3 border-t border-[var(--rule)] pt-3">
-          <summary className="cursor-pointer font-semibold">
-            执行、观察、支持、报告、反例与未知
-          </summary>
-          <dl className="mt-2 space-y-1">
-            {data.reviewProgress.classes.map((item) => (
+
+      <section
+        aria-label="结果分类与支持上限"
+        className="mt-3 border-t border-[var(--rule)] pt-3"
+      >
+        <h4 className="font-semibold">结果分类与支持上限</h4>
+        {reviewProgress && Array.isArray(reviewProgress.classes) ? (
+          <dl className="mt-2 space-y-1" aria-label="服务端原结果分类">
+            {reviewProgress.classes.map((item) => (
               <div key={item.key} className="flex gap-2">
                 <dt className="w-24 shrink-0 font-semibold">
                   {item.label}：{item.count}
@@ -110,11 +85,123 @@ export function MissionResultReceipts({ data }: MissionResultReceiptsProps) {
               </div>
             ))}
           </dl>
-          <p className="mt-2 text-[var(--muted)]">
-            这是原步骤、草稿核对、行动与回执的投影；工具成功或用户说完成都不等于现实目标已达成。
+        ) : (
+          <p className="mt-2">
+            当前读回未提供结果分类摘要，暂不据此推断完成；原草稿与回执仍可核对。
           </p>
-        </details>
+        )}
+        <p className="mt-2">
+          草稿存在不等于完成；工具调用成功或用户自报完成 ≠ 独立支持 ≠
+          现实目标达成。
+        </p>
+      </section>
+
+      <section
+        aria-label="行动与回执"
+        className="mt-3 border-t border-[var(--rule)] pt-3"
+      >
+        <h4 className="font-semibold">行动与回执</h4>
+        {actionReceipts.length === 0 ? (
+          <p className="mt-2">
+            这次读回没有行动回执记录。
+            <a
+              className="workspace-link focus-ring"
+              href={projectHref(data.projectId, "#action-board")}
+            >
+              到项目行动板处理行动 →
+            </a>
+          </p>
+        ) : (
+          <ul className="mt-2 space-y-2">
+            {actionReceipts.map((action) => {
+              const actionHref = projectHref(
+                data.projectId,
+                `#action-${action.id}`,
+              );
+              return (
+                <li key={action.id} className="space-y-1 break-words">
+                  <strong>{action.title ?? "未命名行动"}</strong>
+                  <p>
+                    {action.isSimulated ? "演示情境，不计真实行为 · " : ""}
+                    {action.isSimulated
+                      ? action.status === "DONE"
+                        ? "演示完成标记"
+                        : "演示待办"
+                      : actionOutcomeText(action)}
+                    {action.completedAt
+                      ? ` · ${new Date(action.completedAt).toLocaleString("zh-CN")}`
+                      : ""}
+                  </p>
+                  {!action.isSimulated && (
+                    <p className="flex flex-wrap gap-3">
+                      <a className="workspace-link focus-ring" href={actionHref}>
+                        {action.status === "DONE" ||
+                        action.status === "CANCELLED"
+                          ? "回到原行动 →"
+                          : "回到原行动填写结果 →"}
+                      </a>
+                      {action.resultCardId && (
+                        <a
+                          className="workspace-link focus-ring"
+                          href={`/projects/${encodeURIComponent(data.projectId)}/knowledge#card-${encodeURIComponent(action.resultCardId)}`}
+                        >
+                          查看原复盘回执 →
+                        </a>
+                      )}
+                    </p>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+
+      {(data.selected.output ||
+        data.selected.receipt ||
+        adoptions.length > 0) && (
+        <section
+          aria-label="草稿与已采纳成果"
+          className="mt-3 border-t border-[var(--rule)] pt-3"
+        >
+          <h4 className="font-semibold">草稿与已采纳成果</h4>
+          {data.selected.output && (
+            <div className="mt-2">
+              <strong>
+                指定草稿版本 {data.selected.output.revision} · 只读
+              </strong>
+              {(
+                data.selected.output.contentJson as {
+                  blocks?: Array<{ blockId: string; text: string }>;
+                }
+              ).blocks?.map((b) => (
+                <p className="whitespace-pre-wrap" key={b.blockId}>
+                  {b.text}
+                </p>
+              ))}
+            </div>
+          )}
+          {data.selected.receipt && (
+            <p className="mt-2">
+              指定归入回执：{data.selected.receipt.id} · 草稿版本{" "}
+              {data.selected.receipt.outputRevision}
+            </p>
+          )}
+          {adoptions.map((r) => (
+            <p className="mt-2" key={r.receiptId}>
+              已归入成果：
+              <a
+                className="workspace-link focus-ring"
+                href={`/projects/${data.projectId}/generate?artifact=${r.artifactId}&type=${r.artifactType}`}
+              >
+                {r.title} · {new Date(r.artifactCreatedAt).toLocaleString("zh-CN")}
+              </a>
+              （来自草稿 {r.outputRevision}；回执 {r.receiptId}）
+            </p>
+          ))}
+        </section>
       )}
+
       {data.resourceUsage && (
         <details className="mt-3 border-t border-[var(--rule)] pt-3">
           <summary className="cursor-pointer font-semibold focus-ring">

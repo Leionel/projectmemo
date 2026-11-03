@@ -1,0 +1,4519 @@
+{
+  "generatedAt": "2026-11-03T07:27:44.725Z",
+  "purpose": "BEFORE_FIX primaryAction.requires 字段在 12 个原端点的真实接受/拒绝矩阵",
+  "sourceTree": "BEFORE_FIX 4b69614 clean shadow (recompute for reproducibility)",
+  "method": "真实 route handler + 真实 AuthSession cookie + 独立临时 SQLite fixture；每个矩阵单元使用全新 mission；base body 对照 + 单字段注入 + requires 整包盲发 + 真实 fence 负例",
+  "db": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-post-base-requires-xNGf13\\verify.db",
+  "requiresFields": [
+    "missionVersion",
+    "planRevision",
+    "contextVersion",
+    "constraintsVersion",
+    "researchScopeVersion",
+    "controlVersion",
+    "questionId",
+    "approvalId",
+    "proposalHash",
+    "requiredSourceRevisions",
+    "boundaryAt"
+  ],
+  "endpoints": [
+    "input",
+    "approvals",
+    "pause",
+    "cancel",
+    "resume",
+    "replan",
+    "constraints",
+    "research-scope",
+    "continuation-policy",
+    "responsibility",
+    "continuations-confirm",
+    "artifact-confirm"
+  ],
+  "fieldSemantics": {
+    "missionVersion": {
+      "requestField": "expectedVersion",
+      "endpoints": [
+        "input",
+        "approvals",
+        "pause",
+        "cancel",
+        "resume",
+        "replan",
+        "continuation-policy",
+        "continuations-confirm"
+      ],
+      "fence": "commandMission/editContinuationPolicy/confirmContinuation 直接比较 m.version"
+    },
+    "planRevision": {
+      "requestField": null,
+      "fence": "approval.expectedPlanRevision 在提案时固化，服务端比较 m.planRevision；无请求字段"
+    },
+    "contextVersion": {
+      "requestField": "expectedContextVersion",
+      "endpoints": [
+        "continuations-confirm",
+        "artifact-confirm"
+      ],
+      "fence": "服务端比较 m.contextVersion"
+    },
+    "constraintsVersion": {
+      "requestField": "expectedConstraintsVersion",
+      "endpoints": [
+        "constraints"
+      ],
+      "fence": "editMission 比较 m.constraintsVersion"
+    },
+    "researchScopeVersion": {
+      "requestField": "expectedScopeVersion",
+      "endpoints": [
+        "research-scope"
+      ],
+      "fence": "editMission 比较 m.researchScopeVersion"
+    },
+    "controlVersion": {
+      "requestField": "expectedControlVersion",
+      "endpoints": [
+        "responsibility"
+      ],
+      "fence": "readMissionResponsibility 重算 controlVersion 后比较"
+    },
+    "questionId": {
+      "requestField": "questionId",
+      "endpoints": [
+        "input",
+        "continuations-confirm"
+      ],
+      "fence": "服务端匹配当前 QUESTION 事件/ waitStateJson.questionId"
+    },
+    "approvalId": {
+      "requestField": "路径参数 approvalId",
+      "endpoints": [
+        "approvals"
+      ],
+      "fence": "服务端按 missionId+status=PENDING 查原审批"
+    },
+    "proposalHash": {
+      "requestField": "proposalHash",
+      "endpoints": [
+        "approvals"
+      ],
+      "fence": "服务端比较 approval.proposalHash"
+    },
+    "requiredSourceRevisions": {
+      "requestField": null,
+      "fence": "服务端从原 Source 指针/sourceRefsJson 重查 validateSources；无请求字段"
+    },
+    "boundaryAt": {
+      "requestField": null,
+      "fence": "服务端在提交时重读责任/权限/边界；无请求字段"
+    }
+  },
+  "matrix": [
+    {
+      "endpoint": "input",
+      "field": "missionVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "missionVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"missionVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"missionVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"missionVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "missionVersion"
+      ]
+    },
+    {
+      "endpoint": "input",
+      "field": "planRevision",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "planRevision"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"planRevision\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"planRevision\"],\"path\":[],\"message\":\"Unrecognized key: \\\"planRevision\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "planRevision"
+      ]
+    },
+    {
+      "endpoint": "input",
+      "field": "contextVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "contextVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"contextVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"contextVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"contextVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "contextVersion"
+      ]
+    },
+    {
+      "endpoint": "input",
+      "field": "constraintsVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "constraintsVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"constraintsVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"constraintsVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"constraintsVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "constraintsVersion"
+      ]
+    },
+    {
+      "endpoint": "input",
+      "field": "researchScopeVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "researchScopeVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"researchScopeVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"researchScopeVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"researchScopeVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "researchScopeVersion"
+      ]
+    },
+    {
+      "endpoint": "input",
+      "field": "controlVersion",
+      "sampleValue": "cv-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "controlVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"controlVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"controlVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"controlVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "controlVersion"
+      ]
+    },
+    {
+      "endpoint": "input",
+      "field": "questionId",
+      "sampleValue": "question-post-verify",
+      "status": 409,
+      "errorCode": "INPUT_CHANGED",
+      "errorMessage": "问题已变化，请刷新后补充",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"INPUT_CHANGED\",\"message\":\"问题已变化，请刷新后补充\"}}",
+      "layer": "ENTRY_ACCEPTS_FIELD_THEN_SERVICE_FENCE",
+      "rejectedKeys": []
+    },
+    {
+      "endpoint": "input",
+      "field": "approvalId",
+      "sampleValue": "approval-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "approvalId"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"approvalId\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"approvalId\"],\"path\":[],\"message\":\"Unrecognized key: \\\"approvalId\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "approvalId"
+      ]
+    },
+    {
+      "endpoint": "input",
+      "field": "proposalHash",
+      "sampleValue": "proposal-hash-post-verify",
+      "status": 202,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"mission\":{\"id\":\"cmw0d8a9b000ztc8onsc0r62r\",\"ownerUserId\":\"cmw0d898n0000tc8oov3wgnib\",\"projectId\":\"cmw0d89bs0001tc8onxj929fm\",\"createRequestId\":\"req-9453844a-8ece-49b9-a1cc-6b4ea0290521\",\"createPayloadHash\":\"d80f0df1273f676223dbf2265195e3fef672af7b21756a4683d805a9b4579d14\",\"goal\":\"独立验收 requires 矩阵 input e6546e81-bc6e-4861-a2fd-c3b603a91243\",\"successCriteriaJson\":[\"DRAFT_EXISTS\"],\"constraintsJson\"",
+      "layer": "ENTRY_ACCEPTS_AS_REQUEST_FIELD",
+      "rejectedKeys": []
+    },
+    {
+      "endpoint": "input",
+      "field": "requiredSourceRevisions",
+      "sampleValue": [
+        "capture:post-verify@deadbeef"
+      ],
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "requiredSourceRevisions"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"requiredSourceRevisions\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"requiredSourceRevisions\"],\"path\":[],\"message\":\"Unrecognized key: \\\"requiredSourceRevisions\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "requiredSourceRevisions"
+      ]
+    },
+    {
+      "endpoint": "input",
+      "field": "boundaryAt",
+      "sampleValue": "2026-12-31T00:00:00.000Z",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "boundaryAt"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"boundaryAt\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"boundaryAt\"],\"path\":[],\"message\":\"Unrecognized key: \\\"boundaryAt\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "boundaryAt"
+      ]
+    },
+    {
+      "endpoint": "approvals",
+      "field": "missionVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "missionVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"missionVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"missionVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"missionVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "missionVersion"
+      ]
+    },
+    {
+      "endpoint": "approvals",
+      "field": "planRevision",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "planRevision"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"planRevision\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"planRevision\"],\"path\":[],\"message\":\"Unrecognized key: \\\"planRevision\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "planRevision"
+      ]
+    },
+    {
+      "endpoint": "approvals",
+      "field": "contextVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "contextVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"contextVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"contextVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"contextVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "contextVersion"
+      ]
+    },
+    {
+      "endpoint": "approvals",
+      "field": "constraintsVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "constraintsVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"constraintsVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"constraintsVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"constraintsVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "constraintsVersion"
+      ]
+    },
+    {
+      "endpoint": "approvals",
+      "field": "researchScopeVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "researchScopeVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"researchScopeVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"researchScopeVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"researchScopeVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "researchScopeVersion"
+      ]
+    },
+    {
+      "endpoint": "approvals",
+      "field": "controlVersion",
+      "sampleValue": "cv-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "controlVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"controlVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"controlVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"controlVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "controlVersion"
+      ]
+    },
+    {
+      "endpoint": "approvals",
+      "field": "questionId",
+      "sampleValue": "question-post-verify",
+      "status": 202,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"mission\":{\"id\":\"cmw0d8b6h002mtc8o8gzvutak\",\"ownerUserId\":\"cmw0d8ahw001ctc8oyyrxh9ur\",\"projectId\":\"cmw0d8ahy001dtc8ojt4aq7iw\",\"createRequestId\":\"req-1c23d38e-41d6-43f5-8f55-d35ec71e6b23\",\"createPayloadHash\":\"18bb86ee5d90424bdf55754d527eae94448a41d857a67a97857f219cb341785c\",\"goal\":\"独立验收 requires 矩阵 approvals ebcf9bb9-47c1-4116-bfe4-bb6acc1d1e01\",\"successCriteriaJson\":[\"DRAFT_EXISTS\"],\"constraintsJ",
+      "layer": "ENTRY_ACCEPTS_AS_REQUEST_FIELD",
+      "rejectedKeys": []
+    },
+    {
+      "endpoint": "approvals",
+      "field": "approvalId",
+      "sampleValue": "approval-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "approvalId"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"approvalId\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"approvalId\"],\"path\":[],\"message\":\"Unrecognized key: \\\"approvalId\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "approvalId"
+      ]
+    },
+    {
+      "endpoint": "approvals",
+      "field": "proposalHash",
+      "sampleValue": "proposal-hash-post-verify",
+      "status": 409,
+      "errorCode": "APPROVAL_CHANGED",
+      "errorMessage": "批准预览已失效，请重新预览",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"APPROVAL_CHANGED\",\"message\":\"批准预览已失效，请重新预览\"}}",
+      "layer": "ENTRY_ACCEPTS_FIELD_THEN_SERVICE_FENCE",
+      "rejectedKeys": []
+    },
+    {
+      "endpoint": "approvals",
+      "field": "requiredSourceRevisions",
+      "sampleValue": [
+        "capture:post-verify@deadbeef"
+      ],
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "requiredSourceRevisions"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"requiredSourceRevisions\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"requiredSourceRevisions\"],\"path\":[],\"message\":\"Unrecognized key: \\\"requiredSourceRevisions\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "requiredSourceRevisions"
+      ]
+    },
+    {
+      "endpoint": "approvals",
+      "field": "boundaryAt",
+      "sampleValue": "2026-12-31T00:00:00.000Z",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "boundaryAt"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"boundaryAt\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"boundaryAt\"],\"path\":[],\"message\":\"Unrecognized key: \\\"boundaryAt\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "boundaryAt"
+      ]
+    },
+    {
+      "endpoint": "pause",
+      "field": "missionVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "missionVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"missionVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"missionVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"missionVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "missionVersion"
+      ]
+    },
+    {
+      "endpoint": "pause",
+      "field": "planRevision",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "planRevision"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"planRevision\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"planRevision\"],\"path\":[],\"message\":\"Unrecognized key: \\\"planRevision\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "planRevision"
+      ]
+    },
+    {
+      "endpoint": "pause",
+      "field": "contextVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "contextVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"contextVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"contextVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"contextVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "contextVersion"
+      ]
+    },
+    {
+      "endpoint": "pause",
+      "field": "constraintsVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "constraintsVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"constraintsVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"constraintsVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"constraintsVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "constraintsVersion"
+      ]
+    },
+    {
+      "endpoint": "pause",
+      "field": "researchScopeVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "researchScopeVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"researchScopeVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"researchScopeVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"researchScopeVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "researchScopeVersion"
+      ]
+    },
+    {
+      "endpoint": "pause",
+      "field": "controlVersion",
+      "sampleValue": "cv-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "controlVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"controlVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"controlVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"controlVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "controlVersion"
+      ]
+    },
+    {
+      "endpoint": "pause",
+      "field": "questionId",
+      "sampleValue": "question-post-verify",
+      "status": 202,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"mission\":{\"id\":\"cmw0d8bs10043tc8o26ip4rls\",\"ownerUserId\":\"cmw0d8bhe003itc8ov6j8nlz9\",\"projectId\":\"cmw0d8bhm003jtc8oe92qay8t\",\"createRequestId\":\"req-a318c98f-5583-4c1c-904b-81d14111a28e\",\"createPayloadHash\":\"8e3e1d7d34b9078b39a24c8b2c5e22cfded3d63a24cd499f86c51bf33bf76842\",\"goal\":\"独立验收 requires 矩阵 pause f8cdceeb-2fa9-4c8e-9a7a-419bb6338192\",\"successCriteriaJson\":[\"DRAFT_EXISTS\"],\"constraintsJson\"",
+      "layer": "ENTRY_ACCEPTS_AS_REQUEST_FIELD",
+      "rejectedKeys": []
+    },
+    {
+      "endpoint": "pause",
+      "field": "approvalId",
+      "sampleValue": "approval-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "approvalId"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"approvalId\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"approvalId\"],\"path\":[],\"message\":\"Unrecognized key: \\\"approvalId\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "approvalId"
+      ]
+    },
+    {
+      "endpoint": "pause",
+      "field": "proposalHash",
+      "sampleValue": "proposal-hash-post-verify",
+      "status": 202,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"mission\":{\"id\":\"cmw0d8btx0048tc8o0tzxfpu2\",\"ownerUserId\":\"cmw0d8bhe003itc8ov6j8nlz9\",\"projectId\":\"cmw0d8bhm003jtc8oe92qay8t\",\"createRequestId\":\"req-9329ddd1-1335-4996-a74d-17a5d4b0a6a0\",\"createPayloadHash\":\"4f79e07c30914073d74907cad6978e8a54b9b3b350d35eee682e214bee57c6ba\",\"goal\":\"独立验收 requires 矩阵 pause 40450390-0be9-4357-8724-8cff79476b02\",\"successCriteriaJson\":[\"DRAFT_EXISTS\"],\"constraintsJson\"",
+      "layer": "ENTRY_ACCEPTS_AS_REQUEST_FIELD",
+      "rejectedKeys": []
+    },
+    {
+      "endpoint": "pause",
+      "field": "requiredSourceRevisions",
+      "sampleValue": [
+        "capture:post-verify@deadbeef"
+      ],
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "requiredSourceRevisions"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"requiredSourceRevisions\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"requiredSourceRevisions\"],\"path\":[],\"message\":\"Unrecognized key: \\\"requiredSourceRevisions\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "requiredSourceRevisions"
+      ]
+    },
+    {
+      "endpoint": "pause",
+      "field": "boundaryAt",
+      "sampleValue": "2026-12-31T00:00:00.000Z",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "boundaryAt"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"boundaryAt\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"boundaryAt\"],\"path\":[],\"message\":\"Unrecognized key: \\\"boundaryAt\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "boundaryAt"
+      ]
+    },
+    {
+      "endpoint": "cancel",
+      "field": "missionVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "missionVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"missionVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"missionVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"missionVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "missionVersion"
+      ]
+    },
+    {
+      "endpoint": "cancel",
+      "field": "planRevision",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "planRevision"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"planRevision\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"planRevision\"],\"path\":[],\"message\":\"Unrecognized key: \\\"planRevision\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "planRevision"
+      ]
+    },
+    {
+      "endpoint": "cancel",
+      "field": "contextVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "contextVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"contextVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"contextVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"contextVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "contextVersion"
+      ]
+    },
+    {
+      "endpoint": "cancel",
+      "field": "constraintsVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "constraintsVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"constraintsVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"constraintsVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"constraintsVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "constraintsVersion"
+      ]
+    },
+    {
+      "endpoint": "cancel",
+      "field": "researchScopeVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "researchScopeVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"researchScopeVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"researchScopeVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"researchScopeVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "researchScopeVersion"
+      ]
+    },
+    {
+      "endpoint": "cancel",
+      "field": "controlVersion",
+      "sampleValue": "cv-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "controlVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"controlVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"controlVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"controlVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "controlVersion"
+      ]
+    },
+    {
+      "endpoint": "cancel",
+      "field": "questionId",
+      "sampleValue": "question-post-verify",
+      "status": 202,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"mission\":{\"id\":\"cmw0d8c8n0052tc8omc7rw7a9\",\"ownerUserId\":\"cmw0d8c07004htc8omdwgc0xt\",\"projectId\":\"cmw0d8c0l004itc8okccveswa\",\"createRequestId\":\"req-8bdf851c-f9d2-4e40-9627-055b1a585a99\",\"createPayloadHash\":\"6ed978eb3aa4f37380aa16066cd08da3a2190fb09460f05c7714179b69d30324\",\"goal\":\"独立验收 requires 矩阵 cancel d87894d6-90d7-4347-851c-8acc10cba478\",\"successCriteriaJson\":[\"DRAFT_EXISTS\"],\"constraintsJson",
+      "layer": "ENTRY_ACCEPTS_AS_REQUEST_FIELD",
+      "rejectedKeys": []
+    },
+    {
+      "endpoint": "cancel",
+      "field": "approvalId",
+      "sampleValue": "approval-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "approvalId"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"approvalId\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"approvalId\"],\"path\":[],\"message\":\"Unrecognized key: \\\"approvalId\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "approvalId"
+      ]
+    },
+    {
+      "endpoint": "cancel",
+      "field": "proposalHash",
+      "sampleValue": "proposal-hash-post-verify",
+      "status": 202,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"mission\":{\"id\":\"cmw0d8ca60057tc8orv78vqq9\",\"ownerUserId\":\"cmw0d8c07004htc8omdwgc0xt\",\"projectId\":\"cmw0d8c0l004itc8okccveswa\",\"createRequestId\":\"req-eeaaa5b7-977b-4048-a5fd-ff8dd2bb1d2b\",\"createPayloadHash\":\"bbbf03b29cb3241c02345b28661d6815422bb733991801c18ecbc1f8974d6c6e\",\"goal\":\"独立验收 requires 矩阵 cancel 4ab1a565-8d3b-4a36-bc43-7980c66bf277\",\"successCriteriaJson\":[\"DRAFT_EXISTS\"],\"constraintsJson",
+      "layer": "ENTRY_ACCEPTS_AS_REQUEST_FIELD",
+      "rejectedKeys": []
+    },
+    {
+      "endpoint": "cancel",
+      "field": "requiredSourceRevisions",
+      "sampleValue": [
+        "capture:post-verify@deadbeef"
+      ],
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "requiredSourceRevisions"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"requiredSourceRevisions\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"requiredSourceRevisions\"],\"path\":[],\"message\":\"Unrecognized key: \\\"requiredSourceRevisions\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "requiredSourceRevisions"
+      ]
+    },
+    {
+      "endpoint": "cancel",
+      "field": "boundaryAt",
+      "sampleValue": "2026-12-31T00:00:00.000Z",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "boundaryAt"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"boundaryAt\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"boundaryAt\"],\"path\":[],\"message\":\"Unrecognized key: \\\"boundaryAt\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "boundaryAt"
+      ]
+    },
+    {
+      "endpoint": "resume",
+      "field": "missionVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "missionVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"missionVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"missionVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"missionVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "missionVersion"
+      ]
+    },
+    {
+      "endpoint": "resume",
+      "field": "planRevision",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "planRevision"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"planRevision\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"planRevision\"],\"path\":[],\"message\":\"Unrecognized key: \\\"planRevision\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "planRevision"
+      ]
+    },
+    {
+      "endpoint": "resume",
+      "field": "contextVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "contextVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"contextVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"contextVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"contextVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "contextVersion"
+      ]
+    },
+    {
+      "endpoint": "resume",
+      "field": "constraintsVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "constraintsVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"constraintsVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"constraintsVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"constraintsVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "constraintsVersion"
+      ]
+    },
+    {
+      "endpoint": "resume",
+      "field": "researchScopeVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "researchScopeVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"researchScopeVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"researchScopeVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"researchScopeVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "researchScopeVersion"
+      ]
+    },
+    {
+      "endpoint": "resume",
+      "field": "controlVersion",
+      "sampleValue": "cv-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "controlVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"controlVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"controlVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"controlVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "controlVersion"
+      ]
+    },
+    {
+      "endpoint": "resume",
+      "field": "questionId",
+      "sampleValue": "question-post-verify",
+      "status": 202,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"mission\":{\"id\":\"cmw0d8cjc0061tc8ojqxxe5wf\",\"ownerUserId\":\"cmw0d8cdg005gtc8oau86hqjd\",\"projectId\":\"cmw0d8cdi005htc8ogtp38lcb\",\"createRequestId\":\"req-3a5a115c-1b31-4008-b9a6-1ea299107f42\",\"createPayloadHash\":\"da4136cd7ce5b7741ed9d77112a1dd39db5f2989c74affb617aa38725dc2a727\",\"goal\":\"独立验收 requires 矩阵 resume 34ffca2e-bb79-424a-9237-4b63f6a6e661\",\"successCriteriaJson\":[\"DRAFT_EXISTS\"],\"constraintsJson",
+      "layer": "ENTRY_ACCEPTS_AS_REQUEST_FIELD",
+      "rejectedKeys": []
+    },
+    {
+      "endpoint": "resume",
+      "field": "approvalId",
+      "sampleValue": "approval-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "approvalId"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"approvalId\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"approvalId\"],\"path\":[],\"message\":\"Unrecognized key: \\\"approvalId\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "approvalId"
+      ]
+    },
+    {
+      "endpoint": "resume",
+      "field": "proposalHash",
+      "sampleValue": "proposal-hash-post-verify",
+      "status": 202,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"mission\":{\"id\":\"cmw0d8ckx0066tc8obfuebdoe\",\"ownerUserId\":\"cmw0d8cdg005gtc8oau86hqjd\",\"projectId\":\"cmw0d8cdi005htc8ogtp38lcb\",\"createRequestId\":\"req-e151f1f2-f80d-4188-99d0-0974c14f69b6\",\"createPayloadHash\":\"a1074f0d3ce6329d29f296bd467d53fcb5081ed4bb560cbdf33099434cbb8bbd\",\"goal\":\"独立验收 requires 矩阵 resume 207ad05f-1e05-495f-abbd-89e5932d7e4c\",\"successCriteriaJson\":[\"DRAFT_EXISTS\"],\"constraintsJson",
+      "layer": "ENTRY_ACCEPTS_AS_REQUEST_FIELD",
+      "rejectedKeys": []
+    },
+    {
+      "endpoint": "resume",
+      "field": "requiredSourceRevisions",
+      "sampleValue": [
+        "capture:post-verify@deadbeef"
+      ],
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "requiredSourceRevisions"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"requiredSourceRevisions\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"requiredSourceRevisions\"],\"path\":[],\"message\":\"Unrecognized key: \\\"requiredSourceRevisions\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "requiredSourceRevisions"
+      ]
+    },
+    {
+      "endpoint": "resume",
+      "field": "boundaryAt",
+      "sampleValue": "2026-12-31T00:00:00.000Z",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "boundaryAt"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"boundaryAt\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"boundaryAt\"],\"path\":[],\"message\":\"Unrecognized key: \\\"boundaryAt\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "boundaryAt"
+      ]
+    },
+    {
+      "endpoint": "replan",
+      "field": "missionVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "missionVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"missionVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"missionVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"missionVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "missionVersion"
+      ]
+    },
+    {
+      "endpoint": "replan",
+      "field": "planRevision",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "planRevision"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"planRevision\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"planRevision\"],\"path\":[],\"message\":\"Unrecognized key: \\\"planRevision\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "planRevision"
+      ]
+    },
+    {
+      "endpoint": "replan",
+      "field": "contextVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "contextVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"contextVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"contextVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"contextVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "contextVersion"
+      ]
+    },
+    {
+      "endpoint": "replan",
+      "field": "constraintsVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "constraintsVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"constraintsVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"constraintsVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"constraintsVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "constraintsVersion"
+      ]
+    },
+    {
+      "endpoint": "replan",
+      "field": "researchScopeVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "researchScopeVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"researchScopeVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"researchScopeVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"researchScopeVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "researchScopeVersion"
+      ]
+    },
+    {
+      "endpoint": "replan",
+      "field": "controlVersion",
+      "sampleValue": "cv-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "controlVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"controlVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"controlVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"controlVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "controlVersion"
+      ]
+    },
+    {
+      "endpoint": "replan",
+      "field": "questionId",
+      "sampleValue": "question-post-verify",
+      "status": 202,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"mission\":{\"id\":\"cmw0d8cwm007otc8ocsaim9zx\",\"ownerUserId\":\"cmw0d8cno006ftc8ofotj6201\",\"projectId\":\"cmw0d8cnt006gtc8o7yti5ljz\",\"createRequestId\":\"req-ca9434a0-f8b1-4d65-a3f4-918ba2e62fc6\",\"createPayloadHash\":\"ebea63fa58c6e1b25a07ff785fee870a7a8df5ca81b801e64497393e1dacae0d\",\"goal\":\"独立验收 requires 矩阵 replan 24c0dec2-f15e-42b0-ac84-2b9a27de8577\",\"successCriteriaJson\":[\"DRAFT_EXISTS\"],\"constraintsJson",
+      "layer": "ENTRY_ACCEPTS_AS_REQUEST_FIELD",
+      "rejectedKeys": []
+    },
+    {
+      "endpoint": "replan",
+      "field": "approvalId",
+      "sampleValue": "approval-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "approvalId"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"approvalId\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"approvalId\"],\"path\":[],\"message\":\"Unrecognized key: \\\"approvalId\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "approvalId"
+      ]
+    },
+    {
+      "endpoint": "replan",
+      "field": "proposalHash",
+      "sampleValue": "proposal-hash-post-verify",
+      "status": 202,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"mission\":{\"id\":\"cmw0d8cz5007ztc8oehhygly8\",\"ownerUserId\":\"cmw0d8cno006ftc8ofotj6201\",\"projectId\":\"cmw0d8cnt006gtc8o7yti5ljz\",\"createRequestId\":\"req-e2195944-90f5-4050-9fc5-6c68f8ec27da\",\"createPayloadHash\":\"62eafb1c24fb489d2a3d1fea4f483f11289541b31a829bba18cfeceef705d619\",\"goal\":\"独立验收 requires 矩阵 replan 1a0a8861-a3fa-4b4c-bbf3-e28330d08b56\",\"successCriteriaJson\":[\"DRAFT_EXISTS\"],\"constraintsJson",
+      "layer": "ENTRY_ACCEPTS_AS_REQUEST_FIELD",
+      "rejectedKeys": []
+    },
+    {
+      "endpoint": "replan",
+      "field": "requiredSourceRevisions",
+      "sampleValue": [
+        "capture:post-verify@deadbeef"
+      ],
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "requiredSourceRevisions"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"requiredSourceRevisions\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"requiredSourceRevisions\"],\"path\":[],\"message\":\"Unrecognized key: \\\"requiredSourceRevisions\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "requiredSourceRevisions"
+      ]
+    },
+    {
+      "endpoint": "replan",
+      "field": "boundaryAt",
+      "sampleValue": "2026-12-31T00:00:00.000Z",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "boundaryAt"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"boundaryAt\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"boundaryAt\"],\"path\":[],\"message\":\"Unrecognized key: \\\"boundaryAt\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "boundaryAt"
+      ]
+    },
+    {
+      "endpoint": "constraints",
+      "field": "missionVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "missionVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"missionVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"missionVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"missionVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "missionVersion"
+      ]
+    },
+    {
+      "endpoint": "constraints",
+      "field": "planRevision",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "planRevision"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"planRevision\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"planRevision\"],\"path\":[],\"message\":\"Unrecognized key: \\\"planRevision\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "planRevision"
+      ]
+    },
+    {
+      "endpoint": "constraints",
+      "field": "contextVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "contextVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"contextVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"contextVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"contextVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "contextVersion"
+      ]
+    },
+    {
+      "endpoint": "constraints",
+      "field": "constraintsVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "constraintsVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"constraintsVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"constraintsVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"constraintsVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "constraintsVersion"
+      ]
+    },
+    {
+      "endpoint": "constraints",
+      "field": "researchScopeVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "researchScopeVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"researchScopeVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"researchScopeVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"researchScopeVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "researchScopeVersion"
+      ]
+    },
+    {
+      "endpoint": "constraints",
+      "field": "controlVersion",
+      "sampleValue": "cv-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "controlVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"controlVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"controlVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"controlVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "controlVersion"
+      ]
+    },
+    {
+      "endpoint": "constraints",
+      "field": "questionId",
+      "sampleValue": "question-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "questionId"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"questionId\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"questionId\"],\"path\":[],\"message\":\"Unrecognized key: \\\"questionId\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "questionId"
+      ]
+    },
+    {
+      "endpoint": "constraints",
+      "field": "approvalId",
+      "sampleValue": "approval-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "approvalId"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"approvalId\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"approvalId\"],\"path\":[],\"message\":\"Unrecognized key: \\\"approvalId\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "approvalId"
+      ]
+    },
+    {
+      "endpoint": "constraints",
+      "field": "proposalHash",
+      "sampleValue": "proposal-hash-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "proposalHash"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"proposalHash\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"proposalHash\"],\"path\":[],\"message\":\"Unrecognized key: \\\"proposalHash\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "proposalHash"
+      ]
+    },
+    {
+      "endpoint": "constraints",
+      "field": "requiredSourceRevisions",
+      "sampleValue": [
+        "capture:post-verify@deadbeef"
+      ],
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "requiredSourceRevisions"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"requiredSourceRevisions\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"requiredSourceRevisions\"],\"path\":[],\"message\":\"Unrecognized key: \\\"requiredSourceRevisions\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "requiredSourceRevisions"
+      ]
+    },
+    {
+      "endpoint": "constraints",
+      "field": "boundaryAt",
+      "sampleValue": "2026-12-31T00:00:00.000Z",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "boundaryAt"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"boundaryAt\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"boundaryAt\"],\"path\":[],\"message\":\"Unrecognized key: \\\"boundaryAt\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "boundaryAt"
+      ]
+    },
+    {
+      "endpoint": "research-scope",
+      "field": "missionVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "missionVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"missionVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"missionVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"missionVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "missionVersion"
+      ]
+    },
+    {
+      "endpoint": "research-scope",
+      "field": "planRevision",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "planRevision"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"planRevision\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"planRevision\"],\"path\":[],\"message\":\"Unrecognized key: \\\"planRevision\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "planRevision"
+      ]
+    },
+    {
+      "endpoint": "research-scope",
+      "field": "contextVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "contextVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"contextVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"contextVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"contextVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "contextVersion"
+      ]
+    },
+    {
+      "endpoint": "research-scope",
+      "field": "constraintsVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "constraintsVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"constraintsVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"constraintsVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"constraintsVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "constraintsVersion"
+      ]
+    },
+    {
+      "endpoint": "research-scope",
+      "field": "researchScopeVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "researchScopeVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"researchScopeVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"researchScopeVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"researchScopeVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "researchScopeVersion"
+      ]
+    },
+    {
+      "endpoint": "research-scope",
+      "field": "controlVersion",
+      "sampleValue": "cv-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "controlVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"controlVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"controlVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"controlVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "controlVersion"
+      ]
+    },
+    {
+      "endpoint": "research-scope",
+      "field": "questionId",
+      "sampleValue": "question-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "questionId"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"questionId\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"questionId\"],\"path\":[],\"message\":\"Unrecognized key: \\\"questionId\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "questionId"
+      ]
+    },
+    {
+      "endpoint": "research-scope",
+      "field": "approvalId",
+      "sampleValue": "approval-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "approvalId"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"approvalId\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"approvalId\"],\"path\":[],\"message\":\"Unrecognized key: \\\"approvalId\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "approvalId"
+      ]
+    },
+    {
+      "endpoint": "research-scope",
+      "field": "proposalHash",
+      "sampleValue": "proposal-hash-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "proposalHash"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"proposalHash\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"proposalHash\"],\"path\":[],\"message\":\"Unrecognized key: \\\"proposalHash\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "proposalHash"
+      ]
+    },
+    {
+      "endpoint": "research-scope",
+      "field": "requiredSourceRevisions",
+      "sampleValue": [
+        "capture:post-verify@deadbeef"
+      ],
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "requiredSourceRevisions"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"requiredSourceRevisions\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"requiredSourceRevisions\"],\"path\":[],\"message\":\"Unrecognized key: \\\"requiredSourceRevisions\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "requiredSourceRevisions"
+      ]
+    },
+    {
+      "endpoint": "research-scope",
+      "field": "boundaryAt",
+      "sampleValue": "2026-12-31T00:00:00.000Z",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "boundaryAt"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"boundaryAt\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"boundaryAt\"],\"path\":[],\"message\":\"Unrecognized key: \\\"boundaryAt\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "boundaryAt"
+      ]
+    },
+    {
+      "endpoint": "continuation-policy",
+      "field": "missionVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "missionVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"missionVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"missionVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"missionVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "missionVersion"
+      ]
+    },
+    {
+      "endpoint": "continuation-policy",
+      "field": "planRevision",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "planRevision"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"planRevision\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"planRevision\"],\"path\":[],\"message\":\"Unrecognized key: \\\"planRevision\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "planRevision"
+      ]
+    },
+    {
+      "endpoint": "continuation-policy",
+      "field": "contextVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "contextVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"contextVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"contextVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"contextVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "contextVersion"
+      ]
+    },
+    {
+      "endpoint": "continuation-policy",
+      "field": "constraintsVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "constraintsVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"constraintsVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"constraintsVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"constraintsVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "constraintsVersion"
+      ]
+    },
+    {
+      "endpoint": "continuation-policy",
+      "field": "researchScopeVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "researchScopeVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"researchScopeVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"researchScopeVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"researchScopeVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "researchScopeVersion"
+      ]
+    },
+    {
+      "endpoint": "continuation-policy",
+      "field": "controlVersion",
+      "sampleValue": "cv-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "controlVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"controlVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"controlVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"controlVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "controlVersion"
+      ]
+    },
+    {
+      "endpoint": "continuation-policy",
+      "field": "questionId",
+      "sampleValue": "question-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "questionId"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"questionId\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"questionId\"],\"path\":[],\"message\":\"Unrecognized key: \\\"questionId\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "questionId"
+      ]
+    },
+    {
+      "endpoint": "continuation-policy",
+      "field": "approvalId",
+      "sampleValue": "approval-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "approvalId"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"approvalId\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"approvalId\"],\"path\":[],\"message\":\"Unrecognized key: \\\"approvalId\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "approvalId"
+      ]
+    },
+    {
+      "endpoint": "continuation-policy",
+      "field": "proposalHash",
+      "sampleValue": "proposal-hash-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "proposalHash"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"proposalHash\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"proposalHash\"],\"path\":[],\"message\":\"Unrecognized key: \\\"proposalHash\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "proposalHash"
+      ]
+    },
+    {
+      "endpoint": "continuation-policy",
+      "field": "requiredSourceRevisions",
+      "sampleValue": [
+        "capture:post-verify@deadbeef"
+      ],
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "requiredSourceRevisions"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"requiredSourceRevisions\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"requiredSourceRevisions\"],\"path\":[],\"message\":\"Unrecognized key: \\\"requiredSourceRevisions\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "requiredSourceRevisions"
+      ]
+    },
+    {
+      "endpoint": "continuation-policy",
+      "field": "boundaryAt",
+      "sampleValue": "2026-12-31T00:00:00.000Z",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "boundaryAt"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"boundaryAt\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"boundaryAt\"],\"path\":[],\"message\":\"Unrecognized key: \\\"boundaryAt\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "boundaryAt"
+      ]
+    },
+    {
+      "endpoint": "responsibility",
+      "field": "missionVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "missionVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"missionVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"missionVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"missionVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "missionVersion"
+      ]
+    },
+    {
+      "endpoint": "responsibility",
+      "field": "planRevision",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "planRevision"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"planRevision\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"planRevision\"],\"path\":[],\"message\":\"Unrecognized key: \\\"planRevision\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "planRevision"
+      ]
+    },
+    {
+      "endpoint": "responsibility",
+      "field": "contextVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "contextVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"contextVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"contextVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"contextVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "contextVersion"
+      ]
+    },
+    {
+      "endpoint": "responsibility",
+      "field": "constraintsVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "constraintsVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"constraintsVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"constraintsVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"constraintsVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "constraintsVersion"
+      ]
+    },
+    {
+      "endpoint": "responsibility",
+      "field": "researchScopeVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "researchScopeVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"researchScopeVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"researchScopeVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"researchScopeVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "researchScopeVersion"
+      ]
+    },
+    {
+      "endpoint": "responsibility",
+      "field": "controlVersion",
+      "sampleValue": "cv-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "controlVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"controlVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"controlVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"controlVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "controlVersion"
+      ]
+    },
+    {
+      "endpoint": "responsibility",
+      "field": "questionId",
+      "sampleValue": "question-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "questionId"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"questionId\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"questionId\"],\"path\":[],\"message\":\"Unrecognized key: \\\"questionId\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "questionId"
+      ]
+    },
+    {
+      "endpoint": "responsibility",
+      "field": "approvalId",
+      "sampleValue": "approval-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "approvalId"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"approvalId\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"approvalId\"],\"path\":[],\"message\":\"Unrecognized key: \\\"approvalId\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "approvalId"
+      ]
+    },
+    {
+      "endpoint": "responsibility",
+      "field": "proposalHash",
+      "sampleValue": "proposal-hash-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "proposalHash"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"proposalHash\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"proposalHash\"],\"path\":[],\"message\":\"Unrecognized key: \\\"proposalHash\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "proposalHash"
+      ]
+    },
+    {
+      "endpoint": "responsibility",
+      "field": "requiredSourceRevisions",
+      "sampleValue": [
+        "capture:post-verify@deadbeef"
+      ],
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "requiredSourceRevisions"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"requiredSourceRevisions\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"requiredSourceRevisions\"],\"path\":[],\"message\":\"Unrecognized key: \\\"requiredSourceRevisions\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "requiredSourceRevisions"
+      ]
+    },
+    {
+      "endpoint": "responsibility",
+      "field": "boundaryAt",
+      "sampleValue": "2026-12-31T00:00:00.000Z",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "boundaryAt"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"boundaryAt\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"boundaryAt\"],\"path\":[],\"message\":\"Unrecognized key: \\\"boundaryAt\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "boundaryAt"
+      ]
+    },
+    {
+      "endpoint": "continuations-confirm",
+      "field": "missionVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "missionVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"missionVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"missionVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"missionVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "missionVersion"
+      ]
+    },
+    {
+      "endpoint": "continuations-confirm",
+      "field": "planRevision",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "planRevision"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"planRevision\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"planRevision\"],\"path\":[],\"message\":\"Unrecognized key: \\\"planRevision\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "planRevision"
+      ]
+    },
+    {
+      "endpoint": "continuations-confirm",
+      "field": "contextVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "contextVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"contextVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"contextVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"contextVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "contextVersion"
+      ]
+    },
+    {
+      "endpoint": "continuations-confirm",
+      "field": "constraintsVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "constraintsVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"constraintsVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"constraintsVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"constraintsVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "constraintsVersion"
+      ]
+    },
+    {
+      "endpoint": "continuations-confirm",
+      "field": "researchScopeVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "researchScopeVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"researchScopeVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"researchScopeVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"researchScopeVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "researchScopeVersion"
+      ]
+    },
+    {
+      "endpoint": "continuations-confirm",
+      "field": "controlVersion",
+      "sampleValue": "cv-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "controlVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"controlVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"controlVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"controlVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "controlVersion"
+      ]
+    },
+    {
+      "endpoint": "continuations-confirm",
+      "field": "questionId",
+      "sampleValue": "question-post-verify",
+      "status": 409,
+      "errorCode": "INPUT_CHANGED",
+      "errorMessage": "等待问题已变化，请刷新",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"INPUT_CHANGED\",\"message\":\"等待问题已变化，请刷新\"}}",
+      "layer": "ENTRY_ACCEPTS_FIELD_THEN_SERVICE_FENCE",
+      "rejectedKeys": []
+    },
+    {
+      "endpoint": "continuations-confirm",
+      "field": "approvalId",
+      "sampleValue": "approval-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "approvalId"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"approvalId\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"approvalId\"],\"path\":[],\"message\":\"Unrecognized key: \\\"approvalId\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "approvalId"
+      ]
+    },
+    {
+      "endpoint": "continuations-confirm",
+      "field": "proposalHash",
+      "sampleValue": "proposal-hash-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "proposalHash"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"proposalHash\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"proposalHash\"],\"path\":[],\"message\":\"Unrecognized key: \\\"proposalHash\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "proposalHash"
+      ]
+    },
+    {
+      "endpoint": "continuations-confirm",
+      "field": "requiredSourceRevisions",
+      "sampleValue": [
+        "capture:post-verify@deadbeef"
+      ],
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "requiredSourceRevisions"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"requiredSourceRevisions\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"requiredSourceRevisions\"],\"path\":[],\"message\":\"Unrecognized key: \\\"requiredSourceRevisions\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "requiredSourceRevisions"
+      ]
+    },
+    {
+      "endpoint": "continuations-confirm",
+      "field": "boundaryAt",
+      "sampleValue": "2026-12-31T00:00:00.000Z",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "boundaryAt"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"boundaryAt\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"boundaryAt\"],\"path\":[],\"message\":\"Unrecognized key: \\\"boundaryAt\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "boundaryAt"
+      ]
+    },
+    {
+      "endpoint": "artifact-confirm",
+      "field": "missionVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "missionVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"missionVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"missionVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"missionVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "missionVersion"
+      ]
+    },
+    {
+      "endpoint": "artifact-confirm",
+      "field": "planRevision",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "planRevision"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"planRevision\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"planRevision\"],\"path\":[],\"message\":\"Unrecognized key: \\\"planRevision\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "planRevision"
+      ]
+    },
+    {
+      "endpoint": "artifact-confirm",
+      "field": "contextVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "contextVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"contextVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"contextVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"contextVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "contextVersion"
+      ]
+    },
+    {
+      "endpoint": "artifact-confirm",
+      "field": "constraintsVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "constraintsVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"constraintsVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"constraintsVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"constraintsVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "constraintsVersion"
+      ]
+    },
+    {
+      "endpoint": "artifact-confirm",
+      "field": "researchScopeVersion",
+      "sampleValue": 1,
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "researchScopeVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"researchScopeVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"researchScopeVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"researchScopeVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "researchScopeVersion"
+      ]
+    },
+    {
+      "endpoint": "artifact-confirm",
+      "field": "controlVersion",
+      "sampleValue": "cv-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "controlVersion"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"controlVersion\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"controlVersion\"],\"path\":[],\"message\":\"Unrecognized key: \\\"controlVersion\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "controlVersion"
+      ]
+    },
+    {
+      "endpoint": "artifact-confirm",
+      "field": "questionId",
+      "sampleValue": "question-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "questionId"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"questionId\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"questionId\"],\"path\":[],\"message\":\"Unrecognized key: \\\"questionId\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "questionId"
+      ]
+    },
+    {
+      "endpoint": "artifact-confirm",
+      "field": "approvalId",
+      "sampleValue": "approval-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "approvalId"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"approvalId\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"approvalId\"],\"path\":[],\"message\":\"Unrecognized key: \\\"approvalId\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "approvalId"
+      ]
+    },
+    {
+      "endpoint": "artifact-confirm",
+      "field": "proposalHash",
+      "sampleValue": "proposal-hash-post-verify",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "proposalHash"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"proposalHash\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"proposalHash\"],\"path\":[],\"message\":\"Unrecognized key: \\\"proposalHash\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "proposalHash"
+      ]
+    },
+    {
+      "endpoint": "artifact-confirm",
+      "field": "requiredSourceRevisions",
+      "sampleValue": [
+        "capture:post-verify@deadbeef"
+      ],
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "requiredSourceRevisions"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"requiredSourceRevisions\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"requiredSourceRevisions\"],\"path\":[],\"message\":\"Unrecognized key: \\\"requiredSourceRevisions\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "requiredSourceRevisions"
+      ]
+    },
+    {
+      "endpoint": "artifact-confirm",
+      "field": "boundaryAt",
+      "sampleValue": "2026-12-31T00:00:00.000Z",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "errorMessage": "提交内容不完整或格式不正确",
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "boundaryAt"
+          ],
+          "path": [],
+          "message": "Unrecognized key: \"boundaryAt\""
+        }
+      ],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"提交内容不完整或格式不正确\",\"details\":[{\"code\":\"unrecognized_keys\",\"keys\":[\"boundaryAt\"],\"path\":[],\"message\":\"Unrecognized key: \\\"boundaryAt\\\"\"}]}}",
+      "layer": "ENTRY_ZOD_REJECTS_UNKNOWN_FIELD",
+      "rejectedKeys": [
+        "boundaryAt"
+      ]
+    }
+  ],
+  "controls": [
+    {
+      "endpoint": "input",
+      "status": 202,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"mission\":{\"id\":\"cmw0d89rf0007tc8oy5zvumcn\",\"ownerUserId\":\"cmw0d898n0000tc8oov3wgnib\",\"projectId\":\"cmw0d89bs0001tc8onxj929fm\",\"createRequestId\":\"req-47234a43-a8b3-41c5-aef5-201896e9b766\",\"createPayloadHash\":\"23f0f25efb5282e388eda4e5c62fdc6c27e1d0794f15429369a704906c9cac91\",\"goal\":\"独立验收 requires 矩阵 input 85763493-0808-485d-8722-7bbe21cc1227\",\"successCriteriaJson\":[\"DRAFT_EXISTS\"],\"constraintsJson\"",
+      "classified": "BASE_VALID_ACCEPTED"
+    },
+    {
+      "endpoint": "approvals",
+      "status": 202,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"mission\":{\"id\":\"cmw0d8ary001ltc8ovhxj215z\",\"ownerUserId\":\"cmw0d8ahw001ctc8oyyrxh9ur\",\"projectId\":\"cmw0d8ahy001dtc8ojt4aq7iw\",\"createRequestId\":\"req-e1c043d2-de8d-49ef-bb87-d3c7f5a745f4\",\"createPayloadHash\":\"a738b954ab373394cd280fd7ca11de97e5dad5c1067e75b454c6863a1c8d06c9\",\"goal\":\"独立验收 requires 矩阵 approvals 05ead08b-6f17-420f-bb90-9fbe5e21adcf\",\"successCriteriaJson\":[\"DRAFT_EXISTS\"],\"constraintsJ",
+      "classified": "BASE_VALID_ACCEPTED"
+    },
+    {
+      "endpoint": "pause",
+      "status": 202,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"mission\":{\"id\":\"cmw0d8bli003otc8oskrmx8cu\",\"ownerUserId\":\"cmw0d8bhe003itc8ov6j8nlz9\",\"projectId\":\"cmw0d8bhm003jtc8oe92qay8t\",\"createRequestId\":\"req-2a23a3f0-094d-4b82-bb65-0606c4f00234\",\"createPayloadHash\":\"2c12bff664b2314a251a12ad566d93a48fb00eca3337ce1c5e047bdbf62defb7\",\"goal\":\"独立验收 requires 矩阵 pause d234a306-2dc5-4186-ad4b-afba2203fcca\",\"successCriteriaJson\":[\"DRAFT_EXISTS\"],\"constraintsJson\"",
+      "classified": "BASE_VALID_ACCEPTED"
+    },
+    {
+      "endpoint": "cancel",
+      "status": 202,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"mission\":{\"id\":\"cmw0d8c3r004ntc8ov14hwmsx\",\"ownerUserId\":\"cmw0d8c07004htc8omdwgc0xt\",\"projectId\":\"cmw0d8c0l004itc8okccveswa\",\"createRequestId\":\"req-90497a4b-f918-46f4-8edd-f6ba4e0dc53e\",\"createPayloadHash\":\"72bbb6a265dbb1b7b8e0d28a316e77425518b56ed34202bf71c67db0c6c13308\",\"goal\":\"独立验收 requires 矩阵 cancel 929c5ce7-16d1-44bb-9aa9-a41f388e1e67\",\"successCriteriaJson\":[\"DRAFT_EXISTS\"],\"constraintsJson",
+      "classified": "BASE_VALID_ACCEPTED"
+    },
+    {
+      "endpoint": "resume",
+      "status": 202,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"mission\":{\"id\":\"cmw0d8cfb005mtc8oy4lbsgw3\",\"ownerUserId\":\"cmw0d8cdg005gtc8oau86hqjd\",\"projectId\":\"cmw0d8cdi005htc8ogtp38lcb\",\"createRequestId\":\"req-d280770e-d1ca-4e3f-b71d-dc05d6e0304f\",\"createPayloadHash\":\"f66b620b2a951583d988493ad9501a8baf8f1401b41e6506366c7cfd89858b6c\",\"goal\":\"独立验收 requires 矩阵 resume 580879c6-c9dd-4940-9564-7e53dd57f12f\",\"successCriteriaJson\":[\"DRAFT_EXISTS\"],\"constraintsJson",
+      "classified": "BASE_VALID_ACCEPTED"
+    },
+    {
+      "endpoint": "replan",
+      "status": 202,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"mission\":{\"id\":\"cmw0d8cqu006otc8olih0zghn\",\"ownerUserId\":\"cmw0d8cno006ftc8ofotj6201\",\"projectId\":\"cmw0d8cnt006gtc8o7yti5ljz\",\"createRequestId\":\"req-bbb07001-a73d-4c91-866e-6328f172124c\",\"createPayloadHash\":\"3c8f01dc4fbb9cd5e0c8e20cbc03a3bea11ecb8660ebcf119e9841766ea4a0c7\",\"goal\":\"独立验收 requires 矩阵 replan 2c606aa4-32cb-40cd-acb6-66f710ab0df5\",\"successCriteriaJson\":[\"DRAFT_EXISTS\"],\"constraintsJson",
+      "classified": "BASE_VALID_ACCEPTED"
+    },
+    {
+      "endpoint": "constraints",
+      "status": 200,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"mission\":{\"id\":\"cmw0d8d6z008qtc8odirdtzkm\",\"ownerUserId\":\"cmw0d8d3p008ktc8o6w7r7vm9\",\"projectId\":\"cmw0d8d3r008ltc8ojo485uit\",\"createRequestId\":\"req-3549fba9-54f0-4c46-ab25-97ba9e75eb6d\",\"createPayloadHash\":\"4d66d9f8aee87dd38b6c1df9c7e1da1b5a0ee059ed287b5c3278b85d3941b235\",\"goal\":\"独立验收 requires 矩阵 constraints d11805b5-c558-4ebc-9715-5065b8f9e177\",\"successCriteriaJson\":[\"DRAFT_EXISTS\"],\"constraint",
+      "classified": "BASE_VALID_ACCEPTED"
+    },
+    {
+      "endpoint": "research-scope",
+      "status": 200,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"mission\":{\"id\":\"cmw0d8dnq009ntc8o5ji93gf7\",\"ownerUserId\":\"cmw0d8dio009htc8o1wk1q01j\",\"projectId\":\"cmw0d8dir009itc8oqfbds74f\",\"createRequestId\":\"req-3ad41360-d08a-40ec-bd6b-aa7c96d2de5f\",\"createPayloadHash\":\"7a95660aecd30de1d8f659850fd48ec42d7cf3ba254662ef6f114f5261167eb7\",\"goal\":\"独立验收 requires 矩阵 research-scope 37bec3f9-5905-41b3-a978-250e3bc67f5f\",\"successCriteriaJson\":[\"DRAFT_EXISTS\"],\"constra",
+      "classified": "BASE_VALID_ACCEPTED"
+    },
+    {
+      "endpoint": "continuation-policy",
+      "status": 200,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"mission\":{\"id\":\"cmw0d8e3d00aktc8oe06zk6fq\",\"ownerUserId\":\"cmw0d8e0u00aetc8o2y95w1h4\",\"projectId\":\"cmw0d8e0y00aftc8o7uj1i4jk\",\"createRequestId\":\"req-04631ad9-1b16-4a74-bcad-173fd67f1cfb\",\"createPayloadHash\":\"945a964e14b231ce899519470ebbf2f443ef48e6c237aafbf0ad6d6fbd75a629\",\"goal\":\"独立验收 requires 矩阵 continuation-policy fd282bf5-99e2-47c8-9d05-f5eedead1ad6\",\"successCriteriaJson\":[\"DRAFT_EXISTS\"],\"co",
+      "classified": "BASE_VALID_ACCEPTED"
+    },
+    {
+      "endpoint": "responsibility",
+      "status": 200,
+      "errorCode": null,
+      "errorMessage": null,
+      "issues": [],
+      "hasMissionOrResult": true,
+      "bodyPreview": "{\"responsibility\":{\"schemaVersion\":1,\"missionId\":\"cmw0d8ebg00bhtc8o7te15p8t\",\"projectId\":\"cmw0d8e9t00bctc8om5f50rjs\",\"controlVersion\":\"f2f636bce088ab443c2b50bae66261168f68bf2977f091ae73462eb7417feae4\",\"goal\":\"独立验收 requires 矩阵 responsibility e24349ed-5b0d-4378-b0b0-3d8e5211da93\",\"successCriteria\":[\"DRAFT_EXISTS\"],\"successCriteriaLabels\":[\"草稿已保存\"],\"workingObjective\":null,\"constraints\":{\"availableMin",
+      "classified": "BASE_VALID_ACCEPTED"
+    },
+    {
+      "endpoint": "continuations-confirm",
+      "status": 409,
+      "errorCode": "ASSESSMENT_CHANGED",
+      "errorMessage": "评估已变化，请重新预览",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"ASSESSMENT_CHANGED\",\"message\":\"评估已变化，请重新预览\"}}",
+      "classified": "BASE_STRUCTURALLY_VALID_REACHED_FENCE"
+    },
+    {
+      "endpoint": "artifact-confirm",
+      "status": 409,
+      "errorCode": "OUTPUT_CHANGED",
+      "errorMessage": "成果或上下文已变化，请重新预览",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"OUTPUT_CHANGED\",\"message\":\"成果或上下文已变化，请重新预览\"}}",
+      "classified": "BASE_STRUCTURALLY_VALID_REACHED_FENCE"
+    }
+  ],
+  "fullForward": [
+    {
+      "endpoint": "input",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "rejectedRequiresKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "note": "把 readback.primaryAction.requires 作为请求字段整包盲发"
+    },
+    {
+      "endpoint": "approvals",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "rejectedRequiresKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "note": "把 readback.primaryAction.requires 作为请求字段整包盲发"
+    },
+    {
+      "endpoint": "pause",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "rejectedRequiresKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "note": "把 readback.primaryAction.requires 作为请求字段整包盲发"
+    },
+    {
+      "endpoint": "cancel",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "rejectedRequiresKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "note": "把 readback.primaryAction.requires 作为请求字段整包盲发"
+    },
+    {
+      "endpoint": "resume",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "rejectedRequiresKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "note": "把 readback.primaryAction.requires 作为请求字段整包盲发"
+    },
+    {
+      "endpoint": "replan",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "rejectedRequiresKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "note": "把 readback.primaryAction.requires 作为请求字段整包盲发"
+    },
+    {
+      "endpoint": "constraints",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "rejectedRequiresKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "questionId",
+        "approvalId",
+        "proposalHash",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "note": "把 readback.primaryAction.requires 作为请求字段整包盲发"
+    },
+    {
+      "endpoint": "research-scope",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "rejectedRequiresKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "questionId",
+        "approvalId",
+        "proposalHash",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "note": "把 readback.primaryAction.requires 作为请求字段整包盲发"
+    },
+    {
+      "endpoint": "continuation-policy",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "rejectedRequiresKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "questionId",
+        "approvalId",
+        "proposalHash",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "note": "把 readback.primaryAction.requires 作为请求字段整包盲发"
+    },
+    {
+      "endpoint": "responsibility",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "rejectedRequiresKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "questionId",
+        "approvalId",
+        "proposalHash",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "note": "把 readback.primaryAction.requires 作为请求字段整包盲发"
+    },
+    {
+      "endpoint": "continuations-confirm",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "rejectedRequiresKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "proposalHash",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "note": "把 readback.primaryAction.requires 作为请求字段整包盲发"
+    },
+    {
+      "endpoint": "artifact-confirm",
+      "status": 422,
+      "errorCode": "VALIDATION_ERROR",
+      "rejectedRequiresKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "questionId",
+        "approvalId",
+        "proposalHash",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "note": "把 readback.primaryAction.requires 作为请求字段整包盲发"
+    }
+  ],
+  "fences": [
+    {
+      "label": "input 旧 expectedVersion（missionVersion 等价字段）",
+      "endpoint": "input",
+      "status": 409,
+      "errorCode": "MISSION_CHANGED",
+      "errorMessage": "委托状态已变化，请刷新",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"MISSION_CHANGED\",\"message\":\"委托状态已变化，请刷新\"}}"
+    },
+    {
+      "label": "input 错误 questionId",
+      "endpoint": "input",
+      "status": 409,
+      "errorCode": "INPUT_CHANGED",
+      "errorMessage": "问题已变化，请刷新后补充",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"INPUT_CHANGED\",\"message\":\"问题已变化，请刷新后补充\"}}"
+    },
+    {
+      "label": "approvals 错误 proposalHash",
+      "endpoint": "approvals",
+      "status": 409,
+      "errorCode": "APPROVAL_CHANGED",
+      "errorMessage": "批准预览已失效，请重新预览",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"APPROVAL_CHANGED\",\"message\":\"批准预览已失效，请重新预览\"}}"
+    },
+    {
+      "label": "approvals 错误 approvalId（路径）",
+      "endpoint": "approvals",
+      "status": 409,
+      "errorCode": "APPROVAL_CHANGED",
+      "errorMessage": "批准预览已失效，请重新预览",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"APPROVAL_CHANGED\",\"message\":\"批准预览已失效，请重新预览\"}}"
+    },
+    {
+      "label": "pause 旧 expectedVersion",
+      "endpoint": "pause",
+      "status": 409,
+      "errorCode": "MISSION_CHANGED",
+      "errorMessage": "委托状态已变化，请刷新",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"MISSION_CHANGED\",\"message\":\"委托状态已变化，请刷新\"}}"
+    },
+    {
+      "label": "cancel 旧 expectedVersion",
+      "endpoint": "cancel",
+      "status": 409,
+      "errorCode": "MISSION_CHANGED",
+      "errorMessage": "委托状态已变化，请刷新",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"MISSION_CHANGED\",\"message\":\"委托状态已变化，请刷新\"}}"
+    },
+    {
+      "label": "resume 旧 expectedVersion",
+      "endpoint": "resume",
+      "status": 409,
+      "errorCode": "MISSION_CHANGED",
+      "errorMessage": "委托状态已变化，请刷新",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"MISSION_CHANGED\",\"message\":\"委托状态已变化，请刷新\"}}"
+    },
+    {
+      "label": "resume 在非 PAUSED 状态",
+      "endpoint": "resume",
+      "status": 409,
+      "errorCode": "MISSION_NOT_PAUSED",
+      "errorMessage": "仅暂停的委托可以继续；失败任务需先修复原因",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"MISSION_NOT_PAUSED\",\"message\":\"仅暂停的委托可以继续；失败任务需先修复原因\"}}"
+    },
+    {
+      "label": "replan 在非 WAITING_APPROVAL 状态",
+      "endpoint": "replan",
+      "status": 409,
+      "errorCode": "INVALID_TRANSITION",
+      "errorMessage": "当前没有待重新预览的提案",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"INVALID_TRANSITION\",\"message\":\"当前没有待重新预览的提案\"}}"
+    },
+    {
+      "label": "constraints 旧 expectedConstraintsVersion",
+      "endpoint": "constraints",
+      "status": 409,
+      "errorCode": "MISSION_CHANGED",
+      "errorMessage": "委托已变化，请刷新后修改",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"MISSION_CHANGED\",\"message\":\"委托已变化，请刷新后修改\"}}"
+    },
+    {
+      "label": "research-scope 旧 expectedScopeVersion",
+      "endpoint": "research-scope",
+      "status": 409,
+      "errorCode": "MISSION_CHANGED",
+      "errorMessage": "委托已变化，请刷新后修改",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"MISSION_CHANGED\",\"message\":\"委托已变化，请刷新后修改\"}}"
+    },
+    {
+      "label": "continuation-policy 旧 expectedVersion",
+      "endpoint": "continuation-policy",
+      "status": 409,
+      "errorCode": "MISSION_CHANGED",
+      "errorMessage": "委托已变化，请刷新",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"MISSION_CHANGED\",\"message\":\"委托已变化，请刷新\"}}"
+    },
+    {
+      "label": "responsibility 错误 expectedControlVersion（controlVersion 等价字段）",
+      "endpoint": "responsibility",
+      "status": 409,
+      "errorCode": "MISSION_CHANGED",
+      "errorMessage": "责任合同已变化或来源权限已更新，请刷新后核对",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"MISSION_CHANGED\",\"message\":\"责任合同已变化或来源权限已更新，请刷新后核对\"}}"
+    },
+    {
+      "label": "continations-confirm 旧 expectedContextVersion",
+      "endpoint": "continuations-confirm",
+      "status": 409,
+      "errorCode": "ASSESSMENT_CHANGED",
+      "errorMessage": "评估已变化，请重新预览",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"ASSESSMENT_CHANGED\",\"message\":\"评估已变化，请重新预览\"}}"
+    },
+    {
+      "label": "artifact-confirm 旧 expectedContextVersion",
+      "endpoint": "artifact-confirm",
+      "status": 409,
+      "errorCode": "OUTPUT_CHANGED",
+      "errorMessage": "成果或上下文已变化，请重新预览",
+      "issues": [],
+      "hasMissionOrResult": false,
+      "bodyPreview": "{\"error\":{\"code\":\"OUTPUT_CHANGED\",\"message\":\"成果或上下文已变化，请重新预览\"}}"
+    }
+  ],
+  "requiresSample_input": {
+    "missionVersion": 2,
+    "planRevision": 1,
+    "contextVersion": 1,
+    "constraintsVersion": 1,
+    "researchScopeVersion": 1,
+    "controlVersion": "25c216bf510550c9f1dbe9a4a7b87af3f3390ab953c6b6706dea628263621521",
+    "questionId": "cmw0d89kl0006tc8owfx4zx6m",
+    "approvalId": null,
+    "proposalHash": null,
+    "requiredSourceRevisions": [],
+    "boundaryAt": null
+  },
+  "requiresSample_approvals": {
+    "missionVersion": 2,
+    "planRevision": 1,
+    "contextVersion": 1,
+    "constraintsVersion": 1,
+    "researchScopeVersion": 1,
+    "controlVersion": "bd0e5aacc3190a324d9fd3842fe4e2d8cc316e3f85f96e828f801629e3aaa199",
+    "questionId": null,
+    "approvalId": "cmw0d8al6001ktc8obwt5dpwv",
+    "proposalHash": "proposal-6f391442-1b7f-4ab5-8f82-297326027de4",
+    "requiredSourceRevisions": [],
+    "boundaryAt": "2026-11-03T08:27:46.824Z"
+  },
+  "requiresSample_pause": {
+    "missionVersion": 1,
+    "planRevision": 1,
+    "contextVersion": 1,
+    "constraintsVersion": 1,
+    "researchScopeVersion": 1,
+    "controlVersion": "b0605c3f238aa9ae600a894b8fa8f214a448265cdc8ddf7162a3aef028ff74a8",
+    "questionId": null,
+    "approvalId": null,
+    "proposalHash": null,
+    "requiredSourceRevisions": [],
+    "boundaryAt": null
+  },
+  "requiresSample_cancel": {
+    "missionVersion": 1,
+    "planRevision": 1,
+    "contextVersion": 1,
+    "constraintsVersion": 1,
+    "researchScopeVersion": 1,
+    "controlVersion": "33f1758d2977601c52f48e39bc54795deb73e2857f5499add31c55375dd4b1ed",
+    "questionId": null,
+    "approvalId": null,
+    "proposalHash": null,
+    "requiredSourceRevisions": [],
+    "boundaryAt": null
+  },
+  "requiresSample_resume": {
+    "missionVersion": 2,
+    "planRevision": 1,
+    "contextVersion": 1,
+    "constraintsVersion": 1,
+    "researchScopeVersion": 1,
+    "controlVersion": "7dea55fce3e4a43c04f9742396376accf01733121926d39a8fd44fec58f5c6aa",
+    "questionId": null,
+    "approvalId": null,
+    "proposalHash": null,
+    "requiredSourceRevisions": [],
+    "boundaryAt": null
+  },
+  "requiresSample_replan": {
+    "missionVersion": 2,
+    "planRevision": 1,
+    "contextVersion": 1,
+    "constraintsVersion": 1,
+    "researchScopeVersion": 1,
+    "controlVersion": "5e04cbd83643eef10592b4b30c3035065f95a66ca50473ae47c24a4fd78ec5db",
+    "questionId": null,
+    "approvalId": "cmw0d8con006ntc8ofzamvyex",
+    "proposalHash": "proposal-9f2d87fd-602a-4757-bbb6-b7a83de950aa",
+    "requiredSourceRevisions": [],
+    "boundaryAt": "2026-11-03T08:27:49.559Z"
+  },
+  "requiresSample_constraints": {
+    "missionVersion": 1,
+    "planRevision": 1,
+    "contextVersion": 1,
+    "constraintsVersion": 1,
+    "researchScopeVersion": 1,
+    "controlVersion": "b5f067f1a64a58d41589884c41120c9c0a7e322b1139f2267f260e17926d8ba4",
+    "questionId": null,
+    "approvalId": null,
+    "proposalHash": null,
+    "requiredSourceRevisions": [],
+    "boundaryAt": null
+  },
+  "requiresSample_research-scope": {
+    "missionVersion": 1,
+    "planRevision": 1,
+    "contextVersion": 1,
+    "constraintsVersion": 1,
+    "researchScopeVersion": 1,
+    "controlVersion": "099e98448a909d02d5166f6a1e65cd33f7eca67971e3c076e4add1dad4ac87db",
+    "questionId": null,
+    "approvalId": null,
+    "proposalHash": null,
+    "requiredSourceRevisions": [],
+    "boundaryAt": null
+  },
+  "requiresSample_continuation-policy": {
+    "missionVersion": 1,
+    "planRevision": 1,
+    "contextVersion": 1,
+    "constraintsVersion": 1,
+    "researchScopeVersion": 1,
+    "controlVersion": "7a2456e6cffc885885f421b5c054902f17af75ec0631697d76a030fcf16cc071",
+    "questionId": null,
+    "approvalId": null,
+    "proposalHash": null,
+    "requiredSourceRevisions": [],
+    "boundaryAt": null
+  },
+  "requiresSample_responsibility": {
+    "missionVersion": 1,
+    "planRevision": 1,
+    "contextVersion": 1,
+    "constraintsVersion": 1,
+    "researchScopeVersion": 1,
+    "controlVersion": "b06c0c6adf2705c476167fceb7d5ff63e75e28697243d175c4ade113acb6667b",
+    "questionId": null,
+    "approvalId": null,
+    "proposalHash": null,
+    "requiredSourceRevisions": [],
+    "boundaryAt": null
+  },
+  "requiresSample_continuations-confirm": {
+    "missionVersion": 2,
+    "planRevision": 1,
+    "contextVersion": 1,
+    "constraintsVersion": 1,
+    "researchScopeVersion": 1,
+    "controlVersion": "8fbc854436fd86c625ef0503c5c5d3281ebf7e1043c77f6a417c8f5104ed5be2",
+    "questionId": "cmw0d8eqh00cftc8o73gezw0c",
+    "approvalId": null,
+    "proposalHash": null,
+    "requiredSourceRevisions": [],
+    "boundaryAt": null
+  },
+  "requiresSample_artifact-confirm": {
+    "missionVersion": 1,
+    "planRevision": 1,
+    "contextVersion": 1,
+    "constraintsVersion": 1,
+    "researchScopeVersion": 1,
+    "controlVersion": "4476bbff1f11bc4b938c6c2536ff5faf0e57cb29fa32eeb9c96c900a09d58801",
+    "questionId": null,
+    "approvalId": null,
+    "proposalHash": null,
+    "requiredSourceRevisions": [],
+    "boundaryAt": null
+  },
+  "byEndpoint": {
+    "input": {
+      "baseControl": {
+        "status": 202,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      "entryRejects": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "entryAccepts": [
+        {
+          "field": "questionId",
+          "status": 409,
+          "errorCode": "INPUT_CHANGED"
+        },
+        {
+          "field": "proposalHash",
+          "status": 202,
+          "errorCode": null
+        }
+      ],
+      "fullForwardStatus": 422,
+      "fullForwardRejectedKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ]
+    },
+    "approvals": {
+      "baseControl": {
+        "status": 202,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      "entryRejects": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "entryAccepts": [
+        {
+          "field": "questionId",
+          "status": 202,
+          "errorCode": null
+        },
+        {
+          "field": "proposalHash",
+          "status": 409,
+          "errorCode": "APPROVAL_CHANGED"
+        }
+      ],
+      "fullForwardStatus": 422,
+      "fullForwardRejectedKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ]
+    },
+    "pause": {
+      "baseControl": {
+        "status": 202,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      "entryRejects": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "entryAccepts": [
+        {
+          "field": "questionId",
+          "status": 202,
+          "errorCode": null
+        },
+        {
+          "field": "proposalHash",
+          "status": 202,
+          "errorCode": null
+        }
+      ],
+      "fullForwardStatus": 422,
+      "fullForwardRejectedKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ]
+    },
+    "cancel": {
+      "baseControl": {
+        "status": 202,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      "entryRejects": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "entryAccepts": [
+        {
+          "field": "questionId",
+          "status": 202,
+          "errorCode": null
+        },
+        {
+          "field": "proposalHash",
+          "status": 202,
+          "errorCode": null
+        }
+      ],
+      "fullForwardStatus": 422,
+      "fullForwardRejectedKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ]
+    },
+    "resume": {
+      "baseControl": {
+        "status": 202,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      "entryRejects": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "entryAccepts": [
+        {
+          "field": "questionId",
+          "status": 202,
+          "errorCode": null
+        },
+        {
+          "field": "proposalHash",
+          "status": 202,
+          "errorCode": null
+        }
+      ],
+      "fullForwardStatus": 422,
+      "fullForwardRejectedKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ]
+    },
+    "replan": {
+      "baseControl": {
+        "status": 202,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      "entryRejects": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "entryAccepts": [
+        {
+          "field": "questionId",
+          "status": 202,
+          "errorCode": null
+        },
+        {
+          "field": "proposalHash",
+          "status": 202,
+          "errorCode": null
+        }
+      ],
+      "fullForwardStatus": 422,
+      "fullForwardRejectedKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ]
+    },
+    "constraints": {
+      "baseControl": {
+        "status": 200,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      "entryRejects": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "questionId",
+        "approvalId",
+        "proposalHash",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "entryAccepts": [],
+      "fullForwardStatus": 422,
+      "fullForwardRejectedKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "questionId",
+        "approvalId",
+        "proposalHash",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ]
+    },
+    "research-scope": {
+      "baseControl": {
+        "status": 200,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      "entryRejects": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "questionId",
+        "approvalId",
+        "proposalHash",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "entryAccepts": [],
+      "fullForwardStatus": 422,
+      "fullForwardRejectedKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "questionId",
+        "approvalId",
+        "proposalHash",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ]
+    },
+    "continuation-policy": {
+      "baseControl": {
+        "status": 200,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      "entryRejects": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "questionId",
+        "approvalId",
+        "proposalHash",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "entryAccepts": [],
+      "fullForwardStatus": 422,
+      "fullForwardRejectedKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "questionId",
+        "approvalId",
+        "proposalHash",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ]
+    },
+    "responsibility": {
+      "baseControl": {
+        "status": 200,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      "entryRejects": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "questionId",
+        "approvalId",
+        "proposalHash",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "entryAccepts": [],
+      "fullForwardStatus": 422,
+      "fullForwardRejectedKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "questionId",
+        "approvalId",
+        "proposalHash",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ]
+    },
+    "continuations-confirm": {
+      "baseControl": {
+        "status": 409,
+        "errorCode": "ASSESSMENT_CHANGED",
+        "classified": "BASE_STRUCTURALLY_VALID_REACHED_FENCE"
+      },
+      "entryRejects": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "proposalHash",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "entryAccepts": [
+        {
+          "field": "questionId",
+          "status": 409,
+          "errorCode": "INPUT_CHANGED"
+        }
+      ],
+      "fullForwardStatus": 422,
+      "fullForwardRejectedKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "approvalId",
+        "proposalHash",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ]
+    },
+    "artifact-confirm": {
+      "baseControl": {
+        "status": 409,
+        "errorCode": "OUTPUT_CHANGED",
+        "classified": "BASE_STRUCTURALLY_VALID_REACHED_FENCE"
+      },
+      "entryRejects": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "questionId",
+        "approvalId",
+        "proposalHash",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ],
+      "entryAccepts": [],
+      "fullForwardStatus": 422,
+      "fullForwardRejectedKeys": [
+        "missionVersion",
+        "planRevision",
+        "contextVersion",
+        "constraintsVersion",
+        "researchScopeVersion",
+        "controlVersion",
+        "questionId",
+        "approvalId",
+        "proposalHash",
+        "requiredSourceRevisions",
+        "boundaryAt"
+      ]
+    }
+  },
+  "verdict": {
+    "matrixCells": 132,
+    "entryRejectedCells": 119,
+    "entryRejectedCases": 13,
+    "allEndpointsRejectBlindRequiresForward": true,
+    "blindForwardRejectedKeyCounts": {
+      "input": 9,
+      "approvals": 9,
+      "pause": 9,
+      "cancel": 9,
+      "resume": 9,
+      "replan": 9,
+      "constraints": 11,
+      "research-scope": 11,
+      "continuation-policy": 11,
+      "responsibility": 11,
+      "continuations-confirm": 10,
+      "artifact-confirm": 11
+    },
+    "nonRequestFieldMatrix": [
+      {
+        "field": "planRevision",
+        "endpointsWhereRejected": [
+          "input",
+          "approvals",
+          "pause",
+          "cancel",
+          "resume",
+          "replan",
+          "constraints",
+          "research-scope",
+          "continuation-policy",
+          "responsibility",
+          "continuations-confirm",
+          "artifact-confirm"
+        ]
+      },
+      {
+        "field": "requiredSourceRevisions",
+        "endpointsWhereRejected": [
+          "input",
+          "approvals",
+          "pause",
+          "cancel",
+          "resume",
+          "replan",
+          "constraints",
+          "research-scope",
+          "continuation-policy",
+          "responsibility",
+          "continuations-confirm",
+          "artifact-confirm"
+        ]
+      },
+      {
+        "field": "boundaryAt",
+        "endpointsWhereRejected": [
+          "input",
+          "approvals",
+          "pause",
+          "cancel",
+          "resume",
+          "replan",
+          "constraints",
+          "research-scope",
+          "continuation-policy",
+          "responsibility",
+          "continuations-confirm",
+          "artifact-confirm"
+        ]
+      }
+    ],
+    "fenceErrors": [
+      {
+        "label": "input 旧 expectedVersion（missionVersion 等价字段）",
+        "endpoint": "input",
+        "status": 409,
+        "errorCode": "MISSION_CHANGED"
+      },
+      {
+        "label": "input 错误 questionId",
+        "endpoint": "input",
+        "status": 409,
+        "errorCode": "INPUT_CHANGED"
+      },
+      {
+        "label": "approvals 错误 proposalHash",
+        "endpoint": "approvals",
+        "status": 409,
+        "errorCode": "APPROVAL_CHANGED"
+      },
+      {
+        "label": "approvals 错误 approvalId（路径）",
+        "endpoint": "approvals",
+        "status": 409,
+        "errorCode": "APPROVAL_CHANGED"
+      },
+      {
+        "label": "pause 旧 expectedVersion",
+        "endpoint": "pause",
+        "status": 409,
+        "errorCode": "MISSION_CHANGED"
+      },
+      {
+        "label": "cancel 旧 expectedVersion",
+        "endpoint": "cancel",
+        "status": 409,
+        "errorCode": "MISSION_CHANGED"
+      },
+      {
+        "label": "resume 旧 expectedVersion",
+        "endpoint": "resume",
+        "status": 409,
+        "errorCode": "MISSION_CHANGED"
+      },
+      {
+        "label": "resume 在非 PAUSED 状态",
+        "endpoint": "resume",
+        "status": 409,
+        "errorCode": "MISSION_NOT_PAUSED"
+      },
+      {
+        "label": "replan 在非 WAITING_APPROVAL 状态",
+        "endpoint": "replan",
+        "status": 409,
+        "errorCode": "INVALID_TRANSITION"
+      },
+      {
+        "label": "constraints 旧 expectedConstraintsVersion",
+        "endpoint": "constraints",
+        "status": 409,
+        "errorCode": "MISSION_CHANGED"
+      },
+      {
+        "label": "research-scope 旧 expectedScopeVersion",
+        "endpoint": "research-scope",
+        "status": 409,
+        "errorCode": "MISSION_CHANGED"
+      },
+      {
+        "label": "continuation-policy 旧 expectedVersion",
+        "endpoint": "continuation-policy",
+        "status": 409,
+        "errorCode": "MISSION_CHANGED"
+      },
+      {
+        "label": "responsibility 错误 expectedControlVersion（controlVersion 等价字段）",
+        "endpoint": "responsibility",
+        "status": 409,
+        "errorCode": "MISSION_CHANGED"
+      },
+      {
+        "label": "continations-confirm 旧 expectedContextVersion",
+        "endpoint": "continuations-confirm",
+        "status": 409,
+        "errorCode": "ASSESSMENT_CHANGED"
+      },
+      {
+        "label": "artifact-confirm 旧 expectedContextVersion",
+        "endpoint": "artifact-confirm",
+        "status": 409,
+        "errorCode": "OUTPUT_CHANGED"
+      }
+    ],
+    "controlAcceptedOrFence": [
+      {
+        "endpoint": "input",
+        "status": 202,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      {
+        "endpoint": "approvals",
+        "status": 202,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      {
+        "endpoint": "pause",
+        "status": 202,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      {
+        "endpoint": "cancel",
+        "status": 202,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      {
+        "endpoint": "resume",
+        "status": 202,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      {
+        "endpoint": "replan",
+        "status": 202,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      {
+        "endpoint": "constraints",
+        "status": 200,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      {
+        "endpoint": "research-scope",
+        "status": 200,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      {
+        "endpoint": "continuation-policy",
+        "status": 200,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      {
+        "endpoint": "responsibility",
+        "status": 200,
+        "errorCode": null,
+        "classified": "BASE_VALID_ACCEPTED"
+      },
+      {
+        "endpoint": "continuations-confirm",
+        "status": 409,
+        "errorCode": "ASSESSMENT_CHANGED",
+        "classified": "BASE_STRUCTURALLY_VALID_REACHED_FENCE"
+      },
+      {
+        "endpoint": "artifact-confirm",
+        "status": 409,
+        "errorCode": "OUTPUT_CHANGED",
+        "classified": "BASE_STRUCTURALLY_VALID_REACHED_FENCE"
+      }
+    ],
+    "conclusion": "requires 不是可盲发的请求字段集合：missionVersion/planRevision/contextVersion/constraintsVersion/researchScopeVersion/controlVersion/questionId/approvalId/proposalHash/requiredSourceRevisions/boundaryAt 在大多数端点被 strict schema 以 422 VALIDATION_ERROR(unrecognized_keys) 拒绝；各端点真正接受的是改名后的 expectedVersion/expectedContextVersion/expectedConstraintsVersion/expectedScopeVersion/expectedControlVersion、questionId、路径 approvalId、proposalHash 等字段，并在服务层真实 409 fence 重查；requiredSourceRevisions 与 boundaryAt 无任何请求字段，只能由服务端从原来源/责任记录重推导。"
+  }
+}

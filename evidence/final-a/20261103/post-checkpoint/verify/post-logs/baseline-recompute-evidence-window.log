@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "outPath": "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\post-checkpoint\\verify\\post-runs\\baseline-recompute-evidence-window.json",
+  "verdict": {
+    "targetReviewExistsInDb": true,
+    "evictedScenarioHit": false,
+    "evictedScenarioItemCount": 0,
+    "evictedScenarioTruncated": true,
+    "controlScenarioHit": true,
+    "boundary21ScenarioHit": false,
+    "boundary21ItemCount": 0,
+    "boundary21Truncated": true,
+    "readOnlyZeroChange": true,
+    "conclusion": "BEFORE_FIX 复现：目标 question 的审查事件确实在库中（seq 可查），但当前 readback 先 take 21 再 filter/slice(0,20)，更新的其他 question 审查把目标挤出窗口，legacy evidenceReviews.items 为空；truncated 位虽为 true，但目标问题自己的审查未命中。"
+  }
+}

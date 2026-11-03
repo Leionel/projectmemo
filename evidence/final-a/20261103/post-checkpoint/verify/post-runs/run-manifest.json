@@ -1,0 +1,125 @@
+{
+  "generatedAt": "2026-11-03T15:44:56.6646259+08:00",
+  "checkpoint": "4b696141435825a3582816e8e449c0e0cf013f29",
+  "commits": {
+    "final": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+    "terminal": "e7c1da88c15e1516032e2514dd60b7e0b006fb9d",
+    "evidenceWindow": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+    "requires": "479326131bedb385b0d89f710d960708ae7e9461"
+  },
+  "environment": {
+    "repo": "D:\\Projects\\hongmen-final-a-mission-packet",
+    "branch": "codex/final-a-mission-packet",
+    "head": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+    "node": "v24.16.0",
+    "npm": "11.15.0",
+    "shadow": "%TEMP%\\pm-post-verify-final-3ec63e62",
+    "shadowMethod": "git archive <SHA> -- lib app components prisma public tests scripts package.json ... ; tar -xf; 复制 lib/generated/prisma; node_modules junction 到仓库",
+    "isolation": "每个 fixture 各自 mkdtemp 临时 SQLite + migrations 重放；LLM_MODE=mock；无网络/付费调用；不读 .env"
+  },
+  "runs": [
+    {
+      "exit": 0,
+      "command": "(4b69614 shadow) npx.cmd tsx verify-fixtures/baseline-terminal.ts post-runs/baseline-recompute-terminal.json",
+      "name": "baseline-recompute-terminal",
+      "log": "post-logs/baseline-recompute-terminal.log"
+    },
+    {
+      "exit": 0,
+      "command": "(4b69614 shadow) npx.cmd tsx verify-fixtures/baseline-evidence-window.ts post-runs/baseline-recompute-evidence-window.json",
+      "name": "baseline-recompute-evidence-window",
+      "log": "post-logs/baseline-recompute-evidence-window.log"
+    },
+    {
+      "exit": 0,
+      "command": "(4b69614 shadow) npx.cmd tsx verify-fixtures/baseline-requires.ts post-runs/baseline-recompute-requires.json",
+      "name": "baseline-recompute-requires",
+      "log": "post-logs/baseline-recompute-requires.log"
+    },
+    {
+      "exit": 0,
+      "command": "(4b69614 shadow) npx.cmd tsx verify-fixtures/baseline-readback-instrument.ts post-runs/baseline-recompute-readback-instrument.json",
+      "name": "baseline-recompute-readback-instrument",
+      "log": "post-logs/baseline-recompute-readback-instrument.log"
+    },
+    {
+      "exit": 0,
+      "command": "(3ec63e62 shadow) npm.cmd exec tsc -- --noEmit",
+      "name": "after-tsc-shadow",
+      "log": "post-logs/after-tsc-shadow.log"
+    },
+    {
+      "exit": 0,
+      "command": "(3ec63e62 shadow) npx.cmd tsx verify-fixtures/post-terminal-verify.ts post-runs/after-post-terminal.json",
+      "name": "after-post-terminal",
+      "log": "post-logs/after-post-terminal.log"
+    },
+    {
+      "exit": 0,
+      "command": "(3ec63e62 shadow) npx.cmd tsx verify-fixtures/post-evidence-window-verify.ts post-runs/after-post-evidence-window.json",
+      "name": "after-post-evidence-window",
+      "log": "post-logs/after-post-evidence-window.log"
+    },
+    {
+      "exit": 0,
+      "command": "(3ec63e62 shadow) npx.cmd tsx verify-fixtures/post-requires-verify.ts post-runs/after-post-requires.json",
+      "name": "after-post-requires",
+      "log": "post-logs/after-post-requires.log"
+    },
+    {
+      "exit": 0,
+      "command": "(3ec63e62 shadow) npx.cmd tsx verify-fixtures/baseline-readback-instrument.ts post-runs/after-post-perf-run1.json",
+      "name": "after-post-perf-run1",
+      "log": "post-logs/after-post-perf-run1.log"
+    },
+    {
+      "exit": 0,
+      "command": "(3ec63e62 shadow) npx.cmd tsx verify-fixtures/baseline-readback-instrument.ts post-runs/after-post-perf-run2.json",
+      "name": "after-post-perf-run2",
+      "log": "post-logs/after-post-perf-run2.log"
+    },
+    {
+      "exit": 0,
+      "command": "(3ec63e62 shadow) npx.cmd tsx scripts/final-a/a1-contract-samples.ts",
+      "name": "after-a1-contract-samples",
+      "log": "post-logs/after-a1-contract-samples.log"
+    },
+    {
+      "exit": 0,
+      "command": "npx.cmd tsx verify-fixtures/compare-baseline.ts verify/",
+      "name": "baseline-recompute-check",
+      "log": "post-logs/baseline-recompute-check.log"
+    },
+    {
+      "exit": 0,
+      "command": "pwsh -File verify/git-boundary.ps1 -Checkpoint 4b69614 -FinalSha 3ec63e62",
+      "name": "git-boundary-final",
+      "log": "post-logs/git-boundary.log"
+    },
+    {
+      "exit": 0,
+      "command": "pwsh -File verify/git-boundary.ps1 -FinalSha 4793261 -SkipHeadCheck",
+      "name": "git-boundary-4793261",
+      "log": "post-logs/git-boundary-479326131bed.log"
+    },
+    {
+      "exit": 0,
+      "command": "pwsh -File verify/git-boundary.ps1 -FinalSha e7c1da8 -SkipHeadCheck",
+      "name": "git-boundary-e7c1da8",
+      "log": "post-logs/git-boundary-e7c1da88c15e.log"
+    },
+    {
+      "exit": 0,
+      "command": "pwsh -File verify/git-boundary.ps1 -FinalSha 3ec63e6 -SkipHeadCheck",
+      "name": "git-boundary-3ec63e6",
+      "log": "post-logs/git-boundary-3ec63e62470d.log"
+    },
+    {
+      "name": "aggregate",
+      "command": "npx.cmd tsx verify-fixtures/build-post-verification.ts verify/ verify/a-post-checkpoint-verification.json",
+      "exit": 0,
+      "log": "post-logs/aggregate.log",
+      "at": "2026-11-03T15:45:34.0365062+08:00"
+    }
+  ]
+}

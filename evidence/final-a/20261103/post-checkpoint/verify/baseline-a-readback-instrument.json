@@ -1,0 +1,305 @@
+{
+  "generatedAt": "2026-11-03T07:00:34.133Z",
+  "purpose": "BEFORE_FIX readback 事务数/查询特征/重读上限/SourcePolicy≤8/GET 零副作用/跨请求缓存 独立量测",
+  "sourceTree": "checkpoint 4b69614 clean shadow via git archive (HEAD tree; untracked excluded)",
+  "instrumentation": {
+    "method": "自建 PrismaClient(query event log) 注入 globalThis.prisma；包装 $transaction 计数；不改产品源码",
+    "db": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-post-base-instr-RAmVYy\\verify.db"
+  },
+  "scenarios": {
+    "stableReadback": {
+      "missionId": "cmw0c9ayo0003y88or09kp0qc",
+      "missionVersion": 2,
+      "questionId": "cmw0c9azq0005y88o6hg45z9n",
+      "sourcesPrepared": 10,
+      "perCall": [
+        {
+          "transactions": 2,
+          "queries": 118,
+          "elapsedMs": 88.54
+        },
+        {
+          "transactions": 2,
+          "queries": 118,
+          "elapsedMs": 49.86
+        },
+        {
+          "transactions": 2,
+          "queries": 118,
+          "elapsedMs": 45.21
+        },
+        {
+          "transactions": 2,
+          "queries": 118,
+          "elapsedMs": 44.61
+        },
+        {
+          "transactions": 2,
+          "queries": 118,
+          "elapsedMs": 42.63
+        },
+        {
+          "transactions": 2,
+          "queries": 118,
+          "elapsedMs": 36.33
+        },
+        {
+          "transactions": 2,
+          "queries": 118,
+          "elapsedMs": 41.5
+        },
+        {
+          "transactions": 2,
+          "queries": 118,
+          "elapsedMs": 37.33
+        },
+        {
+          "transactions": 2,
+          "queries": 118,
+          "elapsedMs": 37.81
+        },
+        {
+          "transactions": 2,
+          "queries": 118,
+          "elapsedMs": 35.45
+        },
+        {
+          "transactions": 2,
+          "queries": 118,
+          "elapsedMs": 35.47
+        },
+        {
+          "transactions": 2,
+          "queries": 118,
+          "elapsedMs": 39.45
+        }
+      ],
+      "transactions": [
+        2
+      ],
+      "queries": [
+        118
+      ],
+      "latencyMs": {
+        "min": 35.45,
+        "median": 41.5,
+        "max": 88.54
+      },
+      "queryShapesFirstCall": [
+        "SELECT `main`.`AgentMission`.`id`, `main`.`AgentMission`.`ownerUserId`, `main`.`AgentMission`.`projectId`, `main`.`AgentMission`.`createRequestId`, `main`.`AgentMission`.`createPay",
+        "SELECT `main`.`ProjectMembership`.`id`, `main`.`ProjectMembership`.`userId`, `main`.`ProjectMembership`.`projectId`, `main`.`ProjectMembership`.`role`, `main`.`ProjectMembership`.`",
+        "SELECT `main`.`AgentMissionEvent`.`id`, `main`.`AgentMissionEvent`.`missionId`, `main`.`AgentMissionEvent`.`seq`, `main`.`AgentMissionEvent`.`type`, `main`.`AgentMissionEvent`.`pay",
+        "SELECT `main`.`MissionArtifactReceipt`.`id`, `main`.`MissionArtifactReceipt`.`projectId`, `main`.`MissionArtifactReceipt`.`missionId`, `main`.`MissionArtifactReceipt`.`outputId`, `",
+        "SELECT `main`.`GeneratedArtifact`.`id`, `main`.`GeneratedArtifact`.`createdAt`, `main`.`GeneratedArtifact`.`artifactType` FROM `main`.`GeneratedArtifact` WHERE `main`.`GeneratedArt",
+        "SELECT `main`.`AgentMissionStep`.`id`, `main`.`AgentMissionStep`.`resultJson` FROM `main`.`AgentMissionStep` WHERE (`main`.`AgentMissionStep`.`missionId` = ? AND `main`.`AgentMissi",
+        "SELECT `main`.`AgentMissionApproval`.`id`, `main`.`AgentMissionApproval`.`missionId`, `main`.`AgentMissionApproval`.`stepId`, `main`.`AgentMissionApproval`.`proposalHash`, `main`.`",
+        "SELECT `main`.`AgentMissionOutput`.`id`, `main`.`AgentMissionOutput`.`revision`, `main`.`AgentMissionOutput`.`createdAt`, `main`.`AgentMissionOutput`.`claimChecksJson` FROM `main`.",
+        "SELECT COUNT(*) AS `_count$_all` FROM (SELECT `main`.`AgentMissionStep`.`id` FROM `main`.`AgentMissionStep` WHERE (`main`.`AgentMissionStep`.`missionId` = ? AND `main`.`AgentMissio",
+        " SELECT id FROM \"?\" WHERE \"?\"=? AND \"?\"='CHAT' AND json_extract(trace, '$.missionId')=? ORDER BY \"?\" DESC, id DESC LIMIT ?",
+        "SELECT `main`.`AgentRun`.`id`, `main`.`AgentRun`.`status`, `main`.`AgentRun`.`provider`, `main`.`AgentRun`.`fallbackReason`, `main`.`AgentRun`.`runType`, `main`.`AgentRun`.`trace`,",
+        "SELECT `main`.`AgentMissionStep`.`id`, `main`.`AgentMissionStep`.`status`, `main`.`AgentMissionStep`.`toolName`, `main`.`AgentMissionStep`.`toolVersion`, `main`.`AgentMissionStep`.",
+        "SELECT `main`.`AgentMissionStep`.`id`, `main`.`AgentMissionStep`.`missionId`, `main`.`AgentMissionStep`.`ordinal`, `main`.`AgentMissionStep`.`planRevision`, `main`.`AgentMissionSte",
+        "SELECT `main`.`AgentMissionOutput`.`id`, `main`.`AgentMissionOutput`.`missionId`, `main`.`AgentMissionOutput`.`stepId`, `main`.`AgentMissionOutput`.`revision`, `main`.`AgentMission",
+        "SELECT `main`.`Capture`.`id`, `main`.`Capture`.`processingJson`, `main`.`Capture`.`projectId`, `main`.`Capture`.`rawText`, `main`.`Capture`.`sourceType`, `main`.`Capture`.`requestI",
+        "SELECT `main`.`KnowledgeCard`.`id`, `main`.`KnowledgeCard`.`captureId` FROM `main`.`KnowledgeCard` WHERE `main`.`KnowledgeCard`.`captureId` IN (?) LIMIT ? OFFSET ?",
+        "SELECT `main`.`Project`.`id`, `main`.`Project`.`deletionRequestedAt` FROM `main`.`Project` WHERE (`main`.`Project`.`id` = ? AND N=N) LIMIT ? OFFSET ?",
+        "SELECT `main`.`User`.`id`, `main`.`User`.`continuitySeq` FROM `main`.`User` WHERE (`main`.`User`.`id` = ? AND N=N) LIMIT ? OFFSET ?",
+        "SELECT `main`.`AgentDirectiveEvent`.`id`, `main`.`AgentDirectiveEvent`.`ownerUserId`, `main`.`AgentDirectiveEvent`.`seq`, `main`.`AgentDirectiveEvent`.`commandId`, `main`.`AgentDir",
+        "SELECT `main`.`AgentClaimEvent`.`id`, `main`.`AgentClaimEvent`.`claimId`, `main`.`AgentClaimEvent`.`ownerUserId`, `main`.`AgentClaimEvent`.`revision`, `main`.`AgentClaimEvent`.`req",
+        "SELECT `main`.`AgentClaim`.`id`, `main`.`AgentClaim`.`ownerUserId`, `main`.`AgentClaim`.`projectId`, `main`.`AgentClaim`.`scopeType`, `main`.`AgentClaim`.`scopeKey`, `main`.`AgentC",
+        "SELECT `main`.`Capture`.`id`, `main`.`Capture`.`sourceType` FROM `main`.`Capture` WHERE (`main`.`Capture`.`id` = ? AND `main`.`Capture`.`projectId` = ?) LIMIT ? OFFSET ?",
+        "SELECT `main`.`ExternalSignal`.`id` FROM `main`.`ExternalSignal` WHERE (`main`.`ExternalSignal`.`adoptedCaptureId` = ? AND `main`.`ExternalSignal`.`projectId` = ?) LIMIT ? OFFSET ?",
+        "SELECT `main`.`AgentMissionEvent`.`id`, `main`.`AgentMissionEvent`.`type`, `main`.`AgentMissionEvent`.`seq`, `main`.`AgentMissionEvent`.`createdAt`, `main`.`AgentMissionEvent`.`pay",
+        "SELECT `main`.`ProjectMembership`.`id`, `main`.`ProjectMembership`.`role` FROM `main`.`ProjectMembership` WHERE ((`main`.`ProjectMembership`.`userId` = ? AND `main`.`ProjectMembers",
+        "SELECT `main`.`AgentMissionStep`.`id`, `main`.`AgentMissionStep`.`protocolJson` FROM `main`.`AgentMissionStep` WHERE `main`.`AgentMissionStep`.`missionId` = ? LIMIT ? OFFSET ?",
+        "SELECT `main`.`AgentMissionStep`.`id`, `main`.`AgentMissionStep`.`ordinal`, `main`.`AgentMissionStep`.`toolName`, `main`.`AgentMissionStep`.`status`, `main`.`AgentMissionStep`.`fin",
+        "SELECT `main`.`AgentMissionEvent`.`id`, `main`.`AgentMissionEvent`.`seq` FROM `main`.`AgentMissionEvent` WHERE (`main`.`AgentMissionEvent`.`missionId` = ? AND `main`.`AgentMissionE",
+        "COMMIT",
+        "SELECT `main`.`AgentMission`.`id`, `main`.`AgentMission`.`version`, `main`.`AgentMission`.`status`, `main`.`AgentMission`.`planRevision`, `main`.`AgentMission`.`contextVersion`, `m"
+      ],
+      "consistency": "VERSION_STABLE",
+      "retries": 0,
+      "materialUseItems": 8,
+      "sourceLimit": 8,
+      "sourceLimitReached": true,
+      "currentUseStates": [
+        "ALLOWED",
+        "ALLOWED",
+        "ALLOWED",
+        "ALLOWED",
+        "ALLOWED",
+        "ALLOWED",
+        "ALLOWED",
+        "ALLOWED"
+      ],
+      "availabilityStates": [
+        "CURRENT",
+        "CURRENT",
+        "CURRENT",
+        "CURRENT",
+        "CURRENT",
+        "CURRENT",
+        "CURRENT",
+        "CURRENT"
+      ],
+      "sourcePolicyChecks": null,
+      "materialCoverage": {
+        "eventLimit": 80,
+        "eventsInspected": 10,
+        "eventsTruncated": false,
+        "stepLimit": 40,
+        "stepsInspected": 0,
+        "stepsTruncated": false,
+        "outputLimit": 20,
+        "outputsInspected": 0,
+        "outputsTruncated": false,
+        "receiptsInspected": 0,
+        "receiptsTruncated": false,
+        "runLimit": 40,
+        "projectRunLimit": 40,
+        "runsInspected": 0,
+        "runsTruncated": false,
+        "runScope": "MISSION_FILTERED",
+        "sourceLimit": 8,
+        "sourceLimitReached": true,
+        "mapping": "DIRECT_SOURCE_POINTERS_ONLY"
+      },
+      "evidenceWindow": {
+        "name": "EVIDENCE_REVIEWS",
+        "limit": 3,
+        "returned": 0,
+        "truncated": false,
+        "note": "有界窗口内未找到记录只表示覆盖不足，不等于从未发生。"
+      },
+      "readOnly": {
+        "before": {
+          "version": 2,
+          "status": "WAITING_INPUT",
+          "updatedAt": "2026-11-03T07:00:34.439Z",
+          "nextEventSeq": 12,
+          "budgetUsedJson": {},
+          "lastErrorJson": null,
+          "counts": {
+            "events": 12,
+            "steps": 0,
+            "approvals": 0,
+            "outputs": 0,
+            "receipts": 0
+          }
+        },
+        "after": {
+          "version": 2,
+          "status": "WAITING_INPUT",
+          "updatedAt": "2026-11-03T07:00:34.439Z",
+          "nextEventSeq": 12,
+          "budgetUsedJson": {},
+          "lastErrorJson": null,
+          "counts": {
+            "events": 12,
+            "steps": 0,
+            "approvals": 0,
+            "outputs": 0,
+            "receipts": 0
+          }
+        },
+        "identical": true
+      }
+    },
+    "retryOnce": {
+      "missionId": "cmw0c9bgd000ty88orz4pidfg",
+      "transactions": 4,
+      "queries": 90,
+      "consistency": "RETRIED",
+      "retries": 1,
+      "observedMissionVersion": 2
+    },
+    "continuousAdvance": {
+      "missionId": "cmw0c9bhj000yy88oiujprlsr",
+      "transactions": 6,
+      "queries": 138,
+      "consistency": "VERSION_ADVANCED",
+      "retries": 2,
+      "observedMissionVersion": 3,
+      "advancedBlocker": true
+    },
+    "crossRequestCache": {
+      "missionId": "cmw0c9bj90013y88onyws5m1u",
+      "first": {
+        "status": 200,
+        "cacheControl": "no-store",
+        "transactions": 2,
+        "queries": 47,
+        "version": 1,
+        "readAt": "2026-11-03T07:00:35.142Z",
+        "planRevision": 1
+      },
+      "second": {
+        "status": 200,
+        "cacheControl": "no-store",
+        "transactions": 2,
+        "queries": 47,
+        "version": 6,
+        "readAt": "2026-11-03T07:00:35.176Z",
+        "planRevision": 3
+      },
+      "seenNewVersionAfterDbBump": true,
+      "readAtDiffers": true,
+      "sideEffectsOnlyFromOwnBump": {
+        "before": {
+          "version": 1,
+          "status": "READY",
+          "updatedAt": "2026-11-03T07:00:35.112Z",
+          "nextEventSeq": 1,
+          "budgetUsedJson": {},
+          "lastErrorJson": null,
+          "counts": {
+            "events": 1,
+            "steps": 0,
+            "approvals": 0,
+            "outputs": 0,
+            "receipts": 0
+          }
+        },
+        "after": {
+          "version": 6,
+          "status": "READY",
+          "updatedAt": "2026-11-03T07:00:35.148Z",
+          "nextEventSeq": 1,
+          "budgetUsedJson": {},
+          "lastErrorJson": null,
+          "counts": {
+            "events": 1,
+            "steps": 0,
+            "approvals": 0,
+            "outputs": 0,
+            "receipts": 0
+          }
+        },
+        "expectedVersionDelta": 5,
+        "expectedPlanRevisionDelta": 2
+      },
+      "getWrittenFieldsUnchangedExceptOwnBump": true
+    }
+  },
+  "verdict": {
+    "stableTransactions": [
+      2
+    ],
+    "stableQueries": [
+      118
+    ],
+    "retryOnceTransactions": 4,
+    "retryOnceConsistency": "RETRIED",
+    "retryOnceRetries": 1,
+    "continuousTransactions": 6,
+    "continuousConsistency": "VERSION_ADVANCED",
+    "continuousRetries": 2,
+    "maxTwoRetriesRespected": true,
+    "materialUseItemsAtMost8": true,
+    "sourcePolicyChecks": null,
+    "sourcePolicyChecksAtMostItems": true,
+    "readbackZeroSideEffect": true,
+    "crossRequestCacheAbsent": true,
+    "noStoreHeader": true
+  }
+}

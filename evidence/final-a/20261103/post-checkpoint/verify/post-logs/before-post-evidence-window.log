@@ -1,0 +1,84 @@
+{
+  "ok": true,
+  "outPath": "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\post-checkpoint\\verify\\post-runs\\before-post-evidence-window.json",
+  "summary": {
+    "total": 14,
+    "pass": 5,
+    "fail": 9,
+    "notRun": 0
+  },
+  "failed": [
+    {
+      "id": "PST-EVW-01",
+      "detail": {
+        "itemQuestionIds": [],
+        "targetQuestionId": "cmw0c4yyp0005hw8oloidi0fk"
+      }
+    },
+    {
+      "id": "PST-EVW-02",
+      "detail": {
+        "itemEventIds": [],
+        "targetEventId": "cmw0c4yzn0006hw8opcmtpexc"
+      }
+    },
+    {
+      "id": "PST-EVW-04",
+      "detail": {
+        "itemCount": 0,
+        "truncated": true,
+        "itemEventIds": []
+      }
+    },
+    {
+      "id": "PST-EVW-05",
+      "detail": {
+        "truncated": true,
+        "itemCount": 0
+      }
+    },
+    {
+      "id": "PST-EVW-07",
+      "detail": {
+        "itemEventIds": [],
+        "itemCount": 0
+      }
+    },
+    {
+      "id": "PST-EVW-09",
+      "detail": {
+        "windowLimit": null,
+        "displayLimit": null,
+        "inspected": null
+      }
+    },
+    {
+      "id": "PST-EVW-10",
+      "detail": {
+        "questionFiltered": null,
+        "questionId": null,
+        "note": null
+      }
+    },
+    {
+      "id": "PST-EVW-11",
+      "detail": {
+        "itemEventIds": [],
+        "expectedLatest3": [
+          "cmw0c4zzh0034hw8o80jreb0l",
+          "cmw0c4zzb0033hw8owe5iysht",
+          "cmw0c4zz40032hw8obxh8b91n"
+        ],
+        "truncated": true
+      }
+    },
+    {
+      "id": "PST-EVW-13",
+      "detail": {
+        "itemEventIds": [],
+        "questionId": null,
+        "itemCount": 0
+      }
+    }
+  ]
+}

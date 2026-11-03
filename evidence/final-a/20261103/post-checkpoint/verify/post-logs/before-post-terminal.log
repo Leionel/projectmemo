@@ -1,0 +1,48 @@
+{
+  "ok": true,
+  "outPath": "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\post-checkpoint\\verify\\post-runs\\before-post-terminal.json",
+  "summary": {
+    "total": 16,
+    "pass": 7,
+    "fail": 9,
+    "notRun": 0
+  },
+  "failed": [
+    {
+      "id": "PST-TERM-01",
+      "verdict": "FAIL"
+    },
+    {
+      "id": "PST-TERM-02",
+      "verdict": "FAIL"
+    },
+    {
+      "id": "PST-TERM-03",
+      "verdict": "FAIL"
+    },
+    {
+      "id": "PST-TERM-05",
+      "verdict": "FAIL"
+    },
+    {
+      "id": "PST-TERM-06",
+      "verdict": "FAIL"
+    },
+    {
+      "id": "PST-TERM-07",
+      "verdict": "FAIL"
+    },
+    {
+      "id": "PST-TERM-12",
+      "verdict": "FAIL"
+    },
+    {
+      "id": "PST-TERM-13",
+      "verdict": "FAIL"
+    },
+    {
+      "id": "PST-TERM-15",
+      "verdict": "FAIL"
+    }
+  ]
+}

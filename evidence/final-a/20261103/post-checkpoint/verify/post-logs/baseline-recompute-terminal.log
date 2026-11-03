@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "outPath": "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\post-checkpoint\\verify\\post-runs\\baseline-recompute-terminal.json",
+  "verdict": {
+    "summaryCanFindSucceeded": false,
+    "summaryCanFindCancelled": false,
+    "focusCanFindSucceeded": false,
+    "focusCanFindCancelled": false,
+    "detailExpressesSucceededTerminal": true,
+    "detailExpressesCancelledTerminal": true,
+    "detailExpressesUnsettledSucceeded": true,
+    "detailExpressesUnsettledCancelled": true,
+    "readbackExpressesSucceededTerminal": true,
+    "readbackExpressesCancelledTerminal": true,
+    "readbackExpressesUnsettledSucceeded": true,
+    "readbackExpressesUnsettledCancelled": true,
+    "readbackPrimaryActionKinds": {
+      "succeeded": "CHECK_UNKNOWN_EFFECT",
+      "cancelled": "CHECK_UNKNOWN_EFFECT"
+    },
+    "readOnlyZeroChange": true,
+    "nonOwner404": true,
+    "conclusion": "入口缺口：missionWorkspaceSummary/GlobalFocus 只查非终态状态集，终态+未结算UNKNOWN任务完全不在摘要/Focus 结果中；但同一 workState 投影在 detail/readback 已能并列表达 terminal+unsettledEffect，故不是“状态不可表达”。"
+  }
+}

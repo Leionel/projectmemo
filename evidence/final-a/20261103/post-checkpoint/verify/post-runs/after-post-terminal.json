@@ -1,0 +1,1027 @@
+{
+  "generatedAt": "2026-11-03T07:29:53.669Z",
+  "purpose": "POST 独立复验：终态+未结算 UNKNOWN 现有摘要找回入口（identity/version、旧客户端、非 Owner、零变更、截断诚实）",
+  "sourceTree": "clean shadow of 3ec63e62470d0033f3cd6404c047ad720ecae72c (git archive, HEAD tree)",
+  "commit": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+  "db": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-post-final-terminal-6aKFK7\\verify.db",
+  "scenarios": {
+    "main": {
+      "missions": {
+        "succeededUnknown": "cmw0db0lu0004yw8okvg8xt6y",
+        "cancelledUnknown": "cmw0db0mo0006yw8ogs76dfca",
+        "plainSucceeded": "cmw0db0n00008yw8oxtf45mto"
+      },
+      "summaryService": {
+        "keys": [
+          "enabled",
+          "totalActive",
+          "items",
+          "terminalUnsettled"
+        ],
+        "enabled": true,
+        "totalActive": 1,
+        "itemsIds": [
+          "cmw0db0nd000ayw8oyt806hsa"
+        ],
+        "terminalUnsettled": {
+          "items": [
+            {
+              "id": "cmw0db0mo0006yw8ogs76dfca",
+              "goal": "POST 复验：取消但外部结果未知",
+              "status": "CANCELLED",
+              "version": 1,
+              "attention": "原委托已取消，历史结果保留；仍有未知调用结果未结算，不能视为成功完成",
+              "workState": {
+                "phase": "COMPLETED",
+                "nextActor": "USER",
+                "requiresUser": true,
+                "reasonCode": "CANCELLED",
+                "reasonText": "原委托已取消，历史结果保留；仍有未知调用结果未结算，不能视为成功完成",
+                "actionLabel": "查看取消前原结果并核对未知调用",
+                "originalRef": {
+                  "kind": "MISSION",
+                  "id": "cmw0db0mo0006yw8ogs76dfca",
+                  "version": 1
+                },
+                "exactQuestionRef": null,
+                "exactApprovalRef": null,
+                "checkedAt": "2026-11-03T07:29:53.998Z",
+                "observedAt": null,
+                "nextCheckAt": null,
+                "nextBoundary": null,
+                "freshness": "FRESH",
+                "terminal": {
+                  "status": "CANCELLED",
+                  "at": "2026-11-03T07:29:53.911Z",
+                  "atSource": "FINISHED_AT",
+                  "reasonCode": "CANCELLED"
+                },
+                "unsettledEffect": {
+                  "present": true,
+                  "code": "EXTERNAL_UNKNOWN",
+                  "source": "LAST_ERROR",
+                  "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+                  "resolvedByRead": false
+                },
+                "stopRequest": {
+                  "state": "CANCEL_SETTLED",
+                  "requestedAt": "2026-11-03T07:29:53.911Z",
+                  "settled": true,
+                  "note": "取消请求已结算：原委托已取消，历史结果保留，不能视为成功完成"
+                }
+              },
+              "activity": null,
+              "activityAt": null,
+              "outputRevision": null
+            },
+            {
+              "id": "cmw0db0lu0004yw8okvg8xt6y",
+              "goal": "POST 复验：成功但外部结果未知",
+              "status": "SUCCEEDED",
+              "version": 1,
+              "attention": "原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准",
+              "workState": {
+                "phase": "COMPLETED",
+                "nextActor": "USER",
+                "requiresUser": true,
+                "reasonCode": "SUCCEEDED",
+                "reasonText": "原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准",
+                "actionLabel": "查看原结果并核对未知调用",
+                "originalRef": {
+                  "kind": "MISSION",
+                  "id": "cmw0db0lu0004yw8okvg8xt6y",
+                  "version": 1
+                },
+                "exactQuestionRef": null,
+                "exactApprovalRef": null,
+                "checkedAt": "2026-11-03T07:29:53.998Z",
+                "observedAt": null,
+                "nextCheckAt": null,
+                "nextBoundary": null,
+                "freshness": "FRESH",
+                "terminal": {
+                  "status": "SUCCEEDED",
+                  "at": "2026-11-03T07:29:53.909Z",
+                  "atSource": "FINISHED_AT",
+                  "reasonCode": "SUCCEEDED"
+                },
+                "unsettledEffect": {
+                  "present": true,
+                  "code": "EXTERNAL_UNKNOWN",
+                  "source": "LAST_ERROR",
+                  "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+                  "resolvedByRead": false
+                },
+                "stopRequest": {
+                  "state": "NONE",
+                  "requestedAt": null,
+                  "settled": true,
+                  "note": "原委托已完成；停止请求不再具有执行含义"
+                }
+              },
+              "activity": null,
+              "activityAt": null,
+              "outputRevision": null
+            }
+          ],
+          "inspected": 3,
+          "limit": 6,
+          "truncated": false,
+          "note": "仅检查了本项目最近 3 条终态委托（按最后修订时间）；窗口内未找到不等于全库没有（更早或非本项目的终态委托不在窗口内），请从原委托列表/详情核对。",
+          "identityNote": "条目 id/status/version 与原委托、详情与读回一致；workState 并列显示 terminal 与 unsettledEffect（requiresUser=true，仅能在原委托中核对/结算）。读取只投影既有事实：不核销 UNKNOWN、不改变终态、version、updatedAt 或生命周期。"
+        }
+      },
+      "summaryRoute": {
+        "status": 200,
+        "hasTerminalUnsettled": true,
+        "keys": [
+          "enabled",
+          "totalActive",
+          "items",
+          "terminalUnsettled"
+        ],
+        "foundSucceeded": true,
+        "foundCancelled": true
+      },
+      "detail": {
+        "succeeded": {
+          "status": "SUCCEEDED",
+          "version": 1,
+          "workState": {
+            "terminal": {
+              "status": "SUCCEEDED",
+              "at": "2026-11-03T07:29:53.909Z",
+              "atSource": "FINISHED_AT",
+              "reasonCode": "SUCCEEDED"
+            },
+            "unsettledEffect": {
+              "present": true,
+              "code": "EXTERNAL_UNKNOWN",
+              "source": "LAST_ERROR",
+              "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+              "resolvedByRead": false
+            }
+          }
+        },
+        "cancelled": {
+          "status": "CANCELLED",
+          "version": 1
+        }
+      },
+      "readback": {
+        "succeeded": {
+          "missionVersion": 1,
+          "terminal": {
+            "status": "SUCCEEDED",
+            "at": "2026-11-03T07:29:53.909Z",
+            "atSource": "FINISHED_AT",
+            "reasonCode": "SUCCEEDED"
+          },
+          "unsettledEffect": {
+            "present": true,
+            "code": "EXTERNAL_UNKNOWN",
+            "source": "LAST_ERROR",
+            "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+            "resolvedByRead": false
+          },
+          "requiresUser": true,
+          "primaryAction": "CHECK_UNKNOWN_EFFECT"
+        },
+        "cancelled": {
+          "missionVersion": 1,
+          "terminal": {
+            "status": "CANCELLED",
+            "at": "2026-11-03T07:29:53.911Z",
+            "atSource": "FINISHED_AT",
+            "reasonCode": "CANCELLED"
+          },
+          "unsettledEffect": {
+            "present": true,
+            "code": "EXTERNAL_UNKNOWN",
+            "source": "LAST_ERROR",
+            "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+            "resolvedByRead": false
+          },
+          "requiresUser": true
+        }
+      },
+      "readOnly": {
+        "before": [
+          {
+            "id": "cmw0db0lu0004yw8okvg8xt6y",
+            "status": "SUCCEEDED",
+            "version": 1,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "updatedAt": "2026-11-03T07:29:53.910Z",
+            "nextEventSeq": 1,
+            "finishedAt": "2026-11-03T07:29:53.909Z",
+            "cancelRequestedAt": null,
+            "lastErrorJson": {
+              "code": "EXTERNAL_UNKNOWN",
+              "message": "外部调用结果未知，读取不会自动核销",
+              "phase": "TOOL"
+            }
+          },
+          {
+            "id": "cmw0db0mo0006yw8ogs76dfca",
+            "status": "CANCELLED",
+            "version": 1,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "updatedAt": "2026-11-03T07:29:53.912Z",
+            "nextEventSeq": 1,
+            "finishedAt": "2026-11-03T07:29:53.911Z",
+            "cancelRequestedAt": "2026-11-03T07:29:53.911Z",
+            "lastErrorJson": {
+              "code": "EXTERNAL_UNKNOWN",
+              "message": "外部调用结果未知，读取不会自动核销",
+              "phase": "TOOL"
+            }
+          },
+          {
+            "id": "cmw0db0n00008yw8oxtf45mto",
+            "status": "SUCCEEDED",
+            "version": 1,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "updatedAt": "2026-11-03T07:29:53.921Z",
+            "nextEventSeq": 1,
+            "finishedAt": "2026-11-03T07:29:53.920Z",
+            "cancelRequestedAt": null,
+            "lastErrorJson": null
+          },
+          {
+            "id": "cmw0db0nd000ayw8oyt806hsa",
+            "status": "READY",
+            "version": 1,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "updatedAt": "2026-11-03T07:29:53.975Z",
+            "nextEventSeq": 1,
+            "finishedAt": null,
+            "cancelRequestedAt": null,
+            "lastErrorJson": null
+          }
+        ],
+        "after": [
+          {
+            "id": "cmw0db0lu0004yw8okvg8xt6y",
+            "status": "SUCCEEDED",
+            "version": 1,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "updatedAt": "2026-11-03T07:29:53.910Z",
+            "nextEventSeq": 1,
+            "finishedAt": "2026-11-03T07:29:53.909Z",
+            "cancelRequestedAt": null,
+            "lastErrorJson": {
+              "code": "EXTERNAL_UNKNOWN",
+              "message": "外部调用结果未知，读取不会自动核销",
+              "phase": "TOOL"
+            }
+          },
+          {
+            "id": "cmw0db0mo0006yw8ogs76dfca",
+            "status": "CANCELLED",
+            "version": 1,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "updatedAt": "2026-11-03T07:29:53.912Z",
+            "nextEventSeq": 1,
+            "finishedAt": "2026-11-03T07:29:53.911Z",
+            "cancelRequestedAt": "2026-11-03T07:29:53.911Z",
+            "lastErrorJson": {
+              "code": "EXTERNAL_UNKNOWN",
+              "message": "外部调用结果未知，读取不会自动核销",
+              "phase": "TOOL"
+            }
+          },
+          {
+            "id": "cmw0db0n00008yw8oxtf45mto",
+            "status": "SUCCEEDED",
+            "version": 1,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "updatedAt": "2026-11-03T07:29:53.921Z",
+            "nextEventSeq": 1,
+            "finishedAt": "2026-11-03T07:29:53.920Z",
+            "cancelRequestedAt": null,
+            "lastErrorJson": null
+          },
+          {
+            "id": "cmw0db0nd000ayw8oyt806hsa",
+            "status": "READY",
+            "version": 1,
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "updatedAt": "2026-11-03T07:29:53.975Z",
+            "nextEventSeq": 1,
+            "finishedAt": null,
+            "cancelRequestedAt": null,
+            "lastErrorJson": null
+          }
+        ],
+        "identical": true
+      },
+      "accessControl": {
+        "serviceCode": "MISSION_NOT_FOUND",
+        "serviceStatus": 404,
+        "routeStatus": 404,
+        "routeCode": "MISSION_NOT_FOUND",
+        "readbackStatus": 404,
+        "readbackCode": "MISSION_NOT_FOUND"
+      },
+      "globalFocus": {
+        "serviceFound": true,
+        "routeFound": true,
+        "counts": {
+          "waiting": 2,
+          "running": 1,
+          "actions": 0,
+          "reminders": 0
+        },
+        "coverage": {
+          "complete": true,
+          "consideredProjectIds": [
+            "cmw0db0kz0001yw8ocxoxnd2p"
+          ],
+          "countsAreBounded": true,
+          "terminalUnsettled": {
+            "inspected": 3,
+            "limit": 6,
+            "truncated": false,
+            "note": "非终态待回应窗口与终态 unsettled 窗口分别有界：终态窗口按最后修订时间只检查当前授权范围内最近 6 条已结束（成功/取消）委托；窗口内未找到不等于全库没有，更早或跨项目的终态委托请从原项目/委托列表核对。终态条目只提示核对，读取不会结算 UNKNOWN。"
+          }
+        },
+        "itemSucc": {
+          "id": "cmw0db0lu0004yw8okvg8xt6y",
+          "status": "SUCCEEDED",
+          "workState": {
+            "terminal": {
+              "status": "SUCCEEDED",
+              "at": "2026-11-03T07:29:53.909Z",
+              "atSource": "FINISHED_AT",
+              "reasonCode": "SUCCEEDED"
+            },
+            "unsettledEffect": {
+              "present": true,
+              "code": "EXTERNAL_UNKNOWN",
+              "source": "LAST_ERROR",
+              "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+              "resolvedByRead": false
+            },
+            "requiresUser": true
+          }
+        }
+      }
+    },
+    "truncation": {
+      "createdTerminalUnsettled": 8,
+      "window": {
+        "itemIds": [
+          "cmw0db0x8000wyw8ot90308rc",
+          "cmw0db0wi000uyw8otpl16cv2",
+          "cmw0db0vy000syw8ozy0a32py",
+          "cmw0db0v5000qyw8o5sb1vvmq",
+          "cmw0db0ul000oyw8ooq5rv221",
+          "cmw0db0uf000myw8op7077ddj"
+        ],
+        "inspected": 7,
+        "limit": 6,
+        "truncated": true,
+        "note": "仅检查了本项目最近 7 条终态委托（按最后修订时间），窗口已截断：更早的终态委托未检查，窗口内未找到不等于全库没有，请从原委托列表/详情核对。",
+        "identityNote": "条目 id/status/version 与原委托、详情与读回一致；workState 并列显示 terminal 与 unsettledEffect（requiresUser=true，仅能在原委托中核对/结算）。读取只投影既有事实：不核销 UNKNOWN、不改变终态、version、updatedAt 或生命周期。"
+      },
+      "foundCount": 6,
+      "readOnly": {
+        "missionCount": 8,
+        "statuses": [
+          "SUCCEEDED",
+          "CANCELLED",
+          "SUCCEEDED",
+          "CANCELLED",
+          "SUCCEEDED",
+          "CANCELLED",
+          "SUCCEEDED",
+          "CANCELLED"
+        ]
+      },
+      "focus": {
+        "coverage": {
+          "complete": false,
+          "consideredProjectIds": [],
+          "countsAreBounded": true,
+          "terminalUnsettled": {
+            "inspected": 7,
+            "limit": 6,
+            "truncated": true,
+            "note": "非终态待回应窗口与终态 unsettled 窗口分别有界：终态窗口按最后修订时间只检查当前授权范围内最近 6 条已结束（成功/取消）委托；窗口内未找到不等于全库没有，更早或跨项目的终态委托请从原项目/委托列表核对。终态条目只提示核对，读取不会结算 UNKNOWN。"
+          }
+        },
+        "counts": {
+          "waiting": 7,
+          "running": 0,
+          "actions": 0,
+          "reminders": 0
+        },
+        "waitingLength": 6,
+        "hasMore": true
+      }
+    },
+    "stepUnknown": {
+      "summaryWindow": {
+        "items": [
+          {
+            "id": "cmw0db0zo0012yw8oe26pfsjb",
+            "goal": "POST 复验：终态但原步骤 UNKNOWN",
+            "status": "SUCCEEDED",
+            "version": 1,
+            "attention": "原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准",
+            "workState": {
+              "phase": "COMPLETED",
+              "nextActor": "USER",
+              "requiresUser": true,
+              "reasonCode": "SUCCEEDED",
+              "reasonText": "原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准",
+              "actionLabel": "查看原结果并核对未知调用",
+              "originalRef": {
+                "kind": "MISSION",
+                "id": "cmw0db0zo0012yw8oe26pfsjb",
+                "version": 1
+              },
+              "exactQuestionRef": null,
+              "exactApprovalRef": null,
+              "checkedAt": "2026-11-03T07:29:54.421Z",
+              "observedAt": null,
+              "nextCheckAt": null,
+              "nextBoundary": null,
+              "freshness": "FRESH",
+              "terminal": {
+                "status": "SUCCEEDED",
+                "at": "2026-11-03T07:29:54.395Z",
+                "atSource": "FINISHED_AT",
+                "reasonCode": "SUCCEEDED"
+              },
+              "unsettledEffect": {
+                "present": true,
+                "code": null,
+                "source": "STEP",
+                "reasonText": "原 1 个步骤结果尚未结算，读取不会自动核销",
+                "resolvedByRead": false
+              },
+              "stopRequest": {
+                "state": "NONE",
+                "requestedAt": null,
+                "settled": true,
+                "note": "原委托已完成；停止请求不再具有执行含义"
+              }
+            },
+            "activity": null,
+            "activityAt": null,
+            "outputRevision": null
+          }
+        ],
+        "inspected": 1,
+        "limit": 6,
+        "truncated": false,
+        "note": "仅检查了本项目最近 1 条终态委托（按最后修订时间）；窗口内未找到不等于全库没有（更早或非本项目的终态委托不在窗口内），请从原委托列表/详情核对。",
+        "identityNote": "条目 id/status/version 与原委托、详情与读回一致；workState 并列显示 terminal 与 unsettledEffect（requiresUser=true，仅能在原委托中核对/结算）。读取只投影既有事实：不核销 UNKNOWN、不改变终态、version、updatedAt 或生命周期。"
+      },
+      "readbackUnsettled": {
+        "present": true,
+        "code": null,
+        "source": "STEP",
+        "reasonText": "原 1 个步骤结果尚未结算，读取不会自动核销",
+        "resolvedByRead": false
+      }
+    },
+    "disabled": {
+      "summary": {
+        "enabled": false,
+        "totalActive": 0,
+        "items": []
+      }
+    }
+  },
+  "checks": [
+    {
+      "id": "PST-TERM-01",
+      "question": "missionWorkspaceSummary 暴露 terminalUnsettled 窗口字段",
+      "verdict": "PASS",
+      "observed": {
+        "keys": [
+          "enabled",
+          "totalActive",
+          "items",
+          "terminalUnsettled"
+        ],
+        "windowKeys": [
+          "items",
+          "inspected",
+          "limit",
+          "truncated",
+          "note",
+          "identityNote"
+        ]
+      }
+    },
+    {
+      "id": "PST-TERM-02",
+      "question": "SUCCEEDED+EXTERNAL_UNKNOWN 能在现有摘要找回",
+      "verdict": "PASS",
+      "observed": {
+        "id": "cmw0db0lu0004yw8okvg8xt6y",
+        "goal": "POST 复验：成功但外部结果未知",
+        "status": "SUCCEEDED",
+        "version": 1,
+        "attention": "原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准",
+        "workState": {
+          "phase": "COMPLETED",
+          "nextActor": "USER",
+          "requiresUser": true,
+          "reasonCode": "SUCCEEDED",
+          "reasonText": "原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准",
+          "actionLabel": "查看原结果并核对未知调用",
+          "originalRef": {
+            "kind": "MISSION",
+            "id": "cmw0db0lu0004yw8okvg8xt6y",
+            "version": 1
+          },
+          "exactQuestionRef": null,
+          "exactApprovalRef": null,
+          "checkedAt": "2026-11-03T07:29:53.998Z",
+          "observedAt": null,
+          "nextCheckAt": null,
+          "nextBoundary": null,
+          "freshness": "FRESH",
+          "terminal": {
+            "status": "SUCCEEDED",
+            "at": "2026-11-03T07:29:53.909Z",
+            "atSource": "FINISHED_AT",
+            "reasonCode": "SUCCEEDED"
+          },
+          "unsettledEffect": {
+            "present": true,
+            "code": "EXTERNAL_UNKNOWN",
+            "source": "LAST_ERROR",
+            "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "NONE",
+            "requestedAt": null,
+            "settled": true,
+            "note": "原委托已完成；停止请求不再具有执行含义"
+          }
+        },
+        "activity": null,
+        "activityAt": null,
+        "outputRevision": null
+      }
+    },
+    {
+      "id": "PST-TERM-03",
+      "question": "CANCELLED+EXTERNAL_UNKNOWN 能在现有摘要找回",
+      "verdict": "PASS",
+      "observed": {
+        "id": "cmw0db0mo0006yw8ogs76dfca",
+        "goal": "POST 复验：取消但外部结果未知",
+        "status": "CANCELLED",
+        "version": 1,
+        "attention": "原委托已取消，历史结果保留；仍有未知调用结果未结算，不能视为成功完成",
+        "workState": {
+          "phase": "COMPLETED",
+          "nextActor": "USER",
+          "requiresUser": true,
+          "reasonCode": "CANCELLED",
+          "reasonText": "原委托已取消，历史结果保留；仍有未知调用结果未结算，不能视为成功完成",
+          "actionLabel": "查看取消前原结果并核对未知调用",
+          "originalRef": {
+            "kind": "MISSION",
+            "id": "cmw0db0mo0006yw8ogs76dfca",
+            "version": 1
+          },
+          "exactQuestionRef": null,
+          "exactApprovalRef": null,
+          "checkedAt": "2026-11-03T07:29:53.998Z",
+          "observedAt": null,
+          "nextCheckAt": null,
+          "nextBoundary": null,
+          "freshness": "FRESH",
+          "terminal": {
+            "status": "CANCELLED",
+            "at": "2026-11-03T07:29:53.911Z",
+            "atSource": "FINISHED_AT",
+            "reasonCode": "CANCELLED"
+          },
+          "unsettledEffect": {
+            "present": true,
+            "code": "EXTERNAL_UNKNOWN",
+            "source": "LAST_ERROR",
+            "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "CANCEL_SETTLED",
+            "requestedAt": "2026-11-03T07:29:53.911Z",
+            "settled": true,
+            "note": "取消请求已结算：原委托已取消，历史结果保留，不能视为成功完成"
+          }
+        },
+        "activity": null,
+        "activityAt": null,
+        "outputRevision": null
+      }
+    },
+    {
+      "id": "PST-TERM-04",
+      "question": "普通终态（无未结算 UNKNOWN）不误入 terminalUnsettled",
+      "verdict": "PASS",
+      "observed": {
+        "found": false
+      }
+    },
+    {
+      "id": "PST-TERM-05",
+      "question": "摘要条目与 detail/readback 同 id/version/status",
+      "verdict": "PASS",
+      "observed": {
+        "summaryItem": {
+          "id": "cmw0db0lu0004yw8okvg8xt6y",
+          "version": 1,
+          "status": "SUCCEEDED"
+        },
+        "readback": {
+          "version": 1,
+          "status": "SUCCEEDED"
+        },
+        "detail": {
+          "version": 1,
+          "status": "SUCCEEDED"
+        }
+      }
+    },
+    {
+      "id": "PST-TERM-06",
+      "question": "摘要 workState 并列 terminal+unsettledEffect 且 requiresUser=true（与 readback 一致）",
+      "verdict": "PASS",
+      "observed": {
+        "terminal": {
+          "status": "SUCCEEDED",
+          "at": "2026-11-03T07:29:53.909Z",
+          "atSource": "FINISHED_AT",
+          "reasonCode": "SUCCEEDED"
+        },
+        "unsettledEffect": {
+          "present": true,
+          "code": "EXTERNAL_UNKNOWN",
+          "source": "LAST_ERROR",
+          "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+          "resolvedByRead": false
+        },
+        "requiresUser": true
+      }
+    },
+    {
+      "id": "PST-TERM-07",
+      "question": "摘要 route 与 service 一致（同窗口、能找回）",
+      "verdict": "PASS",
+      "observed": {
+        "status": 200,
+        "seats": true
+      }
+    },
+    {
+      "id": "PST-TERM-08",
+      "question": "旧客户端字段仍存在且语义不变（enabled/totalActive/items 及旧 item 键）",
+      "verdict": "PASS",
+      "observed": {
+        "keys": [
+          "enabled",
+          "totalActive",
+          "items",
+          "terminalUnsettled"
+        ],
+        "itemKeys": [
+          "id",
+          "goal",
+          "status",
+          "version",
+          "attention",
+          "workState",
+          "activity",
+          "activityAt",
+          "outputRevision"
+        ]
+      }
+    },
+    {
+      "id": "PST-TERM-09",
+      "question": "totalActive 只计活跃任务、不计终态（与 BEFORE 语义一致）",
+      "verdict": "PASS",
+      "observed": {
+        "totalActive": 1,
+        "itemsIds": [
+          "cmw0db0nd000ayw8oyt806hsa"
+        ]
+      }
+    },
+    {
+      "id": "PST-TERM-10",
+      "question": "读摘要/详情/读回前后数据库零变更（含终态 version/updatedAt/生命周期）",
+      "verdict": "PASS",
+      "observed": {
+        "identical": true
+      }
+    },
+    {
+      "id": "PST-TERM-22",
+      "question": "summary/readback GET 响应保持 no-store（不缓存终态窗口）",
+      "verdict": "PASS",
+      "observed": {
+        "summary": "no-store",
+        "readback": "no-store"
+      }
+    },
+    {
+      "id": "PST-TERM-11",
+      "question": "非 Owner 读摘要服务/路由 404，读回 404",
+      "verdict": "PASS",
+      "observed": {
+        "serviceCode": "MISSION_NOT_FOUND",
+        "serviceStatus": 404,
+        "routeStatus": 404,
+        "routeCode": "MISSION_NOT_FOUND",
+        "readbackStatus": 404,
+        "readbackCode": "MISSION_NOT_FOUND"
+      }
+    },
+    {
+      "id": "PST-TERM-17",
+      "question": "GlobalFocus（Focus）能找回终态+未结算 UNKNOWN 并保留 terminal+unsettledEffect/requiresUser",
+      "verdict": "PASS",
+      "observed": {
+        "serviceFound": true,
+        "routeFound": true,
+        "counts": {
+          "waiting": 2,
+          "running": 1,
+          "actions": 0,
+          "reminders": 0
+        },
+        "coverage": {
+          "complete": true,
+          "consideredProjectIds": [
+            "cmw0db0kz0001yw8ocxoxnd2p"
+          ],
+          "countsAreBounded": true,
+          "terminalUnsettled": {
+            "inspected": 3,
+            "limit": 6,
+            "truncated": false,
+            "note": "非终态待回应窗口与终态 unsettled 窗口分别有界：终态窗口按最后修订时间只检查当前授权范围内最近 6 条已结束（成功/取消）委托；窗口内未找到不等于全库没有，更早或跨项目的终态委托请从原项目/委托列表核对。终态条目只提示核对，读取不会结算 UNKNOWN。"
+          }
+        },
+        "itemSucc": {
+          "id": "cmw0db0lu0004yw8okvg8xt6y",
+          "status": "SUCCEEDED",
+          "workState": {
+            "terminal": {
+              "status": "SUCCEEDED",
+              "at": "2026-11-03T07:29:53.909Z",
+              "atSource": "FINISHED_AT",
+              "reasonCode": "SUCCEEDED"
+            },
+            "unsettledEffect": {
+              "present": true,
+              "code": "EXTERNAL_UNKNOWN",
+              "source": "LAST_ERROR",
+              "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+              "resolvedByRead": false
+            },
+            "requiresUser": true
+          }
+        }
+      }
+    },
+    {
+      "id": "PST-TERM-18",
+      "question": "Focus route 与 service 一致（waiting 含终态项、counts.waiting 计入）",
+      "verdict": "PASS",
+      "observed": {
+        "status": 200,
+        "counts": {
+          "waiting": 2,
+          "running": 1,
+          "actions": 0,
+          "reminders": 0
+        }
+      }
+    },
+    {
+      "id": "PST-TERM-23",
+      "question": "Focus GET 响应保持 no-store",
+      "verdict": "PASS",
+      "observed": {
+        "cacheControl": "private, no-store"
+      }
+    },
+    {
+      "id": "PST-TERM-19",
+      "question": "Focus coverage.terminalUnsettled 覆盖说明诚实（inspected/limit/truncated/note）",
+      "verdict": "PASS",
+      "observed": {
+        "inspected": 3,
+        "limit": 6,
+        "truncated": false,
+        "note": "非终态待回应窗口与终态 unsettled 窗口分别有界：终态窗口按最后修订时间只检查当前授权范围内最近 6 条已结束（成功/取消）委托；窗口内未找到不等于全库没有，更早或跨项目的终态委托请从原项目/委托列表核对。终态条目只提示核对，读取不会结算 UNKNOWN。"
+      }
+    },
+    {
+      "id": "PST-TERM-20",
+      "question": "Focus 旧客户端字段仍存在、waiting 条目旧键不变（增量并入 + 可选 coverage 字段）",
+      "verdict": "PASS",
+      "observed": {
+        "keys": [
+          "coverage",
+          "discussions",
+          "primaryContext",
+          "counts",
+          "nextDeadline",
+          "schemaVersion",
+          "missionEnabled",
+          "archived",
+          "hasMore",
+          "waiting",
+          "running",
+          "actions",
+          "reminders",
+          "records"
+        ],
+        "itemKeys": [
+          "id",
+          "projectId",
+          "projectTitle",
+          "title",
+          "detail",
+          "status",
+          "activity",
+          "activityAt",
+          "recordedAt",
+          "dueAt",
+          "projectDeadline",
+          "recordFields",
+          "workState",
+          "actionLabel"
+        ]
+      }
+    },
+    {
+      "id": "PST-TERM-12",
+      "question": "有界窗口：items ≤ limit 且 truncated 诚实",
+      "verdict": "PASS",
+      "observed": {
+        "items": 6,
+        "inspected": 7,
+        "limit": 6,
+        "truncated": true
+      }
+    },
+    {
+      "id": "PST-TERM-13",
+      "question": "截断说明明确“窗口内未找到≠全库没有”",
+      "verdict": "PASS",
+      "observed": "仅检查了本项目最近 7 条终态委托（按最后修订时间），窗口已截断：更早的终态委托未检查，窗口内未找到不等于全库没有，请从原委托列表/详情核对。"
+    },
+    {
+      "id": "PST-TERM-14",
+      "question": "终态生命周期不被读取改变（仍为 SUCCEEDED/CANCELLED，无新增状态）",
+      "verdict": "PASS",
+      "observed": [
+        "SUCCEEDED",
+        "CANCELLED",
+        "SUCCEEDED",
+        "CANCELLED",
+        "SUCCEEDED",
+        "CANCELLED",
+        "SUCCEEDED",
+        "CANCELLED"
+      ]
+    },
+    {
+      "id": "PST-TERM-21",
+      "question": "Focus 终态窗口同样有界且截断诚实（inspected>limit、truncated=true、hasMore=true、waiting 不超上限）",
+      "verdict": "PASS",
+      "observed": {
+        "coverage": {
+          "complete": false,
+          "consideredProjectIds": [],
+          "countsAreBounded": true,
+          "terminalUnsettled": {
+            "inspected": 7,
+            "limit": 6,
+            "truncated": true,
+            "note": "非终态待回应窗口与终态 unsettled 窗口分别有界：终态窗口按最后修订时间只检查当前授权范围内最近 6 条已结束（成功/取消）委托；窗口内未找到不等于全库没有，更早或跨项目的终态委托请从原项目/委托列表核对。终态条目只提示核对，读取不会结算 UNKNOWN。"
+          }
+        },
+        "counts": {
+          "waiting": 7,
+          "running": 0,
+          "actions": 0,
+          "reminders": 0
+        },
+        "waitingLength": 6,
+        "hasMore": true
+      }
+    },
+    {
+      "id": "PST-TERM-15",
+      "question": "终态 + 原 Step UNKNOWN（无 lastErrorJson）也能从摘要找回",
+      "verdict": "PASS",
+      "observed": {
+        "item": {
+          "id": "cmw0db0zo0012yw8oe26pfsjb",
+          "workState": {
+            "phase": "COMPLETED",
+            "nextActor": "USER",
+            "requiresUser": true,
+            "reasonCode": "SUCCEEDED",
+            "reasonText": "原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准",
+            "actionLabel": "查看原结果并核对未知调用",
+            "originalRef": {
+              "kind": "MISSION",
+              "id": "cmw0db0zo0012yw8oe26pfsjb",
+              "version": 1
+            },
+            "exactQuestionRef": null,
+            "exactApprovalRef": null,
+            "checkedAt": "2026-11-03T07:29:54.421Z",
+            "observedAt": null,
+            "nextCheckAt": null,
+            "nextBoundary": null,
+            "freshness": "FRESH",
+            "terminal": {
+              "status": "SUCCEEDED",
+              "at": "2026-11-03T07:29:54.395Z",
+              "atSource": "FINISHED_AT",
+              "reasonCode": "SUCCEEDED"
+            },
+            "unsettledEffect": {
+              "present": true,
+              "code": null,
+              "source": "STEP",
+              "reasonText": "原 1 个步骤结果尚未结算，读取不会自动核销",
+              "resolvedByRead": false
+            },
+            "stopRequest": {
+              "state": "NONE",
+              "requestedAt": null,
+              "settled": true,
+              "note": "原委托已完成；停止请求不再具有执行含义"
+            }
+          }
+        },
+        "readback": {
+          "present": true,
+          "code": null,
+          "source": "STEP",
+          "reasonText": "原 1 个步骤结果尚未结算，读取不会自动核销",
+          "resolvedByRead": false
+        }
+      }
+    },
+    {
+      "id": "PST-TERM-16",
+      "question": "feature 关闭时保持 enabled=false（与旧行为一致）",
+      "verdict": "PASS",
+      "observed": {
+        "enabled": false,
+        "totalActive": 0,
+        "items": []
+      }
+    }
+  ],
+  "summary": {
+    "total": 23,
+    "pass": 23,
+    "fail": 0,
+    "notRun": 0
+  }
+}

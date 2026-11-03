@@ -1,0 +1,2577 @@
+{
+  "generatedAt": "2026-11-03T07:46:02.103Z",
+  "purpose": "Track A 第二批三项交付的独立 POST 验收（A-新0 第二步）",
+  "role": "post-checkpoint-verifier（独立验收；未改 lib/tests/app/components/harmonyos/prisma、未 git add/commit/push）",
+  "checkpoint": "4b696141435825a3582816e8e449c0e0cf013f29",
+  "branch": "codex/final-a-mission-packet",
+  "commits": {
+    "final": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+    "terminal": "e7c1da88c15e1516032e2514dd60b7e0b006fb9d",
+    "evidenceWindow": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+    "requires": "479326131bedb385b0d89f710d960708ae7e9461"
+  },
+  "environment": {
+    "repo": "D:\\Projects\\hongmen-final-a-mission-packet",
+    "branch": "codex/final-a-mission-packet",
+    "head": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+    "node": "v24.16.0",
+    "npm": "11.15.0",
+    "shadow": "%TEMP%\\pm-post-verify-final-3ec63e62",
+    "shadowMethod": "git archive <SHA> -- lib app components prisma public tests scripts package.json ... ; tar -xf; 复制 lib/generated/prisma; node_modules junction 到仓库",
+    "isolation": "每个 fixture 各自 mkdtemp 临时 SQLite + migrations 重放；LLM_MODE=mock；无网络/付费调用；不读 .env"
+  },
+  "runs": [
+    {
+      "exit": 0,
+      "command": "(4b69614 shadow) npx.cmd tsx verify-fixtures/baseline-terminal.ts post-runs/baseline-recompute-terminal.json",
+      "name": "baseline-recompute-terminal",
+      "log": "post-logs/baseline-recompute-terminal.log"
+    },
+    {
+      "exit": 0,
+      "command": "(4b69614 shadow) npx.cmd tsx verify-fixtures/baseline-evidence-window.ts post-runs/baseline-recompute-evidence-window.json",
+      "name": "baseline-recompute-evidence-window",
+      "log": "post-logs/baseline-recompute-evidence-window.log"
+    },
+    {
+      "exit": 0,
+      "command": "(4b69614 shadow) npx.cmd tsx verify-fixtures/baseline-requires.ts post-runs/baseline-recompute-requires.json",
+      "name": "baseline-recompute-requires",
+      "log": "post-logs/baseline-recompute-requires.log"
+    },
+    {
+      "exit": 0,
+      "command": "(4b69614 shadow) npx.cmd tsx verify-fixtures/baseline-readback-instrument.ts post-runs/baseline-recompute-readback-instrument.json",
+      "name": "baseline-recompute-readback-instrument",
+      "log": "post-logs/baseline-recompute-readback-instrument.log"
+    },
+    {
+      "exit": 0,
+      "command": "(3ec63e62 shadow) npm.cmd exec tsc -- --noEmit",
+      "name": "after-tsc-shadow",
+      "log": "post-logs/after-tsc-shadow.log"
+    },
+    {
+      "exit": 0,
+      "command": "(3ec63e62 shadow) npx.cmd tsx verify-fixtures/post-terminal-verify.ts post-runs/after-post-terminal.json",
+      "name": "after-post-terminal",
+      "log": "post-logs/after-post-terminal.log"
+    },
+    {
+      "exit": 0,
+      "command": "(3ec63e62 shadow) npx.cmd tsx verify-fixtures/post-evidence-window-verify.ts post-runs/after-post-evidence-window.json",
+      "name": "after-post-evidence-window",
+      "log": "post-logs/after-post-evidence-window.log"
+    },
+    {
+      "exit": 0,
+      "command": "(3ec63e62 shadow) npx.cmd tsx verify-fixtures/post-requires-verify.ts post-runs/after-post-requires.json",
+      "name": "after-post-requires",
+      "log": "post-logs/after-post-requires.log"
+    },
+    {
+      "exit": 0,
+      "command": "(3ec63e62 shadow) npx.cmd tsx verify-fixtures/baseline-readback-instrument.ts post-runs/after-post-perf-run1.json",
+      "name": "after-post-perf-run1",
+      "log": "post-logs/after-post-perf-run1.log"
+    },
+    {
+      "exit": 0,
+      "command": "(3ec63e62 shadow) npx.cmd tsx verify-fixtures/baseline-readback-instrument.ts post-runs/after-post-perf-run2.json",
+      "name": "after-post-perf-run2",
+      "log": "post-logs/after-post-perf-run2.log"
+    },
+    {
+      "exit": 0,
+      "command": "(3ec63e62 shadow) npx.cmd tsx scripts/final-a/a1-contract-samples.ts",
+      "name": "after-a1-contract-samples",
+      "log": "post-logs/after-a1-contract-samples.log"
+    },
+    {
+      "exit": 0,
+      "command": "npx.cmd tsx verify-fixtures/compare-baseline.ts verify/",
+      "name": "baseline-recompute-check",
+      "log": "post-logs/baseline-recompute-check.log"
+    },
+    {
+      "exit": 0,
+      "command": "pwsh -File verify/git-boundary.ps1 -Checkpoint 4b69614 -FinalSha 3ec63e62",
+      "name": "git-boundary-final",
+      "log": "post-logs/git-boundary.log"
+    },
+    {
+      "exit": 0,
+      "command": "pwsh -File verify/git-boundary.ps1 -FinalSha 4793261 -SkipHeadCheck",
+      "name": "git-boundary-4793261",
+      "log": "post-logs/git-boundary-479326131bed.log"
+    },
+    {
+      "exit": 0,
+      "command": "pwsh -File verify/git-boundary.ps1 -FinalSha e7c1da8 -SkipHeadCheck",
+      "name": "git-boundary-e7c1da8",
+      "log": "post-logs/git-boundary-e7c1da88c15e.log"
+    },
+    {
+      "exit": 0,
+      "command": "pwsh -File verify/git-boundary.ps1 -FinalSha 3ec63e6 -SkipHeadCheck",
+      "name": "git-boundary-3ec63e6",
+      "log": "post-logs/git-boundary-3ec63e62470d.log"
+    },
+    {
+      "name": "aggregate",
+      "command": "npx.cmd tsx verify-fixtures/build-post-verification.ts verify/ verify/a-post-checkpoint-verification.json",
+      "exit": 0,
+      "log": "post-logs/aggregate.log",
+      "at": "2026-11-03T15:45:34.0365062+08:00"
+    }
+  ],
+  "sections": [
+    {
+      "id": "terminal-entry",
+      "title": "终态（SUCCEEDED/CANCELLED）+ 未结算 UNKNOWN 从现有摘要入口找回（identity/version、旧客户端、非 Owner、零变更、截断诚实）",
+      "verdict": "PASS",
+      "evidence": [
+        "post-runs/after-post-terminal.json",
+        "post-logs/after-post-terminal.exit",
+        "baseline-a-terminal.json"
+      ],
+      "checks": [
+        {
+          "id": "PST-TERM-01",
+          "question": "missionWorkspaceSummary 暴露 terminalUnsettled 窗口字段",
+          "verdict": "PASS",
+          "observed": {
+            "keys": [
+              "enabled",
+              "totalActive",
+              "items",
+              "terminalUnsettled"
+            ],
+            "windowKeys": [
+              "items",
+              "inspected",
+              "limit",
+              "truncated",
+              "note",
+              "identityNote"
+            ]
+          }
+        },
+        {
+          "id": "PST-TERM-02",
+          "question": "SUCCEEDED+EXTERNAL_UNKNOWN 能在现有摘要找回",
+          "verdict": "PASS",
+          "observed": {
+            "id": "cmw0db0lu0004yw8okvg8xt6y",
+            "goal": "POST 复验：成功但外部结果未知",
+            "status": "SUCCEEDED",
+            "version": 1,
+            "attention": "原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准",
+            "workState": {
+              "phase": "COMPLETED",
+              "nextActor": "USER",
+              "requiresUser": true,
+              "reasonCode": "SUCCEEDED",
+              "reasonText": "原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准",
+              "actionLabel": "查看原结果并核对未知调用",
+              "originalRef": {
+                "kind": "MISSION",
+                "id": "cmw0db0lu0004yw8okvg8xt6y",
+                "version": 1
+              },
+              "exactQuestionRef": null,
+              "exactApprovalRef": null,
+              "checkedAt": "2026-11-03T07:29:53.998Z",
+              "observedAt": null,
+              "nextCheckAt": null,
+              "nextBoundary": null,
+              "freshness": "FRESH",
+              "terminal": {
+                "status": "SUCCEEDED",
+                "at": "2026-11-03T07:29:53.909Z",
+                "atSource": "FINISHED_AT",
+                "reasonCode": "SUCCEEDED"
+              },
+              "unsettledEffect": {
+                "present": true,
+                "code": "EXTERNAL_UNKNOWN",
+                "source": "LAST_ERROR",
+                "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+                "resolvedByRead": false
+              },
+              "stopRequest": {
+                "state": "NONE",
+                "requestedAt": null,
+                "settled": true,
+                "note": "原委托已完成；停止请求不再具有执行含义"
+              }
+            },
+            "activity": null,
+            "activityAt": null,
+            "outputRevision": null
+          }
+        },
+        {
+          "id": "PST-TERM-03",
+          "question": "CANCELLED+EXTERNAL_UNKNOWN 能在现有摘要找回",
+          "verdict": "PASS",
+          "observed": {
+            "id": "cmw0db0mo0006yw8ogs76dfca",
+            "goal": "POST 复验：取消但外部结果未知",
+            "status": "CANCELLED",
+            "version": 1,
+            "attention": "原委托已取消，历史结果保留；仍有未知调用结果未结算，不能视为成功完成",
+            "workState": {
+              "phase": "COMPLETED",
+              "nextActor": "USER",
+              "requiresUser": true,
+              "reasonCode": "CANCELLED",
+              "reasonText": "原委托已取消，历史结果保留；仍有未知调用结果未结算，不能视为成功完成",
+              "actionLabel": "查看取消前原结果并核对未知调用",
+              "originalRef": {
+                "kind": "MISSION",
+                "id": "cmw0db0mo0006yw8ogs76dfca",
+                "version": 1
+              },
+              "exactQuestionRef": null,
+              "exactApprovalRef": null,
+              "checkedAt": "2026-11-03T07:29:53.998Z",
+              "observedAt": null,
+              "nextCheckAt": null,
+              "nextBoundary": null,
+              "freshness": "FRESH",
+              "terminal": {
+                "status": "CANCELLED",
+                "at": "2026-11-03T07:29:53.911Z",
+                "atSource": "FINISHED_AT",
+                "reasonCode": "CANCELLED"
+              },
+              "unsettledEffect": {
+                "present": true,
+                "code": "EXTERNAL_UNKNOWN",
+                "source": "LAST_ERROR",
+                "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+                "resolvedByRead": false
+              },
+              "stopRequest": {
+                "state": "CANCEL_SETTLED",
+                "requestedAt": "2026-11-03T07:29:53.911Z",
+                "settled": true,
+                "note": "取消请求已结算：原委托已取消，历史结果保留，不能视为成功完成"
+              }
+            },
+            "activity": null,
+            "activityAt": null,
+            "outputRevision": null
+          }
+        },
+        {
+          "id": "PST-TERM-04",
+          "question": "普通终态（无未结算 UNKNOWN）不误入 terminalUnsettled",
+          "verdict": "PASS",
+          "observed": {
+            "found": false
+          }
+        },
+        {
+          "id": "PST-TERM-05",
+          "question": "摘要条目与 detail/readback 同 id/version/status",
+          "verdict": "PASS",
+          "observed": {
+            "summaryItem": {
+              "id": "cmw0db0lu0004yw8okvg8xt6y",
+              "version": 1,
+              "status": "SUCCEEDED"
+            },
+            "readback": {
+              "version": 1,
+              "status": "SUCCEEDED"
+            },
+            "detail": {
+              "version": 1,
+              "status": "SUCCEEDED"
+            }
+          }
+        },
+        {
+          "id": "PST-TERM-06",
+          "question": "摘要 workState 并列 terminal+unsettledEffect 且 requiresUser=true（与 readback 一致）",
+          "verdict": "PASS",
+          "observed": {
+            "terminal": {
+              "status": "SUCCEEDED",
+              "at": "2026-11-03T07:29:53.909Z",
+              "atSource": "FINISHED_AT",
+              "reasonCode": "SUCCEEDED"
+            },
+            "unsettledEffect": {
+              "present": true,
+              "code": "EXTERNAL_UNKNOWN",
+              "source": "LAST_ERROR",
+              "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+              "resolvedByRead": false
+            },
+            "requiresUser": true
+          }
+        },
+        {
+          "id": "PST-TERM-07",
+          "question": "摘要 route 与 service 一致（同窗口、能找回）",
+          "verdict": "PASS",
+          "observed": {
+            "status": 200,
+            "seats": true
+          }
+        },
+        {
+          "id": "PST-TERM-08",
+          "question": "旧客户端字段仍存在且语义不变（enabled/totalActive/items 及旧 item 键）",
+          "verdict": "PASS",
+          "observed": {
+            "keys": [
+              "enabled",
+              "totalActive",
+              "items",
+              "terminalUnsettled"
+            ],
+            "itemKeys": [
+              "id",
+              "goal",
+              "status",
+              "version",
+              "attention",
+              "workState",
+              "activity",
+              "activityAt",
+              "outputRevision"
+            ]
+          }
+        },
+        {
+          "id": "PST-TERM-09",
+          "question": "totalActive 只计活跃任务、不计终态（与 BEFORE 语义一致）",
+          "verdict": "PASS",
+          "observed": {
+            "totalActive": 1,
+            "itemsIds": [
+              "cmw0db0nd000ayw8oyt806hsa"
+            ]
+          }
+        },
+        {
+          "id": "PST-TERM-10",
+          "question": "读摘要/详情/读回前后数据库零变更（含终态 version/updatedAt/生命周期）",
+          "verdict": "PASS",
+          "observed": {
+            "identical": true
+          }
+        },
+        {
+          "id": "PST-TERM-22",
+          "question": "summary/readback GET 响应保持 no-store（不缓存终态窗口）",
+          "verdict": "PASS",
+          "observed": {
+            "summary": "no-store",
+            "readback": "no-store"
+          }
+        },
+        {
+          "id": "PST-TERM-11",
+          "question": "非 Owner 读摘要服务/路由 404，读回 404",
+          "verdict": "PASS",
+          "observed": {
+            "serviceCode": "MISSION_NOT_FOUND",
+            "serviceStatus": 404,
+            "routeStatus": 404,
+            "routeCode": "MISSION_NOT_FOUND",
+            "readbackStatus": 404,
+            "readbackCode": "MISSION_NOT_FOUND"
+          }
+        },
+        {
+          "id": "PST-TERM-17",
+          "question": "GlobalFocus（Focus）能找回终态+未结算 UNKNOWN 并保留 terminal+unsettledEffect/requiresUser",
+          "verdict": "PASS",
+          "observed": {
+            "serviceFound": true,
+            "routeFound": true,
+            "counts": {
+              "waiting": 2,
+              "running": 1,
+              "actions": 0,
+              "reminders": 0
+            },
+            "coverage": {
+              "complete": true,
+              "consideredProjectIds": [
+                "cmw0db0kz0001yw8ocxoxnd2p"
+              ],
+              "countsAreBounded": true,
+              "terminalUnsettled": {
+                "inspected": 3,
+                "limit": 6,
+                "truncated": false,
+                "note": "非终态待回应窗口与终态 unsettled 窗口分别有界：终态窗口按最后修订时间只检查当前授权范围内最近 6 条已结束（成功/取消）委托；窗口内未找到不等于全库没有，更早或跨项目的终态委托请从原项目/委托列表核对。终态条目只提示核对，读取不会结算 UNKNOWN。"
+              }
+            },
+            "itemSucc": {
+              "id": "cmw0db0lu0004yw8okvg8xt6y",
+              "status": "SUCCEEDED",
+              "workState": {
+                "terminal": {
+                  "status": "SUCCEEDED",
+                  "at": "2026-11-03T07:29:53.909Z",
+                  "atSource": "FINISHED_AT",
+                  "reasonCode": "SUCCEEDED"
+                },
+                "unsettledEffect": {
+                  "present": true,
+                  "code": "EXTERNAL_UNKNOWN",
+                  "source": "LAST_ERROR",
+                  "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+                  "resolvedByRead": false
+                },
+                "requiresUser": true
+              }
+            }
+          }
+        },
+        {
+          "id": "PST-TERM-18",
+          "question": "Focus route 与 service 一致（waiting 含终态项、counts.waiting 计入）",
+          "verdict": "PASS",
+          "observed": {
+            "status": 200,
+            "counts": {
+              "waiting": 2,
+              "running": 1,
+              "actions": 0,
+              "reminders": 0
+            }
+          }
+        },
+        {
+          "id": "PST-TERM-23",
+          "question": "Focus GET 响应保持 no-store",
+          "verdict": "PASS",
+          "observed": {
+            "cacheControl": "private, no-store"
+          }
+        },
+        {
+          "id": "PST-TERM-19",
+          "question": "Focus coverage.terminalUnsettled 覆盖说明诚实（inspected/limit/truncated/note）",
+          "verdict": "PASS",
+          "observed": {
+            "inspected": 3,
+            "limit": 6,
+            "truncated": false,
+            "note": "非终态待回应窗口与终态 unsettled 窗口分别有界：终态窗口按最后修订时间只检查当前授权范围内最近 6 条已结束（成功/取消）委托；窗口内未找到不等于全库没有，更早或跨项目的终态委托请从原项目/委托列表核对。终态条目只提示核对，读取不会结算 UNKNOWN。"
+          }
+        },
+        {
+          "id": "PST-TERM-20",
+          "question": "Focus 旧客户端字段仍存在、waiting 条目旧键不变（增量并入 + 可选 coverage 字段）",
+          "verdict": "PASS",
+          "observed": {
+            "keys": [
+              "coverage",
+              "discussions",
+              "primaryContext",
+              "counts",
+              "nextDeadline",
+              "schemaVersion",
+              "missionEnabled",
+              "archived",
+              "hasMore",
+              "waiting",
+              "running",
+              "actions",
+              "reminders",
+              "records"
+            ],
+            "itemKeys": [
+              "id",
+              "projectId",
+              "projectTitle",
+              "title",
+              "detail",
+              "status",
+              "activity",
+              "activityAt",
+              "recordedAt",
+              "dueAt",
+              "projectDeadline",
+              "recordFields",
+              "workState",
+              "actionLabel"
+            ]
+          }
+        },
+        {
+          "id": "PST-TERM-12",
+          "question": "有界窗口：items ≤ limit 且 truncated 诚实",
+          "verdict": "PASS",
+          "observed": {
+            "items": 6,
+            "inspected": 7,
+            "limit": 6,
+            "truncated": true
+          }
+        },
+        {
+          "id": "PST-TERM-13",
+          "question": "截断说明明确“窗口内未找到≠全库没有”",
+          "verdict": "PASS",
+          "observed": "仅检查了本项目最近 7 条终态委托（按最后修订时间），窗口已截断：更早的终态委托未检查，窗口内未找到不等于全库没有，请从原委托列表/详情核对。"
+        },
+        {
+          "id": "PST-TERM-14",
+          "question": "终态生命周期不被读取改变（仍为 SUCCEEDED/CANCELLED，无新增状态）",
+          "verdict": "PASS",
+          "observed": [
+            "SUCCEEDED",
+            "CANCELLED",
+            "SUCCEEDED",
+            "CANCELLED",
+            "SUCCEEDED",
+            "CANCELLED",
+            "SUCCEEDED",
+            "CANCELLED"
+          ]
+        },
+        {
+          "id": "PST-TERM-21",
+          "question": "Focus 终态窗口同样有界且截断诚实（inspected>limit、truncated=true、hasMore=true、waiting 不超上限）",
+          "verdict": "PASS",
+          "observed": {
+            "coverage": {
+              "complete": false,
+              "consideredProjectIds": [],
+              "countsAreBounded": true,
+              "terminalUnsettled": {
+                "inspected": 7,
+                "limit": 6,
+                "truncated": true,
+                "note": "非终态待回应窗口与终态 unsettled 窗口分别有界：终态窗口按最后修订时间只检查当前授权范围内最近 6 条已结束（成功/取消）委托；窗口内未找到不等于全库没有，更早或跨项目的终态委托请从原项目/委托列表核对。终态条目只提示核对，读取不会结算 UNKNOWN。"
+              }
+            },
+            "counts": {
+              "waiting": 7,
+              "running": 0,
+              "actions": 0,
+              "reminders": 0
+            },
+            "waitingLength": 6,
+            "hasMore": true
+          }
+        },
+        {
+          "id": "PST-TERM-15",
+          "question": "终态 + 原 Step UNKNOWN（无 lastErrorJson）也能从摘要找回",
+          "verdict": "PASS",
+          "observed": {
+            "item": {
+              "id": "cmw0db0zo0012yw8oe26pfsjb",
+              "workState": {
+                "phase": "COMPLETED",
+                "nextActor": "USER",
+                "requiresUser": true,
+                "reasonCode": "SUCCEEDED",
+                "reasonText": "原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准",
+                "actionLabel": "查看原结果并核对未知调用",
+                "originalRef": {
+                  "kind": "MISSION",
+                  "id": "cmw0db0zo0012yw8oe26pfsjb",
+                  "version": 1
+                },
+                "exactQuestionRef": null,
+                "exactApprovalRef": null,
+                "checkedAt": "2026-11-03T07:29:54.421Z",
+                "observedAt": null,
+                "nextCheckAt": null,
+                "nextBoundary": null,
+                "freshness": "FRESH",
+                "terminal": {
+                  "status": "SUCCEEDED",
+                  "at": "2026-11-03T07:29:54.395Z",
+                  "atSource": "FINISHED_AT",
+                  "reasonCode": "SUCCEEDED"
+                },
+                "unsettledEffect": {
+                  "present": true,
+                  "code": null,
+                  "source": "STEP",
+                  "reasonText": "原 1 个步骤结果尚未结算，读取不会自动核销",
+                  "resolvedByRead": false
+                },
+                "stopRequest": {
+                  "state": "NONE",
+                  "requestedAt": null,
+                  "settled": true,
+                  "note": "原委托已完成；停止请求不再具有执行含义"
+                }
+              }
+            },
+            "readback": {
+              "present": true,
+              "code": null,
+              "source": "STEP",
+              "reasonText": "原 1 个步骤结果尚未结算，读取不会自动核销",
+              "resolvedByRead": false
+            }
+          }
+        },
+        {
+          "id": "PST-TERM-16",
+          "question": "feature 关闭时保持 enabled=false（与旧行为一致）",
+          "verdict": "PASS",
+          "observed": {
+            "enabled": false,
+            "totalActive": 0,
+            "items": []
+          }
+        }
+      ],
+      "totals": {
+        "total": 23,
+        "pass": 23,
+        "fail": 0
+      },
+      "detail": {
+        "afterSummary": {
+          "total": 23,
+          "pass": 23,
+          "fail": 0,
+          "notRun": 0
+        },
+        "afterExit": 0,
+        "beforeSummary": {
+          "total": 16,
+          "pass": 7,
+          "fail": 9,
+          "notRun": 0
+        },
+        "beforeExit": 1,
+        "globalFocusResidual": {
+          "serviceFound": true,
+          "routeFound": true,
+          "counts": {
+            "waiting": 2,
+            "running": 1,
+            "actions": 0,
+            "reminders": 0
+          },
+          "coverage": {
+            "complete": true,
+            "consideredProjectIds": [
+              "cmw0db0kz0001yw8ocxoxnd2p"
+            ],
+            "countsAreBounded": true,
+            "terminalUnsettled": {
+              "inspected": 3,
+              "limit": 6,
+              "truncated": false,
+              "note": "非终态待回应窗口与终态 unsettled 窗口分别有界：终态窗口按最后修订时间只检查当前授权范围内最近 6 条已结束（成功/取消）委托；窗口内未找到不等于全库没有，更早或跨项目的终态委托请从原项目/委托列表核对。终态条目只提示核对，读取不会结算 UNKNOWN。"
+            }
+          },
+          "itemSucc": {
+            "id": "cmw0db0lu0004yw8okvg8xt6y",
+            "status": "SUCCEEDED",
+            "workState": {
+              "terminal": {
+                "status": "SUCCEEDED",
+                "at": "2026-11-03T07:29:53.909Z",
+                "atSource": "FINISHED_AT",
+                "reasonCode": "SUCCEEDED"
+              },
+              "unsettledEffect": {
+                "present": true,
+                "code": "EXTERNAL_UNKNOWN",
+                "source": "LAST_ERROR",
+                "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+                "resolvedByRead": false
+              },
+              "requiresUser": true
+            }
+          }
+        }
+      },
+      "residual": [
+        "终态窗口有界：missionWorkspaceSummary 只检查本项目最近 7 条终态（limit=6+1），GlobalFocus 只检查当前授权范围内最近 7 条；窗口内未找到≠全库没有，更早/跨项目终态委托仍应从原项目或委托列表核对。",
+        "终态条目只提示核对，不结算 UNKNOWN、不改变终态/版本/updatedAt；不构成新的执行资格。"
+      ]
+    },
+    {
+      "id": "evidence-window",
+      "title": "证据审查有界窗口：先按选中原问题筛再限额（命中 ≤3、截断真、无 question 不回退、读零写入）",
+      "verdict": "PASS",
+      "evidence": [
+        "post-runs/after-post-evidence-window.json",
+        "post-logs/after-post-evidence-window.exit",
+        "baseline-a-evidence-window.json"
+      ],
+      "checks": [
+        {
+          "id": "PST-EVW-01",
+          "question": "21 条更新其他问题审查后，目标问题审查仍被命中",
+          "verdict": "PASS",
+          "observed": {
+            "itemQuestionIds": [
+              "cmw0db5k00005co8ovr6y63c7"
+            ],
+            "targetQuestionId": "cmw0db5k00005co8ovr6y63c7"
+          }
+        },
+        {
+          "id": "PST-EVW-02",
+          "question": "命中事件就是目标审查事件（身份可核）",
+          "verdict": "PASS",
+          "observed": {
+            "itemEventIds": [
+              "cmw0db5k40006co8oyj6tdp7m"
+            ],
+            "targetEventId": "cmw0db5k40006co8oyj6tdp7m"
+          }
+        },
+        {
+          "id": "PST-EVW-03",
+          "question": "返回条数 ≤3",
+          "verdict": "PASS",
+          "observed": {
+            "itemCount": 1
+          }
+        },
+        {
+          "id": "PST-EVW-04",
+          "question": "packet.basis.evidenceReviews 与 legacy 同命中",
+          "verdict": "PASS",
+          "observed": {
+            "itemCount": 1,
+            "truncated": false,
+            "itemEventIds": [
+              "cmw0db5k40006co8oyj6tdp7m"
+            ]
+          }
+        },
+        {
+          "id": "PST-EVW-05",
+          "question": "该问题自身窗口未溢出时 truncated=false（不虚报截断）",
+          "verdict": "PASS",
+          "observed": {
+            "truncated": false,
+            "itemCount": 1
+          }
+        },
+        {
+          "id": "PST-EVW-06",
+          "question": "读回零写入",
+          "verdict": "PASS",
+          "observed": {
+            "identical": true
+          }
+        },
+        {
+          "id": "PST-EVW-07",
+          "question": "21 条边界场景目标审查仍被命中且 ≤3",
+          "verdict": "PASS",
+          "observed": {
+            "itemEventIds": [
+              "cmw0db5nb000yco8o3fk7oojl"
+            ],
+            "itemCount": 1
+          }
+        },
+        {
+          "id": "PST-EVW-08",
+          "question": "同问题 22 条审查：只返回最近 3 条且 truncated=true",
+          "verdict": "PASS",
+          "observed": {
+            "itemEventIds": [
+              "cmw0db5qj002aco8ol84l8djh",
+              "cmw0db5qh0029co8o5jkbgq2k",
+              "cmw0db5qf0028co8o3hcwwua9"
+            ],
+            "newestThreeIds": [
+              "cmw0db5qj002aco8ol84l8djh",
+              "cmw0db5qh0029co8o5jkbgq2k",
+              "cmw0db5qf0028co8o3hcwwua9"
+            ],
+            "truncated": true
+          }
+        },
+        {
+          "id": "PST-EVW-09",
+          "question": "窗口/展示上限与 inspected 计数可核（windowLimit=20, displayLimit=3, inspected≥21）",
+          "verdict": "PASS",
+          "observed": {
+            "windowLimit": 20,
+            "displayLimit": 3,
+            "inspected": 21
+          }
+        },
+        {
+          "id": "PST-EVW-10",
+          "question": "未选中问题时不无中生有按问题过滤（questionFiltered=false / questionId=null）",
+          "verdict": "PASS",
+          "observed": {
+            "questionFiltered": false,
+            "questionId": null,
+            "note": "未选中原问题，未按问题过滤；窗口只取最近 20 条 EVIDENCE_FIT_REVIEWED，未找到不代表从未发生。"
+          }
+        },
+        {
+          "id": "PST-EVW-11",
+          "question": "未选中问题不回退：保持旧窗口语义（items 为空、truncated 按 21 条窗口诚实=true），不伪造问题命中",
+          "verdict": "PASS",
+          "observed": {
+            "itemCount": 0,
+            "truncated": true,
+            "packetItemCount": 0,
+            "expectedLatest3": [
+              "cmw0db5sn0034co8o0asuwtp0",
+              "cmw0db5sl0033co8oexdkldxt",
+              "cmw0db5sj0032co8o7sxrtm4z"
+            ]
+          }
+        },
+        {
+          "id": "PST-EVW-12",
+          "question": "未选中问题的读取零写入",
+          "verdict": "PASS",
+          "observed": {
+            "identical": true
+          }
+        },
+        {
+          "id": "PST-EVW-13",
+          "question": "无显式 questionId 时按 waitStateJson.questionId 先筛后限并命中目标审查",
+          "verdict": "PASS",
+          "observed": {
+            "itemEventIds": [
+              "cmw0db5tj003bco8o84i26tq2"
+            ],
+            "questionId": "cmw0db5ti003aco8ony2wr3s2",
+            "itemCount": 1
+          }
+        },
+        {
+          "id": "PST-EVW-14",
+          "question": "对照：单条目标审查命中且 truncated=false",
+          "verdict": "PASS",
+          "observed": {
+            "itemCount": 1,
+            "truncated": false,
+            "itemQuestionIds": [
+              "cmw0db5vo0042co8oadr0yxko"
+            ],
+            "itemEventIds": [
+              "cmw0db5vq0043co8o28v9dkxn"
+            ],
+            "questionFiltered": true,
+            "questionId": "cmw0db5vo0042co8oadr0yxko",
+            "windowLimit": 20,
+            "displayLimit": 3,
+            "inspected": 1,
+            "note": "已按选中原问题先过滤 EVIDENCE_FIT_REVIEWED 再取最近 20 条窗口（最多展示 3 条）；truncated 只表示该问题窗口溢出，未命中只表示该问题在窗口内没有审查记录。"
+          }
+        }
+      ],
+      "totals": {
+        "total": 14,
+        "pass": 14,
+        "fail": 0
+      },
+      "detail": {
+        "afterSummary": {
+          "total": 14,
+          "pass": 14,
+          "fail": 0,
+          "notRun": 0
+        },
+        "afterExit": 0,
+        "beforeSummary": {
+          "total": 14,
+          "pass": 5,
+          "fail": 9,
+          "notRun": 0
+        },
+        "beforeExit": 1
+      }
+    },
+    {
+      "id": "requires",
+      "title": "primaryAction.requires：真实端点接受/拒绝矩阵、401/404、真实 409 错误码、requiredSourceRevisions 非请求字段与服务端重导出",
+      "verdict": "PASS",
+      "evidence": [
+        "post-runs/after-post-requires.json",
+        "post-logs/after-post-requires.exit",
+        "baseline-a-requires.json"
+      ],
+      "checks": [
+        {
+          "id": "PST-REQ-01",
+          "question": "12 个端点未认证请求真实返回 401 UNAUTHORIZED",
+          "verdict": "PASS",
+          "observed": [
+            {
+              "endpoint": "input",
+              "status": 401,
+              "errorCode": "UNAUTHORIZED"
+            },
+            {
+              "endpoint": "approvals",
+              "status": 401,
+              "errorCode": "UNAUTHORIZED"
+            },
+            {
+              "endpoint": "pause",
+              "status": 401,
+              "errorCode": "UNAUTHORIZED"
+            },
+            {
+              "endpoint": "cancel",
+              "status": 401,
+              "errorCode": "UNAUTHORIZED"
+            },
+            {
+              "endpoint": "resume",
+              "status": 401,
+              "errorCode": "UNAUTHORIZED"
+            },
+            {
+              "endpoint": "replan",
+              "status": 401,
+              "errorCode": "UNAUTHORIZED"
+            },
+            {
+              "endpoint": "constraints",
+              "status": 401,
+              "errorCode": "UNAUTHORIZED"
+            },
+            {
+              "endpoint": "research-scope",
+              "status": 401,
+              "errorCode": "UNAUTHORIZED"
+            },
+            {
+              "endpoint": "continuation-policy",
+              "status": 401,
+              "errorCode": "UNAUTHORIZED"
+            },
+            {
+              "endpoint": "responsibility",
+              "status": 401,
+              "errorCode": "UNAUTHORIZED"
+            },
+            {
+              "endpoint": "continuations-confirm",
+              "status": 401,
+              "errorCode": "UNAUTHORIZED"
+            },
+            {
+              "endpoint": "artifact-confirm",
+              "status": 401,
+              "errorCode": "UNAUTHORIZED"
+            }
+          ]
+        },
+        {
+          "id": "PST-REQ-02",
+          "question": "12 个端点非 Owner 请求真实返回 404 MISSION_NOT_FOUND（不返回 403/数据）",
+          "verdict": "PASS",
+          "observed": [
+            {
+              "endpoint": "input",
+              "status": 404,
+              "errorCode": "MISSION_NOT_FOUND"
+            },
+            {
+              "endpoint": "approvals",
+              "status": 404,
+              "errorCode": "MISSION_NOT_FOUND"
+            },
+            {
+              "endpoint": "pause",
+              "status": 404,
+              "errorCode": "MISSION_NOT_FOUND"
+            },
+            {
+              "endpoint": "cancel",
+              "status": 404,
+              "errorCode": "MISSION_NOT_FOUND"
+            },
+            {
+              "endpoint": "resume",
+              "status": 404,
+              "errorCode": "MISSION_NOT_FOUND"
+            },
+            {
+              "endpoint": "replan",
+              "status": 404,
+              "errorCode": "MISSION_NOT_FOUND"
+            },
+            {
+              "endpoint": "constraints",
+              "status": 404,
+              "errorCode": "MISSION_NOT_FOUND"
+            },
+            {
+              "endpoint": "research-scope",
+              "status": 404,
+              "errorCode": "MISSION_NOT_FOUND"
+            },
+            {
+              "endpoint": "continuation-policy",
+              "status": 404,
+              "errorCode": "MISSION_NOT_FOUND"
+            },
+            {
+              "endpoint": "responsibility",
+              "status": 404,
+              "errorCode": "MISSION_NOT_FOUND"
+            },
+            {
+              "endpoint": "continuations-confirm",
+              "status": 404,
+              "errorCode": "MISSION_NOT_FOUND"
+            },
+            {
+              "endpoint": "artifact-confirm",
+              "status": 404,
+              "errorCode": "MISSION_NOT_FOUND"
+            }
+          ]
+        },
+        {
+          "id": "PST-REQ-03",
+          "question": "readback.primaryAction.requires 仍为 11 个约定字段（C/D 消费形状稳定）",
+          "verdict": "PASS",
+          "observed": {
+            "keys": [
+              "approvalId",
+              "boundaryAt",
+              "constraintsVersion",
+              "contextVersion",
+              "controlVersion",
+              "missionVersion",
+              "planRevision",
+              "proposalHash",
+              "questionId",
+              "requiredSourceRevisions",
+              "researchScopeVersion"
+            ],
+            "expected": [
+              "approvalId",
+              "boundaryAt",
+              "constraintsVersion",
+              "contextVersion",
+              "controlVersion",
+              "missionVersion",
+              "planRevision",
+              "proposalHash",
+              "questionId",
+              "requiredSourceRevisions",
+              "researchScopeVersion"
+            ],
+            "readOnly": true,
+            "submissionGuard": "SERVER_RECHECKS_OWNER_PROJECT_VERSION_SOURCE_PERMISSION_LEASE_BUDGET_IDEMPOTENCY"
+          }
+        },
+        {
+          "id": "PST-REQ-04",
+          "question": "requiredSourceRevisions 由服务端从原来源重导出且包含真实绑定来源",
+          "verdict": "PASS",
+          "observed": {
+            "derived": [
+              "capture:cmw0dbgej00hvis8o8uk8jg8e@d01e4b3aaf005b68f3bcdd76497a63b30dd1fb6920df8d0b01056e6ed50d222c"
+            ],
+            "expectedEntry": "capture:cmw0dbgej00hvis8o8uk8jg8e@d01e4b3aaf005b68f3bcdd76497a63b30dd1fb6920df8d0b01056e6ed50d222c",
+            "materialItems": 1,
+            "currentUse": [
+              "ALLOWED"
+            ]
+          }
+        },
+        {
+          "id": "PST-REQ-05",
+          "question": "requiredSourceRevisions 仍是入口拒绝的非请求字段（422 unrecognized_keys）",
+          "verdict": "PASS",
+          "observed": {
+            "status": 422,
+            "errorCode": "VALIDATION_ERROR",
+            "rejectedKeys": [
+              "requiredSourceRevisions"
+            ]
+          }
+        },
+        {
+          "id": "PST-REQ-06",
+          "question": "材料接续：旧来源 hash 被服务端重查拒绝 409 SOURCE_CHANGED",
+          "verdict": "PASS",
+          "observed": {
+            "status": 409,
+            "errorCode": "SOURCE_CHANGED"
+          }
+        },
+        {
+          "id": "PST-REQ-07",
+          "question": "input：等待回答的原问题身份按 waitState 绑定（waitState.questionId 被接受、更新观察事件 id 被拒绝 INPUT_CHANGED）",
+          "verdict": "PASS",
+          "observed": {
+            "waitStateQuestionAccepted": {
+              "status": 202,
+              "errorCode": null
+            },
+            "newerEventQuestion": {
+              "id": "cmw0dbgkg00idis8oosvtb16z",
+              "status": 409,
+              "errorCode": "INPUT_CHANGED"
+            }
+          }
+        },
+        {
+          "id": "PST-REQ-15",
+          "question": "跨问题：用另一个 QUESTION 事件 id 回答（且该事件更新）被 409 INPUT_CHANGED 拒绝",
+          "verdict": "PASS",
+          "observed": {
+            "question2EventId": "cmw0dbgln00iiis8oi3lyi18z",
+            "status": 409,
+            "errorCode": "INPUT_CHANGED"
+          }
+        },
+        {
+          "id": "PST-REQ-08",
+          "question": "GET readback 把 requires 字段当查询参数时 422 VALIDATION_ERROR（unrecognized_keys）",
+          "verdict": "PASS",
+          "observed": {
+            "status": 422,
+            "errorCode": "VALIDATION_ERROR",
+            "rejectedKeys": [
+              "missionVersion",
+              "boundaryAt"
+            ]
+          }
+        },
+        {
+          "id": "PST-REQ-12",
+          "question": "requires.controlVersion 与服务端 readMissionResponsibility 重算值一致（不是客户端可伪造字段）",
+          "verdict": "PASS",
+          "observed": {
+            "requiresControlVersion": "1c3fadfc5c5de0de08de31ff228c9b957d23065851272d40cc1723e8eac3359d",
+            "responsibilityControlVersion": "1c3fadfc5c5de0de08de31ff228c9b957d23065851272d40cc1723e8eac3359d"
+          }
+        },
+        {
+          "id": "PST-REQ-13",
+          "question": "requires.boundaryAt 等于服务端从原记录重算的最早有效边界",
+          "verdict": "PASS",
+          "observed": {
+            "requiresBoundaryAt": null,
+            "authorityNextBoundary": null
+          }
+        },
+        {
+          "id": "PST-REQ-14",
+          "question": "未来 deadline 被服务端重导出为 requires.boundaryAt（=deadline）且与 authority.nextBoundary 一致",
+          "verdict": "PASS",
+          "observed": {
+            "deadline": "2026-11-10T07:30:14.696Z",
+            "requiresBoundaryAt": "2026-11-10T07:30:14.696Z",
+            "authorityNextBoundary": "2026-11-10T07:30:14.696Z",
+            "permissionState": "WITHIN_TIME_BOUNDARY"
+          }
+        },
+        {
+          "id": "PST-REQ-09",
+          "question": "15 项真实 fence 负例全部返回预期 409 + 错误码",
+          "verdict": "PASS",
+          "observed": {
+            "fences": [
+              {
+                "label": "input 旧 expectedVersion（missionVersion 等价字段）",
+                "status": 409,
+                "errorCode": "MISSION_CHANGED"
+              },
+              {
+                "label": "input 错误 questionId",
+                "status": 409,
+                "errorCode": "INPUT_CHANGED"
+              },
+              {
+                "label": "approvals 错误 proposalHash",
+                "status": 409,
+                "errorCode": "APPROVAL_CHANGED"
+              },
+              {
+                "label": "approvals 错误 approvalId（路径）",
+                "status": 409,
+                "errorCode": "APPROVAL_CHANGED"
+              },
+              {
+                "label": "pause 旧 expectedVersion",
+                "status": 409,
+                "errorCode": "MISSION_CHANGED"
+              },
+              {
+                "label": "cancel 旧 expectedVersion",
+                "status": 409,
+                "errorCode": "MISSION_CHANGED"
+              },
+              {
+                "label": "resume 旧 expectedVersion",
+                "status": 409,
+                "errorCode": "MISSION_CHANGED"
+              },
+              {
+                "label": "resume 在非 PAUSED 状态",
+                "status": 409,
+                "errorCode": "MISSION_NOT_PAUSED"
+              },
+              {
+                "label": "replan 在非 WAITING_APPROVAL 状态",
+                "status": 409,
+                "errorCode": "INVALID_TRANSITION"
+              },
+              {
+                "label": "constraints 旧 expectedConstraintsVersion",
+                "status": 409,
+                "errorCode": "MISSION_CHANGED"
+              },
+              {
+                "label": "research-scope 旧 expectedScopeVersion",
+                "status": 409,
+                "errorCode": "MISSION_CHANGED"
+              },
+              {
+                "label": "continuation-policy 旧 expectedVersion",
+                "status": 409,
+                "errorCode": "MISSION_CHANGED"
+              },
+              {
+                "label": "responsibility 错误 expectedControlVersion（controlVersion 等价字段）",
+                "status": 409,
+                "errorCode": "MISSION_CHANGED"
+              },
+              {
+                "label": "continations-confirm 旧 expectedContextVersion",
+                "status": 409,
+                "errorCode": "ASSESSMENT_CHANGED"
+              },
+              {
+                "label": "artifact-confirm 旧 expectedContextVersion",
+                "status": 409,
+                "errorCode": "OUTPUT_CHANGED"
+              }
+            ],
+            "mismatch": []
+          }
+        },
+        {
+          "id": "PST-REQ-10",
+          "question": "12 端点对 requires 整包盲发仍全部 422（不得当请求字段透传）",
+          "verdict": "PASS",
+          "observed": [
+            {
+              "endpoint": "input",
+              "status": 422,
+              "rejected": 9
+            },
+            {
+              "endpoint": "approvals",
+              "status": 422,
+              "rejected": 9
+            },
+            {
+              "endpoint": "pause",
+              "status": 422,
+              "rejected": 9
+            },
+            {
+              "endpoint": "cancel",
+              "status": 422,
+              "rejected": 9
+            },
+            {
+              "endpoint": "resume",
+              "status": 422,
+              "rejected": 9
+            },
+            {
+              "endpoint": "replan",
+              "status": 422,
+              "rejected": 9
+            },
+            {
+              "endpoint": "constraints",
+              "status": 422,
+              "rejected": 11
+            },
+            {
+              "endpoint": "research-scope",
+              "status": 422,
+              "rejected": 11
+            },
+            {
+              "endpoint": "continuation-policy",
+              "status": 422,
+              "rejected": 11
+            },
+            {
+              "endpoint": "responsibility",
+              "status": 422,
+              "rejected": 11
+            },
+            {
+              "endpoint": "continuations-confirm",
+              "status": 422,
+              "rejected": 10
+            },
+            {
+              "endpoint": "artifact-confirm",
+              "status": 422,
+              "rejected": 11
+            }
+          ]
+        },
+        {
+          "id": "PST-REQ-11",
+          "question": "planRevision / requiredSourceRevisions / boundaryAt 在 12 端点仍全部为入口拒绝的非请求字段",
+          "verdict": "PASS",
+          "observed": {
+            "nonRequestRejectedEverywhere": [
+              {
+                "field": "planRevision",
+                "rejectedOn": 12
+              },
+              {
+                "field": "requiredSourceRevisions",
+                "rejectedOn": 12
+              },
+              {
+                "field": "boundaryAt",
+                "rejectedOn": 12
+              }
+            ],
+            "unexpected": []
+          }
+        }
+      ],
+      "totals": {
+        "total": 15,
+        "pass": 15,
+        "fail": 0
+      },
+      "detail": {
+        "afterExit": 0,
+        "matrixCells": 132,
+        "entryRejectedCells": 119,
+        "blindForwardAll422": true,
+        "beforeSummary": {
+          "total": 11,
+          "pass": 10,
+          "fail": 1,
+          "notRun": 0
+        },
+        "beforeExit": 1
+      }
+    },
+    {
+      "id": "performance",
+      "title": "readback 性能与只读契约：事务数=2、最多 2 次重读、SourcePolicy≤8、GET 零副作用、无跨请求缓存、BEFORE/AFTER 同一脚本可复算",
+      "verdict": "PASS",
+      "evidence": [
+        "post-runs/after-post-perf-run1.json",
+        "post-runs/after-post-perf-run2.json",
+        "baseline-a-readback-instrument.json",
+        "post-logs/after-post-perf-run1.exit",
+        "post-logs/after-post-perf-run2.exit"
+      ],
+      "checks": [
+        {
+          "id": "PST-PERF-01",
+          "question": "同一脚本两次复跑 AFTER：事务数/查询数/重试数一致（可复算）",
+          "verdict": "PASS",
+          "observed": {
+            "run1": {
+              "stableTransactions": [
+                2
+              ],
+              "stableQueries": [
+                88
+              ],
+              "retryOnceTransactions": 4,
+              "retryOnceRetries": 1,
+              "continuousTransactions": 6,
+              "continuousRetries": 2,
+              "materialUseItemsAtMost8": true,
+              "sourcePolicyChecks": 8,
+              "readbackZeroSideEffect": true,
+              "crossRequestCacheAbsent": true,
+              "noStoreHeader": true
+            },
+            "run2": {
+              "stableTransactions": [
+                2
+              ],
+              "stableQueries": [
+                88
+              ],
+              "retryOnceTransactions": 4,
+              "retryOnceRetries": 1,
+              "continuousTransactions": 6,
+              "continuousRetries": 2,
+              "materialUseItemsAtMost8": true,
+              "sourcePolicyChecks": 8,
+              "readbackZeroSideEffect": true,
+              "crossRequestCacheAbsent": true,
+              "noStoreHeader": true
+            }
+          }
+        },
+        {
+          "id": "PST-PERF-02",
+          "question": "稳定读回事务数恒为 2",
+          "verdict": "PASS",
+          "observed": {
+            "run1": [
+              2
+            ],
+            "run2": [
+              2
+            ]
+          }
+        },
+        {
+          "id": "PST-PERF-03",
+          "question": "最多 2 次重读（retryOnce=1、continuous=2）且连续推进以 VERSION_ADVANCED 收敛",
+          "verdict": "PASS",
+          "observed": {
+            "retryOnce": 1,
+            "continuous": 2,
+            "consistency": "VERSION_ADVANCED"
+          }
+        },
+        {
+          "id": "PST-PERF-04",
+          "question": "SourcePolicy 有界 ≤8（items=8/limit=8/sourceLimitReached=true；新 sourcePolicyChecks ≤ items）",
+          "verdict": "PASS",
+          "observed": {
+            "materialUseItemsAtMost8": true,
+            "sourcePolicyChecks": 8
+          }
+        },
+        {
+          "id": "PST-PERF-05",
+          "question": "GET/readback 零副作用（业务行、事件/步骤/输出计数、预算不变）",
+          "verdict": "PASS",
+          "observed": {
+            "run1": true,
+            "run2": true
+          }
+        },
+        {
+          "id": "PST-PERF-06",
+          "question": "无跨请求缓存（两次 GET 之间外部推进版本后第二次读到新版本且 readAt 不同）",
+          "verdict": "PASS",
+          "observed": {
+            "run1": true,
+            "run2": true
+          }
+        },
+        {
+          "id": "PST-PERF-07",
+          "question": "GET 响应 cache-control: no-store",
+          "verdict": "PASS",
+          "observed": {
+            "run1": true,
+            "run2": true
+          }
+        },
+        {
+          "id": "PST-PERF-08",
+          "question": "BEFORE/AFTER 基线数字可对照（BEFORE 已固定：事务 [2]、查询 [118]、retry 4/6）",
+          "verdict": "PASS",
+          "observed": {
+            "before": {
+              "stableTransactions": [
+                2
+              ],
+              "stableQueries": [
+                118
+              ],
+              "retryOnceTransactions": 4,
+              "retryOnceConsistency": "RETRIED",
+              "retryOnceRetries": 1,
+              "continuousTransactions": 6,
+              "continuousConsistency": "VERSION_ADVANCED",
+              "continuousRetries": 2,
+              "maxTwoRetriesRespected": true,
+              "materialUseItemsAtMost8": true,
+              "sourcePolicyChecks": null,
+              "sourcePolicyChecksAtMostItems": true,
+              "readbackZeroSideEffect": true,
+              "crossRequestCacheAbsent": true,
+              "noStoreHeader": true
+            },
+            "after": {
+              "stableTransactions": [
+                2
+              ],
+              "stableQueries": [
+                88
+              ],
+              "retryOnceTransactions": 4,
+              "retryOnceRetries": 1,
+              "continuousTransactions": 6,
+              "continuousRetries": 2,
+              "materialUseItemsAtMost8": true,
+              "sourcePolicyChecks": 8,
+              "readbackZeroSideEffect": true,
+              "crossRequestCacheAbsent": true,
+              "noStoreHeader": true
+            }
+          }
+        }
+      ],
+      "totals": {
+        "total": 8,
+        "pass": 8,
+        "fail": 0
+      },
+      "detail": {
+        "afterExitRun1": 0,
+        "afterExitRun2": 0,
+        "run1": {
+          "stableTransactions": [
+            2
+          ],
+          "stableQueries": [
+            88
+          ],
+          "retryOnceTransactions": 4,
+          "retryOnceRetries": 1,
+          "continuousTransactions": 6,
+          "continuousRetries": 2,
+          "materialUseItemsAtMost8": true,
+          "sourcePolicyChecks": 8,
+          "readbackZeroSideEffect": true,
+          "crossRequestCacheAbsent": true,
+          "noStoreHeader": true
+        },
+        "run2": {
+          "stableTransactions": [
+            2
+          ],
+          "stableQueries": [
+            88
+          ],
+          "retryOnceTransactions": 4,
+          "retryOnceRetries": 1,
+          "continuousTransactions": 6,
+          "continuousRetries": 2,
+          "materialUseItemsAtMost8": true,
+          "sourcePolicyChecks": 8,
+          "readbackZeroSideEffect": true,
+          "crossRequestCacheAbsent": true,
+          "noStoreHeader": true
+        },
+        "before": {
+          "stableTransactions": [
+            2
+          ],
+          "stableQueries": [
+            118
+          ],
+          "retryOnceTransactions": 4,
+          "retryOnceConsistency": "RETRIED",
+          "retryOnceRetries": 1,
+          "continuousTransactions": 6,
+          "continuousConsistency": "VERSION_ADVANCED",
+          "continuousRetries": 2,
+          "maxTwoRetriesRespected": true,
+          "materialUseItemsAtMost8": true,
+          "sourcePolicyChecks": null,
+          "sourcePolicyChecksAtMostItems": true,
+          "readbackZeroSideEffect": true,
+          "crossRequestCacheAbsent": true,
+          "noStoreHeader": true
+        },
+        "latencyBefore": {
+          "min": 35.45,
+          "median": 41.5,
+          "max": 88.54
+        },
+        "latencyAfterRun1": {
+          "min": 17.59,
+          "median": 24.03,
+          "max": 100.32
+        }
+      }
+    },
+    {
+      "id": "before-reproducibility",
+      "title": "BEFORE 基线数字可复现：同一脚本在 4b69614 干净 shadow 重跑，与先前记录的 BEFORE 基线一致",
+      "verdict": "PASS",
+      "evidence": [
+        "post-runs/baseline-recompute-check.json",
+        "post-runs/baseline-recompute-terminal.json",
+        "post-runs/baseline-recompute-evidence-window.json",
+        "post-runs/baseline-recompute-requires.json",
+        "post-runs/baseline-recompute-readback-instrument.json"
+      ],
+      "checks": [
+        {
+          "id": "RCP-TERM-01",
+          "question": "BEFORE 终态基线可复现：summary/focus 均找不到，detail/readback 可表达 terminal+unsettled",
+          "verdict": "PASS",
+          "observed": {
+            "before": {
+              "summaryCanFindSucceeded": false,
+              "summaryCanFindCancelled": false,
+              "focusCanFindSucceeded": false,
+              "focusCanFindCancelled": false,
+              "detailExpressesSucceededTerminal": true,
+              "detailExpressesCancelledTerminal": true,
+              "detailExpressesUnsettledSucceeded": true,
+              "detailExpressesUnsettledCancelled": true,
+              "readbackExpressesSucceededTerminal": true,
+              "readbackExpressesCancelledTerminal": true,
+              "readbackExpressesUnsettledSucceeded": true,
+              "readbackExpressesUnsettledCancelled": true,
+              "readbackPrimaryActionKinds": {
+                "succeeded": "CHECK_UNKNOWN_EFFECT",
+                "cancelled": "CHECK_UNKNOWN_EFFECT"
+              },
+              "readOnlyZeroChange": true,
+              "nonOwner404": true,
+              "conclusion": "入口缺口：missionWorkspaceSummary/GlobalFocus 只查非终态状态集，终态+未结算UNKNOWN任务完全不在摘要/Focus 结果中；但同一 workState 投影在 detail/readback 已能并列表达 terminal+unsettledEffect，故不是“状态不可表达”。"
+            },
+            "recompute": {
+              "summaryCanFindSucceeded": false,
+              "summaryCanFindCancelled": false,
+              "focusCanFindSucceeded": false,
+              "focusCanFindCancelled": false,
+              "detailExpressesSucceededTerminal": true,
+              "detailExpressesCancelledTerminal": true,
+              "detailExpressesUnsettledSucceeded": true,
+              "detailExpressesUnsettledCancelled": true,
+              "readbackExpressesSucceededTerminal": true,
+              "readbackExpressesCancelledTerminal": true,
+              "readbackExpressesUnsettledSucceeded": true,
+              "readbackExpressesUnsettledCancelled": true,
+              "readbackPrimaryActionKinds": {
+                "succeeded": "CHECK_UNKNOWN_EFFECT",
+                "cancelled": "CHECK_UNKNOWN_EFFECT"
+              },
+              "readOnlyZeroChange": true,
+              "nonOwner404": true,
+              "conclusion": "入口缺口：missionWorkspaceSummary/GlobalFocus 只查非终态状态集，终态+未结算UNKNOWN任务完全不在摘要/Focus 结果中；但同一 workState 投影在 detail/readback 已能并列表达 terminal+unsettledEffect，故不是“状态不可表达”。"
+            }
+          }
+        },
+        {
+          "id": "RCP-WIN-01",
+          "question": "BEFORE 证据窗口基线可复现：目标审查在库但被挤出（items=0/truncated=true），对照命中",
+          "verdict": "PASS",
+          "observed": {
+            "before": {
+              "targetReviewExistsInDb": true,
+              "evictedScenarioHit": false,
+              "evictedScenarioItemCount": 0,
+              "evictedScenarioTruncated": true,
+              "controlScenarioHit": true,
+              "boundary21ScenarioHit": false,
+              "readOnlyZeroChange": true
+            },
+            "recompute": {
+              "targetReviewExistsInDb": true,
+              "evictedScenarioHit": false,
+              "evictedScenarioItemCount": 0,
+              "evictedScenarioTruncated": true,
+              "controlScenarioHit": true,
+              "boundary21ScenarioHit": false,
+              "readOnlyZeroChange": true
+            }
+          }
+        },
+        {
+          "id": "RCP-REQ-01",
+          "question": "BEFORE requires 矩阵基线可复现：132 单元/119 入口拒绝、整包盲发 12/12 422、15 项 fence 错误码一致",
+          "verdict": "PASS",
+          "observed": {
+            "before": {
+              "matrixCells": 132,
+              "entryRejectedCells": 119,
+              "blindForwardAll422": true,
+              "fences": [
+                [
+                  "input 旧 expectedVersion（missionVersion 等价字段）",
+                  409,
+                  "MISSION_CHANGED"
+                ],
+                [
+                  "input 错误 questionId",
+                  409,
+                  "INPUT_CHANGED"
+                ],
+                [
+                  "approvals 错误 proposalHash",
+                  409,
+                  "APPROVAL_CHANGED"
+                ],
+                [
+                  "approvals 错误 approvalId（路径）",
+                  409,
+                  "APPROVAL_CHANGED"
+                ],
+                [
+                  "pause 旧 expectedVersion",
+                  409,
+                  "MISSION_CHANGED"
+                ],
+                [
+                  "cancel 旧 expectedVersion",
+                  409,
+                  "MISSION_CHANGED"
+                ],
+                [
+                  "resume 旧 expectedVersion",
+                  409,
+                  "MISSION_CHANGED"
+                ],
+                [
+                  "resume 在非 PAUSED 状态",
+                  409,
+                  "MISSION_NOT_PAUSED"
+                ],
+                [
+                  "replan 在非 WAITING_APPROVAL 状态",
+                  409,
+                  "INVALID_TRANSITION"
+                ],
+                [
+                  "constraints 旧 expectedConstraintsVersion",
+                  409,
+                  "MISSION_CHANGED"
+                ],
+                [
+                  "research-scope 旧 expectedScopeVersion",
+                  409,
+                  "MISSION_CHANGED"
+                ],
+                [
+                  "continuation-policy 旧 expectedVersion",
+                  409,
+                  "MISSION_CHANGED"
+                ],
+                [
+                  "responsibility 错误 expectedControlVersion（controlVersion 等价字段）",
+                  409,
+                  "MISSION_CHANGED"
+                ],
+                [
+                  "continations-confirm 旧 expectedContextVersion",
+                  409,
+                  "ASSESSMENT_CHANGED"
+                ],
+                [
+                  "artifact-confirm 旧 expectedContextVersion",
+                  409,
+                  "OUTPUT_CHANGED"
+                ]
+              ]
+            },
+            "recompute": {
+              "matrixCells": 132,
+              "entryRejectedCells": 119,
+              "blindForwardAll422": true,
+              "fences": [
+                [
+                  "input 旧 expectedVersion（missionVersion 等价字段）",
+                  409,
+                  "MISSION_CHANGED"
+                ],
+                [
+                  "input 错误 questionId",
+                  409,
+                  "INPUT_CHANGED"
+                ],
+                [
+                  "approvals 错误 proposalHash",
+                  409,
+                  "APPROVAL_CHANGED"
+                ],
+                [
+                  "approvals 错误 approvalId（路径）",
+                  409,
+                  "APPROVAL_CHANGED"
+                ],
+                [
+                  "pause 旧 expectedVersion",
+                  409,
+                  "MISSION_CHANGED"
+                ],
+                [
+                  "cancel 旧 expectedVersion",
+                  409,
+                  "MISSION_CHANGED"
+                ],
+                [
+                  "resume 旧 expectedVersion",
+                  409,
+                  "MISSION_CHANGED"
+                ],
+                [
+                  "resume 在非 PAUSED 状态",
+                  409,
+                  "MISSION_NOT_PAUSED"
+                ],
+                [
+                  "replan 在非 WAITING_APPROVAL 状态",
+                  409,
+                  "INVALID_TRANSITION"
+                ],
+                [
+                  "constraints 旧 expectedConstraintsVersion",
+                  409,
+                  "MISSION_CHANGED"
+                ],
+                [
+                  "research-scope 旧 expectedScopeVersion",
+                  409,
+                  "MISSION_CHANGED"
+                ],
+                [
+                  "continuation-policy 旧 expectedVersion",
+                  409,
+                  "MISSION_CHANGED"
+                ],
+                [
+                  "responsibility 错误 expectedControlVersion（controlVersion 等价字段）",
+                  409,
+                  "MISSION_CHANGED"
+                ],
+                [
+                  "continations-confirm 旧 expectedContextVersion",
+                  409,
+                  "ASSESSMENT_CHANGED"
+                ],
+                [
+                  "artifact-confirm 旧 expectedContextVersion",
+                  409,
+                  "OUTPUT_CHANGED"
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "id": "RCP-PERF-01",
+          "question": "BEFORE 性能基线可复现：事务[2]/查询[118]/retry 4-6/零副作用/无跨请求缓存一致",
+          "verdict": "PASS",
+          "observed": {
+            "before": {
+              "stableTransactions": [
+                2
+              ],
+              "stableQueries": [
+                118
+              ],
+              "retryOnceTransactions": 4,
+              "retryOnceConsistency": "RETRIED",
+              "continuousTransactions": 6,
+              "continuousRetries": 2,
+              "materialUseItemsAtMost8": true,
+              "readbackZeroSideEffect": true,
+              "crossRequestCacheAbsent": true
+            },
+            "recompute": {
+              "stableTransactions": [
+                2
+              ],
+              "stableQueries": [
+                118
+              ],
+              "retryOnceTransactions": 4,
+              "retryOnceConsistency": "RETRIED",
+              "continuousTransactions": 6,
+              "continuousRetries": 2,
+              "materialUseItemsAtMost8": true,
+              "readbackZeroSideEffect": true,
+              "crossRequestCacheAbsent": true
+            }
+          }
+        }
+      ],
+      "totals": {
+        "total": 4,
+        "pass": 4,
+        "fail": 0
+      },
+      "detail": {
+        "summary": {
+          "total": 4,
+          "pass": 4,
+          "fail": 0
+        },
+        "beforeBaselines": [
+          "baseline-a-terminal.json",
+          "baseline-a-evidence-window.json",
+          "baseline-a-requires.json",
+          "baseline-a-readback-instrument.json"
+        ]
+      }
+    },
+    {
+      "id": "git-boundary",
+      "title": "git 边界：无 schema/迁移/UI/ArkTS/官网/新表/Runner/Planner、docs 未入 git、无密钥",
+      "verdict": "PASS",
+      "evidence": [
+        "post-runs/git-boundary.json"
+      ],
+      "checks": [
+        {
+          "id": "GIT-01",
+          "question": "FinalSha 是固定检查点 4b69614 的后代",
+          "verdict": "PASS",
+          "observed": {
+            "checkpoint": "4b696141435825a3582816e8e449c0e0cf013f29",
+            "finalSha": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+            "isAncestor": true
+          }
+        },
+        {
+          "id": "GIT-02",
+          "question": "最终验收 SHA 等于当前 HEAD（验收对象与工作树一致）",
+          "verdict": "PASS",
+          "observed": {
+            "head": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+            "finalSha": "3ec63e62470d0033f3cd6404c047ad720ecae72c"
+          }
+        },
+        {
+          "id": "GIT-03",
+          "question": "提交区间不含 schema.prisma / prisma/migrations",
+          "verdict": "PASS",
+          "observed": {
+            "schemaChanges": [],
+            "prismaFiles": []
+          }
+        },
+        {
+          "id": "GIT-04",
+          "question": "提交区间不含 app/ components/ harmonyos/ public/ deploy/ e2e/ 等 UI/官网/客户端文件",
+          "verdict": "PASS",
+          "observed": {
+            "forbiddenPrefixes": [
+              "prisma/",
+              "app/",
+              "components/",
+              "harmonyos/",
+              "docs/",
+              "public/",
+              "deploy/",
+              "e2e/",
+              "prototypes/"
+            ],
+            "hits": []
+          }
+        },
+        {
+          "id": "GIT-05",
+          "question": "规划 docs（docs/FINAL/...）未入 git：不在提交区间、未被跟踪且被 gitignore；仓库既有 docs/ 本次未变",
+          "verdict": "PASS",
+          "observed": {
+            "docsInCommits": 0,
+            "planningTracked": 0,
+            "planningIgnored": true,
+            "trackedDocsElsewhere": 41
+          }
+        },
+        {
+          "id": "GIT-06",
+          "question": "提交区间不含 .env / 签名私钥 / keystore 等敏感文件",
+          "verdict": "PASS",
+          "observed": {
+            "envFiles": []
+          }
+        },
+        {
+          "id": "GIT-07",
+          "question": "新增行未发现密钥模式（7 类模式扫描）",
+          "verdict": "PASS",
+          "observed": {
+            "patterns": [
+              "private_key",
+              "openai_sk",
+              "aws_akia",
+              "github_token",
+              "slack_token",
+              "bearer_hardcode",
+              "env_secret_assign"
+            ],
+            "hits": []
+          }
+        },
+        {
+          "id": "GIT-08",
+          "question": "新增行未新增数据表（model/CREATE TABLE）",
+          "verdict": "PASS",
+          "observed": {
+            "hits": []
+          }
+        },
+        {
+          "id": "GIT-09",
+          "question": "新增行未引入 Runner/Planner/后台循环执行器",
+          "verdict": "PASS",
+          "observed": {
+            "hits": []
+          }
+        },
+        {
+          "id": "GIT-10",
+          "question": "提交区间未改 lib/mission/runner.ts 之外的执行器/调度文件",
+          "verdict": "PASS",
+          "observed": {
+            "executorRelated": []
+          }
+        },
+        {
+          "id": "GIT-LIN-01",
+          "question": "三个提交均为固定检查点 4b69614 的后代，且 requires/terminal 是最终 SHA 的祖先",
+          "verdict": "PASS",
+          "observed": {
+            "isDescendantOfCheckpoint": {
+              "479326131bedb385b0d89f710d960708ae7e9461": true,
+              "3ec63e62470d0033f3cd6404c047ad720ecae72c": true,
+              "e7c1da88c15e1516032e2514dd60b7e0b006fb9d": true
+            },
+            "isAncestorOfFinal": {
+              "479326131bedb385b0d89f710d960708ae7e9461": true,
+              "e7c1da88c15e1516032e2514dd60b7e0b006fb9d": true
+            }
+          }
+        },
+        {
+          "id": "GIT-LIN-02",
+          "question": "提交顺序为 requires→terminal→perf，且每个提交恰有 1 个父提交（无 merge）",
+          "verdict": "PASS",
+          "observed": {
+            "revListOrder": [
+              "479326131bedb385b0d89f710d960708ae7e9461",
+              "e7c1da88c15e1516032e2514dd60b7e0b006fb9d",
+              "3ec63e62470d0033f3cd6404c047ad720ecae72c"
+            ],
+            "expectedOrder": [
+              "479326131bedb385b0d89f710d960708ae7e9461",
+              "e7c1da88c15e1516032e2514dd60b7e0b006fb9d",
+              "3ec63e62470d0033f3cd6404c047ad720ecae72c"
+            ],
+            "parents": [
+              "479326131bedb385b0d89f710d960708ae7e9461 4b696141435825a3582816e8e449c0e0cf013f29",
+              "e7c1da88c15e1516032e2514dd60b7e0b006fb9d 479326131bedb385b0d89f710d960708ae7e9461",
+              "3ec63e62470d0033f3cd6404c047ad720ecae72c e7c1da88c15e1516032e2514dd60b7e0b006fb9d"
+            ]
+          }
+        },
+        {
+          "id": "GIT-LIN-03",
+          "question": "最终 SHA == 当前 HEAD；工作树除 evidence/ 交付物外零改动（无未提交实现文件；未 push/未 merge）",
+          "verdict": "PASS",
+          "observed": {
+            "head": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+            "finalSha": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+            "nonEvidenceChanges": [],
+            "pendingEvidence": [
+              "?? evidence/final-a/20261103/post-checkpoint/A_SECOND_BATCH_RECEIPT.md",
+              "?? evidence/final-a/20261103/post-checkpoint/verify/baseline-a-evidence-window.json",
+              "?? evidence/final-a/20261103/post-checkpoint/verify/baseline-a-readback-instrument.json",
+              "?? evidence/final-a/20261103/post-checkpoint/verify/baseline-a-requires.json",
+              "?? evidence/final-a/20261103/post-checkpoint/verify/baseline-a-terminal.json",
+              "?? evidence/final-a/20261103/post-checkpoint/verify/baseline-provenance.json",
+              "?? evidence/final-a/20261103/post-checkpoint/verify/baseline-summary.md",
+              "?? evidence/final-a/20261103/post-checkpoint/verify/fixtures/baseline-evidence-window.ts"
+            ],
+            "evidencePendingCount": 99,
+            "branch": "codex/final-a-mission-packet",
+            "pushed": "NOT_PUSHED（仅本地提交，无 remote 更新）"
+          }
+        },
+        {
+          "id": "GIT-SCOPE-requires",
+          "question": "提交 479326131bed（requires）自身范围：无 schema/迁移/UI/ArkTS/官网/新表/Runner/Planner",
+          "verdict": "PASS",
+          "observed": {
+            "sha": "479326131bedb385b0d89f710d960708ae7e9461",
+            "changedFileCount": 3,
+            "changedFiles": [
+              "A\tevidence/final-a/20261103/post-checkpoint/REQUIRES_ENDPOINT_MAP.md",
+              "M\tlib/mission/missionService.ts",
+              "A\ttests/finalARequiresGuards.test.ts"
+            ],
+            "failed": []
+          }
+        },
+        {
+          "id": "GIT-SCOPE-terminal",
+          "question": "提交 e7c1da88c15e（terminal）自身范围：无 schema/迁移/UI/ArkTS/官网/新表/Runner/Planner",
+          "verdict": "PASS",
+          "observed": {
+            "sha": "e7c1da88c15e1516032e2514dd60b7e0b006fb9d",
+            "changedFileCount": 10,
+            "changedFiles": [
+              "A\tevidence/final-a/20261103/post-checkpoint/REQUIRES_ENDPOINT_MAP.md",
+              "A\tevidence/final-a/20261103/post-checkpoint/TERMINAL_UNKNOWN_ENTRY.md",
+              "M\tlib/mission/missionService.ts",
+              "M\tlib/mission/presentation.ts",
+              "M\tlib/mission/workspaceSummary.ts",
+              "M\tlib/server/globalFocus.ts",
+              "M\tlib/types/globalFocus.ts",
+              "A\ttests/finalARequiresGuards.test.ts",
+              "A\ttests/finalATerminalUnknownFocus.test.ts",
+              "A\ttests/finalATerminalUnknownSummary.test.ts"
+            ],
+            "failed": []
+          }
+        },
+        {
+          "id": "GIT-SCOPE-evidence-window",
+          "question": "提交 3ec63e62470d（evidence-window）自身范围：无 schema/迁移/UI/ArkTS/官网/新表/Runner/Planner",
+          "verdict": "PASS",
+          "observed": {
+            "sha": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+            "changedFileCount": 26,
+            "changedFiles": [
+              "A\tevidence/final-a/20261103/post-checkpoint/REQUIRES_ENDPOINT_MAP.md",
+              "A\tevidence/final-a/20261103/post-checkpoint/TERMINAL_UNKNOWN_ENTRY.md",
+              "A\tevidence/final-a/20261103/post-checkpoint/perf/PERF_RECEIPT.md",
+              "A\tevidence/final-a/20261103/post-checkpoint/perf/RUN_LOG.md",
+              "A\tevidence/final-a/20261103/post-checkpoint/perf/readback-perf.json",
+              "A\tevidence/final-a/20261103/post-checkpoint/perf/runs/readback-perf-AFTER-run1.json",
+              "A\tevidence/final-a/20261103/post-checkpoint/perf/runs/readback-perf-AFTER.json",
+              "A\tevidence/final-a/20261103/post-checkpoint/perf/runs/readback-perf-AFTER2-run1.json",
+              "A\tevidence/final-a/20261103/post-checkpoint/perf/runs/readback-perf-AFTER2.json",
+              "A\tevidence/final-a/20261103/post-checkpoint/perf/runs/readback-perf-BEFORE-run1.json",
+              "A\tevidence/final-a/20261103/post-checkpoint/perf/runs/readback-perf-BEFORE.json",
+              "M\tlib/continuity/sourcePolicy.ts",
+              "M\tlib/mission/materialUseProjection.ts",
+              "M\tlib/mission/missionService.ts",
+              "M\tlib/mission/presentation.ts",
+              "M\tlib/mission/readback.ts",
+              "M\tlib/mission/responsibility.ts",
+              "M\tlib/mission/workspaceSummary.ts",
+              "M\tlib/server/globalFocus.ts",
+              "M\tlib/types/globalFocus.ts",
+              "M\tscripts/final-a/a1-contract-samples.ts",
+              "A\tscripts/final-a/perf-readback.ts",
+              "A\ttests/finalAEvidenceReviewWindow.test.ts",
+              "A\ttests/finalARequiresGuards.test.ts",
+              "A\ttests/finalATerminalUnknownFocus.test.ts",
+              "A\ttests/finalATerminalUnknownSummary.test.ts"
+            ],
+            "failed": []
+          }
+        }
+      ],
+      "totals": {
+        "total": 16,
+        "pass": 16,
+        "fail": 0
+      },
+      "detail": {
+        "branch": "codex/final-a-mission-packet",
+        "head": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+        "checkpoint": "4b696141435825a3582816e8e449c0e0cf013f29",
+        "finalSha": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+        "commits": [
+          "479326131bedb385b0d89f710d960708ae7e9461",
+          "e7c1da88c15e1516032e2514dd60b7e0b006fb9d",
+          "3ec63e62470d0033f3cd6404c047ad720ecae72c"
+        ],
+        "changedFileCount": 26,
+        "changedFiles": [
+          "A\tevidence/final-a/20261103/post-checkpoint/REQUIRES_ENDPOINT_MAP.md",
+          "A\tevidence/final-a/20261103/post-checkpoint/TERMINAL_UNKNOWN_ENTRY.md",
+          "A\tevidence/final-a/20261103/post-checkpoint/perf/PERF_RECEIPT.md",
+          "A\tevidence/final-a/20261103/post-checkpoint/perf/RUN_LOG.md",
+          "A\tevidence/final-a/20261103/post-checkpoint/perf/readback-perf.json",
+          "A\tevidence/final-a/20261103/post-checkpoint/perf/runs/readback-perf-AFTER-run1.json",
+          "A\tevidence/final-a/20261103/post-checkpoint/perf/runs/readback-perf-AFTER.json",
+          "A\tevidence/final-a/20261103/post-checkpoint/perf/runs/readback-perf-AFTER2-run1.json",
+          "A\tevidence/final-a/20261103/post-checkpoint/perf/runs/readback-perf-AFTER2.json",
+          "A\tevidence/final-a/20261103/post-checkpoint/perf/runs/readback-perf-BEFORE-run1.json",
+          "A\tevidence/final-a/20261103/post-checkpoint/perf/runs/readback-perf-BEFORE.json",
+          "M\tlib/continuity/sourcePolicy.ts",
+          "M\tlib/mission/materialUseProjection.ts",
+          "M\tlib/mission/missionService.ts",
+          "M\tlib/mission/presentation.ts",
+          "M\tlib/mission/readback.ts",
+          "M\tlib/mission/responsibility.ts",
+          "M\tlib/mission/workspaceSummary.ts",
+          "M\tlib/server/globalFocus.ts",
+          "M\tlib/types/globalFocus.ts",
+          "M\tscripts/final-a/a1-contract-samples.ts",
+          "A\tscripts/final-a/perf-readback.ts",
+          "A\ttests/finalAEvidenceReviewWindow.test.ts",
+          "A\ttests/finalARequiresGuards.test.ts",
+          "A\ttests/finalATerminalUnknownFocus.test.ts",
+          "A\ttests/finalATerminalUnknownSummary.test.ts"
+        ],
+        "commitLineage": {
+          "generatedAt": "2026-11-03T15:44:17.7775437+08:00",
+          "purpose": "三个提交的祖先链/顺序/工作树一致性",
+          "checkpoint": "4b696141435825a3582816e8e449c0e0cf013f29",
+          "finalSha": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+          "commits": {
+            "requires": "479326131bedb385b0d89f710d960708ae7e9461",
+            "terminal": "e7c1da88c15e1516032e2514dd60b7e0b006fb9d",
+            "evidenceWindow": "3ec63e62470d0033f3cd6404c047ad720ecae72c"
+          },
+          "checks": [
+            {
+              "id": "GIT-LIN-01",
+              "question": "三个提交均为固定检查点 4b69614 的后代，且 requires/terminal 是最终 SHA 的祖先",
+              "verdict": "PASS",
+              "observed": {
+                "isDescendantOfCheckpoint": {
+                  "479326131bedb385b0d89f710d960708ae7e9461": true,
+                  "3ec63e62470d0033f3cd6404c047ad720ecae72c": true,
+                  "e7c1da88c15e1516032e2514dd60b7e0b006fb9d": true
+                },
+                "isAncestorOfFinal": {
+                  "479326131bedb385b0d89f710d960708ae7e9461": true,
+                  "e7c1da88c15e1516032e2514dd60b7e0b006fb9d": true
+                }
+              }
+            },
+            {
+              "id": "GIT-LIN-02",
+              "question": "提交顺序为 requires→terminal→perf，且每个提交恰有 1 个父提交（无 merge）",
+              "verdict": "PASS",
+              "observed": {
+                "revListOrder": [
+                  "479326131bedb385b0d89f710d960708ae7e9461",
+                  "e7c1da88c15e1516032e2514dd60b7e0b006fb9d",
+                  "3ec63e62470d0033f3cd6404c047ad720ecae72c"
+                ],
+                "expectedOrder": [
+                  "479326131bedb385b0d89f710d960708ae7e9461",
+                  "e7c1da88c15e1516032e2514dd60b7e0b006fb9d",
+                  "3ec63e62470d0033f3cd6404c047ad720ecae72c"
+                ],
+                "parents": [
+                  "479326131bedb385b0d89f710d960708ae7e9461 4b696141435825a3582816e8e449c0e0cf013f29",
+                  "e7c1da88c15e1516032e2514dd60b7e0b006fb9d 479326131bedb385b0d89f710d960708ae7e9461",
+                  "3ec63e62470d0033f3cd6404c047ad720ecae72c e7c1da88c15e1516032e2514dd60b7e0b006fb9d"
+                ]
+              }
+            },
+            {
+              "id": "GIT-LIN-03",
+              "question": "最终 SHA == 当前 HEAD；工作树除 evidence/ 交付物外零改动（无未提交实现文件；未 push/未 merge）",
+              "verdict": "PASS",
+              "observed": {
+                "head": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+                "finalSha": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+                "nonEvidenceChanges": [],
+                "pendingEvidence": [
+                  "?? evidence/final-a/20261103/post-checkpoint/A_SECOND_BATCH_RECEIPT.md",
+                  "?? evidence/final-a/20261103/post-checkpoint/verify/baseline-a-evidence-window.json",
+                  "?? evidence/final-a/20261103/post-checkpoint/verify/baseline-a-readback-instrument.json",
+                  "?? evidence/final-a/20261103/post-checkpoint/verify/baseline-a-requires.json",
+                  "?? evidence/final-a/20261103/post-checkpoint/verify/baseline-a-terminal.json",
+                  "?? evidence/final-a/20261103/post-checkpoint/verify/baseline-provenance.json",
+                  "?? evidence/final-a/20261103/post-checkpoint/verify/baseline-summary.md",
+                  "?? evidence/final-a/20261103/post-checkpoint/verify/fixtures/baseline-evidence-window.ts"
+                ],
+                "evidencePendingCount": 99,
+                "branch": "codex/final-a-mission-packet",
+                "pushed": "NOT_PUSHED（仅本地提交，无 remote 更新）"
+              }
+            }
+          ],
+          "summary": {
+            "total": 3,
+            "pass": 3,
+            "fail": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "aux-scripts",
+      "title": "脚本安全：perf 脚本只临时库/无网络/无模型；a1-contract-samples 仅类型对齐且可跑",
+      "verdict": "PASS",
+      "evidence": [
+        "post-runs/script-safety.json"
+      ],
+      "checks": [
+        {
+          "id": "SAFE-PERF-01",
+          "question": "perf-readback.ts 无网络/模型调用（静态扫描 9 类模式 0 命中；provider 为 mock）",
+          "verdict": "PASS",
+          "observed": {
+            "patternCounts": {
+              "fetch\\(": 0,
+              "https?://": 0,
+              "openai": 0,
+              "anthropic": 0,
+              "deepseek": 0,
+              "lib/model": 0,
+              "modelAdapter": 0,
+              "API_KEY": 0,
+              "PRIVATE KEY": 0
+            }
+          }
+        },
+        {
+          "id": "SAFE-PERF-02",
+          "question": "perf 证据三阶段均：独立临时 SQLite（%TEMP% mkdtemp）、LLM=mock、模型/网络调用 0、读零写入、阶段期望 18/18",
+          "verdict": "PASS",
+          "observed": {
+            "phases": [
+              {
+                "phase": "before",
+                "head": "4b696141435825a3582816e8e449c0e0cf013f29",
+                "llmMode": "mock",
+                "modelProviderCalls": 0,
+                "networkCalls": 0,
+                "dbKind": "isolated-temporary-sqlite",
+                "tempDir": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-final-a-perf-readback-before-4EWqab",
+                "migrationsApplied": 52,
+                "writeStatementsTotal": 0,
+                "checks": "18/18"
+              },
+              {
+                "phase": "after",
+                "head": "4b696141435825a3582816e8e449c0e0cf013f29",
+                "llmMode": "mock",
+                "modelProviderCalls": 0,
+                "networkCalls": 0,
+                "dbKind": "isolated-temporary-sqlite",
+                "tempDir": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-final-a-perf-readback-after-M5uP1b",
+                "migrationsApplied": 52,
+                "writeStatementsTotal": 0,
+                "checks": "18/18"
+              },
+              {
+                "phase": "after2",
+                "head": "4b696141435825a3582816e8e449c0e0cf013f29",
+                "llmMode": "mock",
+                "modelProviderCalls": 0,
+                "networkCalls": 0,
+                "dbKind": "isolated-temporary-sqlite",
+                "tempDir": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-final-a-perf-readback-after2-MrvmSl",
+                "migrationsApplied": 52,
+                "writeStatementsTotal": 0,
+                "checks": "18/18"
+              }
+            ]
+          }
+        },
+        {
+          "id": "SAFE-PERF-03",
+          "question": "perf 关键数字：BEFORE 窗口 hits=0（复现挤出）、AFTER/AFTER2 hits=3；事务 2；最多 2 次重读；SourcePolicy=6；SELECT BEFORE/AFTER/AFTER2=100/100/78",
+          "verdict": "PASS",
+          "observed": {
+            "windowCorrectness": {
+              "before": {
+                "selectedQuestionId": "cmw0cpknq0004n88oqo33wslo",
+                "targetReviewEventsInDb": 3,
+                "newerOtherQuestionReviewEventsInDb": 24,
+                "phase": "BEFORE",
+                "status": "REPRODUCED_SQUEEZE_BY_OTHER_QUESTIONS",
+                "hits": 0,
+                "hitQuestionIds": [],
+                "questionFilteredFieldPresent": false,
+                "truncated": true,
+                "returnedItems": 0,
+                "reviewWindow": 20,
+                "reviewDisplayLimit": 3,
+                "coverage": null,
+                "note": "BEFORE 代码先取全 Mission 最近 21 条 EVIDENCE_FIT_REVIEWED 再按 questionId 过滤：24 条更新的其他问题审查会挤出 3 条较早的目标问题审查，hits=0（缺陷复现，不是“从未发生”）。"
+              },
+              "after": {
+                "selectedQuestionId": "cmw0cq5gp0004x08o5gqvl0ml",
+                "targetReviewEventsInDb": 3,
+                "newerOtherQuestionReviewEventsInDb": 24,
+                "phase": "AFTER",
+                "status": "FIXED_QUESTION_FILTERED_FIRST",
+                "hits": 3,
+                "hitQuestionIds": [
+                  "cmw0cq5gp0004x08o5gqvl0ml"
+                ],
+                "questionFilteredFieldPresent": true,
+                "truncated": false,
+                "returnedItems": 3,
+                "reviewWindow": 20,
+                "reviewDisplayLimit": 3,
+                "coverage": null,
+                "note": "AFTER 代码先用 json_extract(payloadJson,'$.evidenceFit.premise.questionId') 按选中 questionId 过滤再限额 21/20：hits=3，truncated 只表示目标问题窗口溢出。"
+              },
+              "after2": {
+                "selectedQuestionId": "cmw0cqp4b0004fk8obspu1esz",
+                "targetReviewEventsInDb": 3,
+                "newerOtherQuestionReviewEventsInDb": 24,
+                "phase": "AFTER2",
+                "status": "FIXED_QUESTION_FILTERED_FIRST",
+                "hits": 3,
+                "hitQuestionIds": [
+                  "cmw0cqp4b0004fk8obspu1esz"
+                ],
+                "questionFilteredFieldPresent": true,
+                "truncated": false,
+                "returnedItems": 3,
+                "reviewWindow": 20,
+                "reviewDisplayLimit": 3,
+                "coverage": null,
+                "note": "AFTER 代码先用 json_extract(payloadJson,'$.evidenceFit.premise.questionId') 按选中 questionId 过滤再限额 21/20：hits=3，truncated 只表示目标问题窗口溢出。"
+              }
+            },
+            "transactionsStable": {
+              "before": [
+                null
+              ],
+              "after": [
+                null
+              ]
+            },
+            "retries": {
+              "beforeRetried": 1,
+              "beforeAdvanced": 2,
+              "afterRetried": 1,
+              "afterAdvanced": 2,
+              "after2Retried": 1,
+              "after2Advanced": 2
+            },
+            "sourcePolicyChecks": {
+              "before": [
+                6
+              ],
+              "after2": [
+                6
+              ]
+            },
+            "selectPerRead": {
+              "before": 100,
+              "after": 100,
+              "after2": 78
+            }
+          }
+        },
+        {
+          "id": "SAFE-A1-01",
+          "question": "a1-contract-samples.ts 相对 4b69614 仅新增 sourcePolicyChecks:1 类型对齐（无删除、无其他行为线）",
+          "verdict": "PASS",
+          "observed": {
+            "addedLines": [
+              "+    // 只读量测字段（A-新3）：本样本含 1 个 item 的 currentUse 判定。",
+              "+    sourcePolicyChecks: 1,"
+            ],
+            "removedLines": []
+          }
+        },
+        {
+          "id": "SAFE-A1-02",
+          "question": "a1-contract-samples.ts 在最终 SHA shadow 运行 exit 0、只写 evidence 样本 14 个、静态无 DB/网络/模型依赖（execFileSync 仅 git rev-parse）",
+          "verdict": "PASS",
+          "observed": {
+            "exit": 0,
+            "samplesWritten": 14,
+            "staticForbiddenPatterns": 0
+          }
+        },
+        {
+          "id": "SAFE-SEC-01",
+          "question": "两个脚本无密钥/私钥模式命中",
+          "verdict": "PASS",
+          "observed": {
+            "patterns": [
+              "-----BEGIN",
+              "sk-[A-Za-z0-9]",
+              "AKIA[0-9A-Z]{16}",
+              "gh[pousr]_",
+              "xox[baprs]-",
+              "PRIVATE KEY"
+            ],
+            "hits": []
+          }
+        }
+      ],
+      "totals": {
+        "total": 6,
+        "pass": 6,
+        "fail": 0
+      },
+      "detail": {
+        "mergedPerfEvidence": "evidence/final-a/20261103/post-checkpoint/perf/readback-perf.json",
+        "a1RunLog": "post-logs/after-a1-contract-samples.log",
+        "a1DiffCommand": "git diff 4b69614 3ec63e62 -- scripts/final-a/a1-contract-samples.ts"
+      }
+    }
+  ],
+  "failures": [],
+  "overallVerdict": "PASS",
+  "notRunSections": [],
+  "cannotSignOff": [],
+  "residualRisks": [
+    "终态窗口有界：missionWorkspaceSummary 只检查本项目最近 7 条终态（limit=6+1），GlobalFocus 只检查当前授权范围内最近 7 条；窗口内未找到≠全库没有，更早/跨项目终态委托仍应从原项目或委托列表核对。",
+    "终态条目只提示核对，不结算 UNKNOWN、不改变终态/版本/updatedAt；不构成新的执行资格。"
+  ],
+  "denominators": {
+    "terminalChecks": {
+      "total": 23,
+      "pass": 23,
+      "fail": 0
+    },
+    "evidenceWindowChecks": {
+      "total": 14,
+      "pass": 14,
+      "fail": 0
+    },
+    "requiresChecks": {
+      "total": 15,
+      "pass": 15,
+      "fail": 0
+    },
+    "performanceChecks": {
+      "total": 8,
+      "pass": 8,
+      "fail": 0
+    },
+    "beforeReproducibilityChecks": {
+      "total": 4,
+      "pass": 4,
+      "fail": 0
+    },
+    "gitChecks": {
+      "total": 16,
+      "pass": 16,
+      "fail": 0
+    }
+  },
+  "evidenceIndex": {
+    "baseline": [
+      "baseline-a-terminal.json",
+      "baseline-a-evidence-window.json",
+      "baseline-a-requires.json",
+      "baseline-a-readback-instrument.json",
+      "baseline-summary.md",
+      "baseline-provenance.json"
+    ],
+    "fixtures": [
+      "fixtures/baseline-terminal.ts",
+      "fixtures/baseline-evidence-window.ts",
+      "fixtures/baseline-requires.ts",
+      "fixtures/baseline-readback-instrument.ts",
+      "fixtures/post-terminal-verify.ts",
+      "fixtures/post-evidence-window-verify.ts",
+      "fixtures/post-requires-verify.ts",
+      "fixtures/build-post-verification.ts",
+      "git-boundary.ps1"
+    ],
+    "logs": "post-logs/（每个命令的 .log/.exit）"
+  }
+}

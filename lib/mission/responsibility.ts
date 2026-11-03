@@ -45,9 +45,14 @@ export async function resolveSourceGrantVersions(tx: Tx, userId: string, project
 }
 
 /** One snapshot of the original responsibility. This read grants no execution permission. */
-export async function readMissionResponsibility(userId: string, id: string, externalTx?: Tx) {
+export async function readMissionResponsibility(userId: string, id: string, externalTx?: Tx,
+  /**
+   * 同请求只读复用：仅供调用方已在同一事务用 ownedMission(userId, id, tx) 校验归属（owner/项目角色）后传入，
+   * 跳过重复的 ownedMission 读取；缺省时仍自行 ownedMission 校验，行为不变。不跨请求/不缓存。
+   */
+  preloadedMission?: Awaited<ReturnType<typeof ownedMission>>) {
   const run = async (tx: Tx) => {
-    const m = await ownedMission(userId, id, tx);
+    const m = preloadedMission ?? await ownedMission(userId, id, tx);
     const [continuity, events, approvals] = await Promise.all([
       effectiveContinuity(userId, { projectId: m.projectId, missionId: id }, tx),
       tx.agentMissionEvent.findMany({ where: { missionId: id }, orderBy: [{ seq: "desc" }, { id: "desc" }], take: 21 }),

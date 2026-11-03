@@ -18,7 +18,26 @@ export type MissionWorkspaceItem = {
   workState?: import("@/lib/types/workState").WorkState; attention: string | null; activity: string | null; activityAt: string | null;
   outputRevision: number | null;
 };
-export type MissionWorkspaceSummary = { enabled: boolean; totalActive: number; items: MissionWorkspaceItem[] };
+/**
+ * 终态 + 未结算 UNKNOWN 的既有摘要找回窗口：增量可选字段，旧客户端忽略，不改变 items/totalActive 语义。
+ * 只有“窗口内实际检查到的终态委托”才可能出现在 items；为空只表示本窗口未找到，不等于全库没有。
+ */
+export type MissionTerminalUnsettledSummary = {
+  items: MissionWorkspaceItem[];
+  /** 本次实际检查的本项目终态委托条数（按 updatedAt 倒序的有界窗口，可能为 limit 或 limit+1）。 */
+  inspected: number;
+  /** 单次检查窗口上限；items 不会超过 limit。 */
+  limit: number;
+  /** 窗口外仍有未检查的本项目终态委托：窗口内未找到不等于全库没有。 */
+  truncated: boolean;
+  note: string;
+  identityNote: string;
+};
+export type MissionWorkspaceSummary = {
+  enabled: boolean; totalActive: number; items: MissionWorkspaceItem[];
+  /** 可选：终态委托中仍有未结算 UNKNOWN（lastErrorJson UNKNOWN 或原 Step UNKNOWN）的只读找回入口。 */
+  terminalUnsettled?: MissionTerminalUnsettledSummary;
+};
 
 /** Read-only facets from existing criteria events, Output and adoption receipts. */
 export type MissionCompletionSummary = {

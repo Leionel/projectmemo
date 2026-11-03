@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "outPath": "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\post-checkpoint\\verify\\post-runs\\before-post-requires.json",
+  "summary": {
+    "total": 11,
+    "pass": 10,
+    "fail": 1,
+    "notRun": 0
+  },
+  "failed": [
+    {
+      "id": "PST-REQ-07",
+      "detail": {
+        "waitStateQuestionAccepted": {
+          "status": 409,
+          "errorCode": "INPUT_CHANGED"
+        },
+        "newerEventQuestion": {
+          "id": "cmw0c59un00iehs8o6axfeodj",
+          "status": 202,
+          "errorCode": null
+        }
+      }
+    }
+  ]
+}

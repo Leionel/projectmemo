@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "outPath": "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\post-checkpoint\\verify\\post-runs\\after-post-terminal.json",
+  "summary": {
+    "total": 23,
+    "pass": 23,
+    "fail": 0,
+    "notRun": 0
+  },
+  "failed": []
+}

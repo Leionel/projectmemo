@@ -1,0 +1,101 @@
+{
+  "ok": true,
+  "outPath": "D:\\Projects\\hongmen-final-a-mission-packet\\evidence\\final-a\\20261103\\post-checkpoint\\verify\\baseline-a-requires.json",
+  "verdict": {
+    "matrixCells": 132,
+    "entryRejectedCells": 119,
+    "blindForwardAll422": true,
+    "fences": [
+      {
+        "label": "input 旧 expectedVersion（missionVersion 等价字段）",
+        "endpoint": "input",
+        "status": 409,
+        "errorCode": "MISSION_CHANGED"
+      },
+      {
+        "label": "input 错误 questionId",
+        "endpoint": "input",
+        "status": 409,
+        "errorCode": "INPUT_CHANGED"
+      },
+      {
+        "label": "approvals 错误 proposalHash",
+        "endpoint": "approvals",
+        "status": 409,
+        "errorCode": "APPROVAL_CHANGED"
+      },
+      {
+        "label": "approvals 错误 approvalId（路径）",
+        "endpoint": "approvals",
+        "status": 409,
+        "errorCode": "APPROVAL_CHANGED"
+      },
+      {
+        "label": "pause 旧 expectedVersion",
+        "endpoint": "pause",
+        "status": 409,
+        "errorCode": "MISSION_CHANGED"
+      },
+      {
+        "label": "cancel 旧 expectedVersion",
+        "endpoint": "cancel",
+        "status": 409,
+        "errorCode": "MISSION_CHANGED"
+      },
+      {
+        "label": "resume 旧 expectedVersion",
+        "endpoint": "resume",
+        "status": 409,
+        "errorCode": "MISSION_CHANGED"
+      },
+      {
+        "label": "resume 在非 PAUSED 状态",
+        "endpoint": "resume",
+        "status": 409,
+        "errorCode": "MISSION_NOT_PAUSED"
+      },
+      {
+        "label": "replan 在非 WAITING_APPROVAL 状态",
+        "endpoint": "replan",
+        "status": 409,
+        "errorCode": "INVALID_TRANSITION"
+      },
+      {
+        "label": "constraints 旧 expectedConstraintsVersion",
+        "endpoint": "constraints",
+        "status": 409,
+        "errorCode": "MISSION_CHANGED"
+      },
+      {
+        "label": "research-scope 旧 expectedScopeVersion",
+        "endpoint": "research-scope",
+        "status": 409,
+        "errorCode": "MISSION_CHANGED"
+      },
+      {
+        "label": "continuation-policy 旧 expectedVersion",
+        "endpoint": "continuation-policy",
+        "status": 409,
+        "errorCode": "MISSION_CHANGED"
+      },
+      {
+        "label": "responsibility 错误 expectedControlVersion（controlVersion 等价字段）",
+        "endpoint": "responsibility",
+        "status": 409,
+        "errorCode": "MISSION_CHANGED"
+      },
+      {
+        "label": "continations-confirm 旧 expectedContextVersion",
+        "endpoint": "continuations-confirm",
+        "status": 409,
+        "errorCode": "ASSESSMENT_CHANGED"
+      },
+      {
+        "label": "artifact-confirm 旧 expectedContextVersion",
+        "endpoint": "artifact-confirm",
+        "status": 409,
+        "errorCode": "OUTPUT_CHANGED"
+      }
+    ]
+  }
+}

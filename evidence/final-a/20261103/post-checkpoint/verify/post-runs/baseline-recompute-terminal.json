@@ -1,0 +1,601 @@
+{
+  "generatedAt": "2026-11-03T07:27:26.090Z",
+  "purpose": "BEFORE_FIX 终态+未结算UNKNOWN 入口可达性独立特征化",
+  "sourceTree": "BEFORE_FIX 4b69614 clean shadow (recompute for reproducibility)",
+  "db": {
+    "kind": "temporary sqlite (mkdtemp) + prisma migrations replayed",
+    "path": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-post-base-terminal-pafJc6\\verify.db"
+  },
+  "scenarios": {
+    "succeededUnknown": {
+      "missionId": "cmw0d7urr0003488otijfyfkd",
+      "missionRow": {
+        "status": "SUCCEEDED",
+        "lastErrorJson": {
+          "code": "EXTERNAL_UNKNOWN"
+        },
+        "finishedAt": "2026-11-03T07:27:26.381Z"
+      },
+      "summary": {
+        "service": {
+          "enabled": true,
+          "totalActive": 0,
+          "itemIds": [],
+          "itemKeys": []
+        },
+        "route": {
+          "status": 200,
+          "body": {
+            "enabled": true,
+            "totalActive": 0,
+            "items": []
+          },
+          "missionFound": false
+        }
+      },
+      "focus": {
+        "missionFound": false,
+        "counts": {
+          "waiting": 0,
+          "running": 0,
+          "actions": 0,
+          "reminders": 0
+        },
+        "waiting": [],
+        "running": [],
+        "coverage": {
+          "complete": true,
+          "consideredProjectIds": [],
+          "countsAreBounded": true
+        },
+        "primaryContextProjectId": null
+      },
+      "detail": {
+        "status": "SUCCEEDED",
+        "error": {
+          "code": "EXTERNAL_UNKNOWN",
+          "message": "外部写入结果未知，读取不会自动核销",
+          "phase": "TOOL"
+        },
+        "workState": {
+          "phase": "COMPLETED",
+          "nextActor": "USER",
+          "requiresUser": true,
+          "reasonCode": "SUCCEEDED",
+          "reasonText": "原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准",
+          "actionLabel": "查看原结果并核对未知调用",
+          "checkedAt": "2026-11-03T07:27:26.504Z",
+          "observedAt": null,
+          "terminal": {
+            "status": "SUCCEEDED",
+            "at": "2026-11-03T07:27:26.381Z",
+            "atSource": "FINISHED_AT",
+            "reasonCode": "SUCCEEDED"
+          },
+          "unsettledEffect": {
+            "present": true,
+            "code": "EXTERNAL_UNKNOWN",
+            "source": "LAST_ERROR",
+            "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "NONE",
+            "requestedAt": null,
+            "settled": true,
+            "note": "原委托已完成；停止请求不再具有执行含义"
+          },
+          "originalRef": {
+            "kind": "MISSION",
+            "id": "cmw0d7urr0003488otijfyfkd",
+            "version": 1
+          },
+          "exactQuestionRef": null
+        }
+      },
+      "readback1": {
+        "missionStatus": "SUCCEEDED",
+        "missionVersion": 1,
+        "workState": {
+          "phase": "COMPLETED",
+          "nextActor": "USER",
+          "requiresUser": true,
+          "reasonCode": "SUCCEEDED",
+          "reasonText": "原委托完成条件已通过；仍有未知调用结果未结算，现实效果以原结果为准",
+          "actionLabel": "查看原结果并核对未知调用",
+          "checkedAt": "2026-11-03T07:27:26.519Z",
+          "observedAt": null,
+          "terminal": {
+            "status": "SUCCEEDED",
+            "at": "2026-11-03T07:27:26.381Z",
+            "atSource": "FINISHED_AT",
+            "reasonCode": "SUCCEEDED"
+          },
+          "unsettledEffect": {
+            "present": true,
+            "code": "EXTERNAL_UNKNOWN",
+            "source": "LAST_ERROR",
+            "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "NONE",
+            "requestedAt": null,
+            "settled": true,
+            "note": "原委托已完成；停止请求不再具有执行含义"
+          },
+          "originalRef": {
+            "kind": "MISSION",
+            "id": "cmw0d7urr0003488otijfyfkd",
+            "version": 1
+          },
+          "exactQuestionRef": null
+        },
+        "observation": {
+          "readAt": "2026-11-03T07:27:26.586Z",
+          "state": "NOT_OBSERVED",
+          "lastSuccessfulAt": null,
+          "lastFailedAt": null,
+          "lastNoNewInformationAt": null,
+          "nextCheckAt": null,
+          "authority": "ORIGINAL_DELEGATION_RECORDS_ONLY"
+        },
+        "workPacket": {
+          "contractVersion": "final-a-workpacket-v1",
+          "schemaVersion": 1,
+          "identity": {
+            "missionId": "cmw0d7urr0003488otijfyfkd",
+            "projectId": "cmw0d7uql0001488obrljbtvv",
+            "missionVersion": 1,
+            "missionStatus": "SUCCEEDED",
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "controlVersion": "778693d0624ce9c05439108baee48a5f0ddc11b3a241fe5b463137c2ea6b4572",
+            "originalRef": {
+              "kind": "MISSION",
+              "id": "cmw0d7urr0003488otijfyfkd",
+              "version": 1
+            }
+          },
+          "snapshot": {
+            "mode": "SINGLE_READ_TRANSACTION",
+            "consistency": "VERSION_STABLE",
+            "retries": 0,
+            "checkedAt": "2026-11-03T07:27:26.586Z",
+            "note": "同一只读事务内读取；身份与版本来自同一快照。"
+          },
+          "observations": {
+            "readAt": "2026-11-03T07:27:26.586Z",
+            "state": "NOT_OBSERVED",
+            "lastSuccessfulAt": null,
+            "lastFailedAt": null,
+            "lastNoNewInformationAt": null,
+            "nextCheckAt": null,
+            "authority": "ORIGINAL_DELEGATION_RECORDS_ONLY"
+          },
+          "stoppedUnknownEffect": {
+            "present": true,
+            "code": "EXTERNAL_UNKNOWN",
+            "source": "LAST_ERROR",
+            "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+            "resolvedByRead": false
+          },
+          "primaryAction": {
+            "kind": "CHECK_UNKNOWN_EFFECT",
+            "label": "查看原结果并核对未知调用",
+            "target": {
+              "kind": "MISSION",
+              "id": "cmw0d7urr0003488otijfyfkd",
+              "version": 1
+            },
+            "requires": {
+              "missionVersion": 1,
+              "planRevision": 1,
+              "contextVersion": 1,
+              "constraintsVersion": 1,
+              "researchScopeVersion": 1,
+              "controlVersion": "778693d0624ce9c05439108baee48a5f0ddc11b3a241fe5b463137c2ea6b4572",
+              "questionId": null,
+              "approvalId": null,
+              "proposalHash": null,
+              "requiredSourceRevisions": [],
+              "boundaryAt": null
+            },
+            "submissionGuard": "SERVER_RECHECKS_OWNER_PROJECT_VERSION_SOURCE_PERMISSION_LEASE_BUDGET_IDEMPOTENCY",
+            "readOnly": true
+          },
+          "waitingOn": "NONE",
+          "blockerCodes": [
+            "UNKNOWN_EFFECT:EXTERNAL_UNKNOWN"
+          ],
+          "coverageWindows": [
+            {
+              "name": "RECENT_STEPS",
+              "limit": 5,
+              "returned": 0,
+              "truncated": false
+            },
+            {
+              "name": "ACTION_RECEIPTS",
+              "limit": 5,
+              "returned": 0,
+              "truncated": false
+            },
+            {
+              "name": "MATERIAL_USES",
+              "limit": 8,
+              "returned": 0,
+              "truncated": false
+            },
+            {
+              "name": "MATERIAL_SOURCE_EVENTS",
+              "limit": 80,
+              "returned": 0,
+              "truncated": false
+            },
+            {
+              "name": "MATERIAL_MISSION_RUNS",
+              "limit": 40,
+              "returned": 0,
+              "truncated": false
+            },
+            {
+              "name": "MISSION_MODEL_RUNS",
+              "limit": 20,
+              "returned": 0,
+              "truncated": false
+            },
+            {
+              "name": "EVIDENCE_REVIEWS",
+              "limit": 3,
+              "returned": 0,
+              "truncated": false
+            }
+          ]
+        }
+      },
+      "readback2Stable": {
+        "versionSame": true,
+        "observationLastSuccessfulAtSame": true,
+        "observedAtIsReadTime": true,
+        "packetConsistency": "VERSION_STABLE",
+        "primaryActionKindSame": true
+      },
+      "routeEvidence": {
+        "readbackGet": {
+          "status": 200,
+          "hasReadback": true,
+          "packetKind": "CHECK_UNKNOWN_EFFECT"
+        },
+        "nonOwner": {
+          "status": 404,
+          "code": "MISSION_NOT_FOUND"
+        }
+      },
+      "readOnly": {
+        "before": {
+          "status": "SUCCEEDED",
+          "version": 1,
+          "updatedAt": "2026-11-03T07:27:26.383Z",
+          "finishedAt": "2026-11-03T07:27:26.381Z",
+          "planRevision": 1,
+          "contextVersion": 1,
+          "constraintsVersion": 1,
+          "researchScopeVersion": 1,
+          "nextEventSeq": 1,
+          "lastErrorJson": {
+            "code": "EXTERNAL_UNKNOWN",
+            "message": "外部写入结果未知，读取不会自动核销",
+            "phase": "TOOL"
+          },
+          "counts": {
+            "events": 1,
+            "steps": 0,
+            "approvals": 0,
+            "outputs": 0
+          }
+        },
+        "after": {
+          "status": "SUCCEEDED",
+          "version": 1,
+          "updatedAt": "2026-11-03T07:27:26.383Z",
+          "finishedAt": "2026-11-03T07:27:26.381Z",
+          "planRevision": 1,
+          "contextVersion": 1,
+          "constraintsVersion": 1,
+          "researchScopeVersion": 1,
+          "nextEventSeq": 1,
+          "lastErrorJson": {
+            "code": "EXTERNAL_UNKNOWN",
+            "message": "外部写入结果未知，读取不会自动核销",
+            "phase": "TOOL"
+          },
+          "counts": {
+            "events": 1,
+            "steps": 0,
+            "approvals": 0,
+            "outputs": 0
+          }
+        },
+        "identical": true
+      }
+    },
+    "cancelledUnknown": {
+      "missionId": "cmw0d7v1a000b488ojrnqe5or",
+      "summary": {
+        "totalActive": 0,
+        "itemIds": [],
+        "missionFound": false
+      },
+      "focus": {
+        "missionFound": false
+      },
+      "detail": {
+        "status": "CANCELLED",
+        "error": {
+          "code": "EXTERNAL_UNKNOWN",
+          "message": "取消在途的外部写入结果未知",
+          "phase": "TOOL"
+        },
+        "workState": {
+          "phase": "COMPLETED",
+          "nextActor": "USER",
+          "requiresUser": true,
+          "reasonCode": "CANCELLED",
+          "reasonText": "原委托已取消，历史结果保留；仍有未知调用结果未结算，不能视为成功完成",
+          "actionLabel": "查看取消前原结果并核对未知调用",
+          "checkedAt": "2026-11-03T07:27:26.717Z",
+          "observedAt": null,
+          "terminal": {
+            "status": "CANCELLED",
+            "at": "2026-11-03T07:27:26.692Z",
+            "atSource": "FINISHED_AT",
+            "reasonCode": "CANCELLED"
+          },
+          "unsettledEffect": {
+            "present": true,
+            "code": "EXTERNAL_UNKNOWN",
+            "source": "LAST_ERROR",
+            "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "CANCEL_SETTLED",
+            "requestedAt": "2026-11-03T07:27:26.692Z",
+            "settled": true,
+            "note": "取消请求已结算：原委托已取消，历史结果保留，不能视为成功完成"
+          },
+          "originalRef": {
+            "kind": "MISSION",
+            "id": "cmw0d7v1a000b488ojrnqe5or",
+            "version": 1
+          },
+          "exactQuestionRef": null
+        }
+      },
+      "readback": {
+        "missionStatus": "CANCELLED",
+        "workState": {
+          "phase": "COMPLETED",
+          "nextActor": "USER",
+          "requiresUser": true,
+          "reasonCode": "CANCELLED",
+          "reasonText": "原委托已取消，历史结果保留；仍有未知调用结果未结算，不能视为成功完成",
+          "actionLabel": "查看取消前原结果并核对未知调用",
+          "checkedAt": "2026-11-03T07:27:26.722Z",
+          "observedAt": null,
+          "terminal": {
+            "status": "CANCELLED",
+            "at": "2026-11-03T07:27:26.692Z",
+            "atSource": "FINISHED_AT",
+            "reasonCode": "CANCELLED"
+          },
+          "unsettledEffect": {
+            "present": true,
+            "code": "EXTERNAL_UNKNOWN",
+            "source": "LAST_ERROR",
+            "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+            "resolvedByRead": false
+          },
+          "stopRequest": {
+            "state": "CANCEL_SETTLED",
+            "requestedAt": "2026-11-03T07:27:26.692Z",
+            "settled": true,
+            "note": "取消请求已结算：原委托已取消，历史结果保留，不能视为成功完成"
+          },
+          "originalRef": {
+            "kind": "MISSION",
+            "id": "cmw0d7v1a000b488ojrnqe5or",
+            "version": 1
+          },
+          "exactQuestionRef": null
+        },
+        "workPacket": {
+          "contractVersion": "final-a-workpacket-v1",
+          "schemaVersion": 1,
+          "identity": {
+            "missionId": "cmw0d7v1a000b488ojrnqe5or",
+            "projectId": "cmw0d7v150009488oksv7inrs",
+            "missionVersion": 1,
+            "missionStatus": "CANCELLED",
+            "planRevision": 1,
+            "contextVersion": 1,
+            "constraintsVersion": 1,
+            "researchScopeVersion": 1,
+            "controlVersion": "9796d4ee1139cfe61bb22d178229df619f61d39c687b2c72b2ad6eec2b2e284e",
+            "originalRef": {
+              "kind": "MISSION",
+              "id": "cmw0d7v1a000b488ojrnqe5or",
+              "version": 1
+            }
+          },
+          "snapshot": {
+            "mode": "SINGLE_READ_TRANSACTION",
+            "consistency": "VERSION_STABLE",
+            "retries": 0,
+            "checkedAt": "2026-11-03T07:27:26.750Z",
+            "note": "同一只读事务内读取；身份与版本来自同一快照。"
+          },
+          "observations": {
+            "readAt": "2026-11-03T07:27:26.750Z",
+            "state": "NOT_OBSERVED",
+            "lastSuccessfulAt": null,
+            "lastFailedAt": null,
+            "lastNoNewInformationAt": null,
+            "nextCheckAt": null,
+            "authority": "ORIGINAL_DELEGATION_RECORDS_ONLY"
+          },
+          "stoppedUnknownEffect": {
+            "present": true,
+            "code": "EXTERNAL_UNKNOWN",
+            "source": "LAST_ERROR",
+            "reasonText": "原请求或外部效果尚未结算，读取不会自动核销",
+            "resolvedByRead": false
+          },
+          "primaryAction": {
+            "kind": "CHECK_UNKNOWN_EFFECT",
+            "label": "查看取消前原结果并核对未知调用",
+            "target": {
+              "kind": "MISSION",
+              "id": "cmw0d7v1a000b488ojrnqe5or",
+              "version": 1
+            },
+            "requires": {
+              "missionVersion": 1,
+              "planRevision": 1,
+              "contextVersion": 1,
+              "constraintsVersion": 1,
+              "researchScopeVersion": 1,
+              "controlVersion": "9796d4ee1139cfe61bb22d178229df619f61d39c687b2c72b2ad6eec2b2e284e",
+              "questionId": null,
+              "approvalId": null,
+              "proposalHash": null,
+              "requiredSourceRevisions": [],
+              "boundaryAt": null
+            },
+            "submissionGuard": "SERVER_RECHECKS_OWNER_PROJECT_VERSION_SOURCE_PERMISSION_LEASE_BUDGET_IDEMPOTENCY",
+            "readOnly": true
+          },
+          "waitingOn": "NONE",
+          "blockerCodes": [
+            "UNKNOWN_EFFECT:EXTERNAL_UNKNOWN"
+          ],
+          "coverageWindows": [
+            {
+              "name": "RECENT_STEPS",
+              "limit": 5,
+              "returned": 0,
+              "truncated": false
+            },
+            {
+              "name": "ACTION_RECEIPTS",
+              "limit": 5,
+              "returned": 0,
+              "truncated": false
+            },
+            {
+              "name": "MATERIAL_USES",
+              "limit": 8,
+              "returned": 0,
+              "truncated": false
+            },
+            {
+              "name": "MATERIAL_SOURCE_EVENTS",
+              "limit": 80,
+              "returned": 0,
+              "truncated": false
+            },
+            {
+              "name": "MATERIAL_MISSION_RUNS",
+              "limit": 40,
+              "returned": 0,
+              "truncated": false
+            },
+            {
+              "name": "MISSION_MODEL_RUNS",
+              "limit": 20,
+              "returned": 0,
+              "truncated": false
+            },
+            {
+              "name": "EVIDENCE_REVIEWS",
+              "limit": 3,
+              "returned": 0,
+              "truncated": false
+            }
+          ]
+        }
+      },
+      "readOnly": {
+        "before": {
+          "status": "CANCELLED",
+          "version": 1,
+          "updatedAt": "2026-11-03T07:27:26.693Z",
+          "finishedAt": "2026-11-03T07:27:26.692Z",
+          "planRevision": 1,
+          "contextVersion": 1,
+          "constraintsVersion": 1,
+          "researchScopeVersion": 1,
+          "nextEventSeq": 1,
+          "lastErrorJson": {
+            "code": "EXTERNAL_UNKNOWN",
+            "message": "取消在途的外部写入结果未知",
+            "phase": "TOOL"
+          },
+          "counts": {
+            "events": 1,
+            "steps": 0,
+            "approvals": 0,
+            "outputs": 0
+          }
+        },
+        "after": {
+          "status": "CANCELLED",
+          "version": 1,
+          "updatedAt": "2026-11-03T07:27:26.693Z",
+          "finishedAt": "2026-11-03T07:27:26.692Z",
+          "planRevision": 1,
+          "contextVersion": 1,
+          "constraintsVersion": 1,
+          "researchScopeVersion": 1,
+          "nextEventSeq": 1,
+          "lastErrorJson": {
+            "code": "EXTERNAL_UNKNOWN",
+            "message": "取消在途的外部写入结果未知",
+            "phase": "TOOL"
+          },
+          "counts": {
+            "events": 1,
+            "steps": 0,
+            "approvals": 0,
+            "outputs": 0
+          }
+        },
+        "identical": true
+      }
+    }
+  },
+  "verdict": {
+    "summaryCanFindSucceeded": false,
+    "summaryCanFindCancelled": false,
+    "focusCanFindSucceeded": false,
+    "focusCanFindCancelled": false,
+    "detailExpressesSucceededTerminal": true,
+    "detailExpressesCancelledTerminal": true,
+    "detailExpressesUnsettledSucceeded": true,
+    "detailExpressesUnsettledCancelled": true,
+    "readbackExpressesSucceededTerminal": true,
+    "readbackExpressesCancelledTerminal": true,
+    "readbackExpressesUnsettledSucceeded": true,
+    "readbackExpressesUnsettledCancelled": true,
+    "readbackPrimaryActionKinds": {
+      "succeeded": "CHECK_UNKNOWN_EFFECT",
+      "cancelled": "CHECK_UNKNOWN_EFFECT"
+    },
+    "readOnlyZeroChange": true,
+    "nonOwner404": true,
+    "conclusion": "入口缺口：missionWorkspaceSummary/GlobalFocus 只查非终态状态集，终态+未结算UNKNOWN任务完全不在摘要/Focus 结果中；但同一 workState 投影在 detail/readback 已能并列表达 terminal+unsettledEffect，故不是“状态不可表达”。"
+  }
+}

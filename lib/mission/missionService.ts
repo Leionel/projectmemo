@@ -75,8 +75,12 @@ export async function commandMission(userId:string,id:string,action:string,raw:u
     let status=m.status;
     if(action==="input"){
       const q=await tx.agentMissionEvent.findFirst({where:{missionId:id,type:{in:["QUESTION","INVESTIGATION_NO_NEW_INFORMATION","INVESTIGATION_OBSERVATION_CHANGED"]}},orderBy:{seq:"desc"}});
-      if(m.status!=="WAITING_INPUT"||!body.answer||q?.id!==body.questionId)throw new AppError("INPUT_CHANGED","问题已变化，请刷新后补充",409);status="READY";
       const wait=m.waitStateJson as unknown as WaitState;
+      // 原问题身份以 waitState 的未解决原问题为准（与工作包 requires.questionId 同源）：
+      // 等待回答期间原委托可能先写入观察事件，最新事件 id 不等于用户正在回答的原问题 id。
+      // resolved===true 的旧问题不接受；没有 wait 记录的旧数据回退到最新问题/观察事件，保持原兼容。
+      const expectedQuestionId=wait?.resolved!==true&&typeof wait.questionId==="string"?wait.questionId:q?.id;
+      if(m.status!=="WAITING_INPUT"||!body.answer||expectedQuestionId==null||expectedQuestionId!==body.questionId)throw new AppError("INPUT_CHANGED","问题已变化，请刷新后补充",409);status="READY";
       const fit=await assessEvidenceFit(tx,m,wait,[],body.evidenceReview);
       if(fit){
         requireFitReview(fit,body.evidenceReview);

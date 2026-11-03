@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { AppError } from "@/lib/api";
 import { sourceUse } from "@/lib/continuity/sourcePolicy";
+import { effectiveContinuity } from "@/lib/continuity/directiveService";
 import type { Tx } from "./repository";
 import { readProjectMaterialView, type MaterialCoverage } from "./sourceSignals";
 
@@ -49,9 +50,12 @@ const textHash = (text: string) => createHash("sha256").update(text).digest("hex
   * 历史 facts 保留原身份；原始摘录仍在原记录中，但普通读回不下发受抑制/未知来源正文。
  * SourcePolicy 抛错时保守记为 UNKNOWN，保留原因，不中断整份读回。
  */
-async function currentUseOf(input: { userId: string; projectId: string; missionId: string; sourceId: string; tx: Tx; checkedAt: string }): Promise<MaterialUseCurrentUse> {
+async function currentUseOf(input: { userId: string; projectId: string; missionId: string; sourceId: string; tx: Tx; checkedAt: string;
+  /** 同请求只读复用：本次 materialUseProjection 已算过一次 continuity view，逐 item 复用同一快照。 */
+  continuity?: Awaited<ReturnType<typeof effectiveContinuity>> }): Promise<MaterialUseCurrentUse> {
   try {
-    const use = await sourceUse(input.userId, input.projectId, input.sourceId, input.tx, { missionId: input.missionId });
+    const use = await sourceUse(input.userId, input.projectId, input.sourceId, input.tx, { missionId: input.missionId },
+      input.continuity ? { continuity: input.continuity } : undefined);
     return { state: use.state, independentEvidence: use.independentEvidence, reason: use.reason, policy: "SOURCE_POLICY_V1", checkedAt: input.checkedAt, appliesTo: "CURRENT_USE_ONLY" };
   } catch (error) {
     const reason = error instanceof AppError ? error.code : "SOURCE_POLICY_UNAVAILABLE";
@@ -86,6 +90,8 @@ export async function materialUseProjection(tx: Tx, input: { missionId: string; 
   const events = eventRows.slice(0, 80), steps = stepRows.slice(0, 40), outputs = outputRows.slice(0, 20), receipts = receiptRows.slice(0, 20);
   const items = new Map<string, MaterialUseItem>();
   let sourceLimitReached = false;
+  // 只读量测：本请求实际执行的 SourcePolicy currentUse 判定次数；只增输出数字，不改变任何判定。
+  let sourcePolicyChecks = 0;
   const add = (p: Pointer, fact: MaterialUseFact) => {
     let item = items.get(key(p));
     if (!item) {
@@ -152,6 +158,11 @@ export async function materialUseProjection(tx: Tx, input: { missionId: string; 
       }
     }
   }
+  // 同请求只读复用：仅在调用方提供 userId 时，本请求只计算一次 continuity view（同一 tx、同一 user+mission scope），
+  // 逐 item 传给 sourceUse；不跨请求/版本缓存，逐 source 的 lineage/许可判定逻辑与结果不变。
+  const continuity = input.userId
+    ? await effectiveContinuity(input.userId, { projectId: input.projectId, missionId: input.missionId }, tx)
+    : null;
   for (const item of items.values()) {
     const view = await readProjectMaterialView(input.projectId, item.sourcePointer.id, tx);
     if (view) {
@@ -163,9 +174,11 @@ export async function materialUseProjection(tx: Tx, input: { missionId: string; 
     }
     // 单独保存版本事实，不能仅新增旧客户端不会读取的 currentUse 字段。
     item.revisionAvailability = item.availability;
-    item.currentUse = input.userId
-      ? await currentUseOf({ userId: input.userId, projectId: input.projectId, missionId: input.missionId, sourceId: item.sourcePointer.id, tx, checkedAt })
-      : null;
+    if (input.userId) {
+      sourcePolicyChecks += 1;
+      item.currentUse = await currentUseOf({ userId: input.userId, projectId: input.projectId, missionId: input.missionId, sourceId: item.sourcePointer.id, tx, checkedAt,
+        ...(continuity ? { continuity } : {}) });
+    } else item.currentUse = null;
     if (item.currentUse?.state !== "ALLOWED") {
       item.availability = "UNAVAILABLE";
       item.excerpt = null;
@@ -181,6 +194,8 @@ export async function materialUseProjection(tx: Tx, input: { missionId: string; 
       // 原 projectRunLimit 保留为兼容别名：窗口已改为先按 Mission 过滤再取 40 条。
       runLimit, projectRunLimit: runLimit, runsInspected: runs.length, runsTruncated: runIds.length > runLimit, runScope: "MISSION_FILTERED" as const,
       sourceLimit: 8, sourceLimitReached, mapping: "DIRECT_SOURCE_POINTERS_ONLY" as const,
+      // 量测口径：每次 item 的 currentUse 判定即一次 SourcePolicy sourceUse 检查（只读数字）。
+      sourcePolicyChecks,
     },
   };
 }

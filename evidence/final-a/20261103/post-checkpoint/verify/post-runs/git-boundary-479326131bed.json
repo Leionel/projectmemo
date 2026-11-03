@@ -1,0 +1,132 @@
+{
+  "generatedAt": "2026-11-03T15:43:16.9520119+08:00",
+  "purpose": "POST 独立验收：A 第二批交付的 git 边界 / 密钥 / docs 扫描",
+  "repo": "D:\\Projects\\hongmen-final-a-mission-packet",
+  "branch": "codex/final-a-mission-packet",
+  "head": "3ec63e62470d0033f3cd6404c047ad720ecae72c",
+  "checkpoint": "4b696141435825a3582816e8e449c0e0cf013f29",
+  "finalSha": "479326131bedb385b0d89f710d960708ae7e9461",
+  "commits": [
+    "479326131bedb385b0d89f710d960708ae7e9461"
+  ],
+  "changedFiles": [
+    "A\tevidence/final-a/20261103/post-checkpoint/REQUIRES_ENDPOINT_MAP.md",
+    "M\tlib/mission/missionService.ts",
+    "A\ttests/finalARequiresGuards.test.ts"
+  ],
+  "changedFileCount": 3,
+  "checks": [
+    {
+      "id": "GIT-01",
+      "question": "FinalSha 是固定检查点 4b69614 的后代",
+      "verdict": "PASS",
+      "observed": {
+        "checkpoint": "4b696141435825a3582816e8e449c0e0cf013f29",
+        "finalSha": "479326131bedb385b0d89f710d960708ae7e9461",
+        "isAncestor": true
+      },
+      "note": ""
+    },
+    {
+      "id": "GIT-03",
+      "question": "提交区间不含 schema.prisma / prisma/migrations",
+      "verdict": "PASS",
+      "observed": {
+        "schemaChanges": [],
+        "prismaFiles": []
+      },
+      "note": ""
+    },
+    {
+      "id": "GIT-04",
+      "question": "提交区间不含 app/ components/ harmonyos/ public/ deploy/ e2e/ 等 UI/官网/客户端文件",
+      "verdict": "PASS",
+      "observed": {
+        "forbiddenPrefixes": [
+          "prisma/",
+          "app/",
+          "components/",
+          "harmonyos/",
+          "docs/",
+          "public/",
+          "deploy/",
+          "e2e/",
+          "prototypes/"
+        ],
+        "hits": []
+      },
+      "note": ""
+    },
+    {
+      "id": "GIT-05",
+      "question": "规划 docs（docs/FINAL/...）未入 git：不在提交区间、未被跟踪且被 gitignore；仓库既有 docs/ 本次未变",
+      "verdict": "PASS",
+      "observed": {
+        "docsInCommits": 0,
+        "planningTracked": 0,
+        "planningIgnored": true,
+        "trackedDocsElsewhere": 41
+      },
+      "note": ""
+    },
+    {
+      "id": "GIT-06",
+      "question": "提交区间不含 .env / 签名私钥 / keystore 等敏感文件",
+      "verdict": "PASS",
+      "observed": {
+        "envFiles": []
+      },
+      "note": ""
+    },
+    {
+      "id": "GIT-07",
+      "question": "新增行未发现密钥模式（7 类模式扫描）",
+      "verdict": "PASS",
+      "observed": {
+        "patterns": [
+          "private_key",
+          "openai_sk",
+          "aws_akia",
+          "github_token",
+          "slack_token",
+          "bearer_hardcode",
+          "env_secret_assign"
+        ],
+        "hits": []
+      },
+      "note": ""
+    },
+    {
+      "id": "GIT-08",
+      "question": "新增行未新增数据表（model/CREATE TABLE）",
+      "verdict": "PASS",
+      "observed": {
+        "hits": []
+      },
+      "note": ""
+    },
+    {
+      "id": "GIT-09",
+      "question": "新增行未引入 Runner/Planner/后台循环执行器",
+      "verdict": "PASS",
+      "observed": {
+        "hits": []
+      },
+      "note": ""
+    },
+    {
+      "id": "GIT-10",
+      "question": "提交区间未改 lib/mission/runner.ts 之外的执行器/调度文件",
+      "verdict": "PASS",
+      "observed": {
+        "executorRelated": []
+      },
+      "note": ""
+    }
+  ],
+  "summary": {
+    "total": 9,
+    "pass": 9,
+    "fail": 0
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "generatedAt": "2026-11-03T15:44:42.0387280+08:00",
+  "purpose": "脚本安全与 perf 证据独立复核（perf 脚本只临时库/无网络/无模型；a1 样本脚本仅类型对齐且可跑）",
+  "checks": [
+    {
+      "id": "SAFE-PERF-01",
+      "question": "perf-readback.ts 无网络/模型调用（静态扫描 9 类模式 0 命中；provider 为 mock）",
+      "verdict": "PASS",
+      "observed": {
+        "patternCounts": {
+          "fetch\\(": 0,
+          "https?://": 0,
+          "openai": 0,
+          "anthropic": 0,
+          "deepseek": 0,
+          "lib/model": 0,
+          "modelAdapter": 0,
+          "API_KEY": 0,
+          "PRIVATE KEY": 0
+        }
+      }
+    },
+    {
+      "id": "SAFE-PERF-02",
+      "question": "perf 证据三阶段均：独立临时 SQLite（%TEMP% mkdtemp）、LLM=mock、模型/网络调用 0、读零写入、阶段期望 18/18",
+      "verdict": "PASS",
+      "observed": {
+        "phases": [
+          {
+            "phase": "before",
+            "head": "4b696141435825a3582816e8e449c0e0cf013f29",
+            "llmMode": "mock",
+            "modelProviderCalls": 0,
+            "networkCalls": 0,
+            "dbKind": "isolated-temporary-sqlite",
+            "tempDir": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-final-a-perf-readback-before-4EWqab",
+            "migrationsApplied": 52,
+            "writeStatementsTotal": 0,
+            "checks": "18/18"
+          },
+          {
+            "phase": "after",
+            "head": "4b696141435825a3582816e8e449c0e0cf013f29",
+            "llmMode": "mock",
+            "modelProviderCalls": 0,
+            "networkCalls": 0,
+            "dbKind": "isolated-temporary-sqlite",
+            "tempDir": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-final-a-perf-readback-after-M5uP1b",
+            "migrationsApplied": 52,
+            "writeStatementsTotal": 0,
+            "checks": "18/18"
+          },
+          {
+            "phase": "after2",
+            "head": "4b696141435825a3582816e8e449c0e0cf013f29",
+            "llmMode": "mock",
+            "modelProviderCalls": 0,
+            "networkCalls": 0,
+            "dbKind": "isolated-temporary-sqlite",
+            "tempDir": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\pm-final-a-perf-readback-after2-MrvmSl",
+            "migrationsApplied": 52,
+            "writeStatementsTotal": 0,
+            "checks": "18/18"
+          }
+        ]
+      }
+    },
+    {
+      "id": "SAFE-PERF-03",
+      "question": "perf 关键数字：BEFORE 窗口 hits=0（复现挤出）、AFTER/AFTER2 hits=3；事务 2；最多 2 次重读；SourcePolicy=6；SELECT BEFORE/AFTER/AFTER2=100/100/78",
+      "verdict": "PASS",
+      "observed": {
+        "windowCorrectness": {
+          "before": {
+            "selectedQuestionId": "cmw0cpknq0004n88oqo33wslo",
+            "targetReviewEventsInDb": 3,
+            "newerOtherQuestionReviewEventsInDb": 24,
+            "phase": "BEFORE",
+            "status": "REPRODUCED_SQUEEZE_BY_OTHER_QUESTIONS",
+            "hits": 0,
+            "hitQuestionIds": [],
+            "questionFilteredFieldPresent": false,
+            "truncated": true,
+            "returnedItems": 0,
+            "reviewWindow": 20,
+            "reviewDisplayLimit": 3,
+            "coverage": null,
+            "note": "BEFORE 代码先取全 Mission 最近 21 条 EVIDENCE_FIT_REVIEWED 再按 questionId 过滤：24 条更新的其他问题审查会挤出 3 条较早的目标问题审查，hits=0（缺陷复现，不是“从未发生”）。"
+          },
+          "after": {
+            "selectedQuestionId": "cmw0cq5gp0004x08o5gqvl0ml",
+            "targetReviewEventsInDb": 3,
+            "newerOtherQuestionReviewEventsInDb": 24,
+            "phase": "AFTER",
+            "status": "FIXED_QUESTION_FILTERED_FIRST",
+            "hits": 3,
+            "hitQuestionIds": [
+              "cmw0cq5gp0004x08o5gqvl0ml"
+            ],
+            "questionFilteredFieldPresent": true,
+            "truncated": false,
+            "returnedItems": 3,
+            "reviewWindow": 20,
+            "reviewDisplayLimit": 3,
+            "coverage": null,
+            "note": "AFTER 代码先用 json_extract(payloadJson,'$.evidenceFit.premise.questionId') 按选中 questionId 过滤再限额 21/20：hits=3，truncated 只表示目标问题窗口溢出。"
+          },
+          "after2": {
+            "selectedQuestionId": "cmw0cqp4b0004fk8obspu1esz",
+            "targetReviewEventsInDb": 3,
+            "newerOtherQuestionReviewEventsInDb": 24,
+            "phase": "AFTER2",
+            "status": "FIXED_QUESTION_FILTERED_FIRST",
+            "hits": 3,
+            "hitQuestionIds": [
+              "cmw0cqp4b0004fk8obspu1esz"
+            ],
+            "questionFilteredFieldPresent": true,
+            "truncated": false,
+            "returnedItems": 3,
+            "reviewWindow": 20,
+            "reviewDisplayLimit": 3,
+            "coverage": null,
+            "note": "AFTER 代码先用 json_extract(payloadJson,'$.evidenceFit.premise.questionId') 按选中 questionId 过滤再限额 21/20：hits=3，truncated 只表示目标问题窗口溢出。"
+          }
+        },
+        "transactionsStable": {
+          "before": [
+            null
+          ],
+          "after": [
+            null
+          ]
+        },
+        "retries": {
+          "beforeRetried": 1,
+          "beforeAdvanced": 2,
+          "afterRetried": 1,
+          "afterAdvanced": 2,
+          "after2Retried": 1,
+          "after2Advanced": 2
+        },
+        "sourcePolicyChecks": {
+          "before": [
+            6
+          ],
+          "after2": [
+            6
+          ]
+        },
+        "selectPerRead": {
+          "before": 100,
+          "after": 100,
+          "after2": 78
+        }
+      }
+    },
+    {
+      "id": "SAFE-A1-01",
+      "question": "a1-contract-samples.ts 相对 4b69614 仅新增 sourcePolicyChecks:1 类型对齐（无删除、无其他行为线）",
+      "verdict": "PASS",
+      "observed": {
+        "addedLines": [
+          "+    // 只读量测字段（A-新3）：本样本含 1 个 item 的 currentUse 判定。",
+          "+    sourcePolicyChecks: 1,"
+        ],
+        "removedLines": []
+      }
+    },
+    {
+      "id": "SAFE-A1-02",
+      "question": "a1-contract-samples.ts 在最终 SHA shadow 运行 exit 0、只写 evidence 样本 14 个、静态无 DB/网络/模型依赖（execFileSync 仅 git rev-parse）",
+      "verdict": "PASS",
+      "observed": {
+        "exit": 0,
+        "samplesWritten": 14,
+        "staticForbiddenPatterns": 0
+      }
+    },
+    {
+      "id": "SAFE-SEC-01",
+      "question": "两个脚本无密钥/私钥模式命中",
+      "verdict": "PASS",
+      "observed": {
+        "patterns": [
+          "-----BEGIN",
+          "sk-[A-Za-z0-9]",
+          "AKIA[0-9A-Z]{16}",
+          "gh[pousr]_",
+          "xox[baprs]-",
+          "PRIVATE KEY"
+        ],
+        "hits": []
+      }
+    }
+  ],
+  "summary": {
+    "total": 6,
+    "pass": 6,
+    "fail": 0
+  },
+  "detail": {
+    "mergedPerfEvidence": "evidence/final-a/20261103/post-checkpoint/perf/readback-perf.json",
+    "a1RunLog": "post-logs/after-a1-contract-samples.log",
+    "a1DiffCommand": "git diff 4b69614 3ec63e62 -- scripts/final-a/a1-contract-samples.ts"
+  }
+}

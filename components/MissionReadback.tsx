@@ -91,10 +91,10 @@ export function MissionReadback({
       document.removeEventListener("visibilitychange", refresh);
     };
   }, []);
-  const boundaries = [data?.workPacket?.next.nextBoundary,
-    data?.workPacket?.authority.nextBoundary, data?.workPacket?.authority.deadline,
-    data?.workPacket?.authority.permissionExpiresAt,
-    data?.workPacket?.next.primaryAction?.requires.boundaryAt]
+  const boundaries = [data?.workPacket?.next?.nextBoundary,
+    data?.workPacket?.authority?.nextBoundary, data?.workPacket?.authority?.deadline,
+    data?.workPacket?.authority?.permissionExpiresAt,
+    data?.workPacket?.next?.primaryAction?.requires?.boundaryAt]
     .map((value) => value ? Date.parse(value) : NaN).filter(Number.isFinite);
   const boundary = boundaries.length ? Math.min(...boundaries) : null;
   const expired = boundary !== null && boundary <= clock;

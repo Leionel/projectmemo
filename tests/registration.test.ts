@@ -1,4 +1,17 @@
-import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, afterEach, afterAll, describe, expect, it, vi } from "vitest";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+const isolated = await vi.hoisted(async () =>
+  (await import("./helpers/continuityDatabase")).continuityDatabase("registration"),
+);
+afterAll(async () => {
+  await db.$disconnect();
+  const target = path.resolve(isolated.dir);
+  if (!target.startsWith(path.join(os.tmpdir(), "pm-continuity-registration-")))
+    throw new Error("拒绝清理隔离目录之外的路径");
+  fs.rmSync(target, { recursive: true, force: true });
+});
 import { NextRequest } from "next/server";
 import { AppError } from "@/lib/api";
 import { createMission } from "@/lib/mission/missionService";

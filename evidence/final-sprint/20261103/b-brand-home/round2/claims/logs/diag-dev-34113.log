@@ -1,0 +1,19 @@
+
+> projectmemo@0.1.0 dev
+> next dev --hostname 127.0.0.1 --port 34113
+
+▲ Next.js 16.4.3 (Turbopack)
+- Local:         http://127.0.0.1:34113
+- Network:       http://127.0.0.1:34113
+✓ Ready in 4.8s
+✓ Running next.config.ts took 222ms
+
+  We detected TypeScript in your project and reconfigured your tsconfig.json file for you.
+  The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
+
+  	- include was updated to add '.next-diag/types/**/*.ts'
+  	- include was updated to add '.next-diag/dev/types/**/*.ts'
+
+
+○ Compiling / ...
+ GET / 200 in 4.9s (next.js: 2.1s, application-code: 2.8s)

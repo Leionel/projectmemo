@@ -84,3 +84,13 @@ evidence/final-sprint/20261103/b-brand-home/
   audit/a11y/                独立无障碍与交互审计
   tools/                     可重跑的采集/探针脚本
 ```
+
+---
+
+## 8. 第二批（Round 2）追加
+
+主控检查点 `4b69614` 之后的本轮工作与用户追加要求见 [round2/RECEIPT_ROUND2.md](round2/RECEIPT_ROUND2.md)：
+
+- 最终源码候选：`2affe4616ad2ef652a4bfdfdc032e1342f14b7db`（`f06685d` 决赛演示本页播放 + `2affe46` Round 2 审计两项修复；前序 `4b69614` 为集成检查点）。
+- 用户要求把决赛演示改为本页可播放：点击前 0 外域，点击后加载 Bilibili 官方播放器；焦点/收起/新窗口外链均已验证。
+- 生产构建 exit 0（93.4s，43 页，无 OOM）；生产 start 性能（CLS 0、warm FCP/LCP ≈92ms/1440 light、加载期 0 外域）；定向 E2E 10/10；独立 a11y 报告 1 MAJOR+1 MINOR 已在本候选修复并由 Lead 定向复验；真人理解测试仍 NOT_RUN。

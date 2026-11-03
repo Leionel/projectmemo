@@ -1,0 +1,6 @@
+=== ROUND2 PRODUCTION PERF ===
+OK 1440-light   cold: ttfb=26.4ms fcp=924ms lcp=924ms cls=0 load=949ms req=24 transfer=1211700B | warm(median): ttfb=26.1 fcp=92 lcp=92 cls=0 load=93.8ms req=24 transfer=6948.5B
+OK 390-light    cold: ttfb=26.4ms fcp=696ms lcp=696ms cls=0 load=197.5ms req=24 transfer=1211702B | warm(median): ttfb=18.4 fcp=76 lcp=76 cls=0 load=62.15ms req=24 transfer=6950B
+OK 1440-dark    cold: ttfb=20.6ms fcp=696ms lcp=856ms cls=0 load=755.3ms req=24 transfer=1211701B | warm(median): ttfb=15.5 fcp=86 lcp=86 cls=0 load=78.05ms req=24 transfer=6950B
+network: {"requestRecords":216,"uniqueRequestUrls":24,"externalOriginRequests":0,"apiWriteRequests":0,"bilibiliRequests":0,"failures":6,"imageFontFailures":0,"consoleErrors":0,"pageErrors":0}
+assertions: {"noBilibiliRequestDuringLoad":true,"noApiWrites":true,"noExternalOrigins":true,"noPageErrors":true}

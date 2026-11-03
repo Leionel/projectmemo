@@ -1,0 +1,185 @@
+{
+  "files": {
+    "public/fonts/pm-editorial-serif.ttf": {
+      "exists": true,
+      "bytes": 162052,
+      "sha256": "41880f3d221070de0c01a3d3f7cdd7ca2efe37180cb1d700dce93e03a160492b",
+      "addedIn": "c93da46",
+      "addedDate": "2026-10-23"
+    },
+    "public/fonts/pm-serif-brand.ttf": {
+      "exists": true,
+      "bytes": 3012,
+      "sha256": "aa823a7398c0174367c3aedf4ff6e2d1498b837775a2278df22d5939926d4b7b",
+      "addedIn": "3c3d577",
+      "addedDate": "2026-10-22"
+    },
+    "public/fonts/manrope-variable.ttf": {
+      "exists": true,
+      "bytes": 164700,
+      "sha256": "3ae11c49db0455a3cc33e37d380f20fdb8c7f8b41dc07625c177e3d87a9d6ae6",
+      "addedIn": "ac04330",
+      "addedDate": "2026-10-22"
+    },
+    "public/fonts/OFL.txt": {
+      "exists": true,
+      "bytes": 4447,
+      "sha256": "7074a3e788908628d18605968b453c290f8eda59a1ff57117ff021c48e763cdc",
+      "addedIn": "3c3d577",
+      "addedDate": "2026-10-22"
+    },
+    "public/fonts/Manrope-OFL.txt": {
+      "exists": true,
+      "bytes": 4480,
+      "sha256": "4b8929f05a122b7abb9059501dc7dc4df86f8c97d5a1769d60d82cf2d2795dde",
+      "addedIn": "ac04330",
+      "addedDate": "2026-10-22"
+    },
+    "public/fonts/PM-Editorial-NOTICE.txt": {
+      "exists": true,
+      "bytes": 592,
+      "sha256": "da6d551a2f99349810f4c131deccce367c31f005c4a8d48ebe1196aa833485ff",
+      "addedIn": "c93da46",
+      "addedDate": "2026-10-23"
+    },
+    "public/logo.png": {
+      "exists": true,
+      "bytes": 830149,
+      "sha256": "a7b7a7aabcdd772d9d25f9185b52bce5c293f97029aef8fe4ac256cb4cbccae4",
+      "addedIn": "c65fe9b",
+      "addedDate": "2026-08-19"
+    },
+    "public/logo-v2.png": {
+      "exists": true,
+      "bytes": 830149,
+      "sha256": "a7b7a7aabcdd772d9d25f9185b52bce5c293f97029aef8fe4ac256cb4cbccae4",
+      "addedIn": "c65fe9b",
+      "addedDate": "2026-08-19"
+    },
+    "public/home/workspace-desktop.jpg": {
+      "exists": true,
+      "bytes": 94169,
+      "sha256": "6f318122931b4a24ad0faed2720432fb9edfb1a5de7d0699549cd117a7ff198f",
+      "addedIn": "c93da46",
+      "addedDate": "2026-10-23"
+    },
+    "public/home/workspace-mobile.jpg": {
+      "exists": true,
+      "bytes": 37953,
+      "sha256": "31bddeb251613fbafa916c4339bbf22345baef5da437620aa0185c759c2aae76",
+      "addedIn": "c93da46",
+      "addedDate": "2026-10-23"
+    }
+  },
+  "runtime": {
+    "document": {
+      "transferSize": 18510,
+      "encodedBodySize": 18210,
+      "decodedBodySize": 74506
+    },
+    "resources": [
+      {
+        "name": "/logo.png",
+        "initiatorType": "link",
+        "transferSize": 830449,
+        "encodedBodySize": 830149,
+        "decodedBodySize": 830149,
+        "duration": 547.8
+      },
+      {
+        "name": "/fonts/pm-serif-brand.ttf",
+        "initiatorType": "css",
+        "transferSize": 2509,
+        "encodedBodySize": 2209,
+        "decodedBodySize": 3012,
+        "duration": 36.2
+      },
+      {
+        "name": "/fonts/pm-editorial-serif.ttf",
+        "initiatorType": "css",
+        "transferSize": 105695,
+        "encodedBodySize": 105395,
+        "decodedBodySize": 162052,
+        "duration": 370.7
+      },
+      {
+        "name": "/fonts/manrope-variable.ttf",
+        "initiatorType": "css",
+        "transferSize": 69160,
+        "encodedBodySize": 68860,
+        "decodedBodySize": 164700,
+        "duration": 351.7
+      }
+    ],
+    "preconnect": [
+      {
+        "rel": "preload",
+        "href": "/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0qva5cupmdgep._.js",
+        "as": "script"
+      },
+      {
+        "rel": "preload",
+        "href": "/logo.png",
+        "as": "image"
+      }
+    ],
+    "externalAnchors": [
+      {
+        "text": "2026 C4-AI 决赛演示视频忆程 ProjectMemo · Bilibili · 新窗口打开",
+        "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "ariaLabel": null
+      },
+      {
+        "text": "决赛演示",
+        "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "ariaLabel": "决赛演示（Bilibili，在新窗口打开）"
+      }
+    ]
+  },
+  "evidenceRunner": [
+    {
+      "name": "http://127.0.0.1:34111/fonts/pm-serif-brand.ttf",
+      "initiatorType": "css",
+      "startTime": 236,
+      "duration": 0,
+      "transferSize": 0,
+      "encodedBodySize": 2209,
+      "decodedBodySize": 3012,
+      "nextHopProtocol": "http/1.1"
+    },
+    {
+      "name": "http://127.0.0.1:34111/fonts/pm-editorial-serif.ttf",
+      "initiatorType": "css",
+      "startTime": 236.1,
+      "duration": 0,
+      "transferSize": 0,
+      "encodedBodySize": 105395,
+      "decodedBodySize": 162052,
+      "nextHopProtocol": "http/1.1"
+    },
+    {
+      "name": "http://127.0.0.1:34111/fonts/manrope-variable.ttf",
+      "initiatorType": "css",
+      "startTime": 236.2,
+      "duration": 0,
+      "transferSize": 0,
+      "encodedBodySize": 68860,
+      "decodedBodySize": 164700,
+      "nextHopProtocol": "http/1.1"
+    },
+    {
+      "name": "http://127.0.0.1:34111/__nextjs_font/geist-latin.woff2",
+      "initiatorType": "css",
+      "startTime": 294.6,
+      "duration": 0,
+      "transferSize": 0,
+      "encodedBodySize": 28356,
+      "decodedBodySize": 28356,
+      "nextHopProtocol": "http/1.1"
+    }
+  ]
+}

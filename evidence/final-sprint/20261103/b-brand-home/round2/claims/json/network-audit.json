@@ -1,0 +1,2999 @@
+{
+  "generatedAt": "2026-11-03T07:18:57.024Z",
+  "base": "http://127.0.0.1:34111",
+  "candidateSha": "f06685d84b85c523595f2950b07b07dcdbf4271d",
+  "mode": "anonymous playwright chromium 1440x900 read-only",
+  "notes": {
+    "externalAfterClick": "用户显式点击 Bilibili 外链/播放按钮后，由外部站点自行发起的请求不计入本站加载/交互阶段；其中包含外部站点的非 GET 请求（其自身行为，非本站发起）。",
+    "popupCanonicalization": "Bilibili 将 /video/BV1Qaxb6PE7G?vd_source=... 规范化为 /video/BV1Qaxb6PE7G/?vd_source=...（仅补斜杠，参数保留）。",
+    "logoImage": "首页仍加载页头品牌 logo.png（既有 BrandLink <Image priority unoptimized>）；无旧 workspace-*.jpg 请求。",
+    "stageStatuses": "Hero 阶段状态文案（无需操作/核对示例/等你确认）来自冻结公开示例卡片，非实时系统状态；卡片 footer 标注冻结示例/不调用模型。",
+    "videoEmbed": "当前工作树新增 DemoVideoPlayer：默认本地门面，用户点击后才创建 Bilibili iframe（embed URL 自带 autoplay=1）。若最终口径仍禁止 iframe，此项需回退；见 CLAIMS_ROUND2 的 OPEN 项。"
+  },
+  "summary": {
+    "totalRequests": 150,
+    "apiRequests": 0,
+    "apiWrites": 0,
+    "externalRequests": 95,
+    "externalBeforeVideoClick": 43,
+    "externalBeforeAnyUserAction": 0,
+    "externalAfterEmbedClick": 43,
+    "externalNonGetAfterVideoClick": 0,
+    "modelHintRequests": 0,
+    "imageRequests": 7,
+    "localImageRequests": 4,
+    "externalImagesAfterClick": 2,
+    "oldHeroImageRequests": 0,
+    "bilibiliRequestsBeforeClick": 12,
+    "bilibiliRequestsAfterEmbedClick": 12,
+    "failedRequests": 16,
+    "pageErrors": 0,
+    "consoleErrorsWarnings": 3
+  },
+  "assertions": {
+    "noApiTraffic": true,
+    "noApiWrites": true,
+    "noExternalBeforeAnyUserAction": true,
+    "noBilibiliBeforeAnyUserAction": true,
+    "noIframeBeforeAnyUserAction": true,
+    "noModelCallsBeforeVideoClick": true,
+    "noOldHeroImages": true,
+    "noExternalPreconnect": true,
+    "noEmbedsOnLoad": true,
+    "videoEmbedOnlyAfterUserClick": true,
+    "videoEmbedSrcExact": true,
+    "videoEmbedCollapseUnloads": true,
+    "videoEmbedAttrs": {
+      "srcIsBilibiliPlayer": true,
+      "hasTitle": true,
+      "loading": "lazy",
+      "referrerPolicy": "no-referrer-when-downgrade",
+      "allow": "autoplay; fullscreen; picture-in-picture; encrypted-media"
+    }
+  },
+  "externalSurface": {
+    "externalHintLinks": [],
+    "iframes": 0,
+    "videoTags": 0,
+    "audioTags": 0,
+    "embeds": 0,
+    "autoplay": 0,
+    "bilibiliAnchors": [
+      {
+        "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+        "target": "_blank",
+        "rel": "noopener noreferrer"
+      },
+      {
+        "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+        "target": "_blank",
+        "rel": "noopener noreferrer"
+      }
+    ],
+    "biliRequestsSoFar": 0
+  },
+  "heroStageStatuses": [
+    "无需操作",
+    "核对示例",
+    "等你确认"
+  ],
+  "videoEmbed": {
+    "facadeCount": 1,
+    "beforeIframes": 0,
+    "info": {
+      "iframeCount": 1,
+      "src": "https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1",
+      "title": "2026 C4-AI 决赛演示视频（Bilibili 官方播放器）",
+      "loading": "lazy",
+      "referrerPolicy": "no-referrer-when-downgrade",
+      "allow": "autoplay; fullscreen; picture-in-picture; encrypted-media",
+      "stageActive": "true",
+      "activeElement": "IFRAME"
+    },
+    "biliRequestsBefore": 0,
+    "biliRequestsAfter": 12,
+    "playerFrame": {
+      "title": "External Player - 哔哩哔哩嵌入式外链播放器",
+      "videoCount": 1,
+      "duration": 277,
+      "paused": false,
+      "readyState": 4
+    },
+    "collapseCount": 1,
+    "afterCollapse": {
+      "iframeCount": 0,
+      "facadeBack": true,
+      "activeElementLabel": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器"
+    }
+  },
+  "externalDomainsAfterUserClick": [
+    "player.bilibili.com",
+    "s1.hdslb.com",
+    "data.bilibili.com",
+    "api.bilibili.com",
+    "cn-hbwh-fx-01-01.bilivideo.com",
+    "cn-hbwh-fx-01-03.bilivideo.com",
+    "www.bilibili.com",
+    "i0.hdslb.com",
+    "cn-hbwh-fx-01-04.bilivideo.com"
+  ],
+  "videoLinks": {
+    "mainCount": 1,
+    "footerCount": 1,
+    "main": {
+      "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+      "target": "_blank",
+      "rel": "noopener noreferrer",
+      "title": null,
+      "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+      "text": "在 Bilibili 打开（新窗口）"
+    },
+    "footer": {
+      "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+      "target": "_blank",
+      "rel": "noopener noreferrer",
+      "title": null,
+      "ariaLabel": "决赛演示（Bilibili，在新窗口打开）",
+      "text": "决赛演示"
+    },
+    "iframes": 0,
+    "videos": 0,
+    "autoplay": 0
+  },
+  "steps": [
+    {
+      "name": "load-home",
+      "ok": true,
+      "value": {
+        "status": 200,
+        "title": "忆程 ProjectMemo｜人可以下线，项目别掉线。",
+        "url": "http://127.0.0.1:34111/"
+      }
+    },
+    {
+      "name": "hero-default-stage",
+      "ok": true,
+      "value": {
+        "tabCount": 3,
+        "selected": "03 回来后",
+        "rows": "原委托\n用已有材料整理一份阶段汇报\n原任务与草稿都留在原处\n依据\n比赛材料、任务安排、老师建议\n3 条来源可回看原文\n变化\n演示流程缺少完成回执\n原判断“先写汇报草稿”需要你重新确认\n等你\n补充演示结果，或确认先按现有材料写汇报草稿\n确认后从原委托继续，不会另建任务",
+        "panel": "原委托\n用已有材料整理一份阶段汇报\n原任务与草稿都留在原处\n依据\n比赛材料、任务安排、老师建议\n3 条来源可回看原文\n变化\n演示流程缺少完成回执\n原判断“先写汇报草稿”需要你重新确认\n等你\n补充演示结果，或确认先按现有材料写汇报草稿\n确认后从原委托继续，不会另建任务\n查看依据\n回到原委托"
+      }
+    },
+    {
+      "name": "hero-stage-switch",
+      "ok": true,
+      "value": {
+        "panels": [
+          {
+            "index": 0,
+            "selected": "01 离开时",
+            "status": "无需操作",
+            "panel": "原委托\n用已有材料整理一份阶段汇报\n目标与结束条件已经确认\n依据\n比赛材料、任务安排、老师建议\n3 条来源已保存\n变化\n还没有开始核对\n离开期间不改变项目内容\n等你\n暂时不需要你操作\n关掉页面不会丢掉这条委托\n查看依据\n回到原委托"
+          },
+          {
+            "index": 1,
+            "selected": "02 期间",
+            "status": "核对示例",
+            "panel": "原委托\n用已有材料整理一份阶段汇报\n任务身份与范围不变\n依据\n已读 3 条来源\n冻结示例，不连接服务器\n变化\n发现缺口：演示流程还没有完成回执\n缺口不会被自动当成已完成\n等你\n回来后处理，期间不改变项目\n示例不模拟正在执行的 Worker\n查看依据\n回到原委托"
+          },
+          {
+            "index": 2,
+            "selected": "03 回来后",
+            "status": "等你确认",
+            "panel": "原委托\n用已有材料整理一份阶段汇报\n原任务与草稿都留在原处\n依据\n比赛材料、任务安排、老师建议\n3 条来源可回看原文\n变化\n演示流程缺少完成回执\n原判断“先写汇报草稿”需要你重新确认\n等你\n补充演示结果，或确认先按现有材料写汇报草稿\n确认后从原委托继续，不会另建任务\n查看依据\n回到原委托"
+          }
+        ],
+        "finalSelected": "03 回来后",
+        "finalStatus": "等你确认",
+        "finalMatchesBack": true
+      }
+    },
+    {
+      "name": "external-link-surface",
+      "ok": true,
+      "value": {
+        "externalHintLinks": [],
+        "iframes": 0,
+        "videoTags": 0,
+        "audioTags": 0,
+        "embeds": 0,
+        "autoplay": 0,
+        "bilibiliAnchors": [
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer"
+          },
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer"
+          }
+        ],
+        "biliRequestsSoFar": 0
+      }
+    },
+    {
+      "name": "hero-evidence-expand",
+      "ok": true,
+      "value": {
+        "textBefore": "查看依据",
+        "textExpanded": "收起依据",
+        "expanded": "true",
+        "collapsed": "false",
+        "quoteCount": 3,
+        "text": "原文来自内置公开素材，不读取你的项目。\n\n比赛材料\n示例素材 · 比赛要求摘录\n\n初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。\n\n任务安排\n示例素材 · 项目任务记录\n\n目前还没有完整 Demo，需要先完成项目创建、碎片捕获和成果生成闭环。\n\n老师建议\n示例素材 · 指导意见摘录\n\n老师建议作品不要叫普通学习助手，要突出项目制学习和知识资产复用。"
+      }
+    },
+    {
+      "name": "hero-primary-cta-anchor",
+      "ok": true,
+      "value": {
+        "hash": "#experience",
+        "scrollY": 1274,
+        "sectionTop": 79.6,
+        "headerBottom": 57,
+        "headingTop": 202.6,
+        "headingOccluded": false,
+        "headerPosition": "sticky"
+      }
+    },
+    {
+      "name": "demo-receipt-gate-before-confirm",
+      "ok": true,
+      "value": {
+        "panel": "本页模拟操作\n\n完成了什么，由实际结果来说明\n\n确认示例行动后，试着填写一段模拟回执。保存后回到依据页，可以看到这段结果和原记录放在一起。\n\n5 / 5\n完成回执\n模拟数据\n\n先确认行动，再填写模拟回执。单纯切换到这一步，不会把行动标为完成。\n\n返回确认行动",
+        "gateVisible": true
+      }
+    },
+    {
+      "name": "demo-confirm-action",
+      "ok": true,
+      "value": {
+        "panel": "等待你的确认\n\n先核对提案，再决定是否创建\n\n建议还不是待办。查看行动要做什么、怎样记录结果，再由你确认。这里的操作只影响本页示例。\n\n4 / 5\n行动提案\n本页示例已确认\n验证一次资料录入到成果草稿的流程\n要做什么\n录入一条项目记录，查看生成的记忆，再整理一份成果草稿。\n完成后记录\n实际操作结果、失败位置，以及是否需要补充材料。\n来源\n任务安排\n查看原文\n比赛材料\n查看原文\n\n示例行动已确认，尚未填写完成结果。\n\n去填写模拟回执"
+      }
+    },
+    {
+      "name": "demo-save-simulated-receipt",
+      "ok": true,
+      "value": {
+        "panel": "本页模拟操作\n\n完成了什么，由实际结果来说明\n\n确认示例行动后，试着填写一段模拟回执。保存后回到依据页，可以看到这段结果和原记录放在一起。\n\n5 / 5\n完成回执\n模拟数据\n\n模拟回执已加入本页示例\n\n审计示例：假设已录入一条记录并生成草稿，来源还需要逐项核对。\n\n结果由你在本页填写，未经过实际操作核验。\n\n回到依据页查看"
+      }
+    },
+    {
+      "name": "demo-back-to-evidence-and-reset",
+      "ok": true,
+      "value": {
+        "receiptReflected": true,
+        "evidencePanel": "已知与待确认\n\n记录说了什么，哪些还不知道\n\n历史记录和当前状态分别看。没有找到新的完成结果，不能据此断言功能现在仍未完成。\n\n2 / 5\n已有依据\n示例整理\n记录中提到\n\n初赛需要作品说明文档和演示材料。\n\n比赛材料\n查看原文\n已有任务安排\n\n先完成项目创建、资料录入和成果生成流程。\n\n任务安排\n查看原文\n当前状态待确认\n\n下方是你填写的模拟结果，真实完成情况仍需实际回执。\n\n新增模拟回执\n\n审计示例：假设已录入一条记录并生成草稿，来源还需要逐项核对。\n\n模拟回执\n查看原文",
+        "resetOk": true,
+        "status": "示例已重置，未修改任何个人项目。"
+      }
+    },
+    {
+      "name": "demo-source-dialog",
+      "ok": true,
+      "value": {
+        "dialogOpen": 1,
+        "dialogText": "示例原始记录\n\n比赛材料\n初赛需要准备创意描述、设计稿、作品介绍文档和演示材料。\n\n原文取自项目自带的演示素材，不是在线用户的个人记录。",
+        "dialogClosed": 0,
+        "focusAfter": {
+          "tag": "BUTTON",
+          "label": "查看原文：比赛材料",
+          "text": "比赛材料查看原文"
+        }
+      }
+    },
+    {
+      "name": "scroll-motion-sweep",
+      "ok": true,
+      "value": {
+        "scrollY": 3547,
+        "docHeight": 4447,
+        "railProgress": "1.000",
+        "activeRailSteps": 4,
+        "progressTransform": "matrix(1, 0, 0, 1, 0, 0)",
+        "dataMotion": "on"
+      }
+    },
+    {
+      "name": "video-link-attributes",
+      "ok": true,
+      "value": {
+        "mainCount": 1,
+        "footerCount": 1,
+        "main": {
+          "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+          "target": "_blank",
+          "rel": "noopener noreferrer",
+          "title": null,
+          "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+          "text": "在 Bilibili 打开（新窗口）"
+        },
+        "footer": {
+          "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+          "target": "_blank",
+          "rel": "noopener noreferrer",
+          "title": null,
+          "ariaLabel": "决赛演示（Bilibili，在新窗口打开）",
+          "text": "决赛演示"
+        },
+        "iframes": 0,
+        "videos": 0,
+        "autoplay": 0
+      }
+    },
+    {
+      "name": "video-embed-on-demand",
+      "ok": true,
+      "value": {
+        "facadeCount": 1,
+        "beforeIframes": 0,
+        "info": {
+          "iframeCount": 1,
+          "src": "https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1",
+          "title": "2026 C4-AI 决赛演示视频（Bilibili 官方播放器）",
+          "loading": "lazy",
+          "referrerPolicy": "no-referrer-when-downgrade",
+          "allow": "autoplay; fullscreen; picture-in-picture; encrypted-media",
+          "stageActive": "true",
+          "activeElement": "IFRAME"
+        },
+        "biliRequestsBefore": 0,
+        "biliRequestsAfter": 12,
+        "playerFrame": {
+          "title": "External Player - 哔哩哔哩嵌入式外链播放器",
+          "videoCount": 1,
+          "duration": 277,
+          "paused": false,
+          "readyState": 4
+        },
+        "collapseCount": 1,
+        "afterCollapse": {
+          "iframeCount": 0,
+          "facadeBack": true,
+          "activeElementLabel": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器"
+        }
+      }
+    },
+    {
+      "name": "video-main-click",
+      "ok": true,
+      "value": {
+        "popup": {
+          "url": "https://www.bilibili.com/video/BV1Qaxb6PE7G/?vd_source=eaf1b5590706fdf5d967f5f1d697db8b"
+        },
+        "mainPageUrl": "http://127.0.0.1:34111/#experience",
+        "mainPageUnchanged": true
+      }
+    },
+    {
+      "name": "video-footer-click",
+      "ok": true,
+      "value": {
+        "popup": {
+          "url": "https://www.bilibili.com/video/BV1Qaxb6PE7G/?vd_source=eaf1b5590706fdf5d967f5f1d697db8b"
+        },
+        "mainPageUrl": "http://127.0.0.1:34111/#experience",
+        "mainPageUnchanged": true
+      }
+    },
+    {
+      "name": "screenshots",
+      "ok": true,
+      "value": "saved"
+    }
+  ],
+  "api": [],
+  "apiWrites": [],
+  "externalRequests": [
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1",
+      "resourceType": "document",
+      "origin": "https://player.bilibili.com",
+      "path": "/player.html",
+      "local": false,
+      "at": "2026-11-03T07:18:25.325Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/log-reporter.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/log-reporter.js",
+      "local": false,
+      "at": "2026-11-03T07:18:25.759Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/core.6dcbfdb4.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/core.6dcbfdb4.js",
+      "local": false,
+      "at": "2026-11-03T07:18:25.761Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "POST",
+      "url": "https://data.bilibili.com/log/web?0000141793690306126https%3A%2F%2Fplayer.bilibili.com%2Fplayer.html%3Fbvid%3DBV1Qaxb6PE7G%26page%3D1%26high_quality%3D1%26danmaku%3D0%26autoplay%3D1|http%3A%2F%2F127.0.0.1%3A34111%2F|457.1.0.0|1793690306126||572x321|1|{%22lsid%22:%221D110F4810_1A1A046061C%22,%22buvid_fp%22:null,%22buvid4%22:%22null%22,%22bsource_origin%22:%22empty%22,%22share_source_origin%22:%22empty%22}|{}|9CCE91B5-8B2E-AC110-F5E6-1CE67237C5F106117infoc|zh-CN|null|undefined",
+      "resourceType": "ping",
+      "origin": "https://data.bilibili.com",
+      "path": "/log/web",
+      "local": false,
+      "at": "2026-11-03T07:18:26.143Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "local": false,
+      "at": "2026-11-03T07:18:26.823Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://api.bilibili.com/x/web-interface/wbi/view/detail?bvid=BV1Qaxb6PE7G&need_view=1&isGaiaAvoided=true&web_location=1315873&w_rid=2b3527355059dbb67c73efa000c1e3e5&wts=1793690307",
+      "resourceType": "xhr",
+      "origin": "https://api.bilibili.com",
+      "path": "/x/web-interface/wbi/view/detail",
+      "local": false,
+      "at": "2026-11-03T07:18:26.837Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://api.bilibili.com/x/player/wbi/playurl?avid=117541628287845&bvid=BV1Qaxb6PE7G&cid=43242685663&qn=0&fnver=0&fnval=4048&fourk=1&gaia_source=external-link&from_client=BROWSER&is_main_page=false&need_fragment=false&isGaiaAvoided=true&session=fd14049ccea9ff71369dda4cfbe36dc8&web_location=1315873&w_rid=b6a880fa8f25e0fc811c229c8efdcde3&wts=1793690307",
+      "resourceType": "xhr",
+      "origin": "https://api.bilibili.com",
+      "path": "/x/player/wbi/playurl",
+      "local": false,
+      "at": "2026-11-03T07:18:27.395Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://api.bilibili.com/x/player/wbi/v2?aid=117541628287845&cid=43242685663&isGaiaAvoided=true&web_location=1315873&w_rid=0d91ffcd247cb07f4c10a755454da9bf&wts=1793690307",
+      "resourceType": "xhr",
+      "origin": "https://api.bilibili.com",
+      "path": "/x/player/wbi/v2",
+      "local": false,
+      "at": "2026-11-03T07:18:27.396Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://api.bilibili.com/x/web-interface/wbi/view/detail?aid=117541628287845&bvid=BV1Qaxb6PE7G&p=1&isGaiaAvoided=true&platform=web&web_location=1315873&w_rid=53b8db5f426aa97369137fe21ad9990d&wts=1793690307",
+      "resourceType": "xhr",
+      "origin": "https://api.bilibili.com",
+      "path": "/x/web-interface/wbi/view/detail",
+      "local": false,
+      "at": "2026-11-03T07:18:27.397Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "POST",
+      "url": "https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket?key_id=ec02&hexsign=f1ab36b854555537073011f5569abcb41102e86dc2b93aa0936e23d9d3710746&context[ts]=1793690306&csrf=",
+      "resourceType": "xhr",
+      "origin": "https://api.bilibili.com",
+      "path": "/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket",
+      "local": false,
+      "at": "2026-11-03T07:18:27.406Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-01.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&og=ali&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&nbs=1&uipk=5&platform=pc&mid=0&deadline=1793697507&oi=1001173019&gen=playurlv3&os=bcache&upsig=fcbb930c8ed93dac2ddf4bd68c427229&uparams=e,og,trid,nbs,uipk,platform,mid,deadline,oi,gen,os&cdnid=3871&bvc=vod&nettype=0&bw=102787&lrs=0&V=v3.0.8&np=151388311&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-01.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:28.481Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-03.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&oi=1001173019&nbs=1&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&deadline=1793697507&os=bcache&og=cos&uipk=5&platform=pc&mid=0&gen=playurlv3&upsig=51d9cfb43d8fd4368f76e73134016280&uparams=e,oi,nbs,trid,deadline,os,og,uipk,platform,mid,gen&cdnid=3873&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&np=151388311&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-03.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:28.492Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "POST",
+      "url": "https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi",
+      "resourceType": "xhr",
+      "origin": "https://api.bilibili.com",
+      "path": "/x/internal/gaia-gateway/ExClimbWuzhi",
+      "local": false,
+      "at": "2026-11-03T07:18:28.556Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "POST",
+      "url": "https://data.bilibili.com/log/web?0133241793690308541https%3A%2F%2Fplayer.bilibili.com%2Fplayer.html%3Fbvid%3DBV1Qaxb6PE7G%26page%3D1%26high_quality%3D1%26danmaku%3D0%26autoplay%3D1|457.1.fp.pv||1793690308541|||572x321|1|{%22lsid%22:%221D110F4810_1A1A046061C%22,%22buvid_fp%22:%22buvid_fp_iframe7D6466D3-D472-5F810-919D-310A4F256717908541infoc%22,%22buvid4%22:%22null%22,%22bsource_origin%22:%22empty%22,%22share_source_origin%22:%22empty%22}|{}|http%3A%2F%2F127.0.0.1%3A34111%2F|null|zh-CN|null|0",
+      "resourceType": "ping",
+      "origin": "https://data.bilibili.com",
+      "path": "/log/web",
+      "local": false,
+      "at": "2026-11-03T07:18:28.557Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-01.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&og=ali&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&nbs=1&uipk=5&platform=pc&mid=0&deadline=1793697507&oi=1001173019&gen=playurlv3&os=bcache&upsig=fcbb930c8ed93dac2ddf4bd68c427229&uparams=e,og,trid,nbs,uipk,platform,mid,deadline,oi,gen,os&cdnid=3871&bvc=vod&nettype=0&bw=102787&lrs=0&V=v3.0.8&np=151388311&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-01.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:28.694Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-03.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&oi=1001173019&nbs=1&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&deadline=1793697507&os=bcache&og=cos&uipk=5&platform=pc&mid=0&gen=playurlv3&upsig=51d9cfb43d8fd4368f76e73134016280&uparams=e,oi,nbs,trid,deadline,os,og,uipk,platform,mid,gen&cdnid=3873&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&np=151388311&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-03.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:28.695Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-01.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&og=ali&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&nbs=1&uipk=5&platform=pc&mid=0&deadline=1793697507&oi=1001173019&gen=playurlv3&os=bcache&upsig=fcbb930c8ed93dac2ddf4bd68c427229&uparams=e,og,trid,nbs,uipk,platform,mid,deadline,oi,gen,os&cdnid=3871&bvc=vod&nettype=0&bw=102787&lrs=0&V=v3.0.8&np=151388311&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-01.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:28.745Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-03.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&oi=1001173019&nbs=1&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&deadline=1793697507&os=bcache&og=cos&uipk=5&platform=pc&mid=0&gen=playurlv3&upsig=51d9cfb43d8fd4368f76e73134016280&uparams=e,oi,nbs,trid,deadline,os,og,uipk,platform,mid,gen&cdnid=3873&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&np=151388311&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-03.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:28.754Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-03.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&oi=1001173019&nbs=1&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&deadline=1793697507&os=bcache&og=cos&uipk=5&platform=pc&mid=0&gen=playurlv3&upsig=51d9cfb43d8fd4368f76e73134016280&uparams=e,oi,nbs,trid,deadline,os,og,uipk,platform,mid,gen&cdnid=3873&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&np=151388311&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-03.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:28.803Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/img/ploading.png",
+      "resourceType": "image",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/img/ploading.png",
+      "local": false,
+      "at": "2026-11-03T07:18:28.831Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-01.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&og=ali&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&nbs=1&uipk=5&platform=pc&mid=0&deadline=1793697507&oi=1001173019&gen=playurlv3&os=bcache&upsig=fcbb930c8ed93dac2ddf4bd68c427229&uparams=e,og,trid,nbs,uipk,platform,mid,deadline,oi,gen,os&cdnid=3871&bvc=vod&nettype=0&bw=102787&lrs=0&V=v3.0.8&np=151388311&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-01.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:28.833Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-01.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&og=ali&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&nbs=1&uipk=5&platform=pc&mid=0&deadline=1793697507&oi=1001173019&gen=playurlv3&os=bcache&upsig=fcbb930c8ed93dac2ddf4bd68c427229&uparams=e,og,trid,nbs,uipk,platform,mid,deadline,oi,gen,os&cdnid=3871&bvc=vod&nettype=0&bw=102787&lrs=0&V=v3.0.8&np=151388311&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-01.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:28.872Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-01.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&og=ali&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&nbs=1&uipk=5&platform=pc&mid=0&deadline=1793697507&oi=1001173019&gen=playurlv3&os=bcache&upsig=fcbb930c8ed93dac2ddf4bd68c427229&uparams=e,og,trid,nbs,uipk,platform,mid,deadline,oi,gen,os&cdnid=3871&bvc=vod&nettype=0&bw=102787&lrs=0&V=v3.0.8&np=151388311&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-01.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:29.091Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "POST",
+      "url": "https://data.bilibili.com/log/web?0133241793690308510https%3A%2F%2Fplayer.bilibili.com%2Fplayer.html%3Fbvid%3DBV1Qaxb6PE7G%26page%3D1%26high_quality%3D1%26danmaku%3D0%26autoplay%3D1|457.1.fp.risk||1793690308510|||572x321|1|{%22cookieEnabled%22:1,%22userAgent%22:%22Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20HeadlessChrome%2F149.0.7827.55%20Safari%2F537.36%22,%22webdriver%22:1,%22language%22:%22zh-CN%22,%22colorDepth%22:24,%22deviceMemory%22:16,%22hardwareConcurrency%22:28,%22screenResolution%22:%22900%2C%2C1440%22,%22availableScreenResolution%22:%22900%2C%2C1440%22,%22timezoneOffset%22:-480,%22timezone%22:%22Asia%2FSingapore%22,%22sessionStorage%22:1,%22localStorage%22:1,%22indexedDb%22:1,%22addBehavior%22:0,%22openDatabase%22:0,%22cpuClass%22:%22not%20available%22,%22platform%22:%22Win32%22,%22plugins%22:%22%22,%22canvas%22:%228gAAAABJRU5ErkJggg%3D%3D%22,%22webgl_str%22:%22%2F%2F8cxNnQAAAAZJREFUAwA1xAD%2FyjOy7AAAAABJRU5ErkJggg%3D%3D%22,%22webgl_params%22:%22extensions%3AANGLE_instanced_arrays%3BEXT_blend_minmax%3BEXT_clip_control%3BEXT_color_buffer_half_float%3BEXT_depth_clamp%3BEXT_float_blend%3BEXT_frag_depth%3BEXT_polygon_offset_clamp%3BEXT_shader_texture_lod%3BEXT_texture_compression_bptc%3BEXT_texture_compression_rgtc%3BEXT_texture_filter_anisotropic%3BEXT_texture_mirror_clamp_to_edge%3BEXT_sRGB%3BOES_element_index_uint%3BOES_fbo_render_mipmap%3BOES_standard_derivatives%3BOES_texture_float%3BOES_texture_float_linear%3BOES_texture_half_float%3BOES_texture_half_float_linear%3BOES_vertex_array_object%3BWEBGL_color_buffer_float%3BWEBGL_compressed_texture_astc%3BWEBGL_compressed_texture_etc%3BWEBGL_compressed_texture_etc1%3BWEBGL_compressed_texture_s3tc%3BWEBGL_compressed_texture_s3tc_srgb%3BWEBGL_debug_renderer_info%3BWEBGL_debug_shaders%3BWEBGL_depth_texture%3BWEBGL_draw_buffers%3BWEBGL_lose_context%3BWEBGL_multi_draw%3BWEBGL_polygon_mode%2C%2Cwebgl%20aliased%20line%20width%20range%3A%5B1%2C%201%5D%2C%2Cwebgl%20aliased%20point%20size%20range%3A%5B1%2C%201023%5D%2C%2Cwebgl%20alpha%20bits%3A8%2C%2Cwebgl%20antialiasing%3Ayes%2C%2Cwebgl%20blue%20bits%3A8%2C%2Cwebgl%20depth%20bits%3A24%2C%2Cwebgl%20green%20bits%3A8%2C%2Cwebgl%20max%20anisotropy%3A16%2C%2Cwebgl%20max%20combined%20texture%20image%20units%3A64%2C%2Cwebgl%20max%20cube%20map%20texture%20size%3A16384%2C%2Cwebgl%20max%20fragment%20uniform%20vectors%3A4096%2C%2Cwebgl%20max%20render%20buffer%20size%3A8192%2C%2Cwebgl%20max%20texture%20image%20units%3A32%2C%2Cwebgl%20max%20texture%20size%3A8192%2C%2Cwebgl%20max%20varying%20vectors%3A31%2C%2Cwebgl%20max%20vertex%20attribs%3A16%2C%2Cwebgl%20max%20vertex%20texture%20image%20units%3A32%2C%2Cwebgl%20max%20vertex%20uniform%20vectors%3A4096%2C%2Cwebgl%20max%20viewport%20dims%3A%5B8192%2C%208192%5D%2C%2Cwebgl%20red%20bits%3A8%2C%2Cwebgl%20renderer%3AWebKit%20WebGL%2C%2Cwebgl%20shading%20language%20version%3AWebGL%20GLSL%20ES%201.0%20(OpenGL%20ES%20GLSL%20ES%201.0%20Chromium)%2C%2Cwebgl%20stencil%20bits%3A0%2C%2Cwebgl%20vendor%3AWebKit%2C%2Cwebgl%20version%3AWebGL%201.0%20(OpenGL%20ES%202.0%20Chromium)%2C%2Cwebgl%20unmasked%20vendor%3AGoogle%20Inc.%20(Google)%2C%2Cwebgl%20unmasked%20renderer%3AANGLE%20(Google%2C%20Vulkan%201.3.0%20(SwiftShader%20Device%20(Subzero)%20(0x0000C0DE))%2C%20SwiftShader%20driver)%2C%2Cwebgl%20vertex%20shader%20high%20float%20precision%3A23%2C%2Cwebgl%20vertex%20shader%20high%20float%20precision%20rangeMin%3A127%2C%2Cwebgl%20vertex%20shader%20high%20float%20precision%20rangeMax%3A127%2C%2Cwebgl%20vertex%20shader%20medium%20float%20precision%3A10%2C%2Cwebgl%20vertex%20shader%20medium%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20medium%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20vertex%20shader%20low%20float%20precision%3A10%2C%2Cwebgl%20vertex%20shader%20low%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20low%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20fragment%20shader%20high%20float%20precision%3A23%2C%2Cwebgl%20fragment%20shader%20high%20float%20precision%20rangeMin%3A127%2C%2Cwebgl%20fragment%20shader%20high%20float%20precision%20rangeMax%3A127%2C%2Cwebgl%20fragment%20shader%20medium%20float%20precision%3A10%2C%2Cwebgl%20fragment%20shader%20medium%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20medium%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20fragment%20shader%20low%20float%20precision%3A10%2C%2Cwebgl%20fragment%20shader%20low%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20low%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20vertex%20shader%20high%20int%20precision%3A0%2C%2Cwebgl%20vertex%20shader%20high%20int%20precision%20rangeMin%3A31%2C%2Cwebgl%20vertex%20shader%20high%20int%20precision%20rangeMax%3A30%2C%2Cwebgl%20vertex%20shader%20medium%20int%20precision%3A0%2C%2Cwebgl%20vertex%20shader%20medium%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20medium%20int%20precision%20rangeMax%3A14%2C%2Cwebgl%20vertex%20shader%20low%20int%20precision%3A0%2C%2Cwebgl%20vertex%20shader%20low%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20low%20int%20precision%20rangeMax%3A14%2C%2Cwebgl%20fragment%20shader%20high%20int%20precision%3A0%2C%2Cwebgl%20fragment%20shader%20high%20int%20precision%20rangeMin%3A31%2C%2Cwebgl%20fragment%20shader%20high%20int%20precision%20rangeMax%3A30%2C%2Cwebgl%20fragment%20shader%20medium%20int%20precision%3A0%2C%2Cwebgl%20fragment%20shader%20medium%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20medium%20int%20precision%20rangeMax%3A14%2C%2Cwebgl%20fragment%20shader%20low%20int%20precision%3A0%2C%2Cwebgl%20fragment%20shader%20low%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20low%20int%20precision%20rangeMax%3A14%22,%22webglVendorAndRenderer%22:%22Google%20Inc.%20(Google)~ANGLE%20(Google%2C%20Vulkan%201.3.0%20(SwiftShader%20Device%20(Subzero)%20(0x0000C0DE))%2C%20SwiftShader%20driver)%22,%22hasLiedLanguages%22:0,%22hasLiedResolution%22:0,%22hasLiedOs%22:0,%22hasLiedBrowser%22:0,%22touchSupport%22:%220%2C%2C0%2C%2C0%22,%22fonts%22:%22Arial%2C%2CArial%20Black%2C%2CArial%20Narrow%2C%2CBook%20Antiqua%2C%2CBookman%20Old%20Style%2C%2CCalibri%2C%2CCambria%2C%2CCambria%20Math%2C%2CCentury%2C%2CCentury%20Gothic%2C%2CCentury%20Schoolbook%2C%2CComic%20Sans%20MS%2C%2CConsolas%2C%2CCourier%2C%2CCourier%20New%2C%2CGeorgia%2C%2CHelvetica%2C%2CImpact%2C%2CLucida%20Bright%2C%2CLucida%20Calligraphy%2C%2CLucida%20Console%2C%2CLucida%20Fax%2C%2CLucida%20Handwriting%2C%2CLucida%20Sans%2C%2CLucida%20Sans%20Typewriter%2C%2CLucida%20Sans%20Unicode%2C%2CMicrosoft%20Sans%20Serif%2C%2CMonotype%20Corsiva%2C%2CMS%20Gothic%2C%2CMS%20PGothic%2C%2CMS%20Reference%20Sans%20Serif%2C%2CMS%20Sans%20Serif%2C%2CMS%20Serif%2C%2CPalatino%20Linotype%2C%2CSegoe%20Print%2C%2CSegoe%20Script%2C%2CSegoe%20UI%2C%2CSegoe%20UI%20Light%2C%2CSegoe%20UI%20Semibold%2C%2CSegoe%20UI%20Symbol%2C%2CTahoma%2C%2CTimes%2C%2CTimes%20New%20Roman%2C%2CTrebuchet%20MS%2C%2CVerdana%2C%2CWingdings%2C%2CWingdings%202%2C%2CWingdings%203%22,%22audio%22:%22124.04347527516074%22,%22lsid%22:%221D110F4810_1A1A046061C%22,%22buvid_fp%22:%22buvid_fp_iframe7D6466D3-D472-5F810-919D-310A4F256717908541infoc%22,%22buvid4%22:%22null%22,%22bsource_origin%22:%22empty%22,%22share_source_origin%22:%22empty%22}|{}|http%3A%2F%2F127.0.0.1%3A34111%2F|null|zh-CN|null|0",
+      "resourceType": "ping",
+      "origin": "https://data.bilibili.com",
+      "path": "/log/web",
+      "local": false,
+      "at": "2026-11-03T07:18:29.100Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-03.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&oi=1001173019&nbs=1&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&deadline=1793697507&os=bcache&og=cos&uipk=5&platform=pc&mid=0&gen=playurlv3&upsig=51d9cfb43d8fd4368f76e73134016280&uparams=e,oi,nbs,trid,deadline,os,og,uipk,platform,mid,gen&cdnid=3873&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&np=151388311&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-03.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:29.151Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-03.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&oi=1001173019&nbs=1&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&deadline=1793697507&os=bcache&og=cos&uipk=5&platform=pc&mid=0&gen=playurlv3&upsig=51d9cfb43d8fd4368f76e73134016280&uparams=e,oi,nbs,trid,deadline,os,og,uipk,platform,mid,gen&cdnid=3873&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&np=151388311&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-03.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:29.198Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.root-extra.5d38cf19.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.root-extra.5d38cf19.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.302Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.lottie_light.c0643260.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.lottie_light.c0643260.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.303Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.713.2b221bd6.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.713.2b221bd6.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.305Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.common-helper.acd3cbd8.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.common-helper.acd3cbd8.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.306Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.787.2cab3d4f.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.787.2cab3d4f.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.338Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.926.3d2255d5.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.926.3d2255d5.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.338Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.779.927eee6b.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.779.927eee6b.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.339Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.231.2a8f567b.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.231.2a8f567b.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.340Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.69.0247b290.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.69.0247b290.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.341Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.936.b4f963a9.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.936.b4f963a9.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.341Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.777.d5b47d2c.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.777.d5b47d2c.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.342Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.165.cd9329c3.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.165.cd9329c3.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.343Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.76.50174f8f.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.76.50174f8f.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.344Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.797.ad950a04.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.797.ad950a04.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.345Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.embedded-helper.61f29de2.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.embedded-helper.61f29de2.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.347Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://api.bilibili.com/x/click-interface/click/now",
+      "resourceType": "xhr",
+      "origin": "https://api.bilibili.com",
+      "path": "/x/click-interface/click/now",
+      "local": false,
+      "at": "2026-11-03T07:18:29.349Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://api.bilibili.com/x/click-interface/click/now",
+      "resourceType": "xhr",
+      "origin": "https://api.bilibili.com",
+      "path": "/x/click-interface/click/now",
+      "local": false,
+      "at": "2026-11-03T07:18:29.350Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+      "resourceType": "document",
+      "origin": "https://www.bilibili.com",
+      "path": "/video/BV1Qaxb6PE7G",
+      "local": false,
+      "at": "2026-11-03T07:18:32.063Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/font/regular.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/font/regular.css",
+      "local": false,
+      "at": "2026-11-03T07:18:32.761Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/font/medium.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/font/medium.css",
+      "local": false,
+      "at": "2026-11-03T07:18:32.762Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/core.9c6ca999.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/core.9c6ca999.js",
+      "local": false,
+      "at": "2026-11-03T07:18:32.762Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/map.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/map.css",
+      "local": false,
+      "at": "2026-11-03T07:18:32.763Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/light_u.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/light_u.css",
+      "local": false,
+      "at": "2026-11-03T07:18:32.763Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/light.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/light.css",
+      "local": false,
+      "at": "2026-11-03T07:18:32.764Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/log-reporter.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/log-reporter.js",
+      "local": false,
+      "at": "2026-11-03T07:18:32.827Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/video/css/video.0.8c3699a3aaf218112dadb300b3127b36bdacfe5c.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/video/css/video.0.8c3699a3aaf218112dadb300b3127b36bdacfe5c.css",
+      "local": false,
+      "at": "2026-11-03T07:18:32.828Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/b-mirror/biliMirror.umd.mini.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/b-mirror/biliMirror.umd.mini.js",
+      "local": false,
+      "at": "2026-11-03T07:18:32.839Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bmg/register/cmpt.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bmg/register/cmpt.js",
+      "local": false,
+      "at": "2026-11-03T07:18:32.840Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bmg/register/fallback.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bmg/register/fallback.js",
+      "local": false,
+      "at": "2026-11-03T07:18:32.841Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://i0.hdslb.com/bfs/static/jinkela/long/images/512.png",
+      "resourceType": "image",
+      "origin": "https://i0.hdslb.com",
+      "path": "/bfs/static/jinkela/long/images/512.png",
+      "local": false,
+      "at": "2026-11-03T07:18:32.847Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/cm/cm-sdk/static/js/bili-collect.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/cm/cm-sdk/static/js/bili-collect.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.330Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/risk-captcha-sdk/CaptchaLoader.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/risk-captcha-sdk/CaptchaLoader.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.495Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://www.bilibili.com/gentleman/polyfill.js?features=globalThis",
+      "resourceType": "script",
+      "origin": "https://www.bilibili.com",
+      "path": "/gentleman/polyfill.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.497Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/950.3cf17.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/950.3cf17.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.572Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/512.4a4c4.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/512.4a4c4.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.572Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/86.e192d.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/86.e192d.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.574Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/fehub/loki/unpkg/svgaplayerweb/svga.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/fehub/loki/unpkg/svgaplayerweb/svga.min.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.574Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/user-fingerprint/bili-user-fingerprint.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/user-fingerprint/bili-user-fingerprint.min.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.584Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/kv-sdk/index.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/kv-sdk/index.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.584Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-04.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30032.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&mid=0&deadline=1793697512&nbs=1&uipk=5&og=cos&oi=1001173019&trid=00000316b3bf5e114743ab33ed02173afb9u&platform=pc&gen=playurlv3&os=bcache&upsig=10acab24e238b8a20eff30a4ee3a8bd5&uparams=e,mid,deadline,nbs,uipk,og,oi,trid,platform,gen,os&cdnid=3874&bvc=vod&nettype=0&bw=159935&lrs=0&V=v3.0.8&buvid=622B74CE-3CFC-60D9-B2A3-81321473408212361infoc&build=0&np=151388311&dl=0&f=u_0_0&qn_dyeid=82a331824a2aa0b400b05cc46ae98ac8&agrr=1&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-04.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30032.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:33.693Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-03.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&os=bcache&og=cos&mid=0&deadline=1793697512&nbs=1&oi=1001173019&trid=00000316b3bf5e114743ab33ed02173afb9u&gen=playurlv3&uipk=5&platform=pc&upsig=641a71a3d76b4dd1f6496e2e3f1594e4&uparams=e,os,og,mid,deadline,nbs,oi,trid,gen,uipk,platform&cdnid=3873&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&agrr=1&buvid=622B74CE-3CFC-60D9-B2A3-81321473408212361infoc&build=0&np=151388311&dl=0&f=u_0_0&qn_dyeid=82a331824a2aa0b400b05cc46ae98ac8&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-03.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:33.707Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.708Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/reporter-pb/index.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/reporter-pb/index.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.953Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+      "resourceType": "document",
+      "origin": "https://www.bilibili.com",
+      "path": "/video/BV1Qaxb6PE7G",
+      "local": false,
+      "at": "2026-11-03T07:18:35.504Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/font/regular.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/font/regular.css",
+      "local": false,
+      "at": "2026-11-03T07:18:36.028Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/font/medium.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/font/medium.css",
+      "local": false,
+      "at": "2026-11-03T07:18:36.074Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/core.9c6ca999.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/core.9c6ca999.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.075Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/map.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/map.css",
+      "local": false,
+      "at": "2026-11-03T07:18:36.076Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/light_u.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/light_u.css",
+      "local": false,
+      "at": "2026-11-03T07:18:36.091Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/light.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/light.css",
+      "local": false,
+      "at": "2026-11-03T07:18:36.094Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/log-reporter.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/log-reporter.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.144Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/video/css/video.0.8c3699a3aaf218112dadb300b3127b36bdacfe5c.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/video/css/video.0.8c3699a3aaf218112dadb300b3127b36bdacfe5c.css",
+      "local": false,
+      "at": "2026-11-03T07:18:36.146Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/b-mirror/biliMirror.umd.mini.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/b-mirror/biliMirror.umd.mini.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.147Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bmg/register/cmpt.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bmg/register/cmpt.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.149Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bmg/register/fallback.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bmg/register/fallback.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.150Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://i0.hdslb.com/bfs/static/jinkela/long/images/512.png",
+      "resourceType": "image",
+      "origin": "https://i0.hdslb.com",
+      "path": "/bfs/static/jinkela/long/images/512.png",
+      "local": false,
+      "at": "2026-11-03T07:18:36.152Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/cm/cm-sdk/static/js/bili-collect.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/cm/cm-sdk/static/js/bili-collect.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.820Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/risk-captcha-sdk/CaptchaLoader.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/risk-captcha-sdk/CaptchaLoader.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.831Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://www.bilibili.com/gentleman/polyfill.js?features=globalThis",
+      "resourceType": "script",
+      "origin": "https://www.bilibili.com",
+      "path": "/gentleman/polyfill.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.913Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/fehub/loki/unpkg/svgaplayerweb/svga.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/fehub/loki/unpkg/svgaplayerweb/svga.min.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.914Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/950.3cf17.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/950.3cf17.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.930Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/512.4a4c4.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/512.4a4c4.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.952Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/86.e192d.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/86.e192d.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.967Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/user-fingerprint/bili-user-fingerprint.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/user-fingerprint/bili-user-fingerprint.min.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.985Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/kv-sdk/index.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/kv-sdk/index.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.987Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-04.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30032.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&trid=000062200de37ed24a3487290fa4f23b4bau&mid=0&uipk=5&gen=playurlv3&os=bcache&deadline=1793697516&oi=1001173019&og=cos&platform=pc&nbs=1&upsig=2de8df822e561aa566f249ad6af7aea9&uparams=e,trid,mid,uipk,gen,os,deadline,oi,og,platform,nbs&cdnid=3874&bvc=vod&nettype=0&bw=159935&lrs=0&V=v3.0.8&agrr=1&buvid=622B74CE-3CFC-60D9-B2A3-81321473408212361infoc&build=0&dl=0&np=151388311&f=u_0_0&qn_dyeid=30aa972f5be2134d0069a3896ae98acc&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-04.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30032.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:37.035Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-03.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&nbs=1&trid=000062200de37ed24a3487290fa4f23b4bau&oi=1001173019&platform=pc&gen=playurlv3&og=cos&mid=0&deadline=1793697516&uipk=5&os=bcache&upsig=511607f574dbcbe0e5fcf8e6f4235622&uparams=e,nbs,trid,oi,platform,gen,og,mid,deadline,uipk,os&cdnid=3873&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&build=0&dl=0&np=151388311&f=u_0_0&qn_dyeid=30aa972f5be2134d0069a3896ae98acc&agrr=1&buvid=622B74CE-3CFC-60D9-B2A3-81321473408212361infoc&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-03.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:37.054Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "local": false,
+      "at": "2026-11-03T07:18:37.080Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/reporter-pb/index.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/reporter-pb/index.js",
+      "local": false,
+      "at": "2026-11-03T07:18:37.410Z"
+    }
+  ],
+  "externalNonGetAfterVideoClick": [],
+  "modelHints": [],
+  "imageRequests": [
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/logo.png",
+      "resourceType": "image",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/logo.png",
+      "local": true,
+      "at": "2026-11-03T07:18:03.791Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/logo.png",
+      "resourceType": "image",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/logo.png",
+      "local": true,
+      "at": "2026-11-03T07:18:07.230Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/img/ploading.png",
+      "resourceType": "image",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/img/ploading.png",
+      "local": false,
+      "at": "2026-11-03T07:18:28.831Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://i0.hdslb.com/bfs/static/jinkela/long/images/512.png",
+      "resourceType": "image",
+      "origin": "https://i0.hdslb.com",
+      "path": "/bfs/static/jinkela/long/images/512.png",
+      "local": false,
+      "at": "2026-11-03T07:18:32.847Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://i0.hdslb.com/bfs/static/jinkela/long/images/512.png",
+      "resourceType": "image",
+      "origin": "https://i0.hdslb.com",
+      "path": "/bfs/static/jinkela/long/images/512.png",
+      "local": false,
+      "at": "2026-11-03T07:18:36.152Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/logo.png",
+      "resourceType": "image",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/logo.png",
+      "local": true,
+      "at": "2026-11-03T07:18:53.453Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/logo.png",
+      "resourceType": "image",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/logo.png",
+      "local": true,
+      "at": "2026-11-03T07:18:54.668Z"
+    }
+  ],
+  "failed": [
+    {
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.787.2cab3d4f.js",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.779.927eee6b.js",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.76.50174f8f.js",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.926.3d2255d5.js",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.common-helper.acd3cbd8.js",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://api.bilibili.com/x/click-interface/click/now",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.777.d5b47d2c.js",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://api.bilibili.com/x/click-interface/click/now",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.embedded-helper.61f29de2.js",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.231.2a8f567b.js",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.lottie_light.c0643260.js",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.165.cd9329c3.js",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.936.b4f963a9.js",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.713.2b221bd6.js",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.69.0247b290.js",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.797.ad950a04.js",
+      "failure": "net::ERR_ABORTED"
+    }
+  ],
+  "pageErrors": [],
+  "consoleMessages": [
+    {
+      "type": "warning",
+      "text": "The resource http://127.0.0.1:34111/logo.png was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+    },
+    {
+      "type": "warning",
+      "text": "Allow attribute will take precedence over 'allowfullscreen'."
+    },
+    {
+      "type": "warning",
+      "text": "The resource http://127.0.0.1:34111/logo.png was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+    }
+  ],
+  "requests": [
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/",
+      "resourceType": "document",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/",
+      "local": true,
+      "at": "2026-11-03T07:18:02.303Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/logo.png",
+      "resourceType": "image",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/logo.png",
+      "local": true,
+      "at": "2026-11-03T07:18:03.791Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_1m_kv2t8hd7hd._.css",
+      "resourceType": "stylesheet",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_1m_kv2t8hd7hd._.css",
+      "local": true,
+      "at": "2026-11-03T07:18:03.802Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_1jiib-2own1si._.css",
+      "resourceType": "stylesheet",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_1jiib-2own1si._.css",
+      "local": true,
+      "at": "2026-11-03T07:18:03.803Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0qva5cupmdgep._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0qva5cupmdgep._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:03.805Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+      "local": true,
+      "at": "2026-11-03T07:18:03.810Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/1q96_modules_next_dist_compiled_react-dom_cjs_react-dom_development_1sqry0_53krp4.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/1q96_modules_next_dist_compiled_react-dom_cjs_react-dom_development_1sqry0_53krp4.js",
+      "local": true,
+      "at": "2026-11-03T07:18:03.811Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_react-dom_0grqycjrj6mju._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_react-dom_0grqycjrj6mju._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:03.812Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:03.817Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jmam7qwg.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jmam7qwg.js",
+      "local": true,
+      "at": "2026-11-03T07:18:03.822Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_1amofcmz--cdp._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_1amofcmz--cdp._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:03.823Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:03.828Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:03.830Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqwj2323d._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqwj2323d._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:03.830Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_1anvha4rlo79g._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_1anvha4rlo79g._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:03.831Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/turbopack-_06rkbud3pyrlm._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/turbopack-_06rkbud3pyrlm._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:03.833Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_219uq1sj0q91c._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_219uq1sj0q91c._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:03.837Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_0_duo-exf6bfz._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_0_duo-exf6bfz._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:03.838Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_0y6xgmo32juxh._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_0y6xgmo32juxh._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:03.840Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_17f25dzi-5r2x._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_17f25dzi-5r2x._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:03.841Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_0xf402376gn4t._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_0xf402376gn4t._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:03.843Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_1itzgohq65v6w._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_1itzgohq65v6w._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:03.843Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/fonts/pm-serif-brand.ttf",
+      "resourceType": "font",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/fonts/pm-serif-brand.ttf",
+      "local": true,
+      "at": "2026-11-03T07:18:04.028Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/fonts/pm-editorial-serif.ttf",
+      "resourceType": "font",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/fonts/pm-editorial-serif.ttf",
+      "local": true,
+      "at": "2026-11-03T07:18:04.538Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/fonts/manrope-variable.ttf",
+      "resourceType": "font",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/fonts/manrope-variable.ttf",
+      "local": true,
+      "at": "2026-11-03T07:18:04.539Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:04.658Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/logo.png",
+      "resourceType": "image",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/logo.png",
+      "local": true,
+      "at": "2026-11-03T07:18:07.230Z"
+    },
+    {
+      "phase": "load",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/__nextjs_font/geist-latin.woff2",
+      "resourceType": "font",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/__nextjs_font/geist-latin.woff2",
+      "local": true,
+      "at": "2026-11-03T07:18:07.637Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1",
+      "resourceType": "document",
+      "origin": "https://player.bilibili.com",
+      "path": "/player.html",
+      "local": false,
+      "at": "2026-11-03T07:18:25.325Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/log-reporter.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/log-reporter.js",
+      "local": false,
+      "at": "2026-11-03T07:18:25.759Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/core.6dcbfdb4.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/core.6dcbfdb4.js",
+      "local": false,
+      "at": "2026-11-03T07:18:25.761Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "POST",
+      "url": "https://data.bilibili.com/log/web?0000141793690306126https%3A%2F%2Fplayer.bilibili.com%2Fplayer.html%3Fbvid%3DBV1Qaxb6PE7G%26page%3D1%26high_quality%3D1%26danmaku%3D0%26autoplay%3D1|http%3A%2F%2F127.0.0.1%3A34111%2F|457.1.0.0|1793690306126||572x321|1|{%22lsid%22:%221D110F4810_1A1A046061C%22,%22buvid_fp%22:null,%22buvid4%22:%22null%22,%22bsource_origin%22:%22empty%22,%22share_source_origin%22:%22empty%22}|{}|9CCE91B5-8B2E-AC110-F5E6-1CE67237C5F106117infoc|zh-CN|null|undefined",
+      "resourceType": "ping",
+      "origin": "https://data.bilibili.com",
+      "path": "/log/web",
+      "local": false,
+      "at": "2026-11-03T07:18:26.143Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "local": false,
+      "at": "2026-11-03T07:18:26.823Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://api.bilibili.com/x/web-interface/wbi/view/detail?bvid=BV1Qaxb6PE7G&need_view=1&isGaiaAvoided=true&web_location=1315873&w_rid=2b3527355059dbb67c73efa000c1e3e5&wts=1793690307",
+      "resourceType": "xhr",
+      "origin": "https://api.bilibili.com",
+      "path": "/x/web-interface/wbi/view/detail",
+      "local": false,
+      "at": "2026-11-03T07:18:26.837Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://api.bilibili.com/x/player/wbi/playurl?avid=117541628287845&bvid=BV1Qaxb6PE7G&cid=43242685663&qn=0&fnver=0&fnval=4048&fourk=1&gaia_source=external-link&from_client=BROWSER&is_main_page=false&need_fragment=false&isGaiaAvoided=true&session=fd14049ccea9ff71369dda4cfbe36dc8&web_location=1315873&w_rid=b6a880fa8f25e0fc811c229c8efdcde3&wts=1793690307",
+      "resourceType": "xhr",
+      "origin": "https://api.bilibili.com",
+      "path": "/x/player/wbi/playurl",
+      "local": false,
+      "at": "2026-11-03T07:18:27.395Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://api.bilibili.com/x/player/wbi/v2?aid=117541628287845&cid=43242685663&isGaiaAvoided=true&web_location=1315873&w_rid=0d91ffcd247cb07f4c10a755454da9bf&wts=1793690307",
+      "resourceType": "xhr",
+      "origin": "https://api.bilibili.com",
+      "path": "/x/player/wbi/v2",
+      "local": false,
+      "at": "2026-11-03T07:18:27.396Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://api.bilibili.com/x/web-interface/wbi/view/detail?aid=117541628287845&bvid=BV1Qaxb6PE7G&p=1&isGaiaAvoided=true&platform=web&web_location=1315873&w_rid=53b8db5f426aa97369137fe21ad9990d&wts=1793690307",
+      "resourceType": "xhr",
+      "origin": "https://api.bilibili.com",
+      "path": "/x/web-interface/wbi/view/detail",
+      "local": false,
+      "at": "2026-11-03T07:18:27.397Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "POST",
+      "url": "https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket?key_id=ec02&hexsign=f1ab36b854555537073011f5569abcb41102e86dc2b93aa0936e23d9d3710746&context[ts]=1793690306&csrf=",
+      "resourceType": "xhr",
+      "origin": "https://api.bilibili.com",
+      "path": "/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket",
+      "local": false,
+      "at": "2026-11-03T07:18:27.406Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-01.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&og=ali&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&nbs=1&uipk=5&platform=pc&mid=0&deadline=1793697507&oi=1001173019&gen=playurlv3&os=bcache&upsig=fcbb930c8ed93dac2ddf4bd68c427229&uparams=e,og,trid,nbs,uipk,platform,mid,deadline,oi,gen,os&cdnid=3871&bvc=vod&nettype=0&bw=102787&lrs=0&V=v3.0.8&np=151388311&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-01.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:28.481Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-03.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&oi=1001173019&nbs=1&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&deadline=1793697507&os=bcache&og=cos&uipk=5&platform=pc&mid=0&gen=playurlv3&upsig=51d9cfb43d8fd4368f76e73134016280&uparams=e,oi,nbs,trid,deadline,os,og,uipk,platform,mid,gen&cdnid=3873&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&np=151388311&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-03.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:28.492Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "POST",
+      "url": "https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi",
+      "resourceType": "xhr",
+      "origin": "https://api.bilibili.com",
+      "path": "/x/internal/gaia-gateway/ExClimbWuzhi",
+      "local": false,
+      "at": "2026-11-03T07:18:28.556Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "POST",
+      "url": "https://data.bilibili.com/log/web?0133241793690308541https%3A%2F%2Fplayer.bilibili.com%2Fplayer.html%3Fbvid%3DBV1Qaxb6PE7G%26page%3D1%26high_quality%3D1%26danmaku%3D0%26autoplay%3D1|457.1.fp.pv||1793690308541|||572x321|1|{%22lsid%22:%221D110F4810_1A1A046061C%22,%22buvid_fp%22:%22buvid_fp_iframe7D6466D3-D472-5F810-919D-310A4F256717908541infoc%22,%22buvid4%22:%22null%22,%22bsource_origin%22:%22empty%22,%22share_source_origin%22:%22empty%22}|{}|http%3A%2F%2F127.0.0.1%3A34111%2F|null|zh-CN|null|0",
+      "resourceType": "ping",
+      "origin": "https://data.bilibili.com",
+      "path": "/log/web",
+      "local": false,
+      "at": "2026-11-03T07:18:28.557Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-01.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&og=ali&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&nbs=1&uipk=5&platform=pc&mid=0&deadline=1793697507&oi=1001173019&gen=playurlv3&os=bcache&upsig=fcbb930c8ed93dac2ddf4bd68c427229&uparams=e,og,trid,nbs,uipk,platform,mid,deadline,oi,gen,os&cdnid=3871&bvc=vod&nettype=0&bw=102787&lrs=0&V=v3.0.8&np=151388311&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-01.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:28.694Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-03.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&oi=1001173019&nbs=1&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&deadline=1793697507&os=bcache&og=cos&uipk=5&platform=pc&mid=0&gen=playurlv3&upsig=51d9cfb43d8fd4368f76e73134016280&uparams=e,oi,nbs,trid,deadline,os,og,uipk,platform,mid,gen&cdnid=3873&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&np=151388311&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-03.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:28.695Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-01.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&og=ali&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&nbs=1&uipk=5&platform=pc&mid=0&deadline=1793697507&oi=1001173019&gen=playurlv3&os=bcache&upsig=fcbb930c8ed93dac2ddf4bd68c427229&uparams=e,og,trid,nbs,uipk,platform,mid,deadline,oi,gen,os&cdnid=3871&bvc=vod&nettype=0&bw=102787&lrs=0&V=v3.0.8&np=151388311&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-01.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:28.745Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-03.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&oi=1001173019&nbs=1&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&deadline=1793697507&os=bcache&og=cos&uipk=5&platform=pc&mid=0&gen=playurlv3&upsig=51d9cfb43d8fd4368f76e73134016280&uparams=e,oi,nbs,trid,deadline,os,og,uipk,platform,mid,gen&cdnid=3873&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&np=151388311&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-03.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:28.754Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-03.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&oi=1001173019&nbs=1&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&deadline=1793697507&os=bcache&og=cos&uipk=5&platform=pc&mid=0&gen=playurlv3&upsig=51d9cfb43d8fd4368f76e73134016280&uparams=e,oi,nbs,trid,deadline,os,og,uipk,platform,mid,gen&cdnid=3873&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&np=151388311&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-03.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:28.803Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/img/ploading.png",
+      "resourceType": "image",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/img/ploading.png",
+      "local": false,
+      "at": "2026-11-03T07:18:28.831Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-01.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&og=ali&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&nbs=1&uipk=5&platform=pc&mid=0&deadline=1793697507&oi=1001173019&gen=playurlv3&os=bcache&upsig=fcbb930c8ed93dac2ddf4bd68c427229&uparams=e,og,trid,nbs,uipk,platform,mid,deadline,oi,gen,os&cdnid=3871&bvc=vod&nettype=0&bw=102787&lrs=0&V=v3.0.8&np=151388311&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-01.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:28.833Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-01.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&og=ali&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&nbs=1&uipk=5&platform=pc&mid=0&deadline=1793697507&oi=1001173019&gen=playurlv3&os=bcache&upsig=fcbb930c8ed93dac2ddf4bd68c427229&uparams=e,og,trid,nbs,uipk,platform,mid,deadline,oi,gen,os&cdnid=3871&bvc=vod&nettype=0&bw=102787&lrs=0&V=v3.0.8&np=151388311&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-01.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:28.872Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-01.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&og=ali&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&nbs=1&uipk=5&platform=pc&mid=0&deadline=1793697507&oi=1001173019&gen=playurlv3&os=bcache&upsig=fcbb930c8ed93dac2ddf4bd68c427229&uparams=e,og,trid,nbs,uipk,platform,mid,deadline,oi,gen,os&cdnid=3871&bvc=vod&nettype=0&bw=102787&lrs=0&V=v3.0.8&np=151388311&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-01.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:29.091Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "POST",
+      "url": "https://data.bilibili.com/log/web?0133241793690308510https%3A%2F%2Fplayer.bilibili.com%2Fplayer.html%3Fbvid%3DBV1Qaxb6PE7G%26page%3D1%26high_quality%3D1%26danmaku%3D0%26autoplay%3D1|457.1.fp.risk||1793690308510|||572x321|1|{%22cookieEnabled%22:1,%22userAgent%22:%22Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20HeadlessChrome%2F149.0.7827.55%20Safari%2F537.36%22,%22webdriver%22:1,%22language%22:%22zh-CN%22,%22colorDepth%22:24,%22deviceMemory%22:16,%22hardwareConcurrency%22:28,%22screenResolution%22:%22900%2C%2C1440%22,%22availableScreenResolution%22:%22900%2C%2C1440%22,%22timezoneOffset%22:-480,%22timezone%22:%22Asia%2FSingapore%22,%22sessionStorage%22:1,%22localStorage%22:1,%22indexedDb%22:1,%22addBehavior%22:0,%22openDatabase%22:0,%22cpuClass%22:%22not%20available%22,%22platform%22:%22Win32%22,%22plugins%22:%22%22,%22canvas%22:%228gAAAABJRU5ErkJggg%3D%3D%22,%22webgl_str%22:%22%2F%2F8cxNnQAAAAZJREFUAwA1xAD%2FyjOy7AAAAABJRU5ErkJggg%3D%3D%22,%22webgl_params%22:%22extensions%3AANGLE_instanced_arrays%3BEXT_blend_minmax%3BEXT_clip_control%3BEXT_color_buffer_half_float%3BEXT_depth_clamp%3BEXT_float_blend%3BEXT_frag_depth%3BEXT_polygon_offset_clamp%3BEXT_shader_texture_lod%3BEXT_texture_compression_bptc%3BEXT_texture_compression_rgtc%3BEXT_texture_filter_anisotropic%3BEXT_texture_mirror_clamp_to_edge%3BEXT_sRGB%3BOES_element_index_uint%3BOES_fbo_render_mipmap%3BOES_standard_derivatives%3BOES_texture_float%3BOES_texture_float_linear%3BOES_texture_half_float%3BOES_texture_half_float_linear%3BOES_vertex_array_object%3BWEBGL_color_buffer_float%3BWEBGL_compressed_texture_astc%3BWEBGL_compressed_texture_etc%3BWEBGL_compressed_texture_etc1%3BWEBGL_compressed_texture_s3tc%3BWEBGL_compressed_texture_s3tc_srgb%3BWEBGL_debug_renderer_info%3BWEBGL_debug_shaders%3BWEBGL_depth_texture%3BWEBGL_draw_buffers%3BWEBGL_lose_context%3BWEBGL_multi_draw%3BWEBGL_polygon_mode%2C%2Cwebgl%20aliased%20line%20width%20range%3A%5B1%2C%201%5D%2C%2Cwebgl%20aliased%20point%20size%20range%3A%5B1%2C%201023%5D%2C%2Cwebgl%20alpha%20bits%3A8%2C%2Cwebgl%20antialiasing%3Ayes%2C%2Cwebgl%20blue%20bits%3A8%2C%2Cwebgl%20depth%20bits%3A24%2C%2Cwebgl%20green%20bits%3A8%2C%2Cwebgl%20max%20anisotropy%3A16%2C%2Cwebgl%20max%20combined%20texture%20image%20units%3A64%2C%2Cwebgl%20max%20cube%20map%20texture%20size%3A16384%2C%2Cwebgl%20max%20fragment%20uniform%20vectors%3A4096%2C%2Cwebgl%20max%20render%20buffer%20size%3A8192%2C%2Cwebgl%20max%20texture%20image%20units%3A32%2C%2Cwebgl%20max%20texture%20size%3A8192%2C%2Cwebgl%20max%20varying%20vectors%3A31%2C%2Cwebgl%20max%20vertex%20attribs%3A16%2C%2Cwebgl%20max%20vertex%20texture%20image%20units%3A32%2C%2Cwebgl%20max%20vertex%20uniform%20vectors%3A4096%2C%2Cwebgl%20max%20viewport%20dims%3A%5B8192%2C%208192%5D%2C%2Cwebgl%20red%20bits%3A8%2C%2Cwebgl%20renderer%3AWebKit%20WebGL%2C%2Cwebgl%20shading%20language%20version%3AWebGL%20GLSL%20ES%201.0%20(OpenGL%20ES%20GLSL%20ES%201.0%20Chromium)%2C%2Cwebgl%20stencil%20bits%3A0%2C%2Cwebgl%20vendor%3AWebKit%2C%2Cwebgl%20version%3AWebGL%201.0%20(OpenGL%20ES%202.0%20Chromium)%2C%2Cwebgl%20unmasked%20vendor%3AGoogle%20Inc.%20(Google)%2C%2Cwebgl%20unmasked%20renderer%3AANGLE%20(Google%2C%20Vulkan%201.3.0%20(SwiftShader%20Device%20(Subzero)%20(0x0000C0DE))%2C%20SwiftShader%20driver)%2C%2Cwebgl%20vertex%20shader%20high%20float%20precision%3A23%2C%2Cwebgl%20vertex%20shader%20high%20float%20precision%20rangeMin%3A127%2C%2Cwebgl%20vertex%20shader%20high%20float%20precision%20rangeMax%3A127%2C%2Cwebgl%20vertex%20shader%20medium%20float%20precision%3A10%2C%2Cwebgl%20vertex%20shader%20medium%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20medium%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20vertex%20shader%20low%20float%20precision%3A10%2C%2Cwebgl%20vertex%20shader%20low%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20low%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20fragment%20shader%20high%20float%20precision%3A23%2C%2Cwebgl%20fragment%20shader%20high%20float%20precision%20rangeMin%3A127%2C%2Cwebgl%20fragment%20shader%20high%20float%20precision%20rangeMax%3A127%2C%2Cwebgl%20fragment%20shader%20medium%20float%20precision%3A10%2C%2Cwebgl%20fragment%20shader%20medium%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20medium%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20fragment%20shader%20low%20float%20precision%3A10%2C%2Cwebgl%20fragment%20shader%20low%20float%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20low%20float%20precision%20rangeMax%3A15%2C%2Cwebgl%20vertex%20shader%20high%20int%20precision%3A0%2C%2Cwebgl%20vertex%20shader%20high%20int%20precision%20rangeMin%3A31%2C%2Cwebgl%20vertex%20shader%20high%20int%20precision%20rangeMax%3A30%2C%2Cwebgl%20vertex%20shader%20medium%20int%20precision%3A0%2C%2Cwebgl%20vertex%20shader%20medium%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20medium%20int%20precision%20rangeMax%3A14%2C%2Cwebgl%20vertex%20shader%20low%20int%20precision%3A0%2C%2Cwebgl%20vertex%20shader%20low%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20vertex%20shader%20low%20int%20precision%20rangeMax%3A14%2C%2Cwebgl%20fragment%20shader%20high%20int%20precision%3A0%2C%2Cwebgl%20fragment%20shader%20high%20int%20precision%20rangeMin%3A31%2C%2Cwebgl%20fragment%20shader%20high%20int%20precision%20rangeMax%3A30%2C%2Cwebgl%20fragment%20shader%20medium%20int%20precision%3A0%2C%2Cwebgl%20fragment%20shader%20medium%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20medium%20int%20precision%20rangeMax%3A14%2C%2Cwebgl%20fragment%20shader%20low%20int%20precision%3A0%2C%2Cwebgl%20fragment%20shader%20low%20int%20precision%20rangeMin%3A15%2C%2Cwebgl%20fragment%20shader%20low%20int%20precision%20rangeMax%3A14%22,%22webglVendorAndRenderer%22:%22Google%20Inc.%20(Google)~ANGLE%20(Google%2C%20Vulkan%201.3.0%20(SwiftShader%20Device%20(Subzero)%20(0x0000C0DE))%2C%20SwiftShader%20driver)%22,%22hasLiedLanguages%22:0,%22hasLiedResolution%22:0,%22hasLiedOs%22:0,%22hasLiedBrowser%22:0,%22touchSupport%22:%220%2C%2C0%2C%2C0%22,%22fonts%22:%22Arial%2C%2CArial%20Black%2C%2CArial%20Narrow%2C%2CBook%20Antiqua%2C%2CBookman%20Old%20Style%2C%2CCalibri%2C%2CCambria%2C%2CCambria%20Math%2C%2CCentury%2C%2CCentury%20Gothic%2C%2CCentury%20Schoolbook%2C%2CComic%20Sans%20MS%2C%2CConsolas%2C%2CCourier%2C%2CCourier%20New%2C%2CGeorgia%2C%2CHelvetica%2C%2CImpact%2C%2CLucida%20Bright%2C%2CLucida%20Calligraphy%2C%2CLucida%20Console%2C%2CLucida%20Fax%2C%2CLucida%20Handwriting%2C%2CLucida%20Sans%2C%2CLucida%20Sans%20Typewriter%2C%2CLucida%20Sans%20Unicode%2C%2CMicrosoft%20Sans%20Serif%2C%2CMonotype%20Corsiva%2C%2CMS%20Gothic%2C%2CMS%20PGothic%2C%2CMS%20Reference%20Sans%20Serif%2C%2CMS%20Sans%20Serif%2C%2CMS%20Serif%2C%2CPalatino%20Linotype%2C%2CSegoe%20Print%2C%2CSegoe%20Script%2C%2CSegoe%20UI%2C%2CSegoe%20UI%20Light%2C%2CSegoe%20UI%20Semibold%2C%2CSegoe%20UI%20Symbol%2C%2CTahoma%2C%2CTimes%2C%2CTimes%20New%20Roman%2C%2CTrebuchet%20MS%2C%2CVerdana%2C%2CWingdings%2C%2CWingdings%202%2C%2CWingdings%203%22,%22audio%22:%22124.04347527516074%22,%22lsid%22:%221D110F4810_1A1A046061C%22,%22buvid_fp%22:%22buvid_fp_iframe7D6466D3-D472-5F810-919D-310A4F256717908541infoc%22,%22buvid4%22:%22null%22,%22bsource_origin%22:%22empty%22,%22share_source_origin%22:%22empty%22}|{}|http%3A%2F%2F127.0.0.1%3A34111%2F|null|zh-CN|null|0",
+      "resourceType": "ping",
+      "origin": "https://data.bilibili.com",
+      "path": "/log/web",
+      "local": false,
+      "at": "2026-11-03T07:18:29.100Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-03.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&oi=1001173019&nbs=1&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&deadline=1793697507&os=bcache&og=cos&uipk=5&platform=pc&mid=0&gen=playurlv3&upsig=51d9cfb43d8fd4368f76e73134016280&uparams=e,oi,nbs,trid,deadline,os,og,uipk,platform,mid,gen&cdnid=3873&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&np=151388311&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-03.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:29.151Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-03.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&oi=1001173019&nbs=1&trid=0000f4be8cb30fdb4569ba21e42a63d3266u&deadline=1793697507&os=bcache&og=cos&uipk=5&platform=pc&mid=0&gen=playurlv3&upsig=51d9cfb43d8fd4368f76e73134016280&uparams=e,oi,nbs,trid,deadline,os,og,uipk,platform,mid,gen&cdnid=3873&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&agrr=1&buvid=&build=0&dl=0&f=u_0_0&qn_dyeid=8f5fe5fe98314da300759d636ae98ac3&np=151388311&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-03.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:29.198Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.root-extra.5d38cf19.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.root-extra.5d38cf19.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.302Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.lottie_light.c0643260.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.lottie_light.c0643260.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.303Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.713.2b221bd6.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.713.2b221bd6.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.305Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.common-helper.acd3cbd8.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.common-helper.acd3cbd8.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.306Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.787.2cab3d4f.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.787.2cab3d4f.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.338Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.926.3d2255d5.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.926.3d2255d5.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.338Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.779.927eee6b.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.779.927eee6b.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.339Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.231.2a8f567b.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.231.2a8f567b.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.340Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.69.0247b290.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.69.0247b290.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.341Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.936.b4f963a9.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.936.b4f963a9.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.341Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.777.d5b47d2c.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.777.d5b47d2c.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.342Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.165.cd9329c3.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.165.cd9329c3.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.343Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.76.50174f8f.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.76.50174f8f.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.344Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.797.ad950a04.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.797.ad950a04.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.345Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/widgets/npd.embedded-helper.61f29de2.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/widgets/npd.embedded-helper.61f29de2.js",
+      "local": false,
+      "at": "2026-11-03T07:18:29.347Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://api.bilibili.com/x/click-interface/click/now",
+      "resourceType": "xhr",
+      "origin": "https://api.bilibili.com",
+      "path": "/x/click-interface/click/now",
+      "local": false,
+      "at": "2026-11-03T07:18:29.349Z"
+    },
+    {
+      "phase": "video-embed-click",
+      "method": "GET",
+      "url": "https://api.bilibili.com/x/click-interface/click/now",
+      "resourceType": "xhr",
+      "origin": "https://api.bilibili.com",
+      "path": "/x/click-interface/click/now",
+      "local": false,
+      "at": "2026-11-03T07:18:29.350Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+      "resourceType": "document",
+      "origin": "https://www.bilibili.com",
+      "path": "/video/BV1Qaxb6PE7G",
+      "local": false,
+      "at": "2026-11-03T07:18:32.063Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/font/regular.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/font/regular.css",
+      "local": false,
+      "at": "2026-11-03T07:18:32.761Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/font/medium.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/font/medium.css",
+      "local": false,
+      "at": "2026-11-03T07:18:32.762Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/core.9c6ca999.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/core.9c6ca999.js",
+      "local": false,
+      "at": "2026-11-03T07:18:32.762Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/map.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/map.css",
+      "local": false,
+      "at": "2026-11-03T07:18:32.763Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/light_u.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/light_u.css",
+      "local": false,
+      "at": "2026-11-03T07:18:32.763Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/light.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/light.css",
+      "local": false,
+      "at": "2026-11-03T07:18:32.764Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/log-reporter.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/log-reporter.js",
+      "local": false,
+      "at": "2026-11-03T07:18:32.827Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/video/css/video.0.8c3699a3aaf218112dadb300b3127b36bdacfe5c.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/video/css/video.0.8c3699a3aaf218112dadb300b3127b36bdacfe5c.css",
+      "local": false,
+      "at": "2026-11-03T07:18:32.828Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/b-mirror/biliMirror.umd.mini.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/b-mirror/biliMirror.umd.mini.js",
+      "local": false,
+      "at": "2026-11-03T07:18:32.839Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bmg/register/cmpt.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bmg/register/cmpt.js",
+      "local": false,
+      "at": "2026-11-03T07:18:32.840Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bmg/register/fallback.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bmg/register/fallback.js",
+      "local": false,
+      "at": "2026-11-03T07:18:32.841Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://i0.hdslb.com/bfs/static/jinkela/long/images/512.png",
+      "resourceType": "image",
+      "origin": "https://i0.hdslb.com",
+      "path": "/bfs/static/jinkela/long/images/512.png",
+      "local": false,
+      "at": "2026-11-03T07:18:32.847Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/cm/cm-sdk/static/js/bili-collect.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/cm/cm-sdk/static/js/bili-collect.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.330Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/risk-captcha-sdk/CaptchaLoader.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/risk-captcha-sdk/CaptchaLoader.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.495Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://www.bilibili.com/gentleman/polyfill.js?features=globalThis",
+      "resourceType": "script",
+      "origin": "https://www.bilibili.com",
+      "path": "/gentleman/polyfill.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.497Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/950.3cf17.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/950.3cf17.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.572Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/512.4a4c4.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/512.4a4c4.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.572Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/86.e192d.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/86.e192d.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.574Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/fehub/loki/unpkg/svgaplayerweb/svga.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/fehub/loki/unpkg/svgaplayerweb/svga.min.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.574Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/user-fingerprint/bili-user-fingerprint.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/user-fingerprint/bili-user-fingerprint.min.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.584Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/kv-sdk/index.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/kv-sdk/index.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.584Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-04.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30032.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&mid=0&deadline=1793697512&nbs=1&uipk=5&og=cos&oi=1001173019&trid=00000316b3bf5e114743ab33ed02173afb9u&platform=pc&gen=playurlv3&os=bcache&upsig=10acab24e238b8a20eff30a4ee3a8bd5&uparams=e,mid,deadline,nbs,uipk,og,oi,trid,platform,gen,os&cdnid=3874&bvc=vod&nettype=0&bw=159935&lrs=0&V=v3.0.8&buvid=622B74CE-3CFC-60D9-B2A3-81321473408212361infoc&build=0&np=151388311&dl=0&f=u_0_0&qn_dyeid=82a331824a2aa0b400b05cc46ae98ac8&agrr=1&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-04.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30032.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:33.693Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-03.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&os=bcache&og=cos&mid=0&deadline=1793697512&nbs=1&oi=1001173019&trid=00000316b3bf5e114743ab33ed02173afb9u&gen=playurlv3&uipk=5&platform=pc&upsig=641a71a3d76b4dd1f6496e2e3f1594e4&uparams=e,os,og,mid,deadline,nbs,oi,trid,gen,uipk,platform&cdnid=3873&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&agrr=1&buvid=622B74CE-3CFC-60D9-B2A3-81321473408212361infoc&build=0&np=151388311&dl=0&f=u_0_0&qn_dyeid=82a331824a2aa0b400b05cc46ae98ac8&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-03.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:33.707Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.708Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/reporter-pb/index.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/reporter-pb/index.js",
+      "local": false,
+      "at": "2026-11-03T07:18:33.953Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+      "resourceType": "document",
+      "origin": "https://www.bilibili.com",
+      "path": "/video/BV1Qaxb6PE7G",
+      "local": false,
+      "at": "2026-11-03T07:18:35.504Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/font/regular.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/font/regular.css",
+      "local": false,
+      "at": "2026-11-03T07:18:36.028Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/font/medium.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/font/medium.css",
+      "local": false,
+      "at": "2026-11-03T07:18:36.074Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/player/main/core.9c6ca999.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/player/main/core.9c6ca999.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.075Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/map.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/map.css",
+      "local": false,
+      "at": "2026-11-03T07:18:36.076Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/light_u.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/light_u.css",
+      "local": false,
+      "at": "2026-11-03T07:18:36.091Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/light.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bili-theme/light.css",
+      "local": false,
+      "at": "2026-11-03T07:18:36.094Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/log-reporter.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/log-reporter.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.144Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/video/css/video.0.8c3699a3aaf218112dadb300b3127b36bdacfe5c.css",
+      "resourceType": "stylesheet",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/video/css/video.0.8c3699a3aaf218112dadb300b3127b36bdacfe5c.css",
+      "local": false,
+      "at": "2026-11-03T07:18:36.146Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/b-mirror/biliMirror.umd.mini.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/b-mirror/biliMirror.umd.mini.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.147Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bmg/register/cmpt.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bmg/register/cmpt.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.149Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/bmg/register/fallback.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/bmg/register/fallback.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.150Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://i0.hdslb.com/bfs/static/jinkela/long/images/512.png",
+      "resourceType": "image",
+      "origin": "https://i0.hdslb.com",
+      "path": "/bfs/static/jinkela/long/images/512.png",
+      "local": false,
+      "at": "2026-11-03T07:18:36.152Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/cm/cm-sdk/static/js/bili-collect.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/cm/cm-sdk/static/js/bili-collect.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.820Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/risk-captcha-sdk/CaptchaLoader.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/risk-captcha-sdk/CaptchaLoader.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.831Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://www.bilibili.com/gentleman/polyfill.js?features=globalThis",
+      "resourceType": "script",
+      "origin": "https://www.bilibili.com",
+      "path": "/gentleman/polyfill.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.913Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/fehub/loki/unpkg/svgaplayerweb/svga.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/fehub/loki/unpkg/svgaplayerweb/svga.min.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.914Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/950.3cf17.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/950.3cf17.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.930Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/512.4a4c4.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/512.4a4c4.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.952Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/log/report/86.e192d.function.chunk.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/log/report/86.e192d.function.chunk.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.967Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/user-fingerprint/bili-user-fingerprint.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/user-fingerprint/bili-user-fingerprint.min.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.985Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/kv-sdk/index.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/kv-sdk/index.js",
+      "local": false,
+      "at": "2026-11-03T07:18:36.987Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-04.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30032.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&trid=000062200de37ed24a3487290fa4f23b4bau&mid=0&uipk=5&gen=playurlv3&os=bcache&deadline=1793697516&oi=1001173019&og=cos&platform=pc&nbs=1&upsig=2de8df822e561aa566f249ad6af7aea9&uparams=e,trid,mid,uipk,gen,os,deadline,oi,og,platform,nbs&cdnid=3874&bvc=vod&nettype=0&bw=159935&lrs=0&V=v3.0.8&agrr=1&buvid=622B74CE-3CFC-60D9-B2A3-81321473408212361infoc&build=0&dl=0&np=151388311&f=u_0_0&qn_dyeid=30aa972f5be2134d0069a3896ae98acc&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-04.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30032.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:37.035Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://cn-hbwh-fx-01-03.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&nbs=1&trid=000062200de37ed24a3487290fa4f23b4bau&oi=1001173019&platform=pc&gen=playurlv3&og=cos&mid=0&deadline=1793697516&uipk=5&os=bcache&upsig=511607f574dbcbe0e5fcf8e6f4235622&uparams=e,nbs,trid,oi,platform,gen,og,mid,deadline,uipk,os&cdnid=3873&bvc=vod&nettype=0&bw=65788&lrs=0&V=v3.0.8&build=0&dl=0&np=151388311&f=u_0_0&qn_dyeid=30aa972f5be2134d0069a3896ae98acc&agrr=1&buvid=622B74CE-3CFC-60D9-B2A3-81321473408212361infoc&orderid=0,3",
+      "resourceType": "xhr",
+      "origin": "https://cn-hbwh-fx-01-03.bilivideo.com",
+      "path": "/upgcxcode/63/56/43242685663/43242685663-1-30216.m4s",
+      "local": false,
+      "at": "2026-11-03T07:18:37.054Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+      "local": false,
+      "at": "2026-11-03T07:18:37.080Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "https://s1.hdslb.com/bfs/seed/jinkela/short/reporter-pb/index.js",
+      "resourceType": "script",
+      "origin": "https://s1.hdslb.com",
+      "path": "/bfs/seed/jinkela/short/reporter-pb/index.js",
+      "local": false,
+      "at": "2026-11-03T07:18:37.410Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/",
+      "resourceType": "document",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/",
+      "local": true,
+      "at": "2026-11-03T07:18:37.933Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/logo.png",
+      "resourceType": "image",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/logo.png",
+      "local": true,
+      "at": "2026-11-03T07:18:53.453Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_1m_kv2t8hd7hd._.css",
+      "resourceType": "stylesheet",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_1m_kv2t8hd7hd._.css",
+      "local": true,
+      "at": "2026-11-03T07:18:53.472Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_1jiib-2own1si._.css",
+      "resourceType": "stylesheet",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_1jiib-2own1si._.css",
+      "local": true,
+      "at": "2026-11-03T07:18:53.492Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0qva5cupmdgep._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0qva5cupmdgep._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:53.493Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+      "local": true,
+      "at": "2026-11-03T07:18:53.493Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/1q96_modules_next_dist_compiled_react-dom_cjs_react-dom_development_1sqry0_53krp4.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/1q96_modules_next_dist_compiled_react-dom_cjs_react-dom_development_1sqry0_53krp4.js",
+      "local": true,
+      "at": "2026-11-03T07:18:53.495Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_react-dom_0grqycjrj6mju._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_react-dom_0grqycjrj6mju._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:53.499Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:53.501Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jmam7qwg.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jmam7qwg.js",
+      "local": true,
+      "at": "2026-11-03T07:18:53.502Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_compiled_1amofcmz--cdp._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_compiled_1amofcmz--cdp._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:53.506Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:53.507Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:53.509Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqwj2323d._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqwj2323d._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:53.511Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_1anvha4rlo79g._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_1anvha4rlo79g._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:53.516Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/turbopack-_06rkbud3pyrlm._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/turbopack-_06rkbud3pyrlm._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:53.517Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_219uq1sj0q91c._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_219uq1sj0q91c._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:53.517Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_0_duo-exf6bfz._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_0_duo-exf6bfz._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:53.520Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_0y6xgmo32juxh._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_0y6xgmo32juxh._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:53.521Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_17f25dzi-5r2x._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_17f25dzi-5r2x._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:53.521Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/_0xf402376gn4t._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/_0xf402376gn4t._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:53.522Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_1itzgohq65v6w._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_1itzgohq65v6w._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:53.522Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/fonts/pm-editorial-serif.ttf",
+      "resourceType": "font",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/fonts/pm-editorial-serif.ttf",
+      "local": true,
+      "at": "2026-11-03T07:18:54.271Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/fonts/manrope-variable.ttf",
+      "resourceType": "font",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/fonts/manrope-variable.ttf",
+      "local": true,
+      "at": "2026-11-03T07:18:54.273Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/fonts/pm-serif-brand.ttf",
+      "resourceType": "font",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/fonts/pm-serif-brand.ttf",
+      "local": true,
+      "at": "2026-11-03T07:18:54.274Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
+      "resourceType": "script",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js",
+      "local": true,
+      "at": "2026-11-03T07:18:54.399Z"
+    },
+    {
+      "phase": "video-click",
+      "method": "GET",
+      "url": "http://127.0.0.1:34111/logo.png",
+      "resourceType": "image",
+      "origin": "http://127.0.0.1:34111",
+      "path": "/logo.png",
+      "local": true,
+      "at": "2026-11-03T07:18:54.668Z"
+    }
+  ]
+}

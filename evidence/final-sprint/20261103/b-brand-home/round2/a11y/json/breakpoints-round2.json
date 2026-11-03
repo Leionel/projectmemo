@@ -1,0 +1,435 @@
+{
+  "meta": {
+    "label": "round2",
+    "sha": "f06685d84b85c523595f2950b07b07dcdbf4271d",
+    "base": "http://127.0.0.1:34111",
+    "startedAt": "2026-11-03T07:25:16.656Z",
+    "finishedAt": "2026-11-03T07:25:32.316Z"
+  },
+  "viewports": {
+    "360x740": {
+      "innerWidth": 360,
+      "scrollWidth": 360,
+      "overflow": false,
+      "smallCount": 0,
+      "small": [],
+      "targets": {
+        "storyTabs": [
+          {
+            "id": "story-tab-0",
+            "text": "1查看记录",
+            "fontSize": 12.8,
+            "w": 62.5,
+            "h": 60.4,
+            "under44": false
+          },
+          {
+            "id": "story-tab-1",
+            "text": "2核对依据",
+            "fontSize": 12.8,
+            "w": 62.5,
+            "h": 60.4,
+            "under44": false
+          },
+          {
+            "id": "story-tab-2",
+            "text": "3查看判断",
+            "fontSize": 12.8,
+            "w": 62.5,
+            "h": 60.4,
+            "under44": false
+          },
+          {
+            "id": "story-tab-3",
+            "text": "4确认行动",
+            "fontSize": 12.8,
+            "w": 62.5,
+            "h": 60.4,
+            "under44": false
+          },
+          {
+            "id": "story-tab-4",
+            "text": "5填写回执",
+            "fontSize": 12.8,
+            "w": 62.5,
+            "h": 60.4,
+            "under44": false
+          }
+        ],
+        "stageTabs": [
+          {
+            "id": "stage-tab-away",
+            "text": "01离开时",
+            "fontSize": 12.8,
+            "w": 100.9,
+            "h": 44,
+            "under44": false
+          },
+          {
+            "id": "stage-tab-during",
+            "text": "02期间",
+            "fontSize": 12.8,
+            "w": 100.9,
+            "h": 44,
+            "under44": false
+          },
+          {
+            "id": "stage-tab-back",
+            "text": "03回来后",
+            "fontSize": 12.8,
+            "w": 100.9,
+            "h": 44,
+            "under44": false
+          }
+        ],
+        "prevNext": [
+          {
+            "id": "",
+            "text": "",
+            "fontSize": 14,
+            "w": 44,
+            "h": 44,
+            "under44": false
+          },
+          {
+            "id": "",
+            "text": "",
+            "fontSize": 14,
+            "w": 44,
+            "h": 44,
+            "under44": false
+          }
+        ],
+        "headerCta": {
+          "id": "",
+          "text": "进入工作台",
+          "fontSize": 14,
+          "w": 111.8,
+          "h": 44,
+          "under44": false
+        },
+        "heroCta": {
+          "id": "",
+          "text": "体验一段项目接续",
+          "fontSize": 14,
+          "w": 157.6,
+          "h": 46,
+          "under44": false
+        },
+        "sourceButton": {
+          "id": "",
+          "text": "任务安排查看原文",
+          "fontSize": 12.8,
+          "w": 136.2,
+          "h": 44,
+          "under44": false
+        },
+        "videoLink": {
+          "id": "",
+          "text": "在 Bilibili 打开（新窗口）",
+          "fontSize": 12.8,
+          "w": 157.7,
+          "h": 44,
+          "under44": false
+        },
+        "footerExternal": {
+          "id": "",
+          "text": "决赛演示",
+          "fontSize": 13.12,
+          "w": 69.3,
+          "h": 44,
+          "under44": false
+        }
+      },
+      "heroCtaVisible": true,
+      "stageTabVisible": true,
+      "storyPanelVisible": true,
+      "h1Visible": true,
+      "headerHeight": 57,
+      "shotFile": "shots/round2-breakpoint-360x740.png"
+    },
+    "320x640": {
+      "innerWidth": 320,
+      "scrollWidth": 320,
+      "overflow": false,
+      "smallCount": 0,
+      "small": [],
+      "targets": {
+        "storyTabs": [
+          {
+            "id": "story-tab-0",
+            "text": "1查看记录",
+            "fontSize": 12.8,
+            "w": 54.5,
+            "h": 60.4,
+            "under44": false
+          },
+          {
+            "id": "story-tab-1",
+            "text": "2核对依据",
+            "fontSize": 12.8,
+            "w": 54.5,
+            "h": 60.4,
+            "under44": false
+          },
+          {
+            "id": "story-tab-2",
+            "text": "3查看判断",
+            "fontSize": 12.8,
+            "w": 54.5,
+            "h": 60.4,
+            "under44": false
+          },
+          {
+            "id": "story-tab-3",
+            "text": "4确认行动",
+            "fontSize": 12.8,
+            "w": 54.5,
+            "h": 60.4,
+            "under44": false
+          },
+          {
+            "id": "story-tab-4",
+            "text": "5填写回执",
+            "fontSize": 12.8,
+            "w": 54.5,
+            "h": 60.4,
+            "under44": false
+          }
+        ],
+        "stageTabs": [
+          {
+            "id": "stage-tab-away",
+            "text": "01离开时",
+            "fontSize": 12.8,
+            "w": 87.6,
+            "h": 44,
+            "under44": false
+          },
+          {
+            "id": "stage-tab-during",
+            "text": "02期间",
+            "fontSize": 12.8,
+            "w": 87.6,
+            "h": 44,
+            "under44": false
+          },
+          {
+            "id": "stage-tab-back",
+            "text": "03回来后",
+            "fontSize": 12.8,
+            "w": 87.6,
+            "h": 44,
+            "under44": false
+          }
+        ],
+        "prevNext": [
+          {
+            "id": "",
+            "text": "",
+            "fontSize": 14,
+            "w": 44,
+            "h": 44,
+            "under44": false
+          },
+          {
+            "id": "",
+            "text": "",
+            "fontSize": 14,
+            "w": 44,
+            "h": 44,
+            "under44": false
+          }
+        ],
+        "headerCta": {
+          "id": "",
+          "text": "进入工作台",
+          "fontSize": 14,
+          "w": 111.8,
+          "h": 44,
+          "under44": false
+        },
+        "heroCta": {
+          "id": "",
+          "text": "体验一段项目接续",
+          "fontSize": 14,
+          "w": 284,
+          "h": 46,
+          "under44": false
+        },
+        "sourceButton": {
+          "id": "",
+          "text": "任务安排查看原文",
+          "fontSize": 12.8,
+          "w": 136.2,
+          "h": 44,
+          "under44": false
+        },
+        "videoLink": {
+          "id": "",
+          "text": "在 Bilibili 打开（新窗口）",
+          "fontSize": 12.8,
+          "w": 157.7,
+          "h": 44,
+          "under44": false
+        },
+        "footerExternal": {
+          "id": "",
+          "text": "决赛演示",
+          "fontSize": 13.12,
+          "w": 69.3,
+          "h": 44,
+          "under44": false
+        }
+      },
+      "heroCtaVisible": true,
+      "stageTabVisible": true,
+      "storyPanelVisible": true,
+      "h1Visible": true,
+      "headerHeight": 57,
+      "shotFile": "shots/round2-breakpoint-320x640.png"
+    },
+    "720x450(200%)": {
+      "innerWidth": 720,
+      "scrollWidth": 720,
+      "overflow": false,
+      "smallCount": 0,
+      "small": [],
+      "targets": {
+        "storyTabs": [
+          {
+            "id": "story-tab-0",
+            "text": "1查看记录",
+            "fontSize": 12.8,
+            "w": 134.5,
+            "h": 60.4,
+            "under44": false
+          },
+          {
+            "id": "story-tab-1",
+            "text": "2核对依据",
+            "fontSize": 12.8,
+            "w": 134.5,
+            "h": 60.4,
+            "under44": false
+          },
+          {
+            "id": "story-tab-2",
+            "text": "3查看判断",
+            "fontSize": 12.8,
+            "w": 134.5,
+            "h": 60.4,
+            "under44": false
+          },
+          {
+            "id": "story-tab-3",
+            "text": "4确认行动",
+            "fontSize": 12.8,
+            "w": 134.5,
+            "h": 60.4,
+            "under44": false
+          },
+          {
+            "id": "story-tab-4",
+            "text": "5填写回执",
+            "fontSize": 12.8,
+            "w": 134.5,
+            "h": 60.4,
+            "under44": false
+          }
+        ],
+        "stageTabs": [
+          {
+            "id": "stage-tab-away",
+            "text": "01离开时",
+            "fontSize": 12.8,
+            "w": 220.9,
+            "h": 44,
+            "under44": false
+          },
+          {
+            "id": "stage-tab-during",
+            "text": "02期间",
+            "fontSize": 12.8,
+            "w": 220.9,
+            "h": 44,
+            "under44": false
+          },
+          {
+            "id": "stage-tab-back",
+            "text": "03回来后",
+            "fontSize": 12.8,
+            "w": 220.9,
+            "h": 44,
+            "under44": false
+          }
+        ],
+        "prevNext": [
+          {
+            "id": "",
+            "text": "",
+            "fontSize": 14,
+            "w": 44,
+            "h": 44,
+            "under44": false
+          },
+          {
+            "id": "",
+            "text": "",
+            "fontSize": 14,
+            "w": 44,
+            "h": 44,
+            "under44": false
+          }
+        ],
+        "headerCta": {
+          "id": "",
+          "text": "进入工作台",
+          "fontSize": 14,
+          "w": 111.8,
+          "h": 44,
+          "under44": false
+        },
+        "heroCta": {
+          "id": "",
+          "text": "体验一段项目接续",
+          "fontSize": 14,
+          "w": 337.6,
+          "h": 46,
+          "under44": false
+        },
+        "sourceButton": {
+          "id": "",
+          "text": "任务安排查看原文",
+          "fontSize": 12.8,
+          "w": 136.2,
+          "h": 44,
+          "under44": false
+        },
+        "videoLink": {
+          "id": "",
+          "text": "在 Bilibili 打开（新窗口）",
+          "fontSize": 12.8,
+          "w": 157.7,
+          "h": 44,
+          "under44": false
+        },
+        "footerExternal": {
+          "id": "",
+          "text": "决赛演示",
+          "fontSize": 13.12,
+          "w": 69.3,
+          "h": 44,
+          "under44": false
+        }
+      },
+      "heroCtaVisible": true,
+      "stageTabVisible": true,
+      "storyPanelVisible": true,
+      "h1Visible": true,
+      "headerHeight": 57,
+      "shotFile": "shots/round2-breakpoint-720x450_200__.png"
+    }
+  },
+  "errors": []
+}

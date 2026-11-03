@@ -1,0 +1,73 @@
+{
+  "observedAt": "2026-11-03T06:58:27.274Z",
+  "head": "4b696141435825a3582816e8e449c0e0cf013f29",
+  "branch": "codex/final-b-brand-home",
+  "statusAppComponents": [
+    "M app/home.module.css",
+    " M app/page.tsx",
+    "?? components/home/DemoVideoPlayer.tsx"
+  ],
+  "statusTooling": [
+    "M next-env.d.ts",
+    " M tsconfig.json"
+  ],
+  "files": [
+    {
+      "file": "app/page.tsx",
+      "mtime": "2026-11-03T06:56:29.269Z",
+      "size": 13183
+    },
+    {
+      "file": "app/home.module.css",
+      "mtime": "2026-11-03T06:57:22.893Z",
+      "size": 31643
+    },
+    {
+      "file": "components/home/DemoVideoPlayer.tsx",
+      "mtime": "2026-11-03T06:56:05.137Z",
+      "size": 2496
+    },
+    {
+      "file": "components/home/HomeMotion.tsx",
+      "mtime": "2026-11-03T06:29:34.399Z",
+      "size": 4955
+    },
+    {
+      "file": "components/home/HomeHeroLens.tsx",
+      "mtime": "2026-11-03T06:29:34.398Z",
+      "size": 8524
+    },
+    {
+      "file": "components/HomeJourney.tsx",
+      "mtime": "2026-11-03T04:42:33.035Z",
+      "size": 18440
+    },
+    {
+      "file": "app/globals.css",
+      "mtime": "2026-11-03T02:56:33.073Z",
+      "size": 18256
+    },
+    {
+      "file": "app/layout.tsx",
+      "mtime": "2026-11-03T02:56:33.074Z",
+      "size": 3701
+    },
+    {
+      "file": "components/SiteHeader.tsx",
+      "mtime": "2026-11-03T03:51:38.717Z",
+      "size": 1617
+    },
+    {
+      "file": "components/SiteHeader.module.css",
+      "mtime": "2026-11-03T04:26:14.142Z",
+      "size": 2803
+    }
+  ],
+  "diffStatAppComponents": "app/home.module.css | 149 ++++++++++++++++++++++++++++++++++++++--------------\n app/page.tsx        |  25 ++-------\n 2 files changed, 114 insertions(+), 60 deletions(-)",
+  "probeTimeline": {
+    "mainProbe": "2026-11-03T06:48:18.634Z .. 06:52:49.859Z (UTC) = 14:48:18..14:52:49 +08",
+    "accountsSupplement": "2026-11-03T06:55:13.527Z .. 06:55:37.366Z (UTC) = 14:55:13..14:55:37 +08",
+    "breakpointsSupplement": "2026-11-03T06:56:16.796Z .. 06:56:37.890Z (UTC) = 14:56:16..14:56:37 +08"
+  },
+  "note": "Round 2 主探针与账号页补充在源码干净时完成；断点补充运行期间 app/page.tsx 于 14:56:29 被修改（DemoVideoPlayer 接入），数据不可绑定 4b69614。"
+}

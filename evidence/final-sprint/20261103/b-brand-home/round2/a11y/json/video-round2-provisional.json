@@ -1,0 +1,189 @@
+{
+  "meta": {
+    "label": "round2-provisional",
+    "sha": "4b69614+worktree-video",
+    "base": "http://127.0.0.1:34111",
+    "startedAt": "2026-11-03T07:05:10.533Z",
+    "note": "Round 2 视频播放器专项取证。",
+    "finishedAt": "2026-11-03T07:05:49.162Z"
+  },
+  "sections": {
+    "beforeClick": {
+      "present": true,
+      "state": {
+        "demoSection": true,
+        "facade": {
+          "ariaLabel": "在本页播放 2026 C4-AI 决赛演示视频，将加载 Bilibili 官方播放器",
+          "text": "公开视频 · Bilibili2026 C4-AI 决赛演示视频点击播放 · 由 Bilibili 官方播放器加载",
+          "rect": {
+            "w": 572,
+            "h": 321
+          },
+          "tabIndex": 0,
+          "focusVisible": false
+        },
+        "iframe": null,
+        "fallback": [
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "name": "在 Bilibili 打开",
+            "mentionsExternal": true,
+            "mentionsNewWindow": false,
+            "rect": {
+              "w": 98,
+              "h": 44
+            }
+          },
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "name": "决赛演示（Bilibili，在新窗口打开）",
+            "mentionsExternal": true,
+            "mentionsNewWindow": true,
+            "rect": {
+              "w": 72,
+              "h": 44
+            }
+          }
+        ],
+        "active": {
+          "tag": "body",
+          "ariaLabel": null
+        }
+      },
+      "externalCount": 0,
+      "external": [],
+      "bilibiliRequests": 0,
+      "shotFile": "shots/round2-provisional-video-before-click.png"
+    },
+    "afterClick": {
+      "present": true,
+      "focusBefore": {
+        "tag": "button",
+        "ariaLabel": "在本页播放 2026 C4-AI 决赛演示视频，将加载 Bilibili 官方播放器"
+      },
+      "state": {
+        "demoSection": true,
+        "facade": null,
+        "iframe": {
+          "src": "https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1",
+          "title": "2026 C4-AI 决赛演示视频（Bilibili 官方播放器）",
+          "allow": "autoplay; fullscreen; picture-in-picture; encrypted-media",
+          "loading": "lazy",
+          "referrerPolicy": "no-referrer-when-downgrade"
+        },
+        "fallback": [
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "name": "在 Bilibili 打开",
+            "mentionsExternal": true,
+            "mentionsNewWindow": false,
+            "rect": {
+              "w": 98,
+              "h": 44
+            }
+          },
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "name": "决赛演示（Bilibili，在新窗口打开）",
+            "mentionsExternal": true,
+            "mentionsNewWindow": true,
+            "rect": {
+              "w": 72,
+              "h": 44
+            }
+          }
+        ],
+        "active": {
+          "tag": "body",
+          "ariaLabel": null
+        }
+      },
+      "externalCount": 1,
+      "external": [
+        "https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1"
+      ],
+      "bilibiliRequests": 1,
+      "bilibili": [
+        "https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1"
+      ],
+      "frames": [
+        "http://127.0.0.1:34111/"
+      ],
+      "iframeAutoplayParam": true,
+      "shotFile": "shots/round2-provisional-video-after-click.png"
+    },
+    "keyboard": {
+      "present": true,
+      "focusVisible": true,
+      "afterSpace": {
+        "demoSection": true,
+        "facade": null,
+        "iframe": {
+          "src": "https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1",
+          "title": "2026 C4-AI 决赛演示视频（Bilibili 官方播放器）",
+          "allow": "autoplay; fullscreen; picture-in-picture; encrypted-media",
+          "loading": "lazy",
+          "referrerPolicy": "no-referrer-when-downgrade"
+        },
+        "fallback": [
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "name": "在 Bilibili 打开",
+            "mentionsExternal": true,
+            "mentionsNewWindow": false,
+            "rect": {
+              "w": 98,
+              "h": 44
+            }
+          },
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "name": "决赛演示（Bilibili，在新窗口打开）",
+            "mentionsExternal": true,
+            "mentionsNewWindow": true,
+            "rect": {
+              "w": 72,
+              "h": 44
+            }
+          }
+        ],
+        "active": {
+          "tag": "body",
+          "ariaLabel": null
+        }
+      },
+      "shotFile": "shots/round2-provisional-video-keyboard-activated.png"
+    },
+    "noJs": {
+      "data": {
+        "facade": true,
+        "iframe": false,
+        "fallbackLinks": [
+          {
+            "name": "在 Bilibili 打开",
+            "target": "_blank"
+          },
+          {
+            "name": "决赛演示",
+            "target": "_blank"
+          }
+        ],
+        "mainLoading": true
+      },
+      "shotFile": "shots/round2-provisional-video-no-js.png"
+    }
+  },
+  "errors": []
+}

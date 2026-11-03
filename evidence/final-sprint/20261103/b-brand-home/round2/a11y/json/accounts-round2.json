@@ -1,0 +1,431 @@
+{
+  "meta": {
+    "label": "round2",
+    "sha": "f06685d84b85c523595f2950b07b07dcdbf4271d",
+    "base": "http://127.0.0.1:34111",
+    "startedAt": "2026-11-03T07:24:37.568Z",
+    "note": "Round 2 账号页补充取证（initScript 固化主题）。",
+    "finishedAt": "2026-11-03T07:25:15.199Z"
+  },
+  "pages": {
+    "light:/login": {
+      "desktop": {
+        "title": "登录忆程｜忆程 ProjectMemo",
+        "htmlClass": "light",
+        "bodyBg": "rgb(247, 246, 242)",
+        "header": {
+          "height": 57,
+          "position": "sticky",
+          "bg": "rgb(247, 246, 242)"
+        },
+        "main": {
+          "id": "main-content",
+          "top": 57,
+          "width": 1040
+        },
+        "nav": {
+          "label": "首页导航",
+          "links": [
+            "返回官网"
+          ]
+        },
+        "cta": {
+          "text": "返回官网",
+          "fontSize": 12.8,
+          "h": 44,
+          "w": 82
+        },
+        "leak": {
+          "homeMain": false,
+          "hero": false,
+          "storyFrame": false
+        },
+        "overflow": false,
+        "formFields": [
+          {
+            "type": null,
+            "id": "username",
+            "label": "账号"
+          },
+          {
+            "type": "password",
+            "id": "password",
+            "label": "密码"
+          }
+        ],
+        "headings": [
+          "h2:把项目，接着做下去。",
+          "h1:登录忆程"
+        ],
+        "skipTarget": true,
+        "themeToggle": 0
+      },
+      "mobile": {
+        "headerHeight": 57,
+        "cta": {
+          "text": "返回官网",
+          "fontSize": 12.8,
+          "h": 44,
+          "w": 74
+        },
+        "overflow": false,
+        "formFields": 2,
+        "mainTop": 57
+      },
+      "consoleErrors": [],
+      "shotDesktop": "shots/round2-account-light-login-1440.png",
+      "shotMobile": "shots/round2-account-light-login-390.png"
+    },
+    "light:/register": {
+      "desktop": {
+        "title": "创建账号｜忆程 ProjectMemo",
+        "htmlClass": "light",
+        "bodyBg": "rgb(247, 246, 242)",
+        "header": {
+          "height": 57,
+          "position": "sticky",
+          "bg": "rgb(247, 246, 242)"
+        },
+        "main": {
+          "id": "main-content",
+          "top": 57,
+          "width": 1040
+        },
+        "nav": {
+          "label": "首页导航",
+          "links": [
+            "返回官网"
+          ]
+        },
+        "cta": {
+          "text": "返回官网",
+          "fontSize": 12.8,
+          "h": 44,
+          "w": 82
+        },
+        "leak": {
+          "homeMain": false,
+          "hero": false,
+          "storyFrame": false
+        },
+        "overflow": false,
+        "formFields": [
+          {
+            "type": null,
+            "id": "username",
+            "label": "账号"
+          },
+          {
+            "type": "email",
+            "id": "email",
+            "label": "邮箱"
+          },
+          {
+            "type": "password",
+            "id": "password",
+            "label": "密码"
+          },
+          {
+            "type": "password",
+            "id": "confirm-password",
+            "label": "确认密码"
+          }
+        ],
+        "headings": [
+          "h2:把项目，接着做下去。",
+          "h1:创建你的账号"
+        ],
+        "skipTarget": true,
+        "themeToggle": 0
+      },
+      "mobile": {
+        "headerHeight": 57,
+        "cta": {
+          "text": "返回官网",
+          "fontSize": 12.8,
+          "h": 44,
+          "w": 74
+        },
+        "overflow": false,
+        "formFields": 4,
+        "mainTop": 57
+      },
+      "consoleErrors": [],
+      "shotDesktop": "shots/round2-account-light-register-1440.png",
+      "shotMobile": "shots/round2-account-light-register-390.png"
+    },
+    "light:/forgot-password": {
+      "desktop": {
+        "title": "找回密码｜忆程 ProjectMemo",
+        "htmlClass": "light",
+        "bodyBg": "rgb(247, 246, 242)",
+        "header": {
+          "height": 57,
+          "position": "sticky",
+          "bg": "rgb(247, 246, 242)"
+        },
+        "main": {
+          "id": "main-content",
+          "top": 57,
+          "width": 1040
+        },
+        "nav": {
+          "label": "首页导航",
+          "links": [
+            "返回官网"
+          ]
+        },
+        "cta": {
+          "text": "返回官网",
+          "fontSize": 12.8,
+          "h": 44,
+          "w": 82
+        },
+        "leak": {
+          "homeMain": false,
+          "hero": false,
+          "storyFrame": false
+        },
+        "overflow": false,
+        "formFields": [
+          {
+            "type": "email",
+            "id": "email",
+            "label": "邮箱"
+          }
+        ],
+        "headings": [
+          "h2:把项目，接着做下去。",
+          "h1:找回密码"
+        ],
+        "skipTarget": true,
+        "themeToggle": 0
+      },
+      "mobile": {
+        "headerHeight": 57,
+        "cta": {
+          "text": "返回官网",
+          "fontSize": 12.8,
+          "h": 44,
+          "w": 74
+        },
+        "overflow": false,
+        "formFields": 1,
+        "mainTop": 57
+      },
+      "consoleErrors": [],
+      "shotDesktop": "shots/round2-account-light-forgot-password-1440.png",
+      "shotMobile": "shots/round2-account-light-forgot-password-390.png"
+    },
+    "dark:/login": {
+      "desktop": {
+        "title": "登录忆程｜忆程 ProjectMemo",
+        "htmlClass": "dark",
+        "bodyBg": "rgb(21, 30, 28)",
+        "header": {
+          "height": 57,
+          "position": "sticky",
+          "bg": "rgb(21, 30, 28)"
+        },
+        "main": {
+          "id": "main-content",
+          "top": 57,
+          "width": 1040
+        },
+        "nav": {
+          "label": "首页导航",
+          "links": [
+            "返回官网"
+          ]
+        },
+        "cta": {
+          "text": "返回官网",
+          "fontSize": 12.8,
+          "h": 44,
+          "w": 82
+        },
+        "leak": {
+          "homeMain": false,
+          "hero": false,
+          "storyFrame": false
+        },
+        "overflow": false,
+        "formFields": [
+          {
+            "type": null,
+            "id": "username",
+            "label": "账号"
+          },
+          {
+            "type": "password",
+            "id": "password",
+            "label": "密码"
+          }
+        ],
+        "headings": [
+          "h2:把项目，接着做下去。",
+          "h1:登录忆程"
+        ],
+        "skipTarget": true,
+        "themeToggle": 0
+      },
+      "mobile": {
+        "headerHeight": 57,
+        "cta": {
+          "text": "返回官网",
+          "fontSize": 12.8,
+          "h": 44,
+          "w": 74
+        },
+        "overflow": false,
+        "formFields": 2,
+        "mainTop": 57
+      },
+      "consoleErrors": [],
+      "shotDesktop": "shots/round2-account-dark-login-1440.png",
+      "shotMobile": "shots/round2-account-dark-login-390.png"
+    },
+    "dark:/register": {
+      "desktop": {
+        "title": "创建账号｜忆程 ProjectMemo",
+        "htmlClass": "dark",
+        "bodyBg": "rgb(21, 30, 28)",
+        "header": {
+          "height": 57,
+          "position": "sticky",
+          "bg": "rgb(21, 30, 28)"
+        },
+        "main": {
+          "id": "main-content",
+          "top": 57,
+          "width": 1040
+        },
+        "nav": {
+          "label": "首页导航",
+          "links": [
+            "返回官网"
+          ]
+        },
+        "cta": {
+          "text": "返回官网",
+          "fontSize": 12.8,
+          "h": 44,
+          "w": 82
+        },
+        "leak": {
+          "homeMain": false,
+          "hero": false,
+          "storyFrame": false
+        },
+        "overflow": false,
+        "formFields": [
+          {
+            "type": null,
+            "id": "username",
+            "label": "账号"
+          },
+          {
+            "type": "email",
+            "id": "email",
+            "label": "邮箱"
+          },
+          {
+            "type": "password",
+            "id": "password",
+            "label": "密码"
+          },
+          {
+            "type": "password",
+            "id": "confirm-password",
+            "label": "确认密码"
+          }
+        ],
+        "headings": [
+          "h2:把项目，接着做下去。",
+          "h1:创建你的账号"
+        ],
+        "skipTarget": true,
+        "themeToggle": 0
+      },
+      "mobile": {
+        "headerHeight": 57,
+        "cta": {
+          "text": "返回官网",
+          "fontSize": 12.8,
+          "h": 44,
+          "w": 74
+        },
+        "overflow": false,
+        "formFields": 4,
+        "mainTop": 57
+      },
+      "consoleErrors": [],
+      "shotDesktop": "shots/round2-account-dark-register-1440.png",
+      "shotMobile": "shots/round2-account-dark-register-390.png"
+    },
+    "dark:/forgot-password": {
+      "desktop": {
+        "title": "找回密码｜忆程 ProjectMemo",
+        "htmlClass": "dark",
+        "bodyBg": "rgb(21, 30, 28)",
+        "header": {
+          "height": 57,
+          "position": "sticky",
+          "bg": "rgb(21, 30, 28)"
+        },
+        "main": {
+          "id": "main-content",
+          "top": 57,
+          "width": 1040
+        },
+        "nav": {
+          "label": "首页导航",
+          "links": [
+            "返回官网"
+          ]
+        },
+        "cta": {
+          "text": "返回官网",
+          "fontSize": 12.8,
+          "h": 44,
+          "w": 82
+        },
+        "leak": {
+          "homeMain": false,
+          "hero": false,
+          "storyFrame": false
+        },
+        "overflow": false,
+        "formFields": [
+          {
+            "type": "email",
+            "id": "email",
+            "label": "邮箱"
+          }
+        ],
+        "headings": [
+          "h2:把项目，接着做下去。",
+          "h1:找回密码"
+        ],
+        "skipTarget": true,
+        "themeToggle": 0
+      },
+      "mobile": {
+        "headerHeight": 57,
+        "cta": {
+          "text": "返回官网",
+          "fontSize": 12.8,
+          "h": 44,
+          "w": 74
+        },
+        "overflow": false,
+        "formFields": 1,
+        "mainTop": 57
+      },
+      "consoleErrors": [],
+      "shotDesktop": "shots/round2-account-dark-forgot-password-1440.png",
+      "shotMobile": "shots/round2-account-dark-forgot-password-390.png"
+    }
+  },
+  "errors": []
+}

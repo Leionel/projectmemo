@@ -1,0 +1,400 @@
+{
+  "meta": {
+    "label": "round2",
+    "sha": "f06685d84b85c523595f2950b07b07dcdbf4271d",
+    "base": "http://127.0.0.1:34111",
+    "startedAt": "2026-11-03T07:25:42.235Z",
+    "note": "Round 2 视频播放器专项取证；非真实用户测试、非无障碍认证。autoplay 策略为观察项，不据此判失败。",
+    "finishedAt": "2026-11-03T07:26:54.755Z"
+  },
+  "sections": {
+    "beforeClick": {
+      "present": true,
+      "state": {
+        "facade": {
+          "ariaLabel": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器",
+          "text": "公开视频 · Bilibili2026 C4-AI 决赛演示视频点击加载播放器 · 在播放器内播放",
+          "rect": {
+            "w": 572,
+            "h": 321
+          },
+          "tabIndex": 0,
+          "focusVisible": false
+        },
+        "iframe": null,
+        "collapse": null,
+        "external": [
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "visibleText": "在 Bilibili 打开（新窗口）",
+            "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+            "rect": {
+              "w": 165,
+              "h": 44
+            }
+          },
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "visibleText": "决赛演示",
+            "ariaLabel": "决赛演示（Bilibili，在新窗口打开）",
+            "rect": {
+              "w": 72,
+              "h": 44
+            }
+          }
+        ],
+        "active": {
+          "tag": "body",
+          "title": null,
+          "ariaLabel": null,
+          "text": "((e, i, s, u, m, a, l, h)=>{ let d = doc"
+        },
+        "bodyText": "跳到主要内容 忆程 ProjectMemo 产品体验 长期委托 使用场景 决赛演示 进入工作台 面向大学生的 个人项目 Agent 人可以下线， 项目别掉线。 关掉页面，目标、材料和判断依据都留在原处。回来时先看原委托做到哪、依据是什么，再决定下一步。 体验一段项目接续 进入工作台 公开示例 · 不调用模型 · 不写入你的项目。 公开示例 · 忆程参赛作品开发 整理阶段汇报 等你确认 01 离开时 02 期间 03 回来后 原委托 用已有材料整理一份阶段汇报 原任务与草稿都留在原处 依据 比赛材料、任务安排、老师建议 3 条来源可回看原文 变化 演示流程缺少完成回执 原判断“先写汇报草稿”需要你重新确认 等你 补充演示结果，或确认先按现有材料写汇报草稿 确认后从原委托继续，不会另建任务 查看依据 回到原委托 冻结示例 · 不调用模型 · 与下方五步示例使用同一份素材 01 离开以后 新情况出现时，它带着出处回来。 同一个示例委托：来源、判断和等你决定的那一步，都留在原处。 来源 3 条来源保留原文 比赛材料、任务安排、老师建议，随时可以回到原文核对。 变化 发现一处没有回执 演示流程是否跑通，现有材料无法确认。 判断改变 先补演示结果，再写汇报 原来：先按比赛材料写汇报草稿。 等你 补充结果，或确认原计划 原任务、来源和草稿都保留，不另建一个新任务。 什么情况下才会自动接续？ 这一"
+      },
+      "externalCount": 0,
+      "external": [],
+      "bilibiliRequests": 0,
+      "shotFile": "shots/round2-video-before-click.png"
+    },
+    "afterClick": {
+      "present": true,
+      "focusBefore": {
+        "tag": "button",
+        "ariaLabel": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器"
+      },
+      "clickedAt": 1793690760766,
+      "state": {
+        "facade": null,
+        "iframe": {
+          "src": "https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1",
+          "title": "2026 C4-AI 决赛演示视频（Bilibili 官方播放器）",
+          "allow": "autoplay; fullscreen; picture-in-picture; encrypted-media",
+          "loading": "lazy",
+          "referrerPolicy": "no-referrer-when-downgrade",
+          "tabIndex": 0,
+          "focusVisible": false
+        },
+        "collapse": {
+          "text": "收起播放器",
+          "tag": "button",
+          "tabIndex": 0
+        },
+        "external": [
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "visibleText": "在 Bilibili 打开（新窗口）",
+            "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+            "rect": {
+              "w": 165,
+              "h": 44
+            }
+          },
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "visibleText": "决赛演示",
+            "ariaLabel": "决赛演示（Bilibili，在新窗口打开）",
+            "rect": {
+              "w": 72,
+              "h": 44
+            }
+          }
+        ],
+        "active": {
+          "tag": "iframe",
+          "title": "2026 C4-AI 决赛演示视频（Bilibili 官方播放器）",
+          "ariaLabel": null,
+          "text": ""
+        },
+        "bodyText": "跳到主要内容 忆程 ProjectMemo 产品体验 长期委托 使用场景 决赛演示 进入工作台 面向大学生的 个人项目 Agent 人可以下线， 项目别掉线。 关掉页面，目标、材料和判断依据都留在原处。回来时先看原委托做到哪、依据是什么，再决定下一步。 体验一段项目接续 进入工作台 公开示例 · 不调用模型 · 不写入你的项目。 公开示例 · 忆程参赛作品开发 整理阶段汇报 等你确认 01 离开时 02 期间 03 回来后 原委托 用已有材料整理一份阶段汇报 原任务与草稿都留在原处 依据 比赛材料、任务安排、老师建议 3 条来源可回看原文 变化 演示流程缺少完成回执 原判断“先写汇报草稿”需要你重新确认 等你 补充演示结果，或确认先按现有材料写汇报草稿 确认后从原委托继续，不会另建任务 查看依据 回到原委托 冻结示例 · 不调用模型 · 与下方五步示例使用同一份素材 01 离开以后 新情况出现时，它带着出处回来。 同一个示例委托：来源、判断和等你决定的那一步，都留在原处。 来源 3 条来源保留原文 比赛材料、任务安排、老师建议，随时可以回到原文核对。 变化 发现一处没有回执 演示流程是否跑通，现有材料无法确认。 判断改变 先补演示结果，再写汇报 原来：先按比赛材料写汇报草稿。 等你 补充结果，或确认原计划 原任务、来源和草稿都保留，不另建一个新任务。 什么情况下才会自动接续？ 这一"
+      },
+      "externalCount": 40,
+      "external": [
+        {
+          "url": "https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1",
+          "type": "document"
+        },
+        {
+          "url": "https://s1.hdslb.com/bfs/seed/log/report/log-reporter.js",
+          "type": "script"
+        },
+        {
+          "url": "https://s1.hdslb.com/bfs/static/player/main/core.6dcbfdb4.js",
+          "type": "script"
+        },
+        {
+          "url": "https://data.bilibili.com/log/web?0000141793690761393https%3A%2F%2Fplayer.bilibili.com%2Fplayer.html%3Fbvid%3DBV1Qaxb6PE7G%26page%3D1%26high",
+          "type": "ping"
+        },
+        {
+          "url": "https://s1.hdslb.com/bfs/static/jinkela/long/unify-http-request/forticket.min.js",
+          "type": "script"
+        },
+        {
+          "url": "https://api.bilibili.com/x/web-interface/wbi/view/detail?bvid=BV1Qaxb6PE7G&need_view=1&isGaiaAvoided=true&web_location=1315873&w_rid=d6984e4",
+          "type": "xhr"
+        },
+        {
+          "url": "https://api.bilibili.com/x/player/wbi/playurl?avid=117541628287845&bvid=BV1Qaxb6PE7G&cid=43242685663&qn=0&fnver=0&fnval=4048&fourk=1&gaia_so",
+          "type": "xhr"
+        },
+        {
+          "url": "https://api.bilibili.com/x/player/wbi/v2?aid=117541628287845&cid=43242685663&isGaiaAvoided=true&web_location=1315873&w_rid=db9230ce822e5734f",
+          "type": "xhr"
+        },
+        {
+          "url": "https://api.bilibili.com/x/web-interface/wbi/view/detail?aid=117541628287845&bvid=BV1Qaxb6PE7G&p=1&isGaiaAvoided=true&platform=web&web_locat",
+          "type": "xhr"
+        },
+        {
+          "url": "https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket?key_id=ec02&hexsign=83420d19a5f69c8abedfb7df296c0460c1538fc9f60aed",
+          "type": "xhr"
+        }
+      ],
+      "bilibiliRequests": 22,
+      "bilibili": [
+        {
+          "url": "https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1",
+          "type": "document"
+        },
+        {
+          "url": "https://data.bilibili.com/log/web?0000141793690761393https%3A%2F%2Fplayer.bilibili.com%2Fplayer.html%3Fbvid%3DBV1Qaxb6PE7G%26page%3D1%26high",
+          "type": "ping"
+        },
+        {
+          "url": "https://api.bilibili.com/x/web-interface/wbi/view/detail?bvid=BV1Qaxb6PE7G&need_view=1&isGaiaAvoided=true&web_location=1315873&w_rid=d6984e4",
+          "type": "xhr"
+        },
+        {
+          "url": "https://api.bilibili.com/x/player/wbi/playurl?avid=117541628287845&bvid=BV1Qaxb6PE7G&cid=43242685663&qn=0&fnver=0&fnval=4048&fourk=1&gaia_so",
+          "type": "xhr"
+        },
+        {
+          "url": "https://api.bilibili.com/x/player/wbi/v2?aid=117541628287845&cid=43242685663&isGaiaAvoided=true&web_location=1315873&w_rid=db9230ce822e5734f",
+          "type": "xhr"
+        },
+        {
+          "url": "https://api.bilibili.com/x/web-interface/wbi/view/detail?aid=117541628287845&bvid=BV1Qaxb6PE7G&p=1&isGaiaAvoided=true&platform=web&web_locat",
+          "type": "xhr"
+        },
+        {
+          "url": "https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket?key_id=ec02&hexsign=83420d19a5f69c8abedfb7df296c0460c1538fc9f60aed",
+          "type": "xhr"
+        },
+        {
+          "url": "https://cn-hbwh-fx-01-01.bilivideo.com/upgcxcode/63/56/43242685663/43242685663-1-30016.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrN",
+          "type": "xhr"
+        }
+      ],
+      "frames": [
+        "http://127.0.0.1:34111/",
+        "https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1"
+      ],
+      "iframeAutoplayParam": true,
+      "focusInIframe": true,
+      "shotFile": "shots/round2-video-after-click.png"
+    },
+    "collapse": {
+      "present": true,
+      "collapseVisible": true,
+      "state": {
+        "facade": {
+          "ariaLabel": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器",
+          "text": "公开视频 · Bilibili2026 C4-AI 决赛演示视频点击加载播放器 · 在播放器内播放",
+          "rect": {
+            "w": 572,
+            "h": 321
+          },
+          "tabIndex": 0,
+          "focusVisible": false
+        },
+        "iframe": null,
+        "collapse": null,
+        "external": [
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "visibleText": "在 Bilibili 打开（新窗口）",
+            "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+            "rect": {
+              "w": 165,
+              "h": 44
+            }
+          },
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "visibleText": "决赛演示",
+            "ariaLabel": "决赛演示（Bilibili，在新窗口打开）",
+            "rect": {
+              "w": 72,
+              "h": 44
+            }
+          }
+        ],
+        "active": {
+          "tag": "button",
+          "title": null,
+          "ariaLabel": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器",
+          "text": "公开视频 · Bilibili2026 C4-AI 决赛演示视频点击加载播放器 "
+        },
+        "bodyText": "跳到主要内容 忆程 ProjectMemo 产品体验 长期委托 使用场景 决赛演示 进入工作台 面向大学生的 个人项目 Agent 人可以下线， 项目别掉线。 关掉页面，目标、材料和判断依据都留在原处。回来时先看原委托做到哪、依据是什么，再决定下一步。 体验一段项目接续 进入工作台 公开示例 · 不调用模型 · 不写入你的项目。 公开示例 · 忆程参赛作品开发 整理阶段汇报 等你确认 01 离开时 02 期间 03 回来后 原委托 用已有材料整理一份阶段汇报 原任务与草稿都留在原处 依据 比赛材料、任务安排、老师建议 3 条来源可回看原文 变化 演示流程缺少完成回执 原判断“先写汇报草稿”需要你重新确认 等你 补充演示结果，或确认先按现有材料写汇报草稿 确认后从原委托继续，不会另建任务 查看依据 回到原委托 冻结示例 · 不调用模型 · 与下方五步示例使用同一份素材 01 离开以后 新情况出现时，它带着出处回来。 同一个示例委托：来源、判断和等你决定的那一步，都留在原处。 来源 3 条来源保留原文 比赛材料、任务安排、老师建议，随时可以回到原文核对。 变化 发现一处没有回执 演示流程是否跑通，现有材料无法确认。 判断改变 先补演示结果，再写汇报 原来：先按比赛材料写汇报草稿。 等你 补充结果，或确认原计划 原任务、来源和草稿都保留，不另建一个新任务。 什么情况下才会自动接续？ 这一"
+      },
+      "iframeRemoved": true,
+      "facadeRestored": true,
+      "focusOnFacade": true,
+      "bilibiliRequestsBeforeCollapse": 27,
+      "bilibiliRequestsAfterCollapse": 28,
+      "newRequestsAfterCollapse": 1,
+      "shotFile": "shots/round2-video-after-collapse.png"
+    },
+    "keyboard": {
+      "present": true,
+      "focusVisible": true,
+      "afterEnter": {
+        "facade": null,
+        "iframe": {
+          "src": "https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1",
+          "title": "2026 C4-AI 决赛演示视频（Bilibili 官方播放器）",
+          "allow": "autoplay; fullscreen; picture-in-picture; encrypted-media",
+          "loading": "lazy",
+          "referrerPolicy": "no-referrer-when-downgrade",
+          "tabIndex": 0,
+          "focusVisible": false
+        },
+        "collapse": {
+          "text": "收起播放器",
+          "tag": "button",
+          "tabIndex": 0
+        },
+        "external": [
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "visibleText": "在 Bilibili 打开（新窗口）",
+            "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+            "rect": {
+              "w": 165,
+              "h": 44
+            }
+          },
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "visibleText": "决赛演示",
+            "ariaLabel": "决赛演示（Bilibili，在新窗口打开）",
+            "rect": {
+              "w": 72,
+              "h": 44
+            }
+          }
+        ],
+        "active": {
+          "tag": "iframe",
+          "title": "2026 C4-AI 决赛演示视频（Bilibili 官方播放器）",
+          "ariaLabel": null,
+          "text": ""
+        },
+        "bodyText": "跳到主要内容 忆程 ProjectMemo 产品体验 长期委托 使用场景 决赛演示 进入工作台 面向大学生的 个人项目 Agent 人可以下线， 项目别掉线。 关掉页面，目标、材料和判断依据都留在原处。回来时先看原委托做到哪、依据是什么，再决定下一步。 体验一段项目接续 进入工作台 公开示例 · 不调用模型 · 不写入你的项目。 公开示例 · 忆程参赛作品开发 整理阶段汇报 等你确认 01 离开时 02 期间 03 回来后 原委托 用已有材料整理一份阶段汇报 原任务与草稿都留在原处 依据 比赛材料、任务安排、老师建议 3 条来源可回看原文 变化 演示流程缺少完成回执 原判断“先写汇报草稿”需要你重新确认 等你 补充演示结果，或确认先按现有材料写汇报草稿 确认后从原委托继续，不会另建任务 查看依据 回到原委托 冻结示例 · 不调用模型 · 与下方五步示例使用同一份素材 01 离开以后 新情况出现时，它带着出处回来。 同一个示例委托：来源、判断和等你决定的那一步，都留在原处。 来源 3 条来源保留原文 比赛材料、任务安排、老师建议，随时可以回到原文核对。 变化 发现一处没有回执 演示流程是否跑通，现有材料无法确认。 判断改变 先补演示结果，再写汇报 原来：先按比赛材料写汇报草稿。 等你 补充结果，或确认原计划 原任务、来源和草稿都保留，不另建一个新任务。 什么情况下才会自动接续？ 这一"
+      },
+      "focusInIframeAfterEnter": true,
+      "collapseReachable": true,
+      "collapseFocusVisible": true,
+      "afterCollapse": {
+        "facade": {
+          "ariaLabel": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器",
+          "text": "公开视频 · Bilibili2026 C4-AI 决赛演示视频点击加载播放器 · 在播放器内播放",
+          "rect": {
+            "w": 572,
+            "h": 321
+          },
+          "tabIndex": 0,
+          "focusVisible": true
+        },
+        "iframe": null,
+        "collapse": null,
+        "external": [
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "visibleText": "在 Bilibili 打开（新窗口）",
+            "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+            "rect": {
+              "w": 165,
+              "h": 44
+            }
+          },
+          {
+            "href": "https://www.bilibili.com/video/BV1Qaxb6PE7G?vd_source=eaf1b5590706fdf5d967f5f1d697db8b",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "visibleText": "决赛演示",
+            "ariaLabel": "决赛演示（Bilibili，在新窗口打开）",
+            "rect": {
+              "w": 72,
+              "h": 44
+            }
+          }
+        ],
+        "active": {
+          "tag": "button",
+          "title": null,
+          "ariaLabel": "在本页加载 2026 C4-AI 决赛演示视频的 Bilibili 官方播放器",
+          "text": "公开视频 · Bilibili2026 C4-AI 决赛演示视频点击加载播放器 "
+        },
+        "bodyText": "跳到主要内容 忆程 ProjectMemo 产品体验 长期委托 使用场景 决赛演示 进入工作台 面向大学生的 个人项目 Agent 人可以下线， 项目别掉线。 关掉页面，目标、材料和判断依据都留在原处。回来时先看原委托做到哪、依据是什么，再决定下一步。 体验一段项目接续 进入工作台 公开示例 · 不调用模型 · 不写入你的项目。 公开示例 · 忆程参赛作品开发 整理阶段汇报 等你确认 01 离开时 02 期间 03 回来后 原委托 用已有材料整理一份阶段汇报 原任务与草稿都留在原处 依据 比赛材料、任务安排、老师建议 3 条来源可回看原文 变化 演示流程缺少完成回执 原判断“先写汇报草稿”需要你重新确认 等你 补充演示结果，或确认先按现有材料写汇报草稿 确认后从原委托继续，不会另建任务 查看依据 回到原委托 冻结示例 · 不调用模型 · 与下方五步示例使用同一份素材 01 离开以后 新情况出现时，它带着出处回来。 同一个示例委托：来源、判断和等你决定的那一步，都留在原处。 来源 3 条来源保留原文 比赛材料、任务安排、老师建议，随时可以回到原文核对。 变化 发现一处没有回执 演示流程是否跑通，现有材料无法确认。 判断改变 先补演示结果，再写汇报 原来：先按比赛材料写汇报草稿。 等你 补充结果，或确认原计划 原任务、来源和草稿都保留，不另建一个新任务。 什么情况下才会自动接续？ 这一"
+      },
+      "focusBackOnFacade": true,
+      "shotFile": "shots/round2-video-keyboard.png"
+    },
+    "autoplayObservation": {
+      "present": true,
+      "data": {
+        "iframe": {
+          "src": "https://player.bilibili.com/player.html?bvid=BV1Qaxb6PE7G&page=1&high_quality=1&danmaku=0&autoplay=1",
+          "allow": "autoplay; fullscreen; picture-in-picture; encrypted-media"
+        },
+        "crossOriginProbe": "null-document",
+        "copyClaimsAutoplay": false,
+        "copyMentionsInPlayer": false,
+        "bodyTextAroundDemo": "跳到主要内容 忆程 ProjectMemo 产品体验 长期委托 使用场景 决赛演示 进入工作台 面向大学生的 个人项目 Agent 人可以下线， 项目别掉线。 关掉页面，目标、材料和判断依据都留在原处。回来时先看原委托做到哪、依据是什么，再决定下一步。 体验一段项目接续 进入工作台 公开示例 · 不调用模型 · 不写入你的项目。 公开示例 · 忆程参赛作品开发 整理阶段汇报 等你确认 01 离开时 02 期间 03 回来后 原委托 用已有材料整理一份阶段汇报 原任务与草稿都留在"
+      },
+      "shotFile": "shots/round2-video-autoplay-observation.png"
+    },
+    "noJs": {
+      "data": {
+        "facade": true,
+        "iframe": false,
+        "externalLinks": [
+          {
+            "text": "在 Bilibili 打开（新窗口）",
+            "ariaLabel": "在 Bilibili 打开 2026 C4-AI 决赛演示视频（新窗口）",
+            "target": "_blank",
+            "rel": "noopener noreferrer"
+          },
+          {
+            "text": "决赛演示",
+            "ariaLabel": "决赛演示（Bilibili，在新窗口打开）",
+            "target": "_blank",
+            "rel": "noopener noreferrer"
+          }
+        ],
+        "mainLoading": true
+      },
+      "shotFile": "shots/round2-video-no-js.png"
+    }
+  },
+  "errors": []
+}

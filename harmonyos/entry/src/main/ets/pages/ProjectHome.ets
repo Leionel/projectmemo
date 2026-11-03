@@ -160,6 +160,12 @@ struct ProjectHome {
   @State actionSearchQuery: string = '';
   @State expandedActionDescId: string = '';
   @State selectedActionId: string = '';
+  @State editingActionId: string = '';
+  @State editActionTitle: string = '';
+  @State editActionDescription: string = '';
+  @State confirmCancelActionId: string = '';
+  @State actionEditBusy: boolean = false;
+  @State actionEditError: string = '';
   @State attachmentLoadError: string = '';
   @State actionStatusFilter: string = 'ALL';
   @State lastUploadedAttachmentId: string = '';
@@ -2460,6 +2466,53 @@ struct ProjectHome {
     }
   }
 
+  private beginEditAction(action: ActionItem): void {
+    this.confirmCancelActionId = '';
+    this.actionEditError = '';
+    this.editingActionId = action.id;
+    this.editActionTitle = action.title;
+    this.editActionDescription = action.description ?? '';
+  }
+
+  private async saveActionEdit(actionId: string): Promise<void> {
+    const title = this.editActionTitle.trim();
+    if (title.length < 2) {
+      this.actionEditError = '行动标题至少 2 个字';
+      return;
+    }
+    if (this.actionEditBusy) return;
+    this.actionEditBusy = true;
+    this.actionEditError = '';
+    try {
+      await this.actionService.updateContent(this.projectId, actionId, title, this.editActionDescription.trim());
+      this.editingActionId = '';
+      promptAction.showToast({ message: '行动已更新' });
+      await this.loadAllData(true);
+    } catch (e) {
+      this.actionEditError = e instanceof ApiError ? e.message : '保存失败，请稍后重试；已填写的内容仍保留';
+    } finally {
+      this.actionEditBusy = false;
+    }
+  }
+
+  /** 取消只改变行动状态，原标题、来源提醒与历史记录都保留。 */
+  private async cancelAction(actionId: string): Promise<void> {
+    if (this.actionEditBusy) return;
+    this.actionEditBusy = true;
+    this.actionEditError = '';
+    try {
+      await this.actionService.updateStatus(this.projectId, actionId, 'CANCELLED');
+      this.confirmCancelActionId = '';
+      this.selectedActionId = '';
+      promptAction.showToast({ message: '已取消这项行动' });
+      await this.loadAllData(true);
+    } catch (e) {
+      this.actionEditError = e instanceof ApiError ? e.message : '取消失败，请稍后重试';
+    } finally {
+      this.actionEditBusy = false;
+    }
+  }
+
   private async probeReminderAvailability(): Promise<void> {
     try {
       this.reminderAvailable = await this.reminderService.isAvailable(this.projectId);
@@ -3296,7 +3349,7 @@ struct ProjectHome {
       .height(4)
 
       Row() {
-        Text(`${this.project.cards.length} 条记忆 · ${this.actions.filter((a: ActionItem) => !a.isSimulated && a.status !== 'DONE').length} 项待推进行动 · ${this.artifacts.length} 份成果草稿`)
+        Text(`${this.project.cards.length} 条记忆 · ${this.actions.filter((a: ActionItem) => !a.isSimulated && a.status !== 'DONE' && a.status !== 'CANCELLED').length} 项待推进行动 · ${this.artifacts.length} 份成果草稿`)
           .fontSize(11)
           .fontColor(PMColors.INK_TERTIARY)
           .layoutWeight(1)
@@ -4645,7 +4698,7 @@ if (this.attachmentSearchOpen) {
       const inDesc = (action.description ?? '').toLowerCase().includes(q);
       if (!inTitle && !inDesc) { return false; }
     }
-    return this.actionStatusFilter === 'ALL' || (this.actionStatusFilter === 'ACTIVE' ? action.status !== 'DONE' : action.status === this.actionStatusFilter);
+    return this.actionStatusFilter === 'ALL' || (this.actionStatusFilter === 'ACTIVE' ? action.status !== 'DONE' && action.status !== 'CANCELLED' : action.status === this.actionStatusFilter);
   }
   @Builder
   private ActionRow(action: ActionItem) {
@@ -4715,7 +4768,7 @@ if (this.attachmentSearchOpen) {
               .onClick(() => { this.actionSearchQuery = ''; })
           }.width('100%').padding({ left: 12, right: 12 }).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(10)
         }
-        Text(`待推进 ${this.actions.filter((a: ActionItem) => !a.isSimulated && a.status !== 'DONE').length} · 已完成 ${this.actions.filter((a: ActionItem) => !a.isSimulated && a.status === 'DONE').length} · 统计不含演示行动，列表保留演示标记`)
+        Text(`待推进 ${this.actions.filter((a: ActionItem) => !a.isSimulated && a.status !== 'DONE' && a.status !== 'CANCELLED').length} · 已完成 ${this.actions.filter((a: ActionItem) => !a.isSimulated && a.status === 'DONE').length} · 统计不含演示行动，列表保留演示标记`)
           .fontSize(12).fontColor(PMColors.INK_TERTIARY)
         Scroll() {
           Row({ space: 6 }) {
@@ -4779,7 +4832,7 @@ if (this.attachmentSearchOpen) {
                     .fontColor(PMColors.RISK)
                     .margin({ left: PMSpacing.SM })
                 }
-                if (action.status !== 'DONE') {
+                if (action.status !== 'DONE' && action.status !== 'CANCELLED') {
                   Text(TextFormatters.priorityToChinese(action.priority))
                     .fontSize(PMFontSize.CAPTION)
                     .fontColor(PMColors.INK_TERTIARY)
@@ -4912,6 +4965,51 @@ if (this.attachmentSearchOpen) {
                         })
                     }
                   }.width('100%')
+                  if (!action.isSimulated && this.editingActionId !== action.id && this.confirmCancelActionId !== action.id) {
+                    Row({ space: PMSpacing.MD }) {
+                      Text('编辑').fontSize(13).fontColor(PMColors.INK_SECONDARY).height(40)
+                        .accessibilityText('编辑行动标题与预期结果')
+                        .onClick(() => { this.beginEditAction(action); })
+                      Text('不再需要').fontSize(13).fontColor(PMColors.INK_SECONDARY).height(40)
+                        .accessibilityText('取消这项行动')
+                        .onClick(() => { this.editingActionId = ''; this.actionEditError = ''; this.confirmCancelActionId = action.id; })
+                    }.width('100%')
+                  }
+                  if (this.editingActionId === action.id) {
+                    Column({ space: PMSpacing.SM }) {
+                      TextInput({ text: this.editActionTitle, placeholder: '行动标题' })
+                        .fontSize(14).height(44).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(11)
+                        .maxLength(160).enabled(!this.actionEditBusy)
+                        .accessibilityText('行动标题')
+                        .onChange((value: string) => { this.editActionTitle = value; })
+                      TextArea({ text: this.editActionDescription, placeholder: '预期结果（选填）' })
+                        .fontSize(14).constraintSize({ minHeight: 72 }).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(11)
+                        .maxLength(500).enabled(!this.actionEditBusy)
+                        .accessibilityText('预期结果')
+                        .onChange((value: string) => { this.editActionDescription = value; })
+                      Row({ space: PMSpacing.SM }) {
+                        PMButton({ label: this.actionEditBusy ? '正在保存…' : '保存', disabled: this.actionEditBusy,
+                          onAction: (): void => { this.saveActionEdit(action.id); } }).layoutWeight(1)
+                        PMButton({ label: '放弃修改', secondary: true, disabled: this.actionEditBusy,
+                          onAction: (): void => { this.editingActionId = ''; this.actionEditError = ''; } }).layoutWeight(1)
+                      }.width('100%')
+                    }.width('100%')
+                  }
+                  if (this.confirmCancelActionId === action.id) {
+                    Column({ space: PMSpacing.SM }) {
+                      Text('确定不再需要这项行动？它会标为已取消，来源与历史记录保留。')
+                        .fontSize(13).lineHeight(19).fontColor(PMColors.INK_PRIMARY)
+                      Row({ space: PMSpacing.SM }) {
+                        PMButton({ label: this.actionEditBusy ? '正在取消…' : '确定取消', disabled: this.actionEditBusy,
+                          onAction: (): void => { this.cancelAction(action.id); } }).layoutWeight(1)
+                        PMButton({ label: '保留', secondary: true, disabled: this.actionEditBusy,
+                          onAction: (): void => { this.confirmCancelActionId = ''; } }).layoutWeight(1)
+                      }.width('100%')
+                    }.width('100%').padding(PMSpacing.MD).backgroundColor(PMColors.RISK_LIGHT).borderRadius(PMRadius.MD)
+                  }
+                  if (this.actionEditError !== '' && (this.editingActionId === action.id || this.confirmCancelActionId === action.id)) {
+                    Text(this.actionEditError).fontSize(13).fontColor(PMColors.RISK)
+                  }
                 }
                 .width('100%')
                 .margin({ top: PMSpacing.MD })
@@ -4919,9 +5017,9 @@ if (this.attachmentSearchOpen) {
             }
             .width('100%')
             .padding(PMSpacing.LG)
-            .backgroundColor(action.status === 'DONE' ? PMColors.SURFACE_SUBTLE : PMColors.SURFACE)
+            .backgroundColor(action.status === 'DONE' || action.status === 'CANCELLED' ? PMColors.SURFACE_SUBTLE : PMColors.SURFACE)
             .borderRadius(PMRadius.LG)
-            .border({ width: 1, color: action.status === 'DONE' ? PMColors.BORDER_SUBTLE : PMColors.BORDER })
+            .border({ width: 1, color: action.status === 'DONE' || action.status === 'CANCELLED' ? PMColors.BORDER_SUBTLE : PMColors.BORDER })
             .shadow({ radius: 6, color: 'rgba(19, 36, 58, 0.03)', offsetX: 0, offsetY: 1 })
             .alignItems(HorizontalAlign.Start)
           }

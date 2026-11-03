@@ -135,6 +135,7 @@ export struct StatusBadge {
       case 'RESOLVED':
         return PMColors.SUCCESS_LIGHT;
       case 'DISMISSED':
+      case 'CANCELLED':
         return PMColors.SURFACE_SUBTLE;
       case 'SNOOZED':
         return PMColors.EVIDENCE_LIGHT;
@@ -153,6 +154,7 @@ export struct StatusBadge {
       case 'RESOLVED':
         return PMColors.SUCCESS;
       case 'DISMISSED':
+      case 'CANCELLED':
         return PMColors.INK_TERTIARY;
       case 'SNOOZED':
         return PMColors.EVIDENCE;

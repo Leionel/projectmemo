@@ -102,3 +102,8 @@ export class ActionCreateInput {
 export class ActionDueAtInput {
   dueAt: string | null = null;
 }
+
+export class ActionEditInput {
+  title: string = '';
+  description: string | null = null;
+}

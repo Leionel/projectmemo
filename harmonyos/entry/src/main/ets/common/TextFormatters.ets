@@ -186,6 +186,7 @@ export class TextFormatters {
       'TODO': '待开始',
       'DOING': '进行中',
       'DONE': '已完成',
+      'CANCELLED': '已取消',
       'OPEN': '待处理',
       'PENDING': '待处理',
       'ACCEPTED': '已采纳',

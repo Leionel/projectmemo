@@ -607,8 +607,7 @@ struct Index {
   }
 
   private canCreateProject(): boolean {
-    return this.newTitle.trim().length >= 2 && this.newGoal.trim().length >= 2 &&
-      this.newDescription.trim().length >= 10 && !this.isCreating;
+    return this.newTitle.trim().length >= 2 && this.newGoal.trim().length >= 2 && !this.isCreating;
   }
 
   private async submitCreateProject(): Promise<void> {
@@ -622,10 +621,6 @@ struct Index {
     }
     if (this.newGoal.trim().length < 2) {
       this.createError = '项目目标至少 2 个字';
-      return;
-    }
-    if (this.newDescription.trim().length < 10) {
-      this.createError = '项目简述至少 10 个字';
       return;
     }
     this.isCreating = true;
@@ -1220,7 +1215,7 @@ struct Index {
   private visibleOpenActions(): ActionItem[] {
     const q = this.globalSearchQuery.trim().toLowerCase();
     return this.allActions.filter((a) => {
-      if (a.isSimulated || (this.globalActionStatus === 'ACTIVE' ? a.status === 'DONE' : this.globalActionStatus !== 'ALL' && a.status !== this.globalActionStatus)) {
+      if (a.isSimulated || (this.globalActionStatus === 'ACTIVE' ? a.status === 'DONE' || a.status === 'CANCELLED' : this.globalActionStatus !== 'ALL' && a.status !== this.globalActionStatus)) {
         return false;
       }
       return q === '' || a.title.toLowerCase().includes(q);
@@ -1572,7 +1567,7 @@ struct Index {
             .backgroundColor(this.taskTabFilter === 'REMINDERS' ? PMColors.BRAND_LIGHT : PMColors.SURFACE)
             .fontColor(this.taskTabFilter === 'REMINDERS' ? PMColors.BRAND : PMColors.INK_SECONDARY)
             .accessibilitySelected(this.taskTabFilter === 'REMINDERS').onClick(() => { this.taskTabFilter = 'REMINDERS'; })
-          Button(`待办行动 ${this.allActions.filter((a: ActionItem) => a.status !== 'DONE' && !a.isSimulated).length}`, { type: ButtonType.Normal })
+          Button(`待办行动 ${this.allActions.filter((a: ActionItem) => a.status !== 'DONE' && a.status !== 'CANCELLED' && !a.isSimulated).length}`, { type: ButtonType.Normal })
             .layoutWeight(1).constraintSize({ minHeight: 44 }).borderRadius(11).fontSize(14)
             .backgroundColor(this.taskTabFilter === 'ACTIONS' ? PMColors.BRAND_LIGHT : PMColors.SURFACE)
             .fontColor(this.taskTabFilter === 'ACTIONS' ? PMColors.BRAND : PMColors.INK_SECONDARY)
@@ -1611,7 +1606,7 @@ struct Index {
           }
           ForEach(this.visibleOpenActions(), (item: ActionItem) => {
             ListItem() {
-              PMListRow({ title: item.title, subtitle: item.description ?? '', kind: 'action', status: item.status === 'DONE' ? '已完成' : item.status === 'DOING' ? '进行中' : '待开始',
+              PMListRow({ title: item.title, subtitle: item.description ?? '', kind: 'action', status: item.status === 'DONE' ? '已完成' : item.status === 'CANCELLED' ? '已取消' : item.status === 'DOING' ? '进行中' : '待开始',
                 meta: this.projects.find((p: Project) => p.id === item.projectId)?.title ?? '',
                 onOpen: (): void => { router.pushUrl({ url: 'pages/ProjectHome', params: { projectId: item.projectId, tab: 'actions', actionId: item.id } }); } })
                 .backgroundColor(PMColors.SURFACE).borderRadius(18)
@@ -3352,7 +3347,7 @@ struct Index {
               .border({ width: 1, color: PMColors.BORDER })
               .margin({ top: PMSpacing.XS })
 
-            Text('项目简述（至少 10 字）')
+            Text('项目简述（选填）')
               .fontSize(PMFontSize.SECONDARY)
               .fontWeight(FontWeight.Medium)
               .fontColor(PMColors.INK_SECONDARY)

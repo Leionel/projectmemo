@@ -4,6 +4,7 @@ import {
   ActionCreateInput,
   ActionCreateResponse,
   ActionDueAtInput,
+  ActionEditInput,
   ActionItem,
   ActionsResponse,
   ActionUpdateResponse,
@@ -67,6 +68,17 @@ export class ActionService {
   async updateDueAt(projectId: string, actionId: string, dueAt: string): Promise<ActionItem> {
     const body = new ActionDueAtInput();
     body.dueAt = dueAt;
+    const response: ActionUpdateResponse = await this.client.patch<ActionUpdateResponse>(
+      `/api/projects/${projectId}/actions/${actionId}`,
+      body
+    );
+    return response.action;
+  }
+
+  async updateContent(projectId: string, actionId: string, title: string, description: string): Promise<ActionItem> {
+    const body = new ActionEditInput();
+    body.title = title;
+    body.description = description === '' ? null : description;
     const response: ActionUpdateResponse = await this.client.patch<ActionUpdateResponse>(
       `/api/projects/${projectId}/actions/${actionId}`,
       body

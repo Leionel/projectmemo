@@ -48,7 +48,7 @@ export struct ActionFeasibilityEditor {
       if (source === 'action') {
         const actions = await this.actionService.list(this.projectId);
         this.pickerItems = actions
-          .filter((action) => action.id !== this.actionId && action.status !== 'DONE')
+          .filter((action) => action.id !== this.actionId && action.status !== 'DONE' && action.status !== 'CANCELLED')
           .map((action): PickerItem => {
             const item = new PickerItem();
             item.kind = 'action';

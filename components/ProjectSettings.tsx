@@ -85,7 +85,7 @@ export function ProjectSettings({ project, canDelete = false }: ProjectSettingsP
         <form onSubmit={save} className="mt-5 space-y-4" aria-busy={saving}>
           <fieldset disabled={busy} className="space-y-4 disabled:opacity-70">
             <div><label htmlFor="edit-title" className="text-sm font-bold">项目名称</label><input id="edit-title" name="title" defaultValue={project.title} minLength={2} maxLength={80} required className={field} /></div>
-            <div><label htmlFor="edit-description" className="text-sm font-bold">项目描述</label><textarea id="edit-description" name="description" defaultValue={project.description} minLength={10} maxLength={500} required rows={3} className={field} /></div>
+            <div><label htmlFor="edit-description" className="text-sm font-bold">项目描述</label><textarea id="edit-description" name="description" defaultValue={project.description} maxLength={500} rows={3} className={field} /></div>
             <div><label htmlFor="edit-goal" className="text-sm font-bold">项目目标</label><textarea id="edit-goal" name="goal" defaultValue={project.goal} minLength={2} maxLength={300} required rows={3} className={field} /></div>
             <div className="grid gap-4 sm:grid-cols-2"><div><label htmlFor="edit-scenario" className="text-sm font-bold">项目场景</label><select id="edit-scenario" name="scenario" defaultValue={project.scenario} className={field}>{scenarioOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></div><div><label htmlFor="edit-deadline" className="text-sm font-bold">截止日期</label><input id="edit-deadline" name="deadline" type="date" defaultValue={project.deadline} className={field} /></div></div>
           </fieldset>

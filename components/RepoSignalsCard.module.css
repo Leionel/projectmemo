@@ -10,6 +10,10 @@
 .form button { min-height: 2.75rem; color: var(--paper-strong); background: var(--teal); border-color: var(--teal); }
 .form button:hover:enabled { background: var(--teal-strong); color: var(--paper-strong); }
 .item { display: grid; gap: .5rem; padding-top: 1rem; border-top: 1px solid var(--rule); min-width: 0; }
+.signals { display: grid; gap: .75rem; padding-left: .875rem; border-left: 2px solid var(--rule); }
+.signal { display: grid; gap: .375rem; min-width: 0; }
+.signal + .signal { padding-top: .75rem; border-top: 1px dashed var(--rule); }
+.revoked > summary { cursor: pointer; color: var(--ink-soft); font-size: .875rem; min-height: 2.75rem; display: flex; align-items: center; }
 .panel select { min-width: 0; max-width: 100%; }
 @media (max-width: 640px) {
   .panel > summary { line-height: 1.7; }

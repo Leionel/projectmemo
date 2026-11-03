@@ -86,13 +86,43 @@ export function RepoSignalsCard({ projectId, initialOpen = false }: { projectId:
     await load();
   });
 
+  const active = data?.connections.filter(c => c.status === "ACTIVE") ?? [];
+  const revoked = data?.connections.filter(c => c.status !== "ACTIVE") ?? [];
+  const signalsOf = (connectionId: string) => data?.signals.filter(s => s.connectionId === connectionId) ?? [];
+  const signalRow = (s: SignalView) => (
+    <div key={s.id} className={repoStyles.signal}>
+      <p>
+        <strong>{s.title}</strong>
+        <span className={styles.badge} style={{ marginLeft: ".5rem" }}>{STATUS_LABEL[s.status] ?? s.status}</span>
+      </p>
+      <p className={styles.muted}>
+        {s.sha.slice(0, 10)} · {s.authorName}{s.committedAt ? ` · ${new Date(s.committedAt).toLocaleString("zh-CN")}` : ""}
+        {" · "}
+        <a href={s.url} target="_blank" rel="noopener noreferrer">查看提交</a>
+        {s.linkedActionId ? ` · 已关联行动 ${s.linkedActionId.slice(-6)}` : ""}
+        {s.adoptedCaptureId ? ` · 已写入资料记录 ${s.adoptedCaptureId.slice(-6)}` : ""}
+      </p>
+      {s.status === "CANDIDATE" && s.canAdopt !== false && (
+        <div className={styles.actions}>
+          <select value={actionChoice[s.id] ?? ""} onChange={e => setActionChoice(current => ({ ...current, [s.id]: e.target.value }))} aria-label="可选关联行动">
+            <option value="">不关联行动</option>
+            {actions.map(a => <option key={a.id} value={a.id}>{a.title}</option>)}
+          </select>
+          <button disabled={busy} onClick={() => void adopt(s.id)}>采纳为项目资料</button>
+          <button disabled={busy} onClick={() => void dismiss(s.id)}>忽略</button>
+        </div>
+      )}
+      {s.status === "CANDIDATE" && s.canAdopt === false && s.adoptionUnavailableReason && <p role="status" className={styles.muted}>{s.adoptionUnavailableReason}</p>}
+    </div>
+  );
+
   return (
     <details id="repo-signals" open={open} className={`${styles.panel} ${repoStyles.panel}`} onToggle={e => { setOpen(e.currentTarget.open); if (e.currentTarget.open && !data && !busy) { void load(); void loadActions(); } }}>
-      <summary><Github size={18} aria-hidden="true"/>GitHub 仓库{data ? ` · ${data.connections.filter(c => c.status === "ACTIVE").length} 个连接 · ${data.signals.filter(s => s.status === "CANDIDATE").length} 条待处理` : " · 连接与提交记录"}</summary>
+      <summary><Github size={18} aria-hidden="true"/>GitHub 仓库{data ? ` · ${active.length} 个连接 · ${data.signals.filter(s => s.status === "CANDIDATE" && s.canAdopt !== false).length} 条待处理` : " · 连接与提交记录"}</summary>
       <div className={repoStyles.body}>
       <p className={styles.muted}>连接公开仓库，查看提交，再选择哪些记录加入项目资料。首次读取最近 30 条；后续刷新追踪新的提交。</p>
       {error && <p role="alert" className={styles.muted}>{error}</p>}
-      {data?.connections.map(c => (
+      {active.map(c => (
         <div key={c.id} className={repoStyles.item}>
           <p><strong>{c.repo}@{c.ref}</strong>
             <span className={styles.badge} style={{ marginLeft: ".5rem" }}>{c.status === "ACTIVE" ? "活跃" : "已撤销"}</span>
@@ -106,13 +136,26 @@ export function RepoSignalsCard({ projectId, initialOpen = false }: { projectId:
             <div className={styles.actions}>
               <button disabled={busy} onClick={() => { setBusy(true); void api('/api/conversations/entry', 'POST', { requestId: crypto.randomUUID(), scope: 'PROJECT', projectId, entry: { kind: 'SOURCE_OBSERVATION', projectId, id: c.id } }).then(r => { window.location.href = '/focus?conversation=' + encodeURIComponent(r.id); }).catch(e => setError(e.message)).finally(() => setBusy(false)); }}>在忆程中讨论</button>
               <button disabled={busy} onClick={() => void refresh(c.id)}>{c.lastStatus === "PARTIAL" ? "继续同步提交" : "刷新提交"}</button>
-              {data.ciAvailable && <><button disabled={busy} onClick={() => void setCi(c, c.access === "COMMITS" ? "COMMITS_AND_CI" : "COMMITS")}>{c.access === "COMMITS" ? "允许 Agent 读取 CI 状态" : "停止 CI 读取"}</button>
+              {data?.ciAvailable && <><button disabled={busy} onClick={() => void setCi(c, c.access === "COMMITS" ? "COMMITS_AND_CI" : "COMMITS")}>{c.access === "COMMITS" ? "允许 Agent 读取 CI 状态" : "停止 CI 读取"}</button>
                 {c.access !== "COMMITS" && <button disabled={busy} onClick={() => void setCi(c, c.access === "COMMITS_CI_LOGS" ? "COMMITS_AND_CI" : "COMMITS_CI_LOGS")}>{c.access === "COMMITS_CI_LOGS" ? "停止日志读取" : "允许读取脱敏的失败日志"}</button>}</>}
               <button disabled={busy} onClick={() => void revoke(c.id)}>撤销连接（停止新请求，历史保留）</button>
             </div>
           )}
+          {signalsOf(c.id).length > 0 && <div className={repoStyles.signals}>{signalsOf(c.id).map(signalRow)}</div>}
         </div>
       ))}
+      {revoked.length > 0 && (
+        <details className={repoStyles.revoked}>
+          <summary>已撤销的连接 · {revoked.length} 个（历史记录保留，不再采纳）</summary>
+          {revoked.map(c => (
+            <div key={c.id} className={repoStyles.item}>
+              <p><strong>{c.repo}@{c.ref}</strong><span className={styles.badge} style={{ marginLeft: ".5rem" }}>已撤销</span></p>
+              <p className={styles.muted}>已采纳 {c.adoptedCount}{c.revokedReason ? ` · 撤销原因：${c.revokedReason}` : ""}</p>
+              {signalsOf(c.id).length > 0 && <div className={repoStyles.signals}>{signalsOf(c.id).map(signalRow)}</div>}
+            </div>
+          ))}
+        </details>
+      )}
       {data && data.connections.filter(c => c.status !== "REVOKED").length < 3 && (
         <div className={repoStyles.form}>
           <label>公开仓库（owner/repo）
@@ -124,32 +167,6 @@ export function RepoSignalsCard({ projectId, initialOpen = false }: { projectId:
           <button disabled={busy || !repo.trim()} onClick={() => void create()}>创建并首次刷新</button>
         </div>
       )}
-      {data?.signals.map(s => (
-        <div key={s.id} className={repoStyles.item}>
-          <p>
-            <strong>{s.title}</strong>
-            <span className={styles.badge} style={{ marginLeft: ".5rem" }}>{STATUS_LABEL[s.status] ?? s.status}</span>
-          </p>
-          <p className={styles.muted}>
-            {s.sha.slice(0, 10)} · {s.authorName}{s.committedAt ? ` · ${new Date(s.committedAt).toLocaleString("zh-CN")}` : ""}
-            {" · "}
-            <a href={s.url} target="_blank" rel="noopener noreferrer">查看提交</a>
-            {s.linkedActionId ? ` · 已关联行动 ${s.linkedActionId.slice(-6)}` : ""}
-            {s.adoptedCaptureId ? ` · 已写入资料记录 ${s.adoptedCaptureId.slice(-6)}` : ""}
-          </p>
-          {s.status === "CANDIDATE" && (
-            <div className={styles.actions}>
-              <select value={actionChoice[s.id] ?? ""} onChange={e => setActionChoice(current => ({ ...current, [s.id]: e.target.value }))} aria-label="可选关联行动">
-                <option value="">不关联行动</option>
-                {actions.map(a => <option key={a.id} value={a.id}>{a.title}</option>)}
-              </select>
-              <button disabled={busy || s.canAdopt === false} onClick={() => void adopt(s.id)}>采纳为项目资料</button>
-              {s.canAdopt === false && s.adoptionUnavailableReason && <span role="status">{s.adoptionUnavailableReason}</span>}
-              <button disabled={busy} onClick={() => void dismiss(s.id)}>忽略</button>
-            </div>
-          )}
-        </div>
-      ))}
       {data && !data.signals.length && <p className={styles.muted}>还没有信号；创建连接或点刷新拉取。</p>}
       <p className={styles.muted}>提交记录只是资料线索；行动完成仍以你填写的回执为准。</p>
       </div>

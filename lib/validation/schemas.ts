@@ -17,13 +17,14 @@ const deadlineSchema = z
 
 const projectFields = {
   title: z.string().trim().min(2, "项目名称至少 2 个字").max(80),
-  description: z.string().trim().min(10, "项目描述至少 10 个字").max(500),
+  description: z.string().trim().max(500, "项目描述不能超过 500 个字"),
   goal: z.string().trim().min(2, "请填写项目目标").max(300),
   scenario: z.enum(["COURSE_DESIGN", "RESEARCH", "COMPETITION", "INNOVATION", "LAB_TASK"]),
   deadline: deadlineSchema,
 };
 
-export const projectCreateSchema = z.object({ ...projectFields, requestId: z.string().trim().min(1).max(128).optional() });
+// 描述选填：首次建项只需名称与目标，先让用户看到价值，描述可随时在项目设置里补充。
+export const projectCreateSchema = z.object({ ...projectFields, description: projectFields.description.default(""), requestId: z.string().trim().min(1).max(128).optional() });
 
 export const projectUpdateSchema = z
   .object(projectFields)

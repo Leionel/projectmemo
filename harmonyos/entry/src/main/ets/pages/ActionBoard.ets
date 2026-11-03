@@ -971,7 +971,7 @@ struct ActionBoard {
       // 顶行：状态与优先级
       Row() {
         StatusBadge({ status: action.status })
-        if (action.status !== 'DONE') {
+        if (action.status !== 'DONE' && action.status !== 'CANCELLED') {
           Text(TextFormatters.priorityToChinese(action.priority))
             .fontSize(PMFontSize.CAPTION)
             .fontColor(PMColors.INK_TERTIARY)

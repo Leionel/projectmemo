@@ -8,6 +8,13 @@ describe("input validation", () => {
     expect(captureCreateSchema.safeParse({ rawText: "短" }).success).toBe(false);
   });
 
+  it("lets a project be created with only a name and goal", () => {
+    const parsed = projectCreateSchema.parse({ title: "毕业设计", goal: "完成开题", scenario: "RESEARCH" });
+    expect(parsed.description).toBe("");
+    expect(projectCreateSchema.safeParse({ title: "毕业设计", goal: "完成开题", scenario: "RESEARCH", description: "x".repeat(501) }).success).toBe(false);
+    expect(projectUpdateSchema.parse({ title: "更新后的项目" }).description).toBeUndefined();
+  });
+
   it("rejects malformed LLM JSON payloads", () => {
     expect(knowledgeCardDraftSchema.safeParse({ type: "unknown", title: "x", summary: "bad", keywords: [], nextActions: [], importance: 9 }).success).toBe(false);
   });

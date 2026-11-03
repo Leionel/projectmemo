@@ -197,3 +197,23 @@ export function recordLoginFailure(identifier: string): void {
 export function clearLoginFailure(identifier: string): void {
   loginFailureBuckets.delete(identifier);
 }
+
+/**
+ * 多键版登录限流：一次登录同时检查
+ * - `ip:规范化标识`（原行为，防单标识暴力破解，大小写/空格变化归入同一桶）；
+ * - `ip:user:<id>`（同一账号用用户名或邮箱切换尝试时仍累计，覆盖本次新增的两种标识路径）。
+ *
+ * 键都带客户端 IP，因此不会因账号级累计造成跨 IP 的锁死 DoS；
+ * 分布式多 IP 暴力破解仍依赖代理/网关层的限流，这里保持进程内原机制，不新建风控服务。
+ */
+export function enforceLoginRateLimits(identifiers: string[]): void {
+  for (const identifier of identifiers) enforceLoginRateLimit(identifier);
+}
+
+export function recordLoginFailures(identifiers: string[]): void {
+  for (const identifier of identifiers) recordLoginFailure(identifier);
+}
+
+export function clearLoginFailures(identifiers: string[]): void {
+  for (const identifier of identifiers) clearLoginFailure(identifier);
+}

@@ -1,6 +1,6 @@
 import { db } from "../lib/db";
 import { hashPassword } from "../lib/auth/password";
-import { E2E_PASSWORD, E2E_USERNAME } from "./e2e-env";
+import { E2E_EMAIL, E2E_PASSWORD, E2E_UNVERIFIED_EMAIL, E2E_USERNAME } from "./e2e-env";
 
 const SEED_PROJECT_TITLES = [
   "人工智能创意赛 忆程 ProjectMemo 作品开发",
@@ -36,6 +36,23 @@ async function main() {
     where: { userId_projectId: { userId: user.id, projectId: project.id } },
     create: { userId: user.id, projectId: project.id, role: "OWNER" },
     update: {},
+  });
+  // 同一账号绑定已验证邮箱：E2E 既要覆盖原用户名登录，也要覆盖“用户名或邮箱”中的邮箱路径。
+  await db.accountSecurity.upsert({
+    where: { userId: user.id },
+    create: { userId: user.id, email: E2E_EMAIL, emailVerifiedAt: new Date() },
+    update: { email: E2E_EMAIL, emailVerifiedAt: new Date() },
+  });
+  // 未验证邮箱账号：用于浏览器旅程验证“提示重新发信”而不是误报密码错误。
+  const pending = await db.user.upsert({
+    where: { username: `${E2E_USERNAME}-pending` },
+    create: { username: `${E2E_USERNAME}-pending`, displayName: "E2E 待验证身份", passwordHash },
+    update: { passwordHash },
+  });
+  await db.accountSecurity.upsert({
+    where: { userId: pending.id },
+    create: { userId: pending.id, email: E2E_UNVERIFIED_EMAIL, emailVerifiedAt: null },
+    update: { email: E2E_UNVERIFIED_EMAIL, emailVerifiedAt: null },
   });
   const member = await db.user.upsert({ where: { username: `${E2E_USERNAME}-member` },
     create: { username: `${E2E_USERNAME}-member`, displayName: "E2E 普通成员", passwordHash }, update: { passwordHash } });

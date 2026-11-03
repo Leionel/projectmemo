@@ -28,7 +28,7 @@ const content: Record<
 > = {
   login: {
     title: "登录忆程",
-    description: "继续查看你的项目、记录和行动。",
+    description: "使用用户名或邮箱，继续查看你的项目、记录和行动。",
     action: "登录工作台",
   },
   register: {
@@ -70,6 +70,7 @@ function AuthForm({ mode }: { mode: AuthMode }) {
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [errorCode, setErrorCode] = useState("");
   const [success, setSuccess] = useState("");
   const [mailReady, setMailReady] = useState<boolean | null>(null);
   const [mailFailure, setMailFailure] = useState("");
@@ -94,7 +95,7 @@ function AuthForm({ mode }: { mode: AuthMode }) {
         setMailFailure(
           data.registrationEnabled === true
             ? ""
-            : "账号邮件服务尚未配置，注册和找回密码暂不可用。已有账号仍可正常登录。",
+            : "邮件服务暂时不可用：注册、邮箱验证和找回密码暂不可用。已有账号仍可正常登录。",
         );
       })
       .catch(() => {
@@ -112,6 +113,7 @@ function AuthForm({ mode }: { mode: AuthMode }) {
     event.preventDefault();
     if (loading) return;
     setError("");
+    setErrorCode("");
     if (
       (mode === "register" || mode === "reset-password") &&
       password !== confirmPassword
@@ -144,6 +146,7 @@ function AuthForm({ mode }: { mode: AuthMode }) {
       const result = await response.json().catch(() => null);
       if (!response.ok) {
         const detail = result?.error?.details?.[0]?.message;
+        setErrorCode(typeof result?.error?.code === "string" ? result.error.code : "");
         throw new Error(
           detail ||
             result?.error?.message ||
@@ -195,8 +198,26 @@ function AuthForm({ mode }: { mode: AuthMode }) {
         {success ? (
           <div className={styles.success} role="status">
             <Check size={23} aria-hidden="true" />
-            <h2>{mode === "register" ? "请查收验证邮件" : "操作已完成"}</h2>
+            <h2>
+              {mode === "register"
+                ? "请查收验证邮件"
+                : mode === "verify-email"
+                  ? "邮箱已验证"
+                  : mode === "reset-password"
+                    ? "密码已更新"
+                    : "操作已完成"}
+            </h2>
             <p>{success}</p>
+            {mode === "verify-email" && (
+              <p className={styles.help}>
+                请返回登录页，用刚才验证的账号登录；这次验证不会在浏览器里自动建立会话。
+              </p>
+            )}
+            {mode === "reset-password" && (
+              <p className={styles.help}>
+                旧密码和原有登录状态已失效，请用新密码重新登录。
+              </p>
+            )}
             <Link className={styles.submit} href={"/login" + authQuery}>
               返回登录
               <ArrowRight size={16} />
@@ -217,10 +238,33 @@ function AuthForm({ mode }: { mode: AuthMode }) {
               </div>
             )}
             {error && (
-              <div id="auth-error" className={styles.error} role="alert">
-                <CircleAlert size={17} aria-hidden="true" />
-                <p>{error}</p>
-              </div>
+              <>
+                <div id="auth-error" className={styles.error} role="alert">
+                  <CircleAlert size={17} aria-hidden="true" />
+                  <p>{error}</p>
+                </div>
+                {errorCode === "EMAIL_NOT_VERIFIED" && (
+                  <p className={styles.help}>
+                    没收到验证邮件？
+                    <Link href="/resend-verification">重新发送验证邮件</Link>
+                  </p>
+                )}
+                {errorCode === "ACCOUNT_LINK_EXPIRED" && (
+                  <p className={styles.help}>
+                    {mode === "reset-password" ? (
+                      <>
+                        重置链接已失效，
+                        <Link href="/forgot-password">重新申请重置邮件</Link>
+                      </>
+                    ) : (
+                      <>
+                        验证链接已失效，
+                        <Link href="/resend-verification">重新发送验证邮件</Link>
+                      </>
+                    )}
+                  </p>
+                )}
+              </>
             )}
             <form
               method="post"
@@ -230,10 +274,13 @@ function AuthForm({ mode }: { mode: AuthMode }) {
             >
               {(mode === "login" || mode === "register") && (
                 <div className={styles.field}>
-                  <label htmlFor="username">账号</label>
+                  <label htmlFor="username">
+                    {mode === "login" ? "用户名或邮箱" : "账号"}
+                  </label>
                   <input
                     id="username"
                     name="username"
+                    type="text"
                     autoComplete="username"
                     autoCapitalize="none"
                     autoCorrect="off"
@@ -248,8 +295,10 @@ function AuthForm({ mode }: { mode: AuthMode }) {
                     }
                     required
                     disabled={loading}
-                    placeholder="输入你的账号"
-                    maxLength={mode === "register" ? 32 : undefined}
+                    placeholder={
+                      mode === "login" ? "输入用户名或邮箱" : "输入你的账号"
+                    }
+                    maxLength={mode === "register" ? 32 : 254}
                     minLength={mode === "register" ? 3 : undefined}
                     aria-describedby={
                       mode === "register"
@@ -397,7 +446,7 @@ function AuthForm({ mode }: { mode: AuthMode }) {
                 <Link href={"/login" + authQuery}>已有账号？返回登录</Link>
               )}
             </div>
-            {(mode === "login" || error) && (
+            {mode === "login" && (
               <Link className={styles.resendLink} href="/resend-verification">
                 重新发送邮箱验证
               </Link>

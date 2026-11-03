@@ -15,6 +15,7 @@ import s1HandoffContractTest from './S1Handoff.test';
 import s2ReadbackContractTest from './S2Readback.test';
 import workPacketContractTest from './WorkPacketContract.test';
 import widgetHandoffTest from './WidgetHandoff.test';
+import loginIdentifierTest from './LoginIdentifier.test';
 
 export default function testsuite() {
   localUnitTest();
@@ -34,6 +35,7 @@ export default function testsuite() {
   s2ReadbackContractTest();
   workPacketContractTest();
   widgetHandoffTest();
+  loginIdentifierTest();
 }
 
 

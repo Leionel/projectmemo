@@ -14,6 +14,9 @@ export const E2E_BASE_URL = `http://127.0.0.1:${E2E_PORT}`;
 // 不写进 prisma/seed.ts，避免污染开发库和演示库。
 export const E2E_USERNAME = "e2e-reviewer";
 export const E2E_PASSWORD = "e2e-reviewer-password";
+// 邮箱登录/E2E 浏览器旅程使用；.invalid 顶级域只用于隔离库，不会真实收信。
+export const E2E_EMAIL = "e2e-reviewer@example.invalid";
+export const E2E_UNVERIFIED_EMAIL = "e2e-pending@example.invalid";
 export const E2E_AUTH_STATE_PATH = path.resolve(process.cwd(), "test-results", ".auth", "e2e-user.json");
 
 export const E2E_ENV = {

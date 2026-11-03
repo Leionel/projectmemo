@@ -7,6 +7,7 @@ export class UserInfo {
 }
 
 export class LoginInput {
+  /** 兼容字段：承载用户名或已绑定邮箱；服务端按同一字段解析，旧客户端无需改协议。 */
   username: string = '';
   password: string = '';
   client: string = 'harmony';

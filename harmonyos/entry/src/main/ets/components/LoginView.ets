@@ -1,7 +1,7 @@
 import { AuthService } from '../services/AuthService';
 import { AccountCapabilities, RegisterInput, AccountEmailInput, AccountMessage } from '../models/Auth';
 import { ApiError } from '../models/Project';
-import { buildRegisterInput, registrationError, accountEmailError } from '../common/AccountContract';
+import { buildRegisterInput, registrationError, accountEmailError, loginIdentifierError, loginErrorMessage } from '../common/AccountContract';
 import { PMColors, PMSpacing, PMFontSize, PMRadius, PMFontFamily } from '../common/DesignTokens';
 
 @Component
@@ -14,6 +14,7 @@ export struct LoginView {
   @State isSubmitting: boolean = false;
   @State isChecking: boolean = true;
   @State errorMessage: string = '';
+  @State errorCode: string = '';
   @State successMessage: string = '';
   @State mailStatus: string = '';
   @State capabilities: AccountCapabilities = new AccountCapabilities();
@@ -40,7 +41,7 @@ export struct LoginView {
 
   private changeMode(next: string): void {
     if (this.isSubmitting) return;
-    this.mode = next; this.password = ''; this.confirmPassword = ''; this.errorMessage = ''; this.successMessage = '';
+    this.mode = next; this.password = ''; this.confirmPassword = ''; this.errorMessage = ''; this.errorCode = ''; this.successMessage = '';
   }
 
   private title(): string {
@@ -60,8 +61,9 @@ export struct LoginView {
   private async submit(): Promise<void> {
     if (!this.canSubmit()) return;
     this.errorMessage = '';
+    this.errorCode = '';
     const registration: RegisterInput = buildRegisterInput(this.username, this.email, this.password, this.confirmPassword);
-    const validation: string = this.mode === 'register' ? registrationError(registration) : this.mode === 'login' ? '' : accountEmailError(this.email);
+    const validation: string = this.mode === 'register' ? registrationError(registration) : this.mode === 'login' ? loginIdentifierError(this.username) : accountEmailError(this.email);
     if (validation !== '') { this.errorMessage = validation; return; }
     const requestVersion: number = ++this.version;
     this.isSubmitting = true;
@@ -88,7 +90,8 @@ export struct LoginView {
       }
     } catch (e) {
       if (!this.active || requestVersion !== this.version) return;
-      this.errorMessage = e instanceof ApiError ? e.message : '请求未完成，请检查网络后重试';
+      this.errorCode = e instanceof ApiError ? e.code : '';
+      this.errorMessage = e instanceof ApiError ? loginErrorMessage(e.code, e.message) : '请求未完成，请检查网络后重试';
     } finally { if (this.active && requestVersion === this.version) this.isSubmitting = false; }
   }
 
@@ -110,29 +113,34 @@ export struct LoginView {
 
         Column({ space: PMSpacing.SM }) {
           Text(this.title()).fontSize(PMFontSize.DISPLAY).fontWeight(FontWeight.Bold).fontColor(PMColors.INK_PRIMARY).lineHeight(36)
-          Text(this.mode === 'login' ? '登录后，接着推进上次的项目。' : this.mode === 'register' ? '用一个账号，保存项目里的积累。' : '我们会将安全链接发送到你的邮箱。')
+          Text(this.mode === 'login' ? '用用户名或邮箱登录，接着推进上次的项目。' : this.mode === 'register' ? '用一个账号，保存项目里的积累。' : '我们会将安全链接发送到你的邮箱。')
             .fontSize(PMFontSize.BODY).fontColor(PMColors.INK_SECONDARY).lineHeight(24)
         }.width('100%').alignItems(HorizontalAlign.Start)
 
         Column() {
           if (this.successMessage !== '') {
             Text(this.successMessage).fontSize(PMFontSize.BODY).fontColor(PMColors.BRAND).lineHeight(24)
-            Text('在邮件中打开链接完成操作，然后返回应用登录。注册成功不代表邮箱已验证。')
+            Text('在系统浏览器中打开邮件链接完成操作，然后返回应用登录。验证成功不会让应用自动登录。')
               .fontSize(PMFontSize.SECONDARY).fontColor(PMColors.INK_SECONDARY).lineHeight(22).margin({ top: 16, bottom: 20 })
             Button('返回登录', { type: ButtonType.Normal }).width('100%').height(48).borderRadius(PMRadius.BUTTON).fontSize(PMFontSize.BUTTON).backgroundColor(PMColors.BRAND).fontColor(PMColors.SURFACE).onClick(() => this.changeMode('login'))
             if (this.capabilities.registrationEnabled) { Button('重新发送验证邮件', { type: ButtonType.Normal }).height(44).fontColor(PMColors.BRAND).backgroundColor(Color.Transparent).margin({ top: 12 }).onClick(() => this.changeMode('resend')) }
           } else {
             if (this.errorMessage !== '') {
               Text(this.errorMessage).width('100%').fontSize(PMFontSize.SECONDARY).fontColor(PMColors.RISK).lineHeight(22)
-                .padding(12).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(8).margin({ bottom: 20 }).accessibilityText(this.errorMessage)
+                .padding(12).backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(8).margin({ bottom: this.mode === 'login' && this.errorCode === 'EMAIL_NOT_VERIFIED' ? 8 : 20 }).accessibilityText(this.errorMessage)
+              if (this.mode === 'login' && this.errorCode === 'EMAIL_NOT_VERIFIED' && this.capabilities.registrationEnabled) {
+                Button('重新发送验证邮件', { type: ButtonType.Normal }).height(44).fontSize(PMFontSize.SECONDARY).fontColor(PMColors.BRAND)
+                  .backgroundColor(Color.Transparent).enabled(!this.isSubmitting).margin({ bottom: 12 })
+                  .onClick(() => this.changeMode('resend'))
+              }
             }
             if (this.mode === 'login' || this.mode === 'register') {
               Column() {
-                this.FieldLabel('账号')
-                TextInput({ placeholder: '输入你的账号', text: this.username }).height(48).fontSize(PMFontSize.BODY)
+                this.FieldLabel(this.mode === 'login' ? '用户名或邮箱' : '账号')
+                TextInput({ placeholder: this.mode === 'login' ? '输入用户名或邮箱' : '输入你的账号', text: this.username }).height(48).fontSize(PMFontSize.BODY)
                   .fontColor(PMColors.INK_PRIMARY).placeholderColor(PMColors.INK_TERTIARY).caretColor(PMColors.BRAND)
                   .backgroundColor(PMColors.SURFACE_SUBTLE).borderRadius(PMRadius.MD).border({ width: 1, color: PMColors.BORDER_SUBTLE }).enabled(!this.isSubmitting)
-                  .accessibilityText('账号').onChange((value: string) => { this.username = this.mode === 'register' ? value.toLowerCase() : value; })
+                  .accessibilityText(this.mode === 'login' ? '用户名或邮箱' : '账号').onChange((value: string) => { this.username = this.mode === 'register' ? value.toLowerCase() : value; })
                 if (this.mode === 'register') {
                   Text('3–32 位字母、数字、下划线或短横线，以字母或数字开头。').fontSize(PMFontSize.CAPTION).fontColor(PMColors.INK_TERTIARY).lineHeight(18).margin({ top: 6 })
                 }

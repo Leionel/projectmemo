@@ -101,10 +101,12 @@ export type WorkPacketMaterialCurrentUse = {
   appliesTo: "CURRENT_USE_ONLY";
 };
 type MaterialUseItemBase = MaterialUseProjection["items"][number];
-export type WorkPacketMaterialUseItem = Omit<MaterialUseItemBase, "currentUse" | "availabilityMeaning"> & {
+export type WorkPacketMaterialUseItem = Omit<MaterialUseItemBase, "currentUse" | "availabilityMeaning" | "revisionAvailability"> & {
+  /** 原修订匹配事实；旧服务缺失时不能据 availability 推断当前许可。 */
+  revisionAvailability?: MaterialUseItemBase["revisionAvailability"];
   /** 当前是否允许继续作为依据；缺省只表示旧服务/未应用来源策略，不能当作允许。 */
   currentUse?: WorkPacketMaterialCurrentUse | null;
-  /** availability=CURRENT 只说明版本匹配；该文案说明它不等于当前可用或独立证据。 */
+  /** availability 为兼容消费者的版本/当前许可联合显示，不表示独立支持。 */
   availabilityMeaning?: string | null;
 };
 /** 复用原 MaterialUseProjection 形状，只叠加 currentUse/availabilityMeaning 增量。 */

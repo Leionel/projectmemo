@@ -297,7 +297,12 @@ export async function runMissionSlice(options:{id?:string;workerId?:string;provi
     :{kind:"REVIEW_REQUIRED",automatic:false,message:failure.protocol?"模型格式纠错仍未通过，请检查模型配置后人工继续。":"请核对当前失败原因后继续，已有步骤和结果保留。",...(failure.protocol?{attempt:failures+1,maxAttempts:2}:{})};
    await tx.agentRun.create({data:{projectId:m.projectId,runType:"CHAT",status:"FAILED",provider:metadata?.provider??(options.provider?"TEST_FIXTURE":"mission-adapter"),trace:json({prompt:options.provider?null:{id:missionStrategyV2.id,version:missionStrategyV2.version,purpose:missionStrategyV2.purpose,outputSchemaVersion:missionStrategyV2.outputSchemaVersion},missionId:m.id,stepId:activeStepId,sourceDecisionRunId,code,phase:failure.phase,category:failure.category,...metadata,diagnostic,recovery,contextManifest,...(failedSettlements.size?{usageSettlementFailures:[...failedSettlements]}:{})}),fallbackReason:code}});
    await tx.agentMission.update({where:{id:m.id},data:{lastErrorJson:json({code,message:failure.message,diagnostic,phase:failure.phase,category:failure.category,recovery})}});
-   await event(tx,m.id,failure.protocol?"MODEL_PROTOCOL_ERROR":"EXECUTION_STOPPED",{code,...diagnostic,phase:failure.phase,category:failure.category,recovery});
+    // 仅补审计身份：普通停止/预算/模型失败不等于声明观察失败，不改变原调度与结算。
+    const declaredObservationFailure = !stop && !failure.protocol && phase === "TOOL"
+      && typeof record(active?.protocolJson).delegationCycle === "string"
+      && !/(STOP|CANCEL|BUDGET|QUOTA)/.test(code);
+    await event(tx,m.id,failure.protocol?"MODEL_PROTOCOL_ERROR":"EXECUTION_STOPPED",{code,...diagnostic,phase:failure.phase,category:failure.category,recovery,
+      ...(declaredObservationFailure ? {purpose:"DECLARED_OBSERVATION",stepId:active!.id} : {})});
    const status=current.cancelRequestedAt?"CANCELLED":current.pauseRequestedAt?"PAUSED":(retry||repair||code==="CONTEXT_CHANGED")?"READY":"PAUSED";
    await release(tx,current,status,stop?"USER":code==="BUDGET_EXHAUSTED"?"BUDGET":"REVIEW_REQUIRED");
   });return true;

@@ -1376,6 +1376,15 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* CSS 兜底：偏好热切换时，不等 JS 事件也立即停用滚动视差。 */
+  .home[data-motion="on"] [data-hero-copy],
+  .home[data-motion="on"] [data-hero-lens] {
+    translate: none;
+  }
+  .scrollProgress,
+  .railProgress {
+    transform: scale(0) !important;
+  }
   .home *,
   .home *::before,
   .home *::after {

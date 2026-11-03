@@ -1,0 +1,42 @@
+### Result
+{"scope":"anonymous local homepage browser only","stages":[{"name":"离开时","header":"公开示例\n·\n忆程参赛作品开发\n\n整理阶段汇报\n无需操作"},{"name":"期间","header":"公开示例\n·\n忆程参赛作品开发\n\n整理阶段汇报\n核对示例"},{"name":"回来后","header":"公开示例\n·\n忆程参赛作品开发\n\n整理阶段汇报\n等你确认"}],"reduced":{"translate":"none","shift":"0"},"viewports":[{"width":1440,"scrollWidth":1440},{"width":390,"scrollWidth":390}],"requests":[{"url":"http://127.0.0.1:34119/","method":"GET","type":"document"},{"url":"http://127.0.0.1:34119/logo.png","method":"GET","type":"image"},{"url":"http://127.0.0.1:34119/_next/static/chunks/_1m_kv2t8hd7hd._.css","method":"GET","type":"stylesheet"},{"url":"http://127.0.0.1:34119/_next/static/chunks/_1jiib-2own1si._.css","method":"GET","type":"stylesheet"},{"url":"http://127.0.0.1:34119/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_0qva5cupmdgep._.js","method":"GET","type":"script"},{"url":"http://127.0.0.1:34119/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js","method":"GET","type":"script"},{"url":"http://127.0.0.1:34119/_next/static/chunks/1q96_modules_next_dist_compiled_react-dom_cjs_react-dom_development_1sqry0_53krp4.js","method":"GET","type":"script"},{"url":"http://127.0.0.1:34119/_next/static/chunks/node_modules_next_dist_compiled_react-dom_0grqycjrj6mju._.js","method":"GET","type":"script"},{"url":"http://127.0.0.1:34119/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js","method":"GET","type":"script"},{"url":"http://127.0.0.1:34119/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jmam7qwg.js","method":"GET","type":"script"},{"url":"http://127.0.0.1:34119/_next/static/chunks/node_modules_next_dist_compiled_1amofcmz--cdp._.js","method":"GET","type":"script"},{"url":"http://127.0.0.1:34119/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js","method":"GET","type":"script"},{"url":"http://127.0.0.1:34119/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js","method":"GET","type":"script"},{"url":"http://127.0.0.1:34119/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqwj2323d._.js","method":"GET","type":"script"},{"url":"http://127.0.0.1:34119/_next/static/chunks/_1anvha4rlo79g._.js","method":"GET","type":"script"},{"url":"http://127.0.0.1:34119/_next/static/chunks/turbopack-_06rkbud3pyrlm._.js","method":"GET","type":"script"},{"url":"http://127.0.0.1:34119/_next/static/chunks/_219uq1sj0q91c._.js","method":"GET","type":"script"},{"url":"http://127.0.0.1:34119/_next/static/chunks/_0_duo-exf6bfz._.js","method":"GET","type":"script"},{"url":"http://127.0.0.1:34119/_next/static/chunks/node_modules_0y6xgmo32juxh._.js","method":"GET","type":"script"},{"url":"http://127.0.0.1:34119/_next/static/chunks/_17f25dzi-5r2x._.js","method":"GET","type":"script"},{"url":"http://127.0.0.1:34119/_next/static/chunks/_1hulrz_f5p140._.js","method":"GET","type":"script"},{"url":"http://127.0.0.1:34119/_next/static/chunks/node_modules_lucide-react_dist_esm_icons_1a2xsjp5_07ye._.js","method":"GET","type":"script"},{"url":"http://127.0.0.1:34119/fonts/pm-editorial-serif.ttf","method":"GET","type":"font"},{"url":"http://127.0.0.1:34119/fonts/manrope-variable.ttf","method":"GET","type":"font"},{"url":"http://127.0.0.1:34119/fonts/pm-serif-brand.ttf","method":"GET","type":"font"},{"url":"http://127.0.0.1:34119/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1mojsayzyj2p6._.js","method":"GET","type":"script"},{"url":"http://127.0.0.1:34119/__nextjs_font/geist-latin.woff2","method":"GET","type":"font"},{"url":"http://127.0.0.1:34119/icon.svg?icon.2vm7euv9l6yim.svg","method":"GET","type":"other"}],"nonReadRequests":[],"externalRequests":[],"serverModelCalls":{"measured":false,"reason":"Browser network cannot attest server-to-provider traffic. Preview configured mock; no live-model quality claim."}}
+### Ran Playwright code
+```js
+await (async (page) => {
+  const requests = [];
+  page.on('request', r => requests.push({ url: r.url(), method: r.method(), type: r.resourceType() }));
+  await page.reload({ waitUntil: 'networkidle' });
+  const stages = [];
+  for (const [name, label] of [['离开时', '无需操作'], ['期间', '核对示例'], ['回来后', '等你确认']]) {
+    await page.getByRole('tab', { name, exact: true }).click();
+    const header = await page.locator('[data-hero-lens] header').innerText();
+    if (!header.includes(label)) throw new Error(`阶段状态不符: ${name}: ${header}`);
+    stages.push({ name, header });
+  }
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.evaluate(() => window.scrollTo(0, 280));
+  await page.waitForFunction(() => document.querySelector('main')?.getAttribute('data-motion') === 'on');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.waitForFunction(() => document.querySelector('main')?.getAttribute('data-motion') === 'reduced');
+  const reduced = await page.locator('[data-hero]').evaluate(el => ({ translate: getComputedStyle(el).translate, shift: el.style.getPropertyValue('--hero-shift') }));
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.waitForFunction(() => document.querySelector('main')?.getAttribute('data-motion') === 'on');
+  const viewports = [];
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.screenshot({ path: `D:/Projects/hongmen-final-integration/evidence/final-integration/20261103-review/home-${width}.png` });
+    viewports.push(await page.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth })));
+  }
+  return { scope: 'anonymous local homepage browser only', stages, reduced, viewports, requests,
+    nonReadRequests: requests.filter(r => !['GET', 'HEAD', 'OPTIONS'].includes(r.method)),
+    externalRequests: requests.filter(r => new URL(r.url).origin !== 'http://127.0.0.1:34119'),
+    serverModelCalls: { measured: false, reason: 'Browser network cannot attest server-to-provider traffic. Preview configured mock; no live-model quality claim.' } };
+}
+)(page);
+```
+### Page
+- Page URL: http://127.0.0.1:34119/
+- Page Title: 忆程 ProjectMemo｜人可以下线，项目别掉线。
+### Events
+- New console entries: .playwright-cli\console-2026-11-03T06-18-02-952Z.log#L3-L15

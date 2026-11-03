@@ -46,22 +46,24 @@ async function writeLoop(missionId: string, iterations: number, state: WriterSta
 }
 
 /**
- * 受控并发点：在 readback 的事务外版本复查（db.agentMission.findUnique）前，经第二连接先提交一次真实写入。
+ * 受控并发点：在 readback 的第二只读事务前，经第二连接先提交一次真实写入。
  * 单进程内 better-sqlite3 是同步驱动，无法在事务中间自然插入第二连接写入；
  * 这里把写入钉在“快照已读取、复查尚未返回”的真实窗口，用于确定性复现 VERSION_ADVANCED/RETRIED。
  */
-async function readWithInjectedWrites(missionId: string, injections: number): Promise<MissionReadback> {
+async function readWithInjectedWrites(missionId: string, injections: number, changeControl = false): Promise<MissionReadback> {
   let remaining = injections;
-  const original = db.agentMission.findUnique.bind(db.agentMission);
-  const spy = vi.spyOn(db.agentMission, "findUnique");
-  spy.mockImplementation(((args: unknown) => {
-    if (remaining > 0) {
+  let calls = 0;
+  const original = db.$transaction.bind(db);
+  const spy = vi.spyOn(db, "$transaction");
+  spy.mockImplementation((async (callback: unknown, options: unknown) => {
+    calls += 1;
+    if (calls % 2 === 0 && remaining > 0) {
       remaining -= 1;
-      return writerClient.agentMission.update({ where: { id: missionId }, data: {
-        version: { increment: 1 }, contextVersion: { increment: 1 }, planRevision: { increment: 1 }, updatedAt: new Date(),
-      } }).then(() => original(args as never));
+      await writerClient.agentMission.update({ where: { id: missionId }, data: {
+        version: { increment: 1 }, ...(changeControl ? { contextVersion: { increment: 1 }, planRevision: { increment: 1 } } : {}), updatedAt: new Date(),
+      } });
     }
-    return original(args as never);
+    return original(callback as never, options as never);
   }) as never);
   try {
     return await readMissionBack(missionIdOwner!, missionId);
@@ -98,6 +100,64 @@ function assertInternalConsistency(back: MissionReadback): void {
 }
 
 describe("A2 FS-A07 并发：真实双连接写入下 readback 响应内部一致", () => {
+  it("快照采集后项目访问被撤回，第二事务拒绝返回旧私有读回", async () => {
+    const user = await db.user.create({ data: { username: `access-race-${crypto.randomUUID()}`, displayName: "访问竞争", passwordHash: "unused" } });
+    const project = await db.project.create({ data: { title: "访问撤回", description: "SYNTHETIC", goal: "核对权限", scenario: "RESEARCH", memberships: { create: { userId: user.id, role: "OWNER" } } } });
+    const mission = await db.agentMission.create({ data: { ownerUserId: user.id, projectId: project.id, goal: "私有任务", createRequestId: crypto.randomUUID(), createPayloadHash: "test", successCriteriaJson: [], constraintsJson: {}, budgetJson: {} } });
+    let calls = 0;
+    const original = db.$transaction.bind(db);
+    const spy = vi.spyOn(db, "$transaction");
+    spy.mockImplementation((async (callback: unknown, options: unknown) => {
+      calls += 1;
+      if (calls === 2) await writerClient.projectMembership.delete({ where: { userId_projectId: { userId: user.id, projectId: project.id } } });
+      return original(callback as never, options as never);
+    }) as never);
+    try { await expect(readMissionBack(user.id, mission.id)).rejects.toMatchObject({ code: "MISSION_NOT_FOUND", status: 404 }); }
+    finally { spy.mockRestore(); }
+  });
+
+  it.each([1, 3])("复查前撤回来源且Mission版本未变：控制变化%d次分别重读或拒绝旧正文", async injections => {
+    const user = await db.user.create({ data: { username: `control-race-${crypto.randomUUID()}`, displayName: "控制版本竞争", passwordHash: "unused" } });
+    const project = await db.project.create({ data: { title: "控制版本竞争", description: "SYNTHETIC", goal: "核对撤权", scenario: "RESEARCH", memberships: { create: { userId: user.id, role: "OWNER" } } } });
+    const mission = await db.agentMission.create({ data: { ownerUserId: user.id, projectId: project.id, goal: "核对来源", createRequestId: crypto.randomUUID(), createPayloadHash: "test", status: "WAITING_INPUT", successCriteriaJson: [], constraintsJson: {}, budgetJson: {}, waitStateJson: { questionId: "q-control-race", waitingFor: "USER" } } });
+    const source = await db.capture.create({ data: { projectId: project.id, rawText: "不能在撤回后发布的正文", sourceType: "记录" } });
+    const { sourceHash } = await import("@/lib/mission/repository");
+    const pointer = { id: `capture:${source.id}`, hash: (await sourceHash(project.id, `capture:${source.id}`))! };
+    await db.agentMissionEvent.create({ data: { missionId: mission.id, seq: 1, type: "SOURCE_ARRIVED", payloadJson: { questionId: "q-control-race", sourcePointer: pointer } } });
+    const before = await readMissionBack(user.id, mission.id);
+    let calls = 0;
+    const original = db.$transaction.bind(db);
+    const spy = vi.spyOn(db, "$transaction");
+    spy.mockImplementation((async (callback: unknown, options: unknown) => {
+      calls += 1;
+      if (calls % 2 === 0 && calls <= injections * 2) await writerClient.$transaction(async tx => {
+        const owner = await tx.user.findUniqueOrThrow({ where: { id: user.id } });
+        await tx.agentDirectiveEvent.create({ data: {
+          ownerUserId: user.id, projectId: project.id, missionId: mission.id, seq: owner.continuitySeq + 1,
+          commandId: crypto.randomUUID(), eventIndex: 0, inputHash: "a".repeat(64), directiveId: crypto.randomUUID(),
+          kind: "USE_SUPPRESSION", operation: "SET", quote: "停止使用这条来源", sourceIdsJson: [pointer.id],
+          sourceJson: { origin: "ISOLATED_CONTROL_RACE" }, admissionJson: { status: "DIRECT_APPLIED", kind: "USE_SUPPRESSION" }, validFrom: new Date(), timezone: "Asia/Shanghai",
+        } });
+        await tx.user.update({ where: { id: user.id }, data: { continuitySeq: { increment: 1 } } });
+      });
+      return original(callback as never, options as never);
+    }) as never);
+    let after: MissionReadback;
+    try {
+      if (injections === 3) {
+        await expect(readMissionBack(user.id, mission.id)).rejects.toMatchObject({ code: "WORK_PACKET_AUTHORITY_CHANGED", status: 409 });
+        expect((await db.agentMission.findUniqueOrThrow({ where: { id: mission.id } })).version).toBe(mission.version);
+        return;
+      }
+      after = await readMissionBack(user.id, mission.id);
+    } finally { spy.mockRestore(); }
+    expect(after.missionVersion).toBe(before.missionVersion);
+    expect(after.workPacket!.identity.controlVersion).not.toBe(before.workPacket!.identity.controlVersion);
+    expect(after.workPacket!.snapshot).toMatchObject({ consistency: "RETRIED", retries: 1 });
+    expect(after.materialUses.items[0]).toMatchObject({ sourcePointer: pointer, availability: "UNAVAILABLE", excerpt: null, currentUse: { state: "SUPPRESSED" } });
+    expect((await db.agentMission.findUniqueOrThrow({ where: { id: mission.id } })).version).toBe(mission.version);
+  });
+
   it("第二连接并发推进版本 + 受控复查点：内部不一致=0，RETRIED/VERSION_ADVANCED 正确标记", async () => {
     const user = await db.user.create({ data: { username: `final-a-concurrency-${crypto.randomUUID()}`, displayName: "并发一致性验收", passwordHash: "unused" } });
     const project = await db.project.create({ data: { title: "并发一致性项目", description: "SYNTHETIC_FINAL_A_CONCURRENCY", goal: "核对快照一致性", scenario: "RESEARCH", memberships: { create: { userId: user.id, role: "OWNER" } } } });
@@ -153,12 +213,15 @@ describe("A2 FS-A07 并发：真实双连接写入下 readback 响应内部一�
       researchScopeVersion: advanced.workPacket!.identity.researchScopeVersion,
     });
 
+    // 持续 context/plan/control 推进不能发布旧 requires；与纯版本推进分开验证。
+    await expect(readWithInjectedWrites(mission.id, 3, true)).rejects.toMatchObject({ code: "WORK_PACKET_AUTHORITY_CHANGED", status: 409 });
+
     // 读取只读：事件数不变；草稿/回执不被读取创建；Mission 版本推进只来自第二连接写入。
     expect(await db.agentMissionEvent.count({ where: { missionId: mission.id } })).toBe(beforeEvents);
     expect(await db.agentMissionOutput.count({ where: { missionId: mission.id } })).toBe(0);
     expect(await db.missionArtifactReceipt.count({ where: { missionId: mission.id } })).toBe(0);
     const afterMission = await db.agentMission.findUniqueOrThrow({ where: { id: mission.id } });
-    expect(afterMission.version).toBe(beforeMission.version + writerState.ok + 1 + 3);
+    expect(afterMission.version).toBe(beforeMission.version + writerState.ok + 1 + 3 + 3);
     expect(afterMission.updatedAt.getTime()).toBeGreaterThanOrEqual(beforeMission.updatedAt.getTime());
 
     // 证据化输出：真实迭代、标记分布、内部不一致计数（应恒为 0）。

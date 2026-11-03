@@ -23,10 +23,11 @@ export type MaterialUseCurrentUse = {
 export type MaterialUseItem = {
   sourcePointer: Pointer;
   title: string;
-  /** 仅表示版本匹配：CURRENT 表示当前材料 hash 与历史指针一致。 */
+  /** 旧消费者的安全显示：未获当前使用许可时为 UNAVAILABLE。 */
   availability: "CURRENT" | "CHANGED" | "UNAVAILABLE";
-  /** availability 的冻结含义：版本匹配不等于当前允许使用，也不表示独立证据。 */
-  availabilityMeaning: "REVISION_MATCH_ONLY_NOT_CURRENT_PERMISSION";
+  /** 原版本匹配事实独立保留，不因许可变化改写历史。 */
+  revisionAvailability: "CURRENT" | "CHANGED" | "UNAVAILABLE";
+  availabilityMeaning: "REVISION_MATCH_AND_CURRENT_USE_POLICY";
   /** 原 SourcePolicy 的当前使用判定；null 只表示调用方未提供用户上下文，不能当作允许。 */
   currentUse: MaterialUseCurrentUse | null;
   facts: MaterialUseFact[];
@@ -45,7 +46,7 @@ const textHash = (text: string) => createHash("sha256").update(text).digest("hex
 
 /**
  * 当前可用性沿原 SourcePolicy 判定：抑制/撤权/来源链未知只影响“当前能否作为依据”，
- * 历史 facts（绑定、引用、摘录、归入回执）保留原身份，永不因撤权删除。
+  * 历史 facts 保留原身份；原始摘录仍在原记录中，但普通读回不下发受抑制/未知来源正文。
  * SourcePolicy 抛错时保守记为 UNKNOWN，保留原因，不中断整份读回。
  */
 async function currentUseOf(input: { userId: string; projectId: string; missionId: string; sourceId: string; tx: Tx; checkedAt: string }): Promise<MaterialUseCurrentUse> {
@@ -89,8 +90,8 @@ export async function materialUseProjection(tx: Tx, input: { missionId: string; 
     let item = items.get(key(p));
     if (!item) {
       if (items.size >= 8) { sourceLimitReached = true; return; }
-      item = { sourcePointer: p, title: p.id.startsWith("attachment:") ? "项目附件" : "项目记录", availability: "UNAVAILABLE",
-        availabilityMeaning: "REVISION_MATCH_ONLY_NOT_CURRENT_PERMISSION", currentUse: null,
+      item = { sourcePointer: p, title: p.id.startsWith("attachment:") ? "项目附件" : "项目记录", availability: "UNAVAILABLE", revisionAvailability: "UNAVAILABLE",
+        availabilityMeaning: "REVISION_MATCH_AND_CURRENT_USE_POLICY", currentUse: null,
         facts: [], coverage: null, bodyCoverage: "NOT_RECORDED", excerpt: null };
       items.set(key(p), item);
     }
@@ -160,10 +161,15 @@ export async function materialUseProjection(tx: Tx, input: { missionId: string; 
       if (item.availability === "CURRENT") item.excerpt ??= view.source.text.slice(0, 400);
       if (item.availability === "CURRENT" && !item.facts.some(f => f.kind === "SAVED")) item.facts.unshift({ kind: "SAVED", refId: item.sourcePointer.id });
     }
-    // 历史 facts 与 availability 原样保留；当前许可单独判定，撤权不删除历史。
+    // 单独保存版本事实，不能仅新增旧客户端不会读取的 currentUse 字段。
+    item.revisionAvailability = item.availability;
     item.currentUse = input.userId
       ? await currentUseOf({ userId: input.userId, projectId: input.projectId, missionId: input.missionId, sourceId: item.sourcePointer.id, tx, checkedAt })
       : null;
+    if (item.currentUse?.state !== "ALLOWED") {
+      item.availability = "UNAVAILABLE";
+      item.excerpt = null;
+    }
   }
   return {
     schemaVersion: 1 as const, questionId: input.questionId, items: [...items.values()],

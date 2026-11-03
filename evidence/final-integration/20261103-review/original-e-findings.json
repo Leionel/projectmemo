@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "kind": "TRACK_E_INDEPENDENT_FINDINGS",
+  "generatedAt": "2026-11-03T11:47:00+08:00",
+  "timeZone": "Asia/Singapore",
+  "candidate": {
+    "worktree": "D:/Projects/hongmen-final-e-quality-evidence",
+    "branch": "codex/final-e-quality-evidence",
+    "head": "485d485378637e1da3280ed092739d441c8cf749",
+    "headSubject": "鸿蒙：统一弹层关闭入口，重构记忆/理解/行动的信息层级",
+    "trackedModificationsByThisTask": 0
+  },
+  "howFound": {
+    "method": "独立反例测试（新文件，不复用既有测试断言），服务端/纯投影断言，不以 UI 禁用代替",
+    "testFiles": [
+      "tests/final-e/projectionBoundaries.test.ts",
+      "tests/final-e/missionCommandsIsolation.test.ts",
+      "tests/final-e/isolationAndSource.test.ts",
+      "tests/final-e/stopAndLease.test.ts"
+    ],
+    "runReceipt": "evidence/final-e-20261103/logs/independent-tests-run.log",
+    "runResult": "33 cases: 28 PASS / 5 FAIL (the 5 FAIL are the product findings E-F01..E-F04 below; each case recorded separately)",
+    "noSkipNoAssertionWeakening": true
+  },
+  "findings": [
+    {
+      "id": "E-F04",
+      "severity": "P0",
+      "gates": ["Security", "Functional"],
+      "owner": "A (Mission 合同/服务投影负责人)",
+      "status": "CONFIRMED_OPEN",
+      "title": "用户撤回来源后，读回仍把该材料标为 CURRENT 并返回原正文摘录",
+      "contractRefs": [
+        "07_执行准备/03_鸿蒙与独立验收职责.md §1 FS-A05；§4 E-SEC-01、D-SRC-01",
+        "04_工程验收/09_可靠性安全与发布Gate.md §1 Security（源撤回）",
+        "04_工程验收/10_纵向演示与独立验收协议.md §4 R09"
+      ],
+      "source": [
+        "lib/mission/materialUseProjection.ts:108-116（availability 只按 hash 比较，CURRENT 时无条件给出 excerpt）",
+        "lib/mission/readback.ts:153-156（readback 直接用该投影，不查 sourceUse/SourcePolicy）",
+        "app/api/missions/[id]/readback/route.ts:14-18（searchParams 原样透传给 readMissionBack）"
+      ],
+      "repro": "tests/final-e/isolationAndSource.test.ts > R09/FS-A05：提交 mission 域 SUPPRESS_USE 指令后调用 readMissionBack(user, missionId, {sourceId:\"capture:…\"})",
+      "expected": "撤回后该材料不能作为当前可用依据：availability 不得为 CURRENT，且不得把原正文摘录当作当前依据下发（历史可保留但须标不可用/历史）",
+      "actual": "售后服务端执行路径已正确拒绝（validateSources 抛 SOURCE_USE_SUPPRESSED；mission 变 PAUSED/REVIEW_REQUIRED，原 approval 变 OBSOLETE，无 action 写入），但同一读回接口仍返回 availability=\"CURRENT\" 且 excerpt=\"撤回来源的原始记录：私人内容不得继续使用\"",
+      "impact": "认证用户（任务所有者）在明确要求停止使用某材料后，GET /api/missions/{id}/readback 仍下发该材料正文摘录并标为当前依据；属于安全/知情边界不一致。不是外部写入，但违反“撤回后不作为当前证据”的 Gate 语义。",
+      "severityNote": "P0：同一读路径同时是 Web/鸿蒙详情页数据源；修复点集中（投影需接入 sourceUse 状态），但若只修执行路径不修投影，撤回语义在界面层仍不成立。",
+      "proposedAction": "A 在 materialUseProjection 的 availability/excerpt 计算中接入现有 sourceUse/SourcePolicy（SUPPRESSED/UNKNOWN 不得 CURRENT，且不返回正文摘录）；补充 materialUseProjection 级负例。E 复验对应测试转绿后签收。"
+    },
+    {
+      "id": "E-F01",
+      "severity": "P1",
+      "gates": ["Functional", "Evidence"],
+      "owner": "A",
+      "status": "CONFIRMED_OPEN",
+      "title": "停止在途（暂停/取消请求已登记但未结算）在 WorkState 中不可见，仍显示 LEASE_ACTIVE“正在调查”",
+      "contractRefs": [
+        "07_执行准备/03_鸿蒙与独立验收职责.md §4 D-WP? / FS-A02：原 RUNNING 保护保留，明确停止请求尚未结算；真实竞争下不误导恢复",
+        "00_总控/preparation-20261103/WORK_STATE_PROBE.json FS-A02 纯投影记录"
+      ],
+      "source": [
+        "lib/mission/workState.ts:7-12（输入类型无 pauseRequestedAt/cancelRequestedAt）",
+        "lib/mission/workState.ts:33-35（RUNNING 分支只看 leaseUntil）",
+        "lib/mission/missionService.ts:106-107,110（pause/cancel 在 RUNNING 时保留 status=RUNNING 并写 pauseRequestedAt/cancelRequestedAt）"
+      ],
+      "repro": "tests/final-e/projectionBoundaries.test.ts > FS-A02 停止请求在途（2 例）：missionWorkState({status:RUNNING, leaseUntil:+60s, cancelRequestedAt|pauseRequestedAt:now})",
+      "expected": "保留 RUNNING（不提前成功/取消/暂停），并在 reason/action 层明确“停止请求尚未结算”",
+      "actual": "RUNNING / LEASE_ACTIVE / “正在调查，进展来自已保存步骤” — 与没有停止请求时完全相同；服务端 fenced 已抛 STOP_REQUESTED（执行保护存在，显示语义缺失）",
+      "impact": "用户点了取消/暂停后看到仍在调查，可能重复操作或误判未生效；无法从工作态区分“正常在途”和“已请求停止待结算”。",
+      "proposedAction": "A 在 missionWorkState 输入中加入停止请求时间并输出可区分的 reasonCode/文案（服务端保护已存在，不改权限）。"
+    },
+    {
+      "id": "E-F02",
+      "severity": "P1",
+      "gates": ["Functional", "Evidence"],
+      "owner": "A",
+      "status": "CONFIRMED_OPEN",
+      "title": "原终态 SUCCEEDED 与未结算 UNKNOWN 效果不能同时可见：UNKNOWN 覆盖终态",
+      "contractRefs": [
+        "07_执行准备/03_鸿蒙与独立验收职责.md §1 FS-A01：原终态与未结算效果同时可见；取消不显示成功完成",
+        "00_总控/preparation-20261103/WORK_STATE_PROBE.json FS-A01-TERMINAL-UNKNOWN"
+      ],
+      "source": [
+        "lib/mission/workState.ts:28-29（/UNKNOWN/ 错误码优先于 SUCCEEDED/CANCELLED 分支）",
+        "lib/types/workState.ts:9（originalRef 只有 kind/id/version，无原终态字段）"
+      ],
+      "repro": "tests/final-e/projectionBoundaries.test.ts > FS-A01：missionWorkState({status:\"SUCCEEDED\", lastErrorJson:{code:\"EXTERNAL_UNKNOWN\"}})",
+      "expected": "同时表达“已完成/已取消”的原终态与“外部请求未结算”的未知效果",
+      "actual": "phase=UNKNOWN、reasonCode=EXTERNAL_UNKNOWN，序列化结果中没有 SUCCEEDED/完成 痕迹",
+      "impact": "已成功委托遇到未结算外部效果时会被整体显示为“待核对未知”，完成事实被吞掉；反向也可能把完成误读为未完成。",
+      "proposedAction": "A 决定双维度表达（原终态 + 未结算效果）；准备文档字段未冻结，需 A 冻结合同后 C/D 接线。"
+    },
+    {
+      "id": "E-F03",
+      "severity": "P1",
+      "gates": ["Evidence", "Functional"],
+      "owner": "A",
+      "status": "CONFIRMED_OPEN",
+      "title": "readback.observedAt 是读取时刻；无写入时反复 GET 会推进“成功观察时间”",
+      "contractRefs": [
+        "07_执行准备/03_鸿蒙与独立验收职责.md FS-A04：反复 GET 不推进成功观察时间；失败不显示无变化",
+        "04_工程验收/09 §7.1/§7.2（最近成功扫描/失败扫描须可区分）"
+      ],
+      "source": [
+        "lib/mission/readback.ts:163（observedAt: new Date().toISOString()）",
+        "lib/mission/workState.ts:23（真正观察时间来自 planJson.delegation.lastObservedAt）"
+      ],
+      "repro": "tests/final-e/missionCommandsIsolation.test.ts > FS-A04：连续两次 readMissionBack（中间无 Worker/工具写入）",
+      "expected": "读时间与“成功观察时间”分开；重复 GET 不改变成功观察时间",
+      "actual": "两次 GET observedAt 分别为 …09.206Z 与 …09.241Z（missionUpdatedAt 未变）",
+      "impact": "页面刷新会不断刷新“最近观察”，可掩盖 Worker 停止/观察失败；R07 与 Evidence Gate 的“进程心跳≠任务观察”被削弱。",
+      "proposedAction": "A 把 readback.observedAt 改为真实最近成功观察（delegation.lastObservedAt）或另设 readAt 字段；UI 显示需同步。"
+    },
+    {
+      "id": "E-EV01",
+      "severity": "P2",
+      "gates": ["Evidence"],
+      "owner": "LEAD / 主控（准备证据维护者）",
+      "status": "CONFIRMED_OPEN",
+      "title": "准备阶段 HOMEPAGE_BASELINE 不能单独作为官网动态证据（硬编码 + 监听过窄 + 路径指错树）",
+      "contractRefs": [
+        "04_工程验收/10 §4 E-RES-01；§5 层级 A",
+        "00_总控/preparation-20261103/PREPARATION_ACCEPTANCE.json homepage 段"
+      ],
+      "source": [
+        "00_总控/preparation-20261103/capture-homepage.js:33（modelCalls: 0 为硬编码字面量）",
+        "00_总控/preparation-20261103/capture-homepage.js:4-8（privateWrites 只监听 /api/ 且非 GET）",
+        "00_总控/preparation-20261103/capture-homepage.js:15（截图路径指向 D:/Projects/hongmen 主目录，不在本树）"
+      ],
+      "repro": "读脚本即可；另本次 homepage 审计的实际抓包在 evidence/final-e-20261103/homepage/",
+      "expected": "动态证据应来自真实请求清单（含非 GET、非 /api/、模型端点），路径绑定当前候选树",
+      "actual": "modelCalls 未测量（写死 0）；privateWrites 只覆盖 /api/ 非 GET；截图不在本树；无请求清单",
+      "impact": "准备回执中 'privateWriteRequestsObserved: 0 / provider: no provider calls' 不能被单独引用为动态证据；本次审计已补足（见 E-EV02 修复建议）。",
+      "proposedAction": "主控在准备回执中标注该证据为 UI 基线而非动态反例；后续新准备回执改用实测请求清单。未修改准备目录文件。"
+    },
+    {
+      "id": "E-EV02",
+      "severity": "P2",
+      "gates": ["Evidence"],
+      "owner": "LEAD / 主控",
+      "status": "CONFIRMED_OPEN",
+      "title": "准备证据链的绑定强度不足：日志无 SHA/日期/dirty、types 日志为空、回执目录被 gitignore、capturedAt 早于引用回执、109/HAP 属 D 树、protectedFiles 未标 tree",
+      "contractRefs": [
+        "04_工程验收/09 §2/§5；03 §5.3；15_准备执行回执与开工索引.md §7"
+      ],
+      "source": [
+        "docs/FINAL/…/preparation-20261103/baseline-*.log（无 485d485/日期/git rev-parse）",
+        "baseline-types.log 0 字节（空文件 sha256=E3B0C442…）",
+        ".gitignore:45 docs/（git ls-files 规划目录=0）",
+        "PREPARATION_ACCEPTANCE.json capturedAt=11:21:59 早于其引用的 DOCUMENT_CHECK.json(11:24:06)/独立复核(11:26:15)/文件 mtime 11:26:50",
+        "baseline-harmony-retry.log:70 与 baseline-hap.log 的路径全部为 D:/Projects/hongmen-final-d-harmony-native；E 树 harmonyos/entry/build 与 oh_modules 不存在",
+        "PREPARATION_ACCEPTANCE.json protectedFiles 3 个 sha256 只在主目录成立（E 树 3/3 不同但均等于 HEAD blob）"
+      ],
+      "repro": "见 evidence/final-e-20261103/engineering/ENGINEERING_BASELINE.json（13 items / 10 findings / 12 条不可签收理由码）与 ENGINEERING_BASELINE.md",
+      "expected": "证据应绑定 (tree, SHA, date, dirty, DB/provider, 计数分母)，并随候选可追溯",
+      "actual": "内部自洽但外绑不足；准备窗口证据可作“准备基线”，不能给后续新代码/新候选签收",
+      "impact": "对外只能用“准备窗口在 485d485 上跑过”，不能引用为候选 Gate PASS。",
+      "proposedAction": "主控补：在日志头部写入 SHA/日期/dirty、空日志补摘要、证据随候选提交或另建可追溯锚定；本任务未改准备目录。"
+    },
+    {
+      "id": "E-BLK-01",
+      "severity": "BLOCKER",
+      "gates": ["Evidence", "Device"],
+      "owner": "LEAD / D + 受权签名者",
+      "status": "BLOCKED",
+      "title": "候选无可绑定 signed HAP；设备上已存在更早的外部 debug 签名安装；签名安装与设备旅程未验",
+      "contractRefs": [
+        "04_工程验收/09 §6；07_执行准备/03 §3 E-HAP-01/FS-E01、D3"
+      ],
+      "source": [
+        "scripts/harmony-build.ts:57-61（unsigned 优先，双产物并存只报 unsigned hash）",
+        "PREPARATION_ACCEPTANCE.json hap.state=PASS_UNSIGNED_ONLY / installed=false；signedInstall=NOT_RUN"
+      ],
+      "observedFacts": [
+        "E 候选树 0 个 .hap、无 harmonyos/entry/build 与 oh_modules；被接受的 unsigned HAP 在 D 树（8,047,574B / 2D64B3DA…，与回执一致）",
+        "唯一 signed HAP 在主目录 outputs（8,136,834B / EC3E1AF6…，mtime 11:07:29），早于候选 unsigned（11:18:09），ets/modules.abc 字节不同 → 不能绑定候选",
+        "模拟器已装 debug 签名包 xyz.luojiatutor.projectmemo，updateTime 11:07:38（早于候选 HAP），证书指纹与主目录 signed 一致，进程 11:07:47 起运行；非本任务安装",
+        "E/D 树 build-profile signingConfigs=[]，无签名材料；本次未安装/卸载/清数据"
+      ],
+      "expected": "候选绑定 signed HAP（路径/mtime/hash 显式核对）+ 实际安装 + 系统旅程（登录/冷热启动/系统返回/卡片/换号/离线）",
+      "actual": "模拟器只读可达（127.0.0.1:5555 / API24 / x86_64 / emulator，身份与 11:09 复核一致）；交互、真机、signed 安装均无证据",
+      "proposedAction": "主控提供受权签名+安装授权后在候选树构建并显式核对 signed 产物，再补设备旅程；在此之前 Device Gate 保持 BLOCKED，不得用 unsigned 或旧主目录 signed 顶替。"
+    }
+  ],
+  "notFindings": {
+    "note": "以下为本次独立验证通过、但不能外推为整体 Gate PASS",
+    "independentPass": [
+      "R06 丢回包重试：同 requestId 不新增事件/不推进版本；同号不同内容 REQUEST_ID_REUSED 409",
+      "FS-A07 并发版本：旧 expectedVersion 与真并发同版本均只有一个成功，另一个 MISSION_CHANGED 409；planRevision 变化后旧提案 APPROVAL_CHANGED",
+      "R05 旧批准：replan 后 EXPIRED/OBSOLETE，执行拒绝，读回状态如实；expiresAt 等于边界即失效；proposalHash 不符拒绝",
+      "E-SEC-01 执行路径：他人账号读/写/批准 404；撤回来源后 validateSources 抛 SOURCE_USE_SUPPRESSED 且任务暂停、无 action 写入",
+      "R04 跨账号：A 的项目前草稿/原文/追加材料对 B 全部 404，A 自己可读",
+      "R02 来源修订：旧指针读回 CHANGED，不给旧摘录",
+      "同一身份：跨 mission 的 question/approval 读回 404；旧问题标记历史；Action/resultCardId 回执同对象、跨项目行动不混入",
+      "E-RES-01：用户自报只计用户报告、模拟行动不计、独立支持 0；未定价费用为 UNPRICED 非 0",
+      "R07/E-WRK-01/02：心跳新鲜但 release 不匹配→STALE 且不“有效观察”；同轮成功不掩盖持续失败，只有干净整轮清除",
+      "停止在途执行保护：pause/cancel 在 RUNNING 时保持 RUNNING 并登记时间；fenced 抛 STOP_REQUESTED；租约过期换 Worker 后旧租约 LEASE_LOST；上下文变化 CONTEXT_CHANGED"
+    ]
+  }
+}

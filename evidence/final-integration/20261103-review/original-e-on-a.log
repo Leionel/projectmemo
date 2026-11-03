@@ -1,0 +1,67 @@
+
+> projectmemo@0.1.0 test
+> vitest run tests/final-e
+
+
+ RUN  v4.1.12 D:/Projects/hongmen-final-integration
+
+ ❯ tests/final-e/missionCommandsIsolation.test.ts (13 tests | 1 failed) 1393ms
+     × 无写入时反复 GET 不应推进“成功观察时间” 132ms
+ ❯ tests/final-e/isolationAndSource.test.ts (3 tests | 1 failed) 769ms
+     × 用户撤回某来源后：批准执行被服务端拒绝，但读回仍把它当作 CURRENT 可引用正文 221ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/final-e/isolationAndSource.test.ts > R09 / FS-A05 来源撤回：执行路径拒绝，读投影不得继续当当前依据 > 用户撤回某来源后：批准执行被服务端拒绝，但读回仍把它当作 CURRENT 可引用正文
+AssertionError: expected 'CURRENT' not to be 'CURRENT' // Object.is equality
+ ❯ tests/final-e/isolationAndSource.test.ts:198:41
+    196|     expect(item).toBeTruthy();
+    197|     // soft：让回执同时记录“可用性”和“正文摘录”两个实际值，便于定位缺陷范围。
+    198|     expect.soft(item!.availability).not.toBe("CURRENT");
+       |                                         ^
+    199|     expect.soft(item!.excerpt).toBeNull();
+    200|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/final-e/isolationAndSource.test.ts > R09 / FS-A05 来源撤回：执行路径拒绝，读投影不得继续当当前依据 > 用户撤回某来源后：批准执行被服务端拒绝，但读回仍把它当作 CURRENT 可引用正文
+AssertionError: expected '撤回来源的原始记录：私人内容不得继续使用' to be null
+
+- Expected:
+null
+
++ Received:
+"撤回来源的原始记录：私人内容不得继续使用"
+
+ ❯ tests/final-e/isolationAndSource.test.ts:199:32
+    197|     // soft：让回执同时记录“可用性”和“正文摘录”两个实际值，便于定位缺陷范围。
+    198|     expect.soft(item!.availability).not.toBe("CURRENT");
+    199|     expect.soft(item!.excerpt).toBeNull();
+       |                                ^
+    200|   });
+    201| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/final-e/missionCommandsIsolation.test.ts > FS-A04 读回时间与成功观察时间分开 > 无写入时反复 GET 不应推进“成功观察时间”
+AssertionError: expected '2026-11-03T06:08:14.752Z' to be '2026-11-03T06:08:14.706Z' // Object.is equality
+
+Expected: "2026-11-03T06:08:14.706Z"
+Received: "2026-11-03T06:08:14.752Z"
+
+ ❯ tests/final-e/missionCommandsIsolation.test.ts:400:31
+    398|     expect(second.missionUpdatedAt).toBe(first.missionUpdatedAt);
+    399|     // FS-A04 验收：读取动作本身不能成为“成功观察”的时间来源。
+    400|     expect(second.observedAt).toBe(first.observedAt);
+       |                               ^
+    401|   });
+    402| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  2 failed | 2 passed (4)
+      Tests  2 failed | 31 passed (33)
+   Start at  14:08:07
+   Duration  14.72s (transform 4.93s, setup 0ms, import 10.18s, tests 2.73s, environment 0ms)
+

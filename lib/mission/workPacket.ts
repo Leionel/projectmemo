@@ -284,7 +284,7 @@ export function buildMissionWorkPacket(input: WorkPacketInput, now: Date = new D
   const materialUses = input.basis?.materialUses ?? null;
   const evidenceReviews = input.basis?.evidenceReviews ?? null;
   const materialItems: WorkPacketMaterialUseItem[] = materialUses?.items ?? [];
-  const sourceUnavailable = materialItems.some(item => item.availability === "UNAVAILABLE" || (item.currentUse ? item.currentUse.state !== "ALLOWED" : false));
+  const sourceUnavailable = materialItems.some(item => item.availability !== "CURRENT" || item.currentUse?.state !== "ALLOWED");
   const currentUsePolicy: "SOURCE_POLICY_APPLIED" | "NOT_APPLIED" = input.basis?.currentUsePolicy
     ?? (materialItems.some(item => item.currentUse !== undefined) ? "SOURCE_POLICY_APPLIED" : "NOT_APPLIED");
   // NO_CHANGE 只是最近一次成功观察的结论：必须已有成功观察、“无变化”事件不早于它，且没有来源不可用。
@@ -433,8 +433,8 @@ export function buildMissionWorkPacket(input: WorkPacketInput, now: Date = new D
     true, latestOutput ? { kind: "OUTPUT", id: latestOutput.id } : { kind: "MISSION", id: mission.missionId }));
   // 来源阻断与终态无关：历史留痕保留，但当前是否可继续作为依据必须展开。
   for (const item of materialItems) {
-    if (item.availability === "CHANGED") blockers.push(blocker("SOURCE", "SOURCE_CHANGED", "原资料修订已变化，历史留痕保留；当前依据需重新核对", null, true, { kind: "SOURCE", id: item.sourcePointer.id }));
-    else if (item.availability === "UNAVAILABLE") blockers.push(blocker("SOURCE", "SOURCE_UNAVAILABLE", "原资料当前不可用，历史摘录仍按原身份保留；不能当作当前已核对", null, false, { kind: "SOURCE", id: item.sourcePointer.id }));
+    if ((item.revisionAvailability ?? item.availability) === "CHANGED") blockers.push(blocker("SOURCE", "SOURCE_CHANGED", "原资料修订已变化，历史留痕保留；当前依据需重新核对", null, true, { kind: "SOURCE", id: item.sourcePointer.id }));
+    if (item.availability === "UNAVAILABLE") blockers.push(blocker("SOURCE", "SOURCE_UNAVAILABLE", "原资料当前不可用，历史身份仍保留；不能当作当前已核对", null, false, { kind: "SOURCE", id: item.sourcePointer.id }));
     if (item.currentUse?.state === "SUPPRESSED") blockers.push(blocker("SOURCE", "CURRENT_USE_SUPPRESSED", "当前来源许可已被撤回；历史留痕保留，不能作为当前独立证据", null, true, { kind: "SOURCE", id: item.sourcePointer.id }));
     else if (item.currentUse?.state === "UNKNOWN") blockers.push(blocker("SOURCE", "CURRENT_USE_UNKNOWN", "当前来源链未知；不能作为当前独立证据", null, true, { kind: "SOURCE", id: item.sourcePointer.id }));
   }
@@ -516,7 +516,7 @@ export function buildMissionWorkPacket(input: WorkPacketInput, now: Date = new D
   const done = { recentSteps, latestOutput, progress, actionReceipts, note: doneNote, coverage: { limit: stepLimit, truncated: stepsTruncated } };
 
   const basisNote = ["依据只取原资料使用与证据审查投影；历史留痕保留原身份，当前可用不等于独立支持。",
-    currentUsePolicy === "NOT_APPLIED" ? "本次未应用来源许可判断：availability=CURRENT 只表示版本匹配，不能当作当前可用或独立证据。" : "",
+    currentUsePolicy === "NOT_APPLIED" ? "本次未应用来源许可判断：不能将旧服务的版本匹配记录当作当前可用或独立证据。" : "",
     materialUses === null ? "本次没有读取资料使用窗口，未找到记录不等于从未使用。" : "",
     evidenceReviews === null ? "本次没有读取证据审查窗口，未找到记录不等于从未发生。" : "",
     canShowNoChange ? "" : observationState === "FAILED_LAST" ? "最近观察失败，不能据此显示来源已核对或无变化。" : ""].filter(Boolean).join(" ");

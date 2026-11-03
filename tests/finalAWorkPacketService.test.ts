@@ -351,7 +351,12 @@ describe("A2 FS-A03/04/05/06/07 服务修复", () => {
     expect(second.workPacket!.observations.state).toBe("OBSERVED");
     // 失败晚于成功观察：不得显示“无变化”。
     const failedAt = new Date(Date.now() - 1_000);
-    await addEvent(mission.id, "EXECUTION_STOPPED", { code: "TOOL_FAILED" }, failedAt);
+    const observationStep = await db.agentMissionStep.create({ data: {
+      missionId: mission.id, ordinal: 1, planRevision: mission.planRevision, toolName: "read_repository_ci", toolVersion: "1",
+      canonicalInputJson: json({}), inputHash: "declared-observation-failure", readSetJson: json([]),
+      protocolJson: json({ delegationCycle: "fs-a04-cycle" }), status: "FAILED",
+    } });
+    await addEvent(mission.id, "EXECUTION_STOPPED", { code: "TOOL_FAILED", phase: "TOOL", purpose: "DECLARED_OBSERVATION", stepId: observationStep.id }, failedAt);
     const failed = await withDelegation(() => readMissionBack(owner.userId, mission.id));
     expect(failed.workPacket!.observations.state).toBe("FAILED_LAST");
     expect(failed.workPacket!.observations.lastFailedAt).toBe(failedAt.toISOString());
@@ -361,6 +366,29 @@ describe("A2 FS-A03/04/05/06/07 服务修复", () => {
     expect(failed.workPacket!.done.note).not.toContain("无新变化");
   });
 
+  it("成功观察后的停止/预算/模型格式错误与旧不明失败不冒充观察失败", async () => {
+    const owner = await ownerProject("not-observation-failure");
+    const observedAt = new Date(Date.now() - 120_000);
+    const mission = await createMissionRow(owner, { status: "WAITING_INPUT",
+      planJson: { delegation: { lastObservedAt: observedAt.toISOString() } },
+      continuationPolicyJson: boundedPolicy(new Date(Date.now() + 3_600_000)),
+      waitStateJson: { resolved: true, waitingFor: "OBSERVATION" } });
+    await addEvent(mission.id, "INVESTIGATION_NO_NEW_INFORMATION", { changed: false });
+    for (const [type, payload] of [
+      ["EXECUTION_STOPPED", { code: "USER_STOP", phase: "TOOL", purpose: "DECLARED_OBSERVATION", recovery: { kind: "STOP_REQUESTED" } }],
+      ["EXECUTION_STOPPED", { code: "BUDGET_EXHAUSTED", phase: "TOOL", purpose: "DECLARED_OBSERVATION" }],
+      ["MODEL_PROTOCOL_ERROR", { code: "MODEL_PROTOCOL_ERROR", phase: "DECISION", category: "MODEL_PROTOCOL" }],
+      ["EXECUTION_STOPPED", { code: "TOOL_FAILED" }],
+    ] as const) {
+      await addEvent(mission.id, type, payload);
+      const back = await withDelegation(() => readMissionBack(owner.userId, mission.id));
+      expect(back.observation).toMatchObject({ state: "OBSERVED", lastSuccessfulAt: observedAt.toISOString(), lastFailedAt: null });
+      expect(back.workPacket!.observations.lastFailedAt).toBeNull();
+      expect(back.workPacket!.next.note).not.toContain("观察失败");
+      expect(await db.agentMissionEvent.count({ where: { missionId: mission.id, type } })).toBeGreaterThan(0);
+    }
+  });
+
   it("FS-A05：SUPPRESS_USE 后当前使用 SUPPRESSED、历史 facts 保留、不称独立证据", async () => {
     const owner = await ownerProject("fs-a05");
     const mission = await createMissionRow(owner, { status: "WAITING_INPUT",
@@ -368,7 +396,7 @@ describe("A2 FS-A03/04/05/06/07 服务修复", () => {
     const material = await bindMaterial(owner, mission.id, "q-suppress");
     const before = await readMissionBack(owner.userId, mission.id);
     const beforeItem = before.materialUses.items.find(item => item.sourcePointer.id === material.pointer.id)!;
-    expect(beforeItem).toMatchObject({ availability: "CURRENT", availabilityMeaning: "REVISION_MATCH_ONLY_NOT_CURRENT_PERMISSION" });
+    expect(beforeItem).toMatchObject({ availability: "CURRENT", revisionAvailability: "CURRENT", availabilityMeaning: "REVISION_MATCH_AND_CURRENT_USE_POLICY" });
     expect(beforeItem.currentUse).toMatchObject({ state: "ALLOWED", policy: "SOURCE_POLICY_V1", appliesTo: "CURRENT_USE_ONLY" });
     expect(beforeItem.facts.map(fact => fact.kind)).toEqual(expect.arrayContaining(["SAVED", "CANDIDATE", "BOUND"]));
     expect(before.workPacket!.basis.currentUsePolicy).toBe("SOURCE_POLICY_APPLIED");
@@ -383,7 +411,12 @@ describe("A2 FS-A03/04/05/06/07 服务修复", () => {
     const afterItem = after.materialUses.items.find(item => item.sourcePointer.id === material.pointer.id)!;
     expect(afterItem.currentUse).toMatchObject({ state: "SUPPRESSED", independentEvidence: false, reason: expect.any(String) });
     expect(afterItem.facts).toEqual(beforeItem.facts);
-    expect(afterItem.availability).toBe(beforeItem.availability);
+    expect(afterItem).toMatchObject({ availability: "UNAVAILABLE", revisionAvailability: beforeItem.revisionAvailability, excerpt: null, sourcePointer: material.pointer });
+    // 模拟旧 Web/ArkTS：只认识旧字段，不能靠新增 currentUse 提示才知道当前不可用。
+    const legacy = JSON.parse(JSON.stringify(afterItem)) as { availability: string; excerpt: string | null; sourcePointer: { id: string; hash: string } };
+    expect(legacy.availability).toBe("UNAVAILABLE");
+    expect(legacy.excerpt).toBeNull();
+    expect(legacy.sourcePointer).toEqual(material.pointer);
     expect(after.workPacket!.blockers.some(blocker => blocker.code === "CURRENT_USE_SUPPRESSED" && blocker.blocksActions)).toBe(true);
     expect(after.workPacket!.next.primaryAction!.requires.requiredSourceRevisions).toEqual([]);
     expect(after.workPacket!.identity.controlVersion).not.toBe(beforeControlVersion);
@@ -396,8 +429,25 @@ describe("A2 FS-A03/04/05/06/07 服务修复", () => {
     const ghost = await readMissionBack(ghostOwner.userId, ghostMission.id);
     const ghostItem = ghost.materialUses.items.find(item => item.sourcePointer.id === ghostPointer.id)!;
     expect(ghostItem.currentUse).toMatchObject({ state: "UNKNOWN", independentEvidence: false });
+    expect(ghostItem).toMatchObject({ availability: "UNAVAILABLE", revisionAvailability: "UNAVAILABLE", excerpt: null, sourcePointer: ghostPointer });
     expect(ghostItem.facts.map(fact => fact.kind)).toEqual(["CANDIDATE"]);
     expect(ghost.workPacket!.blockers.some(blocker => blocker.code === "CURRENT_USE_UNKNOWN")).toBe(true);
+  });
+
+  it("来源删除后 UNKNOWN 不从历史绑定回执重新下发正文，原身份与 facts 保留", async () => {
+    const owner = await ownerProject("unknown-legacy-body");
+    const mission = await createMissionRow(owner, { status: "WAITING_INPUT", waitStateJson: { questionId: "q-deleted", waitingFor: "USER" } });
+    const material = await bindMaterial(owner, mission.id, "q-deleted", "不可从历史绑定重新发布的正文");
+    const before = await readMissionBack(owner.userId, mission.id);
+    const beforeItem = before.materialUses.items.find(item => item.sourcePointer.id === material.pointer.id)!;
+    expect(beforeItem.excerpt).toBe("不可从历史绑定重新发布的正文");
+    await db.capture.delete({ where: { id: material.capture.id } });
+    const after = await readMissionBack(owner.userId, mission.id);
+    const item = JSON.parse(JSON.stringify(after.materialUses.items.find(value => value.sourcePointer.id === material.pointer.id)!));
+    expect(item.currentUse).toMatchObject({ state: "UNKNOWN", independentEvidence: false });
+    expect(item).toMatchObject({ availability: "UNAVAILABLE", revisionAvailability: "UNAVAILABLE", excerpt: null, sourcePointer: material.pointer });
+    expect(item.facts.map((fact: { kind: string }) => fact.kind)).toEqual(expect.arrayContaining(["CANDIDATE", "BOUND"]));
+    expect(after.workPacket!.basis.materialUses!.items.find(value => value.sourcePointer.id === material.pointer.id)!.excerpt).toBeNull();
   });
 
   it("FS-A05/FS-A07：许可变化但 mission.version 未变时，工作包仍要求重核并携带 controlVersion/来源修订", async () => {

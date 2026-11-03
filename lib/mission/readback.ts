@@ -33,7 +33,13 @@ const iso = (v: unknown): string | null => {
 /** 观察事件的有界窗口：最近 21 条原事件，未找到只表示覆盖不足。 */
 const OBSERVATION_EVENT_TYPES = ["INVESTIGATION_NO_NEW_INFORMATION", "INVESTIGATION_OBSERVATION_CHANGED", "EXECUTION_STOPPED", "MODEL_PROTOCOL_ERROR"] as const;
 const SUCCESS_OBSERVATION_EVENT_TYPES = ["INVESTIGATION_NO_NEW_INFORMATION", "INVESTIGATION_OBSERVATION_CHANGED"] as const;
-const FAILURE_EVENT_TYPES = ["EXECUTION_STOPPED", "MODEL_PROTOCOL_ERROR"] as const;
+/** 只有明确声明的观察工具失败才是观察失败；停止、额度和模型错误保留在执行审计中。 */
+function failedDeclaredObservation(event: { type: string; payloadJson: unknown }): boolean {
+  const payload = record(event.payloadJson);
+  return event.type === "EXECUTION_STOPPED" && payload.purpose === "DECLARED_OBSERVATION" && payload.phase === "TOOL"
+    && payload.category !== "MODEL_PROTOCOL" && record(payload.recovery).kind !== "STOP_REQUESTED"
+    && !/(STOP|CANCEL|BUDGET|QUOTA)/.test(String(payload.code ?? ""));
+}
 /** 原累计用量的规范键；缺失记为 null（未知），不补 0、不因重启/跨日清零。 */
 const USAGE_KEYS = ["models", "tools", "searches", "fetches", "browserRequests", "browserBytes", "calendarRequests", "externalWrites", "metadataRequests", "activeMs", "reservedOutputTokens", "inputTokens", "outputTokens", "unknownCalls"] as const;
 
@@ -200,12 +206,12 @@ async function collectMissionBack(
   // FS-A04：观察时间只从原委托记录/原事件的有界窗口派生，读取绝不推进成功观察时间。
   const observationRows = await tx.agentMissionEvent.findMany({
     where: { missionId: id, type: { in: [...OBSERVATION_EVENT_TYPES] } },
-    orderBy: { seq: "desc" }, take: 21, select: { id: true, type: true, seq: true, createdAt: true },
+    orderBy: { seq: "desc" }, take: 21, select: { id: true, type: true, seq: true, createdAt: true, payloadJson: true },
   });
   const delegation = record(record(m.planJson).delegation);
   const latestSuccessObservation = observationRows.find(e => (SUCCESS_OBSERVATION_EVENT_TYPES as readonly string[]).includes(e.type));
   const latestNoNewInformation = observationRows.find(e => e.type === "INVESTIGATION_NO_NEW_INFORMATION");
-  const latestFailure = observationRows.find(e => (FAILURE_EVENT_TYPES as readonly string[]).includes(e.type));
+  const latestFailure = observationRows.find(failedDeclaredObservation);
   const observationFacts = {
     lastSuccessfulAt: iso(delegation.lastObservedAt) ?? latestSuccessObservation?.createdAt.toISOString() ?? null,
     lastFailedAt: latestFailure?.createdAt.toISOString() ?? null,
@@ -362,7 +368,7 @@ async function collectMissionBack(
   };
 }
 
-/** 事务外轻量复查：只比版本字段，不重读业务事实；不一致由调用方整包重试。 */
+/** 第二只读事务的版本复查；不一致由调用方整包重试。 */
 function snapshotAdvanced(snapshot: SnapshotVersionFields, current: SnapshotVersionFields | null): boolean {
   if (!current) return true;
   return current.version !== snapshot.version || current.status !== snapshot.status
@@ -382,7 +388,7 @@ function observationOf(facts: { lastSuccessfulAt: string | null; lastFailedAt: s
  * 同一委托的只读四问读回。
  *
  * 原 readback 字段与语义保持不变；新增 readAt/observation 与可选 workPacket（旧客户端忽略）。
- * 事实在同一 db.$transaction 内收集（含 responsibility 复用同一快照）；事务外只做一次版本复查：
+ * 事实在同一 db.$transaction 内收集；第二只读事务重新鉴权并比较 Mission 与 controlVersion：
  * - 快照未被推进 → VERSION_STABLE；
  * - 已推进且重试 <2 → 整包重读并标记 RETRIED（retries 计数）；
  * - 重试后仍推进 → 返回本次内部一致快照并标记 VERSION_ADVANCED，主操作 requires 携带全量版本，
@@ -401,22 +407,41 @@ export async function readMissionBack(
   for (;;) {
     now = new Date();
     collected = await db.$transaction(tx => collectMissionBack(tx, userId, id, input, now), { timeout: 10_000 });
-    const current = await db.agentMission.findUnique({ where: { id }, select: SNAPSHOT_SELECT });
-    advanced = snapshotAdvanced(collected.mission, current);
+    const current = await db.$transaction(async tx => {
+      // 责任读取会重检 owner/项目角色；撤权后不能返回上一事务的私有快照。
+      const responsibility = await readMissionResponsibility(userId, id, tx);
+      const mission = await tx.agentMission.findUnique({ where: { id }, select: SNAPSHOT_SELECT });
+      return { mission, controlVersion: responsibility.controlVersion };
+    }, { timeout: 10_000 });
+    const checkedAt = Date.now();
+    const boundaryCrossed = [
+      collected.packetBase.responsibility?.permissionExpiresAt,
+      collected.packetBase.responsibility?.deadline,
+      collected.packetBase.responsibility?.personalMemoryNextBoundary,
+      collected.workState.nextBoundary,
+    ].some(value => value && Date.parse(value) > +now && Date.parse(value) <= checkedAt);
+    const authorityAdvanced = collected.packetBase.responsibility?.controlVersion !== current.controlVersion;
+    advanced = snapshotAdvanced(collected.mission, current.mission) || authorityAdvanced || boundaryCrossed;
+    if (authorityAdvanced && retries >= 2) {
+      throw new AppError("WORK_PACKET_AUTHORITY_CHANGED", "读取期间来源或权限持续变化，请重新读取原委托后核对", 409);
+    }
     if (!advanced || retries >= 2) break;
     retries += 1;
   }
   const consistency = advanced ? "VERSION_ADVANCED" as const : retries === 0 ? "VERSION_STABLE" as const : "RETRIED" as const;
-  const readAt = now.toISOString();
+  // 发布时再按当前时间评估边界；成功观察时间仍来自原记录，不随读取推进。
+  const evaluatedAt = new Date();
+  const readAt = evaluatedAt.toISOString();
   let workPacket: WorkPacket | undefined;
   try {
-    workPacket = buildMissionWorkPacket({ ...collected.packetBase, snapshot: { consistency, retries, checkedAt: readAt } }, now);
+    workPacket = buildMissionWorkPacket({ ...collected.packetBase, snapshot: { consistency, retries, checkedAt: readAt } }, evaluatedAt);
   } catch {
     // 旧客户端仍可退回原详情；缺失 workPacket 不等于默认成功事实。
     workPacket = undefined;
   }
   return {
     ...collected.readback,
+    observedAt: readAt,
     readAt,
     observation: workPacket?.observations ?? observationOf(collected.observationFacts, readAt),
     ...(workPacket ? { workPacket } : {}),

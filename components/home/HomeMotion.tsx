@@ -15,29 +15,8 @@ export function HomeMotion() {
     if (!("IntersectionObserver" in window)) return;
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (reduceMotion.matches) {
-      root.setAttribute("data-motion", "reduced");
-      return;
-    }
-
-    root.setAttribute("data-motion", "on");
-
     const observers: IntersectionObserver[] = [];
     const drawables = Array.from(root.querySelectorAll<HTMLElement>("[data-draw]"));
-    if (drawables.length) {
-      const drawObserver = new IntersectionObserver(
-        (entries, observer) => {
-          for (const entry of entries) {
-            if (!entry.isIntersecting) continue;
-            entry.target.setAttribute("data-drawn", "true");
-            observer.unobserve(entry.target);
-          }
-        },
-        { rootMargin: "0px 0px -10% 0px", threshold: 0.15 },
-      );
-      drawables.forEach((element) => drawObserver.observe(element));
-      observers.push(drawObserver);
-    }
 
     const hero = root.querySelector<HTMLElement>("[data-hero]");
     const rail = root.querySelector<HTMLElement>("[data-rail]");
@@ -46,11 +25,13 @@ export function HomeMotion() {
     const stackedRail = window.matchMedia("(max-width: 720px)");
 
     let frame = 0;
+    let enabled = false;
     const clamp = (value: number, min: number, max: number) =>
       Math.min(max, Math.max(min, value));
 
     const update = () => {
       frame = 0;
+      if (!enabled || reduceMotion.matches) return;
       const viewport = window.innerHeight;
 
       if (progressBar) {
@@ -89,21 +70,62 @@ export function HomeMotion() {
     };
 
     const requestUpdate = () => {
-      if (frame) return;
+      if (!enabled || reduceMotion.matches || frame) return;
       frame = window.requestAnimationFrame(update);
     };
 
-    window.addEventListener("scroll", requestUpdate, { passive: true });
-    window.addEventListener("resize", requestUpdate);
-    stackedRail.addEventListener("change", requestUpdate);
-    update();
-
-    return () => {
+    const stopMotion = () => {
+      enabled = false;
       window.cancelAnimationFrame(frame);
+      frame = 0;
       window.removeEventListener("scroll", requestUpdate);
       window.removeEventListener("resize", requestUpdate);
       stackedRail.removeEventListener("change", requestUpdate);
-      observers.forEach((observer) => observer.disconnect());
+      observers.splice(0).forEach((observer) => observer.disconnect());
+      hero?.style.setProperty("--hero-shift", "0");
+      rail?.style.setProperty("--rail-progress", "0");
+      railSteps.forEach((step) => step.removeAttribute("data-active"));
+      if (progressBar) {
+        progressBar.style.transform = "scaleX(0)";
+        progressBar.removeAttribute("data-visible");
+      }
+    };
+
+    const applyPreference = () => {
+      if (reduceMotion.matches) {
+        stopMotion();
+        root.setAttribute("data-motion", "reduced");
+        return;
+      }
+      if (enabled) return;
+      enabled = true;
+      root.setAttribute("data-motion", "on");
+      if (drawables.length) {
+        const drawObserver = new IntersectionObserver(
+          (entries, observer) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              entry.target.setAttribute("data-drawn", "true");
+              observer.unobserve(entry.target);
+            }
+          },
+          { rootMargin: "0px 0px -10% 0px", threshold: 0.15 },
+        );
+        drawables.forEach((element) => drawObserver.observe(element));
+        observers.push(drawObserver);
+      }
+      window.addEventListener("scroll", requestUpdate, { passive: true });
+      window.addEventListener("resize", requestUpdate);
+      stackedRail.addEventListener("change", requestUpdate);
+      update();
+    };
+
+    reduceMotion.addEventListener("change", applyPreference);
+    applyPreference();
+
+    return () => {
+      reduceMotion.removeEventListener("change", applyPreference);
+      stopMotion();
       root.removeAttribute("data-motion");
     };
   }, []);

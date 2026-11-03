@@ -1,0 +1,3 @@
+evidence/final-integration/20261103-review/original-e-tests/isolationAndSource.test.ts(10,17): error TS2307: Cannot find module '../helpers/continuityDatabase' or its corresponding type declarations.
+evidence/final-integration/20261103-review/original-e-tests/missionCommandsIsolation.test.ts(11,17): error TS2307: Cannot find module '../helpers/continuityDatabase' or its corresponding type declarations.
+evidence/final-integration/20261103-review/original-e-tests/stopAndLease.test.ts(11,17): error TS2307: Cannot find module '../helpers/continuityDatabase' or its corresponding type declarations.

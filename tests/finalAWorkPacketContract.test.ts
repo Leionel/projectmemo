@@ -500,6 +500,31 @@ describe("覆盖说明：未找到 ≠ 从未发生", () => {
     expect(packet.done.note).not.toContain("无新变化");
     expect(packet.blockers).toContainEqual(expect.objectContaining({ kind: "SOURCE", code: "SOURCE_UNAVAILABLE" }));
   });
+
+  it.each([
+    { availability: "CHANGED" as const, currentUse: currentAllowed },
+    { availability: "CURRENT" as const, currentUse: { ...currentAllowed, state: "UNKNOWN" as const } },
+    { availability: "CURRENT" as const, currentUse: null },
+  ])("修订变化或未知许可不延用旧无变化结论：%j", ({ availability, currentUse }) => {
+    const packet = build({ basis: {
+      questionId: "q-1", materialUses: materialUsesFixture([materialItem({ id: "capture:changed", availability, currentUse })]),
+      evidenceReviews: null, currentUsePolicy: "SOURCE_POLICY_APPLIED",
+    } });
+    expect(packet.observations.state).toBe("OBSERVED");
+    expect(packet.observations.lastNoNewInformationAt).not.toBeNull();
+    expect(packet.next.note).not.toContain("未发现新变化");
+    expect(packet.done.note).not.toContain("无新变化");
+    if (availability === "CHANGED") expect(packet.blockers).toContainEqual(expect.objectContaining({ code: "SOURCE_CHANGED" }));
+  });
+
+  it("许可掩蔽为不可用仍保留原修订变化阻断", () => {
+    const packet = build({ basis: {
+      questionId: "q-1", materialUses: materialUsesFixture([materialItem({ id: "capture:suppressed-changed", availability: "UNAVAILABLE", revisionAvailability: "CHANGED", excerpt: null, currentUse: { ...currentAllowed, state: "SUPPRESSED" } })]),
+      evidenceReviews: null, currentUsePolicy: "SOURCE_POLICY_APPLIED",
+    } });
+    expect(packet.blockers.map(value => value.code)).toEqual(expect.arrayContaining(["SOURCE_CHANGED", "CURRENT_USE_SUPPRESSED"]));
+    expect(packet.next.note).not.toContain("未发现新变化");
+  });
 });
 
 describe("时间跨界：主操作变重核，并保留全量版本要求", () => {

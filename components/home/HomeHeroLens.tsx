@@ -12,9 +12,9 @@ import { exampleProject } from "./homeExample";
 import styles from "@/app/home.module.css";
 
 const stages = [
-  { id: "away", label: "离开时" },
-  { id: "during", label: "期间" },
-  { id: "back", label: "回来后" },
+  { id: "away", label: "离开时", status: "无需操作" },
+  { id: "during", label: "期间", status: "核对示例" },
+  { id: "back", label: "回来后", status: "等你确认" },
 ] as const;
 
 type StageId = (typeof stages)[number]["id"];
@@ -154,7 +154,7 @@ export function HomeHeroLens() {
         </div>
         <span className={styles.lensStatus}>
           <span className={styles.statusDot} aria-hidden="true" />
-          等你确认
+          {stages[stageIndex].status}
         </span>
       </header>
 

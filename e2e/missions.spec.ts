@@ -30,7 +30,7 @@ test("same Mission survives reload, receives metric, auto continues, waits for a
  await panel.getByRole("button",{name:"批准创建行动",exact:true}).click();await expect.poll(()=>fixture("state",id).approvals.filter(a=>a.status==="APPROVED").length).toBe(1);await slice(id,{kind:"ask",question:"不应在创建片段额外调用模型",missing:"PRIVATE"});await expect(panel.getByRole("link",{name:"已创建行动：核对实验条件后确认汇报"})).toBeVisible();expect(fixture("state",id).actions.filter(a=>a.title==="核对实验条件后确认汇报"&&a.status==="TODO")).toHaveLength(1);
  await panel.getByRole("button",{name:"预览归入项目周报",exact:true}).click();await expect(panel.getByText("归入只保存成果，不确认项目事实。",{exact:true})).toBeVisible();await panel.getByRole("button",{name:"确认保存并向项目成员共享",exact:true}).click();await expect(panel.getByText(/已归入项目周报，成果编号/)).toBeVisible();const receipt=fixture("state",id).receipt!;
  await slice(id,{kind:"finish",outputId:receipt.outputId});await expect(panel.getByText("委托条件已验收",{exact:true}).first()).toBeVisible();
- const readback=panel.getByRole('region',{name:'原任务与完成回执'});
+ const readback=panel.getByRole('region',{name:'原任务当前工作包与完成回执'});
  await readback.getByText(/^本次用量 · 模型/).click();
  await expect(readback.getByText('费用尚不能核算：这些记录未绑定费率与账单。',{exact:true})).toBeVisible();
  await expect(readback.getByText(/已记录输入 .* token · 输出 .* token/)).toBeVisible();

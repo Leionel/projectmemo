@@ -1,0 +1,222 @@
+{
+  "sample": "a2-legacy-server-without-workpacket",
+  "label": "旧服务缺 workPacket 变体",
+  "generatedAt": "2026-11-03T04:13:17.882Z",
+  "command": "npm.cmd exec -- tsx scripts/final-a/generate-samples.ts",
+  "baseSha": "3a62dcefa0a5ff357ae5afbb301598cd4b672d0c",
+  "headSha": "3a62dcefa0a5ff357ae5afbb301598cd4b672d0c",
+  "a1ContractCommit": "f267aec674dbb9c28f6fa79bf428816016d2bee5",
+  "a1FixCommit": "b243f62a2970ffc1bd070ba6c2933690c230d72f",
+  "variant": "LEGACY_SERVER_WITHOUT_WORKPACKET",
+  "note": "由新服务真实响应移除下列增量字段得到，模拟旧后端/旧缓存；客户端缺 workPacket 时必须退回原详情，不得构造默认成功事实。",
+  "removedPaths": [
+    "workPacket",
+    "readAt",
+    "observation",
+    "workState.terminal",
+    "workState.unsettledEffect",
+    "workState.stopRequest",
+    "materialUses.items[].currentUse",
+    "materialUses.items[].availabilityMeaning",
+    "materialUses.coverage.eventsInspected",
+    "materialUses.coverage.stepsInspected",
+    "materialUses.coverage.outputsInspected",
+    "materialUses.coverage.receiptsInspected",
+    "materialUses.coverage.runLimit",
+    "materialUses.coverage.runsInspected",
+    "materialUses.coverage.runScope",
+    "callCoverage.runScope"
+  ],
+  "readback": {
+    "workState": {
+      "phase": "QUEUED",
+      "nextActor": "AGENT",
+      "requiresUser": false,
+      "reasonCode": "DAILY_BUDGET_WAITING",
+      "reasonText": "今日调用额度已用完，等待许可时区的次日；累计用量保留",
+      "actionLabel": "查看下次检查时间",
+      "originalRef": {
+        "kind": "MISSION",
+        "id": "cmw06a7qa001fis8o40hfae1z",
+        "version": 1
+      },
+      "exactQuestionRef": null,
+      "exactApprovalRef": null,
+      "checkedAt": "2026-11-03T04:13:19.140Z",
+      "observedAt": null,
+      "nextCheckAt": "2026-11-03T05:13:19.137Z",
+      "nextBoundary": null,
+      "freshness": "FRESH"
+    },
+    "schemaVersion": 1,
+    "missionId": "cmw06a7qa001fis8o40hfae1z",
+    "projectId": "cmw06a7q8001dis8oa2xzupn9",
+    "missionVersion": 1,
+    "missionStatus": "READY",
+    "observedAt": "2026-11-03T04:13:19.140Z",
+    "missionUpdatedAt": "2026-11-03T04:13:19.139Z",
+    "materialUses": {
+      "schemaVersion": 1,
+      "questionId": null,
+      "items": [],
+      "coverage": {
+        "eventLimit": 80,
+        "eventsTruncated": false,
+        "stepLimit": 40,
+        "stepsTruncated": false,
+        "outputLimit": 20,
+        "outputsTruncated": false,
+        "receiptsTruncated": false,
+        "projectRunLimit": 40,
+        "runsTruncated": false,
+        "sourceLimit": 8,
+        "sourceLimitReached": false,
+        "mapping": "DIRECT_SOURCE_POINTERS_ONLY"
+      }
+    },
+    "evidenceReviews": {
+      "items": [],
+      "truncated": false
+    },
+    "reviewProgress": {
+      "schemaVersion": 1,
+      "classes": [
+        {
+          "key": "executed",
+          "label": "已执行",
+          "count": 0,
+          "note": "工具步骤确实运行过；不等于结论成立或目标达成"
+        },
+        {
+          "key": "observed",
+          "label": "已观察",
+          "count": 0,
+          "note": "执行时带回了可引用来源"
+        },
+        {
+          "key": "independentlySupported",
+          "label": "已独立支持",
+          "count": 0,
+          "note": "逐句核对支持 0 条；当前未提供独立核验回执"
+        },
+        {
+          "key": "userReported",
+          "label": "用户报告",
+          "count": 0,
+          "note": "行动已完成并留下复盘回执；仍是用户报告"
+        },
+        {
+          "key": "counterExamples",
+          "label": "反例",
+          "count": 0,
+          "note": "原文与主张冲突，保留冲突"
+        },
+        {
+          "key": "unknown",
+          "label": "未知",
+          "count": 0,
+          "note": "未核验或信息不足，不当作失败或没有"
+        }
+      ],
+      "counts": {
+        "executed": {
+          "steps": 0,
+          "actions": 0
+        },
+        "observed": {
+          "steps": 0
+        },
+        "independentlySupported": {
+          "claims": 0
+        },
+        "textuallySupported": {
+          "claims": 0
+        },
+        "userReported": {
+          "actionReceipts": 0
+        },
+        "counterExamples": {
+          "claims": 0
+        },
+        "unknown": {
+          "claims": 0,
+          "steps": 0
+        }
+      },
+      "policy": "PROJECTION_FROM_EXISTING_STEPS_OUTPUTS_ACTIONS_RECEIPTS_NOT_REALITY_COMPLETION",
+      "coverage": {
+        "outputsInspected": 0,
+        "stepsInspected": 0,
+        "actionsInspected": 0
+      }
+    },
+    "callCoverage": {
+      "schemaVersion": 1,
+      "scope": "MISSION_AGENTRUN_AND_STEP_RECEIPTS",
+      "inspected": {
+        "agentRuns": 0,
+        "steps": 0,
+        "limit": 20,
+        "truncated": false
+      },
+      "models": {
+        "total": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "partial": 0,
+        "fallback": 0,
+        "unknown": 0,
+        "usageRecorded": 0,
+        "usageUnknown": 0
+      },
+      "tools": {
+        "total": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "failedCodes": [],
+      "dedupe": "AGENTRUN_ID_AND_STEP_ID",
+      "pricing": {
+        "state": "UNPRICED",
+        "estimate": null,
+        "billedAmount": null,
+        "currency": null,
+        "rateSource": null,
+        "applicableFrom": null,
+        "reason": "没有绑定费率来源、适用时间、模型/工具版本与币种；只能给出已记录的调用与 token，不能估价或声称完整账单。"
+      },
+      "summary": "可核对调用：模型尚未找到回执· 工具已检查 0 次（成功 0 / 失败 0）",
+      "notes": [
+        "尚未找到本委托的模型调用回执，不能据此判断没有调用。",
+        "费用与估算保持未知：未绑定费率、币种与账单，不把次数换算成金额。",
+        "范围仅当前委托的原回执；不含建项预览、其他独立讨论或跨项目用量。"
+      ]
+    },
+    "resourceUsage": {
+      "schemaVersion": 1,
+      "scope": "MISSION_RECORDED_COUNTERS_ONLY",
+      "models": 3,
+      "tools": 2,
+      "inputTokens": 40,
+      "outputTokens": 12,
+      "unknownCalls": 1,
+      "monetaryCost": null,
+      "pricingState": "UNPRICED",
+      "summary": "模型 3 次 · 工具 2 次",
+      "coverageNote": "有 1 次请求结果或用量未知，已记录 token 不代表完整用量。",
+      "costNote": "费用尚不能核算：这些记录未绑定费率与账单。"
+    },
+    "sourceConversation": null,
+    "selected": {
+      "question": null,
+      "approval": null,
+      "output": null,
+      "receipt": null
+    },
+    "adoptions": [],
+    "actionReceipts": [],
+    "realityOutcome": "NOT_INFERRED"
+  }
+}

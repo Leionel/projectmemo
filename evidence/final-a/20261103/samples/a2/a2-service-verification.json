@@ -1,0 +1,148 @@
+{
+  "kind": "A2_SERVICE_VERIFICATION",
+  "generatedAt": "2026-11-03T12:16:30+08:00",
+  "worktree": "D:/Projects/hongmen-final-a-mission-packet",
+  "baseSha": "3a62dcefa0a5ff357ae5afbb301598cd4b672d0c",
+  "headSha": "3a62dcefa0a5ff357ae5afbb301598cd4b672d0c",
+  "aTrackBaselineSha": "485d485378637e1da3280ed092739d441c8cf749",
+  "a1Commit": "f267aec674dbb9c28f6fa79bf428816016d2bee5",
+  "a1ContractReceiptCommit": "543162f",
+  "a1FixCommit": "b243f62a2970ffc1bd070ba6c2933690c230d72f",
+  "a2Status": "UNCOMMITTED_WORKTREE_CHANGES（提交由 Lead 执行；fixCommit 待回填 A2 SHA）",
+  "a1FixEffect": {
+    "runningMission": "A1-fix（b243f62）后 RUNNING+有效 lease 的主操作由 RECHECK_AUTHORITY 改为 WAIT_FOR_OBSERVATION（label=查看委托进展（执行中），waitingOn=SYSTEM_WORKER）；samples/a2/a2-running.json 已按修复后重生。",
+    "personalMemoryBoundary": "个人记忆 nextBoundary 越界现在参与 authorityRecheck 并输出 TIME_BOUNDARY blocker PERSONAL_MEMORY_BOUNDARY_PASSED；A2 服务测试新增覆盖。",
+    "expiredLease": "A1 裁决保留“租约过期 → WAIT_FOR_OBSERVATION/LEASE 阻断”，不标为许可重核（A2 语义第 6 条中 lease 措辞按 A1 最终裁决理解）。"
+  },
+  "a1Residual01": {
+    "finding": "A1 HEAD 的 missionSummarySelect 未含 pauseRequestedAt/cancelRequestedAt，Focus 摘要在停止请求在途时仍显示 LEASE_ACTIVE（readback/detail 已正确）。",
+    "a2Fix": "workspaceSummary.missionSummarySelect 已增加 pauseRequestedAt/cancelRequestedAt/pauseReason（本任务写作用域内）。",
+    "coverage": "tests/finalAWorkPacketService.test.ts > A1-RESIDUAL-01",
+    "assertions": [
+      "RUNNING + 有效 lease + pauseRequestedAt（另例 cancelRequestedAt）",
+      "missionWorkspaceSummary 返回 item.workState: phase=RUNNING、reasonCode=STOP_REQUESTED_IN_FLIGHT、stopRequest.state=PAUSE_REQUESTED/CANCEL_REQUESTED、settled=false",
+      "摘要 actionLabel=核对停止结算，无继续/恢复建议文案",
+      "missionDetail 与 readMissionBack 的 workState 解释一致；workPacket.next.primaryAction=CHECK_STOP_SETTLEMENT"
+    ],
+    "verdict": "PASS（本次重跑 18 个 A2 服务测试中覆盖；修复前该断言会在 summary 侧得到 LEASE_ACTIVE 而失败）"
+  },
+  "scope": {
+    "modified": [
+      "lib/mission/readback.ts",
+      "lib/mission/materialUseProjection.ts",
+      "lib/mission/missionService.ts",
+      "lib/mission/workspaceSummary.ts"
+    ],
+    "added": [
+      "tests/finalAWorkPacketService.test.ts",
+      "tests/finalAConcurrencyService.test.ts",
+      "scripts/final-a/generate-samples.ts",
+      "evidence/final-a/20261103/samples/a2/"
+    ],
+    "notChanged": "prisma schema/迁移、app/、components/、harmonyos/、其他 lib/、其他 tests/、docs（仅本地 ISSUE_TRACKER 更新，未 git add）；未触碰 samples/FS-A0x 与 samples/a1-pure"
+  },
+  "commands": [
+    {
+      "command": "npm.cmd test -- tests/finalAWorkPacketService.test.ts tests/finalAConcurrencyService.test.ts",
+      "exitCode": 0,
+      "at": "2026-11-03T12:15:49+08:00",
+      "files": 2,
+      "tests": 19,
+      "note": "finalAWorkPacketService 18 passed（含 A1-fix RUNNING、个人记忆边界、A1-RESIDUAL-01 停止请求摘要）；finalAConcurrencyService 1 passed"
+    },
+    {
+      "command": "npm.cmd test -- tests/missionContinuation.test.ts tests/missionMaterialUseProjection.test.ts tests/s2ResourceReadback.test.ts tests/s2CallCoverage.test.ts tests/s2AuditFixes.test.ts tests/auditS2CallCoverageWindow.test.ts tests/missionNativeContract.test.ts tests/missionWorkspaceSummary.test.ts tests/agentUxWorkState.test.ts tests/copilotContinuation.test.ts tests/missionReadbackPanel.test.ts tests/missionEvidenceFitIntegration.test.ts",
+      "exitCode": 0,
+      "at": "2026-11-03T12:16:06+08:00",
+      "files": 12,
+      "tests": 84,
+      "note": "受影响回归全绿；含 missionNativeContract 的 ArkTS 服务读回与 missionWorkspaceSummary"
+    },
+    {
+      "command": "npm.cmd exec -- tsx scripts/final-a/generate-samples.ts",
+      "exitCode": 0,
+      "at": "2026-11-03T12:13:00+08:00",
+      "samples": 13,
+      "note": "基于 A1-fix 后 HEAD(3a62dce) 重生：12 种状态真实 readback 响应 + 旧服务缺 workPacket 变体；a2-running 主操作=WAIT_FOR_OBSERVATION"
+    },
+    {
+      "command": "npm.cmd exec tsc -- --noEmit",
+      "exitCode": 1,
+      "at": "2026-11-03T12:14:20+08:00",
+      "note": "项目级 tsc 当前仅 1 个错误，位于独立验收未跟踪临时探针 evidence/final-a/20261103/verify/fixtures/a1-final-head-probe.ts:47（TS2367 字面量窄化比较），不在 A2 作用域。"
+    },
+    {
+      "command": "tsc -p <系统临时 tsconfig（继承仓库 tsconfig，仅 exclude evidence/final-a/20261103/verify）> --noEmit",
+      "exitCode": 0,
+      "at": "2026-11-03T12:14:40+08:00",
+      "note": "排除独立验收临时探针目录后，A1-fix + A2 工作树类型检查 exit 0；A2 修改文件无类型错误。"
+    }
+  ],
+  "tscBlocker": {
+    "file": "evidence/final-a/20261103/verify/fixtures/a1-final-head-probe.ts:47",
+    "error": "TS2367: comparison between '\"WAIT_FOR_OBSERVATION\"' and '\"RECHECK_AUTHORITY\"' has no overlap（先断言 kind===WAIT_FOR_OBSERVATION 后又断言 kind!==RECHECK_AUTHORITY，被 TS 窄化后判定恒真）",
+    "owner": "独立验收（untracked 临时探针，不应留在会被 tsconfig include 的路径）",
+    "suggestion": "由验收侧移到系统临时目录或改为 .mts/删除；A2 不做修改。修复后项目级 tsc 预期 exit 0。"
+  },
+  "readbackSideEffects": {
+    "source": "tests/finalAWorkPacketService.test.ts > GET 前后无业务写入",
+    "checks": {
+      "missionVersion": "不变",
+      "missionStatus": "不变",
+      "planRevision/contextVersion/constraintsVersion/researchScopeVersion": "不变",
+      "updatedAt": "不变",
+      "budgetUsedJson": "不变（累计预算不清零）",
+      "lastErrorJson/waitStateJson": "不变",
+      "agentMissionEvent": "前后计数不变（测试 fixture 为 2 条）",
+      "agentRun": "前后计数不变（0）",
+      "agentMissionStep": "前后计数不变（0）",
+      "agentMissionOutput": "前后计数不变（1，未新增）",
+      "missionArtifactReceipt": "前后计数不变（0，未新增）",
+      "agentDirectiveEvent": "前后计数不变（0）",
+      "user.continuitySeq": "不变"
+    },
+    "samplesReadSideEffects": "samples/a2 下 12 个状态样本的 observed.readSideEffects 四项均为 true（版本/状态/预算/updatedAt 读后不变）"
+  },
+  "concurrency": {
+    "source": "tests/finalAConcurrencyService.test.ts",
+    "connection": "第二个 PrismaClient（PrismaBetterSqlite3，同一临时库文件，WAL）",
+    "readerRounds": 32,
+    "writerCommits": 49,
+    "writerSqliteBusyRetries": 0,
+    "consistencyDistribution": {
+      "VERSION_STABLE": 30,
+      "RETRIED": 1,
+      "VERSION_ADVANCED": 1
+    },
+    "internalInconsistencies": 0,
+    "missionVersionBefore": 1,
+    "missionVersionAfter": 54,
+    "note": "数值为一次真实运行样本（writerCommits 随调度略有波动；三分类分布与内部不一致=0 为断言项）。",
+    "assertions": [
+      "每个响应 missionVersion == workState.originalRef.version == workPacket.identity.missionVersion == stopped.workState.originalRef.version",
+      "identity/authority/requires 的 controlVersion 与全版本字段同源一致",
+      "RETRIED retries=1；VERSION_ADVANCED retries=2 且 blockers 含 SNAPSHOT_VERSION_ADVANCED、submissionGuard=SERVER_RECHECKS_...",
+      "读取不新增事件/草稿/回执；Mission 版本推进只来自第二连接写入"
+    ],
+    "controlledPointNote": "单进程 better-sqlite3 为同步驱动，无法在事务中间自然插入第二连接写入；RETRIED/VERSION_ADVANCED 用受控复查点（db.agentMission.findUnique 复查前经第二连接真实提交写入）确定性复现，属文档第 4 节允许的‘服务端受控并发点’。真实并发压力阶段（30 轮）同时运行第二连接写入，未出现内部不一致。"
+  },
+  "permissionChangeGuard": {
+    "fact": "来源撤销/USE_SUPPRESSION 可能推进责任视图 controlVersion 而 mission.version 不变",
+    "coverage": "tests/finalAWorkPacketService.test.ts > FS-A05/FS-A07 许可变化但 mission.version 未变",
+    "assertions": [
+      "mission.version/status 与 readback.missionVersion 前后不变",
+      "workPacket.identity.controlVersion 变化",
+      "currentUse=SUPPRESSED / independentEvidence=false，历史 facts 保留",
+      "primaryAction.requires.controlVersion == identity.controlVersion；requiredSourceRevisions 为空（被抑制来源不作为当前依据）",
+      "snapshot.consistency 仍为 VERSION_STABLE：版本复查只覆盖 Mission 版本字段，许可守卫由 requires.controlVersion/requiredSourceRevisions/boundaryAt + 提交时服务端复查承担"
+    ],
+    "clarification": "工作包不签发客户端凭据；primaryAction.submissionGuard 只声明原 command/continuation/adoption/Action 路径在提交时会重查 owner/项目/版本/来源许可/lease/预算/幂等。"
+  },
+  "residualRisks": [
+    "许可变化不推进 Mission 版本字段时，事务外版本复查无法检测；依赖 requires 内容守卫与提交时服务端复查（已测试并声明）。",
+    "readback 延迟增加（责任视图 + ≤8×sourceUse 谱系 + 事务外复查），只记录未做墙钟性能断言。",
+    "A1 裁决保留：过期 lease → WAIT_FOR_OBSERVATION/LEASE 阻断（不标为许可重核），与原 A2 语义第 6 条 lease 措辞的差异按 A1 最终裁决理解。",
+    "项目级 tsc 当前被独立验收的未跟踪临时探针 .ts 阻塞（非 A2 作用域）；排除该目录后 tsc exit 0，需验收侧修正后做最终项目级签收。",
+    "工作包尚未由 E 独立并发/安全轨复核，也未含 Web/鸿蒙客户端消费与设备证据。"
+  ]
+}

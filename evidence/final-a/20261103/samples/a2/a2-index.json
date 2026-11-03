@@ -1,0 +1,140 @@
+{
+  "generatedAt": "2026-11-03T04:13:17.882Z",
+  "command": "npm.cmd exec -- tsx scripts/final-a/generate-samples.ts",
+  "baseSha": "3a62dcefa0a5ff357ae5afbb301598cd4b672d0c",
+  "headSha": "3a62dcefa0a5ff357ae5afbb301598cd4b672d0c",
+  "a1ContractCommit": "f267aec674dbb9c28f6fa79bf428816016d2bee5",
+  "a1FixCommit": "b243f62a2970ffc1bd070ba6c2933690c230d72f",
+  "output": "evidence/final-a/20261103/samples/a2/",
+  "contractVersion": "final-a-workpacket-v1",
+  "note": "A2 readMissionBack 真实序列化样本；基于 A1-fix（b243f62）后重新生成：RUNNING+有效 lease 样本的 primaryAction 已变为 WAIT_FOR_OBSERVATION（查看委托进展（执行中））。合成隔离库；不含密钥/真实用户数据；与 probe-service 的 FS-A0x 样本分目录存放。",
+  "samples": [
+    {
+      "file": "a2-running.json",
+      "path": "evidence/final-a/20261103/samples/a2/a2-running.json",
+      "label": "运行",
+      "missionStatus": "RUNNING",
+      "phase": "RUNNING",
+      "primaryAction": "WAIT_FOR_OBSERVATION",
+      "observationState": "NOT_OBSERVED",
+      "bytes": 20321
+    },
+    {
+      "file": "a2-queued.json",
+      "path": "evidence/final-a/20261103/samples/a2/a2-queued.json",
+      "label": "排队",
+      "missionStatus": "READY",
+      "phase": "QUEUED",
+      "primaryAction": "WAIT_FOR_OBSERVATION",
+      "observationState": "NOT_OBSERVED",
+      "bytes": 20108
+    },
+    {
+      "file": "a2-waiting-user.json",
+      "path": "evidence/final-a/20261103/samples/a2/a2-waiting-user.json",
+      "label": "等待用户",
+      "missionStatus": "WAITING_INPUT",
+      "phase": "WAITING_USER",
+      "primaryAction": "ANSWER_QUESTION",
+      "observationState": "NOT_OBSERVED",
+      "bytes": 21046
+    },
+    {
+      "file": "a2-waiting-approval.json",
+      "path": "evidence/final-a/20261103/samples/a2/a2-waiting-approval.json",
+      "label": "等待批准",
+      "missionStatus": "WAITING_APPROVAL",
+      "phase": "WAITING_APPROVAL",
+      "primaryAction": "REVIEW_APPROVAL",
+      "observationState": "NOT_OBSERVED",
+      "bytes": 21502
+    },
+    {
+      "file": "a2-observation-no-change.json",
+      "path": "evidence/final-a/20261103/samples/a2/a2-observation-no-change.json",
+      "label": "观察无变化",
+      "missionStatus": "WAITING_INPUT",
+      "phase": "WAITING_OBSERVATION",
+      "primaryAction": "WAIT_FOR_OBSERVATION",
+      "observationState": "OBSERVED",
+      "bytes": 20838
+    },
+    {
+      "file": "a2-failed.json",
+      "path": "evidence/final-a/20261103/samples/a2/a2-failed.json",
+      "label": "失败",
+      "missionStatus": "FAILED",
+      "phase": "FAILED",
+      "primaryAction": "REVIEW_FAILURE",
+      "observationState": "NOT_OBSERVED",
+      "bytes": 20914
+    },
+    {
+      "file": "a2-stop-requested.json",
+      "path": "evidence/final-a/20261103/samples/a2/a2-stop-requested.json",
+      "label": "停止请求中",
+      "missionStatus": "RUNNING",
+      "phase": "RUNNING",
+      "primaryAction": "CHECK_STOP_SETTLEMENT",
+      "observationState": "NOT_OBSERVED",
+      "bytes": 21611
+    },
+    {
+      "file": "a2-paused.json",
+      "path": "evidence/final-a/20261103/samples/a2/a2-paused.json",
+      "label": "已暂停",
+      "missionStatus": "PAUSED",
+      "phase": "PAUSED",
+      "primaryAction": "RESUME_DELEGATION",
+      "observationState": "NOT_OBSERVED",
+      "bytes": 20563
+    },
+    {
+      "file": "a2-unknown.json",
+      "path": "evidence/final-a/20261103/samples/a2/a2-unknown.json",
+      "label": "未知",
+      "missionStatus": "PAUSED",
+      "phase": "UNKNOWN",
+      "primaryAction": "RECHECK_AUTHORITY",
+      "observationState": "NOT_OBSERVED",
+      "bytes": 21993
+    },
+    {
+      "file": "a2-cancelled.json",
+      "path": "evidence/final-a/20261103/samples/a2/a2-cancelled.json",
+      "label": "取消",
+      "missionStatus": "CANCELLED",
+      "phase": "COMPLETED",
+      "primaryAction": "VIEW_RESULT",
+      "observationState": "NOT_OBSERVED",
+      "bytes": 19422
+    },
+    {
+      "file": "a2-succeeded.json",
+      "path": "evidence/final-a/20261103/samples/a2/a2-succeeded.json",
+      "label": "成功",
+      "missionStatus": "SUCCEEDED",
+      "phase": "COMPLETED",
+      "primaryAction": "VIEW_RESULT",
+      "observationState": "NOT_OBSERVED",
+      "bytes": 19509
+    },
+    {
+      "file": "a2-daily-budget-waiting.json",
+      "path": "evidence/final-a/20261103/samples/a2/a2-daily-budget-waiting.json",
+      "label": "额度等待",
+      "missionStatus": "READY",
+      "phase": "QUEUED",
+      "primaryAction": "WAIT_FOR_OBSERVATION",
+      "observationState": "NOT_OBSERVED",
+      "bytes": 21366
+    },
+    {
+      "file": "a2-legacy-server-without-workpacket.json",
+      "path": "evidence/final-a/20261103/samples/a2/a2-legacy-server-without-workpacket.json",
+      "label": "旧服务缺 workPacket 变体",
+      "variant": "LEGACY_SERVER_WITHOUT_WORKPACKET",
+      "bytes": 6907
+    }
+  ]
+}

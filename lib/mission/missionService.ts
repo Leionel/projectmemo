@@ -41,7 +41,7 @@ export async function listMissions(userId:string,projectId:string,cursor?:string
 }
 export async function missionDetail(userId:string,id:string){
   const m=await ownedMission(userId,id);const [steps,approvals,outputs,questions]=await Promise.all([
-    db.agentMissionStep.findMany({where:{missionId:id},orderBy:{ordinal:"asc"}}),db.agentMissionApproval.findMany({where:{missionId:id,status:"PENDING"}}),db.agentMissionOutput.findMany({where:{missionId:id},orderBy:{revision:"desc"},take:5}),db.agentMissionEvent.findMany({where:{missionId:id,type:{in:["QUESTION","INVESTIGATION_NO_NEW_INFORMATION","INVESTIGATION_OBSERVATION_CHANGED"]}},orderBy:{seq:"desc"},take:1}),
+    db.agentMissionStep.findMany({where:{missionId:id},orderBy:{ordinal:"asc"}}),db.agentMissionApproval.findMany({where:{missionId:id,status:"PENDING"}}),db.agentMissionOutput.findMany({where:{missionId:id},orderBy:{revision:"desc"},take:5}),db.agentMissionEvent.findMany({where:{missionId:id,type:{in:["QUESTION","INVESTIGATION_NO_NEW_INFORMATION","INVESTIGATION_OBSERVATION_CHANGED","DAILY_BUDGET_WAITING"]}},orderBy:{seq:"desc"},take:1}),
   ]);
   const projectedSteps=await Promise.all(steps.map(async s=>{
     let execution:{phase:string;jobName:string;current:boolean;receipt:unknown;failure:unknown}|undefined;
@@ -59,7 +59,7 @@ export async function missionDetail(userId:string,id:string){
   }));
   const completion=await readMissionCompletion(id,outputs[0]?.verificationStatus??null);
   const continuity=await effectiveContinuity(userId,{projectId:m.projectId,missionId:m.id});
-  const workState=missionWorkState({...m,delegationEnabled:isFeatureEnabled("MISSION_INVESTIGATION_DELEGATION_ENABLED",false),events:questions,approvals});
+  const workState=missionWorkState({...m,delegationEnabled:isFeatureEnabled("MISSION_INVESTIGATION_DELEGATION_ENABLED",false),events:questions,approvals,unknownSteps:steps.filter(s=>s.status==="UNKNOWN").length});
   const currentQuestion=workState.exactQuestionRef?await db.agentMissionEvent.findFirst({where:{id:workState.exactQuestionRef,missionId:id,type:"QUESTION"}}):null;
   const fitPremise=m.waitStateJson&&m.status==="WAITING_INPUT"?premiseFor(m,m.waitStateJson as unknown as WaitState):null;
   const experience=isFeatureEnabled("PROJECT_EXPERIENCE_ENABLED",true)?{enabled:true as const,suggestions:await suggestionsForMission(m),note:"建议不改变权限；影子观察不注入模型上下文。"}:{enabled:false as const,suggestions:[],note:"项目经验复用当前未开启。"};
